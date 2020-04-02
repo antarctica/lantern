@@ -1,0 +1,6 @@
+__pycache__
+/htmlcov
+/.coverage
+/output/candidate-record-iso-html.xml
+/output/candidate-record-iso-rubric.xml
+/output/candidate-record.xml

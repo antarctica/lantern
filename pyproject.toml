@@ -1,0 +1,43 @@
+[tool.poetry]
+name = "scar-add-metadata-toolbox"
+version = "0.0.0"
+license = "OGL-UK-3.0"
+description = "Python library for generating SCAR Antarctic Digital Database metadata records"
+authors = [
+    "Felix Fennell <felnne@bas.ac.uk>"
+]
+readme = "README.md"
+homepage = "https://github.com/antarctica/scar-add-metadata-toolbox"
+repository = "https://github.com/antarctica/scar-add-metadata-toolbox"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: Other/Proprietary License",
+    "Operating System :: OS Independent",
+    "Intended Audience :: Science/Research"
+]
+
+packages = [
+    {include = "scar_add_metadata_toolbox"},
+]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+# bas-metadata-library = "0.0.0"
+
+[tool.poetry.dev-dependencies]
+black = "^19.10b0"
+bandit = "^1.6.2"
+tomlkit = "^0.5.8"
+pytest = "^5.3.2"
+pytest-cov = "^2.8.1"
+pytest-random-order = "^1.0.4"
+
+[tool.black]
+line-length = 120
+target-version = ['py38']
+include = '\.pyi?$'
+exclude = ''
+
+[build-system]
+requires = ["poetry>=1.0.0"]
+build-backend = "poetry.masonry.api"

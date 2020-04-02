@@ -1,0 +1,20 @@
+---
+  version: "2"
+
+  services:
+    app:
+      build: .
+      image: docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox:latest
+      command: python scar_add_metadata_toolbox/
+      volumes:
+        - .:/usr/src/app
+
+    web:
+      image: nginx:alpine
+      volumes:
+        - ./support/nginx/default.conf:/etc/nginx/conf.d/default.conf
+        - ./support/nginx/index.html:/usr/share/nginx/html/index.html
+        - ./output:/usr/share/nginx/html/output
+        - ./support/xml-stylesheets:/usr/share/nginx/html/stylesheets
+      ports:
+        - "9000:9000"

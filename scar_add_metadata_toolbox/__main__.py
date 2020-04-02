@@ -1,4 +1,4 @@
-from datetime import datetime, timezone, date
+from datetime import datetime, date
 from pathlib import Path
 
 # noinspection PyPackageRequirements
@@ -13,12 +13,20 @@ minimal_record_config = {
     "language": "eng",
     "character_set": "utf8",
     "hierarchy_level": "dataset",
-    "contacts": [{"organisation": {"name": "UK Polar Data Centre"}, "role": ["pointOfContact"]}],
-    "date_stamp": datetime(2018, 10, 18, 14, 40, 44, tzinfo=timezone.utc),
+    "contacts": [
+        {
+            "organisation": {"name": "British Antarctic Survey"},
+            "role": ["pointOfContact"],
+        }
+    ],
+    "date_stamp": datetime.utcnow(),
     "resource": {
-        "title": {"value": "Test Record"},
-        "dates": [{"date": date(2018, 1, 1), "date_precision": "year", "date_type": "creation"}],
-        "abstract": "Test Record for ISO 19115 metadata standard family (no profile), with required properties only.",
+        "title": {"value": "Antarctic Coastline (Polygon)"},
+        "dates": [{"date": date(2020, 4, 2), "date_precision": "year", "date_type": "creation"}],
+        "abstract": "Coastline of Antarctica encoded as a polygon. This abstract, and the dataset to which it belongs, "
+        "is fictitious. This is a candidate record to develop and validate discovery level metadata for "
+        "SCAR Antarctic Digital Database (ADD) datasets. See the ADD website for real datasets "
+        "(https://add.scar.org).",
         "character_set": "utf8",
         "language": "eng",
         "topics": ["environment", "climatologyMeteorologyAtmosphere"],

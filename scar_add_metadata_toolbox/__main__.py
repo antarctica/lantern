@@ -10,16 +10,30 @@ from lxml.etree import ElementTree, ProcessingInstruction, fromstring, tostring 
 from bas_metadata_library.standards.iso_19115_2_v1 import MetadataRecordConfig, MetadataRecord
 
 minimal_record_config = {
+    "file_identifier": "86bd7a1a-845d-48a9-8d71-59fdf7290556",
     "language": "eng",
     "character_set": "utf8",
     "hierarchy_level": "dataset",
     "contacts": [
         {
             "organisation": {"name": "British Antarctic Survey"},
+            # "position": "Mapping and Geographic Information Centre",
+            "phone": "+44 (0)1223 221400",
+            "address": {
+                "delivery_point": "British Antarctic Survey, High Cross, Madingley Road",
+                "city": "Cambridge",
+                "administrative_area": "Cambridgeshire",
+                "postal_code": "CB3 0ET",
+                "country": "United Kingdom",
+            },
+            "email": "magic@bas.ac.uk",
             "role": ["pointOfContact"],
         }
     ],
     "date_stamp": datetime.utcnow(),
+    "maintenance": {"maintenance_frequency": "asNeeded", "progress": "underDevelopment"},
+    "metadata_standard": {"name": "ISO 19115", "version": "1.0"},
+    "reference_system_info": {"code": {"value": "urn:ogc:def:crs:EPSG::3031"}},
     "resource": {
         "title": {"value": "Antarctic Coastline (Polygon)"},
         "dates": [{"date": date(2020, 4, 2), "date_precision": "year", "date_type": "creation"}],
@@ -27,6 +41,29 @@ minimal_record_config = {
         "is fictitious. This is a candidate record to develop and validate discovery level metadata for "
         "SCAR Antarctic Digital Database (ADD) datasets. See the ADD website for real datasets "
         "(https://add.scar.org).",
+        "contacts": [
+            {
+                "individual": {"name": "Watson, Constance"},
+                "organisation": {"name": "British Antarctic Survey"},
+                "email": "conwat@bas.ac.uk",
+                "role": ["author"],
+            }
+        ],
+        "keywords": [{"terms": [{"term": "Land Cover"}], "type": "theme"}],
+        "maintenance": {"maintenance_frequency": "biannually", "progress": "completed"},
+        "constraints": {
+            "access": [{"restriction_code": "otherRestrictions"}],
+            "usage": [
+                {
+                    "copyright_licence": {
+                        "statement": "This information is licensed under the Create Commons Attribution 4.0 "
+                        "International Licence (CC BY 4.0). To view this licence, visit "
+                        "https://creativecommons.org/licenses/by/4.0/",
+                    }
+                }
+            ],
+        },
+        "spatial_representation_type": "vector",
         "character_set": "utf8",
         "language": "eng",
         "topics": ["environment", "climatologyMeteorologyAtmosphere"],
@@ -38,8 +75,50 @@ minimal_record_config = {
                     "south_latitude": -68.1511,
                     "north_latitude": -54.30761,
                 }
-            }
+            },
+            "temporal": {"period": {"start": datetime(2020, 4, 2, 0, 0), "end": datetime(2020, 4, 2, 0, 0)}},
         },
+        "formats": [
+            {"format": "Web Map Service"},
+            {"format": "GeoPackage"},
+            {"format": "Shapefile"},
+            {"format": "CSV"},
+        ],
+        "transfer_options": [
+            {
+                "online_resource": {
+                    "href": "https://example.com/ogc/wms?layer=add-coastline-polygon",
+                    "title": "Web Map Service (WMS)",
+                    "description": "Access information as a OGC Web Map Service layer",
+                    "function": "download",
+                }
+            },
+            {
+                "online_resource": {
+                    "href": "https://example.com/data/add-coastline-polygon.gpkg",
+                    "title": "GeoPackage",
+                    "description": "Download information as a OGC GeoPackage",
+                    "function": "download",
+                }
+            },
+            {
+                "online_resource": {
+                    "href": "https://example.com/data/add-coastline-polygon.shp.zip",
+                    "title": "GeoPackage",
+                    "description": "Download information as an ESRI Shapefile",
+                    "function": "download",
+                }
+            },
+            {
+                "online_resource": {
+                    "href": "https://example.com/data/add-coastline-polygon.csv",
+                    "title": "CSV",
+                    "description": "Download information as a Comma Separated Value file",
+                    "function": "download",
+                }
+            },
+        ],
+        "lineage": "This dataset is fictitious and does not exist, it therefore has no lineage",
     },
 }
 configuration = MetadataRecordConfig(**minimal_record_config)

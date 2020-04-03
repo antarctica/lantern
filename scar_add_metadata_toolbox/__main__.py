@@ -38,7 +38,7 @@ minimal_record_config = {
         }
     ],
     "date_stamp": datetime.utcnow(),
-    "maintenance": {"maintenance_frequency": "asNeeded", "progress": "underDevelopment"},
+    "maintenance": {"maintenance_frequency": "asNeeded", "progress": "completed"},
     "metadata_standard": {"name": "ISO 19115", "version": "1.0"},
     "reference_system_info": {
         "code": {"value": "urn:ogc:def:crs:EPSG::3031", "href": "http://www.opengis.net/def/crs/EPSG/0/4326"},
@@ -62,12 +62,28 @@ minimal_record_config = {
     },
     "resource": {
         "title": {"value": "Antarctic Coastline (Polygon)"},
-        "dates": [{"date": date(2020, 4, 2), "date_precision": "year", "date_type": "creation"}],
+        "dates": [
+            {"date": date(2020, 4, 2), "date_type": "creation"},
+            {"date": date(2020, 4, 3), "date_type": "publication"},
+            {"date": date(2020, 4, 3), "date_type": "released"},
+        ],
         "abstract": "Coastline of Antarctica encoded as a polygon. This abstract, and the dataset to which it belongs, "
         "is fictitious. This is a candidate record to develop and validate discovery level metadata for "
         "SCAR Antarctic Digital Database (ADD) datasets. See the ADD website for real datasets "
         "(https://add.scar.org).",
         "edition": "1",
+        "identifiers": [
+            {
+                "identifier": "https://data.bas.ac.uk/item/86bd7a1a-845d-48a9-8d71-59fdf7290556",
+                "href": "https://data.bas.ac.uk/item/86bd7a1a-845d-48a9-8d71-59fdf7290556",
+                "title": "self",
+            },
+            {
+                "identifier": "https://doi.org/10.5285/86BD7A1A-845D-48A9-8D71-59FDF7290556",
+                "href": "https://doi.org/10.5285/86BD7A1A-845D-48A9-8D71-59FDF7290556",
+                "title": "doi",
+            },
+        ],
         "contacts": [
             {
                 "individual": {
@@ -86,7 +102,55 @@ minimal_record_config = {
                     "function": "information",
                 },
                 "role": ["author"],
-            }
+            },
+            {
+                "organisation": {
+                    "name": "Mapping and Geographic Information Centre, British Antarctic Survey",
+                    "href": "https://ror.org/01rhff309",
+                    "title": "ror",
+                },
+                "phone": "+44 (0)1223 221400",
+                "address": {
+                    "delivery_point": "British Antarctic Survey, High Cross, Madingley Road",
+                    "city": "Cambridge",
+                    "administrative_area": "Cambridgeshire",
+                    "postal_code": "CB3 0ET",
+                    "country": "United Kingdom",
+                },
+                "email": "magic@bas.ac.uk",
+                "online_resource": {
+                    "href": "https://www.bas.ac.uk/team/business-teams/mapping-and-geographic-information/",
+                    "title": "Mapping and Geographic Information Centre (MAGIC) - BAS public website",
+                    "description": "General information about the BAS Mapping and Geographic Information Centre "
+                    "(MAGIC) from the British Antarctic Survey (BAS) public website.",
+                    "function": "information",
+                },
+                "role": ["publisher", "pointOfContact"],
+            },
+            {
+                "organisation": {
+                    "name": "UK Polar Data Centre, British Antarctic Survey",
+                    "href": "https://ror.org/01rhff309",
+                    "title": "ror",
+                },
+                "phone": "+44 (0)1223 221400",
+                "address": {
+                    "delivery_point": "British Antarctic Survey, High Cross, Madingley Road",
+                    "city": "Cambridge",
+                    "administrative_area": "Cambridgeshire",
+                    "postal_code": "CB3 0ET",
+                    "country": "United Kingdom",
+                },
+                "email": "polardatacentre@bas.ac.uk",
+                "online_resource": {
+                    "href": "https://www.bas.ac.uk/team/business-teams/information-services/uk-polar-data-centre/",
+                    "title": "UK Polar Data Centre (UK PDC) - BAS public website",
+                    "description": "General information about the NERC Polar Data Centre (UK PDC) from the British "
+                    "Antarctic Survey (BAS) public website.",
+                    "function": "information",
+                },
+                "role": ["distributor"],
+            },
         ],
         "keywords": [
             {
@@ -134,7 +198,14 @@ minimal_record_config = {
                         "https://creativecommons.org/licenses/by/4.0/",
                         "href": "https://creativecommons.org/licenses/by/4.0/",
                     }
-                }
+                },
+                {
+                    "required_citation": {
+                        "statement": "Cite this information as: 'Watson, C. *Antarctic Coastline (Polygon) - (MAGIC "
+                        "ADD candidate metadata record).* Mapping and Geographic Information Centre, British Antarctic "
+                        "Survey. https://doi.org/10.5285/86BD7A1A-845D-48A9-8D71-59FDF7290556'"
+                    }
+                },
             ],
         },
         "spatial_representation_type": "vector",

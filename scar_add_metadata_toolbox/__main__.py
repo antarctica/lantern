@@ -172,7 +172,7 @@ minimal_record_config = {
                 "online_resource": {
                     "href": "https://example.com/data/add-coastline-polygon.gpkg",
                     "title": "GeoPackage",
-                    "description": "Download information as a OGC GeoPackage",
+                    "description": "Download information as a OGC GeoPackage.",
                     "function": "download",
                 },
             },
@@ -181,7 +181,7 @@ minimal_record_config = {
                 "online_resource": {
                     "href": "https://example.com/data/add-coastline-polygon.shp.zip",
                     "title": "GeoPackage",
-                    "description": "Download information as an ESRI Shapefile",
+                    "description": "Download information as an ESRI Shapefile.",
                     "function": "download",
                 },
             },
@@ -190,7 +190,7 @@ minimal_record_config = {
                 "online_resource": {
                     "href": "https://example.com/data/add-coastline-polygon.csv",
                     "title": "CSV",
-                    "description": "Download information as a Comma Separated Value file",
+                    "description": "Download information as a Comma Separated Value file.",
                     "function": "download",
                 },
             },

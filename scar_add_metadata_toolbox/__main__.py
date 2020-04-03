@@ -122,7 +122,9 @@ minimal_record_config = {
         ],
         "maintenance": {"maintenance_frequency": "biannually", "progress": "completed"},
         "constraints": {
-            "access": [{"restriction_code": "otherRestrictions"}],
+            "access": [
+                {"restriction_code": "otherRestrictions", "inspire_limitations_on_public_access": "noLimitations"}
+            ],
             "usage": [
                 {
                     "copyright_licence": {
@@ -192,6 +194,21 @@ minimal_record_config = {
                     "function": "download",
                 },
             },
+        ],
+        "measures": [
+            {
+                "code": "Conformity_001",
+                "code_space": "INSPIRE",
+                "pass": True,
+                "title": {
+                    "value": "Commission Regulation (EU) No 1089/2010 of 23 November 2010 implementing Directive "
+                    "2007/2/EC of the European Parliament and of the Council as regards interoperability of "
+                    "spatial data sets and services",
+                    "href": "http://data.europa.eu/eli/reg/2010/1089",
+                },
+                "dates": [{"date": date(2010, 12, 8), "date_type": "publication"}],
+                "explanation": "See the referenced specification",
+            }
         ],
         "lineage": "This dataset is fictitious and does not exist, it therefore has no lineage",
     },

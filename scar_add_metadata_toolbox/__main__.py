@@ -185,7 +185,87 @@ minimal_record_config = {
                     },
                 },
                 "type": "theme",
-            }
+            },
+            {
+                "terms": [
+                    {
+                        "term": "COASTAL LANDFORMS",
+                        "href": "https://gcmdservices.gsfc.nasa.gov/kms/concept/c58320e6-3f1d-4c36-9bee-6bad73404c21",
+                    }
+                ],
+                "thesaurus": {
+                    "title": {
+                        "value": "Global Change Master Directory (GCMD) Science Keywords",
+                        "href": "https://earthdata.nasa.gov/about/gcmd/global-change-master-directory-gcmd-keywords",
+                    },
+                    "dates": [{"date": date(2020, 1, 9), "date_type": "publication"}],
+                    "edition": "9.1",
+                    "contact": {
+                        "organisation": {
+                            "name": "Global Change Data Center, Science and Exploration Directorate, Goddard Space "
+                            "Flight Center (GSFC) National Aeronautics and Space Administration (NASA)",
+                            "href": "https://ror.org/027ka1x80",
+                            "title": "ror",
+                        },
+                        "address": {
+                            "city": "Greenbelt",
+                            "administrative_area": "MD",
+                            "country": "United States of America",
+                        },
+                        "online_resource": {
+                            "href": "https://earthdata.nasa.gov/about/gcmd/global-change-master-directory-gcmd-"
+                            "keywords",
+                            "title": "Global Change Master Directory (GCMD) Keywords",
+                            "description": "The information provided on this page seeks to define how the GCMD "
+                            "Keywords are structured, used and accessed. It also provides information on how users can "
+                            "participate in the further development of the keywords.",
+                            "function": "information",
+                        },
+                        "role": ["publisher"],
+                    },
+                },
+                "type": "theme",
+            },
+            {
+                "terms": [
+                    {
+                        "term": "ANTARCTICA",
+                        "href": "https://gcmdservices.gsfc.nasa.gov/kms/concept/70fb5a3b-35b1-4048-a8be-56a0d865281c",
+                    }
+                ],
+                "thesaurus": {
+                    "title": {
+                        "value": "Global Change Master Directory (GCMD) Location Keywords",
+                        "href": "https://earthdata.nasa.gov/about/gcmd/global-change-master-directory-gcmd-keywords",
+                    },
+                    "dates": [{"date": date(2020, 1, 9), "date_type": "publication"}],
+                    "edition": "9.1",
+                    "contact": {
+                        "organisation": {
+                            "name": "Global Change Data Center, Science and Exploration Directorate, Goddard Space "
+                            "Flight Center (GSFC) National Aeronautics and Space Administration (NASA)",
+                            "href": "https://ror.org/027ka1x80",
+                            "title": "ror",
+                        },
+                        "address": {
+                            "city": "Greenbelt",
+                            "administrative_area": "MD",
+                            "country": "United States of America",
+                        },
+                        "online_resource": {
+                            "href": "https://earthdata.nasa.gov/about/gcmd/global-change-master-directory-gcmd-"
+                            "keywords",
+                            "title": "Global Change Master Directory (GCMD) Keywords",
+                            "description": "The information provided on this page seeks to define how the GCMD "
+                            "Keywords are structured, used and accessed. It also provides information on how users can "
+                            "participate in the further development of the keywords.",
+                            "function": "information",
+                        },
+                        "role": ["publisher"],
+                    },
+                },
+                "type": "place",
+            },
         ],
         "maintenance": {"maintenance_frequency": "biannually", "progress": "completed"},
         "constraints": {

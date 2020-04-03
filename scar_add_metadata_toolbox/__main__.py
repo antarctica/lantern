@@ -16,7 +16,7 @@ minimal_record_config = {
     "hierarchy_level": "dataset",
     "contacts": [
         {
-            "organisation": {"name": "British Antarctic Survey"},
+            "organisation": {"name": "British Antarctic Survey", "href": "https://ror.org/01rhff309", "title": "ror"},
             # "position": "Mapping and Geographic Information Centre",
             "phone": "+44 (0)1223 221400",
             "address": {
@@ -27,13 +27,39 @@ minimal_record_config = {
                 "country": "United Kingdom",
             },
             "email": "magic@bas.ac.uk",
+            "online_resource": {
+                "href": "https://www.bas.ac.uk/team/business-teams/mapping-and-geographic-information/",
+                "title": "Mapping and Geographic Information Centre (MAGIC) - BAS public website",
+                "description": "General information about the BAS Mapping and Geographic Information Centre (MAGIC) "
+                "from the British Antarctic Survey (BAS) public website.",
+                "function": "information",
+            },
             "role": ["pointOfContact"],
         }
     ],
     "date_stamp": datetime.utcnow(),
     "maintenance": {"maintenance_frequency": "asNeeded", "progress": "underDevelopment"},
     "metadata_standard": {"name": "ISO 19115", "version": "1.0"},
-    "reference_system_info": {"code": {"value": "urn:ogc:def:crs:EPSG::3031"}},
+    "reference_system_info": {
+        "code": {"value": "urn:ogc:def:crs:EPSG::3031", "href": "http://www.opengis.net/def/crs/EPSG/0/4326"},
+        "version": "6.18.3",
+        "authority": {
+            "title": {"value": "European Petroleum Survey Group (EPSG) Geodetic Parameter Registry"},
+            "dates": [{"date": date(2008, 11, 12), "date_type": "publication"}],
+            "contact": {
+                "organisation": {"name": "European Petroleum Survey Group"},
+                "email": "EPSGadministrator@iogp.org",
+                "online_resource": {
+                    "href": "https://www.epsg-registry.org/",
+                    "title": "EPSG Geodetic Parameter Dataset",
+                    "description": "The EPSG Geodetic Parameter Dataset is a structured dataset of Coordinate "
+                    "Reference Systems and Coordinate Transformations, accessible through this online registry",
+                    "function": "information",
+                },
+                "role": ["publisher"],
+            },
+        },
+    },
     "resource": {
         "title": {"value": "Antarctic Coastline (Polygon)"},
         "dates": [{"date": date(2020, 4, 2), "date_precision": "year", "date_type": "creation"}],
@@ -43,22 +69,67 @@ minimal_record_config = {
         "(https://add.scar.org).",
         "contacts": [
             {
-                "individual": {"name": "Watson, Constance"},
+                "individual": {
+                    "name": "Watson, Constance",
+                    "href": "https://sandbox.orcid.org/0000-0001-8373-6934",
+                    "title": "orcid",
+                },
                 "organisation": {"name": "British Antarctic Survey"},
                 "email": "conwat@bas.ac.uk",
+                "online_resource": {
+                    "href": "https://sandbox.orcid.org/0000-0001-8373-6934",
+                    "title": "ORCID record",
+                    "description": "ORCID is an open, non-profit, community-driven effort to create and maintain a "
+                    "registry of unique researcher identifiers and a transparent method of linking research activities "
+                    "and outputs to these identifiers.",
+                    "function": "information",
+                },
                 "role": ["author"],
             }
         ],
-        "keywords": [{"terms": [{"term": "Land Cover"}], "type": "theme"}],
+        "keywords": [
+            {
+                "terms": [{"term": "Land Cover", "href": "https://www.eionet.europa.eu/gemet/en/inspire-theme/lc"}],
+                "thesaurus": {
+                    "title": {
+                        "value": "General Multilingual Environmental Thesaurus - INSPIRE themes",
+                        "href": "http://www.eionet.europa.eu/gemet/inspire_themes",
+                    },
+                    "dates": [{"date": date(2018, 8, 16), "date_type": "publication"}],
+                    "edition": "4.1.2",
+                    "contact": {
+                        "organisation": {
+                            "name": "European Environment Information and Observation Network (EIONET), "
+                            "European Environment Agency (EEA)",
+                            "href": "https://ror.org/02k4b9v70",
+                            "title": "ror",
+                        },
+                        "email": "helpdesk@eionet.europa.eu",
+                        "online_resource": {
+                            "href": "https://www.eionet.europa.eu/gemet/en/themes/",
+                            "title": "GEMET INSPIRE Spatial Data Themes  General Multilingual Environmental Thesaurus",
+                            "description": "GEMET, the GEneral Multilingual Environmental Thesaurus, has been "
+                            "developed as a multilingual thesauri for indexing, retrieval and control of terms in "
+                            "order to save time, energy and funds",
+                            "function": "information",
+                        },
+                        "role": ["publisher"],
+                    },
+                },
+                "type": "theme",
+            }
+        ],
         "maintenance": {"maintenance_frequency": "biannually", "progress": "completed"},
         "constraints": {
             "access": [{"restriction_code": "otherRestrictions"}],
             "usage": [
                 {
                     "copyright_licence": {
+                        # "code": "CC-BY-4.0",
                         "statement": "This information is licensed under the Create Commons Attribution 4.0 "
                         "International Licence (CC BY 4.0). To view this licence, visit "
                         "https://creativecommons.org/licenses/by/4.0/",
+                        "href": "https://creativecommons.org/licenses/by/4.0/",
                     }
                 }
             ],

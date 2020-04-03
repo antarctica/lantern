@@ -16,8 +16,11 @@ minimal_record_config = {
     "hierarchy_level": "dataset",
     "contacts": [
         {
-            "organisation": {"name": "British Antarctic Survey", "href": "https://ror.org/01rhff309", "title": "ror"},
-            # "position": "Mapping and Geographic Information Centre",
+            "organisation": {
+                "name": "Mapping and Geographic Information Centre, British Antarctic Survey",
+                "href": "https://ror.org/01rhff309",
+                "title": "ror",
+            },
             "phone": "+44 (0)1223 221400",
             "address": {
                 "delivery_point": "British Antarctic Survey, High Cross, Madingley Road",

@@ -67,6 +67,7 @@ minimal_record_config = {
         "is fictitious. This is a candidate record to develop and validate discovery level metadata for "
         "SCAR Antarctic Digital Database (ADD) datasets. See the ADD website for real datasets "
         "(https://add.scar.org).",
+        "edition": "1",
         "contacts": [
             {
                 "individual": {
@@ -165,28 +166,31 @@ minimal_record_config = {
                 }
             },
             {
+                "size": {"unit": "MB", "magnitude": 20},
                 "online_resource": {
                     "href": "https://example.com/data/add-coastline-polygon.gpkg",
                     "title": "GeoPackage",
                     "description": "Download information as a OGC GeoPackage",
                     "function": "download",
-                }
+                },
             },
             {
+                "size": {"unit": "MB", "magnitude": 25},
                 "online_resource": {
                     "href": "https://example.com/data/add-coastline-polygon.shp.zip",
                     "title": "GeoPackage",
                     "description": "Download information as an ESRI Shapefile",
                     "function": "download",
-                }
+                },
             },
             {
+                "size": {"unit": "MB", "magnitude": 2},
                 "online_resource": {
                     "href": "https://example.com/data/add-coastline-polygon.csv",
                     "title": "CSV",
                     "description": "Download information as a Comma Separated Value file",
                     "function": "download",
-                }
+                },
             },
         ],
         "lineage": "This dataset is fictitious and does not exist, it therefore has no lineage",

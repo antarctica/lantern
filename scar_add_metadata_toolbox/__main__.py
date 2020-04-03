@@ -140,7 +140,7 @@ minimal_record_config = {
         "spatial_representation_type": "vector",
         "character_set": "utf8",
         "language": "eng",
-        "topics": ["environment", "climatologyMeteorologyAtmosphere"],
+        "topics": ["environment", "environment"],
         "extent": {
             "geographic": {
                 "bounding_box": {

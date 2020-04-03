@@ -53,7 +53,7 @@ minimal_record_config = {
                     "href": "https://www.epsg-registry.org/",
                     "title": "EPSG Geodetic Parameter Dataset",
                     "description": "The EPSG Geodetic Parameter Dataset is a structured dataset of Coordinate "
-                    "Reference Systems and Coordinate Transformations, accessible through this online registry",
+                    "Reference Systems and Coordinate Transformations, accessible through this online registry.",
                     "function": "information",
                 },
                 "role": ["publisher"],
@@ -111,7 +111,7 @@ minimal_record_config = {
                             "title": "GEMET INSPIRE Spatial Data Themes  General Multilingual Environmental Thesaurus",
                             "description": "GEMET, the GEneral Multilingual Environmental Thesaurus, has been "
                             "developed as a multilingual thesauri for indexing, retrieval and control of terms in "
-                            "order to save time, energy and funds",
+                            "order to save time, energy and funds.",
                             "function": "information",
                         },
                         "role": ["publisher"],
@@ -163,7 +163,7 @@ minimal_record_config = {
                 "online_resource": {
                     "href": "https://example.com/ogc/wms?layer=add-coastline-polygon",
                     "title": "Web Map Service (WMS)",
-                    "description": "Access information as a OGC Web Map Service layer",
+                    "description": "Access information as a OGC Web Map Service layer.",
                     "function": "download",
                 }
             },

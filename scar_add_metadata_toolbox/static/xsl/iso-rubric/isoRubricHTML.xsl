@@ -11,7 +11,6 @@
   <!-- 		July 27, 2012 - October 15, 2012: ted.habermann@noaa.gov		
     Did some work to adopt the rubric to service metadata:	Paths like //gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation were changed to //gmd:identificationInfo//gmd:citation	in order to pick up titles for services in cases where no gmd:MD_DataIdentification exists.		Cleaned up and expanded the lineage paths to include embedded sources and process steps. Removed some unused variables: titleCnt, purposeCnt, some other *Cnt variables	-->
   <xsl:variable name="rubricVersion" select="'1.1.1'"/>
-  <xsl:include href="./isoAltViews.xsl"/>
   <xsl:include href="./isoRubricStars.xsl"/>
 
   <xsl:template match="/">
@@ -472,7 +471,6 @@
       </head>
       <body>
         <!-- Links to Alternate ISO views -->
-        <xsl:call-template name="isoAltViews"/>
         <h1>ISO 19115 SpiralTracker Report</h1>
         <p>This report identifies ISO metadata elements described in spirals of documentation development described in <a href="https://geo-ide.noaa.gov/wiki/index.php?title=Creating_Good_Documentation">Creating Good Documentation</a>. Together these spirals build a strong foundation for high-quality documentation. The ISO Standard includes a number of options for building on that foundation by addressing specific scientific needs. See <a href="https://geo-ide.noaa.gov/wiki/index.php?title=Use_Cases_to_CRUD">Use Cases to CRUD</a> for some examples. </p>
         <p>The elements are listed by name and are followed by M, C, or O if they are Mandatory, Conditional or Optional. They are followed by UDD (attribute name) if they are included in the <a href="https://geo-ide.noaa.gov/wiki/index.php?title=NetCDF_Attribute_Convention_for_Dataset_Discovery">NetCDF Attribute Convention for Dataset Discovery</a>.</p>

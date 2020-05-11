@@ -1,0 +1,75 @@
+<section class="app-item-tab app-item-contact">
+    <header>
+        <h2><i class="far fa-comment-alt-lines"></i> Contact us about this item</h2>
+    </header>
+    <p>Your message will be sent to the <strong>{{ item.resource.contacts_by_role.publisher.0.organisation.display_name }}</strong>, who manage this item.</p>
+    <div class="bsk-alert bsk-alert-info bsk-alert-highlight">
+        We try to answer messages within 2 days, we'll contact you if it will take us longer.
+    </div>
+
+    <form action="https://prod-66.westeurope.logic.azure.com:443/workflows/21919e9ce6964d1c90d520eff13214c7/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=WUJcFcM-hXnylyQna0ZpvUuIflk5tCW_scCASG6SYFE" accept-charset="UTF-8" method="post" onsubmit="itemContactFormSubmit(event, this)">
+        <fieldset>
+            <div class="bsk-form-group">
+                <label class="bsk-control-label" for="message-subject">Message subject</label>
+                <input type="text" name="message-subject" id="message-subject" class="bsk-form-control" value="Message about '{{ item.resource.title.value }}'" required />
+            </div>
+            <div class="bsk-form-group">
+                <label for="message-content">Message details</label>
+                <textarea name="message-content" id="message-content" class="bsk-form-control" rows="8" required></textarea>
+            </div>
+            <div class="bsk-alert bsk-alert-warning bsk-alert-highlight">
+                Do not any include any sensitive or personal information.
+            </div>
+        </fieldset>
+        <fieldset>
+            <div class="bsk-form-group">
+                <label class="bsk-control-label" for="message-sender-name">Your name</label>
+                <input type="text" class="bsk-form-control" name="message-sender-name" id="message-sender-name" placeholder="Connie Watson" required />
+            </div>
+            <div class="bsk-form-group">
+                <label class="bsk-control-label" for="message-sender-email">Your email address</label>
+                <input type="email" class="bsk-form-control" name="message-sender-email" id="message-sender-email" placeholder="connie.watson@bas.ac.uk" required />
+            </div>
+            <div class="bsk-alert bsk-alert-info bsk-alert-highlight">
+                We will only use this information for contacting you about your message.
+            </div>
+        </fieldset>
+        <fieldset>
+            <button id="contact-form-control" type="submit" class="bsk-btn bsk-btn-lg bsk-btn-primary">
+                <i class="fa-fw far fa-envelope" aria-hidden="true"></i>
+                <span>Send Message</span>
+            </button>
+            <div id="contact-form-result" class="bsk-alert bsk-alert-solid bsk-fade bsk-hidden"></div>
+        </fieldset>
+    </form>
+
+    <hr />
+
+    <header>
+        <h3>Alternative contact methods</h3>
+    </header>
+    <dl class="bsk-row">
+        <div class="bsk-col-24-md-5">
+            <dt><i class="far fa-envelope"></i> By post</dt>
+            <dd>
+                {{ item.resource.contacts_by_role.publisher.0.address.delivery_point }}
+                <br />
+                {{ item.resource.contacts_by_role.publisher.0.address.city }}
+                <br />
+                {{ item.resource.contacts_by_role.publisher.0.address.administrative_area }}
+                <br />
+                {{ item.resource.contacts_by_role.publisher.0.address.postal_code }}
+                <br />
+                {{ item.resource.contacts_by_role.publisher.0.address.country }}
+            </dd>
+        </div>
+        <div class="bsk-col-24-md-5 bsk-col-24-md-offset-3">
+            <dt><i class="far fa-at"></i> By email</dt>
+            <dd><a href="mailto:{{ item.resource.contacts_by_role.publisher.0.email }}">{{ item.resource.contacts_by_role.publisher.0.email }}</a></dd>
+        </div>
+        <div class="bsk-col-24-md-5 bsk-col-24-md-offset-3">
+           <dt><i class="far fa-phone-rotary"></i> By phone</dt>
+            <dd>{{ item.resource.contacts_by_role.publisher.0.phone }}</dd>
+        </div>
+    </dl>
+</section>

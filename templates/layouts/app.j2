@@ -1,0 +1,12 @@
+{% extends 'bas_style_kit/layouts/bsk_standard.j2' %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="https://www.googletagmanager.com/gtag/js?id=UA-64130716-19"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'UA-64130716-19', { 'anonymize_ip': true });
+</script>
+{% endblock %}

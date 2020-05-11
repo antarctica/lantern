@@ -1,0 +1,31 @@
+{% extends 'app/layouts/app.j2' %}
+
+{% block main_content %}
+    {% with type='collection', title=collection.title %}
+        {% include 'app/includes/common/header.j2' %}
+    {% endwith %}
+
+    <div class="bsk-row">
+        <div class="bsk-col-12-md-9">
+            {% include 'app/includes/collection/summary-information.j2' %}
+
+            <div class="app-collection-item-count">{{ collection['items'] | length }} items</div>
+
+            {% for item in collection['items'] %}
+                {% with item=item %}
+                {% include 'app/includes/collection/item.j2' %}
+            {% endwith %}
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        gtag('event', 'view', {
+          'event_category': 'collection',
+          'event_label': '{{ collection.id }}'
+        });
+    </script>
+{% endblock %}

@@ -1,6 +1,5 @@
 __pycache__
 /htmlcov
 /.coverage
-/output/candidate-record-iso-html.xml
-/output/candidate-record-iso-rubric.xml
-/output/candidate-record.xml
+/scar_add_metadata_toolbox/build
+/provisioning/terraform/.terraform

@@ -1,0 +1,122 @@
+<section class="app-item-tab app-item-additional-information">
+    <header>
+        <h2><i class="far fa-info-square"></i> Additional Information</h2>
+    </header>
+    <dl class="bsk-dl-horizontal bsk-dl-horizontal-lg">
+        <dt>Item ID:</dt>
+        <dd>{{ item.file_identifier }}</dd>
+        <dt>Item type:</dt>
+        <dd>
+            {% if item.hierarchy_level == 'dataset' %}
+                <i class="far fa-fw fa-cube"></i> Dataset
+            {% elif item.hierarchy_level == 'series' %}
+                <i class="far fa-fw fa-cubes"></i> Series
+            {% elif item.hierarchy_level == 'service' %}
+                <i class="far fa-fw fa-cog"></i> Service
+            {% endif %}
+        </dd>
+        <dt>Data type:</dt>
+        <dd>
+            {% if item.resource.spatial_representation_type == 'vector' %}
+                <i class="far fa-fw fa-draw-polygon"></i> Vector
+            {% elif item.resource.spatial_representation_type == 'gridded' %}
+                <i class="far fa-fw fa-game-board"></i> Raster
+            {% elif item.resource.spatial_representation_type == 'textTable' %}
+                <i class="far fa-fw fa-list-ol"></i> Tabular
+            {% endif %}
+        </dd>
+        <dt>Spatial reference system:</dt>
+        <dd>
+            {% if item.reference_system_info.code.value == 'urn:ogc:def:crs:EPSG::3031' %}
+                WGS 84 / Antarctic Polar Stereographic (<a href="{{ item.reference_system_info.code.href }}">EPSG:3031</a>)
+            {% else %}
+                {{ item.reference_system_info.code.value }}
+            {% endif %}
+        </dd>
+        <dt>Language</dt>
+        <dd>
+            {% if item.resource.language == 'eng' %}
+                English (UK)
+            {% endif %}
+        </dd>
+        <dt>Character set</dt>
+        <dd>
+            <mark>
+                Blocked by &nbsp;
+                <a href="https://gitlab.data.bas.ac.uk/uk-pdc/metadata-infrastructure/metadata-generator/issues/84">
+                    <i class="fal fa-file-invoice"></i>
+                    uk-pdc/metadata-infrastructure/metadata-generator#84
+                </a>
+            </mark>
+        </dd>
+        {% for date in item.resource.dates %}
+            <dt>
+                {% if date.date_type == 'creation' %}
+                    Item created:
+                {% elif date.date_type == 'revision' %}
+                    Item revised:
+                {% elif date.date_type == 'publication' %}
+                    Item published:
+                {% elif date.date_type == 'released' %}
+                    Item released:
+                {% endif %}
+            </dt>
+            <dd>{{ date.display_value }}</dd>
+        {% endfor %}
+        <dt>Update frequency:</dt>
+        <dd>{{ item.resource.maintenance.maintenance_frequency | capitalize }}</dd>
+        <dt>Status:</dt>
+        <dd>
+            {% if item.resource.maintenance.status == 'current' %}
+                <span class="bsk-text-success"><i class="fa-fw far fa-check"></i> Current</span>
+            {% endif %}
+        <dt>Usage requirements:</dt>
+        <dd>
+            {% if item.resource.constraints.citation %}
+                Attribution/Citation required
+            {% endif %}
+        </dd>
+    </dl>
+    <h3>Metadata information</h3>
+    <dl class="bsk-dl-horizontal bsk-dl-horizontal-lg">
+        <dt>Language</dt>
+        <dd>
+            {% if item.language == 'eng' %}
+                English (UK)
+            {% endif %}
+        </dd>
+        <dt>Character set</dt>
+        <dd>
+            <mark>
+                Blocked by &nbsp;
+                <a href="https://gitlab.data.bas.ac.uk/uk-pdc/metadata-infrastructure/metadata-generator/issues/84">
+                    <i class="fal fa-file-invoice"></i>
+                    uk-pdc/metadata-infrastructure/metadata-generator#84
+                </a>
+            </mark>
+        </dd>
+        <dt>Status:</dt>
+        <dd>{{ item.maintenance.progress | capitalize }}</dd>
+        <dt>Last updated:</dt>
+        <dd>{{ item.date_stamp.display_value }}</dd>
+        <dt>Update frequency:</dt>
+        <dd>
+            {% if item.maintenance.maintenance_frequency == 'asNeeded' %}
+                As needed
+            {% endif %}
+        </dd>
+        <dt>Metadata standard:</dt>
+        <dd>{{ item.metadata_standard.name }}</dd>
+        <dt>Metadata standard version:</dt>
+        <dd>{{ item.metadata_standard.version }}</dd>
+        <dt>Metadata links</dt>
+        <dd>
+            <div>
+                <a href="{{ item.metadata_links.iso_xml }}">View as ISO XML</a>
+            </div>
+            <div>
+                <a href="{{ item.metadata_links.iso_html }}">View as ISO HTML</a>
+            </div>
+        </dd>
+    </dl>
+</section>

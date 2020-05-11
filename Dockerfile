@@ -8,39 +8,45 @@ ENV PYTHONPATH=$APPPATH
 RUN mkdir $APPPATH
 WORKDIR $APPPATH
 
-RUN apk add --no-cache libxslt-dev libffi-dev libressl-dev git
+RUN apk add --no-cache libxslt-dev libffi-dev libressl-dev git geos-dev proj-dev proj-util postgresql-dev
 
 
 FROM base as build
 
-ENV APPVENV=/usr/local/virtualenvs/bas_add_metadata_toolbox
+ENV APPVENV=/usr/local/virtualenvs/scar_add_metadata_toolbox
 
 RUN apk add --no-cache build-base
 RUN python3 -m venv $APPVENV
 ENV PATH="$APPVENV/bin:$PATH"
 
 ## pre-install known wheels to save time
-# ADD http://bsl-repoa.nerc-bas.ac.uk/magic/v1/libraries/python/wheels/linux_x86_64/cp38m/lxml-4.5.0-cp38-cp38-linux_x86_64.whl /tmp/wheelhouse/
-# RUN pip install --no-index --find-links=file:///tmp/wheelhouse lxml==4.5.0
-
-# pre-install pre-release wheels
-COPY support/python-packages/bas_metadata_library-0.0.0-py3-none-any.whl /tmp/wheelhouse/
-RUN pip install --find-links=file:///tmp/wheelhouse bas-metadata-library==0.0.0
+ADD http://bsl-repoa.nerc-bas.ac.uk/magic/v1/libraries/python/wheels/linux_x86_64/cp38m/lxml-4.5.0-cp38-cp38-linux_x86_64.whl http://bsl-repoa.nerc-bas.ac.uk/magic/v1/libraries/python/wheels/linux_x86_64/cp38m/pyproj-2.6.0-cp38-cp38-linux_x86_64.whl /tmp/wheelhouse/
+RUN pip install --no-index --find-links=file:///tmp/wheelhouse lxml==4.5.0 pyproj==2.6.0
 
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir poetry==1.0.0
 
-# COPY pyproject.toml poetry.toml poetry.lock $APPPATH
-COPY pyproject.toml poetry.toml $APPPATH
+COPY pyproject.toml poetry.toml poetry.lock $APPPATH
 RUN poetry update --no-interaction --no-ansi
 RUN poetry install --no-root --no-interaction --no-ansi
+
+# Patch CSW to workaround
+## patch issues in PyCSW
+COPY ./support/pycsw/patches/pycsw/plugins/profiles/apiso/apiso.py $APPVENV/lib/python3.8/site-packages/pycsw/plugins/profiles/apiso/apiso.py
+
+# pre-install pre-release wheels (temporary)
+COPY support/python-packages/bas_metadata_library-0.0.0-py3-none-any.whl /tmp/wheelhouse/
+RUN pip install --find-links=file:///tmp/wheelhouse bas-metadata-library==0.0.0
 
 
 FROM base as run
 
-ENV APPVENV=/usr/local/virtualenvs/bas_add_metadata_toolbox
+ENV APPVENV=/usr/local/virtualenvs/scar_add_metadata_toolbox
 ENV PATH="$APPVENV/bin:$PATH"
+ENV FLASK_APP=/usr/src/app/manage.py
+ENV FLASK_ENV=development
 
 COPY --from=build $APPVENV/ $APPVENV/
+RUN mkdir -p /var/log/app/
 
 ENTRYPOINT []

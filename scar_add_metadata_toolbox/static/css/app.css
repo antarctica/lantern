@@ -1,0 +1,126 @@
+.app-item-summary .bsk-dl-horizontal dt,
+.app-item-summary .bsk-dl-horizontal dd {
+    text-align: left;
+    padding: 10px 0;
+}
+
+.bsk-nav-tabs>li.bsk-pull-right>a {
+    margin-right: 0;
+}
+
+.app-item-keywords header {
+    margin-bottom: 25px;
+}
+.app-item-tab header {
+    margin-bottom: 25px;
+}
+.app-item-tab header.bsk-alert-heading  {
+    margin-bottom: 0;
+}
+
+address p {
+    margin-bottom: 2px;
+}
+address p:last-of-type {
+    margin-bottom: 0;
+}
+.app-orcid-icon {
+    color: #A6CE39;
+}
+
+.app-item-data .bsk-dl-horizontal dt,
+.app-item-data .bsk-dl-horizontal dd {
+    text-align: left;
+    padding: 10px 0;
+}
+.app-item-data .bsk-alert .bsk-close {
+    top: -5px;
+    font-size: 200%;
+    position: relative;
+}
+
+.app-item-citation .bsk-dl-horizontal dt,
+.app-item-citation .bsk-dl-horizontal dd {
+    text-align: left;
+    padding: 10px 0;
+}
+.app-item-citation .bsk-dl-horizontal dd.app-citation-examples button.bsk-btn-link {
+    padding-top: 0;
+    padding-left: 0;
+}
+.app-item-citation .bsk-dl-horizontal dd.app-citation-examples .app-citation-example {
+    margin-left: 25px;
+}
+
+.app-item-licence .bsk-dl-horizontal dt,
+.app-item-licence .bsk-dl-horizontal dd {
+    text-align: left;
+    padding: 10px 0;
+}
+.app-item-licence .bsk-dl-horizontal dd ul {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+.app-item-licence .bsk-dl-horizontal dd ul li {
+    margin-top: 20px;
+}
+.app-item-licence .bsk-dl-horizontal dd ul li > div {
+    padding-left: 20px;
+    padding-top: 5px;
+}
+.app-item-licence .app-summary-alert {
+    margin-top: 30px;
+    margin-bottom: 0;
+}
+
+.app-item-additional-information .bsk-dl-horizontal dt,
+.app-item-additional-information .bsk-dl-horizontal dd {
+    text-align: left;
+    padding: 10px 0;
+}
+
+.app-item-contact form fieldset .bsk-form-group {
+    margin-bottom: 30px;
+}
+.app-item-contact form fieldset .bsk-form-group:first-of-type,
+.app-item-contact form fieldset > button:first-of-type{
+    margin-top: 15px;
+}
+.app-item-contact #contact-form-result {
+    margin-top: 20px;
+    margin-bottom: 0;
+}
+
+.app-item-extent ul.app-keywords-list {
+    margin-bottom: 30px;
+}
+.app-item-extent #item-map {
+    height: 420px;
+}
+
+.app-collection-summary .bsk-dl-horizontal dt,
+.app-collection-summary .bsk-dl-horizontal dd {
+    text-align: left;
+    padding: 10px 0;
+}
+
+.app-collection-item .bsk-dl-horizontal dt,
+.app-collection-item .bsk-dl-horizontal dd {
+    text-align: left;
+    padding: 5px 0;
+}
+
+.app-collection-item-count {
+    margin-top: 50px;
+    margin-bottom: 40px;
+    font-weight: bold;
+}
+
+.app-feedback .bsk-lead {
+    margin-bottom: 40px;
+}
+
+.app-feedback #contact-form-result {
+    margin-top: 20px;
+    margin-bottom: 0;
+}

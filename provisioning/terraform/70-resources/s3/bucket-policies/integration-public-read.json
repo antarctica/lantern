@@ -1,0 +1,13 @@
+{
+    "Version": "2012-10-17",
+    "Id": "Policy1442850416137",
+    "Statement": [
+        {
+            "Sid": "AllowPublicAccess",
+            "Effect": "Allow",
+            "Principal": "*",
+            "Action": "s3:GetObject",
+            "Resource": "arn:aws:s3:::add-catalogue-integration.data.bas.ac.uk/*"
+        }
+    ]
+}

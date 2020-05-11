@@ -1,0 +1,27 @@
+.leaflet-bar {
+    box-shadow: 0 0px 3px rgba(0,0,0,0.65);
+}
+.leaflet-bar,
+.leaflet-bar a {
+    color: #333;
+    background-color: #eee;
+    border-bottom: none;
+}
+.leaflet-bar a:first-child,
+.leaflet-bar a:last-child {
+    border-radius: 0;
+}
+.leaflet-bar a.leaflet-disabled {
+    cursor: not-allowed;
+    opacity: .65;
+    background-color: #eee;
+    color: #333;
+}
+.leaflet-container .leaflet-control-attribution {
+    background: #333;
+    color: #ccc;
+    font-size: 14px;
+}
+.leaflet-container .leaflet-control-attribution a {
+    color: #fff;
+}

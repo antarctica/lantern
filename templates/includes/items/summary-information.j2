@@ -1,0 +1,29 @@
+<section class="bsk-sidebar bsk-sidebar-default app-item-summary">
+    <dl class="bsk-dl-horizontal">
+        <dt>Version:</dt>
+        <dd>{{ item.resource.edition }}</dd>
+        <dt>Released:</dt>
+        <dd>
+            {{ item.resource.dates_by_type.released.display_value }}
+        </dd>
+        <dt>Status:</dt>
+        <dd>
+            {% if item.resource.maintenance.status == 'current' %}
+                <span class="bsk-label bsk-label-success"><i class="fa-fw far fa-check"></i> Current</span>
+            {% endif %}
+            {% if item.resource.maintenance.maintenance_frequency == 'biannually' %}
+                (Updated every 6 months)
+            {% endif %}
+        </dd>
+        <dt>Collection:</dt>
+        <dd>
+            <a href="{{ item.resource.special_keywords.collection.href }}">{{ item.resource.special_keywords.collection.display_value }}</a>
+        </dd>
+        <dt>Topic:</dt>
+        <dd>{{ item.resource.special_keywords.topic.display_value }}</dd>
+        <dt>Publisher:</dt>
+        <dd>{{ item.resource.contacts_by_role.publisher.0.organisation.display_name }}</dd>
+    </dl>
+    <h3>Abstract</h3>
+    <p>{{ item.resource.abstract }}</p>
+</section>

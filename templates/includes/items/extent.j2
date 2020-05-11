@@ -1,0 +1,75 @@
+<section class="app-item-tab app-item-extent">
+    <header>
+        <h2><i class="far fa-expand-arrows"></i> Extent</h2>
+    </header>
+
+    <div class="bsk-row">
+        <div class="bsk-col-12-md-6">
+            <div id="item-map"></div>
+        </div>
+        <div class="bsk-col-12-md-6">
+            {% if item.resource.keywords_by_type.place %}
+                <header>
+                    <h4>Places</h4>
+                </header>
+                <ul class="bsk-list-unstyled app-keywords-list fa-ul">
+                    {% for places_keywords in item.resource.keywords_by_type.place %}
+                        {% for place_keyword in places_keywords.terms %}
+                            <li><span class="fa-li">
+                                <i class="far fa-map-pin"></i></span>
+                                {{ place_keyword.term }}
+                                {% if place_keyword.href %}
+                                    <a href="{{ place_keyword.href }}"><i class="far fa-info-circle"></i></a>
+                                {% endif %}
+                                {% if places_keywords.thesaurus %}
+                                    <small>
+                                        {{ places_keywords.thesaurus.title.display_value }}
+                                        {% if places_keywords.thesaurus.title.href %}
+                                            <a href="{{ places_keywords.thesaurus.title.href }}"><i class="far fa-info-circle"></i></a>
+                                        {% endif %}
+                                    </small>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            <header>
+                <h4>Bounding coordinates</h4>
+            </header>
+            <dl class="bsk-dl">
+                <dt>
+                    <i class="far fa-border-style fa-flip-horizontal"></i>
+                    Top-right corner:
+                </dt>
+                <dd>North: {{ item.resource.extent.geographic.bounding_box.north_latitude }}, East: {{ item.resource.extent.geographic.bounding_box.east_longitude }}</dd>
+                <dt>
+                    <i class="far fa-border-style fa-flip-vertical"></i>
+                    Bottom-left corner:
+                </dt>
+                <dd>South: {{ item.resource.extent.geographic.bounding_box.south_latitude }}, West: {{ item.resource.extent.geographic.bounding_box.west_longitude }}</dd>
+            </dl>
+
+            <header>
+                <h4>Temporal range</h4>
+            </header>
+            <dl class="bsk-dl">
+                <div class="bsk-row">
+                    <div class="bsk-col-12-md-4">
+                        <dt>From:</dt>
+                        <dd>{{ item.resource.extent.temporal.period.start.display_value }}</dd>
+                    </div>
+                    <div class="bsk-col-12-md-2 bsk-sr-hidden">
+                        <dt>&nbsp;</dt>
+                        <dd class="bsk-text-center"><i class="fas fa-long-arrow-alt-right"></i></dd>
+                    </div>
+                    <div class="bsk-col-12-md-6">
+                        <dt>To:</dt>
+                        <dd>{{ item.resource.extent.temporal.period.end.display_value }}</dd>
+                    </div>
+                </div>
+            </dl>
+        </div>
+    </div>
+</section>

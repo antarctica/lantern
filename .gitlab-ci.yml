@@ -1,0 +1,138 @@
+---
+
+# == Notes ==
+
+# GitLab automatically passes artifacts from previous stages by default
+
+# Secret variables
+# - Set required secret variables at: https://gitlab.data.bas.ac.uk/magic/add-metadata-toolbox/settings/ci_cd
+# - Variables are grouped by section in KEY: "value" format (e.g. FOO: "bar")
+#   Sensitive values are represented by "[Sensitive]"
+#
+# - CSW server connection strings
+#   > APP_CSW_CONNECTION_STRING_PASSWORD_PUBLISHED: "[Sensitive]"
+#   > APP_CSW_CONNECTION_STRING_PASSWORD_UNPUBLISHED: "[Sensitive]"
+#
+# - Private key for the 'bas-magic-shared-deployment-identity'
+#   > PACKAGE_REPO_SSH_PRIVATE_KEY (protected, file): "[Sensitive]"
+#   > PODMAN_HOST_SSH_PRIVATE_KEY (protected, file): "[Sensitive]"
+
+# == Global settings ==
+
+stages:
+  - 🧪 test
+  - 📦 package
+  - 🏗 build
+  - 🚚 publish
+  - 🚀 release
+
+variables:
+  DOCKER_HOST: tcp://docker:2376
+  DOCKER_CERT_PATH: /certs/client
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_VERIFY: 1
+  GITLAB_REGISTRY: docker-registry.data.bas.ac.uk
+  PACKAGE_REPOSITORY: bsl-repoa.nerc-bas.ac.uk
+  PODMAN_HOST: bslws01.nerc-bas.ac.uk
+  APP_NAME: scar-add-metadata-toolbox
+  APP_PACKAGE: scar-add-metadata-toolbox
+  APP_STATIC_SITE_S3_BUCKET: add-catalogue-integration.data.bas.ac.uk
+  APP_CSW_CONNECTION_STRING_PUBLISHED: postgresql://pycsw_production:$APP_CSW_CONNECTION_STRING_PASSWORD_PUBLISHED@bsldb.nerc-bas.ac.uk/pycsw_production
+  APP_CSW_CONNECTION_STRING_UNPUBLISHED: postgresql://pycsw_production:$APP_CSW_CONNECTION_STRING_PASSWORD_UNPUBLISHED@bsldb.nerc-bas.ac.uk/pycsw_production
+
+image:
+  name: docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox:latest
+  entrypoint: [""]
+
+# == Jobs ==
+
+black:
+  stage: 🧪 test
+  script:
+    - "black --check scar_add_metadata_toolbox/"
+
+bandit:
+  stage: 🧪 test
+  script:
+    - "bandit -r ."
+
+package:
+  stage: 📦 package
+  before_script:
+    - "python3 support/python-packaging/parse_version.py $(git describe --tags) > _version && export VERSION=$(cat _version)"
+    - "python support/python-packaging/parse_version.py ${VERSION:-0.0.0} --pyproject"
+  script:
+    - "poetry build"
+  artifacts:
+    name: "$CI_BUILD_TOKEN-build"
+    paths:
+      - dist
+    expire_in: 1 month
+
+container:
+  stage: 🏗 build
+  image:
+    name: docker:19.03-dind
+    entrypoint: [""]
+  before_script:
+    - 'cp -r ./dist/*.whl ./support/docker-packaging/'
+    - 'cp -r ./support/pycsw/ ./support/docker-packaging/'
+    - 'cd support/docker-packaging/'
+    - 'echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" "$CI_REGISTRY" --password-stdin'
+    - "python3 support/python-packaging/parse_version.py $(git describe --tags) > _version && export VERSION=$(cat _version)"
+    - 'export PACKAGE_VERSION=$APP_PACKAGE==${VERSION:-0.0.0}'
+  script:
+    - 'docker build . -t $CI_REGISTRY_IMAGE/deploy:$CI_COMMIT_SHA --build-arg APP_PACKAGE_VERSION=$PACKAGE_VERSION'
+    - 'docker push $CI_REGISTRY_IMAGE/deploy:$CI_COMMIT_SHA'
+  services:
+    - docker:dind
+  tags:
+    - dnd
+
+podman:
+  stage: 🏗 build
+  image:
+    name: hashicorp/terraform:0.12.24
+    entrypoint: [""]
+  before_script:
+    - "cd provisioning/podman"
+  script:
+    - 'terraform init'
+    - 'terraform validate'
+    - 'terraform apply -auto-approve -var="registry_image=$CI_REGISTRY_IMAGE/deploy:$CI_COMMIT_SHA" -var="app_csw_connection_string_published=$APP_CSW_CONNECTION_STRING_PUBLISHED" -var="app_csw_connection_string_unpublished=$APP_CSW_CONNECTION_STRING_UNPUBLISHED" -var="app_s3_static_site_bucket=$APP_STATIC_SITE_S3_BUCKET"'
+    - 'chmod +x scar-add-metadata-toolbox'
+  artifacts:
+    name: "$CI_BUILD_TOKEN-podman-wrapper"
+    paths:
+      - provisioning/podman/scar-add-metadata-toolbox
+      - provisioning/podman/dot.env
+    expire_in: 10 mins
+
+publish-package:
+  stage: 🚚 publish
+  image: kroniak/ssh-client
+  before_script:
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - ssh-keyscan -H $PACKAGE_REPOSITORY > ~/.ssh/known_hosts
+    - mv $PACKAGE_REPO_SSH_PRIVATE_KEY ~/.ssh/id_rsa
+    - chmod 400 ~/.ssh/id_rsa
+  script:
+    - 'ssh build@$PACKAGE_REPOSITORY -C "mkdir -p /var/repo/magic/v1/projects/scar-add-metadata-toolbox/latest/dist/"'
+    - scp dist/*.* build@$PACKAGE_REPOSITORY:/var/repo/magic/v1/projects/scar-add-metadata-toolbox/latest/dist/
+
+publish-podman:
+  stage: 🚚 publish
+  image: kroniak/ssh-client
+  before_script:
+    - 'mkdir -p ~/.ssh'
+    - 'chmod 700 ~/.ssh'
+    - 'ssh-keyscan -H $PODMAN_HOST > ~/.ssh/known_hosts'
+    - 'mv $PODMAN_HOST_SSH_PRIVATE_KEY ~/.ssh/id_rsa'
+    - 'chmod 400 ~/.ssh/id_rsa'
+  script:
+    - 'ssh geoweb@$PODMAN_HOST -C "mkdir -p /users/geoweb/.config/scar-add-metadata-toolbox/"'
+    - 'ssh geoweb@$PODMAN_HOST -C "mkdir -p /users/geoweb/projects/scar-add-metadata-toolbox/records"'
+    - 'scp provisioning/podman/scar-add-metadata-toolbox geoweb@$PODMAN_HOST:/users/geoweb/bin/'
+    - 'scp provisioning/podman/dot.env geoweb@$PODMAN_HOST:/users/geoweb/.config/scar-add-metadata-toolbox/.env'
+    - 'ssh geoweb@$PODMAN_HOST -C "chmod 600 /users/geoweb/.config/scar-add-metadata-toolbox/.env"'

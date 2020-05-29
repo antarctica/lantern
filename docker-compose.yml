@@ -14,18 +14,14 @@
       ports:
         - 9000:9000
       depends_on:
-        - csw-unpub-db
-        - csw-pub-db
+        - csw-db
 
-    csw-unpub-db:
+    csw-db:
       image: postgis/postgis:12-3.0-alpine
       environment:
         POSTGRES_PASSWORD: password
-
-    csw-pub-db:
-      image: postgis/postgis:12-3.0-alpine
-      environment:
-        POSTGRES_PASSWORD: password
+      ports:
+        - "5432:5432"
 
     web:
       image: nginx:alpine

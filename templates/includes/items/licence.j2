@@ -2,7 +2,7 @@
     <header>
         <h2><i class="far fa-file-certificate"></i> Licence</h2>
     </header>
-    {% if item.resource.constraints.copyright.reformat_statement %}
+    {% if item.resource.constraints and item.resource.constraints.copyright and item.resource.constraints.copyright.reformat_statement %}
         {% if item.resource.constraints.copyright.code == 'cc-by-4.0' %}
             <dl class="bsk-dl-horizontal">
                 <dt>Item licence</dt>
@@ -42,7 +42,7 @@
                 </dd>
             </dl>
         {% endif %}
-    {% else %}
+    {% elif item.resource.constraints %}
         {{ item.resource.constraints.copyright }}
     {% endif %}
 </section>

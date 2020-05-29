@@ -9,8 +9,6 @@
         <div class="bsk-col-12-md-9">
             {% include 'app/includes/collection/summary-information.j2' %}
 
-            <div class="app-collection-item-count">{{ collection['items'] | length }} items</div>
-
             {% for item in collection['items'] %}
                 {% with item=item %}
                 {% include 'app/includes/collection/item.j2' %}

@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="mock-csw" uuid="d6bb2e9a-b93a-4b39-8f69-2c553bc565cd">
+    <data-source source="LOCAL" name="Remote [Production]" uuid="9a9e9c51-4931-439a-8e72-698e0b3e688e">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://bsldb.nerc-bas.ac.uk:5432/pycsw_production</jdbc-url>
+    </data-source>
+    <data-source source="LOCAL" name="Local [Development]" uuid="1d0ed4d5-4ad8-4f83-884c-8620032068a0">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>

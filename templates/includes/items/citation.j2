@@ -2,7 +2,7 @@
     <header>
         <h2><i class="far fa-quote-right"></i> Citation</h2>
     </header>
-    {% if item.resource.constraints.citation.reformat_statement and item.resource.constraints.citation.elements %}
+    {% if item.resource.constraints and item.resource.constraints.citation.reformat_statement and item.resource.constraints.citation.elements %}
         <dl class="bsk-dl-horizontal">
             <dt>Item URL</dt>
             <dd>
@@ -65,7 +65,7 @@
                 </div>
             </dd>
         </dl>
-    {% else %}
+    {% elif item.resource.constraints %}
         <p>{{ item.resource.constraints.citation.statement }}</p>
     {% endif %}
 </section>

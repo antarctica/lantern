@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+set -e
+
+blue=$(tput setaf 4)
+normal=$(tput sgr0)
+
+printf "%40s\n\n" "$${blue}Note: This command was run inside a container.$${normal}"
+
+podman run --rm=true --tty --interactive --user=root \
+--volume /users/geoweb/.config/scar-add-metadata-toolbox/.env:/usr/src/app/.env:ro \
+--volume /users/geoweb/projects/scar-add-metadata-toolbox/records/:/usr/src/app/records/:rw \
+ ${registry_image} "$@"

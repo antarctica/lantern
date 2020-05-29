@@ -1,0 +1,10 @@
+---
+version: "2"
+
+services:
+  terraform:
+    image: hashicorp/terraform:0.12.24
+    working_dir: /usr/src/app/provisioning/terraform
+    entrypoint: ash
+    volumes:
+      - .:/usr/src/app/provisioning/terraform

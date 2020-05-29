@@ -31,7 +31,7 @@ python support/python-packaging/parse_version.py $(git describe --tags)
 ```
 
 The generated version string will be written to *stdout*. If the `--pyproject` flag is set the `tool.poetry.version`
-variable in `pyproject.toml` file.
+variable in `pyproject.toml` file will be set,
 
 == Implementation ==
 

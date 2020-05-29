@@ -104,16 +104,17 @@ address p:last-of-type {
     padding: 10px 0;
 }
 
+.app-collection-item {
+    margin-bottom: 45px;
+}
+.app-collection-item:last-of-type {
+    margin-bottom: 0;
+}
+
 .app-collection-item .bsk-dl-horizontal dt,
 .app-collection-item .bsk-dl-horizontal dd {
     text-align: left;
     padding: 5px 0;
-}
-
-.app-collection-item-count {
-    margin-top: 50px;
-    margin-bottom: 40px;
-    font-weight: bold;
 }
 
 .app-feedback .bsk-lead {

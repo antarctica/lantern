@@ -17,10 +17,15 @@
         </dd>
         <dt>Collection:</dt>
         <dd>
-            <a href="{{ item.resource.special_keywords.collection.href }}">{{ item.resource.special_keywords.collection.display_value }}</a>
+            {% if item.resource.special_keywords.collection %}
+                <a href="{{ item.resource.special_keywords.collection.href }}">{{ item.resource.special_keywords.collection.display_value }}</a>
+            {% endif %}
         </dd>
         <dt>Topic:</dt>
-        <dd>{{ item.resource.special_keywords.topic.display_value }}</dd>
+        <dd>
+            {% if item.resource.special_keywords.collection %}
+                {{ item.resource.special_keywords.topic.display_value }}</dd>
+            {% endif %}
         <dt>Publisher:</dt>
         <dd>{{ item.resource.contacts_by_role.publisher.0.organisation.display_name }}</dd>
     </dl>

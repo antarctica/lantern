@@ -36,32 +36,20 @@ class Config:
     def __init__(self):
         load_dotenv()
 
-        self.APP_ENABLE_FILE_LOGGING = (
-            str2bool(os.environ.get("APP_ENABLE_FILE_LOGGING")) or False
-        )
+        self.APP_ENABLE_FILE_LOGGING = str2bool(os.environ.get("APP_ENABLE_FILE_LOGGING")) or False
         self.APP_ENABLE_SENTRY = str2bool(os.environ.get("APP_ENABLE_SENTRY")) or True
 
-        self.LOG_FORMAT = (
-            "[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s"
-        )
-        self.LOG_FILE_PATH = Path(
-            os.environ.get("APP_LOG_FILE_PATH") or "/var/log/app/app.log"
-        )
+        self.LOG_FORMAT = "[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s"
+        self.LOG_FILE_PATH = Path(os.environ.get("APP_LOG_FILE_PATH") or "/var/log/app/app.log")
 
         self.SENTRY_DSN = os.environ.get("SENTRY_DSN") or None
 
-        self.APP_AUTH_SESSION_FILE_PATH = Path.home().joinpath(
-            ".config/scar_add_metadata_toolbox/auth.json"
-        )
+        self.APP_AUTH_SESSION_FILE_PATH = Path.home().joinpath(".config/scar_add_metadata_toolbox/auth.json")
         if "APP_AUTH_SESSION_FILE_PATH" in os.environ:
-            self.APP_AUTH_SESSION_FILE_PATH = Path(
-                os.environ.get("APP_AUTH_SESSION_FILE_PATH")
-            )
+            self.APP_AUTH_SESSION_FILE_PATH = Path(os.environ.get("APP_AUTH_SESSION_FILE_PATH"))
         self.AUTH_CLIENT_SCOPES = []
         if "AUTH_CLIENT_SCOPES" in os.environ:
-            self.AUTH_CLIENT_SCOPES = str(os.environ.get("AUTH_CLIENT_SCOPES")).split(
-                " "
-            )
+            self.AUTH_CLIENT_SCOPES = str(os.environ.get("AUTH_CLIENT_SCOPES")).split(" ")
         self.AUTH_CLIENT_TENANCY = os.environ.get("AUTH_CLIENT_TENANCY") or None
         self.AUTH_CLIENT_ID = os.environ.get("AUTH_CLIENT_ID") or None
 
@@ -69,24 +57,18 @@ class Config:
         self.AZURE_OAUTH_APPLICATION_ID = os.environ.get("AUTH_SERVER_ID") or None
         self.AZURE_OAUTH_CLIENT_APPLICATION_IDS = [self.AUTH_CLIENT_ID]
 
-        self.CSW_ENDPOINT_UNPUBLISHED = (
-            os.environ.get("CSW_ENDPOINT") or "http://app:9000/csw/unpublished"
-        )
-        self.CSW_ENDPOINT_PUBLISHED = (
-            os.environ.get("CSW_ENDPOINT") or "http://app:9000/csw/published"
-        )
+        self.CSW_ENDPOINT_UNPUBLISHED = os.environ.get("CSW_ENDPOINT") or "http://app:9000/csw/unpublished"
+        self.CSW_ENDPOINT_PUBLISHED = os.environ.get("CSW_ENDPOINT") or "http://app:9000/csw/published"
 
         self.CSW_CONFIG_UNPUBLISHED = {
             "server": {
-                "url": os.environ.get("CSW_ENDPOINT")
-                or "http://app:9000/csw/unpublished",
+                "url": os.environ.get("CSW_ENDPOINT") or "http://app:9000/csw/unpublished",
                 "mimetype": "application/xml; charset=UTF-8",
                 "encoding": "UTF-8",
                 "language": "en-GB",
                 "maxrecords": "100",
                 "loglevel": "DEBUG",
-                "logfile": os.environ.get("APP_CSW_LOG_FILE_PATH")
-                or "/var/log/app/csw-unpublished.log",
+                "logfile": os.environ.get("APP_CSW_LOG_FILE_PATH") or "/var/log/app/csw-unpublished.log",
                 "pretty_print": "true",
                 "gzip_compresslevel": "8",
                 "domainquerytype": "list",
@@ -117,10 +99,7 @@ class Config:
                 "contact_instructions": "During hours of service on weekdays. Best efforts support only.",
                 "contact_role": "pointOfContact",
             },
-            "repository": {
-                "database": os.environ.get("CSW_UNPUBLISHED_DB_CONNECTION"),
-                "table": "records",
-            },
+            "repository": {"database": os.environ.get("CSW_UNPUBLISHED_DB_CONNECTION"), "table": "records_unpublished"},
             "metadata:inspire": {
                 "enabled": "true",
                 "languages_supported": "eng",
@@ -135,15 +114,13 @@ class Config:
         }
         self.CSW_CONFIG_PUBLISHED = {
             "server": {
-                "url": os.environ.get("CSW_ENDPOINT")
-                or "http://app:9000/csw/published",
+                "url": os.environ.get("CSW_ENDPOINT") or "http://app:9000/csw/published",
                 "mimetype": "application/xml; charset=UTF-8",
                 "encoding": "UTF-8",
                 "language": "en-GB",
                 "maxrecords": "100",
                 "loglevel": "DEBUG",
-                "logfile": os.environ.get("APP_CSW_LOG_FILE_PATH")
-                or "/var/log/app/csw-published.log",
+                "logfile": os.environ.get("APP_CSW_LOG_FILE_PATH") or "/var/log/app/csw-published.log",
                 "pretty_print": "true",
                 "gzip_compresslevel": "8",
                 "domainquerytype": "list",
@@ -174,10 +151,7 @@ class Config:
                 "contact_instructions": "During hours of service on weekdays. Best efforts support only.",
                 "contact_role": "pointOfContact",
             },
-            "repository": {
-                "database": os.environ.get("CSW_PUBLISHED_DB_CONNECTION"),
-                "table": "records",
-            },
+            "repository": {"database": os.environ.get("CSW_PUBLISHED_DB_CONNECTION"), "table": "records_published"},
             "metadata:inspire": {
                 "enabled": "true",
                 "languages_supported": "eng",
@@ -197,14 +171,14 @@ class Config:
 
         self.BSK_TEMPLATES = BskTemplates()
         self.BSK_TEMPLATES.site_title = "BAS Data Catalogue"
-        self.BSK_TEMPLATES.site_description = "Discover data, services and records held by the British Antarctic Survey and UK Polar Data Centre"
+        self.BSK_TEMPLATES.site_description = (
+            "Discover data, services and records held by the British Antarctic Survey and UK Polar Data Centre"
+        )
         self.BSK_TEMPLATES.bsk_site_nav_brand_text = "BAS Data Catalogue"
         # TODO: Waiting for fix
         # self.BSK_TEMPLATES.bsk_site_development_phase = "experimental"
         self.BSK_TEMPLATES.bsk_site_development_phase = "alpha"
-        self.BSK_TEMPLATES.bsk_site_feedback_href = (
-            "https://add-catalogue.data.bas.ac.uk/feedback"
-        )
+        self.BSK_TEMPLATES.bsk_site_feedback_href = "/feedback"
         self.BSK_TEMPLATES.bsk_site_footer_policies_cookies_href = "/legal/cookies"
         self.BSK_TEMPLATES.bsk_site_footer_policies_copyright_href = "/legal/copyright"
         self.BSK_TEMPLATES.bsk_site_footer_policies_privacy_href = "/legal/privacy"
@@ -249,9 +223,7 @@ class Config:
     # noinspection PyPep8Naming
     @property
     def CLIENT_AUTH(self):
-        return PublicClientApplication(
-            client_id=self.AUTH_CLIENT_ID, authority=self.AUTH_CLIENT_TENANCY
-        )
+        return PublicClientApplication(client_id=self.AUTH_CLIENT_ID, authority=self.AUTH_CLIENT_TENANCY)
 
     # noinspection PyPep8Naming
     @property
@@ -274,9 +246,7 @@ class ProductionConfig(Config):  # pragma: no cover
 
     def __init__(self):
         super().__init__()
-        self.APP_ENABLE_FILE_LOGGING = (
-            str2bool(os.environ.get("APP_ENABLE_FILE_LOGGING")) or True
-        )
+        self.APP_ENABLE_FILE_LOGGING = str2bool(os.environ.get("APP_ENABLE_FILE_LOGGING")) or True
 
     # noinspection PyPep8Naming
     @property

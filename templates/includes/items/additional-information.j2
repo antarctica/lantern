@@ -19,7 +19,7 @@
         <dd>
             {% if item.resource.spatial_representation_type == 'vector' %}
                 <i class="far fa-fw fa-draw-polygon"></i> Vector
-            {% elif item.resource.spatial_representation_type == 'gridded' %}
+            {% elif item.resource.spatial_representation_type == 'grid' %}
                 <i class="far fa-fw fa-game-board"></i> Raster
             {% elif item.resource.spatial_representation_type == 'textTable' %}
                 <i class="far fa-fw fa-list-ol"></i> Tabular
@@ -40,15 +40,7 @@
             {% endif %}
         </dd>
         <dt>Character set</dt>
-        <dd>
-            <mark>
-                Blocked by &nbsp;
-                <a href="https://gitlab.data.bas.ac.uk/uk-pdc/metadata-infrastructure/metadata-generator/issues/84">
-                    <i class="fal fa-file-invoice"></i>
-                    uk-pdc/metadata-infrastructure/metadata-generator#84
-                </a>
-            </mark>
-        </dd>
+        <dd>UTF-8</dd>
         {% for date in item.resource.dates %}
             <dt>
                 {% if date.date_type == 'creation' %}
@@ -64,7 +56,13 @@
             <dd>{{ date.display_value }}</dd>
         {% endfor %}
         <dt>Update frequency:</dt>
-        <dd>{{ item.resource.maintenance.maintenance_frequency | capitalize }}</dd>
+        <dd>
+            {% if item.resource.maintenance.maintenance_frequency == 'biannually' %}
+                Biannually
+            {% elif item.resource.maintenance.maintenance_frequency == 'asNeeded' %}
+                As Needed
+            {% endif %}
+        </dd>
         <dt>Status:</dt>
         <dd>
             {% if item.resource.maintenance.status == 'current' %}
@@ -72,7 +70,7 @@
             {% endif %}
         <dt>Usage requirements:</dt>
         <dd>
-            {% if item.resource.constraints.citation %}
+            {% if item.resource.constraints and item.resource.constraints.citation %}
                 Attribution/Citation required
             {% endif %}
         </dd>
@@ -86,14 +84,8 @@
             {% endif %}
         </dd>
         <dt>Character set</dt>
+        <dd>UTF-8</dd>
         <dd>
-            <mark>
-                Blocked by &nbsp;
-                <a href="https://gitlab.data.bas.ac.uk/uk-pdc/metadata-infrastructure/metadata-generator/issues/84">
-                    <i class="fal fa-file-invoice"></i>
-                    uk-pdc/metadata-infrastructure/metadata-generator#84
-                </a>
-            </mark>
         </dd>
         <dt>Status:</dt>
         <dd>{{ item.maintenance.progress | capitalize }}</dd>

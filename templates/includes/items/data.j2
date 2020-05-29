@@ -20,6 +20,8 @@
                             <abbr title="OGC GeoPackage">GeoPackage</abbr>
                         {% elif transfer_option.format.format == 'shp' %}
                             <abbr title="ESRI Shapefile">Shapefile</abbr>
+                        {% elif transfer_option.format.format == 'pdf' %}
+                            <abbr title="Adobe Portable Document Format">PDF</abbr>
                         {% else %}
                             <span class="bsk-text-muted">Unknown</span>
                         {% endif %}
@@ -40,7 +42,7 @@
                                 {% set calc_btn_variant = 'bsk-btn-primary' %}
                             {% endif %}
                             {% if transfer_option.format.format == 'wms' %}
-                                <button type="button" class="bsk-btn {{ calc_btn_variant }}" data-toggle="collapse" data-target="#item-wms-info-layer-{{ transfer_option.format.layer }}" aria-expanded="false" aria-label="Close" aria-controls="#item-wms-info-layer-{{ transfer_option.format.layer }}">
+                                <button type="button" class="bsk-btn {{ calc_btn_variant }}" data-toggle="collapse" data-target="#item-wms-info-layer-{{ transfer_option.format.layer | replace(':', '-') }}" aria-expanded="false" aria-label="Close" aria-controls="#item-wms-info-layer-{{ transfer_option.format.layer | replace(':', '-') }}">
                                     Add layer to GIS
                                     <i class="fa-fw far fa-layer-plus"></i>
                                 </button>
@@ -58,18 +60,15 @@
             {% endfor %}
         </tbody>
     </table>
-    <div class="bsk-alert bsk-alert-highlight bsk-alert-info">
-        Please <a href="#item-details-contact" class="bsk-alert-link">contact us</a> if you need this item in another format.
-    </div>
-    {% if item.resource.constraints.citation %}
+    {% if item.resource.constraints and item.resource.constraints.citation %}
         <div class="bsk-alert bsk-alert-solid bsk-alert-info">
             You <strong>must</strong> include an <a href="#item-details-citation" class="bsk-alert-link">acknowledgement</a> if you use this item.
         </div>
     {% endif %}
     {% for transfer_option in item.resource.transfer_options %}
         {% if transfer_option.format.format == 'wms' %}
-            <div id="item-wms-info-layer-{{ transfer_option.format.layer }}" class="bsk-alert bsk-alert-block bsk-alert-outline bsk-alert-info bsk-collapse bsk-fade" role="alert">
-                <button type="button" class="bsk-close" data-toggle="collapse" data-target="#item-wms-info-layer-{{ transfer_option.format.layer }}" aria-expanded="false" aria-label="Close" aria-controls="#item-wms-info-layer-{{ transfer_option.format.layer }}">&times;</button>
+            <div id="item-wms-info-layer-{{ transfer_option.format.layer | replace(':', '-') }}" class="bsk-alert bsk-alert-block bsk-alert-outline bsk-alert-info bsk-collapse bsk-fade" role="alert">
+                <button type="button" class="bsk-close" data-toggle="collapse" data-target="#item-wms-info-layer-{{ transfer_option.format.layer | replace(':', '-') }}" aria-expanded="false" aria-label="Close" aria-controls="#item-wms-info-layer-{{ transfer_option.format.layer | replace(':', '-') }}">&times;</button>
                 <header class="bsk-alert-heading">
                     <div class="bsk-h4">Web Map Service instructions</div>
                 </header>

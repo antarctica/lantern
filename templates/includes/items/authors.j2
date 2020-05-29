@@ -12,7 +12,7 @@
                                 <strong>{{ author.individual.name }}</strong>
                             </p>
                         {% endif %}
-                        {% if author.organisation.name %}
+                        {% if author.organisation and author.organisation.name %}
                             <p>
                                 <strong>{{ author.organisation.name }}</strong>
                             </p>
@@ -25,11 +25,15 @@
                             </p>
                         {% endif %}
                         {% if author.online_resource and author.online_resource.href %}
-                            <p>
-                                <i class="fa-fw far fa-globe"></i>
-                                <abbr title="Website">Web:</abbr>
-                                <a href="{{ author.online_resource.href }}">{{ author.online_resource.href }}</a>
-                            </p>
+                            {% if author.individual.title == 'orcid' and author.individual.href %}
+                                {% if author.online_resource.href != author.individual.href %}
+                                    <p>
+                                        <i class="fa-fw far fa-globe"></i>
+                                        <abbr title="Website">Web:</abbr>
+                                        <a href="{{ author.online_resource.href }}">{{ author.online_resource.href }}</a>
+                                    </p>
+                                {% endif %}
+                            {% endif %}
                         {% endif %}
                         {% if author.individual.title == 'orcid' %}
                             <p>

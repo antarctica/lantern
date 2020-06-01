@@ -14,7 +14,8 @@ may break without warning or in unexpected ways. Code quality and organisation i
 These limitations will be addressed in the near future as this project develops into a prototype for other discovery
 metadata records. Parts of this project may also be used for widely, such as in the new BAS wide data catalogue.
 
-See the milestones and issues in this project on GitLab (internal) for more information.
+See the milestones and issues in [GitLab](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues) (internal)
+for more information.
 
 ## Overview
 
@@ -29,8 +30,12 @@ This project is a monolithic (Python Flask) application comprised of several com
 These components map to components 2, 4 and 6 in the draft ADD data workflow
 ([#139 (internal)](https://gitlab.data.bas.ac.uk/MAGIC/add/issues/139)).
 
-At a high level, the *metadata editor* and *data catalogue* components are both clients of the *metdata repositories*.
-Components communicate using CSW (including the transactional profile) with records encoded using ISO 19139.
+In the client/server model, the *metadata editor* acts as a client of the *metadata repositories* and *data catalogue*
+components, that act as servers.
+
+In terms of application state, the *metadata editor* and *data catalogue* components  act as clients of the
+*metdata repositories*, which act as servers using CSW (including the transactional profile) and records encoded using
+ISO 19139.
 
 All of the *unpublished repository*, and the transactional parts of the *published repository*, are authenticated using
 OAuth (currently using Azure Active Directory). Access control is used to restrict access to draft/in-progress records
@@ -47,16 +52,20 @@ reverse-proxying.
 
 ## Usage
 
-This project can be used on the BAS central workstations using the shared MAGIC user:
+The *metadata editor* component of this project is ran on the BAS central workstations using the shared MAGIC user:
 
 ```shell
 $ ssh geoweb@bslws01.nerc-bas.ac.uk
-$ add-metadata-toolbox [command]
+$ scar-add-metadata-toolbox [command]
 ```
 
-Runtime and configuration files are stored in `/users/geoweb/.config/scar-add-metadata-toolbox/`.
+The editor is configured using a settings file: `/users/geoweb/.config/scar-add-metadata-toolbox/.env`.
 
-If any errors occur they will be reported to [Sentry](#error-tracking) and relevant individuals alerted by email.
+The *unpublished repository*, *published repository* and *data catalogue* run together as a
+[service](http://bsl-nomad-magic-dev-s1.nerc-bas.ac.uk:4646/ui/jobs/scar-add-metadata-toolbox) in the experimental
+[MAGIC Nomad cluster](https://gitlab.data.bas.ac.uk/MAGIC/infrastructure/nomad).
+
+Any errors will be automatically reported to [Sentry](#error-tracking) and relevant individuals alerted by email.
 
 ### Workflow: Adding a new record
 
@@ -497,6 +506,9 @@ Logs for this service are written to *stdout/stderr* as appropriate.
 [Continuous deployment](#continuous-deployment) will configure this application to run on the BAS central workstations
 as a container, using an automatically generated launch script and `.env` file.
 
+[Continuous deployment](#continuous-deployment) will configure this application to run on in the experimental the experimental [MAGIC Nomad cluster](https://gitlab.data.bas.ac.uk/MAGIC/infrastructure/nomad), using an automatically
+generated job definition and environment variables.
+
 See the [Usage](#usage) section for how to use and run the application.
 
 ### Terraform
@@ -506,8 +518,8 @@ Terraform is used for resources required for hosting the *Data catalogue* compon
 Access to the [BAS AWS account](https://gitlab.data.bas.ac.uk/WSF/bas-aws) and [Remote state](#terraform-remote-state)
 are is needed to provision these resources.
 
-Terraform is also used for generating launch scripts and configuration files from templates. However these files are
-not included in Terraform state.
+Terraform is also used for generating launch scripts, job definitions and configuration files from templates. However
+these files are not included in Terraform state.
 
 #### Terraform remote state
 

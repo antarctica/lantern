@@ -16,6 +16,13 @@
 # - Private key for the 'bas-magic-shared-deployment-identity'
 #   > PACKAGE_REPO_SSH_PRIVATE_KEY (protected, file): "[Sensitive]"
 #   > PODMAN_HOST_SSH_PRIVATE_KEY (protected, file): "[Sensitive]"
+#
+# - Nomad deploy token
+#   create a deploy token at https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/settings/repository
+#     - name: 'MAGIC Nomad'
+#     - username: 'nomad'
+#     - scopes: 'read_registry'
+#   > NOMAD_DEPLOY_TOKEN (protected): "[Sensitive]"
 
 # == Global settings ==
 
@@ -121,8 +128,8 @@ publish-package:
     - 'ssh build@$PACKAGE_REPOSITORY -C "mkdir -p /var/repo/magic/v1/projects/scar-add-metadata-toolbox/latest/dist/"'
     - scp dist/*.* build@$PACKAGE_REPOSITORY:/var/repo/magic/v1/projects/scar-add-metadata-toolbox/latest/dist/
 
-publish-podman:
-  stage: 🚚 publish
+release-podman:
+  stage: 🚀 release
   image: kroniak/ssh-client
   before_script:
     - 'mkdir -p ~/.ssh'
@@ -136,3 +143,15 @@ publish-podman:
     - 'scp provisioning/podman/scar-add-metadata-toolbox geoweb@$PODMAN_HOST:/users/geoweb/bin/'
     - 'scp provisioning/podman/dot.env geoweb@$PODMAN_HOST:/users/geoweb/.config/scar-add-metadata-toolbox/.env'
     - 'ssh geoweb@$PODMAN_HOST -C "chmod 600 /users/geoweb/.config/scar-add-metadata-toolbox/.env"'
+
+nomad:
+  stage: 🚀 release
+  image:
+    name: hashicorp/terraform:0.12.24
+    entrypoint: [""]
+  before_script:
+    - "cd provisioning/nomad"
+  script:
+    - 'terraform init'
+    - 'terraform validate'
+    - 'terraform apply -auto-approve -var="registry_image=$CI_REGISTRY_IMAGE/deploy:$CI_COMMIT_SHA" -var="registry_token=$NOMAD_DEPLOY_TOKEN" -var="app_csw_connection_string_published=$APP_CSW_CONNECTION_STRING_PUBLISHED" -var="app_csw_connection_string_unpublished=$APP_CSW_CONNECTION_STRING_UNPUBLISHED" -var="app_s3_static_site_bucket=$APP_STATIC_SITE_S3_BUCKET"'

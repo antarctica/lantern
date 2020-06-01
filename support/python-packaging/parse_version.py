@@ -56,41 +56,41 @@ The components in this version string are:
 
 if __name__ == "__main__":
     parser = ArgumentParser()
-    parser.add_argument('git_describe', help='Output of running `git describe --tags`')
-    parser.add_argument('--pyproject', dest='update_pyproject', action='store_true')
+    parser.add_argument("git_describe", help="Output of running `git describe --tags`")
+    parser.add_argument("--pyproject", dest="update_pyproject", action="store_true")
     parser.set_defaults(update_pyproject=False)
     args = parser.parse_args()
     error = False
 
-    version_string = ''
+    version_string = ""
 
-    version_elements = str(args.git_describe).split('-')
+    version_elements = str(args.git_describe).split("-")
     if len(version_elements) == 1:
-        version_string = version_elements[0].replace('v', '')
+        version_string = version_elements[0].replace("v", "")
     elif len(version_elements) == 3:
-        tag = version_elements[0].replace('v', '')
+        tag = version_elements[0].replace("v", "")
         distance = version_elements[1]
         version_string = f"{tag}.post{distance}.dev0"
     else:
         error = True
-        stderr.write('Error: invalid number of elements')
+        stderr.write("Error: invalid number of elements")
         exit(1)
 
     if args.update_pyproject:
         from pathlib import Path
         from tomlkit import loads as toml_load, dumps as toml_dump
 
-        pyproject_file_path = Path('./pyproject.toml')
+        pyproject_file_path = Path("./pyproject.toml")
 
         if pyproject_file_path.exists():
-            with open(pyproject_file_path, 'r') as pyproject_file:
+            with open(pyproject_file_path, "r") as pyproject_file:
                 pyproject_contents = pyproject_file.read()
 
             pyproject_toml = toml_load(pyproject_contents)
 
-            pyproject_toml['tool']['poetry']['version'] = version_string
+            pyproject_toml["tool"]["poetry"]["version"] = version_string
 
-            with open(pyproject_file_path, 'w') as pyproject_file:
+            with open(pyproject_file_path, "w") as pyproject_file:
                 pyproject_file.write(toml_dump(pyproject_toml))
 
     stdout.write(version_string)

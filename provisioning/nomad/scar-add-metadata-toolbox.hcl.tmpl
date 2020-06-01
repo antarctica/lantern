@@ -1,0 +1,76 @@
+# SCAR ADD Metadata Toolbox
+#
+# Nomad source: https://www.nomadproject.io/docs/job-specification/job.html
+job "scar-add-metadata-toolbox" {
+    region = "bas"
+    datacenters = ["cambridge"]
+    type = "service"
+
+    # Application instances
+    #
+    # Nomad guide: https://www.nomadproject.io/docs/job-specification/group.html
+    group "app" {
+        count = 1
+
+        restart {
+            attempts = 2
+            interval = "30m"
+            delay = "15s"
+            mode = "fail"
+        }
+
+        ephemeral_disk {
+            size = 200
+        }
+
+        # Flask application server
+        #
+        # Nomad guide: https://www.nomadproject.io/docs/job-specification/task.html
+        task "flask-app" {
+            driver = "docker"
+
+            env {
+                SENTRY_DSN = "https://db9543e7b68f4b2596b189ff444438e3@o39753.ingest.sentry.io/5197036"
+                AUTH_CLIENT_TENANCY = "https://login.microsoftonline.com/d14c529b-5558-4a80-93b6-7655681e55d6"
+                AUTH_CLIENT_ID = "e9f1f826-156f-448f-aa9c-ca44ec35aafb"
+                AUTH_CLIENT_SCOPES = "api://d364a396-36a8-4137-a6ef-12996fa39183/Records.Read.All"
+                AUTH_SERVER_TENANCY = "d14c529b-5558-4a80-93b6-7655681e55d6"
+                AUTH_SERVER_ID = "d364a396-36a8-4137-a6ef-12996fa39183"
+                CSW_UNPUBLISHED_DB_CONNECTION = "${app_csw_connection_string_unpublished}"
+                CSW_PUBLISHED_DB_CONNECTION = "${app_csw_connection_string_published}"
+                STATIC_BUILD_DIR = "./scar_add_metadata_toolbox/build"
+                S3_BUCKET = "${app_s3_static_site_bucket}"
+            }
+
+            config {
+                auth {
+                    username = "nomad",
+                    password = "${registry_token}",
+                    server_address = "docker-registry.data.bas.ac.uk",
+                }
+
+                image = "${registry_image}"
+                args = [
+                    "run",
+                    "--host",
+                    "0.0.0.0",
+                ]
+                port_map {
+                    flask = 5000
+                }
+            }
+
+            resources {
+                memory = 256
+
+                network {
+                    mbits = 10
+
+                    port  "flask"  {
+                        static = 5001
+                    }
+                }
+            }
+        }
+    }
+}

@@ -9,5 +9,6 @@ printf "%40s\n\n" "$${blue}Note: This command was run inside a container.$${norm
 
 podman run --rm=true --tty --interactive --user=root \
 --volume /users/geoweb/.config/scar-add-metadata-toolbox/.env:/usr/src/app/.env:ro \
+--volume /users/geoweb/.config/scar-add-metadata-toolbox/auth/:/root/.config/scar_add_metadata_toolbox/auth/:rw \
 --volume /users/geoweb/projects/scar-add-metadata-toolbox/records/:/usr/src/app/records/:rw \
  ${registry_image} "$@"

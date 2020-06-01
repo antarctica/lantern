@@ -57,8 +57,8 @@ class Config:
         self.AZURE_OAUTH_APPLICATION_ID = os.environ.get("AUTH_SERVER_ID") or None
         self.AZURE_OAUTH_CLIENT_APPLICATION_IDS = [self.AUTH_CLIENT_ID]
 
-        self.CSW_ENDPOINT_UNPUBLISHED = os.environ.get("CSW_ENDPOINT") or "http://app:9000/csw/unpublished"
-        self.CSW_ENDPOINT_PUBLISHED = os.environ.get("CSW_ENDPOINT") or "http://app:9000/csw/published"
+        self.CSW_ENDPOINT_UNPUBLISHED = os.environ.get("CSW_ENDPOINT_UNPUBLISHED") or "http://app:9000/csw/unpublished"
+        self.CSW_ENDPOINT_PUBLISHED = os.environ.get("CSW_ENDPOINT_PUBLISHED") or "http://app:9000/csw/published"
 
         self.CSW_CONFIG_UNPUBLISHED = {
             "server": {

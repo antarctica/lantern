@@ -1,13 +1,13 @@
 import os
+import sys
 import warnings
-from time import strftime
+import logging
 
 import requests
 import sentry_sdk
 import simplejson as json
 
 from logging import Formatter
-from logging.handlers import RotatingFileHandler
 from datetime import date, datetime
 from pathlib import Path
 from urllib.parse import urlparse as url_parse, parse_qs as query_string_parse
@@ -29,7 +29,7 @@ from flask import (
     Response,
 )
 from flask.cli import AppGroup
-from jinja2 import PrefixLoader, FileSystemLoader, PackageLoader
+from jinja2 import PrefixLoader, PackageLoader
 from markupsafe import escape as markup_escape
 from markdown import markdown
 from dateutil.relativedelta import relativedelta
@@ -59,7 +59,7 @@ from inquirer import prompt, List as inquirer_list, Path as inquirer_path
 from lxml.etree import ElementTree, ProcessingInstruction, fromstring, tostring  # nosec
 
 warnings.simplefilter(action="ignore", category=FutureWarning)
-from pycsw.server import Csw
+from pycsw.server import Csw as _Csw
 
 # For overloaded CSW class
 import inspect
@@ -455,15 +455,29 @@ class CatalogueServiceWeb(_CatalogueServiceWeb):
             self._parserecords(outputschema, esn)
 
 
+# noinspection PyUnusedLocal
+def setup_logger(config=None):
+    logging.basicConfig(level=logging.WARNING, stream=sys.stdout)
+
+
+class Csw(_Csw):
+    def __init__(self, rtconfig=None, env=None, version="3.0.0"):
+        with mock.patch("pycsw.core.log.setup_logger", side_effect=setup_logger()):
+            super().__init__(rtconfig, env, version)
+
+
 def create_app():
     app = Flask(__name__)
 
     app.config.from_object(_create_app_config())
 
-    app.jinja_loader = PrefixLoader(
-        {"app": FileSystemLoader("templates"), "bas_style_kit": PackageLoader("bas_style_kit_jinja_templates"),}
-    )
     app.config["bsk_templates"] = app.config["BSK_TEMPLATES"]
+    app.jinja_loader = PrefixLoader(
+        {
+            "app": PackageLoader("scar_add_metadata_toolbox"),
+            "bas_style_kit": PackageLoader("bas_style_kit_jinja_templates"),
+        }
+    )
 
     @app.template_filter()
     def format_datetime(value, date_format="date+time"):

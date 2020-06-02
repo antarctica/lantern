@@ -102,7 +102,7 @@ container:
   tags:
     - dnd
 
-podman:
+podman-wrapper:
   stage: 🏗 build
   image:
     name: hashicorp/terraform:0.12.24
@@ -134,7 +134,7 @@ publish-package:
     - 'ssh build@$PACKAGE_REPOSITORY -C "mkdir -p /var/repo/magic/v1/projects/scar-add-metadata-toolbox/latest/dist/"'
     - scp dist/*.* build@$PACKAGE_REPOSITORY:/var/repo/magic/v1/projects/scar-add-metadata-toolbox/latest/dist/
 
-release-podman:
+podman:
   stage: 🚀 release
   image: kroniak/ssh-client
   before_script:

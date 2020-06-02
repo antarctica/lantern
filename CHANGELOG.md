@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+* Amending `parse_version.py` packaging script to prevent pre-calculated version strings being broken if fed back in
+
 ## [0.1.0] - 2020-06-02
 
 ### Added

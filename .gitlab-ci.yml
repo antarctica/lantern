@@ -73,7 +73,7 @@ package:
   stage: 📦 package
   before_script:
     - "python3 support/python-packaging/parse_version.py $(git describe --tags) > _version && export VERSION=$(cat _version)"
-    - "python support/python-packaging/parse_version.py ${VERSION:-0.0.0} --pyproject"
+    - "python3 support/python-packaging/parse_version.py ${VERSION:-0.0.0} --pyproject"
   script:
     - "poetry build"
   artifacts:
@@ -88,12 +88,14 @@ container:
     name: docker:19.03-dind
     entrypoint: [""]
   before_script:
+    - 'apk update && apk add python3 git'
     - 'cp -r ./dist/*.whl ./support/docker-packaging/'
     - 'cp -r ./support/pycsw/ ./support/docker-packaging/'
-    - 'cd support/docker-packaging/'
     - 'echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" "$CI_REGISTRY" --password-stdin'
     - "python3 support/python-packaging/parse_version.py $(git describe --tags) > _version && export VERSION=$(cat _version)"
     - 'export PACKAGE_VERSION=$APP_PACKAGE==${VERSION:-0.0.0}'
+    - 'cd support/docker-packaging/'
+    - 'ls -l .'
   script:
     - 'docker build . -t $CI_REGISTRY_IMAGE/deploy:$CI_COMMIT_SHA --build-arg APP_PACKAGE_VERSION=$PACKAGE_VERSION'
     - 'docker push $CI_REGISTRY_IMAGE/deploy:$CI_COMMIT_SHA'

@@ -66,9 +66,13 @@ if __name__ == "__main__":
 
     version_elements = str(args.git_describe).split("-")
     if len(version_elements) == 1:
-        version_string = version_elements[0].replace("v", "")
+        # the `0` argument passed to `.replace()` ensures only the 1st instance of 'v' is replaced,
+        # without this, the 'v' in 'dev0' is replaced where a pre-formed version string is passed in.
+        version_string = version_elements[0].replace("v", "", 0)
     elif len(version_elements) == 3:
-        tag = version_elements[0].replace("v", "")
+        # the `0` argument passed to `.replace()` ensures only the 1st instance of 'v' is replaced,
+        # without this, the 'v' in 'dev0' is replaced where a pre-formed version string is passed in.
+        tag = version_elements[0].replace("v", "", 0)
         distance = version_elements[1]
         version_string = f"{tag}.post{distance}.dev0"
     else:

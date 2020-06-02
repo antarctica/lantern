@@ -23,6 +23,10 @@
 #     - username: 'nomad'
 #     - scopes: 'read_registry'
 #   > NOMAD_DEPLOY_TOKEN (protected): "[Sensitive]"
+#
+# - Sentry - create tokens at https://sentry.io/settings/antarctica/developer-settings/bas-gitlab-4ffa11/
+# > SENTRY_AUTH_TOKEN: "[Sensitive]"
+#
 
 # == Global settings ==
 
@@ -43,6 +47,8 @@ variables:
   PODMAN_HOST: bslws01.nerc-bas.ac.uk
   APP_NAME: scar-add-metadata-toolbox
   APP_PACKAGE: scar-add-metadata-toolbox
+  SENTRY_ORG: antarctica
+  SENTRY_PROJECT: add-metadata-editor
   APP_STATIC_SITE_S3_BUCKET: add-catalogue-integration.data.bas.ac.uk
   APP_CSW_CONNECTION_STRING_PUBLISHED: postgresql://pycsw_production:$APP_CSW_CONNECTION_STRING_PASSWORD_PUBLISHED@bsldb.nerc-bas.ac.uk/pycsw_production
   APP_CSW_CONNECTION_STRING_UNPUBLISHED: postgresql://pycsw_production:$APP_CSW_CONNECTION_STRING_PASSWORD_UNPUBLISHED@bsldb.nerc-bas.ac.uk/pycsw_production
@@ -155,3 +161,17 @@ nomad:
     - 'terraform init'
     - 'terraform validate'
     - 'terraform apply -auto-approve -var="registry_image=$CI_REGISTRY_IMAGE/deploy:$CI_COMMIT_SHA" -var="registry_token=$NOMAD_DEPLOY_TOKEN" -var="app_csw_connection_string_published=$APP_CSW_CONNECTION_STRING_PUBLISHED" -var="app_csw_connection_string_unpublished=$APP_CSW_CONNECTION_STRING_UNPUBLISHED" -var="app_s3_static_site_bucket=$APP_STATIC_SITE_S3_BUCKET"'
+
+sentry:
+  stage: 🚀 release
+  image:
+    name: getsentry/sentry-cli
+    entrypoint: [""]
+  before_script:
+    - 'apk update && apk add python3 git'
+    - "python3 support/python-packaging/parse_version.py $(git describe --tags) > _version && export VERSION=$(cat _version)"
+    - "export SENTRY_VERSION=$SENTRY_PROJECT@${VERSION:-0.0.0}"
+  script:
+    - "sentry-cli releases new --finalize $SENTRY_VERSION"
+    - "sentry-cli releases deploys $SENTRY_VERSION new -e production"
+    - "sentry-cli releases set-commits --auto $SENTRY_VERSION"

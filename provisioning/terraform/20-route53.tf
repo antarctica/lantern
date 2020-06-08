@@ -12,14 +12,14 @@
 #
 # Tags are not supported by this resource
 resource "aws_route53_record" "add-catalogue-integration" {
-  zone_id = "${data.terraform_remote_state.BAS-CORE-DOMAINS.DATA-BAS-AC-UK-ID}"
+  zone_id = data.terraform_remote_state.BAS-CORE-DOMAINS.outputs.DATA-BAS-AC-UK-ID
 
   name = "add-catalogue-integration"
   type = "CNAME"
   ttl  = 300
 
   records = [
-    "${aws_cloudfront_distribution.add-catalogue-integration.domain_name}",
+    aws_cloudfront_distribution.add-catalogue-integration.domain_name
   ]
 }
 
@@ -34,13 +34,13 @@ resource "aws_route53_record" "add-catalogue-integration" {
 #
 # Tags are not supported by this resource
 resource "aws_route53_record" "add-catalogue-production" {
-  zone_id = "${data.terraform_remote_state.BAS-CORE-DOMAINS.DATA-BAS-AC-UK-ID}"
+  zone_id = data.terraform_remote_state.BAS-CORE-DOMAINS.outputs.DATA-BAS-AC-UK-ID
 
   name = "add-catalogue"
   type = "CNAME"
   ttl  = 300
 
   records = [
-    "${aws_cloudfront_distribution.add-catalogue-production.domain_name}",
+    aws_cloudfront_distribution.add-catalogue-production.domain_name,
   ]
 }

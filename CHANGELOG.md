@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+* Updating to Terraform 0.12.x, requiring syntax changes mainly for interpolation
+  [#3](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/3)
+* Switching to a Terraform Docker image that includes the Azure CLI
+  [#3](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/3)
+
 ## [0.1.1] - 2020-06-02
 
 ### Fixed

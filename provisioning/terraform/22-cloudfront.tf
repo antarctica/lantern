@@ -26,14 +26,14 @@ resource "aws_cloudfront_distribution" "add-catalogue-integration" {
   price_class = "PriceClass_100"
 
   aliases = [
-    "${aws_s3_bucket.add-catalogue-integration.bucket}",
+    aws_s3_bucket.add-catalogue-integration.bucket,
   ]
 
   # Origin configuration
   #
   # Note: CloudFront to the Origin uses HTTP, End-consumers to CloudFront uses HTTPS
   origin {
-    domain_name = "${aws_s3_bucket.add-catalogue-integration.website_endpoint}"
+    domain_name = aws_s3_bucket.add-catalogue-integration.website_endpoint
     origin_id   = "S3_${aws_s3_bucket.add-catalogue-integration.bucket}"
 
     custom_origin_config {
@@ -95,7 +95,7 @@ resource "aws_cloudfront_distribution" "add-catalogue-integration" {
   viewer_certificate {
     ssl_support_method       = "sni-only"
     minimum_protocol_version = "TLSv1.1_2016"
-    acm_certificate_arn      = "${aws_acm_certificate_validation.add-catalogue-integration.certificate_arn}"
+    acm_certificate_arn      = aws_acm_certificate_validation.add-catalogue-integration.certificate_arn
   }
 }
 
@@ -124,14 +124,14 @@ resource "aws_cloudfront_distribution" "add-catalogue-production" {
   price_class = "PriceClass_100"
 
   aliases = [
-    "${aws_s3_bucket.add-catalogue-production.bucket}",
+    aws_s3_bucket.add-catalogue-production.bucket,
   ]
 
   # Origin configuration
   #
   # Note: CloudFront to the Origin uses HTTP, End-consumers to CloudFront uses HTTPS
   origin {
-    domain_name = "${ aws_s3_bucket.add-catalogue-production.website_endpoint }"
+    domain_name = aws_s3_bucket.add-catalogue-production.website_endpoint
     origin_id   = "S3_${aws_s3_bucket.add-catalogue-production.bucket}"
 
     custom_origin_config {
@@ -193,6 +193,6 @@ resource "aws_cloudfront_distribution" "add-catalogue-production" {
   viewer_certificate {
     ssl_support_method       = "sni-only"
     minimum_protocol_version = "TLSv1.1_2016"
-    acm_certificate_arn      = "${aws_acm_certificate_validation.add-catalogue-production.certificate_arn}"
+    acm_certificate_arn      = aws_acm_certificate_validation.add-catalogue-production.certificate_arn
   }
 }

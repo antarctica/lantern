@@ -43,8 +43,8 @@ resource "aws_iam_user" "bas-gitlab-ci-add" {
 # Tags are not supported by this resource
 resource "aws_iam_user_policy" "bas-add-integration-management-policy" {
   name   = "bas-add-integration-management-policy"
-  user   = "${aws_iam_user.bas-gitlab-ci-add.name}"
-  policy = "${file("70-resources/iam/policies/inline/integration-bucket.json")}"
+  user   = aws_iam_user.bas-gitlab-ci-add.name
+  policy = file("70-resources/iam/policies/inline/integration-bucket.json")
 }
 
 # Bucket management policy (Production)
@@ -62,6 +62,6 @@ resource "aws_iam_user_policy" "bas-add-integration-management-policy" {
 # Tags are not supported by this resource
 resource "aws_iam_user_policy" "bas-add-production-management-policy" {
   name   = "bas-add-production-management-policy"
-  user   = "${aws_iam_user.bas-gitlab-ci-add.name}"
-  policy = "${file("70-resources/iam/policies/inline/production-bucket.json")}"
+  user   = aws_iam_user.bas-gitlab-ci-add.name
+  policy = file("70-resources/iam/policies/inline/production-bucket.json")
 }

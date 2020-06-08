@@ -15,12 +15,12 @@
 # AWS source: http://docs.aws.amazon.com/acm/latest/userguide/acm-overview.html
 # Terraform source: https://www.terraform.io/docs/providers/aws/r/acm_certificate.html
 resource "aws_acm_certificate" "add-catalogue-integration" {
-  provider = "aws.us-east-1"
+  provider = aws.us-east-1
 
-  domain_name       = "${aws_s3_bucket.add-catalogue-integration.bucket}"
+  domain_name       = aws_s3_bucket.add-catalogue-integration.bucket
   validation_method = "DNS"
 
-  tags {
+  tags = {
     Name         = "add-catalogue-integration.data.bas.ac.uk"
     X-Project    = "ADD Data Catalogue"
     X-Managed-By = "Terraform"
@@ -35,12 +35,12 @@ resource "aws_acm_certificate" "add-catalogue-integration" {
 # AWS source: http://docs.aws.amazon.com/acm/latest/userguide/acm-overview.html
 # Terraform source: https://www.terraform.io/docs/providers/aws/r/acm_certificate.html
 resource "aws_acm_certificate" "add-catalogue-production" {
-  provider = "aws.us-east-1"
+  provider = aws.us-east-1
 
-  domain_name       = "${aws_s3_bucket.add-catalogue-production.bucket}"
+  domain_name       = aws_s3_bucket.add-catalogue-production.bucket
   validation_method = "DNS"
 
-  tags {
+  tags = {
     Name         = "add-catalogue.data.bas.ac.uk"
     X-Project    = "ADD Data Catalogue"
     X-Managed-By = "Terraform"
@@ -64,14 +64,14 @@ resource "aws_acm_certificate" "add-catalogue-production" {
 #
 # Tags are not supported by this resource
 resource "aws_route53_record" "add-catalogue-integration-cert" {
-  zone_id = "${data.terraform_remote_state.BAS-CORE-DOMAINS.DATA-BAS-AC-UK-ID}"
+  zone_id = data.terraform_remote_state.BAS-CORE-DOMAINS.outputs.DATA-BAS-AC-UK-ID
 
-  name = "${aws_acm_certificate.add-catalogue-integration.domain_validation_options.0.resource_record_name}"
-  type = "${aws_acm_certificate.add-catalogue-integration.domain_validation_options.0.resource_record_type}"
+  name = aws_acm_certificate.add-catalogue-integration.domain_validation_options.0.resource_record_name
+  type = aws_acm_certificate.add-catalogue-integration.domain_validation_options.0.resource_record_type
   ttl  = 60
 
   records = [
-    "${aws_acm_certificate.add-catalogue-integration.domain_validation_options.0.resource_record_value}",
+    aws_acm_certificate.add-catalogue-integration.domain_validation_options.0.resource_record_value,
   ]
 }
 
@@ -86,14 +86,14 @@ resource "aws_route53_record" "add-catalogue-integration-cert" {
 #
 # Tags are not supported by this resource
 resource "aws_route53_record" "add-catalogue-production-cert" {
-  zone_id = "${data.terraform_remote_state.BAS-CORE-DOMAINS.DATA-BAS-AC-UK-ID}"
+  zone_id = data.terraform_remote_state.BAS-CORE-DOMAINS.outputs.DATA-BAS-AC-UK-ID
 
-  name = "${aws_acm_certificate.add-catalogue-production.domain_validation_options.0.resource_record_name}"
-  type = "${aws_acm_certificate.add-catalogue-production.domain_validation_options.0.resource_record_type}"
+  name = aws_acm_certificate.add-catalogue-production.domain_validation_options.0.resource_record_name
+  type = aws_acm_certificate.add-catalogue-production.domain_validation_options.0.resource_record_type
   ttl  = 60
 
   records = [
-    "${aws_acm_certificate.add-catalogue-production.domain_validation_options.0.resource_record_value}",
+    aws_acm_certificate.add-catalogue-production.domain_validation_options.0.resource_record_value,
   ]
 }
 
@@ -116,10 +116,10 @@ resource "aws_route53_record" "add-catalogue-production-cert" {
 #
 # Tags are not supported by this resource
 resource "aws_acm_certificate_validation" "add-catalogue-integration" {
-  provider = "aws.us-east-1"
+  provider = aws.us-east-1
 
-  certificate_arn         = "${aws_acm_certificate.add-catalogue-integration.arn}"
-  validation_record_fqdns = ["${aws_route53_record.add-catalogue-integration-cert.fqdn}"]
+  certificate_arn         = aws_acm_certificate.add-catalogue-integration.arn
+  validation_record_fqdns = [aws_route53_record.add-catalogue-integration-cert.fqdn]
 }
 
 # add-catalogue.data.bas.ac.uk
@@ -135,8 +135,8 @@ resource "aws_acm_certificate_validation" "add-catalogue-integration" {
 #
 # Tags are not supported by this resource
 resource "aws_acm_certificate_validation" "add-catalogue-production" {
-  provider = "aws.us-east-1"
+  provider = aws.us-east-1
 
-  certificate_arn         = "${aws_acm_certificate.add-catalogue-production.arn}"
-  validation_record_fqdns = ["${aws_route53_record.add-catalogue-production-cert.fqdn}"]
+  certificate_arn         = aws_acm_certificate.add-catalogue-production.arn
+  validation_record_fqdns = [aws_route53_record.add-catalogue-production-cert.fqdn]
 }

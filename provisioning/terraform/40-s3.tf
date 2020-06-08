@@ -18,14 +18,14 @@ resource "aws_s3_bucket" "add-catalogue-integration" {
   # Bucket policy - All objects can be read by anyone, but only the owner can change them
   #
   # Source: http://docs.aws.amazon.com/AmazonS3/latest/dev/example-bucket-policies.html#example-bucket-policies-use-case-2
-  policy = "${file("70-resources/s3/bucket-policies/integration-public-read.json")}"
+  policy = file("70-resources/s3/bucket-policies/integration-public-read.json")
 
   website {
     index_document = "index.html"
     error_document = "error.html"
   }
 
-  tags {
+  tags = {
     Name         = "add-catalogue-integration.data.bas.ac.uk"
     X-Project    = "ADD Data Catalogue"
     X-Managed-By = "Terraform"
@@ -40,7 +40,7 @@ resource "aws_s3_bucket" "add-catalogue-integration" {
 # AWS source: https://aws.amazon.com/s3/
 # Terraform source: https://www.terraform.io/docs/providers/aws/r/s3_bucket_object.html
 resource "aws_s3_bucket_object" "add-catalogue-integration-index" {
-  bucket           = "${aws_s3_bucket.add-catalogue-integration.bucket}"
+  bucket           = aws_s3_bucket.add-catalogue-integration.bucket
   key              = "index.html"
   content          = "ADD Data Catalogue"
   website_redirect = "/master"
@@ -63,14 +63,14 @@ resource "aws_s3_bucket" "add-catalogue-production" {
   # Bucket policy - All objects can be read by anyone, but only the owner can change them
   #
   # Source: http://docs.aws.amazon.com/AmazonS3/latest/dev/example-bucket-policies.html#example-bucket-policies-use-case-2
-  policy = "${file("70-resources/s3/bucket-policies/production-public-read.json")}"
+  policy = file("70-resources/s3/bucket-policies/production-public-read.json")
 
   website {
     index_document = "index.html"
     error_document = "error.html"
   }
 
-  tags {
+  tags = {
     Name         = "add-catalogue.data.bas.ac.uk"
     X-Project    = "ADD Data Catalogue"
     X-Managed-By = "Terraform"

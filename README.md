@@ -504,12 +504,13 @@ Logs for this service are written to *stdout/stderr* as appropriate.
 ## Setup
 
 [Continuous deployment](#continuous-deployment) will configure this application to run on the BAS central workstations
-as a container, using an automatically generated launch script and `.env` file.
+as a Podman container, using an automatically generated launch script and `.env` file.
 
-[Continuous deployment](#continuous-deployment) will configure this application to run on in the experimental the experimental [MAGIC Nomad cluster](https://gitlab.data.bas.ac.uk/MAGIC/infrastructure/nomad), using an automatically
-generated job definition and environment variables.
+[Continuous deployment](#continuous-deployment) will configure this application to run in the experimental
+[MAGIC Nomad cluster](https://gitlab.data.bas.ac.uk/MAGIC/infrastructure/nomad), using an automatically
+generated job definition.
 
-See the [Usage](#usage) section for how to use and run the application.
+See the [Usage](#usage) section for how to use the application.
 
 ### Terraform
 

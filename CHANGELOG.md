@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* Azure AD app registrations as Terraform resources
+  [#3](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/3)
+
 ### Changed
 
 * Updating to Terraform 0.12.x, requiring syntax changes mainly for interpolation

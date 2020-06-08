@@ -514,13 +514,43 @@ See the [Usage](#usage) section for how to use the application.
 
 ### Terraform
 
-Terraform is used for resources required for hosting the *Data catalogue* component as a static website.
+Terraform is used for:
 
-Access to the [BAS AWS account](https://gitlab.data.bas.ac.uk/WSF/bas-aws) and [Remote state](#terraform-remote-state)
-are is needed to provision these resources.
+* resources required for hosting the *Data catalogue* component as a static website
+* resources required for protecting and accessing the *unpublished repository*, *published repository*  components
+* a templated job file for Nomad during [Continuous deployment](#continuous-deployment)
+* a templated launch script and `.env` for Podman during [Continuous deployment](#continuous-deployment)
 
-Terraform is also used for generating launch scripts, job definitions and configuration files from templates. However
-these files are not included in Terraform state.
+Access to the [BAS AWS account](https://gitlab.data.bas.ac.uk/WSF/bas-aws),
+[Terraform remote state](#terraform-remote-state) and NERC Azure tenancy are required to provision these resources.
+
+**Note:** The templated Podman and Nomad runtime files are not included in Terraform state.
+
+```
+$ cd provisioning/terraform
+$ docker-compose run terraform
+
+$ az login --allow-no-subscriptions
+
+$ terraform init
+$ terraform validate
+$ terraform fmt
+$ terraform apply
+
+$ exit
+$ docker-compose down
+```
+
+Once provisioned the following steps need to be taken manually:
+
+1. setting branding icons (if desired)
+2. the permission assignment for the Editor application registration to access the Catalogue application registration
+   needs to be confirmed by a tenancy administrator using the Azure Portal
+3. roles need to be assigned to users and/or groups within the Catalogue enterprise application (Service Principle)
+4. the `accessTokenAcceptedVersion: 2` needs setting in both application registration manifests
+
+**Note:** Assignments are 1:1 between users/groups and roles but there can be multiple assignments. I.e. roles `Foo`
+and `Bar` can be assigned to the same user/group by creating two role assignments.
 
 #### Terraform remote state
 
@@ -540,110 +570,6 @@ the [BAS Web & Applications Team](mailto:servicedesk@bas.ac.uk) to request acces
 
 See the [BAS Terraform Remote State](https://gitlab.data.bas.ac.uk/WSF/terraform-remote-state) project for how these
 permissions to remote state are enforced.
-
-### Azure Active Directory
-
-Two Azure application registrations need to be created in the *BAS Web & Applications Active Directory* in Azure through
-the [Azure Portal](https://portal.azure.com). The [First registration](#registration-1-data-catalogue-component),
-represents the *Data Catalogue* component, the [Second](#registration-2-metadata-editor-component) represents the
-*Metadata editor* component.
-
-Global Administrator permissions in the *BAS Web & Applications Active Directory* tenancy are needed to provision these
-resources.
-
-**Note:** This provisioning should have already been performed (and applies globally). If changes are made to this
-provisioning it only needs to be applied once.
-
-#### Registration 1 - Data Catalogue component
-
-* name: `Antarctic Digital Database (ADD) - Metadata Catalogue`
-* supported account types: *Accounts in this organisational directory only*
-
-Once registered, edit the application:
-
-* Manage -> Token configuration:
-    * *Add optional claim*
-        * Token type: *Access*
-        * Claim:
-            * *email*
-            * *given_name*
-            * *family_name*
-* Manage -> Expose an API:
-    * Application ID URI: `api://[application id]`
-    * Scopes defined by this API -> *Add a scope*
-        * Scope name: `Records.Read.All`
-        * Who can consent: *Admins Only*
-        * Admin consent display name: `Read all catalogue records`
-        * Admin consent description: `Allow reading all catalogue records`
-        * User consent display name: N/A
-        * User consent description: N/A
-        * State: enabled
-* Manage -> Manifest:
-    * `accessTokenAcceptedVersion`: `2`
-    * `appRoles`: [1]
-
-Set users that are allowed to update records in the catalogue:
-
-* Overview -> managed Application in local directory (link) -> Users and groups:
-    * *Add user*
-        * Users: *[User]*
-        * Role: *Records.ReadWrite.All*
-
-Set users that are allowed to publish records from the unpublished to published catalogue:
-
-* Overview -> managed Application in local directory (link) -> Users and groups:
-    * *Add user*
-        * Users: As Applicable
-        * Role: *Records.Publish.All*
-
-**Note:** Assignments are 1:1 between user:role but there can be multiple user:role assignments. I.e. to assign both the
-*Records.ReadWrite.All* and *Records.Publish.All* roles create two role assignments with the same user.
-
-[1] Application roles:
-
-```json
-{
-    "allowedMemberTypes": [
-        "User"
-    ],
-    "description": "Change all metadata records.",
-    "displayName": "Records.ReadWrite.All",
-    "id": "b7baedc2-bde7-4723-a9b3-edd021843cd1",
-    "isEnabled": true,
-    "lang": null,
-    "origin": "Application",
-    "value": "Records.ReadWrite.All"
-},
-{
-    "allowedMemberTypes": [
-        "User"
-    ],
-    "description": "Publish all metadata records.",
-    "displayName": "Records.Publish.All",
-    "id": "f4ab9b0a-21dd-4ac8-a6f0-178388bef98d",
-    "isEnabled": true,
-    "lang": null,
-    "origin": "Application",
-    "value": "Records.Publish.All"
-}
-```
-
-#### Registration 2 - Metadata Editor component
-
-* name: `Antarctic Digital Database (ADD) - Metadata Editor`
-* supported account types: *Accounts in this organisational directory only*
-* redirect URI: `https://login.microsoftonline.com/common/oauth2/nativeclient`
-
-Once registered, edit the application:
-
-* Manage -> Branding:
-    * Homepage: `https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox`
-* Manage -> API Permissions:
-    * *Add a permission*
-        * *My APIs* -> *Antarctic Digital Database (ADD) - Metadata Catalogue* -> *Records.Read.All*
-* Manage -> Authentication:
-    * *Advanced settings* -> *Default client type* -> Treat application as a public client: *Yes*
-    * *Grant admin consent for [Tenancy]*
 
 ## Development
 

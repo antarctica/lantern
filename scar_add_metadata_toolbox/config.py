@@ -62,7 +62,7 @@ class Config:
 
         self.CSW_CONFIG_UNPUBLISHED = {
             "server": {
-                "url": os.environ.get("CSW_ENDPOINT") or "http://app:9000/csw/unpublished",
+                "url": os.environ.get("CSW_ENDPOINT_UNPUBLISHED") or "http://app:9000/csw/unpublished",
                 "mimetype": "application/xml; charset=UTF-8",
                 "encoding": "UTF-8",
                 "language": "en-GB",
@@ -114,7 +114,7 @@ class Config:
         }
         self.CSW_CONFIG_PUBLISHED = {
             "server": {
-                "url": os.environ.get("CSW_ENDPOINT") or "http://app:9000/csw/published",
+                "url": os.environ.get("CSW_ENDPOINT_PUBLISHED") or "http://app:9000/csw/published",
                 "mimetype": "application/xml; charset=UTF-8",
                 "encoding": "UTF-8",
                 "language": "en-GB",

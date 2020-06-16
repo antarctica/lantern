@@ -14,8 +14,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
-* Fixing incorrect environment variable reference for CSW endpoints
+* Incorrect environment variable reference for CSW endpoints
   [#5](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/5)
+* Documenting workaround for initialising PyCSW tables
+  [#6](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/6)
 
 ### Changed
 

@@ -512,6 +512,53 @@ generated job definition.
 
 See the [Usage](#usage) section for how to use the application.
 
+### CSW records tables
+
+The [CSW backing databases](#csw-backing-databases) are initialised by PyCSW's admin script which will:
+
+* create a records table, the name of which is set by the relevant PyCSW configuration
+* create a geometry column, if PostGIS is detected
+* create relevant indexes
+
+Two of these indexes (`fts_gin_idx` [full text search] and `wkb_geometry_idx` [binary geometry]) are named non-uniquely, 
+meaning multiple records table cannot be created in the same schema. This appears to be an oversight as all other 
+indexes are made unique by prefixing them with the name of the records table.
+
+Because these indexes are not unique and we create two records tables in the same schema (for the *Published* and 
+*Unpublished* repositories) the second database will not be initialised correctly and must be manually corrected.
+
+Both PyCSW instances are initialised by the `manage.py` entry point script and so will run each time the application is
+ran. To fix the second database:
+
+1. verify the first records table, `records_unpublished`, has been created successfully (contains `fts_gin_idx` and 
+   `wkb_geometry_idx` indexes)
+2. alter the affected indexes in the first table [1]
+3. drop the second records table, `records_publised` as it will be incomplete [2]
+4. using Nomad, restart the application, which will reinitialise the second records table, this time correctly
+5. alter the affected indexes in the second table [3]
+
+**Note:** These steps will be performed automatically, or mitigated by fixing the upstream PyCSW package, in future.
+
+[1]
+
+```sql
+ALTER INDEX fts_gin_idx RENAME TO ix_records_unpublished_fts_gin_indx;
+ALTER INDEX wkb_geometry_idx RENAME TO ix_unpublished_wkb_geometry_idx;
+```
+
+[2]
+
+```sql
+DROP TABLE records_published;
+```
+
+[3]
+
+```sql
+ALTER INDEX fts_gin_idx RENAME TO ix_records_published_fts_gin_indx;
+ALTER INDEX wkb_geometry_idx RENAME TO ix_published_wkb_geometry_idx;
+```
+
 ### Terraform
 
 Terraform is used for:

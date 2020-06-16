@@ -15,13 +15,13 @@
 SENTRY_DSN=https://db9543e7b68f4b2596b189ff444438e3@o39753.ingest.sentry.io/5197036
 
 ## Azure authentication (Client/Editor) - Get from https://portal.azure.com/
-AUTH_CLIENT_TENANCY=https://login.microsoftonline.com/d14c529b-5558-4a80-93b6-7655681e55d6
-AUTH_CLIENT_ID=e9f1f826-156f-448f-aa9c-ca44ec35aafb
-AUTH_CLIENT_SCOPES="api://d364a396-36a8-4137-a6ef-12996fa39183/Records.Read.All"
+AUTH_CLIENT_TENANCY=https://login.microsoftonline.com/b311db95-32ad-438f-a101-7ba061712a4e
+AUTH_CLIENT_ID=91c284e7-6522-4eb4-9943-f4ec08e98cb9
+AUTH_CLIENT_SCOPES=api://8bfe65d3-9509-4b0a-acd2-8ce8cdc0c01e/BAS.MAGIC.ADD.Access
 
 ## Azure authentication (Server/Catalogue) - Get from https://portal.azure.com
-AUTH_SERVER_TENANCY=d14c529b-5558-4a80-93b6-7655681e55d6
-AUTH_SERVER_ID=d364a396-36a8-4137-a6ef-12996fa39183
+AUTH_SERVER_TENANCY=b311db95-32ad-438f-a101-7ba061712a4e
+AUTH_SERVER_ID=8b45581e-1b2e-4b8c-b667-e5a1360b6906
 
 ## CSW repository (client)
 # APP_CSW_LOG_FILE_PATH=/var/log/app/csw.log

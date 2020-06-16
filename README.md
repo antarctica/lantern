@@ -384,6 +384,10 @@ that will interact with protected resource (i.e. to read, write and publish reco
 library is used to request access tokens using the OAuth device code grant type, as terminal applications can't use
 redirects.
 
+Both applications are registered in the NERC Azure tenancy administered by the
+[UKRI/NERC DDaT](https://infohub.ukri.org/corporate-hub/digital-data-and-technology-ddat/) team, currently via the old
+[RTS Helpdesk](mailto:rtsservicedesk@nerc.ac.uk).
+
 The [Azure Portal](https://portal.azure.com) is used to assign permissions to applications and users as needed.
 
 ### CSW
@@ -558,6 +562,12 @@ DROP TABLE records_published;
 ALTER INDEX fts_gin_idx RENAME TO ix_records_published_fts_gin_indx;
 ALTER INDEX wkb_geometry_idx RENAME TO ix_published_wkb_geometry_idx;
 ```
+
+### Azure permissions
+
+[Terraform](#terraform) will create and configure the relevant Azure application registrations required for using 
+[OAuth](#oauth) however manual approval by a Tenancy Administrator is needed to grant one registration to access the
+other. You will need to request this manually by contacting the [RTS Helpdesk](mailto:rtsservicedesk@nerc.ac.uk).
 
 ### Terraform
 

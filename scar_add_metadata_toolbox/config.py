@@ -263,13 +263,6 @@ class DevelopmentConfig(Config):  # pragma: no cover
 
     DEBUG = True
 
-    @property
-    def SENTRY_CONFIG(self) -> Dict:
-        _config = super().SENTRY_CONFIG
-        _config["server_name"] = "Local container"
-
-        return _config
-
     LOGGING_LEVEL = logging.INFO
 
     def __init__(self):
@@ -280,6 +273,13 @@ class DevelopmentConfig(Config):  # pragma: no cover
     @property
     def VERSION(self) -> str:
         return "N/A"
+
+    @property
+    def SENTRY_CONFIG(self) -> Dict:
+        _config = super().SENTRY_CONFIG
+        _config["server_name"] = "Local container"
+
+        return _config
 
 
 class TestingConfig(Config):

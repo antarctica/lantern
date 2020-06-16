@@ -1613,17 +1613,17 @@ def create_app():
     # If unauthenticated, prevent transactions and use virtual catalogue where published date is set and past today
 
     @app.route("/csw/unpublished", methods=["GET", "POST"])
-    @auth("Records.Read.All")
+    @auth("BAS.MAGIC.ADD.Records.ReadWrite.All")
     def csw_server_unpublished():
         """embedded PyCSW instance for unpublished records"""
         app.logger.info(f"Running pycsw version: {pycsw_version}")
 
-        app.logger.info("Katy")
+        app.logger.info("Kilo")
 
         # TODO: Create our own CSW Server and Client classes
         csw = Csw(rtconfig=app.config["CSW_CONFIG_UNPUBLISHED"], env=request.environ, version="2.0.2",)
 
-        app.logger.info("Joss")
+        app.logger.info("Juliette")
 
         app.logger.info(request.data)
 
@@ -1634,21 +1634,12 @@ def create_app():
             csw.requesttype = "POST"
             csw.request = request.data
 
-            # Detect CSW transaction
-            # TODO: Replace this with proper XML parsing
-            if "csw:Transaction" in csw.request.decode():
-                # Long term this will be replaced by [1]
-                # [1] https://gitlab.data.bas.ac.uk/web-apps/flask-extensions/flask-azure-oauth/issues/17
-                # TODO: Move scope value to config value
-                if "Records.ReadWrite.All" not in current_token.scopes:
-                    raise ApiAuthTokenScopesInsufficient().response()
-
         # http_status_code, response = csw.dispatch_wsgi()
         http_status_code, response = csw.dispatch()
 
         response = response.decode()
 
-        app.logger.info("Lois")
+        app.logger.info("Lima")
         app.logger.info(response)
 
         return response, http_status_code, {"Content-type": csw.contenttype}
@@ -1674,7 +1665,7 @@ def create_app():
                 # Long term this will be replaced by [1]
                 # [1] https://gitlab.data.bas.ac.uk/web-apps/flask-extensions/flask-azure-oauth/issues/17
                 # TODO: Move scope value to config value
-                if "Records.Publish.All" not in current_token.scopes:
+                if "BAS.MAGIC.ADD.Records.Publish.All" not in current_token.scopes:
                     app.logger.info("No scope to publish")
                     app.logger.info(current_token.scopes)
                     raise ApiAuthTokenScopesInsufficient().response()

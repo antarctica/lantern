@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#3](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/3)
 * Switching to a Terraform Docker image that includes the Azure CLI
   [#3](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/3)
+* Switching to NERC tenancy for OAuth authentication/authorisation
+  [#4](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/4)
 
 ## [0.1.1] - 2020-06-02
 

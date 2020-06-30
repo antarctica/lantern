@@ -22,16 +22,16 @@ ENV PATH="$APPVENV/bin:$PATH"
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir poetry==1.0.0
 
-COPY pyproject.toml poetry.toml poetry.lock $APPPATH
-RUN poetry update --no-interaction --no-ansi
-RUN poetry install --no-root --no-interaction --no-ansi
-
 ## pre-install wheels to save time (this can be disabled if you can't access `bsl-repoa`)
 RUN python -m pip install http://bsl-repoa.nerc-bas.ac.uk/magic/v1/libraries/python/wheels/linux_x86_64/cp38m/lxml-4.5.0-cp38-cp38-linux_x86_64.whl
 RUN python -m pip install http://bsl-repoa.nerc-bas.ac.uk/magic/v1/libraries/python/wheels/linux_x86_64/cp38m/pyproj-2.6.0-cp38-cp38-linux_x86_64.whl
 
 # pre-install pre-release wheels (temporary)
 RUN python -m pip install http://bsl-repoa.nerc-bas.ac.uk/magic/v1/projects/metadata-library/latest/dist/bas_metadata_library-0.0.0-py3-none-any.whl
+
+COPY pyproject.toml poetry.toml poetry.lock $APPPATH
+RUN poetry update --no-interaction --no-ansi
+RUN poetry install --no-root --no-interaction --no-ansi
 
 # Patch CSW to workaround issues in PyCSW
 COPY ./support/pycsw/patches/pycsw/plugins/profiles/apiso/apiso.py $APPVENV/lib/python3.8/site-packages/pycsw/plugins/profiles/apiso/apiso.py

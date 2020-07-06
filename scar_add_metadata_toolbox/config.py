@@ -202,6 +202,12 @@ class Config:
                 "integrity": "sha256-JjbqQErDTc0GyOlDQLEgyqoC6XR6puR0wIJFkoHp9Fo=",
             }
         )
+        self.BSK_TEMPLATES.site_scripts.append(
+            {
+                "href": "https://cdn.web.bas.ac.uk/libs/markdown-it/11.0.0/js/markdown-it.min.js",
+                "integrity": "sha256-3mv+NUxFuBg26MtcnuN2X37WUxuGunWCCiG2YCSBjNc=",
+            }
+        )
         self.BSK_TEMPLATES.site_styles.append({"href": "/static/css/app.css"})
         self.BSK_TEMPLATES.site_scripts.append({"href": "/static/js/app.js"})
 

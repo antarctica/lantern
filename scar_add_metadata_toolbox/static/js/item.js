@@ -51,6 +51,9 @@ function itemContactFormSubmit(e, form) {
     $(form).find('#contact-form-control i').toggleClass('fa-circle-notch');
     $(form).find('#contact-form-control span').text('Sending message');
 
+    var md = window.markdownit();
+    md.set({gfm: true});
+
     fetch('https://prod-66.westeurope.logic.azure.com:443/workflows/21919e9ce6964d1c90d520eff13214c7/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=WUJcFcM-hXnylyQna0ZpvUuIflk5tCW_scCASG6SYFE', {
         method: 'post',
         headers: new Headers({'content-type': 'application/json;charset=UTF-8'}),
@@ -58,7 +61,7 @@ function itemContactFormSubmit(e, form) {
             'service-id': 'add-data-catalogue',
             'type': 'message',
             'subject': form['message-subject'].value,
-            'content': form['message-content'].value,
+            'content': md.render(form['message-content'].value),
             'sender-name': form['message-sender-name'].value,
             'sender-email': form['message-sender-email'].value
         })

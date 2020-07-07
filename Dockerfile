@@ -30,7 +30,6 @@ RUN python -m pip install http://bsl-repoa.nerc-bas.ac.uk/magic/v1/libraries/pyt
 RUN python -m pip install http://bsl-repoa.nerc-bas.ac.uk/magic/v1/projects/metadata-library/latest/dist/bas_metadata_library-0.0.0-py3-none-any.whl
 
 COPY pyproject.toml poetry.toml poetry.lock $APPPATH
-RUN poetry update --no-interaction --no-ansi
 RUN poetry install --no-root --no-interaction --no-ansi
 
 # Patch CSW to workaround issues in PyCSW

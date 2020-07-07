@@ -11,8 +11,8 @@ anyone with similar needs.
 **This project is a prototype with a significant number of sharp and pointy edges. It has not been thoroughly tested and
 may break without warning or in unexpected ways. Code quality and organisation is currently very low.**
 
-These limitations will be addressed in the near future as this project develops into a prototype for other discovery
-metadata records. Parts of this project may also be used for widely, such as in the new BAS wide data catalogue.
+These limitations will be addressed as this project develops into a prototype for discovery metadata for other MAGIC
+data, and more widely to include other publishers eventually forming a new BAS wide data catalogue.
 
 See the milestones and issues in [GitLab](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues) (internal)
 for more information.
@@ -302,16 +302,14 @@ Successfully retracted record [33d5a2d4-66d8-46be-82c8-404664b21455].
 
 A Flask application using [CSW](#csw) to store [Metadata records](#metadata-records) and Jinja templates using the
 [BAS Style Kit](https://style-kit.web.bas.ac.uk) to display records as [Items](#items) and [Collections](#collections)
-in a data catalogue served as a static website.
+in a data catalogue served as a static website. CSW catalogues are secured using [OAuth](#oauth) and backed by PostGIS
+databases provided by BAS IT.
 
-CSW catalogues are secured using [OAuth](#oauth) and backed by PostGIS databases provided by BAS IT. Data catalogue
-output is captured as a static website using the [Frozen Flask](#frozen-flask) extension and uploaded to an S3 static
-website. Routes have been configured in the BAS General Load Balancer to reverse proxy routes in the data catalogue as
-path prefixes within the main [BAS data catalogue](https://data.bas.ac.uk).
-
-Site feedback and per-item contact forms in the catalogue and static site are handled by
-[Microsoft Power Automate](#feedback-and-contact-forms). Legal policies are from the
-[Legal Policies Templates](https://gitlab.data.bas.ac.uk/web-apps/legal-policies-templates) project.
+Data catalogue output is captured as a static website using the [Frozen Flask](#frozen-flask) extension and uploaded to
+an S3 static website. Routes have been configured in the BAS General Load Balancer to reverse proxy routes in the data
+catalogue as path prefixes within the main [BAS data catalogue](https://data.bas.ac.uk). Contact forms for feedback and
+items in the static catalogue use [Microsoft Power Automate](#feedback-and-contact-forms). Legal policies use templates
+from the [Legal Policies Templates](https://gitlab.data.bas.ac.uk/web-apps/legal-policies-templates) project.
 
 ### Metadata records
 
@@ -436,10 +434,9 @@ message with the relevant project.
 
 ### Configuration
 
-Configuration options are set within `scar_add_metadata_toolbox/config.py`.
-
-All [Options](#configuration-options) are defined in a `Config` base class, with per-environment sub-classes overriding
-and extending these options as needed. The active configuration is set using the `FLASK_ENV` environment variable.
+Configuration options are set within `scar_add_metadata_toolbox/config.py` in a `Config` base class, with
+per-environment sub-classes overriding and extending these options as needed. The active configuration is set using the
+`FLASK_ENV` environment variable.
 
 Most options can be [Set using environment variables or files](#setting-configuration-options).
 
@@ -453,8 +450,8 @@ Most options can be [Set using environment variables or files](#setting-configur
 | `LOGGING_LEVEL`                      | No       | Logging Level                | Internal    | Valid [Python logging level](https://docs.python.org/3/library/logging.html#logging-levels)                          | Depends on environment                                       | `logging.WARNING`                                                        | See [Python documentation](https://docs.python.org/3/library/logging.html#logging-levels)                                                     | -                            |
 | `LOG_FORMAT`                         | No       | String                       | Internal    | Valid [Python Log Formatter Format](https://docs.python.org/3/library/logging.html#logging.Formatter.format)         | See `Config` class                                           | See `Config` class                                                       | See [Python documentation](https://docs.python.org/3/library/logging.html#logging.Formatter.format)                                           | -                            |
 | `LOG_FILE_PATH`                      | No       | Path                         | `.flaskenv` | Valid file path, the file does not need to already exist                                                             | `/var/log/app/app.log`                                       | `/var/log/app/app.log`                                                   | Path to application log file, if enabled                                                                                                      | Set by `APP_LOG_FILE_PATH`   |
-| `APP_ENABLE_SENTRY`                  | No       | Boolean                      | `.flaskenv` | `True`/`False`                                                                                                       | Depends on environment                                       | `True`                                                                   | Feature flag for [Error reporting](#error-reporting)                                                                                          | -                            |
-| `APP_ENABLE_FILE_LOGGING`            | No       | Boolean                      | `.flaskenv` | `True`/`False`                                                                                                       | `False`                                                      | `False`                                                                  | Feature flag for writing [Application Logs](#logging) to a file in addition to standard out                                                   | -                            |
+| `APP_ENABLE_SENTRY`                  | No       | Boolean                      | `.flaskenv` | `True`/`False`                                                                                                       | Depends on environment                                       | `True`                                                                   | Feature flag for [Error reporting](#error-tracking)                                                                                           | -                            |
+| `APP_ENABLE_FILE_LOGGING`            | No       | Boolean                      | `.flaskenv` | `True`/`False`                                                                                                       | `False`                                                      | `False`                                                                  | Feature flag for writing [Application Logs](#application-logging) to a file in addition to standard out                                       | -                            |
 | `SENTEY_DSN`                         | Yes      | String                       | `.flaskenv` | [Sentry DSN](https://docs.sentry.io/error-reporting/quickstart/?platform=python#configure-the-sdk) for this project  | `https://c69a62ee2262460f9bc79c4048ba764f@sentry.io/1832548` | `https://c69a62ee2262460f9bc79c4048ba764f@sentry.io/1832548`             | Sentry [Data Source Name](https://docs.sentry.io/error-reporting/quickstart/?platform=python#configure-the-sdk)                               | This value is not a secret   |
 | `APP_AUTH_SESSION_FILE_PATH`         | No       | String                       | `.flaskenv` | Valid file path, the file does not need to already exist                                                             | `~/.config/scar_add_metadata_toolbox/auth.json`              | `~/.config/scar_add_metadata_toolbox/auth.json`                          | File in which the access token and other authentication metadata will be stored between command runs                                          | -                            |
 | `AUTH_CLIENT_SCOPES`                 | Yes      | List[String]                 | `.flaskenv` | Valid list of scopes defined in the Azure application identified by `AZURE_OAUTH_APPLICATION_ID`                     | Empty List                                                   | `api://8643fd87-cca5-4e56-bc81-46af208ef260/Records.Read.All`            | List of required scopes defined in the the Azure application identified by `AZURE_OAUTH_APPLICATION_ID`                                       | -                            |
@@ -503,7 +500,7 @@ Errors in this service are tracked with Sentry:
 Error tracking will be enabled or disabled depending on the environment. It can be manually controlled by setting the
 `APP_ENABLE_SENTRY` [Configuration option](#configuration).
 
-### Logging
+### Application logging
 
 Logs for this service are written to *stdout/stderr* as appropriate.
 
@@ -526,17 +523,17 @@ The [CSW backing databases](#csw-backing-databases) are initialised by PyCSW's a
 * create a geometry column, if PostGIS is detected
 * create relevant indexes
 
-Two of these indexes (`fts_gin_idx` [full text search] and `wkb_geometry_idx` [binary geometry]) are named non-uniquely, 
-meaning multiple records table cannot be created in the same schema. This appears to be an oversight as all other 
+Two of these indexes (`fts_gin_idx` [full text search] and `wkb_geometry_idx` [binary geometry]) are named non-uniquely,
+meaning multiple records table cannot be created in the same schema. This appears to be an oversight as all other
 indexes are made unique by prefixing them with the name of the records table.
 
-Because these indexes are not unique and we create two records tables in the same schema (for the *Published* and 
+Because these indexes are not unique and we create two records tables in the same schema (for the *Published* and
 *Unpublished* repositories) the second database will not be initialised correctly and must be manually corrected.
 
 Both PyCSW instances are initialised by the `manage.py` entry point script and so will run each time the application is
 ran. To fix the second database:
 
-1. verify the first records table, `records_unpublished`, has been created successfully (contains `fts_gin_idx` and 
+1. verify the first records table, `records_unpublished`, has been created successfully (contains `fts_gin_idx` and
    `wkb_geometry_idx` indexes)
 2. alter the affected indexes in the first table [1]
 3. drop the second records table, `records_publised` as it will be incomplete [2]
@@ -567,7 +564,7 @@ ALTER INDEX wkb_geometry_idx RENAME TO ix_published_wkb_geometry_idx;
 
 ### Azure permissions
 
-[Terraform](#terraform) will create and configure the relevant Azure application registrations required for using 
+[Terraform](#terraform) will create and configure the relevant Azure application registrations required for using
 [OAuth](#oauth) however manual approval by a Tenancy Administrator is needed to grant one registration to access the
 other. You will need to request this manually by contacting the [RTS Helpdesk](mailto:rtsservicedesk@nerc.ac.uk).
 

@@ -4,7 +4,7 @@
     </header>
     <p>Your message will be sent to the <strong>{{ item.resource.contacts_by_role.publisher.0.organisation.display_name }}</strong>, who manage this item.</p>
     <div class="bsk-alert bsk-alert-info bsk-alert-highlight">
-        We try to answer messages within 2 days, we'll contact you if it will take us longer.
+        We try to answer messages within 2 days. We'll contact you if it will take us longer.
     </div>
 
     <form action="https://prod-66.westeurope.logic.azure.com:443/workflows/21919e9ce6964d1c90d520eff13214c7/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=WUJcFcM-hXnylyQna0ZpvUuIflk5tCW_scCASG6SYFE" accept-charset="UTF-8" method="post" onsubmit="itemContactFormSubmit(event, this)">
@@ -51,7 +51,7 @@
     <header>
         <h3>Alternative contact methods</h3>
     </header>
-    <dl class="bsk-row">
+    <dl class="bsk-dl-lg bsk-row">
         <div class="bsk-col-24-md-5">
             <dt><i class="far fa-envelope"></i> By post</dt>
             <dd>

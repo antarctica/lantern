@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
+* Updating Python dependencies via Poetry
+  [#9](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/9)
 * Installing direct wheel dependencies via Poetry
   [#9](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/9)
 * Poetry update removed from Dockerfile and made a manual action 

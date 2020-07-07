@@ -636,54 +636,70 @@ $ cd add-metadata-toolbox
 
 ### Development environment
 
-The `:latest` container image is used for developing this project. It can run locally using Docker and Docker Compose:
+A flexible development environment is available for developing this application locally. It can be used in a variety of
+ways depending on what is being developed:
+
+* all components, the Flask application, CSW database and static website can be ran locally
+    * useful for end-to-end testing
+    * useful for testing changes to how data is loaded into the CSW catalogues
+* the Flask application can be ran directly, without needing to convert it into a static site
+    * useful for iterating on changes to the data catalogue website
+* the Flask application can use the production CSW database
+    * useful for testing with real-world data
+
+The local development environment is defined using Docker Compose in `./docker-compose.yml`. It consists of:
+
+* an `app` service for running the Flask application using the [development container](#development-container)
+* a `csw-db` service for storing data added to local CSW catalogues (if used)
+* a `web` service for serving a local version of the data catalogue static site (if used)
+
+To create a local development environment:
+
+1. pull docker images: `docker-compose pull` [1]
+2. create configuration files [2], then [configure](#configuration) them as needed
+    * for example the connection string for CSW data (i.e. local or production)
+3. run the Docker Compose stack: `docker-compose up`
+    * the Flask application will be available directly at: [http://localhost:9000](http://localhost:9000)
+    * the static site will be available at: [http://localhost:9001](http://localhost:9001)
+4. run application [Commands](#command-reference) [3]
+    * for example building the data catalogue as a static site
+
+To destroy a local development environment run `docker-compose down`.
+
+[1] This requires access to the BAS Docker Registry (part of [gitlab.data.bas.ac.uk](https://gitlab.data.bas.ac.uk)).
+
+You will need to sign-in using your GitLab credentials (your password is set through your GitLab profile) the first
+time this is used:
 
 ```shell
 $ docker login docker-registry.data.bas.ac.uk
-$ docker-compose pull app
 ```
 
-You will need access to the private BAS Docker Registry (part of
-[gitlab.data.bas.ac.uk](https://gitlab.data.bas.ac.uk)) to pull this image. If you don't, you can build the relevant
-image/tag locally instead using `docker-compose build app`.
-
-You will also need to create/configure required [Configuration files](#configuration):
+[2]
 
 ```shell
 $ cp .flaskenv.example .flaskenv
 $ cp .env.example .env
 ```
 
-**Note:** This will include authentication information for using the protected embedded CSW catalogues.
-
-To run/test application [Commands](#command-reference):
+[3]
 
 ```shell
+# in a new terminal
 $ docker-compose run app flask [task]
 ```
 
-### Code Style
+#### Development container
 
-PEP-8 style and formatting guidelines must be used for this project, with the exception of the 80 character line limit.
+A development container image, defined by `./Dockerfile`, is built manually, tagged as `:latest` and hosted in the
+private BAS Docker Registry (part of [gitlab.data.bas.ac.uk](https://gitlab.data.bas.ac.uk)):
 
-[Black](https://github.com/psf/black) is used to ensure compliance, configured in `pyproject.toml`.
+[docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/container_registry)
 
-Black can be [integrated](https://black.readthedocs.io/en/stable/editor_integration.html#pycharm-intellij-idea) with a
-range of editors, such as PyCharm, to perform formatting automatically.
+It is separate to the [deployment container](#docker-image) and installs both runtime and development
+[dependencies](#dependencies) (deployment containers only install runtime dependencies).
 
-To apply formatting manually:
-
-```shell
-$ docker-compose run app black bas_scar_add_metadata_toolbox/
-```
-
-To check compliance manually:
-
-```shell
-$ docker-compose run app black --check bas_scar_add_metadata_toolbox/
-```
-
-Checks are ran automatically in [Continuous Integration](#continuous-integration).
+If you don't have access to the BAS Docker Register, you can build this image locally using `docker-compose build app`.
 
 ### Python version
 
@@ -707,9 +723,6 @@ When upgrading to a new version of Python, ensure the following are also checked
 
 Python dependencies for this project are managed with [Poetry](https://python-poetry.org) in `pyproject.toml`.
 
-The development container image installs both runtime and development dependencies. Deployment images only install
-runtime dependencies.
-
 Non-code files, such as static files, can also be included in the [Python package](#python-package) using the
 `include` key in `pyproject.toml`.
 
@@ -722,7 +735,13 @@ $ docker-compose run app ash
 $ poetry add [dependency] (--dev)
 ```
 
-Then rebuild the development container and push to GitLab (GitLab will rebuild other images automatically as needed):
+Then rebuild the [Development container](#development-container) and push to GitLab (GitLab will rebuild other images
+automatically as needed):
+
+```shell
+$ docker-compose build app
+$ docker-compose push app
+```
 
 #### Updating dependencies
 
@@ -755,6 +774,53 @@ $ docker-compose run app bandit -r .
 
 Checks are ran automatically in [Continuous Integration](#continuous-integration).
 
+### Code Style
+
+PEP-8 style and formatting guidelines must be used for this project, with the exception of the 80 character line limit.
+
+[Black](https://github.com/psf/black) is used to ensure compliance, configured in `pyproject.toml`.
+
+Black can be [integrated](https://black.readthedocs.io/en/stable/editor_integration.html#pycharm-intellij-idea) with a
+range of editors, such as PyCharm, to perform formatting automatically.
+
+To apply formatting manually:
+
+```shell
+$ docker-compose run app black bas_scar_add_metadata_toolbox/
+```
+
+To check compliance manually:
+
+```shell
+$ docker-compose run app black --check bas_scar_add_metadata_toolbox/
+```
+
+Checks are ran automatically in [Continuous Integration](#continuous-integration).
+
+### Flask application
+
+The Flask application representing this project is defined in the
+[`scar_add_metadata_toolbox`](/scar_add_metadata_toolbox) package. The application uses the
+[application factory](https://flask.palletsprojects.com/en/1.1.x/patterns/appfactories/) pattern using an entry point
+script to create an instance at runtime.
+
+Currently all application routes, commands, classes and other utility methods are defined in the
+[`scar_add_metadata_toolbox.__init__`](/scar_add_metadata_toolbox/__init__.py) module. This will be slowly refactored
+into sub-packages as the design and features of the application mature and stabilise. Until a large scale refactoring
+is undertaken, new functionality should be added alongside existing code.
+
+### Flask configuration
+
+All Flask configuration options (i.e. the contents of `app.config[]`) are defined by classes in the
+[`scar_add_metadata_toolbox.config`](/scar_add_metadata_toolbox/config.py) module. A base class defines all options
+with default values, with sub-classes changing values for each runtime environment (testing, production, etc.).
+
+When new configuration options are added, they **MUST** be documented in the [Configuration](#configuration) README
+section. Options that may need to be overridden at runtime, **SHOULD** be set using `.env` (if sensitive) or
+`.flaskenv` (if non-sensitive).
+
+Complex configuration options, or options that use derived values, **SHOULD** use Python property getters and setters.
+
 ### Logging
 
 Use the Flask default logger, for example:
@@ -784,6 +850,24 @@ foo_path = Path("foo.txt")
 print(f"foo_path is: {str(foo_path.absolute())}")
 ```
 
+### Templates
+
+Application templates use [Jinja2](https://jinja.palletsprojects.com/en/2.11.x/) (via Flask's bundled instance) using
+the [BAS Style Kit Jinja Templates](https://pypi.org/project/bas-style-kit-jinja-templates) library to use layouts,
+components and patterns from the [BAS Style Kit](https://style-kit.web.bas.ac.uk).
+
+Application specific templates are defined in the
+[`./scar_add_metadata_toolbox/templates`](/scar_add_metadata_toolbox/templates) package.
+
+All views **MUST** inherit from the application layout [`app.j2`](/scar_add_metadata_toolbox/templates/layouts/app.j2).
+
+In general, complex views **SHOULD** be broken down into components using
+[includes](https://jinja.palletsprojects.com/en/2.11.x/templates/#include).
+
+Common content **SHOULD** also use includes or [macros](https://jinja.palletsprojects.com/en/2.11.x/templates/#macros)
+for avoiding duplication. If these includes or macros would be useful outside of this project, they **SHOULD** be
+considered for inclusion into the BAS Style Kit, either generally or for the Jinja templates specifically.
+
 ### Editor support
 
 #### PyCharm
@@ -809,8 +893,9 @@ Server:
 
 ### Docker image
 
-A project Docker/OCI image is built by [Continuous Delivery](#continuous-deployment), tagged after each commit. Images
-are hosted through the private BAS Docker Registry (part of [gitlab.data.bas.ac.uk](https://gitlab.data.bas.ac.uk)):
+A deployment container image, defined by `./support/docker-packaging/Dockerfile`, is built by
+[Continuous Delivery](#continuous-deployment), tagged as `/deploy:[commit]` and hosted in the private BAS Docker
+Registry (part of [gitlab.data.bas.ac.uk](https://gitlab.data.bas.ac.uk)):
 
 [docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox/deploy](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/container_registry)
 

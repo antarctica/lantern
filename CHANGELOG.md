@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
+* Additional developer documentation
+  [#8](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/8)
 * Support for Markdown in feedback and item contact forms
   [#7](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/7)
 * Azure AD app registrations as Terraform resources

@@ -29,7 +29,7 @@ variable "app_s3_static_site_bucket" {
 
 # Terraform source: https://www.terraform.io/docs/providers/nomad/index.html
 provider "nomad" {
-  address = "http://bsl-nomad-magic-dev-s1.nerc-bas.ac.uk:4646"
+  address = "http://bsl-nomad-magic-dev-s3.nerc-bas.ac.uk:4646"
   region  = "bas"
 }
 

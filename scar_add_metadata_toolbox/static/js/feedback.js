@@ -6,11 +6,14 @@ function feedbackFormSubmit(e, form) {
     $(form).find('#contact-form-control i').toggleClass('fa-circle-notch');
     $(form).find('#contact-form-control span').text('Sending message');
 
+    var md = window.markdownit();
+    md.set({gfm: true});
+
     var payload = {
         'service-id': 'add-data-catalogue',
         'type': 'feedback',
         'subject': 'feedback-message',
-        'content': form['feedback-content'].value,
+        'content': md.render(form['feedback-content'].value),
     };
     if (!(form['feedback-sender-name'].value === '')) {
         payload['sender-name'] = form['feedback-sender-name'].value

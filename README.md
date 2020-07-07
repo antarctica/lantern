@@ -430,7 +430,9 @@ Generators are used for all routes we wish to export, notably: items, collection
 
 A Microsoft
 [Power Automate](https://emea.flow.microsoft.com/manage/environments/Default-b311db95-32ad-438f-a101-7ba061712a4e/flows/97d95c3b-5d40-4358-86a6-979a679a4b7c/details)
-service is used for handling feedback and contact form submissions, notifying relevant staff by email via Outlook.
+service is used for handling feedback and contact form submissions. Messages support Markdown formatting, which is
+converted to HTML prior to submission. When submitted, Power Automate uses the GitLab API to create an issue for each
+message with the relevant project.
 
 ### Configuration
 

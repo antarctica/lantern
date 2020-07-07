@@ -716,6 +716,8 @@ runtime dependencies.
 Non-code files, such as static files, can also be included in the [Python package](#python-package) using the
 `include` key in `pyproject.toml`.
 
+#### Adding new dependencies
+
 To add a new (development) dependency:
 
 ```shell
@@ -724,6 +726,16 @@ $ poetry add [dependency] (--dev)
 ```
 
 Then rebuild the development container and push to GitLab (GitLab will rebuild other images automatically as needed):
+
+#### Updating dependencies
+
+```shell
+$ docker-compose run app ash
+$ poetry update
+```
+
+Then rebuild the [Development container](#development-container) and push to GitLab (GitLab will rebuild other images
+automatically as needed):
 
 ```shell
 $ docker-compose build app

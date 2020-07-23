@@ -4,6 +4,9 @@
 
 # GitLab automatically passes artifacts from previous stages by default
 
+# Included files
+# This CI definition uses a GitLab provided include template
+
 # Secret variables
 # - Set required secret variables at: https://gitlab.data.bas.ac.uk/magic/add-metadata-toolbox/settings/ci_cd
 # - Variables are grouped by section in KEY: "value" format (e.g. FOO: "bar")
@@ -28,12 +31,19 @@
 # > SENTRY_AUTH_TOKEN: "[Sensitive]"
 #
 
+# == Includes ==
+
+include:
+  - template: 'Workflows/MergeRequest-Pipelines.gitlab-ci.yml'
+
 # == Global settings ==
 
 stages:
   - 🧪 test
   - 📦 package
   - 🏗 build
+  - 🔍 review
+  - 🧹 post-review
   - 🚚 publish
   - 🚀 release
 
@@ -123,6 +133,49 @@ podman-wrapper:
       - provisioning/podman/dot.env
     expire_in: 10 mins
 
+review:
+  stage: 🔍 review
+  image:
+    name: hashicorp/terraform:0.12.24
+    entrypoint: [""]
+  before_script:
+    - "cd provisioning/nomad-review-apps"
+    - "export TF_VAR_job_name=$APP_NAME-ra-$CI_COMMIT_REF_SLUG"
+    - "export TF_VAR_registry_image=$CI_REGISTRY_IMAGE/deploy:$CI_COMMIT_SHA"
+    - "export TF_VAR_registry_token=$NOMAD_DEPLOY_TOKEN"
+    - "export TF_VAR_app_csw_connection_string_published=$APP_CSW_CONNECTION_STRING_PUBLISHED"
+    - "export TF_VAR_app_csw_connection_string_unpublished=$APP_CSW_CONNECTION_STRING_UNPUBLISHED"
+    - "export TF_VAR_app_s3_static_site_bucket=$APP_STATIC_SITE_S3_BUCKET"
+  script:
+    - 'terraform init'
+    - 'terraform validate'
+    - 'terraform apply -auto-approve'
+  artifacts:
+    name: "CI_BUILD_TOKEN-review-app-state"
+    paths:
+      - "provisioning/nomad-review-apps/terraform.tfstate"
+    expire_in: 1 month
+  environment:
+    name: review/$CI_COMMIT_REF_NAME
+    url: http://bsl-nomad-magic-dev-s3.nerc-bas.ac.uk:4646/ui/jobs/$APP_NAME-ra-$CI_COMMIT_REF_SLUG
+    on_stop: stop-review
+
+stop-review:
+  stage: 🧹 post-review
+  image:
+    name: hashicorp/terraform:0.12.24
+    entrypoint: [""]
+  before_script:
+    - "cd provisioning/nomad-review-apps"
+  script:
+    - 'terraform init'
+    - 'terraform validate'
+    - 'terraform destroy -auto-approve'
+  when: manual
+  environment:
+    name: review/$CI_COMMIT_REF_NAME
+    action: stop
+
 publish-package:
   stage: 🚚 publish
   image: kroniak/ssh-client
@@ -134,7 +187,7 @@ publish-package:
     - chmod 400 ~/.ssh/id_rsa
   script:
     - 'ssh build@$PACKAGE_REPOSITORY -C "mkdir -p /var/repo/magic/v1/projects/scar-add-metadata-toolbox/latest/dist/"'
-    - scp dist/*.* build@$PACKAGE_REPOSITORY:/var/repo/magic/v1/projects/scar-add-metadata-toolbox/latest/dist/
+    - 'scp dist/*.* build@$PACKAGE_REPOSITORY:/var/repo/magic/v1/projects/scar-add-metadata-toolbox/latest/dist/'
 
 podman:
   stage: 🚀 release
@@ -173,7 +226,9 @@ sentry:
     - 'apk update && apk add python3 git'
     - "python3 support/python-packaging/parse_version.py $(git describe --tags) > _version && export VERSION=$(cat _version)"
     - "export SENTRY_VERSION=$SENTRY_PROJECT@${VERSION:-0.0.0}"
+    - 'if [ -z "$CI_COMMIT_TAG" ]; then export SENTRY_ENVIRONMENT="review-$CI_MERGE_REQUEST_ID"; else export SENTRY_ENVIRONMENT="production"; fi'
   script:
+    - "echo $SENTRY_ENVIRONMENT"
     - "sentry-cli releases new --finalize $SENTRY_VERSION"
-    - "sentry-cli releases deploys $SENTRY_VERSION new -e production"
+    - "sentry-cli releases deploys $SENTRY_VERSION new -e $SENTRY_ENVIRONMENT"
     - "sentry-cli releases set-commits --auto $SENTRY_VERSION"

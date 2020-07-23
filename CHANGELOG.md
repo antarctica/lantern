@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
+* Review apps using Nomad 
+  [#11](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/11)
 * Additional developer documentation
   [#8](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/8)
 * Support for Markdown in feedback and item contact forms

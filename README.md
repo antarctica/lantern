@@ -882,6 +882,21 @@ Automated tests are not yet used in this project.
 
 All commits will trigger a Continuous Integration process using GitLab's CI/CD platform, configured in `.gitlab-ci.yml`.
 
+## Review apps
+
+To preview changes to functionality, commits made in branches will trigger a review app to be created using GitLab's 
+CI/CD platform, configured in `.gitlab-ci.yml`.
+
+Specifically, review apps are deployed as standalone [Nomad services](#nomad-service). They are not deployed as  
+[Command line apps](#command-line-application).
+
+### Limitations
+
+* the URL for review apps point to the Nomad job via it's UI, rather than the managed application, as the port number 
+  for the application is set dynamically and not stored in the Terraform state for the Nomad job
+* the application will currently use the production CSW database, therefore records **MUST NOT** be changed by review 
+  apps, this is currently unenforced but will be when ServiceDesk ticket #42232 is resolved
+
 ## Deployment
 
 ### Python package
@@ -898,6 +913,16 @@ A deployment container image, defined by `./support/docker-packaging/Dockerfile`
 Registry (part of [gitlab.data.bas.ac.uk](https://gitlab.data.bas.ac.uk)):
 
 [docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox/deploy](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/container_registry)
+
+### Nomad service
+
+The deployment [Docker image](#docker-image) is deployed as a service job in the experimental
+[MAGIC Nomad cluster](https://gitlab.data.bas.ac.uk/MAGIC/infrastructure/nomad).
+
+### Command line application
+
+The deployment [Docker image](#docker-image) is made available as a command line application on the BAS central 
+workstations using Podman. A wrapper shell script is used to mask the `podman run` run command for ease of use.
 
 ### Continuous Deployment
 

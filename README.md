@@ -627,6 +627,18 @@ the [BAS Web & Applications Team](mailto:servicedesk@bas.ac.uk) to request acces
 See the [BAS Terraform Remote State](https://gitlab.data.bas.ac.uk/WSF/terraform-remote-state) project for how these
 permissions to remote state are enforced.
 
+### Docker image tag expiration policy
+
+The Docker image for this project uses a [Tag expiration policy](#docker-image-expiration-policy) which needs to be
+configured manually in [GitLab](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/settings/ci_cd).
+
+* Expiration policy: *enabled*
+* Expiration interval: *90 days*
+* Expiration schedule: *Every week*
+* Number of tags to retain: *10 tag per image name*
+* Tags with names matching this regex pattern will expire: `(review.+|build.+)`
+* Tags with names matching this regex pattern will be preserved: `release.+`
+
 ## Development
 
 ```shell
@@ -884,11 +896,17 @@ All commits will trigger a Continuous Integration process using GitLab's CI/CD p
 
 ## Review apps
 
-To preview changes to functionality, commits made in branches will trigger a review app to be created using GitLab's 
+To review changes to functionality, commits made in branches will trigger review apps to be created using GitLab's 
 CI/CD platform, configured in `.gitlab-ci.yml`.
 
-Specifically, review apps are deployed as standalone [Nomad services](#nomad-service). They are not deployed as  
+Review apps are only partially deployed, in they are deployed as a [Nomad service](#nomad-service) but not as a 
 [Command line apps](#command-line-application).
+
+Containers for review apps are built using the [deployment Docker image](#docker-image) but tagged as `review:[slug]`,
+where `[slug]` is a reference to the merge request the review app is related to. Images are hosted in the private BAS 
+Docker Registry (part of [gitlab.data.bas.ac.uk](https://gitlab.data.bas.ac.uk)):
+
+[docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox/deploy](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/container_registry)
 
 ### Limitations
 
@@ -909,10 +927,20 @@ Server:
 ### Docker image
 
 A deployment container image, defined by `./support/docker-packaging/Dockerfile`, is built by
-[Continuous Delivery](#continuous-deployment), tagged as `/deploy:[commit]` and hosted in the private BAS Docker
-Registry (part of [gitlab.data.bas.ac.uk](https://gitlab.data.bas.ac.uk)):
+[Continuous Delivery](#continuous-deployment) for releases (Git tags). Images are tagged as `/release:[tag]`, where 
+`[tag]` is the name of the Git tag a release is related to. Images are hosted in the private BAS Docker Registry (part 
+of [gitlab.data.bas.ac.uk](https://gitlab.data.bas.ac.uk)):
 
 [docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox/deploy](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/container_registry)
+
+**Note:** All container builds (including those from [Review apps](#review-apps)) are also tagged as `/build:[commit]`,
+where `[commit]` is a reference to the Git commit that triggered the image to be built.
+
+#### Docker image expiration policy
+
+An image [expiration policy](https://docs.gitlab.com/ee/user/packages/container_registry/#cleanup-policy) is used to 
+limit the number of non-release container images that are kept. This policy is set within, and enforced automatically 
+by, GitLab. See the [Setup section](#docker-image-tag-expiration-policy) for how this is configured.
 
 ### Nomad service
 

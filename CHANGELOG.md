@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
+* Docker image tag expiration policy
+  [#12](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/12)
 * Review apps using Nomad 
   [#11](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/11)
 * Additional developer documentation
@@ -27,6 +29,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
+* Switching to refactored/externalised Python version parsing script
+  [#12](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/12)
+* Improvements to Continuous Integration/Deployment pipeline
+  [#12](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/12)
 * Updating Python dependencies via Poetry
   [#9](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/9)
 * Installing direct wheel dependencies via Poetry

@@ -1,0 +1,5 @@
+[run]
+omit =
+    scar_add_metadata_toolbox/hazmat/__init__.py
+    scar_add_metadata_toolbox/hazmat/csw.py
+    scar_add_metadata_toolbox/hazmat/metadata.py

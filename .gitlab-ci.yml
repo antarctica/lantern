@@ -85,6 +85,37 @@ version:
     reports:
       dotenv: build.env
 
+test-app:
+  stage: 🧪 test
+  variables:
+    FLASK_ENV: testing
+  script:
+    - "pytest -o junit_family=xunit2 --junitxml=test-results.xml --random-order"
+  needs: []
+  artifacts:
+    reports:
+      junit: test-results.xml
+  rules:
+    - changes:
+        - '**/*.py'
+
+coverage-app:
+  stage: 🧪 test
+  variables:
+    FLASK_ENV: testing
+  script:
+    - "pytest --cov=scar_add_metadata_toolbox --cov-fail-under=100 ."
+    - "coverage html"
+  artifacts:
+    name: "$CI_BUILD_TOKEN-coverage"
+    paths:
+      - htmlcov
+    expire_in: 1 month
+  rules:
+    - changes:
+        - '**/*.py'
+
+
 black:
   stage: 🧪 test
   script:

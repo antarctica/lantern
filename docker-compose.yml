@@ -27,6 +27,6 @@
       image: nginx:alpine
       volumes:
         - ./support/nginx/default.conf:/etc/nginx/conf.d/default.conf
-        - ./scar_add_metadata_toolbox/build:/usr/share/nginx/html/public
+        - ./_site/:/usr/share/nginx/html/public/
       ports:
         - "9001:9001"

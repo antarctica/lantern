@@ -1,5 +1,6 @@
+/provisioning/terraform/.terraform
 __pycache__
 /htmlcov
 /.coverage
-/scar_add_metadata_toolbox/build
-/provisioning/terraform/.terraform
+/_site
+/collections.json

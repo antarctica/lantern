@@ -1,0 +1,85 @@
+<section class="app-item-tab app-item-additional-information">
+    <header>
+        <h2><i class="far fa-info-square"></i> Additional Information</h2>
+    </header>
+    <dl class="bsk-dl-horizontal bsk-dl-horizontal-lg">
+        <dt>Item ID:</dt>
+        <dd>{{ item.identifier }}</dd>
+        <dt>Item type:</dt>
+        <dd>
+            {% if item.item_type == 'dataset' %}
+                <i class="far fa-fw fa-cube"></i> Dataset
+            {% elif item.item_type == 'series' %}
+                <i class="far fa-fw fa-cubes"></i> Series
+            {% elif item.item_type == 'service' %}
+                <i class="far fa-fw fa-cog"></i> Service
+            {% endif %}
+        </dd>
+        <dt>Data type:</dt>
+        <dd>
+            {% if item.data_type == 'vector' %}
+                <i class="far fa-fw fa-draw-polygon"></i> Vector
+            {% elif item.data_type == 'grid' %}
+                <i class="far fa-fw fa-game-board"></i> Raster
+            {% elif item.data_type == 'textTable' %}
+                <i class="far fa-fw fa-list-ol"></i> Tabular
+            {% endif %}
+        </dd>
+        <dt>Spatial reference system:</dt>
+        <dd>{{ item.spatial_reference_system_markdown }}</dd>
+        <dt>Language</dt>
+        <dd>{{ item.language }}</dd>
+        <dt>Character set</dt>
+        <dd>{{ item.character_set }}</dd>
+        {% if item.created %}
+            <dt>Item created</dt>
+            <dd>{{ item.created }}</dd>
+        {% endif %}
+        {% if item.published %}
+            <dt>Item published</dt>
+            <dd>{{ item.published }}</dd>
+        {% endif %}
+        {% if item.released %}
+            <dt>Item released</dt>
+            <dd>{{ item.released }}</dd>
+        {% endif %}
+        {% if item.updated %}
+            <dt>Item updated</dt>
+            <dd>{{ item.updated }}</dd>
+        {% endif %}
+        <dt>Update frequency:</dt>
+        <dd>{{ item.maintenance_frequency }}</dd>
+        <dt>Status:</dt>
+        <dd>
+            {% if item.status == 'current' %}
+                <span class="bsk-text-success"><i class="fa-fw far fa-check"></i> Current</span>
+            {% endif %}
+        </dd>
+    </dl>
+    <h3>Metadata information</h3>
+    <dl class="bsk-dl-horizontal bsk-dl-horizontal-lg">
+        <dt>Language</dt>
+        <dd>{{ item.metadata_language }}</dd>
+        <dt>Character set</dt>
+        <dd>{{ item.metadata_character_set }}</dd>
+        <dt>Status:</dt>
+        <dd>{{ item.metadata_maintenance_progress }}</dd>
+        <dt>Last updated:</dt>
+        <dd>{{ item.metadata_updated }}</dd>
+        <dt>Update frequency:</dt>
+        <dd>{{ item.metadata_maintenance_frequency }}</dd>
+        <dt>Metadata standard:</dt>
+        <dd>{{ item.metadata_standard_name }}</dd>
+        <dt>Metadata standard version:</dt>
+        <dd>{{ item.metadata_standard_version }}</dd>
+        <dt>Metadata links</dt>
+        <dd>
+            <div>
+                <a href="/records/{{ item.identifier }}/iso-xml/{{ item.identifier }}.xml">View as ISO XML</a>
+            </div>
+            <div>
+                <a href="/records/{{ item.identifier }}/iso-html/{{ item.identifier }}.xml">View as ISO HTML</a>
+            </div>
+        </dd>
+    </dl>
+</section>

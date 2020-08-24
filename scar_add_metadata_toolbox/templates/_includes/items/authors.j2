@@ -2,7 +2,7 @@
     <header>
         <h2><i class="far fa-user-friends"></i> Authors</h2>
     </header>
-    {% for author_row in item.resource.contacts_by_role.author | batch(2) %}
+    {% for author_row in item.authors | batch(2) %}
         <div class="bsk-row">
             {% for author in author_row %}
                 <div class="bsk-col-12-md-6">
@@ -37,11 +37,9 @@
                         {% endif %}
                         {% if author.individual.title == 'orcid' %}
                             <p>
-                                <span class="bsk-orcid-id">
-                                    <i class="fa-fw fab fa-orcid app-orcid-icon"></i>
-                                    <abbr title="ORCID iD">ORCID:</abbr>
-                                    <a href="{{ author.individual.href }}">{{ author.individual.href }}</a>
-                                </span>
+                                <i class="fab fa-fw fa-orcid bsk-orcid-id" aria-hidden="true"></i>
+                                <abbr title="ORCID iD">ORCID:</abbr>
+                                <a href="{{ author.individual.href }}">{{ author.individual.href }}</a>
                             </p>
                         {% endif %}
                     </address>

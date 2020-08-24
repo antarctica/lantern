@@ -1,0 +1,73 @@
+<section class="app-item-tab app-item-extent">
+    <header>
+        <h2><i class="far fa-expand-arrows"></i> Extent</h2>
+    </header>
+
+    <div class="bsk-row">
+        <div class="bsk-col-12-md-6">
+            <div id="item-map"></div>
+        </div>
+        <div class="bsk-col-12-md-6">
+            <header>
+                <h4>Location keywords</h4>
+            </header>
+            <ul class="bsk-list-unstyled app-keywords-list fa-ul">
+                {% for location_keyword_set in item.location_keywords %}
+                    {% for location_term in location_keyword_set.terms %}
+                        <li><span class="fa-li">
+                            <i class="far fa-map-pin"></i></span>
+                            {{ location_term.term }}
+                                {% if location_term.href %}
+                                    <a href="{{ location_term.href }}"><i class="far fa-info-circle"></i></a>
+                                {% endif %}
+                                {% if location_keyword_set.thesaurus %}
+                                    <small>
+                                        {{ location_keyword_set.thesaurus.title.value }}
+                                        {% if location_keyword_set.thesaurus.title.href %}
+                                            <a href="{{ location_keyword_set.thesaurus.title.href }}"><i class="far fa-info-circle"></i></a>
+                                        {% endif %}
+                                    </small>
+                                {% endif %}
+                        </li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+
+            <header>
+                <h4>Bounding coordinates</h4>
+            </header>
+            <dl class="bsk-dl">
+                <dt>
+                    <i class="far fa-border-style fa-flip-horizontal"></i>
+                    Top-right corner:
+                </dt>
+                <dd>North: {{ item.geographic_extent.bounding_box.north_latitude }}, East: {{ item.geographic_extent.bounding_box.east_longitude }}</dd>
+                <dt>
+                    <i class="far fa-border-style fa-flip-vertical"></i>
+                    Bottom-left corner:
+                </dt>
+                <dd>South: {{ item.geographic_extent.bounding_box.south_latitude }}, West: {{ item.geographic_extent.bounding_box.west_longitude }}</dd>
+            </dl>
+
+            <header>
+                <h4>Temporal range</h4>
+            </header>
+            <dl class="bsk-dl">
+                <div class="bsk-row">
+                    <div class="bsk-col-12-md-4">
+                        <dt>From:</dt>
+                        <dd>{{ item.temporal_extent.start }}</dd>
+                    </div>
+                    <div class="bsk-col-12-md-2 bsk-sr-hidden">
+                        <dt>&nbsp;</dt>
+                        <dd class="bsk-text-center"><i class="fas fa-long-arrow-alt-right"></i></dd>
+                    </div>
+                    <div class="bsk-col-12-md-6">
+                        <dt>To:</dt>
+                        <dd>{{ item.temporal_extent.end }}</dd>
+                    </div>
+                </div>
+            </dl>
+        </div>
+    </div>
+</section>

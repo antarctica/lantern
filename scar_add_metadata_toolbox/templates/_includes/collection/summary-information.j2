@@ -1,12 +1,12 @@
 <section class="bsk-sidebar bsk-sidebar-default app-collection-summary">
     <dl class="bsk-dl-horizontal">
         <dt>Items:</dt>
-        <dd>{{ collection['items'] | length }}</dd>
-        <dt>Topic:</dt>
-        <dd>{{ collection.topic }}</dd>
+        <dd>{{ collection.items | length }}</dd>
+        <dt>Topics:</dt>
+        <dd>{{ collection.topics | join(',') }}</dd>
         <dt>Publishers:</dt>
         <dd>{{ collection.publishers | join(',') }}</dd>
     </dl>
     <h3>Summary</h3>
-    <div>{{ collection.description }}</div>
+    <div>{{ collection.summary_markdown }}</div>
 </section>

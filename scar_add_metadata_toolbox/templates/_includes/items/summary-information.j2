@@ -1,0 +1,27 @@
+<section class="bsk-sidebar bsk-sidebar-default app-item-summary">
+    <dl class="bsk-dl-horizontal">
+        <dt>Version:</dt>
+        <dd>{{ item.edition }}</dd>
+        <dt>Released:</dt>
+        <dd>
+            {{ item.released }}
+        </dd>
+        <dt>Status:</dt>
+        <dd>
+            {% if item.status == 'current' %}
+                <span class="bsk-label bsk-label-success"><i class="fa-fw far fa-check"></i> Current</span>
+            {% endif %}
+            {% if item.maintenance_frequency == 'Biannually (every 6 months)' %}
+                (Updated every 6 months)
+            {% endif %}
+        </dd>
+        <dt>Collections:</dt>
+        <dd>{{ item.collections | join(',') }}</dd>
+        <dt>Topics:</dt>
+        <dd>{{ item.topics | join(',') }}</dd>
+        <dt>Publishers:</dt>
+        <dd>{{ item.publishers | join(',') }}</dd>
+    </dl>
+    <h3>Abstract</h3>
+    <p>{{ item.abstract_markdown }}</p>
+</section>

@@ -29,6 +29,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
+* Various PyCharm configuration changes (run/debug configurations etc.)
+  [#15](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/15)
 * Switching to refactored/externalised Python version parsing script
   [#12](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/12)
 * Improvements to Continuous Integration/Deployment pipeline

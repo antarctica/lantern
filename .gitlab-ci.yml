@@ -1,44 +1,44 @@
-# ---
+---
 
-# # == Notes ==
+# == Notes ==
 
-# # GitLab automatically passes artifacts from previous stages by default
+# GitLab automatically passes artifacts from previous stages by default
 
-# # This CI definition uses a GitLab provided include template
+# This CI definition uses a GitLab provided include template
 
-# # Secret variables
-# # - Set required secret variables at: https://gitlab.data.bas.ac.uk/magic/add-metadata-toolbox/settings/ci_cd
-# # - Variables are grouped by section in KEY: "value" format (e.g. FOO: "bar")
-# #   Sensitive values are represented by "[Sensitive]"
-# #
-# # - CSW server connection strings
-# #   > APP_CSW_CONNECTION_STRING_PASSWORD_PUBLISHED: "[Sensitive]"
-# #   > APP_CSW_CONNECTION_STRING_PASSWORD_UNPUBLISHED: "[Sensitive]"
-# #
-# # - Private key for the 'bas-magic-shared-deployment-identity'
-# #   > PACKAGE_REPO_SSH_PRIVATE_KEY (protected, file): "[Sensitive]"
-# #   > PODMAN_HOST_SSH_PRIVATE_KEY (protected, file): "[Sensitive]"
-# #
-# # - Nomad deploy token
-# #   create a deploy token at https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/settings/repository
-# #     - name: 'MAGIC Nomad'
-# #     - username: 'nomad'
-# #     - scopes: 'read_registry'
-# #   > NOMAD_DEPLOY_TOKEN (protected): "[Sensitive]"
-# #
-# # - Sentry - create tokens at https://sentry.io/settings/antarctica/developer-settings/bas-gitlab-4ffa11/
-# # > SENTRY_AUTH_TOKEN: "[Sensitive]"
-# #
+# Secret variables
+# - Set required secret variables at: https://gitlab.data.bas.ac.uk/magic/add-metadata-toolbox/settings/ci_cd
+# - Variables are grouped by section in KEY: "value" format (e.g. FOO: "bar")
+#   Sensitive values are represented by "[Sensitive]"
+#
+# - CSW server connection strings
+#   > APP_CSW_CONNECTION_STRING_PASSWORD_PUBLISHED: "[Sensitive]"
+#   > APP_CSW_CONNECTION_STRING_PASSWORD_UNPUBLISHED: "[Sensitive]"
+#
+# - Private key for the 'bas-magic-shared-deployment-identity'
+#   > PACKAGE_REPO_SSH_PRIVATE_KEY (protected, file): "[Sensitive]"
+#   > PODMAN_HOST_SSH_PRIVATE_KEY (protected, file): "[Sensitive]"
+#
+# - Nomad deploy token
+#   create a deploy token at https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/settings/repository
+#     - name: 'MAGIC Nomad'
+#     - username: 'nomad'
+#     - scopes: 'read_registry'
+#   > NOMAD_DEPLOY_TOKEN (protected): "[Sensitive]"
+#
+# - Sentry - create tokens at https://sentry.io/settings/antarctica/developer-settings/bas-gitlab-4ffa11/
+# > SENTRY_AUTH_TOKEN: "[Sensitive]"
+#
 
-# # == Includes ==
+# == Includes ==
 
-# include:
-#   - template: 'Workflows/MergeRequest-Pipelines.gitlab-ci.yml'
+include:
+  - template: 'Workflows/MergeRequest-Pipelines.gitlab-ci.yml'
 
-# # == Global settings ==
+# == Global settings ==
 
-# stages:
-#   - 💥 setup
+stages:
+  - 💥 setup
 #   - 🧪 test
 #   - 📦 package
 #   - 🏗 build
@@ -47,43 +47,43 @@
 #   - 🚚 publish
 #   - 🚀 release
 
-# variables:
-#   DOCKER_HOST: tcp://docker:2376
-#   DOCKER_CERT_PATH: /certs/client
-#   DOCKER_DRIVER: overlay2
-#   DOCKER_TLS_VERIFY: 1
-#   GITLAB_REGISTRY: docker-registry.data.bas.ac.uk
-#   PACKAGE_REPOSITORY: bsl-repoa.nerc-bas.ac.uk
-#   PODMAN_HOST: bslws01.nerc-bas.ac.uk
-#   APP_NAME: scar-add-metadata-toolbox
-#   APP_PACKAGE: scar-add-metadata-toolbox
-#   SENTRY_ORG: antarctica
-#   SENTRY_PROJECT: add-metadata-editor
-#   APP_STATIC_SITE_S3_BUCKET: add-catalogue-integration.data.bas.ac.uk
-#   APP_CSW_CONNECTION_STRING_PUBLISHED: postgresql://pycsw_production:$APP_CSW_CONNECTION_STRING_PASSWORD_PUBLISHED@bsldb.nerc-bas.ac.uk/pycsw_production
-#   APP_CSW_CONNECTION_STRING_UNPUBLISHED: postgresql://pycsw_production:$APP_CSW_CONNECTION_STRING_PASSWORD_UNPUBLISHED@bsldb.nerc-bas.ac.uk/pycsw_production
+variables:
+  DOCKER_HOST: tcp://docker:2376
+  DOCKER_CERT_PATH: /certs/client
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_VERIFY: 1
+  GITLAB_REGISTRY: docker-registry.data.bas.ac.uk
+  PACKAGE_REPOSITORY: bsl-repoa.nerc-bas.ac.uk
+  PODMAN_HOST: bslws01.nerc-bas.ac.uk
+  APP_NAME: scar-add-metadata-toolbox
+  APP_PACKAGE: scar-add-metadata-toolbox
+  SENTRY_ORG: antarctica
+  SENTRY_PROJECT: add-metadata-editor
+  APP_STATIC_SITE_S3_BUCKET: add-catalogue-integration.data.bas.ac.uk
+  APP_CSW_CONNECTION_STRING_PUBLISHED: postgresql://pycsw_production:$APP_CSW_CONNECTION_STRING_PASSWORD_PUBLISHED@bsldb.nerc-bas.ac.uk/pycsw_production
+  APP_CSW_CONNECTION_STRING_UNPUBLISHED: postgresql://pycsw_production:$APP_CSW_CONNECTION_STRING_PASSWORD_UNPUBLISHED@bsldb.nerc-bas.ac.uk/pycsw_production
 
-# image:
-#   name: docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox:latest
-#   entrypoint: [""]
+image:
+  name: docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox:latest
+  entrypoint: [""]
 
-# # == Jobs ==
+# == Jobs ==
 
-# version:
-#   stage: 💥 setup
-#   image:
-#     name: docker-registry.data.bas.ac.uk/magic/infrastructure/python-version-parser:latest
-#     entrypoint: [""]
-#   before_script:
-#     - "python3 /usr/src/app/python_version_parser $(git describe --tags) > _version && export VERSION=$(cat _version)"
-#     - "export VERSION=${VERSION:-0.0.0}"
-#   script:
-#     - 'echo $VERSION'
-#     - 'echo "VERSION=$VERSION" >> build.env'
-#   needs: []
-#   artifacts:
-#     reports:
-#       dotenv: build.env
+version:
+  stage: 💥 setup
+  image:
+    name: docker-registry.data.bas.ac.uk/magic/infrastructure/python-version-parser:latest
+    entrypoint: [""]
+  before_script:
+    - "python3 /usr/src/app/python_version_parser $(git describe --tags) > _version && export VERSION=$(cat _version)"
+    - "export VERSION=${VERSION:-0.0.0}"
+  script:
+    - 'echo $VERSION'
+    - 'echo "VERSION=$VERSION" >> build.env'
+  needs: []
+  artifacts:
+    reports:
+      dotenv: build.env
 
 # test-app:
 #   stage: 🧪 test

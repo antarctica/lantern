@@ -1,10 +1,9 @@
 import logging
 import os
 
-import simplejson as json
 import pkg_resources
 
-from typing import Dict
+from typing import Dict, List
 from pathlib import Path
 
 from flask.cli import load_dotenv
@@ -17,210 +16,113 @@ from bas_style_kit_jinja_templates import BskTemplates
 
 class Config:
     """
-    Flask configuration base class
+    Flask/App configuration base class
 
-    Includes a mixture of static and dynamic configuration options. Dynamic objects are typically set from environment
-    variables (set directly or through environment files).
-
-    See the project README for configuration option details.
+    Configuration options are mostly set using class properties and are typically hard-coded. A limited number of
+    options can be set at runtime using environment variables (set directly or through an `.env` file).
     """
 
     ENV = os.environ.get("FLASK_ENV")
     DEBUG = False
     TESTING = False
 
-    NAME = "scar-add-metadata-toolbox"
+    LOG_FORMAT = "[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s"
 
-    LOGGING_LEVEL = logging.WARNING
+    # Used as defaults for values that can be set at runtime
+    _APP_ENABLE_SENTRY = True
+    _LOGGING_LEVEL = logging.WARNING
+    _COLLECTIONS_PATH = Path.home().joinpath(".config/scar_add_metadata_toolbox/collections.json")
+    _AUTH_SESSION_FILE_PATH = Path.home().joinpath(".config/scar_add_metadata_toolbox/auth.json")
+    _SITE_PATH = Path("/tmp/_site")
 
     def __init__(self):
         load_dotenv()
 
-        self.APP_ENABLE_FILE_LOGGING = str2bool(os.environ.get("APP_ENABLE_FILE_LOGGING")) or False
-        self.APP_ENABLE_SENTRY = str2bool(os.environ.get("APP_ENABLE_SENTRY")) or True
+        """
+        APP_ENABLE_SENTRY - Whether to enable Sentry error reporting
+        
+        If true errors and uncaught exceptions will be reported to Sentry. A default value is set on an per-environment 
+        basis (off in development/testing) by overriding the attribute, however it can be also be set at runtime.
+        """
+        self.APP_ENABLE_SENTRY = str2bool(os.environ.get("APP_ENABLE_SENTRY") or self._APP_ENABLE_SENTRY)
 
-        self.LOG_FORMAT = "[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s"
-        self.LOG_FILE_PATH = Path(os.environ.get("APP_LOG_FILE_PATH") or "/var/log/app/app.log")
-
-        self.SENTRY_DSN = os.environ.get("SENTRY_DSN") or None
-
-        self.APP_AUTH_SESSION_FILE_PATH = Path.home().joinpath(".config/scar_add_metadata_toolbox/auth.json")
-        if "APP_AUTH_SESSION_FILE_PATH" in os.environ:
-            self.APP_AUTH_SESSION_FILE_PATH = Path(os.environ.get("APP_AUTH_SESSION_FILE_PATH"))
-        self.AUTH_CLIENT_SCOPES = []
-        if "AUTH_CLIENT_SCOPES" in os.environ:
-            self.AUTH_CLIENT_SCOPES = str(os.environ.get("AUTH_CLIENT_SCOPES")).split(" ")
-        self.AUTH_CLIENT_TENANCY = os.environ.get("AUTH_CLIENT_TENANCY") or None
-        self.AUTH_CLIENT_ID = os.environ.get("AUTH_CLIENT_ID") or None
-
-        self.AZURE_OAUTH_TENANCY = os.environ.get("AUTH_SERVER_TENANCY") or None
-        self.AZURE_OAUTH_APPLICATION_ID = os.environ.get("AUTH_SERVER_ID") or None
-        self.AZURE_OAUTH_CLIENT_APPLICATION_IDS = [self.AUTH_CLIENT_ID]
-
-        self.CSW_ENDPOINT_UNPUBLISHED = os.environ.get("CSW_ENDPOINT_UNPUBLISHED") or "http://app:9000/csw/unpublished"
-        self.CSW_ENDPOINT_PUBLISHED = os.environ.get("CSW_ENDPOINT_PUBLISHED") or "http://app:9000/csw/published"
-
-        self.CSW_CONFIG_UNPUBLISHED = {
-            "server": {
-                "url": os.environ.get("CSW_ENDPOINT_UNPUBLISHED") or "http://app:9000/csw/unpublished",
-                "mimetype": "application/xml; charset=UTF-8",
-                "encoding": "UTF-8",
-                "language": "en-GB",
-                "maxrecords": "100",
-                "loglevel": "DEBUG",
-                "logfile": os.environ.get("APP_CSW_LOG_FILE_PATH") or "/var/log/app/csw-unpublished.log",
-                "pretty_print": "true",
-                "gzip_compresslevel": "8",
-                "domainquerytype": "list",
-                "domaincounts": "false",
-                "profiles": "apiso",
-            },
-            "manager": {"transactions": "true", "allowed_ips": "*.*.*.*",},
-            "metadata:main": {
-                "identification_title": "Internal CSW (Unpublished)",
-                "identification_abstract": "Internal PyCSW OGC CSW server for unpublished records",
-                "identification_keywords": "catalogue, discovery, metadata",
-                "identification_keywords_type": "theme",
-                "identification_fees": "None",
-                "identification_accessconstraints": "None",
-                "provider_name": "British Antarctic Survey",
-                "provider_url": "https://www.bas.ac.uk/",
-                "contact_name": "Mapping and Geographic Information Centre, British Antarctic Survey",
-                "contact_position": "Technical Contact",
-                "contact_address": "British Antarctic Survey, Madingley Road, High Cross",
-                "contact_city": "Cambridge",
-                "contact_stateorprovince": "Cambridgeshire",
-                "contact_postalcode": "CB30ET",
-                "contact_country": "United Kingdom",
-                "contact_phone": "+44(0) 1223 221400",
-                "contact_email": "magic @ bas.ac.uk",
-                "contact_url": "https://www.bas.ac.uk/team/magic",
-                "contact_hours": "07:00 - 19:00",
-                "contact_instructions": "During hours of service on weekdays. Best efforts support only.",
-                "contact_role": "pointOfContact",
-            },
-            "repository": {"database": os.environ.get("CSW_UNPUBLISHED_DB_CONNECTION"), "table": "records_unpublished"},
-            "metadata:inspire": {
-                "enabled": "true",
-                "languages_supported": "eng",
-                "default_language": "eng",
-                "date": "YYYY-MM-DD",
-                "gemet_keywords": "Utility and governmental services",
-                "conformity_service": "notEvaluated",
-                "contact_name": "Mapping and Geographic Information Centre, British Antarctic Survey",
-                "contact_email": "magic@bas.ac.uk",
-                "temp_extent": "YYYY-MM-DD/YYYY-MM-DD",
-            },
-        }
-        self.CSW_CONFIG_PUBLISHED = {
-            "server": {
-                "url": os.environ.get("CSW_ENDPOINT_PUBLISHED") or "http://app:9000/csw/published",
-                "mimetype": "application/xml; charset=UTF-8",
-                "encoding": "UTF-8",
-                "language": "en-GB",
-                "maxrecords": "100",
-                "loglevel": "DEBUG",
-                "logfile": os.environ.get("APP_CSW_LOG_FILE_PATH") or "/var/log/app/csw-published.log",
-                "pretty_print": "true",
-                "gzip_compresslevel": "8",
-                "domainquerytype": "list",
-                "domaincounts": "false",
-                "profiles": "apiso",
-            },
-            "manager": {"transactions": "true", "allowed_ips": "*.*.*.*",},
-            "metadata:main": {
-                "identification_title": "Internal CSW (Published)",
-                "identification_abstract": "Internal PyCSW OGC CSW server for published records",
-                "identification_keywords": "catalogue, discovery, metadata",
-                "identification_keywords_type": "theme",
-                "identification_fees": "None",
-                "identification_accessconstraints": "None",
-                "provider_name": "British Antarctic Survey",
-                "provider_url": "https://www.bas.ac.uk/",
-                "contact_name": "Mapping and Geographic Information Centre, British Antarctic Survey",
-                "contact_position": "Technical Contact",
-                "contact_address": "British Antarctic Survey, Madingley Road, High Cross",
-                "contact_city": "Cambridge",
-                "contact_stateorprovince": "Cambridgeshire",
-                "contact_postalcode": "CB30ET",
-                "contact_country": "United Kingdom",
-                "contact_phone": "+44(0) 1223 221400",
-                "contact_email": "magic @ bas.ac.uk",
-                "contact_url": "https://www.bas.ac.uk/team/magic",
-                "contact_hours": "07:00 - 19:00",
-                "contact_instructions": "During hours of service on weekdays. Best efforts support only.",
-                "contact_role": "pointOfContact",
-            },
-            "repository": {"database": os.environ.get("CSW_PUBLISHED_DB_CONNECTION"), "table": "records_published"},
-            "metadata:inspire": {
-                "enabled": "true",
-                "languages_supported": "eng",
-                "default_language": "eng",
-                "date": "YYYY-MM-DD",
-                "gemet_keywords": "Utility and governmental services",
-                "conformity_service": "notEvaluated",
-                "contact_name": "Mapping and Geographic Information Centre, British Antarctic Survey",
-                "contact_email": "magic@bas.ac.uk",
-                "temp_extent": "YYYY-MM-DD/YYYY-MM-DD",
-            },
-        }
-
-        self.STATIC_BUILD_DIR = os.environ.get("STATIC_BUILD_DIR") or "./build"
-        self.STATIC_BUILD_DIR = Path(self.STATIC_BUILD_DIR)
-        self.S3_BUCKET = os.environ.get("S3_BUCKET")
-
-        self.BSK_TEMPLATES = BskTemplates()
-        self.BSK_TEMPLATES.site_title = "BAS Data Catalogue"
-        self.BSK_TEMPLATES.site_description = (
-            "Discover data, services and records held by the British Antarctic Survey and UK Polar Data Centre"
-        )
-        self.BSK_TEMPLATES.bsk_site_nav_brand_text = "BAS Data Catalogue"
-        # TODO: Waiting for fix
-        # self.BSK_TEMPLATES.bsk_site_development_phase = "experimental"
-        self.BSK_TEMPLATES.bsk_site_development_phase = "alpha"
-        self.BSK_TEMPLATES.bsk_site_feedback_href = "/feedback"
-        self.BSK_TEMPLATES.bsk_site_footer_policies_cookies_href = "/legal/cookies"
-        self.BSK_TEMPLATES.bsk_site_footer_policies_copyright_href = "/legal/copyright"
-        self.BSK_TEMPLATES.bsk_site_footer_policies_privacy_href = "/legal/privacy"
-        # TODO: Waiting for fix
-        # self.BSK_TEMPLATES.site_analytics["id"] = "UA-64130716-19"
-        self.BSK_TEMPLATES.site_styles.append(
-            {
-                "href": "https://cdn.web.bas.ac.uk/libs/font-awesome-pro/5.13.0/css/all.min.css",
-                "integrity": "sha256-DjbUjEiuM4tczO997cVF1zbf91BC9OzycscGGk/ZKks=",
-            }
-        )
-        self.BSK_TEMPLATES.site_scripts.append(
-            {
-                "href": "https://browser.sentry-cdn.com/5.15.4/bundle.min.js",
-                "integrity": "sha384-Nrg+xiw+qRl3grVrxJtWazjeZmUwoSt0FAVsbthlJ5OMpx0G08bqIq3b/v0hPjhB",
-            }
-        )
-        self.BSK_TEMPLATES.site_scripts.append(
-            {
-                "href": "https://cdn.web.bas.ac.uk/libs/jquery-sticky-tabs/1.2.0/jquery.stickytabs.js",
-                "integrity": "sha256-JjbqQErDTc0GyOlDQLEgyqoC6XR6puR0wIJFkoHp9Fo=",
-            }
-        )
-        self.BSK_TEMPLATES.site_scripts.append(
-            {
-                "href": "https://cdn.web.bas.ac.uk/libs/markdown-it/11.0.0/js/markdown-it.min.js",
-                "integrity": "sha256-3mv+NUxFuBg26MtcnuN2X37WUxuGunWCCiG2YCSBjNc=",
-            }
-        )
-        self.BSK_TEMPLATES.site_styles.append({"href": "/static/css/app.css"})
-        self.BSK_TEMPLATES.site_scripts.append({"href": "/static/js/app.js"})
+        """
+        AUTH_SESSION_FILE_PATH - Path to the file used to store authentication information
+        
+        When ran as a CLI using containers, this application becomes stateless. Therefore user auth information (access 
+        token etc.) needs to persisted elsewhere, in this case as a file written to the path set by this config option.
+        
+        Note: As this file stores authentication information its contents should be considered sensitive, meaning 
+        restricted read/write permissions should be set for example. Note that as OAuth is used for authentication, no
+        long-lived credentials (e.g. passwords) will be stored in this file.
+        """
+        self.AUTH_SESSION_FILE_PATH = Path(os.environ.get("APP_AUTH_SESSION_FILE_PATH") or self._AUTH_SESSION_FILE_PATH)
 
     # noinspection PyPep8Naming
     @property
-    def VERSION(self) -> str:
+    def NAME(self) -> str:
+        """
+        Application name
+
+        Taken from the package where possible, otherwise a generic placeholder is used.
+
+        :rtype str
+        :return: Application name
+        """
         return "Unknown"
 
     # noinspection PyPep8Naming
     @property
+    def VERSION(self) -> str:
+        """
+        Application version
+
+        Taken from the package where possible, otherwise a generic placeholder is used.
+
+        :rtype str
+        :return: Application version
+        """
+        return "Unknown"
+
+    # noinspection PyPep8Naming
+    @property
+    def LOGGING_LEVEL(self) -> int:
+        """
+        Application logging level
+
+        Python logging module logging level. If set at runtime, the level set as a descriptive string is mapped to the
+        relevant numeric level using the logging level enumeration.
+
+        :rtype int
+        :return: Application logging level
+        """
+        if "APP_LOGGING_LEVEL" in os.environ:  # pragma: no cover
+            if os.environ.get("APP_LOGGING_LEVEL") == "debug":
+                return logging.DEBUG
+            elif os.environ.get("APP_LOGGING_LEVEL") == "info":
+                return logging.INFO
+            elif os.environ.get("APP_LOGGING_LEVEL") == "warning":
+                return logging.WARNING
+            elif os.environ.get("APP_LOGGING_LEVEL") == "error":
+                return logging.ERROR
+            elif os.environ.get("APP_LOGGING_LEVEL") == "critical":
+                return logging.CRITICAL
+
+        return self._LOGGING_LEVEL
+
+    # noinspection PyPep8Naming
+    @property
     def SENTRY_CONFIG(self) -> Dict:
+        """
+        Sentry runtime configuration
+
+        Settings used for Sentry, typically reusing other config options. Only relevant if `APP_ENABLE_SENTRY` is True.
+
+        :rtype dict
+        :return: Sentry runtime configuration
+        """
         return {
-            "dsn": self.SENTRY_DSN,
+            "dsn": "https://db9543e7b68f4b2596b189ff444438e3@o39753.ingest.sentry.io/5197036",
             "integrations": [FlaskIntegration()],
             "environment": self.ENV,
             "release": f"{self.NAME}@{self.VERSION}",
@@ -228,19 +130,261 @@ class Config:
 
     # noinspection PyPep8Naming
     @property
-    def CLIENT_AUTH(self):
+    def BSK_TEMPLATES(self) -> BskTemplates:
+        """
+        BAS Style Kit Jinja2 templates configuration
+
+        Sets relevant configuration options for setting application identity, primary navigation, analytics and
+        required CSS styles and JavaScript.
+
+        :rtype BskTemplates
+        :return: BAS Style Kit Jinja2 templates configuration
+        """
+        bsk_templates = BskTemplates()
+        bsk_templates.site_title = "BAS Data Catalogue"
+        bsk_templates.site_description = (
+            "Discover data, services and records held by the British Antarctic Survey and UK Polar Data Centre"
+        )
+        bsk_templates.bsk_site_nav_brand_text = "BAS Data Catalogue"
+        bsk_templates.bsk_site_development_phase = "alpha"
+        bsk_templates.bsk_site_feedback_href = "/feedback"
+        bsk_templates.bsk_site_footer_policies_cookies_href = "/legal/cookies"
+        bsk_templates.bsk_site_footer_policies_copyright_href = "/legal/copyright"
+        bsk_templates.bsk_site_footer_policies_privacy_href = "/legal/privacy"
+        bsk_templates.site_analytics["id"] = "UA-64130716-19"
+        bsk_templates.site_styles.append(
+            {
+                "href": "https://cdn.web.bas.ac.uk/libs/font-awesome-pro/5.13.0/css/all.min.css",
+                "integrity": "sha256-DjbUjEiuM4tczO997cVF1zbf91BC9OzycscGGk/ZKks=",
+            }
+        )
+        bsk_templates.site_scripts.append(
+            {
+                "href": "https://browser.sentry-cdn.com/5.15.4/bundle.min.js",
+                "integrity": "sha384-Nrg+xiw+qRl3grVrxJtWazjeZmUwoSt0FAVsbthlJ5OMpx0G08bqIq3b/v0hPjhB",
+            }
+        )
+        bsk_templates.site_scripts.append(
+            {
+                "href": "https://cdn.web.bas.ac.uk/libs/jquery-sticky-tabs/1.2.0/jquery.stickytabs.js",
+                "integrity": "sha256-JjbqQErDTc0GyOlDQLEgyqoC6XR6puR0wIJFkoHp9Fo=",
+            }
+        )
+        bsk_templates.site_scripts.append(
+            {
+                "href": "https://cdn.web.bas.ac.uk/libs/markdown-it/11.0.0/js/markdown-it.min.js",
+                "integrity": "sha256-3mv+NUxFuBg26MtcnuN2X37WUxuGunWCCiG2YCSBjNc=",
+            }
+        )
+        bsk_templates.site_styles.append({"href": "/static/css/app.css"})
+        bsk_templates.site_scripts.append({"href": "/static/js/app.js"})
+
+        return bsk_templates
+
+    # noinspection PyPep8Naming
+    @property
+    def COLLECTIONS_CONFIG(self) -> dict:
+        """
+        Collections config
+
+        Configuration for application Collections class instance. See Collections class for details on configuration on
+        required/available options
+
+        :rtype dict
+        :return: Collections config
+        """
+        return {"collections_path": Path(os.environ.get("APP_COLLECTIONS_PATH") or self._COLLECTIONS_PATH)}
+
+    # noinspection PyPep8Naming
+    @property
+    def CSW_CLIENTS_CONFIG(self) -> dict:
+        """
+        CSW clients config
+
+        Configuration for CSW clients used in application Repository class instances. See Repository class for details
+        on required/available options. This arrangement of configuration options is intended for use with the
+        application MirrorRepository class instance.
+
+        :rtype dict
+        :return: CSW clients config
+        """
+        return {
+            "unpublished": {"client_config": {"endpoint": os.environ.get("CSW_ENDPOINT_UNPUBLISHED")}},
+            "published": {"client_config": {"endpoint": os.environ.get("CSW_ENDPOINT_PUBLISHED")}},
+        }
+
+    # noinspection PyPep8Naming
+    @property
+    def CSW_SERVERS_CONFIG(self) -> dict:
+        """
+        CSW servers config
+
+        Configuration for CSW servers/repositories used in CSWServer class instances. See CSWServer class for details on
+        required/available options. This arrangement of configuration options is intended for use with the application
+        CSWServer class instances set by `scar_add_metadata_toolbox.utils._create_csw_repositories` method.
+
+        :rtype dict
+        :return: CSW servers config
+        """
+        return {
+            "unpublished": {
+                "endpoint": os.environ.get("CSW_SERVER_CONFIG_UNPUBLISHED_ENDPOINT"),
+                "title": "Internal CSW (Unpublished)",
+                "abstract": "Internal PyCSW OGC CSW server for unpublished records",
+                "database_connection_string": os.environ.get("CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION"),
+                "database_table": "records_unpublished",
+                "auth_required_scopes_read": ["BAS.MAGIC.ADD.Records.ReadWrite.All"],
+                "auth_required_scopes_write": ["BAS.MAGIC.ADD.Records.ReadWrite.All"],
+            },
+            "published": {
+                "endpoint": os.environ.get("CSW_SERVER_CONFIG_PUBLISHED_ENDPOINT"),
+                "title": "Internal CSW (Published)",
+                "abstract": "Internal PyCSW OGC CSW server for published records",
+                "database_connection_string": os.environ.get("CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION"),
+                "database_table": "records_published",
+                "auth_required_scopes_read": [],
+                "auth_required_scopes_write": ["BAS.MAGIC.ADD.Records.Publish.All"],
+            },
+        }
+
+    # noinspection PyPep8Naming
+    @property
+    def AZURE_OAUTH_TENANCY(self) -> str:
+        """
+        Azure tenancy (server)
+
+        Tenancy ID for the Azure app registration representing the server/catalogue component of this application.
+
+        Note: This value is not sensitive.
+
+        :rtype str
+        :return: Azure tenancy ID
+        """
+        return "b311db95-32ad-438f-a101-7ba061712a4e"
+
+    # noinspection PyPep8Naming
+    @property
+    def AZURE_OAUTH_APPLICATION_ID(self) -> str:
+        """
+        Azure application (server)
+
+        Azure app registration ID for the registration representing the server/catalogue component of this application.
+
+        Note: This value is not sensitive.
+
+        :rtype str
+        :return: Azure app registration ID
+        """
+        return "8b45581e-1b2e-4b8c-b667-e5a1360b6906"
+
+    # noinspection PyPep8Naming
+    @property
+    def AZURE_OAUTH_CLIENT_APPLICATION_IDS(self) -> List[str]:
+        """
+        Azure approved applications (server)
+
+        List of of Azure app registrations ID for applications/services (clients) trusted/approved to use the
+        server/catalogue component of this application.
+
+        This list automatically includes the app registration representing the client/editor component of this
+        application, in addition to these services:
+
+        * 3b864b8d-a6b8-44c1-8468-16f455e5eb4f = BAS Nagios (for uptime/availability monitoring)
+
+        Note: These values are not sensitive.
+
+        :rtype list
+        :return: List of approved Azure app registration IDs
+        """
+        return [self.AUTH_CLIENT_ID, "3b864b8d-a6b8-44c1-8468-16f455e5eb4f"]
+
+    # noinspection PyPep8Naming
+    @property
+    def AUTH_CLIENT_SCOPES(self) -> List[str]:
+        """
+        Azure scopes (client)
+
+        List of scopes requested in OAuth authorisation requests to Azure (i.e. sign-in requests).
+
+        These should be scopes always required by this application, rather than scopes needed for specific/privileged
+        actions, as these are typically conferred on specific users and will be included as roles in access tokens.
+
+        This scope is very general and is effectively static. Other scopes, needed for publishing records for example,
+        are granted to specific users as roles (which the Flask Azure OAuth provider treats as scopes).
+
+        Note: These values are not sensitive.
+
+        :rtype list
+        :return: OAuth authorisation request scopes
+        """
+        return ["api://8bfe65d3-9509-4b0a-acd2-8ce8cdc0c01e/BAS.MAGIC.ADD.Access"]
+
+    # noinspection PyPep8Naming
+    @property
+    def AUTH_CLIENT_ID(self) -> str:
+        """
+        Azure application (client)
+
+        Azure app registration ID for the registration representing the client/editor component of this application.
+
+        Note: This value is not sensitive.
+
+        :rtype str
+        :return: Azure app registration ID
+        """
+        return "91c284e7-6522-4eb4-9943-f4ec08e98cb9"
+
+    # noinspection PyPep8Naming
+    @property
+    def AUTH_CLIENT_TENANCY(self) -> str:
+        """
+        Azure tenancy (client)
+
+        Tenancy endpoint for the Azure app registration representing the client/editor component of this application.
+
+        Note: This value is not sensitive.
+
+        :rtype str
+        :return: Azure tenancy endpoint
+        """
+        return "https://login.microsoftonline.com/b311db95-32ad-438f-a101-7ba061712a4e"
+
+    # noinspection PyPep8Naming
+    @property
+    def CLIENT_AUTH(self) -> PublicClientApplication:
+        """
+        Azure auth provider (client)
+
+        Uses the Microsoft Authentication Library (MSAL) for Python to simplify requesting access tokens from Azure.
+
+        This is used for the client/editor component of this application, which is considered a 'public' client as this
+        application runs on the user's device, and therefore isn't confidential.
+
+        Note: The Flask Azure OAuth provider is used for the server/catalogue component, instantiated in the
+        application factor method.
+
+        :rtype PublicClientApplication
+        :return: Microsoft Authentication Library Public Client application
+        """
         return PublicClientApplication(client_id=self.AUTH_CLIENT_ID, authority=self.AUTH_CLIENT_TENANCY)
 
     # noinspection PyPep8Naming
     @property
-    def CLIENT_AUTH_TOKEN(self):
-        client_auth_token = None
+    def SITE_PATH(self) -> Path:
+        """
+        Path to the directory used to store generated static site content
 
-        if self.APP_AUTH_SESSION_FILE_PATH.exists():
-            with open(str(self.APP_AUTH_SESSION_FILE_PATH), "r") as auth_file:
-                client_auth_token = json.load(auth_file)
+        The contents of this directory should be considered ephemeral and under the exclusive control this application.
 
-        return client_auth_token
+        :rtype Path
+        :return Site site content path
+        """
+        return Path(os.environ.get("APP_SITE_PATH") or self._SITE_PATH)
+
+    # noinspection PyPep8Naming
+    @property
+    def S3_BUCKET(self) -> str:
+        return os.environ.get("APP_S3_BUCKET")
 
 
 class ProductionConfig(Config):  # pragma: no cover
@@ -250,9 +394,10 @@ class ProductionConfig(Config):  # pragma: no cover
     Note: This method is excluded from test coverage as its meaning would be undermined.
     """
 
-    def __init__(self):
-        super().__init__()
-        self.APP_ENABLE_FILE_LOGGING = str2bool(os.environ.get("APP_ENABLE_FILE_LOGGING")) or True
+    # noinspection PyPep8Naming
+    @property
+    def NAME(self) -> str:
+        return pkg_resources.require("scar-add-metadata-toolbox")[0].name
 
     # noinspection PyPep8Naming
     @property
@@ -269,11 +414,35 @@ class DevelopmentConfig(Config):  # pragma: no cover
 
     DEBUG = True
 
-    LOGGING_LEVEL = logging.INFO
+    _APP_ENABLE_SENTRY = False
+    _LOGGING_LEVEL = logging.INFO
+    _COLLECTIONS_PATH = Path(f"./collections.json")
+    _AUTH_SESSION_FILE_PATH = Path("./auth.json")
+    _SITE_PATH = Path("./_site")
 
     def __init__(self):
+        """
+        Use this method to override property values defined in the config base class.
+
+        For this class, values will typically be local services to ensure production data is not inadvertently modified.
+        """
         super().__init__()
-        self.APP_ENABLE_SENTRY = str2bool(os.environ.get("APP_ENABLE_SENTRY")) or False
+
+        if "CSW_ENDPOINT_UNPUBLISHED" not in os.environ:
+            os.environ["CSW_ENDPOINT_UNPUBLISHED"] = "http://app:9000/csw/unpublished"
+        if "CSW_ENDPOINT_PUBLISHED" not in os.environ:
+            os.environ["CSW_ENDPOINT_PUBLISHED"] = "http://app:9000/csw/published"
+        if "CSW_SERVER_CONFIG_UNPUBLISHED_ENDPOINT" not in os.environ:
+            os.environ["CSW_SERVER_CONFIG_UNPUBLISHED_ENDPOINT"] = "http://app:9000/csw/unpublished"
+        if "CSW_SERVER_CONFIG_PUBLISHED_ENDPOINT" not in os.environ:
+            os.environ["CSW_SERVER_CONFIG_PUBLISHED_ENDPOINT"] = "http://app:9000/csw/published"
+
+        if "CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION" not in os.environ:
+            os.environ[
+                "CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION"
+            ] = "postgresql://postgres:password@db/postgres"
+        if "CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION" not in os.environ:
+            os.environ["CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION"] = "postgresql://postgres:password@db/postgres"
 
     # noinspection PyPep8Naming
     @property
@@ -281,29 +450,40 @@ class DevelopmentConfig(Config):  # pragma: no cover
         return "N/A"
 
     @property
-    def SENTRY_CONFIG(self) -> Dict:
-        _config = super().SENTRY_CONFIG
-        _config["server_name"] = "Local container"
+    def S3_BUCKET(self) -> str:
+        if "S3_BUCKET" in os.environ:
+            return os.environ["S3_BUCKET"]
+        return "add-catalogue-integration.data.bas.ac.uk"
 
-        return _config
 
-
-class TestingConfig(Config):
+class TestingConfig(DevelopmentConfig):
     """
     Flask configuration for Testing environments
     """
 
-    DEBUG = True
     TESTING = True
 
-    LOGGING_LEVEL = logging.DEBUG
+    _LOGGING_LEVEL = logging.DEBUG
 
     def __init__(self):
-        super().__init__()
-        self.APP_ENABLE_FILE_LOGGING = False
-        self.APP_ENABLE_SENTRY = False
+        """
+        Use this method to override property values defined in the config base class.
 
-    # noinspection PyPep8Naming
-    @property
-    def VERSION(self) -> str:
-        return "N/A"
+        For this class, values will typically be generic or intentionally wrong to ensure components are mocked
+        correctly or production data is not inadvertently modified.
+        """
+        super().__init__()
+
+        os.environ["CSW_ENDPOINT_UNPUBLISHED"] = "http://example.com/csw/unpublished"
+        os.environ["CSW_ENDPOINT_PUBLISHED"] = "http://example.com/csw/published"
+        os.environ["CSW_SERVER_CONFIG_UNPUBLISHED_ENDPOINT"] = "http://example.com/csw/unpublished"
+        os.environ["CSW_SERVER_CONFIG_PUBLISHED_ENDPOINT"] = "http://example.com/csw/published"
+
+        os.environ[
+            "CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION"
+        ] = "postgresql://postgres:password@example/postgres"
+        os.environ[
+            "CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION"
+        ] = "postgresql://postgres:password@example/postgres"
+
+        os.environ["S3_BUCKET"] = "example"

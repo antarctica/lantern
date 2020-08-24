@@ -8,7 +8,7 @@ ENV PYTHONPATH=$APPPATH
 RUN mkdir $APPPATH
 WORKDIR $APPPATH
 
-RUN apk add --no-cache libxslt-dev libffi-dev libressl-dev git geos-dev proj-dev proj-util postgresql-dev
+RUN apk add --no-cache libxslt-dev libffi-dev libressl-dev geos-dev proj-dev proj-util postgresql-dev
 
 
 FROM base as build
@@ -33,8 +33,9 @@ FROM base as run
 
 ENV APPVENV=/usr/local/virtualenvs/scar_add_metadata_toolbox
 ENV PATH="$APPVENV/bin:$PATH"
-ENV FLASK_APP=/usr/src/app/manage.py
+ENV FLASK_APP=scar_add_metadata_toolbox
 ENV FLASK_ENV=development
+ENV PYTHONUNBUFFERED=1
 
 COPY --from=build $APPVENV/ $APPVENV/
 RUN mkdir -p /var/log/app/

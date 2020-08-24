@@ -1,0 +1,111 @@
+{% extends 'app/_layouts/app.j2' %}
+{% from 'bas_style_kit/macros/bsk_pattern_item_type_header.j2' import pattern_item_type_header %}
+
+{% block main_content %}
+    {{ pattern_item_type_header('item', item.title_markdown) }}
+    <div class="bsk-row">
+        <div class="bsk-col-12-md-9">
+            {% include 'app/_includes/items/summary-information.j2' %}
+        </div>
+        <div class="bsk-col-12-md-3">
+            {% include 'app/_includes/items/descriptive-keywords.j2' %}
+        </div>
+    </div>
+
+    <nav id="app-item-nav" class="bsk-nav-wrapper bsk-nav-wrapper-tabs" role="navigation">
+        <ul class="bsk-nav bsk-nav-tabs" role="tablist">
+            <li class="bsk-active" role="presentation">
+                <a href="#item-details-data" role="tab" data-toggle="tab">
+                    <i class="far fa-cube"></i>
+                    Data
+                </a>
+            </li>
+            <li role="presentation">
+                <a href="#item-details-authors" role="tab" data-toggle="tab">
+                    <i class="far fa-user-friends"></i>
+                    Authors
+                </a>
+            </li>
+            <li role="presentation">
+                <a href="#item-details-citation" role="tab" data-toggle="tab">
+                    <i class="far fa-quote-right"></i>
+                    Citation
+                </a>
+            </li>
+            <li role="presentation">
+                <a href="#item-details-licence" role="tab" data-toggle="tab">
+                    <i class="far fa-file-certificate"></i>
+                    Licence
+                </a>
+            </li>
+            <li role="presentation">
+                <a href="#item-details-extent" role="tab" data-toggle="tab">
+                    <i class="far fa-expand-arrows"></i>
+                    Extent
+                </a>
+            </li>
+            <li role="presentation">
+                <a href="#item-details-lineage" role="tab" data-toggle="tab">
+                    <i class="far fa-scroll-old"></i>
+                    Lineage
+                </a>
+            </li>
+            <li role="presentation">
+                <a href="#item-details-additional-information" role="tab" data-toggle="tab">
+                    <i class="far fa-info-square"></i>
+                    Additional Information
+                </a>
+            </li>
+            <li class="bsk-pull-right" role="presentation">
+                <a href="#item-details-contact" role="tab" data-toggle="tab">
+                    <i class="far fa-comment-alt-lines"></i>
+                    Contact
+                </a>
+            </li>
+        </ul>
+        <div class="bsk-tab-content">
+            <div id="item-details-data" class="bsk-tab-pane bsk-fade bsk-in bsk-active" role="tabpanel">
+                {% include 'app/_includes/items/data.j2' %}
+            </div>
+            <div id="item-details-authors" class="bsk-tab-pane bsk-fade" role="tabpanel">
+                {% include 'app/_includes/items/authors.j2' %}
+            </div>
+            <div id="item-details-citation" class="bsk-tab-pane bsk-fade" role="tabpanel">
+                {% include 'app/_includes/items/citation.j2' %}
+            </div>
+            <div id="item-details-licence" class="bsk-tab-pane bsk-fade" role="tabpanel">
+                {% include 'app/_includes/items/licence.j2' %}
+            </div>
+            <div id="item-details-extent" class="bsk-tab-pane bsk-fade" role="tabpanel">
+                {% include 'app/_includes/items/extent.j2' %}
+            </div>
+            <div id="item-details-lineage" class="bsk-tab-pane bsk-fade" role="tabpanel">
+                {% include 'app/_includes/items/lineage.j2' %}
+            </div>
+            <div id="item-details-additional-information" class="bsk-tab-pane bsk-fade" role="tabpanel">
+                {% include 'app/_includes/items/additional-information.j2' %}
+            </div>
+            <div id="item-details-contact" class="bsk-tab-pane bsk-fade" role="tabpanel">
+                {% include 'app/_includes/items/contact.j2' %}
+            </div>
+        </div>
+    </nav>
+{% endblock %}
+
+{% block styles %}
+    {{ super() }}
+    <link rel="stylesheet" href="https://cdn.web.bas.ac.uk/libs/leaflet/1.6.0/css/leaflet.min.css" integrity="sha256-UU2pVKdO1sE4T0KZHipoxQmYePb1fWMCCR09RzM616Y=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="/static/css/map.css" />
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="https://cdn.web.bas.ac.uk/libs/leaflet/1.6.0/js/leaflet.min.js" integrity="sha256-JOnsZs28NnzfQkVhxtJmqdalYkF/ejmYWXD//vFzgWA=" crossorigin="anonymous"></script>
+    <script src="https://cdn.web.bas.ac.uk/libs/proj4js/2.4.3/proj4-2.4.3.min.js" integrity="sha256-2ywP8gZSxQqabTEhcw+Xc3zpb/n6aAc3D0sneTtRNHw=" crossorigin="anonymous"></script>
+    <script src="https://cdn.web.bas.ac.uk/libs/proj4leaflet/v1.0.1/js/proj4leaflet-1.0.1.min.js" integrity="sha256-2/tIGOC+qdPryEVGe/iMOwpH4YHC3tcam5t8aqi74KI=" crossorigin="anonymous"></script>
+    <script>
+        var item_id = '{{ item.file_identifier }}';
+        var geographic_bounding_extent = {{ item.geographic_extent.bounding_box_geojson }};
+    </script>
+    <script src="/static/js/item.js"></script>
+{% endblock %}

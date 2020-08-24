@@ -7,11 +7,41 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed [BREAKING!]
+
+* Updating application configuration options, including reducing the options that can be set at runtime
+  [#14](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/14)
+* Removing entrypoint/`manage.py` in favour of `FLASK_APP` environment variable
+  [#47](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/47)
+
 ### Added
 
+* Support for multiple collections
+  [#53](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/53)
+* The order of items in collections can be defined
+  [#65](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/65)
+* Records and collections can now be managed in bulk, rather than individually (e.g. export all records at once)
+  [#52](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/52)
+  [#49](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/49)
+* Improved data licence summary for CC 4.0 (warranties and disclaimers)
+  [#24](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/24)
+* Markdown can now be used for item titles, abstracts and lineage statements
+  [#55](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/55)
+* WMS instructions panel is now highlighted when opened
+  [#41](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/41)
+* User conformation added when publishing the static site
+  [#43](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/43)
+* BAS Nagios instance trusted to use CSW catalogues for monitoring
+  [#70](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/70)
+* Support for setting the logging level at runtime
+  [#25](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/25)
+* Lists of information shown using tables in CLI commands
+  [#23](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/23)
+* Documentation guides for adding/updating collections/records and assigning application permissions
+  [#33](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/33)
 * Docker image tag expiration policy
   [#12](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/12)
-* Review apps using Nomad 
+* Review apps using Nomad
   [#11](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/11)
 * Additional developer documentation
   [#8](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/8)
@@ -29,6 +59,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
+* Fundamental application refactoring, creating new `classes`, `commands`, `csw` and `hazmat` modules
+  [#15](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/15)
+
+* Updating project documentation inc. CLI reference
+  [#33](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/33)
+* Various PyCharm configuration changes (run/debug configurations etc.)
+  [#15](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/15)
 * Switching to refactored/externalised Python version parsing script
   [#12](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/12)
 * Improvements to Continuous Integration/Deployment pipeline
@@ -37,7 +74,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#9](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/9)
 * Installing direct wheel dependencies via Poetry
   [#9](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/9)
-* Poetry update removed from Dockerfile and made a manual action 
+* Poetry update removed from Dockerfile and made a manual action
   [#9](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/9)
 * Updating to Terraform 0.12.x, requiring syntax changes mainly for interpolation
   [#3](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/3)

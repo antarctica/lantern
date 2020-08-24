@@ -1,0 +1,28 @@
+{% extends 'app/_layouts/app.j2' %}
+{% from 'bas_style_kit/macros/bsk_pattern_item_type_header.j2' import pattern_item_type_header %}
+
+{% block main_content %}
+    {{ pattern_item_type_header('collection', collection.title_markdown) }}
+
+    <div class="bsk-row">
+        <div class="bsk-col-12-md-9">
+            {% include 'app/_includes/collection/summary-information.j2' %}
+
+            {% for item in collection.items %}
+                {% with item=item %}
+                {% include 'app/_includes/collection/item.j2' %}
+                {% endwith %}
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        gtag('event', 'view', {
+          'event_category': 'collection',
+          'event_label': '{{ collection.id }}'
+        });
+    </script>
+{% endblock %}

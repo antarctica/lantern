@@ -1,0 +1,32 @@
+<section class="app-item-keywords">
+    <header>
+        <h2>Keywords</h2>
+    </header>
+
+    {% for theme_keyword_set in item.theme_keywords %}
+        <div>
+            <h3 class="bsk-h5">
+                {{ theme_keyword_set.thesaurus.title.value }}
+                {% if theme_keyword_set.thesaurus.title.href %}
+                    <a href="{{ theme_keyword_set.thesaurus.title.href }}">
+                        <i class="far fa-info-circle"></i>
+                    </a>
+                {% endif %}
+            </h3>
+            <ul class="bsk-list-unstyled app-keywords-list fa-ul">
+                {% for theme_keyword in theme_keyword_set.terms %}
+                    <li>
+                        <span class="fa-li"><i class="far fa-tag"></i></span>
+                        {{ theme_keyword.term }}
+                        {% if theme_keyword.href %}
+                            <a href="{{ theme_keyword.href }}"><i class="far fa-info-circle"></i></a>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% if not loop.last %}
+            <hr />
+        {% endif %}
+    {% endfor %}
+</section>

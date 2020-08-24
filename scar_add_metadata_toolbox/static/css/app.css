@@ -125,3 +125,20 @@ address p:last-of-type {
     margin-top: 20px;
     margin-bottom: 0;
 }
+
+.app-alert-black-text {
+    color: #333;
+}
+
+@keyframes highlight {
+ 	0% {
+ 		background: #ffe9c0;
+ 	}
+ 	100% {
+ 		background: none;
+ 	}
+}
+
+.app-highlight {
+    animation: highlight 4s;
+}

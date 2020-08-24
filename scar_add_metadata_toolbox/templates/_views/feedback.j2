@@ -1,0 +1,53 @@
+{% extends 'app/_layouts/app.j2' %}
+
+{% block main_content %}
+    <div class="app-feedback">
+        <header class="bsk-page-header">
+            <h1>Help us improve this website</h1>
+        </header>
+        <p class="bsk-lead app-feedback-lead">We'd love to know your thoughts about using this website, including any problems you found.</p>
+        <form action="https://prod-66.westeurope.logic.azure.com:443/workflows/21919e9ce6964d1c90d520eff13214c7/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=WUJcFcM-hXnylyQna0ZpvUuIflk5tCW_scCASG6SYFE" accept-charset="UTF-8" method="post" onsubmit="feedbackFormSubmit(event, this)">
+            <fieldset>
+                <div class="bsk-form-group">
+                    <label for="feedback-content">Your message</label>
+                    <textarea name="feedback-content" id="feedback-content" class="bsk-form-control" rows="8" required></textarea>
+                </div>
+                <div class="bsk-help-block bsk-text-muted">
+                    <i class="fab fa-markdown"></i> You can use <a href="https://commonmark.org/help/">Markdown</a> to format your message.
+                </div>
+                <div class="bsk-alert bsk-alert-info bsk-alert-highlight">
+                    If something went wrong, please describe what you were doing and what went wrong.
+                </div>
+                <div class="bsk-alert bsk-alert-warning bsk-alert-highlight">
+                    Do not any include any sensitive or personal information.
+                </div>
+            </fieldset>
+            <fieldset>
+                <h2 class="bsk-h4">Would you like a reply?</h2>
+                <div class="bsk-form-group">
+                    <label class="bsk-control-label" for="feedback-sender-name">Your name (Optional)</label>
+                    <input type="text" class="bsk-form-control" name="feedback-sender-name" id="feedback-sender-name" placeholder="Connie Watson" />
+                </div>
+                <div class="bsk-form-group">
+                    <label class="bsk-control-label" for="feedback-sender-email">Your email address (Optional)</label>
+                    <input type="email" class="bsk-form-control" name="feedback-sender-email" id="feedback-sender-email" placeholder="connie.watson@bas.ac.uk" />
+                </div>
+                <div class="bsk-alert bsk-alert-info bsk-alert-highlight">
+                    We will only use your contact information to reply to you about your message. We may not reply straight away.
+                </div>
+            </fieldset>
+            <fieldset>
+                <button id="contact-form-control" type="submit" class="bsk-btn bsk-btn-lg bsk-btn-primary">
+                    <i class="fa-fw far fa-envelope" aria-hidden="true"></i>
+                    <span>Send Feedback</span>
+                </button>
+                <div id="contact-form-result" class="bsk-alert bsk-alert-solid bsk-fade bsk-hidden"></div>
+            </fieldset>
+        </form>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="/static/js/feedback.js"></script>
+{% endblock %}

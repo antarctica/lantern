@@ -1,0 +1,8 @@
+<section class="app-item-tab app-item-licence">
+    <header>
+        <h2><i class="far fa-file-certificate"></i> Licence</h2>
+    </header>
+    {% if item.licence.href == 'https://creativecommons.org/licenses/by/4.0/' %}
+        {% include 'app/_includes/items/licence-cc-by-4-0.j2' %}
+    {% endif %}
+</section>

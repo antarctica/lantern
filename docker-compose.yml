@@ -14,9 +14,20 @@
       ports:
         - 9000:9000
       depends_on:
-        - csw-db
+        - db
 
-    csw-db:
+    app-cli:
+      image: docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox:latest
+      command: ash
+      volumes:
+        - .:/usr/src/app
+      environment:
+        - AWS_ACCESS_KEY_ID
+        - AWS_SECRET_ACCESS_KEY
+      depends_on:
+        - app
+
+    db:
       image: postgis/postgis:12-3.0-alpine
       environment:
         POSTGRES_PASSWORD: password
@@ -27,6 +38,6 @@
       image: nginx:alpine
       volumes:
         - ./support/nginx/default.conf:/etc/nginx/conf.d/default.conf
-        - ./scar_add_metadata_toolbox/build:/usr/share/nginx/html/public
+        - ./_site/:/usr/share/nginx/html/public/
       ports:
         - "9001:9001"

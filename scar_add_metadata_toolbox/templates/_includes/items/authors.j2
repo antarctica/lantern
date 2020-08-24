@@ -1,0 +1,50 @@
+<section class="app-item-tab app-item-authors">
+    <header>
+        <h2><i class="far fa-user-friends"></i> Authors</h2>
+    </header>
+    {% for author_row in item.authors | batch(2) %}
+        <div class="bsk-row">
+            {% for author in author_row %}
+                <div class="bsk-col-12-md-6">
+                    <address>
+                        {% if author.individual.name %}
+                            <p>
+                                <strong>{{ author.individual.name }}</strong>
+                            </p>
+                        {% endif %}
+                        {% if author.organisation and author.organisation.name %}
+                            <p>
+                                <strong>{{ author.organisation.name }}</strong>
+                            </p>
+                        {% endif %}
+                        {% if author.email %}
+                            <p>
+                                <i class="fa-fw far fa-at"></i>
+                                <abbr title="Email address">Email:</abbr>
+                                <a href="mailto:{{ author.email }}">{{ author.email }}</a>
+                            </p>
+                        {% endif %}
+                        {% if author.online_resource and author.online_resource.href %}
+                            {% if author.individual.title == 'orcid' and author.individual.href %}
+                                {% if author.online_resource.href != author.individual.href %}
+                                    <p>
+                                        <i class="fa-fw far fa-globe"></i>
+                                        <abbr title="Website">Web:</abbr>
+                                        <a href="{{ author.online_resource.href }}">{{ author.online_resource.href }}</a>
+                                    </p>
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+                        {% if author.individual.title == 'orcid' %}
+                            <p>
+                                <i class="fab fa-fw fa-orcid bsk-orcid-id" aria-hidden="true"></i>
+                                <abbr title="ORCID iD">ORCID:</abbr>
+                                <a href="{{ author.individual.href }}">{{ author.individual.href }}</a>
+                            </p>
+                        {% endif %}
+                    </address>
+                </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+</section>

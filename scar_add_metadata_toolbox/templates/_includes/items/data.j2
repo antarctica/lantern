@@ -1,0 +1,53 @@
+<section class="app-item-tab app-item-data">
+    <header>
+        <h2><i class="far fa-cube"></i> Data</h2>
+    </header>
+    <table class="bsk-table bsk-table-responsive">
+        <thead>
+            <tr>
+                <th>Format</th>
+                <th class="bsk-text-center">Size</th>
+                <th class="bsk-text-right">Access</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for download in item.downloads %}
+                <tr>
+                    <td>
+                        <abbr title="{{ download.format_description }}">{{ download.format_title}}</abbr>
+                    </td>
+                    <td class="bsk-text-center">
+                        {% if download.size %}
+                            {{ download.size }}
+                        {% elif download.format == 'wms' %}
+                            <span class="bsk-text-muted">N/A</span>
+                        {% endif %}
+                    </td>
+                    <td class="bsk-text-right">
+                        {% if download.format == 'wms' %}
+                            <button type="button" class="bsk-btn bsk-btn-primary app-wms-info-trigger" data-toggle="collapse" data-target="#item-wms-info-layer-{{ download.id }}" aria-expanded="false" aria-label="Close" aria-controls="#item-wms-info-layer-{{ download.id }}">
+                                Add item to GIS
+                                <i class="fa-fw far fa-layer-plus"></i>
+                            </button>
+                        {% else %}
+                            <a class="bsk-btn bsk-btn-default" href="{{ download.url }}">
+                                Download item
+                                <i class="fa-fw far fa-download"></i>
+                            </a>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="bsk-alert bsk-alert-solid bsk-alert-info">
+        You <strong>must</strong> include an <a href="#item-details-citation" class="bsk-alert-link">acknowledgement</a> if you use this item.
+    </div>
+
+    {% for download in item.downloads %}
+        {% if download.format == 'wms' %}
+            {% include 'app/_includes/items/data-wms-instructions.j2' %}
+        {% endif %}
+    {% endfor %}
+</section>

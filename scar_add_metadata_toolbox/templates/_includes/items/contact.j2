@@ -1,0 +1,79 @@
+<section class="app-item-tab app-item-contact">
+    <header>
+        <h2><i class="far fa-comment-alt-lines"></i> Contact us about this item</h2>
+    </header>
+    <p>Your message will be sent to the <strong>{{ item.point_of_contact }}</strong>, who manage this item.</p>
+    <div class="bsk-alert bsk-alert-info bsk-alert-highlight">
+        We try to answer messages within 2 days. We'll contact you first if it will take us longer.
+    </div>
+
+    <form action="https://prod-66.westeurope.logic.azure.com:443/workflows/21919e9ce6964d1c90d520eff13214c7/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=WUJcFcM-hXnylyQna0ZpvUuIflk5tCW_scCASG6SYFE" accept-charset="UTF-8" method="post" onsubmit="itemContactFormSubmit(event, this)">
+        <fieldset>
+            <div class="bsk-form-group">
+                <label class="bsk-control-label" for="message-subject">Message subject</label>
+                <input type="text" name="message-subject" id="message-subject" class="bsk-form-control" value="Message about '{{ item.title }}'" required />
+            </div>
+            <div class="bsk-form-group">
+                <label for="message-content">Message details</label>
+                <textarea name="message-content" id="message-content" class="bsk-form-control" rows="8" required></textarea>
+                <div class="bsk-help-block bsk-text-muted">
+                    <i class="fab fa-markdown"></i> You can use <a href="https://commonmark.org/help/">Markdown</a> to format your message.
+                </div>
+            </div>
+            <div class="bsk-alert bsk-alert-warning bsk-alert-highlight">
+                Do not any include any sensitive or personal information.
+            </div>
+        </fieldset>
+        <fieldset>
+            <div class="bsk-form-group">
+                <label class="bsk-control-label" for="message-sender-name">Your name</label>
+                <input type="text" class="bsk-form-control" name="message-sender-name" id="message-sender-name" placeholder="Connie Watson" required />
+            </div>
+            <div class="bsk-form-group">
+                <label class="bsk-control-label" for="message-sender-email">Your email address</label>
+                <input type="email" class="bsk-form-control" name="message-sender-email" id="message-sender-email" placeholder="conwat@bas.ac.uk" required />
+            </div>
+            <div class="bsk-alert bsk-alert-info bsk-alert-highlight">
+                We will only use this information for contacting you about your message.
+            </div>
+        </fieldset>
+        <fieldset>
+            <button id="contact-form-control" type="submit" class="bsk-btn bsk-btn-lg bsk-btn-primary">
+                <i class="fa-fw far fa-envelope" aria-hidden="true"></i>
+                <span>Send Message</span>
+            </button>
+            <div id="contact-form-result" class="bsk-alert bsk-alert-solid bsk-fade bsk-hidden"></div>
+        </fieldset>
+    </form>
+
+    <hr />
+
+    <header>
+        <h3>Alternative contact methods</h3>
+    </header>
+    <dl class="bsk-dl-lg bsk-row">
+        <div class="bsk-col-24-md-6">
+            <dt><i class="far fa-envelope"></i> By post</dt>
+            <dd>
+                {% set address_lines = item.point_of_contact_details.address.delivery_point.split(',') %}
+                {{ address_lines | join(',<br />') }},
+                <br />
+                {{ item.point_of_contact_details.address.city }},
+                <br />
+                {{ item.point_of_contact_details.address.administrative_area }},
+                <br />
+                {{ item.point_of_contact_details.address.postal_code }},
+                <br />
+                {{ item.point_of_contact_details.address.country }}
+            </dd>
+        </div>
+        <div class="bsk-col-24-md-5 bsk-col-24-md-offset-3">
+            <dt><i class="far fa-at"></i> By email</dt>
+            <dd><a href="mailto:{{ item.point_of_contact_details.email }}">{{ item.point_of_contact_details.email }}</a></dd>
+        </div>
+        <div class="bsk-col-24-md-5 bsk-col-24-md-offset-3">
+           <dt><i class="far fa-phone-rotary"></i> By phone</dt>
+            <dd>{{ item.point_of_contact_details.phone }}</dd>
+        </div>
+    </dl>
+</section>

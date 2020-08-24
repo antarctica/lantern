@@ -1,0 +1,37 @@
+<div id="item-wms-info-layer-{{ download.id }}" class="bsk-alert bsk-alert-block bsk-alert-outline bsk-alert-info bsk-collapse bsk-fade app-wms-info" role="alert">
+    <button type="button" class="bsk-close" data-toggle="collapse" data-target="#item-wms-info-layer-{{ download.id }}" aria-expanded="false" aria-label="Close" aria-controls="#item-wms-info-layer-{{ download.id }}">&times;</button>
+    <header class="bsk-alert-heading">
+        <div class="bsk-h4">Web Map Service (WMS) instructions</div>
+    </header>
+    <div class="bsk-alert-body">
+        <p>This item is available as a layer that can be added to a desktop or online GIS.</p>
+        <p>The steps needed to add this layer will vary on the software or service you're using but you will need these settings/options:</p>
+        <dl class="bsk-dl-horizontal bsk-dl-horizontal-lg">
+            <dt>Server URL</dt>
+            <dd><code>{{ download.endpoint }}</code></dd>
+            <dt>Layer name</dt>
+            <dd><code>{{ download.layer }}</code></dd>
+            <dt>Instructions</dt>
+            <dd>
+                <div>
+                    <a href="https://docs.qgis.org/3.10/en/docs/user_manual/working_with_ogc/ogc_client_support.html#ogc-wms">
+                        Instructions for QGIS
+                        <i class="far fa-external-link"></i>
+                    </a>
+                </div>
+                <div>
+                    <a href="https://pro.arcgis.com/en/pro-app/help/data/services/add-wms-services.htm">
+                        Instructions for ESRI ArcPro
+                        <i class="far fa-external-link"></i>
+                    </a>
+                </div>
+                <div>
+                    <a href="https://desktop.arcgis.com/en/arcmap/10.3/map/web-maps-and-services/adding-wms-services.htm">
+                        Instructions for ESRI ArcGIS
+                        <i class="far fa-external-link"></i>
+                    </a>
+                </div>
+            </dd>
+        </dl>
+    </div>
+</div>

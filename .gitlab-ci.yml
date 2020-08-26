@@ -285,6 +285,10 @@ pypi-testing:
       artifacts: true
     - job: package
       artifacts: true
+  rules:
+    - if: '$CI_COMMIT_TAG == null'
+      changes:
+        - 'scar_add_metadata_toolbox/**/*.*'
 
 pypi:
   stage: 🚚 publish

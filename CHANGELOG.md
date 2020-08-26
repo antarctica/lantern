@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.2.1] - 2020-08-26
+
+### Fixed
+
+* PyCSW patching (incorrectly targeted Python 3.8 rather 3.6)
+  [#72](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/72)
+
 ## [0.2.0] - 2020-08-26
 
 ### Changed [BREAKING!]

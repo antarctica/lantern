@@ -746,10 +746,13 @@ def build_pages():
 @site_commands_blueprint.cli.command("copy-assets")
 def copy_assets():
     """Copy all static assets (CSS, JS, etc.)."""
+    # workaround for lack of `dirs_exist_ok` option in Python 3.6
+    try:
+        Path(current_app.config["SITE_PATH"]).joinpath("static").unlink()
+    except FileNotFoundError:
+        pass
     copytree(
-        str(Path("./scar_add_metadata_toolbox/static")),
-        str(Path(current_app.config["SITE_PATH"]).joinpath("static")),
-        dirs_exist_ok=True,
+        str(Path("./scar_add_metadata_toolbox/static")), str(Path(current_app.config["SITE_PATH"]).joinpath("static"))
     )
     print("Ok. static assets copied.")
 

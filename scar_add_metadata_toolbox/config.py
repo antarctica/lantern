@@ -1,11 +1,10 @@
 import logging
 import os
 
-import pkg_resources
-
 from typing import Dict, List
 from pathlib import Path
 
+from importlib_metadata import version
 from flask.cli import load_dotenv
 from msal import PublicClientApplication
 from sentry_sdk.integrations.flask import FlaskIntegration
@@ -33,7 +32,7 @@ class Config:
     _LOGGING_LEVEL = logging.WARNING
     _COLLECTIONS_PATH = Path.home().joinpath(".config/scar_add_metadata_toolbox/collections.json")
     _AUTH_SESSION_FILE_PATH = Path.home().joinpath(".config/scar_add_metadata_toolbox/auth.json")
-    _SITE_PATH = Path("/tmp/_site")
+    _SITE_PATH = Path.home().joinpath(".config/scar_add_metadata_toolbox/_site")
 
     def __init__(self):
         load_dotenv()
@@ -62,14 +61,12 @@ class Config:
     @property
     def NAME(self) -> str:
         """
-        Application name
-
-        Taken from the package where possible, otherwise a generic placeholder is used.
+        Application/Package name
 
         :rtype str
         :return: Application name
         """
-        return "Unknown"
+        return "scar-add-metadata-toolbox"
 
     # noinspection PyPep8Naming
     @property
@@ -396,13 +393,8 @@ class ProductionConfig(Config):  # pragma: no cover
 
     # noinspection PyPep8Naming
     @property
-    def NAME(self) -> str:
-        return pkg_resources.require("scar-add-metadata-toolbox")[0].name
-
-    # noinspection PyPep8Naming
-    @property
     def VERSION(self) -> str:
-        return pkg_resources.require("scar-add-metadata-toolbox")[0].version
+        return version("scar-add-metadata-toolbox")
 
 
 class DevelopmentConfig(Config):  # pragma: no cover

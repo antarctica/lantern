@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Dict, List, Union
 from urllib.parse import urlparse as url_parse, parse_qs as query_string_parse
 
+from backports.datetime_fromisoformat import MonkeyPatch
 from dateutil.relativedelta import relativedelta
 from markdown import markdown
 
@@ -23,6 +24,9 @@ from scar_add_metadata_toolbox.hazmat.metadata import (
     load_record_from_json,
     process_usage_constraints,
 )
+
+# Workaround for lack of `date(time).fromisoformat()` method in Python 3.6
+MonkeyPatch.patch_fromisoformat()
 
 
 class RecordRetractBeforeDeleteException(Exception):
@@ -1570,7 +1574,7 @@ class Collections:
             self.collections_path = config["collections_path"]
 
         try:
-            with open(str(self.collections_path), mode="r") as collections_file:
+            with open(str(self.collections_path), mode="r") as collections_file:  # pragma: no cover
                 collections_data = json.load(collections_file)
                 for collection_config in collections_data.values():
                     self.add(collection=Collection(config=collection_config))
@@ -1614,9 +1618,9 @@ class Collections:
 
         self.update(collection=collection)
 
-    def update(self, collection: Collection) -> None:
+    def update(self, collection: Collection) -> None:  # pragma: no cover (method mocked in testing)
         """
-        Update an existing Collections
+        Update an existing Collection
 
         :type collection Collection
         :param collection: Collection to update

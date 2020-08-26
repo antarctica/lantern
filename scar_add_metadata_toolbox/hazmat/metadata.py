@@ -26,7 +26,13 @@ from typing import List, Dict
 # We don't currently allow untrusted/user-provided XML so this is not a risk
 from lxml.etree import tostring, ElementTree  # nosec
 
+from backports.datetime_fromisoformat import MonkeyPatch
+
 from bas_metadata_library.standards.iso_19115_2_v1 import MetadataRecord, MetadataRecordConfig
+
+
+# Workaround for lack of `date(time).fromisoformat()` method in Python 3.6
+MonkeyPatch.patch_fromisoformat()
 
 
 def load_record_from_json(record) -> dict:

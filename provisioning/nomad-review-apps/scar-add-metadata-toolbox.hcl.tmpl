@@ -30,18 +30,17 @@ job "${job_name}" {
             driver = "docker"
 
             env {
-                SENTRY_DSN = "https://db9543e7b68f4b2596b189ff444438e3@o39753.ingest.sentry.io/5197036"
-                AUTH_CLIENT_TENANCY = "https://login.microsoftonline.com/b311db95-32ad-438f-a101-7ba061712a4e"
-                AUTH_CLIENT_ID = "91c284e7-6522-4eb4-9943-f4ec08e98cb9"
-                AUTH_CLIENT_SCOPES = "api://8bfe65d3-9509-4b0a-acd2-8ce8cdc0c01e/BAS.MAGIC.ADD.Access"
-                AUTH_SERVER_TENANCY = "b311db95-32ad-438f-a101-7ba061712a4e"
-                AUTH_SERVER_ID = "8b45581e-1b2e-4b8c-b667-e5a1360b6906"
-                CSW_ENDPOINT_UNPUBLISHED = "http://10.70.1.140:5001/csw/unpublished"
-                CSW_ENDPOINT_PUBLISHED= "http://10.70.1.140:5001/csw/published"
-                CSW_UNPUBLISHED_DB_CONNECTION = "${app_csw_connection_string_unpublished}"
-                CSW_PUBLISHED_DB_CONNECTION = "${app_csw_connection_string_published}"
-                STATIC_BUILD_DIR = "./scar_add_metadata_toolbox/build"
-                S3_BUCKET = "${app_s3_static_site_bucket}"
+                APP_LOGGING_LEVEL="debug"
+                APP_AUTH_SESSION_FILE_PATH="$${NOMAD_TASK_DIR}/auth.json"
+                APP_COLLECTIONS_PATH="$${NOMAD_TASK_DIR}/collections.json"
+                APP_SITE_PATH="$${NOMAD_TASK_DIR}/_site"
+                CSW_ENDPOINT_UNPUBLISHED="http://localhost:5000/csw/unpublished"
+                CSW_ENDPOINT_PUBLISHED="http://localhost:5000/csw/published"
+                CSW_SERVER_CONFIG_UNPUBLISHED_ENDPOINT="http://$${NOMAD_ADDR_flask}/csw/unpublished"
+                CSW_SERVER_CONFIG_PUBLISHED_ENDPOINT="http://$${NOMAD_ADDR_flask}/csw/published"
+                CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION="${app_csw_connection_string_unpublished}"
+                CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION="${app_csw_connection_string_published}"
+                APP_S3_BUCKET="${app_s3_static_site_bucket}"
             }
 
             config {

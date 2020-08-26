@@ -16,8 +16,13 @@
 #   > APP_CSW_CONNECTION_STRING_PASSWORD_UNPUBLISHED: "[Sensitive]"
 #
 # - Private key for the 'bas-magic-shared-deployment-identity'
-#   > PACKAGE_REPO_SSH_PRIVATE_KEY (protected, file): "[Sensitive]"
 #   > PODMAN_HOST_SSH_PRIVATE_KEY (protected, file): "[Sensitive]"
+#
+# - PyPi (production) - create tokens at https://pypi.org/manage/account/
+# > PYPI_TOKEN (protected): "[Sensitive]"
+#
+# - PyPi (staging) - create tokens at https://test.pypi.org/manage/account/
+# > PYPI_TEST_TOKEN (protected): "[Sensitive]"
 #
 # - Nomad deploy token
 #   create a deploy token at https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/settings/repository
@@ -39,21 +44,21 @@ include:
 
 stages:
   - 💥 setup
-#   - 🧪 test
-#   - 📦 package
-#   - 🏗 build
-#   - 🔍 review
-#   - 🧹 post-review
-#   - 🚚 publish
-#   - 🚀 release
+  - 🧪 test
+  - 📦 package
+  - 🏗 build
+  - 🔍 review
+  - 🧹 post-review
+  - 🚚 publish
+  - 🚀 release
 
 variables:
+  GIT_DEPTH: 100
   DOCKER_HOST: tcp://docker:2376
   DOCKER_CERT_PATH: /certs/client
   DOCKER_DRIVER: overlay2
   DOCKER_TLS_VERIFY: 1
   GITLAB_REGISTRY: docker-registry.data.bas.ac.uk
-  PACKAGE_REPOSITORY: bsl-repoa.nerc-bas.ac.uk
   PODMAN_HOST: bslws01.nerc-bas.ac.uk
   APP_NAME: scar-add-metadata-toolbox
   APP_PACKAGE: scar-add-metadata-toolbox
@@ -85,269 +90,275 @@ version:
     reports:
       dotenv: build.env
 
-# test-app:
-#   stage: 🧪 test
-#   variables:
-#     FLASK_ENV: testing
-#   script:
-#     - "pytest -o junit_family=xunit2 --junitxml=test-results.xml --random-order"
-#   needs: []
-#   artifacts:
-#     reports:
-#       junit: test-results.xml
-#   rules:
-#     - changes:
-#         - '**/*.py'
+pytest:
+  stage: 🧪 test
+  variables:
+    FLASK_ENV: testing
+  script:
+    - "pytest -o junit_family=xunit2 --junitxml=test-results.xml --random-order"
+  needs: []
+  artifacts:
+    reports:
+      junit: test-results.xml
+  rules:
+    - changes:
+      - '**/*.py'
 
-# coverage-app:
-#   stage: 🧪 test
-#   variables:
-#     FLASK_ENV: testing
-#   script:
-#     - "pytest --cov=scar_add_metadata_toolbox --cov-fail-under=100 ."
-#     - "coverage html"
-#   needs: []
-#   artifacts:
-#     name: "$CI_BUILD_TOKEN-coverage"
-#     paths:
-#       - htmlcov
-#     expire_in: 1 month
-#   rules:
-#     - changes:
-#         - '**/*.py'
+coverage:
+  stage: 🧪 test
+  variables:
+    FLASK_ENV: testing
+  script:
+    - "pytest --cov=scar_add_metadata_toolbox --cov-fail-under=100 ."
+  after_script:
+    - "coverage html"
+  needs: []
+  artifacts:
+    paths:
+      - htmlcov
+    expire_in: 1 week
+    when: always
+  rules:
+    - changes:
+      - '**/*.py'
 
-# black:
-#   stage: 🧪 test
-#   script:
-#     - "black --check scar_add_metadata_toolbox/"
-#   needs: []
-#   rules:
-#     - changes:
-#       - '**/*.py'
+black:
+ stage: 🧪 test
+ script:
+   - "black --check scar_add_metadata_toolbox/"
+ needs: []
+ rules:
+   - changes:
+     - '**/*.py'
 
-# bandit:
-#   stage: 🧪 test
-#   script:
-#     - "bandit -r ."
-#   needs: []
-#   rules:
-#     - changes:
-#       - '**/*.py'
+bandit:
+ stage: 🧪 test
+ script:
+   - "bandit -r ."
+ needs: []
+ rules:
+   - changes:
+     - '**/*.py'
 
-# package:
-#   stage: 📦 package
-#   script:
-#     - "poetry version $VERSION"
-#     - "poetry build"
-#   needs:
-#     - job: test-app
-#     - job: black
-#     - job: bandit
-#     - job: version
-#       artifacts: true
-#   artifacts:
-#     name: "$CI_BUILD_TOKEN-build"
-#     paths:
-#       - dist
-#     expire_in: 1 month
-#   rules:
-#     - changes:
-#       - 'scar_add_metadata_toolbox/**/*.*'
+package:
+ stage: 📦 package
+ script:
+   - "poetry version $VERSION"
+   - "poetry build"
+ needs:
+   - job: pytest
+   - job: black
+   - job: bandit
+   - job: version
+     artifacts: true
+ artifacts:
+   paths:
+     - dist
+   expire_in: 1 month
+ rules:
+   - changes:
+     - 'scar_add_metadata_toolbox/**/*.*'
 
-# container:
-#   stage: 🏗 build
-#   image:
-#     name: docker:19.03-dind
-#     entrypoint: [""]
-#   before_script:
-#     - 'if [ -z "$CI_COMMIT_TAG" ]; then export IMAGE_ALIAS="review:$CI_COMMIT_REF_SLUG"; else export IMAGE_ALIAS="release:$CI_COMMIT_TAG"; fi'
-#     - 'echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" "$CI_REGISTRY" --password-stdin'
-#     - 'cp -r ./dist/*.whl ./support/docker-packaging/'
-#     - 'cp -r ./support/pycsw/ ./support/docker-packaging/'
-#     - 'cd support/docker-packaging/'
-#   script:
-#     - 'docker build . -t $CI_REGISTRY_IMAGE/build:$CI_COMMIT_SHA -t $CI_REGISTRY_IMAGE/$IMAGE_ALIAS --build-arg APP_PACKAGE_VERSION="$APP_PACKAGE==$VERSION"'
-#     - 'docker push $CI_REGISTRY_IMAGE/build:$CI_COMMIT_SHA'
-#     - 'docker push $CI_REGISTRY_IMAGE/$IMAGE_ALIAS'
-#   services:
-#     - docker:dind
-#   tags:
-#     - dnd
-#   needs:
-#     - job: package
-#     - job: version
-#       artifacts: true
-#   rules:
-#     - changes:
-#       - 'scar_add_metadata_toolbox/**/*.*'
-#       - 'support/docker-provisioning/**/*.*'
-#       - 'support/pycsw/**/*.*'
+container:
+ stage: 🏗 build
+ image:
+   name: docker:19.03-dind
+   entrypoint: [""]
+ before_script:
+   - 'if [ -z "$CI_COMMIT_TAG" ]; then export IMAGE_ALIAS="review:$CI_COMMIT_REF_SLUG"; else export IMAGE_ALIAS="release:$CI_COMMIT_TAG"; fi'
+   - 'echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" "$CI_REGISTRY" --password-stdin'
+   - 'cp -r ./dist/*.whl ./support/docker-packaging/'
+   - 'cp -r ./support/pycsw/ ./support/docker-packaging/'
+   - 'cd support/docker-packaging/'
+ script:
+   - 'docker build . -t $CI_REGISTRY_IMAGE/build:$CI_COMMIT_SHA -t $CI_REGISTRY_IMAGE/$IMAGE_ALIAS --build-arg APP_PACKAGE_VERSION="$APP_PACKAGE==$VERSION"'
+   - 'docker push $CI_REGISTRY_IMAGE/build:$CI_COMMIT_SHA'
+   - 'docker push $CI_REGISTRY_IMAGE/$IMAGE_ALIAS'
+ services:
+   - docker:dind
+ tags:
+   - dnd
+ needs:
+   - job: package
+     artifacts: true
+   - job: version
+     artifacts: true
+ rules:
+   - changes:
+     - 'scar_add_metadata_toolbox/**/*.*'
+     - 'support/docker-provisioning/**/*.*'
+     - 'support/pycsw/**/*.*'
 
-# podman-wrapper:
-#   stage: 🏗 build
-#   image:
-#     name: hashicorp/terraform:0.12.24
-#     entrypoint: [""]
-#   before_script:
-#     - "cd provisioning/podman"
-#     - "export TF_VAR_registry_image=$CI_REGISTRY_IMAGE/review:$CI_COMMIT_REF_SLUG"
-#     - "export TF_VAR_app_csw_connection_string_published=$APP_CSW_CONNECTION_STRING_PUBLISHED"
-#     - "export TF_VAR_app_csw_connection_string_unpublished=$APP_CSW_CONNECTION_STRING_UNPUBLISHED"
-#     - "export TF_VAR_app_s3_static_site_bucket=$APP_STATIC_SITE_S3_BUCKET"
-#   script:
-#     - 'terraform init'
-#     - 'terraform validate'
-#     - 'terraform apply -auto-approve'
-#     - 'chmod +x scar-add-metadata-toolbox'
-#   needs: []
-#   artifacts:
-#     name: "$CI_BUILD_TOKEN-podman-wrapper"
-#     paths:
-#       - provisioning/podman/scar-add-metadata-toolbox
-#       - provisioning/podman/dot.env
-#     expire_in: 1 month
-#   rules:
-#     - if: '$CI_COMMIT_TAG != null'
+podman-wrapper:
+ stage: 🏗 build
+ image:
+   name: hashicorp/terraform:0.12.24
+   entrypoint: [""]
+ before_script:
+   - "cd provisioning/podman"
+   - "export TF_VAR_registry_image=$CI_REGISTRY_IMAGE/review:$CI_COMMIT_REF_SLUG"
+   - "export TF_VAR_app_csw_connection_string_published=$APP_CSW_CONNECTION_STRING_PUBLISHED"
+   - "export TF_VAR_app_csw_connection_string_unpublished=$APP_CSW_CONNECTION_STRING_UNPUBLISHED"
+   - "export TF_VAR_app_s3_static_site_bucket=$APP_STATIC_SITE_S3_BUCKET"
+ script:
+   - 'terraform init'
+   - 'terraform validate'
+   - 'terraform apply -auto-approve'
+   - 'chmod +x scar-add-metadata-toolbox'
+ needs: []
+ artifacts:
+   paths:
+     - provisioning/podman/scar-add-metadata-toolbox
+     - provisioning/podman/dot.env
+   expire_in: 1 month
+ rules:
+   - if: '$CI_COMMIT_TAG != null'
 
-# review:
-#   stage: 🔍 review
-#   image:
-#     name: hashicorp/terraform:0.12.24
-#     entrypoint: [""]
-#   before_script:
-#     - "cd provisioning/nomad-review-apps"
-#     - "export TF_VAR_job_name=$APP_NAME-ra-$CI_COMMIT_REF_SLUG"
-#     - "export TF_VAR_registry_image=$CI_REGISTRY_IMAGE/review:$CI_COMMIT_REF_SLUG"
-#     - "export TF_VAR_registry_token=$NOMAD_DEPLOY_TOKEN"
-#     - "export TF_VAR_app_csw_connection_string_published=$APP_CSW_CONNECTION_STRING_PUBLISHED"
-#     - "export TF_VAR_app_csw_connection_string_unpublished=$APP_CSW_CONNECTION_STRING_UNPUBLISHED"
-#     - "export TF_VAR_app_s3_static_site_bucket=$APP_STATIC_SITE_S3_BUCKET"
-#   script:
-#     - 'terraform init'
-#     - 'terraform validate'
-#     - 'terraform apply -auto-approve'
-#   needs:
-#     - job: container
-#   artifacts:
-#     name: "CI_BUILD_TOKEN-review-app-state"
-#     paths:
-#       - "provisioning/nomad-review-apps/terraform.tfstate"
-#     expire_in: 1 month
-#   rules:
-#     - if: '$CI_COMMIT_TAG == null'
-#       changes:
-#         - 'scar_add_metadata_toolbox/**/*.*'
-#         - 'support/docker-provisioning/**/*.*'
-#         - 'support/pycsw/**/*.*'
-#   environment:
-#     name: review/$CI_COMMIT_REF_NAME
-#     url: http://bsl-nomad-magic-dev-s3.nerc-bas.ac.uk:4646/ui/jobs/$APP_NAME-ra-$CI_COMMIT_REF_SLUG
-#     on_stop: stop-review
+review:
+ stage: 🔍 review
+ image:
+   name: hashicorp/terraform:0.12.24
+   entrypoint: [""]
+ before_script:
+   - "cd provisioning/nomad-review-apps"
+   - "export TF_VAR_job_name=$APP_NAME-ra-$CI_COMMIT_REF_SLUG"
+   - "export TF_VAR_registry_image=$CI_REGISTRY_IMAGE/review:$CI_COMMIT_REF_SLUG"
+   - "export TF_VAR_registry_token=$NOMAD_DEPLOY_TOKEN"
+   - "export TF_VAR_app_csw_connection_string_published=$APP_CSW_CONNECTION_STRING_PUBLISHED"
+   - "export TF_VAR_app_csw_connection_string_unpublished=$APP_CSW_CONNECTION_STRING_UNPUBLISHED"
+   - "export TF_VAR_app_s3_static_site_bucket=$APP_STATIC_SITE_S3_BUCKET"
+ script:
+   - 'terraform init'
+   - 'terraform validate'
+   - 'terraform apply -auto-approve'
+ needs:
+   - job: container
+ artifacts:
+   paths:
+     - "provisioning/nomad-review-apps/terraform.tfstate"
+   expire_in: 1 month
+ rules:
+   - if: '$CI_COMMIT_TAG == null'
+     changes:
+       - 'scar_add_metadata_toolbox/**/*.*'
+       - 'support/docker-provisioning/**/*.*'
+       - 'support/pycsw/**/*.*'
+ environment:
+   name: review/$CI_COMMIT_REF_NAME
+   url: http://bsl-nomad-magic-dev-s3.nerc-bas.ac.uk:4646/ui/jobs/$APP_NAME-ra-$CI_COMMIT_REF_SLUG
+   on_stop: stop-review
 
-# stop-review:
-#   stage: 🧹 post-review
-#   image:
-#     name: hashicorp/terraform:0.12.24
-#     entrypoint: [""]
-#   before_script:
-#     - "cd provisioning/nomad-review-apps"
-#   script:
-#     - 'terraform init'
-#     - 'terraform validate'
-#     - 'terraform destroy -auto-approve'
-#   needs:
-#     - job: review
-#       artifacts: true
-#   rules:
-#     - if: '$CI_COMMIT_TAG == null'
-#       changes:
-#         - 'scar_add_metadata_toolbox/**/*.*'
-#         - 'support/docker-provisioning/**/*.*'
-#         - 'support/pycsw/**/*.*'
-#       when: manual
-#   environment:
-#     name: review/$CI_COMMIT_REF_NAME
-#     action: stop
+stop-review:
+ stage: 🧹 post-review
+ image:
+   name: hashicorp/terraform:0.12.24
+   entrypoint: [""]
+ before_script:
+   - "cd provisioning/nomad-review-apps"
+ script:
+   - 'terraform init'
+   - 'terraform validate'
+   - 'terraform destroy -auto-approve'
+ needs:
+   - job: review
+     artifacts: true
+ rules:
+   - if: '$CI_COMMIT_TAG == null'
+     changes:
+       - 'scar_add_metadata_toolbox/**/*.*'
+       - 'support/docker-provisioning/**/*.*'
+       - 'support/pycsw/**/*.*'
+     when: manual
+ environment:
+   name: review/$CI_COMMIT_REF_NAME
+   action: stop
 
-# publish-package:
-#   stage: 🚚 publish
-#   image: kroniak/ssh-client
-#   before_script:
-#     - mkdir -p ~/.ssh
-#     - chmod 700 ~/.ssh
-#     - ssh-keyscan -H $PACKAGE_REPOSITORY > ~/.ssh/known_hosts
-#     - mv $PACKAGE_REPO_SSH_PRIVATE_KEY ~/.ssh/id_rsa
-#     - chmod 400 ~/.ssh/id_rsa
-#   script:
-#     - 'ssh build@$PACKAGE_REPOSITORY -C "mkdir -p /var/repo/magic/v1/projects/scar-add-metadata-toolbox/latest/dist/"'
-#     - 'scp dist/*.* build@$PACKAGE_REPOSITORY:/var/repo/magic/v1/projects/scar-add-metadata-toolbox/latest/dist/'
-#   needs:
-#     - job: package
-#       artifacts: true
-#   rules:
-#     -
-#       if: '$CI_COMMIT_TAG != null'
-#       changes:
-#         - 'scar_add_metadata_toolbox/**/*.*'
+pypi-testing:
+  stage: 🚚 publish
+  before_script:
+    - "poetry config pypi-token.pypi-testing $PYPI_TEST_TOKEN --local"
+  script:
+    - "poetry version $VERSION"
+    - "poetry publish --repository pypi-testing --no-interaction"
+  needs:
+    - job: version
+      artifacts: true
+    - job: package
+      artifacts: true
 
-# podman:
-#   stage: 🚀 release
-#   image: kroniak/ssh-client
-#   before_script:
-#     - 'mkdir -p ~/.ssh'
-#     - 'chmod 700 ~/.ssh'
-#     - 'ssh-keyscan -H $PODMAN_HOST > ~/.ssh/known_hosts'
-#     - 'mv $PODMAN_HOST_SSH_PRIVATE_KEY ~/.ssh/id_rsa'
-#     - 'chmod 400 ~/.ssh/id_rsa'
-#   script:
-#     - 'ssh geoweb@$PODMAN_HOST -C "mkdir -p /users/geoweb/.config/scar-add-metadata-toolbox/"'
-#     - 'ssh geoweb@$PODMAN_HOST -C "mkdir -p /users/geoweb/projects/scar-add-metadata-toolbox/records"'
-#     - 'scp provisioning/podman/scar-add-metadata-toolbox geoweb@$PODMAN_HOST:/users/geoweb/bin/'
-#     - 'scp provisioning/podman/dot.env geoweb@$PODMAN_HOST:/users/geoweb/.config/scar-add-metadata-toolbox/.env'
-#     - 'ssh geoweb@$PODMAN_HOST -C "chmod 600 /users/geoweb/.config/scar-add-metadata-toolbox/.env"'
-#   needs:
-#     - job: podman-wrapper
-#       artifacts: true
-#   rules:
-#     - if: '$CI_COMMIT_TAG != null'
+pypi:
+  stage: 🚚 publish
+  before_script:
+    - "poetry config pypi-token.pypi $PYPI_TOKEN --local"
+    - "poetry version $VERSION"
+  script:
+    - "poetry publish --repository pypi --no-interaction"
+  needs:
+    - job: version
+      artifacts: true
+    - job: package
+      artifacts: true
+  rules:
+    - if: '$CI_COMMIT_TAG != null'
 
-# nomad:
-#   stage: 🚀 release
-#   image:
-#     name: hashicorp/terraform:0.12.24
-#     entrypoint: [""]
-#   before_script:
-#     - "cd provisioning/nomad"
-#     - "export TF_VAR_registry_image=$CI_REGISTRY_IMAGE/release:$CI_COMMIT_TAG"
-#     - "export TF_VAR_registry_token=$NOMAD_DEPLOY_TOKEN"
-#     - "export TF_VAR_app_csw_connection_string_published=$APP_CSW_CONNECTION_STRING_PUBLISHED"
-#     - "export TF_VAR_app_csw_connection_string_unpublished=$APP_CSW_CONNECTION_STRING_UNPUBLISHED"
-#     - "export TF_VAR_app_s3_static_site_bucket=$APP_STATIC_SITE_S3_BUCKET"
-#   script:
-#     - 'terraform init'
-#     - 'terraform validate'
-#     - 'terraform apply -auto-approve'
-#   needs:
-#     - job: container
-#   rules:
-#     - if: '$CI_COMMIT_TAG != null'
+podman:
+ stage: 🚀 release
+ image: kroniak/ssh-client
+ before_script:
+   - 'mkdir -p ~/.ssh'
+   - 'chmod 700 ~/.ssh'
+   - 'ssh-keyscan -H $PODMAN_HOST > ~/.ssh/known_hosts'
+   - 'mv $PODMAN_HOST_SSH_PRIVATE_KEY ~/.ssh/id_rsa'
+   - 'chmod 400 ~/.ssh/id_rsa'
+ script:
+   - 'ssh geoweb@$PODMAN_HOST -C "mkdir -p /users/geoweb/.config/scar-add-metadata-toolbox/"'
+   - 'ssh geoweb@$PODMAN_HOST -C "mkdir -p /users/geoweb/projects/scar-add-metadata-toolbox/records"'
+   - 'scp provisioning/podman/scar-add-metadata-toolbox geoweb@$PODMAN_HOST:/users/geoweb/bin/'
+   - 'scp provisioning/podman/dot.env geoweb@$PODMAN_HOST:/users/geoweb/.config/scar-add-metadata-toolbox/.env'
+   - 'ssh geoweb@$PODMAN_HOST -C "chmod 600 /users/geoweb/.config/scar-add-metadata-toolbox/.env"'
+ needs:
+   - job: podman-wrapper
+     artifacts: true
+ rules:
+   - if: '$CI_COMMIT_TAG != null'
 
-# sentry:
-#   stage: 🚀 release
-#   image:
-#     name: getsentry/sentry-cli
-#     entrypoint: [""]
-#   before_script:
-#     - "export SENTRY_VERSION=$SENTRY_PROJECT@$VERSION"
-#     - 'if [ -z "$CI_COMMIT_TAG" ]; then export SENTRY_ENVIRONMENT="review-$CI_MERGE_REQUEST_ID"; else export SENTRY_ENVIRONMENT="production"; fi'
-#     - 'export SENTRY_ENVIRONMENT=`echo review-$CI_COMMIT_REF_SLUG | cut -c -64`'
-#   script:
-#     - "sentry-cli releases new --finalize $SENTRY_VERSION"
-#     - "sentry-cli releases deploys $SENTRY_VERSION new -e $SENTRY_ENVIRONMENT"
-#     - "sentry-cli releases set-commits --auto $SENTRY_VERSION"
-#   needs:
-#     - job: version
-#       artifacts: true
-#   rules:
-#     - if: '$CI_COMMIT_TAG != null'
-#     - if: '$CI_COMMIT_BRANCH != "master"'
+nomad:
+ stage: 🚀 release
+ image:
+   name: hashicorp/terraform:0.12.24
+   entrypoint: [""]
+ before_script:
+   - "cd provisioning/nomad"
+   - "export TF_VAR_registry_image=$CI_REGISTRY_IMAGE/release:$CI_COMMIT_TAG"
+   - "export TF_VAR_registry_token=$NOMAD_DEPLOY_TOKEN"
+   - "export TF_VAR_app_csw_connection_string_published=$APP_CSW_CONNECTION_STRING_PUBLISHED"
+   - "export TF_VAR_app_csw_connection_string_unpublished=$APP_CSW_CONNECTION_STRING_UNPUBLISHED"
+   - "export TF_VAR_app_s3_static_site_bucket=$APP_STATIC_SITE_S3_BUCKET"
+ script:
+   - 'terraform init'
+   - 'terraform validate'
+   - 'terraform apply -auto-approve'
+ needs:
+   - job: container
+ rules:
+   - if: '$CI_COMMIT_TAG != null'
+
+sentry:
+ stage: 🚀 release
+ image:
+   name: getsentry/sentry-cli
+   entrypoint: [""]
+ before_script:
+   - "export SENTRY_VERSION=$SENTRY_PROJECT@$VERSION"
+   - 'if [ -z "$CI_COMMIT_TAG" ]; then export SENTRY_ENVIRONMENT="review-$CI_MERGE_REQUEST_ID"; else export SENTRY_ENVIRONMENT="production"; fi'
+   - 'export SENTRY_ENVIRONMENT=`echo review-$CI_COMMIT_REF_SLUG | cut -c -64`'
+ script:
+   - "sentry-cli releases new --finalize $SENTRY_VERSION"
+   - "sentry-cli releases deploys $SENTRY_VERSION new -e $SENTRY_ENVIRONMENT"
+   - "sentry-cli releases set-commits --auto $SENTRY_VERSION"
+ needs:
+   - job: version
+     artifacts: true
+ rules:
+   - if: '$CI_COMMIT_TAG != null'
+   - if: '$CI_COMMIT_BRANCH != "master"'

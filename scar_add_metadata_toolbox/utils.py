@@ -2,7 +2,7 @@ import os
 import json
 from base64 import urlsafe_b64decode
 
-from typing import Dict, Any, Optional
+from typing import Dict, Optional
 from pathlib import Path
 
 # noinspection PyPackageRequirements

@@ -1620,27 +1620,33 @@ class TestCommandSiteBuildCollectionPages:
             in collection_pages_paths
         )
 
-    @pytest.mark.usefixtures("app_runner_mocked_csw_not_setup")
-    def test_cli_site_collection_pages_csw_not_setup(self, app_runner_mocked_csw_not_setup):
-        result = app_runner_mocked_csw_not_setup.invoke(args=["site", "build-collections"])
+    @pytest.mark.usefixtures("app_runner_mocked_csw_not_setup_mocked_collection")
+    def test_cli_site_collection_pages_csw_not_setup(self, app_runner_mocked_csw_not_setup_mocked_collection):
+        result = app_runner_mocked_csw_not_setup_mocked_collection.invoke(args=["site", "build-collections"])
         assert result.exit_code == 64
         assert "No. CSW catalogue not setup." in result.output
 
-    @pytest.mark.usefixtures("app_runner_mocked_csw_auth_token_error")
-    def test_cli_site_collection_pages_auth_token_error(self, app_runner_mocked_csw_auth_token_error):
-        result = app_runner_mocked_csw_auth_token_error.invoke(args=["site", "build-collections"])
+    @pytest.mark.usefixtures("app_runner_mocked_csw_auth_token_error_mocked_collection")
+    def test_cli_site_collection_pages_auth_token_error(self, app_runner_mocked_csw_auth_token_error_mocked_collection):
+        result = app_runner_mocked_csw_auth_token_error_mocked_collection.invoke(args=["site", "build-collections"])
         assert result.exit_code == 64
         assert "No. Error with auth token. Try signing out and in again or seek support." in result.output
 
-    @pytest.mark.usefixtures("app_runner_mocked_csw_missing_auth_token")
-    def test_cli_site_collection_pages_auth_token_missing(self, app_runner_mocked_csw_missing_auth_token):
-        result = app_runner_mocked_csw_missing_auth_token.invoke(args=["site", "build-collections"])
+    @pytest.mark.usefixtures("app_runner_mocked_csw_missing_auth_token_mocked_collection")
+    def test_cli_site_collection_pages_auth_token_missing(
+        self, app_runner_mocked_csw_missing_auth_token_mocked_collection
+    ):
+        result = app_runner_mocked_csw_missing_auth_token_mocked_collection.invoke(args=["site", "build-collections"])
         assert result.exit_code == 64
         assert "No. Missing auth token. Run `auth sign-in` first." in result.output
 
-    @pytest.mark.usefixtures("app_runner_mocked_csw_insufficient_auth_token")
-    def test_cli_site_collection_pages_auth_token_insufficient(self, app_runner_mocked_csw_insufficient_auth_token):
-        result = app_runner_mocked_csw_insufficient_auth_token.invoke(args=["site", "build-collections"])
+    @pytest.mark.usefixtures("app_runner_mocked_csw_insufficient_auth_token_mocked_collection")
+    def test_cli_site_collection_pages_auth_token_insufficient(
+        self, app_runner_mocked_csw_insufficient_auth_token_mocked_collection
+    ):
+        result = app_runner_mocked_csw_insufficient_auth_token_mocked_collection.invoke(
+            args=["site", "build-collections"]
+        )
         assert result.exit_code == 64
         assert "No. Missing permissions in auth token. Seek support to assign required permissions." in result.output
 
@@ -1904,7 +1910,7 @@ class TestCommandAuthSignIn:
     def test_cli_sign_in(self, app_runner):
         result = app_runner.invoke(args=["auth", "sign-in"])
         assert result.exit_code == 0
-        assert "Ok. Access token for '*unknown*' set in '/usr/src/app/auth.json'." in result.output
+        assert "Ok. Access token for '*unknown*' set in" in result.output
 
 
 class TestCommandAuthSignOut:

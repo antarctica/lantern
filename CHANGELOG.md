@@ -61,7 +61,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Fundamental application refactoring, creating new `classes`, `commands`, `csw` and `hazmat` modules
   [#15](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/15)
-
+* Publishing application packages via PyPi
+  [#71](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/71)
 * Updating project documentation inc. CLI reference
   [#33](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/33)
 * Various PyCharm configuration changes (run/debug configurations etc.)
@@ -72,8 +73,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#12](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/12)
 * Updating Python dependencies via Poetry
   [#9](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/9)
-* Installing direct wheel dependencies via Poetry
-  [#9](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/9)
+* Downgrading to Python 3.6 for compatibility with BAS IT
+  [#72](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/72)
 * Poetry update removed from Dockerfile and made a manual action
   [#9](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/9)
 * Updating to Terraform 0.12.x, requiring syntax changes mainly for interpolation

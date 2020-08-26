@@ -31,6 +31,7 @@ from tests.scar_add_metadata_toolbox.classes import (
     MockCSWClientAuthMissing,
     MockCSWClientAuthInsufficient,
     MockCollectionsUnknownRecord,
+    MockCSWServerAuthTokenError,
 )
 from tests.scar_add_metadata_toolbox.resources.csw.records import make_test_record
 
@@ -117,7 +118,6 @@ def app_runner(app):
 def app_runner_mocked_csw():
     with patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client:
         mock_csw_client.side_effect = MockCSWClient
-
         app = create_app()
         return app.test_cli_runner()
 
@@ -126,7 +126,6 @@ def app_runner_mocked_csw():
 def app_runner_mocked_csw_inserts_fail():
     with patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client:
         mock_csw_client.side_effect = MockCSWClientInsertsFail
-
         app = create_app()
         return app.test_cli_runner()
 
@@ -249,6 +248,15 @@ def app_static_site():
 
 
 @pytest.fixture
+def app_runner_mocked_csw_server():
+    with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
+        mock_csw_server.side_effect = MockCSWServer
+
+        app = create_app()
+        return app.test_cli_runner()
+
+
+@pytest.fixture
 def app_client_mocked_csw_server():
     with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
         mock_csw_server.side_effect = MockCSWServer
@@ -276,6 +284,15 @@ def app_client_mocked_csw_server_requests_fail():
 
 
 @pytest.fixture
+def app_client_mocked_csw_server_auth_token_error():
+    with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
+        mock_csw_server.side_effect = MockCSWServerAuthTokenError
+
+        app = create_app()
+        return app.test_client()
+
+
+@pytest.fixture
 def app_client_mocked_csw_server_missing_auth_token():
     with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
         mock_csw_server.side_effect = MockCSWServerMissingAuthToken
@@ -291,15 +308,6 @@ def app_client_mocked_csw_server_insufficient_auth_token():
 
         app = create_app()
         return app.test_client()
-
-
-@pytest.fixture
-def app_runner_mocked_csw_server():
-    with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
-        mock_csw_server.side_effect = MockCSWServer
-
-        app = create_app()
-        return app.test_cli_runner()
 
 
 @pytest.fixture

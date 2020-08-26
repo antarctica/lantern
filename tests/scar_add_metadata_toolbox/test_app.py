@@ -56,4 +56,4 @@ def test_cli_help(app_runner):
 def test_cli_version(app_runner):
     result = app_runner.invoke(args=["version"])
     assert result.exit_code == 0
-    assert "Unknown version: N/A" in result.output
+    assert "scar-add-metadata-toolbox version: N/A" in result.output

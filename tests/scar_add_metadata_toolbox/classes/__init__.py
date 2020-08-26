@@ -180,6 +180,11 @@ class MockCSWServerNotSetup(MockCSWServer):
         raise CSWDatabaseNotInitialisedException()
 
 
+class MockCSWServerAuthTokenError(MockCSWServer):
+    def process_request(self, request: Request, token: Optional[AzureToken] = None) -> Response:
+        raise CSWAuthException()
+
+
 class MockCSWServerMissingAuthToken(MockCSWServer):
     def process_request(self, request: Request, token: Optional[AzureToken] = None) -> Response:
         raise CSWAuthMissingException()

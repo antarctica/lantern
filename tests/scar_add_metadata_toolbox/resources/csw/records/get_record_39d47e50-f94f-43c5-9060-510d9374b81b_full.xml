@@ -190,7 +190,7 @@
           <gmd:date>
             <gmd:CI_Date>
               <gmd:date>
-                <gco:DateTime>2020-03-09T15:07:56</gco:DateTime>
+                <gco:DateTime>2020-06-09T15:07:56</gco:DateTime>
               </gmd:date>
               <gmd:dateType>
                 <gmd:CI_DateTypeCode codeList="https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_DateTypeCode" codeListValue="released">released</gmd:CI_DateTypeCode>

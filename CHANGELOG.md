@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Collections file is no longer inadvertently modified on class initialisation
   [#95](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/95)
+  
+### Changed
+
+* Working around absolute dates in test records 'expiring' and giving different test results (needs permanent fix)
+  [#96](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/96)
  
 ## [0.2.1] - 2020-08-26
 

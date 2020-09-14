@@ -63,7 +63,7 @@ def make_test_record(identifier: str, title: str) -> dict:
                 {"date_precision": "year", "date": str(date(2020, 1, 1).year), "date_type": "creation"},
                 {"date": date(2020, 2, 26).isoformat(), "date_type": "revision"},
                 {"date": datetime(2020, 1, 15, 10, 44, 14).isoformat(), "date_type": "publication"},
-                {"date": datetime(2020, 3, 9, 15, 7, 56).isoformat(), "date_type": "released"},
+                {"date": datetime(2020, 6, 9, 15, 7, 56).isoformat(), "date_type": "released"},
             ],
             "edition": f"1.2",
             "abstract": title,

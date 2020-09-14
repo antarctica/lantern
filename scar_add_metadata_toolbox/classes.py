@@ -1576,8 +1576,7 @@ class Collections:
         try:
             with open(str(self.collections_path), mode="r") as collections_file:  # pragma: no cover
                 collections_data = json.load(collections_file)
-                for collection_config in collections_data.values():
-                    self.add(collection=Collection(config=collection_config))
+                self.collections = collections_data
         except FileNotFoundError:  # pragma: no cover
             # Ignore because the collections file hasn't been setup yet
             pass

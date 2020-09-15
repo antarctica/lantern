@@ -53,7 +53,10 @@ def make_test_record(identifier: str, title: str) -> dict:
                     "role": ["publisher"],
                 },
             },
-            "code": {"value": "urn:ogc:def:crs:EPSG::3031", "href": "http://www.opengis.net/def/crs/EPSG/0/3031",},
+            "code": {
+                "value": "urn:ogc:def:crs:EPSG::3031",
+                "href": "http://www.opengis.net/def/crs/EPSG/0/3031",
+            },
             "version": "6.18.3",
         },
         "maintenance": {"maintenance_frequency": "asNeeded", "progress": "completed"},
@@ -115,7 +118,12 @@ def make_test_record(identifier: str, title: str) -> dict:
             "maintenance": {"maintenance_frequency": "biannually", "progress": "completed"},
             "keywords": [
                 {
-                    "terms": [{"term": "STUFF", "href": f"https://www.eionet.europa.eu/gemet/en/inspire-theme/st",}],
+                    "terms": [
+                        {
+                            "term": "STUFF",
+                            "href": f"https://www.eionet.europa.eu/gemet/en/inspire-theme/st",
+                        }
+                    ],
                     "type": "theme",
                     "thesaurus": {
                         "title": {
@@ -300,7 +308,10 @@ def make_test_record(identifier: str, title: str) -> dict:
             ],
             "constraints": {
                 "access": [
-                    {"restriction_code": "otherRestrictions", "inspire_limitations_on_public_access": "noLimitations",}
+                    {
+                        "restriction_code": "otherRestrictions",
+                        "inspire_limitations_on_public_access": "noLimitations",
+                    }
                 ],
                 "usage": [
                     {

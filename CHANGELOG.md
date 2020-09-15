@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.2.3] - 2020-09-15
+
+### Fixed
+
+* Removing hardcoded location for static site assets
+  [#97](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/97)
+
 ## [0.2.2] - 2020-09-14
 
 ### Fixed

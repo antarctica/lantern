@@ -636,13 +636,13 @@ as PyCharm, to perform formatting automatically.
 To apply formatting manually:
 
 ```shell
-$ docker-compose run app black bas_scar_add_metadata_toolbox/
+$ docker-compose run app black scar_add_metadata_toolbox/
 ```
 
 To check compliance manually:
 
 ```shell
-$ docker-compose run app black --check bas_scar_add_metadata_toolbox/
+$ docker-compose run app black --check scar_add_metadata_toolbox/
 ```
 
 Checks are ran automatically in [Continuous Integration](#continuous-integration).

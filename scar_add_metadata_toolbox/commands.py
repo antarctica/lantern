@@ -13,6 +13,7 @@ import click
 #
 # We don't currently allow untrusted/user-provided XML so this is not a risk
 from lxml.etree import ElementTree, ProcessingInstruction, fromstring, tostring  # nosec
+from importlib_resources import path as resource_path
 from click import Abort
 from click_spinner import spinner
 from faker import Faker
@@ -85,9 +86,7 @@ def list_records():
 @click.argument("record_path", type=click.Path(exists=True, dir_okay=False))
 @click.option("--allow-update", is_flag=True, help="Update any existing record.")
 @click.option("--publish", is_flag=True, help="Publish record after importing.")
-@click.option(
-    "--allow-republish", is_flag=True, help="Republish any existing, published, record.",
-)
+@click.option("--allow-republish", is_flag=True, help="Republish any existing, published, record.")
 @click.pass_context
 def import_record(
     ctx, record_path: str, allow_update: bool = False, publish: bool = False, allow_republish: bool = False
@@ -135,9 +134,7 @@ def import_record(
 @click.argument("records_path", type=click.Path(exists=True, file_okay=False))
 @click.option("--allow-update", is_flag=True, help="Update any existing records.")
 @click.option("--publish", is_flag=True, help="Publish records after importing.")
-@click.option(
-    "--allow-republish", is_flag=True, help="Republish any existing, published, records.",
-)
+@click.option("--allow-republish", is_flag=True, help="Republish any existing, published, records.")
 @click.pass_context
 def import_records(
     ctx, records_path: str, allow_update: bool = False, publish: bool = False, allow_republish: bool = False
@@ -163,9 +160,7 @@ def import_records(
 
 @record_commands_blueprint.cli.command("publish")
 @click.argument("record-identifier")
-@click.option(
-    "--allow-republish", is_flag=True, help="Republish any existing, published, record.",
-)
+@click.option("--allow-republish", is_flag=True, help="Republish any existing, published, record.")
 def publish_record(record_identifier: str, allow_republish: bool = False):
     """Publish a record."""
     try:
@@ -200,9 +195,7 @@ def publish_record(record_identifier: str, allow_republish: bool = False):
 
 
 @record_commands_blueprint.cli.command("bulk-publish")
-@click.option(
-    "--force-republish", is_flag=True, help="Republish all existing records too.",
-)
+@click.option("--force-republish", is_flag=True, help="Republish all existing records too.")
 @click.pass_context
 def publish_records(ctx, force_republish: bool = False):
     """Publish all (un)published records."""
@@ -214,9 +207,7 @@ def publish_records(ctx, force_republish: bool = False):
     _record_count = 1
     for record_identifier in record_identifiers:
         print(f"# Record {_record_count}/{len(record_identifiers)}")
-        ctx.invoke(
-            publish_record, record_identifier=record_identifier, allow_republish=force_republish,
-        )
+        ctx.invoke(publish_record, record_identifier=record_identifier, allow_republish=force_republish)
         _record_count += 1
     print(f"Ok. {len(record_identifiers)} records (re)published.")
 
@@ -751,9 +742,8 @@ def copy_assets():
         Path(current_app.config["SITE_PATH"]).joinpath("static").unlink()
     except FileNotFoundError:
         pass
-    copytree(
-        str(Path("./scar_add_metadata_toolbox/static")), str(Path(current_app.config["SITE_PATH"]).joinpath("static"))
-    )
+    with resource_path("scar_add_metadata_toolbox", "static") as static_dir:
+        copytree(str(Path(static_dir)), str(Path(current_app.config["SITE_PATH"]).joinpath("static")))
     print("Ok. static assets copied.")
 
 

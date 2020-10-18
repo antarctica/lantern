@@ -7,12 +7,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-## [0.2.3] - 2020-09-15
-
 ### Added
 
 * API usage documentation 
   [#60](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/60)
+
+### Changed
+
+* Using `api.bas.ac.uk` endpoints in Podman environment configuration
+  [#60](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/60)
+
+## [0.2.3] - 2020-09-15
 
 ### Fixed
 

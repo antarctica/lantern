@@ -233,6 +233,10 @@ insert, update and delete records programmatically.
 The CSW version is fixed to *2.0.2* because it's the latest version supported by
 [OWSLib](https://geopython.github.io/OWSLib/), the CSW client used by the *Metadata editor*.
 
+**Note:** The CSW repositories are considered to be APIs, and so ran as services through the 
+[BAS API Load Balancer](https://gitlab.data.bas.ac.uk/WSF/api-load-balancer) (internal) with documentation in the
+[BAS API Documentation](https://gitlab.data.bas.ac.uk/WSF/api-docs) project (internal).
+
 **Note:** Some elements of both the PyCSW server and the OWSLib client have been extended by this project to incorporate
 OAuth support. These modifications will be formalised, ideally as upstream contributions, but currently reside within
 the 'Hazardous Materials' module as a number of unsightly workarounds are currently needed.
@@ -801,6 +805,19 @@ by, GitLab. See the [Setup section](#docker-image-tag-expiration-policy) for how
 The deployment [Docker image](#docker-image) is deployed as a service job in the experimental
 [MAGIC Nomad cluster](https://gitlab.data.bas.ac.uk/MAGIC/infrastructure/nomad).
 
+### API Service
+
+The CSW Catalogues are deployed as a service within the BAS API Load Balancer, backed by the production 
+[BAS IT service](#bas-it-service).
+
+#### API Documentation
+
+Usage documentation for this API service is held in `docs/api/` and currently 
+[manually](https://gitlab.data.bas.ac.uk/WSF/api-docs#adding-a-service-manually) published using these service paths:
+
+* `s3://bas-api-docs-content-testing/services/data/metadata/add/csw/`
+* `s3://bas-api-docs-content/services/data/metadata/add/csw/`
+
 ### Command line application
 
 The deployment [Docker image](#docker-image) is made available as a command line application on the BAS central
@@ -817,6 +834,7 @@ For all releases:
 1. create a release branch
 2. close release in `CHANGELOG.md`
 3. push changes, merge the release branch into `master` and tag with version
+4. re-deploy API documentation if needed 
 
 ## Feedback
 

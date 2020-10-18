@@ -251,12 +251,16 @@ CSW servers are backed using PostGIS (PostgreSQL) databases provided by BAS IT (
 `bsldb`). As PyCSW uses a single table for all records, all servers share the same database and schema, configured
 through SQLAlchemy connection strings.
 
-Separate databases are used for each environment (currently only production is used), details are stored in the MAGIC
-1Password shared vault. In local development, a local PostGIS database configured in `docker-compose.yml` can be used:
+Separate databases are used for each environment (development, staging and production). Credentials are stored in the 
+MAGIC 1Password shared vault. In local development, a local PostGIS database configured in `docker-compose.yml` can be 
+used:
 
 ```
 postgresql://postgres:password@csw-db/postgres`
 ```
+
+To test against real data in a non-production environment, use the staging environment database, which is synced from
+the production database automatically by BAS IT every Tuesday at 02:00.
 
 ### Jinja templates
 

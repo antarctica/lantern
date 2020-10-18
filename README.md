@@ -459,6 +459,14 @@ configured manually in [GitLab](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata
 * Tags with names matching this regex pattern will expire: `(review.+|build.+)`
 * Tags with names matching this regex pattern will be preserved: `release.+`
 
+### BAS IT
+
+Manually request a new PostGIS database for the CSW catalogue backing databases from the BAS IT ServiceDesk.
+
+Manually request a new application to be deployed from the BAS IT ServiceDesk using the 
+[request template](http://ictdocs.nerc-bas.ac.uk/wiki/index.php/Provisioning_Process#Template_ServiceDesk_request).
+
+See [#44](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/44) for an example.
 
 ### BAS API Load Balancer
 
@@ -813,6 +821,46 @@ by, GitLab. See the [Setup section](#docker-image-tag-expiration-policy) for how
 The deployment [Docker image](#docker-image) is deployed as a service job in the experimental
 [MAGIC Nomad cluster](https://gitlab.data.bas.ac.uk/MAGIC/infrastructure/nomad) (internal).
 
+### BAS IT service
+
+The deployment [Python package](#python-package) is deployed as a WSGI application via BAS IT using an Ansible playbook: 
+[`/playbooks/magic/add-metadata-toolbox.yml`](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/playbooks/magic/add-metadata-toolbox.yml) (internal)
+
+Variables for this application are set in: 
+[`/group_vars/magic/add-metadata-toolbox.yml`](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/group_vars/magic/add-metadata-toolbox.yml) (internal)
+
+Environment variables used by this application are set in: 
+[`/playbooks/magic/add-metadata-toolbox.yml`](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/playbooks/magic/add-metadata-toolbox.yml) (internal)
+
+This application is deployed to a development, staging and production environment. Hosts for each environment are listed 
+in the relevant Ansible inventory in: 
+[`/inventory/magic/`](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/tree/master/inventory/magic) (internal)
+
+**Note:** The process to run/update this playbook/variables is still under development (see 
+[#44](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/44) (internal) for background). Currently 
+either needs to be requested through the [IT ServiceDesk](mailto:servicedesk@bas.ac.uk).
+
+#### Key paths
+
+Key files/directories within this deployed application are:
+
+* `/etc/httpd/sites/10-add-metadata-toolbox.conf`: Apache virtual host
+* `/var/opt/wsgi/.virtualenvs/add-metadata-toolbox`: Python virtual environment
+* `/var/www/add-metadata-toolbox/app.py`: Application entrypoint script
+* `/var/log/httpd/access_log.add_metadata_toolbox`: Apache virtual host access log
+* `/var/log/httpd/error_log.add_metadata_toolbox`: Apache/Application error/log file
+
+#### SSH access
+
+| Environment | SSH Access     | Sudo | Access   |
+| ----------- | -------------- | ---- | -------- |
+| Development | Yes            | Yes  | `felnne` |
+| Staging     | Yes (for logs) | No   | `felnne` |
+| Production  | Yes (for logs) | No   | `felnne` |
+
+Currently access to the servers for each environment is bespoke but should be standardised in future, see 
+[#100](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/100) for more information.
+
 ### API Service
 
 The CSW Catalogues are deployed as a service within the BAS API Load Balancer, backed by the production 
@@ -842,7 +890,8 @@ For all releases:
 1. create a release branch
 2. close release in `CHANGELOG.md`
 3. push changes, merge the release branch into `master` and tag with version
-4. re-deploy API documentation if needed 
+4. create a ServiceDesk request to deploy the new package version (and change/add environment variables if needed)
+5. re-deploy API documentation if needed 
 
 ## Feedback
 

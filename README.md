@@ -88,9 +88,9 @@ Flask application using [CSW](#csw) to store [Metadata records](#metadata-record
 in [Collections](#collections) rendered as [Jinja templates](#jinja-templates) served as a
 [static website](#s3-static-website) within the [BAS data catalogue](https://data.bas.ac.uk).
 
-CSW catalogues are backed by BAS IT provided PostGIS databases, secured using [OAuth](#oauth). Contact forms for
-feedback and items in the static catalogue use [Microsoft Power Automate](#feedback-and-contact-forms). Legal policies
-use templates from the [Legal Policies](https://gitlab.data.bas.ac.uk/web-apps/legal-policies-templates) project.
+CSW catalogues are backed by PostGIS databases, secured using [OAuth](#oauth). Contact forms for feedback and items in 
+the static catalogue use [Microsoft Power Automate](#feedback-and-contact-forms). Legal policies use templates from the 
+[Legal Policies](https://gitlab.data.bas.ac.uk/web-apps/legal-policies-templates) project.
 
 ### Architecture
 
@@ -459,6 +459,14 @@ configured manually in [GitLab](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata
 * Tags with names matching this regex pattern will expire: `(review.+|build.+)`
 * Tags with names matching this regex pattern will be preserved: `release.+`
 
+
+### BAS API Load Balancer
+
+Manually [add a new service](https://gitlab.data.bas.ac.uk/WSF/api-load-balancer#adding-a-new-service) and related
+[documentation](https://gitlab.data.bas.ac.uk/WSF/api-docs#adding-a-new-service-service-version).
+
+See [#60](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/60) for an example.
+
 ## Development
 
 ```shell
@@ -803,7 +811,7 @@ by, GitLab. See the [Setup section](#docker-image-tag-expiration-policy) for how
 ### Nomad service
 
 The deployment [Docker image](#docker-image) is deployed as a service job in the experimental
-[MAGIC Nomad cluster](https://gitlab.data.bas.ac.uk/MAGIC/infrastructure/nomad).
+[MAGIC Nomad cluster](https://gitlab.data.bas.ac.uk/MAGIC/infrastructure/nomad) (internal).
 
 ### API Service
 

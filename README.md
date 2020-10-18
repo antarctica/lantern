@@ -88,9 +88,9 @@ Flask application using [CSW](#csw) to store [Metadata records](#metadata-record
 in [Collections](#collections) rendered as [Jinja templates](#jinja-templates) served as a
 [static website](#s3-static-website) within the [BAS data catalogue](https://data.bas.ac.uk).
 
-CSW catalogues are backed by BAS IT provided PostGIS databases, secured using [OAuth](#oauth). Contact forms for
-feedback and items in the static catalogue use [Microsoft Power Automate](#feedback-and-contact-forms). Legal policies
-use templates from the [Legal Policies](https://gitlab.data.bas.ac.uk/web-apps/legal-policies-templates) project.
+CSW catalogues are backed by PostGIS databases, secured using [OAuth](#oauth). Contact forms for feedback and items in 
+the static catalogue use [Microsoft Power Automate](#feedback-and-contact-forms). Legal policies use templates from the 
+[Legal Policies](https://gitlab.data.bas.ac.uk/web-apps/legal-policies-templates) project.
 
 ### Architecture
 
@@ -232,6 +232,10 @@ insert, update and delete records programmatically.
 
 The CSW version is fixed to *2.0.2* because it's the latest version supported by
 [OWSLib](https://geopython.github.io/OWSLib/), the CSW client used by the *Metadata editor*.
+
+**Note:** The CSW repositories are considered to be APIs, and so ran as services through the 
+[BAS API Load Balancer](https://gitlab.data.bas.ac.uk/WSF/api-load-balancer) (internal) with documentation in the
+[BAS API Documentation](https://gitlab.data.bas.ac.uk/WSF/api-docs) project (internal).
 
 **Note:** Some elements of both the PyCSW server and the OWSLib client have been extended by this project to incorporate
 OAuth support. These modifications will be formalised, ideally as upstream contributions, but currently reside within
@@ -454,6 +458,22 @@ configured manually in [GitLab](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata
 * Number of tags to retain: *10 tag per image name*
 * Tags with names matching this regex pattern will expire: `(review.+|build.+)`
 * Tags with names matching this regex pattern will be preserved: `release.+`
+
+### BAS IT
+
+Manually request a new PostGIS database for the CSW catalogue backing databases from the BAS IT ServiceDesk.
+
+Manually request a new application to be deployed from the BAS IT ServiceDesk using the 
+[request template](http://ictdocs.nerc-bas.ac.uk/wiki/index.php/Provisioning_Process#Template_ServiceDesk_request).
+
+See [#44](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/44) for an example.
+
+### BAS API Load Balancer
+
+Manually [add a new service](https://gitlab.data.bas.ac.uk/WSF/api-load-balancer#adding-a-new-service) and related
+[documentation](https://gitlab.data.bas.ac.uk/WSF/api-docs#adding-a-new-service-service-version).
+
+See [#60](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/60) for an example.
 
 ## Development
 
@@ -799,7 +819,60 @@ by, GitLab. See the [Setup section](#docker-image-tag-expiration-policy) for how
 ### Nomad service
 
 The deployment [Docker image](#docker-image) is deployed as a service job in the experimental
-[MAGIC Nomad cluster](https://gitlab.data.bas.ac.uk/MAGIC/infrastructure/nomad).
+[MAGIC Nomad cluster](https://gitlab.data.bas.ac.uk/MAGIC/infrastructure/nomad) (internal).
+
+### BAS IT service
+
+The deployment [Python package](#python-package) is deployed as a WSGI application via BAS IT using an Ansible playbook: 
+[`/playbooks/magic/add-metadata-toolbox.yml`](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/playbooks/magic/add-metadata-toolbox.yml) (internal)
+
+Variables for this application are set in: 
+[`/group_vars/magic/add-metadata-toolbox.yml`](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/group_vars/magic/add-metadata-toolbox.yml) (internal)
+
+Environment variables used by this application are set in: 
+[`/playbooks/magic/add-metadata-toolbox.yml`](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/playbooks/magic/add-metadata-toolbox.yml) (internal)
+
+This application is deployed to a development, staging and production environment. Hosts for each environment are listed 
+in the relevant Ansible inventory in: 
+[`/inventory/magic/`](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/tree/master/inventory/magic) (internal)
+
+**Note:** The process to run/update this playbook/variables is still under development (see 
+[#44](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/44) (internal) for background). Currently 
+either needs to be requested through the [IT ServiceDesk](mailto:servicedesk@bas.ac.uk).
+
+#### Key paths
+
+Key files/directories within this deployed application are:
+
+* `/etc/httpd/sites/10-add-metadata-toolbox.conf`: Apache virtual host
+* `/var/opt/wsgi/.virtualenvs/add-metadata-toolbox`: Python virtual environment
+* `/var/www/add-metadata-toolbox/app.py`: Application entrypoint script
+* `/var/log/httpd/access_log.add_metadata_toolbox`: Apache virtual host access log
+* `/var/log/httpd/error_log.add_metadata_toolbox`: Apache/Application error/log file
+
+#### SSH access
+
+| Environment | SSH Access     | Sudo | Access   |
+| ----------- | -------------- | ---- | -------- |
+| Development | Yes            | Yes  | `felnne` |
+| Staging     | Yes (for logs) | No   | `felnne` |
+| Production  | Yes (for logs) | No   | `felnne` |
+
+Currently access to the servers for each environment is bespoke but should be standardised in future, see 
+[#100](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/100) for more information.
+
+### API Service
+
+The CSW Catalogues are deployed as a service within the BAS API Load Balancer, backed by the production 
+[BAS IT service](#bas-it-service).
+
+#### API Documentation
+
+Usage documentation for this API service is held in `docs/api/` and currently 
+[manually](https://gitlab.data.bas.ac.uk/WSF/api-docs#adding-a-service-manually) published using these service paths:
+
+* `s3://bas-api-docs-content-testing/services/data/metadata/add/csw/`
+* `s3://bas-api-docs-content/services/data/metadata/add/csw/`
 
 ### Command line application
 
@@ -817,6 +890,8 @@ For all releases:
 1. create a release branch
 2. close release in `CHANGELOG.md`
 3. push changes, merge the release branch into `master` and tag with version
+4. create a ServiceDesk request to deploy the new package version (and change/add environment variables if needed)
+5. re-deploy API documentation if needed 
 
 ## Feedback
 

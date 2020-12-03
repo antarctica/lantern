@@ -146,9 +146,6 @@ package:
    - "poetry version $VERSION"
    - "poetry build"
  needs:
-   - job: pytest
-   - job: black
-   - job: bandit
    - job: version
      artifacts: true
  artifacts:

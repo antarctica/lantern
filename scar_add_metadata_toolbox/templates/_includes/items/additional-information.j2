@@ -53,6 +53,8 @@
         <dd>
             {% if item.status == 'current' %}
                 <span class="bsk-text-success"><i class="fa-fw far fa-check"></i> Current</span>
+            {% elif item.status == 'outdated' %}
+                <span class="bsk-text-warning"><i class="fa-fw far fa-exclamation-triangle"></i> Outdated</span>
             {% endif %}
         </dd>
     </dl>

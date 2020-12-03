@@ -10,6 +10,8 @@
         <dd>
             {% if item.status == 'current' %}
                 <span class="bsk-label bsk-label-success"><i class="fa-fw far fa-check"></i> Current</span>
+            {% elif item.status == 'outdated' %}
+                <span class="bsk-label bsk-label-warning"><i class="fa-fw far fa-exclamation-triangle"></i> Outdated</span>
             {% endif %}
             {% if item.maintenance_frequency == 'Biannually (every 6 months)' %}
                 (Updated every 6 months)

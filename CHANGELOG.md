@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Adding missing label for outdated items in item template
   [#107](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/107)
+* Incorrect name of CLI in command reference documentation
+  [#103](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/103)
 
 ### Changed
 

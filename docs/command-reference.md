@@ -7,33 +7,33 @@
 When using the BAS central workstations as the `geoweb` user use:
 
 ```
-add-metadata-toolbox [command]
+$ scar-add-metadata-toolbox [command]
 ```
 
 E.g.:
 
 ```
-add-metadata-toolbox version
+$ scar-add-metadata-toolbox version
 ```
 
 Otherwise run commands using:
 
 ```
-flask [command]
+$ flask [command]
 ```
 
 ### Listing commands
 
-All application commands can be listed by running the `add-metadata-toolbox` or `flask` without a command, or by adding 
-the `--help` option (`add-metadata-toolbox --help` or `flask --help`).
+All application commands can be listed by running the `scar-add-metadata-toolbox` or `flask` without a command, or by 
+adding the `--help` option (`scar-add-metadata-toolbox --help` or `flask --help`).
 
 This will list all top level commands or command groups. Commands within a group can be listed by calling the group as
-a command (and optionally `--help` option), e.g. `add-metadata-toolbox records --help` or `flask records --help`.
+a command (and optionally `--help` option), e.g. `scar-add-metadata-toolbox records --help` or `flask records --help`.
 
 ### Command help
 
 A brief description of each command and its options can be listed using the `--help` option, e.g. 
-`add-metadata-toolbox records import --help` or `flask records import --help`.
+`scar-add-metadata-toolbox records import --help` or `flask records import --help`.
 
 ### Bulk commands
 
@@ -139,7 +139,7 @@ You can sign-in again if you need to get a new user access token (if your permis
 override any existing token.
 
 ```
-add-metadata-toolbox auth sign-in
+$ scar-add-metadata-toolbox auth sign-in
 To sign-in, visit 'https://microsoft.com/devicelogin', enter this code 'XXXXXXXXX' and then press any key...
 Ok. Access token for 'Connie Watson' set in '/usr/src/app/auth.json'.
 ```
@@ -151,7 +151,7 @@ Remove existing access token if present.
 In some cases you may want to intentionally clear your user access token, rather than allowing it to expire.
 
 ```
-add-metadata-toolbox auth sign-out
+$ scar-add-metadata-toolbox auth sign-out
 Ok. Access token removed.
 ```
 
@@ -169,7 +169,7 @@ e.g. `e74543c0-4c4e-4b41-aa33-5bb2f67df389.json`
 **Note:** The export directory must already exist.
 
 ```
-add-metadata-toolbox collections bulk-export /tmp/collections/
+$ scar-add-metadata-toolbox collections bulk-export /tmp/collections/
 1 collections to (re)export.
 # Collection 1/1
 Ok. Collection 'e74543c0-4c4e-4b41-aa33-5bb2f67df389' exported.
@@ -179,7 +179,7 @@ Ok. 1 collections (re)exported.
 If the directory you are exporting to already has exported collections you will get an error:
 
 ```
-add-metadata-toolbox collections bulk-export /tmp/collections/
+$ scar-add-metadata-toolbox collections bulk-export /tmp/collections/
 1 collections to (re)export.
 # Collection 1/1
 No. Export of collection 'e74543c0-4c4e-4b41-aa33-5bb2f67df389' would be overwritten. Add `--allow-overwrite` flag to allow.
@@ -188,7 +188,7 @@ No. Export of collection 'e74543c0-4c4e-4b41-aa33-5bb2f67df389' would be overwri
 If you'd like to update them, add the `--allow-overwrite` option:
 
 ```
-add-metadata-toolbox collections bulk-export /tmp/collections/ --allow-overwrite
+$ scar-add-metadata-toolbox collections bulk-export /tmp/collections/ --allow-overwrite
 1 collections to (re)export.
 # Collection 1/1
 Ok. Collection 'e74543c0-4c4e-4b41-aa33-5bb2f67df389' re-exported.
@@ -200,7 +200,7 @@ Ok. 1 collections (re)exported.
 Import records from files in a directory.
 
 ```
-add-metadata-toolbox collections bulk-import /tmp/collections/
+$ scar-add-metadata-toolbox collections bulk-import /tmp/collections/
 1 collections to import/update.
 # collection 1/1
 Ok. Collection 'e74543c0-4c4e-4b41-aa33-5bb2f67df389' imported.
@@ -210,7 +210,7 @@ Ok. 1 collections imported/updated.
 If the directory you are importing from contains collections have already exist you will get an error:
 
 ```
-add-metadata-toolbox collections bulk-import /tmp/collections/
+$ scar-add-metadata-toolbox collections bulk-import /tmp/collections/
 1 collections to import/update.
 # Collection 1/1
 No. Collection 'e74543c0-4c4e-4b41-aa33-5bb2f67df389' already exists. Add `--allow-update` flag to allow.
@@ -219,7 +219,7 @@ No. Collection 'e74543c0-4c4e-4b41-aa33-5bb2f67df389' already exists. Add `--all
 If you'd like to re-import and update them, add the `--allow-update` option:
 
 ```
-add-metadata-toolbox collections bulk-import /tmp/collections/ --allow-update
+$ scar-add-metadata-toolbox collections bulk-import /tmp/collections/ --allow-update
 1 collections to import/update.
 # Collection 1/1
 Ok. Collection 'e74543c0-4c4e-4b41-aa33-5bb2f67df389' updated.
@@ -233,7 +233,7 @@ Remove all collections.
 **WARNING!** Deleted collections cannot be recovered unless they have been exported as a backup first.
 
 ```
-add-metadata-toolbox collections bulk-remove
+$ scar-add-metadata-toolbox collections bulk-remove
 CONFIRM: Permanently remove all 3 collections? [y/N]: y
 1 collections to remove.
 # Collection 1/1
@@ -252,21 +252,21 @@ Export a collection to a file.
 the `.json` file extension.
 
 ```
-add-metadata-toolbox collections export e74543c0-4c4e-4b41-aa33-5bb2f67df389 /tmp/collection.json
+$ scar-add-metadata-toolbox collections export e74543c0-4c4e-4b41-aa33-5bb2f67df389 /tmp/collection.json
 Ok. Collection 'e74543c0-4c4e-4b41-aa33-5bb2f67df389' exported.
 ```
 
 If the file you are exporting to already has exists you will get an error:
 
 ```
-add-metadata-toolbox collections export e74543c0-4c4e-4b41-aa33-5bb2f67df389 /tmp/collection.json
+$ scar-add-metadata-toolbox collections export e74543c0-4c4e-4b41-aa33-5bb2f67df389 /tmp/collection.json
 No. Export of collection 'e74543c0-4c4e-4b41-aa33-5bb2f67df389' would be overwritten. Add `--allow-overwrite` flag to allow.
 ```
 
 If you'd like to update the file, add the `--allow-overwrite` option:
 
 ```
-add-metadata-toolbox collections export e74543c0-4c4e-4b41-aa33-5bb2f67df389 /tmp/collection.json --allow-overwrite
+$ scar-add-metadata-toolbox collections export e74543c0-4c4e-4b41-aa33-5bb2f67df389 /tmp/collection.json --allow-overwrite
 Ok. Collection 'e74543c0-4c4e-4b41-aa33-5bb2f67df389' re-exported.
 ```
 
@@ -277,21 +277,21 @@ Import a collection from a file.
 See the [Collections](../README.md#collections) README section for how to write a new collection.
 
 ```
-add-metadata-toolbox collections import /tmp/collections/e74543c0-4c4e-4b41-aa33-5bb2f67df389.json
+$ scar-add-metadata-toolbox collections import /tmp/collections/e74543c0-4c4e-4b41-aa33-5bb2f67df389.json
 Ok. Collection 'e74543c0-4c4e-4b41-aa33-5bb2f67df389' imported.
 ```
 
 If the file you are importing contains a collection that already exists you will get an error:
 
 ```
-add-metadata-toolbox collections import /tmp/collections/e74543c0-4c4e-4b41-aa33-5bb2f67df389.json
+$ scar-add-metadata-toolbox collections import /tmp/collections/e74543c0-4c4e-4b41-aa33-5bb2f67df389.json
 No. Collection 'e74543c0-4c4e-4b41-aa33-5bb2f67df389' already exists. Add `--allow-update` flag to allow.
 ```
 
 If you'd like to update the collection from the file, add the `--allow-update` option:
 
 ```
-add-metadata-toolbox collections import /tmp/collections/e74543c0-4c4e-4b41-aa33-5bb2f67df389.json --allow-update
+$ scar-add-metadata-toolbox collections import /tmp/collections/e74543c0-4c4e-4b41-aa33-5bb2f67df389.json --allow-update
 Ok. Collection 'e74543c0-4c4e-4b41-aa33-5bb2f67df389' updated.
 ```
 
@@ -302,7 +302,7 @@ View details for a collection.
 **Note:** You need to be signed in with permission to edit metadata records to use this command.
 
 ```
-add-metadata-toolbox collections inspect e74543c0-4c4e-4b41-aa33-5bb2f67df389
+$ scar-add-metadata-toolbox collections inspect e74543c0-4c4e-4b41-aa33-5bb2f67df389
 Ok. Collection details for 'e74543c0-4c4e-4b41-aa33-5bb2f67df389':
 
 Identifier: e74543c0-4c4e-4b41-aa33-5bb2f67df389
@@ -346,7 +346,7 @@ Items in collection: 18
 List all collections.
  
 ```
-add-metadata-toolbox collections list
+$ scar-add-metadata-toolbox collections list
 
 ╒══════════════════════════════════════╤═══════════════════════════════════════╤═════════════════╕
 │ Collection Identifier                │ Collection Title                      │   Items (count) │
@@ -364,7 +364,7 @@ Remove a collection.
 **WARNING!** Deleted collections cannot be recovered unless they have been exported as a backup first.
 
 ```
-add-metadata-toolbox collections remove e74543c0-4c4e-4b41-aa33-5bb2f67df389
+$ scar-add-metadata-toolbox collections remove e74543c0-4c4e-4b41-aa33-5bb2f67df389
 Ok. Collection 'e74543c0-4c4e-4b41-aa33-5bb2f67df389' removed.
 ```
 
@@ -387,7 +387,7 @@ This command requires the name of a CSW catalogue to initialise, for which valid
 **Note:** This command only needs to be ran as part of setting up this application for the first time. 
 
 ```
-add-metadata-toolbox csw setup unpublished
+$ scar-add-metadata-toolbox csw setup unpublished
 Ok. Catalogue 'unpublished' setup.
 ```
 
@@ -407,7 +407,7 @@ e.g. `2cddeea3-eb67-46af-a002-8251337984d4.json`
 **Note:** The export directory must already exist.
 
 ```
-add-metadata-toolbox records bulk-export /tmp/records/
+$ scar-add-metadata-toolbox records bulk-export /tmp/records/
 18 records to (re)export.
 # Record 1/18
 Ok. Record '2cddeea3-eb67-46af-a002-8251337984d4' exported.
@@ -451,7 +451,7 @@ Ok. 18 records (re)exported.
 If the directory you are exporting to already has exported records you will get an error:
 
 ```
-add-metadata-toolbox records bulk-export /tmp/records/
+$ scar-add-metadata-toolbox records bulk-export /tmp/records/
 18 records to (re)export.
 # Record 1/18
 No. Export of record '2cddeea3-eb67-46af-a002-8251337984d4' would be overwritten. Add `--allow-overwrite` flag to allow.
@@ -460,7 +460,7 @@ No. Export of record '2cddeea3-eb67-46af-a002-8251337984d4' would be overwritten
 If you'd like to update them, add the `--allow-overwrite` option:
 
 ```
-add-metadata-toolbox records bulk-export /tmp/records/ --allow-overwrite
+$ scar-add-metadata-toolbox records bulk-export /tmp/records/ --allow-overwrite
 18 records to (re)export.
 # Record 1/18
 Ok. Record '2cddeea3-eb67-46af-a002-8251337984d4' re-exported.
@@ -508,7 +508,7 @@ Import records from files in a directory.
 **Note:** You need to be signed in with permission to edit metadata records to use this command.
 
 ```
-add-metadata-toolbox records bulk-import /tmp/records
+$ scar-add-metadata-toolbox records bulk-import /tmp/records
 18 records to import/update.
 # Record 1/18
 Ok. Record '2cddeea3-eb67-46af-a002-8251337984d4' imported.
@@ -552,7 +552,7 @@ Ok. 18 records imported/updated.
 If the directory you are importing from contains collections have already exist you will get an error:
 
 ```
-add-metadata-toolbox records bulk-import /tmp/records
+$ scar-add-metadata-toolbox records bulk-import /tmp/records
 18 records to import/update.
 # Record 1/18
 No. Record '4149c45d-ce29-49f3-88ed-8366fe1afa23' already exists. Add `--allow-update` flag to allow.
@@ -561,7 +561,7 @@ No. Record '4149c45d-ce29-49f3-88ed-8366fe1afa23' already exists. Add `--allow-u
 If you'd like to re-import and update them, add the `--allow-update` option:
 
 ```
-add-metadata-toolbox records bulk-import /tmp/records --allow-update
+$ scar-add-metadata-toolbox records bulk-import /tmp/records --allow-update
 18 records to import/update.
 # Record 1/18
 Ok. Record '4149c45d-ce29-49f3-88ed-8366fe1afa23' updated.
@@ -605,7 +605,7 @@ Ok. 18 records imported/updated.
 To automatically publish records after import add the `--publish` option:
 
 ```
-add-metadata-toolbox records bulk-import /tmp/records --publish
+$ scar-add-metadata-toolbox records bulk-import /tmp/records --publish
 18 records to import/update.
 # Record 1/18
 Ok. Record '4149c45d-ce29-49f3-88ed-8366fe1afa23' imported.
@@ -668,7 +668,7 @@ Updated records will still be considered published (as they will have the same f
 records add the `--allow-republish` option.
 
 ```
-add-metadata-toolbox records bulk-import /tmp/records --publish --allow-update --allow-republish
+$ scar-add-metadata-toolbox records bulk-import /tmp/records --publish --allow-update --allow-republish
 18 records to import/update.
 # Record 1/18
 Ok. Record '4149c45d-ce29-49f3-88ed-8366fe1afa23' updated.
@@ -734,7 +734,7 @@ Publish all (un)published records.
 **Note:** You need to be signed in with permission to publish/retract metadata records to use this command.
 
 ```
-add-metadata-toolbox records bulk-publish
+$ scar-add-metadata-toolbox records bulk-publish
 18 records to (re)publish.
 # Record 1/18
 Ok. Record 'dd6dd055-481e-4de2-8444-e00d7536f779' published.
@@ -830,7 +830,7 @@ Remove all unpublished records.
 **WARNING!** Deleted records cannot be recovered unless they have been exported as a backup first.
 
 ```
-add-metadata-toolbox records bulk-remove
+$ scar-add-metadata-toolbox records bulk-remove
 CONFIRM: Permanently remove all 18 unpublished records? [y/N]: y
 18 records to remove.
 # Record 1/18
@@ -879,7 +879,7 @@ Retract all published records.
 **Note:** You need to be signed in with permission to publish/retract metadata records to use this command.
 
 ```
-add-metadata-toolbox records bulk-retract
+$ scar-add-metadata-toolbox records bulk-retract
 18 records to retract.
 # Record 1/18
 Ok. Record 'c1ed29bc-6136-4467-8357-00d426c8850c' retracted.
@@ -930,21 +930,21 @@ Export a record to a file.
 `.json` file extension.
 
 ```
-add-metadata-toolbox records export 4149c45d-ce29-49f3-88ed-8366fe1afa23 /tmp/record.json
+$ scar-add-metadata-toolbox records export 4149c45d-ce29-49f3-88ed-8366fe1afa23 /tmp/record.json
 Ok. Record '4149c45d-ce29-49f3-88ed-8366fe1afa23' exported.
 ```
 
 If the file you are exporting to already has exists you will get an error:
 
 ```
-add-metadata-toolbox records export 4149c45d-ce29-49f3-88ed-8366fe1afa23 /tmp/record.json
+$ scar-add-metadata-toolbox records export 4149c45d-ce29-49f3-88ed-8366fe1afa23 /tmp/record.json
 No. Export of record '4149c45d-ce29-49f3-88ed-8366fe1afa23' would be overwritten. Add `--allow-overwrite` flag to allow.
 ```
 
 If you'd like to update the file, add the `--allow-overwrite` option:
 
 ```
-add-metadata-toolbox collections export e74543c0-4c4e-4b41-aa33-5bb2f67df389 /tmp/collection.json --allow-overwrite
+$ scar-add-metadata-toolbox collections export e74543c0-4c4e-4b41-aa33-5bb2f67df389 /tmp/collection.json --allow-overwrite
 Ok. Record '4149c45d-ce29-49f3-88ed-8366fe1afa23' re-exported.
 ```
 
@@ -958,28 +958,28 @@ See the [Provisional guidance (internal)](https://gitlab.data.bas.ac.uk/MAGIC/ad
 write a new record.
 
 ```
-add-metadata-toolbox records import /tmp/record.json
+$ scar-add-metadata-toolbox records import /tmp/record.json
 Ok. Record '4149c45d-ce29-49f3-88ed-8366fe1afa23' imported.
 ```
 
 If the file you are importing contains a record that already exists you will get an error:
 
 ```
-add-metadata-toolbox records import /tmp/record.json
+$ scar-add-metadata-toolbox records import /tmp/record.json
 No. Record '4149c45d-ce29-49f3-88ed-8366fe1afa23' already exists. Add `--allow-update` flag to allow.
 ```
 
 If you'd like to update the record from the file, add the `--allow-update` option:
 
 ```
-add-metadata-toolbox records import /tmp/record.json --allow-update
+$ scar-add-metadata-toolbox records import /tmp/record.json --allow-update
 Ok. Record '4149c45d-ce29-49f3-88ed-8366fe1afa23' updated.
 ```
 
 To automatically publish the record after import add the `--publish` option:
 
 ```
-add-metadata-toolbox records import /tmp/record.json --publish
+$ scar-add-metadata-toolbox records import /tmp/record.json --publish
 Ok. Record '4149c45d-ce29-49f3-88ed-8366fe1afa23' imported.
 Ok. Record '4149c45d-ce29-49f3-88ed-8366fe1afa23' published.
 ```
@@ -988,7 +988,7 @@ An updated record will still be considered published (as they will have the same
 updated record add the `--allow-republish` option.
 
 ```
-add-metadata-toolbox records import /tmp/record.json --publish --allow-update --allow-republish
+$ scar-add-metadata-toolbox records import /tmp/record.json --publish --allow-update --allow-republish
 Ok. Record '4149c45d-ce29-49f3-88ed-8366fe1afa23' updated.
 Ok. Record '4149c45d-ce29-49f3-88ed-8366fe1afa23' republished.
 ```
@@ -1000,7 +1000,7 @@ List all records.
 **Note:** You need to be signed in with permission to edit metadata records to use this command.
 
 ```
-add-metadata-toolbox records list
+$ scar-add-metadata-toolbox records list
 
 ╒══════════════════════════════════════╤══════════════════════════════════════════════════════════════════╤═════════════╕
 │ Record Identifier                    │ Record Title                                                     │ Status      │
@@ -1052,21 +1052,21 @@ Publish a record.
 **Note:** You need to be signed in with permission to publish/retract metadata records to use this command.
 
 ```
-add-metadata-toolbox records publish 4149c45d-ce29-49f3-88ed-8366fe1afa23
+$ scar-add-metadata-toolbox records publish 4149c45d-ce29-49f3-88ed-8366fe1afa23
 Ok. Record '4149c45d-ce29-49f3-88ed-8366fe1afa23' published.
 ```
 
 If the record you are publishing has already been published you will get an error:
 
 ```
-add-metadata-toolbox records publish 4149c45d-ce29-49f3-88ed-8366fe1afa23
+$ scar-add-metadata-toolbox records publish 4149c45d-ce29-49f3-88ed-8366fe1afa23
 No. Record '4149c45d-ce29-49f3-88ed-8366fe1afa23' already published. Add `--allow-republish` flag to allow.
 ```
 
 If you'd like to republish the record to match its unpublished version, add the `--allow-republish` option:
 
 ```
-add-metadata-toolbox records publish 4149c45d-ce29-49f3-88ed-8366fe1afa23 --allow-republish
+$ scar-add-metadata-toolbox records publish 4149c45d-ce29-49f3-88ed-8366fe1afa23 --allow-republish
 Ok. Record '4149c45d-ce29-49f3-88ed-8366fe1afa23' republished.
 ```
 
@@ -1081,7 +1081,7 @@ Remove an unpublished record.
 **WARNING!** Deleted records cannot be recovered unless they have been exported as a backup first.
 
 ```
-add-metadata-toolbox records remove 4149c45d-ce29-49f3-88ed-8366fe1afa23
+$ scar-add-metadata-toolbox records remove 4149c45d-ce29-49f3-88ed-8366fe1afa23
 CONFIRM: Permanently remove record '4149c45d-ce29-49f3-88ed-8366fe1afa23'? [y/N]: y
 Ok. Record '4149c45d-ce29-49f3-88ed-8366fe1afa23' removed.
 ```
@@ -1096,7 +1096,7 @@ Retract a published record.
 **Note:** You need to be signed in with permission to publish/retract metadata records to use this command.
 
 ```
-add-metadata-toolbox records retract 4149c45d-ce29-49f3-88ed-8366fe1afa23
+$ scar-add-metadata-toolbox records retract 4149c45d-ce29-49f3-88ed-8366fe1afa23
 Ok. Record '4149c45d-ce29-49f3-88ed-8366fe1afa23' retracted.
 ```
 
@@ -1122,7 +1122,7 @@ Generates a given number of collections using fake data. A random number of reco
 this command should therefore be ran after seeding records.
 
 ```
-add-metadata-toolbox seed collections 3
+$ scar-add-metadata-toolbox seed collections 3
 3 collections to insert.
 # Collection 1/3
 Ok. Inserted collection '1a2296cc-a3c1-4085-ab0a-5d04da4abd6f.
@@ -1140,7 +1140,7 @@ Create sample records for testing.
 Generates a given number of records using fake data.
 
 ```
-add-metadata-toolbox seed records 3
+$ scar-add-metadata-toolbox seed records 3
 3 records to insert.
 # Record 1/3
 Ok. Inserted record '17b41473-184f-4f63-8ee4-b99f00312c88.
@@ -1166,7 +1166,7 @@ Build all static site components.
 **Note:** You need to be signed in with permission to edit metadata records to use this command.
 
 ```
-add-metadata-toolbox site build
+$ scar-add-metadata-toolbox site build
 54 record pages to generate.
 # Record page 1/18 (stylesheet 1/3)
 Ok. Generated item page for '862f7159-9e0d-46e2-9684-df1bf924dabc' (stylesheet 'iso-html').
@@ -1340,7 +1340,7 @@ Build pages for all collections.
 **Note:** You need to be signed in with permission to edit metadata records to use this command.
 
 ```
-add-metadata-toolbox site build-collections
+$ scar-add-metadata-toolbox site build-collections
 1 collection pages to generate.
 # Collection page 1/1
   [####################################]  100%          
@@ -1355,7 +1355,7 @@ Build pages for all items.
 **Note:** You need to be signed in with permission to edit metadata records to use this command.
 
 ```
-add-metadata-toolbox site build-items
+$ scar-add-metadata-toolbox site build-items
 18 item pages to generate.
 # Item page 1/18
 Ok. Generated item page for '862f7159-9e0d-46e2-9684-df1bf924dabc'.
@@ -1401,7 +1401,7 @@ Ok. 18 item pages generated.
 Build pages for legal policies and feedback form.
 
 ```
-add-metadata-toolbox site build-pages
+$ scar-add-metadata-toolbox site build-pages
 3 legal pages to generate.
 # Legal page 1/3
 Ok. Generated legal page for 'cookies'.
@@ -1420,7 +1420,7 @@ Build pages for all records (XML).
 **Note:** You need to be signed in with permission to edit metadata records to use this command.
 
 ```
-add-metadata-toolbox site build-records
+$ scar-add-metadata-toolbox site build-records
 54 record pages to generate.
 # Record page 1/18 (stylesheet 1/3)
 Ok. Generated item page for '862f7159-9e0d-46e2-9684-df1bf924dabc' (stylesheet 'iso-html').
@@ -1538,7 +1538,7 @@ Ok. 54 record pages generated.
 Copy all static assets (CSS, JS, etc.).
 
 ```
-add-metadata-toolbox site copy-assets
+$ scar-add-metadata-toolbox site copy-assets
 Ok. static assets copied.
 ```
 
@@ -1549,7 +1549,7 @@ Publish static site build to remote location.
 **WARNING:** This will replace the contents of the static site. 
 
 ```
-add-metadata-toolbox site publish
+$ scar-add-metadata-toolbox site publish
 CONFIRM: Publish static site to 'add-catalogue-integration.data.bas.ac.uk'? [y/N]: y
 upload: _site/collections/1790c9d5-af77-4a03-9a08-6ba8e83ce748/index.html to s3://add-catalogue-integration.data.bas.ac.uk/collections/1790c9d5-af77-4a03-9a08-6ba8e83ce748/index.html
 delete: s3://add-catalogue-integration.data.bas.ac.uk/collections/4d62ce11-fc98-4aca-9564-8abe11d79d9a/index.html
@@ -1651,7 +1651,7 @@ To build site content and the publish it, add the `--build` option.
 **Note:** You need to be signed in with permission to edit metadata records to use this option.
 
 ```
-add-metadata-toolbox site publish --build
+$ scar-add-metadata-toolbox site publish --build
 54 record pages to generate.
 # Record page 1/18 (stylesheet 1/3)
 Ok. Generated item page for '862f7159-9e0d-46e2-9684-df1bf924dabc' (stylesheet 'iso-html').
@@ -1898,10 +1898,10 @@ Ok. Site published to 'add-catalogue-integration.data.bas.ac.uk'
 ```
 
 ## `version`
-  
+
 Show application version.
 
 ```
-add-metadata-toolbox version
+$ scar-add-metadata-toolbox version
 SCAR ADD Metadata Toolbox version: 0.0.0
 ```

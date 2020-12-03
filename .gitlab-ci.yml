@@ -89,6 +89,9 @@ version:
   artifacts:
     reports:
       dotenv: build.env
+  rules:
+    - changes:
+      - 'scar_add_metadata_toolbox/**/*.*'
 
 pytest:
   stage: 🧪 test
@@ -283,7 +286,7 @@ pypi-testing:
     - job: package
       artifacts: true
   rules:
-    - if: '$CI_COMMIT_TAG == null'
+    - if: '$CI_COMMIT_TAG == null && $CI_COMMIT_BRANCH != "master"'
       changes:
         - 'scar_add_metadata_toolbox/**/*.*'
 
@@ -363,3 +366,5 @@ sentry:
  rules:
    - if: '$CI_COMMIT_TAG != null'
    - if: '$CI_COMMIT_BRANCH != "master"'
+     changes:
+      - 'scar_add_metadata_toolbox/**/*.*'

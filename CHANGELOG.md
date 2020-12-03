@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Adding IT setup/deployment instructions 
   [#44](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/44)
 
+### Fixed
+
+* Adding missing label for outdated items in item template
+  [#107](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/107)
+
 ### Changed
 
 * Using `api.bas.ac.uk` endpoints in Podman environment configuration

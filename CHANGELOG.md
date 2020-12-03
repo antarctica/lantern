@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#107](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/107)
 * Incorrect name of CLI in command reference documentation
   [#103](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/103)
+* Using `release` instead of `review` images reference in Podman wrapper script
+  [#76](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/76)
 
 ### Changed
 

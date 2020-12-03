@@ -196,7 +196,7 @@ podman-wrapper:
    entrypoint: [""]
  before_script:
    - "cd provisioning/podman"
-   - "export TF_VAR_registry_image=$CI_REGISTRY_IMAGE/review:$CI_COMMIT_REF_SLUG"
+   - "export TF_VAR_registry_image=$CI_REGISTRY_IMAGE/release:$CI_COMMIT_REF_SLUG"
    - "export TF_VAR_app_csw_connection_string_published=$APP_CSW_CONNECTION_STRING_PUBLISHED"
    - "export TF_VAR_app_csw_connection_string_unpublished=$APP_CSW_CONNECTION_STRING_UNPUBLISHED"
    - "export TF_VAR_app_s3_static_site_bucket=$APP_STATIC_SITE_S3_BUCKET"

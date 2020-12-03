@@ -22,7 +22,7 @@ packages = [
 
 [tool.poetry.dependencies]
 awscli = "^1.18.93"
-bas-metadata-library = "^0.3.0"
+bas-metadata-library = "^0.3.1"
 bas-style-kit-jinja-templates = "^0.5.0"
 click-spinner = "^0.1.10"
 Faker = "^4.1.1"
@@ -55,7 +55,7 @@ importlib_resources = "^3.0.0"
 backports-datetime-fromisoformat = "^1.0.0"
 
 [tool.poetry.dev-dependencies]
-black = "^19.10b0"
+black = "^20.8b1"
 bandit = "^1.6.2"
 pytest = "^5.3.2"
 pytest-cov = "^2.8.1"

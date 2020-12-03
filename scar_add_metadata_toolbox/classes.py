@@ -7,6 +7,7 @@ from typing import Dict, List, Union
 from urllib.parse import urlparse as url_parse, parse_qs as query_string_parse
 
 from backports.datetime_fromisoformat import MonkeyPatch
+from bas_metadata_library.standards.iso_19115_2_v1 import MetadataRecord
 from dateutil.relativedelta import relativedelta
 from markdown import markdown
 
@@ -18,7 +19,6 @@ from scar_add_metadata_toolbox.csw import (
 )
 
 from scar_add_metadata_toolbox.hazmat.metadata import (
-    generate_record_config_from_record_xml,
     generate_xml_record_from_record_config_without_xml_declaration,
     dump_record_to_json,
     load_record_from_json,
@@ -480,8 +480,9 @@ class Repository:
         :return: requested record
         """
         record_xml = self.csw_client.get_record(identifier=record_identifier, mode=CSWGetRecordMode.FULL)
-        record_config = generate_record_config_from_record_xml(record_xml=record_xml)
-        return Record(config=record_config)
+        record_config = MetadataRecord(record=record_xml).make_config()
+        record_config.validate()
+        return Record(config=record_config.config)
 
     def retrieve_records(self) -> List[Record]:
         """
@@ -498,8 +499,9 @@ class Repository:
         :return: all records
         """
         for record_xml in self.csw_client.get_records(mode=CSWGetRecordMode.FULL):
-            record_config = generate_record_config_from_record_xml(record_xml=record_xml)
-            yield Record(config=record_config)
+            record_config = MetadataRecord(record=record_xml).make_config()
+            record_config.validate()
+            yield Record(config=record_config.config)
 
     def list_record_identifiers(self) -> List[str]:
         """
@@ -523,8 +525,8 @@ class Repository:
         """
         _record_summaries = {}
         for record_xml in self.csw_client.get_records(mode=CSWGetRecordMode.BRIEF):
-            record_config = generate_record_config_from_record_xml(record_xml=record_xml, validate_record_config=False)
-            record = RecordSummary(config=record_config)
+            record_config = MetadataRecord(record=record_xml).make_config()
+            record = RecordSummary(config=record_config.config)
             _record_summaries[record.identifier] = record
         return _record_summaries
 

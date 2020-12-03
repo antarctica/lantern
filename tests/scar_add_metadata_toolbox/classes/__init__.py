@@ -1,11 +1,11 @@
 from typing import List, Optional
 from pathlib import Path
 
+from bas_metadata_library.standards.iso_19115_2_v1 import MetadataRecord
 from flask import Request, Response, current_app
 from flask_azure_oauth import AzureToken
 from flask_azure_oauth.tokens import TestJwt
 
-from scar_add_metadata_toolbox.hazmat.metadata import generate_record_config_from_record_xml
 from scar_add_metadata_toolbox.csw import (
     CSWServer,
     CSWClient,
@@ -60,8 +60,8 @@ class MockCSWClient(CSWClient):
     def insert_record(self, record: str) -> None:
         if isinstance(record, bytes):
             record = record.decode()
-        _record_config = generate_record_config_from_record_xml(record_xml=record)
-        _identifier = _record_config["file_identifier"]
+        _record_config = MetadataRecord(record=record).make_config().config
+        _identifier = str(_record_config["file_identifier"])
 
         if _identifier in self._records.keys():
             raise RecordInsertConflictException()
@@ -71,8 +71,8 @@ class MockCSWClient(CSWClient):
     def update_record(self, record: str) -> None:
         if isinstance(record, bytes):
             record = record.decode()
-        _record_config = generate_record_config_from_record_xml(record_xml=record)
-        _identifier = _record_config["file_identifier"]
+        _record_config = MetadataRecord(record=record).make_config().config
+        _identifier = str(_record_config["file_identifier"])
 
         self._records[_identifier] = {"full": record, "brief": record}
 

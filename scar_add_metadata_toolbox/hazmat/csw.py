@@ -151,7 +151,13 @@ class CSWAuth(Authentication):
     _TOKEN = None
 
     def __init__(
-        self, token=None, username=None, password=None, cert=None, verify=True, shared=False,
+        self,
+        token=None,
+        username=None,
+        password=None,
+        cert=None,
+        verify=True,
+        shared=False,
     ):
         """
         :param str token=None: Token for bearer authentication, None for
@@ -189,7 +195,13 @@ class CSWAuth(Authentication):
 
     def __repr__(self, *args, **kwargs):
         return "<{} shared={} token={} username={} password={} cert={} verify={}>".format(
-            self.__class__.__name__, self.shared, self.token, self.username, self.password, self.cert, self.verify,
+            self.__class__.__name__,
+            self.shared,
+            self.token,
+            self.username,
+            self.password,
+            self.cert,
+            self.verify,
         )
 
 
@@ -382,7 +394,8 @@ class CSWClient(_CatalogueServiceWeb):
                 node0.set("startPosition", str(startposition))
             node0.set("maxRecords", str(maxrecords))
             node0.set(
-                util.nspath_eval("xsi:schemaLocation", csw_namespaces), csw_schema_location,
+                util.nspath_eval("xsi:schemaLocation", csw_namespaces),
+                csw_schema_location,
             )
 
             node1 = etree.SubElement(node0, util.nspath_eval("csw:Query", csw_namespaces))
@@ -475,5 +488,10 @@ def convert_csw_brief_gmd_to_gmi_xml(record_xml: str) -> str:
     for gmd_sub_element in gmd_sub_elements:
         gmi_xml_element.append(gmd_sub_element)
 
-    record_xml = tostring(ElementTree(gmi_xml_element), pretty_print=True, xml_declaration=False, encoding="utf-8",)
+    record_xml = tostring(
+        ElementTree(gmi_xml_element),
+        pretty_print=True,
+        xml_declaration=False,
+        encoding="utf-8",
+    )
     return record_xml.decode()

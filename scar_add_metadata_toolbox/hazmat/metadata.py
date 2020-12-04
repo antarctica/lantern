@@ -39,10 +39,10 @@ def load_record_from_json(record) -> dict:
     """
     Decodes a Metadata Configuration object from JSON
 
-    MetadataConfig instances are objects, using data types such as datetimes. Whilst makes sense at runtime, objects
-    are not an ideal format for storing as files (as backups, or for transferring information from system to another
-    for example). To solve this a JSON encoding of MetadataConfig objects is used instead, which this method parses to
-    reconstruct the original object.
+    MetadataConfig instances are objects, using data types such as datetimes. Whilst this makes sense at runtime,
+    objects are not an ideal format for storing as files (as backups, or for transferring information from system to
+    another for example). To solve this a JSON encoding of MetadataConfig objects is used instead, which this method
+    parses to reconstruct the original object.
 
     This encoding only requires encoding dates, however due to other bugs in the Metadata Library, additional fixes are
     applied to some other elements/options.
@@ -60,7 +60,9 @@ def load_record_from_json(record) -> dict:
     for index, resource_date in enumerate(options["data"]["resource"]["dates"]):
         if "date_precision" in resource_date.keys() and resource_date["date_precision"] == "year":
             options["data"]["resource"]["dates"][index]["date"] = date(
-                year=int(options["data"]["resource"]["dates"][index]["date"]), month=1, day=1,
+                year=int(options["data"]["resource"]["dates"][index]["date"]),
+                month=1,
+                day=1,
             ).isoformat()
 
         if len(options["data"]["resource"]["dates"][index]["date"]) == 10:

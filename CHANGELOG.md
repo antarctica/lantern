@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+* Fixing Black code formatting
+  [#109](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/109)
 * Adding missing label for outdated items in item template
   [#107](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/107)
 * Incorrect name of CLI in command reference documentation

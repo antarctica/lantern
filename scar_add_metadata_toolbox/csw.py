@@ -176,7 +176,10 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
             "domaincounts": "false",
             "profiles": "apiso",
         },
-        "manager": {"transactions": "true", "allowed_ips": "*.*.*.*",},
+        "manager": {
+            "transactions": "true",
+            "allowed_ips": "*.*.*.*",
+        },
         "metadata:main": {
             "identification_title": "Internal CSW (Published)",
             "identification_abstract": "Internal PyCSW OGC CSW server for published records",

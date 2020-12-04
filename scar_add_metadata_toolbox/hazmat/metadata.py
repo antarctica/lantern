@@ -98,13 +98,8 @@ def load_record_from_json(record) -> dict:
     record_config = MetadataRecordConfig(**record_data)
     record_config.validate()
 
-    # hack around invalid/missing character encoding
-    _record_config = record_config.config
-    # noinspection PyTypeChecker
-    _record_config["character_set"] = "utf-8"
-    _record_config["resource"]["character_set"] = "utf-8"
-
     # hack ground weird structure of constraints
+    _record_config = record_config.config
     if (
         "constraints" in _record_config["resource"].keys()
         and "usage" in _record_config["resource"]["constraints"].keys()
@@ -190,61 +185,10 @@ def generate_xml_record_from_record_config_without_xml_declaration(record_config
     if isinstance(record_config, MetadataRecordConfig):
         record_config = record_config.config
 
-    # hack
-    # noinspection PyTypeChecker
-    record_config["character_set"] = "utf8"
-    record_config["resource"]["character_set"] = "utf8"
-
-    # hack (not sure why this is happening)
-    if "value" in record_config["resource"]["formats"][1]:
-        record_config["resource"]["formats"][1]["version"] = record_config["resource"]["formats"][1]["value"]
-        del record_config["resource"]["formats"][1]["value"]
-    if "value" in record_config["resource"]["formats"][2]:
-        record_config["resource"]["formats"][2]["version"] = record_config["resource"]["formats"][2]["value"]
-        del record_config["resource"]["formats"][2]["value"]
-
     record_config = MetadataRecordConfig(**record_config)
     record = MetadataRecord(configuration=record_config).make_element()
     document = tostring(ElementTree(record), pretty_print=True, xml_declaration=False, encoding="utf-8")
     return document
-
-
-def generate_record_config_from_record_xml(record_xml: str, validate_record_config: bool = True) -> dict:
-    """
-    Converts an XML encoded MetadataRecord instance into a MetadataConfig object
-
-    This conversion is natively supported in the Metadata Library, however, due to other bugs in the Metadata Library,
-    additional fixes are applied to some other elements/options.
-
-    Long term, these issues will be fixed as bugs.
-    """
-    record_config = MetadataRecord(record=record_xml).make_config()
-    _record_config = record_config.config
-
-    # hack around date_stamp being a datetime when it should be a date
-    try:
-        # noinspection PyUnresolvedReferences
-        _record_config["date_stamp"] = _record_config["date_stamp"].date()
-    except KeyError:
-        pass
-
-    # hack around invalid/missing character encoding
-    # noinspection PyTypeChecker
-    _record_config["character_set"] = "utf-8"
-    _record_config["resource"]["character_set"] = "utf-8"
-
-    # hack around wrong key for format versions
-    try:
-        for index, resource_format in enumerate(_record_config["resource"]["formats"]):
-            if "value" in resource_format.keys():
-                _record_config["resource"]["formats"][index]["version"] = resource_format["value"]
-                del _record_config["resource"]["formats"][index]["value"]
-    except KeyError:
-        pass
-
-    if validate_record_config:
-        record_config.validate()
-    return _record_config
 
 
 def process_usage_constraints(constraints=List[Dict[str, dict]]) -> Dict[str, dict]:

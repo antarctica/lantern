@@ -39,11 +39,13 @@ class MockCSWClient(CSWClient):
             self._records["7e3719b4-60a4-4b4e-aa84-cee7a5e7218f"] = {"full": "", "brief": ""}
         for identifier in self._records.keys():
             with open(
-                str(self._records_responses_base_path.joinpath(f"get_record_{identifier}_full.xml")), mode="r",
+                str(self._records_responses_base_path.joinpath(f"get_record_{identifier}_full.xml")),
+                mode="r",
             ) as record:
                 self._records[identifier]["full"] = record.read()
             with open(
-                str(self._records_responses_base_path.joinpath(f"get_record_{identifier}_brief.xml")), mode="r",
+                str(self._records_responses_base_path.joinpath(f"get_record_{identifier}_brief.xml")),
+                mode="r",
             ) as record:
                 self._records[identifier]["brief"] = record.read()
 

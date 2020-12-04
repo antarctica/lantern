@@ -4,3 +4,4 @@ __pycache__
 /.coverage
 /_site
 /collections.json
+/auth.json

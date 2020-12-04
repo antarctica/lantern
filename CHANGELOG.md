@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#113](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/113)
 * `site copy-assets` command compatibility with Python 3.6 to delete files recursively
   [#112](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/112)
+* Removing unavailable/misleading configuration options from Podman environment file template
+  [#111](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/111)
 * HTTP exceptions in CSW client calls were not correctly re-raised for error handling
   [#110](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/110)
 * Fixing Black code formatting

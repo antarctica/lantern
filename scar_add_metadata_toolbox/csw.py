@@ -457,6 +457,7 @@ class CSWClient:  # pragma: no cover (until #59 is resolved)
         except HTTPError as e:
             if e.response.content.decode() == "Catalogue not yet available.":
                 raise CSWDatabaseNotInitialisedException()
+            raise HTTPError(e)
         except XMLSyntaxError:
             if _csw.response.decode() == "Missing authorisation token.":
                 raise CSWAuthMissingException()

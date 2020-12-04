@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+* HTTP exceptions in CSW client calls were not correctly re-raised for error handling
+  [#110](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/110)
 * Fixing Black code formatting
   [#109](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/109)
 * Adding missing label for outdated items in item template

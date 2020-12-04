@@ -43,7 +43,7 @@ class Config:
         If true errors and uncaught exceptions will be reported to Sentry. A default value is set on an per-environment 
         basis (off in development/testing) by overriding the attribute, however it can be also be set at runtime.
         """
-        self.APP_ENABLE_SENTRY = str2bool(os.environ.get("APP_ENABLE_SENTRY") or self._APP_ENABLE_SENTRY)
+        self.APP_ENABLE_SENTRY = str2bool(os.environ.get("APP_ENABLE_SENTRY") or str(self._APP_ENABLE_SENTRY))
 
         """
         AUTH_SESSION_FILE_PATH - Path to the file used to store authentication information

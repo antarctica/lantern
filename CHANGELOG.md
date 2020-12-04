@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+* Reference to S3 bucket environment variable in config class
+  [#113](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/113)
 * HTTP exceptions in CSW client calls were not correctly re-raised for error handling
   [#110](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/110)
 * Fixing Black code formatting

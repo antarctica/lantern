@@ -5,7 +5,7 @@ from os import EX_USAGE
 from pathlib import Path
 from uuid import uuid4
 from random import choice as random_choice, choices as random_choices
-from shutil import copytree
+from shutil import copytree, rmtree
 
 import click
 
@@ -737,9 +737,9 @@ def build_pages():
 @site_commands_blueprint.cli.command("copy-assets")
 def copy_assets():
     """Copy all static assets (CSS, JS, etc.)."""
-    # workaround for lack of `dirs_exist_ok` option in Python 3.6
+    # workaround for lack of `dirs_exist_ok` option in copytree in Python 3.6
     try:
-        Path(current_app.config["SITE_PATH"]).joinpath("static").unlink()
+        rmtree(Path(current_app.config["SITE_PATH"]).joinpath("static"))
     except FileNotFoundError:
         pass
     with resource_path("scar_add_metadata_toolbox", "static") as static_dir:

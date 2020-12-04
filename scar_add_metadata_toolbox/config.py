@@ -443,8 +443,8 @@ class DevelopmentConfig(Config):  # pragma: no cover
 
     @property
     def S3_BUCKET(self) -> str:
-        if "S3_BUCKET" in os.environ:
-            return os.environ["S3_BUCKET"]
+        if "APP_S3_BUCKET" in os.environ:
+            return os.environ["APP_S3_BUCKET"]
         return "add-catalogue-integration.data.bas.ac.uk"
 
 

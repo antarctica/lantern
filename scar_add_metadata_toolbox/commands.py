@@ -7,6 +7,7 @@ from uuid import uuid4
 from random import choice as random_choice, choices as random_choices
 from shutil import copytree, rmtree
 
+# noinspection PyPackageRequirements
 import click
 
 # Exempting Bandit security issue (Using Element to parse untrusted XML data is known to be vulnerable to XML attacks)

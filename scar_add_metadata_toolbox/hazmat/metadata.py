@@ -199,7 +199,7 @@ def process_usage_constraints(constraints=List[Dict[str, dict]]) -> Dict[str, di
 
     This is a workaround for the confusing way usage constraints are currently modelled in the Metadata Libraries
     record configuration scheme. This is currently modelled closely on the ISO abstract model, however in practice,
-    this is not very intuitive and overly flexible to interpret easily. This str
+    this is not very intuitive and overly flexible to interpret easily.
 
     This method represents how this structure will work in future to prevent adding additional processing to support
     structures that will be replaced.

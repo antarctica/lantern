@@ -1954,7 +1954,7 @@ class Item:
 
         if download["format"] == "wms":
             url_parsed = url_parse(download["url"])
-            url_query_string = query_string_parse(url_parsed.query)
+            url_query_string: Dict[str, List[str]] = query_string_parse(url_parsed.query)
             download["endpoint"] = f"{url_parsed.scheme}://{url_parsed.netloc}{url_parsed.path}"
             download["layer"] = url_query_string["layer"][0]
 

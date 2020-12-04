@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+* Missing sub-antarctic bounding geometry
+  [#114](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/114)
 * Reference to S3 bucket environment variable in config class
   [#113](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/113)
 * `site copy-assets` command compatibility with Python 3.6 to delete files recursively

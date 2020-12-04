@@ -865,6 +865,22 @@ Key files/directories within this deployed application are:
 Currently access to the servers for each environment is bespoke but should be standardised in future, see 
 [#100](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/100) for more information.
 
+#### Flask CLI
+
+To use the Flask CLI:
+
+```shell
+$ ssh [server]
+$ sudo su
+$ . [path to virtual environment]/bin/activate 
+$ export FLASK_APP=scar_add_metadata_toolbox
+$ export FLASK_ENV=production
+$ flask [command]
+$ deactivate
+$ exit
+$ exit
+```
+
 ### API Service
 
 The CSW Catalogues are deployed as a service within the BAS API Load Balancer, backed by the production 

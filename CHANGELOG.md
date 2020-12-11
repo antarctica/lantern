@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+* Invalid contact/feedback form submissions when JavaScript is not used for form submission
+  [#123](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/123)
+
 ## [0.2.4] - 2020-12-04
 
 ### Added

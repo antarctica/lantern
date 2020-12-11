@@ -6,7 +6,7 @@
             <h1>Help us improve this website</h1>
         </header>
         <p class="bsk-lead app-feedback-lead">We'd love to know your thoughts about using this website, including any problems you found.</p>
-        <form action="https://prod-66.westeurope.logic.azure.com:443/workflows/21919e9ce6964d1c90d520eff13214c7/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=WUJcFcM-hXnylyQna0ZpvUuIflk5tCW_scCASG6SYFE" accept-charset="UTF-8" method="post" onsubmit="feedbackFormSubmit(event, this)">
+        <form id="app-feedback-form" class="bsk-hidden" action="#" accept-charset="UTF-8" method="post" onsubmit="feedbackFormSubmit(event, this)">
             <fieldset>
                 <div class="bsk-form-group">
                     <label for="feedback-content">Your message</label>
@@ -44,6 +44,11 @@
                 <div id="contact-form-result" class="bsk-alert bsk-alert-solid bsk-fade bsk-hidden"></div>
             </fieldset>
         </form>
+        <noscript>
+            <div class="bsk-alert bsk-alert-info bsk-alert-solid">
+                This feedback form requires JavaScript. If this is unavailable please send feedback to the <a href="mailto:servicedesk@bas.ac.uk" class="bsk-alert-link">BAS IT ServiceDesk</a> directly.
+            </div>
+        </noscript>
     </div>
 {% endblock %}
 

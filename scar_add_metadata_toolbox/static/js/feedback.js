@@ -1,3 +1,7 @@
+$(function() {
+    $('#app-feedback-form').removeClass('bsk-hidden');
+});
+
 function feedbackFormSubmit(e, form) {
     e.preventDefault();
     $(form).find('#contact-form-control').toggleClass('bsk-disabled');

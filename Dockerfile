@@ -25,9 +25,6 @@ RUN pip install --no-cache-dir --upgrade pip && \
 COPY pyproject.toml poetry.toml poetry.lock $APPPATH
 RUN poetry install --no-root --no-interaction --no-ansi
 
-# Patch CSW to workaround issues in PyCSW
-COPY ./support/pycsw/patches/pycsw/plugins/profiles/apiso/apiso.py $APPVENV/lib/python3.6/site-packages/pycsw/plugins/profiles/apiso/apiso.py
-
 
 FROM base as run
 

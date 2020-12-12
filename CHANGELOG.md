@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* Python dependencies updated, inc. PyCSW to 2.6.0
+  [#130](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/130)
+  
 ### Fixed
 
 * Invalid contact/feedback form submissions when JavaScript is not used for form submission

@@ -20,8 +20,5 @@ RUN python -m pip install http://bsl-repoa.nerc-bas.ac.uk/magic/v1/libraries/pyt
 RUN python -m pip install http://bsl-repoa.nerc-bas.ac.uk/magic/v1/libraries/python/wheels/linux_x86_64/cp36m/pyproj-2.6.0-cp36-cp36m-linux_x86_64.whl
 RUN python -m pip install --find-links=file:///tmp/wheelhouse $APP_PACKAGE_VERSION
 
-# Patch CSW to workaround issues in PyCSW
-COPY pycsw/patches/pycsw/plugins/profiles/apiso/apiso.py $APP_VENV/lib/python3.6/site-packages/pycsw/plugins/profiles/apiso/apiso.py
-
 ENTRYPOINT ["flask"]
 EXPOSE 5000

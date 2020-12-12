@@ -20,7 +20,7 @@ RUN python3 -m venv $APPVENV
 ENV PATH="$APPVENV/bin:$PATH"
 
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir poetry==1.0.0
+    pip install --no-cache-dir poetry==1.1.0
 
 COPY pyproject.toml poetry.toml poetry.lock $APPPATH
 RUN poetry install --no-root --no-interaction --no-ansi

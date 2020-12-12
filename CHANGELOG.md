@@ -11,7 +11,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Python dependencies updated, inc. PyCSW to 2.6.0
   [#130](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/130)
-  
+* Poetry updated to 1.1.0
+  [#131](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/131)
+
 ### Fixed
 
 * Invalid contact/feedback form submissions when JavaScript is not used for form submission

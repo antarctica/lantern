@@ -1902,7 +1902,7 @@ class Item:
             _overdue += relativedelta(months=+6)
 
         if _now <= _overdue:
-            return "current"
+            return "current"  # pragma: no cover (will be addressed in #116)
         return "outdated"  # pragma: no cover (added for future use)
 
     @staticmethod
@@ -2145,7 +2145,7 @@ class Item:
     def temporal_extent(self) -> Dict[str, str]:
         return {
             "start": self._format_date(date_datetime=self.record.temporal_extent["start"], native_precision="day"),
-            "end": self._format_date(date_datetime=self.record.temporal_extent["start"], native_precision="day"),
+            "end": self._format_date(date_datetime=self.record.temporal_extent["end"], native_precision="day"),
         }
 
     @property
@@ -2285,6 +2285,7 @@ class Collection:
 
     @property
     def summary_markdown(self) -> str:
+        # noinspection PyTypeChecker
         return markdown(self.summary, output_format="html5")
 
     @property

@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#123](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/123)
 * Incorrect use of temporal extent start from record as both temporal extent start and end in item class
   [#129](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/129)
+* Missing PostGIS extension will trigger an exception when setting up a CSW catalogue
+  [#132](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/132)
 
 ## [0.2.4] - 2020-12-04
 

@@ -353,13 +353,16 @@ See the [Usage](#usage) section for how to use the application.
 Backing databases for PyCSW servers require initialisation using the `csw setup` application
 [CLI command](docs/command-reference.md#csw-setup) for both the *published* and *unpublished* repositories.
 
-Normally this command will create the required database table, geometry column (if PostGIS is detected) and relevant
-indexes. As catalogues only require a single table, multiple can be stored in the same database/schema. However two of
-the indexes used (`fts_gin_idx` [full text search] and `wkb_geometry_idx` [binary geometry]) are named non-uniquely,
-preventing multiple catalogues being co-located in the same schema.
+**Note:** Backing databases must use the PostgreSQL engine with the PostGIS extension enabled.
 
-This appears to be an oversight as all other indexes are made unique by prefixing them with the name of the records
-table and doing this manually for these indexes appears to work without issue.
+Normally this command will create the required database table, geometry column and relevant indexes. As catalogues only 
+require a single table, multiple can be stored in the same database/schema. However, two of the indexes used 
+(`fts_gin_idx` [full text search] and `wkb_geometry_idx` [binary geometry]) are named non-uniquely, preventing multiple 
+catalogues being co-located in the same schema.
+
+This appears to be an oversight, as all other indexes are made unique by prefixing them with the name of the records
+table, and doing this manually for these indexes appears to work without issue. To workaround this issue, you will need
+to manually modify the indexes of catalogue tables once they've been setup.
 
 Assuming the *Unpublished catalogue* is setup first, perform these steps *before* setting up the *Published catalogue*:
 
@@ -368,8 +371,6 @@ Assuming the *Unpublished catalogue* is setup first, perform these steps *before
 2. alter the affected indexes in the `records_unpublished` table [1]
 3. setup the *Published catalogue* `flask csw setup published`
 4. alter the affected indexes in the second table [2]
-
-**Note:** These steps will be performed automatically, or mitigated by fixing the upstream PyCSW package, in future.
 
 [1]
 

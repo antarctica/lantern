@@ -38,6 +38,7 @@ from scar_add_metadata_toolbox.csw import (
     CSWAuthMissingException,
     CSWAuthInsufficientException,
     CSWAuthException,
+    CSWDatabasePostGISExtensionUnavailable,
 )
 from scar_add_metadata_toolbox.utils import aws_cli
 
@@ -803,6 +804,10 @@ def setup_catalogue(catalogue: str):
         sys_exit(EX_USAGE)
     except CSWDatabaseAlreadyInitialisedException:
         print(f"Ok. Note CSW catalogue '{catalogue}' is already setup.")
+    except CSWDatabasePostGISExtensionUnavailable:  # pragma: no cover (will be addressed in #116)
+        print(
+            f"No. CSW backing database does not have the PostGIS extension enabled. Enable this extension and try again."
+        )
 
 
 auth_commands_blueprint = Blueprint("auth", __name__)

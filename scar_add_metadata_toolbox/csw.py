@@ -68,6 +68,18 @@ class CSWDatabaseNotInitialisedException(Exception):
     pass
 
 
+class CSWDatabasePostGISExtensionUnavailable(Exception):
+    """
+    Represents a situation where the backing database or a CSW Server does not have the PostGIS extension enabled
+
+    Backing databases must have this extension to support spatial querying as part of the CSW standard (e.g. searching
+    by bounding box). If the PyCSW admin database setup method is called without this extension available, it will
+    attempt to use a workaround which leads to problems with creating duplicate tables.
+    """
+
+    pass
+
+
 class CSWMethodNotSupportedException(Exception):
     """
     Represents a situation where an unsupported HTTP method is used in a request to a CSW Server
@@ -300,8 +312,13 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
         if self._is_initialised:
             raise CSWDatabaseAlreadyInitialisedException()
 
-        csw_database = create_engine(self._csw_config["repository"]["database"])
-        csw_database.execute("SELECT version();")
+        try:
+            csw_database = create_engine(self._csw_config["repository"]["database"])
+            csw_database.execute("SELECT version();")
+            csw_database.execute("SELECT PostGIS_Full_Version();")
+        except ProgrammingError as e:
+            if "ERROR:  function postgis_full_version() does not exist" in e.orig.pgerror:
+                raise CSWDatabasePostGISExtensionUnavailable()
 
         try:
             admin.setup_db(

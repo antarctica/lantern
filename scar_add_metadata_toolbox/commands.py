@@ -569,12 +569,12 @@ site_commands_blueprint.cli.short_help = "Manage static site."
 # noinspection PyUnresolvedReferences
 @site_commands_blueprint.cli.command("build-items")
 def build_items():
-    """Build pages for all items."""
+    """Build pages for all published items."""
     items_output_path = Path(current_app.config["SITE_PATH"]).joinpath("items")
 
     try:
         with spinner():
-            _records = list(current_app.records.retrieve_records())
+            _records = list(current_app.records.retrieve_published_records())
 
         print(f"{len(_records)} item pages to generate.")
         _items_count = 1
@@ -649,13 +649,13 @@ def build_collections():
 
 @site_commands_blueprint.cli.command("build-records")
 def build_records():
-    """Build pages for all records (XML)."""
+    """Build pages for all published records (XML)."""
     stylesheets = ["iso-html", "iso-rubric", "iso-xml"]
     records_output_path = Path(current_app.config["SITE_PATH"]).joinpath("records")
 
     try:
         with spinner():
-            records = list(current_app.records.retrieve_records())
+            records = list(current_app.records.retrieve_published_records())
 
         print(f"{len(records) * len(stylesheets)} record pages to generate.")
         _records_count = 1

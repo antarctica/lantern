@@ -1549,25 +1549,17 @@ class TestCommandSiteBuildItemPages:
     def test_cli_site_item_pages(self, app_static_site):
         result = app_static_site.test_cli_runner().invoke(args=["site", "build-items"])
         assert result.exit_code == 0
-        assert "2 item pages to generate." in result.output
-        assert "# Item page 1/2" in result.output
+        assert "1 item pages to generate." in result.output
+        assert "# Item page 1/1" in result.output
         assert f"Ok. Generated item page for '{TestRecords.TEST_RECORD_1.value['file_identifier']}'." in result.output
-        assert "# Item page 2/2" in result.output
-        assert f"Ok. Generated item page for '{TestRecords.TEST_RECORD_2.value['file_identifier']}'." in result.output
-        assert "Ok. 2 item pages generated." in result.output
+        assert "Ok. 1 item pages generated." in result.output
 
         # Verify file structure
         item_pages_paths = list(Path(app_static_site.config["SITE_PATH"]).glob("**/*.*"))
-        assert len(item_pages_paths) == 2
+        assert len(item_pages_paths) == 1
         assert (
             Path(app_static_site.config["SITE_PATH"]).joinpath(
                 f"items/{TestRecords.TEST_RECORD_1.value['file_identifier']}/index.html"
-            )
-            in item_pages_paths
-        )
-        assert (
-            Path(app_static_site.config["SITE_PATH"]).joinpath(
-                f"items/{TestRecords.TEST_RECORD_2.value['file_identifier']}/index.html"
             )
             in item_pages_paths
         )
@@ -1651,48 +1643,33 @@ class TestCommandSiteBuildCollectionPages:
         assert "No. Missing permissions in auth token. Seek support to assign required permissions." in result.output
 
 
-class TestCommandSiteBuildRecords:
+class TestCommandSiteBuildRecordPages:
     @pytest.mark.usefixtures("app_static_site")
     def test_cli_site_record_pages(self, app_static_site):
         result = app_static_site.test_cli_runner().invoke(args=["site", "build-records"])
         assert result.exit_code == 0
 
-        assert "6 record pages to generate." in result.output
-        assert "# Record page 1/2 (stylesheet 1/3)" in result.output
+        assert "3 record pages to generate." in result.output
+        assert "# Record page 1/1 (stylesheet 1/3)" in result.output
         assert (
             f"Ok. Generated item page for '{TestRecords.TEST_RECORD_1.value['file_identifier']}' (stylesheet 'iso-html')."
             in result.output
         )
-        assert "# Record page 1/2 (stylesheet 2/3)" in result.output
+        assert "# Record page 1/1 (stylesheet 2/3)" in result.output
         assert (
             f"Ok. Generated item page for '{TestRecords.TEST_RECORD_1.value['file_identifier']}' (stylesheet 'iso-rubric')."
             in result.output
         )
-        assert "# Record page 1/2 (stylesheet 3/3)" in result.output
+        assert "# Record page 1/1 (stylesheet 3/3)" in result.output
         assert (
             f"Ok. Generated item page for '{TestRecords.TEST_RECORD_1.value['file_identifier']}' (stylesheet 'iso-xml')."
             in result.output
         )
-        assert "# Record page 2/2 (stylesheet 1/3)" in result.output
-        assert (
-            f"Ok. Generated item page for '{TestRecords.TEST_RECORD_2.value['file_identifier']}' (stylesheet 'iso-html')."
-            in result.output
-        )
-        assert "# Record page 2/2 (stylesheet 2/3)" in result.output
-        assert (
-            f"Ok. Generated item page for '{TestRecords.TEST_RECORD_2.value['file_identifier']}' (stylesheet 'iso-rubric')."
-            in result.output
-        )
-        assert "# Record page 2/2 (stylesheet 3/3)" in result.output
-        assert (
-            f"Ok. Generated item page for '{TestRecords.TEST_RECORD_2.value['file_identifier']}' (stylesheet 'iso-xml')."
-            in result.output
-        )
-        assert "Ok. 6 record pages generated." in result.output
+        assert "Ok. 3 record pages generated." in result.output
 
         # Verify file structure
         record_pages_paths = list(Path(app_static_site.config["SITE_PATH"]).glob("**/*.*"))
-        assert len(record_pages_paths) == 6
+        assert len(record_pages_paths) == 3
         assert (
             Path(app_static_site.config["SITE_PATH"]).joinpath(
                 f"records/{TestRecords.TEST_RECORD_1.value['file_identifier']}/iso-html/{TestRecords.TEST_RECORD_1.value['file_identifier']}.xml"
@@ -1708,24 +1685,6 @@ class TestCommandSiteBuildRecords:
         assert (
             Path(app_static_site.config["SITE_PATH"]).joinpath(
                 f"records/{TestRecords.TEST_RECORD_1.value['file_identifier']}/iso-xml/{TestRecords.TEST_RECORD_1.value['file_identifier']}.xml"
-            )
-            in record_pages_paths
-        )
-        assert (
-            Path(app_static_site.config["SITE_PATH"]).joinpath(
-                f"records/{TestRecords.TEST_RECORD_2.value['file_identifier']}/iso-html/{TestRecords.TEST_RECORD_2.value['file_identifier']}.xml"
-            )
-            in record_pages_paths
-        )
-        assert (
-            Path(app_static_site.config["SITE_PATH"]).joinpath(
-                f"records/{TestRecords.TEST_RECORD_2.value['file_identifier']}/iso-rubric/{TestRecords.TEST_RECORD_2.value['file_identifier']}.xml"
-            )
-            in record_pages_paths
-        )
-        assert (
-            Path(app_static_site.config["SITE_PATH"]).joinpath(
-                f"records/{TestRecords.TEST_RECORD_2.value['file_identifier']}/iso-xml/{TestRecords.TEST_RECORD_2.value['file_identifier']}.xml"
             )
             in record_pages_paths
         )
@@ -1796,9 +1755,9 @@ class TestCommandSiteBuildAll:
     def test_cli_site_build_all(self, app_static_site):
         result = app_static_site.test_cli_runner().invoke(args=["site", "build"])
         assert result.exit_code == 0
-        assert "Ok. 2 item pages generated." in result.output
+        assert "Ok. 1 item pages generated." in result.output
         assert "Ok. 1 collection pages generated." in result.output
-        assert "Ok. 6 record pages generated." in result.output
+        assert "Ok. 3 record pages generated." in result.output
         assert "Ok. 3 legal pages generated." in result.output
         assert "Ok. feedback page generated." in result.output
         assert "Ok. static assets copied." in result.output

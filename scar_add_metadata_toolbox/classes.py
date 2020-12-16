@@ -1470,28 +1470,24 @@ class MirrorRepository:
             record = self.unpublished_repository.retrieve_record(record_identifier=record_identifier)
             return MirrorRecord(config=record.config, published=False)
 
-    def retrieve_records(self) -> List[MirrorRecord]:
+    # retrieve_records() method removed as part of #133/#134
+
+    def retrieve_published_records(self) -> List[MirrorRecord]:
         """
-        Retrieves all records in the repository
+        Retrieves all published records in the repository
 
         Note: Records are returned using a generator for use in iterators such as for loops. If an actual List of
         records is needed, for calculating a length for example, the return value can be wrapped, e.g.
 
         ```
-        records_count = len(list(repository.retrieve_records()))
+        records_count = len(list(repository.retrieve_published_records()))
         ```
 
         :rtype list
-        :return: all records
+        :return: all published records
         """
-        unpublished_records = self.unpublished_repository.retrieve_records()
-        published_record_identifiers = self.published_repository.list_record_identifiers()
-
-        for unpublished_record in unpublished_records:
-            _record_published = False
-            if unpublished_record.identifier in published_record_identifiers:
-                _record_published = True
-            yield MirrorRecord(config=unpublished_record.config, published=_record_published)
+        for published_record in self.published_repository.retrieve_records():
+            yield MirrorRecord(config=published_record.config, published=True)
 
     def list_record_identifiers(self) -> List[str]:
         """

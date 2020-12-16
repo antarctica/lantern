@@ -1163,7 +1163,7 @@ Manage static site.
 
 Build all static site components.
 
-**Note:** You need to be signed in with permission to edit metadata records to use this command.
+**Note:** This will only include items that have been published.
 
 ```
 $ scar-add-metadata-toolbox site build
@@ -1337,7 +1337,7 @@ Ok. Site built.
 
 Build pages for all collections.
 
-**Note:** You need to be signed in with permission to edit metadata records to use this command.
+**Note:** This will only include items in collections that have been published.
 
 ```
 $ scar-add-metadata-toolbox site build-collections
@@ -1352,7 +1352,7 @@ Ok. 1 collection pages generated.
 
 Build pages for all items.
 
-**Note:** You need to be signed in with permission to edit metadata records to use this command.
+**Note:** This will only include items that have been published.
 
 ```
 $ scar-add-metadata-toolbox site build-items
@@ -1417,7 +1417,7 @@ Ok. feedback page generated.
 
 Build pages for all records (XML).
 
-**Note:** You need to be signed in with permission to edit metadata records to use this command.
+**Note:** This will only include records for items that have been published.
 
 ```
 $ scar-add-metadata-toolbox site build-records

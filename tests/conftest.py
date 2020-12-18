@@ -6,15 +6,6 @@ from unittest.mock import patch
 import pytest
 
 from scar_add_metadata_toolbox import create_app
-from scar_add_metadata_toolbox.classes import (
-    CSWClient,
-    RecordSummary,
-    Record,
-    MirrorRecordSummary,
-    MirrorRecord,
-    Item,
-    Collection,
-)
 
 from tests.scar_add_metadata_toolbox.classes import (
     MockCSWClient,
@@ -308,40 +299,3 @@ def app_client_mocked_csw_server_insufficient_auth_token():
 
         app = create_app()
         return app.test_client()
-
-
-@pytest.fixture
-def classes_csw_client():
-    return CSWClient(config={"endpoint": "test", "auth": {}})
-
-
-@pytest.fixture
-def classes_record_summary():
-    return RecordSummary(config={"file_identifier": "test", "resource": {"title": {"value": "test"}}})
-
-
-@pytest.fixture
-def classes_record():
-    return Record(config={"file_identifier": "test", "resource": {"title": {"value": "test"}}})
-
-
-@pytest.fixture
-def classes_mirror_record_summary():
-    return MirrorRecordSummary(
-        config={"file_identifier": "test", "resource": {"title": {"value": "test"}}}, published=False
-    )
-
-
-@pytest.fixture
-def classes_mirror_record():
-    return MirrorRecord(config={"file_identifier": "test", "resource": {"title": {"value": "test"}}}, published=False)
-
-
-@pytest.fixture
-def classes_item():
-    return Item(record=Record(config={"file_identifier": "test", "title": "test"}))
-
-
-@pytest.fixture
-def classes_collection():
-    return Collection(config={"identifier": "test"})

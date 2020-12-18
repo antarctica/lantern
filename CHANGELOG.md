@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+* Items incorrectly required a collection to be set in records
+  [#119](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/119)
 * Invalid contact/feedback form submissions when JavaScript is not used for form submission
   [#123](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/123)
 * Incorrect use of temporal extent start from record as both temporal extent start and end in item class

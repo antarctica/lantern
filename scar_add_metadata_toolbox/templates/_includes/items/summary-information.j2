@@ -17,8 +17,10 @@
                 (Updated every 6 months)
             {% endif %}
         </dd>
+        {% if item.collections %}
         <dt>Collections:</dt>
         <dd>{{ item.collections | join(',') }}</dd>
+        {% endif %}
         <dt>Topics:</dt>
         <dd>{{ item.topics | join(',') }}</dd>
     </dl>

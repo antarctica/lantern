@@ -3,7 +3,7 @@ import json
 from datetime import date, datetime
 from hashlib import sha1
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Optional
 from urllib.parse import urlparse as url_parse, parse_qs as query_string_parse
 from enum import Enum
 
@@ -1993,7 +1993,7 @@ class Item:
         return self.record.usage_constraints["required_citation"]["statement"]
 
     @property
-    def collections(self) -> List[str]:
+    def collections(self) -> Optional[List[str]]:
         """
         Item's Collections
 
@@ -2008,6 +2008,9 @@ class Item:
         collection_terms = self._filter_keyword_terms(
             keyword_sets=self.record.theme_keywords, keyword_set_url="http://vocab.nerc.ac.uk/collection/T02/1/"
         )
+        if collection_terms is None:  # pragma: no cover (will be addressed in #116)
+            return []
+
         # return a list of just term values
         return [term["term"] for term in collection_terms]
 

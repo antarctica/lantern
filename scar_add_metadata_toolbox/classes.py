@@ -1158,8 +1158,11 @@ class Record(RecordSummary):
         return self.config["resource"]["language"]
 
     @property
-    def lineage(self) -> str:
-        return self.config["resource"]["lineage"]
+    def lineage(self) -> Optional[str]:
+        try:
+            return self.config["resource"]["lineage"]
+        except KeyError:
+            return None
 
     @property
     def location_keywords(self) -> List[dict]:

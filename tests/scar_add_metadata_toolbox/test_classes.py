@@ -58,6 +58,12 @@ def test_collection_repr():
 
 
 # Coverage test
+def test_record_lineage_none():
+    record = Record(config={})
+    assert record.lineage is None
+
+
+# Coverage test
 def test_record_transfer_options_none():
     record = Record(config={})
     assert record.transfer_options is None

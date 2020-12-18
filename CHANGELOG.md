@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#119](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/119)
 * Items incorrectly required transfer options to be set in records
   [#120](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/120)
+* Items incorrectly required a lineage to be set in records
+  [#135](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/135) 
 * Invalid contact/feedback form submissions when JavaScript is not used for form submission
   [#123](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/123)
 * Incorrect use of temporal extent start from record as both temporal extent start and end in item class

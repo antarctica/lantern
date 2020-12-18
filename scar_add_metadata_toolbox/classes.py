@@ -3,7 +3,7 @@ import json
 from datetime import date, datetime
 from hashlib import sha1
 from pathlib import Path
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Optional
 from urllib.parse import urlparse as url_parse, parse_qs as query_string_parse
 from enum import Enum
 
@@ -1158,8 +1158,11 @@ class Record(RecordSummary):
         return self.config["resource"]["language"]
 
     @property
-    def lineage(self) -> str:
-        return self.config["resource"]["lineage"]
+    def lineage(self) -> Optional[str]:
+        try:
+            return self.config["resource"]["lineage"]
+        except KeyError:
+            return None
 
     @property
     def location_keywords(self) -> List[dict]:
@@ -1217,8 +1220,11 @@ class Record(RecordSummary):
         }
 
     @property
-    def transfer_options(self) -> List[dict]:
-        return self.config["resource"]["transfer_options"]
+    def transfer_options(self) -> Optional[List[dict]]:
+        try:
+            return self.config["resource"]["transfer_options"]
+        except KeyError:
+            return None
 
     @property
     def usage_constraints(self) -> Dict[str, dict]:
@@ -1993,7 +1999,7 @@ class Item:
         return self.record.usage_constraints["required_citation"]["statement"]
 
     @property
-    def collections(self) -> List[str]:
+    def collections(self) -> Optional[List[str]]:
         """
         Item's Collections
 
@@ -2008,6 +2014,9 @@ class Item:
         collection_terms = self._filter_keyword_terms(
             keyword_sets=self.record.theme_keywords, keyword_set_url="http://vocab.nerc.ac.uk/collection/T02/1/"
         )
+        if collection_terms is None:  # pragma: no cover (will be addressed in #116)
+            return []
+
         # return a list of just term values
         return [term["term"] for term in collection_terms]
 
@@ -2023,6 +2032,10 @@ class Item:
     @property
     def downloads(self) -> List[Dict[str, str]]:
         downloads = []
+
+        if self.record.transfer_options is None:  # pragma: no cover (will be addressed in #116)
+            return downloads
+
         for transfer_option in self.record.transfer_options:
             downloads.append(self._process_download(transfer_option=transfer_option))
         return downloads

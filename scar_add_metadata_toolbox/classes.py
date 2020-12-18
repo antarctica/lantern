@@ -2130,14 +2130,6 @@ class Item:
         return self._format_date(date_datetime=_date["value"], native_precision=_date["precision"])
 
     @property
-    def publishers(self) -> List[str]:
-        publishers = self.record.contacts["publisher"]
-        _publishers = []
-        for publisher in publishers:
-            _publishers.append(self._format_organisation_name(organisation_name=publisher["organisation"]["name"]))
-        return _publishers
-
-    @property
     def temporal_extent(self) -> Dict[str, str]:
         return {
             "start": self._format_date(date_datetime=self.record.temporal_extent["start"], native_precision="day"),
@@ -2270,10 +2262,6 @@ class Collection:
     @property
     def topics(self) -> List[str]:
         return self.config["topics"]
-
-    @property
-    def publishers(self) -> List[str]:
-        return self.config["publishers"]
 
     @property
     def summary(self) -> str:

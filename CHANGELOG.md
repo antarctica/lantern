@@ -25,6 +25,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Missing PostGIS extension will trigger an exception when setting up a CSW catalogue
   [#132](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/132)
 
+### Removed
+
+* Publisher from item and collection page templates, as this would always be the same value
+  [#125](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/125)
+
 ## [0.2.4] - 2020-12-04
 
 ### Added

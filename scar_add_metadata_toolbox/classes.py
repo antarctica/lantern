@@ -1217,8 +1217,11 @@ class Record(RecordSummary):
         }
 
     @property
-    def transfer_options(self) -> List[dict]:
-        return self.config["resource"]["transfer_options"]
+    def transfer_options(self) -> Optional[List[dict]]:
+        try:
+            return self.config["resource"]["transfer_options"]
+        except KeyError:
+            return None
 
     @property
     def usage_constraints(self) -> Dict[str, dict]:
@@ -2026,6 +2029,10 @@ class Item:
     @property
     def downloads(self) -> List[Dict[str, str]]:
         downloads = []
+
+        if self.record.transfer_options is None:  # pragma: no cover (will be addressed in #116)
+            return downloads
+
         for transfer_option in self.record.transfer_options:
             downloads.append(self._process_download(transfer_option=transfer_option))
         return downloads

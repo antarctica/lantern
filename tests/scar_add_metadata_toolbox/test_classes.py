@@ -55,3 +55,9 @@ def test_item_repr():
 def test_collection_repr():
     collection = Collection(config={"identifier": "test"})
     assert repr(collection) == f"<Collection / {collection.identifier}>"
+
+
+# Coverage test
+def test_record_transfer_options_none():
+    record = Record(config={})
+    assert record.transfer_options is None

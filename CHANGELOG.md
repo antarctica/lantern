@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+* Items incorrectly required a Spatial Reference System to be set in records
+  [#157](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/157)
 * Items incorrectly required a collection to be set in records
   [#119](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/119)
 * Items incorrectly required transfer options to be set in records

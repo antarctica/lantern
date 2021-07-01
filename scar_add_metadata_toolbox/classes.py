@@ -1956,6 +1956,21 @@ class Item:
             download["format"] = "wms"
             download["format_title"] = "Web Map Service (WMS)"
             download["format_description"] = "OGC Web Map Service"
+        elif transfer_option["online_resource"]["title"] == "PNG":  # pragma: no cover (will be addressed in #116)
+            download["format"] = "png"
+            download["format_title"] = "PNG"
+            download["format_description"] = "PNG image"
+            download["format_version"] = "1"
+        elif transfer_option["online_resource"]["title"] == "JPEG":  # pragma: no cover (will be addressed in #116)
+            download["format"] = "jpeg"
+            download["format_title"] = "JPEG"
+            download["format_description"] = "JPEG image"
+            download["format_version"] = "1"
+        elif transfer_option["online_resource"]["title"] == "PDF":  # pragma: no cover (will be addressed in #116)
+            download["format"] = "pdf"
+            download["format_title"] = "PDF"
+            download["format_description"] = "Adobe PDF"
+            download["format_version"] = "1.6"
 
         if "size" in transfer_option.keys():
             download["size"] = f"{transfer_option['size']['magnitude']} {transfer_option['size']['unit']}"

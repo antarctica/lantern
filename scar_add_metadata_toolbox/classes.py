@@ -2001,8 +2001,12 @@ class Item:
         return str(self.record.character_set).upper()
 
     @property
-    def citation(self) -> str:
+    def citation(self) -> str:  # pragma: no cover (will be addressed in #116)
         return self.record.usage_constraints["required_citation"]["statement"]
+
+    @property
+    def citation_markdown(self) -> str:
+        return markdown(self.record.usage_constraints["required_citation"]["statement"], output_format="html5")
 
     @property
     def collections(self) -> Optional[List[str]]:

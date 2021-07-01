@@ -142,3 +142,7 @@ address p:last-of-type {
 .app-highlight {
     animation: highlight 4s;
 }
+
+.app-item-licence-symbol {
+    margin-right: 40px;
+}

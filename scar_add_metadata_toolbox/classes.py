@@ -2150,13 +2150,19 @@ class Item:
         }
 
     @property
-    def spatial_reference_system(self) -> str:
+    def spatial_reference_system(self) -> Optional[str]:
+        if self.record.spatial_reference_system is None:
+            return None
+
         return self._format_spatial_reference_system(
             spatial_reference_system_code=self.record.spatial_reference_system["code"]
         )
 
     @property
-    def spatial_reference_system_markdown(self) -> str:
+    def spatial_reference_system_markdown(self) -> Optional[str]:
+        if self.spatial_reference_system is None:
+            return None
+
         return markdown(self.spatial_reference_system, output_format="html5")
 
     @property

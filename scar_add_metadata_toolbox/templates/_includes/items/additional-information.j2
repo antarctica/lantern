@@ -26,7 +26,13 @@
             {% endif %}
         </dd>
         <dt>Spatial reference system:</dt>
-        <dd>{{ item.spatial_reference_system_markdown }}</dd>
+        <dd>
+            {% if item.spatial_reference_system_markdown %}
+                {{ item.spatial_reference_system_markdown }}
+            {% else %}
+                -
+            {% endif %}
+        </dd>
         <dt>Language</dt>
         <dd>{{ item.language }}</dd>
         <dt>Character set</dt>

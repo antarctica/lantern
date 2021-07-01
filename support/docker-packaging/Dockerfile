@@ -1,4 +1,4 @@
-FROM python:3.6-alpine
+FROM python:3.6-alpine3.13
 
 LABEL maintainer = "Felix Fennell <felnne@bas.ac.uk>"
 
@@ -11,7 +11,7 @@ ENV FLASK_ENV=production
 
 WORKDIR $APP_PATH
 
-RUN apk add --no-cache build-base libxslt-dev libffi-dev libressl-dev geos-dev proj-dev proj-util postgresql-dev
+RUN apk add --no-cache build-base libxslt-dev libffi-dev libressl-dev geos-dev proj-dev proj-util postgresql-dev cargo
 RUN python3 -m venv $APP_VENV
 
 # Install application

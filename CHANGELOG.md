@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 * minimal support for product records
+* Markdown support for item citations
+  [#153](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/153)
   [#156](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/127)
 * alert that JavaScript is required in item pages to enable tabs to work
   [#127](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/127)

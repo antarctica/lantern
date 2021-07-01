@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 
 * minimal support for product records
+* Support for PNG, JPEG and PDF transfer option formats
+  [#155](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/155)
 * Support for Open Government Licence (OGL)
   [#151](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/151)
 * Markdown support for item citations

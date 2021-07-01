@@ -54,9 +54,10 @@ def load_record_from_json(record) -> dict:
     options = {"data": record}
 
     options["data"]["date_stamp"] = date.fromisoformat(options["data"]["date_stamp"])
-    options["data"]["reference_system_info"]["authority"]["dates"][0]["date"] = date.fromisoformat(
-        options["data"]["reference_system_info"]["authority"]["dates"][0]["date"]
-    )
+    if "reference_system_info" in options["data"]:
+        options["data"]["reference_system_info"]["authority"]["dates"][0]["date"] = date.fromisoformat(
+            options["data"]["reference_system_info"]["authority"]["dates"][0]["date"]
+        )
     for index, resource_date in enumerate(options["data"]["resource"]["dates"]):
         if "date_precision" in resource_date.keys() and resource_date["date_precision"] == "year":
             options["data"]["resource"]["dates"][index]["date"] = date(

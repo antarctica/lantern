@@ -2240,9 +2240,12 @@ class Item:
         return [term["term"] for term in topic_terms]
 
     @property
-    def updated(self) -> str:
-        _date = self.record.dates["revision"]
-        return self._format_date(date_datetime=_date["value"], native_precision=_date["precision"])
+    def updated(self) -> Optional[str]:
+        try:
+            _date = self.record.dates["revision"]
+            return self._format_date(date_datetime=_date["value"], native_precision=_date["precision"])
+        except KeyError:  # pragma: no cover (will be addressed in #116)
+            return None
 
 
 class Collection:

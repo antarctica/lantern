@@ -89,9 +89,9 @@ version:
   artifacts:
     reports:
       dotenv: build.env
-  rules:
-    - changes:
-      - 'scar_add_metadata_toolbox/**/*.*'
+#  rules:
+#    - changes:
+#      - 'scar_add_metadata_toolbox/**/*.*'
 
 pytest:
   stage: 🧪 test
@@ -155,9 +155,9 @@ package:
    paths:
      - dist
    expire_in: 1 month
- rules:
-   - changes:
-     - 'scar_add_metadata_toolbox/**/*.*'
+# rules:
+#   - changes:
+#     - 'scar_add_metadata_toolbox/**/*.*'
 
 container:
  stage: 🏗 build
@@ -183,10 +183,10 @@ container:
      artifacts: true
    - job: version
      artifacts: true
- rules:
-   - changes:
-     - 'scar_add_metadata_toolbox/**/*.*'
-     - 'support/docker-provisioning/**/*.*'
+# rules:
+#   - changes:
+#     - 'scar_add_metadata_toolbox/**/*.*'
+#     - 'support/docker-provisioning/**/*.*'
 
 podman-wrapper:
  stage: 🏗 build

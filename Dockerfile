@@ -8,7 +8,7 @@ ENV PYTHONPATH=$APPPATH
 RUN mkdir $APPPATH
 WORKDIR $APPPATH
 
-RUN apk add --no-cache libxslt-dev libffi-dev libressl-dev geos-dev proj-dev proj-util postgresql-dev
+RUN apk add --no-cache libxslt-dev libffi-dev libressl-dev geos-dev proj-dev proj-util postgresql-dev cargo
 
 
 FROM base as build

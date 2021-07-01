@@ -30,6 +30,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#129](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/129)
 * Missing PostGIS extension will trigger an exception when setting up a CSW catalogue
   [#132](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/132)
+* Broken dependencies in newer Alpine image
+  [#158](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/158)
 
 ### Removed
 

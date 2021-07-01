@@ -22,7 +22,7 @@ packages = [
 
 [tool.poetry.dependencies]
 awscli = "^1.18.93"
-bas-metadata-library = "^0.3.1"
+bas-metadata-library = "^0.4.0"
 bas-style-kit-jinja-templates = "^0.5.0"
 click-spinner = "^0.1.10"
 Faker = "^4.1.1"

@@ -1201,12 +1201,18 @@ class Record(RecordSummary):
         return self.config["date_stamp"]
 
     @property
-    def spatial_reference_system(self) -> dict:
-        return self.config["reference_system_info"]
+    def spatial_reference_system(self) -> Optional[dict]:
+        try:
+            return self.config["reference_system_info"]
+        except KeyError:  # pragma: no cover (will be addressed in #116)
+            return None
 
     @property
-    def spatial_representation_type(self) -> str:
-        return self.config["resource"]["spatial_representation_type"]
+    def spatial_representation_type(self) -> Optional[str]:
+        try:
+            return self.config["resource"]["spatial_representation_type"]
+        except KeyError:  # pragma: no cover (will be addressed in #116)
+            return None
 
     @property
     def theme_keywords(self) -> List[dict]:

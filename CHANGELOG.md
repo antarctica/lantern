@@ -26,6 +26,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+* Reference to item ID in item JS script
+  [#162](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/162)
 * Items using an invalid item bounding box geometry
   [#154](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/154)
 * Items incorrectly used 3031 projection for all bounding boxes

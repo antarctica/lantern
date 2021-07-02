@@ -1834,13 +1834,15 @@ class Item:
                     "type": "Feature",
                     "properties": {"gid": 1, "label": "Bounding polygon"},
                     "geometry": {
-                        "type": "polygon",
+                        "type": "Polygon",
                         "coordinates": [
-                            [bounding_box["west_longitude"], bounding_box["south_latitude"]],
-                            [bounding_box["east_longitude"], bounding_box["south_latitude"]],
-                            [bounding_box["east_longitude"], bounding_box["north_latitude"]],
-                            [bounding_box["west_longitude"], bounding_box["north_latitude"]],
-                            [bounding_box["west_longitude"], bounding_box["south_latitude"]],
+                            [
+                                [bounding_box["west_longitude"], bounding_box["south_latitude"]],
+                                [bounding_box["east_longitude"], bounding_box["south_latitude"]],
+                                [bounding_box["east_longitude"], bounding_box["north_latitude"]],
+                                [bounding_box["west_longitude"], bounding_box["north_latitude"]],
+                                [bounding_box["west_longitude"], bounding_box["south_latitude"]],
+                            ],
                         ],
                     },
                 }

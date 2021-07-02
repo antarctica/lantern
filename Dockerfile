@@ -38,6 +38,5 @@ ENV FLASK_ENV=development
 ENV PYTHONUNBUFFERED=1
 
 COPY --from=build $APPVENV/ $APPVENV/
-RUN mkdir -p /var/log/app/
 
 ENTRYPOINT []

@@ -53,6 +53,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
+* Updating copyright year
+  [#163](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/162)
 * README improvements 
   [#163](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/162)
 

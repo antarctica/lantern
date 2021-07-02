@@ -88,8 +88,8 @@ Flask application using [CSW](#csw) to store [Metadata records](#metadata-record
 in [Collections](#collections) rendered as [Jinja templates](#jinja-templates) served as a
 [static website](#s3-static-website) within the [BAS data catalogue](https://data.bas.ac.uk).
 
-CSW catalogues are backed by PostGIS databases, secured using [OAuth](#oauth). Contact forms for feedback and items in 
-the static catalogue use [Microsoft Power Automate](#feedback-and-contact-forms). Legal policies use templates from the 
+CSW catalogues are backed by PostGIS databases, secured using [OAuth](#oauth). Contact forms for feedback and items in
+the static catalogue use [Microsoft Power Automate](#feedback-and-contact-forms). Legal policies use templates from the
 [Legal Policies](https://gitlab.data.bas.ac.uk/web-apps/legal-policies-templates) project.
 
 ### Architecture
@@ -233,7 +233,7 @@ insert, update and delete records programmatically.
 The CSW version is fixed to *2.0.2* because it's the latest version supported by
 [OWSLib](https://geopython.github.io/OWSLib/), the CSW client used by the *Metadata editor*.
 
-**Note:** The CSW repositories are considered to be APIs, and so ran as services through the 
+**Note:** The CSW repositories are considered to be APIs, and so ran as services through the
 [BAS API Load Balancer](https://gitlab.data.bas.ac.uk/WSF/api-load-balancer) (internal) with documentation in the
 [BAS API Documentation](https://gitlab.data.bas.ac.uk/WSF/api-docs) project (internal).
 
@@ -251,8 +251,8 @@ CSW servers are backed using PostGIS (PostgreSQL) databases provided by BAS IT (
 `bsldb`). As PyCSW uses a single table for all records, all servers share the same database and schema, configured
 through SQLAlchemy connection strings.
 
-Separate databases are used for each environment (development, staging and production). Credentials are stored in the 
-MAGIC 1Password shared vault. In local development, a local PostGIS database configured in `docker-compose.yml` can be 
+Separate databases are used for each environment (development, staging and production). Credentials are stored in the
+MAGIC 1Password shared vault. In local development, a local PostGIS database configured in `docker-compose.yml` can be
 used:
 
 ```
@@ -355,9 +355,9 @@ Backing databases for PyCSW servers require initialisation using the `csw setup`
 
 **Note:** Backing databases must use the PostgreSQL engine with the PostGIS extension enabled.
 
-Normally this command will create the required database table, geometry column and relevant indexes. As catalogues only 
-require a single table, multiple can be stored in the same database/schema. However, two of the indexes used 
-(`fts_gin_idx` [full text search] and `wkb_geometry_idx` [binary geometry]) are named non-uniquely, preventing multiple 
+Normally this command will create the required database table, geometry column and relevant indexes. As catalogues only
+require a single table, multiple can be stored in the same database/schema. However, two of the indexes used
+(`fts_gin_idx` [full text search] and `wkb_geometry_idx` [binary geometry]) are named non-uniquely, preventing multiple
 catalogues being co-located in the same schema.
 
 This appears to be an oversight, as all other indexes are made unique by prefixing them with the name of the records
@@ -408,9 +408,9 @@ Access to the [BAS AWS account](https://gitlab.data.bas.ac.uk/WSF/bas-aws),
 
 **Note:** The templated Podman and Nomad runtime files are not included in Terraform state.
 
-```
+```shell
 $ cd provisioning/terraform
-$ docker-compose run terraform
+$ docker compose run terraform
 
 $ az login --allow-no-subscriptions
 
@@ -420,7 +420,7 @@ $ terraform fmt
 $ terraform apply
 
 $ exit
-$ docker-compose down
+$ docker compose down
 ```
 
 Once provisioned the following steps need to be taken manually:
@@ -468,7 +468,7 @@ configured manually in [GitLab](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata
 
 Manually request a new PostGIS database for the CSW catalogue backing databases from the BAS IT ServiceDesk.
 
-Manually request a new application to be deployed from the BAS IT ServiceDesk using the 
+Manually request a new application to be deployed from the BAS IT ServiceDesk using the
 [request template](http://ictdocs.nerc-bas.ac.uk/wiki/index.php/Provisioning_Process#Template_ServiceDesk_request).
 
 See [#44](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/44) for an example.
@@ -509,15 +509,15 @@ The local development environment is defined using Docker Compose in `./docker-c
 
 To create a local development environment:
 
-1. pull docker images: `docker-compose pull` [1]
-3. run the Docker Compose stack: `docker-compose up`
+1. pull docker images: `docker compose pull` [1]
+3. run the Docker Compose stack: `docker compose up`
     * the Flask application will be available directly at: [http://localhost:9000](http://localhost:9000)
     * the static site will be available at: [http://localhost:9001](http://localhost:9001)
 4. run application [Commands](docs/command-reference.md) [2]
 
 To destroy a local development environment:
 
-1. run `docker-compose down`
+1. run `docker compose down`
 
 [1] This requires access to the BAS Docker Registry (part of [gitlab.data.bas.ac.uk](https://gitlab.data.bas.ac.uk)):
 
@@ -531,7 +531,7 @@ first time this is used.
 [2] In a new terminal:
 
 ```shell
-$ docker-compose run app-cli flask [task]
+$ docker compose run app-cli flask [task]
 ```
 
 #### Development container
@@ -544,7 +544,7 @@ private BAS Docker Registry (part of [gitlab.data.bas.ac.uk](https://gitlab.data
 It is separate to the [deployment container](#docker-image) and installs both runtime and development
 [dependencies](#dependencies) (deployment containers only install runtime dependencies).
 
-If you don't have access to the BAS Docker Register, you can build this image locally using `docker-compose build app`.
+If you don't have access to the BAS Docker Register, you can build this image locally using `docker compose build app`.
 
 ### Python version
 
@@ -606,7 +606,7 @@ Non-code files, such as static files, can also be included in the [Python packag
 To add a new (development) dependency:
 
 ```shell
-$ docker-compose run app ash
+$ docker compose run app ash
 $ poetry add [dependency] (--dev)
 ```
 
@@ -614,14 +614,14 @@ Then rebuild the [Development container](#development-container) and push to Git
 automatically as needed):
 
 ```shell
-$ docker-compose build app
-$ docker-compose push app
+$ docker compose build app
+$ docker compose push app
 ```
 
 #### Updating dependencies
 
 ```shell
-$ docker-compose run app ash
+$ docker compose run app ash
 $ poetry update
 ```
 
@@ -629,8 +629,8 @@ Then rebuild the [Development container](#development-container) and push to Git
 automatically as needed):
 
 ```shell
-$ docker-compose build app
-$ docker-compose push app
+$ docker compose build app
+$ docker compose push app
 ```
 
 ### Static security scanning
@@ -644,7 +644,7 @@ application. As with all security tools, Bandit is an aid for spotting common mi
 To run checks manually:
 
 ```shell
-$ docker-compose run app bandit -r .
+$ docker compose run app bandit -r .
 ```
 
 Checks are ran automatically in [Continuous Integration](#continuous-integration).
@@ -661,13 +661,13 @@ as PyCharm, to perform formatting automatically.
 To apply formatting manually:
 
 ```shell
-$ docker-compose run app black scar_add_metadata_toolbox/
+$ docker compose run app black scar_add_metadata_toolbox/
 ```
 
 To check compliance manually:
 
 ```shell
-$ docker-compose run app black --check scar_add_metadata_toolbox/
+$ docker compose run app black --check scar_add_metadata_toolbox/
 ```
 
 Checks are ran automatically in [Continuous Integration](#continuous-integration).
@@ -749,7 +749,7 @@ All code in the `scar_add_metadata_toolbox` package must be covered by tests, de
 To run tests manually from the command line:
 
 ```shell
-$ docker-compose run app -e FLASK_ENV=testing app pytest --random-order
+$ docker compose run app -e FLASK_ENV=testing app pytest --random-order
 ```
 
 To run/debug tests using PyCharm, use the included *App (Tests)* run/debug configuration.
@@ -765,7 +765,7 @@ A `.coveragerc` file is used to omit code from the `scar_add_metadata_toolbox.ha
 To measure coverage manually:
 
 ```shell
-$ docker-compose run -e FLASK_ENV=testing app pytest --cov=scar_add_metadata_toolbox --cov-fail-under=100 --cov-report=html .
+$ docker compose run -e FLASK_ENV=testing app pytest --cov=scar_add_metadata_toolbox --cov-fail-under=100 --cov-report=html .
 ```
 
 [Continuous Integration](#continuous-integration) will check coverage automatically and fail if less than 100%.
@@ -828,21 +828,21 @@ The deployment [Docker image](#docker-image) is deployed as a service job in the
 
 ### BAS IT service
 
-The deployment [Python package](#python-package) is deployed as a WSGI application via BAS IT using an Ansible playbook: 
+The deployment [Python package](#python-package) is deployed as a WSGI application via BAS IT using an Ansible playbook:
 [`/playbooks/magic/add-metadata-toolbox.yml`](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/playbooks/magic/add-metadata-toolbox.yml) (internal)
 
-Variables for this application are set in: 
+Variables for this application are set in:
 [`/group_vars/magic/add-metadata-toolbox.yml`](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/group_vars/magic/add-metadata-toolbox.yml) (internal)
 
-Environment variables used by this application are set in: 
+Environment variables used by this application are set in:
 [`/playbooks/magic/add-metadata-toolbox.yml`](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/playbooks/magic/add-metadata-toolbox.yml) (internal)
 
-This application is deployed to a development, staging and production environment. Hosts for each environment are listed 
-in the relevant Ansible inventory in: 
+This application is deployed to a development, staging and production environment. Hosts for each environment are listed
+in the relevant Ansible inventory in:
 [`/inventory/magic/`](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/tree/master/inventory/magic) (internal)
 
-**Note:** The process to run/update this playbook/variables is still under development (see 
-[#44](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/44) (internal) for background). Currently 
+**Note:** The process to run/update this playbook/variables is still under development (see
+[#44](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/44) (internal) for background). Currently
 either needs to be requested through the [IT ServiceDesk](mailto:servicedesk@bas.ac.uk).
 
 #### Key paths
@@ -863,7 +863,7 @@ Key files/directories within this deployed application are:
 | Staging     | Yes (for logs) | No   | `felnne` |
 | Production  | Yes (for logs) | No   | `felnne` |
 
-Currently access to the servers for each environment is bespoke but should be standardised in future, see 
+Currently access to the servers for each environment is bespoke but should be standardised in future, see
 [#100](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/100) for more information.
 
 #### Flask CLI
@@ -873,7 +873,7 @@ To use the Flask CLI:
 ```shell
 $ ssh [server]
 $ sudo su
-$ . [path to virtual environment]/bin/activate 
+$ . [path to virtual environment]/bin/activate
 $ export FLASK_APP=scar_add_metadata_toolbox
 $ export FLASK_ENV=production
 $ flask [command]
@@ -884,12 +884,12 @@ $ exit
 
 ### API Service
 
-The CSW Catalogues are deployed as a service within the BAS API Load Balancer, backed by the production 
+The CSW Catalogues are deployed as a service within the BAS API Load Balancer, backed by the production
 [BAS IT service](#bas-it-service).
 
 #### API Documentation
 
-Usage documentation for this API service is held in `docs/api/` and currently 
+Usage documentation for this API service is held in `docs/api/` and currently
 [manually](https://gitlab.data.bas.ac.uk/WSF/api-docs#adding-a-service-manually) published using these service paths:
 
 * `s3://bas-api-docs-content-testing/services/data/metadata/add/csw/`
@@ -912,7 +912,7 @@ For all releases:
 2. close release in `CHANGELOG.md`
 3. push changes, merge the release branch into `master` and tag with version
 4. create a ServiceDesk request to deploy the new package version (and change/add environment variables if needed)
-5. re-deploy API documentation if needed 
+5. re-deploy API documentation if needed
 
 ## Feedback
 

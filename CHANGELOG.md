@@ -51,6 +51,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Broken dependencies in newer Alpine image
   [#158](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/158)
 
+### Changed
+
+* README improvements 
+  [#163](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/162)
+
 ### Removed
 
 * Publisher from item and collection page templates, as this would always be the same value

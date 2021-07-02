@@ -141,8 +141,8 @@ var epsg_3031 = new L.Proj.CRS(
 );
 
 var antarctica = L.tileLayer.wms('https://maps.bas.ac.uk/antarctic/wms?tiled=true', {
-  attribution: 'Map data <a href="https://www.add.scar.org">SCAR Antarctic Digital Database</a>',
-  layers: 'add:antarctic_rema_z5_hillshade_and_bathymetry',
+  attribution: 'Map Data <a href="https://www.add.scar.org">SCAR Antarctic Digital Database</a>',
+  layers: 'add:antarctic_hillshade_and_bathymetry',
   format: 'image/png',
   transparent: true,
   crs: epsg_3031

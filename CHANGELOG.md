@@ -53,10 +53,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
+* Extent map is only shown when the extent tab is selected for an item
+  [#164](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/164)
 * Updating copyright year
-  [#163](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/162)
+  [#163](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/163)
 * README improvements 
-  [#163](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/162)
+  [#163](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/163)
 
 ### Removed
 

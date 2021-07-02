@@ -110,7 +110,7 @@
     <script src="https://cdn.web.bas.ac.uk/libs/proj4js/2.4.3/proj4-2.4.3.min.js" integrity="sha256-2ywP8gZSxQqabTEhcw+Xc3zpb/n6aAc3D0sneTtRNHw=" crossorigin="anonymous"></script>
     <script src="https://cdn.web.bas.ac.uk/libs/proj4leaflet/v1.0.1/js/proj4leaflet-1.0.1.min.js" integrity="sha256-2/tIGOC+qdPryEVGe/iMOwpH4YHC3tcam5t8aqi74KI=" crossorigin="anonymous"></script>
     <script>
-        var item_id = '{{ item.file_identifier }}';
+        var item_id = '{{ item.identifier }}';
         var geographic_bounding_extent = {{ item.geographic_extent.bounding_box_geojson }};
     </script>
     <script src="/static/js/item.js"></script>

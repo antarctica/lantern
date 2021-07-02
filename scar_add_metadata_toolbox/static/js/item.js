@@ -140,34 +140,23 @@ var epsg_3031 = new L.Proj.CRS(
   }
 );
 
-var antarctica = L.tileLayer.wms('https://maps.bas.ac.uk/antarctic/wms?tiled=true', {
+var antarctica = L.tileLayer.wms('https://maps.bas.ac.uk/antarctic/wms', {
   attribution: 'Map Data <a href="https://www.add.scar.org">SCAR Antarctic Digital Database</a>',
   layers: 'add:antarctic_hillshade_and_bathymetry',
   format: 'image/png',
   transparent: true,
-  crs: epsg_3031
+  crs: epsg_3031,
+  tiled: true
 });
-var sub_antarctica = L.tileLayer.wms('https://maps.bas.ac.uk/antarctic/wms?tiled=true', {
+var sub_antarctica = L.tileLayer.wms('https://maps.bas.ac.uk/antarctic/wms', {
+  attribution: 'Map Data <a href="https://www.add.scar.org">SCAR Antarctic Digital Database</a>',
   continuousWorld: true,
   layers: 'add:sub_antarctic_coastline',
   format: 'image/png',
   transparent: true,
-  crs: epsg_3031
-});
-
-var map = L.map('item-map', {
-  attribution: false,
   crs: epsg_3031,
-  layers: [
-    antarctica,
-    sub_antarctica
-  ],
-  center: [-90, 0],
-  zoom: 0,
-  maxZoom: 5
+  tiled: true
 });
-map.attributionControl.setPrefix(false);
-L.control.scale().addTo(map);
 
 function geographic_bounding_extent_style(feature) {
   return {
@@ -177,15 +166,28 @@ function geographic_bounding_extent_style(feature) {
     fill: '#CC0033',
   };
 }
-L.Proj.geoJson(geographic_bounding_extent, {style: geographic_bounding_extent_style()}).addTo(map);
 
 $(function() {
-  // Ensure map is corrected when viewed in a tab
-  //
-
   $('#app-item-nav a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
     if (e.target.hash === '#item-details-extent') {
-      map.invalidateSize();
+      var map_container = L.DomUtil.get('item-map');
+      if(map_container.innerHTML === ''){
+        // Load map when viewed in a tab for the first time
+        var map = L.map('item-map', {
+          attribution: false,
+          crs: epsg_3031,
+          layers: [
+            antarctica,
+            sub_antarctica
+          ],
+          center: [-90, 0],
+          zoom: 0,
+          maxZoom: 5
+        });
+        L.control.scale().addTo(map);
+        L.Proj.geoJson(geographic_bounding_extent, {style: geographic_bounding_extent_style()}).addTo(map);
+        map.attributionControl.setPrefix(false);
+      }
     }
   })
 });

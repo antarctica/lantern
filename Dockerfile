@@ -1,4 +1,4 @@
-FROM python:3.6-alpine as base
+FROM python:3.6-alpine3.13 as base
 
 LABEL maintainer = "Felix Fennell <felnne@bas.ac.uk>"
 
@@ -38,6 +38,5 @@ ENV FLASK_ENV=development
 ENV PYTHONUNBUFFERED=1
 
 COPY --from=build $APPVENV/ $APPVENV/
-RUN mkdir -p /var/log/app/
 
 ENTRYPOINT []

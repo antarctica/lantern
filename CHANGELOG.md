@@ -9,15 +9,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
-* minimal support for product records
 * Support for PNG, JPEG and PDF transfer option formats
   [#155](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/155)
 * Support for Open Government Licence (OGL)
   [#151](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/151)
 * Markdown support for item citations
   [#153](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/153)
+* Minimal support for product records
   [#156](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/127)
-* alert that JavaScript is required in item pages to enable tabs to work
+* Alert that JavaScript is required in item pages to enable tabs to work
   [#127](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/127)
 * Python dependencies updated, inc. PyCSW to 2.6.0
   [#130](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/130)
@@ -50,6 +50,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#132](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/132)
 * Broken dependencies in newer Alpine image
   [#158](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/158)
+
+### Changed
+
+* Updating copyright year
+  [#163](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/162)
+* README improvements 
+  [#163](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/162)
 
 ### Removed
 

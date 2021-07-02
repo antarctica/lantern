@@ -646,7 +646,12 @@ class TestCommandRecordsBulkExport:
             assert result.exit_code == 0
 
             result = app_runner_mocked_csw.invoke(
-                args=["records", "bulk-export", record_directory, "--allow-overwrite",]
+                args=[
+                    "records",
+                    "bulk-export",
+                    record_directory,
+                    "--allow-overwrite",
+                ]
             )
             assert result.exit_code == 0
             assert "2 records to (re)export." in result.output
@@ -1369,7 +1374,12 @@ class TestCommandCollectionsBulkExport:
             assert result.exit_code == 0
 
             result = app_runner_mocked_collections.invoke(
-                args=["collections", "bulk-export", collection_directory, "--allow-overwrite",]
+                args=[
+                    "collections",
+                    "bulk-export",
+                    collection_directory,
+                    "--allow-overwrite",
+                ]
             )
             assert result.exit_code == 0
             assert "1 collections to (re)export." in result.output

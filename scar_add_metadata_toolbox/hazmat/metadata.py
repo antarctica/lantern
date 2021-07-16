@@ -132,9 +132,10 @@ def dump_record_to_json(record):
     record = deepcopy(record)
 
     record["date_stamp"] = record["date_stamp"].isoformat()
-    record["reference_system_info"]["authority"]["dates"][0]["date"] = record["reference_system_info"]["authority"][
-        "dates"
-    ][0]["date"].isoformat()
+    if "reference_system_info" in record:
+        record["reference_system_info"]["authority"]["dates"][0]["date"] = record["reference_system_info"]["authority"][
+            "dates"
+        ][0]["date"].isoformat()
 
     for index, resource_date in enumerate(record["resource"]["dates"]):
         record["resource"]["dates"][index]["date"] = resource_date["date"].isoformat()

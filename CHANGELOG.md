@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+* Items incorrectly required a Spatial Reference System to be set when exporting as records
+  [#157](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/157)
+
 ## [0.3.0] - 2021-07-02
 
 ### Added

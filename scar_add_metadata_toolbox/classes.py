@@ -2045,7 +2045,7 @@ class Item:
         :return: Collection names
         """
         collection_terms = self._filter_keyword_terms(
-            keyword_sets=self.record.theme_keywords, keyword_set_url="http://vocab.nerc.ac.uk/collection/T02/1/"
+            keyword_sets=self.record.theme_keywords, keyword_set_url="http://vocab.nerc.ac.uk/collection/T02/current/"
         )
         if collection_terms is None:  # pragma: no cover (will be addressed in #116)
             return []
@@ -2212,8 +2212,8 @@ class Item:
 
         Theme keywords are currently used for two keyword sets that the catalogue treats differently:
 
-        * BAS research topics - http://vocab.nerc.ac.uk/collection/T01/1/
-        * Data catalogue collections - http://vocab.nerc.ac.uk/collection/T02/1/
+        * BAS research topics - http://vocab.nerc.ac.uk/collection/T01/current1/
+        * Data catalogue collections - http://vocab.nerc.ac.uk/collection/T02/current/
 
         As these keyword sets are exposed through other Item properties (collections and topics respectively), they are
         filtered out from other theme keyword sets. Additionally, ISO Topics are filtered in as a theme keyword set.
@@ -2223,8 +2223,8 @@ class Item:
         """
         theme_keywords = []
         excluded_keyword_sets = [
-            "http://vocab.nerc.ac.uk/collection/T01/1/",
-            "http://vocab.nerc.ac.uk/collection/T02/1/",
+            "http://vocab.nerc.ac.uk/collection/T01/current/",
+            "http://vocab.nerc.ac.uk/collection/T02/current/",
         ]
 
         _iso_topics_keyword_terms = []
@@ -2267,7 +2267,7 @@ class Item:
         :return: Topic names
         """
         topic_terms = self._filter_keyword_terms(
-            keyword_sets=self.record.theme_keywords, keyword_set_url="http://vocab.nerc.ac.uk/collection/T01/1/"
+            keyword_sets=self.record.theme_keywords, keyword_set_url="http://vocab.nerc.ac.uk/collection/T01/current/"
         )
         # return a list of just term values
         return [term["term"] for term in topic_terms]

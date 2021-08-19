@@ -520,7 +520,7 @@
       <gmd:descriptiveKeywords>
         <gmd:MD_Keywords>
           <gmd:keyword>
-            <gmx:Anchor xlink:href="http://vocab.nerc.ac.uk/collection/T01/1/9cd3118f-55e2-4c07-b9f4-e260e40e8eb2/1/" xlink:actuate="onRequest">Topographic mapping</gmx:Anchor>
+            <gmx:Anchor xlink:href="http://vocab.nerc.ac.uk/collection/T01current9cd3118f-55e2-4c07-b9f4-e260e40e8eb2/1/" xlink:actuate="onRequest">Topographic mapping</gmx:Anchor>
           </gmd:keyword>
           <gmd:type>
             <gmd:MD_KeywordTypeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme">theme</gmd:MD_KeywordTypeCode>
@@ -528,7 +528,7 @@
           <gmd:thesaurusName>
             <gmd:CI_Citation>
               <gmd:title>
-                <gmx:Anchor xlink:href="http://vocab.nerc.ac.uk/collection/T01/1/" xlink:actuate="onRequest">British Antarctic Survey research topics</gmx:Anchor>
+                <gmx:Anchor xlink:href="http://vocab.nerc.ac.uk/collection/T01/current/" xlink:actuate="onRequest">British Antarctic Survey research topics</gmx:Anchor>
               </gmd:title>
               <gmd:date>
                 <gmd:CI_Date>
@@ -609,7 +609,7 @@
       <gmd:descriptiveKeywords>
         <gmd:MD_Keywords>
           <gmd:keyword>
-            <gmx:Anchor xlink:href="http://vocab.nerc.ac.uk/collection/T02/1/8e91de62-b6e3-402e-b11f-73d2c1f37cff/" xlink:actuate="onRequest">Antarctic Digital Database</gmx:Anchor>
+            <gmx:Anchor xlink:href="http://vocab.nerc.ac.uk/collection/T02/current/8e91de62-b6e3-402e-b11f-73d2c1f37cff/" xlink:actuate="onRequest">Antarctic Digital Database</gmx:Anchor>
           </gmd:keyword>
           <gmd:type>
             <gmd:MD_KeywordTypeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme">theme</gmd:MD_KeywordTypeCode>
@@ -617,7 +617,7 @@
           <gmd:thesaurusName>
             <gmd:CI_Citation>
               <gmd:title>
-                <gmx:Anchor xlink:href="http://vocab.nerc.ac.uk/collection/T02/1/" xlink:actuate="onRequest">British Antarctic Survey data catalogue collections</gmx:Anchor>
+                <gmx:Anchor xlink:href="http://vocab.nerc.ac.uk/collection/T02/current/" xlink:actuate="onRequest">British Antarctic Survey data catalogue collections</gmx:Anchor>
               </gmd:title>
               <gmd:date>
                 <gmd:CI_Date>

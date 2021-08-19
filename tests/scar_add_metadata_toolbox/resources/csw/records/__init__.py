@@ -193,14 +193,14 @@ def make_test_record(identifier: str, title: str) -> dict:
                     "terms": [
                         {
                             "term": "Topographic mapping",
-                            "href": "http://vocab.nerc.ac.uk/collection/T01/1/9cd3118f-55e2-4c07-b9f4-e260e40e8eb2/1/",
+                            "href": "http://vocab.nerc.ac.uk/collection/T01/current/9cd3118f-55e2-4c07-b9f4-e260e40e8eb2/1/",
                         }
                     ],
                     "type": "theme",
                     "thesaurus": {
                         "title": {
                             "value": "British Antarctic Survey research topics",
-                            "href": "http://vocab.nerc.ac.uk/collection/T01/1/",
+                            "href": "http://vocab.nerc.ac.uk/collection/T01/current/",
                         },
                         "dates": [{"date": date(2020, 5, 6).isoformat(), "date_type": "publication"}],
                         "edition": "1",
@@ -233,14 +233,14 @@ def make_test_record(identifier: str, title: str) -> dict:
                     "terms": [
                         {
                             "term": "Antarctic Digital Database",
-                            "href": "http://vocab.nerc.ac.uk/collection/T02/1/8e91de62-b6e3-402e-b11f-73d2c1f37cff/",
+                            "href": "http://vocab.nerc.ac.uk/collection/T02/current/8e91de62-b6e3-402e-b11f-73d2c1f37cff/",
                         }
                     ],
                     "type": "theme",
                     "thesaurus": {
                         "title": {
                             "value": "British Antarctic Survey data catalogue collections",
-                            "href": "http://vocab.nerc.ac.uk/collection/T02/1/",
+                            "href": "http://vocab.nerc.ac.uk/collection/T02/current/",
                         },
                         "dates": [{"date": date(2020, 5, 5).isoformat(), "date_type": "publication"}],
                         "edition": "1",

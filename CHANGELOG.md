@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Items incorrectly required a Spatial Reference System to be set when exporting as records
   [#157](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/157)
+* URLs for NVS vocabularies which were set incorrectly in records
+  [#175](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/175)
 
 ## [0.3.0] - 2021-07-02
 

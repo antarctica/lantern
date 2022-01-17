@@ -24,6 +24,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Simplifying CI/CD workflow
   [#189](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/189)
 
+### Removed
+
+* Record seeding support (in favour of importing existing records)
+  [#128](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/128)
+
 ## [0.3.0] - 2021-07-02
 
 ### Added

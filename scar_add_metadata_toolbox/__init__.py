@@ -9,7 +9,6 @@ from scar_add_metadata_toolbox.commands import (
     collections_commands_blueprint,
     site_commands_blueprint,
     auth_commands_blueprint,
-    seeding_commands_blueprint,
     csw_commands_blueprint,
 )
 from scar_add_metadata_toolbox.csw import (
@@ -60,7 +59,6 @@ def create_app():
     app.register_blueprint(site_commands_blueprint)
     app.register_blueprint(csw_commands_blueprint)
     app.register_blueprint(auth_commands_blueprint)
-    app.register_blueprint(seeding_commands_blueprint)
 
     @app.cli.command("version")
     def version():

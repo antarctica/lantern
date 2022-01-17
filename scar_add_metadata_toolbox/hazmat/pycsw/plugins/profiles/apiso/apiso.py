@@ -1,6 +1,20 @@
 # -*- coding: utf-8 -*-
 # =================================================================
 #
+# Changes, which are local to this dependency, within this package,
+# have been made to this file, in order to improve compatibility,
+# add functionality, or address bugs that are not present, or not
+# addressed in the upstream package.
+#
+# See the README for the SCAR ADD Metadata Toolbox (this package)
+# for more information about why these changes have been made.
+#
+# Summary of changes made to this file:
+# - amend `write_record` method to work around hex-encoded values
+# =================================================================
+
+# =================================================================
+#
 # Authors: Tom Kralidis <tomkralidis@gmail.com>
 #          Angelos Tzotsos <tzotsos@gmail.com>
 #
@@ -387,7 +401,9 @@ class APISO(profile.Profile):
 
         xml_blob = util.getqattr(result, self.context.md_core_model['mappings']['pycsw:XML'])
 
-        #xml_blob_decoded = bytes.fromhex(xml_blob[2:]).decode('utf-8')
+        # Patch to fix hex encoding issues - https://github.com/geopython/pycsw/issues/576
+        if xml_blob[:2] == "\\x":
+            xml_blob = bytes.fromhex(xml_blob[2:]).decode('utf-8')
 
         if isinstance(xml_blob, bytes):
             iso_string = b'<gmd:MD_Metadata>'

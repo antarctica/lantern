@@ -1,4 +1,20 @@
 # -*- coding: ISO-8859-15 -*-
+# =================================================================
+#
+# Changes, which are local to this dependency, within this package,
+# have been made to this file, in order to improve compatibility,
+# add functionality, or address bugs that are not present, or not
+# addressed in the upstream package.
+#
+# See the README for the SCAR ADD Metadata Toolbox (this package)
+# for more information about why these changes have been made.
+#
+# Summary of changes made to this file:
+# - amend `Authentication` class to support token based auth
+# - amend `openURL`, `http_get`, `http_post` methods to support
+#   token based auth
+# =================================================================
+
 # =============================================================================
 # Copyright (c) 2008 Tom Kralidis
 #
@@ -142,8 +158,8 @@ class ResponseWrapper(object):
     # @TODO: __getattribute__ for poking at response
 
 
-def openURL(url_base, data=None, method='Get', cookies=None, username=None, password=None, timeout=30, headers=None,
-            verify=True, cert=None, auth=None):
+def openURL(url_base, data=None, method='Get', cookies=None, token=None, username=None, password=None, timeout=30,
+            headers=None, verify=True, cert=None, auth=None):
     """
     Function to open URLs.
 
@@ -164,6 +180,8 @@ def openURL(url_base, data=None, method='Get', cookies=None, username=None, pass
     rkwargs['timeout'] = timeout
 
     if auth:
+        if token:
+            auth.token = token
         if username:
             auth.username = username
         if password:
@@ -174,6 +192,8 @@ def openURL(url_base, data=None, method='Get', cookies=None, username=None, pass
             auth.verify = verify
     else:
         auth = Authentication(username, password, cert, verify)
+    if auth.token:
+        headers['Authorization'] = f"Bearer {auth.token}"
     if auth.username and auth.password:
         rkwargs['auth'] = (auth.username, auth.password)
     rkwargs['cert'] = auth.cert
@@ -380,7 +400,7 @@ def testXMLAttribute(element, attribute):
     return None
 
 
-def http_post(url=None, request=None, lang='en-US', timeout=10, username=None, password=None, auth=None):
+def http_post(url=None, request=None, lang='en-US', timeout=10, token=None, username=None, password=None, auth=None):
     """
 
     Invoke an HTTP POST request
@@ -412,12 +432,18 @@ def http_post(url=None, request=None, lang='en-US', timeout=10, username=None, p
     rkwargs = {}
 
     if auth:
+        if token:
+            auth.token = token
         if username:
             auth.username = username
         if password:
             auth.password = password
+    elif token is not None:
+        auth = Authentication(token=token)
     else:
-        auth = Authentication(username, password)
+        auth = Authentication(username=username, password=password)
+    if auth.token is not None:
+        headers['Authorization'] = f"Bearer {auth.token}"
     if auth.username is not None and auth.password is not None:
         rkwargs['auth'] = (auth.username, auth.password)
     rkwargs['verify'] = auth.verify
@@ -440,6 +466,8 @@ def http_get(*args, **kwargs):
         auth = Authentication()
 
     # Populate values with other arguments supplied
+    if 'token' in rkwargs:
+        auth.token = rkwargs.pop('token')
     if 'username' in rkwargs:
         auth.username = rkwargs.pop('username')
     if 'password' in rkwargs:
@@ -450,7 +478,12 @@ def http_get(*args, **kwargs):
         auth.verify = rkwargs.pop('verify')
 
     # Build keyword args for call to requests.get()
-    if auth.username and auth.password:
+    if auth.token:
+        headers = {}
+        if 'headers' in rkwargs:
+            headers = rkwargs['headers']
+        headers['Authorization'] = f"Bearer {auth.token}"
+    elif auth.username and auth.password:
         rkwargs.setdefault('auth', (auth.username, auth.password))
     else:
         rkwargs.setdefault('auth', None)
@@ -832,14 +865,17 @@ def is_vector_grid(grid_elem):
 
 class Authentication(object):
 
+    _TOKEN = None
     _USERNAME = None
     _PASSWORD = None
     _CERT = None
     _VERIFY = None
 
-    def __init__(self, username=None, password=None,
+    def __init__(self, token=None, username=None, password=None,
                  cert=None, verify=True, shared=False):
         '''
+        :param str token=None: Token for bearer authentication, None for
+            unauthenticated access (or if using user/pass or cert/verify)
         :param str username=None: Username for basic authentication, None for
             unauthenticated access (or if using cert/verify)
         :param str password=None: Password for basic authentication, None for
@@ -855,10 +891,28 @@ class Authentication(object):
             instance-level (shared=False, default)
         '''
         self.shared = shared
+        self.token = token
         self.username = username
         self.password = password
         self.cert = cert
         self.verify = verify
+
+    @property
+    def token(self):
+        if self.shared:
+            return self._TOKEN
+        return self._token
+
+    @token.setter
+    def token(self, value):
+        if value is None:
+            pass
+        elif not isinstance(value, str):
+            raise TypeError('Value for "token" must be a str')
+        if self.shared:
+            self.__class__._TOKEN = value
+        else:
+            self._token = value
 
     @property
     def username(self):
@@ -951,6 +1005,7 @@ class Authentication(object):
     @property
     def urlopen_kwargs(self):
         return {
+            "token": self.token,
             'username': self.username,
             'password': self.password,
             'cert': self.cert,
@@ -958,5 +1013,5 @@ class Authentication(object):
         }
 
     def __repr__(self, *args, **kwargs):
-        return '<{} shared={} username={} password={} cert={} verify={}>'.format(
-            self.__class__.__name__, self.shared, self.username, self.password, self.cert, self.verify)
+        return '<{} shared={} token={} username={} password={} cert={} verify={}>'.format(
+            self.__class__.__name__, self.shared, self.token, self.username, self.password, self.cert, self.verify)

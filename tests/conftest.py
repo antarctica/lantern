@@ -24,32 +24,32 @@ from tests.scar_add_metadata_toolbox.classes import (
     MockCollectionsUnknownRecord,
     MockCSWServerAuthTokenError,
 )
-from tests.scar_add_metadata_toolbox.resources.csw.records import make_test_record
+from tests.scar_add_metadata_toolbox.resources.csw.records import make_test_record_config
 
 
-class TestRecords(Enum):
+class TestRecordConfigurations(Enum):
     __test__ = False
 
-    TEST_RECORD_1 = make_test_record(
+    TEST_RECORD_1 = make_test_record_config(
         identifier="7e3719b4-60a4-4b4e-aa84-cee7a5e7218f", title="Test Record 1 (Published)"
     )
-    TEST_RECORD_2 = make_test_record(
+    TEST_RECORD_2 = make_test_record_config(
         identifier="39d47e50-f94f-43c5-9060-510d9374b81b", title="Test Record 2 (Unpublished)"
     )
-    TEST_RECORD_3 = make_test_record(
+    TEST_RECORD_3 = make_test_record_config(
         identifier="180d07c4-8b97-48ed-87ac-359b6899fa8b", title="Test Record 3 (Imported, Unpublished)"
     )
-    TEST_RECORD_4 = make_test_record(
+    TEST_RECORD_4 = make_test_record_config(
         identifier="7e3719b4-60a4-4b4e-aa84-cee7a5e7218f", title="Test Record 4 (Imported, Updated, Unpublished)"
     )
-    TEST_RECORD_5 = make_test_record(
+    TEST_RECORD_5 = make_test_record_config(
         identifier="2f8ad5b8-b861-4459-88d9-b9ff98a34a98", title="Test Record 5 (Imported, Published)"
     )
-    TEST_RECORD_6 = make_test_record(
+    TEST_RECORD_6 = make_test_record_config(
         identifier="7e3719b4-60a4-4b4e-aa84-cee7a5e7218f",
         title="Test Record 6 (Imported, Updated, Published, Republished)",
     )
-    TEST_RECORD_7 = make_test_record(
+    TEST_RECORD_7 = make_test_record_config(
         identifier="7e3719b4-60a4-4b4e-aa84-cee7a5e7218f", title="Test Record 7 (Imported, Duplicate of Test Record 1)"
     )
 

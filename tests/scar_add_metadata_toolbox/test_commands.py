@@ -3,12 +3,11 @@ import json
 from pathlib import Path
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 from unittest import mock
-from unittest.mock import patch
 
 import pytest
+from bas_metadata_library.standards.iso_19115_2 import MetadataRecordConfigV2
 
-from tests.conftest import TestRecords, TestCollections
-from tests.scar_add_metadata_toolbox.classes import MockCollections
+from tests.conftest import TestRecordConfigurations, TestCollections
 
 
 class TestCommandRecordsList:
@@ -49,9 +48,9 @@ class TestCommandRecordsImport:
     @pytest.mark.usefixtures("app_runner_mocked_csw")
     def test_cli_records_import(self, app_runner_mocked_csw):
         with NamedTemporaryFile(mode="r+") as record_file:
-            record_data = TestRecords.TEST_RECORD_3.value
-            json.dump(record_data, record_file)
-            record_file.flush()
+            record_data = TestRecordConfigurations.TEST_RECORD_3.value
+            record_configuration = MetadataRecordConfigV2(**record_data)
+            record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw.invoke(args=["records", "import", record_file.name])
             assert result.exit_code == 0
@@ -65,9 +64,9 @@ class TestCommandRecordsImport:
     @pytest.mark.usefixtures("app_runner_mocked_csw")
     def test_cli_records_import_allow_update(self, app_runner_mocked_csw):
         with NamedTemporaryFile(mode="r+") as record_file:
-            record_data = TestRecords.TEST_RECORD_4.value
-            json.dump(record_data, record_file)
-            record_file.flush()
+            record_data = TestRecordConfigurations.TEST_RECORD_4.value
+            record_configuration = MetadataRecordConfigV2(**record_data)
+            record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw.invoke(args=["records", "import", record_file.name, "--allow-update"])
             assert result.exit_code == 0
@@ -76,9 +75,9 @@ class TestCommandRecordsImport:
     @pytest.mark.usefixtures("app_runner_mocked_csw")
     def test_cli_records_import_publish(self, app_runner_mocked_csw):
         with NamedTemporaryFile(mode="r+") as record_file:
-            record_data = TestRecords.TEST_RECORD_5.value
-            json.dump(record_data, record_file)
-            record_file.flush()
+            record_data = TestRecordConfigurations.TEST_RECORD_5.value
+            record_configuration = MetadataRecordConfigV2(**record_data)
+            record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw.invoke(args=["records", "import", record_file.name, "--publish"])
             assert result.exit_code == 0
@@ -88,9 +87,9 @@ class TestCommandRecordsImport:
     @pytest.mark.usefixtures("app_runner_mocked_csw")
     def test_cli_records_import_publish_allow_update_allow_republish(self, app_runner_mocked_csw):
         with NamedTemporaryFile(mode="r+") as record_file:
-            record_data = TestRecords.TEST_RECORD_6.value
-            json.dump(record_data, record_file)
-            record_file.flush()
+            record_data = TestRecordConfigurations.TEST_RECORD_6.value
+            record_configuration = MetadataRecordConfigV2(**record_data)
+            record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw.invoke(
                 args=["records", "import", record_file.name, "--allow-update", "--publish", "--allow-republish"]
@@ -138,9 +137,9 @@ class TestCommandRecordsImport:
     @pytest.mark.usefixtures("app_runner_mocked_csw_not_setup")
     def test_cli_records_import_csw_not_setup(self, app_runner_mocked_csw_not_setup):
         with NamedTemporaryFile(mode="r+") as record_file:
-            record_data = TestRecords.TEST_RECORD_3.value
-            json.dump(record_data, record_file)
-            record_file.flush()
+            record_data = TestRecordConfigurations.TEST_RECORD_3.value
+            record_configuration = MetadataRecordConfigV2(**record_data)
+            record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw_not_setup.invoke(args=["records", "import", record_file.name])
             assert result.exit_code == 64
@@ -149,9 +148,9 @@ class TestCommandRecordsImport:
     @pytest.mark.usefixtures("app_runner_mocked_csw_auth_token_error")
     def test_cli_records_import_auth_token_error(self, app_runner_mocked_csw_auth_token_error):
         with NamedTemporaryFile(mode="r+") as record_file:
-            record_data = TestRecords.TEST_RECORD_3.value
-            json.dump(record_data, record_file)
-            record_file.flush()
+            record_data = TestRecordConfigurations.TEST_RECORD_3.value
+            record_configuration = MetadataRecordConfigV2(**record_data)
+            record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw_auth_token_error.invoke(args=["records", "import", record_file.name])
             assert result.exit_code == 64
@@ -160,9 +159,9 @@ class TestCommandRecordsImport:
     @pytest.mark.usefixtures("app_runner_mocked_csw_missing_auth_token")
     def test_cli_records_import_auth_token_missing(self, app_runner_mocked_csw_missing_auth_token):
         with NamedTemporaryFile(mode="r+") as record_file:
-            record_data = TestRecords.TEST_RECORD_3.value
-            json.dump(record_data, record_file)
-            record_file.flush()
+            record_data = TestRecordConfigurations.TEST_RECORD_3.value
+            record_configuration = MetadataRecordConfigV2(**record_data)
+            record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw_missing_auth_token.invoke(args=["records", "import", record_file.name])
             assert result.exit_code == 64
@@ -171,9 +170,9 @@ class TestCommandRecordsImport:
     @pytest.mark.usefixtures("app_runner_mocked_csw_insufficient_auth_token")
     def test_cli_records_import_auth_token_insufficient(self, app_runner_mocked_csw_insufficient_auth_token):
         with NamedTemporaryFile(mode="r+") as record_file:
-            record_data = TestRecords.TEST_RECORD_3.value
-            json.dump(record_data, record_file)
-            record_file.flush()
+            record_data = TestRecordConfigurations.TEST_RECORD_3.value
+            record_configuration = MetadataRecordConfigV2(**record_data)
+            record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw_insufficient_auth_token.invoke(args=["records", "import", record_file.name])
             assert result.exit_code == 64
@@ -182,9 +181,9 @@ class TestCommandRecordsImport:
     @pytest.mark.usefixtures("app_runner_mocked_csw_inserts_fail")
     def test_cli_records_import_error_server(self, app_runner_mocked_csw_inserts_fail):
         with NamedTemporaryFile(mode="r+") as record_file:
-            record_data = TestRecords.TEST_RECORD_3.value
-            json.dump(record_data, record_file)
-            record_file.flush()
+            record_data = TestRecordConfigurations.TEST_RECORD_3.value
+            record_configuration = MetadataRecordConfigV2(**record_data)
+            record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw_inserts_fail.invoke(args=["records", "import", record_file.name])
             assert result.exit_code == 64
@@ -193,9 +192,9 @@ class TestCommandRecordsImport:
     @pytest.mark.usefixtures("app_runner_mocked_csw")
     def test_cli_records_import_error_conflict(self, app_runner_mocked_csw):
         with NamedTemporaryFile(mode="r+") as record_file:
-            record_data = TestRecords.TEST_RECORD_7.value
-            json.dump(record_data, record_file)
-            record_file.flush()
+            record_data = TestRecordConfigurations.TEST_RECORD_7.value
+            record_configuration = MetadataRecordConfigV2(**record_data)
+            record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw.invoke(args=["records", "import", record_file.name])
             assert result.exit_code == 64
@@ -207,9 +206,9 @@ class TestCommandRecordsImport:
     @pytest.mark.usefixtures("app_runner_mocked_csw")
     def test_cli_records_import_error_publish_conflict(self, app_runner_mocked_csw):
         with NamedTemporaryFile(mode="r+") as record_file:
-            record_data = TestRecords.TEST_RECORD_7.value
-            json.dump(record_data, record_file)
-            record_file.flush()
+            record_data = TestRecordConfigurations.TEST_RECORD_7.value
+            record_configuration = MetadataRecordConfigV2(**record_data)
+            record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw.invoke(
                 args=["records", "import", record_file.name, "--allow-update", "--publish"]
@@ -227,9 +226,9 @@ class TestCommandRecordsBulkImport:
     def test_cli_records_bulk_import(self, app_runner_mocked_csw):
         with TemporaryDirectory() as record_directory:
             with open(str(Path(f"{record_directory}/record.json")), mode="w+") as record_file:
-                record_data = TestRecords.TEST_RECORD_3.value
-                json.dump(record_data, record_file)
-                record_file.flush()
+                record_data = TestRecordConfigurations.TEST_RECORD_3.value
+                record_configuration = MetadataRecordConfigV2(**record_data)
+                record_configuration.dump(file=Path(record_file.name))
 
                 result = app_runner_mocked_csw.invoke(args=["records", "bulk-import", record_directory])
                 assert result.exit_code == 0
@@ -247,9 +246,9 @@ class TestCommandRecordsBulkImport:
     def test_cli_records_bulk_import_allow_update(self, app_runner_mocked_csw):
         with TemporaryDirectory() as record_directory:
             with open(str(Path(f"{record_directory}/record.json")), mode="w+") as record_file:
-                record_data = TestRecords.TEST_RECORD_4.value
-                json.dump(record_data, record_file)
-                record_file.flush()
+                record_data = TestRecordConfigurations.TEST_RECORD_4.value
+                record_configuration = MetadataRecordConfigV2(**record_data)
+                record_configuration.dump(file=Path(record_file.name))
 
                 result = app_runner_mocked_csw.invoke(
                     args=["records", "bulk-import", record_directory, "--allow-update"]
@@ -264,9 +263,9 @@ class TestCommandRecordsBulkImport:
     def test_cli_records_bulk_import_publish(self, app_runner_mocked_csw):
         with TemporaryDirectory() as record_directory:
             with open(str(Path(f"{record_directory}/record.json")), mode="w+") as record_file:
-                record_data = TestRecords.TEST_RECORD_5.value
-                json.dump(record_data, record_file)
-                record_file.flush()
+                record_data = TestRecordConfigurations.TEST_RECORD_5.value
+                record_configuration = MetadataRecordConfigV2(**record_data)
+                record_configuration.dump(file=Path(record_file.name))
 
                 result = app_runner_mocked_csw.invoke(args=["records", "bulk-import", record_directory, "--publish"])
                 assert result.exit_code == 0
@@ -280,9 +279,9 @@ class TestCommandRecordsBulkImport:
     def test_cli_records_bulk_import_publish_allow_update_allow_republish(self, app_runner_mocked_csw):
         with TemporaryDirectory() as record_directory:
             with open(str(Path(f"{record_directory}/record.json")), mode="w+") as record_file:
-                record_data = TestRecords.TEST_RECORD_6.value
-                json.dump(record_data, record_file)
-                record_file.flush()
+                record_data = TestRecordConfigurations.TEST_RECORD_6.value
+                record_configuration = MetadataRecordConfigV2(**record_data)
+                record_configuration.dump(file=Path(record_file.name))
 
                 result = app_runner_mocked_csw.invoke(
                     args=[
@@ -341,9 +340,9 @@ class TestCommandRecordsBulkImport:
             with open(valid_record_path, mode="w+") as valid_record_file, open(
                 invalid_record_path, mode="w+"
             ) as invalid_record_file:
-                valid_record_data = TestRecords.TEST_RECORD_3.value
-                json.dump(valid_record_data, valid_record_file)
-                valid_record_file.flush()
+                valid_record_data = TestRecordConfigurations.TEST_RECORD_3.value
+                record_configuration = MetadataRecordConfigV2(**valid_record_data)
+                record_configuration.dump(file=Path(valid_record_file.name))
                 invalid_record_data = '{"foo":}'
                 invalid_record_file.write(invalid_record_data)
                 invalid_record_file.flush()
@@ -361,18 +360,29 @@ class TestCommandRecordsPublish:
     @pytest.mark.usefixtures("app_runner_mocked_csw")
     def test_cli_records_publish(self, app_runner_mocked_csw):
         result = app_runner_mocked_csw.invoke(
-            args=["records", "publish", TestRecords.TEST_RECORD_2.value["file_identifier"]]
+            args=["records", "publish", TestRecordConfigurations.TEST_RECORD_2.value["file_identifier"]]
         )
         assert result.exit_code == 0
-        assert f"Ok. Record '{TestRecords.TEST_RECORD_2.value['file_identifier']}' published." in result.output
+        assert (
+            f"Ok. Record '{TestRecordConfigurations.TEST_RECORD_2.value['file_identifier']}' published."
+            in result.output
+        )
 
     @pytest.mark.usefixtures("app_runner_mocked_csw")
     def test_cli_records_publish_allow_republish(self, app_runner_mocked_csw):
         result = app_runner_mocked_csw.invoke(
-            args=["records", "publish", TestRecords.TEST_RECORD_1.value["file_identifier"], "--allow-republish"]
+            args=[
+                "records",
+                "publish",
+                TestRecordConfigurations.TEST_RECORD_1.value["file_identifier"],
+                "--allow-republish",
+            ]
         )
         assert result.exit_code == 0
-        assert f"Ok. Record '{TestRecords.TEST_RECORD_1.value['file_identifier']}' republished." in result.output
+        assert (
+            f"Ok. Record '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}' republished."
+            in result.output
+        )
 
     @pytest.mark.usefixtures("app_runner_mocked_csw")
     def test_cli_records_publish_error_no_record_identifier(self, app_runner_mocked_csw):
@@ -383,7 +393,7 @@ class TestCommandRecordsPublish:
     @pytest.mark.usefixtures("app_runner_mocked_csw_not_setup")
     def test_cli_records_publish_csw_not_setup(self, app_runner_mocked_csw_not_setup):
         result = app_runner_mocked_csw_not_setup.invoke(
-            args=["records", "publish", TestRecords.TEST_RECORD_2.value["file_identifier"]]
+            args=["records", "publish", TestRecordConfigurations.TEST_RECORD_2.value["file_identifier"]]
         )
         assert result.exit_code == 64
         assert "No. CSW catalogue not setup." in result.output
@@ -391,7 +401,7 @@ class TestCommandRecordsPublish:
     @pytest.mark.usefixtures("app_runner_mocked_csw_auth_token_error")
     def test_cli_records_publish_auth_token_error(self, app_runner_mocked_csw_auth_token_error):
         result = app_runner_mocked_csw_auth_token_error.invoke(
-            args=["records", "publish", TestRecords.TEST_RECORD_2.value["file_identifier"]]
+            args=["records", "publish", TestRecordConfigurations.TEST_RECORD_2.value["file_identifier"]]
         )
         assert result.exit_code == 64
         assert "No. Error with auth token. Try signing out and in again or seek support." in result.output
@@ -399,7 +409,7 @@ class TestCommandRecordsPublish:
     @pytest.mark.usefixtures("app_runner_mocked_csw_missing_auth_token")
     def test_cli_records_publish_auth_token_missing(self, app_runner_mocked_csw_missing_auth_token):
         result = app_runner_mocked_csw_missing_auth_token.invoke(
-            args=["records", "publish", TestRecords.TEST_RECORD_2.value["file_identifier"]]
+            args=["records", "publish", TestRecordConfigurations.TEST_RECORD_2.value["file_identifier"]]
         )
         assert result.exit_code == 64
         assert "No. Missing auth token. Run `auth sign-in` first." in result.output
@@ -407,7 +417,7 @@ class TestCommandRecordsPublish:
     @pytest.mark.usefixtures("app_runner_mocked_csw_insufficient_auth_token")
     def test_cli_records_publish_auth_token_insufficient(self, app_runner_mocked_csw_insufficient_auth_token):
         result = app_runner_mocked_csw_insufficient_auth_token.invoke(
-            args=["records", "publish", TestRecords.TEST_RECORD_2.value["file_identifier"]]
+            args=["records", "publish", TestRecordConfigurations.TEST_RECORD_2.value["file_identifier"]]
         )
         assert result.exit_code == 64
         assert "No. Missing permissions in auth token. Seek support to assign required permissions." in result.output
@@ -421,23 +431,23 @@ class TestCommandRecordsPublish:
     @pytest.mark.usefixtures("app_runner_mocked_csw")
     def test_cli_records_publish_error_conflict(self, app_runner_mocked_csw):
         result = app_runner_mocked_csw.invoke(
-            args=["records", "publish", TestRecords.TEST_RECORD_1.value["file_identifier"]]
+            args=["records", "publish", TestRecordConfigurations.TEST_RECORD_1.value["file_identifier"]]
         )
         assert result.exit_code == 64
         assert (
-            f"No. Record '{TestRecords.TEST_RECORD_1.value['file_identifier']}' already published. Add `--allow-republish` flag to allow."
+            f"No. Record '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}' already published. Add `--allow-republish` flag to allow."
             in result.output
         )
 
     @pytest.mark.usefixtures("app_runner_mocked_csw_inserts_fail")
     def test_cli_records_import_error_server(self, app_runner_mocked_csw_inserts_fail):
         result = app_runner_mocked_csw_inserts_fail.invoke(
-            args=["records", "publish", TestRecords.TEST_RECORD_2.value["file_identifier"]]
+            args=["records", "publish", TestRecordConfigurations.TEST_RECORD_2.value["file_identifier"]]
         )
 
         assert result.exit_code == 64
         assert (
-            f"No. Server error publishing record '{TestRecords.TEST_RECORD_2.value['file_identifier']}'."
+            f"No. Server error publishing record '{TestRecordConfigurations.TEST_RECORD_2.value['file_identifier']}'."
             in result.output
         )
 
@@ -449,7 +459,10 @@ class TestCommandRecordsBulkPublish:
         assert result.exit_code == 0
         assert "1 records to (re)publish." in result.output
         assert "# Record 1/1" in result.output
-        assert f"Ok. Record '{TestRecords.TEST_RECORD_2.value['file_identifier']}' published." in result.output
+        assert (
+            f"Ok. Record '{TestRecordConfigurations.TEST_RECORD_2.value['file_identifier']}' published."
+            in result.output
+        )
         assert "Ok. 1 records (re)published." in result.output
 
     @pytest.mark.usefixtures("app_runner_mocked_csw")
@@ -458,9 +471,15 @@ class TestCommandRecordsBulkPublish:
         assert result.exit_code == 0
         assert "2 records to (re)publish." in result.output
         assert "# Record 1/2" in result.output
-        assert f"Ok. Record '{TestRecords.TEST_RECORD_1.value['file_identifier']}' republished." in result.output
+        assert (
+            f"Ok. Record '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}' republished."
+            in result.output
+        )
         assert "# Record 2/2" in result.output
-        assert f"Ok. Record '{TestRecords.TEST_RECORD_2.value['file_identifier']}' published." in result.output
+        assert (
+            f"Ok. Record '{TestRecordConfigurations.TEST_RECORD_2.value['file_identifier']}' published."
+            in result.output
+        )
         assert "Ok. 2 records (re)published." in result.output
 
     @pytest.mark.usefixtures("app_runner_mocked_csw_inserts_fail")
@@ -470,7 +489,7 @@ class TestCommandRecordsBulkPublish:
         assert "1 records to (re)publish." in result.output
         assert "# Record 1/1" in result.output
         assert (
-            f"No. Server error publishing record '{TestRecords.TEST_RECORD_2.value['file_identifier']}'."
+            f"No. Server error publishing record '{TestRecordConfigurations.TEST_RECORD_2.value['file_identifier']}'."
             in result.output
         )
 
@@ -481,13 +500,24 @@ class TestCommandRecordsExport:
         with TemporaryDirectory() as record_directory:
             record_path = Path(record_directory).joinpath("record.json")
             result = app_runner_mocked_csw.invoke(
-                args=["records", "export", TestRecords.TEST_RECORD_1.value["file_identifier"], str(record_path)]
+                args=[
+                    "records",
+                    "export",
+                    TestRecordConfigurations.TEST_RECORD_1.value["file_identifier"],
+                    str(record_path),
+                ]
             )
             assert result.exit_code == 0
-            assert f"Ok. Record '{TestRecords.TEST_RECORD_1.value['file_identifier']}' exported." in result.output
-            with open(str(record_path), mode="r") as record_file:
-                record_data = json.load(record_file)
-                assert record_data == TestRecords.TEST_RECORD_1.value
+            assert (
+                f"Ok. Record '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}' exported."
+                in result.output
+            )
+
+            # verify export
+            export_record_configuration = MetadataRecordConfigV2()
+            export_record_configuration.load(file=record_path)
+            verification_record_configuration = MetadataRecordConfigV2(**TestRecordConfigurations.TEST_RECORD_1.value)
+            assert export_record_configuration.config == verification_record_configuration.config
 
     @pytest.mark.usefixtures("app_runner_mocked_csw")
     def test_cli_records_export_allow_overwrite(self, app_runner_mocked_csw):
@@ -496,7 +526,12 @@ class TestCommandRecordsExport:
 
             # Write file out initially
             result = app_runner_mocked_csw.invoke(
-                args=["records", "export", TestRecords.TEST_RECORD_1.value["file_identifier"], str(record_path)]
+                args=[
+                    "records",
+                    "export",
+                    TestRecordConfigurations.TEST_RECORD_1.value["file_identifier"],
+                    str(record_path),
+                ]
             )
             assert result.exit_code == 0
 
@@ -504,13 +539,16 @@ class TestCommandRecordsExport:
                 args=[
                     "records",
                     "export",
-                    TestRecords.TEST_RECORD_1.value["file_identifier"],
+                    TestRecordConfigurations.TEST_RECORD_1.value["file_identifier"],
                     str(record_path),
                     "--allow-overwrite",
                 ]
             )
             assert result.exit_code == 0
-            assert f"Ok. Record '{TestRecords.TEST_RECORD_1.value['file_identifier']}' re-exported." in result.output
+            assert (
+                f"Ok. Record '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}' re-exported."
+                in result.output
+            )
 
     @pytest.mark.usefixtures("app_runner_mocked_csw")
     def test_cli_records_export_error_no_record_identifier_specified(self, app_runner_mocked_csw):
@@ -521,7 +559,7 @@ class TestCommandRecordsExport:
     @pytest.mark.usefixtures("app_runner_mocked_csw")
     def test_cli_records_export_error_no_record_path_specified(self, app_runner_mocked_csw):
         result = app_runner_mocked_csw.invoke(
-            args=["records", "export", TestRecords.TEST_RECORD_1.value["file_identifier"]]
+            args=["records", "export", TestRecordConfigurations.TEST_RECORD_1.value["file_identifier"]]
         )
         assert result.exit_code == 2
         assert "Error: Missing argument 'RECORD_PATH'." in result.output
@@ -530,7 +568,12 @@ class TestCommandRecordsExport:
     def test_cli_records_export_error_record_path_directory_specified(self, app_runner_mocked_csw):
         with TemporaryDirectory() as record_directory:
             result = app_runner_mocked_csw.invoke(
-                args=["records", "export", TestRecords.TEST_RECORD_1.value["file_identifier"], record_directory]
+                args=[
+                    "records",
+                    "export",
+                    TestRecordConfigurations.TEST_RECORD_1.value["file_identifier"],
+                    record_directory,
+                ]
             )
             assert result.exit_code == 2
             assert f"Error: Invalid value for 'RECORD_PATH': File '{record_directory}' is a directory." in result.output
@@ -540,7 +583,12 @@ class TestCommandRecordsExport:
         with TemporaryDirectory() as record_directory:
             record_path = Path(record_directory).joinpath("record.json")
             result = app_runner_mocked_csw_not_setup.invoke(
-                args=["records", "export", TestRecords.TEST_RECORD_1.value["file_identifier"], str(record_path)]
+                args=[
+                    "records",
+                    "export",
+                    TestRecordConfigurations.TEST_RECORD_1.value["file_identifier"],
+                    str(record_path),
+                ]
             )
             assert result.exit_code == 64
             assert "No. CSW catalogue not setup." in result.output
@@ -550,7 +598,12 @@ class TestCommandRecordsExport:
         with TemporaryDirectory() as record_directory:
             record_path = Path(record_directory).joinpath("record.json")
             result = app_runner_mocked_csw_auth_token_error.invoke(
-                args=["records", "export", TestRecords.TEST_RECORD_1.value["file_identifier"], str(record_path)]
+                args=[
+                    "records",
+                    "export",
+                    TestRecordConfigurations.TEST_RECORD_1.value["file_identifier"],
+                    str(record_path),
+                ]
             )
             assert result.exit_code == 64
             assert "No. Error with auth token. Try signing out and in again or seek support." in result.output
@@ -560,7 +613,12 @@ class TestCommandRecordsExport:
         with TemporaryDirectory() as record_directory:
             record_path = Path(record_directory).joinpath("record.json")
             result = app_runner_mocked_csw_missing_auth_token.invoke(
-                args=["records", "export", TestRecords.TEST_RECORD_1.value["file_identifier"], str(record_path)]
+                args=[
+                    "records",
+                    "export",
+                    TestRecordConfigurations.TEST_RECORD_1.value["file_identifier"],
+                    str(record_path),
+                ]
             )
             assert result.exit_code == 64
             assert "No. Missing auth token. Run `auth sign-in` first." in result.output
@@ -570,7 +628,12 @@ class TestCommandRecordsExport:
         with TemporaryDirectory() as record_directory:
             record_path = Path(record_directory).joinpath("record.json")
             result = app_runner_mocked_csw_insufficient_auth_token.invoke(
-                args=["records", "export", TestRecords.TEST_RECORD_1.value["file_identifier"], str(record_path)]
+                args=[
+                    "records",
+                    "export",
+                    TestRecordConfigurations.TEST_RECORD_1.value["file_identifier"],
+                    str(record_path),
+                ]
             )
             assert result.exit_code == 64
             assert (
@@ -593,16 +656,26 @@ class TestCommandRecordsExport:
 
             # Write file out initially
             result = app_runner_mocked_csw.invoke(
-                args=["records", "export", TestRecords.TEST_RECORD_1.value["file_identifier"], str(record_path)]
+                args=[
+                    "records",
+                    "export",
+                    TestRecordConfigurations.TEST_RECORD_1.value["file_identifier"],
+                    str(record_path),
+                ]
             )
             assert result.exit_code == 0
 
             result = app_runner_mocked_csw.invoke(
-                args=["records", "export", TestRecords.TEST_RECORD_1.value["file_identifier"], str(record_path)]
+                args=[
+                    "records",
+                    "export",
+                    TestRecordConfigurations.TEST_RECORD_1.value["file_identifier"],
+                    str(record_path),
+                ]
             )
             assert result.exit_code == 64
             assert (
-                f"No. Export of record '{TestRecords.TEST_RECORD_1.value['file_identifier']}' would be overwritten. Add `--allow-overwrite` flag to allow."
+                f"No. Export of record '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}' would be overwritten. Add `--allow-overwrite` flag to allow."
                 in result.output
             )
 
@@ -617,21 +690,35 @@ class TestCommandRecordsBulkExport:
             assert result.exit_code == 0
             assert "2 records to (re)export." in result.output
             assert "# Record 1/2" in result.output
-            assert f"Ok. Record '{TestRecords.TEST_RECORD_1.value['file_identifier']}' exported." in result.output
+            assert (
+                f"Ok. Record '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}' exported."
+                in result.output
+            )
             assert "# Record 2/2" in result.output
-            assert f"Ok. Record '{TestRecords.TEST_RECORD_2.value['file_identifier']}' exported." in result.output
+            assert (
+                f"Ok. Record '{TestRecordConfigurations.TEST_RECORD_2.value['file_identifier']}' exported."
+                in result.output
+            )
             assert "Ok. 2 records (re)exported." in result.output
 
             # Verify export
             record_paths = list(records_path.glob("*.json"))
             assert len(record_paths) == 2
-            assert records_path.joinpath(f"{TestRecords.TEST_RECORD_1.value['file_identifier']}.json") in record_paths
-            assert records_path.joinpath(f"{TestRecords.TEST_RECORD_2.value['file_identifier']}.json") in record_paths
-            with open(
-                str(records_path.joinpath(f"{TestRecords.TEST_RECORD_1.value['file_identifier']}.json")), mode="r"
-            ) as record_file:
-                record_data = json.load(record_file)
-                assert record_data == TestRecords.TEST_RECORD_1.value
+            assert (
+                records_path.joinpath(f"{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}.json")
+                in record_paths
+            )
+            assert (
+                records_path.joinpath(f"{TestRecordConfigurations.TEST_RECORD_2.value['file_identifier']}.json")
+                in record_paths
+            )
+
+            export_record_configuration = MetadataRecordConfigV2()
+            export_record_configuration.load(
+                file=records_path.joinpath(f"{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}.json")
+            )
+            verification_record_configuration = MetadataRecordConfigV2(**TestRecordConfigurations.TEST_RECORD_1.value)
+            assert export_record_configuration.config == verification_record_configuration.config
 
     @pytest.mark.usefixtures("app_runner_mocked_csw")
     def test_cli_records_bulk_export_allow_overwrite(self, app_runner_mocked_csw):
@@ -639,9 +726,16 @@ class TestCommandRecordsBulkExport:
             records_path = Path(record_directory)
 
             # Write file out initially
-            record_path = records_path.joinpath(f"{TestRecords.TEST_RECORD_2.value['file_identifier']}.json")
+            record_path = records_path.joinpath(
+                f"{TestRecordConfigurations.TEST_RECORD_2.value['file_identifier']}.json"
+            )
             result = app_runner_mocked_csw.invoke(
-                args=["records", "export", TestRecords.TEST_RECORD_2.value["file_identifier"], str(record_path)]
+                args=[
+                    "records",
+                    "export",
+                    TestRecordConfigurations.TEST_RECORD_2.value["file_identifier"],
+                    str(record_path),
+                ]
             )
             assert result.exit_code == 0
 
@@ -656,9 +750,15 @@ class TestCommandRecordsBulkExport:
             assert result.exit_code == 0
             assert "2 records to (re)export." in result.output
             assert "# Record 1/2" in result.output
-            assert f"Ok. Record '{TestRecords.TEST_RECORD_1.value['file_identifier']}' exported." in result.output
+            assert (
+                f"Ok. Record '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}' exported."
+                in result.output
+            )
             assert "# Record 2/2" in result.output
-            assert f"Ok. Record '{TestRecords.TEST_RECORD_2.value['file_identifier']}' re-exported." in result.output
+            assert (
+                f"Ok. Record '{TestRecordConfigurations.TEST_RECORD_2.value['file_identifier']}' re-exported."
+                in result.output
+            )
             assert "Ok. 2 records (re)exported." in result.output
 
     @pytest.mark.usefixtures("app_runner_mocked_csw")
@@ -691,9 +791,16 @@ class TestCommandRecordsBulkExport:
             records_path = Path(record_directory)
 
             # Write file out initially
-            record_path = records_path.joinpath(f"{TestRecords.TEST_RECORD_2.value['file_identifier']}.json")
+            record_path = records_path.joinpath(
+                f"{TestRecordConfigurations.TEST_RECORD_2.value['file_identifier']}.json"
+            )
             result = app_runner_mocked_csw.invoke(
-                args=["records", "export", TestRecords.TEST_RECORD_2.value["file_identifier"], str(record_path)]
+                args=[
+                    "records",
+                    "export",
+                    TestRecordConfigurations.TEST_RECORD_2.value["file_identifier"],
+                    str(record_path),
+                ]
             )
             assert result.exit_code == 0
 
@@ -701,10 +808,13 @@ class TestCommandRecordsBulkExport:
             assert result.exit_code == 64
             assert "2 records to (re)export." in result.output
             assert "# Record 1/2" in result.output
-            assert f"Ok. Record '{TestRecords.TEST_RECORD_1.value['file_identifier']}' exported." in result.output
+            assert (
+                f"Ok. Record '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}' exported."
+                in result.output
+            )
             assert "# Record 2/2" in result.output
             assert (
-                f"No. Export of record '{TestRecords.TEST_RECORD_2.value['file_identifier']}' would be overwritten. Add `--allow-overwrite` flag to allow."
+                f"No. Export of record '{TestRecordConfigurations.TEST_RECORD_2.value['file_identifier']}' would be overwritten. Add `--allow-overwrite` flag to allow."
                 in result.output
             )
 
@@ -716,17 +826,22 @@ class TestCommandRecordsRemove:
         mock_confirm.return_value = "y"
 
         result = app_runner_mocked_csw.invoke(
-            args=["records", "remove", TestRecords.TEST_RECORD_2.value["file_identifier"]]
+            args=["records", "remove", TestRecordConfigurations.TEST_RECORD_2.value["file_identifier"]]
         )
         assert result.exit_code == 0
-        assert f"Ok. Record '{TestRecords.TEST_RECORD_2.value['file_identifier']}' removed." in result.output
+        assert (
+            f"Ok. Record '{TestRecordConfigurations.TEST_RECORD_2.value['file_identifier']}' removed." in result.output
+        )
 
         # verify deletion
         result = app_runner_mocked_csw.invoke(
-            args=["records", "remove", TestRecords.TEST_RECORD_2.value["file_identifier"]]
+            args=["records", "remove", TestRecordConfigurations.TEST_RECORD_2.value["file_identifier"]]
         )
         assert result.exit_code == 64
-        assert f"No. Record '{TestRecords.TEST_RECORD_2.value['file_identifier']}' does not exist." in result.output
+        assert (
+            f"No. Record '{TestRecordConfigurations.TEST_RECORD_2.value['file_identifier']}' does not exist."
+            in result.output
+        )
 
     @mock.patch("scar_add_metadata_toolbox.commands.click.confirm")
     @pytest.mark.usefixtures("app_runner_mocked_csw")
@@ -734,7 +849,7 @@ class TestCommandRecordsRemove:
         mock_confirm.return_value = False
 
         result = app_runner_mocked_csw.invoke(
-            args=["records", "remove", TestRecords.TEST_RECORD_2.value["file_identifier"]]
+            args=["records", "remove", TestRecordConfigurations.TEST_RECORD_2.value["file_identifier"]]
         )
         assert result.exit_code == 1
         assert f"Aborted!" in result.output
@@ -742,22 +857,37 @@ class TestCommandRecordsRemove:
         # verify non-deletion
         result = app_runner_mocked_csw.invoke(args=["records", "list"])
         assert result.exit_code == 0
-        assert TestRecords.TEST_RECORD_2.value["file_identifier"] in result.output
+        assert TestRecordConfigurations.TEST_RECORD_2.value["file_identifier"] in result.output
 
     @pytest.mark.usefixtures("app_runner_mocked_csw")
     def test_cli_records_remove_force_confirm(self, app_runner_mocked_csw):
         result = app_runner_mocked_csw.invoke(
-            args=["records", "remove", TestRecords.TEST_RECORD_2.value["file_identifier"], "--force-remove"]
+            args=[
+                "records",
+                "remove",
+                TestRecordConfigurations.TEST_RECORD_2.value["file_identifier"],
+                "--force-remove",
+            ]
         )
         assert result.exit_code == 0
-        assert f"Ok. Record '{TestRecords.TEST_RECORD_2.value['file_identifier']}' removed." in result.output
+        assert (
+            f"Ok. Record '{TestRecordConfigurations.TEST_RECORD_2.value['file_identifier']}' removed." in result.output
+        )
 
         # verify deletion
         result = app_runner_mocked_csw.invoke(
-            args=["records", "remove", TestRecords.TEST_RECORD_2.value["file_identifier"], "--force-remove"]
+            args=[
+                "records",
+                "remove",
+                TestRecordConfigurations.TEST_RECORD_2.value["file_identifier"],
+                "--force-remove",
+            ]
         )
         assert result.exit_code == 64
-        assert f"No. Record '{TestRecords.TEST_RECORD_2.value['file_identifier']}' does not exist." in result.output
+        assert (
+            f"No. Record '{TestRecordConfigurations.TEST_RECORD_2.value['file_identifier']}' does not exist."
+            in result.output
+        )
 
     @pytest.mark.usefixtures("app_runner_mocked_csw")
     def test_cli_records_remove_error_no_record_identifier_specified(self, app_runner_mocked_csw):
@@ -768,7 +898,12 @@ class TestCommandRecordsRemove:
     @pytest.mark.usefixtures("app_runner_mocked_csw_not_setup")
     def test_cli_records_remove_csw_not_setup(self, app_runner_mocked_csw_not_setup):
         result = app_runner_mocked_csw_not_setup.invoke(
-            args=["records", "remove", TestRecords.TEST_RECORD_2.value["file_identifier"], "--force-remove"]
+            args=[
+                "records",
+                "remove",
+                TestRecordConfigurations.TEST_RECORD_2.value["file_identifier"],
+                "--force-remove",
+            ]
         )
         assert result.exit_code == 64
         assert "No. CSW catalogue not setup." in result.output
@@ -776,7 +911,12 @@ class TestCommandRecordsRemove:
     @pytest.mark.usefixtures("app_runner_mocked_csw_auth_token_error")
     def test_cli_records_remove_auth_token_error(self, app_runner_mocked_csw_auth_token_error):
         result = app_runner_mocked_csw_auth_token_error.invoke(
-            args=["records", "remove", TestRecords.TEST_RECORD_2.value["file_identifier"], "--force-remove"]
+            args=[
+                "records",
+                "remove",
+                TestRecordConfigurations.TEST_RECORD_2.value["file_identifier"],
+                "--force-remove",
+            ]
         )
         assert result.exit_code == 64
         assert "No. Error with auth token. Try signing out and in again or seek support." in result.output
@@ -784,7 +924,12 @@ class TestCommandRecordsRemove:
     @pytest.mark.usefixtures("app_runner_mocked_csw_missing_auth_token")
     def test_cli_records_remove_auth_token_missing(self, app_runner_mocked_csw_missing_auth_token):
         result = app_runner_mocked_csw_missing_auth_token.invoke(
-            args=["records", "remove", TestRecords.TEST_RECORD_2.value["file_identifier"], "--force-remove"]
+            args=[
+                "records",
+                "remove",
+                TestRecordConfigurations.TEST_RECORD_2.value["file_identifier"],
+                "--force-remove",
+            ]
         )
         assert result.exit_code == 64
         assert "No. Missing auth token. Run `auth sign-in` first." in result.output
@@ -792,7 +937,12 @@ class TestCommandRecordsRemove:
     @pytest.mark.usefixtures("app_runner_mocked_csw_insufficient_auth_token")
     def test_cli_records_remove_auth_token_insufficient(self, app_runner_mocked_csw_insufficient_auth_token):
         result = app_runner_mocked_csw_insufficient_auth_token.invoke(
-            args=["records", "remove", TestRecords.TEST_RECORD_2.value["file_identifier"], "--force-remove"]
+            args=[
+                "records",
+                "remove",
+                TestRecordConfigurations.TEST_RECORD_2.value["file_identifier"],
+                "--force-remove",
+            ]
         )
         assert result.exit_code == 64
         assert "No. Missing permissions in auth token. Seek support to assign required permissions." in result.output
@@ -812,11 +962,11 @@ class TestCommandRecordsRemove:
         mock_confirm.return_value = "y"
 
         result = app_runner_mocked_csw.invoke(
-            args=["records", "remove", TestRecords.TEST_RECORD_1.value["file_identifier"]]
+            args=["records", "remove", TestRecordConfigurations.TEST_RECORD_1.value["file_identifier"]]
         )
         assert result.exit_code == 64
         assert (
-            f"No. Record '{TestRecords.TEST_RECORD_1.value['file_identifier']}' is published, retract it first."
+            f"No. Record '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}' is published, retract it first."
             in result.output
         )
 
@@ -830,15 +980,20 @@ class TestCommandRecordsBulkRemove:
         result = app_runner_mocked_csw.invoke(args=["records", "bulk-remove"])
         assert result.exit_code == 0
         assert f"1 records to remove." in result.output
-        assert f"Ok. Record '{TestRecords.TEST_RECORD_2.value['file_identifier']}' removed." in result.output
+        assert (
+            f"Ok. Record '{TestRecordConfigurations.TEST_RECORD_2.value['file_identifier']}' removed." in result.output
+        )
         assert f"Ok. 1 records removed." in result.output
 
         # verify deletion
         result = app_runner_mocked_csw.invoke(
-            args=["records", "remove", TestRecords.TEST_RECORD_2.value["file_identifier"]]
+            args=["records", "remove", TestRecordConfigurations.TEST_RECORD_2.value["file_identifier"]]
         )
         assert result.exit_code == 64
-        assert f"No. Record '{TestRecords.TEST_RECORD_2.value['file_identifier']}' does not exist." in result.output
+        assert (
+            f"No. Record '{TestRecordConfigurations.TEST_RECORD_2.value['file_identifier']}' does not exist."
+            in result.output
+        )
 
     @mock.patch("scar_add_metadata_toolbox.commands.click.confirm")
     @pytest.mark.usefixtures("app_runner_mocked_csw")
@@ -852,24 +1007,30 @@ class TestCommandRecordsBulkRemove:
         # verify non-deletion
         result = app_runner_mocked_csw.invoke(args=["records", "list"])
         assert result.exit_code == 0
-        assert TestRecords.TEST_RECORD_2.value["file_identifier"] in result.output
+        assert TestRecordConfigurations.TEST_RECORD_2.value["file_identifier"] in result.output
 
 
 class TestCommandRecordsRetract:
     @pytest.mark.usefixtures("app_runner_mocked_csw")
     def test_cli_records_retract(self, app_runner_mocked_csw):
         result = app_runner_mocked_csw.invoke(
-            args=["records", "retract", TestRecords.TEST_RECORD_1.value["file_identifier"]]
+            args=["records", "retract", TestRecordConfigurations.TEST_RECORD_1.value["file_identifier"]]
         )
         assert result.exit_code == 0
-        assert f"Ok. Record '{TestRecords.TEST_RECORD_1.value['file_identifier']}' retracted." in result.output
+        assert (
+            f"Ok. Record '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}' retracted."
+            in result.output
+        )
 
         # verify retraction
         result = app_runner_mocked_csw.invoke(
-            args=["records", "retract", TestRecords.TEST_RECORD_1.value["file_identifier"]]
+            args=["records", "retract", TestRecordConfigurations.TEST_RECORD_1.value["file_identifier"]]
         )
         assert result.exit_code == 64
-        assert f"No. Record '{TestRecords.TEST_RECORD_1.value['file_identifier']}' is not published." in result.output
+        assert (
+            f"No. Record '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}' is not published."
+            in result.output
+        )
 
     @pytest.mark.usefixtures("app_runner_mocked_csw")
     def test_cli_records_retract_error_no_record_identifier_specified(self, app_runner_mocked_csw):
@@ -880,7 +1041,7 @@ class TestCommandRecordsRetract:
     @pytest.mark.usefixtures("app_runner_mocked_csw_not_setup")
     def test_cli_records_retract_csw_not_setup(self, app_runner_mocked_csw_not_setup):
         result = app_runner_mocked_csw_not_setup.invoke(
-            args=["records", "retract", TestRecords.TEST_RECORD_1.value["file_identifier"]]
+            args=["records", "retract", TestRecordConfigurations.TEST_RECORD_1.value["file_identifier"]]
         )
         assert result.exit_code == 64
         assert "No. CSW catalogue not setup." in result.output
@@ -888,7 +1049,7 @@ class TestCommandRecordsRetract:
     @pytest.mark.usefixtures("app_runner_mocked_csw_auth_token_error")
     def test_cli_records_retract_auth_token_error(self, app_runner_mocked_csw_auth_token_error):
         result = app_runner_mocked_csw_auth_token_error.invoke(
-            args=["records", "retract", TestRecords.TEST_RECORD_1.value["file_identifier"]]
+            args=["records", "retract", TestRecordConfigurations.TEST_RECORD_1.value["file_identifier"]]
         )
         assert result.exit_code == 64
         assert "No. Error with auth token. Try signing out and in again or seek support." in result.output
@@ -896,7 +1057,7 @@ class TestCommandRecordsRetract:
     @pytest.mark.usefixtures("app_runner_mocked_csw_missing_auth_token")
     def test_cli_records_retract_auth_token_missing(self, app_runner_mocked_csw_missing_auth_token):
         result = app_runner_mocked_csw_missing_auth_token.invoke(
-            args=["records", "retract", TestRecords.TEST_RECORD_1.value["file_identifier"]]
+            args=["records", "retract", TestRecordConfigurations.TEST_RECORD_1.value["file_identifier"]]
         )
         assert result.exit_code == 64
         assert "No. Missing auth token. Run `auth sign-in` first." in result.output
@@ -904,7 +1065,7 @@ class TestCommandRecordsRetract:
     @pytest.mark.usefixtures("app_runner_mocked_csw_insufficient_auth_token")
     def test_cli_records_retract_auth_token_insufficient(self, app_runner_mocked_csw_insufficient_auth_token):
         result = app_runner_mocked_csw_insufficient_auth_token.invoke(
-            args=["records", "retract", TestRecords.TEST_RECORD_1.value["file_identifier"]]
+            args=["records", "retract", TestRecordConfigurations.TEST_RECORD_1.value["file_identifier"]]
         )
         assert result.exit_code == 64
         assert "No. Missing permissions in auth token. Seek support to assign required permissions." in result.output
@@ -922,15 +1083,21 @@ class TestCommandRecordsBulkRetract:
         result = app_runner_mocked_csw.invoke(args=["records", "bulk-retract"])
         assert result.exit_code == 0
         assert f"1 records to retract." in result.output
-        assert f"Ok. Record '{TestRecords.TEST_RECORD_1.value['file_identifier']}' retracted." in result.output
+        assert (
+            f"Ok. Record '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}' retracted."
+            in result.output
+        )
         assert f"Ok. 1 records retracted." in result.output
 
         # verify deletion
         result = app_runner_mocked_csw.invoke(
-            args=["records", "retract", TestRecords.TEST_RECORD_1.value["file_identifier"]]
+            args=["records", "retract", TestRecordConfigurations.TEST_RECORD_1.value["file_identifier"]]
         )
         assert result.exit_code == 64
-        assert f"No. Record '{TestRecords.TEST_RECORD_1.value['file_identifier']}' is not published." in result.output
+        assert (
+            f"No. Record '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}' is not published."
+            in result.output
+        )
 
 
 class TestCommandCollectionsList:
@@ -1561,7 +1728,10 @@ class TestCommandSiteBuildItemPages:
         assert result.exit_code == 0
         assert "1 item pages to generate." in result.output
         assert "# Item page 1/1" in result.output
-        assert f"Ok. Generated item page for '{TestRecords.TEST_RECORD_1.value['file_identifier']}'." in result.output
+        assert (
+            f"Ok. Generated item page for '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}'."
+            in result.output
+        )
         assert "Ok. 1 item pages generated." in result.output
 
         # Verify file structure
@@ -1569,7 +1739,7 @@ class TestCommandSiteBuildItemPages:
         assert len(item_pages_paths) == 1
         assert (
             Path(app_static_site.config["SITE_PATH"]).joinpath(
-                f"items/{TestRecords.TEST_RECORD_1.value['file_identifier']}/index.html"
+                f"items/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}/index.html"
             )
             in item_pages_paths
         )
@@ -1662,17 +1832,17 @@ class TestCommandSiteBuildRecordPages:
         assert "3 record pages to generate." in result.output
         assert "# Record page 1/1 (stylesheet 1/3)" in result.output
         assert (
-            f"Ok. Generated item page for '{TestRecords.TEST_RECORD_1.value['file_identifier']}' (stylesheet 'iso-html')."
+            f"Ok. Generated item page for '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}' (stylesheet 'iso-html')."
             in result.output
         )
         assert "# Record page 1/1 (stylesheet 2/3)" in result.output
         assert (
-            f"Ok. Generated item page for '{TestRecords.TEST_RECORD_1.value['file_identifier']}' (stylesheet 'iso-rubric')."
+            f"Ok. Generated item page for '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}' (stylesheet 'iso-rubric')."
             in result.output
         )
         assert "# Record page 1/1 (stylesheet 3/3)" in result.output
         assert (
-            f"Ok. Generated item page for '{TestRecords.TEST_RECORD_1.value['file_identifier']}' (stylesheet 'iso-xml')."
+            f"Ok. Generated item page for '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}' (stylesheet 'iso-xml')."
             in result.output
         )
         assert "Ok. 3 record pages generated." in result.output
@@ -1682,19 +1852,19 @@ class TestCommandSiteBuildRecordPages:
         assert len(record_pages_paths) == 3
         assert (
             Path(app_static_site.config["SITE_PATH"]).joinpath(
-                f"records/{TestRecords.TEST_RECORD_1.value['file_identifier']}/iso-html/{TestRecords.TEST_RECORD_1.value['file_identifier']}.xml"
+                f"records/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}/iso-html/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}.xml"
             )
             in record_pages_paths
         )
         assert (
             Path(app_static_site.config["SITE_PATH"]).joinpath(
-                f"records/{TestRecords.TEST_RECORD_1.value['file_identifier']}/iso-rubric/{TestRecords.TEST_RECORD_1.value['file_identifier']}.xml"
+                f"records/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}/iso-rubric/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}.xml"
             )
             in record_pages_paths
         )
         assert (
             Path(app_static_site.config["SITE_PATH"]).joinpath(
-                f"records/{TestRecords.TEST_RECORD_1.value['file_identifier']}/iso-xml/{TestRecords.TEST_RECORD_1.value['file_identifier']}.xml"
+                f"records/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}/iso-xml/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}.xml"
             )
             in record_pages_paths
         )
@@ -1777,7 +1947,7 @@ class TestCommandSiteBuildAll:
         site_paths = list(Path(app_static_site.config["SITE_PATH"]).glob("**/*.*"))
         assert (
             Path(app_static_site.config["SITE_PATH"]).joinpath(
-                f"items/{TestRecords.TEST_RECORD_1.value['file_identifier']}/index.html"
+                f"items/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}/index.html"
             )
             in site_paths
         )
@@ -1789,7 +1959,7 @@ class TestCommandSiteBuildAll:
         )
         assert (
             Path(app_static_site.config["SITE_PATH"]).joinpath(
-                f"records/{TestRecords.TEST_RECORD_1.value['file_identifier']}/iso-html/{TestRecords.TEST_RECORD_1.value['file_identifier']}.xml"
+                f"records/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}/iso-html/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}.xml"
             )
             in site_paths
         )

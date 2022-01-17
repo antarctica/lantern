@@ -1,46 +1,52 @@
 from datetime import date, datetime
+from pathlib import Path
+
+from bas_metadata_library.standards.iso_19115_2 import MetadataRecordConfigV2, MetadataRecord
 
 
-def make_test_record(identifier: str, title: str) -> dict:
+def make_test_record_config(identifier: str, title: str) -> dict:
     return {
         "file_identifier": identifier,
-        "language": "eng",
-        "character_set": "utf-8",
         "hierarchy_level": "dataset",
-        "contacts": [
-            {
-                "organisation": {
-                    "name": "Mapping and Geographic Information Centre, British Antarctic Survey",
-                    "href": "https://ror.org/01rhff309",
-                    "title": "ror",
-                },
-                "phone": "+44 (0)1223 221400",
-                "address": {
-                    "delivery_point": "British Antarctic Survey, High Cross, Madingley Road",
-                    "city": "Cambridge",
-                    "administrative_area": "Cambridgeshire",
-                    "postal_code": "CB3 0ET",
-                    "country": "United Kingdom",
-                },
-                "email": "magic@bas.ac.uk",
-                "online_resource": {
-                    "href": "https://www.bas.ac.uk/team/magic",
-                    "title": "Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-                    "description": "General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
-                    "function": "information",
-                },
-                "role": ["pointOfContact"],
-            }
-        ],
-        "date_stamp": date(2020, 5, 25).isoformat(),
-        "metadata_standard": {
-            "name": "ISO 19115-2 Geographic Information - Metadata - Part 2: Extensions for Imagery and Gridded Data",
-            "version": "ISO 19115-2:2009(E)",
+        "metadata": {
+            "language": "eng",
+            "character_set": "utf-8",
+            "contacts": [
+                {
+                    "organisation": {
+                        "name": "Mapping and Geographic Information Centre, British Antarctic Survey",
+                        "href": "https://ror.org/01rhff309",
+                        "title": "ror",
+                    },
+                    "phone": "+44 (0)1223 221400",
+                    "address": {
+                        "delivery_point": "British Antarctic Survey, High Cross, Madingley Road",
+                        "city": "Cambridge",
+                        "administrative_area": "Cambridgeshire",
+                        "postal_code": "CB3 0ET",
+                        "country": "United Kingdom",
+                    },
+                    "email": "magic@bas.ac.uk",
+                    "online_resource": {
+                        "href": "https://www.bas.ac.uk/team/magic",
+                        "title": "Mapping and Geographic Information Centre (MAGIC) - BAS public website",
+                        "description": "General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
+                        "function": "information",
+                    },
+                    "role": ["pointOfContact"],
+                }
+            ],
+            "date_stamp": date(2020, 5, 25),
+            "metadata_standard": {
+                "name": "ISO 19115-2 Geographic Information - Metadata - Part 2: Extensions for Imagery and Gridded Data",
+                "version": "ISO 19115-2:2009(E)",
+            },
+            "maintenance": {"maintenance_frequency": "asNeeded", "progress": "completed"},
         },
         "reference_system_info": {
             "authority": {
                 "title": {"value": "European Petroleum Survey Group (EPSG) Geodetic Parameter Registry"},
-                "dates": [{"date": date(2008, 11, 12).isoformat(), "date_type": "publication"}],
+                "dates": {"publication": {"date": date(2008, 11, 12)}},
                 "contact": {
                     "organisation": {"name": "European Petroleum Survey Group"},
                     "email": "EPSGadministrator@iogp.org",
@@ -59,16 +65,15 @@ def make_test_record(identifier: str, title: str) -> dict:
             },
             "version": "6.18.3",
         },
-        "maintenance": {"maintenance_frequency": "asNeeded", "progress": "completed"},
-        "resource": {
+        "identification": {
             "title": {"value": title},
-            "dates": [
-                {"date_precision": "year", "date": str(date(2020, 1, 1).year), "date_type": "creation"},
-                {"date": date(2020, 2, 26).isoformat(), "date_type": "revision"},
-                {"date": datetime(2020, 1, 15, 10, 44, 14).isoformat(), "date_type": "publication"},
-                {"date": datetime(2020, 6, 9, 15, 7, 56).isoformat(), "date_type": "released"},
-            ],
-            "edition": f"1.2",
+            "dates": {
+                "creation": {"date": date(2020, 1, 1), "date_precision": "year"},
+                "revision": {"date": date(2020, 2, 26)},
+                "publication": {"date": datetime(2020, 1, 15, 10, 44, 14)},
+                "released": {"date": date(2020, 2, 26)},
+            },
+            "edition": "1.2",
             "abstract": title,
             "contacts": [
                 {
@@ -112,7 +117,7 @@ def make_test_record(identifier: str, title: str) -> dict:
                         "description": "General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
                         "function": "information",
                     },
-                    "role": ["publisher", "pointOfContact", "distributor"],
+                    "role": ["publisher", "pointOfContact"],
                 },
             ],
             "maintenance": {"maintenance_frequency": "biannually", "progress": "completed"},
@@ -130,7 +135,7 @@ def make_test_record(identifier: str, title: str) -> dict:
                             "value": "General Multilingual Environmental Thesaurus - INSPIRE themes",
                             "href": "http://www.eionet.europa.eu/gemet/inspire_themes",
                         },
-                        "dates": [{"date": date(2008, 8, 16).isoformat(), "date_type": "publication"}],
+                        "dates": {"publication": {"date": date(2008, 8, 16)}},
                         "edition": "4.1.2",
                         "contact": {
                             "organisation": {
@@ -166,7 +171,7 @@ def make_test_record(identifier: str, title: str) -> dict:
                             "value": "Global Change Master Directory (GCMD) Science Keywords",
                             "href": "https://earthdata.nasa.gov/about/gcmd/global-change-master-directory-gcmd-keywords",
                         },
-                        "dates": [{"date": date(2020, 1, 9).isoformat(), "date_type": "publication"}],
+                        "dates": {"publication": {"date": date(2020, 1, 9)}},
                         "edition": "9.1",
                         "contact": {
                             "organisation": {
@@ -202,7 +207,7 @@ def make_test_record(identifier: str, title: str) -> dict:
                             "value": "British Antarctic Survey research topics",
                             "href": "http://vocab.nerc.ac.uk/collection/T01/current/",
                         },
-                        "dates": [{"date": date(2020, 5, 6).isoformat(), "date_type": "publication"}],
+                        "dates": {"publication": {"date": date(2020, 5, 6)}},
                         "edition": "1",
                         "contact": {
                             "organisation": {
@@ -242,7 +247,7 @@ def make_test_record(identifier: str, title: str) -> dict:
                             "value": "British Antarctic Survey data catalogue collections",
                             "href": "http://vocab.nerc.ac.uk/collection/T02/current/",
                         },
-                        "dates": [{"date": date(2020, 5, 5).isoformat(), "date_type": "publication"}],
+                        "dates": {"publication": {"date": date(2020, 5, 5)}},
                         "edition": "1",
                         "contact": {
                             "organisation": {
@@ -282,7 +287,7 @@ def make_test_record(identifier: str, title: str) -> dict:
                             "value": "Global Change Master Directory (GCMD) Location Keywords",
                             "href": "https://earthdata.nasa.gov/about/gcmd/global-change-master-directory-gcmd-keywords",
                         },
-                        "dates": [{"date": date(2020, 1, 9).isoformat(), "date_type": "publication"}],
+                        "dates": {"publication": {"date": date(2020, 1, 9)}},
                         "edition": "9.1",
                         "contact": {
                             "organisation": {
@@ -306,27 +311,19 @@ def make_test_record(identifier: str, title: str) -> dict:
                     },
                 },
             ],
-            "constraints": {
-                "access": [
-                    {
-                        "restriction_code": "otherRestrictions",
-                        "inspire_limitations_on_public_access": "noLimitations",
-                    }
-                ],
-                "usage": [
-                    {
-                        "copyright_licence": {
-                            "statement": "This information is licensed under the Create Commons Attribution 4.0 International Licence (CC BY 4.0). To view this licence, visit https://creativecommons.org/licenses/by/4.0/",
-                            "href": "https://creativecommons.org/licenses/by/4.0/",
-                        }
-                    },
-                    {
-                        "required_citation": {
-                            "statement": "Please cite this item as: 'Produced using data from the SCAR Antarctic Digital Database'."
-                        }
-                    },
-                ],
-            },
+            "constraints": [
+                {
+                    "type": "usage",
+                    "restriction_code": "license",
+                    "statement": "This information is licensed under the Create Commons Attribution 4.0 International Licence (CC BY 4.0). To view this licence, visit https://creativecommons.org/licenses/by/4.0/",
+                    "href": "https://creativecommons.org/licenses/by/4.0/",
+                },
+                {
+                    "type": "usage",
+                    "restriction_code": "otherRestrictions",
+                    "statement": "Please cite this item as: 'Produced using data from the SCAR Antarctic Digital Database'.",
+                },
+            ],
             "spatial_representation_type": "vector",
             "language": "eng",
             "character_set": "utf-8",
@@ -341,46 +338,108 @@ def make_test_record(identifier: str, title: str) -> dict:
                     }
                 },
                 "temporal": {
-                    "period": {"start": datetime(2020, 6, 25).isoformat(), "end": datetime(2020, 4, 23).isoformat()}
+                    "period": {"start": {"date": datetime(2020, 6, 25)}, "end": {"date": datetime(2020, 4, 23)}}
                 },
             },
-            "formats": [
-                {"format": "Web Map Service"},
-                {
-                    "format": "GeoPackage",
-                    "href": "https://www.iana.org/assignments/media-types/application/geopackage+sqlite3",
-                    "version": "1.2",
-                },
-                {"format": "Shapefile", "href": "https://support.esri.com/en/white-paper/279", "version": "1"},
-            ],
-            "transfer_options": [
-                {
-                    "online_resource": {
-                        "href": f"https://maps.bas.ac.uk/antarctic/wms?layer=add:test",
-                        "title": "Web Map Service (WMS)",
-                        "description": "Access information as a OGC Web Map Service layer.",
-                        "function": "download",
-                    }
-                },
-                {
-                    "size": {"unit": "kB", "magnitude": 8171.0},
-                    "online_resource": {
-                        "href": f"https://data.bas.ac.uk/download/35b35d75-1060-4340-a365-62c2f718ca0d",
-                        "title": "GeoPackage",
-                        "description": "Download information as a OGC GeoPackage.",
-                        "function": "download",
-                    },
-                },
-                {
-                    "size": {"unit": "kB", "magnitude": 7535.0},
-                    "online_resource": {
-                        "href": f"https://data.bas.ac.uk/download/c9e8ef23-0d49-4059-a013-51fdbc8ba1bb",
-                        "title": "Shapefile",
-                        "description": "Download information as an ESRI Shapefile.",
-                        "function": "download",
-                    },
-                },
-            ],
             "lineage": "Lineage",
         },
+        "distribution": [
+            {
+                "distributor": {
+                    "organisation": {
+                        "name": "Mapping and Geographic Information Centre, British Antarctic Survey",
+                        "href": "https://ror.org/01rhff309",
+                        "title": "ror",
+                    },
+                    "phone": "+44 (0)1223 221400",
+                    "address": {
+                        "delivery_point": "British Antarctic Survey, High Cross, Madingley Road",
+                        "city": "Cambridge",
+                        "administrative_area": "Cambridgeshire",
+                        "postal_code": "CB3 0ET",
+                        "country": "United Kingdom",
+                    },
+                    "email": "magic@bas.ac.uk",
+                    "online_resource": {
+                        "href": "https://www.bas.ac.uk/team/magic",
+                        "title": "Mapping and Geographic Information Centre (MAGIC) - BAS public website",
+                        "description": "General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
+                        "function": "information",
+                    },
+                    "role": ["distributor"],
+                },
+                "distribution_options": [
+                    {
+                        "transfer_option": {
+                            "online_resource": {
+                                "href": "https://maps.bas.ac.uk/antarctic/wms?layer=add:test",
+                                "title": "Web Map Service (WMS)",
+                                "description": "Access information as a OGC Web Map Service layer.",
+                                "function": "download",
+                            }
+                        },
+                        "format": {"format": "Web Map Service"},
+                    },
+                    {
+                        "transfer_option": {
+                            "size": {"unit": "kB", "magnitude": 8171.0},
+                            "online_resource": {
+                                "href": "https://data.bas.ac.uk/download/35b35d75-1060-4340-a365-62c2f718ca0d",
+                                "title": "GeoPackage",
+                                "description": "Download information as a OGC GeoPackage.",
+                                "function": "download",
+                            },
+                        },
+                        "format": {
+                            "format": "GeoPackage",
+                            "version": "1.2",
+                            "href": "https://www.iana.org/assignments/media-types/application/geopackage+sqlite3",
+                        },
+                    },
+                    {
+                        "transfer_option": {
+                            "size": {"unit": "kB", "magnitude": 7535.0},
+                            "online_resource": {
+                                "href": "https://data.bas.ac.uk/download/c9e8ef23-0d49-4059-a013-51fdbc8ba1bb",
+                                "title": "Shapefile",
+                                "description": "Download information as an ESRI Shapefile.",
+                                "function": "download",
+                            },
+                        },
+                        "format": {
+                            "format": "Shapefile",
+                            "version": "1",
+                            "href": "https://support.esri.com/en/white-paper/279",
+                        },
+                    },
+                ],
+            }
+        ],
     }
+
+
+def make_test_record(identifier: str, title: str) -> None:
+    config = make_test_record_config(identifier=identifier, title=title)
+    configuration = MetadataRecordConfigV2(**config)
+    record = MetadataRecord(configuration=configuration)
+    with open(Path(f"get_record_{identifier}_full.xml"), mode="w") as record_file:
+        record_file.write(record.generate_xml_document().decode())
+
+
+"""
+To update test records:
+- run this script through a terminal [1]
+- this will generate full records, brief records should be edited manually as needed
+
+The ID and titles used in these calls are taken from the `TEST_RECORD_1` and `TEST_RECORD_2` items in the
+`tests.conftest.TestRecordConfigurations` enumeration.
+
+[1] 
+$ docker compose run app-cli
+$ cd tests/scar_add_metadata_toolbox/resources/csw/records/
+$ poetry run python __init__.py
+"""
+if __name__ == "__main__":
+    make_test_record(identifier="7e3719b4-60a4-4b4e-aa84-cee7a5e7218f", title="Test Record 1 (Published)")
+    make_test_record(identifier="39d47e50-f94f-43c5-9060-510d9374b81b", title="Test Record 2 (Unpublished)")
+    print("Test records regenerated")

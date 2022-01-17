@@ -1,7 +1,7 @@
 from typing import List, Optional
 from pathlib import Path
 
-from bas_metadata_library.standards.iso_19115_2_v1 import MetadataRecord
+from bas_metadata_library.standards.iso_19115_2 import MetadataRecord
 from flask import Request, Response, current_app
 from flask_azure_oauth import AzureToken
 from flask_azure_oauth.tokens import TestJwt

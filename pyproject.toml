@@ -21,8 +21,9 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-awscli = "^1.18.93"
-bas-metadata-library = "^0.4.0"
+# temporary pinned to specific version to aid in dependency resolution time
+awscli = "1.18.93"
+bas-metadata-library = "0.8.0"
 bas-style-kit-jinja-templates = "^0.5.0"
 click-spinner = "^0.1.10"
 Faker = "^4.1.1"
@@ -33,7 +34,7 @@ inquirer = "^2.7.0"
 Markdown = "^3.2.2"
 msal = "^1.4.1"
 OWSLib = "^0.19.2"
-python = "^3.6"
+python = "^3.6.2"
 python-dateutil = "^2.8.1"
 python-dotenv = "^0.10.3"
 requests = "^2.24.0"
@@ -41,8 +42,6 @@ sentry-sdk = {version = "^0.14.3", extras = ["flask"]}
 simplejson = "^3.17.0"
 str2bool = "^1.1"
 tabulate = "^0.8.7"
-# BAS Metadata Library dependency - to pin version of indirect dependencies
-lxml = "4.5.2"
 # OWSlib dependency - to pin version of indirect dependencies
 pyproj = "2.6.0"
 pycsw = "^2.6.0"

@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Upgraded to BAS Metadata Library v0.8.0
   [#183](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/183)
+* Vendored PyCSW and OWSlib dependencies
+  [#193](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/193)
 
 ### Fixed
 

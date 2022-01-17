@@ -32,7 +32,6 @@ Frozen-Flask = "^0.15.0"
 inquirer = "^2.7.0"
 Markdown = "^3.2.2"
 msal = "^1.4.1"
-OWSLib = "^0.19.2"
 python = "^3.6.2"
 python-dateutil = "^2.8.1"
 python-dotenv = "^0.10.3"
@@ -41,16 +40,34 @@ sentry-sdk = {version = "^0.14.3", extras = ["flask"]}
 simplejson = "^3.17.0"
 str2bool = "^1.1"
 tabulate = "^0.8.7"
-# OWSlib dependency - to pin version of indirect dependencies
-pyproj = "2.6.0"
-pycsw = "^2.6.0"
-# optional PyCSW dependencies
-psycopg2-binary = "^2.8.5"
-SQLAlchemy = "^1.3.18"
+
 # python 3.6 backports
+#
+
 importlib_metadata = "^1.7.0"
 importlib_resources = "^3.0.0"
 backports-datetime-fromisoformat = "^1.0.0"
+
+# dependencies for vendored OWSlib package
+#
+
+# python-dateutil = "^1.5"  # already a dependency of main app
+pytz = "^2021.3"
+# requests = "^1.0"  # already a dependency of main app
+pyproj = "^2.6.0"
+pyyaml = "^5.3.1"
+
+# dependencies for vendored PyCSW package
+#
+
+geolinks = "^0.2.0"
+# lxml = "^4.7"  # already a dependency of main app
+# pyproj = "^2.6.0"  # already a dependency of OWSLib vendored dependency
+Shapely = "^1.8.0"
+xmltodict = "^0.12.0"
+# optional PyCSW dependencies
+psycopg2-binary = "^2.8.5"
+SQLAlchemy = "^1.3.18"
 
 [tool.poetry.dev-dependencies]
 black = "^20.8b1"

@@ -1,4 +1,5 @@
-<gmi:MI_Metadata xmlns:gmi="http://www.isotc211.org/2005/gmi" xmlns:gmd="http://www.isotc211.org/2005/gmd" xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:gml="http://www.opengis.net/gml" xmlns:gml32="http://www.opengis.net/gml/3.2" xmlns:gmx="http://www.isotc211.org/2005/gmx" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.isotc211.org/2005/gmd https://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/gmd/gmd.xsd http://www.isotc211.org/2005/gco https://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/gco/gco.xsd http://www.isotc211.org/2005/gmx https://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/gmx/gmx.xsd http://www.isotc211.org/2005/srv https://standards.iso.org/iso/19119/srv/srv.xsd http://www.isotc211.org/2005/gmi https://standards.iso.org/iso/19115/-2/gmi/1.0/gmi.xsd http://www.isotc211.org/2005/gss https://standards.iso.org/iso/19139/Schemas/gss/gss.xsd http://www.isotc211.org/2005/gsr https://standards.iso.org/iso/19139/Schemas/gsr/gsr.xsd http://www.isotc211.org/2005/gts https://standards.iso.org/iso/19139/Schemas/gts/gts.xsd">
+<?xml version='1.0' encoding='utf-8'?>
+<gmi:MI_Metadata xmlns:gmd="http://www.isotc211.org/2005/gmd" xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:gmx="http://www.isotc211.org/2005/gmx" xmlns:srv="http://www.isotc211.org/2005/srv" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:gmi="http://www.isotc211.org/2005/gmi" xmlns:gss="http://www.isotc211.org/2005/gss" xmlns:gsr="http://www.isotc211.org/2005/gsr" xmlns:gts="http://www.isotc211.org/2005/gts" xsi:schemaLocation="http://www.isotc211.org/2005/gmd https://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/gmd/gmd.xsd http://www.isotc211.org/2005/gco https://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/gco/gco.xsd http://www.isotc211.org/2005/gmx https://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/gmx/gmx.xsd http://www.isotc211.org/2005/srv https://standards.iso.org/iso/19119/srv/srv.xsd http://www.isotc211.org/2005/gmi https://standards.iso.org/iso/19115/-2/gmi/1.0/gmi.xsd http://www.isotc211.org/2005/gss https://standards.iso.org/iso/19139/Schemas/gss/gss.xsd http://www.isotc211.org/2005/gsr https://standards.iso.org/iso/19139/Schemas/gsr/gsr.xsd http://www.isotc211.org/2005/gts https://standards.iso.org/iso/19139/Schemas/gts/gts.xsd">
   <gmd:fileIdentifier>
     <gco:CharacterString>7e3719b4-60a4-4b4e-aa84-cee7a5e7218f</gco:CharacterString>
   </gmd:fileIdentifier>
@@ -190,7 +191,7 @@
           <gmd:date>
             <gmd:CI_Date>
               <gmd:date>
-                <gco:DateTime>2020-06-09T15:07:56</gco:DateTime>
+                <gco:Date>2020-02-26</gco:Date>
               </gmd:date>
               <gmd:dateType>
                 <gmd:CI_DateTypeCode codeList="https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_DateTypeCode" codeListValue="released">released</gmd:CI_DateTypeCode>
@@ -770,38 +771,34 @@
         </gmd:MD_Keywords>
       </gmd:descriptiveKeywords>
       <gmd:resourceConstraints>
-        <gmd:MD_LegalConstraints id="InspireLimitationsOnPublicAccess">
-          <gmd:accessConstraints>
-            <gmd:MD_RestrictionCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/gmxCodelists.xml#MD_RestrictionCode" codeListValue="otherRestrictions">otherRestrictions</gmd:MD_RestrictionCode>
-          </gmd:accessConstraints>
+        <gmd:MD_LegalConstraints>
+          <gmd:useConstraints>
+            <gmd:MD_RestrictionCode codeList="https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_RestrictionCode" codeListValue="license">license</gmd:MD_RestrictionCode>
+          </gmd:useConstraints>
           <gmd:otherConstraints>
-            <gmx:Anchor xlink:href="http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations" xlink:actuate="onRequest">noLimitations</gmx:Anchor>
+            <gmx:Anchor xlink:href="https://creativecommons.org/licenses/by/4.0/" xlink:actuate="onRequest">This information is licensed under the Create Commons Attribution 4.0 International Licence (CC BY 4.0). To view this licence, visit https://creativecommons.org/licenses/by/4.0/</gmx:Anchor>
           </gmd:otherConstraints>
         </gmd:MD_LegalConstraints>
       </gmd:resourceConstraints>
       <gmd:resourceConstraints>
-        <gmd:MD_LegalConstraints id="copyright">
-          <gmd:useLimitation>
-            <gmx:Anchor xlink:href="https://creativecommons.org/licenses/by/4.0/" xlink:actuate="onRequest">This information is licensed under the Create Commons Attribution 4.0 International Licence (CC BY 4.0). To view this licence, visit https://creativecommons.org/licenses/by/4.0/</gmx:Anchor>
-          </gmd:useLimitation>
-        </gmd:MD_LegalConstraints>
-      </gmd:resourceConstraints>
-      <gmd:resourceConstraints>
-        <gmd:MD_LegalConstraints id="citation">
-          <gmd:useLimitation>
+        <gmd:MD_LegalConstraints>
+          <gmd:useConstraints>
+            <gmd:MD_RestrictionCode codeList="https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_RestrictionCode" codeListValue="otherRestrictions">otherRestrictions</gmd:MD_RestrictionCode>
+          </gmd:useConstraints>
+          <gmd:otherConstraints>
             <gco:CharacterString>Please cite this item as: 'Produced using data from the SCAR Antarctic Digital Database'.</gco:CharacterString>
-          </gmd:useLimitation>
+          </gmd:otherConstraints>
         </gmd:MD_LegalConstraints>
       </gmd:resourceConstraints>
       <gmd:spatialRepresentationType>
         <gmd:MD_SpatialRepresentationTypeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/gmxCodelists.xml#MD_SpatialRepresentationTypeCode" codeListValue="vector">vector</gmd:MD_SpatialRepresentationTypeCode>
       </gmd:spatialRepresentationType>
-      <gmd:characterSet>
-        <gmd:MD_CharacterSetCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/gmxCodelists.xml#MD_CharacterSetCode" codeListValue="utf-8">utf-8</gmd:MD_CharacterSetCode>
-      </gmd:characterSet>
       <gmd:language>
         <gmd:LanguageCode codeList="http://www.loc.gov/standards/iso639-2/php/code_list.php" codeListValue="eng">eng</gmd:LanguageCode>
       </gmd:language>
+      <gmd:characterSet>
+        <gmd:MD_CharacterSetCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/gmxCodelists.xml#MD_CharacterSetCode" codeListValue="utf-8">utf-8</gmd:MD_CharacterSetCode>
+      </gmd:characterSet>
       <gmd:topicCategory>
         <gmd:MD_TopicCategoryCode>environment</gmd:MD_TopicCategoryCode>
       </gmd:topicCategory>
@@ -829,10 +826,10 @@
           <gmd:temporalElement>
             <gmd:EX_TemporalExtent>
               <gmd:extent>
-                <gml32:TimePeriod gml32:id="boundingExtent">
-                  <gml32:beginPosition>2020-06-25T00:00:00</gml32:beginPosition>
-                  <gml32:endPosition>2020-04-23T00:00:00</gml32:endPosition>
-                </gml32:TimePeriod>
+                <gml:TimePeriod gml:id="boundingExtent">
+                  <gml:beginPosition>2020-06-25T00:00:00</gml:beginPosition>
+                  <gml:endPosition>2020-04-23T00:00:00</gml:endPosition>
+                </gml:TimePeriod>
               </gmd:extent>
             </gmd:EX_TemporalExtent>
           </gmd:temporalElement>
@@ -842,34 +839,6 @@
   </gmd:identificationInfo>
   <gmd:distributionInfo>
     <gmd:MD_Distribution>
-      <gmd:distributionFormat>
-        <gmd:MD_Format>
-          <gmd:name>
-            <gco:CharacterString>Web Map Service</gco:CharacterString>
-          </gmd:name>
-          <gmd:version gco:nilReason="unknown"/>
-        </gmd:MD_Format>
-      </gmd:distributionFormat>
-      <gmd:distributionFormat>
-        <gmd:MD_Format>
-          <gmd:name>
-            <gmx:Anchor xlink:href="https://www.iana.org/assignments/media-types/application/geopackage+sqlite3" xlink:actuate="onRequest">GeoPackage</gmx:Anchor>
-          </gmd:name>
-          <gmd:version>
-            <gco:CharacterString>1.2</gco:CharacterString>
-          </gmd:version>
-        </gmd:MD_Format>
-      </gmd:distributionFormat>
-      <gmd:distributionFormat>
-        <gmd:MD_Format>
-          <gmd:name>
-            <gmx:Anchor xlink:href="https://support.esri.com/en/white-paper/279" xlink:actuate="onRequest">Shapefile</gmx:Anchor>
-          </gmd:name>
-          <gmd:version>
-            <gco:CharacterString>1</gco:CharacterString>
-          </gmd:version>
-        </gmd:MD_Format>
-      </gmd:distributionFormat>
       <gmd:distributor>
         <gmd:MD_Distributor>
           <gmd:distributorContact>
@@ -931,80 +900,108 @@
               </gmd:role>
             </gmd:CI_ResponsibleParty>
           </gmd:distributorContact>
+          <gmd:distributorFormat>
+            <gmd:MD_Format id="bml-c9d29077a2036a763bf4e5515f66de7420af5940-fmt">
+              <gmd:name>
+                <gco:CharacterString>Web Map Service</gco:CharacterString>
+              </gmd:name>
+              <gmd:version gco:nilReason="missing"/>
+            </gmd:MD_Format>
+          </gmd:distributorFormat>
+          <gmd:distributorFormat>
+            <gmd:MD_Format id="bml-3b1ea42cc8d2ba1e20a78ad65e9e8721fe91f31e-fmt">
+              <gmd:name>
+                <gmx:Anchor xlink:href="https://www.iana.org/assignments/media-types/application/geopackage+sqlite3" xlink:actuate="onRequest">GeoPackage</gmx:Anchor>
+              </gmd:name>
+              <gmd:version>
+                <gco:CharacterString>1.2</gco:CharacterString>
+              </gmd:version>
+            </gmd:MD_Format>
+          </gmd:distributorFormat>
+          <gmd:distributorFormat>
+            <gmd:MD_Format id="bml-f71cae1996af39eabbc465124a8e642d9cbb5bd5-fmt">
+              <gmd:name>
+                <gmx:Anchor xlink:href="https://support.esri.com/en/white-paper/279" xlink:actuate="onRequest">Shapefile</gmx:Anchor>
+              </gmd:name>
+              <gmd:version>
+                <gco:CharacterString>1</gco:CharacterString>
+              </gmd:version>
+            </gmd:MD_Format>
+          </gmd:distributorFormat>
+          <gmd:distributorTransferOptions>
+            <gmd:MD_DigitalTransferOptions id="bml-c9d29077a2036a763bf4e5515f66de7420af5940-tfo">
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://maps.bas.ac.uk/antarctic/wms?layer=add:test</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:name>
+                    <gco:CharacterString>Web Map Service (WMS)</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>Access information as a OGC Web Map Service layer.</gco:CharacterString>
+                  </gmd:description>
+                  <gmd:function>
+                    <gmd:CI_OnLineFunctionCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="download">download</gmd:CI_OnLineFunctionCode>
+                  </gmd:function>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+            </gmd:MD_DigitalTransferOptions>
+          </gmd:distributorTransferOptions>
+          <gmd:distributorTransferOptions>
+            <gmd:MD_DigitalTransferOptions id="bml-3b1ea42cc8d2ba1e20a78ad65e9e8721fe91f31e-tfo">
+              <gmd:unitsOfDistribution>
+                <gco:CharacterString>kB</gco:CharacterString>
+              </gmd:unitsOfDistribution>
+              <gmd:transferSize>
+                <gco:Real>8171</gco:Real>
+              </gmd:transferSize>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.bas.ac.uk/download/35b35d75-1060-4340-a365-62c2f718ca0d</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:name>
+                    <gco:CharacterString>GeoPackage</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>Download information as a OGC GeoPackage.</gco:CharacterString>
+                  </gmd:description>
+                  <gmd:function>
+                    <gmd:CI_OnLineFunctionCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="download">download</gmd:CI_OnLineFunctionCode>
+                  </gmd:function>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+            </gmd:MD_DigitalTransferOptions>
+          </gmd:distributorTransferOptions>
+          <gmd:distributorTransferOptions>
+            <gmd:MD_DigitalTransferOptions id="bml-f71cae1996af39eabbc465124a8e642d9cbb5bd5-tfo">
+              <gmd:unitsOfDistribution>
+                <gco:CharacterString>kB</gco:CharacterString>
+              </gmd:unitsOfDistribution>
+              <gmd:transferSize>
+                <gco:Real>7535</gco:Real>
+              </gmd:transferSize>
+              <gmd:onLine>
+                <gmd:CI_OnlineResource>
+                  <gmd:linkage>
+                    <gmd:URL>https://data.bas.ac.uk/download/c9e8ef23-0d49-4059-a013-51fdbc8ba1bb</gmd:URL>
+                  </gmd:linkage>
+                  <gmd:name>
+                    <gco:CharacterString>Shapefile</gco:CharacterString>
+                  </gmd:name>
+                  <gmd:description>
+                    <gco:CharacterString>Download information as an ESRI Shapefile.</gco:CharacterString>
+                  </gmd:description>
+                  <gmd:function>
+                    <gmd:CI_OnLineFunctionCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="download">download</gmd:CI_OnLineFunctionCode>
+                  </gmd:function>
+                </gmd:CI_OnlineResource>
+              </gmd:onLine>
+            </gmd:MD_DigitalTransferOptions>
+          </gmd:distributorTransferOptions>
         </gmd:MD_Distributor>
       </gmd:distributor>
-      <gmd:transferOptions>
-        <gmd:MD_DigitalTransferOptions>
-          <gmd:onLine>
-            <gmd:CI_OnlineResource>
-              <gmd:linkage>
-                <gmd:URL>https://maps.bas.ac.uk/antarctic/wms?layer=add:test</gmd:URL>
-              </gmd:linkage>
-              <gmd:name>
-                <gco:CharacterString>Web Map Service (WMS)</gco:CharacterString>
-              </gmd:name>
-              <gmd:description>
-                <gco:CharacterString>Access information as a OGC Web Map Service layer.</gco:CharacterString>
-              </gmd:description>
-              <gmd:function>
-                <gmd:CI_OnLineFunctionCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="download">download</gmd:CI_OnLineFunctionCode>
-              </gmd:function>
-            </gmd:CI_OnlineResource>
-          </gmd:onLine>
-        </gmd:MD_DigitalTransferOptions>
-      </gmd:transferOptions>
-      <gmd:transferOptions>
-        <gmd:MD_DigitalTransferOptions>
-          <gmd:unitsOfDistribution>
-            <gco:CharacterString>kB</gco:CharacterString>
-          </gmd:unitsOfDistribution>
-          <gmd:transferSize>
-            <gco:Real>8171.0</gco:Real>
-          </gmd:transferSize>
-          <gmd:onLine>
-            <gmd:CI_OnlineResource>
-              <gmd:linkage>
-                <gmd:URL>https://data.bas.ac.uk/download/35b35d75-1060-4340-a365-62c2f718ca0d</gmd:URL>
-              </gmd:linkage>
-              <gmd:name>
-                <gco:CharacterString>GeoPackage</gco:CharacterString>
-              </gmd:name>
-              <gmd:description>
-                <gco:CharacterString>Download information as a OGC GeoPackage.</gco:CharacterString>
-              </gmd:description>
-              <gmd:function>
-                <gmd:CI_OnLineFunctionCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="download">download</gmd:CI_OnLineFunctionCode>
-              </gmd:function>
-            </gmd:CI_OnlineResource>
-          </gmd:onLine>
-        </gmd:MD_DigitalTransferOptions>
-      </gmd:transferOptions>
-      <gmd:transferOptions>
-        <gmd:MD_DigitalTransferOptions>
-          <gmd:unitsOfDistribution>
-            <gco:CharacterString>kB</gco:CharacterString>
-          </gmd:unitsOfDistribution>
-          <gmd:transferSize>
-            <gco:Real>7535.0</gco:Real>
-          </gmd:transferSize>
-          <gmd:onLine>
-            <gmd:CI_OnlineResource>
-              <gmd:linkage>
-                <gmd:URL>https://data.bas.ac.uk/download/c9e8ef23-0d49-4059-a013-51fdbc8ba1bb</gmd:URL>
-              </gmd:linkage>
-              <gmd:name>
-                <gco:CharacterString>Shapefile</gco:CharacterString>
-              </gmd:name>
-              <gmd:description>
-                <gco:CharacterString>Download information as an ESRI Shapefile.</gco:CharacterString>
-              </gmd:description>
-              <gmd:function>
-                <gmd:CI_OnLineFunctionCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="download">download</gmd:CI_OnLineFunctionCode>
-              </gmd:function>
-            </gmd:CI_OnlineResource>
-          </gmd:onLine>
-        </gmd:MD_DigitalTransferOptions>
-      </gmd:transferOptions>
     </gmd:MD_Distribution>
   </gmd:distributionInfo>
   <gmd:dataQualityInfo>
@@ -1012,7 +1009,7 @@
       <gmd:scope>
         <gmd:DQ_Scope>
           <gmd:level>
-            <gmd:MD_ScopeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/gmxCodelists.xml#MD_ScopeCode" codeListValue="dataset">dataset</gmd:MD_ScopeCode>
+            <gmd:MD_ScopeCode codeList="https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_ScopeCode" codeListValue="dataset">dataset</gmd:MD_ScopeCode>
           </gmd:level>
         </gmd:DQ_Scope>
       </gmd:scope>

@@ -19,20 +19,20 @@ def test_csw_client_repr():
 
 # Coverage test
 def test_record_summary_repr():
-    record_summary = RecordSummary(config={"file_identifier": "test", "resource": {"title": {"value": "test"}}})
+    record_summary = RecordSummary(config={"file_identifier": "test", "identification": {"title": {"value": "test"}}})
     assert repr(record_summary) == f"<RecordSummary / {record_summary.identifier} / {record_summary.title}>"
 
 
 # Coverage test
 def test_record_repr():
-    record = Record(config={"file_identifier": "test", "resource": {"title": {"value": "test"}}})
+    record = Record(config={"file_identifier": "test", "identification": {"title": {"value": "test"}}})
     assert repr(record) == f"<Record / {record.identifier}>"
 
 
 # Coverage test
 def test_mirror_record_summary_repr():
     mirror_record_summary = MirrorRecordSummary(
-        config={"file_identifier": "test", "resource": {"title": {"value": "test"}}}, published=False
+        config={"file_identifier": "test", "identification": {"title": {"value": "test"}}}, published=False
     )
     assert repr(mirror_record_summary) == f"<MirrorRecordSummary / {mirror_record_summary.identifier} / Unpublished>"
 
@@ -40,7 +40,7 @@ def test_mirror_record_summary_repr():
 # Coverage test
 def test_mirror_record_repr():
     mirror_record = MirrorRecord(
-        config={"file_identifier": "test", "resource": {"title": {"value": "test"}}}, published=False
+        config={"file_identifier": "test", "identification": {"title": {"value": "test"}}}, published=False
     )
     assert repr(mirror_record) == f"<MirrorRecord / {mirror_record.identifier} / Unpublished>"
 
@@ -64,6 +64,6 @@ def test_record_lineage_none():
 
 
 # Coverage test
-def test_record_transfer_options_none():
+def test_record_distributions_none():
     record = Record(config={})
-    assert record.transfer_options is None
+    assert record.distributions is None

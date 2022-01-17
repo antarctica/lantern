@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* Upgraded to BAS Metadata Library v0.8.0
+  [#183](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/183)
+
 ### Fixed
 
 * Items incorrectly required a Spatial Reference System to be set when exporting as records

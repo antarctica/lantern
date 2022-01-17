@@ -3,12 +3,12 @@ import json
 from datetime import date, datetime
 from hashlib import sha1
 from pathlib import Path
-from typing import Dict, List, Union, Optional
+from typing import Dict, List, Union, Optional, Any
 from urllib.parse import urlparse as url_parse, parse_qs as query_string_parse
 from enum import Enum
 
 from backports.datetime_fromisoformat import MonkeyPatch
-from bas_metadata_library.standards.iso_19115_2_v1 import MetadataRecord
+from bas_metadata_library.standards.iso_19115_2 import MetadataRecordConfigV2, MetadataRecord
 from dateutil.relativedelta import relativedelta
 from markdown import markdown
 
@@ -17,13 +17,6 @@ from scar_add_metadata_toolbox.csw import (
     CSWClient,
     RecordNotFoundException,
     RecordInsertConflictException,
-)
-
-from scar_add_metadata_toolbox.hazmat.metadata import (
-    generate_xml_record_from_record_config_without_xml_declaration,
-    dump_record_to_json,
-    load_record_from_json,
-    process_usage_constraints,
 )
 
 # Workaround for lack of `date(time).fromisoformat()` method in Python 3.6
@@ -958,7 +951,7 @@ class RecordSummary:
 
     @property
     def title(self) -> str:
-        return self.config["resource"]["title"]["value"]
+        return self.config["identification"]["title"]["value"]
 
 
 class Record(RecordSummary):
@@ -983,61 +976,10 @@ class Record(RecordSummary):
     def __repr__(self):
         return f"<Record / {self.identifier}>"
 
-    def _process_resource_dates(self) -> Dict[str, Dict[str, Union[str, date, datetime]]]:
+    @staticmethod
+    def _process_contacts(contacts: List[dict]) -> Dict[str, List[dict]]:
         """
-        Processes resource dates into a dict, keyed by date type, with precision
-
-        ISO allows multiple dates of the same type (e.g. multiple publication dates) however this doesn't make much
-        sense and is harder to interact with. This method will restructure dates by their date type and stored with a
-        default precision of 'day'. This precision will be overridden if less precise.
-
-        E.g. This input:
-
-        ```
-        [
-            {
-                "date_type": "creation",
-                "date": <date 2020-01-01>,
-                "date_precision": "year"
-            },
-            {
-                "date_type": "publication",
-                "date": <datetime 2020-04-20T14:43:30>,
-            }
-        ]
-        ```
-
-        Will become:
-
-        ```
-        {
-            'creation": {
-                "date": <date 2020-01-01>,
-                "date_precision": "year"
-            },
-            "publication": {
-                "date": <datetime 2020-04-20T14:43:30>,
-                "date_precision": "day"
-            }
-        ]
-        ```
-
-        :rtype dict
-        :return: resource dates keyed by date type
-        """
-        resource_dates = {}
-        for resource_date in self.config["resource"]["dates"]:
-            _resource_date = {"value": resource_date["date"], "precision": "day"}
-            try:
-                _resource_date["precision"] = resource_date["date_precision"]
-            except KeyError:
-                pass
-            resource_dates[resource_date["date_type"]] = _resource_date
-        return resource_dates
-
-    def _process_resource_contacts(self) -> Dict[str, List[dict]]:
-        """
-        Processes resource points of contact into a dict, key by role
+        Processes contact into a dict, keyed by role
 
         ISO allows multiple contacts to have the same role (e.g. multiple authors). The BAS Metadata Library config
         allows contacts to have multiple roles (e.g. publisher and distributor). This method will restructure contacts
@@ -1094,111 +1036,132 @@ class Record(RecordSummary):
         }
         ```
 
+        :type contacts: list
+        :param contacts: list of contacts
         :rtype dict
         :return: resource contacts keyed by role
         """
-        resource_contacts = {}
-        for resource_contact in self.config["resource"]["contacts"]:
-            for resource_contact_role in resource_contact["role"]:
-                if resource_contact_role not in resource_contacts.keys():
-                    resource_contacts[resource_contact_role] = []
-                resource_contacts[resource_contact_role].append(resource_contact)
-        return resource_contacts
+        _contacts_by_role = {}
+        for contact in contacts:
+            for role in contact["role"]:
+                if role not in _contacts_by_role.keys():
+                    _contacts_by_role[role] = []
+                _contacts_by_role[role].append(contact)
+        return _contacts_by_role
 
-    def _filter_resource_keywords(self, keyword_type: str) -> List[dict]:
+    @staticmethod
+    def _filter_keywords(keywords: List[dict], keyword_type: str) -> List[dict]:
         """
-        Filters resource descriptive keywords by keyword type
+        Filters descriptive keywords by keyword type
 
-        ISO supports multiple keyword type for descriptive keywords (e.g. theme, place), as each type is typically used
+        ISO supports multiple types of descriptive keywords (e.g. theme, place). As each type is typically used
         differently, this method filters keywords for a specified type (e.g. only theme keywords).
 
-        Keyword types are defined by the relevant BAS Metadata Library record configuration schema.
+        Keyword types are defined by the relevant BAS Metadata Library record configuration schema and ISO code list.
 
+        :type keywords: list
+        :param keywords: list of (all) description keywords
         :type keyword_type str
-        :param keyword_type: descriptive keyword type
+        :param keyword_type: descriptive keyword type to filter by
         :rtype list
-        :return: list of descriptive keywords of the specified keyword type
+        :return: subset of descriptive keywords that are for the specified keyword type
         """
         _keywords = []
-        for keywords in self.config["resource"]["keywords"]:
-            if keywords["type"] == keyword_type:
-                _keywords.append(keywords)
+        for keyword_set in keywords:
+            if keyword_set["type"] == keyword_type:
+                _keywords.append(keyword_set)
 
         return _keywords
 
     @property
     def abstract(self) -> str:
-        return self.config["resource"]["abstract"]
+        return self.config["identification"]["abstract"]
 
     @property
     def character_set(self) -> str:
-        return self.config["resource"]["character_set"]
+        return self.config["identification"]["character_set"]
+
+    @property
+    def constraints(self) -> List[Dict[str, str]]:
+        return self.config["identification"]["constraints"]
 
     @property
     def contacts(self) -> Dict[str, List[dict]]:
-        return self._process_resource_contacts()
+        return self._process_contacts(contacts=self.config["identification"]["contacts"])
 
     @property
     def dates(self) -> Dict[str, Dict[str, Union[str, date, datetime]]]:
-        return self._process_resource_dates()
+        _dates = {}
+        for date_type, date_value in self.config["identification"]["dates"].items():
+            if "date_precision" not in date_value:
+                date_value["date_precision"] = None
+            _dates[date_type] = date_value
+        return _dates
+
+    @property
+    def distributions(self) -> Optional[List[dict]]:
+        try:
+            return self.config["distribution"]
+        except KeyError:
+            return None
 
     @property
     def edition(self) -> str:
-        return self.config["resource"]["edition"]
+        return self.config["identification"]["edition"]
 
     @property
     def geographic_extent(self) -> Dict:
-        return self.config["resource"]["extent"]["geographic"]
+        return self.config["identification"]["extent"]["geographic"]
 
     def hierarchy_level(self) -> str:
         return self.config["hierarchy_level"]
 
     @property
     def language(self) -> str:
-        return self.config["resource"]["language"]
+        return self.config["identification"]["language"]
 
     @property
     def lineage(self) -> Optional[str]:
         try:
-            return self.config["resource"]["lineage"]
+            return self.config["identification"]["lineage"]
         except KeyError:
             return None
 
     @property
     def location_keywords(self) -> List[dict]:
-        return self._filter_resource_keywords(keyword_type="place")
+        return self._filter_keywords(keywords=self.config["identification"]["keywords"], keyword_type="place")
 
     @property
     def maintenance_frequency(self) -> str:
-        return self.config["resource"]["maintenance"]["maintenance_frequency"]
+        return self.config["identification"]["maintenance"]["maintenance_frequency"]
 
     @property
     def metadata_character_set(self) -> str:
-        return self.config["character_set"]
+        return self.config["metadata"]["character_set"]
 
     @property
     def metadata_language(self) -> str:
-        return self.config["language"]
+        return self.config["metadata"]["language"]
 
     @property
     def metadata_maintenance_frequency(self) -> str:
-        return self.config["maintenance"]["maintenance_frequency"]
+        return self.config["metadata"]["maintenance"]["maintenance_frequency"]
 
     @property
     def metadata_maintenance_progress(self) -> str:
-        return self.config["maintenance"]["progress"]
+        return self.config["metadata"]["maintenance"]["progress"]
 
     @property
     def metadata_standard_name(self) -> str:
-        return self.config["metadata_standard"]["name"]
+        return self.config["metadata"]["metadata_standard"]["name"]
 
     @property
     def metadata_standard_version(self) -> str:
-        return self.config["metadata_standard"]["version"]
+        return self.config["metadata"]["metadata_standard"]["version"]
 
     @property
     def metadata_updated(self) -> date:
-        return self.config["date_stamp"]
+        return self.config["metadata"]["date_stamp"]
 
     @property
     def spatial_reference_system(self) -> Optional[dict]:
@@ -1210,35 +1173,24 @@ class Record(RecordSummary):
     @property
     def spatial_representation_type(self) -> Optional[str]:
         try:
-            return self.config["resource"]["spatial_representation_type"]
+            return self.config["identification"]["spatial_representation_type"]
         except KeyError:  # pragma: no cover (will be addressed in #116)
             return None
 
     @property
     def theme_keywords(self) -> List[dict]:
-        return self._filter_resource_keywords(keyword_type="theme")
+        return self._filter_keywords(keywords=self.config["identification"]["keywords"], keyword_type="theme")
 
     @property
     def temporal_extent(self) -> Dict[str, datetime]:
         return {
-            "start": self.config["resource"]["extent"]["temporal"]["period"]["start"],
-            "end": self.config["resource"]["extent"]["temporal"]["period"]["end"],
+            "start": self.config["identification"]["extent"]["temporal"]["period"]["start"],
+            "end": self.config["identification"]["extent"]["temporal"]["period"]["end"],
         }
 
     @property
-    def transfer_options(self) -> Optional[List[dict]]:
-        try:
-            return self.config["resource"]["transfer_options"]
-        except KeyError:
-            return None
-
-    @property
-    def usage_constraints(self) -> Dict[str, dict]:
-        return process_usage_constraints(constraints=self.config["resource"]["constraints"]["usage"])
-
-    @property
     def topics(self) -> List[str]:
-        return self.config["resource"]["topics"]
+        return self.config["identification"]["topics"]
 
     def load(self, record_path: Path) -> None:
         """
@@ -1249,9 +1201,9 @@ class Record(RecordSummary):
         :type record_path Path
         :param record_path: path to file containing JSON encoded record configuration
         """
-        with open(str(record_path)) as record_file:
-            _record_config = json.load(record_file)
-            self.config = load_record_from_json(record=_record_config)
+        configuration = MetadataRecordConfigV2()
+        configuration.load(file=record_path)
+        self.config: Dict[str, Any] = configuration.config
 
     def dump(self, record_path: Path, overwrite: bool = False) -> None:
         """
@@ -1264,16 +1216,16 @@ class Record(RecordSummary):
         :type overwrite: bool
         :param overwrite: if the desired file already exists, whether to replace its contents
         """
-        _record_config = dump_record_to_json(record=self.config)
+        configuration = MetadataRecordConfigV2(**self.config)
+        configuration.validate()
         try:
-            with open(str(record_path), mode="x") as record_file:
-                json.dump(_record_config, record_file, indent=4)
+            if record_path.exists():
+                raise FileExistsError
+            configuration.dump(file=record_path)
         except FileExistsError:
             if not overwrite:
                 raise FileExistsError()
-
-            with open(str(record_path), mode="w") as record_file:
-                json.dump(_record_config, record_file, indent=4)
+            configuration.dump(file=record_path)
 
     def dumps(self, dump_format: str) -> str:
         """
@@ -1290,7 +1242,9 @@ class Record(RecordSummary):
         :return: encoded record configuration
         """
         if dump_format == "xml":
-            return generate_xml_record_from_record_config_without_xml_declaration(record_config=self.config)
+            configuration = MetadataRecordConfigV2(**self.config)
+            record = MetadataRecord(configuration=configuration)
+            return record.generate_xml_document().decode()
 
 
 class MirrorRecordSummary(Record):
@@ -1397,7 +1351,10 @@ class Repository:
         :return: all summarised records, keyed by record identifier
         """
         _record_summaries = {}
-        for record_xml in self.csw_client.get_records(mode=CSWGetRecordMode.BRIEF):
+
+        for record_xml in self.csw_client.get_records(mode=CSWGetRecordMode.FULL):
+            record_xml = record_xml.replace("</csw:SearchResults>", "")
+            record_xml = record_xml.replace("</csw:GetRecordsResponse>", "")
             record_config = MetadataRecord(record=record_xml).make_config()
             record = RecordSummary(config=record_config.config)
             _record_summaries[record.identifier] = record
@@ -1416,7 +1373,7 @@ class Repository:
         :param update: whether an existing record can be overridden
         """
         try:
-            record_xml = generate_xml_record_from_record_config_without_xml_declaration(record_config=record.config)
+            record_xml = record.dumps(dump_format="xml")
             self.csw_client.insert_record(record=record_xml)
         except RecordInsertConflictException:
             if not update:
@@ -1674,7 +1631,7 @@ class Item:
         return f"<Item / {self.identifier}>"
 
     @staticmethod
-    def _format_date(date_datetime: Union[date, datetime], native_precision: str = "day") -> str:
+    def _format_date(date_datetime: Union[date, datetime], date_precision: Optional[str] = None) -> str:
         """
         Format a date for display
 
@@ -1692,14 +1649,14 @@ class Item:
 
         :type date_datetime date or datetime
         :param date_datetime: date or datetime to be formatted
-        :type native_precision str
-        :param native_precision: maximum precision of
+        :type date_precision str
+        :param date_precision: maximum precision of
         :rtype str
         :return: ISO 8601 date or datetime
         """
-        if native_precision == "day":
+        if date_precision is None:
             return date_datetime.isoformat()
-        elif native_precision == "year":
+        elif date_precision == "year":
             return str(date_datetime.year)
 
     @staticmethod
@@ -1922,74 +1879,75 @@ class Item:
         return "outdated"  # pragma: no cover (added for future use)
 
     @staticmethod
-    def _process_download(transfer_option: dict) -> Dict[str, str]:
+    def _process_download(distribution_option: dict) -> Dict[str, str]:
         """
-        Generate an abstracted dataset download option
+        Generate an item download
 
-        Transforms a ISO 19115 transfer option into an abstracted download option intended specifically for the item
-        page template. It remaps elements such as size sizes and file names which are currently used to infer the data
-        format using conventional names. Special support is included for OGC WMS URIs to extract elements such as base
-        endpoint and layer.
+        Transforms a ISO 19115 transfer option and optionally an associated format, into an item download option. These
+        download options are bespoke to this data catalogue, using inference and hard-coded formatting options to enrich
+        or simplify information to be more useful.
 
-        In future, ISO transfer options will be associated to an distribution format removing the need to infer data
-        formats from conventional file names.
-
-        :type transfer_option dict
-        :param transfer_option: ISO transfer option
+        :type distribution_option dict
+        :param distribution_option: combination of a ISO transfer option and optional ISO format object
         :rtype dict
         :return: item download option
         """
-        download = {
+        if "format" not in distribution_option:  # pragma: no cover (will be addressed in #116)
+            distribution_option["format"] = {"format": None}
+        if "href" not in distribution_option["format"]:
+            distribution_option["format"]["href"] = None
+
+        download_option = {
             # Exempting Bandit security issue (weak hash method), not used for security/cryptography
-            "id": sha1(transfer_option["online_resource"]["href"].encode("utf-8")).hexdigest(),  # nosec
+            "id": sha1(json.dumps(distribution_option).encode()).hexdigest(),  # nosec
             "format": None,
             "format_title": None,
             "format_description": None,
-            "format_version": None,
             "size": None,
-            "url": transfer_option["online_resource"]["href"],
+            "url": distribution_option["transfer_option"]["online_resource"]["href"],
         }
 
-        if transfer_option["online_resource"]["title"] == "GeoPackage":
-            download["format"] = "gpkg"
-            download["format_title"] = "GeoPackage"
-            download["format_description"] = "OGC GeoPackage"
-            download["format_version"] = "1.2"
-        elif transfer_option["online_resource"]["title"] == "Shapefile":
-            download["format"] = "shp"
-            download["format_title"] = "Shapefile"
-            download["format_description"] = "ESRI Shapefile"
-            download["format_version"] = "1"
-        elif transfer_option["online_resource"]["title"] == "Web Map Service (WMS)":
-            download["format"] = "wms"
-            download["format_title"] = "Web Map Service (WMS)"
-            download["format_description"] = "OGC Web Map Service"
-        elif transfer_option["online_resource"]["title"] == "PNG":  # pragma: no cover (will be addressed in #116)
-            download["format"] = "png"
-            download["format_title"] = "PNG"
-            download["format_description"] = "PNG image"
-            download["format_version"] = "1"
-        elif transfer_option["online_resource"]["title"] == "JPEG":  # pragma: no cover (will be addressed in #116)
-            download["format"] = "jpeg"
-            download["format_title"] = "JPEG"
-            download["format_description"] = "JPEG image"
-            download["format_version"] = "1"
-        elif transfer_option["online_resource"]["title"] == "PDF":  # pragma: no cover (will be addressed in #116)
-            download["format"] = "pdf"
-            download["format_title"] = "PDF"
-            download["format_description"] = "Adobe PDF"
-            download["format_version"] = "1.6"
+        if "size" in distribution_option["transfer_option"]:
+            size = distribution_option["transfer_option"]["size"]
+            download_option["size"] = f"{size['magnitude']}{size['unit']}"
 
-        if "size" in transfer_option.keys():
-            download["size"] = f"{transfer_option['size']['magnitude']} {transfer_option['size']['unit']}"
+        if (
+            distribution_option["format"]["href"]
+            == "https://www.iana.org/assignments/media-types/application/geopackage+sqlite3"
+        ):
+            download_option["format"] = "gpkg"
+            download_option["format_title"] = "GeoPackage"
+            download_option["format_description"] = "OGC GeoPackage"
+        elif distribution_option["format"]["href"] == "https://support.esri.com/en/white-paper/279":
+            download_option["format"] = "shp"
+            download_option["format_title"] = "Shapefile"
+            download_option["format_description"] = "ESRI Shapefile"
+        elif (
+            distribution_option["format"]["href"] == "https://www.iana.org/assignments/media-types/application/pdf"
+        ):  # pragma: no cover (added for future use)
+            download_option["format"] = "pdf"
+            download_option["format_title"] = "PDF"
+            download_option["format_description"] = "Adobe PDF"
+        elif (
+            distribution_option["format"]["href"] == "https://www.iana.org/assignments/media-types/application/png"
+        ):  # pragma: no cover (added for future use)
+            download_option["format"] = "png"
+            download_option["format_title"] = "PNG"
+            download_option["format_description"] = "PNG image"
+        elif distribution_option["format"]["format"] == "Web Map Service":
+            download_option["format"] = "wms"
+            download_option["format_title"] = "Web Map Service (WMS)"
+            download_option["format_description"] = "OGC Web Map Service"
 
-        if download["format"] == "wms":
-            url_parsed = url_parse(download["url"])
-            url_query_string: Dict[str, List[str]] = query_string_parse(url_parsed.query)
-            download["endpoint"] = f"{url_parsed.scheme}://{url_parsed.netloc}{url_parsed.path}"
-            download["layer"] = url_query_string["layer"][0]
+        if distribution_option["format"]["format"] == "Web Map Service":
+            endpoint_elements = url_parse(distribution_option["transfer_option"]["online_resource"]["href"])
+            endpoint_parameters: dict = query_string_parse(endpoint_elements.query)
+            download_option[
+                "endpoint"
+            ] = f"{endpoint_elements.scheme}://{endpoint_elements.netloc}{endpoint_elements.path}"
+            download_option["layer"] = endpoint_parameters["layer"][0]
 
-        return download
+        return download_option
 
     @staticmethod
     def _filter_keyword_terms(keyword_sets: List[dict], keyword_set_url: str) -> List[dict]:
@@ -2013,7 +1971,7 @@ class Item:
 
     @property
     def abstract_markdown(self) -> str:
-        return markdown(self.abstract, output_format="html5")
+        return markdown(self.abstract, output_format="html")
 
     @property
     def authors(self) -> List[dict]:
@@ -2025,11 +1983,13 @@ class Item:
 
     @property
     def citation(self) -> str:  # pragma: no cover (will be addressed in #116)
-        return self.record.usage_constraints["required_citation"]["statement"]
+        for constraint in self.record.constraints:
+            if constraint["type"] == "usage" and "Please cite this item as" in constraint["statement"]:
+                return constraint["statement"]
 
     @property
     def citation_markdown(self) -> str:
-        return markdown(self.record.usage_constraints["required_citation"]["statement"], output_format="html5")
+        return markdown(self.citation, output_format="html")
 
     @property
     def collections(self) -> Optional[List[str]]:
@@ -2056,7 +2016,7 @@ class Item:
     @property
     def created(self) -> str:
         _date = self.record.dates["creation"]
-        return self._format_date(date_datetime=_date["value"], native_precision=_date["precision"])
+        return self._format_date(date_datetime=_date["date"], date_precision=_date["date_precision"])
 
     @property
     def data_type(self) -> str:
@@ -2066,11 +2026,10 @@ class Item:
     def downloads(self) -> List[Dict[str, str]]:
         downloads = []
 
-        if self.record.transfer_options is None:  # pragma: no cover (will be addressed in #116)
-            return downloads
+        for distribution in self.record.distributions:
+            for distribution_option in distribution["distribution_options"]:
+                downloads.append(self._process_download(distribution_option=distribution_option))
 
-        for transfer_option in self.record.transfer_options:
-            downloads.append(self._process_download(transfer_option=transfer_option))
         return downloads
 
     @property
@@ -2098,8 +2057,10 @@ class Item:
         return self._format_language(language=self.record.language)
 
     @property
-    def licence(self) -> dict:
-        return self.record.usage_constraints["copyright_licence"]
+    def licence_url(self) -> str:
+        for constraint in self.record.constraints:
+            if constraint["type"] == "usage" and constraint["restriction_code"] == "license":
+                return constraint["href"]
 
     @property
     def lineage(self) -> str:
@@ -2107,7 +2068,7 @@ class Item:
 
     @property
     def lineage_markdown(self) -> str:
-        return markdown(self.lineage, output_format="html5")
+        return markdown(self.lineage, output_format="html")
 
     @property
     def location_keywords(self) -> List[dict]:
@@ -2148,12 +2109,12 @@ class Item:
 
     @property
     def metadata_updated(self) -> str:
-        return self._format_date(date_datetime=self.record.metadata_updated, native_precision="day")
+        return self._format_date(date_datetime=self.record.metadata_updated)
 
     @property
     def released(self) -> str:
         _date = self.record.dates["released"]
-        return self._format_date(date_datetime=_date["value"], native_precision=_date["precision"])
+        return self._format_date(date_datetime=_date["date"], date_precision=_date["date_precision"])
 
     @property
     def point_of_contact(self) -> str:
@@ -2173,13 +2134,13 @@ class Item:
     @property
     def published(self) -> str:
         _date = self.record.dates["publication"]
-        return self._format_date(date_datetime=_date["value"], native_precision=_date["precision"])
+        return self._format_date(date_datetime=_date["date"], date_precision=_date["date_precision"])
 
     @property
     def temporal_extent(self) -> Dict[str, str]:
         return {
-            "start": self._format_date(date_datetime=self.record.temporal_extent["start"], native_precision="day"),
-            "end": self._format_date(date_datetime=self.record.temporal_extent["end"], native_precision="day"),
+            "start": self._format_date(date_datetime=self.record.temporal_extent["start"], date_precision="day"),
+            "end": self._format_date(date_datetime=self.record.temporal_extent["end"], date_precision="day"),
         }
 
     @property
@@ -2196,13 +2157,13 @@ class Item:
         if self.spatial_reference_system is None:
             return None  # pragma: no cover (will be addressed in #116)
 
-        return markdown(self.spatial_reference_system, output_format="html5")
+        return markdown(self.spatial_reference_system, output_format="html")
 
     @property
     def status(self) -> str:
         return self._process_status(
             maintenance_frequency=self.record.maintenance_frequency,
-            released_date=self.record.dates["released"]["value"],
+            released_date=self.record.dates["released"]["date"],
         )
 
     @property
@@ -2251,7 +2212,7 @@ class Item:
 
     @property
     def title_markdown(self) -> str:
-        return markdown(self.title, output_format="html5")
+        return markdown(self.title, output_format="html")
 
     @property
     def topics(self) -> List[str]:
@@ -2276,7 +2237,7 @@ class Item:
     def updated(self) -> Optional[str]:
         try:
             _date = self.record.dates["revision"]
-            return self._format_date(date_datetime=_date["value"], native_precision=_date["precision"])
+            return self._format_date(date_datetime=_date["date"], date_precision=_date["date_precision"])
         except KeyError:  # pragma: no cover (will be addressed in #116)
             return None
 
@@ -2312,7 +2273,7 @@ class Collection:
 
     @property
     def title_markdown(self) -> str:
-        return markdown(self.title, output_format="html5")
+        return markdown(self.title, output_format="html")
 
     @property
     def topics(self) -> List[str]:

@@ -566,6 +566,7 @@ def remove_collections(ctx, force_remove: bool):
 site_commands_blueprint = Blueprint("site", __name__)
 site_commands_blueprint.cli.short_help = "Manage static site."
 
+
 # noinspection PyUnresolvedReferences
 @site_commands_blueprint.cli.command("build-items")
 def build_items():
@@ -672,7 +673,7 @@ def build_records():
 
                 with open(str(record_output_path), mode="w") as record_file:
                     record_xml = record.dumps(dump_format="xml")
-                    record_xml_element = ElementTree(fromstring(record_xml))
+                    record_xml_element = ElementTree(fromstring(record_xml.encode()))
                     record_xml_element_root = record_xml_element.getroot()
 
                     if stylesheet == "iso-html":

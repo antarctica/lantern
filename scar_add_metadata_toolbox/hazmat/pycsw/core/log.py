@@ -1,6 +1,21 @@
 # -*- coding: utf-8 -*-
 # =================================================================
 #
+# Changes, which are local to this dependency, within this package,
+# have been made to this file, in order to improve compatibility,
+# add functionality, or address bugs that are not present, or not
+# addressed in the upstream package.
+#
+# See the README for the SCAR ADD Metadata Toolbox (this package)
+# for more information about why these changes have been made.
+#
+# Summary of changes made to this file:
+# - amend `setup_logger` method to log to stdout unless a file
+#   path configuration option has been set
+# =================================================================
+
+# =================================================================
+#
 # Authors: Tom Kralidis <tomkralidis@gmail.com>
 #
 # Copyright (c) 2015 Tom Kralidis
@@ -28,6 +43,7 @@
 #
 # =================================================================
 
+import sys
 import logging
 
 LOGGER = logging.getLogger(__name__)
@@ -67,11 +83,6 @@ def setup_logger(config=None):
             raise RuntimeError(
                 'Invalid server configuration (server.loglevel).')
 
-        if not config.has_option('server', 'logfile'):
-            raise RuntimeError(
-                'Invalid server configuration (server.loglevel set,\
-                but server.logfile missing).')
-
     if config.has_option('server', 'logfile'):
         if not config.has_option('server', 'loglevel'):
             raise RuntimeError(
@@ -80,17 +91,18 @@ def setup_logger(config=None):
 
         logfile = config.get('server', 'logfile')
 
-    if loglevel != 'NOTSET' and logfile is None:
-        raise RuntimeError(
-            'Invalid server configuration \
-            (server.loglevel set, but server.logfile is not).')
-
     # Setup logging globally (not only for the pycsw module)
     # based on the parameters passed.
-    logging.basicConfig(level=LOGLEVELS[loglevel],
-                        filename=logfile,
-                        datefmt=TIME_FORMAT,
-                        format=MSG_FORMAT)
+    if logfile is None:
+        logging.basicConfig(level=LOGLEVELS[loglevel],
+                            datefmt=TIME_FORMAT,
+                            format=MSG_FORMAT,
+                            stream=sys.stdout)
+    else:
+        logging.basicConfig(level=LOGLEVELS[loglevel],
+                            filename=logfile,
+                            datefmt=TIME_FORMAT,
+                            format=MSG_FORMAT)
 
     LOGGER.info('Logging initialized (level: %s).', loglevel)
 

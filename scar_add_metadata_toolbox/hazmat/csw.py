@@ -122,29 +122,7 @@ def wrapped_request_post(*args, **kwargs):
     return _
 
 
-# noinspection PyUnusedLocal
-def setup_logger(config=None):
-    """
-    Changes PyCSW logging destination to use stdout rather than a file
-
-    This is for consistency with other components that use stdout and to follow the logging conventions for containers.
-
-    Long term the logging destination should be a configuration option in PyCSW.
-    """
-    logging.basicConfig(level=logging.DEBUG, stream=sys.stdout)
-
-
 class CSWServer(_Csw):
-    """
-    PyCSW instance using the modified `setup_logging` method
-
-    Long term the logging destination should be a configuration option in PyCSW.
-    """
-
-    def __init__(self, rtconfig=None, env=None, version="3.0.0"):
-        with mock.patch("pycsw.core.log.setup_logger", side_effect=setup_logger()):
-            super().__init__(rtconfig, env, version)
-
     def dispatch(self, writer=sys.stdout, write_headers=True):
         """ Handle incoming HTTP request """
 

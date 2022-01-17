@@ -181,7 +181,6 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
             "language": "en-GB",
             "maxrecords": "100",
             "loglevel": "DEBUG",
-            "logfile": "/dev/null",
             "pretty_print": "true",
             "gzip_compresslevel": "8",
             "domainquerytype": "list",

@@ -291,7 +291,7 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
                 raise CSWAuthInsufficientException()
         except AttributeError:
             # noinspection PyComparisonWithNone
-            if token == None:
+            if token is None:
                 raise CSWAuthMissingException()
 
     def setup(self) -> None:

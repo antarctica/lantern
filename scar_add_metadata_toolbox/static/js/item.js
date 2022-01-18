@@ -47,10 +47,6 @@ $(function() {
         document.getElementById(this.id).scrollIntoView()
         document.getElementById(this.id).classList.add('app-highlight');
     });
-    // $('.app-wms-info-trigger').click(function () {
-    //     var instructions_box = $($(this).data('target'))[0];
-    //     instructions_box.scrollIntoView();
-    // })
 });
 
 // Item contact form

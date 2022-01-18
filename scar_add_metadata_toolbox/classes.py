@@ -982,28 +982,28 @@ class Record(RecordSummary):
         Processes contact into a dict, keyed by role
 
         ISO allows multiple contacts to have the same role (e.g. multiple authors). The BAS Metadata Library config
-        allows contacts to have multiple roles (e.g. publisher and distributor). This method will restructure contacts
-        by their roles.
+        also allows contacts to have multiple roles (e.g. publisher and distributor). This method will restructure, and
+        where needed duplicate, contacts to group them by their roles.
 
         E.g. This (simplified) input:
 
         ```
         [
             {
-                "organisation_name": "MAGIC",
+                "name": "MAGIC",
                 "roles": [
                     "point of contact",
                     "distributor"
                 ]
             },
             {
-                "organisation_name": "Constance Watson",
+                "name": "Constance Watson",
                 "roles": [
                     "author"
                 ]
             },
             {
-                "organisation_name": "John Cinnamon",
+                "name": "John Cinnamon",
                 "roles": [
                     "author"
                 ]
@@ -1017,10 +1017,10 @@ class Record(RecordSummary):
         {
             "author": [
                 {
-                    "organisation_name": "Constance Watson"
+                    "name": "Constance Watson"
                 },
                 {
-                    "organisation_name": "John Cinnamon"
+                    "name": "John Cinnamon"
                 }
             ],
             "point of contact": [
@@ -1635,17 +1635,13 @@ class Item:
         """
         Format a date for display
 
-        Currently all dates use the default ISO 8601 representation upto their native precision.
-
-        Note: Native precision currently only applies to dates and not times within datetimes - i.e. a datetime with
-        seconds will be displayed with seconds even though the native precision may be day.
+        Date(time)s are formatted using ISO 8601, upto an optional data precision.
 
         For example:
-
-        * a date `<date 2020-04-20 precision=day>` will be formatted as "2020-04-20"
-        * a date `<date 2020-01-01 precision=year>` will be formatted as "2020"
-        * a datetime `<datetime 2020-04-20T14:30:45 precision=day>` will be formatted as "2020-04-20T14:30:45"
-        * a datetime `<datetime 2020-04-20T14:30 precision=day>` will be formatted as "2020-04-20T14:30"
+        * `{'date': date(2020,4,20)}` will be formatted as "2020-04-20"
+        * `{'date': date(2020,1,1), 'date_precision':'year'}` will be formatted as "2020"
+        * `{'date': datetime(2020,4,20,14)}` will be formatted as "2020-04-20T14:00:00"
+        * `{'date': datetime(2020,4,20,14,26,45)}` will be formatted as "2020-04-20T14:26:45"
 
         :type date_datetime date or datetime
         :param date_datetime: date or datetime to be formatted
@@ -1664,9 +1660,7 @@ class Item:
         """
         Format an ISO 19115 language code list value
 
-        Note: It is currently assumed that where English is used this refers to the United Kingdom localisation.
-
-        Note: Other code values can be added as needed in future.
+        Note: It is currently assumed that where English is used this refers to a United Kingdom (GB) localisation.
 
         :type language str
         :param language: ISO 19115 language code list value
@@ -1680,8 +1674,6 @@ class Item:
     def _format_maintenance_frequency(maintenance_frequency: str) -> str:
         """
         Format an ISO 19115 maintenance frequency code list value
-
-        Note: Other code values can be added as needed in future.
 
         :type maintenance_frequency str
         :param maintenance_frequency: ISO 19115 maintenance frequency code list value
@@ -1698,13 +1690,10 @@ class Item:
         """
         Format an organisation name
 
-        Typically this is used to remove redundant information from names, as items will be shown in a BAS branded page
-        template it isn't necessary to include 'British Antarctic Survey' in organisation names for example, whereas
-        records may be harvested and shown in non-BAS branded websites so that context is needed.
+        Typically, this is used to remove redundant information from names. For example, as items will be shown in a
+        BAS branded webpage, it isn't necessary to include 'British Antarctic Survey' in organisation names.
 
-        Names may also be modified to include helpful, but informal, elements such as abbreviations.
-
-        Note: Other organisation names can be added as needed in future
+        This may also be used to include helpful, but informal, elements in names, such as abbreviations.
 
         :type organisation_name str
         :param organisation_name: organisation name
@@ -1726,8 +1715,6 @@ class Item:
         As keywords are shown in a relatively narrow part of the page and titles are often quite verbose, this method
         shortens them into something more suitable, whilst still being easily identifiable.
 
-        Note: Other thesaurus titles can be added as needed in future.
-
         :type thesaurus_title str
         :param thesaurus_title: title of the keyword set as defined in the keyword thesaurus
         :rtype str
@@ -1745,13 +1732,13 @@ class Item:
         """
         Format a spatial reference system identifier
 
-        Formal identifiers for spatial reference systems (or coordinate/spatial reference systems) are readily
+        Formal identifiers for spatial reference systems (or coordinate/spatial reference systems) are not readily
         accessible to those not very familiar with them. This method expands identifiers to include information people
-        will understand, if only at a high level (e.g. that it relates to Antarctic rather than the Arctic).
+        will understand, if only at a high level (e.g. that it relates to Antarctic rather than the Arctic). It may
+        also use a less formal, but more useful, URL for more information about the reference system.
 
-        Wherever possible URIs are used to match identifiers to avoid ambiguity with how they are referenced as codes.
-
-        Note: Other reference systems can be added as needed in the future.
+        Wherever possible URIs are used to match identifiers, to avoid ambiguity with how they are referenced as codes
+        or names.
 
         :type spatial_reference_system_code dict
         :param spatial_reference_system_code: spatial reference system containing a href property with an identifier URI
@@ -1766,15 +1753,15 @@ class Item:
         """
         Constructs a GeoJSON bounding box for an items spatial extent
 
-        By default this method uses a top-left and bottom-right pair of coordinates to define a box indicating the
+        By default, this method uses a top-left and bottom-right pair of coordinates to define a box indicating the
         extent of an item.
 
-        However, where a dataset covers all of Antarctica, a bounding box and corners no longer make sense (either to
-        humans or to mapping libraries). To workaround this, the WellKnownExtents class is used for regions that should
-        be treated differently. For Antarctica for example a polygon is used to effectively define a bounding radius
-        from the South pole that covers the Antarctic continent.
+        However, in some cases, such as where a dataset covers all of Antarctica, a bounding box and corners no longer
+        make sense (either to humans or to mapping libraries). To work around this, the WellKnownExtents class is used
+        to define extents for areas that should be treated differently. For Antarctica for example, a bounding radius
+        from the South Pole is used, defined as a polygon.
 
-        This method, and the WellKnownExtents class can be expanded as needed to accommodate other areas where a
+        This method and the WellKnownExtents class, can be expanded as needed to accommodate other areas where a
         bounding box feature is unsuitable.
 
         :type bounding_box dict
@@ -1834,14 +1821,14 @@ class Item:
     @staticmethod
     def _process_status(maintenance_frequency: str, released_date: Union[date, datetime]):
         """
-        Determines whether an item is current or outdated/superseded etc
+        Determines the status of an item
 
         Supported maintenance frequencies are:
 
         * biannual (periodic)
         * as-needed (non-periodic)
 
-        Possible statuses are:
+        Possible states are:
 
         * current
         * outdated
@@ -1851,8 +1838,6 @@ class Item:
         Where an item has a periodic maintenance frequency (e.g. every month), an overdue date is calculated by adding
         the maintenance frequency to the items release date. If the current date is less or equal to this overdue date
         it's considered current, otherwise it's deemed to be outdated.
-
-        Note: Other status values can be added as needed in future.
 
         Note: This method includes code paths that are not currently used and so are exempt from code coverage. These
         paths are known to be needed in future and will therefore be tested and included in coverage in the future.
@@ -1997,9 +1982,6 @@ class Item:
         Item's Collections
 
         Collections are implemented as a descriptive keyword set using the NERC Vocabulary Service (T02).
-
-        Currently only collection names to show as free text values are returned. In future, collection IDs will be
-        returned to allow linking items to their collections.
 
         :rtype list
         :return: Collection names
@@ -2171,13 +2153,13 @@ class Item:
         """
         Theme keywords (filtered)
 
-        Theme keywords are currently used for two keyword sets that the catalogue treats differently:
+        Theme keywords are currently used for two keyword sets that the catalogue treats as special cases:
 
-        * BAS research topics - http://vocab.nerc.ac.uk/collection/T01/current1/
-        * Data catalogue collections - http://vocab.nerc.ac.uk/collection/T02/current/
+        1. BAS research topics - http://vocab.nerc.ac.uk/collection/T01/current1/
+        2. Data catalogue collections - http://vocab.nerc.ac.uk/collection/T02/current/ (deprecated)
 
         As these keyword sets are exposed through other Item properties (collections and topics respectively), they are
-        filtered out from other theme keyword sets. Additionally, ISO Topics are filtered in as a theme keyword set.
+        filtered _out_ from other theme keyword sets. Additionally, ISO Topics are filtered _in_ as a theme keyword set.
 
         :rtype list
         :return: theme keyword sets, exc. BAS research topics and data catalogue collections, inc. ISO topics
@@ -2221,8 +2203,8 @@ class Item:
 
         Research topics are implemented as a descriptive keyword set using the NERC Vocabulary Service (T01).
 
-        Currently only topic names to show as free text values are returned. In future, topic IDs will be returned to
-        allow linking items to their collections.
+        Note: These are separate to ISO Topics, which are treated as a description keyword set (see the
+        `Item.theme_keywords` property).
 
         :rtype list
         :return: Topic names

@@ -1,4 +1,19 @@
 # -*- coding: ISO-8859-15 -*-
+# =================================================================
+#
+# Changes, which are local to this dependency, within this package,
+# have been made to this file, in order to improve compatibility,
+# add functionality, or address bugs that are not present, or not
+# addressed in the upstream package.
+#
+# See the README for the SCAR ADD Metadata Toolbox (this package)
+# for more information about why these changes have been made.
+#
+# Summary of changes made to this file:
+# - amend `CatalogueServiceWeb.transaction` method to handle
+#   UTF-8 encoded strings (decoded to bytes)
+# =================================================================
+
 # =============================================================================
 # Copyright (c) 2009 Tom Kralidis
 #
@@ -443,11 +458,19 @@ class CatalogueServiceWeb(object):
         if ttype == 'insert':
             if record is None:
                 raise RuntimeError('Nothing to insert.')
-            node1.append(etree.fromstring(record))
+            if isinstance(record, str):
+                record = record.encode()
+            record = etree.fromstring(record)
+            del record.attrib["{http://www.w3.org/2001/XMLSchema-instance}schemaLocation"]
+            node1.append(record)
 
         if ttype == 'update':
             if record is not None:
-                node1.append(etree.fromstring(record))
+                if isinstance(record, str):
+                    record = record.encode()
+                record = etree.fromstring(record)
+                del record.attrib["{http://www.w3.org/2001/XMLSchema-instance}schemaLocation"]
+                node1.append(record)
             else:
                 if propertyname is not None and propertyvalue is not None:
                     node2 = etree.SubElement(node1, util.nspath_eval('csw:RecordProperty', namespaces))

@@ -190,9 +190,7 @@ class WebFeatureService_(object):
         elif filter:
             request["query"] = str(filter)
         if typename:
-            typename = (
-                [typename] if type(typename) == type("") else typename
-            )  # noqa: E721
+            typename = [typename] if type(typename) == type("") else typename  # noqa: E721
             if int(self.version.split(".")[0]) >= 2:
                 request["typenames"] = ",".join(typename)
             else:

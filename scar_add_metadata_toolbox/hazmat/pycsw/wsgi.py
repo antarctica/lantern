@@ -83,26 +83,20 @@ from scar_add_metadata_toolbox.hazmat.pycsw import server
 def application(env, start_response):
     """WSGI wrapper"""
 
-    print(env['PATH_INFO'])
-
+    print(env["PATH_INFO"])
 
     pycsw_root = get_pycsw_root_path(os.environ, env)
     configuration_path = get_configuration_path(os.environ, env, pycsw_root)
-    env['local.app_root'] = pycsw_root
-    if 'HTTP_HOST' in env and ':' in env['HTTP_HOST']:
-        env['HTTP_HOST'] = env['HTTP_HOST'].split(':')[0]
+    env["local.app_root"] = pycsw_root
+    if "HTTP_HOST" in env and ":" in env["HTTP_HOST"]:
+        env["HTTP_HOST"] = env["HTTP_HOST"].split(":")[0]
     csw = server.Csw(configuration_path, env)
     status, contents = csw.dispatch_wsgi()
-    headers = {
-        'Content-Length': str(len(contents)),
-        'Content-Type': str(csw.contenttype)
-    }
+    headers = {"Content-Length": str(len(contents)), "Content-Type": str(csw.contenttype)}
     if "gzip" in env.get("HTTP_ACCEPT_ENCODING", ""):
         try:
-            compression_level = int(
-                csw.config.get("server", "gzip_compresslevel"))
-            contents, compress_headers = compress_response(
-                contents, compression_level)
+            compression_level = int(csw.config.get("server", "gzip_compresslevel"))
+            contents, compress_headers = compress_response(contents, compression_level)
             headers.update(compress_headers)
         except configparser.NoOptionError:
             print(
@@ -111,7 +105,7 @@ def application(env, start_response):
                 "Returning an uncompressed response..."
             )
         except configparser.NoSectionError:
-            print('Could not load user configuration %s' % configuration_path)
+            print("Could not load user configuration %s" % configuration_path)
 
     start_response(status, list(headers.items()))
     return [contents]
@@ -137,17 +131,15 @@ def compress_response(response, compression_level):
     """
 
     buf = BytesIO()
-    gzipfile = gzip.GzipFile(mode='wb', fileobj=buf,
-                             compresslevel=compression_level)
+    gzipfile = gzip.GzipFile(mode="wb", fileobj=buf, compresslevel=compression_level)
     gzipfile.write(response)
     gzipfile.close()
     compressed_response = buf.getvalue()
-    compression_headers = {'Content-Encoding': 'gzip'}
+    compression_headers = {"Content-Encoding": "gzip"}
     return compressed_response, compression_headers
 
 
-def get_pycsw_root_path(process_environment, request_environment=None,
-                        root_path_key="PYCSW_ROOT"):
+def get_pycsw_root_path(process_environment, request_environment=None, root_path_key="PYCSW_ROOT"):
     """Get pycsw's root path.
 
     The root path will be searched in the ``process_environment`` first, then
@@ -173,19 +165,14 @@ def get_pycsw_root_path(process_environment, request_environment=None,
 
     """
 
-    req_env = (
-        dict(request_environment) if request_environment is not None else {})
+    req_env = dict(request_environment) if request_environment is not None else {}
     app_root = process_environment.get(
-        root_path_key,
-        req_env.get(
-            root_path_key,
-            os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        )
+        root_path_key, req_env.get(root_path_key, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     )
     return app_root
 
-def get_configuration_path(process_environment, request_environment,
-                           pycsw_root, config_path_key="PYCSW_CONFIG"):
+
+def get_configuration_path(process_environment, request_environment, pycsw_root, config_path_key="PYCSW_CONFIG"):
     """Get the path for pycsw configuration file.
 
     The configuration file path is searched in the following:
@@ -216,28 +203,26 @@ def get_configuration_path(process_environment, request_environment,
     # scan from config= or PYCSW_CONFIG environment variable
     query_string = request_environment.get("QUERY_STRING", "").lower()
 
-    for kvp in query_string.split('&'):
+    for kvp in query_string.split("&"):
         if "config" in kvp:
-            configuration_path = unquote(kvp.split('=')[1])
+            configuration_path = unquote(kvp.split("=")[1])
             break
     else:
         # did not find any `config` parameter in the request
         # lets try the process env, request env and fallback to
         # <pycsw_root>/default.cfg
         configuration_path = process_environment.get(
-            config_path_key,
-            request_environment.get(
-                config_path_key, os.path.join(pycsw_root, "default.cfg")
-            )
+            config_path_key, request_environment.get(config_path_key, os.path.join(pycsw_root, "default.cfg"))
         )
     return configuration_path
 
 
-if __name__ == '__main__':  # run inline using WSGI reference implementation
+if __name__ == "__main__":  # run inline using WSGI reference implementation
     from wsgiref.simple_server import make_server
+
     port = 8000
     if len(sys.argv) > 1:
         port = int(sys.argv[1])
-    httpd = make_server('', port, application)
-    print('Serving on port {}...'.format(port))
+    httpd = make_server("", port, application)
+    print("Serving on port {}...".format(port))
     httpd.serve_forever()

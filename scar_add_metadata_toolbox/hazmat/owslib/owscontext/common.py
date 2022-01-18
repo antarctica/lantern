@@ -56,17 +56,16 @@ SUPPORTED_GEOJSON_OFFERING_EXTENSIONS = [
     GEOJSON_OWCSPEC_URL + "/wps",
     GEOJSON_OWCSPEC_URL + "/csw",
     GEOJSON_OWCSPEC_URL + "/geotiff",
-    GEOJSON_OWCSPEC_URL + "/sos"
+    GEOJSON_OWCSPEC_URL + "/sos",
 ]
 
 # FIXME are the geosjson and atom offering codes ok,
 # because ATOM offering codes are different (spec vs conf vs req)
 
 ATOM_OFFERING_CODES = [
-    'http://www.opengis.net/spec/owc/1.0/conf/atom/gml',
-    'http://www.opengis.net/spec/owc/1.0/req/atom/wms'
-    'http://www.opengis.net/spec/owc-atom/1.0/req/gml',
-    'http://www.opengis.net/spec/owc-atom/1.0/req/csw',
+    "http://www.opengis.net/spec/owc/1.0/conf/atom/gml",
+    "http://www.opengis.net/spec/owc/1.0/req/atom/wms" "http://www.opengis.net/spec/owc-atom/1.0/req/gml",
+    "http://www.opengis.net/spec/owc-atom/1.0/req/csw",
 ]
 
 
@@ -87,9 +86,7 @@ class TimeIntervalFormat(object):
     little helper to have time intervals
     """
 
-    def __init__(self,
-                 start,
-                 end=None):
+    def __init__(self, start, end=None):
         """
         constructor:
 
@@ -112,7 +109,7 @@ class TimeIntervalFormat(object):
         """
         return {
             "start": None if self.start is None else self.start.isoformat(),
-            "end": None if self.start is None else self.start.isoformat()
+            "end": None if self.start is None else self.start.isoformat(),
         }
 
     @classmethod
@@ -180,7 +177,7 @@ def extract_p(path, dict_obj, default):
     if dict_obj is None:
         return default
 
-    keys = path.split('.')
+    keys = path.split(".")
     tmp_iter = dict_obj
     for key in keys:
         try:

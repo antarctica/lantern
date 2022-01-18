@@ -2,8 +2,7 @@
 
 
 class IServiceIdentificationMetadata:
-    """OO-interface to service identification metadata.
-    """
+    """OO-interface to service identification metadata."""
 
     type = property("""Service name (string): "WMS", "WFS", "WCS", or "SOS".""")
     version = property("""Version of service protocol (string).""")
@@ -15,8 +14,7 @@ class IServiceIdentificationMetadata:
 
 
 class IServiceProviderMetadata:
-    """OO-interface to service provider metadata.
-    """
+    """OO-interface to service provider metadata."""
 
     name = property("""Provider's name (string).""")
     url = property("""URL for provider's web site (string).""")
@@ -24,21 +22,20 @@ class IServiceProviderMetadata:
 
 
 class IServiceOperations:
-    """OO-interface to service operations metadata.
-    """
+    """OO-interface to service operations metadata."""
 
     operations = property("""List of operation descriptors (list). These must implement IOperationMetadata (below).""")
     exceptions = property("""List of exception formats (list).""")
 
 
 class IServiceContents:
-    """OO-interface to service contents metadata.
-    """
+    """OO-interface to service contents metadata."""
 
     contents = property("""List of content descriptors (list). These must implement IServiceContent (below).""")
 
 
 # IServiceMetadata aggregates the 4 aspects above
+
 
 class IServiceMetadata(IServiceOperations, IServiceContents):
     """OWS Metadata.
@@ -52,18 +49,18 @@ class IServiceMetadata(IServiceOperations, IServiceContents):
 
 # A Service has an online resource URL as well as metadata collections
 
+
 class IService(IServiceMetadata):
-    """The OGC Web Service interface.
-    """
+    """The OGC Web Service interface."""
 
     url = property("""Online resource URL (string)""")
 
 
 # specific service types are described below: WMS, WFS, WCS, SOS and WPS
 
+
 class IWebMapService(IService):
-    """Abstraction for an OGC Web Map Service (WMS).
-    """
+    """Abstraction for an OGC Web Map Service (WMS)."""
 
     def getcapabilities():
         """Make a request to the WMS, returns an XML document wrapped in a
@@ -78,8 +75,7 @@ class IWebMapService(IService):
 
 
 class IWebFeatureService(IService):
-    """Abstraction for an OGC Web Feature Service (WFS).
-    """
+    """Abstraction for an OGC Web Feature Service (WFS)."""
 
     def getcapabilities():
         """Make a request to the WFS, returns an XML document wrapped in a
@@ -99,8 +95,7 @@ class IWebCoverageService(IService):
 
 
 class ISensorObservationService(IService):
-    """Abstraction for an OGC Sensor Observation Service (SOS).
-    """
+    """Abstraction for an OGC Sensor Observation Service (SOS)."""
 
     def getcapabilities():
         """Make a request to the SOS, returns an XML document wrapped in a
@@ -139,30 +134,29 @@ class IWebProcessingService(IService):
         and ultimately retrieve the result.
         """
 
+
 # Second level metadata interfaces
 
 
 class IOperationMetadata:
-    """OO-interface to operation metadata.
-    """
+    """OO-interface to operation metadata."""
 
     name = property("""Operation name (string): GetCapabilities", for example.""")
     formatOptions = property("""List of content types (list).""")
     methods = property(
-        """Mapping of method descriptors, keyed to HTTP verbs. Items must implement IMethodMetadata (below).""")
+        """Mapping of method descriptors, keyed to HTTP verbs. Items must implement IMethodMetadata (below)."""
+    )
 
 
 class IMethodMetadata:
-    """OO-interface to method metadata.
-    """
+    """OO-interface to method metadata."""
 
     url = property("""Method endpoint URL (string).""")
     # TODO: constraint
 
 
 class IContentMetadata:
-    """OO-interface to content metadata.
-    """
+    """OO-interface to content metadata."""
 
     id = property("""Unique identifier (string).""")
     title = property("""Human-targeted title (string).""")
@@ -176,7 +170,9 @@ class IContentMetadata:
 
 class iSensorObservationServiceContentMetadata(IContentMetadata):
     """Extension class for SOS specifics"""
+
     pass
+
 
 # XXX: needed?
 

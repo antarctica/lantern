@@ -39,35 +39,37 @@ import mimetypes
 
 class WCSDecoder(object):
     def __init__(self, u):
-        ''' initiate with a urllib  url object.'''
+        """ initiate with a urllib  url object."""
         self.u = u
         self._getType()
 
     def _getType(self):
-        ''' determine whether it is a Multipart Mime or a Coverages XML file'''
+        """ determine whether it is a Multipart Mime or a Coverages XML file"""
 
         # what's the best way to test this?
         # for now read start of file
         tempu = self.u
-        if tempu.readline()[:14] == '<?xml version=':
-            self.urlType = 'XML'
+        if tempu.readline()[:14] == "<?xml version=":
+            self.urlType = "XML"
         else:
-            self.urlType = 'Multipart'
+            self.urlType = "Multipart"
 
-    def getCoverages(self, unpackdir='./unpacked'):
-        if self.urlType == 'XML':
+    def getCoverages(self, unpackdir="./unpacked"):
+        if self.urlType == "XML":
             paths = []
             u_xml = self.u.read()
             u_tree = etree.fromstring(u_xml)
             for ref in u_tree.findall(
-                    '{http://www.opengis.net/wcs/1.1}Coverage/{http://www.opengis.net/wcs/1.1}Reference'):
-                path = ref.attrib['{http://www.w3.org/1999/xlink}href']
+                "{http://www.opengis.net/wcs/1.1}Coverage/{http://www.opengis.net/wcs/1.1}Reference"
+            ):
+                path = ref.attrib["{http://www.w3.org/1999/xlink}href"]
                 paths.append(path)
             for ref in u_tree.findall(
-                    '{http://www.opengis.net/wcs/1.1.0/owcs}Coverage/{{http://www.opengis.net/wcs/1.1.0/owcs}Reference'):  # noqa
-                path = ref.attrib['{http://www.w3.org/1999/xlink}href']
+                "{http://www.opengis.net/wcs/1.1.0/owcs}Coverage/{{http://www.opengis.net/wcs/1.1.0/owcs}Reference"
+            ):  # noqa
+                path = ref.attrib["{http://www.w3.org/1999/xlink}href"]
                 paths.append(path)
-        elif self.urlType == 'Multipart':
+        elif self.urlType == "Multipart":
             # Decode multipart mime and return fileobjects
             u_mpart = self.u.read()
             mpart = MpartMime(u_mpart)
@@ -97,7 +99,7 @@ class MpartMime(object):
         counter = 1
         for part in msg.walk():
             # multipart/* are just containers, ignore
-            if part.get_content_maintype() == 'multipart':
+            if part.get_content_maintype() == "multipart":
                 continue
             # Applications should really check the given filename so that an
             # email message can't be used to overwrite important files
@@ -109,11 +111,11 @@ class MpartMime(object):
                     ext = None
                 if not ext:
                     # Use a generic extension
-                    ext = '.bin'
-                filename = 'part-%03d%s' % (counter, ext)
+                    ext = ".bin"
+                filename = "part-%03d%s" % (counter, ext)
             fullpath = os.path.join(unpackdir, filename)
             names.append(fullpath)
-            fp = open(fullpath, 'wb')
+            fp = open(fullpath, "wb")
             fp.write(part.get_payload(decode=True))
             fp.close()
         return names

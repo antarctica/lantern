@@ -48,8 +48,9 @@ class ServiceException(Exception):
 class WCSBase(object):
     """Base class to be subclassed by version dependent WCS classes. Provides 'high-level'
     version independent methods"""
+
     def __new__(self, url, xml, cookies, auth=None):
-        """ overridden __new__ method
+        """overridden __new__ method
 
         @type url: string
         @param url: url of WCS capabilities document
@@ -68,17 +69,15 @@ class WCSBase(object):
         self.auth = auth or Authentication()
 
     def getDescribeCoverage(self, identifier):
-        ''' returns a describe coverage document - checks the internal cache to see if it has been fetched before '''
+        """ returns a describe coverage document - checks the internal cache to see if it has been fetched before """
         if identifier not in list(self._describeCoverage.keys()):
-            reader = DescribeCoverageReader(
-                self.version, identifier, self.cookies, self.auth)
+            reader = DescribeCoverageReader(self.version, identifier, self.cookies, self.auth)
             self._describeCoverage[identifier] = reader.read(self.url)
         return self._describeCoverage[identifier]
 
 
 class WCSCapabilitiesReader(object):
-    """Read and parses WCS capabilities document into a lxml.etree infoset
-    """
+    """Read and parses WCS capabilities document into a lxml.etree infoset"""
 
     def __init__(self, version=None, cookies=None, auth=None):
         """Initialize
@@ -98,20 +97,20 @@ class WCSCapabilitiesReader(object):
         @return: getCapabilities URL
         """
         qs = []
-        if service_url.find('?') != -1:
-            qs = parse_qsl(service_url.split('?')[1])
+        if service_url.find("?") != -1:
+            qs = parse_qsl(service_url.split("?")[1])
 
         params = [x[0] for x in qs]
 
-        if 'service' not in params:
-            qs.append(('service', 'WCS'))
-        if 'request' not in params:
-            qs.append(('request', 'GetCapabilities'))
-        if ('version' not in params) and (self.version is not None):
-            qs.append(('version', self.version))
+        if "service" not in params:
+            qs.append(("service", "WCS"))
+        if "request" not in params:
+            qs.append(("request", "GetCapabilities"))
+        if ("version" not in params) and (self.version is not None):
+            qs.append(("version", self.version))
 
         urlqs = urlencode(tuple(qs))
-        return service_url.split('?')[0] + '?' + urlqs
+        return service_url.split("?")[0] + "?" + urlqs
 
     def read(self, service_url, timeout=30):
         """Get and parse a WCS capabilities document, returning an
@@ -136,8 +135,7 @@ class WCSCapabilitiesReader(object):
 
 
 class DescribeCoverageReader(object):
-    """Read and parses WCS DescribeCoverage document into a lxml.etree infoset
-    """
+    """Read and parses WCS DescribeCoverage document into a lxml.etree infoset"""
 
     def __init__(self, version, identifier, cookies, auth=None):
         """Initialize
@@ -158,36 +156,36 @@ class DescribeCoverageReader(object):
         @return: getCapabilities URL
         """
         qs = []
-        if service_url.find('?') != -1:
-            qs = parse_qsl(service_url.split('?')[1])
+        if service_url.find("?") != -1:
+            qs = parse_qsl(service_url.split("?")[1])
 
         params = [x[0] for x in qs]
 
-        if 'service' not in params:
-            qs.append(('service', 'WCS'))
-        if 'request' not in params:
-            qs.append(('request', 'DescribeCoverage'))
-        if 'version' not in params:
-            qs.append(('version', self.version))
-        if self.version == '1.0.0':
-            if 'coverage' not in params:
-                qs.append(('coverage', self.identifier))
-        elif self.version == '2.0.0':
-            if 'CoverageID' not in params:
-                qs.append(('CoverageID', self.identifier))
-        elif self.version == '2.0.1':
-            if 'CoverageID' not in params:
-                qs.append(('CoverageID', self.identifier))
-        elif self.version == '1.1.0' or self.version == '1.1.1':
+        if "service" not in params:
+            qs.append(("service", "WCS"))
+        if "request" not in params:
+            qs.append(("request", "DescribeCoverage"))
+        if "version" not in params:
+            qs.append(("version", self.version))
+        if self.version == "1.0.0":
+            if "coverage" not in params:
+                qs.append(("coverage", self.identifier))
+        elif self.version == "2.0.0":
+            if "CoverageID" not in params:
+                qs.append(("CoverageID", self.identifier))
+        elif self.version == "2.0.1":
+            if "CoverageID" not in params:
+                qs.append(("CoverageID", self.identifier))
+        elif self.version == "1.1.0" or self.version == "1.1.1":
             # NOTE: WCS 1.1.0 is ambigous about whether it should be identifier
             # or identifiers (see tables 9, 10 of specification)
-            if 'identifiers' not in params:
-                qs.append(('identifiers', self.identifier))
-            if 'identifier' not in params:
-                qs.append(('identifier', self.identifier))
-                qs.append(('format', 'text/xml'))
+            if "identifiers" not in params:
+                qs.append(("identifiers", self.identifier))
+            if "identifier" not in params:
+                qs.append(("identifier", self.identifier))
+                qs.append(("format", "text/xml"))
         urlqs = urlencode(tuple(qs))
-        return service_url.split('?')[0] + '?' + urlqs
+        return service_url.split("?")[0] + "?" + urlqs
 
     def read(self, service_url, timeout=30):
         """Get and parse a Describe Coverage document, returning an

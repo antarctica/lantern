@@ -53,17 +53,15 @@ def xml2dict(xml_string, namespaces):
     """
 
     namespaces_reverse = dict((v, k) for k, v in namespaces.items())
-    return xmltodict.parse(xml_string, process_namespaces=True,
-                           namespaces=namespaces_reverse)
+    return xmltodict.parse(xml_string, process_namespaces=True, namespaces=namespaces_reverse)
 
 
 def xml2json(xml_string, namespaces, pretty_print=False):
     """Convert an xml string to JSON"""
 
-    separators = (',', ': ')
+    separators = (",", ": ")
 
     if pretty_print:
-        return json.dumps(xml2dict(xml_string, namespaces),
-                          indent=4, separators=separators)
+        return json.dumps(xml2dict(xml_string, namespaces), indent=4, separators=separators)
 
     return json.dumps(xml2dict(xml_string, namespaces), separators=separators)

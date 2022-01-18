@@ -57,15 +57,13 @@ class Features(API):
         @returns: feature results
         """
 
-        if 'bbox' in kwargs:
-            kwargs['bbox'] = ','.join(kwargs['bbox'])
+        if "bbox" in kwargs:
+            kwargs["bbox"] = ",".join(kwargs["bbox"])
 
-        path = 'collections/{}/items'.format(collection_id)
+        path = "collections/{}/items".format(collection_id)
         url = self._build_url(path)
-        LOGGER.debug('Request: {}'.format(url))
-        response = http_get(
-            url, headers=self.headers, params=kwargs, auth=self.auth
-        ).json()
+        LOGGER.debug("Request: {}".format(url))
+        response = http_get(url, headers=self.headers, params=kwargs, auth=self.auth).json()
         return response
 
     def collection_item(self, collection_id, identifier):
@@ -80,8 +78,8 @@ class Features(API):
         @returns: single feature result
         """
 
-        path = 'collections/{}/items/{}'.format(collection_id, identifier)
+        path = "collections/{}/items/{}".format(collection_id, identifier)
         url = self._build_url(path)
-        LOGGER.debug('Request: {}'.format(url))
+        LOGGER.debug("Request: {}".format(url))
         response = http_get(url, headers=self.headers, auth=self.auth).json()
         return response

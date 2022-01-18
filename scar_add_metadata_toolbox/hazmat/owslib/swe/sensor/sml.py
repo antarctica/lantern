@@ -17,7 +17,14 @@
 
 from scar_add_metadata_toolbox.hazmat.owslib.etree import etree
 from scar_add_metadata_toolbox.hazmat.owslib import crs, util
-from scar_add_metadata_toolbox.hazmat.owslib.util import testXMLValue, testXMLAttribute, nspath_eval, xmltag_split, dict_union, extract_xml_list
+from scar_add_metadata_toolbox.hazmat.owslib.util import (
+    testXMLValue,
+    testXMLAttribute,
+    nspath_eval,
+    xmltag_split,
+    dict_union,
+    extract_xml_list,
+)
 from scar_add_metadata_toolbox.hazmat.owslib.namespaces import Namespaces
 
 
@@ -42,10 +49,10 @@ class SensorML(object):
         else:
             self._root = element
 
-        if hasattr(self._root, 'getroot'):
+        if hasattr(self._root, "getroot"):
             self._root = self._root.getroot()
 
-        self.members = [Member(x) for x in self._root.findall(nsp('sml:member'))]
+        self.members = [Member(x) for x in self._root.findall(nsp("sml:member"))]
 
 
 class Member(object):
@@ -65,29 +72,32 @@ class PropertyGroup(object):
     def __init__(self, element):
         # Both capabilities and characteristics contain a single swe:DataRecord element
         self.capabilities = {}
-        for cap in element.findall(nsp('sml:capabilities')):
+        for cap in element.findall(nsp("sml:capabilities")):
             name = testXMLAttribute(cap, "name")
             if name is not None:
                 self.capabilities[name] = cap[0]
 
         self.characteristics = {}
-        for cha in element.findall(nsp('sml:characteristics')):
+        for cha in element.findall(nsp("sml:characteristics")):
             name = testXMLAttribute(cha, "name")
             if name is not None:
                 self.characteristics[name] = cha[0]
 
     def get_capabilities_by_name(self, name):
         """
-            Return list of element by name, case insensitive
+        Return list of element by name, case insensitive
         """
         return [self.capabilities[capab] for capab in list(self.capabilities.keys()) if capab.lower() == name.lower()]
 
     def get_characteristics_by_name(self, name):
         """
-            Return list of element objects by name, case insensitive
+        Return list of element objects by name, case insensitive
         """
-        return [self.characteristics[charac]
-                for charac in list(self.characteristics.keys()) if charac.lower() == name.lower()]
+        return [
+            self.characteristics[charac]
+            for charac in list(self.characteristics.keys())
+            if charac.lower() == name.lower()
+        ]
 
 
 class ConstraintGroup(object):
@@ -116,23 +126,23 @@ class Document(object):
             self.contact = Contact(element.find(nsp("sml:contact")))
         except AttributeError:
             self.contact = None
-        self.format = testXMLValue(element.find(nsp('sml:format')))
-        self.url = testXMLAttribute(element.find(nsp('sml:onlineResource')), nsp('xlink:href'))
+        self.format = testXMLValue(element.find(nsp("sml:format")))
+        self.url = testXMLAttribute(element.find(nsp("sml:onlineResource")), nsp("xlink:href"))
 
 
 class Right(object):
     def __init__(self, element):
-        self.id = testXMLAttribute(element, nsp('gml:id'))
-        self.privacyAct = testXMLAttribute(element, nsp('sml:privacyAct'))
-        self.intellectualPropertyRights = testXMLAttribute(element, nsp('sml:intellectualPropertyRights'))
-        self.copyRights = testXMLAttribute(element, nsp('sml:copyRights'))
+        self.id = testXMLAttribute(element, nsp("gml:id"))
+        self.privacyAct = testXMLAttribute(element, nsp("sml:privacyAct"))
+        self.intellectualPropertyRights = testXMLAttribute(element, nsp("sml:intellectualPropertyRights"))
+        self.copyRights = testXMLAttribute(element, nsp("sml:copyRights"))
         self.documentation = [Documentation(x) for x in element.findall(nsp("sml:documentation"))]
 
 
 class ReferenceGroup(object):
     def __init__(self, element):
         self.contacts = {}
-        for contact in element.findall(nsp('sml:contact')):
+        for contact in element.findall(nsp("sml:contact")):
             cont = Contact(contact)
             self.contacts[cont.role] = cont
 
@@ -140,35 +150,38 @@ class ReferenceGroup(object):
 
     def get_contacts_by_role(self, role):
         """
-            Return a Contact by role, case insensitive
+        Return a Contact by role, case insensitive
         """
         return [self.contacts[contact] for contact in list(self.contacts.keys()) if contact.lower() == role.lower()]
 
 
 class GeneralInfoGroup(object):
     def __init__(self, element):
-        self.keywords = extract_xml_list(element.findall(nsp('sml:keywords/sml:KeywordList/sml:keyword')))
+        self.keywords = extract_xml_list(element.findall(nsp("sml:keywords/sml:KeywordList/sml:keyword")))
 
         self.identifiers = {}
-        for identifier in element.findall(nsp('sml:identification/sml:IdentifierList/sml:identifier')):
+        for identifier in element.findall(nsp("sml:identification/sml:IdentifierList/sml:identifier")):
             ident = Identifier(identifier)
             self.identifiers[ident.name] = ident
 
         self.classifiers = {}
-        for classifier in element.findall(nsp('sml:classification/sml:ClassifierList/sml:classifier')):
+        for classifier in element.findall(nsp("sml:classification/sml:ClassifierList/sml:classifier")):
             classi = Classifier(classifier)
             self.classifiers[classi.name] = classi
 
     def get_identifiers_by_name(self, name):
         """
-            Return list of Identifier objects by name, case insensitive
+        Return list of Identifier objects by name, case insensitive
         """
-        return [self.identifiers[identifier]
-                for identifier in list(self.identifiers.keys()) if identifier.lower() == name.lower()]
+        return [
+            self.identifiers[identifier]
+            for identifier in list(self.identifiers.keys())
+            if identifier.lower() == name.lower()
+        ]
 
     def get_classifiers_by_name(self, name):
         """
-            Return list of Classifier objects by name, case insensitive
+        Return list of Classifier objects by name, case insensitive
         """
         return [self.classifiers[classi] for classi in list(self.classifiers.keys()) if classi.lower() == name.lower()]
 
@@ -179,26 +192,31 @@ class Contact(object):
         # contact information here.
         self.role = testXMLAttribute(element, nsp("xlink:role"))
         self.href = testXMLAttribute(element, nsp("xlink:href"))
-        self.organization = testXMLValue(element.find(nsp('sml:ResponsibleParty/sml:organizationName')))
-        self.phone = testXMLValue(element.find(nsp('sml:ResponsibleParty/sml:contactInfo/sml:phone/sml:voice')))
+        self.organization = testXMLValue(element.find(nsp("sml:ResponsibleParty/sml:organizationName")))
+        self.phone = testXMLValue(element.find(nsp("sml:ResponsibleParty/sml:contactInfo/sml:phone/sml:voice")))
         self.address = testXMLValue(
-            element.find(nsp('sml:ResponsibleParty/sml:contactInfo/sml:address/sml:deliveryPoint')))
-        self.city = testXMLValue(element.find(nsp('sml:ResponsibleParty/sml:contactInfo/sml:address/sml:city')))
+            element.find(nsp("sml:ResponsibleParty/sml:contactInfo/sml:address/sml:deliveryPoint"))
+        )
+        self.city = testXMLValue(element.find(nsp("sml:ResponsibleParty/sml:contactInfo/sml:address/sml:city")))
         self.region = testXMLValue(
-            element.find(nsp('sml:ResponsibleParty/sml:contactInfo/sml:address/sml:administrativeArea')))
+            element.find(nsp("sml:ResponsibleParty/sml:contactInfo/sml:address/sml:administrativeArea"))
+        )
         self.postcode = testXMLValue(
-            element.find(nsp('sml:ResponsibleParty/sml:contactInfo/sml:address/sml:postalCode')))
-        self.country = testXMLValue(element.find(nsp('sml:ResponsibleParty/sml:contactInfo/sml:address/sml:country')))
+            element.find(nsp("sml:ResponsibleParty/sml:contactInfo/sml:address/sml:postalCode"))
+        )
+        self.country = testXMLValue(element.find(nsp("sml:ResponsibleParty/sml:contactInfo/sml:address/sml:country")))
         self.email = testXMLValue(
-            element.find(nsp('sml:ResponsibleParty/sml:contactInfo/sml:address/sml:electronicMailAddress')))
+            element.find(nsp("sml:ResponsibleParty/sml:contactInfo/sml:address/sml:electronicMailAddress"))
+        )
         self.url = testXMLAttribute(
-            element.find(nsp('sml:ResponsibleParty/sml:contactInfo/sml:onlineResource')), nsp("xlink:href"))
+            element.find(nsp("sml:ResponsibleParty/sml:contactInfo/sml:onlineResource")), nsp("xlink:href")
+        )
 
 
 class HistoryGroup(object):
     def __init__(self, element):
         self.history = {}
-        for event_member in element.findall(nsp('sml:history/sml:EventList/sml:member')):
+        for event_member in element.findall(nsp("sml:history/sml:EventList/sml:member")):
             name = testXMLAttribute(event_member, "name")
             if self.history.get(name) is None:
                 self.history[name] = []
@@ -207,7 +225,7 @@ class HistoryGroup(object):
 
     def get_history_by_name(self, name):
         """
-            Return Events list by members name
+        Return Events list by members name
         """
         return self.history.get(name.lower(), [])
 
@@ -217,8 +235,8 @@ class Event(ReferenceGroup, GeneralInfoGroup):
         ReferenceGroup.__init__(self, element)
         GeneralInfoGroup.__init__(self, element)
         self.id = testXMLAttribute(element, nsp("gml:id"))
-        self.date = testXMLValue(element.find(nsp('sml:date')))
-        self.description = testXMLValue(element.find(nsp('gml:description')))
+        self.date = testXMLValue(element.find(nsp("sml:date")))
+        self.description = testXMLValue(element.find(nsp("gml:description")))
 
 
 class MetadataGroup(GeneralInfoGroup, PropertyGroup, ConstraintGroup, ReferenceGroup, HistoryGroup):
@@ -250,8 +268,9 @@ class AbstractProcess(AbstractFeature, MetadataGroup):
 
 
 class AbstractRestrictedProcess(AbstractFeature):
-    """ Removes ('restricts' in xml schema language) gml:name, gml:description,
-    and sml:metadataGroup from an AbstractProcess """
+    """Removes ('restricts' in xml schema language) gml:name, gml:description,
+    and sml:metadataGroup from an AbstractProcess"""
+
     def __init__(self, element):
         AbstractFeature.__init__(self, element)
         self.name = None
@@ -329,9 +348,9 @@ class Component(AbstractProcess, PhysicalPropertiesGroup):
 
 class Term(object):
     def __init__(self, element):
-        self.codeSpace = testXMLAttribute(element.find(nsp('sml:Term/sml:codeSpace')), nsp("xlink:href"))
-        self.definition = testXMLAttribute(element.find(nsp('sml:Term')), "definition")
-        self.value = testXMLValue(element.find(nsp('sml:Term/sml:value')))
+        self.codeSpace = testXMLAttribute(element.find(nsp("sml:Term/sml:codeSpace")), nsp("xlink:href"))
+        self.definition = testXMLAttribute(element.find(nsp("sml:Term")), "definition")
+        self.value = testXMLValue(element.find(nsp("sml:Term/sml:value")))
 
 
 class Classifier(Term):
@@ -348,6 +367,7 @@ class Identifier(Term):
 
 class ProcessMethod(MetadataGroup):
     """ Inherits from gml:AbstractGMLType """
+
     def __init__(self, element):
         MetadataGroup.__init__(self, element)
         self.rules = element.find(nsp("sml:rules"))

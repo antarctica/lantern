@@ -20,8 +20,7 @@ from urllib.parse import urlencode, parse_qsl
 
 
 class WFSCapabilitiesReader(object):
-    """Read and parse capabilities document into a lxml.etree infoset
-    """
+    """Read and parse capabilities document into a lxml.etree infoset"""
 
     def __init__(self, version="1.0", username=None, password=None, headers=None, auth=None):
         """Initialize"""
@@ -36,8 +35,7 @@ class WFSCapabilitiesReader(object):
         self._infoset = None
 
     def capabilities_url(self, service_url):
-        """Return a capabilities url
-        """
+        """Return a capabilities url"""
         qs = []
         if service_url.find("?") != -1:
             qs = parse_qsl(service_url.split("?")[1])
@@ -76,9 +74,7 @@ class WFSCapabilitiesReader(object):
         string should be an XML capabilities document
         """
         if not isinstance(st, str) and not isinstance(st, bytes):
-            raise ValueError(
-                "String must be of type string or bytes, not %s" % type(st)
-            )
+            raise ValueError("String must be of type string or bytes, not %s" % type(st))
         return etree.fromstring(st)
 
 
@@ -88,8 +84,4 @@ class AbstractContentMetadata(object):
         self.headers = headers
 
     def get_metadata(self):
-        return [
-            m["metadata"]
-            for m in self.metadataUrls
-            if m.get("metadata", None) is not None
-        ]
+        return [m["metadata"] for m in self.metadataUrls if m.get("metadata", None) is not None]

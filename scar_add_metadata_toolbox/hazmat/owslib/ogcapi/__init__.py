@@ -32,9 +32,7 @@ from scar_add_metadata_toolbox.hazmat.owslib.util import http_get
 
 LOGGER = logging.getLogger(__name__)
 
-REQUEST_HEADERS = {
-    'User-Agent': 'OWSLib {} (https://geopython.github.io/OWSLib)'.format(__version__)
-}
+REQUEST_HEADERS = {"User-Agent": "OWSLib {} (https://geopython.github.io/OWSLib)".format(__version__)}
 
 
 class API(object):
@@ -57,10 +55,10 @@ class API(object):
         @returns: `owslib.ogcapi.API`
         """
 
-        if '?' in url:
-            self.url, self.url_query_string = url.split('?')
+        if "?" in url:
+            self.url, self.url_query_string = url.split("?")
         else:
-            self.url = url.rstrip('/') + '/'
+            self.url = url.rstrip("/") + "/"
             self.url_query_string = None
 
         self.json_ = json_
@@ -71,10 +69,10 @@ class API(object):
         self.auth = auth
 
         if json_ is not None:  # static JSON string
-            self.links = json.loads(json_)['links']
+            self.links = json.loads(json_)["links"]
         else:
             response = http_get(url, headers=self.headers, auth=self.auth).json()
-            self.links = response['links']
+            self.links = response["links"]
 
     def api(self):
         """
@@ -86,25 +84,25 @@ class API(object):
         url = None
         openapi_format = None
 
-        openapi_json_mimetype = 'application/vnd.oai.openapi+json;version=3.0'
-        openapi_yaml_mimetype = 'application/vnd.oai.openapi;version=3.0'
+        openapi_json_mimetype = "application/vnd.oai.openapi+json;version=3.0"
+        openapi_yaml_mimetype = "application/vnd.oai.openapi;version=3.0"
 
-        LOGGER.debug('Searching for OpenAPI JSON Document')
+        LOGGER.debug("Searching for OpenAPI JSON Document")
         for l in self.links:
-            if l['rel'] == 'service-desc' and l['type'] == openapi_json_mimetype:
+            if l["rel"] == "service-desc" and l["type"] == openapi_json_mimetype:
                 openapi_format = openapi_json_mimetype
-                url = l['href']
+                url = l["href"]
                 break
 
-            LOGGER.debug('Searching for OpenAPI YAML Document')
+            LOGGER.debug("Searching for OpenAPI YAML Document")
             if url is None:
-                if l['rel'] == 'service-desc' and l['type'] == openapi_yaml_mimetype:
+                if l["rel"] == "service-desc" and l["type"] == openapi_yaml_mimetype:
                     openapi_format = openapi_yaml_mimetype
-                    url = l['href']
+                    url = l["href"]
                     break
 
         if url is not None:
-            LOGGER.debug('Request: {}'.format(url))
+            LOGGER.debug("Request: {}".format(url))
             response = http_get(url, headers=REQUEST_HEADERS, auth=self.auth)
             if openapi_format == openapi_json_mimetype:
                 content = response.json()
@@ -112,7 +110,7 @@ class API(object):
                 content = yaml.load(response.text)
             return content
         else:
-            msg = 'Did not find service-desc link'
+            msg = "Did not find service-desc link"
             LOGGER.error(msg)
             raise RuntimeError(msg)
 
@@ -123,8 +121,8 @@ class API(object):
         @returns: `dict` of conformance object
         """
 
-        url = self._build_url('conformance')
-        LOGGER.debug('Request: {}'.format(url))
+        url = self._build_url("conformance")
+        LOGGER.debug("Request: {}".format(url))
         response = http_get(url, headers=self.headers, auth=self.auth).json()
 
         return response
@@ -136,11 +134,11 @@ class API(object):
         @returns: `dict` of collections object
         """
 
-        url = self._build_url('collections')
-        LOGGER.debug('Request: {}'.format(url))
+        url = self._build_url("collections")
+        LOGGER.debug("Request: {}".format(url))
         response = http_get(url, headers=self.headers, auth=self.auth).json()
 
-        return response['collections']
+        return response["collections"]
 
     def collection(self, collection_id):
         """
@@ -152,9 +150,9 @@ class API(object):
         @returns: `dict` of feature collection metadata
         """
 
-        path = 'collections/{}'.format(collection_id)
+        path = "collections/{}".format(collection_id)
         url = self._build_url(path)
-        LOGGER.debug('Request: {}'.format(url))
+        LOGGER.debug("Request: {}".format(url))
         response = http_get(url, headers=self.headers, auth=self.auth).json()
 
         return response
@@ -171,12 +169,12 @@ class API(object):
 
         url = self.url
         if self.url_query_string is not None:
-            LOGGER.debug('base URL has a query string')
+            LOGGER.debug("base URL has a query string")
             url = urljoin(url, path)
-            url = '?'.join([url, self.url_query_string])
+            url = "?".join([url, self.url_query_string])
         else:
             url = urljoin(url, path)
 
-        LOGGER.debug('URL: {}'.format(url))
+        LOGGER.debug("URL: {}".format(url))
 
         return url

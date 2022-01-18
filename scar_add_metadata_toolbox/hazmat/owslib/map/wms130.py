@@ -33,9 +33,18 @@ from urllib.parse import urlencode
 import warnings
 from math import sqrt
 from scar_add_metadata_toolbox.hazmat.owslib.etree import etree
-from scar_add_metadata_toolbox.hazmat.owslib.util import (openURL, ServiceException, testXMLValue,
-                         extract_xml_list, xmltag_split, OrderedDict, nspath,
-                         nspath_eval, bind_url, Authentication)
+from scar_add_metadata_toolbox.hazmat.owslib.util import (
+    openURL,
+    ServiceException,
+    testXMLValue,
+    extract_xml_list,
+    xmltag_split,
+    OrderedDict,
+    nspath,
+    nspath_eval,
+    bind_url,
+    Authentication,
+)
 from scar_add_metadata_toolbox.hazmat.owslib.fgdc import Metadata
 from scar_add_metadata_toolbox.hazmat.owslib.iso import MD_Metadata
 from scar_add_metadata_toolbox.hazmat.owslib.crs import Crs
@@ -46,7 +55,7 @@ from scar_add_metadata_toolbox.hazmat.owslib.util import log
 
 n = Namespaces()
 WMS_NAMESPACE = n.get_namespace("wms")
-OGC_NAMESPACE = n.get_namespace('ogc')
+OGC_NAMESPACE = n.get_namespace("ogc")
 INCH_TO_M = 0.0254  # Standard inch to meter conversion
 OGC_PIXEL_SIZE = 0.00028  # The OGC standard pixel size is 0.28 mm, here it's in meter
 OGC_DPI = INCH_TO_M / OGC_PIXEL_SIZE
@@ -55,19 +64,27 @@ SCALEDENOM_TO_RESOLUTION = 1 / OGC_DPI * INCH_TO_M * sqrt(2)
 
 
 class WebMapService_1_3_0(object):
-
     def __getitem__(self, name):
-        ''' check contents dictionary to allow dict
+        """check contents dictionary to allow dict
         like access to service layers
-        '''
-        if name in self.__getattribute__('contents'):
-            return self.__getattribute__('contents')[name]
+        """
+        if name in self.__getattribute__("contents"):
+            return self.__getattribute__("contents")[name]
         else:
             raise KeyError("No content named %s" % name)
 
-    def __init__(self, url, version='1.3.0', xml=None, username=None,
-                 password=None, parse_remote_metadata=False, timeout=30,
-                 headers=None, auth=None):
+    def __init__(
+        self,
+        url,
+        version="1.3.0",
+        xml=None,
+        username=None,
+        password=None,
+        parse_remote_metadata=False,
+        timeout=30,
+        headers=None,
+        auth=None,
+    ):
         """initialize"""
         if auth:
             if username:
@@ -82,8 +99,7 @@ class WebMapService_1_3_0(object):
         self.auth = auth or Authentication(username, password)
 
         # Authentication handled by Reader
-        reader = WMSCapabilitiesReader(
-            self.version, url=self.url, headers=headers, auth=self.auth)
+        reader = WMSCapabilitiesReader(self.version, url=self.url, headers=headers, auth=self.auth)
         if xml:  # read from stored xml
             self._capabilities = reader.readString(xml)
         else:  # read from server
@@ -93,7 +109,7 @@ class WebMapService_1_3_0(object):
 
         # avoid building capabilities metadata if the
         # response is a ServiceExceptionReport
-        se = self._capabilities.find('ServiceException')
+        se = self._capabilities.find("ServiceException")
         if se is not None:
             err_message = str(se.text).strip()
             raise ServiceException(err_message)
@@ -102,13 +118,12 @@ class WebMapService_1_3_0(object):
         self._buildMetadata(parse_remote_metadata)
 
     def _buildMetadata(self, parse_remote_metadata=False):
-        '''set up capabilities metadata objects:'''
+        """set up capabilities metadata objects:"""
 
-        self.updateSequence = self._capabilities.attrib.get('updateSequence')
+        self.updateSequence = self._capabilities.attrib.get("updateSequence")
 
         # serviceIdentification metadata
-        serviceelem = self._capabilities.find(nspath('Service',
-                                              ns=WMS_NAMESPACE))
+        serviceelem = self._capabilities.find(nspath("Service", ns=WMS_NAMESPACE))
         self.identification = ServiceIdentification(serviceelem, self.version)
 
         # serviceProvider metadata
@@ -116,22 +131,22 @@ class WebMapService_1_3_0(object):
 
         # serviceOperations metadata
         self.operations = []
-        for elem in self._capabilities.find(nspath('Capability/Request',
-                                            ns=WMS_NAMESPACE))[:]:
+        for elem in self._capabilities.find(nspath("Capability/Request", ns=WMS_NAMESPACE))[:]:
             self.operations.append(OperationMetadata(elem))
 
         # serviceContents metadata: our assumption is that services use a top-level
         # layer as a metadata organizer, nothing more.
         self.contents = OrderedDict()
-        caps = self._capabilities.find(nspath('Capability', WMS_NAMESPACE))
+        caps = self._capabilities.find(nspath("Capability", WMS_NAMESPACE))
 
         # recursively gather content metadata for all layer elements.
         # To the WebMapService.contents store only metadata of named layers.
         def gather_layers(parent_elem, parent_metadata):
             layers = []
-            for index, elem in enumerate(parent_elem.findall(nspath('Layer', WMS_NAMESPACE))):
-                cm = ContentMetadata(elem, parent=parent_metadata, index=index + 1,
-                                     parse_remote_metadata=parse_remote_metadata)
+            for index, elem in enumerate(parent_elem.findall(nspath("Layer", WMS_NAMESPACE))):
+                cm = ContentMetadata(
+                    elem, parent=parent_metadata, index=index + 1, parse_remote_metadata=parse_remote_metadata
+                )
                 if cm.id:
                     if cm.id in self.contents:
                         warnings.warn('Content metadata for layer "%s" already exists. Using child layer' % cm.id)
@@ -139,15 +154,16 @@ class WebMapService_1_3_0(object):
                     self.contents[cm.id] = cm
                 cm.children = gather_layers(elem, cm)
             return layers
+
         gather_layers(caps, None)
 
         # exceptions
-        self.exceptions = [f.text for f
-                           in self._capabilities.findall(nspath('Capability/Exception/Format',
-                                                         WMS_NAMESPACE))]
+        self.exceptions = [
+            f.text for f in self._capabilities.findall(nspath("Capability/Exception/Format", WMS_NAMESPACE))
+        ]
 
     def items(self):
-        '''supports dict-like items() access'''
+        """supports dict-like items() access"""
         items = []
         for item in self.contents:
             items.append((item, self.contents[item]))
@@ -166,75 +182,89 @@ class WebMapService_1_3_0(object):
                 return item
         raise KeyError("No operation named %s" % name)
 
-    def __build_getmap_request(self, layers=None, styles=None, srs=None, bbox=None,
-                               format=None, size=None, time=None, dimensions={},
-                               elevation=None, transparent=False,
-                               bgcolor=None, exceptions=None, **kwargs):
+    def __build_getmap_request(
+        self,
+        layers=None,
+        styles=None,
+        srs=None,
+        bbox=None,
+        format=None,
+        size=None,
+        time=None,
+        dimensions={},
+        elevation=None,
+        transparent=False,
+        bgcolor=None,
+        exceptions=None,
+        **kwargs,
+    ):
 
-        request = {'service': 'WMS', 'version': self.version, 'request': 'GetMap'}
+        request = {"service": "WMS", "version": self.version, "request": "GetMap"}
 
         # check layers and styles
         assert len(layers) > 0
-        request['layers'] = ','.join(layers)
+        request["layers"] = ",".join(layers)
         if styles:
             assert len(styles) == len(layers)
-            request['styles'] = ','.join(styles)
+            request["styles"] = ",".join(styles)
         else:
-            request['styles'] = ''
+            request["styles"] = ""
 
         # size
-        request['width'] = str(size[0])
-        request['height'] = str(size[1])
+        request["width"] = str(size[0])
+        request["height"] = str(size[1])
 
         # remap srs to crs for the actual request
-        if srs.upper() == 'EPSG:0':
+        if srs.upper() == "EPSG:0":
             # if it's esri's unknown spatial ref code, bail
-            raise Exception('Undefined spatial reference (%s).' % srs)
+            raise Exception("Undefined spatial reference (%s)." % srs)
 
         sref = Crs(srs)
-        if sref.axisorder == 'yx':
+        if sref.axisorder == "yx":
             # remap the given bbox
             bbox = (bbox[1], bbox[0], bbox[3], bbox[2])
 
         # remapping the srs to crs for the request
-        request['crs'] = str(srs)
-        request['bbox'] = ','.join([repr(x) for x in bbox])
-        request['format'] = str(format)
-        request['transparent'] = str(transparent).upper()
-        request['bgcolor'] = '0x' + bgcolor[1:7]
-        request['exceptions'] = str(exceptions)
+        request["crs"] = str(srs)
+        request["bbox"] = ",".join([repr(x) for x in bbox])
+        request["format"] = str(format)
+        request["transparent"] = str(transparent).upper()
+        request["bgcolor"] = "0x" + bgcolor[1:7]
+        request["exceptions"] = str(exceptions)
 
         if time is not None:
-            request['time'] = str(time)
+            request["time"] = str(time)
 
         if elevation is not None:
-            request['elevation'] = str(elevation)
+            request["elevation"] = str(elevation)
 
         # any other specified dimension, prefixed with "dim_"
         for k, v in list(dimensions.items()):
-            request['dim_' + k] = str(v)
+            request["dim_" + k] = str(v)
 
         if kwargs:
             for kw in kwargs:
                 request[kw] = kwargs[kw]
         return request
 
-    def getmap(self, layers=None,
-               styles=None,
-               srs=None,
-               bbox=None,
-               format=None,
-               size=None,
-               time=None,
-               elevation=None,
-               dimensions={},
-               transparent=False,
-               bgcolor='#FFFFFF',
-               exceptions='XML',
-               method='Get',
-               timeout=None,
-               **kwargs
-               ):
+    def getmap(
+        self,
+        layers=None,
+        styles=None,
+        srs=None,
+        bbox=None,
+        format=None,
+        size=None,
+        time=None,
+        elevation=None,
+        dimensions={},
+        transparent=False,
+        bgcolor="#FFFFFF",
+        exceptions="XML",
+        method="Get",
+        timeout=None,
+        **kwargs,
+    ):
         """Request and return an image from the WMS as a file-like object.
 
         Parameters
@@ -295,9 +325,13 @@ class WebMapService_1_3_0(object):
         """
 
         try:
-            base_url = next((m.get('url') for m in
-                            self.getOperationByName('GetMap').methods if
-                            m.get('type').lower() == method.lower()))
+            base_url = next(
+                (
+                    m.get("url")
+                    for m in self.getOperationByName("GetMap").methods
+                    if m.get("type").lower() == method.lower()
+                )
+            )
         except StopIteration:
             base_url = self.url
 
@@ -314,7 +348,8 @@ class WebMapService_1_3_0(object):
             transparent=transparent,
             bgcolor=bgcolor,
             exceptions=exceptions,
-            **kwargs)
+            **kwargs,
+        )
 
         data = urlencode(request)
 
@@ -328,36 +363,43 @@ class WebMapService_1_3_0(object):
             headers[k.lower()] = v
 
         # handle the potential charset def
-        if headers.get('content-type', '').split(';')[0] in ['application/vnd.ogc.se_xml', 'text/xml']:
+        if headers.get("content-type", "").split(";")[0] in ["application/vnd.ogc.se_xml", "text/xml"]:
             se_xml = u.read()
             se_tree = etree.fromstring(se_xml)
-            err_message = str(se_tree.find(nspath('ServiceException', OGC_NAMESPACE)).text).strip()
+            err_message = str(se_tree.find(nspath("ServiceException", OGC_NAMESPACE)).text).strip()
             raise ServiceException(err_message)
         return u
 
-    def getfeatureinfo(self, layers=None,
-                       styles=None,
-                       srs=None,
-                       bbox=None,
-                       format=None,
-                       size=None,
-                       time=None,
-                       elevation=None,
-                       dimensions={},
-                       transparent=False,
-                       bgcolor='#FFFFFF',
-                       exceptions='XML',
-                       query_layers=None,
-                       xy=None,
-                       info_format=None,
-                       feature_count=20,
-                       method='Get',
-                       timeout=None,
-                       **kwargs
-                       ):
+    def getfeatureinfo(
+        self,
+        layers=None,
+        styles=None,
+        srs=None,
+        bbox=None,
+        format=None,
+        size=None,
+        time=None,
+        elevation=None,
+        dimensions={},
+        transparent=False,
+        bgcolor="#FFFFFF",
+        exceptions="XML",
+        query_layers=None,
+        xy=None,
+        info_format=None,
+        feature_count=20,
+        method="Get",
+        timeout=None,
+        **kwargs,
+    ):
         try:
-            base_url = next((m.get('url') for m in self.getOperationByName('GetFeatureInfo').methods
-                            if m.get('type').lower() == method.lower()))
+            base_url = next(
+                (
+                    m.get("url")
+                    for m in self.getOperationByName("GetFeatureInfo").methods
+                    if m.get("type").lower() == method.lower()
+                )
+            )
         except StopIteration:
             base_url = self.url
 
@@ -375,21 +417,22 @@ class WebMapService_1_3_0(object):
             transparent=transparent,
             bgcolor=bgcolor,
             exceptions=exceptions,
-            **kwargs)
+            **kwargs,
+        )
 
         # extend to GetFeatureInfo-Request
-        request['request'] = 'GetFeatureInfo'
+        request["request"] = "GetFeatureInfo"
 
         if not query_layers:
-            __str_query_layers = ','.join(layers)
+            __str_query_layers = ",".join(layers)
         else:
-            __str_query_layers = ','.join(query_layers)
+            __str_query_layers = ",".join(query_layers)
 
-        request['query_layers'] = __str_query_layers
-        request['i'] = str(xy[0])
-        request['j'] = str(xy[1])
-        request['info_format'] = info_format
-        request['feature_count'] = str(feature_count)
+        request["query_layers"] = __str_query_layers
+        request["i"] = str(xy[0])
+        request["j"] = str(xy[1])
+        request["info_format"] = info_format
+        request["feature_count"] = str(feature_count)
 
         data = urlencode(request)
 
@@ -398,10 +441,10 @@ class WebMapService_1_3_0(object):
         u = openURL(base_url, data, method, timeout=timeout or self.timeout, auth=self.auth)
 
         # check for service exceptions, and return
-        if u.info()['Content-Type'] == 'XML':
+        if u.info()["Content-Type"] == "XML":
             se_xml = u.read()
             se_tree = etree.fromstring(se_xml)
-            err_message = str(se_tree.find('ServiceException').text).strip()
+            err_message = str(se_tree.find("ServiceException").text).strip()
             raise ServiceException(err_message)
         return u
 
@@ -409,29 +452,29 @@ class WebMapService_1_3_0(object):
 class ServiceIdentification(object):
     def __init__(self, infoset, version):
         self._root = infoset
-        self.type = testXMLValue(self._root.find(nspath('Name', WMS_NAMESPACE)))
+        self.type = testXMLValue(self._root.find(nspath("Name", WMS_NAMESPACE)))
         self.version = version
-        self.title = testXMLValue(self._root.find(nspath('Title', WMS_NAMESPACE)))
-        self.abstract = testXMLValue(self._root.find(nspath('Abstract', WMS_NAMESPACE)))
-        self.keywords = extract_xml_list(self._root.findall(nspath('KeywordList/Keyword', WMS_NAMESPACE)))
-        self.accessconstraints = testXMLValue(self._root.find(nspath('AccessConstraints', WMS_NAMESPACE)))
-        self.fees = testXMLValue(self._root.find(nspath('Fees', WMS_NAMESPACE)))
+        self.title = testXMLValue(self._root.find(nspath("Title", WMS_NAMESPACE)))
+        self.abstract = testXMLValue(self._root.find(nspath("Abstract", WMS_NAMESPACE)))
+        self.keywords = extract_xml_list(self._root.findall(nspath("KeywordList/Keyword", WMS_NAMESPACE)))
+        self.accessconstraints = testXMLValue(self._root.find(nspath("AccessConstraints", WMS_NAMESPACE)))
+        self.fees = testXMLValue(self._root.find(nspath("Fees", WMS_NAMESPACE)))
 
 
 class ServiceProvider(object):
     def __init__(self, infoset):
         self._root = infoset
-        name = self._root.find(nspath('ContactInformation/ContactPersonPrimary/ContactOrganization', WMS_NAMESPACE))
+        name = self._root.find(nspath("ContactInformation/ContactPersonPrimary/ContactOrganization", WMS_NAMESPACE))
         if name is not None:
             self.name = name.text
         else:
             self.name = None
         self.url = None
-        online_resource = self._root.find(nspath('OnlineResource', WMS_NAMESPACE))
+        online_resource = self._root.find(nspath("OnlineResource", WMS_NAMESPACE))
         if online_resource is not None:
-            self.url = online_resource.attrib.get('{http://www.w3.org/1999/xlink}href', '')
+            self.url = online_resource.attrib.get("{http://www.w3.org/1999/xlink}href", "")
         # contact metadata
-        contact = self._root.find(nspath('ContactInformation', WMS_NAMESPACE))
+        contact = self._root.find(nspath("ContactInformation", WMS_NAMESPACE))
         # sometimes there is a contact block that is empty, so make
         # sure there are children to parse
         if contact is not None and contact[:] != []:
@@ -441,13 +484,11 @@ class ServiceProvider(object):
 
 
 class ContentMetadata(AbstractContentMetadata):
-
-    def __init__(self, elem, parent=None, children=None, index=0, parse_remote_metadata=False,
-                 timeout=30, auth=None):
+    def __init__(self, elem, parent=None, children=None, index=0, parse_remote_metadata=False, timeout=30, auth=None):
         super(ContentMetadata, self).__init__(auth)
 
-        if xmltag_split(elem.tag) != 'Layer':
-            raise ValueError('%s should be a Layer' % (elem,))
+        if xmltag_split(elem.tag) != "Layer":
+            raise ValueError("%s should be a Layer" % (elem,))
 
         self.parent = parent
         if parent:
@@ -457,23 +498,23 @@ class ContentMetadata(AbstractContentMetadata):
 
         self._children = children
 
-        self.id = self.name = testXMLValue(elem.find(nspath('Name', WMS_NAMESPACE)))
+        self.id = self.name = testXMLValue(elem.find(nspath("Name", WMS_NAMESPACE)))
 
         # layer attributes
-        self.queryable = int(elem.attrib.get('queryable', 0))
-        self.cascaded = int(elem.attrib.get('cascaded', 0))
-        self.opaque = int(elem.attrib.get('opaque', 0))
-        self.noSubsets = int(elem.attrib.get('noSubsets', 0))
-        self.fixedWidth = int(elem.attrib.get('fixedWidth', 0))
-        self.fixedHeight = int(elem.attrib.get('fixedHeight', 0))
+        self.queryable = int(elem.attrib.get("queryable", 0))
+        self.cascaded = int(elem.attrib.get("cascaded", 0))
+        self.opaque = int(elem.attrib.get("opaque", 0))
+        self.noSubsets = int(elem.attrib.get("noSubsets", 0))
+        self.fixedWidth = int(elem.attrib.get("fixedWidth", 0))
+        self.fixedHeight = int(elem.attrib.get("fixedHeight", 0))
 
         # title is mandatory property
         self.title = None
-        title = testXMLValue(elem.find(nspath('Title', WMS_NAMESPACE)))
+        title = testXMLValue(elem.find(nspath("Title", WMS_NAMESPACE)))
         if title is not None:
             self.title = title.strip()
 
-        self.abstract = testXMLValue(elem.find(nspath('Abstract', WMS_NAMESPACE)))
+        self.abstract = testXMLValue(elem.find(nspath("Abstract", WMS_NAMESPACE)))
 
         # TODO: what is the preferred response to esri's handling of custom projections
         # in the spatial ref definitions? see
@@ -482,46 +523,54 @@ class ContentMetadata(AbstractContentMetadata):
         # http://maps.ngdc.noaa.gov/arcgis/services/firedetects/MapServer/WMSServer?request=GetCapabilities&service=WMS
 
         # bboxes
-        b = elem.find(nspath('EX_GeographicBoundingBox', WMS_NAMESPACE))
+        b = elem.find(nspath("EX_GeographicBoundingBox", WMS_NAMESPACE))
         self.boundingBoxWGS84 = None
         if b is not None:
-            minx = b.find(nspath('westBoundLongitude', WMS_NAMESPACE))
-            miny = b.find(nspath('southBoundLatitude', WMS_NAMESPACE))
-            maxx = b.find(nspath('eastBoundLongitude', WMS_NAMESPACE))
-            maxy = b.find(nspath('northBoundLatitude', WMS_NAMESPACE))
-            box = tuple(map(float, [minx.text if minx is not None else None,
-                            miny.text if miny is not None else None,
-                            maxx.text if maxx is not None else None,
-                            maxy.text if maxy is not None else None]))
+            minx = b.find(nspath("westBoundLongitude", WMS_NAMESPACE))
+            miny = b.find(nspath("southBoundLatitude", WMS_NAMESPACE))
+            maxx = b.find(nspath("eastBoundLongitude", WMS_NAMESPACE))
+            maxy = b.find(nspath("northBoundLatitude", WMS_NAMESPACE))
+            box = tuple(
+                map(
+                    float,
+                    [
+                        minx.text if minx is not None else None,
+                        miny.text if miny is not None else None,
+                        maxx.text if maxx is not None else None,
+                        maxy.text if maxy is not None else None,
+                    ],
+                )
+            )
 
             self.boundingBoxWGS84 = tuple(box)
         elif self.parent:
-            if hasattr(self.parent, 'boundingBoxWGS84'):
+            if hasattr(self.parent, "boundingBoxWGS84"):
                 self.boundingBoxWGS84 = self.parent.boundingBoxWGS84
 
         # make a bbox list (of tuples)
         crs_list = []
-        for bb in elem.findall(nspath('BoundingBox', WMS_NAMESPACE)):
-            srs_str = bb.attrib.get('CRS', None)
+        for bb in elem.findall(nspath("BoundingBox", WMS_NAMESPACE)):
+            srs_str = bb.attrib.get("CRS", None)
             srs = Crs(srs_str)
 
-            box = tuple(map(float, [bb.attrib['minx'],
-                        bb.attrib['miny'],
-                        bb.attrib['maxx'],
-                        bb.attrib['maxy']]
-            ))
+            box = tuple(map(float, [bb.attrib["minx"], bb.attrib["miny"], bb.attrib["maxx"], bb.attrib["maxy"]]))
             minx, miny, maxx, maxy = box[0], box[1], box[2], box[3]
 
             # handle the ordering so that it always
             # returns (minx, miny, maxx, maxy)
-            if srs and srs.axisorder == 'yx':
+            if srs and srs.axisorder == "yx":
                 # reverse things
                 minx, miny, maxx, maxy = box[1], box[0], box[3], box[2]
 
-            crs_list.append((
-                minx, miny, maxx, maxy,
-                srs_str,
-            ))
+            crs_list.append(
+                (
+                    minx,
+                    miny,
+                    maxx,
+                    maxy,
+                    srs_str,
+                )
+            )
         self.crs_list = crs_list
         # and maintain the original boundingBox attribute (first in list)
         # or the wgs84 bbox (to handle cases of incomplete parentage)
@@ -529,29 +578,36 @@ class ContentMetadata(AbstractContentMetadata):
 
         # ScaleHint
         self.scaleHint = None
-        self.min_scale_denominator = elem.find(nspath('MinScaleDenominator', WMS_NAMESPACE))
-        min_scale_hint = 0 if self.min_scale_denominator is None else \
-            float(self.min_scale_denominator.text) * SCALEDENOM_TO_RESOLUTION
-        self.max_scale_denominator = elem.find(nspath('MaxScaleDenominator', WMS_NAMESPACE))
-        max_scale_hint = 0 if self.max_scale_denominator is None else \
-            float(self.max_scale_denominator.text) * SCALEDENOM_TO_RESOLUTION
+        self.min_scale_denominator = elem.find(nspath("MinScaleDenominator", WMS_NAMESPACE))
+        min_scale_hint = (
+            0
+            if self.min_scale_denominator is None
+            else float(self.min_scale_denominator.text) * SCALEDENOM_TO_RESOLUTION
+        )
+        self.max_scale_denominator = elem.find(nspath("MaxScaleDenominator", WMS_NAMESPACE))
+        max_scale_hint = (
+            0
+            if self.max_scale_denominator is None
+            else float(self.max_scale_denominator.text) * SCALEDENOM_TO_RESOLUTION
+        )
         if self.min_scale_denominator is not None or self.max_scale_denominator is not None:
-            self.scaleHint = {'min': min_scale_hint, 'max': max_scale_hint}
+            self.scaleHint = {"min": min_scale_hint, "max": max_scale_hint}
 
-        attribution = elem.find(nspath('Attribution', WMS_NAMESPACE))
+        attribution = elem.find(nspath("Attribution", WMS_NAMESPACE))
         if attribution is not None:
             self.attribution = dict()
-            title = attribution.find(nspath('Title', WMS_NAMESPACE))
-            url = attribution.find(nspath('OnlineResource', WMS_NAMESPACE))
-            logo = attribution.find(nspath('LogoURL', WMS_NAMESPACE))
+            title = attribution.find(nspath("Title", WMS_NAMESPACE))
+            url = attribution.find(nspath("OnlineResource", WMS_NAMESPACE))
+            logo = attribution.find(nspath("LogoURL", WMS_NAMESPACE))
             if title is not None:
-                self.attribution['title'] = title.text
+                self.attribution["title"] = title.text
             if url is not None:
-                self.attribution['url'] = url.attrib['{http://www.w3.org/1999/xlink}href']
+                self.attribution["url"] = url.attrib["{http://www.w3.org/1999/xlink}href"]
             if logo is not None:
-                self.attribution['logo_size'] = (int(logo.attrib['width']), int(logo.attrib['height']))
-                self.attribution['logo_url'] = logo.find(
-                    nspath('OnlineResource', WMS_NAMESPACE)).attrib['{http://www.w3.org/1999/xlink}href']
+                self.attribution["logo_size"] = (int(logo.attrib["width"]), int(logo.attrib["height"]))
+                self.attribution["logo_url"] = logo.find(nspath("OnlineResource", WMS_NAMESPACE)).attrib[
+                    "{http://www.w3.org/1999/xlink}href"
+                ]
 
         # TODO: get this from the bbox attributes instead (deal with parents)
         # SRS options
@@ -562,11 +618,11 @@ class ContentMetadata(AbstractContentMetadata):
             self.crsOptions = list(self.parent.crsOptions)
 
         # Look for SRS option attached to this layer
-        if elem.find(nspath('CRS', WMS_NAMESPACE)) is not None:
+        if elem.find(nspath("CRS", WMS_NAMESPACE)) is not None:
             # some servers found in the wild use a single SRS
             # tag containing a whitespace separated list of SRIDs
             # instead of several SRS tags. hence the inner loop
-            for srslist in [x.text for x in elem.findall(nspath('CRS', WMS_NAMESPACE))]:
+            for srslist in [x.text for x in elem.findall(nspath("CRS", WMS_NAMESPACE))]:
                 if srslist:
                     for srs in srslist.split():
                         self.crsOptions.append(srs)
@@ -593,31 +649,31 @@ class ContentMetadata(AbstractContentMetadata):
             self.styles = self.parent.styles.copy()
 
         # Get the styles for this layer (items with the same name are replaced)
-        for s in elem.findall(nspath('Style', WMS_NAMESPACE)):
-            name = s.find(nspath('Name', WMS_NAMESPACE))
-            title = s.find(nspath('Title', WMS_NAMESPACE))
+        for s in elem.findall(nspath("Style", WMS_NAMESPACE)):
+            name = s.find(nspath("Name", WMS_NAMESPACE))
+            title = s.find(nspath("Title", WMS_NAMESPACE))
             if name is None or title is None:
-                raise ValueError('%s missing name or title' % (s,))
-            style = {'title': title.text}
+                raise ValueError("%s missing name or title" % (s,))
+            style = {"title": title.text}
             # legend url
-            legend = s.find(nspath('LegendURL/OnlineResource', WMS_NAMESPACE))
+            legend = s.find(nspath("LegendURL/OnlineResource", WMS_NAMESPACE))
             if legend is not None:
-                style['legend'] = legend.attrib['{http://www.w3.org/1999/xlink}href']
+                style["legend"] = legend.attrib["{http://www.w3.org/1999/xlink}href"]
 
-            lgd = s.find(nspath('LegendURL', WMS_NAMESPACE))
+            lgd = s.find(nspath("LegendURL", WMS_NAMESPACE))
             if lgd is not None:
-                if 'width' in list(lgd.attrib.keys()):
-                    style['legend_width'] = lgd.attrib.get('width')
-                if 'height' in list(lgd.attrib.keys()):
-                    style['legend_height'] = lgd.attrib.get('height')
+                if "width" in list(lgd.attrib.keys()):
+                    style["legend_width"] = lgd.attrib.get("width")
+                if "height" in list(lgd.attrib.keys()):
+                    style["legend_height"] = lgd.attrib.get("height")
 
-                lgd_format = lgd.find(nspath('Format', WMS_NAMESPACE))
+                lgd_format = lgd.find(nspath("Format", WMS_NAMESPACE))
                 if lgd_format is not None:
-                    style['legend_format'] = lgd_format.text.strip()
+                    style["legend_format"] = lgd_format.text.strip()
             self.styles[name.text] = style
 
         # keywords
-        self.keywords = [f.text for f in elem.findall(nspath('KeywordList/Keyword', WMS_NAMESPACE))]
+        self.keywords = [f.text for f in elem.findall(nspath("KeywordList/Keyword", WMS_NAMESPACE))]
 
         # extents replaced by dimensions of name
         # comment by Soren Scott
@@ -629,43 +685,45 @@ class ContentMetadata(AbstractContentMetadata):
         self.defaulttimeposition = None
         time_dimension = None
 
-        for dim in elem.findall(nspath('Dimension', WMS_NAMESPACE)):
-            dim_name = dim.attrib.get('name')
-            if dim_name is not None and dim_name.lower() == 'time':
+        for dim in elem.findall(nspath("Dimension", WMS_NAMESPACE)):
+            dim_name = dim.attrib.get("name")
+            if dim_name is not None and dim_name.lower() == "time":
                 time_dimension = dim
         if time_dimension is not None:
-            self.timepositions = time_dimension.text.split(',') if time_dimension.text else None
-            self.defaulttimeposition = time_dimension.attrib.get('default', None)
+            self.timepositions = time_dimension.text.split(",") if time_dimension.text else None
+            self.defaulttimeposition = time_dimension.attrib.get("default", None)
 
         # Elevations - available vertical levels
         self.elevations = None
         elev_dimension = None
-        for dim in elem.findall(nspath('Dimension', WMS_NAMESPACE)):
-            if dim.attrib.get('name') == 'elevation':
+        for dim in elem.findall(nspath("Dimension", WMS_NAMESPACE)):
+            if dim.attrib.get("name") == "elevation":
                 elev_dimension = dim
         if elev_dimension is not None:
-            self.elevations = [e.strip() for e in elev_dimension.text.split(',')] if elev_dimension.text else None
+            self.elevations = [e.strip() for e in elev_dimension.text.split(",")] if elev_dimension.text else None
 
         # and now capture the dimensions as more generic things (and custom things)
         self.dimensions = {}
-        for dim in elem.findall(nspath('Dimension', WMS_NAMESPACE)):
-            dim_name = dim.attrib.get('name')
+        for dim in elem.findall(nspath("Dimension", WMS_NAMESPACE)):
+            dim_name = dim.attrib.get("name")
             dim_data = {}
             for k, v in list(dim.attrib.items()):
-                if k != 'name':
+                if k != "name":
                     dim_data[k] = v
             # single values and ranges are not differentiated here
-            dim_data['values'] = dim.text.strip().split(',') if dim.text.strip() else None
+            dim_data["values"] = dim.text.strip().split(",") if dim.text.strip() else None
             self.dimensions[dim_name] = dim_data
 
         # MetadataURLs
         self.metadataUrls = []
-        for m in elem.findall(nspath('MetadataURL', WMS_NAMESPACE)):
+        for m in elem.findall(nspath("MetadataURL", WMS_NAMESPACE)):
             metadataUrl = {
-                'type': testXMLValue(m.attrib['type'], attrib=True),
-                'format': testXMLValue(m.find(nspath('Format', WMS_NAMESPACE))),
-                'url': testXMLValue(m.find(
-                    nspath('OnlineResource', WMS_NAMESPACE)).attrib['{http://www.w3.org/1999/xlink}href'], attrib=True)
+                "type": testXMLValue(m.attrib["type"], attrib=True),
+                "format": testXMLValue(m.find(nspath("Format", WMS_NAMESPACE))),
+                "url": testXMLValue(
+                    m.find(nspath("OnlineResource", WMS_NAMESPACE)).attrib["{http://www.w3.org/1999/xlink}href"],
+                    attrib=True,
+                ),
             }
             self.metadataUrls.append(metadataUrl)
 
@@ -674,48 +732,50 @@ class ContentMetadata(AbstractContentMetadata):
 
         # DataURLs
         self.dataUrls = []
-        for m in elem.findall(nspath('DataURL', WMS_NAMESPACE)):
+        for m in elem.findall(nspath("DataURL", WMS_NAMESPACE)):
             dataUrl = {
-                'format': m.find(nspath('Format', WMS_NAMESPACE)).text.strip(),
-                'url': m.find(nspath('OnlineResource', WMS_NAMESPACE)).attrib['{http://www.w3.org/1999/xlink}href']
+                "format": m.find(nspath("Format", WMS_NAMESPACE)).text.strip(),
+                "url": m.find(nspath("OnlineResource", WMS_NAMESPACE)).attrib["{http://www.w3.org/1999/xlink}href"],
             }
             self.dataUrls.append(dataUrl)
 
         # FeatureListURLs
         self.featureListUrls = []
-        for m in elem.findall(nspath('FeatureListURL', WMS_NAMESPACE)):
+        for m in elem.findall(nspath("FeatureListURL", WMS_NAMESPACE)):
             featureUrl = {
-                'format': m.find(nspath('Format', WMS_NAMESPACE)).text.strip(),
-                'url': m.find(nspath('OnlineResource', WMS_NAMESPACE)).attrib['{http://www.w3.org/1999/xlink}href']
+                "format": m.find(nspath("Format", WMS_NAMESPACE)).text.strip(),
+                "url": m.find(nspath("OnlineResource", WMS_NAMESPACE)).attrib["{http://www.w3.org/1999/xlink}href"],
             }
             self.featureListUrls.append(featureUrl)
 
         self.layers = []
-        for child in elem.findall(nspath('Layer', WMS_NAMESPACE)):
+        for child in elem.findall(nspath("Layer", WMS_NAMESPACE)):
             self.layers.append(ContentMetadata(child, self))
 
     def parse_remote_metadata(self, timeout=30):
         """Parse remote metadata for MetadataURL and add it as metadataUrl['metadata']"""
         for metadataUrl in self.metadataUrls:
-            if metadataUrl['url'] is not None \
-                    and metadataUrl['format'].lower() in ['application/xml', 'text/xml']:  # download URL
+            if metadataUrl["url"] is not None and metadataUrl["format"].lower() in [
+                "application/xml",
+                "text/xml",
+            ]:  # download URL
                 try:
-                    content = openURL(
-                        metadataUrl['url'], timeout=timeout, auth=self.auth)
+                    content = openURL(metadataUrl["url"], timeout=timeout, auth=self.auth)
                     doc = etree.fromstring(content.read())
 
-                    mdelem = doc.find('.//metadata')
+                    mdelem = doc.find(".//metadata")
                     if mdelem is not None:
-                        metadataUrl['metadata'] = Metadata(mdelem)
+                        metadataUrl["metadata"] = Metadata(mdelem)
                         continue
 
-                    mdelem = doc.find('.//' + nspath_eval('gmd:MD_Metadata', n.get_namespaces(['gmd']))) \
-                        or doc.find('.//' + nspath_eval('gmi:MI_Metadata', n.get_namespaces(['gmi'])))
+                    mdelem = doc.find(".//" + nspath_eval("gmd:MD_Metadata", n.get_namespaces(["gmd"]))) or doc.find(
+                        ".//" + nspath_eval("gmi:MI_Metadata", n.get_namespaces(["gmi"]))
+                    )
                     if mdelem is not None:
-                        metadataUrl['metadata'] = MD_Metadata(mdelem)
+                        metadataUrl["metadata"] = MD_Metadata(mdelem)
                         continue
                 except Exception:
-                    metadataUrl['metadata'] = None
+                    metadataUrl["metadata"] = None
 
     @property
     def children(self):
@@ -729,7 +789,7 @@ class ContentMetadata(AbstractContentMetadata):
             self._children.extend(value)
 
     def __str__(self):
-        return 'Layer Name: %s Title: %s' % (self.name, self.title)
+        return "Layer Name: %s Title: %s" % (self.name, self.title)
 
 
 class OperationMetadata(object):
@@ -737,21 +797,21 @@ class OperationMetadata(object):
         """."""
         self.name = xmltag_split(elem.tag)
         # formatOptions
-        self.formatOptions = [f.text for f in elem.findall(nspath('Format', WMS_NAMESPACE))]
+        self.formatOptions = [f.text for f in elem.findall(nspath("Format", WMS_NAMESPACE))]
         self.methods = []
-        for verb in elem.findall(nspath('DCPType/HTTP/*', WMS_NAMESPACE)):
-            url = verb.find(nspath('OnlineResource', WMS_NAMESPACE)).attrib['{http://www.w3.org/1999/xlink}href']
-            self.methods.append({'type': xmltag_split(verb.tag), 'url': url})
+        for verb in elem.findall(nspath("DCPType/HTTP/*", WMS_NAMESPACE)):
+            url = verb.find(nspath("OnlineResource", WMS_NAMESPACE)).attrib["{http://www.w3.org/1999/xlink}href"]
+            self.methods.append({"type": xmltag_split(verb.tag), "url": url})
 
 
 class ContactMetadata(object):
     def __init__(self, elem):
-        name = elem.find(nspath('ContactPersonPrimary/ContactPerson', WMS_NAMESPACE))
+        name = elem.find(nspath("ContactPersonPrimary/ContactPerson", WMS_NAMESPACE))
         if name is not None:
             self.name = name.text
         else:
             self.name = None
-        email = elem.find('ContactElectronicMailAddress')
+        email = elem.find("ContactElectronicMailAddress")
         if email is not None:
             self.email = email.text
         else:
@@ -759,35 +819,35 @@ class ContactMetadata(object):
         self.address = self.city = self.region = None
         self.postcode = self.country = None
 
-        address = elem.find(nspath('ContactAddress', WMS_NAMESPACE))
+        address = elem.find(nspath("ContactAddress", WMS_NAMESPACE))
         if address is not None:
-            street = address.find(nspath('Address', WMS_NAMESPACE))
+            street = address.find(nspath("Address", WMS_NAMESPACE))
             if street is not None:
                 self.address = street.text
 
-            city = address.find(nspath('City', WMS_NAMESPACE))
+            city = address.find(nspath("City", WMS_NAMESPACE))
             if city is not None:
                 self.city = city.text
 
-            region = address.find(nspath('StateOrProvince', WMS_NAMESPACE))
+            region = address.find(nspath("StateOrProvince", WMS_NAMESPACE))
             if region is not None:
                 self.region = region.text
 
-            postcode = address.find(nspath('PostCode', WMS_NAMESPACE))
+            postcode = address.find(nspath("PostCode", WMS_NAMESPACE))
             if postcode is not None:
                 self.postcode = postcode.text
 
-            country = address.find(nspath('Country', WMS_NAMESPACE))
+            country = address.find(nspath("Country", WMS_NAMESPACE))
             if country is not None:
                 self.country = country.text
 
-        organization = elem.find(nspath('ContactPersonPrimary/ContactOrganization', WMS_NAMESPACE))
+        organization = elem.find(nspath("ContactPersonPrimary/ContactOrganization", WMS_NAMESPACE))
         if organization is not None:
             self.organization = organization.text
         else:
             self.organization = None
 
-        position = elem.find(nspath('ContactPosition', WMS_NAMESPACE))
+        position = elem.find(nspath("ContactPosition", WMS_NAMESPACE))
         if position is not None:
             self.position = position.text
         else:

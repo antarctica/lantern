@@ -65,18 +65,17 @@ LOGGER = logging.getLogger(__name__)
 # Global variables for spatial ranking algorithm
 ranking_enabled = False
 ranking_pass = False
-ranking_query_geometry = ''
+ranking_query_geometry = ""
 
 # Lookups for the secure_filename function
 # https://github.com/pallets/werkzeug/blob/778f482d1ac0c9e8e98f774d2595e9074e6984d7/werkzeug/utils.py#L30-L31
-_filename_ascii_strip_re = re.compile(r'[^A-Za-z0-9_.-]')
-_windows_device_files = ('CON', 'AUX', 'COM1', 'COM2', 'COM3', 'COM4', 'LPT1',
-                         'LPT2', 'LPT3', 'PRN', 'NUL')
+_filename_ascii_strip_re = re.compile(r"[^A-Za-z0-9_.-]")
+_windows_device_files = ("CON", "AUX", "COM1", "COM2", "COM3", "COM4", "LPT1", "LPT2", "LPT3", "PRN", "NUL")
 
 
 def get_today_and_now():
     """Get the date, right now, in ISO8601"""
-    return time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime())
+    return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.localtime())
 
 
 def datetime2iso8601(value):
@@ -100,14 +99,13 @@ def datetime2iso8601(value):
         else:
             result = value.strftime("%Y-%m-%dT%H:%M:%SZ")
     else:  # value is a datetime.date
-        result = value.strftime('%Y-%m-%d')
+        result = value.strftime("%Y-%m-%d")
     return result
 
 
 def get_time_iso2unix(isotime):
     """Convert ISO8601 to UNIX timestamp"""
-    return int(time.mktime(time.strptime(
-        isotime, '%Y-%m-%dT%H:%M:%SZ'))) - time.timezone
+    return int(time.mktime(time.strptime(isotime, "%Y-%m-%dT%H:%M:%SZ"))) - time.timezone
 
 
 def get_version_integer(version):
@@ -133,13 +131,13 @@ def get_version_integer(version):
     """
 
     try:
-        xyz = version.split('.')
+        xyz = version.split(".")
         if len(xyz) == 3:
             result = int(xyz[0]) * 10000 + int(xyz[1]) * 100 + int(xyz[2])
         else:
             result = -1
     except AttributeError as err:
-        raise RuntimeError('%s' % str(err))
+        raise RuntimeError("%s" % str(err))
     return result
 
 
@@ -167,23 +165,23 @@ def nspath_eval(xpath, nsmap):
     """
 
     out = []
-    for node in xpath.split('/'):
+    for node in xpath.split("/"):
         chunks = node.split(":")
         if len(chunks) == 2:
-            prefix, element = node.split(':')
-            out.append('{%s}%s' % (nsmap[prefix], element))
+            prefix, element = node.split(":")
+            out.append("{%s}%s" % (nsmap[prefix], element))
         elif len(chunks) == 1:
             out.append(node)
         else:
             raise RuntimeError("Invalid XPath expression: {0}".format(xpath))
-    return '/'.join(out)
+    return "/".join(out)
 
 
 def wktenvelope2bbox(envelope):
     """returns bbox string of WKT ENVELOPE definition"""
 
-    tmparr = [x.strip() for x in envelope.split('(')[1].split(')')[0].split(',')]
-    bbox = '%s,%s,%s,%s' % (tmparr[0], tmparr[3], tmparr[1], tmparr[2])
+    tmparr = [x.strip() for x in envelope.split("(")[1].split(")")[0].split(",")]
+    bbox = "%s,%s,%s,%s" % (tmparr[0], tmparr[3], tmparr[1], tmparr[2])
     return bbox
 
 
@@ -202,7 +200,7 @@ def wkt2geom(ewkt, bounds=True):
     Returns
     -------
     shapely.geometry.base.BaseGeometry or tuple
-        Depending on the value of the ``bounds`` parameter, returns either 
+        Depending on the value of the ``bounds`` parameter, returns either
         the shapely geometry instance or a tuple with the bounding box.
 
     References
@@ -212,7 +210,7 @@ def wkt2geom(ewkt, bounds=True):
     """
 
     wkt = ewkt.split(";")[-1] if ewkt.find("SRID") != -1 else ewkt
-    if wkt.startswith('ENVELOPE'):
+    if wkt.startswith("ENVELOPE"):
         wkt = bbox2wktpolygon(wktenvelope2bbox(wkt))
     geometry = loads(wkt)
     return geometry.envelope.bounds if bounds else geometry
@@ -233,11 +231,21 @@ def bbox2wktpolygon(bbox):
 
     """
 
-    if bbox.startswith('ENVELOPE'):
+    if bbox.startswith("ENVELOPE"):
         bbox = wktenvelope2bbox(bbox)
     minx, miny, maxx, maxy = [float(coord) for coord in bbox.split(",")]
-    return 'POLYGON((%.2f %.2f, %.2f %.2f, %.2f %.2f, %.2f %.2f, %.2f %.2f))' \
-        % (minx, miny, minx, maxy, maxx, maxy, maxx, miny, minx, miny)
+    return "POLYGON((%.2f %.2f, %.2f %.2f, %.2f %.2f, %.2f %.2f, %.2f %.2f))" % (
+        minx,
+        miny,
+        minx,
+        maxy,
+        maxx,
+        maxy,
+        maxx,
+        miny,
+        minx,
+        miny,
+    )
 
 
 def transform_mappings(queryables, typename):
@@ -252,8 +260,7 @@ def transform_mappings(queryables, typename):
 
     for item in queryables:
         try:
-            matching_typename = [key for key, value in typename.items() if
-                                 value == item][0]
+            matching_typename = [key for key, value in typename.items() if value == item][0]
             queryable_value = queryables[matching_typename]
             queryables[item] = {
                 "xpath": queryable_value["xpath"],
@@ -272,8 +279,8 @@ def getqattr(obj, name):
         if "link" in name:  # create link format
             links = []
             for link in value:
-                links.append(','.join(list(link)))
-            result = '^'.join(links)
+                links.append(",".join(list(link)))
+            result = "^".join(links)
         else:
             result = value
     except TypeError:  # item is not callable
@@ -288,11 +295,11 @@ def getqattr(obj, name):
 
 def http_request(method, url, request=None, timeout=30):
     """Perform HTTP request"""
-    if method == 'POST':
+    if method == "POST":
         return http_post(url, request, timeout=timeout)
     else:  # GET
         request = Request(url)
-        request.add_header('User-Agent', 'pycsw (https://pycsw.org/)')
+        request.add_header("User-Agent", "pycsw (https://pycsw.org/)")
         return urlopen(request, timeout=timeout).read()
 
 
@@ -310,16 +317,10 @@ def bind_url(url):
 
 def ip_in_network_cidr(ip, net):
     """decipher whether IP is within CIDR range"""
-    ipaddr = int(
-        ''.join(['%02x' % int(x) for x in ip.split('.')]),
-        16
-    )
-    netstr, bits = net.split('/')
-    netaddr = int(
-        ''.join(['%02x' % int(x) for x in netstr.split('.')]),
-        16
-    )
-    mask = (0xffffffff << (32 - int(bits))) & 0xffffffff
+    ipaddr = int("".join(["%02x" % int(x) for x in ip.split(".")]), 16)
+    netstr, bits = net.split("/")
+    netaddr = int("".join(["%02x" % int(x) for x in netstr.split(".")]), 16)
+    mask = (0xFFFFFFFF << (32 - int(bits))) & 0xFFFFFFFF
     return (ipaddr & mask) == (netaddr & mask)
 
 
@@ -337,12 +338,12 @@ def ipaddress_in_whitelist(ipaddress, whitelist):
         return True
     else:
         for white in whitelist:
-            if white.find('/') != -1:  # CIDR
+            if white.find("/") != -1:  # CIDR
                 if ip_in_network_cidr(ipaddress, white):
                     return True
-            elif white.find('*') != -1:  # subnet wildcard
-                    if ipaddress.startswith(white.split('*')[0]):
-                        return True
+            elif white.find("*") != -1:  # subnet wildcard
+                if ipaddress.startswith(white.split("*")[0]):
+                    return True
     return False
 
 
@@ -353,13 +354,13 @@ def get_anytext(bag):
     """
 
     if isinstance(bag, list):  # list of words
-        return ' '.join([_f for _f in bag if _f]).strip()
+        return " ".join([_f for _f in bag if _f]).strip()
     else:  # xml
         if isinstance(bag, bytes) or isinstance(bag, str):
             # serialize to lxml
             bag = etree.fromstring(bag, PARSER)
         # get all XML element content
-        return ' '.join([value.strip() for value in bag.xpath('//text()')])
+        return " ".join([value.strip() for value in bag.xpath("//text()")])
 
 
 # https://github.com/pallets/werkzeug/blob/778f482d1ac0c9e8e98f774d2595e9074e6984d7/werkzeug/utils.py#L253
@@ -389,19 +390,18 @@ def secure_filename(filename):
     """
     if isinstance(filename, str):
         from unicodedata import normalize
-        filename = normalize('NFKD', filename).encode('ascii', 'ignore')
-        filename = filename.decode('ascii')
+
+        filename = normalize("NFKD", filename).encode("ascii", "ignore")
+        filename = filename.decode("ascii")
     for sep in os.path.sep, os.path.altsep:
         if sep:
-            filename = filename.replace(sep, ' ')
-    filename = str(_filename_ascii_strip_re.sub('', '_'.join(
-                   filename.split()))).strip('._')
+            filename = filename.replace(sep, " ")
+    filename = str(_filename_ascii_strip_re.sub("", "_".join(filename.split()))).strip("._")
 
     # on nt a couple of special files are present in each folder.  We
     # have to ensure that the target file is not such a filename.  In
     # this case we prepend an underline
-    if os.name == 'nt' and filename and \
-       filename.split('.')[0].upper() in _windows_device_files:
-        filename = '_' + filename
+    if os.name == "nt" and filename and filename.split(".")[0].upper() in _windows_device_files:
+        filename = "_" + filename
 
     return filename

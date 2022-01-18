@@ -44,13 +44,14 @@ def get_namespaces():
 
 
 namespaces = get_namespaces()
-schema = 'http://schemas.opengis.net/filter/1.1.0/filter.xsd'
-schema_location = '%s %s' % (namespaces['ogc'], schema)
+schema = "http://schemas.opengis.net/filter/1.1.0/filter.xsd"
+schema_location = "%s %s" % (namespaces["ogc"], schema)
 
 
 class FilterRequest(object):
     """ filter class """
-    def __init__(self, parent=None, version='1.1.0'):
+
+    def __init__(self, parent=None, version="1.1.0"):
         """
 
         filter Constructor
@@ -64,12 +65,20 @@ class FilterRequest(object):
         """
 
         self.version = version
-        self._root = etree.Element(util.nspath_eval('ogc:Filter', namespaces))
+        self._root = etree.Element(util.nspath_eval("ogc:Filter", namespaces))
         if parent is not None:
-            self._root.set(util.nspath_eval('xsi:schemaLocation', namespaces), schema_location)
+            self._root.set(util.nspath_eval("xsi:schemaLocation", namespaces), schema_location)
 
-    def set(self, parent=False, qtype=None, keywords=[], typenames='csw:Record', propertyname='csw:AnyText', bbox=None,
-            identifier=None):
+    def set(
+        self,
+        parent=False,
+        qtype=None,
+        keywords=[],
+        typenames="csw:Record",
+        propertyname="csw:AnyText",
+        bbox=None,
+        identifier=None,
+    ):
         """
 
         Construct and process a  GetRecords request
@@ -89,14 +98,14 @@ class FilterRequest(object):
         # Set the identifier if passed.  Ignore other parameters
         dc_identifier_equals_filter = None
         if identifier is not None:
-            dc_identifier_equals_filter = PropertyIsEqualTo('dc:identifier', identifier)
+            dc_identifier_equals_filter = PropertyIsEqualTo("dc:identifier", identifier)
             self._root.append(dc_identifier_equals_filter.toXML())
             return self._root
 
         # Set the query type if passed
         dc_type_equals_filter = None
         if qtype is not None:
-            dc_type_equals_filter = PropertyIsEqualTo('dc:type', qtype)
+            dc_type_equals_filter = PropertyIsEqualTo("dc:type", qtype)
 
         # Set a bbox query if passed
         bbox_filter = None
@@ -197,58 +206,88 @@ class FilterRequest(object):
 
 class FilterCapabilities(object):
     """ Abstraction for Filter_Capabilities """
+
     def __init__(self, elem):
         # Spatial_Capabilities
-        self.spatial_operands = [f.text for f in elem.findall(util.nspath_eval(
-            'ogc:Spatial_Capabilities/ogc:GeometryOperands/ogc:GeometryOperand', namespaces))]
+        self.spatial_operands = [
+            f.text
+            for f in elem.findall(
+                util.nspath_eval("ogc:Spatial_Capabilities/ogc:GeometryOperands/ogc:GeometryOperand", namespaces)
+            )
+        ]
         self.spatial_operators = []
-        for f in elem.findall(util.nspath_eval(
-                'ogc:Spatial_Capabilities/ogc:SpatialOperators/ogc:SpatialOperator', namespaces)):
-            self.spatial_operators.append(f.attrib['name'])
+        for f in elem.findall(
+            util.nspath_eval("ogc:Spatial_Capabilities/ogc:SpatialOperators/ogc:SpatialOperator", namespaces)
+        ):
+            self.spatial_operators.append(f.attrib["name"])
 
         # Temporal_Capabilities
-        self.temporal_operands = [f.text for f in elem.findall(util.nspath_eval(
-            'ogc:Temporal_Capabilities/ogc:TemporalOperands/ogc:TemporalOperand', namespaces))]
+        self.temporal_operands = [
+            f.text
+            for f in elem.findall(
+                util.nspath_eval("ogc:Temporal_Capabilities/ogc:TemporalOperands/ogc:TemporalOperand", namespaces)
+            )
+        ]
         self.temporal_operators = []
-        for f in elem.findall(util.nspath_eval(
-                'ogc:Temporal_Capabilities/ogc:TemporalOperators/ogc:TemporalOperator', namespaces)):
-            self.temporal_operators.append(f.attrib['name'])
+        for f in elem.findall(
+            util.nspath_eval("ogc:Temporal_Capabilities/ogc:TemporalOperators/ogc:TemporalOperator", namespaces)
+        ):
+            self.temporal_operators.append(f.attrib["name"])
 
         # Scalar_Capabilities
-        self.scalar_comparison_operators = [f.text for f in elem.findall(util.nspath_eval(
-            'ogc:Scalar_Capabilities/ogc:ComparisonOperators/ogc:ComparisonOperator', namespaces))]
+        self.scalar_comparison_operators = [
+            f.text
+            for f in elem.findall(
+                util.nspath_eval("ogc:Scalar_Capabilities/ogc:ComparisonOperators/ogc:ComparisonOperator", namespaces)
+            )
+        ]
 
 
 class FilterCapabilities200(object):
     """Abstraction for Filter_Capabilities 2.0"""
+
     def __init__(self, elem):
         # Spatial_Capabilities
-        self.spatial_operands = [f.attrib.get('name') for f in elem.findall(util.nspath_eval(
-            'fes:Spatial_Capabilities/fes:GeometryOperands/fes:GeometryOperand', namespaces))]
+        self.spatial_operands = [
+            f.attrib.get("name")
+            for f in elem.findall(
+                util.nspath_eval("fes:Spatial_Capabilities/fes:GeometryOperands/fes:GeometryOperand", namespaces)
+            )
+        ]
         self.spatial_operators = []
-        for f in elem.findall(util.nspath_eval(
-                'fes:Spatial_Capabilities/fes:SpatialOperators/fes:SpatialOperator', namespaces)):
-            self.spatial_operators.append(f.attrib['name'])
+        for f in elem.findall(
+            util.nspath_eval("fes:Spatial_Capabilities/fes:SpatialOperators/fes:SpatialOperator", namespaces)
+        ):
+            self.spatial_operators.append(f.attrib["name"])
 
         # Temporal_Capabilities
-        self.temporal_operands = [f.attrib.get('name') for f in elem.findall(util.nspath_eval(
-            'fes:Temporal_Capabilities/fes:TemporalOperands/fes:TemporalOperand', namespaces))]
+        self.temporal_operands = [
+            f.attrib.get("name")
+            for f in elem.findall(
+                util.nspath_eval("fes:Temporal_Capabilities/fes:TemporalOperands/fes:TemporalOperand", namespaces)
+            )
+        ]
         self.temporal_operators = []
-        for f in elem.findall(util.nspath_eval(
-                'fes:Temporal_Capabilities/fes:TemporalOperators/fes:TemporalOperator', namespaces)):
-            self.temporal_operators.append(f.attrib['name'])
+        for f in elem.findall(
+            util.nspath_eval("fes:Temporal_Capabilities/fes:TemporalOperators/fes:TemporalOperator", namespaces)
+        ):
+            self.temporal_operators.append(f.attrib["name"])
 
         # Scalar_Capabilities
-        self.scalar_comparison_operators = [f.text for f in elem.findall(util.nspath_eval(
-            'fes:Scalar_Capabilities/fes:ComparisonOperators/fes:ComparisonOperator', namespaces))]
+        self.scalar_comparison_operators = [
+            f.text
+            for f in elem.findall(
+                util.nspath_eval("fes:Scalar_Capabilities/fes:ComparisonOperators/fes:ComparisonOperator", namespaces)
+            )
+        ]
 
         # Conformance
         self.conformance = []
-        for f in elem.findall(util.nspath_eval('fes:Conformance/fes:Constraint', namespaces)):
-            self.conformance[f.attrib.get('name')] = f.find(util.nspath_eval('fes:DefaultValue', namespaces)).text
+        for f in elem.findall(util.nspath_eval("fes:Conformance/fes:Constraint", namespaces)):
+            self.conformance[f.attrib.get("name")] = f.find(util.nspath_eval("fes:DefaultValue", namespaces)).text
 
 
-def setsortby(parent, propertyname, order='ASC'):
+def setsortby(parent, propertyname, order="ASC"):
     """
 
     constructs a SortBy element
@@ -262,23 +301,23 @@ def setsortby(parent, propertyname, order='ASC'):
 
     """
 
-    tmp = etree.SubElement(parent, util.nspath_eval('ogc:SortBy', namespaces))
-    tmp2 = etree.SubElement(tmp, util.nspath_eval('ogc:SortProperty', namespaces))
-    etree.SubElement(tmp2, util.nspath_eval('ogc:PropertyName', namespaces)).text = propertyname
-    etree.SubElement(tmp2, util.nspath_eval('ogc:SortOrder', namespaces)).text = order
+    tmp = etree.SubElement(parent, util.nspath_eval("ogc:SortBy", namespaces))
+    tmp2 = etree.SubElement(tmp, util.nspath_eval("ogc:SortProperty", namespaces))
+    etree.SubElement(tmp2, util.nspath_eval("ogc:PropertyName", namespaces)).text = propertyname
+    etree.SubElement(tmp2, util.nspath_eval("ogc:SortOrder", namespaces)).text = order
 
 
 class SortProperty(object):
-    def __init__(self, propertyname, order='ASC'):
+    def __init__(self, propertyname, order="ASC"):
         self.propertyname = propertyname
         self.order = order.upper()
-        if self.order not in ['DESC', 'ASC']:
+        if self.order not in ["DESC", "ASC"]:
             raise ValueError("SortOrder can only be 'ASC' or 'DESC'")
 
     def toXML(self):
         node0 = etree.Element(util.nspath_eval("ogc:SortProperty", namespaces))
-        etree.SubElement(node0, util.nspath_eval('ogc:PropertyName', namespaces)).text = self.propertyname
-        etree.SubElement(node0, util.nspath_eval('ogc:SortOrder', namespaces)).text = self.order
+        etree.SubElement(node0, util.nspath_eval("ogc:PropertyName", namespaces)).text = self.propertyname
+        etree.SubElement(node0, util.nspath_eval("ogc:SortOrder", namespaces)).text = self.order
         return node0
 
 
@@ -300,6 +339,7 @@ class OgcExpression(object):
 
 class BinaryComparisonOpType(OgcExpression):
     """ Super class of all the property operation classes"""
+
     def __init__(self, propertyoperator, propertyname, literal, matchcase=True):
         self.propertyoperator = propertyoperator
         self.propertyname = propertyname
@@ -309,51 +349,58 @@ class BinaryComparisonOpType(OgcExpression):
     def toXML(self):
         node0 = etree.Element(util.nspath_eval(self.propertyoperator, namespaces))
         if not self.matchcase:
-            node0.set('matchCase', 'false')
-        etree.SubElement(node0, util.nspath_eval('ogc:PropertyName', namespaces)).text = self.propertyname
-        etree.SubElement(node0, util.nspath_eval('ogc:Literal', namespaces)).text = self.literal
+            node0.set("matchCase", "false")
+        etree.SubElement(node0, util.nspath_eval("ogc:PropertyName", namespaces)).text = self.propertyname
+        etree.SubElement(node0, util.nspath_eval("ogc:Literal", namespaces)).text = self.literal
         return node0
 
 
 class PropertyIsEqualTo(BinaryComparisonOpType):
     """ PropertyIsEqualTo class"""
+
     def __init__(self, propertyname, literal, matchcase=True):
-        BinaryComparisonOpType.__init__(self, 'ogc:PropertyIsEqualTo', propertyname, literal, matchcase)
+        BinaryComparisonOpType.__init__(self, "ogc:PropertyIsEqualTo", propertyname, literal, matchcase)
 
 
 class PropertyIsNotEqualTo(BinaryComparisonOpType):
     """ PropertyIsNotEqualTo class """
+
     def __init__(self, propertyname, literal, matchcase=True):
-        BinaryComparisonOpType.__init__(self, 'ogc:PropertyIsNotEqualTo', propertyname, literal, matchcase)
+        BinaryComparisonOpType.__init__(self, "ogc:PropertyIsNotEqualTo", propertyname, literal, matchcase)
 
 
 class PropertyIsLessThan(BinaryComparisonOpType):
     """PropertyIsLessThan class"""
+
     def __init__(self, propertyname, literal, matchcase=True):
-        BinaryComparisonOpType.__init__(self, 'ogc:PropertyIsLessThan', propertyname, literal, matchcase)
+        BinaryComparisonOpType.__init__(self, "ogc:PropertyIsLessThan", propertyname, literal, matchcase)
 
 
 class PropertyIsGreaterThan(BinaryComparisonOpType):
     """PropertyIsGreaterThan class"""
+
     def __init__(self, propertyname, literal, matchcase=True):
-        BinaryComparisonOpType.__init__(self, 'ogc:PropertyIsGreaterThan', propertyname, literal, matchcase)
+        BinaryComparisonOpType.__init__(self, "ogc:PropertyIsGreaterThan", propertyname, literal, matchcase)
 
 
 class PropertyIsLessThanOrEqualTo(BinaryComparisonOpType):
     """PropertyIsLessThanOrEqualTo class"""
+
     def __init__(self, propertyname, literal, matchcase=True):
-        BinaryComparisonOpType.__init__(self, 'ogc:PropertyIsLessThanOrEqualTo', propertyname, literal, matchcase)
+        BinaryComparisonOpType.__init__(self, "ogc:PropertyIsLessThanOrEqualTo", propertyname, literal, matchcase)
 
 
 class PropertyIsGreaterThanOrEqualTo(BinaryComparisonOpType):
     """PropertyIsGreaterThanOrEqualTo class"""
+
     def __init__(self, propertyname, literal, matchcase=True):
-        BinaryComparisonOpType.__init__(self, 'ogc:PropertyIsGreaterThanOrEqualTo', propertyname, literal, matchcase)
+        BinaryComparisonOpType.__init__(self, "ogc:PropertyIsGreaterThanOrEqualTo", propertyname, literal, matchcase)
 
 
 class PropertyIsLike(OgcExpression):
     """PropertyIsLike class"""
-    def __init__(self, propertyname, literal, escapeChar='\\', singleChar='_', wildCard='%', matchCase=True):
+
+    def __init__(self, propertyname, literal, escapeChar="\\", singleChar="_", wildCard="%", matchCase=True):
         self.propertyname = propertyname
         self.literal = literal
         self.escapeChar = escapeChar
@@ -362,67 +409,73 @@ class PropertyIsLike(OgcExpression):
         self.matchCase = matchCase
 
     def toXML(self):
-        node0 = etree.Element(util.nspath_eval('ogc:PropertyIsLike', namespaces))
-        node0.set('wildCard', self.wildCard)
-        node0.set('singleChar', self.singleChar)
-        node0.set('escapeChar', self.escapeChar)
+        node0 = etree.Element(util.nspath_eval("ogc:PropertyIsLike", namespaces))
+        node0.set("wildCard", self.wildCard)
+        node0.set("singleChar", self.singleChar)
+        node0.set("escapeChar", self.escapeChar)
         if not self.matchCase:
-            node0.set('matchCase', 'false')
-        etree.SubElement(node0, util.nspath_eval('ogc:PropertyName', namespaces)).text = self.propertyname
-        etree.SubElement(node0, util.nspath_eval('ogc:Literal', namespaces)).text = self.literal
+            node0.set("matchCase", "false")
+        etree.SubElement(node0, util.nspath_eval("ogc:PropertyName", namespaces)).text = self.propertyname
+        etree.SubElement(node0, util.nspath_eval("ogc:Literal", namespaces)).text = self.literal
         return node0
 
 
 class PropertyIsNull(OgcExpression):
     """PropertyIsNull class"""
+
     def __init__(self, propertyname):
         self.propertyname = propertyname
 
     def toXML(self):
-        node0 = etree.Element(util.nspath_eval('ogc:PropertyIsNull', namespaces))
-        etree.SubElement(node0, util.nspath_eval('ogc:PropertyName', namespaces)).text = self.propertyname
+        node0 = etree.Element(util.nspath_eval("ogc:PropertyIsNull", namespaces))
+        etree.SubElement(node0, util.nspath_eval("ogc:PropertyName", namespaces)).text = self.propertyname
         return node0
 
 
 class PropertyIsBetween(OgcExpression):
     """PropertyIsBetween class"""
+
     def __init__(self, propertyname, lower, upper):
         self.propertyname = propertyname
         self.lower = lower
         self.upper = upper
 
     def toXML(self):
-        node0 = etree.Element(util.nspath_eval('ogc:PropertyIsBetween', namespaces))
-        etree.SubElement(node0, util.nspath_eval('ogc:PropertyName', namespaces)).text = self.propertyname
-        node1 = etree.SubElement(node0, util.nspath_eval('ogc:LowerBoundary', namespaces))
-        etree.SubElement(node1, util.nspath_eval('ogc:Literal', namespaces)).text = '%s' % self.lower
-        node2 = etree.SubElement(node0, util.nspath_eval('ogc:UpperBoundary', namespaces))
-        etree.SubElement(node2, util.nspath_eval('ogc:Literal', namespaces)).text = '%s' % self.upper
+        node0 = etree.Element(util.nspath_eval("ogc:PropertyIsBetween", namespaces))
+        etree.SubElement(node0, util.nspath_eval("ogc:PropertyName", namespaces)).text = self.propertyname
+        node1 = etree.SubElement(node0, util.nspath_eval("ogc:LowerBoundary", namespaces))
+        etree.SubElement(node1, util.nspath_eval("ogc:Literal", namespaces)).text = "%s" % self.lower
+        node2 = etree.SubElement(node0, util.nspath_eval("ogc:UpperBoundary", namespaces))
+        etree.SubElement(node2, util.nspath_eval("ogc:Literal", namespaces)).text = "%s" % self.upper
         return node0
 
 
 class BBox(OgcExpression):
     """Construct a BBox, two pairs of coordinates (west-south and east-north)"""
+
     def __init__(self, bbox, crs=None):
         self.bbox = bbox
         self.crs = crs
 
     def toXML(self):
-        tmp = etree.Element(util.nspath_eval('ogc:BBOX', namespaces))
-        etree.SubElement(tmp, util.nspath_eval('ogc:PropertyName', namespaces)).text = 'ows:BoundingBox'
-        tmp2 = etree.SubElement(tmp, util.nspath_eval('gml:Envelope', namespaces))
+        tmp = etree.Element(util.nspath_eval("ogc:BBOX", namespaces))
+        etree.SubElement(tmp, util.nspath_eval("ogc:PropertyName", namespaces)).text = "ows:BoundingBox"
+        tmp2 = etree.SubElement(tmp, util.nspath_eval("gml:Envelope", namespaces))
         if self.crs is not None:
-            tmp2.set('srsName', self.crs)
-        etree.SubElement(tmp2, util.nspath_eval('gml:lowerCorner', namespaces)).text = '{} {}'.format(
-            self.bbox[0], self.bbox[1])
-        etree.SubElement(tmp2, util.nspath_eval('gml:upperCorner', namespaces)).text = '{} {}'.format(
-            self.bbox[2], self.bbox[3])
+            tmp2.set("srsName", self.crs)
+        etree.SubElement(tmp2, util.nspath_eval("gml:lowerCorner", namespaces)).text = "{} {}".format(
+            self.bbox[0], self.bbox[1]
+        )
+        etree.SubElement(tmp2, util.nspath_eval("gml:upperCorner", namespaces)).text = "{} {}".format(
+            self.bbox[2], self.bbox[3]
+        )
         return tmp
 
 
 # BINARY
 class BinaryLogicOpType(OgcExpression):
     """ Binary Operators: And / Or """
+
     def __init__(self, binary_operator, operations):
         self.binary_operator = binary_operator
         try:
@@ -440,17 +493,18 @@ class BinaryLogicOpType(OgcExpression):
 
 class And(BinaryLogicOpType):
     def __init__(self, operations):
-        super(And, self).__init__('ogc:And', operations)
+        super(And, self).__init__("ogc:And", operations)
 
 
 class Or(BinaryLogicOpType):
     def __init__(self, operations):
-        super(Or, self).__init__('ogc:Or', operations)
+        super(Or, self).__init__("ogc:Or", operations)
 
 
 # UNARY
 class UnaryLogicOpType(OgcExpression):
     """ Unary Operator: Not """
+
     def __init__(self, urary_operator, operations):
         self.urary_operator = urary_operator
         self.operations = operations
@@ -464,4 +518,4 @@ class UnaryLogicOpType(OgcExpression):
 
 class Not(UnaryLogicOpType):
     def __init__(self, operations):
-        super(Not, self).__init__('ogc:Not', operations)
+        super(Not, self).__init__("ogc:Not", operations)

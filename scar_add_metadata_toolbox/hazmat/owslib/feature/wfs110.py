@@ -41,7 +41,7 @@ from scar_add_metadata_toolbox.hazmat.owslib.ows import (
     Constraint,
     Parameter,
     OperationsMetadata,
-    BoundingBox
+    BoundingBox,
 )
 from scar_add_metadata_toolbox.hazmat.owslib.fes import FilterCapabilities
 from scar_add_metadata_toolbox.hazmat.owslib.crs import Crs
@@ -80,7 +80,7 @@ class WebFeatureService_1_1_0(WebFeatureService_):
         password=None,
         auth=None,
     ):
-        """ overridden __new__ method
+        """overridden __new__ method
 
         @type url: string
         @param url: url of WFS capabilities document
@@ -156,69 +156,46 @@ class WebFeatureService_1_1_0(WebFeatureService_):
         self.updateSequence = self._capabilities.attrib.get("updateSequence")
 
         # ServiceIdentification
-        val = self._capabilities.find(
-            nspath_eval("ows:ServiceIdentification", namespaces)
-        )
+        val = self._capabilities.find(nspath_eval("ows:ServiceIdentification", namespaces))
         if val is not None:
             self.identification = ServiceIdentification(val, self.owscommon.namespace)
         # ServiceProvider
-        val = self._capabilities.find(
-            nspath_eval("ows:ServiceProvider", namespaces)
-        )
+        val = self._capabilities.find(nspath_eval("ows:ServiceProvider", namespaces))
         if val is not None:
             self.provider = ServiceProvider(val, self.owscommon.namespace)
         # ServiceOperations metadata
         self.operations = []
-        for elem in self._capabilities.findall(
-            nspath_eval("ows:OperationsMetadata/ows:Operation", namespaces)
-        ):
+        for elem in self._capabilities.findall(nspath_eval("ows:OperationsMetadata/ows:Operation", namespaces)):
             self.operations.append(OperationsMetadata(elem, self.owscommon.namespace))
         self.constraints = {}
-        for elem in self._capabilities.findall(
-            nspath_eval("ows:OperationsMetadata/ows:Constraint", namespaces)
-        ):
-            self.constraints[elem.attrib["name"]] = Constraint(
-                elem, self.owscommon.namespace
-            )
+        for elem in self._capabilities.findall(nspath_eval("ows:OperationsMetadata/ows:Constraint", namespaces)):
+            self.constraints[elem.attrib["name"]] = Constraint(elem, self.owscommon.namespace)
         self.parameters = {}
-        for elem in self._capabilities.findall(
-            nspath_eval("ows:OperationsMetadata/ows:Parameter", namespaces)
-        ):
-            self.parameters[elem.attrib["name"]] = Parameter(
-                elem, self.owscommon.namespace
-            )
+        for elem in self._capabilities.findall(nspath_eval("ows:OperationsMetadata/ows:Parameter", namespaces)):
+            self.parameters[elem.attrib["name"]] = Parameter(elem, self.owscommon.namespace)
 
         # FilterCapabilities
-        val = self._capabilities.find(
-            nspath_eval("ogc:Filter_Capabilities", namespaces)
-        )
+        val = self._capabilities.find(nspath_eval("ogc:Filter_Capabilities", namespaces))
         self.filters = FilterCapabilities(val)
 
         # serviceContents metadata: our assumption is that services use a top-level
         # layer as a metadata organizer, nothing more.
 
         self.contents = {}
-        features = self._capabilities.findall(
-            nspath_eval("wfs:FeatureTypeList/wfs:FeatureType", namespaces)
-        )
+        features = self._capabilities.findall(nspath_eval("wfs:FeatureTypeList/wfs:FeatureType", namespaces))
         for feature in features:
             cm = ContentMetadata(feature, parse_remote_metadata, headers=self.headers, auth=self.auth)
             self.contents[cm.id] = cm
 
         # exceptions
-        self.exceptions = [
-            f.text for f in self._capabilities.findall("Capability/Exception/Format")
-        ]
+        self.exceptions = [f.text for f in self._capabilities.findall("Capability/Exception/Format")]
 
     def getcapabilities(self):
         """Request and return capabilities document from the WFS as a
         file-like object.
         NOTE: this is effectively redundant now"""
         reader = WFSCapabilitiesReader(self.version, auth=self.auth)
-        return openURL(
-            reader.capabilities_url(self.url), timeout=self.timeout,
-            headers=self.headers, auth=self.auth
-        )
+        return openURL(reader.capabilities_url(self.url), timeout=self.timeout, headers=self.headers, auth=self.auth)
 
     def items(self):
         """supports dict-like items() access"""
@@ -339,8 +316,7 @@ class WebFeatureService_1_1_0(WebFeatureService_):
 
         data = urlencode(request)
         log.debug("Making request: %s?%s" % (base_url, data))
-        u = openURL(base_url, data, method, timeout=self.timeout,
-                    headers=self.headers, auth=self.auth)
+        u = openURL(base_url, data, method, timeout=self.timeout, headers=self.headers, auth=self.auth)
 
         # check for service exceptions, rewrap, and return
         # We're going to assume that anything with a content-length > 32k
@@ -393,10 +369,7 @@ class ContentMetadata(AbstractContentMetadata):
         self.id = testXMLValue(elem.find(nspath_eval("wfs:Name", namespaces)))
         self.title = testXMLValue(elem.find(nspath_eval("wfs:Title", namespaces)))
         self.abstract = testXMLValue(elem.find(nspath_eval("wfs:Abstract", namespaces)))
-        self.keywords = [
-            f.text
-            for f in elem.findall(nspath_eval("ows:Keywords/ows:Keyword", namespaces))
-        ]
+        self.keywords = [f.text for f in elem.findall(nspath_eval("ows:Keywords/ows:Keyword", namespaces))]
 
         # bbox
         self.boundingBoxWGS84 = None
@@ -415,29 +388,16 @@ class ContentMetadata(AbstractContentMetadata):
             except TypeError:
                 self.boundingBoxWGS84 = None
         # crs options
-        self.crsOptions = [
-            Crs(srs.text)
-            for srs in elem.findall(nspath_eval("wfs:OtherSRS", namespaces))
-        ]
+        self.crsOptions = [Crs(srs.text) for srs in elem.findall(nspath_eval("wfs:OtherSRS", namespaces))]
         dsrs = testXMLValue(elem.find(nspath_eval("wfs:DefaultSRS", namespaces)))
         if dsrs is not None:  # first element is default srs
             self.crsOptions.insert(0, Crs(dsrs))
 
         # verbs
-        self.verbOptions = [
-            op.text
-            for op in elem.findall(
-                nspath_eval("wfs:Operations/wfs:Operation", namespaces)
-            )
-        ]
+        self.verbOptions = [op.text for op in elem.findall(nspath_eval("wfs:Operations/wfs:Operation", namespaces))]
 
         # output formats
-        self.outputFormats = [
-            op.text
-            for op in elem.findall(
-                nspath_eval("wfs:OutputFormats/wfs:Format", namespaces)
-            )
-        ]
+        self.outputFormats = [op.text for op in elem.findall(nspath_eval("wfs:OutputFormats/wfs:Format", namespaces))]
 
         # MetadataURLs
         self.metadataUrls = []
@@ -460,9 +420,7 @@ class ContentMetadata(AbstractContentMetadata):
     def parse_remote_metadata(self, timeout=30):
         """Parse remote metadata for MetadataURL of format 'text/xml' and add it as metadataUrl['metadata']"""
         for metadataUrl in self.metadataUrls:
-            if (
-                metadataUrl["url"] is not None and metadataUrl["format"].lower() == "text/xml"
-            ):
+            if metadataUrl["url"] is not None and metadataUrl["format"].lower() == "text/xml":
                 try:
                     content = openURL(metadataUrl["url"], timeout=timeout, headers=self.headers, auth=self.auth)
                     doc = etree.fromstring(content.read())
@@ -474,9 +432,7 @@ class ContentMetadata(AbstractContentMetadata):
                         else:
                             metadataUrl["metadata"] = None
                     elif metadataUrl["type"] in ["TC211", "19115", "19139"]:
-                        mdelem = doc.find(
-                            ".//" + nspath_eval("gmd:MD_Metadata", namespaces)
-                        ) or doc.find(
+                        mdelem = doc.find(".//" + nspath_eval("gmd:MD_Metadata", namespaces)) or doc.find(
                             ".//" + nspath_eval("gmi:MI_Metadata", namespaces)
                         )
                         if mdelem is not None:

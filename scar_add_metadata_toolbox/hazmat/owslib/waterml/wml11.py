@@ -13,7 +13,12 @@
 #   vendored dependency
 # =================================================================
 
-from scar_add_metadata_toolbox.hazmat.owslib.waterml.wml import SitesResponse, TimeSeriesResponse, VariablesResponse, namespaces
+from scar_add_metadata_toolbox.hazmat.owslib.waterml.wml import (
+    SitesResponse,
+    TimeSeriesResponse,
+    VariablesResponse,
+    namespaces,
+)
 from scar_add_metadata_toolbox.hazmat.owslib.etree import etree, ElementType
 
 
@@ -29,21 +34,21 @@ class WaterML_1_1(object):
         else:
             self._root = etree.fromstring(element)
 
-        if hasattr(self._root, 'getroot'):
+        if hasattr(self._root, "getroot"):
             self._root = self._root.getroot()
 
-        self._ns = 'wml1.1'
+        self._ns = "wml1.1"
 
     @property
     def response(self):
         try:
-            if self._root.tag == str(ns(self._ns) + 'variablesResponse'):
+            if self._root.tag == str(ns(self._ns) + "variablesResponse"):
                 return VariablesResponse(self._root, self._ns)
-            elif self._root.tag == str(ns(self._ns) + 'timeSeriesResponse'):
+            elif self._root.tag == str(ns(self._ns) + "timeSeriesResponse"):
                 return TimeSeriesResponse(self._root, self._ns)
-            elif self._root.tag == str(ns(self._ns) + 'sitesResponse'):
+            elif self._root.tag == str(ns(self._ns) + "sitesResponse"):
                 return SitesResponse(self._root, self._ns)
         except Exception:
             raise
 
-        raise ValueError('Unable to determine response type from xml')
+        raise ValueError("Unable to determine response type from xml")

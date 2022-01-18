@@ -25,7 +25,12 @@
 from scar_add_metadata_toolbox.hazmat.owslib import util
 from scar_add_metadata_toolbox.hazmat.owslib.fgdc import Metadata
 from scar_add_metadata_toolbox.hazmat.owslib.iso import MD_Metadata
-from scar_add_metadata_toolbox.hazmat.owslib.ows import Constraint, ServiceIdentification, ServiceProvider, OperationsMetadata
+from scar_add_metadata_toolbox.hazmat.owslib.ows import (
+    Constraint,
+    ServiceIdentification,
+    ServiceProvider,
+    OperationsMetadata,
+)
 from scar_add_metadata_toolbox.hazmat.owslib.etree import etree
 from scar_add_metadata_toolbox.hazmat.owslib.util import nspath, testXMLValue, openURL, Authentication
 from scar_add_metadata_toolbox.hazmat.owslib.crs import Crs
@@ -73,7 +78,7 @@ class WebFeatureService_2_0_0(WebFeatureService_):
         password=None,
         auth=None,
     ):
-        """ overridden __new__ method
+        """overridden __new__ method
 
         @type url: string
         @param url: url of WFS capabilities document
@@ -153,12 +158,8 @@ class WebFeatureService_2_0_0(WebFeatureService_):
         if serviceidentelem is not None:
             self.identification = ServiceIdentification(serviceidentelem)
         # need to add to keywords list from featuretypelist information:
-        featuretypelistelem = self._capabilities.find(
-            nspath("FeatureTypeList", ns=WFS_NAMESPACE)
-        )
-        featuretypeelems = featuretypelistelem.findall(
-            nspath("FeatureType", ns=WFS_NAMESPACE)
-        )
+        featuretypelistelem = self._capabilities.find(nspath("FeatureTypeList", ns=WFS_NAMESPACE))
+        featuretypeelems = featuretypelistelem.findall(nspath("FeatureType", ns=WFS_NAMESPACE))
         if serviceidentelem is not None:
             for f in featuretypeelems:
                 kwds = f.findall(nspath("Keywords/Keyword", ns=OWS_NAMESPACE))
@@ -179,50 +180,31 @@ class WebFeatureService_2_0_0(WebFeatureService_):
             if elem.tag != nspath("ExtendedCapabilities"):
                 self.operations.append(OperationsMetadata(elem))
         self.constraints = {}
-        for elem in self._capabilities.findall(
-            nspath("OperationsMetadata/Constraint", ns=WFS_NAMESPACE)
-        ):
-            self.constraints[elem.attrib["name"]] = Constraint(
-                elem, self.owscommon.namespace
-            )
+        for elem in self._capabilities.findall(nspath("OperationsMetadata/Constraint", ns=WFS_NAMESPACE)):
+            self.constraints[elem.attrib["name"]] = Constraint(elem, self.owscommon.namespace)
         self.parameters = {}
-        for elem in self._capabilities.findall(
-            nspath("OperationsMetadata/Parameter", ns=WFS_NAMESPACE)
-        ):
-            self.parameters[elem.attrib["name"]] = Parameter(
-                elem, self.owscommon.namespace
-            )
+        for elem in self._capabilities.findall(nspath("OperationsMetadata/Parameter", ns=WFS_NAMESPACE)):
+            self.parameters[elem.attrib["name"]] = Parameter(elem, self.owscommon.namespace)
 
         # serviceContents metadata: our assumption is that services use a top-level
         # layer as a metadata organizer, nothing more.
 
         self.contents = {}
-        featuretypelist = self._capabilities.find(
-            nspath("FeatureTypeList", ns=WFS_NAMESPACE)
-        )
-        features = self._capabilities.findall(
-            nspath("FeatureTypeList/FeatureType", ns=WFS_NAMESPACE)
-        )
+        featuretypelist = self._capabilities.find(nspath("FeatureTypeList", ns=WFS_NAMESPACE))
+        features = self._capabilities.findall(nspath("FeatureTypeList/FeatureType", ns=WFS_NAMESPACE))
         for feature in features:
-            cm = ContentMetadata(
-                feature, featuretypelist, parse_remote_metadata, auth=self.auth
-            )
+            cm = ContentMetadata(feature, featuretypelist, parse_remote_metadata, auth=self.auth)
             self.contents[cm.id] = cm
 
         # exceptions
-        self.exceptions = [
-            f.text for f in self._capabilities.findall("Capability/Exception/Format")
-        ]
+        self.exceptions = [f.text for f in self._capabilities.findall("Capability/Exception/Format")]
 
     def getcapabilities(self):
         """Request and return capabilities document from the WFS as a
         file-like object.
         NOTE: this is effectively redundant now"""
         reader = WFSCapabilitiesReader(self.version, auth=self.auth)
-        return openURL(
-            reader.capabilities_url(self.url), timeout=self.timeout,
-            headers=self.headers, auth=self.auth
-        )
+        return openURL(reader.capabilities_url(self.url), timeout=self.timeout, headers=self.headers, auth=self.auth)
 
     def items(self):
         """supports dict-like items() access"""
@@ -341,13 +323,7 @@ class WebFeatureService_2_0_0(WebFeatureService_):
             return u
 
     def getpropertyvalue(
-        self,
-        query=None,
-        storedquery_id=None,
-        valuereference=None,
-        typename=None,
-        method=nspath("Get"),
-        **kwargs
+        self, query=None, storedquery_id=None, valuereference=None, typename=None, method=nspath("Get"), **kwargs
     ):
         """ the WFS GetPropertyValue method"""
         try:
@@ -406,9 +382,7 @@ class WebFeatureService_2_0_0(WebFeatureService_):
             "request": "ListStoredQueries",
         }
         encoded_request = urlencode(request)
-        u = openURL(
-            base_url, data=encoded_request, timeout=self.timeout, headers=self.headers, auth=self.auth
-        )
+        u = openURL(base_url, data=encoded_request, timeout=self.timeout, headers=self.headers, auth=self.auth)
         tree = etree.fromstring(u.read())
         tempdict = {}
         for sqelem in tree[:]:
@@ -438,9 +412,7 @@ class WebFeatureService_2_0_0(WebFeatureService_):
             "request": "DescribeStoredQueries",
         }
         encoded_request = urlencode(request)
-        u = openURL(
-            base_url, data=encoded_request, timeout=self.timeout, headers=self.headers, auth=self.auth
-        )
+        u = openURL(base_url, data=encoded_request, timeout=self.timeout, headers=self.headers, auth=self.auth)
         tree = etree.fromstring(u.read())
         tempdict2 = {}
         for sqelem in tree[:]:
@@ -501,9 +473,7 @@ class ContentMetadata(AbstractContentMetadata):
     Implements IMetadata.
     """
 
-    def __init__(
-        self, elem, parent, parse_remote_metadata=False, timeout=30, headers=None, auth=None
-    ):
+    def __init__(self, elem, parent, parse_remote_metadata=False, timeout=30, headers=None, auth=None):
         """."""
         super(ContentMetadata, self).__init__(headers=headers, auth=auth)
         self.id = elem.find(nspath("Name", ns=WFS_NAMESPACE)).text
@@ -513,9 +483,7 @@ class ContentMetadata(AbstractContentMetadata):
             self.abstract = abstract.text
         else:
             self.abstract = None
-        self.keywords = [
-            f.text for f in elem.findall(nspath("Keywords", ns=WFS_NAMESPACE))
-        ]
+        self.keywords = [f.text for f in elem.findall(nspath("Keywords", ns=WFS_NAMESPACE))]
 
         # bboxes
         self.boundingBoxWGS84 = None
@@ -540,21 +508,15 @@ class ContentMetadata(AbstractContentMetadata):
             except AttributeError:
                 self.boundingBoxWGS84 = None
         # crs options
-        self.crsOptions = [
-            Crs(srs.text) for srs in elem.findall(nspath("OtherCRS", ns=WFS_NAMESPACE))
-        ]
+        self.crsOptions = [Crs(srs.text) for srs in elem.findall(nspath("OtherCRS", ns=WFS_NAMESPACE))]
         defaultCrs = elem.findall(nspath("DefaultCRS", ns=WFS_NAMESPACE))
         if len(defaultCrs) > 0:
             self.crsOptions.insert(0, Crs(defaultCrs[0].text))
 
         # verbs
-        self.verbOptions = [
-            op.tag for op in parent.findall(nspath("Operations/*", ns=WFS_NAMESPACE))
-        ]
+        self.verbOptions = [op.tag for op in parent.findall(nspath("Operations/*", ns=WFS_NAMESPACE))]
         self.verbOptions + [
-            op.tag
-            for op in elem.findall(nspath("Operations/*", ns=WFS_NAMESPACE))
-            if op.tag not in self.verbOptions
+            op.tag for op in elem.findall(nspath("Operations/*", ns=WFS_NAMESPACE)) if op.tag not in self.verbOptions
         ]
 
         # others not used but needed for iContentMetadata harmonisation
@@ -565,11 +527,7 @@ class ContentMetadata(AbstractContentMetadata):
         # MetadataURLs
         self.metadataUrls = []
         for m in elem.findall(nspath("MetadataURL", ns=WFS_NAMESPACE)):
-            metadataUrl = {
-                "url": testXMLValue(
-                    m.attrib["{http://www.w3.org/1999/xlink}href"], attrib=True
-                )
-            }
+            metadataUrl = {"url": testXMLValue(m.attrib["{http://www.w3.org/1999/xlink}href"], attrib=True)}
             self.metadataUrls.append(metadataUrl)
 
         if parse_remote_metadata:
@@ -590,9 +548,7 @@ class ContentMetadata(AbstractContentMetadata):
 
                     mdelem = doc.find(
                         ".//" + util.nspath_eval("gmd:MD_Metadata", n.get_namespaces(["gmd"]))
-                    ) or doc.find(
-                        ".//" + util.nspath_eval("gmi:MI_Metadata", n.get_namespaces(["gmi"]))
-                    )
+                    ) or doc.find(".//" + util.nspath_eval("gmi:MI_Metadata", n.get_namespaces(["gmi"])))
                     if mdelem is not None:
                         metadataUrl["metadata"] = MD_Metadata(mdelem)
                         continue

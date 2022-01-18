@@ -39,9 +39,7 @@ GML_NAMESPACES = (
 )
 
 
-def get_schema(
-    url, typename, version="1.0.0", timeout=30, headers=None, username=None, password=None, auth=None
-):
+def get_schema(url, typename, version="1.0.0", timeout=30, headers=None, username=None, password=None, auth=None):
     """Parses DescribeFeatureType response and creates schema compatible
     with :class:`fiona`
 
@@ -61,8 +59,7 @@ def get_schema(
     else:
         auth = Authentication(username, password)
     url = _get_describefeaturetype_url(url, version, typename)
-    root = _get_remote_describefeaturetype(url, timeout=timeout,
-                                           headers=headers, auth=auth)
+    root = _get_remote_describefeaturetype(url, timeout=timeout, headers=headers, auth=auth)
 
     if ":" in typename:
         typename = typename.split(":")[1]
@@ -76,8 +73,7 @@ def get_schema(
 
 
 def _get_elements(complex_type, root):
-    """Get attribute elements
-    """
+    """Get attribute elements"""
 
     found_elements = []
     element = findall(

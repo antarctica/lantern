@@ -91,7 +91,7 @@ class WebFeatureService_1_0_0(object):
         password=None,
         auth=None,
     ):
-        """ overridden __new__ method
+        """overridden __new__ method
 
         @type url: string
         @param url: url of WFS capabilities document
@@ -182,25 +182,18 @@ class WebFeatureService_1_0_0(object):
         featuretypelist = self._capabilities.find(nspath("FeatureTypeList"))
         features = self._capabilities.findall(nspath("FeatureTypeList/FeatureType"))
         for feature in features:
-            cm = ContentMetadata(
-                feature, featuretypelist, parse_remote_metadata, auth=self.auth
-            )
+            cm = ContentMetadata(feature, featuretypelist, parse_remote_metadata, auth=self.auth)
             self.contents[cm.id] = cm
 
         # exceptions
-        self.exceptions = [
-            f.text for f in self._capabilities.findall("Capability/Exception/Format")
-        ]
+        self.exceptions = [f.text for f in self._capabilities.findall("Capability/Exception/Format")]
 
     def getcapabilities(self):
         """Request and return capabilities document from the WFS as a
         file-like object.
         NOTE: this is effectively redundant now"""
         reader = WFSCapabilitiesReader(self.version, auth=self.auth)
-        return openURL(
-            reader.capabilities_url(self.url), timeout=self.timeout,
-            headers=self.headers, auth=self.auth
-        )
+        return openURL(reader.capabilities_url(self.url), timeout=self.timeout, headers=self.headers, auth=self.auth)
 
     def items(self):
         """supports dict-like items() access"""
@@ -300,8 +293,7 @@ class WebFeatureService_1_0_0(object):
 
         data = urlencode(request)
         log.debug("Making request: %s?%s" % (base_url, data))
-        u = openURL(base_url, data, method, timeout=self.timeout,
-                    headers=self.headers, auth=self.auth)
+        u = openURL(base_url, data, method, timeout=self.timeout, headers=self.headers, auth=self.auth)
 
         # check for service exceptions, rewrap, and return
         # We're going to assume that anything with a content-length > 32k
@@ -361,9 +353,7 @@ class ServiceIdentification(object):
         self.abstract = testXMLValue(self._root.find(nspath("Abstract")))
         self.keywords = [f.text for f in self._root.findall(nspath("Keywords"))]
         self.fees = testXMLValue(self._root.find(nspath("Fees")))
-        self.accessconstraints = testXMLValue(
-            self._root.find(nspath("AccessConstraints"))
-        )
+        self.accessconstraints = testXMLValue(self._root.find(nspath("AccessConstraints")))
 
 
 class ServiceProvider(object):
@@ -382,9 +372,7 @@ class ContentMetadata(AbstractContentMetadata):
     Implements IMetadata.
     """
 
-    def __init__(
-        self, elem, parent, parse_remote_metadata=False, timeout=30, auth=None
-    ):
+    def __init__(self, elem, parent, parse_remote_metadata=False, timeout=30, auth=None):
         """."""
         super(ContentMetadata, self).__init__(auth)
         self.id = testXMLValue(elem.find(nspath("Name")))
@@ -414,11 +402,17 @@ class ContentMetadata(AbstractContentMetadata):
             try:
                 src_srs = pyproj.Proj(srs.text)
                 mincorner = pyproj.transform(
-                    src_srs, wgs84, b.attrib["minx"], b.attrib["miny"],
+                    src_srs,
+                    wgs84,
+                    b.attrib["minx"],
+                    b.attrib["miny"],
                     always_xy=True,
                 )
                 maxcorner = pyproj.transform(
-                    src_srs, wgs84, b.attrib["maxx"], b.attrib["maxy"],
+                    src_srs,
+                    wgs84,
+                    b.attrib["maxx"],
+                    b.attrib["maxy"],
                     always_xy=True,
                 )
 
@@ -436,11 +430,7 @@ class ContentMetadata(AbstractContentMetadata):
 
         # verbs
         self.verbOptions = [op.tag for op in parent.findall(nspath("Operations/*"))]
-        self.verbOptions + [
-            op.tag
-            for op in elem.findall(nspath("Operations/*"))
-            if op.tag not in self.verbOptions
-        ]
+        self.verbOptions + [op.tag for op in elem.findall(nspath("Operations/*")) if op.tag not in self.verbOptions]
 
         # others not used but needed for iContentMetadata harmonisation
         self.styles = None
@@ -460,13 +450,9 @@ class ContentMetadata(AbstractContentMetadata):
     def parse_remote_metadata(self, timeout=30):
         """Parse remote metadata for MetadataURL of format 'XML' and add it as metadataUrl['metadata']"""
         for metadataUrl in self.metadataUrls:
-            if (
-                metadataUrl["url"] is not None and metadataUrl["format"].lower() == "xml"
-            ):
+            if metadataUrl["url"] is not None and metadataUrl["format"].lower() == "xml":
                 try:
-                    content = openURL(
-                        metadataUrl["url"], timeout=timeout, headers=self.headers, auth=self.auth
-                    )
+                    content = openURL(metadataUrl["url"], timeout=timeout, headers=self.headers, auth=self.auth)
                     doc = etree.fromstring(content.read())
                     if metadataUrl["type"] == "FGDC":
                         mdelem = doc.find(".//metadata")
@@ -477,9 +463,7 @@ class ContentMetadata(AbstractContentMetadata):
                     elif metadataUrl["type"] == "TC211":
                         mdelem = doc.find(
                             ".//" + util.nspath_eval("gmd:MD_Metadata", n.get_namespaces(["gmd"]))
-                        ) or doc.find(
-                            ".//" + util.nspath_eval("gmi:MI_Metadata", n.get_namespaces(["gmi"]))
-                        )
+                        ) or doc.find(".//" + util.nspath_eval("gmi:MI_Metadata", n.get_namespaces(["gmi"])))
                         if mdelem is not None:
                             metadataUrl["metadata"] = MD_Metadata(mdelem)
                         else:

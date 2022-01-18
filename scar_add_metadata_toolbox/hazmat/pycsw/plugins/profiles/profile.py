@@ -33,13 +33,27 @@
 import os
 import warnings
 
-class Profile(object):
-    ''' base Profile class '''
-    def __init__(self, name, version, title, url,
-    namespace, typename, outputschema, prefixes, model, core_namespaces,
-    added_namespaces,repository):
 
-        ''' Initialize profile '''
+class Profile(object):
+    """ base Profile class """
+
+    def __init__(
+        self,
+        name,
+        version,
+        title,
+        url,
+        namespace,
+        typename,
+        outputschema,
+        prefixes,
+        model,
+        core_namespaces,
+        added_namespaces,
+        repository,
+    ):
+
+        """ Initialize profile """
         self.name = name
         self.version = version
         self.title = title
@@ -50,66 +64,62 @@ class Profile(object):
         self.prefixes = prefixes
         self.repository = repository
 
-        if 'DescribeRecord' in model['operations']:
-            model['operations']['DescribeRecord']['parameters']\
-            ['typeName']['values'].append(self.typename)
+        if "DescribeRecord" in model["operations"]:
+            model["operations"]["DescribeRecord"]["parameters"]["typeName"]["values"].append(self.typename)
 
-        model['operations']['GetRecords']['parameters']['outputSchema']\
-        ['values'].append(self.outputschema)
+        model["operations"]["GetRecords"]["parameters"]["outputSchema"]["values"].append(self.outputschema)
 
-        model['operations']['GetRecords']['parameters']['typeNames']\
-        ['values'].append(self.typename)
+        model["operations"]["GetRecords"]["parameters"]["typeNames"]["values"].append(self.typename)
 
-        model['operations']['GetRecordById']['parameters']['outputSchema']\
-        ['values'].append(self.outputschema)
+        model["operations"]["GetRecordById"]["parameters"]["outputSchema"]["values"].append(self.outputschema)
 
-        if 'Harvest' in model['operations']:
-            model['operations']['Harvest']['parameters']['ResourceType']\
-            ['values'].append(self.outputschema)
+        if "Harvest" in model["operations"]:
+            model["operations"]["Harvest"]["parameters"]["ResourceType"]["values"].append(self.outputschema)
 
         # namespaces
         core_namespaces.update(added_namespaces)
 
         # repository
-        model['typenames'][self.typename] = self.repository
+        model["typenames"][self.typename] = self.repository
 
     def extend_core(self, model, namespaces, config):
-        ''' Extend config.model and config.namespaces '''
+        """ Extend config.model and config.namespaces """
         raise NotImplementedError
 
     def check_parameters(self):
-        ''' Perform extra parameters checking.
-            Return dict with keys "locator", "code", "text" or None '''
+        """Perform extra parameters checking.
+        Return dict with keys "locator", "code", "text" or None"""
         raise NotImplementedError
 
     def get_extendedcapabilities(self):
-        ''' Return ExtendedCapabilities child as lxml.etree.Element '''
+        """ Return ExtendedCapabilities child as lxml.etree.Element """
         raise NotImplementedError
 
     def get_schemacomponents(self):
-        ''' Return schema components as lxml.etree.Element list '''
+        """ Return schema components as lxml.etree.Element list """
         raise NotImplementedError
 
     def check_getdomain(self, kvp):
-        '''Perform extra profile specific checks in the GetDomain request'''
+        """Perform extra profile specific checks in the GetDomain request"""
         raise NotImplementedError
 
     def write_record(self, result, esn, outputschema, queryables):
-        ''' Return csw:SearchResults child as lxml.etree.Element '''
+        """ Return csw:SearchResults child as lxml.etree.Element """
         raise NotImplementedError
 
     def transform2dcmappings(self, queryables):
-        ''' Transform information model mappings into csw:Record mappings '''
+        """ Transform information model mappings into csw:Record mappings """
         raise NotImplementedError
 
+
 def load_profiles(path, cls, profiles):
-    ''' load CSW profiles, return dict by class name '''
+    """ load CSW profiles, return dict by class name """
 
     def look_for_subclass(modulename):
         module = __import__(modulename)
 
         dmod = module.__dict__
-        for modname in modulename.split('.')[1:]:
+        for modname in modulename.split(".")[1:]:
             dmod = dmod[modname].__dict__
 
         for key, entry in dmod.items():
@@ -118,24 +128,26 @@ def load_profiles(path, cls, profiles):
 
             try:
                 if issubclass(entry, cls):
-                    aps['plugins'][key] = entry
+                    aps["plugins"][key] = entry
             except TypeError:
                 continue
 
     aps = {}
-    aps['plugins'] = {}
-    aps['loaded'] = {}
+    aps["plugins"] = {}
+    aps["loaded"] = {}
 
-    for prof in profiles.split(','):
+    for prof in profiles.split(","):
         # fgdc, atom, dif, gm03 are supported in core
         # no need to specify them explicitly anymore
         # provide deprecation warning
         # https://github.com/geopython/pycsw/issues/118
-        if prof in ['fgdc', 'atom', 'dif', 'gm03']:
-            warnings.warn('%s is now a core module, and does not need to be'
-                          ' specified explicitly.  So you can remove %s from '
-                          'server.profiles' % (prof, prof))
+        if prof in ["fgdc", "atom", "dif", "gm03"]:
+            warnings.warn(
+                "%s is now a core module, and does not need to be"
+                " specified explicitly.  So you can remove %s from "
+                "server.profiles" % (prof, prof)
+            )
         else:
-            modulename='%s.%s.%s' % (path.replace(os.sep, '.'), prof, prof)
+            modulename = "%s.%s.%s" % (path.replace(os.sep, "."), prof, prof)
             look_for_subclass(modulename)
     return aps

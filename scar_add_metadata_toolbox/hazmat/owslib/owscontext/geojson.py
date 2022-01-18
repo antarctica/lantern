@@ -34,6 +34,7 @@ from scar_add_metadata_toolbox.hazmat.owslib.owscontext.common import skip_nulls
 
 # from scar_add_metadata_toolbox.hazmat.owslib.util import log
 
+
 class DateTimeEncoder(json.JSONEncoder):
     """
     https://stackoverflow.com/questions/11875770/how-to-overcome-datetime-datetime-not-json-serializable/36142844#36142844

@@ -59,30 +59,30 @@ def cql2fes1(cql, namespaces):
     tmp_list = []
     logical_op = None
 
-    LOGGER.debug('CQL: %s', cql)
+    LOGGER.debug("CQL: %s", cql)
 
-    if ' or ' in cql:
-        logical_op = etree.Element(util.nspath_eval('ogc:Or', namespaces))
-        tmp_list = cql.split(' or ')
-    elif ' OR ' in cql:
-        logical_op = etree.Element(util.nspath_eval('ogc:Or', namespaces))
-        tmp_list = cql.split(' OR ')
-    elif ' and ' in cql:
-        logical_op = etree.Element(util.nspath_eval('ogc:And', namespaces))
-        tmp_list = cql.split(' and ')
-    elif ' AND ' in cql:
-        logical_op = etree.Element(util.nspath_eval('ogc:And', namespaces))
-        tmp_list = cql.split(' AND ')
+    if " or " in cql:
+        logical_op = etree.Element(util.nspath_eval("ogc:Or", namespaces))
+        tmp_list = cql.split(" or ")
+    elif " OR " in cql:
+        logical_op = etree.Element(util.nspath_eval("ogc:Or", namespaces))
+        tmp_list = cql.split(" OR ")
+    elif " and " in cql:
+        logical_op = etree.Element(util.nspath_eval("ogc:And", namespaces))
+        tmp_list = cql.split(" and ")
+    elif " AND " in cql:
+        logical_op = etree.Element(util.nspath_eval("ogc:And", namespaces))
+        tmp_list = cql.split(" AND ")
 
     if tmp_list:
-        LOGGER.debug('Logical operator found (AND/OR)')
+        LOGGER.debug("Logical operator found (AND/OR)")
     else:
         tmp_list.append(cql)
 
     for t in tmp_list:
         filters.append(_parse_condition(t))
 
-    root = etree.Element(util.nspath_eval('ogc:Filter', namespaces))
+    root = etree.Element(util.nspath_eval("ogc:Filter", namespaces))
 
     if logical_op is not None:
         root.append(logical_op)
@@ -90,21 +90,16 @@ def cql2fes1(cql, namespaces):
     for flt in filters:
         condition = etree.Element(util.nspath_eval(flt[0], namespaces))
 
-        etree.SubElement(
-            condition,
-            util.nspath_eval('ogc:PropertyName', namespaces)).text = flt[1]
+        etree.SubElement(condition, util.nspath_eval("ogc:PropertyName", namespaces)).text = flt[1]
 
-        etree.SubElement(
-            condition,
-            util.nspath_eval('ogc:Literal', namespaces)).text = flt[2]
+        etree.SubElement(condition, util.nspath_eval("ogc:Literal", namespaces)).text = flt[2]
 
         if logical_op is not None:
             logical_op.append(condition)
         else:
             root.append(condition)
 
-    LOGGER.debug('Resulting OGC Filter: %s',
-                 etree.tostring(root, pretty_print=1))
+    LOGGER.debug("Resulting OGC Filter: %s", etree.tostring(root, pretty_print=1))
 
     return root
 
@@ -112,19 +107,18 @@ def cql2fes1(cql, namespaces):
 def _parse_condition(condition):
     """parses a single condition"""
 
-    LOGGER.debug('condition: %s', condition)
+    LOGGER.debug("condition: %s", condition)
 
     # split at the most 2 times to take into account literals with
     # spaces in them
     property_name, operator, literal = condition.split(None, 2)
 
-    literal = literal.replace('"', '').replace('\'', '')
+    literal = literal.replace('"', "").replace("'", "")
 
-    for k, v in fes1_model['ComparisonOperators'].items():
-        if v['opvalue'] == operator:
+    for k, v in fes1_model["ComparisonOperators"].items():
+        if v["opvalue"] == operator:
             fes1_predicate = k
 
-    LOGGER.debug('parsed condition: %s %s %s', property_name, fes1_predicate,
-                 literal)
+    LOGGER.debug("parsed condition: %s %s %s", property_name, fes1_predicate, literal)
 
     return (fes1_predicate, property_name, literal)

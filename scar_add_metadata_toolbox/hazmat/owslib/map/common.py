@@ -20,10 +20,9 @@ from scar_add_metadata_toolbox.hazmat.owslib.util import strip_bom, Authenticati
 
 
 class WMSCapabilitiesReader(object):
-    """Read and parse capabilities document into a lxml.etree infoset
-    """
+    """Read and parse capabilities document into a lxml.etree infoset"""
 
-    def __init__(self, version='1.1.1', url=None, un=None, pw=None, headers=None, auth=None):
+    def __init__(self, version="1.1.1", url=None, un=None, pw=None, headers=None, auth=None):
         """Initialize"""
         self.version = version
         self._infoset = None
@@ -48,23 +47,22 @@ class WMSCapabilitiesReader(object):
         #     self._open = opener.open
 
     def capabilities_url(self, service_url):
-        """Return a capabilities url
-        """
+        """Return a capabilities url"""
         qs = []
-        if service_url.find('?') != -1:
-            qs = parse_qsl(service_url.split('?')[1])
+        if service_url.find("?") != -1:
+            qs = parse_qsl(service_url.split("?")[1])
 
         params = [x[0] for x in qs]
 
-        if 'service' not in params:
-            qs.append(('service', 'WMS'))
-        if 'request' not in params:
-            qs.append(('request', 'GetCapabilities'))
-        if 'version' not in params:
-            qs.append(('version', self.version))
+        if "service" not in params:
+            qs.append(("service", "WMS"))
+        if "request" not in params:
+            qs.append(("request", "GetCapabilities"))
+        if "version" not in params:
+            qs.append(("version", self.version))
 
         urlqs = urlencode(tuple(qs))
-        return service_url.split('?')[0] + '?' + urlqs
+        return service_url.split("?")[0] + "?" + urlqs
 
     def read(self, service_url, timeout=30):
         """Get and parse a WMS capabilities document, returning an
@@ -76,9 +74,8 @@ class WMSCapabilitiesReader(object):
         self.request = self.capabilities_url(service_url)
 
         # now split it up again to use the generic openURL function...
-        spliturl = self.request.split('?')
-        u = openURL(spliturl[0], spliturl[1], method='Get',
-                    timeout=timeout, headers=self.headers, auth=self.auth)
+        spliturl = self.request.split("?")
+        u = openURL(spliturl[0], spliturl[1], method="Get", timeout=timeout, headers=self.headers, auth=self.auth)
 
         raw_text = strip_bom(u.read())
         return etree.fromstring(raw_text)
@@ -95,9 +92,8 @@ class WMSCapabilitiesReader(object):
 
 
 class AbstractContentMetadata(object):
-
     def __init__(self, auth=None):
         self.auth = auth or Authentication()
 
     def get_metadata(self):
-        return [m['metadata'] for m in self.metadataUrls if m.get('metadata', None) is not None]
+        return [m["metadata"] for m in self.metadataUrls if m.get("metadata", None) is not None]

@@ -19,18 +19,17 @@ https://portal.opengeospatial.org/files/?artifact_id=8618
 from .etree import etree
 
 
-context_ns_uri = 'http://www.opengis.net/context'
-context_schemas_uri = 'http://schemas.opengis.net/context/1.0.0/context.xsd'
+context_ns_uri = "http://www.opengis.net/context"
+context_schemas_uri = "http://schemas.opengis.net/context/1.0.0/context.xsd"
 
 
 def WMCElement(tag):
-    """WMC based element
-    """
+    """WMC based element"""
     return etree.Element("{%s}" % context_ns_uri + tag)
 
 
 class MapContext:
-    """ Map Context abstraction
+    """Map Context abstraction
 
     It uses a Map representation as input and export it as as map
     context
@@ -40,40 +39,39 @@ class MapContext:
         self._map = map_
 
     def _getRootElement(self):
-        root = WMCElement('ViewContext')
+        root = WMCElement("ViewContext")
         attrs = {
-            '{http://www.w3.org/2001/XMLSchema-instance}schemaLocation':
-            context_ns_uri + ' ' + context_schemas_uri,
-            'id': self._map.id,
-            'version': '1.0.0',
+            "{http://www.w3.org/2001/XMLSchema-instance}schemaLocation": context_ns_uri + " " + context_schemas_uri,
+            "id": self._map.id,
+            "version": "1.0.0",
         }
         for k, v in list(attrs.items()):
             root.attrib[k] = v
         return root
 
     def _getGeneralElement(self):
-        general = WMCElement('General')
+        general = WMCElement("General")
         general.append(self._getWindowElement())
         general.append(self._getBoundingBoxElement())
         return general
 
     def _getWindowElement(self):
-        window = WMCElement('Window')
-        window.attrib['width'] = str(self._map.size[0])
-        window.attrib['height'] = str(self._map.size[1])
+        window = WMCElement("Window")
+        window.attrib["width"] = str(self._map.size[0])
+        window.attrib["height"] = str(self._map.size[1])
         return window
 
     def _getBoundingBoxElement(self):
-        bbox = WMCElement('BoundingBox')
-        bbox.attrib['SRS'] = str(self._map.srs.split()[0])
-        bbox.attrib['minx'] = str(self._map.bounds[0])
-        bbox.attrib['miny'] = str(self._map.bounds[1])
-        bbox.attrib['maxx'] = str(self._map.bounds[2])
-        bbox.attrib['maxy'] = str(self._map.bounds[3])
+        bbox = WMCElement("BoundingBox")
+        bbox.attrib["SRS"] = str(self._map.srs.split()[0])
+        bbox.attrib["minx"] = str(self._map.bounds[0])
+        bbox.attrib["miny"] = str(self._map.bounds[1])
+        bbox.attrib["maxx"] = str(self._map.bounds[2])
+        bbox.attrib["maxy"] = str(self._map.bounds[3])
         return bbox
 
     def _getLayerListElement(self):
-        layerlist = WMCElement('LayerList')
+        layerlist = WMCElement("LayerList")
         layering = list(zip(self._map.layernames, self._map.layertitles))
         layer_infos = self._map.getLayerInfos()
 
@@ -81,53 +79,50 @@ class MapContext:
         for name, title in layering:
 
             # Layer
-            layer = WMCElement('Layer')
-            layer.attrib['queryable'] = '0'
-            layer.attrib['hidden'] = str(
-                int(name not in self._map.visible_layers))
+            layer = WMCElement("Layer")
+            layer.attrib["queryable"] = "0"
+            layer.attrib["hidden"] = str(int(name not in self._map.visible_layers))
 
             # Layer styles
             if layer_infos and layer_infos.get(title):
-                stylelist = WMCElement('StyleList')
+                stylelist = WMCElement("StyleList")
                 # Get wms `Style` nodes for a given layer
                 for e_style in layer_infos.get(title):
-                    e_style.attrib['current'] = '1'
+                    e_style.attrib["current"] = "1"
                     # Change namespace to wmc
                     for node in e_style.getiterator():
-                        tag_name = node.tag[node.tag.rfind('}') + 1:]
+                        tag_name = node.tag[node.tag.rfind("}") + 1 :]
                         node.tag = "{%s}" % context_ns_uri + tag_name
                     stylelist.append(e_style)
                 layer.append(stylelist)
 
             # Server
-            server = WMCElement('Server')
-            server.attrib['service'] = 'OGC:WMS'
-            server.attrib['version'] = '1.1.1'
-            server.attrib['title'] = 'OGC:WMS'
+            server = WMCElement("Server")
+            server.attrib["service"] = "OGC:WMS"
+            server.attrib["version"] = "1.1.1"
+            server.attrib["title"] = "OGC:WMS"
 
             # OnlineRessource
-            oressource = WMCElement('OnlineResource')
-            oressource.attrib[
-                '{http://www.w3.org/1999/xlink}type'] = 'simple'
-            oressource.attrib[
-                '{http://www.w3.org/1999/xlink}href'] = self._map.url
+            oressource = WMCElement("OnlineResource")
+            oressource.attrib["{http://www.w3.org/1999/xlink}type"] = "simple"
+            oressource.attrib["{http://www.w3.org/1999/xlink}href"] = self._map.url
             server.append(oressource)
             layer.append(server)
 
             # Name
-            e_name = WMCElement('Name')
+            e_name = WMCElement("Name")
             e_name.text = name
             layer.append(e_name)
 
             # Title
-            e_title = WMCElement('Title')
+            e_title = WMCElement("Title")
             e_title.text = title
             layer.append(e_title)
 
             # Format
-            formatlist = WMCElement('FormatList')
-            format = WMCElement('Format')
-            format.attrib['current'] = '1'
+            formatlist = WMCElement("FormatList")
+            format = WMCElement("Format")
+            format.attrib["current"] = "1"
             format.text = self._map.format
             formatlist.append(format)
             layer.append(formatlist)
@@ -136,8 +131,7 @@ class MapContext:
         return layerlist
 
     def __call__(self):
-        """Export self._map to WMC
-        """
+        """Export self._map to WMC"""
         wmc_doc_tree = self._getRootElement()
         wmc_doc_tree.append(self._getGeneralElement())
         wmc_doc_tree.append(self._getLayerListElement())
@@ -145,7 +139,7 @@ class MapContext:
 
 
 class AggregateMapContext(MapContext):
-    """ Map Context abstraction
+    """Map Context abstraction
 
     It uses a Map representation as input and export it as as map
     context -- with aggregation of all layers accomplished through
@@ -153,42 +147,42 @@ class AggregateMapContext(MapContext):
     """
 
     def _getLayerListElement(self):
-        layerlist = WMCElement('LayerList')
+        layerlist = WMCElement("LayerList")
         # layering = zip(self._map.layernames, self._map.layertitles)
         # layer_infos = self._map.getLayerInfos()
 
         # Layer
-        layer = WMCElement('Layer')
-        layer.attrib['queryable'] = '0'
-        layer.attrib['hidden'] = '0'
+        layer = WMCElement("Layer")
+        layer.attrib["queryable"] = "0"
+        layer.attrib["hidden"] = "0"
 
         # Server
-        server = WMCElement('Server')
-        server.attrib['service'] = 'OGC:WMS'
-        server.attrib['version'] = '1.1.1'
-        server.attrib['title'] = 'OGC:WMS'
+        server = WMCElement("Server")
+        server.attrib["service"] = "OGC:WMS"
+        server.attrib["version"] = "1.1.1"
+        server.attrib["title"] = "OGC:WMS"
 
         # OnlineRessource
-        oressource = WMCElement('OnlineResource')
-        oressource.attrib['{http://www.w3.org/1999/xlink}type'] = 'simple'
-        oressource.attrib['{http://www.w3.org/1999/xlink}href'] = self._map.url
+        oressource = WMCElement("OnlineResource")
+        oressource.attrib["{http://www.w3.org/1999/xlink}type"] = "simple"
+        oressource.attrib["{http://www.w3.org/1999/xlink}href"] = self._map.url
         server.append(oressource)
         layer.append(server)
 
         # Name
-        e_name = WMCElement('Name')
-        e_name.text = ','.join(self._map.layernames)
+        e_name = WMCElement("Name")
+        e_name.text = ",".join(self._map.layernames)
         layer.append(e_name)
 
         # Title
-        e_title = WMCElement('Title')
-        e_title.text = 'Aggregate Layers'
+        e_title = WMCElement("Title")
+        e_title.text = "Aggregate Layers"
         layer.append(e_title)
 
         # Format
-        formatlist = WMCElement('FormatList')
-        format = WMCElement('Format')
-        format.attrib['current'] = '1'
+        formatlist = WMCElement("FormatList")
+        format = WMCElement("Format")
+        format.attrib["current"] = "1"
         format.text = self._map.format
         formatlist.append(format)
         layer.append(formatlist)

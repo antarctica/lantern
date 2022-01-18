@@ -15,7 +15,12 @@
 
 from scar_add_metadata_toolbox.hazmat.owslib.util import nspath_eval
 from scar_add_metadata_toolbox.hazmat.owslib.namespaces import Namespaces
-from scar_add_metadata_toolbox.hazmat.owslib.util import testXMLAttribute, testXMLValue, InfiniteDateTime, NegativeInfiniteDateTime
+from scar_add_metadata_toolbox.hazmat.owslib.util import (
+    testXMLAttribute,
+    testXMLValue,
+    InfiniteDateTime,
+    NegativeInfiniteDateTime,
+)
 
 from dateutil import parser
 from datetime import timedelta
@@ -86,8 +91,9 @@ def get_float(value):
         return None
 
 
-AnyScalar = [nspv(x) for x in [
-    "swe20:Boolean", "swe20:Count", "swe20:Quantity", "swe20:Time", "swe20:Category", "swe20:Text"]]
+AnyScalar = [
+    nspv(x) for x in ["swe20:Boolean", "swe20:Count", "swe20:Quantity", "swe20:Time", "swe20:Category", "swe20:Text"]
+]
 AnyNumerical = [nspv(x) for x in ["swe20:Count", "swe20:Quantity", "swe20:Time"]]
 AnyRange = [nspv(x) for x in ["swe20:QuantityRange", "swe20:TimeRange", "swe20:CountRange", "swe20:CategoryRange"]]
 
@@ -117,42 +123,45 @@ class NamedObject(object):
 class AbstractSWE(object):
     def __init__(self, element):
         # Attributes
-        self.id = testXMLAttribute(element, "id")   # string, optional
+        self.id = testXMLAttribute(element, "id")  # string, optional
 
         # Elements
-        self.extention = []                            # anyType, min=0, max=X
+        self.extention = []  # anyType, min=0, max=X
 
 
 class AbstractSWEIdentifiable(AbstractSWE):
     def __init__(self, element):
         super(AbstractSWEIdentifiable, self).__init__(element)
         # Elements
-        self.identifier = testXMLValue(element.find(nspv("swe20:identifier")))    # anyURI, min=0
-        self.label = testXMLValue(element.find(nspv("swe20:label")))         # string, min=0
-        self.description = testXMLValue(element.find(nspv("swe20:description")))   # string, min=0
+        self.identifier = testXMLValue(element.find(nspv("swe20:identifier")))  # anyURI, min=0
+        self.label = testXMLValue(element.find(nspv("swe20:label")))  # string, min=0
+        self.description = testXMLValue(element.find(nspv("swe20:description")))  # string, min=0
 
 
 class AbstractDataComponent(AbstractSWEIdentifiable):
     def __init__(self, element):
         super(AbstractDataComponent, self).__init__(element)
         # Attributes
-        self.definition = testXMLAttribute(element, "definition")                        # anyURI, required
-        self.updatable = get_boolean(testXMLAttribute(element, "updatable"))            # boolean, optional
-        self.optional = get_boolean(testXMLAttribute(element, "optional")) or False    # boolean, default=False
+        self.definition = testXMLAttribute(element, "definition")  # anyURI, required
+        self.updatable = get_boolean(testXMLAttribute(element, "updatable"))  # boolean, optional
+        self.optional = get_boolean(testXMLAttribute(element, "optional")) or False  # boolean, default=False
 
 
 class AbstractSimpleComponent(AbstractDataComponent):
     def __init__(self, element):
         super(AbstractSimpleComponent, self).__init__(element)
         # Attributes
-        self.referenceFrame = testXMLAttribute(element, "referenceFrame")    # anyURI, optional
-        self.axisID = testXMLAttribute(element, "axisID")            # string, optional
+        self.referenceFrame = testXMLAttribute(element, "referenceFrame")  # anyURI, optional
+        self.axisID = testXMLAttribute(element, "axisID")  # string, optional
 
         # Elements
         self.quality = [
-            _f for _f in [
-                Quality(q) for q in [
-                    e.find('*') for e in element.findall(nspv("swe20:quality"))] if q is not None] if _f]
+            _f
+            for _f in [
+                Quality(q) for q in [e.find("*") for e in element.findall(nspv("swe20:quality"))] if q is not None
+            ]
+            if _f
+        ]
         try:
             self.nilValues = NilValues(element.find(nspv("swe20:nilValues")))
         except Exception:
@@ -178,8 +187,8 @@ class NilValues(AbstractSWE):
     def __init__(self, element):
         super(NilValues, self).__init__(element)
         self.nilValue = [
-            _f for _f in [
-                nilValue(x) for x in element.findall(nspv("swe20:nilValue"))] if _f]  # string, min=0, max=X
+            _f for _f in [nilValue(x) for x in element.findall(nspv("swe20:nilValue"))] if _f
+        ]  # string, min=0, max=X
 
 
 class nilValue(object):
@@ -192,8 +201,8 @@ class AllowedTokens(AbstractSWE):
     def __init__(self, element):
         super(AllowedTokens, self).__init__(element)
         self.value = [
-            _f for _f in [
-                testXMLValue(x) for x in element.findall(nspv("swe20:value"))] if _f]  # string, min=0, max=X
+            _f for _f in [testXMLValue(x) for x in element.findall(nspv("swe20:value"))] if _f
+        ]  # string, min=0, max=X
         # string (Unicode Technical Standard #18, Version 13), min=0
         self.pattern = testXMLValue(element.find(nspv("swe20:pattern")))
 
@@ -202,13 +211,14 @@ class AllowedValues(AbstractSWE):
     def __init__(self, element):
         super(AllowedValues, self).__init__(element)
         self.value = [
-            _f for _f in [
-                get_float(x) for x in [
-                    testXMLValue(x) for x in element.findall(nspv("swe20:value"))]] if _f]
+            _f for _f in [get_float(x) for x in [testXMLValue(x) for x in element.findall(nspv("swe20:value"))]] if _f
+        ]
         self.interval = [
-            _f for _f in [make_pair(testXMLValue(x)) for x in element.findall(nspv("swe20:interval"))] if _f]
+            _f for _f in [make_pair(testXMLValue(x)) for x in element.findall(nspv("swe20:interval"))] if _f
+        ]
         self.significantFigures = get_int(
-            testXMLValue(element.find(nspv("swe20:significantFigures"))))  # integer, min=0
+            testXMLValue(element.find(nspv("swe20:significantFigures")))
+        )  # integer, min=0
 
 
 class AllowedTimes(AbstractSWE):
@@ -216,10 +226,11 @@ class AllowedTimes(AbstractSWE):
         super(AllowedTimes, self).__init__(element)
         self.value = [_f for _f in [testXMLValue(x) for x in element.findall(nspv("swe20:value"))] if _f]
         self.interval = [
-            _f for _f in [
-                make_pair(testXMLValue(x)) for x in element.findall(nspv("swe20:interval"))] if _f]
+            _f for _f in [make_pair(testXMLValue(x)) for x in element.findall(nspv("swe20:interval"))] if _f
+        ]
         self.significantFigures = get_int(
-            testXMLValue(element.find(nspv("swe20:significantFigures"))))  # integer, min=0
+            testXMLValue(element.find(nspv("swe20:significantFigures")))
+        )  # integer, min=0
 
 
 class Boolean(AbstractSimpleComponent):
@@ -256,12 +267,14 @@ class Category(AbstractSimpleComponent):
         super(Category, self).__init__(element)
         # Elements
         self.codeSpace = testXMLAttribute(
-            element.find(nspv("swe20:codeSpace")), nspv("xlink:href"))  # Reference, min=0, max=1
+            element.find(nspv("swe20:codeSpace")), nspv("xlink:href")
+        )  # Reference, min=0, max=1
         self.value = testXMLValue(element.find(nspv("swe20:value")))  # string, min=0, max=1
 
         try:
             self.constraint = AllowedTokens(
-                element.find(nspv("swe20:constraint/swe20:AllowedTokens")))  # AllowedTokens, min=0, max=1
+                element.find(nspv("swe20:constraint/swe20:AllowedTokens"))
+            )  # AllowedTokens, min=0, max=1
         except Exception:
             self.constraint = None
 
@@ -282,7 +295,8 @@ class Count(AbstractSimpleComponent):
 
         try:
             self.constraint = AllowedValues(
-                element.find(nspv("swe20:constraint/swe20:AllowedValues")))  # AllowedValues, min=0, max=1
+                element.find(nspv("swe20:constraint/swe20:AllowedValues"))
+            )  # AllowedValues, min=0, max=1
         except Exception:
             self.constraint = None
 
@@ -304,7 +318,8 @@ class Quantity(AbstractSimpleComponent):
 
         try:
             self.constraint = AllowedValues(
-                element.find(nspv("swe20:constraint/swe20:AllowedValues")))  # AllowedValues, min=0, max=1
+                element.find(nspv("swe20:constraint/swe20:AllowedValues"))
+            )  # AllowedValues, min=0, max=1
         except Exception:
             self.constraint = None
 
@@ -356,7 +371,8 @@ class Time(AbstractSimpleComponent):
 
         try:
             self.constraint = AllowedTimes(
-                element.find(nspv("swe20:constraint/swe20:AllowedTimes")))  # AllowedTimes, min=0, max=1
+                element.find(nspv("swe20:constraint/swe20:AllowedTimes"))
+            )  # AllowedTimes, min=0, max=1
         except Exception:
             self.constraint = None
 
@@ -379,7 +395,8 @@ class TimeRange(AbstractSimpleComponent):
 
         try:
             self.constraint = AllowedTimes(
-                element.find(nspv("swe20:constraint/swe20:AllowedTimes")))  # AllowedTimes, min=0, max=1
+                element.find(nspv("swe20:constraint/swe20:AllowedTimes"))
+            )  # AllowedTimes, min=0, max=1
         except Exception:
             self.constraint = None
 
@@ -447,8 +464,8 @@ class Item(NamedObject):
 class DataArray(AbstractDataComponent):
     def __init__(self, element):
         super(DataArray, self).__init__(element)
-        self.elementCount = element.find(nspv("swe20:elementCount/swe20:Count"))      # required
-        self.elementType = ElementType(element.find(nspv("swe20:elementType")))      # required
+        self.elementCount = element.find(nspv("swe20:elementCount/swe20:Count"))  # required
+        self.elementType = ElementType(element.find(nspv("swe20:elementType")))  # required
         self.values = testXMLValue(element.find(nspv("swe20:values")))
         try:
             self.encoding = AbstractEncoding(element.find(nspv("swe20:encoding")))
@@ -459,19 +476,19 @@ class DataArray(AbstractDataComponent):
 class Matrix(AbstractDataComponent):
     def __init__(self, element):
         super(Matrix, self).__init__(element)
-        self.elementCount = element.find(nspv("swe20:elementCount/swe20:Count"))      # required
-        self.elementType = ElementType(element.find(nspv("swe20:elementType")))      # required
+        self.elementCount = element.find(nspv("swe20:elementCount/swe20:Count"))  # required
+        self.elementType = ElementType(element.find(nspv("swe20:elementType")))  # required
         self.encoding = AbstractEncoding(element.find(nspv("swe20:encoding")))
         self.values = testXMLValue(element.find(nspv("swe20:values")))
-        self.referenceFrame = testXMLAttribute(element, "referenceFrame")               # anyURI, required
-        self.localFrame = testXMLAttribute(element, "localFrame")                   # anyURI, optional
+        self.referenceFrame = testXMLAttribute(element, "referenceFrame")  # anyURI, required
+        self.localFrame = testXMLAttribute(element, "localFrame")  # anyURI, optional
 
 
 class DataStream(AbstractSWEIdentifiable):
     def __init__(self, element):
         super(DataStream, self).__init__(element)
-        self.elementCount = element.find(nspv("swe20:elementCount/swe20:Count"))      # optional
-        self.elementType = ElementType(element.find(nspv("swe20:elementType")))      # optional
+        self.elementCount = element.find(nspv("swe20:elementCount/swe20:Count"))  # optional
+        self.elementType = ElementType(element.find(nspv("swe20:elementType")))  # optional
         self.encoding = AbstractEncoding(element.find(nspv("swe20:encoding")))
         self.values = testXMLValue(element.find(nspv("swe20:values")))
 
@@ -513,5 +530,4 @@ class BinaryEncoding(AbstractEncoding):
 
 
 # TODO: Individually whitelist valid classes which correspond to XML tags
-obj_mapping = {name: obj for name, obj in inspect.getmembers(modules[__name__],
-                                                             inspect.isclass)}
+obj_mapping = {name: obj for name, obj in inspect.getmembers(modules[__name__], inspect.isclass)}

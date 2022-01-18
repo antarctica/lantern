@@ -44,7 +44,12 @@ import errno
 import dateutil.parser as parser
 from datetime import timedelta
 import logging
-from scar_add_metadata_toolbox.hazmat.owslib.util import log, datetime_from_ansi, datetime_from_iso, param_list_to_url_string
+from scar_add_metadata_toolbox.hazmat.owslib.util import (
+    log,
+    datetime_from_ansi,
+    datetime_from_iso,
+    param_list_to_url_string,
+)
 
 
 #  function to save writing out WCS namespace in full each time
@@ -90,36 +95,26 @@ class WebCoverageService_2_0_1(WCSBase):
 
         # serviceIdentification metadata
         subelem = self._capabilities.find(ns("ServiceIdentification"))
-        self.identification = ServiceIdentification(
-            subelem, namespace=self.ows_common.namespace
-        )
+        self.identification = ServiceIdentification(subelem, namespace=self.ows_common.namespace)
 
         # serviceProvider metadata
         serviceproviderelem = self._capabilities.find(ns("ServiceProvider"))
-        self.provider = ServiceProvider(
-            serviceproviderelem, namespace=self.ows_common.namespace
-        )
+        self.provider = ServiceProvider(serviceproviderelem, namespace=self.ows_common.namespace)
 
         # serviceOperations metadata
         self.operations = []
         for elem in self._capabilities.find(ns("OperationsMetadata"))[:]:
             if elem.tag != ns("ExtendedCapabilities"):
-                self.operations.append(
-                    OperationsMetadata(elem, namespace=self.ows_common.namespace)
-                )
+                self.operations.append(OperationsMetadata(elem, namespace=self.ows_common.namespace))
 
         # serviceContents metadata
         self.contents = {}
-        for elem in self._capabilities.findall(
-            nsWCS2("Contents/") + nsWCS2("CoverageSummary")
-        ):
+        for elem in self._capabilities.findall(nsWCS2("Contents/") + nsWCS2("CoverageSummary")):
             cm = ContentMetadata(elem, self)
             self.contents[cm.id] = cm
 
         # exceptions
-        self.exceptions = [
-            f.text for f in self._capabilities.findall("Capability/Exception/Format")
-        ]
+        self.exceptions = [f.text for f in self._capabilities.findall("Capability/Exception/Format")]
 
     def items(self):
         """supports dict-like items() access"""
@@ -145,7 +140,7 @@ class WebCoverageService_2_0_1(WCSBase):
         resz=None,
         parameter=None,
         method="Get",
-        **kwargs
+        **kwargs,
     ):
         """Request and return a coverage from the WCS as a file-like object
         note: additional **kwargs helps with multi-version implementation
@@ -219,13 +214,13 @@ class WebCoverageService_2_0_1(WCSBase):
         # encode and request
         data = urlencode(request)
         if subsets:
-            data += param_list_to_url_string(subsets, 'subset')
+            data += param_list_to_url_string(subsets, "subset")
         if resolutions:
-            log.debug('Adding vendor-specific RESOLUTION parameter.')
-            data += param_list_to_url_string(resolutions, 'resolution')
+            log.debug("Adding vendor-specific RESOLUTION parameter.")
+            data += param_list_to_url_string(resolutions, "resolution")
         if sizes:
-            log.debug('Adding vendor-specific SIZE parameter.')
-            data += param_list_to_url_string(sizes, 'size')
+            log.debug("Adding vendor-specific SIZE parameter.")
+            data += param_list_to_url_string(sizes, "size")
 
         log.debug("WCS 2.0.1 DEBUG: Second part of URL: %s" % data)
 
@@ -253,9 +248,7 @@ class ContentMetadata(object):
         self.id = elem.find(nsWCS2("CoverageId")).text
         self.title = testXMLValue(elem.find(ns("label")))
         self.abstract = testXMLValue(elem.find(ns("description")))
-        self.keywords = [
-            f.text for f in elem.findall(ns("keywords") + "/" + ns("keyword"))
-        ]
+        self.keywords = [f.text for f in elem.findall(ns("keywords") + "/" + ns("keyword"))]
         self.boundingBox = None  # needed for iContentMetadata harmonisation
         self.boundingBoxWGS84 = None
         b = elem.find(ns("lonLatEnvelope"))
@@ -279,14 +272,18 @@ class ContentMetadata(object):
         if not hasattr(self, "descCov"):
             self.descCov = self._service.getDescribeCoverage(self.id)
         gridelem = self.descCov.find(
-            nsWCS2("CoverageDescription/") + "{http://www.opengis.net/gml/3.2}domainSet/" + "{http://www.opengis.net/gml/3.3/rgrid}ReferenceableGridByVectors"  # noqa
+            nsWCS2("CoverageDescription/")
+            + "{http://www.opengis.net/gml/3.2}domainSet/"
+            + "{http://www.opengis.net/gml/3.3/rgrid}ReferenceableGridByVectors"  # noqa
         )
         if gridelem is not None:
             grid = ReferenceableGridByVectors(gridelem)
         else:
             # HERE I LOOK FOR RECTIFIEDGRID
             gridelem = self.descCov.find(
-                nsWCS2("CoverageDescription/") + "{http://www.opengis.net/gml/3.2}domainSet/" + "{http://www.opengis.net/gml/3.2}RectifiedGrid"  # noqa
+                nsWCS2("CoverageDescription/")
+                + "{http://www.opengis.net/gml/3.2}domainSet/"
+                + "{http://www.opengis.net/gml/3.2}RectifiedGrid"  # noqa
             )
             grid = RectifiedGrid(gridelem)
         return grid
@@ -321,15 +318,15 @@ class ContentMetadata(object):
             self.descCov = self._service.getDescribeCoverage(self.id)
 
         gridelem = self.descCov.find(
-            nsWCS2("CoverageDescription/") + "{http://www.opengis.net/gml/3.2}domainSet/" + "{http://www.opengis.net/gml/3.3/rgrid}ReferenceableGridByVectors"  # noqa
+            nsWCS2("CoverageDescription/")
+            + "{http://www.opengis.net/gml/3.2}domainSet/"
+            + "{http://www.opengis.net/gml/3.3/rgrid}ReferenceableGridByVectors"  # noqa
         )
         if gridelem is not None:
             # irregular time axis
             cooeficients = []
 
-            grid_axes = gridelem.findall(
-                "{http://www.opengis.net/gml/3.3/rgrid}generalGridAxis"
-            )
+            grid_axes = gridelem.findall("{http://www.opengis.net/gml/3.3/rgrid}generalGridAxis")
             for elem in grid_axes:
                 if elem.find(
                     "{http://www.opengis.net/gml/3.3/rgrid}GeneralGridAxis/{http://www.opengis.net/gml/3.3/rgrid}gridAxesSpanned"  # noqa
@@ -365,8 +362,8 @@ class ContentMetadata(object):
     timepositions = property(_getTimePositions, None)
 
     def _getOtherBoundingBoxes(self):
-        """ incomplete, should return other bounding boxes not in WGS84
-            #TODO: find any other bounding boxes. Need to check for gml:EnvelopeWithTimePeriod."""
+        """incomplete, should return other bounding boxes not in WGS84
+        #TODO: find any other bounding boxes. Need to check for gml:EnvelopeWithTimePeriod."""
 
         bboxes = []
 
@@ -374,7 +371,9 @@ class ContentMetadata(object):
             self.descCov = self._service.getDescribeCoverage(self.id)
 
         for envelope in self.descCov.findall(
-            nsWCS2("CoverageDescription/") + "{http://www.opengis.net/gml/3.2}boundedBy/" + "{http://www.opengis.net/gml/3.2}Envelope"  # noqa
+            nsWCS2("CoverageDescription/")
+            + "{http://www.opengis.net/gml/3.2}boundedBy/"
+            + "{http://www.opengis.net/gml/3.2}Envelope"  # noqa
         ):
             bbox = {}
             bbox["nativeSrs"] = envelope.attrib["srsName"]
@@ -414,9 +413,7 @@ class ContentMetadata(object):
     def _getSupportedFormatsProperty(self):
         # gets supported formats info
         frmts = []
-        for elem in self._service._capabilities.findall(
-            nsWCS2("ServiceMetadata/") + nsWCS2("formatSupported")
-        ):
+        for elem in self._service._capabilities.findall(nsWCS2("ServiceMetadata/") + nsWCS2("formatSupported")):
             frmts.append(elem.text)
         return frmts
 
@@ -428,9 +425,7 @@ class ContentMetadata(object):
         for elem in self._service.getDescribeCoverage(self.id).findall(
             ns("CoverageOffering/") + ns("rangeSet/") + ns("RangeSet/") + ns("axisDescription/") + ns("AxisDescription")
         ):
-            axisDescs.append(
-                AxisDescription(elem)
-            )  # create a 'AxisDescription' object.
+            axisDescs.append(AxisDescription(elem))  # create a 'AxisDescription' object.
         return axisDescs
 
     axisDescriptions = property(_getAxisDescriptionsProperty, None)
@@ -460,9 +455,7 @@ class Grid(object):
             self.highlimits = grid.find(
                 "{http://www.opengis.net/gml/3.2}limits/{http://www.opengis.net/gml/3.2}GridEnvelope/{http://www.opengis.net/gml/3.2}high"  # noqa
             ).text.split(" ")
-            for axis in grid.findall("{http://www.opengis.net/gml/3.2}axisLabels")[
-                0
-            ].text.split(" "):
+            for axis in grid.findall("{http://www.opengis.net/gml/3.2}axisLabels")[0].text.split(" "):
                 self.axislabels.append(axis)
 
 
@@ -475,9 +468,7 @@ class RectifiedGrid(Grid):
             "{http://www.opengis.net/gml/3.2}origin/{http://www.opengis.net/gml/3.2}Point/{http://www.opengis.net/gml/3.2}pos"  # noqa
         ).text.split()
         self.offsetvectors = []
-        for offset in rectifiedgrid.findall(
-            "{http://www.opengis.net/gml/3.2}offsetVector"
-        ):
+        for offset in rectifiedgrid.findall("{http://www.opengis.net/gml/3.2}offsetVector"):
             self.offsetvectors.append(offset.text.split())
 
 
@@ -497,7 +488,7 @@ class ReferenceableGridByVectors(Grid):
 
 
 class AxisDescription(object):
-    """ Class to represent the AxisDescription element optionally found as part of the RangeSet and used to
+    """Class to represent the AxisDescription element optionally found as part of the RangeSet and used to
     define ordinates of additional dimensions such as wavelength bands or pressure levels"""
 
     def __init__(self, axisdescElem):

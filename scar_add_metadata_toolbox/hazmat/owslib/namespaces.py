@@ -1,3 +1,17 @@
+# =================================================================
+#
+# Changes, which are local to this dependency, within this package,
+# have been made to this file, in order to improve compatibility,
+# add functionality, or address bugs that are not present, or not
+# addressed in the upstream package.
+#
+# See the README for the SCAR ADD Metadata Toolbox (this package)
+# for more information about why these changes have been made.
+#
+# Summary of changes made to this file:
+# - amend `Namespaces` method to include the GSS and GSR namespaces
+# =================================================================
+
 class Namespaces(object):
     """
         Class for holding and maniputlating a dictionary containing the various namespaces for
@@ -22,6 +36,8 @@ class Namespaces(object):
         'gml311': 'http://www.opengis.net/gml',
         'gml32': 'http://www.opengis.net/gml/3.2',
         'gmx': 'http://www.isotc211.org/2005/gmx',
+        'gss': 'http://www.isotc211.org/2005/gss',
+        'gsr': 'http://www.isotc211.org/2005/gsr',
         'gts': 'http://www.isotc211.org/2005/gts',
         'ogc': 'http://www.opengis.net/ogc',
         'om': 'http://www.opengis.net/om/1.0',

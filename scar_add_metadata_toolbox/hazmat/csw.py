@@ -560,10 +560,6 @@ class CSWClient(_CatalogueServiceWeb):
 
         """
 
-        # append additional ISO namespaces to transaction
-        namespaces["gss"] = "http://www.isotc211.org/2005/gss"
-        namespaces["gsr"] = "http://www.isotc211.org/2005/gsr"
-
         # construct request
         node0 = self._setrootelement("csw:Transaction")
         node0.set("version", self.version)

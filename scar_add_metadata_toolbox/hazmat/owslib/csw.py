@@ -12,6 +12,8 @@
 # Summary of changes made to this file:
 # - amend `CatalogueServiceWeb.transaction` method to handle
 #   UTF-8 encoded strings (decoded to bytes)
+# - amend `CatalogueServiceWeb._parserecords` method to workaround
+#   bug with trailing element tags in XML strings
 # =================================================================
 
 # =============================================================================
@@ -574,6 +576,14 @@ class CatalogueServiceWeb(object):
         if outputschema == namespaces['gmd']:  # iso 19139
             for i in self._exml.findall('.//' + util.nspath_eval('gmd:MD_Metadata', namespaces)) or \
                     self._exml.findall('.//' + util.nspath_eval('gmi:MI_Metadata', namespaces)):
+
+                # Fix trailing tags
+                i_str = etree.tostring(i).decode()
+                i_str = i_str.replace("</gmi:MI_Metadata></csw:SearchResults>", "</gmi:MI_Metadata>")
+                i_str = i_str.replace("</gmi:MI_Metadata></csw:GetRecordsResponse>", "</gmi:MI_Metadata>")
+                i_str = i_str.replace("</gmi:MI_Metadata></csw:GetRecordByIdResponse>", "</gmi:MI_Metadata>")
+                i = etree.fromstring(i_str)
+
                 val = i.find(util.nspath_eval('gmd:fileIdentifier/gco:CharacterString', namespaces))
                 identifier = self._setidentifierkey(util.testXMLValue(val))
                 self.records[identifier] = MD_Metadata(i)

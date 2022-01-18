@@ -1,6 +1,21 @@
 # -*- coding: utf-8 -*-
 # =================================================================
 #
+# Changes, which are local to this dependency, within this package,
+# have been made to this file, in order to improve compatibility,
+# add functionality, or address bugs that are not present, or not
+# addressed in the upstream package.
+#
+# See the README for the SCAR ADD Metadata Toolbox (this package)
+# for more information about why these changes have been made.
+#
+# Summary of changes made to this file:
+# - amend `Csw2.parse_postdata` method to workaround bug with
+#   trailing element tags in XML strings
+# =================================================================
+
+# =================================================================
+#
 # Authors: Tom Kralidis <tomkralidis@gmail.com>
 #          Angelos Tzotsos <tzotsos@gmail.com>
 #
@@ -1821,6 +1836,10 @@ class Csw2(object):
                 tname = ttype.attrib.get('typeName')
 
                 for mdrec in ttype.xpath('child::*'):
+                    mdrec = etree.tostring(mdrec).decode()
+                    mdrec = mdrec.replace("</gmi:MI_Metadata></csw:Insert></csw:Transaction>", "</gmi:MI_Metadata>")
+                    mdrec = etree.fromstring(mdrec)
+
                     xml = mdrec
                     request['transactions'].append(
                     {'type': 'insert', 'typename': tname, 'xml': xml})
@@ -1831,6 +1850,12 @@ class Csw2(object):
                 update = {'type': 'update'}
 
                 if len(child) == 1:  # it's a wholesale update
+                    mdrec = child[0]
+                    mdrec = etree.tostring(mdrec).decode()
+                    mdrec = mdrec.replace("</gmi:MI_Metadata></csw:Update></csw:Transaction>", "</gmi:MI_Metadata>")
+                    mdrec = etree.fromstring(mdrec)
+                    child[0] = mdrec
+
                     update['xml'] = child[0]
                 else:  # it's a RecordProperty with Constraint Update
                     update['recordproperty'] = []

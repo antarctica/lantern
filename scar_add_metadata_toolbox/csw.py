@@ -8,22 +8,17 @@ from typing import List, Optional
 # We don't currently allow untrusted/user-provided XML so this is not a risk
 from lxml.etree import Element, ElementTree, fromstring, tostring, XMLSyntaxError  # nosec
 from flask import Request, Response
-from owslib.ows import ExceptionReport
-from owslib.util import ServiceException
-from pycsw.core import admin
-from owslib.csw import namespaces as csw_namespaces
 from requests import HTTPError
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.exc import ProgrammingError
 from flask_azure_oauth import AzureToken
 
-from scar_add_metadata_toolbox.hazmat.csw import (
-    CSWClient as _CSWClient,
-    CSWServer as _CSWServer,
-    convert_csw_brief_gmd_to_gmi_xml,
-    CSWAuth,
-)
 from scar_add_metadata_toolbox.hazmat.owslib.namespaces import Namespaces
+from scar_add_metadata_toolbox.hazmat.owslib.ows import ExceptionReport
+from scar_add_metadata_toolbox.hazmat.owslib.util import ServiceException, Authentication as CSWAuth
+from scar_add_metadata_toolbox.hazmat.owslib.csw import namespaces as csw_namespaces, CatalogueServiceWeb as _CSWClient
+from scar_add_metadata_toolbox.hazmat.pycsw.core import admin
+from scar_add_metadata_toolbox.hazmat.pycsw.server import Csw as _CSWServer
 
 
 class CSWGetRecordMode(Enum):

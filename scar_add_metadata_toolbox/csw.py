@@ -6,23 +6,19 @@ from typing import List, Optional
 # Exempting Bandit security issue (Using Element to parse untrusted XML data is known to be vulnerable to XML attacks)
 #
 # We don't currently allow untrusted/user-provided XML so this is not a risk
-from lxml.etree import ElementTree, fromstring, XMLSyntaxError  # nosec
+from lxml.etree import Element, ElementTree, fromstring, tostring, XMLSyntaxError  # nosec
 from flask import Request, Response
-from owslib.ows import ExceptionReport
-from owslib.util import ServiceException
-from pycsw.core import admin
-from owslib.csw import namespaces as csw_namespaces
 from requests import HTTPError
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.exc import ProgrammingError
 from flask_azure_oauth import AzureToken
 
-from scar_add_metadata_toolbox.hazmat.csw import (
-    CSWClient as _CSWClient,
-    CSWServer as _CSWServer,
-    convert_csw_brief_gmd_to_gmi_xml,
-    CSWAuth,
-)
+from scar_add_metadata_toolbox.hazmat.owslib.namespaces import Namespaces
+from scar_add_metadata_toolbox.hazmat.owslib.ows import ExceptionReport
+from scar_add_metadata_toolbox.hazmat.owslib.util import ServiceException, Authentication as CSWAuth
+from scar_add_metadata_toolbox.hazmat.owslib.csw import namespaces as csw_namespaces, CatalogueServiceWeb as _CSWClient
+from scar_add_metadata_toolbox.hazmat.pycsw.core import admin
+from scar_add_metadata_toolbox.hazmat.pycsw.server import Csw as _CSWServer
 
 
 class CSWGetRecordMode(Enum):
@@ -181,7 +177,6 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
             "language": "en-GB",
             "maxrecords": "100",
             "loglevel": "DEBUG",
-            "logfile": "/dev/null",
             "pretty_print": "true",
             "gzip_compresslevel": "8",
             "domainquerytype": "list",
@@ -512,7 +507,7 @@ class CSWClient:  # pragma: no cover (until #59 is resolved)
                 if isinstance(raw_record.xml, bytes):
                     raw_record.xml = raw_record.xml.decode()
                 if mode == CSWGetRecordMode.BRIEF:
-                    raw_record.xml = convert_csw_brief_gmd_to_gmi_xml(record_xml=raw_record.xml)
+                    raw_record.xml = self._convert_csw_brief_gmd_to_gmi_xml(record_xml=raw_record.xml)
                 yield raw_record.xml
         except HTTPError as e:
             if e.response.content.decode() == "Catalogue not yet available.":
@@ -613,3 +608,45 @@ class CSWClient:  # pragma: no cover (until #59 is resolved)
                 raise CSWAuthMissingException()
             elif _csw.response.decode() == "Insufficient authorisation token.":
                 raise CSWAuthInsufficientException()
+
+    @staticmethod
+    def _convert_csw_brief_gmd_to_gmi_xml(record_xml: str) -> str:
+        """
+        Convert CSW GetRecord(s) requests using the 'brief' element set name from ISO-19115(-0) to ISO 19115-2
+
+        Where GetRecord or GetRecords requests use element set names other than 'full', PyCSW needs to derive
+        summarised representations of records. As the PyCSW profile for ISO 19115 was written for the original ISO
+        19115:2003 standard, derived representations use this version. This is an issue if newer editions of 19115 are
+        used, notably 19115-2 and 19115-3 (19115-1).
+
+        As the BAS Metadata Library is sensitive to each edition (as the namespace and elements differ between
+        editions), this means that a 'brief' version of an ISO 19115-2 record can't be parsed as it will use the ISO
+        19115 namespace (GMD rather than GMI).
+
+        To prevent needing to use different edition implementations depending on the element set used, this method
+        will 'covert' a record using the GMD namespace to the GMI namespace. This is a crude conversion, as it simply
+        creates a new root level element (using the GMI namespace) and copies all direct children of the original GMD
+        root element.
+
+        The effect is to replace the root element with the expected namespace to allow records to be parsed as
+        expected. This is possible because ISO 19115-2 is a superset and extension of the original ISO 19115 standard.
+        It would not be possible to do this in the same way with ISO 19115-3, as it uses a different conceptual model.
+        """
+        iso_ns = Namespaces()
+
+        gmd_xml_element = ElementTree(fromstring(record_xml))
+        gmd_sub_elements = gmd_xml_element.getroot().xpath(f"/gmd:MD_Metadata/*", namespaces=iso_ns.namespace_dict)
+        gmi_xml_element = Element(
+            f"{{{iso_ns.get_namespace('gmi')}}}MI_Metadata",
+            nsmap=iso_ns.namespace_dict,
+        )
+        for gmd_sub_element in gmd_sub_elements:
+            gmi_xml_element.append(gmd_sub_element)
+
+        record_xml = tostring(
+            ElementTree(gmi_xml_element),
+            pretty_print=True,
+            xml_declaration=False,
+            encoding="utf-8",
+        )
+        return record_xml.decode()

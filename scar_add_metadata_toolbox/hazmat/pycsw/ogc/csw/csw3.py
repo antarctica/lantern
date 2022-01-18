@@ -1,6 +1,21 @@
 # -*- coding: utf-8 -*-
 # =================================================================
 #
+# Changes, which are local to this dependency, within this package,
+# have been made to this file, in order to improve compatibility,
+# add functionality, or address bugs that are not present, or not
+# addressed in the upstream package.
+#
+# See the README for the SCAR ADD Metadata Toolbox (this package)
+# for more information about why these changes have been made.
+#
+# Summary of changes made to this file:
+# - rewriting imports to allow this package to be used as a
+#   vendored dependency
+# =================================================================
+
+# =================================================================
+#
 # Authors: Tom Kralidis <tomkralidis@gmail.com>
 #
 # Copyright (c) 2016 Tom Kralidis
@@ -34,14 +49,14 @@ import cgi
 from time import time
 from urllib.parse import quote, unquote
 from io import StringIO
-from pycsw.core.etree import etree
-from pycsw.ogc.csw.cql import cql2fes1
-from pycsw import oaipmh, opensearch, sru
-from pycsw.plugins.profiles import profile as pprofile
-import pycsw.plugins.outputschemas
-from pycsw.core import config, log, metadata, util
-from pycsw.core.formats.fmt_json import xml2dict
-from pycsw.ogc.fes import fes2
+from scar_add_metadata_toolbox.hazmat.pycsw.core.etree import etree
+from scar_add_metadata_toolbox.hazmat.pycsw.ogc.csw.cql import cql2fes1
+from scar_add_metadata_toolbox.hazmat.pycsw import oaipmh, opensearch, sru
+from scar_add_metadata_toolbox.hazmat.pycsw.plugins.profiles import profile as pprofile
+import scar_add_metadata_toolbox.hazmat.pycsw.plugins.outputschemas
+from scar_add_metadata_toolbox.hazmat.pycsw.core import config, log, metadata, util
+from scar_add_metadata_toolbox.hazmat.pycsw.core.formats.fmt_json import xml2dict
+from scar_add_metadata_toolbox.hazmat.pycsw.ogc.fes import fes2
 import logging
 
 LOGGER = logging.getLogger(__name__)

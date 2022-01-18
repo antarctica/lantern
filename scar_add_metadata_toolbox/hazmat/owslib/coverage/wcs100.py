@@ -1,4 +1,19 @@
 # -*- coding: ISO-8859-15 -*-
+# =================================================================
+#
+# Changes, which are local to this dependency, within this package,
+# have been made to this file, in order to improve compatibility,
+# add functionality, or address bugs that are not present, or not
+# addressed in the upstream package.
+#
+# See the README for the SCAR ADD Metadata Toolbox (this package)
+# for more information about why these changes have been made.
+#
+# Summary of changes made to this file:
+# - rewriting imports to allow this package to be used as a
+#   vendored dependency
+# =================================================================
+
 # =============================================================================
 # Copyright (c) 2004, 2006 Sean C. Gillies
 # Copyright (c) 2007 STFC <http://www.stfc.ac.uk>
@@ -9,16 +24,16 @@
 # Contact email: d.lowe@rl.ac.uk
 # =============================================================================
 
-from owslib.coverage.wcsBase import WCSBase, WCSCapabilitiesReader, ServiceException
+from scar_add_metadata_toolbox.hazmat.owslib.coverage.wcsBase import WCSBase, WCSCapabilitiesReader, ServiceException
 from urllib.parse import urlencode
-from owslib.util import openURL, testXMLValue
-from owslib.etree import etree
-from owslib.crs import Crs
+from scar_add_metadata_toolbox.hazmat.owslib.util import openURL, testXMLValue
+from scar_add_metadata_toolbox.hazmat.owslib.etree import etree
+from scar_add_metadata_toolbox.hazmat.owslib.crs import Crs
 import os
 import errno
 
 import logging
-from owslib.util import log, makeString
+from scar_add_metadata_toolbox.hazmat.owslib.util import log, makeString
 
 
 #  function to save writing out WCS namespace in full each time

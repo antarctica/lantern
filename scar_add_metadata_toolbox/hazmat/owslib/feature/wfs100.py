@@ -1,3 +1,18 @@
+# =================================================================
+#
+# Changes, which are local to this dependency, within this package,
+# have been made to this file, in order to improve compatibility,
+# add functionality, or address bugs that are not present, or not
+# addressed in the upstream package.
+#
+# See the README for the SCAR ADD Metadata Toolbox (this package)
+# for more information about why these changes have been made.
+#
+# Summary of changes made to this file:
+# - rewriting imports to allow this package to be used as a
+#   vendored dependency
+# =================================================================
+
 # =============================================================================
 # OWSLib. Copyright (C) 2005 Sean C. Gillies
 #
@@ -6,11 +21,11 @@
 # $Id: wfs.py 503 2006-02-01 17:09:12Z dokai $
 # =============================================================================
 
-from owslib import util
+from scar_add_metadata_toolbox.hazmat.owslib import util
 
 from io import BytesIO
 from urllib.parse import urlencode
-from owslib.util import (
+from scar_add_metadata_toolbox.hazmat.owslib.util import (
     testXMLValue,
     extract_xml_list,
     ServiceException,
@@ -19,13 +34,13 @@ from owslib.util import (
     openURL,
     log,
 )
-from owslib.etree import etree
-from owslib.fgdc import Metadata
-from owslib.iso import MD_Metadata
-from owslib.crs import Crs
-from owslib.namespaces import Namespaces
-from owslib.feature.schema import get_schema
-from owslib.feature.common import (
+from scar_add_metadata_toolbox.hazmat.owslib.etree import etree
+from scar_add_metadata_toolbox.hazmat.owslib.fgdc import Metadata
+from scar_add_metadata_toolbox.hazmat.owslib.iso import MD_Metadata
+from scar_add_metadata_toolbox.hazmat.owslib.crs import Crs
+from scar_add_metadata_toolbox.hazmat.owslib.namespaces import Namespaces
+from scar_add_metadata_toolbox.hazmat.owslib.feature.schema import get_schema
+from scar_add_metadata_toolbox.hazmat.owslib.feature.common import (
     WFSCapabilitiesReader,
     AbstractContentMetadata,
 )

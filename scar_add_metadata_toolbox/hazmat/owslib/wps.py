@@ -1,4 +1,19 @@
 # -*- coding: ISO-8859-15 -*-
+# =================================================================
+#
+# Changes, which are local to this dependency, within this package,
+# have been made to this file, in order to improve compatibility,
+# add functionality, or address bugs that are not present, or not
+# addressed in the upstream package.
+#
+# See the README for the SCAR ADD Metadata Toolbox (this package)
+# for more information about why these changes have been made.
+#
+# Summary of changes made to this file:
+# - rewriting imports to allow this package to be used as a
+#   vendored dependency
+# =================================================================
+
 # =============================================================================
 # Copyright (c) 2018 Luca Cinquini
 #
@@ -106,14 +121,14 @@ Also, the directory tests/ contains several examples of well-formed "Execute" re
 * The files PMLExecuteRequest*.xml contain requests that can be submitted to the live PML WPS service.
 """
 
-from owslib.etree import etree
-from owslib.ows import DEFAULT_OWS_NAMESPACE, XLINK_NAMESPACE
-from owslib.ows import ServiceIdentification, ServiceProvider, OperationsMetadata, BoundingBox
+from scar_add_metadata_toolbox.hazmat.owslib.etree import etree
+from scar_add_metadata_toolbox.hazmat.owslib.ows import DEFAULT_OWS_NAMESPACE, XLINK_NAMESPACE
+from scar_add_metadata_toolbox.hazmat.owslib.ows import ServiceIdentification, ServiceProvider, OperationsMetadata, BoundingBox
 from time import sleep
-from owslib.util import (testXMLValue, testXMLAttribute, build_get_url, clean_ows_url, dump, getTypedValue,
+from scar_add_metadata_toolbox.hazmat.owslib.util import (testXMLValue, testXMLAttribute, build_get_url, clean_ows_url, dump, getTypedValue,
                          getNamespace, element_to_string, nspath, openURL, nspath_eval, log, Authentication)
 from xml.dom.minidom import parseString
-from owslib.namespaces import Namespaces
+from scar_add_metadata_toolbox.hazmat.owslib.namespaces import Namespaces
 from urllib.parse import urlparse
 import warnings
 

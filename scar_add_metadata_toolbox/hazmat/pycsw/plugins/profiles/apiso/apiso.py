@@ -11,6 +11,8 @@
 #
 # Summary of changes made to this file:
 # - amend `write_record` method to work around hex-encoded values
+# - rewriting imports to allow this package to be used as a
+#   vendored dependency
 # =================================================================
 
 # =================================================================
@@ -45,9 +47,9 @@
 # =================================================================
 
 import os
-from pycsw.core import config, util
-from pycsw.core.etree import etree
-from pycsw.plugins.profiles import profile
+from scar_add_metadata_toolbox.hazmat.pycsw.core import config, util
+from scar_add_metadata_toolbox.hazmat.pycsw.core.etree import etree
+from scar_add_metadata_toolbox.hazmat.pycsw.plugins.profiles import profile
 
 CODELIST = 'http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml'
 CODESPACE = 'ISOTC211/19115'

@@ -1,12 +1,27 @@
-from owslib.etree import etree
+# =================================================================
+#
+# Changes, which are local to this dependency, within this package,
+# have been made to this file, in order to improve compatibility,
+# add functionality, or address bugs that are not present, or not
+# addressed in the upstream package.
+#
+# See the README for the SCAR ADD Metadata Toolbox (this package)
+# for more information about why these changes have been made.
+#
+# Summary of changes made to this file:
+# - rewriting imports to allow this package to be used as a
+#   vendored dependency
+# =================================================================
+
+from scar_add_metadata_toolbox.hazmat.owslib.etree import etree
 from urllib.parse import urlencode, parse_qsl
-from owslib import ows
-from owslib.crs import Crs
-from owslib.fes import FilterCapabilities200
-from owslib.util import openURL, testXMLValue, testXMLAttribute, nspath_eval, extract_time
-from owslib.namespaces import Namespaces
-from owslib.swe.observation.om import MeasurementObservation
-from owslib.swe.observation.waterml2 import MeasurementTimeseriesObservation
+from scar_add_metadata_toolbox.hazmat.owslib import ows
+from scar_add_metadata_toolbox.hazmat.owslib.crs import Crs
+from scar_add_metadata_toolbox.hazmat.owslib.fes import FilterCapabilities200
+from scar_add_metadata_toolbox.hazmat.owslib.util import openURL, testXMLValue, testXMLAttribute, nspath_eval, extract_time
+from scar_add_metadata_toolbox.hazmat.owslib.namespaces import Namespaces
+from scar_add_metadata_toolbox.hazmat.owslib.swe.observation.om import MeasurementObservation
+from scar_add_metadata_toolbox.hazmat.owslib.swe.observation.waterml2 import MeasurementTimeseriesObservation
 
 
 def get_namespaces():

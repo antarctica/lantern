@@ -1,4 +1,19 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
+# =================================================================
+#
+# Changes, which are local to this dependency, within this package,
+# have been made to this file, in order to improve compatibility,
+# add functionality, or address bugs that are not present, or not
+# addressed in the upstream package.
+#
+# See the README for the SCAR ADD Metadata Toolbox (this package)
+# for more information about why these changes have been made.
+#
+# Summary of changes made to this file:
+# - rewriting imports to allow this package to be used as a
+#   vendored dependency
+# =================================================================
+
 # =================================================================
 #
 # Authors: Tom Kralidis <tomkralidis@gmail.com>
@@ -35,7 +50,7 @@ from django.db import connection
 from django.db.models import Avg, Max, Min, Count
 from django.conf import settings
 
-from pycsw.core import repository, util
+from scar_add_metadata_toolbox.hazmat.pycsw.core import repository, util
 from OpenDataCatalog.opendata.models import Resource
 
 class OpenDataCatalogRepository(object):

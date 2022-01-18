@@ -1,3 +1,18 @@
+# =================================================================
+#
+# Changes, which are local to this dependency, within this package,
+# have been made to this file, in order to improve compatibility,
+# add functionality, or address bugs that are not present, or not
+# addressed in the upstream package.
+#
+# See the README for the SCAR ADD Metadata Toolbox (this package)
+# for more information about why these changes have been made.
+#
+# Summary of changes made to this file:
+# - rewriting imports to allow this package to be used as a
+#   vendored dependency
+# =================================================================
+
 # =============================================================================
 # OWSLib. Copyright (C) 2005 Sean C. Gillies
 #
@@ -7,26 +22,26 @@
 # =============================================================================
 
 # owslib imports:
-from owslib import util
-from owslib.fgdc import Metadata
-from owslib.iso import MD_Metadata
-from owslib.ows import Constraint, ServiceIdentification, ServiceProvider, OperationsMetadata
-from owslib.etree import etree
-from owslib.util import nspath, testXMLValue, openURL, Authentication
-from owslib.crs import Crs
-from owslib.feature import WebFeatureService_
-from owslib.feature.common import (
+from scar_add_metadata_toolbox.hazmat.owslib import util
+from scar_add_metadata_toolbox.hazmat.owslib.fgdc import Metadata
+from scar_add_metadata_toolbox.hazmat.owslib.iso import MD_Metadata
+from scar_add_metadata_toolbox.hazmat.owslib.ows import Constraint, ServiceIdentification, ServiceProvider, OperationsMetadata
+from scar_add_metadata_toolbox.hazmat.owslib.etree import etree
+from scar_add_metadata_toolbox.hazmat.owslib.util import nspath, testXMLValue, openURL, Authentication
+from scar_add_metadata_toolbox.hazmat.owslib.crs import Crs
+from scar_add_metadata_toolbox.hazmat.owslib.feature import WebFeatureService_
+from scar_add_metadata_toolbox.hazmat.owslib.feature.common import (
     WFSCapabilitiesReader,
     AbstractContentMetadata,
 )
-from owslib.namespaces import Namespaces
+from scar_add_metadata_toolbox.hazmat.owslib.namespaces import Namespaces
 
 # other imports
 from io import BytesIO
 from urllib.parse import urlencode
 
 import logging
-from owslib.util import log
+from scar_add_metadata_toolbox.hazmat.owslib.util import log
 
 n = Namespaces()
 WFS_NAMESPACE = n.get_namespace("wfs20")

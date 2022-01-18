@@ -1,6 +1,21 @@
 # -*- coding: utf-8 -*-
 # =================================================================
 #
+# Changes, which are local to this dependency, within this package,
+# have been made to this file, in order to improve compatibility,
+# add functionality, or address bugs that are not present, or not
+# addressed in the upstream package.
+#
+# See the README for the SCAR ADD Metadata Toolbox (this package)
+# for more information about why these changes have been made.
+#
+# Summary of changes made to this file:
+# - rewriting imports to allow this package to be used as a
+#   vendored dependency
+# =================================================================
+
+# =================================================================
+#
 # Authors: Tom Kralidis <tomkralidis@gmail.com>
 #          Angelos Tzotsos <tzotsos@gmail.com>
 #
@@ -35,9 +50,9 @@ import os
 import sys
 from glob import glob
 
-from pycsw.core import metadata, repository, util
-from pycsw.core.etree import etree
-from pycsw.core.etree import PARSER
+from scar_add_metadata_toolbox.hazmat.pycsw.core import metadata, repository, util
+from scar_add_metadata_toolbox.hazmat.pycsw.core.etree import etree
+from scar_add_metadata_toolbox.hazmat.pycsw.core.etree import PARSER
 
 LOGGER = logging.getLogger(__name__)
 
@@ -217,7 +232,7 @@ def setup_db(database, table, home, create_sfsql_tables=True, create_plpythonu_f
         AS $$
             import sys
             sys.path.append('%s')
-            from pycsw.core import util
+            from scar_add_metadata_toolbox.hazmat.pycsw.core import util
             return util.get_anytext(xml)
             $$ LANGUAGE plpythonu;
         ''' % pycsw_home
@@ -227,7 +242,7 @@ def setup_db(database, table, home, create_sfsql_tables=True, create_plpythonu_f
         AS $$
             import sys
             sys.path.append('%s')
-            from pycsw.core import repository
+            from scar_add_metadata_toolbox.hazmat.pycsw.core import repository
             return repository.query_spatial(bbox_data_wkt, bbox_input_wkt, predicate, distance)
             $$ LANGUAGE plpythonu;
         ''' % pycsw_home
@@ -237,7 +252,7 @@ def setup_db(database, table, home, create_sfsql_tables=True, create_plpythonu_f
         AS $$
             import sys
             sys.path.append('%s')
-            from pycsw.core import repository
+            from scar_add_metadata_toolbox.hazmat.pycsw.core import repository
             return repository.update_xpath(nsmap, xml, recprops)
             $$ LANGUAGE plpythonu;
         ''' % pycsw_home
@@ -247,7 +262,7 @@ def setup_db(database, table, home, create_sfsql_tables=True, create_plpythonu_f
         AS $$
             import sys
             sys.path.append('%s')
-            from pycsw.core import repository
+            from scar_add_metadata_toolbox.hazmat.pycsw.core import repository
             return repository.get_geometry_area(geom)
             $$ LANGUAGE plpythonu;
         ''' % pycsw_home
@@ -257,7 +272,7 @@ def setup_db(database, table, home, create_sfsql_tables=True, create_plpythonu_f
         AS $$
             import sys
             sys.path.append('%s')
-            from pycsw.core import repository
+            from scar_add_metadata_toolbox.hazmat.pycsw.core import repository
             return repository.get_spatial_overlay_rank(target_geom, query_geom)
             $$ LANGUAGE plpythonu;
         ''' % pycsw_home

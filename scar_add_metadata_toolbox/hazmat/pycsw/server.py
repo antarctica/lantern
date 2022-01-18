@@ -1,6 +1,21 @@
 # -*- coding: utf-8 -*-
 # =================================================================
 #
+# Changes, which are local to this dependency, within this package,
+# have been made to this file, in order to improve compatibility,
+# add functionality, or address bugs that are not present, or not
+# addressed in the upstream package.
+#
+# See the README for the SCAR ADD Metadata Toolbox (this package)
+# for more information about why these changes have been made.
+#
+# Summary of changes made to this file:
+# - rewriting imports to allow this package to be used as a
+#   vendored dependency
+# =================================================================
+
+# =================================================================
+#
 # Authors: Tom Kralidis <tomkralidis@gmail.com>
 #          Angelos Tzotsos <tzotsos@gmail.com>
 #
@@ -41,12 +56,12 @@ import sys
 from time import time
 import wsgiref.util
 
-from pycsw.core.etree import etree
-from pycsw import oaipmh, opensearch, sru
-from pycsw.plugins.profiles import profile as pprofile
-import pycsw.plugins.outputschemas
-from pycsw.core import config, log, util
-from pycsw.ogc.csw import csw2, csw3
+from scar_add_metadata_toolbox.hazmat.pycsw.core.etree import etree
+from scar_add_metadata_toolbox.hazmat.pycsw import oaipmh, opensearch, sru
+from scar_add_metadata_toolbox.hazmat.pycsw.plugins.profiles import profile as pprofile
+import scar_add_metadata_toolbox.hazmat.pycsw.plugins.outputschemas
+from scar_add_metadata_toolbox.hazmat.pycsw.core import config, log, util
+from scar_add_metadata_toolbox.hazmat.pycsw.ogc.csw import csw2, csw3
 
 LOGGER = logging.getLogger(__name__)
 
@@ -404,7 +419,7 @@ class Csw(object):
 
         else:  # load default repository
             self.orm = 'sqlalchemy'
-            from pycsw.core import repository
+            from scar_add_metadata_toolbox.hazmat.pycsw.core import repository
             try:
                 LOGGER.info('Loading default repository')
                 self.repository = repository.Repository(
@@ -658,7 +673,7 @@ class Csw(object):
         if (isinstance(self.kvp, dict) and 'outputformat' in self.kvp and
                 self.kvp['outputformat'] == 'application/json'):
             self.contenttype = self.kvp['outputformat']
-            from pycsw.core.formats import fmt_json
+            from scar_add_metadata_toolbox.hazmat.pycsw.core.formats import fmt_json
             response = fmt_json.xml2json(response,
                                          self.context.namespaces,
                                          self.pretty_print)

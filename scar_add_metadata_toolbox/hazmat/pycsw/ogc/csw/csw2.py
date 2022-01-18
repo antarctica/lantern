@@ -12,6 +12,8 @@
 # Summary of changes made to this file:
 # - amend `Csw2.parse_postdata` method to workaround bug with
 #   trailing element tags in XML strings
+# - rewriting imports to allow this package to be used as a
+#   vendored dependency
 # =================================================================
 
 # =================================================================
@@ -50,14 +52,14 @@ import sys
 import cgi
 from urllib.parse import quote, unquote
 from io import StringIO
-from pycsw.core.etree import etree
-from pycsw import oaipmh, opensearch, sru
-from pycsw.ogc.csw.cql import cql2fes1
-from pycsw.plugins.profiles import profile as pprofile
-import pycsw.plugins.outputschemas
-from pycsw.core import config, log, metadata, util
-from pycsw.core.formats.fmt_json import xml2dict
-from pycsw.ogc.fes import fes1
+from scar_add_metadata_toolbox.hazmat.pycsw.core.etree import etree
+from scar_add_metadata_toolbox.hazmat.pycsw import oaipmh, opensearch, sru
+from scar_add_metadata_toolbox.hazmat.pycsw.ogc.csw.cql import cql2fes1
+from scar_add_metadata_toolbox.hazmat.pycsw.plugins.profiles import profile as pprofile
+import scar_add_metadata_toolbox.hazmat.pycsw.plugins.outputschemas
+from scar_add_metadata_toolbox.hazmat.pycsw.core import config, log, metadata, util
+from scar_add_metadata_toolbox.hazmat.pycsw.core.formats.fmt_json import xml2dict
+from scar_add_metadata_toolbox.hazmat.pycsw.ogc.fes import fes1
 import logging
 
 LOGGER = logging.getLogger(__name__)

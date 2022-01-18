@@ -1,6 +1,21 @@
 # -*- coding: utf-8 -*-
 # =================================================================
 #
+# Changes, which are local to this dependency, within this package,
+# have been made to this file, in order to improve compatibility,
+# add functionality, or address bugs that are not present, or not
+# addressed in the upstream package.
+#
+# See the README for the SCAR ADD Metadata Toolbox (this package)
+# for more information about why these changes have been made.
+#
+# Summary of changes made to this file:
+# - rewriting imports to allow this package to be used as a
+#   vendored dependency
+# =================================================================
+
+# =================================================================
+#
 # Authors: Tom Kralidis <tomkralidis@gmail.com>
 #          Angelos Tzotsos <tzotsos@gmail.com>
 #          Ricardo Garcia Silva <ricardo.garcia.silva@gmail.com>
@@ -41,9 +56,9 @@ import time
 from urllib.request import Request, urlopen
 from urllib.parse import urlparse
 from shapely.wkt import loads
-from owslib.util import http_post
+from scar_add_metadata_toolbox.hazmat.owslib.util import http_post
 
-from pycsw.core.etree import etree, PARSER
+from scar_add_metadata_toolbox.hazmat.pycsw.core.etree import etree, PARSER
 
 LOGGER = logging.getLogger(__name__)
 

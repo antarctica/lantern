@@ -1,6 +1,21 @@
 # -*- coding: utf-8 -*-
 # =================================================================
 #
+# Changes, which are local to this dependency, within this package,
+# have been made to this file, in order to improve compatibility,
+# add functionality, or address bugs that are not present, or not
+# addressed in the upstream package.
+#
+# See the README for the SCAR ADD Metadata Toolbox (this package)
+# for more information about why these changes have been made.
+#
+# Summary of changes made to this file:
+# - rewriting imports to allow this package to be used as a
+#   vendored dependency
+# =================================================================
+
+# =================================================================
+#
 # Authors: Tom Kralidis <tomkralidis@gmail.com>
 #          Ricardo Garcia Silva <ricardo.garcia.silva@gmail.com>
 #
@@ -36,12 +51,12 @@ import uuid
 from urllib.parse import urlparse
 
 from geolinks import sniff_link
-from owslib.util import build_get_url
+from scar_add_metadata_toolbox.hazmat.owslib.util import build_get_url
 from shapely.wkt import loads
 from shapely.geometry import MultiPolygon
 
-from pycsw.core.etree import etree
-from pycsw.core import util
+from scar_add_metadata_toolbox.hazmat.pycsw.core.etree import etree
+from scar_add_metadata_toolbox.hazmat.pycsw.core import util
 
 LOGGER = logging.getLogger(__name__)
 
@@ -1480,7 +1495,7 @@ def _parse_dc(context, repos, exml):
 def caps2iso(record, caps, context):
     """Creates ISO metadata from Capabilities XML"""
 
-    from pycsw.plugins.profiles.apiso.apiso import APISO
+    from scar_add_metadata_toolbox.hazmat.pycsw.plugins.profiles.apiso.apiso import APISO
 
     apiso_obj = APISO(context.model, context.namespaces, context)
     apiso_obj.ogc_schemas_base = 'http://schemas.opengis.net'

@@ -1,4 +1,19 @@
 # -*- coding: iso-8859-15 -*-
+# =================================================================
+#
+# Changes, which are local to this dependency, within this package,
+# have been made to this file, in order to improve compatibility,
+# add functionality, or address bugs that are not present, or not
+# addressed in the upstream package.
+#
+# See the README for the SCAR ADD Metadata Toolbox (this package)
+# for more information about why these changes have been made.
+#
+# Summary of changes made to this file:
+# - rewriting imports to allow this package to be used as a
+#   vendored dependency
+# =================================================================
+
 # =============================================================================
 # Copyright (c) 2004, 2006 Sean C. Gillies
 # Copyright (c) 2005 Nuxeo SARL <http://nuxeo.com>
@@ -17,17 +32,17 @@ from urllib.parse import urlencode
 
 import warnings
 from math import sqrt
-from owslib.etree import etree
-from owslib.util import (openURL, ServiceException, testXMLValue,
+from scar_add_metadata_toolbox.hazmat.owslib.etree import etree
+from scar_add_metadata_toolbox.hazmat.owslib.util import (openURL, ServiceException, testXMLValue,
                          extract_xml_list, xmltag_split, OrderedDict, nspath,
                          nspath_eval, bind_url, Authentication)
-from owslib.fgdc import Metadata
-from owslib.iso import MD_Metadata
-from owslib.crs import Crs
-from owslib.namespaces import Namespaces
-from owslib.map.common import WMSCapabilitiesReader, AbstractContentMetadata
+from scar_add_metadata_toolbox.hazmat.owslib.fgdc import Metadata
+from scar_add_metadata_toolbox.hazmat.owslib.iso import MD_Metadata
+from scar_add_metadata_toolbox.hazmat.owslib.crs import Crs
+from scar_add_metadata_toolbox.hazmat.owslib.namespaces import Namespaces
+from scar_add_metadata_toolbox.hazmat.owslib.map.common import WMSCapabilitiesReader, AbstractContentMetadata
 
-from owslib.util import log
+from scar_add_metadata_toolbox.hazmat.owslib.util import log
 
 n = Namespaces()
 WMS_NAMESPACE = n.get_namespace("wms")

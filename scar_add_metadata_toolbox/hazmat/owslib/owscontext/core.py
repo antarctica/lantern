@@ -1,4 +1,19 @@
 # -*- coding: utf-8 -*-
+# =================================================================
+#
+# Changes, which are local to this dependency, within this package,
+# have been made to this file, in order to improve compatibility,
+# add functionality, or address bugs that are not present, or not
+# addressed in the upstream package.
+#
+# See the README for the SCAR ADD Metadata Toolbox (this package)
+# for more information about why these changes have been made.
+#
+# Summary of changes made to this file:
+# - rewriting imports to allow this package to be used as a
+#   vendored dependency
+# =================================================================
+
 # =============================================================================
 # Authors : Alexander Kmoch <allixender@gmail.com>
 #
@@ -12,14 +27,14 @@ Conceptual model base classes: http://www.opengeospatial.org/standards/owc
 OGC OWS Context Conceptual Model 1.0 (12-080r2)
 """
 
-from owslib.owscontext.atom import decode_atomxml, encode_atomxml
-from owslib.owscontext.common import GENERIC_OWCSPEC_URL
-# from owslib.util import log
+from scar_add_metadata_toolbox.hazmat.owslib.owscontext.atom import decode_atomxml, encode_atomxml
+from scar_add_metadata_toolbox.hazmat.owslib.owscontext.common import GENERIC_OWCSPEC_URL
+# from scar_add_metadata_toolbox.hazmat.owslib.util import log
 # TODO make dates from (currently) string to datetime instances
-from owslib.owscontext.common import TimeIntervalFormat
-from owslib.owscontext.common import try_float, try_int, \
+from scar_add_metadata_toolbox.hazmat.owslib.owscontext.common import TimeIntervalFormat
+from scar_add_metadata_toolbox.hazmat.owslib.owscontext.common import try_float, try_int, \
     extract_p, build_from_xp
-from owslib.owscontext.geojson import encode_json, decode_json
+from scar_add_metadata_toolbox.hazmat.owslib.owscontext.geojson import encode_json, decode_json
 
 
 class OwcContext(object):

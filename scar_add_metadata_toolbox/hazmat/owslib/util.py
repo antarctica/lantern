@@ -13,6 +13,8 @@
 # - amend `Authentication` class to support token based auth
 # - amend `openURL`, `http_get`, `http_post` methods to support
 #   token based auth
+# - rewriting imports to allow this package to be used as a
+#   vendored dependency
 # =================================================================
 
 # =============================================================================
@@ -29,8 +31,8 @@ from collections import OrderedDict
 from dateutil import parser
 from datetime import datetime, timedelta
 import pytz
-from owslib.etree import etree, ParseError
-from owslib.namespaces import Namespaces
+from scar_add_metadata_toolbox.hazmat.owslib.etree import etree, ParseError
+from scar_add_metadata_toolbox.hazmat.owslib.namespaces import Namespaces
 from urllib.parse import urlsplit, urlencode, urlparse, parse_qs, urlunparse, parse_qsl
 import copy
 

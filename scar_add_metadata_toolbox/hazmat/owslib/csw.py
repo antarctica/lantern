@@ -14,6 +14,8 @@
 #   UTF-8 encoded strings (decoded to bytes)
 # - amend `CatalogueServiceWeb._parserecords` method to workaround
 #   bug with trailing element tags in XML strings
+# - rewriting imports to allow this package to be used as a
+#   vendored dependency
 # =================================================================
 
 # =============================================================================
@@ -32,16 +34,16 @@ from io import BytesIO
 import random
 from urllib.parse import urlencode
 
-from owslib.etree import etree
-from owslib import fes
-from owslib import util
-from owslib import ows
-from owslib.iso import MD_Metadata, FC_FeatureCatalogue
-from owslib.fgdc import Metadata
-from owslib.dif import DIF
-from owslib.gm03 import GM03
-from owslib.namespaces import Namespaces
-from owslib.util import cleanup_namespaces, bind_url, add_namespaces, OrderedDict, Authentication, openURL, http_post
+from scar_add_metadata_toolbox.hazmat.owslib.etree import etree
+from scar_add_metadata_toolbox.hazmat.owslib import fes
+from scar_add_metadata_toolbox.hazmat.owslib import util
+from scar_add_metadata_toolbox.hazmat.owslib import ows
+from scar_add_metadata_toolbox.hazmat.owslib.iso import MD_Metadata, FC_FeatureCatalogue
+from scar_add_metadata_toolbox.hazmat.owslib.fgdc import Metadata
+from scar_add_metadata_toolbox.hazmat.owslib.dif import DIF
+from scar_add_metadata_toolbox.hazmat.owslib.gm03 import GM03
+from scar_add_metadata_toolbox.hazmat.owslib.namespaces import Namespaces
+from scar_add_metadata_toolbox.hazmat.owslib.util import cleanup_namespaces, bind_url, add_namespaces, OrderedDict, Authentication, openURL, http_post
 
 # default variables
 outputformat = 'application/xml'

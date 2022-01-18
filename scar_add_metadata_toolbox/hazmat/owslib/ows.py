@@ -1,4 +1,19 @@
 # -*- coding: ISO-8859-15 -*-
+# =================================================================
+#
+# Changes, which are local to this dependency, within this package,
+# have been made to this file, in order to improve compatibility,
+# add functionality, or address bugs that are not present, or not
+# addressed in the upstream package.
+#
+# See the README for the SCAR ADD Metadata Toolbox (this package)
+# for more information about why these changes have been made.
+#
+# Summary of changes made to this file:
+# - rewriting imports to allow this package to be used as a
+#   vendored dependency
+# =================================================================
+
 # =============================================================================
 # Copyright (c) 2008 Tom Kralidis
 #
@@ -17,9 +32,9 @@ Currently supports version 1.1.0 (06-121r3).
 
 import logging
 
-from owslib.etree import etree
-from owslib import crs, util
-from owslib.namespaces import Namespaces
+from scar_add_metadata_toolbox.hazmat.owslib.etree import etree
+from scar_add_metadata_toolbox.hazmat.owslib import crs, util
+from scar_add_metadata_toolbox.hazmat.owslib.namespaces import Namespaces
 
 LOGGER = logging.getLogger(__name__)
 

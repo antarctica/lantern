@@ -1,3 +1,18 @@
+# =================================================================
+#
+# Changes, which are local to this dependency, within this package,
+# have been made to this file, in order to improve compatibility,
+# add functionality, or address bugs that are not present, or not
+# addressed in the upstream package.
+#
+# See the README for the SCAR ADD Metadata Toolbox (this package)
+# for more information about why these changes have been made.
+#
+# Summary of changes made to this file:
+# - rewriting imports to allow this package to be used as a
+#   vendored dependency
+# =================================================================
+
 # =============================================================================
 # OWSLib. Copyright (C) 2015 Jachym Cepicky
 #
@@ -11,9 +26,9 @@ generating layer schema description compatible with `fiona`
 
 import sys
 from urllib.parse import urlencode, parse_qsl
-from owslib.etree import etree
-from owslib.namespaces import Namespaces
-from owslib.util import which_etree, findall, Authentication, openURL
+from scar_add_metadata_toolbox.hazmat.owslib.etree import etree
+from scar_add_metadata_toolbox.hazmat.owslib.namespaces import Namespaces
+from scar_add_metadata_toolbox.hazmat.owslib.util import which_etree, findall, Authentication, openURL
 
 MYNS = Namespaces()
 XS_NAMESPACE = MYNS.get_namespace("xs")

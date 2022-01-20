@@ -2,29 +2,6 @@
 version: "2"
 
 services:
-  app:
-    build: .
-    image: docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox:latest
-    command: flask run --host 0.0.0.0 --port 9000
-    volumes:
-      - .:/usr/src/app
-    ports:
-      - "9000:9000"
-    depends_on:
-      - db
-
-  app-cli:
-    image: docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox:latest
-    command: ash
-    volumes:
-      - .:/usr/src/app
-    environment:
-      - AWS_ACCESS_KEY_ID
-      - AWS_SECRET_ACCESS_KEY
-      - APP_AUTH_SESSION_FILE_PATH=/usr/src/app/auth.json
-    depends_on:
-      - app
-
   db:
     image: postgis/postgis:12-3.0-alpine
     environment:

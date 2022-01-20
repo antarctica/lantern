@@ -16,10 +16,6 @@ classifiers = [
     "Intended Audience :: Science/Research"
 ]
 
-packages = [
-    {include = "scar_add_metadata_toolbox"},
-]
-
 [tool.poetry.dependencies]
 awscli = "1.22.37" # pinned to specific version to aid in dependency resolution time
 bas-metadata-library = "^0.8.0"

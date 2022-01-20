@@ -29,6 +29,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#189](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/189)
 * Vendoring PyCSW and OWSlib dependencies within Hazmat module
   [#193](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/193)
+* Restructuring package to use `src` directory
+  [#195](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/195)
 
 ### Removed
 

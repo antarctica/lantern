@@ -24,6 +24,9 @@ from scar_add_metadata_toolbox.utils import (
 )
 
 
+foo = 'x'
+
+
 def create_app():
     """
     Application factory

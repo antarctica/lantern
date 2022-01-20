@@ -34,6 +34,11 @@ image:
   name: docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox:latest
   entrypoint: [""]
 
+default:
+  before_script:
+    - "ln -s /.venv .venv"
+    - "poetry install --no-interaction --no-ansi"
+
 # == Jobs ==
 
 test:
@@ -55,23 +60,16 @@ test:
     - changes:
         - '**/*.py'
 
-black:
+lint:
   stage: 📋 lint
   needs: []
   script:
-    - "poetry run black --check scar_add_metadata_toolbox/ tests/"
+    - "poetry check"
+    - "poetry run black --check src/"
+    - "poetry run bandit -r src/"
   rules:
     - changes:
-      - '**/*.py'
-
-bandit:
-  stage: 📋 lint
-  needs: []
-  script:
-    - "bandit -r ."
-  rules:
-    - changes:
-      - '**/*.py'
+        - '**/*.py'
 
 build:
   stage: 🏗 build
@@ -93,7 +91,10 @@ publish:
   stage: 🚚 publish
   needs:
     - test
+    - lint
   before_script:
+    - "ln -s /.venv .venv"
+    - "poetry install --no-interaction --no-ansi"
     - "poetry config pypi-token.pypi $PYPI_TOKEN --local"
   script:
     - "poetry publish --build --no-interaction"

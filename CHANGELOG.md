@@ -25,8 +25,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
-* Simplifying CI/CD workflow
+* Simplifying and CI/CD workflow
   [#189](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/189)
+  [#196](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/196)
 * Vendoring PyCSW and OWSlib dependencies within Hazmat module
   [#193](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/193)
 * Restructuring package to use `src` directory

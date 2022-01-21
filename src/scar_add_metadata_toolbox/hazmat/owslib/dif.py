@@ -41,7 +41,7 @@ namespaces = get_namespaces()
 
 
 class DIF(object):
-    """ Process DIF """
+    """Process DIF"""
 
     def __init__(self, md):
         val = md.find(util.nspath_eval("dif:Entry_ID", namespaces))
@@ -180,7 +180,7 @@ class DIF(object):
 
 
 class Citation(object):
-    """ Parse Data_Set_Citation """
+    """Parse Data_Set_Citation"""
 
     def __init__(self, el):
         val = el.find(util.nspath_eval("dif:Dataset_Creator", namespaces))
@@ -218,7 +218,7 @@ class Citation(object):
 
 
 class Personnel(object):
-    """ Process Personnel """
+    """Process Personnel"""
 
     def __init__(self, md):
         self.role = []
@@ -251,7 +251,7 @@ class Personnel(object):
 
 
 class Contact_Address(object):
-    """ Process Contact_Address """
+    """Process Contact_Address"""
 
     def __init__(self, md):
         self.address = []
@@ -272,7 +272,7 @@ class Contact_Address(object):
 
 
 class Discipline(object):
-    """ Process Discipline """
+    """Process Discipline"""
 
     def __init__(self, md):
         val = md.find(util.nspath_eval("dif:Discipline_Name", namespaces))
@@ -286,7 +286,7 @@ class Discipline(object):
 
 
 class Parameters(object):
-    """ Process Parameters """
+    """Process Parameters"""
 
     def __init__(self, md):
         val = md.find(util.nspath_eval("dif:Category", namespaces))
@@ -312,7 +312,7 @@ class Parameters(object):
 
 
 class Name(object):
-    """ Process Sensor_Name, Source_Name, Project, IDN_Node """
+    """Process Sensor_Name, Source_Name, Project, IDN_Node"""
 
     def __init__(self, md):
         val = md.find(util.nspath_eval("dif:Short_Name", namespaces))
@@ -323,7 +323,7 @@ class Name(object):
 
 
 class Temporal_Coverage(object):
-    """ Process Temporal_Coverage """
+    """Process Temporal_Coverage"""
 
     def __init__(self, md):
         val = md.find(util.nspath_eval("dif:Start_Date", namespaces))
@@ -334,7 +334,7 @@ class Temporal_Coverage(object):
 
 
 class Paleo_Temporal_Coverage(object):
-    """ Process Paleo_Temporal_Coverage """
+    """Process Paleo_Temporal_Coverage"""
 
     def __init__(self, md):
         val = md.find(util.nspath_eval("dif:Paleo_Start_Date", namespaces))
@@ -349,7 +349,7 @@ class Paleo_Temporal_Coverage(object):
 
 
 class Chronostratigraphic_Unit(object):
-    """ Process Chronostratigraphic_Unit """
+    """Process Chronostratigraphic_Unit"""
 
     def __init__(self, md):
         val = md.find(util.nspath_eval("dif:Eon", namespaces))
@@ -372,7 +372,7 @@ class Chronostratigraphic_Unit(object):
 
 
 class Spatial_Coverage(object):
-    """ Process Spatial_Coverage """
+    """Process Spatial_Coverage"""
 
     def __init__(self, md):
         val = md.find(util.nspath_eval("dif:Southernmost_Latitude", namespaces))
@@ -401,7 +401,7 @@ class Spatial_Coverage(object):
 
 
 class Location(object):
-    """ Process Location """
+    """Process Location"""
 
     def __init__(self, md):
         val = md.find(util.nspath_eval("dif:Location_Category", namespaces))
@@ -424,7 +424,7 @@ class Location(object):
 
 
 class Data_Resolution(object):
-    """ Process Data_Resolution"""
+    """Process Data_Resolution"""
 
     def __init__(self, md):
         val = md.find(util.nspath_eval("dif:Latitude_Resolution", namespaces))
@@ -450,7 +450,7 @@ class Data_Resolution(object):
 
 
 class Data_Center(object):
-    """ Process Data_Center """
+    """Process Data_Center"""
 
     def __init__(self, md):
         val = md.find(util.nspath_eval("dif:Data_Center_Name", namespaces))
@@ -467,7 +467,7 @@ class Data_Center(object):
 
 
 class Distribution(object):
-    """ Process Distribution """
+    """Process Distribution"""
 
     def __init__(self, md):
         val = md.find(util.nspath_eval("dif:Distribution_Media", namespaces))
@@ -484,7 +484,7 @@ class Distribution(object):
 
 
 class Multimedia_Sample(object):
-    """ Process Multimedia_Sample """
+    """Process Multimedia_Sample"""
 
     def __init__(self, md):
         val = md.find(util.nspath_eval("dif:File", namespaces))
@@ -519,7 +519,7 @@ class Multimedia_Sample(object):
 
 
 class Related_URL(object):
-    """ Process Related_URL """
+    """Process Related_URL"""
 
     def __init__(self, md):
         self.content_type = []
@@ -534,7 +534,7 @@ class Related_URL(object):
 
 
 class URL_Content_Type(object):
-    """ Process URL_Content_Type """
+    """Process URL_Content_Type"""
 
     def __init__(self, md):
         val = md.find(util.nspath_eval("dif:Type", namespaces))

@@ -56,7 +56,7 @@ CODESPACE = "ISOTC211/19115"
 
 
 class APISO(profile.Profile):
-    """ APISO class """
+    """APISO class"""
 
     def __init__(self, model, namespaces, context):
         self.context = context
@@ -313,7 +313,7 @@ class APISO(profile.Profile):
         )
 
     def extend_core(self, model, namespaces, config):
-        """ Extend core configuration """
+        """Extend core configuration"""
 
         # update INSPIRE vars
         self.context.namespaces.update(self.inspire_namespaces)
@@ -366,7 +366,7 @@ class APISO(profile.Profile):
         return None
 
     def get_extendedcapabilities(self):
-        """ Add child to ows:OperationsMetadata Element """
+        """Add child to ows:OperationsMetadata Element"""
 
         if self.inspire_config is not None:
 
@@ -548,7 +548,7 @@ class APISO(profile.Profile):
             return ex_caps
 
     def get_schemacomponents(self):
-        """ Return schema components as lxml.etree.Element list """
+        """Return schema components as lxml.etree.Element list"""
 
         node1 = etree.Element(
             util.nspath_eval("csw:SchemaComponent", self.context.namespaces),
@@ -607,7 +607,7 @@ class APISO(profile.Profile):
         return None
 
     def write_record(self, result, esn, outputschema, queryables, caps=None):
-        """ Return csw:SearchResults child as lxml.etree.Element """
+        """Return csw:SearchResults child as lxml.etree.Element"""
         typename = util.getqattr(result, self.context.md_core_model["mappings"]["pycsw:Typename"])
         is_iso_anyway = False
 
@@ -991,7 +991,7 @@ def write_keywords(keywords, nsmap):
 
 
 def write_extent(bbox, nsmap):
-    """ Generate BBOX extent """
+    """Generate BBOX extent"""
 
     if bbox is not None:
         try:

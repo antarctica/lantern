@@ -293,7 +293,7 @@ class OpenSearch(object):
 
 
 def kvp2filterxml(kvp, context, profiles):
-    """ transform kvp to filter XML string """
+    """transform kvp to filter XML string"""
 
     bbox_element = None
     time_element = None

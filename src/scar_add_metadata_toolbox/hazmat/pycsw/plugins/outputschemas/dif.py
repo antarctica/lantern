@@ -69,7 +69,7 @@ XPATH_MAPPINGS = {
 
 
 def write_record(result, esn, context, url=None):
-    """ Return csw:SearchResults child as lxml.etree.Element """
+    """Return csw:SearchResults child as lxml.etree.Element"""
 
     typename = util.getqattr(result, context.md_core_model["mappings"]["pycsw:Typename"])
 
@@ -183,7 +183,7 @@ def write_record(result, esn, context, url=None):
 
 
 def write_extent(bbox, nsmap):
-    """ Generate BBOX extent """
+    """Generate BBOX extent"""
 
     from shapely.wkt import loads
 

@@ -55,10 +55,10 @@ from OpenDataCatalog.opendata.models import Resource
 
 
 class OpenDataCatalogRepository(object):
-    """ Class to interact with underlying repository """
+    """Class to interact with underlying repository"""
 
     def __init__(self, context, repo_filter=None):
-        """ Initialize repository """
+        """Initialize repository"""
 
         self.context = context
         self.filter = repo_filter
@@ -94,7 +94,7 @@ class OpenDataCatalogRepository(object):
         self.queryables["_all"].update(self.context.md_core_model["mappings"])
 
     def query_ids(self, ids):
-        """ Query by list of identifiers """
+        """Query by list of identifiers"""
 
         # identifiers are URN masked, where the last token of the identifier
         # is opendata.models.Resource.id (integer)
@@ -105,7 +105,7 @@ class OpenDataCatalogRepository(object):
             return []
 
     def query_domain(self, domain, typenames, domainquerytype="list", count=False):
-        """ Query by property domain values """
+        """Query by property domain values"""
 
         objects = self._get_repo_filter(Resource.objects)
 
@@ -118,7 +118,7 @@ class OpenDataCatalogRepository(object):
                 return objects.values_list(domain).distinct()
 
     def query_insert(self, direction="max"):
-        """ Query to get latest (default) or earliest update to repository """
+        """Query to get latest (default) or earliest update to repository"""
         from datetime import datetime
 
         if direction == "min":
@@ -130,11 +130,11 @@ class OpenDataCatalogRepository(object):
         )
 
     def query_source(self, source):
-        """ Query by source """
+        """Query by source"""
         return self._get_repo_filter(Resource.objects).filter(source=source)
 
     def query(self, constraint, sortby=None, typenames=None, maxrecords=10, startposition=0):
-        """ Query records from underlying repository """
+        """Query records from underlying repository"""
 
         # run the raw query and get total
         if "where" in constraint:  # GetRecords with constraint
@@ -171,7 +171,7 @@ class OpenDataCatalogRepository(object):
             return [str(total), query.all()[startposition : startposition + int(maxrecords)]]
 
     def _get_repo_filter(self, query):
-        """ Apply repository wide side filter / mask query """
+        """Apply repository wide side filter / mask query"""
         if self.filter is not None:
             return query.extra(where=[self.filter])
         return query

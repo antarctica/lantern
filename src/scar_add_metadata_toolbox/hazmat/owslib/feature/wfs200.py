@@ -108,7 +108,7 @@ class WebFeatureService_2_0_0(WebFeatureService_):
         return obj
 
     def __getitem__(self, name):
-        """ check contents dictionary to allow dict like access to service layers"""
+        """check contents dictionary to allow dict like access to service layers"""
         if name in list(self.__getattribute__("contents").keys()):
             return self.__getattribute__("contents")[name]
         else:
@@ -149,7 +149,7 @@ class WebFeatureService_2_0_0(WebFeatureService_):
         self._buildMetadata(parse_remote_metadata)
 
     def _buildMetadata(self, parse_remote_metadata=False):
-        """set up capabilities metadata objects: """
+        """set up capabilities metadata objects:"""
 
         self.updateSequence = self._capabilities.attrib.get("updateSequence")
 
@@ -325,7 +325,7 @@ class WebFeatureService_2_0_0(WebFeatureService_):
     def getpropertyvalue(
         self, query=None, storedquery_id=None, valuereference=None, typename=None, method=nspath("Get"), **kwargs
     ):
-        """ the WFS GetPropertyValue method"""
+        """the WFS GetPropertyValue method"""
         try:
             base_url = next(
                 (
@@ -357,7 +357,7 @@ class WebFeatureService_2_0_0(WebFeatureService_):
         return u.read()
 
     def _getStoredQueries(self):
-        """ gets descriptions of the stored queries available on the server """
+        """gets descriptions of the stored queries available on the server"""
         sqs = []
         # This method makes two calls to the WFS - one ListStoredQueries, and one DescribeStoredQueries.
         # The information is then aggregated in 'StoredQuery' objects
@@ -451,7 +451,7 @@ class WebFeatureService_2_0_0(WebFeatureService_):
 
 
 class StoredQuery(object):
-    """' Class to describe a storedquery """
+    """' Class to describe a storedquery"""
 
     def __init__(self, id, title, returntype, abstract, parameters):
         self.id = id

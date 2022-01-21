@@ -78,10 +78,10 @@ class EnvInterpolation(configparser.BasicInterpolation):
 
 
 class Csw(object):
-    """ Base CSW server """
+    """Base CSW server"""
 
     def __init__(self, rtconfig=None, env=None, version="3.0.0"):
-        """ Initialize CSW """
+        """Initialize CSW"""
 
         if not env:
             self.environ = os.environ
@@ -233,14 +233,14 @@ class Csw(object):
         LOGGER.debug("Namespaces: %s", self.context.namespaces)
 
     def expand_path(self, path):
-        """ return safe path for WSGI environments """
+        """return safe path for WSGI environments"""
         if "local.app_root" in self.environ and not os.path.isabs(path):
             return os.path.join(self.environ["local.app_root"], path)
         else:
             return path
 
     def dispatch_wsgi(self):
-        """ WSGI handler """
+        """WSGI handler"""
 
         if hasattr(self, "response"):
             return self._write_response()
@@ -270,27 +270,27 @@ class Csw(object):
         return self.dispatch()
 
     def opensearch(self):
-        """ enable OpenSearch """
+        """enable OpenSearch"""
         if not self.opensearchobj:
             self.opensearchobj = opensearch.OpenSearch(self.context)
 
         return self.opensearchobj
 
     def sru(self):
-        """ enable SRU """
+        """enable SRU"""
         if not self.sruobj:
             self.sruobj = sru.Sru(self.context)
 
         return self.sruobj
 
     def oaipmh(self):
-        """ enable OAI-PMH """
+        """enable OAI-PMH"""
         if not self.oaipmhobj:
             self.oaipmhobj = oaipmh.OAIPMH(self.context, self.config)
         return self.oaipmhobj
 
     def dispatch(self, writer=sys.stdout, write_headers=True):
-        """ Handle incoming HTTP request """
+        """Handle incoming HTTP request"""
 
         error = 0
         if self.requesttype == "GET":
@@ -590,39 +590,39 @@ class Csw(object):
         return self._write_response()
 
     def getcapabilities(self):
-        """ Handle GetCapabilities request """
+        """Handle GetCapabilities request"""
         return self.iface.getcapabilities()
 
     def describerecord(self):
-        """ Handle DescribeRecord request """
+        """Handle DescribeRecord request"""
         return self.iface.describerecord()
 
     def getdomain(self):
-        """ Handle GetDomain request """
+        """Handle GetDomain request"""
         return self.iface.getdomain()
 
     def getrecords(self):
-        """ Handle GetRecords request """
+        """Handle GetRecords request"""
         return self.iface.getrecords()
 
     def getrecordbyid(self, raw=False):
-        """ Handle GetRecordById request """
+        """Handle GetRecordById request"""
         return self.iface.getrecordbyid(raw)
 
     def getrepositoryitem(self):
-        """ Handle GetRepositoryItem request """
+        """Handle GetRepositoryItem request"""
         return self.iface.getrepositoryitem()
 
     def transaction(self):
-        """ Handle Transaction request """
+        """Handle Transaction request"""
         return self.iface.transaction()
 
     def harvest(self):
-        """ Handle Harvest request """
+        """Handle Harvest request"""
         return self.iface.harvest()
 
     def _write_response(self):
-        """ Generate response """
+        """Generate response"""
         # set HTTP response headers and XML declaration
 
         xmldecl = ""
@@ -661,7 +661,7 @@ class Csw(object):
         return [self.context.response_codes[self.status], s]
 
     def _gen_soap_wrapper(self):
-        """ Generate SOAP wrapper """
+        """Generate SOAP wrapper"""
         LOGGER.info("Writing SOAP wrapper.")
         node = etree.Element(
             util.nspath_eval("soapenv:Envelope", self.context.namespaces), nsmap=self.context.namespaces
@@ -695,7 +695,7 @@ class Csw(object):
         self.response = node
 
     def _gen_manager(self):
-        """ Update self.context.model with CSW-T advertising """
+        """Update self.context.model with CSW-T advertising"""
         if self.config.has_option("manager", "transactions") and self.config.get("manager", "transactions") == "true":
 
             self.manager = True
@@ -739,7 +739,7 @@ class Csw(object):
                 self.csw_harvest_pagesize = int(self.config.get("manager", "csw_harvest_pagesize"))
 
     def _test_manager(self):
-        """ Verify that transactions are allowed """
+        """Verify that transactions are allowed"""
 
         if self.config.get("manager", "transactions") != "true":
             raise RuntimeError("CSW-T interface is disabled")
@@ -757,7 +757,7 @@ class Csw(object):
             raise RuntimeError("CSW-T operations not allowed for this IP address: %s" % ipaddress)
 
     def _cql_update_queryables_mappings(self, cql, mappings):
-        """ Transform CQL query's properties to underlying DB columns """
+        """Transform CQL query's properties to underlying DB columns"""
         LOGGER.debug("Raw CQL text = %s", cql)
         LOGGER.debug(str(list(mappings.keys())))
         if cql is not None:
@@ -770,7 +770,7 @@ class Csw(object):
             return cql
 
     def _process_responsehandler(self, xml):
-        """ Process response handler """
+        """Process response handler"""
 
         if self.kvp["responsehandler"] is not None:
             LOGGER.info("Processing responsehandler %s" % self.kvp["responsehandler"])

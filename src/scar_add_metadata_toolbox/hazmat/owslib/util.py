@@ -303,7 +303,7 @@ def nspath(path, ns=OWS_NAMESPACE):
 
 
 def nspath_eval(xpath, namespaces):
-    """ Return an etree friendly xpath """
+    """Return an etree friendly xpath"""
     out = []
     for chunks in xpath.split("/"):
         namespace, element = chunks.split(":")
@@ -312,7 +312,7 @@ def nspath_eval(xpath, namespaces):
 
 
 def cleanup_namespaces(element):
-    """ Remove unused namespaces from an element """
+    """Remove unused namespaces from an element"""
     if etree.__name__ == "lxml.etree":
         etree.cleanup_namespaces(element)
         return element
@@ -589,7 +589,7 @@ def xmlvalid(xml, xsd):
 
 
 def xmltag_split(tag):
-    """ Return XML element bare tag name (without prefix) """
+    """Return XML element bare tag name (without prefix)"""
     try:
         return tag.split("}")[1]
     except Exception:
@@ -597,7 +597,7 @@ def xmltag_split(tag):
 
 
 def getNamespace(element):
-    """ Utility method to extract the namespace from an XML element tag encoded as {namespace}localname. """
+    """Utility method to extract the namespace from an XML element tag encoded as {namespace}localname."""
     if element.tag[0] == "{":
         return element.tag[1:].split("}")[0]
     else:
@@ -647,7 +647,7 @@ def dump(obj, prefix=""):
 
 
 def getTypedValue(data_type, value):
-    """Utility function to cast a string value to the appropriate XSD type. """
+    """Utility function to cast a string value to the appropriate XSD type."""
 
     if data_type == "boolean":
         return True if value.lower() == "true" else False
@@ -818,7 +818,7 @@ def findall(root, xpath, attribute_name=None, attribute_value=None):
 
 
 def datetime_from_iso(iso):
-    """returns a datetime object from dates in the format 2001-07-01T00:00:00Z or 2001-07-01T00:00:00.000Z """
+    """returns a datetime object from dates in the format 2001-07-01T00:00:00Z or 2001-07-01T00:00:00.000Z"""
     try:
         iso_datetime = datetime.strptime(iso, "%Y-%m-%dT%H:%M:%SZ")
     except Exception:

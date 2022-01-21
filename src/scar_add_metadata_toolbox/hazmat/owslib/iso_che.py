@@ -45,7 +45,7 @@ namespaces = get_namespaces()
 
 
 class CHE_MD_Metadata(object):
-    """ Process gmd:MD_Metadata """
+    """Process gmd:MD_Metadata"""
 
     def __init__(self, md=None):
 
@@ -178,7 +178,7 @@ class CHE_MD_Metadata(object):
                 self.dataquality = None
 
     def get_default_locale(self):
-        """ get default gmd:PT_Locale based on gmd:language """
+        """get default gmd:PT_Locale based on gmd:language"""
 
         for loc in self.locales:
             if loc.languagecode == self.language:
@@ -187,7 +187,7 @@ class CHE_MD_Metadata(object):
 
 
 class PT_Locale(object):
-    """ process PT_Locale """
+    """process PT_Locale"""
 
     def __init__(self, md=None):
         if md is None:
@@ -205,7 +205,7 @@ class PT_Locale(object):
 
 
 class CI_Date(object):
-    """ process CI_Date """
+    """process CI_Date"""
 
     def __init__(self, md=None):
         if md is None:
@@ -227,7 +227,7 @@ class CI_Date(object):
 
 
 class CI_ResponsibleParty(object):
-    """ process CI_ResponsibleParty """
+    """process CI_ResponsibleParty"""
 
     def __init__(self, md=None):
 
@@ -394,7 +394,7 @@ class MD_Keywords(object):
 
 
 class MD_DataIdentification(object):
-    """ process MD_DataIdentification """
+    """process MD_DataIdentification"""
 
     def __init__(self, md=None, identtype=None):
         if md is None:
@@ -743,7 +743,7 @@ class MD_DataIdentification(object):
 
 
 class MD_Distributor(object):
-    """ process MD_Distributor """
+    """process MD_Distributor"""
 
     def __init__(self, md=None):
         if md is None:
@@ -769,7 +769,7 @@ class MD_Distributor(object):
 
 
 class MD_Distribution(object):
-    """ process MD_Distribution """
+    """process MD_Distribution"""
 
     def __init__(self, md=None):
         if md is None:
@@ -804,7 +804,7 @@ class MD_Distribution(object):
 
 
 class DQ_DataQuality(object):
-    """ process DQ_DataQuality"""
+    """process DQ_DataQuality"""
 
     def __init__(self, md=None):
         if md is None:
@@ -890,7 +890,7 @@ class DQ_DataQuality(object):
 
 
 class SV_ServiceIdentification(object):
-    """ process SV_ServiceIdentification """
+    """process SV_ServiceIdentification"""
 
     def __init__(self, md=None):
         if md is None:
@@ -977,7 +977,7 @@ class SV_ServiceIdentification(object):
 
 
 class CI_OnlineResource(object):
-    """ process CI_OnlineResource """
+    """process CI_OnlineResource"""
 
     def __init__(self, md=None):
         if md is None:
@@ -1067,7 +1067,7 @@ class EX_GeographicBoundingPolygon(object):
 
 
 class EX_Extent(object):
-    """ process EX_Extent """
+    """process EX_Extent"""
 
     def __init__(self, md=None):
         if md is None:
@@ -1097,7 +1097,7 @@ class EX_Extent(object):
 
 
 class MD_ReferenceSystem(object):
-    """ process MD_ReferenceSystem """
+    """process MD_ReferenceSystem"""
 
     def __init__(self, md=None):
         if md is None:
@@ -1137,7 +1137,7 @@ class MD_ReferenceSystem(object):
 
 
 def _testCodeListValue(elpath):
-    """ get gco:CodeListValue_Type attribute, else get text content """
+    """get gco:CodeListValue_Type attribute, else get text content"""
     if elpath is not None:  # try to get @codeListValue
         val = util.testXMLValue(elpath.attrib.get("codeListValue"), True)
         if val is not None:
@@ -1149,7 +1149,7 @@ def _testCodeListValue(elpath):
 
 
 class CodelistCatalogue(object):
-    """ process CT_CodelistCatalogue """
+    """process CT_CodelistCatalogue"""
 
     def __init__(self, ct):
         val = ct.find(util.nspath_eval("gmx:name/gco:CharacterString", namespaces))

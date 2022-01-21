@@ -51,7 +51,7 @@ from scar_add_metadata_toolbox.hazmat.pycsw.plugins.profiles import profile
 
 
 class EBRIM(profile.Profile):
-    """ EBRim class """
+    """EBRim class"""
 
     def __init__(self, model, namespaces, context):
 
@@ -105,7 +105,7 @@ class EBRIM(profile.Profile):
         )
 
     def extend_core(self, model, namespaces, config):
-        """ Extend core configuration """
+        """Extend core configuration"""
 
         self.ogc_schemas_base = config.get("server", "ogc_schemas_base")
 
@@ -114,11 +114,11 @@ class EBRIM(profile.Profile):
         return None
 
     def get_extendedcapabilities(self):
-        """ Add child to ows:OperationsMetadata Element """
+        """Add child to ows:OperationsMetadata Element"""
         return None
 
     def get_schemacomponents(self):
-        """ Return schema components as lxml.etree.Element list """
+        """Return schema components as lxml.etree.Element list"""
 
         node = etree.Element(
             util.nspath_eval("csw:SchemaComponent", self.context.namespaces),
@@ -152,7 +152,7 @@ class EBRIM(profile.Profile):
         return None
 
     def write_record(self, result, esn, outputschema, queryables):
-        """ Return csw:SearchResults child as lxml.etree.Element """
+        """Return csw:SearchResults child as lxml.etree.Element"""
 
         identifier = util.getqattr(result, self.context.md_core_model["mappings"]["pycsw:Identifier"])
         typename = util.getqattr(result, self.context.md_core_model["mappings"]["pycsw:Typename"])

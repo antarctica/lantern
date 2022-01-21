@@ -59,7 +59,7 @@ class WebCoverageService_1_1_0(WCSBase):
     ns = Namespaces_1_1_0()
 
     def __getitem__(self, name):
-        """ check contents dictionary to allow dict like access to service layers"""
+        """check contents dictionary to allow dict like access to service layers"""
         if name in list(self.__getattribute__("contents").keys()):
             return self.__getattribute__("contents")[name]
         else:
@@ -347,7 +347,7 @@ class ServiceProvider(object):
 
 
 class ContactMetadata(object):
-    """ implements IContactMetadata"""
+    """implements IContactMetadata"""
 
     def __init__(self, elem, nmSpc):
         try:
@@ -547,7 +547,7 @@ class ContentMetadata(object):
     timepositions = property(_getTimePositions, None)
 
     def _checkChildAndParent(self, path):
-        """ checks child coverage  summary, and if item not found checks higher level coverage summary"""
+        """checks child coverage  summary, and if item not found checks higher level coverage summary"""
         try:
             value = self._elem.find(path).text
         except Exception:

@@ -40,7 +40,7 @@ def nspv(path):
 
 
 class TimePeriod(object):
-    """ Basic class for gml TimePeriod """
+    """Basic class for gml TimePeriod"""
 
     def __init__(self, start, end):
         self.start = start
@@ -112,14 +112,14 @@ class MeasurementObservation(OM_Observation):
 
 
 class Result(object):
-    """ Base class for different OM_Observation result types """
+    """Base class for different OM_Observation result types"""
 
     def __init__(self, element):
         pass
 
 
 class Measurement(Result):
-    """ A single measurement (value + uom) """
+    """A single measurement (value + uom)"""
 
     def __init__(self, value, uom):
         super(Measurement, self).__init__(None)

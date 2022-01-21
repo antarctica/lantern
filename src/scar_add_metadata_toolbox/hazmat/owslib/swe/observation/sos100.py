@@ -47,7 +47,7 @@ class SensorObservationService_1_0_0(object):
         return obj
 
     def __getitem__(self, id):
-        """ check contents dictionary to allow dict like access to service observational offerings"""
+        """check contents dictionary to allow dict like access to service observational offerings"""
         if id in list(self.__getattribute__("contents").keys()):
             return self.__getattribute__("contents")[id]
         else:

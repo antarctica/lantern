@@ -106,7 +106,7 @@ class Repository(object):
     """ Class to interact with underlying repository """
 
     def __init__(self, database, context, app_root=None, table="records", repo_filter=None):
-        """ Initialize repository """
+        """Initialize repository"""
 
         self.context = context
         self.filter = repo_filter
@@ -219,7 +219,7 @@ class Repository(object):
         return value_dict
 
     def query_ids(self, ids):
-        """ Query by list of identifiers """
+        """Query by list of identifiers"""
 
         column = getattr(self.dataset, self.context.md_core_model["mappings"]["pycsw:Identifier"])
 
@@ -227,7 +227,7 @@ class Repository(object):
         return self._get_repo_filter(query).all()
 
     def query_domain(self, domain, typenames, domainquerytype="list", count=False):
-        """ Query by property domain values """
+        """Query by property domain values"""
 
         domain_value = getattr(self.dataset, domain)
 
@@ -245,7 +245,7 @@ class Repository(object):
         return self._get_repo_filter(query).all()
 
     def query_insert(self, direction="max"):
-        """ Query to get latest (default) or earliest update to repository """
+        """Query to get latest (default) or earliest update to repository"""
         column = getattr(self.dataset, self.context.md_core_model["mappings"]["pycsw:InsertDate"])
 
         if direction == "min":
@@ -254,14 +254,14 @@ class Repository(object):
         return self._get_repo_filter(self.session.query(func.max(column))).first()[0]
 
     def query_source(self, source):
-        """ Query by source """
+        """Query by source"""
         column = getattr(self.dataset, self.context.md_core_model["mappings"]["pycsw:Source"])
 
         query = self.session.query(self.dataset).filter(column == source)
         return self._get_repo_filter(query).all()
 
     def query(self, constraint, sortby=None, typenames=None, maxrecords=10, startposition=0):
-        """ Query records from underlying repository """
+        """Query records from underlying repository"""
 
         # run the raw query and get total
         if "where" in constraint:  # GetRecords with constraint
@@ -314,7 +314,7 @@ class Repository(object):
         return [str(total), self._get_repo_filter(query).limit(maxrecords).offset(startposition).all()]
 
     def insert(self, record, source, insert_date):
-        """ Insert a record into the repository """
+        """Insert a record into the repository"""
 
         if isinstance(record.xml, bytes):
             LOGGER.debug("Decoding bytes to unicode")
@@ -329,7 +329,7 @@ class Repository(object):
             raise
 
     def update(self, record=None, recprops=None, constraint=None):
-        """ Update a record in the repository based on identifier """
+        """Update a record in the repository based on identifier"""
 
         if record is not None:
             identifier = getattr(record, self.context.md_core_model["mappings"]["pycsw:Identifier"])
@@ -409,7 +409,7 @@ class Repository(object):
                 raise RuntimeError(msg)
 
     def delete(self, constraint):
-        """ Delete a record from the repository """
+        """Delete a record from the repository"""
 
         try:
             self.session.begin()
@@ -448,7 +448,7 @@ class Repository(object):
         return rows
 
     def _get_repo_filter(self, query):
-        """ Apply repository wide side filter / mask query """
+        """Apply repository wide side filter / mask query"""
         if self.filter is not None:
             return query.filter(text(self.filter))
         return query

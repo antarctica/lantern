@@ -51,7 +51,7 @@ class MeasurementTimeseriesObservation(OM_Observation):
         self._parse_result()
 
     def _parse_result(self):
-        """ Parse the result element of the observation type """
+        """Parse the result element of the observation type"""
         if self.result is not None:
             result = self.result.find(nspv("wml2:MeasurementTimeseries"))
             self.result = MeasurementTimeseries(result)
@@ -61,14 +61,14 @@ class MeasurementTimeseriesObservation(OM_Observation):
 
 
 class Timeseries(Result):
-    """ Generic time-series class """
+    """Generic time-series class"""
 
     def __init__(self, element):
         super(Timeseries, self).__init__(element)
 
 
 class MeasurementTimeseries(Timeseries):
-    """ A WaterML2.0 timeseries of measurements, with per-value metadata. """
+    """A WaterML2.0 timeseries of measurements, with per-value metadata."""
 
     def __init__(self, element):
         super(MeasurementTimeseries, self).__init__(element)
@@ -150,7 +150,7 @@ class TVPMeasurementMetadata(TVPMetadata):
 
 
 class MeasurementTimeseriesDomainRange(Timeseries):
-    """ Class to implement domain range timeseries encoding """
+    """Class to implement domain range timeseries encoding"""
 
     def __init__(self, element):
         super(MeasurementTimeseriesDomainRange, self, element).__init__()

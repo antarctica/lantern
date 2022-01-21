@@ -39,12 +39,12 @@ import mimetypes
 
 class WCSDecoder(object):
     def __init__(self, u):
-        """ initiate with a urllib  url object."""
+        """initiate with a urllib  url object."""
         self.u = u
         self._getType()
 
     def _getType(self):
-        """ determine whether it is a Multipart Mime or a Coverages XML file"""
+        """determine whether it is a Multipart Mime or a Coverages XML file"""
 
         # what's the best way to test this?
         # for now read start of file
@@ -79,11 +79,11 @@ class WCSDecoder(object):
 
 class MpartMime(object):
     def __init__(self, mpartmime):
-        """ mpartmime is a multipart mime file  that has already been read in."""
+        """mpartmime is a multipart mime file  that has already been read in."""
         self.mpartmime = mpartmime
 
     def unpackToDir(self, unpackdir):
-        """ unpacks contents of Multipart mime to a given directory"""
+        """unpacks contents of Multipart mime to a given directory"""
 
         names = []
         # create the directory if it doesn't exist:

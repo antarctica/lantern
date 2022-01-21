@@ -49,7 +49,7 @@ schema_location = "%s %s" % (namespaces["ogc"], schema)
 
 
 class FilterRequest(object):
-    """ filter class """
+    """filter class"""
 
     def __init__(self, parent=None, version="1.1.0"):
         """
@@ -205,7 +205,7 @@ class FilterRequest(object):
 
 
 class FilterCapabilities(object):
-    """ Abstraction for Filter_Capabilities """
+    """Abstraction for Filter_Capabilities"""
 
     def __init__(self, elem):
         # Spatial_Capabilities
@@ -338,7 +338,7 @@ class OgcExpression(object):
 
 
 class BinaryComparisonOpType(OgcExpression):
-    """ Super class of all the property operation classes"""
+    """Super class of all the property operation classes"""
 
     def __init__(self, propertyoperator, propertyname, literal, matchcase=True):
         self.propertyoperator = propertyoperator
@@ -356,14 +356,14 @@ class BinaryComparisonOpType(OgcExpression):
 
 
 class PropertyIsEqualTo(BinaryComparisonOpType):
-    """ PropertyIsEqualTo class"""
+    """PropertyIsEqualTo class"""
 
     def __init__(self, propertyname, literal, matchcase=True):
         BinaryComparisonOpType.__init__(self, "ogc:PropertyIsEqualTo", propertyname, literal, matchcase)
 
 
 class PropertyIsNotEqualTo(BinaryComparisonOpType):
-    """ PropertyIsNotEqualTo class """
+    """PropertyIsNotEqualTo class"""
 
     def __init__(self, propertyname, literal, matchcase=True):
         BinaryComparisonOpType.__init__(self, "ogc:PropertyIsNotEqualTo", propertyname, literal, matchcase)
@@ -474,7 +474,7 @@ class BBox(OgcExpression):
 
 # BINARY
 class BinaryLogicOpType(OgcExpression):
-    """ Binary Operators: And / Or """
+    """Binary Operators: And / Or"""
 
     def __init__(self, binary_operator, operations):
         self.binary_operator = binary_operator
@@ -503,7 +503,7 @@ class Or(BinaryLogicOpType):
 
 # UNARY
 class UnaryLogicOpType(OgcExpression):
-    """ Unary Operator: Not """
+    """Unary Operator: Not"""
 
     def __init__(self, urary_operator, operations):
         self.urary_operator = urary_operator

@@ -66,16 +66,16 @@ LOGGER = logging.getLogger(__name__)
 
 
 class Csw2(object):
-    """ CSW 2.x server """
+    """CSW 2.x server"""
 
     def __init__(self, server_csw):
-        """ Initialize CSW2 """
+        """Initialize CSW2"""
 
         self.parent = server_csw
         self.version = "2.0.2"
 
     def getcapabilities(self):
-        """ Handle GetCapabilities request """
+        """Handle GetCapabilities request"""
         serviceidentification = True
         serviceprovider = True
         operationsmetadata = True
@@ -432,7 +432,7 @@ class Csw2(object):
         return node
 
     def describerecord(self):
-        """ Handle DescribeRecord request """
+        """Handle DescribeRecord request"""
 
         if "typename" not in self.parent.kvp or len(self.parent.kvp["typename"]) == 0:  # missing typename
             # set to return all typenames
@@ -511,7 +511,7 @@ class Csw2(object):
         return node
 
     def getdomain(self):
-        """ Handle GetDomain request """
+        """Handle GetDomain request"""
         if "parametername" not in self.parent.kvp and "propertyname" not in self.parent.kvp:
             return self.exceptionreport(
                 "MissingParameterValue",
@@ -643,7 +643,7 @@ class Csw2(object):
         return node
 
     def getrecords(self):
-        """ Handle GetRecords request """
+        """Handle GetRecords request"""
 
         timestamp = util.get_today_and_now()
 
@@ -1092,7 +1092,7 @@ class Csw2(object):
             return node
 
     def getrecordbyid(self, raw=False):
-        """ Handle GetRecordById request """
+        """Handle GetRecordById request"""
 
         if "id" not in self.parent.kvp:
             return self.exceptionreport("MissingParameterValue", "id", "Missing id parameter")
@@ -1215,7 +1215,7 @@ class Csw2(object):
         return node
 
     def getrepositoryitem(self):
-        """ Handle GetRepositoryItem request """
+        """Handle GetRepositoryItem request"""
 
         # similar to GetRecordById without csw:* wrapping
         node = self.parent.getrecordbyid(raw=True)
@@ -1225,7 +1225,7 @@ class Csw2(object):
             return node
 
     def transaction(self):
-        """ Handle Transaction request """
+        """Handle Transaction request"""
 
         try:
             self.parent._test_manager()
@@ -1361,7 +1361,7 @@ class Csw2(object):
         return node
 
     def harvest(self):
-        """ Handle Harvest request """
+        """Handle Harvest request"""
 
         service_identifier = None
         old_identifier = None
@@ -1573,7 +1573,7 @@ class Csw2(object):
             return node
 
     def _write_record(self, recobj, queryables):
-        """ Generate csw:Record """
+        """Generate csw:Record"""
         if self.parent.kvp["elementsetname"] == "brief":
             elname = "BriefRecord"
         elif self.parent.kvp["elementsetname"] == "summary":
@@ -1695,7 +1695,7 @@ class Csw2(object):
         return record
 
     def _parse_constraint(self, element):
-        """ Parse csw:Constraint """
+        """Parse csw:Constraint"""
 
         query = {}
 
@@ -1741,7 +1741,7 @@ class Csw2(object):
         return query
 
     def parse_postdata(self, postdata):
-        """ Parse POST XML """
+        """Parse POST XML"""
 
         request = {}
         try:
@@ -2047,7 +2047,7 @@ class Csw2(object):
         return request
 
     def _write_transactionsummary(self, inserted=0, updated=0, deleted=0):
-        """ Write csw:TransactionSummary construct """
+        """Write csw:TransactionSummary construct"""
         node = etree.Element(util.nspath_eval("csw:TransactionSummary", self.parent.context.namespaces))
 
         if "requestid" in self.parent.kvp and self.parent.kvp["requestid"] is not None:
@@ -2064,7 +2064,7 @@ class Csw2(object):
         return node
 
     def _write_acknowledgement(self, root=True):
-        """ Generate csw:Acknowledgement """
+        """Generate csw:Acknowledgement"""
         node = etree.Element(
             util.nspath_eval("csw:Acknowledgement", self.parent.context.namespaces),
             nsmap=self.parent.context.namespaces,
@@ -2095,7 +2095,7 @@ class Csw2(object):
         return node
 
     def _write_verboseresponse(self, insertresults):
-        """ show insert result identifiers """
+        """show insert result identifiers"""
         insertresult = etree.Element(util.nspath_eval("csw:InsertResult", self.parent.context.namespaces))
         for ir in insertresults:
             briefrec = etree.SubElement(
@@ -2111,7 +2111,7 @@ class Csw2(object):
         return insertresult
 
     def exceptionreport(self, code, locator, text):
-        """ Generate ExceptionReport """
+        """Generate ExceptionReport"""
         self.parent.exception = True
         self.parent.status = "OK"
 
@@ -2150,7 +2150,7 @@ class Csw2(object):
 
 
 def write_boundingbox(bbox, nsmap):
-    """ Generate ows:BoundingBox """
+    """Generate ows:BoundingBox"""
 
     if bbox is not None:
         try:

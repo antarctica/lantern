@@ -63,16 +63,16 @@ LOGGER = logging.getLogger(__name__)
 
 
 class Csw3(object):
-    """ CSW 3.x server """
+    """CSW 3.x server"""
 
     def __init__(self, server_csw):
-        """ Initialize CSW3 """
+        """Initialize CSW3"""
 
         self.parent = server_csw
         self.version = "3.0.0"
 
     def getcapabilities(self):
-        """ Handle GetCapabilities request """
+        """Handle GetCapabilities request"""
         serviceidentification = True
         serviceprovider = True
         operationsmetadata = True
@@ -526,7 +526,7 @@ class Csw3(object):
         return node
 
     def getdomain(self):
-        """ Handle GetDomain request """
+        """Handle GetDomain request"""
         if "parametername" not in self.parent.kvp and "valuereference" not in self.parent.kvp:
             return self.exceptionreport(
                 "MissingParameterValue",
@@ -654,7 +654,7 @@ class Csw3(object):
         return node
 
     def getrecords(self):
-        """ Handle GetRecords request """
+        """Handle GetRecords request"""
 
         timestamp = util.get_today_and_now()
 
@@ -1168,7 +1168,7 @@ class Csw3(object):
             return node
 
     def getrecordbyid(self, raw=False):
-        """ Handle GetRecordById request """
+        """Handle GetRecordById request"""
 
         if "id" not in self.parent.kvp:
             return self.exceptionreport("MissingParameterValue", "id", "Missing id parameter")
@@ -1307,7 +1307,7 @@ class Csw3(object):
         return node
 
     def getrepositoryitem(self):
-        """ Handle GetRepositoryItem request """
+        """Handle GetRepositoryItem request"""
 
         # similar to GetRecordById without csw:* wrapping
         node = self.parent.getrecordbyid(raw=True)
@@ -1317,7 +1317,7 @@ class Csw3(object):
             return node
 
     def transaction(self):
-        """ Handle Transaction request """
+        """Handle Transaction request"""
 
         try:
             self.parent._test_manager()
@@ -1454,7 +1454,7 @@ class Csw3(object):
         return node
 
     def harvest(self):
-        """ Handle Harvest request """
+        """Handle Harvest request"""
 
         service_identifier = None
         old_identifier = None
@@ -1666,7 +1666,7 @@ class Csw3(object):
             return node
 
     def _write_record(self, recobj, queryables):
-        """ Generate csw30:Record """
+        """Generate csw30:Record"""
         if self.parent.kvp["elementsetname"] == "brief":
             elname = "BriefRecord"
         elif self.parent.kvp["elementsetname"] == "summary":
@@ -1811,7 +1811,7 @@ class Csw3(object):
         return record
 
     def _parse_constraint(self, element):
-        """ Parse csw:Constraint """
+        """Parse csw:Constraint"""
 
         query = {}
 
@@ -1857,7 +1857,7 @@ class Csw3(object):
         return query
 
     def parse_postdata(self, postdata):
-        """ Parse POST XML """
+        """Parse POST XML"""
 
         request = {}
         try:
@@ -2147,7 +2147,7 @@ class Csw3(object):
         return request
 
     def _write_transactionsummary(self, inserted=0, updated=0, deleted=0):
-        """ Write csw:TransactionSummary construct """
+        """Write csw:TransactionSummary construct"""
         node = etree.Element(util.nspath_eval("csw30:TransactionSummary", self.parent.context.namespaces))
 
         if "requestid" in self.parent.kvp and self.parent.kvp["requestid"] is not None:
@@ -2168,7 +2168,7 @@ class Csw3(object):
         return node
 
     def _write_acknowledgement(self, root=True):
-        """ Generate csw:Acknowledgement """
+        """Generate csw:Acknowledgement"""
         node = etree.Element(
             util.nspath_eval("csw30:Acknowledgement", self.parent.context.namespaces),
             nsmap=self.parent.context.namespaces,
@@ -2199,7 +2199,7 @@ class Csw3(object):
         return node
 
     def _write_verboseresponse(self, insertresults):
-        """ show insert result identifiers """
+        """show insert result identifiers"""
         insertresult = etree.Element(util.nspath_eval("csw30:InsertResult", self.parent.context.namespaces))
         for ir in insertresults:
             briefrec = etree.SubElement(
@@ -2215,7 +2215,7 @@ class Csw3(object):
         return insertresult
 
     def _write_allowed_values(self, values):
-        """ design pattern to write ows20:AllowedValues """
+        """design pattern to write ows20:AllowedValues"""
 
         allowed_values = etree.Element(util.nspath_eval("ows20:AllowedValues", self.parent.context.namespaces))
 
@@ -2226,7 +2226,7 @@ class Csw3(object):
         return allowed_values
 
     def exceptionreport(self, code, locator, text):
-        """ Generate ExceptionReport """
+        """Generate ExceptionReport"""
         self.parent.exception = True
         self.parent.status = code
 
@@ -2268,7 +2268,7 @@ class Csw3(object):
         return node
 
     def resolve_nsmap(self, list_):
-        """' Resolve typename bindings based on default and KVP namespaces """
+        """' Resolve typename bindings based on default and KVP namespaces"""
 
         nsmap = {}
 
@@ -2310,7 +2310,7 @@ class Csw3(object):
 
 
 def write_boundingbox(bbox, nsmap):
-    """ Generate ows20:BoundingBox """
+    """Generate ows20:BoundingBox"""
 
     if bbox is not None:
         try:
@@ -2349,7 +2349,7 @@ def write_boundingbox(bbox, nsmap):
 
 
 def get_resultset_status(matched, nextrecord):
-    """ Helper function to assess status of a result set """
+    """Helper function to assess status of a result set"""
 
     status = "subset"  # default
 

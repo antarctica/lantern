@@ -414,7 +414,7 @@ class WebMapService_1_1_1(object):
 
 
 class ServiceIdentification(object):
-    """ Implements IServiceIdentificationMetadata """
+    """Implements IServiceIdentificationMetadata"""
 
     def __init__(self, infoset, version):
         self._root = infoset
@@ -428,7 +428,7 @@ class ServiceIdentification(object):
 
 
 class ServiceProvider(object):
-    """ Implements IServiceProviderMetatdata """
+    """Implements IServiceProviderMetatdata"""
 
     def __init__(self, infoset):
         self._root = infoset

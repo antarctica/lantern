@@ -121,7 +121,7 @@ class WebFeatureService_1_0_0(object):
         return obj
 
     def __getitem__(self, name):
-        """ check contents dictionary to allow dict like access to service layers"""
+        """check contents dictionary to allow dict like access to service layers"""
         if name in list(self.__getattribute__("contents").keys()):
             return self.__getattribute__("contents")[name]
         else:
@@ -159,7 +159,7 @@ class WebFeatureService_1_0_0(object):
         self._buildMetadata(parse_remote_metadata)
 
     def _buildMetadata(self, parse_remote_metadata=False):
-        """set up capabilities metadata objects: """
+        """set up capabilities metadata objects:"""
 
         self.updateSequence = self._capabilities.attrib.get("updateSequence")
 
@@ -343,7 +343,7 @@ class WebFeatureService_1_0_0(object):
 
 
 class ServiceIdentification(object):
-    """ Implements IServiceIdentificationMetadata """
+    """Implements IServiceIdentificationMetadata"""
 
     def __init__(self, infoset, version):
         self._root = infoset
@@ -357,7 +357,7 @@ class ServiceIdentification(object):
 
 
 class ServiceProvider(object):
-    """ Implements IServiceProviderMetatdata """
+    """Implements IServiceProviderMetatdata"""
 
     def __init__(self, infoset):
         self._root = infoset

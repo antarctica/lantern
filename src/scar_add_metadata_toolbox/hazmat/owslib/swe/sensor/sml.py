@@ -366,7 +366,7 @@ class Identifier(Term):
 
 
 class ProcessMethod(MetadataGroup):
-    """ Inherits from gml:AbstractGMLType """
+    """Inherits from gml:AbstractGMLType"""
 
     def __init__(self, element):
         MetadataGroup.__init__(self, element)

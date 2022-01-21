@@ -205,7 +205,7 @@ class WebMapTileService(object):
         return self._capabilities
 
     def _buildMetadata(self, parse_remote_metadata=False):
-        """ set up capabilities metadata objects """
+        """set up capabilities metadata objects"""
 
         self.updateSequence = self._capabilities.attrib.get("updateSequence")
 

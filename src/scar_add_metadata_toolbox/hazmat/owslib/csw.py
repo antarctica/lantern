@@ -68,7 +68,7 @@ schema_location = "%s %s" % (namespaces["csw"], schema)
 
 
 class CatalogueServiceWeb(object):
-    """ csw request class """
+    """csw request class"""
 
     def __init__(
         self, url, lang="en-US", version="2.0.2", timeout=10, skip_caps=False, username=None, password=None, auth=None
@@ -680,7 +680,7 @@ class CatalogueServiceWeb(object):
             self.results["deleted"] = int(util.testXMLValue(ts))
 
     def _setesnel(self, esn):
-        """ Set the element name to parse depending on the ElementSetName requested """
+        """Set the element name to parse depending on the ElementSetName requested"""
         el = "Record"
         if esn == "brief":
             el = "BriefRecord"
@@ -802,7 +802,7 @@ class CatalogueServiceWeb(object):
 
 
 class CswRecord(object):
-    """ Process csw:Record, csw:BriefRecord, csw:SummaryRecord """
+    """Process csw:Record, csw:BriefRecord, csw:SummaryRecord"""
 
     def __init__(self, record):
 

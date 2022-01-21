@@ -87,7 +87,7 @@ class TileMapService(object):
         return self._capabilities
 
     def _buildMetadata(self, parse_remote_metadata=False):
-        """ set up capabilities metadata objects """
+        """set up capabilities metadata objects"""
         if self._capabilities.attrib.get("version"):
             self.version = self._capabilities.attrib.get("version")
         self.identification = ServiceIdentification(self._capabilities, self.version)

@@ -47,7 +47,7 @@ class WebCoverageService_1_0_0(WCSBase):
     """
 
     def __getitem__(self, name):
-        """ check contents dictionary to allow dict like access to service layers"""
+        """check contents dictionary to allow dict like access to service layers"""
         if name in list(self.__getattribute__("contents").keys()):
             return self.__getattribute__("contents")[name]
         else:
@@ -222,7 +222,7 @@ class OperationMetadata(object):
 
 
 class ServiceIdentification(object):
-    """ Abstraction for ServiceIdentification metadata """
+    """Abstraction for ServiceIdentification metadata"""
 
     def __init__(self, elem):
         # properties
@@ -255,7 +255,7 @@ class ServiceProvider(object):
 
 
 class ContactMetadata(object):
-    """ implements IContactMetadata"""
+    """implements IContactMetadata"""
 
     def __init__(self, elem):
         try:
@@ -462,7 +462,7 @@ class ContentMetadata(object):
 
 
 class Grid(object):
-    """ Simple grid class to provide axis and value information for a gml grid """
+    """Simple grid class to provide axis and value information for a gml grid"""
 
     def __init__(self, grid):
         self.axislabels = []
@@ -486,7 +486,7 @@ class Grid(object):
 
 
 class RectifiedGrid(Grid):
-    """ RectifiedGrid class, extends Grid with additional offset vector information """
+    """RectifiedGrid class, extends Grid with additional offset vector information"""
 
     def __init__(self, rectifiedgrid):
         super(RectifiedGrid, self).__init__(rectifiedgrid)

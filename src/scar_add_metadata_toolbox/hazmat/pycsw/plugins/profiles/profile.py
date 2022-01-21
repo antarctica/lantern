@@ -35,7 +35,7 @@ import warnings
 
 
 class Profile(object):
-    """ base Profile class """
+    """base Profile class"""
 
     def __init__(
         self,
@@ -53,7 +53,7 @@ class Profile(object):
         repository,
     ):
 
-        """ Initialize profile """
+        """Initialize profile"""
         self.name = name
         self.version = version
         self.title = title
@@ -83,7 +83,7 @@ class Profile(object):
         model["typenames"][self.typename] = self.repository
 
     def extend_core(self, model, namespaces, config):
-        """ Extend config.model and config.namespaces """
+        """Extend config.model and config.namespaces"""
         raise NotImplementedError
 
     def check_parameters(self):
@@ -92,11 +92,11 @@ class Profile(object):
         raise NotImplementedError
 
     def get_extendedcapabilities(self):
-        """ Return ExtendedCapabilities child as lxml.etree.Element """
+        """Return ExtendedCapabilities child as lxml.etree.Element"""
         raise NotImplementedError
 
     def get_schemacomponents(self):
-        """ Return schema components as lxml.etree.Element list """
+        """Return schema components as lxml.etree.Element list"""
         raise NotImplementedError
 
     def check_getdomain(self, kvp):
@@ -104,16 +104,16 @@ class Profile(object):
         raise NotImplementedError
 
     def write_record(self, result, esn, outputschema, queryables):
-        """ Return csw:SearchResults child as lxml.etree.Element """
+        """Return csw:SearchResults child as lxml.etree.Element"""
         raise NotImplementedError
 
     def transform2dcmappings(self, queryables):
-        """ Transform information model mappings into csw:Record mappings """
+        """Transform information model mappings into csw:Record mappings"""
         raise NotImplementedError
 
 
 def load_profiles(path, cls, profiles):
-    """ load CSW profiles, return dict by class name """
+    """load CSW profiles, return dict by class name"""
 
     def look_for_subclass(modulename):
         module = __import__(modulename)

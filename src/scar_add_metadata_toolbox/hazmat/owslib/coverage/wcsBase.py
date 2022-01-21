@@ -69,7 +69,7 @@ class WCSBase(object):
         self.auth = auth or Authentication()
 
     def getDescribeCoverage(self, identifier):
-        """ returns a describe coverage document - checks the internal cache to see if it has been fetched before """
+        """returns a describe coverage document - checks the internal cache to see if it has been fetched before"""
         if identifier not in list(self._describeCoverage.keys()):
             reader = DescribeCoverageReader(self.version, identifier, self.cookies, self.auth)
             self._describeCoverage[identifier] = reader.read(self.url)

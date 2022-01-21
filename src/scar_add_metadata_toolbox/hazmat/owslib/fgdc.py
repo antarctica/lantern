@@ -29,7 +29,7 @@ from scar_add_metadata_toolbox.hazmat.owslib import util
 
 
 class Metadata(object):
-    """ Process metadata """
+    """Process metadata"""
 
     def __init__(self, md):
         if hasattr(md, "getroot"):  # standalone document
@@ -47,7 +47,7 @@ class Metadata(object):
 
 
 class Idinfo(object):
-    """ Process idinfo """
+    """Process idinfo"""
 
     def __init__(self, md):
         val = md.find("idinfo/datasetid")
@@ -93,7 +93,7 @@ class Idinfo(object):
 
 
 class Citation(object):
-    """ Process citation """
+    """Process citation"""
 
     def __init__(self, md):
         if md is not None:
@@ -123,7 +123,7 @@ class Citation(object):
 
 
 class Descript(object):
-    """ Process descript """
+    """Process descript"""
 
     def __init__(self, md):
         val = md.find("abstract")
@@ -137,7 +137,7 @@ class Descript(object):
 
 
 class Timeperd(object):
-    """ Process timeperd """
+    """Process timeperd"""
 
     def __init__(self, md):
         if md is not None:
@@ -150,7 +150,7 @@ class Timeperd(object):
 
 
 class Timeinfo(object):
-    """ Process timeinfo """
+    """Process timeinfo"""
 
     def __init__(self, md):
         val = md.find("sngdate")
@@ -163,7 +163,7 @@ class Timeinfo(object):
 
 
 class Sngdate(object):
-    """ Process sngdate """
+    """Process sngdate"""
 
     def __init__(self, md):
         val = md.find("caldate")
@@ -173,7 +173,7 @@ class Sngdate(object):
 
 
 class Rngdates(object):
-    """ Process rngdates """
+    """Process rngdates"""
 
     def __init__(self, md):
         val = md.find("begdate")
@@ -187,7 +187,7 @@ class Rngdates(object):
 
 
 class Status(object):
-    """ Process status """
+    """Process status"""
 
     def __init__(self, md):
         val = md.find("progress")
@@ -198,7 +198,7 @@ class Status(object):
 
 
 class Spdom(object):
-    """ Process spdom """
+    """Process spdom"""
 
     def __init__(self, md):
         val = md.find("bounding/westbc")
@@ -223,7 +223,7 @@ class Spdom(object):
 
 
 class Bbox(object):
-    """ Generate bbox for spdom (convenience function) """
+    """Generate bbox for spdom (convenience function)"""
 
     def __init__(self, spdom):
         self.minx = spdom.westbc
@@ -233,7 +233,7 @@ class Bbox(object):
 
 
 class Keywords(object):
-    """ Process keywords """
+    """Process keywords"""
 
     def __init__(self, md):
         self.theme = []
@@ -273,7 +273,7 @@ class Keywords(object):
 
 
 class Ptcontac(object):
-    """ Process ptcontac """
+    """Process ptcontac"""
 
     def __init__(self, md):
         val = md.find("cntinfo/cntorgp/cntorg")
@@ -311,7 +311,7 @@ class Ptcontac(object):
 
 
 class Eainfo(object):
-    """ Process eainfo """
+    """Process eainfo"""
 
     def __init__(self, md):
         val = md.find("eainfo/detailed/enttyp/enttypl")
@@ -342,7 +342,7 @@ class Eainfo(object):
 
 
 class Distinfo(object):
-    """ Process distinfo """
+    """Process distinfo"""
 
     def __init__(self, md):
         val = md.find("distinfo")
@@ -358,7 +358,7 @@ class Distinfo(object):
 
 
 class Metainfo(object):
-    """ Process metainfo """
+    """Process metainfo"""
 
     def __init__(self, md):
         val = md.find("metainfo/metd")

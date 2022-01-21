@@ -34,7 +34,7 @@ from scar_add_metadata_toolbox.hazmat.owslib.util import clean_ows_url, Authenti
 
 
 def WebCoverageService(url, version=None, xml=None, cookies=None, timeout=30, auth=None):
-    """ wcs factory function, returns a version specific WebCoverageService object """
+    """wcs factory function, returns a version specific WebCoverageService object"""
 
     if not auth:
         auth = Authentication()

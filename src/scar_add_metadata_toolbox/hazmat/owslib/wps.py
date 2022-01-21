@@ -1577,7 +1577,7 @@ class Process(object):
     """
 
     def __init__(self, elem, verbose=False):
-        """ Initialization method extracts all available metadata from an XML document (passed in as etree object) """
+        """Initialization method extracts all available metadata from an XML document (passed in as etree object)"""
 
         # <ns0:ProcessDescriptions service="WPS" version="1.0.0"
         #   xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsDescribeProcess_response.xsd"  # noqa

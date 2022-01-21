@@ -64,7 +64,7 @@ LOGGER = logging.getLogger(__name__)
 def parse_record(
     context, record, repos=None, mtype="http://www.opengis.net/cat/csw/2.0.2", identifier=None, pagesize=10
 ):
-    """ parse metadata """
+    """parse metadata"""
 
     if identifier is None:
         identifier = uuid.uuid4().urn
@@ -132,7 +132,7 @@ def parse_record(
 
 
 def _set(context, obj, name, value):
-    """ convenience method to set values """
+    """convenience method to set values"""
     setattr(obj, context.md_core_model["mappings"][name], value)
 
 

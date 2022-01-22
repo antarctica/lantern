@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.4.0] - 2022-01-24 [BREAKING!]
+
+### Changed [BREAKING!]
+
+* Relicensing project under the MIT licence (from the UK Open Government Licence)
+  [#188](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/187)
+
 ### Added
 
 * Upgraded project dependencies

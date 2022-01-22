@@ -24,60 +24,57 @@ $ flask [command]
 
 ### Listing commands
 
-All application commands can be listed by running the `scar-add-metadata-toolbox` or `flask` without a command, or by 
-adding the `--help` option (`scar-add-metadata-toolbox --help` or `flask --help`).
+All application commands can be listed by running the `scar-add-metadata-toolbox` or `flask` command without any 
+arguments, or using `--help` option (i.e. `scar-add-metadata-toolbox --help` or `flask --help`).
 
-This will list all top level commands or command groups. Commands within a group can be listed by calling the group as
-a command (and optionally `--help` option), e.g. `scar-add-metadata-toolbox records --help` or `flask records --help`.
+This will list all top level commands or command groups. Commands within a group can be listed by calling the group 
+without a sub-command (or the group with the `--help` option). E.g. `scar-add-metadata-toolbox records --help` or 
+`flask records --help`.
 
 ### Command help
 
-A brief description of each command and its options can be listed using the `--help` option, e.g. 
+A brief description of each command, and any options it supports, can be listed using the `--help` option, e.g. 
 `scar-add-metadata-toolbox records import --help` or `flask records import --help`.
 
 ### Bulk commands
 
-Many commands have 'bulk' counterparts that can be used for convenience. Bulk commands internally call the non-bulk
-version in a loop, and so work the same way as if you manually used the non-bulk command multiple times.
+For convenience, many commands have 'bulk' counterparts. These work as if you manually used the non-bulk command 
+for each item or each file in a directory.
 
-For example, the `records import` imports a single record from a file, whereas the `records bulk-import` command imports 
-records from all files in a directory by internally calling `records import` on each file in the directory.
+For example, the `records import` command imports a single record from a file. Whereas the `records bulk-import` 
+command imports records from all files in a directory (by internally using the `records import` command on each file).
 
-Bulk commands will stop at the first error they encounter, meaning if 20 records are imported and the 2nd causes an 
-error for example, the remaining 18 records won't be imported because the 2nd record failed.
+Bulk commands will stop at the first error they encounter, meaning if 20 records are to be imported, and the 2nd 
+causes an error, the remaining 18 records won't be imported.
 
 ### Command permissions
 
-Many commands can only be used by specific individuals or groups of individuals, typically either members of MAGIC or
-data managers within the ADD project itself.
+Many commands can only be used by specific individuals, or groups of individuals - typically either members of MAGIC or
+ADD project staff. You will need to sign-in using your NERC/BAS user account to access any restricted commands.
 
-To enforce these permissions many commands require you to sign-in using your NERC/BAS user account. This process will
-generate a user access token, valid for one hour, which allows this application to perform privileged actions on your
-behalf.
+Sign-ins last for 1 hour (unless you sign out), after which you will need to sign-in again. You will be told if your
+login session has expired.
 
-For example, the `records publish` command can only be used by ADD data managers. Once you have signed-in and try to 
-publish a record this application will check you have permission to publish records, returning an error if you don't.
-
-ADD project staff can assign permissions to user as needed using the 
+ADD project staff can assign permissions to users as needed using the 
 [Assigning permissions to users and groups](workflow-permissions-users.md) workflow.
 
-If you have issues with permissions not working please raise an [issue](../README.md#issue-tracking).
+If you have issues with permissions not working, please raise an [issue](../README.md#issue-tracking).
 
 **Note:** You will need an account within the NERC Active Directory to use this application. If you have a BAS email 
-address you have an account and should use the same username and password you use for accessing your BAS email.
+address you have an account.
 
 ### Common errors
 
 There are some common errors that can occur when using most commands:
-   
+
 #### `CSW catalogue not setup`
 
 ```
 No. CSW catalogue not setup.
 ```
 
-This error means the CSW catalogues for storing records have not been setup properly. This error should not occur and 
-you should contact support (@felnne) if it occurs.
+This error means the CSW catalogues for storing records have not been setup properly. This error should not occur, 
+please raise an [issue](../README.md#issue-tracking) if it occurs.
 
 #### `Error with auth token`
 
@@ -85,8 +82,8 @@ you should contact support (@felnne) if it occurs.
 No. Error with auth token. Try signing out and in again or seek support.
 ```
 
-This error typically means your user auth token has expired and needs to refreshed by signing-in again. If this doesn't
-fix the problem, you should contact support (@felnne).
+This error typically means your access token has expired and you need to sign in again. If this doesn't fix the problem
+please raise an [issue](../README.md#issue-tracking).
 
 #### `Missing auth token`
 
@@ -94,9 +91,9 @@ fix the problem, you should contact support (@felnne).
 No. Missing auth token. Run `auth sign-in` first.
 ```
 
-This error occurs when you try to use a command that requires permission to use and have not yet signed-in.
+This error occurs when you try to use a restricted command but you haven't signed-in yet.
 
-Use the [Sign-in](#auth-sign-in) command to fix this.
+Run the [Sign-in](#auth-sign-in) command to fix this.
 
 #### `Missing permissions in auth token`
 
@@ -104,7 +101,7 @@ Use the [Sign-in](#auth-sign-in) command to fix this.
 No. Missing permissions in auth token. Seek support to assign required permissions.
 ```
 
-This error occurs when you try to use a command that requires permissions you haven't been assigned. See the 
+This error occurs when you try to use a restricted command that requires permissions you haven't been assigned. See the 
 [Command permissions](#command-permissions) section for more information.
 
 ## `auth`
@@ -119,11 +116,18 @@ Running this command will return a code you will need to enter into a Microsoft 
 change each time you sign-in. It's used to help identify the application you are trying to sign into. The application
 will wait until you tell it you've signed in.
 
-When you enter the code into the website, you will be redirected to the standard NERC sign-in page (the same used for 
-accessing Office 365) to enter your password.
+When you enter the code into the website, you may be asked to sign in. If you do, use your BAS/NERC account (the same 
+you use for accessing your email or Office 365).
 
-The first time you use this application, you will be asked to allow the 'SCAR ADD Metadata Toolbox (Editor)' application
-to access your basic account information (your name and email address). You need to approve this request to continue.
+**Note:** The first time you use this application, you will be asked whether you want to allow the 'SCAR ADD Metadata 
+Toolbox (Editor)' application to access your basic account information (your name and email address). You need to 
+approve/allow this request to use the Data Catalogue.
+
+You may be asked:
+
+> Are you trying to sign in to SCAR ADD Metadata Toolbox (Editor)?
+
+If so, choose *Continue*.
 
 When you see this message:
 
@@ -131,12 +135,12 @@ When you see this message:
 >
 > You have signed in to the SCAR ADD Metadata Toolbox (Editor) application on your device. You may now close this window.
 
-You can press any key to prompt the application to continue signing in. If successful you will see a success message 
-with your name and the path to a file that contains your user access token, which you can ignore unless you have 
+You can press any key to prompt back in the application to continue signing in. If successful, you will see a success 
+message with your name and the path to a file that contains your user access token, which you can ignore unless you have 
 problems with permissions later.
 
-You can sign-in again if you need to get a new user access token (if your permissions change for example). This will
-override any existing token.
+You can sign-in again if you need to get a new user access token (or if your permissions change). This will replace 
+any existing token you have.
 
 ```
 $ scar-add-metadata-toolbox auth sign-in
@@ -1107,49 +1111,6 @@ Ok. Record '4149c45d-ce29-49f3-88ed-8366fe1afa23' retracted.
 ## `run`
 
 **Note:** This command should be ignored. It's part of the framework used to build this application and can't be hidden.
-
-## `seed`
-  
-Manage sample resources for testing.
-
-**Note:** These commands should only be used during development.
-
-### `seed collections`
-
-Create sample collections for testing.
-
-Generates a given number of collections using fake data. A random number of records will be added to each collection,
-this command should therefore be ran after seeding records.
-
-```
-$ scar-add-metadata-toolbox seed collections 3
-3 collections to insert.
-# Collection 1/3
-Ok. Inserted collection '1a2296cc-a3c1-4085-ab0a-5d04da4abd6f.
-# Collection 2/3
-Ok. Inserted collection 'c137ac4f-e992-4563-95a2-0f1202233257.
-# Collection 3/3
-Ok. Inserted collection '6d670c11-e700-4675-af08-405e70ef1c9f.
-Ok. Inserted 3 collections.
-```
-
-### `seed records`
-
-Create sample records for testing.
-
-Generates a given number of records using fake data.
-
-```
-$ scar-add-metadata-toolbox seed records 3
-3 records to insert.
-# Record 1/3
-Ok. Inserted record '17b41473-184f-4f63-8ee4-b99f00312c88.
-# Record 2/3
-Ok. Inserted record '00cd7eeb-70f3-481b-8f1d-aeab92199080.
-# Record 3/3
-Ok. Inserted record 'd146c907-3abb-447e-9ed8-d61bc547e509.
-Ok. Inserted 3 records.
-```
 
 ## `shell`
 

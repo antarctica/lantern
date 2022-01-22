@@ -1,75 +1,49 @@
 # SCAR Antarctic Digital Database (ADD) Metadata Toolbox
 
-Editor, repository and data catalogue for
+Repository and Catalogue for
 [SCAR Antarctic Digital Database (ADD) discovery metadata](http://data.bas.ac.uk/collections/e74543c0-4c4e-4b41-aa33-5bb2f67df389/).
 
 ## Status
 
 This project is a mature alpha.
 
-This means the core components needed have now been implemented but are subject to considerable change and refactoring.
+This means core, required, components have been implemented but are subject to considerable change and refactoring.
 
-Between releases major parts of this project may be replaced whilst the project evolves. As major non-core features are
-yet to be implemented the shape and scope of this project may change significantly. It is still expected that this
-project will grow to cover other MAGIC datasets and products in future, and more widely to act as the seed for a new
-BAS wide data catalogue.
+Between releases major parts of this project may be replaced/rewritten. As major non-core features are yet to be 
+implemented, the shape and scope of this project may change significantly.
 
-The *0.2.0* release has effectively been a complete rewrite of the project to reorganise and reimplement prototype code
-in a more structured way. Automated integration tests have been added and the project is now open-sourced.
-
-Some undesirable code from the *0.1.0* release still remains, to workaround issues in other packages until they can be
-properly addressed. This code has been moved to a 'Hazardous Materials' (`scar_add_metadata_toolbox.hazmat`) module.
+In time, this project will grow to cover other MAGIC datasets, products and activities. It may also be used as the seed 
+for a new BAS wide Data Catalogue.
 
 Further information on upcoming changes to this project can be found in the issues and milestones in
 [GitLab (internal)](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues).
 
 **Note:** This project is designed to meet an internal need within the
-[Mapping and Geographic Information Centre (MAGIC)](https://www.bas.ac.uk/team/magic) at BAS. It has been open-sourced
-in case it's of use to others with similar needs.
+[Mapping and Geographic Information Centre (MAGIC)](https://www.bas.ac.uk/team/magic) at the British Antarctic Survey.
+It has been open-sourced in case it's of use to others with similar needs.
 
 ## Overview
 
-This project is comprised of several components:
+This project is made up of a:
 
-1. metadata editor - for maintaining metadata records written as JSON files via the
-   [BAS Metadata Library](https://github.com/antarctica/metadata-library)
-2. unpublished (working) metadata repository - using an embedded, authenticated PyCSW catalogue
-3. published metadata repository - using an embedded, partially-authenticated PyCSW catalogue
-4. data catalogue - using a static website
+1. Repository, for storing metadata records, acts as a source of truth
+2. Catalogue, for displaying metadata records, acts as a discovery tool
 
-These components map to components 2, 4 and 6 in the draft ADD data workflow
+These components map to components 4 and 6 in the draft ADD data workflow
 ([#139 (internal)](https://gitlab.data.bas.ac.uk/MAGIC/add/issues/139)).
 
-Metadata records are persisted within the the *metadata repositories*, using the ISO 19115-2 (geographic information)
-metadata standard.
+Metadata records use the [ISO 19115](https://metadata-standards.data.bas.ac.uk/standard/iso-19115/) metadata standard.
+The [OGC Catalogue Services for the Web (CSW)] standard is used to provide the *Repository* component, allowing records
+to be added, accessed, updated and deleted. Records can be either published (available publicly) or unpublished. 
+Access to any unpublished records, and the ability to publish/retract records, is restricted to relevant ADD project 
+members.
 
-Access to unpublished records, and the ability to publish/retract records is restricted to restricted to relevant ADD
-project members. Once published, records can viewed through the *data catalogue*, which presents them as human readable
-items, (such as visualising geographic extents on a map). Manually curated collections provide a means to group items.
-
-The *data catalogue* is rendered as a static website for improved performance, reliability and ease of hosting.
-Currently this content is accessed within the existing [BAS data catalogue](https://data.bas.ac.uk).
+Once published, records can be viewed through the *Catalogue* component, a static website, which presents records as 
+human-readable items (with geographic extents visualised on a map for example). Manually curated collections provide a 
+basic way to group items into sets. The Catalogue is part of the current/legacy BAS Data Catalogue, known as the
+[Discovery Metadata System (DMS)](https://data.bas.ac.uk), which is in the process of being replaced.
 
 ## Usage
-
-### Metadata editor
-
-The *metadata editor* component of this project is ran on the BAS central workstations using the shared MAGIC user:
-
-```shell
-$ ssh geoweb@bslws01.nerc-bas.ac.uk
-$ scar-add-metadata-toolbox [command]
-```
-
-The editor is configured using a settings file: `/users/geoweb/.config/scar-add-metadata-toolbox/.env`.
-
-### Metadata repositories and data catalogue
-
-The *unpublished repository*, *published repository* and *data catalogue* run as a
-[service](http://bsl-nomad-magic-dev-s1.nerc-bas.ac.uk:4646/ui/jobs/scar-add-metadata-toolbox) in the experimental
-[MAGIC Nomad cluster](https://gitlab.data.bas.ac.uk/MAGIC/infrastructure/nomad).
-
-Any errors will be automatically reported to [Sentry](#sentry-error-tracking) and relevant individuals alerted by email.
 
 ### Workflows
 
@@ -84,13 +58,18 @@ Any errors will be automatically reported to [Sentry](#sentry-error-tracking) an
 
 ## Implementation
 
-Flask application using [CSW](#csw) to store [Metadata records](#metadata-records) and display them as [Items](#items)
-in [Collections](#collections) rendered as [Jinja templates](#jinja-templates) served as a
-[static website](#s3-static-website) within the [BAS data catalogue](https://data.bas.ac.uk).
+Flask application using [CSW](#csw) to store [Metadata records](#metadata-records), and display them as [Items](#items),
+in [Collections](#collections), rendered using [Jinja templates](#jinja-templates), served as a
+[static website](#s3-static-website) within the [BAS Discovery Metadata System (DMS)](https://data.bas.ac.uk) website.
+A command line interface is used to setup components, manage records and build/publish the static site.
 
-CSW catalogues are backed by PostGIS databases, secured using [OAuth](#oauth). Contact forms for feedback and items in
-the static catalogue use [Microsoft Power Automate](#feedback-and-contact-forms). Legal policies use templates from the
+CSW catalogues are backed by PostGIS databases and secured using [OAuth](#oauth). Contact forms for feedback and items 
+in the static site use [Microsoft Power Automate](#feedback-and-contact-forms). Legal policies use templates from the
 [Legal Policies](https://gitlab.data.bas.ac.uk/web-apps/legal-policies-templates) project.
+
+[Static site](#website-metrics) and [item download](#download-metrics) are tracked using 
+[Google Analytics Event Tracking](https://developers.google.com/analytics/devguides/collection/analyticsjs/events).
+Application errors are tracked using [Sentry](#sentry-error-tracking).
 
 ### Architecture
 
@@ -100,11 +79,12 @@ This diagram shows the main concepts in this project and how they relate:
 
 ### Metadata records
 
-Metadata records are the content and data within project. Records describe resources, which are typically datasets
+Metadata records are the content and data within this project. Records describe resources, which are typically datasets
 within the ADD, e.g. a record might describe the Antarctic Coastline dataset. Records are based on the ISO 19115
-metadata standard (specifically 19115-2:2009), which defines an information model for geographic data.
+metadata standard (specifically 19115-2:2009), which defines an information model and XML encoding for geographic data.
 
-Records are stored/persisted in a records repository (implemented using [CSW](#csw)) or in files for import and export.
+Records are stored/persisted in a records repository (implemented using [CSW](#csw)). Records are imported or 
+exported (for editing) as files.
 
 A metadata record includes information to answer questions such as:
 
@@ -125,34 +105,33 @@ A metadata record includes information to answer questions such as:
 * how can I download or access this dataset?
 
 This metadata is termed 'discovery metadata' (to separate it from metadata for calibration or analysis for example). It
-helps users find metadata in catalogues or search engines, and then to help them decide if the data is useful to them.
+helps users find metadata in catalogues or search engines, and then helps them decide if the data is useful to them.
 
 The information in a metadata record is encoded in a different formats at different stages:
 
-* during editing, records are encoded as JSON, using the
-  [BAS Metadata Library](https://github.com/antarctica/metadata-library)'s record configuration
-* when stored in a repository, records are encoded as XML using the ISO 19139 standard
-* when viewed in the data catalogue, records are encoded in HTML or as (styled) XML
+* when imported/exported (during editing), records are encoded as JSON, using the
+  [BAS Metadata Library](https://github.com/antarctica/metadata-library) record configuration
+* when stored in a repository, records are encoded as XML using the ISO 19139 encoding standard
+* when viewed in the data catalogue, records are encoded in freeform HTML or as (styled) standardised XML
 
 These different formats are used for different reasons:
 
-* JSON is easily understood by machines and is concise to understand and edit by humans
-* XML is also machine readable but more suited/mature for complex standards such ISO 19139
-* HTML is designed for presenting information to humans, with very flexible formatting options
+* JSON is concise/accessible enough to be understood by humans for editing
+* XML is proscribed by the ISO 19139 standard
+* HTML is the defacto standard for web content
 
 ### Items
 
-Items represent [Metadata records](#metadata-records) but in a form intended for human consumption. They are derived
-from [Records](#metadata-records) and are specific to the data catalogue, allowing greater flexibility compared to the
-strict rigidity and formality enforced by metadata records.
+Items are derived from [Records](#metadata-records) but with greater flexibility to make them more intuitive for humans.
+Whereas Records prioritise strictness and formality, using complex standards, Items prioritise readability and 
+understanding by humans.
 
-For example, a resource's coordinate reference system may be defined as `urn:ogc:def:crs:EPSG::3031` in a metadata
-record but will be shown as `WGS 84 / Antarctic Polar Stereographic (EPSG:3031)` in items. Both are technically correct
-but the descriptive version is easier for a human to understand, at the sake of being less precise and harder for
-machines to parse.
+For example, a resource's coordinate reference system may be defined as `urn:ogc:def:crs:EPSG::3031` in a Record
+and as `WGS 84 / Antarctic Polar Stereographic (EPSG:3031)` in an equivalent Item. The Record's definition is 
+precise and unambiguous (and therefore more interoperable), whereas the Item definition is less complex and more
+descriptive (and therefore more understandable to a human).
 
-As items are derived from records, they are not persisted themselves, except as rendered pages within the data catalogue
-static site.
+As items are derived from records, they are not persisted themselves, except as rendered pages within the static site.
 
 ### Collections
 
@@ -201,22 +180,26 @@ For example:
 
 ### OAuth
 
-This project uses OAuth to protect access to the *Unpublished* and *Published* repositories via the
-[Microsoft (Azure) identity platform](https://docs.microsoft.com/en-us/azure/active-directory/develop/).
+OAuth is used to protect access to actions or information (unpublished Records) within the *Repository* component. 
+The [Microsoft (Azure) identity platform](https://docs.microsoft.com/en-us/azure/active-directory/develop/) is used to 
+define roles/scopes for restricted actions or information, and to assign these to users/groups. The
+[Flask Azure AD OAuth Provider](https://pypi.org/project/flask-azure-oauth/) is used to enforce these permissions 
+within the Flask application.
 
-The *Unpublished* and *Published* repositories are registered together as the resource to be protected with different
-scopes and roles to authorise users to read, write and publish records. The
-[Flask Azure AD OAuth Provider](https://pypi.org/project/flask-azure-oauth/) is used to verify access tokens when CSW
-requests are made and enforce these permissions as needed.
+Two Azure OAuth applications (application registrations) are defined for this:
 
-The *Metadata editor* is registered as a separate application as a client that will interact with protected resource
-(i.e. to read, write and publish records). The
-[Microsoft Authentication Library (MSAL) for Python](https://github.com/AzureAD/microsoft-authentication-library-for-python)
-library is used to request access tokens using the OAuth device code grant type.
+1. a server application, representing the Repository
+2. a client application, representing a user accessing or modifying records within the Repository
 
-Both applications are registered in the NERC Azure tenancy administered by the
-[UKRI/NERC DDaT](https://infohub.ukri.org/corporate-hub/digital-data-and-technology-ddat/) team, currently via the old
-[RTS Helpdesk](mailto:rtsservicedesk@nerc.ac.uk).
+The server app registration defines the roles/scopes that exist (reading records, updating records, etc.). These are 
+then assigned to users and groups, who use them through the client app registration to read/update records, etc.
+
+The Flask application represents both of these app registrations. The CLI acts as the client, and the CSW catalogues as
+the server.
+
+Both Azure applications are registered in the NERC Azure tenancy administered by the
+[UKRI/NERC DDaT](https://infohub.ukri.org/corporate-hub/digital-data-and-technology-ddat/) team. 
+[Terraform](#terraform) is used to define and provision these applications.
 
 The [Azure Portal](https://portal.azure.com) is used to assign permissions to applications and users as needed:
 
@@ -224,56 +207,107 @@ The [Azure Portal](https://portal.azure.com) is used to assign permissions to ap
 
 ### CSW
 
-The *Unpublished* and *Published* repositories are implemented as embedded [PyCSW](http://pycsw.org) servers. The
-embedded mode allowing integration with Flask for authentication and authorisation of requests via [OAuth](#oauth).
+The [OGC CSW](https://www.ogc.org/standards/cat) standard is used as a protocol and interface for accessing and 
+managing records in the *Repository* component.
 
-The CSW transactional profile is used extensively for clients (such as the *Metadata editor* and *Data catalogue*) to
-insert, update and delete records programmatically.
+Separate CSW catalogues are used for Published and unpublished records, using embedded [PyCSW](http://pycsw.org) 
+servers to allow integration with Flask for authentication and authorisation of requests via [OAuth](#oauth).
+
+Records are accessed using `getRecords` and `getRecordById` requests. Records are managed using the CSW 
+transactional profile. These requests can be made using from the Flask CLI, or from other applications, if authorised. 
 
 The CSW version is fixed to *2.0.2* because it's the latest version supported by
-[OWSLib](https://geopython.github.io/OWSLib/), the CSW client used by the *Metadata editor*.
+[OWSLib](https://geopython.github.io/OWSLib/), the CSW client used by the Flask CLI.
 
 **Note:** The CSW repositories are considered to be APIs, and so ran as services through the
 [BAS API Load Balancer](https://gitlab.data.bas.ac.uk/WSF/api-load-balancer) (internal) with documentation in the
 [BAS API Documentation](https://gitlab.data.bas.ac.uk/WSF/api-docs) project (internal).
 
-**Note:** Some elements of both the PyCSW server and the OWSLib client have been extended by this project to incorporate
-OAuth support. These modifications will be formalised, ideally as upstream contributions, but currently reside within
-the 'Hazardous Materials' module as a number of unsightly workarounds are currently needed.
+#### CSW package modifications
 
-#### Max records limit
+Some elements of both the PyCSW server and the OWSLib client have been extended by this project to incorporate
+OAuth support and fix a variety of issues. These modifications will be formalised, ideally as upstream contributions, 
+but currently reside within the [Hazardous Materials module](#hazardous-materials-module).
+
+These modifications are:
+
+* PyCSW:
+  * hex-encoding - see https://github.com/geopython/pycsw/issues/576 for details
+  * allowing stdout for logging
+* OWSlib:
+  * adding token authentication type
+  * adding GSS and GSR namespaces (used in ISO 19115-2 records)
+  * working around records as strings (decode to bytes)
+  * working around records with additional schema location attribute (remove)
+  * working around XPath queries that result in trailing element tags
+
+#### CSW Max records limit
 
 Both PyCSW (CSW servers) and OWSLib (CSW clients) have a maximum record of 100 per request.
 
 #### CSW backing databases
 
-CSW servers are backed using PostGIS (PostgreSQL) databases provided by BAS IT (via the central Postgres database
-`bsldb`). As PyCSW uses a single table for all records, all servers share the same database and schema, configured
-through SQLAlchemy connection strings.
+CSW servers are backed using PostGIS (PostgreSQL) databases. In production, these are provided by BAS IT (via the 
+central Postgres database `bsldb`). Credentials for this database are stored in the MAGIC 1Password shared vault. 
 
-Separate databases are used for each environment (development, staging and production). Credentials are stored in the
-MAGIC 1Password shared vault. In local development, a local PostGIS database configured in `docker-compose.yml` can be
-used:
+In local development environments, a local PostGIS database configured in `docker-compose.yml` is used.
 
-```
-postgresql://postgres:password@csw-db/postgres`
-```
-
-To test against real data in a non-production environment, use the staging environment database, which is synced from
-the production database automatically by BAS IT every Tuesday at 02:00.
+To test against real data in a non-production environment, a staging database, which is synced from the production 
+database, can be used. Credentials for this database are stored in the MAGIC 1Password shared vault. This database is
+re-synced automatically by BAS IT every Tuesday at 02:00. 
 
 ### Jinja templates
 
-A series of [Jinja2](https://jinja.palletsprojects.com/) templates are used for rendering pages in the *Data catalogue*.
+A series of [Jinja2](https://jinja.palletsprojects.com/) templates are used for rendering pages in the *Catalogue* 
+component.
 
-Templates use the [BAS Style Kit Jinja Templates](https://pypi.org/project/bas-style-kit-jinja-templates/) and styled
-using the [BAS Style Kit](https://style-kit.web.bas.ac.uk).
+Templates use the [BAS Style Kit Jinja Templates](https://pypi.org/project/bas-style-kit-jinja-templates/) which use 
+the [BAS Style Kit](https://style-kit.web.bas.ac.uk).
 
 ### S3 static website
 
-Rendered pages and other assets are hosted through an AWS S3 bucket with static website hosting enabled.
+Rendered pages and other assets are hosted through an AWS S3 bucket with static website hosting enabled. Separate 
+production and staging buckets are available to preview changes. [Terraform](#terraform) is used to define and 
+provision these buckets.
 
-Reverse proxy rules are used to expose content from this static site within the existing/legacy BAS Data Catalogue, DMS.
+Rules within the BAS General Load Balancer, managed by IT, are used to reverse proxy content from these S3 static sites 
+to appear as part of the current/legacy BAS Discovery Metadata System (DMS).
+
+### Downloads Proxy 
+
+To support [tracking downloads](#download-metrics) of items, a proxy service is used, which redirects download URLs
+defined in Records/Items to a real location. This redirection is used to increase the chances downloads are tracked, 
+by making the real location of items less obvious, and harder to share/use directly.
+
+E.g. A download URL such as `https://data.bas.ac.uk/downloads/123`, where `123` is a unique identifier, will be 
+resolved by this Proxy to a URL such as `https://example.com/dataset.gpkg` (it's real location).
+
+The Downloads Proxy is a very simple AWS Lambda function. When a request is made (using a download URL), the unique 
+identifier is looked up in a JSON file. This returns an object containing the real download URL, and metadata on the
+item the download relates to, and it's file type (to track downloads by item and by file format).
+
+Entries in this file are managed manually. The JSON file looks like this:
+
+```json
+{
+  "123": {
+    "item_id": "abc",
+    "transfer_option_format": "gpkg",
+    "transfer_option_location": "https://example.com/data/example1.gpkg"
+  },
+  "345": {
+    "item_id": "def",
+    "transfer_option_format": "gpkg",
+    "transfer_option_location": "https://example.com/data/example2.gpkg"
+  }
+}
+```
+
+The Lambda function, and JSON file, are managed within the AWS Console as part of the BAS AWS account.
+
+[bas-add-data-catalogue-downloads-metrics function](https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/bas-add-data-catalogue-downloads-metrics?tab=code).
+
+At some point this Proxy will be more integrated into this project, though it may not be implemented in the same form.
 
 ### Feedback and contact forms
 
@@ -281,6 +315,26 @@ A Microsoft
 [Power Automate](https://emea.flow.microsoft.com/manage/environments/Default-b311db95-32ad-438f-a101-7ba061712a4e/flows/97d95c3b-5d40-4358-86a6-979a679a4b7c/details)
 Flow is used to process feedback and contact form submissions. Messages support Markdown formatting, converted to HTML
 prior to submission. On submitted, Power Automate creates an issue for the message in a relevant GitLab project.
+
+### Website metrics
+
+Metrics for viewing item/collection web pages, and tabs within pages, are tracked as events within Google 
+Analytics.
+
+[Events report](https://analytics.google.com/analytics/web/#/report/content-event-overview/a64130716w100162930p104062219/).
+
+### Download metrics
+
+To support tracking downloads of item artefacts, a [Downloads Proxy](#downloads-proxy) service is used. This service
+logs events within Google Analytics. See the [Website Metrics](#website-metrics) section for how to access event 
+reports.
+
+For download metrics to be recorded, download URLs (i.e. https://data.bas.ac.uk/downloads/123`) must be used.
+It doesn't matter if the URL is accessed through a data catalogue item page, or if the link is shared directly, 
+downloads will still be recorded.
+
+These download metrics are not foolproof however. If a user shares the real file after downloading it, or is determined 
+enough to discover the real URL and share that, the tracking can be bypassed.
 
 ### Sentry error tracking
 
@@ -295,6 +349,20 @@ Error tracking will be enabled or disabled depending on the environment. It can 
 ### Application logging
 
 Logs for this service are written to *stdout/stderr* as appropriate.
+
+### Hazardous Materials module
+
+In order to implement the [CSW package modifications](#csw-package-modifications), the `pycsw` and `owslib` packages
+have been vendored into this application, meaning their source code, and their dependencies, have been added within 
+this project.
+
+As this code is third party, and hasn't been vetted or integrated into this project, it is held in a *hazmat* 
+(Hazardous Materials) module, `scar_add_metadata_toolbox.hazmat`. This module is exempt from 
+[Code Linting](#code-linting), [Testing](#testing) and [Test Coverage](#test-coverage) rules.
+
+The eventual aim is to remove these packages from this project, however this will depend on whether these packages 
+are used in the longer term (see [#194](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/194)), and 
+if so, whether the changes made to them in this project, could be integrated into their upstream projects.
 
 ## Configuration
 
@@ -319,7 +387,7 @@ set at runtime using environment variables. If not set, default values will be u
 | `CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION`   | Connection string for published CSW catalogue backing database   | Valid SQLAlchemy connection string | `postgresql://postgres:password@db.example.com/postgres`        |
 | `APP_S3_BUCKET`                                     | AWS S3 bucket name used for hosting static website content       | Valid AWS S3 bucket name           | `add-catalogue.data.bas.ac.uk`                                  |
 
-These options are typically set when running this application as a client (metadata editor and data catalogue):
+These options are typically set when running this application as a client (CLI):
 
 * `APP_LOGGING_LEVEL`
 * `APP_AUTH_SESSION_FILE_PATH`
@@ -329,7 +397,7 @@ These options are typically set when running this application as a client (metad
 * `CSW_ENDPOINT_PUBLISHED`
 * `APP_S3_BUCKET`
 
-These options are typically set when running this application as a server (metadata repositories):
+These options are typically set when running this application as a server (CSW catalogues):
 
 * `APP_LOGGING_LEVEL`
 * `CSW_SERVER_CONFIG_UNPUBLISHED_ENDPOINT`
@@ -339,14 +407,93 @@ These options are typically set when running this application as a server (metad
 
 ## Setup
 
-[Continuous deployment](#continuous-deployment) will configure this application to run on the BAS central workstations
-as a Podman container, using an automatically generated launch script and environment variables.
-
-[Continuous deployment](#continuous-deployment) will configure this application to run in the experimental
-[MAGIC Nomad cluster](https://gitlab.data.bas.ac.uk/MAGIC/infrastructure/nomad), using an automatically
-generated job definition.
+To setup this project as an en-user (to manage and publish records), create a 
+[Development Environment](#development-environment).
 
 See the [Usage](#usage) section for how to use the application.
+
+To setup a new production/stage deployment of this project as a server, see the [BAS IT](#bas-it) section.
+
+### Terraform
+
+Terraform is used for:
+
+* resources required for protecting and accessing the *Repository* components
+* resources required for hosting the *Catalogue* component as a static website
+
+Access to the [BAS AWS account](https://gitlab.data.bas.ac.uk/WSF/bas-aws),
+[Terraform remote state](#terraform-remote-state) and NERC Azure tenancy are required to provision these resources.
+
+```shell
+$ cd provisioning/terraform
+$ docker compose run terraform
+
+$ az login --allow-no-subscriptions
+
+$ terraform init
+$ terraform validate
+$ terraform fmt
+$ terraform apply
+
+$ exit
+$ docker compose down
+```
+
+**Note:** The `terraform apply` step will need to be taken in stages for Azure application registrations. See the notes 
+in `provisioning/terraform/54-azure_app_registrations.tf` for details.
+
+Once provisioned, the following steps need to be taken manually:
+
+1. set branding icons (if desired)
+2. set [Azure permissions](#azure-permissions)
+3. [assign roles](docs/workflow-permissions-users.md) to users and/or groups
+4. set `accessTokenAcceptedVersion: 2` in both application registration manifests
+
+**Note:** Assignments are 1:1 between users/groups and roles but there can be multiple assignments. I.e. roles `Foo`
+and `Bar` can be assigned to the same user/group by creating two role assignments.
+
+#### Terraform remote state
+
+State information for this project is stored remotely using a
+[Backend](https://www.terraform.io/docs/backends/index.html).
+
+Specifically the [AWS S3](https://www.terraform.io/docs/backends/types/s3.html) backend as part of the
+[BAS Terraform Remote State](https://gitlab.data.bas.ac.uk/WSF/terraform-remote-state) project.
+
+Remote state storage will be automatically initialised when running `terraform init`. Any changes to remote state will
+be automatically saved to the remote backend, there is no need to push or pull changes.
+
+##### Remote state authentication
+
+Permission to read and/or write remote state information for this project is restricted to authorised users. Contact
+the [BAS Web & Applications Team](mailto:servicedesk@bas.ac.uk) to request access.
+
+See the [BAS Terraform Remote State](https://gitlab.data.bas.ac.uk/WSF/terraform-remote-state) project for how these
+permissions to remote state are enforced.
+
+### Azure permissions
+
+[Terraform](#terraform) will create and configure the relevant Azure application registrations required for using
+[OAuth](#oauth) to protect the CSW catalogues. However manual approval by a Tenancy Administrator is needed to grant
+the registration representing the *client* role of the application access to the registration for the *server* role.
+
+This has been approved by NERC RTS in 
+[#3 (Internal)](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/3).
+
+### BAS IT
+
+Manually request a new application to be deployed from the BAS IT ServiceDesk using the
+[request template](http://ictdocs.nerc-bas.ac.uk/wiki/index.php/Provisioning_Process#Template_ServiceDesk_request).
+
+See [#44](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/44) for an example.
+
+Manually request a new PostGIS database for the CSW catalogue backing databases from the BAS IT ServiceDesk and 
+[setup](#pycsw-backing-database-setup) when provisioned.
+
+Manually [add a new service](https://gitlab.data.bas.ac.uk/WSF/api-load-balancer#adding-a-new-service) and related
+[documentation](https://gitlab.data.bas.ac.uk/WSF/api-docs#adding-a-new-service-service-version).
+
+See [#60](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/60) for an example.
 
 ### PyCSW backing database setup
 
@@ -386,188 +533,60 @@ ALTER INDEX fts_gin_idx RENAME TO ix_records_published_fts_gin_indx;
 ALTER INDEX wkb_geometry_idx RENAME TO ix_published_wkb_geometry_idx;
 ```
 
-### Azure permissions
-
-[Terraform](#terraform) will create and configure the relevant Azure application registrations required for using
-[OAuth](#oauth) to protect the CSW catalogues. However manual approval by a Tenancy Administrator is needed to grant
-the registration representing the *client* role of the application access to the registration for the *server* role.
-
-This has been approved by NERC RTS in [#3](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/3).
-
-### Terraform
-
-Terraform is used for:
-
-* resources required for hosting the *Data catalogue* component as a static website
-* resources required for protecting and accessing the *unpublished repository*, *published repository*  components
-* a templated job file for Nomad during [Continuous deployment](#continuous-deployment)
-* a templated launch script for Podman during [Continuous deployment](#continuous-deployment)
-
-Access to the [BAS AWS account](https://gitlab.data.bas.ac.uk/WSF/bas-aws),
-[Terraform remote state](#terraform-remote-state) and NERC Azure tenancy are required to provision these resources.
-
-**Note:** The templated Podman and Nomad runtime files are not included in Terraform state.
-
-```shell
-$ cd provisioning/terraform
-$ docker compose run terraform
-
-$ az login --allow-no-subscriptions
-
-$ terraform init
-$ terraform validate
-$ terraform fmt
-$ terraform apply
-
-$ exit
-$ docker compose down
-```
-
-Once provisioned the following steps need to be taken manually:
-
-1. set branding icons (if desired)
-2. set [Azure permissions](#azure-permissions)
-3. [assign roles](docs/workflow-permissions-users.md) to users and/or groups
-4. set `accessTokenAcceptedVersion: 2` in both application registration manifests
-
-**Note:** Assignments are 1:1 between users/groups and roles but there can be multiple assignments. I.e. roles `Foo`
-and `Bar` can be assigned to the same user/group by creating two role assignments.
-
-#### Terraform remote state
-
-State information for this project is stored remotely using a
-[Backend](https://www.terraform.io/docs/backends/index.html).
-
-Specifically the [AWS S3](https://www.terraform.io/docs/backends/types/s3.html) backend as part of the
-[BAS Terraform Remote State](https://gitlab.data.bas.ac.uk/WSF/terraform-remote-state) project.
-
-Remote state storage will be automatically initialised when running `terraform init`. Any changes to remote state will
-be automatically saved to the remote backend, there is no need to push or pull changes.
-
-##### Remote state authentication
-
-Permission to read and/or write remote state information for this project is restricted to authorised users. Contact
-the [BAS Web & Applications Team](mailto:servicedesk@bas.ac.uk) to request access.
-
-See the [BAS Terraform Remote State](https://gitlab.data.bas.ac.uk/WSF/terraform-remote-state) project for how these
-permissions to remote state are enforced.
-
-### Docker image tag expiration policy
-
-The Docker image for this project uses a [Tag expiration policy](#docker-image-expiration-policy) which needs to be
-configured manually in [GitLab](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/settings/ci_cd).
-
-* Expiration policy: *enabled*
-* Expiration interval: *90 days*
-* Expiration schedule: *Every week*
-* Number of tags to retain: *10 tag per image name*
-* Tags with names matching this regex pattern will expire: `(review.+|build.+)`
-* Tags with names matching this regex pattern will be preserved: `release.+`
-
-### BAS IT
-
-Manually request a new PostGIS database for the CSW catalogue backing databases from the BAS IT ServiceDesk.
-
-Manually request a new application to be deployed from the BAS IT ServiceDesk using the
-[request template](http://ictdocs.nerc-bas.ac.uk/wiki/index.php/Provisioning_Process#Template_ServiceDesk_request).
-
-See [#44](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/44) for an example.
-
-### BAS API Load Balancer
-
-Manually [add a new service](https://gitlab.data.bas.ac.uk/WSF/api-load-balancer#adding-a-new-service) and related
-[documentation](https://gitlab.data.bas.ac.uk/WSF/api-docs#adding-a-new-service-service-version).
-
-See [#60](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/60) for an example.
-
 ## Development
-
-```shell
-$ git clone https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox
-$ cd add-metadata-toolbox
-```
 
 ### Development environment
 
-A flexible development environment is available for developing this application locally. It can be used in a variety of
-ways depending on what is being developed:
+Once setup, a development environment can be used to:
 
-* all components, the Flask application, CSW database and static website can be ran locally
-    * useful for end-to-end testing
-    * useful for testing changes to how data is loaded into the CSW catalogues
-* the Flask application can be ran directly, without needing to convert it into a static site
-    * useful for iterating on changes to the data catalogue website
-* the Flask application can use the production CSW database
-    * useful for testing with real-world data
+* run all components locally:
+  * useful for end-to-end testing
+  * useful for testing changes to how data is loaded into CSW catalogues
+* use real data but generate a local static site:
+  * useful for iterating changes to static website templates
+  * NOT YET SUPPORTED - see [#200](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/200)
+* use real data:
+  * useful for managing records (i.e. for ADD releases)
+  * NOT YET SUPPORTED - see [#201](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/201)
 
-The local development environment is defined using Docker Compose in `./docker-compose.yml`. It consists of:
+Git, [Poetry](https://python-poetry.org) and [Docker Desktop](https://www.docker.com/products/docker-desktop) are 
+required to set up a local development environment of this project.
 
-* an `app` service for running the Flask application as a web application
-* an `app-cli` service for running [application commands](docs/command-reference.md)
-* a `csw-db` service for storing data added to local CSW catalogues (if used)
-* a `web` service for serving a local version of the data catalogue static site (if used)
-
-To create a local development environment:
-
-1. pull docker images: `docker compose pull` [1]
-3. run the Docker Compose stack: `docker compose up`
-    * the Flask application will be available directly at: [http://localhost:9000](http://localhost:9000)
-    * the static site will be available at: [http://localhost:9001](http://localhost:9001)
-4. run application [Commands](docs/command-reference.md) [2]
-
-To destroy a local development environment:
-
-1. run `docker compose down`
-
-[1] This requires access to the BAS Docker Registry (part of [gitlab.data.bas.ac.uk](https://gitlab.data.bas.ac.uk)):
+**Note:** If you use [Pyenv](https://github.com/pyenv/pyenv), this project sets a local Python version for consistency.
 
 ```shell
-$ docker login docker-registry.data.bas.ac.uk
+# clone from the BAS GitLab instance if possible
+$ git clone https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox.git
+
+# setup virtual environment
+$ cd add-metadata-toolbox
+$ poetry install
+
+# pull docker containers
+$ docker compose pull
 ```
 
-**Note:** You will need to sign-in using your GitLab credentials (your password is set through your GitLab profile) the
-first time this is used.
-
-[2] In a new terminal:
+To run all components locally:
 
 ```shell
-$ docker compose run app-cli flask [task]
+# start local Postgres database for CSW and Nginx for static website
+$ docker compose up
+
+# start flask application as a server (it will automatically use the local postgres database)
+$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask
+
+# Run flask CLI commands
+$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask [command]
 ```
 
-#### Development container
+See the [Command Reference](docs/command-reference.md) for how to use the CLI. Where `flask` is written, replace this
+with `FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask`.
 
-A development container image, defined by `./Dockerfile`, is built manually, tagged as `:latest` and hosted in the
-private BAS Docker Registry (part of [gitlab.data.bas.ac.uk](https://gitlab.data.bas.ac.uk)):
-
-[docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/container_registry)
-
-It is separate to the [deployment container](#docker-image) and installs both runtime and development
-[dependencies](#dependencies) (deployment containers only install runtime dependencies).
-
-If you don't have access to the BAS Docker Register, you can build this image locally using `docker compose build app`.
-
-### Python version
-
-When upgrading to a new version of Python, ensure the following are also checked and updated where needed:
-
-* `Dockerfile`:
-    * base stage image (e.g. `FROM python:3.X-alpine as base` to `FROM python:3.Y-alpine as base`)
-    * pre-compiled wheels (e.g. `https://.../linux_x86_64/cp3Xm/lxml-4.5.0-cp3X-cp3X-linux_x86_64.whl` to
-     `http://.../linux_x86_64/cp3Ym/lxml-4.5.0-cp3Y-cp3Y-linux_x86_64.whl`)
-* `support/docker-packaging/Dockerfile`:
-    * base stage image (e.g. `FROM python:3.X-alpine as base` to `FROM python:3.Y-alpine as base`)
-    * pre-compiled wheels (e.g. `http://.../linux_x86_64/cp3Xm/lxml-4.5.0-cp3X-cp3X-linux_x86_64.whl` to
-     `http://.../linux_x86_64/cp3Ym/lxml-4.5.0-cp3Y-cp3Y-linux_x86_64.whl`)
-* `pyproject.toml`
-    * `[tool.poetry.dependencies]`
-        * `python` (e.g. `python = "^3.X"` to `python = "^3.Y"`)
-    * `[tool.black]`
-        * `target-version` (e.g. `target-version = ['py3X']` to `target-version = ['py3Y']`)
+When built, a local static site can be accessed from [http://localhost:9000](http://localhost:9000).
 
 ### Package structure
 
-All code for this project should be defined in the [`scar_add_metadata_toolbox`](scar_add_metadata_toolbox) package,
-with the exception of tests.
+All code for this project should be defined in the `scar_add_metadata_toolbox` package, with the exception of tests.
 
 In brief, this package is comprised of these modules:
 
@@ -581,18 +600,34 @@ In brief, this package is comprised of these modules:
 * `scar_add_metadata_toolbox.templates` - contains [Application templates](#templates)
 * `scar_add_metadata_toolbox.utils` - contains various utility/helper methods and classes
 
-#### Hazardous Materials module
+### Code Style
 
-Whilst this application has been developed, extended/modified versions of class from 3rd party packages have been
-created to address unresolved bugs or add new required functionality. As this code often requires workarounds and hacks
-it is ugly, non-standard and against established best practices (such as not to use mocks outside of tests).
+PEP-8 style and formatting guidelines must be used for this project, except the 80 character line limit.
+[Black](https://github.com/psf/black) is used for formatting, configured in `pyproject.toml` and enforced as part of
+[Python code linting](#code-linting).
 
-In time, these changes and additions are expected to be either incorporated into upstream packages, or if not possible,
-into forked packages that we maintain. Until then, this code is kept in a 'Hazardous Materials' (Hazmat) module,
-`scar_add_metadata_toolbox.hazmat`, to indicate that it shouldn't be treated like other modules in this project.
+Black can be integrated with a range of editors, such as
+[PyCharm](https://black.readthedocs.io/en/stable/integrations/editors.html#pycharm-intellij-idea), to apply formatting
+automatically when saving files.
 
-Ideally no additional code will be added to this module, however if other changes/extensions need to be made in a
-non-clean way then they should be added here, rather than 'polluting' the main package.
+To apply formatting manually:
+
+```shell
+$ poetry run black src/ tests/
+```
+
+### Code Linting
+
+[Flake8](https://flake8.pycqa.org) and various extensions are used to lint Python files. Specific checks, and any
+configuration options, are documented in the `./.flake8` config file.
+
+To check files manually:
+
+```shell
+$ poetry run flake8 src/ tests/
+```
+
+Checks are run automatically in [Continuous Integration](#continuous-integration).
 
 ### Dependencies
 
@@ -606,77 +641,67 @@ Non-code files, such as static files, can also be included in the [Python packag
 To add a new (development) dependency:
 
 ```shell
-$ docker compose run app ash
 $ poetry add [dependency] (--dev)
 ```
 
-Then rebuild the [Development container](#development-container) and push to GitLab (GitLab will rebuild other images
-automatically as needed):
+Then update the Docker image used for CI/CD builds and push to the BAS Docker Registry (which is provided by GitLab):
 
 ```shell
-$ docker compose build app
-$ docker compose push app
+$ docker build -f gitlab-ci.Dockerfile -t docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox:latest .
+$ docker push docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox:latest
 ```
 
 #### Updating dependencies
 
 ```shell
-$ docker compose run app ash
 $ poetry update
 ```
 
-Then rebuild the [Development container](#development-container) and push to GitLab (GitLab will rebuild other images
-automatically as needed):
+See the instructions above to update the Docker image used in CI/CD.
+
+#### Dependency vulnerability checks
+
+The [Safety](https://pypi.org/project/safety/) package is used to check dependencies against known vulnerabilities.
+
+**IMPORTANT!** As with all security tools, Safety is an aid for spotting common mistakes, not a guarantee of secure
+code. In particular this is using the free vulnerability database, which is updated less frequently than paid options.
+
+This is a good tool for spotting low-hanging fruit in terms of vulnerabilities. It isn't a substitute for proper
+vetting of dependencies, or a proper audit of potential issues by security professionals. If in any doubt you MUST seek
+proper advice.
+
+Checks are run automatically in [Continuous Integration](#continuous-integration).
+
+To check locally:
 
 ```shell
-$ docker compose build app
-$ docker compose push app
+$ poetry export --without-hashes -f requirements.txt | poetry run safety check --full-report --stdin
 ```
+
+#### Dependencies for vendored dependencies 
+
+...
 
 ### Static security scanning
 
-To ensure the security of this API, source code is checked against [Bandit](https://github.com/PyCQA/bandit) for issues
-such as not sanitising user inputs or using weak cryptography. Bandit is configured in `.bandit`.
+To ensure the security of this API, source code is checked against [Bandit](https://github.com/PyCQA/bandit)
+and enforced as part of [Code linting](#code-linting).
 
 **Warning:** Bandit is a static analysis tool and can't check for issues that are only be detectable when running the
 application. As with all security tools, Bandit is an aid for spotting common mistakes, not a guarantee of secure code.
 
-To run checks manually:
+To check manually:
 
 ```shell
-$ docker compose run app bandit -r .
+$ poetry run bandit -r src/ tests/
 ```
 
-Checks are ran automatically in [Continuous Integration](#continuous-integration).
-
-### Code Style
-
-PEP-8 style and formatting guidelines must be used for this project, with the exception of the 80 character line limit.
-
-[Black](https://github.com/psf/black) is used to ensure compliance, configured in `pyproject.toml`.
-
-Black can be [integrated](https://black.readthedocs.io/en/stable/editor_integration.html) with a range of editors, such
-as PyCharm, to perform formatting automatically.
-
-To apply formatting manually:
-
-```shell
-$ docker compose run app black scar_add_metadata_toolbox/
-```
-
-To check compliance manually:
-
-```shell
-$ docker compose run app black --check scar_add_metadata_toolbox/
-```
-
-Checks are ran automatically in [Continuous Integration](#continuous-integration).
+Checks are run automatically in [Continuous Integration](#continuous-integration).
 
 ### Flask application
 
-The Flask application representing this project is defined in the
-[`scar_add_metadata_toolbox`](/scar_add_metadata_toolbox) package. The application uses the
-[application factory](https://flask.palletsprojects.com/en/1.1.x/patterns/appfactories/) pattern.
+The Flask application representing this project is defined in the `scar_add_metadata_toolbox` package. The 
+application uses the [application factory](https://flask.palletsprojects.com/en/1.1.x/patterns/appfactories/) pattern.
 
 Flask Blueprints are used to logically organise application commands, currently all within the
 `scar_add_metadata_toolbox.commands` module. Until this is refactored, additional commands should be registered in the
@@ -705,14 +730,7 @@ current_app.logger.info('Log message')
 
 Use Python's [`pathlib`](https://docs.python.org/3.8/library/pathlib.html) library for file paths.
 
-Where displaying a file path to the user, use the absolute form to aid in debugging:
-
-```python
-from pathlib import Path
-
-foo_path = Path("foo.txt")
-print(f"foo_path is: {str(foo_path.absolute())}")
-```
+Where displaying a file path to the user, use the absolute/resolved form to aid in debugging.
 
 ### Templates
 
@@ -722,23 +740,12 @@ application specific templates from the `scar_add_metadata_toolbox.templates` mo
 
 Styles, components and patterns from the [BAS Style Kit](https://style-kit.web.bas.ac.uk) should be used where possible.
 Configuration options for Style Kit Jinja Templates are set in the `scar_add_metadata_toolbox.config` module, including
-loading local styles and scripts defined in [`scar_add_metadata_toolbox/static`](scar_add_metadata_toolbox/static).
+loading local styles and scripts defined in `scar_add_metadata_toolbox.static`.
 
-Application views should inherit from the application layout,
-[`app.j2`](scar_add_metadata_toolbox/templates/_layouts/app.j2), and using
-[includes](https://jinja.palletsprojects.com/en/2.11.x/templates/#include) and
+Application views should inherit from the application layout, `scar_add_metadata_toolbox.templates/_layouts/app.j2`,
+and using [includes](https://jinja.palletsprojects.com/en/2.11.x/templates/#include) and
 [macros](https://jinja.palletsprojects.com/en/2.11.x/templates/#macros) to breakdown and reuse content within views is
 strongly encouraged.
-
-### Editor support
-
-#### PyCharm
-
-Multiple run/debug configurations are included in the project for debugging and testing:
-
-* *App* runs the Flask application and is useful for debug the server role of this application (e.g. CSW requests)
-* *App CLI* runs the Flask application and is useful for debug the client role of this application (e.g. static site
-   commands requests) - change the *parameters* option to set which command to run
 
 ### Testing
 
@@ -749,10 +756,10 @@ All code in the `scar_add_metadata_toolbox` package must be covered by tests, de
 To run tests manually from the command line:
 
 ```shell
-$ docker compose run app -e FLASK_ENV=testing app pytest --random-order
+$ FLASK_ENV=testing poetry run pytest --random-order
 ```
 
-To run/debug tests using PyCharm, use the included *App (Tests)* run/debug configuration.
+To run tests manually using PyCharm, use the included *App (Tests)* run/debug configuration.
 
 Tests are ran automatically in [Continuous Integration](#continuous-integration).
 
@@ -765,7 +772,7 @@ A `.coveragerc` file is used to omit code from the `scar_add_metadata_toolbox.ha
 To measure coverage manually:
 
 ```shell
-$ docker compose run -e FLASK_ENV=testing app pytest --cov=scar_add_metadata_toolbox --cov-fail-under=100 --cov-report=html .
+$ FLASK_ENV=testing poetry run pytest --cov=scar_add_metadata_toolbox --cov-config=.coveragerc --cov-fail-under=100 --cov-report=html .
 ```
 
 [Continuous Integration](#continuous-integration) will check coverage automatically and fail if less than 100%.
@@ -774,57 +781,17 @@ $ docker compose run -e FLASK_ENV=testing app pytest --cov=scar_add_metadata_too
 
 All commits will trigger a Continuous Integration process using GitLab's CI/CD platform, configured in `.gitlab-ci.yml`.
 
-## Review apps
-
-To review changes to functionality, commits made in branches will trigger review apps to be created using GitLab's
-CI/CD platform, configured in `.gitlab-ci.yml`.
-
-Review apps run as [Nomad services](#nomad-service) only, not as [Command line applications](#command-line-application).
-
-Containers for review apps are built using the [deployment Docker image](#docker-image) but tagged as `review:[slug]`,
-where `[slug]` is a reference to the merge request the review app is related to. Images are hosted in the private BAS
-Docker Registry (part of [gitlab.data.bas.ac.uk](https://gitlab.data.bas.ac.uk)):
-
-[docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox/deploy](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/container_registry)
-
-### Limitations
-
-* the URL for review apps point to the Nomad job via it's UI, rather than the managed application, as the port number
-  for the application is set dynamically and not stored in the Terraform state for the Nomad job
-* the application will currently use the production CSW database, therefore records **MUST NOT** be changed by review
-  apps, this is currently unenforced but will be when ServiceDesk ticket #42232 is resolved
-
 ## Deployment
 
 ### Python package
 
-A project Python package is built by [Continuous Delivery](#continuous-deployment), hosted through the private BAS Repo
-Server:
+This project is distributed as a Python package, hosted in ...
 
-[bsl-repoa.nerc-bas.ac.uk/magic/v1/projects/scar-add-metadata-toolbox/latest/dist/](http://bsl-repoa.nerc-bas.ac.uk/magic/v1/projects/scar-add-metadata-toolbox/latest/dist/)
+Source and binary packages are built and published automatically using
+[Poetry](https://python-poetry.org) in [Continuous Deployment](#continuous-deployment).
 
-### Docker image
-
-A deployment container image, defined by `./support/docker-packaging/Dockerfile`, is built by
-[Continuous Delivery](#continuous-deployment) for releases (Git tags). Images are tagged as `/release:[tag]`, where
-`[tag]` is the name of the Git tag a release is related to. Images are hosted in the private BAS Docker Registry (part
-of [gitlab.data.bas.ac.uk](https://gitlab.data.bas.ac.uk)):
-
-[docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox/deploy](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/container_registry)
-
-**Note:** All container builds (including those from [Review apps](#review-apps)) are also tagged as `/build:[commit]`,
-where `[commit]` is a reference to the Git commit that triggered the image to be built.
-
-#### Docker image expiration policy
-
-An image [expiration policy](https://docs.gitlab.com/ee/user/packages/container_registry/#cleanup-policy) is used to
-limit the number of non-release container images that are kept. This policy is set within, and enforced automatically
-by, GitLab. See the [Setup section](#docker-image-tag-expiration-policy) for how this is configured.
-
-### Nomad service
-
-The deployment [Docker image](#docker-image) is deployed as a service job in the experimental
-[MAGIC Nomad cluster](https://gitlab.data.bas.ac.uk/MAGIC/infrastructure/nomad) (internal).
+**Note:** Except for tagged releases, Python packages built in CD will use `0.0.0` as a version to indicate they are
+not formal releases.
 
 ### BAS IT service
 
@@ -895,11 +862,6 @@ Usage documentation for this API service is held in `docs/api/` and currently
 * `s3://bas-api-docs-content-testing/services/data/metadata/add/csw/`
 * `s3://bas-api-docs-content/services/data/metadata/add/csw/`
 
-### Command line application
-
-The deployment [Docker image](#docker-image) is made available as a command line application on the BAS central
-workstations using Podman. A wrapper shell script is used to mask the `podman run` run command for ease of use.
-
 ### Continuous Deployment
 
 All commits will trigger a Continuous Deployment process using GitLab's CI/CD platform, configured in `.gitlab-ci.yml`.
@@ -910,7 +872,7 @@ For all releases:
 
 1. create a release branch
 2. close release in `CHANGELOG.md`
-3. push changes, merge the release branch into `master` and tag with version
+3. push changes, merge the release branch into `main` and tag with version
 4. create a ServiceDesk request to deploy the new package version (and change/add environment variables if needed)
 5. re-deploy API documentation if needed
 
@@ -928,9 +890,22 @@ This project uses issue tracking, see the
 
 ## License
 
-© UK Research and Innovation (UKRI), 2020 - 2021, British Antarctic Survey.
+Copyright (c) 2020-2022 UK Research and Innovation (UKRI), British Antarctic Survey.
 
-You may use and re-use this software and associated documentation files free of charge in any format or medium, under
-the terms of the Open Government Licence v3.0.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-You may obtain a copy of the Open Government Licence at http://www.nationalarchives.gov.uk/doc/open-government-licence/
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

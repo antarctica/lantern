@@ -8,7 +8,7 @@ import click
 from click import Abort
 from click_spinner import spinner
 from flask import Blueprint, current_app, render_template
-from importlib_resources import path as resource_path
+from importlib_resources import files as resource_path
 from lxml.etree import (
     ElementTree,
     fromstring,
@@ -738,14 +738,21 @@ def build_pages():
 
 @site_commands_blueprint.cli.command("copy-assets")
 def copy_assets():
-    """Copy all static assets (CSS, JS, etc.)."""
+    """Copy all static assets (CSS, JS, etc.).
+
+    Note: The path returned by importlib_resources is not a normal Path object and needs to converted before it can be
+    used. The empty `.joinpath()` method is part of this conversion.
+    """
     # workaround for lack of `dirs_exist_ok` option in copytree in Python 3.6
     try:
         rmtree(Path(current_app.config["SITE_PATH"]).joinpath("static"))
     except FileNotFoundError:
         pass
-    with resource_path("scar_add_metadata_toolbox", "static") as static_dir:
-        copytree(str(Path(static_dir)), str(Path(current_app.config["SITE_PATH"]).joinpath("static")))
+
+    copytree(
+        str(Path(resource_path("scar_add_metadata_toolbox.static").joinpath(""))),
+        str(Path(current_app.config["SITE_PATH"]).joinpath("static")),
+    )
     print("Ok. static assets copied.")
 
 

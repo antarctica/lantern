@@ -26,6 +26,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#175](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/175)
 * Test failures related to dependency changes and paths to test resources
   [#197](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/197)
+* Test warnings related to deprecated `importlib_resources` methods
+  [#199](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/199)
 
 ### Changed
 

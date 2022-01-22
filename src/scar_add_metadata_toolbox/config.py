@@ -420,20 +420,22 @@ class DevelopmentConfig(Config):  # pragma: no cover
         super().__init__()
 
         if "CSW_ENDPOINT_UNPUBLISHED" not in os.environ:
-            os.environ["CSW_ENDPOINT_UNPUBLISHED"] = "http://app:9000/csw/unpublished"
+            os.environ["CSW_ENDPOINT_UNPUBLISHED"] = "http://localhost:5000/csw/unpublished"
         if "CSW_ENDPOINT_PUBLISHED" not in os.environ:
-            os.environ["CSW_ENDPOINT_PUBLISHED"] = "http://app:9000/csw/published"
+            os.environ["CSW_ENDPOINT_PUBLISHED"] = "http://localhost:5000/csw/published"
         if "CSW_SERVER_CONFIG_UNPUBLISHED_ENDPOINT" not in os.environ:
-            os.environ["CSW_SERVER_CONFIG_UNPUBLISHED_ENDPOINT"] = "http://app:9000/csw/unpublished"
+            os.environ["CSW_SERVER_CONFIG_UNPUBLISHED_ENDPOINT"] = "http://localhost:5000/csw/unpublished"
         if "CSW_SERVER_CONFIG_PUBLISHED_ENDPOINT" not in os.environ:
-            os.environ["CSW_SERVER_CONFIG_PUBLISHED_ENDPOINT"] = "http://app:9000/csw/published"
+            os.environ["CSW_SERVER_CONFIG_PUBLISHED_ENDPOINT"] = "http://localhost:5000/csw/published"
 
         if "CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION" not in os.environ:
             os.environ[
                 "CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION"
-            ] = "postgresql://postgres:password@db/postgres"
+            ] = "postgresql://postgres:password@localhost/postgres"
         if "CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION" not in os.environ:
-            os.environ["CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION"] = "postgresql://postgres:password@db/postgres"
+            os.environ[
+                "CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION"
+            ] = "postgresql://postgres:password@localhost/postgres"
 
     # noinspection PyPep8Naming
     @property

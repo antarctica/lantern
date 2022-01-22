@@ -6,14 +6,6 @@
 
 # This CI definition uses a GitLab provided include template
 
-# Secret variables
-# - Set required secret variables at: https://gitlab.data.bas.ac.uk/magic/add-metadata-toolbox/settings/ci_cd
-# - Variables are grouped by section in KEY: "value" format (e.g. FOO: "bar")
-# - Sensitive values are represented by "[Sensitive]"
-#
-# - PyPi (production) - create tokens at https://pypi.org/manage/account/
-# > PYPI_TOKEN (protected): "[Sensitive]"
-
 # == Includes ==
 
 include:
@@ -95,8 +87,9 @@ publish:
   before_script:
     - "ln -s /.venv .venv"
     - "poetry install --no-interaction --no-ansi"
-    - "poetry config pypi-token.pypi $PYPI_TOKEN --local"
+    - 'poetry config repositories.gitlab "$CI_SERVER_URL/api/v4/projects/$CI_PROJECT_ID/packages/pypi"'
+    - 'poetry config http-basic.gitlab gitlab-ci-token "$CI_JOB_TOKEN" --local'
   script:
-    - "poetry publish --build --no-interaction"
+    - "poetry publish --build --no-interaction --repository gitlab"
   rules:
     - if: '$CI_COMMIT_TAG != null'

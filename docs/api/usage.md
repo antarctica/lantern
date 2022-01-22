@@ -4,9 +4,9 @@ title: SCAR ADD CSW - Usage
 
 ## General information
 
-This API provides access to records  the 
+This API provides access to records in the 
 [SCAR ADD Data Catalogue](http://data.bas.ac.uk/collections/e74543c0-4c4e-4b41-aa33-5bb2f67df389/) using the 
-[OGC CSW](https://www.ogc.org/standards/cat) standard (Open Geospatial Consortium, Catalogue Service for the Web).
+[OGC CSW](https://www.ogc.org/standards/cat) standard (Open Geospatial Consortium, Catalogue Services for the Web).
 
 This can be used to search/filter and retrieve records in their raw ISO 19115 form. If authenticated, this API can also
 be used to create, update or delete records.
@@ -15,7 +15,7 @@ This API is part of the [SCAR ADD Metadata Toolbox](https://github.com/antarctic
 
 ### Support
 
-Limited, best effort, support only is offered for this API. 
+Limited, best efforts, support is offered for this API. 
 
 Contact the [BAS Service Desk](mailto:servicedesk@bas.ac.uk) in the first instance.
 
@@ -62,22 +62,19 @@ Only the `http://www.isotc211.org/2005/gmd` (ISO 19115/19139) output schema is o
  
 ### Content Types
 
-This API officially supports the `text/xml` content type only for both requests and responses.
+Only the `text/xml` content type is officially supported by this API.
 
-This API supports UTF-8 character encoding only, unless stated otherwise.
+Only the `UTF-8` character encoding scheme is officially supported by this API.
 
 ### Errors
 
-Errors covered by the CSW standard, will use the relevant form specified by the standard.
+Errors covered by the CSW standard will use the relevant error format and content specified by the standard.
 
-Other errors will be returned in a logical but non-standardised form.
-
-**Note:** Authentication errors will currently use a `application/json` content type. This is a considered a bug and 
-will addressed in future versions of this API.
+Other errors will be returned in a logical but non-standardised form using the `application/json` media type.
 
 ### Request IDs
 
-All requests will include a `X-Request-ID` header to aid in debugging requests through different components.
+All responses will include a `X-Request-ID` header to aid debugging requests through different components.
 
 If desired, a custom request ID can be specified by the client which will be used instead of, or in addition to, the
 automatically generated value.
@@ -117,13 +114,13 @@ This API consists of a single resource, [Catalogues](#catalogues).
 Catalogues represent CSW instances. The ADD Data Catalogue includes two catalogues:
 
 * Published (`published`) - containing published records available to the public
-* Unpublished (`unpublished`) - containing draft records restricted to ADD project staff
+* Unpublished (`unpublished`) - containing draft, or otherwise unpublished, records restricted to ADD project staff
 
 CSW requests must target a catalogue using a path prefix, e.g. `/published`, followed by a valid CSW request.
 
 E.g. `https://api.bas.ac.uk/data/metadata/add/csw/v1/published?service=CSW&request=GetCapabilities"`
 
-Parts of this require require authentication and authorisation:
+Access to parts of this resource require authentication and authorisation:
 
 * transactional requests (in either catalogue) are authenticated and restricted to ADD project staff
 * requests to read records in the unpublished catalogue are authenticated and restricted to ADD project staff

@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "scar-add-metadata-toolbox"
 version = "0.0.0"
-license = "OGL-UK-3.0"
+license = "MIT"
 description = "Editor, repository and data catalogue for SCAR Antarctic Digital Database (ADD) discovery metadata"
 authors = [
     "Felix Fennell <felnne@bas.ac.uk>"

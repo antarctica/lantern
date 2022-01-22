@@ -785,7 +785,8 @@ All commits will trigger a Continuous Integration process using GitLab's CI/CD p
 
 ### Python package
 
-This project is distributed as a Python package, hosted in ...
+This project is distributed as a Python package, hosted in the 
+[BAS GitLab Python Registry](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/packages).
 
 Source and binary packages are built and published automatically using
 [Poetry](https://python-poetry.org) in [Continuous Deployment](#continuous-deployment).

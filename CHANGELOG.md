@@ -24,6 +24,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#193](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/193)
 * Flake8 linting
   [#198](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/198)
+* Publishing packages to GitLab package registry
+  [#203](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/203)
 
 ### Fixed
 

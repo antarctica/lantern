@@ -47,7 +47,7 @@ test:
   variables:
     FLASK_ENV: testing
   script:
-    - "poetry run pytest -o junit_family=xunit2 --junitxml=test-results.xml --random-order --cov=scar_add_metadata_toolbox --cov-fail-under=100"
+    - "poetry run pytest -o junit_family=xunit2 --junitxml=test-results.xml --random-order --cov=scar_add_metadata_toolbox --cov-config=.coveragerc --cov-fail-under=100"
     - "poetry run coverage html"
   coverage: '/Total coverage: \d+\.\d+/'
   artifacts:
@@ -65,8 +65,8 @@ lint:
   needs: []
   script:
     - "poetry check"
-    - "poetry run black --check src/"
-    - "poetry run bandit -r src/"
+    - "poetry run flake8 src/ tests/"
+    - "poetry export --without-hashes -f requirements.txt | poetry run safety check --full-report --stdin"
   rules:
     - changes:
         - '**/*.py'

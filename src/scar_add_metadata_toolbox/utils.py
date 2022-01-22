@@ -1,13 +1,11 @@
-import os
 import json
+import os
 from base64 import urlsafe_b64decode
-
-from typing import Dict, Optional
 from pathlib import Path
+from typing import Dict, Optional
 
-# noinspection PyPackageRequirements
 from awscli.clidriver import create_clidriver
-from jinja2 import PrefixLoader, PackageLoader
+from jinja2 import PackageLoader, PrefixLoader
 from werkzeug.utils import import_string
 
 from scar_add_metadata_toolbox.config import Config

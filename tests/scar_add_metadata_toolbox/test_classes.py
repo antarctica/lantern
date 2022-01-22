@@ -1,13 +1,11 @@
-import pytest
-
 from scar_add_metadata_toolbox.classes import (
     Collection,
+    CSWClient,
     Item,
-    Record,
     MirrorRecord,
     MirrorRecordSummary,
+    Record,
     RecordSummary,
-    CSWClient,
 )
 
 

@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from pathlib import Path
 
-from bas_metadata_library.standards.iso_19115_2 import MetadataRecordConfigV2, MetadataRecord
+from bas_metadata_library.standards.iso_19115_2 import MetadataRecord, MetadataRecordConfigV2
 
 
 def make_test_record_config(identifier: str, title: str) -> dict:
@@ -30,7 +30,8 @@ def make_test_record_config(identifier: str, title: str) -> dict:
                     "online_resource": {
                         "href": "https://www.bas.ac.uk/team/magic",
                         "title": "Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-                        "description": "General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
+                        "description": "General information about the BAS Mapping and Geographic Information Centre "
+                        "(MAGIC) from the British Antarctic Survey (BAS) public website.",
                         "function": "information",
                     },
                     "role": ["pointOfContact"],
@@ -53,7 +54,9 @@ def make_test_record_config(identifier: str, title: str) -> dict:
                     "online_resource": {
                         "href": "https://www.epsg-registry.org/",
                         "title": "EPSG Geodetic Parameter Dataset",
-                        "description": "The EPSG Geodetic Parameter Dataset is a structured dataset of Coordinate Reference Systems and Coordinate Transformations, accessible through this online registry.",
+                        "description": "The EPSG Geodetic Parameter Dataset is a structured dataset of Coordinate "
+                        "Reference Systems and Coordinate Transformations, accessible through this "
+                        "online registry.",
                         "function": "information",
                     },
                     "role": ["publisher"],
@@ -78,8 +81,8 @@ def make_test_record_config(identifier: str, title: str) -> dict:
             "contacts": [
                 {
                     "individual": {
-                        "name": f"Watson, Constance",
-                        "href": f"https://orcid.org/0001-0002-0003-0004",
+                        "name": "Watson, Constance",
+                        "href": "https://sandbox.orcid.org/0000-0001-8373-6934",
                         "title": "orcid",
                     },
                     "organisation": {
@@ -89,9 +92,11 @@ def make_test_record_config(identifier: str, title: str) -> dict:
                     },
                     "email": "conwat@bas.ac.uk",
                     "online_resource": {
-                        "href": f"https://orcid.org/0001-0002-0003-0004",
+                        "href": "https://sandbox.orcid.org/0000-0001-8373-6934",
                         "title": "ORCID record",
-                        "description": "ORCID is an open, non-profit, community-driven effort to create and maintain a registry of unique researcher identifiers and a transparent method of linking research activities and outputs to these identifiers.",
+                        "description": "ORCID is an open, non-profit, community-driven effort to create and maintain a "
+                        "registry of unique researcher identifiers and a transparent method of linking "
+                        "research activities and outputs to these identifiers.",
                         "function": "information",
                     },
                     "role": ["author"],
@@ -114,7 +119,8 @@ def make_test_record_config(identifier: str, title: str) -> dict:
                     "online_resource": {
                         "href": "https://www.bas.ac.uk/team/magic",
                         "title": "Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-                        "description": "General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
+                        "description": "General information about the BAS Mapping and Geographic Information Centre "
+                        "(MAGIC) from the British Antarctic Survey (BAS) public website.",
                         "function": "information",
                     },
                     "role": ["publisher", "pointOfContact"],
@@ -126,7 +132,7 @@ def make_test_record_config(identifier: str, title: str) -> dict:
                     "terms": [
                         {
                             "term": "STUFF",
-                            "href": f"https://www.eionet.europa.eu/gemet/en/inspire-theme/st",
+                            "href": "https://www.eionet.europa.eu/gemet/en/inspire-theme/st",
                         }
                     ],
                     "type": "theme",
@@ -139,7 +145,8 @@ def make_test_record_config(identifier: str, title: str) -> dict:
                         "edition": "4.1.2",
                         "contact": {
                             "organisation": {
-                                "name": "European Environment Information and Observation Network (EIONET), European Environment Agency (EEA)",
+                                "name": "European Environment Information and Observation Network (EIONET), European "
+                                "Environment Agency (EEA)",
                                 "href": "https://ror.org/02k4b9v70",
                                 "title": "ror",
                             },
@@ -147,7 +154,9 @@ def make_test_record_config(identifier: str, title: str) -> dict:
                             "online_resource": {
                                 "href": "https://www.eionet.europa.eu/gemet/en/themes/",
                                 "title": "GEMET INSPIRE Spatial Data Themes  General Multilingual Environmental Thesaurus",
-                                "description": "GEMET, the GEneral Multilingual Environmental Thesaurus, has been developed as a multilingual thesauri for indexing, retrieval and control of terms in order to save time, energy and funds.",
+                                "description": "GEMET, the GEneral Multilingual Environmental Thesaurus, has been "
+                                "developed as a multilingual thesauri for indexing, retrieval and "
+                                "control of terms in order to save time, energy and funds.",
                                 "function": "information",
                             },
                             "role": ["publisher"],
@@ -161,8 +170,8 @@ def make_test_record_config(identifier: str, title: str) -> dict:
                             "href": "https://gcmdservices.gsfc.nasa.gov/kms/concept/3e822484-c94a-457b-a32f-376fcbd6fd35",
                         },
                         {
-                            "term": f"STUFF",
-                            "href": f"https://gcmdservices.gsfc.nasa.gov/kms/concept/c4992969-05db-4bb6-9dac-d35535503650",
+                            "term": "STUFF",
+                            "href": "https://gcmdservices.gsfc.nasa.gov/kms/concept/c4992969-05db-4bb6-9dac-d35535503650",
                         },
                     ],
                     "type": "theme",
@@ -175,7 +184,8 @@ def make_test_record_config(identifier: str, title: str) -> dict:
                         "edition": "9.1",
                         "contact": {
                             "organisation": {
-                                "name": "Global Change Data Center, Science and Exploration Directorate, Goddard Space Flight Center (GSFC) National Aeronautics and Space Administration (NASA)",
+                                "name": "Global Change Data Center, Science and Exploration Directorate, Goddard Space "
+                                "Flight Center (GSFC) National Aeronautics and Space Administration (NASA)",
                                 "href": "https://ror.org/027ka1x80",
                                 "title": "ror",
                             },
@@ -187,7 +197,10 @@ def make_test_record_config(identifier: str, title: str) -> dict:
                             "online_resource": {
                                 "href": "https://earthdata.nasa.gov/about/gcmd/global-change-master-directory-gcmd-keywords",
                                 "title": "Global Change Master Directory (GCMD) Keywords",
-                                "description": "The information provided on this page seeks to define how the GCMD Keywords are structured, used and accessed. It also provides information on how users can participate in the further development of the keywords.",
+                                "description": "The information provided on this page seeks to define how the GCMD "
+                                "Keywords are structured, used and accessed. It also provides "
+                                "information on how users can participate in the further development of "
+                                "the keywords.",
                                 "function": "information",
                             },
                             "role": ["publisher"],
@@ -227,7 +240,8 @@ def make_test_record_config(identifier: str, title: str) -> dict:
                             "online_resource": {
                                 "href": "https://www.bas.ac.uk/team/business-teams/information-services/uk-polar-data-centre/",
                                 "title": "UK Polar Data Centre (UK PDC) - BAS public website",
-                                "description": "General information about the NERC Polar Data Centre (UK PDC) from the British Antarctic Survey (BAS) public website.",
+                                "description": "General information about the NERC Polar Data Centre (UK PDC) from the "
+                                "British Antarctic Survey (BAS) public website.",
                                 "function": "information",
                             },
                             "role": ["publisher"],
@@ -267,7 +281,8 @@ def make_test_record_config(identifier: str, title: str) -> dict:
                             "online_resource": {
                                 "href": "https://www.bas.ac.uk/team/business-teams/information-services/uk-polar-data-centre/",
                                 "title": "UK Polar Data Centre (UK PDC) - BAS public website",
-                                "description": "General information about the NERC Polar Data Centre (UK PDC) from the British Antarctic Survey (BAS) public website.",
+                                "description": "General information about the NERC Polar Data Centre (UK PDC) from the "
+                                "British Antarctic Survey (BAS) public website.",
                                 "function": "information",
                             },
                             "role": ["publisher"],
@@ -291,7 +306,8 @@ def make_test_record_config(identifier: str, title: str) -> dict:
                         "edition": "9.1",
                         "contact": {
                             "organisation": {
-                                "name": "Global Change Data Center, Science and Exploration Directorate, Goddard Space Flight Center (GSFC) National Aeronautics and Space Administration (NASA)",
+                                "name": "Global Change Data Center, Science and Exploration Directorate, Goddard Space "
+                                "Flight Center (GSFC) National Aeronautics and Space Administration (NASA)",
                                 "href": "https://ror.org/027ka1x80",
                                 "title": "ror",
                             },
@@ -303,7 +319,10 @@ def make_test_record_config(identifier: str, title: str) -> dict:
                             "online_resource": {
                                 "href": "https://earthdata.nasa.gov/about/gcmd/global-change-master-directory-gcmd-keywords",
                                 "title": "Global Change Master Directory (GCMD) Keywords",
-                                "description": "The information provided on this page seeks to define how the GCMD Keywords are structured, used and accessed. It also provides information on how users can participate in the further development of the keywords.",
+                                "description": "The information provided on this page seeks to define how the GCMD "
+                                "Keywords are structured, used and accessed. It also provides "
+                                "information on how users can participate in the further development of "
+                                "the keywords.",
                                 "function": "information",
                             },
                             "role": ["publisher"],
@@ -315,13 +334,16 @@ def make_test_record_config(identifier: str, title: str) -> dict:
                 {
                     "type": "usage",
                     "restriction_code": "license",
-                    "statement": "This information is licensed under the Create Commons Attribution 4.0 International Licence (CC BY 4.0). To view this licence, visit https://creativecommons.org/licenses/by/4.0/",
+                    "statement": "This information is licensed under the Create Commons Attribution 4.0 International "
+                    "Licence (CC BY 4.0). To view this licence, "
+                    "visit https://creativecommons.org/licenses/by/4.0/",
                     "href": "https://creativecommons.org/licenses/by/4.0/",
                 },
                 {
                     "type": "usage",
                     "restriction_code": "otherRestrictions",
-                    "statement": "Please cite this item as: 'Produced using data from the SCAR Antarctic Digital Database'.",
+                    "statement": "Please cite this item as: "
+                    "'Produced using data from the SCAR Antarctic Digital Database'.",
                 },
             ],
             "spatial_representation_type": "vector",
@@ -363,7 +385,8 @@ def make_test_record_config(identifier: str, title: str) -> dict:
                     "online_resource": {
                         "href": "https://www.bas.ac.uk/team/magic",
                         "title": "Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-                        "description": "General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
+                        "description": "General information about the BAS Mapping and Geographic Information Centre "
+                        "(MAGIC) from the British Antarctic Survey (BAS) public website.",
                         "function": "information",
                     },
                     "role": ["distributor"],
@@ -434,8 +457,7 @@ To update test records:
 The ID and titles used in these calls are taken from the `TEST_RECORD_1` and `TEST_RECORD_2` items in the
 `tests.conftest.TestRecordConfigurations` enumeration.
 
-[1] 
-$ docker compose run app-cli
+[1]
 $ cd tests/scar_add_metadata_toolbox/resources/csw/records/
 $ poetry run python __init__.py
 """

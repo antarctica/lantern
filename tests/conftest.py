@@ -6,23 +6,22 @@ from unittest.mock import patch
 import pytest
 
 from scar_add_metadata_toolbox import create_app
-
 from tests.scar_add_metadata_toolbox.classes import (
-    MockCSWClient,
     MockCollections,
+    MockCollectionsUnknownRecord,
+    MockCSWClient,
+    MockCSWClientAuthError,
+    MockCSWClientAuthInsufficient,
+    MockCSWClientAuthMissing,
     MockCSWClientInsertsFail,
+    MockCSWClientServerNotSetup,
     MockCSWServer,
+    MockCSWServerAuthTokenError,
+    MockCSWServerInsufficientAuthToken,
+    MockCSWServerMissingAuthToken,
     MockCSWServerNotSetup,
     MockCSWServerRequestsFail,
-    MockCSWServerMissingAuthToken,
-    MockCSWServerInsufficientAuthToken,
     MockPublicClientApplication,
-    MockCSWClientServerNotSetup,
-    MockCSWClientAuthError,
-    MockCSWClientAuthMissing,
-    MockCSWClientAuthInsufficient,
-    MockCollectionsUnknownRecord,
-    MockCSWServerAuthTokenError,
 )
 from tests.scar_add_metadata_toolbox.resources.csw.records import make_test_record_config
 

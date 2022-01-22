@@ -2,21 +2,23 @@ from copy import deepcopy
 from enum import Enum
 from typing import List, Optional
 
-# noinspection PyPackageRequirements
-# Exempting Bandit security issue (Using Element to parse untrusted XML data is known to be vulnerable to XML attacks)
-#
-# We don't currently allow untrusted/user-provided XML so this is not a risk
-from lxml.etree import Element, ElementTree, fromstring, tostring, XMLSyntaxError  # nosec
 from flask import Request, Response
+from flask_azure_oauth import AzureToken
+from lxml.etree import (
+    Element,
+    ElementTree,
+    fromstring,
+    tostring,
+    XMLSyntaxError,
+)  # nosec - see 'lxml` package (bandit)' section in README
 from requests import HTTPError
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.exc import ProgrammingError
-from flask_azure_oauth import AzureToken
 
+from scar_add_metadata_toolbox.hazmat.owslib.csw import CatalogueServiceWeb as _CSWClient, namespaces as csw_namespaces
 from scar_add_metadata_toolbox.hazmat.owslib.namespaces import Namespaces
 from scar_add_metadata_toolbox.hazmat.owslib.ows import ExceptionReport
-from scar_add_metadata_toolbox.hazmat.owslib.util import ServiceException, Authentication as CSWAuth
-from scar_add_metadata_toolbox.hazmat.owslib.csw import namespaces as csw_namespaces, CatalogueServiceWeb as _CSWClient
+from scar_add_metadata_toolbox.hazmat.owslib.util import Authentication as CSWAuth, ServiceException
 from scar_add_metadata_toolbox.hazmat.pycsw.core import admin
 from scar_add_metadata_toolbox.hazmat.pycsw.server import Csw as _CSWServer
 
@@ -288,11 +290,11 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
         """
         try:
             if len(self._csw_auth[method]) > 0 and not token.scopes.issuperset(set(self._csw_auth[method])):
-                raise CSWAuthInsufficientException()
+                raise CSWAuthInsufficientException() from None
         except AttributeError:
             # noinspection PyComparisonWithNone
             if token is None:
-                raise CSWAuthMissingException()
+                raise CSWAuthMissingException() from None
 
     def setup(self) -> None:
         """
@@ -314,7 +316,7 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
             csw_database.execute("SELECT PostGIS_Full_Version();")
         except ProgrammingError as e:
             if "ERROR:  function postgis_full_version() does not exist" in e.orig.pgerror:
-                raise CSWDatabasePostGISExtensionUnavailable()
+                raise CSWDatabasePostGISExtensionUnavailable() from e
 
         try:
             admin.setup_db(
@@ -325,7 +327,7 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
         except ProgrammingError as e:
             # Ignore errors related to PyCSW's limitations with non-namespaced indexes
             if 'ERROR:  relation "fts_gin_idx" already exists' not in e.orig.pgerror:
-                raise CSWDatabaseAlreadyInitialisedException()
+                raise CSWDatabaseAlreadyInitialisedException() from e
             pass
 
     def process_request(self, request: Request, token: Optional[AzureToken] = None) -> Response:
@@ -442,7 +444,7 @@ class CSWClient:  # pragma: no cover (until #59 is resolved)
         try:
             return _CSWClient(self._csw_endpoint, auth=self._csw_auth, **self._csw_config)
         except ServiceException:
-            raise CSWAuthException()
+            raise CSWAuthException() from None
 
     def get_record(self, identifier: str, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> str:
         """
@@ -469,13 +471,13 @@ class CSWClient:  # pragma: no cover (until #59 is resolved)
             return _csw.records[identifier].xml.decode()
         except HTTPError as e:
             if e.response.content.decode() == "Catalogue not yet available.":
-                raise CSWDatabaseNotInitialisedException()
-            raise HTTPError(e)
+                raise CSWDatabaseNotInitialisedException() from None
+            raise HTTPError(e) from e
         except XMLSyntaxError:
             if _csw.response.decode() == "Missing authorisation token.":
-                raise CSWAuthMissingException()
+                raise CSWAuthMissingException() from None
             elif _csw.response.decode() == "Insufficient authorisation token.":
-                raise CSWAuthInsufficientException()
+                raise CSWAuthInsufficientException() from None
 
     def get_records(self, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> List[str]:
         """
@@ -511,12 +513,12 @@ class CSWClient:  # pragma: no cover (until #59 is resolved)
                 yield raw_record.xml
         except HTTPError as e:
             if e.response.content.decode() == "Catalogue not yet available.":
-                raise CSWDatabaseNotInitialisedException()
+                raise CSWDatabaseNotInitialisedException() from e
         except XMLSyntaxError:
             if _csw.response.decode() == "Missing authorisation token.":
-                raise CSWAuthMissingException()
+                raise CSWAuthMissingException() from None
             elif _csw.response.decode() == "Insufficient authorisation token.":
-                raise CSWAuthInsufficientException()
+                raise CSWAuthInsufficientException() from None
 
     def insert_record(self, record: str) -> None:
         """
@@ -535,17 +537,17 @@ class CSWClient:  # pragma: no cover (until #59 is resolved)
         try:
             _csw.transaction(ttype=CSWTransactionType.INSERT.value, typename="gmd:MD_Metadata", record=record)
             if len(_csw.results["insertresults"]) != 1:
-                raise RecordServerException()
+                raise RecordServerException() from None
         except ExceptionReport:
-            raise RecordInsertConflictException()
+            raise RecordInsertConflictException() from None
         except HTTPError as e:
             if e.response.content.decode() == "Catalogue not yet available.":
-                raise CSWDatabaseNotInitialisedException()
+                raise CSWDatabaseNotInitialisedException() from e
         except XMLSyntaxError:
             if _csw.response.decode() == "Missing authorisation token.":
-                raise CSWAuthMissingException()
+                raise CSWAuthMissingException() from None
             elif _csw.response.decode() == "Insufficient authorisation token.":
-                raise CSWAuthInsufficientException()
+                raise CSWAuthInsufficientException() from None
 
     def update_record(self, record: str) -> None:
         """
@@ -569,15 +571,15 @@ class CSWClient:  # pragma: no cover (until #59 is resolved)
                 )[0]
             )
             if _csw.results["updated"] != 1:
-                raise RecordServerException()
+                raise RecordServerException() from None
         except HTTPError as e:
             if e.response.content.decode() == "Catalogue not yet available.":
-                raise CSWDatabaseNotInitialisedException()
+                raise CSWDatabaseNotInitialisedException() from e
         except XMLSyntaxError:
             if _csw.response.decode() == "Missing authorisation token.":
-                raise CSWAuthMissingException()
+                raise CSWAuthMissingException() from None
             elif _csw.response.decode() == "Insufficient authorisation token.":
-                raise CSWAuthInsufficientException()
+                raise CSWAuthInsufficientException() from None
 
     def delete_record(self, identifier: str) -> None:
         """
@@ -599,15 +601,15 @@ class CSWClient:  # pragma: no cover (until #59 is resolved)
             )
             # noinspection PyTypeChecker
             if _csw.results["deleted"] != 1:
-                raise RecordServerException()
+                raise RecordServerException() from None
         except HTTPError as e:
             if e.response.content.decode() == "Catalogue not yet available.":
-                raise CSWDatabaseNotInitialisedException()
+                raise CSWDatabaseNotInitialisedException() from e
         except XMLSyntaxError:
             if _csw.response.decode() == "Missing authorisation token.":
-                raise CSWAuthMissingException()
+                raise CSWAuthMissingException() from None
             elif _csw.response.decode() == "Insufficient authorisation token.":
-                raise CSWAuthInsufficientException()
+                raise CSWAuthInsufficientException() from None
 
     @staticmethod
     def _convert_csw_brief_gmd_to_gmi_xml(record_xml: str) -> str:
@@ -635,7 +637,7 @@ class CSWClient:  # pragma: no cover (until #59 is resolved)
         iso_ns = Namespaces()
 
         gmd_xml_element = ElementTree(fromstring(record_xml))
-        gmd_sub_elements = gmd_xml_element.getroot().xpath(f"/gmd:MD_Metadata/*", namespaces=iso_ns.namespace_dict)
+        gmd_sub_elements = gmd_xml_element.getroot().xpath("/gmd:MD_Metadata/*", namespaces=iso_ns.namespace_dict)
         gmi_xml_element = Element(
             f"{{{iso_ns.get_namespace('gmi')}}}MI_Metadata",
             nsmap=iso_ns.namespace_dict,

@@ -1,28 +1,24 @@
-from typing import List, Optional
 from pathlib import Path
+from typing import List, Optional
 
 from bas_metadata_library.standards.iso_19115_2 import MetadataRecord
-from flask import Request, Response, current_app
+from flask import current_app, Request, Response
 from flask_azure_oauth import AzureToken
 from flask_azure_oauth.mocks.tokens import TestJwt
 
+from scar_add_metadata_toolbox.classes import Collection, CollectionNotFoundException, Collections
 from scar_add_metadata_toolbox.csw import (
-    CSWServer,
+    CSWAuthException,
+    CSWAuthInsufficientException,
+    CSWAuthMissingException,
     CSWClient,
+    CSWDatabaseAlreadyInitialisedException,
+    CSWDatabaseNotInitialisedException,
     CSWGetRecordMode,
+    CSWServer,
     RecordInsertConflictException,
     RecordNotFoundException,
     RecordServerException,
-    CSWDatabaseAlreadyInitialisedException,
-    CSWDatabaseNotInitialisedException,
-    CSWAuthMissingException,
-    CSWAuthInsufficientException,
-    CSWAuthException,
-)
-from scar_add_metadata_toolbox.classes import (
-    Collections,
-    Collection,
-    CollectionNotFoundException,
 )
 
 
@@ -51,7 +47,7 @@ class MockCSWClient(CSWClient):
         try:
             return self._records[identifier][mode.value]
         except KeyError:
-            raise RecordNotFoundException()
+            raise RecordNotFoundException() from None
 
     def get_records(self, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> List[str]:
         for identifier in self._records.keys():
@@ -80,80 +76,80 @@ class MockCSWClient(CSWClient):
         try:
             del self._records[identifier]
         except KeyError:
-            raise RecordNotFoundException()
+            raise RecordNotFoundException() from None
 
 
 class MockCSWClientInsertsFail(MockCSWClient):
     def insert_record(self, record: str) -> None:
-        raise RecordServerException()
+        raise RecordServerException() from None
 
 
 class MockCSWClientServerNotSetup(MockCSWClient):
     def get_record(self, identifier: str, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> str:
-        raise CSWDatabaseNotInitialisedException()
+        raise CSWDatabaseNotInitialisedException() from None
 
     def get_records(self, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> List[str]:
-        raise CSWDatabaseNotInitialisedException()
+        raise CSWDatabaseNotInitialisedException() from None
 
     def insert_record(self, record: str) -> None:
-        raise CSWDatabaseNotInitialisedException()
+        raise CSWDatabaseNotInitialisedException() from None
 
     def update_record(self, record: str) -> None:
-        raise CSWDatabaseNotInitialisedException()
+        raise CSWDatabaseNotInitialisedException() from None
 
     def delete_record(self, identifier: str) -> None:
-        raise CSWDatabaseNotInitialisedException()
+        raise CSWDatabaseNotInitialisedException() from None
 
 
 class MockCSWClientAuthError(MockCSWClient):
     def get_record(self, identifier: str, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> str:
-        raise CSWAuthException()
+        raise CSWAuthException() from None
 
     def get_records(self, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> List[str]:
-        raise CSWAuthException()
+        raise CSWAuthException() from None
 
     def insert_record(self, record: str) -> None:
-        raise CSWAuthException()
+        raise CSWAuthException() from None
 
     def update_record(self, record: str) -> None:
-        raise CSWAuthException()
+        raise CSWAuthException() from None
 
     def delete_record(self, identifier: str) -> None:
-        raise CSWAuthException()
+        raise CSWAuthException() from None
 
 
 class MockCSWClientAuthMissing(MockCSWClient):
     def get_record(self, identifier: str, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> str:
-        raise CSWAuthMissingException()
+        raise CSWAuthMissingException() from None
 
     def get_records(self, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> List[str]:
-        raise CSWAuthMissingException()
+        raise CSWAuthMissingException() from None
 
     def insert_record(self, record: str) -> None:
-        raise CSWAuthMissingException()
+        raise CSWAuthMissingException() from None
 
     def update_record(self, record: str) -> None:
-        raise CSWAuthMissingException()
+        raise CSWAuthMissingException() from None
 
     def delete_record(self, identifier: str) -> None:
-        raise CSWAuthMissingException()
+        raise CSWAuthMissingException() from None
 
 
 class MockCSWClientAuthInsufficient(MockCSWClient):
     def get_record(self, identifier: str, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> str:
-        raise CSWAuthInsufficientException()
+        raise CSWAuthInsufficientException() from None
 
     def get_records(self, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> List[str]:
-        raise CSWAuthInsufficientException()
+        raise CSWAuthInsufficientException() from None
 
     def insert_record(self, record: str) -> None:
-        raise CSWAuthInsufficientException()
+        raise CSWAuthInsufficientException() from None
 
     def update_record(self, record: str) -> None:
-        raise CSWAuthInsufficientException()
+        raise CSWAuthInsufficientException() from None
 
     def delete_record(self, identifier: str) -> None:
-        raise CSWAuthInsufficientException()
+        raise CSWAuthInsufficientException() from None
 
 
 class MockCSWServer(CSWServer):
@@ -168,7 +164,7 @@ class MockCSWServer(CSWServer):
 
     def setup(self) -> None:
         if self.initialised:
-            raise CSWDatabaseAlreadyInitialisedException()
+            raise CSWDatabaseAlreadyInitialisedException() from None
         self.initialised = True
 
     def process_request(self, request: Request, token: Optional[AzureToken] = None) -> Response:
@@ -177,27 +173,27 @@ class MockCSWServer(CSWServer):
 
 class MockCSWServerNotSetup(MockCSWServer):
     def process_request(self, request: Request, token: Optional[AzureToken] = None) -> Response:
-        raise CSWDatabaseNotInitialisedException()
+        raise CSWDatabaseNotInitialisedException() from None
 
 
 class MockCSWServerAuthTokenError(MockCSWServer):
     def process_request(self, request: Request, token: Optional[AzureToken] = None) -> Response:
-        raise CSWAuthException()
+        raise CSWAuthException() from None
 
 
 class MockCSWServerMissingAuthToken(MockCSWServer):
     def process_request(self, request: Request, token: Optional[AzureToken] = None) -> Response:
-        raise CSWAuthMissingException()
+        raise CSWAuthMissingException() from None
 
 
 class MockCSWServerInsufficientAuthToken(MockCSWServer):
     def process_request(self, request: Request, token: Optional[AzureToken] = None) -> Response:
-        raise CSWAuthInsufficientException()
+        raise CSWAuthInsufficientException() from None
 
 
 class MockCSWServerRequestsFail(MockCSWServer):
     def process_request(self, request: Request, token: Optional[AzureToken] = None) -> Response:
-        raise RecordServerException()
+        raise RecordServerException() from None
 
 
 class MockCollections(Collections):
@@ -221,7 +217,7 @@ class MockCollections(Collections):
         try:
             del self.collections[collection_identifier]
         except KeyError:
-            raise CollectionNotFoundException()
+            raise CollectionNotFoundException() from None
 
 
 class MockCollectionsUnknownRecord(Collections):
@@ -245,7 +241,7 @@ class MockCollectionsUnknownRecord(Collections):
         try:
             del self.collections[collection_identifier]
         except KeyError:
-            raise CollectionNotFoundException()
+            raise CollectionNotFoundException() from None
 
 
 class MockPublicClientApplication:

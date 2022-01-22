@@ -1,13 +1,13 @@
-import pytest
-
 from unittest.mock import patch
 
+import pytest
 from flask import Flask
 
 from scar_add_metadata_toolbox import create_app
-
-# TestingConfig is renamed to prevent PyTest trying to test the class
-from scar_add_metadata_toolbox.config import Config, TestingConfig as _TestingConfig
+from scar_add_metadata_toolbox.config import (
+    Config,
+    TestingConfig as _TestingConfig,
+)  # TestingConfig renamed to prevent PyTest trying to test the class
 
 
 @pytest.mark.usefixtures("app")

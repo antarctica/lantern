@@ -3,18 +3,18 @@ from flask import Flask, request, Response
 from flask_azure_oauth import FlaskAzureOauth
 from markupsafe import escape
 
-from scar_add_metadata_toolbox.classes import MirrorRepository, Collections
+from scar_add_metadata_toolbox.classes import Collections, MirrorRepository
 from scar_add_metadata_toolbox.commands import (
-    record_commands_blueprint,
-    collections_commands_blueprint,
-    site_commands_blueprint,
     auth_commands_blueprint,
+    collections_commands_blueprint,
     csw_commands_blueprint,
+    record_commands_blueprint,
+    site_commands_blueprint,
 )
 from scar_add_metadata_toolbox.csw import (
-    CSWDatabaseNotInitialisedException,
-    CSWAuthMissingException,
     CSWAuthInsufficientException,
+    CSWAuthMissingException,
+    CSWDatabaseNotInitialisedException,
 )
 from scar_add_metadata_toolbox.utils import (
     _create_app_config,

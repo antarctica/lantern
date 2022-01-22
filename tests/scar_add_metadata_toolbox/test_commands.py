@@ -1,5 +1,4 @@
 import json
-
 from pathlib import Path
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 from unittest import mock
@@ -7,7 +6,7 @@ from unittest import mock
 import pytest
 from bas_metadata_library.standards.iso_19115_2 import MetadataRecordConfigV2
 
-from tests.conftest import TestRecordConfigurations, TestCollections
+from tests.conftest import TestCollections, TestRecordConfigurations
 
 
 class TestCommandRecordsList:
@@ -343,7 +342,7 @@ class TestCommandRecordsBulkImport:
                 valid_record_data = TestRecordConfigurations.TEST_RECORD_3.value
                 record_configuration = MetadataRecordConfigV2(**valid_record_data)
                 record_configuration.dump(file=Path(valid_record_file.name))
-                invalid_record_data = '{"foo":}'
+                invalid_record_data = '{"foo":}'  # noqa: FS003
                 invalid_record_file.write(invalid_record_data)
                 invalid_record_file.flush()
 
@@ -435,8 +434,8 @@ class TestCommandRecordsPublish:
         )
         assert result.exit_code == 64
         assert (
-            f"No. Record '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}' already published. Add `--allow-republish` flag to allow."
-            in result.output
+            f"No. Record '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}' already published. Add "
+            f"`--allow-republish` flag to allow." in result.output
         )
 
     @pytest.mark.usefixtures("app_runner_mocked_csw_inserts_fail")
@@ -675,8 +674,8 @@ class TestCommandRecordsExport:
             )
             assert result.exit_code == 64
             assert (
-                f"No. Export of record '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}' would be overwritten. Add `--allow-overwrite` flag to allow."
-                in result.output
+                f"No. Export of record '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}' would be "
+                f"overwritten. Add `--allow-overwrite` flag to allow." in result.output
             )
 
 
@@ -814,8 +813,8 @@ class TestCommandRecordsBulkExport:
             )
             assert "# Record 2/2" in result.output
             assert (
-                f"No. Export of record '{TestRecordConfigurations.TEST_RECORD_2.value['file_identifier']}' would be overwritten. Add `--allow-overwrite` flag to allow."
-                in result.output
+                f"No. Export of record '{TestRecordConfigurations.TEST_RECORD_2.value['file_identifier']}' would be "
+                f"overwritten. Add `--allow-overwrite` flag to allow." in result.output
             )
 
 
@@ -852,7 +851,7 @@ class TestCommandRecordsRemove:
             args=["records", "remove", TestRecordConfigurations.TEST_RECORD_2.value["file_identifier"]]
         )
         assert result.exit_code == 1
-        assert f"Aborted!" in result.output
+        assert "Aborted!" in result.output
 
         # verify non-deletion
         result = app_runner_mocked_csw.invoke(args=["records", "list"])
@@ -979,11 +978,11 @@ class TestCommandRecordsBulkRemove:
 
         result = app_runner_mocked_csw.invoke(args=["records", "bulk-remove"])
         assert result.exit_code == 0
-        assert f"1 records to remove." in result.output
+        assert "1 records to remove." in result.output
         assert (
             f"Ok. Record '{TestRecordConfigurations.TEST_RECORD_2.value['file_identifier']}' removed." in result.output
         )
-        assert f"Ok. 1 records removed." in result.output
+        assert "Ok. 1 records removed." in result.output
 
         # verify deletion
         result = app_runner_mocked_csw.invoke(
@@ -1002,7 +1001,7 @@ class TestCommandRecordsBulkRemove:
 
         result = app_runner_mocked_csw.invoke(args=["records", "bulk-remove"])
         assert result.exit_code == 1
-        assert f"Aborted!" in result.output
+        assert "Aborted!" in result.output
 
         # verify non-deletion
         result = app_runner_mocked_csw.invoke(args=["records", "list"])
@@ -1074,7 +1073,7 @@ class TestCommandRecordsRetract:
     def test_cli_records_retract_error_unknown_record_identifier(self, app_runner_mocked_csw):
         result = app_runner_mocked_csw.invoke(args=["records", "retract", "unknown-identifier"])
         assert result.exit_code == 64
-        assert f"No. Record 'unknown-identifier' is not published." in result.output
+        assert "No. Record 'unknown-identifier' is not published." in result.output
 
 
 class TestCommandRecordsBulkRetract:
@@ -1082,12 +1081,12 @@ class TestCommandRecordsBulkRetract:
     def test_cli_records_bulk_retract(self, app_runner_mocked_csw):
         result = app_runner_mocked_csw.invoke(args=["records", "bulk-retract"])
         assert result.exit_code == 0
-        assert f"1 records to retract." in result.output
+        assert "1 records to retract." in result.output
         assert (
             f"Ok. Record '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}' retracted."
             in result.output
         )
-        assert f"Ok. 1 records retracted." in result.output
+        assert "Ok. 1 records retracted." in result.output
 
         # verify deletion
         result = app_runner_mocked_csw.invoke(
@@ -1354,7 +1353,7 @@ class TestCommandCollectionsBulkImport:
                 valid_collection_data = TestCollections.TEST_COLLECTION_2.value
                 json.dump(valid_collection_data, valid_collection_file)
                 valid_collection_file.flush()
-                invalid_collection_data = '{"foo":}'
+                invalid_collection_data = '{"foo":}'  # noqa: FS003
                 invalid_collection_file.write(invalid_collection_data)
                 invalid_collection_file.flush()
 
@@ -1489,8 +1488,8 @@ class TestCommandCollectionsExport:
             )
             assert result.exit_code == 64
             assert (
-                f"No. Export of collection '{TestCollections.TEST_COLLECTION_1.value['identifier']}' would be overwritten. Add `--allow-overwrite` flag to allow."
-                in result.output
+                f"No. Export of collection '{TestCollections.TEST_COLLECTION_1.value['identifier']}' would be "
+                f"overwritten. Add `--allow-overwrite` flag to allow." in result.output
             )
 
 
@@ -1604,8 +1603,8 @@ class TestCommandCollectionsBulkExport:
             assert "1 collections to (re)export." in result.output
             assert "# Collection 1/1" in result.output
             assert (
-                f"No. Export of collection '{TestCollections.TEST_COLLECTION_1.value['identifier']}' would be overwritten. Add `--allow-overwrite` flag to allow."
-                in result.output
+                f"No. Export of collection '{TestCollections.TEST_COLLECTION_1.value['identifier']}' would be "
+                f"overwritten. Add `--allow-overwrite` flag to allow." in result.output
             )
 
 
@@ -1639,7 +1638,7 @@ class TestCommandCollectionsRemove:
             args=["collections", "remove", TestCollections.TEST_COLLECTION_1.value["identifier"]]
         )
         assert result.exit_code == 1
-        assert f"Aborted!" in result.output
+        assert "Aborted!" in result.output
 
         # verify non-deletion
         result = app_runner_mocked_collections.invoke(
@@ -1691,9 +1690,9 @@ class TestCommandCollectionsBulkRemove:
 
         result = app_runner_mocked_collections.invoke(args=["collections", "bulk-remove"])
         assert result.exit_code == 0
-        assert f"1 collections to remove." in result.output
+        assert "1 collections to remove." in result.output
         assert f"Ok. Collection '{TestCollections.TEST_COLLECTION_1.value['identifier']}' removed." in result.output
-        assert f"Ok. 1 collections removed." in result.output
+        assert "Ok. 1 collections removed." in result.output
 
         # verify deletion
         result = app_runner_mocked_collections.invoke(
@@ -1711,7 +1710,7 @@ class TestCommandCollectionsBulkRemove:
 
         result = app_runner_mocked_collections.invoke(args=["collections", "bulk-remove"])
         assert result.exit_code == 1
-        assert f"Aborted!" in result.output
+        assert "Aborted!" in result.output
 
         # verify non-deletion
         result = app_runner_mocked_collections.invoke(
@@ -1832,18 +1831,18 @@ class TestCommandSiteBuildRecordPages:
         assert "3 record pages to generate." in result.output
         assert "# Record page 1/1 (stylesheet 1/3)" in result.output
         assert (
-            f"Ok. Generated item page for '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}' (stylesheet 'iso-html')."
-            in result.output
+            f"Ok. Generated item page for '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}' "
+            f"(stylesheet 'iso-html')." in result.output
         )
         assert "# Record page 1/1 (stylesheet 2/3)" in result.output
         assert (
-            f"Ok. Generated item page for '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}' (stylesheet 'iso-rubric')."
-            in result.output
+            f"Ok. Generated item page for '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}' "
+            f"(stylesheet 'iso-rubric')." in result.output
         )
         assert "# Record page 1/1 (stylesheet 3/3)" in result.output
         assert (
-            f"Ok. Generated item page for '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}' (stylesheet 'iso-xml')."
-            in result.output
+            f"Ok. Generated item page for '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}' "
+            f"(stylesheet 'iso-xml')." in result.output
         )
         assert "Ok. 3 record pages generated." in result.output
 
@@ -1999,7 +1998,7 @@ class TestCommandSitePublish:
 
         result = app_static_site.test_cli_runner().invoke(args=["site", "publish"])
         assert result.exit_code == 1
-        assert f"Aborted!" in result.output
+        assert "Aborted!" in result.output
 
     @mock.patch("scar_add_metadata_toolbox.commands.aws_cli")
     @pytest.mark.usefixtures("app_static_site")
@@ -2016,7 +2015,7 @@ class TestCommandCSWSetup:
     def test_cli_setup(self, app_runner_mocked_csw_server):
         result = app_runner_mocked_csw_server.invoke(args=["csw", "setup", "published"])
         assert result.exit_code == 0
-        assert f"Ok. Catalogue 'published' setup." in result.output
+        assert "Ok. Catalogue 'published' setup." in result.output
 
     @pytest.mark.usefixtures("app_runner_mocked_csw_server")
     def test_cli_setup_catalogue_already_setup(self, app_runner_mocked_csw_server):

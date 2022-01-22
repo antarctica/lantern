@@ -1,17 +1,15 @@
 import logging
 import os
-
-from typing import Dict, List
 from pathlib import Path
+from typing import Dict, List
 
-from importlib_metadata import version
+from bas_style_kit_jinja_templates import BskTemplates
 from flask.cli import load_dotenv
+from flask_azure_oauth.mocks.keys import TestJwk
+from importlib_metadata import version
 from msal import PublicClientApplication
 from sentry_sdk.integrations.flask import FlaskIntegration
 from str2bool import str2bool
-from flask_azure_oauth.mocks.keys import TestJwk
-
-from bas_style_kit_jinja_templates import BskTemplates
 
 
 class Config:
@@ -40,19 +38,19 @@ class Config:
 
         """
         APP_ENABLE_SENTRY - Whether to enable Sentry error reporting
-        
-        If true errors and uncaught exceptions will be reported to Sentry. A default value is set on an per-environment 
+
+        If true errors and uncaught exceptions will be reported to Sentry. A default value is set on an per-environment
         basis (off in development/testing) by overriding the attribute, however it can be also be set at runtime.
         """
         self.APP_ENABLE_SENTRY = str2bool(os.environ.get("APP_ENABLE_SENTRY") or str(self._APP_ENABLE_SENTRY))
 
         """
         AUTH_SESSION_FILE_PATH - Path to the file used to store authentication information
-        
-        When ran as a CLI using containers, this application becomes stateless. Therefore user auth information (access 
+
+        When ran as a CLI using containers, this application becomes stateless. Therefore user auth information (access
         token etc.) needs to persisted elsewhere, in this case as a file written to the path set by this config option.
-        
-        Note: As this file stores authentication information its contents should be considered sensitive, meaning 
+
+        Note: As this file stores authentication information its contents should be considered sensitive, meaning
         restricted read/write permissions should be set for example. Note that as OAuth is used for authentication, no
         long-lived credentials (e.g. passwords) will be stored in this file.
         """
@@ -281,7 +279,7 @@ class Config:
         """
         Azure approved applications (server)
 
-        List of of Azure app registrations ID for applications/services (clients) trusted/approved to use the
+        List of Azure app registrations ID for applications/services (clients) trusted/approved to use the
         server/catalogue component of this application.
 
         This list automatically includes the app registration representing the client/editor component of this
@@ -375,7 +373,7 @@ class Config:
         The contents of this directory should be considered ephemeral and under the exclusive control this application.
 
         :rtype Path
-        :return Site site content path
+        :return Site content path
         """
         return Path(os.environ.get("APP_SITE_PATH") or self._SITE_PATH)
 
@@ -409,7 +407,7 @@ class DevelopmentConfig(Config):  # pragma: no cover
 
     _APP_ENABLE_SENTRY = False
     _LOGGING_LEVEL = logging.INFO
-    _COLLECTIONS_PATH = Path(f"./collections.json")
+    _COLLECTIONS_PATH = Path("./collections.json")
     _AUTH_SESSION_FILE_PATH = Path("./auth.json")
     _SITE_PATH = Path("./_site")
 

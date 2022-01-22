@@ -25,4 +25,4 @@ def test_aws_cli_error(mock_aws_cli):
     mock_aws_cli.return_value = MockAwsCli(exit_code=1)
     with pytest.raises(RuntimeError) as e:
         aws_cli(["foo", "bar"])
-    assert f"AWS CLI exited with code 1" in str(e.value)
+    assert "AWS CLI exited with code 1" in str(e.value)

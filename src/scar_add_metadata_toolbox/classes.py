@@ -1,22 +1,21 @@
 import json
-
 from datetime import date, datetime
+from enum import Enum
 from hashlib import sha1
 from pathlib import Path
-from typing import Dict, List, Union, Optional, Any
-from urllib.parse import urlparse as url_parse, parse_qs as query_string_parse
-from enum import Enum
+from typing import Any, Dict, List, Optional, Union
+from urllib.parse import parse_qs as query_string_parse, urlparse as url_parse
 
 from backports.datetime_fromisoformat import MonkeyPatch
-from bas_metadata_library.standards.iso_19115_2 import MetadataRecordConfigV2, MetadataRecord
+from bas_metadata_library.standards.iso_19115_2 import MetadataRecord, MetadataRecordConfigV2
 from dateutil.relativedelta import relativedelta
 from markdown import markdown
 
 from scar_add_metadata_toolbox.csw import (
-    CSWGetRecordMode,
     CSWClient,
-    RecordNotFoundException,
+    CSWGetRecordMode,
     RecordInsertConflictException,
+    RecordNotFoundException,
 )
 
 # Workaround for lack of `date(time).fromisoformat()` method in Python 3.6
@@ -888,7 +887,7 @@ class RecordRetractBeforeDeleteException(Exception):
     Represents a situation whereby a record is deleted before it has been first been retracted
 
     This is illogical as published records must have an unpublished counterpart. If this unpublished counterpart is
-    removed (deleted) this rule would be violated. Instead the published record must be removed (retracted) first.
+    removed (deleted) this rule would be violated. Instead, the published record must be removed (retracted) first.
     """
 
     pass
@@ -1220,11 +1219,11 @@ class Record(RecordSummary):
         configuration.validate()
         try:
             if record_path.exists():
-                raise FileExistsError
+                raise FileExistsError from None
             configuration.dump(file=record_path)
         except FileExistsError:
             if not overwrite:
-                raise FileExistsError()
+                raise FileExistsError() from None
             configuration.dump(file=record_path)
 
     def dumps(self, dump_format: str) -> str:
@@ -1233,7 +1232,7 @@ class Record(RecordSummary):
 
         Specifically encodes a BAS Metadata Library record configuration for ISO 19115-2 using a specified encoding.
 
-        Currently only the 'xml' format is supported for rendering a record configuration as ISO XML. Others may be
+        Currently, only the 'xml' format is supported for rendering a record configuration as ISO XML. Others may be
         added in the future as needs arise.
 
         :type dump_format str
@@ -1377,7 +1376,7 @@ class Repository:
             self.csw_client.insert_record(record=record_xml)
         except RecordInsertConflictException:
             if not update:
-                raise RecordInsertConflictException()
+                raise RecordInsertConflictException() from None
 
             # noinspection PyUnboundLocalVariable
             self.csw_client.update_record(record=record_xml)
@@ -1464,7 +1463,7 @@ class MirrorRepository:
 
         Record identifiers are the same as ISO 19115-2 file identifiers.
 
-        Note: As all records have to appear in the unpublished repository we can just return it's identifiers using the
+        Note: As all records have to appear in the unpublished repository we can just return its identifiers using the
         relevant method. The published catalogue's identifiers would only ever be a subset of those.
 
         :rtype list
@@ -1587,13 +1586,13 @@ class MirrorRepository:
         try:
             record = self.unpublished_repository.retrieve_record(record_identifier=record_identifier)
         except RecordNotFoundException:
-            raise RecordNotFoundException()
+            raise RecordNotFoundException() from None
 
         try:
             self.published_repository.insert_record(record=record, update=False)
         except RecordInsertConflictException:
             if not republish:
-                raise RecordInsertConflictException()
+                raise RecordInsertConflictException() from None
             self.published_repository.insert_record(record=record, update=True)
 
     def retract_record(self, record_identifier: str) -> None:
@@ -1743,7 +1742,7 @@ class Item:
         :type spatial_reference_system_code dict
         :param spatial_reference_system_code: spatial reference system containing a href property with an identifier URI
         :rtype str
-        :return: formatted spatial reference system identifier, including markdown links
+        :return: formatted spatial reference system identifier, including Markdown links
         """
         if spatial_reference_system_code["href"] == "http://www.opengis.net/def/crs/EPSG/0/3031":
             return "WGS 84 / Antarctic Polar Stereographic ([EPSG:3031](https://spatialreference.org/ref/epsg/3031/))"
@@ -1883,8 +1882,8 @@ class Item:
             distribution_option["format"]["href"] = None
 
         download_option = {
-            # Exempting Bandit security issue (weak hash method), not used for security/cryptography
-            "id": sha1(json.dumps(distribution_option).encode()).hexdigest(),  # nosec
+            # Bandit B303/S303 warning is exempted as these hashes are not used for any security related purposes
+            "id": sha1(json.dumps(distribution_option).encode()).hexdigest(),  # noqa: S303 - nosec
             "format": None,
             "format_title": None,
             "format_description": None,
@@ -2231,7 +2230,7 @@ class Collection:
     common properties.
 
     Collections only exist within the data catalogue and can be used to relate any set of items together by including
-    the relevant collection identifier as a descriptive keyword in Records (that underpin Items). Currently items in
+    the relevant collection identifier as a descriptive keyword in Records (that underpin Items). Currently, items in
     collections also need to be defined directly in the collection definitions file (`collections.json`).
 
     See the project README for Collection configurations properties.
@@ -2298,7 +2297,7 @@ class Collection:
                 json.dump(self.config, collection_file, indent=4)
         except FileExistsError:
             if not overwrite:
-                raise FileExistsError()
+                raise FileExistsError() from None
 
             with open(str(collection_path), mode="w") as collection_file:
                 json.dump(self.config, collection_file, indent=4)
@@ -2336,7 +2335,7 @@ class Collections:
                 collections_data = json.load(collections_file)
                 self.collections = collections_data
         except FileNotFoundError:  # pragma: no cover
-            # Ignore because the collections file hasn't been setup yet
+            # Ignore because the collections file hasn't been set up yet
             pass
 
     def get_all(self) -> List[Collection]:
@@ -2361,7 +2360,7 @@ class Collections:
         try:
             return Collection(config=self.collections[collection_identifier])
         except KeyError:
-            raise CollectionNotFoundException()
+            raise CollectionNotFoundException() from None
 
     def add(self, collection: Collection) -> None:
         """
@@ -2371,7 +2370,7 @@ class Collections:
         :param collection: Collection to create
         """
         if collection.identifier in self.collections.keys():
-            raise CollectionInsertConflictException
+            raise CollectionInsertConflictException from None
 
         self.update(collection=collection)
 

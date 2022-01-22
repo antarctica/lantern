@@ -1,41 +1,40 @@
 from json import JSONDecodeError
-from sys import exit as sys_exit
 from os import EX_USAGE
 from pathlib import Path
-
 from shutil import copytree, rmtree
+from sys import exit as sys_exit
 
-# noinspection PyPackageRequirements
 import click
-
-# Exempting Bandit security issue (Using Element to parse untrusted XML data is known to be vulnerable to XML attacks)
-#
-# We don't currently allow untrusted/user-provided XML so this is not a risk
-from lxml.etree import ElementTree, ProcessingInstruction, fromstring, tostring  # nosec
-from importlib_resources import path as resource_path
 from click import Abort
 from click_spinner import spinner
 from flask import Blueprint, current_app, render_template
+from importlib_resources import path as resource_path
+from lxml.etree import (
+    ElementTree,
+    fromstring,
+    ProcessingInstruction,
+    tostring,
+)  # nosec - see 'lxml` package (bandit)' section in README
 from tabulate import tabulate
 
 from scar_add_metadata_toolbox.classes import (
-    Record,
-    RecordRetractBeforeDeleteException,
-    Item,
     Collection,
     CollectionInsertConflictException,
     CollectionNotFoundException,
+    Item,
+    Record,
+    RecordRetractBeforeDeleteException,
 )
 from scar_add_metadata_toolbox.csw import (
+    CSWAuthException,
+    CSWAuthInsufficientException,
+    CSWAuthMissingException,
     CSWDatabaseAlreadyInitialisedException,
-    RecordServerException,
+    CSWDatabaseNotInitialisedException,
+    CSWDatabasePostGISExtensionUnavailable,
     RecordInsertConflictException,
     RecordNotFoundException,
-    CSWDatabaseNotInitialisedException,
-    CSWAuthMissingException,
-    CSWAuthInsufficientException,
-    CSWAuthException,
-    CSWDatabasePostGISExtensionUnavailable,
+    RecordServerException,
 )
 from scar_add_metadata_toolbox.utils import aws_cli
 
@@ -81,7 +80,7 @@ def list_records():
         sys_exit(EX_USAGE)
 
 
-@record_commands_blueprint.cli.command("import")
+@record_commands_blueprint.cli.command("import")  # noqa: C901
 @click.argument("record_path", type=click.Path(exists=True, dir_okay=False))
 @click.option("--allow-update", is_flag=True, help="Update any existing record.")
 @click.option("--publish", is_flag=True, help="Publish record after importing.")
@@ -255,7 +254,7 @@ def export_record(record_identifier: str, record_path: str, allow_overwrite: boo
 @click.option("--allow-overwrite", is_flag=True, help="Allow existing exports to be overwritten.")
 @click.pass_context
 def export_records(ctx, records_path: str, allow_overwrite: bool = False):
-    """Export all records to files in a directory."""
+    """Export all records as files in a directory."""
     records_path = Path(records_path)
     record_identifiers = current_app.records.list_record_identifiers()
 
@@ -401,7 +400,7 @@ def inspect_collection(collection_identifier: str):
         print(f"Identifier: {collection.identifier}")
         print(f"Title: {collection.title}")
         print("")
-        print(f"Summary:")
+        print("Summary:")
         print(collection.summary)
         print("")
         print(f"Items in collection: {len(collection.item_identifiers)}")
@@ -733,8 +732,8 @@ def build_pages():
     feedback_page_output_path = Path(current_app.config["SITE_PATH"]).joinpath("feedback/index.html")
     feedback_page_output_path.parent.mkdir(exist_ok=True, parents=True)
     with open(str(feedback_page_output_path), mode="w") as feedback_page_file:
-        feedback_page_file.write(render_template(f"app/_views/feedback.j2"))
-    print(f"Ok. feedback page generated.")
+        feedback_page_file.write(render_template("app/_views/feedback.j2"))
+    print("Ok. feedback page generated.")
 
 
 @site_commands_blueprint.cli.command("copy-assets")
@@ -808,7 +807,7 @@ def setup_catalogue(catalogue: str):
         print(f"Ok. Note CSW catalogue '{catalogue}' is already setup.")
     except CSWDatabasePostGISExtensionUnavailable:  # pragma: no cover (will be addressed in #116)
         print(
-            f"No. CSW backing database does not have the PostGIS extension enabled. Enable this extension and try again."
+            "No. CSW backing database does not have the PostGIS extension enabled. Enable this extension and try again."
         )
 
 
@@ -821,12 +820,14 @@ def auth_sign_in():
     """Set user access token to use application."""
     auth_flow = current_app.config["CLIENT_AUTH"].initiate_device_flow(scopes=current_app.config["AUTH_CLIENT_SCOPES"])
     click.pause(
-        f"To sign-in, visit 'https://microsoft.com/devicelogin', enter this code '{auth_flow['user_code']}' and then press any key..."
+        f"To sign-in, visit 'https://microsoft.com/devicelogin', "
+        f"enter this code '{auth_flow['user_code']}' and then press any key..."
     )
     auth_payload = current_app.config["CLIENT_AUTH"].acquire_token_by_device_flow(auth_flow)
     current_app.auth_token.payload = auth_payload
     print(
-        f"Ok. Access token for '{current_app.auth_token.access_token_bearer_insecure}' set in '{str(current_app.auth_token.session_file_path.absolute())}'."
+        f"Ok. Access token for '{current_app.auth_token.access_token_bearer_insecure}' "
+        f"set in '{str(current_app.auth_token.session_file_path.absolute())}'."
     )
 
 
@@ -837,4 +838,4 @@ def auth_sign_out():
         del current_app.auth_token.payload
     except FileNotFoundError:
         pass
-    print(f"Ok. Access token removed.")
+    print("Ok. Access token removed.")

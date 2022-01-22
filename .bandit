@@ -1,2 +1,0 @@
-[bandit]
-exclude: /tests,/scar_add_metadata_toolbox/hazmat

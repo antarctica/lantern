@@ -42,8 +42,8 @@ backports-datetime-fromisoformat = "^1.0.0"
 # python-dateutil = "^1.5"  # already a dependency of main app
 pytz = "^2021.3"
 # requests = "^1.0"  # already a dependency of main app
-pyproj = "2.6.1"  # pinned due to PROJ version in 3.6 alpine container, > 3.0.0 requires Python > 3.7
-pyyaml = "^5.4.1"
+pyproj = "2.6.1"  # pinned to specific version due to PROJ version in 3.6 alpine container
+pyyaml = "5.4.1"  # pinned to specific version due to AWS CLI compatibility, requires PyYAML < 5.5
 
 # # dependencies for vendored PyCSW package
 geolinks = "^0.2.0"

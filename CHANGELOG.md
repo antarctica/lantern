@@ -38,11 +38,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Test warnings related to deprecated `importlib_resources` methods
   [#199](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/199)
 
-### Removed
-
-* Podman and Nomad deployment options
-  [#202](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/202)
-
 ### Changed
 
 * Simplifying and CI/CD workflow
@@ -59,6 +54,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Record seeding support (in favour of importing existing records)
   [#128](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/128)
+* Podman and Nomad deployment options
+  [#202](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/202)
 
 ## [0.3.0] - 2021-07-02
 

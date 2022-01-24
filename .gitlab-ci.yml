@@ -41,7 +41,6 @@ test:
   script:
     - "poetry run pytest -o junit_family=xunit2 --junitxml=test-results.xml --random-order --cov=scar_add_metadata_toolbox --cov-config=.coveragerc --cov-fail-under=100"
     - "poetry run coverage html"
-    - "ls -l"
   coverage: '/Total coverage: \d+\.\d+/'
   artifacts:
     reports:
@@ -49,9 +48,9 @@ test:
     paths:
       - htmlcov
     expire_in: 1 month
-#  rules:
-#    - changes:
-#        - '**/*.py'
+  rules:
+    - changes:
+        - '**/*.py'
 
 lint:
   stage: 📋 lint

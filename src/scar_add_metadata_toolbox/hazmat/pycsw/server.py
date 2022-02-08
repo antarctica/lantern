@@ -58,8 +58,8 @@ import wsgiref.util
 
 from scar_add_metadata_toolbox.hazmat.pycsw.core.etree import etree
 from scar_add_metadata_toolbox.hazmat.pycsw import oaipmh, opensearch, sru
+from scar_add_metadata_toolbox.hazmat.pycsw.plugins import outputschemas
 from scar_add_metadata_toolbox.hazmat.pycsw.plugins.profiles import profile as pprofile
-import scar_add_metadata_toolbox.hazmat.pycsw.plugins.outputschemas
 from scar_add_metadata_toolbox.hazmat.pycsw.core import config, log, util
 from scar_add_metadata_toolbox.hazmat.pycsw.ogc.csw import csw2, csw3
 
@@ -224,9 +224,9 @@ class Csw(object):
         # load outputschemas
         LOGGER.info("Loading outputschemas")
 
-        for osch in pycsw.plugins.outputschemas.__all__:
-            output_schema_module = __import__("pycsw.plugins.outputschemas.%s" % osch)
-            mod = getattr(output_schema_module.plugins.outputschemas, osch)
+        for osch in outputschemas.__all__:
+            output_schema_module = __import__("scar_add_metadata_toolbox.hazmat.pycsw.plugins.outputschemas.%s" % osch)
+            mod = getattr(output_schema_module.hazmat.pycsw.plugins.outputschemas, osch)
             self.outputschemas[mod.NAMESPACE] = mod
 
         LOGGER.debug("Outputschemas loaded: %s.", self.outputschemas)
@@ -359,7 +359,9 @@ class Csw(object):
         # load profiles
         if self.config.has_option("server", "profiles"):
             self.profiles = pprofile.load_profiles(
-                os.path.join("pycsw", "plugins", "profiles"), pprofile.Profile, self.config.get("server", "profiles")
+                os.path.join("scar_add_metadata_toolbox", "hazmat", "pycsw", "plugins", "profiles"),
+                pprofile.Profile,
+                self.config.get("server", "profiles"),
             )
 
             for prof in self.profiles["plugins"].keys():

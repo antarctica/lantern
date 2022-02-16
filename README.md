@@ -569,20 +569,20 @@ $ docker compose pull
 To run all components locally:
 
 ```shell
-# start local Postgres database for CSW and Nginx for static website
+# Start the local Postgres database for CSW, and Nginx for the local static website
 $ docker compose up
 
-# start flask application as a server (it will automatically use the local postgres database)
-$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask
+# In another terminal; Start the flask application as a server (it will use the local postgres database by default)
+$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask run
 
-# Run flask CLI commands
+# In another terminal; Run flask CLI commands as a client
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask [command]
 ```
 
 See the [Command Reference](docs/command-reference.md) for how to use the CLI. Where `flask` is written, replace this
 with `FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask`.
 
-When built, a local static site can be accessed from [http://localhost:9000](http://localhost:9000).
+When built, the local static site can be accessed from [http://localhost:9000](http://localhost:9000).
 
 ### Package structure
 

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "scar-add-metadata-toolbox"
-version = "0.4.0"
+version = "0.4.2"
 license = "MIT"
 description = "Editor, repository and data catalogue for SCAR Antarctic Digital Database (ADD) discovery metadata"
 authors = [

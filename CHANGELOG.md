@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+* Dynamic imports used for output schemas and profiles in vendored PyCSW dependency
+  [#204](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/204)
+
 ## [0.4.0] - 2022-01-24 [BREAKING!]
 
 ### Changed [BREAKING!]

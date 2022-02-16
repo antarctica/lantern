@@ -917,8 +917,8 @@ class Csw2(object):
 
             LOGGER.debug("DistributedSearch specified (hopCount: %s).", self.parent.kvp["hopcount"])
 
-            from owslib.csw import CatalogueServiceWeb
-            from owslib.ows import ExceptionReport
+            from scar_add_metadata_toolbox.hazmat.owslib.csw import CatalogueServiceWeb
+            from scar_add_metadata_toolbox.hazmat.owslib.ows import ExceptionReport
 
             for fedcat in self.parent.config.get("server", "federatedcatalogues").split(","):
                 LOGGER.debug(

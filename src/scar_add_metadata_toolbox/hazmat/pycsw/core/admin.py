@@ -486,7 +486,7 @@ def export_records(context, database, table, xml_dirpath):
 
 def refresh_harvested_records(context, database, table, url):
     """refresh / harvest all non-local records in repository"""
-    from owslib.csw import CatalogueServiceWeb
+    from scar_add_metadata_toolbox.hazmat.owslib.csw import CatalogueServiceWeb
 
     # get configuration and init repo connection
     repos = repository.Repository(database, context, table=table)
@@ -581,7 +581,7 @@ def post_xml(url, xml, timeout=30):
 
     LOGGER.info("Executing HTTP POST request %s on server %s", xml, url)
 
-    from owslib.util import http_post
+    from scar_add_metadata_toolbox.hazmat.owslib.util import http_post
 
     try:
         with open(xml) as f:

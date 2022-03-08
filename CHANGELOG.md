@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+* Increasing minimum SQL Alchemy version in requirements file
+  [#207](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/207)
+
 ## [0.4.2] - 2022-02-16
 
 ### Fixed

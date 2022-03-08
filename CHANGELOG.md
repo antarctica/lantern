@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+* ensuring test coverage is always captured in CI
+  [#210]((https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/210)
+
 ## [0.4.3] - 2022-03-08
 
 ### Changed

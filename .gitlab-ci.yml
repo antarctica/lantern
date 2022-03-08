@@ -39,8 +39,7 @@ test:
   variables:
     FLASK_ENV: testing
   script:
-    - "poetry run pytest -o junit_family=xunit2 --junitxml=test-results.xml --random-order --cov=scar_add_metadata_toolbox --cov-config=.coveragerc --cov-fail-under=100"
-    - "poetry run coverage html"
+    - "poetry run pytest -o junit_family=xunit2 --junitxml=test-results.xml --random-order --cov=scar_add_metadata_toolbox --cov-config=.coveragerc --cov-fail-under=100 --cov-report=html"
   coverage: '/Total coverage: \d+\.\d+/'
   artifacts:
     reports:

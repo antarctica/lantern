@@ -269,7 +269,6 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
         :return: whether the backing database has been initialised
         """
         csw_database = create_engine(self._csw_config["repository"]["database"])
-        # return csw_database.dialect.has_table(csw_database, self._csw_config["repository"]["table"])
         return inspect(csw_database).has_table(self._csw_config["repository"]["table"])
 
     def _check_auth(self, method: str, token: Optional[AzureToken]) -> None:

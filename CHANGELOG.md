@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Increasing minimum SQL Alchemy version in requirements file
   [#207](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/207)
 
+### Removed
+
+* Old code used for checking CSW backing database tables exist
+  [#208](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/208)
+
 ## [0.4.2] - 2022-02-16
 
 ### Fixed

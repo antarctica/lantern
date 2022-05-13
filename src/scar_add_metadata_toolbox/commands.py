@@ -575,7 +575,7 @@ def copy_assets():
 @site_commands_blueprint.cli.command("build")
 @click.pass_context
 def build_all(ctx):
-    """Build all static site components."""
+    """Build all site components."""
     ctx.invoke(build_records)
     ctx.invoke(build_items)
     ctx.invoke(build_collections)

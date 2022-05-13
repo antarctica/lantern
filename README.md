@@ -729,6 +729,24 @@ $ FLASK_ENV=testing poetry run pytest --cov=scar_add_metadata_toolbox --cov-conf
 
 All commits will trigger a Continuous Integration process using GitLab's CI/CD platform, configured in `.gitlab-ci.yml`.
 
+#### Test Records
+
+To ensure components such as Repository, Record, Item and Collection classes work correctly, a number of valid and 
+intentionally invalid, [Metadata Record](#metadata-records) configurations are held within the tests for this project.
+
+Test record configurations are defined in `tests/scar_add_metadata_toolbox/records.py`, and are used to ensure 
+components such as the Repository, Record, Item and Collection classes work correctly. These include a range of record 
+types, classes of records, and ways records can be invalid.
+
+These records are accessed through a fake/mocked CSW Server instance, which returns record configurations as XML from
+static files held in `tests/scar_add_metadata_toolbox/resources/csw/records/`. These static files need to be kept 
+in-sync with the record configurations defined in `records.py` using this Python command:
+
+```shell
+$ cd tests/scar_add_metadata_toolbox
+$ poetry run python -c "from records import make_csw_test_records; make_csw_test_records()"
+```
+
 ## Deployment
 
 ### Python package

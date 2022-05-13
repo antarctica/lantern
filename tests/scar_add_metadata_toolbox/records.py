@@ -1,13 +1,16 @@
 from datetime import date, datetime
+from enum import Enum
 from pathlib import Path
+from typing import List, Optional
 
 from bas_metadata_library.standards.iso_19115_2 import MetadataRecord, MetadataRecordConfigV2
 
 
-def make_test_record_config(identifier: str, title: str) -> dict:
-    return {
+def make_test_record_config(
+    identifier: str, title: str, hierarchy_level: str, item_identifiers: Optional[List[str]] = None
+) -> dict:
+    config = {
         "file_identifier": identifier,
-        "hierarchy_level": "dataset",
         "metadata": {
             "language": "eng",
             "character_set": "utf-8",
@@ -43,30 +46,6 @@ def make_test_record_config(identifier: str, title: str) -> dict:
                 "version": "ISO 19115-2:2009(E)",
             },
             "maintenance": {"maintenance_frequency": "asNeeded", "progress": "completed"},
-        },
-        "reference_system_info": {
-            "authority": {
-                "title": {"value": "European Petroleum Survey Group (EPSG) Geodetic Parameter Registry"},
-                "dates": {"publication": {"date": date(2008, 11, 12)}},
-                "contact": {
-                    "organisation": {"name": "European Petroleum Survey Group"},
-                    "email": "EPSGadministrator@iogp.org",
-                    "online_resource": {
-                        "href": "https://www.epsg-registry.org/",
-                        "title": "EPSG Geodetic Parameter Dataset",
-                        "description": "The EPSG Geodetic Parameter Dataset is a structured dataset of Coordinate "
-                        "Reference Systems and Coordinate Transformations, accessible through this "
-                        "online registry.",
-                        "function": "information",
-                    },
-                    "role": ["publisher"],
-                },
-            },
-            "code": {
-                "value": "urn:ogc:def:crs:EPSG::3031",
-                "href": "http://www.opengis.net/def/crs/EPSG/0/3031",
-            },
-            "version": "6.18.3",
         },
         "identification": {
             "title": {"value": title},
@@ -365,7 +344,35 @@ def make_test_record_config(identifier: str, title: str) -> dict:
             },
             "lineage": "Lineage",
         },
-        "distribution": [
+    }
+
+    if hierarchy_level != "collection":
+        config["hierarchy_level"] = "dataset"
+        config["reference_system_info"] = {
+            "authority": {
+                "title": {"value": "European Petroleum Survey Group (EPSG) Geodetic Parameter Registry"},
+                "dates": {"publication": {"date": date(2008, 11, 12)}},
+                "contact": {
+                    "organisation": {"name": "European Petroleum Survey Group"},
+                    "email": "EPSGadministrator@iogp.org",
+                    "online_resource": {
+                        "href": "https://www.epsg-registry.org/",
+                        "title": "EPSG Geodetic Parameter Dataset",
+                        "description": "The EPSG Geodetic Parameter Dataset is a structured dataset of Coordinate "
+                        "Reference Systems and Coordinate Transformations, accessible through this "
+                        "online registry.",
+                        "function": "information",
+                    },
+                    "role": ["publisher"],
+                },
+            },
+            "code": {
+                "value": "urn:ogc:def:crs:EPSG::3031",
+                "href": "http://www.opengis.net/def/crs/EPSG/0/3031",
+            },
+            "version": "6.18.3",
+        }
+        config["distribution"] = [
             {
                 "distributor": {
                     "organisation": {
@@ -437,31 +444,107 @@ def make_test_record_config(identifier: str, title: str) -> dict:
                     },
                 ],
             }
-        ],
-    }
+        ]
+    elif hierarchy_level == "collection":
+        config["hierarchy_level"] = "collection"
+
+        aggregations = []
+        if item_identifiers is not None:
+            for item_identifier in item_identifiers:
+                aggregations.append(
+                    {
+                        "association_type": "isComposedOf",
+                        "initiative_type": "collection",
+                        "identifier": {
+                            "identifier": item_identifier,
+                            "href": f"https://data.bas.ac.uk/items/{item_identifier}",
+                            "namespace": "data.bas.ac.uk",
+                        },
+                    }
+                )
+        config["identification"]["aggregations"] = aggregations
+
+    return config
 
 
-def make_test_record(identifier: str, title: str) -> None:
-    config = make_test_record_config(identifier=identifier, title=title)
-    configuration = MetadataRecordConfigV2(**config)
-    record = MetadataRecord(configuration=configuration)
-    with open(Path(f"get_record_{identifier}_full.xml"), mode="w") as record_file:
-        record_file.write(record.generate_xml_document().decode())
+class TestRecordConfigurations(Enum):
+    __test__ = False
+
+    TEST_RECORD_1 = make_test_record_config(
+        identifier="7e3719b4-60a4-4b4e-aa84-cee7a5e7218f",
+        title="Test Item Record 1 (Published)",
+        hierarchy_level="dataset",
+        item_identifiers=None,
+    )
+    TEST_RECORD_2 = make_test_record_config(
+        identifier="39d47e50-f94f-43c5-9060-510d9374b81b",
+        title="Test Item Record 2 (Unpublished)",
+        hierarchy_level="dataset",
+        item_identifiers=None,
+    )
+    TEST_RECORD_3 = make_test_record_config(
+        identifier="180d07c4-8b97-48ed-87ac-359b6899fa8b",
+        title="Test Item Record 3 (Imported, Unpublished)",
+        hierarchy_level="dataset",
+        item_identifiers=None,
+    )
+    TEST_RECORD_4 = make_test_record_config(
+        identifier="7e3719b4-60a4-4b4e-aa84-cee7a5e7218f",
+        title="Test Item Record 4 (Imported, Updated, Unpublished)",
+        hierarchy_level="dataset",
+        item_identifiers=None,
+    )
+    TEST_RECORD_5 = make_test_record_config(
+        identifier="2f8ad5b8-b861-4459-88d9-b9ff98a34a98",
+        title="Test Item Record 5 (Imported, Published)",
+        hierarchy_level="dataset",
+        item_identifiers=None,
+    )
+    TEST_RECORD_6 = make_test_record_config(
+        identifier="7e3719b4-60a4-4b4e-aa84-cee7a5e7218f",
+        title="Test Item Record 6 (Imported, Updated, Published, Republished)",
+        hierarchy_level="dataset",
+        item_identifiers=None,
+    )
+    TEST_RECORD_7 = make_test_record_config(
+        identifier="7e3719b4-60a4-4b4e-aa84-cee7a5e7218f",
+        title="Test Item Record 7 (Imported, Duplicate of Test Record 1)",
+        hierarchy_level="dataset",
+        item_identifiers=None,
+    )
+    TEST_RECORD_8 = make_test_record_config(
+        identifier="b759077f-bd3f-4a18-bbd7-e6b3f84bc551",
+        title="Test Collection 1 (Published)",
+        hierarchy_level="collection",
+        item_identifiers=["7e3719b4-60a4-4b4e-aa84-cee7a5e7218f"],
+    )
+    TEST_RECORD_9 = make_test_record_config(
+        identifier="6062c26f-0165-4109-a2d9-29cf884f079d",
+        title="Test Collection 2 (Imported)",
+        hierarchy_level="collection",
+        item_identifiers=["7e3719b4-60a4-4b4e-aa84-cee7a5e7218f"],
+    )
+    TEST_RECORD_10 = make_test_record_config(
+        identifier="b759077f-bd3f-4a18-bbd7-e6b3f84bc551",
+        title="Test Collection 3 (Imported, Updated, Duplicate of Test Collection 1)",
+        hierarchy_level="collection",
+        item_identifiers=["7e3719b4-60a4-4b4e-aa84-cee7a5e7218f"],
+    )
+    TEST_RECORD_11 = make_test_record_config(
+        identifier="0d1b9063-da63-403d-ba16-f72e5f6f5688",
+        title="Test Collection 4 (Imported, contains unknown item identifier)",
+        hierarchy_level="collection",
+        item_identifiers=["unknown"],
+    )
 
 
-"""
-To update test records:
-- run this script through a terminal [1]
-- this will generate full records, brief records should be edited manually as needed
-
-The ID and titles used in these calls are taken from the `TEST_RECORD_1` and `TEST_RECORD_2` items in the
-`tests.conftest.TestRecordConfigurations` enumeration.
-
-[1]
-$ cd tests/scar_add_metadata_toolbox/resources/csw/records/
-$ poetry run python __init__.py
-"""
-if __name__ == "__main__":
-    make_test_record(identifier="7e3719b4-60a4-4b4e-aa84-cee7a5e7218f", title="Test Record 1 (Published)")
-    make_test_record(identifier="39d47e50-f94f-43c5-9060-510d9374b81b", title="Test Record 2 (Unpublished)")
+def make_csw_test_records() -> None:
+    records_base_path = Path("resources/csw/records").resolve()
+    for record_config in TestRecordConfigurations:
+        print(f"Generating test record for '{record_config.name}'")
+        configuration = MetadataRecordConfigV2(**record_config.value)
+        record = MetadataRecord(configuration=configuration)
+        record_path = records_base_path.joinpath(f"get_record_{record_config.value['file_identifier']}_full.xml")
+        with open(Path(record_path), mode="w") as record_file:
+            record_file.write(record.generate_xml_document().decode())
     print("Test records regenerated")

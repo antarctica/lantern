@@ -16,6 +16,7 @@
 #   bug with trailing element tags in XML strings
 # - rewriting imports to allow this package to be used as a
 #   vendored dependency
+# - disabled warnings (see issue #224)
 # =================================================================
 
 # =============================================================================
@@ -255,11 +256,12 @@ class CatalogueServiceWeb(object):
 
         """
 
-        warnings.warn(
-            """Please use the updated 'getrecords2' method instead of 'getrecords'.
-        The 'getrecords' method will be upgraded to use the 'getrecords2' parameters
-        in a future version of OWSLib."""
-        )
+        # Disabled as per https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/224
+        # warnings.warn(
+        #     """Please use the updated 'getrecords2' method instead of 'getrecords'.
+        # The 'getrecords' method will be upgraded to use the 'getrecords2' parameters
+        # in a future version of OWSLib."""
+        # )
 
         if xml is not None:
             self.request = etree.fromstring(xml)

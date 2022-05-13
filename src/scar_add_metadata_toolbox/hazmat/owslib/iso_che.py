@@ -12,6 +12,7 @@
 # Summary of changes made to this file:
 # - rewriting imports to allow this package to be used as a
 #   vendored dependency
+# - disabled warnings (see issue #224)
 # =================================================================
 
 # =============================================================================
@@ -130,14 +131,15 @@ class CHE_MD_Metadata(object):
             else:
                 self.referencesystem = None
 
-            # TODO: merge .identificationinfo into .identification
-            warnings.warn(
-                "the .identification and .serviceidentification properties will merge into "
-                ".identification being a list of properties.  This is currently implemented "
-                "in .identificationinfo.  "
-                "Please see https://github.com/geopython/OWSLib/issues/38 for more information",
-                FutureWarning,
-            )
+            # Disabled as per https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/224
+            # # TODO: merge .identificationinfo into .identification
+            # warnings.warn(
+            #     "the .identification and .serviceidentification properties will merge into "
+            #     ".identification being a list of properties.  This is currently implemented "
+            #     "in .identificationinfo.  "
+            #     "Please see https://github.com/geopython/OWSLib/issues/38 for more information",
+            #     FutureWarning,
+            # )
 
             val = md.find(util.nspath_eval("gmd:identificationInfo/che:CHE_MD_DataIdentification", namespaces))
             val2 = md.find(util.nspath_eval("gmd:identificationInfo/srv:SV_ServiceIdentification", namespaces))
@@ -624,13 +626,14 @@ class MD_DataIdentification(object):
                 if val:
                     self.spatialrepresentationtype.append(val)
 
-            warnings.warn(
-                "The .keywords and .keywords2 properties will merge into the "
-                ".keywords property in the future, with .keywords becoming a list "
-                "of MD_Keywords instances. This is currently implemented in .keywords2. "
-                "Please see https://github.com/geopython/OWSLib/issues/301 for more information",
-                FutureWarning,
-            )
+            # Disabled as per https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/224
+            # warnings.warn(
+            #     "The .keywords and .keywords2 properties will merge into the "
+            #     ".keywords property in the future, with .keywords becoming a list "
+            #     "of MD_Keywords instances. This is currently implemented in .keywords2. "
+            #     "Please see https://github.com/geopython/OWSLib/issues/301 for more information",
+            #     FutureWarning,
+            # )
 
             self.keywords = []
 

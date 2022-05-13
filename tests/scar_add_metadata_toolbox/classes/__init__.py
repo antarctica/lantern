@@ -28,21 +28,17 @@ class MockCSWClient(CSWClient):
         self._records = {}
         self._records_responses_base_path = Path(__file__).parent.resolve().parent.joinpath("resources/csw/records")
         if self._csw_endpoint == "http://example.com/csw/unpublished":
-            self._records["7e3719b4-60a4-4b4e-aa84-cee7a5e7218f"] = {"full": "", "brief": ""}
-            self._records["39d47e50-f94f-43c5-9060-510d9374b81b"] = {"full": "", "brief": ""}
+            self._records["7e3719b4-60a4-4b4e-aa84-cee7a5e7218f"] = {"full": ""}
+            self._records["39d47e50-f94f-43c5-9060-510d9374b81b"] = {"full": ""}
             self._records["b759077f-bd3f-4a18-bbd7-e6b3f84bc551"] = {"full": ""}
         if self._csw_endpoint == "http://example.com/csw/published":
-            self._records["7e3719b4-60a4-4b4e-aa84-cee7a5e7218f"] = {"full": "", "brief": ""}
+            self._records["7e3719b4-60a4-4b4e-aa84-cee7a5e7218f"] = {"full": ""}
             self._records["b759077f-bd3f-4a18-bbd7-e6b3f84bc551"] = {"full": ""}
         for identifier in self._records.keys():
             with open(
                 self._records_responses_base_path.joinpath(f"get_record_{identifier}_full.xml"), mode="r"
             ) as record:
                 self._records[identifier]["full"] = record.read()
-            with open(
-                self._records_responses_base_path.joinpath(f"get_record_{identifier}_brief.xml"), mode="r"
-            ) as record:
-                self._records[identifier]["brief"] = record.read()
 
     def get_record(self, identifier: str, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> str:
         try:

@@ -194,6 +194,10 @@ These modifications are:
 
 Both PyCSW (CSW servers) and OWSLib (CSW clients) have a maximum record of 100 per request.
 
+### CSW Supported Element Sets
+
+Both PyCSW (CSW server) and OWSLib (CSW client) support the *full* Element Set only.
+
 #### CSW backing databases
 
 CSW servers are backed using PostGIS (PostgreSQL) databases. In production, these are provided by BAS IT (via the 

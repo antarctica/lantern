@@ -27,7 +27,8 @@ This sequence diagram shows how the overall process to add and view a new record
 ## Steps
 
 1. run [`auth sign-in`](command-reference.md#auth-sign-in)
-1. run [`record import --publish`](command-reference.md#collections-import)
-2. run [`site build-items`](command-reference.md#site-build-collections)
-3. run [`site build-records`](command-reference.md#site-build-collections)
-3. run [`site publish`](command-reference.md#site-publish)
+2. run [`record import --publish`](command-reference.md#collections-import)
+3. run [`site build-items`](command-reference.md#site-build-items)
+4. run [`site build-collections`](command-reference.md#site-build-collections)
+5. run [`site build-records`](command-reference.md#site-build-records)
+6. run [`site publish`](command-reference.md#site-publish)

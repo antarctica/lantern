@@ -13,5 +13,17 @@
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
       <jdbc-url>jdbc:postgresql://localhost:5432/postgres</jdbc-url>
     </data-source>
+    <data-source source="LOCAL" name="Remote [Staging]" uuid="2be313ec-262d-4093-af16-cf2f4b4dbb04">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://bsldb.nerc-bas.ac.uk:5432/pycsw_staging</jdbc-url>
+    </data-source>
+    <data-source source="LOCAL" name="Remote [Development]" uuid="5bb29395-4006-4ee1-8b93-6b0a0e271e09">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://bsldb.nerc-bas.ac.uk:5432/pycsw_dev</jdbc-url>
+    </data-source>
   </component>
 </project>

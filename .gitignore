@@ -6,3 +6,4 @@ __pycache__
 /_site
 /collections.json
 /auth.json
+/.idea/runConfigurations

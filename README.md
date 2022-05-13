@@ -98,7 +98,7 @@ The information in a metadata record is encoded in a different formats at differ
 * when imported/exported (during editing), records are encoded as JSON, using the
   [BAS Metadata Library](https://github.com/antarctica/metadata-library) record configuration
 * when stored in a repository, records are encoded as XML using the ISO 19139 encoding standard
-* when viewed in the data catalogue, records are encoded in freeform HTML or as (styled) standardised XML
+* when viewed in the data catalogue, records are encoded in bespoke HTML
 
 These different formats are used for different reasons:
 
@@ -157,7 +157,7 @@ The [Azure Portal](https://portal.azure.com) is used to assign permissions to ap
 ### CSW
 
 The [OGC CSW](https://www.ogc.org/standards/cat) standard is used as a protocol and interface for accessing and 
-managing records in the *Repository* component.
+managing [Records](#metadata-records) in the *Repository* component.
 
 Separate CSW catalogues are used for Published and unpublished records, using embedded [PyCSW](http://pycsw.org) 
 servers to allow integration with Flask for authentication and authorisation of requests via [OAuth](#oauth).
@@ -192,7 +192,7 @@ These modifications are:
 
 #### CSW Max records limit
 
-Both PyCSW (CSW servers) and OWSLib (CSW clients) have a maximum record of 100 per request.
+Both PyCSW (CSW server) and OWSLib (CSW client) have a maximum record limit of *100* per request.
 
 ### CSW Supported Element Sets
 
@@ -259,8 +259,6 @@ Entries in this file are managed manually. The JSON file looks like this:
 The Lambda function, and JSON file, are managed within the AWS Console as part of the BAS AWS account.
 
 [bas-add-data-catalogue-downloads-metrics function](https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/bas-add-data-catalogue-downloads-metrics?tab=code).
-
-At some point this Proxy will be more integrated into this project, though it may not be implemented in the same form.
 
 ### Feedback and contact forms
 
@@ -521,6 +519,8 @@ $ docker compose pull
 To run all components locally:
 
 ```shell
+$ cd add-metadata-toolbox
+
 # Start the local Postgres database for CSW, and Nginx for the local static website
 $ docker compose up
 
@@ -629,10 +629,6 @@ To check locally:
 ```shell
 $ poetry export --without-hashes -f requirements.txt | poetry run safety check --full-report --stdin
 ```
-
-#### Dependencies for vendored dependencies 
-
-...
 
 ### Static security scanning
 

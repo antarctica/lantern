@@ -30,9 +30,10 @@ This sequence diagram shows how the overall process to update, re-publish and vi
 ## Steps
 
 1. run [`auth sign-in`](command-reference.md#auth-sign-in)
-1. run [`records export`](command-reference.md#records-export)
-2. update record file as needed
-3. run [`records import --allow-update --publish --allow-republish`](command-reference.md#records-import)
-2. run [`site build-items`](command-reference.md#site-build-collections)
-3. run [`site build-records`](command-reference.md#site-build-collections)
-3. run [`site publish`](command-reference.md#site-publish)
+2. run [`records export`](command-reference.md#records-export)
+3. update record file as needed
+4. run [`records import --allow-update --publish --allow-republish`](command-reference.md#records-import)
+5. run [`site build-items`](command-reference.md#site-build-items)
+6. run [`site build-collections`](command-reference.md#site-build-collections)
+7. run [`site build-records`](command-reference.md#site-build-records)
+8. run [`site publish`](command-reference.md#site-publish)

@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+* documentation inaccuracies and tweaks
+  [#232](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/232)
 * reducing ambiguity of site build all command
   [#225](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/225)
 * ensuring test coverage is always captured in CI

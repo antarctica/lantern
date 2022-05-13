@@ -187,15 +187,3 @@ $(function() {
     }
   })
 });
-
-
-// Page watermark
-//
-
-function watermark(text) {
-  const body = document.getElementsByTagName('body')[0];
-  body.style.backgroundImage = "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' height='150px' width='150px'>" + "<text transform='translate(20, 100) rotate(-45)' fill='%23F499BE' font-size='20' font-family='\“Helvetica Neue\”, Helvetica, Arial, sans-serif' font-weight='bold'>" + text + "</text></svg>\")";
-}
-$(function() {
-  watermark('Unpublished')
-});

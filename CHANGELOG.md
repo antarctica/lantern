@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+* removing experimental watermark style accidentially applied to all catalogue pages
+  [#234](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/234)
 * documentation inaccuracies and tweaks
   [#232](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/232)
 * reducing ambiguity of site build all command

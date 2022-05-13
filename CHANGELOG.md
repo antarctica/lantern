@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed [BREAKING!]
+
+* Refactoring Collections to use Records, rather than a standalone implementation
+  [#171](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/171)
+
 ### Fixed
 
 * ensuring test coverage is always captured in CI

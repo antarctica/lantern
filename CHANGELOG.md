@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * reducing ambiguity of site build all command
   [#225](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/225)
 * ensuring test coverage is always captured in CI
-  [#210]((https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/210)
+  [#210](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/210)
 
 ### Changed
 

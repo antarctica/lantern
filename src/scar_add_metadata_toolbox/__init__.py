@@ -3,10 +3,9 @@ from flask import Flask, request, Response
 from flask_azure_oauth import FlaskAzureOauth
 from markupsafe import escape
 
-from scar_add_metadata_toolbox.classes import Collections, MirrorRepository
+from scar_add_metadata_toolbox.classes import MirrorRepository
 from scar_add_metadata_toolbox.commands import (
     auth_commands_blueprint,
-    collections_commands_blueprint,
     csw_commands_blueprint,
     record_commands_blueprint,
     site_commands_blueprint,
@@ -46,7 +45,6 @@ def create_app():
     app.auth_token = AppAuthToken(session_file_path=app.config["AUTH_SESSION_FILE_PATH"])
 
     app.repositories = _create_csw_repositories(repositories_config=app.config["CSW_SERVERS_CONFIG"])
-    app.collections = Collections(config=app.config["COLLECTIONS_CONFIG"])
     app.config["CSW_CLIENTS_CONFIG"]["unpublished"]["client_config"]["auth"] = {"token": app.auth_token.access_token}
     app.config["CSW_CLIENTS_CONFIG"]["published"]["client_config"]["auth"] = {"token": app.auth_token.access_token}
     app.records = MirrorRepository(
@@ -55,7 +53,6 @@ def create_app():
     )
 
     app.register_blueprint(record_commands_blueprint)
-    app.register_blueprint(collections_commands_blueprint)
     app.register_blueprint(site_commands_blueprint)
     app.register_blueprint(csw_commands_blueprint)
     app.register_blueprint(auth_commands_blueprint)

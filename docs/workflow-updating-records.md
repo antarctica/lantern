@@ -1,6 +1,6 @@
 # SCAR Antarctic Digital Database (ADD) Metadata Toolbox - Updating existing records
 
-Follow this workflow to update an existing record (for example to correct information).
+Follow this workflow to update an existing record (for example to correct information in an Item or Collection).
 
 **Note:** You will need *author* rights to update metadata records and *editor* rights to re-publish them for others
 to see.

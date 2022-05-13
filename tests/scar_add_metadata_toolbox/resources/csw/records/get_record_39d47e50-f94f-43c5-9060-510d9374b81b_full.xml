@@ -156,7 +156,7 @@
       <gmd:citation>
         <gmd:CI_Citation>
           <gmd:title>
-            <gco:CharacterString>Test Record 2 (Unpublished)</gco:CharacterString>
+            <gco:CharacterString>Test Item Record 2 (Unpublished)</gco:CharacterString>
           </gmd:title>
           <gmd:date>
             <gmd:CI_Date>
@@ -204,7 +204,7 @@
         </gmd:CI_Citation>
       </gmd:citation>
       <gmd:abstract>
-        <gco:CharacterString>Test Record 2 (Unpublished)</gco:CharacterString>
+        <gco:CharacterString>Test Item Record 2 (Unpublished)</gco:CharacterString>
       </gmd:abstract>
       <gmd:pointOfContact>
         <gmd:CI_ResponsibleParty>

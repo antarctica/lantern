@@ -1,7 +1,11 @@
+import pytest
+
 from scar_add_metadata_toolbox.classes import (
     Collection,
+    CollectionInvalidSourceRecordException,
     CSWClient,
     Item,
+    ItemInvalidSourceRecordException,
     MirrorRecord,
     MirrorRecordSummary,
     Record,
@@ -45,13 +49,15 @@ def test_mirror_record_repr():
 
 # Coverage test
 def test_item_repr():
-    item = Item(record=Record(config={"file_identifier": "test", "title": "test"}))
+    item = Item(record=Record(config={"file_identifier": "test", "hierarchy_level": "dataset", "title": "test"}))
     assert repr(item) == f"<Item / {item.identifier}>"
 
 
 # Coverage test
 def test_collection_repr():
-    collection = Collection(config={"identifier": "test"})
+    collection = Collection(
+        record=Record(config={"file_identifier": "test", "hierarchy_level": "collection", "title": "test"})
+    )
     assert repr(collection) == f"<Collection / {collection.identifier}>"
 
 
@@ -65,3 +71,28 @@ def test_record_lineage_none():
 def test_record_distributions_none():
     record = Record(config={})
     assert record.distributions is None
+
+
+# Coverage test
+def test_record_temporal_extent_none():
+    record = Record(config={})
+    assert record.temporal_extent["start"] is None
+    assert record.temporal_extent["end"] is None
+
+
+# Coverage test
+def test_item_invalid_record_type():
+    with pytest.raises(ItemInvalidSourceRecordException):
+        Item(record=Record(config={"hierarchy_level": "collection"}))
+
+
+# Coverage test
+def test_collection_invalid_record_type():
+    with pytest.raises(CollectionInvalidSourceRecordException):
+        Collection(record=Record(config={"hierarchy_level": "dataset"}))
+
+
+# Coverage test
+def test_collection_no_item_identifiers():
+    collection = Collection(record=Record(config={"hierarchy_level": "collection"}))
+    assert collection.item_identifiers is None

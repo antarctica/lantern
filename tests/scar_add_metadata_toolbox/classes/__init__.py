@@ -6,7 +6,6 @@ from flask import current_app, Request, Response
 from flask_azure_oauth import AzureToken
 from flask_azure_oauth.mocks.tokens import TestJwt
 
-from scar_add_metadata_toolbox.classes import Collection, CollectionNotFoundException, Collections
 from scar_add_metadata_toolbox.csw import (
     CSWAuthException,
     CSWAuthInsufficientException,
@@ -194,54 +193,6 @@ class MockCSWServerInsufficientAuthToken(MockCSWServer):
 class MockCSWServerRequestsFail(MockCSWServer):
     def process_request(self, request: Request, token: Optional[AzureToken] = None) -> Response:
         raise RecordServerException() from None
-
-
-class MockCollections(Collections):
-    # noinspection PyMissingConstructor,PyUnusedLocal
-    def __init__(self, config: dict):
-        self.collections = {
-            "b759077f-bd3f-4a18-bbd7-e6b3f84bc551": {
-                "identifier": "b759077f-bd3f-4a18-bbd7-e6b3f84bc551",
-                "title": "Test Collection 1",
-                "topics": ["Topographic Mapping"],
-                "publishers": ["Mapping and Geographic Information Centre (MAGIC)"],
-                "summary": "Description for Test Collection 1.",
-                "item_identifiers": ["7e3719b4-60a4-4b4e-aa84-cee7a5e7218f"],
-            },
-        }
-
-    def update(self, collection: Collection) -> None:
-        self.collections[collection.identifier] = collection.dumps()
-
-    def delete(self, collection_identifier: str) -> None:
-        try:
-            del self.collections[collection_identifier]
-        except KeyError:
-            raise CollectionNotFoundException() from None
-
-
-class MockCollectionsUnknownRecord(Collections):
-    # noinspection PyMissingConstructor,PyUnusedLocal
-    def __init__(self, config: dict):
-        self.collections = {
-            "0d1b9063-da63-403d-ba16-f72e5f6f5688": {
-                "identifier": "0d1b9063-da63-403d-ba16-f72e5f6f5688",
-                "title": "Test Collection 4 (Imported, contains unknown item identifier)",
-                "topics": ["Topographic Mapping"],
-                "publishers": ["Mapping and Geographic Information Centre (MAGIC)"],
-                "summary": "Description for Test Collection 4.",
-                "item_identifiers": ["unknown"],
-            },
-        }
-
-    def update(self, collection: Collection) -> None:
-        self.collections[collection.identifier] = collection.dumps()
-
-    def delete(self, collection_identifier: str) -> None:
-        try:
-            del self.collections[collection_identifier]
-        except KeyError:
-            raise CollectionNotFoundException() from None
 
 
 class MockPublicClientApplication:

@@ -893,20 +893,17 @@ class RecordRetractBeforeDeleteException(Exception):
     pass
 
 
-class CollectionInsertConflictException(Exception):
+class ItemInvalidSourceRecordException(Exception):
     """
-    Represents a situation where a collection to be inserted already exists in a set of collections
-
-    Collections must be unique. If a collection is inserted into a set with the same identifier as an existing
-    collection, neither collection would be unique and this rule would be violated. Collections may be updated instead.
+    Represents a situation where an Item class is instantiated with a Record that doesn't represent an item.
     """
 
     pass
 
 
-class CollectionNotFoundException(Exception):
+class CollectionInvalidSourceRecordException(Exception):
     """
-    Represents a situation where a given collection does not exist
+    Represents a situation where a Collection class is instantiated with a Record that doesn't represent a collection.
     """
 
     pass
@@ -915,18 +912,18 @@ class CollectionNotFoundException(Exception):
 class RecordSummary:
     """
     Records represent and describe a given resource, often in great detail using a conceptual model. These full
-    representations (represented by the Record class) are inherently large and complex and so unwieldy in large numbers,
-    such as indexes.
+    representations (represented by the Record class) are inherently large and complex and so unwieldy in large numbers.
 
-    Record summaries also represent and describe a resource but in far less detail. As RecordSummaries are simpler, they
-    can be processed more easily when in greater numbers than Records.
+    Record Summaries represent and describe a resource in far less detail. As RecordSummaries are simpler, they
+    can be processed more easily than Records, especially in large numbers, such as listings and indexes etc.
 
-    Record summaries are effectively subsets of Records, however to leverage inheritance, Records inherit from and
-    extend RecordSummaries. Collections of record summaries are typically held in a repository (represented by the
-    Repository class).
+    Record Summaries are effectively subsets of Records, however to leverage inheritance, Records inherit from, and
+    extend, RecordSummaries.
 
-    Record summaries are created from a configuration dictionary. Properties are defined to access specific parts of
-    this configuration. Record summaries are intended to be read-only objects.
+    Record Summaries are created from a configuration dictionary. Properties are defined to access specific parts of
+    this configuration. Record Summaries are intended to be read-only objects.
+
+    Sets of Record Summaries are typically interacted with via a Repository (represented by the Repository class).
 
     To ensure RecordSummaries remain lightweight, properties should be strictly limited, with anything non-essential
     added to the Record class instead.
@@ -947,6 +944,10 @@ class RecordSummary:
     @property
     def identifier(self) -> str:
         return self.config["file_identifier"]
+
+    @property
+    def hierarchy_level(self) -> str:
+        return self.config["hierarchy_level"]
 
     @property
     def title(self) -> str:
@@ -1077,6 +1078,13 @@ class Record(RecordSummary):
         return self.config["identification"]["abstract"]
 
     @property
+    def aggregations(self) -> List[dict]:
+        try:
+            return self.config["identification"]["aggregations"]
+        except KeyError:
+            return []
+
+    @property
     def character_set(self) -> str:
         return self.config["identification"]["character_set"]
 
@@ -1111,9 +1119,6 @@ class Record(RecordSummary):
     @property
     def geographic_extent(self) -> Dict:
         return self.config["identification"]["extent"]["geographic"]
-
-    def hierarchy_level(self) -> str:
-        return self.config["hierarchy_level"]
 
     @property
     def language(self) -> str:
@@ -1181,11 +1186,19 @@ class Record(RecordSummary):
         return self._filter_keywords(keywords=self.config["identification"]["keywords"], keyword_type="theme")
 
     @property
-    def temporal_extent(self) -> Dict[str, datetime]:
-        return {
-            "start": self.config["identification"]["extent"]["temporal"]["period"]["start"],
-            "end": self.config["identification"]["extent"]["temporal"]["period"]["end"],
-        }
+    def temporal_extent(self) -> Dict[str, Optional[datetime]]:
+        _temporal_extent = {"start": None, "end": None}
+
+        try:
+            _temporal_extent["start"] = self.config["identification"]["extent"]["temporal"]["period"]["start"]["date"]
+        except KeyError:
+            pass
+        try:
+            _temporal_extent["end"] = self.config["identification"]["extent"]["temporal"]["period"]["end"]["date"]
+        except KeyError:
+            pass
+
+        return _temporal_extent
 
     @property
     def topics(self) -> List[str]:
@@ -1609,10 +1622,11 @@ class MirrorRepository:
 
 class Item:
     """
-    Items are abstractions of records specific and tailored to the needs of this project.
+    Items are abstractions of Records, specific and tailored to the needs of this project, using any hierarchy level
+    except 'collection', which is represented by the Collection class.
 
-    Items are read only and use a record internally for exposing information through properties. They are designed to
-    provide final output to humans, rather than for onward use or interpretation by other services - use records for
+    Items are read only and use a Record internally for exposing information through properties. They are designed to
+    provide final output to humans, rather than for onward use or interpretation by other services - use Records for
     that.
 
     Various formatting, processing and filtering methods are used to transform some information to be more easily
@@ -1625,6 +1639,9 @@ class Item:
         :param record: Record item is based on
         """
         self.record = record
+
+        if self.record.hierarchy_level == "collection":
+            raise ItemInvalidSourceRecordException()
 
     def __repr__(self):
         return f"<Item / {self.identifier}>"
@@ -2031,7 +2048,7 @@ class Item:
 
     @property
     def item_type(self) -> str:
-        return self.record.hierarchy_level()
+        return self.record.hierarchy_level
 
     @property
     def language(self) -> str:
@@ -2118,13 +2135,6 @@ class Item:
         return self._format_date(date_datetime=_date["date"], date_precision=_date["date_precision"])
 
     @property
-    def temporal_extent(self) -> Dict[str, str]:
-        return {
-            "start": self._format_date(date_datetime=self.record.temporal_extent["start"], date_precision="day"),
-            "end": self._format_date(date_datetime=self.record.temporal_extent["end"], date_precision="day"),
-        }
-
-    @property
     def spatial_reference_system(self) -> Optional[str]:
         if self.record.spatial_reference_system is None:
             return None  # pragma: no cover (will be addressed in #116)
@@ -2146,6 +2156,13 @@ class Item:
             maintenance_frequency=self.record.maintenance_frequency,
             released_date=self.record.dates["released"]["date"],
         )
+
+    @property
+    def temporal_extent(self) -> Dict[str, str]:
+        return {
+            "start": self._format_date(date_datetime=self.record.temporal_extent["start"]),
+            "end": self._format_date(date_datetime=self.record.temporal_extent["end"]),
+        }
 
     @property
     def theme_keywords(self) -> List[dict]:
@@ -2225,32 +2242,99 @@ class Item:
 
 class Collection:
     """
-    Collections represent an unstructured set of Items that are somehow related. Collections are independent of other
-    grouping mechanisms, such as descriptive keywords, dataset series and aggregations, publishers and/or any other
-    common properties.
+    Collections are abstractions of Records, specific and tailored to the needs of this project, that use the
+    'collection' hierarchy level. All other hierarchy levels are represented by the Item class.
 
-    Collections only exist within the data catalogue and can be used to relate any set of items together by including
-    the relevant collection identifier as a descriptive keyword in Records (that underpin Items). Currently, items in
-    collections also need to be defined directly in the collection definitions file (`collections.json`).
+    They are used to represent an unstructured set of Items that are somehow related. Collections are independent of
+    other grouping mechanisms, such as: descriptive keywords, aggregations, publishers and/or other common properties.
 
-    See the project README for Collection configurations properties.
+    As with Items, Collections are read only and use a Record internally for exposing information through properties.
+    They are designed to provide final output to humans, rather than for onward use or interpretation by other services
+    - use Records for that.
+
+    Various formatting, processing and filtering methods are used to transform some information to be more easily
+    understood or to make more contextual sense.
     """
 
-    def __init__(self, config: dict = None):
-        self.config = {}
-        if self.config is not None:
-            self.config = config
+    def __init__(self, record: Record):
+        """
+        :type record Record
+        :param record: Record item is based on
+        """
+        self.record = record
+
+        if self.record.hierarchy_level != "collection":
+            raise CollectionInvalidSourceRecordException()
 
     def __repr__(self):
         return f"<Collection / {self.identifier}>"
 
+    @staticmethod
+    def _filter_aggregations(
+        aggregations: List[dict], association_type: str, initiative_type: Optional[str] = None
+    ) -> List[dict]:
+        """
+        Filters aggregations by an association type, and optionally an initiative type
+
+        Aggregations in ISO can be used for expressing multiple types of relationship between one resource and others.
+        Two, code list options are used to indicate the type of relationship (the association type, required), and the
+        context of this relationship (the initiative type, optional).
+
+        Association and initiative types are defined by the relevant BAS Metadata Library record configuration schema
+        and ISO code lists.
+
+        For example:
+
+        | Association Type   | Initiative Type | Example/Description                                                |
+        | ------------------ | --------------- | ------------------------------------------------------------------ |
+        | revisionOf         | -               | a record replaces/updates another                                  |
+        | isComposedOf       | Collection      | a record is made up of a set of other records to form a collection |
+
+        As different combinations of association and initiative types are typically used differently, this method
+        filters keywords for a specified type (e.g. only 'isComposedOf' aggregations).
+
+        :type aggregations: list
+        :param aggregations: list of (all) aggregations
+        :type association_type: str
+        :param association_type: association type to filter by
+        :type initiative_type: str
+        :param initiative_type: optionally, initiative type to filter by
+        :rtype list
+        :return: subset of descriptive keywords that are for the specified association, and optionally initiative, type
+        """
+        _aggregations = []
+        for aggregation in aggregations:
+            if (
+                aggregation["association_type"] == association_type
+                and aggregation["initiative_type"] == initiative_type
+            ):
+                _aggregations.append(aggregation)
+
+        return _aggregations
+
+    @staticmethod
+    def _filter_keyword_terms(keyword_sets: List[dict], keyword_set_url: str) -> List[dict]:
+        """
+        Filter a specific keyword set from a collection of keyword sets based on the keyword set's URI
+
+        :type keyword_sets dict
+        :param keyword_sets: collection of keyword sets to filter
+        :type keyword_set_url str
+        :param keyword_set_url: URI of keyword set to filter out of the collection of keyword sets
+        :rtype dict
+        :return: filtered keyword set
+        """
+        for keyword_set in keyword_sets:
+            if keyword_set["thesaurus"]["title"]["href"] == keyword_set_url:
+                return keyword_set["terms"]
+
     @property
     def identifier(self) -> str:
-        return self.config["identifier"]
+        return self.record.identifier
 
     @property
     def title(self) -> str:
-        return self.config["title"]
+        return self.record.title
 
     @property
     def title_markdown(self) -> str:
@@ -2258,11 +2342,25 @@ class Collection:
 
     @property
     def topics(self) -> List[str]:
-        return self.config["topics"]
+        """
+        Collection's research topics
+
+        Research topics are implemented as a descriptive keyword set using the NERC Vocabulary Service (T01).
+
+        Note: These are separate to ISO Topics, which are treated as a description keyword set.
+
+        :rtype list
+        :return: Topic names
+        """
+        topic_terms = self._filter_keyword_terms(
+            keyword_sets=self.record.theme_keywords, keyword_set_url="http://vocab.nerc.ac.uk/collection/T01/current/"
+        )
+        # return a list of just term values
+        return [term["term"] for term in topic_terms]
 
     @property
     def summary(self) -> str:
-        return self.config["summary"]
+        return self.record.abstract
 
     @property
     def summary_markdown(self) -> str:
@@ -2270,130 +2368,25 @@ class Collection:
         return markdown(self.summary, output_format="html5")
 
     @property
-    def item_identifiers(self) -> List[str]:
-        return self.config["item_identifiers"]
-
-    def load(self, collection_path: Path) -> None:
+    def item_identifiers(self) -> Optional[List[str]]:
         """
-        Loads a Collection from a file encoded using JSON
+        Item identifiers in Collection
 
-        :type collection_path Path
-        :param collection_path: path to file containing JSON encoded record configuration
+        Items within the Collection, as specified by a record's aggregations. Returned as a list of Item identifiers.
+
+        Note: Only items that exist within the BAS Data Catalogue are currently supported, as determined by the
+        namespace of each aggregation identifier (specifically 'data.bas.ac.uk').
+
+        :return: List of Item identifiers in a Collection
         """
-        with open(str(collection_path)) as collection_file:
-            self.config = json.load(collection_file)
+        collection_aggregations = self._filter_aggregations(
+            aggregations=self.record.aggregations, association_type="isComposedOf", initiative_type="collection"
+        )
+        if len(collection_aggregations) < 1:
+            return None
 
-    def dump(self, collection_path: Path, overwrite: bool = False) -> None:
-        """
-        Saves a Collection to a file encoded using JSON
-
-        :type collection_path Path
-        :param collection_path: desired path of file that will contain JSON encoded record configuration
-        :type overwrite: bool
-        :param overwrite: if the desired file already exists, whether to replace its contents
-        """
-        try:
-            with open(str(collection_path), mode="x") as collection_file:
-                json.dump(self.config, collection_file, indent=4)
-        except FileExistsError:
-            if not overwrite:
-                raise FileExistsError() from None
-
-            with open(str(collection_path), mode="w") as collection_file:
-                json.dump(self.config, collection_file, indent=4)
-
-    def dumps(self) -> Dict:
-        """
-        Return a collections configuration
-
-        :rtype dict
-        :return: collection configuration
-        """
-        return self.config
-
-
-class Collections:
-    """
-    Represents a data store with an interface for creating, retrieving, updating and deleting Collections
-
-    Collections use a file to encode a series of Collection configurations with methods to interact with this file and
-    the configurations it contains.
-    """
-
-    def __init__(self, config: dict):
-        """
-        :type config dict
-        :param config: Collections configuration, consisting of a single parameter for the path to a collections file
-        """
-        self.collections = {}
-        self.collections_path = None
-        if "collections_path" in config.keys():
-            self.collections_path = config["collections_path"]
-
-        try:
-            with open(str(self.collections_path), mode="r") as collections_file:  # pragma: no cover
-                collections_data = json.load(collections_file)
-                self.collections = collections_data
-        except FileNotFoundError:  # pragma: no cover
-            # Ignore because the collections file hasn't been set up yet
-            pass
-
-    def get_all(self) -> List[Collection]:
-        """
-        Retrieve all Collections
-
-        :rtype list
-        :return: all Collections
-        """
-        _collections = []
-        for collection_identifier in self.collections.keys():
-            _collections.append(self.get(collection_identifier=collection_identifier))
-        return _collections
-
-    def get(self, collection_identifier: str) -> Collection:
-        """
-        Retrieve specific Collection specified by its identifier
-
-        :rtype Collection
-        :return: specified Collection
-        """
-        try:
-            return Collection(config=self.collections[collection_identifier])
-        except KeyError:
-            raise CollectionNotFoundException() from None
-
-    def add(self, collection: Collection) -> None:
-        """
-        Create a new Collections
-
-        :type collection Collection
-        :param collection: Collection to create
-        """
-        if collection.identifier in self.collections.keys():
-            raise CollectionInsertConflictException from None
-
-        self.update(collection=collection)
-
-    def update(self, collection: Collection) -> None:  # pragma: no cover (method mocked in testing)
-        """
-        Update an existing Collection
-
-        :type collection Collection
-        :param collection: Collection to update
-        """
-        self.collections[collection.identifier] = collection.dumps()
-
-        with open(str(self.collections_path), mode="w") as collections_file:
-            json.dump(self.collections, collections_file, indent=4)
-
-    def delete(self, collection_identifier: str) -> None:  # pragma: no cover (method mocked in testing)
-        """
-        Delete a specific Collection specified by its identifier
-
-        :rtype str
-        :return: Collection identifier
-        """
-        del self.collections[collection_identifier]
-
-        with open(str(self.collections_path), mode="w") as collections_file:
-            json.dump(self.collections, collections_file, indent=4)
+        item_identifiers = []
+        for collection_aggregate in collection_aggregations:
+            if collection_aggregate["identifier"]["namespace"] == "data.bas.ac.uk":
+                item_identifiers.append(collection_aggregate["identifier"]["identifier"])
+        return item_identifiers

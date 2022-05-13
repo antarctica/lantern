@@ -29,7 +29,6 @@ class Config:
     # Used as defaults for values that can be set at runtime
     _APP_ENABLE_SENTRY = True
     _LOGGING_LEVEL = logging.WARNING
-    _COLLECTIONS_PATH = Path.home().joinpath(".config/scar_add_metadata_toolbox/collections.json")
     _AUTH_SESSION_FILE_PATH = Path.home().joinpath(".config/scar_add_metadata_toolbox/auth.json")
     _SITE_PATH = Path.home().joinpath(".config/scar_add_metadata_toolbox/_site")
 
@@ -176,20 +175,6 @@ class Config:
         bsk_templates.site_scripts.append({"href": "/static/js/app.js"})
 
         return bsk_templates
-
-    # noinspection PyPep8Naming
-    @property
-    def COLLECTIONS_CONFIG(self) -> dict:
-        """
-        Collections config
-
-        Configuration for application Collections class instance. See Collections class for details on configuration on
-        required/available options
-
-        :rtype dict
-        :return: Collections config
-        """
-        return {"collections_path": Path(os.environ.get("APP_COLLECTIONS_PATH") or self._COLLECTIONS_PATH)}
 
     # noinspection PyPep8Naming
     @property
@@ -407,7 +392,6 @@ class DevelopmentConfig(Config):  # pragma: no cover
 
     _APP_ENABLE_SENTRY = False
     _LOGGING_LEVEL = logging.INFO
-    _COLLECTIONS_PATH = Path("./collections.json")
     _AUTH_SESSION_FILE_PATH = Path("./auth.json")
     _SITE_PATH = Path("./_site")
 

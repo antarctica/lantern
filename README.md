@@ -80,32 +80,18 @@ This diagram shows the main concepts in this project and how they relate:
 ### Metadata records
 
 Metadata records are the content and data within this project. Records describe resources, which are typically datasets
-within the ADD, e.g. a record might describe the Antarctic Coastline dataset. Records are based on the ISO 19115
-metadata standard (specifically 19115-2:2009), which defines an information model and XML encoding for geographic data.
+within the ADD, e.g. a record might describe the Antarctic Coastline dataset. Other types of records might describe 
+[Collections](#collections) of related records, or other resource such as map products.
 
-Records are stored/persisted in a records repository (implemented using [CSW](#csw)). Records are imported or 
-exported (for editing) as files.
+Records in this catalogue aim to provide *discovery metadata*, which allows users to find and evaluate whether a 
+resource is useful to them (i.e. does it cover the right area?, has it been updated recently?, how was it made?, etc.). 
+This metadata is separate it from metadata for calibration or analysis for example.
 
-A metadata record includes information to answer questions such as:
+Records are based on the [ISO 19115](https://metadata-standards.data.bas.ac.uk/standard/iso-19115-19139/) metadata 
+standard, which defines an information model (*19115-2:2009*), and XML encoding (*19139-2:2012*), for geographic data.
 
-* what is this dataset?
-* what formats is this dataset available in?
-* what projection does this dataset use?
-* what keywords describe the themes, places, etc. related to this dataset?
-* why is this dataset useful?
-* who is this dataset for?
-* who made this dataset?
-* who can I contact with any questions about this dataset?
-* when was this dataset created?
-* when was it last updated?
-* what time period does it cover?
-* where does this dataset cover?
-* how was this dataset created?
-* how can trust the quality of this dataset?
-* how can I download or access this dataset?
-
-This metadata is termed 'discovery metadata' (to separate it from metadata for calibration or analysis for example). It
-helps users find metadata in catalogues or search engines, and then helps them decide if the data is useful to them.
+Records are stored/persisted in a records repository (implemented using [CSW](#csw)). Records are imported and 
+exported (for editing) as files, or inserted/updated via the CSW transactional profile by other services.
 
 The information in a metadata record is encoded in a different formats at different stages:
 
@@ -122,61 +108,24 @@ These different formats are used for different reasons:
 
 ### Items
 
-Items are derived from [Records](#metadata-records) but with greater flexibility to make them more intuitive for humans.
-Whereas Records prioritise strictness and formality, using complex standards, Items prioritise readability and 
-understanding by humans.
+Items are derived from Records using any hierarchy level except 'collection' (which is represented by 
+[Collections](#collections)). Whereas Records prioritise strictness and being unambiguous, Items prioritise readability 
+and understanding by humans.
 
-For example, a resource's coordinate reference system may be defined as `urn:ogc:def:crs:EPSG::3031` in a Record
-and as `WGS 84 / Antarctic Polar Stereographic (EPSG:3031)` in an equivalent Item. The Record's definition is 
-precise and unambiguous (and therefore more interoperable), whereas the Item definition is less complex and more
-descriptive (and therefore more understandable to a human).
+Items are specific to this Data Catalogue, and can infer and present information in ways that general representations
+are unable to (e.g. by recognising and reformatting commonly used projections, vocabularies or contacts). 
 
-As items are derived from records, they are not persisted themselves, except as rendered pages within the static site.
+As Items are derived from Records, they are not persisted themselves, except as rendered pages within the static site.
 
 ### Collections
 
-Collections are a simple way to group [Items](#items) together based on a shared purpose, theme or topic. They are
-specific to the data catalogue and are not based on metadata records.
+Collections are a simple way to group [Items](#items) together based on a shared purpose, theme or topic. Like Items, 
+collections are derived from Records using the 'collection' hierarchy level.
 
-Collections are stored/persisted in a collections repository (implemented as a JSON file) or in files for import and
-export.
+As Collections are derived from Records, they are not persisted themselves, except as rendered pages within the static 
+site.
 
-They support a limited set of properties compared to records/items:
-
-| Property           | Data Type | Required | Description                                                  |
-| ------------------ | --------- | -------- | ------------------------------------------------------------ |
-| identifier         | String    | Yes      | UUID                                                         |
-| title              | String    | Yes      | Descriptive title                                            |
-| topics             | Array     | Yes      | BAS Research Topics associated with collection               |
-| topics.*           | String    | Yes      | BAS Research Topic                                           |
-| publishers         | Array     | Yes      | Data catalogue publishers associated with collection         |
-| publishers.*       | String    | Yes      | Data catalogue publisher                                     |
-| summary            | String    | Yes      | Descriptive summary, supports markdown formatting            |
-| item_identifiers   | Array     | Yes      | Items associated with collection, specified by their Item ID |
-| item_identifiers.* | String    | Yes      | Item ID                                                      |
-
-**Note:** Items in collections will be shown in the order they are listed in the `item_identifiers` property.
-
-For example:
-
-```json
-{
-    "identifier": "1790c9d5-af77-4a03-9a08-6ba8e83ce748",
-    "title": "Operation Tabarin",
-    "topics": [
-        "Living and Working in Antarctica"
-    ],
-    "publishers": [
-        "BAS Archives Service"
-    ],
-    "summary": "A secret British Antarctic expedition launched in 1943 during the course of World War II ...",
-    "item_identifiers": [
-        "82f3fe32-6d6b-4e7a-8256-690ce99fc653",
-        "88a22198-36e0-4aff-9099-aae1dfd7baa9",
-        "35c6d732-3acc-4044-9c8f-680eed39268a"
-    ]
-}
-```
+**Note:** Currently, Collections can only include Items from this Data Catalogue, rather than external resources.
 
 ### OAuth
 
@@ -377,7 +326,6 @@ set at runtime using environment variables. If not set, default values will be u
 | `APP_ENABLE_SENTRY`                                 | Feature flag to enable/disable Sentry error tracking             | true/false                         | `true`                                                          |
 | `APP_LOGGING_LEVEL`                                 | Minimum logging level to include in application logs             | debug/info/warning/error/critical  | `warning`                                                       |
 | `APP_AUTH_SESSION_FILE_PATH`                        | Path to file used for authentication information                 | valid file path                    | `/home/user/.config/scar_add_metadata_toolbox/auth.json`        |
-| `APP_COLLECTIONS_PATH`                              | Path to file used for data catalogue collections                 | valid file path                    | `/home/user/.config/scar_add_metadata_toolbox/collections.json` |
 | `APP_SITE_PATH`                                     | Path to directory used for rendered static site content          | valid directory path               | `/home/user/.config/scar_add_metadata_toolbox/_site`            |
 | `CSW_ENDPOINT_UNPUBLISHED`                          | CSW endpoint for accessing unpublished catalogue                 | valid URL                          | `http://example.com/csw/unpublished`                            |
 | `CSW_ENDPOINT_PUBLISHED`                            | CSW endpoint for accessing published catalogue                   | valid URL                          | `http://example.com/csw/published`                              |

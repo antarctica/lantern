@@ -19,8 +19,6 @@ from tabulate import tabulate
 
 from scar_add_metadata_toolbox.classes import (
     Collection,
-    CollectionInsertConflictException,
-    CollectionNotFoundException,
     Item,
     Record,
     RecordRetractBeforeDeleteException,
@@ -52,6 +50,7 @@ def list_records():
             _records.append(
                 {
                     "identifier": record.identifier,
+                    "type": record.hierarchy_level,
                     "title": record.title,
                     "status": "Published" if record.published else "Unpublished",
                 }
@@ -60,7 +59,12 @@ def list_records():
         print(
             tabulate(
                 _records,
-                headers={"identifier": "Record Identifier", "title": "Record Title", "status": "Status"},
+                headers={
+                    "identifier": "Record Identifier",
+                    "type": "Record Type",
+                    "title": "Record Title",
+                    "status": "Status",
+                },
                 tablefmt="fancy_grid",
             )
         )
@@ -362,203 +366,6 @@ def retract_records(ctx):
     print(f"Ok. {len(record_identifiers)} records retracted.")
 
 
-collections_commands_blueprint = Blueprint("collections", __name__)
-collections_commands_blueprint.cli.short_help = "Manage site collections."
-
-
-@collections_commands_blueprint.cli.command("list")
-def list_collections():
-    """List all collections."""
-    collections = current_app.collections.get_all()
-    _collections = []
-    for collection in collections:
-        _collections.append(
-            {"identifier": collection.identifier, "title": collection.title, "items": len(collection.item_identifiers)}
-        )
-
-    print("")
-    print(
-        tabulate(
-            _collections,
-            headers={"identifier": "Collection Identifier", "title": "Collection Title", "items": "Items (count)"},
-            tablefmt="fancy_grid",
-        )
-    )
-    print("")
-    print(f"Ok. {len(collections)} collections.")
-
-
-@collections_commands_blueprint.cli.command("inspect")
-@click.argument("collection-identifier")
-def inspect_collection(collection_identifier: str):
-    """View details for a collection."""
-    try:
-        collection = current_app.collections.get(collection_identifier=collection_identifier)
-
-        print(f"Ok. Collection details for '{collection.identifier}':")
-        print("")
-        print(f"Identifier: {collection.identifier}")
-        print(f"Title: {collection.title}")
-        print("")
-        print("Summary:")
-        print(collection.summary)
-        print("")
-        print(f"Items in collection: {len(collection.item_identifiers)}")
-        for item_identifier in collection.item_identifiers:
-            item = Item(record=current_app.records.retrieve_record(record_identifier=item_identifier))
-            print(f"* {item.identifier} - {item.title}")
-    except CollectionNotFoundException:
-        print(f"No. Collection '{collection_identifier}' does not exist.")
-        sys_exit(EX_USAGE)
-    except RecordNotFoundException:
-        # noinspection PyUnboundLocalVariable
-        print(f"No. Record '{item_identifier}' in collection '{collection_identifier}' does not exist.")
-        sys_exit(EX_USAGE)
-    except CSWDatabaseNotInitialisedException:
-        print("No. CSW catalogue not setup.")
-        sys_exit(EX_USAGE)
-    except CSWAuthException:
-        print("No. Error with auth token. Try signing out and in again or seek support.")
-        sys_exit(EX_USAGE)
-    except CSWAuthMissingException:
-        print("No. Missing auth token. Run `auth sign-in` first.")
-        sys_exit(EX_USAGE)
-    except CSWAuthInsufficientException:
-        print("No. Missing permissions in auth token. Seek support to assign required permissions.")
-        sys_exit(EX_USAGE)
-
-
-@collections_commands_blueprint.cli.command("import")
-@click.argument("collection_path", type=click.Path(exists=True, dir_okay=False))
-@click.option("--allow-update", is_flag=True, help="Update any existing collection.")
-def import_collection(collection_path: str, allow_update: bool = False):
-    """Import a collection from a file."""
-    collection_path = Path(collection_path)
-
-    try:
-        collection = Collection()
-        collection.load(collection_path=collection_path)
-        current_app.collections.add(collection=collection)
-        print(f"Ok. Collection '{collection.identifier}' imported.")
-    except JSONDecodeError:
-        print(f"No. Collection in file '{collection_path}' is not valid JSON.")
-        sys_exit(EX_USAGE)
-    except CollectionInsertConflictException:
-        if not allow_update:
-            # noinspection PyUnboundLocalVariable
-            print(f"No. Collection '{collection.identifier}' already exists. Add `--allow-update` flag to allow.")
-            sys_exit(EX_USAGE)
-
-        current_app.collections.update(collection=collection)
-        print(f"Ok. Collection '{collection.identifier}' updated.")
-
-
-@collections_commands_blueprint.cli.command("bulk-import")
-@click.argument("collections_path", type=click.Path(exists=True, file_okay=False))
-@click.option("--allow-update", is_flag=True, help="Update any existing collections.")
-@click.pass_context
-def import_collections(ctx, collections_path: str, allow_update: bool = False):
-    """Import records from files in a directory."""
-    collections_path = Path(collections_path)
-    collection_paths = list(collections_path.glob("*.json"))
-
-    print(f"{len(collection_paths)} collections to import/update.")
-    _collection_count = 1
-    for collection_path in collection_paths:
-        print(f"# Collection {_collection_count}/{len(collection_paths)}")
-        ctx.invoke(import_collection, collection_path=str(collection_path), allow_update=allow_update)
-        _collection_count += 1
-    print(f"Ok. {len(collection_paths)} collections imported/updated.")
-
-
-@collections_commands_blueprint.cli.command("export")
-@click.argument("collection-identifier")
-@click.argument("collection_path", type=click.Path(dir_okay=False))
-@click.option("--allow-overwrite", is_flag=True, help="Allow existing exports to be overwritten.")
-def export_collection(collection_identifier: str, collection_path: str, allow_overwrite: bool = False):
-    """Export a collection to a file."""
-    collection_path = Path(collection_path)
-
-    try:
-        collection = current_app.collections.get(collection_identifier=collection_identifier)
-        collection.dump(collection_path=collection_path, overwrite=False)
-        print(f"Ok. Collection '{collection.identifier}' exported.")
-    except CollectionNotFoundException:
-        print(f"No. Collection '{collection_identifier}' does not exist.")
-        sys_exit(EX_USAGE)
-    except FileExistsError:
-        if not allow_overwrite:
-            # noinspection PyUnboundLocalVariable
-            print(
-                f"No. Export of collection '{collection.identifier}' would be overwritten. Add `--allow-overwrite` flag to allow."
-            )
-            sys_exit(EX_USAGE)
-        collection.dump(collection_path=collection_path, overwrite=True)
-        print(f"Ok. Collection '{collection.identifier}' re-exported.")
-
-
-@collections_commands_blueprint.cli.command("bulk-export")
-@click.argument("collections_path", type=click.Path(exists=True, file_okay=False))
-@click.option("--allow-overwrite", is_flag=True, help="Allow existing exports to be overwritten.")
-@click.pass_context
-def export_collections(ctx, collections_path: str, allow_overwrite: bool = False):
-    """Export all collections to files in a directory."""
-    collections_path = Path(collections_path)
-
-    collections = current_app.collections.get_all()
-
-    print(f"{len(collections)} collections to (re)export.")
-    _collections_count = 1
-    for collection in collections:
-        print(f"# Collection {_collections_count}/{len(collections)}")
-        collection_path = collections_path.joinpath(f"{collection.identifier}.json")
-        ctx.invoke(
-            export_collection,
-            collection_identifier=collection.identifier,
-            collection_path=collection_path,
-            allow_overwrite=allow_overwrite,
-        )
-        _collections_count += 1
-    print(f"Ok. {len(collections)} collections (re)exported.")
-
-
-@collections_commands_blueprint.cli.command("remove")
-@click.argument("collection-identifier")
-@click.option("--force-remove", is_flag=True, help="Suppress interactive conformation.")
-def remove_collection(collection_identifier, force_remove: bool):
-    """Remove a collection."""
-    if not force_remove:
-        if not click.confirm(f"CONFIRM: Permanently remove collection '{collection_identifier}'?", abort=True):
-            raise Abort()
-
-    try:
-        current_app.collections.delete(collection_identifier=collection_identifier)
-        print(f"Ok. Collection '{collection_identifier}' removed.")
-    except CollectionNotFoundException:
-        print(f"No. Collection '{collection_identifier}' does not exist.")
-        sys_exit(EX_USAGE)
-
-
-@collections_commands_blueprint.cli.command("bulk-remove")
-@click.option("--force-remove", is_flag=True, help="Suppress interactive conformation.")
-@click.pass_context
-def remove_collections(ctx, force_remove: bool):
-    """Remove all collections."""
-    collections = current_app.collections.get_all()
-
-    if not force_remove:
-        if not click.confirm(f"CONFIRM: Permanently remove all {len(collections)} collections?", abort=True):
-            raise Abort()
-
-    print(f"{len(collections)} collections to remove.")
-    _collection_count = 1
-    for collection in collections:
-        print(f"# Collection {_collection_count}/{len(collections)}")
-        ctx.invoke(remove_collection, collection_identifier=collection.identifier, force_remove=True)
-        _collection_count += 1
-    print(f"Ok. {len(collections)} collections removed.")
-
-
 site_commands_blueprint = Blueprint("site", __name__)
 site_commands_blueprint.cli.short_help = "Manage static site."
 
@@ -572,13 +379,17 @@ def build_items():
     try:
         # noinspection PyArgumentList
         with spinner():
-            _records = list(current_app.records.retrieve_published_records())
+            all_records = list(current_app.records.retrieve_published_records())
+            selected_records = []
+            for record in all_records:
+                if record.hierarchy_level != "collection":
+                    selected_records.append(record)
 
-        print(f"{len(_records)} item pages to generate.")
+        print(f"{len(selected_records)} item pages to generate.")
         _items_count = 1
-        for _record in _records:
-            print(f"# Item page {_items_count}/{len(_records)}")
-            item = Item(record=_record)
+        for record in selected_records:
+            print(f"# Item page {_items_count}/{len(selected_records)}")
+            item = Item(record=record)
             item_output_path = items_output_path.joinpath(f"{item.identifier}/index.html")
             item_output_path.parent.mkdir(exist_ok=True, parents=True)
 
@@ -586,7 +397,7 @@ def build_items():
                 item_file.write(render_template("app/_views/item-details.j2", item=item))
             print(f"Ok. Generated item page for '{item.identifier}'.")
             _items_count += 1
-        print(f"Ok. {len(_records)} item pages generated.")
+        print(f"Ok. {len(selected_records)} item pages generated.")
     except CSWDatabaseNotInitialisedException:
         print("No. CSW catalogue not setup.")
         sys_exit(EX_USAGE)
@@ -610,12 +421,17 @@ def build_collections():
     try:
         # noinspection PyArgumentList
         with spinner():
-            collections = current_app.collections.get_all()
+            all_records = list(current_app.records.retrieve_published_records())
+            selected_records = []
+            for record in all_records:
+                if record.hierarchy_level == "collection":
+                    selected_records.append(record)
 
-        print(f"{len(collections)} collection pages to generate.")
+        print(f"{len(selected_records)} collection pages to generate.")
         _collection_count = 1
-        for collection in collections:
-            print(f"# Collection page {_collection_count}/{len(collections)}")
+        for record in selected_records:
+            print(f"# Collection page {_collection_count}/{len(selected_records)}")
+            collection = Collection(record=record)
             collection_output_path = collections_output_path.joinpath(f"{collection.identifier}/index.html")
             collection_output_path.parent.mkdir(exist_ok=True, parents=True)
 
@@ -631,7 +447,7 @@ def build_collections():
                 collection_file.write(render_template("app/_views/collection-details.j2", collection=collection))
             print(f"Ok. Generated collection page for '{collection.identifier}'.")
             _collection_count += 1
-        print(f"Ok. {len(collections)} collection pages generated.")
+        print(f"Ok. {len(selected_records)} collection pages generated.")
     except CSWDatabaseNotInitialisedException:
         print("No. CSW catalogue not setup.")
         sys_exit(EX_USAGE)

@@ -1,6 +1,6 @@
 # SCAR Antarctic Digital Database (ADD) Metadata Toolbox - Adding new records
 
-Follow this workflow to create and publish new records.
+Follow this workflow to create and publish new records (items and/or collections).
 
 **Note:** You will need *author* rights to import new metadata records and *editor* rights to publish them for others
 to see.
@@ -17,7 +17,7 @@ This sequence diagram shows how the overall process to add and view a new record
 4. the imported record is published
 5. the metadata editor retrieves the imported record from the unpublished repository
 6. the metadata editor inserts the imported record into the published repository
-7. records are built as items as static HTML pages
+7. records are built as static HTML pages
 8. records are retrieved from the published repository
 9. records are built as styled XML files
 10. records are retrieved from the published repository

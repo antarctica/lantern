@@ -1,4 +1,3 @@
-from enum import Enum
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
@@ -7,8 +6,6 @@ import pytest
 
 from scar_add_metadata_toolbox import create_app
 from tests.scar_add_metadata_toolbox.classes import (
-    MockCollections,
-    MockCollectionsUnknownRecord,
     MockCSWClient,
     MockCSWClientAuthError,
     MockCSWClientAuthInsufficient,
@@ -153,84 +150,11 @@ def app_runner_mocked_csw_insufficient_auth_token():
 
 
 @pytest.fixture
-def app_runner_mocked_csw_not_setup_mocked_collection():
-    with patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client, patch(
-        "scar_add_metadata_toolbox.Collections"
-    ) as mock_collections:
-        mock_csw_client.side_effect = MockCSWClientServerNotSetup
-        mock_collections.side_effect = MockCollections
-
-        app = create_app()
-        return app.test_cli_runner()
-
-
-@pytest.fixture
-def app_runner_mocked_csw_auth_token_error_mocked_collection():
-    with patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client, patch(
-        "scar_add_metadata_toolbox.Collections"
-    ) as mock_collections:
-        mock_csw_client.side_effect = MockCSWClientAuthError
-        mock_collections.side_effect = MockCollections
-
-        app = create_app()
-        return app.test_cli_runner()
-
-
-@pytest.fixture
-def app_runner_mocked_csw_missing_auth_token_mocked_collection():
-    with patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client, patch(
-        "scar_add_metadata_toolbox.Collections"
-    ) as mock_collections:
-        mock_csw_client.side_effect = MockCSWClientAuthMissing
-        mock_collections.side_effect = MockCollections
-
-        app = create_app()
-        return app.test_cli_runner()
-
-
-@pytest.fixture
-def app_runner_mocked_csw_insufficient_auth_token_mocked_collection():
-    with patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client, patch(
-        "scar_add_metadata_toolbox.Collections"
-    ) as mock_collections:
-        mock_csw_client.side_effect = MockCSWClientAuthInsufficient
-        mock_collections.side_effect = MockCollections
-
-        app = create_app()
-        return app.test_cli_runner()
-
-
-@pytest.fixture
-def app_runner_mocked_collections():
-    with patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client, patch(
-        "scar_add_metadata_toolbox.Collections"
-    ) as mock_collections:
-        mock_csw_client.side_effect = MockCSWClient
-        mock_collections.side_effect = MockCollections
-
-        app = create_app()
-        return app.test_cli_runner()
-
-
-@pytest.fixture
-def app_runner_mocked_collections_unknown_record():
-    with patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client, patch(
-        "scar_add_metadata_toolbox.Collections"
-    ) as mock_collections:
-        mock_csw_client.side_effect = MockCSWClient
-        mock_collections.side_effect = MockCollectionsUnknownRecord
-
-        app = create_app()
-        return app.test_cli_runner()
-
-
-@pytest.fixture
 def app_static_site():
-    with patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client, patch(
-        "scar_add_metadata_toolbox.Collections"
-    ) as mock_collections, TemporaryDirectory() as site_directory:
+    with patch(
+        "scar_add_metadata_toolbox.classes.CSWClient"
+    ) as mock_csw_client, TemporaryDirectory() as site_directory:
         mock_csw_client.side_effect = MockCSWClient
-        mock_collections.side_effect = MockCollections
 
         app = create_app()
         app.config["SITE_PATH"] = Path(site_directory)

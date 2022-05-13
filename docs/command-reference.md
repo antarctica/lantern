@@ -143,7 +143,7 @@ You can sign-in again if you need to get a new user access token (or if your per
 any existing token you have.
 
 ```
-$ scar-add-metadata-toolbox auth sign-in
+$ flask auth sign-in
 To sign-in, visit 'https://microsoft.com/devicelogin', enter this code 'XXXXXXXXX' and then press any key...
 Ok. Access token for 'Connie Watson' set in '/usr/src/app/auth.json'.
 ```
@@ -155,225 +155,9 @@ Remove existing access token if present.
 In some cases you may want to intentionally clear your user access token, rather than allowing it to expire.
 
 ```
-$ scar-add-metadata-toolbox auth sign-out
+$ flask auth sign-out
 Ok. Access token removed.
 ```
-
-## `collections`
-  
-Manage site collections.
-
-### `collections bulk-export`
-
-Export all collections to files in a directory.
-
-Collections will be saved as separate files named after their identifier, 
-e.g. `e74543c0-4c4e-4b41-aa33-5bb2f67df389.json`
-
-**Note:** The export directory must already exist.
-
-```
-$ scar-add-metadata-toolbox collections bulk-export /tmp/collections/
-1 collections to (re)export.
-# Collection 1/1
-Ok. Collection 'e74543c0-4c4e-4b41-aa33-5bb2f67df389' exported.
-Ok. 1 collections (re)exported.
-```
-
-If the directory you are exporting to already has exported collections you will get an error:
-
-```
-$ scar-add-metadata-toolbox collections bulk-export /tmp/collections/
-1 collections to (re)export.
-# Collection 1/1
-No. Export of collection 'e74543c0-4c4e-4b41-aa33-5bb2f67df389' would be overwritten. Add `--allow-overwrite` flag to allow.
-```
-
-If you'd like to update them, add the `--allow-overwrite` option:
-
-```
-$ scar-add-metadata-toolbox collections bulk-export /tmp/collections/ --allow-overwrite
-1 collections to (re)export.
-# Collection 1/1
-Ok. Collection 'e74543c0-4c4e-4b41-aa33-5bb2f67df389' re-exported.
-Ok. 1 collections (re)exported.
-```
-
-### `collections bulk-import`
-
-Import records from files in a directory.
-
-```
-$ scar-add-metadata-toolbox collections bulk-import /tmp/collections/
-1 collections to import/update.
-# collection 1/1
-Ok. Collection 'e74543c0-4c4e-4b41-aa33-5bb2f67df389' imported.
-Ok. 1 collections imported/updated.
-```
-
-If the directory you are importing from contains collections have already exist you will get an error:
-
-```
-$ scar-add-metadata-toolbox collections bulk-import /tmp/collections/
-1 collections to import/update.
-# Collection 1/1
-No. Collection 'e74543c0-4c4e-4b41-aa33-5bb2f67df389' already exists. Add `--allow-update` flag to allow.
-```
-
-If you'd like to re-import and update them, add the `--allow-update` option:
-
-```
-$ scar-add-metadata-toolbox collections bulk-import /tmp/collections/ --allow-update
-1 collections to import/update.
-# Collection 1/1
-Ok. Collection 'e74543c0-4c4e-4b41-aa33-5bb2f67df389' updated.
-Ok. 1 collections imported/updated.
-```
-
-### `collections bulk-remove`
-
-Remove all collections.
-
-**WARNING!** Deleted collections cannot be recovered unless they have been exported as a backup first.
-
-```
-$ scar-add-metadata-toolbox collections bulk-remove
-CONFIRM: Permanently remove all 3 collections? [y/N]: y
-1 collections to remove.
-# Collection 1/1
-Ok. Collection 'e74543c0-4c4e-4b41-aa33-5bb2f67df389' removed.
-Ok. 1 collections removed.
-```
-
-**Note:** This command uses an interactive conformation to protect against unintentional deletions. If using this 
-command in a non-interactive environment you can add the `--force-remove` option to suppress this conformation.
-
-### `collections export`
-
-Export a collection to a file.
-
-**Note:** Collections are exported as JSON files, therefore it's strongly recommended you export them to a file with 
-the `.json` file extension.
-
-```
-$ scar-add-metadata-toolbox collections export e74543c0-4c4e-4b41-aa33-5bb2f67df389 /tmp/collection.json
-Ok. Collection 'e74543c0-4c4e-4b41-aa33-5bb2f67df389' exported.
-```
-
-If the file you are exporting to already has exists you will get an error:
-
-```
-$ scar-add-metadata-toolbox collections export e74543c0-4c4e-4b41-aa33-5bb2f67df389 /tmp/collection.json
-No. Export of collection 'e74543c0-4c4e-4b41-aa33-5bb2f67df389' would be overwritten. Add `--allow-overwrite` flag to allow.
-```
-
-If you'd like to update the file, add the `--allow-overwrite` option:
-
-```
-$ scar-add-metadata-toolbox collections export e74543c0-4c4e-4b41-aa33-5bb2f67df389 /tmp/collection.json --allow-overwrite
-Ok. Collection 'e74543c0-4c4e-4b41-aa33-5bb2f67df389' re-exported.
-```
-
-### `collections import`
-
-Import a collection from a file.
-
-See the [Collections](../README.md#collections) README section for how to write a new collection.
-
-```
-$ scar-add-metadata-toolbox collections import /tmp/collections/e74543c0-4c4e-4b41-aa33-5bb2f67df389.json
-Ok. Collection 'e74543c0-4c4e-4b41-aa33-5bb2f67df389' imported.
-```
-
-If the file you are importing contains a collection that already exists you will get an error:
-
-```
-$ scar-add-metadata-toolbox collections import /tmp/collections/e74543c0-4c4e-4b41-aa33-5bb2f67df389.json
-No. Collection 'e74543c0-4c4e-4b41-aa33-5bb2f67df389' already exists. Add `--allow-update` flag to allow.
-```
-
-If you'd like to update the collection from the file, add the `--allow-update` option:
-
-```
-$ scar-add-metadata-toolbox collections import /tmp/collections/e74543c0-4c4e-4b41-aa33-5bb2f67df389.json --allow-update
-Ok. Collection 'e74543c0-4c4e-4b41-aa33-5bb2f67df389' updated.
-```
-
-### `collections inspect`
-
-View details for a collection.
-
-**Note:** You need to be signed in with permission to edit metadata records to use this command.
-
-```
-$ scar-add-metadata-toolbox collections inspect e74543c0-4c4e-4b41-aa33-5bb2f67df389
-Ok. Collection details for 'e74543c0-4c4e-4b41-aa33-5bb2f67df389':
-
-Identifier: e74543c0-4c4e-4b41-aa33-5bb2f67df389
-Title: SCAR Antarctic Digital Database (ADD)
-
-Summary:
-  The Scientific Committee on Antarctic Research (SCAR) Antarctic Digital Database (ADD) aims to provide a seamless topographic map compiled from the best available international geographic information for all areas. It covers Antarctica south of 60°S.
-
-  The SCAR ADD consists of geographic information layers including:
-
-  * coastline
-  * ice-shelf grounding line
-  * rock outcrop
-  * contours
-
-  See the [SCAR website](https://scar.org/data-products/antarctic-digital-database/) for more information.
-
-Items in collection: 18
-* 2cddeea3-eb67-46af-a002-8251337984d4 - Low resolution vector contours for Antarctica
-* 2e9b1977-d1a5-4b9b-b58f-cf1a94c63c23 - Medium resolution vector polygons of Antarctic rock outcrop
-* 3a6d68fc-5a35-4f40-b45d-2268000031a4 - Medium resolution Antarctic moraine dataset
-* 6dd2149e-b2e9-40d1-83ce-5d58b9b8dfda - Medium resolution Antarctic lakes dataset
-* 9ae21db4-49a9-409c-b48f-af597bbfec17 - High resolution Antarctic moraine dataset
-* 862f7159-9e0d-46e2-9684-df1bf924dabc - Medium resolution vector polygons of the Antarctic coastline
-* 8537f4c6-fc79-4d18-8877-dc2db9ee945e - High resolution Antarctic lakes dataset
-* 33d5a2d4-66d8-46be-82c8-404664b21455 - High resolution vector polygons of the Antarctic coastline
-* 87cf3067-befd-4a66-8b41-e3b5a60e2140 - Antarctic streams dataset
-* 4149c45d-ce29-49f3-88ed-8366fe1afa23 - Automatically extracted rock outcrop dataset for Antarctica
-* 8643fd87-cca5-4e56-bc81-46af208ef260 - Medium resolution vector contours for Antarctica
-* 722521b8-22f3-4585-9f2a-a1c24212baef - Medium resolution vector polygon seamask for areas south of 60°S
-* c1ed29bc-6136-4467-8357-00d426c8850c - Antarctic Digital Database data limit at 60°S
-* d531a142-d6e7-4961-ab36-ab1db39f3f00 - High resolution vector polygons of Antarctic rock outcrop
-* f58e3d6c-bc21-40fa-ab1a-a7798c9a8121 - High resolution vector contours for Antarctica
-* 63501753-9578-4a61-b5a6-7024f5837182 - High resolution vector polylines of the Antarctic coastline
-* c920561d-ec14-4e13-a5be-4c7a962b16cc - Medium resolution vector polylines of the Antarctic coastline
-* dd6dd055-481e-4de2-8444-e00d7536f779 - High resolution vector polygon seamask for areas south of 60°S
-```
-
-### `collections list`
-
-List all collections.
- 
-```
-$ scar-add-metadata-toolbox collections list
-
-╒══════════════════════════════════════╤═══════════════════════════════════════╤═════════════════╕
-│ Collection Identifier                │ Collection Title                      │   Items (count) │
-╞══════════════════════════════════════╪═══════════════════════════════════════╪═════════════════╡
-│ e74543c0-4c4e-4b41-aa33-5bb2f67df389 │ SCAR Antarctic Digital Database (ADD) │              18 │
-╘══════════════════════════════════════╧═══════════════════════════════════════╧═════════════════╛
-
-Ok. 1 collections.
-```
-
-### `collections remove`
-
-Remove a collection.
-
-**WARNING!** Deleted collections cannot be recovered unless they have been exported as a backup first.
-
-```
-$ scar-add-metadata-toolbox collections remove e74543c0-4c4e-4b41-aa33-5bb2f67df389
-Ok. Collection 'e74543c0-4c4e-4b41-aa33-5bb2f67df389' removed.
-```
-
-**Note:** This command uses an interactive conformation to protect against unintentional deletions. If using this 
-command in a non-interactive environment you can add the `--force-remove` option to suppress this conformation.
 
 ## `csw`
 
@@ -1006,45 +790,45 @@ List all records.
 ```
 $ scar-add-metadata-toolbox records list
 
-╒══════════════════════════════════════╤══════════════════════════════════════════════════════════════════╤═════════════╕
-│ Record Identifier                    │ Record Title                                                     │ Status      │
-╞══════════════════════════════════════╪══════════════════════════════════════════════════════════════════╪═════════════╡
-│ 862f7159-9e0d-46e2-9684-df1bf924dabc │ Medium resolution vector polygons of the Antarctic coastline     │ Published   │
-├──────────────────────────────────────┼──────────────────────────────────────────────────────────────────┼─────────────┤
-│ 722521b8-22f3-4585-9f2a-a1c24212baef │ Medium resolution vector polygon seamask for areas south of 60°S │ Published   │
-├──────────────────────────────────────┼──────────────────────────────────────────────────────────────────┼─────────────┤
-│ d531a142-d6e7-4961-ab36-ab1db39f3f00 │ High resolution vector polygons of Antarctic rock outcrop        │ Published   │
-├──────────────────────────────────────┼──────────────────────────────────────────────────────────────────┼─────────────┤
-│ 33d5a2d4-66d8-46be-82c8-404664b21455 │ High resolution vector polygons of the Antarctic coastline       │ Published   │
-├──────────────────────────────────────┼──────────────────────────────────────────────────────────────────┼─────────────┤
-│ 9ae21db4-49a9-409c-b48f-af597bbfec17 │ High resolution Antarctic moraine dataset                        │ Published   │
-├──────────────────────────────────────┼──────────────────────────────────────────────────────────────────┼─────────────┤
-│ 2e9b1977-d1a5-4b9b-b58f-cf1a94c63c23 │ Medium resolution vector polygons of Antarctic rock outcrop      │ Published   │
-├──────────────────────────────────────┼──────────────────────────────────────────────────────────────────┼─────────────┤
-│ 4149c45d-ce29-49f3-88ed-8366fe1afa23 │ Automatically extracted rock outcrop dataset for Antarctica      │ Published   │
-├──────────────────────────────────────┼──────────────────────────────────────────────────────────────────┼─────────────┤
-│ dd6dd055-481e-4de2-8444-e00d7536f779 │ High resolution vector polygon seamask for areas south of 60°S   │ Published   │
-├──────────────────────────────────────┼──────────────────────────────────────────────────────────────────┼─────────────┤
-│ 63501753-9578-4a61-b5a6-7024f5837182 │ High resolution vector polylines of the Antarctic coastline      │ Published   │
-├──────────────────────────────────────┼──────────────────────────────────────────────────────────────────┼─────────────┤
-│ c1ed29bc-6136-4467-8357-00d426c8850c │ Antarctic Digital Database data limit at 60°S                    │ Published   │
-├──────────────────────────────────────┼──────────────────────────────────────────────────────────────────┼─────────────┤
-│ 6dd2149e-b2e9-40d1-83ce-5d58b9b8dfda │ Medium resolution Antarctic lakes dataset                        │ Published   │
-├──────────────────────────────────────┼──────────────────────────────────────────────────────────────────┼─────────────┤
-│ c920561d-ec14-4e13-a5be-4c7a962b16cc │ Medium resolution vector polylines of the Antarctic coastline    │ Published   │
-├──────────────────────────────────────┼──────────────────────────────────────────────────────────────────┼─────────────┤
-│ f58e3d6c-bc21-40fa-ab1a-a7798c9a8121 │ High resolution vector contours for Antarctica                   │ Published   │
-├──────────────────────────────────────┼──────────────────────────────────────────────────────────────────┼─────────────┤
-│ 87cf3067-befd-4a66-8b41-e3b5a60e2140 │ Antarctic streams dataset                                        │ Published   │
-├──────────────────────────────────────┼──────────────────────────────────────────────────────────────────┼─────────────┤
-│ 8643fd87-cca5-4e56-bc81-46af208ef260 │ Medium resolution vector contours for Antarctica                 │ Published   │
-├──────────────────────────────────────┼──────────────────────────────────────────────────────────────────┼─────────────┤
-│ 3a6d68fc-5a35-4f40-b45d-2268000031a4 │ Medium resolution Antarctic moraine dataset                      │ Published   │
-├──────────────────────────────────────┼──────────────────────────────────────────────────────────────────┼─────────────┤
-│ 8537f4c6-fc79-4d18-8877-dc2db9ee945e │ High resolution Antarctic lakes dataset                          │ Published   │
-├──────────────────────────────────────┼──────────────────────────────────────────────────────────────────┼─────────────┤
-│ 2cddeea3-eb67-46af-a002-8251337984d4 │ Low resolution vector contours for Antarctica                    │ Published   │
-╘══════════════════════════════════════╧══════════════════════════════════════════════════════════════════╧═════════════╛
+╒══════════════════════════════════════╤═══════════════╤══════════════════════════════════════════════════════════════════╤═══════════╕
+│ Record Identifier                    │ Record Type   │ Record Title                                                     │ Status    │
+╞══════════════════════════════════════╪═══════════════╪══════════════════════════════════════════════════════════════════╪═══════════╡
+│ bc71347d-298a-4df3-88b0-cb9a908db166 │ dataset       │ High resolution vector polylines of the Antarctic coastline      │ Published │
+├──────────────────────────────────────┼───────────────┼──────────────────────────────────────────────────────────────────┼───────────┤
+│ 4e09c5d9-edf4-448e-aea7-2e56e9376aae │ dataset       │ Medium resolution vector polylines of the Antarctic coastline    │ Published │
+├──────────────────────────────────────┼───────────────┼──────────────────────────────────────────────────────────────────┼───────────┤
+│ ee7c6af2-da57-4519-8637-812eec5ff782 │ dataset       │ High resolution vector polygons of the Antarctic coastline       │ Published │
+├──────────────────────────────────────┼───────────────┼──────────────────────────────────────────────────────────────────┼───────────┤
+│ d30fa109-67e0-4c1d-8da9-c443834a366d │ dataset       │ Medium resolution vector polygons of the Antarctic coastline     │ Published │
+├──────────────────────────────────────┼───────────────┼──────────────────────────────────────────────────────────────────┼───────────┤
+│ 4bd20a2b-df7d-46a2-acdf-5104c82ff4c7 │ dataset       │ High resolution vector contours for Antarctica                   │ Published │
+├──────────────────────────────────────┼───────────────┼──────────────────────────────────────────────────────────────────┼───────────┤
+│ 0779002b-b95d-432f-b035-b952c36aa5c9 │ dataset       │ Medium resolution vector contours for Antarctica                 │ Published │
+├──────────────────────────────────────┼───────────────┼──────────────────────────────────────────────────────────────────┼───────────┤
+│ 178ec50d-1ffb-42a4-a4a3-1145419da2bb │ dataset       │ Automatically extracted rock outcrop dataset for Antarctica      │ Published │
+├──────────────────────────────────────┼───────────────┼──────────────────────────────────────────────────────────────────┼───────────┤
+│ cbacce42-2fdc-4f06-bdc2-73b6c66aa641 │ dataset       │ High resolution vector polygons of Antarctic rock outcrop        │ Published │
+├──────────────────────────────────────┼───────────────┼──────────────────────────────────────────────────────────────────┼───────────┤
+│ 077e1f04-7068-4327-a4f2-71d863f70064 │ dataset       │ Medium resolution vector polygons of Antarctic rock outcrop      │ Published │
+├──────────────────────────────────────┼───────────────┼──────────────────────────────────────────────────────────────────┼───────────┤
+│ 84725134-262f-4c5c-a72e-0c7601c2f0da │ dataset       │ High resolution Antarctic moraine dataset                        │ Published │
+├──────────────────────────────────────┼───────────────┼──────────────────────────────────────────────────────────────────┼───────────┤
+│ 0f2e16f3-48cb-4d52-ba73-7ebc44a1985b │ dataset       │ Medium resolution Antarctic moraine dataset                      │ Published │
+├──────────────────────────────────────┼───────────────┼──────────────────────────────────────────────────────────────────┼───────────┤
+│ 6a27ab9e-1258-49b1-bd2c-fcbed310ab45 │ dataset       │ High resolution Antarctic lakes dataset                          │ Published │
+├──────────────────────────────────────┼───────────────┼──────────────────────────────────────────────────────────────────┼───────────┤
+│ 2f5f6c0a-4949-4153-8b22-a86337235a77 │ dataset       │ Medium resolution Antarctic lakes dataset                        │ Published │
+├──────────────────────────────────────┼───────────────┼──────────────────────────────────────────────────────────────────┼───────────┤
+│ 6a4d6fa2-d713-45ab-a30a-7130795e29d2 │ dataset       │ Antarctic streams dataset                                        │ Published │
+├──────────────────────────────────────┼───────────────┼──────────────────────────────────────────────────────────────────┼───────────┤
+│ 6dbaed82-ce85-4cbc-aa7d-3baa981cbd65 │ dataset       │ High resolution vector polygon seamask for areas south of 60°S   │ Published │
+├──────────────────────────────────────┼───────────────┼──────────────────────────────────────────────────────────────────┼───────────┤
+│ d28d698b-09c2-4693-bcf8-87234e5fd3ec │ dataset       │ Medium resolution vector polygon seamask for areas south of 60°S │ Published │
+├──────────────────────────────────────┼───────────────┼──────────────────────────────────────────────────────────────────┼───────────┤
+│ 367c992b-55a7-4a90-b972-861e443f95a1 │ dataset       │ Antarctic Digital Database data limit at 60°S                    │ Published │
+├──────────────────────────────────────┼───────────────┼──────────────────────────────────────────────────────────────────┼───────────┤
+│ e74543c0-4c4e-4b41-aa33-5bb2f67df389 │ collection    │ SCAR Antarctic Digital Database (ADD)                            │ Published │
+╘══════════════════════════════════════╧═══════════════╧══════════════════════════════════════════════════════════════════╧═══════════╛
 
 Ok. 18 records.
 ```
@@ -1123,6 +907,8 @@ Manage static site.
 ### `site build            `
 
 Build all static site components.
+
+**Note:** This will only include collections that have been published.
 
 **Note:** This will only include items that have been published.
 
@@ -1298,6 +1084,8 @@ Ok. Site built.
 
 Build pages for all collections.
 
+**Note:** This will only include collections that have been published.
+
 **Note:** This will only include items in collections that have been published.
 
 ```
@@ -1378,7 +1166,7 @@ Ok. feedback page generated.
 
 Build pages for all records (XML).
 
-**Note:** This will only include records for items that have been published.
+**Note:** This will only include records that have been published.
 
 ```
 $ scar-add-metadata-toolbox site build-records

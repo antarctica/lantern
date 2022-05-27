@@ -81,6 +81,25 @@ def test_record_temporal_extent_none():
 
 
 # Coverage test
+def test_item__format_spatial_reference_system_projections():
+    test_cases = [
+        {
+            "in": {"value": "EPSG:3031", "href": "http://www.opengis.net/def/crs/EPSG/0/3031"},
+            "out": "WGS 84 / Antarctic Polar Stereographic ([EPSG:3031](https://spatialreference.org/ref/epsg/3031/))",
+        },
+        {
+            "in": {"value": "EPSG:4326", "href": "http://www.opengis.net/def/crs/EPSG/0/4326"},
+            "out": "WGS 84 ([EPSG:4326](https://spatialreference.org/ref/epsg/wgs-84/))",
+        },
+        {"in": {"value": "EPSG:unsupported", "href": "http://www.opengis.net/def/crs/EPSG/0/unsupported"}, "out": None},
+    ]
+
+    for test_case in test_cases:
+        s = Item._format_spatial_reference_system(test_case["in"])
+        assert s == test_case["out"]
+
+
+# Coverage test
 def test_item_invalid_record_type():
     with pytest.raises(ItemInvalidSourceRecordException):
         Item(record=Record(config={"hierarchy_level": "collection"}))

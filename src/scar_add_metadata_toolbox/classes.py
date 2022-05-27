@@ -1770,6 +1770,8 @@ class Item:
         """
         if spatial_reference_system_code["href"] == "http://www.opengis.net/def/crs/EPSG/0/3031":
             return "WGS 84 / Antarctic Polar Stereographic ([EPSG:3031](https://spatialreference.org/ref/epsg/3031/))"
+        elif spatial_reference_system_code["href"] == "http://www.opengis.net/def/crs/EPSG/0/4326":
+            return "WGS 84 ([EPSG:4326](https://spatialreference.org/ref/epsg/wgs-84/))"
 
     @staticmethod
     def _process_bounding_box_geojson(bounding_box: Dict[str, str]) -> Dict:

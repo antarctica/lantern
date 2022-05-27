@@ -1168,6 +1168,13 @@ class Record(RecordSummary):
         return self.config["metadata"]["date_stamp"]
 
     @property
+    def other_citation_details(self) -> Optional[str]:
+        try:
+            return self.config["identification"]["other_citation_details"]
+        except KeyError:
+            return None
+
+    @property
     def spatial_reference_system(self) -> Optional[dict]:
         try:
             return self.config["reference_system_info"]
@@ -1983,10 +1990,8 @@ class Item:
         return str(self.record.character_set).upper()
 
     @property
-    def citation(self) -> str:  # pragma: no cover (will be addressed in #116)
-        for constraint in self.record.constraints:
-            if constraint["type"] == "usage" and "Please cite this item as" in constraint["statement"]:
-                return constraint["statement"]
+    def citation(self) -> Optional[str]:
+        return self.record.other_citation_details
 
     @property
     def citation_markdown(self) -> str:

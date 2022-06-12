@@ -32,6 +32,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Suppressing CSW dependency warnings
   [#224](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/224)
+* Upgrading Terraform configuration to 1.0.0
+  [#241](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/241)
 
 ## [0.4.3] - 2022-03-08
 

@@ -8,7 +8,7 @@
 # Includes outputs such as VPC subnet identifiers.
 #
 # Source: https://gitlab.data.bas.ac.uk/WSF/bas-aws
-# Terraform source: https://www.terraform.io/docs/providers/terraform/r/remote_state.html
+# Terraform source: https://www.terraform.io/language/state/remote-state-data
 data "terraform_remote_state" "BAS-AWS" {
   backend = "s3"
 
@@ -24,7 +24,7 @@ data "terraform_remote_state" "BAS-AWS" {
 # Includes outputs such as DNS zone identifiers.
 #
 # Source: https://gitlab.data.bas.ac.uk/WSF/bas-core-domains
-# Terraform source: https://www.terraform.io/docs/providers/terraform/r/remote_state.html
+# Terraform source: https://www.terraform.io/language/state/remote-state-data
 data "terraform_remote_state" "BAS-CORE-DOMAINS" {
   backend = "s3"
 

@@ -8,7 +8,7 @@
 # This resource relies on the AWS Terraform provider being previously configured
 #
 # AWS source: http://docs.aws.amazon.com/Route53/latest/DeveloperGuide/rrsets-working-with.html
-# Terraform source: https://www.terraform.io/docs/providers/aws/r/route53_record.html
+# Terraform source: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record
 #
 # Tags are not supported by this resource
 resource "aws_route53_record" "add-catalogue-integration" {
@@ -30,7 +30,7 @@ resource "aws_route53_record" "add-catalogue-integration" {
 # This resource relies on the AWS Terraform provider being previously configured
 #
 # AWS source: http://docs.aws.amazon.com/Route53/latest/DeveloperGuide/rrsets-working-with.html
-# Terraform source: https://www.terraform.io/docs/providers/aws/r/route53_record.html
+# Terraform source: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/route53_record
 #
 # Tags are not supported by this resource
 resource "aws_route53_record" "add-catalogue-production" {

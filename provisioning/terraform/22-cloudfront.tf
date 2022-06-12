@@ -10,7 +10,7 @@
 # This resource relies on the AWS Terraform provider being previously configured
 #
 # AWS source: https://aws.amazon.com/cloudfront/
-# Terraform source: https://www.terraform.io/docs/providers/aws/r/cloudfront_distribution.html
+# Terraform source: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_distribution
 #
 # Tags are not supported by this resource
 resource "aws_cloudfront_distribution" "add-catalogue-integration" {
@@ -108,7 +108,7 @@ resource "aws_cloudfront_distribution" "add-catalogue-integration" {
 # This resource relies on the AWS Terraform provider being previously configured
 #
 # AWS source: https://aws.amazon.com/cloudfront/
-# Terraform source: https://www.terraform.io/docs/providers/aws/r/cloudfront_distribution.html
+# Terraform source: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/cloudfront_distribution
 #
 # Tags are not supported by this resource
 resource "aws_cloudfront_distribution" "add-catalogue-production" {

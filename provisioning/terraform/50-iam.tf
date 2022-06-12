@@ -17,7 +17,7 @@
 # This resource relies on the AWS Terraform provider being previously configured.
 #
 # AWS source: https://aws.amazon.com/iam/
-# Terraform source: https://www.terraform.io/docs/providers/aws/r/iam_user.html
+# Terraform source: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_user
 resource "aws_iam_user" "bas-gitlab-ci-add" {
   name = "bas-gitlab-ci-add"
 }
@@ -38,7 +38,7 @@ resource "aws_iam_user" "bas-gitlab-ci-add" {
 # This resource relies on the AWS Terraform provider being previously configured.
 #
 # AWS source: http://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html#customer-managed-policies
-# Terraform source: https://www.terraform.io/docs/providers/aws/r/iam_user_policy.html
+# Terraform source: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_user_policy
 #
 # Tags are not supported by this resource
 resource "aws_iam_user_policy" "bas-add-integration-management-policy" {
@@ -57,7 +57,7 @@ resource "aws_iam_user_policy" "bas-add-integration-management-policy" {
 # This resource relies on the AWS Terraform provider being previously configured.
 #
 # AWS source: http://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies_managed-vs-inline.html#customer-managed-policies
-# Terraform source: https://www.terraform.io/docs/providers/aws/r/iam_user_policy.html
+# Terraform source: https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_user_policy
 #
 # Tags are not supported by this resource
 resource "aws_iam_user_policy" "bas-add-production-management-policy" {

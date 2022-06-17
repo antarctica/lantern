@@ -5,12 +5,12 @@
       <sourceFolder url="file://$MODULE_DIR$/src/scar_add_metadata_toolbox" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/support/downloads-proxy" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/.idea" />
       <excludeFolder url="file://$MODULE_DIR$/.pytest_cache" />
       <excludeFolder url="file://$MODULE_DIR$/_site" />
       <excludeFolder url="file://$MODULE_DIR$/htmlcov" />
       <excludeFolder url="file://$MODULE_DIR$/provisioning" />
-      <excludeFolder url="file://$MODULE_DIR$/support" />
       <excludeFolder url="file://$MODULE_DIR$/x-records" />
     </content>
     <orderEntry type="jdk" jdkName="Poetry (add-metadata-toolbox)" jdkType="Python SDK" />

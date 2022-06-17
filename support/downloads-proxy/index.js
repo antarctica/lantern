@@ -65,7 +65,7 @@ exports.handler_write = async (event) => {
   const artefact_lookup = generateArtefactLookup(event);
   const artefact_lookups = await getArtefactLookups();
 
-  if (!getArtefactLookup(artefact_lookup['artefact_id'], artefact_lookups['artefacts'])) {
+  if (getArtefactLookup(artefact_lookup['artefact_id'], artefact_lookups['artefacts'])) {
     console.warn(`Lookup item with ID '${artefact_lookup['artefact_id']}' already exists`)
     return {
       statusCode: 409,

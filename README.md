@@ -250,7 +250,7 @@ In addition, there are two independent environments, *staging* and *production*.
 bucket, containing a separate code package and artefact lookups JSON file. The Lambda endpoint for each environment is
 reverse proxied to appear as part of the BAS Data Catalogue (`data.bas.ac.uk`) using the BAS General Load Balancer.
 
-Staging instance:
+* Staging instance:
   * [S3 bucket](https://s3.console.aws.amazon.com/s3/buckets/add-catalogue-downloads-proxy-stage?region=eu-west-1&tab=objects)
   * [Lambda function (Read)](https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/add-catalogue-downloads-proxy-stage)
   * [Lambda endpoint (Read)](https://vp3wuemex36unyzbzx76g4pnce0henks.lambda-url.eu-west-1.on.aws/)
@@ -259,8 +259,7 @@ Staging instance:
   * Lambda endpoint (Read, Reverse Proxied [Staging Catalogue]): `https://data-testing.data.bas.ac.uk/download-testing/`
   * Lambda endpoint (Read, Reverse Proxied [Production Catalogue]): `https://data.bas.ac.uk/download-testing/`
   * Artefact lookups file: `s3://add-catalogue-downloads-proxy-stage/lookups.json`
-
-Production instance:
+* Production instance:
   * [S3 bucket](https://s3.console.aws.amazon.com/s3/buckets/add-catalogue-downloads-proxy-prod?region=eu-west-1&tab=objects)
   * [Lambda function (Read)](https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/add-catalogue-downloads-proxy-prod)
   * [Lambda endpoint (Read)](https://v7lyval5auv7hnqd75rsdhfi640wvpet.lambda-url.eu-west-1.on.aws/)
@@ -321,17 +320,46 @@ An example JSON file looks like:
 Individual artefact lookups can be added through the relevant Lambda function. Bulk additions, or changes/removals 
 of existing lookup items can be made by updating the relevant JSON file via the AWS S3 API.
 
-The Lambda function for adding new entries requires authentication using an AWS IAM principle (user or role). This 
-project defines a Custom Managed IAM Policy within the BAS AWS Account for easily assigning permissions to principles.
+The Lambda function for adding new entries requires authentication using an AWS IAM principle (user or role). This
+project defines a Custom Managed IAM Policy within the BAS AWS Account for easily assigning permissions to principles:
 
-Calls to the Lambda function endpoint require authentication using the 
+* staging: `BAS-ADD-Catalogue-Downloads-Proxy-Function-Write-Staging`
+* production: `BAS-ADD-Catalogue-Downloads-Proxy-Function-Write-Production`
+
+These policies are managed, and should be attached to principles, using Terraform.
+
+Calls to the Lambda function endpoint require authentication using the
 [AWS Signature Version 4](https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html) algorithm.
 
-For example, using the command line:
+A HTTP `204 No Content` status will be returned if the new lookup item is added successfully.
+
+A HTTP `409 Conflict` status will be returned if the artefact ID in the lookup item is already registered.
+
+Example (using the command line):
 
 ```shell
-# with the awscurl installed and access to a AWS IAM principle with appropriate privileges
-$ awscurl --region eu-west-1 --service lambda --access_key $AWS_ACCESS_KEY_ID --secret_key $AWS_SECRET_ACCESS_KEY 'https://$LAMBDA-ENDPOINT.lambda-url.eu-west-1.on.aws/' --request POST --header 'Content-Type: application/json' --data $'{"origin_url": "http://www.example.com/foo.txt", "artefact_id": "758ab069-46d7-47b7-82d4-1905ed155a54", "resource_id": "beaa0a4e-e452-4087-b4f5-eb2b8246dedb", "media_type": "application/geopackage+vnd.sqlite3", "origin_uri": "https://example.com/dataset.gpkg"}'
+# with AWSCuRL installed and AWS credentials configured (`brew install awscurl awscli`, then `aws configure`)
+$ awscurl --region eu-west-1 --service lambda --access_key $AWS_ACCESS_KEY_ID --secret_key $AWS_SECRET_ACCESS_KEY 'https://$LAMBDA-ENDPOINT.lambda-url.eu-west-1.on.aws/' --request POST --header 'Content-Type: application/json' --data $'{"artefact_id": "758ab069-46d7-47b7-82d4-1905ed155a54", "resource_id": "beaa0a4e-e452-4087-b4f5-eb2b8246dedb", "media_type": "application/geopackage+vnd.sqlite3", "origin_uri": "https://example.com/dataset.gpkg"}'
+```
+
+Example (using Python):
+
+```python
+import requests
+# `pip install requests-auth-aws-sigv4`
+from requests_auth_aws_sigv4 import AWSSigV4
+
+lookup_item = {
+    'artefact_id': '758ab069-46d7-47b7-82d4-1905ed155a54',
+    'resource_id': 'beaa0a4e-e452-4087-b4f5-eb2b8246dedb',
+    'media_type': 'application/geopackage+vnd.sqlite3',
+    'origin_uri': 'https://example.com/dataset.gpkg'
+}
+lambda_endpoint = 'https://$LAMBDA-ENDPOINT.lambda-url.eu-west-1.on.aws/'
+
+r = requests.post(url=lambda_endpoint, json=lookup_item, auth=AWSSigV4('lambda'))
+r.raise_for_status()
+print(r.status_code)
 ```
 
 ### Feedback and contact forms

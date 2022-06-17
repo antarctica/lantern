@@ -228,37 +228,111 @@ to appear as part of the current/legacy BAS Discovery Metadata System (DMS).
 
 ### Downloads Proxy 
 
-To support [tracking downloads](#download-metrics) of items, a proxy service is used, which redirects download URLs
-defined in Records/Items to a real location. This redirection is used to increase the chances downloads are tracked, 
-by making the real location of items less obvious, and harder to share/use directly.
+To support [tracking downloads](#download-metrics) of items, a proxy service is used. This proxy intercepts requests to 
+download files, returning a 302 temporary redirect to the item download. Redirection is used to increase, but not 
+ensure, the chances downloads are tracked, by making the real location of items less obvious, and harder to share/use 
+directly.
 
-E.g. A download URL such as `https://data.bas.ac.uk/downloads/123`, where `123` is a unique identifier, will be 
-resolved by this Proxy to a URL such as `https://example.com/dataset.gpkg` (it's real location).
+When a request is made (using a download URL), an [AWS Lambda function](#downloads-proxy-lambda-functions) looks up 
+the distribution option identifier (termed an [Artefact lookup](#downloads-proxy-artefacts-lookup-schema) item) in a 
+JSON file (stored in a a S3 bucket).
 
-The Downloads Proxy is a very simple AWS Lambda function. When a request is made (using a download URL), the unique 
-identifier is looked up in a JSON file. This returns an object containing the real download URL, and metadata on the
-item the download relates to, and it's file type (to track downloads by item and by file format).
+For example, requesting a download URL such as `https://data.bas.ac.uk/download/123`, where `123` is the identifier 
+for a distribution option (artefact lookup) within an item, will return a 302 redirect with a URL to it's real location,
+`https://example.com/dataset.gpkg`.
 
-Entries in this file are managed manually. The JSON file looks like this:
+#### Downloads proxy Lambda functions
+
+The Downloads Proxy is a set of AWS Lambda functions using NodeJS defined in `support/downloads-proxy/index.js`. 
+
+There are two functions used for reading and writing [Artefact Lookups](#downloads-proxy-artefacts-lookup-schema). 
+In addition, there are two independent environments, *staging* and *production*. Each environment uses a separate S3 
+bucket, containing a separate code package and artefact lookups JSON file. The Lambda endpoint for each environment is
+reverse proxied to appear as part of the BAS Data Catalogue (`data.bas.ac.uk`) using the BAS General Load Balancer.
+
+Staging instance:
+  * [S3 bucket](https://s3.console.aws.amazon.com/s3/buckets/add-catalogue-downloads-proxy-stage?region=eu-west-1&tab=objects)
+  * [Lambda function (Read)](https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/add-catalogue-downloads-proxy-stage)
+  * [Lambda endpoint (Read)](https://vp3wuemex36unyzbzx76g4pnce0henks.lambda-url.eu-west-1.on.aws/)
+  * [Lambda function (Write)](https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/add-catalogue-downloads-proxy-write-stage)
+  * [Lambda endpoint (Write)](https://zrpqdlufnfqcmqmzppwzegosvu0rvbca.lambda-url.eu-west-1.on.aws/)
+  * Lambda endpoint (Read, Reverse Proxied [Staging Catalogue]): `https://data-testing.data.bas.ac.uk/download-testing/`
+  * Lambda endpoint (Read, Reverse Proxied [Production Catalogue]): `https://data.bas.ac.uk/download-testing/`
+  * Artefact lookups file: `s3://add-catalogue-downloads-proxy-stage/lookups.json`
+
+Production instance:
+  * [S3 bucket](https://s3.console.aws.amazon.com/s3/buckets/add-catalogue-downloads-proxy-prod?region=eu-west-1&tab=objects)
+  * [Lambda function (Read)](https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/add-catalogue-downloads-proxy-prod)
+  * [Lambda endpoint (Read)](https://v7lyval5auv7hnqd75rsdhfi640wvpet.lambda-url.eu-west-1.on.aws/)
+  * [Lambda function (Write)](https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/add-catalogue-downloads-proxy-write-prod)
+  * [Lambda endpoint (Write)](https://dvej4gdfa333uci4chyhkxj3wq0fkxrs.lambda-url.eu-west-1.on.aws/)
+  * Lambda endpoint (Read, Reverse Proxied [Staging Catalogue]): `https://data-testing.data.bas.ac.uk/download/`
+  * Lambda endpoint (Read, Reverse Proxied [Production Catalogue]): `https://data.bas.ac.uk/download/`
+  * Artefact lookups file: `s3://add-catalogue-downloads-proxy-prod/lookups.json`
+
+See the [relevant](#downloads-proxy-source) development sub-section for information on the source code for these 
+functions.
+
+See the [Terraform](#terraform) setup sub-section for information on how to provision the resources for these functions.
+
+See the [BAS API Load Balancer](#bas-api-load-balancer) setup sub-section for information on how to setup reverse 
+proxying for these functions.
+
+#### Downloads proxy artefacts lookup schema
+
+The Downloads Proxy reads information about artefacts that can be downloaded from a JSON file stored in an S3 bucket.
+This JSON file can be [Updated](#updating-downloads-proxy-artefacts-lookups) as needed to include new artefact downloads 
+or amend existing entries. The structure of this file consists of an object, the keys of which are artefact IDs, and 
+values are an artefact lookup item. 
+
+An artefact lookup item is defined as an object with these properties:
+
+| Property      | Data Type | Required | Example                                |
+| ------------- | --------- | -------- |----------------------------------------|
+| `artefact_id` | String    | Yes      | '758ab069-46d7-47b7-82d4-1905ed155a54' |
+| `resource_id` | String    | Yes      | 'beaa0a4e-e452-4087-b4f5-eb2b8246dedb' |
+| `media_type`  | String    | Yes      | 'application/geopackage+vnd.sqlite3'   |
+| `origin_uri`  | String    | Yes      | 'https://example.com/dataset.gpkg'     |
+
+This structure is formally described by a JSON Schema in `support/downloads/proxy/artefact-lookups-v1.json`, which 
+is published as part of the [BAS Metadata Standards](https://metadata-standards.data.bas.ac.uk) as:
+
+https://metadata-standards.data.bas.ac.uk/scar-add-metadata-toolbox-downloads-proxy-schemas/v1/artefact-lookups-v1.json
+
+An example JSON file looks like:
 
 ```json
 {
-  "123": {
-    "item_id": "abc",
-    "transfer_option_format": "gpkg",
-    "transfer_option_location": "https://example.com/data/example1.gpkg"
-  },
-  "345": {
-    "item_id": "def",
-    "transfer_option_format": "gpkg",
-    "transfer_option_location": "https://example.com/data/example2.gpkg"
+  "$id": "https://example.com/lookup.json",
+  "$schema": "https://metadata-standards.data.bas.ac.uk/scar-add-metadata-toolbox-downloads-proxy-schemas/v1/artefact-lookups-v1.json",
+  "artefacts": {
+    "a16faf66-3ed1-46e5-8f53-2ef398d86b3f": {
+      "artefact_id": "758ab069-46d7-47b7-82d4-1905ed155a54",
+      "resource_id": "beaa0a4e-e452-4087-b4f5-eb2b8246dedb",
+      "media_type": "application/geopackage+sqlite3",
+      "origin_uri": "https://example.com/dataset.gpkg"
+    }
   }
 }
 ```
 
-The Lambda function, and JSON file, are managed within the AWS Console as part of the BAS AWS account.
+#### Updating downloads proxy artefacts lookups
 
-[bas-add-data-catalogue-downloads-metrics function](https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/bas-add-data-catalogue-downloads-metrics?tab=code).
+Individual artefact lookups can be added through the relevant Lambda function. Bulk additions, or changes/removals 
+of existing lookup items can be made by updating the relevant JSON file via the AWS S3 API.
+
+The Lambda function for adding new entries requires authentication using an AWS IAM principle (user or role). This 
+project defines a Custom Managed IAM Policy within the BAS AWS Account for easily assigning permissions to principles.
+
+Calls to the Lambda function endpoint require authentication using the 
+[AWS Signature Version 4](https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html) algorithm.
+
+For example, using the command line:
+
+```shell
+# with the awscurl installed and access to a AWS IAM principle with appropriate privileges
+$ awscurl --region eu-west-1 --service lambda --access_key $AWS_ACCESS_KEY_ID --secret_key $AWS_SECRET_ACCESS_KEY 'https://$LAMBDA-ENDPOINT.lambda-url.eu-west-1.on.aws/' --request POST --header 'Content-Type: application/json' --data $'{"origin_url": "http://www.example.com/foo.txt", "artefact_id": "758ab069-46d7-47b7-82d4-1905ed155a54", "resource_id": "beaa0a4e-e452-4087-b4f5-eb2b8246dedb", "media_type": "application/geopackage+vnd.sqlite3", "origin_uri": "https://example.com/dataset.gpkg"}'
+```
 
 ### Feedback and contact forms
 
@@ -276,16 +350,15 @@ Analytics.
 
 ### Download metrics
 
-To support tracking downloads of item artefacts, a [Downloads Proxy](#downloads-proxy) service is used. This service
-logs events within Google Analytics. See the [Website Metrics](#website-metrics) section for how to access event 
-reports.
+To support tracking downloads of item artefacts, the [Downloads Proxy](#downloads-proxy) is used. This service logs 
+events within Google Analytics. See the [Website Metrics](#website-metrics) section for how to access event reports.
 
-For download metrics to be recorded, download URLs (i.e. https://data.bas.ac.uk/downloads/123`) must be used.
-It doesn't matter if the URL is accessed through a data catalogue item page, or if the link is shared directly, 
-downloads will still be recorded.
+For download metrics to be recorded, download URLs (i.e. `https://data.bas.ac.uk/downloads/123`) must be used.
+It doesn't matter if the URL is accessed through a data catalogue item page, indirectly through another catalogue, or
+the link is shared directly.
 
-These download metrics are not foolproof however. If a user shares the real file after downloading it, or is determined 
-enough to discover the real URL and share that, the tracking can be bypassed.
+These download metrics are not foolproof however. If a user hosts and shares the file after downloading it themselves 
+for example, no metrics will be recorded.
 
 ### Sentry error tracking
 
@@ -390,7 +463,7 @@ $ docker compose down
 ```
 
 **Note:** The `terraform apply` step will need to be taken in stages for Azure application registrations. See the notes 
-in `provisioning/terraform/54-azure_app_registrations.tf` for details.
+in `provisioning/terraform/56-azure_app_registrations.tf` for details.
 
 Once provisioned, the following steps need to be taken manually:
 
@@ -434,15 +507,21 @@ This has been approved by NERC RTS in
 
 Manually request a new application to be deployed from the BAS IT ServiceDesk using the
 [request template](http://ictdocs.nerc-bas.ac.uk/wiki/index.php/Provisioning_Process#Template_ServiceDesk_request).
-
 See [#44](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/44) for an example.
 
 Manually request a new PostGIS database for the CSW catalogue backing databases from the BAS IT ServiceDesk and 
 [setup](#pycsw-backing-database-setup) when provisioned.
 
+Manually request entries are setup in the BAS General Load Balancer for:
+
+* Data Catalogue application URLs
+* [Downloads proxy](#downloads-proxy) instance endpoints (see  
+[#242](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/242) for an example)
+
+### BAS API Load Balancer
+
 Manually [add a new service](https://gitlab.data.bas.ac.uk/WSF/api-load-balancer#adding-a-new-service) and related
 [documentation](https://gitlab.data.bas.ac.uk/WSF/api-docs#adding-a-new-service-service-version).
-
 See [#60](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/60) for an example.
 
 ### PyCSW backing database setup
@@ -487,18 +566,6 @@ ALTER INDEX wkb_geometry_idx RENAME TO ix_published_wkb_geometry_idx;
 
 ### Development environment
 
-Once setup, a development environment can be used to:
-
-* run all components locally:
-  * useful for end-to-end testing
-  * useful for testing changes to how data is loaded into CSW catalogues
-* use real data but generate a local static site:
-  * useful for iterating changes to static website templates
-  * NOT YET SUPPORTED - see [#200](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/200)
-* use real data:
-  * useful for managing records (i.e. for ADD releases)
-  * NOT YET SUPPORTED - see [#201](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/201)
-
 Git, [Poetry](https://python-poetry.org) and [Docker Desktop](https://www.docker.com/products/docker-desktop) are 
 required to set up a local development environment of this project.
 
@@ -516,7 +583,12 @@ $ poetry install
 $ docker compose pull
 ```
 
-To run all components locally:
+#### Running all components locally
+
+Useful for:
+
+* end-to-end testing
+* testing changes to how data is loaded into CSW catalogues
 
 ```shell
 $ cd add-metadata-toolbox
@@ -524,10 +596,10 @@ $ cd add-metadata-toolbox
 # Start the local Postgres database for CSW, and Nginx for the local static website
 $ docker compose up
 
-# In another terminal; Start the flask application as a server (it will use the local postgres database by default)
+# In another terminal; Start the Flask application as a server (it will use the local postgres database by default)
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask run
 
-# In another terminal; Run flask CLI commands as a client
+# In another terminal; Run Flask CLI commands as a client
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask [command]
 ```
 
@@ -536,9 +608,84 @@ with `FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask
 
 When built, the local static site can be accessed from [http://localhost:9000](http://localhost:9000).
 
+Quick start (example):
+
+```shell
+$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask csw setup unpublished 
+$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask csw setup published 
+$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask auth sign-in
+$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask records import --publish ~/some-example-record.json
+$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask site build
+# (after example-record updated)
+$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask records import --publish --allow-update --allow-republish ~/some-example-record.json
+```
+
+#### Building a local static site with production data 
+
+Useful for developing and testing changes to static website templates.
+
+```shell
+$ cd add-metadata-toolbox
+
+# Start the local Postgres database for CSW [not used], and Nginx for the local static website
+$ docker compose up
+```
+
+See the [Command Reference](docs/command-reference.md) for how to use the CLI. Where `flask` is written, replace this
+with:
+
+```shell
+# Run Flask CLI commands as a client, with remote server
+$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development CSW_ENDPOINT_UNPUBLISHED=https://api.bas.ac.uk/data/metadata/add/csw/v1/unpublished CSW_ENDPOINT_PUBLISHED=https://api.bas.ac.uk/data/metadata/add/csw/v1/published poetry run flask [command]
+```
+
+When built, the local static site can be accessed from [http://localhost:9000](http://localhost:9000).
+
+**Note:** to use the remote server in the staging environment instead, use this command for `flask` commands:
+
+```shell
+# Run Flask CLI commands as a client, with remote server
+$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development CSW_ENDPOINT_UNPUBLISHED=http://add-metadata-toolbox-staging.bslmagf.nerc-bas.ac.uk/csw/unpublished CSW_ENDPOINT_PUBLISHED=http://add-metadata-toolbox-staging.bslmagf.nerc-bas.ac.uk/csw/published poetry run flask [command]
+```
+
+#### Using a local client and local server with a remote database
+
+Useful for testing with real data but where changes to the server application are being developed or tested.
+
+```shell
+$ cd add-metadata-toolbox
+
+# Start the local Postgres database for CSW [not used], and Nginx for the local static website
+$ docker compose up
+
+# In another terminal; Start the Flask application as a server (using the production database)
+$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION=postgresql://pycsw_production:xxx@bsldb.nerc-bas.ac.uk/pycsw_production CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION=postgresql://pycsw_production:xxx@bsldb.nerc-bas.ac.uk/pycsw_production poetry run flask run
+
+# In another terminal; Run Flask CLI commands as a client
+$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask [command]
+```
+
+Where `xxx` should be replaced with real credentials from the *MAGIC CSW [Prod]* entry in the MAGIC 1Password.
+
+See the [Command Reference](docs/command-reference.md) for how to use the CLI. Where `flask` is written, replace this
+with `FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask`.
+
+When built, the local static site can be accessed from [http://localhost:9000](http://localhost:9000).
+
+**Note:** to use the database staging environment instead, use this command for starting the Flask application as a 
+server:
+
+```shell
+# In another terminal; Start the Flask application as a server (using the production database)
+$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION=postgresql://pycsw_staging:xxx@bsldb.nerc-bas.ac.uk/pycsw_staging CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION=postgresql://pycsw_staging:xxx@bsldb.nerc-bas.ac.uk/pycsw_staging poetry run flask run
+```
+
+Where `xxx` should be replaced with real credentials from the *MAGIC CSW [Staging]* entry in the MAGIC 1Password.
+
 ### Package structure
 
-All code for this project should be defined in the `scar_add_metadata_toolbox` package, with the exception of tests.
+All code for this project should be defined in the `scar_add_metadata_toolbox` package, with the exception of tests 
+and the [Downloads Proxy](#downloads-proxy).
 
 In brief, this package is comprised of these modules:
 
@@ -747,6 +894,21 @@ $ cd tests/scar_add_metadata_toolbox
 $ poetry run python -c "from records import make_csw_test_records; make_csw_test_records()"
 ```
 
+### Downloads Proxy source
+
+Source code for the [Downloads Proxy](#downloads-proxy) is contained in a single JavaScript (NodeJS) module, `.
+/support/downloads-proxy/index.js`. This module is composed of a set of JS functions with two AWS Lambda event handler 
+entrypoints for the read and write Lambda functions (i.e. both Lambda functions read from the same source file but 
+use different entrypoint methods).
+
+Lambda event handlers receive event and context information as per the 
+[Lambda documentation](https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-develop-integrations-lambda.html#http-api-develop-integrations-lambda.proxy-format).
+
+The Lambda function execution environment has access to the NodeJS standard library and the AWS JavaScript SDK.
+
+See the [Downloads Proxy Deployment](#downloads-proxy-deployment) sub-section for information on releasing changes to 
+the Download Proxy code.
+
 ## Deployment
 
 ### Python package
@@ -828,6 +990,54 @@ Usage documentation for this API service is held in `docs/api/` and currently
 
 * `s3://bas-api-docs-content-testing/services/data/metadata/add/csw/`
 * `s3://bas-api-docs-content/services/data/metadata/add/csw/`
+
+### Downloads proxy deployment
+
+When [Source Code](#downloads-proxy-source) for the [Downloads Proxy](#downloads-proxy) is updated, it needs to be
+packaged into a zip archive for deployment via [Terraform](#terraform).
+
+**Note:** Terraform will automatically deploy either zip archive if its file hash changes. Therefore only update the 
+archives of Download Proxy environments you wish to update. I.e. don't update the production archive if changes are 
+still being tested.
+
+To package the source code into a deployment package for the staging environment:
+
+```shell
+$ cd support/downloads-proxy/
+$ zip -u downloads-proxy-stage.zip index.js
+```
+
+To package the source code into a deployment package for the production environment:
+
+```shell
+$ cd support/downloads-proxy/
+$ zip -u downloads-proxy-prod.zip index.js
+```
+
+To deploy changes, plan and apply the [Terraform](#terraform) configuration.
+
+### Downloads proxy JSON Schema deployment
+
+The JSON Schema used for the [Downloads Proxy](#downloads-proxy-artefacts-lookup-schema) is distributed through the BAS 
+Metadata Standards website, alongside other related schemas from other projects.
+
+**Note:** These instructions assume the JSON Schema is version 1. Replace `v1` if this version is different (e.g. `v3`).
+
+To deploy the latest Downloads Proxy JSON Schema for use within the *staging* environment of the BAS Metadata 
+Standards website:
+
+```shell
+# with the AWS CLI installed and configured with appropriate credentials
+$ aws s3 cp ./support/downloads-proxy/artefact-lookups-v1.json s3://metadata-standards-testing.data.bas.ac.uk/scar-add-metadata-toolbox-downloads-proxy-schemas/v1/artefact-lookups-v1.json
+```
+
+To deploy the latest Downloads Proxy JSON Schema for use within the *production* environment of the BAS Metadata 
+Standards website:
+
+```shell
+# with the AWS CLI installed and configured with appropriate credentials
+$ aws s3 cp ./support/downloads-proxy/artefact-lookups-v1.json s3://metadata-standards.data.bas.ac.uk/scar-add-metadata-toolbox-downloads-proxy-schemas/v1/artefact-lookups-v1.json
+```
 
 ### Continuous Deployment
 

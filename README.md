@@ -245,10 +245,13 @@ for a distribution option (artefact lookup) within an item, will return a 302 re
 
 The Downloads Proxy is a set of AWS Lambda functions using NodeJS defined in `support/downloads-proxy/index.js`. 
 
-There are two functions used for reading and writing [Artefact Lookups](#downloads-proxy-artefacts-lookup-schema). 
-In addition, there are two independent environments, *staging* and *production*. Each environment uses a separate S3 
-bucket, containing a separate code package and artefact lookups JSON file. The Lambda endpoint for each environment is
-reverse proxied to appear as part of the BAS Data Catalogue (`data.bas.ac.uk`) using the BAS General Load Balancer.
+There are two functions used for reading and writing [Artefact Lookups](#downloads-proxy-artefacts-lookup-schema).
+In addition, there are two independent environments, *staging* and *production*. Each environment uses a separate S3
+bucket, with object versioning, containing a separate code package and artefact lookups JSON file. The Lambda endpoint 
+for each environment is reverse proxied to appear as part of the BAS Data Catalogue (`data.bas.ac.uk`) using the BAS 
+General Load Balancer.
+
+**WARNING!** Some or all lookup items in the staging environment MAY be removed at anytime.
 
 * Staging instance:
   * [S3 bucket](https://s3.console.aws.amazon.com/s3/buckets/add-catalogue-downloads-proxy-stage?region=eu-west-1&tab=objects)
@@ -280,9 +283,9 @@ proxying for these functions.
 #### Downloads proxy artefacts lookup schema
 
 The Downloads Proxy reads information about artefacts that can be downloaded from a JSON file stored in an S3 bucket.
-This JSON file can be [Updated](#updating-downloads-proxy-artefacts-lookups) as needed to include new artefact downloads 
-or amend existing entries. The structure of this file consists of an object, the keys of which are artefact IDs, and 
-values are an artefact lookup item. 
+This JSON file can be [Updated](#updating-downloads-proxy-artefacts-lookups) as needed to include new artefact downloads
+or amend existing entries. The structure of this file consists of an object, the keys of which are artefact IDs, and
+values are an artefact lookup item.
 
 An artefact lookup item is defined as an object with these properties:
 
@@ -360,6 +363,21 @@ lambda_endpoint = 'https://$LAMBDA-ENDPOINT.lambda-url.eu-west-1.on.aws/'
 r = requests.post(url=lambda_endpoint, json=lookup_item, auth=AWSSigV4('lambda'))
 r.raise_for_status()
 print(r.status_code)
+```
+
+#### Resetting staging downloads proxy lookup items
+
+Periodically, lookup items in the staging environment should be reset on the production environment to clear out 
+temporary or invalid lookup items added when developing integrations or in other testing.
+
+This involves copying the lookup file from the production environment to the staging environment.
+
+**Note:** Lookup files are versioned using S3 object versioning. If needed, this can be used to recover overwritten 
+staging lookup items.
+
+```shell
+# with the AWS CLI installed and configured with appropriate credentials
+$ aws s3 cp s3://add-catalogue-downloads-proxy-prod/lookups.json s3://add-catalogue-downloads-proxy-stage/lookups.json
 ```
 
 ### Feedback and contact forms

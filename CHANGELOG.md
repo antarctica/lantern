@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
+* Additional documentation for resetting the Downloads Proxy staging environment
+  [#248](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/248)
 * Downloads Proxy version 2 
   [#242](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/242)
 * Note about data currency in WMS usage instructions

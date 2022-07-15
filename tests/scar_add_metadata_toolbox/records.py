@@ -146,11 +146,11 @@ def make_test_record_config(
                     "terms": [
                         {
                             "term": "TOPOGRAPHY",
-                            "href": "https://gcmdservices.gsfc.nasa.gov/kms/concept/3e822484-c94a-457b-a32f-376fcbd6fd35",
+                            "href": "https://gcmd.earthdata.nasa.gov/kms/concept/3e822484-c94a-457b-a32f-376fcbd6fd35",
                         },
                         {
                             "term": "STUFF",
-                            "href": "https://gcmdservices.gsfc.nasa.gov/kms/concept/c4992969-05db-4bb6-9dac-d35535503650",
+                            "href": "https://gcmd.earthdata.nasa.gov/kms/concept/c4992969-05db-4bb6-9dac-d35535503650",
                         },
                     ],
                     "type": "theme",
@@ -272,7 +272,7 @@ def make_test_record_config(
                     "terms": [
                         {
                             "term": "ANTARCTICA",
-                            "href": "https://gcmdservices.gsfc.nasa.gov/kms/concept/70fb5a3b-35b1-4048-a8be-56a0d865281c",
+                            "href": "https://gcmd.earthdata.nasa.gov/kms/concept/70fb5a3b-35b1-4048-a8be-56a0d865281c",
                         }
                     ],
                     "type": "place",

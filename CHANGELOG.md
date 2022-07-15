@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Refactoring Collections to use Records, rather than a standalone implementation
   [#171](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/171)
+* Switching to new GCMD keywords URL
+  [#236](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/236)
 
 ### Added
 

@@ -1506,8 +1506,14 @@ class TestCommandAuthSignOut:
         assert result.exit_code == 0
         assert "Ok. Access token removed." in result.output
 
+    @pytest.mark.usefixtures("app")
     @pytest.mark.usefixtures("app_runner")
-    def test_cli_sign_out_missing_file(self, app_runner):
+    def test_cli_sign_out_missing_file(self, app, app_runner):
+        # ensure auth file doesn't exist to trigger exception
+        auth_file_path: Path = app.config["AUTH_SESSION_FILE_PATH"]
+        if auth_file_path.exists():
+            auth_file_path.unlink()
+
         result = app_runner.invoke(args=["auth", "sign-out"])
         assert result.exit_code == 0
         assert "Ok. Access token removed." in result.output

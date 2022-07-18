@@ -659,6 +659,6 @@ def auth_sign_out():
     """Remove existing access token if present."""
     try:
         del current_app.auth_token.payload
-    except FileNotFoundError:  # pragma: no cover (will be addressed in #231)
+    except FileNotFoundError:
         pass
     print("Ok. Access token removed.")

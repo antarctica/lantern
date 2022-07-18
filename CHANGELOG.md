@@ -26,6 +26,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Fixed
 
 * removing experimental watermark style accidentially applied to all catalogue pages
+* ensuring any pre-existing auth file is removed when testing sign-out command where an auth file does not yet exist
+  [#231](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/231)
   [#234](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/234)
 * documentation inaccuracies and tweaks
   [#232](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/232)

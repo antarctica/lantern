@@ -913,7 +913,7 @@ A `.coveragerc` file is used to omit code from the `scar_add_metadata_toolbox.ha
 To measure coverage manually:
 
 ```shell
-$ FLASK_ENV=testing poetry run pytest --cov=scar_add_metadata_toolbox --cov-config=.coveragerc --cov-fail-under=100 --cov-report=html .
+$ FLASK_ENV=testing poetry run pytest --random-order --cov=scar_add_metadata_toolbox --cov-config=.coveragerc --cov-fail-under=100 --cov-report=html .
 ```
 
 [Continuous Integration](#continuous-integration) will check coverage automatically and fail if less than 100%.

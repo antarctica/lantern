@@ -420,6 +420,13 @@ Error tracking will be enabled or disabled depending on the environment. It can 
 
 Logs for this service are written to *stdout/stderr* as appropriate.
 
+#### Application logging (BAS IT)
+
+When deployed as a BAS IT service, application logs are captured by Apache, and written to a log files. See  
+[Key Paths](#key-paths) section for location). Log files are rotated weekly at ≈03:00 each week.
+
+**Note:** When logs are rotated the Flask application will be restarted.
+
 ### Hazardous Materials module
 
 In order to implement the [CSW package modifications](#csw-package-modifications), the `pycsw` and `owslib` packages

@@ -990,9 +990,70 @@ This application is deployed to a development, staging and production environmen
 in the relevant Ansible inventory in:
 [`/inventory/magic/`](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/tree/master/inventory/magic) (internal)
 
-**Note:** The process to run/update this playbook/variables is still under development (see
-[#44](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/44) (internal) for background). Currently
-either needs to be requested through the [IT ServiceDesk](mailto:servicedesk@bas.ac.uk).
+#### Deployment process
+
+To deploy a new version of the Python package to the IT managed service:
+
+1. create an issue in the 
+   [Station Data Management](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/issues) project
+    * this should link to the release, in this project, being deployed
+    * for example: https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/issues/62
+2. create a merge request from this issue and update:
+    * the [`scar_add_metadata_toolbox_version`](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/group_vars/magic/add-metadata-toolbox.yml#L16) 
+      group variable to the new release
+3. push change to branch and deploy to the development instance, using an 
+   [BAS IT Ansible Deployment Environment](#bas-it-ansible-deployment-environment) [1]
+
+[1]
+
+```shell
+# ssh into deployment environment
+$ cd ./ansible
+$ workon venv
+$ git fetch origin
+$ git switch -c $BRANCH origin/$BRANCH
+$ invoke ansible -e dev magic/add-metadata-toolbox
+```
+
+#### BAS IT Ansible deployment environment
+
+A virtual machine is required to setup a deployment environment from which to run BAS IT Ansible deployments:
+
+**Note:** Deployment environments are shared between projects, a pre-configured environment may already be setup.
+
+1. create a new virtual machine (CentOS is recommended)
+2. setup a user with sudo access, and who's public key is registered in GitLab (to allow cloning projects)
+3. install required software [1]
+4. configure software [2]
+
+[1]
+
+```shell
+# update existing software first
+$ yum update
+$ shutdown -r now
+
+# install software
+$ yum install epel-release python-virtualenvwrapper git libffi-devel gcc
+```
+
+[2]
+
+```shell
+$ echo 'export WORKON_HOME=$HOME/.virtualenvs' >> ~/.bashrc
+$ echo 'source /usr/bin/virtualenvwrapper.sh' >> ~/.bashrc
+# restart shell
+
+$ git clone git@gitlab.data.bas.ac.uk:station-data-management/ansible.git
+$ cd ansible
+$ mkvirtualenv -a . venv
+$ venv/bin/activate
+(venv) $ pip install --upgrade pip
+(venv) $ pip install -r requirements.txt --index-url http://bsl-repoa/pdc/halley/pip --trusted-host bsl-repoa
+(venv) $ echo '[Secret]' > $/.vault_magic.password
+```
+
+Where: `[Secret]` is from the 'Ansible Vault - BAS IT (MAGIC Dev)' entry in 1Password.
 
 #### Key paths
 

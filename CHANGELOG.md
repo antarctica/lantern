@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
+* Additional documentation on how log rotate is used in BAS IT deployments
+  [#215](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/215)
 * Additional documentation for resetting the Downloads Proxy staging environment
   [#248](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/248)
 * Downloads Proxy version 2 

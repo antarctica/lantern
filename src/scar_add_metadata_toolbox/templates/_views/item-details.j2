@@ -100,18 +100,17 @@
 
 {% block styles %}
     {{ super() }}
-    <link rel="stylesheet" href="https://cdn.web.bas.ac.uk/libs/leaflet/1.6.0/css/leaflet.min.css" integrity="sha256-UU2pVKdO1sE4T0KZHipoxQmYePb1fWMCCR09RzM616Y=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://js.arcgis.com/4.23/esri/themes/dark/main.css" />
     <link rel="stylesheet" href="/static/css/map.css" />
 {% endblock %}
 
 {% block scripts %}
     {{ super() }}
-    <script src="https://cdn.web.bas.ac.uk/libs/leaflet/1.6.0/js/leaflet.min.js" integrity="sha256-JOnsZs28NnzfQkVhxtJmqdalYkF/ejmYWXD//vFzgWA=" crossorigin="anonymous"></script>
-    <script src="https://cdn.web.bas.ac.uk/libs/proj4js/2.4.3/proj4-2.4.3.min.js" integrity="sha256-2ywP8gZSxQqabTEhcw+Xc3zpb/n6aAc3D0sneTtRNHw=" crossorigin="anonymous"></script>
-    <script src="https://cdn.web.bas.ac.uk/libs/proj4leaflet/v1.0.1/js/proj4leaflet-1.0.1.min.js" integrity="sha256-2/tIGOC+qdPryEVGe/iMOwpH4YHC3tcam5t8aqi74KI=" crossorigin="anonymous"></script>
+    <script src="https://js.arcgis.com/4.23/"></script>
     <script>
-        var item_id = '{{ item.identifier }}';
-        var geographic_bounding_extent = {{ item.geographic_extent.bounding_box_geojson }};
+        const item_id = '{{ item.identifier }}';
+        const esri_api_key = '{{ config.ESRI_API_KEY }}';
+        const geographic_bounding_extent = {{ item.geographic_extent.bounding_box_geojson }};
     </script>
     <script src="/static/js/item.js"></script>
 {% endblock %}

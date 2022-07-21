@@ -42,6 +42,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
+* Replacing extent map with ESRI ArcGIS JS client and map data
+  [#42](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/42)
 * Suppressing CSW dependency warnings
   [#224](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/224)
 * Upgrading Terraform configuration to 1.0.0

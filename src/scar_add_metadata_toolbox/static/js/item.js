@@ -120,70 +120,84 @@ function itemContactFormSubmit(e, form) {
 // Item map
 //
 
-var epsg_3031 = new L.Proj.CRS(
-  'EPSG:3031',
-  '+proj=stere +lat_0=-90 +lat_ts=-71 +lon_0=0 +k=1 +x_0=0 +y_0=0 +ellps=WGS84 +datum=WGS84 +units=m +no_defs ',
-  {
-    origin: [-4194304, 4194304],
-    resolutions: [
-      16384,
-      8192,
-      4096,
-      2048,
-      1024,
-      512,
-    ]
-  }
-);
+function itemMap() {
+    require([
+        "esri/config",
+        "esri/geometry/Polygon",
+        "esri/Map",
+        "esri/views/MapView",
+        "esri/Basemap",
+        "esri/layers/TileLayer",
+        "esri/Graphic",
+        "esri/layers/GraphicsLayer",
+        "esri/widgets/ScaleBar"
+    ], function (
+        esriConfig,
+        Polygon,
+        Map,
+        MapView,
+        Basemap,
+        TileLayer,
+        Graphic,
+        GraphicsLayer,
+        ScaleBar
+    ) {
+        esriConfig.apiKey = esri_api_key;
 
-var antarctica = L.tileLayer.wms('https://maps.bas.ac.uk/antarctic/wms', {
-  attribution: 'Map Data <a href="https://www.add.scar.org">SCAR Antarctic Digital Database</a>',
-  layers: 'add:antarctic_hillshade_and_bathymetry',
-  format: 'image/png',
-  transparent: true,
-  crs: epsg_3031,
-  tiled: true
-});
-var sub_antarctica = L.tileLayer.wms('https://maps.bas.ac.uk/antarctic/wms', {
-  attribution: 'Map Data <a href="https://www.add.scar.org">SCAR Antarctic Digital Database</a>',
-  continuousWorld: true,
-  layers: 'add:sub_antarctic_coastline',
-  format: 'image/png',
-  transparent: true,
-  crs: epsg_3031,
-  tiled: true
-});
+        const polygon = new Polygon({
+          rings: geographic_bounding_extent.features[0].geometry.coordinates,
+          spatialReference: { wkid: 4326 }
+        });
 
-function geographic_bounding_extent_style(feature) {
-  return {
-    weight: 2,
-    opacity: 1,
-    color: '#CC0033',
-    fill: '#CC0033',
-  };
+        const simpleFillSymbol = {
+            type: "simple-fill",
+            color: [204, 0, 51, 0.2], // #CC0033 @ 80% opacity
+            outline: {
+                color: [204, 0, 51, 1], // #CC0033
+                width: 1
+            }
+        };
+
+        const graphicsLayer = new GraphicsLayer();
+
+        const polygonGraphic = new Graphic({
+            geometry: polygon,
+            symbol: simpleFillSymbol
+        });
+
+        const basemapLayer = new TileLayer({
+            portalItem: {
+                id: "35d47151a80747a79767901444e1fe80"
+            }
+        });
+
+        const basemap = new Basemap({
+            baseLayers: [basemapLayer]
+        });
+
+        const map = new Map({
+            basemap: basemap
+        });
+
+        const view = new MapView({
+            map: map,
+            container: "item-map",
+            extent: polygon.extent
+        });
+
+        const ESRIscaleBar = new ScaleBar({
+            unit: "dual",
+            view: view
+        });
+
+        graphicsLayer.add(polygonGraphic);
+        map.add(graphicsLayer);
+        view.ui.add(ESRIscaleBar, {position: "bottom-left"});
+    });
 }
 
 $(function() {
-  $('#app-item-nav a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-    if (e.target.hash === '#item-details-extent') {
-      var map_container = L.DomUtil.get('item-map');
-      if(map_container.innerHTML === ''){
-        // Load map when viewed in a tab for the first time
-        var map = L.map('item-map', {
-          attribution: false,
-          crs: epsg_3031,
-          layers: [
-            antarctica,
-            sub_antarctica
-          ],
-          center: [-90, 0],
-          zoom: 0,
-          maxZoom: 5
-        });
-        L.control.scale().addTo(map);
-        L.Proj.geoJson(geographic_bounding_extent, {style: geographic_bounding_extent_style()}).addTo(map);
-        map.attributionControl.setPrefix(false);
-      }
-    }
-  })
+    $('#app-item-nav a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+        itemMap();
+    })
 });

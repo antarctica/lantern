@@ -211,16 +211,47 @@ re-synced automatically by BAS IT every Tuesday at 02:00.
 
 ### Jinja templates
 
-A series of [Jinja2](https://jinja.palletsprojects.com/) templates are used for rendering pages in the *Catalogue* 
-component.
+A series of [Jinja2](https://jinja.palletsprojects.com/) templates are used for rendering pages, including 
+[Items](#items), [Collections](#collections) from the *Catalogue* component. Templates use the 
+[BAS Style Kit Jinja Templates](https://pypi.org/project/bas-style-kit-jinja-templates/), which in turn implements the 
+[BAS Style Kit](https://style-kit.web.bas.ac.uk).
 
-Templates use the [BAS Style Kit Jinja Templates](https://pypi.org/project/bas-style-kit-jinja-templates/) which use 
-the [BAS Style Kit](https://style-kit.web.bas.ac.uk).
+Templates are stored in the `scar_add_metadata_toolbox.templates` module and organised into:
+
+* `_layouts`: base page designs, currently using the 
+  [Standard Page](https://github.com/antarctica/bas-style-kit-jinja-templates#layouts) layout from the BAS Style Kit
+* `_views`: designs for specific pages or types of content, such as the feedback and legal pages and Items
+* `_includes`: components of a page that may be content specific (specific tabs within Item pages), or shared
+
+For example, the template used for Item pages is a view which inherits from the application layout and combines a 
+number of includes to define a page structure with a fixed header and a series of tabs, each with their own content.
+
+### ESRI web maps
+
+To display the spatial extent of Items, an ESRI web map is included in the page template for Items. This web map 
+uses:
+
+* the [ESRI ArcGIS API for JavaScript](https://developers.arcgis.com/javascript/latest/) as a mapping framework
+* [ESRI ArcGIS Online](https://www.arcgis.com/index.html) for mapping layers
+
+### ESRI API key
+
+Accessing content from ArcGIS Online requires an API key from the ESRI 
+[ArcGIS Developers](https://developers.arcgis.com) platform. This API key is treated as an application secret, and 
+must be set as an environment variable when building the static site.
+
+Once built, this key will be embedded in page content, and visible to end-users accessing the static site. This is 
+considered safe providing some 
+[precautions](https://developers.arcgis.com/documentation/mapping-apis-and-services/security/security-best-practices/#api-key-security)
+are taken.
+
+The API key used for this project is stored in the MAGIC 1Password shared vault as the *SCAR ADD Metadata Toolbox - 
+ESRI ArcGIS API key* item.
 
 ### S3 static website
 
-Rendered pages and other assets are hosted through an AWS S3 bucket with static website hosting enabled. Separate 
-production and staging buckets are available to preview changes. [Terraform](#terraform) is used to define and 
+Rendered templates and other static assets are hosted through an AWS S3 bucket with static website hosting enabled. 
+Separate production and staging buckets are available to preview changes. [Terraform](#terraform) is used to define and
 provision these buckets.
 
 Rules within the BAS General Load Balancer, managed by IT, are used to reverse proxy content from these S3 static sites 
@@ -449,19 +480,20 @@ Application configuration options are set in per-environment classes extending a
 Configuration options are defined, and documented, using class properties. Some configuration options may optionally be
 set at runtime using environment variables. If not set, default values will be used.
 
-| Configuration Option                                | Description                                                      | Allowed Values                     | Example Value                                                   |
-| --------------------------------------------------- | ---------------------------------------------------------------- | ---------------------------------- | --------------------------------------------------------------- |
-| `APP_ENABLE_SENTRY`                                 | Feature flag to enable/disable Sentry error tracking             | true/false                         | `true`                                                          |
-| `APP_LOGGING_LEVEL`                                 | Minimum logging level to include in application logs             | debug/info/warning/error/critical  | `warning`                                                       |
-| `APP_AUTH_SESSION_FILE_PATH`                        | Path to file used for authentication information                 | valid file path                    | `/home/user/.config/scar_add_metadata_toolbox/auth.json`        |
-| `APP_SITE_PATH`                                     | Path to directory used for rendered static site content          | valid directory path               | `/home/user/.config/scar_add_metadata_toolbox/_site`            |
-| `CSW_ENDPOINT_UNPUBLISHED`                          | CSW endpoint for accessing unpublished catalogue                 | valid URL                          | `http://example.com/csw/unpublished`                            |
-| `CSW_ENDPOINT_PUBLISHED`                            | CSW endpoint for accessing published catalogue                   | valid URL                          | `http://example.com/csw/published`                              |
-| `CSW_SERVER_CONFIG_UNPUBLISHED_ENDPOINT`            | Endpoint at which to run unpublished CSW catalogue               | valid URL                          | `http://example.com/csw/unpublished`                            |
-| `CSW_SERVER_CONFIG_PUBLISHED_ENDPOINT`              | Endpoint at which to run published CSW catalogue                 | Valid URL                          | `http://example.com/csw/published`                              |
-| `CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION` | Connection string for unpublished CSW catalogue backing database | Valid SQLAlchemy connection string | `postgresql://postgres:password@db.example.com/postgres`        |
-| `CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION`   | Connection string for published CSW catalogue backing database   | Valid SQLAlchemy connection string | `postgresql://postgres:password@db.example.com/postgres`        |
-| `APP_S3_BUCKET`                                     | AWS S3 bucket name used for hosting static website content       | Valid AWS S3 bucket name           | `add-catalogue.data.bas.ac.uk`                                  |
+| Configuration Option                                | Description                                                           | Allowed Values                     | Example Value                                            |
+|-----------------------------------------------------|-----------------------------------------------------------------------|------------------------------------|----------------------------------------------------------|
+| `APP_ENABLE_SENTRY`                                 | Feature flag to enable/disable Sentry error tracking                  | True/False                         | `true`                                                   |
+| `APP_LOGGING_LEVEL`                                 | Minimum logging level to include in application logs                  | debug/info/warning/error/critical  | `warning`                                                |
+| `APP_AUTH_SESSION_FILE_PATH`                        | Path to file used for authentication information                      | Valid file path                    | `/home/user/.config/scar_add_metadata_toolbox/auth.json` |
+| `APP_SITE_PATH`                                     | Path to directory used for rendered static site content               | Valid directory path               | `/home/user/.config/scar_add_metadata_toolbox/_site`     |
+| `CSW_ENDPOINT_UNPUBLISHED`                          | CSW endpoint for accessing unpublished catalogue                      | Valid URL                          | `http://example.com/csw/unpublished`                     |
+| `CSW_ENDPOINT_PUBLISHED`                            | CSW endpoint for accessing published catalogue                        | Valid URL                          | `http://example.com/csw/published`                       |
+| `CSW_SERVER_CONFIG_UNPUBLISHED_ENDPOINT`            | Endpoint at which to run unpublished CSW catalogue                    | Valid URL                          | `http://example.com/csw/unpublished`                     |
+| `CSW_SERVER_CONFIG_PUBLISHED_ENDPOINT`              | Endpoint at which to run published CSW catalogue                      | Valid URL                          | `http://example.com/csw/published`                       |
+| `CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION` | Connection string for unpublished CSW catalogue backing <br/>database | Valid SQLAlchemy connection string | `postgresql://postgres:password@db.example.com/postgres` |
+| `CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION`   | Connection string for published CSW catalogue backing <br/>database   | Valid SQLAlchemy connection string | `postgresql://postgres:password@db.example.com/postgres` |
+| `APP_S3_BUCKET`                                     | AWS S3 bucket name used for hosting static website content            | Valid AWS S3 bucket name           | `add-catalogue.data.bas.ac.uk`                           |
+| `APP_ESRI_API_KEY`                                  | API Key for using [ESRI ArcGIS JavaScript client](#esri-api-key)      | Valid ESRI API key                 | `AAPK...qo`                                              |
 
 These options are typically set when running this application as a client (CLI):
 
@@ -472,6 +504,7 @@ These options are typically set when running this application as a client (CLI):
 * `CSW_ENDPOINT_UNPUBLISHED`
 * `CSW_ENDPOINT_PUBLISHED`
 * `APP_S3_BUCKET`
+* `APP_ESRI_API_KEY`
 
 These options are typically set when running this application as a server (CSW catalogues):
 
@@ -615,6 +648,25 @@ ALTER INDEX fts_gin_idx RENAME TO ix_records_published_fts_gin_indx;
 ALTER INDEX wkb_geometry_idx RENAME TO ix_published_wkb_geometry_idx;
 ```
 
+### ESRI ArcGIS
+
+ESRI ArcGIS is used for the [web maps](#esri-web-maps) within the catalogue static site.
+
+Access to the [BAS ESRI tenancy](https://gitlab.data.bas.ac.uk/MAGIC/esri) is required to provision these resources.
+
+To generate an ESRI ArcGIS developer API key:
+
+1. login to https://developers.arcgis.com/api-keys/
+2. click *New API Key*:
+      1. title: `SCAR ADD Metadata Toolbox`
+      1. description: `Embedded maps shown within the ADD Data Catalogue for extent information.`
+3. from the *Location Services* section of the page for the new API key:
+     1. choose *Configure Services*
+     2. disable the *Geocoding (not stored)* option if enabled
+     3. note: the *Basemaps* service is always enabled
+4. copy the API key and paste into a 1Password password item with the name 'SCAR ADD Metadata Toolbox - ESRI ArcGIS API 
+   key'
+
 ## Development
 
 ### Development environment
@@ -668,12 +720,16 @@ $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask csw
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask csw setup published 
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask auth sign-in
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask records import --publish ~/some-example-record.json
-$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask site build
+$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development APP_ESRI_API_KEY=xxx poetry run flask site build
 # (after example-record updated)
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask records import --publish --allow-update --allow-republish ~/some-example-record.json
+$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development APP_ESRI_API_KEY=xxx poetry run flask site build
 ```
 
-#### Building a local static site with production data 
+Where the value for `APP_ESRI_API_KEY` is held in the MAGIC shared vault in 1Password under 
+'SCAR ADD Metadata Toolbox - ESRI ArcGIS API key'.
+
+#### Building a local static site with production data
 
 Useful for developing and testing changes to static website templates.
 
@@ -693,6 +749,9 @@ $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development CSW_ENDPOINT_UNPUBLI
 ```
 
 When built, the local static site can be accessed from [http://localhost:9000](http://localhost:9000).
+
+If building the static site, include the `APP_ESRI_API_KEY` environment variable as well, using the 'SCAR ADD Metadata 
+Toolbox - ESRI ArcGIS API key' item in the MAGIC shared vault in 1Password as the value.
 
 **Note:** to use the remote server in the staging environment instead, use this command for `flask` commands:
 
@@ -725,7 +784,10 @@ with `FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask
 
 When built, the local static site can be accessed from [http://localhost:9000](http://localhost:9000).
 
-**Note:** to use the database staging environment instead, use this command for starting the Flask application as a 
+If building the static site, include the `APP_ESRI_API_KEY` environment variable as well, using the 'SCAR ADD Metadata 
+Toolbox - ESRI ArcGIS API key' item in the MAGIC shared vault in 1Password as the value.
+
+**Note:** to use the database staging environment instead, use this command for starting the Flask application as a
 server:
 
 ```shell

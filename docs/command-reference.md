@@ -42,6 +42,9 @@ causes an error, the remaining 18 records won't be imported.
 Many commands can only be used by specific individuals, or groups of individuals - typically either members of MAGIC or
 ADD project staff. You will need to sign in using your NERC/BAS user account to access any restricted commands.
 
+Some commands also require setting API keys for external services, such as ArcGIS Online for the extent maps shown in
+item pages.
+
 Sign in sessions last for 1 hour (unless you sign out), after which you will need to sign in again. You will be told if 
 your session has expired.
 
@@ -52,6 +55,9 @@ If you have issues with permissions not working, please raise an [issue](../READ
 
 **Note:** You will need an account within the NERC Active Directory to use this application. If you have a BAS email 
 address you have an account. Contact the [BAS IT ServiceDesk](mailto:servicedesk@bas.ac.uk) to request an account.
+
+**Note:** You will need access to the shared vault in the MAGIC 1Password account to access API Keys used for ArcGIS 
+Online.
 
 ### Common errors
 
@@ -902,8 +908,11 @@ Build all static site components.
 
 **Note:** This will only include items that have been published.
 
+**Note:** You need to set the `APP_ESRI_API_KEY` environment variable with the value from the 'SCAR ADD Metadata 
+Toolbox - ESRI ArcGIS API key' entry in the shared vault of the MAGIC 1Password account to use this command correctly.
+
 ```
-$ flask site build
+$ APP_ESRI_API_KEY=xxx flask site build
 54 record pages to generate.
 # Record page 1/18 (stylesheet 1/3)
 Ok. Generated item page for '862f7159-9e0d-46e2-9684-df1bf924dabc' (stylesheet 'iso-html').
@@ -1078,8 +1087,11 @@ Build pages for all collections.
 
 **Note:** This will only include items in collections that have been published.
 
+**Note:** You need to set the `APP_ESRI_API_KEY` environment variable with the value from the 'SCAR ADD Metadata 
+Toolbox - ESRI ArcGIS API key' entry in the shared vault of the MAGIC 1Password account to use this command correctly.
+
 ```
-$ flask site build-collections
+$ APP_ESRI_API_KEY=xxx flask site build-collections
 1 collection pages to generate.
 # Collection page 1/1
   [####################################]  100%          
@@ -1093,8 +1105,11 @@ Build pages for all items.
 
 **Note:** This will only include items that have been published.
 
+**Note:** You need to set the `APP_ESRI_API_KEY` environment variable with the value from the 'SCAR ADD Metadata 
+Toolbox - ESRI ArcGIS API key' entry in the shared vault of the MAGIC 1Password account to use this command correctly.
+
 ```
-$ flask site build-items
+$ APP_ESRI_API_KEY=xxx flask site build-items
 18 item pages to generate.
 # Item page 1/18
 Ok. Generated item page for '862f7159-9e0d-46e2-9684-df1bf924dabc'.

@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Union
 from urllib.parse import parse_qs as query_string_parse, urlparse as url_parse
 
 from backports.datetime_fromisoformat import MonkeyPatch
-from bas_metadata_library.standards.iso_19115_2 import MetadataRecord, MetadataRecordConfigV2
+from bas_metadata_library.standards.iso_19115_2 import MetadataRecord, MetadataRecordConfigV2, MetadataRecordConfigV3
 from dateutil.relativedelta import relativedelta
 from markdown import markdown
 
@@ -1237,7 +1237,14 @@ class Record(RecordSummary):
         :param overwrite: if the desired file already exists, whether to replace its contents
         """
         configuration = MetadataRecordConfigV2(**self.config)
+        if (
+            "$schema" in self.config
+            and self.config["$schema"]
+            == "https://metadata-standards.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-1-v3.json"
+        ):
+            configuration = MetadataRecordConfigV3(**self.config).downgrade_to_v2_config()
         configuration.validate()
+
         try:
             if record_path.exists():
                 raise FileExistsError from None
@@ -1262,7 +1269,8 @@ class Record(RecordSummary):
         :return: encoded record configuration
         """
         if dump_format == "xml":
-            configuration = MetadataRecordConfigV2(**self.config)
+            configuration = MetadataRecordConfigV3()
+            configuration.upgrade_from_v2_config(v2_config=MetadataRecordConfigV2(**self.config))
             record = MetadataRecord(configuration=configuration)
             return record.generate_xml_document().decode()
 
@@ -1327,7 +1335,9 @@ class Repository:
         :return: requested record
         """
         record_xml = self.csw_client.get_record(identifier=record_identifier, mode=CSWGetRecordMode.FULL)
+        record_xml = record_xml.replace("<gmd:EX_Extent>", '<gmd:EX_Extent id="bounding">')
         record_config = MetadataRecord(record=record_xml).make_config()
+        record_config = record_config.downgrade_to_v2_config()
         record_config.validate()
         return Record(config=record_config.config)
 
@@ -1346,7 +1356,9 @@ class Repository:
         :return: all records
         """
         for record_xml in self.csw_client.get_records(mode=CSWGetRecordMode.FULL):
+            record_xml = record_xml.replace("<gmd:EX_Extent>", '<gmd:EX_Extent id="bounding">')
             record_config = MetadataRecord(record=record_xml).make_config()
+            record_config = record_config.downgrade_to_v2_config()
             record_config.validate()
             yield Record(config=record_config.config)
 

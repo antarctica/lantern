@@ -74,7 +74,7 @@ stevedore = ">=1.20.0"
 
 [[package]]
 name = "bas-metadata-library"
-version = "0.9.0"
+version = "0.9.1"
 description = "Python library for generating metadata records"
 category = "main"
 optional = false
@@ -1176,7 +1176,7 @@ testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytes
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6.2"
-content-hash = "0dfd708326f79699c9374cff13bf9c6879f4e4dad28e93dc8d07d6535288ca4d"
+content-hash = "24a48ddda7fe650d9176cd9db0a1ab236f2360ed029b29dbfb1e23534a096d76"
 
 [metadata.files]
 atomicwrites = [

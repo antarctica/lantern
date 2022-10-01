@@ -18,7 +18,7 @@ classifiers = [
 
 [tool.poetry.dependencies]
 awscli = "1.22.37" # pinned to specific version to aid in dependency resolution time
-bas-metadata-library = "^0.8.0"
+bas-metadata-library = "^0.9.0"
 bas-style-kit-jinja-templates = "^0.7.0"
 click-spinner = "^0.1.10"
 Flask = "^2.0.2"
@@ -29,7 +29,7 @@ python = "^3.6.2"
 python-dateutil = "^2.8.1"
 python-dotenv = "^0.19.2"
 requests = "^2.24.0"
-sentry-sdk = {version = "^1.7.2", extras = ["flask"]}
+sentry-sdk = {version = "^1.9.0", extras = ["flask"]}
 str2bool = "^1.1"
 tabulate = "^0.8.7"
 

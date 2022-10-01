@@ -4,14 +4,30 @@
 
 ### Running commands
 
+#### Running commands (Local Development)
+
 Using a [local development environment](../README.md#development-environment):
+
+**Note:** You need other local development environment components running to run these commands.
 
 ```shell
 $ cd add-metadata-toolbox
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask [command]
 ```
 
-**Note:** You need other local development environment components running to run these commands.
+#### Running commands (Staging)
+
+```shell
+$ cd add-metadata-toolbox
+$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=production CSW_ENDPOINT_UNPUBLISHED=http://add-metadata-toolbox-staging.bslmagf.nerc-bas.ac.uk/csw/unpublished CSW_ENDPOINT_PUBLISHED=http://add-metadata-toolbox-staging.bslmagf.nerc-bas.ac.uk/csw/published poetry run flask [command]
+```
+
+#### Running commands (Production)
+
+```shell
+$ cd add-metadata-toolbox
+$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=production CSW_ENDPOINT_UNPUBLISHED=http://add-metadata-toolbox.bslmagf.nerc-bas.ac.uk/csw/unpublished CSW_ENDPOINT_PUBLISHED=http://add-metadata-toolbox.bslmagf.nerc-bas.ac.uk/csw/published poetry run flask [command]
+```
 
 ### Listing commands
 

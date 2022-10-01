@@ -23,6 +23,7 @@ ENV PATH="/root/.local/bin:$PATH"
 COPY pyproject.toml poetry.lock /
 RUN poetry config virtualenvs.in-project true
 RUN poetry install --no-root --no-interaction --no-ansi
+RUN poetry run python -m pip install --upgrade pip
 
 FROM base as run
 

@@ -58,7 +58,7 @@ lint:
   script:
     - "poetry check"
     - "poetry run flake8 src/ tests/"
-    - "poetry export --without-hashes -f requirements.txt | poetry run safety check --full-report --stdin"
+    - "poetry run safety check --full-report"
   rules:
     - changes:
         - '**/*.py'

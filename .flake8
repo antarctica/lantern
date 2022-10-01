@@ -33,5 +33,5 @@ max-line-length = 120
 max-complexity = 10
 
 # for flake8-import-order
-application-import-names = scar_add_metadata_toolbox,scar_add_metadata_toolbox_tests
+application-import-names = scar_add_metadata_toolbox, tests.scar_add_metadata_toolbox_tests
 import-order-style = smarkets

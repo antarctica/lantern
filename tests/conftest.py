@@ -5,7 +5,7 @@ from unittest.mock import patch
 import pytest
 
 from scar_add_metadata_toolbox import create_app
-from scar_add_metadata_toolbox_tests.classes import (
+from tests.scar_add_metadata_toolbox_tests.classes import (
     MockCSWClient,
     MockCSWClientAuthError,
     MockCSWClientAuthInsufficient,

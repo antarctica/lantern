@@ -31,6 +31,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
+* Updating Poetry install method and location in CI/CD image
+  [#269](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/269)
 * ensuring any pre-existing auth file is removed when testing sign-out command where an auth file does not yet exist
   [#231](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/231)
 * removing experimental watermark style accidentally applied to all catalogue pages

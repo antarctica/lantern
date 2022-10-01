@@ -1,9 +1,8 @@
+/.idea/runConfigurations
 /.venv
-/provisioning/terraform/.terraform
 __pycache__
+/provisioning/terraform/.terraform
 /htmlcov
 /.coverage
 /_site
-/collections.json
 /auth.json
-/.idea/runConfigurations

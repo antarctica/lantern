@@ -22,16 +22,16 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#215](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/215)
 * Additional documentation for resetting the Downloads Proxy staging environment
   [#248](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/248)
-* Downloads Proxy version 2 
+* Downloads Proxy version 2
   [#242](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/242)
 * Note about data currency in WMS usage instructions
   [#233](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/233)
 
 ### Fixed
 
-* removing experimental watermark style accidentially applied to all catalogue pages
 * ensuring any pre-existing auth file is removed when testing sign-out command where an auth file does not yet exist
   [#231](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/231)
+* removing experimental watermark style accidentally applied to all catalogue pages
   [#234](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/234)
 * documentation inaccuracies and tweaks
   [#232](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/232)
@@ -161,7 +161,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Items incorrectly required transfer options to be set in records
   [#120](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/120)
 * Items incorrectly required a lineage to be set in records
-  [#135](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/135) 
+  [#135](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/135)
 * Invalid contact/feedback form submissions when JavaScript is not used for form submission
   [#123](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/123)
 * Incorrect use of temporal extent start from record as both temporal extent start and end in item class
@@ -177,7 +177,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#164](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/164)
 * Updating copyright year
   [#163](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/163)
-* README improvements 
+* README improvements
   [#163](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/163)
 
 ### Removed
@@ -191,9 +191,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Documentation on database sync between staging and production databases for testing
   [#44](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/44)
-* API usage documentation 
+* API usage documentation
   [#60](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/60)
-* Adding IT setup/deployment instructions 
+* Adding IT setup/deployment instructions
   [#44](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/44)
 
 ### Fixed
@@ -237,12 +237,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Collections file is no longer inadvertently modified on class initialisation
   [#95](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/issues/95)
-  
+
 ### Changed
 
 * Working around absolute dates in test records 'expiring' and giving different test results (needs permanent fix)
   [#96](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/96)
- 
+
 ## [0.2.1] - 2020-08-26
 
 ### Fixed

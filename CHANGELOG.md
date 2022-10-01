@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
+* Updating to BAS Metadata Library 0.9.1
+  [#251](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/272)
 * Updating to BAS Metadata Library 0.9.0
   [#251](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/251)
 * Additional documentation on how to run BAS IT Ansible playbooks for development deployments
@@ -46,6 +48,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
+* Updating project dependencies
+  [#268](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/268)
+* Updating Safety linting command in CI
+  [#273](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/273)
 * Replacing extent map with ESRI ArcGIS JS client and map data
   [#42](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/42)
 * Suppressing CSW dependency warnings

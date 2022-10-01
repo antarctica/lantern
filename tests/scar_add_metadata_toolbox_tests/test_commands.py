@@ -5,7 +5,7 @@ from unittest import mock
 import pytest
 from bas_metadata_library.standards.iso_19115_2 import MetadataRecordConfigV2
 
-from tests.scar_add_metadata_toolbox.records import TestRecordConfigurations
+from scar_add_metadata_toolbox_tests.records import TestRecordConfigurations
 
 
 class TestCommandRecordsList:
@@ -530,10 +530,7 @@ class TestCommandRecordsExport:
             export_record_configuration = MetadataRecordConfigV2()
             export_record_configuration.load(file=record_path)
             verification_record_configuration = MetadataRecordConfigV2(**TestRecordConfigurations.TEST_RECORD_7.value)
-            # TODO: Remove the need for dict sorting - see https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/227
-            assert dict(sorted(export_record_configuration.config.items())) == dict(
-                sorted(verification_record_configuration.config.items())
-            )
+            assert export_record_configuration.config == verification_record_configuration.config
 
     @pytest.mark.usefixtures("app_runner_mocked_csw")
     def test_cli_records_export_allow_overwrite(self, app_runner_mocked_csw):
@@ -743,10 +740,7 @@ class TestCommandRecordsBulkExport:
                 file=records_path.joinpath(f"{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}.json")
             )
             verification_record_configuration = MetadataRecordConfigV2(**TestRecordConfigurations.TEST_RECORD_7.value)
-            # TODO: Remove the need for dict sorting - see https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/227
-            assert dict(sorted(export_record_configuration.config.items())) == dict(
-                sorted(verification_record_configuration.config.items())
-            )
+            assert export_record_configuration.config == verification_record_configuration.config
 
     @pytest.mark.usefixtures("app_runner_mocked_csw")
     def test_cli_records_bulk_export_allow_overwrite(self, app_runner_mocked_csw):

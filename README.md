@@ -807,8 +807,11 @@ Where `xxx` should be replaced with real credentials from the *MAGIC CSW [Stagin
 
 ### Package structure
 
-All code for this project should be defined in the `scar_add_metadata_toolbox` package, with the exception of tests 
-and the [Downloads Proxy](#downloads-proxy).
+All code for this project should be defined in the `scar_add_metadata_toolbox` package, within the `src/` directory, 
+with the exception of:
+
+* [Tests](#testing)
+* the [Downloads Proxy](#downloads-proxy)
 
 In brief, this package is comprised of these modules:
 
@@ -967,8 +970,10 @@ strongly encouraged.
 
 ### Testing
 
-All code in the `scar_add_metadata_toolbox` package must be covered by tests, defined in `tests/`. This project uses
-[PyTest](https://docs.pytest.org/en/latest/) which should be ran in a random order using
+All code in the `scar_add_metadata_toolbox` package must be covered by tests, defined in the 
+`scar_add_metadata_toolbox_tests` package within the `tests/` directory.
+
+This project uses [PyTest](https://docs.pytest.org/en/latest/) which should be ran in a random order using
 [pytest-random-order](https://pypi.org/project/pytest-random-order/).
 
 To run tests manually from the command line:

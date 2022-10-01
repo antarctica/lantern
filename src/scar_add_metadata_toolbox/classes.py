@@ -1237,12 +1237,6 @@ class Record(RecordSummary):
         :param overwrite: if the desired file already exists, whether to replace its contents
         """
         configuration = MetadataRecordConfigV2(**self.config)
-        if (
-            "$schema" in self.config
-            and self.config["$schema"]
-            == "https://metadata-standards.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-1-v3.json"
-        ):
-            configuration = MetadataRecordConfigV3(**self.config).downgrade_to_v2_config()
         configuration.validate()
 
         try:

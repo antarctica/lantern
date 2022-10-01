@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
+* Updating to BAS Metadata Library 0.9.0
+  [#251](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/251)
 * Additional documentation on how to run BAS IT Ansible playbooks for development deployments
   [#213](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/213)
 * Additional documentation on how log rotate is used in BAS IT deployments

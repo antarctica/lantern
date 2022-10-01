@@ -1329,7 +1329,6 @@ class Repository:
         :return: requested record
         """
         record_xml = self.csw_client.get_record(identifier=record_identifier, mode=CSWGetRecordMode.FULL)
-        record_xml = record_xml.replace("<gmd:EX_Extent>", '<gmd:EX_Extent id="bounding">')
         record_config = MetadataRecord(record=record_xml).make_config()
         record_config = record_config.downgrade_to_v2_config()
         record_config.validate()
@@ -1350,7 +1349,6 @@ class Repository:
         :return: all records
         """
         for record_xml in self.csw_client.get_records(mode=CSWGetRecordMode.FULL):
-            record_xml = record_xml.replace("<gmd:EX_Extent>", '<gmd:EX_Extent id="bounding">')
             record_config = MetadataRecord(record=record_xml).make_config()
             record_config = record_config.downgrade_to_v2_config()
             record_config.validate()

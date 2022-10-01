@@ -113,6 +113,8 @@ class Config:
 
         Settings used for Sentry, typically reusing other config options. Only relevant if `APP_ENABLE_SENTRY` is True.
 
+        Note: Sentry DSN values are not sensitive.
+
         :rtype dict
         :return: Sentry runtime configuration
         """
@@ -365,6 +367,12 @@ class Config:
     # noinspection PyPep8Naming
     @property
     def S3_BUCKET(self) -> str:
+        """
+        Name of the AWS S3 bucket used to host static site content
+
+        :rtype str
+        :return: S3 bucket name
+        """
         return os.environ.get("APP_S3_BUCKET")
 
     # noinspection PyPep8Naming

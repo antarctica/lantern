@@ -591,18 +591,25 @@ This has been approved by NERC RTS in
 
 ### BAS IT
 
+#### Flask application
+
 Manually request a new application to be deployed from the BAS IT ServiceDesk using the
 [request template](http://ictdocs.nerc-bas.ac.uk/wiki/index.php/Provisioning_Process#Template_ServiceDesk_request).
 See [#44](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/44) for an example.
 
-Manually request a new PostGIS database for the CSW catalogue backing databases from the BAS IT ServiceDesk and 
-[setup](#pycsw-backing-database-setup) when provisioned.
+#### Postgres database
+
+Manually request a new PostGIS database for the [CSW backing databases](#csw-backing-databases) from the BAS IT
+ServiceDesk and run required [setup](#pycsw-backing-database-setup) when provisioned.
+
+#### BAS General Load Balancer
 
 Manually request entries are setup in the BAS General Load Balancer for:
 
 * Data Catalogue application URLs
-* [Downloads proxy](#downloads-proxy) instance endpoints (see  
-[#242](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/242) for an example)
+* [Downloads proxy](#downloads-proxy) instance endpoints (see
+  [#242](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/242) for an example)
+  * **Note:** ensure HAProxy health checks are disabled for this service, as it will incur a cost
 
 ### BAS API Load Balancer
 
@@ -777,7 +784,8 @@ $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development CSW_SERVER_CONFIG_UN
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask [command]
 ```
 
-Where `xxx` should be replaced with real credentials from the *MAGIC CSW [Prod]* entry in the MAGIC 1Password.
+Where `xxx` should be replaced with real credentials from the *MAGIC CSW [Prod]* entry in the shared vault in the 
+MAGIC 1Password.
 
 See the [Command Reference](docs/command-reference.md) for how to use the CLI. Where `flask` is written, replace this
 with `FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask`.

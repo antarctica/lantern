@@ -48,6 +48,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
+* Migrating to BAS Metadata Library ISO 19115 V3 record configurations
+  [#267](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/267)
 * Updating project dependencies
   [#268](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/268)
 * Updating Safety linting command in CI

@@ -884,6 +884,53 @@ $ poetry update
 
 See the instructions above to update the Docker image used in CI/CD.
 
+#### Updating `bas-metadata-libray` package [WIP]
+
+Special care should be taken when the `bas-metadata-library` switches to a new 
+[record configuration version](https://gitlab.data.bas.ac.uk/uk-pdc/metadata-infrastructure/metadata-library#supported-configuration-versions).
+
+When this occurs, a multi-stage upgrade process should be followed to manage the rate of change. At each stage in 
+this process, application tests should be re-run to ensure regressions are not introduced. Additional (edge) test 
+cases may need to be added to the test suite as real world testing/deployment uncovers unforeseen regressions.
+
+A general schedule to follow is:
+
+1. upgrade the Pip dependency for the Metadata Library to the new version:
+    * this will usually mean all MetadataRecord classes will use the new config version internally
+    * where a new MetadataRecordConfig class is returned it should be downgraded to the old version
+    * where a new MetadataRecordConfig class is required as input, it should be upgraded from the old version
+    * the `Record.dump()`, `Record.dumps()`, `Repository.retrieve_record()` and `Repository.retrieve_records()` methods 
+      all interact with MetadataRecordConfig class instances and will need to be updated
+    * usually calling the relevant `upgrade_from_vX_config()` or `downgrade_to_vX_config()` methods is enough to 
+      migrate between configuration versions, additional tweaks may be needed depending on the config schema changes
+2. use new Metadata Configuration classes natively:
+    * this means all references to the old MetadataRecordConfig class should be removed
+    * this also means uses of the `upgrade_from_vX_config()` or `downgrade_to_vX_config()` methods should be removed
+    * change properties in the `Record` and `Item` classes to be compatible with the new config schema, whilst 
+      preserving the form of returned information as far as possible [1]
+    * update tests to use the new MetadataRecordConfig class
+    * update test record configurations to be compatible with the new config schema
+3. use new or changed properties from the new config schema:
+    * this will depend on the nature of the new schema, but usually means adding new properties to the `Record` or 
+      `Item` classes, or changing existing properties to include additional or different information
+    * these changes can then be surfaced in templates or other outputs
+    * each change should use a dedicated feature branch to make changes more atomic and easier to review
+    * suitable tests should be added or extended to ensure test coverage and to prevent future regressions
+    * where relevant, other refactoring should be considered if large changes are made
+
+[1] 
+
+For example, An existing property such as *lineage* is changed from a string to an object, to support new, 
+additional, configuration properties. To illustrate in pseudo-code, going from: `lineage: '...'` to: 
+`lineage: {statement: '...', additional_property: '...'}`.
+
+In step (2) of the schedule above, the existing `Record.lineage()` Python property (or `Item.lineage()` property 
+depending) should be changed to read from `config.lineage.statement` rather than `config.lineage`. This preserves 
+the existing interface of the Python property and ignores new features from the new config schema.
+
+Later in step (3), the `Record.lineage()` or `Item.lineage()` Python property can be amended to return both 
+properties, or new properties added for the additional property if that makes more sense.
+
 #### Dependency vulnerability checks
 
 The [Safety](https://pypi.org/project/safety/) package is used to check dependencies against known vulnerabilities.
@@ -1018,7 +1065,7 @@ static files held in `tests/scar_add_metadata_toolbox/resources/csw/records/`. T
 in-sync with the record configurations defined in `records.py` using this Python command:
 
 ```shell
-$ cd tests/scar_add_metadata_toolbox
+$ cd tests/scar_add_metadata_toolbox_tests
 $ poetry run python -c "from records import make_csw_test_records; make_csw_test_records()"
 ```
 

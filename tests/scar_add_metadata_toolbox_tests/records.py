@@ -3,13 +3,14 @@ from enum import Enum
 from pathlib import Path
 from typing import List, Optional
 
-from bas_metadata_library.standards.iso_19115_2 import MetadataRecord, MetadataRecordConfigV2
+from bas_metadata_library.standards.iso_19115_2 import MetadataRecord, MetadataRecordConfigV3
 
 
 def make_test_record_config(
     identifier: str, title: str, hierarchy_level: str, item_identifiers: Optional[List[str]] = None
 ) -> dict:
     config = {
+        "$schema": "https://metadata-standards.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-2-v3.json",
         "file_identifier": identifier,
         "metadata": {
             "language": "eng",
@@ -329,24 +330,52 @@ def make_test_record_config(
             "language": "eng",
             "character_set": "utf-8",
             "topics": ["environment", "geoscientificInformation"],
-            "extent": {
-                "geographic": {
-                    "bounding_box": {
-                        "west_longitude": -180.0,
-                        "east_longitude": 180.0,
-                        "south_latitude": -90.0,
-                        "north_latitude": -60.0,
-                    }
-                },
-                "temporal": {
-                    "period": {"start": {"date": datetime(2020, 6, 25)}, "end": {"date": datetime(2020, 4, 23)}}
-                },
-            },
-            "lineage": "Lineage",
+            "extents": [
+                {
+                    "identifier": "bounding",
+                    "geographic": {
+                        "bounding_box": {
+                            "west_longitude": -180.0,
+                            "east_longitude": 180.0,
+                            "south_latitude": -90.0,
+                            "north_latitude": -60.0,
+                        }
+                    },
+                    "temporal": {
+                        "period": {"start": {"date": datetime(2020, 6, 25)}, "end": {"date": datetime(2020, 4, 23)}}
+                    },
+                }
+            ],
+            "lineage": {"statement": "Lineage"},
         },
     }
 
     if hierarchy_level != "collection":
+        _distributor = {
+            "organisation": {
+                "name": "Mapping and Geographic Information Centre, British Antarctic Survey",
+                "href": "https://ror.org/01rhff309",
+                "title": "ror",
+            },
+            "phone": "+44 (0)1223 221400",
+            "address": {
+                "delivery_point": "British Antarctic Survey, High Cross, Madingley Road",
+                "city": "Cambridge",
+                "administrative_area": "Cambridgeshire",
+                "postal_code": "CB3 0ET",
+                "country": "United Kingdom",
+            },
+            "email": "magic@bas.ac.uk",
+            "online_resource": {
+                "href": "https://www.bas.ac.uk/team/magic",
+                "title": "Mapping and Geographic Information Centre (MAGIC) - BAS public website",
+                "description": "General information about the BAS Mapping and Geographic Information Centre "
+                "(MAGIC) from the British Antarctic Survey (BAS) public website.",
+                "function": "information",
+            },
+            "role": ["distributor"],
+        }
+
         config["hierarchy_level"] = "dataset"
         config["reference_system_info"] = {
             "authority": {
@@ -374,76 +403,51 @@ def make_test_record_config(
         }
         config["distribution"] = [
             {
-                "distributor": {
-                    "organisation": {
-                        "name": "Mapping and Geographic Information Centre, British Antarctic Survey",
-                        "href": "https://ror.org/01rhff309",
-                        "title": "ror",
-                    },
-                    "phone": "+44 (0)1223 221400",
-                    "address": {
-                        "delivery_point": "British Antarctic Survey, High Cross, Madingley Road",
-                        "city": "Cambridge",
-                        "administrative_area": "Cambridgeshire",
-                        "postal_code": "CB3 0ET",
-                        "country": "United Kingdom",
-                    },
-                    "email": "magic@bas.ac.uk",
+                "distributor": _distributor,
+                "transfer_option": {
                     "online_resource": {
-                        "href": "https://www.bas.ac.uk/team/magic",
-                        "title": "Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-                        "description": "General information about the BAS Mapping and Geographic Information Centre "
-                        "(MAGIC) from the British Antarctic Survey (BAS) public website.",
-                        "function": "information",
-                    },
-                    "role": ["distributor"],
+                        "href": "https://maps.bas.ac.uk/antarctic/wms?layer=add:test",
+                        "title": "Web Map Service (WMS)",
+                        "description": "Access information as a OGC Web Map Service layer.",
+                        "function": "download",
+                    }
                 },
-                "distribution_options": [
-                    {
-                        "transfer_option": {
-                            "online_resource": {
-                                "href": "https://maps.bas.ac.uk/antarctic/wms?layer=add:test",
-                                "title": "Web Map Service (WMS)",
-                                "description": "Access information as a OGC Web Map Service layer.",
-                                "function": "download",
-                            }
-                        },
-                        "format": {"format": "Web Map Service"},
+                "format": {"format": "Web Map Service"},
+            },
+            {
+                "distributor": _distributor,
+                "transfer_option": {
+                    "size": {"unit": "kB", "magnitude": 8171.0},
+                    "online_resource": {
+                        "href": "https://data.bas.ac.uk/download/35b35d75-1060-4340-a365-62c2f718ca0d",
+                        "title": "GeoPackage",
+                        "description": "Download information as a OGC GeoPackage.",
+                        "function": "download",
                     },
-                    {
-                        "transfer_option": {
-                            "size": {"unit": "kB", "magnitude": 8171.0},
-                            "online_resource": {
-                                "href": "https://data.bas.ac.uk/download/35b35d75-1060-4340-a365-62c2f718ca0d",
-                                "title": "GeoPackage",
-                                "description": "Download information as a OGC GeoPackage.",
-                                "function": "download",
-                            },
-                        },
-                        "format": {
-                            "format": "GeoPackage",
-                            "version": "1.2",
-                            "href": "https://www.iana.org/assignments/media-types/application/geopackage+sqlite3",
-                        },
+                },
+                "format": {
+                    "format": "GeoPackage",
+                    "version": "1.2",
+                    "href": "https://www.iana.org/assignments/media-types/application/geopackage+sqlite3",
+                },
+            },
+            {
+                "distributor": _distributor,
+                "transfer_option": {
+                    "size": {"unit": "kB", "magnitude": 7535.0},
+                    "online_resource": {
+                        "href": "https://data.bas.ac.uk/download/c9e8ef23-0d49-4059-a013-51fdbc8ba1bb",
+                        "title": "Shapefile",
+                        "description": "Download information as an ESRI Shapefile.",
+                        "function": "download",
                     },
-                    {
-                        "transfer_option": {
-                            "size": {"unit": "kB", "magnitude": 7535.0},
-                            "online_resource": {
-                                "href": "https://data.bas.ac.uk/download/c9e8ef23-0d49-4059-a013-51fdbc8ba1bb",
-                                "title": "Shapefile",
-                                "description": "Download information as an ESRI Shapefile.",
-                                "function": "download",
-                            },
-                        },
-                        "format": {
-                            "format": "Shapefile",
-                            "version": "1",
-                            "href": "https://support.esri.com/en/white-paper/279",
-                        },
-                    },
-                ],
-            }
+                },
+                "format": {
+                    "format": "Shapefile",
+                    "version": "1",
+                    "href": "https://support.esri.com/en/white-paper/279",
+                },
+            },
         ]
     elif hierarchy_level == "collection":
         config["hierarchy_level"] = "collection"
@@ -542,7 +546,7 @@ def make_csw_test_records() -> None:
     records_base_path = Path("resources/csw/records").resolve()
     for record_config in TestRecordConfigurations:
         print(f"Generating test record for '{record_config.name}'")
-        configuration = MetadataRecordConfigV2(**record_config.value)
+        configuration = MetadataRecordConfigV3(**record_config.value)
         record = MetadataRecord(configuration=configuration)
         record_path = records_base_path.joinpath(f"get_record_{record_config.value['file_identifier']}_full.xml")
         with open(Path(record_path), mode="w") as record_file:

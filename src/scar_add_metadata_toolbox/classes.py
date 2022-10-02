@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Union
 from urllib.parse import parse_qs as query_string_parse, urlparse as url_parse
 
 from backports.datetime_fromisoformat import MonkeyPatch
-from bas_metadata_library.standards.iso_19115_2 import MetadataRecord, MetadataRecordConfigV2, MetadataRecordConfigV3
+from bas_metadata_library.standards.iso_19115_2 import MetadataRecord, MetadataRecordConfigV3
 from dateutil.relativedelta import relativedelta
 from markdown import markdown
 
@@ -1119,7 +1119,7 @@ class Record(RecordSummary):
 
     @property
     def geographic_extent(self) -> Dict:
-        return self.config["identification"]["extent"]["geographic"]
+        return self.config["identification"]["extents"][0]["geographic"]
 
     @property
     def language(self) -> str:
@@ -1128,7 +1128,7 @@ class Record(RecordSummary):
     @property
     def lineage(self) -> Optional[str]:
         try:
-            return self.config["identification"]["lineage"]
+            return self.config["identification"]["lineage"]["statement"]
         except KeyError:
             return None
 
@@ -1198,11 +1198,13 @@ class Record(RecordSummary):
         _temporal_extent = {"start": None, "end": None}
 
         try:
-            _temporal_extent["start"] = self.config["identification"]["extent"]["temporal"]["period"]["start"]["date"]
+            _temporal_extent["start"] = self.config["identification"]["extents"][0]["temporal"]["period"]["start"][
+                "date"
+            ]
         except KeyError:
             pass
         try:
-            _temporal_extent["end"] = self.config["identification"]["extent"]["temporal"]["period"]["end"]["date"]
+            _temporal_extent["end"] = self.config["identification"]["extents"][0]["temporal"]["period"]["end"]["date"]
         except KeyError:
             pass
 
@@ -1221,7 +1223,7 @@ class Record(RecordSummary):
         :type record_path Path
         :param record_path: path to file containing JSON encoded record configuration
         """
-        configuration = MetadataRecordConfigV2()
+        configuration = MetadataRecordConfigV3()
         configuration.load(file=record_path)
         self.config: Dict[str, Any] = configuration.config
 
@@ -1236,7 +1238,7 @@ class Record(RecordSummary):
         :type overwrite: bool
         :param overwrite: if the desired file already exists, whether to replace its contents
         """
-        configuration = MetadataRecordConfigV2(**self.config)
+        configuration = MetadataRecordConfigV3(**self.config)
         configuration.validate()
 
         try:
@@ -1263,8 +1265,7 @@ class Record(RecordSummary):
         :return: encoded record configuration
         """
         if dump_format == "xml":
-            configuration = MetadataRecordConfigV3()
-            configuration.upgrade_from_v2_config(v2_config=MetadataRecordConfigV2(**self.config))
+            configuration = MetadataRecordConfigV3(**self.config)
             record = MetadataRecord(configuration=configuration)
             return record.generate_xml_document().decode()
 
@@ -1330,7 +1331,6 @@ class Repository:
         """
         record_xml = self.csw_client.get_record(identifier=record_identifier, mode=CSWGetRecordMode.FULL)
         record_config = MetadataRecord(record=record_xml).make_config()
-        record_config = record_config.downgrade_to_v2_config()
         record_config.validate()
         return Record(config=record_config.config)
 
@@ -1350,7 +1350,6 @@ class Repository:
         """
         for record_xml in self.csw_client.get_records(mode=CSWGetRecordMode.FULL):
             record_config = MetadataRecord(record=record_xml).make_config()
-            record_config = record_config.downgrade_to_v2_config()
             record_config.validate()
             yield Record(config=record_config.config)
 
@@ -1893,7 +1892,7 @@ class Item:
         return "outdated"  # pragma: no cover (added for future use)
 
     @staticmethod
-    def _process_download(distribution_option: dict) -> Dict[str, str]:
+    def _process_download(distribution: dict) -> Dict[str, str]:
         """
         Generate an item download
 
@@ -1901,67 +1900,65 @@ class Item:
         download options are bespoke to this data catalogue, using inference and hard-coded formatting options to enrich
         or simplify information to be more useful.
 
-        :type distribution_option dict
-        :param distribution_option: combination of a ISO transfer option and optional ISO format object
+        :type distribution dict
+        :param distribution: combination of a ISO transfer option and optional ISO format object
         :rtype dict
         :return: item download option
         """
-        if "format" not in distribution_option:  # pragma: no cover (will be addressed in #116)
-            distribution_option["format"] = {"format": None}
-        if "href" not in distribution_option["format"]:
-            distribution_option["format"]["href"] = None
+        if "format" not in distribution:  # pragma: no cover (will be addressed in #116)
+            distribution["format"] = {"format": None}
+        if "href" not in distribution["format"]:
+            distribution["format"]["href"] = None
 
-        download_option = {
+        download = {
             # Bandit B303/S303 warning is exempted as these hashes are not used for any security related purposes
-            "id": sha1(json.dumps(distribution_option).encode()).hexdigest(),  # noqa: S303 - nosec
+            "id": sha1(json.dumps(distribution).encode()).hexdigest(),  # noqa: S303 - nosec
             "format": None,
             "format_title": None,
             "format_description": None,
             "size": None,
-            "url": distribution_option["transfer_option"]["online_resource"]["href"],
+            "url": distribution["transfer_option"]["online_resource"]["href"],
         }
 
-        if "size" in distribution_option["transfer_option"]:
-            size = distribution_option["transfer_option"]["size"]
-            download_option["size"] = f"{size['magnitude']}{size['unit']}"
+        if "size" in distribution["transfer_option"]:
+            size = distribution["transfer_option"]["size"]
+            download["size"] = f"{size['magnitude']}{size['unit']}"
 
         if (
-            distribution_option["format"]["href"]
+            distribution["format"]["href"]
             == "https://www.iana.org/assignments/media-types/application/geopackage+sqlite3"
         ):
-            download_option["format"] = "gpkg"
-            download_option["format_title"] = "GeoPackage"
-            download_option["format_description"] = "OGC GeoPackage"
-        elif distribution_option["format"]["href"] == "https://support.esri.com/en/white-paper/279":
-            download_option["format"] = "shp"
-            download_option["format_title"] = "Shapefile"
-            download_option["format_description"] = "ESRI Shapefile"
+            download["format"] = "gpkg"
+            download["format_title"] = "GeoPackage"
+            download["format_description"] = "OGC GeoPackage"
+        elif distribution["format"]["href"] == "https://support.esri.com/en/white-paper/279":
+            download["format"] = "shp"
+            download["format_title"] = "Shapefile"
+            download["format_description"] = "ESRI Shapefile"
         elif (
-            distribution_option["format"]["href"] == "https://www.iana.org/assignments/media-types/application/pdf"
+            distribution["format"]["href"] == "https://www.iana.org/assignments/media-types/application/pdf"
         ):  # pragma: no cover (added for future use)
-            download_option["format"] = "pdf"
-            download_option["format_title"] = "PDF"
-            download_option["format_description"] = "Adobe PDF"
+            download["format"] = "pdf"
+            download["format_title"] = "PDF"
+            download["format_description"] = "Adobe PDF"
         elif (
-            distribution_option["format"]["href"] == "https://www.iana.org/assignments/media-types/application/png"
+            distribution["format"]["href"] == "https://www.iana.org/assignments/media-types/application/png"
         ):  # pragma: no cover (added for future use)
-            download_option["format"] = "png"
-            download_option["format_title"] = "PNG"
-            download_option["format_description"] = "PNG image"
-        elif distribution_option["format"]["format"] == "Web Map Service":
-            download_option["format"] = "wms"
-            download_option["format_title"] = "Web Map Service (WMS)"
-            download_option["format_description"] = "OGC Web Map Service"
+            download["format"] = "png"
+            download["format_title"] = "PNG"
+            download["format_description"] = "PNG image"
+        elif distribution["format"]["format"] == "Web Map Service":
+            download["format"] = "wms"
+            download["format_title"] = "Web Map Service (WMS)"
+            download["format_description"] = "OGC Web Map Service"
 
-        if distribution_option["format"]["format"] == "Web Map Service":
-            endpoint_elements = url_parse(distribution_option["transfer_option"]["online_resource"]["href"])
+        if distribution["format"]["format"] == "Web Map Service":
+            endpoint_elements = url_parse(distribution["transfer_option"]["online_resource"]["href"])
             endpoint_parameters: dict = query_string_parse(endpoint_elements.query)
-            download_option[
-                "endpoint"
-            ] = f"{endpoint_elements.scheme}://{endpoint_elements.netloc}{endpoint_elements.path}"
-            download_option["layer"] = endpoint_parameters["layer"][0]
+            download["endpoint"] = f"{endpoint_elements.scheme}://{endpoint_elements.netloc}{endpoint_elements.path}"
+            download["layer"] = endpoint_parameters["layer"][0]
 
-        return download_option
+        return download
 
     @staticmethod
     def _filter_keyword_terms(keyword_sets: List[dict], keyword_set_url: str) -> List[dict]:
@@ -2036,8 +2033,7 @@ class Item:
         downloads = []
 
         for distribution in self.record.distributions:
-            for distribution_option in distribution["distribution_options"]:
-                downloads.append(self._process_download(distribution_option=distribution_option))
+            downloads.append(self._process_download(distribution=distribution))
 
         return downloads
 

@@ -1854,7 +1854,8 @@ class Item:
         Supported maintenance frequencies are:
 
         * biannual (periodic)
-        * as-needed (non-periodic)
+        * asNeeded (non-periodic)
+        * notPlanned (non-periodic)
 
         Possible states are:
 
@@ -1877,7 +1878,9 @@ class Item:
         :rtype str
         :return: item status
         """
-        if maintenance_frequency == "asNeeded":  # pragma: no cover (added for future use)
+        if maintenance_frequency == "asNeeded":
+            return "current"
+        elif maintenance_frequency == "notPlanned":
             return "current"
 
         _now = datetime.today()

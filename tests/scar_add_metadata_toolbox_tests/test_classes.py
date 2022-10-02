@@ -1,3 +1,5 @@
+import datetime
+
 import pytest
 
 from scar_add_metadata_toolbox.classes import (
@@ -115,3 +117,35 @@ def test_collection_invalid_record_type():
 def test_collection_no_item_identifiers():
     collection = Collection(record=Record(config={"hierarchy_level": "collection"}))
     assert collection.item_identifiers is None
+
+
+# Coverage test
+def test_item_status_as_needed():
+    item = Item(
+        record=Record(
+            config={
+                "hierarchy_level": "dataset",
+                "identification": {
+                    "dates": {"released": {"date": datetime.datetime.utcnow().date()}},
+                    "maintenance": {"maintenance_frequency": "asNeeded"},
+                },
+            }
+        )
+    )
+    assert item.status == "current"
+
+
+# Coverage test
+def test_item_status_not_planned():
+    item = Item(
+        record=Record(
+            config={
+                "hierarchy_level": "dataset",
+                "identification": {
+                    "dates": {"released": {"date": datetime.datetime.utcnow().date()}},
+                    "maintenance": {"maintenance_frequency": "notPlanned"},
+                },
+            }
+        )
+    )
+    assert item.status == "current"

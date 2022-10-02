@@ -3,7 +3,7 @@ from tempfile import NamedTemporaryFile, TemporaryDirectory
 from unittest import mock
 
 import pytest
-from bas_metadata_library.standards.iso_19115_2 import MetadataRecordConfigV2
+from bas_metadata_library.standards.iso_19115_2 import MetadataRecordConfigV3
 
 from tests.scar_add_metadata_toolbox_tests.records import TestRecordConfigurations
 
@@ -57,7 +57,7 @@ class TestCommandRecordsImport:
     def test_cli_records_import(self, app_runner_mocked_csw):
         with NamedTemporaryFile(mode="r+") as record_file:
             record_data = TestRecordConfigurations.TEST_RECORD_3.value
-            record_configuration = MetadataRecordConfigV2(**record_data)
+            record_configuration = MetadataRecordConfigV3(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw.invoke(args=["records", "import", record_file.name])
@@ -73,7 +73,7 @@ class TestCommandRecordsImport:
     def test_cli_records_import_allow_update(self, app_runner_mocked_csw):
         with NamedTemporaryFile(mode="r+") as record_file:
             record_data = TestRecordConfigurations.TEST_RECORD_4.value
-            record_configuration = MetadataRecordConfigV2(**record_data)
+            record_configuration = MetadataRecordConfigV3(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw.invoke(args=["records", "import", record_file.name, "--allow-update"])
@@ -84,7 +84,7 @@ class TestCommandRecordsImport:
     def test_cli_records_import_publish(self, app_runner_mocked_csw):
         with NamedTemporaryFile(mode="r+") as record_file:
             record_data = TestRecordConfigurations.TEST_RECORD_5.value
-            record_configuration = MetadataRecordConfigV2(**record_data)
+            record_configuration = MetadataRecordConfigV3(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw.invoke(args=["records", "import", record_file.name, "--publish"])
@@ -96,7 +96,7 @@ class TestCommandRecordsImport:
     def test_cli_records_import_publish_allow_update_allow_republish(self, app_runner_mocked_csw):
         with NamedTemporaryFile(mode="r+") as record_file:
             record_data = TestRecordConfigurations.TEST_RECORD_6.value
-            record_configuration = MetadataRecordConfigV2(**record_data)
+            record_configuration = MetadataRecordConfigV3(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw.invoke(
@@ -146,7 +146,7 @@ class TestCommandRecordsImport:
     def test_cli_records_import_csw_not_setup(self, app_runner_mocked_csw_not_setup):
         with NamedTemporaryFile(mode="r+") as record_file:
             record_data = TestRecordConfigurations.TEST_RECORD_3.value
-            record_configuration = MetadataRecordConfigV2(**record_data)
+            record_configuration = MetadataRecordConfigV3(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw_not_setup.invoke(args=["records", "import", record_file.name])
@@ -157,7 +157,7 @@ class TestCommandRecordsImport:
     def test_cli_records_import_auth_token_error(self, app_runner_mocked_csw_auth_token_error):
         with NamedTemporaryFile(mode="r+") as record_file:
             record_data = TestRecordConfigurations.TEST_RECORD_3.value
-            record_configuration = MetadataRecordConfigV2(**record_data)
+            record_configuration = MetadataRecordConfigV3(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw_auth_token_error.invoke(args=["records", "import", record_file.name])
@@ -168,7 +168,7 @@ class TestCommandRecordsImport:
     def test_cli_records_import_auth_token_missing(self, app_runner_mocked_csw_missing_auth_token):
         with NamedTemporaryFile(mode="r+") as record_file:
             record_data = TestRecordConfigurations.TEST_RECORD_3.value
-            record_configuration = MetadataRecordConfigV2(**record_data)
+            record_configuration = MetadataRecordConfigV3(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw_missing_auth_token.invoke(args=["records", "import", record_file.name])
@@ -179,7 +179,7 @@ class TestCommandRecordsImport:
     def test_cli_records_import_auth_token_insufficient(self, app_runner_mocked_csw_insufficient_auth_token):
         with NamedTemporaryFile(mode="r+") as record_file:
             record_data = TestRecordConfigurations.TEST_RECORD_3.value
-            record_configuration = MetadataRecordConfigV2(**record_data)
+            record_configuration = MetadataRecordConfigV3(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw_insufficient_auth_token.invoke(args=["records", "import", record_file.name])
@@ -190,7 +190,7 @@ class TestCommandRecordsImport:
     def test_cli_records_import_error_server(self, app_runner_mocked_csw_inserts_fail):
         with NamedTemporaryFile(mode="r+") as record_file:
             record_data = TestRecordConfigurations.TEST_RECORD_3.value
-            record_configuration = MetadataRecordConfigV2(**record_data)
+            record_configuration = MetadataRecordConfigV3(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw_inserts_fail.invoke(args=["records", "import", record_file.name])
@@ -201,7 +201,7 @@ class TestCommandRecordsImport:
     def test_cli_records_import_error_conflict(self, app_runner_mocked_csw):
         with NamedTemporaryFile(mode="r+") as record_file:
             record_data = TestRecordConfigurations.TEST_RECORD_7.value
-            record_configuration = MetadataRecordConfigV2(**record_data)
+            record_configuration = MetadataRecordConfigV3(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw.invoke(args=["records", "import", record_file.name])
@@ -215,7 +215,7 @@ class TestCommandRecordsImport:
     def test_cli_records_import_error_publish_conflict(self, app_runner_mocked_csw):
         with NamedTemporaryFile(mode="r+") as record_file:
             record_data = TestRecordConfigurations.TEST_RECORD_7.value
-            record_configuration = MetadataRecordConfigV2(**record_data)
+            record_configuration = MetadataRecordConfigV3(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw.invoke(
@@ -235,7 +235,7 @@ class TestCommandRecordsBulkImport:
         with TemporaryDirectory() as record_directory:
             with open(str(Path(f"{record_directory}/record.json")), mode="w+") as record_file:
                 record_data = TestRecordConfigurations.TEST_RECORD_3.value
-                record_configuration = MetadataRecordConfigV2(**record_data)
+                record_configuration = MetadataRecordConfigV3(**record_data)
                 record_configuration.dump(file=Path(record_file.name))
 
                 result = app_runner_mocked_csw.invoke(args=["records", "bulk-import", record_directory])
@@ -255,7 +255,7 @@ class TestCommandRecordsBulkImport:
         with TemporaryDirectory() as record_directory:
             with open(str(Path(f"{record_directory}/record.json")), mode="w+") as record_file:
                 record_data = TestRecordConfigurations.TEST_RECORD_4.value
-                record_configuration = MetadataRecordConfigV2(**record_data)
+                record_configuration = MetadataRecordConfigV3(**record_data)
                 record_configuration.dump(file=Path(record_file.name))
 
                 result = app_runner_mocked_csw.invoke(
@@ -272,7 +272,7 @@ class TestCommandRecordsBulkImport:
         with TemporaryDirectory() as record_directory:
             with open(str(Path(f"{record_directory}/record.json")), mode="w+") as record_file:
                 record_data = TestRecordConfigurations.TEST_RECORD_5.value
-                record_configuration = MetadataRecordConfigV2(**record_data)
+                record_configuration = MetadataRecordConfigV3(**record_data)
                 record_configuration.dump(file=Path(record_file.name))
 
                 result = app_runner_mocked_csw.invoke(args=["records", "bulk-import", record_directory, "--publish"])
@@ -288,7 +288,7 @@ class TestCommandRecordsBulkImport:
         with TemporaryDirectory() as record_directory:
             with open(str(Path(f"{record_directory}/record.json")), mode="w+") as record_file:
                 record_data = TestRecordConfigurations.TEST_RECORD_6.value
-                record_configuration = MetadataRecordConfigV2(**record_data)
+                record_configuration = MetadataRecordConfigV3(**record_data)
                 record_configuration.dump(file=Path(record_file.name))
 
                 result = app_runner_mocked_csw.invoke(
@@ -349,7 +349,7 @@ class TestCommandRecordsBulkImport:
                 invalid_record_path, mode="w+"
             ) as invalid_record_file:
                 valid_record_data = TestRecordConfigurations.TEST_RECORD_3.value
-                record_configuration = MetadataRecordConfigV2(**valid_record_data)
+                record_configuration = MetadataRecordConfigV3(**valid_record_data)
                 record_configuration.dump(file=Path(valid_record_file.name))
                 invalid_record_data = '{"foo":}'  # noqa: FS003
                 invalid_record_file.write(invalid_record_data)
@@ -527,9 +527,9 @@ class TestCommandRecordsExport:
             )
 
             # verify export
-            export_record_configuration = MetadataRecordConfigV2()
+            export_record_configuration = MetadataRecordConfigV3()
             export_record_configuration.load(file=record_path)
-            verification_record_configuration = MetadataRecordConfigV2(**TestRecordConfigurations.TEST_RECORD_7.value)
+            verification_record_configuration = MetadataRecordConfigV3(**TestRecordConfigurations.TEST_RECORD_7.value)
             assert export_record_configuration.config == verification_record_configuration.config
 
     @pytest.mark.usefixtures("app_runner_mocked_csw")
@@ -735,11 +735,11 @@ class TestCommandRecordsBulkExport:
                 in record_paths
             )
 
-            export_record_configuration = MetadataRecordConfigV2()
+            export_record_configuration = MetadataRecordConfigV3()
             export_record_configuration.load(
                 file=records_path.joinpath(f"{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}.json")
             )
-            verification_record_configuration = MetadataRecordConfigV2(**TestRecordConfigurations.TEST_RECORD_7.value)
+            verification_record_configuration = MetadataRecordConfigV3(**TestRecordConfigurations.TEST_RECORD_7.value)
             assert export_record_configuration.config == verification_record_configuration.config
 
     @pytest.mark.usefixtures("app_runner_mocked_csw")

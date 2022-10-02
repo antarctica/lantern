@@ -806,7 +806,7 @@
         <gmd:MD_TopicCategoryCode>geoscientificInformation</gmd:MD_TopicCategoryCode>
       </gmd:topicCategory>
       <gmd:extent>
-        <gmd:EX_Extent>
+        <gmd:EX_Extent id="bounding">
           <gmd:geographicElement>
             <gmd:EX_GeographicBoundingBox>
               <gmd:westBoundLongitude>
@@ -826,7 +826,7 @@
           <gmd:temporalElement>
             <gmd:EX_TemporalExtent>
               <gmd:extent>
-                <gml:TimePeriod gml:id="boundingExtent">
+                <gml:TimePeriod>
                   <gml:beginPosition>2020-06-25T00:00:00</gml:beginPosition>
                   <gml:endPosition>2020-04-23T00:00:00</gml:endPosition>
                 </gml:TimePeriod>

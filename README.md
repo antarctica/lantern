@@ -1065,7 +1065,7 @@ static files held in `tests/scar_add_metadata_toolbox/resources/csw/records/`. T
 in-sync with the record configurations defined in `records.py` using this Python command:
 
 ```shell
-$ cd tests/scar_add_metadata_toolbox
+$ cd tests/scar_add_metadata_toolbox_tests
 $ poetry run python -c "from records import make_csw_test_records; make_csw_test_records()"
 ```
 

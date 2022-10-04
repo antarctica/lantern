@@ -445,7 +445,7 @@ def make_test_record_config(
                 "format": {
                     "format": "Shapefile",
                     "version": "1",
-                    "href": "https://support.esri.com/en/white-paper/279",
+                    "href": "https://www.iana.org/assignments/media-types/application/vnd.shp",
                 },
             },
         ]

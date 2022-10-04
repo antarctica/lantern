@@ -1934,7 +1934,7 @@ class Item:
             download["format"] = "gpkg"
             download["format_title"] = "GeoPackage"
             download["format_description"] = "OGC GeoPackage"
-        elif distribution["format"]["href"] == "https://support.esri.com/en/white-paper/279":
+        elif distribution["format"]["href"] == "https://www.iana.org/assignments/media-types/application/vnd.shp":
             download["format"] = "shp"
             download["format_title"] = "Shapefile"
             download["format_description"] = "ESRI Shapefile"

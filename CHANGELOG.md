@@ -50,6 +50,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
+* Updating the URL used to detect Shapefile downloads to IANA value
+  [#275](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/275)
 * Migrating to BAS Metadata Library ISO 19115 V3 record configurations
   [#267](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/267)
 * Updating project dependencies

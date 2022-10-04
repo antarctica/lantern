@@ -919,9 +919,9 @@
             </gmd:MD_Format>
           </gmd:distributorFormat>
           <gmd:distributorFormat>
-            <gmd:MD_Format id="bml-f71cae1996af39eabbc465124a8e642d9cbb5bd5-fmt">
+            <gmd:MD_Format id="bml-81f0d1c671e7c89378fe3d8115a9ab9d45513912-fmt">
               <gmd:name>
-                <gmx:Anchor xlink:href="https://support.esri.com/en/white-paper/279" xlink:actuate="onRequest">Shapefile</gmx:Anchor>
+                <gmx:Anchor xlink:href="https://www.iana.org/assignments/media-types/application/vnd.shp" xlink:actuate="onRequest">Shapefile</gmx:Anchor>
               </gmd:name>
               <gmd:version>
                 <gco:CharacterString>1</gco:CharacterString>
@@ -975,7 +975,7 @@
             </gmd:MD_DigitalTransferOptions>
           </gmd:distributorTransferOptions>
           <gmd:distributorTransferOptions>
-            <gmd:MD_DigitalTransferOptions id="bml-f71cae1996af39eabbc465124a8e642d9cbb5bd5-tfo">
+            <gmd:MD_DigitalTransferOptions id="bml-81f0d1c671e7c89378fe3d8115a9ab9d45513912-tfo">
               <gmd:unitsOfDistribution>
                 <gco:CharacterString>kB</gco:CharacterString>
               </gmd:unitsOfDistribution>

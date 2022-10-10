@@ -36,38 +36,35 @@
             <header>
                 <h4>Bounding coordinates</h4>
             </header>
-            <dl class="bsk-dl">
-                <dt>
-                    <i class="far fa-border-style fa-flip-horizontal"></i>
-                    Top-right corner:
-                </dt>
-                <dd>North: {{ item.geographic_extent.bounding_box.north_latitude }}, East: {{ item.geographic_extent.bounding_box.east_longitude }}</dd>
-                <dt>
-                    <i class="far fa-border-style fa-flip-vertical"></i>
-                    Bottom-left corner:
-                </dt>
-                <dd>South: {{ item.geographic_extent.bounding_box.south_latitude }}, West: {{ item.geographic_extent.bounding_box.west_longitude }}</dd>
-            </dl>
+            
+                {% for geographic_extent in item.geographic_extents %}
+                <dl class="bsk-dl">
+                    <dt>
+                        {{geographic_extent.identifier}}<br>
+                        <i class="far fa-border-style fa-flip-horizontal"></i>
+                        Top-right corner:
+                    </dt>
+                    <dd>North: {{ geographic_extent.bounding_box.north_latitude }}, East: {{ geographic_extent.bounding_box.east_longitude }} </dd>
+                    <dt>
+                        <i class="far fa-border-style fa-flip-vertical"></i>
+                        Bottom-left corner:
+                    </dt>
+                    <dd>South: {{ geographic_extent.bounding_box.south_latitude }}, West: {{ geographic_extent.bounding_box.west_longitude }} </dd>
+                </dl>
+                {% endfor %}
+
+            <hr>
 
             <header>
                 <h4>Temporal range</h4>
             </header>
-            <dl class="bsk-dl">
-                <div class="bsk-row">
-                    <div class="bsk-col-12-md-4">
-                        <dt>From:</dt>
-                        <dd>{{ item.temporal_extent.start }}</dd>
-                    </div>
-                    <div class="bsk-col-12-md-2 bsk-sr-hidden">
-                        <dt>&nbsp;</dt>
-                        <dd class="bsk-text-center"><i class="fas fa-long-arrow-alt-right"></i></dd>
-                    </div>
-                    <div class="bsk-col-12-md-6">
-                        <dt>To:</dt>
-                        <dd>{{ item.temporal_extent.end }}</dd>
-                    </div>
-                </div>
-            </dl>
+
+            {% for temporal_extent in item.temporal_extents %}
+                <dl class="bsk-dl">
+                    <dt>{{ temporal_extent.extent_number }}</dt>
+                    <dd><b>From:</b> {{ temporal_extent.start }}, <b>To:</b> {{ temporal_extent.end }}</dd>
+                </dl>
+            {% endfor %}
         </div>
     </div>
 </section>

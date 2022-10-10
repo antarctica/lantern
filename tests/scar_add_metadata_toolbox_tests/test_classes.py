@@ -76,10 +76,88 @@ def test_record_distributions_none():
 
 
 # Coverage test
-def test_record_temporal_extent_none():
+def test_record_extent_none():
     record = Record(config={})
-    assert record.temporal_extent["start"] is None
-    assert record.temporal_extent["end"] is None
+    assert record.extents is None
+
+
+# Coverage test
+def test_record_temporal_extent_none():
+    record = Record(
+        config={
+            "identification": {
+                "extents": [
+                    {
+                        "identifier": "bounding",
+                        "geographic": {
+                            "bounding_box": {
+                                "west_longitude": -45.61521,
+                                "east_longitude": -27.04976,
+                                "south_latitude": -68.1511,
+                                "north_latitude": -54.30761,
+                            }
+                        },
+                    }
+                ]
+            }
+        }
+    )
+    assert record.extents[0]["temporal"]["start"] is None
+    assert record.extents[0]["temporal"]["end"] is None
+
+
+# Coverage test
+def test_record_temporal_extent_start_none():
+    start = datetime.datetime.utcnow()
+    record = Record(
+        config={
+            "identification": {
+                "extents": [
+                    {
+                        "identifier": "bounding",
+                        "geographic": {
+                            "bounding_box": {
+                                "west_longitude": -45.61521,
+                                "east_longitude": -27.04976,
+                                "south_latitude": -68.1511,
+                                "north_latitude": -54.30761,
+                            }
+                        },
+                        "temporal": {"period": {"start": {"date": start}}},
+                    }
+                ]
+            }
+        }
+    )
+    assert record.extents[0]["temporal"]["start"] == start
+    assert record.extents[0]["temporal"]["end"] is None
+
+
+# Coverage test
+def test_record_temporal_extent_end_none():
+    end = datetime.datetime.utcnow()
+    record = Record(
+        config={
+            "identification": {
+                "extents": [
+                    {
+                        "identifier": "bounding",
+                        "geographic": {
+                            "bounding_box": {
+                                "west_longitude": -45.61521,
+                                "east_longitude": -27.04976,
+                                "south_latitude": -68.1511,
+                                "north_latitude": -54.30761,
+                            }
+                        },
+                        "temporal": {"period": {"end": {"date": end}}},
+                    }
+                ]
+            }
+        }
+    )
+    assert record.extents[0]["temporal"]["start"] is None
+    assert record.extents[0]["temporal"]["end"] == end
 
 
 # Coverage test

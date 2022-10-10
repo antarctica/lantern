@@ -49,8 +49,6 @@ basic way to group items into sets. The Catalogue is part of the current/legacy 
 
 * [adding new records](docs/workflow-adding-records.md)
 * [updating existing records](docs/workflow-updating-records.md)
-* [adding new collections](docs/workflow-adding-collections.md)
-* [updating existing collections](docs/workflow-updating-collections.md)
 
 ### Available commands
 
@@ -591,7 +589,7 @@ This has been approved by NERC RTS in
 
 ### BAS IT
 
-#### Flask application
+#### Flask application setup
 
 Manually request a new application to be deployed from the BAS IT ServiceDesk using the
 [request template](http://ictdocs.nerc-bas.ac.uk/wiki/index.php/Provisioning_Process#Template_ServiceDesk_request).
@@ -666,7 +664,7 @@ To generate an ESRI ArcGIS developer API key:
 1. login to https://developers.arcgis.com/api-keys/
 2. click *New API Key*:
       1. title: `SCAR ADD Metadata Toolbox`
-      1. description: `Embedded maps shown within the ADD Data Catalogue for extent information.`
+      2. description: `Embedded maps shown within the ADD Data Catalogue for extent information.`
 3. from the *Location Services* section of the page for the new API key:
      1. choose *Configure Services*
      2. disable the *Geocoding (not stored)* option if enabled
@@ -733,8 +731,8 @@ $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask rec
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development APP_ESRI_API_KEY=xxx poetry run flask site build
 ```
 
-Where the value for `APP_ESRI_API_KEY` is held in the MAGIC shared vault in 1Password under 
-'SCAR ADD Metadata Toolbox - ESRI ArcGIS API key'.
+Where the value for `APP_ESRI_API_KEY` is the 'SCAR ADD Metadata Toolbox - ESRI ArcGIS API key' item in the shared 
+vault in the MAGIC 1Password account.
 
 #### Building a local static site with production data
 
@@ -1117,13 +1115,13 @@ in the relevant Ansible inventory in:
 To deploy a new version of the Python package to the IT managed service:
 
 1. create an issue in the 
-   [Station Data Management](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/issues) project
-    * this should link to the release, in this project, being deployed
-    * for example: https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/issues/62
+   [Station Data Management](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/issues) GitLab project
+    * this should link to the new release (in this project) being deployed
+    * for an example see: https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/issues/62
 2. create a merge request from this issue and update:
     * the [`scar_add_metadata_toolbox_version`](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/group_vars/magic/add-metadata-toolbox.yml#L16) 
       group variable to the new release
-3. push change to branch and deploy to the development instance, using an 
+3. push change to branch and deploy to the development instance, using a pre-setup
    [BAS IT Ansible Deployment Environment](#bas-it-ansible-deployment-environment) [1]
 
 [1]
@@ -1139,9 +1137,9 @@ $ invoke ansible -e dev magic/add-metadata-toolbox
 
 #### BAS IT Ansible deployment environment
 
-A virtual machine is required to setup a deployment environment from which to run BAS IT Ansible deployments:
+To setup a deployment environment from which to run BAS IT Ansible deployments in a VM:
 
-**Note:** Deployment environments are shared between projects, a pre-configured environment may already be setup.
+**Note:** Deployment environments are shared between projects, a pre-setup environment may already be available.
 
 1. create a new virtual machine (CentOS is recommended)
 2. setup a user with sudo access, and who's public key is registered in GitLab (to allow cloning projects)
@@ -1283,12 +1281,15 @@ All commits will trigger a Continuous Deployment process using GitLab's CI/CD pl
 
 For all releases:
 
-1. create a release branch
-2. close release in `CHANGELOG.md`
-3. bump package version `poetry version [minor/patch]`
-4. push changes, merge the release branch into `main` and tag with version
-5. create a ServiceDesk request to deploy the new package version (and change/add environment variables if needed)
-6. re-deploy API documentation if needed
+1. create a [Issue](#issue-tracking) using the *release* template
+
+**Note:** To update the release template, edit `./gitlab/issue_templates/release.md`. 
+
+Typically you will then want to deploy the new release:
+
+1. create a [Issue](#issue-tracking) using the *deployment* template
+
+**Note:** To update the release template, edit `./gitlab/issue_templates/deployment.md`.
 
 ## Feedback
 

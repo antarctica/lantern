@@ -7,8 +7,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.5.0] - 2022-10-10
+
 ### Changed [BREAKING!]
 
+* Migrating to BAS Metadata Library ISO 19115 V3 record configurations
+  [#267](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/267)
 * Refactoring Collections to use Records, rather than a standalone implementation
   [#171](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/171)
 * Switching to new GCMD keywords URL
@@ -54,8 +58,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Updating the URL used to detect Shapefile downloads to IANA value
   [#275](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/275)
-* Migrating to BAS Metadata Library ISO 19115 V3 record configurations
-  [#267](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/267)
 * Updating project dependencies
   [#268](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/268)
 * Updating Safety linting command in CI

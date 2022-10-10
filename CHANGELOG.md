@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
+* Support for multiple geographic and temporal extents
+  [#249](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/249)
 * Support for records with a 'not planned' resource maintenance frequency
   [#182](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/182)
 * Updating to BAS Metadata Library 0.9.1

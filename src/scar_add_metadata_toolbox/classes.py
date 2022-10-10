@@ -1,4 +1,5 @@
 import json
+from copy import deepcopy
 from datetime import date, datetime
 from enum import Enum
 from hashlib import sha1
@@ -1074,6 +1075,35 @@ class Record(RecordSummary):
 
         return _keywords
 
+    @staticmethod
+    def _process_temporal_extent(temporal_extent: Optional[dict]) -> Dict[str, Optional[datetime]]:
+        """
+        Assemble a temporal extent
+
+        Temporal extents consist of an optional start and end date instant. This method checks whether either the start
+        or end period has been specified, and if not, use a default 'undefined' value.
+
+        ;type temporal_extent: dict
+        :param temporal_extent: temporal extent
+        :return: temporal extent with default start/end values if not specified
+        :rtype dict
+        """
+        _temporal_extent = {"start": None, "end": None}
+
+        if temporal_extent is None:
+            return _temporal_extent
+
+        try:
+            _temporal_extent["start"] = temporal_extent["period"]["start"]["date"]
+        except KeyError:
+            pass
+        try:
+            _temporal_extent["end"] = temporal_extent["period"]["end"]["date"]
+        except KeyError:
+            pass
+
+        return _temporal_extent
+
     @property
     def abstract(self) -> str:
         return self.config["identification"]["abstract"]
@@ -1118,8 +1148,20 @@ class Record(RecordSummary):
         return self.config["identification"]["edition"]
 
     @property
-    def geographic_extent(self) -> Dict:
-        return self.config["identification"]["extents"][0]["geographic"]
+    def extents(self) -> Optional[List[dict]]:
+        extents = []
+
+        try:
+            for _extent in self.config["identification"]["extents"]:
+                extent = deepcopy(_extent)
+                if "temporal" not in extent:
+                    extent["temporal"] = None
+                extent["temporal"] = self._process_temporal_extent(temporal_extent=extent["temporal"])
+                extents.append(extent)
+        except KeyError:
+            return None
+
+        return extents
 
     @property
     def language(self) -> str:
@@ -1192,23 +1234,6 @@ class Record(RecordSummary):
     @property
     def theme_keywords(self) -> List[dict]:
         return self._filter_keywords(keywords=self.config["identification"]["keywords"], keyword_type="theme")
-
-    @property
-    def temporal_extent(self) -> Dict[str, Optional[datetime]]:
-        _temporal_extent = {"start": None, "end": None}
-
-        try:
-            _temporal_extent["start"] = self.config["identification"]["extents"][0]["temporal"]["period"]["start"][
-                "date"
-            ]
-        except KeyError:
-            pass
-        try:
-            _temporal_extent["end"] = self.config["identification"]["extents"][0]["temporal"]["period"]["end"]["date"]
-        except KeyError:
-            pass
-
-        return _temporal_extent
 
     @property
     def topics(self) -> List[str]:
@@ -2045,12 +2070,17 @@ class Item:
         return self.record.edition
 
     @property
-    def geographic_extent(self) -> Dict:
-        geographic_extent = self.record.geographic_extent
-        geographic_extent["bounding_box_geojson"] = self._process_bounding_box_geojson(
-            bounding_box=geographic_extent["bounding_box"]
-        )
-        return geographic_extent
+    def geographic_extents(self) -> List[dict]:
+        geographic_extents = []
+
+        for extent in self.record.extents:
+            geographic_extent = deepcopy(extent["geographic"])
+            geographic_extent["bounding_box_geojson"] = self._process_bounding_box_geojson(
+                bounding_box=geographic_extent["bounding_box"]
+            )
+            geographic_extents.append(geographic_extent)
+
+        return geographic_extents
 
     @property
     def identifier(self) -> str:
@@ -2168,11 +2198,18 @@ class Item:
         )
 
     @property
-    def temporal_extent(self) -> Dict[str, str]:
-        return {
-            "start": self._format_date(date_datetime=self.record.temporal_extent["start"]),
-            "end": self._format_date(date_datetime=self.record.temporal_extent["end"]),
-        }
+    def temporal_extents(self) -> List[Dict[str, str]]:
+        temporal_extents = []
+
+        for extent in self.record.extents:
+            temporal_extents.append(
+                {
+                    "start": self._format_date(date_datetime=extent["temporal"]["start"]),
+                    "end": self._format_date(date_datetime=extent["temporal"]["end"]),
+                }
+            )
+
+        return temporal_extents
 
     @property
     def theme_keywords(self) -> List[dict]:

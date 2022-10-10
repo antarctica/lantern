@@ -1283,12 +1283,15 @@ All commits will trigger a Continuous Deployment process using GitLab's CI/CD pl
 
 For all releases:
 
-1. create a release branch
-2. close release in `CHANGELOG.md`
-3. bump package version `poetry version [minor/patch]`
-4. push changes, merge the release branch into `main` and tag with version
-5. create a ServiceDesk request to deploy the new package version (and change/add environment variables if needed)
-6. re-deploy API documentation if needed
+1. create a [Issue](#issue-tracking) using the *release* template
+
+**Note:** To update the release template, edit `./gitlab/issue_templates/release.md`. 
+
+Typically you will then want to deploy the new release:
+
+1. create a [Issue](#issue-tracking) using the *deployment* template
+
+**Note:** To update the release template, edit `./gitlab/issue_templates/deployment.md`.
 
 ## Feedback
 

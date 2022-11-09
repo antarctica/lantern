@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+* Suppressing currently unsupported ESRI Living Atlas distribution options from displaying in a broken state
+  [#294](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/294)
+
 ### Changed
 
 * Improving Downloads Proxy documentation

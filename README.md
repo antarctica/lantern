@@ -280,31 +280,39 @@ bucket, with object versioning, containing a separate code package and artefact 
 for each environment is reverse proxied to appear as part of the BAS Data Catalogue (`data.bas.ac.uk`) using the BAS 
 General Load Balancer.
 
+Access to use Lambda functions that can modify state (the write functions) is restricted. AWS Customer Managed IAM 
+polices are defined by this project to assign permissions to use these functions to suitable AWS IAM principles 
+(users or roles).
+
 **WARNING!** Some or all lookup items in the staging environment MAY be removed at anytime.
 
 * Staging instance:
-  * [S3 bucket](https://s3.console.aws.amazon.com/s3/buckets/add-catalogue-downloads-proxy-stage?region=eu-west-1&tab=objects)
-  * [Lambda function (Read)](https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/add-catalogue-downloads-proxy-stage)
-  * [Lambda endpoint (Read)](https://vp3wuemex36unyzbzx76g4pnce0henks.lambda-url.eu-west-1.on.aws/)
-  * [Lambda function (Write)](https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/add-catalogue-downloads-proxy-write-stage)
-  * [Lambda endpoint (Write)](https://zrpqdlufnfqcmqmzppwzegosvu0rvbca.lambda-url.eu-west-1.on.aws/)
-  * Lambda endpoint (Read, Reverse Proxied [Staging Catalogue]): `https://data-testing.data.bas.ac.uk/download-testing/`
-  * Lambda endpoint (Read, Reverse Proxied [Production Catalogue]): `https://data.bas.ac.uk/download-testing/`
+  * S3 bucket (AWS Console): `https://s3.console.aws.amazon.com/s3/buckets/add-catalogue-downloads-proxy-stage?region=eu-west-1&tab=objects`
+  * Lambda function (Read, AWS Console): `https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/add-catalogue-downloads-proxy-stage`
+  * Lambda function (Read, HTTP Endpoint): `https://vp3wuemex36unyzbzx76g4pnce0henks.lambda-url.eu-west-1.on.aws/`
+  * Lambda function (Write, AWS Console): `https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/add-catalogue-downloads-proxy-write-stage`
+  * Lambda function (Write, HTTP Endpoint): `https://zrpqdlufnfqcmqmzppwzegosvu0rvbca.lambda-url.eu-west-1.on.aws/`
+  * Lambda function (Read, Reverse Proxied HTTP Endpoint, Staging Catalogue): `https://data-testing.data.bas.ac. uk/download-testing/`
+  * Lambda endpoint (Read, Reverse Proxied HTTP Endpoint, Production Catalogue): `https://data.bas.ac. uk/download-testing/`
   * Artefact lookups file: `s3://add-catalogue-downloads-proxy-stage/lookups.json`
+  * Lambda function (Write, IAM Customer Managed policy): `BAS-ADD-Catalogue-Downloads-Proxy-Function-Write-Staging`
 * Production instance:
-  * [S3 bucket](https://s3.console.aws.amazon.com/s3/buckets/add-catalogue-downloads-proxy-prod?region=eu-west-1&tab=objects)
-  * [Lambda function (Read)](https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/add-catalogue-downloads-proxy-prod)
-  * [Lambda endpoint (Read)](https://v7lyval5auv7hnqd75rsdhfi640wvpet.lambda-url.eu-west-1.on.aws/)
-  * [Lambda function (Write)](https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/add-catalogue-downloads-proxy-write-prod)
-  * [Lambda endpoint (Write)](https://dvej4gdfa333uci4chyhkxj3wq0fkxrs.lambda-url.eu-west-1.on.aws/)
-  * Lambda endpoint (Read, Reverse Proxied [Staging Catalogue]): `https://data-testing.data.bas.ac.uk/download/`
-  * Lambda endpoint (Read, Reverse Proxied [Production Catalogue]): `https://data.bas.ac.uk/download/`
+  * S3 bucket (AWS Console): `https://s3.console.aws.amazon.com/s3/buckets/add-catalogue-downloads-proxy-prod?region=eu-west-1&tab=objects`
+  * Lambda function (Read, AWS Console): `https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/add-catalogue-downloads-proxy-prod`
+  * Lambda endpoint (Read, HTTP Endpoint): `https://v7lyval5auv7hnqd75rsdhfi640wvpet.lambda-url.eu-west-1.on.aws/`
+  * Lambda function (Write, AWS Console): `https://eu-west-1.console.aws.amazon.com/lambda/home?
+    region=eu-west-1#/functions/add-catalogue-downloads-proxy-write-prod`
+  * Lambda function (Write, HTTP Endpoint): `https://dvej4gdfa333uci4chyhkxj3wq0fkxrs.lambda-url.eu-west-1.on.aws/`
+  * Lambda function (Read, Reverse Proxied HTTP Endpoint, Staging Catalogue): `https://data-testing.data.bas.ac.uk/download/`
+  * Lambda function (Read, Reverse Proxied HTTP Endpoint, Production Catalogue): `https://data.bas.ac.uk/download/`
   * Artefact lookups file: `s3://add-catalogue-downloads-proxy-prod/lookups.json`
+  * Lambda function (Write, IAM Customer Managed policy): `BAS-ADD-Catalogue-Downloads-Proxy-Function-Write-Production`
 
 See the [relevant](#downloads-proxy-source) development sub-section for information on the source code for these 
-functions.
+functions. 
 
-See the [Terraform](#terraform) setup sub-section for information on how to provision the resources for these functions.
+See the [Terraform](#terraform) setup sub-section for information on how to provision the resources for 
+these functions, including IAM policies.
 
 See the [BAS API Load Balancer](#bas-api-load-balancer) setup sub-section for information on how to setup reverse 
 proxying for these functions.
@@ -312,11 +320,11 @@ proxying for these functions.
 #### Downloads proxy artefacts lookup schema
 
 The Downloads Proxy reads information about artefacts that can be downloaded from a JSON file stored in an S3 bucket.
-This JSON file can be [Updated](#updating-downloads-proxy-artefacts-lookups) as needed to include new artefact downloads
+This JSON file can be [Updated](#updating-downloads-proxy-artefacts-lookups) as needed to include new artefact lookups
 or amend existing entries. The structure of this file consists of an object, the keys of which are artefact IDs, and
 values are an artefact lookup item.
 
-An artefact lookup item is defined as an object with these properties:
+An artefact lookup item is an object with these properties:
 
 | Property      | Data Type | Required | Example                                |
 | ------------- | --------- | -------- |----------------------------------------|
@@ -326,11 +334,11 @@ An artefact lookup item is defined as an object with these properties:
 | `origin_uri`  | String    | Yes      | 'https://example.com/dataset.gpkg'     |
 
 This structure is formally described by a JSON Schema in `support/downloads/proxy/artefact-lookups-v1.json`, which 
-is published as part of the [BAS Metadata Standards](https://metadata-standards.data.bas.ac.uk) as:
+is published as part of the [BAS Metadata Standards](https://metadata-standards.data.bas.ac.uk) website at:
 
 https://metadata-standards.data.bas.ac.uk/scar-add-metadata-toolbox-downloads-proxy-schemas/v1/artefact-lookups-v1.json
 
-An example JSON file looks like:
+A complete JSON file, with a single artefact lookup item, looks like this:
 
 ```json
 {
@@ -347,38 +355,61 @@ An example JSON file looks like:
 }
 ```
 
-#### Updating downloads proxy artefacts lookups
+#### Registering downloads proxy artefacts lookup items
 
-Individual artefact lookups can be added through the relevant Lambda function. Bulk additions, or changes/removals 
-of existing lookup items can be made by updating the relevant JSON file via the AWS S3 API.
+Individual artefact lookup items can be added through a Lambda function. 
 
-The Lambda function for adding new entries requires authentication using an AWS IAM principle (user or role). This
-project defines a Custom Managed IAM Policy within the BAS AWS Account for easily assigning permissions to principles:
+**Note:** Bulk additions, or changes/removals of existing lookup items can be made by updating the relevant JSON file 
+via the AWS S3 API. This is out of scope for this guide.
 
-* staging: `BAS-ADD-Catalogue-Downloads-Proxy-Function-Write-Staging`
-* production: `BAS-ADD-Catalogue-Downloads-Proxy-Function-Write-Production`
-
-These policies are managed, and should be attached to principles, using Terraform.
-
-Calls to the Lambda function endpoint require authentication using the
+Requests to these Lambda functions require authentication using the
 [AWS Signature Version 4](https://docs.aws.amazon.com/general/latest/gr/signature-version-4.html) algorithm.
 
-A HTTP `204 No Content` status will be returned if the new lookup item is added successfully.
+Generating this signature requires an AWS IAM principle (user or role) with the relevant IAM policy assigned, see the
+[Downloads proxy Lambda functions](#downloads-proxy-lambda-functions) section for references and more information.
 
-A HTTP `409 Conflict` status will be returned if the artefact ID in the lookup item is already registered.
+When called:
 
-Example (using the command line):
+* a HTTP `204 No Content` status will be returned if the new lookup item is added successfully
+* a HTTP `409 Conflict` status will be returned if the artefact ID in the lookup item is already registered
+* other HTTP errors (in the `4xx` or `5xx` range), may be returned if an error occurs
+
+Reference (using the command line):
 
 ```shell
 # with AWSCuRL installed and AWS credentials configured (`brew install awscurl awscli`, then `aws configure`)
-$ awscurl --region eu-west-1 --service lambda --access_key $AWS_ACCESS_KEY_ID --secret_key $AWS_SECRET_ACCESS_KEY 'https://$LAMBDA-ENDPOINT.lambda-url.eu-west-1.on.aws/' --request POST --header 'Content-Type: application/json' --data $'{"artefact_id": "758ab069-46d7-47b7-82d4-1905ed155a54", "resource_id": "beaa0a4e-e452-4087-b4f5-eb2b8246dedb", "media_type": "application/geopackage+vnd.sqlite3", "origin_uri": "https://example.com/dataset.gpkg"}'
+$ awscurl --region eu-west-1 --service lambda --access_key $AWS_ACCESS_KEY_ID --secret_key $AWS_SECRET_ACCESS_KEY '[Lambda function (Write, HTTP Endpoint)]' --request POST --header 'Content-Type: application/json' --data $'{"artefact_id": "[Artefact ID]", "resource_id": "[Resource ID]", "media_type": "[Media Type]", "origin_uri": "[Origin URI]"}'
 ```
 
-Example (using Python):
+Example (using the command line, for a fake artefact/resource using the staging environment):
+
+```shell
+$ awscurl --region eu-west-1 --service lambda --access_key xxx --secret_key xxx 'https://zrpqdlufnfqcmqmzppwzegosvu0rvbca.lambda-url.eu-west-1.on.aws/' --request POST --header 'Content-Type: application/json' --data $'{"artefact_id": "758ab069-46d7-47b7-82d4-1905ed155a54", "resource_id": "beaa0a4e-e452-4087-b4f5-eb2b8246dedb", "media_type": "application/geopackage+vnd.sqlite3", "origin_uri": "https://example.com/dataset.gpkg"}'
+```
+
+Reference (using Python):
 
 ```python
 import requests
-# `pip install requests-auth-aws-sigv4`
+from requests_auth_aws_sigv4 import AWSSigV4  # `pip install requests-auth-aws-sigv4`
+
+lookup_item = {
+    'artefact_id': '[Artefact ID]',
+    'resource_id': '[Resource ID]',
+    'media_type': '[Media Type]',
+    'origin_uri': '[Origin URI]'
+}
+lambda_endpoint = 'https://zrpqdlufnfqcmqmzppwzegosvu0rvbca.lambda-url.eu-west-1.on.aws/'
+
+r = requests.post(url=lambda_endpoint, json=lookup_item, auth=AWSSigV4('lambda'))
+r.raise_for_status()
+print(r.status_code)
+```
+
+Example (using Python, for a fake artefact/resource using the staging environment):
+
+```python
+import requests
 from requests_auth_aws_sigv4 import AWSSigV4
 
 lookup_item = {
@@ -387,7 +418,7 @@ lookup_item = {
     'media_type': 'application/geopackage+vnd.sqlite3',
     'origin_uri': 'https://example.com/dataset.gpkg'
 }
-lambda_endpoint = 'https://$LAMBDA-ENDPOINT.lambda-url.eu-west-1.on.aws/'
+lambda_endpoint = 'https://zrpqdlufnfqcmqmzppwzegosvu0rvbca.lambda-url.eu-west-1.on.aws/'
 
 r = requests.post(url=lambda_endpoint, json=lookup_item, auth=AWSSigV4('lambda'))
 r.raise_for_status()

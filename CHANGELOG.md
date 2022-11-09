@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+* Improving Downloads Proxy documentation
+  [#293](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/293)
+
 ## [0.5.0] - 2022-10-10
 
 ### Changed [BREAKING!]

@@ -330,7 +330,7 @@ An artefact lookup item is an object with these properties:
 | ------------- | --------- | -------- |----------------------------------------|
 | `artefact_id` | String    | Yes      | '758ab069-46d7-47b7-82d4-1905ed155a54' |
 | `resource_id` | String    | Yes      | 'beaa0a4e-e452-4087-b4f5-eb2b8246dedb' |
-| `media_type`  | String    | Yes      | 'application/geopackage+vnd.sqlite3'   |
+| `media_type`  | String    | Yes      | 'application/geopackage+sqlite3'       |
 | `origin_uri`  | String    | Yes      | 'https://example.com/dataset.gpkg'     |
 
 This structure is formally described by a JSON Schema in `support/downloads/proxy/artefact-lookups-v1.json`, which 
@@ -384,7 +384,7 @@ $ awscurl --region eu-west-1 --service lambda --access_key $AWS_ACCESS_KEY_ID --
 Example (using the command line, for a fake artefact/resource using the staging environment):
 
 ```shell
-$ awscurl --region eu-west-1 --service lambda --access_key xxx --secret_key xxx 'https://zrpqdlufnfqcmqmzppwzegosvu0rvbca.lambda-url.eu-west-1.on.aws/' --request POST --header 'Content-Type: application/json' --data $'{"artefact_id": "758ab069-46d7-47b7-82d4-1905ed155a54", "resource_id": "beaa0a4e-e452-4087-b4f5-eb2b8246dedb", "media_type": "application/geopackage+vnd.sqlite3", "origin_uri": "https://example.com/dataset.gpkg"}'
+$ awscurl --region eu-west-1 --service lambda --access_key xxx --secret_key xxx 'https://zrpqdlufnfqcmqmzppwzegosvu0rvbca.lambda-url.eu-west-1.on.aws/' --request POST --header 'Content-Type: application/json' --data $'{"artefact_id": "758ab069-46d7-47b7-82d4-1905ed155a54", "resource_id": "beaa0a4e-e452-4087-b4f5-eb2b8246dedb", "media_type": "application/geopackage+sqlite3", "origin_uri": "https://example.com/dataset.gpkg"}'
 ```
 
 Reference (using Python):
@@ -415,7 +415,7 @@ from requests_auth_aws_sigv4 import AWSSigV4
 lookup_item = {
     'artefact_id': '758ab069-46d7-47b7-82d4-1905ed155a54',
     'resource_id': 'beaa0a4e-e452-4087-b4f5-eb2b8246dedb',
-    'media_type': 'application/geopackage+vnd.sqlite3',
+    'media_type': 'application/geopackage+sqlite3',
     'origin_uri': 'https://example.com/dataset.gpkg'
 }
 lambda_endpoint = 'https://zrpqdlufnfqcmqmzppwzegosvu0rvbca.lambda-url.eu-west-1.on.aws/'

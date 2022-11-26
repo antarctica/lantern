@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#294](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/294)
 * Incorrectly committed pyenv `.python-version` file
   [#306](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/306)
+* GeoPackage media type in README examples
+  [#307](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/307)
 
 ### Changed
 

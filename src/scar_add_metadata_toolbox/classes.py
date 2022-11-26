@@ -1397,8 +1397,6 @@ class Repository:
         _record_summaries = {}
 
         for record_xml in self.csw_client.get_records(mode=CSWGetRecordMode.FULL):
-            record_xml = record_xml.replace("</csw:SearchResults>", "")
-            record_xml = record_xml.replace("</csw:GetRecordsResponse>", "")
             record_config = MetadataRecord(record=record_xml).make_config()
             record = RecordSummary(config=record_config.config)
             _record_summaries[record.identifier] = record

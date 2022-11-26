@@ -17,7 +17,7 @@ FROM base as build
 
 RUN apk add --no-cache build-base cargo
 RUN python3 -m pip install pipx
-RUN python3 -m pipx install poetry==1.1.4
+RUN python3 -m pipx install poetry==1.2.2
 
 ENV PATH="/root/.local/bin:$PATH"
 COPY pyproject.toml poetry.lock /

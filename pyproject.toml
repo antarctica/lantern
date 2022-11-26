@@ -33,31 +33,25 @@ sentry-sdk = {version = "^1.9.9", extras = ["flask"]}
 str2bool = "^1.1"
 tabulate = "^0.9.0"
 
-
-# # Python 3.8 backports
-#
-
+# # Backports # #
 importlib_resources = "^5.10.0"
 
-
-# # dependencies for vendored OWSlib package
-# python-dateutil = "^1.5"  # already a dependency of main app
+# # Dependencies for vendored OWSlib package # #
 pytz = "^2022.2.1"
-# requests = "^1.0"  # already a dependency of main app
 pyproj = "3.4.0"  # pinned to ensure compatibility with PROJ version available in Python alpine container
 pyyaml = "^5.4"  # pinned for AWS CLI compatibility, which requires PyYAML < 5.5
+# `python-dateutil and `requests` dependencies skipped as they already dependencies of the main app.
 
-# # dependencies for vendored PyCSW package
+# # Dependencies for vendored PyCSW package # #
 geolinks = "^0.2.0"
-# lxml = "^4.7"  # already a dependency of main app
-# pyproj = "^2.6.0"  # already a dependency of OWSLib vendored dependency
 Shapely = "^1.8.4"
 xmltodict = "^0.13.0"
 psycopg2-binary = "^2.9.3"
 SQLAlchemy = "^1.4.41"
+# `lxml` and `pyproj` dependencies skipped as they already dependencies of main app and owslib dependency.
 
-[tool.poetry.dev-dependencies]
-flake8 = "^5.0.4"  # pinned because https://github.com/PyCQA/flake8-import-order/issues/189 not in a release yet
+[tool.poetry.group.dev.dependencies]
+flake8 = "^6.0.0"  # pinned because https://github.com/PyCQA/flake8-import-order/issues/189 not in a release yet
 flake8-bandit = "^4.1.1"
 flake8-black = "^0.3.5"
 flake8-bugbear = "^22.10.27"
@@ -68,8 +62,7 @@ pytest = "^7.2.0"
 pytest-cov = "^4.0.0"
 pytest-flask = "^1.2.0"
 pytest-random-order = "^1.0.4"
-safety = "^2.2.0"
-tomlkit = "^0.11.5"
+safety = "^2.3.2"
 
 [tool.black]
 line-length = 120

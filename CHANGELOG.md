@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Minimum Python version increased to 3.8.1
   [#289](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/294)
+* Minimum Poetry version increased to 1.2.x
+  [#312](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/312)
 
 ### Added
 

@@ -17,7 +17,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-awscli = "1.24.10" # pinned because <= 1.25 requires Python > 3.6, also to aid in dependency resolution time
+awscli = "1.27.16" # pinned because <= 1.25 requires Python > 3.6, also to aid in dependency resolution time
 bas-metadata-library = "^0.9.1"
 bas-style-kit-jinja-templates = "^0.7.0"
 click-spinner = "^0.1.10"
@@ -33,10 +33,6 @@ sentry-sdk = {version = "^1.9.9", extras = ["flask"]}
 str2bool = "^1.1"
 tabulate = "^0.8.10"
 
-# # Python 3.6 backports
-importlib_metadata = "^4.2.0"
-importlib_resources = "^5.4.0"
-backports-datetime-fromisoformat = "^1.0.0"
 
 # # dependencies for vendored OWSlib package
 # python-dateutil = "^1.5"  # already a dependency of main app

@@ -1,3 +1,4 @@
+from importlib.metadata import version
 import logging
 import os
 from pathlib import Path
@@ -6,7 +7,6 @@ from typing import Dict, List
 from bas_style_kit_jinja_templates import BskTemplates
 from flask.cli import load_dotenv
 from flask_azure_oauth.mocks.keys import TestJwk
-from importlib_metadata import version
 from msal import PublicClientApplication
 from sentry_sdk.integrations.flask import FlaskIntegration
 from str2bool import str2bool

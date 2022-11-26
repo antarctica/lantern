@@ -1083,7 +1083,7 @@ class Record(RecordSummary):
         Temporal extents consist of an optional start and end date instant. This method checks whether either the start
         or end period has been specified, and if not, use a default 'undefined' value.
 
-        ;type temporal_extent: dict
+        :type temporal_extent: dict
         :param temporal_extent: temporal extent
         :return: temporal extent with default start/end values if not specified
         :rtype dict
@@ -1409,6 +1409,7 @@ class Repository:
         return _record_summaries
 
     def insert_record(self, record: Record, update: bool = False) -> None:
+        # noinspection GrazieInspection
         """
         Creates a new record, or updates an existing record, in the repository
 
@@ -1670,6 +1671,7 @@ class Item:
     """
 
     def __init__(self, record: Record):
+        # noinspection GrazieInspection
         """
         :type record Record
         :param record: Record item is based on
@@ -2304,6 +2306,7 @@ class Collection:
     """
 
     def __init__(self, record: Record):
+        # noinspection GrazieInspection
         """
         :type record Record
         :param record: Record item is based on

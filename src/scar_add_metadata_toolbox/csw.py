@@ -60,7 +60,7 @@ class CSWDatabaseNotInitialisedException(Exception):
 
     Backing databases must be initialised to ensure relevant database structures, indexes and triggers exist and are
     configured before records are written or read from a catalogue. If requests are made to a CSW server before has
-    happened this rule would be violated. The relevant initialisation method can be ran to resolve this.
+    happened this rule would be violated. The relevant initialisation method can be run to resolve this.
     """
 
     pass
@@ -118,8 +118,8 @@ class CSWAuthInsufficientException(Exception):
     Requests to authorised CSW requests must include authorisation information that satisfies all the requirements of
     the resource or action being requested. If any of these requirements are not met this rule would be violated.
 
-    Typically this error relates to missing scopes/roles that are required by the resource or action being requested.
-    E.g. to publish a record the Publish scope/role is required.
+    Usually this error relates to missing scopes/roles that are required by the resource or action being requested.
+    E.g. to publish a record the 'Publish' scope/role is required.
     """
 
     pass
@@ -233,7 +233,7 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
         * endpoint: URL clients will use for access (str)
         * title: catalogue title (str)
         * abstract: catalogue description (str)
-        * database_connection_string: PyCSW (SQL Alchemy) connection string (must use PostgreSQL)
+        * database_connection_string: PyCSW (SQL Alchemy) connection string (must use Postgres)
         * database_table_table: name of table for storing records (str)
         * auth_required_scopes_read: OAuth scopes required to make record(s) requests (may be empty list)
         * auth_required_scopes_write: OAuth scopes required to make transactional requests (may be empty list)
@@ -277,7 +277,7 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
 
         I.e. is the client allowed to perform the action they're trying to do.
 
-        Currently actions are simplified to 'read' or 'write' and the required set of scopes is specified by the
+        Actions are simplified to 'read' or 'write' and the required set of scopes is specified by the
         'auth_required_scopes_read' or 'auth_required_scopes_write' class config options.
 
         If the token does not include the required scopes an exception is raised, otherwise nothing is returned.
@@ -330,6 +330,7 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
             pass
 
     def process_request(self, request: Request, token: Optional[AzureToken] = None) -> Response:
+        # noinspection GrazieInspection
         """
         Process a CSW request and return a suitable response
 
@@ -396,8 +397,8 @@ class CSWClient:  # pragma: no cover (until #59 is resolved)
     * raising exceptions for errors
     * support for token based authentication
     * workaround to fix transactional update results count error
-    * compatibility with this applications CSWServer class for error handling
-    * compatibility with this applications Repository class for setting CSW configuration options
+    * compatibility with this application's CSWServer class for error handling
+    * compatibility with this application's Repository class for setting CSW configuration options
 
     Note: This class uses classes from the Hazardous Materials module. This is to work around limitations in the OWSLib
     package. This will be addressed by upstreaming missing functionality or creating a derivative package.
@@ -482,7 +483,7 @@ class CSWClient:  # pragma: no cover (until #59 is resolved)
         """
         Return all records
 
-        Currently returns all records in a CSW catalogue, i.e. search/filtering options are not yet supported.
+        Returns all records in a CSW catalogue, i.e. search/filtering options are not yet supported.
 
         CSW supports returning full/complete records or summary versions with more specific elements. Formally CSW
         refers to these as Element Set Names, this method refers to this as the (record) mode. Options are described by
@@ -526,7 +527,7 @@ class CSWClient:  # pragma: no cover (until #59 is resolved)
         Uses the CSW transactional profile to insert a new record into a CSW catalogue.
 
         Note: If a record with the same IS0 19115 file identifier exists it will be considered a duplicate of an
-        existing record and result in a conflict error. To update an existing record, including changing it's file
+        existing record and result in a conflict error. To update an existing record, including changing its file
         identifier, use the `update_record()` method.
 
         :type record str

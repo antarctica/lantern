@@ -474,10 +474,10 @@ class TestingConfig(DevelopmentConfig):
         """
         super().__init__()
 
-        os.environ["CSW_ENDPOINT_UNPUBLISHED"] = "http://example.com/csw/unpublished"
-        os.environ["CSW_ENDPOINT_PUBLISHED"] = "http://example.com/csw/published"
-        os.environ["CSW_SERVER_CONFIG_UNPUBLISHED_ENDPOINT"] = "http://example.com/csw/unpublished"
-        os.environ["CSW_SERVER_CONFIG_PUBLISHED_ENDPOINT"] = "http://example.com/csw/published"
+        os.environ["CSW_ENDPOINT_UNPUBLISHED"] = "https://example.com/csw/unpublished"
+        os.environ["CSW_ENDPOINT_PUBLISHED"] = "https://example.com/csw/published"
+        os.environ["CSW_SERVER_CONFIG_UNPUBLISHED_ENDPOINT"] = "https://example.com/csw/unpublished"
+        os.environ["CSW_SERVER_CONFIG_PUBLISHED_ENDPOINT"] = "https://example.com/csw/published"
 
         os.environ[
             "CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION"

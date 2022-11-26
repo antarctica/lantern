@@ -27,13 +27,15 @@ def create_app():
     """
     Application factory
 
-    This application uses the application factory pattern [1].
+    This app object:
+    * loads configuration from the `config` class (based on the `FLASK_ENV` environment variable)
+    * creates instances of important classes such as authentication and metadata records
+    * defines a `version` CLI command for debugging the package version installed
+    * registers additional CLI commands from blueprints, for use when this app is run as a client
+    * defines a route for handling CSW requests, for use when this is run as a server
 
-    In addition to various routes and commands (registered directly or via blueprints), the app object includes
-    instances of important classes such as authentication and metadata records/collections. Application configuration
-    is loaded from the `config` class.
-
-    :return:
+    :rtype Flask
+    :return: application object
     """
     app = Flask(__name__)
 

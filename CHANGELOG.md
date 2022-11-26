@@ -24,6 +24,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Improving release issue template
   [#310](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/310)
+* Improving doc blocks, code formatting, typos, minor syntax changes and PyCharm inspections
+  [#311](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/311)
 * Improving Downloads Proxy documentation
   [#293](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/293)
 

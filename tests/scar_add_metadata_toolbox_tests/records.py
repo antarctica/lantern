@@ -546,6 +546,7 @@ def make_csw_test_records() -> None:
     records_base_path = Path("resources/csw/records").resolve()
     for record_config in TestRecordConfigurations:
         print(f"Generating test record for '{record_config.name}'")
+        # noinspection PyArgumentList
         configuration = MetadataRecordConfigV3(**record_config.value)
         record = MetadataRecord(configuration=configuration)
         record_path = records_base_path.joinpath(f"get_record_{record_config.value['file_identifier']}_full.xml")

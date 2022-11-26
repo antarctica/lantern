@@ -244,7 +244,8 @@ def export_record(record_identifier: str, record_path: str, allow_overwrite: boo
     except FileExistsError:
         if not allow_overwrite:
             print(
-                f"No. Export of record '{record_identifier}' would be overwritten. Add `--allow-overwrite` flag to allow."
+                f"No. Export of record '{record_identifier}' would be overwritten. "
+                f"Add `--allow-overwrite` flag to allow."
             )
             sys_exit(EX_USAGE)
 
@@ -554,10 +555,8 @@ def build_pages():
 
 @site_commands_blueprint.cli.command("copy-assets")
 def copy_assets():
-    """Copy all static assets (CSS, JS, etc.).
-
-    Note: The path returned by importlib_resources is not a normal Path object and needs to converted before it can be
-    used. The empty `.joinpath()` method is part of this conversion.
+    """
+    Copy all static assets (CSS, JS, etc.).
     """
     # workaround for lack of `dirs_exist_ok` option in copytree in Python 3.6
     try:
@@ -565,6 +564,8 @@ def copy_assets():
     except FileNotFoundError:
         pass
 
+    # The path returned by importlib_resources is not a normal Path object and needs to converted before it can be used.
+    # This empty `.joinpath()` method is part of this conversion.
     copytree(
         str(Path(resource_path("scar_add_metadata_toolbox.static").joinpath(""))),
         str(Path(current_app.config["SITE_PATH"]).joinpath("static")),
@@ -623,7 +624,8 @@ def setup_catalogue(catalogue: str):
         print(f"Ok. Catalogue '{catalogue}' setup.")
     except KeyError:
         print(
-            f"No. CSW catalogue '{catalogue}' does not exist. Valid options are [{', '.join(current_app.repositories.keys())}]."
+            f"No. CSW catalogue '{catalogue}' does not exist. "
+            f"Valid options are [{', '.join(current_app.repositories.keys())}]."
         )
         sys_exit(EX_USAGE)
     except CSWDatabaseAlreadyInitialisedException:

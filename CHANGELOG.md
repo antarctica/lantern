@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#306](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/306)
 * GeoPackage media type in README examples
   [#307](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/307)
+* Correcting git command in IT deployment README instructions
+  [#309](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/309)
 
 ### Changed
 

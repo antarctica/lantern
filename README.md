@@ -1162,7 +1162,7 @@ To deploy a new version of the Python package to the IT managed service:
 $ cd ./ansible
 $ workon venv
 $ git fetch origin
-$ git switch -c $BRANCH origin/$BRANCH
+$ git checkout -b $BRANCH origin/$BRANCH
 $ invoke ansible -e dev magic/add-metadata-toolbox
 ```
 

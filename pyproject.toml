@@ -56,6 +56,7 @@ flake8-bandit = "^4.1.1"
 flake8-black = "^0.3.5"
 flake8-bugbear = "^22.10.27"
 flake8-builtins = "^2.0.1"
+flake8-comprehensions = "^3.10.1"
 flake8-import-order = "^0.18.1"
 flake8-pyproject = "^1.2.1"
 flake8-use-fstring = "^1.4"
@@ -80,6 +81,7 @@ extend-exclude = ['*/hazmat/*']
 # B9:  bug-bear opinionated (additional, additional bad code checks)
 # BLK: black (code formatting)
 # C:   mccabe (code complexity)
+# C4:  comprehensions (list/dict/set comprehensions)
 # E:   pycodestyle errors (PEP8 checks)
 # F:   pyflakes (invalid/bad code checks)
 # FS:  use-fstring (f-strings used for text interpolation)

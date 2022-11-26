@@ -143,7 +143,7 @@ def import_records(
 ):
     """Import records from files in a directory."""
     records_path = Path(records_path)
-    record_paths = list(sorted(records_path.glob("*.json")))
+    record_paths = sorted(records_path.glob("*.json"))
 
     print(f"{len(record_paths)} records to import/update.")
     _record_count = 1

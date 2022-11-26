@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Minimum Python version increased to 3.8.1
   [#289](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/294)
 
+### Added
+
+* Documentation on updating minimum Python version
+  [#289](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/294)
+
 ### Fixed
 
 * Suppressing currently unsupported ESRI Living Atlas distribution options from displaying in a broken state

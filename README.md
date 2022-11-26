@@ -909,13 +909,42 @@ $ docker build -f gitlab-ci.Dockerfile -t docker-registry.data.bas.ac.uk/magic/a
 $ docker push docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox:latest
 ```
 
+#### Listing outdated dependencies
+
+To list out of date dependencies:
+
+```shell
+$ poetry show --outdated
+```
+
+**Note:** This will include non-primary dependencies (i.e. not those listed directly in `pyproject.toml`), which should
+normally be ignored.
+
+**Note:** To find out why a dependency is required, run `poetry show [package]`.
+
 #### Updating dependencies
+
+To update packages within their allowed constraints:
 
 ```shell
 $ poetry update
 ```
 
-See the instructions above to update the Docker image used in CI/CD.
+After updating, see the instructions above to update the Docker image used in CI/CD.
+
+To update dependencies to their latest versions:
+
+1. [List outdated dependencies](#listing-outdated-dependencies)
+2. review this list against version constraints in `pyproject.toml` and against change logs for each package
+3. for packages that are ok to update to their latest versions, update the version constraint in `pyproject.toml`
+4. perform an update as listed above
+
+**Note:** If a dependency cannot be updated due to a conflict with another package or Python version, pin the version
+as needed and append a comment to explain which package is blocking further updates, e.g.:
+
+```python
+  # pinned because >= 0.3.2 requires Python > 3.6
+```
 
 #### Updating minimum Python version [WIP]
 
@@ -960,8 +989,8 @@ $ docker build -f gitlab-ci.Dockerfile -t docker-registry.data.bas.ac.uk/magic/a
 $ docker push docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox:latest
 ``` 
 
-2. change any packages that are pinned in `poetry.toml` due to Python version to their latest major versions
-3. run `poetry upgrade` to upgrade dependencies
+1. change any packages that are pinned in `poetry.toml` due to Python version to their latest major versions
+2. run `poetry upgrade` to upgrade dependencies
 
 #### Upgrading `pyproj` dependency
 

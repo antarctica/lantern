@@ -34,6 +34,12 @@ str2bool = "^1.1"
 tabulate = "^0.8.10"
 
 
+# # Python 3.8 backports
+#
+
+importlib_resources = "^5.10.0"
+
+
 # # dependencies for vendored OWSlib package
 # python-dateutil = "^1.5"  # already a dependency of main app
 pytz = "^2022.2.1"

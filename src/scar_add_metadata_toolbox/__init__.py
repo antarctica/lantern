@@ -11,9 +11,9 @@ from scar_add_metadata_toolbox.commands import (
     site_commands_blueprint,
 )
 from scar_add_metadata_toolbox.csw import (
-    CSWAuthInsufficientException,
-    CSWAuthMissingException,
-    CSWDatabaseNotInitialisedException,
+    CSWAuthInsufficientError,
+    CSWAuthMissingError,
+    CSWDatabaseNotInitialisedError,
 )
 from scar_add_metadata_toolbox.utils import (
     _create_app_config,
@@ -71,11 +71,11 @@ def create_app():
             return app.repositories[escape(catalogue)].process_request(request=request, token=current_token)
         except KeyError:
             return Response(response="Catalogue not found.", status=404)
-        except CSWDatabaseNotInitialisedException:
+        except CSWDatabaseNotInitialisedError:
             return Response(response="Catalogue not yet available.", status=500)
-        except CSWAuthMissingException:
+        except CSWAuthMissingError:
             return Response(response="Missing authorisation token.", status=401)
-        except CSWAuthInsufficientException:
+        except CSWAuthInsufficientError:
             return Response(response="Insufficient authorisation token.", status=403)
 
     return app

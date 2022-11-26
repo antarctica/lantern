@@ -4,10 +4,10 @@ import pytest
 
 from scar_add_metadata_toolbox.classes import (
     Collection,
-    CollectionInvalidSourceRecordException,
+    CollectionInvalidSourceRecordError,
     CSWClient,
     Item,
-    ItemInvalidSourceRecordException,
+    ItemInvalidSourceRecordError,
     MirrorRecord,
     MirrorRecordSummary,
     Record,
@@ -181,13 +181,13 @@ def test_item__format_spatial_reference_system_projections():
 
 # Coverage test
 def test_item_invalid_record_type():
-    with pytest.raises(ItemInvalidSourceRecordException):
+    with pytest.raises(ItemInvalidSourceRecordError):
         Item(record=Record(config={"hierarchy_level": "collection"}))
 
 
 # Coverage test
 def test_collection_invalid_record_type():
-    with pytest.raises(CollectionInvalidSourceRecordException):
+    with pytest.raises(CollectionInvalidSourceRecordError):
         Collection(record=Record(config={"hierarchy_level": "dataset"}))
 
 

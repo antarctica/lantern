@@ -43,7 +43,7 @@ class CSWTransactionType(Enum):
     DELETE = "delete"
 
 
-class CSWDatabaseAlreadyInitialisedException(Exception):
+class CSWDatabaseAlreadyInitialisedError(Exception):
     """
     Represents a situation whereby a CSW Server's backing database has already been initialised
 
@@ -54,7 +54,7 @@ class CSWDatabaseAlreadyInitialisedException(Exception):
     pass
 
 
-class CSWDatabaseNotInitialisedException(Exception):
+class CSWDatabaseNotInitialisedError(Exception):
     """
     Represents a situation where the backing database for a CSW Server has not yet been initialised
 
@@ -66,7 +66,7 @@ class CSWDatabaseNotInitialisedException(Exception):
     pass
 
 
-class CSWDatabasePostGISExtensionUnavailable(Exception):
+class CSWDatabasePostGISExtensionUnavailableError(Exception):
     """
     Represents a situation where the backing database or a CSW Server does not have the PostGIS extension enabled
 
@@ -78,7 +78,7 @@ class CSWDatabasePostGISExtensionUnavailable(Exception):
     pass
 
 
-class CSWMethodNotSupportedException(Exception):
+class CSWMethodNotSupportedError(Exception):
     """
     Represents a situation where an unsupported HTTP method is used in a request to a CSW Server
 
@@ -88,7 +88,7 @@ class CSWMethodNotSupportedException(Exception):
     pass
 
 
-class CSWAuthException(Exception):
+class CSWAuthError(Exception):
     """
     Represents a situation where there the authentication information included in a CSW request causes an error
 
@@ -99,7 +99,7 @@ class CSWAuthException(Exception):
     pass
 
 
-class CSWAuthMissingException(Exception):
+class CSWAuthMissingError(Exception):
     """
     Represents a situation where authentication information is required for a CSW request but was not included
 
@@ -110,7 +110,7 @@ class CSWAuthMissingException(Exception):
     pass
 
 
-class CSWAuthInsufficientException(Exception):
+class CSWAuthInsufficientError(Exception):
     """
     Indicates a situation where the authorisation requirements for a CSW request are not satisfied by the information
     included in the request
@@ -125,7 +125,7 @@ class CSWAuthInsufficientException(Exception):
     pass
 
 
-class RecordServerException(Exception):
+class RecordServerError(Exception):
     """
     Represents a situation where a record server encounters an error processing a request
 
@@ -136,7 +136,7 @@ class RecordServerException(Exception):
     pass
 
 
-class RecordNotFoundException(Exception):
+class RecordNotFoundError(Exception):
     """
     Represents a situation where a given record does not exist
     """
@@ -144,7 +144,7 @@ class RecordNotFoundException(Exception):
     pass
 
 
-class RecordInsertConflictException(Exception):
+class RecordInsertConflictError(Exception):
     """
     Represents a situation where a record to be inserted already exists in a repository
 
@@ -289,11 +289,11 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
         """
         try:
             if len(self._csw_auth[method]) > 0 and not token.scopes.issuperset(set(self._csw_auth[method])):
-                raise CSWAuthInsufficientException() from None
+                raise CSWAuthInsufficientError() from None
         except AttributeError:
             # noinspection PyComparisonWithNone
             if token is None:
-                raise CSWAuthMissingException() from None
+                raise CSWAuthMissingError() from None
 
     def setup(self) -> None:
         """
@@ -307,7 +307,7 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
         README for more information.
         """
         if self._is_initialised:
-            raise CSWDatabaseAlreadyInitialisedException()
+            raise CSWDatabaseAlreadyInitialisedError()
 
         try:
             csw_database = create_engine(self._csw_config["repository"]["database"])
@@ -315,7 +315,7 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
             csw_database.execute("SELECT PostGIS_Full_Version();")
         except ProgrammingError as e:
             if "ERROR:  function postgis_full_version() does not exist" in e.orig.pgerror:
-                raise CSWDatabasePostGISExtensionUnavailable() from e
+                raise CSWDatabasePostGISExtensionUnavailableError() from e
 
         try:
             admin.setup_db(
@@ -326,7 +326,7 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
         except ProgrammingError as e:
             # Ignore errors related to PyCSW's limitations with non-namespaced indexes
             if 'ERROR:  relation "fts_gin_idx" already exists' not in e.orig.pgerror:
-                raise CSWDatabaseAlreadyInitialisedException() from e
+                raise CSWDatabaseAlreadyInitialisedError() from e
             pass
 
     def process_request(self, request: Request, token: Optional[AzureToken] = None) -> Response:
@@ -350,10 +350,10 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
         :return: Flask HTTP response
         """
         if not self._is_initialised:
-            raise CSWDatabaseNotInitialisedException()
+            raise CSWDatabaseNotInitialisedError()
 
         if request.method != "HEAD" and request.method != "GET" and request.method != "POST":
-            raise CSWMethodNotSupportedException()
+            raise CSWMethodNotSupportedError()
 
         _csw = _CSWServer(rtconfig=self._csw_config, env=request.environ, version="2.0.2")
         _csw.requesttype = "GET"
@@ -444,7 +444,7 @@ class CSWClient:  # pragma: no cover (until #59 is resolved)
         try:
             return _CSWClient(self._csw_endpoint, auth=self._csw_auth, **self._csw_config)
         except ServiceException:
-            raise CSWAuthException() from None
+            raise CSWAuthError() from None
 
     def get_record(self, identifier: str, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> str:
         """
@@ -467,17 +467,17 @@ class CSWClient:  # pragma: no cover (until #59 is resolved)
         try:
             _csw.getrecordbyid(id=[identifier], esn=mode.value, outputschema="http://www.isotc211.org/2005/gmd")
             if len(_csw.records) != 1:
-                raise RecordNotFoundException()
+                raise RecordNotFoundError()
             return _csw.records[identifier].xml.decode()
         except HTTPError as e:
             if e.response.content.decode() == "Catalogue not yet available.":
-                raise CSWDatabaseNotInitialisedException() from None
+                raise CSWDatabaseNotInitialisedError() from None
             raise HTTPError(e) from e
         except XMLSyntaxError:
             if _csw.response.decode() == "Missing authorisation token.":
-                raise CSWAuthMissingException() from None
+                raise CSWAuthMissingError() from None
             elif _csw.response.decode() == "Insufficient authorisation token.":
-                raise CSWAuthInsufficientException() from None
+                raise CSWAuthInsufficientError() from None
 
     def get_records(self, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> List[str]:
         """
@@ -513,12 +513,12 @@ class CSWClient:  # pragma: no cover (until #59 is resolved)
                 yield raw_record.xml
         except HTTPError as e:
             if e.response.content.decode() == "Catalogue not yet available.":
-                raise CSWDatabaseNotInitialisedException() from e
+                raise CSWDatabaseNotInitialisedError() from e
         except XMLSyntaxError:
             if _csw.response.decode() == "Missing authorisation token.":
-                raise CSWAuthMissingException() from None
+                raise CSWAuthMissingError() from None
             elif _csw.response.decode() == "Insufficient authorisation token.":
-                raise CSWAuthInsufficientException() from None
+                raise CSWAuthInsufficientError() from None
 
     def insert_record(self, record: str) -> None:
         """
@@ -537,17 +537,17 @@ class CSWClient:  # pragma: no cover (until #59 is resolved)
         try:
             _csw.transaction(ttype=CSWTransactionType.INSERT.value, typename="gmd:MD_Metadata", record=record)
             if len(_csw.results["insertresults"]) != 1:
-                raise RecordServerException() from None
+                raise RecordServerError() from None
         except ExceptionReport:
-            raise RecordInsertConflictException() from None
+            raise RecordInsertConflictError() from None
         except HTTPError as e:
             if e.response.content.decode() == "Catalogue not yet available.":
-                raise CSWDatabaseNotInitialisedException() from e
+                raise CSWDatabaseNotInitialisedError() from e
         except XMLSyntaxError:
             if _csw.response.decode() == "Missing authorisation token.":
-                raise CSWAuthMissingException() from None
+                raise CSWAuthMissingError() from None
             elif _csw.response.decode() == "Insufficient authorisation token.":
-                raise CSWAuthInsufficientException() from None
+                raise CSWAuthInsufficientError() from None
 
     def update_record(self, record: str) -> None:
         """
@@ -571,15 +571,15 @@ class CSWClient:  # pragma: no cover (until #59 is resolved)
                 )[0]
             )
             if _csw.results["updated"] != 1:
-                raise RecordServerException() from None
+                raise RecordServerError() from None
         except HTTPError as e:
             if e.response.content.decode() == "Catalogue not yet available.":
-                raise CSWDatabaseNotInitialisedException() from e
+                raise CSWDatabaseNotInitialisedError() from e
         except XMLSyntaxError:
             if _csw.response.decode() == "Missing authorisation token.":
-                raise CSWAuthMissingException() from None
+                raise CSWAuthMissingError() from None
             elif _csw.response.decode() == "Insufficient authorisation token.":
-                raise CSWAuthInsufficientException() from None
+                raise CSWAuthInsufficientError() from None
 
     def delete_record(self, identifier: str) -> None:
         """
@@ -601,15 +601,15 @@ class CSWClient:  # pragma: no cover (until #59 is resolved)
             )
             # noinspection PyTypeChecker
             if _csw.results["deleted"] != 1:
-                raise RecordServerException() from None
+                raise RecordServerError() from None
         except HTTPError as e:
             if e.response.content.decode() == "Catalogue not yet available.":
-                raise CSWDatabaseNotInitialisedException() from e
+                raise CSWDatabaseNotInitialisedError() from e
         except XMLSyntaxError:
             if _csw.response.decode() == "Missing authorisation token.":
-                raise CSWAuthMissingException() from None
+                raise CSWAuthMissingError() from None
             elif _csw.response.decode() == "Insufficient authorisation token.":
-                raise CSWAuthInsufficientException() from None
+                raise CSWAuthInsufficientError() from None
 
     @staticmethod
     def _convert_csw_brief_gmd_to_gmi_xml(record_xml: str) -> str:

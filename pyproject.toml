@@ -60,6 +60,7 @@ flake8-comprehensions = "^3.10.1"
 flake8-import-order = "^0.18.1"
 flake8-pyproject = "^1.2.1"
 flake8-use-fstring = "^1.4"
+pep8-naming = "^0.13.2"
 pytest = "^7.2.0"
 pytest-cov = "^4.0.0"
 pytest-flask = "^1.2.0"
@@ -86,6 +87,7 @@ extend-exclude = ['*/hazmat/*']
 # F:   pyflakes (invalid/bad code checks)
 # FS:  use-fstring (f-strings used for text interpolation)
 # I:   import order (python import ordering)
+# N:   Pep8 naming
 # S:   bandit (static security checks)
 # W:   pycodestyle warnings (PEP8 checks)
 select = ['A','B','B9','BLK','C','C4','E','F','FS','N','I','S','W']
@@ -98,6 +100,7 @@ select = ['A','B','B9','BLK','C','C4','E','F','FS','N','I','S','W']
 ignore = ['E203','E501','S320','S410','W503']
 
 # tests/*: S101 - ignore use of assert
+# config.py: N802 - ignore use of upper case method names
 per-file-ignores = ['tests/*: S101', 'config.py: N802']
 
 # general

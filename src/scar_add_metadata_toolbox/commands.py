@@ -21,18 +21,18 @@ from scar_add_metadata_toolbox.classes import (
     Collection,
     Item,
     Record,
-    RecordRetractBeforeDeleteException,
+    RecordRetractBeforeDeleteError,
 )
 from scar_add_metadata_toolbox.csw import (
-    CSWAuthException,
-    CSWAuthInsufficientException,
-    CSWAuthMissingException,
-    CSWDatabaseAlreadyInitialisedException,
-    CSWDatabaseNotInitialisedException,
-    CSWDatabasePostGISExtensionUnavailable,
-    RecordInsertConflictException,
-    RecordNotFoundException,
-    RecordServerException,
+    CSWAuthError,
+    CSWAuthInsufficientError,
+    CSWAuthMissingError,
+    CSWDatabaseAlreadyInitialisedError,
+    CSWDatabaseNotInitialisedError,
+    CSWDatabasePostGISExtensionUnavailableError,
+    RecordInsertConflictError,
+    RecordNotFoundError,
+    RecordServerError,
 )
 from scar_add_metadata_toolbox.utils import aws_cli
 
@@ -70,16 +70,16 @@ def list_records():
         )
         print("")
         print(f"Ok. {len(records)} records.")
-    except CSWDatabaseNotInitialisedException:
+    except CSWDatabaseNotInitialisedError:
         print("No. CSW catalogue not setup.")
         sys_exit(EX_USAGE)
-    except CSWAuthException:
+    except CSWAuthError:
         print("No. Error with auth token. Try signing out and in again or seek support.")
         sys_exit(EX_USAGE)
-    except CSWAuthMissingException:
+    except CSWAuthMissingError:
         print("No. Missing auth token. Run `auth sign-in` first.")
         sys_exit(EX_USAGE)
-    except CSWAuthInsufficientException:
+    except CSWAuthInsufficientError:
         print("No. Missing permissions in auth token. Seek support to assign required permissions.")
         sys_exit(EX_USAGE)
 
@@ -103,23 +103,23 @@ def import_record(  # noqa: C901
     except JSONDecodeError:
         print(f"No. Record in file '{record_path}' is not valid JSON.")
         sys_exit(EX_USAGE)
-    except CSWDatabaseNotInitialisedException:
+    except CSWDatabaseNotInitialisedError:
         print("No. CSW catalogue not setup.")
         sys_exit(EX_USAGE)
-    except CSWAuthException:
+    except CSWAuthError:
         print("No. Error with auth token. Try signing out and in again or seek support.")
         sys_exit(EX_USAGE)
-    except CSWAuthMissingException:
+    except CSWAuthMissingError:
         print("No. Missing auth token. Run `auth sign-in` first.")
         sys_exit(EX_USAGE)
-    except CSWAuthInsufficientException:
+    except CSWAuthInsufficientError:
         print("No. Missing permissions in auth token. Seek support to assign required permissions.")
         sys_exit(EX_USAGE)
-    except RecordServerException:
+    except RecordServerError:
         # noinspection PyUnboundLocalVariable
         print(f"No. Server error importing record '{record.identifier}'.")
         sys_exit(EX_USAGE)
-    except RecordInsertConflictException:
+    except RecordInsertConflictError:
         if not allow_update:
             # noinspection PyUnboundLocalVariable
             print(f"No. Record '{record.identifier}' already exists. Add `--allow-update` flag to allow.")
@@ -168,26 +168,26 @@ def publish_record(record_identifier: str, allow_republish: bool = False):
     try:
         current_app.records.publish_record(record_identifier=record_identifier, republish=False)
         print(f"Ok. Record '{record_identifier}' published.")
-    except CSWDatabaseNotInitialisedException:
+    except CSWDatabaseNotInitialisedError:
         print("No. CSW catalogue not setup.")
         sys_exit(EX_USAGE)
-    except CSWAuthException:
+    except CSWAuthError:
         print("No. Error with auth token. Try signing out and in again or seek support.")
         sys_exit(EX_USAGE)
-    except CSWAuthMissingException:
+    except CSWAuthMissingError:
         print("No. Missing auth token. Run `auth sign-in` first.")
         sys_exit(EX_USAGE)
-    except CSWAuthInsufficientException:
+    except CSWAuthInsufficientError:
         print("No. Missing permissions in auth token. Seek support to assign required permissions.")
         sys_exit(EX_USAGE)
-    except RecordNotFoundException:
+    except RecordNotFoundError:
         print(f"No. Record '{record_identifier}' does not exist.")
         sys_exit(EX_USAGE)
-    except RecordServerException:
+    except RecordServerError:
         # noinspection PyUnboundLocalVariable
         print(f"No. Server error publishing record '{record_identifier}'.")
         sys_exit(EX_USAGE)
-    except RecordInsertConflictException:
+    except RecordInsertConflictError:
         if not allow_republish:
             print(f"No. Record '{record_identifier}' already published. Add `--allow-republish` flag to allow.")
             sys_exit(EX_USAGE)
@@ -226,19 +226,19 @@ def export_record(record_identifier: str, record_path: str, allow_overwrite: boo
         record = current_app.records.retrieve_record(record_identifier=record_identifier)
         record.dump(record_path=record_path, overwrite=False)
         print(f"Ok. Record '{record_identifier}' exported.")
-    except CSWDatabaseNotInitialisedException:
+    except CSWDatabaseNotInitialisedError:
         print("No. CSW catalogue not setup.")
         sys_exit(EX_USAGE)
-    except CSWAuthException:
+    except CSWAuthError:
         print("No. Error with auth token. Try signing out and in again or seek support.")
         sys_exit(EX_USAGE)
-    except CSWAuthMissingException:
+    except CSWAuthMissingError:
         print("No. Missing auth token. Run `auth sign-in` first.")
         sys_exit(EX_USAGE)
-    except CSWAuthInsufficientException:
+    except CSWAuthInsufficientError:
         print("No. Missing permissions in auth token. Seek support to assign required permissions.")
         sys_exit(EX_USAGE)
-    except RecordNotFoundException:
+    except RecordNotFoundError:
         print(f"No. Record '{record_identifier}' does not exist.")
         sys_exit(EX_USAGE)
     except FileExistsError:
@@ -290,22 +290,22 @@ def remove_record(record_identifier: str, force_remove: bool):
     try:
         current_app.records.delete_record(record_identifier=record_identifier)
         print(f"Ok. Record '{record_identifier}' removed.")
-    except CSWDatabaseNotInitialisedException:
+    except CSWDatabaseNotInitialisedError:
         print("No. CSW catalogue not setup.")
         sys_exit(EX_USAGE)
-    except CSWAuthException:
+    except CSWAuthError:
         print("No. Error with auth token. Try signing out and in again or seek support.")
         sys_exit(EX_USAGE)
-    except CSWAuthMissingException:
+    except CSWAuthMissingError:
         print("No. Missing auth token. Run `auth sign-in` first.")
         sys_exit(EX_USAGE)
-    except CSWAuthInsufficientException:
+    except CSWAuthInsufficientError:
         print("No. Missing permissions in auth token. Seek support to assign required permissions.")
         sys_exit(EX_USAGE)
-    except RecordNotFoundException:
+    except RecordNotFoundError:
         print(f"No. Record '{record_identifier}' does not exist.")
         sys_exit(EX_USAGE)
-    except RecordRetractBeforeDeleteException:
+    except RecordRetractBeforeDeleteError:
         print(f"No. Record '{record_identifier}' is published, retract it first.")
         sys_exit(EX_USAGE)
 
@@ -335,19 +335,19 @@ def retract_record(record_identifier: str):
     try:
         current_app.records.retract_record(record_identifier=record_identifier)
         print(f"Ok. Record '{record_identifier}' retracted.")
-    except CSWDatabaseNotInitialisedException:
+    except CSWDatabaseNotInitialisedError:
         print("No. CSW catalogue not setup.")
         sys_exit(EX_USAGE)
-    except CSWAuthException:
+    except CSWAuthError:
         print("No. Error with auth token. Try signing out and in again or seek support.")
         sys_exit(EX_USAGE)
-    except CSWAuthMissingException:
+    except CSWAuthMissingError:
         print("No. Missing auth token. Run `auth sign-in` first.")
         sys_exit(EX_USAGE)
-    except CSWAuthInsufficientException:
+    except CSWAuthInsufficientError:
         print("No. Missing permissions in auth token. Seek support to assign required permissions.")
         sys_exit(EX_USAGE)
-    except RecordNotFoundException:
+    except RecordNotFoundError:
         print(f"No. Record '{record_identifier}' is not published.")
         sys_exit(EX_USAGE)
 
@@ -399,16 +399,16 @@ def build_items():
             print(f"Ok. Generated item page for '{item.identifier}'.")
             _items_count += 1
         print(f"Ok. {len(selected_records)} item pages generated.")
-    except CSWDatabaseNotInitialisedException:
+    except CSWDatabaseNotInitialisedError:
         print("No. CSW catalogue not setup.")
         sys_exit(EX_USAGE)
-    except CSWAuthException:
+    except CSWAuthError:
         print("No. Error with auth token. Try signing out and in again or seek support.")
         sys_exit(EX_USAGE)
-    except CSWAuthMissingException:
+    except CSWAuthMissingError:
         print("No. Missing auth token. Run `auth sign-in` first.")
         sys_exit(EX_USAGE)
-    except CSWAuthInsufficientException:
+    except CSWAuthInsufficientError:
         print("No. Missing permissions in auth token. Seek support to assign required permissions.")
         sys_exit(EX_USAGE)
 
@@ -449,16 +449,16 @@ def build_collections():
             print(f"Ok. Generated collection page for '{collection.identifier}'.")
             _collection_count += 1
         print(f"Ok. {len(selected_records)} collection pages generated.")
-    except CSWDatabaseNotInitialisedException:
+    except CSWDatabaseNotInitialisedError:
         print("No. CSW catalogue not setup.")
         sys_exit(EX_USAGE)
-    except CSWAuthException:
+    except CSWAuthError:
         print("No. Error with auth token. Try signing out and in again or seek support.")
         sys_exit(EX_USAGE)
-    except CSWAuthMissingException:
+    except CSWAuthMissingError:
         print("No. Missing auth token. Run `auth sign-in` first.")
         sys_exit(EX_USAGE)
-    except CSWAuthInsufficientException:
+    except CSWAuthInsufficientError:
         print("No. Missing permissions in auth token. Seek support to assign required permissions.")
         sys_exit(EX_USAGE)
 
@@ -512,16 +512,16 @@ def build_records():
                 _stylesheet_count += 1
             _records_count += 1
         print(f"Ok. {len(records) * len(stylesheets)} record pages generated.")
-    except CSWDatabaseNotInitialisedException:
+    except CSWDatabaseNotInitialisedError:
         print("No. CSW catalogue not setup.")
         sys_exit(EX_USAGE)
-    except CSWAuthException:
+    except CSWAuthError:
         print("No. Error with auth token. Try signing out and in again or seek support.")
         sys_exit(EX_USAGE)
-    except CSWAuthMissingException:
+    except CSWAuthMissingError:
         print("No. Missing auth token. Run `auth sign-in` first.")
         sys_exit(EX_USAGE)
-    except CSWAuthInsufficientException:
+    except CSWAuthInsufficientError:
         print("No. Missing permissions in auth token. Seek support to assign required permissions.")
         sys_exit(EX_USAGE)
 
@@ -628,9 +628,9 @@ def setup_catalogue(catalogue: str):
             f"Valid options are [{', '.join(current_app.repositories.keys())}]."
         )
         sys_exit(EX_USAGE)
-    except CSWDatabaseAlreadyInitialisedException:
+    except CSWDatabaseAlreadyInitialisedError:
         print(f"Ok. Note CSW catalogue '{catalogue}' is already setup.")
-    except CSWDatabasePostGISExtensionUnavailable:  # pragma: no cover (will be addressed in #116)
+    except CSWDatabasePostGISExtensionUnavailableError:  # pragma: no cover (will be addressed in #116)
         print(
             "No. CSW backing database does not have the PostGIS extension enabled. Enable this extension and try again."
         )

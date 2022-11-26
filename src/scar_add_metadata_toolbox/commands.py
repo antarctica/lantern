@@ -8,7 +8,7 @@ import click
 from click import Abort
 from click_spinner import spinner
 from flask import Blueprint, current_app, render_template
-from importlib_resources import files as resource_path
+from importlib_resources import as_file as resource_path_as_file, files as resource_path
 from lxml.etree import (
     ElementTree,
     fromstring,
@@ -90,7 +90,7 @@ def list_records():
 @click.option("--publish", is_flag=True, help="Publish record after importing.")
 @click.option("--allow-republish", is_flag=True, help="Republish any existing, published, record.")
 @click.pass_context
-def import_record(
+def import_record(  # noqa: C901
     ctx, record_path: str, allow_update: bool = False, publish: bool = False, allow_republish: bool = False
 ):
     """Import a record from a file."""
@@ -564,12 +564,12 @@ def copy_assets():
     except FileNotFoundError:
         pass
 
-    # The path returned by importlib_resources is not a normal Path object and needs to converted before it can be used.
-    # This empty `.joinpath()` method is part of this conversion.
-    copytree(
-        str(Path(resource_path("scar_add_metadata_toolbox.static").joinpath(""))),
-        str(Path(current_app.config["SITE_PATH"]).joinpath("static")),
-    )
+    with resource_path_as_file(resource_path("scar_add_metadata_toolbox.static")) as static_dir_path:
+        copytree(
+            str(static_dir_path),
+            str(Path(current_app.config["SITE_PATH"]).joinpath("static")),
+        )
+
     print("Ok. static assets copied.")
 
 

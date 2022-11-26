@@ -909,15 +909,121 @@ $ docker build -f gitlab-ci.Dockerfile -t docker-registry.data.bas.ac.uk/magic/a
 $ docker push docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox:latest
 ```
 
+#### Listing outdated dependencies
+
+To list out of date dependencies:
+
+```shell
+$ poetry show --outdated
+```
+
+**Note:** This will include non-primary dependencies (i.e. not those listed directly in `pyproject.toml`), which should
+normally be ignored.
+
+**Note:** To find out why a dependency is required, run `poetry show [package]`.
+
 #### Updating dependencies
+
+To update packages within their allowed constraints:
 
 ```shell
 $ poetry update
 ```
 
-See the instructions above to update the Docker image used in CI/CD.
+After updating, see the instructions above to update the Docker image used in CI/CD.
+
+To update dependencies to their latest versions:
+
+1. [List outdated dependencies](#listing-outdated-dependencies)
+2. review this list against version constraints in `pyproject.toml` and against change logs for each package
+3. for packages that are ok to update to their latest versions, update the version constraint in `pyproject.toml`
+4. perform an update as listed above
+
+**Note:** If a dependency cannot be updated due to a conflict with another package or Python version, pin the version
+as needed and append a comment to explain which package is blocking further updates, e.g.:
+
+```python
+  # pinned because >= 0.3.2 requires Python > 3.6
+```
+
+#### Updating minimum Python version [WIP]
+
+As dependencies drop support for older Python versions, pressure will build to increase the minimum Python version 
+required for this package (e.g. from `3.6` to `3.8`). When this pressure becomes too great (e.g. due to incompatibility 
+with OS packages, security vulnerabilities, etc.), the minimum Python version should be increased.
+
+Suggested upgrade steps:
 
 #### Updating `bas-metadata-libray` package [WIP]
+1. upgrade to new Python version but keeping the same dependency versions (except `pyproj` and backports)
+2. address any code incompatibilities due to backports
+3. upgrade dependencies to their latest versions, as per the [Updating dependencies](#updating-dependencies) section
+
+In more detail for step 1:
+
+1. in `poetry.toml` change special `python` dependency to new Python version (e.g. `^3.8`)
+2. if using `pyenv`, switch to the latest patch release of new Python version (e.g. 3.8.15)
+3. re-create the virtual environment to check all dependencies install correctly [1]
+4. run application tests manually
+5. update the base image used in `gitlab-ci.Dockerfile` to match the new Python version (e.g. `python:3.8-alpine`)
+6. rebuild the `gitlab-ci.Dockerfile` (the Docker image used for CI/CD builds) [2]
+7. check whether the [`pyproj`](#upgrading-pyproj-dependency) dependency can be updated 
+8. push the updated container to the BAS Docker Registry [3]
+
+[1]
+
+```
+$ rm -rf .venv 
+$ poetry install
+```
+
+[2]
+
+```
+$ docker build -f gitlab-ci.Dockerfile -t docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox:latest .
+```
+
+[3]
+
+```
+$ docker push docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox:latest
+``` 
+
+1. change any packages that are pinned in `poetry.toml` due to Python version to their latest major versions
+2. run `poetry upgrade` to upgrade dependencies
+
+#### Upgrading `pyproj` dependency
+
+The [pyproj](https://pyproj4.github.io/pyproj/stable/index.html) dependency depends on the version of the 
+[`PROJ`](https://proj.org) library installed. Special care should therefore be taken to ensure the version of *pyproj*
+required by this package supports the version of *PROJ* library available on target platforms. 
+
+The *pyproj* website documents the minimum version of PROJ and Python required for each release. For example version
+3.4.0 requires:
+
+* Python 3.8
+* PROJ 8.2
+
+For development, in addition to local development environments (where it's assumed any version requirements can be met),
+the container used for CI/CD in GitLab needs to be checked. This container is defined in `gitlab-ci.Dockerfile` and 
+used the Alpine Python base image corresponding to the minimum Python version used by the package. Newer Alpine 
+releases are used for newer versions of Python, and newer versions of PROJ are packaged for newer versions of Alpine. 
+Care therefore needs to be taken if the version of Python used is old. To check the version of PROJ available within 
+this container image:
+
+```
+$ docker run -it --rm docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox:latest ash
+$  proj -v
+proj_create: unrecognized format / unknown name
+Rel. 9.0.0, March 1st, 2022
+<proj>: 
+projection initialization failure
+cause: Invalid PROJ string syntax
+program abnormally terminated
+```
+
+If these dependencies can be satisfied for all target platforms, it is safe to upgrade the `pyproj` dependency.
+
 
 Special care should be taken when the `bas-metadata-library` switches to a new 
 [record configuration version](https://gitlab.data.bas.ac.uk/uk-pdc/metadata-infrastructure/metadata-library#supported-configuration-versions).

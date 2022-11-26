@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 from urllib.parse import parse_qs as query_string_parse, urlparse as url_parse
 
-from backports.datetime_fromisoformat import MonkeyPatch
 from bas_metadata_library.standards.iso_19115_2 import MetadataRecord, MetadataRecordConfigV3
 from dateutil.relativedelta import relativedelta
 from markdown import markdown
@@ -18,9 +17,6 @@ from scar_add_metadata_toolbox.csw import (
     RecordInsertConflictException,
     RecordNotFoundException,
 )
-
-# Workaround for lack of `date(time).fromisoformat()` method in Python 3.6
-MonkeyPatch.patch_fromisoformat()
 
 
 class WellKnownExtents(Enum):

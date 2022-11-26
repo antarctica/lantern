@@ -793,7 +793,7 @@ Toolbox - ESRI ArcGIS API key' item in the MAGIC shared vault in 1Password as th
 
 ```shell
 # Run Flask CLI commands as a client, with remote server
-$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development CSW_ENDPOINT_UNPUBLISHED=http://add-metadata-toolbox-staging.bslmagf.nerc-bas.ac.uk/csw/unpublished CSW_ENDPOINT_PUBLISHED=http://add-metadata-toolbox-staging.bslmagf.nerc-bas.ac.uk/csw/published poetry run flask [command]
+$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development CSW_ENDPOINT_UNPUBLISHED=http://add-metadata-toolbox.bslmagf-staging.nerc-bas.ac.uk/csw/unpublished CSW_ENDPOINT_PUBLISHED=http://add-metadata-toolbox.bslmagf-staging.nerc-bas.ac.uk/csw/published poetry run flask [command]
 ```
 
 #### Using a local client and local server with a remote database

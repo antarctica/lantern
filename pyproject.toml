@@ -51,12 +51,13 @@ SQLAlchemy = "^1.4.41"
 # `lxml` and `pyproj` dependencies skipped as they already dependencies of main app and owslib dependency.
 
 [tool.poetry.group.dev.dependencies]
-flake8 = "^6.0.0"  # pinned because https://github.com/PyCQA/flake8-import-order/issues/189 not in a release yet
+flake8 = "^5.0.4"  # pinned because https://github.com/PyCQA/flake8-import-order/issues/189 not in a release yet
 flake8-bandit = "^4.1.1"
 flake8-black = "^0.3.5"
 flake8-bugbear = "^22.10.27"
 flake8-builtins = "^2.0.1"
 flake8-import-order = "^0.18.1"
+flake8-pyproject = "^1.2.1"
 flake8-use-fstring = "^1.4"
 pytest = "^7.2.0"
 pytest-cov = "^4.0.0"
@@ -69,6 +70,44 @@ line-length = 120
 target-version = ['py36']
 include = '\.pyi?$'
 exclude = ''
+
+[tool.flake8]
+# ignore code in hazmat module
+extend-exclude = ['*/hazmat/*']
+
+# A:   builtins (variables named after builtin names)
+# B:   bug-bear (additional bad code checks)
+# B9:  bug-bear opinionated (additional, additional bad code checks)
+# BLK: black (code formatting)
+# C:   mccabe (code complexity)
+# E:   pycodestyle errors (PEP8 checks)
+# F:   pyflakes (invalid/bad code checks)
+# FS:  use-fstring (f-strings used for text interpolation)
+# I:   import order (python import ordering)
+# S:   bandit (static security checks)
+# W:   pycodestyle warnings (PEP8 checks)
+select = ['A','B','B9','BLK','C','C4','E','F','FS','N','I','S','W']
+
+# E203: for Black compatibility (whitespace before ‘:')
+# E501: for bug-bear compatibility (as B905 overrides line length checks)
+# S320: for using fromstring to process XML (see 'lxml package (bandit)' section in README for details)
+# S410: for using Element to process XML (see 'lxml package (bandit)' section in README for details)
+# W503: for Black compatibility (line break before binary operator)
+ignore = ['E203','E501','S320','S410','W503']
+
+# tests/*: S101 - ignore use of assert
+per-file-ignores = ['tests/*: S101', 'config.py: N802']
+
+# general
+max-line-length = 120
+
+# for mccabe
+max-complexity = 10
+
+# for flake8-import-order
+application-import-names = ['scar_add_metadata_toolbox', 'tests.scar_add_metadata_toolbox_tests']
+import-order-style = 'smarkets'
+
 
 [build-system]
 requires = ["poetry>=1.0.0"]

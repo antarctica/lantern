@@ -40,6 +40,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
+* Migrating additional PyCSW workarounds to Hazmat module
+  [#270](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/270)
 * Upgrading project dependencies
   [#289](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/289)
 * Improving release issue template

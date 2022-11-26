@@ -510,7 +510,10 @@ class CSWClient:  # pragma: no cover (until #59 is resolved)
                     raw_record.xml = raw_record.xml.decode()
                 if mode == CSWGetRecordMode.BRIEF:
                     raw_record.xml = self._convert_csw_brief_gmd_to_gmi_xml(record_xml=raw_record.xml)
-                yield raw_record.xml
+
+                raw_record_xml = raw_record.xml.replace("</csw:SearchResults>", "")
+                raw_record_xml = raw_record_xml.replace("</csw:GetRecordsResponse>", "")
+                yield raw_record_xml
         except HTTPError as e:
             if e.response.content.decode() == "Catalogue not yet available.":
                 raise CSWDatabaseNotInitialisedError() from e

@@ -27,6 +27,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
+* Upgrading project dependencies
+  [#289](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/289)
 * Improving release issue template
   [#310](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/310)
 * Improving doc blocks, code formatting, typos, minor syntax changes and PyCharm inspections

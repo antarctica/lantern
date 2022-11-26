@@ -23,15 +23,15 @@ bas-style-kit-jinja-templates = "^0.7.0"
 click-spinner = "^0.1.10"
 Flask = "^2.0.2"
 flask-azure-oauth = "^0.7.0"
-Markdown = "3.2.2" # pinned due to importlib-metadata compatibility with flake8
+Markdown = "3.4.1"
 msal = "^1.19.0"
 python = "^3.8.1"
 python-dateutil = "^2.8.1"
-python-dotenv = "^0.20.0" # pinned because <= 0.21 requires Python > 3.6
-requests = "^2.27.1"  # pinned because <= 2.28 requires Python > 3.6
+python-dotenv = "^0.21.0"
+requests = "^2.28.1"
 sentry-sdk = {version = "^1.9.9", extras = ["flask"]}
 str2bool = "^1.1"
-tabulate = "^0.8.10"
+tabulate = "^0.9.0"
 
 
 # # Python 3.8 backports
@@ -44,8 +44,8 @@ importlib_resources = "^5.10.0"
 # python-dateutil = "^1.5"  # already a dependency of main app
 pytz = "^2022.2.1"
 # requests = "^1.0"  # already a dependency of main app
-pyproj = "2.6.1"  # pinned to highest PROJ version available in Python 3.6 alpine container
-pyyaml = "5.4.1"  # pinned because AWS CLI compatibility, requires PyYAML < 5.5 - REVIEW
+pyproj = "3.4.0"  # pinned to ensure compatibility with PROJ version available in Python alpine container
+pyyaml = "^5.4"  # pinned for AWS CLI compatibility, which requires PyYAML < 5.5
 
 # # dependencies for vendored PyCSW package
 geolinks = "^0.2.0"
@@ -57,14 +57,14 @@ psycopg2-binary = "^2.9.3"
 SQLAlchemy = "^1.4.41"
 
 [tool.poetry.dev-dependencies]
-flake8 = "^4.0.1"  # pinned because >= 5.0 requires Flake8-bandit 4.1.0, which requires Python > 3.6
-flake8-bandit = "2.1.2"  # pinned because >= 3.0 requires Bandit > 1.7.3, which requires Python > 3.6
-flake8-black = "0.3.1"  # pinned because >= 0.3.2 requires Python > 3.6
+flake8 = "^6.0.0"
+flake8-bandit = "^4.1.1"
+flake8-black = "^0.3.5"
 flake8-bugbear = "^22.9.23"
-flake8-builtins = "^1.5.3"
+flake8-builtins = "^2.0.1"
 flake8-import-order = "^0.18.1"
 flake8-use-fstring = "^1.4"
-pytest = "^7.0.1"  # pinned because >= 7.3 requires Python > 3.6
+pytest = "^7.2.0"
 pytest-cov = "^4.0.0"
 pytest-flask = "^1.2.0"
 pytest-random-order = "^1.0.4"

@@ -54,6 +54,10 @@ basic way to group items into sets. The Catalogue is part of the current/legacy 
 
 [Command line reference](docs/command-reference.md)
 
+### Registering download proxy items
+
+See the [Registering Download Proxy Artefact Lookup Items](#registering-downloads-proxy-artefacts-lookup-items) section.
+
 ## Implementation
 
 Flask application using [CSW](#csw) to store [Metadata records](#metadata-records), and display them as [Items](#items),
@@ -445,7 +449,7 @@ $ aws s3 cp s3://add-catalogue-downloads-proxy-prod/lookups.json s3://add-catalo
 A Microsoft
 [Power Automate](https://emea.flow.microsoft.com/manage/environments/Default-b311db95-32ad-438f-a101-7ba061712a4e/flows/97d95c3b-5d40-4358-86a6-979a679a4b7c/details)
 Flow is used to process feedback and contact form submissions. Messages support Markdown formatting, converted to HTML
-prior to submission. On submitted, Power Automate creates an issue for the message in a relevant GitLab project.
+prior to submission. On submission, Power Automate creates an issue for the message in a relevant GitLab project.
 
 ### Website metrics
 

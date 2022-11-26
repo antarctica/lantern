@@ -49,6 +49,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Improving Downloads Proxy documentation
   [#293](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/293)
 
+### Removed
+
+* Paw API document (migrated to Paw cloud)
+  [#313](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/313)
+
 ## [0.5.0] - 2022-10-10
 
 ### Changed [BREAKING!]

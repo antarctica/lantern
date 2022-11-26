@@ -57,10 +57,10 @@ psycopg2-binary = "^2.9.3"
 SQLAlchemy = "^1.4.41"
 
 [tool.poetry.dev-dependencies]
-flake8 = "^6.0.0"
+flake8 = "^5.0.4"  # pinned because https://github.com/PyCQA/flake8-import-order/issues/189 not in a release yet
 flake8-bandit = "^4.1.1"
 flake8-black = "^0.3.5"
-flake8-bugbear = "^22.9.23"
+flake8-bugbear = "^22.10.27"
 flake8-builtins = "^2.0.1"
 flake8-import-order = "^0.18.1"
 flake8-use-fstring = "^1.4"

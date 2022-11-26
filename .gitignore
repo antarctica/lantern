@@ -1,4 +1,5 @@
 /.idea/runConfigurations
+.python-version
 /.venv
 __pycache__
 /provisioning/terraform/.terraform

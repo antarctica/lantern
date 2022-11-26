@@ -711,10 +711,10 @@ To generate an ESRI ArcGIS developer API key:
 
 ### Development environment
 
-Git, [Poetry](https://python-poetry.org) and [Docker Desktop](https://www.docker.com/products/docker-desktop) are 
-required to set up a local development environment of this project.
 
 **Note:** If you use [Pyenv](https://github.com/pyenv/pyenv), this project sets a local Python version for consistency.
+Git, [Poetry](https://python-poetry.org) [1.2+] and [Docker Compose](https://docs.docker.com/compose/) are required to 
+set up a local development environment of this project.
 
 ```shell
 # clone from the BAS GitLab instance if possible

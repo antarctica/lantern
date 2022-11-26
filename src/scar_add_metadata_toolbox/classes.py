@@ -14,8 +14,8 @@ from markdown import markdown
 from scar_add_metadata_toolbox.csw import (
     CSWClient,
     CSWGetRecordMode,
-    RecordInsertConflictException,
-    RecordNotFoundException,
+    RecordInsertConflictError,
+    RecordNotFoundError,
 )
 
 
@@ -880,7 +880,7 @@ class WellKnownExtents(Enum):
     }
 
 
-class RecordRetractBeforeDeleteException(Exception):
+class RecordRetractBeforeDeleteError(Exception):
     """
     Represents a situation whereby a record is deleted before it has been first been retracted
 
@@ -891,7 +891,7 @@ class RecordRetractBeforeDeleteException(Exception):
     pass
 
 
-class ItemInvalidSourceRecordException(Exception):
+class ItemInvalidSourceRecordError(Exception):
     """
     Represents a situation where an Item class is instantiated with a Record that doesn't represent an item.
     """
@@ -899,7 +899,7 @@ class ItemInvalidSourceRecordException(Exception):
     pass
 
 
-class CollectionInvalidSourceRecordException(Exception):
+class CollectionInvalidSourceRecordError(Exception):
     """
     Represents a situation where a Collection class is instantiated with a Record that doesn't represent a collection.
     """
@@ -1420,9 +1420,9 @@ class Repository:
         try:
             record_xml = record.dumps(dump_format="xml")
             self.csw_client.insert_record(record=record_xml)
-        except RecordInsertConflictException:
+        except RecordInsertConflictError:
             if not update:
-                raise RecordInsertConflictException() from None
+                raise RecordInsertConflictError() from None
 
             # noinspection PyUnboundLocalVariable
             self.csw_client.update_record(record=record_xml)
@@ -1480,7 +1480,7 @@ class MirrorRepository:
         try:
             record = self.published_repository.retrieve_record(record_identifier=record_identifier)
             return MirrorRecord(config=record.config, published=True)
-        except RecordNotFoundException:
+        except RecordNotFoundError:
             record = self.unpublished_repository.retrieve_record(record_identifier=record_identifier)
             return MirrorRecord(config=record.config, published=False)
 
@@ -1613,7 +1613,7 @@ class MirrorRepository:
         :param record_identifier: identifier of the record to delete
         """
         if record_identifier in self.published_repository.list_record_identifiers():
-            raise RecordRetractBeforeDeleteException()
+            raise RecordRetractBeforeDeleteError()
 
         self.unpublished_repository.delete_record(record_identifier=record_identifier)
 
@@ -1631,14 +1631,14 @@ class MirrorRepository:
         """
         try:
             record = self.unpublished_repository.retrieve_record(record_identifier=record_identifier)
-        except RecordNotFoundException:
-            raise RecordNotFoundException() from None
+        except RecordNotFoundError:
+            raise RecordNotFoundError() from None
 
         try:
             self.published_repository.insert_record(record=record, update=False)
-        except RecordInsertConflictException:
+        except RecordInsertConflictError:
             if not republish:
-                raise RecordInsertConflictException() from None
+                raise RecordInsertConflictError() from None
             self.published_repository.insert_record(record=record, update=True)
 
     def retract_record(self, record_identifier: str) -> None:
@@ -1675,7 +1675,7 @@ class Item:
         self.record = record
 
         if self.record.hierarchy_level == "collection":
-            raise ItemInvalidSourceRecordException()
+            raise ItemInvalidSourceRecordError()
 
     def __repr__(self):
         return f"<Item / {self.identifier}>"
@@ -2310,7 +2310,7 @@ class Collection:
         self.record = record
 
         if self.record.hierarchy_level != "collection":
-            raise CollectionInvalidSourceRecordException()
+            raise CollectionInvalidSourceRecordError()
 
     def __repr__(self):
         return f"<Collection / {self.identifier}>"

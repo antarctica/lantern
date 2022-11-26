@@ -877,7 +877,7 @@ $ poetry run black src/ tests/
 ### Code Linting
 
 [Flake8](https://flake8.pycqa.org) and various extensions are used to lint Python files. Specific checks, and any
-configuration options, are documented in the `./.flake8` config file.
+configuration options, are documented in the `[tool.flake8]` section of `pyproject.toml`.
 
 To check files manually:
 

@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
+* Flake8 `pyproject.toml` support via `flake8-pyproject`
+  [#300](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/300)
+* Flake8 comprehensions plugin
+  [#259](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/259)
+* Flake8 Pep8 naming plugin
+  [#260](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/260)
 * Documentation on updating minimum Python version
   [#289](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/294)
 

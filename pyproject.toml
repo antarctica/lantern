@@ -25,7 +25,7 @@ Flask = "^2.0.2"
 flask-azure-oauth = "^0.7.0"
 Markdown = "3.2.2" # pinned due to importlib-metadata compatibility with flake8
 msal = "^1.19.0"
-python = "^3.6.2"
+python = "^3.8.1"
 python-dateutil = "^2.8.1"
 python-dotenv = "^0.20.0" # pinned because <= 0.21 requires Python > 3.6
 requests = "^2.27.1"  # pinned because <= 2.28 requires Python > 3.6

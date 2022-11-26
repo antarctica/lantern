@@ -57,6 +57,7 @@ class TestCommandRecordsImport:
     def test_cli_records_import(self, app_runner_mocked_csw):
         with NamedTemporaryFile(mode="r+") as record_file:
             record_data = TestRecordConfigurations.TEST_RECORD_3.value
+            # noinspection PyArgumentList
             record_configuration = MetadataRecordConfigV3(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
@@ -73,6 +74,7 @@ class TestCommandRecordsImport:
     def test_cli_records_import_allow_update(self, app_runner_mocked_csw):
         with NamedTemporaryFile(mode="r+") as record_file:
             record_data = TestRecordConfigurations.TEST_RECORD_4.value
+            # noinspection PyArgumentList
             record_configuration = MetadataRecordConfigV3(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
@@ -84,6 +86,7 @@ class TestCommandRecordsImport:
     def test_cli_records_import_publish(self, app_runner_mocked_csw):
         with NamedTemporaryFile(mode="r+") as record_file:
             record_data = TestRecordConfigurations.TEST_RECORD_5.value
+            # noinspection PyArgumentList
             record_configuration = MetadataRecordConfigV3(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
@@ -96,6 +99,7 @@ class TestCommandRecordsImport:
     def test_cli_records_import_publish_allow_update_allow_republish(self, app_runner_mocked_csw):
         with NamedTemporaryFile(mode="r+") as record_file:
             record_data = TestRecordConfigurations.TEST_RECORD_6.value
+            # noinspection PyArgumentList
             record_configuration = MetadataRecordConfigV3(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
@@ -146,6 +150,7 @@ class TestCommandRecordsImport:
     def test_cli_records_import_csw_not_setup(self, app_runner_mocked_csw_not_setup):
         with NamedTemporaryFile(mode="r+") as record_file:
             record_data = TestRecordConfigurations.TEST_RECORD_3.value
+            # noinspection PyArgumentList
             record_configuration = MetadataRecordConfigV3(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
@@ -157,6 +162,7 @@ class TestCommandRecordsImport:
     def test_cli_records_import_auth_token_error(self, app_runner_mocked_csw_auth_token_error):
         with NamedTemporaryFile(mode="r+") as record_file:
             record_data = TestRecordConfigurations.TEST_RECORD_3.value
+            # noinspection PyArgumentList
             record_configuration = MetadataRecordConfigV3(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
@@ -168,6 +174,7 @@ class TestCommandRecordsImport:
     def test_cli_records_import_auth_token_missing(self, app_runner_mocked_csw_missing_auth_token):
         with NamedTemporaryFile(mode="r+") as record_file:
             record_data = TestRecordConfigurations.TEST_RECORD_3.value
+            # noinspection PyArgumentList
             record_configuration = MetadataRecordConfigV3(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
@@ -179,6 +186,7 @@ class TestCommandRecordsImport:
     def test_cli_records_import_auth_token_insufficient(self, app_runner_mocked_csw_insufficient_auth_token):
         with NamedTemporaryFile(mode="r+") as record_file:
             record_data = TestRecordConfigurations.TEST_RECORD_3.value
+            # noinspection PyArgumentList
             record_configuration = MetadataRecordConfigV3(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
@@ -190,6 +198,7 @@ class TestCommandRecordsImport:
     def test_cli_records_import_error_server(self, app_runner_mocked_csw_inserts_fail):
         with NamedTemporaryFile(mode="r+") as record_file:
             record_data = TestRecordConfigurations.TEST_RECORD_3.value
+            # noinspection PyArgumentList
             record_configuration = MetadataRecordConfigV3(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
@@ -201,6 +210,7 @@ class TestCommandRecordsImport:
     def test_cli_records_import_error_conflict(self, app_runner_mocked_csw):
         with NamedTemporaryFile(mode="r+") as record_file:
             record_data = TestRecordConfigurations.TEST_RECORD_7.value
+            # noinspection PyArgumentList
             record_configuration = MetadataRecordConfigV3(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
@@ -215,6 +225,7 @@ class TestCommandRecordsImport:
     def test_cli_records_import_error_publish_conflict(self, app_runner_mocked_csw):
         with NamedTemporaryFile(mode="r+") as record_file:
             record_data = TestRecordConfigurations.TEST_RECORD_7.value
+            # noinspection PyArgumentList
             record_configuration = MetadataRecordConfigV3(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
@@ -224,8 +235,8 @@ class TestCommandRecordsImport:
             assert result.exit_code == 64
             assert f"Ok. Record '{record_data['file_identifier']}' updated." in result.output
             assert (
-                f"No. Record '{record_data['file_identifier']}' already published. Add `--allow-republish` flag to allow."
-                in result.output
+                f"No. Record '{record_data['file_identifier']}' already published. "
+                f"Add `--allow-republish` flag to allow." in result.output
             )
 
 
@@ -235,6 +246,7 @@ class TestCommandRecordsBulkImport:
         with TemporaryDirectory() as record_directory:
             with open(str(Path(f"{record_directory}/record.json")), mode="w+") as record_file:
                 record_data = TestRecordConfigurations.TEST_RECORD_3.value
+                # noinspection PyArgumentList
                 record_configuration = MetadataRecordConfigV3(**record_data)
                 record_configuration.dump(file=Path(record_file.name))
 
@@ -255,6 +267,7 @@ class TestCommandRecordsBulkImport:
         with TemporaryDirectory() as record_directory:
             with open(str(Path(f"{record_directory}/record.json")), mode="w+") as record_file:
                 record_data = TestRecordConfigurations.TEST_RECORD_4.value
+                # noinspection PyArgumentList
                 record_configuration = MetadataRecordConfigV3(**record_data)
                 record_configuration.dump(file=Path(record_file.name))
 
@@ -272,6 +285,7 @@ class TestCommandRecordsBulkImport:
         with TemporaryDirectory() as record_directory:
             with open(str(Path(f"{record_directory}/record.json")), mode="w+") as record_file:
                 record_data = TestRecordConfigurations.TEST_RECORD_5.value
+                # noinspection PyArgumentList
                 record_configuration = MetadataRecordConfigV3(**record_data)
                 record_configuration.dump(file=Path(record_file.name))
 
@@ -288,6 +302,7 @@ class TestCommandRecordsBulkImport:
         with TemporaryDirectory() as record_directory:
             with open(str(Path(f"{record_directory}/record.json")), mode="w+") as record_file:
                 record_data = TestRecordConfigurations.TEST_RECORD_6.value
+                # noinspection PyArgumentList
                 record_configuration = MetadataRecordConfigV3(**record_data)
                 record_configuration.dump(file=Path(record_file.name))
 
@@ -349,6 +364,7 @@ class TestCommandRecordsBulkImport:
                 invalid_record_path, mode="w+"
             ) as invalid_record_file:
                 valid_record_data = TestRecordConfigurations.TEST_RECORD_3.value
+                # noinspection PyArgumentList
                 record_configuration = MetadataRecordConfigV3(**valid_record_data)
                 record_configuration.dump(file=Path(valid_record_file.name))
                 invalid_record_data = '{"foo":}'  # noqa: FS003
@@ -529,6 +545,7 @@ class TestCommandRecordsExport:
             # verify export
             export_record_configuration = MetadataRecordConfigV3()
             export_record_configuration.load(file=record_path)
+            # noinspection PyArgumentList
             verification_record_configuration = MetadataRecordConfigV3(**TestRecordConfigurations.TEST_RECORD_7.value)
             assert export_record_configuration.config == verification_record_configuration.config
 
@@ -739,6 +756,7 @@ class TestCommandRecordsBulkExport:
             export_record_configuration.load(
                 file=records_path.joinpath(f"{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}.json")
             )
+            # noinspection PyArgumentList
             verification_record_configuration = MetadataRecordConfigV3(**TestRecordConfigurations.TEST_RECORD_7.value)
             assert export_record_configuration.config == verification_record_configuration.config
 
@@ -993,8 +1011,8 @@ class TestCommandRecordsRemove:
         )
         assert result.exit_code == 64
         assert (
-            f"No. Record '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}' is published, retract it first."
-            in result.output
+            f"No. Record '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}' is published, "
+            f"retract it first." in result.output
         )
 
 
@@ -1271,37 +1289,43 @@ class TestCommandSiteBuildRecordPages:
         assert len(record_pages_paths) == 6
         assert (
             Path(app_static_site.config["SITE_PATH"]).joinpath(
-                f"records/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}/iso-html/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}.xml"
+                f"records/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}/iso-html/"
+                f"{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}.xml"
             )
             in record_pages_paths
         )
         assert (
             Path(app_static_site.config["SITE_PATH"]).joinpath(
-                f"records/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}/iso-rubric/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}.xml"
+                f"records/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}/iso-rubric/"
+                f"{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}.xml"
             )
             in record_pages_paths
         )
         assert (
             Path(app_static_site.config["SITE_PATH"]).joinpath(
-                f"records/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}/iso-xml/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}.xml"
+                f"records/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}/iso-xml/"
+                f"{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}.xml"
             )
             in record_pages_paths
         )
         assert (
             Path(app_static_site.config["SITE_PATH"]).joinpath(
-                f"records/{TestRecordConfigurations.TEST_RECORD_10.value['file_identifier']}/iso-html/{TestRecordConfigurations.TEST_RECORD_10.value['file_identifier']}.xml"
+                f"records/{TestRecordConfigurations.TEST_RECORD_10.value['file_identifier']}/iso-html/"
+                f"{TestRecordConfigurations.TEST_RECORD_10.value['file_identifier']}.xml"
             )
             in record_pages_paths
         )
         assert (
             Path(app_static_site.config["SITE_PATH"]).joinpath(
-                f"records/{TestRecordConfigurations.TEST_RECORD_10.value['file_identifier']}/iso-rubric/{TestRecordConfigurations.TEST_RECORD_10.value['file_identifier']}.xml"
+                f"records/{TestRecordConfigurations.TEST_RECORD_10.value['file_identifier']}/iso-rubric/"
+                f"{TestRecordConfigurations.TEST_RECORD_10.value['file_identifier']}.xml"
             )
             in record_pages_paths
         )
         assert (
             Path(app_static_site.config["SITE_PATH"]).joinpath(
-                f"records/{TestRecordConfigurations.TEST_RECORD_10.value['file_identifier']}/iso-xml/{TestRecordConfigurations.TEST_RECORD_10.value['file_identifier']}.xml"
+                f"records/{TestRecordConfigurations.TEST_RECORD_10.value['file_identifier']}/iso-xml/"
+                f"{TestRecordConfigurations.TEST_RECORD_10.value['file_identifier']}.xml"
             )
             in record_pages_paths
         )
@@ -1396,7 +1420,8 @@ class TestCommandSiteBuildAll:
         )
         assert (
             Path(app_static_site.config["SITE_PATH"]).joinpath(
-                f"records/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}/iso-html/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}.xml"
+                f"records/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}/iso-html/"
+                f"{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}.xml"
             )
             in site_paths
         )

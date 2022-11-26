@@ -90,7 +90,7 @@ class AppAuthToken:
     This class serves two main purposes:
 
     1. enabling easier access to access tokens returned in auth requests from the Microsoft Authentication Library
-    2. persisting auth information to a local file for situations where this application is ran statelessly
+    2. persisting auth information to a local file for situations where this application is run statelessly
     """
 
     def __init__(self, session_file_path: Path):
@@ -110,7 +110,7 @@ class AppAuthToken:
         having to fetch signing key sets to authenticate tokens etc. where the claims shown don't have an
         impact on security (e.g. greeting messages).
 
-        WARNING: This method is insecure as it does not validate it's claims are authentic, or that the token is still
+        WARNING: This method is insecure as it does not validate its claims are authentic, or that the token is still
         valid. This method therefore MUST NOT be used in a secure context (e.g. determining if a user has access to a
         resource or action). A full JWT library MUST be used instead in such circumstances.
 

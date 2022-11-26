@@ -54,6 +54,10 @@ basic way to group items into sets. The Catalogue is part of the current/legacy 
 
 [Command line reference](docs/command-reference.md)
 
+### Registering download proxy items
+
+See the [Registering Download Proxy Artefact Lookup Items](#registering-downloads-proxy-artefacts-lookup-items) section.
+
 ## Implementation
 
 Flask application using [CSW](#csw) to store [Metadata records](#metadata-records), and display them as [Items](#items),
@@ -330,7 +334,7 @@ An artefact lookup item is an object with these properties:
 | ------------- | --------- | -------- |----------------------------------------|
 | `artefact_id` | String    | Yes      | '758ab069-46d7-47b7-82d4-1905ed155a54' |
 | `resource_id` | String    | Yes      | 'beaa0a4e-e452-4087-b4f5-eb2b8246dedb' |
-| `media_type`  | String    | Yes      | 'application/geopackage+vnd.sqlite3'   |
+| `media_type`  | String    | Yes      | 'application/geopackage+sqlite3'       |
 | `origin_uri`  | String    | Yes      | 'https://example.com/dataset.gpkg'     |
 
 This structure is formally described by a JSON Schema in `support/downloads/proxy/artefact-lookups-v1.json`, which 
@@ -384,7 +388,7 @@ $ awscurl --region eu-west-1 --service lambda --access_key $AWS_ACCESS_KEY_ID --
 Example (using the command line, for a fake artefact/resource using the staging environment):
 
 ```shell
-$ awscurl --region eu-west-1 --service lambda --access_key xxx --secret_key xxx 'https://zrpqdlufnfqcmqmzppwzegosvu0rvbca.lambda-url.eu-west-1.on.aws/' --request POST --header 'Content-Type: application/json' --data $'{"artefact_id": "758ab069-46d7-47b7-82d4-1905ed155a54", "resource_id": "beaa0a4e-e452-4087-b4f5-eb2b8246dedb", "media_type": "application/geopackage+vnd.sqlite3", "origin_uri": "https://example.com/dataset.gpkg"}'
+$ awscurl --region eu-west-1 --service lambda --access_key xxx --secret_key xxx 'https://zrpqdlufnfqcmqmzppwzegosvu0rvbca.lambda-url.eu-west-1.on.aws/' --request POST --header 'Content-Type: application/json' --data $'{"artefact_id": "758ab069-46d7-47b7-82d4-1905ed155a54", "resource_id": "beaa0a4e-e452-4087-b4f5-eb2b8246dedb", "media_type": "application/geopackage+sqlite3", "origin_uri": "https://example.com/dataset.gpkg"}'
 ```
 
 Reference (using Python):
@@ -415,7 +419,7 @@ from requests_auth_aws_sigv4 import AWSSigV4
 lookup_item = {
     'artefact_id': '758ab069-46d7-47b7-82d4-1905ed155a54',
     'resource_id': 'beaa0a4e-e452-4087-b4f5-eb2b8246dedb',
-    'media_type': 'application/geopackage+vnd.sqlite3',
+    'media_type': 'application/geopackage+sqlite3',
     'origin_uri': 'https://example.com/dataset.gpkg'
 }
 lambda_endpoint = 'https://zrpqdlufnfqcmqmzppwzegosvu0rvbca.lambda-url.eu-west-1.on.aws/'
@@ -445,7 +449,7 @@ $ aws s3 cp s3://add-catalogue-downloads-proxy-prod/lookups.json s3://add-catalo
 A Microsoft
 [Power Automate](https://emea.flow.microsoft.com/manage/environments/Default-b311db95-32ad-438f-a101-7ba061712a4e/flows/97d95c3b-5d40-4358-86a6-979a679a4b7c/details)
 Flow is used to process feedback and contact form submissions. Messages support Markdown formatting, converted to HTML
-prior to submission. On submitted, Power Automate creates an issue for the message in a relevant GitLab project.
+prior to submission. On submission, Power Automate creates an issue for the message in a relevant GitLab project.
 
 ### Website metrics
 
@@ -793,7 +797,7 @@ Toolbox - ESRI ArcGIS API key' item in the MAGIC shared vault in 1Password as th
 
 ```shell
 # Run Flask CLI commands as a client, with remote server
-$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development CSW_ENDPOINT_UNPUBLISHED=http://add-metadata-toolbox-staging.bslmagf.nerc-bas.ac.uk/csw/unpublished CSW_ENDPOINT_PUBLISHED=http://add-metadata-toolbox-staging.bslmagf.nerc-bas.ac.uk/csw/published poetry run flask [command]
+$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development CSW_ENDPOINT_UNPUBLISHED=http://add-metadata-toolbox.bslmagf-staging.nerc-bas.ac.uk/csw/unpublished CSW_ENDPOINT_PUBLISHED=http://add-metadata-toolbox.bslmagf-staging.nerc-bas.ac.uk/csw/published poetry run flask [command]
 ```
 
 #### Using a local client and local server with a remote database
@@ -1162,7 +1166,7 @@ To deploy a new version of the Python package to the IT managed service:
 $ cd ./ansible
 $ workon venv
 $ git fetch origin
-$ git switch -c $BRANCH origin/$BRANCH
+$ git checkout -b $BRANCH origin/$BRANCH
 $ invoke ansible -e dev magic/add-metadata-toolbox
 ```
 

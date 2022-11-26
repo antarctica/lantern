@@ -1,8 +1,15 @@
-/.idea/runConfigurations
+# Python
+.python-version
 /.venv
 __pycache__
+
+# Provisioning
 /provisioning/terraform/.terraform
+
+# Testing
 /htmlcov
 /.coverage
+
+# App
 /_site
 /auth.json

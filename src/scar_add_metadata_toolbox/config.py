@@ -1,6 +1,6 @@
-from importlib.metadata import version
 import logging
 import os
+from importlib.metadata import version
 from pathlib import Path
 from typing import Dict, List
 

@@ -1,6 +1,26 @@
 from http import HTTPStatus
 
 import pytest
+from flask.testing import FlaskClient
+
+
+@pytest.mark.usefixtures("app_client")
+def test_health(app_client: FlaskClient):
+    expected_response = {
+        "description": "Server side endpoints for the SCAR Antarctic Digital Database " "(ADD) Metadata Toolbox.",
+        "links": {
+            "about": "https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox",
+            "describedBy": "https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/blob/vN/A/README.md",
+            "self": "http://localhost/meta/health/v1",
+        },
+        "releaseId": "N/A",
+        "status": "pass",
+        "version": 1,
+    }
+    response = app_client.get("/meta/health/v1")
+    assert response.status_code == HTTPStatus.OK
+    assert response.mimetype == "application/json"
+    assert response.json == expected_response
 
 
 class TestRouteCSW:

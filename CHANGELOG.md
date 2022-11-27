@@ -66,6 +66,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Removed
 
+* Invalid missing CSW catalogue test which was was not being handled by the expected function and therefore misleading
+  [#318](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/318)
 * Paw API document (migrated to Paw cloud)
   [#313](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/313)
 

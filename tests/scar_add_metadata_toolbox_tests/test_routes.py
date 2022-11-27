@@ -30,11 +30,6 @@ class TestRouteCSW:
         assert result.status_code == HTTPStatus.OK
 
     @pytest.mark.usefixtures("app_client_mocked_csw_server")
-    def test_csw_missing_catalogue(self, app_client_mocked_csw_server):
-        result = app_client_mocked_csw_server.get("/csw")
-        assert result.status_code == HTTPStatus.NOT_FOUND
-
-    @pytest.mark.usefixtures("app_client_mocked_csw_server")
     def test_csw_unknown_catalogue(self, app_client_mocked_csw_server):
         result = app_client_mocked_csw_server.get("/csw/invalid?service=CSW&request=GetCapabilities")
         assert result.status_code == HTTPStatus.NOT_FOUND

@@ -90,9 +90,9 @@ def create_app():
         try:
             return app.repositories[escape(catalogue)].process_request(request=request, token=current_token)
         except KeyError:
-            return Response(response="Catalogue not found.", status=404)
+            return Response(response="Catalogue not found.", status=HTTPStatus.NOT_FOUND)
         except CSWDatabaseNotInitialisedError:
-            return Response(response="Catalogue not yet available.", status=500)
+            return Response(response="Catalogue not yet available.", status=HTTPStatus.INTERNAL_SERVER_ERROR)
         except CSWUnknownRequestError:
             return Response(response="Request/operation information missing.", status=HTTPStatus.BAD_REQUEST)
         except CSWAmbiguousRequestError:
@@ -104,8 +104,8 @@ def create_app():
                 response="Request/operation cannot be evaluated / not supported.", status=HTTPStatus.BAD_REQUEST
             )
         except CSWAuthMissingError:
-            return Response(response="Missing authorisation token.", status=401)
+            return Response(response="Missing authorisation token.", status=HTTPStatus.UNAUTHORIZED)
         except CSWAuthInsufficientError:
-            return Response(response="Insufficient authorisation token.", status=403)
+            return Response(response="Insufficient authorisation token.", status=HTTPStatus.FORBIDDEN)
 
     return app

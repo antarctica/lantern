@@ -1388,7 +1388,7 @@ class TestCommandSiteCopyAssets:
 
         # Verify file structure
         asset_paths = list(Path(app_static_site.config["SITE_PATH"]).glob("**/*.*"))
-        assert Path(app_static_site.config["SITE_PATH"]).joinpath("static/txt/heartbeat.txt") in asset_paths
+        assert Path(app_static_site.config["SITE_PATH"]).joinpath("static/css/app.css") in asset_paths
 
 
 class TestCommandSiteBuildAll:
@@ -1427,7 +1427,7 @@ class TestCommandSiteBuildAll:
         )
         assert Path(app_static_site.config["SITE_PATH"]).joinpath("legal/cookies/index.html") in site_paths
         assert Path(app_static_site.config["SITE_PATH"]).joinpath("feedback/index.html") in site_paths
-        assert Path(app_static_site.config["SITE_PATH"]).joinpath("static/txt/heartbeat.txt") in site_paths
+        assert Path(app_static_site.config["SITE_PATH"]).joinpath("static/css/app.css") in site_paths
 
 
 class TestCommandSitePublish:

@@ -1,5 +1,5 @@
 from authlib.integrations.flask_oauth2 import current_token
-from flask import Flask, request, Response
+from flask import Flask, request, Response, url_for
 from flask_azure_oauth import FlaskAzureOauth
 from markupsafe import escape
 
@@ -63,6 +63,21 @@ def create_app():
     def version():
         """Show application version."""
         print(f"{app.config['NAME']} version: {app.config['VERSION']}")
+
+    @app.route("/meta/health/v1")
+    def health():
+        return {
+            "status": "pass",
+            "version": 1,
+            "releaseId": app.config["VERSION"],
+            "description": "Server side endpoints for the SCAR Antarctic Digital Database (ADD) Metadata Toolbox.",
+            "links": {
+                "self": url_for(endpoint="health", _external=True),
+                "about": "https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox",
+                "describedBy": f"https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/blob/"
+                f"v{app.config['VERSION']}/README.md",
+            },
+        }
 
     @app.route("/csw/<string:catalogue>", methods=["HEAD", "GET", "POST"])
     @auth(optional=True)

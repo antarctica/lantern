@@ -3,6 +3,7 @@ from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 import pytest
+from flask.testing import FlaskClient
 
 from scar_add_metadata_toolbox import create_app
 from tests.scar_add_metadata_toolbox_tests.classes import (
@@ -34,6 +35,13 @@ def app():
 @pytest.mark.usefixtures("app")
 def app_runner(app):
     return app.test_cli_runner()
+
+
+@pytest.fixture
+@pytest.mark.usefixtures("app")
+def app_client(app) -> FlaskClient:
+    with app.test_client() as client:
+        return client
 
 
 @pytest.fixture

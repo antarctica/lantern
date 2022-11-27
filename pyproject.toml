@@ -73,6 +73,18 @@ target-version = ['py36']
 include = '\.pyi?$'
 exclude = ''
 
+[tool.coverage.run]
+branch = false
+source = ["src"]
+omit = ["*/hazmat/*"]
+
+[tool.coverage.report]
+show_missing = false
+fail_under = 100
+
+[tool.coverage.html]
+directory = "htmlcov"
+
 [tool.flake8]
 # ignore code in hazmat module
 extend-exclude = ['*/hazmat/*']

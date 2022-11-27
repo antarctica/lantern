@@ -1242,12 +1242,13 @@ Tests are ran automatically in [Continuous Integration](#continuous-integration)
 
 [pytest-cov](https://pypi.org/project/pytest-cov/) is used to measure test coverage.
 
-A `.coveragerc` file is used to omit code from the `scar_add_metadata_toolbox.hazmat` module.
+The `[tool.coverage]` sections in `pyproject.toml` are used to omit code from the `scar_add_metadata_toolbox.hazmat` 
+module from coverage checks.
 
 To measure coverage manually:
 
 ```shell
-$ FLASK_ENV=testing poetry run pytest --random-order --cov=scar_add_metadata_toolbox --cov-config=.coveragerc --cov-fail-under=100 --cov-report=html .
+$ FLASK_ENV=testing poetry run pytest --random-order --cov --cov-report=html .
 ```
 
 [Continuous Integration](#continuous-integration) will check coverage automatically and fail if less than 100%.

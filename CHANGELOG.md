@@ -51,6 +51,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
+* PyTest Coverage configuration refactored into `pyproject.toml`
+  [#142](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/142)
 * Refactoring how CSW requests are evaluated with respect to permission checks
   [#73](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/73)
 * Improving documentation

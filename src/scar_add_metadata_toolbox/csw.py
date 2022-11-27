@@ -1,6 +1,6 @@
 from copy import deepcopy
 from enum import Enum
-from typing import List, Optional
+from typing import Generator, Optional
 
 from flask import Request, Response
 from flask_azure_oauth import AzureToken
@@ -479,7 +479,7 @@ class CSWClient:  # pragma: no cover (until #59 is resolved)
             elif _csw.response.decode() == "Insufficient authorisation token.":
                 raise CSWAuthInsufficientError() from None
 
-    def get_records(self, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> List[str]:
+    def get_records(self, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> Generator[str, None, None]:
         """
         Return all records
 

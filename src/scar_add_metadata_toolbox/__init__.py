@@ -4,6 +4,7 @@ from authlib.integrations.flask_oauth2 import current_token
 from flask import Flask, request, Response, url_for
 from flask_azure_oauth import FlaskAzureOauth
 from markupsafe import escape
+from werkzeug.exceptions import NotFound
 
 from scar_add_metadata_toolbox.classes import MirrorRepository
 from scar_add_metadata_toolbox.commands import (
@@ -68,6 +69,10 @@ def create_app():
     def version():
         """Show application version."""
         print(f"{app.config['NAME']} version: {app.config['VERSION']}")
+
+    @app.errorhandler(NotFound)
+    def handle_bad_request(e):
+        return Response(response="Not Found.", status=HTTPStatus.NOT_FOUND)
 
     @app.route("/meta/health/v1")
     def health():

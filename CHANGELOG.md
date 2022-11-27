@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
+* 404 error handler route for server side endpoints
+  [#319](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/319)
 * Dynamic health endpoint indicating basic liveliness and installed package version
   [#282](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/282)
 * Flake8 `pyproject.toml` support via `flake8-pyproject`

@@ -5,6 +5,13 @@ from flask.testing import FlaskClient
 
 
 @pytest.mark.usefixtures("app_client")
+def test_404(app_client: FlaskClient):
+    response = app_client.get("/404")
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.text == "Not Found."
+
+
+@pytest.mark.usefixtures("app_client")
 def test_health(app_client: FlaskClient):
     expected_response = {
         "description": "Server side endpoints for the SCAR Antarctic Digital Database " "(ADD) Metadata Toolbox.",

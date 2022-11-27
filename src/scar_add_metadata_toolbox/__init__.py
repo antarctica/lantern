@@ -1,7 +1,10 @@
+from http import HTTPStatus
+
 from authlib.integrations.flask_oauth2 import current_token
 from flask import Flask, request, Response, url_for
 from flask_azure_oauth import FlaskAzureOauth
 from markupsafe import escape
+from werkzeug.exceptions import NotFound
 
 from scar_add_metadata_toolbox.classes import MirrorRepository
 from scar_add_metadata_toolbox.commands import (
@@ -11,9 +14,12 @@ from scar_add_metadata_toolbox.commands import (
     site_commands_blueprint,
 )
 from scar_add_metadata_toolbox.csw import (
+    CSWAmbiguousRequestError,
     CSWAuthInsufficientError,
     CSWAuthMissingError,
     CSWDatabaseNotInitialisedError,
+    CSWUnknownRequestError,
+    CSWUnmappedRequestError,
 )
 from scar_add_metadata_toolbox.utils import (
     _create_app_config,
@@ -23,7 +29,7 @@ from scar_add_metadata_toolbox.utils import (
 )
 
 
-def create_app():
+def create_app():  # noqa: C901
     """
     Application factory
 
@@ -64,6 +70,10 @@ def create_app():
         """Show application version."""
         print(f"{app.config['NAME']} version: {app.config['VERSION']}")
 
+    @app.errorhandler(NotFound)
+    def handle_bad_request(e):
+        return Response(response="Not Found.", status=HTTPStatus.NOT_FOUND)
+
     @app.route("/meta/health/v1")
     def health():
         return {
@@ -85,12 +95,22 @@ def create_app():
         try:
             return app.repositories[escape(catalogue)].process_request(request=request, token=current_token)
         except KeyError:
-            return Response(response="Catalogue not found.", status=404)
+            return Response(response="Catalogue not found.", status=HTTPStatus.NOT_FOUND)
         except CSWDatabaseNotInitialisedError:
-            return Response(response="Catalogue not yet available.", status=500)
+            return Response(response="Catalogue not yet available.", status=HTTPStatus.INTERNAL_SERVER_ERROR)
+        except CSWUnknownRequestError:
+            return Response(response="Request/operation information missing.", status=HTTPStatus.BAD_REQUEST)
+        except CSWAmbiguousRequestError:
+            return Response(
+                response="Request/operation information specified in multiple forms.", status=HTTPStatus.BAD_REQUEST
+            )
+        except CSWUnmappedRequestError:
+            return Response(
+                response="Request/operation cannot be evaluated / not supported.", status=HTTPStatus.BAD_REQUEST
+            )
         except CSWAuthMissingError:
-            return Response(response="Missing authorisation token.", status=401)
+            return Response(response="Missing authorisation token.", status=HTTPStatus.UNAUTHORIZED)
         except CSWAuthInsufficientError:
-            return Response(response="Insufficient authorisation token.", status=403)
+            return Response(response="Insufficient authorisation token.", status=HTTPStatus.FORBIDDEN)
 
     return app

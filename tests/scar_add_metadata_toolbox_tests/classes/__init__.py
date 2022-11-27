@@ -7,6 +7,7 @@ from flask_azure_oauth import AzureToken
 from flask_azure_oauth.mocks.tokens import TestJwt
 
 from scar_add_metadata_toolbox.csw import (
+    CSWAmbiguousRequestError,
     CSWAuthError,
     CSWAuthInsufficientError,
     CSWAuthMissingError,
@@ -15,6 +16,8 @@ from scar_add_metadata_toolbox.csw import (
     CSWDatabaseNotInitialisedError,
     CSWGetRecordMode,
     CSWServer,
+    CSWUnknownRequestError,
+    CSWUnmappedRequestError,
     RecordInsertConflictError,
     RecordNotFoundError,
     RecordServerError,
@@ -171,6 +174,21 @@ class MockCSWServer(CSWServer):
 class MockCSWServerNotSetup(MockCSWServer):
     def process_request(self, request: Request, token: Optional[AzureToken] = None) -> Response:
         raise CSWDatabaseNotInitialisedError() from None
+
+
+class MockCSWServerNoRequestType(MockCSWServer):
+    def process_request(self, request: Request, token: Optional[AzureToken] = None) -> Response:
+        raise CSWUnknownRequestError() from None
+
+
+class MockCSWServerAmbiguousRequestError(MockCSWServer):
+    def process_request(self, request: Request, token: Optional[AzureToken] = None) -> Response:
+        raise CSWAmbiguousRequestError() from None
+
+
+class MockCSWServerUnmappedRequestError(MockCSWServer):
+    def process_request(self, request: Request, token: Optional[AzureToken] = None) -> Response:
+        raise CSWUnmappedRequestError() from None
 
 
 class MockCSWServerAuthTokenError(MockCSWServer):

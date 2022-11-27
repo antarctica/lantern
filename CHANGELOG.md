@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
+* 404 error handler route for server side endpoints
+  [#319](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/319)
 * Dynamic health endpoint indicating basic liveliness and installed package version
   [#282](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/282)
 * Flake8 `pyproject.toml` support via `flake8-pyproject`
@@ -49,6 +51,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
+* Refactoring how CSW requests are evaluated with respect to permission checks
+  [#73](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/73)
 * Improving documentation
   [#315](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/315)
 * Migrating additional PyCSW workarounds to Hazmat module
@@ -64,6 +68,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Removed
 
+* Invalid missing CSW catalogue test which was was not being handled by the expected function and therefore misleading
+  [#318](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/318)
 * Paw API document (migrated to Paw cloud)
   [#313](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/313)
 

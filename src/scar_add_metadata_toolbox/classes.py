@@ -4,7 +4,7 @@ from datetime import date, datetime
 from enum import Enum
 from hashlib import sha1
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, Generator, List, Optional, Union
 from urllib.parse import parse_qs as query_string_parse, urlparse as url_parse
 
 from bas_metadata_library.standards.iso_19115_2 import MetadataRecord, MetadataRecordConfigV3
@@ -1355,7 +1355,7 @@ class Repository:
         record_config.validate()
         return Record(config=record_config.config)
 
-    def retrieve_records(self) -> List[Record]:
+    def retrieve_records(self) -> Generator[Record, None, None]:
         """
         Retrieves all records in the repository
 

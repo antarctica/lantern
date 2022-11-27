@@ -56,16 +56,16 @@ class TestRouteCSW:
 
     @pytest.mark.usefixtures("app_client_mocked_csw_server_ambiguous_request")
     def test_csw_catalogue_ambiguous_request_type(self, app_client_mocked_csw_server_ambiguous_request):
-        body = """<csw:DescribeRecord 
-            service="CSW" 
-            version="2.0.2" 
-            outputFormat="application/xml" 
-            schemaLanguage="http://www.w3.org/XML/Schema" 
-            xmlns="http://www.opengis.net/cat/csw/2.0.2" 
-            xmlns:csw30="http://www.opengis.net/cat/csw/3.0" 
-            xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" 
-            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-            xsi:schemaLocation="http://www.opengis.net/cat/csw/3.0 
+        body = """<csw:DescribeRecord
+            service="CSW"
+            version="2.0.2"
+            outputFormat="application/xml"
+            schemaLanguage="http://www.w3.org/XML/Schema"
+            xmlns="http://www.opengis.net/cat/csw/2.0.2"
+            xmlns:csw30="http://www.opengis.net/cat/csw/3.0"
+            xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.opengis.net/cat/csw/3.0
             http://schemas.opengis.net/cat/csw/3.0/cswGetCapabilities.xsd"
         >
             <csw:TypeName>csw:Record</csw:TypeName>

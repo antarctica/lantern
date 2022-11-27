@@ -29,7 +29,7 @@ from scar_add_metadata_toolbox.utils import (
 )
 
 
-def create_app():
+def create_app():  # noqa: C901
     """
     Application factory
 

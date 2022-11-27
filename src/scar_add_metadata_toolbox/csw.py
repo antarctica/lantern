@@ -362,7 +362,7 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
                 raise CSWAuthMissingError() from None
 
     @staticmethod
-    def _determine_transaction_type(csw_request: _CSWServer) -> CSWTransactionType:
+    def _determine_transaction_type(csw_request: _CSWServer) -> CSWTransactionType:  # noqa: C901
         """
         Determines the CSW transaction type from a CSW request type
 

@@ -20,8 +20,8 @@ from tests.scar_add_metadata_toolbox_tests.classes import (
     MockCSWServerMissingAuthToken,
     MockCSWServerNoRequestType,
     MockCSWServerNotSetup,
-    MockCSWServerUnmappedRequestError,
     MockCSWServerRequestsFail,
+    MockCSWServerUnmappedRequestError,
     MockPublicClientApplication,
 )
 

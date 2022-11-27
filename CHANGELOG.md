@@ -49,6 +49,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
+* Refactoring how CSW requests are evaluated with respect to permission checks
+  [#73](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/73)
 * Improving documentation
   [#315](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/315)
 * Migrating additional PyCSW workarounds to Hazmat module

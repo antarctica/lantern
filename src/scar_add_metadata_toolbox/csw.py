@@ -1,6 +1,6 @@
 from copy import deepcopy
 from enum import Enum
-from typing import Generator, Optional
+from typing import Dict, Generator, Optional
 
 from flask import Request, Response
 from flask_azure_oauth import AzureToken
@@ -35,9 +35,11 @@ class CSWGetRecordMode(Enum):
 
 class CSWTransactionType(Enum):
     """
-    Represents the transaction types used in the CSW specification
+    Represents the transaction types used in the CSW specification, plus a 'SELECT' value to represent
+    retrieval only requests.
     """
 
+    SELECT = "select"
     INSERT = "insert"
     UPDATE = "update"
     DELETE = "delete"
@@ -83,6 +85,62 @@ class CSWMethodNotSupportedError(Exception):
     Represents a situation where an unsupported HTTP method is used in a request to a CSW Server
 
     CSW requests must use the HEAD, GET or POST HTTP method. If another method is used this rule would be violated.
+    """
+
+    pass
+
+
+class CSWUnknownRequestError(Exception):
+    """
+    Represents a situation where a CSW request doesn't contain a property describing the type of request
+
+    E.g. for GET requests, a 'request' string query parameter is not included, or in Post requests, there isn't a
+    recognised element that can mapped to a request type (e.g. a '<csw:Query>' element can be mapped to a 'query' type).
+
+    It is inherently hard to be specific about how to resolve this error. As we take a restrictive approach to detecting
+    request types, it's possible the request made by the client is perfectly valid but not yet supported by us.
+    """
+
+    pass
+
+
+class CSWAmbiguousRequestError(Exception):
+    """
+    Represents a situation where a CSW request contains multiple properties describing the type of request
+
+    E.g. a request contains a 'request' string query parameter and an element in the body (such as '<csw:Query>').
+
+    This makes it non-trivial to determine the overall request type (e.g. if one property indicates a read request and
+    another a write request) and introduces ambiguity that could lead to processing errors (potentially not doing what
+    the user expected) or security errors (where a write request is allowed when it shouldn't).
+
+    To avoid these situations, any request that is ambiguity is rejected. It is inherently hard to be specific about
+    how to resolve this error, but it's unlikely to be a false positive.
+    """
+
+    pass
+
+
+class CSWUnmappedRequestError(Exception):
+    """
+    Represents a situation where a CSW request contains a 'request' string query parameter that is not mapped to a
+    transaction type
+
+    E.g. a request contains a 'request' string query parameter with a value of 'Foo', which is not yet mapped to one of
+    the four transaction types (select, insert, update, delete).
+
+    The CSW 'request' query parameter is inherently specific to the type of operation being requested (e.g.
+    'GetRecordById' vs 'GetRecords'). This is too granular whether a user is authorised to perform an action, where the
+    broader transaction type is more appropriate to base a decision on.
+
+    An internal mapping is used to associate specific request types with general transaction types. Where a request
+    does not appear in this mapping, this error will be raised. There is nothing the user can do to fix this error,
+    except to use a different request type that is mapped, or raise a bug report. We do not list the types of requests
+    that are mapped.
+
+    In practice, this error should not occur however, as the catalogue client CLI internally makes CSW requests itself
+    and would therefore trigger those that are expected to be used by other types of clients. It's possible other \
+    clients may wish to make more exotic requests but that does not mean we need to support them.
     """
 
     pass
@@ -271,29 +329,112 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
         csw_database = create_engine(self._csw_config["repository"]["database"])
         return inspect(csw_database).has_table(self._csw_config["repository"]["table"])
 
-    def _check_auth(self, method: str, token: Optional[AzureToken]) -> None:
+    def _check_auth(self, transaction_type: CSWTransactionType, token: Optional[AzureToken]) -> None:
         """
-        Checks whether an authorisation token contains all of a required set of scopes
+        Checks whether an authorisation token contains the scopes required for a transaction
 
-        I.e. is the client allowed to perform the action they're trying to do.
+        I.e. 'is the client allowed to perform the action they're trying to do?'
 
-        Actions are simplified to 'read' or 'write' and the required set of scopes is specified by the
-        'auth_required_scopes_read' or 'auth_required_scopes_write' class config options.
+        `CSWTransactionType` members are simplified to generic 'read' or 'write' permissions. Scopes for these
+        permissions are specified by the `auth_required_scopes_read` or `auth_required_scopes_write` class variables
+        respectively (see `init()` method).
 
         If the token does not include the required scopes an exception is raised, otherwise nothing is returned.
 
-        :type method str
-        :param method: either 'read' or 'write'
+        :type transaction_type CSWTransactionType
+        :param transaction_type: a CSW transaction type
         :type token AzureToken
         :param token: request authorisation token
         """
+
+        permissions_required = "write"
+        if transaction_type == CSWTransactionType.SELECT:
+            permissions_required = "read"
+
         try:
-            if len(self._csw_auth[method]) > 0 and not token.scopes.issuperset(set(self._csw_auth[method])):
+            if len(self._csw_auth[permissions_required]) > 0 and not token.scopes.issuperset(
+                set(self._csw_auth[permissions_required])
+            ):
                 raise CSWAuthInsufficientError() from None
         except AttributeError:
             # noinspection PyComparisonWithNone
             if token is None:
                 raise CSWAuthMissingError() from None
+
+    @staticmethod
+    def _determine_transaction_type(csw_request: _CSWServer) -> CSWTransactionType:
+        """
+        Determines the CSW transaction type from a CSW request type
+
+        The transaction type is determined from either:
+        - the value of a `request` query string parameter
+        - the presence of a CSW transaction element (e.g. '<csw:Delete>')
+        - the presence of a '<csw:Query>' element
+
+        E.g.:
+        - a GET request containing '&request=GetRecordById' query string parameter is a 'SELECT' transaction
+        - a POST request containing a '<csw:Query>' element is a 'SELECT' transaction
+        - a POST request containing a '<csw:Delete>' element is a 'DELETE' transaction
+
+        Transaction types are represented by the `CSWTransactionType` enumeration. For the purposes of this method,
+        transactions include 'SELECT'. Requests such as `GetRecordById` are mapped to a transaction type internally.
+
+        If a transaction type cannot be determined because:
+
+        - _neither_ a 'request' query string parameter or '<csw:Transaction>' element are present in the request:
+            - a `CSWUnknownRequestError` exception is raised
+        - _both_ a 'request' query string parameter or '<csw:Transaction>' element are present in the request:
+            - a `CSWAmbiguousRequestError` exception is raised
+        - a 'request' query string parameter (only) is present but its value cannot be mapped to a transaction type:
+            - a `CSWUnmappedRequestError` exception is raised
+
+        All of these exceptions should be returned to the user as a 400 Bad Request HTTP error response.
+
+        :type csw_request scar_add_metadata_toolbox.hazmat.pycsw.server.Csw
+        :param csw_request: CSW server request
+        :rtype CSWTransactionType
+        :return: CSW transaction type
+        """
+        request_transaction_types_mapping: Dict[str, CSWTransactionType] = {
+            "GetCapabilities": CSWTransactionType.SELECT,
+            "DescribeRecord": CSWTransactionType.SELECT,
+            "GetRecords": CSWTransactionType.SELECT,
+            "GetRecordById": CSWTransactionType.SELECT,
+        }
+        request_type: Optional[str] = None
+        transaction_type: Optional[CSWTransactionType] = None
+
+        try:
+            # '?request=GetRecordById' becomes 'GetRecordById'
+            request_type = str(csw_request.kvp["request"])
+        except KeyError:
+            pass
+
+        if csw_request.requesttype == "POST":
+            request_xml = ElementTree(fromstring(csw_request.request))
+            if len(request_xml.xpath("/csw:Query", namespaces=csw_namespaces)) > 0:
+                transaction_type = CSWTransactionType.SELECT
+            elif len(request_xml.xpath("/csw:Transaction/csw:Insert", namespaces=csw_namespaces)) > 0:
+                transaction_type = CSWTransactionType.INSERT
+            elif len(request_xml.xpath("/csw:Transaction/csw:Update", namespaces=csw_namespaces)) > 0:
+                transaction_type = CSWTransactionType.UPDATE
+            elif len(request_xml.xpath("/csw:Transaction/csw:Delete", namespaces=csw_namespaces)) > 0:
+                transaction_type = CSWTransactionType.DELETE
+
+        if request_type is None and transaction_type is None:
+            raise CSWUnknownRequestError() from None
+
+        if request_type is not None and transaction_type is not None:
+            raise CSWAmbiguousRequestError() from None
+
+        if transaction_type is not None:
+            return transaction_type
+
+        if request_type is not None:
+            try:
+                return request_transaction_types_mapping[request_type]
+            except KeyError:
+                raise CSWUnmappedRequestError() from None
 
     def setup(self) -> None:
         """
@@ -352,31 +493,22 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
         if not self._is_initialised:
             raise CSWDatabaseNotInitialisedError()
 
-        if request.method != "HEAD" and request.method != "GET" and request.method != "POST":
+        if request.method not in ["HEAD", "GET", "POST"]:
             raise CSWMethodNotSupportedError()
 
         _csw = _CSWServer(rtconfig=self._csw_config, env=request.environ, version="2.0.2")
-        _csw.requesttype = "GET"
         _csw.kvp = request.args.to_dict()
-        _request_type = "inspect"
+        _csw.requesttype = request.method
+
+        # CSW doesn't natively support HEAD requests so alias to GET
+        if request.method == "HEAD":
+            _csw.requesttype = "GET"
 
         if request.method == "POST":
-            _request_type = "read"
-            _csw.requesttype = "POST"
             _csw.request = request.data
 
-            request_xml = ElementTree(fromstring(_csw.request))
-            if len(request_xml.xpath("/csw:Transaction/csw:Insert", namespaces=csw_namespaces)) > 0:
-                _request_type = "create"
-            elif len(request_xml.xpath("/csw:Transaction/csw:Update", namespaces=csw_namespaces)) > 0:
-                _request_type = "update"
-            elif len(request_xml.xpath("/csw:Transaction/csw:Delete", namespaces=csw_namespaces)) > 0:
-                _request_type = "delete"
-
-        if _request_type == "read":
-            self._check_auth(method="read", token=token)
-        elif _request_type == "create" or _request_type == "update" or _request_type == "delete":
-            self._check_auth(method="write", token=token)
+        transaction_type = self._determine_transaction_type(csw_request=_csw)
+        self._check_auth(transaction_type=transaction_type, token=token)
 
         status_code, response = _csw.dispatch()
 

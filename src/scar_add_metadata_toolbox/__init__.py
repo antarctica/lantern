@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 from authlib.integrations.flask_oauth2 import current_token
 from flask import Flask, request, Response, url_for
 from flask_azure_oauth import FlaskAzureOauth
@@ -11,9 +13,12 @@ from scar_add_metadata_toolbox.commands import (
     site_commands_blueprint,
 )
 from scar_add_metadata_toolbox.csw import (
+    CSWAmbiguousRequestError,
     CSWAuthInsufficientError,
     CSWAuthMissingError,
     CSWDatabaseNotInitialisedError,
+    CSWUnknownRequestError,
+    CSWUnmappedRequestError,
 )
 from scar_add_metadata_toolbox.utils import (
     _create_app_config,
@@ -88,6 +93,16 @@ def create_app():
             return Response(response="Catalogue not found.", status=404)
         except CSWDatabaseNotInitialisedError:
             return Response(response="Catalogue not yet available.", status=500)
+        except CSWUnknownRequestError:
+            return Response(response="Request/operation information missing.", status=HTTPStatus.BAD_REQUEST)
+        except CSWAmbiguousRequestError:
+            return Response(
+                response="Request/operation information specified in multiple forms.", status=HTTPStatus.BAD_REQUEST
+            )
+        except CSWUnmappedRequestError:
+            return Response(
+                response="Request/operation cannot be evaluated / not supported.", status=HTTPStatus.BAD_REQUEST
+            )
         except CSWAuthMissingError:
             return Response(response="Missing authorisation token.", status=401)
         except CSWAuthInsufficientError:

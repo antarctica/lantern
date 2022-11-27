@@ -292,6 +292,16 @@ To test against real data in a non-production environment, a staging database, w
 database, can be used. Credentials for this database are stored in the MAGIC 1Password shared vault. This database is
 re-synced automatically by BAS IT every Tuesday at 02:00. 
 
+#### CSW auth
+
+Requests are evaluated as being either 'read' or 'write' based on either the `request` query string parameter, or
+elements used in the request body (e.g. `request=GetRecords` or `<csw:Query>` for a read/select request).
+
+These permissions are mapped onto required scopes for each catalogue. Required scopes may be empty to allow anonymous 
+for read or write.
+
+Where the request type cannot be determined unambiguously it will be rejected.
+
 ### Jinja templates
 
 A series of [Jinja2](https://jinja.palletsprojects.com/) templates are used for rendering pages, including 

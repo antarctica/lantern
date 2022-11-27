@@ -14,10 +14,13 @@ from tests.scar_add_metadata_toolbox_tests.classes import (
     MockCSWClientInsertsFail,
     MockCSWClientServerNotSetup,
     MockCSWServer,
+    MockCSWServerAmbiguousRequestError,
     MockCSWServerAuthTokenError,
     MockCSWServerInsufficientAuthToken,
     MockCSWServerMissingAuthToken,
+    MockCSWServerNoRequestType,
     MockCSWServerNotSetup,
+    MockCSWServerUnmappedRequestError,
     MockCSWServerRequestsFail,
     MockPublicClientApplication,
 )
@@ -135,6 +138,33 @@ def app_client_mocked_csw_server_not_setup():
 def app_client_mocked_csw_server_requests_fail():
     with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
         mock_csw_server.side_effect = MockCSWServerRequestsFail
+
+        app = create_app()
+        return app.test_client()
+
+
+@pytest.fixture
+def app_client_mocked_csw_server_no_request_type():
+    with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
+        mock_csw_server.side_effect = MockCSWServerNoRequestType
+
+        app = create_app()
+        return app.test_client()
+
+
+@pytest.fixture
+def app_client_mocked_csw_server_ambiguous_request():
+    with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
+        mock_csw_server.side_effect = MockCSWServerAmbiguousRequestError
+
+        app = create_app()
+        return app.test_client()
+
+
+@pytest.fixture
+def app_client_mocked_csw_server_unmapped_request():
+    with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
+        mock_csw_server.side_effect = MockCSWServerUnmappedRequestError
 
         app = create_app()
         return app.test_client()

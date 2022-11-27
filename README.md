@@ -156,6 +156,38 @@ The [Azure Portal](https://portal.azure.com) is used to assign permissions to ap
 
 * [assigning permissions to users](docs/workflow-permissions-users.md)
 
+### Health checks
+
+A check for the Flask application is available to determine the health of the server side application (CSV endpoints).
+
+It is available at `/meta/health/v1` and uses the draft 
+[Health Check Response Format for HTTP APIs](https://inadarei.github.io/rfc-healthcheck) RFC structure.
+
+**Note:** This endpoint is tested or designed for high frequency checks (i.e. more than every 10 seconds). 
+
+It is intended for use in monitoring systems, and to verify the deployed version of the service. It is currently a very 
+basic check, without verifying things like database connectivity.
+
+Example request/response:
+
+```
+$ curl "https://example.com/meta/health/v1" -H 'Accept: application/json'
+```
+
+```json
+{
+  "description": "Server side endpoints for the SCAR Antarctic Digital Database (ADD) Metadata Toolbox.",
+  "links": {
+    "about": "https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox",
+    "describedBy": "https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/blob/vN/A/README.md",
+    "self": "https://example.com/meta/health/v1"
+  },
+  "releaseId": "0.6.0",
+  "status": "pass",
+  "version": 1
+}
+```
+
 ### CSW
 
 The [OGC CSW](https://www.ogc.org/standards/cat) standard is used as a protocol and interface for accessing and 

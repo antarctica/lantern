@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Removed [BREAKING!]
+
+* Static health check endpoint removed (see new dynamic endpoint for an alternative)
+  [#282](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/282)
+
 ### Changed [BREAKING!]
 
 * Minimum Python version increased to 3.8.1
@@ -16,6 +21,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
+* Dynamic health endpoint indicating basic liveliness and installed package version
+  [#282](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/282)
 * Flake8 `pyproject.toml` support via `flake8-pyproject`
   [#300](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/300)
 * Flake8 comprehensions plugin

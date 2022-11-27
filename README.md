@@ -60,18 +60,32 @@ See the [Registering Download Proxy Artefact Lookup Items](#registering-download
 
 ## Implementation
 
-Flask application using [CSW](#csw) to store [Metadata records](#metadata-records), and display them as [Items](#items),
-in [Collections](#collections), rendered using [Jinja templates](#jinja-templates), served as a
-[static website](#s3-static-website) within the [BAS Discovery Metadata System (DMS)](https://data.bas.ac.uk) website.
-A command line interface is used to setup components, manage records and build/publish the static site.
+### Implementation Overview
 
-CSW catalogues are backed by PostGIS databases and secured using [OAuth](#oauth). Contact forms for feedback and items 
-in the static site use [Microsoft Power Automate](#feedback-and-contact-forms). Legal policies use templates from the
-[Legal Policies](https://gitlab.data.bas.ac.uk/web-apps/legal-policies-templates) project.
+Flask application:
 
-[Static site](#website-metrics) and [item download](#download-metrics) are tracked using 
-[Google Analytics Event Tracking](https://developers.google.com/analytics/devguides/collection/analyticsjs/events).
-Application errors are tracked using [Sentry](#sentry-error-tracking).
+* using [CSW](#csw) to store [Metadata records](#metadata-records)
+* interpreted as [Items](#items) in [Collections](#collections)
+* rendered using [Jinja templates](#jinja-templates)
+* served as a [static website](#s3-static-website) within the [`data.bas.ac.uk`](https://data.bas.ac.uk) website
+* providing a CLI to set up components, manage records and build/publish the static site
+* backend errors are tracked using [Sentry](#sentry-error-tracking)
+* providing a [health endpoint](#health-checks) for monitoring application state
+
+[CSW catalogues](#csw):
+
+* are reverse proxied as a route in Flask
+* are backed by PostGIS databases
+* are secured using [OAuth](#oauth)
+
+Static website:
+
+* is hosted in AWS S3 and reverse proxied as part of the [`data.bas.ac.uk`](https://data.bas.ac.uk) domain
+* web maps are hosted using [Esri](#esri-web-maps)
+* contact forms for feedback and items are processed using [Microsoft Power Automate](#feedback-and-contact-forms)
+* legal policies use templates from the 
+  [Legal Policies](https://gitlab.data.bas.ac.uk/web-apps/legal-policies-templates) project
+* uses [Sentry](#sentry-error-tracking) for frontend error tracking
 
 ### Architecture
 
@@ -156,6 +170,20 @@ The [Azure Portal](https://portal.azure.com) is used to assign permissions to ap
 
 * [assigning permissions to users](docs/workflow-permissions-users.md)
 
+### Sentry error tracking
+
+Backend and frontend errors in this service are tracked with Sentry:
+
+* [Sentry dashboard](https://sentry.io/organizations/antarctica/issues/?project=5197036)
+* [GitLab dashboard](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/error_tracking)
+
+Backend error tracking will be enabled or disabled depending on the environment. It can be manually controlled by 
+setting the `APP_ENABLE_SENTRY` [Configuration option](#configuration).
+
+### Application logging
+
+Logs for this service are written to *stdout/stderr* as appropriate.
+
 ### Health checks
 
 A check for the Flask application is available to determine the health of the server side application (CSV endpoints).
@@ -187,6 +215,27 @@ $ curl "https://example.com/meta/health/v1" -H 'Accept: application/json'
   "version": 1
 }
 ```
+
+#### Application logging (BAS IT)
+
+When deployed as a BAS IT service, application logs are captured by Apache, and written to a log files. See  
+[Key Paths](#key-paths) section for location. Log files are rotated weekly at ≈03:00 (day unknown).
+
+**Note:** When logs are rotated the Flask application will be restarted.
+
+### Hazardous Materials module
+
+In order to implement the [CSW package modifications](#csw-package-modifications), the `pycsw` and `owslib` packages
+have been vendored into this application, meaning their source code, and their dependencies, have been added within 
+this project.
+
+As this code is third party, and hasn't been vetted or integrated into this project, it is held in a *hazmat* 
+(Hazardous Materials) module, `scar_add_metadata_toolbox.hazmat`. This module is exempt from 
+[Code Linting](#code-linting), [Testing](#testing) and [Test Coverage](#test-coverage) rules.
+
+The eventual aim is to remove these packages from this project, however this will depend on whether these packages 
+are used in the longer term (see [#194](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/194)), and 
+if so, whether the changes made to them in this project, could be integrated into their upstream projects.
 
 ### CSW
 
@@ -228,7 +277,7 @@ These modifications are:
 
 Both PyCSW (CSW server) and OWSLib (CSW client) have a maximum record limit of *100* per request.
 
-### CSW Supported Element Sets
+#### CSW Supported Element Sets
 
 Both PyCSW (CSW server) and OWSLib (CSW client) support the *full* Element Set only.
 
@@ -260,6 +309,15 @@ Templates are stored in the `scar_add_metadata_toolbox.templates` module and org
 For example, the template used for Item pages is a view which inherits from the application layout and combines a 
 number of includes to define a page structure with a fixed header and a series of tabs, each with their own content.
 
+### S3 static website
+
+Rendered templates and other static assets are hosted through an AWS S3 bucket with static website hosting enabled. 
+Separate production and integration buckets are available to preview changes. [Terraform](#terraform) is used to define 
+and provision these buckets.
+
+Rules within the BAS General Load Balancer, managed by IT, are used to reverse proxy content from these S3 static sites 
+to appear as part of the production and testing current/legacy BAS Discovery Metadata System (DMS).
+
 ### ESRI web maps
 
 To display the spatial extent of Items, an ESRI web map is included in the page template for Items. This web map 
@@ -268,7 +326,7 @@ uses:
 * the [ESRI ArcGIS API for JavaScript](https://developers.arcgis.com/javascript/latest/) as a mapping framework
 * [ESRI ArcGIS Online](https://www.arcgis.com/index.html) for mapping layers
 
-### ESRI API key
+#### ESRI API key
 
 Accessing content from ArcGIS Online requires an API key from the ESRI 
 [ArcGIS Developers](https://developers.arcgis.com) platform. This API key is treated as an application secret, and 
@@ -282,14 +340,22 @@ are taken.
 The API key used for this project is stored in the MAGIC 1Password shared vault as the *SCAR ADD Metadata Toolbox - 
 ESRI ArcGIS API key* item.
 
-### S3 static website
+### Feedback and contact forms
 
-Rendered templates and other static assets are hosted through an AWS S3 bucket with static website hosting enabled. 
-Separate production and staging buckets are available to preview changes. [Terraform](#terraform) is used to define and
-provision these buckets.
+A Microsoft
+[Power Automate](https://emea.flow.microsoft.com/manage/environments/Default-b311db95-32ad-438f-a101-7ba061712a4e/flows/97d95c3b-5d40-4358-86a6-979a679a4b7c/details)
+Flow is used to process feedback and contact form submissions. Messages support Markdown formatting, converted to HTML
+prior to submission. On submission, Power Automate creates an issue for the message in a relevant GitLab project.
 
-Rules within the BAS General Load Balancer, managed by IT, are used to reverse proxy content from these S3 static sites 
-to appear as part of the current/legacy BAS Discovery Metadata System (DMS).
+### Website metrics
+
+**Note:** Website metrics are not currently collected. See 
+[#292](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/292) for more information.
+
+### Download metrics
+
+**Note:** Download metrics are not currently collected. See 
+[#246](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/246) for more information.
 
 ### Downloads Proxy 
 
@@ -475,67 +541,6 @@ staging lookup items.
 # with the AWS CLI installed and configured with appropriate credentials
 $ aws s3 cp s3://add-catalogue-downloads-proxy-prod/lookups.json s3://add-catalogue-downloads-proxy-stage/lookups.json
 ```
-
-### Feedback and contact forms
-
-A Microsoft
-[Power Automate](https://emea.flow.microsoft.com/manage/environments/Default-b311db95-32ad-438f-a101-7ba061712a4e/flows/97d95c3b-5d40-4358-86a6-979a679a4b7c/details)
-Flow is used to process feedback and contact form submissions. Messages support Markdown formatting, converted to HTML
-prior to submission. On submission, Power Automate creates an issue for the message in a relevant GitLab project.
-
-### Website metrics
-
-Metrics for viewing item/collection web pages, and tabs within pages, are tracked as events within Google 
-Analytics.
-
-[Events report](https://analytics.google.com/analytics/web/#/report/content-event-overview/a64130716w100162930p104062219/).
-
-### Download metrics
-
-To support tracking downloads of item artefacts, the [Downloads Proxy](#downloads-proxy) is used. This service logs 
-events within Google Analytics. See the [Website Metrics](#website-metrics) section for how to access event reports.
-
-For download metrics to be recorded, download URLs (i.e. `https://data.bas.ac.uk/downloads/123`) must be used.
-It doesn't matter if the URL is accessed through a data catalogue item page, indirectly through another catalogue, or
-the link is shared directly.
-
-These download metrics are not foolproof however. If a user hosts and shares the file after downloading it themselves 
-for example, no metrics will be recorded.
-
-### Sentry error tracking
-
-Errors in this service are tracked with Sentry:
-
-* [Sentry dashboard](https://sentry.io/organizations/antarctica/issues/?project=5197036)
-* [GitLab dashboard](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/error_tracking)
-
-Error tracking will be enabled or disabled depending on the environment. It can be manually controlled by setting the
-`APP_ENABLE_SENTRY` [Configuration option](#configuration).
-
-### Application logging
-
-Logs for this service are written to *stdout/stderr* as appropriate.
-
-#### Application logging (BAS IT)
-
-When deployed as a BAS IT service, application logs are captured by Apache, and written to a log files. See  
-[Key Paths](#key-paths) section for location). Log files are rotated weekly at ≈03:00 each week.
-
-**Note:** When logs are rotated the Flask application will be restarted.
-
-### Hazardous Materials module
-
-In order to implement the [CSW package modifications](#csw-package-modifications), the `pycsw` and `owslib` packages
-have been vendored into this application, meaning their source code, and their dependencies, have been added within 
-this project.
-
-As this code is third party, and hasn't been vetted or integrated into this project, it is held in a *hazmat* 
-(Hazardous Materials) module, `scar_add_metadata_toolbox.hazmat`. This module is exempt from 
-[Code Linting](#code-linting), [Testing](#testing) and [Test Coverage](#test-coverage) rules.
-
-The eventual aim is to remove these packages from this project, however this will depend on whether these packages 
-are used in the longer term (see [#194](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/194)), and 
-if so, whether the changes made to them in this project, could be integrated into their upstream projects.
 
 ## Configuration
 

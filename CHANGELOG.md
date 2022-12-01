@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed [BREAKING!]
 
+* Scheme for OGL URL changed from `http` to `https`, records will need to upgrade to this URL to be identified correctly
+  [#328](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/328)
 * Minimum Python version increased to 3.8.1
   [#289](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/294)
 * Minimum Poetry version increased to 1.2.x

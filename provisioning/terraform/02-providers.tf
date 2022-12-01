@@ -9,7 +9,7 @@
 # configure credentials to use this provider.
 #
 # AWS source: https://aws.amazon.com/
-# Terraform source: https://registry.terraform.io/providers/hashicorp/aws/latest/docs#example-usage
+# Terraform source: https://registry.terraform.io/providers/hashicorp/aws
 provider "aws" {
   region = "eu-west-1"
 }
@@ -17,13 +17,9 @@ provider "aws" {
 # AWS provider - alias
 #
 # This alias is used for resources or data-sources that require the 'us-east-1' region, which is used as a control
-# region by AWS for some services
+# region by AWS for some services.
 #
-# See https://registry.terraform.io/providers/hashicorp/aws/latest/docs#authentication-and-configuration for how to
-# configure credentials to use this provider.
-#
-# AWS source: https://aws.amazon.com/
-# Terraform source: https://www.terraform.io/docs/providers/aws/index.html
+# See 'AWS' provider section for provider links.
 provider "aws" {
   alias  = "us-east-1"
   region = "us-east-1"

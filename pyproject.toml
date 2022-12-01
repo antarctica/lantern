@@ -17,7 +17,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-awscli = "1.27.16" # pinned because <= 1.25 requires Python > 3.6, also to aid in dependency resolution time
+awscli = "1.27.16" # pinned to aid in dependency resolution time
 bas-metadata-library = "^0.9.1"
 bas-style-kit-jinja-templates = "^0.7.0"
 click-spinner = "^0.1.10"
@@ -40,7 +40,7 @@ importlib_resources = "^5.10.0"
 pytz = "^2022.2.1"
 pyproj = "3.4.0"  # pinned to ensure compatibility with PROJ version available in Python alpine container
 pyyaml = "^5.4"  # pinned for AWS CLI compatibility, which requires PyYAML < 5.5
-# `python-dateutil and `requests` dependencies skipped as they already dependencies of the main app.
+# Note: `python-dateutil and `requests` dependencies skipped as they already dependencies of the main app.
 
 # # Dependencies for vendored PyCSW package # #
 geolinks = "^0.2.0"
@@ -48,7 +48,7 @@ Shapely = "^1.8.4"
 xmltodict = "^0.13.0"
 psycopg2-binary = "^2.9.3"
 SQLAlchemy = "^1.4.41"
-# `lxml` and `pyproj` dependencies skipped as they already dependencies of main app and owslib dependency.
+# Note: `lxml` and `pyproj` dependencies skipped as they already dependencies of main app and owslib dependency.
 
 [tool.poetry.group.dev.dependencies]
 flake8 = "^5.0.4"  # pinned because https://github.com/PyCQA/flake8-import-order/issues/189 not in a release yet

@@ -7,7 +7,6 @@
 #
 #    *    *    *    *    *    *    *    *    *    *    *    *    *    *    *    *    *    *    *    *    *    *    *
 
-
 # ADD Data Catalogue (Integration)
 #
 # This resource relies on the AWS Terraform provider being previously configured.

@@ -55,6 +55,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
+* Improving EditorConfig configuration for Terraform and Markdown files
+  [#326](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/326)
 * PyTest Coverage configuration refactored into `pyproject.toml`
   [#142](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/142)
 * Refactoring how CSW requests are evaluated with respect to permission checks

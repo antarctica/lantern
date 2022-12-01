@@ -9,10 +9,10 @@ This project is a mature alpha.
 
 This means core, required, components have been implemented but are subject to considerable change and refactoring.
 
-Between releases major parts of this project may be replaced/rewritten. As major non-core features are yet to be 
+Between releases major parts of this project may be replaced/rewritten. As major non-core features are yet to be
 implemented, the shape and scope of this project may change significantly.
 
-In time, this project will grow to cover other MAGIC datasets, products and activities. It may also be used as the seed 
+In time, this project will grow to cover other MAGIC datasets, products and activities. It may also be used as the seed
 for a new BAS wide Data Catalogue.
 
 Further information on upcoming changes to this project can be found in the issues and milestones in
@@ -34,13 +34,13 @@ These components map to components 4 and 6 in the draft ADD data workflow
 
 Metadata records use the [ISO 19115](https://metadata-standards.data.bas.ac.uk/standard/iso-19115/) metadata standard.
 The [OGC Catalogue Services for the Web (CSW)] standard is used to provide the *Repository* component, allowing records
-to be added, accessed, updated and deleted. Records can be either published (available publicly) or unpublished. 
-Access to any unpublished records, and the ability to publish/retract records, is restricted to relevant ADD project 
+to be added, accessed, updated and deleted. Records can be either published (available publicly) or unpublished.
+Access to any unpublished records, and the ability to publish/retract records, is restricted to relevant ADD project
 members.
 
-Once published, records can be viewed through the *Catalogue* component, a static website, which presents published 
-records as human-readable items (with geographic extents visualised on a map for example). Manually curated collections 
-provide a basic way to group items into sets. This Catalogue is part of the current/legacy BAS Data Catalogue, known as 
+Once published, records can be viewed through the *Catalogue* component, a static website, which presents published
+records as human-readable items (with geographic extents visualised on a map for example). Manually curated collections
+provide a basic way to group items into sets. This Catalogue is part of the current/legacy BAS Data Catalogue, known as
 the [Discovery Metadata System (DMS)](https://data.bas.ac.uk), which is in the process of being replaced.
 
 ## Usage
@@ -83,7 +83,7 @@ Static website:
 * is hosted in AWS S3 and reverse proxied as part of the [`data.bas.ac.uk`](https://data.bas.ac.uk) domain
 * web maps are hosted using [Esri](#esri-web-maps)
 * contact forms for feedback and items are processed using [Microsoft Power Automate](#feedback-and-contact-forms)
-* legal policies use templates from the 
+* legal policies use templates from the
   [Legal Policies](https://gitlab.data.bas.ac.uk/web-apps/legal-policies-templates) project
 * uses [Sentry](#sentry-error-tracking) for frontend error tracking
 
@@ -96,17 +96,17 @@ This diagram shows the main concepts in this project and how they relate:
 ### Metadata records
 
 Metadata records are the content and data within this project. Records describe resources, which are typically datasets
-within the ADD, e.g. a record might describe the Antarctic Coastline dataset. Other types of records might describe 
+within the ADD, e.g. a record might describe the Antarctic Coastline dataset. Other types of records might describe
 [Collections](#collections) of related records, or other resource such as map products.
 
-Records in this catalogue aim to provide *discovery metadata*, which allows users to find and evaluate whether a 
-resource is useful to them (i.e. does it cover the right area?, has it been updated recently?, how was it made?, etc.). 
+Records in this catalogue aim to provide *discovery metadata*, which allows users to find and evaluate whether a
+resource is useful to them (i.e. does it cover the right area?, has it been updated recently?, how was it made?, etc.).
 This metadata is separate it from metadata for calibration or analysis for example.
 
-Records are based on the [ISO 19115](https://metadata-standards.data.bas.ac.uk/standard/iso-19115-19139/) metadata 
+Records are based on the [ISO 19115](https://metadata-standards.data.bas.ac.uk/standard/iso-19115-19139/) metadata
 standard, which defines an information model (*19115-2:2009*), and XML encoding (*19139-2:2012*), for geographic data.
 
-Records are stored/persisted in a records' repository (implemented using [CSW](#csw)). Records are imported and 
+Records are stored/persisted in a records' repository (implemented using [CSW](#csw)). Records are imported and
 exported (for editing) as files, or inserted/updated via the CSW transactional profile by other services.
 
 The information in a metadata record is encoded in a different formats at different stages:
@@ -124,31 +124,31 @@ These different formats are used for different reasons:
 
 ### Items
 
-Items are derived from Records using any hierarchy level except 'collection' (which is represented by 
-[Collections](#collections)). Whereas Records prioritise strictness and being unambiguous, Items prioritise readability 
+Items are derived from Records using any hierarchy level except 'collection' (which is represented by
+[Collections](#collections)). Whereas Records prioritise strictness and being unambiguous, Items prioritise readability
 and understanding by humans.
 
 Items are specific to this Data Catalogue, and can infer and present information in ways that general representations
-are unable to (e.g. by recognising and reformatting commonly used projections, vocabularies or contacts). 
+are unable to (e.g. by recognising and reformatting commonly used projections, vocabularies or contacts).
 
 As Items are derived from Records, they are not persisted themselves, except as rendered pages within the static site.
 
 ### Collections
 
-Collections are a simple way to group [Items](#items) together based on a shared purpose, theme or topic. Like Items, 
+Collections are a simple way to group [Items](#items) together based on a shared purpose, theme or topic. Like Items,
 collections are derived from Records using the 'collection' hierarchy level.
 
-As Collections are derived from Records, they are not persisted themselves, except as rendered pages within the static 
+As Collections are derived from Records, they are not persisted themselves, except as rendered pages within the static
 site.
 
 **Note:** Currently, Collections can only include Items from this Data Catalogue, rather than external resources.
 
 ### OAuth
 
-OAuth is used to protect access to actions or information (unpublished Records) within the *Repository* component. 
-The [Microsoft (Azure) identity platform](https://docs.microsoft.com/en-us/azure/active-directory/develop/) is used to 
+OAuth is used to protect access to actions or information (unpublished Records) within the *Repository* component.
+The [Microsoft (Azure) identity platform](https://docs.microsoft.com/en-us/azure/active-directory/develop/) is used to
 define roles/scopes for restricted actions or information, and to assign these to users/groups. The
-[Flask Azure AD OAuth Provider](https://pypi.org/project/flask-azure-oauth/) is used to enforce these permissions 
+[Flask Azure AD OAuth Provider](https://pypi.org/project/flask-azure-oauth/) is used to enforce these permissions
 within the Flask application.
 
 Two Azure OAuth applications (application registrations) are defined for this:
@@ -156,14 +156,14 @@ Two Azure OAuth applications (application registrations) are defined for this:
 1. a server application, representing the Repository
 2. a client application, representing a user accessing or modifying records within the Repository
 
-The server app registration defines the roles/scopes that exist (reading records, updating records, etc.). These are 
+The server app registration defines the roles/scopes that exist (reading records, updating records, etc.). These are
 then assigned to users and groups, who use them through the client app registration to read/update records, etc.
 
 The Flask application represents both of these app registrations. The CLI acts as the client, and the CSW catalogues as
 the server.
 
 Both Azure applications are registered in the NERC Azure tenancy administered by the
-[UKRI/NERC DDaT](https://infohub.ukri.org/corporate-hub/digital-data-and-technology-ddat/) team. 
+[UKRI/NERC DDaT](https://infohub.ukri.org/corporate-hub/digital-data-and-technology-ddat/) team.
 [Terraform](#terraform) is used to define and provision these applications.
 
 The [Azure Portal](https://portal.azure.com) is used to assign permissions to applications and users as needed:
@@ -177,7 +177,7 @@ Backend and frontend errors in this service are tracked with Sentry:
 * [Sentry dashboard](https://sentry.io/organizations/antarctica/issues/?project=5197036)
 * [GitLab dashboard](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/error_tracking)
 
-Backend error tracking will be enabled or disabled depending on the environment. It can be manually controlled by 
+Backend error tracking will be enabled or disabled depending on the environment. It can be manually controlled by
 setting the `APP_ENABLE_SENTRY` [Configuration option](#configuration).
 
 ### Application logging
@@ -188,12 +188,12 @@ Logs for this service are written to *stdout/stderr* as appropriate.
 
 A check for the Flask application is available to determine the health of the server side application (CSV endpoints).
 
-It is available at `/meta/health/v1` and uses the draft 
+It is available at `/meta/health/v1` and uses the draft
 [Health Check Response Format for HTTP APIs](https://inadarei.github.io/rfc-healthcheck) RFC structure.
 
-**Note:** This endpoint is tested or designed for high frequency checks (i.e. more than every 10 seconds). 
+**Note:** This endpoint is tested or designed for high frequency checks (i.e. more than every 10 seconds).
 
-It is intended for use in monitoring systems, and to verify the deployed version of the service. It is currently a very 
+It is intended for use in monitoring systems, and to verify the deployed version of the service. It is currently a very
 basic check, without verifying things like database connectivity.
 
 Example request/response:
@@ -218,7 +218,7 @@ $ curl "https://example.com/meta/health/v1" -H 'Accept: application/json'
 
 #### Application logging (BAS IT)
 
-When deployed as a BAS IT service, application logs are captured by Apache, and written to a log files. See  
+When deployed as a BAS IT service, application logs are captured by Apache, and written to a log files. See
 [Key Paths](#key-paths) section for location. Log files are rotated weekly at ≈03:00 (day unknown).
 
 **Note:** When logs are rotated the Flask application will be restarted.
@@ -226,27 +226,27 @@ When deployed as a BAS IT service, application logs are captured by Apache, and 
 ### Hazardous Materials module
 
 In order to implement the [CSW package modifications](#csw-package-modifications), the `pycsw` and `owslib` packages
-have been vendored into this application, meaning their source code, and their dependencies, have been added within 
+have been vendored into this application, meaning their source code, and their dependencies, have been added within
 this project.
 
-As this code is third party, and hasn't been vetted or integrated into this project, it is held in a *hazmat* 
-(Hazardous Materials) module, `scar_add_metadata_toolbox.hazmat`. This module is exempt from 
+As this code is third party, and hasn't been vetted or integrated into this project, it is held in a *hazmat*
+(Hazardous Materials) module, `scar_add_metadata_toolbox.hazmat`. This module is exempt from
 [Code Linting](#code-linting), [Testing](#testing) and [Test Coverage](#test-coverage) rules.
 
-The eventual aim is to remove these packages from this project, however this will depend on whether these packages 
-are used in the longer term (see [#194](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/194)), and 
+The eventual aim is to remove these packages from this project, however this will depend on whether these packages
+are used in the longer term (see [#194](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/194)), and
 if so, whether the changes made to them in this project, could be integrated into their upstream projects.
 
 ### CSW
 
-The [OGC CSW](https://www.ogc.org/standards/cat) standard is used as a protocol and interface for accessing and 
+The [OGC CSW](https://www.ogc.org/standards/cat) standard is used as a protocol and interface for accessing and
 managing [Records](#metadata-records) in the *Repository* component.
 
-Separate CSW catalogues are used for Published and unpublished records, using embedded [PyCSW](http://pycsw.org) 
+Separate CSW catalogues are used for Published and unpublished records, using embedded [PyCSW](http://pycsw.org)
 servers to allow integration with Flask for authentication and authorisation of requests via [OAuth](#oauth).
 
-Records are accessed using `getRecords` and `getRecordById` requests. Records are managed using the CSW 
-transactional profile. These requests can be made using from the Flask CLI, or from other applications, if authorised. 
+Records are accessed using `getRecords` and `getRecordById` requests. Records are managed using the CSW
+transactional profile. These requests can be made using from the Flask CLI, or from other applications, if authorised.
 
 The CSW version is fixed to *2.0.2* because it's the latest version supported by
 [OWSLib](https://geopython.github.io/OWSLib/), the CSW client used by the Flask CLI.
@@ -258,7 +258,7 @@ The CSW version is fixed to *2.0.2* because it's the latest version supported by
 #### CSW package modifications
 
 Some elements of both the PyCSW server and the OWSLib client have been extended by this project to incorporate
-OAuth support and fix a variety of issues. These modifications will be formalised, ideally as upstream contributions, 
+OAuth support and fix a variety of issues. These modifications will be formalised, ideally as upstream contributions,
 but currently reside within the [Hazardous Materials module](#hazardous-materials-module).
 
 These modifications are:
@@ -283,54 +283,58 @@ Both PyCSW (CSW server) and OWSLib (CSW client) support the *full* Element Set o
 
 #### CSW backing databases
 
-CSW servers are backed using PostGIS (Postgres) databases. In production, these are provided by BAS IT (via the 
-central Postgres database `bsldb`). Credentials for this database are stored in the MAGIC 1Password shared vault. 
+CSW servers are backed using PostGIS (Postgres) databases. In production, these are provided by BAS IT (via the
+central Postgres database `bsldb`). Credentials for this database are stored in the MAGIC 1Password shared vault.
 
 In local development environments, a local PostGIS database configured in `docker-compose.yml` is used.
 
-To test against real data in a non-production environment, a staging database, which is synced from the production 
+To test against real data in a non-production environment, a staging database, which is synced from the production
 database, can be used. Credentials for this database are stored in the MAGIC 1Password shared vault. This database is
-re-synced automatically by BAS IT every Tuesday at 02:00. 
+re-synced automatically by BAS IT every Tuesday at 02:00.
 
 #### CSW auth
 
 Requests are evaluated as being either 'read' or 'write' based on either the `request` query string parameter, or
 elements used in the request body (e.g. `request=GetRecords` or `<csw:Query>` for a read/select request).
 
-These permissions are mapped onto required scopes for each catalogue. Required scopes may be empty to allow anonymous 
+These permissions are mapped onto required scopes for each catalogue. Required scopes may be empty to allow anonymous
 for read or write.
 
 Where the request type cannot be determined unambiguously it will be rejected.
 
+#### CSW revision tracking
+
+...
+
 ### Jinja templates
 
-A series of [Jinja2](https://jinja.palletsprojects.com/) templates are used for rendering pages, including 
-[Items](#items), [Collections](#collections) from the *Catalogue* component. Templates use the 
-[BAS Style Kit Jinja Templates](https://pypi.org/project/bas-style-kit-jinja-templates/), which in turn implements the 
+A series of [Jinja2](https://jinja.palletsprojects.com/) templates are used for rendering pages, including
+[Items](#items), [Collections](#collections) from the *Catalogue* component. Templates use the
+[BAS Style Kit Jinja Templates](https://pypi.org/project/bas-style-kit-jinja-templates/), which in turn implements the
 [BAS Style Kit](https://style-kit.web.bas.ac.uk).
 
 Templates are stored in the `scar_add_metadata_toolbox.templates` module and organised into:
 
-* `_layouts`: base page designs, currently using the 
+* `_layouts`: base page designs, currently using the
   [Standard Page](https://github.com/antarctica/bas-style-kit-jinja-templates#layouts) layout from the BAS Style Kit
 * `_views`: designs for specific pages or types of content, such as the feedback and legal pages and Items
 * `_includes`: components of a page that may be content specific (specific tabs within Item pages), or shared
 
-For example, the template used for Item pages is a view which inherits from the application layout and combines a 
+For example, the template used for Item pages is a view which inherits from the application layout and combines a
 number of includes to define a page structure with a fixed header and a series of tabs, each with their own content.
 
 ### S3 static website
 
-Rendered templates and other static assets are hosted through an AWS S3 bucket with static website hosting enabled. 
-Separate production and integration buckets are available to preview changes. [Terraform](#terraform) is used to define 
+Rendered templates and other static assets are hosted through an AWS S3 bucket with static website hosting enabled.
+Separate production and integration buckets are available to preview changes. [Terraform](#terraform) is used to define
 and provision these buckets.
 
-Rules within the BAS General Load Balancer, managed by IT, are used to reverse proxy content from these S3 static sites 
+Rules within the BAS General Load Balancer, managed by IT, are used to reverse proxy content from these S3 static sites
 to appear as part of the production and testing current/legacy BAS Discovery Metadata System (DMS).
 
 ### ESRI web maps
 
-To display the spatial extent of Items, an ESRI web map is included in the page template for Items. This web map 
+To display the spatial extent of Items, an ESRI web map is included in the page template for Items. This web map
 uses:
 
 * the [ESRI ArcGIS API for JavaScript](https://developers.arcgis.com/javascript/latest/) as a mapping framework
@@ -338,16 +342,16 @@ uses:
 
 #### ESRI API key
 
-Accessing content from ArcGIS Online requires an API key from the ESRI 
-[ArcGIS Developers](https://developers.arcgis.com) platform. This API key is treated as an application secret, and 
+Accessing content from ArcGIS Online requires an API key from the ESRI
+[ArcGIS Developers](https://developers.arcgis.com) platform. This API key is treated as an application secret, and
 must be set as an environment variable when building the static site.
 
-Once built, this key will be embedded in page content, and visible to end-users accessing the static site. This is 
-considered safe providing some 
+Once built, this key will be embedded in page content, and visible to end-users accessing the static site. This is
+considered safe providing some
 [precautions](https://developers.arcgis.com/documentation/mapping-apis-and-services/security/security-best-practices/#api-key-security)
 are taken.
 
-The API key used for this project is stored in the MAGIC 1Password shared vault as the *SCAR ADD Metadata Toolbox - 
+The API key used for this project is stored in the MAGIC 1Password shared vault as the *SCAR ADD Metadata Toolbox -
 ESRI ArcGIS API key* item.
 
 ### Feedback and contact forms
@@ -359,41 +363,41 @@ prior to submission. On submission, Power Automate creates an issue for the mess
 
 ### Website metrics
 
-**Note:** Website metrics are not currently collected. See 
+**Note:** Website metrics are not currently collected. See
 [#292](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/292) for more information.
 
 ### Download metrics
 
-**Note:** Download metrics are not currently collected. See 
+**Note:** Download metrics are not currently collected. See
 [#246](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/246) for more information.
 
-### Downloads Proxy 
+### Downloads Proxy
 
-To support [tracking downloads](#download-metrics) of items, a proxy service is used. This proxy intercepts requests to 
-download files, returning a 302 temporary redirect to the item download. Redirection is used to increase, but not 
-ensure, the chances downloads are tracked, by making the real location of items less obvious, and harder to share/use 
+To support [tracking downloads](#download-metrics) of items, a proxy service is used. This proxy intercepts requests to
+download files, returning a 302 temporary redirect to the item download. Redirection is used to increase, but not
+ensure, the chances downloads are tracked, by making the real location of items less obvious, and harder to share/use
 directly.
 
-When a request is made (using a download URL), an [AWS Lambda function](#downloads-proxy-lambda-functions) looks up 
-the distribution option identifier (termed an [Artefact lookup](#downloads-proxy-artefacts-lookup-schema) item) in a 
+When a request is made (using a download URL), an [AWS Lambda function](#downloads-proxy-lambda-functions) looks up
+the distribution option identifier (termed an [Artefact lookup](#downloads-proxy-artefacts-lookup-schema) item) in a
 JSON file (stored in a S3 bucket).
 
-For example, requesting a download URL such as `https://data.bas.ac.uk/download/123`, where `123` is the identifier 
+For example, requesting a download URL such as `https://data.bas.ac.uk/download/123`, where `123` is the identifier
 for a distribution option (artefact lookup) within an item, will return a 302 redirect with a URL to its real location,
 `https://example.com/dataset.gpkg`.
 
 #### Downloads proxy Lambda functions
 
-The Downloads Proxy is a set of AWS Lambda functions using NodeJS defined in `support/downloads-proxy/index.js`. 
+The Downloads Proxy is a set of AWS Lambda functions using NodeJS defined in `support/downloads-proxy/index.js`.
 
 There are two functions used for reading and writing [Artefact Lookups](#downloads-proxy-artefacts-lookup-schema).
 In addition, there are two independent environments, *staging* and *production*. Each environment uses a separate S3
-bucket, with object versioning, containing a separate code package and artefact lookups JSON file. The Lambda endpoint 
-for each environment is reverse proxied to appear as part of the BAS Data Catalogue (`data.bas.ac.uk`) using the BAS 
+bucket, with object versioning, containing a separate code package and artefact lookups JSON file. The Lambda endpoint
+for each environment is reverse proxied to appear as part of the BAS Data Catalogue (`data.bas.ac.uk`) using the BAS
 General Load Balancer.
 
-Access to use Lambda functions that can modify state (the write functions) is restricted. AWS Customer Managed IAM 
-polices are defined by this project to assign permissions to use these functions to suitable AWS IAM principles 
+Access to use Lambda functions that can modify state (the write functions) is restricted. AWS Customer Managed IAM
+polices are defined by this project to assign permissions to use these functions to suitable AWS IAM principles
 (users or roles).
 
 **WARNING!** Some or all lookup items in the staging environment MAY be removed at anytime.
@@ -420,20 +424,20 @@ polices are defined by this project to assign permissions to use these functions
   * Artefact lookups file: `s3://add-catalogue-downloads-proxy-prod/lookups.json`
   * Lambda function (Write, IAM Customer Managed policy): `BAS-ADD-Catalogue-Downloads-Proxy-Function-Write-Production`
 
-See the [relevant](#downloads-proxy-source) development subsection for information on the source code for these 
-functions. 
+See the [relevant](#downloads-proxy-source) development subsection for information on the source code for these
+functions.
 
-See the [Terraform](#terraform) setup subsection for information on how to provision the resources for 
+See the [Terraform](#terraform) setup subsection for information on how to provision the resources for
 these functions, including IAM policies.
 
-See the [BAS API Load Balancer](#bas-api-load-balancer) setup subsection for information on how to set up reverse 
+See the [BAS API Load Balancer](#bas-api-load-balancer) setup subsection for information on how to set up reverse
 proxying for these functions.
 
 #### Downloads proxy artefacts lookup schema
 
 The Downloads Proxy reads information about artefacts that can be downloaded from a JSON file stored in an S3 bucket.
-This JSON file can be [Updated](#registering-downloads-proxy-artefacts-lookup-items) as needed to include new artefact 
-lookups or amend existing entries. The structure of this file consists of an object, the keys of which are artefact 
+This JSON file can be [Updated](#registering-downloads-proxy-artefacts-lookup-items) as needed to include new artefact
+lookups or amend existing entries. The structure of this file consists of an object, the keys of which are artefact
 IDs, and values are an artefact lookup item.
 
 An artefact lookup item is an object with these properties:
@@ -445,7 +449,7 @@ An artefact lookup item is an object with these properties:
 | `media_type`   | String    | Yes      | 'application/geopackage+sqlite3'       |
 | `origin_uri`   | String    | Yes      | 'https://example.com/dataset.gpkg'     |
 
-This structure is formally described by a JSON Schema in `support/downloads/proxy/artefact-lookups-v1.json`, which 
+This structure is formally described by a JSON Schema in `support/downloads/proxy/artefact-lookups-v1.json`, which
 is published as part of the [BAS Metadata Standards](https://metadata-standards.data.bas.ac.uk) website at:
 
 https://metadata-standards.data.bas.ac.uk/scar-add-metadata-toolbox-downloads-proxy-schemas/v1/artefact-lookups-v1.json
@@ -469,9 +473,9 @@ A complete JSON file, with a single artefact lookup item, looks like this:
 
 #### Registering downloads proxy artefacts lookup items
 
-Individual artefact lookup items can be added through a Lambda function. 
+Individual artefact lookup items can be added through a Lambda function.
 
-**Note:** Bulk additions, or changes/removals of existing lookup items can be made by updating the relevant JSON file 
+**Note:** Bulk additions, or changes/removals of existing lookup items can be made by updating the relevant JSON file
 via the AWS S3 API. This is out of scope for this guide.
 
 Requests to these Lambda functions require authentication using the
@@ -539,12 +543,12 @@ print(r.status_code)
 
 #### Resetting staging downloads proxy lookup items
 
-Periodically, lookup items in the staging environment should be reset on the production environment to clear out 
+Periodically, lookup items in the staging environment should be reset on the production environment to clear out
 temporary or invalid lookup items added when developing integrations or in other testing.
 
 This involves copying the lookup file from the production environment to the staging environment.
 
-**Note:** Lookup files are versioned using S3 object versioning. If needed, this can be used to recover overwritten 
+**Note:** Lookup files are versioned using S3 object versioning. If needed, this can be used to recover overwritten
 staging lookup items.
 
 ```shell
@@ -596,7 +600,7 @@ These options are typically set when running this application as a server (CSW c
 
 ## Setup
 
-To set up this project as an en-user (to manage and publish records), create a 
+To set up this project as an en-user (to manage and publish records), create a
 [Development Environment](#development-environment).
 
 See the [Usage](#usage) section for how to use the application.
@@ -628,7 +632,7 @@ $ exit
 $ docker compose down
 ```
 
-**Note:** The `terraform apply` step will need to be taken in stages for Azure application registrations. See the notes 
+**Note:** The `terraform apply` step will need to be taken in stages for Azure application registrations. See the notes
 in `provisioning/terraform/56-azure_app_registrations.tf` for details.
 
 Once provisioned, the following steps need to be taken manually:
@@ -663,12 +667,12 @@ permissions to remote state are enforced.
 ### Azure permissions
 
 [Terraform](#terraform) will create and configure the relevant Azure application registrations required for using
-[OAuth](#oauth) to protect the CSW catalogues. 
+[OAuth](#oauth) to protect the CSW catalogues.
 
-Manual approval by a Tenancy Administrator (UKRI) is needed to grant the registration representing the *client* role 
+Manual approval by a Tenancy Administrator (UKRI) is needed to grant the registration representing the *client* role
 of the application access to the registration for the *server* role.
 
-This has been approved by NERC RTS in 
+This has been approved by NERC RTS in
 [#3 (Internal)](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/3).
 
 ### BAS IT
@@ -699,8 +703,8 @@ Manually request entries are set up in the BAS General Load Balancer for:
 ### BAS API Load Balancer
 
 Manually [add a new service](https://gitlab.data.bas.ac.uk/WSF/api-load-balancer#adding-a-new-service) and related
-[documentation](https://gitlab.data.bas.ac.uk/WSF/api-docs#adding-a-new-service-service-version) for the CSW, health 
-check and other server side endpoints. See [#60](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/60) 
+[documentation](https://gitlab.data.bas.ac.uk/WSF/api-docs#adding-a-new-service-service-version) for the CSW, health
+check and other server side endpoints. See [#60](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/60)
 for an example.
 
 ### Nagios checks
@@ -711,7 +715,7 @@ Request URL checks are setup in the [PDC Nagios instance](https://gitlab.data.ba
 * a CSW GetCapabilities request for the published catalogue
 * one of the legal policy pages within the static site
 
-See  for an example request for these checks.
+See [bas-nagios#52](https://gitlab.data.bas.ac.uk/tdba/bas-nagios/-/issues/52) for an example request for these checks.
 
 ### PyCSW backing database setup
 
@@ -767,14 +771,14 @@ To generate an ESRI ArcGIS developer API key:
      1. choose *Configure Services*
      2. disable the *Geocoding (not stored)* option if enabled
      3. note: the *Basemaps* service is always enabled
-4. copy the API key and paste into a 1Password password item with the name 'SCAR ADD Metadata Toolbox - ESRI ArcGIS API 
+4. copy the API key and paste into a 1Password password item with the name 'SCAR ADD Metadata Toolbox - ESRI ArcGIS API
    key'
 
 ## Development
 
 ### Development environment
 
-Git, [Poetry](https://python-poetry.org) [1.2+] and [Docker Compose](https://docs.docker.com/compose/) are required to 
+Git, [Poetry](https://python-poetry.org) [1.2+] and [Docker Compose](https://docs.docker.com/compose/) are required to
 set up a local development environment of this project.
 
 ```shell
@@ -817,8 +821,8 @@ When built, the local static site can be accessed from [http://localhost:9000](h
 Quick start (example):
 
 ```shell
-$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask csw setup unpublished 
-$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask csw setup published 
+$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask csw setup unpublished
+$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask csw setup published
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask auth sign-in
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask records import --publish ~/some-example-record.json
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development APP_ESRI_API_KEY=xxx poetry run flask site build
@@ -827,7 +831,7 @@ $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask rec
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development APP_ESRI_API_KEY=xxx poetry run flask site build
 ```
 
-Where the value for `APP_ESRI_API_KEY` is the 'SCAR ADD Metadata Toolbox - ESRI ArcGIS API key' item in the shared 
+Where the value for `APP_ESRI_API_KEY` is the 'SCAR ADD Metadata Toolbox - ESRI ArcGIS API key' item in the shared
 vault in the MAGIC 1Password account.
 
 #### Building a local static site with production data
@@ -851,7 +855,7 @@ $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development CSW_ENDPOINT_UNPUBLI
 
 When built, the local static site can be accessed from [http://localhost:9000](http://localhost:9000).
 
-If building the static site, include the `APP_ESRI_API_KEY` environment variable as well, using the 'SCAR ADD Metadata 
+If building the static site, include the `APP_ESRI_API_KEY` environment variable as well, using the 'SCAR ADD Metadata
 Toolbox - ESRI ArcGIS API key' item in the MAGIC shared vault in 1Password as the value.
 
 **Note:** to use the remote server in the staging environment instead, use this command for `flask` commands:
@@ -878,7 +882,7 @@ $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development CSW_SERVER_CONFIG_UN
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask [command]
 ```
 
-Where `xxx` should be replaced with real credentials from the *MAGIC CSW [Prod]* entry in the shared vault in the 
+Where `xxx` should be replaced with real credentials from the *MAGIC CSW [Prod]* entry in the shared vault in the
 MAGIC 1Password.
 
 See the [Command Reference](docs/command-reference.md) for how to use the CLI. Where `flask` is written, replace this
@@ -886,7 +890,7 @@ with `FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask
 
 When built, the local static site can be accessed from [http://localhost:9000](http://localhost:9000).
 
-If building the static site, include the `APP_ESRI_API_KEY` environment variable as well, using the 'SCAR ADD Metadata 
+If building the static site, include the `APP_ESRI_API_KEY` environment variable as well, using the 'SCAR ADD Metadata
 Toolbox - ESRI ArcGIS API key' item in the MAGIC shared vault in 1Password as the value.
 
 **Note:** to use the database staging environment instead, use this command for starting the Flask application as a
@@ -901,7 +905,7 @@ Where `xxx` should be replaced with real credentials from the *MAGIC CSW [Stagin
 
 ### Package structure
 
-All code for this project should be defined in the `scar_add_metadata_toolbox` package, within the `src/` directory, 
+All code for this project should be defined in the `scar_add_metadata_toolbox` package, within the `src/` directory,
 except for:
 
 * [Tests](#testing)
@@ -1009,8 +1013,8 @@ as needed and append a comment to explain which package is blocking further upda
 
 #### Updating minimum Python version [WIP]
 
-As dependencies drop support for older Python versions, pressure will build to increase the minimum Python version 
-required for this package (e.g. from `3.6` to `3.8`). When this pressure becomes too great (e.g. due to incompatibility 
+As dependencies drop support for older Python versions, pressure will build to increase the minimum Python version
+required for this package (e.g. from `3.6` to `3.8`). When this pressure becomes too great (e.g. due to incompatibility
 with OS packages, security vulnerabilities, etc.), the minimum Python version should be increased.
 
 Suggested upgrade steps:
@@ -1027,13 +1031,13 @@ In more detail for step 1:
 4. run application tests manually
 5. update the base image used in `gitlab-ci.Dockerfile` to match the new Python version (e.g. `python:3.8-alpine`)
 6. rebuild the `gitlab-ci.Dockerfile` (the Docker image used for CI/CD builds) [2]
-7. check whether the [`pyproj`](#upgrading-pyproj-dependency) dependency can be updated 
+7. check whether the [`pyproj`](#upgrading-pyproj-dependency) dependency can be updated
 8. push the updated container to the BAS Docker Registry [3]
 
 [1]
 
 ```
-$ rm -rf .venv 
+$ rm -rf .venv
 $ poetry install
 ```
 
@@ -1047,16 +1051,16 @@ $ docker build -f gitlab-ci.Dockerfile -t docker-registry.data.bas.ac.uk/magic/a
 
 ```
 $ docker push docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox:latest
-``` 
+```
 
 1. change any packages that are pinned in `poetry.toml` due to Python version to their latest major versions
 2. run `poetry upgrade` to upgrade dependencies
 
 #### Upgrading `pyproj` dependency
 
-The [pyproj](https://pyproj4.github.io/pyproj/stable/index.html) dependency depends on the version of the 
+The [pyproj](https://pyproj4.github.io/pyproj/stable/index.html) dependency depends on the version of the
 [`PROJ`](https://proj.org) library installed. Special care should therefore be taken to ensure the version of *pyproj*
-required by this package supports the version of *PROJ* library available on target platforms. 
+required by this package supports the version of *PROJ* library available on target platforms.
 
 The *pyproj* website documents the minimum version of PROJ and Python required for each release. For example version
 3.4.0 requires:
@@ -1065,10 +1069,10 @@ The *pyproj* website documents the minimum version of PROJ and Python required f
 * PROJ 8.2
 
 For development, in addition to local development environments (where it's assumed any version requirements can be met),
-the container used for CI/CD in GitLab needs to be checked. This container is defined in `gitlab-ci.Dockerfile` and 
-used the Alpine Python base image corresponding to the minimum Python version used by the package. Newer Alpine 
-releases are used for newer versions of Python, and newer versions of PROJ are packaged for newer versions of Alpine. 
-Care therefore needs to be taken if the version of Python used is old. To check the version of PROJ available within 
+the container used for CI/CD in GitLab needs to be checked. This container is defined in `gitlab-ci.Dockerfile` and
+used the Alpine Python base image corresponding to the minimum Python version used by the package. Newer Alpine
+releases are used for newer versions of Python, and newer versions of PROJ are packaged for newer versions of Alpine.
+Care therefore needs to be taken if the version of Python used is old. To check the version of PROJ available within
 this container image:
 
 ```
@@ -1076,7 +1080,7 @@ $ docker run -it --rm docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox:
 $  proj -v
 proj_create: unrecognized format / unknown name
 Rel. 9.0.0, March 1st, 2022
-<proj>: 
+<proj>:
 projection initialization failure
 cause: Invalid PROJ string syntax
 program abnormally terminated
@@ -1086,14 +1090,14 @@ If these dependencies can be satisfied for all target platforms, it is safe to u
 
 #### Updating `bas-metadata-libray` dependency
 
-Special care should be taken when the `bas-metadata-library` switches to a new 
+Special care should be taken when the `bas-metadata-library` switches to a new
 [record configuration version](https://gitlab.data.bas.ac.uk/uk-pdc/metadata-infrastructure/metadata-library#supported-configuration-versions).
 
-**Note:** When this is not the case, and the record configuration has not changed, this dependency can be upgraded like 
+**Note:** When this is not the case, and the record configuration has not changed, this dependency can be upgraded like
 any other and this section skipped.
 
-To upgrade, a multi-stage process should be followed to manage the rate of change. At each stage application tests 
-should be re-run to ensure regressions are not introduced. Additional (edge) test cases may need to be added to the 
+To upgrade, a multi-stage process should be followed to manage the rate of change. At each stage application tests
+should be re-run to ensure regressions are not introduced. Additional (edge) test cases may need to be added to the
 test suite as real world testing/deployment uncovers unforeseen regressions.
 
 Suggested upgrade steps:
@@ -1102,38 +1106,38 @@ Suggested upgrade steps:
     * this will usually mean all MetadataRecord classes will use the new config version internally
     * where a new MetadataRecordConfig class is returned it should be downgraded to the old version
     * where a new MetadataRecordConfig class is required as input, it should be upgraded from the old version
-    * the `Record.dump()`, `Record.dumps()`, `Repository.retrieve_record()` and `Repository.retrieve_records()` methods 
+    * the `Record.dump()`, `Record.dumps()`, `Repository.retrieve_record()` and `Repository.retrieve_records()` methods
       all interact with MetadataRecordConfig class instances and will need to be updated
-    * usually calling the relevant `upgrade_from_vX_config()` or `downgrade_to_vX_config()` methods is enough to 
+    * usually calling the relevant `upgrade_from_vX_config()` or `downgrade_to_vX_config()` methods is enough to
       migrate between configuration versions, additional tweaks may be needed depending on the config schema changes
 2. use new Metadata Configuration classes natively:
     * this means all references to the old MetadataRecordConfig class should be removed
     * this also means uses of the `upgrade_from_vX_config()` or `downgrade_to_vX_config()` methods should be removed
-    * change properties in the `Record` and `Item` classes to be compatible with the new config schema, whilst 
+    * change properties in the `Record` and `Item` classes to be compatible with the new config schema, whilst
       preserving the form of returned information as far as possible [1]
     * update tests to use the new MetadataRecordConfig class
     * update test record configurations to be compatible with the new config schema
 3. use new or changed properties from the new config schema:
-    * this will depend on the nature of the new schema, but usually means adding new properties to the `Record` or 
+    * this will depend on the nature of the new schema, but usually means adding new properties to the `Record` or
       `Item` classes, or changing existing properties to include additional or different information
     * these changes can then be surfaced in templates or other outputs
     * each change should use a dedicated feature branch to make changes more atomic and easier to review
     * suitable tests should be added or extended to ensure test coverage and to prevent future regressions
     * where relevant, other refactoring should be considered if large changes are made
 
-[1] 
+[1]
 
-For example, An existing property such as *lineage* is changed from a string to an object, to support new, 
+For example, An existing property such as *lineage* is changed from a string to an object, to support new,
 additional, configuration properties. To illustrate in pseudocode:
 
-* going from: `lineage: '...'` 
+* going from: `lineage: '...'`
 * to: `lineage: {statement: '...', additional_property: '...'}`.
 
-In step (2) of the schedule above, the existing `Record.lineage()` Python property (or `Item.lineage()` property 
-depending on the class) should be changed to read from `config.lineage.statement` rather than `config.lineage`. This 
+In step (2) of the schedule above, the existing `Record.lineage()` Python property (or `Item.lineage()` property
+depending on the class) should be changed to read from `config.lineage.statement` rather than `config.lineage`. This
 preserves the existing interface of the Python property and ignores new features from the new config schema.
 
-Later in step (3), the `Record.lineage()` or `Item.lineage()` Python property can be amended to return both 
+Later in step (3), the `Record.lineage()` or `Item.lineage()` Python property can be amended to return both
 properties, or new properties added for the additional property if that makes more sense.
 
 #### Dependency vulnerability checks
@@ -1173,7 +1177,7 @@ Checks are run automatically in [Continuous Integration](#continuous-integration
 
 ### Flask application
 
-The Flask application representing this project is defined in the `scar_add_metadata_toolbox` package. The 
+The Flask application representing this project is defined in the `scar_add_metadata_toolbox` package. The
 application uses the [application factory](https://flask.palletsprojects.com/en/1.1.x/patterns/appfactories/) pattern.
 
 Flask Blueprints are used to logically organise application commands, currently all within the
@@ -1222,10 +1226,10 @@ strongly encouraged.
 
 ### Testing
 
-All code in the `scar_add_metadata_toolbox` package must be covered by tests, defined in the 
+All code in the `scar_add_metadata_toolbox` package must be covered by tests, defined in the
 `scar_add_metadata_toolbox_tests` package within the `tests/` directory.
 
-This project uses [PyTest](https://docs.pytest.org/en/latest/) as a framework. Tests should always be run in a random 
+This project uses [PyTest](https://docs.pytest.org/en/latest/) as a framework. Tests should always be run in a random
 order using [pytest-random-order](https://pypi.org/project/pytest-random-order/).
 
 To run tests manually from the command line:
@@ -1242,7 +1246,7 @@ Tests are ran automatically in [Continuous Integration](#continuous-integration)
 
 [pytest-cov](https://pypi.org/project/pytest-cov/) is used to measure test coverage.
 
-The `[tool.coverage]` sections in `pyproject.toml` are used to omit code from the `scar_add_metadata_toolbox.hazmat` 
+The `[tool.coverage]` sections in `pyproject.toml` are used to omit code from the `scar_add_metadata_toolbox.hazmat`
 module from coverage checks.
 
 To measure coverage manually:
@@ -1259,15 +1263,15 @@ All commits will trigger a Continuous Integration process using GitLab's CI/CD p
 
 #### Test Records
 
-To ensure components such as Repository, Record, Item and Collection classes work correctly, a number of valid and 
+To ensure components such as Repository, Record, Item and Collection classes work correctly, a number of valid and
 intentionally invalid, [Metadata Record](#metadata-records) configurations are held within the tests for this project.
 
-Test record configurations are defined in `tests/scar_add_metadata_toolbox/records.py`, and are used to ensure 
-components such as the Repository, Record, Item and Collection classes work correctly. These include a range of record 
+Test record configurations are defined in `tests/scar_add_metadata_toolbox/records.py`, and are used to ensure
+components such as the Repository, Record, Item and Collection classes work correctly. These include a range of record
 types, classes of records, and ways records can be invalid.
 
 These records are accessed through a fake/mocked CSW Server instance, which returns record configurations as XML from
-static files held in `tests/scar_add_metadata_toolbox/resources/csw/records/`. These static files need to be kept 
+static files held in `tests/scar_add_metadata_toolbox/resources/csw/records/`. These static files need to be kept
 in-sync with the record configurations defined in `records.py` using this Python command:
 
 ```shell
@@ -1278,23 +1282,23 @@ $ poetry run python -c "from records import make_csw_test_records; make_csw_test
 ### Downloads Proxy source
 
 Source code for the [Downloads Proxy](#downloads-proxy) is contained in a single JavaScript (NodeJS) module, `.
-/support/downloads-proxy/index.js`. This module is composed of a set of JS functions with two AWS Lambda event handler 
-entrypoints for the read and write Lambda functions (i.e. both Lambda functions read from the same source file but 
+/support/downloads-proxy/index.js`. This module is composed of a set of JS functions with two AWS Lambda event handler
+entrypoints for the read and write Lambda functions (i.e. both Lambda functions read from the same source file but
 use different entrypoint methods).
 
-Lambda event handlers receive event and context information as per the 
+Lambda event handlers receive event and context information as per the
 [Lambda documentation](https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-develop-integrations-lambda.html#http-api-develop-integrations-lambda.proxy-format).
 
 The Lambda function execution environment has access to the NodeJS standard library and the AWS JavaScript SDK.
 
-See the [Downloads Proxy Deployment](#downloads-proxy-deployment) subsection for information on releasing changes to 
+See the [Downloads Proxy Deployment](#downloads-proxy-deployment) subsection for information on releasing changes to
 the Download Proxy code.
 
 ## Deployment
 
 ### Python package
 
-This project is distributed as a Python package, hosted in the 
+This project is distributed as a Python package, hosted in the
 [BAS GitLab Python Registry](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/packages).
 
 Source and binary packages are built and published automatically using
@@ -1322,12 +1326,12 @@ in the relevant Ansible inventory in:
 
 To deploy a new version of the Python package to the IT managed service:
 
-1. create an issue in the 
+1. create an issue in the
    [Station Data Management](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/issues) GitLab project
     * this should link to the new release (in this project) being deployed
     * for an example see: https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/issues/62
 2. create a merge request from this issue and update:
-    * the [`scar_add_metadata_toolbox_version`](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/group_vars/magic/add-metadata-toolbox.yml#L16) 
+    * the [`scar_add_metadata_toolbox_version`](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/group_vars/magic/add-metadata-toolbox.yml#L16)
       group variable to the new release
 3. push change to branch and deploy to the development instance, using a pre-setup
    [BAS IT Ansible Deployment Environment](#bas-it-ansible-deployment-environment) [1]
@@ -1435,8 +1439,8 @@ Usage documentation for this API service is held in `docs/api/` and currently
 When [Source Code](#downloads-proxy-source) for the [Downloads Proxy](#downloads-proxy) is updated, it needs to be
 packaged into a zip archive for deployment via [Terraform](#terraform).
 
-**Note:** Terraform will automatically deploy either zip archive if its file hash changes. Therefore, only update the 
-archives of Download Proxy environments you wish to update. I.e. don't update the production archive if changes are 
+**Note:** Terraform will automatically deploy either zip archive if its file hash changes. Therefore, only update the
+archives of Download Proxy environments you wish to update. I.e. don't update the production archive if changes are
 still being tested.
 
 To package the source code into a deployment package for the staging environment:
@@ -1457,12 +1461,12 @@ To deploy changes, plan and apply the [Terraform](#terraform) configuration.
 
 ### Downloads proxy JSON Schema deployment
 
-The JSON Schema used for the [Downloads Proxy](#downloads-proxy-artefacts-lookup-schema) is distributed through the BAS 
+The JSON Schema used for the [Downloads Proxy](#downloads-proxy-artefacts-lookup-schema) is distributed through the BAS
 Metadata Standards website, alongside other related schemas from other projects.
 
 **Note:** These instructions assume the JSON Schema is version 1. Replace `v1` if this version is different (e.g. `v3`).
 
-To deploy the latest Downloads Proxy JSON Schema for use within the *staging* environment of the BAS Metadata 
+To deploy the latest Downloads Proxy JSON Schema for use within the *staging* environment of the BAS Metadata
 Standards website:
 
 ```shell
@@ -1470,7 +1474,7 @@ Standards website:
 $ aws s3 cp ./support/downloads-proxy/artefact-lookups-v1.json s3://metadata-standards-testing.data.bas.ac.uk/scar-add-metadata-toolbox-downloads-proxy-schemas/v1/artefact-lookups-v1.json
 ```
 
-To deploy the latest Downloads Proxy JSON Schema for use within the *production* environment of the BAS Metadata 
+To deploy the latest Downloads Proxy JSON Schema for use within the *production* environment of the BAS Metadata
 Standards website:
 
 ```shell
@@ -1488,7 +1492,7 @@ For all releases:
 
 1. create an [Issue](#issue-tracking) using the *release* template
 
-**Note:** To update the release template, edit `./gitlab/issue_templates/release.md`. 
+**Note:** To update the release template, edit `./gitlab/issue_templates/release.md`.
 
 Usually you will then want to deploy the new release:
 

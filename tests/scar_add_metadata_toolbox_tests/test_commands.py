@@ -1473,36 +1473,105 @@ class TestCommandSitePublish:
         assert f"Ok. Site published to '{app_static_site.config['S3_BUCKET']}'" in result.output
 
 
-class TestCommandCSWSetup:
+class TestCommandCSWSetupBackingDB:
     @pytest.mark.usefixtures("app_runner_mocked_csw_server")
-    def test_cli_setup(self, app_runner_mocked_csw_server):
-        result = app_runner_mocked_csw_server.invoke(args=["csw", "setup", "published"])
+    def test_cli_setup_backing_db(self, app_runner_mocked_csw_server):
+        catalogue = "published"
+        result = app_runner_mocked_csw_server.invoke(args=["csw", "setup", "db", catalogue])
         assert result.exit_code == 0
-        assert "Ok. Catalogue 'published' setup." in result.output
+        assert f"Ok. Backing database for Catalogue '{catalogue}' set up." in result.output
 
     @pytest.mark.usefixtures("app_runner_mocked_csw_server")
-    def test_cli_setup_catalogue_already_setup(self, app_runner_mocked_csw_server):
-        # setup catalogue initially
-        result = app_runner_mocked_csw_server.invoke(args=["csw", "setup", "published"])
+    def test_cli_setup_backing_db_catalogue_already_setup(self, app_runner_mocked_csw_server):
+        catalogue = "published"
+        # setup catalogue initially ...
+        result = app_runner_mocked_csw_server.invoke(args=["csw", "setup", "db", catalogue])
         assert result.exit_code == 0
+        assert f"Ok. Backing database for Catalogue '{catalogue}' set up." in result.output
 
-        # then repeat
-        result = app_runner_mocked_csw_server.invoke(args=["csw", "setup", "published"])
+        # ... then repeat
+        result = app_runner_mocked_csw_server.invoke(args=["csw", "setup", "db", catalogue])
         assert result.exit_code == 0
-        assert "Ok. Note CSW catalogue 'published' is already setup." in result.output
+        assert f"Ok. Note: Backing database for Catalogue '{catalogue}' already setup." in result.output
 
     @pytest.mark.usefixtures("app_runner_mocked_csw_server")
-    def test_cli_setup_no_catalogue_specified(self, app_runner_mocked_csw_server):
-        result = app_runner_mocked_csw_server.invoke(args=["csw", "setup"])
+    def test_cli_setup_backing_db_no_catalogue_specified(self, app_runner_mocked_csw_server):
+        result = app_runner_mocked_csw_server.invoke(args=["csw", "setup", "db"])
         assert result.exit_code == 2
         assert "Error: Missing argument 'CATALOGUE'." in result.output
 
     @pytest.mark.usefixtures("app_runner_mocked_csw_server")
-    def test_cli_setup_invalid_catalogue_specified(self, app_runner_mocked_csw_server):
-        result = app_runner_mocked_csw_server.invoke(args=["csw", "setup", "invalid"])
+    def test_cli_setup_backing_db_invalid_catalogue_specified(self, app_runner_mocked_csw_server):
+        catalogue = "invalid"
+        catalogues = ["unpublished", "published"]
+        result = app_runner_mocked_csw_server.invoke(args=["csw", "setup", "db", "invalid"])
         assert result.exit_code == 64
         assert (
-            "No. CSW catalogue 'invalid' does not exist. Valid options are [unpublished, published]." in result.output
+            f"No. CSW catalogue '{catalogue}' does not exist. "
+            f"Valid options are [{', '.join(catalogues)}]." in result.output
+        )
+
+
+class TestCommandCSWSetupBackingRepo:
+    @pytest.mark.usefixtures("app_runner_mocked_csw_server")
+    def test_cli_setup_backing_repo(self, app_runner_mocked_csw_server):
+        catalogue = "unpublished"
+        result = app_runner_mocked_csw_server.invoke(args=["csw", "setup", "repo", catalogue])
+        assert result.exit_code == 0
+        assert f"Ok. Tracking repo for Catalogue '{catalogue}' set up." in result.output
+
+    @pytest.mark.usefixtures("app_runner_mocked_csw_server")
+    def test_cli_setup_backing_repo_catalogue_already_setup(self, app_runner_mocked_csw_server):
+        catalogue = "unpublished"
+        # setup catalogue initially ...
+        result = app_runner_mocked_csw_server.invoke(args=["csw", "setup", "repo", catalogue])
+        assert result.exit_code == 0
+        assert f"Ok. Tracking repo for Catalogue '{catalogue}' set up." in result.output
+
+        # ... then repeat
+        result = app_runner_mocked_csw_server.invoke(args=["csw", "setup", "repo", catalogue])
+        assert result.exit_code == 0
+        assert f"Ok. Note: Tracking repo for CSW catalogue '{catalogue}' already setup." in result.output
+
+    @pytest.mark.usefixtures("app_runner_mocked_csw_server_tracking_not_enabled")
+    def test_cli_setup_backing_repo_catalogue_not_enabled(self, app_runner_mocked_csw_server_tracking_not_enabled):
+        catalogue = "published"
+        result = app_runner_mocked_csw_server_tracking_not_enabled.invoke(args=["csw", "setup", "repo", catalogue])
+        assert result.exit_code == 64
+        assert (
+            f"No. Revision tracking not enabled for Catalogue '{catalogue}'. Enable this feature and try again."
+            in result.output
+        )
+
+    @pytest.mark.usefixtures("app_runner_mocked_csw_server_tracking_invalid_credentials")
+    def test_cli_setup_backing_repo_catalogue_invalid_credentials(
+        self, app_runner_mocked_csw_server_tracking_invalid_credentials
+    ):
+        catalogue = "unpublished"
+        result = app_runner_mocked_csw_server_tracking_invalid_credentials.invoke(
+            args=["csw", "setup", "repo", catalogue]
+        )
+        assert result.exit_code == 64
+        assert (
+            "No. Access credentials for revision tracking git remote are invalid. Check credentials and try again."
+            in result.output
+        )
+
+    @pytest.mark.usefixtures("app_runner_mocked_csw_server")
+    def test_cli_setup_backing_repo_no_catalogue_specified(self, app_runner_mocked_csw_server):
+        result = app_runner_mocked_csw_server.invoke(args=["csw", "setup", "repo"])
+        assert result.exit_code == 2
+        assert "Error: Missing argument 'CATALOGUE'." in result.output
+
+    @pytest.mark.usefixtures("app_runner_mocked_csw_server")
+    def test_cli_setup_backing_db_invalid_catalogue_specified(self, app_runner_mocked_csw_server):
+        catalogue = "invalid"
+        catalogues = ["unpublished", "published"]
+        result = app_runner_mocked_csw_server.invoke(args=["csw", "setup", "repo", "invalid"])
+        assert result.exit_code == 64
+        assert (
+            f"No. CSW catalogue '{catalogue}' does not exist. "
+            f"Valid options are [{', '.join(catalogues)}]." in result.output
         )
 
 

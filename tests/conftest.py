@@ -16,11 +16,14 @@ from tests.scar_add_metadata_toolbox_tests.classes import (
     MockCSWServer,
     MockCSWServerAmbiguousRequestError,
     MockCSWServerAuthTokenError,
+    MockCSWServerBackingDBNotSetup,
+    MockCSWServerBackingRepoNotSetup,
     MockCSWServerInsufficientAuthToken,
     MockCSWServerMissingAuthToken,
     MockCSWServerNoRequestType,
-    MockCSWServerNotSetup,
     MockCSWServerRequestsFail,
+    MockCSWServerRevisionTrackingDisabled,
+    MockCSWServerRevisionTrackingInvalidCredentials,
     MockCSWServerUnmappedRequestError,
     MockPublicClientApplication,
 )
@@ -96,6 +99,24 @@ def app_runner_mocked_csw_insufficient_auth_token():
 
 
 @pytest.fixture
+def app_runner_mocked_csw_server_tracking_not_enabled():
+    with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
+        mock_csw_server.side_effect = MockCSWServerRevisionTrackingDisabled
+
+        app = create_app()
+        return app.test_cli_runner()
+
+
+@pytest.fixture
+def app_runner_mocked_csw_server_tracking_invalid_credentials():
+    with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
+        mock_csw_server.side_effect = MockCSWServerRevisionTrackingInvalidCredentials
+
+        app = create_app()
+        return app.test_cli_runner()
+
+
+@pytest.fixture
 def app_static_site():
     with patch(
         "scar_add_metadata_toolbox.classes.CSWClient"
@@ -126,9 +147,18 @@ def app_client_mocked_csw_server():
 
 
 @pytest.fixture
-def app_client_mocked_csw_server_not_setup():
+def app_client_mocked_csw_server_backing_db_not_setup():
     with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
-        mock_csw_server.side_effect = MockCSWServerNotSetup
+        mock_csw_server.side_effect = MockCSWServerBackingDBNotSetup
+
+        app = create_app()
+        return app.test_client()
+
+
+@pytest.fixture
+def app_client_mocked_csw_server_backing_repo_not_setup():
+    with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
+        mock_csw_server.side_effect = MockCSWServerBackingRepoNotSetup
 
         app = create_app()
         return app.test_client()

@@ -218,6 +218,11 @@ class Config:
                 "database_table": "records_unpublished",
                 "auth_required_scopes_read": ["BAS.MAGIC.ADD.Records.ReadWrite.All"],
                 "auth_required_scopes_write": ["BAS.MAGIC.ADD.Records.ReadWrite.All"],
+                "tracking_enabled": True,
+                "tracking_working_dir": os.environ.get("CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_WORKING_DIR"),
+                "tracking_remote_url": os.environ.get("CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_REMOTE_URL"),
+                "tracking_branch": "main",
+                "tracking_gitlab_pat": os.environ.get("CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN"),
             },
             "published": {
                 "endpoint": os.environ.get("CSW_SERVER_CONFIG_PUBLISHED_ENDPOINT"),
@@ -444,16 +449,20 @@ class DevelopmentConfig(Config):  # pragma: no cover
                 "CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION"
             ] = "postgresql://postgres:password@localhost/postgres"
 
+        if "CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_WORKING_DIR" not in os.environ:
+            os.environ["CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_WORKING_DIR"] = str(Path("./_record_revisions"))
+        if "CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_REMOTE_URL" not in os.environ:
+            os.environ[
+                "CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_REMOTE_URL"
+            ] = "https://gitlab.data.bas.ac.uk/felnne/add-catalogue-integration-records.git"
+
+        if "APP_S3_BUCKET" in os.environ:
+            os.environ["APP_S3_BUCKET"] = "add-catalogue-integration.data.bas.ac.uk"
+
     # noinspection PyPep8Naming
     @property
     def VERSION(self) -> str:
         return "N/A"
-
-    @property
-    def S3_BUCKET(self) -> str:
-        if "APP_S3_BUCKET" in os.environ:
-            return os.environ["APP_S3_BUCKET"]
-        return "add-catalogue-integration.data.bas.ac.uk"
 
 
 class TestingConfig(DevelopmentConfig):

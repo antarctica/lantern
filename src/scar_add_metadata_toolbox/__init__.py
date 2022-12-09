@@ -18,6 +18,7 @@ from scar_add_metadata_toolbox.csw import (
     CSWAuthInsufficientError,
     CSWAuthMissingError,
     CSWDatabaseNotInitialisedError,
+    CSWTrackingRepositoryNotInitialisedError,
     CSWUnknownRequestError,
     CSWUnmappedRequestError,
 )
@@ -97,7 +98,9 @@ def create_app():  # noqa: C901
         except KeyError:
             return Response(response="Catalogue not found.", status=HTTPStatus.NOT_FOUND)
         except CSWDatabaseNotInitialisedError:
-            return Response(response="Catalogue not yet available.", status=HTTPStatus.INTERNAL_SERVER_ERROR)
+            return Response(response="Catalogue DB not yet available.", status=HTTPStatus.INTERNAL_SERVER_ERROR)
+        except CSWTrackingRepositoryNotInitialisedError:
+            return Response(response="Catalogue Repo not yet available.", status=HTTPStatus.INTERNAL_SERVER_ERROR)
         except CSWUnknownRequestError:
             return Response(response="Request/operation information missing.", status=HTTPStatus.BAD_REQUEST)
         except CSWAmbiguousRequestError:

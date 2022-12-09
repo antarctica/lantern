@@ -12,4 +12,5 @@ __pycache__
 
 # App
 /_site
+/_record_revisions
 /auth.json

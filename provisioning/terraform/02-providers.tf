@@ -39,3 +39,17 @@ provider "azuread" {
   # NERC Production AD
   tenant_id = "b311db95-32ad-438f-a101-7ba061712a4e"
 }
+
+# BAS GitLab provider
+#
+# The BAS preferred Git hosting provider
+#
+# See https://registry.terraform.io/providers/gitlabhq/gitlab/latest/docs for how to configure credentials to use this
+# provider.
+#
+# GitLab source: https://about.gitlab.com
+# Terraform source: https://registry.terraform.io/providers/gitlabhq/gitlab/latest/docs
+provider "gitlab" {
+  # BAS Cambridge production
+  base_url = "https://gitlab.data.bas.ac.uk/api/v4/"
+}

@@ -1,7 +1,14 @@
+import json
 from copy import deepcopy
 from enum import Enum
-from typing import Dict, Generator, Optional
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from typing import Dict, Generator, List, Optional, Tuple, Union
 
+from bas_metadata_library.standards.iso_19115_2 import MetadataRecord
+from dulwich import porcelain
+from dulwich.client import HTTPUnauthorized
+from dulwich.errors import NotGitRepository
 from flask import Request, Response
 from flask_azure_oauth import AzureToken
 from lxml.etree import (
@@ -50,7 +57,7 @@ class CSWDatabaseAlreadyInitialisedError(Exception):
     Represents a situation whereby a CSW Server's backing database has already been initialised
 
     Backing databases must only be initialised once to avoid errors creating duplicate structures or unwanted side
-    effects such as table truncation. If a database is initialised multiple times this role would be violated.
+    effects such as table truncation. If a database is initialised multiple times this rule would be violated.
     """
 
     pass
@@ -61,7 +68,7 @@ class CSWDatabaseNotInitialisedError(Exception):
     Represents a situation where the backing database for a CSW Server has not yet been initialised
 
     Backing databases must be initialised to ensure relevant database structures, indexes and triggers exist and are
-    configured before records are written or read from a catalogue. If requests are made to a CSW server before has
+    configured before records are written to or read from a catalogue. If requests are made to a CSW server before has
     happened this rule would be violated. The relevant initialisation method can be run to resolve this.
     """
 
@@ -183,6 +190,54 @@ class CSWAuthInsufficientError(Exception):
     pass
 
 
+class CSWTrackingRepositoryAlreadyInitialisedError(Exception):
+    """
+    Represents a situation whereby a CSW Server's revision tracking backing git repository has already been initialised
+
+    Backing repositories must only be initialised once to avoid loosing revision information. If a repository is
+    initialised multiple times this rule would be violated.
+    """
+
+    pass
+
+
+class CSWTrackingRepositoryInvalidCredentialsError(Exception):
+    """
+    Represents a situation where credentials used interact for a backing git repository remote are invalid
+
+    This is a non-specific error and could indicate a range of situations, such as missing credentials (not set),
+    invalid credentials (e.g. typos), authorisation issues (e.g. valid credentials but not allowed to perform action)
+    or other, service specific, errors (e.g. account lockout, etc.).
+    """
+
+    pass
+
+
+class CSWTrackingRepositoryNotEnabledError(Exception):
+    """
+    Represents a situation where a backing git repository is set up for a CSW Server with revision tracking disabled
+
+    Revision tracking is an optional feature and must be enabled to set up a backing git repository. Setting up a
+    backing repository where this feature is disabled would violate this rule. If appropriate, this error can be
+    resolved by enabling this feature in the catalogue config.
+    """
+
+    pass
+
+
+class CSWTrackingRepositoryNotInitialisedError(Exception):
+    """
+    Represents a situation where the backing git repository for a CSW Server with revision tracking enabled has not yet
+    been initialised
+
+    Backing repositories must be initialised to ensure relevant git structures, remotes and branches exist and are
+    configured before records are written to a catalogue. If requests are made to a CSW server before has
+    happened this rule would be violated. The relevant initialisation method can be run to resolve this.
+    """
+
+    pass
+
+
 class RecordServerError(Exception):
     """
     Represents a situation where a record server encounters an error processing a request
@@ -223,13 +278,13 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
     * raising exceptions for errors
     * support for token based authentication
     * support for performing/reporting backing database initialisation
+    * support for tracking revisions to records in a Git repository
     * simplifying PyCSW configuration options using a base configuration
 
-    Note: This class uses classes from the Hazardous Materials module. This is to work around limitations in the PyCSW
-    package. This will be addressed by upstreaming missing functionality or creating a derivative package.
+    Note: This class uses classes from the Hazardous Materials module. This is to work around limitations in PyCSW.
     """
 
-    base_configuration = {
+    base_configuration: dict = {
         "server": {
             "url": None,
             "mimetype": "application/xml; charset=UTF-8",
@@ -284,40 +339,51 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
         },
     }
 
-    def __init__(self, config: dict):
+    base_auth_configuration: Dict[str, List[str]] = {"read": [], "write": []}
+
+    base_tracking_configuration: Dict[str, Optional[Union[bool, str, Path]]] = {
+        "enabled": False,
+        "working_dir": None,
+        "remote_url": None,
+        "branch": "main",
+        "committer_identity": "SCAR ADD Metadata Toolbox Records Tracking Bot <magic+add-cat-rec-trac@bas.ac.uk>",
+        "gitlab_pat": None,
+    }
+
+    def __init__(self, config: dict) -> None:
         """
         Configuration dict must include:
+        * 'endpoint': URL clients will use for access (str)
+        * 'title': catalogue title (str)
+        * 'abstract': catalogue description (str)
+        * 'database_connection_string': PyCSW (SQL Alchemy) connection string (must use Postgres)
+        * 'database_table_table': name of table for storing records (str)
 
-        * endpoint: URL clients will use for access (str)
-        * title: catalogue title (str)
-        * abstract: catalogue description (str)
-        * database_connection_string: PyCSW (SQL Alchemy) connection string (must use Postgres)
-        * database_table_table: name of table for storing records (str)
-        * auth_required_scopes_read: OAuth scopes required to make record(s) requests (may be empty list)
-        * auth_required_scopes_write: OAuth scopes required to make transactional requests (may be empty list)
+        Note: Other PyCSW configuration options may not be changed.
 
-        Other PyCSW configuration options may not be changed.
+        Configuration options for other, optional, features should be provided in the same configuration dict:
+
+        For authentication/authorisation:
+        * 'auth_required_scopes_read': OAuth scopes required to make record(s) requests (may be empty list)
+        * 'auth_required_scopes_write': OAuth scopes required to make transactional requests (may be empty list)
+
+        For revision tracking:
+        * `tracking_enabled`: whether revision tracking is enabled for a catalogue
+        * 'tracking_working_dir': path to working directory (git working copy) used for storing versioned records
+        * 'tracking_remote_url': URL to git remote commits for revision tracking are pushed to
+        * 'tracking_branch': git branch used for revision tracking (conventionally 'main')
+        * 'tracking_committer_identity': name and email used for the committer (not author) identity in git commits
+        * 'tracking_gitlab_pat': GitLab Personal Access Token used to authenticate pushing commits to git remote
 
         :type config dict
         :param config: PyCSW config subset
         """
-        _csw_options = deepcopy(self.base_configuration)
-        if "endpoint" in config.keys():
-            _csw_options["server"]["url"] = config["endpoint"]
-        if "title" in config.keys():
-            _csw_options["metadata:main"]["identification_title"] = config["title"]
-        if "abstract" in config.keys():
-            _csw_options["metadata:main"]["identification_abstract"] = config["abstract"]
-        if "database_connection_string" in config.keys():
-            _csw_options["repository"]["database"] = config["database_connection_string"]
-        if "database_table" in config.keys():
-            _csw_options["repository"]["table"] = config["database_table"]
-
-        self._csw_config = _csw_options
-        self._csw_auth = {"read": config["auth_required_scopes_read"], "write": config["auth_required_scopes_write"]}
+        self._csw_config = self._init_csw_config(config=config)
+        self._auth_config = self._init_auth_config(config=config)
+        self._tracking_config = self._init_tracking_config(config=config)
 
     @property
-    def _is_initialised(self) -> bool:
+    def _backing_db_is_initialised(self) -> bool:
         """
         Tests whether the backing database has been initialised for catalogue
 
@@ -329,40 +395,113 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
         csw_database = create_engine(self._csw_config["repository"]["database"])
         return inspect(csw_database).has_table(self._csw_config["repository"]["table"])
 
-    def _check_auth(self, transaction_type: CSWTransactionType, token: Optional[AzureToken]) -> None:
+    @property
+    def _backing_repo_is_initialised(self) -> bool:
         """
-        Checks whether an authorisation token contains the scopes required for a transaction
+        Tests whether the backing git repository has been initialised for catalogue revision tracking
 
-        I.e. 'is the client allowed to perform the action they're trying to do?'
+        Checks whether the active local branch, and the branch in the current remote, match the expected branch.
+        If yes, it is assumed to have been initialised.
 
-        `CSWTransactionType` members are simplified to generic 'read' or 'write' permissions. Scopes for these
-        permissions are specified by the `auth_required_scopes_read` or `auth_required_scopes_write` class variables
-        respectively (see `init()` method).
-
-        If the token does not include the required scopes an exception is raised, otherwise nothing is returned.
-
-        :type transaction_type CSWTransactionType
-        :param transaction_type: a CSW transaction type
-        :type token AzureToken
-        :param token: request authorisation token
+        :rtype bool
+        :return: whether backing git repository has been initialised
         """
-
-        permissions_required = "write"
-        if transaction_type == CSWTransactionType.SELECT:
-            permissions_required = "read"
-
         try:
-            if len(self._csw_auth[permissions_required]) > 0 and not token.scopes.issuperset(
-                set(self._csw_auth[permissions_required])
+            if (
+                porcelain.active_branch(repo=self._tracking_repo).decode() == self._tracking_config["branch"]
+                and f"refs/heads/{self._tracking_config['branch']}".encode()
+                in porcelain.fetch(
+                    repo=self._tracking_repo,
+                    remote_location="origin",
+                    depth=0,
+                    username="gitlab-ci-token",
+                    password=self._tracking_config["gitlab_pat"],
+                ).refs.keys()
             ):
-                raise CSWAuthInsufficientError() from None
-        except AttributeError:
-            # noinspection PyComparisonWithNone
-            if token is None:
-                raise CSWAuthMissingError() from None
+                return True
+            return False
+        except NotGitRepository:
+            return False
+
+    @property
+    def _tracking_enabled(self) -> bool:
+        """
+        Convenience property for determining if revision tracking is enabled
+
+        :rtype bool
+        :return: whether revision tracking is enabled
+        """
+        return self._tracking_config["enabled"]
+
+    @property
+    def _tracking_repo(self) -> str:
+        """
+        Convenience property for the git working copy used if revision tracking is enabled
+
+        This property is the file system directory containing the '.git' directory (as a string), which is used by
+        Dulwich/Porcelain's functional methods - i.e. it isn't a special kind of Repository object etc.
+
+        :rtype str
+        :return: path to git working copy
+        """
+        return str(self._tracking_config["working_dir"])
 
     @staticmethod
-    def _determine_transaction_type(csw_request: _CSWServer) -> CSWTransactionType:  # noqa: C901
+    def _format_commit_author(token: AzureToken) -> str:
+        """
+        Formats the author information for a git commit message from the authenticated user
+
+        Author information uses the form `{name} <{email}>`. These values are taken from the current OAuth token via
+        claims provided by Azure Active Directory.
+
+        :type token AzureToken
+        :param token: request authentication token
+        :rtype str
+        :return: git commit author information
+        """
+        return f"{token.claims['given_name']} {token.claims['family_name']} <{token.claims['email']}>"
+
+    @staticmethod
+    def _request_record(csw_request: str) -> str:
+        """
+        Extracts the metadata record from a CSW transactional request
+
+        The record will be wrapped in a CSW Transaction element (plus others), which all need to be stripped off.
+
+        Note: this method assumes a CSW transactional request, and assumes the payload of this request uses ISO 19115-2.
+
+        :type csw_request str
+        :param csw_request: body of the PyCSW request
+        :rtype str
+        :return: metadata record as a string
+        """
+        record = ElementTree(fromstring(csw_request.encode())).xpath("//gmi:MI_Metadata", namespaces=csw_namespaces)[0]
+        return tostring(record).decode()
+
+    @staticmethod
+    def _request_record_file_identifier(csw_request: str) -> str:
+        """
+        Extracts the file identifier for the metadata record in a CSW transactional request
+
+        Depending on the type of CSW request, this identifier may be contained in an ISO 'fileIdentifier' element or a
+        DCAT 'identifier' element.
+
+        :type csw_request str
+        :param csw_request: body of the PyCSW request
+        :rtype str
+        :return: file identifier as a string
+        """
+        return str(
+            ElementTree(fromstring(csw_request.encode())).xpath(
+                "//gmd:fileIdentifier/gco:CharacterString/text() | "
+                "//ogc:Filter/ogc:PropertyIsEqualTo[ogc:PropertyName/text() = 'dc:identifier']/ogc:Literal/text() | "
+                "//ogc:Filter/ogc:PropertyIsLike[ogc:PropertyName/text() = 'dc:identifier']/ogc:Literal/text()",
+                namespaces=csw_namespaces,
+            )[0]
+        )
+
+    @staticmethod
+    def _transaction_type(csw_request: _CSWServer) -> CSWTransactionType:  # noqa: C901
         """
         Determines the CSW transaction type from a CSW request type
 
@@ -412,7 +551,11 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
 
         if csw_request.requesttype == "POST":
             request_xml = ElementTree(fromstring(csw_request.request))
-            if len(request_xml.xpath("/csw:Query", namespaces=csw_namespaces)) > 0:
+            if len(request_xml.xpath("/csw:DescribeRecord", namespaces=csw_namespaces)) > 0:
+                transaction_type = CSWTransactionType.SELECT
+            elif len(request_xml.xpath("/csw:GetRecords", namespaces=csw_namespaces)) > 0:
+                transaction_type = CSWTransactionType.SELECT
+            elif len(request_xml.xpath("/csw:Query", namespaces=csw_namespaces)) > 0:
                 transaction_type = CSWTransactionType.SELECT
             elif len(request_xml.xpath("/csw:Transaction/csw:Insert", namespaces=csw_namespaces)) > 0:
                 transaction_type = CSWTransactionType.INSERT
@@ -436,7 +579,533 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
             except KeyError:
                 raise CSWUnmappedRequestError() from None
 
-    def setup(self) -> None:
+    def _check_auth(self, transaction_type: CSWTransactionType, token: Optional[AzureToken]) -> None:
+        """
+        Checks whether an authorisation token contains the scopes required for a transaction
+
+        I.e. 'is the client allowed to perform the action they're trying to do?'
+
+        `CSWTransactionType` members are simplified to generic 'read' or 'write' permissions. Scopes for these
+        permissions are specified by the `auth_required_scopes_read` or `auth_required_scopes_write` class variables
+        respectively (see `init()` method).
+
+        If the token does not include the required scopes an exception is raised, otherwise nothing is returned.
+
+        :type transaction_type CSWTransactionType
+        :param transaction_type: a CSW transaction type
+        :type token AzureToken
+        :param token: request authorisation token
+        """
+
+        permissions_required = "write"
+        if transaction_type == CSWTransactionType.SELECT:
+            permissions_required = "read"
+
+        try:
+            if len(self._auth_config[permissions_required]) > 0 and not token.scopes.issuperset(
+                set(self._auth_config[permissions_required])
+            ):
+                raise CSWAuthInsufficientError() from None
+        except AttributeError:
+            # noinspection PyComparisonWithNone
+            if token is None:
+                raise CSWAuthMissingError() from None
+
+    def _create_tracking_repo(self) -> None:
+        """
+        Creates the git repository used for catalogue revision tracking
+
+        The git repository is created in a temporary directory rather than the configured working directory to avoid
+        differences in behaviour between setting up a repository for the first time (which is only done once), and
+        setting up a repository by cloning it from a remote location (which is done every other time).
+
+        I.e. Except for the very first time, setting up a revision tracking is actually setting a local instance of an
+        existing repository by cloning it from an existing remote.
+
+        That, much more common, case is covered by the `_clone_tracking_repo()` method. This method covers the one-off,
+        initial, case where the remote does not yet exist.
+
+        Steps performed:
+        * new repository initialised, and a hard-coded 'origin' remote added
+        * a default README file created (to give basic information about the repo, and for content in an initial commit)
+        * README file is staged and committed, using an internal author (i.e. app as author rather than user of the app)
+        * new branch is created and switched to (as repo is always created with 'master' as default branch name)
+        *
+        """
+        readme_content = """
+# SCAR ADD Metadata Toolbox - Revision Tracking Repository
+
+This repository is used to track revisions to metadata records contained in the Unpublished CSW catalogue,
+within the [SCAR ADD Metadata Toolbox](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/) project.
+See the [CSW Revision Tracking](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/blob/main/README.md#user-content-csw-revision-tracking)
+subsection for specific information relating to this repository and
+its use.
+
+**Note:** This repository is designed to be exclusively managed by the Metadata Toolbox project and
+**MUST NOT** be modified outside of this tool."""  # noqa: B950
+        initial_commit_message = "Initial commit; Adding README."
+
+        with TemporaryDirectory() as temp_dir:
+            repo = porcelain.init(path=temp_dir)
+            porcelain.remote_add(repo=repo, name="origin", url=self._tracking_config["remote_url"])
+
+            readme_path = Path(temp_dir).joinpath("README.md")
+            with open(readme_path, mode="w") as readme_file:
+                readme_file.write(readme_content)
+
+            porcelain.add(repo=repo, paths=str(readme_path))
+            porcelain.commit(
+                repo=repo,
+                message=initial_commit_message,
+                committer=self._tracking_config["committer_identity"],
+                author=self._tracking_config["committer_identity"],
+            )
+
+            porcelain.branch_create(repo=repo, name=self._tracking_config["branch"])
+            porcelain.update_head(repo=repo, target=self._tracking_config["branch"])
+
+            porcelain.push(
+                repo=repo,
+                remote_location="origin",
+                refspecs=self._tracking_config["branch"],
+                username="gitlab-ci-token",
+                password=self._tracking_config["gitlab_pat"],
+            )
+
+    def _clone_tracking_repo(self) -> None:
+        """
+        Clones the git repository used for catalogue revision tracking to the working directory
+
+        The relevant branch is cloned from the remote repository to the working directory.
+        """
+        try:
+            porcelain.clone(
+                source=self._tracking_config["remote_url"],
+                target=self._tracking_config["working_dir"],
+                checkout=True,
+                branch=self._tracking_config["branch"],
+                username="gitlab-ci-token",
+                password=self._tracking_config["gitlab_pat"],
+            )
+        except HTTPUnauthorized as e:
+            raise CSWTrackingRepositoryInvalidCredentialsError from e
+
+    def _commit_and_push_tracking_repo(self, commit_message: str, token: AzureToken) -> str:
+        """
+        Commit staged files and push commit to remote in git repository used for catalogue revision tracking
+
+        Separate committer and author identities when committing. The author identity is calculated from the current
+        OAuth token, the committer is a static value representing this application as a client.
+
+        The commit message is usually a string for the type of operation (e.g. 'Record Inserted'). Modified files are
+        indicated commit (inc. file names etc.). The hash of the commit is returned for reporting to the user.
+
+        :type commit_message str
+        :param commit_message: text to use for commit messages
+        :type token AzureToken
+        :param token: request authorisation token
+        :rtype str
+        :return: commit hash for use as revision ID
+        """
+        commit_hash = porcelain.commit(
+            repo=self._tracking_repo,
+            message=commit_message,
+            committer=self._tracking_config["committer_identity"],
+            author=self._format_commit_author(token=token),
+        )
+
+        porcelain.push(
+            repo=self._tracking_repo,
+            remote_location="origin",
+            refspecs=self._tracking_config["branch"],
+            username="gitlab-ci-token",
+            password=self._tracking_config["gitlab_pat"],
+        )
+
+        return commit_hash
+
+    def _init_auth_config(self, config: dict) -> Dict[str, List[str]]:
+        """
+        Prepare configuration options relating to authentication and authorisation
+
+        :type config dict
+        :param config: overall set of CSW configuration options
+        :rtype dict
+        :return: auth specific configuration options
+        """
+        auth_options = deepcopy(self.base_auth_configuration)
+        if "auth_required_scopes_read" in config.keys():
+            auth_options["read"] = config["auth_required_scopes_read"]
+        if "auth_required_scopes_write" in config.keys():
+            auth_options["write"] = config["auth_required_scopes_write"]
+
+        return auth_options
+
+    def _init_csw_config(self, config: dict) -> dict:
+        """
+        Prepare configuration options relating to pyCSW
+
+        :type config dict
+        :param config: overall set of CSW configuration options
+        :rtype dict
+        :return: pyCSW specific configuration options
+        """
+        csw_options = deepcopy(self.base_configuration)
+        if "endpoint" in config.keys():
+            csw_options["server"]["url"] = config["endpoint"]
+        if "title" in config.keys():
+            csw_options["metadata:main"]["identification_title"] = config["title"]
+        if "abstract" in config.keys():
+            csw_options["metadata:main"]["identification_abstract"] = config["abstract"]
+        if "database_connection_string" in config.keys():
+            csw_options["repository"]["database"] = config["database_connection_string"]
+        if "database_table" in config.keys():
+            csw_options["repository"]["table"] = config["database_table"]
+
+        return csw_options
+
+    def _init_tracking_config(self, config: dict) -> Dict[str, Optional[Union[bool, str, Path]]]:
+        """
+        Prepare configuration options relating to revision tracking
+
+        :type config dict
+        :param config: overall set of CSW configuration options
+        :rtype dict
+        :return: revision tracking specific configuration options
+        """
+        tracking_options = deepcopy(self.base_tracking_configuration)
+        if "tracking_enabled" in config.keys():
+            tracking_options["enabled"] = config["tracking_enabled"]
+        if "tracking_working_dir" in config.keys() and config["tracking_working_dir"] is not None:
+            tracking_options["working_dir"] = Path(config["tracking_working_dir"])
+        if "tracking_remote_url" in config.keys():
+            tracking_options["remote_url"] = config["tracking_remote_url"]
+        if "tracking_branch" in config.keys():
+            tracking_options["branch"] = config["tracking_branch"]
+        if "tracking_committer_identity" in config.keys():
+            tracking_options["committer_identity"] = config["tracking_committer_identity"]
+        if "tracking_gitlab_pat" in config.keys():
+            tracking_options["gitlab_pat"] = config["tracking_gitlab_pat"]
+
+        return tracking_options
+
+    def _prepare_csw_request(self, request: Request) -> _CSWServer:
+        """
+        Construct a PyCSW request from a Flask request
+
+        Tidying method to group together the logic used to transform a Flask HTTP request into a CSW (HTTP) request.
+
+        :type request Request
+        :param request: Flask HTTP request
+        :rtype pycsw.server.Csw
+        :return: CSW request
+        """
+        csw = _CSWServer(rtconfig=self._csw_config, env=request.environ, version="2.0.2")
+        csw.kvp = request.args.to_dict()
+        csw.requesttype = request.method
+
+        # CSW doesn't natively support HEAD requests so alias to GET
+        if request.method == "HEAD":
+            csw.requesttype = "GET"
+
+        if request.method == "POST":
+            csw.request = request.data
+
+        return csw
+
+    def _track_revision_delete(self, csw_request: str, token: AzureToken) -> str:
+        """
+        Capture a record deleted via a transactional CSW request, where record revision tracking is enabled
+
+        This method:
+        * removes (unlinking) files for the specified record (i.e. all encodings) from the git working copy
+        * commits/pushes this change to the remote repository
+        * deletes hashed storage directories relevant to the deleted record if they're empty
+
+        Empty hashed storage directories are deleted to prevent inconsistency between the working copy
+        (which can contain empty directories) and the remote repository (which can't, as git only tracks files).
+
+        See the `_track_revision()` method for general information on how revision tracking works.
+
+        See the `_track_revision_record_paths()` method for information on how hash storage works.
+
+        :type csw_request str
+        :param csw_request: CSW server request body
+        :param token:
+        :rtype str
+        :return: commit hash for use as revision ID
+        """
+        record_xml_path, record_json_path = self._track_revision_record_paths(csw_request=csw_request)
+
+        record_xml_path.unlink()
+        record_json_path.unlink()
+
+        record_path = record_xml_path.parent
+        if not any(record_path.iterdir()):
+            record_path.rmdir()
+        if not any(record_path.parent.iterdir()):
+            record_path.parent.rmdir()
+
+        porcelain.add(repo=self._tracking_repo, paths=[record_xml_path, record_json_path])
+        commit_hash = self._commit_and_push_tracking_repo(commit_message="Record Deleted", token=token)
+
+        return commit_hash
+
+    def _track_revision_filter_request(
+        self, csw_request: str, csw_response: str, transaction_type: CSWTransactionType
+    ) -> bool:
+        """
+        Checks whether a CSW request should trigger revision tracking
+
+        Checks applied:
+        * whether the CSW request modifies a record (i.e. requests which only retrieve information do not need tracking)
+        * whether revision tracking is enabled for the current catalogue
+        * whether the CWS request was successful, to avoid tracking changes that aren't present within the CSW server
+
+        If any check fails this method returns False without completing other checks. If all checks pass, a True value
+        is returned by default.
+
+        See the `_track_revision()` method for general information on how revision tracking works, and the rationale for
+        why it's important to only track successful requests.
+
+        :type csw_request
+        :param csw_request: CSW server request body
+        :type csw_response str
+        :param csw_response: CSW server response body
+        :type transaction_type CSWTransactionType
+        :param transaction_type: a CSW transaction type
+        :rtype bool
+        :return: True if revision tracking applies to this request, otherwise False
+        """
+        if transaction_type == CSWTransactionType.SELECT:
+            return False
+        if not self._tracking_enabled:
+            return False
+        if not self._transaction_successful(
+            transaction_type=transaction_type, csw_request=csw_request, csw_response=csw_response
+        ):
+            return False
+
+        return True
+
+    def _track_revision_insert_update(
+        self, csw_request: str, transaction_type: CSWTransactionType, token: AzureToken
+    ) -> str:
+        """
+        Capture a record added or updated via a transactional CSW request, where record revision tracking is enabled
+
+        This method:
+        * extracts the metadata record from the CSW request (as XML)
+        * converts this record into a BAS Metadata Library record configuration (as JSON)
+        * validates this record configuration against the ISO 19115-2 JSON schema
+        * writes out the metadata record as an XML file within the git working copy
+        * writes out the record configuration as a JSON file within the git working copy (and correcting indentation)
+        * commits/pushes this change to the remote repository
+
+        See the `_track_revision()` method for general information on how revision tracking works.
+
+        :type csw_request str
+        :param csw_request: CSW server request body
+        :type transaction_type CSWTransactionType
+        :param transaction_type: a CSW transaction type
+        :type token AzureToken
+        :param token: request authorisation token
+        :rtype str
+        :return: commit hash for use as revision ID
+        """
+        record_xml = self._request_record(csw_request=csw_request)
+        record_xml_path, record_json_path = self._track_revision_record_paths(csw_request=csw_request)
+
+        record = MetadataRecord(record=record_xml)
+        record.validate()
+        record_config = record.make_config()
+        record_config.validate()
+
+        with open(record_xml_path, mode="w") as xml_file:
+            xml_file.write(record.generate_xml_document().decode())
+
+        record_config.dump(file=record_json_path)
+        # correct indentation / pretty printing of JSON file
+        with open(record_json_path, mode="r") as json_file:
+            json_data = json.load(json_file)
+        with open(record_json_path, mode="w") as json_file:
+            json.dump(json_data, json_file, indent=2)
+
+        commit_message = "Record Inserted"
+        if transaction_type == CSWTransactionType.UPDATE:
+            commit_message = "Record Updated"
+
+        porcelain.add(repo=self._tracking_repo, paths=[record_xml_path, record_json_path])
+        commit_hash = self._commit_and_push_tracking_repo(commit_message=commit_message, token=token)
+
+        return commit_hash
+
+    def _track_revision_record_paths(self, csw_request: str) -> Tuple[Path, Path]:
+        """
+        Generate file paths for a record within record tracking repo
+
+        When record revision tracking is enabled, records are stored in a defined structure within a git working copy.
+        Records are stored in both XML and JSON encodings within this structure. Paths for these files are returned by
+        this method.
+
+        Files are named after the file identifier of the record modified in the current (transactional) request. These
+        files are stored using a 'hashed storage' layout, similar to those used in other systems with potentially large
+        numbers of files named after UUID like identifiers. To avoid single directories containing large numbers of
+        files, lowering performance, files are stored in subdirectories named after the first and second two character
+        components of their identifier. Within this application, all such subdirectories are stored within a top level
+        'records' directory.
+
+        For example, a record with a file identifier of 'b1a7d1b5-c419-41e7-9178-b1ffd76d5371' is stored as:
+        * '/records/b1/a7/b1a7d1b5-c419-41e7-9178-b1ffd76d5371.xml'
+        * '/records/b1/a7/b1a7d1b5-c419-41e7-9178-b1ffd76d5371.json'
+
+        Another record with an identifier 'b1a5b59c-8e53-4091-8548-8d24ca7099ab' is stored as:
+        * '/records/b1/a5/b1a5b59c-8e53-4091-8548-8d24ca7099ab.xml'
+        * '/records/b1/a5/b1a5b59c-8e53-4091-8548-8d24ca7099ab.json'
+
+        This method will determine these paths and create parent directories as needed by parsing the file identifier
+        from the record within a transactional request, and return both paths (XML and JSON) as tuple.
+
+        :type csw_request str
+        :param csw_request: CSW server request body
+        :rtype Tuple
+        :return: tuple of XML and JSON file paths for record in request within tracking repo
+        """
+        working_directory = Path(self._tracking_config["working_dir"]).resolve()
+        record_id = self._request_record_file_identifier(csw_request=csw_request)
+
+        records_directory = working_directory.joinpath("records")
+        records_directory.mkdir(parents=False, exist_ok=True)
+
+        record_path = records_directory.joinpath(record_id[0:2]).joinpath(record_id[2:4])
+        record_path.mkdir(parents=True, exist_ok=True)
+
+        xml_path = record_path.joinpath(f"{record_id}.xml")
+        json_path = record_path.joinpath(f"{record_id}.json")
+
+        return xml_path, json_path
+
+    def _track_revision(
+        self, flask_request: Request, csw_response: str, transaction_type: CSWTransactionType, token: AzureToken
+    ) -> Optional[str]:
+        """
+        Capture changes to records modified via transactional CSW requests, where record revision tracking is enabled
+
+        This method uses information from the request passed _to_, and response returned _from_, an embedded CSW server.
+        It does not interact with this server directly or underlying components such as the backing database. This
+        method filters out requests where revision tracking is disabled (at a catalogue level), or has not modified a
+        record (at a request level, for read/select operations).
+
+        Revision tracking applies _after_ a record has been modified to ensure it reflects the state of the CSW backing
+        database. If records were tracked _before_, and an operation failed (meaning the database does not change), we
+        would need to roll back the tracked chain to ensure consistency. Tracking _after_ avoids this issue, providing
+        we validate that the CSW transaction was successful. All revision information, including tracked records,
+        are contained in a git working copy managed by this app.
+
+        **Known Limitations**
+
+        This method fails gracefully, without returning client errors for failures because:
+        1. there are no revision tracking errors in the CSW standard to return and adding some may break clients
+        2. doing so will not roll back the operation that has already taken place within CSW (i.e. record deletion)
+
+        It is recognised this a poses a consistency problem and undermines confidence in this feature. See #39 for
+        more information.
+
+        :type flask_request Request
+        :param flask_request: Flask HTTP request
+        :type csw_response str
+        :param csw_response CSW response body
+        :type transaction_type CSWTransactionType
+        :param transaction_type: a CSW transaction type
+        :type token AzureToken
+        :param token: request authorisation token
+        :rtype str
+        :return: Revision identifier, or None
+        """
+        csw_request = flask_request.data.decode()
+
+        if not self._track_revision_filter_request(
+            csw_request=csw_request, csw_response=csw_response, transaction_type=transaction_type
+        ):
+            return None
+
+        if transaction_type == CSWTransactionType.INSERT or transaction_type == CSWTransactionType.UPDATE:
+            return self._track_revision_insert_update(
+                csw_request=csw_request, transaction_type=transaction_type, token=token
+            )
+        elif transaction_type == CSWTransactionType.DELETE:
+            return self._track_revision_delete(csw_request=csw_request, token=token)
+
+        return None
+
+    def _transaction_successful(
+        self, transaction_type: CSWTransactionType, csw_request: str, csw_response: str
+    ) -> bool:
+        """
+        Determines whether a CSW transaction was successful
+
+        Checks whether the response from `pycsw` indicates an insert, update or delete transaction was successful by
+        checking the number of modified records is as expected (specifically 1, since we don't support bulk updates).
+
+        For insert transactions, we additionally check the record that was inserted has the same file identifier as the
+        submitted record. This does not apply to other transaction types as PyCSW does not include the information.
+
+        :type transaction_type CSWTransactionType
+        :param transaction_type: CSW transaction type
+        :type csw_request str
+        :param csw_request: CSW server request body
+        :type csw_response str
+        :param csw_request: CSW server response body
+        :rtype bool
+        :return: True if request was a successful transaction, otherwise False
+        """
+        transaction_count_element: Optional[str] = None
+        transaction_result_element: Optional[str] = None
+
+        transaction_count: int = 0
+        transaction_record_id: Optional[str] = None
+
+        if transaction_type == CSWTransactionType.INSERT:
+            transaction_count_element = "csw:totalInserted"
+            transaction_result_element = "csw:InsertResult"
+        elif transaction_type == CSWTransactionType.UPDATE:
+            transaction_count_element = "csw:totalUpdated"
+        elif transaction_type == CSWTransactionType.DELETE:
+            transaction_count_element = "csw:totalDeleted"
+
+        request_record_id = self._request_record_file_identifier(csw_request=csw_request)
+        response_xml = ElementTree(fromstring(csw_response.encode()))
+
+        try:
+            transaction_count = int(
+                response_xml.xpath(
+                    f"/csw:TransactionResponse/csw:TransactionSummary/{transaction_count_element}/text()",
+                    namespaces=csw_namespaces,
+                )[0]
+            )
+            if transaction_result_element is not None:
+                transaction_record_id = str(
+                    response_xml.xpath(
+                        f"/csw:TransactionResponse/{transaction_result_element}/csw:BriefRecord/dc:identifier/text()",
+                        namespaces=csw_namespaces,
+                    )[0]
+                )
+        except IndexError:
+            pass
+
+        if transaction_result_element is None and transaction_count == 1:
+            return True
+
+        if (
+            transaction_result_element is not None
+            and transaction_count == 1
+            and transaction_record_id == request_record_id
+        ):
+            return True
+
+        return False
+
+    def setup_database(self) -> None:
         """
         Initialises the backing database for the catalogue
 
@@ -447,7 +1116,7 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
         this causes (which are not fatal) are detected by this method and treated as a false positive. See the project
         README for more information.
         """
-        if self._is_initialised:
+        if self._backing_db_is_initialised:
             raise CSWDatabaseAlreadyInitialisedError()
 
         try:
@@ -470,18 +1139,60 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
                 raise CSWDatabaseAlreadyInitialisedError() from e
             pass
 
+    def setup_tracking(self) -> None:
+        """
+        Initialises the backing git repository for catalogue revision tracking
+
+        Checks whether:
+        * tracking is enabled for catalogue
+
+        If not:
+        * setup is aborted (as a repository cannot be setup)
+
+        Otherwise, check whether:
+        * the git repository already exists as a working copy, with a remote containing the expected branch
+
+        If not, checks whether:
+        * the working directory is already a git repo with a remote by attempting to clone from the remote
+
+        If this fails because:
+        * the working directory already exists:
+            * setup is aborted (as the repository is already setup)
+        * the working directory does not already exist, and does not contain the expected branch:
+            * a new temporary working directory is created, configured and pushed to the remote
+            * the remote is cloned to the real working directory
+        """
+        if not self._tracking_enabled:
+            raise CSWTrackingRepositoryNotEnabledError() from None
+
+        if self._backing_repo_is_initialised:
+            raise CSWTrackingRepositoryAlreadyInitialisedError() from None
+
+        try:
+            self._clone_tracking_repo()
+        except FileExistsError as e:
+            working_copy_git_path = Path(self._tracking_config["working_dir"]).joinpath(".git")
+            if e.strerror != "File exists" or e.filename != str(working_copy_git_path):
+                raise e
+        except ValueError as e:
+            if e.args[0] != f"b'{self._tracking_config['branch']}' is not a valid branch or tag":
+                raise e
+
+            self._create_tracking_repo()
+            self._clone_tracking_repo()
+
     def process_request(self, request: Request, token: Optional[AzureToken] = None) -> Response:
         # noinspection GrazieInspection
         """
-        Process a CSW request and return a suitable response
+        Process a CSW request and return response
 
         Represents embedding CSW by processing an incoming Flask/HTTP request into a CSW request and returning the CSW
         response as a Flask/HTTP response.
 
         In addition this method:
-
-        * implements authorisation checks for reading records and using the transactional profile
+        * supports authorisation checks for reading records and using the transactional profile
         * supports HEAD requests by treating them as GET requests and discarding the response body
+        * supports tracking record revisions for requests using the transactional profile (when enabled)
 
         :type request Request
         :param request: Flask HTTP request
@@ -490,32 +1201,31 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
         :rtype Response
         :return: Flask HTTP response
         """
-        if not self._is_initialised:
+        if not self._backing_db_is_initialised:
             raise CSWDatabaseNotInitialisedError()
-
+        if self._tracking_enabled and not self._backing_repo_is_initialised:
+            raise CSWTrackingRepositoryNotInitialisedError()
         if request.method not in ["HEAD", "GET", "POST"]:
             raise CSWMethodNotSupportedError()
 
-        _csw = _CSWServer(rtconfig=self._csw_config, env=request.environ, version="2.0.2")
-        _csw.kvp = request.args.to_dict()
-        _csw.requesttype = request.method
-
-        # CSW doesn't natively support HEAD requests so alias to GET
-        if request.method == "HEAD":
-            _csw.requesttype = "GET"
-
-        if request.method == "POST":
-            _csw.request = request.data
-
-        transaction_type = self._determine_transaction_type(csw_request=_csw)
+        csw_request = self._prepare_csw_request(request=request)
+        transaction_type = self._transaction_type(csw_request=csw_request)
         self._check_auth(transaction_type=transaction_type, token=token)
 
-        status_code, response = _csw.dispatch()
+        headers = {}
+        status_code, csw_response = csw_request.dispatch()
+
+        revision_id = self._track_revision(
+            flask_request=request, csw_response=csw_response.decode(), transaction_type=transaction_type, token=token
+        )
+        if revision_id is not None:
+            headers["X-CSW-REVISION-ID"] = revision_id
 
         if request.method == "HEAD":
-            return Response(status=status_code)
-
-        return Response(response=response, status=status_code, content_type=_csw.contenttype)
+            return Response(status=status_code, headers=headers)
+        return Response(
+            response=csw_response, status=status_code, content_type=csw_request.contenttype, headers=headers
+        )
 
 
 class CSWClient:  # pragma: no cover (until #59 is resolved)
@@ -523,7 +1233,7 @@ class CSWClient:  # pragma: no cover (until #59 is resolved)
     Represents a CSW Client backed by OWSLib
 
     This class is largely a wrapper around the OWSLib CSW class in order to abstract away CSW or OWSLib specific
-    details (such as needing to known to use the `getRecords2` method for example).
+    details (such as needing to know to use the `getRecords2` method for example).
 
     Other features include:
     * raising exceptions for errors

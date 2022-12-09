@@ -16,6 +16,10 @@ from scar_add_metadata_toolbox.csw import (
     CSWDatabaseNotInitialisedError,
     CSWGetRecordMode,
     CSWServer,
+    CSWTrackingRepositoryAlreadyInitialisedError,
+    CSWTrackingRepositoryInvalidCredentialsError,
+    CSWTrackingRepositoryNotEnabledError,
+    CSWTrackingRepositoryNotInitialisedError,
     CSWUnknownRequestError,
     CSWUnmappedRequestError,
     RecordInsertConflictError,
@@ -156,24 +160,49 @@ class MockCSWServer(CSWServer):
     def __init__(self, config: dict):
         super().__init__(config)
 
-        self.initialised = False
+        self.backing_db_initialised = False
+        self.backing_repo_initialised = False
 
     @property
-    def _is_initialised(self) -> bool:
-        return self.initialised
+    def _backing_db_is_initialised(self) -> bool:
+        return self.backing_db_initialised
 
-    def setup(self) -> None:
-        if self.initialised:
+    @property
+    def _backing_repo_is_initialised(self) -> bool:
+        return self.backing_repo_initialised
+
+    def setup_database(self) -> None:
+        if self.backing_db_initialised:
             raise CSWDatabaseAlreadyInitialisedError() from None
-        self.initialised = True
+        self.backing_db_initialised = True
+
+    def setup_tracking(self) -> None:
+        if self.backing_repo_initialised:
+            raise CSWTrackingRepositoryAlreadyInitialisedError() from None
+        self.backing_repo_initialised = True
 
     def process_request(self, request: Request, token: Optional[AzureToken] = None) -> Response:
         return Response("ok")
 
 
-class MockCSWServerNotSetup(MockCSWServer):
+class MockCSWServerBackingDBNotSetup(MockCSWServer):
     def process_request(self, request: Request, token: Optional[AzureToken] = None) -> Response:
         raise CSWDatabaseNotInitialisedError() from None
+
+
+class MockCSWServerBackingRepoNotSetup(MockCSWServer):
+    def process_request(self, request: Request, token: Optional[AzureToken] = None) -> Response:
+        raise CSWTrackingRepositoryNotInitialisedError() from None
+
+
+class MockCSWServerRevisionTrackingDisabled(MockCSWServer):
+    def setup_tracking(self) -> None:
+        raise CSWTrackingRepositoryNotEnabledError() from None
+
+
+class MockCSWServerRevisionTrackingInvalidCredentials(MockCSWServer):
+    def setup_tracking(self) -> None:
+        raise CSWTrackingRepositoryInvalidCredentialsError from None
 
 
 class MockCSWServerNoRequestType(MockCSWServer):

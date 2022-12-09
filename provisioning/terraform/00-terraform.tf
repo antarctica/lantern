@@ -27,6 +27,11 @@ terraform {
       source  = "hashicorp/azuread"
       version = "~> 2.23"
     }
+
+    gitlab = {
+      source  = "gitlabhq/gitlab"
+      version = "3.20.0"
+    }
   }
 
   # AWS S3 Remote state backend

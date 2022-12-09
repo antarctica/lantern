@@ -42,11 +42,21 @@ class TestRouteCSW:
         assert result.status_code == HTTPStatus.NOT_FOUND
         assert result.text == "Catalogue not found."
 
-    @pytest.mark.usefixtures("app_client_mocked_csw_server_not_setup")
-    def test_csw_catalogue_not_ready(self, app_client_mocked_csw_server_not_setup):
-        result = app_client_mocked_csw_server_not_setup.get("/csw/published?service=CSW&request=GetCapabilities")
+    @pytest.mark.usefixtures("app_client_mocked_csw_server_backing_db_not_setup")
+    def test_csw_catalogue_not_ready_backing_db(self, app_client_mocked_csw_server_backing_db_not_setup):
+        result = app_client_mocked_csw_server_backing_db_not_setup.get(
+            "/csw/published?service=CSW&request=GetCapabilities"
+        )
         assert result.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
-        assert result.text == "Catalogue not yet available."
+        assert result.text == "Catalogue DB not yet available."
+
+    @pytest.mark.usefixtures("app_client_mocked_csw_server_backing_repo_not_setup")
+    def test_csw_catalogue_not_ready_backing_repo(self, app_client_mocked_csw_server_backing_repo_not_setup):
+        result = app_client_mocked_csw_server_backing_repo_not_setup.get(
+            "/csw/unpublished?service=CSW&request=GetCapabilities"
+        )
+        assert result.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+        assert result.text == "Catalogue Repo not yet available."
 
     @pytest.mark.usefixtures("app_client_mocked_csw_server_no_request_type")
     def test_csw_catalogue_no_request_type(self, app_client_mocked_csw_server_no_request_type):

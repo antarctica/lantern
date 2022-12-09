@@ -4,53 +4,33 @@
 
 ### Running commands
 
-#### Running commands (Local Development)
+See the [Development environment](../README.md#development-environment) section in the project README for information
+on how to run these commands in a development or staging environment.
 
-Using a [local development environment](../README.md#development-environment):
-
-**Note:** You need other local development environment components running to run these commands.
-
-```shell
-$ cd add-metadata-toolbox
-$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask [command]
-```
-
-#### Running commands (Staging)
-
-```shell
-$ cd add-metadata-toolbox
-$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=production CSW_ENDPOINT_UNPUBLISHED=http://add-metadata-toolbox-staging.bslmagf.nerc-bas.ac.uk/csw/unpublished CSW_ENDPOINT_PUBLISHED=http://add-metadata-toolbox-staging.bslmagf.nerc-bas.ac.uk/csw/published poetry run flask [command]
-```
-
-#### Running commands (Production)
-
-```shell
-$ cd add-metadata-toolbox
-$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=production CSW_ENDPOINT_UNPUBLISHED=http://add-metadata-toolbox.bslmagf.nerc-bas.ac.uk/csw/unpublished CSW_ENDPOINT_PUBLISHED=http://add-metadata-toolbox.bslmagf.nerc-bas.ac.uk/csw/published poetry run flask [command]
-```
+**Note:** Information on running these commands in a production environment will be added in the future.
 
 ### Listing commands
 
-All application commands can be listed by running the `flask` command without any arguments, or using `--help` option 
+All application commands can be listed by running the `flask` command without any arguments, or using `--help` option
 (i.e. `flask --help`).
 
-This will list all top level commands or command groups. Commands within a group can be listed by calling the group 
+This will list all top level commands or command groups. Commands within a group can be listed by calling the group
 without a sub-command (or the group with the `--help` option). E.g. `flask records --help`.
 
 ### Command help
 
-A brief description of each command, and any options it supports, can be listed using the `--help` option, e.g. 
+A brief description of each command, and any options it supports, can be listed using the `--help` option, e.g.
 `flask records import --help`.
 
 ### Bulk commands
 
-For convenience, many commands have 'bulk' counterparts. These work as if you manually used the non-bulk command 
+For convenience, many commands have 'bulk' counterparts. These work as if you manually used the non-bulk command
 for each item or each file in a directory.
 
-For example, the `records import` command imports a single record from a file. Whereas the `records bulk-import` 
+For example, the `records import` command imports a single record from a file. Whereas the `records bulk-import`
 command imports records from all files in a directory (by internally using the `records import` command on each file).
 
-Bulk commands will stop at the first error they encounter, meaning if 20 records are to be imported, and the 2nd 
+Bulk commands will stop at the first error they encounter, meaning if 20 records are to be imported, and the 2nd
 causes an error, the remaining 18 records won't be imported.
 
 ### Command permissions
@@ -61,18 +41,18 @@ ADD project staff. You will need to sign in using your NERC/BAS user account to 
 Some commands also require setting API keys for external services, such as ArcGIS Online for the extent maps shown in
 item pages.
 
-Sign in sessions last for 1 hour (unless you sign out), after which you will need to sign in again. You will be told if 
+Sign in sessions last for 1 hour (unless you sign out), after which you will need to sign in again. You will be told if
 your session has expired.
 
-ADD project staff can assign permissions to users as needed using the 
+ADD project staff can assign permissions to users as needed using the
 [Assigning permissions to users and groups](workflow-permissions-users.md) workflow.
 
 If you have issues with permissions not working, please raise an [issue](../README.md#issue-tracking).
 
-**Note:** You will need an account within the NERC Active Directory to use this application. If you have a BAS email 
+**Note:** You will need an account within the NERC Active Directory to use this application. If you have a BAS email
 address you have an account. Contact the [BAS IT ServiceDesk](mailto:servicedesk@bas.ac.uk) to request an account.
 
-**Note:** You will need access to the shared vault in the MAGIC 1Password account to access API Keys used for ArcGIS 
+**Note:** You will need access to the shared vault in the MAGIC 1Password account to access API Keys used for ArcGIS
 Online.
 
 ### Common errors
@@ -85,7 +65,7 @@ There are some common errors that can occur when using most commands:
 No. CSW catalogue not setup.
 ```
 
-This error means the CSW catalogues for storing records have not been setup properly. This error should not occur, 
+This error means the CSW catalogues for storing records have not been setup properly. This error should not occur,
 please raise an [issue](../README.md#issue-tracking) if it occurs.
 
 #### `Error with auth token`
@@ -113,7 +93,7 @@ Run the [Sign-in](#auth-sign-in) command to fix this.
 No. Missing permissions in auth token. Seek support to assign required permissions.
 ```
 
-This error occurs when you try to use a restricted command that requires permissions you haven't been assigned. See the 
+This error occurs when you try to use a restricted command that requires permissions you haven't been assigned. See the
 [Command permissions](#command-permissions) section for more information.
 
 ## `auth`
@@ -128,11 +108,11 @@ Running this command will return a code you will need to enter into a Microsoft 
 change each time you sign-in. It's used to help identify the application you are trying to sign into. The application
 will wait until you tell it you've signed in.
 
-When you enter the code into the website, you may be asked to sign in. If you do, use your BAS/NERC account (the same 
+When you enter the code into the website, you may be asked to sign in. If you do, use your BAS/NERC account (the same
 you use for accessing your email or Office 365).
 
-**Note:** The first time you use this application, you will be asked whether you want to allow the 'SCAR ADD Metadata 
-Toolbox (Editor)' application to access your basic account information (your name and email address). You need to 
+**Note:** The first time you use this application, you will be asked whether you want to allow the 'SCAR ADD Metadata
+Toolbox (Editor)' application to access your basic account information (your name and email address). You need to
 approve/allow this request to use the Data Catalogue.
 
 You may be asked:
@@ -147,11 +127,11 @@ When you see this message:
 >
 > You have signed in to the SCAR ADD Metadata Toolbox (Editor) application on your device. You may now close this window.
 
-You can press any key to prompt back in the application to continue signing in. If successful, you will see a success 
-message with your name and the path to a file that contains your user access token, which you can ignore unless you have 
+You can press any key to prompt back in the application to continue signing in. If successful, you will see a success
+message with your name and the path to a file that contains your user access token, which you can ignore unless you have
 problems with permissions later.
 
-You can sign-in again if you need to get a new user access token (or if your permissions change). This will replace 
+You can sign-in again if you need to get a new user access token (or if your permissions change). This will replace
 any existing token you have.
 
 ```
@@ -175,24 +155,42 @@ Ok. Access token removed.
 
 Manage CSW catalogues.
 
-### `csw setup`
+### `csw setup db`
 
-Setup catalogue database structure.
+Setup CSW backing database structure.
 
-This command requires the name of a CSW catalogue to initialise, for which valid options are:
+This command requires the name of a CSW catalogue to setup, valid options are:
 
 * `published`
 * `unpublished`
 
-**Note:** This command only needs to be ran as part of setting up this application for the first time. 
+**Note:** This command only needs to be ran as part of setting up this application for the first time.
 
 ```
-$ flask csw setup unpublished
-Ok. Catalogue 'unpublished' setup.
+$ flask csw setup db unpublished
+Ok. Backing database for Catalogue 'unpublished' set up.
+```
+
+### `csw setup repo`
+
+Setup CSW revision tracking repository.
+
+This command requires the name of a CSW catalogue to setup, valid options are:
+
+* `unpublished`
+* (the published catalogue does not use revision tracking)
+
+**Note:** This command only needs to be ran as part of setting up this application for the first time.
+
+**Note:** Tt may take some time to clone the remote repository to a working copy depending on its size.
+
+```
+$ flask csw setup repo unpublished
+Ok. Tracking repo for Catalogue 'unpublished' set up.
 ```
 
 ## `records`
-  
+
 Manage metadata records.
 
 ### `records bulk-export`
@@ -201,10 +199,12 @@ Export all records to files in a directory.
 
 **Note:** You need to be signed in with permission to edit metadata records to use this command.
 
-Records will be saved as separate files named after their identifier, 
+Records will be saved as separate files named after their identifier,
 e.g. `2cddeea3-eb67-46af-a002-8251337984d4.json`
 
 **Note:** The export directory must already exist.
+
+**Note:** The latest revision of each record will be exported.
 
 ```
 $ flask records bulk-export /tmp/records/
@@ -575,7 +575,7 @@ Ok. Record 'f58e3d6c-bc21-40fa-ab1a-a7798c9a8121' published.
 Ok. 18 records (re)published.
 ```
 
-By default only unpublished records will be published. To republish all records instead add the `--force-republish` 
+By default only unpublished records will be published. To republish all records instead add the `--force-republish`
 option:
 
 ```
@@ -726,8 +726,10 @@ Export a record to a file.
 
 **Note:** You need to be signed in with permission to publish metadata records to use this command.
 
-**Note:** Records are exported as JSON files, therefore it's strongly recommended you export them to a file with the 
+**Note:** Records are exported as JSON files, therefore it's strongly recommended you export them to a file with the
 `.json` file extension.
+
+**Note:** The latest revision of the record will be exported.
 
 ```
 $ flask records export 4149c45d-ce29-49f3-88ed-8366fe1afa23 /tmp/record.json
@@ -754,7 +756,7 @@ Import a record from a file.
 
 **Note:** You need to be signed in with permission to edit metadata records to use this command.
 
-See the [Provisional guidance (internal)](https://gitlab.data.bas.ac.uk/MAGIC/add/-/issues/146#note_49157) for how to 
+See the [Provisional guidance (internal)](https://gitlab.data.bas.ac.uk/MAGIC/add/-/issues/146#note_49157) for how to
 write a new record.
 
 ```
@@ -784,7 +786,7 @@ Ok. Record '4149c45d-ce29-49f3-88ed-8366fe1afa23' imported.
 Ok. Record '4149c45d-ce29-49f3-88ed-8366fe1afa23' published.
 ```
 
-An updated record will still be considered published (as they will have the same file identifier). To republish an 
+An updated record will still be considered published (as they will have the same file identifier). To republish an
 updated record add the `--allow-republish` option.
 
 ```
@@ -886,7 +888,7 @@ CONFIRM: Permanently remove record '4149c45d-ce29-49f3-88ed-8366fe1afa23'? [y/N]
 Ok. Record '4149c45d-ce29-49f3-88ed-8366fe1afa23' removed.
 ```
 
-**Note:** This command uses an interactive conformation to protect against unintentional deletions. If using this 
+**Note:** This command uses an interactive conformation to protect against unintentional deletions. If using this
 command in a non-interactive environment you can add the `--force-remove` option to suppress this conformation.
 
 ### `records retract`
@@ -924,7 +926,7 @@ Build all static site components.
 
 **Note:** This will only include items that have been published.
 
-**Note:** You need to set the `APP_ESRI_API_KEY` environment variable with the value from the 'SCAR ADD Metadata 
+**Note:** You need to set the `APP_ESRI_API_KEY` environment variable with the value from the 'SCAR ADD Metadata
 Toolbox - ESRI ArcGIS API key' entry in the shared vault of the MAGIC 1Password account to use this command correctly.
 
 ```
@@ -1079,7 +1081,7 @@ Ok. Generated item page for '2cddeea3-eb67-46af-a002-8251337984d4'.
 Ok. 18 item pages generated.
 1 collection pages to generate.
 # Collection page 1/1
-  [####################################]  100%          
+  [####################################]  100%
 Ok. Generated collection page for 'e74543c0-4c4e-4b41-aa33-5bb2f67df389'.
 Ok. 1 collection pages generated.
 3 legal pages to generate.
@@ -1103,14 +1105,14 @@ Build pages for all collections.
 
 **Note:** This will only include items in collections that have been published.
 
-**Note:** You need to set the `APP_ESRI_API_KEY` environment variable with the value from the 'SCAR ADD Metadata 
+**Note:** You need to set the `APP_ESRI_API_KEY` environment variable with the value from the 'SCAR ADD Metadata
 Toolbox - ESRI ArcGIS API key' entry in the shared vault of the MAGIC 1Password account to use this command correctly.
 
 ```
 $ APP_ESRI_API_KEY=xxx flask site build-collections
 1 collection pages to generate.
 # Collection page 1/1
-  [####################################]  100%          
+  [####################################]  100%
 Ok. Generated collection page for 'e74543c0-4c4e-4b41-aa33-5bb2f67df389'.
 Ok. 1 collection pages generated.
 ```
@@ -1121,7 +1123,7 @@ Build pages for all items.
 
 **Note:** This will only include items that have been published.
 
-**Note:** You need to set the `APP_ESRI_API_KEY` environment variable with the value from the 'SCAR ADD Metadata 
+**Note:** You need to set the `APP_ESRI_API_KEY` environment variable with the value from the 'SCAR ADD Metadata
 Toolbox - ESRI ArcGIS API key' entry in the shared vault of the MAGIC 1Password account to use this command correctly.
 
 ```
@@ -1316,7 +1318,7 @@ Ok. static assets copied.
 
 Publish static site build to remote location.
 
-**WARNING:** This will replace the contents of the static site. 
+**WARNING:** This will replace the contents of the static site.
 
 ```
 $ flask site publish
@@ -1412,8 +1414,8 @@ upload: _site/records/f58e3d6c-bc21-40fa-ab1a-a7798c9a8121/iso-xml/f58e3d6c-bc21
 Ok. Site published to 'add-catalogue-integration.data.bas.ac.uk'
 ```
 
-**Note:** This command uses an interactive conformation to protect against publishing to the wrong location 
-unintentionally. If using this command in a non-interactive environment you can add the `--force-publish` option to 
+**Note:** This command uses an interactive conformation to protect against publishing to the wrong location
+unintentionally. If using this command in a non-interactive environment you can add the `--force-publish` option to
 suppress this conformation.
 
 To build site content and the publish it, add the `--build` option.
@@ -1572,7 +1574,7 @@ Ok. Generated item page for '2cddeea3-eb67-46af-a002-8251337984d4'.
 Ok. 18 item pages generated.
 1 collection pages to generate.
 # Collection page 1/1
-  [####################################]  100%          
+  [####################################]  100%
 Ok. Generated collection page for 'e74543c0-4c4e-4b41-aa33-5bb2f67df389'.
 Ok. 1 collection pages generated.
 3 legal pages to generate.

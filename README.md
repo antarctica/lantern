@@ -24,7 +24,7 @@ It has been open-sourced in case it's of use to others with similar needs.
 
 ## Overview
 
-This project is made up of a:
+At a high level, this project is made up of a:
 
 1. Repository, for storing metadata records, acting as a source of truth
 2. Catalogue, for displaying metadata records, acting as a discovery tool
@@ -33,10 +33,16 @@ These components map to components 4 and 6 in the draft ADD data workflow
 ([#139 (internal)](https://gitlab.data.bas.ac.uk/MAGIC/add/issues/139)).
 
 Metadata records use the [ISO 19115](https://metadata-standards.data.bas.ac.uk/standard/iso-19115/) metadata standard.
-The [OGC Catalogue Services for the Web (CSW)] standard is used to provide the *Repository* component, allowing records
-to be added, accessed, updated and deleted. Records can be either published (available publicly) or unpublished.
-Access to any unpublished records, and the ability to publish/retract records, is restricted to relevant ADD project
-members.
+The [OGC Catalogue Services for the Web (CSW)] standard is used to provide the *Repository* component.
+
+ADD project members can:
+
+* add, retrieve, update and delete metadata records
+* metadata records can be either:
+  * published (accessible by anyone)
+  * unpublished (accessible only by ADD project members, whilst in draft etc.)
+* publish metadata records when ready
+* retract published metadata records if needed
 
 Once published, records can be viewed through the *Catalogue* component, a static website, which presents published
 records as human-readable items (with geographic extents visualised on a map for example). Manually curated collections
@@ -77,6 +83,7 @@ Flask application:
 * are reverse proxied as a route in Flask
 * are backed by PostGIS databases
 * are secured using [OAuth](#oauth)
+* optionally track changes made to records using [Revision Tracking](#csw-revision-tracking)
 
 Static website:
 
@@ -239,17 +246,22 @@ if so, whether the changes made to them in this project, could be integrated int
 
 ### CSW
 
+#### CSW overview
+
 The [OGC CSW](https://www.ogc.org/standards/cat) standard is used as a protocol and interface for accessing and
 managing [Records](#metadata-records) in the *Repository* component.
 
 Separate CSW catalogues are used for Published and unpublished records, using embedded [PyCSW](http://pycsw.org)
-servers to allow integration with Flask for authentication and authorisation of requests via [OAuth](#oauth).
+servers with Flask routes to allow additional features:
+
+* using [OAuth](#oauth) for [authentication and authorisation](#csw-auth) requests
+* optionally using Git for [revision tracking](#csw-revision-tracking) of records in requests
 
 Records are accessed using `getRecords` and `getRecordById` requests. Records are managed using the CSW
 transactional profile. These requests can be made using from the Flask CLI, or from other applications, if authorised.
 
 The CSW version is fixed to *2.0.2* because it's the latest version supported by
-[OWSLib](https://geopython.github.io/OWSLib/), the CSW client used by the Flask CLI.
+[OWSLib](https://geopython.github.io/OWSLib/), which is the CSW client used by the Flask CLI.
 
 **Note:** The CSW repositories are considered to be APIs, and so ran as services through the
 [BAS API Load Balancer](https://gitlab.data.bas.ac.uk/WSF/api-load-balancer) (internal) with documentation in the
@@ -304,7 +316,37 @@ Where the request type cannot be determined unambiguously it will be rejected.
 
 #### CSW revision tracking
 
-...
+CSW servers can optionally use revision tracking, where records modified in a CSW server are tracked as files in a Git
+repository. I.e. When a record is inserted, the record is written as files within a Git repo, and updated/deleted later
+using an update or delete transactional request.
+
+Revision tracking is only enabled for the *Unpublished*
+
+Revision tracking is designed to protect against accidental changes to records, or set of records if bulk operations
+are carried out. Records are stored as:
+
+* ISO 19115 XML (for durability and completeness) and using the
+* BAS Metadata Library 19115 JSON (for ease of use and comparison)
+
+Records are written to a Git working copy stored locally. Records are stored using a hashed directory structure based
+on the file identifier for each metadata record, under a common 'records/' root directory. For example a record with an
+identifier of 'b1a7d1b5-c419-41e7-9178-b1ffd76d5371' will be stored at `records/b1/a7/`. This hashed structure is to
+ensure individual directories do not contain large numbers of files, reducing file system performance.
+
+Changes to records are committed on a per-record basis, using the user's identity (from the OAuth token), and pushed
+to a remote repository. As this working copy resides on the server side of the application, there should only be a
+single committer. Remote repositories are stored in the BAS GitLab instance for each environment:
+
+* [Integration](https://gitlab.data.bas.ac.uk/MAGIC/add-catalogue-records-integration)
+* [Production](https://gitlab.data.bas.ac.uk/MAGIC/add-catalogue-records-production)
+
+When enabled, revision tracking is performed after records have been processed (inserted, updated or deleted) and only
+if the transaction was successful (prevent changes being committed that aren't present in the related CSW catalogue).
+For successful, tracked, transactions the Git commit hash will be returned in a `X-CSW-REVISION-ID` header. If desired,
+this can be used to link to the tracked change:
+
+* Integration: `https://gitlab.data.bas.ac.uk/MAGIC/add-catalogue-records-integration/-/commit/{REVISION ID}`
+* Production: `https://gitlab.data.bas.ac.uk/MAGIC/add-catalogue-records-production/-/commit/{REVISION ID}`
 
 ### Jinja templates
 
@@ -564,20 +606,23 @@ Application configuration options are set in per-environment classes extending a
 Configuration options are defined, and documented, using class properties. Some configuration options may optionally be
 set at runtime using environment variables. If not set, default values will be used.
 
-| Configuration Option                                | Description                                                           | Allowed Values                     | Example Value                                            |
-|-----------------------------------------------------|-----------------------------------------------------------------------|------------------------------------|----------------------------------------------------------|
-| `APP_ENABLE_SENTRY`                                 | Feature flag to enable/disable Sentry error tracking                  | True/False                         | `true`                                                   |
-| `APP_LOGGING_LEVEL`                                 | Minimum logging level to include in application logs                  | debug/info/warning/error/critical  | `warning`                                                |
-| `APP_AUTH_SESSION_FILE_PATH`                        | Path to file used for authentication information                      | Valid file path                    | `/home/user/.config/scar_add_metadata_toolbox/auth.json` |
-| `APP_SITE_PATH`                                     | Path to directory used for rendered static site content               | Valid directory path               | `/home/user/.config/scar_add_metadata_toolbox/_site`     |
-| `CSW_ENDPOINT_UNPUBLISHED`                          | CSW endpoint for accessing unpublished catalogue                      | Valid URL                          | `http://example.com/csw/unpublished`                     |
-| `CSW_ENDPOINT_PUBLISHED`                            | CSW endpoint for accessing published catalogue                        | Valid URL                          | `http://example.com/csw/published`                       |
-| `CSW_SERVER_CONFIG_UNPUBLISHED_ENDPOINT`            | Endpoint at which to run unpublished CSW catalogue                    | Valid URL                          | `http://example.com/csw/unpublished`                     |
-| `CSW_SERVER_CONFIG_PUBLISHED_ENDPOINT`              | Endpoint at which to run published CSW catalogue                      | Valid URL                          | `http://example.com/csw/published`                       |
-| `CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION` | Connection string for unpublished CSW catalogue backing <br/>database | Valid SQLAlchemy connection string | `postgresql://postgres:password@db.example.com/postgres` |
-| `CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION`   | Connection string for published CSW catalogue backing <br/>database   | Valid SQLAlchemy connection string | `postgresql://postgres:password@db.example.com/postgres` |
-| `APP_S3_BUCKET`                                     | AWS S3 bucket name used for hosting static website content            | Valid AWS S3 bucket name           | `add-catalogue.data.bas.ac.uk`                           |
-| `APP_ESRI_API_KEY`                                  | API Key for using [ESRI ArcGIS JavaScript client](#esri-api-key)      | Valid ESRI API key                 | `AAPK...qo`                                              |
+| Configuration Option                                  | Description                                                                  | Allowed Values                     | Example Value                                                              |
+|-------------------------------------------------------|------------------------------------------------------------------------------|------------------------------------|----------------------------------------------------------------------------|
+| `APP_ENABLE_SENTRY`                                   | Feature flag to enable/disable Sentry error tracking                         | True/False                         | `true`                                                                     |
+| `APP_LOGGING_LEVEL`                                   | Minimum logging level to include in application logs                         | debug/info/warning/error/critical  | `warning`                                                                  |
+| `APP_AUTH_SESSION_FILE_PATH`                          | Path to file used for authentication information                             | Valid file path                    | `/home/user/.config/scar_add_metadata_toolbox/auth.json`                   |
+| `APP_SITE_PATH`                                       | Path to directory used for rendered static site content                      | Valid directory path               | `/home/user/.config/scar_add_metadata_toolbox/_site/`                      |
+| `CSW_ENDPOINT_UNPUBLISHED`                            | CSW endpoint for accessing unpublished catalogue                             | Valid URL                          | `http://example.com/csw/unpublished`                                       |
+| `CSW_ENDPOINT_PUBLISHED`                              | CSW endpoint for accessing published catalogue                               | Valid URL                          | `http://example.com/csw/published`                                         |
+| `CSW_SERVER_CONFIG_UNPUBLISHED_ENDPOINT`              | Endpoint at which to run unpublished CSW catalogue                           | Valid URL                          | `http://example.com/csw/unpublished`                                       |
+| `CSW_SERVER_CONFIG_PUBLISHED_ENDPOINT`                | Endpoint at which to run published CSW catalogue                             | Valid URL                          | `http://example.com/csw/published`                                         |
+| `CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION`   | Connection string for unpublished CSW catalogue backing database             | Valid SQLAlchemy connection string | `postgresql://postgres:password@db.example.com/postgres`                   |
+| `CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION`     | Connection string for published CSW catalogue backing database               | Valid SQLAlchemy connection string | `postgresql://postgres:password@db.example.com/postgres`                   |
+| `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_WORKING_DIR`  | Path to directory used for CSW revision tracking local working copy          | Valid directory path               | `/opt/var/scar_add_metadata_toolbox/revision_tracking/`                    |
+| `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_REMOTE_URL`   | Connection string/URL for CSW revision tracking Git remote                   | Valid Git remote URL               | `https://gitlab.data.bas.ac.uk/MAGIC/add-catalogue-records-production.git` |
+| `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN` | GitLab Personal Access Token used to access CSW revision tracking Git remote | Valid GitLab PAT                   | `glpat-xx...xx`                                                            |
+| `APP_S3_BUCKET`                                       | AWS S3 bucket name used for hosting static website content                   | Valid AWS S3 bucket name           | `add-catalogue.data.bas.ac.uk`                                             |
+| `APP_ESRI_API_KEY`                                    | API Key for using [ESRI ArcGIS JavaScript client](#esri-api-key)             | Valid ESRI API key                 | `AAPK...qo`                                                                |
 
 These options are typically set when running this application as a client (CLI):
 
@@ -597,6 +642,9 @@ These options are typically set when running this application as a server (CSW c
 * `CSW_SERVER_CONFIG_PUBLISHED_ENDPOINT`
 * `CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION`
 * `CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION`
+* `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_WORKING_DIR`
+* `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_REMOTE_URL`
+* `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN`
 
 ## Setup
 
@@ -612,10 +660,15 @@ To set up a new production/stage deployment of this project as a server, see the
 Terraform is used for:
 
 * resources required for protecting and accessing the *Repository* components
-* resources required for hosting the *Catalogue* component as a static website
+* resources required for hosting the *Catalogue* [static website](#s3-static-website)
+* resources required for hosting the Git repositories used for [CSW revision tracking](#csw-revision-tracking)
 
-Access to the [BAS AWS account](https://gitlab.data.bas.ac.uk/WSF/bas-aws),
-[Terraform remote state](#terraform-remote-state) and NERC Azure tenancy are required to provision these resources.
+You will need access to these accounts to provision these resources:
+
+* [BAS Terraform remote state project](#terraform-remote-state)
+* [BAS AWS account](https://gitlab.data.bas.ac.uk/WSF/bas-aws)
+* [BAS GitLab instance](https://gitlab.data.bas.ac.uk/WSF/bas-gitlab)
+* NERC Azure tenancy
 
 ```shell
 $ cd provisioning/terraform
@@ -635,7 +688,9 @@ $ docker compose down
 **Note:** The `terraform apply` step will need to be taken in stages for Azure application registrations. See the notes
 in `provisioning/terraform/56-azure_app_registrations.tf` for details.
 
-Once provisioned, the following steps need to be taken manually:
+#### Manual setup - Azure app registrations
+
+Once provisioned, the following steps need to be taken manually to configure Azure app registrations:
 
 1. set branding icons (if desired)
 2. set [Azure permissions](#azure-permissions)
@@ -644,6 +699,42 @@ Once provisioned, the following steps need to be taken manually:
 
 **Note:** Assignments are 1:1 between users/groups and roles but there can be multiple assignments. I.e. roles `Foo`
 and `Bar` can be assigned to the same user/group by creating two role assignments.
+
+#### Manual setup - GitLab projects
+
+Once provisioned, the following steps need to be taken manually to configure the GitLab projects used for CSW revision
+tracking:
+
+1. for the [Revision Tracking bot user](https://gitlab.data.bas.ac.uk/admin/users/bot-add-catalogue-records-tracking)
+   in the GitLab Admin centre:
+    * choose the *Confirm user* option to skip verifying the email address assigned to the user
+    * choose the *Impersonate user* option
+    * from the [Edit Profile](https://gitlab.data.bas.ac.uk/-/profile) page:
+        * set the avatar to '/support/gitlab-avatars/revision-tracking.jpg'
+        * set status to: '🤖 Bot User'
+        * set pronouns to: 'They/Them'
+        * set job title to: 'Records Tracking Bot'
+        * set organisation to: 'British Antarctic Survey'
+        * set biography to 'I am a bot used to track changes made to metadata records in the SCAR ADD Metadata Toolbox
+          project.'
+        * set private profile to *True*
+    * from the [Access Tokens](https://gitlab.data.bas.ac.uk/-/profile/personal_access_tokens) page:
+        * create a new Personal Access Token:
+            * token name: 'scar-add-metadata-toolbox-internal'
+            * expiry date: *None*
+            * scopes: *write_repository*
+        * save token in 1Password
+    * from the [Notifications](https://gitlab.data.bas.ac.uk/-/profile/notifications) page:
+        * set global notification level to: *Disabled*
+2. for the Revision Tracking GitLab
+   [Production](https://gitlab.data.bas.ac.uk/MAGIC/add-catalogue-records-production) project:
+    * under *Settings* -> *General*:
+        * set *Avatar* to '/support/gitlab-avatars/revision-tracking.jpg'
+        * under *Visibility*, disable all features except 'Repository'
+        * (this will hide the 'Repository' sidebar section until an initial commit is made)
+3. repeat the above steps for the
+   [Integration](https://gitlab.data.bas.ac.uk/MAGIC/add-catalogue-records-integration) project, except:
+    * set *Avatar* to '/support/gitlab-avatars/revision-tracking-inverted.jpg'
 
 #### Terraform remote state
 
@@ -709,7 +800,7 @@ for an example.
 
 ### Nagios checks
 
-Request URL checks are setup in the [PDC Nagios instance](https://gitlab.data.bas.ac.uk/nagios/config/bslnagios) for:
+Request URL checks are set up in the [PDC Nagios instance](https://gitlab.data.bas.ac.uk/nagios/config/bslnagios) for:
 
 * the [Health Check](#health-checks) endpoint
 * a CSW GetCapabilities request for the published catalogue
@@ -719,8 +810,8 @@ See [bas-nagios#52](https://gitlab.data.bas.ac.uk/tdba/bas-nagios/-/issues/52) f
 
 ### PyCSW backing database setup
 
-Backing databases for PyCSW servers require initialisation using the `csw setup` application
-[CLI command](docs/command-reference.md#csw-setup) for both the *published* and *unpublished* repositories.
+Backing databases for PyCSW servers require initialisation using the `csw setup db`
+[CLI command](docs/command-reference.md#csw-setup-db) for both the *published* and *unpublished* repositories.
 
 **Note:** Backing databases must use the Postgres engine with the PostGIS extension enabled.
 
@@ -755,6 +846,12 @@ ALTER INDEX fts_gin_idx RENAME TO ix_records_published_fts_gin_indx;
 ALTER INDEX wkb_geometry_idx RENAME TO ix_published_wkb_geometry_idx;
 ```
 
+### CSW revision tracking repository setup
+
+Backing git repositories used for [CSW Revision Tracking](#csw-revision-tracking) (where enabled), requires
+initialisation using the `csw setup repo` [CLI command](docs/command-reference.md#csw-setup-repo) for the *unpublished*
+repository.
+
 ### ESRI ArcGIS
 
 ESRI ArcGIS is used for the [web maps](#esri-web-maps) within the catalogue static site.
@@ -778,8 +875,8 @@ To generate an ESRI ArcGIS developer API key:
 
 ### Development environment
 
-Git, [Poetry](https://python-poetry.org) [1.2+] and [Docker Compose](https://docs.docker.com/compose/) are required to
-set up a local development environment of this project.
+[Git](https://git-scm.com), [Poetry](https://python-poetry.org) (version 1.2+) and
+[Docker Compose](https://docs.docker.com/compose/) are required to set up a local development environment:
 
 ```shell
 # clone from the BAS GitLab instance if possible
@@ -807,22 +904,27 @@ $ cd add-metadata-toolbox
 $ docker compose up
 
 # In another terminal; Start the Flask application as a server (it will use the local postgres database by default)
-$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask run
+$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN=glpat-xxx poetry run flask run
 
 # In another terminal; Run Flask CLI commands as a client
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask [command]
 ```
 
+Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN` is the
+'SCAR ADD Metadata Toolbox (Data Catalogue) CSW Revision Tracking GitLab Personal Access Token (PAT)' item in the shared
+vault in the MAGIC 1Password account.
+
 See the [Command Reference](docs/command-reference.md) for how to use the CLI. Where `flask` is written, replace this
-with `FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask`.
+with command example above.
 
 When built, the local static site can be accessed from [http://localhost:9000](http://localhost:9000).
 
 Quick start (example):
 
 ```shell
-$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask csw setup unpublished
-$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask csw setup published
+$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask csw setup db unpublished
+$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask csw setup db published
+$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask csw setup repo unpublished
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask auth sign-in
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask records import --publish ~/some-example-record.json
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development APP_ESRI_API_KEY=xxx poetry run flask site build
@@ -830,6 +932,10 @@ $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development APP_ESRI_API_KEY=xxx
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask records import --publish --allow-update --allow-republish ~/some-example-record.json
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development APP_ESRI_API_KEY=xxx poetry run flask site build
 ```
+
+Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN` is the
+'SCAR ADD Metadata Toolbox (Data Catalogue) CSW Revision Tracking GitLab Personal Access Token (PAT)' item in the shared
+vault in the MAGIC 1Password account.
 
 Where the value for `APP_ESRI_API_KEY` is the 'SCAR ADD Metadata Toolbox - ESRI ArcGIS API key' item in the shared
 vault in the MAGIC 1Password account.
@@ -853,10 +959,10 @@ with:
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development CSW_ENDPOINT_UNPUBLISHED=https://api.bas.ac.uk/data/metadata/add/csw/v1/unpublished CSW_ENDPOINT_PUBLISHED=https://api.bas.ac.uk/data/metadata/add/csw/v1/published poetry run flask [command]
 ```
 
-When built, the local static site can be accessed from [http://localhost:9000](http://localhost:9000).
-
 If building the static site, include the `APP_ESRI_API_KEY` environment variable as well, using the 'SCAR ADD Metadata
 Toolbox - ESRI ArcGIS API key' item in the MAGIC shared vault in 1Password as the value.
+
+When built, the local static site can be accessed from [http://localhost:9000](http://localhost:9000).
 
 **Note:** to use the remote server in the staging environment instead, use this command for `flask` commands:
 
@@ -876,7 +982,7 @@ $ cd add-metadata-toolbox
 $ docker compose up
 
 # In another terminal; Start the Flask application as a server (using the production database)
-$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION=postgresql://pycsw_production:xxx@bsldb.nerc-bas.ac.uk/pycsw_production CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION=postgresql://pycsw_production:xxx@bsldb.nerc-bas.ac.uk/pycsw_production poetry run flask run
+$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION=postgresql://pycsw_production:xxx@bsldb.nerc-bas.ac.uk/pycsw_production CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION=postgresql://pycsw_production:xxx@bsldb.nerc-bas.ac.uk/pycsw_production CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_REMOTE_URL=https://gitlab.data.bas.ac.uk/MAGIC/add-catalogue-records-production.git CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN=xxx poetry run flask run
 
 # In another terminal; Run Flask CLI commands as a client
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask [command]
@@ -885,10 +991,20 @@ $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask [co
 Where `xxx` should be replaced with real credentials from the *MAGIC CSW [Prod]* entry in the shared vault in the
 MAGIC 1Password.
 
+Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN` is the
+'SCAR ADD Metadata Toolbox (Data Catalogue) CSW Revision Tracking GitLab Personal Access Token (PAT)' item in the shared
+vault in the MAGIC 1Password account.
+
+If building the static site, include the `APP_ESRI_API_KEY` environment variable as well, using the 'SCAR ADD Metadata
+Toolbox - ESRI ArcGIS API key' item in the MAGIC shared vault in 1Password as the value.
+
 See the [Command Reference](docs/command-reference.md) for how to use the CLI. Where `flask` is written, replace this
-with `FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask`.
+with command example above.
 
 When built, the local static site can be accessed from [http://localhost:9000](http://localhost:9000).
+Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN` is the
+'SCAR ADD Metadata Toolbox (Data Catalogue) CSW Revision Tracking GitLab Personal Access Token (PAT)' item in the shared
+vault in the MAGIC 1Password account.
 
 If building the static site, include the `APP_ESRI_API_KEY` environment variable as well, using the 'SCAR ADD Metadata
 Toolbox - ESRI ArcGIS API key' item in the MAGIC shared vault in 1Password as the value.
@@ -898,10 +1014,14 @@ server:
 
 ```shell
 # In another terminal; Start the Flask application as a server (using the production database)
-$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION=postgresql://pycsw_staging:xxx@bsldb.nerc-bas.ac.uk/pycsw_staging CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION=postgresql://pycsw_staging:xxx@bsldb.nerc-bas.ac.uk/pycsw_staging poetry run flask run
+$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION=postgresql://pycsw_staging:xxx@bsldb.nerc-bas.ac.uk/pycsw_staging CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION=postgresql://pycsw_staging:xxx@bsldb.nerc-bas.ac.uk/pycsw_staging CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_REMOTE_URL=https://gitlab.data.bas.ac.uk/MAGIC/add-catalogue-records-integration.git CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN=xxx poetry run flask run
 ```
 
 Where `xxx` should be replaced with real credentials from the *MAGIC CSW [Staging]* entry in the MAGIC 1Password.
+
+Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN` is the
+'SCAR ADD Metadata Toolbox (Data Catalogue) CSW Revision Tracking GitLab Personal Access Token (PAT)' item in the shared
+vault in the MAGIC 1Password account.
 
 ### Package structure
 
@@ -1140,7 +1260,7 @@ preserves the existing interface of the Python property and ignores new features
 Later in step (3), the `Record.lineage()` or `Item.lineage()` Python property can be amended to return both
 properties, or new properties added for the additional property if that makes more sense.
 
-#### Dependency vulnerability checks
+### Dependency vulnerability checks
 
 The [Safety](https://pypi.org/project/safety/) package is used to check dependencies against known vulnerabilities.
 
@@ -1152,6 +1272,8 @@ vetting of dependencies, or a proper audit of potential issues by security profe
 proper advice.
 
 Checks are run automatically in [Continuous Integration](#continuous-integration).
+
+Safety is configured using a [Policy File](https://docs.pyup.io/docs/safety-20-policy-file) in `.safety-policy`.
 
 To check locally:
 

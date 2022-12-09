@@ -8,6 +8,7 @@ import click
 from click import Abort
 from click_spinner import spinner
 from flask import Blueprint, current_app, render_template
+from flask.cli import AppGroup
 from importlib_resources import as_file as resource_path_as_file, files as resource_path
 from lxml.etree import (
     ElementTree,
@@ -30,6 +31,9 @@ from scar_add_metadata_toolbox.csw import (
     CSWDatabaseAlreadyInitialisedError,
     CSWDatabaseNotInitialisedError,
     CSWDatabasePostGISExtensionUnavailableError,
+    CSWTrackingRepositoryAlreadyInitialisedError,
+    CSWTrackingRepositoryInvalidCredentialsError,
+    CSWTrackingRepositoryNotEnabledError,
     RecordInsertConflictError,
     RecordNotFoundError,
     RecordServerError,
@@ -44,17 +48,19 @@ record_commands_blueprint.cli.short_help = "Manage metadata records."
 def list_records():
     """List all records."""
     try:
-        records = current_app.records.list_records()
-        _records = []
-        for record in records.values():
-            _records.append(
-                {
-                    "identifier": record.identifier,
-                    "type": record.hierarchy_level,
-                    "title": record.title,
-                    "status": "Published" if record.published else "Unpublished",
-                }
-            )
+        # noinspection PyArgumentList
+        with spinner():
+            records = current_app.records.list_records()
+            _records = []
+            for record in records.values():
+                _records.append(
+                    {
+                        "identifier": record.identifier,
+                        "type": record.hierarchy_level,
+                        "title": record.title,
+                        "status": "Published" if record.published else "Unpublished",
+                    }
+                )
         print("")
         print(
             tabulate(
@@ -93,7 +99,7 @@ def list_records():
 def import_record(  # noqa: C901
     ctx, record_path: str, allow_update: bool = False, publish: bool = False, allow_republish: bool = False
 ):
-    """Import a record from a file."""
+    """Import record from RECORD_PATH."""
     try:
         record_path = Path(record_path)
         record = Record()
@@ -141,7 +147,7 @@ def import_record(  # noqa: C901
 def import_records(
     ctx, records_path: str, allow_update: bool = False, publish: bool = False, allow_republish: bool = False
 ):
-    """Import records from files in a directory."""
+    """Import records from files in RECORDS_PATH."""
     records_path = Path(records_path)
     record_paths = sorted(records_path.glob("*.json"))
 
@@ -161,10 +167,10 @@ def import_records(
 
 
 @record_commands_blueprint.cli.command("publish")
-@click.argument("record-identifier")
+@click.argument("record_identifier")
 @click.option("--allow-republish", is_flag=True, help="Republish any existing, published, record.")
 def publish_record(record_identifier: str, allow_republish: bool = False):
-    """Publish a record."""
+    """Publish record identified by RECORD_IDENTIFIER."""
     try:
         current_app.records.publish_record(record_identifier=record_identifier, republish=False)
         print(f"Ok. Record '{record_identifier}' published.")
@@ -215,11 +221,11 @@ def publish_records(ctx, force_republish: bool = False):
 
 
 @record_commands_blueprint.cli.command("export")
-@click.argument("record-identifier")
+@click.argument("record_identifier")
 @click.argument("record_path", type=click.Path(dir_okay=False))
 @click.option("--allow-overwrite", is_flag=True, help="Allow existing export to be overwritten.")
 def export_record(record_identifier: str, record_path: str, allow_overwrite: bool = False):
-    """Export a record to a file."""
+    """Export record identified by RECORD_IDENTIFIER to RECORD_PATH."""
     record_path = Path(record_path)
 
     try:
@@ -259,7 +265,7 @@ def export_record(record_identifier: str, record_path: str, allow_overwrite: boo
 @click.option("--allow-overwrite", is_flag=True, help="Allow existing exports to be overwritten.")
 @click.pass_context
 def export_records(ctx, records_path: str, allow_overwrite: bool = False):
-    """Export all records as files in a directory."""
+    """Export all records as files to RECORDS_PATH."""
     records_path = Path(records_path)
     record_identifiers = current_app.records.list_record_identifiers()
 
@@ -279,10 +285,10 @@ def export_records(ctx, records_path: str, allow_overwrite: bool = False):
 
 
 @record_commands_blueprint.cli.command("remove")
-@click.argument("record-identifier")
+@click.argument("record_identifier")
 @click.option("--force-remove", is_flag=True, help="Suppress interactive conformation.")
 def remove_record(record_identifier: str, force_remove: bool):
-    """Remove an unpublished record."""
+    """Remove unpublished record identified by RECORD_IDENTIFIER."""
     if not force_remove:
         if not click.confirm(f"CONFIRM: Permanently remove record '{record_identifier}'?", abort=True):
             raise Abort()
@@ -329,9 +335,9 @@ def remove_records(ctx):
 
 
 @record_commands_blueprint.cli.command("retract")
-@click.argument("record-identifier")
+@click.argument("record_identifier")
 def retract_record(record_identifier: str):
-    """Retract a published record."""
+    """Retract published record identified by RECORD_IDENTIFIER."""
     try:
         current_app.records.retract_record(record_identifier=record_identifier)
         print(f"Ok. Record '{record_identifier}' retracted.")
@@ -612,16 +618,19 @@ def build_publish(ctx, build: bool = False, force_publish: bool = False):
 csw_commands_blueprint = Blueprint("csw", __name__)
 csw_commands_blueprint.cli.short_help = "Manage CSW catalogues."
 
+csw_setup_cli = AppGroup("setup", short_help="Setup CSW databases and tracking repos.")
+csw_commands_blueprint.cli.add_command(csw_setup_cli)
 
-@csw_commands_blueprint.cli.command("setup")
+
+@csw_setup_cli.command("db")
 @click.argument("catalogue")
-def setup_catalogue(catalogue: str):
-    """Setup catalogue database structure."""
+def setup_catalogue_backing_db(catalogue: str):
+    """Setup backing database for CATALOGUE."""
     try:
         # noinspection PyArgumentList
         with spinner():
-            current_app.repositories[catalogue].setup()
-        print(f"Ok. Catalogue '{catalogue}' setup.")
+            current_app.repositories[catalogue].setup_database()
+        print(f"Ok. Backing database for Catalogue '{catalogue}' set up.")
     except KeyError:
         print(
             f"No. CSW catalogue '{catalogue}' does not exist. "
@@ -629,11 +638,34 @@ def setup_catalogue(catalogue: str):
         )
         sys_exit(EX_USAGE)
     except CSWDatabaseAlreadyInitialisedError:
-        print(f"Ok. Note CSW catalogue '{catalogue}' is already setup.")
+        print(f"Ok. Note: Backing database for Catalogue '{catalogue}' already setup.")
     except CSWDatabasePostGISExtensionUnavailableError:  # pragma: no cover (will be addressed in #116)
+        print("No. Backing database does not have the PostGIS extension enabled. Enable this extension and try again.")
+
+
+@csw_setup_cli.command("repo")
+@click.argument("catalogue")
+def setup_catalogue_tracking_repo(catalogue: str):
+    """Setup tracking repo for CATALOGUE."""
+    try:
+        # noinspection PyArgumentList
+        with spinner():
+            current_app.repositories[catalogue].setup_tracking()
+        print(f"Ok. Tracking repo for Catalogue '{catalogue}' set up.")
+    except KeyError:
         print(
-            "No. CSW backing database does not have the PostGIS extension enabled. Enable this extension and try again."
+            f"No. CSW catalogue '{catalogue}' does not exist. "
+            f"Valid options are [{', '.join(current_app.repositories.keys())}]."
         )
+        sys_exit(EX_USAGE)
+    except CSWTrackingRepositoryNotEnabledError:
+        print(f"No. Revision tracking not enabled for Catalogue '{catalogue}'. Enable this feature and try again.")
+        sys_exit(EX_USAGE)
+    except CSWTrackingRepositoryAlreadyInitialisedError:
+        print(f"Ok. Note: Tracking repo for CSW catalogue '{catalogue}' already setup.")
+    except CSWTrackingRepositoryInvalidCredentialsError:
+        print("No. Access credentials for revision tracking git remote are invalid. Check credentials and try again.")
+        sys_exit(EX_USAGE)
 
 
 auth_commands_blueprint = Blueprint("auth", __name__)

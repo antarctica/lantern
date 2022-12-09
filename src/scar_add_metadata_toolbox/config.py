@@ -456,7 +456,7 @@ class DevelopmentConfig(Config):  # pragma: no cover
                 "CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_REMOTE_URL"
             ] = "https://gitlab.data.bas.ac.uk/felnne/add-catalogue-integration-records.git"
 
-        if "APP_S3_BUCKET" in os.environ:
+        if "APP_S3_BUCKET" not in os.environ:
             os.environ["APP_S3_BUCKET"] = "add-catalogue-integration.data.bas.ac.uk"
 
     # noinspection PyPep8Naming

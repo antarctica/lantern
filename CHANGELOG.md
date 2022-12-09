@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Added
 
+* Revision tracking for the unpublished CSW catalogue
+  [#39](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/39)
 * 404 error handler route for server side endpoints
   [#319](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/319)
 * Dynamic health endpoint indicating basic liveliness and installed package version
@@ -42,7 +44,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#316](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/316)
 * Correcting Esri product names in WMS instructions
   [#327](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/327)
-  [#316](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/316)
 * Suppressing currently unsupported ESRI Living Atlas distribution options from displaying in a broken state
   [#294](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/294)
 * Incorrectly committed pyenv `.python-version` file

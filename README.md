@@ -852,6 +852,9 @@ Backing git repositories used for [CSW Revision Tracking](#csw-revision-tracking
 initialisation using the `csw setup repo` [CLI command](docs/command-reference.md#csw-setup-repo) for the *unpublished*
 repository.
 
+**Note:** Make sure to set the `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_REMOTE_URL` environment variable on the client
+side when running this command.
+
 ### ESRI ArcGIS
 
 ESRI ArcGIS is used for the [web maps](#esri-web-maps) within the catalogue static site.
@@ -1013,7 +1016,7 @@ Toolbox - ESRI ArcGIS API key' item in the MAGIC shared vault in 1Password as th
 server:
 
 ```shell
-# In another terminal; Start the Flask application as a server (using the production database)
+# In another terminal; Start the Flask application as a server (using the staging database)
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION=postgresql://pycsw_staging:xxx@bsldb.nerc-bas.ac.uk/pycsw_staging CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION=postgresql://pycsw_staging:xxx@bsldb.nerc-bas.ac.uk/pycsw_staging CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_REMOTE_URL=https://gitlab.data.bas.ac.uk/MAGIC/add-catalogue-records-integration.git CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN=xxx poetry run flask run
 ```
 

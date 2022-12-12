@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Revision tracking for the unpublished CSW catalogue
   [#39](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/39)
+* Add Related tab to hold related resources to the main resource
+  [#322](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/322)
 * 404 error handler route for server side endpoints
   [#319](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/319)
 * Dynamic health endpoint indicating basic liveliness and installed package version

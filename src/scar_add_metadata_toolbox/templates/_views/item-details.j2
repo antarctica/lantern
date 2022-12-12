@@ -57,6 +57,12 @@
                 </a>
             </li>
             <li role="presentation">
+                <a href="#item-details-related" role="tab" data-toggle="tab">
+                    <i class="far fa-books"></i>
+                    Related
+                </a>
+            </li>
+            <li role="presentation">
                 <a href="#item-details-additional-information" role="tab" data-toggle="tab">
                     <i class="far fa-info-square"></i>
                     Additional Information
@@ -87,6 +93,9 @@
             </div>
             <div id="item-details-lineage" class="bsk-tab-pane bsk-fade" role="tabpanel">
                 {% include 'app/_includes/items/lineage.j2' %}
+            </div>
+            <div id="item-details-related" class="bsk-tab-pane bsk-fade" role="tabpanel">
+                {% include 'app/_includes/items/related.j2' %}
             </div>
             <div id="item-details-additional-information" class="bsk-tab-pane bsk-fade" role="tabpanel">
                 {% include 'app/_includes/items/additional-information.j2' %}

@@ -2146,6 +2146,24 @@ class Item:
         return self._format_date(date_datetime=self.record.metadata_updated)
 
     @property
+    def related_references(self) -> List[dict]:
+        return Collection._filter_aggregations(
+            aggregations=self.record.aggregations, association_type="crossReference", initiative_type="sciencePaper"
+        )
+
+    @property
+    def related_project_resources(self) -> List[dict]:
+        return Collection._filter_aggregations(
+            aggregations=self.record.aggregations, association_type="crossReference", initiative_type="project"
+        )
+
+    @property
+    def related_datasets(self) -> List[dict]:
+        return Collection._filter_aggregations(
+            aggregations=self.record.aggregations, association_type="crossReference", initiative_type="investigation"
+        )
+
+    @property
     def released(self) -> str:
         _date = self.record.dates["released"]
         return self._format_date(date_datetime=_date["date"], date_precision=_date["date_precision"])

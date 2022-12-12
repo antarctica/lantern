@@ -1,0 +1,35 @@
+<section class="app-item-tab app-item-related">
+    <header>
+        <h2><i class="far fa-books"></i> Related</h2>
+    </header>
+    {% if item.related_references %}
+        <h3>References</h3>
+        {% for reference in item.related_references %}
+            {% if reference.identifier %}
+                <div>
+                <a href="{{ reference.identifier.href }}">{{ reference.identifier.identifier }}</a>
+                </div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+    {% if item.related_project_resources %}
+        <h3>Project Resources</h3>
+        {% for project_resource in item.related_project_resources %}
+            {% if project_resource.identifier %}
+                <div>
+                <a href="{{ project_resource.identifier.href }}">{{ project_resource.identifier.identifier }}</a>
+                </div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+    {% if item.related_datasets %}
+        <h3>Datasets</h3>
+        {% for dataset in item.related_datasets %}
+            {% if dataset.identifier %}
+                <div>
+                <a href="{{ dataset.identifier.href }}">{{ dataset.identifier.identifier }}</a>
+                </div>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+</section>

@@ -193,17 +193,32 @@ Logs for this service are written to *stdout/stderr* as appropriate.
 
 ### Health checks
 
-A check for the Flask application is available to determine the health of the server side application (CSV endpoints).
+Two endpoints are available to check the health of the static site and Flask application respectively:
 
-It is available at `/meta/health/v1` and uses the draft
+* static site: `/static/txt/heartbeat.txt`
+* Flask app / CSW endpoints: `/meta/health/v1`
+
+The static site health check is a simple file that is copied into the static site when built. 
+
+The Flask/CSW health check uses the draft
 [Health Check Response Format for HTTP APIs](https://inadarei.github.io/rfc-healthcheck) RFC structure.
 
-**Note:** This endpoint is tested or designed for high frequency checks (i.e. more than every 10 seconds).
+**Note:** This endpoint is not rated for high frequency checks and should not be checked more than every 10 seconds.
 
-It is intended for use in monitoring systems, and to verify the deployed version of the service. It is currently a very
-basic check, without verifying things like database connectivity.
+Both endpoints are intended for use in monitoring systems, where a non-200 status code can be interpreted as a failure. 
+The Flask endpoint can also be used to verify the deployed version of the service. Both checks are currently very basic.
 
-Example request/response:
+Example request/response (static site):
+
+```
+$ curl "https://www.example.com/static/txt/heartbeat.txt"
+```
+
+```
+badump, badump
+```
+
+Example request/response (Flask route):
 
 ```
 $ curl "https://example.com/meta/health/v1" -H 'Accept: application/json'

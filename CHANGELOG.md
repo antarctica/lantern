@@ -42,7 +42,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Fixed
 
-* Correcting incorrect types on generator functions
+* Restoring health check for static site
+  [#346](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/346)
+* Correcting types on generator functions
   [#316](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/316)
 * Correcting Esri product names in WMS instructions
   [#327](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/327)

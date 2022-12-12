@@ -59,6 +59,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed
 
+* Exempting SQLAlchemy insecure URL string casting security vulnerability
+  [#344](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/344)
 * Exempting AuthLib dependency security vulnerabilities
   [#329](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/329)
 * Improving EditorConfig configuration for Terraform and Markdown files

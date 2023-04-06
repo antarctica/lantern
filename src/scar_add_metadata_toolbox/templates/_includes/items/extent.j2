@@ -5,7 +5,15 @@
 
     <div class="bsk-row">
         <div class="bsk-col-12-md-6">
-            <div id="item-map"></div>
+            {% if item.geographic_extents[0].bounding_box.east_longitude == 180
+                and item.geographic_extents[0].bounding_box.north_latitude == -60
+                and item.geographic_extents[0].bounding_box.south_latitude == -90
+                and item.geographic_extents[0].bounding_box.west_longitude == -180
+            %}
+                <img src="/static/img/add-map.jpg" alt="extent map" />
+            {% else %}
+                <div id="item-map"></div>
+            {% endif %}
         </div>
         <div class="bsk-col-12-md-6">
             <header>

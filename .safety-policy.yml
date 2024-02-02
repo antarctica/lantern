@@ -21,16 +21,16 @@ security:
     ignore-vulnerabilities:
         51668:  # (PVE-2022-51668)
             reason: we don't believe we call this method, see MAGIC/add-metadata-toolbox#344 for details
-            expires: '2023-06-12'
+            expires: '2024-06-01'
         51646:  # https://pyup.io/v/51646/f17 (CVE-2022-39174)
             reason: we don't believe we are vulnerable to this, see MAGIC/add-metadata-toolbox#329 for details
-            expires: '2023-06-06'
+            expires: '2024-06-01'
         51645:  # https://pyup.io/v/51645/f17 (CVE-2022-39175)
             reason: we don't believe we are vulnerable to this, see MAGIC/add-metadata-toolbox#329 for details
-            expires: '2023-06-06'
+            expires: '2024-06-01'
         51634:  # https://pyup.io/v/51634/f17 (PVE-2022-51634)
             reason: we don't believe we are vulnerable to this, see MAGIC/add-metadata-toolbox#329 for details
-            expires: '2023-06-06'
+            expires: '2024-06-01'
 
 # Configuration for the `safety alert` command
 #

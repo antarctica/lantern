@@ -17,18 +17,18 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-awscli = "1.27.16" # pinned to aid in dependency resolution time
+awscli = "1.31.8" # pinned to aid in dependency resolution time
 bas-metadata-library = "^0.9.1"
 bas-style-kit-jinja-templates = "^0.7.0"
 click-spinner = "^0.1.10"
 dulwich = "^0.20.50"
 Flask = "^2.0.2"
 flask-azure-oauth = "^0.7.0"
-Markdown = "3.4.1"
+Markdown = "^3.4.1"
 msal = "^1.19.0"
-python = "^3.8.1"
+python = "^3.9"
 python-dateutil = "^2.8.1"
-python-dotenv = "^0.21.0"
+python-dotenv = "^1.0.0"
 requests = "^2.28.1"
 sentry-sdk = {version = "^1.9.9", extras = ["flask"]}
 str2bool = "^1.1"
@@ -38,9 +38,9 @@ tabulate = "^0.9.0"
 importlib_resources = "^5.10.0"
 
 # # Dependencies for vendored OWSlib package # #
-pytz = "^2022.2.1"
-pyproj = "3.4.0"  # pinned to ensure compatibility with PROJ version available in Python alpine container
-pyyaml = "^5.4"  # pinned for AWS CLI compatibility, which requires PyYAML < 5.5
+pytz = "^2023.3"
+pyproj = "3.6.1"  # pinned to ensure compatibility with PROJ version available in Python alpine container
+pyyaml = "^6.0"   # pinned for AWS CLI compatibility, which requires PyYAML < 6.1
 # Note: `python-dateutil and `requests` dependencies skipped as they already dependencies of the main app.
 
 # # Dependencies for vendored PyCSW package # #
@@ -52,10 +52,10 @@ SQLAlchemy = "^1.4.41"
 # Note: `lxml` and `pyproj` dependencies skipped as they already dependencies of main app and owslib dependency.
 
 [tool.poetry.group.dev.dependencies]
-flake8 = "^5.0.4"  # pinned because https://github.com/PyCQA/flake8-import-order/issues/189 not in a release yet
+flake8 = "^6.1.0"
 flake8-bandit = "^4.1.1"
 flake8-black = "^0.3.5"
-flake8-bugbear = "^22.10.27"
+flake8-bugbear = "^23.12.2"
 flake8-builtins = "^2.0.1"
 flake8-comprehensions = "^3.10.1"
 flake8-import-order = "^0.18.1"

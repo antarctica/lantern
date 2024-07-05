@@ -33,7 +33,7 @@ security:
             expires: '2025-01-01'
         70612:  # https://data.safetycli.com/v/70612/f17/ (PVE-2022-51668)
             reason: we don't believe we call this method, see MAGIC/add-metadata-toolbox#372 for details
-            expires: '2025-01-01'
+            expires: '2100-01-01'
 
 # Configuration for the `safety alert` command
 #

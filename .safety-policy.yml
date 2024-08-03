@@ -21,16 +21,22 @@ security:
     ignore-vulnerabilities:
         51668:  # (PVE-2022-51668)
             reason: we don't believe we call this method, see MAGIC/add-metadata-toolbox#344 for details
-            expires: '2024-06-01'
+            expires: '2025-01-01'
         51646:  # https://pyup.io/v/51646/f17 (CVE-2022-39174)
             reason: we don't believe we are vulnerable to this, see MAGIC/add-metadata-toolbox#329 for details
-            expires: '2024-06-01'
+            expires: '2025-01-01'
         51645:  # https://pyup.io/v/51645/f17 (CVE-2022-39175)
             reason: we don't believe we are vulnerable to this, see MAGIC/add-metadata-toolbox#329 for details
-            expires: '2024-06-01'
+            expires: '2025-01-01'
         51634:  # https://pyup.io/v/51634/f17 (PVE-2022-51634)
             reason: we don't believe we are vulnerable to this, see MAGIC/add-metadata-toolbox#329 for details
-            expires: '2024-06-01'
+            expires: '2025-01-01'
+        70612:  # https://data.safetycli.com/v/70612/f17/ (PVE-2022-51668)
+            reason: we don't believe we call this method, see MAGIC/add-metadata-toolbox#372 for details
+            expires: '2100-01-01'
+        71636:  # https://data.safetycli.com/v/71636/f17 (CVE-2024-37568)
+            reason: temporary exemption to unblock release until we can assess properly, see MAGIC/add-metadata-toolbox#377 for details
+            expires: '2024-09-01'
 
 # Configuration for the `safety alert` command
 #

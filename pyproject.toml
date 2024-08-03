@@ -37,6 +37,9 @@ tabulate = "^0.9.0"
 # # Backports # #
 importlib_resources = "^5.10.0"
 
+# Poetry export workaround
+urllib3 = ">=1.26,<2"
+
 # # Dependencies for vendored OWSlib package # #
 pytz = "^2023.3"
 pyproj = "3.6.1"  # pinned to ensure compatibility with PROJ version available in Python alpine container

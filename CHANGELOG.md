@@ -12,6 +12,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Temporary workaround added for dynamic extent map added for ADD records
   [#354](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/354)
 
+### Changed
+
+* Updating app dependencies
+  [#373](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/373)
+* Running tests and linting when packages change (to ensure stability and detect vulnerable packages)
+  [#373](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/373)
+
 ## [0.6.0] - 2022-12-12 [BREAKING!]
 
 ### Removed [BREAKING!]

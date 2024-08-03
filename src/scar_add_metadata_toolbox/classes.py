@@ -1906,7 +1906,7 @@ class Item:
 
         _now = datetime.today()
         _overdue = released_date
-        if type(released_date) == date:  # pragma: no cover (added for future use)
+        if isinstance(released_date, date):  # pragma: no cover (added for future use)
             _now = _now.date()
         if maintenance_frequency == "biannually":
             _overdue += relativedelta(months=+6)
@@ -1936,7 +1936,7 @@ class Item:
 
         download = {
             # Bandit B303/S303 warning is exempted as these hashes are not used for any security related purposes
-            "id": sha1(json.dumps(distribution).encode()).hexdigest(),  # noqa: S303 - nosec
+            "id": sha1(json.dumps(distribution).encode()).hexdigest(),  # noqa: S303, S324 - nosec
             "format": None,
             "format_title": None,
             "format_description": None,

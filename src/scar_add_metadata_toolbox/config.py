@@ -441,20 +441,20 @@ class DevelopmentConfig(Config):  # pragma: no cover
             os.environ["CSW_SERVER_CONFIG_PUBLISHED_ENDPOINT"] = "http://localhost:5000/csw/published"
 
         if "CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION" not in os.environ:
-            os.environ[
-                "CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION"
-            ] = "postgresql://postgres:password@localhost/postgres"
+            os.environ["CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION"] = (
+                "postgresql://postgres:password@localhost/postgres"
+            )
         if "CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION" not in os.environ:
-            os.environ[
-                "CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION"
-            ] = "postgresql://postgres:password@localhost/postgres"
+            os.environ["CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION"] = (
+                "postgresql://postgres:password@localhost/postgres"
+            )
 
         if "CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_WORKING_DIR" not in os.environ:
             os.environ["CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_WORKING_DIR"] = str(Path("./_record_revisions"))
         if "CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_REMOTE_URL" not in os.environ:
-            os.environ[
-                "CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_REMOTE_URL"
-            ] = "https://gitlab.data.bas.ac.uk/felnne/add-catalogue-integration-records.git"
+            os.environ["CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_REMOTE_URL"] = (
+                "https://gitlab.data.bas.ac.uk/felnne/add-catalogue-integration-records.git"
+            )
 
         if "APP_S3_BUCKET" not in os.environ:
             os.environ["APP_S3_BUCKET"] = "add-catalogue-integration.data.bas.ac.uk"
@@ -488,12 +488,12 @@ class TestingConfig(DevelopmentConfig):
         os.environ["CSW_SERVER_CONFIG_UNPUBLISHED_ENDPOINT"] = "https://example.com/csw/unpublished"
         os.environ["CSW_SERVER_CONFIG_PUBLISHED_ENDPOINT"] = "https://example.com/csw/published"
 
-        os.environ[
-            "CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION"
-        ] = "postgresql://postgres:password@example/postgres"
-        os.environ[
-            "CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION"
-        ] = "postgresql://postgres:password@example/postgres"
+        os.environ["CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION"] = (
+            "postgresql://postgres:password@example/postgres"
+        )
+        os.environ["CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION"] = (
+            "postgresql://postgres:password@example/postgres"
+        )
 
         os.environ["S3_BUCKET"] = "example"
 

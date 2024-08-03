@@ -1187,7 +1187,7 @@ $ docker build -f gitlab-ci.Dockerfile -t docker-registry.data.bas.ac.uk/magic/a
 
 [3]
 
-```
+``` 
 $ docker push docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox:latest
 ```
 

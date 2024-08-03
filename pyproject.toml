@@ -129,7 +129,6 @@ max-complexity = 10
 application-import-names = ['scar_add_metadata_toolbox', 'tests.scar_add_metadata_toolbox_tests']
 import-order-style = 'smarkets'
 
-
 [build-system]
-requires = ["poetry>=1.0.0"]
+requires = ["poetry>=1.2.0"]
 build-backend = "poetry.masonry.api"

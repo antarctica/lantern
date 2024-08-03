@@ -1929,10 +1929,13 @@ class Item:
         :rtype dict
         :return: item download option
         """
-        if "format" not in distribution:  # pragma: no cover (will be addressed in #116)
-            distribution["format"] = {"format": None}
-        if "href" not in distribution["format"]:
-            distribution["format"]["href"] = None
+        format_dict = distribution.get("format")
+        if format_dict is not None:
+            distribution_format = format_dict.get("format")
+            distribution_format_href = format_dict.get("href")
+        else:  # pragma: no cover (will be addressed in #116)
+            distribution_format = None
+            distribution_format_href = None
 
         download = {
             # Bandit B303/S303 warning is exempted as these hashes are not used for any security related purposes
@@ -1948,35 +1951,32 @@ class Item:
             size = distribution["transfer_option"]["size"]
             download["size"] = f"{size['magnitude']}{size['unit']}"
 
-        if (
-            distribution["format"]["href"]
-            == "https://www.iana.org/assignments/media-types/application/geopackage+sqlite3"
-        ):
+        if distribution_format_href == "https://www.iana.org/assignments/media-types/application/geopackage+sqlite3":
             download["format"] = "gpkg"
             download["format_title"] = "GeoPackage"
             download["format_description"] = "OGC GeoPackage"
-        elif distribution["format"]["href"] == "https://www.iana.org/assignments/media-types/application/vnd.shp":
+        elif distribution_format_href == "https://www.iana.org/assignments/media-types/application/vnd.shp":
             download["format"] = "shp"
             download["format_title"] = "Shapefile"
             download["format_description"] = "ESRI Shapefile"
         elif (
-            distribution["format"]["href"] == "https://www.iana.org/assignments/media-types/application/pdf"
+            distribution_format_href == "https://www.iana.org/assignments/media-types/application/pdf"
         ):  # pragma: no cover (added for future use)
             download["format"] = "pdf"
             download["format_title"] = "PDF"
             download["format_description"] = "Adobe PDF"
         elif (
-            distribution["format"]["href"] == "https://www.iana.org/assignments/media-types/application/png"
+            distribution_format_href == "https://www.iana.org/assignments/media-types/application/png"
         ):  # pragma: no cover (added for future use)
             download["format"] = "png"
             download["format_title"] = "PNG"
             download["format_description"] = "PNG image"
-        elif distribution["format"]["format"] == "Web Map Service":
+        elif distribution_format == "Web Map Service":
             download["format"] = "wms"
             download["format_title"] = "Web Map Service (WMS)"
             download["format_description"] = "OGC Web Map Service"
 
-        if distribution["format"]["format"] == "Web Map Service":
+        if distribution_format == "Web Map Service":
             endpoint_elements = url_parse(distribution["transfer_option"]["online_resource"]["href"])
             endpoint_parameters: dict = query_string_parse(endpoint_elements.query)
             download["endpoint"] = f"{endpoint_elements.scheme}://{endpoint_elements.netloc}{endpoint_elements.path}"

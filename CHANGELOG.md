@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Temporary workaround added for dynamic extent map added for ADD records
   [#354](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/354)
+* Typos in licence templates
+  [#379](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/379)
 
 ### Changed
 

@@ -51,6 +51,8 @@ test:
   rules:
     - changes:
         - '**/*.py'
+        - 'pyproject.toml'
+        - 'poetry.lock'
 
 lint:
   stage: 📋 lint
@@ -62,6 +64,8 @@ lint:
   rules:
     - changes:
         - '**/*.py'
+        - '.safety-policy.yml'
+        - 'poetry.lock'
 
 build:
   stage: 🏗 build

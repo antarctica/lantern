@@ -113,7 +113,8 @@ select = ['A','B','B9','BLK','C','C4','E','F','FS','N','I','S','W']
 # S320: for using fromstring to process XML (see 'lxml package (bandit)' section in README for details)
 # S410: for using Element to process XML (see 'lxml package (bandit)' section in README for details)
 # W503: for Black compatibility (line break before binary operator)
-ignore = ['E203','E501','S320','S410','W503']
+# B907: for not being a real issue
+ignore = ['E203','E501','S320','S410','W503', 'B907']
 
 # tests/*: S101 - ignore use of assert
 # config.py: N802 - ignore use of upper case method names
@@ -129,7 +130,6 @@ max-complexity = 10
 application-import-names = ['scar_add_metadata_toolbox', 'tests.scar_add_metadata_toolbox_tests']
 import-order-style = 'smarkets'
 
-
 [build-system]
-requires = ["poetry>=1.0.0"]
+requires = ["poetry>=1.2.0"]
 build-backend = "poetry.masonry.api"

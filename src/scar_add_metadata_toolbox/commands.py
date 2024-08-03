@@ -10,12 +10,6 @@ from click_spinner import spinner
 from flask import Blueprint, current_app, render_template
 from flask.cli import AppGroup
 from importlib_resources import as_file as resource_path_as_file, files as resource_path
-from lxml.etree import (
-    ElementTree,
-    fromstring,
-    ProcessingInstruction,
-    tostring,
-)  # nosec - see 'lxml` package (bandit)' section in README
 from tabulate import tabulate
 
 from scar_add_metadata_toolbox.classes import (
@@ -38,7 +32,7 @@ from scar_add_metadata_toolbox.csw import (
     RecordNotFoundError,
     RecordServerError,
 )
-from scar_add_metadata_toolbox.utils import aws_cli
+from scar_add_metadata_toolbox.utils import _build_item, _build_record, aws_cli, RECORD_STYLESHEETS
 
 record_commands_blueprint = Blueprint("records", __name__)
 record_commands_blueprint.cli.short_help = "Manage metadata records."
@@ -381,8 +375,6 @@ site_commands_blueprint.cli.short_help = "Manage static site."
 @site_commands_blueprint.cli.command("build-items")
 def build_items():
     """Build pages for all published items."""
-    items_output_path = Path(current_app.config["SITE_PATH"]).joinpath("items")
-
     try:
         # noinspection PyArgumentList
         with spinner():
@@ -396,13 +388,8 @@ def build_items():
         _items_count = 1
         for record in selected_records:
             print(f"# Item page {_items_count}/{len(selected_records)}")
-            item = Item(record=record)
-            item_output_path = items_output_path.joinpath(f"{item.identifier}/index.html")
-            item_output_path.parent.mkdir(exist_ok=True, parents=True)
-
-            with open(str(item_output_path), mode="w") as item_file:
-                item_file.write(render_template("app/_views/item-details.j2", item=item))
-            print(f"Ok. Generated item page for '{item.identifier}'.")
+            _build_item(record)
+            print(f"Ok. Generated item page for '{record.identifier}'.")
             _items_count += 1
         print(f"Ok. {len(selected_records)} item pages generated.")
     except CSWDatabaseNotInitialisedError:
@@ -416,6 +403,36 @@ def build_items():
         sys_exit(EX_USAGE)
     except CSWAuthInsufficientError:
         print("No. Missing permissions in auth token. Seek support to assign required permissions.")
+        sys_exit(EX_USAGE)
+
+
+# noinspection PyUnresolvedReferences
+@site_commands_blueprint.cli.command("build-item")
+@click.argument("record_identifier")
+def build_item(record_identifier: str):
+    """Build page for specified item."""
+    try:
+        # noinspection PyArgumentList
+        with spinner():
+            record = current_app.records.retrieve_record(record_identifier)
+
+        print(f"Generating item page for '{record.identifier}'")
+        _build_item(record)
+        print(f"Ok. Generated item page for '{record.identifier}'.")
+    except CSWDatabaseNotInitialisedError:
+        print("No. CSW catalogue not setup.")
+        sys_exit(EX_USAGE)
+    except CSWAuthError:
+        print("No. Error with auth token. Try signing out and in again or seek support.")
+        sys_exit(EX_USAGE)
+    except CSWAuthMissingError:
+        print("No. Missing auth token. Run `auth sign-in` first.")
+        sys_exit(EX_USAGE)
+    except CSWAuthInsufficientError:
+        print("No. Missing permissions in auth token. Seek support to assign required permissions.")
+        sys_exit(EX_USAGE)
+    except RecordNotFoundError:
+        print(f"No. Record '{record_identifier}' does not exist.")
         sys_exit(EX_USAGE)
 
 
@@ -472,52 +489,25 @@ def build_collections():
 @site_commands_blueprint.cli.command("build-records")
 def build_records():
     """Build pages for all published records (XML)."""
-    stylesheets = ["iso-html", "iso-rubric", "iso-xml"]
-    records_output_path = Path(current_app.config["SITE_PATH"]).joinpath("records")
-
     try:
         # noinspection PyArgumentList
         with spinner():
             records = list(current_app.records.retrieve_published_records())
 
-        print(f"{len(records) * len(stylesheets)} record pages to generate.")
+        print(f"{len(records) * len(RECORD_STYLESHEETS)} record pages to generate.")
         _records_count = 1
         for record in records:
-            _stylesheet_count = 1
-            for stylesheet in stylesheets:
-                print(
-                    f"# Record page {_records_count}/{len(records)} (stylesheet {_stylesheet_count}/{len(stylesheets)})"
-                )
-                record_output_path = records_output_path.joinpath(
-                    f"{record.identifier}/{stylesheet}/{record.identifier}.xml"
-                )
-                record_output_path.parent.mkdir(exist_ok=True, parents=True)
-
-                with open(str(record_output_path), mode="w") as record_file:
-                    record_xml = record.dumps(dump_format="xml")
-                    record_xml_element = ElementTree(fromstring(record_xml.encode()))
-                    record_xml_element_root = record_xml_element.getroot()
-
-                    if stylesheet == "iso-html":
-                        record_xml_element_root.addprevious(
-                            ProcessingInstruction(
-                                "xml-stylesheet", 'type="text/xsl" href="/static/xsl/iso-html/xml-to-html-ISO.xsl"'
-                            )
-                        )
-                    elif stylesheet == "iso-rubric":
-                        record_xml_element_root.addprevious(
-                            ProcessingInstruction(
-                                "xml-stylesheet", 'type="text/xsl" href="/static/xsl/iso-rubric/isoRubricHTML.xsl"'
-                            )
-                        )
-
-                    record_file.write(
-                        tostring(record_xml_element, pretty_print=True, xml_declaration=True, encoding="utf-8").decode()
-                    )
-                print(f"Ok. Generated item page for '{record.identifier}' (stylesheet '{stylesheet}').")
-                _stylesheet_count += 1
+            _build_record(
+                record,
+                lambda count, stylesheet, record=record, _records_count=_records_count: print(
+                    f"# Record page {_records_count}/{len(records)} (stylesheet {count}/{len(RECORD_STYLESHEETS)})"
+                ),
+                lambda count, stylesheet, record=record, _records_count=_records_count: print(
+                    f"Ok. Generated item page for '{record.identifier}' (stylesheet '{stylesheet}')."
+                ),
+            )
             _records_count += 1
-        print(f"Ok. {len(records) * len(stylesheets)} record pages generated.")
+        print(f"Ok. {len(records) * len(RECORD_STYLESHEETS)} record pages generated.")
     except CSWDatabaseNotInitialisedError:
         print("No. CSW catalogue not setup.")
         sys_exit(EX_USAGE)
@@ -529,6 +519,41 @@ def build_records():
         sys_exit(EX_USAGE)
     except CSWAuthInsufficientError:
         print("No. Missing permissions in auth token. Seek support to assign required permissions.")
+        sys_exit(EX_USAGE)
+
+
+@site_commands_blueprint.cli.command("build-record")
+@click.argument("record_identifier")
+def build_record(record_identifier: str):
+    """Build page for specified record (XML)."""
+    try:
+        # noinspection PyArgumentList
+        with spinner():
+            record = current_app.records.retrieve_record(record_identifier)
+
+        print(f"{len(RECORD_STYLESHEETS)} record pages to generate for record '{record.identifier}'.")
+        _build_record(
+            record,
+            lambda count, stylesheet: print(f"# Stylesheet {count}/{len(RECORD_STYLESHEETS)}"),
+            lambda count, stylesheet: print(
+                f"Ok. Generated item page for '{record.identifier}' (stylesheet '{stylesheet}')."
+            ),
+        )
+        print(f"Ok. {len(RECORD_STYLESHEETS)} record pages generated for record '{record.identifier}'.")
+    except CSWDatabaseNotInitialisedError:
+        print("No. CSW catalogue not setup.")
+        sys_exit(EX_USAGE)
+    except CSWAuthError:
+        print("No. Error with auth token. Try signing out and in again or seek support.")
+        sys_exit(EX_USAGE)
+    except CSWAuthMissingError:
+        print("No. Missing auth token. Run `auth sign-in` first.")
+        sys_exit(EX_USAGE)
+    except CSWAuthInsufficientError:
+        print("No. Missing permissions in auth token. Seek support to assign required permissions.")
+        sys_exit(EX_USAGE)
+    except RecordNotFoundError:
+        print(f"No. Record '{record_identifier}' does not exist.")
         sys_exit(EX_USAGE)
 
 

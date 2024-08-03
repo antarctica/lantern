@@ -15,14 +15,18 @@ from scar_add_metadata_toolbox.commands import (
 )
 from scar_add_metadata_toolbox.csw import (
     CSWAmbiguousRequestError,
+    CSWAuthError,
     CSWAuthInsufficientError,
     CSWAuthMissingError,
     CSWDatabaseNotInitialisedError,
     CSWTrackingRepositoryNotInitialisedError,
     CSWUnknownRequestError,
     CSWUnmappedRequestError,
+    RecordNotFoundError,
 )
 from scar_add_metadata_toolbox.utils import (
+    _build_item,
+    _build_record,
     _create_app_config,
     _create_app_jinja_loader,
     _create_csw_repositories,
@@ -115,5 +119,29 @@ def create_app():  # noqa: C901
             return Response(response="Missing authorisation token.", status=HTTPStatus.UNAUTHORIZED)
         except CSWAuthInsufficientError:
             return Response(response="Insufficient authorisation token.", status=HTTPStatus.FORBIDDEN)
+
+    @app.route("/site/build", methods=["POST"])
+    @auth(["BAS.MAGIC.ADD.Records.Publish.All"])
+    def build_item():
+        try:
+            record_id = request.args["item"]
+
+            record = app.records.retrieve_record(record_id)
+            _build_record(record)
+            _build_item(record)
+
+            return Response(status=HTTPStatus.CREATED)
+        except CSWDatabaseNotInitialisedError:
+            return Response(response="Internal server error.", status=HTTPStatus.INTERNAL_SERVER_ERROR)
+        except CSWAuthError:
+            return Response(response="Internal server error.", status=HTTPStatus.INTERNAL_SERVER_ERROR)
+        except CSWAuthMissingError:
+            return Response(response="Internal server error.", status=HTTPStatus.INTERNAL_SERVER_ERROR)
+        except CSWAuthInsufficientError:
+            return Response(response="Internal server error.", status=HTTPStatus.INTERNAL_SERVER_ERROR)
+        except RecordNotFoundError:
+            return Response(response="Record not found.", status=HTTPStatus.NOT_FOUND)
+        except KeyError:
+            return Response(response="Parameter 'item' missing.", status=HTTPStatus.BAD_REQUEST)
 
     return app

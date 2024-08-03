@@ -258,3 +258,26 @@ class MockPublicClientApplication:
                 app=current_app, roles=["BAS.MAGIC.ADD.Records.ReadWrite.All", "BAS.MAGIC.ADD.Records.Publish.All"]
             ).dumps()
         }
+
+
+def create_mock_auth(scopes_used=None):
+    class MockFlaskAzureOauth:
+        # noinspection PyUnusedLocal
+        def init_app(self, app):
+            pass
+
+        def __call__(self, scopes=None, *args, **kwargs):
+            def checkauth(func):
+                def wrapper(*args, **kwargs):
+                    if scopes_used is not None:
+                        scopes_used.append(scopes)
+
+                    return func(*args, **kwargs)
+
+                wrapper.__name__ = func.__name__
+
+                return wrapper
+
+            return checkauth
+
+    return MockFlaskAzureOauth

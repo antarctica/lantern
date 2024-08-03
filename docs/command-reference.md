@@ -1168,6 +1168,19 @@ Ok. Generated item page for '2cddeea3-eb67-46af-a002-8251337984d4'.
 Ok. 18 item pages generated.
 ```
 
+### `site build-item`
+
+Build page for an item.
+
+**Note:** You need to set the `APP_ESRI_API_KEY` environment variable with the value from the 'SCAR ADD Metadata
+Toolbox - ESRI ArcGIS API key' entry in the shared vault of the MAGIC 1Password account to use this command correctly.
+
+```
+$ flask site build-item f432236d-a5d9-4f3b-b286-f8175aba8732
+Generating item page for 'f432236d-a5d9-4f3b-b286-f8175aba8732'
+Ok. Generated item page for 'f432236d-a5d9-4f3b-b286-f8175aba8732'.
+```
+
 ### `site build-pages`
 
 Build pages for legal policies and feedback form.
@@ -1303,6 +1316,22 @@ Ok. Generated item page for '2cddeea3-eb67-46af-a002-8251337984d4' (stylesheet '
 # Record page 18/18 (stylesheet 3/3)
 Ok. Generated item page for '2cddeea3-eb67-46af-a002-8251337984d4' (stylesheet 'iso-xml').
 Ok. 54 record pages generated.
+```
+
+### `site build-record`
+
+Build page for a record (XML).
+
+```
+$ flask site build-record f432236d-a5d9-4f3b-b286-f8175aba8732
+3 record pages to generate for record 'f432236d-a5d9-4f3b-b286-f8175aba8732'.
+# Stylesheet 1/3
+Ok. Generated item page for 'f432236d-a5d9-4f3b-b286-f8175aba8732' (stylesheet 'iso-html').
+# Stylesheet 2/3
+Ok. Generated item page for 'f432236d-a5d9-4f3b-b286-f8175aba8732' (stylesheet 'iso-rubric').
+# Stylesheet 3/3
+Ok. Generated item page for 'f432236d-a5d9-4f3b-b286-f8175aba8732' (stylesheet 'iso-xml').
+Ok. 3 record pages generated for record 'f432236d-a5d9-4f3b-b286-f8175aba8732'.
 ```
 
 ### `site copy-assets`

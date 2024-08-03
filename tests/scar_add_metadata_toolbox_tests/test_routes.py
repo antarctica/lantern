@@ -1,7 +1,10 @@
 from http import HTTPStatus
+from pathlib import Path
 
 import pytest
 from flask.testing import FlaskClient
+
+from tests.scar_add_metadata_toolbox_tests.records import TestRecordConfigurations
 
 
 @pytest.mark.usefixtures("app_client")
@@ -107,3 +110,96 @@ class TestRouteCSW:
         )
         assert result.status_code == HTTPStatus.FORBIDDEN
         assert result.text == "Insufficient authorisation token."
+
+
+class TestRouteSiteBuild:
+    @pytest.mark.usefixtures("app_static_site_auth")
+    def test_site_build(self, app_static_site_auth):
+        result = app_static_site_auth.test_client().post(
+            f"/site/build?item={TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}"
+        )
+        assert result.status_code == HTTPStatus.CREATED
+
+        # Verify file structure
+        record_pages_paths = list(Path(app_static_site_auth.config["SITE_PATH"]).glob("**/*.*"))
+        item_pages_paths = list(Path(app_static_site_auth.config["SITE_PATH"]).glob("**/*.*"))
+        assert len(record_pages_paths) == 4
+        assert (
+            Path(app_static_site_auth.config["SITE_PATH"]).joinpath(
+                f"records/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}/iso-html/"
+                f"{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}.xml"
+            )
+            in record_pages_paths
+        )
+        assert (
+            Path(app_static_site_auth.config["SITE_PATH"]).joinpath(
+                f"records/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}/iso-rubric/"
+                f"{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}.xml"
+            )
+            in record_pages_paths
+        )
+        assert (
+            Path(app_static_site_auth.config["SITE_PATH"]).joinpath(
+                f"records/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}/iso-xml/"
+                f"{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}.xml"
+            )
+            in record_pages_paths
+        )
+        assert (
+            Path(app_static_site_auth.config["SITE_PATH"]).joinpath(
+                f"items/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}/index.html"
+            )
+            in item_pages_paths
+        )
+
+    @pytest.mark.usefixtures("app_static_site_auth")
+    def test_site_build_missing_record(self, app_static_site_auth):
+        result = app_static_site_auth.test_client().post("/site/build?item=does-not-exist")
+        assert result.status_code == HTTPStatus.NOT_FOUND
+        assert result.text == "Record not found."
+
+    @pytest.mark.usefixtures("app_static_site_auth")
+    def test_site_build_missing_item_parameter(self, app_static_site_auth):
+        result = app_static_site_auth.test_client().post("/site/build")
+        assert result.status_code == HTTPStatus.BAD_REQUEST
+        assert result.text == "Parameter 'item' missing."
+
+    @pytest.mark.usefixtures("app_static_site_auth_get_scopes")
+    def test_site_build_auth_scopes(self, app_static_site_auth_get_scopes):
+        app_static_site_auth_get_scopes.app.test_client().post(
+            f"/site/build?item={TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}"
+        )
+        assert len(app_static_site_auth_get_scopes.auth_scopes) == 1
+        assert app_static_site_auth_get_scopes.auth_scopes[0] == ["BAS.MAGIC.ADD.Records.Publish.All"]
+
+    @pytest.mark.usefixtures("app_static_site_auth_csw_not_setup")
+    def test_site_build_csw_not_setup(self, app_static_site_auth_csw_not_setup):
+        result = app_static_site_auth_csw_not_setup.test_client().post(
+            f"/site/build?item={TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}"
+        )
+        assert result.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+        assert result.text == "Internal server error."
+
+    @pytest.mark.usefixtures("app_static_site_auth_csw_auth_token_error")
+    def test_site_build_csw_auth_token_error(self, app_static_site_auth_csw_auth_token_error):
+        result = app_static_site_auth_csw_auth_token_error.test_client().post(
+            f"/site/build?item={TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}"
+        )
+        assert result.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+        assert result.text == "Internal server error."
+
+    @pytest.mark.usefixtures("app_static_site_auth_csw_missing_auth_token")
+    def test_site_build_csw_missing_auth_token(self, app_static_site_auth_csw_missing_auth_token):
+        result = app_static_site_auth_csw_missing_auth_token.test_client().post(
+            f"/site/build?item={TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}"
+        )
+        assert result.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+        assert result.text == "Internal server error."
+
+    @pytest.mark.usefixtures("app_static_site_auth_csw_insufficient_auth_token")
+    def test_site_build_csw_insufficient_auth_token(self, app_static_site_auth_csw_insufficient_auth_token):
+        result = app_static_site_auth_csw_insufficient_auth_token.test_client().post(
+            f"/site/build?item={TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}"
+        )
+        assert result.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+        assert result.text == "Internal server error."

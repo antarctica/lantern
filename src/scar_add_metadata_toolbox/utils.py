@@ -2,12 +2,20 @@ import json
 import os
 from base64 import urlsafe_b64decode
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Callable, Dict, Optional
 
 from awscli.clidriver import create_clidriver
+from flask import current_app, render_template
 from jinja2 import PackageLoader, PrefixLoader
+from lxml.etree import (
+    ElementTree,
+    fromstring,
+    ProcessingInstruction,
+    tostring,
+)  # nosec - see 'lxml` package (bandit)' section in README
 from werkzeug.utils import import_string
 
+from scar_add_metadata_toolbox.classes import Item, Record
 from scar_add_metadata_toolbox.config import Config
 from scar_add_metadata_toolbox.csw import CSWServer
 
@@ -205,3 +213,62 @@ class AppAuthToken:
         self.session_file_path.parent.mkdir(parents=True, exist_ok=True)
         with open(str(self.session_file_path), "w") as auth_file:
             json.dump(self._payload, auth_file, indent=4)
+
+
+def _build_item(record: Record):
+    """Build page for specified record."""
+    items_output_path = Path(current_app.config["SITE_PATH"]).joinpath("items")
+
+    item = Item(record=record)
+    item_output_path = items_output_path.joinpath(f"{item.identifier}/index.html")
+    item_output_path.parent.mkdir(exist_ok=True, parents=True)
+
+    with open(str(item_output_path), mode="w") as item_file:
+        item_file.write(render_template("app/_views/item-details.j2", item=item))
+
+
+RECORD_STYLESHEETS = ["iso-html", "iso-rubric", "iso-xml"]
+
+
+def _build_record(
+    record: Record,
+    on_stylesheet_begin: Optional[Callable[[int, str], None]] = None,
+    on_stylesheet_done: Optional[Callable[[int, str], None]] = None,
+):
+    """Build pages for specified record (XML)."""
+    records_output_path = Path(current_app.config["SITE_PATH"]).joinpath("records")
+
+    _stylesheet_count = 1
+    for stylesheet in RECORD_STYLESHEETS:
+        if on_stylesheet_begin is not None:
+            on_stylesheet_begin(_stylesheet_count, stylesheet)
+
+        record_output_path = records_output_path.joinpath(f"{record.identifier}/{stylesheet}/{record.identifier}.xml")
+        record_output_path.parent.mkdir(exist_ok=True, parents=True)
+
+        with open(str(record_output_path), mode="w") as record_file:
+            record_xml = record.dumps(dump_format="xml")
+            record_xml_element = ElementTree(fromstring(record_xml.encode()))
+            record_xml_element_root = record_xml_element.getroot()
+
+            if stylesheet == "iso-html":
+                record_xml_element_root.addprevious(
+                    ProcessingInstruction(
+                        "xml-stylesheet", 'type="text/xsl" href="/static/xsl/iso-html/xml-to-html-ISO.xsl"'
+                    )
+                )
+            elif stylesheet == "iso-rubric":
+                record_xml_element_root.addprevious(
+                    ProcessingInstruction(
+                        "xml-stylesheet", 'type="text/xsl" href="/static/xsl/iso-rubric/isoRubricHTML.xsl"'
+                    )
+                )
+
+            record_file.write(
+                tostring(record_xml_element, pretty_print=True, xml_declaration=True, encoding="utf-8").decode()
+            )
+
+        if on_stylesheet_done is not None:
+            on_stylesheet_done(_stylesheet_count, stylesheet)
+
+        _stylesheet_count += 1

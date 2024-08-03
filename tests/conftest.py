@@ -1,3 +1,4 @@
+from collections import namedtuple
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import patch
@@ -7,6 +8,7 @@ from flask.testing import FlaskClient
 
 from scar_add_metadata_toolbox import create_app
 from tests.scar_add_metadata_toolbox_tests.classes import (
+    create_mock_auth,
     MockCSWClient,
     MockCSWClientAuthError,
     MockCSWClientAuthInsufficient,
@@ -225,3 +227,98 @@ def app_client_mocked_csw_server_insufficient_auth_token():
 
         app = create_app()
         return app.test_client()
+
+
+@pytest.fixture
+def app_static_site_auth():
+    with patch(
+        "scar_add_metadata_toolbox.classes.CSWClient"
+    ) as mock_csw_client, TemporaryDirectory() as site_directory, patch(
+        "scar_add_metadata_toolbox.FlaskAzureOauth"
+    ) as mock_flask_azure_oauth:
+        mock_flask_azure_oauth.side_effect = create_mock_auth()
+        mock_csw_client.side_effect = MockCSWClient
+
+        app = create_app()
+        app.config["SITE_PATH"] = Path(site_directory)
+        return app
+
+
+@pytest.fixture
+def app_static_site_auth_csw_not_setup():
+    with patch(
+        "scar_add_metadata_toolbox.classes.CSWClient"
+    ) as mock_csw_client, TemporaryDirectory() as site_directory, patch(
+        "scar_add_metadata_toolbox.FlaskAzureOauth"
+    ) as mock_flask_azure_oauth:
+        mock_flask_azure_oauth.side_effect = create_mock_auth()
+        mock_csw_client.side_effect = MockCSWClientServerNotSetup
+
+        app = create_app()
+        app.config["SITE_PATH"] = Path(site_directory)
+        return app
+
+
+@pytest.fixture
+def app_static_site_auth_csw_auth_token_error():
+    with patch(
+        "scar_add_metadata_toolbox.classes.CSWClient"
+    ) as mock_csw_client, TemporaryDirectory() as site_directory, patch(
+        "scar_add_metadata_toolbox.FlaskAzureOauth"
+    ) as mock_flask_azure_oauth:
+        mock_flask_azure_oauth.side_effect = create_mock_auth()
+        mock_csw_client.side_effect = MockCSWClientAuthError
+
+        app = create_app()
+        app.config["SITE_PATH"] = Path(site_directory)
+        return app
+
+
+@pytest.fixture
+def app_static_site_auth_csw_missing_auth_token():
+    with patch(
+        "scar_add_metadata_toolbox.classes.CSWClient"
+    ) as mock_csw_client, TemporaryDirectory() as site_directory, patch(
+        "scar_add_metadata_toolbox.FlaskAzureOauth"
+    ) as mock_flask_azure_oauth:
+        mock_flask_azure_oauth.side_effect = create_mock_auth()
+        mock_csw_client.side_effect = MockCSWClientAuthMissing
+
+        app = create_app()
+        app.config["SITE_PATH"] = Path(site_directory)
+        return app
+
+
+@pytest.fixture
+def app_static_site_auth_csw_insufficient_auth_token():
+    with patch(
+        "scar_add_metadata_toolbox.classes.CSWClient"
+    ) as mock_csw_client, TemporaryDirectory() as site_directory, patch(
+        "scar_add_metadata_toolbox.FlaskAzureOauth"
+    ) as mock_flask_azure_oauth:
+        mock_flask_azure_oauth.side_effect = create_mock_auth()
+        mock_csw_client.side_effect = MockCSWClientAuthInsufficient
+
+        app = create_app()
+        app.config["SITE_PATH"] = Path(site_directory)
+        return app
+
+
+AppAuthScopes = namedtuple("AppAuthScopes", ["app", "auth_scopes"])
+
+
+@pytest.fixture
+def app_static_site_auth_get_scopes():
+    with patch(
+        "scar_add_metadata_toolbox.classes.CSWClient"
+    ) as mock_csw_client, TemporaryDirectory() as site_directory, patch(
+        "scar_add_metadata_toolbox.FlaskAzureOauth"
+    ) as mock_flask_azure_oauth:
+        auth_scopes = []
+
+        mock_flask_azure_oauth.side_effect = create_mock_auth(auth_scopes)
+        mock_csw_client.side_effect = MockCSWClient
+
+        app = create_app()
+        app.config["SITE_PATH"] = Path(site_directory)
+        return AppAuthScopes(app, auth_scopes)

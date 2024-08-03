@@ -1197,6 +1197,71 @@ class TestCommandSiteBuildItemPages:
         assert "No. Missing permissions in auth token. Seek support to assign required permissions." in result.output
 
 
+class TestCommandSiteBuildItemPage:
+    @pytest.mark.usefixtures("app_static_site")
+    def test_cli_site_item_page(self, app_static_site):
+        result = app_static_site.test_cli_runner().invoke(
+            args=["site", "build-item", TestRecordConfigurations.TEST_RECORD_1.value["file_identifier"]]
+        )
+        assert result.exit_code == 0
+        assert (
+            f"Generating item page for '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}'"
+            in result.output
+        )
+        assert (
+            f"Ok. Generated item page for '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}'."
+            in result.output
+        )
+
+        # Verify file structure
+        item_pages_paths = list(Path(app_static_site.config["SITE_PATH"]).glob("**/*.*"))
+        assert len(item_pages_paths) == 1
+        assert (
+            Path(app_static_site.config["SITE_PATH"]).joinpath(
+                f"items/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}/index.html"
+            )
+            in item_pages_paths
+        )
+
+    @pytest.mark.usefixtures("app_runner_mocked_csw_not_setup")
+    def test_cli_site_item_page_csw_not_setup(self, app_runner_mocked_csw_not_setup):
+        result = app_runner_mocked_csw_not_setup.invoke(
+            args=["site", "build-item", TestRecordConfigurations.TEST_RECORD_1.value["file_identifier"]]
+        )
+        assert result.exit_code == 64
+        assert "No. CSW catalogue not setup." in result.output
+
+    @pytest.mark.usefixtures("app_runner_mocked_csw_auth_token_error")
+    def test_cli_site_item_page_auth_token_error(self, app_runner_mocked_csw_auth_token_error):
+        result = app_runner_mocked_csw_auth_token_error.invoke(
+            args=["site", "build-item", TestRecordConfigurations.TEST_RECORD_1.value["file_identifier"]]
+        )
+        assert result.exit_code == 64
+        assert "No. Error with auth token. Try signing out and in again or seek support." in result.output
+
+    @pytest.mark.usefixtures("app_runner_mocked_csw_missing_auth_token")
+    def test_cli_site_item_page_auth_token_missing(self, app_runner_mocked_csw_missing_auth_token):
+        result = app_runner_mocked_csw_missing_auth_token.invoke(
+            args=["site", "build-item", TestRecordConfigurations.TEST_RECORD_1.value["file_identifier"]]
+        )
+        assert result.exit_code == 64
+        assert "No. Missing auth token. Run `auth sign-in` first." in result.output
+
+    @pytest.mark.usefixtures("app_runner_mocked_csw_insufficient_auth_token")
+    def test_cli_site_item_page_auth_token_insufficient(self, app_runner_mocked_csw_insufficient_auth_token):
+        result = app_runner_mocked_csw_insufficient_auth_token.invoke(
+            args=["site", "build-item", TestRecordConfigurations.TEST_RECORD_1.value["file_identifier"]]
+        )
+        assert result.exit_code == 64
+        assert "No. Missing permissions in auth token. Seek support to assign required permissions." in result.output
+
+    @pytest.mark.usefixtures("app_static_site")
+    def test_cli_site_item_page_record_missing(self, app_static_site):
+        result = app_static_site.test_cli_runner().invoke(args=["site", "build-item", "does-not-exist"])
+        assert result.exit_code == 64
+        assert "No. Record 'does-not-exist' does not exist."
+
+
 class TestCommandSiteBuildCollectionPages:
     @pytest.mark.usefixtures("app_static_site")
     def test_cli_site_collection_pages(self, app_static_site):
@@ -1353,6 +1418,102 @@ class TestCommandSiteBuildRecordPages:
         result = app_runner_mocked_csw_insufficient_auth_token.invoke(args=["site", "build-records"])
         assert result.exit_code == 64
         assert "No. Missing permissions in auth token. Seek support to assign required permissions." in result.output
+
+
+class TestCommandSiteBuildRecordPage:
+    @pytest.mark.usefixtures("app_static_site")
+    def test_cli_site_build_record(self, app_static_site):
+        result = app_static_site.test_cli_runner().invoke(
+            args=["site", "build-record", TestRecordConfigurations.TEST_RECORD_1.value["file_identifier"]]
+        )
+        assert result.exit_code == 0
+
+        assert (
+            f"3 record pages to generate for record "
+            f"'{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}'." in result.output
+        )
+        assert "# Stylesheet 1/3" in result.output
+        assert (
+            f"Ok. Generated item page for '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}' "
+            f"(stylesheet 'iso-html')." in result.output
+        )
+        assert "# Stylesheet 2/3" in result.output
+        assert (
+            f"Ok. Generated item page for '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}' "
+            f"(stylesheet 'iso-rubric')." in result.output
+        )
+        assert "# Stylesheet 3/3" in result.output
+        assert (
+            f"Ok. Generated item page for '{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}' "
+            f"(stylesheet 'iso-xml')." in result.output
+        )
+        assert (
+            f"Ok. 3 record pages generated for record "
+            f"'{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}'." in result.output
+        )
+
+        # Verify file structure
+        record_pages_paths = list(Path(app_static_site.config["SITE_PATH"]).glob("**/*.*"))
+        assert len(record_pages_paths) == 3
+        assert (
+            Path(app_static_site.config["SITE_PATH"]).joinpath(
+                f"records/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}/iso-html/"
+                f"{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}.xml"
+            )
+            in record_pages_paths
+        )
+        assert (
+            Path(app_static_site.config["SITE_PATH"]).joinpath(
+                f"records/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}/iso-rubric/"
+                f"{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}.xml"
+            )
+            in record_pages_paths
+        )
+        assert (
+            Path(app_static_site.config["SITE_PATH"]).joinpath(
+                f"records/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}/iso-xml/"
+                f"{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}.xml"
+            )
+            in record_pages_paths
+        )
+
+    @pytest.mark.usefixtures("app_runner_mocked_csw_not_setup")
+    def test_cli_site_record_pages_csw_not_setup(self, app_runner_mocked_csw_not_setup):
+        result = app_runner_mocked_csw_not_setup.invoke(
+            args=["site", "build-record", TestRecordConfigurations.TEST_RECORD_1.value["file_identifier"]]
+        )
+        assert result.exit_code == 64
+        assert "No. CSW catalogue not setup." in result.output
+
+    @pytest.mark.usefixtures("app_runner_mocked_csw_auth_token_error")
+    def test_cli_site_record_pages_auth_token_error(self, app_runner_mocked_csw_auth_token_error):
+        result = app_runner_mocked_csw_auth_token_error.invoke(
+            args=["site", "build-record", TestRecordConfigurations.TEST_RECORD_1.value["file_identifier"]]
+        )
+        assert result.exit_code == 64
+        assert "No. Error with auth token. Try signing out and in again or seek support." in result.output
+
+    @pytest.mark.usefixtures("app_runner_mocked_csw_missing_auth_token")
+    def test_cli_site_record_pages_auth_token_missing(self, app_runner_mocked_csw_missing_auth_token):
+        result = app_runner_mocked_csw_missing_auth_token.invoke(
+            args=["site", "build-record", TestRecordConfigurations.TEST_RECORD_1.value["file_identifier"]]
+        )
+        assert result.exit_code == 64
+        assert "No. Missing auth token. Run `auth sign-in` first." in result.output
+
+    @pytest.mark.usefixtures("app_runner_mocked_csw_insufficient_auth_token")
+    def test_cli_site_record_pages_auth_token_insufficient(self, app_runner_mocked_csw_insufficient_auth_token):
+        result = app_runner_mocked_csw_insufficient_auth_token.invoke(
+            args=["site", "build-record", TestRecordConfigurations.TEST_RECORD_1.value["file_identifier"]]
+        )
+        assert result.exit_code == 64
+        assert "No. Missing permissions in auth token. Seek support to assign required permissions." in result.output
+
+    @pytest.mark.usefixtures("app_static_site")
+    def test_cli_site_item_page_record_missing(self, app_static_site):
+        result = app_static_site.test_cli_runner().invoke(args=["site", "build-record", "does-not-exist"])
+        assert result.exit_code == 64
+        assert "No. Record 'does-not-exist' does not exist."
 
 
 class TestCommandSiteBuildPages:

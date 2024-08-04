@@ -123,11 +123,12 @@ class Csw2(object):
                     % (self.parent.kvp["updatesequence"], updatesequence),
                 )
 
-        node.attrib[
-            util.nspath_eval("xsi:schemaLocation", self.parent.context.namespaces)
-        ] = "%s %s/csw/2.0.2/CSW-discovery.xsd" % (
-            self.parent.context.namespaces["csw"],
-            self.parent.config.get("server", "ogc_schemas_base"),
+        node.attrib[util.nspath_eval("xsi:schemaLocation", self.parent.context.namespaces)] = (
+            "%s %s/csw/2.0.2/CSW-discovery.xsd"
+            % (
+                self.parent.context.namespaces["csw"],
+                self.parent.config.get("server", "ogc_schemas_base"),
+            )
         )
 
         metadata_main = dict(self.parent.config.items("metadata:main"))
@@ -298,9 +299,9 @@ class Csw2(object):
                 if self.parent.context.model["operations"][operation]["methods"]["post"]:
                     post = etree.SubElement(http, util.nspath_eval("ows:Post", self.parent.context.namespaces))
                     post.attrib[util.nspath_eval("xlink:type", self.parent.context.namespaces)] = "simple"
-                    post.attrib[
-                        util.nspath_eval("xlink:href", self.parent.context.namespaces)
-                    ] = self.parent.config.get("server", "url")
+                    post.attrib[util.nspath_eval("xlink:href", self.parent.context.namespaces)] = (
+                        self.parent.config.get("server", "url")
+                    )
 
                 for parameter in sorted(self.parent.context.model["operations"][operation]["parameters"]):
                     param = etree.SubElement(
@@ -472,11 +473,12 @@ class Csw2(object):
             nsmap=self.parent.context.namespaces,
         )
 
-        node.attrib[
-            util.nspath_eval("xsi:schemaLocation", self.parent.context.namespaces)
-        ] = "%s %s/csw/2.0.2/CSW-discovery.xsd" % (
-            self.parent.context.namespaces["csw"],
-            self.parent.config.get("server", "ogc_schemas_base"),
+        node.attrib[util.nspath_eval("xsi:schemaLocation", self.parent.context.namespaces)] = (
+            "%s %s/csw/2.0.2/CSW-discovery.xsd"
+            % (
+                self.parent.context.namespaces["csw"],
+                self.parent.config.get("server", "ogc_schemas_base"),
+            )
         )
 
         for typename in self.parent.kvp["typename"]:
@@ -525,11 +527,12 @@ class Csw2(object):
             nsmap=self.parent.context.namespaces,
         )
 
-        node.attrib[
-            util.nspath_eval("xsi:schemaLocation", self.parent.context.namespaces)
-        ] = "%s %s/csw/2.0.2/CSW-discovery.xsd" % (
-            self.parent.context.namespaces["csw"],
-            self.parent.config.get("server", "ogc_schemas_base"),
+        node.attrib[util.nspath_eval("xsi:schemaLocation", self.parent.context.namespaces)] = (
+            "%s %s/csw/2.0.2/CSW-discovery.xsd"
+            % (
+                self.parent.context.namespaces["csw"],
+                self.parent.config.get("server", "ogc_schemas_base"),
+            )
         )
 
         if "parametername" in self.parent.kvp:
@@ -982,11 +985,12 @@ class Csw2(object):
             version="2.0.2",
         )
 
-        node.attrib[
-            util.nspath_eval("xsi:schemaLocation", self.parent.context.namespaces)
-        ] = "%s %s/csw/2.0.2/CSW-discovery.xsd" % (
-            self.parent.context.namespaces["csw"],
-            self.parent.config.get("server", "ogc_schemas_base"),
+        node.attrib[util.nspath_eval("xsi:schemaLocation", self.parent.context.namespaces)] = (
+            "%s %s/csw/2.0.2/CSW-discovery.xsd"
+            % (
+                self.parent.context.namespaces["csw"],
+                self.parent.config.get("server", "ogc_schemas_base"),
+            )
         )
 
         if "requestid" in self.parent.kvp and self.parent.kvp["requestid"] is not None:
@@ -1146,11 +1150,12 @@ class Csw2(object):
             nsmap=self.parent.context.namespaces,
         )
 
-        node.attrib[
-            util.nspath_eval("xsi:schemaLocation", self.parent.context.namespaces)
-        ] = "%s %s/csw/2.0.2/CSW-discovery.xsd" % (
-            self.parent.context.namespaces["csw"],
-            self.parent.config.get("server", "ogc_schemas_base"),
+        node.attrib[util.nspath_eval("xsi:schemaLocation", self.parent.context.namespaces)] = (
+            "%s %s/csw/2.0.2/CSW-discovery.xsd"
+            % (
+                self.parent.context.namespaces["csw"],
+                self.parent.config.get("server", "ogc_schemas_base"),
+            )
         )
 
         # query repository
@@ -1345,11 +1350,12 @@ class Csw2(object):
             version="2.0.2",
         )
 
-        node.attrib[
-            util.nspath_eval("xsi:schemaLocation", self.parent.context.namespaces)
-        ] = "%s %s/csw/2.0.2/CSW-publication.xsd" % (
-            self.parent.context.namespaces["csw"],
-            self.parent.config.get("server", "ogc_schemas_base"),
+        node.attrib[util.nspath_eval("xsi:schemaLocation", self.parent.context.namespaces)] = (
+            "%s %s/csw/2.0.2/CSW-publication.xsd"
+            % (
+                self.parent.context.namespaces["csw"],
+                self.parent.config.get("server", "ogc_schemas_base"),
+            )
         )
 
         node.append(self._write_transactionsummary(inserted=inserted, updated=updated, deleted=deleted))
@@ -1550,11 +1556,12 @@ class Csw2(object):
             nsmap=self.parent.context.namespaces,
         )
 
-        node.attrib[
-            util.nspath_eval("xsi:schemaLocation", self.parent.context.namespaces)
-        ] = "%s %s/csw/2.0.2/CSW-publication.xsd" % (
-            self.parent.context.namespaces["csw"],
-            self.parent.config.get("server", "ogc_schemas_base"),
+        node.attrib[util.nspath_eval("xsi:schemaLocation", self.parent.context.namespaces)] = (
+            "%s %s/csw/2.0.2/CSW-publication.xsd"
+            % (
+                self.parent.context.namespaces["csw"],
+                self.parent.config.get("server", "ogc_schemas_base"),
+            )
         )
 
         node2 = etree.SubElement(
@@ -1754,7 +1761,6 @@ class Csw2(object):
 
         # if this is a SOAP request, get to SOAP-ENV:Body/csw:*
         if doc.tag == util.nspath_eval("soapenv:Envelope", self.parent.context.namespaces):
-
             LOGGER.debug("SOAP request specified")
             self.parent.soap = True
 
@@ -1787,7 +1793,6 @@ class Csw2(object):
                 doc.find(".//%s" % util.nspath_eval("csw:Insert", self.parent.context.namespaces)) is None
                 and len(doc.xpath("//csw:Update/child::*", namespaces=self.parent.context.namespaces)) == 0
             ):
-
                 LOGGER.info("Validating %s", postdata)
                 schema = etree.XMLSchema(file=schema)
                 parser = etree.XMLParser(schema=schema, resolve_entities=False)
@@ -2072,11 +2077,12 @@ class Csw2(object):
         )
 
         if root:
-            node.attrib[
-                util.nspath_eval("xsi:schemaLocation", self.parent.context.namespaces)
-            ] = "%s %s/csw/2.0.2/CSW-discovery.xsd" % (
-                self.parent.context.namespaces["csw"],
-                self.parent.config.get("server", "ogc_schemas_base"),
+            node.attrib[util.nspath_eval("xsi:schemaLocation", self.parent.context.namespaces)] = (
+                "%s %s/csw/2.0.2/CSW-discovery.xsd"
+                % (
+                    self.parent.context.namespaces["csw"],
+                    self.parent.config.get("server", "ogc_schemas_base"),
+                )
             )
 
         node1 = etree.SubElement(node, util.nspath_eval("csw:EchoedRequest", self.parent.context.namespaces))
@@ -2129,9 +2135,9 @@ class Csw2(object):
             language=language,
         )
 
-        node.attrib[
-            util.nspath_eval("xsi:schemaLocation", self.parent.context.namespaces)
-        ] = "%s %s/ows/1.0.0/owsExceptionReport.xsd" % (self.parent.context.namespaces["ows"], ogc_schemas_base)
+        node.attrib[util.nspath_eval("xsi:schemaLocation", self.parent.context.namespaces)] = (
+            "%s %s/ows/1.0.0/owsExceptionReport.xsd" % (self.parent.context.namespaces["ows"], ogc_schemas_base)
+        )
 
         exception = etree.SubElement(
             node, util.nspath_eval("ows:Exception", self.parent.context.namespaces), exceptionCode=code, locator=locator

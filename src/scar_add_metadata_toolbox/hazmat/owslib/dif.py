@@ -22,7 +22,7 @@
 # Contact email: tomkralidis@gmail.com
 # =============================================================================
 
-""" DIF metadata parser """
+"""DIF metadata parser"""
 
 from scar_add_metadata_toolbox.hazmat.owslib.etree import etree
 from scar_add_metadata_toolbox.hazmat.owslib import util

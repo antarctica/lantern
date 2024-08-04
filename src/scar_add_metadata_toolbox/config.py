@@ -2,7 +2,6 @@ import logging
 import os
 from importlib.metadata import version
 from pathlib import Path
-from typing import Dict, List
 
 from bas_style_kit_jinja_templates import BskTemplates
 from flask.cli import load_dotenv
@@ -14,7 +13,7 @@ from str2bool import str2bool
 
 class Config:
     """
-    Flask/App configuration base class
+    Flask/App configuration base class.
 
     Configuration options are mostly set using class properties and are typically hard-coded. A limited number of
     options can be set at runtime using environment variables (set directly or through an `.env` file).
@@ -32,7 +31,7 @@ class Config:
     _AUTH_SESSION_FILE_PATH = Path.home().joinpath(".config/scar_add_metadata_toolbox/auth.json")
     _SITE_PATH = Path.home().joinpath(".config/scar_add_metadata_toolbox/_site")
 
-    def __init__(self):
+    def __init__(self) -> None:
         load_dotenv()
 
         """
@@ -59,7 +58,7 @@ class Config:
     @property
     def NAME(self) -> str:
         """
-        Application/Package name
+        Application/Package name.
 
         :rtype str
         :return: Application name
@@ -70,7 +69,7 @@ class Config:
     @property
     def VERSION(self) -> str:
         """
-        Application version
+        Application version.
 
         Taken from the package where possible, otherwise a generic placeholder is used.
 
@@ -83,7 +82,7 @@ class Config:
     @property
     def LOGGING_LEVEL(self) -> int:
         """
-        Application logging level
+        Application logging level.
 
         Python logging module logging level. If set at runtime, the level set as a descriptive string is mapped to the
         relevant numeric level using the logging level enumeration.
@@ -94,22 +93,22 @@ class Config:
         if "APP_LOGGING_LEVEL" in os.environ:  # pragma: no cover
             if os.environ.get("APP_LOGGING_LEVEL") == "debug":
                 return logging.DEBUG
-            elif os.environ.get("APP_LOGGING_LEVEL") == "info":
+            if os.environ.get("APP_LOGGING_LEVEL") == "info":
                 return logging.INFO
-            elif os.environ.get("APP_LOGGING_LEVEL") == "warning":
+            if os.environ.get("APP_LOGGING_LEVEL") == "warning":
                 return logging.WARNING
-            elif os.environ.get("APP_LOGGING_LEVEL") == "error":
+            if os.environ.get("APP_LOGGING_LEVEL") == "error":
                 return logging.ERROR
-            elif os.environ.get("APP_LOGGING_LEVEL") == "critical":
+            if os.environ.get("APP_LOGGING_LEVEL") == "critical":
                 return logging.CRITICAL
 
         return self._LOGGING_LEVEL
 
     # noinspection PyPep8Naming
     @property
-    def SENTRY_CONFIG(self) -> Dict:
+    def SENTRY_CONFIG(self) -> dict:
         """
-        Sentry runtime configuration
+        Sentry runtime configuration.
 
         Settings used for Sentry, typically reusing other config options. Only relevant if `APP_ENABLE_SENTRY` is True.
 
@@ -129,7 +128,7 @@ class Config:
     @property
     def BSK_TEMPLATES(self) -> BskTemplates:
         """
-        BAS Style Kit Jinja2 templates configuration
+        BAS Style Kit Jinja2 templates configuration.
 
         Sets relevant configuration options for setting application identity, primary navigation, analytics and
         required CSS styles and JavaScript.
@@ -182,7 +181,7 @@ class Config:
     @property
     def CSW_CLIENTS_CONFIG(self) -> dict:
         """
-        CSW clients config
+        CSW clients config.
 
         Configuration for CSW clients used in application Repository class instances. See Repository class for details
         on required/available options. This arrangement of configuration options is intended for use with the
@@ -200,7 +199,7 @@ class Config:
     @property
     def CSW_SERVERS_CONFIG(self) -> dict:
         """
-        CSW servers config
+        CSW servers config.
 
         Configuration for CSW servers/repositories used in CSWServer class instances. See CSWServer class for details on
         required/available options. This arrangement of configuration options is intended for use with the application
@@ -239,7 +238,7 @@ class Config:
     @property
     def AZURE_OAUTH_TENANCY(self) -> str:
         """
-        Azure tenancy (server)
+        Azure tenancy (server).
 
         Tenancy ID for the Azure app registration representing the server/catalogue component of this application.
 
@@ -254,7 +253,7 @@ class Config:
     @property
     def AZURE_OAUTH_APPLICATION_ID(self) -> str:
         """
-        Azure application (server)
+        Azure application (server).
 
         Azure app registration ID for the registration representing the server/catalogue component of this application.
 
@@ -267,9 +266,9 @@ class Config:
 
     # noinspection PyPep8Naming
     @property
-    def AZURE_OAUTH_CLIENT_APPLICATION_IDS(self) -> List[str]:
+    def AZURE_OAUTH_CLIENT_APPLICATION_IDS(self) -> list[str]:
         """
-        Azure approved applications (server)
+        Azure approved applications (server).
 
         List of Azure app registrations ID for applications/services (clients) trusted/approved to use the
         server/catalogue component of this application.
@@ -288,9 +287,9 @@ class Config:
 
     # noinspection PyPep8Naming
     @property
-    def AUTH_CLIENT_SCOPES(self) -> List[str]:
+    def AUTH_CLIENT_SCOPES(self) -> list[str]:
         """
-        Azure scopes (client)
+        Azure scopes (client).
 
         List of scopes requested in OAuth authorisation requests to Azure (i.e. sign-in requests).
 
@@ -311,7 +310,7 @@ class Config:
     @property
     def AUTH_CLIENT_ID(self) -> str:
         """
-        Azure application (client)
+        Azure application (client).
 
         Azure app registration ID for the registration representing the client/editor component of this application.
 
@@ -326,7 +325,7 @@ class Config:
     @property
     def AUTH_CLIENT_TENANCY(self) -> str:
         """
-        Azure tenancy (client)
+        Azure tenancy (client).
 
         Tenancy endpoint for the Azure app registration representing the client/editor component of this application.
 
@@ -341,7 +340,7 @@ class Config:
     @property
     def CLIENT_AUTH(self) -> PublicClientApplication:
         """
-        Azure auth provider (client)
+        Azure auth provider (client).
 
         Uses the Microsoft Authentication Library (MSAL) for Python to simplify requesting access tokens from Azure.
 
@@ -360,7 +359,7 @@ class Config:
     @property
     def SITE_PATH(self) -> Path:
         """
-        Path to the directory used to store generated static site content
+        Path to the directory used to store generated static site content.
 
         The contents of this directory should be considered ephemeral and under the exclusive control this application.
 
@@ -373,7 +372,7 @@ class Config:
     @property
     def S3_BUCKET(self) -> str:
         """
-        Name of the AWS S3 bucket used to host static site content
+        Name of the AWS S3 bucket used to host static site content.
 
         :rtype str
         :return: S3 bucket name
@@ -384,7 +383,7 @@ class Config:
     @property
     def ESRI_API_KEY(self) -> str:
         """
-        API Key for ESRI ArcGIS JavaScript client
+        API Key for ESRI ArcGIS JavaScript client.
 
         Used for displaying maps within frontend content.
 
@@ -398,7 +397,7 @@ class Config:
 
 class ProductionConfig(Config):  # pragma: no cover
     """
-    Flask configuration for Production environments
+    Flask configuration for Production environments.
 
     Note: This method is excluded from test coverage as its meaning would be undermined.
     """
@@ -406,12 +405,13 @@ class ProductionConfig(Config):  # pragma: no cover
     # noinspection PyPep8Naming
     @property
     def VERSION(self) -> str:
+        """Application version."""
         return version("scar-add-metadata-toolbox")
 
 
 class DevelopmentConfig(Config):  # pragma: no cover
     """
-    Flask configuration for (local) Development environments
+    Flask configuration for (local) Development environments.
 
     Note: This method is excluded from test coverage as its meaning would be undermined.
     """
@@ -423,7 +423,7 @@ class DevelopmentConfig(Config):  # pragma: no cover
     _AUTH_SESSION_FILE_PATH = Path("./auth.json")
     _SITE_PATH = Path("./_site")
 
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Use this method to override property values defined in the config base class.
 
@@ -462,19 +462,18 @@ class DevelopmentConfig(Config):  # pragma: no cover
     # noinspection PyPep8Naming
     @property
     def VERSION(self) -> str:
+        """Application version."""
         return "N/A"
 
 
 class TestingConfig(DevelopmentConfig):
-    """
-    Flask configuration for Testing environments
-    """
+    """Flask configuration for Testing environments."""
 
     TESTING = True
 
     _LOGGING_LEVEL = logging.DEBUG
 
-    def __init__(self):
+    def __init__(self) -> None:
         """
         Use this method to override property values defined in the config base class.
 
@@ -499,5 +498,5 @@ class TestingConfig(DevelopmentConfig):
 
     # noinspection PyPep8Naming
     @property
-    def TEST_JWKS(self):
+    def TEST_JWKS(self) -> TestJwk:  # noqa: D102
         return TestJwk()

@@ -173,7 +173,6 @@ def _parse_metadata(context, repos, record):
 
 
 def _parse_csw(context, repos, record, identifier, pagesize=10):
-
     from scar_add_metadata_toolbox.hazmat.owslib.csw import CatalogueServiceWeb
 
     recobjs = []  # records
@@ -270,7 +269,6 @@ def _parse_csw(context, repos, record, identifier, pagesize=10):
 
 
 def _parse_waf(context, repos, record, identifier):
-
     recobjs = []
 
     content = util.http_request("GET", record)
@@ -321,7 +319,6 @@ def _parse_waf(context, repos, record, identifier):
 
 
 def _parse_wms(context, repos, record, identifier):
-
     from scar_add_metadata_toolbox.hazmat.owslib.wms import WebMapService
 
     recobjs = []
@@ -458,7 +455,6 @@ def _parse_wms(context, repos, record, identifier):
 
 
 def _parse_wmts(context, repos, record, identifier):
-
     from scar_add_metadata_toolbox.hazmat.owslib.wmts import WebMapTileService
 
     recobjs = []
@@ -578,7 +574,6 @@ def _parse_wmts(context, repos, record, identifier):
 
 
 def _parse_wfs(context, repos, record, identifier, version):
-
     import requests
     from scar_add_metadata_toolbox.hazmat.owslib.wfs import WebFeatureService
 
@@ -698,7 +693,6 @@ def _parse_wfs(context, repos, record, identifier, version):
 
 
 def _parse_wcs(context, repos, record, identifier):
-
     from scar_add_metadata_toolbox.hazmat.owslib.wcs import WebCoverageService
 
     bboxs = []
@@ -795,7 +789,6 @@ def _parse_wcs(context, repos, record, identifier):
 
 
 def _parse_wps(context, repos, record, identifier):
-
     from scar_add_metadata_toolbox.hazmat.owslib.wps import WebProcessingService
 
     recobjs = []
@@ -886,7 +879,6 @@ def _parse_wps(context, repos, record, identifier):
 
 
 def _parse_sos(context, repos, record, identifier, version):
-
     from scar_add_metadata_toolbox.hazmat.owslib.sos import SensorObservationService
 
     bboxs = []
@@ -998,7 +990,6 @@ def _parse_sos(context, repos, record, identifier, version):
 
 
 def _parse_fgdc(context, repos, exml):
-
     from scar_add_metadata_toolbox.hazmat.owslib.fgdc import Metadata
 
     recobj = repos.dataset()
@@ -1193,7 +1184,6 @@ def _parse_gm03(context, repos, exml):
 
 
 def _parse_iso(context, repos, exml):
-
     from scar_add_metadata_toolbox.hazmat.owslib.iso import MD_Metadata
     from scar_add_metadata_toolbox.hazmat.owslib.iso_che import CHE_MD_Metadata
 
@@ -1400,7 +1390,6 @@ def _parse_iso(context, repos, exml):
 
 
 def _parse_dc(context, repos, exml):
-
     from scar_add_metadata_toolbox.hazmat.owslib.csw import CswRecord
 
     recobj = repos.dataset()

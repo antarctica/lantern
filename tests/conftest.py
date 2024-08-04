@@ -4,11 +4,11 @@ from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 import pytest
-from flask.testing import FlaskClient
+from flask import Flask
+from flask.testing import FlaskClient, FlaskCliRunner
 
 from scar_add_metadata_toolbox import create_app
 from tests.scar_add_metadata_toolbox_tests.classes import (
-    create_mock_auth,
     MockCSWClient,
     MockCSWClientAuthError,
     MockCSWClientAuthInsufficient,
@@ -28,80 +28,88 @@ from tests.scar_add_metadata_toolbox_tests.classes import (
     MockCSWServerRevisionTrackingInvalidCredentials,
     MockCSWServerUnmappedRequestError,
     MockPublicClientApplication,
+    create_mock_auth,
 )
 
 
-@pytest.fixture
-def app():
+@pytest.fixture()
+def app() -> Flask:
+    """Patched application to bypass auth."""
     with patch("scar_add_metadata_toolbox.config.PublicClientApplication") as mock_msal_client_application:
         mock_msal_client_application.side_effect = MockPublicClientApplication
-        app = create_app()
-        return app
+        return create_app()
 
 
-@pytest.fixture
-@pytest.mark.usefixtures("app")
-def app_runner(app):
+@pytest.fixture()
+def app_runner(app: Flask) -> FlaskCliRunner:
+    """App runner."""
     return app.test_cli_runner()
 
 
-@pytest.fixture
-@pytest.mark.usefixtures("app")
-def app_client(app) -> FlaskClient:
+@pytest.fixture()
+def app_client(app: Flask) -> FlaskClient:
+    """App client."""
     with app.test_client() as client:
         return client
 
 
-@pytest.fixture
-def app_runner_mocked_csw():
+@pytest.fixture()
+def app_runner_mocked_csw() -> FlaskCliRunner:
+    """App runner with mocked CSW client."""
     with patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client:
         mock_csw_client.side_effect = MockCSWClient
         app = create_app()
         return app.test_cli_runner()
 
 
-@pytest.fixture
-def app_runner_mocked_csw_inserts_fail():
+@pytest.fixture()
+def app_runner_mocked_csw_inserts_fail() -> FlaskCliRunner:
+    """App runner with mocked CSW client that fails to insert."""
     with patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client:
         mock_csw_client.side_effect = MockCSWClientInsertsFail
         app = create_app()
         return app.test_cli_runner()
 
 
-@pytest.fixture
-def app_runner_mocked_csw_not_setup():
+@pytest.fixture()
+def app_runner_mocked_csw_not_setup() -> FlaskCliRunner:
+    """App runner with mocked CSW client that is not setup."""
     with patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client:
         mock_csw_client.side_effect = MockCSWClientServerNotSetup
         app = create_app()
         return app.test_cli_runner()
 
 
-@pytest.fixture
-def app_runner_mocked_csw_auth_token_error():
+@pytest.fixture()
+def app_runner_mocked_csw_auth_token_error() -> FlaskCliRunner:
+    """App runner with mocked CSW client that has an auth token error."""
     with patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client:
         mock_csw_client.side_effect = MockCSWClientAuthError
         app = create_app()
         return app.test_cli_runner()
 
 
-@pytest.fixture
-def app_runner_mocked_csw_missing_auth_token():
+@pytest.fixture()
+def app_runner_mocked_csw_missing_auth_token() -> FlaskCliRunner:
+    """App runner with mocked CSW client that is missing an auth token."""
     with patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client:
         mock_csw_client.side_effect = MockCSWClientAuthMissing
         app = create_app()
         return app.test_cli_runner()
 
 
-@pytest.fixture
-def app_runner_mocked_csw_insufficient_auth_token():
+@pytest.fixture()
+def app_runner_mocked_csw_insufficient_auth_token() -> FlaskCliRunner:
+    """App runner with mocked CSW client that has an insufficient auth token."""
     with patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client:
         mock_csw_client.side_effect = MockCSWClientAuthInsufficient
         app = create_app()
         return app.test_cli_runner()
 
 
-@pytest.fixture
-def app_runner_mocked_csw_server_tracking_not_enabled():
+@pytest.fixture()
+def app_runner_mocked_csw_server_tracking_not_enabled() -> FlaskCliRunner:
+    """App runner with mocked CSW server that has revision tracking disabled."""
     with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
         mock_csw_server.side_effect = MockCSWServerRevisionTrackingDisabled
 
@@ -109,8 +117,9 @@ def app_runner_mocked_csw_server_tracking_not_enabled():
         return app.test_cli_runner()
 
 
-@pytest.fixture
-def app_runner_mocked_csw_server_tracking_invalid_credentials():
+@pytest.fixture()
+def app_runner_mocked_csw_server_tracking_invalid_credentials() -> FlaskCliRunner:
+    """App runner with mocked CSW server that has invalid credentials."""
     with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
         mock_csw_server.side_effect = MockCSWServerRevisionTrackingInvalidCredentials
 
@@ -118,11 +127,13 @@ def app_runner_mocked_csw_server_tracking_invalid_credentials():
         return app.test_cli_runner()
 
 
-@pytest.fixture
-def app_static_site():
-    with patch(
-        "scar_add_metadata_toolbox.classes.CSWClient"
-    ) as mock_csw_client, TemporaryDirectory() as site_directory:
+@pytest.fixture()
+def app_static_site() -> Flask:
+    """Patched application to use fake CSW client and temp site directory."""
+    with (
+        patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client,
+        TemporaryDirectory() as site_directory,
+    ):
         mock_csw_client.side_effect = MockCSWClient
 
         app = create_app()
@@ -130,8 +141,9 @@ def app_static_site():
         return app
 
 
-@pytest.fixture
-def app_runner_mocked_csw_server():
+@pytest.fixture()
+def app_runner_mocked_csw_server() -> FlaskCliRunner:
+    """App runner with mocked CSW server."""
     with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
         mock_csw_server.side_effect = MockCSWServer
 
@@ -139,8 +151,9 @@ def app_runner_mocked_csw_server():
         return app.test_cli_runner()
 
 
-@pytest.fixture
-def app_client_mocked_csw_server():
+@pytest.fixture()
+def app_client_mocked_csw_server() -> FlaskClient:
+    """App client with mocked CSW server."""
     with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
         mock_csw_server.side_effect = MockCSWServer
 
@@ -148,8 +161,9 @@ def app_client_mocked_csw_server():
         return app.test_client()
 
 
-@pytest.fixture
-def app_client_mocked_csw_server_backing_db_not_setup():
+@pytest.fixture()
+def app_client_mocked_csw_server_backing_db_not_setup() -> FlaskClient:
+    """App client with mocked CSW server that has backing DB not setup."""
     with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
         mock_csw_server.side_effect = MockCSWServerBackingDBNotSetup
 
@@ -157,8 +171,9 @@ def app_client_mocked_csw_server_backing_db_not_setup():
         return app.test_client()
 
 
-@pytest.fixture
-def app_client_mocked_csw_server_backing_repo_not_setup():
+@pytest.fixture()
+def app_client_mocked_csw_server_backing_repo_not_setup() -> FlaskClient:
+    """App client with mocked CSW server that has backing repo not setup."""
     with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
         mock_csw_server.side_effect = MockCSWServerBackingRepoNotSetup
 
@@ -166,8 +181,9 @@ def app_client_mocked_csw_server_backing_repo_not_setup():
         return app.test_client()
 
 
-@pytest.fixture
-def app_client_mocked_csw_server_requests_fail():
+@pytest.fixture()
+def app_client_mocked_csw_server_requests_fail() -> FlaskClient:
+    """App client with mocked CSW server that fails requests."""
     with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
         mock_csw_server.side_effect = MockCSWServerRequestsFail
 
@@ -175,8 +191,9 @@ def app_client_mocked_csw_server_requests_fail():
         return app.test_client()
 
 
-@pytest.fixture
-def app_client_mocked_csw_server_no_request_type():
+@pytest.fixture()
+def app_client_mocked_csw_server_no_request_type() -> FlaskClient:
+    """App client with mocked CSW server that has no request type."""
     with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
         mock_csw_server.side_effect = MockCSWServerNoRequestType
 
@@ -184,8 +201,9 @@ def app_client_mocked_csw_server_no_request_type():
         return app.test_client()
 
 
-@pytest.fixture
-def app_client_mocked_csw_server_ambiguous_request():
+@pytest.fixture()
+def app_client_mocked_csw_server_ambiguous_request() -> FlaskClient:
+    """App client with mocked CSW server that has an ambiguous request."""
     with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
         mock_csw_server.side_effect = MockCSWServerAmbiguousRequestError
 
@@ -193,8 +211,9 @@ def app_client_mocked_csw_server_ambiguous_request():
         return app.test_client()
 
 
-@pytest.fixture
-def app_client_mocked_csw_server_unmapped_request():
+@pytest.fixture()
+def app_client_mocked_csw_server_unmapped_request() -> FlaskClient:
+    """App client with mocked CSW server that has an unmapped request."""
     with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
         mock_csw_server.side_effect = MockCSWServerUnmappedRequestError
 
@@ -202,8 +221,9 @@ def app_client_mocked_csw_server_unmapped_request():
         return app.test_client()
 
 
-@pytest.fixture
-def app_client_mocked_csw_server_auth_token_error():
+@pytest.fixture()
+def app_client_mocked_csw_server_auth_token_error() -> FlaskClient:
+    """App client with mocked CSW server that has an auth token error."""
     with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
         mock_csw_server.side_effect = MockCSWServerAuthTokenError
 
@@ -211,8 +231,9 @@ def app_client_mocked_csw_server_auth_token_error():
         return app.test_client()
 
 
-@pytest.fixture
-def app_client_mocked_csw_server_missing_auth_token():
+@pytest.fixture()
+def app_client_mocked_csw_server_missing_auth_token() -> FlaskClient:
+    """App client with mocked CSW server that is missing an auth token."""
     with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
         mock_csw_server.side_effect = MockCSWServerMissingAuthToken
 
@@ -220,8 +241,9 @@ def app_client_mocked_csw_server_missing_auth_token():
         return app.test_client()
 
 
-@pytest.fixture
-def app_client_mocked_csw_server_insufficient_auth_token():
+@pytest.fixture()
+def app_client_mocked_csw_server_insufficient_auth_token() -> FlaskClient:
+    """App client with mocked CSW server that has an insufficient auth token."""
     with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
         mock_csw_server.side_effect = MockCSWServerInsufficientAuthToken
 
@@ -229,13 +251,14 @@ def app_client_mocked_csw_server_insufficient_auth_token():
         return app.test_client()
 
 
-@pytest.fixture
-def app_static_site_auth():
-    with patch(
-        "scar_add_metadata_toolbox.classes.CSWClient"
-    ) as mock_csw_client, TemporaryDirectory() as site_directory, patch(
-        "scar_add_metadata_toolbox.FlaskAzureOauth"
-    ) as mock_flask_azure_oauth:
+@pytest.fixture()
+def app_static_site_auth() -> Flask:
+    """Patched application to use fake CSW client and auth client."""
+    with (
+        patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client,
+        TemporaryDirectory() as site_directory,
+        patch("scar_add_metadata_toolbox.FlaskAzureOauth") as mock_flask_azure_oauth,
+    ):
         mock_flask_azure_oauth.side_effect = create_mock_auth()
         mock_csw_client.side_effect = MockCSWClient
 
@@ -244,13 +267,14 @@ def app_static_site_auth():
         return app
 
 
-@pytest.fixture
-def app_static_site_auth_csw_not_setup():
-    with patch(
-        "scar_add_metadata_toolbox.classes.CSWClient"
-    ) as mock_csw_client, TemporaryDirectory() as site_directory, patch(
-        "scar_add_metadata_toolbox.FlaskAzureOauth"
-    ) as mock_flask_azure_oauth:
+@pytest.fixture()
+def app_static_site_auth_csw_not_setup() -> Flask:
+    """Patched application to use fake CSW client and auth client that is not configured."""
+    with (
+        patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client,
+        TemporaryDirectory() as site_directory,
+        patch("scar_add_metadata_toolbox.FlaskAzureOauth") as mock_flask_azure_oauth,
+    ):
         mock_flask_azure_oauth.side_effect = create_mock_auth()
         mock_csw_client.side_effect = MockCSWClientServerNotSetup
 
@@ -259,13 +283,14 @@ def app_static_site_auth_csw_not_setup():
         return app
 
 
-@pytest.fixture
-def app_static_site_auth_csw_auth_token_error():
-    with patch(
-        "scar_add_metadata_toolbox.classes.CSWClient"
-    ) as mock_csw_client, TemporaryDirectory() as site_directory, patch(
-        "scar_add_metadata_toolbox.FlaskAzureOauth"
-    ) as mock_flask_azure_oauth:
+@pytest.fixture()
+def app_static_site_auth_csw_auth_token_error() -> Flask:
+    """Patched application to use fake CSW client and auth client that has an auth token error."""
+    with (
+        patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client,
+        TemporaryDirectory() as site_directory,
+        patch("scar_add_metadata_toolbox.FlaskAzureOauth") as mock_flask_azure_oauth,
+    ):
         mock_flask_azure_oauth.side_effect = create_mock_auth()
         mock_csw_client.side_effect = MockCSWClientAuthError
 
@@ -274,13 +299,14 @@ def app_static_site_auth_csw_auth_token_error():
         return app
 
 
-@pytest.fixture
-def app_static_site_auth_csw_missing_auth_token():
-    with patch(
-        "scar_add_metadata_toolbox.classes.CSWClient"
-    ) as mock_csw_client, TemporaryDirectory() as site_directory, patch(
-        "scar_add_metadata_toolbox.FlaskAzureOauth"
-    ) as mock_flask_azure_oauth:
+@pytest.fixture()
+def app_static_site_auth_csw_missing_auth_token() -> Flask:
+    """Patched application to use fake CSW client and auth client that is missing an auth token."""
+    with (
+        patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client,
+        TemporaryDirectory() as site_directory,
+        patch("scar_add_metadata_toolbox.FlaskAzureOauth") as mock_flask_azure_oauth,
+    ):
         mock_flask_azure_oauth.side_effect = create_mock_auth()
         mock_csw_client.side_effect = MockCSWClientAuthMissing
 
@@ -289,13 +315,14 @@ def app_static_site_auth_csw_missing_auth_token():
         return app
 
 
-@pytest.fixture
-def app_static_site_auth_csw_insufficient_auth_token():
-    with patch(
-        "scar_add_metadata_toolbox.classes.CSWClient"
-    ) as mock_csw_client, TemporaryDirectory() as site_directory, patch(
-        "scar_add_metadata_toolbox.FlaskAzureOauth"
-    ) as mock_flask_azure_oauth:
+@pytest.fixture()
+def app_static_site_auth_csw_insufficient_auth_token() -> Flask:
+    """Patched application to use fake CSW client and auth client that has an insufficient auth token."""
+    with (
+        patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client,
+        TemporaryDirectory() as site_directory,
+        patch("scar_add_metadata_toolbox.FlaskAzureOauth") as mock_flask_azure_oauth,
+    ):
         mock_flask_azure_oauth.side_effect = create_mock_auth()
         mock_csw_client.side_effect = MockCSWClientAuthInsufficient
 
@@ -307,13 +334,14 @@ def app_static_site_auth_csw_insufficient_auth_token():
 AppAuthScopes = namedtuple("AppAuthScopes", ["app", "auth_scopes"])
 
 
-@pytest.fixture
-def app_static_site_auth_get_scopes():
-    with patch(
-        "scar_add_metadata_toolbox.classes.CSWClient"
-    ) as mock_csw_client, TemporaryDirectory() as site_directory, patch(
-        "scar_add_metadata_toolbox.FlaskAzureOauth"
-    ) as mock_flask_azure_oauth:
+@pytest.fixture()
+def app_static_site_auth_get_scopes() -> AppAuthScopes:
+    """Patched application auth scopes."""
+    with (
+        patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client,
+        TemporaryDirectory() as site_directory,
+        patch("scar_add_metadata_toolbox.FlaskAzureOauth") as mock_flask_azure_oauth,
+    ):
         auth_scopes = []
 
         mock_flask_azure_oauth.side_effect = create_mock_auth(auth_scopes)

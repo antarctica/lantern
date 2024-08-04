@@ -1061,34 +1061,36 @@ In brief, this package comprises these modules:
 * `scar_add_metadata_toolbox.templates` - contains [Application templates](#templates)
 * `scar_add_metadata_toolbox.utils` - contains various utility/helper methods and classes
 
-### Code Style
+### Editorconfig
 
-PEP-8 style and formatting guidelines must be used for this project, except the 80 character line limit.
-[Black](https://github.com/psf/black) is used for formatting, configured in `pyproject.toml` and enforced as part of
-[Python code linting](#code-linting).
+For consistency, it's strongly recommended to configure your IDE or other editor to use the
+[EditorConfig](https://editorconfig.org/) settings defined in [`.editorconfig`](../.editorconfig).
 
-Black can be integrated with a range of editors, such as
-[PyCharm](https://black.readthedocs.io/en/stable/integrations/editors.html#pycharm-intellij-idea), to apply formatting
-automatically when saving files.
+### Linting
 
-To apply formatting manually:
+[Ruff](https://docs.astral.sh/ruff/) is used to lint and format Python files. Specific checks and config options are
+set in [`pyproject.toml`](../pyproject.toml). Linting checks are run automatically in
+[Continuous Integration](#continuous-integration).
 
-```shell
-$ poetry run black src/ tests/
+To check linting locally:
+
+```
+$ poetry run ruff check src/ tests/
 ```
 
-### Code Linting
+To run and check formatting locally:
 
-[Flake8](https://flake8.pycqa.org) and various extensions are used to lint Python files. Specific checks, and any
-configuration options, are documented in the `[tool.flake8]` section of `pyproject.toml`.
-
-To check files manually:
-
-```shell
-$ poetry run flake8 src/ tests/
+```
+$ poetry run ruff format src/ tests/
+$ poetry run ruff format --check src/ tests/
 ```
 
-Checks are run automatically in [Continuous Integration](#continuous-integration).
+#### Static security analysis
+
+Ruff is configured to run [Bandit](https://github.com/PyCQA/bandit), a static analysis tool for Python.
+
+**WARNING!** As with all security tools, Bandit is an aid for spotting common mistakes, not a guarantee of secure code.
+In particular this tool can't check for issues that are only be detectable when running code.
 
 ### Dependencies
 
@@ -1110,6 +1112,19 @@ Then update the Docker image used for CI/CD builds and push to the BAS Docker Re
 ```shell
 $ docker build -f gitlab-ci.Dockerfile -t docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox:latest .
 $ docker push docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox:latest
+```
+
+#### Vulnerability scanning
+
+The [Safety](https://pypi.org/project/safety/) package is used to check dependencies against known vulnerabilities.
+
+**WARNING!** As with all security tools, Safety is an aid for spotting common mistakes, not a guarantee of secure code.
+In particular this is using the free vulnerability database, which is updated less frequently than paid options.
+
+Checks are run automatically in [Continuous Integration](#continuous-integration). To check locally:
+
+```
+$ poetry run safety scan
 ```
 
 #### Listing outdated dependencies
@@ -1277,43 +1292,6 @@ preserves the existing interface of the Python property and ignores new features
 
 Later in step (3), the `Record.lineage()` or `Item.lineage()` Python property can be amended to return both
 properties, or new properties added for the additional property if that makes more sense.
-
-### Dependency vulnerability checks
-
-The [Safety](https://pypi.org/project/safety/) package is used to check dependencies against known vulnerabilities.
-
-**IMPORTANT!** As with all security tools, Safety is an aid for spotting common mistakes, not a guarantee of secure
-code. In particular this is using the free vulnerability database, which is updated less frequently than paid options.
-
-This is a good tool for spotting low-hanging fruit in terms of vulnerabilities. It isn't a substitute for proper
-vetting of dependencies, or a proper audit of potential issues by security professionals. If in any doubt you MUST seek
-proper advice.
-
-Checks are run automatically in [Continuous Integration](#continuous-integration).
-
-Safety is configured using a [Policy File](https://docs.pyup.io/docs/safety-20-policy-file) in `.safety-policy`.
-
-To check locally:
-
-```shell
-$ poetry export --without-hashes -f requirements.txt | poetry run safety check --full-report --stdin
-```
-
-### Static security scanning
-
-To ensure the security of this API, source code is checked against [Bandit](https://github.com/PyCQA/bandit)
-and enforced as part of [Code linting](#code-linting).
-
-**Warning:** Bandit is a static analysis tool and can't check for issues that are only be detectable when running the
-application. As with all security tools, Bandit is an aid for spotting common mistakes, not a guarantee of secure code.
-
-To check manually:
-
-```shell
-$ poetry run bandit -r src/ tests/
-```
-
-Checks are run automatically in [Continuous Integration](#continuous-integration).
 
 ### Flask application
 

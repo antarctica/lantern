@@ -97,7 +97,6 @@ class OpenSearch(object):
 
         operation_name = etree.QName(self.exml).localname
         if operation_name == "GetRecordsResponse":
-
             startindex = int(self.exml.xpath("//@nextRecord")[0]) - int(
                 self.exml.xpath("//@numberOfRecordsReturned")[0]
             )
@@ -175,7 +174,6 @@ class OpenSearch(object):
 
         response_name = etree.QName(self.exml).localname
         if response_name == "GetRecordsResponse":
-
             startindex = int(self.exml.xpath("//@nextRecord")[0]) - int(
                 self.exml.xpath("//@numberOfRecordsReturned")[0]
             )

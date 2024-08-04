@@ -52,7 +52,6 @@ class Profile(object):
         added_namespaces,
         repository,
     ):
-
         """Initialize profile"""
         self.name = name
         self.version = version

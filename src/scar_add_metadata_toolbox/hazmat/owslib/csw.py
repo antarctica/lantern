@@ -27,7 +27,7 @@
 # Contact email: tomkralidis@gmail.com
 # =============================================================================
 
-""" CSW request and response processor """
+"""CSW request and response processor"""
 
 import inspect
 import warnings
@@ -634,7 +634,6 @@ class CatalogueServiceWeb(object):
             for i in self._exml.findall(".//" + util.nspath_eval("gmd:MD_Metadata", namespaces)) or self._exml.findall(
                 ".//" + util.nspath_eval("gmi:MI_Metadata", namespaces)
             ):
-
                 # Fix trailing tags
                 i_str = etree.tostring(i).decode()
                 i_str = i_str.replace("</gmi:MI_Metadata></csw:SearchResults>", "</gmi:MI_Metadata>")
@@ -807,7 +806,6 @@ class CswRecord(object):
     """Process csw:Record, csw:BriefRecord, csw:SummaryRecord"""
 
     def __init__(self, record):
-
         if hasattr(record, "getroot"):  # standalone document
             self.xml = etree.tostring(record.getroot())
         else:  # part of a larger document

@@ -7,7 +7,7 @@
 # Contact email: tomkralidis@gmail.com
 # =============================================================================
 
-""" API for OGC CRS constructs. """
+"""API for OGC CRS constructs."""
 
 # list of URN codes for EPSG in which axis order
 # of coordinates are y,x (e.g. lat, long)

@@ -22,7 +22,7 @@
 # Contact email: tomkralidis@gmail.com
 # =============================================================================
 
-""" FGDC metadata parser """
+"""FGDC metadata parser"""
 
 from scar_add_metadata_toolbox.hazmat.owslib.etree import etree
 from scar_add_metadata_toolbox.hazmat.owslib import util

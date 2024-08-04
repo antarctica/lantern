@@ -250,7 +250,7 @@ class Csw(object):
         if self.environ["REQUEST_METHOD"] == "POST":
             try:
                 request_body_size = int(self.environ.get("CONTENT_LENGTH", 0))
-            except (ValueError):
+            except ValueError:
                 request_body_size = 0
 
             self.requesttype = "POST"
@@ -534,7 +534,6 @@ class Csw(object):
             self.response = self.iface.exceptionreport(code, locator, text)
 
         else:  # process per the request value
-
             if "responsehandler" in self.kvp:
                 # set flag to process asynchronously
                 import threading
@@ -699,7 +698,6 @@ class Csw(object):
     def _gen_manager(self):
         """Update self.context.model with CSW-T advertising"""
         if self.config.has_option("manager", "transactions") and self.config.get("manager", "transactions") == "true":
-
             self.manager = True
 
             self.context.model["operations_order"].append("Transaction")

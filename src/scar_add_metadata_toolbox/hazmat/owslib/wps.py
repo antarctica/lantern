@@ -237,7 +237,6 @@ def _fix_auth(auth, username=None, password=None, verify=None, cert=None):
 
 
 class IComplexDataInput(object):
-
     """
     Abstract interface representing complex input object for a WPS request.
     """
@@ -251,7 +250,6 @@ class IComplexDataInput(object):
 
 
 class WebProcessingService(object):
-
     """
     Class that contains client-side functionality for invoking an OGC Web Processing Service (WPS).
 
@@ -457,7 +455,6 @@ class WebProcessingService(object):
 
         # loop over children WITHOUT requiring a specific namespace
         for element in root:
-
             # this element's namespace
             ns = getNamespace(element)
 
@@ -590,7 +587,6 @@ class WPSReader(object):
 
 
 class WPSCapabilitiesReader(WPSReader):
-
     """
     Utility class that reads and parses a WPS GetCapabilities document into a lxml.etree infoset.
     """
@@ -620,7 +616,6 @@ class WPSCapabilitiesReader(WPSReader):
 
 
 class WPSDescribeProcessReader(WPSReader):
-
     """
     Class that reads and parses a WPS DescribeProcess document into a etree infoset
     """
@@ -651,7 +646,6 @@ class WPSDescribeProcessReader(WPSReader):
 
 
 class WPSExecuteReader(WPSReader):
-
     """
     Class that reads and parses a WPS Execute response document into a etree infoset
     """
@@ -682,7 +676,6 @@ class WPSExecuteReader(WPSReader):
 
 
 class WPSExecution(object):
-
     """
     Class that represents a single WPS process executed on a remote WPS service.
     """
@@ -701,7 +694,6 @@ class WPSExecution(object):
         auth=None,
         language=None,
     ):
-
         # initialize fields
         self.url = url
         self.version = version
@@ -781,8 +773,7 @@ class WPSExecution(object):
         # <wps:DataInputs>
         dataInputsElement = etree.SubElement(root, nspath_eval("wps:DataInputs", namespaces))
 
-        for (key, val) in inputs:
-
+        for key, val in inputs:
             inputElement = etree.SubElement(dataInputsElement, nspath_eval("wps:Input", namespaces))
             identifierElement = etree.SubElement(inputElement, nspath_eval("ows:Identifier", namespaces))
             identifierElement.text = key
@@ -942,7 +933,6 @@ class WPSExecution(object):
         if self.isSucceded():
             content = b""
             for output in self.processOutputs:
-
                 output_content = output.retrieveData(
                     self.auth.username,
                     self.auth.password,
@@ -1105,7 +1095,6 @@ class WPSExecution(object):
 
 
 class ComplexData(object):
-
     """
     Class that represents a ComplexData element in a WPS document
     """
@@ -1117,19 +1106,16 @@ class ComplexData(object):
 
 
 class InputOutput(object):
-
     """
     Superclass of a WPS input or output data object.
     """
 
     def __init__(self, element):
-
         self.abstract = None
         self.metadata = []
 
         # loop over sub-elements without requiring a specific namespace
         for child in element:
-
             # <ows:Identifier xmlns:ows="http://www.opengis.net/ows/1.1">SUMMARIZE_TIMESTEP</ows:Identifier>
             if child.tag.endswith("Identifier"):
                 self.identifier = testXMLValue(child)
@@ -1208,7 +1194,6 @@ class InputOutput(object):
                         self.dataType = reference[pos + 1 :]
 
             for sub_element in literal_data_element:
-
                 subns = getNamespace(sub_element)
 
                 if sub_element.tag.endswith("DefaultValue"):
@@ -1328,7 +1313,6 @@ class Input(InputOutput):
     """
 
     def __init__(self, inputElement):
-
         # superclass initializer
         super(Input, self).__init__(inputElement)
 
@@ -1357,13 +1341,11 @@ class Input(InputOutput):
 
 
 class Output(InputOutput):
-
     """
     Class that represents a WPS process output.
     """
 
     def __init__(self, outputElement):
-
         # superclass initializer
         super(Output, self).__init__(outputElement)
 
@@ -1609,7 +1591,6 @@ class Process(object):
         self.metadata = []
 
         for child in elem:
-
             # this element's namespace
             # TODO: ns not used
             # ns = getNamespace(child)
@@ -1765,7 +1746,6 @@ class ComplexDataInput(IComplexDataInput, ComplexData):
 
 
 class FeatureCollection(IComplexDataInput):
-
     """
     Base class to represent a Feature Collection used as input to a WPS request.
     The method getXml() is invoked by the WPS execute() method to build the WPS request.
@@ -1782,7 +1762,6 @@ class FeatureCollection(IComplexDataInput):
 
 
 class WFSFeatureCollection(FeatureCollection):
-
     """
     FeatureCollection specified by a WFS query.
     All subclasses must implement the getQuery() method to provide the specific query portion of the XML.
@@ -1836,7 +1815,6 @@ class WFSFeatureCollection(FeatureCollection):
 
 
 class WFSQuery(IComplexDataInput):
-
     """
     Class representing a WFS query, for insertion into a WFSFeatureCollection instance.
 
@@ -1849,7 +1827,6 @@ class WFSQuery(IComplexDataInput):
         self.filters = filters
 
     def getXml(self):
-
         #            <wfs:Query typeName="sample:CONUS_States">
         #                <wfs:PropertyName>the_geom</wfs:PropertyName>
         #                <wfs:PropertyName>STATE</wfs:PropertyName>

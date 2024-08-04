@@ -30,7 +30,6 @@ def WebMapService(
     headers=None,
     auth=None,
 ):
-
     """wms factory function, returns a version specific WebMapService object
 
     @type url: string

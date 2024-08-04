@@ -273,7 +273,6 @@ class Operation(object):
     ns = Namespaces_1_1_0()
 
     def __init__(self, elem, nmSpc):
-
         self.name = elem.get("name")
         self.formatOptions = [
             f.text

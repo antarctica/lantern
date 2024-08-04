@@ -1,11 +1,16 @@
+from __future__ import annotations
+
+import contextlib
 import json
+from collections.abc import Generator
 from copy import deepcopy
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from enum import Enum
 from hashlib import sha1
 from pathlib import Path
-from typing import Any, Dict, Generator, List, Optional, Union
-from urllib.parse import parse_qs as query_string_parse, urlparse as url_parse
+from typing import Any
+from urllib.parse import parse_qs as query_string_parse
+from urllib.parse import urlparse as url_parse
 
 from bas_metadata_library.standards.iso_19115_2 import MetadataRecord, MetadataRecordConfigV3
 from dateutil.relativedelta import relativedelta
@@ -21,13 +26,13 @@ from scar_add_metadata_toolbox.csw import (
 
 class WellKnownExtents(Enum):
     """
-    Represents a set of spatial bounding box extents for common, well-known, regions
+    Represents a set of spatial bounding box extents for common, well-known, regions.
 
     These are needed as bounding boxes for things like Antarctica are not simple to visualise using a corner coordinates
     due to the projections used at the poles. This enumeration holds these more complex representations.
     """
 
-    ANTARCTICA = {
+    ANTARCTICA = {  # noqa: RUF012
         "type": "Polygon",
         "coordinates": [
             [
@@ -126,7 +131,7 @@ class WellKnownExtents(Enum):
             ]
         ],
     }
-    SUB_ANTARCTICA = {
+    SUB_ANTARCTICA = {  # noqa: RUF012
         "type": "Polygon",
         "coordinates": [
             [
@@ -882,7 +887,7 @@ class WellKnownExtents(Enum):
 
 class RecordRetractBeforeDeleteError(Exception):
     """
-    Represents a situation whereby a record is deleted before it has been first been retracted
+    Represents where a record is deleted before it has been first been retracted.
 
     This is illogical as published records must have an unpublished counterpart. If this unpublished counterpart is
     removed (deleted) this rule would be violated. Instead, the published record must be removed (retracted) first.
@@ -892,25 +897,23 @@ class RecordRetractBeforeDeleteError(Exception):
 
 
 class ItemInvalidSourceRecordError(Exception):
-    """
-    Represents a situation where an Item class is instantiated with a Record that doesn't represent an item.
-    """
+    """Represents a situation where an Item class is instantiated with a Record that doesn't represent an item."""
 
     pass
 
 
 class CollectionInvalidSourceRecordError(Exception):
-    """
-    Represents a situation where a Collection class is instantiated with a Record that doesn't represent a collection.
-    """
+    """Represents where a Collection class is instantiated with a Record that doesn't represent a collection."""
 
     pass
 
 
 class RecordSummary:
     """
-    Records represent and describe a given resource, often in great detail using a conceptual model. These full
-    representations (represented by the Record class) are inherently large and complex and so unwieldy in large numbers.
+    Records represent and describe a given resource, often in great detail using a conceptual model.
+
+    These full representations (represented by the Record class) are inherently large and complex and so unwieldy in
+    large numbers.
 
     Record Summaries represent and describe a resource in far less detail. As RecordSummaries are simpler, they
     can be processed more easily than Records, especially in large numbers, such as listings and indexes etc.
@@ -927,8 +930,10 @@ class RecordSummary:
     added to the Record class instead.
     """
 
-    def __init__(self, config: dict = None):
+    def __init__(self, config: dict | None = None) -> None:
         """
+        Initialise class.
+
         :type config dict
         :param config: Record configuration
         """
@@ -936,7 +941,7 @@ class RecordSummary:
         if config is not None:
             self.config = config
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<RecordSummary / {self.identifier} / {self.title}>"
 
     @property
@@ -954,8 +959,9 @@ class RecordSummary:
 
 class Record(RecordSummary):
     """
-    Records represent and describe a given resource, often in great detail using a conceptual model - currently assumed
-    to be ISO 19115 (Geographic Information).
+    Records represent and describe a given resource, often in great detail using a conceptual model.
+
+    Currently assumed to be ISO 19115 (Geographic Information).
 
     As full representations are inherently large and complex, they are unwieldy in large numbers, such as indexes. In
     these circumstances, record summaries (represented by the RecordSummaries class), with an intentionally restricted
@@ -971,13 +977,13 @@ class Record(RecordSummary):
     resources this may change.
     """
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Record / {self.identifier}>"
 
     @staticmethod
-    def _process_contacts(contacts: List[dict]) -> Dict[str, List[dict]]:
+    def _process_contacts(contacts: list[dict]) -> dict[str, list[dict]]:
         """
-        Processes contact into a dict, keyed by role
+        Process contacts into a dict, keyed by role.
 
         ISO allows multiple contacts to have the same role (e.g. multiple authors). The BAS Metadata Library config
         also allows contacts to have multiple roles (e.g. publisher and distributor). This method will restructure, and
@@ -1033,36 +1039,24 @@ class Record(RecordSummary):
             ]
         }
         ```
-
-        :type contacts: list
-        :param contacts: list of contacts
-        :rtype dict
-        :return: resource contacts keyed by role
         """
         _contacts_by_role = {}
         for contact in contacts:
             for role in contact["role"]:
-                if role not in _contacts_by_role.keys():
+                if role not in _contacts_by_role:
                     _contacts_by_role[role] = []
                 _contacts_by_role[role].append(contact)
         return _contacts_by_role
 
     @staticmethod
-    def _filter_keywords(keywords: List[dict], keyword_type: str) -> List[dict]:
+    def _filter_keywords(keywords: list[dict], keyword_type: str) -> list[dict]:
         """
-        Filters descriptive keywords by keyword type
+        Filter descriptive keywords by keyword type.
 
         ISO supports multiple types of descriptive keywords (e.g. theme, place). As each type is typically used
         differently, this method filters keywords for a specified type (e.g. only theme keywords).
 
         Keyword types are defined by the relevant BAS Metadata Library record configuration schema and ISO code list.
-
-        :type keywords: list
-        :param keywords: list of (all) description keywords
-        :type keyword_type str
-        :param keyword_type: descriptive keyword type to filter by
-        :rtype list
-        :return: subset of descriptive keywords that are for the specified keyword type
         """
         _keywords = []
         for keyword_set in keywords:
@@ -1072,15 +1066,13 @@ class Record(RecordSummary):
         return _keywords
 
     @staticmethod
-    def _process_temporal_extent(temporal_extent: Optional[dict]) -> Dict[str, Optional[datetime]]:
+    def _process_temporal_extent(temporal_extent: dict | None) -> dict[str, datetime | None]:
         """
-        Assemble a temporal extent
+        Assemble a temporal extent.
 
         Temporal extents consist of an optional start and end date instant. This method checks whether either the start
         or end period has been specified, and if not, use a default 'undefined' value.
 
-        :type temporal_extent: dict
-        :param temporal_extent: temporal extent
         :return: temporal extent with default start/end values if not specified
         :rtype dict
         """
@@ -1089,14 +1081,10 @@ class Record(RecordSummary):
         if temporal_extent is None:
             return _temporal_extent
 
-        try:
+        with contextlib.suppress(KeyError):
             _temporal_extent["start"] = temporal_extent["period"]["start"]["date"]
-        except KeyError:
-            pass
-        try:
+        with contextlib.suppress(KeyError):
             _temporal_extent["end"] = temporal_extent["period"]["end"]["date"]
-        except KeyError:
-            pass
 
         return _temporal_extent
 
@@ -1105,7 +1093,7 @@ class Record(RecordSummary):
         return self.config["identification"]["abstract"]
 
     @property
-    def aggregations(self) -> List[dict]:
+    def aggregations(self) -> list[dict]:
         try:
             return self.config["identification"]["aggregations"]
         except KeyError:
@@ -1116,15 +1104,15 @@ class Record(RecordSummary):
         return self.config["identification"]["character_set"]
 
     @property
-    def constraints(self) -> List[Dict[str, str]]:
+    def constraints(self) -> list[dict[str, str]]:
         return self.config["identification"]["constraints"]
 
     @property
-    def contacts(self) -> Dict[str, List[dict]]:
+    def contacts(self) -> dict[str, list[dict]]:
         return self._process_contacts(contacts=self.config["identification"]["contacts"])
 
     @property
-    def dates(self) -> Dict[str, Dict[str, Union[str, date, datetime]]]:
+    def dates(self) -> dict[str, dict[str, str | date | datetime]]:
         _dates = {}
         for date_type, date_value in self.config["identification"]["dates"].items():
             if "date_precision" not in date_value:
@@ -1133,7 +1121,7 @@ class Record(RecordSummary):
         return _dates
 
     @property
-    def distributions(self) -> Optional[List[dict]]:
+    def distributions(self) -> list[dict] | None:
         try:
             return self.config["distribution"]
         except KeyError:
@@ -1144,7 +1132,7 @@ class Record(RecordSummary):
         return self.config["identification"]["edition"]
 
     @property
-    def extents(self) -> Optional[List[dict]]:
+    def extents(self) -> list[dict] | None:
         extents = []
 
         try:
@@ -1164,14 +1152,14 @@ class Record(RecordSummary):
         return self.config["identification"]["language"]
 
     @property
-    def lineage(self) -> Optional[str]:
+    def lineage(self) -> str | None:
         try:
             return self.config["identification"]["lineage"]["statement"]
         except KeyError:
             return None
 
     @property
-    def location_keywords(self) -> List[dict]:
+    def location_keywords(self) -> list[dict]:
         return self._filter_keywords(keywords=self.config["identification"]["keywords"], keyword_type="place")
 
     @property
@@ -1207,64 +1195,56 @@ class Record(RecordSummary):
         return self.config["metadata"]["date_stamp"]
 
     @property
-    def other_citation_details(self) -> Optional[str]:
+    def other_citation_details(self) -> str | None:
         try:
             return self.config["identification"]["other_citation_details"]
         except KeyError:
             return None
 
     @property
-    def spatial_reference_system(self) -> Optional[dict]:
+    def spatial_reference_system(self) -> dict | None:
         try:
             return self.config["reference_system_info"]
         except KeyError:  # pragma: no cover (will be addressed in #116)
             return None
 
     @property
-    def spatial_representation_type(self) -> Optional[str]:
+    def spatial_representation_type(self) -> str | None:
         try:
             return self.config["identification"]["spatial_representation_type"]
         except KeyError:  # pragma: no cover (will be addressed in #116)
             return None
 
     @property
-    def theme_keywords(self) -> List[dict]:
+    def theme_keywords(self) -> list[dict]:
         return self._filter_keywords(keywords=self.config["identification"]["keywords"], keyword_type="theme")
 
     @property
-    def topics(self) -> List[str]:
+    def topics(self) -> list[str]:
         return self.config["identification"]["topics"]
 
     def load(self, record_path: Path) -> None:
         """
-        Loads a Record from a file encoded using JSON
+        Load a Record from a file encoded using JSON.
 
         Specifically load a BAS Metadata Library record configuration for ISO 19115-2 that has been JSON encoded.
-
-        :type record_path Path
-        :param record_path: path to file containing JSON encoded record configuration
         """
         configuration = MetadataRecordConfigV3()
         configuration.load(file=record_path)
-        self.config: Dict[str, Any] = configuration.config
+        self.config: dict[str, Any] = configuration.config
 
     def dump(self, record_path: Path, overwrite: bool = False) -> None:
         """
-        Saves a Record to a file encoded using JSON
+        Save a Record to a file encoded using JSON.
 
         Specifically saves a BAS Metadata Library record configuration for ISO 19115-2 using JSON encoding.
-
-        :type record_path Path
-        :param record_path: desired path of file that will contain JSON encoded record configuration
-        :type overwrite: bool
-        :param overwrite: if the desired file already exists, whether to replace its contents
         """
         configuration = MetadataRecordConfigV3(**self.config)
         configuration.validate()
 
         try:
             if record_path.exists():
-                raise FileExistsError from None
+                raise FileExistsError from None  # noqa: TRY301
             configuration.dump(file=record_path)
         except FileExistsError:
             if not overwrite:
@@ -1273,53 +1253,51 @@ class Record(RecordSummary):
 
     def dumps(self, dump_format: str) -> str:
         """
-        Encode a Record in a given format
+        Encode a Record in a given format.
 
         Specifically encodes a BAS Metadata Library record configuration for ISO 19115-2 using a specified encoding.
 
         Currently, only the 'xml' format is supported for rendering a record configuration as ISO XML. Others may be
         added in the future as needs arise.
-
-        :type dump_format str
-        :param dump_format: format to encode record configuration in
-        :rtype str
-        :return: encoded record configuration
         """
-        if dump_format == "xml":
-            configuration = MetadataRecordConfigV3(**self.config)
-            record = MetadataRecord(configuration=configuration)
-            return record.generate_xml_document().decode()
+        if dump_format != "xml":
+            msg = f"Unsupported dump format: {dump_format}"
+            raise ValueError(msg)
+
+        configuration = MetadataRecordConfigV3(**self.config)
+        record = MetadataRecord(configuration=configuration)
+        return record.generate_xml_document().decode()
 
 
 class MirrorRecordSummary(Record):
     """
-    Mirrored record summaries extend record summaries with a 'published' status, representing whether a record is
-    *published* or *unpublished* based on the repositories a record appears within in a mirrored repository.
+    Mirrored record summaries extend record summaries with a 'published' status.
+
+    Representing whether a record is *published* or *unpublished* based on the repositories a record appears within in
+    a mirrored repository.
     """
 
-    def __init__(self, config: dict, published: bool):
+    def __init__(self, config: dict, published: bool) -> None:
         super().__init__(config=config)
         self.published = published
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<MirrorRecordSummary / {self.identifier} / {'Published' if self.published else 'Unpublished'}>"
 
 
 class MirrorRecord(MirrorRecordSummary, Record):
-    """
-    Mirrored records extend mirrored record summaries and records.
-    """
+    """Mirrored records extend mirrored record summaries and records."""
 
-    def __init__(self, config: dict, published: bool):
+    def __init__(self, config: dict, published: bool) -> None:
         super().__init__(config=config, published=published)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<MirrorRecord / {self.identifier} / {'Published' if self.published else 'Unpublished'}>"
 
 
 class Repository:
     """
-    Represents a data store with an interface for creating, retrieving, updating and deleting Records
+    Represents a data store with an interface for creating, retrieving, updating and deleting Records.
 
     Externally, repositories present an abstracted interface for interacting with records using the Record and
     RecordSummary classes. Internally, repositories are backed by an OGC Catalogue Services for the Web (CSW) catalogue.
@@ -1332,16 +1310,12 @@ class Repository:
       back into a Record class
     """
 
-    def __init__(self, client_config: dict):
-        """
-        :type client_config dict
-        :param client_config: configuration for the CSWClient class instance that backs this repository
-        """
+    def __init__(self, client_config: dict) -> None:
         self.csw_client = CSWClient(config=client_config)
 
     def retrieve_record(self, record_identifier: str) -> Record:
         """
-        Retrieves a record from the repository
+        Retrieve a record from the repository.
 
         Record identifiers are the same as ISO 19115-2 file identifiers.
 
@@ -1357,7 +1331,7 @@ class Repository:
 
     def retrieve_records(self) -> Generator[Record, None, None]:
         """
-        Retrieves all records in the repository
+        Retrieve all records in the repository.
 
         Note: Records are returned using a generator for use in iterators such as for loops. If an actual List of
         records is needed, for calculating a length for example, the return value can be wrapped, e.g.
@@ -1365,18 +1339,15 @@ class Repository:
         ```
         records_count = len(list(repository.retrieve_records()))
         ```
-
-        :rtype list
-        :return: all records
         """
         for record_xml in self.csw_client.get_records(mode=CSWGetRecordMode.FULL):
             record_config = MetadataRecord(record=record_xml).make_config()
             record_config.validate()
             yield Record(config=record_config.config)
 
-    def list_record_identifiers(self) -> List[str]:
+    def list_record_identifiers(self) -> list[str]:
         """
-        Retrieves identifiers for all records in the repository
+        Retrieve identifiers for all records in the repository.
 
         Record identifiers are the same as ISO 19115-2 file identifiers.
 
@@ -1385,9 +1356,9 @@ class Repository:
         """
         return list(self.list_records().keys())
 
-    def list_records(self) -> Dict[str, RecordSummary]:
+    def list_records(self) -> dict[str, RecordSummary]:
         """
-        Retrieves summaries for all records in the repository
+        Retrieve summaries for all records in the repository.
 
         Records are returned as a dictionary rather than a list to allow specific records to be easily selected.
 
@@ -1405,7 +1376,7 @@ class Repository:
     def insert_record(self, record: Record, update: bool = False) -> None:
         # noinspection GrazieInspection
         """
-        Creates a new record, or updates an existing record, in the repository
+        Create a new record, or updates an existing record, in the repository.
 
         Records are assumed to be new records by default and will raise an exception if this causes a conflict. Records
         can be updated instead by setting the updated parameter to True.
@@ -1427,7 +1398,7 @@ class Repository:
 
     def delete_record(self, record_identifier: str) -> None:
         """
-        Deletes a record from the repository
+        Delete a record from the repository.
 
         Record identifiers are the same as ISO 19115-2 file identifiers.
 
@@ -1439,8 +1410,7 @@ class Repository:
 
 class MirrorRepository:
     """
-    Represents a composite data store with an interface for creating, retrieving, updating, deleting, publishing and
-    retracting Records
+    Represents a composite data store with an interface for managing Records.
 
     Externally, repositories present an abstracted interface for interacting with records using the MirrorRecord and
     MirrorRecordSummary classes. Internally, mirror repositories are backed by two Repository classes to represent
@@ -1452,19 +1422,13 @@ class MirrorRepository:
     again to (re)publish it.
     """
 
-    def __init__(self, unpublished_repository_config: dict, published_repository_config: dict):
-        """
-        :type unpublished_repository_config dict
-        :param unpublished_repository_config: configuration for the unpublished Repository class instance
-        :type published_repository_config dict
-        :param published_repository_config: configuration for the published Repository class instance
-        """
+    def __init__(self, unpublished_repository_config: dict, published_repository_config: dict) -> None:
         self.published_repository = Repository(**published_repository_config)
         self.unpublished_repository = Repository(**unpublished_repository_config)
 
     def retrieve_record(self, record_identifier: str) -> MirrorRecord:
         """
-        Retrieves a record from the repository
+        Retrieve a record from the repository.
 
         Record identifiers are the same as ISO 19115-2 file identifiers.
 
@@ -1484,9 +1448,9 @@ class MirrorRepository:
 
     # retrieve_records() method removed as part of #133/#134
 
-    def retrieve_published_records(self) -> List[MirrorRecord]:
+    def retrieve_published_records(self) -> list[MirrorRecord]:
         """
-        Retrieves all published records in the repository
+        Retrieve all published records in the repository.
 
         Note: Records are returned using a generator for use in iterators such as for loops. If an actual List of
         records is needed, for calculating a length for example, the return value can be wrapped, e.g.
@@ -1501,9 +1465,9 @@ class MirrorRepository:
         for published_record in self.published_repository.retrieve_records():
             yield MirrorRecord(config=published_record.config, published=True)
 
-    def list_record_identifiers(self) -> List[str]:
+    def list_record_identifiers(self) -> list[str]:
         """
-        Retrieves identifiers for all records in the repository
+        Retrieve identifiers for all records in the repository.
 
         Record identifiers are the same as ISO 19115-2 file identifiers.
 
@@ -1515,9 +1479,9 @@ class MirrorRepository:
         """
         return self.unpublished_repository.list_record_identifiers()
 
-    def list_unpublished_record_identifiers(self) -> List[str]:
+    def list_unpublished_record_identifiers(self) -> list[str]:
         """
-        Retrieves identifiers for all records in the repository
+        Retrieve identifiers for all records in the repository.
 
         Record identifiers are the same as ISO 19115-2 file identifiers.
 
@@ -1529,9 +1493,9 @@ class MirrorRepository:
         """
         return self.unpublished_repository.list_record_identifiers()
 
-    def list_published_record_identifiers(self) -> List[str]:
+    def list_published_record_identifiers(self) -> list[str]:
         """
-        Retrieves identifiers for all published records in the repository
+        Retrieve identifiers for all published records in the repository.
 
         Record identifiers are the same as ISO 19115-2 file identifiers.
 
@@ -1540,9 +1504,9 @@ class MirrorRepository:
         """
         return self.published_repository.list_record_identifiers()
 
-    def list_distinct_unpublished_record_identifiers(self) -> List[str]:
+    def list_distinct_unpublished_record_identifiers(self) -> list[str]:
         """
-        Retrieves identifiers for all unpublished records in the repository
+        Retrieve identifiers for all unpublished records in the repository.
 
         This method *only* returns identifiers for records that have not been published.
 
@@ -1557,9 +1521,9 @@ class MirrorRepository:
         published_record_identifiers = self.list_published_record_identifiers()
         return list(set(unpublished_record_identifiers) - set(published_record_identifiers))
 
-    def list_records(self) -> Dict[str, MirrorRecordSummary]:
+    def list_records(self) -> dict[str, MirrorRecordSummary]:
         """
-        Retrieves summaries for all records in the repository
+        Retrieve summaries for all records in the repository.
 
         Records are returned as a dictionary rather than a list to allow specific records to be easily selected.
 
@@ -1582,7 +1546,7 @@ class MirrorRepository:
 
     def insert_record(self, record: Record, update: bool = False) -> None:
         """
-        Creates a new, unpublished, record, or updates an existing record in the unpublished repository
+        Create a new, unpublished, record, or updates an existing record in the unpublished repository.
 
         Records are assumed to be new by default and will raise an exception if this causes a conflict. Records can be
         updated instead by setting the updated parameter to True.
@@ -1597,9 +1561,9 @@ class MirrorRepository:
         """
         self.unpublished_repository.insert_record(record=record, update=update)
 
-    def delete_record(self, record_identifier) -> None:
+    def delete_record(self, record_identifier: str) -> None:
         """
-        Deletes a record from the unpublished repository
+        Delete a record from the unpublished repository.
 
         Record identifiers are the same as ISO 19115-2 file identifiers.
 
@@ -1617,7 +1581,7 @@ class MirrorRepository:
 
     def publish_record(self, record_identifier: str, republish: bool = False) -> None:
         """
-        Creates a new, published, record, or updates an existing record in the published repository
+        Create a new, published, record, or updates an existing record in the published repository.
 
         Records are assumed to be new by default and will raise an exception if this causes a conflict. Records can be
         updated (republished) instead by setting the updated parameter to True.
@@ -1641,7 +1605,7 @@ class MirrorRepository:
 
     def retract_record(self, record_identifier: str) -> None:
         """
-        Deletes (retracts) a record from the published repository
+        Delete (retracts) a record from the published repository.
 
         Record identifiers are the same as ISO 19115-2 file identifiers.
 
@@ -1653,8 +1617,10 @@ class MirrorRepository:
 
 class Item:
     """
-    Items are abstractions of Records, specific and tailored to the needs of this project, using any hierarchy level
-    except 'collection', which is represented by the Collection class.
+    Items are abstractions of Records.
+
+    They are specific and tailored to the needs of this project, using any hierarchy level except 'collection', which
+    is represented by the Collection class for historical reasons.
 
     Items are read only and use a Record internally for exposing information through properties. They are designed to
     provide final output to humans, rather than for onward use or interpretation by other services - use Records for
@@ -1664,24 +1630,19 @@ class Item:
     understood or to make more contextual sense.
     """
 
-    def __init__(self, record: Record):
-        # noinspection GrazieInspection
-        """
-        :type record Record
-        :param record: Record item is based on
-        """
+    def __init__(self, record: Record) -> None:
         self.record = record
 
         if self.record.hierarchy_level == "collection":
             raise ItemInvalidSourceRecordError()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Item / {self.identifier}>"
 
     @staticmethod
-    def _format_date(date_datetime: Union[date, datetime], date_precision: Optional[str] = None) -> str:
+    def _format_date(date_datetime: date | datetime, date_precision: str | None = None) -> str:
         """
-        Format a date for display
+        Format a date for display.
 
         Date(time)s are formatted using ISO 8601, upto an optional data precision.
 
@@ -1700,13 +1661,13 @@ class Item:
         """
         if date_precision is None:
             return date_datetime.isoformat()
-        elif date_precision == "year":
+        if date_precision == "year":  # noqa: RET503 (will be refactored away)
             return str(date_datetime.year)
 
     @staticmethod
     def _format_language(language: str) -> str:
         """
-        Format an ISO 19115 language code list value
+        Format an ISO 19115 language code list value.
 
         Note: It is currently assumed that where English is used this refers to a United Kingdom (GB) localisation.
 
@@ -1715,13 +1676,13 @@ class Item:
         :rtype str
         :return: formatted language name
         """
-        if language == "eng":
+        if language == "eng":  # noqa: RET503 (will be refactored away)
             return "English (United Kingdom)"
 
     @staticmethod
     def _format_maintenance_frequency(maintenance_frequency: str) -> str:
         """
-        Format an ISO 19115 maintenance frequency code list value
+        Format an ISO 19115 maintenance frequency code list value.
 
         :type maintenance_frequency str
         :param maintenance_frequency: ISO 19115 maintenance frequency code list value
@@ -1730,13 +1691,13 @@ class Item:
         """
         if maintenance_frequency == "biannually":
             return "Biannually (every 6 months)"
-        elif maintenance_frequency == "asNeeded":
+        if maintenance_frequency == "asNeeded":  # noqa: RET503 (will be refactored away)
             return "As Needed"
 
     @staticmethod
     def _format_organisation_name(organisation_name: str) -> str:
         """
-        Format an organisation name
+        Format an organisation name.
 
         Typically, this is used to remove redundant information from names. For example, as items will be shown in a
         BAS branded webpage, it isn't necessary to include 'British Antarctic Survey' in organisation names.
@@ -1755,7 +1716,7 @@ class Item:
     @staticmethod
     def _format_keyword_thesaurus_title(thesaurus_title: str) -> str:
         """
-        Format the name of a keyword set
+        Format the name of a keyword set.
 
         In ISO 19115 keywords that are published by an authority can include a thesaurus that describes what the keyword
         set is, the authority behind them, etc.
@@ -1770,15 +1731,15 @@ class Item:
         """
         if thesaurus_title == "General Multilingual Environmental Thesaurus - INSPIRE themes":
             return "INSPIRE themes"
-        elif thesaurus_title == "Global Change Master Directory (GCMD) Science Keywords":
+        if thesaurus_title == "Global Change Master Directory (GCMD) Science Keywords":
             return "GCMD Science Keywords"
-        elif thesaurus_title == "Global Change Master Directory (GCMD) Location Keywords":
+        if thesaurus_title == "Global Change Master Directory (GCMD) Location Keywords":  # noqa: RET503
             return "GCMD Location Keywords"
 
     @staticmethod
-    def _format_spatial_reference_system(spatial_reference_system_code: Dict[str, str]) -> str:
+    def _format_spatial_reference_system(spatial_reference_system_code: dict[str, str]) -> str:
         """
-        Format a spatial reference system identifier
+        Format a spatial reference system identifier.
 
         Formal identifiers for spatial reference systems (or coordinate/spatial reference systems) are not readily
         accessible to those not very familiar with them. This method expands identifiers to include information people
@@ -1795,13 +1756,13 @@ class Item:
         """
         if spatial_reference_system_code["href"] == "http://www.opengis.net/def/crs/EPSG/0/3031":
             return "WGS 84 / Antarctic Polar Stereographic ([EPSG:3031](https://spatialreference.org/ref/epsg/3031/))"
-        elif spatial_reference_system_code["href"] == "http://www.opengis.net/def/crs/EPSG/0/4326":
+        if spatial_reference_system_code["href"] == "http://www.opengis.net/def/crs/EPSG/0/4326":  # noqa: RET503
             return "WGS 84 ([EPSG:4326](https://spatialreference.org/ref/epsg/wgs-84/))"
 
     @staticmethod
-    def _process_bounding_box_geojson(bounding_box: Dict[str, str]) -> Dict:
+    def _process_bounding_box_geojson(bounding_box: dict[str, str]) -> dict:
         """
-        Constructs a GeoJSON bounding box for an items spatial extent
+        Construct a GeoJSON bounding box for an items spatial extent.
 
         By default, this method uses a top-left and bottom-right pair of coordinates to define a box indicating the
         extent of an item.
@@ -1851,9 +1812,9 @@ class Item:
             and bounding_box["south_latitude"] == -90
             and bounding_box["west_longitude"] == -180
         ):
-            bounding_polygon["crs"]["properties"][
-                "name"
-            ] = "urn:ogc:def:crs:EPSG::3031"  # pragma: no cover (will be addressed in #116)
+            bounding_polygon["crs"]["properties"]["name"] = (
+                "urn:ogc:def:crs:EPSG::3031"  # pragma: no cover (will be addressed in #116)
+            )
             bounding_polygon["features"][0]["geometry"] = WellKnownExtents.ANTARCTICA.value
         elif (  # pragma: no cover (will be addressed in #116)
             bounding_box["east_longitude"] == 180
@@ -1861,16 +1822,16 @@ class Item:
             and bounding_box["south_latitude"] == -60
             and bounding_box["west_longitude"] == -180
         ):
-            bounding_polygon["features"][0][
-                "geometry"
-            ] = WellKnownExtents.SUB_ANTARCTICA.value  # pragma: no cover (will be addressed in #116)
+            bounding_polygon["features"][0]["geometry"] = (
+                WellKnownExtents.SUB_ANTARCTICA.value
+            )  # pragma: no cover (will be addressed in #116)
 
         return bounding_polygon
 
     @staticmethod
-    def _process_status(maintenance_frequency: str, released_date: Union[date, datetime]):
+    def _process_status(maintenance_frequency: str, released_date: date | datetime) -> str:
         """
-        Determines the status of an item
+        Determine the status of an item.
 
         Supported maintenance frequencies are:
 
@@ -1899,12 +1860,10 @@ class Item:
         :rtype str
         :return: item status
         """
-        if maintenance_frequency == "asNeeded":
-            return "current"
-        elif maintenance_frequency == "notPlanned":
+        if maintenance_frequency == "asNeeded" or maintenance_frequency == "notPlanned":
             return "current"
 
-        _now = datetime.today()
+        _now = datetime.now(tz=timezone.utc)
         _overdue = released_date
         if isinstance(released_date, date):  # pragma: no cover (added for future use)
             _now = _now.date()
@@ -1916,9 +1875,9 @@ class Item:
         return "outdated"  # pragma: no cover (added for future use)
 
     @staticmethod
-    def _process_download(distribution: dict) -> Dict[str, str]:
+    def _process_download(distribution: dict) -> dict[str, str]:
         """
-        Generate an item download
+        Generate an item download.
 
         Transforms a ISO 19115 transfer option and optionally an associated format, into an item download option. These
         download options are bespoke to this data catalogue, using inference and hard-coded formatting options to enrich
@@ -1939,7 +1898,7 @@ class Item:
 
         download = {
             # Bandit B303/S303 warning is exempted as these hashes are not used for any security related purposes
-            "id": sha1(json.dumps(distribution).encode()).hexdigest(),  # noqa: S303, S324 - nosec
+            "id": sha1(json.dumps(distribution).encode()).hexdigest(),  # noqa: S324 - nosec
             "format": None,
             "format_title": None,
             "format_description": None,
@@ -1985,9 +1944,9 @@ class Item:
         return download
 
     @staticmethod
-    def _filter_keyword_terms(keyword_sets: List[dict], keyword_set_url: str) -> List[dict]:
+    def _filter_keyword_terms(keyword_sets: list[dict], keyword_set_url: str) -> list[dict]:
         """
-        Filter a specific keyword set from a collection of keyword sets based on the keyword set's URI
+        Filter a specific keyword set from a collection of keyword sets based on the keyword set's URI.
 
         :type keyword_sets dict
         :param keyword_sets: collection of keyword sets to filter
@@ -1996,7 +1955,7 @@ class Item:
         :rtype dict
         :return: filtered keyword set
         """
-        for keyword_set in keyword_sets:
+        for keyword_set in keyword_sets:  # noqa: RET503 (will be refactored away)
             if keyword_set["thesaurus"]["title"]["href"] == keyword_set_url:
                 return keyword_set["terms"]
 
@@ -2009,7 +1968,7 @@ class Item:
         return markdown(self.abstract, output_format="html")
 
     @property
-    def authors(self) -> List[dict]:
+    def authors(self) -> list[dict]:
         return self.record.contacts["author"]
 
     @property
@@ -2017,7 +1976,7 @@ class Item:
         return str(self.record.character_set).upper()
 
     @property
-    def citation(self) -> Optional[str]:
+    def citation(self) -> str | None:
         return self.record.other_citation_details
 
     @property
@@ -2025,9 +1984,9 @@ class Item:
         return markdown(self.citation, output_format="html")
 
     @property
-    def collections(self) -> Optional[List[str]]:
+    def collections(self) -> list[str] | None:
         """
-        Item's Collections
+        Item's Collections.
 
         Collections are implemented as a descriptive keyword set using the NERC Vocabulary Service (T02).
 
@@ -2053,7 +2012,7 @@ class Item:
         return self.record.spatial_representation_type
 
     @property
-    def downloads(self) -> List[Dict[str, str]]:
+    def downloads(self) -> list[dict[str, str]]:
         downloads = []
 
         for distribution in self.record.distributions:
@@ -2066,7 +2025,7 @@ class Item:
         return self.record.edition
 
     @property
-    def geographic_extents(self) -> List[dict]:
+    def geographic_extents(self) -> list[dict]:
         geographic_extents = []
 
         for extent in self.record.extents:
@@ -2092,7 +2051,7 @@ class Item:
 
     @property
     def licence_url(self) -> str:
-        for constraint in self.record.constraints:
+        for constraint in self.record.constraints:  # noqa: RET503 (will be refactored away)
             if constraint["type"] == "usage" and constraint["restriction_code"] == "license":
                 return constraint["href"]
 
@@ -2105,7 +2064,7 @@ class Item:
         return markdown(self.lineage, output_format="html")
 
     @property
-    def location_keywords(self) -> List[dict]:
+    def location_keywords(self) -> list[dict]:
         location_keywords = self.record.location_keywords
         for location_keyword in location_keywords:
             location_keyword["thesaurus"]["title"]["value"] = self._format_keyword_thesaurus_title(
@@ -2146,19 +2105,22 @@ class Item:
         return self._format_date(date_datetime=self.record.metadata_updated)
 
     @property
-    def related_references(self) -> List[dict]:
+    def related_references(self) -> list[dict]:
+        # noinspection PyProtectedMember
         return Collection._filter_aggregations(
             aggregations=self.record.aggregations, association_type="crossReference", initiative_type="sciencePaper"
         )
 
     @property
-    def related_project_resources(self) -> List[dict]:
+    def related_project_resources(self) -> list[dict]:
+        # noinspection PyProtectedMember
         return Collection._filter_aggregations(
             aggregations=self.record.aggregations, association_type="crossReference", initiative_type="project"
         )
 
     @property
-    def related_datasets(self) -> List[dict]:
+    def related_datasets(self) -> list[dict]:
+        # noinspection PyProtectedMember
         return Collection._filter_aggregations(
             aggregations=self.record.aggregations, association_type="crossReference", initiative_type="investigation"
         )
@@ -2189,7 +2151,7 @@ class Item:
         return self._format_date(date_datetime=_date["date"], date_precision=_date["date_precision"])
 
     @property
-    def spatial_reference_system(self) -> Optional[str]:
+    def spatial_reference_system(self) -> str | None:
         if self.record.spatial_reference_system is None:
             return None  # pragma: no cover (will be addressed in #116)
 
@@ -2198,7 +2160,7 @@ class Item:
         )
 
     @property
-    def spatial_reference_system_markdown(self) -> Optional[str]:
+    def spatial_reference_system_markdown(self) -> str | None:
         if self.spatial_reference_system is None:
             return None  # pragma: no cover (will be addressed in #116)
 
@@ -2212,7 +2174,7 @@ class Item:
         )
 
     @property
-    def temporal_extents(self) -> List[Dict[str, str]]:
+    def temporal_extents(self) -> list[dict[str, str]]:
         temporal_extents = []
 
         for extent in self.record.extents:
@@ -2226,9 +2188,9 @@ class Item:
         return temporal_extents
 
     @property
-    def theme_keywords(self) -> List[dict]:
+    def theme_keywords(self) -> list[dict]:
         """
-        Theme keywords (filtered)
+        Theme keywords (filtered).
 
         Theme keywords are currently used for two keyword sets that the catalogue treats as special cases:
 
@@ -2274,9 +2236,9 @@ class Item:
         return markdown(self.title, output_format="html")
 
     @property
-    def topics(self) -> List[str]:
+    def topics(self) -> list[str]:
         """
-        Item's research topics
+        Item's research topics.
 
         Research topics are implemented as a descriptive keyword set using the NERC Vocabulary Service (T01).
 
@@ -2293,7 +2255,7 @@ class Item:
         return [term["term"] for term in topic_terms]
 
     @property
-    def updated(self) -> Optional[str]:
+    def updated(self) -> str | None:
         try:
             _date = self.record.dates["revision"]
             return self._format_date(date_datetime=_date["date"], date_precision=_date["date_precision"])
@@ -2303,8 +2265,10 @@ class Item:
 
 class Collection:
     """
-    Collections are abstractions of Records, specific and tailored to the needs of this project, that use the
-    'collection' hierarchy level. All other hierarchy levels are represented by the Item class.
+    Collections are abstractions of Records.
+
+     They are specific and tailored to the needs of this project, and map to the 'collection' hierarchy level in ISO
+     19115. All other hierarchy levels are represented by the Item class.
 
     They are used to represent an unstructured set of Items that are somehow related. Collections are independent of
     other grouping mechanisms, such as: descriptive keywords, aggregations, publishers and/or other common properties.
@@ -2317,26 +2281,21 @@ class Collection:
     understood or to make more contextual sense.
     """
 
-    def __init__(self, record: Record):
-        # noinspection GrazieInspection
-        """
-        :type record Record
-        :param record: Record item is based on
-        """
+    def __init__(self, record: Record) -> None:
         self.record = record
 
         if self.record.hierarchy_level != "collection":
             raise CollectionInvalidSourceRecordError()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<Collection / {self.identifier}>"
 
     @staticmethod
     def _filter_aggregations(
-        aggregations: List[dict], association_type: str, initiative_type: Optional[str] = None
-    ) -> List[dict]:
+        aggregations: list[dict], association_type: str, initiative_type: str | None = None
+    ) -> list[dict]:
         """
-        Filters aggregations by an association type, and optionally an initiative type
+        Filter aggregations by an association type, and optionally an initiative type.
 
         Aggregations in ISO can be used for expressing multiple types of relationship between one resource and others.
         Two, code list options are used to indicate the type of relationship (the association type, required), and the
@@ -2375,9 +2334,9 @@ class Collection:
         return _aggregations
 
     @staticmethod
-    def _filter_keyword_terms(keyword_sets: List[dict], keyword_set_url: str) -> List[dict]:
+    def _filter_keyword_terms(keyword_sets: list[dict], keyword_set_url: str) -> list[dict]:
         """
-        Filter a specific keyword set from a collection of keyword sets based on the keyword set's URI
+        Filter a specific keyword set from a collection of keyword sets based on the keyword set's URI.
 
         :type keyword_sets dict
         :param keyword_sets: collection of keyword sets to filter
@@ -2386,7 +2345,7 @@ class Collection:
         :rtype dict
         :return: filtered keyword set
         """
-        for keyword_set in keyword_sets:
+        for keyword_set in keyword_sets:  # noqa: RET503 (will be refactored away)
             if keyword_set["thesaurus"]["title"]["href"] == keyword_set_url:
                 return keyword_set["terms"]
 
@@ -2403,9 +2362,9 @@ class Collection:
         return markdown(self.title, output_format="html")
 
     @property
-    def topics(self) -> List[str]:
+    def topics(self) -> list[str]:
         """
-        Collection's research topics
+        Collection's research topics.
 
         Research topics are implemented as a descriptive keyword set using the NERC Vocabulary Service (T01).
 
@@ -2430,9 +2389,9 @@ class Collection:
         return markdown(self.summary, output_format="html5")
 
     @property
-    def item_identifiers(self) -> Optional[List[str]]:
+    def item_identifiers(self) -> list[str] | None:
         """
-        Item identifiers in Collection
+        Item identifiers in Collection.
 
         Items within the Collection, as specified by a record's aggregations. Returned as a list of Item identifiers.
 

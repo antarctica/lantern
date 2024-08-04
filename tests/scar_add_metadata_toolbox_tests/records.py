@@ -1,13 +1,14 @@
+from __future__ import annotations
+
 from datetime import date, datetime
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional
 
 from bas_metadata_library.standards.iso_19115_2 import MetadataRecord, MetadataRecordConfigV3
 
 
 def make_test_record_config(
-    identifier: str, title: str, hierarchy_level: str, item_identifiers: Optional[List[str]] = None
+    identifier: str, title: str, hierarchy_level: str, item_identifiers: list[str] | None = None
 ) -> dict:
     config = {
         "$schema": "https://metadata-standards.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-2-v3.json",
@@ -53,7 +54,7 @@ def make_test_record_config(
             "dates": {
                 "creation": {"date": date(2020, 1, 1), "date_precision": "year"},
                 "revision": {"date": date(2020, 2, 26)},
-                "publication": {"date": datetime(2020, 1, 15, 10, 44, 14)},
+                "publication": {"date": datetime(2020, 1, 15, 10, 44, 14)},  # noqa: DTZ001
                 "released": {"date": date(2020, 2, 26)},
             },
             "edition": "1.2",
@@ -342,7 +343,10 @@ def make_test_record_config(
                         }
                     },
                     "temporal": {
-                        "period": {"start": {"date": datetime(2020, 6, 25)}, "end": {"date": datetime(2020, 4, 23)}}
+                        "period": {
+                            "start": {"date": datetime(2020, 6, 25)},  # noqa: DTZ001
+                            "end": {"date": datetime(2020, 4, 23)},  # noqa: DTZ001
+                        }
                     },
                 }
             ],
@@ -549,7 +553,8 @@ def make_csw_test_records() -> None:
         # noinspection PyArgumentList
         configuration = MetadataRecordConfigV3(**record_config.value)
         record = MetadataRecord(configuration=configuration)
+        # noinspection PyUnresolvedReferences
         record_path = records_base_path.joinpath(f"get_record_{record_config.value['file_identifier']}_full.xml")
-        with open(Path(record_path), mode="w") as record_file:
+        with Path(record_path).open(mode="w") as record_file:
             record_file.write(record.generate_xml_document().decode())
     print("Test records regenerated")

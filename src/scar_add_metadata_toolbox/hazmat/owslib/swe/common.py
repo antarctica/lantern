@@ -59,7 +59,6 @@ def make_pair(string, cast=None):
 
 
 def get_uom(element):
-
     uom = testXMLAttribute(element, "code")
     if uom is None:
         uom = testXMLAttribute(element, nspv("xlink:href"))

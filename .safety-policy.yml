@@ -37,6 +37,12 @@ security:
         71636:  # https://data.safetycli.com/v/71636/f17 (CVE-2024-37568)
             reason: temporary exemption to unblock release until we can assess properly, see MAGIC/add-metadata-toolbox#377 for details
             expires: '2024-09-01'
+        72260:  # https://data.safetycli.com/v/72260/52d (CVE-2024-40647)
+            reason: temporary exemption to unblock merge until MAGIC/add-metadata-toolbox#380
+            expires: '2024-08-08'
+        72083: # https://data.safetycli.com/v/72083/52d (CVE-2024-39689)
+          reason: temporary exemption to unblock merge until MAGIC/add-metadata-toolbox#380
+          expires: '2024-08-08'
 
 # Configuration for the `safety alert` command
 #

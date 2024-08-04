@@ -1,16 +1,18 @@
+from __future__ import annotations
+
 import json
 import os
 from base64 import urlsafe_b64decode
 from pathlib import Path
-from typing import Callable, Dict, Optional
+from typing import Callable
 
 from awscli.clidriver import create_clidriver
 from flask import current_app, render_template
 from jinja2 import PackageLoader, PrefixLoader
 from lxml.etree import (
     ElementTree,
-    fromstring,
     ProcessingInstruction,
+    fromstring,
     tostring,
 )  # nosec - see 'lxml` package (bandit)' section in README
 from werkzeug.utils import import_string
@@ -22,7 +24,7 @@ from scar_add_metadata_toolbox.csw import CSWServer
 
 def _create_app_config() -> Config:
     """
-    Create a Flask application configuration object
+    Create a Flask application configuration object.
 
     Creates an instance of the relevant Config class defined in `config.py` based on the application environment
     (e.g. in production, the ProductionConfig class).
@@ -35,7 +37,7 @@ def _create_app_config() -> Config:
 
 def _create_app_jinja_loader() -> PrefixLoader:
     """
-    Create a Jinja environment's template sources
+    Create a Jinja environment's template sources.
 
     Creates a Jinja prefix loader to load shared and application specific templates together. A prefix (namespace) is
     used to select which set of templates to use. Templates are loaded from relevant Python modules
@@ -51,9 +53,9 @@ def _create_app_jinja_loader() -> PrefixLoader:
     )
 
 
-def _create_csw_repositories(repositories_config: dict) -> Dict[str, CSWServer]:
+def _create_csw_repositories(repositories_config: dict) -> dict[str, CSWServer]:
     """
-    Create application CSW servers
+    Create application CSW servers.
 
     Creates CSW servers (catalogues/repositories) used in the server/catalogue component of this application.
 
@@ -69,9 +71,9 @@ def _create_csw_repositories(repositories_config: dict) -> Dict[str, CSWServer]:
     return _repositories
 
 
-def aws_cli(*cmd) -> None:
+def aws_cli(*cmd) -> None:  # noqa: ANN002
     """
-    AWS CLI python bindings
+    AWS CLI python bindings.
 
     Creates an instance of the AWS CLI that can be used via Python. This allows convenience commands like `s3 sync`,
     rather than needing to implement this ourselves using the underlying boto (AWS Python SDK) methods.
@@ -85,7 +87,8 @@ def aws_cli(*cmd) -> None:
         os.environ.update(env)
         exit_code = create_clidriver().main(*cmd)
         if exit_code > 0:
-            raise RuntimeError(f"AWS CLI exited with code {exit_code}")
+            msg = f"AWS CLI exited with code {exit_code}"
+            raise RuntimeError(msg)
     finally:
         os.environ.clear()
         os.environ.update(old_env)
@@ -93,7 +96,7 @@ def aws_cli(*cmd) -> None:
 
 class AppAuthToken:
     """
-    Azure auth token
+    Azure auth token.
 
     This class serves two main purposes:
 
@@ -101,18 +104,14 @@ class AppAuthToken:
     2. persisting auth information to a local file for situations where this application is run statelessly
     """
 
-    def __init__(self, session_file_path: Path):
-        """
-        :type session_file_path Path
-        :param session_file_path: Path to the file used to persist auth information
-        """
+    def __init__(self, session_file_path: Path) -> None:
         self.session_file_path = session_file_path
         self._payload = None
 
     @property
     def access_token_bearer_insecure(self) -> str:
         """
-        Return the name of the user identified in the access token
+        Return the name of the user identified in the access token.
 
         This is a convenience method to return the name of the user an access token is issued for. This method avoids
         having to fetch signing key sets to authenticate tokens etc. where the claims shown don't have an
@@ -121,9 +120,6 @@ class AppAuthToken:
         WARNING: This method is insecure as it does not validate its claims are authentic, or that the token is still
         valid. This method therefore MUST NOT be used in a secure context (e.g. determining if a user has access to a
         resource or action). A full JWT library MUST be used instead in such circumstances.
-
-        :rtype str
-        :return: Name of the user in access token (or '*unknown*')
         """
         try:
             access_token_parts = self.access_token.split(".")
@@ -134,9 +130,9 @@ class AppAuthToken:
             return "*unknown*"
 
     @property
-    def access_token(self) -> Optional[str]:
+    def access_token(self) -> str | None:
         """
-        OAuth access token
+        OAuth access token.
 
         As defined by Azure: https://docs.microsoft.com/en-us/azure/active-directory/develop/access-tokens
 
@@ -156,7 +152,7 @@ class AppAuthToken:
     @property
     def payload(self) -> dict:
         """
-        Azure device flow response payload
+        Azure device flow response payload.
 
         Payload returned by the Azure OAuth device flow via the Microsoft Authentication Library Public Client object.
 
@@ -171,9 +167,9 @@ class AppAuthToken:
         return self._payload
 
     @payload.setter
-    def payload(self, payload: dict):
+    def payload(self, payload: dict) -> None:
         """
-        Azure device flow response payload
+        Azure device flow response payload.
 
         When set, the payload is saved to a JSON file.
 
@@ -184,9 +180,9 @@ class AppAuthToken:
         self._dump()
 
     @payload.deleter
-    def payload(self):
+    def payload(self) -> None:
         """
-        Azure device flow response payload
+        Azure device flow response payload.
 
         When deleted, the stored payload file is removed.
         """
@@ -194,28 +190,21 @@ class AppAuthToken:
         self.session_file_path.unlink()
 
     def _load(self) -> dict:
-        """
-        Loads payload information from a JSON encoded file
-
-        :rtype dict
-        :returns Azure device flow response payload
-        """
+        """Load payload information from a JSON encoded file."""
         try:
-            with open(str(self.session_file_path), "r") as auth_file:
+            with self.session_file_path.open(mode="r") as auth_file:
                 return json.load(auth_file)
         except FileNotFoundError:
             return {}
 
     def _dump(self) -> None:
-        """
-        Saves payload information to a file encoded as JSON
-        """
+        """Save payload information to a file encoded as JSON."""
         self.session_file_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(str(self.session_file_path), "w") as auth_file:
+        with self.session_file_path.open(mode="w") as auth_file:
             json.dump(self._payload, auth_file, indent=4)
 
 
-def _build_item(record: Record):
+def _build_item(record: Record) -> None:
     """Build page for specified record."""
     items_output_path = Path(current_app.config["SITE_PATH"]).joinpath("items")
 
@@ -223,7 +212,8 @@ def _build_item(record: Record):
     item_output_path = items_output_path.joinpath(f"{item.identifier}/index.html")
     item_output_path.parent.mkdir(exist_ok=True, parents=True)
 
-    with open(str(item_output_path), mode="w") as item_file:
+    with item_output_path.open(mode="w") as item_file:
+        # noinspection PyUnresolvedReferences
         item_file.write(render_template("app/_views/item-details.j2", item=item))
 
 
@@ -232,9 +222,9 @@ RECORD_STYLESHEETS = ["iso-html", "iso-rubric", "iso-xml"]
 
 def _build_record(
     record: Record,
-    on_stylesheet_begin: Optional[Callable[[int, str], None]] = None,
-    on_stylesheet_done: Optional[Callable[[int, str], None]] = None,
-):
+    on_stylesheet_begin: Callable[[int, str], None] | None = None,
+    on_stylesheet_done: Callable[[int, str], None] | None = None,
+) -> None:
     """Build pages for specified record (XML)."""
     records_output_path = Path(current_app.config["SITE_PATH"]).joinpath("records")
 
@@ -246,9 +236,9 @@ def _build_record(
         record_output_path = records_output_path.joinpath(f"{record.identifier}/{stylesheet}/{record.identifier}.xml")
         record_output_path.parent.mkdir(exist_ok=True, parents=True)
 
-        with open(str(record_output_path), mode="w") as record_file:
+        with record_output_path.open(mode="w") as record_file:
             record_xml = record.dumps(dump_format="xml")
-            record_xml_element = ElementTree(fromstring(record_xml.encode()))
+            record_xml_element = ElementTree(fromstring(record_xml.encode()))  # noqa: S320
             record_xml_element_root = record_xml_element.getroot()
 
             if stylesheet == "iso-html":

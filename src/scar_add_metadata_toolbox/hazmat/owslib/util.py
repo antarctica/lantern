@@ -278,7 +278,6 @@ OWS_NAMESPACE = "http://www.opengis.net/ows/1.1"
 
 
 def nspath(path, ns=OWS_NAMESPACE):
-
     """
 
     Prefix the given path with the given namespace identifier.
@@ -885,7 +884,6 @@ def is_vector_grid(grid_elem):
 
 
 class Authentication(object):
-
     _TOKEN = None
     _USERNAME = None
     _PASSWORD = None

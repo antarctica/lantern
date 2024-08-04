@@ -473,14 +473,10 @@ class Grid(object):
             self.dimension = int(grid.get("dimension"))
             self.lowlimits = grid.find(
                 "{http://www.opengis.net/gml}limits/{http://www.opengis.net/gml}GridEnvelope/{http://www.opengis.net/gml}low"
-            ).text.split(
-                " "
-            )  # noqa
+            ).text.split(" ")  # noqa
             self.highlimits = grid.find(
                 "{http://www.opengis.net/gml}limits/{http://www.opengis.net/gml}GridEnvelope/{http://www.opengis.net/gml}high"
-            ).text.split(
-                " "
-            )  # noqa
+            ).text.split(" ")  # noqa
             for axis in grid.findall("{http://www.opengis.net/gml}axisName"):
                 self.axislabels.append(axis.text)
 

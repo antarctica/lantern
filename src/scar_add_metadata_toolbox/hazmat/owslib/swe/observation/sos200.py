@@ -138,7 +138,6 @@ class SensorObservationService_2_0_0(object):
             self.observed_properties.append(observed_prop)
 
     def describe_sensor(self, outputFormat=None, procedure=None, method=None, **kwargs):
-
         method = method or "Get"
 
         try:

@@ -213,7 +213,6 @@ class Sru(object):
             ).text = "0"
 
         elif response_name == "GetRecordsResponse":
-
             recpos = int(element.xpath("//@nextRecord")[0]) - int(element.xpath("//@numberOfRecordsReturned")[0])
 
             node = etree.Element(util.nspath_eval("zs:searchRetrieveResponse", self.namespaces), nsmap=self.namespaces)

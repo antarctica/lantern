@@ -1,7 +1,7 @@
 from http import HTTPStatus
 
 from authlib.integrations.flask_oauth2 import current_token
-from flask import Flask, request, Response, url_for
+from flask import Flask, Response, request, url_for
 from flask_azure_oauth import FlaskAzureOauth
 from markupsafe import escape
 from werkzeug.exceptions import NotFound
@@ -25,18 +25,18 @@ from scar_add_metadata_toolbox.csw import (
     RecordNotFoundError,
 )
 from scar_add_metadata_toolbox.utils import (
+    AppAuthToken,
     _build_item,
     _build_record,
     _create_app_config,
     _create_app_jinja_loader,
     _create_csw_repositories,
-    AppAuthToken,
 )
 
 
-def create_app():  # noqa: C901
+def create_app() -> Flask:  # noqa: C901
     """
-    Application factory
+    Application factory.
 
     This app object:
     * loads configuration from the `config` class (based on the `FLASK_ENV` environment variable)
@@ -51,6 +51,7 @@ def create_app():  # noqa: C901
     app = Flask(__name__)
 
     app.config.from_object(_create_app_config())
+    # noinspection PyPropertyAccess
     app.jinja_loader = _create_app_jinja_loader()
 
     auth = FlaskAzureOauth()
@@ -71,16 +72,16 @@ def create_app():  # noqa: C901
     app.register_blueprint(auth_commands_blueprint)
 
     @app.cli.command("version")
-    def version():
+    def version() -> None:
         """Show application version."""
         print(f"{app.config['NAME']} version: {app.config['VERSION']}")
 
     @app.errorhandler(NotFound)
-    def handle_bad_request(e):
+    def handle_bad_request(e: Exception) -> Response:
         return Response(response="Not Found.", status=HTTPStatus.NOT_FOUND)
 
     @app.route("/meta/health/v1")
-    def health():
+    def health() -> dict:
         return {
             "status": "pass",
             "version": 1,
@@ -96,7 +97,7 @@ def create_app():  # noqa: C901
 
     @app.route("/csw/<string:catalogue>", methods=["HEAD", "GET", "POST"])
     @auth(optional=True)
-    def csw_catalogue(catalogue: str):
+    def csw_catalogue(catalogue: str) -> Response:
         try:
             return app.repositories[escape(catalogue)].process_request(request=request, token=current_token)
         except KeyError:
@@ -122,7 +123,7 @@ def create_app():  # noqa: C901
 
     @app.route("/site/build", methods=["POST"])
     @auth(["BAS.MAGIC.ADD.Records.Publish.All"])
-    def build_item():
+    def build_item() -> Response:
         try:
             record_id = request.args["item"]
 

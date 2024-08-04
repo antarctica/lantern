@@ -2,22 +2,24 @@ from unittest.mock import patch
 
 import pytest
 from flask import Flask
+from flask.testing import FlaskCliRunner
 
 from scar_add_metadata_toolbox import create_app
 from scar_add_metadata_toolbox.config import (
     Config,
+)  # TestingConfig renamed to prevent Pytest trying to test the class
+from scar_add_metadata_toolbox.config import (
     TestingConfig as _TestingConfig,
-)  # TestingConfig renamed to prevent PyTest trying to test the class
+)
 
 
-@pytest.mark.usefixtures("app")
-def test_app(app):
+def test_app(app: Flask):
     assert app is not None
     assert isinstance(app, Flask)
 
 
 @pytest.mark.usefixtures("app")
-def test_app_environment(app):
+def test_app_environment(app: Flask):
     assert app.config["TESTING"] is True
 
 
@@ -45,15 +47,13 @@ def test_app_enable_sentry():
         assert app.config["APP_ENABLE_SENTRY"] is True
 
 
-@pytest.mark.usefixtures("app_runner")
-def test_cli_help(app_runner):
+def test_cli_help(app_runner: FlaskCliRunner):
     result = app_runner.invoke(args=["--help"])
     assert result.exit_code == 0
     assert "Show this message and exit." in result.output
 
 
-@pytest.mark.usefixtures("app_runner")
-def test_cli_version(app_runner):
+def test_cli_version(app_runner: FlaskCliRunner):
     result = app_runner.invoke(args=["version"])
     assert result.exit_code == 0
     assert "scar-add-metadata-toolbox version: N/A" in result.output

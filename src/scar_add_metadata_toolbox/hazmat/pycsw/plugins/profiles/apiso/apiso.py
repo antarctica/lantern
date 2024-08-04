@@ -369,7 +369,6 @@ class APISO(profile.Profile):
         """Add child to ows:OperationsMetadata Element"""
 
         if self.inspire_config is not None:
-
             ex_caps = etree.Element(util.nspath_eval("inspire_ds:ExtendedCapabilities", self.inspire_namespaces))
 
             ex_caps.attrib[util.nspath_eval("xsi:schemaLocation", self.context.namespaces)] = "%s %s/inspire_ds.xsd" % (
@@ -382,9 +381,9 @@ class APISO(profile.Profile):
                 ex_caps, util.nspath_eval("inspire_common:ResourceLocator", self.inspire_namespaces)
             )
 
-            etree.SubElement(
-                res_loc, util.nspath_eval("inspire_common:URL", self.inspire_namespaces)
-            ).text = "%sservice=CSW&version=2.0.2&request=GetCapabilities" % (util.bind_url(self.url))
+            etree.SubElement(res_loc, util.nspath_eval("inspire_common:URL", self.inspire_namespaces)).text = (
+                "%sservice=CSW&version=2.0.2&request=GetCapabilities" % (util.bind_url(self.url))
+            )
 
             etree.SubElement(
                 res_loc, util.nspath_eval("inspire_common:MediaType", self.inspire_namespaces)
@@ -429,9 +428,9 @@ class APISO(profile.Profile):
 
             spec = etree.SubElement(cfm, util.nspath_eval("inspire_common:Specification", self.inspire_namespaces))
 
-            spec.attrib[
-                util.nspath_eval("xsi:type", self.context.namespaces)
-            ] = "inspire_common:citationInspireInteroperabilityRegulation_eng"
+            spec.attrib[util.nspath_eval("xsi:type", self.context.namespaces)] = (
+                "inspire_common:citationInspireInteroperabilityRegulation_eng"
+            )
 
             etree.SubElement(
                 spec, util.nspath_eval("inspire_common:Title", self.inspire_namespaces)
@@ -457,9 +456,9 @@ class APISO(profile.Profile):
                 spec_loc, util.nspath_eval("inspire_common:MediaType", self.inspire_namespaces)
             ).text = "application/pdf"
 
-            spec = etree.SubElement(
-                cfm, util.nspath_eval("inspire_common:Degree", self.inspire_namespaces)
-            ).text = self.inspire_config["conformity_service"]
+            spec = etree.SubElement(cfm, util.nspath_eval("inspire_common:Degree", self.inspire_namespaces)).text = (
+                self.inspire_config["conformity_service"]
+            )
 
             # Metadata Point of Contact
             poc = etree.SubElement(
@@ -489,9 +488,9 @@ class APISO(profile.Profile):
                 ex_caps, util.nspath_eval("inspire_common:MandatoryKeyword", self.inspire_namespaces)
             )
 
-            mkey.attrib[
-                util.nspath_eval("xsi:type", self.context.namespaces)
-            ] = "inspire_common:classificationOfSpatialDataService"
+            mkey.attrib[util.nspath_eval("xsi:type", self.context.namespaces)] = (
+                "inspire_common:classificationOfSpatialDataService"
+            )
 
             etree.SubElement(
                 mkey, util.nspath_eval("inspire_common:KeywordValue", self.inspire_namespaces)
@@ -630,9 +629,9 @@ class APISO(profile.Profile):
             return etree.fromstring(xml_blob, self.context.parser)
 
         node = etree.Element(util.nspath_eval("gmd:MD_Metadata", self.namespaces))
-        node.attrib[
-            util.nspath_eval("xsi:schemaLocation", self.context.namespaces)
-        ] = "%s %s/csw/2.0.2/profiles/apiso/1.0.0/apiso.xsd" % (self.namespace, self.ogc_schemas_base)
+        node.attrib[util.nspath_eval("xsi:schemaLocation", self.context.namespaces)] = (
+            "%s %s/csw/2.0.2/profiles/apiso/1.0.0/apiso.xsd" % (self.namespace, self.ogc_schemas_base)
+        )
 
         # identifier
         idval = util.getqattr(result, self.context.md_core_model["mappings"]["pycsw:Identifier"])

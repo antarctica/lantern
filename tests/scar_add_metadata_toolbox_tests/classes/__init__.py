@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 from pathlib import Path
-from typing import List, Optional
+from typing import Any
 
 from bas_metadata_library.standards.iso_19115_2 import MetadataRecord
-from flask import current_app, Request, Response
+from flask import Flask, Request, Response, current_app
 from flask_azure_oauth import AzureToken
 from flask_azure_oauth.mocks.tokens import TestJwt
 
@@ -29,7 +31,7 @@ from scar_add_metadata_toolbox.csw import (
 
 
 class MockCSWClient(CSWClient):
-    def __init__(self, config: dict):
+    def __init__(self, config: dict) -> None:
         super().__init__(config)
 
         self._records = {}
@@ -41,9 +43,9 @@ class MockCSWClient(CSWClient):
         if self._csw_endpoint == "https://example.com/csw/published":
             self._records["7e3719b4-60a4-4b4e-aa84-cee7a5e7218f"] = {"full": ""}
             self._records["b759077f-bd3f-4a18-bbd7-e6b3f84bc551"] = {"full": ""}
-        for identifier in self._records.keys():
-            with open(
-                self._records_responses_base_path.joinpath(f"get_record_{identifier}_full.xml"), mode="r"
+        for identifier in self._records:
+            with self._records_responses_base_path.joinpath(f"get_record_{identifier}_full.xml").open(
+                mode="r"
             ) as record:
                 self._records[identifier]["full"] = record.read()
 
@@ -53,8 +55,8 @@ class MockCSWClient(CSWClient):
         except KeyError:
             raise RecordNotFoundError() from None
 
-    def get_records(self, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> List[str]:
-        for identifier in self._records.keys():
+    def get_records(self, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> list[str]:
+        for identifier in self._records:
             yield self.get_record(identifier=identifier, mode=mode)
 
     def insert_record(self, record: str) -> None:
@@ -63,7 +65,7 @@ class MockCSWClient(CSWClient):
         _record_config = MetadataRecord(record=record).make_config().config
         _identifier = str(_record_config["file_identifier"])
 
-        if _identifier in self._records.keys():
+        if _identifier in self._records:
             raise RecordInsertConflictError()
 
         self._records[_identifier] = {"full": record, "brief": record}
@@ -92,7 +94,7 @@ class MockCSWClientServerNotSetup(MockCSWClient):
     def get_record(self, identifier: str, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> str:
         raise CSWDatabaseNotInitialisedError() from None
 
-    def get_records(self, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> List[str]:
+    def get_records(self, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> list[str]:
         raise CSWDatabaseNotInitialisedError() from None
 
     def insert_record(self, record: str) -> None:
@@ -109,7 +111,7 @@ class MockCSWClientAuthError(MockCSWClient):
     def get_record(self, identifier: str, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> str:
         raise CSWAuthError() from None
 
-    def get_records(self, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> List[str]:
+    def get_records(self, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> list[str]:
         raise CSWAuthError() from None
 
     def insert_record(self, record: str) -> None:
@@ -126,7 +128,7 @@ class MockCSWClientAuthMissing(MockCSWClient):
     def get_record(self, identifier: str, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> str:
         raise CSWAuthMissingError() from None
 
-    def get_records(self, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> List[str]:
+    def get_records(self, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> list[str]:
         raise CSWAuthMissingError() from None
 
     def insert_record(self, record: str) -> None:
@@ -143,7 +145,7 @@ class MockCSWClientAuthInsufficient(MockCSWClient):
     def get_record(self, identifier: str, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> str:
         raise CSWAuthInsufficientError() from None
 
-    def get_records(self, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> List[str]:
+    def get_records(self, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> list[str]:
         raise CSWAuthInsufficientError() from None
 
     def insert_record(self, record: str) -> None:
@@ -157,7 +159,7 @@ class MockCSWClientAuthInsufficient(MockCSWClient):
 
 
 class MockCSWServer(CSWServer):
-    def __init__(self, config: dict):
+    def __init__(self, config: dict) -> None:
         super().__init__(config)
 
         self.backing_db_initialised = False
@@ -181,17 +183,17 @@ class MockCSWServer(CSWServer):
             raise CSWTrackingRepositoryAlreadyInitialisedError() from None
         self.backing_repo_initialised = True
 
-    def process_request(self, request: Request, token: Optional[AzureToken] = None) -> Response:
+    def process_request(self, request: Request, token: AzureToken | None = None) -> Response:
         return Response("ok")
 
 
 class MockCSWServerBackingDBNotSetup(MockCSWServer):
-    def process_request(self, request: Request, token: Optional[AzureToken] = None) -> Response:
+    def process_request(self, request: Request, token: AzureToken | None = None) -> Response:
         raise CSWDatabaseNotInitialisedError() from None
 
 
 class MockCSWServerBackingRepoNotSetup(MockCSWServer):
-    def process_request(self, request: Request, token: Optional[AzureToken] = None) -> Response:
+    def process_request(self, request: Request, token: AzureToken | None = None) -> Response:
         raise CSWTrackingRepositoryNotInitialisedError() from None
 
 
@@ -206,53 +208,53 @@ class MockCSWServerRevisionTrackingInvalidCredentials(MockCSWServer):
 
 
 class MockCSWServerNoRequestType(MockCSWServer):
-    def process_request(self, request: Request, token: Optional[AzureToken] = None) -> Response:
+    def process_request(self, request: Request, token: AzureToken | None = None) -> Response:
         raise CSWUnknownRequestError() from None
 
 
 class MockCSWServerAmbiguousRequestError(MockCSWServer):
-    def process_request(self, request: Request, token: Optional[AzureToken] = None) -> Response:
+    def process_request(self, request: Request, token: AzureToken | None = None) -> Response:
         raise CSWAmbiguousRequestError() from None
 
 
 class MockCSWServerUnmappedRequestError(MockCSWServer):
-    def process_request(self, request: Request, token: Optional[AzureToken] = None) -> Response:
+    def process_request(self, request: Request, token: AzureToken | None = None) -> Response:
         raise CSWUnmappedRequestError() from None
 
 
 class MockCSWServerAuthTokenError(MockCSWServer):
-    def process_request(self, request: Request, token: Optional[AzureToken] = None) -> Response:
+    def process_request(self, request: Request, token: AzureToken | None = None) -> Response:
         raise CSWAuthError() from None
 
 
 class MockCSWServerMissingAuthToken(MockCSWServer):
-    def process_request(self, request: Request, token: Optional[AzureToken] = None) -> Response:
+    def process_request(self, request: Request, token: AzureToken | None = None) -> Response:
         raise CSWAuthMissingError() from None
 
 
 class MockCSWServerInsufficientAuthToken(MockCSWServer):
-    def process_request(self, request: Request, token: Optional[AzureToken] = None) -> Response:
+    def process_request(self, request: Request, token: AzureToken | None = None) -> Response:
         raise CSWAuthInsufficientError() from None
 
 
 class MockCSWServerRequestsFail(MockCSWServer):
-    def process_request(self, request: Request, token: Optional[AzureToken] = None) -> Response:
+    def process_request(self, request: Request, token: AzureToken | None = None) -> Response:
         raise RecordServerError() from None
 
 
 class MockPublicClientApplication:
     # noinspection PyUnusedLocal
-    def __init__(self, client_id, authority):
+    def __init__(self, client_id: str, authority: str) -> None:
         pass
 
     # noinspection PyUnusedLocal
     @staticmethod
-    def initiate_device_flow(scopes) -> dict:
+    def initiate_device_flow(scopes: list[str]) -> dict:
         return {"user_code": "test"}
 
     # noinspection PyUnusedLocal
     @staticmethod
-    def acquire_token_by_device_flow(device_flow):
+    def acquire_token_by_device_flow(device_flow: dict) -> dict:
         return {
             "access_token": TestJwt(
                 app=current_app, roles=["BAS.MAGIC.ADD.Records.ReadWrite.All", "BAS.MAGIC.ADD.Records.Publish.All"]
@@ -260,15 +262,15 @@ class MockPublicClientApplication:
         }
 
 
-def create_mock_auth(scopes_used=None):
+def create_mock_auth(scopes_used: list[str] | None = None):
     class MockFlaskAzureOauth:
         # noinspection PyUnusedLocal
-        def init_app(self, app):
+        def init_app(self, app: Flask) -> None:
             pass
 
-        def __call__(self, scopes=None, *args, **kwargs):
-            def checkauth(func):
-                def wrapper(*args, **kwargs):
+        def __call__(self, scopes: str | None = None, *args, **kwargs) -> callable:  # noqa: ANN002, ANN003
+            def checkauth(func: callable) -> Any:
+                def wrapper(*args, **kwargs) -> callable:  # noqa: ANN002, ANN003
                     if scopes_used is not None:
                         scopes_used.append(scopes)
 

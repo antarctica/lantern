@@ -409,7 +409,17 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
         :return: whether backing git repository has been initialised
         """
         try:
-            return bool(porcelain.active_branch(repo=self._tracking_repo).decode() == self._tracking_config["branch"] and f"refs/heads/{self._tracking_config['branch']}".encode() in porcelain.fetch(repo=self._tracking_repo, remote_location="origin", depth=0, username="gitlab-ci-token", password=self._tracking_config["gitlab_pat"]).refs)
+            return bool(
+                porcelain.active_branch(repo=self._tracking_repo).decode() == self._tracking_config["branch"]
+                and f"refs/heads/{self._tracking_config['branch']}".encode()
+                in porcelain.fetch(
+                    repo=self._tracking_repo,
+                    remote_location="origin",
+                    depth=0,
+                    username="gitlab-ci-token",
+                    password=self._tracking_config["gitlab_pat"],
+                ).refs
+            )
         except NotGitRepository:
             return False
 
@@ -538,7 +548,11 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
 
         if csw_request.requesttype == "POST":
             request_xml = ElementTree(fromstring(csw_request.request))  # noqa: S320
-            if len(request_xml.xpath("/csw:DescribeRecord", namespaces=csw_namespaces)) > 0 or len(request_xml.xpath("/csw:GetRecords", namespaces=csw_namespaces)) > 0 or len(request_xml.xpath("/csw:Query", namespaces=csw_namespaces)) > 0:
+            if (
+                len(request_xml.xpath("/csw:DescribeRecord", namespaces=csw_namespaces)) > 0
+                or len(request_xml.xpath("/csw:GetRecords", namespaces=csw_namespaces)) > 0
+                or len(request_xml.xpath("/csw:Query", namespaces=csw_namespaces)) > 0
+            ):
                 transaction_type = CSWTransactionType.SELECT
             elif len(request_xml.xpath("/csw:Transaction/csw:Insert", namespaces=csw_namespaces)) > 0:
                 transaction_type = CSWTransactionType.INSERT
@@ -861,7 +875,9 @@ its use.
             return False
         if not self._tracking_enabled:
             return False
-        return self._transaction_successful(transaction_type=transaction_type, csw_request=csw_request, csw_response=csw_response)
+        return self._transaction_successful(
+            transaction_type=transaction_type, csw_request=csw_request, csw_response=csw_response
+        )
 
     def _track_revision_insert_update(
         self: Self, csw_request: str, transaction_type: CSWTransactionType, token: AzureToken
@@ -1069,7 +1085,11 @@ its use.
         if transaction_result_element is None and transaction_count == 1:
             return True
 
-        return bool(transaction_result_element is not None and transaction_count == 1 and transaction_record_id == request_record_id)
+        return bool(
+            transaction_result_element is not None
+            and transaction_count == 1
+            and transaction_record_id == request_record_id
+        )
 
     def setup_database(self: Self) -> None:
         """

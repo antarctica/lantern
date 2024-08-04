@@ -192,7 +192,7 @@ class AppAuthToken:
     def _load(self: Self) -> dict:
         """Load payload information from a JSON encoded file."""
         try:
-            with self.session_file_path.open(mode='r') as auth_file:
+            with self.session_file_path.open(mode="r") as auth_file:
                 return json.load(auth_file)
         except FileNotFoundError:
             return {}
@@ -200,7 +200,7 @@ class AppAuthToken:
     def _dump(self: Self) -> None:
         """Save payload information to a file encoded as JSON."""
         self.session_file_path.parent.mkdir(parents=True, exist_ok=True)
-        with self.session_file_path.open(mode='w') as auth_file:
+        with self.session_file_path.open(mode="w") as auth_file:
             json.dump(self._payload, auth_file, indent=4)
 
 

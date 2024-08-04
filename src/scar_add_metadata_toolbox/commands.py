@@ -621,7 +621,9 @@ def build_publish(ctx: Context, build: bool = False, force_publish: bool = False
     """Publish static site build to remote location."""
     if build:
         ctx.invoke(build_all)
-    if not force_publish and not click.confirm(f"CONFIRM: Publish static site to '{current_app.config['S3_BUCKET']}'?", abort=True):
+    if not force_publish and not click.confirm(
+        f"CONFIRM: Publish static site to '{current_app.config['S3_BUCKET']}'?", abort=True
+    ):
         raise Abort()
 
     aws_cli(

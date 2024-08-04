@@ -1,20 +1,11 @@
 [tool.poetry]
 name = "scar-add-metadata-toolbox"
 version = "0.6.0"
-license = "MIT"
 description = "Editor, repository and data catalogue for SCAR Antarctic Digital Database (ADD) discovery metadata"
-authors = [
-    "Felix Fennell <felnne@bas.ac.uk>"
-]
+authors = ["Felix Fennell <felnne@bas.ac.uk>"]
 readme = "README.md"
-homepage = "https://github.com/antarctica/scar-add-metadata-toolbox"
-repository = "https://github.com/antarctica/scar-add-metadata-toolbox"
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "License :: Other/Proprietary License",
-    "Operating System :: OS Independent",
-    "Intended Audience :: Science/Research"
-]
+license = "MIT"
+packages = [{ include = "scar_add_metadata_toolbox", from = "src" }]
 
 [tool.poetry.dependencies]
 awscli = "1.33.35"  # pinned to aid in dependency resolution time

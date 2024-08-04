@@ -1,3 +1,4 @@
+import contextlib
 from json import JSONDecodeError
 from os import EX_USAGE
 from pathlib import Path
@@ -5,11 +6,12 @@ from shutil import copytree, rmtree
 from sys import exit as sys_exit
 
 import click
-from click import Abort
+from click import Abort, Context
 from click_spinner import spinner
 from flask import Blueprint, current_app, render_template
 from flask.cli import AppGroup
-from importlib_resources import as_file as resource_path_as_file, files as resource_path
+from importlib_resources import as_file as resource_path_as_file
+from importlib_resources import files as resource_path
 from tabulate import tabulate
 
 from scar_add_metadata_toolbox.classes import (
@@ -32,14 +34,14 @@ from scar_add_metadata_toolbox.csw import (
     RecordNotFoundError,
     RecordServerError,
 )
-from scar_add_metadata_toolbox.utils import _build_item, _build_record, aws_cli, RECORD_STYLESHEETS
+from scar_add_metadata_toolbox.utils import RECORD_STYLESHEETS, _build_item, _build_record, aws_cli
 
 record_commands_blueprint = Blueprint("records", __name__)
 record_commands_blueprint.cli.short_help = "Manage metadata records."
 
 
 @record_commands_blueprint.cli.command("list")
-def list_records():
+def list_records() -> None:
     """List all records."""
     try:
         # noinspection PyArgumentList
@@ -84,19 +86,19 @@ def list_records():
         sys_exit(EX_USAGE)
 
 
-@record_commands_blueprint.cli.command("import")  # noqa: C901
+@record_commands_blueprint.cli.command("import")
 @click.argument("record_path", type=click.Path(exists=True, dir_okay=False))
 @click.option("--allow-update", is_flag=True, help="Update any existing record.")
 @click.option("--publish", is_flag=True, help="Publish record after importing.")
 @click.option("--allow-republish", is_flag=True, help="Republish any existing, published, record.")
 @click.pass_context
-def import_record(  # noqa: C901
-    ctx, record_path: str, allow_update: bool = False, publish: bool = False, allow_republish: bool = False
-):
+def import_record(
+    ctx: Context, record_path: str, allow_update: bool = False, publish: bool = False, allow_republish: bool = False
+) -> None:
     """Import record from RECORD_PATH."""
+    record_path = Path(record_path)
+    record = Record()
     try:
-        record_path = Path(record_path)
-        record = Record()
         record.load(record_path=record_path)
         current_app.records.insert_record(record=record, update=False)
         print(f"Ok. Record '{record.identifier}' imported.")
@@ -139,8 +141,8 @@ def import_record(  # noqa: C901
 @click.option("--allow-republish", is_flag=True, help="Republish any existing, published, records.")
 @click.pass_context
 def import_records(
-    ctx, records_path: str, allow_update: bool = False, publish: bool = False, allow_republish: bool = False
-):
+    ctx: Context, records_path: str, allow_update: bool = False, publish: bool = False, allow_republish: bool = False
+) -> None:
     """Import records from files in RECORDS_PATH."""
     records_path = Path(records_path)
     record_paths = sorted(records_path.glob("*.json"))
@@ -163,7 +165,7 @@ def import_records(
 @record_commands_blueprint.cli.command("publish")
 @click.argument("record_identifier")
 @click.option("--allow-republish", is_flag=True, help="Republish any existing, published, record.")
-def publish_record(record_identifier: str, allow_republish: bool = False):
+def publish_record(record_identifier: str, allow_republish: bool = False) -> None:
     """Publish record identified by RECORD_IDENTIFIER."""
     try:
         current_app.records.publish_record(record_identifier=record_identifier, republish=False)
@@ -199,7 +201,7 @@ def publish_record(record_identifier: str, allow_republish: bool = False):
 @record_commands_blueprint.cli.command("bulk-publish")
 @click.option("--force-republish", is_flag=True, help="Republish all existing records too.")
 @click.pass_context
-def publish_records(ctx, force_republish: bool = False):
+def publish_records(ctx: Context, force_republish: bool = False) -> None:
     """Publish all (un)published records."""
     record_identifiers = current_app.records.list_distinct_unpublished_record_identifiers()
     if force_republish:
@@ -218,7 +220,7 @@ def publish_records(ctx, force_republish: bool = False):
 @click.argument("record_identifier")
 @click.argument("record_path", type=click.Path(dir_okay=False))
 @click.option("--allow-overwrite", is_flag=True, help="Allow existing export to be overwritten.")
-def export_record(record_identifier: str, record_path: str, allow_overwrite: bool = False):
+def export_record(record_identifier: str, record_path: str, allow_overwrite: bool = False) -> None:
     """Export record identified by RECORD_IDENTIFIER to RECORD_PATH."""
     record_path = Path(record_path)
 
@@ -258,7 +260,7 @@ def export_record(record_identifier: str, record_path: str, allow_overwrite: boo
 @click.argument("records_path", type=click.Path(exists=True, file_okay=False))
 @click.option("--allow-overwrite", is_flag=True, help="Allow existing exports to be overwritten.")
 @click.pass_context
-def export_records(ctx, records_path: str, allow_overwrite: bool = False):
+def export_records(ctx: Context, records_path: str, allow_overwrite: bool = False) -> None:
     """Export all records as files to RECORDS_PATH."""
     records_path = Path(records_path)
     record_identifiers = current_app.records.list_record_identifiers()
@@ -281,11 +283,10 @@ def export_records(ctx, records_path: str, allow_overwrite: bool = False):
 @record_commands_blueprint.cli.command("remove")
 @click.argument("record_identifier")
 @click.option("--force-remove", is_flag=True, help="Suppress interactive conformation.")
-def remove_record(record_identifier: str, force_remove: bool):
+def remove_record(record_identifier: str, force_remove: bool) -> None:
     """Remove unpublished record identified by RECORD_IDENTIFIER."""
-    if not force_remove:
-        if not click.confirm(f"CONFIRM: Permanently remove record '{record_identifier}'?", abort=True):
-            raise Abort()
+    if not force_remove and not click.confirm(f"CONFIRM: Permanently remove record '{record_identifier}'?", abort=True):
+        raise Abort()
 
     try:
         current_app.records.delete_record(record_identifier=record_identifier)
@@ -312,7 +313,7 @@ def remove_record(record_identifier: str, force_remove: bool):
 
 @record_commands_blueprint.cli.command("bulk-remove")
 @click.pass_context
-def remove_records(ctx):
+def remove_records(ctx: Context) -> None:
     """Remove all unpublished records."""
     record_identifiers = current_app.records.list_distinct_unpublished_record_identifiers()
 
@@ -330,7 +331,7 @@ def remove_records(ctx):
 
 @record_commands_blueprint.cli.command("retract")
 @click.argument("record_identifier")
-def retract_record(record_identifier: str):
+def retract_record(record_identifier: str) -> None:
     """Retract published record identified by RECORD_IDENTIFIER."""
     try:
         current_app.records.retract_record(record_identifier=record_identifier)
@@ -354,7 +355,7 @@ def retract_record(record_identifier: str):
 
 @record_commands_blueprint.cli.command("bulk-retract")
 @click.pass_context
-def retract_records(ctx):
+def retract_records(ctx: Context) -> None:
     """Retract all published records."""
     record_identifiers = current_app.records.list_published_record_identifiers()
 
@@ -373,7 +374,7 @@ site_commands_blueprint.cli.short_help = "Manage static site."
 
 # noinspection PyUnresolvedReferences
 @site_commands_blueprint.cli.command("build-items")
-def build_items():
+def build_items() -> None:
     """Build pages for all published items."""
     try:
         # noinspection PyArgumentList
@@ -409,7 +410,7 @@ def build_items():
 # noinspection PyUnresolvedReferences
 @site_commands_blueprint.cli.command("build-item")
 @click.argument("record_identifier")
-def build_item(record_identifier: str):
+def build_item(record_identifier: str) -> None:
     """Build page for specified item."""
     try:
         # noinspection PyArgumentList
@@ -438,7 +439,7 @@ def build_item(record_identifier: str):
 
 # noinspection PyUnresolvedReferences
 @site_commands_blueprint.cli.command("build-collections")
-def build_collections():
+def build_collections() -> None:
     """Build pages for all collections."""
     collections_output_path = Path(current_app.config["SITE_PATH"]).joinpath("collections")
 
@@ -467,7 +468,7 @@ def build_collections():
                     )
             collection.items = _collection_items
 
-            with open(str(collection_output_path), mode="w") as collection_file:
+            with collection_output_path.open(mode="w") as collection_file:
                 collection_file.write(render_template("app/_views/collection-details.j2", collection=collection))
             print(f"Ok. Generated collection page for '{collection.identifier}'.")
             _collection_count += 1
@@ -487,23 +488,23 @@ def build_collections():
 
 
 @site_commands_blueprint.cli.command("build-records")
-def build_records():
+def build_records() -> None:
     """Build pages for all published records (XML)."""
     try:
         # noinspection PyArgumentList
         with spinner():
-            records = list(current_app.records.retrieve_published_records())
+            records: list[Record] = list(current_app.records.retrieve_published_records())
 
         print(f"{len(records) * len(RECORD_STYLESHEETS)} record pages to generate.")
         _records_count = 1
         for record in records:
             _build_record(
                 record,
-                lambda count, stylesheet, record=record, _records_count=_records_count: print(
-                    f"# Record page {_records_count}/{len(records)} (stylesheet {count}/{len(RECORD_STYLESHEETS)})"
+                lambda count, stylesheet, records_count_=_records_count: print(
+                    f"# Record page {records_count_}/{len(records)} (stylesheet {count}/{len(RECORD_STYLESHEETS)})"
                 ),
-                lambda count, stylesheet, record=record, _records_count=_records_count: print(
-                    f"Ok. Generated item page for '{record.identifier}' (stylesheet '{stylesheet}')."
+                lambda count, stylesheet, record_=record: print(
+                    f"Ok. Generated item page for '{record_.identifier}' (stylesheet '{stylesheet}')."
                 ),
             )
             _records_count += 1
@@ -524,7 +525,7 @@ def build_records():
 
 @site_commands_blueprint.cli.command("build-record")
 @click.argument("record_identifier")
-def build_record(record_identifier: str):
+def build_record(record_identifier: str) -> None:
     """Build page for specified record (XML)."""
     try:
         # noinspection PyArgumentList
@@ -559,7 +560,7 @@ def build_record(record_identifier: str):
 
 # noinspection PyUnresolvedReferences
 @site_commands_blueprint.cli.command("build-pages")
-def build_pages():
+def build_pages() -> None:
     """Build pages for legal policies and feedback form."""
     legal_pages = ["cookies", "copyright", "privacy"]
     legal_pages_output_path = Path(current_app.config["SITE_PATH"]).joinpath("legal")
@@ -571,7 +572,7 @@ def build_pages():
         legal_page_output_path = legal_pages_output_path.joinpath(f"{legal_page}/index.html")
         legal_page_output_path.parent.mkdir(exist_ok=True, parents=True)
 
-        with open(str(legal_page_output_path), mode="w") as legal_page_file:
+        with legal_page_output_path.open(mode="w") as legal_page_file:
             legal_page_file.write(render_template(f"app/_views/legal/{legal_page}.j2"))
         print(f"Ok. Generated legal page for '{legal_page}'.")
         _legal_pages_count += 1
@@ -579,21 +580,17 @@ def build_pages():
 
     feedback_page_output_path = Path(current_app.config["SITE_PATH"]).joinpath("feedback/index.html")
     feedback_page_output_path.parent.mkdir(exist_ok=True, parents=True)
-    with open(str(feedback_page_output_path), mode="w") as feedback_page_file:
+    with feedback_page_output_path.open(mode="w") as feedback_page_file:
         feedback_page_file.write(render_template("app/_views/feedback.j2"))
     print("Ok. feedback page generated.")
 
 
 @site_commands_blueprint.cli.command("copy-assets")
-def copy_assets():
-    """
-    Copy all static assets (CSS, JS, etc.).
-    """
+def copy_assets() -> None:
+    """Copy all static assets (CSS, JS, etc.)."""
     # workaround for lack of `dirs_exist_ok` option in copytree in Python 3.6
-    try:
+    with contextlib.suppress(FileNotFoundError):
         rmtree(Path(current_app.config["SITE_PATH"]).joinpath("static"))
-    except FileNotFoundError:
-        pass
 
     with resource_path_as_file(resource_path("scar_add_metadata_toolbox.static")) as static_dir_path:
         copytree(
@@ -606,7 +603,7 @@ def copy_assets():
 
 @site_commands_blueprint.cli.command("build")
 @click.pass_context
-def build_all(ctx):
+def build_all(ctx: Context) -> None:
     """Build all site components."""
     ctx.invoke(build_records)
     ctx.invoke(build_items)
@@ -620,13 +617,12 @@ def build_all(ctx):
 @click.option("--build", is_flag=True, help="Build static site components prior to publishing.")
 @click.option("--force-publish", is_flag=True, help="Suppress interactive conformation.")
 @click.pass_context
-def build_publish(ctx, build: bool = False, force_publish: bool = False):
+def build_publish(ctx: Context, build: bool = False, force_publish: bool = False) -> None:
     """Publish static site build to remote location."""
     if build:
         ctx.invoke(build_all)
-    if not force_publish:
-        if not click.confirm(f"CONFIRM: Publish static site to '{current_app.config['S3_BUCKET']}'?", abort=True):
-            raise Abort()
+    if not force_publish and not click.confirm(f"CONFIRM: Publish static site to '{current_app.config['S3_BUCKET']}'?", abort=True):
+        raise Abort()
 
     aws_cli(
         [
@@ -649,8 +645,8 @@ csw_commands_blueprint.cli.add_command(csw_setup_cli)
 
 @csw_setup_cli.command("db")
 @click.argument("catalogue")
-def setup_catalogue_backing_db(catalogue: str):
-    """Setup backing database for CATALOGUE."""
+def setup_catalogue_backing_db(catalogue: str) -> None:
+    """Set up backing database for CATALOGUE."""
     try:
         # noinspection PyArgumentList
         with spinner():
@@ -670,8 +666,8 @@ def setup_catalogue_backing_db(catalogue: str):
 
 @csw_setup_cli.command("repo")
 @click.argument("catalogue")
-def setup_catalogue_tracking_repo(catalogue: str):
-    """Setup tracking repo for CATALOGUE."""
+def setup_catalogue_tracking_repo(catalogue: str) -> None:
+    """Set up tracking repo for CATALOGUE."""
     try:
         # noinspection PyArgumentList
         with spinner():
@@ -698,7 +694,7 @@ auth_commands_blueprint.cli.short_help = "Manage user access to information and 
 
 
 @auth_commands_blueprint.cli.command("sign-in")
-def auth_sign_in():
+def auth_sign_in() -> None:
     """Set user access token to use application."""
     auth_flow = current_app.config["CLIENT_AUTH"].initiate_device_flow(scopes=current_app.config["AUTH_CLIENT_SCOPES"])
     click.pause(
@@ -709,15 +705,13 @@ def auth_sign_in():
     current_app.auth_token.payload = auth_payload
     print(
         f"Ok. Access token for '{current_app.auth_token.access_token_bearer_insecure}' "
-        f"set in '{str(current_app.auth_token.session_file_path.absolute())}'."
+        f"set in '{current_app.auth_token.session_file_path.absolute()}'."
     )
 
 
 @auth_commands_blueprint.cli.command("sign-out")
-def auth_sign_out():
+def auth_sign_out() -> None:
     """Remove existing access token if present."""
-    try:
+    with contextlib.suppress(FileNotFoundError):
         del current_app.auth_token.payload
-    except FileNotFoundError:
-        pass
     print("Ok. Access token removed.")

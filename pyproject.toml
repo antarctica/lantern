@@ -110,11 +110,14 @@ ignore = ['ANN101', 'D100', 'D104', 'D105', 'D107', 'D203', 'D212', 'D402', 'E50
 #  TD002 | for allowing TODOs without an author (as an issue should assign ownership)
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*"    = ["ANN201", "ANN401", "S101"]
+"tests/*"    = ["ANN201", "ANN401", "D101", "D102", "D103", "S101"]
 "config.py"  = ["N802"]
 "classes.py" = ["D102"]
 #    tests/* | ANN201 | ignore public functions
 #    tests/* | ANN401 | ignore use of 'Any' type
+#    tests/* |   D101 | ignore missing docstrings for public classes
+#    tests/* |   D102 | ignore missing docstrings for public methods
+#    tests/* |   D103 | ignore missing docstrings for public functions
 #    tests/* |   S101 | ignore use of assert
 #  config.py |   N802 | ignore use of upper case method names
 # classes.py |   D102 | ignore missing docstrings for class methods (temporary)

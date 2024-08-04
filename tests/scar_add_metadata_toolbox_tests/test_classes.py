@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime, timezone
 
 import pytest
 
@@ -108,7 +108,7 @@ def test_record_temporal_extent_none():
 
 # Coverage test
 def test_record_temporal_extent_start_none():
-    start = datetime.datetime.utcnow()
+    start = datetime.now(tz=timezone.utc)
     record = Record(
         config={
             "identification": {
@@ -135,7 +135,7 @@ def test_record_temporal_extent_start_none():
 
 # Coverage test
 def test_record_temporal_extent_end_none():
-    end = datetime.datetime.utcnow()
+    end = datetime.now(tz=timezone.utc)
     record = Record(
         config={
             "identification": {
@@ -204,7 +204,7 @@ def test_item_status_as_needed():
             config={
                 "hierarchy_level": "dataset",
                 "identification": {
-                    "dates": {"released": {"date": datetime.datetime.utcnow().date()}},
+                    "dates": {"released": {"date": datetime.now(tz=timezone.utc).date()}},
                     "maintenance": {"maintenance_frequency": "asNeeded"},
                 },
             }
@@ -220,7 +220,7 @@ def test_item_status_not_planned():
             config={
                 "hierarchy_level": "dataset",
                 "identification": {
-                    "dates": {"released": {"date": datetime.datetime.utcnow().date()}},
+                    "dates": {"released": {"date": datetime.now(tz=timezone.utc).date()}},
                     "maintenance": {"maintenance_frequency": "notPlanned"},
                 },
             }

@@ -78,9 +78,9 @@ def write_record(recobj, esn, context, url=None):
         return etree.fromstring(util.getqattr(recobj, context.md_core_model["mappings"]["pycsw:XML"]), context.parser)
 
     node = etree.Element("metadata")
-    node.attrib[
-        util.nspath_eval("xsi:noNamespaceSchemaLocation", context.namespaces)
-    ] = "http://www.fgdc.gov/metadata/fgdc-std-001-1998.xsd"
+    node.attrib[util.nspath_eval("xsi:noNamespaceSchemaLocation", context.namespaces)] = (
+        "http://www.fgdc.gov/metadata/fgdc-std-001-1998.xsd"
+    )
 
     idinfo = etree.SubElement(node, "idinfo")
     # identifier

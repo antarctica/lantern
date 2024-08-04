@@ -198,7 +198,6 @@ class WebMapService_1_3_0(object):
         exceptions=None,
         **kwargs,
     ):
-
         request = {"service": "WMS", "version": self.version, "request": "GetMap"}
 
         # check layers and styles

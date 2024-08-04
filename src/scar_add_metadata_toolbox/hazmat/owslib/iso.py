@@ -24,7 +24,7 @@
 # Contact email: tomkralidis@gmail.com
 # =============================================================================
 
-""" ISO metadata parser """
+"""ISO metadata parser"""
 
 import warnings
 
@@ -48,7 +48,6 @@ class MD_Metadata(object):
     """Process gmd:MD_Metadata"""
 
     def __init__(self, md=None):
-
         if md is None:
             self.xml = None
             self.identifier = None
@@ -238,7 +237,6 @@ class CI_ResponsibleParty(object):
     """process CI_ResponsibleParty"""
 
     def __init__(self, md=None):
-
         if md is None:
             self.name = None
             self.organization = None

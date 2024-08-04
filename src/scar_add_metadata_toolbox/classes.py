@@ -1851,9 +1851,9 @@ class Item:
             and bounding_box["south_latitude"] == -90
             and bounding_box["west_longitude"] == -180
         ):
-            bounding_polygon["crs"]["properties"][
-                "name"
-            ] = "urn:ogc:def:crs:EPSG::3031"  # pragma: no cover (will be addressed in #116)
+            bounding_polygon["crs"]["properties"]["name"] = (
+                "urn:ogc:def:crs:EPSG::3031"  # pragma: no cover (will be addressed in #116)
+            )
             bounding_polygon["features"][0]["geometry"] = WellKnownExtents.ANTARCTICA.value
         elif (  # pragma: no cover (will be addressed in #116)
             bounding_box["east_longitude"] == 180
@@ -1861,9 +1861,9 @@ class Item:
             and bounding_box["south_latitude"] == -60
             and bounding_box["west_longitude"] == -180
         ):
-            bounding_polygon["features"][0][
-                "geometry"
-            ] = WellKnownExtents.SUB_ANTARCTICA.value  # pragma: no cover (will be addressed in #116)
+            bounding_polygon["features"][0]["geometry"] = (
+                WellKnownExtents.SUB_ANTARCTICA.value
+            )  # pragma: no cover (will be addressed in #116)
 
         return bounding_polygon
 

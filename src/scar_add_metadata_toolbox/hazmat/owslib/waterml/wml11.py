@@ -28,7 +28,6 @@ def ns(namespace):
 
 class WaterML_1_1(object):
     def __init__(self, element):
-
         if isinstance(element, ElementType):
             self._root = element
         else:

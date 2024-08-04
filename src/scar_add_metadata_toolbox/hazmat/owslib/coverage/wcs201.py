@@ -312,7 +312,6 @@ class ContentMetadata(object):
     timelimits = property(_getTimeLimits, None)
 
     def _getTimePositions(self):
-
         timepositions = []
         if not hasattr(self, "descCov"):
             self.descCov = self._service.getDescribeCoverage(self.id)

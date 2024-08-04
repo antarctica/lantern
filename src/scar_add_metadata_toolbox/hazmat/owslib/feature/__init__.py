@@ -55,7 +55,6 @@ class WebFeatureService_(object):
 
         # 1.1.0 and 2.0.0 have same encoding
         if self.version in ["1.1.0", "2.0.0"]:
-
             # format bbox parameter
             if srs.encoding == "urn":
                 if srs.axisorder == "yx":

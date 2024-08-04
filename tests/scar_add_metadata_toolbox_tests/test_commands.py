@@ -360,9 +360,10 @@ class TestCommandRecordsBulkImport:
         with TemporaryDirectory() as record_directory:
             valid_record_path = str(Path(f"{record_directory}/01-valid-record.json"))
             invalid_record_path = str(Path(f"{record_directory}/02-invalid-record.json"))
-            with open(valid_record_path, mode="w+") as valid_record_file, open(
-                invalid_record_path, mode="w+"
-            ) as invalid_record_file:
+            with (
+                open(valid_record_path, mode="w+") as valid_record_file,
+                open(invalid_record_path, mode="w+") as invalid_record_file,
+            ):
                 valid_record_data = TestRecordConfigurations.TEST_RECORD_3.value
                 # noinspection PyArgumentList
                 record_configuration = MetadataRecordConfigV3(**valid_record_data)

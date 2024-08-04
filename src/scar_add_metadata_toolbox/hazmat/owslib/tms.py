@@ -163,9 +163,7 @@ class TileMapService(object):
             ValueError("both title and srs must be specified")
         raise ValueError(
             """Specified Tile with id {}, title {}
-                projection {} format {} at zoomlevel {} cannot be found""".format(
-                id, title, srs, format, z
-            )
+                projection {} format {} at zoomlevel {} cannot be found""".format(id, title, srs, format, z)
         )
 
 
@@ -249,7 +247,6 @@ class ContentMetadata(object):
 
 
 class TileMap(object):
-
     title = None
     abstract = None
     srs = None

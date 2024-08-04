@@ -77,7 +77,6 @@ class MapContext:
 
         # mapbuilder draws layers in bottom-top order
         for name, title in layering:
-
             # Layer
             layer = WMCElement("Layer")
             layer.attrib["queryable"] = "0"

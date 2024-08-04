@@ -54,7 +54,6 @@ class EBRIM(profile.Profile):
     """EBRim class"""
 
     def __init__(self, model, namespaces, context):
-
         self.context = context
 
         self.namespaces = {
@@ -162,9 +161,9 @@ class EBRIM(profile.Profile):
             return etree.fromstring(util.getqattr(result, queryables["pycsw:XML"]["dbcol"]), self.context.parser)
 
         node = etree.Element(util.nspath_eval("rim:ExtrinsicObject", self.namespaces))
-        node.attrib[
-            util.nspath_eval("xsi:schemaLocation", self.context.namespaces)
-        ] = "%s %s/csw/2.0.2/profiles/ebrim/1.0/csw-ebrim.xsd" % (self.namespaces["wrs"], self.ogc_schemas_base)
+        node.attrib[util.nspath_eval("xsi:schemaLocation", self.context.namespaces)] = (
+            "%s %s/csw/2.0.2/profiles/ebrim/1.0/csw-ebrim.xsd" % (self.namespaces["wrs"], self.ogc_schemas_base)
+        )
 
         node.attrib["id"] = identifier
         node.attrib["lid"] = identifier

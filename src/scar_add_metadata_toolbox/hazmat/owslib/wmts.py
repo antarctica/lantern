@@ -341,7 +341,6 @@ class WebMapTileService(object):
     def buildTileResource(
         self, layer=None, style=None, format=None, tilematrixset=None, tilematrix=None, row=None, column=None, **kwargs
     ):
-
         # check the validity of the parameters and set reasonable defaults
         if layer is None:
             raise ValueError("layer is mandatory (cannot be None)")
@@ -377,7 +376,6 @@ class WebMapTileService(object):
 
     @property
     def restonly(self):
-
         # if OperationsMetadata is missing completely --> use REST
         if len(self.operations) == 0:
             return True

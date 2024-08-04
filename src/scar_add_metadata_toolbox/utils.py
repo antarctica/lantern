@@ -4,7 +4,7 @@ import json
 import os
 from base64 import urlsafe_b64decode
 from pathlib import Path
-from typing import Callable, Self
+from typing import Callable
 
 from awscli.clidriver import create_clidriver
 from flask import current_app, render_template
@@ -104,12 +104,12 @@ class AppAuthToken:
     2. persisting auth information to a local file for situations where this application is run statelessly
     """
 
-    def __init__(self: Self, session_file_path: Path) -> None:
+    def __init__(self, session_file_path: Path) -> None:
         self.session_file_path = session_file_path
         self._payload = None
 
     @property
-    def access_token_bearer_insecure(self: Self) -> str:
+    def access_token_bearer_insecure(self) -> str:
         """
         Return the name of the user identified in the access token.
 
@@ -130,7 +130,7 @@ class AppAuthToken:
             return "*unknown*"
 
     @property
-    def access_token(self: Self) -> str | None:
+    def access_token(self) -> str | None:
         """
         OAuth access token.
 
@@ -150,7 +150,7 @@ class AppAuthToken:
             return None
 
     @property
-    def payload(self: Self) -> dict:
+    def payload(self) -> dict:
         """
         Azure device flow response payload.
 
@@ -167,7 +167,7 @@ class AppAuthToken:
         return self._payload
 
     @payload.setter
-    def payload(self: Self, payload: dict) -> None:
+    def payload(self, payload: dict) -> None:
         """
         Azure device flow response payload.
 
@@ -180,7 +180,7 @@ class AppAuthToken:
         self._dump()
 
     @payload.deleter
-    def payload(self: Self) -> None:
+    def payload(self) -> None:
         """
         Azure device flow response payload.
 
@@ -189,7 +189,7 @@ class AppAuthToken:
         self._payload = None
         self.session_file_path.unlink()
 
-    def _load(self: Self) -> dict:
+    def _load(self) -> dict:
         """Load payload information from a JSON encoded file."""
         try:
             with self.session_file_path.open(mode="r") as auth_file:
@@ -197,7 +197,7 @@ class AppAuthToken:
         except FileNotFoundError:
             return {}
 
-    def _dump(self: Self) -> None:
+    def _dump(self) -> None:
         """Save payload information to a file encoded as JSON."""
         self.session_file_path.parent.mkdir(parents=True, exist_ok=True)
         with self.session_file_path.open(mode="w") as auth_file:

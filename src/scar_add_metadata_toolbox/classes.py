@@ -4,11 +4,11 @@ import contextlib
 import json
 from collections.abc import Generator
 from copy import deepcopy
-from datetime import UTC, date, datetime
+from datetime import date, datetime, timezone
 from enum import Enum
 from hashlib import sha1
 from pathlib import Path
-from typing import Any, Self
+from typing import Any
 from urllib.parse import parse_qs as query_string_parse
 from urllib.parse import urlparse as url_parse
 
@@ -930,7 +930,7 @@ class RecordSummary:
     added to the Record class instead.
     """
 
-    def __init__(self: Self, config: dict | None = None) -> None:
+    def __init__(self, config: dict | None = None) -> None:
         """
         Initialise class.
 
@@ -941,19 +941,19 @@ class RecordSummary:
         if config is not None:
             self.config = config
 
-    def __repr__(self: Self) -> str:
+    def __repr__(self) -> str:
         return f"<RecordSummary / {self.identifier} / {self.title}>"
 
     @property
-    def identifier(self: Self) -> str:
+    def identifier(self) -> str:
         return self.config["file_identifier"]
 
     @property
-    def hierarchy_level(self: Self) -> str:
+    def hierarchy_level(self) -> str:
         return self.config["hierarchy_level"]
 
     @property
-    def title(self: Self) -> str:
+    def title(self) -> str:
         return self.config["identification"]["title"]["value"]
 
 
@@ -977,7 +977,7 @@ class Record(RecordSummary):
     resources this may change.
     """
 
-    def __repr__(self: Self) -> str:
+    def __repr__(self) -> str:
         return f"<Record / {self.identifier}>"
 
     @staticmethod
@@ -1089,30 +1089,30 @@ class Record(RecordSummary):
         return _temporal_extent
 
     @property
-    def abstract(self: Self) -> str:
+    def abstract(self) -> str:
         return self.config["identification"]["abstract"]
 
     @property
-    def aggregations(self: Self) -> list[dict]:
+    def aggregations(self) -> list[dict]:
         try:
             return self.config["identification"]["aggregations"]
         except KeyError:
             return []
 
     @property
-    def character_set(self: Self) -> str:
+    def character_set(self) -> str:
         return self.config["identification"]["character_set"]
 
     @property
-    def constraints(self: Self) -> list[dict[str, str]]:
+    def constraints(self) -> list[dict[str, str]]:
         return self.config["identification"]["constraints"]
 
     @property
-    def contacts(self: Self) -> dict[str, list[dict]]:
+    def contacts(self) -> dict[str, list[dict]]:
         return self._process_contacts(contacts=self.config["identification"]["contacts"])
 
     @property
-    def dates(self: Self) -> dict[str, dict[str, str | date | datetime]]:
+    def dates(self) -> dict[str, dict[str, str | date | datetime]]:
         _dates = {}
         for date_type, date_value in self.config["identification"]["dates"].items():
             if "date_precision" not in date_value:
@@ -1121,18 +1121,18 @@ class Record(RecordSummary):
         return _dates
 
     @property
-    def distributions(self: Self) -> list[dict] | None:
+    def distributions(self) -> list[dict] | None:
         try:
             return self.config["distribution"]
         except KeyError:
             return None
 
     @property
-    def edition(self: Self) -> str:
+    def edition(self) -> str:
         return self.config["identification"]["edition"]
 
     @property
-    def extents(self: Self) -> list[dict] | None:
+    def extents(self) -> list[dict] | None:
         extents = []
 
         try:
@@ -1148,82 +1148,82 @@ class Record(RecordSummary):
         return extents
 
     @property
-    def language(self: Self) -> str:
+    def language(self) -> str:
         return self.config["identification"]["language"]
 
     @property
-    def lineage(self: Self) -> str | None:
+    def lineage(self) -> str | None:
         try:
             return self.config["identification"]["lineage"]["statement"]
         except KeyError:
             return None
 
     @property
-    def location_keywords(self: Self) -> list[dict]:
+    def location_keywords(self) -> list[dict]:
         return self._filter_keywords(keywords=self.config["identification"]["keywords"], keyword_type="place")
 
     @property
-    def maintenance_frequency(self: Self) -> str:
+    def maintenance_frequency(self) -> str:
         return self.config["identification"]["maintenance"]["maintenance_frequency"]
 
     @property
-    def metadata_character_set(self: Self) -> str:
+    def metadata_character_set(self) -> str:
         return self.config["metadata"]["character_set"]
 
     @property
-    def metadata_language(self: Self) -> str:
+    def metadata_language(self) -> str:
         return self.config["metadata"]["language"]
 
     @property
-    def metadata_maintenance_frequency(self: Self) -> str:
+    def metadata_maintenance_frequency(self) -> str:
         return self.config["metadata"]["maintenance"]["maintenance_frequency"]
 
     @property
-    def metadata_maintenance_progress(self: Self) -> str:
+    def metadata_maintenance_progress(self) -> str:
         return self.config["metadata"]["maintenance"]["progress"]
 
     @property
-    def metadata_standard_name(self: Self) -> str:
+    def metadata_standard_name(self) -> str:
         return self.config["metadata"]["metadata_standard"]["name"]
 
     @property
-    def metadata_standard_version(self: Self) -> str:
+    def metadata_standard_version(self) -> str:
         return self.config["metadata"]["metadata_standard"]["version"]
 
     @property
-    def metadata_updated(self: Self) -> date:
+    def metadata_updated(self) -> date:
         return self.config["metadata"]["date_stamp"]
 
     @property
-    def other_citation_details(self: Self) -> str | None:
+    def other_citation_details(self) -> str | None:
         try:
             return self.config["identification"]["other_citation_details"]
         except KeyError:
             return None
 
     @property
-    def spatial_reference_system(self: Self) -> dict | None:
+    def spatial_reference_system(self) -> dict | None:
         try:
             return self.config["reference_system_info"]
         except KeyError:  # pragma: no cover (will be addressed in #116)
             return None
 
     @property
-    def spatial_representation_type(self: Self) -> str | None:
+    def spatial_representation_type(self) -> str | None:
         try:
             return self.config["identification"]["spatial_representation_type"]
         except KeyError:  # pragma: no cover (will be addressed in #116)
             return None
 
     @property
-    def theme_keywords(self: Self) -> list[dict]:
+    def theme_keywords(self) -> list[dict]:
         return self._filter_keywords(keywords=self.config["identification"]["keywords"], keyword_type="theme")
 
     @property
-    def topics(self: Self) -> list[str]:
+    def topics(self) -> list[str]:
         return self.config["identification"]["topics"]
 
-    def load(self: Self, record_path: Path) -> None:
+    def load(self, record_path: Path) -> None:
         """
         Load a Record from a file encoded using JSON.
 
@@ -1233,7 +1233,7 @@ class Record(RecordSummary):
         configuration.load(file=record_path)
         self.config: dict[str, Any] = configuration.config
 
-    def dump(self: Self, record_path: Path, overwrite: bool = False) -> None:
+    def dump(self, record_path: Path, overwrite: bool = False) -> None:
         """
         Save a Record to a file encoded using JSON.
 
@@ -1251,7 +1251,7 @@ class Record(RecordSummary):
                 raise FileExistsError() from None
             configuration.dump(file=record_path)
 
-    def dumps(self: Self, dump_format: str) -> str:
+    def dumps(self, dump_format: str) -> str:
         """
         Encode a Record in a given format.
 
@@ -1277,21 +1277,21 @@ class MirrorRecordSummary(Record):
     a mirrored repository.
     """
 
-    def __init__(self: Self, config: dict, published: bool) -> None:
+    def __init__(self, config: dict, published: bool) -> None:
         super().__init__(config=config)
         self.published = published
 
-    def __repr__(self: Self) -> str:
+    def __repr__(self) -> str:
         return f"<MirrorRecordSummary / {self.identifier} / {'Published' if self.published else 'Unpublished'}>"
 
 
 class MirrorRecord(MirrorRecordSummary, Record):
     """Mirrored records extend mirrored record summaries and records."""
 
-    def __init__(self: Self, config: dict, published: bool) -> None:
+    def __init__(self, config: dict, published: bool) -> None:
         super().__init__(config=config, published=published)
 
-    def __repr__(self: Self) -> str:
+    def __repr__(self) -> str:
         return f"<MirrorRecord / {self.identifier} / {'Published' if self.published else 'Unpublished'}>"
 
 
@@ -1310,10 +1310,10 @@ class Repository:
       back into a Record class
     """
 
-    def __init__(self: Self, client_config: dict) -> None:
+    def __init__(self, client_config: dict) -> None:
         self.csw_client = CSWClient(config=client_config)
 
-    def retrieve_record(self: Self, record_identifier: str) -> Record:
+    def retrieve_record(self, record_identifier: str) -> Record:
         """
         Retrieve a record from the repository.
 
@@ -1329,7 +1329,7 @@ class Repository:
         record_config.validate()
         return Record(config=record_config.config)
 
-    def retrieve_records(self: Self) -> Generator[Record, None, None]:
+    def retrieve_records(self) -> Generator[Record, None, None]:
         """
         Retrieve all records in the repository.
 
@@ -1345,7 +1345,7 @@ class Repository:
             record_config.validate()
             yield Record(config=record_config.config)
 
-    def list_record_identifiers(self: Self) -> list[str]:
+    def list_record_identifiers(self) -> list[str]:
         """
         Retrieve identifiers for all records in the repository.
 
@@ -1356,7 +1356,7 @@ class Repository:
         """
         return list(self.list_records().keys())
 
-    def list_records(self: Self) -> dict[str, RecordSummary]:
+    def list_records(self) -> dict[str, RecordSummary]:
         """
         Retrieve summaries for all records in the repository.
 
@@ -1373,7 +1373,7 @@ class Repository:
             _record_summaries[record.identifier] = record
         return _record_summaries
 
-    def insert_record(self: Self, record: Record, update: bool = False) -> None:
+    def insert_record(self, record: Record, update: bool = False) -> None:
         # noinspection GrazieInspection
         """
         Create a new record, or updates an existing record, in the repository.
@@ -1396,7 +1396,7 @@ class Repository:
             # noinspection PyUnboundLocalVariable
             self.csw_client.update_record(record=record_xml)
 
-    def delete_record(self: Self, record_identifier: str) -> None:
+    def delete_record(self, record_identifier: str) -> None:
         """
         Delete a record from the repository.
 
@@ -1422,11 +1422,11 @@ class MirrorRepository:
     again to (re)publish it.
     """
 
-    def __init__(self: Self, unpublished_repository_config: dict, published_repository_config: dict) -> None:
+    def __init__(self, unpublished_repository_config: dict, published_repository_config: dict) -> None:
         self.published_repository = Repository(**published_repository_config)
         self.unpublished_repository = Repository(**unpublished_repository_config)
 
-    def retrieve_record(self: Self, record_identifier: str) -> MirrorRecord:
+    def retrieve_record(self, record_identifier: str) -> MirrorRecord:
         """
         Retrieve a record from the repository.
 
@@ -1448,7 +1448,7 @@ class MirrorRepository:
 
     # retrieve_records() method removed as part of #133/#134
 
-    def retrieve_published_records(self: Self) -> list[MirrorRecord]:
+    def retrieve_published_records(self) -> list[MirrorRecord]:
         """
         Retrieve all published records in the repository.
 
@@ -1465,7 +1465,7 @@ class MirrorRepository:
         for published_record in self.published_repository.retrieve_records():
             yield MirrorRecord(config=published_record.config, published=True)
 
-    def list_record_identifiers(self: Self) -> list[str]:
+    def list_record_identifiers(self) -> list[str]:
         """
         Retrieve identifiers for all records in the repository.
 
@@ -1479,7 +1479,7 @@ class MirrorRepository:
         """
         return self.unpublished_repository.list_record_identifiers()
 
-    def list_unpublished_record_identifiers(self: Self) -> list[str]:
+    def list_unpublished_record_identifiers(self) -> list[str]:
         """
         Retrieve identifiers for all records in the repository.
 
@@ -1493,7 +1493,7 @@ class MirrorRepository:
         """
         return self.unpublished_repository.list_record_identifiers()
 
-    def list_published_record_identifiers(self: Self) -> list[str]:
+    def list_published_record_identifiers(self) -> list[str]:
         """
         Retrieve identifiers for all published records in the repository.
 
@@ -1504,7 +1504,7 @@ class MirrorRepository:
         """
         return self.published_repository.list_record_identifiers()
 
-    def list_distinct_unpublished_record_identifiers(self: Self) -> list[str]:
+    def list_distinct_unpublished_record_identifiers(self) -> list[str]:
         """
         Retrieve identifiers for all unpublished records in the repository.
 
@@ -1521,7 +1521,7 @@ class MirrorRepository:
         published_record_identifiers = self.list_published_record_identifiers()
         return list(set(unpublished_record_identifiers) - set(published_record_identifiers))
 
-    def list_records(self: Self) -> dict[str, MirrorRecordSummary]:
+    def list_records(self) -> dict[str, MirrorRecordSummary]:
         """
         Retrieve summaries for all records in the repository.
 
@@ -1544,7 +1544,7 @@ class MirrorRepository:
             )
         return _records
 
-    def insert_record(self: Self, record: Record, update: bool = False) -> None:
+    def insert_record(self, record: Record, update: bool = False) -> None:
         """
         Create a new, unpublished, record, or updates an existing record in the unpublished repository.
 
@@ -1561,7 +1561,7 @@ class MirrorRepository:
         """
         self.unpublished_repository.insert_record(record=record, update=update)
 
-    def delete_record(self: Self, record_identifier: str) -> None:
+    def delete_record(self, record_identifier: str) -> None:
         """
         Delete a record from the unpublished repository.
 
@@ -1579,7 +1579,7 @@ class MirrorRepository:
 
         self.unpublished_repository.delete_record(record_identifier=record_identifier)
 
-    def publish_record(self: Self, record_identifier: str, republish: bool = False) -> None:
+    def publish_record(self, record_identifier: str, republish: bool = False) -> None:
         """
         Create a new, published, record, or updates an existing record in the published repository.
 
@@ -1603,7 +1603,7 @@ class MirrorRepository:
                 raise RecordInsertConflictError() from None
             self.published_repository.insert_record(record=record, update=True)
 
-    def retract_record(self: Self, record_identifier: str) -> None:
+    def retract_record(self, record_identifier: str) -> None:
         """
         Delete (retracts) a record from the published repository.
 
@@ -1630,13 +1630,13 @@ class Item:
     understood or to make more contextual sense.
     """
 
-    def __init__(self: Self, record: Record) -> None:
+    def __init__(self, record: Record) -> None:
         self.record = record
 
         if self.record.hierarchy_level == "collection":
             raise ItemInvalidSourceRecordError()
 
-    def __repr__(self: Self) -> str:
+    def __repr__(self) -> str:
         return f"<Item / {self.identifier}>"
 
     @staticmethod
@@ -1863,7 +1863,7 @@ class Item:
         if maintenance_frequency == "asNeeded" or maintenance_frequency == "notPlanned":
             return "current"
 
-        _now = datetime.now(tz=UTC)
+        _now = datetime.now(tz=timezone.utc)
         _overdue = released_date
         if isinstance(released_date, date):  # pragma: no cover (added for future use)
             _now = _now.date()
@@ -1960,31 +1960,31 @@ class Item:
                 return keyword_set["terms"]
 
     @property
-    def abstract(self: Self) -> str:
+    def abstract(self) -> str:
         return self.record.abstract
 
     @property
-    def abstract_markdown(self: Self) -> str:
+    def abstract_markdown(self) -> str:
         return markdown(self.abstract, output_format="html")
 
     @property
-    def authors(self: Self) -> list[dict]:
+    def authors(self) -> list[dict]:
         return self.record.contacts["author"]
 
     @property
-    def character_set(self: Self) -> str:
+    def character_set(self) -> str:
         return str(self.record.character_set).upper()
 
     @property
-    def citation(self: Self) -> str | None:
+    def citation(self) -> str | None:
         return self.record.other_citation_details
 
     @property
-    def citation_markdown(self: Self) -> str:
+    def citation_markdown(self) -> str:
         return markdown(self.citation, output_format="html")
 
     @property
-    def collections(self: Self) -> list[str] | None:
+    def collections(self) -> list[str] | None:
         """
         Item's Collections.
 
@@ -2003,16 +2003,16 @@ class Item:
         return [term["term"] for term in collection_terms]
 
     @property
-    def created(self: Self) -> str:
+    def created(self) -> str:
         _date = self.record.dates["creation"]
         return self._format_date(date_datetime=_date["date"], date_precision=_date["date_precision"])
 
     @property
-    def data_type(self: Self) -> str:
+    def data_type(self) -> str:
         return self.record.spatial_representation_type
 
     @property
-    def downloads(self: Self) -> list[dict[str, str]]:
+    def downloads(self) -> list[dict[str, str]]:
         downloads = []
 
         for distribution in self.record.distributions:
@@ -2021,11 +2021,11 @@ class Item:
         return downloads
 
     @property
-    def edition(self: Self) -> str:
+    def edition(self) -> str:
         return self.record.edition
 
     @property
-    def geographic_extents(self: Self) -> list[dict]:
+    def geographic_extents(self) -> list[dict]:
         geographic_extents = []
 
         for extent in self.record.extents:
@@ -2038,33 +2038,33 @@ class Item:
         return geographic_extents
 
     @property
-    def identifier(self: Self) -> str:
+    def identifier(self) -> str:
         return self.record.identifier
 
     @property
-    def item_type(self: Self) -> str:
+    def item_type(self) -> str:
         return self.record.hierarchy_level
 
     @property
-    def language(self: Self) -> str:
+    def language(self) -> str:
         return self._format_language(language=self.record.language)
 
     @property
-    def licence_url(self: Self) -> str:
+    def licence_url(self) -> str:
         for constraint in self.record.constraints:  # noqa: RET503 (will be refactored away)
             if constraint["type"] == "usage" and constraint["restriction_code"] == "license":
                 return constraint["href"]
 
     @property
-    def lineage(self: Self) -> str:
+    def lineage(self) -> str:
         return self.record.lineage
 
     @property
-    def lineage_markdown(self: Self) -> str:
+    def lineage_markdown(self) -> str:
         return markdown(self.lineage, output_format="html")
 
     @property
-    def location_keywords(self: Self) -> list[dict]:
+    def location_keywords(self) -> list[dict]:
         location_keywords = self.record.location_keywords
         for location_keyword in location_keywords:
             location_keyword["thesaurus"]["title"]["value"] = self._format_keyword_thesaurus_title(
@@ -2073,71 +2073,71 @@ class Item:
         return location_keywords
 
     @property
-    def maintenance_frequency(self: Self) -> str:
+    def maintenance_frequency(self) -> str:
         return self._format_maintenance_frequency(maintenance_frequency=self.record.maintenance_frequency)
 
     @property
-    def metadata_maintenance_progress(self: Self) -> str:
+    def metadata_maintenance_progress(self) -> str:
         return str(self.record.metadata_maintenance_progress).capitalize()
 
     @property
-    def metadata_character_set(self: Self) -> str:
+    def metadata_character_set(self) -> str:
         return str(self.record.metadata_character_set).upper()
 
     @property
-    def metadata_language(self: Self) -> str:
+    def metadata_language(self) -> str:
         return self._format_language(language=self.record.metadata_language)
 
     @property
-    def metadata_maintenance_frequency(self: Self) -> str:
+    def metadata_maintenance_frequency(self) -> str:
         return self._format_maintenance_frequency(maintenance_frequency=self.record.metadata_maintenance_frequency)
 
     @property
-    def metadata_standard_name(self: Self) -> str:
+    def metadata_standard_name(self) -> str:
         return self.record.metadata_standard_name
 
     @property
-    def metadata_standard_version(self: Self) -> str:
+    def metadata_standard_version(self) -> str:
         return self.record.metadata_standard_version
 
     @property
-    def metadata_updated(self: Self) -> str:
+    def metadata_updated(self) -> str:
         return self._format_date(date_datetime=self.record.metadata_updated)
 
     @property
-    def related_references(self: Self) -> list[dict]:
+    def related_references(self) -> list[dict]:
         # noinspection PyProtectedMember
         return Collection._filter_aggregations(
             aggregations=self.record.aggregations, association_type="crossReference", initiative_type="sciencePaper"
         )
 
     @property
-    def related_project_resources(self: Self) -> list[dict]:
+    def related_project_resources(self) -> list[dict]:
         # noinspection PyProtectedMember
         return Collection._filter_aggregations(
             aggregations=self.record.aggregations, association_type="crossReference", initiative_type="project"
         )
 
     @property
-    def related_datasets(self: Self) -> list[dict]:
+    def related_datasets(self) -> list[dict]:
         # noinspection PyProtectedMember
         return Collection._filter_aggregations(
             aggregations=self.record.aggregations, association_type="crossReference", initiative_type="investigation"
         )
 
     @property
-    def released(self: Self) -> str:
+    def released(self) -> str:
         _date = self.record.dates["released"]
         return self._format_date(date_datetime=_date["date"], date_precision=_date["date_precision"])
 
     @property
-    def point_of_contact(self: Self) -> str:
+    def point_of_contact(self) -> str:
         points_of_contact = self.record.contacts["pointOfContact"]
         point_of_contact = points_of_contact[0]
         return self._format_organisation_name(organisation_name=point_of_contact["organisation"]["name"])
 
     @property
-    def point_of_contact_details(self: Self) -> dict:
+    def point_of_contact_details(self) -> dict:
         points_of_contact = self.record.contacts["pointOfContact"]
         point_of_contact = points_of_contact[0]
         point_of_contact["organisation"]["name"] = self._format_organisation_name(
@@ -2146,12 +2146,12 @@ class Item:
         return point_of_contact
 
     @property
-    def published(self: Self) -> str:
+    def published(self) -> str:
         _date = self.record.dates["publication"]
         return self._format_date(date_datetime=_date["date"], date_precision=_date["date_precision"])
 
     @property
-    def spatial_reference_system(self: Self) -> str | None:
+    def spatial_reference_system(self) -> str | None:
         if self.record.spatial_reference_system is None:
             return None  # pragma: no cover (will be addressed in #116)
 
@@ -2160,21 +2160,21 @@ class Item:
         )
 
     @property
-    def spatial_reference_system_markdown(self: Self) -> str | None:
+    def spatial_reference_system_markdown(self) -> str | None:
         if self.spatial_reference_system is None:
             return None  # pragma: no cover (will be addressed in #116)
 
         return markdown(self.spatial_reference_system, output_format="html")
 
     @property
-    def status(self: Self) -> str:
+    def status(self) -> str:
         return self._process_status(
             maintenance_frequency=self.record.maintenance_frequency,
             released_date=self.record.dates["released"]["date"],
         )
 
     @property
-    def temporal_extents(self: Self) -> list[dict[str, str]]:
+    def temporal_extents(self) -> list[dict[str, str]]:
         temporal_extents = []
 
         for extent in self.record.extents:
@@ -2188,7 +2188,7 @@ class Item:
         return temporal_extents
 
     @property
-    def theme_keywords(self: Self) -> list[dict]:
+    def theme_keywords(self) -> list[dict]:
         """
         Theme keywords (filtered).
 
@@ -2228,15 +2228,15 @@ class Item:
         return theme_keywords
 
     @property
-    def title(self: Self) -> str:
+    def title(self) -> str:
         return self.record.title
 
     @property
-    def title_markdown(self: Self) -> str:
+    def title_markdown(self) -> str:
         return markdown(self.title, output_format="html")
 
     @property
-    def topics(self: Self) -> list[str]:
+    def topics(self) -> list[str]:
         """
         Item's research topics.
 
@@ -2255,7 +2255,7 @@ class Item:
         return [term["term"] for term in topic_terms]
 
     @property
-    def updated(self: Self) -> str | None:
+    def updated(self) -> str | None:
         try:
             _date = self.record.dates["revision"]
             return self._format_date(date_datetime=_date["date"], date_precision=_date["date_precision"])
@@ -2281,13 +2281,13 @@ class Collection:
     understood or to make more contextual sense.
     """
 
-    def __init__(self: Self, record: Record) -> None:
+    def __init__(self, record: Record) -> None:
         self.record = record
 
         if self.record.hierarchy_level != "collection":
             raise CollectionInvalidSourceRecordError()
 
-    def __repr__(self: Self) -> str:
+    def __repr__(self) -> str:
         return f"<Collection / {self.identifier}>"
 
     @staticmethod
@@ -2350,19 +2350,19 @@ class Collection:
                 return keyword_set["terms"]
 
     @property
-    def identifier(self: Self) -> str:
+    def identifier(self) -> str:
         return self.record.identifier
 
     @property
-    def title(self: Self) -> str:
+    def title(self) -> str:
         return self.record.title
 
     @property
-    def title_markdown(self: Self) -> str:
+    def title_markdown(self) -> str:
         return markdown(self.title, output_format="html")
 
     @property
-    def topics(self: Self) -> list[str]:
+    def topics(self) -> list[str]:
         """
         Collection's research topics.
 
@@ -2380,16 +2380,16 @@ class Collection:
         return [term["term"] for term in topic_terms]
 
     @property
-    def summary(self: Self) -> str:
+    def summary(self) -> str:
         return self.record.abstract
 
     @property
-    def summary_markdown(self: Self) -> str:
+    def summary_markdown(self) -> str:
         # noinspection PyTypeChecker
         return markdown(self.summary, output_format="html5")
 
     @property
-    def item_identifiers(self: Self) -> list[str] | None:
+    def item_identifiers(self) -> list[str] | None:
         """
         Item identifiers in Collection.
 

@@ -7,7 +7,6 @@ from copy import deepcopy
 from enum import Enum
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Self
 
 from bas_metadata_library.standards.iso_19115_2 import MetadataRecord
 from dulwich import porcelain
@@ -350,7 +349,7 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
         "gitlab_pat": None,
     }
 
-    def __init__(self: Self, config: dict) -> None:
+    def __init__(self, config: dict) -> None:
         """
         Initialise a CSW Server instance.
 
@@ -385,7 +384,7 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
         self._tracking_config = self._init_tracking_config(config=config)
 
     @property
-    def _backing_db_is_initialised(self: Self) -> bool:
+    def _backing_db_is_initialised(self) -> bool:
         """
         Test whether the backing database has been initialised for catalogue.
 
@@ -398,7 +397,7 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
         return inspect(csw_database).has_table(self._csw_config["repository"]["table"])
 
     @property
-    def _backing_repo_is_initialised(self: Self) -> bool:
+    def _backing_repo_is_initialised(self) -> bool:
         """
         Test whether the backing git repository has been initialised for catalogue revision tracking.
 
@@ -424,7 +423,7 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
             return False
 
     @property
-    def _tracking_enabled(self: Self) -> bool:
+    def _tracking_enabled(self) -> bool:
         """
         Convenience property for determining if revision tracking is enabled.
 
@@ -434,7 +433,7 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
         return self._tracking_config["enabled"]
 
     @property
-    def _tracking_repo(self: Self) -> str:
+    def _tracking_repo(self) -> str:
         """
         Convenience property for the git working copy used if revision tracking is enabled.
 
@@ -576,7 +575,7 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
             except KeyError:
                 raise CSWUnmappedRequestError() from None
 
-    def _check_auth(self: Self, transaction_type: CSWTransactionType, token: AzureToken | None) -> None:
+    def _check_auth(self, transaction_type: CSWTransactionType, token: AzureToken | None) -> None:
         """
         Check whether an authorisation token contains the scopes required for a transaction.
 
@@ -607,7 +606,7 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
             if token is None:
                 raise CSWAuthMissingError() from None
 
-    def _create_tracking_repo(self: Self) -> None:
+    def _create_tracking_repo(self) -> None:
         """
         Create the git repository used for catalogue revision tracking.
 
@@ -668,7 +667,7 @@ its use.
                 password=self._tracking_config["gitlab_pat"],
             )
 
-    def _clone_tracking_repo(self: Self) -> None:
+    def _clone_tracking_repo(self) -> None:
         """
         Clone the git repository used for catalogue revision tracking to the working directory.
 
@@ -686,7 +685,7 @@ its use.
         except HTTPUnauthorized as e:
             raise CSWTrackingRepositoryInvalidCredentialsError from e
 
-    def _commit_and_push_tracking_repo(self: Self, commit_message: str, token: AzureToken) -> str:
+    def _commit_and_push_tracking_repo(self, commit_message: str, token: AzureToken) -> str:
         """
         Commit staged files and push commit to remote in git repository used for catalogue revision tracking.
 
@@ -720,7 +719,7 @@ its use.
 
         return commit_hash
 
-    def _init_auth_config(self: Self, config: dict) -> dict[str, list[str]]:
+    def _init_auth_config(self, config: dict) -> dict[str, list[str]]:
         """
         Prepare configuration options relating to authentication and authorisation.
 
@@ -737,7 +736,7 @@ its use.
 
         return auth_options
 
-    def _init_csw_config(self: Self, config: dict) -> dict:
+    def _init_csw_config(self, config: dict) -> dict:
         """
         Prepare configuration options relating to pyCSW.
 
@@ -760,7 +759,7 @@ its use.
 
         return csw_options
 
-    def _init_tracking_config(self: Self, config: dict) -> dict[str, bool | str | Path | None]:
+    def _init_tracking_config(self, config: dict) -> dict[str, bool | str | Path | None]:
         """
         Prepare configuration options relating to revision tracking.
 
@@ -785,7 +784,7 @@ its use.
 
         return tracking_options
 
-    def _prepare_csw_request(self: Self, request: Request) -> _CSWServer:
+    def _prepare_csw_request(self, request: Request) -> _CSWServer:
         """
         Construct a PyCSW request from a Flask request.
 
@@ -809,7 +808,7 @@ its use.
 
         return csw
 
-    def _track_revision_delete(self: Self, csw_request: str, token: AzureToken) -> str:
+    def _track_revision_delete(self, csw_request: str, token: AzureToken) -> str:
         """
         Capture a record deleted via a transactional CSW request, where record revision tracking is enabled.
 
@@ -846,7 +845,7 @@ its use.
         return self._commit_and_push_tracking_repo(commit_message="Record Deleted", token=token)
 
     def _track_revision_filter_request(
-        self: Self, csw_request: str, csw_response: str, transaction_type: CSWTransactionType
+        self, csw_request: str, csw_response: str, transaction_type: CSWTransactionType
     ) -> bool:
         """
         Check whether a CSW request should trigger revision tracking.
@@ -880,7 +879,7 @@ its use.
         )
 
     def _track_revision_insert_update(
-        self: Self, csw_request: str, transaction_type: CSWTransactionType, token: AzureToken
+        self, csw_request: str, transaction_type: CSWTransactionType, token: AzureToken
     ) -> str:
         """
         Capture a record added or updated via a transactional CSW request, where record revision tracking is enabled.
@@ -929,7 +928,7 @@ its use.
         porcelain.add(repo=self._tracking_repo, paths=[record_xml_path, record_json_path])
         return self._commit_and_push_tracking_repo(commit_message=commit_message, token=token)
 
-    def _track_revision_record_paths(self: Self, csw_request: str) -> tuple[Path, Path]:
+    def _track_revision_record_paths(self, csw_request: str) -> tuple[Path, Path]:
         """
         Generate file paths for a record within record tracking repo.
 
@@ -975,7 +974,7 @@ its use.
         return xml_path, json_path
 
     def _track_revision(
-        self: Self, flask_request: Request, csw_response: str, transaction_type: CSWTransactionType, token: AzureToken
+        self, flask_request: Request, csw_response: str, transaction_type: CSWTransactionType, token: AzureToken
     ) -> str | None:
         """
         Capture changes to records modified via transactional CSW requests, where record revision tracking is enabled.
@@ -1028,7 +1027,7 @@ its use.
         return None
 
     def _transaction_successful(
-        self: Self, transaction_type: CSWTransactionType, csw_request: str, csw_response: str
+        self, transaction_type: CSWTransactionType, csw_request: str, csw_response: str
     ) -> bool:
         """
         Determine whether a CSW transaction was successful.
@@ -1091,7 +1090,7 @@ its use.
             and transaction_record_id == request_record_id
         )
 
-    def setup_database(self: Self) -> None:
+    def setup_database(self) -> None:
         """
         Initialise the backing database for the catalogue.
 
@@ -1125,7 +1124,7 @@ its use.
                 raise CSWDatabaseAlreadyInitialisedError() from e
             pass
 
-    def setup_tracking(self: Self) -> None:
+    def setup_tracking(self) -> None:
         """
         Initialise the backing git repository for catalogue revision tracking.
 
@@ -1167,7 +1166,7 @@ its use.
             self._create_tracking_repo()
             self._clone_tracking_repo()
 
-    def process_request(self: Self, request: Request, token: AzureToken | None = None) -> Response:
+    def process_request(self, request: Request, token: AzureToken | None = None) -> Response:
         # noinspection GrazieInspection
         """
         Process a CSW request and return response.
@@ -1232,7 +1231,7 @@ class CSWClient:  # pragma: no cover (until #59 is resolved)
     package. This will be addressed by upstreaming missing functionality or creating a derivative package.
     """
 
-    def __init__(self: Self, config: dict) -> None:
+    def __init__(self, config: dict) -> None:
         """
         Initialise CSW client.
 
@@ -1252,10 +1251,10 @@ class CSWClient:  # pragma: no cover (until #59 is resolved)
         del self._csw_config["endpoint"]
         del self._csw_config["auth"]
 
-    def __repr__(self: Self) -> str:
+    def __repr__(self) -> str:
         return f"<CSWClient / Endpoint: {self._csw_endpoint}>"
 
-    def _get_client(self: Self) -> _CSWClient:
+    def _get_client(self) -> _CSWClient:
         """
         Create a OWSLib CSW client instance.
 
@@ -1276,7 +1275,7 @@ class CSWClient:  # pragma: no cover (until #59 is resolved)
         except ServiceException:
             raise CSWAuthError() from None
 
-    def get_record(self: Self, identifier: str, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> str:
+    def get_record(self, identifier: str, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> str:
         """
         Return a single record.
 
@@ -1309,7 +1308,7 @@ class CSWClient:  # pragma: no cover (until #59 is resolved)
             if _csw.response.decode() == "Insufficient authorisation token.":
                 raise CSWAuthInsufficientError() from None
 
-    def get_records(self: Self, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> Generator[str, None, None]:
+    def get_records(self, mode: CSWGetRecordMode = CSWGetRecordMode.FULL) -> Generator[str, None, None]:
         """
         Return all records.
 
@@ -1353,7 +1352,7 @@ class CSWClient:  # pragma: no cover (until #59 is resolved)
             elif _csw.response.decode() == "Insufficient authorisation token.":
                 raise CSWAuthInsufficientError() from None
 
-    def insert_record(self: Self, record: str) -> None:
+    def insert_record(self, record: str) -> None:
         """
         Insert a new record.
 
@@ -1382,7 +1381,7 @@ class CSWClient:  # pragma: no cover (until #59 is resolved)
             if _csw.response.decode() == "Insufficient authorisation token.":
                 raise CSWAuthInsufficientError() from None
 
-    def update_record(self: Self, record: str) -> None:
+    def update_record(self, record: str) -> None:
         """
         Update an existing record.
 
@@ -1414,7 +1413,7 @@ class CSWClient:  # pragma: no cover (until #59 is resolved)
             if _csw.response.decode() == "Insufficient authorisation token.":
                 raise CSWAuthInsufficientError() from None
 
-    def delete_record(self: Self, identifier: str) -> None:
+    def delete_record(self, identifier: str) -> None:
         """
         Delete an existing record.
 

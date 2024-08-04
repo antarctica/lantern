@@ -2,7 +2,6 @@ import logging
 import os
 from importlib.metadata import version
 from pathlib import Path
-from typing import Self
 
 from bas_style_kit_jinja_templates import BskTemplates
 from flask.cli import load_dotenv
@@ -32,7 +31,7 @@ class Config:
     _AUTH_SESSION_FILE_PATH = Path.home().joinpath(".config/scar_add_metadata_toolbox/auth.json")
     _SITE_PATH = Path.home().joinpath(".config/scar_add_metadata_toolbox/_site")
 
-    def __init__(self: Self) -> None:
+    def __init__(self) -> None:
         load_dotenv()
 
         """
@@ -57,7 +56,7 @@ class Config:
 
     # noinspection PyPep8Naming
     @property
-    def NAME(self: Self) -> str:
+    def NAME(self) -> str:
         """
         Application/Package name.
 
@@ -68,7 +67,7 @@ class Config:
 
     # noinspection PyPep8Naming
     @property
-    def VERSION(self: Self) -> str:
+    def VERSION(self) -> str:
         """
         Application version.
 
@@ -81,7 +80,7 @@ class Config:
 
     # noinspection PyPep8Naming
     @property
-    def LOGGING_LEVEL(self: Self) -> int:
+    def LOGGING_LEVEL(self) -> int:
         """
         Application logging level.
 
@@ -107,7 +106,7 @@ class Config:
 
     # noinspection PyPep8Naming
     @property
-    def SENTRY_CONFIG(self: Self) -> dict:
+    def SENTRY_CONFIG(self) -> dict:
         """
         Sentry runtime configuration.
 
@@ -127,7 +126,7 @@ class Config:
 
     # noinspection PyPep8Naming
     @property
-    def BSK_TEMPLATES(self: Self) -> BskTemplates:
+    def BSK_TEMPLATES(self) -> BskTemplates:
         """
         BAS Style Kit Jinja2 templates configuration.
 
@@ -180,7 +179,7 @@ class Config:
 
     # noinspection PyPep8Naming
     @property
-    def CSW_CLIENTS_CONFIG(self: Self) -> dict:
+    def CSW_CLIENTS_CONFIG(self) -> dict:
         """
         CSW clients config.
 
@@ -198,7 +197,7 @@ class Config:
 
     # noinspection PyPep8Naming
     @property
-    def CSW_SERVERS_CONFIG(self: Self) -> dict:
+    def CSW_SERVERS_CONFIG(self) -> dict:
         """
         CSW servers config.
 
@@ -237,7 +236,7 @@ class Config:
 
     # noinspection PyPep8Naming
     @property
-    def AZURE_OAUTH_TENANCY(self: Self) -> str:
+    def AZURE_OAUTH_TENANCY(self) -> str:
         """
         Azure tenancy (server).
 
@@ -252,7 +251,7 @@ class Config:
 
     # noinspection PyPep8Naming
     @property
-    def AZURE_OAUTH_APPLICATION_ID(self: Self) -> str:
+    def AZURE_OAUTH_APPLICATION_ID(self) -> str:
         """
         Azure application (server).
 
@@ -267,7 +266,7 @@ class Config:
 
     # noinspection PyPep8Naming
     @property
-    def AZURE_OAUTH_CLIENT_APPLICATION_IDS(self: Self) -> list[str]:
+    def AZURE_OAUTH_CLIENT_APPLICATION_IDS(self) -> list[str]:
         """
         Azure approved applications (server).
 
@@ -288,7 +287,7 @@ class Config:
 
     # noinspection PyPep8Naming
     @property
-    def AUTH_CLIENT_SCOPES(self: Self) -> list[str]:
+    def AUTH_CLIENT_SCOPES(self) -> list[str]:
         """
         Azure scopes (client).
 
@@ -309,7 +308,7 @@ class Config:
 
     # noinspection PyPep8Naming
     @property
-    def AUTH_CLIENT_ID(self: Self) -> str:
+    def AUTH_CLIENT_ID(self) -> str:
         """
         Azure application (client).
 
@@ -324,7 +323,7 @@ class Config:
 
     # noinspection PyPep8Naming
     @property
-    def AUTH_CLIENT_TENANCY(self: Self) -> str:
+    def AUTH_CLIENT_TENANCY(self) -> str:
         """
         Azure tenancy (client).
 
@@ -339,7 +338,7 @@ class Config:
 
     # noinspection PyPep8Naming
     @property
-    def CLIENT_AUTH(self: Self) -> PublicClientApplication:
+    def CLIENT_AUTH(self) -> PublicClientApplication:
         """
         Azure auth provider (client).
 
@@ -358,7 +357,7 @@ class Config:
 
     # noinspection PyPep8Naming
     @property
-    def SITE_PATH(self: Self) -> Path:
+    def SITE_PATH(self) -> Path:
         """
         Path to the directory used to store generated static site content.
 
@@ -371,7 +370,7 @@ class Config:
 
     # noinspection PyPep8Naming
     @property
-    def S3_BUCKET(self: Self) -> str:
+    def S3_BUCKET(self) -> str:
         """
         Name of the AWS S3 bucket used to host static site content.
 
@@ -382,7 +381,7 @@ class Config:
 
     # noinspection PyPep8Naming
     @property
-    def ESRI_API_KEY(self: Self) -> str:
+    def ESRI_API_KEY(self) -> str:
         """
         API Key for ESRI ArcGIS JavaScript client.
 
@@ -405,7 +404,7 @@ class ProductionConfig(Config):  # pragma: no cover
 
     # noinspection PyPep8Naming
     @property
-    def VERSION(self: Self) -> str:
+    def VERSION(self) -> str:
         """Application version."""
         return version("scar-add-metadata-toolbox")
 
@@ -424,7 +423,7 @@ class DevelopmentConfig(Config):  # pragma: no cover
     _AUTH_SESSION_FILE_PATH = Path("./auth.json")
     _SITE_PATH = Path("./_site")
 
-    def __init__(self: Self) -> None:
+    def __init__(self) -> None:
         """
         Use this method to override property values defined in the config base class.
 
@@ -462,7 +461,7 @@ class DevelopmentConfig(Config):  # pragma: no cover
 
     # noinspection PyPep8Naming
     @property
-    def VERSION(self: Self) -> str:
+    def VERSION(self) -> str:
         """Application version."""
         return "N/A"
 
@@ -474,7 +473,7 @@ class TestingConfig(DevelopmentConfig):
 
     _LOGGING_LEVEL = logging.DEBUG
 
-    def __init__(self: Self) -> None:
+    def __init__(self) -> None:
         """
         Use this method to override property values defined in the config base class.
 
@@ -499,5 +498,5 @@ class TestingConfig(DevelopmentConfig):
 
     # noinspection PyPep8Naming
     @property
-    def TEST_JWKS(self: Self) -> TestJwk:  # noqa: D102
+    def TEST_JWKS(self) -> TestJwk:  # noqa: D102
         return TestJwk()

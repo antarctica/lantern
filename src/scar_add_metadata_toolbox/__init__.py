@@ -1,5 +1,6 @@
 from http import HTTPStatus
 
+import sentry_sdk
 from authlib.integrations.flask_oauth2 import current_token
 from flask import Flask, Response, request, url_for
 from markupsafe import escape
@@ -50,6 +51,9 @@ def create_app() -> Flask:  # noqa: C901
     app = Flask(__name__)
 
     app.config.from_object(_create_app_config())
+
+    sentry_sdk.init(app.config["SENTRY_CONFIG"])
+
     # noinspection PyPropertyAccess
     app.jinja_loader = _create_app_jinja_loader()
 

@@ -6,7 +6,6 @@ from pathlib import Path
 from bas_style_kit_jinja_templates import BskTemplates
 from flask.cli import load_dotenv
 from msal import PublicClientApplication
-from sentry_sdk.integrations.flask import FlaskIntegration
 from str2bool import str2bool
 
 
@@ -118,7 +117,6 @@ class Config:
         """
         return {
             "dsn": "https://db9543e7b68f4b2596b189ff444438e3@o39753.ingest.sentry.io/5197036",
-            "integrations": [FlaskIntegration()],
             "environment": self.ENV,
             "release": f"{self.NAME}@{self.VERSION}",
         }

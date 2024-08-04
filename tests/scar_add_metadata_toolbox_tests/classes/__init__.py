@@ -254,7 +254,7 @@ class MockPublicClientApplication:
     # noinspection PyUnusedLocal
     @staticmethod
     def acquire_token_by_device_flow(device_flow: dict) -> dict:
-        return {"access_token": {}}
+        return {"access_token": None}
         # return {
         #     "access_token": TestJwt(
         #         app=current_app, roles=["BAS.MAGIC.ADD.Records.ReadWrite.All", "BAS.MAGIC.ADD.Records.Publish.All"]  # noqa: ERA001

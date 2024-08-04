@@ -58,8 +58,8 @@ def create_app() -> Flask:  # noqa: C901
     app.auth_token = AppAuthToken(session_file_path=app.config["AUTH_SESSION_FILE_PATH"])
 
     app.repositories = _create_csw_repositories(repositories_config=app.config["CSW_SERVERS_CONFIG"])
-    app.config["CSW_CLIENTS_CONFIG"]["unpublished"]["client_config"]["auth"] = {"token": app.auth_token.access_token}
-    app.config["CSW_CLIENTS_CONFIG"]["published"]["client_config"]["auth"] = {"token": app.auth_token.access_token}
+    app.config["CSW_CLIENTS_CONFIG"]["unpublished"]["client_config"]["auth"] = {"token": None}
+    app.config["CSW_CLIENTS_CONFIG"]["published"]["client_config"]["auth"] = {"token": None}
     app.records = MirrorRepository(
         unpublished_repository_config=app.config["CSW_CLIENTS_CONFIG"]["unpublished"],
         published_repository_config=app.config["CSW_CLIENTS_CONFIG"]["published"],

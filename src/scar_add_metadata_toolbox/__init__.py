@@ -2,7 +2,6 @@ from http import HTTPStatus
 
 from authlib.integrations.flask_oauth2 import current_token
 from flask import Flask, Response, request, url_for
-from flask_azure_oauth import FlaskAzureOauth
 from markupsafe import escape
 from werkzeug.exceptions import NotFound
 
@@ -54,8 +53,8 @@ def create_app() -> Flask:  # noqa: C901
     # noinspection PyPropertyAccess
     app.jinja_loader = _create_app_jinja_loader()
 
-    auth = FlaskAzureOauth()
-    auth.init_app(app)
+    # auth = FlaskAzureOauth()  # noqa: ERA001
+    # auth.init_app(app)  # noqa: ERA001
     app.auth_token = AppAuthToken(session_file_path=app.config["AUTH_SESSION_FILE_PATH"])
 
     app.repositories = _create_csw_repositories(repositories_config=app.config["CSW_SERVERS_CONFIG"])
@@ -96,7 +95,7 @@ def create_app() -> Flask:  # noqa: C901
         }
 
     @app.route("/csw/<string:catalogue>", methods=["HEAD", "GET", "POST"])
-    @auth(optional=True)
+    # @auth(optional=True)
     def csw_catalogue(catalogue: str) -> Response:
         try:
             return app.repositories[escape(catalogue)].process_request(request=request, token=current_token)
@@ -122,7 +121,7 @@ def create_app() -> Flask:  # noqa: C901
             return Response(response="Insufficient authorisation token.", status=HTTPStatus.FORBIDDEN)
 
     @app.route("/site/build", methods=["POST"])
-    @auth(["BAS.MAGIC.ADD.Records.Publish.All"])
+    # @auth(["BAS.MAGIC.ADD.Records.Publish.All"])
     def build_item() -> Response:
         try:
             record_id = request.args["item"]

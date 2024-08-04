@@ -13,7 +13,6 @@ from dulwich import porcelain
 from dulwich.client import HTTPUnauthorized
 from dulwich.errors import NotGitRepository
 from flask import Request, Response
-from flask_azure_oauth import AzureToken
 from lxml.etree import (
     Element,
     ElementTree,
@@ -33,6 +32,7 @@ from scar_add_metadata_toolbox.hazmat.owslib.util import Authentication as CSWAu
 from scar_add_metadata_toolbox.hazmat.owslib.util import ServiceException
 from scar_add_metadata_toolbox.hazmat.pycsw.core import admin
 from scar_add_metadata_toolbox.hazmat.pycsw.server import Csw as _CSWServer
+from scar_add_metadata_toolbox.placeholders import PlaceholderAzureToken
 
 
 class CSWGetRecordMode(Enum):
@@ -446,7 +446,7 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
         return str(self._tracking_config["working_dir"])
 
     @staticmethod
-    def _format_commit_author(token: AzureToken) -> str:
+    def _format_commit_author(token: PlaceholderAzureToken) -> str:
         """
         Format author information for a git commit message from the authenticated use.
 
@@ -575,7 +575,7 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
             except KeyError:
                 raise CSWUnmappedRequestError() from None
 
-    def _check_auth(self, transaction_type: CSWTransactionType, token: AzureToken | None) -> None:
+    def _check_auth(self, transaction_type: CSWTransactionType, token: PlaceholderAzureToken | None) -> None:
         """
         Check whether an authorisation token contains the scopes required for a transaction.
 
@@ -685,7 +685,7 @@ its use.
         except HTTPUnauthorized as e:
             raise CSWTrackingRepositoryInvalidCredentialsError from e
 
-    def _commit_and_push_tracking_repo(self, commit_message: str, token: AzureToken) -> str:
+    def _commit_and_push_tracking_repo(self, commit_message: str, token: PlaceholderAzureToken) -> str:
         """
         Commit staged files and push commit to remote in git repository used for catalogue revision tracking.
 
@@ -808,7 +808,7 @@ its use.
 
         return csw
 
-    def _track_revision_delete(self, csw_request: str, token: AzureToken) -> str:
+    def _track_revision_delete(self, csw_request: str, token: PlaceholderAzureToken) -> str:
         """
         Capture a record deleted via a transactional CSW request, where record revision tracking is enabled.
 
@@ -879,7 +879,7 @@ its use.
         )
 
     def _track_revision_insert_update(
-        self, csw_request: str, transaction_type: CSWTransactionType, token: AzureToken
+        self, csw_request: str, transaction_type: CSWTransactionType, token: PlaceholderAzureToken
     ) -> str:
         """
         Capture a record added or updated via a transactional CSW request, where record revision tracking is enabled.
@@ -974,7 +974,11 @@ its use.
         return xml_path, json_path
 
     def _track_revision(
-        self, flask_request: Request, csw_response: str, transaction_type: CSWTransactionType, token: AzureToken
+        self,
+        flask_request: Request,
+        csw_response: str,
+        transaction_type: CSWTransactionType,
+        token: PlaceholderAzureToken,
     ) -> str | None:
         """
         Capture changes to records modified via transactional CSW requests, where record revision tracking is enabled.
@@ -1166,7 +1170,7 @@ its use.
             self._create_tracking_repo()
             self._clone_tracking_repo()
 
-    def process_request(self, request: Request, token: AzureToken | None = None) -> Response:
+    def process_request(self, request: Request, token: PlaceholderAzureToken | None = None) -> Response:
         # noinspection GrazieInspection
         """
         Process a CSW request and return response.

@@ -4,9 +4,7 @@ from pathlib import Path
 from typing import Any
 
 from bas_metadata_library.standards.iso_19115_2 import MetadataRecord
-from flask import Flask, Request, Response, current_app
-from flask_azure_oauth import AzureToken
-from flask_azure_oauth.mocks.tokens import TestJwt
+from flask import Flask, Request, Response
 
 from scar_add_metadata_toolbox.csw import (
     CSWAmbiguousRequestError,
@@ -28,6 +26,7 @@ from scar_add_metadata_toolbox.csw import (
     RecordNotFoundError,
     RecordServerError,
 )
+from scar_add_metadata_toolbox.placeholders import PlaceholderAzureToken
 
 
 class MockCSWClient(CSWClient):
@@ -183,17 +182,17 @@ class MockCSWServer(CSWServer):
             raise CSWTrackingRepositoryAlreadyInitialisedError() from None
         self.backing_repo_initialised = True
 
-    def process_request(self, request: Request, token: AzureToken | None = None) -> Response:
+    def process_request(self, request: Request, token: PlaceholderAzureToken | None = None) -> Response:
         return Response("ok")
 
 
 class MockCSWServerBackingDBNotSetup(MockCSWServer):
-    def process_request(self, request: Request, token: AzureToken | None = None) -> Response:
+    def process_request(self, request: Request, token: PlaceholderAzureToken | None = None) -> Response:
         raise CSWDatabaseNotInitialisedError() from None
 
 
 class MockCSWServerBackingRepoNotSetup(MockCSWServer):
-    def process_request(self, request: Request, token: AzureToken | None = None) -> Response:
+    def process_request(self, request: Request, token: PlaceholderAzureToken | None = None) -> Response:
         raise CSWTrackingRepositoryNotInitialisedError() from None
 
 
@@ -208,37 +207,37 @@ class MockCSWServerRevisionTrackingInvalidCredentials(MockCSWServer):
 
 
 class MockCSWServerNoRequestType(MockCSWServer):
-    def process_request(self, request: Request, token: AzureToken | None = None) -> Response:
+    def process_request(self, request: Request, token: PlaceholderAzureToken | None = None) -> Response:
         raise CSWUnknownRequestError() from None
 
 
 class MockCSWServerAmbiguousRequestError(MockCSWServer):
-    def process_request(self, request: Request, token: AzureToken | None = None) -> Response:
+    def process_request(self, request: Request, token: PlaceholderAzureToken | None = None) -> Response:
         raise CSWAmbiguousRequestError() from None
 
 
 class MockCSWServerUnmappedRequestError(MockCSWServer):
-    def process_request(self, request: Request, token: AzureToken | None = None) -> Response:
+    def process_request(self, request: Request, token: PlaceholderAzureToken | None = None) -> Response:
         raise CSWUnmappedRequestError() from None
 
 
 class MockCSWServerAuthTokenError(MockCSWServer):
-    def process_request(self, request: Request, token: AzureToken | None = None) -> Response:
+    def process_request(self, request: Request, token: PlaceholderAzureToken | None = None) -> Response:
         raise CSWAuthError() from None
 
 
 class MockCSWServerMissingAuthToken(MockCSWServer):
-    def process_request(self, request: Request, token: AzureToken | None = None) -> Response:
+    def process_request(self, request: Request, token: PlaceholderAzureToken | None = None) -> Response:
         raise CSWAuthMissingError() from None
 
 
 class MockCSWServerInsufficientAuthToken(MockCSWServer):
-    def process_request(self, request: Request, token: AzureToken | None = None) -> Response:
+    def process_request(self, request: Request, token: PlaceholderAzureToken | None = None) -> Response:
         raise CSWAuthInsufficientError() from None
 
 
 class MockCSWServerRequestsFail(MockCSWServer):
-    def process_request(self, request: Request, token: AzureToken | None = None) -> Response:
+    def process_request(self, request: Request, token: PlaceholderAzureToken | None = None) -> Response:
         raise RecordServerError() from None
 
 
@@ -255,11 +254,12 @@ class MockPublicClientApplication:
     # noinspection PyUnusedLocal
     @staticmethod
     def acquire_token_by_device_flow(device_flow: dict) -> dict:
-        return {
-            "access_token": TestJwt(
-                app=current_app, roles=["BAS.MAGIC.ADD.Records.ReadWrite.All", "BAS.MAGIC.ADD.Records.Publish.All"]
-            ).dumps()
-        }
+        return {"access_token": {}}
+        # return {
+        #     "access_token": TestJwt(
+        #         app=current_app, roles=["BAS.MAGIC.ADD.Records.ReadWrite.All", "BAS.MAGIC.ADD.Records.Publish.All"]  # noqa: ERA001
+        #     ).dumps()
+        # }  noqa: ERA001
 
 
 def create_mock_auth(scopes_used: list[str] | None = None):

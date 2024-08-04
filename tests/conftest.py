@@ -28,7 +28,6 @@ from tests.scar_add_metadata_toolbox_tests.classes import (
     MockCSWServerRevisionTrackingInvalidCredentials,
     MockCSWServerUnmappedRequestError,
     MockPublicClientApplication,
-    create_mock_auth,
 )
 
 
@@ -257,9 +256,9 @@ def app_static_site_auth() -> Flask:
     with (
         patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client,
         TemporaryDirectory() as site_directory,
-        patch("scar_add_metadata_toolbox.FlaskAzureOauth") as mock_flask_azure_oauth,
+        # patch("scar_add_metadata_toolbox.FlaskAzureOauth") as mock_flask_azure_oauth,
     ):
-        mock_flask_azure_oauth.side_effect = create_mock_auth()
+        # mock_flask_azure_oauth.side_effect = create_mock_auth()  # noqa: ERA001
         mock_csw_client.side_effect = MockCSWClient
 
         app = create_app()
@@ -273,9 +272,9 @@ def app_static_site_auth_csw_not_setup() -> Flask:
     with (
         patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client,
         TemporaryDirectory() as site_directory,
-        patch("scar_add_metadata_toolbox.FlaskAzureOauth") as mock_flask_azure_oauth,
+        # patch("scar_add_metadata_toolbox.FlaskAzureOauth") as mock_flask_azure_oauth,
     ):
-        mock_flask_azure_oauth.side_effect = create_mock_auth()
+        # mock_flask_azure_oauth.side_effect = create_mock_auth()  # noqa: ERA001
         mock_csw_client.side_effect = MockCSWClientServerNotSetup
 
         app = create_app()
@@ -289,9 +288,9 @@ def app_static_site_auth_csw_auth_token_error() -> Flask:
     with (
         patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client,
         TemporaryDirectory() as site_directory,
-        patch("scar_add_metadata_toolbox.FlaskAzureOauth") as mock_flask_azure_oauth,
+        # patch("scar_add_metadata_toolbox.FlaskAzureOauth") as mock_flask_azure_oauth,
     ):
-        mock_flask_azure_oauth.side_effect = create_mock_auth()
+        # mock_flask_azure_oauth.side_effect = create_mock_auth()  # noqa: ERA001
         mock_csw_client.side_effect = MockCSWClientAuthError
 
         app = create_app()
@@ -305,9 +304,9 @@ def app_static_site_auth_csw_missing_auth_token() -> Flask:
     with (
         patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client,
         TemporaryDirectory() as site_directory,
-        patch("scar_add_metadata_toolbox.FlaskAzureOauth") as mock_flask_azure_oauth,
+        # patch("scar_add_metadata_toolbox.FlaskAzureOauth") as mock_flask_azure_oauth,
     ):
-        mock_flask_azure_oauth.side_effect = create_mock_auth()
+        # mock_flask_azure_oauth.side_effect = create_mock_auth()  # noqa: ERA001
         mock_csw_client.side_effect = MockCSWClientAuthMissing
 
         app = create_app()
@@ -321,9 +320,9 @@ def app_static_site_auth_csw_insufficient_auth_token() -> Flask:
     with (
         patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client,
         TemporaryDirectory() as site_directory,
-        patch("scar_add_metadata_toolbox.FlaskAzureOauth") as mock_flask_azure_oauth,
+        # patch("scar_add_metadata_toolbox.FlaskAzureOauth") as mock_flask_azure_oauth,
     ):
-        mock_flask_azure_oauth.side_effect = create_mock_auth()
+        # mock_flask_azure_oauth.side_effect = create_mock_auth()  # noqa: ERA001
         mock_csw_client.side_effect = MockCSWClientAuthInsufficient
 
         app = create_app()
@@ -340,11 +339,11 @@ def app_static_site_auth_get_scopes() -> AppAuthScopes:
     with (
         patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client,
         TemporaryDirectory() as site_directory,
-        patch("scar_add_metadata_toolbox.FlaskAzureOauth") as mock_flask_azure_oauth,
+        # patch("scar_add_metadata_toolbox.FlaskAzureOauth") as mock_flask_azure_oauth,
     ):
         auth_scopes = []
 
-        mock_flask_azure_oauth.side_effect = create_mock_auth(auth_scopes)
+        # mock_flask_azure_oauth.side_effect = create_mock_auth(auth_scopes)  # noqa: ERA001
         mock_csw_client.side_effect = MockCSWClient
 
         app = create_app()

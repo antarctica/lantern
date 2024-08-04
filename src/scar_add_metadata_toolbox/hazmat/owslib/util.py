@@ -926,7 +926,7 @@ class Authentication(object):
         if value is None:
             pass
         elif not isinstance(value, str):
-            raise TypeError('Value for "token" must be a str')
+            raise TypeError('Value for "token" must be a str, got: {}'.format(type(value)))
         if self.shared:
             self.__class__._TOKEN = value
         else:

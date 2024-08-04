@@ -3,6 +3,7 @@ from tempfile import NamedTemporaryFile, TemporaryDirectory
 from unittest import mock
 from unittest.mock import Mock
 
+import pytest
 from bas_metadata_library.standards.iso_19115_2 import MetadataRecordConfigV3
 from flask import Flask
 from flask.testing import FlaskCliRunner
@@ -1654,6 +1655,7 @@ class TestCommandCSWSetupBackingRepo:
 
 
 class TestCommandAuthSignIn:
+    @pytest.mark.xfail(reason="Auth suspended - see MAGIC/add-metadata-toolbox#380")
     def test_cli_sign_in(self, app_runner: FlaskCliRunner):
         result = app_runner.invoke(args=["auth", "sign-in"])
         assert result.exit_code == 0
@@ -1661,6 +1663,7 @@ class TestCommandAuthSignIn:
 
 
 class TestCommandAuthSignOut:
+    @pytest.mark.xfail(reason="Auth suspended - see MAGIC/add-metadata-toolbox#380")
     def test_cli_sign_out(self, app_runner: FlaskCliRunner):
         # sign-in first
         result = app_runner.invoke(args=["auth", "sign-in"])

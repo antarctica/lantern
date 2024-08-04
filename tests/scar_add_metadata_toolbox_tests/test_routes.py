@@ -1,6 +1,7 @@
 from http import HTTPStatus
 from pathlib import Path
 
+import pytest
 from flask import Flask
 from flask.testing import FlaskClient
 
@@ -152,6 +153,7 @@ class TestRouteSiteBuild:
         assert result.status_code == HTTPStatus.BAD_REQUEST
         assert result.text == "Parameter 'item' missing."
 
+    @pytest.mark.xfail(reason="Auth suspended - see MAGIC/add-metadata-toolbox#380")
     def test_site_build_auth_scopes(self, app_static_site_auth_get_scopes: Flask):
         app_static_site_auth_get_scopes.app.test_client().post(
             f"/site/build?item={TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}"

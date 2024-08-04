@@ -5,7 +5,6 @@ from pathlib import Path
 
 from bas_style_kit_jinja_templates import BskTemplates
 from flask.cli import load_dotenv
-from flask_azure_oauth.mocks.keys import TestJwk
 from msal import PublicClientApplication
 from sentry_sdk.integrations.flask import FlaskIntegration
 from str2bool import str2bool
@@ -495,8 +494,3 @@ class TestingConfig(DevelopmentConfig):
         )
 
         os.environ["S3_BUCKET"] = "example"
-
-    # noinspection PyPep8Naming
-    @property
-    def TEST_JWKS(self) -> TestJwk:  # noqa: D102
-        return TestJwk()

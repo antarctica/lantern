@@ -65,13 +65,14 @@ pytest:
         - 'poetry.lock'
       if: '$CI_COMMIT_BRANCH != "main" && $CI_COMMIT_TAG == null'
 
-flake8:
+ruff:
   stage: 📋 lint
   needs: []
   before_script:
     - *before_script_python
   script:
-    - poetry run flake8 src/ tests/
+    - poetry run ruff check src/ tests/
+    - poetry run ruff format --check src/ tests/
   rules:
     -
       changes:

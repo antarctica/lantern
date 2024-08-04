@@ -86,7 +86,7 @@ safety:
   before_script:
     - *before_script_python
   script:
-    - "poetry run safety check --full-report"
+    - poetry run safety --stage cicd scan --detailed-output
   rules:
     -
       changes:

@@ -24,6 +24,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#382](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/382)
 * Switch from Flake8 and Black to Ruff for linting and code formatting
   [#381](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/381)
+* Updating app dependencies (again, inc. major Safety version)
+  [#373](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/373)
 
 ## [0.6.0] - 2022-12-12 [BREAKING!]
 

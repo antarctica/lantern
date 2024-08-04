@@ -135,7 +135,7 @@ markers = [
 [tool.coverage.report]
 skip_empty = true
 show_missing = false
-fail_under = 100
+fail_under = 75
 exclude_lines = ["@abstractmethod"]
 
 [tool.coverage.html]

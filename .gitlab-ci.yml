@@ -1,45 +1,54 @@
+#file: noinspection YAMLSchemaValidation
 ---
-
-# == Notes ==
-
-# GitLab automatically passes artifacts from previous stages by default
-
-# This CI definition uses a GitLab provided include template
-
-# == Includes ==
 
 include:
   - template: 'Workflows/MergeRequest-Pipelines.gitlab-ci.yml'
-
-# == Global settings ==
 
 stages:
   - 🧪 test
   - 📋 lint
   - 🏗 build
-  - 🚚 publish
+  - 📦 publish
+  - 📣 release
 
 variables:
-  APP_NAME: scar-add-metadata-toolbox
+  # App
+  FLASK_ENV: testing
+
+  # Secrets (set in GitLab CI/CD settings)
+  # - PROJECT_ACCESS_TOKEN
+  #   - https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/settings/access_tokens
+  #   - (name: 'gitlab_ci' scope: 'read_api', role: 'reporter')
+  # - SAFETY_API_KEY
+  #   - https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=swbuhnii4ego6qycyqknvtk7gi&h=magic.1password.eu
 
 image:
   name: docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox:latest
   entrypoint: [""]
 
-default:
-  before_script:
-    - "ln -s /.venv .venv"
-    - "poetry install --no-interaction --no-ansi"
+.before_script_python: &before_script_python
+  - "ln -s /.venv .venv"
+  - "poetry --version"
+  - "poetry install --no-interaction --no-ansi"
+  - "poetry check"
 
-# == Jobs ==
+.before_script_publish: &before_script_publish
+  - "poetry config repositories.gitlab '$CI_SERVER_URL/api/v4/projects/$CI_PROJECT_ID/packages/pypi'"
+  - "poetry config http-basic.gitlab gitlab-ci-token '$CI_JOB_TOKEN' --local"
 
-test:
+.before_script_release: &before_script_release
+  - apk add --no-cache curl jq
+
+# Jobs
+
+pytest:
   stage: 🧪 test
   needs: []
-  variables:
-    FLASK_ENV: testing
+  before_script:
+    - *before_script_python
   script:
-    - "poetry run pytest --random-order --cov --cov-report=html -o junit_family=xunit2 --junitxml=test-results.xml"
+    - poetry run pytest -o junit_family=xunit2 --junitxml=test-results.xml --cov --cov-report=html --continue-on-collection-errors
+    # --continue-on-collection-errors counteracts `-x` flag set in pyproject.toml
   coverage: '/Total coverage: \d+\.\d+/'
   artifacts:
     when: always
@@ -49,51 +58,124 @@ test:
       - htmlcov
     expire_in: 1 month
   rules:
-    - changes:
+    -
+      changes:
         - '**/*.py'
         - 'pyproject.toml'
         - 'poetry.lock'
+      if: '$CI_COMMIT_BRANCH != "main" && $CI_COMMIT_TAG == null'
 
-lint:
+flake8:
   stage: 📋 lint
   needs: []
+  before_script:
+    - *before_script_python
   script:
-    - "poetry check"
-    - "poetry run flake8 src/ tests/"
+    - poetry run flake8 src/ tests/
+  rules:
+    -
+      changes:
+        - '**/*.py'
+        - 'pyproject.toml'
+      if: '$CI_COMMIT_BRANCH != "main" && $CI_COMMIT_TAG == null'
+
+safety:
+  stage: 📋 lint
+  needs: []
+  before_script:
+    - *before_script_python
+  script:
     - "poetry run safety check --full-report"
   rules:
-    - changes:
-        - '**/*.py'
+    -
+      changes:
         - '.safety-policy.yml'
         - 'poetry.lock'
+      if: '$CI_COMMIT_BRANCH != "main" && $CI_COMMIT_TAG == null'
 
 build:
   stage: 🏗 build
   needs: []
+  before_script:
+    - *before_script_python
   script:
-    - "poetry version 0.0.0"
-    - "poetry build"
+    - poetry build
   artifacts:
     paths:
-      - dist
-    expire_in: 1 week
+      - dist/
+    expire_in: 1 month
   rules:
     -
-      if: '$CI_COMMIT_TAG == null'
       changes:
         - '**/*.py'
+        - 'pyproject.toml'
+        - 'poetry.lock'
+      if: '$CI_COMMIT_BRANCH != "main" || $CI_COMMIT_TAG != null'
 
 publish:
-  stage: 🚚 publish
+  stage: 📦 publish
   needs:
-    - test
-    - lint
+    - job: build
+      artifacts: true
   before_script:
-    - "ln -s /.venv .venv"
-    - "poetry install --no-interaction --no-ansi"
-    - 'poetry config repositories.gitlab "$CI_SERVER_URL/api/v4/projects/$CI_PROJECT_ID/packages/pypi"'
-    - 'poetry config http-basic.gitlab gitlab-ci-token "$CI_JOB_TOKEN" --local'
+    - *before_script_python
+    - *before_script_publish
   script:
-    - "poetry publish --build --no-interaction --repository gitlab"
+    - poetry publish --no-interaction --repository gitlab
   rules:
-    - if: '$CI_COMMIT_TAG != null'
+    - if: $CI_COMMIT_TAG
+
+release:
+  stage: 📣 release
+  needs:
+    - job: publish
+  image: registry.gitlab.com/gitlab-org/release-cli:latest
+  before_script:
+    - *before_script_release
+
+    - export TAG_NO_PREFIX=$(echo $CI_COMMIT_TAG | cut -c 2-)
+    # for a string v0.8.13, replace last digit to always be 0
+    - export TAG_NO_PATCH=$(echo $CI_COMMIT_TAG | sed 's/[0-9]$/0/')
+
+    - 'curl -s -H "Authorization: Bearer $PROJECT_ACCESS_TOKEN" "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages" > data.json'
+    - export PACKAGE_ID=$(cat data.json | jq -r ".[] | select(.version==\"$TAG_NO_PREFIX\") | .id") && rm data.json
+
+    - 'curl -s -H "Authorization: Bearer $PROJECT_ACCESS_TOKEN" "$CI_API_V4_URL/projects/$CI_PROJECT_ID/milestones?title=$CI_COMMIT_TAG" > milestone_exact.json'
+    - 'curl -s -H "Authorization: Bearer $PROJECT_ACCESS_TOKEN" "$CI_API_V4_URL/projects/$CI_PROJECT_ID/milestones?title=$TAG_NO_PATCH" > milestone-minor.json'
+    - export MILESTONE_TITLE_EXACT=$(cat milestone_exact.json | jq -r ".[0] | .title") && rm milestone_exact.json
+    - export MILESTONE_TITLE_MINOR=$(cat milestone-minor.json | jq -r ".[0] | .title") && rm milestone-minor.json
+    - >
+      if [ "$MILESTONE_TITLE_EXACT" != "null" ]; then
+          export MILESTONE_TITLE=$MILESTONE_TITLE_EXACT
+      elif [ "$MILESTONE_TITLE_MINOR" != "null" ]; then
+          export MILESTONE_TITLE=$MILESTONE_TITLE_MINOR
+      else
+          export MILESTONE_TITLE=""
+      fi
+
+    - curl -s -L -O https://github.com/taiki-e/parse-changelog/releases/download/v0.6.8/parse-changelog-x86_64-unknown-linux-musl.tar.gz
+    - tar -xzf parse-changelog-x86_64-unknown-linux-musl.tar.gz -C /usr/local/bin/
+    - parse-changelog CHANGELOG.md "$TAG_NO_PREFIX" > changelog.txt
+
+    # the release section cannot access variables defined in a script but can read from a file :|
+    - echo "$TAG_NO_PREFIX" > tag_no_prefix.txt
+    - echo "$PACKAGE_ID" > package_id.txt
+    - echo "$MILESTONE_TITLE" > milestone_title.txt
+  script:
+    - echo 'releasing'
+  release:
+    name: $(cat tag_no_prefix.txt)
+    tag_name: $CI_COMMIT_TAG
+    milestones:
+      - $(cat milestone_title.txt)
+    description: $(cat changelog.txt)
+    assets:
+      links:
+        - name: README
+          url: '$CI_PROJECT_URL/-/blob/$CI_COMMIT_TAG/README.md'
+          link_type: runbook
+        - name: Python Package
+          url: '$CI_PROJECT_URL/-/packages/$(cat package_id.txt)'
+          link_type: package
+  rules:
+    - if: $CI_COMMIT_TAG

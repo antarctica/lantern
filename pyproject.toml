@@ -17,41 +17,43 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-awscli = "1.31.8" # pinned to aid in dependency resolution time
+awscli = "1.33.35"  # pinned to aid in dependency resolution time
 bas-metadata-library = "^0.9.1"
 bas-style-kit-jinja-templates = "^0.7.0"
 click-spinner = "^0.1.10"
-dulwich = "^0.20.50"
-Flask = "^2.0.2"
+dulwich = "^0.22.1"
+Flask = "^2.3.3"
 Markdown = "^3.4.1"
 msal = "^1.19.0"
 python = "^3.9"
 python-dateutil = "^2.8.1"
 python-dotenv = "^1.0.0"
 requests = "^2.28.1"
-sentry-sdk = {version = "^1.9.9", extras = ["flask"]}
+sentry-sdk = {version = "^2.12.0", extras = ["flask"]}
 str2bool = "^1.1"
 tabulate = "^0.9.0"
 
-# # Backports # #
-importlib_resources = "^5.10.0"
+# # Backports
+#
+importlib_resources = "^5.13.0"  # pinned for bas-metadata-library compatibility which requires < 6.0
 
-# Poetry export workaround
-urllib3 = ">=1.26,<2"
-
-# # Dependencies for vendored OWSlib package # #
-pytz = "^2023.3"
+# # Dependencies for vendored OWSlib package
+#
 pyproj = "3.6.1"  # pinned to ensure compatibility with PROJ version available in Python alpine container
+# python-dateutil  # skipped as already dependencies of main app
+pytz = "^2024.1"
 pyyaml = "^6.0"   # pinned for AWS CLI compatibility, which requires PyYAML < 6.1
-# Note: `python-dateutil and `requests` dependencies skipped as they already dependencies of the main app.
+# requests  # skipped as already dependencies of main app
 
-# # Dependencies for vendored PyCSW package # #
+# # Dependencies for vendored PyCSW package
+#
 geolinks = "^0.2.0"
-Shapely = "^1.8.4"
-xmltodict = "^0.13.0"
+# lxml  # skipped as already dependencies of main app and owslib dependency
 psycopg2-binary = "^2.9.3"
-SQLAlchemy = "^1.4.41"
-# Note: `lxml` and `pyproj` dependencies skipped as they already dependencies of main app and owslib dependency.
+# pyproj  # skipped as already dependencies of main app and owslib dependency
+Shapely = "^1.8.4"
+SQLAlchemy = "^1.4.53"
+xmltodict = "^0.13.0"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.5.6"

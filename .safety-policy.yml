@@ -19,6 +19,9 @@ report:
         70612: # https://github.com/advisories/GHSA-f6pv-j8mr-w6rr [Jinja2]
           reason: invalid, disputed by maintainer, and only a dependency of Safety
           expires: '2100-01-01'
+        51668:
+          reason: no fix without new major version, vendored dependency and low risk so exempting permanently
+          expires: '2100-01-01'
 
 fail-scan-with-exit-code:
   dependency-vulnerabilities:

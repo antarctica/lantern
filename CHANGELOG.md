@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#373](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/373)
 * Running tests and linting when packages change (to ensure stability and detect vulnerable packages)
   [#373](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/373)
+* Improving CI config (automatic releases, only running jobs when needed, general refactoring and alignment)
+  [#382](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/382)
 
 ## [0.6.0] - 2022-12-12 [BREAKING!]
 

@@ -3,7 +3,6 @@ from tempfile import NamedTemporaryFile, TemporaryDirectory
 from unittest import mock
 from unittest.mock import Mock
 
-import pytest
 from bas_metadata_library.standards.iso_19115_2 import MetadataRecordConfigV3
 from flask import Flask
 from flask.testing import FlaskCliRunner
@@ -1655,30 +1654,43 @@ class TestCommandCSWSetupBackingRepo:
 
 
 class TestCommandAuthSignIn:
-    @pytest.mark.xfail(reason="Auth suspended - see MAGIC/add-metadata-toolbox#380")
-    def test_cli_sign_in(self, app_runner: FlaskCliRunner):
-        result = app_runner.invoke(args=["auth", "sign-in"])
+    def test_cli_sign_in(self, fx_runner_signed_out: FlaskCliRunner, fx_user_claims: dict):
+        result = fx_runner_signed_out.invoke(args=["auth", "sign-in"])
         assert result.exit_code == 0
-        assert "Ok. Access token for '*unknown*' set in" in result.output
+        assert f"Ok. Signed in as '{fx_user_claims['name']}' ({fx_user_claims['upn']})" in result.output
+
+    def test_cli_sign_in_signed_in(self, fx_runner_signed_out: FlaskCliRunner, fx_user_claims: dict):
+        """User skips sign in when already signed in."""
+        # sign-in first
+        result = fx_runner_signed_out.invoke(args=["auth", "sign-in"])
+        assert result.exit_code == 0
+
+        result = fx_runner_signed_out.invoke(args=["auth", "sign-in"])
+        assert result.exit_code == 0
+        assert (
+            result.output == f"Ok. Signed in as '{fx_user_claims['name']}' ({fx_user_claims['upn']}) [abc] "
+            f"using cached credentials.\n"
+        )
+
+    def test_cli_sign_in_bad_token(self, fx_runner_token_error_signed_out: FlaskCliRunner):
+        """Returns error when token can't be acquired for signing in user."""
+        result = fx_runner_token_error_signed_out.invoke(args=["auth", "sign-in"])
+        assert result.exit_code == 1
+        assert "No. Error signing in." in result.output
 
 
 class TestCommandAuthSignOut:
-    @pytest.mark.xfail(reason="Auth suspended - see MAGIC/add-metadata-toolbox#380")
-    def test_cli_sign_out(self, app_runner: FlaskCliRunner):
+    def test_cli_sign_out(self, fx_runner_signed_out: FlaskCliRunner):
         # sign-in first
-        result = app_runner.invoke(args=["auth", "sign-in"])
+        result = fx_runner_signed_out.invoke(args=["auth", "sign-in"])
         assert result.exit_code == 0
 
-        result = app_runner.invoke(args=["auth", "sign-out"])
+        result = fx_runner_signed_out.invoke(args=["auth", "sign-out"])
         assert result.exit_code == 0
-        assert "Ok. Access token removed." in result.output
+        assert "Ok. Signed out." in result.output
 
-    def test_cli_sign_out_missing_file(self, app: Flask, app_runner: FlaskCliRunner):
-        # ensure auth file doesn't exist to trigger exception
-        auth_file_path: Path = app.config["AUTH_SESSION_FILE_PATH"]
-        if auth_file_path.exists():
-            auth_file_path.unlink()
-
-        result = app_runner.invoke(args=["auth", "sign-out"])
-        assert result.exit_code == 0
-        assert "Ok. Access token removed." in result.output
+    def test_cli_sign_out_signed_out(self, fx_runner_signed_out: FlaskCliRunner):
+        """Returns error when no user is signed in."""
+        result = fx_runner_signed_out.invoke(args=["auth", "sign-out"])
+        assert result.exit_code == 1
+        assert "No. Not signed in." in result.output

@@ -1,7 +1,6 @@
 from http import HTTPStatus
 from pathlib import Path
 
-import pytest
 from flask import Flask
 from flask.testing import FlaskClient
 
@@ -105,86 +104,86 @@ class TestRouteCSW:
 
 
 class TestRouteSiteBuild:
-    def test_site_build(self, app_static_site_auth: Flask):
-        result = app_static_site_auth.test_client().post(
-            f"/site/build?item={TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}"
+    def test_site_build(self, app_static_site: Flask, fx_access_token: str):
+        result = app_static_site.test_client().post(
+            f"/site/build?item={TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}",
+            headers={"Authorization": f"Bearer {fx_access_token}"},
         )
         assert result.status_code == HTTPStatus.CREATED
 
         # Verify file structure
-        record_pages_paths = list(Path(app_static_site_auth.config["SITE_PATH"]).glob("**/*.*"))
-        item_pages_paths = list(Path(app_static_site_auth.config["SITE_PATH"]).glob("**/*.*"))
+        record_pages_paths = list(Path(app_static_site.config["SITE_PATH"]).glob("**/*.*"))
+        item_pages_paths = list(Path(app_static_site.config["SITE_PATH"]).glob("**/*.*"))
         assert len(record_pages_paths) == 4
         assert (
-            Path(app_static_site_auth.config["SITE_PATH"]).joinpath(
+            Path(app_static_site.config["SITE_PATH"]).joinpath(
                 f"records/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}/iso-html/"
                 f"{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}.xml"
             )
             in record_pages_paths
         )
         assert (
-            Path(app_static_site_auth.config["SITE_PATH"]).joinpath(
+            Path(app_static_site.config["SITE_PATH"]).joinpath(
                 f"records/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}/iso-rubric/"
                 f"{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}.xml"
             )
             in record_pages_paths
         )
         assert (
-            Path(app_static_site_auth.config["SITE_PATH"]).joinpath(
+            Path(app_static_site.config["SITE_PATH"]).joinpath(
                 f"records/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}/iso-xml/"
                 f"{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}.xml"
             )
             in record_pages_paths
         )
         assert (
-            Path(app_static_site_auth.config["SITE_PATH"]).joinpath(
+            Path(app_static_site.config["SITE_PATH"]).joinpath(
                 f"items/{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}/index.html"
             )
             in item_pages_paths
         )
 
-    def test_site_build_missing_record(self, app_static_site_auth: Flask):
-        result = app_static_site_auth.test_client().post("/site/build?item=does-not-exist")
+    def test_site_build_missing_record(self, app_static_site: Flask, fx_access_token: str):
+        result = app_static_site.test_client().post(
+            "/site/build?item=does-not-exist", headers={"Authorization": f"Bearer {fx_access_token}"}
+        )
         assert result.status_code == HTTPStatus.NOT_FOUND
         assert result.text == "Record not found."
 
-    def test_site_build_missing_item_parameter(self, app_static_site_auth: Flask):
-        result = app_static_site_auth.test_client().post("/site/build")
+    def test_site_build_missing_item_parameter(self, app_static_site: Flask, fx_access_token: str):
+        result = app_static_site.test_client().post(
+            "/site/build", headers={"Authorization": f"Bearer {fx_access_token}"}
+        )
         assert result.status_code == HTTPStatus.BAD_REQUEST
         assert result.text == "Parameter 'item' missing."
 
-    @pytest.mark.xfail(reason="Auth suspended - see MAGIC/add-metadata-toolbox#380")
-    def test_site_build_auth_scopes(self, app_static_site_auth_get_scopes: Flask):
-        app_static_site_auth_get_scopes.app.test_client().post(
-            f"/site/build?item={TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}"
-        )
-        assert len(app_static_site_auth_get_scopes.auth_scopes) == 1
-        assert app_static_site_auth_get_scopes.auth_scopes[0] == ["BAS.MAGIC.ADD.Records.Publish.All"]
-
-    def test_site_build_csw_not_setup(self, app_static_site_auth_csw_not_setup: Flask):
+    def test_site_build_csw_not_setup(self, app_static_site_auth_csw_not_setup: Flask, fx_access_token: str):
         result = app_static_site_auth_csw_not_setup.test_client().post(
-            f"/site/build?item={TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}"
+            f"/site/build?item={TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}",
+            headers={"Authorization": f"Bearer {fx_access_token}"},
         )
         assert result.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
         assert result.text == "Internal server error."
 
-    def test_site_build_csw_auth_token_error(self, app_static_site_auth_csw_auth_token_error: Flask):
-        result = app_static_site_auth_csw_auth_token_error.test_client().post(
-            f"/site/build?item={TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}"
+    def test_site_build_csw_auth_token_error(self, app_static_site: Flask):
+        result = app_static_site.test_client().post(
+            f"/site/build?item={TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}",
+            headers={"Authorization": "Bearer invalid-token"},
         )
-        assert result.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
-        assert result.text == "Internal server error."
+        assert result.status_code == HTTPStatus.UNAUTHORIZED
+        assert "auth_token_invalid" in result.text
 
-    def test_site_build_csw_missing_auth_token(self, app_static_site_auth_csw_missing_auth_token: Flask):
-        result = app_static_site_auth_csw_missing_auth_token.test_client().post(
+    def test_site_build_csw_missing_auth_token(self, app_static_site: Flask):
+        result = app_static_site.test_client().post(
             f"/site/build?item={TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}"
         )
-        assert result.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
-        assert result.text == "Internal server error."
+        assert result.status_code == HTTPStatus.UNAUTHORIZED
+        assert "auth_header_missing" in result.text
 
-    def test_site_build_csw_insufficient_auth_token(self, app_static_site_auth_csw_insufficient_auth_token: Flask):
-        result = app_static_site_auth_csw_insufficient_auth_token.test_client().post(
-            f"/site/build?item={TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}"
+    def test_site_build_csw_insufficient_auth_token(self, app_static_site: Flask, fx_access_token_no_roles: str):
+        result = app_static_site.test_client().post(
+            f"/site/build?item={TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}",
+            headers={"Authorization": f"Bearer {fx_access_token_no_roles}"},
         )
-        assert result.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
-        assert result.text == "Internal server error."
+        assert result.status_code == HTTPStatus.UNAUTHORIZED
+        assert "auth_token_insufficient_scopes" in result.text

@@ -1,12 +1,13 @@
 from http import HTTPStatus
 
 import sentry_sdk
-from authlib.integrations.flask_oauth2 import current_token
 from flask import Flask, Response, request, url_for
+from flask_entra_auth.resource_protector import FlaskEntraAuth
 from markupsafe import escape
 from werkzeug.exceptions import NotFound
 
 from scar_add_metadata_toolbox.classes import MirrorRepository
+from scar_add_metadata_toolbox.client_auth import MsalFlask
 from scar_add_metadata_toolbox.commands import (
     auth_commands_blueprint,
     csw_commands_blueprint,
@@ -15,7 +16,6 @@ from scar_add_metadata_toolbox.commands import (
 )
 from scar_add_metadata_toolbox.csw import (
     CSWAmbiguousRequestError,
-    CSWAuthError,
     CSWAuthInsufficientError,
     CSWAuthMissingError,
     CSWDatabaseNotInitialisedError,
@@ -25,7 +25,6 @@ from scar_add_metadata_toolbox.csw import (
     RecordNotFoundError,
 )
 from scar_add_metadata_toolbox.utils import (
-    AppAuthToken,
     _build_item,
     _build_record,
     _create_app_config,
@@ -44,9 +43,6 @@ def create_app() -> Flask:  # noqa: C901
     * defines a `version` CLI command for debugging the package version installed
     * registers additional CLI commands from blueprints, for use when this app is run as a client
     * defines a route for handling CSW requests, for use when this is run as a server
-
-    :rtype Flask
-    :return: application object
     """
     app = Flask(__name__)
 
@@ -57,9 +53,11 @@ def create_app() -> Flask:  # noqa: C901
     # noinspection PyPropertyAccess
     app.jinja_loader = _create_app_jinja_loader()
 
-    # auth = FlaskAzureOauth()  # noqa: ERA001
-    # auth.init_app(app)  # noqa: ERA001
-    app.auth_token = AppAuthToken(session_file_path=app.config["AUTH_SESSION_FILE_PATH"])
+    auth = FlaskEntraAuth()
+    auth.init_app(app)
+
+    msal = MsalFlask()
+    msal.init_app(app)
 
     app.repositories = _create_csw_repositories(repositories_config=app.config["CSW_SERVERS_CONFIG"])
     app.config["CSW_CLIENTS_CONFIG"]["unpublished"]["client_config"]["auth"] = {"token": None}
@@ -99,10 +97,10 @@ def create_app() -> Flask:  # noqa: C901
         }
 
     @app.route("/csw/<string:catalogue>", methods=["HEAD", "GET", "POST"])
-    # @auth(optional=True)
+    @app.auth(optional=True)
     def csw_catalogue(catalogue: str) -> Response:
         try:
-            return app.repositories[escape(catalogue)].process_request(request=request, token=current_token)
+            return app.repositories[escape(catalogue)].process_request(request=request, token=app.auth.current_token)
         except KeyError:
             return Response(response="Catalogue not found.", status=HTTPStatus.NOT_FOUND)
         except CSWDatabaseNotInitialisedError:
@@ -125,7 +123,7 @@ def create_app() -> Flask:  # noqa: C901
             return Response(response="Insufficient authorisation token.", status=HTTPStatus.FORBIDDEN)
 
     @app.route("/site/build", methods=["POST"])
-    # @auth(["BAS.MAGIC.ADD.Records.Publish.All"])
+    @app.auth(["BAS.MAGIC.ADD.Records.Publish.All"])
     def build_item() -> Response:
         try:
             record_id = request.args["item"]
@@ -136,12 +134,6 @@ def create_app() -> Flask:  # noqa: C901
 
             return Response(status=HTTPStatus.CREATED)
         except CSWDatabaseNotInitialisedError:
-            return Response(response="Internal server error.", status=HTTPStatus.INTERNAL_SERVER_ERROR)
-        except CSWAuthError:
-            return Response(response="Internal server error.", status=HTTPStatus.INTERNAL_SERVER_ERROR)
-        except CSWAuthMissingError:
-            return Response(response="Internal server error.", status=HTTPStatus.INTERNAL_SERVER_ERROR)
-        except CSWAuthInsufficientError:
             return Response(response="Internal server error.", status=HTTPStatus.INTERNAL_SERVER_ERROR)
         except RecordNotFoundError:
             return Response(response="Record not found.", status=HTTPStatus.NOT_FOUND)

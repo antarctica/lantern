@@ -8,11 +8,13 @@ from enum import Enum
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+from authlib.oauth2.rfc6749.resource_protector import TokenValidator
 from bas_metadata_library.standards.iso_19115_2 import MetadataRecord
 from dulwich import porcelain
 from dulwich.client import HTTPUnauthorized
 from dulwich.errors import NotGitRepository
 from flask import Request, Response
+from flask_entra_auth.token import EntraToken
 from lxml.etree import (
     Element,
     ElementTree,
@@ -32,7 +34,6 @@ from scar_add_metadata_toolbox.hazmat.owslib.util import Authentication as CSWAu
 from scar_add_metadata_toolbox.hazmat.owslib.util import ServiceException
 from scar_add_metadata_toolbox.hazmat.pycsw.core import admin
 from scar_add_metadata_toolbox.hazmat.pycsw.server import Csw as _CSWServer
-from scar_add_metadata_toolbox.placeholders import PlaceholderAzureToken
 
 
 class CSWGetRecordMode(Enum):
@@ -446,17 +447,12 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
         return str(self._tracking_config["working_dir"])
 
     @staticmethod
-    def _format_commit_author(token: PlaceholderAzureToken) -> str:
+    def _format_commit_author(token: EntraToken) -> str:
         """
         Format author information for a git commit message from the authenticated use.
 
         Author information uses the form `{name} <{email}>`. These values are taken from the current OAuth token via
         claims provided by Azure Active Directory.
-
-        :type token AzureToken
-        :param token: request authentication token
-        :rtype str
-        :return: git commit author information
         """
         return f"{token.claims['given_name']} {token.claims['family_name']} <{token.claims['email']}>"
 
@@ -575,7 +571,7 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
             except KeyError:
                 raise CSWUnmappedRequestError() from None
 
-    def _check_auth(self, transaction_type: CSWTransactionType, token: PlaceholderAzureToken | None) -> None:
+    def _check_auth(self, transaction_type: CSWTransactionType, token: EntraToken | None) -> None:
         """
         Check whether an authorisation token contains the scopes required for a transaction.
 
@@ -586,25 +582,19 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
         respectively (see `init()` method).
 
         If the token does not include the required scopes an exception is raised, otherwise nothing is returned.
-
-        :type transaction_type CSWTransactionType
-        :param transaction_type: a CSW transaction type
-        :type token AzureToken
-        :param token: request authorisation token
         """
         permissions_required = "write"
         if transaction_type == CSWTransactionType.SELECT:
             permissions_required = "read"
 
-        try:
-            if len(self._auth_config[permissions_required]) > 0 and not token.scopes.issuperset(
-                set(self._auth_config[permissions_required])
-            ):
-                raise CSWAuthInsufficientError() from None
-        except AttributeError:
-            # noinspection PyComparisonWithNone
-            if token is None:
-                raise CSWAuthMissingError() from None
+        if token is None:
+            raise CSWAuthMissingError() from None
+
+        validator = TokenValidator()
+        if not validator.scope_insufficient(
+            token_scopes=token.scopes, required_scopes=self._auth_config[permissions_required]
+        ):
+            raise CSWAuthInsufficientError() from None
 
     def _create_tracking_repo(self) -> None:
         """
@@ -685,7 +675,7 @@ its use.
         except HTTPUnauthorized as e:
             raise CSWTrackingRepositoryInvalidCredentialsError from e
 
-    def _commit_and_push_tracking_repo(self, commit_message: str, token: PlaceholderAzureToken) -> str:
+    def _commit_and_push_tracking_repo(self, commit_message: str, token: EntraToken) -> str:
         """
         Commit staged files and push commit to remote in git repository used for catalogue revision tracking.
 
@@ -693,14 +683,9 @@ its use.
         OAuth token, the committer is a static value representing this application as a client.
 
         The commit message is usually a string for the type of operation (e.g. 'Record Inserted'). Modified files are
-        indicated commit (inc. file names etc.). The hash of the commit is returned for reporting to the user.
+        indicated commit (inc. file names etc.).
 
-        :type commit_message str
-        :param commit_message: text to use for commit messages
-        :type token AzureToken
-        :param token: request authorisation token
-        :rtype str
-        :return: commit hash for use as revision ID
+        The hash of the commit is returned for reporting to the user.
         """
         commit_hash = porcelain.commit(
             repo=self._tracking_repo,
@@ -808,7 +793,7 @@ its use.
 
         return csw
 
-    def _track_revision_delete(self, csw_request: str, token: PlaceholderAzureToken) -> str:
+    def _track_revision_delete(self, csw_request: str, token: EntraToken) -> str:
         """
         Capture a record deleted via a transactional CSW request, where record revision tracking is enabled.
 
@@ -816,6 +801,7 @@ its use.
         * removes (unlinking) files for the specified record (i.e. all encodings) from the git working copy
         * commits/pushes this change to the remote repository
         * deletes hashed storage directories relevant to the deleted record if they're empty
+        * returns the commit hash for reporting to the user
 
         Empty hashed storage directories are deleted to prevent inconsistency between the working copy
         (which can contain empty directories) and the remote repository (which can't, as git only tracks files).
@@ -823,12 +809,6 @@ its use.
         See the `_track_revision()` method for general information on how revision tracking works.
 
         See the `_track_revision_record_paths()` method for information on how hash storage works.
-
-        :type csw_request str
-        :param csw_request: CSW server request body
-        :param token:
-        :rtype str
-        :return: commit hash for use as revision ID
         """
         record_xml_path, record_json_path = self._track_revision_record_paths(csw_request=csw_request)
 
@@ -879,7 +859,7 @@ its use.
         )
 
     def _track_revision_insert_update(
-        self, csw_request: str, transaction_type: CSWTransactionType, token: PlaceholderAzureToken
+        self, csw_request: str, transaction_type: CSWTransactionType, token: EntraToken
     ) -> str:
         """
         Capture a record added or updated via a transactional CSW request, where record revision tracking is enabled.
@@ -891,17 +871,9 @@ its use.
         * writes out the metadata record as an XML file within the git working copy
         * writes out the record configuration as a JSON file within the git working copy (and correcting indentation)
         * commits/pushes this change to the remote repository
+        * returns the commit hash for reporting to the user
 
         See the `_track_revision()` method for general information on how revision tracking works.
-
-        :type csw_request str
-        :param csw_request: CSW server request body
-        :type transaction_type CSWTransactionType
-        :param transaction_type: a CSW transaction type
-        :type token AzureToken
-        :param token: request authorisation token
-        :rtype str
-        :return: commit hash for use as revision ID
         """
         record_xml = self._request_record(csw_request=csw_request)
         record_xml_path, record_json_path = self._track_revision_record_paths(csw_request=csw_request)
@@ -978,7 +950,7 @@ its use.
         flask_request: Request,
         csw_response: str,
         transaction_type: CSWTransactionType,
-        token: PlaceholderAzureToken,
+        token: EntraToken,
     ) -> str | None:
         """
         Capture changes to records modified via transactional CSW requests, where record revision tracking is enabled.
@@ -1002,17 +974,6 @@ its use.
 
         It is recognised this a poses a consistency problem and undermines confidence in this feature. See #39 for
         more information.
-
-        :type flask_request Request
-        :param flask_request: Flask HTTP request
-        :type csw_response str
-        :param csw_response CSW response body
-        :type transaction_type CSWTransactionType
-        :param transaction_type: a CSW transaction type
-        :type token AzureToken
-        :param token: request authorisation token
-        :rtype str
-        :return: Revision identifier, or None
         """
         csw_request = flask_request.data.decode()
 
@@ -1170,7 +1131,7 @@ its use.
             self._create_tracking_repo()
             self._clone_tracking_repo()
 
-    def process_request(self, request: Request, token: PlaceholderAzureToken | None = None) -> Response:
+    def process_request(self, request: Request, token: EntraToken | None = None) -> Response:
         # noinspection GrazieInspection
         """
         Process a CSW request and return response.
@@ -1182,13 +1143,6 @@ its use.
         * supports authorisation checks for reading records and using the transactional profile
         * supports HEAD requests by treating them as GET requests and discarding the response body
         * supports tracking record revisions for requests using the transactional profile (when enabled)
-
-        :type request Request
-        :param request: Flask HTTP request
-        :type token AzureToken
-        :param token: request authorisation token
-        :rtype Response
-        :return: Flask HTTP response
         """
         if not self._backing_db_is_initialised:
             raise CSWDatabaseNotInitialisedError()

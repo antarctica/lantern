@@ -1,13 +1,18 @@
-from collections import namedtuple
+from __future__ import annotations
+
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from unittest.mock import patch
 
 import pytest
 from flask import Flask
 from flask.testing import FlaskClient, FlaskCliRunner
+from flask_entra_auth.mocks.jwks import MockJwks
+from flask_entra_auth.mocks.jwt import MockClaims, MockJwtClient
+from pytest_httpserver import HTTPServer
+from pytest_mock import MockerFixture
 
 from scar_add_metadata_toolbox import create_app
+from scar_add_metadata_toolbox.csw import CSWClient, CSWServer
 from tests.scar_add_metadata_toolbox_tests.classes import (
     MockCSWClient,
     MockCSWClientAuthError,
@@ -27,16 +32,65 @@ from tests.scar_add_metadata_toolbox_tests.classes import (
     MockCSWServerRevisionTrackingDisabled,
     MockCSWServerRevisionTrackingInvalidCredentials,
     MockCSWServerUnmappedRequestError,
-    MockPublicClientApplication,
 )
 
 
 @pytest.fixture()
-def app() -> Flask:
+def fx_user_claims() -> dict:
+    """Token claims relating to the signed in user."""
+    return {"name": "Connie Watson", "upn": "conwat@example.com"}
+
+
+@pytest.fixture()
+def fx_server_client_id() -> str:
+    """Fake (Entra) client ID for app registration representing server side of app."""
+    return "yyy"
+
+
+@pytest.fixture()
+def fx_claims(fx_server_client_id: str) -> MockClaims:
+    """Fake claims."""
+    return MockClaims(self_app_id=fx_server_client_id)
+
+
+@pytest.fixture()
+def fx_jwks() -> MockJwks:
+    """Fake JWKS."""
+    return MockJwks()
+
+
+@pytest.fixture()
+def fx_jwt_client(fx_jwks: MockJwks, fx_claims: MockClaims) -> MockJwtClient:
+    """Client for generating fake JWTs."""
+    return MockJwtClient(key=fx_jwks.jwk, claims=fx_claims)
+
+
+@pytest.fixture()
+def fx_msal_account() -> dict:
+    """Subset of a fake MSAL account dict."""
+    return {"local_account_id": "abc"}
+
+
+@pytest.fixture()
+def fx_access_token_no_roles(fx_jwt_client: MockJwtClient, fx_user_claims: dict) -> str:
+    """Fake access token including user scopes."""
+    return fx_jwt_client.generate(additional_claims=fx_user_claims)
+
+
+@pytest.fixture()
+def fx_access_token(fx_jwt_client: MockJwtClient, fx_user_claims: dict) -> str:
+    """Fake access token including user scopes."""
+    return fx_jwt_client.generate(roles=["BAS.MAGIC.ADD.Records.Publish.All"], additional_claims=fx_user_claims)
+
+
+@pytest.fixture()
+def app(mocker: MockerFixture) -> Flask:
     """Patched application to bypass auth."""
-    with patch("scar_add_metadata_toolbox.config.PublicClientApplication") as mock_msal_client_application:
-        mock_msal_client_application.side_effect = MockPublicClientApplication
-        return create_app()
+    mocker.patch(
+        "scar_add_metadata_toolbox.client_auth.PublicClientApplication", return_value=mocker.MagicMock(auto_spec=True)
+    )
+
+    return create_app()
 
 
 @pytest.fixture()
@@ -52,300 +106,273 @@ def app_client(app: Flask) -> FlaskClient:
         return client
 
 
+def create_runner(
+    request: pytest.FixtureRequest,
+    return_runner: bool = False,
+    return_client: bool = False,
+    signed_in: bool = False,
+    token_error: bool = False,
+    csw_client: CSWClient | None = None,
+    csw_server: CSWServer | None = None,
+) -> Flask | FlaskCliRunner:
+    """Helper to mock app for testing."""  # noqa: D401
+    # # Get fixture values
+    #
+
+    mocker: MockerFixture = request.getfixturevalue("mocker")
+    access_token: str = request.getfixturevalue("fx_access_token")
+    account_info: dict = request.getfixturevalue("fx_msal_account")
+    httpserver: HTTPServer = request.getfixturevalue("httpserver")
+    mock_jwks: MockJwks = request.getfixturevalue("fx_jwks")
+    mock_claims: MockClaims = request.getfixturevalue("fx_claims")
+    server_client_id: str = request.getfixturevalue("fx_server_client_id")
+
+    # # Internal setup
+    #
+
+    get_accounts_initial_value = [account_info] if signed_in else []
+    acquire_token_value = {"error": "-", "error_description": "..."} if token_error else {"access_token": access_token}
+
+    # # Patch auth
+    #
+
+    mock_public_client_app = mocker.MagicMock(auto_spec=True)
+
+    # noinspection PyUnusedLocal
+    def sf_acquire_token_by_device_flow(flow_state: dict) -> None:
+        mock_public_client_app.get_accounts.return_value = [account_info]
+
+    # noinspection PyUnusedLocal
+    def sf_remove_account(account: dict) -> None:
+        mock_public_client_app.get_accounts.return_value = []
+
+    mock_public_client_app.initiate_device_flow.return_value = {"user_code": "123"}
+    mock_public_client_app.get_accounts.return_value = get_accounts_initial_value
+    mock_public_client_app.acquire_token_silent.return_value = acquire_token_value
+    mock_public_client_app.acquire_token_by_device_flow.side_effect = sf_acquire_token_by_device_flow
+    mock_public_client_app.remove_account.side_effect = sf_remove_account
+    mocker.patch("scar_add_metadata_toolbox.client_auth.PublicClientApplication", return_value=mock_public_client_app)
+
+    # # Patch CSW Client
+    #
+
+    if csw_client is not None:
+        mocker.patch("scar_add_metadata_toolbox.classes.CSWClient", side_effect=csw_client)
+
+    # # Patch CSW Server
+
+    if csw_server is not None:
+        mocker.patch("scar_add_metadata_toolbox.utils.CSWServer", side_effect=csw_server)
+
+    # # Create fake auth endpoints
+    #
+
+    oidc_metadata = {"jwks_uri": httpserver.url_for("/keys"), "issuer": mock_claims.iss}
+    httpserver.expect_request("/.well-known/openid-configuration").respond_with_json(oidc_metadata)
+    httpserver.expect_request("/keys").respond_with_json(mock_jwks.as_dict())
+
+    # # Create app
+    #
+
+    app = create_app()
+
+    # # Patch config
+    #
+
+    conf_dir = TemporaryDirectory()
+    app.config["MSAL_AUTH_CACHE_PATH"] = Path(conf_dir.name).joinpath("/auth_cache.bin")
+
+    site_dir = TemporaryDirectory()
+    app.config["SITE_PATH"] = Path(site_dir.name)
+
+    app.config["ENTRA_AUTH_CLIENT_ID"] = server_client_id
+    app.config["ENTRA_AUTH_OIDC_ENDPOINT"] = httpserver.url_for("/.well-known/openid-configuration")
+
+    # # Create runner
+    #
+
+    runner = app.test_cli_runner()
+
+    # # Create client
+    #
+
+    client = app.test_client()
+
+    # # Yield object
+    #
+
+    if return_runner:
+        yield runner
+    elif return_client:
+        yield client
+    else:
+        yield app
+
+    # # Tear down
+    #
+
+    conf_dir.cleanup()
+    site_dir.cleanup()
+
+
 @pytest.fixture()
-def app_runner_mocked_csw() -> FlaskCliRunner:
+def fx_runner_signed_out(request: pytest.FixtureRequest) -> FlaskCliRunner:
+    """Application runner where a user is not signed in."""
+    # noinspection PyTypeChecker
+    return next(create_runner(request=request, return_runner=True))
+
+
+@pytest.fixture()
+def fx_runner_token_error_signed_out(request: pytest.FixtureRequest) -> FlaskCliRunner:
+    """Application runner where a user is not signed in and can't get a token."""
+    # noinspection PyTypeChecker
+    return next(create_runner(request=request, return_runner=True, token_error=True))
+
+
+@pytest.fixture()
+def app_runner_mocked_csw(request: pytest.FixtureRequest) -> FlaskCliRunner:
     """App runner with mocked CSW client."""
-    with patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client:
-        mock_csw_client.side_effect = MockCSWClient
-        app = create_app()
-        return app.test_cli_runner()
+    # noinspection PyTypeChecker
+    return next(create_runner(request=request, return_runner=True, csw_client=MockCSWClient))
 
 
 @pytest.fixture()
-def app_runner_mocked_csw_inserts_fail() -> FlaskCliRunner:
+def app_runner_mocked_csw_inserts_fail(request: pytest.FixtureRequest) -> FlaskCliRunner:
     """App runner with mocked CSW client that fails to insert."""
-    with patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client:
-        mock_csw_client.side_effect = MockCSWClientInsertsFail
-        app = create_app()
-        return app.test_cli_runner()
+    # noinspection PyTypeChecker
+    return next(create_runner(request=request, return_runner=True, csw_client=MockCSWClientInsertsFail))
 
 
 @pytest.fixture()
-def app_runner_mocked_csw_not_setup() -> FlaskCliRunner:
+def app_runner_mocked_csw_not_setup(request: pytest.FixtureRequest) -> FlaskCliRunner:
     """App runner with mocked CSW client that is not setup."""
-    with patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client:
-        mock_csw_client.side_effect = MockCSWClientServerNotSetup
-        app = create_app()
-        return app.test_cli_runner()
+    # noinspection PyTypeChecker
+    return next(create_runner(request=request, return_runner=True, csw_client=MockCSWClientServerNotSetup))
 
 
 @pytest.fixture()
-def app_runner_mocked_csw_auth_token_error() -> FlaskCliRunner:
+def app_runner_mocked_csw_auth_token_error(request: pytest.FixtureRequest) -> FlaskCliRunner:
     """App runner with mocked CSW client that has an auth token error."""
-    with patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client:
-        mock_csw_client.side_effect = MockCSWClientAuthError
-        app = create_app()
-        return app.test_cli_runner()
+    # noinspection PyTypeChecker
+    return next(create_runner(request=request, return_runner=True, csw_client=MockCSWClientAuthError))
 
 
 @pytest.fixture()
-def app_runner_mocked_csw_missing_auth_token() -> FlaskCliRunner:
+def app_runner_mocked_csw_missing_auth_token(request: pytest.FixtureRequest) -> FlaskCliRunner:
     """App runner with mocked CSW client that is missing an auth token."""
-    with patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client:
-        mock_csw_client.side_effect = MockCSWClientAuthMissing
-        app = create_app()
-        return app.test_cli_runner()
+    # noinspection PyTypeChecker
+    return next(create_runner(request=request, return_runner=True, csw_client=MockCSWClientAuthMissing))
 
 
 @pytest.fixture()
-def app_runner_mocked_csw_insufficient_auth_token() -> FlaskCliRunner:
+def app_runner_mocked_csw_insufficient_auth_token(request: pytest.FixtureRequest) -> FlaskCliRunner:
     """App runner with mocked CSW client that has an insufficient auth token."""
-    with patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client:
-        mock_csw_client.side_effect = MockCSWClientAuthInsufficient
-        app = create_app()
-        return app.test_cli_runner()
+    # noinspection PyTypeChecker
+    return next(create_runner(request=request, return_runner=True, csw_client=MockCSWClientAuthInsufficient))
 
 
 @pytest.fixture()
-def app_runner_mocked_csw_server_tracking_not_enabled() -> FlaskCliRunner:
-    """App runner with mocked CSW server that has revision tracking disabled."""
-    with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
-        mock_csw_server.side_effect = MockCSWServerRevisionTrackingDisabled
-
-        app = create_app()
-        return app.test_cli_runner()
-
-
-@pytest.fixture()
-def app_runner_mocked_csw_server_tracking_invalid_credentials() -> FlaskCliRunner:
-    """App runner with mocked CSW server that has invalid credentials."""
-    with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
-        mock_csw_server.side_effect = MockCSWServerRevisionTrackingInvalidCredentials
-
-        app = create_app()
-        return app.test_cli_runner()
-
-
-@pytest.fixture()
-def app_static_site() -> Flask:
-    """Patched application to use fake CSW client and temp site directory."""
-    with (
-        patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client,
-        TemporaryDirectory() as site_directory,
-    ):
-        mock_csw_client.side_effect = MockCSWClient
-
-        app = create_app()
-        app.config["SITE_PATH"] = Path(site_directory)
-        return app
-
-
-@pytest.fixture()
-def app_runner_mocked_csw_server() -> FlaskCliRunner:
+def app_runner_mocked_csw_server(request: pytest.FixtureRequest) -> FlaskCliRunner:
     """App runner with mocked CSW server."""
-    with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
-        mock_csw_server.side_effect = MockCSWServer
-
-        app = create_app()
-        return app.test_cli_runner()
+    # noinspection PyTypeChecker
+    return next(create_runner(request=request, return_runner=True, csw_server=MockCSWServer))
 
 
 @pytest.fixture()
-def app_client_mocked_csw_server() -> FlaskClient:
+def app_runner_mocked_csw_server_tracking_not_enabled(request: pytest.FixtureRequest) -> FlaskCliRunner:
+    """App runner with mocked CSW server that has revision tracking disabled."""
+    # noinspection PyTypeChecker
+    return next(create_runner(request=request, return_runner=True, csw_server=MockCSWServerRevisionTrackingDisabled))
+
+
+@pytest.fixture()
+def app_runner_mocked_csw_server_tracking_invalid_credentials(request: pytest.FixtureRequest) -> FlaskCliRunner:
+    """App runner with mocked CSW server that has invalid credentials."""
+    # noinspection PyTypeChecker
+    return next(
+        create_runner(request=request, return_runner=True, csw_server=MockCSWServerRevisionTrackingInvalidCredentials)
+    )
+
+
+@pytest.fixture()
+def app_client_mocked_csw_server(request: pytest.FixtureRequest) -> FlaskClient:
     """App client with mocked CSW server."""
-    with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
-        mock_csw_server.side_effect = MockCSWServer
-
-        app = create_app()
-        return app.test_client()
+    # noinspection PyTypeChecker
+    return next(create_runner(request=request, return_client=True, csw_server=MockCSWServer))
 
 
 @pytest.fixture()
-def app_client_mocked_csw_server_backing_db_not_setup() -> FlaskClient:
+def app_client_mocked_csw_server_backing_db_not_setup(request: pytest.FixtureRequest) -> FlaskClient:
     """App client with mocked CSW server that has backing DB not setup."""
-    with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
-        mock_csw_server.side_effect = MockCSWServerBackingDBNotSetup
-
-        app = create_app()
-        return app.test_client()
+    # noinspection PyTypeChecker
+    return next(create_runner(request=request, return_client=True, csw_server=MockCSWServerBackingDBNotSetup))
 
 
 @pytest.fixture()
-def app_client_mocked_csw_server_backing_repo_not_setup() -> FlaskClient:
+def app_client_mocked_csw_server_backing_repo_not_setup(request: pytest.FixtureRequest) -> FlaskClient:
     """App client with mocked CSW server that has backing repo not setup."""
-    with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
-        mock_csw_server.side_effect = MockCSWServerBackingRepoNotSetup
-
-        app = create_app()
-        return app.test_client()
+    # noinspection PyTypeChecker
+    return next(create_runner(request=request, return_client=True, csw_server=MockCSWServerBackingRepoNotSetup))
 
 
 @pytest.fixture()
-def app_client_mocked_csw_server_requests_fail() -> FlaskClient:
+def app_client_mocked_csw_server_requests_fail(request: pytest.FixtureRequest) -> FlaskClient:
     """App client with mocked CSW server that fails requests."""
-    with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
-        mock_csw_server.side_effect = MockCSWServerRequestsFail
-
-        app = create_app()
-        return app.test_client()
+    # noinspection PyTypeChecker
+    return next(create_runner(request=request, return_client=True, csw_server=MockCSWServerRequestsFail))
 
 
 @pytest.fixture()
-def app_client_mocked_csw_server_no_request_type() -> FlaskClient:
+def app_client_mocked_csw_server_no_request_type(request: pytest.FixtureRequest) -> FlaskClient:
     """App client with mocked CSW server that has no request type."""
-    with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
-        mock_csw_server.side_effect = MockCSWServerNoRequestType
-
-        app = create_app()
-        return app.test_client()
+    # noinspection PyTypeChecker
+    return next(create_runner(request=request, return_client=True, csw_server=MockCSWServerNoRequestType))
 
 
 @pytest.fixture()
-def app_client_mocked_csw_server_ambiguous_request() -> FlaskClient:
+def app_client_mocked_csw_server_ambiguous_request(request: pytest.FixtureRequest) -> FlaskClient:
     """App client with mocked CSW server that has an ambiguous request."""
-    with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
-        mock_csw_server.side_effect = MockCSWServerAmbiguousRequestError
-
-        app = create_app()
-        return app.test_client()
+    # noinspection PyTypeChecker
+    return next(create_runner(request=request, return_client=True, csw_server=MockCSWServerAmbiguousRequestError))
 
 
 @pytest.fixture()
-def app_client_mocked_csw_server_unmapped_request() -> FlaskClient:
+def app_client_mocked_csw_server_unmapped_request(request: pytest.FixtureRequest) -> FlaskClient:
     """App client with mocked CSW server that has an unmapped request."""
-    with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
-        mock_csw_server.side_effect = MockCSWServerUnmappedRequestError
-
-        app = create_app()
-        return app.test_client()
+    # noinspection PyTypeChecker
+    return next(create_runner(request=request, return_client=True, csw_server=MockCSWServerUnmappedRequestError))
 
 
 @pytest.fixture()
-def app_client_mocked_csw_server_auth_token_error() -> FlaskClient:
+def app_client_mocked_csw_server_auth_token_error(request: pytest.FixtureRequest) -> FlaskClient:
     """App client with mocked CSW server that has an auth token error."""
-    with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
-        mock_csw_server.side_effect = MockCSWServerAuthTokenError
-
-        app = create_app()
-        return app.test_client()
+    # noinspection PyTypeChecker
+    return next(create_runner(request=request, return_client=True, csw_server=MockCSWServerAuthTokenError))
 
 
 @pytest.fixture()
-def app_client_mocked_csw_server_missing_auth_token() -> FlaskClient:
+def app_client_mocked_csw_server_missing_auth_token(request: pytest.FixtureRequest) -> FlaskClient:
     """App client with mocked CSW server that is missing an auth token."""
-    with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
-        mock_csw_server.side_effect = MockCSWServerMissingAuthToken
-
-        app = create_app()
-        return app.test_client()
+    # noinspection PyTypeChecker
+    return next(create_runner(request=request, return_client=True, csw_server=MockCSWServerMissingAuthToken))
 
 
 @pytest.fixture()
-def app_client_mocked_csw_server_insufficient_auth_token() -> FlaskClient:
+def app_client_mocked_csw_server_insufficient_auth_token(request: pytest.FixtureRequest) -> FlaskClient:
     """App client with mocked CSW server that has an insufficient auth token."""
-    with patch("scar_add_metadata_toolbox.utils.CSWServer") as mock_csw_server:
-        mock_csw_server.side_effect = MockCSWServerInsufficientAuthToken
-
-        app = create_app()
-        return app.test_client()
+    # noinspection PyTypeChecker
+    return next(create_runner(request=request, return_client=True, csw_server=MockCSWServerInsufficientAuthToken))
 
 
 @pytest.fixture()
-def app_static_site_auth() -> Flask:
-    """Patched application to use fake CSW client and auth client."""
-    with (
-        patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client,
-        TemporaryDirectory() as site_directory,
-        # patch("scar_add_metadata_toolbox.FlaskAzureOauth") as mock_flask_azure_oauth,
-    ):
-        # mock_flask_azure_oauth.side_effect = create_mock_auth()  # noqa: ERA001
-        mock_csw_client.side_effect = MockCSWClient
-
-        app = create_app()
-        app.config["SITE_PATH"] = Path(site_directory)
-        return app
+def app_static_site(request: pytest.FixtureRequest) -> Flask:
+    """Patched application to use fake CSW client and temp site directory."""
+    # noinspection PyTypeChecker
+    return next(create_runner(request=request, csw_client=MockCSWClient))
 
 
 @pytest.fixture()
-def app_static_site_auth_csw_not_setup() -> Flask:
+def app_static_site_auth_csw_not_setup(request: pytest.FixtureRequest) -> Flask:
     """Patched application to use fake CSW client and auth client that is not configured."""
-    with (
-        patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client,
-        TemporaryDirectory() as site_directory,
-        # patch("scar_add_metadata_toolbox.FlaskAzureOauth") as mock_flask_azure_oauth,
-    ):
-        # mock_flask_azure_oauth.side_effect = create_mock_auth()  # noqa: ERA001
-        mock_csw_client.side_effect = MockCSWClientServerNotSetup
-
-        app = create_app()
-        app.config["SITE_PATH"] = Path(site_directory)
-        return app
-
-
-@pytest.fixture()
-def app_static_site_auth_csw_auth_token_error() -> Flask:
-    """Patched application to use fake CSW client and auth client that has an auth token error."""
-    with (
-        patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client,
-        TemporaryDirectory() as site_directory,
-        # patch("scar_add_metadata_toolbox.FlaskAzureOauth") as mock_flask_azure_oauth,
-    ):
-        # mock_flask_azure_oauth.side_effect = create_mock_auth()  # noqa: ERA001
-        mock_csw_client.side_effect = MockCSWClientAuthError
-
-        app = create_app()
-        app.config["SITE_PATH"] = Path(site_directory)
-        return app
-
-
-@pytest.fixture()
-def app_static_site_auth_csw_missing_auth_token() -> Flask:
-    """Patched application to use fake CSW client and auth client that is missing an auth token."""
-    with (
-        patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client,
-        TemporaryDirectory() as site_directory,
-        # patch("scar_add_metadata_toolbox.FlaskAzureOauth") as mock_flask_azure_oauth,
-    ):
-        # mock_flask_azure_oauth.side_effect = create_mock_auth()  # noqa: ERA001
-        mock_csw_client.side_effect = MockCSWClientAuthMissing
-
-        app = create_app()
-        app.config["SITE_PATH"] = Path(site_directory)
-        return app
-
-
-@pytest.fixture()
-def app_static_site_auth_csw_insufficient_auth_token() -> Flask:
-    """Patched application to use fake CSW client and auth client that has an insufficient auth token."""
-    with (
-        patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client,
-        TemporaryDirectory() as site_directory,
-        # patch("scar_add_metadata_toolbox.FlaskAzureOauth") as mock_flask_azure_oauth,
-    ):
-        # mock_flask_azure_oauth.side_effect = create_mock_auth()  # noqa: ERA001
-        mock_csw_client.side_effect = MockCSWClientAuthInsufficient
-
-        app = create_app()
-        app.config["SITE_PATH"] = Path(site_directory)
-        return app
-
-
-AppAuthScopes = namedtuple("AppAuthScopes", ["app", "auth_scopes"])
-
-
-@pytest.fixture()
-def app_static_site_auth_get_scopes() -> AppAuthScopes:
-    """Patched application auth scopes."""
-    with (
-        patch("scar_add_metadata_toolbox.classes.CSWClient") as mock_csw_client,
-        TemporaryDirectory() as site_directory,
-        # patch("scar_add_metadata_toolbox.FlaskAzureOauth") as mock_flask_azure_oauth,
-    ):
-        auth_scopes = []
-
-        # mock_flask_azure_oauth.side_effect = create_mock_auth(auth_scopes)  # noqa: ERA001
-        mock_csw_client.side_effect = MockCSWClient
-
-        app = create_app()
-        app.config["SITE_PATH"] = Path(site_directory)
-        return AppAuthScopes(app, auth_scopes)
+    # noinspection PyTypeChecker
+    return next(create_runner(request=request, csw_client=MockCSWClientServerNotSetup))

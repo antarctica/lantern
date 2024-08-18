@@ -33,6 +33,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Refactoring and updating documentation, particularly for deployments
   [#390](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/390)
 
+### Removed
+
+* Unused `pytest-flask` dependency
+  [#389](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/389)
+
 ## [0.6.0] - 2022-12-12 [BREAKING!]
 
 ### Removed [BREAKING!]
@@ -114,7 +119,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Removed
 
-* Invalid missing CSW catalogue test which was was not being handled by the expected function and therefore misleading
+* Invalid missing CSW catalogue test which was not being handled by the expected function and therefore misleading
   [#318](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/318)
 * Paw API document (migrated to Paw cloud)
   [#313](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/313)
@@ -211,7 +216,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ### Changed [BREAKING!]
 
-* Relicensing project under the MIT licence (from the UK Open Government Licence)
+* Re-licensing project under the MIT licence (from the UK Open Government Licence)
   [#188](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/187)
 
 ### Added

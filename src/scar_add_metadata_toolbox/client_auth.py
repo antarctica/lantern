@@ -6,7 +6,7 @@ from typing import TypedDict
 from flask import Flask
 from jwt import decode as jwt_decode
 from msal import PublicClientApplication
-from msal_extensions import PersistedTokenCache, build_encrypted_persistence
+from msal_extensions import FilePersistence, PersistedTokenCache
 
 
 class MsalFlaskError(Exception):
@@ -49,8 +49,12 @@ class MsalFlaskAuth:
         self._client = self._make_client_app()
 
     def _make_auth_cache(self) -> PersistedTokenCache:
-        """Create serialised and encrypted token cache for MSAL client."""
-        return PersistedTokenCache(persistence=build_encrypted_persistence(location=str(self._auth_cache_path)))
+        """
+        Create serialised token cache for MSAL client.
+
+        Would ideally be encrypted but can't because MSAL's Linux support requires a desktop environment.
+        """
+        return PersistedTokenCache(persistence=FilePersistence(location=str(self._auth_cache_path)))
 
     def _make_client_app(self) -> PublicClientApplication:
         """

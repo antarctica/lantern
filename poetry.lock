@@ -1583,25 +1583,6 @@ pytest = ">=4.6"
 testing = ["fields", "hunter", "process-tests", "pytest-xdist", "virtualenv"]
 
 [[package]]
-name = "pytest-flask"
-version = "1.3.0"
-description = "A set of py.test fixtures to test Flask applications."
-optional = false
-python-versions = ">=3.7"
-files = [
-    {file = "pytest-flask-1.3.0.tar.gz", hash = "sha256:58be1c97b21ba3c4d47e0a7691eb41007748506c36bf51004f78df10691fa95e"},
-    {file = "pytest_flask-1.3.0-py3-none-any.whl", hash = "sha256:c0e36e6b0fddc3b91c4362661db83fa694d1feb91fa505475be6732b5bc8c253"},
-]
-
-[package.dependencies]
-Flask = "*"
-pytest = ">=5.2"
-Werkzeug = "*"
-
-[package.extras]
-docs = ["Sphinx", "sphinx-rtd-theme"]
-
-[[package]]
 name = "pytest-httpserver"
 version = "1.1.0"
 description = "pytest-httpserver is a httpserver for pytest"
@@ -2381,4 +2362,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "436be25ae0e12ca3ae4507d241c3c21d52eeda723205a1b6630941e6a06adac5"
+content-hash = "eadd3713b519cd4e3e80a3c4812d3b90120c2f9e98f812e96b0c410a14266cfd"

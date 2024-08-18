@@ -1,13 +1,27 @@
-# SCAR Antarctic Digital Database (ADD) Metadata Toolbox - Application command reference
+# SCAR Antarctic Digital Database (ADD) Metadata Toolbox - CLI reference
 
 ## General information
 
 ### Running commands
 
-See the [Development environment](../README.md#development-environment) section in the project README for information
-on how to run these commands in a development or staging environment.
+Requirements:
 
-**Note:** Information on running these commands in a production environment will be added in the future.
+- an individual user account on the BAS central workstations
+  - (shared accounts should not be used to avoid leaking authentication tokens)
+- access to MAGIC environment modules (`/data/magic/Modules`)
+
+From a BAS central workstation:
+
+```
+$ module load add-metadata-toolbox
+$ flask --help
+```
+
+**Note:** See the [Development](/docs/dev.md#development-environment) documentation for how to run these commands in
+a local development environment.
+
+**Note:** See the [Deployment](/docs/deploy.md#running-cli-commands) documentation for how to run these commands
+during development (relates only to set up commands).
 
 ### Listing commands
 
@@ -45,9 +59,9 @@ Sign in sessions last for 1 hour (unless you sign out), after which you will nee
 your session has expired.
 
 ADD project staff can assign permissions to users as needed using the
-[Assigning permissions to users and groups](workflow-permissions-users.md) workflow.
+[Assigning permissions to users and groups](/docs/workflow-permissions-users.md) workflow.
 
-If you have issues with permissions not working, please raise an [issue](../README.md#issue-tracking).
+If you have issues with permissions not working please contact [support](/README.md#project-maintainer).
 
 **Note:** You will need an account within the NERC Active Directory to use this application. If you have a BAS email
 address you have an account. Contact the [BAS IT ServiceDesk](mailto:servicedesk@bas.ac.uk) to request an account.
@@ -66,7 +80,7 @@ No. CSW catalogue not setup.
 ```
 
 This error means the CSW catalogues for storing records have not been setup properly. This error should not occur,
-please raise an [issue](../README.md#issue-tracking) if it occurs.
+please contact [support](/README.md#project-maintainer) if it occurs.
 
 #### `Error with auth token`
 
@@ -75,7 +89,7 @@ No. Error with auth token. Try signing out and in again or seek support.
 ```
 
 This error typically means your access token has expired and you need to sign in again. If this doesn't fix the problem
-please raise an [issue](../README.md#issue-tracking).
+please contact [support](/README.md#project-maintainer).
 
 #### `Missing auth token`
 

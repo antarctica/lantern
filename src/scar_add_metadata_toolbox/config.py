@@ -5,7 +5,7 @@ from pathlib import Path
 
 from bas_style_kit_jinja_templates import BskTemplates
 from flask.cli import load_dotenv
-from msal import PublicClientApplication
+from platformdirs import user_config_dir
 from str2bool import str2bool
 
 
@@ -26,11 +26,14 @@ class Config:
     # Used as defaults for values that can be set at runtime
     _APP_ENABLE_SENTRY = True
     _LOGGING_LEVEL = logging.WARNING
-    _AUTH_SESSION_FILE_PATH = Path.home().joinpath(".config/scar_add_metadata_toolbox/auth.json")
     _SITE_PATH = Path.home().joinpath(".config/scar_add_metadata_toolbox/_site")
 
     def __init__(self) -> None:
         load_dotenv()
+
+        self._app_org = "BAS"
+        self._app_package = "scar-add-metadata-toolbox"
+        self._app_config = Path(user_config_dir(appauthor=self._app_org, appname=self._app_package))
 
         """
         APP_ENABLE_SENTRY - Whether to enable Sentry error reporting
@@ -39,18 +42,6 @@ class Config:
         basis (off in development/testing) by overriding the attribute, however it can be also be set at runtime.
         """
         self.APP_ENABLE_SENTRY = str2bool(os.environ.get("APP_ENABLE_SENTRY") or str(self._APP_ENABLE_SENTRY))
-
-        """
-        AUTH_SESSION_FILE_PATH - Path to the file used to store authentication information
-
-        When ran as a CLI using containers, this application becomes stateless. Therefore user auth information (access
-        token etc.) needs to persisted elsewhere, in this case as a file written to the path set by this config option.
-
-        Note: As this file stores authentication information its contents should be considered sensitive, meaning
-        restricted read/write permissions should be set for example. Note that as OAuth is used for authentication, no
-        long-lived credentials (e.g. passwords) will be stored in this file.
-        """
-        self.AUTH_SESSION_FILE_PATH = Path(os.environ.get("APP_AUTH_SESSION_FILE_PATH") or self._AUTH_SESSION_FILE_PATH)
 
     # noinspection PyPep8Naming
     @property
@@ -61,7 +52,7 @@ class Config:
         :rtype str
         :return: Application name
         """
-        return "scar-add-metadata-toolbox"
+        return self._app_package
 
     # noinspection PyPep8Naming
     @property
@@ -233,124 +224,80 @@ class Config:
 
     # noinspection PyPep8Naming
     @property
-    def AZURE_OAUTH_TENANCY(self) -> str:
+    def ENTRA_AUTH_CLIENT_ID(self) -> str:
         """
-        Azure tenancy (server).
+        Entra application (server).
 
-        Tenancy ID for the Azure app registration representing the server/catalogue component of this application.
+        Entra app registration ID for the registration representing the server/catalogue component of this application.
 
         Note: This value is not sensitive.
-
-        :rtype str
-        :return: Azure tenancy ID
-        """
-        return "b311db95-32ad-438f-a101-7ba061712a4e"
-
-    # noinspection PyPep8Naming
-    @property
-    def AZURE_OAUTH_APPLICATION_ID(self) -> str:
-        """
-        Azure application (server).
-
-        Azure app registration ID for the registration representing the server/catalogue component of this application.
-
-        Note: This value is not sensitive.
-
-        :rtype str
-        :return: Azure app registration ID
         """
         return "8b45581e-1b2e-4b8c-b667-e5a1360b6906"
 
     # noinspection PyPep8Naming
     @property
-    def AZURE_OAUTH_CLIENT_APPLICATION_IDS(self) -> list[str]:
+    def ENTRA_AUTH_OIDC_ENDPOINT(self) -> str:
         """
-        Azure approved applications (server).
+        Entra OIDC endpoint (server).
 
-        List of Azure app registrations ID for applications/services (clients) trusted/approved to use the
-        server/catalogue component of this application.
+        OIDC endpoint for tenancy containing the registration representing the server/catalogue component of this
+        application.
 
-        This list automatically includes the app registration representing the client/editor component of this
-        application, in addition to these services:
-
-        * 3b864b8d-a6b8-44c1-8468-16f455e5eb4f = BAS Nagios (for uptime/availability monitoring)
-
-        Note: These values are not sensitive.
-
-        :rtype list
-        :return: List of approved Azure app registration IDs
+        Note: This value is not sensitive.
         """
-        return [self.AUTH_CLIENT_ID, "3b864b8d-a6b8-44c1-8468-16f455e5eb4f"]
+        return "https://login.microsoftonline.com/b311db95-32ad-438f-a101-7ba061712a4e/v2.0/.well-known/openid-configuration"
 
     # noinspection PyPep8Naming
     @property
-    def AUTH_CLIENT_SCOPES(self) -> list[str]:
+    def MSAL_AUTH_CACHE_PATH(self) -> Path:
         """
-        Azure scopes (client).
+        MSAL token cache path.
 
-        List of scopes requested in OAuth authorisation requests to Azure (i.e. sign-in requests).
+        Path to a sentinel file MSAL should create for an encrypted token cache.
+        """
+        return self._app_config / "auth_cache.bin"
+
+    # noinspection PyPep8Naming
+    @property
+    def MSAL_SCOPES(self) -> list[str]:
+        """
+        Entra scopes (client).
+
+        List of scopes requested in OAuth authorisation requests to Entra (i.e. sign-in requests).
 
         These should be scopes always required by this application, rather than scopes needed for specific/privileged
         actions, as these are typically conferred on specific users and will be included as roles in access tokens.
 
         This scope is very general and is effectively static. Other scopes, needed for publishing records for example,
-        are granted to specific users as roles (which the Flask Azure OAuth provider treats as scopes).
+        are granted to specific users as roles (which the Flask Entra Auth provider treats as scopes).
 
         Note: These values are not sensitive.
-
-        :rtype list
-        :return: OAuth authorisation request scopes
         """
         return ["api://8bfe65d3-9509-4b0a-acd2-8ce8cdc0c01e/BAS.MAGIC.ADD.Access"]
 
     # noinspection PyPep8Naming
     @property
-    def AUTH_CLIENT_ID(self) -> str:
+    def MSAL_CLIENT_ID(self) -> str:
         """
-        Azure application (client).
+        Entra application (client).
 
-        Azure app registration ID for the registration representing the client/editor component of this application.
+        Entra app registration ID for the registration representing the client/editor component of this application.
 
         Note: This value is not sensitive.
-
-        :rtype str
-        :return: Azure app registration ID
         """
         return "91c284e7-6522-4eb4-9943-f4ec08e98cb9"
 
     # noinspection PyPep8Naming
     @property
-    def AUTH_CLIENT_TENANCY(self) -> str:
+    def MSAL_TENANCY(self) -> str:
         """
-        Azure tenancy (client).
+        Entra tenancy (client).
 
-        Tenancy endpoint for the Azure app registration representing the client/editor component of this application.
+        Entra tenancy containing the Entra app registration representing the client/editor component of this application.
 
         Note: This value is not sensitive.
-
-        :rtype str
-        :return: Azure tenancy endpoint
         """
-        return "https://login.microsoftonline.com/b311db95-32ad-438f-a101-7ba061712a4e"
-
-    # noinspection PyPep8Naming
-    @property
-    def CLIENT_AUTH(self) -> PublicClientApplication:
-        """
-        Azure auth provider (client).
-
-        Uses the Microsoft Authentication Library (MSAL) for Python to simplify requesting access tokens from Azure.
-
-        This is used for the client/editor component of this application, which is considered a 'public' client as this
-        application runs on the user's device, and therefore isn't confidential.
-
-        Note: The Flask Azure OAuth provider is used for the server/catalogue component, instantiated in the
-        application factor method.
-
-        :rtype PublicClientApplication
-        :return: Microsoft Authentication Library Public Client application
-        """
-        return PublicClientApplication(client_id=self.AUTH_CLIENT_ID, authority=self.AUTH_CLIENT_TENANCY)
+        return "b311db95-32ad-438f-a101-7ba061712a4e"
 
     # noinspection PyPep8Naming
     @property

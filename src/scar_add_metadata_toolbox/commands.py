@@ -1,4 +1,5 @@
 import contextlib
+import sys
 from json import JSONDecodeError
 from os import EX_USAGE
 from pathlib import Path
@@ -20,6 +21,7 @@ from scar_add_metadata_toolbox.classes import (
     Record,
     RecordRetractBeforeDeleteError,
 )
+from scar_add_metadata_toolbox.client_auth import MsalFlaskAuth, MsalFlaskNoAccountError, MsalTokenAcquisitionError
 from scar_add_metadata_toolbox.csw import (
     CSWAuthError,
     CSWAuthInsufficientError,
@@ -698,22 +700,39 @@ auth_commands_blueprint.cli.short_help = "Manage user access to information and 
 @auth_commands_blueprint.cli.command("sign-in")
 def auth_sign_in() -> None:
     """Set user access token to use application."""
-    auth_flow = current_app.config["CLIENT_AUTH"].initiate_device_flow(scopes=current_app.config["AUTH_CLIENT_SCOPES"])
-    click.pause(
-        f"To sign-in, visit 'https://microsoft.com/devicelogin', "
-        f"enter this code '{auth_flow['user_code']}' and then press any key..."
+    msal_: MsalFlaskAuth = current_app.msal
+
+    try:
+        click.echo(f"Ok. {msal_.whoami}")
+        sys.exit(0)
+    except (MsalFlaskNoAccountError, MsalTokenAcquisitionError):
+        click.echo("Error signing in with cached credentials. Falling back to a new sign in session.")
+
+    params: dict = msal_.start_device_flow()
+    click.echo(
+        f"To sign in, go to {params['endpoint']}, enter the code '{params['user_code']}' and follow the instructions."
     )
-    auth_payload = current_app.config["CLIENT_AUTH"].acquire_token_by_device_flow(auth_flow)
-    current_app.auth_token.payload = auth_payload
-    print(
-        f"Ok. Access token for '{current_app.auth_token.access_token_bearer_insecure}' "
-        f"set in '{current_app.auth_token.session_file_path.absolute()}'."
-    )
+    click.pause(info="Then, press any key to complete sign in...")
+    msal_.finish_device_flow()
+    try:
+        click.echo(f"Ok. {msal_.whoami.split('[')[0].strip()}.")
+    except MsalTokenAcquisitionError as e:
+        current_app.logger.exception("auth error", exc_info=e)
+        click.echo("No. Error signing in. Please try again or contact support if problem persists..")
+        click.echo(f"Error: {e.error}")
+        click.echo(f"Error: {e.description}")
+        sys.exit(1)
 
 
 @auth_commands_blueprint.cli.command("sign-out")
 def auth_sign_out() -> None:
     """Remove existing access token if present."""
-    with contextlib.suppress(FileNotFoundError):
-        del current_app.auth_token.payload
-    print("Ok. Access token removed.")
+    msal_: MsalFlaskAuth = current_app.msal
+
+    try:
+        msal_.sign_out()
+    except MsalFlaskNoAccountError as e:
+        click.echo("No. Not signed in.")
+        raise Abort() from e
+    else:
+        click.echo("Ok. Signed out.")

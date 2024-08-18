@@ -102,13 +102,13 @@ Manage user access to information and functions.
 
 ### `auth sign-in`
 
-Set user access token to use application.
+Set user account information to use application.
 
 Running this command will return a code you will need to enter into a Microsoft website. This code is random and will
-change each time you sign-in. It's used to help identify the application you are trying to sign into. The application
+change each time you sign-in. It's used to help identify the application you are trying to sign in to. The application
 will wait until you tell it you've signed in.
 
-When you enter the code into the website, you may be asked to sign in. If you do, use your BAS/NERC account (the same
+When you enter the code into the website, you may be asked to sign in. If you are, use your BAS/NERC account (the same
 you use for accessing your email or Office 365).
 
 **Note:** The first time you use this application, you will be asked whether you want to allow the 'SCAR ADD Metadata
@@ -127,28 +127,32 @@ When you see this message:
 >
 > You have signed in to the SCAR ADD Metadata Toolbox (Editor) application on your device. You may now close this window.
 
-You can press any key to prompt back in the application to continue signing in. If successful, you will see a success
-message with your name and the path to a file that contains your user access token, which you can ignore unless you have
-problems with permissions later.
-
-You can sign-in again if you need to get a new user access token (or if your permissions change). This will replace
-any existing token you have.
+You can press any key back in the application to complete the sign in process. If successful, you will see a success
+message with your name and email. Your account information, including an access token, will also be stored securely
+within your user account.
 
 ```
 $ flask auth sign-in
-To sign-in, visit 'https://microsoft.com/devicelogin', enter this code 'XXXXXXXXX' and then press any key...
-Ok. Access token for 'Connie Watson' set in '/usr/src/app/auth.json'.
+To sign in, go to 'https://microsoft.com/devicelogin', enter the code 'XXXXXXXXX' and follow the instructions.
+Then, press any key to complete sign in...
+Ok. Signed in as 'Connie Watson - BAS' (conwat@bas.ac.uk)'
+```
+
+In most cases you will only need to sign in once, as the access token will be automatically renewed on your behalf.
+You can manually renew your access token (if your permissions have changed for example) by running this command again.
+
+```
+$ flask auth sign-in
+Ok. Signed in as 'Connie Watson - BAS' (conwat@bas.ac.uk) [4850d41a-979a-4b83-8b65-e5330a5b03a4] using cached credentials."
 ```
 
 ### `auth sign-out`
 
-Remove existing access token if present.
-
-In some cases you may want to intentionally clear your user access token, rather than allowing it to expire.
+Remove existing account information and access token if present.
 
 ```
 $ flask auth sign-out
-Ok. Access token removed.
+Ok. Signed out.
 ```
 
 ## `csw`

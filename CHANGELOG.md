@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#379](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/379)
 * Enabling Sentry in Python app
   [#385](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/385)
+* Re-enabling authentication with upgraded Entra provider
+  [#387](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/387)
 
 ### Changed
 

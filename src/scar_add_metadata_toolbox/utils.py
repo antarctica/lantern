@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-import json
 import os
-from base64 import urlsafe_b64decode
 from pathlib import Path
 from typing import Callable
 
@@ -92,116 +90,6 @@ def aws_cli(*cmd) -> None:  # noqa: ANN002
     finally:
         os.environ.clear()
         os.environ.update(old_env)
-
-
-class AppAuthToken:
-    """
-    Azure auth token.
-
-    This class serves two main purposes:
-
-    1. enabling easier access to access tokens returned in auth requests from the Microsoft Authentication Library
-    2. persisting auth information to a local file for situations where this application is run statelessly
-    """
-
-    def __init__(self, session_file_path: Path) -> None:
-        self.session_file_path = session_file_path
-        self._payload = None
-
-    @property
-    def access_token_bearer_insecure(self) -> str:
-        """
-        Return the name of the user identified in the access token.
-
-        This is a convenience method to return the name of the user an access token is issued for. This method avoids
-        having to fetch signing key sets to authenticate tokens etc. where the claims shown don't have an
-        impact on security (e.g. greeting messages).
-
-        WARNING: This method is insecure as it does not validate its claims are authentic, or that the token is still
-        valid. This method therefore MUST NOT be used in a secure context (e.g. determining if a user has access to a
-        resource or action). A full JWT library MUST be used instead in such circumstances.
-        """
-        try:
-            access_token_parts = self.access_token.split(".")
-            access_token_payload = urlsafe_b64decode(access_token_parts[1].encode() + b"===").decode()
-            access_token_claims = json.loads(access_token_payload)
-            return f"{access_token_claims['given_name']} {access_token_claims['family_name']}"
-        except KeyError:
-            return "*unknown*"
-
-    @property
-    def access_token(self) -> str | None:
-        """
-        OAuth access token.
-
-        As defined by Azure: https://docs.microsoft.com/en-us/azure/active-directory/develop/access-tokens
-
-        This application uses V2 access tokens.
-
-        None is returned if an access token isn't set so that this class is compatible with the OWSLib Authentication
-        class, which defaults credentials to None if not set (i.e. unauthenticated).
-
-        :rtype str or None
-        :return: access token
-        """
-        try:
-            return self.payload["access_token"]
-        except KeyError:
-            return None
-
-    @property
-    def payload(self) -> dict:
-        """
-        Azure device flow response payload.
-
-        Payload returned by the Azure OAuth device flow via the Microsoft Authentication Library Public Client object.
-
-        This includes tokens (access, refresh, id) and metadata (expiration times) for various purposes.
-
-        When read, the payload is loaded from a JSON file.
-
-        :rtype dict
-        :return: Azure device flow response payload
-        """
-        self._payload = self._load()
-        return self._payload
-
-    @payload.setter
-    def payload(self, payload: dict) -> None:
-        """
-        Azure device flow response payload.
-
-        When set, the payload is saved to a JSON file.
-
-        :type payload dict
-        :param payload: Azure device flow response payload
-        """
-        self._payload = payload
-        self._dump()
-
-    @payload.deleter
-    def payload(self) -> None:
-        """
-        Azure device flow response payload.
-
-        When deleted, the stored payload file is removed.
-        """
-        self._payload = None
-        self.session_file_path.unlink()
-
-    def _load(self) -> dict:
-        """Load payload information from a JSON encoded file."""
-        try:
-            with self.session_file_path.open(mode="r") as auth_file:
-                return json.load(auth_file)
-        except FileNotFoundError:
-            return {}
-
-    def _dump(self) -> None:
-        """Save payload information to a file encoded as JSON."""
-        self.session_file_path.parent.mkdir(parents=True, exist_ok=True)
-        with self.session_file_path.open(mode="w") as auth_file:
-            json.dump(self._payload, auth_file, indent=4)
 
 
 def _build_item(record: Record) -> None:

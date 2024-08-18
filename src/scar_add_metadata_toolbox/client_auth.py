@@ -53,6 +53,7 @@ class MsalFlaskAuth:
         Create serialised token cache for MSAL client.
 
         Would ideally be encrypted but can't because MSAL's Linux support requires a desktop environment.
+        See https://github.com/AzureAD/microsoft-authentication-extensions-for-python/wiki/Encryption-on-Linux.
         """
         return PersistedTokenCache(persistence=FilePersistence(location=str(self._auth_cache_path)))
 

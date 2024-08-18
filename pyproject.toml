@@ -128,7 +128,8 @@ markers = [
   "cov: coverage checks (deselect with '-m \"not cov\"')"
 ]
 filterwarnings = [
-    "ignore::DeprecationWarning:.*hazmat.*"
+    "ignore::DeprecationWarning:.*hazmat.*",
+    "ignore::DeprecationWarning:.*awscli.*"
 ]
 
 [tool.coverage.report]

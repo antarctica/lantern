@@ -99,17 +99,17 @@ class Config:
         """
         Sentry runtime configuration.
 
-        Settings used for Sentry, typically reusing other config options. Only relevant if `APP_ENABLE_SENTRY` is True.
+        Returns empty config if `APP_ENABLE_SENTRY` is False which disables Sentry.
 
         Note: Sentry DSN values are not sensitive.
-
-        :rtype dict
-        :return: Sentry runtime configuration
         """
+        if not self.APP_ENABLE_SENTRY:
+            return {}
+
         return {
             "dsn": "https://db9543e7b68f4b2596b189ff444438e3@o39753.ingest.sentry.io/5197036",
             "environment": self.ENV,
-            "release": f"{self.NAME}@{self.VERSION}",
+            "release": self.VERSION,
         }
 
     # noinspection PyPep8Naming

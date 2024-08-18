@@ -1,17 +1,10 @@
-<!-- SCAR ADD Metadata Toolbox release issue template -->
+/label ~"meta: release"
 
-<!--
-Set issue title to 'X.X.X release' e.g. '0.5.0 release'
--->
+1. [x] create a release issue (title: 'x.x.x release', milestone: x.x.x)
+1. [ ] create merge request from release issue
+1. [ ] bump Python package version: `poetry version [minor/patch]`
+1. [ ] close release in `CHANGELOG.md`
+1. [ ] push changes, merge into `main` and tag commit with version
+1. [ ] create a deployment issue using the `deployment` issue template and follow its instructions
 
-For all releases:
-
-1. [x] create a release issue
-2. [ ] create a merge request from release issue
-3. [ ] close the release in `CHANGELOG.md`
-4. [ ] bump Python package version `poetry version [minor/patch]`
-5. [ ] push changes, merge the merge request into `main` and tag with version
-6. [ ] create a new GitLab release, using the change log entry as release notes
-7. [ ] link the GitLab release to the milestone and [Python package](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/packages)
-8. [ ] close the GitLab milestone for the release
-9. [ ] if needed, create a new milestone for the next release
+See #... for release deployment.

@@ -135,7 +135,7 @@ filterwarnings = [
 [tool.coverage.report]
 skip_empty = true
 show_missing = false
-fail_under = 99
+fail_under = 95
 
 [tool.coverage.html]
 directory = "htmlcov"

@@ -55,7 +55,7 @@ Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN` is the
 'SCAR ADD Metadata Toolbox (Data Catalogue) CSW Revision Tracking GitLab Personal Access Token (PAT)' item in the shared
 vault in the MAGIC 1Password account.
 
-See the [Command Reference](/docs/cli-reference.md) for how to use the CLI. Where `flask` is written, replace this with
+See the [CLI Reference](/docs/cli-reference.md) for how to use the CLI. Where `flask` is written, replace this with
 the command example above.
 
 When built, the local static site can be accessed from [http://localhost:9000](http://localhost:9000).
@@ -89,7 +89,7 @@ $ cd add-metadata-toolbox
 $ docker compose up
 ```
 
-See the [Command Reference](/docs/cli-reference.md) for how to use the CLI. Where `flask` is written, replace this
+See the [CLI Reference](/docs/cli-reference.md) for how to use the CLI. Where `flask` is written, replace this
 with:
 
 ```shell
@@ -130,7 +130,7 @@ Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN` is the
 'SCAR ADD Metadata Toolbox (Data Catalogue) CSW Revision Tracking GitLab Personal Access Token (PAT)' item in the shared
 vault in the MAGIC 1Password account.
 
-See the [Command Reference](/docs/cli-reference.md) for how to use the CLI. Where `flask` is written, replace this with
+See the [CLI Reference](/docs/cli-reference.md) for how to use the CLI. Where `flask` is written, replace this with
 the command example above.
 
 When built, the local static site can be accessed from [http://localhost:9000](http://localhost:9000).

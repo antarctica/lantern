@@ -1867,6 +1867,7 @@ class Item:
         _overdue = released_date
         if isinstance(released_date, date):  # pragma: no cover (added for future use)
             _now = _now.date()
+            _overdue = _overdue.date()
         if maintenance_frequency == "biannually":
             _overdue += relativedelta(months=+6)
 

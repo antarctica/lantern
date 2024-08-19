@@ -29,7 +29,8 @@ production environments can only be performed by BAS IT.
 In the relevant deployment branch:
 
 1. update the [`add_toolbox_version`](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/group_vars/magic/add-metadata-toolbox.yml#L11) variable
-1. run the Ansible playbook: `invoke ansible -e dev magic/add-metadata-toolbox`
+1. run Ansible playbook for app as a server: `invoke ansible -e dev magic/add-metadata-toolbox-server`
+1. run Ansible playbook for app as a client: `invoke ansible -e dev magic/add-metadata-toolbox-client`
 1. push the branch back to GitLab
 
 See the [MAGIC](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/README.MAGIC.md#setup)

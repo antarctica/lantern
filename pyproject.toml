@@ -2,7 +2,11 @@
 name = "scar-add-metadata-toolbox"
 version = "0.6.0"
 description = "Editor, repository and data catalogue for SCAR Antarctic Digital Database (ADD) discovery metadata"
-authors = ["Felix Fennell <felnne@bas.ac.uk>"]
+authors = [
+  "Felix Fennell <felnne@bas.ac.uk>",
+  "Paul Breen <pbree@bas.ac.uk>",
+  "Guy Phlips <guyill@bas.ac.uk>",
+]
 readme = "README.md"
 license = "MIT"
 packages = [{ include = "scar_add_metadata_toolbox", from = "src" }]

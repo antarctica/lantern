@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* HTTP route to building single items
+  [#358](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/358)
+
 ### Fixed
 
 * Temporary workaround added for dynamic extent map added for ADD records
@@ -17,6 +22,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#385](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/385)
 * Re-enabling authentication with upgraded Entra provider
   [#387](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/387)
+* Bug with `Item._process_download` modifying distribution dict
+  [#361](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/361)
 
 ### Changed
 

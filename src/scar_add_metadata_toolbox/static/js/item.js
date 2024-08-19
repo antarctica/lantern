@@ -142,8 +142,6 @@ function itemMap() {
         GraphicsLayer,
         ScaleBar
     ) {
-        esriConfig.apiKey = esri_api_key;
-
         const polygon = new Polygon({
           rings: geographic_bounding_extent.features[0].geometry.coordinates,
           spatialReference: { wkid: 4326 }

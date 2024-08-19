@@ -201,23 +201,3 @@ Backing git repositories used for [CSW Revision Tracking](/docs/implementation-c
 
 **Note:** Make sure to set the `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_REMOTE_URL` environment variable on the client
 side when running this command.
-
-## ESRI ArcGIS
-
-ESRI ArcGIS is used for the [web maps](/docs/implementation.md#esri-web-maps) within the catalogue static site.
-
-Access to the [BAS ArcGIS Online account 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/esri) is required to provision these
-resources.
-
-To generate an ESRI ArcGIS developer API key:
-
-1. login to https://developers.arcgis.com/api-keys/
-2. click *New API Key*:
-      1. title: `SCAR ADD Metadata Toolbox`
-      2. description: `Embedded maps shown within the ADD Data Catalogue for extent information.`
-3. from the *Location Services* section of the page for the new API key:
-     1. choose *Configure Services*
-     2. disable the *Geocoding (not stored)* option if enabled
-     3. note: the *Basemaps* service is always enabled
-4. copy the API key and paste into a 1Password password item with the name 'SCAR ADD Metadata Toolbox - ESRI ArcGIS API
-   key'

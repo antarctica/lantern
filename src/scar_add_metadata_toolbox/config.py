@@ -323,21 +323,6 @@ class Config:
         """
         return os.environ.get("APP_S3_BUCKET")
 
-    # noinspection PyPep8Naming
-    @property
-    def ESRI_API_KEY(self) -> str:
-        """
-        API Key for ESRI ArcGIS JavaScript client.
-
-        Used for displaying maps within frontend content.
-
-        Keys can be created from the ArcGIS Developers portal - https://developers.arcgis.com.
-
-        :rtype str
-        :return: ESRI API Key
-        """
-        return os.environ.get("APP_ESRI_API_KEY")
-
 
 class ProductionConfig(Config):  # pragma: no cover
     """

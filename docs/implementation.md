@@ -234,20 +234,6 @@ uses:
 * the [ESRI ArcGIS API for JavaScript](https://developers.arcgis.com/javascript/latest/) as a mapping framework
 * [ESRI ArcGIS Online](https://www.arcgis.com/index.html) for mapping layers
 
-### ESRI API key
-
-Accessing content from ArcGIS Online requires an API key from the ESRI
-[ArcGIS Developers](https://developers.arcgis.com) platform. This API key is treated as an application secret, and
-must be set as an environment variable when building the static site.
-
-Once built, this key will be embedded in page content, and visible to end-users accessing the static site. This is
-considered safe providing some
-[precautions](https://developers.arcgis.com/documentation/mapping-apis-and-services/security/security-best-practices/#api-key-security)
-are taken.
-
-The API key used for this project is stored in the MAGIC 1Password shared vault as the *SCAR ADD Metadata Toolbox -
-ESRI ArcGIS API key* item.
-
 ## Feedback and contact forms
 
 A Microsoft

@@ -32,6 +32,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#373](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/373)
 * Refactoring and updating documentation, particularly for deployments
   [#390](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/390)
+* Removing redundant Esri API key config option
+  [#392](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/392)
 
 ### Removed
 

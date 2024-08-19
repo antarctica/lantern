@@ -68,17 +68,14 @@ $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask csw
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask csw setup repo unpublished
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask auth sign-in
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask records import --publish ~/some-example-record.json
-$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development APP_ESRI_API_KEY=xxx poetry run flask site build
+$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask site build
 # (after example-record updated)
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask records import --publish --allow-update --allow-republish ~/some-example-record.json
-$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development APP_ESRI_API_KEY=xxx poetry run flask site build
+$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask site build
 ```
 
 Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN` is the
 'SCAR ADD Metadata Toolbox (Data Catalogue) CSW Revision Tracking GitLab Personal Access Token (PAT)' item in the shared
-vault in the MAGIC 1Password account.
-
-Where the value for `APP_ESRI_API_KEY` is the 'SCAR ADD Metadata Toolbox - ESRI ArcGIS API key' item in the shared
 vault in the MAGIC 1Password account.
 
 ### Building a local static site with production data
@@ -99,9 +96,6 @@ with:
 # Run Flask CLI commands as a client, with remote server
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development CSW_ENDPOINT_UNPUBLISHED=https://api.bas.ac.uk/data/metadata/add/csw/v1/unpublished CSW_ENDPOINT_PUBLISHED=https://api.bas.ac.uk/data/metadata/add/csw/v1/published poetry run flask [command]
 ```
-
-If building the static site, include the `APP_ESRI_API_KEY` environment variable as well, using the 'SCAR ADD Metadata
-Toolbox - ESRI ArcGIS API key' item in the MAGIC shared vault in 1Password as the value.
 
 When built, the local static site can be accessed from [http://localhost:9000](http://localhost:9000).
 
@@ -136,9 +130,6 @@ Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN` is the
 'SCAR ADD Metadata Toolbox (Data Catalogue) CSW Revision Tracking GitLab Personal Access Token (PAT)' item in the shared
 vault in the MAGIC 1Password account.
 
-If building the static site, include the `APP_ESRI_API_KEY` environment variable as well, using the 'SCAR ADD Metadata
-Toolbox - ESRI ArcGIS API key' item in the MAGIC shared vault in 1Password as the value.
-
 See the [Command Reference](/docs/cli-reference.md) for how to use the CLI. Where `flask` is written, replace this with
 the command example above.
 
@@ -146,9 +137,6 @@ When built, the local static site can be accessed from [http://localhost:9000](h
 Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN` is the
 'SCAR ADD Metadata Toolbox (Data Catalogue) CSW Revision Tracking GitLab Personal Access Token (PAT)' item in the shared
 vault in the MAGIC 1Password account.
-
-If building the static site, include the `APP_ESRI_API_KEY` environment variable as well, using the 'SCAR ADD Metadata
-Toolbox - ESRI ArcGIS API key' item in the MAGIC shared vault in 1Password as the value.
 
 **Note:** to use the database staging environment instead, use this command for starting the Flask application as a
 server:

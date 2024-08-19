@@ -944,11 +944,8 @@ Build all static site components.
 
 **Note:** This will only include items that have been published.
 
-**Note:** You need to set the `APP_ESRI_API_KEY` environment variable with the value from the 'SCAR ADD Metadata
-Toolbox - ESRI ArcGIS API key' entry in the shared vault of the MAGIC 1Password account to use this command correctly.
-
 ```
-$ APP_ESRI_API_KEY=xxx flask site build
+$ flask site build
 54 record pages to generate.
 # Record page 1/18 (stylesheet 1/3)
 Ok. Generated item page for '862f7159-9e0d-46e2-9684-df1bf924dabc' (stylesheet 'iso-html').
@@ -1123,11 +1120,8 @@ Build pages for all collections.
 
 **Note:** This will only include items in collections that have been published.
 
-**Note:** You need to set the `APP_ESRI_API_KEY` environment variable with the value from the 'SCAR ADD Metadata
-Toolbox - ESRI ArcGIS API key' entry in the shared vault of the MAGIC 1Password account to use this command correctly.
-
 ```
-$ APP_ESRI_API_KEY=xxx flask site build-collections
+$ flask site build-collections
 1 collection pages to generate.
 # Collection page 1/1
   [####################################]  100%
@@ -1141,11 +1135,8 @@ Build pages for all items.
 
 **Note:** This will only include items that have been published.
 
-**Note:** You need to set the `APP_ESRI_API_KEY` environment variable with the value from the 'SCAR ADD Metadata
-Toolbox - ESRI ArcGIS API key' entry in the shared vault of the MAGIC 1Password account to use this command correctly.
-
 ```
-$ APP_ESRI_API_KEY=xxx flask site build-items
+$ flask site build-items
 18 item pages to generate.
 # Item page 1/18
 Ok. Generated item page for '862f7159-9e0d-46e2-9684-df1bf924dabc'.
@@ -1189,9 +1180,6 @@ Ok. 18 item pages generated.
 ### `site build-item`
 
 Build page for an item.
-
-**Note:** You need to set the `APP_ESRI_API_KEY` environment variable with the value from the 'SCAR ADD Metadata
-Toolbox - ESRI ArcGIS API key' entry in the shared vault of the MAGIC 1Password account to use this command correctly.
 
 ```
 $ flask site build-item f432236d-a5d9-4f3b-b286-f8175aba8732

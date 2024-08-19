@@ -255,7 +255,7 @@ class Config:
 
         Path to a sentinel file MSAL should create for an encrypted token cache.
         """
-        return self._app_config / "auth_cache.bin"
+        return Path(os.environ.get("APP_AUTH_CACHE") or self._app_config / "auth_cache.bin")
 
     # noinspection PyPep8Naming
     @property
@@ -310,7 +310,7 @@ class Config:
         :rtype Path
         :return Site content path
         """
-        return Path(os.environ.get("APP_SITE_PATH") or self._SITE_PATH)
+        return Path(os.environ.get("APP_SITE_PATH") or self._app_config / "site")
 
     # noinspection PyPep8Naming
     @property

@@ -7,7 +7,7 @@ elementFormDefault="qualified" version="1.1.0.3" xml:lang="en">
 	<annotation>
 		<appinfo>owsContents.xsd</appinfo>
 		<documentation>This XML Schema  Document encodes the typical Contents section of an OWS service metadata (Capabilities) document. This  Schema can be built upon to define the Contents section for a specific OWS. If the ContentsBaseType in this XML Schema cannot be restricted and extended to define the Contents section for a specific OWS, all other relevant parts defined in owsContents.xsd shall be used by the "ContentsType" in the wxsContents.xsd prepared for the specific OWS.
-		
+
 		OWS is an OGC Standard.
 		Copyright (c) 2006,2010 Open Geospatial Consortium.
 		To obtain additional rights of use, visit http://www.opengeospatial.org/legal/ .

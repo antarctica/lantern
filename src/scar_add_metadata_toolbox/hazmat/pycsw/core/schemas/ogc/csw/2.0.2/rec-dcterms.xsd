@@ -6,7 +6,7 @@
    attributeFormDefault="unqualified" version="2.0.2 2010-01-22">
    <xs:annotation>
       <xs:documentation xml:lang="en"
-         source="http://dublincore.org/documents/dcmi-terms/">This schema declares additional DCMI elements and element refinements 
+         source="http://dublincore.org/documents/dcmi-terms/">This schema declares additional DCMI elements and element refinements
     in the "http://purl.org/dc/terms/" namespace.</xs:documentation>
    </xs:annotation>
    <xs:import namespace="http://purl.org/dc/elements/1.1/" schemaLocation="rec-dcmes.xsd"/>
@@ -82,7 +82,7 @@
    <xs:element name="valid" type="dc:SimpleLiteral" substitutionGroup="dc:date"/>
    <xs:group name="DCMI-terms">
       <xs:annotation>
-         <xs:documentation xml:lang="en">This group is included as a convenience for schema authors who need 
+         <xs:documentation xml:lang="en">This group is included as a convenience for schema authors who need
       to refer to the complete set of DCMI metadata terms.</xs:documentation>
       </xs:annotation>
       <xs:sequence>

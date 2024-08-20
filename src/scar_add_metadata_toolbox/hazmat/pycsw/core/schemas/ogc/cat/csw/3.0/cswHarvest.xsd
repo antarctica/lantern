@@ -12,7 +12,7 @@
          <dc:identifier xmlns:dc="http://purl.org/dc/elements/1.1/">http://schemas.opengis.net/csw/3.0/cswHarvest.xsd</dc:identifier>
       </xsd:appinfo>
       <xsd:documentation xml:lang="en">
-         This schema defines the request and response messages for the 
+         This schema defines the request and response messages for the
          Harvest operation.
       </xsd:documentation>
    </xsd:annotation>
@@ -27,21 +27,21 @@
    <xsd:complexType name="HarvestType">
       <xsd:annotation>
          <xsd:documentation xml:lang="en">
-            Requests that the catalogue attempt to harvest a resource from some 
+            Requests that the catalogue attempt to harvest a resource from some
             network location identified by the source URL.
-   
+
             Source          - a URL from which the resource is retrieved
             ResourceType    - normally a URI that specifies the type of the
                               resource being harvested
-            ResourceFormat  - a media type indicating the format of the 
-                              resource being harvested.  The default is 
+            ResourceFormat  - a media type indicating the format of the
+                              resource being harvested.  The default is
                               "application/xml".
-            ResponseHandler - a reference to some endpoint to which the 
+            ResponseHandler - a reference to some endpoint to which the
                               response shall be forwarded when the
                               harvest operation has been completed
-            HarvestInterval - an interval expressed using the ISO 8601 syntax; 
-                              it specifies the interval between harvest 
-                              attempts (e.g., P6M indicates an interval of 
+            HarvestInterval - an interval expressed using the ISO 8601 syntax;
+                              it specifies the interval between harvest
+                              attempts (e.g., P6M indicates an interval of
                               six months).
          </xsd:documentation>
       </xsd:annotation>
@@ -67,21 +67,21 @@
       id="HarvestResponse">
       <xsd:annotation>
          <xsd:documentation xml:lang="en">
-            The content of the response varies depending on the presence of the 
-            ResponseHandler element. If present, then the catalogue should 
+            The content of the response varies depending on the presence of the
+            ResponseHandler element. If present, then the catalogue should
             verify the request and respond immediately with an
             csw30:Acknowledgement element in the response. The catalogue must
             then attempt to harvest the resource at some later time and send
             the response message to the location specified by the value of the
             ResponseHandler element using the indicated protocol (e.g. ftp,
             mailto, http).
-         
-            If the ResponseHandler element is absent, then the catalogue 
-            must attempt to harvest the resource immediately and include a 
+
+            If the ResponseHandler element is absent, then the catalogue
+            must attempt to harvest the resource immediately and include a
             TransactionResponse element in the response.
 
-            In any case, if the harvest attempt is successful the response 
-            shall include summary representations of the newly created 
+            In any case, if the harvest attempt is successful the response
+            shall include summary representations of the newly created
             catalogue item(s).
          </xsd:documentation>
       </xsd:annotation>

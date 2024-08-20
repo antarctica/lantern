@@ -11,7 +11,7 @@
     operation request and response XML elements and types, which are common to
     all OWSs. This XML Schema shall be edited by each OWS, for example, to
     specify a specific value for the "service" attribute.
-    
+
     OWS is an OGC Standard.
     Copyright (c) 2009 Open Geospatial Consortium.
     To obtain additional rights of use, visit http://www.opengeospatial.org/legal/ .

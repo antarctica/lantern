@@ -5,7 +5,7 @@ Print an XML element as plain formatted text or wrapped paragraphs,
 as appropriate. Makes the text readable on screen, and preserves the author's
 intended formatting.
 
-[The 'fold' and 'chop' templates come from original xml-to-text.xsl by Joe 
+[The 'fold' and 'chop' templates come from original xml-to-text.xsl by Joe
 Shirley.]
 
 Created 6/20/06  Richard.Fozzard@noaa.gov

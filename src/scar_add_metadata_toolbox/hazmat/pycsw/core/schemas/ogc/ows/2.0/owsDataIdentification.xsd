@@ -14,20 +14,20 @@
     encodes the parts of this class that are expected to be useful for other
     metadata. Both may be used within the Contents section of OWS service
     metadata (Capabilities) documents.
-    
+
     OWS is an OGC Standard.
     Copyright (c) 2009 Open Geospatial Consortium.
     To obtain additional rights of use, visit http://www.opengeospatial.org/legal/
     </documentation>
   </annotation>
-  
+
   <!-- ==============================================================
                 includes and imports
         ============================================================== -->
   <include schemaLocation="owsAll.xsd"/>
   <include schemaLocation="owsCommon.xsd" />
   <include schemaLocation="ows19115subset.xsd" />
-  
+
   <!-- ==============================================================
                 elements and types
         ============================================================== -->
@@ -162,8 +162,8 @@
     </annotation>
   </element>
   <!-- ==========================================================
-        The following elements could be added to the IdentificationType when useful for a 
-        specific OWS. In addition the PointOfContact element in ows19115subset.xsd could 
+        The following elements could be added to the IdentificationType when useful for a
+        specific OWS. In addition the PointOfContact element in ows19115subset.xsd could
         be added.
         ============================================================= -->
   <element name="AccessConstraints"

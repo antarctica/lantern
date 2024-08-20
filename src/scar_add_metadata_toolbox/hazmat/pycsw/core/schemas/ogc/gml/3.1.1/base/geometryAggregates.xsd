@@ -269,11 +269,11 @@ A simple link element can be used to implement pointer functionality, and this f
 		</attributeGroup>
 	</complexType>
 	<!-- =========================================================== -->
-	<!-- 
-	
+	<!--
+
 	The following types and elements are deprecated and should not be used !
 	For backward compatibility with GML2 only
-	
+
 	-->
 	<!-- =========================================================== -->
 	<element name="MultiPolygon" type="gml:MultiPolygonType" substitutionGroup="gml:_GeometricAggregate">
@@ -400,10 +400,10 @@ A simple link element can be used to implement pointer functionality, and this f
 	<element name="multiEdgeOf" type="gml:MultiCurvePropertyType"/>
 	<element name="multiCoverage" type="gml:MultiSurfacePropertyType"/>
 	<element name="multiExtentOf" type="gml:MultiSurfacePropertyType"/>
-	<!-- 
-	
+	<!--
+
 	The following types and elements are deprecated and should not be used !
-	
+
 	-->
 	<element name="multiLocation" type="gml:MultiPointPropertyType">
 		<annotation>

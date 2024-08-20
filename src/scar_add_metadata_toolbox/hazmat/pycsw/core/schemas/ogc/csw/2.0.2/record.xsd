@@ -14,7 +14,7 @@
          This schema defines the basic record types that must be supported
          by all CSW implementations. These correspond to full, summary, and
          brief views based on DCMI metadata terms.
-         
+
          CSW is an OGC Standard.
          Copyright (c) 2004,2010 Open Geospatial Consortium, Inc. All Rights Reserved.
          To obtain additional rights of use, visit http://www.opengeospatial.org/legal/ .

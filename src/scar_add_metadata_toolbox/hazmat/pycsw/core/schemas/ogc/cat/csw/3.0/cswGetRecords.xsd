@@ -94,8 +94,8 @@
          <xsd:documentation xml:lang="en">
             Governs the behaviour of a distributed search.
             hopCount     - the maximum number of message hops before
-                           the search is terminated. Each catalogue node 
-                           decrements this value when the request is received, 
+                           the search is terminated. Each catalogue node
+                           decrements this value when the request is received,
                            and must not forward the request if hopCount=0.
          </xsd:documentation>
       </xsd:annotation>
@@ -162,7 +162,7 @@
       <xsd:annotation>
          <xsd:documentation xml:lang="en">
             Specifies a query to execute against instances of one or
-            more object types. A set of ElementName elements may be included 
+            more object types. A set of ElementName elements may be included
             to specify an adhoc view of the csw30:Record instances in the
             result set. Otherwise, use ElementSetName to specify a predefined
             view.  The Constraint element contains a query filter expressed
@@ -191,8 +191,8 @@
    <xsd:simpleType name="TypeNameListType" id="TypeNameListType">
       <xsd:annotation>
          <xsd:documentation xml:lang="en">
-            The exact syntax is defined in an application profile. If querying 
-            against the common record properties, only a single type may be 
+            The exact syntax is defined in an application profile. If querying
+            against the common record properties, only a single type may be
             specified (Record).
          </xsd:documentation>
       </xsd:annotation>
@@ -254,8 +254,8 @@
    <xsd:complexType name="GetRecordsResponseType">
       <xsd:annotation>
          <xsd:documentation xml:lang="en">
-            The response message for a GetRecords request. Some or all of the 
-            matching records may be included as children of the SearchResults 
+            The response message for a GetRecords request. Some or all of the
+            matching records may be included as children of the SearchResults
             element. The RequestId is only included if the client specified it.
          </xsd:documentation>
       </xsd:annotation>
@@ -273,7 +273,7 @@
             search request.
 
             status    - status of the search
-            timestamp - the date and time when the result set was modified 
+            timestamp - the date and time when the result set was modified
                         (ISO 8601 format: YYYY-MM-DDThh:mm:ss[+|-]hh:mm).
          </xsd:documentation>
       </xsd:annotation>
@@ -282,14 +282,14 @@
    <xsd:simpleType name="ResultsStatusType" id="ResultsStatusType">
       <xsd:annotation>
          <xsd:documentation>
-            status of the items included in the resultset: 
+            status of the items included in the resultset:
 	    complete (all items found are included),
             subset (subset of items found are included, but no further
                     items in the requested range startPosition/maxRecords
-                    are available), 
+                    are available),
             processing (subset of items found are included, but server
                         further processing to get the outstanding items
-                        in the requested range startPosition/maxRecords), 
+                        in the requested range startPosition/maxRecords),
             none (no items are included).
          </xsd:documentation>
       </xsd:annotation>
@@ -304,9 +304,9 @@
       <xsd:annotation>
          <xsd:documentation>
             Includes representations of result set members if maxRecords &gt; 0.
-            The items must conform to one of the csw30:Record views or a 
-            profile-specific representation. 
-         
+            The items must conform to one of the csw30:Record views or a
+            profile-specific representation.
+
             resultSetId             - id of the result set (a URI).
             elementSet              - The element set that has been returned
                                       (e.g., "brief", "summary", "full")

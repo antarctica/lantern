@@ -29,10 +29,10 @@
    <xsd:complexType name="GetRecordByIdType" id="GetRecordByIdType">
       <xsd:annotation>
          <xsd:documentation xml:lang="en">
-            Convenience operation to retrieve default record representations 
+            Convenience operation to retrieve default record representations
             by identifier.
-            Id - object identifier (a URI) that provides a reference to a 
-                 catalogue item (or a result set if the catalogue supports 
+            Id - object identifier (a URI) that provides a reference to a
+                 catalogue item (or a result set if the catalogue supports
                  persistent result sets).
             ElementSetName - one of "brief, "summary", or "full"
          </xsd:documentation>

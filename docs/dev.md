@@ -8,6 +8,7 @@ Requirements:
 * [Poetry](https://python-poetry.org/docs/#installation) (1.8+)
 * Git (`brew install git`)
 * Docker Compose (`brew install docker-desktop`)
+* Pre-commit (`pipx install pre-commit`)
 
 Clone project
 
@@ -24,9 +25,11 @@ $ docker compose pull
 ```
 
 Set configuration as per the [Configuration](/docs/config.md) documentation:
+Install pre-commit hooks:
 
 ```
 $ cp .env.example .env
+$ pre-commit install
 ```
 
 ## Running CLI commands
@@ -384,6 +387,17 @@ In particular this tool can't check for issues that are only be detectable when 
 For consistency, it's strongly recommended to configure your IDE or other editor to use the
 [EditorConfig](https://editorconfig.org/) settings defined in [`.editorconfig`](/.editorconfig).
 
+### Pre-commit hook
+
+A set of [Pre-Commit](https://pre-commit.com) hooks are configured in
+[`.pre-commit-config.yaml`](/.pre-commit-config.yaml). These checks must pass to make a commit.
+
+To run pre-commit checks manually:
+
+```
+$ pre-commit run --all-files
+```
+
 ## Testing
 
 [pytest](https://docs.pytest.org) with a number of plugins is used to test the application. Config options are set in
@@ -538,4 +552,3 @@ The Lambda function execution environment has access to the Node.js standard lib
 
 See the [Downloads Proxy Deployment](/docs/deploy.md#downloads-proxy-deployment) subsection for information on
 releasing changes to the Download Proxy code.
-

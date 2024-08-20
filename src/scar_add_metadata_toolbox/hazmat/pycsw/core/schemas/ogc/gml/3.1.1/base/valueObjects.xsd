@@ -3,10 +3,10 @@
         attributeFormDefault="unqualified" version="3.1.1 2010-01-28">
 	<annotation>
 		<appinfo source="urn:opengis:specification:gml:schema-xsd:valueObjects:3.1.1">valueObjects.xsd</appinfo>
-		<documentation>GML conformant schema for Values in which the  
-		    * scalar Value types and lists have their values recorded in simpleContent elements 
+		<documentation>GML conformant schema for Values in which the
+		    * scalar Value types and lists have their values recorded in simpleContent elements
 		    * complex Value types are built recursively
-		    
+
 		    GML is an OGC Standard.
 		    Copyright (c) 2001,2005,2010 Open Geospatial Consortium, Inc. All Rights Reserved.
 		    To obtain additional rights of use, visit http://www.opengeospatial.org/legal/ .
@@ -19,8 +19,8 @@
 	<!-- ====================================================================== -->
 	<group name="Value">
 		<annotation>
-			<documentation>Utility choice group which unifies generic Values defined in this schema document with 
-			Geometry and Temporal objects and the Measures described above, 
+			<documentation>Utility choice group which unifies generic Values defined in this schema document with
+			Geometry and Temporal objects and the Measures described above,
 			so that any of these may be used within aggregate Values.</documentation>
 		</annotation>
 		<choice>

@@ -3,7 +3,7 @@
 	<annotation>
 		<appinfo source="urn:opengis:specification:gml:schema-xsd:coverage:3.1.1">coverage.xsd</appinfo>
 		<documentation xml:lang="en">GML Coverage schema.
-			
+
 			GML is an OGC Standard.
 			Copyright (c) 2001,2005,2010 Open Geospatial Consortium, Inc. All Rights Reserved.
 			To obtain additional rights of use, visit http://www.opengeospatial.org/legal/ .
@@ -73,10 +73,10 @@
 	<!-- =========================================================== -->
 	<complexType name="DomainSetType">
 		<annotation>
-			<documentation>The spatiotemporal domain of a coverage.  
-  Typically 
-  * a geometry collection, 
-  * an implicit geometry (e.g. a grid), 
+			<documentation>The spatiotemporal domain of a coverage.
+  Typically
+  * a geometry collection,
+  * an implicit geometry (e.g. a grid),
   * an explicit or implicit collection of time instances or periods, or
 
 N.B. Temporal geometric complexes and temporal grids are not yet implemented in GML.</documentation>
@@ -121,7 +121,7 @@ N.B. Temporal geometric complexes and temporal grids are not yet implemented in 
 	<!-- =========================================================== -->
 	<complexType name="CoverageFunctionType">
 		<annotation>
-			<documentation>The function or rule which defines the map from members of the domainSet to the range.  
+			<documentation>The function or rule which defines the map from members of the domainSet to the range.
       More functions will be added to this list</documentation>
 		</annotation>
 		<choice>
@@ -173,8 +173,8 @@ N.B. Temporal geometric complexes and temporal grids are not yet implemented in 
 	<!-- =========================================================== -->
 	<complexType name="RangeParametersType">
 		<annotation>
-			<documentation>Metadata about the rangeSet.  Definition of record structure.   
-      This is required if the rangeSet is encoded in a DataBlock.  
+			<documentation>Metadata about the rangeSet.  Definition of record structure.
+      This is required if the rangeSet is encoded in a DataBlock.
       We use a gml:_Value with empty values as a map of the composite value structure.</documentation>
 		</annotation>
 		<sequence minOccurs="0">

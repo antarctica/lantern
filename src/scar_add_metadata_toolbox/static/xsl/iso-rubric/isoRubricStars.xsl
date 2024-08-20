@@ -114,7 +114,7 @@
 -->
 
 <xsl:variable name="distOnlineResourceCnt" select="count(//gmd:distributionInfo//gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource/gmd:linkage/gmd:URL    | //gmd:distributionInfo//gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource/gmd:linkage/gmd:URL    | /*/gmd:identificationInfo/srv:SV_ServiceIdentification/srv:containsOperations/srv:SV_OperationMetadata/srv:connectPoint/gmd:CI_OnlineResource/gmd:linkage/gmd:URL)"/>
-  
+
 		<xsl:variable name="onlineResourceURLExist">
 			<xsl:choose>
 				<xsl:when test="(//gmd:CI_OnlineResource/gmd:linkage/gmd:URL)">1</xsl:when>
@@ -156,7 +156,7 @@
 			<xsl:otherwise>0</xsl:otherwise>
 			</xsl:choose>
 		</xsl:variable>
-																	    
+
 
 		<xsl:variable name="idExist">
 			<xsl:choose>
@@ -393,7 +393,7 @@
 	    -->
 	    <!-- Added   allOnlineResourceFuctionExist to get the right connection Total to fix the 4 star issue -->
 	    <xsl:variable name="connectionTotal" select="$onlineResourceURLExist + $allOnlineResourceNamesExist + $allOnlineResourceDescExist + $allOnlineResourceFunctionExist"/>
-	
+
 	<xsl:variable name="connectionMax">4</xsl:variable>
 		<xsl:variable name="distributionTotal" select="$distributorContactExist + $distributionFormatExist + $distOnlineResourceExist + $graphicOverviewExist + $dataCenterKeywordExist + $dataCenterKeywordThesaurusExist"/>
 		<xsl:variable name="distributionMax">6</xsl:variable>
@@ -417,8 +417,8 @@
 		<xsl:call-template name="showstars">
 			<xsl:with-param name="name" select="'Total Spiral'"/>
 			<xsl:with-param name="total" select="$spiralTotal"/>
-			<xsl:with-param name="max" select="$spiralMax"/> 
-    
+			<xsl:with-param name="max" select="$spiralMax"/>
+
 		</xsl:call-template>
 	</xsl:template>
 	<xsl:template name="showstars">
@@ -454,7 +454,7 @@ Max<xsl:value-of select="$max"/>
 			</xsl:when>
 			<xsl:when test="$column=4">
 				<span class="sprite star_4_0" xmlns="http://www.w3.org/1999/xhtml"></span>
-		        </xsl:when> 
+		        </xsl:when>
 	 		<xsl:otherwise>
 				<span class="sprite star_5_0" xmlns="http://www.w3.org/1999/xhtml"></span>
 			</xsl:otherwise>

@@ -167,4 +167,3 @@ r = requests.post(url=lambda_endpoint, json=lookup_item, auth=AWSSigV4('lambda')
 r.raise_for_status()
 print(r.status_code)
 ```
-

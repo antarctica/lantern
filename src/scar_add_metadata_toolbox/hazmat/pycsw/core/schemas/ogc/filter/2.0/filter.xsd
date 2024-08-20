@@ -13,7 +13,7 @@
          To obtain additional rights of use, visit http://www.opengeospatial.org/legal/ .
       </xsd:documentation>
    </xsd:annotation>
-   
+
    <xsd:include schemaLocation="filterAll.xsd"/>
    <xsd:include schemaLocation="expr.xsd"/>
    <xsd:include schemaLocation="query.xsd"/>
@@ -42,7 +42,7 @@
          <xsd:element ref="fes:temporalOps"/>
          <xsd:element ref="fes:logicOps"/>
          <xsd:element ref="fes:extensionOps"/>
-         <xsd:element ref="fes:Function"/> 
+         <xsd:element ref="fes:Function"/>
          <xsd:element ref="fes:_Id" maxOccurs="unbounded"/>
       </xsd:choice>
    </xsd:group>

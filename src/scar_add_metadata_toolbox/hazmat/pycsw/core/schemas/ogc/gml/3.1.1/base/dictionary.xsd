@@ -3,9 +3,9 @@
 	<annotation>
 		<appinfo source="urn:opengis:specification:gml:schema-xsd:dictionary:3.1.1"/>
 		<documentation>
-			Dictionary schema for GML 3.1.1 
+			Dictionary schema for GML 3.1.1
 			Components to support the lists of definitions.
-			
+
 			GML is an OGC Standard.
 			Copyright (c) 2001,2005,2010 Open Geospatial Consortium, Inc. All Rights Reserved.
 			To obtain additional rights of use, visit http://www.opengeospatial.org/legal/ .
@@ -21,9 +21,9 @@
 	<!-- ===================================================== -->
 	<group name="StandardDefinitionProperties">
 		<annotation>
-			<documentation>This content model group makes it easier to construct types that 
-      derive from DefinitionType and its descendents "by restriction".  
-      A reference to the group saves having to enumerate the standard definition properties. 
+			<documentation>This content model group makes it easier to construct types that
+      derive from DefinitionType and its descendents "by restriction".
+      A reference to the group saves having to enumerate the standard definition properties.
       See definition of StandardObjectProperties for more documentation</documentation>
 		</annotation>
 		<sequence>
@@ -37,7 +37,7 @@
 	<!-- ===================================================== -->
 	<complexType name="DefinitionType">
 		<annotation>
-			<documentation>A definition, which can be included in or referenced by a dictionary. In this extended type, the inherited "description" optional element can hold the definition whenever only text is needed. The inherited "name" elements can provide one or more brief terms for which this is the definition. The inherited "metaDataProperty" elements can be used to reference or include more information about this definition.  
+			<documentation>A definition, which can be included in or referenced by a dictionary. In this extended type, the inherited "description" optional element can hold the definition whenever only text is needed. The inherited "name" elements can provide one or more brief terms for which this is the definition. The inherited "metaDataProperty" elements can be used to reference or include more information about this definition.
 The gml:id attribute is required - it must be possible to reference this definition using this handle.  </documentation>
 		</annotation>
 		<complexContent>
@@ -84,7 +84,7 @@ The gml:id attribute is required - it must be possible to reference this definit
 	<!-- ===================================================== -->
 	<complexType name="DictionaryEntryType">
 		<annotation>
-			<documentation>An entry in a dictionary of definitions. An instance of this type contains or refers to a definition object.  
+			<documentation>An entry in a dictionary of definitions. An instance of this type contains or refers to a definition object.
 
 The number of definitions contained in this dictionaryEntry is restricted to one, but a DefinitionCollection or Dictionary that contains multiple definitions can be substituted if needed. Specialized descendents of this dictionaryEntry might be restricted in an application schema to allow only including specified types of definitions as valid entries in a dictionary. </documentation>
 		</annotation>

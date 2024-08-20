@@ -8,7 +8,7 @@
     </xd:desc>
   </xd:doc>
   <!-- 9/15/2013 - anna.milan@noaa.gov: removed tests for extent @ids, added support for gmx:Anchor or gco:CharacterString for any element (element/*) -->
-  <!-- 		July 27, 2012 - October 15, 2012: ted.habermann@noaa.gov		
+  <!-- 		July 27, 2012 - October 15, 2012: ted.habermann@noaa.gov
     Did some work to adopt the rubric to service metadata:	Paths like //gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation were changed to //gmd:identificationInfo//gmd:citation	in order to pick up titles for services in cases where no gmd:MD_DataIdentification exists.		Cleaned up and expanded the lineage paths to include embedded sources and process steps. Removed some unused variables: titleCnt, purposeCnt, some other *Cnt variables	-->
   <xsl:variable name="rubricVersion" select="'1.1.1'"/>
   <xsl:include href="./isoRubricStars.xsl"/>
@@ -18,7 +18,7 @@
     <!-- *************************************************************** -->
     <!-- calculation variables; must match variables isoRubricStars.xsl  -->
     <!-- *************************************************************** -->
-    <!--       Metadata identifier      
+    <!--       Metadata identifier
       Spirals: ISOOptionalCore, CSWCoreQueryables, Identification    -->
     <xsl:variable name="idExist">
       <xsl:choose>
@@ -688,12 +688,12 @@ gov.noaa.class:AERO100<br/> In this case gov.noaa.class is a namespace and AERO1
             <td class="reportRowHeading" colspan="1" valign="top">Describes the spatial, horizontal and/or vertical, and the temporal coverage in the resource.</td>
             <td class="reportRowHeading" colspan="1" valign="top">The bounding extent for the resource should be identified with id="boundingExtent": &lt;gmd:EX_Extent id="boundingExtent"&gt; <a href="https://geo-ide.noaa.gov/wiki/index.php?title=ISO_Extents"> More...</a></td>
             <td class="reportRowHeading" colspan="1" valign="top">//gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:westBoundLongitude
-              <br/>and<br/>              //gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:eastBoundLongitude 
-              <br/>and<br/>              //gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:northBoundLatitude 
-              <br/>and<br/>              //gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:southBoundLatitude 
-              <br/>or<br/>              //gmd:identificationInfo/srv:SV_ServiceIdentification/srv:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:westBoundLongitude 
-              <br/>and<br/>              //gmd:identificationInfo/srv:SV_ServiceIdentification/srv:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:eastBoundLongitude 
-              <br/>and<br/>              //gmd:identificationInfo/srv:SV_ServiceIdentification/srv:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:northBoundLatitude 
+              <br/>and<br/>              //gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:eastBoundLongitude
+              <br/>and<br/>              //gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:northBoundLatitude
+              <br/>and<br/>              //gmd:identificationInfo/gmd:MD_DataIdentification/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:southBoundLatitude
+              <br/>or<br/>              //gmd:identificationInfo/srv:SV_ServiceIdentification/srv:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:westBoundLongitude
+              <br/>and<br/>              //gmd:identificationInfo/srv:SV_ServiceIdentification/srv:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:eastBoundLongitude
+              <br/>and<br/>              //gmd:identificationInfo/srv:SV_ServiceIdentification/srv:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:northBoundLatitude
               <br/>and<br/>            //gmd:identificationInfo/srv:SV_ServiceIdentification/srv:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:southBoundLatitude</td>
           </tr>
           <tr>

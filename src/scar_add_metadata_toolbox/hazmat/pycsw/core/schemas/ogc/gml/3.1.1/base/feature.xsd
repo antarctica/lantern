@@ -3,7 +3,7 @@
 	<annotation>
 		<appinfo source="urn:opengis:specification:gml:schema-xsd:feature:v3.1.1"/>
 		<documentation>GML Feature schema.
-			
+
 			GML is an OGC Standard.
 			Copyright (c) 2001,2005,2010 Open Geospatial Consortium, Inc. All Rights Reserved.
 			To obtain additional rights of use, visit http://www.opengeospatial.org/legal/ .
@@ -162,8 +162,8 @@
 	<!-- ============================================================== -->
 	<complexType name="LocationPropertyType">
 		<annotation>
-			<documentation>Convenience property for generalised location.  
-      A representative location for plotting or analysis.  
+			<documentation>Convenience property for generalised location.
+      A representative location for plotting or analysis.
       Often augmented by one or more additional geometry properties with more specific semantics.</documentation>
 			<documentation>Deprecated in GML 3.1.0</documentation>
 		</annotation>

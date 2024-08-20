@@ -28,7 +28,7 @@
   <include schemaLocation="owsCommon.xsd" />
   <include schemaLocation="ows19115subset.xsd" />
   <include schemaLocation="owsDomainType.xsd" />
-  
+
   <!-- ==============================================================
                 elements and types
         ============================================================== -->

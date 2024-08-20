@@ -13,9 +13,9 @@
          To obtain additional rights of use, visit http://www.opengeospatial.org/legal/ .
       </xsd:documentation>
    </xsd:annotation>
-   
+
    <xsd:include schemaLocation="filterAll.xsd"/>
-   
+
    <xsd:element name="expression" abstract="true"/>
 
    <xsd:element name="ValueReference" type="xsd:string"
@@ -29,7 +29,7 @@
                       minOccurs="0" maxOccurs="unbounded"/>
       </xsd:sequence>
       <xsd:attribute name="name" type="xsd:string" use="required"/>
-   </xsd:complexType> 
+   </xsd:complexType>
 
    <xsd:element name="Literal" type="fes:LiteralType"
                 substitutionGroup="fes:expression"/>
@@ -41,4 +41,3 @@
    </xsd:complexType>
 
 </xsd:schema>
-

@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#358](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/358)
 * Continuous Deployment support for IT Ansible development environment
   [#396](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/396)
+* Pre-commit hook
+  [#398](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/398)
 
 ### Fixed
 

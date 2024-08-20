@@ -15,7 +15,7 @@
     double, integer, boolean, string, or URI. The allowed values can also be
     encoded for a quantity that is not explicit or not transferred, but is
     constrained by a server implementation.
-    
+
     OWS is an OGC Standard.
     Copyright (c) 2009 Open Geospatial Consortium.
     To obtain additional rights of use, visit http://www.opengeospatial.org/legal/

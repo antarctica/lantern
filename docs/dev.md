@@ -24,11 +24,9 @@ $ poetry install
 $ docker compose pull
 ```
 
-Set configuration as per the [Configuration](/docs/config.md) documentation:
 Install pre-commit hooks:
 
 ```
-$ cp .env.example .env
 $ pre-commit install
 ```
 
@@ -249,27 +247,17 @@ with OS packages, security vulnerabilities, etc.), the minimum Python version sh
 Suggested upgrade steps:
 
 1. upgrade to new Python version but keeping the same dependency versions (except `pyproj` and backports)
-2. address any code incompatibilities due to backports
-3. upgrade dependencies to their latest versions, as per the [Updating dependencies](#updating-dependencies) section
+1. address any code incompatibilities due to backports
+1. upgrade dependencies to their latest versions, as per the [Updating dependencies](#updating-dependencies) section
 
-In more detail for step 1:
+For step (1):
 
-1. in `poetry.toml` change special `python` dependency to new Python version (e.g. `^3.8`)
-2. if using `pyenv`, switch to the latest patch release of new Python version (e.g. 3.8.15)
-3. re-create the virtual environment to check all dependencies install correctly [1]
-4. run application tests manually
-5. update the base image used in `gitlab-ci.Dockerfile` to match the new Python version (e.g. `python:3.8-alpine`)
-7. check whether the [`pyproj`](#upgrading-pyproj-dependency) dependency can be updated
-
-[1]
-
-```
-$ rm -rf .venv
-$ poetry install
-```
-1. change any packages that are pinned in `poetry.toml` due to Python version to their latest major versions
-2. run `poetry upgrade` to upgrade dependencies
+1. if using `pyenv`, switch to the latest patch release of new Python version (e.g. 3.8.15)
+1. in `poetry.toml` change `python` dependency to new Python version (e.g. `^3.8`)
+1. re-create the virtual environment to check all dependencies install correctly (`rm -rf .venv && poetry install`)
+1. run application [Tests](#pytest) manually
 1. update the base image used in the [CI container](#ci-container) to the new Python version (e.g. `python:3.8-alpine`)
+1. check whether the [`pyproj`](#upgrading-pyproj-dependency) dependency can be updated
 
 ### Upgrading `pyproj` dependency
 
@@ -292,8 +280,8 @@ of Alpine. Care therefore needs to be taken if the version of Python used is old
 available within this container image:
 
 ```
-$  proj -v
 $ docker run -it --rm docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox/ci-cd:latest ash
+$ proj -v
 proj_create: unrecognized format / unknown name
 Rel. 9.0.0, March 1st, 2022
 <proj>:
@@ -307,12 +295,11 @@ If these dependencies can be satisfied for all target platforms, it is safe to u
 ### Updating `bas-metadata-libray` dependency
 
 Special care should be taken when the `bas-metadata-library` switches to a new
-[record configuration version](https://gitlab.data.bas.ac.uk/uk-pdc/metadata-infrastructure/metadata-library#supported-configuration-versions).
+[Record Configuration Version](https://github.com/antarctica/metadata-library?tab=readme-ov-file#supported-configuration-versions).
 
-**Note:** When this is not the case, and the record configuration has not changed, this dependency can be upgraded like
-any other and this section skipped.
+**Note:** When this is not the case this dependency can be upgraded like any other and this section skipped.
 
-To upgrade, a multi-stage process should be followed to manage the rate of change. At each stage application tests
+To upgrade, a multi-stage process should be followed to manage the rate of change. At each stage, application tests
 should be re-run to ensure regressions are not introduced. Additional (edge) test cases may need to be added to the
 test suite as real world testing/deployment uncovers unforeseen regressions.
 
@@ -358,6 +345,8 @@ properties, or new properties added for the additional property if that makes mo
 
 ## Linting
 
+### Ruff
+
 [Ruff](https://docs.astral.sh/ruff/) is used to lint and format Python files. Specific checks and config options are
 set in [`pyproject.toml`](/pyproject.toml). Linting checks are run automatically in
 [Continuous Integration](#continuous-integration).
@@ -399,6 +388,8 @@ $ pre-commit run --all-files
 ```
 
 ## Testing
+
+### Pytest
 
 [pytest](https://docs.pytest.org) with a number of plugins is used to test the application. Config options are set in
 [`pyproject.toml`](/pyproject.toml). Tests checks are run automatically in
@@ -516,12 +507,6 @@ The Flask application's configuration (`app.config`) is populated from an enviro
 New configuration options should be added to the base config class as properties, overridden as needed in environment
 subclasses. Where a configuration should be configurable at runtime it should be read as an environment variable and
 documented in the [Configuration](/docs/config.md) documentation.
-
-## File paths
-
-Use Python's [`pathlib`](https://docs.python.org/3.8/library/pathlib.html) library for file paths.
-
-Where displaying a file path to the user, use the absolute/resolved form to aid in debugging.
 
 ## Templates
 

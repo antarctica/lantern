@@ -21,20 +21,9 @@ The deployment [Python package](#python-package) is deployed as a WSGI applicati
 - [Playbook 🛡️](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/playbooks/magic/add-metadata-toolbox.yml)
 - [Inventory 🛡️](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/tree/master/inventory/magic)
 
-This application is deployed to a development, staging and production environment. Deployments to the staging and
-production environments can only be performed by BAS IT.
-
-### Deploy to development environment
-
-In the relevant deployment branch:
-
-1. update the [`add_toolbox_version`](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/group_vars/magic/add-metadata-toolbox.yml#L11) variable
-1. run Ansible playbook for app as a server: `invoke ansible -e dev magic/add-metadata-toolbox-server`
-1. run Ansible playbook for app as a client: `invoke ansible -e dev magic/add-metadata-toolbox-client`
-1. push the branch back to GitLab
-
-See the [MAGIC](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/README.MAGIC.md#setup)
-notes for how to run Ansible deployments.
+This application is deployed to a development, staging and production environment. Development deployments are
+automatic via [Continuous Deployment](#continuous-deployment). Deployments to the staging and production environments
+can only be performed by BAS IT.
 
 ### Running CLI commands
 

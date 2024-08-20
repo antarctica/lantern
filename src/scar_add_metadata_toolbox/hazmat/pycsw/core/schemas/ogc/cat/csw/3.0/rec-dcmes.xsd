@@ -10,15 +10,15 @@
    <xs:annotation>
       <xs:documentation source="http://dublincore.org/documents/dces/"
          xml:lang="en">
-         This schema declares XML elements for the 15 Dublin Core elements in 
+         This schema declares XML elements for the 15 Dublin Core elements in
          the "http://purl.org/dc/elements/1.1/" namespace.
       </xs:documentation>
    </xs:annotation>
    <xs:complexType name="SimpleLiteral" mixed="true">
       <xs:annotation>
          <xs:documentation xml:lang="en">
-            This is the default type for all of the DC elements. It defines a 
-            complexType SimpleLiteral which permits mixed content but disallows 
+            This is the default type for all of the DC elements. It defines a
+            complexType SimpleLiteral which permits mixed content but disallows
             child elements by use of minOcccurs/maxOccurs. However, this
             complexType  does permit the derivation of other types which
             would permit child elements. The scheme attribute may be used
@@ -40,7 +40,7 @@
       substitutionGroup="dc:DC-element">
       <xs:annotation>
          <xs:documentation xml:lang="en">
-            A name given to the resource. Typically, Title will be a name by 
+            A name given to the resource. Typically, Title will be a name by
             which the resource is formally known.
          </xs:documentation>
       </xs:annotation>
@@ -60,9 +60,9 @@
       substitutionGroup="dc:DC-element">
       <xs:annotation>
          <xs:documentation xml:lang="en">
-            A topic of the content of the resource. Typically, Subject will be 
-            expressed as keywords, key phrases, or classification codes that 
-            describe a topic of the resource. Recommended best practice is to 
+            A topic of the content of the resource. Typically, Subject will be
+            expressed as keywords, key phrases, or classification codes that
+            describe a topic of the resource. Recommended best practice is to
             select a value from a controlled vocabulary or formal
             classification  scheme.
          </xs:documentation>
@@ -72,9 +72,9 @@
       substitutionGroup="dc:DC-element">
       <xs:annotation>
          <xs:documentation xml:lang="en">
-            An account of the content of the resource. Examples of Description 
-            include, but are not limited to, an abstract, table of contents, 
-            reference to a graphical representation of content, or free-text 
+            An account of the content of the resource. Examples of Description
+            include, but are not limited to, an abstract, table of contents,
+            reference to a graphical representation of content, or free-text
             account of the content.
          </xs:documentation>
       </xs:annotation>
@@ -94,7 +94,7 @@
       substitutionGroup="dc:DC-element">
       <xs:annotation>
          <xs:documentation xml:lang="en">
-            An entity responsible for making contributions to the content of 
+            An entity responsible for making contributions to the content of
             the resource. Examples of Contributor include a person, an
             organization,  or a service. Typically, the name of a Contributor
             should be used to  indicate the entity.
@@ -117,7 +117,7 @@
       substitutionGroup="dc:DC-element">
       <xs:annotation>
          <xs:documentation xml:lang="en">
-            The nature or genre of the content of the resource. Type includes 
+            The nature or genre of the content of the resource. Type includes
             terms describing general categories, functions, genres, or
             aggregation levels for content. Recommended best practice is to
             select a value from a controlled vocabulary (for example, the
@@ -130,10 +130,10 @@
       substitutionGroup="dc:DC-element">
       <xs:annotation>
          <xs:documentation xml:lang="en">
-            The physical or digital manifestation of the resource. Typically, 
-            Format will include the media-type or dimensions of the resource. 
-            Format may be used to identify the software, hardware, or other 
-            equipment needed to display or operate the resource. Examples of 
+            The physical or digital manifestation of the resource. Typically,
+            Format will include the media-type or dimensions of the resource.
+            Format may be used to identify the software, hardware, or other
+            equipment needed to display or operate the resource. Examples of
             dimensions include size and duration. Recommended best practice
             is to select a value from a controlled vocabulary (for example,
             the list of Internet Media Types defining computer media formats).
@@ -144,8 +144,8 @@
       substitutionGroup="dc:DC-element">
       <xs:annotation>
          <xs:documentation xml:lang="en">
-            An unambiguous reference to the resource within a given context. 
-            Recommended best practice is to identify the resource by means of a 
+            An unambiguous reference to the resource within a given context.
+            Recommended best practice is to identify the resource by means of a
             string or number conforming to a formal identification system.
             Formal identification systems include but are not limited to the
             Uniform Resource Identifier (URI) (including the Uniform Resource
@@ -170,7 +170,7 @@
       substitutionGroup="dc:DC-element">
       <xs:annotation>
          <xs:documentation xml:lang="en">
-            A language of the intellectual content of the resource. Recommended 
+            A language of the intellectual content of the resource. Recommended
             best practice is to use RFC 3066, which, in conjunction with ISO
             639, defines two- and three-letter primary language tags with
             optional subtags. Examples include "en" or "eng" for English,
@@ -182,8 +182,8 @@
    <xs:element name="relation" type="dc:SimpleLiteral"
       substitutionGroup="dc:DC-element">
       <xs:annotation>
-         <xs:documentation xml:lang="en">A reference to a related resource. Recommended best practice is to 
-      identify the referenced resource by means of a string or number 
+         <xs:documentation xml:lang="en">A reference to a related resource. Recommended best practice is to
+      identify the referenced resource by means of a string or number
       conforming to a formal identification system.</xs:documentation>
       </xs:annotation>
    </xs:element>
@@ -191,8 +191,8 @@
       substitutionGroup="dc:DC-element">
       <xs:annotation>
          <xs:documentation xml:lang="en">
-            The extent or scope of the content of the resource. Typically, 
-            Coverage will include spatial location (a place name or geographic 
+            The extent or scope of the content of the resource. Typically,
+            Coverage will include spatial location (a place name or geographic
             coordinates), temporal period (a period label, date, or date
             range), or jurisdiction (such as a named administrative entity).
             Recommended best practice is to select a value from a controlled
@@ -207,8 +207,8 @@
       substitutionGroup="dc:DC-element">
       <xs:annotation>
          <xs:documentation xml:lang="en">
-            Information about rights held in and over the resource. Typically, 
-            Rights will contain a rights management statement for the resource, 
+            Information about rights held in and over the resource. Typically,
+            Rights will contain a rights management statement for the resource,
             or reference a service providing such information. Rights
             information often encompasses Intellectual Property Rights (IPR),
             Copyright, and various Property Rights. If the Rights element is
@@ -220,7 +220,7 @@
    <xs:group name="DC-element-set">
       <xs:annotation>
          <xs:documentation xml:lang="en">
-            This group is included as a convenience for schema authors who need 
+            This group is included as a convenience for schema authors who need
             to refer to all the elements in the
             "http://purl.org/dc/elements/1.1/" namespace.
          </xs:documentation>

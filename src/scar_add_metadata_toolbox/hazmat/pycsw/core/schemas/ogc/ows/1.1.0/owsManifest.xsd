@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema targetNamespace="http://www.opengis.net/ows/1.1" 
-xmlns:ows="http://www.opengis.net/ows/1.1" 
-xmlns:xlink="http://www.w3.org/1999/xlink" 
-xmlns="http://www.w3.org/2001/XMLSchema" 
+<schema targetNamespace="http://www.opengis.net/ows/1.1"
+xmlns:ows="http://www.opengis.net/ows/1.1"
+xmlns:xlink="http://www.w3.org/1999/xlink"
+xmlns="http://www.w3.org/2001/XMLSchema"
 elementFormDefault="qualified" version="1.1.0.3" xml:lang="en">
 	<annotation>
 		<appinfo>owsManifest.xsd</appinfo>
 		<documentation>This XML Schema Document specifies types and elements for document or resource references and for package manifests that contain multiple references. The contents of each type and element specified here can be restricted and/or extended for each use in a specific OWS specification.
-		
+
 		OWS is an OGC Standard.
 		Copyright (c) 2006,2010 Open Geospatial Consortium.
 		To obtain additional rights of use, visit http://www.opengeospatial.org/legal/ .

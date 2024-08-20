@@ -5,8 +5,8 @@
 	<xsl:import href="printTextLines.xsl"/>
 	<xsl:output method="html" indent="no"/>
 	<!-- Global parameters -->
-	<!-- 
-  g-tag-translation-URI 
+	<!--
+  g-tag-translation-URI
     This parameter specifies the URI of the external document
     containing the lookup table for the tag name translation. The
     default is the name of a file in the same directory as the
@@ -36,7 +36,7 @@
     and 'print-lines' to print lines with line breaks preserved as in
     the source XML document. If unspecified, or if an invalid choice
     is specified, 'print-lines' will be used.
-  
+
   [OBSOLETE: replaced by printFormatted template]
 -->
 	<xsl:param name="g-text-field-handler" select="'print-lines'"/>
@@ -118,7 +118,7 @@
 					<xsl:value-of select="$newline"/>
 				</xsl:if>
 				<!-- Call the imported printFormatted template to print both
-            preformatted text and word-wrapped paragraphs. 
+            preformatted text and word-wrapped paragraphs.
             This will parse each line, and call back to the
             printFormattedLine and printParagraphLine templates
             in this file. -->
@@ -143,6 +143,6 @@
 	<!--
   Text formatting template. Use existing line breaks. Indent each line
   to the current indent level. Return the next line each time the template
-  is called.  
+  is called.
   -->
 </xsl:stylesheet>

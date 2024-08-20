@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema targetNamespace="http://www.opengis.net/ows/1.1" 
-xmlns:ows="http://www.opengis.net/ows/1.1" 
-xmlns:xlink="http://www.w3.org/1999/xlink" 
-xmlns="http://www.w3.org/2001/XMLSchema" 
+<schema targetNamespace="http://www.opengis.net/ows/1.1"
+xmlns:ows="http://www.opengis.net/ows/1.1"
+xmlns:xlink="http://www.w3.org/1999/xlink"
+xmlns="http://www.w3.org/2001/XMLSchema"
 elementFormDefault="qualified" version="1.1.0.3" xml:lang="en">
 	<annotation>
 		<appinfo>owsDataIdentification.xsd</appinfo>
 		<documentation>This XML Schema Document encodes the parts of the MD_DataIdentification class of ISO 19115 (OGC Abstract Specification Topic 11) which are expected to be used for most datasets. This Schema also encodes the parts of this class that are expected to be useful for other metadata. Both may be used within the Contents section of OWS service metadata (Capabilities) documents.
-		
+
 		OWS is an OGC Standard.
 		Copyright (c) 2006,2010 Open Geospatial Consortium.
 		To obtain additional rights of use, visit http://www.opengeospatial.org/legal/ .
@@ -103,8 +103,8 @@ This type shall be extended if needed for specific OWS use to include additional
 		</annotation>
 	</element>
 	<!-- ==========================================================
-	The following elements could be added to the IdentificationType when useful for a 
-	specific OWS. In addition the PointOfContact element in ows19115subset.xsd could 
+	The following elements could be added to the IdentificationType when useful for a
+	specific OWS. In addition the PointOfContact element in ows19115subset.xsd could
 	be added.
 	============================================================= -->
 	<element name="AccessConstraints" type="string">

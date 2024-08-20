@@ -3,7 +3,7 @@
 	<annotation>
 		<appinfo source="urn:opengis:specification:gml:schema-xsd:observation:3.1.1">observation.xsd</appinfo>
 		<documentation>Observation schema for GML 3.1
-			
+
 			GML is an OGC Standard.
 			Copyright (c) 2001,2005,2010 Open Geospatial Consortium, Inc. All Rights Reserved.
 			To obtain additional rights of use, visit http://www.opengeospatial.org/legal/ .

@@ -181,10 +181,10 @@ A simple link element can be used to implement pointer functionality, and this f
 		</choice>
 	</complexType>
 	<!-- =========================================================== -->
-	<!-- 
-	
+	<!--
+
 	The following types and elements are deprecated and should not be used !
-	
+
 	-->
 	<!-- =========================================================== -->
 	<element name="polygonProperty" type="gml:PolygonPropertyType">

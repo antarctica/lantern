@@ -11,7 +11,7 @@
     <documentation>This XML Schema Document encodes the common
     "ServiceProvider" section of the GetCapabilities operation response, known
     as the Capabilities XML document. This section encodes the
-    SV_ServiceProvider class of ISO 19119 (OGC Abstract Specification Topic 12). 
+    SV_ServiceProvider class of ISO 19119 (OGC Abstract Specification Topic 12).
 
     OWS is an OGC Standard.
     Copyright (c) 2009 Open Geospatial Consortium.

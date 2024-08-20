@@ -17,7 +17,7 @@
 	<!-- =========================================================== -->
 	<complexType name="CurveType">
 		<annotation>
-			<documentation>Curve is a 1-dimensional primitive. Curves are continuous, connected, and have a measurable length in terms of the coordinate system. 
+			<documentation>Curve is a 1-dimensional primitive. Curves are continuous, connected, and have a measurable length in terms of the coordinate system.
 				A curve is composed of one or more curve segments. Each curve segment within a curve may be defined using a different interpolation method. The curve segments are connected to one another, with the end point of each segment except the last being the start point of the next segment in the segment list.
 				The orientation of the curve is positive.</documentation>
 		</annotation>
@@ -456,7 +456,7 @@ uses the control points and control parameters to determine the position of this
 		<annotation>
 			<documentation>An offset curve is a curve at a constant
 		 distance from the basis curve. They can be useful as a cheap
-		 and simple alternative to constructing curves that are offsets	
+		 and simple alternative to constructing curves that are offsets
 		 by definition.</documentation>
 		</annotation>
 		<complexContent>
@@ -472,7 +472,7 @@ uses the control points and control parameters to determine the position of this
 						<annotation>
 							<documentation>distance is the distance at which the
 							 offset curve is generated from the basis curve. In 2D systems, positive distances
-							 are to be to the left of the basis curve, and the negative distances are to be to the 
+							 are to be to the left of the basis curve, and the negative distances are to be to the
 							 right of the basis curve.</documentation>
 						</annotation>
 					</element>
@@ -480,26 +480,26 @@ uses the control points and control parameters to determine the position of this
 						<annotation>
 							<documentation>refDistance is used to define the vector
        direction of the offset curve from the basis curve. It can
-       be omitted in the 2D case, where the distance can be 
+       be omitted in the 2D case, where the distance can be
        positive or negative. In that case, distance defines left
        side (positive distance) or right side (negative distance)
        with respect to the tangent to the basis curve.
 
-       In 3D the basis curve shall have a well defined tangent 
-       direction for every point. The offset curve at any point 
+       In 3D the basis curve shall have a well defined tangent
+       direction for every point. The offset curve at any point
        in 3D, the basis curve shall have a well-defined tangent
        direction for every point. The offset curve at any point
        (parameter) on the basis curve c is in the direction
-       -   -   -         -               
-       s = v x t  where  v = c.refDirection()  
+       -   -   -         -
+       s = v x t  where  v = c.refDirection()
        and
        -
        t = c.tangent()
                                                     -
        For the offset direction to be well-defined, v shall not
-       on any point of the curve be in the same, or opposite, 
+       on any point of the curve be in the same, or opposite,
        direction as
-       - 
+       -
        t.
 
        The default value of the refDirection shall be the local
@@ -523,52 +523,52 @@ uses the control points and control parameters to determine the position of this
 		<annotation>
 			<documentation>A placement takes a standard geometric
    construction and places it in geographic space. It defines a
-   transformation from a constructive parameter space to the 
-   co-ordinate space of the co-ordinate reference system being used.  
-   Parameter spaces in formulae in this International Standard are 
-   given as (u, v) in 2D and(u, v, w) in 3D. Co-ordinate reference 
-   systems positions are given in formulae, in this International 
+   transformation from a constructive parameter space to the
+   co-ordinate space of the co-ordinate reference system being used.
+   Parameter spaces in formulae in this International Standard are
+   given as (u, v) in 2D and(u, v, w) in 3D. Co-ordinate reference
+   systems positions are given in formulae, in this International
    Standard, by either (x, y) in 2D, or (x, y, z) in 3D.
 
-   Affine placements are defined by linear transformations from 
-   parameter space to the target co-ordiante space. 2-dimensional 
+   Affine placements are defined by linear transformations from
+   parameter space to the target co-ordiante space. 2-dimensional
    Cartesian parameter space,(u,v) transforms into 3-dimensional co-
-   ordinate reference systems,(x,y,z) by using an affine 
+   ordinate reference systems,(x,y,z) by using an affine
    transformation,(u,v)->(x,y,z) which is defined :
 
 	x	ux vx  	x0
-			 u	  
+			 u
 	y =	uy vy   + y0
-			 v		
+			 v
 	x	uz vz	z0
-	
-   Then, given this equation, the location element of the 
+
+   Then, given this equation, the location element of the
    AffinePlacement is the direct position (x0, y0, z0), which is the
    target position of the origin in (u, v). The two reference
-   directions (ux, uy, uz) and (vx, vy, vz) are the target     
+   directions (ux, uy, uz) and (vx, vy, vz) are the target
    directions of the unit vectors at the origin in (u, v).</documentation>
 		</annotation>
 		<sequence>
 			<element name="location" type="gml:DirectPositionType">
 				<annotation>
-					<documentation>The location property gives 
-     the target of the parameter space origin. This is the vector  
+					<documentation>The location property gives
+     the target of the parameter space origin. This is the vector
     (x0, y0, z0) in the formulae above.</documentation>
 				</annotation>
 			</element>
 			<element name="refDirection" type="gml:VectorType" maxOccurs="unbounded">
 				<annotation>
-					<documentation>The attribute refDirection gives the    
-target directions for the co-ordinate basis vectors of the  
-parameter space. These are the columns of the matrix in the 
-formulae given above. The number of directions given shall be 
-inDimension. The dimension of the directions shall be 
+					<documentation>The attribute refDirection gives the
+target directions for the co-ordinate basis vectors of the
+parameter space. These are the columns of the matrix in the
+formulae given above. The number of directions given shall be
+inDimension. The dimension of the directions shall be
 outDimension.</documentation>
 				</annotation>
 			</element>
 			<element name="inDimension" type="positiveInteger">
 				<annotation>
-					<documentation>Dimension of the constructive parameter 
+					<documentation>Dimension of the constructive parameter
      space.</documentation>
 				</annotation>
 			</element>
@@ -589,17 +589,17 @@ outDimension.</documentation>
    In suitably chosen co-ordinates it is given by Fresnel's
    integrals.
 
-    x(t) = 0-integral-t cos(AT*T/2)dT    
-    
+    x(t) = 0-integral-t cos(AT*T/2)dT
+
     y(t) = 0-integral-t sin(AT*T/2)dT
-   
+
    This geometry is mainly used as a transition curve between
    curves of type straight line to circular arc or circular arc
-   to circular arc. With this curve type it is possible to 
+   to circular arc. With this curve type it is possible to
    achieve a C2-continous transition between the above mentioned
    curve types. One formula for the Clothoid is A*A = R*t where
    A is constant, R is the varying radius of curvature along the
-   the curve and t is the length along and given in the Fresnel 
+   the curve and t is the length along and given in the Fresnel
    integrals.</documentation>
 		</annotation>
 		<complexContent>
@@ -610,8 +610,8 @@ outDimension.</documentation>
 							<sequence>
 								<element ref="gml:AffinePlacement">
 									<annotation>
-										<documentation>The "refLocation" is an affine mapping 
-          that places  the curve defined by the Fresnel Integrals  
+										<documentation>The "refLocation" is an affine mapping
+          that places  the curve defined by the Fresnel Integrals
           into the co-ordinate reference system of this object.</documentation>
 									</annotation>
 								</element>
@@ -632,7 +632,7 @@ outDimension.</documentation>
        used in the Fresnel integral and is the value of the
        constructive parameter of this curve segment at its start
        point. The startParameter can either be positive or
-       negative. 
+       negative.
        NOTE! If 0.0 (zero), lies between the startParameter and
        the endParameter of the clothoid, then the curve goes
        through the clothoid's inflection point, and the direction
@@ -665,7 +665,7 @@ outDimension.</documentation>
    geodesic segments. The type essentially combines a sequence of
    Geodesic into a single object.
    The GeodesicString is computed from two or more positions and an
-   interpolation using geodesics defined from the geoid (or 
+   interpolation using geodesics defined from the geoid (or
    ellipsoid) of the co-ordinate reference system being used.</documentation>
 		</annotation>
 		<complexContent>
@@ -679,7 +679,7 @@ outDimension.</documentation>
 						<documentation>The attribute "interpolation" specifies the
      curve interpolation mechanism used for this segment. This
      mechanism uses the control points and control parameters to
-     determine the position of this curve segment. For an 
+     determine the position of this curve segment. For an
      GeodesicString the interpolation is fixed as "geodesic".</documentation>
 					</annotation>
 				</attribute>
@@ -709,8 +709,8 @@ outDimension.</documentation>
 	<!-- =========================================================== -->
 	<complexType name="CubicSplineType">
 		<annotation>
-			<documentation>Cubic splines are similar to line strings in that they are a sequence of segments each with its own defining function. A cubic spline uses the control points and a set of derivative parameters to define a piecewise 3rd degree polynomial interpolation. Unlike line-strings, the parameterization by arc length is not necessarily still a polynomial. 
-				The function describing the curve must be C2, that is, have a continuous 1st and 2nd derivative at all points, and pass through the controlPoints in the order given. Between the control points, the curve segment is defined by a cubic polynomial. At each control point, the polynomial changes in such a manner that the 1st and 2nd derivative vectors are the same from either side. The control parameters record must contain vectorAtStart, and vectorAtEnd which are the unit tangent vectors at controlPoint[1] and controlPoint[n] where n = controlPoint.count. 
+			<documentation>Cubic splines are similar to line strings in that they are a sequence of segments each with its own defining function. A cubic spline uses the control points and a set of derivative parameters to define a piecewise 3rd degree polynomial interpolation. Unlike line-strings, the parameterization by arc length is not necessarily still a polynomial.
+				The function describing the curve must be C2, that is, have a continuous 1st and 2nd derivative at all points, and pass through the controlPoints in the order given. Between the control points, the curve segment is defined by a cubic polynomial. At each control point, the polynomial changes in such a manner that the 1st and 2nd derivative vectors are the same from either side. The control parameters record must contain vectorAtStart, and vectorAtEnd which are the unit tangent vectors at controlPoint[1] and controlPoint[n] where n = controlPoint.count.
 				Note: only the direction of the vectors is relevant, not their length.</documentation>
 		</annotation>
 		<complexContent>
@@ -1156,13 +1156,13 @@ NOTE: This definition allows for a nested structure, i.e. a CompositeCurve may u
    horizontal curves for each integer offset are calculated
    and evaluated at "s". The defines a sequence of control
    points:
-   
-   cn(s) : s  1 .....columns 
+
+   cn(s) : s  1 .....columns
 
    From this sequence a vertical curve is calculated for "s",
    and evaluated at "t". In most cases, the order of
    calculation (horizontal-vertical vs. vertical-horizontal)
-   does not make a difference. Where it does, the horizontal-   
+   does not make a difference. Where it does, the horizontal-
    vertical order shall be the one used.
 
    Logically, any pair of curve interpolation types can lead
@@ -1176,9 +1176,9 @@ NOTE: This definition allows for a nested structure, i.e. a CompositeCurve may u
 					<group ref="gml:PointGrid">
 						<annotation>
 							<documentation>This is the double indexed sequence
-       of control points, given in row major form. 
+       of control points, given in row major form.
        NOTE! There in no assumption made about the shape
-       of the grid. 
+       of the grid.
        For example, the positions need not effect a "21/2D"
        surface, consecutive points may be equal in any or all
        of the ordinates. Further, the curves in either or both
@@ -1211,11 +1211,11 @@ NOTE: This definition allows for a nested structure, i.e. a CompositeCurve may u
    NOTE! A 5-point ellipse with all defining positions identical
    is a point. Thus, a truncated elliptical cone can be given as a
    2x5 set of control points
-   ((P1, P1, P1, P1, P1), (P2, P3, P4, P5, P6)). P1 is the apex 
+   ((P1, P1, P1, P1, P1), (P2, P3, P4, P5, P6)). P1 is the apex
    of the cone. P2, P3,P4, P5 and P6 are any five distinct points
    around the base ellipse of the cone. If the horizontal curves
    are circles as opposed to ellipses, the a circular cone can
-   be constructed using ((P1, P1, P1),(P2, P3, P4)). The apex most     
+   be constructed using ((P1, P1, P1),(P2, P3, P4)). The apex most
    not coinside with the other plane.</documentation>
 		</annotation>
 		<complexContent>
@@ -1253,21 +1253,21 @@ NOTE: This definition allows for a nested structure, i.e. a CompositeCurve may u
 			<documentation>A sphere is a gridded surface given as a
    family of circles whose positions vary linearly along the
    axis of the sphere, and whise radius varies in proportions to
-   the cosine function of the central angle. The horizontal 
+   the cosine function of the central angle. The horizontal
    circles resemble lines of constant latitude, and the vertical
-   arcs resemble lines of constant longitude. 
+   arcs resemble lines of constant longitude.
    NOTE! If the control points are sorted in terms of increasing
    longitude, and increasing latitude, the upNormal of a sphere
    is the outward normal.
    EXAMPLE If we take a gridded set of latitudes and longitudes
    in degrees,(u,v) such as
 
-	(-90,-180)  (-90,-90)  (-90,0)  (-90,  90) (-90, 180) 
-	(-45,-180)  (-45,-90)  (-45,0)  (-45,  90) (-45, 180) 
+	(-90,-180)  (-90,-90)  (-90,0)  (-90,  90) (-90, 180)
+	(-45,-180)  (-45,-90)  (-45,0)  (-45,  90) (-45, 180)
 	(  0,-180)  (  0,-90)  (  0,0)  (  0,  90) (  0, 180)
 	( 45,-180)  ( 45,-90)  ( 45,0)  ( 45, -90) ( 45, 180)
 	( 90,-180)  ( 90,-90)  ( 90,0)  ( 90, -90) ( 90, 180)
-   
+
    And map these points to 3D using the usual equations (where R
    is the radius of the required sphere).
 
@@ -1279,7 +1279,7 @@ NOTE: This definition allows for a nested structure, i.e. a CompositeCurve may u
    surface. Notice that the entire first row and the entire last
    row of the control points map to a single point in each 3D
    Euclidean space, North and South poles respectively, and that
-   each horizontal curve closes back on itself forming a 
+   each horizontal curve closes back on itself forming a
    geometric cycle. This gives us a metrically bounded (of finite
    size), topologically unbounded (not having a boundary, a
    cycle) surface.</documentation>
@@ -1297,7 +1297,7 @@ NOTE: This definition allows for a nested structure, i.e. a CompositeCurve may u
 	<complexType name="PolyhedralSurfaceType">
 		<annotation>
 			<documentation>A polyhedral surface is a surface composed
-   of polygon surfaces connected along their common boundary 
+   of polygon surfaces connected along their common boundary
    curves. This differs from the surface type only in the
    restriction on the types of surface patches acceptable.</documentation>
 		</annotation>
@@ -1307,7 +1307,7 @@ NOTE: This definition allows for a nested structure, i.e. a CompositeCurve may u
 					<group ref="gml:StandardObjectProperties"/>
 					<element ref="gml:polygonPatches">
 						<annotation>
-							<documentation>This property encapsulates the patches of 
+							<documentation>This property encapsulates the patches of
       the polyhedral surface.</documentation>
 						</annotation>
 					</element>
@@ -1319,14 +1319,14 @@ NOTE: This definition allows for a nested structure, i.e. a CompositeCurve may u
 	<element name="polygonPatches" type="gml:PolygonPatchArrayPropertyType" substitutionGroup="gml:patches">
 		<annotation>
 			<documentation>This property element contains a list of
-   polygon patches. The order of the patches is significant and 
+   polygon patches. The order of the patches is significant and
    shall be preserved when processing the list.</documentation>
 		</annotation>
 	</element>
 	<!-- ======================================================== -->
 	<complexType name="PolygonPatchArrayPropertyType">
 		<annotation>
-			<documentation>This type defines a container for an array of 
+			<documentation>This type defines a container for an array of
    polygon patches.</documentation>
 		</annotation>
 		<complexContent>
@@ -1341,14 +1341,14 @@ NOTE: This definition allows for a nested structure, i.e. a CompositeCurve may u
 	<element name="trianglePatches" type="gml:TrianglePatchArrayPropertyType" substitutionGroup="gml:patches">
 		<annotation>
 			<documentation>This property element contains a list of
-   triangle patches. The order of the patches is significant and 
+   triangle patches. The order of the patches is significant and
    shall be preserved when processing the list.</documentation>
 		</annotation>
 	</element>
 	<!-- ======================================================== -->
 	<complexType name="TrianglePatchArrayPropertyType">
 		<annotation>
-			<documentation>This type defines a container for an array of 
+			<documentation>This type defines a container for an array of
      triangle patches.</documentation>
 		</annotation>
 		<complexContent>
@@ -1364,7 +1364,7 @@ NOTE: This definition allows for a nested structure, i.e. a CompositeCurve may u
 	<!-- ======================================================== -->
 	<complexType name="TriangulatedSurfaceType">
 		<annotation>
-			<documentation>A triangulated surface is a polyhedral 
+			<documentation>A triangulated surface is a polyhedral
    surface that is composed only of triangles. There is no
    restriction on how the triangulation is derived.</documentation>
 		</annotation>
@@ -1374,7 +1374,7 @@ NOTE: This definition allows for a nested structure, i.e. a CompositeCurve may u
 					<group ref="gml:StandardObjectProperties"/>
 					<element ref="gml:trianglePatches">
 						<annotation>
-							<documentation>This property encapsulates the patches of 
+							<documentation>This property encapsulates the patches of
       the triangulated surface.</documentation>
 						</annotation>
 					</element>
@@ -1389,9 +1389,9 @@ NOTE: This definition allows for a nested structure, i.e. a CompositeCurve may u
 		<annotation>
 			<documentation>A tin is a triangulated surface that uses
    the Delauny algorithm or a similar algorithm complemented with
-   consideration of breaklines, stoplines, and maximum length of 
+   consideration of breaklines, stoplines, and maximum length of
    triangle sides. These networks satisfy the Delauny's criterion
-   away from the modifications: Fore each triangle in the 
+   away from the modifications: Fore each triangle in the
    network, the circle passing through its vertices does not
    contain, in its interior, the vertex of any other triangle.</documentation>
 		</annotation>
@@ -1405,7 +1405,7 @@ NOTE: This definition allows for a nested structure, i.e. a CompositeCurve may u
        In the area of these pathologies, triangles intersecting
        a stopline shall be removed from the tin surface, leaving
        holes in the surface. If coincidence occurs on surface
-       boundary triangles, the result shall be a change of the 
+       boundary triangles, the result shall be a change of the
        surface boundary. Stoplines contains all these
        pathological segments as a set of line strings.</documentation>
 						</annotation>
@@ -1423,23 +1423,23 @@ NOTE: This definition allows for a nested structure, i.e. a CompositeCurve may u
 					</element>
 					<element name="maxLength" type="gml:LengthType">
 						<annotation>
-							<documentation>Areas of the surface where data is not 
-       sufficiently dense to assure reasonable calculation shall be    
-       removed by adding a retention criterion for triangles based 
-       on the length of their sides. For many triangle sides  
-       exceeding maximum length, the adjacent triangles to that 
+							<documentation>Areas of the surface where data is not
+       sufficiently dense to assure reasonable calculation shall be
+       removed by adding a retention criterion for triangles based
+       on the length of their sides. For many triangle sides
+       exceeding maximum length, the adjacent triangles to that
        triangle side shall be removed from the surface.</documentation>
 						</annotation>
 					</element>
 					<element name="controlPoint">
 						<annotation>
-							<documentation>The corners of the triangles in the TIN 
-  are often referred to as pots. ControlPoint shall contain a 
-  set of the GM_Position used as posts for this TIN. Since each  
-  TIN contains triangles, there must be at least 3 posts. The 
-       order in which these points are given does not affect the 
-       surface that is represented. Application schemas may add 
-       information based on ordering of control points to facilitate 
+							<documentation>The corners of the triangles in the TIN
+  are often referred to as pots. ControlPoint shall contain a
+  set of the GM_Position used as posts for this TIN. Since each
+  TIN contains triangles, there must be at least 3 posts. The
+       order in which these points are given does not affect the
+       surface that is represented. Application schemas may add
+       information based on ordering of control points to facilitate
        the reconstruction of the TIN from the control points.</documentation>
 						</annotation>
 						<complexType>

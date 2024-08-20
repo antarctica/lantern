@@ -15,7 +15,7 @@
     to define the Contents section for a specific OWS, all other relevant
     parts defined in owsContents.xsd shall be used by the "ContentsType" in
     the wxsContents.xsd prepared for the specific OWS.
-    
+
     OWS is an OGC Standard.
     Copyright (c) 2009 Open Geospatial Consortium.
     To obtain additional rights of use, visit http://www.opengeospatial.org/legal/
@@ -26,7 +26,7 @@
         ============================================================== -->
   <include schemaLocation="owsAll.xsd"/>
   <include schemaLocation="owsDataIdentification.xsd" />
-  
+
   <!-- ==============================================================
                 elements and types
         ============================================================== -->

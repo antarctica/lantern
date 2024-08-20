@@ -40,7 +40,7 @@
                               match exactly; including case)
             ResourceType    - normally a URI that specifies the type of
                               the resource being unharvested.
-            ResponseHandler - a reference to some endpoint to which the 
+            ResponseHandler - a reference to some endpoint to which the
                               response shall be forwarded when the
                               unharvest operation has been completed
          </xsd:documentation>

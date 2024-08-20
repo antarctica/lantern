@@ -616,7 +616,7 @@
 	<name tagname="gmx:characterSet">Character set</name>
 	<name tagname="gmx:FileName">File Name</name>
 	<name tagname="gmx:MX_ScopeCode">MX_ScopeCode</name>
-	<name tagname="gmx:MimeFileType">Mime File Type</name>	
+	<name tagname="gmx:MimeFileType">Mime File Type</name>
 	<!-- === Biological Extensions                              -->
 	<name tagname="gmd:taxonomy">Taxonomy</name>
 	<name tagname="gmd:MD_TaxonSys">Taxonomic System</name>

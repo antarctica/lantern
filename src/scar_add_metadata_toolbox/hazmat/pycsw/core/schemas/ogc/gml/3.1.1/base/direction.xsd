@@ -4,7 +4,7 @@
 	<annotation>
 		<appinfo source="urn:opengis:specification:gml:schema-xsd:direction:3.1.1">direction.xsd</appinfo>
 		<documentation>This schema defines "direction" element and type.
-			
+
 			GML is an OGC Standard.
 			Copyright (c) 2001,2005,2010 Open Geospatial Consortium, Inc. All Rights Reserved.
 			To obtain additional rights of use, visit http://www.opengeospatial.org/legal/ .

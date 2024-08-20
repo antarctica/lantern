@@ -2,16 +2,16 @@
 <schema targetNamespace="http://www.opengis.net/gml" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:gml="http://www.opengis.net/gml" elementFormDefault="qualified" version="3.1.1 2010-01-28">
 	<annotation>
 		<appinfo source="urn:opengis:specification:gml:schema-xsd:temporalTopology:3.1.1"/>
-		<documentation xml:lang="en">The temporal topology schema for ISO19136 provides constructs for handling topological complexes and 
-		temporal feature relationships. 
-		Temporal geometric characteristics of features are represented as instants and periods. 
-		While, temporal context of features that does not relate to the position of time is described as connectivity relationships 
-		among instants and periods. These relationships are called temporal topology as they do not change in time, 
-		as long as the direction of time does not change. 
-		It is used effectively in the case of describing a family tree expressing evolution of species, an ecological cycle, 
+		<documentation xml:lang="en">The temporal topology schema for ISO19136 provides constructs for handling topological complexes and
+		temporal feature relationships.
+		Temporal geometric characteristics of features are represented as instants and periods.
+		While, temporal context of features that does not relate to the position of time is described as connectivity relationships
+		among instants and periods. These relationships are called temporal topology as they do not change in time,
+		as long as the direction of time does not change.
+		It is used effectively in the case of describing a family tree expressing evolution of species, an ecological cycle,
 		a lineage of lands or buildings, or a history of separation and merger of administrative boundaries.
 		This schema reflects a partial yet consistent implementation of the model described in ISO 19108:2002.
-		
+
 		GML is an OGC Standard.
 		Copyright (c) 2001,2005,2010 Open Geospatial Consortium, Inc. All Rights Reserved.
 		To obtain additional rights of use, visit http://www.opengeospatial.org/legal/ .
@@ -45,8 +45,8 @@
 	<complexType name="TimeTopologyComplexPropertyType">
 		<annotation>
 			<documentation>A time topology complex property can either be any time topology complex element
-			 encapsulated in an element of this type or an XLink reference to a remote time topology complex element 
-			 (where remote includes elements located elsewhere in the same document). 
+			 encapsulated in an element of this type or an XLink reference to a remote time topology complex element
+			 (where remote includes elements located elsewhere in the same document).
 			 Note that either the reference or the contained element must be given, but not both or none.</documentation>
 		</annotation>
 		<sequence minOccurs="0">
@@ -79,8 +79,8 @@
 	<complexType name="TimeTopologyPrimitivePropertyType">
 		<annotation>
 			<documentation>A time topology primitive property can either hold any time topology complex element
-			 eor carry an XLink reference to a remote time topology complex element 
-			 (where remote includes elements located elsewhere in the same document). 
+			 eor carry an XLink reference to a remote time topology complex element
+			 (where remote includes elements located elsewhere in the same document).
 			 Note that either the reference or the contained element must be given, but not both or none.</documentation>
 		</annotation>
 		<sequence minOccurs="0">
@@ -93,9 +93,9 @@
 	<!-- ================================================================== -->
 	<element name="TimeNode" type="gml:TimeNodeType" substitutionGroup="gml:_TimeTopologyPrimitive">
 		<annotation>
-			<documentation xml:lang="en">"TimeNode" is a zero dimensional temporal topology primitive, 
+			<documentation xml:lang="en">"TimeNode" is a zero dimensional temporal topology primitive,
 			expresses a position in topological time, and is a start and an end of time edge, which represents states of time.
-			Time node may be isolated. However, it cannot describe the ordering relationships with other primitives. 
+			Time node may be isolated. However, it cannot describe the ordering relationships with other primitives.
 			An isolated node may not be an element of any temporal topology complex.</documentation>
 		</annotation>
 	</element>
@@ -117,8 +117,8 @@
 	<!-- ================================================================== -->
 	<complexType name="TimeNodePropertyType">
 		<annotation>
-			<documentation>A time node property can either be any time node element encapsulated in an element of this type 
-			or an XLink reference to a remote time node element (where remote includes elements located elsewhere in the same document). 
+			<documentation>A time node property can either be any time node element encapsulated in an element of this type
+			or an XLink reference to a remote time node element (where remote includes elements located elsewhere in the same document).
 			Note that either the reference or the contained element must be given, but not both or none.</documentation>
 		</annotation>
 		<sequence minOccurs="0">
@@ -132,7 +132,7 @@
 	<element name="TimeEdge" type="gml:TimeEdgeType" substitutionGroup="gml:_TimeTopologyPrimitive">
 		<annotation>
 			<documentation xml:lang="en">TimeEdge is one dimensional temporal topology primitive,
-			 expresses a state in topological time. It has an orientation from its start toward the end, 
+			 expresses a state in topological time. It has an orientation from its start toward the end,
 			 and its boundaries shall associate with two different time nodes.</documentation>
 		</annotation>
 	</element>
@@ -154,8 +154,8 @@
 	<!-- ================================================================== -->
 	<complexType name="TimeEdgePropertyType">
 		<annotation>
-			<documentation>A time edge property can either be any time edge element encapsulated in an element of this type 
-			or an XLink reference to a remote time edge element (where remote includes elements located elsewhere in the same document). 
+			<documentation>A time edge property can either be any time edge element encapsulated in an element of this type
+			or an XLink reference to a remote time edge element (where remote includes elements located elsewhere in the same document).
 			Note that either the reference or the contained element must be given, but not both or none.</documentation>
 		</annotation>
 		<sequence minOccurs="0">
@@ -168,11 +168,11 @@
 	<!-- ================================================================== -->
 	<simpleType name="SuccessionType">
 		<annotation>
-			<documentation>Feature succession is a semantic relationship derived from evaluation of observer, and 
-			Feature Substitution, Feature Division and Feature Fusion are defined as associations between 
-			previous features and next features in the temporal context. 
-			Successions shall be represented in either following two ways. 
-			* define a temporal topological complex element as a feature element 
+			<documentation>Feature succession is a semantic relationship derived from evaluation of observer, and
+			Feature Substitution, Feature Division and Feature Fusion are defined as associations between
+			previous features and next features in the temporal context.
+			Successions shall be represented in either following two ways.
+			* define a temporal topological complex element as a feature element
 			* define an association same as temporal topological complex between features.</documentation>
 		</annotation>
 		<restriction base="string">

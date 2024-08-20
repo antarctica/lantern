@@ -30,7 +30,7 @@ Geometric aggregates (i.e. instances of a subtype of gml:AbstractGeometricAggreg
 	</complexType>
 	<element name="MultiGeometry" type="gml:MultiGeometryType" substitutionGroup="gml:AbstractGeometricAggregate">
 		<annotation>
-			<documentation>gml:MultiGeometry is a collection of one or more GML geometry objects of arbitrary type. 
+			<documentation>gml:MultiGeometry is a collection of one or more GML geometry objects of arbitrary type.
 The members of the geometric aggregate may be specified either using the "standard" property (gml:geometryMember) or the array property (gml:geometryMembers). It is also valid to use both the "standard" and the array properties in the same collection.</documentation>
 		</annotation>
 	</element>

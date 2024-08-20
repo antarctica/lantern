@@ -4,8 +4,8 @@ title: SCAR ADD CSW - Usage
 
 ## General information
 
-This API provides access to records in the 
-[SCAR ADD Data Catalogue](http://data.bas.ac.uk/collections/e74543c0-4c4e-4b41-aa33-5bb2f67df389/) using the 
+This API provides access to records in the
+[SCAR ADD Data Catalogue](http://data.bas.ac.uk/collections/e74543c0-4c4e-4b41-aa33-5bb2f67df389/) using the
 [OGC CSW](https://www.ogc.org/standards/cat) standard (Open Geospatial Consortium, Catalogue Services for the Web).
 
 This can be used to search/filter and retrieve records in their raw ISO 19115 form. If authenticated, this API can also
@@ -15,51 +15,51 @@ This API is part of the [SCAR ADD Metadata Toolbox](https://github.com/antarctic
 
 ### Support
 
-Limited, best efforts, support is offered for this API. 
+Limited, best efforts, support is offered for this API.
 
 Contact the [BAS Service Desk](mailto:servicedesk@bas.ac.uk) in the first instance.
 
 ### Information handling
 
-This API is provided by the [British Antarctic Survey (BAS)](https://www.bas.ac.uk) on behalf of the 
-[Scientific Committee on Antarctic Research (SCAR)](https://www.scar.org). BAS is part of 
+This API is provided by the [British Antarctic Survey (BAS)](https://www.bas.ac.uk) on behalf of the
+[Scientific Committee on Antarctic Research (SCAR)](https://www.scar.org). BAS is part of
 [UK Research and Innovation (URKI)](https://www.ukri.org), who are the legal operator of this service.
 
-Reasonable policies and technical measures are in place to ensure information in this API is held and transferred 
-securely. Where third parties are used to operate this API, they are used for a necessary task with measures in place 
+Reasonable policies and technical measures are in place to ensure information in this API is held and transferred
+securely. Where third parties are used to operate this API, they are used for a necessary task with measures in place
 to ensure they are used appropriately and securely.
 
 Third party services used by this API are:
 
 * Sentry - for monitoring API errors, which may include API responses
 
-[Seek support](#support) if you have any questions about how information is used by this API is used or managed. If you 
+[Seek support](#support) if you have any questions about how information is used by this API is used or managed. If you
 do not receive a prompt reply, you can contact the [BAS Freedom of Information Officer](mailto:foi@bas.ac.uk) directly.
 
 ### Security disclosures
 
-[Seek support](#support) to disclose any security concerns with this API. Contact us first for instructions if you need 
+[Seek support](#support) to disclose any security concerns with this API. Contact us first for instructions if you need
 to report any sensitive information.
 
 ### Versioning policy
 
 This API is versioned. An API version must be specified as a URL prefix (e.g. `/v1`).
 
-Only the latest, stable, API version is supported. When a new version is released, all previous versions are deprecated 
-to allow clients time to move to a supported version. After a period of time, deprecated versions are retired and no 
+Only the latest, stable, API version is supported. When a new version is released, all previous versions are deprecated
+to allow clients time to move to a supported version. After a period of time, deprecated versions are retired and no
 longer accessible.
 
 ## Technical information
 
 ### Standards support
 
-This API implements [OGC CSW 2.0.2](http://portal.opengeospatial.org/files/?artifact_id=20555), including the 
+This API implements [OGC CSW 2.0.2](http://portal.opengeospatial.org/files/?artifact_id=20555), including the
 transactional profile for modifying records.
 
 #### CSW Output Schemas
 
 Only the `http://www.isotc211.org/2005/gmd` (ISO 19115/19139) output schema is officially supported by this API.
- 
+
 ### Content Types
 
 Only the `text/xml` content type is officially supported by this API.
@@ -85,7 +85,7 @@ automatically generated value.
 
 ### Authentication and authorisation
 
-Parts of this API require authentication and suitable authorisation to access. This will be highlighted in the 
+Parts of this API require authentication and suitable authorisation to access. This will be highlighted in the
 [Usage](#usage) section where it applies.
 
 ## Usage

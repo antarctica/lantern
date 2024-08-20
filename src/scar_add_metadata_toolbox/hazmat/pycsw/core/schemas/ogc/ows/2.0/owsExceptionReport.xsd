@@ -9,7 +9,7 @@
     <appinfo>owsExceptionReport.xsd</appinfo>
     <documentation>This XML Schema Document encodes the Exception Report
     response to all OWS operations.
-	
+
     OWS is an OGC Standard.
     Copyright (c) 2009 Open Geospatial Consortium.
     To obtain additional rights of use, visit http://www.opengeospatial.org/legal/ .

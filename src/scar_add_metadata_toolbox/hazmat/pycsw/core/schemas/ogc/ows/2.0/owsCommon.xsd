@@ -10,7 +10,7 @@
     <appinfo>owsCommon.xsd</appinfo>
     <documentation>This XML Schema Document encodes various parameters and
     parameter types that can be used in OWS operation requests and responses.
-    
+
     OWS is an OGC Standard.
     Copyright (c) 2009 Open Geospatial Consortium.
     To obtain additional rights of use, visit http://www.opengeospatial.org/legal/

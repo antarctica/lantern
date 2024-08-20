@@ -2,24 +2,24 @@
 <xsd:schema id="csw-ebrim-iri"
   targetNamespace="http://www.opengis.net/cat/wrs/1.0/iri"
   xmlns:iri="http://www.opengis.net/cat/wrs/1.0/iri"
-  xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
-  elementFormDefault="qualified" 
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  elementFormDefault="qualified"
   version="1.0.1">
 
   <xsd:annotation>
-    <xsd:documentation xml:lang="en" 
+    <xsd:documentation xml:lang="en"
       source="http://www.w3.org/TR/wsdl20-adjuncts/#http-binding">
-    This schema defines content models for HTTP request messages that may be 
-    serialized into the query string portion of the URI or into the message body 
-    in accord with the WSDL HTTP binding rules for the IRI style. The schemas 
-    defined in the base specifications do not adhere to the rules for the IRI 
+    This schema defines content models for HTTP request messages that may be
+    serialized into the query string portion of the URI or into the message body
+    in accord with the WSDL HTTP binding rules for the IRI style. The schemas
+    defined in the base specifications do not adhere to the rules for the IRI
     style and thus cannot be used for this purpose.
     </xsd:documentation>
   </xsd:annotation>
 
   <xsd:element name="GetCapabilities">
     <xsd:annotation>
-      <xsd:documentation 
+      <xsd:documentation
         source="http://portal.opengeospatial.org/files/?artifact_id=8798">
         See OGC 05-008c1, cl. 7.2.1.</xsd:documentation>
     </xsd:annotation>
@@ -35,10 +35,10 @@
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
- 
+
   <xsd:element name="GetRecordById">
   <xsd:annotation>
-    <xsd:documentation 
+    <xsd:documentation
       source="http://portal.opengeospatial.org/files/?artifact_id=20555">
     See OGC 07-006r1, cl. 10.9.2</xsd:documentation>
     </xsd:annotation>
@@ -57,10 +57,10 @@
 
   <xsd:element name="GetRecords">
   <xsd:annotation>
-    <xsd:documentation 
+    <xsd:documentation
       source="http://portal.opengeospatial.org/files/?artifact_id=20555">
     See OGC 07-006r1, cl. 10.8.2. Some optional CSW parameters have been elided.
-    Matching items are returned as rim:RegistryObject elements that include 
+    Matching items are returned as rim:RegistryObject elements that include
     the "summary" element set.</xsd:documentation>
     </xsd:annotation>
     <xsd:complexType>
@@ -74,7 +74,7 @@
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
-  
+
   <xsd:element name="GetRepositoryItem">
   <xsd:annotation>
     <xsd:documentation>
@@ -89,7 +89,7 @@
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
-  
+
   <xsd:element name="Query">
   <xsd:annotation>
     <xsd:documentation>
@@ -106,7 +106,7 @@
       </xsd:sequence>
     </xsd:complexType>
   </xsd:element>
-  
+
   <xsd:simpleType name="AcceptVersionsType">
     <xsd:annotation>
       <xsd:documentation xml:lang="en">
@@ -117,7 +117,7 @@
       <xsd:pattern value="(\d+\.\d{1,2}\.\d{1,2},?)+" />
     </xsd:restriction>
   </xsd:simpleType>
-  
+
   <xsd:simpleType name="CommaSeparatedListType">
     <xsd:annotation>
       <xsd:documentation xml:lang="en">
@@ -128,7 +128,7 @@
       <xsd:pattern value="([\w:\.\-/]+,?)+" />
     </xsd:restriction>
   </xsd:simpleType>
-  
+
   <xsd:simpleType name="ElementSetType">
     <xsd:restriction base="xsd:string">
       <xsd:enumeration value="brief" />
@@ -136,7 +136,7 @@
       <xsd:enumeration value="full" />
     </xsd:restriction>
   </xsd:simpleType>
-  
+
   <xsd:simpleType name="ResultType">
     <xsd:restriction base="xsd:string">
       <xsd:enumeration value="hits" />

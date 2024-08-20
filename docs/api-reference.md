@@ -22,4 +22,3 @@ Equivalent to running the CLI commands `flask site build-record <record_id>` and
 - `403 Forbidden`: The client is not authenticated
 - `404 Not Found`: The record with the specified ID was not found
 - `500 Internal Server Error`: There was an error accessing the CSW or generating the pages
-

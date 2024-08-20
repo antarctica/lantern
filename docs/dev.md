@@ -538,4 +538,3 @@ The Lambda function execution environment has access to the Node.js standard lib
 
 See the [Downloads Proxy Deployment](/docs/deploy.md#downloads-proxy-deployment) subsection for information on
 releasing changes to the Download Proxy code.
-

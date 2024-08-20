@@ -12,10 +12,10 @@ Created 6/20/06  Richard.Fozzard@noaa.gov
 The stylesheet that imports this file needs to define two callback templates:
     printFormattedLine  Output a line, preserving all formatting (whitespace)
     printParagraphLine  Output a line as a continuous paragraph (word-wrapped)
-both with the param "line", the one line string to print. 
+both with the param "line", the one line string to print.
 
-Each callback template then outputs the "line" string as desired (e.g. HTML, 
-text, XML). These templates can have some optional params which printFormatted 
+Each callback template then outputs the "line" string as desired (e.g. HTML,
+text, XML). These templates can have some optional params which printFormatted
 will pass through as needed:
     "restOfString"  Useful for doing something different at the end, e.g. no <P>
     "optional-param-1"  Useful for passing indent values
@@ -47,7 +47,7 @@ printFormatted template with the params:
 	<xsl:template name="printFormatted">
 		<!-- string to print out -->
 		<xsl:param name="elementContent"/>
-		<!-- Name of element to wrap a sequence of formatted lines. 
+		<!-- Name of element to wrap a sequence of formatted lines.
             Set to empty string for no element, i.e. plain text output. -->
 		<xsl:param name="formattedSectionElement" select="'PRE'"/>
 		<!-- used internally to skip 1 or more formatted lines -->
@@ -96,7 +96,7 @@ printFormatted template with the params:
 									</xsl:call-template>
 								</xsl:element>
 							</xsl:when>
-							<!-- else if no element specified, 
+							<!-- else if no element specified,
                             output a formatted section (1 or more lines) directly -->
 							<xsl:otherwise>
 								<xsl:call-template name="printFormattedSection">
@@ -183,7 +183,7 @@ printFormatted template with the params:
   Strip the leading white space (including newlines or other characters
   that get translated to white space by normalize-space) from a block
   of text.
-  
+
   [Stolen from somewhere on the web using Google.]
 -->
 	<xsl:template name="strip-leading-whitespace">
@@ -204,7 +204,7 @@ printFormatted template with the params:
   Strip the trailing white space (including newlines or other characters
   that get translated to white space by normalize-space) from a block
   of text.
-  
+
   [Stolen from somewhere on the web using Google.]
 -->
 	<xsl:template name="strip-trailing-whitespace">

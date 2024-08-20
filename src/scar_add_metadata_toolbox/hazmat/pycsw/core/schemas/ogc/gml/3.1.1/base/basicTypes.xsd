@@ -4,7 +4,7 @@
     <appinfo source="urn:opengis:specification:gml:schema-xsd:basicTypes:3.1.1">basicTypes.xsd</appinfo>
     <documentation>
     Generic simpleContent components for use in GML
-    
+
     GML is an OGC Standard.
     Copyright (c) 2001,2005,2010 Open Geospatial Consortium, Inc. All Rights Reserved.
     To obtain additional rights of use, visit http://www.opengeospatial.org/legal/ .
@@ -13,19 +13,19 @@
   <!-- =========================================================== -->
   <simpleType name="NullEnumeration">
     <annotation>
-      <documentation> Some common reasons for a null value:   
-			
+      <documentation> Some common reasons for a null value:
+
         innapplicable - the object does not have a value
-        missing - The correct value is not readily available to the sender of this data.  
+        missing - The correct value is not readily available to the sender of this data.
                            Furthermore, a correct value may not exist.
         template - the value will be available later
-        unknown - The correct value is not known to, and not computable by, the sender of this data. 
+        unknown - The correct value is not known to, and not computable by, the sender of this data.
                            However, a correct value probably exists.
-        withheld - the value is not divulged 
-        
+        withheld - the value is not divulged
+
         other:reason - as indicated by "reason" string
-        
-        Specific communities may agree to assign more strict semantics when these terms are used in a particular context.  
+
+        Specific communities may agree to assign more strict semantics when these terms are used in a particular context.
       </documentation>
     </annotation>
     <union>
@@ -57,7 +57,7 @@
   <!-- ===================================================== -->
   <simpleType name="SignType">
     <annotation>
-      <documentation>Utility type used in various places 
+      <documentation>Utility type used in various places
       - e.g. to indicate the direction of topological objects;
       "+" for forwards, or "-" for backwards.</documentation>
     </annotation>
@@ -160,10 +160,10 @@
   <!-- =========================================================== -->
   <complexType name="CodeType">
     <annotation>
-      <documentation>Name or code with an (optional) authority.  Text token.  
-      If the codeSpace attribute is present, then its value should identify a dictionary, thesaurus 
-      or authority for the term, such as the organisation who assigned the value, 
-      or the dictionary from which it is taken.  
+      <documentation>Name or code with an (optional) authority.  Text token.
+      If the codeSpace attribute is present, then its value should identify a dictionary, thesaurus
+      or authority for the term, such as the organisation who assigned the value,
+      or the dictionary from which it is taken.
       A text string with an optional codeSpace attribute. </documentation>
     </annotation>
     <simpleContent>
@@ -175,9 +175,9 @@
   <!-- =========================================================== -->
   <complexType name="CodeListType">
     <annotation>
-      <documentation>List of values on a uniform nominal scale.  List of text tokens.   
-      In a list context a token should not include any spaces, so xsd:Name is used instead of xsd:string.   
-      If a codeSpace attribute is present, then its value is a reference to 
+      <documentation>List of values on a uniform nominal scale.  List of text tokens.
+      In a list context a token should not include any spaces, so xsd:Name is used instead of xsd:string.
+      If a codeSpace attribute is present, then its value is a reference to
       a Reference System for the value, a dictionary or code list.</documentation>
     </annotation>
     <simpleContent>
@@ -189,10 +189,10 @@
   <!-- =========================================================== -->
   <complexType name="CodeOrNullListType">
     <annotation>
-      <documentation>List of values on a uniform nominal scale.  List of text tokens.   
-      In a list context a token should not include any spaces, so xsd:Name is used instead of xsd:string.  
-      A member of the list may be a typed null.  
-      If a codeSpace attribute is present, then its value is a reference to 
+      <documentation>List of values on a uniform nominal scale.  List of text tokens.
+      In a list context a token should not include any spaces, so xsd:Name is used instead of xsd:string.
+      A member of the list may be a typed null.
+      If a codeSpace attribute is present, then its value is a reference to
       a Reference System for the value, a dictionary or code list.</documentation>
     </annotation>
     <simpleContent>
@@ -204,7 +204,7 @@
   <!-- =========================================================== -->
   <complexType name="MeasureType">
     <annotation>
-      <documentation>Number with a scale.  
+      <documentation>Number with a scale.
       The value of uom (Units Of Measure) attribute is a reference to a Reference System for the amount, either a ratio or position scale. </documentation>
     </annotation>
     <simpleContent>
@@ -216,8 +216,8 @@
   <!-- =========================================================== -->
   <complexType name="MeasureListType">
     <annotation>
-      <documentation>List of numbers with a uniform scale.  
-      The value of uom (Units Of Measure) attribute is a reference to 
+      <documentation>List of numbers with a uniform scale.
+      The value of uom (Units Of Measure) attribute is a reference to
       a Reference System for the amount, either a ratio or position scale. </documentation>
     </annotation>
     <simpleContent>
@@ -229,9 +229,9 @@
   <!-- =========================================================== -->
   <complexType name="MeasureOrNullListType">
     <annotation>
-      <documentation>List of numbers with a uniform scale.  
-      A member of the list may be a typed null. 
-      The value of uom (Units Of Measure) attribute is a reference to 
+      <documentation>List of numbers with a uniform scale.
+      A member of the list may be a typed null.
+      The value of uom (Units Of Measure) attribute is a reference to
       a Reference System for the amount, either a ratio or position scale. </documentation>
     </annotation>
     <simpleContent>
@@ -243,13 +243,13 @@
   <!-- =========================================================== -->
   <complexType name="CoordinatesType">
     <annotation>
-      <documentation>Tables or arrays of tuples.  
-        May be used for text-encoding of values from a table.  
-        Actually just a string, but allows the user to indicate which characters are used as separators.  
-        The value of the 'cs' attribute is the separator for coordinate values, 
-        and the value of the 'ts' attribute gives the tuple separator (a single space by default); 
+      <documentation>Tables or arrays of tuples.
+        May be used for text-encoding of values from a table.
+        Actually just a string, but allows the user to indicate which characters are used as separators.
+        The value of the 'cs' attribute is the separator for coordinate values,
+        and the value of the 'ts' attribute gives the tuple separator (a single space by default);
         the default values may be changed to reflect local usage.
-        Defaults to CSV within a tuple, space between tuples.  
+        Defaults to CSV within a tuple, space between tuples.
         However, any string content will be schema-valid.  </documentation>
     </annotation>
     <simpleContent>

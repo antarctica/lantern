@@ -16,13 +16,13 @@
     and the XML element names were all capitalized, for consistency with other
     OWS Schemas. This document also provides a simple coding of text in
     multiple languages, simplified from Annex J of ISO 19115.
-		
+
     OWS is an OGC Standard.
     Copyright (c) 2009 Open Geospatial Consortium.
     To obtain additional rights of use, visit http://www.opengeospatial.org/legal/ .
     </documentation>
   </annotation>
-  
+
   <!-- ==============================================================
                 includes and imports
         ============================================================== -->

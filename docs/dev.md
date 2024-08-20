@@ -185,12 +185,7 @@ To add a new (development) dependency:
 $ poetry add (--group dev) [dependency]
 ```
 
-Then update the Docker image used for CI/CD builds and push to the BAS Docker Registry (which is provided by GitLab):
-
-```shell
-$ docker build -f gitlab-ci.Dockerfile -t docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox:latest .
-$ docker push docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox:latest
-```
+The [CI container](#ci-container) will be rebuilt by GitLab automatically whenever dependencies change.
 
 ### Vulnerability scanning
 
@@ -226,7 +221,7 @@ To update packages within their allowed constraints:
 $ poetry update
 ```
 
-After updating, see the instructions above to update the Docker image used in CI/CD.
+The [CI container](#ci-container) will be rebuilt by GitLab automatically whenever dependencies change.
 
 To update dependencies to their latest versions:
 
@@ -261,9 +256,7 @@ In more detail for step 1:
 3. re-create the virtual environment to check all dependencies install correctly [1]
 4. run application tests manually
 5. update the base image used in `gitlab-ci.Dockerfile` to match the new Python version (e.g. `python:3.8-alpine`)
-6. rebuild the `gitlab-ci.Dockerfile` (the Docker image used for CI/CD builds) [2]
 7. check whether the [`pyproj`](#upgrading-pyproj-dependency) dependency can be updated
-8. push the updated container to the BAS Docker Registry [3]
 
 [1]
 
@@ -271,21 +264,9 @@ In more detail for step 1:
 $ rm -rf .venv
 $ poetry install
 ```
-
-[2]
-
-```
-$ docker build -f gitlab-ci.Dockerfile -t docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox:latest .
-```
-
-[3]
-
-```
-$ docker push docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox:latest
-```
-
 1. change any packages that are pinned in `poetry.toml` due to Python version to their latest major versions
 2. run `poetry upgrade` to upgrade dependencies
+1. update the base image used in the [CI container](#ci-container) to the new Python version (e.g. `python:3.8-alpine`)
 
 ### Upgrading `pyproj` dependency
 
@@ -300,15 +281,16 @@ The *pyproj* website documents the minimum version of PROJ and Python required f
 * PROJ 8.2
 
 For development, in addition to local development environments (where it's assumed any version requirements can be met),
-the container used for CI/CD in GitLab needs to be checked. This container is defined in `gitlab-ci.Dockerfile` and
-used the Alpine Python base image corresponding to the minimum Python version used by the package. Newer Alpine
-releases are used for newer versions of Python, and newer versions of PROJ are packaged for newer versions of Alpine.
-Care therefore needs to be taken if the version of Python used is old. To check the version of PROJ available within
-this container image:
+the [CI Container](#ci-container) needs to be checked. This container uses the Alpine Python base image corresponding
+to the minimum Python version used by the package.
+
+Newer Alpine releases are used for newer versions of Python, and newer versions of PROJ are packaged for newer versions
+of Alpine. Care therefore needs to be taken if the version of Python used is old. To check the version of PROJ
+available within this container image:
 
 ```
-$ docker run -it --rm docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox:latest ash
 $  proj -v
+$ docker run -it --rm docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox/ci-cd:latest ash
 proj_create: unrecognized format / unknown name
 Rel. 9.0.0, March 1st, 2022
 <proj>:
@@ -476,6 +458,13 @@ def test_foo():
 ### Continuous Integration
 
 All commits will trigger Continuous Integration using GitLab's CI/CD platform, configured in `.gitlab-ci.yml`.
+
+#### CI container
+
+To improve performance, CI jobs use a Docker container defined by a [`Dockerfile`](/support/ci-cd/Dockerfile)) that
+pre-installs project [Dependencies](#dependencies). GitLab manages this container, automatically updating it if these
+dependencies change. The container image is stored in the project
+[Docker Registry 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/container_registry).
 
 ### Test Records
 

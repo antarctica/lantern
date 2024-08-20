@@ -5,6 +5,7 @@ include:
   - template: 'Workflows/MergeRequest-Pipelines.gitlab-ci.yml'
 
 stages:
+  - 💥 setup
   - 🧪 test
   - 📋 lint
   - 🏗 build
@@ -13,6 +14,9 @@ stages:
   - 📣 release
 
 variables:
+  # Docker
+  IMAGE_NAME: $CI_REGISTRY_IMAGE/ci-cd:latest
+
   # App
   FLASK_ENV: testing
 
@@ -37,9 +41,7 @@ variables:
   # - OP_SERVICE_ACCOUNT_TOKEN
   #   - https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=hialzwumkpxfor6oyqto4legpm&h=magic.1password.eu
 
-image:
-  name: docker-registry.data.bas.ac.uk/magic/add-metadata-toolbox:latest
-  entrypoint: [""]
+image: $IMAGE_NAME
 
 .before_script_python: &before_script_python
   - "ln -s /.venv .venv"
@@ -56,9 +58,31 @@ image:
 
 # Jobs
 
+ci_container:
+  stage: 💥 setup
+  needs: []
+  image: docker:25-dind
+  services:
+    - docker:dind
+  before_script:
+    - echo "$CI_REGISTRY_PASSWORD" | docker login -u "$CI_REGISTRY_USER" "$CI_REGISTRY" --password-stdin
+    - cp support/ci-cd/Dockerfile .
+  script:
+    - docker build -t container .
+    - docker tag container $IMAGE_NAME
+    - docker push $IMAGE_NAME
+  rules:
+    - changes:
+      - Dockerfile
+      - poetry.lock
+  tags:
+    - dnd
+
 pytest:
   stage: 🧪 test
-  needs: []
+  needs:
+    - job: ci_container
+      optional: true
   before_script:
     - *before_script_python
   script:
@@ -82,7 +106,9 @@ pytest:
 
 ruff:
   stage: 📋 lint
-  needs: []
+  needs:
+    - job: ci_container
+      optional: true
   before_script:
     - *before_script_python
   script:
@@ -97,7 +123,9 @@ ruff:
 
 safety:
   stage: 📋 lint
-  needs: []
+  needs:
+    - job: ci_container
+      optional: true
   before_script:
     - *before_script_python
   script:
@@ -111,7 +139,9 @@ safety:
 
 build:
   stage: 🏗 build
-  needs: []
+  needs:
+    - job: ci_container
+      optional: true
   before_script:
     - *before_script_python
   script:

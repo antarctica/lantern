@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.7.1] - 2024-08-24
+
 ### Fixed
 
 * GitLab CI variable used to set GitLab PyPi registry in Continuous Deployment

@@ -29,27 +29,7 @@ polices are defined by this project to assign permissions to use these functions
 
 **WARNING!** Some or all lookup items in the staging environment MAY be removed at anytime.
 
-* Staging instance:
-  * S3 bucket (AWS Console 🔒): `https://s3.console.aws.amazon.com/s3/buckets/add-catalogue-downloads-proxy-stage?region=eu-west-1&tab=objects`
-  * Lambda function (Read, AWS Console 🔒): `https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/add-catalogue-downloads-proxy-stage`
-  * Lambda function (Read, HTTP Endpoint): `https://vp3wuemex36unyzbzx76g4pnce0henks.lambda-url.eu-west-1.on.aws/`
-  * Lambda function (Write, AWS Console 🔒): `https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/add-catalogue-downloads-proxy-write-stage`
-  * Lambda function (Write, HTTP Endpoint 🔒): `https://zrpqdlufnfqcmqmzppwzegosvu0rvbca.lambda-url.eu-west-1.on.aws/`
-  * Lambda function (Read, Reverse Proxied HTTP Endpoint, Staging Catalogue): `https://data-testing.data.bas.ac.uk/download-testing/`
-  * Lambda endpoint (Read, Reverse Proxied HTTP Endpoint, Production Catalogue): `https://data.bas.ac.uk/download-testing/`
-  * Artefact lookups file 🔒: `s3://add-catalogue-downloads-proxy-stage/lookups.json`
-  * Lambda function (Write, IAM Customer Managed policy): `BAS-ADD-Catalogue-Downloads-Proxy-Function-Write-Staging`
-* Production instance:
-  * S3 bucket (AWS Console 🔒): `https://s3.console.aws.amazon.com/s3/buckets/add-catalogue-downloads-proxy-prod?region=eu-west-1&tab=objects`
-  * Lambda function (Read, AWS Console 🔒): `https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1#/functions/add-catalogue-downloads-proxy-prod`
-  * Lambda endpoint (Read, HTTP Endpoint): `https://v7lyval5auv7hnqd75rsdhfi640wvpet.lambda-url.eu-west-1.on.aws/`
-  * Lambda function (Write, AWS Console 🔒): `https://eu-west-1.console.aws.amazon.com/lambda/home?
-    region=eu-west-1#/functions/add-catalogue-downloads-proxy-write-prod`
-  * Lambda function (Write, HTTP Endpoint 🔒): `https://dvej4gdfa333uci4chyhkxj3wq0fkxrs.lambda-url.eu-west-1.on.aws/`
-  * Lambda function (Read, Reverse Proxied HTTP Endpoint, Staging Catalogue): `https://data-testing.data.bas.ac.uk/download/`
-  * Lambda function (Read, Reverse Proxied HTTP Endpoint, Production Catalogue): `https://data.bas.ac.uk/download/`
-  * Artefact lookups file 🔒: `s3://add-catalogue-downloads-proxy-prod/lookups.json`
-  * Lambda function (Write, IAM Customer Managed policy): `BAS-ADD-Catalogue-Downloads-Proxy-Function-Write-Production`
+See the [Infrastructure](/docs/infrastructure.md#downloads-proxy) documentation for specific resources.
 
 See the [relevant](/docs/dev.md#downloads-proxy-source) development subsection for information on the source code for these
 functions.

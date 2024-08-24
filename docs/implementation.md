@@ -93,25 +93,22 @@ See [Configuration](/docs/config.md) documentation.
 OAuth is used to protect access to actions or information (unpublished Records) within the *Repository* component.
 The [Microsoft Entra identity platform](https://learn.microsoft.com/en-us/entra/identity/) is used to define
 roles/scopes for restricted actions or information, and to assign these to users/groups. The
-[Flask Entra Auth Provider](https://pypi.org/project/flask-entra-auth/) is used to enforce these permissions within the
-Flask application.
+[Flask Entra Auth](https://pypi.org/project/flask-entra-auth/) extension is used to enforce these permissions within
+the Flask application.
 
-Two Azure OAuth applications (application registrations) are defined for this:
+Two Entra OAuth applications (application registrations) are defined for this:
 
 1. a server application, representing the Repository
 2. a client application, representing a user accessing or modifying records within the Repository
 
-The server app registration defines the roles/scopes that exist (reading records, updating records, etc.). These are
-then assigned to users and groups, who use them through the client app registration to read/update records, etc.
-
 The Flask application represents both of these app registrations. The CLI acts as the client, and the CSW catalogues as
 the server.
 
-Both Azure applications are registered in the NERC Azure tenancy administered by the
-[UKRI/NERC DDaT 🛡️](https://ukri.sharepoint.com/sites/thesource/SitePages/Live-Operations.aspx) team.
-[Terraform](/docs/setup.md#terraform) is used to define and provision these applications.
+See the [Infrastructure](/docs/infrastructure.md#entra-app-registrations) documentation for specific resources.
+[Terraform](/docs/setup.md#terraform) is used to define and provision these resources.
 
-The [Azure Portal 🔒](https://portal.azure.com) is used to assign permissions to applications and users as needed:
+The server app registration defines the roles/scopes that exist (reading records, updating records, etc.). These are
+then assigned to users and groups, who use them through the client app registration to read/update records, etc.:
 
 * [assigning permissions to users](/docs/workflow-permissions-users.md)
 

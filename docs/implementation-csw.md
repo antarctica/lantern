@@ -54,9 +54,8 @@ documentation for details.
 
 In local development environments, a local PostGIS database configured in `docker-compose.yml` is used.
 
-To test against real data in a non-production environment, a staging database, which is synced from the production
-database, can be used. Credentials for this database are stored in the MAGIC 1Password shared vault. This database is
-re-synced automatically by BAS IT every Tuesday at 02:00.
+To test against real data in a non-production environment, the staging database is synced against the production
+database by BAS IT every Tuesday at 02:00.
 
 ## CSW auth
 

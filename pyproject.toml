@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "scar-add-metadata-toolbox"
-version = "0.6.0"
+version = "0.7.0"
 description = "Editor, repository and data catalogue for SCAR Antarctic Digital Database (ADD) discovery metadata"
 authors = [
   "Felix Fennell <felnne@bas.ac.uk>",

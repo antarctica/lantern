@@ -110,6 +110,8 @@ the server.
 Both Azure applications are registered in the NERC Azure tenancy administered by the
 [UKRI/NERC DDaT 🛡️](https://ukri.sharepoint.com/sites/thesource/SitePages/Live-Operations.aspx) team.
 [Terraform](/docs/setup.md#terraform) is used to define and provision these applications.
+See the [Infrastructure](/docs/infrastructure.md#entra-app-registrations) documentation for specific resources.
+[Terraform](/docs/setup.md#terraform) is used to define and provision these resources.
 
 The [Azure Portal 🔒](https://portal.azure.com) is used to assign permissions to applications and users as needed:
 

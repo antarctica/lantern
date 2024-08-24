@@ -49,8 +49,8 @@ Both PyCSW (CSW server) and OWSLib (CSW client) support the *full* Element Set o
 
 ## CSW backing databases
 
-CSW servers are backed using PostGIS (Postgres) databases. In production, these are provided by BAS IT (via the
-central Postgres database `bsldb`). Credentials for this database are stored in the MAGIC 1Password shared vault.
+CSW servers are backed using PostGIS (Postgres) databases - see the [Infrastructure](/docs/infrastructure.md#databases)
+documentation for details.
 
 In local development environments, a local PostGIS database configured in `docker-compose.yml` is used.
 

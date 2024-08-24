@@ -43,14 +43,15 @@ variables:
 image: $IMAGE_NAME
 
 .before_script_python: &before_script_python
-  - "ln -s /.venv .venv"
-  - "poetry --version"
-  - "poetry install --no-interaction --no-ansi"
-  - "poetry check"
+  - ln -s /.venv .venv
+  - poetry --version
+  - poetry install --no-interaction --no-ansi
+  - poetry check
 
 .before_script_publish: &before_script_publish
-  - "poetry config repositories.gitlab '$CI_SERVER_URL/api/v4/projects/$CI_PROJECT_ID/packages/pypi'"
-  - "poetry config http-basic.gitlab gitlab-ci-token '$CI_JOB_TOKEN' --local"
+  - poetry config repositories.gitlab "$CI_SERVER_URL/api/v4/projects/$CI_PROJECT_ID/packages/pypi"
+  - poetry config http-basic.gitlab gitlab-ci-token "$CI_JOB_TOKEN" --local
+  - poetry check
 
 .before_script_release: &before_script_release
   - apk add --no-cache curl jq

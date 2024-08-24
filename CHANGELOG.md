@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+* GitLab CI variable used to set GitLab PyPi registry in Continuous Deployment
+  [#404](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/404)
+
 ## [0.7.0] - 2024-08-24
 
 ### Added

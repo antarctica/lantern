@@ -13,7 +13,7 @@ packages = [{ include = "scar_add_metadata_toolbox", from = "src" }]
 
 [tool.poetry.dependencies]
 awscli = "1.33.35"  # pinned to aid in dependency resolution time
-bas-metadata-library = "^0.9.1"
+bas-metadata-library = "^0.10.0"
 bas-style-kit-jinja-templates = "^0.7.0"
 click-spinner = "^0.1.10"
 dulwich = "^0.22.1"
@@ -33,7 +33,7 @@ tabulate = "^0.9.0"
 
 # # Backports
 #
-importlib_resources = "^5.13.0"  # pinned for bas-metadata-library compatibility which requires < 6.0
+importlib_resources = "^6.4.4"
 
 # # Dependencies for vendored OWSlib package
 #

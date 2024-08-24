@@ -35,6 +35,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Updating app dependencies
   [#373](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/373)
+* Updating bas-metadata-library dependency
+  [#401](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/401)
 * Running tests and linting when packages change (to ensure stability and detect vulnerable packages)
   [#373](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/373)
 * Improving CI config (automatic releases, only running jobs when needed, general refactoring and alignment)

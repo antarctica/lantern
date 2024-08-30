@@ -305,12 +305,12 @@ test suite as real world testing/deployment uncovers unforeseen regressions.
 
 Suggested upgrade steps:
 
-1. upgrade the Pip dependency for the Metadata Library to the new version:
+1. upgrade the Pip dependency for the Metadata Library to the new version (`poetry update bas-metadata-library`):
     * this will usually mean all MetadataRecord classes will use the new config version internally
     * where a new MetadataRecordConfig class is returned it should be downgraded to the old version
     * where a new MetadataRecordConfig class is required as input, it should be upgraded from the old version
-    * the `Record.dump()`, `Record.dumps()`, `Repository.retrieve_record()` and `Repository.retrieve_records()` methods
-      all interact with MetadataRecordConfig class instances and will need to be updated
+    * the `Record.load()`, `Record.dump()` & `Record.dumps()` and `Repository.retrieve_record()` &
+      `Repository.retrieve_records()` methods will need to be updated
     * usually calling the relevant `upgrade_from_vX_config()` or `downgrade_to_vX_config()` methods is enough to
       migrate between configuration versions, additional tweaks may be needed depending on the config schema changes
 2. use new Metadata Configuration classes natively:

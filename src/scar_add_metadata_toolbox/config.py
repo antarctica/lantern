@@ -26,7 +26,6 @@ class Config:
     # Used as defaults for values that can be set at runtime
     _APP_ENABLE_SENTRY = True
     _LOGGING_LEVEL = logging.WARNING
-    _SITE_PATH = Path.home().joinpath(".config/scar_add_metadata_toolbox/_site")
 
     def __init__(self) -> None:
         load_dotenv()
@@ -350,7 +349,6 @@ class DevelopmentConfig(Config):  # pragma: no cover
     _APP_ENABLE_SENTRY = False
     _LOGGING_LEVEL = logging.INFO
     _AUTH_SESSION_FILE_PATH = Path("./auth.json")
-    _SITE_PATH = Path("./_site")
 
     def __init__(self) -> None:
         """

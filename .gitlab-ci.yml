@@ -72,9 +72,10 @@ ci_container:
     - docker tag container $IMAGE_NAME
     - docker push $IMAGE_NAME
   rules:
-    - changes:
-      - Dockerfile
-      - poetry.lock
+    - if: '$CI_COMMIT_TAG == null'
+      changes:
+        - support/ci-cd/Dockerfile
+        - poetry.lock
   tags:
     - dnd
 

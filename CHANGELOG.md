@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Fixed
+
+* Updating bas-style-kit-jinja-templates dependency to correct 'back to top' link
+  [#152](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/152)
+
 ### Changed
 
 * Updating bas-metadata-library dependency

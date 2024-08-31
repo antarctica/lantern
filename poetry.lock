@@ -83,13 +83,13 @@ strict-rfc3339 = ">=0.7,<0.8"
 
 [[package]]
 name = "bas-style-kit-jinja-templates"
-version = "0.7.0"
+version = "0.7.1"
 description = "A set of Jinja2 templates implementing the BAS Style Kit"
 optional = false
-python-versions = ">=3.6,<4.0"
+python-versions = "<4.0,>=3.6"
 files = [
-    {file = "bas-style-kit-jinja-templates-0.7.0.tar.gz", hash = "sha256:3232ba220bb56392cb43ceba67b5f71108ab37711ef6787da47361a82cd30d3f"},
-    {file = "bas_style_kit_jinja_templates-0.7.0-py3-none-any.whl", hash = "sha256:ebc5ee8577d8947b3d628be4585549750207f77b6977902968ead89e9aa44519"},
+    {file = "bas_style_kit_jinja_templates-0.7.1-py3-none-any.whl", hash = "sha256:70b6e8ca67267d1425bbd06cd536ff55fe84b4cf6c733371482622d91cf9ebe5"},
+    {file = "bas_style_kit_jinja_templates-0.7.1.tar.gz", hash = "sha256:a66bee4e18329ab1b44974a58868199657fdc73e628445713a7641c50efaf5e8"},
 ]
 
 [package.dependencies]

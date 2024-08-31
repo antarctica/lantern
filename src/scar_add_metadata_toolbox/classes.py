@@ -12,7 +12,7 @@ from typing import Any
 from urllib.parse import parse_qs as query_string_parse
 from urllib.parse import urlparse as url_parse
 
-from bas_metadata_library.standards.iso_19115_2 import MetadataRecord, MetadataRecordConfigV3
+from bas_metadata_library.standards.iso_19115_2 import MetadataRecord, MetadataRecordConfigV4
 from dateutil.relativedelta import relativedelta
 from markdown import markdown
 
@@ -1229,7 +1229,7 @@ class Record(RecordSummary):
 
         Specifically load a BAS Metadata Library record configuration for ISO 19115-2 that has been JSON encoded.
         """
-        configuration = MetadataRecordConfigV3()
+        configuration = MetadataRecordConfigV4()
         configuration.load(file=record_path)
         self.config: dict[str, Any] = configuration.config
 
@@ -1239,7 +1239,7 @@ class Record(RecordSummary):
 
         Specifically saves a BAS Metadata Library record configuration for ISO 19115-2 using JSON encoding.
         """
-        configuration = MetadataRecordConfigV3(**self.config)
+        configuration = MetadataRecordConfigV4(**self.config)
         configuration.validate()
 
         try:
@@ -1264,7 +1264,7 @@ class Record(RecordSummary):
             msg = f"Unsupported dump format: {dump_format}"
             raise ValueError(msg)
 
-        configuration = MetadataRecordConfigV3(**self.config)
+        configuration = MetadataRecordConfigV4(**self.config)
         record = MetadataRecord(configuration=configuration)
         return record.generate_xml_document().decode()
 

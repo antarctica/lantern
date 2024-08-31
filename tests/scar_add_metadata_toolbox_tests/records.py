@@ -4,18 +4,18 @@ from datetime import date, datetime
 from enum import Enum
 from pathlib import Path
 
-from bas_metadata_library.standards.iso_19115_2 import MetadataRecord, MetadataRecordConfigV3
+from bas_metadata_library.standards.iso_19115_2 import MetadataRecord, MetadataRecordConfigV4
 
 
 def make_test_record_config(
     identifier: str, title: str, hierarchy_level: str, item_identifiers: list[str] | None = None
 ) -> dict:
     config = {
-        "$schema": "https://metadata-standards.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-2-v3.json",
+        "$schema": "https://metadata-standards.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-2-v4.json",
         "file_identifier": identifier,
         "metadata": {
             "language": "eng",
-            "character_set": "utf-8",
+            "character_set": "utf8",
             "contacts": [
                 {
                     "organisation": {
@@ -329,7 +329,7 @@ def make_test_record_config(
             ],
             "spatial_representation_type": "vector",
             "language": "eng",
-            "character_set": "utf-8",
+            "character_set": "utf8",
             "topics": ["environment", "geoscientificInformation"],
             "extents": [
                 {
@@ -421,7 +421,7 @@ def make_test_record_config(
             {
                 "distributor": _distributor,
                 "transfer_option": {
-                    "size": {"unit": "kB", "magnitude": 8171.0},
+                    "size": {"unit": "kB", "magnitude": 8171},
                     "online_resource": {
                         "href": "https://data.bas.ac.uk/download/35b35d75-1060-4340-a365-62c2f718ca0d",
                         "title": "GeoPackage",
@@ -438,7 +438,7 @@ def make_test_record_config(
             {
                 "distributor": _distributor,
                 "transfer_option": {
-                    "size": {"unit": "kB", "magnitude": 7535.0},
+                    "size": {"unit": "kB", "magnitude": 7535},
                     "online_resource": {
                         "href": "https://data.bas.ac.uk/download/c9e8ef23-0d49-4059-a013-51fdbc8ba1bb",
                         "title": "Shapefile",
@@ -551,7 +551,7 @@ def make_csw_test_records() -> None:
     for record_config in TestRecordConfigurations:
         print(f"Generating test record for '{record_config.name}'")
         # noinspection PyArgumentList
-        configuration = MetadataRecordConfigV3(**record_config.value)
+        configuration = MetadataRecordConfigV4(**record_config.value)
         record = MetadataRecord(configuration=configuration)
         # noinspection PyUnresolvedReferences
         record_path = records_base_path.joinpath(f"get_record_{record_config.value['file_identifier']}_full.xml")

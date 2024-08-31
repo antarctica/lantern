@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Changed
+
+* Updating bas-metadata-library dependency
+  [#408](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/408)
+
 ## [0.7.1] - 2024-08-24
 
 ### Fixed

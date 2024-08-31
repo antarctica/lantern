@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Updating bas-style-kit-jinja-templates dependency to correct 'back to top' link
   [#152](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/152)
+* Esri JS error for missing API key
+  [#411](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/411)
 
 ### Changed
 

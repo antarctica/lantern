@@ -5,10 +5,10 @@
 
     <div class="bsk-row">
         <div class="bsk-col-12-md-6">
-            {% if item.geographic_extents[0].bounding_box.east_longitude == 180
-                and item.geographic_extents[0].bounding_box.north_latitude == -60
-                and item.geographic_extents[0].bounding_box.south_latitude == -90
-                and item.geographic_extents[0].bounding_box.west_longitude == -180
+            {% if item.bounding_geographic_extent.bounding_box.east_longitude == 180
+                and item.bounding_geographic_extent.bounding_box.north_latitude == -60
+                and item.bounding_geographic_extent.bounding_box.south_latitude == -90
+                and item.bounding_geographic_extent.bounding_box.west_longitude == -180
             %}
                 <img src="/static/img/add-map.jpg" alt="extent map" />
             {% else %}
@@ -16,9 +16,7 @@
             {% endif %}
         </div>
         <div class="bsk-col-12-md-6">
-            <header>
-                <h4>Location keywords</h4>
-            </header>
+            <header><h4>Location keywords</h4></header>
             <ul class="bsk-list-unstyled app-keywords-list fa-ul">
                 {% for location_keyword_set in item.location_keywords %}
                     {% for location_term in location_keyword_set.terms %}
@@ -41,38 +39,27 @@
                 {% endfor %}
             </ul>
 
-            <header>
-                <h4>Bounding coordinates</h4>
-            </header>
-
-                {% for geographic_extent in item.geographic_extents %}
-                <dl class="bsk-dl">
-                    <dt>
-                        {{geographic_extent.identifier}}<br>
-                        <i class="far fa-border-style fa-flip-horizontal"></i>
-                        Top-right corner:
-                    </dt>
-                    <dd>North: {{ geographic_extent.bounding_box.north_latitude }}, East: {{ geographic_extent.bounding_box.east_longitude }} </dd>
-                    <dt>
-                        <i class="far fa-border-style fa-flip-vertical"></i>
-                        Bottom-left corner:
-                    </dt>
-                    <dd>South: {{ geographic_extent.bounding_box.south_latitude }}, West: {{ geographic_extent.bounding_box.west_longitude }} </dd>
-                </dl>
-                {% endfor %}
+            <header><h4>Bounding coordinates</h4></header>
+            <dl class="bsk-dl">
+                <dt>
+                    <i class="far fa-border-style fa-flip-horizontal"></i>
+                    Top-right corner:
+                </dt>
+                <dd>North: {{ item.bounding_geographic_extent.bounding_box.north_latitude }}, East: {{ item.bounding_geographic_extent.bounding_box.east_longitude }} </dd>
+                <dt>
+                    <i class="far fa-border-style fa-flip-vertical"></i>
+                    Bottom-left corner:
+                </dt>
+                <dd>South: {{ item.bounding_geographic_extent.bounding_box.south_latitude }}, West: {{ item.bounding_geographic_extent.bounding_box.west_longitude }} </dd>
+            </dl>
 
             <hr>
 
-            <header>
-                <h4>Temporal range</h4>
-            </header>
-
-            {% for temporal_extent in item.temporal_extents %}
-                <dl class="bsk-dl">
-                    <dt>{{ temporal_extent.extent_number }}</dt>
-                    <dd><b>From:</b> {{ temporal_extent.start }}, <b>To:</b> {{ temporal_extent.end }}</dd>
-                </dl>
-            {% endfor %}
+            <header><h4>Temporal range</h4></header>
+            <div>
+              <strong>From:</strong> {{ item.bounding_temporal_extent.start }},
+              <strong>To:</strong> {{ item.bounding_temporal_extent.end }}
+            </div>
         </div>
     </div>
 </section>

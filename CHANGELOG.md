@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Updating bas-metadata-library dependency
   [#408](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/408)
+* Moving citation information to data table to make it more visible
+  [#375](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/375)
 
 ## [0.7.1] - 2024-08-24
 

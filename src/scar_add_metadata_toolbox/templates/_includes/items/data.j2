@@ -46,8 +46,9 @@
     </table>
 
     <div class="bsk-alert bsk-alert-solid bsk-alert-info">
-        You <strong>must</strong> include an <a href="#item-details-citation" class="bsk-alert-link">acknowledgement</a> if you use this item.
+        You <strong>must</strong> include an <a href="#item-citation" class="bsk-alert-link">acknowledgement</a> if you use this item.
     </div>
+    {% include 'app/_includes/items/citation.j2' %}
 
     {% for download in item.downloads %}
         {% if download.format == 'wms' %}

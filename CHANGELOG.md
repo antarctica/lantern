@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#408](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/408)
 * Moving citation information to data table to make it more visible
   [#375](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/375)
+* Replacing Nginx docker service with Python simple server for previewing local static site
+  [#412](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/412)
 
 ## [0.7.1] - 2024-08-24
 

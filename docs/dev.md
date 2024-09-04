@@ -40,9 +40,7 @@ Useful for:
 * testing changes to how data is loaded into CSW catalogues
 
 ```shell
-$ cd add-metadata-toolbox
-
-# Start the local Postgres database for CSW, and Nginx for the local static website
+# Start the local Postgres database for CSW
 $ docker compose up
 
 # In another terminal; Start the Flask application as a server (it will use the local postgres database by default)
@@ -50,6 +48,9 @@ $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development CSW_SERVER_CONFIG_UN
 
 # In another terminal; Run Flask CLI commands as a client
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask [command]
+
+# In another terminal; Run a simple web server for the static site
+$ poetry run python -m http.server 9000 --directory _site
 ```
 
 Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN` is the
@@ -83,13 +84,6 @@ vault in the MAGIC 1Password account.
 
 Useful for developing and testing changes to static website templates.
 
-```shell
-$ cd add-metadata-toolbox
-
-# Start the local Postgres database for CSW [not used], and Nginx for the local static website
-$ docker compose up
-```
-
 See the [CLI Reference](/docs/cli-reference.md) for how to use the CLI. Where `flask` is written, replace this
 with:
 
@@ -98,26 +92,21 @@ with:
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development CSW_ENDPOINT_UNPUBLISHED=https://api.bas.ac.uk/data/metadata/add/csw/v1/unpublished CSW_ENDPOINT_PUBLISHED=https://api.bas.ac.uk/data/metadata/add/csw/v1/published poetry run flask [command]
 ```
 
-When built, the local static site can be accessed from [http://localhost:9000](http://localhost:9000).
-
 **Note:** to use the remote server in the staging environment instead, use this command for `flask` commands:
+When built, and in another terminal, run:
 
-```shell
-# Run Flask CLI commands as a client, with remote server
-$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development CSW_ENDPOINT_UNPUBLISHED=http://add-metadata-toolbox.bslmagf-staging.nerc-bas.ac.uk/csw/unpublished CSW_ENDPOINT_PUBLISHED=http://add-metadata-toolbox.bslmagf-staging.nerc-bas.ac.uk/csw/published poetry run flask [command]
 ```
+$ poetry run python -m http.server 9000 --directory _site
+```
+
+The local static site can then be accessed from [http://localhost:9000](http://localhost:9000).
 
 ### Using a local client and local server with a remote database
 
 Useful for testing with real data but where changes to the server application are being developed or tested.
 
 ```shell
-$ cd add-metadata-toolbox
-
-# Start the local Postgres database for CSW [not used], and Nginx for the local static website
-$ docker compose up
-
-# In another terminal; Start the Flask application as a server (using the production database)
+# Start the Flask application as a server (using the production database)
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION=postgresql://pycsw_production:xxx@bsldb.nerc-bas.ac.uk/pycsw_production CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION=postgresql://pycsw_production:xxx@bsldb.nerc-bas.ac.uk/pycsw_production CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_REMOTE_URL=https://gitlab.data.bas.ac.uk/MAGIC/add-catalogue-records-production.git CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN=xxx poetry run flask run
 
 # In another terminal; Run Flask CLI commands as a client

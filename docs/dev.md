@@ -92,7 +92,6 @@ with:
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development CSW_ENDPOINT_UNPUBLISHED=https://api.bas.ac.uk/data/metadata/add/csw/v1/unpublished CSW_ENDPOINT_PUBLISHED=https://api.bas.ac.uk/data/metadata/add/csw/v1/published poetry run flask [command]
 ```
 
-**Note:** to use the remote server in the staging environment instead, use this command for `flask` commands:
 When built, and in another terminal, run:
 
 ```
@@ -113,8 +112,8 @@ $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development CSW_SERVER_CONFIG_UN
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask [command]
 ```
 
-Where `xxx` should be replaced with real credentials from the *MAGIC CSW [Prod]* entry in the shared vault in the
-MAGIC 1Password.
+Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION` is the relevant database connection string
+(staging or production). See the [Infrastructure](/docs/infrastructure.md#databases) documentation for details.
 
 Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN` is the
 'SCAR ADD Metadata Toolbox (Data Catalogue) CSW Revision Tracking GitLab Personal Access Token (PAT)' item in the shared

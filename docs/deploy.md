@@ -39,6 +39,9 @@ $ deactivate
 $ exit
 ```
 
+**Note:** This `flask` command does not have access to any environment variables set in the `app.py` entrypoint and
+must be set manually. E.g. `CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION=xxx FLASK_APP=scar_add_metadata_toolbox ...`.
+
 ## API Service
 
 The CSW Catalogues are deployed as a service within the BAS API Load Balancer, pointing to the

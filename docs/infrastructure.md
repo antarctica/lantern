@@ -69,6 +69,12 @@ represents both *development* and *staging*.
   - for production use cases
   - managed using [Terraform](/provisioning/terraform/42-gitlab_projects.tf)
 
+## GitLab Access Tokens
+
+- [Revision tracking 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=ffy5l25mjdv577qj6izuk6lo4m&i=jjsf3ts3qgp22a7cnaoui4jv4a&h=magic.1password.eu)
+  - for integration and production [GitLab Projects](#gitlab-projects)
+  - see [Setup](/docs/setup.md#manual-setup-gitlab-projects) documentation for provisioning instructions
+
 ## Downloads proxy
 
 * Staging instance:

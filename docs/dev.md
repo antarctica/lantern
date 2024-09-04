@@ -53,9 +53,8 @@ $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask [co
 $ poetry run python -m http.server 9000 --directory _site
 ```
 
-Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN` is the
-'SCAR ADD Metadata Toolbox (Data Catalogue) CSW Revision Tracking GitLab Personal Access Token (PAT)' item in the shared
-vault in the MAGIC 1Password account.
+Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN` is the GitLab Personal Access Token (PAT)
+for revision tracking. See the [Infrastructure](/docs/infrastructure.md#gitlab-access-tokens) documentation for details.
 
 See the [CLI Reference](/docs/cli-reference.md) for how to use the CLI. Where `flask` is written, replace this with
 the command example above.
@@ -76,9 +75,8 @@ $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask rec
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask site build
 ```
 
-Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN` is the
-'SCAR ADD Metadata Toolbox (Data Catalogue) CSW Revision Tracking GitLab Personal Access Token (PAT)' item in the shared
-vault in the MAGIC 1Password account.
+Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN` is the GitLab Personal Access Token (PAT)
+for revision tracking. See the [Infrastructure](/docs/infrastructure.md#gitlab-access-tokens) documentation for details.
 
 ### Building a local static site with production data
 
@@ -115,31 +113,13 @@ $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask [co
 Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION` is the relevant database connection string
 (staging or production). See the [Infrastructure](/docs/infrastructure.md#databases) documentation for details.
 
-Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN` is the
-'SCAR ADD Metadata Toolbox (Data Catalogue) CSW Revision Tracking GitLab Personal Access Token (PAT)' item in the shared
-vault in the MAGIC 1Password account.
+Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN` is the GitLab Personal Access Token (PAT)
+for revision tracking. See the [Infrastructure](/docs/infrastructure.md#gitlab-access-tokens) documentation for details.
 
 See the [CLI Reference](/docs/cli-reference.md) for how to use the CLI. Where `flask` is written, replace this with
 the command example above.
 
 When built, the local static site can be accessed from [http://localhost:9000](http://localhost:9000).
-Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN` is the
-'SCAR ADD Metadata Toolbox (Data Catalogue) CSW Revision Tracking GitLab Personal Access Token (PAT)' item in the shared
-vault in the MAGIC 1Password account.
-
-**Note:** to use the database staging environment instead, use this command for starting the Flask application as a
-server:
-
-```shell
-# In another terminal; Start the Flask application as a server (using the staging database)
-$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION=postgresql://pycsw_staging:xxx@bsldb.nerc-bas.ac.uk/pycsw_staging CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION=postgresql://pycsw_staging:xxx@bsldb.nerc-bas.ac.uk/pycsw_staging CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_REMOTE_URL=https://gitlab.data.bas.ac.uk/MAGIC/add-catalogue-records-integration.git CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN=xxx poetry run flask run
-```
-
-Where `xxx` should be replaced with real credentials from the *MAGIC CSW [Staging]* entry in the MAGIC 1Password.
-
-Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN` is the
-'SCAR ADD Metadata Toolbox (Data Catalogue) CSW Revision Tracking GitLab Personal Access Token (PAT)' item in the shared
-vault in the MAGIC 1Password account.
 
 ## Contributing
 

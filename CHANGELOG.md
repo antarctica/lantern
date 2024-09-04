@@ -27,6 +27,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#375](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/375)
 * Replacing Nginx docker service with Python simple server for previewing local static site
   [#412](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/412)
+* Migrating to new databases running in new BAS Postgres cluster
+  [#391](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/391)
 
 ## [0.7.1] - 2024-08-24
 

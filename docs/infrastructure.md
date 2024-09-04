@@ -21,19 +21,20 @@ represents both *development* and *staging*.
 
 ## Databases
 
-- [Development 🔒](https://start.1password.com/open/)
+- [Development 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=ffy5l25mjdv577qj6izuk6lo4m&i=vb3uv7xz35iqosx5poznvbgycq&h=magic.1password.eu)
   - hosted using BAS IT
-  - for storing ...
+  - for storing ad-hoc data needed for development and prototyping
   - see [MAGIC/add-metadata-toolbox#391 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/391) for initial setup
-- [Staging 🔒](https://start.1password.com/open/)
+- [Staging 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=ffy5l25mjdv577qj6izuk6lo4m&i=63626cseqf3mrd32h33drhgzim&h=magic.1password.eu)
   - hosted using BAS IT
   - for storing non-production but real data
   - automatically synced against production database every Tuesday at 02:00.
   - see [MAGIC/add-metadata-toolbox#391 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/391) for initial setup
-- [Production 🔒](https://start.1password.com/open/)
+- [Production 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=ffy5l25mjdv577qj6izuk6lo4m&i=nj7d6aoz5b6vrts23urb2unnbu&h=magic.1password.eu)
   - hosted using BAS IT
-  - for storing ...
+  - for storing real, definitive, data
   - see [MAGIC/add-metadata-toolbox#391 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/391) for initial setup
+  - a [read-only](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=ffy5l25mjdv577qj6izuk6lo4m&i=xe23mjl5zrchfbvfm7tdj7xzsi&h=magic.1password.eu) user is also available
 
 ## 1Password
 

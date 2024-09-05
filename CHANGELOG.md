@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+* Disabling Google Analytics in Style Kit templates (as GA version no longer supported)
+  [#416](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/416)
 ## [0.7.3] - 2024-09-05
 
 ### Fixed

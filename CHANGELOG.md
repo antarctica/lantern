@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.7.3] - 2024-09-05
+
+### Fixed
+
+* CSW Server `_transaction_type()` did not work for POST requests (no `request_type`)
+  [#415](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/415)
+
 ## [0.7.2] - 2024-09-05
 
 ### Fixed

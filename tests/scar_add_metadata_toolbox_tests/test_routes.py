@@ -32,8 +32,21 @@ def test_health(app_client: FlaskClient):
 
 
 class TestRouteCSW:
-    def test_csw(self, app_client_mocked_csw_server: FlaskClient):
+    def test_get_capabilities(self, app_client_mocked_csw_server: FlaskClient):
         result = app_client_mocked_csw_server.get("/csw/published?service=CSW&request=GetCapabilities")
+        assert result.status_code == HTTPStatus.OK
+
+    def test_get_records_brief(self, app_client_mocked_csw_server: FlaskClient):
+        data = """
+        <csw:GetRecords service="CSW" version="2.0.2" outputFormat="application/xml" resultType="results" startPosition="1" maxRecords="15" outputSchema="http://www.isotc211.org/2005/gmd" xmlns="http://www.opengis.net/cat/csw/2.0.2" xmlns:csw30="http://www.opengis.net/cat/csw/3.0" xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/cat/csw/3.0 http://schemas.opengis.net/cat/csw/3.0/cswGetCapabilities.xsd">
+          <csw:Query typeNames="csw:Record">
+            <csw:ElementSetName>brief</csw:ElementSetName>
+          </csw:Query>
+        </csw:GetRecords>
+        """
+        result = app_client_mocked_csw_server.post(
+            "/csw/published?service=CSW", headers={"content-type": "text/xml"}, data=data
+        )
         assert result.status_code == HTTPStatus.OK
 
     def test_csw_unknown_catalogue(self, app_client_mocked_csw_server: FlaskClient):

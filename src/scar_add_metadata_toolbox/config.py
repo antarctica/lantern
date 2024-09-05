@@ -11,21 +11,11 @@ from str2bool import str2bool
 
 class Config:
     """
-    Flask/App configuration base class.
+    App configuration.
 
     Configuration options are mostly set using class properties and are typically hard-coded. A limited number of
     options can be set at runtime using environment variables (set directly or through an `.env` file).
     """
-
-    ENV = os.environ.get("FLASK_ENV")
-    DEBUG = False
-    TESTING = False
-
-    LOG_FORMAT = "[%(asctime)s] %(levelname)s [%(name)s.%(funcName)s:%(lineno)d] %(message)s"
-
-    # Used as defaults for values that can be set at runtime
-    _APP_ENABLE_SENTRY = True
-    _LOGGING_LEVEL = logging.WARNING
 
     def __init__(self) -> None:
         load_dotenv()
@@ -40,31 +30,19 @@ class Config:
         If true errors and uncaught exceptions will be reported to Sentry. A default value is set on an per-environment
         basis (off in development/testing) by overriding the attribute, however it can be also be set at runtime.
         """
-        self.APP_ENABLE_SENTRY = str2bool(os.environ.get("APP_ENABLE_SENTRY") or str(self._APP_ENABLE_SENTRY))
+        self.APP_ENABLE_SENTRY = str2bool(os.environ.get("APP_ENABLE_SENTRY", True))
 
     # noinspection PyPep8Naming
     @property
     def NAME(self) -> str:
-        """
-        Application/Package name.
-
-        :rtype str
-        :return: Application name
-        """
+        """Application/Package name."""
         return self._app_package
 
     # noinspection PyPep8Naming
     @property
     def VERSION(self) -> str:
-        """
-        Application version.
-
-        Taken from the package where possible, otherwise a generic placeholder is used.
-
-        :rtype str
-        :return: Application version
-        """
-        return "Unknown"
+        """Application version."""
+        return version("scar-add-metadata-toolbox")
 
     # noinspection PyPep8Naming
     @property
@@ -74,9 +52,6 @@ class Config:
 
         Python logging module logging level. If set at runtime, the level set as a descriptive string is mapped to the
         relevant numeric level using the logging level enumeration.
-
-        :rtype int
-        :return: Application logging level
         """
         if "APP_LOGGING_LEVEL" in os.environ:  # pragma: no cover
             if os.environ.get("APP_LOGGING_LEVEL") == "debug":
@@ -90,7 +65,7 @@ class Config:
             if os.environ.get("APP_LOGGING_LEVEL") == "critical":
                 return logging.CRITICAL
 
-        return self._LOGGING_LEVEL
+        return logging.WARNING
 
     # noinspection PyPep8Naming
     @property
@@ -106,9 +81,9 @@ class Config:
             return {}
 
         return {
-            "dsn": "https://db9543e7b68f4b2596b189ff444438e3@o39753.ingest.sentry.io/5197036",
-            "environment": self.ENV,
             "release": self.VERSION,
+            "dsn": "https://db9543e7b68f4b2596b189ff444438e3@o39753.ingest.sentry.io/5197036",
+            "environment": os.environ.get("APP_SENTRY_ENV"),
         }
 
     # noinspection PyPep8Naming
@@ -320,104 +295,3 @@ class Config:
         :return: S3 bucket name
         """
         return os.environ.get("APP_S3_BUCKET")
-
-
-class ProductionConfig(Config):  # pragma: no cover
-    """
-    Flask configuration for Production environments.
-
-    Note: This method is excluded from test coverage as its meaning would be undermined.
-    """
-
-    # noinspection PyPep8Naming
-    @property
-    def VERSION(self) -> str:
-        """Application version."""
-        return version("scar-add-metadata-toolbox")
-
-
-class DevelopmentConfig(Config):  # pragma: no cover
-    """
-    Flask configuration for (local) Development environments.
-
-    Note: This method is excluded from test coverage as its meaning would be undermined.
-    """
-
-    DEBUG = True
-
-    _APP_ENABLE_SENTRY = False
-    _LOGGING_LEVEL = logging.INFO
-    _AUTH_SESSION_FILE_PATH = Path("./auth.json")
-
-    def __init__(self) -> None:
-        """
-        Use this method to override property values defined in the config base class.
-
-        For this class, values will typically be local services to ensure production data is not inadvertently modified.
-        """
-        super().__init__()
-
-        if "CSW_ENDPOINT_UNPUBLISHED" not in os.environ:
-            os.environ["CSW_ENDPOINT_UNPUBLISHED"] = "http://localhost:5000/csw/unpublished"
-        if "CSW_ENDPOINT_PUBLISHED" not in os.environ:
-            os.environ["CSW_ENDPOINT_PUBLISHED"] = "http://localhost:5000/csw/published"
-        if "CSW_SERVER_CONFIG_UNPUBLISHED_ENDPOINT" not in os.environ:
-            os.environ["CSW_SERVER_CONFIG_UNPUBLISHED_ENDPOINT"] = "http://localhost:5000/csw/unpublished"
-        if "CSW_SERVER_CONFIG_PUBLISHED_ENDPOINT" not in os.environ:
-            os.environ["CSW_SERVER_CONFIG_PUBLISHED_ENDPOINT"] = "http://localhost:5000/csw/published"
-
-        if "CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION" not in os.environ:
-            os.environ["CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION"] = (
-                "postgresql://postgres:password@localhost/postgres"
-            )
-        if "CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION" not in os.environ:
-            os.environ["CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION"] = (
-                "postgresql://postgres:password@localhost/postgres"
-            )
-
-        if "CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_WORKING_DIR" not in os.environ:
-            os.environ["CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_WORKING_DIR"] = str(Path("./_record_revisions"))
-        if "CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_REMOTE_URL" not in os.environ:
-            os.environ["CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_REMOTE_URL"] = (
-                "https://gitlab.data.bas.ac.uk/felnne/add-catalogue-integration-records.git"
-            )
-
-        if "APP_S3_BUCKET" not in os.environ:
-            os.environ["APP_S3_BUCKET"] = "add-catalogue-integration.data.bas.ac.uk"
-
-    # noinspection PyPep8Naming
-    @property
-    def VERSION(self) -> str:
-        """Application version."""
-        return "N/A"
-
-
-class TestingConfig(DevelopmentConfig):
-    """Flask configuration for Testing environments."""
-
-    TESTING = True
-
-    _LOGGING_LEVEL = logging.DEBUG
-
-    def __init__(self) -> None:
-        """
-        Use this method to override property values defined in the config base class.
-
-        For this class, values will typically be generic or intentionally wrong to ensure components are mocked
-        correctly or production data is not inadvertently modified.
-        """
-        super().__init__()
-
-        os.environ["CSW_ENDPOINT_UNPUBLISHED"] = "https://example.com/csw/unpublished"
-        os.environ["CSW_ENDPOINT_PUBLISHED"] = "https://example.com/csw/published"
-        os.environ["CSW_SERVER_CONFIG_UNPUBLISHED_ENDPOINT"] = "https://example.com/csw/unpublished"
-        os.environ["CSW_SERVER_CONFIG_PUBLISHED_ENDPOINT"] = "https://example.com/csw/published"
-
-        os.environ["CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION"] = (
-            "postgresql://postgres:password@example/postgres"
-        )
-        os.environ["CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION"] = (
-            "postgresql://postgres:password@example/postgres"
-        )
-
-        os.environ["S3_BUCKET"] = "example"

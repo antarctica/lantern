@@ -34,7 +34,7 @@ To use the Flask CLI:
 ```
 $ ssh [environment]
 $ source /var/opt/wsgi/.virtualenvs/add-metadata-toolbox/bin/activate
-$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=production flask [command]
+$ FLASK_APP=scar_add_metadata_toolbox flask [command]
 $ deactivate
 $ exit
 ```

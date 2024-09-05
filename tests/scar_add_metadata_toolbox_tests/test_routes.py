@@ -4,6 +4,7 @@ from pathlib import Path
 from flask import Flask
 from flask.testing import FlaskClient
 
+from scar_add_metadata_toolbox import Config
 from tests.scar_add_metadata_toolbox_tests.records import TestRecordConfigurations
 
 
@@ -14,14 +15,16 @@ def test_404(app_client: FlaskClient):
 
 
 def test_health(app_client: FlaskClient):
+    config = Config()
+
     expected_response = {
         "description": "Server side endpoints for the SCAR Antarctic Digital Database " "(ADD) Metadata Toolbox.",
         "links": {
             "about": "https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox",
-            "describedBy": "https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/blob/vN/A/README.md",
+            "describedBy": f"https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/blob/v{config.VERSION}/README.md",
             "self": "http://localhost/meta/health/v1",
         },
-        "releaseId": "N/A",
+        "releaseId": config.VERSION,
         "status": "pass",
         "version": 1,
     }

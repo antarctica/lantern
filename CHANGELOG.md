@@ -31,6 +31,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#391](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/391)
 * Disabling Google Analytics in Style Kit templates (as GA version no longer supported)
   [#416](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/416)
+* Simplifying config class to a single environment, with options overridden by env vars to remove need for `FLASK_ENV`
+  [#314](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/314)
 
 ## [0.7.3] - 2024-09-05
 

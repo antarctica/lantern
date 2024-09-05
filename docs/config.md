@@ -1,10 +1,9 @@
 # SCAR Antarctic Digital Database (ADD) Metadata Toolbox - Configuration
 
-Application configuration options are set in per-environment classes extending a base `Config` class in
-`scar_add_metadata_toolbox/config.py`. The active environment is set using the `FLASK_ENV` environment variable.
+Application configuration options are set the [`Config`](/src/scar_add_metadata_toolbox/config.py) class.
 
 Configuration options are defined, and documented, using class properties. Some configuration options may optionally be
-set at runtime using environment variables. If not set, default values will be used.
+set at runtime using environment variables, set directly or via a `.env` file. If not set, default values will be used.
 
 | Configuration Option                                  | Description                                                                  | Allowed Values                             | Example Value                                                              |
 |-------------------------------------------------------|------------------------------------------------------------------------------|--------------------------------------------|----------------------------------------------------------------------------|

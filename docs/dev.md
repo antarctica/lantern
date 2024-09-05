@@ -40,9 +40,7 @@ Useful for:
 * testing changes to how data is loaded into CSW catalogues
 
 ```shell
-$ cd add-metadata-toolbox
-
-# Start the local Postgres database for CSW, and Nginx for the local static website
+# Start the local Postgres database for CSW
 $ docker compose up
 
 # In another terminal; Start the Flask application as a server (it will use the local postgres database by default)
@@ -50,11 +48,13 @@ $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development CSW_SERVER_CONFIG_UN
 
 # In another terminal; Run Flask CLI commands as a client
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask [command]
+
+# In another terminal; Run a simple web server for the static site
+$ poetry run python -m http.server 9000 --directory _site
 ```
 
-Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN` is the
-'SCAR ADD Metadata Toolbox (Data Catalogue) CSW Revision Tracking GitLab Personal Access Token (PAT)' item in the shared
-vault in the MAGIC 1Password account.
+Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN` is the GitLab Personal Access Token (PAT)
+for revision tracking. See the [Infrastructure](/docs/infrastructure.md#gitlab-access-tokens) documentation for details.
 
 See the [CLI Reference](/docs/cli-reference.md) for how to use the CLI. Where `flask` is written, replace this with
 the command example above.
@@ -75,20 +75,12 @@ $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask rec
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask site build
 ```
 
-Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN` is the
-'SCAR ADD Metadata Toolbox (Data Catalogue) CSW Revision Tracking GitLab Personal Access Token (PAT)' item in the shared
-vault in the MAGIC 1Password account.
+Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN` is the GitLab Personal Access Token (PAT)
+for revision tracking. See the [Infrastructure](/docs/infrastructure.md#gitlab-access-tokens) documentation for details.
 
 ### Building a local static site with production data
 
 Useful for developing and testing changes to static website templates.
-
-```shell
-$ cd add-metadata-toolbox
-
-# Start the local Postgres database for CSW [not used], and Nginx for the local static website
-$ docker compose up
-```
 
 See the [CLI Reference](/docs/cli-reference.md) for how to use the CLI. Where `flask` is written, replace this
 with:
@@ -98,60 +90,36 @@ with:
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development CSW_ENDPOINT_UNPUBLISHED=https://api.bas.ac.uk/data/metadata/add/csw/v1/unpublished CSW_ENDPOINT_PUBLISHED=https://api.bas.ac.uk/data/metadata/add/csw/v1/published poetry run flask [command]
 ```
 
-When built, the local static site can be accessed from [http://localhost:9000](http://localhost:9000).
+When built, and in another terminal, run:
 
-**Note:** to use the remote server in the staging environment instead, use this command for `flask` commands:
-
-```shell
-# Run Flask CLI commands as a client, with remote server
-$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development CSW_ENDPOINT_UNPUBLISHED=http://add-metadata-toolbox.bslmagf-staging.nerc-bas.ac.uk/csw/unpublished CSW_ENDPOINT_PUBLISHED=http://add-metadata-toolbox.bslmagf-staging.nerc-bas.ac.uk/csw/published poetry run flask [command]
 ```
+$ poetry run python -m http.server 9000 --directory _site
+```
+
+The local static site can then be accessed from [http://localhost:9000](http://localhost:9000).
 
 ### Using a local client and local server with a remote database
 
 Useful for testing with real data but where changes to the server application are being developed or tested.
 
 ```shell
-$ cd add-metadata-toolbox
-
-# Start the local Postgres database for CSW [not used], and Nginx for the local static website
-$ docker compose up
-
-# In another terminal; Start the Flask application as a server (using the production database)
+# Start the Flask application as a server (using the production database)
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION=postgresql://pycsw_production:xxx@bsldb.nerc-bas.ac.uk/pycsw_production CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION=postgresql://pycsw_production:xxx@bsldb.nerc-bas.ac.uk/pycsw_production CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_REMOTE_URL=https://gitlab.data.bas.ac.uk/MAGIC/add-catalogue-records-production.git CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN=xxx poetry run flask run
 
 # In another terminal; Run Flask CLI commands as a client
 $ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development poetry run flask [command]
 ```
 
-Where `xxx` should be replaced with real credentials from the *MAGIC CSW [Prod]* entry in the shared vault in the
-MAGIC 1Password.
+Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION` is the relevant database connection string
+(staging or production). See the [Infrastructure](/docs/infrastructure.md#databases) documentation for details.
 
-Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN` is the
-'SCAR ADD Metadata Toolbox (Data Catalogue) CSW Revision Tracking GitLab Personal Access Token (PAT)' item in the shared
-vault in the MAGIC 1Password account.
+Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN` is the GitLab Personal Access Token (PAT)
+for revision tracking. See the [Infrastructure](/docs/infrastructure.md#gitlab-access-tokens) documentation for details.
 
 See the [CLI Reference](/docs/cli-reference.md) for how to use the CLI. Where `flask` is written, replace this with
 the command example above.
 
 When built, the local static site can be accessed from [http://localhost:9000](http://localhost:9000).
-Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN` is the
-'SCAR ADD Metadata Toolbox (Data Catalogue) CSW Revision Tracking GitLab Personal Access Token (PAT)' item in the shared
-vault in the MAGIC 1Password account.
-
-**Note:** to use the database staging environment instead, use this command for starting the Flask application as a
-server:
-
-```shell
-# In another terminal; Start the Flask application as a server (using the staging database)
-$ FLASK_APP=scar_add_metadata_toolbox FLASK_ENV=development CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION=postgresql://pycsw_staging:xxx@bsldb.nerc-bas.ac.uk/pycsw_staging CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION=postgresql://pycsw_staging:xxx@bsldb.nerc-bas.ac.uk/pycsw_staging CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_REMOTE_URL=https://gitlab.data.bas.ac.uk/MAGIC/add-catalogue-records-integration.git CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN=xxx poetry run flask run
-```
-
-Where `xxx` should be replaced with real credentials from the *MAGIC CSW [Staging]* entry in the MAGIC 1Password.
-
-Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN` is the
-'SCAR ADD Metadata Toolbox (Data Catalogue) CSW Revision Tracking GitLab Personal Access Token (PAT)' item in the shared
-vault in the MAGIC 1Password account.
 
 ## Contributing
 
@@ -305,12 +273,12 @@ test suite as real world testing/deployment uncovers unforeseen regressions.
 
 Suggested upgrade steps:
 
-1. upgrade the Pip dependency for the Metadata Library to the new version:
+1. upgrade the Pip dependency for the Metadata Library to the new version (`poetry update bas-metadata-library`):
     * this will usually mean all MetadataRecord classes will use the new config version internally
     * where a new MetadataRecordConfig class is returned it should be downgraded to the old version
     * where a new MetadataRecordConfig class is required as input, it should be upgraded from the old version
-    * the `Record.dump()`, `Record.dumps()`, `Repository.retrieve_record()` and `Repository.retrieve_records()` methods
-      all interact with MetadataRecordConfig class instances and will need to be updated
+    * the `Record.load()`, `Record.dump()` & `Record.dumps()` and `Repository.retrieve_record()` &
+      `Repository.retrieve_records()` methods will need to be updated
     * usually calling the relevant `upgrade_from_vX_config()` or `downgrade_to_vX_config()` methods is enough to
       migrate between configuration versions, additional tweaks may be needed depending on the config schema changes
 2. use new Metadata Configuration classes natively:

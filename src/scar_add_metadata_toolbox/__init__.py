@@ -77,6 +77,7 @@ def create_app() -> Flask:  # noqa: C901
         """Show application version."""
         print(f"{app.config['NAME']} version: {app.config['VERSION']}")
 
+    # noinspection PyUnusedLocal
     @app.errorhandler(NotFound)
     def handle_bad_request(e: Exception) -> Response:
         return Response(response="Not Found.", status=HTTPStatus.NOT_FOUND)

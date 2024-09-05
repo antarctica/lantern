@@ -3,7 +3,7 @@ from tempfile import NamedTemporaryFile, TemporaryDirectory
 from unittest import mock
 from unittest.mock import Mock
 
-from bas_metadata_library.standards.iso_19115_2 import MetadataRecordConfigV3
+from bas_metadata_library.standards.iso_19115_2 import MetadataRecordConfigV4
 from flask import Flask
 from flask.testing import FlaskCliRunner
 
@@ -56,7 +56,7 @@ class TestCommandRecordsImport:
         with NamedTemporaryFile(mode="r+") as record_file:
             record_data = TestRecordConfigurations.TEST_RECORD_3.value
             # noinspection PyArgumentList
-            record_configuration = MetadataRecordConfigV3(**record_data)
+            record_configuration = MetadataRecordConfigV4(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw.invoke(args=["records", "import", record_file.name])
@@ -72,7 +72,7 @@ class TestCommandRecordsImport:
         with NamedTemporaryFile(mode="r+") as record_file:
             record_data = TestRecordConfigurations.TEST_RECORD_4.value
             # noinspection PyArgumentList
-            record_configuration = MetadataRecordConfigV3(**record_data)
+            record_configuration = MetadataRecordConfigV4(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw.invoke(args=["records", "import", record_file.name, "--allow-update"])
@@ -83,7 +83,7 @@ class TestCommandRecordsImport:
         with NamedTemporaryFile(mode="r+") as record_file:
             record_data = TestRecordConfigurations.TEST_RECORD_5.value
             # noinspection PyArgumentList
-            record_configuration = MetadataRecordConfigV3(**record_data)
+            record_configuration = MetadataRecordConfigV4(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw.invoke(args=["records", "import", record_file.name, "--publish"])
@@ -95,7 +95,7 @@ class TestCommandRecordsImport:
         with NamedTemporaryFile(mode="r+") as record_file:
             record_data = TestRecordConfigurations.TEST_RECORD_6.value
             # noinspection PyArgumentList
-            record_configuration = MetadataRecordConfigV3(**record_data)
+            record_configuration = MetadataRecordConfigV4(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw.invoke(
@@ -140,7 +140,7 @@ class TestCommandRecordsImport:
         with NamedTemporaryFile(mode="r+") as record_file:
             record_data = TestRecordConfigurations.TEST_RECORD_3.value
             # noinspection PyArgumentList
-            record_configuration = MetadataRecordConfigV3(**record_data)
+            record_configuration = MetadataRecordConfigV4(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw_not_setup.invoke(args=["records", "import", record_file.name])
@@ -151,7 +151,7 @@ class TestCommandRecordsImport:
         with NamedTemporaryFile(mode="r+") as record_file:
             record_data = TestRecordConfigurations.TEST_RECORD_3.value
             # noinspection PyArgumentList
-            record_configuration = MetadataRecordConfigV3(**record_data)
+            record_configuration = MetadataRecordConfigV4(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw_auth_token_error.invoke(args=["records", "import", record_file.name])
@@ -162,7 +162,7 @@ class TestCommandRecordsImport:
         with NamedTemporaryFile(mode="r+") as record_file:
             record_data = TestRecordConfigurations.TEST_RECORD_3.value
             # noinspection PyArgumentList
-            record_configuration = MetadataRecordConfigV3(**record_data)
+            record_configuration = MetadataRecordConfigV4(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw_missing_auth_token.invoke(args=["records", "import", record_file.name])
@@ -175,7 +175,7 @@ class TestCommandRecordsImport:
         with NamedTemporaryFile(mode="r+") as record_file:
             record_data = TestRecordConfigurations.TEST_RECORD_3.value
             # noinspection PyArgumentList
-            record_configuration = MetadataRecordConfigV3(**record_data)
+            record_configuration = MetadataRecordConfigV4(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw_insufficient_auth_token.invoke(args=["records", "import", record_file.name])
@@ -186,7 +186,7 @@ class TestCommandRecordsImport:
         with NamedTemporaryFile(mode="r+") as record_file:
             record_data = TestRecordConfigurations.TEST_RECORD_3.value
             # noinspection PyArgumentList
-            record_configuration = MetadataRecordConfigV3(**record_data)
+            record_configuration = MetadataRecordConfigV4(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw_inserts_fail.invoke(args=["records", "import", record_file.name])
@@ -197,7 +197,7 @@ class TestCommandRecordsImport:
         with NamedTemporaryFile(mode="r+") as record_file:
             record_data = TestRecordConfigurations.TEST_RECORD_7.value
             # noinspection PyArgumentList
-            record_configuration = MetadataRecordConfigV3(**record_data)
+            record_configuration = MetadataRecordConfigV4(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw.invoke(args=["records", "import", record_file.name])
@@ -211,7 +211,7 @@ class TestCommandRecordsImport:
         with NamedTemporaryFile(mode="r+") as record_file:
             record_data = TestRecordConfigurations.TEST_RECORD_7.value
             # noinspection PyArgumentList
-            record_configuration = MetadataRecordConfigV3(**record_data)
+            record_configuration = MetadataRecordConfigV4(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw.invoke(
@@ -233,7 +233,7 @@ class TestCommandRecordsBulkImport:
         ):
             record_data = TestRecordConfigurations.TEST_RECORD_3.value
             # noinspection PyArgumentList
-            record_configuration = MetadataRecordConfigV3(**record_data)
+            record_configuration = MetadataRecordConfigV4(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw.invoke(args=["records", "bulk-import", record_directory])
@@ -255,7 +255,7 @@ class TestCommandRecordsBulkImport:
         ):
             record_data = TestRecordConfigurations.TEST_RECORD_4.value
             # noinspection PyArgumentList
-            record_configuration = MetadataRecordConfigV3(**record_data)
+            record_configuration = MetadataRecordConfigV4(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw.invoke(args=["records", "bulk-import", record_directory, "--allow-update"])
@@ -272,7 +272,7 @@ class TestCommandRecordsBulkImport:
         ):
             record_data = TestRecordConfigurations.TEST_RECORD_5.value
             # noinspection PyArgumentList
-            record_configuration = MetadataRecordConfigV3(**record_data)
+            record_configuration = MetadataRecordConfigV4(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw.invoke(args=["records", "bulk-import", record_directory, "--publish"])
@@ -290,7 +290,7 @@ class TestCommandRecordsBulkImport:
         ):
             record_data = TestRecordConfigurations.TEST_RECORD_6.value
             # noinspection PyArgumentList
-            record_configuration = MetadataRecordConfigV3(**record_data)
+            record_configuration = MetadataRecordConfigV4(**record_data)
             record_configuration.dump(file=Path(record_file.name))
 
             result = app_runner_mocked_csw.invoke(
@@ -348,7 +348,7 @@ class TestCommandRecordsBulkImport:
             ):
                 valid_record_data = TestRecordConfigurations.TEST_RECORD_3.value
                 # noinspection PyArgumentList
-                record_configuration = MetadataRecordConfigV3(**valid_record_data)
+                record_configuration = MetadataRecordConfigV4(**valid_record_data)
                 record_configuration.dump(file=Path(valid_record_file.name))
                 invalid_record_data = '{"foo":}'
                 invalid_record_file.write(invalid_record_data)
@@ -516,10 +516,10 @@ class TestCommandRecordsExport:
             )
 
             # verify export
-            export_record_configuration = MetadataRecordConfigV3()
+            export_record_configuration = MetadataRecordConfigV4()
             export_record_configuration.load(file=record_path)
             # noinspection PyArgumentList
-            verification_record_configuration = MetadataRecordConfigV3(**TestRecordConfigurations.TEST_RECORD_7.value)
+            verification_record_configuration = MetadataRecordConfigV4(**TestRecordConfigurations.TEST_RECORD_7.value)
             assert export_record_configuration.config == verification_record_configuration.config
 
     def test_cli_records_export_allow_overwrite(self, app_runner_mocked_csw: FlaskCliRunner):
@@ -716,12 +716,12 @@ class TestCommandRecordsBulkExport:
                 in record_paths
             )
 
-            export_record_configuration = MetadataRecordConfigV3()
+            export_record_configuration = MetadataRecordConfigV4()
             export_record_configuration.load(
                 file=records_path.joinpath(f"{TestRecordConfigurations.TEST_RECORD_1.value['file_identifier']}.json")
             )
             # noinspection PyArgumentList
-            verification_record_configuration = MetadataRecordConfigV3(**TestRecordConfigurations.TEST_RECORD_7.value)
+            verification_record_configuration = MetadataRecordConfigV4(**TestRecordConfigurations.TEST_RECORD_7.value)
             assert export_record_configuration.config == verification_record_configuration.config
 
     def test_cli_records_bulk_export_allow_overwrite(self, app_runner_mocked_csw: FlaskCliRunner):

@@ -12,7 +12,7 @@ from typing import Any
 from urllib.parse import parse_qs as query_string_parse
 from urllib.parse import urlparse as url_parse
 
-from bas_metadata_library.standards.iso_19115_2 import MetadataRecord, MetadataRecordConfigV3
+from bas_metadata_library.standards.iso_19115_2 import MetadataRecord, MetadataRecordConfigV4
 from dateutil.relativedelta import relativedelta
 from markdown import markdown
 
@@ -1229,7 +1229,7 @@ class Record(RecordSummary):
 
         Specifically load a BAS Metadata Library record configuration for ISO 19115-2 that has been JSON encoded.
         """
-        configuration = MetadataRecordConfigV3()
+        configuration = MetadataRecordConfigV4()
         configuration.load(file=record_path)
         self.config: dict[str, Any] = configuration.config
 
@@ -1239,7 +1239,7 @@ class Record(RecordSummary):
 
         Specifically saves a BAS Metadata Library record configuration for ISO 19115-2 using JSON encoding.
         """
-        configuration = MetadataRecordConfigV3(**self.config)
+        configuration = MetadataRecordConfigV4(**self.config)
         configuration.validate()
 
         try:
@@ -1264,7 +1264,7 @@ class Record(RecordSummary):
             msg = f"Unsupported dump format: {dump_format}"
             raise ValueError(msg)
 
-        configuration = MetadataRecordConfigV3(**self.config)
+        configuration = MetadataRecordConfigV4(**self.config)
         record = MetadataRecord(configuration=configuration)
         return record.generate_xml_document().decode()
 
@@ -1760,6 +1760,19 @@ class Item:
             return "WGS 84 ([EPSG:4326](https://spatialreference.org/ref/epsg/wgs-84/))"
 
     @staticmethod
+    def _process_extents(extents: list[dict]) -> dict[str, dict]:
+        """
+        Index geographic, vertical or temporal extents with IDs.
+
+        Extents without an ID are omitted.
+        """
+        _ = {}
+        for extent in extents:
+            if "id" in extent:
+                _[extent["id"]] = extent
+        return _
+
+    @staticmethod
     def _process_bounding_box_geojson(bounding_box: dict[str, str]) -> dict:
         """
         Construct a GeoJSON bounding box for an items spatial extent.
@@ -1973,6 +1986,16 @@ class Item:
         return self.record.contacts["author"]
 
     @property
+    def bounding_geographic_extent(self) -> dict | None:
+        indexed_extents = self._process_extents(extents=self.geographic_extents)
+        return indexed_extents.get("bounding", None)
+
+    @property
+    def bounding_temporal_extent(self) -> dict | None:
+        indexed_extents = self._process_extents(extents=self.temporal_extents)
+        return indexed_extents.get("bounding", None)
+
+    @property
     def character_set(self) -> str:
         return str(self.record.character_set).upper()
 
@@ -2034,6 +2057,8 @@ class Item:
             geographic_extent["bounding_box_geojson"] = self._process_bounding_box_geojson(
                 bounding_box=geographic_extent["bounding_box"]
             )
+            if "identifier" in extent:
+                geographic_extent["id"] = extent["identifier"]
             geographic_extents.append(geographic_extent)
 
         return geographic_extents
@@ -2179,12 +2204,13 @@ class Item:
         temporal_extents = []
 
         for extent in self.record.extents:
-            temporal_extents.append(
-                {
-                    "start": self._format_date(date_datetime=extent["temporal"]["start"]),
-                    "end": self._format_date(date_datetime=extent["temporal"]["end"]),
-                }
-            )
+            temporal_extent = {
+                "start": self._format_date(date_datetime=extent["temporal"]["start"]),
+                "end": self._format_date(date_datetime=extent["temporal"]["end"]),
+            }
+            if "identifier" in extent:
+                temporal_extent["id"] = extent["identifier"]
+            temporal_extents.append(temporal_extent)
 
         return temporal_extents
 

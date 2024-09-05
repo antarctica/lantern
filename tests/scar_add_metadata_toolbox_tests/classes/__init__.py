@@ -182,6 +182,9 @@ class MockCSWServer(CSWServer):
         self.backing_repo_initialised = True
 
     def process_request(self, request: Request, token: EntraToken | None = None) -> Response:
+        csw_request = self._prepare_csw_request(request=request)
+        transaction_type = self._transaction_type(csw_request=csw_request)
+        self._check_auth(transaction_type=transaction_type, token=token)
         return Response("ok")
 
 

@@ -587,13 +587,16 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
         if transaction_type == CSWTransactionType.SELECT:
             permissions_required = "read"
 
+        required_scopes = self._auth_config[permissions_required]
+
+        if len(required_scopes) == 0:
+            return
+
         if token is None:
             raise CSWAuthMissingError() from None
 
         validator = TokenValidator()
-        if not validator.scope_insufficient(
-            token_scopes=token.scopes, required_scopes=self._auth_config[permissions_required]
-        ):
+        if not validator.scope_insufficient(token_scopes=token.scopes, required_scopes=required_scopes):
             raise CSWAuthInsufficientError() from None
 
     def _create_tracking_repo(self) -> None:

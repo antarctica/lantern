@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* Item properties for bounding geographic and temporal extent
+  [#278](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/278)
+
+### Fixed
+
+* Updating bas-style-kit-jinja-templates dependency to correct 'back to top' link
+  [#152](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/152)
+* Esri JS error for missing API key
+  [#411](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/411)
+
+### Changed
+
+* Updating bas-metadata-library dependency
+  [#408](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/408)
+* Moving citation information to data table to make it more visible
+  [#375](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/375)
+* Replacing Nginx docker service with Python simple server for previewing local static site
+  [#412](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/412)
+* Migrating to new databases running in new BAS Postgres cluster
+  [#391](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/391)
+* Disabling Google Analytics in Style Kit templates (as GA version no longer supported)
+  [#416](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/416)
+
 ## [0.7.3] - 2024-09-05
 
 ### Fixed

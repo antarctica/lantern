@@ -134,7 +134,6 @@ class Config:
         bsk_templates.bsk_site_footer_policies_cookies_href = "/legal/cookies"
         bsk_templates.bsk_site_footer_policies_copyright_href = "/legal/copyright"
         bsk_templates.bsk_site_footer_policies_privacy_href = "/legal/privacy"
-        bsk_templates.site_analytics["id"] = "UA-64130716-19"
         bsk_templates.site_styles.append(
             {
                 "href": "https://cdn.web.bas.ac.uk/libs/font-awesome-pro/5.13.0/css/all.min.css",

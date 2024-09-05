@@ -241,7 +241,7 @@ prior to submission. On submission, Power Automate creates an issue for the mess
 ## Website metrics
 
 **Note:** Website metrics are not currently collected. See
-[MAGIC/add-metadata-toolbox#292 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/292) for more
+[MAGIC/add-metadata-toolbox#416 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/416) for more
 information.
 
 ## Download metrics

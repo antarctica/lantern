@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.7.2] - 2024-09-05
+
 ### Fixed
 
 * CSW Server `_check_auth()` should allow requests without a token where read is allowed to be anonymous

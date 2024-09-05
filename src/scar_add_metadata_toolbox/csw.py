@@ -21,7 +21,7 @@ from lxml.etree import (
     XMLSyntaxError,
     fromstring,
     tostring,
-)  # nosec - see 'lxml` package (bandit)' section in README
+)
 from requests import HTTPError
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.exc import ProgrammingError
@@ -535,6 +535,8 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
             "GetRecords": CSWTransactionType.SELECT,
             "GetRecordById": CSWTransactionType.SELECT,
         }
+        # noinspection PyUnusedLocal
+        request_type: str | None = None
         transaction_type: CSWTransactionType | None = None
 
         # '?request=GetRecordById' becomes 'GetRecordById'

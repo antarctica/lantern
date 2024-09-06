@@ -598,7 +598,7 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
             raise CSWAuthMissingError() from None
 
         validator = TokenValidator()
-        if not validator.scope_insufficient(token_scopes=token.scopes, required_scopes=required_scopes):
+        if validator.scope_insufficient(token_scopes=token.scopes, required_scopes=required_scopes):
             raise CSWAuthInsufficientError() from None
 
     def _create_tracking_repo(self) -> None:

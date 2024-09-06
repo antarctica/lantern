@@ -19,7 +19,7 @@ You will need access to these accounts to provision these resources:
 * NERC Azure tenancy
 
 ```shell
-$ cd provisioning/terraform
+$ cd support/terraform
 $ docker compose run terraform
 
 $ az login --allow-no-subscriptions
@@ -34,7 +34,7 @@ $ docker compose down
 ```
 
 **Note:** The `terraform apply` step will need to be taken in stages for Azure application registrations. See the notes
-in `provisioning/terraform/56-azure_app_registrations.tf` for details.
+in `support/terraform/56-azure_app_registrations.tf` for details.
 
 ### Manual setup - Entra app registrations
 

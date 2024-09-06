@@ -120,8 +120,8 @@ def create_runner(
 
     This method:
     - patches CSW auth to accept locally signed access tokens or simulate an error acquiring a token from Entra
-    - patches the CSW Server class with a configurable mock (that either responds successfully or raises a exception)
-    - patches the CSW Client class with a configurable mock (that either responds successfully or raises a exception)
+    - patches the CSW Server class with a configurable mock (that either responds successfully or raises an exception)
+    - patches the CSW Client class with a configurable mock (that either responds successfully or raises an exception)
     - updates app config to use a temporary directory for storing the MSAL / client auth cache
     - updates app config to use a temporary directory for the static site build output
     - can be configured to return a Flask app, a Flask test HTTP client or Flask test CLI runner as needed

@@ -55,19 +55,19 @@ represents both *development* and *staging*.
 
 - [Static site - integration (AWS Console 🔒)]()
   - for previewing upcoming static site builds
-  - managed using [Terraform](/provisioning/terraform/40-s3.tf)
+  - managed using [Terraform](/support/terraform/40-s3.tf)
 - [Static site - production (AWS Console 🔒)]()
   - for production static site builds
-  - managed using [Terraform](/provisioning/terraform/40-s3.tf)
+  - managed using [Terraform](/support/terraform/40-s3.tf)
 
 ## GitLab projects
 
 - [Revision tracking - integration 🔒](https://gitlab.data.bas.ac.uk/MAGIC/add-catalogue-records-integration)
   - for non-production use cases
-  - managed using [Terraform](/provisioning/terraform/42-gitlab_projects.tf)
+  - managed using [Terraform](/support/terraform/42-gitlab_projects.tf)
 - [Revision tracking - production 🔒](https://gitlab.data.bas.ac.uk/MAGIC/add-catalogue-records-production)
   - for production use cases
-  - managed using [Terraform](/provisioning/terraform/42-gitlab_projects.tf)
+  - managed using [Terraform](/support/terraform/42-gitlab_projects.tf)
 
 ## GitLab Access Tokens
 

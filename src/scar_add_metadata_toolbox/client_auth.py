@@ -111,7 +111,7 @@ class MsalFlaskAuth:
 
         return {
             "name": access_claims.get("name", "-"),
-            "email": access_claims.get("upn", "-"),
+            "email": access_claims.get("email", "-"),
             "account_id": account.get("local_account_id", "-"),
         }
 

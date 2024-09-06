@@ -38,7 +38,7 @@ from tests.scar_add_metadata_toolbox_tests.classes import (
 @pytest.fixture()
 def fx_user_claims() -> dict:
     """Token claims relating to the signed in user."""
-    return {"name": "Connie Watson", "upn": "conwat@example.com"}
+    return {"name": "Connie Watson", "email": "conwat@example.com"}
 
 
 @pytest.fixture()

@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#152](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/152)
 * Esri JS error for missing API key
   [#411](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/411)
+* Multiple auth related bugs (token scopes, unauthenticated CSW client requests, token comparison, email claim)
+  [#417](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/417)
 
 ### Changed
 

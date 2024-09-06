@@ -87,9 +87,9 @@ def fx_access_token(fx_jwt_client: MockJwtClient, fx_user_claims: dict) -> str:
 def app(mocker: MockerFixture) -> Flask:
     """Patched application to bypass auth."""
     mocker.patch(
-        "scar_add_metadata_toolbox.client_auth.PublicClientApplication", return_value=mocker.MagicMock(auto_spec=True)
+        "scar_add_metadata_toolbox.client_auth.PublicClientApplication.acquire_token_silent",
+        return_value={"access_token": None},
     )
-
     return create_app()
 
 

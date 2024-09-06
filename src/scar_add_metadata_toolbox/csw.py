@@ -594,7 +594,7 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
         if len(required_scopes) == 0:
             return
 
-        if token is None:
+        if not isinstance(token, EntraToken):
             raise CSWAuthMissingError() from None
 
         validator = TokenValidator()

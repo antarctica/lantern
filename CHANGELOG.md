@@ -37,6 +37,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#416](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/416)
 * Simplifying config class to a single environment, with options overridden by env vars to remove need for `FLASK_ENV`
   [#314](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/314)
+* Replacing Postgres docker service with local Postgres instance
+  [#418](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/418)
 
 ## [0.7.3] - 2024-09-05
 

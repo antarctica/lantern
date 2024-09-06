@@ -7,7 +7,7 @@ Requirements:
 * Python 3.9 ([pyenv](https://github.com/pyenv/pyenv) recommended)
 * [Poetry](https://python-poetry.org/docs/#installation) (1.8+)
 * Git (`brew install git`)
-* Docker Compose (`brew install docker-desktop`)
+* Postgres with PostGIS extension (`brew install postgis`)
 * Pre-commit (`pipx install pre-commit`)
 
 Clone project:
@@ -21,7 +21,13 @@ Install project:
 
 ```
 $ poetry install
-$ docker compose pull
+```
+
+Create database and enable extensions:
+
+```
+$ createdb add-toolbox-dev
+$ psql -d add-toolbox-dev -c "CREATE EXTENSION IF NOT EXISTS postgis;"
 ```
 
 Set configuration as per the [Configuration](/docs/config.md) documentation:
@@ -46,10 +52,7 @@ Useful for:
 * testing changes to how data is loaded into CSW catalogues
 
 ```shell
-# Start the local Postgres database for CSW
-$ docker compose up
-
-# In another terminal; Start the Flask application as a server (it will use the local postgres database by default)
+# Start the Flask application as a server (it will use the local postgres database by default)
 $ FLASK_APP=scar_add_metadata_toolbox poetry run flask run --port 5050
 
 # In another terminal; Run Flask CLI commands as a client (see quick start section below)

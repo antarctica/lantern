@@ -10,7 +10,7 @@ Requirements:
 * Docker Compose (`brew install docker-desktop`)
 * Pre-commit (`pipx install pre-commit`)
 
-Clone project
+Clone project:
 
 ```
 $ git clone https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox.git
@@ -50,17 +50,14 @@ Useful for:
 $ docker compose up
 
 # In another terminal; Start the Flask application as a server (it will use the local postgres database by default)
-$ FLASK_APP=scar_add_metadata_toolbox CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN=glpat-xxx poetry run flask run --port 5050
+$ FLASK_APP=scar_add_metadata_toolbox poetry run flask run --port 5050
 
-# In another terminal; Run Flask CLI commands as a client
+# In another terminal; Run Flask CLI commands as a client (see quick start section below)
 $ FLASK_APP=scar_add_metadata_toolbox poetry run flask [command]
 
 # In another terminal; Run a simple web server for the static site
 $ poetry run python -m http.server 9000 --directory _site
 ```
-
-Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN` is the GitLab Personal Access Token (PAT)
-for revision tracking. See the [Infrastructure](/docs/infrastructure.md#gitlab-access-tokens) documentation for details.
 
 See the [CLI Reference](/docs/cli-reference.md) for how to use the CLI. Where `flask` is written, replace this with
 the command example above.
@@ -71,18 +68,16 @@ Quick start (example):
 
 ```shell
 $ FLASK_APP=scar_add_metadata_toolbox poetry run flask csw setup db unpublished
+# follow steps in setup documentation for fixing indexes in CSW backing DB
 $ FLASK_APP=scar_add_metadata_toolbox poetry run flask csw setup db published
 $ FLASK_APP=scar_add_metadata_toolbox poetry run flask csw setup repo unpublished
 $ FLASK_APP=scar_add_metadata_toolbox poetry run flask auth sign-in
-$ FLASK_APP=scar_add_metadata_toolbox poetry run flask records import --publish ~/some-example-record.json
+$ FLASK_APP=scar_add_metadata_toolbox poetry run flask records import --publish path/to/some-example-record.json
 $ FLASK_APP=scar_add_metadata_toolbox poetry run flask site build
 # (after example-record updated)
-$ FLASK_APP=scar_add_metadata_toolbox poetry run flask records import --publish --allow-update --allow-republish ~/some-example-record.json
+$ FLASK_APP=scar_add_metadata_toolbox poetry run flask records import --publish --allow-update --allow-republish path/to/some-example-record.json
 $ FLASK_APP=scar_add_metadata_toolbox poetry run flask site build
 ```
-
-Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN` is the GitLab Personal Access Token (PAT)
-for revision tracking. See the [Infrastructure](/docs/infrastructure.md#gitlab-access-tokens) documentation for details.
 
 ### Building a local static site with production data
 
@@ -110,17 +105,20 @@ Useful for testing with real data but where changes to the server application ar
 
 ```shell
 # Start the Flask application as a server (using the production database)
-$ FLASK_APP=scar_add_metadata_toolbox CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION=postgresql://pycsw_production:xxx@bsldb.nerc-bas.ac.uk/pycsw_production CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION=postgresql://pycsw_production:xxx@bsldb.nerc-bas.ac.uk/pycsw_production CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_REMOTE_URL=https://gitlab.data.bas.ac.uk/MAGIC/add-catalogue-records-production.git CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN=xxx poetry run flask run --port 5050
+$ FLASK_APP=scar_add_metadata_toolbox CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION=xxx CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION=xxx CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_REMOTE_URL=https://gitlab.data.bas.ac.uk/MAGIC/add-catalogue-records-production.git poetry run flask run --port 5050
 
 # In another terminal; Run Flask CLI commands as a client
 $ FLASK_APP=scar_add_metadata_toolbox poetry run flask [command]
 ```
 
-Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION` is the relevant database connection string
-(staging or production). See the [Infrastructure](/docs/infrastructure.md#databases) documentation for details.
+Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_DATABASE_CONNECTION` and
+`CSW_SERVER_CONFIG_PUBLISHED_DATABASE_CONNECTION` is the relevant database connection string (staging or production).
+See the [Infrastructure](/docs/infrastructure.md#databases) documentation for details.
 
-Where the value for `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN` is the GitLab Personal Access Token (PAT)
-for revision tracking. See the [Infrastructure](/docs/infrastructure.md#gitlab-access-tokens) documentation for details.
+The `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_REMOTE_URL` variable is set to the production repo as if
+production data is being modified it should be tracked in the production repo too.
+
+**Note:** If the staging database is used, the `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_REMOTE_URL` should not be changed.
 
 See the [CLI Reference](/docs/cli-reference.md) for how to use the CLI. Where `flask` is written, replace this with
 the command example above.
@@ -366,7 +364,7 @@ $ pre-commit run --all-files
 ### Pytest
 
 [pytest](https://docs.pytest.org) with a number of plugins is used to test the application. Config options are set in
-[`pyproject.toml`](/pyproject.toml). Tests checks are run automatically in
+[`pyproject.toml`](../pyproject.toml). Tests checks are run automatically in
 [Continuous Integration](#continuous-integration).
 
 Tests for the application are defined in the

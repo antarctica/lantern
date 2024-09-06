@@ -12,7 +12,7 @@ from lxml.etree import (
     ProcessingInstruction,
     fromstring,
     tostring,
-)  # nosec - see 'lxml` package (bandit)' section in README
+)
 
 from scar_add_metadata_toolbox.classes import Item, Record
 from scar_add_metadata_toolbox.csw import CSWServer

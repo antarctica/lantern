@@ -1,3 +1,4 @@
+import contextlib
 from http import HTTPStatus
 
 import sentry_sdk
@@ -7,7 +8,7 @@ from markupsafe import escape
 from werkzeug.exceptions import NotFound
 
 from scar_add_metadata_toolbox.classes import MirrorRepository
-from scar_add_metadata_toolbox.client_auth import MsalFlask
+from scar_add_metadata_toolbox.client_auth import MsalFlask, MsalFlaskNoAccountError, MsalTokenAcquisitionError
 from scar_add_metadata_toolbox.commands import (
     auth_commands_blueprint,
     csw_commands_blueprint,
@@ -58,9 +59,14 @@ def create_app() -> Flask:  # noqa: C901
     msal = MsalFlask()
     msal.init_app(app)
 
+    # noinspection PyUnusedLocal
+    access_token = None
+    with contextlib.suppress(MsalFlaskNoAccountError, MsalTokenAcquisitionError):
+        access_token = app.msal.access_token
+
     app.repositories = _create_csw_repositories(repositories_config=app.config["CSW_SERVERS_CONFIG"])
-    app.config["CSW_CLIENTS_CONFIG"]["unpublished"]["client_config"]["auth"] = {"token": None}
-    app.config["CSW_CLIENTS_CONFIG"]["published"]["client_config"]["auth"] = {"token": None}
+    app.config["CSW_CLIENTS_CONFIG"]["unpublished"]["client_config"]["auth"] = {"token": access_token}
+    app.config["CSW_CLIENTS_CONFIG"]["published"]["client_config"]["auth"] = {"token": access_token}
     app.records = MirrorRepository(
         unpublished_repository_config=app.config["CSW_CLIENTS_CONFIG"]["unpublished"],
         published_repository_config=app.config["CSW_CLIENTS_CONFIG"]["published"],

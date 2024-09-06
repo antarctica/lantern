@@ -38,11 +38,11 @@ class MsalFlaskAuth:
     Intended for public (non-trusted) CLI apps where the token cache is stored in a single end-users account.
     """
 
-    def __init__(self, tenancy_id: str, client_id: str, auth_cache_path: Path) -> None:
+    def __init__(self, tenancy_id: str, client_id: str, scopes: list[str], auth_cache_path: Path) -> None:
         self._tenancy_id = tenancy_id
         self._client_id = client_id
         self._authority = f"https://login.microsoftonline.com/{self._tenancy_id}"
-        self._scopes = []
+        self._scopes = scopes
         self._auth_cache_path = auth_cache_path
         self._flow_state = {}
 
@@ -163,5 +163,6 @@ class MsalFlask:
             app.msal = MsalFlaskAuth(
                 tenancy_id=app.config["MSAL_TENANCY"],
                 client_id=app.config["MSAL_CLIENT_ID"],
+                scopes=app.config["MSAL_SCOPES"],
                 auth_cache_path=app.config["MSAL_AUTH_CACHE_PATH"],
             )

@@ -13,21 +13,21 @@ packages = [{ include = "scar_add_metadata_toolbox", from = "src" }]
 
 [tool.poetry.dependencies]
 awscli = "1.33.35"  # pinned to aid in dependency resolution time
-bas-metadata-library = "^0.11.0"
+bas-metadata-library = "^0.12.0"
 bas-style-kit-jinja-templates = "^0.7.0"
 click-spinner = "^0.1.10"
 dulwich = "^0.22.1"
 Flask = "^3.0.3"
 flask-entra-auth = "^0.9.0"
 Markdown = "^3.4.1"
-msal = "^1.19.0"
+msal = "^1.31.0"
 msal-extensions = "^1.2.0"
-platformdirs = "^4.2.2"
+platformdirs = "^4.3.1"
 python = "^3.9"
 python-dateutil = "^2.8.1"
 python-dotenv = "^1.0.0"
 requests = "^2.28.1"
-sentry-sdk = {version = "^2.13.0", extras = ["flask"]}
+sentry-sdk = {version = "^2.14.0", extras = ["flask"]}
 str2bool = "^1.1"
 tabulate = "^0.9.0"
 

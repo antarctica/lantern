@@ -39,6 +39,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#314](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/314)
 * Replacing Postgres docker service with local Postgres instance
   [#418](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/418)
+* Upgrading project dependencies
+  [#419](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/419)
 
 ## [0.7.3] - 2024-09-05
 

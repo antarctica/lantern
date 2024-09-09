@@ -65,13 +65,13 @@ s3transfer = ">=0.10.0,<0.11.0"
 
 [[package]]
 name = "bas-metadata-library"
-version = "0.11.0"
+version = "0.12.0"
 description = "Python library for generating metadata records"
 optional = false
 python-versions = "<4.0,>=3.9"
 files = [
-    {file = "bas_metadata_library-0.11.0-py3-none-any.whl", hash = "sha256:2c6750500463fd0618098e920e6b4ef3a92786fc33ab145eb10530ffb1c41920"},
-    {file = "bas_metadata_library-0.11.0.tar.gz", hash = "sha256:99568c02efcf9003df407a59b46576b5f2c4b0dad0c4f2922bfa9864568bd4ea"},
+    {file = "bas_metadata_library-0.12.0-py3-none-any.whl", hash = "sha256:5414ea33fdeb301b841b1ac26d39917fea6df3756951dbd5bf8935c64eb582e1"},
+    {file = "bas_metadata_library-0.12.0.tar.gz", hash = "sha256:ad7b08ee5586cff9e747e4db631db95a106cb46ed0ea1cf72b85e26e2eb4d8c8"},
 ]
 
 [package.dependencies]
@@ -1162,22 +1162,22 @@ files = [
 
 [[package]]
 name = "msal"
-version = "1.30.0"
+version = "1.31.0"
 description = "The Microsoft Authentication Library (MSAL) for Python library enables your app to access the Microsoft Cloud by supporting authentication of users with Microsoft Azure Active Directory accounts (AAD) and Microsoft Accounts (MSA) using industry standard OAuth2 and OpenID Connect."
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "msal-1.30.0-py3-none-any.whl", hash = "sha256:423872177410cb61683566dc3932db7a76f661a5d2f6f52f02a047f101e1c1de"},
-    {file = "msal-1.30.0.tar.gz", hash = "sha256:b4bf00850092e465157d814efa24a18f788284c9a479491024d62903085ea2fb"},
+    {file = "msal-1.31.0-py3-none-any.whl", hash = "sha256:96bc37cff82ebe4b160d5fc0f1196f6ca8b50e274ecd0ec5bf69c438514086e7"},
+    {file = "msal-1.31.0.tar.gz", hash = "sha256:2c4f189cf9cc8f00c80045f66d39b7c0f3ed45873fd3d1f2af9f22db2e12ff4b"},
 ]
 
 [package.dependencies]
-cryptography = ">=2.5,<45"
+cryptography = ">=2.5,<46"
 PyJWT = {version = ">=1.0.0,<3", extras = ["crypto"]}
 requests = ">=2.0.0,<3"
 
 [package.extras]
-broker = ["pymsalruntime (>=0.13.2,<0.17)"]
+broker = ["pymsalruntime (>=0.14,<0.18)", "pymsalruntime (>=0.17,<0.18)"]
 
 [[package]]
 name = "msal-extensions"
@@ -1207,19 +1207,19 @@ files = [
 
 [[package]]
 name = "platformdirs"
-version = "4.2.2"
+version = "4.3.2"
 description = "A small Python package for determining appropriate platform-specific dirs, e.g. a `user data dir`."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "platformdirs-4.2.2-py3-none-any.whl", hash = "sha256:2d7a1657e36a80ea911db832a8a6ece5ee53d8de21edd5cc5879af6530b1bfee"},
-    {file = "platformdirs-4.2.2.tar.gz", hash = "sha256:38b7b51f512eed9e84a22788b4bce1de17c0adb134d6becb09836e37d8654cd3"},
+    {file = "platformdirs-4.3.2-py3-none-any.whl", hash = "sha256:eb1c8582560b34ed4ba105009a4badf7f6f85768b30126f351328507b2beb617"},
+    {file = "platformdirs-4.3.2.tar.gz", hash = "sha256:9e5e27a08aa095dd127b9f2e764d74254f482fef22b0970773bfba79d091ab8c"},
 ]
 
 [package.extras]
-docs = ["furo (>=2023.9.10)", "proselint (>=0.13)", "sphinx (>=7.2.6)", "sphinx-autodoc-typehints (>=1.25.2)"]
-test = ["appdirs (==1.4.4)", "covdefaults (>=2.3)", "pytest (>=7.4.3)", "pytest-cov (>=4.1)", "pytest-mock (>=3.12)"]
-type = ["mypy (>=1.8)"]
+docs = ["furo (>=2024.8.6)", "proselint (>=0.14)", "sphinx (>=8.0.2)", "sphinx-autodoc-typehints (>=2.4)"]
+test = ["appdirs (==1.4.4)", "covdefaults (>=2.3)", "pytest (>=8.3.2)", "pytest-cov (>=5)", "pytest-mock (>=3.14)"]
+type = ["mypy (>=1.11.2)"]
 
 [[package]]
 name = "pluggy"
@@ -2145,13 +2145,13 @@ typing-extensions = ">=4.7.1"
 
 [[package]]
 name = "sentry-sdk"
-version = "2.13.0"
+version = "2.14.0"
 description = "Python client for Sentry (https://sentry.io)"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "sentry_sdk-2.13.0-py2.py3-none-any.whl", hash = "sha256:6beede8fc2ab4043da7f69d95534e320944690680dd9a963178a49de71d726c6"},
-    {file = "sentry_sdk-2.13.0.tar.gz", hash = "sha256:8d4a576f7a98eb2fdb40e13106e41f330e5c79d72a68be1316e7852cf4995260"},
+    {file = "sentry_sdk-2.14.0-py2.py3-none-any.whl", hash = "sha256:b8bc3dc51d06590df1291b7519b85c75e2ced4f28d9ea655b6d54033503b5bf4"},
+    {file = "sentry_sdk-2.14.0.tar.gz", hash = "sha256:1e0e2eaf6dad918c7d1e0edac868a7bf20017b177f242cefe2a6bcd47955961d"},
 ]
 
 [package.dependencies]
@@ -2520,4 +2520,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "7fadc0e64938fc713955f65f2a700476cc6bab7719ef81ed9332d73d12d172b5"
+content-hash = "7a0b7608a80904bd264079e5e01dff3f1d729c91e816acf664a15c8d3178833b"

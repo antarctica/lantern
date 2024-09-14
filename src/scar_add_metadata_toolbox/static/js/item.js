@@ -47,6 +47,16 @@ $(function() {
         document.getElementById(this.id).scrollIntoView()
         document.getElementById(this.id).classList.add('app-highlight');
     });
+
+    $('.app-fl-info').on('shown.bs.collapse', function () {
+        document.getElementById(this.id).scrollIntoView()
+        document.getElementById(this.id).classList.add('app-highlight');
+    });
+
+    $('.app-tl-info').on('shown.bs.collapse', function () {
+        document.getElementById(this.id).scrollIntoView()
+        document.getElementById(this.id).classList.add('app-highlight');
+    });
 });
 
 // Item contact form

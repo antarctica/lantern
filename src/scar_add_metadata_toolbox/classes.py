@@ -1893,7 +1893,7 @@ class Item:
         return "outdated"  # pragma: no cover (added for future use)
 
     @staticmethod
-    def _process_download(distribution: dict) -> dict[str, str]:
+    def _process_download(distribution: dict, distributions: list[dict]) -> dict[str, str] | None:  # noqa: C901
         """
         Generate an item download.
 
@@ -1901,10 +1901,8 @@ class Item:
         download options are bespoke to this data catalogue, using inference and hard-coded formatting options to enrich
         or simplify information to be more useful.
 
-        :type distribution dict
-        :param distribution: combination of a ISO transfer option and optional ISO format object
-        :rtype dict
-        :return: item download option
+        Some distribution types vary depending on whether another distribution is present, or not. For example, an
+        ArcGIS Feature Service will be combined with a Feature Layer if present.
         """
         format_dict = distribution.get("format")
         if format_dict is not None:
@@ -1915,7 +1913,6 @@ class Item:
             distribution_format_href = None
 
         download = {
-            # Bandit B303/S303 warning is exempted as these hashes are not used for any security related purposes
             "id": sha1(json.dumps(distribution).encode()).hexdigest(),  # noqa: S324 - nosec
             "format": None,
             "format_title": None,
@@ -1952,12 +1949,50 @@ class Item:
             download["format"] = "wms"
             download["format_title"] = "Web Map Service (WMS)"
             download["format_description"] = "OGC Web Map Service"
-
-        if distribution_format == "Web Map Service":
             endpoint_elements = url_parse(distribution["transfer_option"]["online_resource"]["href"])
             endpoint_parameters: dict = query_string_parse(endpoint_elements.query)
             download["endpoint"] = f"{endpoint_elements.scheme}://{endpoint_elements.netloc}{endpoint_elements.path}"
             download["layer"] = endpoint_parameters["layer"][0]
+        elif distribution_format == "ArcGIS Feature Layer":
+            download["format"] = "arcgis_feature_layer"
+            download["format_title"] = "ArcGIS Feature Layer"
+            download["format_description"] = "Esri ArcGIS Feature Layer"
+        elif distribution_format == "ArcGIS Tile Layer":
+            download["format"] = "arcgis_tile_layer"
+            download["format_title"] = "ArcGIS Tile Layer"
+            download["format_description"] = "Esri ArcGIS Tile Layer"
+        elif distribution_format == "ArcGIS Feature Service":
+            download["format"] = "arcgis_feature_service"
+            download["format_title"] = "ArcGIS Feature Service"
+            download["format_description"] = "Esri ArcGIS Feature Service"
+        elif distribution_format == "ArcGIS Vector Tile Service":
+            download["format"] = "arcgis_vector_tile_service"
+            download["format_title"] = "ArcGIS Vector Tile Service"
+            download["format_description"] = "Esri ArcGIS Vector Tile Service"
+
+        if distribution_format == "ArcGIS Feature Layer":
+            for _distribution in distributions:
+                if _distribution.get("format") and _distribution["format"]["format"] == "ArcGIS Feature Service":
+                    download["service_url"] = _distribution["transfer_option"]["online_resource"]["href"]
+                    break
+
+        if distribution_format == "ArcGIS Tile Layer":
+            for _distribution in distributions:
+                if _distribution.get("format") and _distribution["format"]["format"] == "ArcGIS Tile Service":
+                    download["service_url"] = _distribution["transfer_option"]["online_resource"]["href"]
+                    break
+
+        # skip option if it has already been aggregated into another option
+        if distribution_format == "ArcGIS Feature Service":
+            for _distribution in distributions:
+                if _distribution.get("format") and _distribution["format"]["format"] == "ArcGIS Feature Layer":
+                    return None
+
+        # skip option if it has already been aggregated into another option
+        if distribution_format == "ArcGIS Vector Tile Service":
+            for _distribution in distributions:
+                if _distribution.get("format") and _distribution["format"]["format"] == "ArcGIS Tile Layer":
+                    return None
 
         return download
 
@@ -2053,7 +2088,9 @@ class Item:
         downloads = []
 
         for distribution in self.record.distributions:
-            downloads.append(self._process_download(distribution=distribution))
+            download = self._process_download(distribution=distribution, distributions=self.record.distributions)
+            if download is not None:
+                downloads.append(download)
 
         return downloads
 

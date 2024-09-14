@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#394](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/394)
 * Item properties for ISBN identifier
   [#169](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/169)
+* Initial support for ArcGIS features and vector tiles services and layers
+  [#279](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/279)
 
 ### Fixed
 

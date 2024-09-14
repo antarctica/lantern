@@ -146,3 +146,7 @@ address p:last-of-type {
 .app-item-licence-symbol {
     margin-right: 40px;
 }
+
+.app-overflow-x {
+    overflow-x: scroll;
+}

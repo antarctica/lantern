@@ -2230,8 +2230,12 @@ class Item:
         return point_of_contact
 
     @property
-    def published(self) -> str:
-        _date = self.record.dates["publication"]
+    def published(self) -> str | None:
+        _date = self.record.dates.get("publication", None)
+
+        if _date is None:
+            return None
+
         return self._format_date(date_datetime=_date["date"], date_precision=_date["date_precision"])
 
     @property

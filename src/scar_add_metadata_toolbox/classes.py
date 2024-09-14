@@ -1161,7 +1161,8 @@ class Record(RecordSummary):
 
     @property
     def location_keywords(self) -> list[dict]:
-        return self._filter_keywords(keywords=self.config["identification"]["keywords"], keyword_type="place")
+        keywords = self.config["identification"].get("keywords", [])
+        return self._filter_keywords(keywords=keywords, keyword_type="place")
 
     @property
     def maintenance_frequency(self) -> str | None:
@@ -1233,7 +1234,12 @@ class Record(RecordSummary):
 
     @property
     def theme_keywords(self) -> list[dict]:
-        return self._filter_keywords(keywords=self.config["identification"]["keywords"], keyword_type="theme")
+        keywords = self.config["identification"].get("keywords", None)
+
+        if keywords is None:
+            return []
+
+        return self._filter_keywords(keywords=keywords, keyword_type="theme")
 
     @property
     def topics(self) -> list[str]:
@@ -2358,6 +2364,10 @@ class Item:
         topic_terms = self._filter_keyword_terms(
             keyword_sets=self.record.theme_keywords, keyword_set_url="http://vocab.nerc.ac.uk/collection/T01/current/"
         )
+
+        if topic_terms is None:
+            return []
+
         # return a list of just term values
         return [term["term"] for term in topic_terms]
 

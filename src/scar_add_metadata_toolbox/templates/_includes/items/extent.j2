@@ -55,11 +55,13 @@
 
             <hr>
 
-            <header><h4>Temporal range</h4></header>
-            <div>
-              <strong>From:</strong> {{ item.bounding_temporal_extent.start }},
-              <strong>To:</strong> {{ item.bounding_temporal_extent.end }}
-            </div>
+            {% if item.bounding_temporal_extent %}
+                <header><h4>Temporal range</h4></header>
+                <div>
+                  <strong>From:</strong> {{ item.bounding_temporal_extent.start }},
+                  <strong>To:</strong> {{ item.bounding_temporal_extent.end }}
+                </div>
+            {% endif %}
         </div>
     </div>
 </section>

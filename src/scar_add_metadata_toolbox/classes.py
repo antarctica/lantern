@@ -1121,11 +1121,8 @@ class Record(RecordSummary):
         return _dates
 
     @property
-    def distributions(self) -> list[dict] | None:
-        try:
-            return self.config["distribution"]
-        except KeyError:
-            return None
+    def distributions(self) -> list[dict]:
+        return self.config.get("distribution", [])
 
     @property
     def edition(self) -> str | None:

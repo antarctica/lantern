@@ -28,6 +28,11 @@
         <dt>Topics:</dt>
         <dd>{{ item.topics | join(',') }}</dd>
     </dl>
+
+    {% if item.citation_markdown %}
+        {% include 'app/_includes/items/citation.j2' %}
+    {% endif %}
+
     <h3>Abstract</h3>
     <p>{{ item.abstract_markdown }}</p>
 </section>

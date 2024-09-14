@@ -20,12 +20,14 @@
 
     <nav id="app-item-nav" class="bsk-nav-wrapper bsk-nav-wrapper-tabs" role="navigation">
         <ul class="bsk-nav bsk-nav-tabs" role="tablist">
+            {% if item.downloads %}
             <li class="bsk-active" role="presentation">
                 <a href="#item-details-data" role="tab" data-toggle="tab">
                     <i class="far fa-cube"></i>
                     Data
                 </a>
             </li>
+            {% endif %}
             <li role="presentation">
                 <a href="#item-details-authors" role="tab" data-toggle="tab">
                     <i class="far fa-user-friends"></i>
@@ -70,9 +72,11 @@
             </li>
         </ul>
         <div class="bsk-tab-content">
+            {% if item.downloads %}
             <div id="item-details-data" class="bsk-tab-pane bsk-fade bsk-in bsk-active" role="tabpanel">
                 {% include 'app/_includes/items/data.j2' %}
             </div>
+            {% endif %}
             <div id="item-details-authors" class="bsk-tab-pane bsk-fade" role="tabpanel">
                 {% include 'app/_includes/items/authors.j2' %}
             </div>

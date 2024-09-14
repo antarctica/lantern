@@ -1148,6 +1148,10 @@ class Record(RecordSummary):
         return extents
 
     @property
+    def identifiers(self) -> list[dict]:
+        return self.config["identification"].get("identifiers", [])
+
+    @property
     def language(self) -> str:
         return self.config["identification"]["language"]
 
@@ -1973,6 +1977,15 @@ class Item:
             if keyword_set["thesaurus"]["title"]["href"] == keyword_set_url:
                 return keyword_set["terms"]
 
+    @staticmethod
+    def _filter_identifiers(identifiers: list[dict], namespace: str) -> list[dict]:
+        """Return identifiers by namespace."""
+        _ = []
+        for identifier_ in identifiers:
+            if identifier_["namespace"] == namespace:
+                _.append(identifier_)
+        return _
+
     @property
     def abstract(self) -> str:
         return self.record.abstract
@@ -2066,6 +2079,13 @@ class Item:
     @property
     def identifier(self) -> str:
         return self.record.identifier
+
+    @property
+    def isbn(self) -> str | None:
+        isbns = self._filter_identifiers(identifiers=self.record.identifiers, namespace="isbn")
+        if isbns:
+            return isbns[0]["identifier"]
+        return None
 
     @property
     def item_type(self) -> str:

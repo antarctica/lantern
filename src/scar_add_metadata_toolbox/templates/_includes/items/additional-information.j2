@@ -65,6 +65,10 @@
                 <span class="bsk-text-warning"><i class="fa-fw far fa-exclamation-triangle"></i> Outdated</span>
             {% endif %}
         </dd>
+        {% if item.isbn %}
+            <dt>ISBN</dt>
+            <dd>{{ item.isbn }}</dd>
+        {% endif %}
     </dl>
     <h3>Metadata information</h3>
     <dl class="bsk-dl-horizontal bsk-dl-horizontal-lg">

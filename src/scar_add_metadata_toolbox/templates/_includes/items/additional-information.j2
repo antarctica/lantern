@@ -55,16 +55,20 @@
             <dt>Item updated</dt>
             <dd>{{ item.updated }}</dd>
         {% endif %}
-        <dt>Update frequency:</dt>
-        <dd>{{ item.maintenance_frequency }}</dd>
+        {% if item.maintenance_frequency %}
+            <dt>Update frequency:</dt>
+            <dd>{{ item.maintenance_frequency }}</dd>
+        {% endif %}
+        {% if item.status != 'unknown' %}
         <dt>Status:</dt>
-        <dd>
-            {% if item.status == 'current' %}
-                <span class="bsk-text-success"><i class="fa-fw far fa-check"></i> Current</span>
-            {% elif item.status == 'outdated' %}
-                <span class="bsk-text-warning"><i class="fa-fw far fa-exclamation-triangle"></i> Outdated</span>
-            {% endif %}
-        </dd>
+            <dd>
+                {% if item.status == 'current' %}
+                    <span class="bsk-text-success"><i class="fa-fw far fa-check"></i> Current</span>
+                {% elif item.status == 'outdated' %}
+                    <span class="bsk-text-warning"><i class="fa-fw far fa-exclamation-triangle"></i> Outdated</span>
+                {% endif %}
+            </dd>
+        {% endif %}
         {% if item.isbn %}
             <dt>ISBN</dt>
             <dd>{{ item.isbn }}</dd>

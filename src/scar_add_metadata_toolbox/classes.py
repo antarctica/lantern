@@ -2148,10 +2148,12 @@ class Item:
         return self._format_language(language=self.record.language)
 
     @property
-    def licence_url(self) -> str:
-        for constraint in self.record.constraints:  # noqa: RET503 (will be refactored away)
+    def licence_url(self) -> str | None:
+        for constraint in self.record.constraints:
             if constraint["type"] == "usage" and constraint["restriction_code"] == "license":
                 return constraint["href"]
+
+        return None
 
     @property
     def lineage(self) -> str:

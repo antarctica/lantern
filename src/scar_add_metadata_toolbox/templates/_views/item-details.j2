@@ -36,12 +36,14 @@
                     </a>
                 </li>
             {% endif %}
-            <li role="presentation">
-                <a href="#item-details-licence" role="tab" data-toggle="tab">
-                    <i class="far fa-file-certificate"></i>
-                    Licence
-                </a>
-            </li>
+            {% if item.licence_url %}
+                <li role="presentation">
+                    <a href="#item-details-licence" role="tab" data-toggle="tab">
+                        <i class="far fa-file-certificate"></i>
+                        Licence
+                    </a>
+                </li>
+            {% endif %}
             <li role="presentation">
                 <a href="#item-details-extent" role="tab" data-toggle="tab">
                     <i class="far fa-expand-arrows"></i>
@@ -84,9 +86,11 @@
                     {% include 'app/_includes/items/authors.j2' %}
                 </div>
             {% endif %}
-            <div id="item-details-licence" class="bsk-tab-pane bsk-fade" role="tabpanel">
-                {% include 'app/_includes/items/licence.j2' %}
-            </div>
+            {% if item.licence_url %}
+                <div id="item-details-licence" class="bsk-tab-pane bsk-fade" role="tabpanel">
+                    {% include 'app/_includes/items/licence.j2' %}
+                </div>
+            {% endif %}
             <div id="item-details-extent" class="bsk-tab-pane bsk-fade" role="tabpanel">
                 {% include 'app/_includes/items/extent.j2' %}
             </div>

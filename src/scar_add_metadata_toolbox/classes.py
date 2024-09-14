@@ -1105,7 +1105,7 @@ class Record(RecordSummary):
 
     @property
     def constraints(self) -> list[dict[str, str]]:
-        return self.config["identification"]["constraints"]
+        return self.config["identification"].get("constraints", [])
 
     @property
     def contacts(self) -> dict[str, list[dict]]:

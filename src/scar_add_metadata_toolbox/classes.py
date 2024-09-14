@@ -2493,6 +2493,10 @@ class Collection:
         topic_terms = self._filter_keyword_terms(
             keyword_sets=self.record.theme_keywords, keyword_set_url="http://vocab.nerc.ac.uk/collection/T01/current/"
         )
+
+        if topic_terms is None:
+            return []
+
         # return a list of just term values
         return [term["term"] for term in topic_terms]
 

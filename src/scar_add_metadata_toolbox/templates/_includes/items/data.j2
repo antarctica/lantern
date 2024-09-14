@@ -12,47 +12,57 @@
         </thead>
         <tbody>
             {% for download in item.downloads %}
-                {# Conditional added to hide unsupported ESRI Living Atlas download option in #293. #}
-                {# This is a temporay measure until Living Atlas distirubtion options are property supported in #279. #}
-                {% if download.format != None %}
-                    <tr>
-                        <td>
-                            <abbr title="{{ download.format_description }}">{{ download.format_title}}</abbr>
-                        </td>
-                        <td class="bsk-text-center">
-                            {% if download.size %}
-                                {{ download.size }}
-                            {% elif download.format == 'wms' %}
-                                <span class="bsk-text-muted">N/A</span>
-                            {% endif %}
-                        </td>
-                        <td class="bsk-text-right">
-                            {% if download.format == 'wms' %}
-                                <button type="button" class="bsk-btn bsk-btn-primary app-wms-info-trigger" data-toggle="collapse" data-target="#item-wms-info-layer-{{ download.id }}" aria-expanded="false" aria-label="Close" aria-controls="#item-wms-info-layer-{{ download.id }}">
-                                    Add item to GIS
-                                    <i class="fa-fw far fa-layer-plus"></i>
-                                </button>
-                            {% else %}
-                                <a class="bsk-btn bsk-btn-default" href="{{ download.url }}">
-                                    Download item
-                                    <i class="fa-fw far fa-download"></i>
-                                </a>
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endif %}
+                <tr>
+                    <td>
+                        <abbr title="{{ download.format_description }}">{{ download.format_title}}</abbr>
+                    </td>
+                    <td class="bsk-text-center">
+                        {% if download.size %}
+                            {{ download.size }}
+                        {% elif download.format == 'wms' %}
+                            <span class="bsk-text-muted">N/A</span>
+                        {% endif %}
+                    </td>
+                    <td class="bsk-text-right">
+                        {% if download.format == 'wms' %}
+                            <button type="button" class="bsk-btn bsk-btn-primary app-wms-info-trigger" data-toggle="collapse" data-target="#item-wms-info-layer-{{ download.id }}" aria-expanded="false" aria-label="Close" aria-controls="#item-wms-info-layer-{{ download.id }}">
+                                Add item to GIS
+                                <i class="fa-fw far fa-layer-plus"></i>
+                            </button>
+                        {% elif download.format == 'arcgis_feature_layer' %}
+                            <button type="button" class="bsk-btn bsk-btn-primary app-fl-info-trigger" data-toggle="collapse" data-target="#item-fl-info-layer-{{ download.id }}" aria-expanded="false" aria-label="Close" aria-controls="#item-fl-info-layer-{{ download.id }}">
+                                Add item to GIS
+                                <i class="fa-fw far fa-layer-plus"></i>
+                            </button>
+                        {% elif download.format == 'arcgis_tile_layer' %}
+                            <button type="button" class="bsk-btn bsk-btn-primary app-tl-info-trigger" data-toggle="collapse" data-target="#item-tl-info-layer-{{ download.id }}" aria-expanded="false" aria-label="Close" aria-controls="#item-tl-info-layer-{{ download.id }}">
+                                Add item to GIS
+                                <i class="fa-fw far fa-layer-plus"></i>
+                            </button>
+                        {% else %}
+                            <a class="bsk-btn bsk-btn-default" href="{{ download.url }}">
+                                Download item
+                                <i class="fa-fw far fa-download"></i>
+                            </a>
+                        {% endif %}
+                    </td>
+                </tr>
             {% endfor %}
         </tbody>
     </table>
+
+    {% for download in item.downloads %}
+        {% if download.format == 'wms' %}
+            {% include 'app/_includes/items/data-wms-instructions.j2' %}
+        {% elif download.format == 'arcgis_feature_layer' %}
+            {% include 'app/_includes/items/data-feature-layer-instructions.j2' %}
+        {% elif download.format == 'arcgis_tile_layer' %}
+            {% include 'app/_includes/items/data-tile-layer-instructions.j2' %}
+        {% endif %}
+    {% endfor %}
 
     <div class="bsk-alert bsk-alert-solid bsk-alert-info">
         You <strong>must</strong> include an <a href="#item-citation" class="bsk-alert-link">acknowledgement</a> if you use this item.
     </div>
     {% include 'app/_includes/items/citation.j2' %}
-
-    {% for download in item.downloads %}
-        {% if download.format == 'wms' %}
-            {% include 'app/_includes/items/data-wms-instructions.j2' %}
-        {% endif %}
-    {% endfor %}
 </section>

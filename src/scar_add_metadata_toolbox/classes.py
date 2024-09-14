@@ -2025,7 +2025,7 @@ class Item:
 
     @property
     def authors(self) -> list[dict]:
-        return self.record.contacts["author"]
+        return self.record.contacts.get("author", [])
 
     @property
     def bounding_geographic_extent(self) -> dict | None:

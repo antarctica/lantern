@@ -1164,8 +1164,11 @@ class Record(RecordSummary):
         return self._filter_keywords(keywords=self.config["identification"]["keywords"], keyword_type="place")
 
     @property
-    def maintenance_frequency(self) -> str:
-        return self.config["identification"]["maintenance"]["maintenance_frequency"]
+    def maintenance_frequency(self) -> str | None:
+        try:
+            return self.config["identification"]["maintenance"]["maintenance_frequency"]
+        except KeyError:
+            return None
 
     @property
     def metadata_character_set(self) -> str:
@@ -1176,20 +1179,32 @@ class Record(RecordSummary):
         return self.config["metadata"]["language"]
 
     @property
-    def metadata_maintenance_frequency(self) -> str:
-        return self.config["metadata"]["maintenance"]["maintenance_frequency"]
+    def metadata_maintenance_frequency(self) -> str | None:
+        try:
+            return self.config["metadata"]["maintenance"]["maintenance_frequency"]
+        except KeyError:
+            return None
 
     @property
-    def metadata_maintenance_progress(self) -> str:
-        return self.config["metadata"]["maintenance"]["progress"]
+    def metadata_maintenance_progress(self) -> str | None:
+        try:
+            return self.config["metadata"]["maintenance"]["progress"]
+        except KeyError:
+            return None
 
     @property
-    def metadata_standard_name(self) -> str:
-        return self.config["metadata"]["metadata_standard"]["name"]
+    def metadata_standard_name(self) -> str | None:
+        try:
+            return self.config["metadata"]["metadata_standard"]["name"]
+        except KeyError:
+            return None
 
     @property
-    def metadata_standard_version(self) -> str:
-        return self.config["metadata"]["metadata_standard"]["version"]
+    def metadata_standard_version(self) -> str | None:
+        try:
+            return self.config["metadata"]["metadata_standard"]["version"]
+        except KeyError:
+            return None
 
     @property
     def metadata_updated(self) -> date:
@@ -2154,8 +2169,13 @@ class Item:
         return self._format_maintenance_frequency(maintenance_frequency=self.record.maintenance_frequency)
 
     @property
-    def metadata_maintenance_progress(self) -> str:
-        return str(self.record.metadata_maintenance_progress).capitalize()
+    def metadata_maintenance_progress(self) -> str | None:
+        progress = self.record.metadata_maintenance_progress
+
+        if progress is None:
+            return None
+
+        return str(progress).capitalize()
 
     @property
     def metadata_character_set(self) -> str:
@@ -2170,11 +2190,11 @@ class Item:
         return self._format_maintenance_frequency(maintenance_frequency=self.record.metadata_maintenance_frequency)
 
     @property
-    def metadata_standard_name(self) -> str:
+    def metadata_standard_name(self) -> str | None:
         return self.record.metadata_standard_name
 
     @property
-    def metadata_standard_version(self) -> str:
+    def metadata_standard_version(self) -> str | None:
         return self.record.metadata_standard_version
 
     @property

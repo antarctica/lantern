@@ -77,15 +77,15 @@
         <dt>Character set</dt>
         <dd>{{ item.metadata_character_set }}</dd>
         <dt>Status:</dt>
-        <dd>{{ item.metadata_maintenance_progress }}</dd>
+        <dd>{% if item.metadata_maintenance_progress %}{{ item.metadata_maintenance_progress }}{% else %}Unknown{% endif %}</dd>
         <dt>Last updated:</dt>
         <dd>{{ item.metadata_updated }}</dd>
         <dt>Update frequency:</dt>
-        <dd>{{ item.metadata_maintenance_frequency }}</dd>
+        <dd>{% if item.metadata_maintenance_frequency %}{{ item.metadata_maintenance_frequency }}{% else %}Unknown{% endif %}</dd>
         <dt>Metadata standard:</dt>
-        <dd>{{ item.metadata_standard_name }}</dd>
+        <dd>{% if item.metadata_standard_name %}{{ item.metadata_standard_name }}{% else %}Unknown{% endif %}</dd>
         <dt>Metadata standard version:</dt>
-        <dd>{{ item.metadata_standard_version }}</dd>
+        <dd>{% if item.metadata_standard_version %}{{ item.metadata_standard_version }}{% else %}Unknown{% endif %}</dd>
         <dt>Metadata links</dt>
         <dd>
             <div>

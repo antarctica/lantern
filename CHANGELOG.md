@@ -45,6 +45,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#418](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/418)
 * Upgrading project dependencies
   [#419](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/419)
+* Reducing required record properties to agreed minimum
+  [#274](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/274)
 
 ## [0.7.3] - 2024-09-05
 

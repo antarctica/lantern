@@ -1,11 +1,13 @@
 <section class="bsk-sidebar bsk-sidebar-default app-item-summary">
     <dl class="bsk-dl-horizontal">
-        <dt>Version:</dt>
-        <dd>{{ item.edition }}</dd>
         <dt>Released:</dt>
         <dd>
             {{ item.released }}
         </dd>
+        {% if item.edition %}
+            <dt>Version:</dt>
+            <dd>{{ item.edition }}</dd>
+        {% endif %}
         <dt>Status:</dt>
         <dd>
             {% if item.status == 'current' %}

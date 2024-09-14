@@ -1128,8 +1128,8 @@ class Record(RecordSummary):
             return None
 
     @property
-    def edition(self) -> str:
-        return self.config["identification"]["edition"]
+    def edition(self) -> str | None:
+        return self.config["identification"].get("edition", None)
 
     @property
     def extents(self) -> list[dict] | None:

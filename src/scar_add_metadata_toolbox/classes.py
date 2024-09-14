@@ -1846,7 +1846,7 @@ class Item:
         return bounding_polygon
 
     @staticmethod
-    def _process_status(maintenance_frequency: str, released_date: date | datetime) -> str:
+    def _process_status(maintenance_frequency: str, released_date: date | datetime | None) -> str:
         """
         Determine the status of an item.
 
@@ -1860,6 +1860,7 @@ class Item:
 
         * current
         * outdated
+        * unknown
 
         Maintenance frequencies are based on ISO 19115 maintenance frequency code list values.
 
@@ -1869,16 +1870,12 @@ class Item:
 
         Note: This method includes code paths that are not currently used and so are exempt from code coverage. These
         paths are known to be needed in future and will therefore be tested and included in coverage in the future.
-
-        :type maintenance_frequency str
-        :param maintenance_frequency: maintenance frequency code list value
-        :type released_date date or datetime
-        :param released_date: item release date
-        :rtype str
-        :return: item status
         """
         if maintenance_frequency == "asNeeded" or maintenance_frequency == "notPlanned":
             return "current"
+
+        if released_date is None:
+            return "unknown"
 
         _now = datetime.now(tz=timezone.utc)
         _overdue = released_date
@@ -2209,8 +2206,12 @@ class Item:
         )
 
     @property
-    def released(self) -> str:
-        _date = self.record.dates["released"]
+    def released(self) -> str | None:
+        _date = self.record.dates.get("released", None)
+
+        if _date is None:
+            return None
+
         return self._format_date(date_datetime=_date["date"], date_precision=_date["date_precision"])
 
     @property
@@ -2251,9 +2252,10 @@ class Item:
 
     @property
     def status(self) -> str:
+        released_date = self.released
         return self._process_status(
             maintenance_frequency=self.record.maintenance_frequency,
-            released_date=self.record.dates["released"]["date"],
+            released_date=released_date,
         )
 
     @property

@@ -1105,7 +1105,7 @@ class Record(RecordSummary):
 
     @property
     def constraints(self) -> list[dict[str, str]]:
-        return self.config["identification"]["constraints"]
+        return self.config["identification"].get("constraints", [])
 
     @property
     def contacts(self) -> dict[str, list[dict]]:
@@ -1121,15 +1121,12 @@ class Record(RecordSummary):
         return _dates
 
     @property
-    def distributions(self) -> list[dict] | None:
-        try:
-            return self.config["distribution"]
-        except KeyError:
-            return None
+    def distributions(self) -> list[dict]:
+        return self.config.get("distribution", [])
 
     @property
-    def edition(self) -> str:
-        return self.config["identification"]["edition"]
+    def edition(self) -> str | None:
+        return self.config["identification"].get("edition", None)
 
     @property
     def extents(self) -> list[dict] | None:
@@ -1164,11 +1161,15 @@ class Record(RecordSummary):
 
     @property
     def location_keywords(self) -> list[dict]:
-        return self._filter_keywords(keywords=self.config["identification"]["keywords"], keyword_type="place")
+        keywords = self.config["identification"].get("keywords", [])
+        return self._filter_keywords(keywords=keywords, keyword_type="place")
 
     @property
-    def maintenance_frequency(self) -> str:
-        return self.config["identification"]["maintenance"]["maintenance_frequency"]
+    def maintenance_frequency(self) -> str | None:
+        try:
+            return self.config["identification"]["maintenance"]["maintenance_frequency"]
+        except KeyError:
+            return None
 
     @property
     def metadata_character_set(self) -> str:
@@ -1179,20 +1180,32 @@ class Record(RecordSummary):
         return self.config["metadata"]["language"]
 
     @property
-    def metadata_maintenance_frequency(self) -> str:
-        return self.config["metadata"]["maintenance"]["maintenance_frequency"]
+    def metadata_maintenance_frequency(self) -> str | None:
+        try:
+            return self.config["metadata"]["maintenance"]["maintenance_frequency"]
+        except KeyError:
+            return None
 
     @property
-    def metadata_maintenance_progress(self) -> str:
-        return self.config["metadata"]["maintenance"]["progress"]
+    def metadata_maintenance_progress(self) -> str | None:
+        try:
+            return self.config["metadata"]["maintenance"]["progress"]
+        except KeyError:
+            return None
 
     @property
-    def metadata_standard_name(self) -> str:
-        return self.config["metadata"]["metadata_standard"]["name"]
+    def metadata_standard_name(self) -> str | None:
+        try:
+            return self.config["metadata"]["metadata_standard"]["name"]
+        except KeyError:
+            return None
 
     @property
-    def metadata_standard_version(self) -> str:
-        return self.config["metadata"]["metadata_standard"]["version"]
+    def metadata_standard_version(self) -> str | None:
+        try:
+            return self.config["metadata"]["metadata_standard"]["version"]
+        except KeyError:
+            return None
 
     @property
     def metadata_updated(self) -> date:
@@ -1221,7 +1234,12 @@ class Record(RecordSummary):
 
     @property
     def theme_keywords(self) -> list[dict]:
-        return self._filter_keywords(keywords=self.config["identification"]["keywords"], keyword_type="theme")
+        keywords = self.config["identification"].get("keywords", None)
+
+        if keywords is None:
+            return []
+
+        return self._filter_keywords(keywords=keywords, keyword_type="theme")
 
     @property
     def topics(self) -> list[str]:
@@ -1846,7 +1864,7 @@ class Item:
         return bounding_polygon
 
     @staticmethod
-    def _process_status(maintenance_frequency: str, released_date: date | datetime) -> str:
+    def _process_status(maintenance_frequency: str, released_date: date | datetime | None) -> str:
         """
         Determine the status of an item.
 
@@ -1860,6 +1878,7 @@ class Item:
 
         * current
         * outdated
+        * unknown
 
         Maintenance frequencies are based on ISO 19115 maintenance frequency code list values.
 
@@ -1869,16 +1888,12 @@ class Item:
 
         Note: This method includes code paths that are not currently used and so are exempt from code coverage. These
         paths are known to be needed in future and will therefore be tested and included in coverage in the future.
-
-        :type maintenance_frequency str
-        :param maintenance_frequency: maintenance frequency code list value
-        :type released_date date or datetime
-        :param released_date: item release date
-        :rtype str
-        :return: item status
         """
         if maintenance_frequency == "asNeeded" or maintenance_frequency == "notPlanned":
             return "current"
+
+        if released_date is None:
+            return "unknown"
 
         _now = datetime.now(tz=timezone.utc)
         _overdue = released_date
@@ -2031,7 +2046,7 @@ class Item:
 
     @property
     def authors(self) -> list[dict]:
-        return self.record.contacts["author"]
+        return self.record.contacts.get("author", [])
 
     @property
     def bounding_geographic_extent(self) -> dict | None:
@@ -2133,10 +2148,12 @@ class Item:
         return self._format_language(language=self.record.language)
 
     @property
-    def licence_url(self) -> str:
-        for constraint in self.record.constraints:  # noqa: RET503 (will be refactored away)
+    def licence_url(self) -> str | None:
+        for constraint in self.record.constraints:
             if constraint["type"] == "usage" and constraint["restriction_code"] == "license":
                 return constraint["href"]
+
+        return None
 
     @property
     def lineage(self) -> str:
@@ -2160,8 +2177,13 @@ class Item:
         return self._format_maintenance_frequency(maintenance_frequency=self.record.maintenance_frequency)
 
     @property
-    def metadata_maintenance_progress(self) -> str:
-        return str(self.record.metadata_maintenance_progress).capitalize()
+    def metadata_maintenance_progress(self) -> str | None:
+        progress = self.record.metadata_maintenance_progress
+
+        if progress is None:
+            return None
+
+        return str(progress).capitalize()
 
     @property
     def metadata_character_set(self) -> str:
@@ -2176,11 +2198,11 @@ class Item:
         return self._format_maintenance_frequency(maintenance_frequency=self.record.metadata_maintenance_frequency)
 
     @property
-    def metadata_standard_name(self) -> str:
+    def metadata_standard_name(self) -> str | None:
         return self.record.metadata_standard_name
 
     @property
-    def metadata_standard_version(self) -> str:
+    def metadata_standard_version(self) -> str | None:
         return self.record.metadata_standard_version
 
     @property
@@ -2209,8 +2231,12 @@ class Item:
         )
 
     @property
-    def released(self) -> str:
-        _date = self.record.dates["released"]
+    def released(self) -> str | None:
+        _date = self.record.dates.get("released", None)
+
+        if _date is None:
+            return None
+
         return self._format_date(date_datetime=_date["date"], date_precision=_date["date_precision"])
 
     @property
@@ -2229,8 +2255,12 @@ class Item:
         return point_of_contact
 
     @property
-    def published(self) -> str:
-        _date = self.record.dates["publication"]
+    def published(self) -> str | None:
+        _date = self.record.dates.get("publication", None)
+
+        if _date is None:
+            return None
+
         return self._format_date(date_datetime=_date["date"], date_precision=_date["date_precision"])
 
     @property
@@ -2251,9 +2281,13 @@ class Item:
 
     @property
     def status(self) -> str:
+        released_date = self.record.dates.get("released", None)  # can't use self.released as it's a string not date
+        if released_date is not None:
+            released_date = released_date["date"]  # assume released date is always a full date
+
         return self._process_status(
             maintenance_frequency=self.record.maintenance_frequency,
-            released_date=self.record.dates["released"]["date"],
+            released_date=released_date,
         )
 
     @property
@@ -2335,6 +2369,10 @@ class Item:
         topic_terms = self._filter_keyword_terms(
             keyword_sets=self.record.theme_keywords, keyword_set_url="http://vocab.nerc.ac.uk/collection/T01/current/"
         )
+
+        if topic_terms is None:
+            return []
+
         # return a list of just term values
         return [term["term"] for term in topic_terms]
 
@@ -2460,6 +2498,10 @@ class Collection:
         topic_terms = self._filter_keyword_terms(
             keyword_sets=self.record.theme_keywords, keyword_set_url="http://vocab.nerc.ac.uk/collection/T01/current/"
         )
+
+        if topic_terms is None:
+            return []
+
         # return a list of just term values
         return [term["term"] for term in topic_terms]
 

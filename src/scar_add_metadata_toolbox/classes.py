@@ -2281,7 +2281,10 @@ class Item:
 
     @property
     def status(self) -> str:
-        released_date = self.released
+        released_date = self.record.dates.get("released", None)  # can't use self.released as it's a string not date
+        if released_date is not None:
+            released_date = released_date["date"]  # assume released date is always a full date
+
         return self._process_status(
             maintenance_frequency=self.record.maintenance_frequency,
             released_date=released_date,

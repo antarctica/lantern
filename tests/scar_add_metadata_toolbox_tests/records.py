@@ -8,11 +8,12 @@ from bas_metadata_library.standards.iso_19115_2 import MetadataRecord, MetadataR
 
 
 def make_test_record_config(
-    identifier: str, title: str, hierarchy_level: str, item_identifiers: list[str] | None = None
+    identifier: str, title: str, hierarchy_level: str, item_identifiers: list[str] | None = None, return_as: str = False
 ) -> dict:
     config = {
         "$schema": "https://metadata-standards.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-2-v4.json",
         "file_identifier": identifier,
+        "hierarchy_level": hierarchy_level,
         "metadata": {
             "language": "eng",
             "character_set": "utf8",
@@ -43,291 +44,13 @@ def make_test_record_config(
                 }
             ],
             "date_stamp": date(2020, 5, 25),
-            "metadata_standard": {
-                "name": "ISO 19115-2 Geographic Information - Metadata - Part 2: Extensions for Imagery and Gridded Data",
-                "version": "ISO 19115-2:2009(E)",
-            },
-            "maintenance": {"maintenance_frequency": "asNeeded", "progress": "completed"},
         },
         "identification": {
             "title": {"value": title},
             "dates": {
                 "creation": {"date": date(2020, 1, 1), "date_precision": "year"},
-                "revision": {"date": date(2020, 2, 26)},
-                "publication": {"date": datetime(2020, 1, 15, 10, 44, 14)},  # noqa: DTZ001
-                "released": {"date": date(2020, 2, 26)},
             },
-            "edition": "1.2",
-            "abstract": title,
-            "contacts": [
-                {
-                    "individual": {
-                        "name": "Watson, Constance",
-                        "href": "https://sandbox.orcid.org/0000-0001-8373-6934",
-                        "title": "orcid",
-                    },
-                    "organisation": {
-                        "name": "British Antarctic Survey",
-                        "href": "https://ror.org/01rhff309",
-                        "title": "ror",
-                    },
-                    "email": "conwat@bas.ac.uk",
-                    "online_resource": {
-                        "href": "https://sandbox.orcid.org/0000-0001-8373-6934",
-                        "title": "ORCID record",
-                        "description": "ORCID is an open, non-profit, community-driven effort to create and maintain a "
-                        "registry of unique researcher identifiers and a transparent method of linking "
-                        "research activities and outputs to these identifiers.",
-                        "function": "information",
-                    },
-                    "role": ["author"],
-                },
-                {
-                    "organisation": {
-                        "name": "Mapping and Geographic Information Centre, British Antarctic Survey",
-                        "href": "https://ror.org/01rhff309",
-                        "title": "ror",
-                    },
-                    "phone": "+44 (0)1223 221400",
-                    "address": {
-                        "delivery_point": "British Antarctic Survey, High Cross, Madingley Road",
-                        "city": "Cambridge",
-                        "administrative_area": "Cambridgeshire",
-                        "postal_code": "CB3 0ET",
-                        "country": "United Kingdom",
-                    },
-                    "email": "magic@bas.ac.uk",
-                    "online_resource": {
-                        "href": "https://www.bas.ac.uk/team/magic",
-                        "title": "Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-                        "description": "General information about the BAS Mapping and Geographic Information Centre "
-                        "(MAGIC) from the British Antarctic Survey (BAS) public website.",
-                        "function": "information",
-                    },
-                    "role": ["publisher", "pointOfContact"],
-                },
-            ],
-            "maintenance": {"maintenance_frequency": "biannually", "progress": "completed"},
-            "keywords": [
-                {
-                    "terms": [
-                        {
-                            "term": "STUFF",
-                            "href": "https://www.eionet.europa.eu/gemet/en/inspire-theme/st",
-                        }
-                    ],
-                    "type": "theme",
-                    "thesaurus": {
-                        "title": {
-                            "value": "General Multilingual Environmental Thesaurus - INSPIRE themes",
-                            "href": "http://www.eionet.europa.eu/gemet/inspire_themes",
-                        },
-                        "dates": {"publication": {"date": date(2008, 8, 16)}},
-                        "edition": "4.1.2",
-                        "contact": {
-                            "organisation": {
-                                "name": "European Environment Information and Observation Network (EIONET), European "
-                                "Environment Agency (EEA)",
-                                "href": "https://ror.org/02k4b9v70",
-                                "title": "ror",
-                            },
-                            "email": "helpdesk@eionet.europa.eu",
-                            "online_resource": {
-                                "href": "https://www.eionet.europa.eu/gemet/en/themes/",
-                                "title": "GEMET INSPIRE Spatial Data Themes  General Multilingual Environmental Thesaurus",
-                                "description": "GEMET, the GEneral Multilingual Environmental Thesaurus, has been "
-                                "developed as a multilingual thesauri for indexing, retrieval and "
-                                "control of terms in order to save time, energy and funds.",
-                                "function": "information",
-                            },
-                            "role": ["publisher"],
-                        },
-                    },
-                },
-                {
-                    "terms": [
-                        {
-                            "term": "TOPOGRAPHY",
-                            "href": "https://gcmd.earthdata.nasa.gov/kms/concept/3e822484-c94a-457b-a32f-376fcbd6fd35",
-                        },
-                        {
-                            "term": "STUFF",
-                            "href": "https://gcmd.earthdata.nasa.gov/kms/concept/c4992969-05db-4bb6-9dac-d35535503650",
-                        },
-                    ],
-                    "type": "theme",
-                    "thesaurus": {
-                        "title": {
-                            "value": "Global Change Master Directory (GCMD) Science Keywords",
-                            "href": "https://earthdata.nasa.gov/about/gcmd/global-change-master-directory-gcmd-keywords",
-                        },
-                        "dates": {"publication": {"date": date(2020, 1, 9)}},
-                        "edition": "9.1",
-                        "contact": {
-                            "organisation": {
-                                "name": "Global Change Data Center, Science and Exploration Directorate, Goddard Space "
-                                "Flight Center (GSFC) National Aeronautics and Space Administration (NASA)",
-                                "href": "https://ror.org/027ka1x80",
-                                "title": "ror",
-                            },
-                            "address": {
-                                "city": "Greenbelt",
-                                "administrative_area": "MD",
-                                "country": "United States of America",
-                            },
-                            "online_resource": {
-                                "href": "https://earthdata.nasa.gov/about/gcmd/global-change-master-directory-gcmd-keywords",
-                                "title": "Global Change Master Directory (GCMD) Keywords",
-                                "description": "The information provided on this page seeks to define how the GCMD "
-                                "Keywords are structured, used and accessed. It also provides "
-                                "information on how users can participate in the further development of "
-                                "the keywords.",
-                                "function": "information",
-                            },
-                            "role": ["publisher"],
-                        },
-                    },
-                },
-                {
-                    "terms": [
-                        {
-                            "term": "Topographic mapping",
-                            "href": "http://vocab.nerc.ac.uk/collection/T01/current/9cd3118f-55e2-4c07-b9f4-e260e40e8eb2/1/",
-                        }
-                    ],
-                    "type": "theme",
-                    "thesaurus": {
-                        "title": {
-                            "value": "British Antarctic Survey research topics",
-                            "href": "http://vocab.nerc.ac.uk/collection/T01/current/",
-                        },
-                        "dates": {"publication": {"date": date(2020, 5, 6)}},
-                        "edition": "1",
-                        "contact": {
-                            "organisation": {
-                                "name": "UK Polar Data Centre, British Antarctic Survey",
-                                "href": "https://ror.org/01rhff309",
-                                "title": "ror",
-                            },
-                            "phone": "+44 (0)1223 221400",
-                            "address": {
-                                "delivery_point": "British Antarctic Survey, High Cross, Madingley Road",
-                                "city": "Cambridge",
-                                "administrative_area": "Cambridgeshire",
-                                "postal_code": "CB3 0ET",
-                                "country": "United Kingdom",
-                            },
-                            "email": "polardatacentre@bas.ac.uk",
-                            "online_resource": {
-                                "href": "https://www.bas.ac.uk/team/business-teams/information-services/uk-polar-data-centre/",
-                                "title": "UK Polar Data Centre (UK PDC) - BAS public website",
-                                "description": "General information about the NERC Polar Data Centre (UK PDC) from the "
-                                "British Antarctic Survey (BAS) public website.",
-                                "function": "information",
-                            },
-                            "role": ["publisher"],
-                        },
-                    },
-                },
-                {
-                    "terms": [
-                        {
-                            "term": "Antarctic Digital Database",
-                            "href": "http://vocab.nerc.ac.uk/collection/T02/current/8e91de62-b6e3-402e-b11f-73d2c1f37cff/",
-                        }
-                    ],
-                    "type": "theme",
-                    "thesaurus": {
-                        "title": {
-                            "value": "British Antarctic Survey data catalogue collections",
-                            "href": "http://vocab.nerc.ac.uk/collection/T02/current/",
-                        },
-                        "dates": {"publication": {"date": date(2020, 5, 5)}},
-                        "edition": "1",
-                        "contact": {
-                            "organisation": {
-                                "name": "UK Polar Data Centre, British Antarctic Survey",
-                                "href": "https://ror.org/01rhff309",
-                                "title": "ror",
-                            },
-                            "phone": "+44 (0)1223 221400",
-                            "address": {
-                                "delivery_point": "British Antarctic Survey, High Cross, Madingley Road",
-                                "city": "Cambridge",
-                                "administrative_area": "Cambridgeshire",
-                                "postal_code": "CB3 0ET",
-                                "country": "United Kingdom",
-                            },
-                            "email": "polardatacentre@bas.ac.uk",
-                            "online_resource": {
-                                "href": "https://www.bas.ac.uk/team/business-teams/information-services/uk-polar-data-centre/",
-                                "title": "UK Polar Data Centre (UK PDC) - BAS public website",
-                                "description": "General information about the NERC Polar Data Centre (UK PDC) from the "
-                                "British Antarctic Survey (BAS) public website.",
-                                "function": "information",
-                            },
-                            "role": ["publisher"],
-                        },
-                    },
-                },
-                {
-                    "terms": [
-                        {
-                            "term": "ANTARCTICA",
-                            "href": "https://gcmd.earthdata.nasa.gov/kms/concept/70fb5a3b-35b1-4048-a8be-56a0d865281c",
-                        }
-                    ],
-                    "type": "place",
-                    "thesaurus": {
-                        "title": {
-                            "value": "Global Change Master Directory (GCMD) Location Keywords",
-                            "href": "https://earthdata.nasa.gov/about/gcmd/global-change-master-directory-gcmd-keywords",
-                        },
-                        "dates": {"publication": {"date": date(2020, 1, 9)}},
-                        "edition": "9.1",
-                        "contact": {
-                            "organisation": {
-                                "name": "Global Change Data Center, Science and Exploration Directorate, Goddard Space "
-                                "Flight Center (GSFC) National Aeronautics and Space Administration (NASA)",
-                                "href": "https://ror.org/027ka1x80",
-                                "title": "ror",
-                            },
-                            "address": {
-                                "city": "Greenbelt",
-                                "administrative_area": "MD",
-                                "country": "United States of America",
-                            },
-                            "online_resource": {
-                                "href": "https://earthdata.nasa.gov/about/gcmd/global-change-master-directory-gcmd-keywords",
-                                "title": "Global Change Master Directory (GCMD) Keywords",
-                                "description": "The information provided on this page seeks to define how the GCMD "
-                                "Keywords are structured, used and accessed. It also provides "
-                                "information on how users can participate in the further development of "
-                                "the keywords.",
-                                "function": "information",
-                            },
-                            "role": ["publisher"],
-                        },
-                    },
-                },
-            ],
-            "constraints": [
-                {
-                    "type": "usage",
-                    "restriction_code": "license",
-                    "statement": "This information is licensed under the Create Commons Attribution 4.0 International "
-                    "Licence (CC BY 4.0). To view this licence, "
-                    "visit https://creativecommons.org/licenses/by/4.0/",
-                    "href": "https://creativecommons.org/licenses/by/4.0/",
-                },
-                {
-                    "type": "usage",
-                    "restriction_code": "otherRestrictions",
-                    "statement": "Please cite this item as: "
-                    "'Produced using data from the SCAR Antarctic Digital Database'.",
-                },
-            ],
-            "spatial_representation_type": "vector",
+            "abstract": title,  # intentionally the same as title
             "language": "eng",
             "character_set": "utf8",
             "topics": ["environment", "geoscientificInformation"],
@@ -342,16 +65,310 @@ def make_test_record_config(
                             "north_latitude": -60.0,
                         }
                     },
-                    "temporal": {
-                        "period": {
-                            "start": {"date": datetime(2020, 6, 25)},  # noqa: DTZ001
-                            "end": {"date": datetime(2020, 4, 23)},  # noqa: DTZ001
-                        }
-                    },
                 }
             ],
-            "lineage": {"statement": "Lineage"},
         },
+    }
+
+    if return_as == "iso_min":
+        return config
+
+    # Add properties to create minimal MAGIC Discovery Metadata Profile record
+    config["identification"]["edition"] = "1.2"
+    config["identification"]["contacts"] = [
+        {
+            "organisation": {
+                "name": "Mapping and Geographic Information Centre, British Antarctic Survey",
+                "href": "https://ror.org/01rhff309",
+                "title": "ror",
+            },
+            "phone": "+44 (0)1223 221400",
+            "address": {
+                "delivery_point": "British Antarctic Survey, High Cross, Madingley Road",
+                "city": "Cambridge",
+                "administrative_area": "Cambridgeshire",
+                "postal_code": "CB3 0ET",
+                "country": "United Kingdom",
+            },
+            "email": "magic@bas.ac.uk",
+            "online_resource": {
+                "href": "https://www.bas.ac.uk/team/magic",
+                "title": "Mapping and Geographic Information Centre (MAGIC) - BAS public website",
+                "description": "General information about the BAS Mapping and Geographic Information Centre "
+                "(MAGIC) from the British Antarctic Survey (BAS) public website.",
+                "function": "information",
+            },
+            "role": ["pointOfContact"],
+        }
+    ]
+    config["identification"]["maintenance"] = {"maintenance_frequency": "biannually", "progress": "completed"}
+    config["identification"]["other_citation_details"] = (
+        "Please cite this item as: 'Produced using data from the SCAR Antarctic Digital Database'."
+    )
+    config["identification"]["constraints"] = [
+        {"type": "access", "restriction_code": "unrestricted"},
+        {
+            "type": "usage",
+            "restriction_code": "license",
+            "statement": "This information is licensed under the Create Commons Attribution 4.0 International "
+            "Licence (CC BY 4.0). To view this licence, "
+            "visit https://creativecommons.org/licenses/by/4.0/",
+            "href": "https://creativecommons.org/licenses/by/4.0/",
+        },
+    ]
+    config["identification"]["lineage"] = {"statement": "Lineage"}
+
+    if return_as == "magic_min":
+        return config
+
+    # Add/change properties to match existing test records
+    config["identification"]["dates"]["revision"] = {"date": date(2020, 2, 26)}
+    config["identification"]["dates"]["publication"] = {"date": datetime(2020, 1, 15, 10, 44, 14)}  # noqa: DTZ001
+    config["identification"]["dates"]["released"] = {"date": date(2020, 2, 26)}
+    config["identification"]["contacts"].insert(
+        0,
+        {
+            "individual": {
+                "name": "Watson, Constance",
+                "href": "https://sandbox.orcid.org/0000-0001-8373-6934",
+                "title": "orcid",
+            },
+            "organisation": {
+                "name": "British Antarctic Survey",
+                "href": "https://ror.org/01rhff309",
+                "title": "ror",
+            },
+            "email": "conwat@bas.ac.uk",
+            "online_resource": {
+                "href": "https://sandbox.orcid.org/0000-0001-8373-6934",
+                "title": "ORCID record",
+                "description": "ORCID is an open, non-profit, community-driven effort to create and maintain a "
+                "registry of unique researcher identifiers and a transparent method of linking "
+                "research activities and outputs to these identifiers.",
+                "function": "information",
+            },
+            "role": ["author"],
+        },
+    )
+    config["identification"]["contacts"][1]["role"].insert(0, "publisher")
+    config["identification"]["keywords"] = [
+        {
+            "terms": [
+                {
+                    "term": "STUFF",
+                    "href": "https://www.eionet.europa.eu/gemet/en/inspire-theme/st",
+                }
+            ],
+            "type": "theme",
+            "thesaurus": {
+                "title": {
+                    "value": "General Multilingual Environmental Thesaurus - INSPIRE themes",
+                    "href": "http://www.eionet.europa.eu/gemet/inspire_themes",
+                },
+                "dates": {"publication": {"date": date(2008, 8, 16)}},
+                "edition": "4.1.2",
+                "contact": {
+                    "organisation": {
+                        "name": "European Environment Information and Observation Network (EIONET), European "
+                        "Environment Agency (EEA)",
+                        "href": "https://ror.org/02k4b9v70",
+                        "title": "ror",
+                    },
+                    "email": "helpdesk@eionet.europa.eu",
+                    "online_resource": {
+                        "href": "https://www.eionet.europa.eu/gemet/en/themes/",
+                        "title": "GEMET INSPIRE Spatial Data Themes  General Multilingual Environmental Thesaurus",
+                        "description": "GEMET, the GEneral Multilingual Environmental Thesaurus, has been "
+                        "developed as a multilingual thesauri for indexing, retrieval and "
+                        "control of terms in order to save time, energy and funds.",
+                        "function": "information",
+                    },
+                    "role": ["publisher"],
+                },
+            },
+        },
+        {
+            "terms": [
+                {
+                    "term": "TOPOGRAPHY",
+                    "href": "https://gcmd.earthdata.nasa.gov/kms/concept/3e822484-c94a-457b-a32f-376fcbd6fd35",
+                },
+                {
+                    "term": "STUFF",
+                    "href": "https://gcmd.earthdata.nasa.gov/kms/concept/c4992969-05db-4bb6-9dac-d35535503650",
+                },
+            ],
+            "type": "theme",
+            "thesaurus": {
+                "title": {
+                    "value": "Global Change Master Directory (GCMD) Science Keywords",
+                    "href": "https://earthdata.nasa.gov/about/gcmd/global-change-master-directory-gcmd-keywords",
+                },
+                "dates": {"publication": {"date": date(2020, 1, 9)}},
+                "edition": "9.1",
+                "contact": {
+                    "organisation": {
+                        "name": "Global Change Data Center, Science and Exploration Directorate, Goddard Space "
+                        "Flight Center (GSFC) National Aeronautics and Space Administration (NASA)",
+                        "href": "https://ror.org/027ka1x80",
+                        "title": "ror",
+                    },
+                    "address": {
+                        "city": "Greenbelt",
+                        "administrative_area": "MD",
+                        "country": "United States of America",
+                    },
+                    "online_resource": {
+                        "href": "https://earthdata.nasa.gov/about/gcmd/global-change-master-directory-gcmd-keywords",
+                        "title": "Global Change Master Directory (GCMD) Keywords",
+                        "description": "The information provided on this page seeks to define how the GCMD "
+                        "Keywords are structured, used and accessed. It also provides "
+                        "information on how users can participate in the further development of "
+                        "the keywords.",
+                        "function": "information",
+                    },
+                    "role": ["publisher"],
+                },
+            },
+        },
+        {
+            "terms": [
+                {
+                    "term": "Topographic mapping",
+                    "href": "http://vocab.nerc.ac.uk/collection/T01/current/9cd3118f-55e2-4c07-b9f4-e260e40e8eb2/1/",
+                }
+            ],
+            "type": "theme",
+            "thesaurus": {
+                "title": {
+                    "value": "British Antarctic Survey research topics",
+                    "href": "http://vocab.nerc.ac.uk/collection/T01/current/",
+                },
+                "dates": {"publication": {"date": date(2020, 5, 6)}},
+                "edition": "1",
+                "contact": {
+                    "organisation": {
+                        "name": "UK Polar Data Centre, British Antarctic Survey",
+                        "href": "https://ror.org/01rhff309",
+                        "title": "ror",
+                    },
+                    "phone": "+44 (0)1223 221400",
+                    "address": {
+                        "delivery_point": "British Antarctic Survey, High Cross, Madingley Road",
+                        "city": "Cambridge",
+                        "administrative_area": "Cambridgeshire",
+                        "postal_code": "CB3 0ET",
+                        "country": "United Kingdom",
+                    },
+                    "email": "polardatacentre@bas.ac.uk",
+                    "online_resource": {
+                        "href": "https://www.bas.ac.uk/team/business-teams/information-services/uk-polar-data-centre/",
+                        "title": "UK Polar Data Centre (UK PDC) - BAS public website",
+                        "description": "General information about the NERC Polar Data Centre (UK PDC) from the "
+                        "British Antarctic Survey (BAS) public website.",
+                        "function": "information",
+                    },
+                    "role": ["publisher"],
+                },
+            },
+        },
+        {
+            "terms": [
+                {
+                    "term": "Antarctic Digital Database",
+                    "href": "http://vocab.nerc.ac.uk/collection/T02/current/8e91de62-b6e3-402e-b11f-73d2c1f37cff/",
+                }
+            ],
+            "type": "theme",
+            "thesaurus": {
+                "title": {
+                    "value": "British Antarctic Survey data catalogue collections",
+                    "href": "http://vocab.nerc.ac.uk/collection/T02/current/",
+                },
+                "dates": {"publication": {"date": date(2020, 5, 5)}},
+                "edition": "1",
+                "contact": {
+                    "organisation": {
+                        "name": "UK Polar Data Centre, British Antarctic Survey",
+                        "href": "https://ror.org/01rhff309",
+                        "title": "ror",
+                    },
+                    "phone": "+44 (0)1223 221400",
+                    "address": {
+                        "delivery_point": "British Antarctic Survey, High Cross, Madingley Road",
+                        "city": "Cambridge",
+                        "administrative_area": "Cambridgeshire",
+                        "postal_code": "CB3 0ET",
+                        "country": "United Kingdom",
+                    },
+                    "email": "polardatacentre@bas.ac.uk",
+                    "online_resource": {
+                        "href": "https://www.bas.ac.uk/team/business-teams/information-services/uk-polar-data-centre/",
+                        "title": "UK Polar Data Centre (UK PDC) - BAS public website",
+                        "description": "General information about the NERC Polar Data Centre (UK PDC) from the "
+                        "British Antarctic Survey (BAS) public website.",
+                        "function": "information",
+                    },
+                    "role": ["publisher"],
+                },
+            },
+        },
+        {
+            "terms": [
+                {
+                    "term": "ANTARCTICA",
+                    "href": "https://gcmd.earthdata.nasa.gov/kms/concept/70fb5a3b-35b1-4048-a8be-56a0d865281c",
+                }
+            ],
+            "type": "place",
+            "thesaurus": {
+                "title": {
+                    "value": "Global Change Master Directory (GCMD) Location Keywords",
+                    "href": "https://earthdata.nasa.gov/about/gcmd/global-change-master-directory-gcmd-keywords",
+                },
+                "dates": {"publication": {"date": date(2020, 1, 9)}},
+                "edition": "9.1",
+                "contact": {
+                    "organisation": {
+                        "name": "Global Change Data Center, Science and Exploration Directorate, Goddard Space "
+                        "Flight Center (GSFC) National Aeronautics and Space Administration (NASA)",
+                        "href": "https://ror.org/027ka1x80",
+                        "title": "ror",
+                    },
+                    "address": {
+                        "city": "Greenbelt",
+                        "administrative_area": "MD",
+                        "country": "United States of America",
+                    },
+                    "online_resource": {
+                        "href": "https://earthdata.nasa.gov/about/gcmd/global-change-master-directory-gcmd-keywords",
+                        "title": "Global Change Master Directory (GCMD) Keywords",
+                        "description": "The information provided on this page seeks to define how the GCMD "
+                        "Keywords are structured, used and accessed. It also provides "
+                        "information on how users can participate in the further development of "
+                        "the keywords.",
+                        "function": "information",
+                    },
+                    "role": ["publisher"],
+                },
+            },
+        },
+    ]
+    config["identification"]["spatial_representation_type"] = "vector"
+    del config["identification"]["constraints"][0]  # remove access constraint
+    del config["identification"]["other_citation_details"]
+    config["identification"]["constraints"].append(
+        {
+            "type": "usage",
+            "restriction_code": "otherRestrictions",
+            "statement": "Please cite this item as: 'Produced using data from the SCAR Antarctic Digital Database'.",
+        }
+    )
+    config["identification"]["extents"][0]["temporal"] = {
+        "period": {
+            "start": {"date": datetime(2020, 6, 25)},  # noqa: DTZ001
+            "end": {"date": datetime(2020, 4, 23)},  # noqa: DTZ001
+        }
     }
 
     if hierarchy_level != "collection":
@@ -543,6 +560,20 @@ class TestRecordConfigurations(Enum):
         title="Test Collection 4 (Imported, contains unknown item identifier)",
         hierarchy_level="collection",
         item_identifiers=["unknown"],
+    )
+    TEST_RECORD_12 = make_test_record_config(
+        identifier="4a6c1f16-2322-4f3b-8a52-0ee9ed8cdfe7",
+        title="Test Item Record 12 (Record with minimum ISO 19115 properties)",
+        hierarchy_level="dataset",
+        item_identifiers=None,
+        return_as="iso_min",
+    )
+    TEST_RECORD_13 = make_test_record_config(
+        identifier="06219c0c-05c6-41f5-8edb-fb0dfdcc577d",
+        title="Test Item Record 13 (Record with minimum MAGIC Discovery Metadata Profile properties)",
+        hierarchy_level="product",
+        item_identifiers=None,
+        return_as="magic_min",
     )
 
 

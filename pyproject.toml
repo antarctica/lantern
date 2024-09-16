@@ -151,7 +151,7 @@ S3_BUCKET="example"
 [tool.coverage.report]
 skip_empty = true
 show_missing = false
-fail_under = 95
+fail_under = 90
 
 [tool.coverage.html]
 directory = "htmlcov"

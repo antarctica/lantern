@@ -122,6 +122,11 @@ def make_test_record_config(
         return config
 
     # Add/change properties to match existing test records
+    config["metadata"]["maintenance"] = {"maintenance_frequency": "asNeeded", "progress": "completed"}
+    config["metadata"]["metadata_standard"] = {
+        "name": "ISO 19115-2 Geographic Information - Metadata - Part 2: Extensions for Imagery and Gridded Data",
+        "version": "ISO 19115-2:2009(E)",
+    }
     config["identification"]["dates"]["revision"] = {"date": date(2020, 2, 26)}
     config["identification"]["dates"]["publication"] = {"date": datetime(2020, 1, 15, 10, 44, 14)}  # noqa: DTZ001
     config["identification"]["dates"]["released"] = {"date": date(2020, 2, 26)}

@@ -4,7 +4,8 @@ from tempfile import NamedTemporaryFile
 import pytest
 from bas_metadata_library.standards.iso_19115_2 import MetadataRecordConfigV4
 from flask.testing import FlaskCliRunner
-from scar_add_metadata_toolbox_tests.records import TestRecordConfigurations
+
+from tests.scar_add_metadata_toolbox_tests.records import TestRecordConfigurations
 
 
 class TestMinimumRecords:

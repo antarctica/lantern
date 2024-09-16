@@ -21,23 +21,6 @@ $(function() {
     });
 });
 
-// Metrics
-//
-
-$(function() {
-    gtag('event', 'view', {
-      'event_category': 'item',
-      'event_label': item_id
-    });
-    $('#app-item-nav a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-        var tab = e.target.hash.replace('#item-details-', '')
-        gtag('event', 'tab', {
-            'event_category': 'item',
-            'event_label': tab
-        });
-    });
-});
-
 
 // Scroll WMS instructions box into view
 //

@@ -11,8 +11,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 * Item properties for bounding geographic and temporal extent
   [#278](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/278)
-* Upgrading to Flask 3.x
-  [#394](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/394)
 * Item properties for ISBN identifier
   [#169](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/169)
 * Initial support for ArcGIS features and vector tiles services and layers
@@ -43,6 +41,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#314](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/314)
 * Replacing Postgres docker service with local Postgres instance
   [#418](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/418)
+* Upgrading to Flask 3.x
+  [#394](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/394)
 * Upgrading project dependencies
   [#419](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/419)
 * Reducing required record properties to agreed minimum

@@ -74,6 +74,7 @@
             <dd>{{ item.isbn }}</dd>
         {% endif %}
     </dl>
+
     <h3>Metadata information</h3>
     <dl class="bsk-dl-horizontal bsk-dl-horizontal-lg">
         <dt>Language</dt>
@@ -90,13 +91,13 @@
         <dd>{% if item.metadata_standard_name %}{{ item.metadata_standard_name }}{% else %}Unknown{% endif %}</dd>
         <dt>Metadata standard version:</dt>
         <dd>{% if item.metadata_standard_version %}{{ item.metadata_standard_version }}{% else %}Unknown{% endif %}</dd>
-        <dt>Metadata links</dt>
+        <dt>Metadata record links</dt>
         <dd>
             <div>
-                <a href="/records/{{ item.identifier }}/iso-xml/{{ item.identifier }}.xml">View as ISO XML</a>
+                <a href="/records/{{ item.identifier }}/iso-xml/{{ item.identifier }}.xml">View record as XML</a>
             </div>
             <div>
-                <a href="/records/{{ item.identifier }}/iso-html/{{ item.identifier }}.xml">View as ISO HTML</a>
+                <a href="/records/{{ item.identifier }}/iso-html/{{ item.identifier }}.xml">View record as HTML</a>
             </div>
         </dd>
     </dl>

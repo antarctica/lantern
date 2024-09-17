@@ -35,6 +35,10 @@
                 {{ item.spatial_reference_system_markdown }}
             </dd>
         {% endif %}
+        {% if item.scale %}
+            <dt>Scale</dt>
+            <dd>{{ item.scale }}</dd>
+        {% endif %}
         <dt>Language</dt>
         <dd>{{ item.language }}</dd>
         <dt>Character set</dt>

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import contextlib
 import json
+import locale
 from collections.abc import Generator
 from copy import deepcopy
 from datetime import date, datetime, timezone
@@ -1233,6 +1234,10 @@ class Record(RecordSummary):
             return None
 
     @property
+    def spatial_resolution(self) -> int | None:
+        return self.config["identification"].get("spatial_resolution", None)
+
+    @property
     def theme_keywords(self) -> list[dict]:
         keywords = self.config["identification"].get("keywords", None)
 
@@ -2262,6 +2267,15 @@ class Item:
             return None
 
         return self._format_date(date_datetime=_date["date"], date_precision=_date["date_precision"])
+
+    @property
+    def scale(self) -> str | None:
+        scale = self.record.spatial_resolution
+        if scale is None:
+            return None
+
+        locale.setlocale(locale.LC_ALL, "")
+        return f"1:{locale.format_string('%d', scale, grouping=True)}"
 
     @property
     def spatial_reference_system(self) -> str | None:

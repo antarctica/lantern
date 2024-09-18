@@ -1220,6 +1220,20 @@ class Record(RecordSummary):
             return None
 
     @property
+    def series_name(self) -> str | None:
+        try:
+            return self.config["identification"]["series"].get("name", None)
+        except KeyError:
+            return None
+
+    @property
+    def series_issue(self) -> str | None:
+        try:
+            return self.config["identification"]["series"].get("issue_identification", None)
+        except KeyError:
+            return None
+
+    @property
     def spatial_reference_system(self) -> dict | None:
         try:
             return self.config["reference_system_info"]
@@ -2276,6 +2290,20 @@ class Item:
 
         locale.setlocale(locale.LC_ALL, "")
         return f"1:{locale.format_string('%d', scale, grouping=True)}"
+
+    @property
+    def series(self) -> str | None:
+        if self.record.series_name is None:
+            return None
+        if self.record.series_issue is None:
+            return self.record.series_name
+        return f"{self.record.series_name} ({self.record.series_issue})"
+
+    @property
+    def series_markdown(self) -> str | None:
+        if self.series is None:
+            return None
+        return markdown(self.series, output_format="html")
 
     @property
     def spatial_reference_system(self) -> str | None:

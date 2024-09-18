@@ -77,6 +77,10 @@
             <dt>ISBN</dt>
             <dd>{{ item.isbn }}</dd>
         {% endif %}
+        {%  if item.series %}
+            <dt>Series</dt>
+            <dd>{{ item.series_markdown }}</dd>
+        {% endif %}
     </dl>
 
     <h3>Metadata information</h3>

@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#279](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/279)
 * Spatial resolution (scale) support
   [#186](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/186)
+* Series (description) support
+  [#405](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/405)
 
 ### Fixed
 

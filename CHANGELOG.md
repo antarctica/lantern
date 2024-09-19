@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#186](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/186)
 * Series (description) support
   [#405](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/405)
+* Initial support for item thumbnails/graphics
+  [#181](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/181)
 
 ### Fixed
 

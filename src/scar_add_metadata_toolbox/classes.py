@@ -1146,6 +1146,10 @@ class Record(RecordSummary):
         return extents
 
     @property
+    def graphic_overviews(self) -> list[dict]:
+        return self.config["identification"].get("graphic_overviews", [])
+
+    @property
     def identifiers(self) -> list[dict]:
         return self.config["identification"].get("identifiers", [])
 
@@ -2055,6 +2059,13 @@ class Item:
                 _.append(identifier_)
         return _
 
+    @staticmethod
+    def _filter_graphic_overviews(overviews: list[dict], identifier: str) -> dict | None:
+        for overview in overviews:
+            if overview["identifier"] == identifier:
+                return overview
+        return None
+
     @property
     def abstract(self) -> str:
         return self.record.abstract
@@ -2150,6 +2161,16 @@ class Item:
     @property
     def identifier(self) -> str:
         return self.record.identifier
+
+    @property
+    def image_thumbnail(self) -> dict | None:
+        thumbnail = self._filter_graphic_overviews(overviews=self.record.graphic_overviews, identifier="thumbnail")
+        if thumbnail is None:
+            return None
+        return {
+            "href": thumbnail["href"],
+            "alt_text": thumbnail["description"],
+        }
 
     @property
     def isbn(self) -> str | None:

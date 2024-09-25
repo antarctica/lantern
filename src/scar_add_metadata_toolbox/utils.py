@@ -12,25 +12,10 @@ from lxml.etree import (
     ProcessingInstruction,
     fromstring,
     tostring,
-)  # nosec - see 'lxml` package (bandit)' section in README
-from werkzeug.utils import import_string
+)
 
 from scar_add_metadata_toolbox.classes import Item, Record
-from scar_add_metadata_toolbox.config import Config
 from scar_add_metadata_toolbox.csw import CSWServer
-
-
-def _create_app_config() -> Config:
-    """
-    Create a Flask application configuration object.
-
-    Creates an instance of the relevant Config class defined in `config.py` based on the application environment
-    (e.g. in production, the ProductionConfig class).
-
-    :rtype Config
-    :return: Flask config object
-    """
-    return import_string(f"scar_add_metadata_toolbox.config.{str(os.environ['FLASK_ENV']).capitalize()}Config")()
 
 
 def _create_app_jinja_loader() -> PrefixLoader:

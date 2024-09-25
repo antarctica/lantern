@@ -1,9 +1,0 @@
----
-
-services:
-  db:
-    image: postgis/postgis:12-3.0-alpine
-    environment:
-      POSTGRES_PASSWORD: password
-    ports:
-      - "5432:5432"

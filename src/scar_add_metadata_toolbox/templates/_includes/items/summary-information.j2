@@ -1,29 +1,40 @@
 <section class="bsk-sidebar bsk-sidebar-default app-item-summary">
     <dl class="bsk-dl-horizontal">
-        <dt>Version:</dt>
-        <dd>{{ item.edition }}</dd>
-        <dt>Released:</dt>
-        <dd>
-            {{ item.released }}
-        </dd>
-        <dt>Status:</dt>
-        <dd>
-            {% if item.status == 'current' %}
-                <span class="bsk-label bsk-label-success"><i class="fa-fw far fa-check"></i> Current</span>
-            {% elif item.status == 'outdated' %}
-                <span class="bsk-label bsk-label-warning"><i class="fa-fw far fa-exclamation-triangle"></i> Outdated</span>
-            {% endif %}
-            {% if item.maintenance_frequency == 'Biannually (every 6 months)' %}
-                (Updated every 6 months)
-            {% endif %}
-        </dd>
+        {% if item.edition %}
+            <dt>Version:</dt>
+            <dd>{{ item.edition }}</dd>
+        {% endif %}
+        {% if item.released %}
+            <dt>Released:</dt>
+            <dd>{{ item.released }}</dd>
+        {% endif %}
+        {% if item.status != 'unknown' %}
+            <dt>Status:</dt>
+            <dd>
+                {% if item.status == 'current' %}
+                    <span class="bsk-label bsk-label-success"><i class="fa-fw far fa-check"></i> Current</span>
+                {% elif item.status == 'outdated' %}
+                    <span class="bsk-label bsk-label-warning"><i class="fa-fw far fa-exclamation-triangle"></i> Outdated</span>
+                {% endif %}
+                {% if item.maintenance_frequency == 'Biannually (every 6 months)' %}
+                    (Updated every 6 months)
+                {% endif %}
+            </dd>
+        {% endif %}
         {% if item.collections %}
         <dt>Collections:</dt>
         <dd>{{ item.collections | join(',') }}</dd>
         {% endif %}
-        <dt>Topics:</dt>
-        <dd>{{ item.topics | join(',') }}</dd>
+        {% if item.topics %}
+            <dt>Topics:</dt>
+            <dd>{{ item.topics | join(',') }}</dd>
+        {% endif %}
     </dl>
+
+    {% if item.citation_markdown %}
+        {% include 'app/_includes/items/citation.j2' %}
+    {% endif %}
+
     <h3>Abstract</h3>
     <p>{{ item.abstract_markdown }}</p>
 </section>

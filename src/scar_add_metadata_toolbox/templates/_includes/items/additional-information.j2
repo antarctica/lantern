@@ -35,6 +35,10 @@
                 {{ item.spatial_reference_system_markdown }}
             </dd>
         {% endif %}
+        {% if item.scale %}
+            <dt>Scale</dt>
+            <dd>{{ item.scale }}</dd>
+        {% endif %}
         <dt>Language</dt>
         <dd>{{ item.language }}</dd>
         <dt>Character set</dt>
@@ -55,17 +59,32 @@
             <dt>Item updated</dt>
             <dd>{{ item.updated }}</dd>
         {% endif %}
-        <dt>Update frequency:</dt>
-        <dd>{{ item.maintenance_frequency }}</dd>
+        {% if item.maintenance_frequency %}
+            <dt>Update frequency:</dt>
+            <dd>{{ item.maintenance_frequency }}</dd>
+        {% endif %}
+        {% if item.status != 'unknown' %}
         <dt>Status:</dt>
-        <dd>
-            {% if item.status == 'current' %}
-                <span class="bsk-text-success"><i class="fa-fw far fa-check"></i> Current</span>
-            {% elif item.status == 'outdated' %}
-                <span class="bsk-text-warning"><i class="fa-fw far fa-exclamation-triangle"></i> Outdated</span>
-            {% endif %}
-        </dd>
+            <dd>
+                {% if item.status == 'current' %}
+                    <span class="bsk-text-success"><i class="fa-fw far fa-check"></i> Current</span>
+                {% elif item.status == 'outdated' %}
+                    <span class="bsk-text-warning"><i class="fa-fw far fa-exclamation-triangle"></i> Outdated</span>
+                {% endif %}
+            </dd>
+        {% endif %}
+        {% if item.isbn %}
+            <dt>ISBN</dt>
+            <dd>{{ item.isbn }}</dd>
+        {% endif %}
+        {%  if item.series %}
+            <dt>Series</dt>
+            <dd>{{ item.series_markdown }}</dd>
+        {% endif %}
     </dl>
+
+    {% include 'app/_includes/items/descriptive-keywords.j2' %}
+
     <h3>Metadata information</h3>
     <dl class="bsk-dl-horizontal bsk-dl-horizontal-lg">
         <dt>Language</dt>
@@ -73,22 +92,22 @@
         <dt>Character set</dt>
         <dd>{{ item.metadata_character_set }}</dd>
         <dt>Status:</dt>
-        <dd>{{ item.metadata_maintenance_progress }}</dd>
+        <dd>{% if item.metadata_maintenance_progress %}{{ item.metadata_maintenance_progress }}{% else %}Unknown{% endif %}</dd>
         <dt>Last updated:</dt>
         <dd>{{ item.metadata_updated }}</dd>
         <dt>Update frequency:</dt>
-        <dd>{{ item.metadata_maintenance_frequency }}</dd>
+        <dd>{% if item.metadata_maintenance_frequency %}{{ item.metadata_maintenance_frequency }}{% else %}Unknown{% endif %}</dd>
         <dt>Metadata standard:</dt>
-        <dd>{{ item.metadata_standard_name }}</dd>
+        <dd>{% if item.metadata_standard_name %}{{ item.metadata_standard_name }}{% else %}Unknown{% endif %}</dd>
         <dt>Metadata standard version:</dt>
-        <dd>{{ item.metadata_standard_version }}</dd>
-        <dt>Metadata links</dt>
+        <dd>{% if item.metadata_standard_version %}{{ item.metadata_standard_version }}{% else %}Unknown{% endif %}</dd>
+        <dt>Metadata record links</dt>
         <dd>
             <div>
-                <a href="/records/{{ item.identifier }}/iso-xml/{{ item.identifier }}.xml">View as ISO XML</a>
+                <a href="/records/{{ item.identifier }}/iso-xml/{{ item.identifier }}.xml">View record as XML</a>
             </div>
             <div>
-                <a href="/records/{{ item.identifier }}/iso-html/{{ item.identifier }}.xml">View as ISO HTML</a>
+                <a href="/records/{{ item.identifier }}/iso-html/{{ item.identifier }}.xml">View record as HTML</a>
             </div>
         </dd>
     </dl>

@@ -1,3 +1,4 @@
+import contextlib
 from http import HTTPStatus
 
 import sentry_sdk
@@ -7,13 +8,14 @@ from markupsafe import escape
 from werkzeug.exceptions import NotFound
 
 from scar_add_metadata_toolbox.classes import MirrorRepository
-from scar_add_metadata_toolbox.client_auth import MsalFlask
+from scar_add_metadata_toolbox.client_auth import MsalFlask, MsalFlaskNoAccountError, MsalTokenAcquisitionError
 from scar_add_metadata_toolbox.commands import (
     auth_commands_blueprint,
     csw_commands_blueprint,
     record_commands_blueprint,
     site_commands_blueprint,
 )
+from scar_add_metadata_toolbox.config import Config
 from scar_add_metadata_toolbox.csw import (
     CSWAmbiguousRequestError,
     CSWAuthInsufficientError,
@@ -27,7 +29,6 @@ from scar_add_metadata_toolbox.csw import (
 from scar_add_metadata_toolbox.utils import (
     _build_item,
     _build_record,
-    _create_app_config,
     _create_app_jinja_loader,
     _create_csw_repositories,
 )
@@ -38,15 +39,14 @@ def create_app() -> Flask:  # noqa: C901
     Application factory.
 
     This app object:
-    * loads configuration from the `config` class (based on the `FLASK_ENV` environment variable)
+    * loads configuration from the `config` class
     * creates instances of important classes such as authentication and metadata records
     * defines a `version` CLI command for debugging the package version installed
     * registers additional CLI commands from blueprints, for use when this app is run as a client
     * defines a route for handling CSW requests, for use when this is run as a server
     """
     app = Flask(__name__)
-
-    app.config.from_object(_create_app_config())
+    app.config.from_object(Config())
 
     sentry_sdk.init(app.config["SENTRY_CONFIG"])
 
@@ -59,9 +59,14 @@ def create_app() -> Flask:  # noqa: C901
     msal = MsalFlask()
     msal.init_app(app)
 
+    # noinspection PyUnusedLocal
+    access_token = None
+    with contextlib.suppress(MsalFlaskNoAccountError, MsalTokenAcquisitionError):
+        access_token = app.msal.access_token
+
     app.repositories = _create_csw_repositories(repositories_config=app.config["CSW_SERVERS_CONFIG"])
-    app.config["CSW_CLIENTS_CONFIG"]["unpublished"]["client_config"]["auth"] = {"token": None}
-    app.config["CSW_CLIENTS_CONFIG"]["published"]["client_config"]["auth"] = {"token": None}
+    app.config["CSW_CLIENTS_CONFIG"]["unpublished"]["client_config"]["auth"] = {"token": access_token}
+    app.config["CSW_CLIENTS_CONFIG"]["published"]["client_config"]["auth"] = {"token": access_token}
     app.records = MirrorRepository(
         unpublished_repository_config=app.config["CSW_CLIENTS_CONFIG"]["unpublished"],
         published_repository_config=app.config["CSW_CLIENTS_CONFIG"]["published"],

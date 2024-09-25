@@ -21,29 +21,22 @@ $(function() {
     });
 });
 
-// Metrics
-//
-
-$(function() {
-    gtag('event', 'view', {
-      'event_category': 'item',
-      'event_label': item_id
-    });
-    $('#app-item-nav a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-        var tab = e.target.hash.replace('#item-details-', '')
-        gtag('event', 'tab', {
-            'event_category': 'item',
-            'event_label': tab
-        });
-    });
-});
-
 
 // Scroll WMS instructions box into view
 //
 
 $(function() {
     $('.app-wms-info').on('shown.bs.collapse', function () {
+        document.getElementById(this.id).scrollIntoView()
+        document.getElementById(this.id).classList.add('app-highlight');
+    });
+
+    $('.app-fl-info').on('shown.bs.collapse', function () {
+        document.getElementById(this.id).scrollIntoView()
+        document.getElementById(this.id).classList.add('app-highlight');
+    });
+
+    $('.app-tl-info').on('shown.bs.collapse', function () {
         document.getElementById(this.id).scrollIntoView()
         document.getElementById(this.id).classList.add('app-highlight');
     });

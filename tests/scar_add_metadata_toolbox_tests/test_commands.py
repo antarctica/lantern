@@ -1657,7 +1657,7 @@ class TestCommandAuthSignIn:
     def test_cli_sign_in(self, fx_runner_signed_out: FlaskCliRunner, fx_user_claims: dict):
         result = fx_runner_signed_out.invoke(args=["auth", "sign-in"])
         assert result.exit_code == 0
-        assert f"Ok. Signed in as '{fx_user_claims['name']}' ({fx_user_claims['upn']})" in result.output
+        assert f"Ok. Signed in as '{fx_user_claims['name']}' ({fx_user_claims['email']})" in result.output
 
     def test_cli_sign_in_signed_in(self, fx_runner_signed_out: FlaskCliRunner, fx_user_claims: dict):
         """User skips sign in when already signed in."""
@@ -1668,7 +1668,7 @@ class TestCommandAuthSignIn:
         result = fx_runner_signed_out.invoke(args=["auth", "sign-in"])
         assert result.exit_code == 0
         assert (
-            result.output == f"Ok. Signed in as '{fx_user_claims['name']}' ({fx_user_claims['upn']}) [abc] "
+            result.output == f"Ok. Signed in as '{fx_user_claims['name']}' ({fx_user_claims['email']}) [abc] "
             f"using cached credentials.\n"
         )
 

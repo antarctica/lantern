@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.7.4] - 2024-09-25
+
+### Fixed
+
+* CSW Server token scope validation used inverted logic
+  [#421](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/421)
+
 ## [0.7.3] - 2024-09-05
 
 ### Fixed

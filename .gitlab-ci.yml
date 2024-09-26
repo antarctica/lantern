@@ -17,9 +17,6 @@ variables:
   # Docker
   IMAGE_NAME: $CI_REGISTRY_IMAGE/ci-cd:latest
 
-  # App
-  FLASK_ENV: testing
-
   # Deploy
   ANSIBLE_HOST_KEY_CHECKING: "False"
   DEPLOY_GROUP: "magic"

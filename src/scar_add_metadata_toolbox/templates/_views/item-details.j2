@@ -8,7 +8,7 @@
             {% include 'app/_includes/items/summary-information.j2' %}
         </div>
         <div class="bsk-col-12-md-3">
-            {% include 'app/_includes/items/descriptive-keywords.j2' %}
+            {% include 'app/_includes/items/images.j2' %}
         </div>
     </div>
 
@@ -20,42 +20,52 @@
 
     <nav id="app-item-nav" class="bsk-nav-wrapper bsk-nav-wrapper-tabs" role="navigation">
         <ul class="bsk-nav bsk-nav-tabs" role="tablist">
-            <li class="bsk-active" role="presentation">
-                <a href="#item-details-data" role="tab" data-toggle="tab">
-                    <i class="far fa-cube"></i>
-                    Data
-                </a>
-            </li>
-            <li role="presentation">
-                <a href="#item-details-authors" role="tab" data-toggle="tab">
-                    <i class="far fa-user-friends"></i>
-                    Authors
-                </a>
-            </li>
-            <li role="presentation">
-                <a href="#item-details-licence" role="tab" data-toggle="tab">
-                    <i class="far fa-file-certificate"></i>
-                    Licence
-                </a>
-            </li>
-            <li role="presentation">
+            {% if item.downloads %}
+                <li class="bsk-active" role="presentation">
+                    <a href="#item-details-data" role="tab" data-toggle="tab">
+                        <i class="far fa-cube"></i>
+                        Data
+                    </a>
+                </li>
+            {% endif %}
+            {% if item.authors %}
+                <li {% if not item.downloads %}{{ 'class="bsk-active"' }}{% endif %} role="presentation">
+                    <a href="#item-details-authors" role="tab" data-toggle="tab">
+                        <i class="far fa-user-friends"></i>
+                        Authors
+                    </a>
+                </li>
+            {% endif %}
+            {% if item.licence_url %}
+                <li {% if not item.authors %}{{ 'class="bsk-active"' }}{% endif %} role="presentation">
+                    <a href="#item-details-licence" role="tab" data-toggle="tab">
+                        <i class="far fa-file-certificate"></i>
+                        Licence
+                    </a>
+                </li>
+            {% endif %}
+            <li {% if not item.licence_url %}{{ 'class="bsk-active"' }}{% endif %} role="presentation">
                 <a href="#item-details-extent" role="tab" data-toggle="tab">
                     <i class="far fa-expand-arrows"></i>
                     Extent
                 </a>
             </li>
-            <li role="presentation">
-                <a href="#item-details-lineage" role="tab" data-toggle="tab">
-                    <i class="far fa-scroll-old"></i>
-                    Lineage
-                </a>
-            </li>
-            <li role="presentation">
-                <a href="#item-details-related" role="tab" data-toggle="tab">
-                    <i class="far fa-books"></i>
-                    Related
-                </a>
-            </li>
+            {% if item.lineage %}
+                <li role="presentation">
+                    <a href="#item-details-lineage" role="tab" data-toggle="tab">
+                        <i class="far fa-scroll-old"></i>
+                        Lineage
+                    </a>
+                </li>
+            {% endif %}
+            {% if item.related_references or item.related_project_resources or item.related_datasets %}
+                <li role="presentation">
+                    <a href="#item-details-related" role="tab" data-toggle="tab">
+                        <i class="far fa-books"></i>
+                        Related
+                    </a>
+                </li>
+            {% endif %}
             <li role="presentation">
                 <a href="#item-details-additional-information" role="tab" data-toggle="tab">
                     <i class="far fa-info-square"></i>
@@ -70,24 +80,46 @@
             </li>
         </ul>
         <div class="bsk-tab-content">
-            <div id="item-details-data" class="bsk-tab-pane bsk-fade bsk-in bsk-active" role="tabpanel">
-                {% include 'app/_includes/items/data.j2' %}
-            </div>
-            <div id="item-details-authors" class="bsk-tab-pane bsk-fade" role="tabpanel">
-                {% include 'app/_includes/items/authors.j2' %}
-            </div>
-            <div id="item-details-licence" class="bsk-tab-pane bsk-fade" role="tabpanel">
-                {% include 'app/_includes/items/licence.j2' %}
-            </div>
-            <div id="item-details-extent" class="bsk-tab-pane bsk-fade" role="tabpanel">
+            {% if item.downloads %}
+                <div id="item-details-data" class="bsk-tab-pane bsk-fade bsk-in bsk-active" role="tabpanel">
+                    {% include 'app/_includes/items/data.j2' %}
+                </div>
+            {% endif %}
+            {% if item.authors %}
+                <div
+                    id="item-details-authors"
+                    class="bsk-tab-pane bsk-fade {% if not item.downloads %}{{ 'bsk-in bsk-active' }}{% endif %}"
+                    role="tabpanel"
+                >
+                    {% include 'app/_includes/items/authors.j2' %}
+                </div>
+            {% endif %}
+            {% if item.licence_url %}
+                <div
+                    id="item-details-licence"
+                    class="bsk-tab-pane bsk-fade {% if not item.authors %}{{ 'bsk-in bsk-active' }}{% endif %}"
+                    role="tabpanel"
+                >
+                    {% include 'app/_includes/items/licence.j2' %}
+                </div>
+            {% endif %}
+            <div
+                id="item-details-extent"
+                class="bsk-tab-pane bsk-fade {% if not item.licence_url %}{{ 'bsk-in bsk-active' }}{% endif %}"
+                role="tabpanel"
+            >
                 {% include 'app/_includes/items/extent.j2' %}
             </div>
-            <div id="item-details-lineage" class="bsk-tab-pane bsk-fade" role="tabpanel">
-                {% include 'app/_includes/items/lineage.j2' %}
-            </div>
-            <div id="item-details-related" class="bsk-tab-pane bsk-fade" role="tabpanel">
-                {% include 'app/_includes/items/related.j2' %}
-            </div>
+            {% if item.lineage %}
+                <div id="item-details-lineage" class="bsk-tab-pane bsk-fade" role="tabpanel">
+                    {% include 'app/_includes/items/lineage.j2' %}
+                </div>
+            {% endif %}
+            {% if item.related_references or item.related_project_resources or item.related_datasets %}
+                <div id="item-details-related" class="bsk-tab-pane bsk-fade" role="tabpanel">
+                    {% include 'app/_includes/items/related.j2' %}
+                </div>
+            {% endif %}
             <div id="item-details-additional-information" class="bsk-tab-pane bsk-fade" role="tabpanel">
                 {% include 'app/_includes/items/additional-information.j2' %}
             </div>

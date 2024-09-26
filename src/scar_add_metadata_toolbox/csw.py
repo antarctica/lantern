@@ -448,13 +448,8 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
 
     @staticmethod
     def _format_commit_author(token: EntraToken) -> str:
-        """
-        Format author information for a git commit message from the authenticated use.
-
-        Author information uses the form `{name} <{email}>`. These values are taken from the current OAuth token via
-        claims provided by Azure Active Directory.
-        """
-        return f"{token.claims['given_name']} {token.claims['family_name']} <{token.claims['email']}>"
+        """Format author information for a git commit message from the authenticated user."""
+        return f"{token.claims['name']} <{token.claims['email']}>"
 
     @staticmethod
     def _request_record(csw_request: str) -> str:
@@ -594,7 +589,7 @@ class CSWServer:  # pragma: no cover (until #59 is resolved)
         if len(required_scopes) == 0:
             return
 
-        if token is None:
+        if not isinstance(token, EntraToken):
             raise CSWAuthMissingError() from None
 
         validator = TokenValidator()

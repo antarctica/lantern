@@ -63,6 +63,21 @@ These different formats are used for different reasons:
 * XML is proscribed by the ISO 19139 standard
 * HTML is the de-facto standard for web content
 
+### Minimum record requirements
+
+In addition to the properties required by the ISO 19115 standard, the Catalogue requires these properties to be set in
+all records:
+
+1. `file_identifier` so records can be distinguished without relying on a value that may change or not be unique
+2. `identifier` as per [1], so that the Catalogue can determine whether a record is part of the Catalogue or not
+3. `identifier.contacts[role='pointOfContact']` so the _contact_ item tab displays a point of contact
+
+[1]
+
+* identifier: `file_identifier`
+* href: `https://data.bas.ac.uk/items/{file_identifier}`
+* namespace: `data.bas.ac.uk`
+
 ## Items
 
 Items are derived from Records using any hierarchy level except 'collection' (which is represented by
@@ -241,7 +256,7 @@ prior to submission. On submission, Power Automate creates an issue for the mess
 ## Website metrics
 
 **Note:** Website metrics are not currently collected. See
-[MAGIC/add-metadata-toolbox#292 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/292) for more
+[MAGIC/add-metadata-toolbox#416 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/416) for more
 information.
 
 ## Download metrics

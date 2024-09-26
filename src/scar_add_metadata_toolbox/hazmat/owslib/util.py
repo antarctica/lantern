@@ -924,9 +924,12 @@ class Authentication(object):
     @token.setter
     def token(self, value):
         if value is None:
-            pass
-        elif not isinstance(value, str):
+            self._token = None
+            return
+
+        if not isinstance(value, str):
             raise TypeError('Value for "token" must be a str, got: {}'.format(type(value)))
+
         if self.shared:
             self.__class__._TOKEN = value
         else:

@@ -72,7 +72,7 @@ def test_record_lineage_none():
 # Coverage test
 def test_record_distributions_none():
     record = Record(config={})
-    assert record.distributions is None
+    assert len(record.distributions) == 0
 
 
 # Coverage test

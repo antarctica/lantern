@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.7.5] - 2024-09-26
+
+### Fixed
+
+* Multiple auth related bugs (token scopes, email claim)
+  [#417](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/417)
+
 ## [0.7.4] - 2024-09-25
 
 ### Fixed

@@ -7,20 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-### Added
+## [0.7.5] - 2024-09-26
 
-* Item properties for bounding geographic and temporal extent
-  [#278](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/278)
-* Item properties for ISBN identifier
-  [#169](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/169)
-* Initial support for ArcGIS features and vector tiles services and layers
-  [#279](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/279)
-* Spatial resolution (scale) support
-  [#186](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/186)
-* Series (description) support
-  [#405](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/405)
-* Initial support for item thumbnails/graphics
-  [#181](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/181)
+### Fixed
+
+* Multiple auth related bugs (token scopes, email claim)
+  [#417](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/417)
+
+## [0.7.4] - 2024-09-25
 
 ### Fixed
 

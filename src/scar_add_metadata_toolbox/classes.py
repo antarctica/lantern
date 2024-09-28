@@ -2173,11 +2173,13 @@ class Item:
         }
 
     @property
-    def isbn(self) -> str | None:
-        isbns = self._filter_identifiers(identifiers=self.record.identifiers, namespace="isbn")
-        if isbns:
-            return isbns[0]["identifier"]
-        return None
+    def isbns(self) -> list[str]:
+        isbns = []
+
+        for isbn in self._filter_identifiers(identifiers=self.record.identifiers, namespace="isbn"):
+            isbns.append(isbn["identifier"])
+
+        return isbns
 
     @property
     def item_type(self) -> str:

@@ -2163,13 +2163,13 @@ class Item:
         return self.record.identifier
 
     @property
-    def image_thumbnail(self) -> dict | None:
-        thumbnail = self._filter_graphic_overviews(overviews=self.record.graphic_overviews, identifier="thumbnail")
-        if thumbnail is None:
+    def image_overview(self) -> dict | None:
+        overview = self._filter_graphic_overviews(overviews=self.record.graphic_overviews, identifier="overview")
+        if overview is None:
             return None
         return {
-            "href": thumbnail["href"],
-            "alt_text": thumbnail["description"],
+            "href": overview["href"],
+            "alt_text": overview["description"],
         }
 
     @property

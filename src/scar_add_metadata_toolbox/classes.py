@@ -1231,9 +1231,9 @@ class Record(RecordSummary):
             return None
 
     @property
-    def series_issue(self) -> str | None:
+    def series_edition(self) -> str | None:
         try:
-            return self.config["identification"]["series"].get("issue_identification", None)
+            return self.config["identification"]["series"].get("edition", None)
         except KeyError:
             return None
 
@@ -2318,9 +2318,9 @@ class Item:
     def series(self) -> str | None:
         if self.record.series_name is None:
             return None
-        if self.record.series_issue is None:
+        if self.record.series_edition is None:
             return self.record.series_name
-        return f"{self.record.series_name} ({self.record.series_issue})"
+        return f"{self.record.series_name} ({self.record.series_edition})"
 
     @property
     def series_markdown(self) -> str | None:

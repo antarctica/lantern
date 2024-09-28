@@ -73,9 +73,15 @@
                 {% endif %}
             </dd>
         {% endif %}
-        {% if item.isbn %}
-            <dt>ISBN</dt>
-            <dd>{{ item.isbn }}</dd>
+        {% if item.isbns %}
+            <dt>ISBNs</dt>
+            <dd>
+                <ul class="bsk-list-unstyled app-keywords-list">
+                    {% for isbn in item.isbns %}
+                        <li>{{ isbn }}</li>
+                    {% endfor %}
+                </ul>
+            </dd>
         {% endif %}
         {%  if item.series %}
             <dt>Series</dt>

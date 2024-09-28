@@ -18,14 +18,14 @@ and follow the instructions.
 The deployment [Python package](#python-package) is deployed as a WSGI application through the BAS IT
 [Ansible 🛡️](https://gitlab.data.bas.ac.uk/station-data-management/ansible/) project.
 
-- [Playbook 🛡️](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/playbooks/magic/add-metadata-toolbox.yml)
-- [Inventory 🛡️](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/tree/master/inventory/magic)
+- [Server Playbook 🛡️](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/playbooks/magic/add-metadata-toolbox-server.yml)
+- [Client Playbook 🛡️](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/playbooks/magic/add-metadata-toolbox-client.yml)
 
 This application is deployed to a development, staging and production environment. Development deployments are
 automatic via [Continuous Deployment](#continuous-deployment). Deployments to the staging and production environments
-can only be performed by BAS IT.
+are performed by BAS IT.
 
-**Note:** The development and staging environments are not accessible publicly.
+**Note:** The development and staging environments are only accessible from the BAS LAN.
 
 ### Running CLI commands
 

@@ -31,6 +31,12 @@ class MsalTokenAcquisitionError(MsalFlaskError):
         super().__init__(f"Error acquiring token: {error} - {description}")
 
 
+class MsalTokenCacheRenewalError(MsalFlaskError):
+    """Raised when MSAL token cache cannot provide a token (typically because the refresh token has expired)."""
+
+    pass
+
+
 class MsalFlaskAuth:
     """
     Thin abstraction over MSAL.
@@ -82,6 +88,8 @@ class MsalFlaskAuth:
         try:
             result = self._client.acquire_token_silent(scopes=self._scopes, account=self._account)
             return result["access_token"]
+        except TypeError as e:
+            raise MsalTokenCacheRenewalError() from e
         except KeyError as e:
             error = result.get("error", "-")
             description = result.get("error_description", "-")

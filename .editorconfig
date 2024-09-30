@@ -12,3 +12,6 @@ trim_trailing_whitespace = true
 
 [*.py]
 indent_size = 4
+
+[*.j2]
+indent_size = 4

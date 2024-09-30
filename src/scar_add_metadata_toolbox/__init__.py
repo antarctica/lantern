@@ -8,7 +8,12 @@ from markupsafe import escape
 from werkzeug.exceptions import NotFound
 
 from scar_add_metadata_toolbox.classes import MirrorRepository
-from scar_add_metadata_toolbox.client_auth import MsalFlask, MsalFlaskNoAccountError, MsalTokenAcquisitionError
+from scar_add_metadata_toolbox.client_auth import (
+    MsalFlask,
+    MsalFlaskNoAccountError,
+    MsalTokenAcquisitionError,
+    MsalTokenCacheRenewalError,
+)
 from scar_add_metadata_toolbox.commands import (
     auth_commands_blueprint,
     csw_commands_blueprint,
@@ -61,7 +66,7 @@ def create_app() -> Flask:  # noqa: C901
 
     # noinspection PyUnusedLocal
     access_token = None
-    with contextlib.suppress(MsalFlaskNoAccountError, MsalTokenAcquisitionError):
+    with contextlib.suppress(MsalFlaskNoAccountError, MsalTokenAcquisitionError, MsalTokenCacheRenewalError):
         access_token = app.msal.access_token
 
     app.repositories = _create_csw_repositories(repositories_config=app.config["CSW_SERVERS_CONFIG"])

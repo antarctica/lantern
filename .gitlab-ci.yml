@@ -23,7 +23,7 @@ variables:
   DEPLOY_ENV: "dev"
   DEPLOY_SSH_PRIVATE_KEY: "id_ed25519.pem"
   DEPLOY_ANSIBLE_REPO: "gitlab.data.bas.ac.uk/station-data-management/ansible.git"
-  DEPLOY_ANSIBLE_BRANCH: "deploy-add-toolbox-0-6-0"  # temporary until merged
+  DEPLOY_ANSIBLE_BRANCH: "master"
   DEPLOY_ANSIBLE_VENV: "/tmp/.venv/ansible"
   DEPLOY_ANSIBLE_ROOT_PATH: "/tmp/ansible"
   DEPLOY_ANSIBLE_VAULT_PATH: ".vault_magic.password"

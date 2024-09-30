@@ -7,6 +7,53 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Added
+
+* Item properties for bounding geographic and temporal extent
+  [#278](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/278)
+* Item properties for ISBN identifier
+  [#169](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/169)
+* Initial support for ArcGIS features and vector tiles services and layers
+  [#279](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/279)
+* Spatial resolution (scale) support
+  [#186](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/186)
+* Series (description) support
+  [#405](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/405)
+* Initial support for item thumbnails/graphics
+  [#181](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/181)
+
+### Fixed
+
+* Updating bas-style-kit-jinja-templates dependency to correct 'back to top' link
+  [#152](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/152)
+* Esri JS error for missing API key
+  [#411](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/411)
+* Multiple auth related bugs (unauthenticated CSW client requests, token comparison)
+  [#417](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/417)
+
+### Changed
+
+* Updating bas-metadata-library dependency
+  [#408](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/408)
+* Moving citation information to data table to make it more visible
+  [#375](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/375)
+* Replacing Nginx docker service with Python simple server for previewing local static site
+  [#412](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/412)
+* Migrating to new databases running in new BAS Postgres cluster
+  [#391](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/391)
+* Disabling Google Analytics in Style Kit templates (as GA version no longer supported)
+  [#416](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/416)
+* Simplifying config class to a single environment, with options overridden by env vars to remove need for `FLASK_ENV`
+  [#314](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/314)
+* Replacing Postgres docker service with local Postgres instance
+  [#418](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/418)
+* Upgrading to Flask 3.x
+  [#394](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/394)
+* Upgrading project dependencies
+  [#419](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/419)
+* Reducing required record properties to agreed minimum
+  [#274](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/274)
+
 ## [0.7.5] - 2024-09-26
 
 ### Fixed
@@ -47,6 +94,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#419](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/419)
 * Reducing required record properties to agreed minimum
   [#274](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/274)
+
+## [0.7.4] - 2024-09-25
+
+### Fixed
+
+* CSW Server token scope validation used inverted logic
+  [#421](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/421)
 
 ## [0.7.3] - 2024-09-05
 

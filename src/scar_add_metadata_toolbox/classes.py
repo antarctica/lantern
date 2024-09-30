@@ -1256,6 +1256,10 @@ class Record(RecordSummary):
         return self.config["identification"].get("spatial_resolution", None)
 
     @property
+    def supplemental_information(self) -> str | None:
+        return self.config["identification"].get("supplemental_information", None)
+
+    @property
     def theme_keywords(self) -> list[dict]:
         keywords = self.config["identification"].get("keywords", None)
 
@@ -2035,6 +2039,20 @@ class Item:
         return download
 
     @staticmethod
+    def _process_supplemental_info(supplemental_information_str: str) -> dict:
+        try:
+            return json.loads(supplemental_information_str)
+        except json.JSONDecodeError:
+            return {}
+
+    @staticmethod
+    def _process_physical_size(width_mm: float, height_mm: float) -> str:
+        if width_mm == 210 and height_mm == 297:
+            return "A4 (width: 21.0cm, height: 29.7cm)"
+
+        return f"Width: {width_mm}mm, Height: {height_mm}mm"
+
+    @staticmethod
     def _filter_keyword_terms(keyword_sets: list[dict], keyword_set_url: str) -> list[dict]:
         """
         Filter a specific keyword set from a collection of keyword sets based on the keyword set's URI.
@@ -2282,6 +2300,17 @@ class Item:
         return self._format_date(date_datetime=_date["date"], date_precision=_date["date_precision"])
 
     @property
+    def physical_size(self) -> str:
+        kv = self.supplemental_information_json
+
+        if "physical_size_width_mm" in kv and "physical_size_height_mm" in kv:
+            return self._process_physical_size(
+                width_mm=kv["physical_size_width_mm"], height_mm=kv["physical_size_height_mm"]
+            )
+
+        return ""
+
+    @property
     def point_of_contact(self) -> str:
         points_of_contact = self.record.contacts["pointOfContact"]
         point_of_contact = points_of_contact[0]
@@ -2354,6 +2383,13 @@ class Item:
             maintenance_frequency=self.record.maintenance_frequency,
             released_date=released_date,
         )
+
+    @property
+    def supplemental_information_json(self) -> dict:
+        if self.record.supplemental_information is None:
+            return {}
+
+        return self._process_supplemental_info(self.record.supplemental_information)
 
     @property
     def temporal_extents(self) -> list[dict[str, str]]:

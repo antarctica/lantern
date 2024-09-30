@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#405](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/405)
 * Initial support for item thumbnails/graphics
   [#181](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/181)
+* Initial support for physical dimensions/sizes for products
+  [#423](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/423)
 
 ### Fixed
 

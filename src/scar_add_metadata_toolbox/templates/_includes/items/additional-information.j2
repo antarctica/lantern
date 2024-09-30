@@ -87,6 +87,10 @@
             <dt>Series</dt>
             <dd>{{ item.series_markdown }}</dd>
         {% endif %}
+        {% if item.physical_size %}
+            <dt>Physical size</dt>
+            <dd>{{ item.physical_size }}</dd>
+        {% endif %}
     </dl>
 
     {% include 'app/_includes/items/descriptive-keywords.j2' %}

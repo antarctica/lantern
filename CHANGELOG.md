@@ -23,6 +23,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#181](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/181)
 * Initial support for physical dimensions/sizes for products
   [#423](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/423)
+* Initial support for physical reverse of aggregation (back of the map) for products
+  [#424](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/424)
 
 ### Fixed
 

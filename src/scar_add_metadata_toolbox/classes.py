@@ -2053,6 +2053,40 @@ class Item:
         return f"Width: {width_mm}mm, Height: {height_mm}mm"
 
     @staticmethod
+    def _filter_aggregations(
+        aggregations: list[dict], association_type: str, initiative_type: str | None = None
+    ) -> list[dict]:
+        """
+        Filter aggregations by an association type, and optionally an initiative type.
+
+        Aggregations in ISO can be used for expressing multiple types of relationship between one resource and others.
+        Two, code list options are used to indicate the type of relationship (the association type, required), and the
+        context of this relationship (the initiative type, optional).
+
+        Association and initiative types are defined by the relevant BAS Metadata Library record configuration schema
+        and ISO code lists.
+
+        For example:
+
+        | Association Type   | Initiative Type | Example/Description                                                |
+        | ------------------ | --------------- | ------------------------------------------------------------------ |
+        | revisionOf         | -               | a record replaces/updates another                                  |
+        | isComposedOf       | Collection      | a record is made up of a set of other records to form a collection |
+
+        As different combinations of association and initiative types are typically used differently, this method
+        filters keywords for a specified type (e.g. only 'isComposedOf' aggregations).
+        """
+        _aggregations = []
+
+        for aggregation in aggregations:
+            if aggregation["association_type"] == association_type:
+                if initiative_type is not None and aggregation["initiative_type"] != initiative_type:
+                    continue
+                _aggregations.append(aggregation)
+
+        return _aggregations
+
+    @staticmethod
     def _filter_keyword_terms(keyword_sets: list[dict], keyword_set_url: str) -> list[dict]:
         """
         Filter a specific keyword set from a collection of keyword sets based on the keyword set's URI.
@@ -2270,24 +2304,34 @@ class Item:
         return self._format_date(date_datetime=self.record.metadata_updated)
 
     @property
+    def related_datasets(self) -> list[dict]:
+        return self._filter_aggregations(
+            aggregations=self.record.aggregations, association_type="crossReference", initiative_type="investigation"
+        )
+
+    @property
     def related_references(self) -> list[dict]:
-        # noinspection PyProtectedMember
-        return Collection._filter_aggregations(
+        return self._filter_aggregations(
             aggregations=self.record.aggregations, association_type="crossReference", initiative_type="sciencePaper"
         )
 
     @property
-    def related_project_resources(self) -> list[dict]:
-        # noinspection PyProtectedMember
-        return Collection._filter_aggregations(
-            aggregations=self.record.aggregations, association_type="crossReference", initiative_type="project"
-        )
+    def debug(self) -> list:
+        return self.record.aggregations
 
     @property
-    def related_datasets(self) -> list[dict]:
-        # noinspection PyProtectedMember
-        return Collection._filter_aggregations(
-            aggregations=self.record.aggregations, association_type="crossReference", initiative_type="investigation"
+    def related_physical_reverse(self) -> dict | None:
+        reverse_of = self._filter_aggregations(
+            aggregations=self.record.aggregations, association_type="physicalReverseOf"
+        )
+        if len(reverse_of) == 0:
+            return None
+        return reverse_of[0]
+
+    @property
+    def related_projects(self) -> list[dict]:
+        return self._filter_aggregations(
+            aggregations=self.record.aggregations, association_type="crossReference", initiative_type="project"
         )
 
     @property

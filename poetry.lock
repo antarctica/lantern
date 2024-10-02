@@ -65,13 +65,13 @@ s3transfer = ">=0.10.0,<0.11.0"
 
 [[package]]
 name = "bas-metadata-library"
-version = "0.12.0"
+version = "0.13.1"
 description = "Python library for generating metadata records"
 optional = false
 python-versions = "<4.0,>=3.9"
 files = [
-    {file = "bas_metadata_library-0.12.0-py3-none-any.whl", hash = "sha256:5414ea33fdeb301b841b1ac26d39917fea6df3756951dbd5bf8935c64eb582e1"},
-    {file = "bas_metadata_library-0.12.0.tar.gz", hash = "sha256:ad7b08ee5586cff9e747e4db631db95a106cb46ed0ea1cf72b85e26e2eb4d8c8"},
+    {file = "bas_metadata_library-0.13.1-py3-none-any.whl", hash = "sha256:f5338506ed4d319cd0039c261494262a4311968b531d2749be12be34823cff80"},
+    {file = "bas_metadata_library-0.13.1.tar.gz", hash = "sha256:963f2cf3fd8c11253582728420d7c3804a4646ca90e17568a4f27c17275266b0"},
 ]
 
 [package.dependencies]
@@ -2520,4 +2520,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "7a0b7608a80904bd264079e5e01dff3f1d729c91e816acf664a15c8d3178833b"
+content-hash = "fef367a253f7af1794aeac0dfd07aae798a2db6797d3ef8ded8db6c36f0f020e"

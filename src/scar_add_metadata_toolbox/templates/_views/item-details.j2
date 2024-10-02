@@ -58,7 +58,7 @@
                     </a>
                 </li>
             {% endif %}
-            {% if item.related_references or item.related_project_resources or item.related_datasets %}
+            {% if item.related_physical_reverse or item.related_references or item.related_project_resources or item.related_datasets %}
                 <li role="presentation">
                     <a href="#item-details-related" role="tab" data-toggle="tab">
                         <i class="far fa-books"></i>
@@ -115,7 +115,7 @@
                     {% include 'app/_includes/items/lineage.j2' %}
                 </div>
             {% endif %}
-            {% if item.related_references or item.related_project_resources or item.related_datasets %}
+            {% if item.related_physical_reverse or item.related_references or item.related_project_resources or item.related_datasets %}
                 <div id="item-details-related" class="bsk-tab-pane bsk-fade" role="tabpanel">
                     {% include 'app/_includes/items/related.j2' %}
                 </div>

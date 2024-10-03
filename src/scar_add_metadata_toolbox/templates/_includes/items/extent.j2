@@ -4,17 +4,19 @@
     </header>
 
     <div class="bsk-row">
-        <div class="bsk-col-12-md-6">
-            {% if item.bounding_geographic_extent.bounding_box.east_longitude == 180
-                and item.bounding_geographic_extent.bounding_box.north_latitude == -60
-                and item.bounding_geographic_extent.bounding_box.south_latitude == -90
-                and item.bounding_geographic_extent.bounding_box.west_longitude == -180
-            %}
-                <img src="/static/img/add-map.jpg" alt="extent map" />
-            {% else %}
-                <div id="item-map"></div>
-            {% endif %}
-        </div>
+        {% if item.bounding_geographic_extent %}
+            <div class="bsk-col-12-md-6">
+                {% if item.bounding_geographic_extent.bounding_box.east_longitude == 180
+                    and item.bounding_geographic_extent.bounding_box.north_latitude == -60
+                    and item.bounding_geographic_extent.bounding_box.south_latitude == -90
+                    and item.bounding_geographic_extent.bounding_box.west_longitude == -180
+                %}
+                    <img src="/static/img/add-map.jpg" alt="extent map" />
+                {% else %}
+                    <div id="item-map"></div>
+                {% endif %}
+            </div>
+        {% endif %}
         <div class="bsk-col-12-md-6">
             {% if item.location_keywords %}
                 <header><h4>Location keywords</h4></header>
@@ -41,6 +43,7 @@
                 </ul>
             {% endif %}
 
+            {% if item.bounding_geographic_extent %}
             <header><h4>Bounding coordinates</h4></header>
             <dl class="bsk-dl">
                 <dt>
@@ -54,8 +57,9 @@
                 </dt>
                 <dd>South: {{ item.bounding_geographic_extent.bounding_box.south_latitude }}, West: {{ item.bounding_geographic_extent.bounding_box.west_longitude }} </dd>
             </dl>
+            {% endif %}
 
-            <hr>
+            {% if item.bounding_geographic_extent and item.bounding_temporal_extent %}<hr>{% endif %}
 
             {% if item.bounding_temporal_extent %}
                 <header><h4>Temporal range</h4></header>

@@ -78,7 +78,7 @@ def test_record_distributions_none():
 # Coverage test
 def test_record_extent_none():
     record = Record(config={})
-    assert record.extents is None
+    assert len(record.extents) == 0
 
 
 # Coverage test

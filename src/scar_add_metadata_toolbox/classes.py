@@ -2048,7 +2048,9 @@ class Item:
     @staticmethod
     def _process_physical_size(width_mm: float, height_mm: float) -> str:
         if width_mm == 210 and height_mm == 297:
-            return "A4 (width: 21.0cm, height: 29.7cm)"
+            return "A4 Portrait (width: 21.0cm, height: 29.7cm)"
+        if width_mm == 297 and height_mm == 210:
+            return "A4 Landscape (width: 29.7cm, height: 21.0cm)"
 
         return f"Width: {width_mm}mm, Height: {height_mm}mm"
 

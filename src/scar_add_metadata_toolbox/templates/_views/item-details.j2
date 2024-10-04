@@ -44,14 +44,16 @@
                     </a>
                 </li>
             {% endif %}
-            <li {% if not item.licence_url %}{{ 'class="bsk-active"' }}{% endif %} role="presentation">
-                <a href="#item-details-extent" role="tab" data-toggle="tab">
-                    <i class="far fa-expand-arrows"></i>
-                    Extent
-                </a>
-            </li>
+            {% if item.bounding_geographic_extent or item.bounding_temporal_extent %}
+                <li {% if not item.licence_url %}{{ 'class="bsk-active"' }}{% endif %} role="presentation">
+                    <a href="#item-details-extent" role="tab" data-toggle="tab">
+                        <i class="far fa-expand-arrows"></i>
+                        Extent
+                    </a>
+                </li>
+            {% endif %}
             {% if item.lineage %}
-                <li role="presentation">
+                <li {% if not item.bounding_geographic_extent or item.bounding_temporal_extent %}{{ 'class="bsk-active"' }}{% endif %} role="presentation">
                     <a href="#item-details-lineage" role="tab" data-toggle="tab">
                         <i class="far fa-scroll-old"></i>
                         Lineage
@@ -59,14 +61,14 @@
                 </li>
             {% endif %}
             {% if item.related_physical_reverse or item.related_references or item.related_project_resources or item.related_datasets %}
-                <li role="presentation">
+                <li {% if not item.lineage %}{{ 'class="bsk-active"' }}{% endif %} role="presentation">
                     <a href="#item-details-related" role="tab" data-toggle="tab">
                         <i class="far fa-books"></i>
                         Related
                     </a>
                 </li>
             {% endif %}
-            <li role="presentation">
+            <li {% if not item.related_physical_reverse or item.related_references or item.related_project_resources or item.related_datasets %}{{ 'class="bsk-active"' }}{% endif %} role="presentation">
                 <a href="#item-details-additional-information" role="tab" data-toggle="tab">
                     <i class="far fa-info-square"></i>
                     Additional Information
@@ -103,24 +105,26 @@
                     {% include 'app/_includes/items/licence.j2' %}
                 </div>
             {% endif %}
-            <div
-                id="item-details-extent"
-                class="bsk-tab-pane bsk-fade {% if not item.licence_url %}{{ 'bsk-in bsk-active' }}{% endif %}"
-                role="tabpanel"
-            >
-                {% include 'app/_includes/items/extent.j2' %}
-            </div>
+            {% if item.bounding_geographic_extent or item.bounding_temporal_extent %}
+                <div
+                    id="item-details-extent"
+                    class="bsk-tab-pane bsk-fade {% if not item.licence_url %}{{ 'bsk-in bsk-active' }}{% endif %}"
+                    role="tabpanel"
+                >
+                    {% include 'app/_includes/items/extent.j2' %}
+                </div>
+            {% endif %}
             {% if item.lineage %}
-                <div id="item-details-lineage" class="bsk-tab-pane bsk-fade" role="tabpanel">
+                <div id="item-details-lineage" class="bsk-tab-pane bsk-fade {% if not item.bounding_geographic_extent or item.bounding_temporal_extent %}{{ 'bsk-in bsk-active' }}{% endif %}" role="tabpanel">
                     {% include 'app/_includes/items/lineage.j2' %}
                 </div>
             {% endif %}
             {% if item.related_physical_reverse or item.related_references or item.related_project_resources or item.related_datasets %}
-                <div id="item-details-related" class="bsk-tab-pane bsk-fade" role="tabpanel">
+                <div id="item-details-related" class="bsk-tab-pane bsk-fade {% if not item.lineage %}{{ 'bsk-in bsk-active' }}{% endif %}" role="tabpanel">
                     {% include 'app/_includes/items/related.j2' %}
                 </div>
             {% endif %}
-            <div id="item-details-additional-information" class="bsk-tab-pane bsk-fade" role="tabpanel">
+            <div id="item-details-additional-information" class="bsk-tab-pane bsk-fade {% if not item.related_physical_reverse or item.related_references or item.related_project_resources or item.related_datasets %}{{ 'bsk-in bsk-active' }}{% endif %}" role="tabpanel">
                 {% include 'app/_includes/items/additional-information.j2' %}
             </div>
             <div id="item-details-contact" class="bsk-tab-pane bsk-fade" role="tabpanel">
@@ -141,7 +145,10 @@
     <script src="https://js.arcgis.com/4.23/"></script>
     <script>
         const item_id = '{{ item.identifier }}';
-        const geographic_bounding_extent = {{ item.geographic_extents[0].bounding_box_geojson }};
+        let geographic_bounding_extent = {};
+        {% if item.geographic_extents %}
+            geographic_bounding_extent = {{ item.geographic_extents[0].bounding_box_geojson }}
+        {% endif %};
     </script>
     <script src="/static/js/item.js"></script>
 {% endblock %}

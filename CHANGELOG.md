@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#423](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/423)
 * Initial support for physical reverse of aggregation (back of the map) for products
   [#424](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/424)
+* Aggregations based items collections listing implementation
+  [#430](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/430)
 
 ### Fixed
 

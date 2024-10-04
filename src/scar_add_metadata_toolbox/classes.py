@@ -2110,11 +2110,6 @@ class Item:
         return markdown(self.citation, output_format="html")
 
     @property
-    def collections(self) -> list[str] | None:
-        """Item's Collections."""
-        return []
-
-    @property
     def created(self) -> str:
         _date = self.record.dates["creation"]
         return self._format_date(date_datetime=_date["date"], date_precision=_date["date_precision"])
@@ -2259,8 +2254,11 @@ class Item:
         )
 
     @property
-    def debug(self) -> list:
-        return self.record.aggregations
+    def related_collections(self) -> list[dict]:
+        """Item's Collections."""
+        return self._filter_aggregations(
+            aggregations=self.record.aggregations, association_type="largerWorkCitation", initiative_type="collection"
+        )
 
     @property
     def related_physical_reverse(self) -> dict | None:

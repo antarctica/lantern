@@ -2,6 +2,13 @@
     <header>
         <h2><i class="far fa-books"></i> Related</h2>
     </header>
+    {% if item.related_collections %}
+        <h3>Related collections</h3>
+        {% for reference in item.related_collections %}
+            <div><a href="{{ reference.identifier.href }}">{{ reference.identifier.identifier }}</a></div>
+        {% endfor %}
+    {% endif %}
+
     {% if item.related_physical_reverse %}
         <h3>Physical Reverse Of</h3>
         <div>

@@ -5,7 +5,7 @@ import json
 import locale
 from collections.abc import Generator
 from copy import deepcopy
-from datetime import date, datetime, timezone
+from datetime import date, datetime
 from enum import Enum
 from hashlib import sha1
 from pathlib import Path
@@ -14,7 +14,6 @@ from urllib.parse import parse_qs as query_string_parse
 from urllib.parse import urlparse as url_parse
 
 from bas_metadata_library.standards.iso_19115_2 import MetadataRecord, MetadataRecordConfigV4
-from dateutil.relativedelta import relativedelta
 from markdown import markdown
 
 from scar_add_metadata_toolbox.csw import (
@@ -1891,50 +1890,6 @@ class Item:
         return bounding_polygon
 
     @staticmethod
-    def _process_status(maintenance_frequency: str, released_date: date | datetime | None) -> str:
-        """
-        Determine the status of an item.
-
-        Supported maintenance frequencies are:
-
-        * biannual (periodic)
-        * asNeeded (non-periodic)
-        * notPlanned (non-periodic)
-
-        Possible states are:
-
-        * current
-        * outdated
-        * unknown
-
-        Maintenance frequencies are based on ISO 19115 maintenance frequency code list values.
-
-        Where an item has a periodic maintenance frequency (e.g. every month), an overdue date is calculated by adding
-        the maintenance frequency to the items release date. If the current date is less or equal to this overdue date
-        it's considered current, otherwise it's deemed to be outdated.
-
-        Note: This method includes code paths that are not currently used and so are exempt from code coverage. These
-        paths are known to be needed in future and will therefore be tested and included in coverage in the future.
-        """
-        if maintenance_frequency == "asNeeded" or maintenance_frequency == "notPlanned":
-            return "current"
-
-        if released_date is None:
-            return "unknown"
-
-        _now = datetime.now(tz=timezone.utc)
-        _overdue = released_date
-        if isinstance(released_date, date):  # pragma: no cover (added for future use)
-            _now = _now.date()
-            _overdue = _overdue.date()
-        if maintenance_frequency == "biannually":
-            _overdue += relativedelta(months=+6)
-
-        if _now <= _overdue:
-            return "current"  # pragma: no cover (will be addressed in #116)
-        return "outdated"  # pragma: no cover (added for future use)
-
-    @staticmethod
     def _process_download(distribution: dict, distributions: list[dict]) -> dict[str, str] | None:  # noqa: C901
         """
         Generate an item download.
@@ -2418,17 +2373,6 @@ class Item:
             return None  # pragma: no cover (will be addressed in #116)
 
         return markdown(self.spatial_reference_system, output_format="html")
-
-    @property
-    def status(self) -> str:
-        released_date = self.record.dates.get("released", None)  # can't use self.released as it's a string not date
-        if released_date is not None:
-            released_date = released_date["date"]  # assume released date is always a full date
-
-        return self._process_status(
-            maintenance_frequency=self.record.maintenance_frequency,
-            released_date=released_date,
-        )
 
     @property
     def supplemental_information_json(self) -> dict:

@@ -1130,7 +1130,7 @@ class Record(RecordSummary):
         return self.config["identification"].get("edition", None)
 
     @property
-    def extents(self) -> list[dict] | None:
+    def extents(self) -> list[dict]:
         extents = []
 
         try:
@@ -1141,7 +1141,7 @@ class Record(RecordSummary):
                 extent["temporal"] = self._process_temporal_extent(temporal_extent=extent["temporal"])
                 extents.append(extent)
         except KeyError:
-            return None
+            return extents
 
         return extents
 
@@ -1270,7 +1270,7 @@ class Record(RecordSummary):
 
     @property
     def topics(self) -> list[str]:
-        return self.config["identification"]["topics"]
+        return self.config["identification"].get("topics", [])
 
     def load(self, record_path: Path) -> None:
         """

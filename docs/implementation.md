@@ -69,8 +69,9 @@ In addition to the properties required by the ISO 19115 standard, the Catalogue 
 all records:
 
 1. `file_identifier` so records can be distinguished without relying on a value that may change or not be unique
-2. `identifier` as per [1], so that the Catalogue can determine whether a record is part of the Catalogue or not
-3. `identifier.contacts[role='pointOfContact']` so the _contact_ item tab displays a point of contact
+1. `hierarchy_level` so records can be distinguished between [Items](#items) and [Collections](#collections) [2]
+1. `identifier` as per [1], so that the Catalogue can determine whether a record is part of the Catalogue or not
+1. `identifier.contacts[role='pointOfContact']` so the _contact_ item tab displays a point of contact
 
 [1]
 

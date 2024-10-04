@@ -57,6 +57,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#419](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/419)
 * Reducing required record properties to agreed minimum
   [#274](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/274)
+* Template changes for map catalogue
+  [#425](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/425)
 
 ## [0.7.5] - 2024-09-26
 

@@ -1,5 +1,9 @@
 <section class="bsk-sidebar bsk-sidebar-default app-item-summary">
     <dl class="bsk-dl-horizontal">
+        {%  if item.series %}
+            <dt>Series</dt>
+            <dd>{{ item.series_markdown }}</dd>
+        {% endif %}
         {% if item.edition %}
             <dt>Version:</dt>
             <dd>{{ item.edition }}</dd>
@@ -25,9 +29,19 @@
         <dt>Collections:</dt>
         <dd>{{ item.collections | join(',') }}</dd>
         {% endif %}
-        {% if item.topics %}
-            <dt>Topics:</dt>
-            <dd>{{ item.topics | join(',') }}</dd>
+        {% if item.isbns %}
+            <dt>ISBNs</dt>
+            <dd>
+                <ul class="bsk-list-unstyled app-keywords-list">
+                    {% for isbn in item.isbns %}
+                        <li>{{ isbn }}</li>
+                    {% endfor %}
+                </ul>
+            </dd>
+        {% endif %}
+        {% if item.scale %}
+            <dt>Scale</dt>
+            <dd>{{ item.scale }}</dd>
         {% endif %}
     </dl>
 

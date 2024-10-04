@@ -35,14 +35,6 @@
                 {{ item.spatial_reference_system_markdown }}
             </dd>
         {% endif %}
-        {% if item.scale %}
-            <dt>Scale</dt>
-            <dd>{{ item.scale }}</dd>
-        {% endif %}
-        <dt>Language</dt>
-        <dd>{{ item.language }}</dd>
-        <dt>Character set</dt>
-        <dd>{{ item.character_set }}</dd>
         {% if item.created %}
             <dt>Item created</dt>
             <dd>{{ item.created }}</dd>
@@ -83,30 +75,18 @@
                 </ul>
             </dd>
         {% endif %}
-        {%  if item.series %}
-            <dt>Series</dt>
-            <dd>{{ item.series_markdown }}</dd>
-        {% endif %}
         {% if item.physical_size %}
             <dt>Physical size</dt>
             <dd>{{ item.physical_size }}</dd>
         {% endif %}
     </dl>
 
-    {% include 'app/_includes/items/descriptive-keywords.j2' %}
+    {% include 'app/_includes/items/topics-keywords.j2' %}
 
     <h3>Metadata information</h3>
     <dl class="bsk-dl-horizontal bsk-dl-horizontal-lg">
-        <dt>Language</dt>
-        <dd>{{ item.metadata_language }}</dd>
-        <dt>Character set</dt>
-        <dd>{{ item.metadata_character_set }}</dd>
-        <dt>Status:</dt>
-        <dd>{% if item.metadata_maintenance_progress %}{{ item.metadata_maintenance_progress }}{% else %}Unknown{% endif %}</dd>
         <dt>Last updated:</dt>
         <dd>{{ item.metadata_updated }}</dd>
-        <dt>Update frequency:</dt>
-        <dd>{% if item.metadata_maintenance_frequency %}{{ item.metadata_maintenance_frequency }}{% else %}Unknown{% endif %}</dd>
         <dt>Metadata standard:</dt>
         <dd>{% if item.metadata_standard_name %}{{ item.metadata_standard_name }}{% else %}Unknown{% endif %}</dd>
         <dt>Metadata standard version:</dt>

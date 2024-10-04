@@ -2111,22 +2111,8 @@ class Item:
 
     @property
     def collections(self) -> list[str] | None:
-        """
-        Item's Collections.
-
-        Collections are implemented as a descriptive keyword set using the NERC Vocabulary Service (T02).
-
-        :rtype list
-        :return: Collection names
-        """
-        collection_terms = self._filter_keyword_terms(
-            keyword_sets=self.record.theme_keywords, keyword_set_url="http://vocab.nerc.ac.uk/collection/T02/current/"
-        )
-        if collection_terms is None:  # pragma: no cover (will be addressed in #116)
-            return []
-
-        # return a list of just term values
-        return [term["term"] for term in collection_terms]
+        """Item's Collections."""
+        return []
 
     @property
     def created(self) -> str:

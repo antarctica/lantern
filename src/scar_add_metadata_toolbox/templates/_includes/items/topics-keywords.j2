@@ -3,6 +3,19 @@
         <h3>Keywords</h3>
     </header>
     <dl class="bsk-dl-horizontal bsk-dl-horizontal-lg">
+        {% if item.topics %}
+            <dt>BAS Research Topics:</dt>
+            <dd>
+                <ul class="bsk-list-unstyled app-keywords-list fa-ul">
+                    {% for topic in item.topics %}
+                        <li>
+                            <span class="fa-li"><i class="far fa-tag"></i></span>
+                            {{ item }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </dd>
+        {% endif %}
         {% for theme_keyword_set in item.theme_keywords %}
             <dt>
                 {{ theme_keyword_set.thesaurus.title.value }}

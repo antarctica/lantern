@@ -61,6 +61,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#274](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/274)
 * Template changes for map catalogue
   [#425](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/425)
+* Refactoring how enabled and active tabs are determined
+  [#428](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/428)
 
 ### Removed
 

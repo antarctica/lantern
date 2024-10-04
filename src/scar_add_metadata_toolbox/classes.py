@@ -2366,6 +2366,52 @@ class Item:
         return self._process_supplemental_info(self.record.supplemental_information)
 
     @property
+    def templates_tabs(self) -> dict:
+        config = {
+            "active_tab": "data",
+            "is_visible": {
+                "data": False,
+                "authors": False,
+                "licence": False,
+                "extent": False,
+                "lineage": False,
+                "related": False,
+                "additional": True,
+                "contact": True,
+            },
+        }
+
+        if len(self.downloads) > 0:
+            config["is_visible"]["data"] = True
+
+        if len(self.authors) > 0:
+            config["is_visible"]["authors"] = True
+
+        if self.licence_url is not None:
+            config["is_visible"]["licence"] = True
+
+        if self.bounding_geographic_extent is not None or self.bounding_temporal_extent is not None:
+            config["is_visible"]["extent"] = True
+
+        if self.lineage is not None:
+            config["is_visible"]["lineage"] = True
+
+        if (
+            len(self.related_collections) > 0
+            or len(self.related_datasets) > 0
+            or len(self.related_projects) > 0
+            or len(self.related_references) > 0
+        ):
+            config["is_visible"]["related"] = True
+
+        for tab, is_visible in config["is_visible"].items():
+            if is_visible:
+                config["active_tab"] = tab
+                break
+
+        return config
+
+    @property
     def temporal_extents(self) -> list[dict[str, str]]:
         temporal_extents = []
 

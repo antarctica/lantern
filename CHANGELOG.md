@@ -60,6 +60,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 * Template changes for map catalogue
   [#425](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/425)
 
+### Removed
+
+* initial status implementation, which does fit our needs
+  [#426](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/426)
+
 ## [0.7.5] - 2024-09-26
 
 ### Fixed

@@ -17,9 +17,9 @@
                         <abbr title="{{ download.format_description }}">{{ download.format_title}}</abbr>
                     </td>
                     <td class="bsk-text-center">
-                        {% if download.size %}
+                        {% if download.hasSize %}
                             {{ download.size }}
-                        {% elif download.format == 'wms' %}
+                        {% else %}
                             <span class="bsk-text-muted">N/A</span>
                         {% endif %}
                     </td>

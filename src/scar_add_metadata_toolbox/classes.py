@@ -4,7 +4,7 @@ import contextlib
 import json
 import locale
 from collections.abc import Generator
-from copy import deepcopy
+from copy import copy, deepcopy
 from datetime import date, datetime
 from enum import Enum
 from hashlib import sha1
@@ -1572,9 +1572,6 @@ class MirrorRepository:
         Retrieve summaries for all records in the repository.
 
         Records are returned as a dictionary rather than a list to allow specific records to be easily selected.
-
-        :rtype dict
-        :return: all summarised records, keyed by record identifier
         """
         _records = {}
 
@@ -1660,6 +1657,25 @@ class MirrorRepository:
         """
         self.published_repository.delete_record(record_identifier=record_identifier)
 
+    def related_record_summaries(self, record: Record) -> dict[str, MirrorRecordSummary]:
+        """
+        Get summaries of related resources for a record.
+
+        Related resources are taken from aggregations, filtered to the catalogue namespace.
+        """
+        summaries = self.list_records()
+        related_summaries: dict[str, MirrorRecordSummary] = {}
+
+        for aggregation in record.aggregations:
+            if (
+                aggregation["identifier"]["identifier"] in summaries
+                and aggregation["identifier"]["namespace"] == "data.bas.ac.uk"
+            ):
+                summary = summaries[aggregation["identifier"]["identifier"]]
+                related_summaries[summary.identifier] = summary
+
+        return related_summaries
+
 
 class Item:
     """
@@ -1676,8 +1692,9 @@ class Item:
     understood or to make more contextual sense.
     """
 
-    def __init__(self, record: Record) -> None:
+    def __init__(self, record: Record, related_summaries: list[MirrorRecordSummary]) -> None:
         self.record = record
+        self._related_records = related_summaries
 
         if self.record.hierarchy_level == "collection":
             raise ItemInvalidSourceRecordError()
@@ -2013,9 +2030,8 @@ class Item:
 
         return f"Width: {width_mm}mm, Height: {height_mm}mm"
 
-    @staticmethod
     def _filter_aggregations(
-        aggregations: list[dict], association_type: str, initiative_type: str | None = None
+        self, aggregations: list[dict], association_type: str, initiative_type: str | None = None
     ) -> list[dict]:
         """
         Filter aggregations by an association type, and optionally an initiative type.
@@ -2036,6 +2052,9 @@ class Item:
 
         As different combinations of association and initiative types are typically used differently, this method
         filters keywords for a specified type (e.g. only 'isComposedOf' aggregations).
+
+        Where a related/aggregated resource is within this catalogue, it is enhanced with the title of the related
+        resource to provide a human readable identifier.
         """
         _aggregations = []
 
@@ -2043,7 +2062,19 @@ class Item:
             if aggregation["association_type"] == association_type:
                 if initiative_type is not None and aggregation["initiative_type"] != initiative_type:
                     continue
-                _aggregations.append(aggregation)
+
+                _aggregation = copy(aggregation)
+                try:
+                    _aggregation["identifier"]["title"] = self._related_records[
+                        _aggregation["identifier"]["identifier"]
+                    ].title
+                except KeyError:
+                    _aggregation["identifier"]["title"] = _aggregation["identifier"]["identifier"]
+                    if _aggregation["identifier"]["namespace"] == "data.bas.ac.uk":
+                        _aggregation["identifier"]["title"] = (
+                            f"Unknown Item ({_aggregation['identifier']['identifier']})"
+                        )
+                _aggregations.append(_aggregation)
 
         return _aggregations
 

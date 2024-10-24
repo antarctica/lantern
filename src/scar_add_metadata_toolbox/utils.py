@@ -14,7 +14,7 @@ from lxml.etree import (
     tostring,
 )
 
-from scar_add_metadata_toolbox.classes import Item, Record
+from scar_add_metadata_toolbox.classes import Item, MirrorRecordSummary, Record
 from scar_add_metadata_toolbox.csw import CSWServer
 
 
@@ -77,11 +77,11 @@ def aws_cli(*cmd) -> None:  # noqa: ANN002
         os.environ.update(old_env)
 
 
-def _build_item(record: Record) -> None:
+def _build_item(record: Record, related_summaries: list[MirrorRecordSummary]) -> None:
     """Build page for specified record."""
     items_output_path = Path(current_app.config["SITE_PATH"]).joinpath("items")
 
-    item = Item(record=record)
+    item = Item(record=record, related_summaries=related_summaries)
     item_output_path = items_output_path.joinpath(f"{item.identifier}/index.html")
     item_output_path.parent.mkdir(exist_ok=True, parents=True)
 

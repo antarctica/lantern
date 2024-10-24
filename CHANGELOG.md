@@ -68,6 +68,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#425](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/425)
 * Refactoring how enabled and active tabs are determined
   [#428](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/428)
+* Item tabs no longer repeat the tab name as a title within each tab
+  [#434](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/434)
 
 ### Removed
 

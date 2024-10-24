@@ -1,7 +1,4 @@
 <section class="app-item-tab app-item-authors">
-    <header>
-        <h2><i class="far fa-user-friends"></i> Authors</h2>
-    </header>
     {% for author_row in item.authors | batch(2) %}
         <div class="bsk-row">
             {% for author in author_row %}

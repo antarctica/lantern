@@ -10,8 +10,6 @@ from enum import Enum
 from hashlib import sha1
 from pathlib import Path
 from typing import Any
-from urllib.parse import parse_qs as query_string_parse
-from urllib.parse import urlparse as url_parse
 
 from bas_metadata_library.standards.iso_19115_2 import MetadataRecord, MetadataRecordConfigV4
 from markdown import markdown
@@ -1898,6 +1896,9 @@ class Item:
         download options are bespoke to this data catalogue, using inference and hard-coded formatting options to enrich
         or simplify information to be more useful.
 
+        Unknown formats will be passed through and may not be handled as expected. Some formats are skipped as
+        unsupported.
+
         Some distribution types vary depending on whether another distribution is present, or not. For example, an
         ArcGIS Feature Service will be combined with a Feature Layer if present.
         """
@@ -1943,15 +1944,6 @@ class Item:
             download["format"] = "png"
             download["format_title"] = "PNG"
             download["format_description"] = "PNG image"
-        elif distribution_format == "Web Map Service":
-            download["format"] = "wms"
-            download["format_title"] = "Web Map Service (WMS)"
-            download["format_description"] = "OGC Web Map Service"
-            download["hasSize"] = False
-            endpoint_elements = url_parse(distribution["transfer_option"]["online_resource"]["href"])
-            endpoint_parameters: dict = query_string_parse(endpoint_elements.query)
-            download["endpoint"] = f"{endpoint_elements.scheme}://{endpoint_elements.netloc}{endpoint_elements.path}"
-            download["layer"] = endpoint_parameters["layer"][0]
         elif distribution_format == "ArcGIS Feature Layer":
             download["format"] = "arcgis_feature_layer"
             download["format_title"] = "ArcGIS Feature Layer"
@@ -1973,12 +1965,18 @@ class Item:
             download["format_description"] = "Esri ArcGIS Vector Tile Service"
             download["hasSize"] = False
 
+        # skip option if it is an unsupported type
+        if distribution_format == "Web Map Service":
+            return None
+
+        # include service URL from ArcGIS feature service within ArcGIS feature layer options
         if distribution_format == "ArcGIS Feature Layer":
             for _distribution in distributions:
                 if _distribution.get("format") and _distribution["format"]["format"] == "ArcGIS Feature Service":
                     download["service_url"] = _distribution["transfer_option"]["online_resource"]["href"]
                     break
 
+        # include service URL from ArcGIS vector tile service within ArcGIS tile layer options
         if distribution_format == "ArcGIS Tile Layer":
             for _distribution in distributions:
                 if _distribution.get("format") and _distribution["format"]["format"] == "ArcGIS Vector Tile Service":

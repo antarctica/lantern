@@ -22,20 +22,17 @@ $(function() {
 });
 
 
-// Scroll WMS instructions box into view
+// Scroll instruction boxes into view
 //
 
 $(function() {
-    $('.app-wms-info').on('shown.bs.collapse', function () {
-        document.getElementById(this.id).scrollIntoView()
-        document.getElementById(this.id).classList.add('app-highlight');
-    });
-
+    // ArcGIS feature layers
     $('.app-fl-info').on('shown.bs.collapse', function () {
         document.getElementById(this.id).scrollIntoView()
         document.getElementById(this.id).classList.add('app-highlight');
     });
 
+    // ArcGIS tile layers
     $('.app-tl-info').on('shown.bs.collapse', function () {
         document.getElementById(this.id).scrollIntoView()
         document.getElementById(this.id).classList.add('app-highlight');

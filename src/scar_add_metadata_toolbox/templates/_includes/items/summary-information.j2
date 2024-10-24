@@ -1,5 +1,13 @@
 <section class="bsk-sidebar bsk-sidebar-default app-item-summary">
     <dl class="bsk-dl-horizontal">
+        {% if item.related_collections %}
+            <dt>Collections:</dt>
+            <dd>
+                {% for reference in item.related_collections %}
+                    <div><a href="{{ reference.identifier.href }}">{{ reference.identifier.identifier }}</a></div>
+                {% endfor %}
+            </dd>
+        {% endif %}
         {%  if item.series %}
             <dt>Series</dt>
             <dd>{{ item.series_markdown }}</dd>

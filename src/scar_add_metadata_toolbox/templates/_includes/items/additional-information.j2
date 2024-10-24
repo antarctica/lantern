@@ -48,7 +48,7 @@
             <dt>Item updated</dt>
             <dd>{{ item.updated }}</dd>
         {% endif %}
-        {% if item.maintenance_frequency %}
+        {% if item.maintenance_frequency and item.maintenance_frequency != 'As Needed' %}
             <dt>Update frequency:</dt>
             <dd>{{ item.maintenance_frequency }}</dd>
         {% endif %}

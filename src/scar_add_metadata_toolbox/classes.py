@@ -1914,6 +1914,7 @@ class Item:
             "format": None,
             "format_title": None,
             "format_description": None,
+            "hasSize": True,
             "size": None,
             "url": distribution["transfer_option"]["online_resource"]["href"],
         }
@@ -1946,6 +1947,7 @@ class Item:
             download["format"] = "wms"
             download["format_title"] = "Web Map Service (WMS)"
             download["format_description"] = "OGC Web Map Service"
+            download["hasSize"] = False
             endpoint_elements = url_parse(distribution["transfer_option"]["online_resource"]["href"])
             endpoint_parameters: dict = query_string_parse(endpoint_elements.query)
             download["endpoint"] = f"{endpoint_elements.scheme}://{endpoint_elements.netloc}{endpoint_elements.path}"
@@ -1954,18 +1956,22 @@ class Item:
             download["format"] = "arcgis_feature_layer"
             download["format_title"] = "ArcGIS Feature Layer"
             download["format_description"] = "Esri ArcGIS Feature Layer"
+            download["hasSize"] = False
         elif distribution_format == "ArcGIS Tile Layer":
             download["format"] = "arcgis_tile_layer"
             download["format_title"] = "ArcGIS Tile Layer"
             download["format_description"] = "Esri ArcGIS Tile Layer"
+            download["hasSize"] = False
         elif distribution_format == "ArcGIS Feature Service":
             download["format"] = "arcgis_feature_service"
             download["format_title"] = "ArcGIS Feature Service"
             download["format_description"] = "Esri ArcGIS Feature Service"
+            download["hasSize"] = False
         elif distribution_format == "ArcGIS Vector Tile Service":
             download["format"] = "arcgis_vector_tile_service"
             download["format_title"] = "ArcGIS Vector Tile Service"
             download["format_description"] = "Esri ArcGIS Vector Tile Service"
+            download["hasSize"] = False
 
         if distribution_format == "ArcGIS Feature Layer":
             for _distribution in distributions:

@@ -21,7 +21,12 @@ from scar_add_metadata_toolbox.classes import (
     Record,
     RecordRetractBeforeDeleteError,
 )
-from scar_add_metadata_toolbox.client_auth import MsalFlaskAuth, MsalFlaskNoAccountError, MsalTokenAcquisitionError
+from scar_add_metadata_toolbox.client_auth import (
+    MsalFlaskAuth,
+    MsalFlaskNoAccountError,
+    MsalTokenAcquisitionError,
+    MsalTokenCacheRenewalError,
+)
 from scar_add_metadata_toolbox.csw import (
     CSWAuthError,
     CSWAuthInsufficientError,
@@ -391,7 +396,7 @@ def build_items() -> None:
         _items_count = 1
         for record in selected_records:
             print(f"# Item page {_items_count}/{len(selected_records)}")
-            _build_item(record)
+            _build_item(record=record, related_summaries=current_app.records.related_record_summaries(record))
             print(f"Ok. Generated item page for '{record.identifier}'.")
             _items_count += 1
         print(f"Ok. {len(selected_records)} item pages generated.")
@@ -420,7 +425,7 @@ def build_item(record_identifier: str) -> None:
             record = current_app.records.retrieve_record(record_identifier)
 
         print(f"Generating item page for '{record.identifier}'")
-        _build_item(record)
+        _build_item(record=record, related_summaries=current_app.records.related_record_summaries(record))
         print(f"Ok. Generated item page for '{record.identifier}'.")
     except CSWDatabaseNotInitialisedError:
         print("No. CSW catalogue not setup.")
@@ -466,7 +471,10 @@ def build_collections() -> None:
             with click.progressbar(collection.item_identifiers) as item_identifiers:
                 for item_identifier in item_identifiers:
                     _collection_items.append(
-                        Item(record=current_app.records.retrieve_record(record_identifier=item_identifier))
+                        Item(
+                            record=current_app.records.retrieve_record(record_identifier=item_identifier),
+                            related_summaries=[],
+                        )
                     )
             collection.items = _collection_items
 
@@ -705,7 +713,7 @@ def auth_sign_in() -> None:
     try:
         click.echo(f"Ok. {msal_.whoami}")
         sys.exit(0)
-    except (MsalFlaskNoAccountError, MsalTokenAcquisitionError):
+    except (MsalFlaskNoAccountError, MsalTokenAcquisitionError, MsalTokenCacheRenewalError):
         click.echo("Error signing in with cached credentials. Falling back to a new sign in session.")
 
     params: dict = msal_.start_device_flow()

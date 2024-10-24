@@ -138,10 +138,10 @@ def create_app() -> Flask:  # noqa: C901
     def build_item() -> Response:
         try:
             record_id = request.args["item"]
-
             record = app.records.retrieve_record(record_id)
+            related_summaries = app.records.related_record_summaries(record)
             _build_record(record)
-            _build_item(record)
+            _build_item(record=record, related_summaries=related_summaries)
 
             return Response(status=HTTPStatus.CREATED)
         except CSWDatabaseNotInitialisedError:

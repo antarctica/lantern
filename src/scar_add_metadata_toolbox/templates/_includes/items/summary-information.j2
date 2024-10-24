@@ -4,7 +4,7 @@
             <dt>Collections:</dt>
             <dd>
                 {% for reference in item.related_collections %}
-                    <div><a href="{{ reference.identifier.href }}">{{ reference.identifier.identifier }}</a></div>
+                    <div><a href="{{ reference.identifier.href }}">{{ reference.identifier.title }}</a></div>
                 {% endfor %}
             </dd>
         {% endif %}

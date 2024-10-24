@@ -51,7 +51,10 @@ def test_mirror_record_repr():
 
 # Coverage test
 def test_item_repr():
-    item = Item(record=Record(config={"file_identifier": "test", "hierarchy_level": "dataset", "title": "test"}))
+    item = Item(
+        record=Record(config={"file_identifier": "test", "hierarchy_level": "dataset", "title": "test"}),
+        related_summaries=[],
+    )
     assert repr(item) == f"<Item / {item.identifier}>"
 
 
@@ -182,7 +185,7 @@ def test_item__format_spatial_reference_system_projections():
 # Coverage test
 def test_item_invalid_record_type():
     with pytest.raises(ItemInvalidSourceRecordError):
-        Item(record=Record(config={"hierarchy_level": "collection"}))
+        Item(record=Record(config={"hierarchy_level": "collection"}), related_summaries=[])
 
 
 # Coverage test

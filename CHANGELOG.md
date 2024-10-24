@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+### Removed [BREAKING!]
+
+* WMS distribution option support
+  [#433](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/433)
+
 ### Added
 
 * Item properties for bounding geographic and temporal extent

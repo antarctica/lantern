@@ -24,12 +24,7 @@
                         {% endif %}
                     </td>
                     <td class="bsk-text-right">
-                        {% if download.format == 'wms' %}
-                            <button type="button" class="bsk-btn bsk-btn-primary app-wms-info-trigger" data-toggle="collapse" data-target="#item-wms-info-layer-{{ download.id }}" aria-expanded="false" aria-label="Close" aria-controls="#item-wms-info-layer-{{ download.id }}">
-                                Add item to GIS
-                                <i class="fa-fw far fa-layer-plus"></i>
-                            </button>
-                        {% elif download.format == 'arcgis_feature_layer' %}
+                        {% if download.format == 'arcgis_feature_layer' %}
                             <button type="button" class="bsk-btn bsk-btn-primary app-fl-info-trigger" data-toggle="collapse" data-target="#item-fl-info-layer-{{ download.id }}" aria-expanded="false" aria-label="Close" aria-controls="#item-fl-info-layer-{{ download.id }}">
                                 Add item to GIS
                                 <i class="fa-fw far fa-layer-plus"></i>
@@ -52,9 +47,7 @@
     </table>
 
     {% for download in item.downloads %}
-        {% if download.format == 'wms' %}
-            {% include 'app/_includes/items/data-wms-instructions.j2' %}
-        {% elif download.format == 'arcgis_feature_layer' %}
+        {% if download.format == 'arcgis_feature_layer' %}
             {% include 'app/_includes/items/data-feature-layer-instructions.j2' %}
         {% elif download.format == 'arcgis_tile_layer' %}
             {% include 'app/_includes/items/data-tile-layer-instructions.j2' %}

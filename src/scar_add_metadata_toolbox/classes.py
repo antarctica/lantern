@@ -1981,7 +1981,7 @@ class Item:
 
         if distribution_format == "ArcGIS Tile Layer":
             for _distribution in distributions:
-                if _distribution.get("format") and _distribution["format"]["format"] == "ArcGIS Tile Service":
+                if _distribution.get("format") and _distribution["format"]["format"] == "ArcGIS Vector Tile Service":
                     download["service_url"] = _distribution["transfer_option"]["online_resource"]["href"]
                     break
 

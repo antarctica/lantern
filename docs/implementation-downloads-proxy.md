@@ -57,16 +57,16 @@ An artefact lookup item is an object with these properties:
 | `origin_uri`   | String    | Yes      | 'https://example.com/dataset.gpkg'     |
 
 This structure is formally described by a JSON Schema in `support/downloads/proxy/artefact-lookups-v1.json`, which
-is published as part of the [BAS Metadata Standards](https://metadata-standards.data.bas.ac.uk) website at:
+is published as part of the `https://metadata-resources.data.bas.ac.uk` website at:
 
-https://metadata-standards.data.bas.ac.uk/scar-add-metadata-toolbox-downloads-proxy-schemas/v1/artefact-lookups-v1.json
+https://metadata-resources.data.bas.ac.uk/scar-add-metadata-toolbox-downloads-proxy-schemas/v1/artefact-lookups-v1.json
 
 A complete JSON file, with a single artefact lookup item, looks like this:
 
 ```json
 {
   "$id": "https://example.com/lookup.json",
-  "$schema": "https://metadata-standards.data.bas.ac.uk/scar-add-metadata-toolbox-downloads-proxy-schemas/v1/artefact-lookups-v1.json",
+  "$schema": "https://metadata-resources.data.bas.ac.uk/scar-add-metadata-toolbox-downloads-proxy-schemas/v1/artefact-lookups-v1.json",
   "artefacts": {
     "a16faf66-3ed1-46e5-8f53-2ef398d86b3f": {
       "artefact_id": "758ab069-46d7-47b7-82d4-1905ed155a54",

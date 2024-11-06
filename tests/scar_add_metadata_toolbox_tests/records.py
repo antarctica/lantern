@@ -11,7 +11,7 @@ def make_test_record_config(
     identifier: str, title: str, hierarchy_level: str, item_identifiers: list[str] | None = None, return_as: str = False
 ) -> dict:
     config = {
-        "$schema": "https://metadata-standards.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-2-v4.json",
+        "$schema": "https://metadata-resources.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-2-v4.json",
         "file_identifier": identifier,
         "hierarchy_level": hierarchy_level,
         "metadata": {

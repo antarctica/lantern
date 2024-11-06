@@ -22,7 +22,7 @@ A Flask application:
 A Static website:
 
 * hosted on AWS S3 and reverse proxied as part of [`data.bas.ac.uk`](https://data.bas.ac.uk)
-* web maps are hosted using [Esri](#esri-web-maps)
+* web maps are hosted using the [BAS Embedded Maps Service](#extent-maps)
 * contact forms for feedback and items are processed using [Microsoft Power Automate](#feedback-and-contact-forms)
 * legal policies use templates from the
   [Legal Policies 🛡️](https://gitlab.data.bas.ac.uk/web-apps/legal-policies-templates) project
@@ -239,13 +239,10 @@ used to define and provision these buckets.
 Rules within the BAS General Load Balancer, managed by IT, are used to reverse proxy content from these S3 static sites
 to appear as part of the production and testing current/legacy BAS Discovery Metadata System (DMS).
 
-## ESRI web maps
+## Extent maps
 
-To display the spatial extent of Items, an ESRI web map is included in the page template for Items. This web map
-uses:
-
-* the [ESRI ArcGIS API for JavaScript](https://developers.arcgis.com/javascript/latest/) as a mapping framework
-* [ESRI ArcGIS Online](https://www.arcgis.com/index.html) for mapping layers
+To visualise the spatial extent of Items, a map is included using the
+[BAS Embedded Maps](https://github.com/antarctica/embedded-maps).
 
 ## Feedback and contact forms
 

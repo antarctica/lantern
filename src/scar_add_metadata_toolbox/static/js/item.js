@@ -106,15 +106,3 @@ function itemContactFormSubmit(e, form) {
         $(form).find('#contact-form-result').text('Sorry, something went wrong sending your message. Please try again later or use an alternative contact method.');
     });
 }
-
-// Item map
-//
-
-function itemMap() {
-}
-
-$(function() {
-    $('#app-item-nav a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-        itemMap();
-    })
-});

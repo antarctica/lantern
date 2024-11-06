@@ -1,16 +1,8 @@
 <section class="app-item-tab app-item-extent">
     <div class="bsk-row">
-        {% if item.bounding_geographic_extent %}
+        {% if item.bounding_geographic_extent_embedded_map_href %}
             <div class="bsk-col-12-md-6">
-                {% if item.bounding_geographic_extent.bounding_box.east_longitude == 180
-                    and item.bounding_geographic_extent.bounding_box.north_latitude == -60
-                    and item.bounding_geographic_extent.bounding_box.south_latitude == -90
-                    and item.bounding_geographic_extent.bounding_box.west_longitude == -180
-                %}
-                    <img src="/static/img/add-map.jpg" alt="extent map" />
-                {% else %}
-                    <div id="item-map"></div>
-                {% endif %}
+                <iframe src="{{ item.bounding_geographic_extent_embedded_map_href }}" style="border:none;" width="100%" height="500px"></iframe>
             </div>
         {% endif %}
         <div class="bsk-col-12-md-6">

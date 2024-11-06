@@ -295,3 +295,9 @@ class Config:
         :return: S3 bucket name
         """
         return os.environ.get("APP_S3_BUCKET")
+
+    # noinspection PyPep8Naming
+    @property
+    def EXTENT_MAP_ENDPOINT(self) -> str:
+        """Base endpoint for the BAS Embedded Map Service used for item extent maps."""
+        return "https://embedded-maps.data.bas.ac.uk/v1"

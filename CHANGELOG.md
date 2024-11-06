@@ -72,6 +72,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#428](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/428)
 * Item tabs no longer repeat the tab name as a title within each tab
   [#434](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/434)
+* Switching to `metadata-resources` site for downloads proxy schema
+  [#435](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/435)
 
 ### Removed
 

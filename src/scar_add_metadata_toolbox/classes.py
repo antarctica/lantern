@@ -1032,14 +1032,21 @@ class Item:
             size = distribution["transfer_option"]["size"]
             download["size"] = f"{size['magnitude']}{size['unit']}"
 
-        if distribution_format_href == "https://www.iana.org/assignments/media-types/application/geopackage+sqlite3":
+        if (
+            distribution_format_href
+            == "https://metadata-resources.data.bas.ac.uk/media-types/application/geopackage+sqlite3+zip"
+        ):
+            download["format"] = "gpkg_zip"
+            download["format_title"] = "GeoPackage (Zip)"
+            download["format_description"] = "OGC GeoPackage (zip compressed)"
+        elif distribution_format_href == "https://www.iana.org/assignments/media-types/application/geopackage+sqlite3":
             download["format"] = "gpkg"
             download["format_title"] = "GeoPackage"
             download["format_description"] = "OGC GeoPackage"
-        elif distribution_format_href == "https://www.iana.org/assignments/media-types/application/vnd.shp":
-            download["format"] = "shp"
-            download["format_title"] = "Shapefile"
-            download["format_description"] = "ESRI Shapefile"
+        elif distribution_format_href == "https://jpeg.org/jpeg/":
+            download["format"] = "jpeg"
+            download["format_title"] = "JPEG"
+            download["format_description"] = "JPEG image"
         elif (
             distribution_format_href == "https://www.iana.org/assignments/media-types/application/pdf"
         ):  # pragma: no cover (added for future use)
@@ -1047,27 +1054,50 @@ class Item:
             download["format_title"] = "PDF"
             download["format_description"] = "Adobe PDF"
         elif (
-            distribution_format_href == "https://www.iana.org/assignments/media-types/application/png"
+            distribution_format_href == "https://metadata-resources.data.bas.ac.uk/media-types/application/pdf+geo"
         ):  # pragma: no cover (added for future use)
+            download["format"] = "pdf_geo"
+            download["format_title"] = "PDF (Georeferenced)"
+            download["format_description"] = "Adobe PDF (Georeferenced)"
+        elif distribution_format_href == "https://www.iana.org/assignments/media-types/image/png":
             download["format"] = "png"
             download["format_title"] = "PNG"
             download["format_description"] = "PNG image"
-        elif distribution_format == "ArcGIS Feature Layer":
+        elif (
+            distribution_format_href
+            == "https://metadata-resources.data.bas.ac.uk/media-types/application/shapefile+zip"
+        ):
+            download["format"] = "shp_zip"
+            download["format_title"] = "Shapefile (Zip)"
+            download["format_description"] = "ESRI Shapefile (zip compressed)"
+        elif (
+            distribution_format_href
+            == "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+feature"
+        ):
             download["format"] = "arcgis_feature_layer"
             download["format_title"] = "ArcGIS Feature Layer"
             download["format_description"] = "Esri ArcGIS Feature Layer"
             download["hasSize"] = False
-        elif distribution_format == "ArcGIS Tile Layer":
+        elif (
+            distribution_format_href
+            == "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+tile+vector"
+        ):
             download["format"] = "arcgis_tile_layer"
-            download["format_title"] = "ArcGIS Tile Layer"
-            download["format_description"] = "Esri ArcGIS Tile Layer"
+            download["format_title"] = "ArcGIS Tile Layer (Vector)"
+            download["format_description"] = "Esri ArcGIS Tile Layer (Vector)"
             download["hasSize"] = False
-        elif distribution_format == "ArcGIS Feature Service":
+        elif (
+            distribution_format_href
+            == "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+feature"
+        ):
             download["format"] = "arcgis_feature_service"
             download["format_title"] = "ArcGIS Feature Service"
             download["format_description"] = "Esri ArcGIS Feature Service"
             download["hasSize"] = False
-        elif distribution_format == "ArcGIS Vector Tile Service":
+        elif (
+            distribution_format_href
+            == "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+vector"
+        ):
             download["format"] = "arcgis_vector_tile_service"
             download["format_title"] = "ArcGIS Vector Tile Service"
             download["format_description"] = "Esri ArcGIS Vector Tile Service"
@@ -1078,29 +1108,57 @@ class Item:
             return None
 
         # include service URL from ArcGIS feature service within ArcGIS feature layer options
-        if distribution_format == "ArcGIS Feature Layer":
+        if (
+            distribution_format_href
+            == "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+feature"
+        ):
             for _distribution in distributions:
-                if _distribution.get("format") and _distribution["format"]["format"] == "ArcGIS Feature Service":
+                if (
+                    _distribution.get("format")
+                    and _distribution["format"]["href"]
+                    == "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+feature"
+                ):
                     download["service_url"] = _distribution["transfer_option"]["online_resource"]["href"]
                     break
 
         # include service URL from ArcGIS vector tile service within ArcGIS tile layer options
-        if distribution_format == "ArcGIS Tile Layer":
+        if (
+            distribution_format_href
+            == "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+tile+vector"
+        ):
             for _distribution in distributions:
-                if _distribution.get("format") and _distribution["format"]["format"] == "ArcGIS Vector Tile Service":
+                if (
+                    _distribution.get("format")
+                    and _distribution["format"]["format"]
+                    == "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+vector"
+                ):
                     download["service_url"] = _distribution["transfer_option"]["online_resource"]["href"]
                     break
 
         # skip option if it has already been aggregated into another option
-        if distribution_format == "ArcGIS Feature Service":
+        if (
+            distribution_format_href
+            == "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+feature"
+        ):
             for _distribution in distributions:
-                if _distribution.get("format") and _distribution["format"]["format"] == "ArcGIS Feature Layer":
+                if (
+                    _distribution.get("format")
+                    and _distribution["format"]["href"]
+                    == "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+feature"
+                ):
                     return None
 
         # skip option if it has already been aggregated into another option
-        if distribution_format == "ArcGIS Vector Tile Service":
+        if (
+            distribution_format_href
+            == "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+vector"
+        ):
             for _distribution in distributions:
-                if _distribution.get("format") and _distribution["format"]["format"] == "ArcGIS Tile Layer":
+                if (
+                    _distribution.get("format")
+                    and _distribution["format"]["href"]
+                    == "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+tile+vector"
+                ):
                     return None
 
         return download

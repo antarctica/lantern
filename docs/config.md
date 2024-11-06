@@ -21,6 +21,7 @@ set at runtime using environment variables, set directly or via a `.env` file. I
 | `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_REMOTE_URL`   | Connection string/URL for CSW revision tracking Git remote                   | Valid Git remote URL                       | `https://gitlab.data.bas.ac.uk/MAGIC/add-catalogue-records-production.git` |
 | `CSW_SERVER_CONFIG_UNPUBLISHED_TRACKING_GITLAB_TOKEN` | GitLab Personal Access Token used to access CSW revision tracking Git remote | Valid GitLab PAT                           | `glpat-xx...xx`                                                            |
 | `APP_S3_BUCKET`                                       | AWS S3 bucket name used for hosting static website content                   | Valid AWS S3 bucket name                   | `add-catalogue.data.bas.ac.uk`                                             |
+| `EXTENT_MAP_ENDPOINT`                                 | Hardcoded ndpoint used for generating embedded extent maps                   | Valid BAS Embedded Maps Service endpoint   | `http://embedded-maps.data.bas.ac.uk/v1`                                   |
 
 ## Typical client config options
 

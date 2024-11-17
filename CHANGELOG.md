@@ -47,6 +47,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#437](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/437)
 * Support for temporal extents without an end
   [#438](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/438)
+* Fix BAS research topics handling
+  [#439](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/439)
 
 ### Changed
 

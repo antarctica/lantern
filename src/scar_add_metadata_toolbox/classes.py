@@ -1672,7 +1672,7 @@ class Item:
         return markdown(self.title, output_format="html")
 
     @property
-    def topics(self) -> list[str]:
+    def topics(self) -> list[dict]:
         """
         Item's research topics.
 
@@ -1680,19 +1680,10 @@ class Item:
 
         Note: These are separate to ISO Topics, which are treated as a description keyword set (see the
         `Item.theme_keywords` property).
-
-        :rtype list
-        :return: Topic names
         """
-        topic_terms = self._filter_keyword_terms(
+        return self._filter_keyword_terms(
             keyword_sets=self.record.theme_keywords, keyword_set_url="http://vocab.nerc.ac.uk/collection/T01/current/"
         )
-
-        if topic_terms is None:
-            return []
-
-        # return a list of just term values
-        return [term["term"] for term in topic_terms]
 
     @property
     def updated(self) -> str | None:

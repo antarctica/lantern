@@ -10,7 +10,10 @@
                     {% for topic in item.topics %}
                         <li>
                             <span class="fa-li"><i class="far fa-tag"></i></span>
-                            {{ item }}
+                            {{ topic.term }}
+                            {% if topic.href %}
+                                <a href="{{ topic.href }}"><i class="far fa-info-circle"></i></a>
+                            {% endif %}
                         </li>
                     {% endfor %}
                 </ul>

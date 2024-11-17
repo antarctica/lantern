@@ -42,10 +42,6 @@ function feedbackFormSubmit(e, form) {
             $(form).find('#contact-form-result').toggleClass('bsk-in');
             $(form).find('#contact-form-result').toggleClass('bsk-alert-success');
             $(form).find('#contact-form-result').text('Feedback sent successfully, thank you.');
-
-            gtag('event', 'feedback', {
-              'event_category': 'app'
-            });
         } else {
             $(form).find('#contact-form-control').toggleClass('bsk-btn-primary');
             $(form).find('#contact-form-control').toggleClass('bsk-btn-danger');

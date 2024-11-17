@@ -1,7 +1,7 @@
 <div id="item-tl-info-layer-{{ download.id }}" class="bsk-alert bsk-alert-block bsk-alert-outline bsk-alert-info bsk-collapse bsk-fade app-tl-info" role="alert">
     <button type="button" class="bsk-close" data-toggle="collapse" data-target="#item-tl-info-layer-{{ download.id }}" aria-expanded="false" aria-label="Close" aria-controls="#item-tl-info-layer-{{ download.id }}">&times;</button>
     <header class="bsk-alert-heading">
-        <div class="bsk-h4">ArcGIS Feature Layer instructions</div>
+        <div class="bsk-h4">ArcGIS Tile Layer instructions</div>
     </header>
     <div class="bsk-alert-body">
         <p>This item is available as a layer that can be added to a desktop or online GIS.</p>
@@ -10,8 +10,8 @@
             <dt>ArcGIS Item</dt>
             <dd><a href="{{ download.url }}">{{ download.url }}</a></dd>
             {% if download.service_url %}
-            <dt>Service Endpoint</dt>
-            <dd class="app-overflow-x"><code>{{ download.service_url }}</code></dd>
+                <dt>Service Endpoint</dt>
+                <dd class="app-overflow-x"><code>{{ download.service_url }}</code></dd>
             {% endif %}
             <dt>Instructions</dt>
             <dd>

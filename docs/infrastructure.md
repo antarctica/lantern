@@ -9,11 +9,8 @@ Available environments:
 - *staging* - for pre-release testing
 - *production* - for real-world use
 
-Development environments run locally and may be created and destroyed as needed. Staging and Production environments
-are long-lived and run centrally (on the BAS workstations, managed by BAS IT as general infrastructure).
-
-**Note:** For some external services, two environments are used - *production and *integration* - where integration
-represents both *development* and *staging*.
+Local Development environments may be created and destroyed as needed. The hosted Development (integration) and
+Production environments are long-lived and run on central BAS IT infrastructure.
 
 ## Application servers
 
@@ -28,7 +25,7 @@ represents both *development* and *staging*.
 - [Staging 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=ffy5l25mjdv577qj6izuk6lo4m&i=63626cseqf3mrd32h33drhgzim&h=magic.1password.eu)
   - hosted using BAS IT
   - for storing non-production but real data
-  - automatically synced against production database every Tuesday at 02:00.
+  - not currently used
   - see [MAGIC/add-metadata-toolbox#391 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/391) for initial setup
 - [Production 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=ffy5l25mjdv577qj6izuk6lo4m&i=nj7d6aoz5b6vrts23urb2unnbu&h=magic.1password.eu)
   - hosted using BAS IT

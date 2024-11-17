@@ -84,6 +84,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#256](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/256)
 * Distribution option format detection now only uses media types
   [#436](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/436)
+* Updating infrastructure documentation to reflect environments in use (no staging, development as integration)
+  [#441](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/441)
 
 ### Removed
 

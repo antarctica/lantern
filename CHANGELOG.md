@@ -43,6 +43,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#411](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/411)
 * Multiple auth related bugs (unauthenticated CSW client requests, token comparison)
   [#417](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/417)
+* Missing/incorrect information in ArcGIS tile layer info box
+  [#437](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/437)
 
 ### Changed
 

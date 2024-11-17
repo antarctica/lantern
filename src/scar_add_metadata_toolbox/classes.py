@@ -1129,7 +1129,7 @@ class Item:
             for _distribution in distributions:
                 if (
                     _distribution.get("format")
-                    and _distribution["format"]["format"]
+                    and _distribution["format"]["href"]
                     == "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+vector"
                 ):
                     download["service_url"] = _distribution["transfer_option"]["online_resource"]["href"]

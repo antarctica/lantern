@@ -76,11 +76,6 @@ function itemContactFormSubmit(e, form) {
             $(form).find('#contact-form-result').toggleClass('bsk-in');
             $(form).find('#contact-form-result').toggleClass('bsk-alert-success');
             $(form).find('#contact-form-result').text('Message sent successfully, you should hear from us soon.');
-
-            gtag('event', 'contact', {
-              'event_category': 'item',
-              'event_label': item_id
-            });
         } else {
             $(form).find('#contact-form-control').toggleClass('bsk-btn-primary');
             $(form).find('#contact-form-control').toggleClass('bsk-btn-danger');

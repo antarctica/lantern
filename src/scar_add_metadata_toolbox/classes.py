@@ -1611,10 +1611,12 @@ class Item:
         temporal_extents = []
 
         for extent in self.record.extents:
-            temporal_extent = {
-                "start": self._format_date(date_datetime=extent["temporal"]["start"]),
-                "end": self._format_date(date_datetime=extent["temporal"]["end"]),
-            }
+            if "temporal" not in extent or "start" not in extent["temporal"]:
+                continue
+
+            temporal_extent = {"start": self._format_date(date_datetime=extent["temporal"]["start"])}
+            if "end" in extent["temporal"] and extent["temporal"]["end"] is not None:
+                temporal_extent["end"] = self._format_date(date_datetime=extent["temporal"]["end"])
             if "identifier" in extent:
                 temporal_extent["id"] = extent["identifier"]
             temporal_extents.append(temporal_extent)

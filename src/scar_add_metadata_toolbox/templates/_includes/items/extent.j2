@@ -53,7 +53,11 @@
                 <header><h4>Temporal range</h4></header>
                 <div>
                   <strong>From:</strong> {{ item.bounding_temporal_extent.start }},
-                  <strong>To:</strong> {{ item.bounding_temporal_extent.end }}
+                  {% if item.bounding_temporal_extent.end %}
+                      <strong>To:</strong> {{ item.bounding_temporal_extent.end }}
+                  {% else %}
+                      <strong>Onwards</strong>
+                  {% endif %}
                 </div>
             {% endif %}
         </div>

@@ -45,6 +45,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#417](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/417)
 * Missing/incorrect information in ArcGIS tile layer info box
   [#437](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/437)
+* Support for temporal extents without an end
+  [#438](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/438)
 
 ### Changed
 

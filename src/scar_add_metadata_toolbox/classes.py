@@ -1064,8 +1064,7 @@ class Item:
             download["format_title"] = "PNG"
             download["format_description"] = "PNG image"
         elif (
-            distribution_format_href
-            == "https://metadata-resources.data.bas.ac.uk/media-types/application/shapefile+zip"
+            distribution_format_href == "https://metadata-resources.data.bas.ac.uk/media-types/application/vnd.shp+zip"
         ):
             download["format"] = "shp_zip"
             download["format_title"] = "Shapefile (Zip)"

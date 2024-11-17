@@ -5,8 +5,7 @@
 Available environments:
 
 - *local development* - for prototyping and making changes (see [Development](/docs/dev.md) documentation)
-- *development* - for shared experimentation and validating releases on BAS IT infrastructure
-- *staging* - for pre-release testing
+- *development* - for shared experimentation and integration
 - *production* - for real-world use
 
 Local Development environments may be created and destroyed as needed. The hosted Development (integration) and
@@ -14,7 +13,7 @@ Production environments are long-lived and run on central BAS IT infrastructure.
 
 ## Application servers
 
-- managed by [BAS IT Ansible](/docs/deploy.md#bas-it-ansible) project
+- managed by the [BAS IT Ansible](/docs/deploy.md#bas-it-ansible) project
 
 ## Databases
 

@@ -52,6 +52,7 @@ psycopg2-binary = "^2.9.3"
 Shapely = "^1.8.4"
 SQLAlchemy = "^1.4.53"
 xmltodict = "^0.13.0"
+humanize = "^4.11.0"
 
 [tool.poetry.group.dev.dependencies]
 ruff = "^0.5.6"

@@ -863,10 +863,10 @@ class Item:
         :rtype str
         :return: ISO 8601 date or datetime
         """
-        if date_precision is None:
-            return date_datetime.isoformat()
-        if date_precision == "year":  # noqa: RET503 (will be refactored away)
+        if date_precision == "year":
             return str(date_datetime.year)
+
+        return date_datetime.isoformat()
 
     @staticmethod
     def _format_language(language: str) -> str:

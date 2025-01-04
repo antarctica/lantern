@@ -13,6 +13,7 @@ from urllib.parse import urlencode
 
 from bas_metadata_library.standards.iso_19115_2 import MetadataRecord, MetadataRecordConfigV4
 from flask import current_app
+from humanize import naturalsize
 from markdown import markdown
 
 from scar_add_metadata_toolbox.csw import (
@@ -963,6 +964,12 @@ class Item:
             return "WGS 84 ([EPSG:4326](https://spatialreference.org/ref/epsg/wgs-84/))"
 
     @staticmethod
+    def _format_size(magnitude: float, unit: str) -> str:
+        if unit == "bytes":
+            return naturalsize(magnitude)
+        return f"{magnitude}{unit}"
+
+    @staticmethod
     def _process_extents(extents: list[dict]) -> dict[str, dict]:
         """
         Index geographic, vertical or temporal extents with IDs.
@@ -995,8 +1002,7 @@ class Item:
             ],
         }
 
-    @staticmethod
-    def _process_download(distribution: dict, distributions: list[dict]) -> dict[str, str] | None:  # noqa: C901
+    def _process_download(self, distribution: dict, distributions: list[dict]) -> dict[str, str] | None:  # noqa: C901
         """
         Generate an item download.
 
@@ -1030,7 +1036,7 @@ class Item:
 
         if "size" in distribution["transfer_option"]:
             size = distribution["transfer_option"]["size"]
-            download["size"] = f"{size['magnitude']}{size['unit']}"
+            download["size"] = self._format_size(size["magnitude"], size["unit"])
 
         if (
             distribution_format_href

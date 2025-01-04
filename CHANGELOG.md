@@ -34,6 +34,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
   [#430](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/430)
 * Support for resolving titles of items related to an item
   [#431](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/431)
+* Support for human formatting transfer option sizes in bytes
+  [#442](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/442)
 
 ### Fixed
 

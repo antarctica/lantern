@@ -1,0 +1,3 @@
+# Lantern
+
+Placeholder catalogue app.

@@ -1,0 +1,34 @@
+# Python generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# UV generated files
+.venv
+
+# Ruff generated files
+.ruff_cache/
+
+# PyCharm generated files
+.idea/
+
+# Pytest generated files
+.pytest_cache/
+htmlcov/
+.coverage
+
+# Terraform generated files
+/provisioning/terraform/.terraform
+
+# Tailwind generated files
+scripts/tailwind
+
+# App generated files
+exports/
+.cache/
+
+# Temporary files for refactoring
+_scripts/

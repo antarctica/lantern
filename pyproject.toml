@@ -1,0 +1,94 @@
+[project]
+name = "lantern"
+version = "0.1.0"
+description = "Placeholder catalogue app."
+readme = "README.md"
+license = "MIT"
+authors = [
+    { name = "Felix Fennell", email = "felnne@bas.ac.uk" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "assets-tracking-service==0.7.0",
+    "python-gitlab>=6.0.0",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.11.13",
+    "safety>=3.5.2",
+]
+
+[[tool.uv.index]]
+name = "ats"
+url = "https://gitlab.data.bas.ac.uk/api/v4/projects/1220/packages/pypi/simple"
+
+[[tool.uv.index]]
+name = "ats-air"
+url = "https://gitlab.data.bas.ac.uk/api/v4/projects/1291/packages/pypi/simple"
+
+[tool.uv.sources]
+assets-tracking-service = { index = "ats" }
+assets-tracking-service-aircraft-provider = { index = "ats-air" }
+
+[tool.ruff]
+src = ["src"]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["A", "ANN", "B", "B9", "C90", "C4", "D", "DTZ", "E", "EM", "ERA", "F", "FA", "I", "N", "PT", "PTH", "RET", "RUF", "S", "SIM", "TD", "TRY", "UP", "W"]
+#   A | builtins (variables named after builtin names)
+# ANN | annotations (type hints)
+#   B | bug-bear (bad code)
+#  B9 | bug-bear opinionated (additional bad code)
+# C90 | mccabe (code complexity)
+#  C4 | comprehensions (list/dict/set comprehensions)
+#   D | pydocstyle (docstring)
+# DTZ | datetimez (date/time)
+#   E | pycodestyle errors (PEP8)
+#  EM | errmsg (exceptions)
+# ERA | eraticate (comments)
+#   F | pyflakes (invalid/bad code)
+#  FA | uture-annotations (type hints)
+#   I | isort (import ordering)
+#   N | pep8-naming (PEP8)
+#  PT | pytest-style (tests)
+# PTH | use-pathlib (old syntax)
+# RET | return (return statements)
+# RUF | ruff (other)
+#   S | bandit (static security)
+# SIM | simplicity (code complexity)
+#  TD | todos (comments)
+# TRY | tryceratops (exceptions)
+#  UP | pyupgrade (old syntax)
+#   W | pycodestyle warnings (PEP8)
+
+ignore = ["D100", "D104", "D107", "D203", "D212", "D402", "E501", "PT001", "PT023", "TD002"]
+#   D100 | for avoding module level docstrings
+#   D104 | for avoding package level docstrings
+#   D203 | for requring blank line before classes (which looks silly)
+#   D212 | for docstring requring multi-line comments to start on first line (which looks silly)
+#   D402 | for docstring that can't resemble their signatures (despite them being completely different)
+#   E501 | for bug-bear compatibility (as B905 overrides line length checks)
+#  PT001 | for `@pytest.fixture` parentheses (as it's unstable/unreliable)
+#  PT023 | for `@pytest.mark.cov` parentheses (as it's unstable/unreliable)
+#  TD002 | for TODOs without an author (as an issue should assign ownership)
+
+[tool.ruff.lint.per-file-ignores]
+"config.py" = ["D401", "N802"]
+# config.py |   D401 | ignore imperative mood in docstrings (too unreliable)
+# config.py |   N802 | ignore use of upper case method names
+"tests/*" = ["ANN201", "ANN401", "D401", "S101"]
+#   tests/* | ANN201 | ignore public functions
+#   tests/* | ANN401 | ignore use of 'Any' type
+#   tests/* |   D401 | ignore imperative mood in docstrings (too unreliable)
+#   tests/* |   S101 | ignore use of assert
+
+
+[tool.ruff.lint.flake8-annotations]
+allow-star-arg-any = true
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

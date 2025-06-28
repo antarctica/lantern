@@ -3,16 +3,18 @@ from abc import ABC, abstractmethod
 from assets_tracking_service.lib.bas_data_catalogue.models.record import Record
 from assets_tracking_service.lib.bas_data_catalogue.models.record.summary import RecordSummary
 
+class RecordNotFoundError(Exception):
+    """Raised when a record cannot be retrieved."""
+    pass
+
 
 class Store(ABC):
     """
-    Base representation of a container for resources within the BAS Data Catalogue / Metadata ecosystem.
+    Base representation for a container of resources.
 
-    Stores manage a set of Records using some form of temporary or more permanent storage, such as an in-memory dict
-    or a remote database.
+    Stores manage Records held in a temporary or permanent storage system, such as an in-memory dict or remote database.
 
-    This class defines the abstract interface Stores must implement to load, remove, and access stored Records and
-    RecordSummaries.
+    This class defines the abstract interface Stores must implement to manage Records and RecordSummaries.
     """
 
     @property
@@ -28,11 +30,6 @@ class Store(ABC):
         ...
 
     @abstractmethod
-    def purge(self) -> None:
-        """Empty records from store."""
-        ...
-
-    @abstractmethod
-    def loads(self, *args: list) -> None:
-        """Populate store with record(s)."""
+    def get(self, file_identifier: str) -> Record:
+        """Return a specific record or raise a RecordNotFoundError."""
         ...

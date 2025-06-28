@@ -2,6 +2,7 @@ import json
 import logging
 import shutil
 import tarfile
+from hashlib import sha1
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -11,32 +12,36 @@ from gitlab import Gitlab
 from gitlab.v4.objects import Project
 from requests.exceptions import ConnectionError as RequestsConnectionError
 
-from lantern.stores.base_store import Store
+from lantern.stores.base_store import RecordNotFoundError, Store
 
 
-class RecordsUnavailableError(Exception):
-    """Raised when records cannot be loaded from the store."""
+class RemoteStoreUnavailableError(Exception):
+    """Raised when records cannot be loaded from the remote store."""
 
     pass
 
 
 class GitLabStore(Store):
     """
-    Basic Repository backed by GitLab project.
+    Basic Store backed by a GitLab project.
 
-    Uses the https://python-gitlab.readthedocs.io/ package to load Records from a GitLab project via a local cache.
+    Uses https://python-gitlab.readthedocs.io/ to interact with the GitLab API, rather than as a generic Git repository.
 
-    Basic cache-validation is performed by recording comparing the head commit at the time the cache was created against
-    the current repository. If stale, the cache is destroyed and recreated.
+    For efficiency and basic offline support a local records cache is maintained, from which a local subset of records
+    is loaded, optionally filtered by including or excluding a set of record file identifiers, and optionally any
+    directly related records (e.g. the sides of a physical map) to this filtered subset.
 
-    When the cache is (re)generated, record config subsets used for RecordSummaries are saved separately to avoid
-    needing to load full records when generating summaries.
+    Basic cache-validation is performed by comparing the head commit from when the cache was created against the live
+    remote repository. If different (meaning the cache is stale), the cache is recreated. When offline, a warning is
+    logged that cache may be stale.
 
-    A single record target can be specified when loading records to only load a single full Record and RecordSummary,
-    plus RecordSummaries of any directly related resources (so that related resources can be included in Items).
+    When the cache is (re)created, properties needed to create RecordSummaries are saved to a derived file to avoid
+    loading full records.
 
-    Basic offline support is included using cached Records. This may lead to stale results as cache validation will
-    be unavailable.
+    For reference there are three sets of records:
+    1. all records in the remote GitLab project repository (source of truth)
+    2. all records in a (possibly stale) file based local cache
+    3. all or a filtered subset of records from the local cache, held in memory
     """
 
     # TODO: tests
@@ -53,8 +58,11 @@ class GitLabStore(Store):
         self._endpoint = endpoint
         self._access_token = access_token
         self._project_id = project_id
+        self._branch = "main"
+        self._records_path = "records"
         self._cache_path = cache_path
         self._cache_head_path = self._cache_path / "head_commit.json"
+        self._cache_index_path = self._cache_path / "index.json"
         self._cache_summaries_path = self._cache_path / "summaries.json"
         self._client = Gitlab(url=self._endpoint, private_token=self._access_token)
         self._online = self._is_online()
@@ -64,7 +72,7 @@ class GitLabStore(Store):
         return len(self._records)
 
     def _is_online(self) -> bool:
-        """Check if the GitLab is accessible."""
+        """Determine if the GitLab API is accessible."""
         try:
             _ = self._project
         except RequestsConnectionError:
@@ -78,21 +86,21 @@ class GitLabStore(Store):
 
     @property
     def _head_commit_id(self) -> str:
-        """Get the head commit ID of the project."""
+        """The ID of the current head commit in the remote project repo."""
         return self._project.commits.list(get_all=False)[0].id
 
     @property
     def summaries(self) -> list[RecordSummary]:
-        """All loaded record summaries."""
+        """Loaded RecordSummaries."""
         return self._summaries
 
     @property
     def records(self) -> list[Record]:
-        """All loaded records."""
+        """Loaded Records."""
         return self._records
 
     def purge(self) -> None:
-        """Clear cache and loaded records."""
+        """Clear local cache and in-memory records/summaries."""
         self._summaries = []
         self._records = []
         if self._cache_path.exists():
@@ -100,7 +108,11 @@ class GitLabStore(Store):
 
     @staticmethod
     def _get_related_identifiers(record: Record) -> set[str]:
-        """For building a single item with its direct relations."""
+        """
+        Return all directly related Records to a Record.
+
+        Used for building a single item with its direct relations (such as physical maps with sides).
+        """
         return {
             related.identifier.identifier
             for related in record.identification.aggregations
@@ -108,8 +120,14 @@ class GitLabStore(Store):
         }
 
     @staticmethod
+    def _get_config_hash(config: dict) -> str:
+        """Calculate SHA1 hash for a Record config."""
+        return sha1(json.dumps(config, sort_keys=True).encode("utf-8")).hexdigest()  # noqa: S324
+
+    @staticmethod
     def _make_summary_config(config: dict) -> dict:
-        """Subset a Record config into a RecordSummary config."""
+        """Return subset of a Record config needed for a RecordSummary."""
+        # TODO: move to RecordSummary?
         return {
             "file_identifier": config["file_identifier"],
             "hierarchy_level": config["hierarchy_level"],
@@ -126,7 +144,7 @@ class GitLabStore(Store):
         }
 
     def _load_config(self, path: Path) -> dict:
-        """Load record config from JSON file and report any unsupported content."""
+        """Load record config from a JSON file and report any unsupported content."""
         with path.open() as file:
             config = json.load(file)
             if not Record.config_supported(config):
@@ -136,7 +154,7 @@ class GitLabStore(Store):
             return config
 
     def _load_record(self, file_identifier: str) -> None:
-        """Load record from file path."""
+        """Load selected records from local cache."""
         record_path = self._cache_path.joinpath(f"records/{file_identifier}.json")
         self._logger.debug(f"Loading record '{file_identifier}' from '{record_path.resolve()}'")
         config = self._load_config(record_path)
@@ -145,7 +163,7 @@ class GitLabStore(Store):
         self._summaries.append(RecordSummary.loads(record))
 
     def _load_summaries(self, file_identifiers: list[str] | None = None) -> None:
-        """Load record summaries from file path."""
+        """Load selected record summaries from cached summaries file."""
         file_identifiers = file_identifiers or []
         with self._cache_summaries_path.open() as file:
             summaries = json.load(file)["summaries"]
@@ -154,7 +172,11 @@ class GitLabStore(Store):
             self._summaries.append(RecordSummary.loads(summaries[file_identifier]))
 
     def _cache_is_current(self) -> bool:
-        """Check cache is current against remote repository."""
+        """
+        Determine if cache is current or stale compared to the remote project repo.
+
+        Where the cache does not exist, or a head commit ID isn't available, the cache is considered stale.
+        """
         try:
             with self._cache_head_path.open() as f:
                 cache_commit = json.load(f)
@@ -164,17 +186,33 @@ class GitLabStore(Store):
 
         return cache_commit_id == self._head_commit_id
 
-    def _cache_records(self) -> None:
+    def _create_cache(self) -> None:
         """
-        Load contents of project repo and cache locally.
+        Cache records from remote store locally.
 
-        For simplicity, and because the repository is small, records can be fetched from a project repo archive.
+        Any existing cache is removed and recreated.
+
+        For simplicity and efficiency, all records are fetched together using a GitLab project repo archive.
+
+        Steps:
+        - remove existing cache directory if present
+        - create cache directory
+        - create a project repo archive via the GitLab API as a tar.gz archive
+        - extract the contents of the archive to a temporary directory
+        - copy JSON record configs from the archive to the cache directory
+        - save summaries for each record config to a file for building RecordSummaries
+        - save details of the current head commit to a file for cache validation
         """
-        self._cache_path.unlink(missing_ok=True)
+        # TODO: Breakdown
+        # TODO: call from initialise method
+        self._logger.debug(f"Removing existing cache directory '{self._cache_path.resolve()}' if present")
+        if self._cache_path.exists():
+            shutil.rmtree(self._cache_path)
 
         self._logger.info("Caching records from repo export")
-        records_path = self._cache_path / "records"
+        records_path = self._cache_path / self._records_path
         records_path.mkdir(parents=True, exist_ok=True)
+        index = {}
         summaries = []
 
         with TemporaryDirectory() as tmp_path:
@@ -185,32 +223,32 @@ class GitLabStore(Store):
                 self._project.repository_archive(format="tgz", streamed=True, action=f.write)
             with tarfile.open(export_path, "r:gz") as tar:
                 tar.extractall(path=temp_path, filter="data")
-            for record_path in temp_path.glob("**/records/**/*.json"):
+            for record_path in temp_path.glob(f"**/{self._records_path}/**/*.json"):
                 shutil.copy2(record_path, records_path.joinpath(record_path.name))
                 config = self._load_config(record_path)
+                index[config["file_identifier"]] = self._get_config_hash(config)
                 summaries.append(self._make_summary_config(config))
+
         with self._cache_head_path.open(mode="w") as f:
             head_commit = self._project.commits.get(self._head_commit_id)
             json.dump(head_commit.attributes, f, indent=2)
+
+        with self._cache_index_path.open(mode="w") as f:
+            data = {"index": index}
+            json.dump(data, f, indent=2)
+
         with self._cache_summaries_path.open(mode="w") as f:
             data = {"summaries": {summary["file_identifier"]: summary for summary in summaries}}
             json.dump(data, f, indent=2)
 
-    def _get_record(self, file_identifier: str) -> Record | None:
-        """Intentionally simplistic lookup method."""
-        for record in self._records:
-            if record.file_identifier == file_identifier:
-                return record
-        return None
-
-    def _check_cache(self) -> None:
-        """Check cache exists or is current."""
+    def _ensure_cache(self) -> None:
+        """Ensure cache exists and is up to date."""
         if not self._online and not self._cache_path.exists():
             msg = "Local cache and GitLab unavailable. Cannot load records."
-            raise RecordsUnavailableError(msg) from None
+            raise RemoteStoreUnavailableError(msg) from None
 
         if self._online and not self._cache_path.exists():
-            self._cache_records()
+            self._create_cache()
             return
 
         if not self._online:
@@ -220,16 +258,11 @@ class GitLabStore(Store):
         if self._online and not self._cache_is_current():
             self._logger.warning("Cached records are not up to date, reloading from GitLab")
             self.purge()
-            self._check_cache()
+            self._ensure_cache()
             return
 
-    def _load_records_cached_all(self) -> None:
-        self._logger.info("Loading all records from cache")
-        for record_path in self._cache_path.glob("records/*.json"):
-            self._load_record(record_path.stem)
-        return
-
-    def _load_records_cached_except(self, file_identifiers: list[str]) -> None:
+    def _filter_cache_except(self, file_identifiers: list[str]) -> None:
+        """Load records from the local cache into memory with specified exceptions."""
         msg = (
             f"Loading all records from cache except {len(file_identifiers)} excluded"
             if file_identifiers
@@ -244,7 +277,13 @@ class GitLabStore(Store):
         # still load summaries for excluded records in case they are referenced by included records
         self._load_summaries(file_identifiers)
 
-    def _load_records_cached_only(self, file_identifiers: list[str], inc_related: bool) -> None:
+    def _filter_cache_only(self, file_identifiers: list[str], inc_related: bool) -> None:
+        """
+        Load specific records from the local cache into memory.
+
+        As this method is restrictive but some records are composites (e.g. physical maps with multiple sides), the
+        `inc_related` parameter can be used also include directly related records for each selected record.
+        """
         for file_identifier in file_identifiers:
             try:
                 self._load_record(file_identifier)
@@ -253,7 +292,7 @@ class GitLabStore(Store):
                 return
 
             self._logger.info(f"Record '{file_identifier}' loaded from cache")
-            related_identifiers = self._get_related_identifiers(self._get_record(file_identifier))
+            related_identifiers = self._get_related_identifiers(self.get(file_identifier))
             self._load_summaries(list(related_identifiers))
 
         if not inc_related:
@@ -263,30 +302,119 @@ class GitLabStore(Store):
         additional_identifiers = set()
         for file_identifier in file_identifiers:
             # load directly related records as Records (e.g. so all sides of a physical map are built)
-            for related_identifier in self._get_related_identifiers(self._get_record(file_identifier)):
+            for related_identifier in self._get_related_identifiers(self.get(file_identifier)):
                 self._load_record(related_identifier)
-                additional_identifiers.update(self._get_related_identifiers(self._get_record(related_identifier)))
-        # load related records of directly related records as RecordSummaries
+                additional_identifiers.update(self._get_related_identifiers(self.get(related_identifier)))
+        # also load related records of directly related records as additional RecordSummaries
         self._load_summaries(list(additional_identifiers))
-        self._logger.info(f"Loading single record '{file_identifier}' from cache with direct dependencies")
+        self._logger.info(f"{len(file_identifiers)} selected records loaded from cache with direct relations")
 
-    def _load_records_cached(self, inc_records: list[str], exc_records: list[str], inc_related: bool) -> None:
-        self._check_cache()
+    def _filter_cache(self, inc_records: list[str], exc_records: list[str], inc_related: bool) -> None:
+        """
+        Load some or all records from the local cache into memory.
+
+        Only records selected here can be accessed from the `records`/`summaries` properties and related methods.
+
+        This method essentially selects which filtering pathway to use.
+        """
+        self._ensure_cache()
 
         if inc_records and exc_records:
             msg = "Including and excluding records is not supported."
             raise ValueError(msg) from None
 
         if not inc_records:
-            self._load_records_cached_except(exc_records)
+            self._filter_cache_except(exc_records)
             return
 
-        self._load_records_cached_only(inc_records, inc_related)
+        self._filter_cache_only(inc_records, inc_related)
 
-    def loads(self, inc_records: list[str] | None, exc_records: list[str] | None, inc_related: bool = False) -> None:
-        """Load records from cached repository contents."""
+    def _get_remote_hashed_path(self, file_identifier: str) -> str:
+        """
+        Get the hashed storage path for a file identifier.
+
+        For `_get_hashed_path(file_identifier="0be5339c-9d35-44c9-a10f-da4b5356840b")`
+        return: 'records/0b/e5/0b5339c-9d35-44c9-a10f-da4b5356840b.json'
+        """
+        return f"{self._records_path}/{file_identifier[:2]}/{file_identifier[2:4]}/{file_identifier}.json"
+
+    def _commit_configs(self, configs: list[dict], message: str, author: tuple[str, str]) -> None:
+        with self._cache_index_path.open() as f:
+            existing_configs = json.load(f)["index"]
+
+        data = {
+            "branch": self._branch,
+            "commit_message": message,
+            "author_name": author[0],
+            "author_email": author[1],
+            "actions": [],
+        }
+
+        for config in configs:
+            existing_hash = existing_configs.get(config["file_identifier"])
+            if existing_hash == self._get_config_hash(config):
+                self._logger.debug(f"Record '{config['file_identifier']}' is unchanged, skipping")
+                continue
+            config_action = "update"
+            if existing_hash is None:
+                config_action = "create"
+                self._logger.debug(f"Record '{config['file_identifier']}' is new, action set to create")
+
+            data["actions"].append(
+                {
+                    "action": config_action,
+                    "file_path": self._get_remote_hashed_path(config["file_identifier"]),
+                    "content": json.dumps(config, indent=2),
+                }
+            )
+
+        additions = sum(1 for action in data["actions"] if action["action"] == "create")
+        updates = sum(1 for action in data["actions"] if action["action"] == "update")
+        self._logger.info(f"Committing {additions} additions, {updates} updates")
+
+        if not data["actions"]:
+            return
+        self._project.commits.create(data)
+
+    def populate(
+        self, inc_records: list[str] | None = None, exc_records: list[str] | None = None, inc_related: bool = False
+    ) -> None:
+        """
+        Load records and summaries from local cache, optionally filtered by file identifier.
+
+        Wrapper around `_filter_cached()`.
+        """
         if inc_records is None:
             inc_records = []
         if exc_records is None:
             exc_records = []
-        self._load_records_cached(inc_records=inc_records, exc_records=exc_records, inc_related=inc_related)
+        self._filter_cache(inc_records=inc_records, exc_records=exc_records, inc_related=inc_related)
+
+    def get(self, file_identifier: str) -> Record:
+        """
+        Get record from local subset if possible.
+
+        Record must exist in selected local subset (via `filter()`) rather than wider local cache.
+
+        Raises RecordNotFoundError exception if not found.
+        """
+        for record in self._records:
+            if record.file_identifier == file_identifier:
+                return record
+        raise RecordNotFoundError() from None
+
+    def push(self, records: list[Record], message: str, author: tuple[str, str]) -> None:
+        """
+        Add or update records in remote GitLab project repo.
+
+        Requires a local cache to determine if records are additions or updates.
+
+        Invalidates the local cache so new/changed records are included.
+        """
+        configs = [record.dumps() for record in records]
+        self._ensure_cache()
+        self._commit_configs(configs=configs, message=message, author=author)
+        self._create_cache()
+
+    def delete(self, file_identifier: str):
+        pass

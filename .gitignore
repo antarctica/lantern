@@ -27,7 +27,8 @@ htmlcov/
 scripts/tailwind
 
 # App generated files
-exports/
+import/
+export/
 .cache/
 
 # Temporary files for refactoring

@@ -49,7 +49,7 @@ class ToyCatalogue:
     def loads(self, inc_records: list[str], exc_records: list[str], inc_related: bool) -> None:
         """Load records into catalogue store and site exporter."""
         self._logger.info("Loading records")
-        self._store.loads(inc_records=inc_records, exc_records=exc_records, inc_related=inc_related)
+        self._store.populate(inc_records=inc_records, exc_records=exc_records, inc_related=inc_related)
         self._site.loads(summaries=self._store.summaries, records=self._store.records)
         self._logger.info(f"Loaded {len(self._store.summaries)} summaries and {len(self._store.records)} records")
 
@@ -74,7 +74,7 @@ class ToyCatalogue:
 def main() -> None:
     """Entrypoint."""
     inc_records = []
-    exc_records = ["b8b78c6c-fac2-402c-a772-9f518c7121e5"]  # MAGIC collection as it includes ATS collection not in GL
+    exc_records = []
     inc_related = True
     export = True
     publish = False

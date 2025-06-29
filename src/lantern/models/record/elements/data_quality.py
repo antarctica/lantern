@@ -3,7 +3,7 @@ from typing import TypeVar
 
 import cattrs
 
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.common import Citation
+from lantern.models.record.elements.common import Citation
 
 TDataQuality = TypeVar("TDataQuality", bound="DataQuality")
 

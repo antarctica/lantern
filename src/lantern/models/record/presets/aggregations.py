@@ -1,11 +1,6 @@
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.identification import Aggregation
-from assets_tracking_service.lib.bas_data_catalogue.models.record.enums import (
-    AggregationAssociationCode,
-    AggregationInitiativeCode,
-)
-from assets_tracking_service.lib.bas_data_catalogue.models.record.presets.identifiers import (
-    make_bas_cat as make_bas_cat_id,
-)
+from lantern.models.record.elements.identification import Aggregation
+from lantern.models.record.enums import AggregationAssociationCode, AggregationInitiativeCode
+from lantern.models.record.presets.identifiers import make_bas_cat as make_bas_cat_id
 
 
 def make_bas_cat(

@@ -1,8 +1,8 @@
-from assets_tracking_service.lib.bas_data_catalogue.models.record import Distribution
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.common import OnlineResource
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.distribution import Format, TransferOption
-from assets_tracking_service.lib.bas_data_catalogue.models.record.enums import OnlineResourceFunctionCode
-from assets_tracking_service.lib.bas_data_catalogue.models.record.presets.contacts import make_esri_distributor
+from lantern.models.record import Distribution
+from lantern.models.record.elements.common import OnlineResource
+from lantern.models.record.elements.distribution import Format, TransferOption
+from lantern.models.record.enums import OnlineResourceFunctionCode
+from lantern.models.record.presets.contacts import make_esri_distributor
 
 
 def make_esri_feature_layer(

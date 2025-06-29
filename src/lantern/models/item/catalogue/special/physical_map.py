@@ -1,27 +1,15 @@
 from collections.abc import Callable
 from typing import Any
 
-from assets_tracking_service.lib.bas_data_catalogue.models.item.catalogue import (
-    AdditionalInfoTab as CatalogueAdditionalInfoTab,
-)
-from assets_tracking_service.lib.bas_data_catalogue.models.item.catalogue import (
-    Extent as CatalogueExtent,
-)
-from assets_tracking_service.lib.bas_data_catalogue.models.item.catalogue import (
-    ExtentTab as CatalogueExtentTab,
-)
-from assets_tracking_service.lib.bas_data_catalogue.models.item.catalogue import (
-    ItemCatalogue,
-)
-from assets_tracking_service.lib.bas_data_catalogue.models.item.catalogue.elements import ItemSummaryCatalogue
-from assets_tracking_service.lib.bas_data_catalogue.models.record import Record
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.identification import GraphicOverviews
-from assets_tracking_service.lib.bas_data_catalogue.models.record.enums import (
-    AggregationAssociationCode,
-    AggregationInitiativeCode,
-    HierarchyLevelCode,
-)
-from assets_tracking_service.lib.bas_data_catalogue.models.record.summary import RecordSummary
+from lantern.models.item.catalogue import AdditionalInfoTab as CatalogueAdditionalInfoTab
+from lantern.models.item.catalogue import Extent as CatalogueExtent
+from lantern.models.item.catalogue import ExtentTab as CatalogueExtentTab
+from lantern.models.item.catalogue import ItemCatalogue
+from lantern.models.item.catalogue.elements import ItemSummaryCatalogue
+from lantern.models.record import Record
+from lantern.models.record.elements.identification import GraphicOverviews
+from lantern.models.record.enums import AggregationAssociationCode, AggregationInitiativeCode, HierarchyLevelCode
+from lantern.models.record.summary import RecordSummary
 
 
 def side_index_label(index: int) -> str:

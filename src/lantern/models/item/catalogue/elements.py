@@ -4,27 +4,18 @@ from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
 from typing import TypeVar
 
-from assets_tracking_service.lib.bas_data_catalogue.models.item.base import ItemSummaryBase
-from assets_tracking_service.lib.bas_data_catalogue.models.item.base.elements import Extent as ItemExtent
-from assets_tracking_service.lib.bas_data_catalogue.models.item.base.elements import Link, unpack
-from assets_tracking_service.lib.bas_data_catalogue.models.item.base.enums import AccessType
-from assets_tracking_service.lib.bas_data_catalogue.models.item.base.utils import md_as_html
-from assets_tracking_service.lib.bas_data_catalogue.models.item.catalogue.enums import (
-    ResourceTypeIcon,
-    ResourceTypeLabel,
-)
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.common import Date
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.common import Dates as RecordDates
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.common import (
-    Identifiers as RecordIdentifiers,
-)
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.identification import (
-    Aggregations as RecordAggregations,
-)
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.identification import (
-    Maintenance as RecordMaintenance,
-)
-from assets_tracking_service.lib.bas_data_catalogue.models.record.enums import (
+from lantern.models.item.base import ItemSummaryBase
+from lantern.models.item.base.elements import Extent as ItemExtent
+from lantern.models.item.base.elements import Link, unpack
+from lantern.models.item.base.enums import AccessType
+from lantern.models.item.base.utils import md_as_html
+from lantern.models.item.catalogue.enums import ResourceTypeIcon, ResourceTypeLabel
+from lantern.models.record.elements.common import Date
+from lantern.models.record.elements.common import Dates as RecordDates
+from lantern.models.record.elements.common import Identifiers as RecordIdentifiers
+from lantern.models.record.elements.identification import Aggregations as RecordAggregations
+from lantern.models.record.elements.identification import Maintenance as RecordMaintenance
+from lantern.models.record.enums import (
     AggregationAssociationCode,
     AggregationInitiativeCode,
     DatePrecisionCode,
@@ -33,7 +24,7 @@ from assets_tracking_service.lib.bas_data_catalogue.models.record.enums import (
     MaintenanceFrequencyCode,
     ProgressCode,
 )
-from assets_tracking_service.lib.bas_data_catalogue.models.record.summary import RecordSummary
+from lantern.models.record.summary import RecordSummary
 
 TFormattedDate = TypeVar("TFormattedDate", bound="FormattedDate")
 

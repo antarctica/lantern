@@ -7,18 +7,19 @@ from enum import Enum
 from typing import TypeVar
 
 import cattrs
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.common import clean_dict
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.data_quality import DataQuality
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.distribution import Distribution
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.identification import Identification
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.metadata import Metadata
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.projection import ReferenceSystemInfo
-from assets_tracking_service.lib.bas_data_catalogue.models.record.enums import HierarchyLevelCode
 from deepdiff import DeepDiff
 from importlib_resources import as_file as resources_as_file
 from importlib_resources import files as resources_files
 from jsonschema.exceptions import ValidationError
 from jsonschema.validators import validate
+
+from lantern.models.record.elements.common import clean_dict
+from lantern.models.record.elements.data_quality import DataQuality
+from lantern.models.record.elements.distribution import Distribution
+from lantern.models.record.elements.identification import Identification
+from lantern.models.record.elements.metadata import Metadata
+from lantern.models.record.elements.projection import ReferenceSystemInfo
+from lantern.models.record.enums import HierarchyLevelCode
 
 TRecord = TypeVar("TRecord", bound="Record")
 

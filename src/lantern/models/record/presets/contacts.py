@@ -1,13 +1,5 @@
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.common import (
-    Address,
-    Contact,
-    ContactIdentity,
-    OnlineResource,
-)
-from assets_tracking_service.lib.bas_data_catalogue.models.record.enums import (
-    ContactRoleCode,
-    OnlineResourceFunctionCode,
-)
+from lantern.models.record.elements.common import Address, Contact, ContactIdentity, OnlineResource
+from lantern.models.record.enums import ContactRoleCode, OnlineResourceFunctionCode
 
 
 def make_magic_role(roles: list[ContactRoleCode]) -> Contact:

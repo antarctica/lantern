@@ -5,7 +5,7 @@ from typing import TypeVar
 
 import cattrs
 
-from assets_tracking_service.lib.bas_data_catalogue.models.record.enums import (
+from lantern.models.record.enums import (
     ContactRoleCode,
     DatePrecisionCode,
     DateTypeCode,

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.common import Contact, OnlineResource
-from assets_tracking_service.lib.bas_data_catalogue.models.record.enums import ContactRoleCode
+from lantern.models.record.elements.common import Contact, OnlineResource
+from lantern.models.record.enums import ContactRoleCode
 
 
 @dataclass(kw_only=True)

@@ -9,8 +9,21 @@ authors = [
 ]
 requires-python = ">=3.11"
 dependencies = [
-    "assets-tracking-service==0.7.0",
+    "bas-metadata-library>=0.15.3",
+    "beautifulsoup4>=4.13.4",
+    "bleach>=6.2.0",
+    "boto3>=1.38.46",
+    "boto3-stubs[s3]>=1.38.46",
+    "cattrs>=25.1.1",
+    "deepdiff>=8.5.0",
+    "environs>=14.2.0",
+    "humanize>=4.12.3",
+    "jinja2>=3.1.6",
+    "jsonschema>=4.23.0",
+    "markdown>=3.8.2",
+    "pytailwindcss>=0.2.0",
     "python-gitlab>=6.0.0",
+    "sentry-sdk>=2.32.0",
 ]
 
 [dependency-groups]
@@ -28,7 +41,6 @@ name = "ats-air"
 url = "https://gitlab.data.bas.ac.uk/api/v4/projects/1291/packages/pypi/simple"
 
 [tool.uv.sources]
-assets-tracking-service = { index = "ats" }
 assets-tracking-service-aircraft-provider = { index = "ats-air" }
 
 [tool.ruff]

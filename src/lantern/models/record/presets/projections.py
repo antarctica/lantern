@@ -1,6 +1,6 @@
 from datetime import date
 
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.common import (
+from lantern.models.record.elements.common import (
     Citation,
     Contact,
     ContactIdentity,
@@ -9,11 +9,8 @@ from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.commo
     Dates,
     OnlineResource,
 )
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.projection import Code, ReferenceSystemInfo
-from assets_tracking_service.lib.bas_data_catalogue.models.record.enums import (
-    ContactRoleCode,
-    OnlineResourceFunctionCode,
-)
+from lantern.models.record.elements.projection import Code, ReferenceSystemInfo
+from lantern.models.record.enums import ContactRoleCode, OnlineResourceFunctionCode
 
 
 def make_epsg_projection(code: str) -> ReferenceSystemInfo:

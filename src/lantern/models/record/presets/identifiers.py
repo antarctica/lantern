@@ -1,4 +1,4 @@
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.common import Identifier
+from lantern.models.record.elements.common import Identifier
 
 
 def make_bas_cat(item_id: str) -> Identifier:

@@ -1,12 +1,7 @@
 from datetime import datetime
 
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.common import Date
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.identification import (
-    BoundingBox,
-    ExtentGeographic,
-    ExtentTemporal,
-    TemporalPeriod,
-)
+from lantern.models.record.elements.common import Date
+from lantern.models.record.elements.identification import BoundingBox, ExtentGeographic, ExtentTemporal, TemporalPeriod
 
 
 def make_bbox_extent(min_x: float, max_x: float, min_y: float, max_y: float) -> ExtentGeographic:

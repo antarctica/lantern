@@ -4,11 +4,12 @@ from mimetypes import guess_type
 from pathlib import Path
 from shutil import copytree
 
-from assets_tracking_service.config import Config
-from assets_tracking_service.lib.bas_data_catalogue.models.record import Record
 from importlib_resources import as_file as resources_as_file
 from importlib_resources import files as resources_files
 from mypy_boto3_s3 import S3Client
+
+from lantern.config import Config
+from lantern.models.record import Record
 
 
 class S3Utils:
@@ -94,8 +95,8 @@ class Exporter(ABC):
         self._s3_utils = S3Utils(
             logger=logger,
             s3=self._s3_client,
-            s3_bucket=self._config.EXPORTER_DATA_CATALOGUE_AWS_S3_BUCKET,
-            relative_base=self._config.EXPORTER_DATA_CATALOGUE_OUTPUT_PATH,
+            s3_bucket=self._config.AWS_S3_BUCKET,
+            relative_base=self._config.EXPORT_PATH,
         )
 
     @staticmethod
@@ -152,7 +153,7 @@ class ResourceExporter(Exporter, ABC):
             raise ValueError(msg) from None
 
         try:
-            _ = export_base.relative_to(self._config.EXPORTER_DATA_CATALOGUE_OUTPUT_PATH)
+            _ = export_base.relative_to(self._config.EXPORT_PATH)
         except ValueError as e:
             msg = "Export base must be relative to EXPORTER_DATA_CATALOGUE_OUTPUT_PATH."
             raise ValueError(msg) from e

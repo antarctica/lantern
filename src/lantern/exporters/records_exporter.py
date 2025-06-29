@@ -2,13 +2,13 @@ import logging
 
 from boto3 import client as S3Client  # noqa: N812
 
-from assets_tracking_service.config import Config
-from assets_tracking_service.lib.bas_data_catalogue.exporters.base_exporter import Exporter, ResourceExporter
-from assets_tracking_service.lib.bas_data_catalogue.exporters.html_exporter import HtmlAliasesExporter, HtmlExporter
-from assets_tracking_service.lib.bas_data_catalogue.exporters.iso_exporter import IsoXmlExporter, IsoXmlHtmlExporter
-from assets_tracking_service.lib.bas_data_catalogue.exporters.json_exporter import JsonExporter
-from assets_tracking_service.lib.bas_data_catalogue.models.record import Record
-from assets_tracking_service.lib.bas_data_catalogue.models.record.summary import RecordSummary
+from lantern.config import Config
+from lantern.exporters.base_exporter import Exporter, ResourceExporter
+from lantern.exporters.html_exporter import HtmlAliasesExporter, HtmlExporter
+from lantern.exporters.iso_exporter import IsoXmlExporter, IsoXmlHtmlExporter
+from lantern.exporters.json_exporter import JsonExporter
+from lantern.models.record import Record
+from lantern.models.record.summary import RecordSummary
 
 
 class RecordsExporter(Exporter):
@@ -45,7 +45,7 @@ class RecordsExporter(Exporter):
 
     def _get_html_exporter(self, record: Record) -> HtmlExporter:
         """Record as item HTML."""
-        output_path = self._config.EXPORTER_DATA_CATALOGUE_OUTPUT_PATH / "items"
+        output_path = self._config.EXPORT_PATH / "items"
         return HtmlExporter(
             config=self._config,
             logger=self._logger,
@@ -58,28 +58,28 @@ class RecordsExporter(Exporter):
 
     def _get_html_aliases_exporter(self, record: Record) -> HtmlAliasesExporter:
         """Record aliases as redirects to item HTML."""
-        output_path = self._config.EXPORTER_DATA_CATALOGUE_OUTPUT_PATH
+        output_path = self._config.EXPORT_PATH / "aliases"
         return HtmlAliasesExporter(
             config=self._config, logger=self._logger, s3=self._s3_client, record=record, site_base=output_path
         )
 
     def _get_json_exporter(self, record: Record) -> JsonExporter:
         """Record as BAS Metadata Library JSON."""
-        output_path = self._config.EXPORTER_DATA_CATALOGUE_OUTPUT_PATH / "records"
+        output_path = self._config.EXPORT_PATH / "records"
         return JsonExporter(
             config=self._config, logger=self._logger, s3=self._s3_client, record=record, export_base=output_path
         )
 
     def _get_iso_xml_exporter(self, record: Record) -> IsoXmlExporter:
         """Record as ISO XML."""
-        output_path = self._config.EXPORTER_DATA_CATALOGUE_OUTPUT_PATH / "records"
+        output_path = self._config.EXPORT_PATH / "records"
         return IsoXmlExporter(
             config=self._config, logger=self._logger, s3=self._s3_client, record=record, export_base=output_path
         )
 
     def _get_iso_xml_html_exporter(self, record: Record) -> IsoXmlHtmlExporter:
         """Record as ISO XML with HTML stylesheet."""
-        output_path = self._config.EXPORTER_DATA_CATALOGUE_OUTPUT_PATH / "records"
+        output_path = self._config.EXPORT_PATH / "records"
         return IsoXmlHtmlExporter(
             config=self._config, logger=self._logger, s3=self._s3_client, record=record, export_base=output_path
         )

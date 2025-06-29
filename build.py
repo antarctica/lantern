@@ -2,11 +2,12 @@ import functools
 import logging
 from datetime import UTC, datetime
 
-from assets_tracking_service.config import Config
 from boto3 import client as S3Client  # noqa: N812
 
-from lantern.config import Config as LanternConfig
+from lantern.config import Config as Config
 from lantern.exporters.site_exporter import SiteExporter
+from lantern.log import init as init_logging
+from lantern.log import init_sentry
 from lantern.stores.gitlab import GitLabStore
 
 
@@ -30,17 +31,16 @@ def time_task(label: str) -> callable:
 class ToyCatalogue:
     """Toy catalogue for prototyping."""
 
-    def __init__(self, config: Config, config_lantern: LanternConfig, logger: logging.Logger, s3: S3Client) -> None:
+    def __init__(self, config: Config, logger: logging.Logger, s3: S3Client) -> None:
         self._config = config
-        self._config_lantern = config_lantern
         self._s3 = s3
         self._logger = logger
         self._store = GitLabStore(
             logger=self._logger,
-            endpoint=self._config_lantern.STORE_GITLAB_ENDPOINT,
-            access_token=self._config_lantern.STORE_GITLAB_TOKEN,
-            project_id=self._config_lantern.STORE_GITLAB_PROJECT_ID,
-            cache_path=self._config_lantern.STORE_GITLAB_CACHE_PATH,
+            endpoint=self._config.STORE_GITLAB_ENDPOINT,
+            access_token=self._config.STORE_GITLAB_TOKEN,
+            project_id=self._config.STORE_GITLAB_PROJECT_ID,
+            cache_path=self._config.STORE_GITLAB_CACHE_PATH,
         )
         self._site = SiteExporter(config=self._config, logger=self._logger, s3=self._s3)
 
@@ -80,19 +80,20 @@ def main() -> None:
     publish = False
     purge = False
 
+    init_logging()
+    init_sentry()
     logger = logging.getLogger("app")
     logger.info("Initialising")
 
     config = Config()
-    config_lantern = LanternConfig()
     s3 = S3Client(
         "s3",
-        aws_access_key_id=config.EXPORTER_DATA_CATALOGUE_AWS_ACCESS_ID,
-        aws_secret_access_key=config.EXPORTER_DATA_CATALOGUE_AWS_ACCESS_SECRET,
+        aws_access_key_id=config.AWS_ACCESS_ID,
+        aws_secret_access_key=config.AWS_ACCESS_SECRET,
         region_name="eu-west-1",
     )
 
-    cat = ToyCatalogue(config=config, config_lantern=config_lantern, logger=logger, s3=s3)
+    cat = ToyCatalogue(config=config, logger=logger, s3=s3)
 
     if purge:
         cat.purge()

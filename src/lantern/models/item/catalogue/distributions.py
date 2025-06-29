@@ -5,12 +5,10 @@ from typing import Any
 
 from humanize import naturalsize
 
-from assets_tracking_service.lib.bas_data_catalogue.models.item.base import AccessType
-from assets_tracking_service.lib.bas_data_catalogue.models.item.base.elements import Link
-from assets_tracking_service.lib.bas_data_catalogue.models.item.catalogue.enums import DistributionType
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.distribution import (
-    Distribution as RecordDistribution,
-)
+from lantern.models.item.base import AccessType
+from lantern.models.item.base.elements import Link
+from lantern.models.item.catalogue.enums import DistributionType
+from lantern.models.record.elements.distribution import Distribution as RecordDistribution
 
 
 class Distribution(ABC):

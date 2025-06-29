@@ -1,8 +1,5 @@
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.identification import Constraint
-from assets_tracking_service.lib.bas_data_catalogue.models.record.enums import (
-    ConstraintRestrictionCode,
-    ConstraintTypeCode,
-)
+from lantern.models.record.elements.identification import Constraint
+from lantern.models.record.enums import ConstraintRestrictionCode, ConstraintTypeCode
 
 OPEN_ACCESS = Constraint(
     type=ConstraintTypeCode.ACCESS,

@@ -1,13 +1,11 @@
 from dataclasses import dataclass, is_dataclass
 from typing import Any, cast
 
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.common import Contact as RecordContact
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.common import Contacts as RecordContacts
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.common import Date
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.identification import Extent as RecordExtent
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.identification import (
-    Extents as RecordExtents,
-)
+from lantern.models.record.elements.common import Contact as RecordContact
+from lantern.models.record.elements.common import Contacts as RecordContacts
+from lantern.models.record.elements.common import Date
+from lantern.models.record.elements.identification import Extent as RecordExtent
+from lantern.models.record.elements.identification import Extents as RecordExtents
 
 
 class Contact(RecordContact):

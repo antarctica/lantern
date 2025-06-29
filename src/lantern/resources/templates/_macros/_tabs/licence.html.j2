@@ -1,0 +1,181 @@
+{% import '_macros/common.html.j2' as com %}
+
+{% macro clause(content, i_classes) %}
+  <div class="flex justify-between items-center space-x-2">
+    <i class="flex-shrink-0 fa-fw fa-2x {{ i_classes }}"></i>
+    <div class="flex-grow">{{ caller() }}</div>
+  </div>
+{% endmacro %}
+
+{% macro clauses(content, alert_variant, label) %}
+  {% set content = caller() %}
+  <div class="space-y-4">
+    <p><strong>{{ label }}</strong></p>
+    {% call com.alert(variant=alert_variant) %}
+      <div class="space-y-4">
+        {{ content }}
+      </div>
+    {% endcall %}
+  </div>
+{% endmacro %}
+
+{% macro licence(id, href, name, img=None) %}
+  <section id="{{ id }}" class="grid grid-cols-1 gap-y-4 lg:gap-x-8 lg:grid-cols-[auto_1fr]">
+    <div><strong>Item licence</strong></div>
+    <div class="flex justify-between items-top">
+      <div>
+        <a class="{{ com.link_classes() }}" href="{{ href }}">{{ name }} {{ com.ext_link_i() }}</a>
+      </div>
+      {% if img %}
+        <div>
+          <img src="{{ img }}" alt="Licence symbol" />
+        </div>
+      {% endif %}
+    </div>
+
+    <div><strong>Licence summary</strong></div>
+    <div class="space-y-8">
+      {{ caller('rights') }}
+      {{ caller('conditions') }}
+      {{ caller('restrictions') }}
+      <p>This is a short licence summary, see the {{ com.ext_link_a(href=href, value="Formal Licence") }} for more information.</p>
+    </div>
+  </section>
+{% endmacro %}
+
+{% macro ogl_uk_3_0() %}
+  {% call(content) licence(
+    id='licence-ogl-uk-3-0',
+    href='https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/',
+    name='Open Government Licence (OGL 3.0)',
+    img='https://cdn.web.bas.ac.uk/bas-style-kit/0.6.0/img/logos-symbols/ogl-symbol-default-transparent-64.png'
+  ) %}
+    {% if content == 'rights' %}
+      {% call clauses(alert_variant='green', label='You are free to:') %}
+        {% call clause(i_classes='fab fa-creative-commons-share') %}
+          <strong>Share</strong> — copy and redistribute this item in any medium or format
+        {% endcall %}
+        {% call clause(i_classes='fab fa-creative-commons-remix') %}
+          <strong>Adapt</strong> — remix, transform, and build upon this item for any purpose, including commercial
+        {% endcall %}
+      {% endcall %}
+    {% endif %}
+    {% if content == 'conditions' %}
+      {% call clauses(alert_variant='yellow', label='Providing that you:') %}
+        {% call clause(i_classes='fab fa-creative-commons-by') %}
+          <strong>Include attribution</strong> — by including a citation, which must not suggest endorsement of you or your use
+        {% endcall %}
+        {% call clause(i_classes='far fa-ban') %}
+          <strong>Don't include additional restrictions</strong> — you may not legally restrict others from doing things this license permits
+        {% endcall %}
+      {% endcall %}
+    {% endif %}
+    {% if content == 'restrictions' %}
+      {% call clauses(alert_variant='red', label='Important notes:') %}
+        {% call clause(i_classes='far fa-question-circle') %}
+          <strong>Inaccuracies and mistakes</strong> — may be included unintentionally due to limited data availability or quality
+        {% endcall %}
+        {% call clause(i_classes='far fa-exclamation-circle') %}
+          <strong>No warranty, liability or fitness for any purpose</strong> — you must not rely on this information for navigation
+        {% endcall %}
+      {% endcall %}
+    {% endif %}
+  {% endcall %}
+{% endmacro %}
+
+{% macro cc_by_4_0() %}
+  {% call(content) licence(
+    id='licence-cc-4-0',
+    href='https://creativecommons.org/licenses/by/4.0/',
+    name='Creative Commons Attribution 4.0 International Licence (CC BY 4.0)'
+  ) %}
+    {% if content == 'rights' %}
+      {% call clauses(alert_variant='green', label='You are free to:') %}
+        {% call clause(i_classes='fab fa-creative-commons-share') %}
+          <strong>Share</strong> — copy and redistribute this item in any medium or format
+        {% endcall %}
+        {% call clause(i_classes='fab fa-creative-commons-remix') %}
+          <strong>Adapt</strong> — remix, transform, and build upon this item for any purpose, including commercial
+        {% endcall %}
+      {% endcall %}
+    {% endif %}
+    {% if content == 'conditions' %}
+      {% call clauses(alert_variant='yellow', label='Providing that you:') %}
+        {% call clause(i_classes='fab fa-creative-commons-by') %}
+          <strong>Include attribution</strong> — by including a citation, which must not suggest endorsement of you or your use
+        {% endcall %}
+        {% call clause(i_classes='far fa-ban') %}
+          <strong>Don't include additional restrictions</strong> — you may not legally restrict others from doing things this license permits
+        {% endcall %}
+      {% endcall %}
+    {% endif %}
+    {% if content == 'restrictions' %}
+      {% call clauses(alert_variant='red', label='Important notes:') %}
+        {% call clause(i_classes='far fa-question-circle') %}
+          <strong>Inaccuracies and mistakes</strong> — may be included unintentionally due to limited data availability or quality
+        {% endcall %}
+        {% call clause(i_classes='far fa-exclamation-circle') %}
+          <strong>No warranty, liability or fitness for any purpose</strong> — you must not rely on this information for navigation
+        {% endcall %}
+      {% endcall %}
+    {% endif %}
+  {% endcall %}
+{% endmacro %}
+
+{% macro x_operations_mapping_1() %}
+  {% call(content) licence(
+    id='licence-x-operations-mapping-1',
+    href='https://metadata-resources.data.bas.ac.uk/licences/operations-mapping-v1/',
+    name='BAS Operations Mapping Internal Use Licence (v1)'
+  ) %}
+    {% if content == 'rights' %}
+      {% call clauses(alert_variant='green', label='You are free to:') %}
+        {% call clause(i_classes='far fa-check-circle') %}
+          Use this item for any purpose connected to your official duties
+        {% endcall %}
+      {% endcall %}
+    {% endif %}
+    {% if content == 'conditions' %}
+      {% call clauses(alert_variant='yellow', label='Providing that you:') %}
+        {% call clause(i_classes='far fa-ban') %}
+          Do not share this item with anyone that does not have permission to view it
+        {% endcall %}
+        {% call clause(i_classes='fab fa-creative-commons-nd') %}
+          Do not modify or remove any attribution or citation information included in the item
+        {% endcall %}
+      {% endcall %}
+    {% endif %}
+    {% if content == 'restrictions' %}
+      {% call clauses(alert_variant='red', label='Important notes:') %}
+        {% call clause(i_classes='far fa-question-circle') %}
+          <strong>Inaccuracies and mistakes</strong> — may be included unintentionally due to limited data availability or quality
+        {% endcall %}
+        {% call clause(i_classes='far fa-exclamation-circle') %}
+          <strong>Additional restrictions</strong> — may apply as advised when requesting access to this item
+        {% endcall %}
+      {% endcall %}
+    {% endif %}
+  {% endcall %}
+{% endmacro %}
+
+{% macro x_all_rights_reserved_1() %}
+{% call(content) licence(
+    id='all-rights-reserved-1-0',
+    href='https://metadata-resources.data.bas.ac.uk/licences/all-rights-reserved-v1/',
+    name='BAS All Rights Reserved Licence (v1)'
+  ) %}
+    {% if content == 'restrictions' %}
+      {% call clauses(alert_variant='red', label='Important notes:') %}
+        {% call clause(i_classes='far fa-ban') %}
+          <strong>All rights reserved</strong> — any use of this item requires permission by <a class="{{ com.link_classes() }}" href="#tab-contact">contacting us</a>
+        {% endcall %}
+        {% call clause(i_classes='far fa-question-circle') %}
+          <strong>Inaccuracies and mistakes</strong> — may be included unintentionally due to limited data availability or quality
+        {% endcall %}
+        {% call clause(i_classes='far fa-exclamation-circle') %}
+          <strong>No warranty, liability or fitness for any purpose</strong> — you must not rely on this information for navigation
+        {% endcall %}
+      {% endcall %}
+    {% endif %}
+  {% endcall %}
+{% endmacro %}

@@ -1,0 +1,82 @@
+{% import '_macros/common.html.j2' as com %}
+
+{% macro form_input(id, name, value, placeholder, required) %}
+  <div class="space-y-2">
+    <label class="block font-bold" for="{{ id }}">{{ name }}</label>
+    <input class="w-full border-1 border-grey-300" type="text" name="{{ id }}" id="{{ id }}" {% if placeholder %}placeholder="{{ placeholder }}"{% endif %} {% if value %}value="{{ value }}"{% endif %} {% if required %}required{% endif %}>
+  </div>
+{% endmacro %}
+
+{% macro form(data) %}
+  <form action="{{ data.form_action}}" method="GET">
+    {% for param, value in data.form_params | items %}
+      <input type="hidden" name="{{ param }}" value="{{ value }}">
+    {% endfor %}
+    <div class="space-y-8">
+      {% call com.item_title() %}Contact us about this item{% endcall %}
+      {% call com.item_border() %}
+        <div class="space-y-4">
+          {{ form_input(id="message-subject", name="Subject", value=data.subject_default, required=True) }}
+          <div class="space-y-2">
+            <label class="block font-bold" for="message-content">Details</label>
+            <textarea class="w-full border-1 border-grey-300" name="message-content" id="message-content" rows="8" required></textarea>
+            <div class="border-l-5 border-l-yellow-500 p-4 pr-0">
+              Do not any include any sensitive information in your message.
+            </div>
+          </div>
+          {{ form_input(id="message-sender-name", name="Your name", placeholder="Your Name") }}
+          {{ form_input(id="message-sender-email", name="Your email address", placeholder="your.name@example.org", required=True) }}
+          <div>
+            <button class="{{ com.btn_primary_classes() }} p-4" type="submit">
+                Send Message <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+      {% endcall %}
+    </div>
+  </form>
+{% endmacro %}
+
+{% macro alternate(data) %}
+  {% if data.address or data.phone or data.email %}
+    <div class="space-y-8">
+      {% call com.item_title() %}Alternative contact methods{% endcall %}
+      {% call com.item_border() %}
+        <div class="space-y-4">
+          {% if data.address %}
+            <div class="space-y-2">
+              <h3 class="font-bold"><i class="far fa-envelope"></i> By post</h3>
+              <address id="contact-post">{{ data.address }}</address>
+            </div>
+          {% endif %}
+          {% if data.phone %}
+            <div class="space-y-2">
+              <h3 class="font-bold"><i class="far fa-phone-rotary"></i> By phone</h3>
+              <div id="contact-phone">{{ data.phone }}</div>
+            </div>
+          {% endif %}
+          {% if data.email %}
+            <div class="space-y-2">
+              <h3 class="font-bold"><i class="far fa-at"></i> By email</h3>
+              <div id="contact-email"><a class="{{ com.link_classes() }}" href="{{ data.email }}">{{ data.email }}</a></div>
+            </div>
+           {% endif %}
+        </div>
+      </div>
+    {% endcall %}
+  {% endif %}
+{% endmacro %}
+
+{% macro privacy_notice() %}
+  <div class="space-y-8">
+    {% call com.item_title() %}Privacy Notice{% endcall %}
+    {% call com.alert(variant='blue', classes="space-y-2") %}
+      <p>
+        If you contact us, your personal information will be retained for up to three years and then deleted. It will
+        only be used to contact you regarding your enquiry. If this item relates to an external organisation, we may
+        share an anonymised version of your enquiry with them to help answer your query.
+      </p>
+      <p>See our <a class="{{ com.link_classes() }}" href="/legal/privacy">privacy policy</a> for more information.</p>
+    {% endcall %}
+  </div>
+{% endmacro %}

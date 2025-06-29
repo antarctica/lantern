@@ -1,0 +1,14 @@
+{
+  "name": "BAS Data Catalogue",
+  "short_name": "BAS Data",
+  "description": "Discover data, services and products held by the British Antarctic Survey and UK Polar Data Centre.",
+  "start_url": "/",
+  "display": "browser",
+  "theme_color": "#222222",
+  "background_color": "#222222",
+  "icons": [
+    { "src": "/static/img/favicon-192.png", "type": "image/png", "sizes": "192x192" },
+    { "src": "/static/img/favicon-512.png", "type": "image/png", "sizes": "512x512" },
+    { "src": "/static/img/favicon-mask.png", "type": "image/png", "sizes": "512x512", "purpose": "maskable" }
+  ]
+}

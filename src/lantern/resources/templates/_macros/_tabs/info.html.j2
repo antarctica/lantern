@@ -1,0 +1,130 @@
+{% import '_macros/common.html.j2' as com %}
+
+{% macro item(data) %}
+  {% call com.item_title() %}Item Information{% endcall %}
+  {% call com.item_border() %}
+    <dl class="space-y-4">
+      {% call com.dl_item(title='Item ID', id='info-id') %}{{ data.item_id }}{% endcall %}
+
+      {% call com.dl_item(title='Item Type', id='info-type') %}
+        <i class="{{ data.item_type_icon }}"></i> {{ data.item_type }}
+      {% endcall %}
+
+      {% if data.series_name %}
+        {% call com.dl_item(title='Series', id='info-series-name') %}{{ data.series_name }}{% endcall %}
+      {% endif %}
+
+      {% if data.sheet_number %}
+        {% call com.dl_item(title='Sheet Number', id='info-sheet-number') %}{{ data.sheet_number }}{% endcall %}
+      {% endif %}
+
+      {% if data.scale or data.scales %}
+        {% set scales = data.scales if data.scales else [data.scale] %}
+        {% call com.dl_item(title='Scale', id='info-scale') %}
+          <ul class="space-y-2">
+            {% for scale in scales %}
+              <li>{{ scale }}</li>
+            {% endfor %}
+          </ul>
+        {% endcall %}
+      {% endif %}
+
+      {% if data.projection %}
+        {% call com.dl_item(title='Projection', id='info-projection') %}
+          <a class="{{ com.link_classes() }}" href="{{ data.projection.href }}">{{ data.projection.value }} {{ com.ext_link_i() }}</a>
+        {% endcall %}
+      {% endif %}
+
+      {% if data.page_size %}
+        {% set icon_class = None %}
+        {% if 'portrait' in data.page_size | lower %}
+          {% set icon_class = "far fa-fw fa-rectangle-portrait" %}
+        {% elif 'landscape' in data.page_size | lower %}
+          {% set icon_class = "far fa-fw fa-rectangle-landscape" %}
+        {% endif %}
+
+        {% call com.dl_item(title='Page Size', id='info-page-size') %}
+          {% if icon_class %}<i class="{{ icon_class }}"></i>{% endif %}
+          {{ data.page_size }}
+        {% endcall %}
+      {% endif %}
+
+      {% if data.doi %}
+        {% call com.dl_item(title='DOIs', id='info-doi') %}
+          <ul class="space-y-2">
+            {% for item in data.doi %}
+              <li>{{ com.ext_link_a(href=item.href, value=item.value) }}</li>
+            {% endfor %}
+          </ul>
+        {% endcall %}
+      {% endif %}
+
+      {% if data.isbn %}
+        {% call com.dl_item(title='ISBNs', id='info-isbn') %}
+          <ul class="space-y-2">
+            {% for value in data.isbn %}
+              <li>{{ value }}</li>
+            {% endfor %}
+          </ul>
+        {% endcall %}
+      {% endif %}
+
+      {% if data.gitlab_issues %}
+        {% call com.dl_item(title='Internal references', id='info-issues') %}
+          <ul class="space-y-2">
+            {% for value in data.gitlab_issues %}
+              <li>{{ value }}</li>
+            {% endfor %}
+          </ul>
+        {% endcall %}
+      {% endif %}
+
+      {% for label, value in data.dates.items() %}
+        {% set id = label | lower | replace(' ', '-') %}
+        {% call com.dl_item(title=label) %}{{ com.time(value, id='info-'+id) }}{% endcall %}
+      {% endfor %}
+
+      {% if data.status %}
+        {% call com.dl_item(title='Item Status', id='info-status') %}{{ data.status }}{% endcall %}
+      {% endif %}
+
+      {% if data.frequency %}
+        {% call com.dl_item(title='Item Update Frequency', id='info-frequency') %}{{ data.frequency }}{% endcall %}
+      {% endif %}
+    </dl>
+  {% endcall %}
+{% endmacro %}
+
+{% macro metadata(data) %}
+  {% call com.item_title() %}Metadata Information{% endcall %}
+  {% call com.item_border() %}
+    <dl class="space-y-4">
+      {% call com.dl_item(title='Last updated') %}{{ com.time(data.datestamp, id='info-datestamp') }}{% endcall %}
+
+      {% if data.standard %}
+        {% call com.dl_item(title='Metadata Standard', id='info-standard') %}{{ data.standard }}{% endcall %}
+      {% endif %}
+      {% if data.standard_version %}
+        {% call com.dl_item(title='Metadata Standard Version', id='info-standard-version') %}{{ data.standard_version }}{% endcall %}
+      {% endif %}
+
+      {% if data.profiles %}
+        {% call com.dl_item(title='Metadata Profiles', id='info-profiles') %}
+          <ul class="space-y-2">
+            {% for item in data.profiles %}
+              <li>{{ com.ext_link_a(href=item.href, value=item.value) }}</li>
+            {% endfor %}
+          </ul>
+        {% endcall %}
+      {% endif %}
+
+      {% call com.dl_item(title='Metadata links', id='info-records') %}
+        <ul class="space-y-2">
+          {% for item in data.record_links %}
+            <li><a class="{{ com.link_classes() }}" href="{{ item.href }}">{{ item.value }}</a></li>
+          {% endfor %}
+        </ul>
+      {% endcall %}
+    </dl>
+  {% endcall %}
+{% endmacro %}

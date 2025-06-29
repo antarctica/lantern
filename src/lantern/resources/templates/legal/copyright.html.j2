@@ -1,0 +1,63 @@
+{% extends "_layouts/base.html.j2" %}
+{% import '_macros/common.html.j2' as com %}
+
+{% block content %}
+  <article class="{{ com.container_classes() }} flex-1 space-y-4 lg:space-y-8">
+    {{ com.page_header(main='Copyright Policy')}}
+    <div class="space-y-4 lg:space-y-8 lg:w-2/3">
+      {% call com.alert(variant='yellow') %}
+        This policy does not apply to all pages on this website. Check the policy on each page to see which applies.
+      {% endcall %}
+      <section class="space-y-4">
+        <p>
+          Most content on this website is subject to copyright protection and is published under the
+          {{ com.ext_link_a(href='http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/', value="Open Government Licence (OGL)") }},
+          which explains any exempted content.
+        </p>
+        <p>Most content is owned by {{ com.ext_link_a(href='https://www.ukri.org/', value="UK Research and Innovation (UKRI)") }}, to which the
+          {{ com.ext_link_a(href='https://www.bas.ac.uk/', value="British Antarctic Survey (BAS)") }}, <br /> and its parent the
+          {{ com.ext_link_a(href='https://www.ukri.org/councils/nerc/', value="Natural Environment Research Council (NERC)") }}, both belong.</p>
+        <p>Where content has different copyright arrangements, we’ll credit the author and/or copyright holder as appropriate.</p>
+      </section>
+      <section class="space-y-4">
+        <h2 class="text-2xl">Item copyright</h2>
+        <div class="space-y-2">
+          <p>
+            This website contains pages providing information about items (covering a range of material from maps to
+            online services), from a variety of providers and authors (including external organisations).
+          </p>
+          <p>
+            Copyright for these items, and any files or related information this website may link to, varies item to item.
+            Each item page includes a licence tab explaining the copyright arrangements applicable for that item.
+          </p>
+          <p><strong>This copyright policy is limited to these information pages, not the items themselves.</strong></p>
+        </div>
+      </section>
+      <section class="space-y-4">
+        <h2 class="text-2xl">Questions about copyright</h2>
+        <div class="space-y-2">
+          <p>
+            If you have a question about copyright for an item (a map, dataset, etc.), please use the contact tab on
+            the relevant item page to contact the relevant team.
+          </p>
+          <p>
+            If your question relates to this website more generally, please
+            <button class="{{ com.sentry_trigger() }} {{ com.link_classes() }} cursor-pointer">contact us</button> by
+            submitting feedback.
+          </p>
+        </div>
+      </section>
+      <section class="space-y-4">
+        <h2 class="text-2xl">Changes to this policy</h2>
+        <section class="space-y-2">
+          <h3 class="text-lg">2025-05-08</h3>
+          <p>Simplifying and clarifying how policy applies to items vs website pages.</p>
+        </section>
+        <section class="space-y-2">
+          <h3 class="text-lg">2020-05-11</h3>
+          <p>Initial policy.</p>
+        </section>
+      </section>
+    </div>
+  </article>
+{% endblock %}

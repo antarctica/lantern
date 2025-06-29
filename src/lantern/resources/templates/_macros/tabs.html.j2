@@ -1,0 +1,162 @@
+{% import '_macros/common.html.j2' as com %}
+{% import '_macros/_tabs/data.html.j2' as data_tab %}
+{% import '_macros/_tabs/extent.html.j2' as extent_tab %}
+{% import '_macros/_tabs/licence.html.j2' as licence_tab %}
+{% import '_macros/_tabs/info.html.j2' as info_tab %}
+{% import '_macros/_tabs/contact.html.j2' as contact_tab %}
+
+{% macro items(data) %}
+  <section id="tab-content-items" class="grid grid-cols-1 lg:grid-cols-2 gap-y-4 lg:gap-x-4">
+    {% for item in data.items %}
+      {{ com.item_summary(item) }}
+    {% endfor %}
+  </section>
+{% endmacro %}
+
+{% macro data(data) %}
+  <section id="tab-content-data">
+    {% if data.access.name != 'PUBLIC' %}
+      <div class="grid grid-cols-2 gap-x-4">
+        <div class="space-y-4">
+          {% for item in data.items %}
+            {{ data_tab.item(item) }}
+          {% endfor %}
+        </div>
+        <aside id="data-restricted-info" class="col-span-1">
+          {% call com.alert(variant='yellow', classes="border-5 border-yellow-500 space-y-2") %}
+            <p class="text-lg font-bold">This item requires permission to access</p>
+            <p>This may be because the item:</p>
+            <ul class="list-disc pl-4">
+              <li>contains sensitive and/or personal data</li>
+              <li>contains commercially licenced data</li>
+              <li>is under embargo and not yet released</li>
+              <li>includes data from other restricted items</li>
+            </ul>
+            <p>Permission may be granted automatically based on your BAS user account, or require justification.</p>
+          {% endcall %}
+        </aside>
+      </div>
+    {% else %}
+        <div class="{{ classes }} grid grid-cols-1 lg:grid-cols-2 gap-y-4 lg:gap-x-4 items-start">
+          {% for item in data.items %}
+            {{ data_tab.item(item) }}
+          {% endfor %}
+        </div>
+    {% endif %}
+  </section>
+{% endmacro %}
+
+{% macro authors(data) %}
+  <section id="tab-content-authors" class="grid grid-cols-1 lg:grid-cols-2 gap-y-4 lg:gap-x-4">
+    {% for item in data.items %}
+      {{ author(item) }}
+    {% endfor %}
+  </section>
+{% endmacro %}
+
+{% macro author(data) %}
+  <article class="border-1 border-grey-100 p-2 space-y-2">
+    {% if data.individual.name %}<div class="font-bold">{{ data.individual.name }}</div>{% endif %}
+    {% if data.organisation.name %}<div class="font-bold">{{ data.organisation.name }}</div>{% endif %}
+    {% if data.email %}
+      <div><i class="fa-fw far fa-at"></i> Email: <a class="{{ com.link_classes() }}" href="mailto:{{ data.email }}">{{ data.email }}</a></div>
+    {% endif %}
+    {% if data.orcid %}
+      <div><i class="fa-fw fab fa-orcid text-[#A6CE39]"></i> ORCID: <a class="{{ com.link_classes() }}" href="{{ data.orcid }}">{{ data.orcid }} {{ com.ext_link_i() }}</a></div>
+    {% endif %}
+  </article>
+{% endmacro %}
+
+{% macro licence(data) %}
+  <section id="tab-content-licence">
+    {% set slug = data.slug.name | lower %}
+    <article id="licence">{{ licence_tab[slug]() }}</article>
+  </section>
+{% endmacro %}
+
+{% macro extent(data) %}
+  <section id="tab-content-extent">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-y-4 lg:gap-x-4">
+      {% if data.extents %}
+        {% for extent in data.extents %}
+          <div class="col-span-1 space-y-8">
+            {% call com.item_title() %}{{ extent.label }}{% endcall %}
+            {% call com.item_border(classes="space-y-8") %}
+              {{ extent_tab.map(extent.map_iframe) }}
+              {{ extent_tab.info(extent) }}
+            {% endcall %}
+          </div>
+        {% endfor %}
+      {% elif data %}
+        <div class="col-span-1">{{ extent_tab.map(data.map_iframe) }}</div>
+        <div class="col-span-1 space-y-8">{{ extent_tab.info(data) }}</div>
+      {% endif %}
+    </div>
+  </section>
+{% endmacro %}
+
+{% macro lineage(data) %}
+  <section id="tab-content-lineage">
+    <div class="w-full lg:w-2/3 mx-auto">
+      <div class="p-2 space-y-8">
+        {% call com.item_title() %}Lineage Statement{% endcall %}
+        {% call com.item_border() %}
+          <article id="lineage-statement">{{ com.prose(data.statement) }}</article>
+        {% endcall %}
+      </div>
+    </div>
+  </section>
+{% endmacro %}
+
+{% macro related_section(data) %}
+  {% if data.related %}
+    <section id="related-{{ data.id }}" class="space-y-8">
+      {% set items = data.related if data.related is iterable else [data.related] %}
+      {% call com.item_title() %}{{ data.title }}{% endcall %}
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-y-4 lg:gap-x-4">
+        {% for item in items %}
+          {{ com.item_summary(item) }}
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+{% endmacro %}
+
+{% macro related(data) %}
+  <section id="tab-content-related" class="space-y-8">
+    {{ related_section({'id': 'parent-printed-map', 'title': 'Printed map this item is a part of', 'related': data.parent_printed_map}) }}
+    {{ related_section({'id': 'peer-opposite-side', 'title': 'Opposite side of the physical map this item is a part of', 'related': data.peer_opposite_side}) }}
+    {{ related_section({'id': 'parent-collections', 'title': 'Collections this item is a part of', 'related': data.parent_collections}) }}
+    {{ related_section({'id': 'peer-collections', 'title': 'Related collections', 'related': data.peer_collections}) }}
+  </section>
+{% endmacro %}
+
+{% macro info(data) %}
+  <section id="tab-content-info">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-y-4 lg:gap-x-4">
+      <div class="p-2 col-span-1 space-y-8">
+        {{ info_tab.item(data) }}
+      </div>
+      <div class="p-2 col-span-1 space-y-8">
+        {{ info_tab.metadata(data) }}
+      </div>
+    </div>
+  </section>
+{% endmacro %}
+
+{% macro contact(data) %}
+  <section id="tab-content-contact" class="space-y-8">
+    {% call com.alert(variant='blue') %}
+      Contact the <strong>{{ data.team }}</strong> with any questions or comments about this item.
+    {% endcall %}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-y-4 lg:gap-x-4">
+      <div class="p-2 col-span-1 space-y-8">
+        {{ contact_tab.form(data) }}
+      </div>
+      <div class="p-2 col-span-1 space-y-8">
+        {{ contact_tab.alternate(data) }}
+        {{ contact_tab.privacy_notice() }}
+      </div>
+    </div>
+  </section>
+{% endmacro %}

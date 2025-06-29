@@ -1,0 +1,14 @@
+{% import '_macros/common.html.j2' as com %}
+{% import '_macros/site.html.j2' as site %}
+
+<!DOCTYPE html>
+<html lang="en">
+  {{ site.html_head(meta) }}
+  <body id="{{ com.back_to_top_id() }}" class="font-sans text-base text-grey-900 bg-white">
+    <div class="flex flex-col min-h-screen space-y-8 lg:space-y-12">
+      {{ site.header() }}
+      {% block content %}{% endblock %}
+      {{ site.footer(meta) }}
+    </div>
+  </body>
+</html>

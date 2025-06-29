@@ -6,12 +6,12 @@ from hashlib import sha1
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from assets_tracking_service.lib.bas_data_catalogue.models.record import Record
-from assets_tracking_service.lib.bas_data_catalogue.models.record.summary import RecordSummary
 from gitlab import Gitlab
 from gitlab.v4.objects import Project
 from requests.exceptions import ConnectionError as RequestsConnectionError
 
+from lantern.models.record import Record
+from lantern.models.record.summary import RecordSummary
 from lantern.stores.base_store import RecordNotFoundError, Store
 
 

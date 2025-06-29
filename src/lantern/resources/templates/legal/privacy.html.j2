@@ -1,0 +1,135 @@
+{% extends "_layouts/base.html.j2" %}
+{% import '_macros/common.html.j2' as com %}
+
+{% block content %}
+  <article class="{{ com.container_classes() }} flex-1 space-y-4 lg:space-y-8">
+    {{ com.page_header(main='Privacy Policy')}}
+    <div class="space-y-4 lg:space-y-8 lg:w-2/3">
+      {% call com.alert(variant='yellow') %}
+        This policy does not apply to all pages on this website. Check the policy on each page to see which applies.
+      {% endcall %}
+      <section>
+        <p>
+          This website, the <em>BAS Data Catalogue</em> available at
+          <a class="{{ com.link_classes() }}" href="https://data.bas.ac.uk">data.bas.ac.uk</a> (and several preview URLs),
+          is provided by the {{ com.ext_link_a(href='https://www.bas.ac.uk/', value="British Antarctic Survey (BAS)") }},
+          which is part of the {{ com.ext_link_a(href='https://www.ukri.org/councils/nerc/', value="Natural Environment Research Council (NERC)") }}
+          and {{ com.ext_link_a(href='https://www.ukri.org/', value="UK Research and Innovation (UKRI)") }}.
+        </p>
+      </section>
+      <section class="space-y-4">
+        <h2 class="text-2xl">Information we collect about you</h2>
+        <div class="space-y-2">
+          <p>We do not collect any information about you, unless you contact us or provide feedback.</p>
+          <p>We do collect anonymous analytics about the pages you visit and basic information about your web browser.</p>
+          <p>We use third-party providers to enable these functions, as explained in this policy.</p>
+        </div>
+      </section>
+      <section class="space-y-4">
+        <h2 class="text-2xl">Why we collect this information</h2>
+        <div class="space-y-2">
+          <p>We collect your contact information so we can reply to your enquires about items (maps, datasets, etc.).</p>
+          <p>We invite feedback from users to improve this website or answer your questions.</p>
+          <p>We collect anonymous analytics to help guide how we develop and update this website.</p>
+          <p>We collect basic information about your web browser to ensure this website works well for most people.</p>
+        </div>
+      </section>
+      <section class="space-y-4">
+        <h2 class="text-2xl">How we use your information</h2>
+        <div class="space-y-2">
+          <p>
+            If you enquire about an item, your personal information will be retained for up to three years and then
+            deleted. It will only be used to contact you regarding your query. If an item relates to an external
+            organisation, we may share an anonymised version of your enquiry with them to help answer your query.
+          </p>
+          <p>
+            If you provide feedback, your personal information will be retained for up to ninety days and then deleted.
+            It will only be used to contact you regarding your feedback. If deemed relevant to help improve this
+            website, an anonymised version of your feedback may be retained for up to seven years.
+          </p>
+          <p>
+            Basic information about your device (such as the web browser you use), and analytics information
+            (such as page views), will both be retained for up to seven years and then deleted. This information cannot
+            be used to identify you. It is only used for statistics and to better understand errors and performance issues.
+          </p>
+          <p>We process your information under the {{ com.ext_link_a(href='https://www.ukri.org/about-us/privacy-notice/', value="UK Research & Innovation (UKRI) Privacy Notice") }}.</p>
+        </div>
+      </section>
+        <section class="space-y-4">
+        <h2 class="text-2xl">Item enquires (Microsoft)</h2>
+        <div class="space-y-2">
+          <p>
+            We use the {{ com.ext_link_a(href='https://www.microsoft.com/en-gb/power-platform/products/power-automate', value="Microsoft Power Automate") }}
+            platform to collect item enquires and forward them to the relevant team.
+          </p>
+          <p>
+            See Microsoft's {{ com.ext_link_a(href='https://learn.microsoft.com/en-us/power-platform/admin/wp-compliance-data-privacy', value="documentation") }}
+            for general details about how they process information.
+          </p>
+        </div>
+      </section>
+      <section class="space-y-4">
+        <h2 class="text-2xl">Website feedback (Sentry)</h2>
+        <div class="space-y-2">
+          <p>
+            We use {{ com.ext_link_a(href='https://sentry.io/', value="Sentry") }} to collect user feedback for this
+            website.
+          </p>
+          <p>
+            In addition to your feedback and contact information, Sentry will collect basic information about your
+            device (such as the web browser you use) which may be relevant to reviewing and responding to your feedback.
+          </p>
+        </div>
+      </section>
+      <section class="space-y-4">
+        <h2 class="text-2xl">Website error and performance monitoring (Sentry)</h2>
+        <div class="space-y-2">
+          <p>
+            We use {{ com.ext_link_a(href='https://sentry.io/', value="Sentry") }} to monitor errors and/or performance
+            issues within this website.
+          </p>
+          <p>
+            See their {{ com.ext_link_a(href='https://docs.sentry.io/platforms/javascript/data-management/data-collected/', value="documentation") }}
+            for details on information Sentry collects.
+          </p>
+          <p>
+            We have configured Sentry not to collect any information that can identify you (including your IP
+            address). Sentry will collect basic information about your device (such as the web browser you use).
+          </p>
+        </div>
+      </section>
+      <section class="space-y-4">
+        <h2 class="text-2xl">Website analytics (Plausible)</h2>
+        <div class="space-y-2">
+        <p>
+          We use {{ com.ext_link_a(href='https://plausible.io', value="Plausible") }} to collect website analytics.
+          This includes basic information about your device (such as the web browser you use) but does not include any
+          information that can identify you (including your IP address).
+        </p>
+        <p>
+          See their {{ com.ext_link_a(href='https://plausible.io/data-policy', value="data policy") }} for details on
+          how Plausible processes information.
+        </p>
+        </div>
+      </section>
+      <section class="space-y-4">
+        <h2 class="text-2xl">Other privacy policies</h2>
+        <div class="space-y-2">
+        <p>Privacy policies from other BAS websites do not apply here.</p>
+        <p>This website has links to other websites for which we are not responsible.</p>
+        </div>
+      </section>
+      <section class="space-y-4">
+        <h2 class="text-2xl">Changes to this policy</h2>
+        <section class="space-y-2">
+          <h3 class="text-lg">2025-05-08</h3>
+          <p>Updating policy to better explain its scope and reflect changes to the providers we use.</p>
+        </section>
+        <section class="space-y-2">
+          <h3 class="text-lg">2020-05-11</h3>
+          <p>Initial policy.</p>
+        </section>
+      </section>
+    </div>
+  </article>
+{% endblock %}

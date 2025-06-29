@@ -1,0 +1,112 @@
+{% macro container_classes() %}container mx-auto{% endmacro %}
+
+{% macro link_classes() %}text-sky-blue-500 hover:underline{% endmacro %}
+
+{% macro btn_base_classes() %}cursor-pointer{% endmacro %}
+
+{% macro btn_default_classes() %}{{ btn_base_classes() }} bg-grey-100 text-black hover:bg-grey-300{% endmacro %}
+
+{% macro btn_primary_classes() %}{{ btn_base_classes() }} bg-turquoise-500 text-white hover:bg-turquoise-700{% endmacro %}
+
+{% macro btn_warning_classes() %}{{ btn_base_classes() }} bg-yellow-500 text-black hover:bg-yellow-700{% endmacro %}
+
+{% macro footer_link_classes() %}text-sky-blue-300 hover:underline{% endmacro %}
+
+{% macro back_to_top_id() %}site-top{% endmacro %}
+
+{% macro sentry_trigger() %}site-feedback-trigger{% endmacro %}
+
+{% macro prose(value) %}
+  <div class="max-w-none prose prose-base prose-headings:font-bold prose-li:my-0">{{ value }}</div>
+{% endmacro %}
+
+{% macro dl_item(title, id, dd_class=None) %}
+  <div class="space-y-2">
+    <dt class="font-bold">{{ title }}</dt>
+    <dd {% if dd_class %}class="{{ dd_class }}"{% endif %} id="{{ id }}">{{ caller() }}</dd>
+  </div>
+{% endmacro %}
+
+{% macro time(data, id=None) %}
+  <time {% if id %}id="{{ id }}"{% endif %} datetime="{{ data.datetime }}">{{ data.value }}</time>
+{% endmacro %}
+
+{% macro ext_link_i() %}<i class="far fa-external-link"></i>{% endmacro %}
+
+{% macro ext_link_a(href, value) %}
+  <a class="{{ link_classes() }}" href="{{ href }}" target="_blank">{{ value }} {{ ext_link_i() }}</a>
+{% endmacro %}
+
+{% macro page_header(id_wrapper=None, id_sub=None, id_main=None, sub=None, sub_i=None, main=None) %}
+  <header {% if id_wrapper %}id="{{ id_wrapper }}"{% endif %} class="border-b-1 border-grey-100 pb-4">
+    {% if sub %}
+      <small {% if id_sub %}id="{{ id_sub }}"{% endif %} class="text-grey-500 uppercase">
+        {% if sub_i %}<i class="{{ sub_i }}"></i>{% endif %} {{ sub }}
+      </small>
+    {% endif %}
+    <h1 {% if id_main %}id="{{ id_main }}"{% endif %} class="text-3xl">{{ main }}</h1>
+  </header>
+{% endmacro %}
+
+{% macro item_border(classes="") %}
+  <div class="border-1 border-grey-100 p-2 {{ classes }}">
+    {{ caller() }}
+  </div>
+{% endmacro %}
+
+{% macro item_title() %}
+  <h2 class="text-2xl">{{ caller() }}</h2>
+{% endmacro %}
+
+{% macro item_summary(item) %}
+  {% call item_border(classes="p-2 flex flex-col h-full") %}
+    <div class="flex h-full">
+      <div class="w-1/6 shrink-0 self-center">
+        <img class="w-full h-auto object-contain" src="{{ item.href_graphic }}" alt="thumbnail for {{ item.title_plain }}">
+      </div>
+      <div class="w-5/6 flex flex-col h-full ml-2">
+        <header><a class="text-lg {{ link_classes() }}" href="{{item.href}}">{{ item.title_html }}</a></header>
+        <article class="py-2 flex-grow overflow-auto">{{ prose(item.summary_html) }}</article>
+        <footer class="mt-auto flex items-center space-x-2 text-sm text-grey-500">
+          {{ item_summary_fragments(item.fragments) }}
+        </footer>
+      </div>
+    </div>
+  {% endcall %}
+{% endmacro %}
+
+{% macro item_summary_fragments(data) %}
+  <span><i class="{{ data.item_type_icon }}"></i> {{ data.item_type }}</span>
+  {% if data.edition %}
+    <span class="text-grey-100">|</span>
+    <span>{{ data.edition }}</span>
+  {% endif %}
+  {% if data.published %}
+    <span class="text-grey-100">|</span>
+    {{ time(data.published) }}
+  {% endif %}
+  {% if data.children %}
+    <span class="text-grey-100">|</span>
+    <span>{{ data.children }}</span>
+  {% endif %}
+  {% if data.access.name != 'PUBLIC' %}
+    <span class="text-grey-100">|</span>
+    <span><i class="far fa-lock-alt"></i> Restricted</span>
+  {% endif %}
+{% endmacro %}
+
+{% macro alert(variant, classes="") %}
+  {% set variant_colour = "grey-500" %}
+  {% if variant == "green" %}
+    {% set variant_colour = "green-500" %}
+  {% elif variant == "yellow" %}
+    {% set variant_colour = "yellow-500" %}
+  {% elif variant == "red" %}
+    {% set variant_colour = "red-500" %}
+  {% elif variant == "blue" %}
+    {% set variant_colour = "sky-blue-500" %}
+  {% endif %}
+  <div class="p-4 pr-0 border-l-5 border-l-{{ variant_colour }} {{ classes }}">
+    {{ caller() }}
+  </div>
+{% endmacro %}

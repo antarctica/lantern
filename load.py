@@ -5,20 +5,17 @@ from copy import deepcopy
 from datetime import UTC, datetime
 from pathlib import Path
 
-from assets_tracking_service.lib.bas_data_catalogue.models.record import Record
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.identification import Constraint, Constraints
-from assets_tracking_service.lib.bas_data_catalogue.models.record.enums import (
-    AggregationAssociationCode,
-    AggregationInitiativeCode,
-    ConstraintRestrictionCode,
-    ConstraintTypeCode,
-)
-from assets_tracking_service.lib.bas_data_catalogue.models.record.presets.aggregations import (
-    make_bas_cat_collection_member,
-)
 from bas_metadata_library import RecordValidationError
 
 from lantern.config import Config
+from lantern.models.record import Record
+from lantern.models.record.enums import (
+    AggregationAssociationCode,
+    AggregationInitiativeCode,
+    HierarchyLevelCode,
+)
+from lantern.models.record.presets.aggregations import make_bas_cat_collection_member
+from lantern.stores.base_store import RecordNotFoundError
 from lantern.stores.gitlab import GitLabStore
 
 

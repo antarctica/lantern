@@ -1,0 +1,10 @@
+{% extends "_layouts/base.html.j2" %}
+{% import '_macros/item.html.j2' as page %}
+
+{% block content %}
+  <article class="{{ com.container_classes() }} px-2 lg:px-0 flex-1 space-y-8 lg:space-y-12">
+    {{ page.header(item.page_header) }}
+    {{ page.not_tabs({'summary': item.summary, 'graphics': item.graphics, 'sides': item.sides}) }}
+    {{ page.tabs({'tabs': item.tabs, 'default_anchor': item.default_tab_anchor}) }}
+  </article>
+{% endblock %}

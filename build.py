@@ -3,10 +3,10 @@ import logging
 from datetime import UTC, datetime
 
 from assets_tracking_service.config import Config
-from assets_tracking_service.lib.bas_data_catalogue.exporters.site_exporter import SiteExporter
 from boto3 import client as S3Client  # noqa: N812
 
 from lantern.config import Config as LanternConfig
+from lantern.exporters.site_exporter import SiteExporter
 from lantern.stores.gitlab import GitLabStore
 
 

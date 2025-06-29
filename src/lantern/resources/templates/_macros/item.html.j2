@@ -1,0 +1,160 @@
+{% import '_macros/common.html.j2' as com %}
+{% import '_macros/tabs.html.j2' as tab %}
+
+{% macro header(data) %}
+  {{
+    com.page_header(
+      id_wrapper='item-header', id_sub='item-header-type', id_main='item-header-title',
+      sub_i=data.subtitle[1], sub=data.subtitle[0], main=data.title
+    )
+  }}
+{% endmacro %}
+
+{% macro not_tabs(data) %}
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-y-4 lg:gap-x-4">
+    <div class="col-span-2 self-stretch">{{ summary(data.summary) }}</div>
+    <div class="col-span-1 self-start">{{ graphics(data.graphics) }}</div>
+  </div>
+  {% if data.sides %}
+    {{ sides(data.sides) }}
+  {% endif %}
+  {% if data.tabs %}
+    {{ tabs(data.tabs) }}
+  {% endif %}
+{% endmacro %}
+
+{% macro summary(data) %}
+  <section id="item-summary" class="col-span-2 bg-grey-100 space-y-8 p-4 h-full">
+    {% if data.grid_enabled %}
+      {{ summary_grid(data) }}
+    {% endif %}
+    {% if data.citation %}
+      {{ citation(data.citation) }}
+    {% endif %}
+    {{ abstract(data.abstract) }}
+  </section>
+{% endmacro %}
+
+{% macro summary_grid(data) %}
+  <section class="grid grid-cols-1 gap-y-4 lg:gap-x-8 lg:grid-cols-[auto_1fr]">
+    {% if data.collections %}
+      {{ collections(data.collections) }}
+    {% endif %}
+    {% if data.physical_parent %}
+      {{ physical_parent(data.physical_parent) }}
+    {% endif %}
+    {% if data.edition %}
+      {{ edition(data.edition) }}
+    {% endif %}
+    {% if data.published %}
+      {{ published(data.published) }}
+    {% endif %}
+    {% if data.access.name != 'PUBLIC' %}
+      {{ access() }}
+    {% endif %}
+  </section>
+{% endmacro %}
+
+{% macro collections(data) %}
+  <div class="font-bold">Collections</div>
+  <div>
+    <ul id="summary-collections" class="space-y-2">
+      {% for item in data %}
+        <li><a class="{{ com.link_classes() }}" href="{{ item.href }}">{{ item.value }}</a></li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endmacro %}
+
+{% macro physical_parent(data) %}
+  <div class="font-bold">One side of</div>
+  <div id="summary-physical-parent"><a class="{{ com.link_classes() }}" href="{{ data.href }}">{{ data.value }}</a></div>
+{% endmacro %}
+
+{% macro edition(value) %}
+  <div class="font-bold">Edition</div>
+  <div id="summary-edition">{{ value }}</div>
+{% endmacro %}
+
+{% macro published(data) %}
+  <div class="font-bold">Published</div>
+  <div>{{ com.time(data, id='summary-published') }}</div>
+{% endmacro %}
+
+{% macro access() %}
+  <div class="font-bold">Access</div>
+  <div id="summary-access">
+    <span class="bg-yellow-500 px-2 py-1 text-sm"><i class="far fa-lock-alt"></i> Restricted</span>
+  </div>
+{% endmacro %}x
+
+{% macro citation(value) %}
+  <section class="space-y-2">
+    <h2 class="text-2xl">Citation</h2>
+    <article id="summary-citation">{{ com.prose(value) }}</article>
+  </section>
+{% endmacro %}
+
+{% macro abstract(value) %}
+  <section class="space-y-2">
+    <h2 class="text-2xl">Abstract</h2>
+    <article id="summary-abstract">{{ com.prose(value) }}</article>
+  </section>
+{% endmacro %}
+
+{% macro graphics(data) %}
+  <aside id="item-graphics" class="space-y-2">
+    {% if data | length > 0 %}
+      {% set item = data[0] %}
+      {% set alt = item.description or item.identifier %}
+      <img id="graphics-{{ item.identifier }}" class="w-full" src="{{ item.href }}" alt="{{ alt }}"/>
+    {% endif %}
+{#    {% for item in data %}#}
+{#      {% set alt = item.description or item.identifier %}#}
+{#      <img id="graphics-{{ item.identifier }}" class="w-full" src="{{ item.href }}" alt="{{ alt }}"/>#}
+{#    {% endfor %}#}
+  </aside>
+{% endmacro %}
+
+{% macro sides(data) %}
+  <aside id="item-sides" class="col-span-2 grid grid-cols-1 lg:grid-cols-2 gap-y-4 lg:gap-x-4">
+    {% for side in data %}
+      <article class="flex flex-col h-full space-y-8">
+        {% call com.item_title() %}{{ side[0] }}{% endcall %}
+        {{ com.item_summary(side[1]) }}
+      </article>
+    {% endfor %}
+  </aside>
+{% endmacro %}
+
+{% macro nav_tab(data) %}
+  {% set tab_id = "tab-" + data.tab.anchor %}
+  {% set is_default_tab = data.tab.anchor == data.default_anchor %}
+
+  {% if data.tab.enabled %}
+    <input id="{{ tab_id }}" type="radio" name="tabs" class="peer/{{ tab_id }} opacity-0 absolute" {% if is_default_tab %}checked="checked"{% endif %} />
+    <label for="{{ tab_id }}" class="block relative p-4 cursor-pointer hover:underline hover:bg-grey-100 hover:text-sky-blue-500 hover:border-b-grey-300 border-1 border-transparent text-grey-500 peer-checked/{{ tab_id }}:text-grey-900 peer-checked/{{ tab_id }}:border-grey-300 peer-checked/{{ tab_id }}:border-b-white peer-checked/{{ tab_id }}:hover:bg-white peer-checked/{{ tab_id }}:hover:border-b-white">
+      <i class="{{ data.tab.icon }}"></i> {{ data.tab.title }}
+    </label>
+  {% endif %}
+{% endmacro %}
+
+{% macro nav_content(data) %}
+  {% set tab_id = "tab-" + data.anchor %}
+  {% if data.enabled %}
+    <div class="border-1 border-grey-300 p-4 -mt-px w-full hidden peer-checked/{{ tab_id }}:block">
+      {{ tab[data.anchor](data) }}
+    </div>
+  {% endif %}
+{% endmacro %}
+
+{% macro tabs(data) %}
+  <nav id="item-tabs" class="flex flex-row flex-wrap">
+    {% for tab in data.tabs %}
+      {{ nav_tab({'tab': tab, 'default_anchor': data.default_anchor}) }}
+    {% endfor %}
+    {% for tab in data.tabs %}
+      {{ nav_content(tab) }}
+    {% endfor %}
+ </nav>
+{% endmacro %}

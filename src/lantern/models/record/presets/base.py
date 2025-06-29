@@ -1,12 +1,12 @@
 from typing import Any
 
-from assets_tracking_service.lib.bas_data_catalogue.models.record import DataQuality, Metadata, Record
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.common import Contact, Contacts
-from assets_tracking_service.lib.bas_data_catalogue.models.record.enums import ContactRoleCode
-from assets_tracking_service.lib.bas_data_catalogue.models.record.presets.citation import make_magic_citation
-from assets_tracking_service.lib.bas_data_catalogue.models.record.presets.conformance import MAGIC_PROFILE_V1
-from assets_tracking_service.lib.bas_data_catalogue.models.record.presets.contacts import make_magic_role
-from assets_tracking_service.lib.bas_data_catalogue.models.record.presets.identifiers import make_bas_cat
+from lantern.models.record import DataQuality, Metadata, Record
+from lantern.models.record.elements.common import Contact, Contacts
+from lantern.models.record.enums import ContactRoleCode
+from lantern.models.record.presets.citation import make_magic_citation
+from lantern.models.record.presets.conformance import MAGIC_PROFILE_V1
+from lantern.models.record.presets.contacts import make_magic_role
+from lantern.models.record.presets.identifiers import make_bas_cat
 
 
 class RecordMagicDiscoveryV1(Record):

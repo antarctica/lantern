@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
 
-from assets_tracking_service.lib.bas_data_catalogue.models.record import Record
-from assets_tracking_service.lib.bas_data_catalogue.models.record.summary import RecordSummary
+from lantern.models.record import Record
+from lantern.models.record.summary import RecordSummary
+
 
 class RecordNotFoundError(Exception):
     """Raised when a record cannot be retrieved."""

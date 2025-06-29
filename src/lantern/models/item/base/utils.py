@@ -1,8 +1,8 @@
 from markdown import Markdown, markdown
 
-from assets_tracking_service.lib.markdown.extensions.links import LinkifyExtension
-from assets_tracking_service.lib.markdown.extensions.prepend_new_line import PrependNewLineExtension
-from assets_tracking_service.lib.markdown.formats.plaintext import PlainTextExtension
+from lantern.lib.markdown.extensions.links import LinkifyExtension
+from lantern.lib.markdown.extensions.prepend_new_line import PrependNewLineExtension
+from lantern.lib.markdown.formats.plaintext import PlainTextExtension
 
 
 def md_as_html(string: str) -> str:

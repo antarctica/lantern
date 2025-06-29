@@ -4,7 +4,7 @@ from typing import TypeVar
 
 import cattrs
 
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.common import Contacts
+from lantern.models.record.elements.common import Contacts
 
 TMetadata = TypeVar("TMetadata", bound="Metadata")
 

@@ -8,10 +8,10 @@ from lxml.etree import XSLT, ElementTree, fromstring, tostring
 from lxml.etree import parse as parse_xml
 from mypy_boto3_s3 import S3Client
 
-from assets_tracking_service.config import Config
-from assets_tracking_service.lib.bas_data_catalogue.exporters.base_exporter import Exporter as BaseExporter
-from assets_tracking_service.lib.bas_data_catalogue.exporters.base_exporter import ResourceExporter
-from assets_tracking_service.lib.bas_data_catalogue.models.record import Record
+from lantern.config import Config
+from lantern.exporters.base_exporter import Exporter as BaseExporter
+from lantern.exporters.base_exporter import ResourceExporter
+from lantern.models.record import Record
 
 
 class IsoXmlExporter(ResourceExporter):
@@ -61,7 +61,7 @@ class IsoXmlHtmlExporter(ResourceExporter):
         super().__init__(
             config=config, logger=logger, s3=s3, record=record, export_base=export_base, export_name=export_name
         )
-        self._xsl_src_ref = "assets_tracking_service.lib.bas_data_catalogue.resources.xsl"
+        self._xsl_src_ref = "lantern.resources.xsl"
 
     @property
     def name(self) -> str:

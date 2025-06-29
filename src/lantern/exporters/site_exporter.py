@@ -8,13 +8,13 @@ from importlib_resources import files as resources_files
 from jinja2 import Environment, PackageLoader, select_autoescape
 from mypy_boto3_s3 import S3Client
 
-from assets_tracking_service.config import Config
-from assets_tracking_service.lib.bas_data_catalogue.exporters.base_exporter import Exporter
-from assets_tracking_service.lib.bas_data_catalogue.exporters.base_exporter import Exporter as BaseExporter
-from assets_tracking_service.lib.bas_data_catalogue.exporters.records_exporter import RecordsExporter
-from assets_tracking_service.lib.bas_data_catalogue.models.record import Record
-from assets_tracking_service.lib.bas_data_catalogue.models.record.summary import RecordSummary
-from assets_tracking_service.lib.bas_data_catalogue.models.templates import PageMetadata
+from lantern.config import Config
+from lantern.exporters.base_exporter import Exporter
+from lantern.exporters.base_exporter import Exporter as BaseExporter
+from lantern.exporters.records_exporter import RecordsExporter
+from lantern.models.record import Record
+from lantern.models.record.summary import RecordSummary
+from lantern.models.templates import PageMetadata
 
 
 class SiteResourcesExporter(Exporter):
@@ -28,11 +28,11 @@ class SiteResourcesExporter(Exporter):
 
     def __init__(self, config: Config, logger: logging.Logger, s3: S3Client) -> None:
         super().__init__(config=config, logger=logger, s3=s3)
-        self._css_src_ref = "assets_tracking_service.lib.bas_data_catalogue.resources.css"
-        self._fonts_src_ref = "assets_tracking_service.lib.bas_data_catalogue.resources.fonts"
-        self._img_src_ref = "assets_tracking_service.lib.bas_data_catalogue.resources.img"
-        self._txt_src_ref = "assets_tracking_service.lib.bas_data_catalogue.resources.txt"
-        self._export_base = config.EXPORTER_DATA_CATALOGUE_OUTPUT_PATH.joinpath("static")
+        self._css_src_ref = "lantern.resources.css"
+        self._fonts_src_ref = "lantern.resources.fonts"
+        self._img_src_ref = "lantern.resources.img"
+        self._txt_src_ref = "lantern.resources.txt"
+        self._export_base = config.EXPORT_PATH.joinpath("static")
 
     def _dump_css(self) -> None:
         """
@@ -149,7 +149,7 @@ class SiteIndexExporter(Exporter):
     def __init__(self, config: Config, logger: logging.Logger, s3: S3Client) -> None:
         """Initialise exporter."""
         super().__init__(config=config, logger=logger, s3=s3)
-        self._index_path = self._config.EXPORTER_DATA_CATALOGUE_OUTPUT_PATH / "-" / "index" / "index.html"
+        self._index_path = self._config.EXPORT_PATH / "-" / "index" / "index.html"
         self._summaries: list[RecordSummary] = []
         self._records: list[Record] = []
         self._record_ids = set()
@@ -305,7 +305,7 @@ class SitePagesExporter(Exporter):
     def __init__(self, config: Config, s3: S3Client, logger: logging.Logger) -> None:
         """Initialise exporter."""
         super().__init__(config=config, logger=logger, s3=s3)
-        _loader = PackageLoader("assets_tracking_service.lib.bas_data_catalogue", "resources/templates")
+        _loader = PackageLoader("lantern", "resources/templates")
         self._jinja = Environment(loader=_loader, autoescape=select_autoescape(), trim_blocks=True, lstrip_blocks=True)
         self._templates = ["404.html.j2", "legal/cookies.html.j2", "legal/copyright.html.j2", "legal/privacy.html.j2"]
 
@@ -318,16 +318,16 @@ class SitePagesExporter(Exporter):
             "legal/privacy.html.j2": "Privacy Policy",
         }
         return PageMetadata(
-            sentry_src=self._config.EXPORTER_DATA_CATALOGUE_SENTRY_SRC,
-            plausible_domain=self._config.EXPORTER_DATA_CATALOGUE_PLAUSIBLE_DOMAIN,
+            sentry_src=self._config.TEMPLATES_SENTRY_SRC,
+            plausible_domain=self._config.TEMPLATES_PLAUSIBLE_DOMAIN,
             html_title=mapping[template_path],
         )
 
     def _get_page_path(self, template_path: str) -> Path:
         """Get path within exported site for a page based on its template."""
         if template_path == "404.html.j2":
-            return self._config.EXPORTER_DATA_CATALOGUE_OUTPUT_PATH / "404.html"
-        return self._config.EXPORTER_DATA_CATALOGUE_OUTPUT_PATH / template_path.split(".")[0] / "index.html"
+            return self._config.EXPORT_PATH / "404.html"
+        return self._config.EXPORT_PATH / template_path.split(".")[0] / "index.html"
 
     def _dumps(self, template_path: str) -> str:
         """Build a page."""
@@ -384,9 +384,9 @@ class SiteExporter(Exporter):
 
     def purge(self) -> None:
         """Empty file system export directory and S3 publishing bucket."""
-        if self._config.EXPORTER_DATA_CATALOGUE_OUTPUT_PATH.exists():
+        if self._config.EXPORT_PATH.exists():
             self._logger.info("Purging file system export directory")
-            shutil.rmtree(self._config.EXPORTER_DATA_CATALOGUE_OUTPUT_PATH)
+            shutil.rmtree(self._config.EXPORT_PATH)
         self._logger.info("Purging S3 publishing bucket")
         self._s3_utils.empty_bucket()
 

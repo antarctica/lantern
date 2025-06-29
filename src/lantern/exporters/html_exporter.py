@@ -4,14 +4,12 @@ from pathlib import Path
 
 from mypy_boto3_s3 import S3Client
 
-from assets_tracking_service.config import Config
-from assets_tracking_service.lib.bas_data_catalogue.exporters.base_exporter import ResourceExporter
-from assets_tracking_service.lib.bas_data_catalogue.models.item.catalogue import ItemCatalogue
-from assets_tracking_service.lib.bas_data_catalogue.models.item.catalogue.special.physical_map import (
-    ItemCataloguePhysicalMap,
-)
-from assets_tracking_service.lib.bas_data_catalogue.models.record import Record
-from assets_tracking_service.lib.bas_data_catalogue.models.record.summary import RecordSummary
+from lantern.config import Config
+from lantern.exporters.base_exporter import ResourceExporter
+from lantern.models.item.catalogue import ItemCatalogue
+from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
+from lantern.models.record import Record
+from lantern.models.record.summary import RecordSummary
 
 
 class HtmlExporter(ResourceExporter):

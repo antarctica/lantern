@@ -5,9 +5,9 @@ from typing import Any
 from bs4 import BeautifulSoup
 from jinja2 import Environment, PackageLoader, select_autoescape
 
-from assets_tracking_service.config import Config
-from assets_tracking_service.lib.bas_data_catalogue.models.item.base import ItemBase
-from assets_tracking_service.lib.bas_data_catalogue.models.item.catalogue.elements import (
+from lantern.config import Config
+from lantern.models.item.base import ItemBase
+from lantern.models.item.catalogue.elements import (
     Aggregations,
     Dates,
     Extent,
@@ -16,7 +16,7 @@ from assets_tracking_service.lib.bas_data_catalogue.models.item.catalogue.elemen
     PageHeader,
     PageSummary,
 )
-from assets_tracking_service.lib.bas_data_catalogue.models.item.catalogue.tabs import (
+from lantern.models.item.catalogue.tabs import (
     AdditionalInfoTab,
     AuthorsTab,
     ContactTab,
@@ -28,11 +28,11 @@ from assets_tracking_service.lib.bas_data_catalogue.models.item.catalogue.tabs i
     RelatedTab,
     Tab,
 )
-from assets_tracking_service.lib.bas_data_catalogue.models.record import Record
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.identification import GraphicOverview
-from assets_tracking_service.lib.bas_data_catalogue.models.record.enums import ContactRoleCode
-from assets_tracking_service.lib.bas_data_catalogue.models.record.summary import RecordSummary
-from assets_tracking_service.lib.bas_data_catalogue.models.templates import PageMetadata
+from lantern.models.record import Record
+from lantern.models.record.elements.identification import GraphicOverview
+from lantern.models.record.enums import ContactRoleCode
+from lantern.models.record.summary import RecordSummary
+from lantern.models.templates import PageMetadata
 
 
 class ItemInvalidError(Exception):
@@ -100,7 +100,7 @@ class ItemCatalogue(ItemBase):
         super().__init__(record)
         self._config = config
         self._get_summary = get_record_summary
-        _loader = PackageLoader("assets_tracking_service.lib.bas_data_catalogue", "resources/templates")
+        _loader = PackageLoader("lantern", "resources/templates")
         self._jinja = Environment(loader=_loader, autoescape=select_autoescape(), trim_blocks=True, lstrip_blocks=True)
 
         self.validate(record)
@@ -192,7 +192,7 @@ class ItemCatalogue(ItemBase):
         """Extent tab."""
         bounding_ext = self.bounding_extent
         extent = (
-            Extent(bounding_ext, embedded_maps_endpoint=self._config.EXPORTER_DATA_CATALOGUE_EMBEDDED_MAPS_ENDPOINT)
+            Extent(bounding_ext, embedded_maps_endpoint=self._config.TEMPLATES_ITEM_MAPS_ENDPOINT)
             if bounding_ext
             else None
         )
@@ -234,7 +234,7 @@ class ItemCatalogue(ItemBase):
             contact=poc,
             item_id=self.resource_id,
             item_title=self.title_plain,
-            form_action=self._config.EXPORTER_DATA_CATALOGUE_ITEM_CONTACT_ENDPOINT,
+            form_action=self._config.TEMPLATES_ITEM_CONTACT_ENDPOINT,
         )
 
     @property
@@ -250,8 +250,8 @@ class ItemCatalogue(ItemBase):
     def page_metadata(self) -> PageMetadata:
         """Templates page metadata."""
         return PageMetadata(
-            sentry_src=self._config.EXPORTER_DATA_CATALOGUE_SENTRY_SRC,
-            plausible_domain=self._config.EXPORTER_DATA_CATALOGUE_PLAUSIBLE_DOMAIN,
+            sentry_src=self._config.TEMPLATES_SENTRY_SRC,
+            plausible_domain=self._config.TEMPLATES_PLAUSIBLE_DOMAIN,
             html_title=self._html_title,
             html_open_graph=self._html_open_graph,
             html_schema_org=self._html_schema_org,

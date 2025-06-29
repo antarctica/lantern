@@ -5,10 +5,10 @@ from urllib.parse import parse_qs, urlparse
 
 from jinja2 import Environment
 
-from assets_tracking_service.lib.bas_data_catalogue.models.item.base import AccessType
-from assets_tracking_service.lib.bas_data_catalogue.models.item.base.elements import Contact, Link
-from assets_tracking_service.lib.bas_data_catalogue.models.item.base.elements import Extent as ItemExtent
-from assets_tracking_service.lib.bas_data_catalogue.models.item.catalogue.distributions import (
+from lantern.models.item.base import AccessType
+from lantern.models.item.base.elements import Contact, Link
+from lantern.models.item.base.elements import Extent as ItemExtent
+from lantern.models.item.catalogue.distributions import (
     ArcGisFeatureLayer,
     ArcGisOgcApiFeatures,
     ArcGisVectorTileLayer,
@@ -21,7 +21,7 @@ from assets_tracking_service.lib.bas_data_catalogue.models.item.catalogue.distri
     Png,
     Shapefile,
 )
-from assets_tracking_service.lib.bas_data_catalogue.models.item.catalogue.elements import (
+from lantern.models.item.catalogue.elements import (
     Aggregations,
     Dates,
     FormattedDate,
@@ -29,21 +29,13 @@ from assets_tracking_service.lib.bas_data_catalogue.models.item.catalogue.elemen
     ItemSummaryCatalogue,
     Maintenance,
 )
-from assets_tracking_service.lib.bas_data_catalogue.models.item.catalogue.enums import (
-    Licence,
-    ResourceTypeIcon,
-    ResourceTypeLabel,
-)
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.common import Date, Identifier, Series
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.data_quality import DomainConsistency
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.distribution import (
-    Distribution as RecordDistribution,
-)
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.identification import Constraint
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.metadata import MetadataStandard
-from assets_tracking_service.lib.bas_data_catalogue.models.record.enums import (
-    HierarchyLevelCode,
-)
+from lantern.models.item.catalogue.enums import Licence, ResourceTypeIcon, ResourceTypeLabel
+from lantern.models.record.elements.common import Date, Identifier, Series
+from lantern.models.record.elements.data_quality import DomainConsistency
+from lantern.models.record.elements.distribution import Distribution as RecordDistribution
+from lantern.models.record.elements.identification import Constraint
+from lantern.models.record.elements.metadata import MetadataStandard
+from lantern.models.record.enums import HierarchyLevelCode
 
 
 class Tab(ABC):

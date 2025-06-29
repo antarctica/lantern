@@ -8,12 +8,10 @@ from pathlib import Path
 from bas_metadata_library import RecordValidationError
 
 from lantern.config import Config
-from lantern.models.record import Record
-from lantern.models.record.enums import (
-    AggregationAssociationCode,
-    AggregationInitiativeCode,
-    HierarchyLevelCode,
-)
+from lantern.log import init as init_logging
+from lantern.log import init_sentry
+from lantern.models.record import Record, RecordInvalidError
+from lantern.models.record.enums import AggregationAssociationCode, AggregationInitiativeCode, HierarchyLevelCode
 from lantern.models.record.presets.aggregations import make_bas_cat_collection_member
 from lantern.stores.base_store import RecordNotFoundError
 from lantern.stores.gitlab import GitLabStore
@@ -229,8 +227,9 @@ def main() -> None:
     author_name = "Felix Fennell"
     author_email = "felnne@bas.ac.uk"
 
+    init_logging()
+    init_sentry()
     logger = logging.getLogger("app")
-    logger.setLevel(logging.DEBUG)
     logger.info("Initialising")
 
     config = Config()

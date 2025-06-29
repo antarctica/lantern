@@ -2,43 +2,26 @@ import json
 from json import JSONDecodeError
 from urllib.parse import unquote
 
-from assets_tracking_service.lib.bas_data_catalogue.models.item.base.const import (
-    PERMISSIONS_BAS_GROUP,
-    PERMISSIONS_NERC_DIRECTORY,
-)
-from assets_tracking_service.lib.bas_data_catalogue.models.item.base.elements import (
-    Contact,
-    Contacts,
-    Extent,
-    Extents,
-)
-from assets_tracking_service.lib.bas_data_catalogue.models.item.base.enums import AccessType
-from assets_tracking_service.lib.bas_data_catalogue.models.item.base.utils import md_as_html, md_as_plain
-from assets_tracking_service.lib.bas_data_catalogue.models.record import (
-    Distribution,
-    HierarchyLevelCode,
-    Record,
-)
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.common import (
-    Date,
-    Identifier,
-    Identifiers,
-    Series,
-)
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.identification import (
+from lantern.models.item.base.const import PERMISSIONS_BAS_GROUP, PERMISSIONS_NERC_DIRECTORY
+from lantern.models.item.base.elements import Contact, Contacts, Extent, Extents
+from lantern.models.item.base.enums import AccessType
+from lantern.models.item.base.utils import md_as_html, md_as_plain
+from lantern.models.record import Distribution, HierarchyLevelCode, Record
+from lantern.models.record.elements.common import Date, Identifier, Identifiers, Series
+from lantern.models.record.elements.identification import (
     Aggregation,
     Aggregations,
     Constraint,
     Constraints,
     GraphicOverviews,
 )
-from assets_tracking_service.lib.bas_data_catalogue.models.record.enums import (
+from lantern.models.record.enums import (
     AggregationAssociationCode,
     AggregationInitiativeCode,
     ConstraintRestrictionCode,
     ConstraintTypeCode,
 )
-from assets_tracking_service.lib.bas_data_catalogue.models.record.summary import RecordSummary
+from lantern.models.record.summary import RecordSummary
 
 
 class ItemBase:

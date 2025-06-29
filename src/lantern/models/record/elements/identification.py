@@ -3,13 +3,13 @@ from typing import TypeVar
 
 import cattrs
 
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.common import (
+from lantern.models.record.elements.common import (
     Citation,
     Date,
     Dates,
     Identifier,
 )
-from assets_tracking_service.lib.bas_data_catalogue.models.record.enums import (
+from lantern.models.record.enums import (
     AggregationAssociationCode,
     AggregationInitiativeCode,
     ConstraintRestrictionCode,

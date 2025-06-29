@@ -1,9 +1,9 @@
 from datetime import date
 
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.common import Citation, Contacts, Date, Dates
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.data_quality import DomainConsistency
-from assets_tracking_service.lib.bas_data_catalogue.models.record.enums import ContactRoleCode
-from assets_tracking_service.lib.bas_data_catalogue.models.record.presets.contacts import make_magic_role
+from lantern.models.record.elements.common import Citation, Contacts, Date, Dates
+from lantern.models.record.elements.data_quality import DomainConsistency
+from lantern.models.record.enums import ContactRoleCode
+from lantern.models.record.presets.contacts import make_magic_role
 
 MAGIC_PROFILE_V1 = DomainConsistency(
     specification=Citation(

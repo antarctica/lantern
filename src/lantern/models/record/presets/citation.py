@@ -1,5 +1,5 @@
-from assets_tracking_service.lib.bas_data_catalogue.models.record import HierarchyLevelCode
-from assets_tracking_service.lib.bas_data_catalogue.models.record.elements.common import Date, Identifier
+from lantern.models.record import HierarchyLevelCode
+from lantern.models.record.elements.common import Date, Identifier
 
 
 def make_magic_citation(

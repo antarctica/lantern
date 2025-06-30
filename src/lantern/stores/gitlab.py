@@ -127,21 +127,7 @@ class GitLabStore(Store):
     @staticmethod
     def _make_summary_config(config: dict) -> dict:
         """Return subset of a Record config needed for a RecordSummary."""
-        # TODO: move to RecordSummary?
-        return {
-            "file_identifier": config["file_identifier"],
-            "hierarchy_level": config["hierarchy_level"],
-            "date_stamp": config["metadata"]["date_stamp"],
-            "title": config["identification"]["title"]["value"],
-            "purpose": config["identification"].get("purpose", None),
-            "edition": config["identification"].get("edition", None),
-            "creation": config["identification"]["dates"].get("creation", None),
-            "revision": config["identification"]["dates"].get("revision", None),
-            "publication": config["identification"]["dates"].get("publication", None),
-            "graphic_overviews": config["identification"].get("graphic_overviews", []),
-            "constraints": config["identification"].get("constraints", []),
-            "aggregations": config["identification"].get("aggregations", []),
-        }
+        return RecordSummary.subset_config(config)
 
     def _load_config(self, path: Path) -> dict:
         """Load record config from a JSON file and report any unsupported content."""

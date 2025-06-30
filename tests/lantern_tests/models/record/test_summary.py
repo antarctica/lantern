@@ -1,8 +1,9 @@
 from datetime import UTC, datetime
 
 import pytest
+from conftest import _record_config_minimal_iso
 
-from lantern.models.record import HierarchyLevelCode, Record
+from lantern.models.record import HierarchyLevelCode, Record, clean_dict
 from lantern.models.record.elements.common import Date, Identifier
 from lantern.models.record.elements.identification import (
     Aggregation,
@@ -83,6 +84,59 @@ class TestRecordSummary:
         assert record_summary.graphic_overviews[0] == expected_graphic
         assert record_summary.constraints[0] == expected_constraint
         assert record_summary.aggregations[0] == expected_aggregation
+
+    _config = _record_config_minimal_iso()
+    _subset_config_base = {
+        "hierarchy_level": _config["hierarchy_level"],
+        "date_stamp": _config["metadata"]["date_stamp"],
+        "title": _config["identification"]["title"]["value"],
+        "creation": _config["identification"]["dates"]["creation"],
+    }
+
+    # purpose, edition, revision, publication, graphic_overviews, constraints, aggregations
+
+    @pytest.mark.parametrize(
+        ("value", "expected"),
+        [
+            (_config, _subset_config_base),
+            (
+                {
+                    **_config,
+                    **{
+                        "file_identifier": "x",
+                        "identification": {
+                            "title": {"value": "x"},
+                            "abstract": "x",
+                            "purpose": "x",
+                            "edition": "x",
+                            "dates": {"creation": "x", "revision": "x", "publication": "x"},
+                            "graphic_overviews": ["x"],
+                            "constraints": ["x"],
+                            "aggregations": ["x"],
+                        },
+                    },
+                },
+                {
+                    **_subset_config_base,
+                    **{
+                        "file_identifier": "x",
+                        "purpose": "x",
+                        "edition": "x",
+                        "creation": "x",
+                        "revision": "x",
+                        "publication": "x",
+                        "graphic_overviews": ["x"],
+                        "constraints": ["x"],
+                        "aggregations": ["x"],
+                    },
+                },
+            ),
+        ],
+    )
+    def test_subset_config(self, value: dict, expected: dict):
+        """Can create a RecordSummary config from a Record config."""
+        result = clean_dict(RecordSummary.subset_config(value))
+        assert result == expected
 
     def test_loads_json_config(self):
         """Can create a RecordSummary from a dict loaded from JSON."""

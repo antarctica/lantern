@@ -58,7 +58,7 @@ class RecordsExporter(Exporter):
 
     def _get_html_aliases_exporter(self, record: Record) -> HtmlAliasesExporter:
         """Record aliases as redirects to item HTML."""
-        output_path = self._config.EXPORT_PATH / "aliases"
+        output_path = self._config.EXPORT_PATH
         return HtmlAliasesExporter(
             config=self._config, logger=self._logger, s3=self._s3_client, record=record, site_base=output_path
         )

@@ -23,9 +23,9 @@ class S3Utils:
 
     def calc_key(self, path: Path) -> str:
         """
-        Calculate `path` relative to `self._config.EXPORTER_DATA_CATALOGUE_OUTPUT_PATH`.
+        Calculate `path` relative to `self._config.EXPORT_PATH`.
 
-        E.g. `/data/site/html/123/index.html` gives `html/123/index.html` where OUTPUT_PATH is `/data/site/`.
+        E.g. `/data/site/html/123/index.html` gives `html/123/index.html` where EXPORT_PATH is `/data/site/`.
         """
         return str(path.relative_to(self._relative_base))
 
@@ -87,7 +87,7 @@ class Exporter(ABC):
         Initialise exporter.
 
         Where `export_base` is an output directory for each export type which MUST be relative to
-        `Config.EXPORTER_DATA_CATALOGUE_OUTPUT_PATH`, so that a base S3 key can be generated from it.
+        `Config.EXPORT_PATH`, so that a base S3 key can be generated from it.
         """
         self._config = config
         self._logger = logger
@@ -155,7 +155,7 @@ class ResourceExporter(Exporter, ABC):
         try:
             _ = export_base.relative_to(self._config.EXPORT_PATH)
         except ValueError as e:
-            msg = "Export base must be relative to EXPORTER_DATA_CATALOGUE_OUTPUT_PATH."
+            msg = "Export base must be relative to EXPORT_PATH."
             raise ValueError(msg) from e
 
     @abstractmethod

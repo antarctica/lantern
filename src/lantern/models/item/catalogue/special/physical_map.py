@@ -137,7 +137,7 @@ class ItemCataloguePhysicalMap(ItemCatalogue):
                 bounding_extent = Extent(
                     label=label,
                     extent=bounding_extent,
-                    embedded_maps_endpoint=self._config.EXPORTER_DATA_CATALOGUE_EMBEDDED_MAPS_ENDPOINT,
+                    embedded_maps_endpoint=self._config.TEMPLATES_ITEM_MAPS_ENDPOINT,
                 )
                 extents.append(bounding_extent)
 

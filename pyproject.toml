@@ -31,17 +31,17 @@ dev = [
     "ruff>=0.11.13",
     "safety>=3.5.2",
 ]
-
-[[tool.uv.index]]
-name = "ats"
-url = "https://gitlab.data.bas.ac.uk/api/v4/projects/1220/packages/pypi/simple"
-
-[[tool.uv.index]]
-name = "ats-air"
-url = "https://gitlab.data.bas.ac.uk/api/v4/projects/1291/packages/pypi/simple"
-
-[tool.uv.sources]
-assets-tracking-service-aircraft-provider = { index = "ats-air" }
+test = [
+    "moto[s3]>=5.1.6",
+    "pytest>=8.4.1",
+    "pytest-cov>=6.2.1",
+    "pytest-env>=1.1.5",
+    "pytest-freezer>=0.4.9", # check
+    "pytest-mock>=3.14.1",
+    "pytest-playwright>=0.7.0",
+    "pytest-random-order>=1.2.0",
+    "pytest-recording>=0.13.4",
+]
 
 [tool.ruff]
 src = ["src"]
@@ -97,9 +97,52 @@ ignore = ["D100", "D104", "D107", "D203", "D212", "D402", "E501", "PT001", "PT02
 #   tests/* |   D401 | ignore imperative mood in docstrings (too unreliable)
 #   tests/* |   S101 | ignore use of assert
 
-
 [tool.ruff.lint.flake8-annotations]
 allow-star-arg-any = true
+
+[tool.pytest_env]
+# `LANTERN_TEMPLATES_SENTRY_SRC` needs to be real to load the Sentry feedback widget
+LANTERN_LOG_LEVEL = "INFO"
+LANTERN_ENABLE_FEATURE_SENTRY = "false"
+LANTERN_SENTRY_ENVIRONMENT = "test"
+LANTERN_STORE_GITLAB_ENDPOINT = "https://example.com"
+LANTERN_STORE_GITLAB_TOKEN='x'
+LANTERN_STORE_GITLAB_PROJECT_ID='x'
+LANTERN_STORE_GITLAB_CACHE_PATH='cache'
+LANTERN_TEMPLATES_SENTRY_SRC="https://js.sentry-cdn.com/57698b6483c7ac43b7c9c905cdb79943.min.js"
+LANTERN_TEMPLATES_PLAUSIBLE_DOMAIN="x"
+LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT='https://example.com/contact' # must be 'https://example.com/contact'
+LANTERN_EXPORT_PATH="export"
+LANTERN_AWS_ACCESS_ID="x"
+LANTERN_AWS_ACCESS_SECRET="x"
+LANTERN_AWS_S3_BUCKET="x"
+
+[tool.pytest.ini_options]
+addopts = "--strict-markers --random-order -x --ff"
+# --strict-markers | fail if unknown markers are used
+# --random-order   | run tests in random order
+# -x               | stop after first failure [Overriden in CI]
+# --ff             | run failed tests first
+markers = [
+    "cov: coverage checks (deselect with '-m \"not cov\"')",
+]
+
+[tool.coverage.report]
+skip_empty = true
+show_missing = false
+fail_under = 100
+exclude_lines = [
+  "pragma: no cover",
+  "@abstractmethod",
+]
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+[tool.coverage.run]
+branch = true
+source = ["src"]
+omit = []
 
 [build-system]
 requires = ["hatchling"]

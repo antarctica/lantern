@@ -98,18 +98,22 @@ class HtmlAliasesExporter(ResourceExporter):
         return [identifier.href.replace("https://data.bas.ac.uk/", "") for identifier in identifiers]
 
     @property
+    def target(self) -> str:
+        """Redirect location."""
+        return f"/items/{self._record.file_identifier}/"
+
+    @property
     def name(self) -> str:
         """Exporter name."""
         return "Item Aliases"
 
     def dumps(self) -> str:
         """Generate redirect page for record."""
-        target = f"/items/{self._record.file_identifier}/"
         return f"""
 <!DOCTYPE html>
 <html lang="en-GB">
-    <head><title>BAS Data Catalogue</title><meta http-equiv="refresh" content="0;url={target}" /></head>
-    <body>Click <a href="{target}">here</a> if you are not redirected after a few seconds.</body>
+    <head><title>BAS Data Catalogue</title><meta http-equiv="refresh" content="0;url={self.target}" /></head>
+    <body>Click <a href="{self.target}">here</a> if you are not redirected after a few seconds.</body>
 </html>
         """
 
@@ -124,7 +128,7 @@ class HtmlAliasesExporter(ResourceExporter):
 
     def publish(self) -> None:
         """Write redirect pages with redirect headers to S3."""
-        location = f"/items/{self._record.file_identifier}/index.html"
+        location = f"{self.target}index.html"
         for alias in self._get_aliases():
             self._s3_utils.upload_content(
                 key=f"{alias}/index.html", content_type="text/html", body=self.dumps(), redirect=location

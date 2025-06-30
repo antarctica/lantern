@@ -71,6 +71,24 @@ class RecordSummary:
         return converter.structure(value_, cls)
 
     @classmethod
+    def subset_config(cls: type[TRecordSummary], value: dict) -> dict:
+        """Create a RecordSummary config from a Record config."""
+        return {
+            "file_identifier": value.get("file_identifier"),
+            "hierarchy_level": value["hierarchy_level"],
+            "date_stamp": value["metadata"]["date_stamp"],
+            "title": value["identification"]["title"]["value"],
+            "purpose": value["identification"].get("purpose", None),
+            "edition": value["identification"].get("edition", None),
+            "creation": value["identification"]["dates"]["creation"],
+            "revision": value["identification"]["dates"].get("revision", None),
+            "publication": value["identification"]["dates"].get("publication", None),
+            "graphic_overviews": value["identification"].get("graphic_overviews", []),
+            "constraints": value["identification"].get("constraints", []),
+            "aggregations": value["identification"].get("aggregations", []),
+        }
+
+    @classmethod
     def _loads_json_dict(cls: type[TRecordSummary], value: dict) -> "RecordSummary":
         """Create a RecordSummary from a config dict loaded from JSON."""
         converter = cattrs.Converter()

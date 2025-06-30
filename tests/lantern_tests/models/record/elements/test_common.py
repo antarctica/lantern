@@ -369,6 +369,23 @@ class TestContact:
         """Can compare two Contacts checking if roles overlap."""
         assert first.eq_contains_roles(second) == expected
 
+    def test_unstructure_cattrs(self):
+        """
+        Can use Cattrs to convert a Contact instance into plain types.
+
+        Ensures roles are sorted alphabetically to avoid noise in comparisons.
+        """
+        value = Contact(
+            organisation=ContactIdentity(name="x"), role=[ContactRoleCode.POINT_OF_CONTACT, ContactRoleCode.AUTHOR]
+        )
+        expected = {"organisation": {"name": "x"}, "role": ["author", "pointOfContact"]}
+
+        converter = cattrs.Converter()
+        converter.register_unstructure_hook(Contact, lambda d: d.unstructure())
+        result = clean_dict(converter.unstructure(value))
+
+        assert result == expected
+
 
 class TestContacts:
     """Test Contacts container."""

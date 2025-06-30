@@ -1,3 +1,4 @@
+import logging
 from datetime import UTC, date, datetime
 
 import pytest
@@ -196,14 +197,26 @@ class TestRecord:
         result = Record._normalise_static_config_values(fx_record_config_minimal_iso)
         assert "maintenance" not in result["metadata"]
 
-    @pytest.mark.parametrize("supported", [False, True])
-    def test_config_supported(self, fx_record_config_minimal_iso: dict, supported: bool):
+    @pytest.mark.parametrize("value", [{}, {"invalid": "x"}, {"hierarchy_level": HierarchyLevelCode.DIMENSION_GROUP}])
+    def test_config_supported(self, fx_record_config_minimal_iso: dict, value: dict):
         """Can determine if a record config is supported or not."""
-        if not supported:
-            fx_record_config_minimal_iso["hierarchy_level"] = HierarchyLevelCode.SERIES
+        if value:
+            fx_record_config_minimal_iso = {**fx_record_config_minimal_iso, **value}
+        expected = True if not value else False
 
         result = Record.config_supported(fx_record_config_minimal_iso)
-        assert result == supported
+        assert result == expected
+
+    @pytest.mark.cov()
+    def test_config_supported_log(self, caplog: pytest.LogCaptureFixture, fx_record_config_minimal_iso: dict):
+        """Can log unsupported record config contents if set."""
+        fx_record_config_minimal_iso["invalid"] = "x"
+        logger = logging.getLogger("test")
+        logger.setLevel(logging.DEBUG)
+
+        Record.config_supported(config=fx_record_config_minimal_iso, logger=logger)
+
+        assert "Diff: Item root['invalid'] (\"x\") added to dictionary." in caplog.text
 
     def test_validate_min_iso(self):
         """A minimally valid ISO record can be validated."""

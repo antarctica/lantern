@@ -129,6 +129,24 @@ class Contact:
             msg = "At least one role is required"
             raise ValueError(msg) from None
 
+    def unstructure(self) -> list[dict]:
+        """
+        Convert to plain types.
+
+        Ensures roles are sorted alphabetically.
+
+        Intended to be used as a cattrs unstructure hook.
+        E.g. `converter.register_unstructure_hook(Contact, lambda d: d.unstructure())`
+
+        Example input: Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.POINT_OF_CONTACT])
+        Example output: {'organisation': {'name': 'x'}, 'role': ['pointOfContact']}
+        """
+        # noinspection PyUnresolvedReferences
+        converter = cattrs.Converter()
+        contact = converter.unstructure(self)
+        contact["role"] = sorted(contact["role"])
+        return contact
+
     @property
     def role(self) -> list[ContactRoleCode]:
         """Role(s)."""
@@ -196,6 +214,7 @@ class Contacts(list[Contact]):
         """
         # noinspection PyUnresolvedReferences
         converter = cattrs.Converter()
+        converter.register_unstructure_hook(Contact, lambda d: d.unstructure())
         return [converter.unstructure(contact) for contact in self]
 
     def filter(self, roles: ContactRoleCode | list[ContactRoleCode]) -> "Contacts":

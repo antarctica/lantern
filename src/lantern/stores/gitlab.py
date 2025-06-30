@@ -122,7 +122,7 @@ class GitLabStore(Store):
     @staticmethod
     def _get_config_hash(config: dict) -> str:
         """Calculate SHA1 hash for a Record config."""
-        return sha1(json.dumps(config, sort_keys=True).encode("utf-8")).hexdigest()  # noqa: S324
+        return sha1(json.dumps(config, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()  # noqa: S324
 
     @staticmethod
     def _make_summary_config(config: dict) -> dict:
@@ -190,7 +190,7 @@ class GitLabStore(Store):
         """
         Cache records from remote store locally.
 
-        Any existing cache is removed and recreated.
+        Any existing cache is removed and recreated, regardless of whether it's up-to-date.
 
         For simplicity and efficiency, all records are fetched together using a GitLab project repo archive.
 
@@ -231,18 +231,22 @@ class GitLabStore(Store):
 
         with self._cache_head_path.open(mode="w") as f:
             head_commit = self._project.commits.get(self._head_commit_id)
-            json.dump(head_commit.attributes, f, indent=2)
+            json.dump(head_commit.attributes, f, indent=2, ensure_ascii=False)
 
         with self._cache_index_path.open(mode="w") as f:
             data = {"index": index}
-            json.dump(data, f, indent=2)
+            json.dump(data, f, indent=2, ensure_ascii=False)
 
         with self._cache_summaries_path.open(mode="w") as f:
             data = {"summaries": {summary["file_identifier"]: summary for summary in summaries}}
-            json.dump(data, f, indent=2)
+            json.dump(data, f, indent=2, ensure_ascii=False)
 
     def _ensure_cache(self) -> None:
-        """Ensure cache exists and is up to date."""
+        """
+        Ensure cache exists and is up-to-date.
+
+        An existing, up-to-date, cache is not modified.
+        """
         if not self._online and not self._cache_path.exists():
             msg = "Local cache and GitLab unavailable. Cannot load records."
             raise RemoteStoreUnavailableError(msg) from None
@@ -364,11 +368,13 @@ class GitLabStore(Store):
                 {
                     "action": config_action,
                     "file_path": self._get_remote_hashed_path(config["file_identifier"]),
-                    "content": json.dumps(config, indent=2),
+                    "content": json.dumps(config, indent=2, ensure_ascii=False),
                 }
             )
 
+        # noinspection PyTypeChecker
         additions = sum(1 for action in data["actions"] if action["action"] == "create")
+        # noinspection PyTypeChecker
         updates = sum(1 for action in data["actions"] if action["action"] == "update")
         self._logger.info(f"Committing {additions} additions, {updates} updates")
 
@@ -409,12 +415,12 @@ class GitLabStore(Store):
 
         Requires a local cache to determine if records are additions or updates.
 
-        Invalidates the local cache so new/changed records are included.
+        Invalidates the local cache if needed so new/changed records are included.
         """
         configs = [record.dumps() for record in records]
         self._ensure_cache()
         self._commit_configs(configs=configs, message=message, author=author)
+        if len(records) == 0:
+            self._logger.info("No records pushed, skipping cache invalidation")
+            return
         self._create_cache()
-
-    def delete(self, file_identifier: str):
-        pass

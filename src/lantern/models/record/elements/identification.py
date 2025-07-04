@@ -131,6 +131,23 @@ class Aggregations(list[Aggregation]):
             [aggregation for aggregation in self if aggregation.matches_filter(namespace, associations, initiatives)]
         )
 
+    def identifiers(self, exclude: list[str] | None = None) -> list[str]:
+        """
+        Get identifiers from a set of aggregations, optionally filtered to exclude a list of values.
+
+        Exclude list can be used to filter out a Record's own identifier for example.
+        """
+        if exclude is None:
+            exclude = []
+
+        return list(
+            {
+                aggregation.identifier.identifier
+                for aggregation in self
+                if aggregation.identifier.identifier not in exclude
+            }
+        )
+
 
 @dataclass(kw_only=True)
 class BoundingBox:

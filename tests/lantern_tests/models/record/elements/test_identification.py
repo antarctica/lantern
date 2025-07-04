@@ -299,6 +299,16 @@ class TestAggregations:
         assert len(result) == len(expected)
         assert result == expected
 
+    @pytest.mark.parametrize(
+        ("excluded", "expected"),
+        [([], [test_filter_a.identifier.identifier]), ([test_filter_a.identifier.identifier], [])],
+    )
+    def test_identifiers(self, excluded: list[str], expected: list[str]):
+        """Can get identifiers from items in an Aggregation element."""
+        value = Aggregations([self.test_filter_a])
+        result = value.identifiers(exclude=excluded)
+        assert result == expected
+
     def test_structure(self):
         """Can create an Aggregations element by converting a list of plain types."""
         expected = Aggregations(

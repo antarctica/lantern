@@ -1,0 +1,15 @@
+{
+  "$schema": "https://metadata-resources.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-2-v4.json",
+  "file_identifier": "a1b2c3",
+  "hierarchy_level": "dataset",
+    "metadata": {
+      "contacts": [{"organisation": {"name": "x"}, "role": ["pointOfContact"]}],
+      "date_stamp": "2014-06-30"
+  },
+  "identification": {
+    "title": {"value": "x"},
+    "dates": {"creation": "2014-06-30"},
+    "abstract": "x",
+    "language": "eng"
+  }
+}

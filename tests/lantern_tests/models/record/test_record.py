@@ -89,7 +89,12 @@ class TestRecord:
         assert record.metadata.date_stamp == date_stamp
         assert record.identification.abstract == value
 
-    def test_loads(self):
+    def test_sha1(self, fx_record_minimal_iso: Record):
+        """Can calculate a SHA1 hash of the record config."""
+        assert fx_record_minimal_iso.sha1 == "5a9f0174d9bebd69b8310aba338debc2f5aaadf1"
+
+    @pytest.mark.parametrize("check_supported", [False, True])
+    def test_loads(self, check_supported):
         """
         Can create a Record from a JSON serialised dict.
 
@@ -124,7 +129,7 @@ class TestRecord:
                 "lineage": {"statement": expected_str},
             },
         }
-        record = Record.loads(config)
+        record = Record.loads(config, check_supported=check_supported)
 
         assert record._schema is not None
         assert record.identification.title == expected_str  # specially nested property
@@ -204,7 +209,7 @@ class TestRecord:
             fx_record_config_minimal_iso = {**fx_record_config_minimal_iso, **value}
         expected = True if not value else False
 
-        result = Record.config_supported(fx_record_config_minimal_iso)
+        result = Record._config_supported(fx_record_config_minimal_iso)
         assert result == expected
 
     @pytest.mark.cov()
@@ -214,7 +219,7 @@ class TestRecord:
         logger = logging.getLogger("test")
         logger.setLevel(logging.DEBUG)
 
-        Record.config_supported(config=fx_record_config_minimal_iso, logger=logger)
+        Record._config_supported(config=fx_record_config_minimal_iso, logger=logger)
 
         assert "Diff: Item root['invalid'] (\"x\") added to dictionary." in caplog.text
 

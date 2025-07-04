@@ -4,6 +4,7 @@ import logging
 from copy import deepcopy
 from dataclasses import dataclass
 from enum import Enum
+from hashlib import sha1
 from typing import TypeVar
 
 import cattrs
@@ -170,6 +171,10 @@ class Record:
         if self.distribution is None:
             self.distribution = []
 
+    @property
+    def sha1(self) -> str:
+        return sha1(json.dumps(self.dumps(), indent=0, sort_keys=True, ensure_ascii=True).encode("utf-8")).hexdigest()  # noqa: S324
+
     @staticmethod
     def _move_dq_elements(value: dict) -> dict:
         """
@@ -241,8 +246,16 @@ class Record:
         return value  # noqa: RET504
 
     @classmethod
-    def loads(cls, value: dict) -> "Record":
-        """Create a Record from a JSON schema instance."""
+    def loads(cls, value: dict, check_supported: bool = False, logger: logging.Logger | None = None) -> "Record":
+        """
+        Create a Record from a JSON schema instance.
+
+        Set `check_supported` to True to check the configuration is fully supported by this class.
+        Set `logger` to enable optional logging of any unsupported content as a debug message.
+        """
+        if check_supported:
+            cls._config_supported(value, logger=logger)
+
         converter = cattrs.Converter()
         converter.register_structure_hook(Record, lambda d, t: Record.structure(d))
         return converter.structure(value, cls)
@@ -272,7 +285,7 @@ class Record:
         return normalised
 
     @staticmethod
-    def config_supported(config: dict, logger: logging.Logger | None = None) -> bool:
+    def _config_supported(config: dict, logger: logging.Logger | None = None) -> bool:
         """
         Check if a record configuration is supported by this class.
 
@@ -280,12 +293,14 @@ class Record:
 
         If a logger is provided, any unsupported content will be logged as a debug message.
         """
-        # TODO: add test for using logger input
         record = Record.loads(config)
         check = record.dumps()
         normalised = Record._normalise_static_config_values(config)
         supported = normalised == check
         if logger and not supported:
+            logger.warning(
+                f"Record '{config.get('file_identifier')}' contains unsupported content that will be ignored."
+            )
             diff = DeepDiff(check, normalised, verbose_level=2)
             logger.debug(diff.pretty(prefix="Diff: "))
         return supported

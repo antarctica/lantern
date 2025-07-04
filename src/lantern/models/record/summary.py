@@ -6,7 +6,7 @@ from typing import TypeVar
 import cattrs
 
 from lantern.models.record import Record
-from lantern.models.record.elements.common import Date
+from lantern.models.record.elements.common import Date, clean_dict
 from lantern.models.record.elements.identification import (
     Aggregations,
     Constraints,
@@ -70,23 +70,26 @@ class RecordSummary:
         converter.register_structure_hook(GraphicOverviews, lambda d, t: GraphicOverviews.structure(d))
         return converter.structure(value_, cls)
 
-    @classmethod
-    def subset_config(cls: type[TRecordSummary], value: dict) -> dict:
-        """Create a RecordSummary config from a Record config."""
-        return {
-            "file_identifier": value.get("file_identifier"),
-            "hierarchy_level": value["hierarchy_level"],
-            "date_stamp": value["metadata"]["date_stamp"],
-            "title": value["identification"]["title"]["value"],
-            "purpose": value["identification"].get("purpose", None),
-            "edition": value["identification"].get("edition", None),
-            "creation": value["identification"]["dates"]["creation"],
-            "revision": value["identification"]["dates"].get("revision", None),
-            "publication": value["identification"]["dates"].get("publication", None),
-            "graphic_overviews": value["identification"].get("graphic_overviews", []),
-            "constraints": value["identification"].get("constraints", []),
-            "aggregations": value["identification"].get("aggregations", []),
-        }
+    def unstructure(self) -> dict:
+        """
+        Convert RecordSummary to plain types.
+
+        Intended to be used as a cattrs unstructure hook.
+        E.g. `converter.register_unstructure_hook(Record, lambda d: d.unstructure())`
+        """
+        converter = cattrs.Converter()
+        converter.register_unstructure_hook(date, lambda d: d.isoformat())
+        converter.register_unstructure_hook(Date, lambda d: d.unstructure())
+        converter.register_unstructure_hook(Aggregations, lambda d: d.unstructure())
+        converter.register_unstructure_hook(Constraints, lambda d: d.unstructure())
+        converter.register_unstructure_hook(GraphicOverviews, lambda d: d.unstructure())
+        return clean_dict(converter.unstructure(self))
+
+    def dumps(self) -> dict:
+        """Create a JSON safe dict from RecordSummary."""
+        converter = cattrs.Converter()
+        converter.register_unstructure_hook(RecordSummary, lambda d: d.unstructure())
+        return converter.unstructure(self)
 
     @classmethod
     def _loads_json_dict(cls: type[TRecordSummary], value: dict) -> "RecordSummary":

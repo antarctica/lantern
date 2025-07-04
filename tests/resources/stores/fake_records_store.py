@@ -110,4 +110,4 @@ class FakeRecordsStore(Store):
         for record in self.records:
             if record.file_identifier == file_identifier:
                 return record
-        raise RecordNotFoundError() from None
+        raise RecordNotFoundError(file_identifier) from None

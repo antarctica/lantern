@@ -1,5 +1,6 @@
 import logging
 import os
+import shutil
 import sys
 import time
 from copy import deepcopy
@@ -30,8 +31,15 @@ from lantern.models.record import Record
 from lantern.models.record.elements.common import Date, Dates, Identifier, Identifiers
 from lantern.models.record.enums import HierarchyLevelCode
 from lantern.models.record.summary import RecordSummary
+from lantern.stores.gitlab import GitLabStore
 from tests.resources.exporters.fake_exporter import FakeExporter, FakeResourceExporter
 from tests.resources.stores.fake_records_store import FakeRecordsStore
+
+
+@pytest.fixture(scope="module")
+def vcr_config():
+    """Pytest Recording config."""
+    return {"filter_headers": ["PRIVATE-TOKEN"]}
 
 
 @pytest.fixture()
@@ -285,6 +293,57 @@ def fx_item_catalogue_min_physical_map(
         get_record=fx_get_record,
         get_record_summary=fx_get_record_summary,
     )
+
+
+@pytest.fixture()
+def fx_fake_store(fx_logger: logging.Logger) -> FakeRecordsStore:
+    """Fake records store."""
+    return FakeRecordsStore(logger=fx_logger)
+
+
+@pytest.fixture()
+def fx_gitlab_store(fx_logger: logging.Logger, fx_config: Config) -> GitLabStore:
+    """GitLab store."""
+    with TemporaryDirectory() as tmp_path:
+        cache_path = Path(tmp_path) / ".cache"
+
+    return GitLabStore(
+        logger=fx_logger,
+        endpoint=fx_config.STORE_GITLAB_ENDPOINT,
+        access_token=fx_config.STORE_GITLAB_TOKEN,
+        project_id=fx_config.STORE_GITLAB_PROJECT_ID,
+        cache_path=cache_path,
+    )
+
+
+def _gitlab_store_cached_create_cache(store: GitLabStore) -> None:
+    """Copy static GitLab Store cache to simulate cloning from remote repository."""
+    cache_src = Path(__file__).resolve().parent / "resources" / "stores" / "gitlab_cache"
+    # noinspection PyProtectedMember
+    shutil.copytree(cache_src, store._cache_path)
+
+
+@pytest.fixture()
+def fx_gitlab_store_cached(mocker: MockerFixture, fx_gitlab_store: GitLabStore) -> GitLabStore:
+    """
+    GitLab store with existing cache.
+
+    The `_create_cache()` method is mocked to prevent needing to mock GitLab API calls.
+    A static cache is copied from test resources instead.
+    """
+    mocker.patch.object(
+        fx_gitlab_store, "_create_cache", side_effect=lambda: _gitlab_store_cached_create_cache(fx_gitlab_store)
+    )
+    # noinspection PyProtectedMember
+    fx_gitlab_store._create_cache()
+    return fx_gitlab_store
+
+
+@pytest.fixture()
+def fx_gitlab_store_pop(fx_gitlab_store_cached: GitLabStore) -> GitLabStore:
+    """GitLab store with existing cache and populated with records."""
+    fx_gitlab_store_cached.populate()
+    return fx_gitlab_store_cached
 
 
 @pytest.fixture()

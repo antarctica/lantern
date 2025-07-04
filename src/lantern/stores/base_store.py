@@ -7,7 +7,11 @@ from lantern.models.record.summary import RecordSummary
 class RecordNotFoundError(Exception):
     """Raised when a record cannot be retrieved."""
 
-    pass
+    def __init__(self, file_identifier: str) -> None:
+        self.file_identifier = file_identifier
+
+    def __str__(self) -> str:
+        return f"Record '{self.file_identifier}' not found."
 
 
 class Store(ABC):

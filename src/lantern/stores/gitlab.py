@@ -405,7 +405,7 @@ class GitLabStore(Store):
         try:
             return self._records[file_identifier]
         except KeyError:
-            raise RecordNotFoundError() from None
+            raise RecordNotFoundError(file_identifier) from None
 
     def push(self, records: list[Record], message: str, author: tuple[str, str]) -> None:
         """

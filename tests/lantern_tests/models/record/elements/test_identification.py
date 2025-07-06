@@ -2,6 +2,7 @@ from datetime import UTC, date, datetime
 
 import cattrs
 import pytest
+from pytest_unordered import unordered
 
 from lantern.models.record.elements.common import Date, Dates, Identifier, clean_dict, clean_list
 from lantern.models.record.elements.identification import (
@@ -78,6 +79,15 @@ class TestAggregation:
                 {"namespace": "x"},
                 True,
             ),
+            # identifiers
+            (
+                {
+                    "identifier": Identifier(identifier="x", href="x", namespace="x"),
+                    "association_type": AggregationAssociationCode.CROSS_REFERENCE,
+                },
+                {"identifiers": ["x"]},
+                True,
+            ),
             (
                 {
                     "identifier": Identifier(identifier="x", href="x", namespace="x"),
@@ -120,6 +130,31 @@ class TestAggregation:
                     "initiative_type": AggregationInitiativeCode.CAMPAIGN,
                 },
                 {"initiatives": [AggregationInitiativeCode.TASK]},
+                False,
+            ),
+            # namespace + identifier
+            (
+                {
+                    "identifier": Identifier(identifier="x", href="x", namespace="x"),
+                    "association_type": AggregationAssociationCode.CROSS_REFERENCE,
+                },
+                {"namespace": "x", "identifiers": ["x"]},
+                True,
+            ),
+            (
+                {
+                    "identifier": Identifier(identifier="x", href="x", namespace="x"),
+                    "association_type": AggregationAssociationCode.CROSS_REFERENCE,
+                },
+                {"namespace": "y", "identifiers": ["x"]},
+                False,
+            ),
+            (
+                {
+                    "identifier": Identifier(identifier="x", href="x", namespace="x"),
+                    "association_type": AggregationAssociationCode.CROSS_REFERENCE,
+                },
+                {"namespace": "x", "identifiers": ["y"]},
                 False,
             ),
             # namespace + association
@@ -175,6 +210,59 @@ class TestAggregation:
                 {"namespace": "y", "initiatives": [AggregationInitiativeCode.TASK]},
                 False,
             ),
+            # identifiers + association
+            (
+                {
+                    "identifier": Identifier(identifier="x", href="x", namespace="x"),
+                    "association_type": AggregationAssociationCode.CROSS_REFERENCE,
+                },
+                {"identifiers": ["x"], "associations": [AggregationAssociationCode.CROSS_REFERENCE]},
+                True,
+            ),
+            (
+                {
+                    "identifier": Identifier(identifier="x", href="x", namespace="x"),
+                    "association_type": AggregationAssociationCode.CROSS_REFERENCE,
+                },
+                {"identifiers": ["y"], "associations": [AggregationAssociationCode.CROSS_REFERENCE]},
+                False,
+            ),
+            (
+                {
+                    "identifier": Identifier(identifier="x", href="x", namespace="x"),
+                    "association_type": AggregationAssociationCode.CROSS_REFERENCE,
+                },
+                {"identifiers": ["x"], "associations": [AggregationAssociationCode.SERIES]},
+                False,
+            ),
+            # identifiers + initiative
+            (
+                {
+                    "identifier": Identifier(identifier="x", href="x", namespace="x"),
+                    "association_type": AggregationAssociationCode.CROSS_REFERENCE,
+                    "initiative_type": AggregationInitiativeCode.CAMPAIGN,
+                },
+                {"identifiers": ["x"], "initiatives": [AggregationInitiativeCode.CAMPAIGN]},
+                True,
+            ),
+            (
+                {
+                    "identifier": Identifier(identifier="x", href="x", namespace="x"),
+                    "association_type": AggregationAssociationCode.CROSS_REFERENCE,
+                    "initiative_type": AggregationInitiativeCode.CAMPAIGN,
+                },
+                {"identifiers": ["y"], "initiatives": [AggregationInitiativeCode.CAMPAIGN]},
+                False,
+            ),
+            (
+                {
+                    "identifier": Identifier(identifier="x", href="x", namespace="x"),
+                    "association_type": AggregationAssociationCode.CROSS_REFERENCE,
+                    "initiative_type": AggregationInitiativeCode.CAMPAIGN,
+                },
+                {"identifiers": ["x"], "initiatives": [AggregationInitiativeCode.TASK]},
+                False,
+            ),
             # association + initiative
             (
                 {
@@ -212,7 +300,7 @@ class TestAggregation:
                 },
                 False,
             ),
-            # namespace + association + initiative
+            # namespace + identifiers + association + initiative
             (
                 {
                     "identifier": Identifier(identifier="x", href="x", namespace="x"),
@@ -221,6 +309,7 @@ class TestAggregation:
                 },
                 {
                     "namespace": "x",
+                    "identifiers": ["x"],
                     "associations": [AggregationAssociationCode.CROSS_REFERENCE],
                     "initiatives": [AggregationInitiativeCode.CAMPAIGN],
                 },
@@ -268,36 +357,44 @@ class TestAggregations:
         association_type=AggregationAssociationCode.CROSS_REFERENCE,
         initiative_type=AggregationInitiativeCode.CAMPAIGN,
     )
+    test_filter_e = Aggregation(
+        identifier=Identifier(identifier="y", href="x", namespace="x"),
+        association_type=AggregationAssociationCode.CROSS_REFERENCE,
+        initiative_type=AggregationInitiativeCode.CAMPAIGN,
+    )
 
     @pytest.mark.parametrize(
         ("conditions", "expected"),
         [
             (
                 {"namespace": "x", "associations": AggregationAssociationCode.CROSS_REFERENCE},
-                [test_filter_a, test_filter_c],
+                [test_filter_a, test_filter_c, test_filter_e],
             ),
             (
                 {"namespace": "x", "initiatives": AggregationInitiativeCode.CAMPAIGN},
-                [test_filter_c],
+                [test_filter_c, test_filter_e],
+            ),
+            (
+                {"identifiers": ["y"]},
+                [test_filter_e],
             ),
             (
                 {"initiatives": AggregationInitiativeCode.CAMPAIGN},
-                [test_filter_c, test_filter_d],
+                [test_filter_c, test_filter_d, test_filter_e],
             ),
             (
                 {"associations": [AggregationAssociationCode.CROSS_REFERENCE, AggregationAssociationCode.SERIES]},
-                [test_filter_a, test_filter_b, test_filter_c, test_filter_d],
+                [test_filter_a, test_filter_b, test_filter_c, test_filter_d, test_filter_e],
             ),
         ],
     )
     def test_filter(self, conditions: dict, expected: list[Aggregation]):
         """Can filter aggregations by namespace and/or association type and/or initiative type."""
-        aggregations = Aggregations([self.test_filter_a, self.test_filter_b, self.test_filter_c, self.test_filter_d])
-
+        aggregations = Aggregations(
+            [self.test_filter_a, self.test_filter_b, self.test_filter_c, self.test_filter_d, self.test_filter_e]
+        )
         result = aggregations.filter(**conditions)
-
-        assert len(result) == len(expected)
-        assert result == expected
+        assert result == unordered(expected)
 
     @pytest.mark.parametrize(
         ("excluded", "expected"),

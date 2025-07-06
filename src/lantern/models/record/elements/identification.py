@@ -45,6 +45,7 @@ class Aggregation:
     def matches_filter(
         self,
         namespace: str | None = None,
+        identifiers: list[str] | None = None,
         associations: list[AggregationAssociationCode] | None = None,
         initiatives: list[AggregationInitiativeCode] | None = None,
     ) -> bool:
@@ -54,6 +55,8 @@ class Aggregation:
         Intended for use in filtering functions.
         """
         if namespace is not None and self.identifier.namespace != namespace:
+            return False
+        if identifiers is not None and self.identifier.identifier not in identifiers:
             return False
         if associations is not None and self.association_type not in associations:
             return False
@@ -113,24 +116,6 @@ class Aggregations(list[Aggregation]):
         converter = cattrs.Converter()
         return [converter.unstructure(aggregation) for aggregation in self]
 
-    def filter(
-        self,
-        namespace: str | None = None,
-        associations: AggregationAssociationCode | list[AggregationAssociationCode] | None = None,
-        initiatives: AggregationInitiativeCode | list[AggregationInitiativeCode] | None = None,
-    ) -> "Aggregations":
-        """
-        Filter aggregations by namespace and/or association(s) and/or initiative(s).
-
-        Conditions use logical AND, i.e. aggregations must match a namespace and association(s) if specified.
-        Associations/initiatives use logical OR for multiple values.
-        """
-        associations = [associations] if isinstance(associations, AggregationAssociationCode) else associations
-        initiatives = [initiatives] if isinstance(initiatives, AggregationInitiativeCode) else initiatives
-        return Aggregations(
-            [aggregation for aggregation in self if aggregation.matches_filter(namespace, associations, initiatives)]
-        )
-
     def identifiers(self, exclude: list[str] | None = None) -> list[str]:
         """
         Get identifiers from a set of aggregations, optionally filtered to exclude a list of values.
@@ -146,6 +131,32 @@ class Aggregations(list[Aggregation]):
                 for aggregation in self
                 if aggregation.identifier.identifier not in exclude
             }
+        )
+
+    def filter(
+        self,
+        namespace: str | None = None,
+        identifiers: str | list[str] | None = None,
+        associations: AggregationAssociationCode | list[AggregationAssociationCode] | None = None,
+        initiatives: AggregationInitiativeCode | list[AggregationInitiativeCode] | None = None,
+    ) -> "Aggregations":
+        """
+        Filter aggregations by namespace, identifier and/or association(s) and/or initiative(s).
+
+        Conditions use logical AND, i.e. aggregations must match a namespace and association(s) if specified.
+        Associations/initiatives use logical OR for multiple values.
+        """
+        identifiers = [identifiers] if isinstance(identifiers, str) else identifiers
+        associations = [associations] if isinstance(associations, AggregationAssociationCode) else associations
+        initiatives = [initiatives] if isinstance(initiatives, AggregationInitiativeCode) else initiatives
+        return Aggregations(
+            [
+                aggregation
+                for aggregation in self
+                if aggregation.matches_filter(
+                    namespace=namespace, identifiers=identifiers, associations=associations, initiatives=initiatives
+                )
+            ]
         )
 
 

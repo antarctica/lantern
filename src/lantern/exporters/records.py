@@ -3,10 +3,10 @@ import logging
 from boto3 import client as S3Client  # noqa: N812
 
 from lantern.config import Config
-from lantern.exporters.base_exporter import Exporter, ResourceExporter
-from lantern.exporters.html_exporter import HtmlAliasesExporter, HtmlExporter
-from lantern.exporters.iso_exporter import IsoXmlExporter, IsoXmlHtmlExporter
-from lantern.exporters.json_exporter import JsonExporter
+from lantern.exporters.base import Exporter, ResourceExporter
+from lantern.exporters.html import HtmlAliasesExporter, HtmlExporter
+from lantern.exporters.json import JsonExporter
+from lantern.exporters.xml import IsoXmlExporter, IsoXmlHtmlExporter
 from lantern.models.record import Record
 from lantern.models.record.summary import RecordSummary
 

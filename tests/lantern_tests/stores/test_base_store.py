@@ -3,7 +3,7 @@ from resources.stores.fake_records_store import FakeRecordsStore
 
 from lantern.models.record import Record
 from lantern.models.record.summary import RecordSummary
-from lantern.stores.base_store import RecordNotFoundError
+from lantern.stores.base import RecordNotFoundError
 
 
 class TestRecordNotFoundError:

@@ -14,7 +14,7 @@ from requests.exceptions import ConnectionError as RequestsConnectionError
 
 from lantern.models.record import Record
 from lantern.models.record.summary import RecordSummary
-from lantern.stores.base_store import RecordNotFoundError, Store
+from lantern.stores.base import RecordNotFoundError, Store
 
 if TYPE_CHECKING:
     # False at run time, only for type checker

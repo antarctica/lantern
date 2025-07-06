@@ -6,8 +6,8 @@ from unittest.mock import PropertyMock
 from mypy_boto3_s3 import S3Client
 from pytest_mock import MockerFixture
 
-from lantern.exporters.base_exporter import S3Utils
-from lantern.exporters.records_exporter import RecordsExporter
+from lantern.exporters.base import S3Utils
+from lantern.exporters.records import RecordsExporter
 from lantern.models.record import Record
 from lantern.models.record.elements.common import Identifier
 from lantern.models.record.summary import RecordSummary

@@ -5,6 +5,8 @@ from copy import deepcopy
 from datetime import UTC, datetime
 from pathlib import Path
 
+import inquirer
+
 from lantern.config import Config
 from lantern.log import init as init_logging
 from lantern.log import init_sentry
@@ -201,12 +203,23 @@ def _process_records(logger: logging.Logger, records: list[Record], store: GitLa
     return additional_records
 
 
+def _get_args() -> tuple[str, str, str, str]:
+    """Get user input"""
+    answers = inquirer.prompt(
+        [
+            inquirer.Text("title", message="Changeset summary"),
+            inquirer.Editor("message", message="Changeset detail"),
+            inquirer.Text("name", message="Author name", default="Felix Fennell"),
+            inquirer.Text("email", message="Author email", default="felnne@bas.ac.uk"),
+        ]
+    )
+    return answers["title"], answers["message"], answers["name"], answers["email"]
+
+
 def main() -> None:
     """Entrypoint."""
     input_path = Path("import")
-    message = "load improvement testing"
-    author_name = "Felix Fennell"
-    author_email = "felnne@bas.ac.uk"
+    title, message, author_name, author_email = _get_args()
 
     init_logging()
     init_sentry()

@@ -5,8 +5,6 @@ from copy import deepcopy
 from datetime import UTC, datetime
 from pathlib import Path
 
-from bas_metadata_library import RecordValidationError
-
 from lantern.config import Config
 from lantern.log import init as init_logging
 from lantern.log import init_sentry
@@ -30,10 +28,10 @@ def _parse_records(logger: logging.Logger, search_path: Path) -> list[Record]:
         try:
             record = Record.loads(config)
             record.validate()
-        except RecordValidationError:
+        except RecordInvalidError:
             logger.warning(f"Record '{config['file_identifier']}' does not validate, skipping.")
             continue
-        if not Record.config_supported(config):
+        if not Record._config_supported(config):
             logger.warning(
                 f"Record '{config['file_identifier']}' contains unsupported content the catalogue will ignore."
             )
@@ -42,27 +40,39 @@ def _parse_records(logger: logging.Logger, search_path: Path) -> list[Record]:
     return records
 
 
-def _revise_collection(collection: Record) -> Record:
-    """Indicate collection change via edition and relevant dates."""
-    now = datetime.now(tz=UTC).replace(microsecond=0)
-    collection.metadata.date = now.date().isoformat()
-    collection.identification.dates.revision.date = now
+def _revise_collection(time: datetime, collection: Record) -> None:
+    """Indicate collection change via edition and other relevant properties."""
+    collection.identification.dates.revision.date = time
     collection.identification.edition = str(int(collection.identification.edition) + 1)
-    return collection
+
+
+def _revise_record(record: Record) -> None:
+    """Indicate record change via relevant properties."""
+    now = datetime.now(tz=UTC).replace(microsecond=0)
+    record.metadata.date_stamp = now.date()
+    if record.hierarchy_level == HierarchyLevelCode.COLLECTION:
+        _revise_collection(time=now, collection=record)
+
+
+def _revise_records(logger: logging.Logger, records: list[Record], store: GitLabStore) -> None:
+    """Indicate record change via relevant properties if needed."""
+    for record in records:
+        try:
+            existing_record = store.get(record.file_identifier)
+            if record != existing_record:
+                logger.info(f"Record '{record.file_identifier}' is different to stored version, revising")
+                _revise_record(record)
+        except RecordNotFoundError:
+            logger.info(f"Record '{record.file_identifier}' not found in store, skipping revision")
+            continue
 
 
 def _update_collection_aggregations(logger: logging.Logger, record: Record, collection: Record) -> None:
     """Add aggregation back-refs if missing to a collections a record is part of."""
-    # TODO: Enhance aggregations.filter to add an identifier param to avoid checking all children
-    collection_items = [
-        item.identifier.identifier
-        for item in collection.identification.aggregations.filter(
-            namespace="data.bas.ac.uk",
-            associations=AggregationAssociationCode.IS_COMPOSED_OF,
-            initiatives=AggregationInitiativeCode.COLLECTION,
-        )
-    ]
-    if record.file_identifier in collection_items:
+    if (
+        record.file_identifier
+        in collection.identification.aggregations.filter(identifiers=record.file_identifier).identifiers()
+    ):
         logger.debug(
             f"Record '{record.file_identifier}' already in collection '{collection.file_identifier}', skipping"
         )
@@ -110,20 +120,29 @@ def _update_collection_extent(logger: logging.Logger, record: Record, collection
         return
 
 
-def _process_record_collections(logger: logging.Logger, record: Record, collections: dict[str, Record]) -> None:
-    """Update in-scope collections a record is part of."""
+def _update_record_collections(logger: logging.Logger, record: Record, collections: dict[str, Record]) -> None:
+    """
+    Update in-scope collections a record is part of.
+
+    Where in-scope `collections` is a file identifier indexed dict of in-scope collection records.
+
+    The input record is not modified, any matched collections are updated in-place.
+
+    Steps:
+    - get record collection identifiers via aggregations
+    - get the intersection between these identifiers and in-scope collections
+    - update relevant properties for each of these collections via sub-methods
+    """
     parent_collections = record.identification.aggregations.filter(
         namespace="data.bas.ac.uk",
         associations=AggregationAssociationCode.LARGER_WORK_CITATION,
         initiatives=AggregationInitiativeCode.COLLECTION,
     )
     record_collection_ids = [c.identifier.identifier for c in parent_collections]
-    record_magic_collection_ids = set(record_collection_ids).intersection(
-        set(file_identifier for file_identifier in collections)
-    )
-    logger.info(f"Record contains {len(record_magic_collection_ids)} in-scope magic collections")
+    filtered_record_collection_ids = set(record_collection_ids).intersection(set(collections.keys()))
+    logger.info(f"Record contains {len(filtered_record_collection_ids)} in-scope collections to update")
 
-    for collection_id in record_magic_collection_ids:
+    for collection_id in filtered_record_collection_ids:
         collection = collections[collection_id]
         _update_collection_aggregations(logger=logger, record=record, collection=collection)
         _update_collection_extent(logger=logger, record=record, collection=collection)
@@ -133,7 +152,7 @@ def _process_magic_collections(
     logger: logging.Logger, records: list[Record], additional_records: list[Record], store: GitLabStore
 ) -> None:
     """
-    Update in-scope MAGIC collections for records authored in Zap.
+    Update in-scope MAGIC collections for records authored in Zap and other MAGIC workflows.
 
     Zap authored records can be added to one or more MAGIC collections, which adds a child to parent aggregation.
     For records to be shown correctly in the Catalogue, an inverse aggregation is needed in the relevant collection.
@@ -144,18 +163,18 @@ def _process_magic_collections(
     - b8b78c6c-fac2-402c-a772-9f518c7121e5 (MAGIC team) - manually managed
     """
     magic_collection_ids = [
-        "d0d91e22-18c1-4c7f-8dfc-20e94cd2c107",  # BAS General Interest Maps
-        "ef7bc35e-7ad8-4ae5-9ae8-dd708d6e966e",  # BAS Operations Maps
-        "6f5102ae-dfae-4d72-ad07-6ce4c85f5db8",  # BAS Published Maps
-        "e74543c0-4c4e-4b41-aa33-5bb2f67df389",  # SCAR Antarctic Digital Database (ADD)
-        "8ff8240d-dcfa-4906-ad3b-507929842012",  # SCAR Antarctic Digital Database (ADD) Previous Datasets
         "0ed7da71-72e1-46e4-a482-064433d4c73d",  # SCAR Antarctic Digital Database (ADD) Supplemental Datasets
+        "6f5102ae-dfae-4d72-ad07-6ce4c85f5db8",  # BAS Published Maps
+        "8ff8240d-dcfa-4906-ad3b-507929842012",  # SCAR Antarctic Digital Database (ADD) Previous Datasets
+        "d0d91e22-18c1-4c7f-8dfc-20e94cd2c107",  # BAS General Interest Maps
+        "e74543c0-4c4e-4b41-aa33-5bb2f67df389",  # SCAR Antarctic Digital Database (ADD)
+        "ef7bc35e-7ad8-4ae5-9ae8-dd708d6e966e",  # BAS Operations Maps
     ]
     collections = [store.get(record_id) for record_id in magic_collection_ids]
     collections_updated = {c.file_identifier: deepcopy(c) for c in collections}
 
     for record in records:
-        _process_record_collections(
+        _update_record_collections(
             logger=logger,
             record=record,
             collections=collections_updated,
@@ -165,65 +184,27 @@ def _process_magic_collections(
         updated_collection = collections_updated[collection.file_identifier]
         if collection != updated_collection:
             logger.info(f"Collection '{collection.file_identifier}' updated, including with commit")
-            additional_records.append(_revise_collection(updated_collection))
-
-
-def _process_published_maps_workaround(logger: logging.Logger, records: list[Record]) -> None:
-    published_maps_collection_id = "6f5102ae-dfae-4d72-ad07-6ce4c85f5db8"
-    open_access = Constraint(
-        type=ConstraintTypeCode.ACCESS,
-        restriction_code=ConstraintRestrictionCode.UNRESTRICTED,
-        statement="Open Access (Anonymous)",
-    )
-    x_all_rights_v1 = Constraint(
-        type=ConstraintTypeCode.USAGE,
-        restriction_code=ConstraintRestrictionCode.LICENSE,
-        href="https://metadata-resources.data.bas.ac.uk/licences/all-rights-reserved-v1/",
-        statement="This information is licensed under the (Local) All Rights Reserved v1 licence. To view this licence, visit https://metadata-resources.data.bas.ac.uk/licences/all-rights-reserved-v1/.",
-    )
-
-    for record in records:
-        # TODO: Enhance aggregations.filter to add an identifier param to avoid checking all children
-        record_collection_ids = [
-            item.identifier.identifier
-            for item in record.identification.aggregations.filter(
-                namespace="data.bas.ac.uk",
-                associations=AggregationAssociationCode.LARGER_WORK_CITATION,
-                initiatives=AggregationInitiativeCode.COLLECTION,
-            )
-        ]
-        paper_map_parent = record.identification.aggregations.filter(initiatives=AggregationInitiativeCode.PAPER_MAP)
-        if published_maps_collection_id not in record_collection_ids and not paper_map_parent:
-            logger.debug(f"Record '{record.file_identifier}' not in published maps collection, skipping")
-            continue
-
-        licence_result = record.identification.constraints.filter(href=x_all_rights_v1.href)
-        if not licence_result:
-            logger.debug(f"Record '{record.file_identifier}' not using 'All Rights Reserved' licence, skipping")
-            continue
-
-        logger.debug(f"Fixed incorrect access constraint for record '{record.file_identifier}'")
-        record.identification.constraints = Constraints([open_access, x_all_rights_v1])
+            additional_records.append(updated_collection)
 
 
 def _process_records(logger: logging.Logger, records: list[Record], store: GitLabStore) -> list[Record]:
     """
-    Process records if needed.
+    Process records as needed.
 
-    `additional_records` returns any other records created or modified during processing that should be included in the
-    store (e.g. updated collections).
+    `additional_records` returns any other records created or modified during processing that should be included.
+
+    Where any of these records are modified, the date_stamp and other relevant properties are revised.
     """
     additional_records: list[Record] = []
     _process_magic_collections(logger=logger, records=records, additional_records=additional_records, store=store)
-    _process_published_maps_workaround(logger=logger, records=records)
+    _revise_records(logger=logger, records=[*records, *additional_records], store=store)
     return additional_records
 
 
 def main() -> None:
     """Entrypoint."""
-    # TODO: If a record is modified, update date_stamp
     input_path = Path("import")
-    message = "Fixing published map records"
+    message = "load improvement testing"
     author_name = "Felix Fennell"
     author_email = "felnne@bas.ac.uk"
 

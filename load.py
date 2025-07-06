@@ -225,7 +225,7 @@ def main() -> None:
 
     records = _parse_records(logger=logger, search_path=input_path)
     records.extend(_process_records(logger=logger, records=records, store=store))
-    store.push(records=records, message=message, author=(author_name, author_email))
+    store.push(records=records, title=title, message=message, author=(author_name, author_email))
 
 
 if __name__ == "__main__":

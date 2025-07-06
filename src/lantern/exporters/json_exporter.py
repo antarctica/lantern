@@ -1,5 +1,4 @@
 import logging
-from json import dumps as json_dumps
 from pathlib import Path
 
 from mypy_boto3_s3 import S3Client
@@ -33,4 +32,4 @@ class JsonExporter(ResourceExporter):
 
     def dumps(self) -> str:
         """Encode record as data catalogue record config in JSON."""
-        return json_dumps(self._record.dumps(), indent=2)
+        return self._record.dumps_json()

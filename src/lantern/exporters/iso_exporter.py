@@ -2,8 +2,6 @@ import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from bas_metadata_library.standards.iso_19115_2 import MetadataRecord, MetadataRecordConfigV4
-from bas_metadata_library.standards.iso_19115_common.utils import _decode_date_properties
 from lxml.etree import XSLT, ElementTree, fromstring, tostring
 from lxml.etree import parse as parse_xml
 from mypy_boto3_s3 import S3Client
@@ -36,9 +34,7 @@ class IsoXmlExporter(ResourceExporter):
 
     def dumps(self) -> str:
         """Encode record as XML using ISO 19139 schemas."""
-        configuration = MetadataRecordConfigV4(**_decode_date_properties(self._record.dumps()))
-        record = MetadataRecord(configuration=configuration)
-        return record.generate_xml_document().decode()
+        return self._record.dumps_xml()
 
 
 class IsoXmlHtmlExporter(ResourceExporter):

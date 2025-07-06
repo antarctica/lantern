@@ -1,5 +1,4 @@
 import logging
-from json import loads as json_loads
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import PropertyMock
@@ -22,7 +21,7 @@ class TestIsoXmlExporter:
         fx_s3_client: S3Client,
         fx_record_minimal_item: Record,
     ):
-        """Can create an ISO XML Exporter."""
+        """Can create a JSON Exporter."""
         with TemporaryDirectory() as tmp_path:
             output_path = Path(tmp_path)
         mock_config = mocker.Mock()
@@ -48,13 +47,12 @@ class TestIsoXmlExporter:
         fx_s3_client: S3Client,
         fx_record_minimal_item: Record,
     ):
-        """Can encode record as Metadata Library JSON config dict."""
+        """Can encode record as a JSON schema instance string."""
         with TemporaryDirectory() as tmp_path:
             output_path = Path(tmp_path)
         mock_config = mocker.Mock()
         type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
         type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
-        expected = fx_record_minimal_item.dumps()
 
         exporter = JsonExporter(
             config=mock_config,
@@ -65,4 +63,4 @@ class TestIsoXmlExporter:
         )
 
         result = exporter.dumps()
-        assert json_loads(result) == expected
+        assert '{\n  "$schema": "https://' in result

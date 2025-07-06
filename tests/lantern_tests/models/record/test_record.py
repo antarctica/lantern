@@ -1,7 +1,10 @@
+import json
 import logging
 from datetime import UTC, date, datetime
 
 import pytest
+from bas_metadata_library.standards.iso_19115_2 import MetadataRecord
+from bas_metadata_library.standards.iso_19115_common.utils import _encode_date_properties
 from pytest_mock import MockerFixture
 
 from lantern.models.record import Record, RecordInvalidError, RecordSchema
@@ -91,7 +94,38 @@ class TestRecord:
 
     def test_sha1(self, fx_record_minimal_iso: Record):
         """Can calculate a SHA1 hash of the record config."""
-        assert fx_record_minimal_iso.sha1 == "5a9f0174d9bebd69b8310aba338debc2f5aaadf1"
+        assert fx_record_minimal_iso.sha1 == "12e1d01105a5c77e3315e493acf5eb590129ffca"
+
+    @pytest.mark.cov()
+    @pytest.mark.parametrize("maintenance", [False, True])
+    def test_normalise_static_config_values(self, fx_record_config_minimal_iso: dict, maintenance: bool):
+        """Can normalise record."""
+        if maintenance:
+            fx_record_config_minimal_iso["metadata"]["maintenance"] = {"progress": ProgressCode.ON_GOING.value}
+
+        result = Record._normalise_static_config_values(fx_record_config_minimal_iso)
+        assert "maintenance" not in result["metadata"]
+
+    @pytest.mark.parametrize("value", [{}, {"invalid": "x"}, {"hierarchy_level": HierarchyLevelCode.DIMENSION_GROUP}])
+    def test_config_supported(self, fx_record_config_minimal_iso: dict, value: dict):
+        """Can determine if a record config is supported or not."""
+        if value:
+            fx_record_config_minimal_iso = {**fx_record_config_minimal_iso, **value}
+        expected = True if not value else False
+
+        result = Record._config_supported(fx_record_config_minimal_iso)
+        assert result == expected
+
+    @pytest.mark.cov()
+    def test_config_supported_log(self, caplog: pytest.LogCaptureFixture, fx_record_config_minimal_iso: dict):
+        """Can log unsupported record config contents if set."""
+        fx_record_config_minimal_iso["invalid"] = "x"
+        logger = logging.getLogger("test")
+        logger.setLevel(logging.DEBUG)
+
+        Record._config_supported(config=fx_record_config_minimal_iso, logger=logger)
+
+        assert "Diff: Item root['invalid'] (\"x\") added to dictionary." in caplog.text
 
     @pytest.mark.parametrize("check_supported", [False, True])
     def test_loads(self, check_supported: bool):
@@ -145,13 +179,12 @@ class TestRecord:
 
     def test_dumps(self, fx_record_minimal_iso: Record):
         """
-        Can create a dict that can be serialised to JSON from a Record.
+        Can encode record as a dict that can be serialised to JSON.
 
         This is not intended as an exhaustive/comprehensive test of all properties, rather it tests any properties
         that require special processing, such as non-standard nesting or enumerations.
         """
         value_str = "x"
-        value_schema = "https://metadata-resources.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-2-v4.json"
         value_enums = {
             "hierarchy_level": HierarchyLevelCode.DATASET,
             "contact_role": ContactRoleCode.POINT_OF_CONTACT,
@@ -159,7 +192,6 @@ class TestRecord:
             "constraint_code": ConstraintRestrictionCode.LICENSE,
         }
         expected = {
-            "$schema": value_schema,
             "hierarchy_level": value_enums["hierarchy_level"].value,
             "metadata": {
                 "character_set": "utf8",
@@ -192,36 +224,37 @@ class TestRecord:
 
         assert config == expected
 
-    @pytest.mark.cov()
-    @pytest.mark.parametrize("maintenance", [False, True])
-    def test_normalise_static_config_values(self, fx_record_config_minimal_iso: dict, maintenance: bool):
-        """Can normalise record."""
-        if maintenance:
-            fx_record_config_minimal_iso["metadata"]["maintenance"] = {"progress": ProgressCode.ON_GOING.value}
+    def test_dumps_json(self, fx_record_minimal_iso: Record):
+        """
+        Can encode record as a JSON schema instance encoded as a string
 
-        result = Record._normalise_static_config_values(fx_record_config_minimal_iso)
-        assert "maintenance" not in result["metadata"]
+        This only tests JSON schema specific properties are included, as other properties are tested elsewhere.
+        """
+        expected = "https://metadata-resources.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-2-v4.json"
 
-    @pytest.mark.parametrize("value", [{}, {"invalid": "x"}, {"hierarchy_level": HierarchyLevelCode.DIMENSION_GROUP}])
-    def test_config_supported(self, fx_record_config_minimal_iso: dict, value: dict):
-        """Can determine if a record config is supported or not."""
-        if value:
-            fx_record_config_minimal_iso = {**fx_record_config_minimal_iso, **value}
-        expected = True if not value else False
+        result = fx_record_minimal_iso.dumps_json()
+        assert isinstance(result, str)
 
-        result = Record._config_supported(fx_record_config_minimal_iso)
-        assert result == expected
+        decoded = json.loads(result)
+        assert decoded["$schema"] == expected
 
-    @pytest.mark.cov()
-    def test_config_supported_log(self, caplog: pytest.LogCaptureFixture, fx_record_config_minimal_iso: dict):
-        """Can log unsupported record config contents if set."""
-        fx_record_config_minimal_iso["invalid"] = "x"
-        logger = logging.getLogger("test")
-        logger.setLevel(logging.DEBUG)
+    def test_dumps_xml(self, fx_record_minimal_iso: Record):
+        """
+        Can encode record as ISO 19139 XML string.
 
-        Record._config_supported(config=fx_record_config_minimal_iso, logger=logger)
+        Internally this method dumps the record to a JSON config and uses the Metadata Library to encode this as XML.
 
-        assert "Diff: Item root['invalid'] (\"x\") added to dictionary." in caplog.text
+        The Metadata Library's tests verify the conversion to and from a JSON dict extensively. As a result, this test
+        is not intended as an exhaustive/comprehensive of this process.
+        """
+        expected = fx_record_minimal_iso.dumps()
+
+        result = fx_record_minimal_iso.dumps_xml()
+        config = _encode_date_properties(MetadataRecord(record=result).make_config().config)
+        del config["$schema"]
+
+        assert "<gmi:MI_Metadata" in result
+        assert config == expected
 
     def test_validate_min_iso(self):
         """A minimally valid ISO record can be validated."""
@@ -920,12 +953,12 @@ class TestRecord:
     )
     def test_loop(self, run: str, values: dict):
         """
-        Can convert a JSON serialised dict to a Record and back again.
+        Can convert a JSON Schema instance dict into a Record and back again.
 
         Tests various configurations from minimal to complete.
         """
         record = Record.loads(values)
-        result = record.dumps()
+        result = json.loads(record.dumps_json())
         expected = values
 
         if run == "minimal-iso" or run == "minimal-magic":

@@ -8,6 +8,8 @@ from hashlib import sha1
 from typing import TypeVar
 
 import cattrs
+from bas_metadata_library.standards.iso_19115_2 import MetadataRecord, MetadataRecordConfigV4
+from bas_metadata_library.standards.iso_19115_common.utils import _decode_date_properties
 from deepdiff import DeepDiff
 from importlib_resources import as_file as resources_as_file
 from importlib_resources import files as resources_files
@@ -176,6 +178,46 @@ class Record:
         return sha1(json.dumps(self.dumps(), indent=0, sort_keys=True, ensure_ascii=True).encode("utf-8")).hexdigest()  # noqa: S324
 
     @staticmethod
+    def _normalise_static_config_values(value: dict) -> dict:
+        """Adjust properties that will be set by default within a Record to allow for accurate config comparisons."""
+        normalised = deepcopy(value)
+
+        normalised["metadata"]["character_set"] = "utf8"
+        normalised["metadata"]["language"] = "eng"
+        normalised["metadata"]["metadata_standard"] = {
+            "name": "ISO 19115-2 Geographic Information - Metadata - Part 2: Extensions for Imagery and Gridded Data",
+            "version": "ISO 19115-2:2009(E)",
+        }
+        if "maintenance" in normalised["metadata"]:
+            del normalised["metadata"]["maintenance"]
+
+        normalised["identification"]["character_set"] = "utf8"
+        normalised["identification"]["language"] = "eng"
+
+        return normalised
+
+    @staticmethod
+    def _config_supported(config: dict, logger: logging.Logger | None = None) -> bool:
+        """
+        Check if a record configuration is supported by this class.
+
+        To ensure an accurate comparison, default/hard-coded values are added to a copy of the config before comparison.
+
+        Set `logger` to enable optional logging of any unsupported content as a debug message.
+        """
+        record = Record.loads(config)
+        check = record.dumps()
+        normalised = Record._normalise_static_config_values(config)
+        supported = normalised == check
+        if logger and not supported:
+            logger.warning(
+                f"Record '{config.get('file_identifier')}' contains unsupported content that will be ignored."
+            )
+            diff = DeepDiff(check, normalised, verbose_level=2)
+            logger.debug(diff.pretty(prefix="Diff: "))
+        return supported
+
+    @staticmethod
     def _move_dq_elements(value: dict) -> dict:
         """
         Move any data quality elements out of identification until v5 schema available.
@@ -209,9 +251,6 @@ class Record:
         # https://gitlab.data.bas.ac.uk/uk-pdc/metadata-infrastructure/metadata-library/-/issues/255
         value_ = cls._move_dq_elements(value_)
 
-        # rename keys
-        value_["_schema"] = value_.pop("$schema", None)
-
         converter = cattrs.Converter()
         converter.register_structure_hook(Metadata, lambda d, t: Metadata.structure(d))
         converter.register_structure_hook(ReferenceSystemInfo, lambda d, t: ReferenceSystemInfo.structure(d))
@@ -239,11 +278,10 @@ class Record:
             value["identification"] = {**value["identification"], **value["data_quality"]}
             del value["data_quality"]
 
-        # rename keys (ensuring order)
-        schema = value.pop("_schema", None)
-        value = {"$schema": schema, **value}
+        # remove internal keys (ensuring order)
+        value.pop("_schema", None)
 
-        return value  # noqa: RET504
+        return value
 
     @classmethod
     def loads(cls, value: dict, check_supported: bool = False, logger: logging.Logger | None = None) -> "Record":
@@ -261,49 +299,20 @@ class Record:
         return converter.structure(value, cls)
 
     def dumps(self) -> dict:
-        """Create a JSON schema instance from Record using compatible types."""
+        """Export Record as a dict with plain, JSON safe, types."""
         converter = cattrs.Converter()
         converter.register_unstructure_hook(Record, lambda d: d.unstructure())
         return converter.unstructure(self)
 
-    @staticmethod
-    def _normalise_static_config_values(value: dict) -> dict:
-        """Adjust properties that will be set by default within a Record to allow for accurate config comparisons."""
-        normalised = deepcopy(value)
-        normalised["metadata"]["character_set"] = "utf8"
-        normalised["metadata"]["language"] = "eng"
-        normalised["metadata"]["metadata_standard"] = {
-            "name": "ISO 19115-2 Geographic Information - Metadata - Part 2: Extensions for Imagery and Gridded Data",
-            "version": "ISO 19115-2:2009(E)",
-        }
-        normalised["identification"]["character_set"] = "utf8"
-        normalised["identification"]["language"] = "eng"
+    def dumps_json(self) -> str:
+        """Export Record as JSON Schema instance string."""
+        return json.dumps({"$schema": self._schema, **self.dumps()}, indent=2, ensure_ascii=False)
 
-        if "maintenance" in normalised["metadata"]:
-            del normalised["metadata"]["maintenance"]
-
-        return normalised
-
-    @staticmethod
-    def _config_supported(config: dict, logger: logging.Logger | None = None) -> bool:
-        """
-        Check if a record configuration is supported by this class.
-
-        To ensure an accurate comparison, default/hard-coded values are added to a copy of the config before comparison.
-
-        Set `logger` to enable optional logging of any unsupported content as a debug message.
-        """
-        record = Record.loads(config)
-        check = record.dumps()
-        normalised = Record._normalise_static_config_values(config)
-        supported = normalised == check
-        if logger and not supported:
-            logger.warning(
-                f"Record '{config.get('file_identifier')}' contains unsupported content that will be ignored."
-            )
-            diff = DeepDiff(check, normalised, verbose_level=2)
-            logger.debug(diff.pretty(prefix="Diff: "))
-        return supported
+    def dumps_xml(self) -> str:
+        """Export Record as an ISO 19115 XML document using the BAS Metadata Library."""
+        config = MetadataRecordConfigV4(**_decode_date_properties(self.dumps()))
+        record = MetadataRecord(configuration=config)
+        return record.generate_xml_document().decode()
 
     @property
     def _profile_schemas(self) -> list[RecordSchema]:
@@ -341,7 +350,7 @@ class Record:
 
         Any failed validation will raise a `RecordInvalidError` exception.
         """
-        config = self.dumps()
+        config = {"$schema": self._schema, **self.dumps()}
         schemas = self._get_validation_schemas(use_profiles=use_profiles, force_schemas=force_schemas)
 
         for schema in schemas:

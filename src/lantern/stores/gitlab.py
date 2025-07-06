@@ -6,7 +6,7 @@ import shutil
 import tarfile
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from gitlab import Gitlab
 from gitlab.v4.objects import Project
@@ -18,7 +18,7 @@ from lantern.stores.base_store import RecordNotFoundError, Store
 
 if TYPE_CHECKING:
     # False at run time, only for type checker
-    from _typeshed import SupportsWrite
+    pass
 
 
 class RemoteStoreUnavailableError(Exception):
@@ -73,16 +73,6 @@ class GitLabStore(Store):
     def __len__(self) -> int:
         """Record count."""
         return len(self._records)
-
-    @staticmethod
-    def _json_dumps(obj: Any) -> str:  # noqa: ANN401
-        """Wrapper for json.dumps to set common options."""
-        return json.dumps(obj, indent=2, ensure_ascii=False)
-
-    @staticmethod
-    def _json_dump(obj: Any, fp: SupportsWrite[str]) -> None:  # noqa: ANN401
-        """Wrapper for json.dump to set common options."""
-        json.dump(obj, fp, indent=2, ensure_ascii=False)
 
     def _is_online(self) -> bool:
         """Determine if the GitLab API is accessible."""
@@ -164,15 +154,15 @@ class GitLabStore(Store):
             summaries.append(summary.dumps())
 
         with self._cache_head_path.open(mode="w") as f:
-            self._json_dump(head_commit, f)
+            json.dump(head_commit, f, indent=2)
 
         with self._cache_index_path.open(mode="w") as f:
             data = {"index": index}
-            self._json_dump(data, f)
+            json.dump(data, f, indent=2)
 
         with self._cache_summaries_path.open(mode="w") as f:
             data = {"summaries": {summary["file_identifier"]: summary for summary in summaries}}
-            self._json_dump(data, f)
+            json.dump(data, f, indent=2)
 
     def _create_cache(self) -> None:
         """
@@ -309,22 +299,24 @@ class GitLabStore(Store):
 
         self._filter_cache_only(inc_records, inc_related)
 
-    def _get_remote_hashed_path(self, file_identifier: str) -> str:
+    def _get_remote_hashed_path(self, file_name: str) -> str:
         """
-        Get the hashed storage path for a file identifier.
+        Get the hashed storage path for a file name.
 
         A hashed path is used to avoid too many files being in a single directory.
 
-        For `_get_hashed_path(file_identifier="0be5339c-9d35-44c9-a10f-da4b5356840b")`
+        For `_get_hashed_path(file_name="0be5339c-9d35-44c9-a10f-da4b5356840b.json")`
         return: 'records/0b/e5/0b5339c-9d35-44c9-a10f-da4b5356840b.json'
         """
-        return f"{self._records_path_name}/{file_identifier[:2]}/{file_identifier[2:4]}/{file_identifier}.json"
+        return f"{self._records_path_name}/{file_name[:2]}/{file_name[2:4]}/{file_name}"
 
     def _commit(self, records: list[Record], message: str, author: tuple[str, str]) -> dict[str, int]:
         with self._cache_index_path.open() as f:
             records_index = json.load(f)["index"]
 
         actions: list[dict] = []
+        changes: dict[str, list[str]] = {"update": [], "create": []}
+
         data = {
             "branch": self._branch,
             "commit_message": message,
@@ -339,27 +331,50 @@ class GitLabStore(Store):
                 self._logger.debug(f"Record '{record.file_identifier}' is unchanged, skipping")
                 continue
 
-            config_action = "update"
+            action = "update"
             if existing_hash is None:
-                config_action = "create"
+                action = "create"
                 self._logger.debug(f"Record '{record.file_identifier}' is new, action set to create")
 
-            data["actions"].append(
-                {
-                    "action": config_action,
-                    "file_path": self._get_remote_hashed_path(record.file_identifier),
-                    "content": self._json_dumps(record.dumps()),
-                }
+            changes[action].append(record.file_identifier)
+            data["actions"].extend(
+                [
+                    {
+                        "action": action,
+                        "file_path": self._get_remote_hashed_path(f"{record.file_identifier}.json"),
+                        "content": record.dumps_json(),
+                    },
+                    {
+                        "action": action,
+                        "file_path": self._get_remote_hashed_path(f"{record.file_identifier}.xml"),
+                        "content": record.dumps_xml(),
+                    },
+                ]
             )
 
+        # *_total tracks individual files not records so cannot rely on `len(*_id)`
         stats = {
-            "additions": sum(1 for action in data["actions"] if action["action"] == "create"),
-            "updates": sum(1 for action in data["actions"] if action["action"] == "update"),
+            "additions_ids": len(changes["create"]),
+            "additions_total": sum(1 for action in data["actions"] if action["action"] == "create"),
+            "updates_ids": len(changes["update"]),
+            "updates_total": sum(1 for action in data["actions"] if action["action"] == "update"),
         }
+
         if not data["actions"]:
-            self._logger.debug("No actions to perform, skipping")
+            self._logger.info("No actions to perform, skipping")
             return stats
-        self._logger.info(f"Committing {stats['additions']} additions, {stats['updates']} updates")
+
+        _additions = (
+            f"{stats['additions_ids']} added records across {stats['additions_total']} new files"
+            if stats["additions_ids"] >= 1
+            else "0 additional records"
+        )
+        _updates = (
+            f"{stats['updates_ids']} updated records across {stats['updates_total']} modified files"
+            if stats["updates_ids"] >= 1
+            else "0 updated records"
+        )
+        self._logger.info(f"Committing {_additions}, {_updates}")
         self._project.commits.create(data)
         return stats
 

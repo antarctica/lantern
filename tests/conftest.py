@@ -73,7 +73,6 @@ def _record_config_minimal_iso() -> dict:
     Standalone method to allow use outside of fixtures in test parametrisation.
     """
     return {
-        "$schema": "https://metadata-resources.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-2-v4.json",
         "hierarchy_level": "dataset",
         "metadata": {
             "contacts": [{"organisation": {"name": "x"}, "role": ["pointOfContact"]}],

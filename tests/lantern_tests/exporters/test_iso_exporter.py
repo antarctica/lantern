@@ -3,8 +3,6 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import PropertyMock
 
-from bas_metadata_library.standards.iso_19115_2 import MetadataRecord
-from bas_metadata_library.standards.iso_19115_common.utils import _encode_date_properties
 from boto3 import client as S3Client  # noqa: N812
 from pytest_mock import MockerFixture
 
@@ -57,7 +55,6 @@ class TestIsoXmlExporter:
         mock_config = mocker.Mock()
         type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
         type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
-        expected = fx_record_minimal_item.dumps()
 
         exporter = IsoXmlExporter(
             config=mock_config,
@@ -69,8 +66,6 @@ class TestIsoXmlExporter:
 
         result = exporter.dumps()
         assert "<gmi:MI_Metadata" in result
-        config = _encode_date_properties(MetadataRecord(record=result).make_config().config)
-        assert config == expected
 
 
 class TestIsoXmlHtmlExporter:

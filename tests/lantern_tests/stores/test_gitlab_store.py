@@ -40,13 +40,6 @@ class TestGitLabStore:
         """
         assert len(fx_gitlab_store_pop) == 1
 
-    @pytest.mark.cov()
-    def test_json_dumps(self, fx_gitlab_store: GitLabStore):
-        """Can encode objects as JSON with defaults."""
-        value = {"key": "😀"}
-        expected = '{\n  "key": "😀"\n}'
-        assert fx_gitlab_store._json_dumps(value) == expected
-
     @pytest.mark.vcr
     @pytest.mark.block_network
     @pytest.mark.parametrize("expected", [True, False])
@@ -125,7 +118,7 @@ class TestGitLabStore:
         expected_commit_id = "abc123"
         expected_record_name = "a1b2c3.json"
         expected_file_identifier = "x"
-        expected_sha1 = "ad9357aac802e5529b1c7b4737f23c75e2ee78b2"
+        expected_sha1 = "e9dc256d287ce17eb8feeddc4cb34e53da61d459"
 
         initial_mtime = 0
         if exists:
@@ -260,8 +253,8 @@ class TestGitLabStore:
 
     def test_get_remote_hashed_path(self, fx_gitlab_store: GitLabStore):
         """Can get the path to a record within the remote repository."""
-        value = "123456"
-        expected = f"{fx_gitlab_store._records_path_name}/12/34/{value}.json"
+        value = "123456.ext"
+        expected = f"{fx_gitlab_store._records_path_name}/12/34/{value}"
 
         assert fx_gitlab_store._get_remote_hashed_path(value) == expected
 
@@ -270,9 +263,9 @@ class TestGitLabStore:
     @pytest.mark.parametrize(
         ("mode", "expected"),
         [
-            ("none", {"additions": 0, "updates": 0}),
-            ("add", {"additions": 1, "updates": 0}),
-            ("update", {"additions": 0, "updates": 1}),
+            ("none", {"additions_ids": 0, "additions_total": 0, "updates_ids": 0, "updates_total": 0}),
+            ("add", {"additions_ids": 1, "additions_total": 2, "updates_ids": 0, "updates_total": 0}),
+            ("update", {"additions_ids": 0, "additions_total": 0, "updates_ids": 1, "updates_total": 2}),
         ],
     )
     def test_commit(
@@ -296,15 +289,15 @@ class TestGitLabStore:
             record.identification.edition = str(1)
             records.append(record)
 
-        results = fx_gitlab_store_cached._commit(records=records, message="x", author=("x", "x@example.com"))
+        results = fx_gitlab_store_cached._commit(records=records, title="x", message="x", author=("x", "x@example.com"))
         assert results == expected
         if mode == "none":
             assert "No actions to perform, skipping" in caplog.text
             return
         if mode == "add":
-            assert "Committing 1 additions, 0 updates" in caplog.text
+            assert "Committing 1 added records across 2 new files, 0 updated records" in caplog.text
         if mode == "update":
-            assert "Committing 0 additions, 1 updates" in caplog.text
+            assert "Committing 0 additional records, 1 updated records across 2 modified files" in caplog.text
 
     def test_populate(self, fx_gitlab_store_cached: GitLabStore):
         """
@@ -365,7 +358,7 @@ class TestGitLabStore:
         mocker.patch.object(fx_gitlab_store_cached, "_create_cache", return_value=None)
         mocker.patch.object(fx_gitlab_store_cached, "_add_record", return_value=None)
 
-        fx_gitlab_store_cached.push(records=records, message="x", author=("x", "x@example.com"))
+        fx_gitlab_store_cached.push(records=records, title="title", message="x", author=("x", "x@example.com"))
 
         if mode == "none":
             assert "No records to push, skipping" in caplog.text

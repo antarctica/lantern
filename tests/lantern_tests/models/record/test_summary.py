@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
+from typing import Final
 
 import pytest
-from conftest import _record_config_minimal_iso
 
 from lantern.models.record import HierarchyLevelCode, Record
 from lantern.models.record.elements.common import Date, Identifier
@@ -15,6 +15,7 @@ from lantern.models.record.elements.identification import (
 )
 from lantern.models.record.enums import AggregationAssociationCode, ConstraintRestrictionCode, ConstraintTypeCode
 from lantern.models.record.summary import RecordSummary
+from tests.conftest import _record_config_minimal_iso
 
 
 class TestRecordSummary:
@@ -155,7 +156,7 @@ class TestRecordSummary:
         assert record_summary.aggregations[0] == expected_aggregation
 
     _config = _record_config_minimal_iso()
-    _summary_config_min = {
+    _summary_config_min: Final[dict] = {
         "hierarchy_level": _config["hierarchy_level"],
         "date_stamp": _config["metadata"]["date_stamp"],
         "title": _config["identification"]["title"]["value"],
@@ -188,9 +189,7 @@ class TestRecordSummary:
         ],
     )
     def test_dumps(self, fx_record_minimal_iso: Record, complete: bool, expected: dict):
-        """
-        Can create a dict that can be serialised to JSON from a RecordSummary.
-        """
+        """Can create a dict that can be serialised to JSON from a RecordSummary."""
         summary = RecordSummary.loads(fx_record_minimal_iso)
 
         expected_value = "x"

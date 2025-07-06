@@ -310,7 +310,7 @@ class GitLabStore(Store):
         """
         return f"{self._records_path_name}/{file_name[:2]}/{file_name[2:4]}/{file_name}"
 
-    def _commit(self, records: list[Record], message: str, author: tuple[str, str]) -> dict[str, int]:
+    def _commit(self, records: list[Record], title: str, message: str, author: tuple[str, str]) -> dict[str, int]:
         with self._cache_index_path.open() as f:
             records_index = json.load(f)["index"]
 
@@ -319,7 +319,7 @@ class GitLabStore(Store):
 
         data = {
             "branch": self._branch,
-            "commit_message": message,
+            "commit_message": f"{title}\n{message}",
             "author_name": author[0],
             "author_email": author[1],
             "actions": actions,
@@ -422,7 +422,7 @@ class GitLabStore(Store):
         except KeyError:
             raise RecordNotFoundError(file_identifier) from None
 
-    def push(self, records: list[Record], message: str, author: tuple[str, str]) -> None:
+    def push(self, records: list[Record], title: str, message: str, author: tuple[str, str]) -> None:
         """
         Add or update records in remote GitLab project repo.
 
@@ -435,7 +435,7 @@ class GitLabStore(Store):
             return
 
         self._ensure_cache()
-        stats = self._commit(records=records, message=message, author=author)
+        stats = self._commit(records=records, title=title, message=message, author=author)
 
         if not any(stats.values()):
             self._logger.info("No records pushed, skipping cache invalidation")

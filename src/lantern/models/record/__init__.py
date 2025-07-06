@@ -223,7 +223,7 @@ class Record:
         """
         Convert Record to plain types.
 
-        Intended to be used as a cattrs structure hook.
+        Intended to be used as a cattrs unstructure hook.
         E.g. `converter.register_unstructure_hook(Record, lambda d: d.unstructure())`
         """
         converter = cattrs.Converter()
@@ -291,7 +291,7 @@ class Record:
 
         To ensure an accurate comparison, default/hard-coded values are added to a copy of the config before comparison.
 
-        If a logger is provided, any unsupported content will be logged as a debug message.
+        Set `logger` to enable optional logging of any unsupported content as a debug message.
         """
         record = Record.loads(config)
         check = record.dumps()

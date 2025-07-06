@@ -31,6 +31,7 @@ dependencies = [
 dev = [
     "ruff>=0.11.13",
     "safety>=3.5.2",
+    "taskipy>=1.14.1",
 ]
 test = [
     "moto[s3]>=5.1.6",
@@ -43,6 +44,11 @@ test = [
     "pytest-recording>=0.13.4",
     "pytest-unordered>=0.7.0",
 ]
+
+[tool.taskipy.tasks]
+lint = { cmd = "ruff check src/ tests/ build.py load.py", help = "Lint app" }
+test = { cmd = "pytest", help = "Test app" }
+test-clear = { cmd = "pytest --cache-clear", help = "Reset pytest cache" }
 
 [tool.ruff]
 src = ["src"]

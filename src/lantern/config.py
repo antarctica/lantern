@@ -26,7 +26,7 @@ class Config:
         if read_env:
             self.env.read_env()
 
-    def validate(self) -> None:
+    def validate(self) -> None:  # noqa: C901
         """
         Validate configuration.
 

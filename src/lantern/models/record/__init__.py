@@ -175,6 +175,7 @@ class Record:
 
     @property
     def sha1(self) -> str:
+        """SHA1 hash of Record configuration."""
         return sha1(json.dumps(self.dumps(), indent=0, sort_keys=True, ensure_ascii=True).encode("utf-8")).hexdigest()  # noqa: S324
 
     @staticmethod

@@ -111,7 +111,7 @@ class TestRecord:
         """Can determine if a record config is supported or not."""
         if value:
             fx_record_config_minimal_iso = {**fx_record_config_minimal_iso, **value}
-        expected = True if not value else False
+        expected = not bool(value)
 
         result = Record._config_supported(fx_record_config_minimal_iso)
         assert result == expected
@@ -226,7 +226,7 @@ class TestRecord:
 
     def test_dumps_json(self, fx_record_minimal_iso: Record):
         """
-        Can encode record as a JSON schema instance encoded as a string
+        Can encode record as a JSON schema instance encoded as a string.
 
         This only tests JSON schema specific properties are included, as other properties are tested elsewhere.
         """

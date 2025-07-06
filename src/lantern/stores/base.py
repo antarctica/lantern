@@ -11,6 +11,7 @@ class RecordNotFoundError(Exception):
         self.file_identifier = file_identifier
 
     def __str__(self) -> str:
+        """Exception string representation."""
         return f"Record '{self.file_identifier}' not found."
 
 

@@ -72,9 +72,7 @@ class FakeRecordsStore(Store):
         return self._records
 
     def populate(self, inc_records: list[str] | None = None, inc_related: bool = False) -> None:
-        """
-        Load test records, optionally limited to a set of file identifiers and their direct dependencies.
-        """
+        """Load test records, optionally limited to a set of file identifiers and their direct dependencies."""
         if inc_records is None:
             inc_records = []
 

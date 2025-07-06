@@ -204,7 +204,7 @@ def _process_records(logger: logging.Logger, records: list[Record], store: GitLa
 
 
 def _get_args() -> tuple[str, str, str, str]:
-    """Get user input"""
+    """Get user input."""
     answers = inquirer.prompt(
         [
             inquirer.Text("title", message="Changeset summary"),

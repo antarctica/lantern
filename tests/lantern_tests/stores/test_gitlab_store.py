@@ -7,7 +7,7 @@ from unittest.mock import PropertyMock
 
 import pytest
 from pytest_mock import MockerFixture
-from requests.exceptions import ConnectionError
+from requests.exceptions import ConnectionError as RequestsConnectionError
 
 from lantern.models.record import Record
 from lantern.models.record.summary import RecordSummary
@@ -46,7 +46,9 @@ class TestGitLabStore:
     def test_is_online(self, mocker: MockerFixture, fx_gitlab_store: GitLabStore, expected: bool):
         """Can check if remote repository is available."""
         if not expected:
-            mocker.patch.object(GitLabStore, "_project", new_callable=PropertyMock, side_effect=ConnectionError())
+            mocker.patch.object(
+                GitLabStore, "_project", new_callable=PropertyMock, side_effect=RequestsConnectionError()
+            )
 
         assert fx_gitlab_store._is_online() == expected
 

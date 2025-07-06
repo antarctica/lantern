@@ -94,7 +94,7 @@ class TestRecord:
         assert fx_record_minimal_iso.sha1 == "5a9f0174d9bebd69b8310aba338debc2f5aaadf1"
 
     @pytest.mark.parametrize("check_supported", [False, True])
-    def test_loads(self, check_supported):
+    def test_loads(self, check_supported: bool):
         """
         Can create a Record from a JSON serialised dict.
 

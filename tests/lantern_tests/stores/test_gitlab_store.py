@@ -369,5 +369,7 @@ class TestGitLabStore:
 
         if mode == "none":
             assert "No records to push, skipping" in caplog.text
-            return
-        assert "Recreating cache to reflect pushed changes" in caplog.text
+        elif mode == "noop":
+            assert "No records pushed, skipping cache invalidation" in caplog.text
+        else:
+            assert "Recreating cache to reflect pushed changes" in caplog.text

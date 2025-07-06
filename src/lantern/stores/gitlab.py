@@ -418,11 +418,13 @@ class GitLabStore(Store):
         if len(records) == 0:
             self._logger.info("No records to push, skipping")
             return
-        self._ensure_cache()
 
+        self._ensure_cache()
         stats = self._commit(records=records, message=message, author=author)
+
         if not any(stats.values()):
-            self._logger.info("No records to push, skipping")
+            self._logger.info("No records pushed, skipping cache invalidation")
+            return
 
         self._logger.info("Recreating cache to reflect pushed changes")
         self._create_cache()

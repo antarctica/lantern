@@ -83,6 +83,7 @@ def _record_config_minimal_iso() -> dict:
             "title": {"value": "x"},
             "dates": {"creation": "2014-06-30"},
             "abstract": "x",
+            "language": "eng",
         },
     }
 
@@ -635,7 +636,8 @@ def fx_exporter_static_site(module_mocker: MockerFixture) -> TemporaryDirectory:
     """
     Build static site and export to a temp directory.
 
-    Module scoped for performance. Means usual fixtures for config and S3Client can't be used and are duplicated.
+    Module scoped for performance. Means usual fixtures for config, S3Client and FakeRecordsStore can't be used and are
+    duplicated.
     """
     site_dir = TemporaryDirectory()
 

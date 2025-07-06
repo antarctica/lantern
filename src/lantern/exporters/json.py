@@ -4,7 +4,7 @@ from pathlib import Path
 from mypy_boto3_s3 import S3Client
 
 from lantern.config import Config
-from lantern.exporters.base_exporter import ResourceExporter
+from lantern.exporters.base import ResourceExporter
 from lantern.models.record import Record
 
 

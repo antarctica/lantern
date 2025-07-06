@@ -6,7 +6,7 @@ from unittest.mock import PropertyMock
 from boto3 import client as S3Client  # noqa: N812
 from pytest_mock import MockerFixture
 
-from lantern.exporters.iso_exporter import IsoXmlExporter, IsoXmlHtmlExporter
+from lantern.exporters.xml import IsoXmlExporter, IsoXmlHtmlExporter
 from lantern.models.record import Record
 
 

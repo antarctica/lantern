@@ -6,7 +6,7 @@ from unittest.mock import PropertyMock
 from boto3 import client as S3Client  # noqa: N812
 from pytest_mock import MockerFixture
 
-from lantern.exporters.json_exporter import JsonExporter
+from lantern.exporters.json import JsonExporter
 from lantern.models.record import Record
 
 

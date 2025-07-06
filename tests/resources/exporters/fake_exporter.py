@@ -1,4 +1,4 @@
-from lantern.exporters.base_exporter import Exporter, ResourceExporter
+from lantern.exporters.base import Exporter, ResourceExporter
 
 
 class FakeExporter(Exporter):

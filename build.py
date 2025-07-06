@@ -5,7 +5,7 @@ from datetime import UTC, datetime
 from boto3 import client as S3Client  # noqa: N812
 
 from lantern.config import Config as Config
-from lantern.exporters.site_exporter import SiteExporter
+from lantern.exporters.site import SiteExporter
 from lantern.log import init as init_logging
 from lantern.log import init_sentry
 from lantern.stores.gitlab import GitLabStore

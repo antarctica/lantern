@@ -7,7 +7,7 @@ import pytest
 from boto3 import client as S3Client  # noqa: N812
 from pytest_mock import MockerFixture
 
-from lantern.exporters.html_exporter import HtmlAliasesExporter, HtmlExporter
+from lantern.exporters.html import HtmlAliasesExporter, HtmlExporter
 from lantern.models.item.catalogue import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
 from lantern.models.record import Record

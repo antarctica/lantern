@@ -18,11 +18,11 @@ from moto import mock_aws
 from pytest_mock import MockerFixture
 
 from lantern.config import Config
-from lantern.exporters.base_exporter import Exporter, ResourceExporter, S3Utils
-from lantern.exporters.html_exporter import HtmlAliasesExporter, HtmlExporter
-from lantern.exporters.iso_exporter import IsoXmlHtmlExporter
-from lantern.exporters.records_exporter import RecordsExporter
-from lantern.exporters.site_exporter import SiteExporter, SiteIndexExporter, SitePagesExporter, SiteResourcesExporter
+from lantern.exporters.base import Exporter, ResourceExporter, S3Utils
+from lantern.exporters.html import HtmlAliasesExporter, HtmlExporter
+from lantern.exporters.records import RecordsExporter
+from lantern.exporters.site import SiteExporter, SiteIndexExporter, SitePagesExporter, SiteResourcesExporter
+from lantern.exporters.xml import IsoXmlHtmlExporter
 from lantern.models.item.catalogue import AdditionalInfoTab, ItemCatalogue
 from lantern.models.item.catalogue.elements import Dates as ItemCatDates
 from lantern.models.item.catalogue.elements import Identifiers as ItemCatIdentifiers

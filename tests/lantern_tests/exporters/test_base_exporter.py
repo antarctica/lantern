@@ -7,7 +7,7 @@ import pytest
 from boto3 import client as S3Client  # noqa: N812
 from pytest_mock import MockerFixture
 
-from lantern.exporters.base_exporter import Exporter, ResourceExporter, S3Utils
+from lantern.exporters.base import Exporter, ResourceExporter, S3Utils
 from lantern.models.record import Record
 from tests.resources.exporters.fake_exporter import FakeExporter, FakeResourceExporter
 

@@ -9,9 +9,9 @@ from jinja2 import Environment, PackageLoader, select_autoescape
 from mypy_boto3_s3 import S3Client
 
 from lantern.config import Config
-from lantern.exporters.base_exporter import Exporter
-from lantern.exporters.base_exporter import Exporter as BaseExporter
-from lantern.exporters.records_exporter import RecordsExporter
+from lantern.exporters.base import Exporter
+from lantern.exporters.base import Exporter as BaseExporter
+from lantern.exporters.records import RecordsExporter
 from lantern.models.record import Record
 from lantern.models.record.summary import RecordSummary
 from lantern.models.templates import PageMetadata

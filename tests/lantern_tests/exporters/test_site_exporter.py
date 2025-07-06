@@ -7,7 +7,7 @@ import pytest
 from bs4 import BeautifulSoup
 from pytest_mock import MockerFixture
 
-from lantern.exporters.site_exporter import SiteExporter, SiteIndexExporter, SitePagesExporter, SiteResourcesExporter
+from lantern.exporters.site import SiteExporter, SiteIndexExporter, SitePagesExporter, SiteResourcesExporter
 from lantern.models.record import Record
 from lantern.models.record.summary import RecordSummary
 

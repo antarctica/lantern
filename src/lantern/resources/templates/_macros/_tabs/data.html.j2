@@ -1,12 +1,12 @@
 {% import '_macros/common.html.j2' as com %}
 
 {% macro item(data) %}
-  {% call com.item_border(classes="grid grid-cols-3 items-center data-option") %}
-    <div class="text-left">{{ data.format_type.value }}</div>
+  {% call com.item_border(classes="grid grid-cols-1 gap-y-2 lg:grid-cols-3 items-center data-option") %}
+    <div class="text-center lg:text-left">{{ data.format_type.value }}</div>
     <div class="text-center">{{ data.size }}</div>
-    <div class="text-right">{{ action(data) }}</div>
+    <div class="text-center lg:text-right">{{ action(data) }}</div>
     {% if data.access_target %}
-      <div class="col-span-3">{{ content(data) }}</div>
+      <div class="lg:col-span-3">{{ content(data) }}</div>
     {% endif %}
   {% endcall %}
 {% endmacro %}
@@ -68,9 +68,11 @@
 {% macro arc_ogc_features(data) %}
   {% set id_base = data.access_target | replace("#", "") %}
   {% call com.alert(variant='blue', classes='space-y-4') %}
-    <p>Add item to a desktop or online GIS that supports <a class="{{ com.link_classes() }}" href="https://ogcapi.ogc.org/features/">OGC API Features {{ com.ext_link_i() }}</a> services.</p>
-    <p><strong>Note:</strong> This service is implemented using ArcGIS Server.</p>
+    <p>Add item to a desktop or online GIS that supports <a class="{{ com.link_classes() }}" href="https://ogcapi.ogc.org/features/">OGC API Features {{ com.ext_link_i() }}</a> services (as implemented by ArcGIS Server).</p>
     <dl class="space-y-4">
+      {% call com.dl_item(title='ArcGIS Item', id=id_base + '-portal-item') %}
+        {{ com.ext_link_a(href=data.item_link.href, value=data.item_link.value) }}
+      {% endcall %}
       {% call com.dl_item(title='Service Endpoint', id=id_base + '-server-endpoint', dd_class="overflow-x-scroll") %}
         <code>{{ data.service_endpoint }}</code>
       {% endcall %}

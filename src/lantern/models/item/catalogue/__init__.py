@@ -250,6 +250,7 @@ class ItemCatalogue(ItemBase):
     def page_metadata(self) -> PageMetadata:
         """Templates page metadata."""
         return PageMetadata(
+            build_key=self._config.TEMPLATES_CACHE_BUST_VALUE,
             sentry_src=self._config.TEMPLATES_SENTRY_SRC,
             plausible_domain=self._config.TEMPLATES_PLAUSIBLE_DOMAIN,
             html_title=self._html_title,

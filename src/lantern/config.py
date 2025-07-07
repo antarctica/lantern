@@ -1,4 +1,5 @@
 import logging
+from hashlib import sha1
 from importlib.metadata import version
 from pathlib import Path
 from typing import TypedDict
@@ -115,6 +116,7 @@ class Config:
         STORE_GITLAB_TOKEN: str
         STORE_GITLAB_PROJECT_ID: str
         STORE_GITLAB_CACHE_PATH: str
+        TEMPLATES_CACHE_BUST_VALUE: str
         TEMPLATES_SENTRY_SRC: str
         TEMPLATES_PLAUSIBLE_DOMAIN: str
         TEMPLATES_ITEM_MAPS_ENDPOINT: str
@@ -137,6 +139,7 @@ class Config:
             "STORE_GITLAB_TOKEN": self.STORE_GITLAB_TOKEN_SAFE,
             "STORE_GITLAB_PROJECT_ID": self.STORE_GITLAB_PROJECT_ID,
             "STORE_GITLAB_CACHE_PATH": str(self.STORE_GITLAB_CACHE_PATH.resolve()),
+            "TEMPLATES_CACHE_BUST_VALUE": self.TEMPLATES_CACHE_BUST_VALUE,
             "TEMPLATES_SENTRY_SRC": self.TEMPLATES_SENTRY_SRC,
             "TEMPLATES_PLAUSIBLE_DOMAIN": self.TEMPLATES_PLAUSIBLE_DOMAIN,
             "TEMPLATES_ITEM_MAPS_ENDPOINT": self.TEMPLATES_ITEM_MAPS_ENDPOINT,
@@ -216,6 +219,15 @@ class Config:
         """Path to local cache for GitLab store."""
         with self.env.prefixed(self._app_prefix), self.env.prefixed("STORE_GITLAB_"):
             return self.env.path("CACHE_PATH").resolve()
+
+    @property
+    def TEMPLATES_CACHE_BUST_VALUE(self) -> str:
+        """
+        Value to append to URLs for static assets to ensure current versions are used.
+
+        Set to the first 7 characters of app version SHA1 hash. E.g. `main.css?v=f053ddb` for version 0.1.0.
+        """
+        return sha1(f"v{self.VERSION}".encode()).hexdigest()[:7]
 
     @property
     def TEMPLATES_SENTRY_SRC(self) -> str:

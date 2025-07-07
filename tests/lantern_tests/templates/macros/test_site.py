@@ -11,7 +11,13 @@ class TestMacrosSite:
     """Test site template macros."""
 
     @staticmethod
-    def _render(template: str, page_meta: PageMetadata) -> str:
+    def _page_meta() -> PageMetadata:
+        return PageMetadata(build_key="x", html_title="x", sentry_src="x", plausible_domain="x")
+
+    @staticmethod
+    def _render(template: str, page_meta: PageMetadata | None = None) -> str:
+        if page_meta is None:
+            page_meta = TestMacrosSite._page_meta()
         _loader = PackageLoader("lantern", "resources/templates")
         jinja = Environment(loader=_loader, autoescape=select_autoescape(), trim_blocks=True, lstrip_blocks=True)
         return jinja.from_string(template).render(meta=page_meta)
@@ -23,8 +29,7 @@ class TestMacrosSite:
         Basic sanity check.
         """
         template = """{% import '_macros/site.html.j2' as site %}{{ site.head_meta() }}"""
-        meta = PageMetadata(html_title="x", sentry_src="x", plausible_domain="x")
-        html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
+        html = BeautifulSoup(self._render(template), parser="html.parser", features="lxml")
 
         assert html.head.meta["charset"] == "utf-8"
 
@@ -32,8 +37,7 @@ class TestMacrosSite:
         """Can get <title> with expected value from page."""
         expected = "x | BAS Data Catalogue"
         template = """{% import '_macros/site.html.j2' as site %}{{ site.head_title(meta.html_title) }}"""
-        meta = PageMetadata(html_title="x", sentry_src="x", plausible_domain="x")
-        html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
+        html = BeautifulSoup(self._render(template), parser="html.parser", features="lxml")
 
         assert html.head.title.string == expected
 
@@ -46,7 +50,9 @@ class TestMacrosSite:
         """
         expected = {"x": "y"}
         template = """{% import '_macros/site.html.j2' as site %}{{ site.head_open_graph(meta.html_open_graph) }}"""
-        meta = PageMetadata(html_title="x", sentry_src="x", plausible_domain="x", html_open_graph=expected)
+        meta = PageMetadata(
+            build_key="x", html_title="x", sentry_src="x", plausible_domain="x", html_open_graph=expected
+        )
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
 
         for key, val in expected.items():
@@ -55,8 +61,7 @@ class TestMacrosSite:
     def test_head_favicon(self):
         """Can get static favicon."""
         template = """{% import '_macros/site.html.j2' as site %}{{ site.head_favicon() }}"""
-        meta = PageMetadata(html_title="x", sentry_src="x", plausible_domain="x")
-        html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
+        html = BeautifulSoup(self._render(template), parser="html.parser", features="lxml")
 
         assert html.head.find(name="link", rel="icon") is not None
 
@@ -66,22 +71,21 @@ class TestMacrosSite:
     def test_head_styles(self, href: str):
         """Can get static CSS references."""
         template = """{% import '_macros/site.html.j2' as site %}{{ site.head_styles() }}"""
-        meta = PageMetadata(html_title="x", sentry_src="x", plausible_domain="x")
-        html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
+        html = BeautifulSoup(self._render(template), parser="html.parser", features="lxml")
 
-        assert html.head.find(name="link", rel="stylesheet", href=href) is not None
+        assert html.head.find("link", rel="stylesheet", href=lambda h: h and h.startswith(href)) is not None
 
     def test_script_sentry(self):
         """Can get Sentry script from page."""
         template = """{% import '_macros/site.html.j2' as site %}{{ site.script_sentry(meta.sentry_src) }}"""
-        meta = PageMetadata(html_title="x", sentry_src="x", plausible_domain="x")
+        meta = self._page_meta()
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
         assert html.head.find(name="script", src=meta.sentry_src) is not None
 
     def test_script_plausible(self):
         """Can get Plausible script from page."""
         template = """{% import '_macros/site.html.j2' as site %}{{ site.script_plausible(meta.plausible_domain) }}"""
-        meta = PageMetadata(html_title="x", sentry_src="x", plausible_domain="x")
+        meta = self._page_meta()
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
         assert html.head.find(name="script", attrs={"data-domain": meta.plausible_domain}) is not None
 
@@ -94,7 +98,9 @@ class TestMacrosSite:
         """
         expected = {"x": "y"}
         template = """{% import '_macros/site.html.j2' as site %}{{ site.script_schema_org(meta.html_schema_org) }}"""
-        meta = PageMetadata(html_title="x", sentry_src="x", plausible_domain="x", html_schema_org=json.dumps(expected))
+        meta = PageMetadata(
+            build_key="x", html_title="x", sentry_src="x", plausible_domain="x", html_schema_org=json.dumps(expected)
+        )
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
         data = json.loads(html.head.find(name="script", type="application/ld+json").string)
 
@@ -103,8 +109,9 @@ class TestMacrosSite:
     @pytest.mark.parametrize(
         "meta",
         [
-            PageMetadata(html_title="x", sentry_src="x", plausible_domain="x"),
+            PageMetadata(build_key="x", html_title="x", sentry_src="x", plausible_domain="x"),
             PageMetadata(
+                build_key="x",
                 html_title="x",
                 sentry_src="x",
                 plausible_domain="x",
@@ -144,24 +151,21 @@ class TestMacrosSite:
     def test_top_anchor(self):
         """Can get static page top anchor."""
         template = """{% import '_macros/site.html.j2' as site %}{{ site.top_anchor() }}"""
-        meta = PageMetadata(html_title="x", sentry_src="x", plausible_domain="x")
-        html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
+        html = BeautifulSoup(self._render(template), parser="html.parser", features="lxml")
 
         assert html.find(id="site-top") is not None
 
     def test_navbar_title(self):
         """Can get site title in navbar with expected static value."""
         template = """{% import '_macros/site.html.j2' as site %}{{ site.navbar() }}"""
-        meta = PageMetadata(html_title="x", sentry_src="x", plausible_domain="x")
-        html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
+        html = BeautifulSoup(self._render(template), parser="html.parser", features="lxml")
 
         assert html.find(id="site-title").string.strip() == "BAS Data Catalogue"
 
     def test_dev_phase(self):
         """Can get site dev phase label with expected static value."""
         template = """{% import '_macros/site.html.j2' as site %}{{ site.dev_phase() }}"""
-        meta = PageMetadata(html_title="x", sentry_src="x", plausible_domain="x")
-        html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
+        html = BeautifulSoup(self._render(template), parser="html.parser", features="lxml")
 
         assert html.find(id="site-dev-phase").string.strip() == "alpha"
 
@@ -169,7 +173,7 @@ class TestMacrosSite:
         """Can get static site footer."""
         expected = "666"
         template = """{% import '_macros/site.html.j2' as site %}{{ site.footer(meta) }}"""
-        meta = PageMetadata(html_title="x", sentry_src="x", plausible_domain="x", current_year=666)
+        meta = PageMetadata(build_key="x", html_title="x", sentry_src="x", plausible_domain="x", current_year=666)
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
 
         assert html.find(id="site-footer") is not None

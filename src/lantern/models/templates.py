@@ -6,6 +6,7 @@ from datetime import date
 class PageMetadata:
     """Common metadata used across Data Catalogue pages."""
 
+    build_key: str
     html_title: str
     sentry_src: str
     plausible_domain: str

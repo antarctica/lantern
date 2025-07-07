@@ -227,7 +227,7 @@ class Config:
 
         Set to the first 7 characters of app version SHA1 hash. E.g. `main.css?v=f053ddb` for version 0.1.0.
         """
-        return sha1(f"v{self.VERSION}".encode()).hexdigest()[:7]
+        return sha1(f"v{self.VERSION}".encode()).hexdigest()[:7]  # noqa: S324
 
     @property
     def TEMPLATES_SENTRY_SRC(self) -> str:

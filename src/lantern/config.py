@@ -64,12 +64,6 @@ class Config:
             raise ConfigurationError(msg)
 
         try:
-            _ = self.TEMPLATES_SENTRY_SRC
-        except EnvError as e:
-            msg = "TEMPLATES_SENTRY_SRC must be set."
-            raise ConfigurationError(msg) from e
-
-        try:
             _ = self.TEMPLATES_PLAUSIBLE_DOMAIN
         except EnvError as e:
             msg = "TEMPLATES_PLAUSIBLE_DOMAIN must be set."
@@ -81,6 +75,11 @@ class Config:
             msg = "TEMPLATES_ITEM_CONTACT_ENDPOINT must be set."
             raise ConfigurationError(msg) from e
 
+        try:
+            _ = self.EXPORT_PATH
+        except EnvError as e:
+            msg = "EXPORT_PATH must be set."
+            raise ConfigurationError(msg) from e
         if Path(self.EXPORT_PATH).exists() and not Path(self.EXPORT_PATH).is_dir():
             msg = "EXPORT_PATH must be a directory."
             raise ConfigurationError(msg)
@@ -216,13 +215,12 @@ class Config:
     def STORE_GITLAB_CACHE_PATH(self) -> Path:
         """Path to local cache for GitLab store."""
         with self.env.prefixed(self._app_prefix), self.env.prefixed("STORE_GITLAB_"):
-            return self.env.path("CACHE_PATH")
+            return self.env.path("CACHE_PATH").resolve()
 
     @property
     def TEMPLATES_SENTRY_SRC(self) -> str:
         """Sentry dynamic CDN script."""
-        with self.env.prefixed(self._app_prefix), self.env.prefixed("TEMPLATES_"):
-            return self.env("SENTRY_SRC")
+        return "https://js.sentry-cdn.com/57698b6483c7ac43b7c9c905cdb79943.min.js"
 
     @property
     def TEMPLATES_PLAUSIBLE_DOMAIN(self) -> str:
@@ -245,7 +243,7 @@ class Config:
     def EXPORT_PATH(self) -> Path:
         """Path to site output."""
         with self.env.prefixed(self._app_prefix):
-            return self.env.path("EXPORT_PATH")
+            return self.env.path("EXPORT_PATH").resolve()
 
     @property
     def AWS_S3_BUCKET(self) -> str:

@@ -38,13 +38,11 @@ class SiteResourcesExporter(Exporter):
         """
         Copy CSS to directory if not already present.
 
-        The source CSS file needs generating from `main.css.j2` using the `scripts/recreate-css.py` script.
-        Note: the source `main.css` contains an environment specific output path and MUST NOT be checked into git.
+        The source CSS file needs generating from `main.css.j2` using the `tailwind` dev task.
         """
         with resources_as_file(resources_files(self._css_src_ref)) as src_base:
-            name = "main.css"
-            src_path = src_base / name
-            dst_path = self._export_base.joinpath("css", name)
+            src_path = src_base / "main.css"
+            dst_path = self._export_base / "css" / src_path.name
             dst_path.parent.mkdir(parents=True, exist_ok=True)
             copy(src_path, dst_path)
 

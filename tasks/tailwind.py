@@ -14,7 +14,9 @@ from lantern.exporters.site import SiteExporter
 
 # noinspection PyPep8Naming
 class Config(BaseConfig):
-    def __init__(self, export_path: Path):
+    """Local config class."""
+
+    def __init__(self, export_path: Path) -> None:
         super().__init__()
         self._path = export_path
 
@@ -47,7 +49,12 @@ def export_test_site(export_path: Path) -> None:
     store.populate()
 
     with mock_aws():
-        s3_client = S3Client("s3", aws_access_key_id="x", aws_secret_access_key="x", region_name="eu-west-1")
+        s3_client = S3Client(
+            "s3",
+            aws_access_key_id="x",
+            aws_secret_access_key="x",  # noqa: S106
+            region_name="eu-west-1",
+        )
 
     exporter = SiteExporter(config=config, s3=s3_client, logger=logger)
     exporter.loads(summaries=store.summaries, records=store.records)

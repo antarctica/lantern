@@ -46,10 +46,10 @@ test = [
 ]
 
 [tool.taskipy.tasks]
-lint = { cmd = "ruff check src/ tests/ build.py load.py", help = "Lint app" }
 tailwind = { cmd = "python -m tasks.tailwind", help = "Regenerate tailwind styles" }
+lint = { cmd = "ruff check src/ tasks/ tests/ build.py load.py", help = "Lint app" }
 test = { cmd = "pytest", help = "Test app" }
-test-clear = { cmd = "pytest --cache-clear", help = "Reset pytest cache" }
+test-reset = { cmd = "pytest --cache-clear", help = "Reset pytest cache" }
 
 [tool.ruff]
 src = ["src"]
@@ -99,6 +99,8 @@ ignore = ["D100", "D104", "D107", "D203", "D212", "D402", "E501", "PT001", "PT02
 "config.py" = ["D401", "N802"]
 # config.py |   D401 | ignore imperative mood in docstrings (too unreliable)
 # config.py |   N802 | ignore use of upper case method names
+"tasks/tailwind.py" = ["N802"]
+# config.py |   N802 | ignore use of upper case method names in config subclass
 "tests/*" = ["ANN201", "ANN401", "D401", "S101"]
 #   tests/* | ANN201 | ignore public functions
 #   tests/* | ANN401 | ignore use of 'Any' type

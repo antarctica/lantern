@@ -321,7 +321,7 @@ class BasPublishedMap(Distribution):
     @property
     def size(self) -> str:
         """Not applicable."""
-        return "-"
+        return ""
 
     @property
     def action(self) -> Link:

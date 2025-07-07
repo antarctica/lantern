@@ -47,6 +47,7 @@ test = [
 
 [tool.taskipy.tasks]
 lint = { cmd = "ruff check src/ tests/ build.py load.py", help = "Lint app" }
+tailwind = { cmd = "python -m tasks.tailwind", help = "Regenerate tailwind styles" }
 test = { cmd = "pytest", help = "Test app" }
 test-clear = { cmd = "pytest --cache-clear", help = "Reset pytest cache" }
 

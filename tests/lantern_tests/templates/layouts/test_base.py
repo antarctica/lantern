@@ -13,6 +13,7 @@ class TestMacrosSite:
     def page_metadata(self) -> PageMetadata:
         """Get page metadata."""
         return PageMetadata(
+            build_key="x",
             html_title="x",
             sentry_src="x",
             plausible_domain="x",
@@ -39,3 +40,15 @@ class TestMacrosSite:
         schema_org_item = json.loads(meta.html_schema_org)
         schema_org_page = json.loads(html.head.find(name="script", type="application/ld+json").string)
         assert schema_org_item == schema_org_page
+
+    def test_cache_busting(self):
+        """Can set cache busting query string param on relevant resources."""
+        meta = self.page_metadata
+        html = BeautifulSoup(self._render(), parser="html.parser", features="lxml")
+
+        main_css = html.head.find("link", rel="stylesheet", href=lambda h: h and h.startswith("/static/css/main.css"))
+        assert main_css["href"].endswith(f"?v={meta.build_key}")
+
+        favicon_rels = ["shortcut icon", "icon", "apple-touch-icon", "manifest"]
+        for rel in favicon_rels:
+            assert html.head.find("link", rel=rel)["href"].endswith(f"?v={meta.build_key}")

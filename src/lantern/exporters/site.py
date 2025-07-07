@@ -318,6 +318,7 @@ class SitePagesExporter(Exporter):
             "legal/privacy.html.j2": "Privacy Policy",
         }
         return PageMetadata(
+            build_key=self._config.TEMPLATES_CACHE_BUST_VALUE,
             sentry_src=self._config.TEMPLATES_SENTRY_SRC,
             plausible_domain=self._config.TEMPLATES_PLAUSIBLE_DOMAIN,
             html_title=mapping[template_path],

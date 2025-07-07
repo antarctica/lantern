@@ -37,7 +37,7 @@
         </aside>
       </div>
     {% else %}
-        <div class="{{ classes }} grid grid-cols-1 lg:grid-cols-2 gap-y-4 lg:gap-x-4 items-start">
+        <div class="{{ classes }} grid grid-cols-1 gap-y-4 w-full lg:w-1/2 items-start">
           {% for item in data.items %}
             {{ data_tab.item(item) }}
           {% endfor %}

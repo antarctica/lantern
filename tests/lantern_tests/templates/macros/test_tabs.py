@@ -1,8 +1,10 @@
 import json
 from datetime import date
+from unittest.mock import PropertyMock
 
 import pytest
 from bs4 import BeautifulSoup
+from pytest_mock import MockerFixture
 
 from lantern.models.item.catalogue import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
@@ -832,21 +834,19 @@ class TestInfoTab:
         else:
             assert scale is None
 
-    @staticmethod
-    def _get_related_record_scales(identifier: str) -> Record:
-        """Local get_record method returning related records with a scale."""
-        record = _get_record(identifier)
-        record.identification.spatial_resolution = 200_000
-        return record
-
     @pytest.mark.cov()
-    def test_scales(self, fx_item_catalogue_min_physical_map: ItemCataloguePhysicalMap):
+    def test_scales(self, mocker: MockerFixture, fx_item_catalogue_min_physical_map: ItemCataloguePhysicalMap):
         """
         Can get optional multiple scales.
 
         E.g. for physical maps.
         """
-        fx_item_catalogue_min_physical_map._get_record = self._get_related_record_scales
+        mocker.patch.object(
+            fx_item_catalogue_min_physical_map._additional_info.__class__,
+            "scales",
+            new_callable=PropertyMock,
+            return_value=["x", "y"],
+        )
         html = BeautifulSoup(fx_item_catalogue_min_physical_map.render(), parser="html.parser", features="lxml")
 
         scale = html.select_one("#info-scale")

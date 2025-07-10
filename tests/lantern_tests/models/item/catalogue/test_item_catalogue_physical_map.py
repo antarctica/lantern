@@ -145,8 +145,6 @@ class TestAdditionalInfoTab:
 
         assert isinstance(tab, AdditionalInfoTab)
 
-    def test_scales(self):
-        """Can get multiple scales."""
     @pytest.mark.parametrize(
         ("serieses", "expected_names", "expected_sheets"),
         [
@@ -190,6 +188,19 @@ class TestAdditionalInfoTab:
         assert tab.series_names == expected_names
         assert tab.sheet_numbers == expected_sheets
 
+    @pytest.mark.parametrize(
+        ("scales", "expected"),
+        [
+            ([], None),
+            ([None], None),
+            ([None, None], None),
+            ([2_000_000, 2_000_000], None),
+            ([None, 2_000_000], ["- (Side A)", "1:2,000,000 (Side B)"]),
+            ([1_000_000, 2_000_000], ["1:1,000,000 (Side A)", "1:2,000,000 (Side B)"]),
+        ],
+    )
+    def test_scales(self, scales: list[int | None], expected: list[str] | None) -> None:
+        """Can get multiple scales if different."""
         item_id = "x"
         item_type = HierarchyLevelCode.PRODUCT
         identifiers = Identifiers(RecordIdentifiers([]))
@@ -197,8 +208,8 @@ class TestAdditionalInfoTab:
         datestamp = datetime(2014, 6, 30, 14, 30, second=45, tzinfo=UTC).date()
 
         tab = AdditionalInfoTab(
-            scales=[1_000_000, 2_000_000],
             serieses=[],
+            scales=scales,
             item_id=item_id,
             item_type=item_type,
             identifiers=identifiers,
@@ -207,7 +218,7 @@ class TestAdditionalInfoTab:
             kv={},
         )
 
-        assert tab.scales == ["1:1,000,000 (Side A)", "1:2,000,000 (Side B)"]
+        assert tab.scales == expected
 
 
 class TestItemCataloguePhysicalMap:

@@ -110,7 +110,6 @@ class AdditionalInfoTab(CatalogueAdditionalInfoTab):
         return [f"{value} (Side {side_index_label(i)})" for i, value in items.items()]
 
     @property
-    def scales(self) -> list[str]:
     def series_names(self) -> list[str | None] | None:
         """Formatted descriptive series names if set and all the same."""
         # TODO: test
@@ -137,9 +136,14 @@ class AdditionalInfoTab(CatalogueAdditionalInfoTab):
         # return [f"{value} (Side {side_index_label(i)})" for i, value in items.items()]
 
     @property
+    def scales(self) -> list[str] | None:
         """Formatted scales if set."""
-        scales = [self._format_scale(scale) for scale in self._scales]
-        return [f"{scale} (Side {side_index_label(i)})" for i, scale in enumerate(scales)]
+        items: dict[int, str | None] = {
+            i: self._format_scale(scale) if scale else "-" for i, scale in enumerate(self._scales)
+        }
+        if not self._distinct_values(items):
+            return None
+        return [f"{value} (Side {side_index_label(i)})" for i, value in items.items()]
 
 
 class ItemCataloguePhysicalMap(ItemCatalogue):

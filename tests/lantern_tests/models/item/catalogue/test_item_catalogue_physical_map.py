@@ -1,7 +1,10 @@
+import json
 from copy import deepcopy
 from datetime import UTC, datetime
+from unittest.mock import PropertyMock
 
 import pytest
+from pytest_mock import MockerFixture
 
 from lantern.config import Config
 from lantern.models.item.base.elements import Extent as ItemExtent
@@ -15,7 +18,7 @@ from lantern.models.item.catalogue.special.physical_map import (
     side_index_label,
 )
 from lantern.models.record import HierarchyLevelCode, Record
-from lantern.models.record.elements.common import Date
+from lantern.models.record.elements.common import Date, Series
 from lantern.models.record.elements.common import Dates as RecordDates
 from lantern.models.record.elements.common import Identifiers as RecordIdentifiers
 from lantern.models.record.elements.identification import BoundingBox, ExtentGeographic, GraphicOverview
@@ -130,6 +133,7 @@ class TestAdditionalInfoTab:
         datestamp = datetime(2014, 6, 30, 14, 30, second=45, tzinfo=UTC).date()
 
         tab = AdditionalInfoTab(
+            serieses=[],
             scales=[],
             item_id=item_id,
             item_type=item_type,
@@ -143,6 +147,49 @@ class TestAdditionalInfoTab:
 
     def test_scales(self):
         """Can get multiple scales."""
+    @pytest.mark.parametrize(
+        ("serieses", "expected_names", "expected_sheets"),
+        [
+            ([], None, None),
+            ([None], None, None),
+            ([None, None], None, None),
+            ([Series(name="x"), Series(name="x")], None, None),
+            ([Series(page="x"), Series(page="x")], None, None),
+            ([None, Series(name="x")], ["- (Side A)", "x (Side B)"], None),
+            ([None, Series(page="x")], None, ["- (Side A)", "x (Side B)"]),
+            ([Series(name="x"), Series(name="y")], ["x (Side A)", "y (Side B)"], None),
+            ([Series(page="x"), Series(page="y")], None, ["x (Side A)", "y (Side B)"]),
+            (
+                [Series(name="x", page="y"), Series(name="y", page="x")],
+                ["x (Side A)", "y (Side B)"],
+                ["y (Side A)", "x (Side B)"],
+            ),
+        ],
+    )
+    def test_series(
+        self, serieses: list[Series | None], expected_names: list[str] | None, expected_sheets: list[str] | None
+    ) -> None:
+        """Can get multiple scales if different."""
+        item_id = "x"
+        item_type = HierarchyLevelCode.PRODUCT
+        identifiers = Identifiers(RecordIdentifiers([]))
+        dates = Dates(dates=RecordDates(creation=Date(date=datetime(2014, 6, 30, 14, 30, second=45, tzinfo=UTC))))
+        datestamp = datetime(2014, 6, 30, 14, 30, second=45, tzinfo=UTC).date()
+
+        tab = AdditionalInfoTab(
+            serieses=serieses,
+            scales=[],
+            item_id=item_id,
+            item_type=item_type,
+            identifiers=identifiers,
+            dates=dates,
+            datestamp=datestamp,
+            kv={},
+        )
+
+        assert tab.series_names == expected_names
+        assert tab.sheet_numbers == expected_sheets
+
         item_id = "x"
         item_type = HierarchyLevelCode.PRODUCT
         identifiers = Identifiers(RecordIdentifiers([]))
@@ -151,6 +198,7 @@ class TestAdditionalInfoTab:
 
         tab = AdditionalInfoTab(
             scales=[1_000_000, 2_000_000],
+            serieses=[],
             item_id=item_id,
             item_type=item_type,
             identifiers=identifiers,
@@ -204,6 +252,19 @@ class TestItemCataloguePhysicalMap:
         """Can get physical map specific tabs."""
         assert isinstance(fx_item_catalogue_min_physical_map._extent, ExtentTab)
         assert isinstance(fx_item_catalogue_min_physical_map._additional_info, AdditionalInfoTab)
+
+    def test_tab_additional_info_series_page(
+        self, mocker: MockerFixture, fx_item_catalogue_min_physical_map: ItemCataloguePhysicalMap
+    ):
+        """Can set series page property if included in supplemental info."""
+        page = "x"
+        assert fx_item_catalogue_min_physical_map._sides[0].identification.series == Series()
+
+        side = fx_item_catalogue_min_physical_map._sides[0]
+        side.identification.supplemental_information = json.dumps({"sheet_number": page})
+        mocker.patch.object(ItemCataloguePhysicalMap, "_sides", new_callable=PropertyMock, return_value=[side])
+
+        assert fx_item_catalogue_min_physical_map._additional_info._serieses[0].page == page
 
     @staticmethod
     def _get_record_graphics(identifier: str) -> Record:

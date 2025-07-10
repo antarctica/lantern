@@ -1,4 +1,6 @@
+import json
 from collections.abc import Callable
+from json import JSONDecodeError
 from typing import Any
 
 from lantern.models.item.catalogue import AdditionalInfoTab as CatalogueAdditionalInfoTab
@@ -7,6 +9,7 @@ from lantern.models.item.catalogue import ExtentTab as CatalogueExtentTab
 from lantern.models.item.catalogue import ItemCatalogue
 from lantern.models.item.catalogue.elements import ItemSummaryCatalogue
 from lantern.models.record import Record
+from lantern.models.record.elements.common import Series
 from lantern.models.record.elements.identification import GraphicOverviews
 from lantern.models.record.enums import AggregationAssociationCode, AggregationInitiativeCode, HierarchyLevelCode
 from lantern.models.record.summary import RecordSummary
@@ -65,15 +68,75 @@ class AdditionalInfoTab(CatalogueAdditionalInfoTab):
     """
     Special form of AdditionalInfoTab for physical maps.
 
-    Extends catalogue item additional info tab to include a list of scales (corresponding to each map side).
+    Extends tab with properties returning values for each side of a physical map (e.g. `scales`: scale in each side).
+
+    Where properties are the same (or all None) for all sides, these properties should return None. Templates will try
+    the plural properties first and fall back to the singular version.
     """
 
-    def __init__(self, scales: list[int | None], **kwargs: Any) -> None:
+    def __init__(self, serieses: list[Series | None], scales: list[int | None], **kwargs: Any) -> None:
         super().__init__(**kwargs)
+        self._serieses = serieses
         self._scales = scales
+
+    @staticmethod
+    def _distinct_values(items: dict[int, str | None]) -> bool:
+        """
+        Check if values are distinct or all None.
+
+        Where values are a side indexed dict of a given property (e.g. scales for each side).
+
+        Util method to avoid duplicating logic.
+        """
+        # TODO: test
+
+        distinct = {v for v in items.values()}
+        if len(distinct) <= 1 or distinct == {None}:
+            return False
+        return True
+
+    def _series_property(self, property_name: str) -> list[str | None] | None:
+        """
+        Get formatted property from series values for each side.
+
+        Utility method to avoid duplicating logic.
+        """
+        items: dict[int, str | None] = {
+            i: getattr(series, property_name) if series and getattr(series, property_name) else "-"
+            for i, series in enumerate(self._serieses)
+        }
+        if not self._distinct_values(items):
+            return None
+        return [f"{value} (Side {side_index_label(i)})" for i, value in items.items()]
 
     @property
     def scales(self) -> list[str]:
+    def series_names(self) -> list[str | None] | None:
+        """Formatted descriptive series names if set and all the same."""
+        # TODO: test
+        return self._series_property("name")
+
+        # items: dict[int, str | None] = {
+        #     i: series.name if series.name else "-" for i, series in enumerate(self._serieses)
+        # }
+        # if not self._distinct_values(items):
+        #     return None
+        # return [f"{value} (Side {side_index_label(i)})" for i, value in items.items()]
+
+    @property
+    def sheet_numbers(self) -> list[str | None] | None:
+        """Formatted descriptive series sheet numbers if set and not all the same."""
+        # TODO: test
+        return self._series_property("page")
+
+        # items: dict[int, str | None] = {
+        #     i: series.page if series.page else "-" for i, series in enumerate(self._serieses)
+        # }
+        # if not self._distinct_values(items):
+        #     return None
+        # return [f"{value} (Side {side_index_label(i)})" for i, value in items.items()]
+
+    @property
         """Formatted scales if set."""
         scales = [self._format_scale(scale) for scale in self._scales]
         return [f"{scale} (Side {side_index_label(i)})" for i, scale in enumerate(scales)]
@@ -87,7 +150,7 @@ class ItemCataloguePhysicalMap(ItemCatalogue):
 
     Extends catalogue items to get (product) records representing each side and use these to configure:
     - the extents tab to show multiple extents
-    - the additional info tab to show multiple scales
+    - the additional info tab to show multiple series, scales and other properties
     - graphic overviews to include those from each side
     - item summaries for each side
     """
@@ -148,11 +211,25 @@ class ItemCataloguePhysicalMap(ItemCatalogue):
         """
         Additional info tab.
 
-        Adapted to handle a set of scales for each side of a physical map.
+        Adapted to handle sets of values for each side of a physical map for specific properties.
         """
         kwargs = {k.lstrip("_"): v for k, v in super()._additional_info.__dict__.items()}
+
+        # Workaround for series.page being set by supplemental information in V4 config
+        # TODO: Test
+        for side in self._sides:
+            if side.identification.supplemental_information is None:
+                continue
+            try:
+                sup_info = json.loads(side.identification.supplemental_information)
+            except JSONDecodeError:
+                continue
+            if "sheet_number" in sup_info:
+                side.identification.series.page = sup_info["sheet_number"]
+
+        series: list[Series] = [side.identification.series for side in self._sides]
         scales = [side.identification.spatial_resolution for side in self._sides]
-        return AdditionalInfoTab(scales=scales, **kwargs)
+        return AdditionalInfoTab(serieses=series, scales=scales, **kwargs)
 
     @property
     def graphics(self) -> GraphicOverviews:

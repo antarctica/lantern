@@ -10,12 +10,26 @@
         <i class="{{ data.item_type_icon }}"></i> {{ data.item_type }}
       {% endcall %}
 
-      {% if data.series_name %}
-        {% call com.dl_item(title='Series', id='info-series-name') %}{{ data.series_name }}{% endcall %}
+    {% if data.series_name or data.series_names %}
+        {% set names = data.series_names if data.series_names else [data.series_name] %}
+        {% call com.dl_item(title='Series', id='info-series-name') %}
+          <ul class="space-y-2">
+            {% for name in names %}
+              <li>{{ name }}</li>
+            {% endfor %}
+          </ul>
+        {% endcall %}
       {% endif %}
 
-      {% if data.sheet_number %}
-        {% call com.dl_item(title='Sheet Number', id='info-sheet-number') %}{{ data.sheet_number }}{% endcall %}
+    {% if data.sheet_number or data.sheet_numbers %}
+        {% set numbers = data.sheet_numbers if data.sheet_numbers else [data.sheet_number] %}
+        {% call com.dl_item(title='Sheet number', id='info-sheet-number') %}
+          <ul class="space-y-2">
+            {% for number in numbers %}
+              <li>{{ number }}</li>
+            {% endfor %}
+          </ul>
+        {% endcall %}
       {% endif %}
 
       {% if data.scale or data.scales %}

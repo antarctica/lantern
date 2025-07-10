@@ -259,9 +259,7 @@ class TestLicenceTab:
             href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
             statement="x",
         )
-        tab = LicenceTab(
-            jinja=fx_item_catalogue_min._jinja, item_type=HierarchyLevelCode.PRODUCT, licence=constraint
-        )
+        tab = LicenceTab(jinja=fx_item_catalogue_min._jinja, item_type=HierarchyLevelCode.PRODUCT, licence=constraint)
 
         assert tab.enabled is True
         assert tab.slug == Licence.OGL_UK_3_0
@@ -493,9 +491,7 @@ class TestAdditionalInfoTab:
             ({"physical_size_width_mm": 594, "physical_size_height_mm": 420}, "A3 Landscape"),
         ],
     )
-    def test_page_size(
-        self, fx_item_cat_info_tab_minimal: AdditionalInfoTab, kv: dict | None, expected: str | None
-    ):
+    def test_page_size(self, fx_item_cat_info_tab_minimal: AdditionalInfoTab, kv: dict | None, expected: str | None):
         """Can get page size if set."""
         fx_item_cat_info_tab_minimal._kv = kv
         assert fx_item_cat_info_tab_minimal.page_size == expected

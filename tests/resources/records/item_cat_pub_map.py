@@ -34,7 +34,7 @@ from lantern.models.record.enums import (
 from lantern.models.record.presets.extents import make_bbox_extent, make_temporal_extent
 from tests.resources.records.utils import make_record
 
-# A trio of records to demonstrate a published map with two sides.
+# A trio of records to demonstrate a published map with two, mostly similar, sides.
 
 ids = {
     "c": "53ed9f6a-2d68-46c2-b5c5-f15422aaf5b2",
@@ -117,6 +117,7 @@ combined.identification.edition = "1"
 combined.identification.series = Series(name="Catalogue Test Resources", edition="1")
 combined.identification.dates.creation = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
 combined.identification.dates.published = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
+combined.identification.spatial_resolution = 400_000
 combined.identification.supplemental_information = json.dumps(
     {"physical_size_width_mm": 890, "physical_size_height_mm": 840, "sheet_number": "1"}
 )
@@ -173,9 +174,13 @@ side_a = make_record(
     purpose="Item to test published maps are presented correctly (side A).\n\nIt's Sunday, but screw it — juice box time. Say something that will terrify me. Yeah, I invited her. You said you wanted to spend time some with her.",
 )
 side_a.identification.edition = "1"
+side_a.identification.series = Series(name="Catalogue Test Resources", edition="1")
 side_a.identification.dates.creation = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
 side_a.identification.dates.published = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
 side_a.identification.spatial_resolution = 400_000
+side_a.identification.supplemental_information = json.dumps(
+    {"physical_size_width_mm": 890, "physical_size_height_mm": 840, "sheet_number": "1"}
+)
 side_a.identification.constraints = constraints
 side_a.distribution = distribution
 side_a.identification.graphic_overviews = GraphicOverviews(
@@ -228,10 +233,14 @@ side_b = make_record(
     abstract="Map Y for testing published maps support.",
     purpose="Item to test published maps are presented correctly (side B).",
 )
-side_b.identification.edition = "2"
+side_b.identification.edition = "1"
+combined.identification.series = Series(name="Catalogue Test Resources", edition="1")
 side_b.identification.dates.creation = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
 side_b.identification.dates.published = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
-side_b.identification.spatial_resolution = 800_000
+side_b.identification.spatial_resolution = 400_000
+side_b.identification.supplemental_information = json.dumps(
+    {"physical_size_width_mm": 890, "physical_size_height_mm": 840, "sheet_number": "1"}
+)
 side_b.identification.constraints = constraints
 side_b.distribution = distribution
 side_b.identification.graphic_overviews = GraphicOverviews(

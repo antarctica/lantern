@@ -169,7 +169,7 @@ class TestDataTab:
                     "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+feature+ogc",
                     "https://metadata-resources.data.bas.ac.uk/media-types/x-service/ogc+api+feature",
                 ],
-                "This service is implemented using ArcGIS Server.",
+                "(as implemented by ArcGIS Server)",
             ),
             (
                 ["https://www.bas.ac.uk/data/our-data/maps/how-to-order-a-map/"],

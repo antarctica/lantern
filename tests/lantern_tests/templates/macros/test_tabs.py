@@ -768,6 +768,25 @@ class TestInfoTab:
         else:
             assert series_name is None
 
+    @pytest.mark.cov()
+    def test_series_names(self, mocker: MockerFixture, fx_item_catalogue_min_physical_map: ItemCataloguePhysicalMap):
+        """
+        Can get optional multiple series names.
+
+        E.g. for physical maps.
+        """
+        mocker.patch.object(
+            fx_item_catalogue_min_physical_map._additional_info.__class__,
+            "series_names",
+            new_callable=PropertyMock,
+            return_value=["x", "y"],
+        )
+        html = BeautifulSoup(fx_item_catalogue_min_physical_map.render(), parser="html.parser", features="lxml")
+
+        names = html.select_one("#info-series-name")
+        for value in fx_item_catalogue_min_physical_map._additional_info.series_names:
+            assert names.find(name="li", string=value) is not None
+
     @pytest.mark.parametrize("value", [Series, Series(name="x", page="y", edition="z")])
     def test_sheet_number(self, fx_item_catalogue_min: ItemCatalogue, value: Series):
         """Can get optional item descriptive series sheet number based on value from item."""
@@ -780,6 +799,25 @@ class TestInfoTab:
             assert sheet_number.text.strip() == expected
         else:
             assert sheet_number is None
+
+    @pytest.mark.cov()
+    def test_sheet_numbers(self, mocker: MockerFixture, fx_item_catalogue_min_physical_map: ItemCataloguePhysicalMap):
+        """
+        Can get optional multiple series sheet numbers.
+
+        E.g. for physical maps.
+        """
+        mocker.patch.object(
+            fx_item_catalogue_min_physical_map._additional_info.__class__,
+            "sheet_numbers",
+            new_callable=PropertyMock,
+            return_value=["x", "y"],
+        )
+        html = BeautifulSoup(fx_item_catalogue_min_physical_map.render(), parser="html.parser", features="lxml")
+
+        numbers = html.select_one("#info-sheet-number")
+        for value in fx_item_catalogue_min_physical_map._additional_info.sheet_numbers:
+            assert numbers.find(name="li", string=value) is not None
 
     @pytest.mark.parametrize("value", [None, 1.0])
     def test_scale(self, fx_item_catalogue_min: ItemCatalogue, value: float | None):

@@ -14,6 +14,9 @@ from tests.resources.records.item_cat_product_restricted import record as produc
 from tests.resources.records.item_cat_pub_map import combined as product_published_map_combined
 from tests.resources.records.item_cat_pub_map import side_a as product_published_map_side_a
 from tests.resources.records.item_cat_pub_map import side_b as product_published_map_side_b
+from tests.resources.records.item_cat_pub_map_diff import combined as product_diff_published_map_combined
+from tests.resources.records.item_cat_pub_map_diff import side_a as product_diff_published_map_side_a
+from tests.resources.records.item_cat_pub_map_diff import side_b as product_diff_published_map_side_b
 
 
 class FakeRecordsStore(Store):
@@ -50,6 +53,9 @@ class FakeRecordsStore(Store):
             product_published_map_combined,
             product_published_map_side_a,
             product_published_map_side_b,
+            product_diff_published_map_combined,
+            product_diff_published_map_side_a,
+            product_diff_published_map_side_b,
         ]
 
     @staticmethod

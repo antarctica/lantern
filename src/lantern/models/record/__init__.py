@@ -195,6 +195,9 @@ class Record:
         normalised["identification"]["character_set"] = "utf8"
         normalised["identification"]["language"] = "eng"
 
+        if "$schema" in normalised and normalised["$schema"] == Record._schema:
+            del normalised["$schema"]
+
         return normalised
 
     @staticmethod

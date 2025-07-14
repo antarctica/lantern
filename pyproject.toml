@@ -50,6 +50,10 @@ tailwind = { cmd = "python -m tasks.tailwind", help = "Regenerate tailwind style
 lint = { cmd = "ruff check src/ tasks/ tests/ build.py load.py", help = "Lint app" }
 test = { cmd = "pytest", help = "Test app" }
 test-reset = { cmd = "pytest --cache-clear", help = "Reset pytest cache" }
+load-records = { cmd = "python load.py", help = "Load records from a directory" }
+build-records = { cmd = "python build.py", help = "Build records as a catalogue site" }
+build-test-records = { cmd = "python tests/scripts/build_test.py", help = "Build test records as a catalogue site" }
+serve = { cmd = "python -m http.server 9000 --directory export", help = "Serve local catalogue site" }
 
 [tool.ruff]
 src = ["src"]

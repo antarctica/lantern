@@ -1,8 +1,18 @@
 from datetime import date
 
-from lantern.models.record.elements.common import Date, Dates, Identifier, Identifiers
-from lantern.models.record.elements.identification import Aggregation, Aggregations, GraphicOverview, GraphicOverviews
-from lantern.models.record.enums import (
+from lantern.lib.metadata_library.models.record.elements.common import (
+    Date,
+    Dates,
+    Identifier,
+    Identifiers,
+)
+from lantern.lib.metadata_library.models.record.elements.identification import (
+    Aggregation,
+    Aggregations,
+    GraphicOverview,
+    GraphicOverviews,
+)
+from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,
     AggregationInitiativeCode,
     DatePrecisionCode,

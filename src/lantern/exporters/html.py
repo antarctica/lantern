@@ -6,10 +6,10 @@ from mypy_boto3_s3 import S3Client
 
 from lantern.config import Config
 from lantern.exporters.base import ResourceExporter
+from lantern.lib.metadata_library.models.record import Record
+from lantern.lib.metadata_library.models.record.summary import RecordSummary
 from lantern.models.item.catalogue import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
-from lantern.models.record import Record
-from lantern.models.record.summary import RecordSummary
 
 
 class HtmlExporter(ResourceExporter):

@@ -5,6 +5,12 @@ from urllib.parse import parse_qs, urlparse
 
 from jinja2 import Environment
 
+from lantern.lib.metadata_library.models.record.elements.common import Date, Identifier, Series
+from lantern.lib.metadata_library.models.record.elements.data_quality import DomainConsistency
+from lantern.lib.metadata_library.models.record.elements.distribution import Distribution as RecordDistribution
+from lantern.lib.metadata_library.models.record.elements.identification import Constraint
+from lantern.lib.metadata_library.models.record.elements.metadata import MetadataStandard
+from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
 from lantern.models.item.base import AccessType
 from lantern.models.item.base.elements import Contact, Link
 from lantern.models.item.base.elements import Extent as ItemExtent
@@ -30,12 +36,6 @@ from lantern.models.item.catalogue.elements import (
     Maintenance,
 )
 from lantern.models.item.catalogue.enums import Licence, ResourceTypeIcon, ResourceTypeLabel
-from lantern.models.record.elements.common import Date, Identifier, Series
-from lantern.models.record.elements.data_quality import DomainConsistency
-from lantern.models.record.elements.distribution import Distribution as RecordDistribution
-from lantern.models.record.elements.identification import Constraint
-from lantern.models.record.elements.metadata import MetadataStandard
-from lantern.models.record.enums import HierarchyLevelCode
 
 
 class Tab(ABC):

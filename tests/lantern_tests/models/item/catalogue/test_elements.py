@@ -2,16 +2,10 @@ from datetime import UTC, date, datetime
 
 import pytest
 
-from lantern.models.item.base import AccessType
-from lantern.models.item.base.elements import Extent as ItemExtent
-from lantern.models.item.base.elements import Link
-from lantern.models.item.catalogue import Aggregations, Dates, Extent, PageHeader, PageSummary
-from lantern.models.item.catalogue.elements import FormattedDate, Identifiers, ItemSummaryCatalogue, Maintenance
-from lantern.models.item.catalogue.enums import ResourceTypeIcon, ResourceTypeLabel
-from lantern.models.record.elements.common import Date, Identifier
-from lantern.models.record.elements.common import Dates as RecordDates
-from lantern.models.record.elements.common import Identifiers as RecordIdentifiers
-from lantern.models.record.elements.identification import (
+from lantern.lib.metadata_library.models.record.elements.common import Date, Identifier
+from lantern.lib.metadata_library.models.record.elements.common import Dates as RecordDates
+from lantern.lib.metadata_library.models.record.elements.common import Identifiers as RecordIdentifiers
+from lantern.lib.metadata_library.models.record.elements.identification import (
     Aggregation,
     BoundingBox,
     ExtentGeographic,
@@ -19,10 +13,10 @@ from lantern.models.record.elements.identification import (
     GraphicOverview,
     TemporalPeriod,
 )
-from lantern.models.record.elements.identification import Aggregations as RecordAggregations
-from lantern.models.record.elements.identification import Extent as RecordExtent
-from lantern.models.record.elements.identification import Maintenance as RecordMaintenance
-from lantern.models.record.enums import (
+from lantern.lib.metadata_library.models.record.elements.identification import Aggregations as RecordAggregations
+from lantern.lib.metadata_library.models.record.elements.identification import Extent as RecordExtent
+from lantern.lib.metadata_library.models.record.elements.identification import Maintenance as RecordMaintenance
+from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,
     AggregationInitiativeCode,
     DatePrecisionCode,
@@ -31,7 +25,13 @@ from lantern.models.record.enums import (
     MaintenanceFrequencyCode,
     ProgressCode,
 )
-from lantern.models.record.summary import RecordSummary
+from lantern.lib.metadata_library.models.record.summary import RecordSummary
+from lantern.models.item.base import AccessType
+from lantern.models.item.base.elements import Extent as ItemExtent
+from lantern.models.item.base.elements import Link
+from lantern.models.item.catalogue import Aggregations, Dates, Extent, PageHeader, PageSummary
+from lantern.models.item.catalogue.elements import FormattedDate, Identifiers, ItemSummaryCatalogue, Maintenance
+from lantern.models.item.catalogue.enums import ResourceTypeIcon, ResourceTypeLabel
 from tests.conftest import _get_record_summary
 
 

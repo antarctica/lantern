@@ -3,22 +3,22 @@ from datetime import date
 import pytest
 from bs4 import BeautifulSoup
 
-from lantern.models.item.catalogue import ItemCatalogue, Tab
-from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
-from lantern.models.record.elements.common import Date, Identifier
-from lantern.models.record.elements.identification import (
+from lantern.lib.metadata_library.models.record.elements.common import Date, Identifier
+from lantern.lib.metadata_library.models.record.elements.identification import (
     Aggregation,
     Aggregations,
     Constraint,
     GraphicOverview,
     GraphicOverviews,
 )
-from lantern.models.record.enums import (
+from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,
     AggregationInitiativeCode,
     ConstraintRestrictionCode,
     ConstraintTypeCode,
 )
+from lantern.models.item.catalogue import ItemCatalogue, Tab
+from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
 from tests.conftest import _item_catalogue_min
 
 
@@ -92,9 +92,7 @@ class TestMacrosItem:
             ),
         ],
     )
-    def test_physical_parent(
-        self, fx_item_catalogue_min_physical_map: ItemCataloguePhysicalMap, value: Aggregations
-    ):
+    def test_physical_parent(self, fx_item_catalogue_min_physical_map: ItemCataloguePhysicalMap, value: Aggregations):
         """Can get item physical map parent with expected value from item."""
         fx_item_catalogue_min_physical_map._record.identification.aggregations = value
         expected = fx_item_catalogue_min_physical_map.summary.physical_parent

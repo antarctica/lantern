@@ -1,8 +1,7 @@
 import json
 from datetime import date
 
-from lantern.models.record import Distribution, ReferenceSystemInfo
-from lantern.models.record.elements.common import (
+from lantern.lib.metadata_library.models.record.elements.common import (
     Address,
     Citation,
     Contact,
@@ -15,10 +14,20 @@ from lantern.models.record.elements.common import (
     OnlineResource,
     Series,
 )
-from lantern.models.record.elements.distribution import Format, TransferOption
-from lantern.models.record.elements.identification import GraphicOverview, GraphicOverviews
-from lantern.models.record.elements.projection import Code
-from lantern.models.record.enums import (
+from lantern.lib.metadata_library.models.record.elements.distribution import (
+    Distribution,
+    Format,
+    TransferOption,
+)
+from lantern.lib.metadata_library.models.record.elements.identification import (
+    GraphicOverview,
+    GraphicOverviews,
+)
+from lantern.lib.metadata_library.models.record.elements.projection import (
+    Code,
+    ReferenceSystemInfo,
+)
+from lantern.lib.metadata_library.models.record.enums import (
     ContactRoleCode,
     DatePrecisionCode,
     HierarchyLevelCode,

@@ -23,14 +23,14 @@ from lantern.exporters.html import HtmlAliasesExporter, HtmlExporter
 from lantern.exporters.records import RecordsExporter
 from lantern.exporters.site import SiteExporter, SiteIndexExporter, SitePagesExporter, SiteResourcesExporter
 from lantern.exporters.xml import IsoXmlHtmlExporter
+from lantern.lib.metadata_library.models.record import Record
+from lantern.lib.metadata_library.models.record.elements.common import Date, Dates, Identifier, Identifiers
+from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
+from lantern.lib.metadata_library.models.record.summary import RecordSummary
 from lantern.models.item.catalogue import AdditionalInfoTab, ItemCatalogue
 from lantern.models.item.catalogue.elements import Dates as ItemCatDates
 from lantern.models.item.catalogue.elements import Identifiers as ItemCatIdentifiers
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
-from lantern.models.record import Record
-from lantern.models.record.elements.common import Date, Dates, Identifier, Identifiers
-from lantern.models.record.enums import HierarchyLevelCode
-from lantern.models.record.summary import RecordSummary
 from lantern.stores.gitlab import GitLabStore
 from tests.resources.exporters.fake_exporter import FakeExporter, FakeResourceExporter
 from tests.resources.stores.fake_records_store import FakeRecordsStore

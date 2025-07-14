@@ -7,6 +7,21 @@ import pytest
 from pytest_mock import MockerFixture
 
 from lantern.config import Config
+from lantern.lib.metadata_library.models.record import Record
+from lantern.lib.metadata_library.models.record.elements.common import Date, Series
+from lantern.lib.metadata_library.models.record.elements.common import Dates as RecordDates
+from lantern.lib.metadata_library.models.record.elements.common import Identifiers as RecordIdentifiers
+from lantern.lib.metadata_library.models.record.elements.identification import (
+    BoundingBox,
+    ExtentGeographic,
+    GraphicOverview,
+)
+from lantern.lib.metadata_library.models.record.elements.identification import Extent as RecordExtent
+from lantern.lib.metadata_library.models.record.enums import (
+    AggregationAssociationCode,
+    AggregationInitiativeCode,
+    HierarchyLevelCode,
+)
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.catalogue import Dates, Identifiers
 from lantern.models.item.catalogue.elements import ItemSummaryCatalogue
@@ -17,13 +32,6 @@ from lantern.models.item.catalogue.special.physical_map import (
     ItemCataloguePhysicalMap,
     side_index_label,
 )
-from lantern.models.record import HierarchyLevelCode, Record
-from lantern.models.record.elements.common import Date, Series
-from lantern.models.record.elements.common import Dates as RecordDates
-from lantern.models.record.elements.common import Identifiers as RecordIdentifiers
-from lantern.models.record.elements.identification import BoundingBox, ExtentGeographic, GraphicOverview
-from lantern.models.record.elements.identification import Extent as RecordExtent
-from lantern.models.record.enums import AggregationAssociationCode, AggregationInitiativeCode
 from tests.conftest import _get_record, _get_record_summary
 
 

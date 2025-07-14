@@ -2,6 +2,42 @@ from datetime import UTC, datetime
 
 import pytest
 
+from lantern.lib.metadata_library.models.record import Distribution as RecordDistribution
+from lantern.lib.metadata_library.models.record.elements.common import (
+    Address,
+    Citation,
+    ContactIdentity,
+    Date,
+    Identifier,
+    OnlineResource,
+    Series,
+)
+from lantern.lib.metadata_library.models.record.elements.common import Contact as RecordContact
+from lantern.lib.metadata_library.models.record.elements.common import Dates as RecordDates
+from lantern.lib.metadata_library.models.record.elements.common import Identifiers as RecordIdentifiers
+from lantern.lib.metadata_library.models.record.elements.data_quality import DomainConsistency
+from lantern.lib.metadata_library.models.record.elements.distribution import Format, TransferOption
+from lantern.lib.metadata_library.models.record.elements.identification import (
+    Aggregation,
+    BoundingBox,
+    Constraint,
+    ExtentGeographic,
+)
+from lantern.lib.metadata_library.models.record.elements.identification import Aggregations as RecordAggregations
+from lantern.lib.metadata_library.models.record.elements.identification import Extent as RecordExtent
+from lantern.lib.metadata_library.models.record.elements.identification import Maintenance as RecordMaintenance
+from lantern.lib.metadata_library.models.record.elements.metadata import MetadataStandard
+from lantern.lib.metadata_library.models.record.enums import (
+    AggregationAssociationCode,
+    AggregationInitiativeCode,
+    ConstraintRestrictionCode,
+    ConstraintTypeCode,
+    ContactRoleCode,
+    HierarchyLevelCode,
+    MaintenanceFrequencyCode,
+    OnlineResourceFunctionCode,
+    ProgressCode,
+)
 from lantern.models.item.base import AccessType
 from lantern.models.item.base.elements import Contact, Contacts, Link
 from lantern.models.item.base.elements import Extent as ItemExtent
@@ -28,37 +64,6 @@ from lantern.models.item.catalogue.tabs import (
     LicenceTab,
     LineageTab,
     RelatedTab,
-)
-from lantern.models.record.elements.common import (
-    Address,
-    Citation,
-    ContactIdentity,
-    Date,
-    Identifier,
-    OnlineResource,
-    Series,
-)
-from lantern.models.record.elements.common import Contact as RecordContact
-from lantern.models.record.elements.common import Dates as RecordDates
-from lantern.models.record.elements.common import Identifiers as RecordIdentifiers
-from lantern.models.record.elements.data_quality import DomainConsistency
-from lantern.models.record.elements.distribution import Distribution as RecordDistribution
-from lantern.models.record.elements.distribution import Format, TransferOption
-from lantern.models.record.elements.identification import Aggregation, BoundingBox, Constraint, ExtentGeographic
-from lantern.models.record.elements.identification import Aggregations as RecordAggregations
-from lantern.models.record.elements.identification import Extent as RecordExtent
-from lantern.models.record.elements.identification import Maintenance as RecordMaintenance
-from lantern.models.record.elements.metadata import MetadataStandard
-from lantern.models.record.enums import (
-    AggregationAssociationCode,
-    AggregationInitiativeCode,
-    ConstraintRestrictionCode,
-    ConstraintTypeCode,
-    ContactRoleCode,
-    HierarchyLevelCode,
-    MaintenanceFrequencyCode,
-    OnlineResourceFunctionCode,
-    ProgressCode,
 )
 from tests.conftest import _get_record_summary
 

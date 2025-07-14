@@ -2,26 +2,28 @@ import json
 from json import JSONDecodeError
 from urllib.parse import unquote
 
-from lantern.models.item.base.const import PERMISSIONS_BAS_GROUP, PERMISSIONS_NERC_DIRECTORY
-from lantern.models.item.base.elements import Contact, Contacts, Extent, Extents
-from lantern.models.item.base.enums import AccessType
-from lantern.models.item.base.utils import md_as_html, md_as_plain
-from lantern.models.record import Distribution, HierarchyLevelCode, Record
-from lantern.models.record.elements.common import Date, Identifier, Identifiers, Series
-from lantern.models.record.elements.identification import (
+from lantern.lib.metadata_library.models.record import Record
+from lantern.lib.metadata_library.models.record.elements.common import Date, Identifier, Identifiers, Series
+from lantern.lib.metadata_library.models.record.elements.distribution import Distribution
+from lantern.lib.metadata_library.models.record.elements.identification import (
     Aggregation,
     Aggregations,
     Constraint,
     Constraints,
     GraphicOverviews,
 )
-from lantern.models.record.enums import (
+from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,
     AggregationInitiativeCode,
     ConstraintRestrictionCode,
     ConstraintTypeCode,
+    HierarchyLevelCode,
 )
-from lantern.models.record.summary import RecordSummary
+from lantern.lib.metadata_library.models.record.summary import RecordSummary
+from lantern.models.item.base.const import PERMISSIONS_BAS_GROUP, PERMISSIONS_NERC_DIRECTORY
+from lantern.models.item.base.elements import Contact, Contacts, Extent, Extents
+from lantern.models.item.base.enums import AccessType
+from lantern.models.item.base.utils import md_as_html, md_as_plain
 
 
 class ItemBase:

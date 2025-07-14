@@ -1,7 +1,7 @@
 from datetime import UTC, date, datetime
 
-from lantern.models.record import Record
-from lantern.models.record.elements.common import (
+from lantern.lib.metadata_library.models.record import Record
+from lantern.lib.metadata_library.models.record.elements.common import (
     Address,
     Contact,
     ContactIdentity,
@@ -11,8 +11,8 @@ from lantern.models.record.elements.common import (
     Identifier,
     OnlineResource,
 )
-from lantern.models.record.elements.data_quality import Lineage
-from lantern.models.record.elements.identification import (
+from lantern.lib.metadata_library.models.record.elements.data_quality import Lineage
+from lantern.lib.metadata_library.models.record.elements.identification import (
     Aggregation,
     Aggregations,
     Constraint,
@@ -22,7 +22,7 @@ from lantern.models.record.elements.identification import (
     Identification,
     Maintenance,
 )
-from lantern.models.record.enums import (
+from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,
     AggregationInitiativeCode,
     ConstraintRestrictionCode,
@@ -34,8 +34,8 @@ from lantern.models.record.enums import (
     OnlineResourceFunctionCode,
     ProgressCode,
 )
-from lantern.models.record.presets.base import RecordMagicDiscoveryV1
-from lantern.models.record.presets.extents import make_bbox_extent, make_temporal_extent
+from lantern.lib.metadata_library.models.record.presets.base import RecordMagicDiscoveryV1
+from lantern.lib.metadata_library.models.record.presets.extents import make_bbox_extent, make_temporal_extent
 
 
 def make_record(

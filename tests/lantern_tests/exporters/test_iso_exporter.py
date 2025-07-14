@@ -7,7 +7,7 @@ from boto3 import client as S3Client  # noqa: N812
 from pytest_mock import MockerFixture
 
 from lantern.exporters.xml import IsoXmlExporter, IsoXmlHtmlExporter
-from lantern.models.record import Record
+from lantern.lib.metadata_library.models.record import Record
 
 
 class TestIsoXmlExporter:

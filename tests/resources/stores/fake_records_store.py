@@ -1,7 +1,7 @@
 import logging
 
-from lantern.models.record import Record
-from lantern.models.record.summary import RecordSummary
+from lantern.lib.metadata_library.models.record import Record
+from lantern.lib.metadata_library.models.record.summary import RecordSummary
 from lantern.stores.base import RecordNotFoundError, Store
 from tests.resources.records.item_cat_collection_all import record as collection_all_supported
 from tests.resources.records.item_cat_collection_min import record as collection_min_supported

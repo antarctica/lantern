@@ -1,4 +1,4 @@
-from lantern.models.record.enums import HierarchyLevelCode
+from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
 from tests.resources.records.utils import make_record
 
 # A record for an ItemCatalogue instance with examples of Markdown formatting in all supported fields.

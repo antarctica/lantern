@@ -12,11 +12,15 @@ import pytest
 from bs4 import BeautifulSoup
 from jinja2 import Environment, PackageLoader, select_autoescape
 
+from lantern.lib.metadata_library.models.record.elements.common import Date
+from lantern.lib.metadata_library.models.record.elements.identification import Constraint, Constraints
+from lantern.lib.metadata_library.models.record.enums import (
+    ConstraintRestrictionCode,
+    ConstraintTypeCode,
+    HierarchyLevelCode,
+)
+from lantern.lib.metadata_library.models.record.summary import RecordSummary
 from lantern.models.item.catalogue.elements import ItemSummaryCatalogue
-from lantern.models.record.elements.common import Date
-from lantern.models.record.elements.identification import Constraint, Constraints
-from lantern.models.record.enums import ConstraintRestrictionCode, ConstraintTypeCode, HierarchyLevelCode
-from lantern.models.record.summary import RecordSummary
 
 
 class TestPageHeader:

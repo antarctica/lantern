@@ -3,6 +3,21 @@ from datetime import date
 
 import pytest
 
+from lantern.lib.metadata_library.models.record.elements.common import Contact as RecordContact
+from lantern.lib.metadata_library.models.record.elements.common import (
+    ContactIdentity,
+    Date,
+)
+from lantern.lib.metadata_library.models.record.elements.identification import (
+    BoundingBox,
+    ExtentGeographic,
+    ExtentTemporal,
+    TemporalPeriod,
+)
+from lantern.lib.metadata_library.models.record.elements.identification import Extent as RecordExtent
+from lantern.lib.metadata_library.models.record.enums import (
+    ContactRoleCode,
+)
 from lantern.models.item.base.elements import (
     Contact,
     Contacts,
@@ -10,21 +25,6 @@ from lantern.models.item.base.elements import (
     Extents,
     Link,
     unpack,
-)
-from lantern.models.record.elements.common import Contact as RecordContact
-from lantern.models.record.elements.common import (
-    ContactIdentity,
-    Date,
-)
-from lantern.models.record.elements.identification import (
-    BoundingBox,
-    ExtentGeographic,
-    ExtentTemporal,
-    TemporalPeriod,
-)
-from lantern.models.record.elements.identification import Extent as RecordExtent
-from lantern.models.record.enums import (
-    ContactRoleCode,
 )
 
 

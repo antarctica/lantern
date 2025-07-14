@@ -5,10 +5,10 @@ from typing import Any
 
 from humanize import naturalsize
 
+from lantern.lib.metadata_library.models.record import Distribution as RecordDistribution
 from lantern.models.item.base import AccessType
 from lantern.models.item.base.elements import Link
 from lantern.models.item.catalogue.enums import DistributionType
-from lantern.models.record.elements.distribution import Distribution as RecordDistribution
 
 
 class Distribution(ABC):

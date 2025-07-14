@@ -8,8 +8,8 @@ from bs4 import BeautifulSoup
 from pytest_mock import MockerFixture
 
 from lantern.exporters.site import SiteExporter, SiteIndexExporter, SitePagesExporter, SiteResourcesExporter
-from lantern.models.record import Record
-from lantern.models.record.summary import RecordSummary
+from lantern.lib.metadata_library.models.record import Record
+from lantern.lib.metadata_library.models.record.summary import RecordSummary
 
 
 class TestSiteIndexExporter:

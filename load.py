@@ -8,11 +8,14 @@ from pathlib import Path
 import inquirer
 
 from lantern.config import Config
+from lantern.lib.metadata_library.models.record import Record, RecordInvalidError, make_bas_cat_collection_member
+from lantern.lib.metadata_library.models.record.enums import (
+    AggregationAssociationCode,
+    AggregationInitiativeCode,
+    HierarchyLevelCode,
+)
 from lantern.log import init as init_logging
 from lantern.log import init_sentry
-from lantern.models.record import Record, RecordInvalidError
-from lantern.models.record.enums import AggregationAssociationCode, AggregationInitiativeCode, HierarchyLevelCode
-from lantern.models.record.presets.aggregations import make_bas_cat_collection_member
 from lantern.stores.base import RecordNotFoundError
 from lantern.stores.gitlab import GitLabStore
 

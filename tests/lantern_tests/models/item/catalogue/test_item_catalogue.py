@@ -4,6 +4,16 @@ from datetime import UTC, datetime
 import pytest
 
 from lantern.config import Config
+from lantern.lib.metadata_library.models.record import Record
+from lantern.lib.metadata_library.models.record.elements.common import (
+    Contact,
+    ContactIdentity,
+    Contacts,
+    Date,
+    Identifiers,
+)
+from lantern.lib.metadata_library.models.record.elements.identification import GraphicOverview, GraphicOverviews
+from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
 from lantern.models.item.catalogue import ItemCatalogue, ItemInvalidError
 from lantern.models.item.catalogue.elements import PageSummary
 from lantern.models.item.catalogue.enums import ResourceTypeLabel
@@ -18,10 +28,6 @@ from lantern.models.item.catalogue.tabs import (
     LineageTab,
     RelatedTab,
 )
-from lantern.models.record import Record
-from lantern.models.record.elements.common import Contact, ContactIdentity, Contacts, Date, Identifiers
-from lantern.models.record.elements.identification import GraphicOverview, GraphicOverviews
-from lantern.models.record.enums import ContactRoleCode
 from tests.conftest import _get_record_summary
 
 

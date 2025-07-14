@@ -1,5 +1,9 @@
 import pytest
 
+from lantern.lib.metadata_library.models.record import Distribution as RecordDistribution
+from lantern.lib.metadata_library.models.record.elements.common import Contact, ContactIdentity, OnlineResource
+from lantern.lib.metadata_library.models.record.elements.distribution import Format, Size, TransferOption
+from lantern.lib.metadata_library.models.record.enums import ContactRoleCode, OnlineResourceFunctionCode
 from lantern.models.item.base import AccessType
 from lantern.models.item.base.elements import Link
 from lantern.models.item.catalogue.distributions import (
@@ -17,10 +21,6 @@ from lantern.models.item.catalogue.distributions import (
     Shapefile,
 )
 from lantern.models.item.catalogue.enums import DistributionType
-from lantern.models.record.elements.common import Contact, ContactIdentity, OnlineResource
-from lantern.models.record.elements.distribution import Distribution as RecordDistribution
-from lantern.models.record.elements.distribution import Format, Size, TransferOption
-from lantern.models.record.enums import ContactRoleCode, OnlineResourceFunctionCode
 
 
 def _make_dist(format_href: str) -> RecordDistribution:

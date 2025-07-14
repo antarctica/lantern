@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
-from lantern.models.record import Record
-from lantern.models.record.summary import RecordSummary
+from lantern.lib.metadata_library.models.record import Record
+from lantern.lib.metadata_library.models.record.summary import RecordSummary
 
 
 class RecordNotFoundError(Exception):

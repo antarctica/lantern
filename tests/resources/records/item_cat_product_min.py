@@ -1,5 +1,5 @@
-from lantern.models.record.elements.identification import Aggregations
-from lantern.models.record.enums import ContactRoleCode, HierarchyLevelCode
+from lantern.lib.metadata_library.models.record.elements.identification import Aggregations
+from lantern.lib.metadata_library.models.record.enums import ContactRoleCode, HierarchyLevelCode
 from tests.resources.records.utils import make_record
 
 # A record for an ItemCatalogue instance with minimum required fields for products.

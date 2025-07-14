@@ -8,9 +8,9 @@ from pytest_mock import MockerFixture
 
 from lantern.exporters.base import S3Utils
 from lantern.exporters.records import RecordsExporter
-from lantern.models.record import Record
-from lantern.models.record.elements.common import Identifier
-from lantern.models.record.summary import RecordSummary
+from lantern.lib.metadata_library.models.record import Record
+from lantern.lib.metadata_library.models.record.elements.common import Identifier
+from lantern.lib.metadata_library.models.record.summary import RecordSummary
 
 
 class TestRecordsExporter:

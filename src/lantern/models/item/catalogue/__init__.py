@@ -6,6 +6,10 @@ from bs4 import BeautifulSoup
 from jinja2 import Environment, PackageLoader, select_autoescape
 
 from lantern.config import Config
+from lantern.lib.metadata_library.models.record import Record
+from lantern.lib.metadata_library.models.record.elements.identification import GraphicOverview
+from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
+from lantern.lib.metadata_library.models.record.summary import RecordSummary
 from lantern.models.item.base import ItemBase
 from lantern.models.item.catalogue.elements import (
     Aggregations,
@@ -28,10 +32,6 @@ from lantern.models.item.catalogue.tabs import (
     RelatedTab,
     Tab,
 )
-from lantern.models.record import Record
-from lantern.models.record.elements.identification import GraphicOverview
-from lantern.models.record.enums import ContactRoleCode
-from lantern.models.record.summary import RecordSummary
 from lantern.models.templates import PageMetadata
 
 
@@ -90,7 +90,6 @@ class ItemCatalogue(ItemBase):
     - *.language (not useful to end-users, present in underlying record)
     - *.online_resource.protocol (not useful to end-users, present in underlying record)
     - identification.citation.identifiers[namespace='data.bas.ac.uk'] (maybe shown in citation, otherwise intended for external use)
-    - identification.citation.identifiers[namespace='alias.data.bas.ac.uk'] (maybe shown in citation, otherwise consumed internally)
     - distribution.distributor
     """
 

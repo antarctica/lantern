@@ -7,8 +7,8 @@ from lantern.exporters.base import Exporter, ResourceExporter
 from lantern.exporters.html import HtmlAliasesExporter, HtmlExporter
 from lantern.exporters.json import JsonExporter
 from lantern.exporters.xml import IsoXmlExporter, IsoXmlHtmlExporter
-from lantern.models.record import Record
-from lantern.models.record.summary import RecordSummary
+from lantern.lib.metadata_library.models.record import Record
+from lantern.lib.metadata_library.models.record.summary import RecordSummary
 
 
 class RecordsExporter(Exporter):

@@ -9,8 +9,8 @@ import pytest
 from pytest_mock import MockerFixture
 from requests.exceptions import ConnectionError as RequestsConnectionError
 
-from lantern.models.record import Record
-from lantern.models.record.summary import RecordSummary
+from lantern.lib.metadata_library.models.record import Record
+from lantern.lib.metadata_library.models.record.summary import RecordSummary
 from lantern.stores.base import RecordNotFoundError
 from lantern.stores.gitlab import GitLabStore, RemoteStoreUnavailableError
 from tests.resources.stores.fake_records_store import FakeRecordsStore

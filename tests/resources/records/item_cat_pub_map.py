@@ -1,8 +1,7 @@
 import json
 from datetime import UTC, date, datetime
 
-from lantern.models.record import Distribution
-from lantern.models.record.elements.common import (
+from lantern.lib.metadata_library.models.record.elements.common import (
     Address,
     Contact,
     ContactIdentity,
@@ -11,8 +10,8 @@ from lantern.models.record.elements.common import (
     OnlineResource,
     Series,
 )
-from lantern.models.record.elements.distribution import TransferOption
-from lantern.models.record.elements.identification import (
+from lantern.lib.metadata_library.models.record.elements.distribution import Distribution, TransferOption
+from lantern.lib.metadata_library.models.record.elements.identification import (
     Aggregation,
     Constraint,
     Constraints,
@@ -21,7 +20,7 @@ from lantern.models.record.elements.identification import (
     GraphicOverview,
     GraphicOverviews,
 )
-from lantern.models.record.enums import (
+from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,
     AggregationInitiativeCode,
     ConstraintRestrictionCode,
@@ -31,7 +30,7 @@ from lantern.models.record.enums import (
     HierarchyLevelCode,
     OnlineResourceFunctionCode,
 )
-from lantern.models.record.presets.extents import make_bbox_extent, make_temporal_extent
+from lantern.lib.metadata_library.models.record.presets.extents import make_bbox_extent, make_temporal_extent
 from tests.resources.records.utils import make_record
 
 # A trio of records to demonstrate a published map with two, mostly similar, sides.

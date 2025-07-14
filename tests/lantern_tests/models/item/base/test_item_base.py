@@ -3,16 +3,20 @@ from datetime import UTC, datetime
 
 import pytest
 
-from lantern.models.item.base import ItemBase, ItemSummaryBase
-from lantern.models.item.base.elements import Contact, Contacts, Extent, Extents
-from lantern.models.item.base.enums import AccessType
-from lantern.models.record import DataQuality, Record, ReferenceSystemInfo
-from lantern.models.record.elements.common import Contact as RecordContact
-from lantern.models.record.elements.common import ContactIdentity, Date, Identifier, Identifiers, OnlineResource, Series
-from lantern.models.record.elements.common import Contacts as RecordContacts
-from lantern.models.record.elements.data_quality import Lineage
-from lantern.models.record.elements.distribution import Distribution, TransferOption
-from lantern.models.record.elements.identification import (
+from lantern.lib.metadata_library.models.record import Record
+from lantern.lib.metadata_library.models.record.elements.common import Contact as RecordContact
+from lantern.lib.metadata_library.models.record.elements.common import (
+    ContactIdentity,
+    Date,
+    Identifier,
+    Identifiers,
+    OnlineResource,
+    Series,
+)
+from lantern.lib.metadata_library.models.record.elements.common import Contacts as RecordContacts
+from lantern.lib.metadata_library.models.record.elements.data_quality import DataQuality, Lineage
+from lantern.lib.metadata_library.models.record.elements.distribution import Distribution, TransferOption
+from lantern.lib.metadata_library.models.record.elements.identification import (
     Aggregation,
     Aggregations,
     BoundingBox,
@@ -22,10 +26,10 @@ from lantern.models.record.elements.identification import (
     GraphicOverview,
     GraphicOverviews,
 )
-from lantern.models.record.elements.identification import Extent as RecordExtent
-from lantern.models.record.elements.identification import Extents as RecordExtents
-from lantern.models.record.elements.projection import Code
-from lantern.models.record.enums import (
+from lantern.lib.metadata_library.models.record.elements.identification import Extent as RecordExtent
+from lantern.lib.metadata_library.models.record.elements.identification import Extents as RecordExtents
+from lantern.lib.metadata_library.models.record.elements.projection import Code, ReferenceSystemInfo
+from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,
     AggregationInitiativeCode,
     ConstraintRestrictionCode,
@@ -34,8 +38,11 @@ from lantern.models.record.enums import (
     HierarchyLevelCode,
     OnlineResourceFunctionCode,
 )
-from lantern.models.record.presets.projections import EPSG_4326
-from lantern.models.record.summary import RecordSummary
+from lantern.lib.metadata_library.models.record.presets.projections import EPSG_4326
+from lantern.lib.metadata_library.models.record.summary import RecordSummary
+from lantern.models.item.base import ItemBase, ItemSummaryBase
+from lantern.models.item.base.elements import Contact, Contacts, Extent, Extents
+from lantern.models.item.base.enums import AccessType
 
 
 class TestItemBase:
@@ -465,9 +472,7 @@ class TestItemBase:
             ),
         ],
     )
-    def test_projection(
-        self, fx_record_minimal_item: Record, value: ReferenceSystemInfo | None, expected: str | None
-    ):
+    def test_projection(self, fx_record_minimal_item: Record, value: ReferenceSystemInfo | None, expected: str | None):
         """Can get projection if present and an EPSG code."""
         fx_record_minimal_item.reference_system_info = value
         item = ItemBase(fx_record_minimal_item)
@@ -673,9 +678,7 @@ class TestItemSummaryBase:
         assert summary.summary_md == expected
 
     @pytest.mark.parametrize(("value", "expected"), [("x", "<p>x</p>"), ("_x_", "<p><em>x</em></p>"), (None, None)])
-    def test_summary_html(
-        self, fx_record_summary_minimal_item: RecordSummary, value: str | None, expected: str | None
-    ):
+    def test_summary_html(self, fx_record_summary_minimal_item: RecordSummary, value: str | None, expected: str | None):
         """Can get summary (purpose) with Markdown formatting, if present, encoded as HTML."""
         if expected is not None:
             fx_record_summary_minimal_item.purpose = value

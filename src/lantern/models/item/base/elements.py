@@ -1,11 +1,11 @@
 from dataclasses import dataclass, is_dataclass
 from typing import Any, cast
 
-from lantern.models.record.elements.common import Contact as RecordContact
-from lantern.models.record.elements.common import Contacts as RecordContacts
-from lantern.models.record.elements.common import Date
-from lantern.models.record.elements.identification import Extent as RecordExtent
-from lantern.models.record.elements.identification import Extents as RecordExtents
+from lantern.lib.metadata_library.models.record.elements.common import Contact as RecordContact
+from lantern.lib.metadata_library.models.record.elements.common import Contacts as RecordContacts
+from lantern.lib.metadata_library.models.record.elements.common import Date
+from lantern.lib.metadata_library.models.record.elements.identification import Extent as RecordExtent
+from lantern.lib.metadata_library.models.record.elements.identification import Extents as RecordExtents
 
 
 class Contact(RecordContact):

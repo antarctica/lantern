@@ -12,8 +12,8 @@ from lantern.config import Config
 from lantern.exporters.base import Exporter
 from lantern.exporters.base import Exporter as BaseExporter
 from lantern.exporters.records import RecordsExporter
-from lantern.models.record import Record
-from lantern.models.record.summary import RecordSummary
+from lantern.lib.metadata_library.models.record import Record
+from lantern.lib.metadata_library.models.record.summary import RecordSummary
 from lantern.models.templates import PageMetadata
 
 

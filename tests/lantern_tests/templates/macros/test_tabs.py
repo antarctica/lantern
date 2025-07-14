@@ -6,10 +6,7 @@ import pytest
 from bs4 import BeautifulSoup
 from pytest_mock import MockerFixture
 
-from lantern.models.item.catalogue import ItemCatalogue
-from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
-from lantern.models.record import DataQuality, Distribution, Record, ReferenceSystemInfo
-from lantern.models.record.elements.common import (
+from lantern.lib.metadata_library.models.record.elements.common import (
     Address,
     Citation,
     Contact,
@@ -21,9 +18,11 @@ from lantern.models.record.elements.common import (
     OnlineResource,
     Series,
 )
-from lantern.models.record.elements.data_quality import DomainConsistency, Lineage
-from lantern.models.record.elements.distribution import Format, Size, TransferOption
-from lantern.models.record.elements.identification import (
+from lantern.lib.metadata_library.models.record import Record
+from lantern.lib.metadata_library.models.record.elements.data_quality import DataQuality
+from lantern.lib.metadata_library.models.record.elements.projection import Code, ReferenceSystemInfo
+from lantern.lib.metadata_library.models.record.elements.distribution import Distribution, Format, Size, TransferOption
+from lantern.lib.metadata_library.models.record.elements.identification import (
     Aggregation,
     Aggregations,
     BoundingBox,
@@ -36,8 +35,8 @@ from lantern.models.record.elements.identification import (
     Maintenance,
     TemporalPeriod,
 )
-from lantern.models.record.elements.projection import Code
-from lantern.models.record.enums import (
+from lantern.lib.metadata_library.models.record.elements.data_quality import DomainConsistency, Lineage
+from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,
     AggregationInitiativeCode,
     ConstraintRestrictionCode,
@@ -47,6 +46,8 @@ from lantern.models.record.enums import (
     OnlineResourceFunctionCode,
     ProgressCode,
 )
+from lantern.models.item.catalogue import ItemCatalogue
+from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
 from tests.conftest import _get_record
 
 

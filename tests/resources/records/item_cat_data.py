@@ -1,6 +1,20 @@
-from lantern.models.record.elements.common import Address, Contact, ContactIdentity, OnlineResource
-from lantern.models.record.elements.distribution import Distribution, Format, Size, TransferOption
-from lantern.models.record.enums import ContactRoleCode, HierarchyLevelCode, OnlineResourceFunctionCode
+from lantern.lib.metadata_library.models.record.elements.common import (
+    Address,
+    Contact,
+    ContactIdentity,
+    OnlineResource,
+)
+from lantern.lib.metadata_library.models.record.elements.distribution import (
+    Distribution,
+    Format,
+    Size,
+    TransferOption,
+)
+from lantern.lib.metadata_library.models.record.enums import (
+    ContactRoleCode,
+    HierarchyLevelCode,
+    OnlineResourceFunctionCode,
+)
 from tests.resources.records.utils import make_record
 
 # A record with all supported distribution options.

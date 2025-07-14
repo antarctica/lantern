@@ -1,5 +1,9 @@
-from lantern.models.record.elements.identification import Constraint, Constraints
-from lantern.models.record.enums import ConstraintRestrictionCode, ConstraintTypeCode, HierarchyLevelCode
+from lantern.lib.metadata_library.models.record.elements.identification import Constraint, Constraints
+from lantern.lib.metadata_library.models.record.enums import (
+    ConstraintRestrictionCode,
+    ConstraintTypeCode,
+    HierarchyLevelCode,
+)
 from tests.resources.records.utils import make_record
 
 # Records for all supported licence usage constraints.

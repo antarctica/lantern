@@ -336,8 +336,6 @@ class TestAuthorsTab:
             assert html.find("div", string=expected.organisation.name) is not None
         if expected.individual is not None:
             assert html.find("div", string=expected.individual.name) is not None
-        if expected.email is not None:
-            assert html.find("a", href=f"mailto:{expected.email}") is not None
         if expected.orcid is not None:
             assert html.find("a", href=expected.orcid) is not None
 

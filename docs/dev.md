@@ -37,6 +37,10 @@ Run `uv run task [task]` to run a specific task.
 
 See [Adding development tasks](#adding-development-tasks) for how to add new tasks.
 
+> [!TIP]
+> If offline, use `uv run --offline task ...` to avoid lookup errors trying to the unconstrained build system
+> requirements in `pyproject.toml`, which is a [Known Issue](https://github.com/astral-sh/uv/issues/5190) within UV.
+
 ## Contributing
 
 All changes except minor tweaks (typos, comments, etc.) MUST:
@@ -168,7 +172,7 @@ fine with good justification:
 [Continuous Integration](#continuous-integration) will check coverage automatically.
 
 > [!TIP]
-> To check coverage manually run the `coverage` [Development Task](#development-tasks).
+> To check coverage manually run the `test-cov` [Development Task](#development-tasks).
 
 > [!TIP]
 > To run tests for a specific module locally:

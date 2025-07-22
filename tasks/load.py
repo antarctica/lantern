@@ -8,12 +8,14 @@ from pathlib import Path
 import inquirer
 
 from lantern.config import Config
-from lantern.lib.metadata_library.models.record import Record, RecordInvalidError, make_bas_cat_collection_member
+from lantern.lib.metadata_library.models.record import Record, RecordInvalidError
+from lantern.lib.metadata_library.models.record.elements.common import Date
 from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,
     AggregationInitiativeCode,
     HierarchyLevelCode,
 )
+from lantern.lib.metadata_library.models.record.presets.aggregations import make_bas_cat_collection_member
 from lantern.log import init as init_logging
 from lantern.log import init_sentry
 from lantern.stores.base import RecordNotFoundError
@@ -47,6 +49,8 @@ def _parse_records(logger: logging.Logger, search_path: Path) -> list[Record]:
 
 def _revise_collection(time: datetime, collection: Record) -> None:
     """Indicate collection change via edition and other relevant properties."""
+    if collection.identification.dates.revision is None:
+        collection.identification.dates.revision = Date(date=time)
     collection.identification.dates.revision.date = time
     collection.identification.edition = str(int(collection.identification.edition) + 1)
 
@@ -221,9 +225,6 @@ def _get_args() -> tuple[str, str, str, str]:
 
 def main() -> None:
     """Entrypoint."""
-    input_path = Path("import")
-    title, message, author_name, author_email = _get_args()
-
     init_logging()
     init_sentry()
     logger = logging.getLogger("app")
@@ -237,8 +238,11 @@ def main() -> None:
         project_id=config.STORE_GITLAB_PROJECT_ID,
         cache_path=config.STORE_GITLAB_CACHE_PATH,
     )
-    store.populate()
 
+    input_path = Path("./import")
+    logger.info(f"Loading records from: '{input_path.resolve()}'")
+    title, message, author_name, author_email = _get_args()
+    store.populate()
     records = _parse_records(logger=logger, search_path=input_path)
     records.extend(_process_records(logger=logger, records=records, store=store))
     store.push(records=records, title=title, message=message, author=(author_name, author_email))

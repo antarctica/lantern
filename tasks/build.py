@@ -76,8 +76,8 @@ def main() -> None:
     inc_records = []
     exc_records = []
     inc_related = True
-    export = True
-    publish = False
+    export = False
+    publish = True
     purge = False
 
     init_logging()

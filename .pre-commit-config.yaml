@@ -16,7 +16,6 @@ repos:
   rev: v0.12.4
   hooks:
     - id: ruff-check
-      args: ["--extend-select", "S320"]
     - id: ruff-format
 - repo: https://github.com/astral-sh/uv-pre-commit
   rev: 0.8.0

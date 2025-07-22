@@ -76,7 +76,7 @@ class IsoXmlHtmlExporter(ResourceExporter):
             BaseExporter._dump_package_resources(src_ref=self._xsl_src_ref, dest_path=xsl_path)
 
             entrypoint_path = xsl_path / "iso-html" / "xml-to-html-ISO.xsl"
-            xsl_doc = parse_xml(entrypoint_path)  # noqa: S320
+            xsl_doc = parse_xml(entrypoint_path)
 
             record_xml = IsoXmlExporter(
                 config=self._config,
@@ -85,7 +85,7 @@ class IsoXmlHtmlExporter(ResourceExporter):
                 record=self._record,
                 export_base=self._export_path.parent,
             ).dumps()
-            record_doc = ElementTree(fromstring(record_xml.encode()))  # noqa: S320
+            record_doc = ElementTree(fromstring(record_xml.encode()))
 
             transform = XSLT(xsl_doc)
             return tostring(transform(record_doc), method="html", pretty_print=True, encoding="utf-8").decode()

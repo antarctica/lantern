@@ -247,6 +247,22 @@ class TestGitLabStore:
             results = [record.file_identifier for record in fx_gitlab_store.records]
             assert sorted(expected) == sorted(results)
 
+    def test_filter_cache_unknown(self, caplog: pytest.LogCaptureFixture, fx_gitlab_store: GitLabStore):
+        """Can log warning for unknown records in filter conditions."""
+        fake_store = FakeRecordsStore(logger=fx_gitlab_store._logger)
+        fake_store.populate()
+        with TemporaryDirectory() as tmp_path:
+            temp_path = Path(tmp_path)
+            for record in fake_store.records:
+                config_path = temp_path / f"{record.file_identifier}.json"
+                with config_path.open("w") as f:
+                    json.dump(record.dumps(), f, indent=2)
+            config_paths = list(temp_path.glob("*.json"))
+            fx_gitlab_store._populate_cache(config_paths=config_paths, head_commit={"x": "x"})
+
+            fx_gitlab_store._filter_cache(inc_records=["unknown"], exc_records=[], inc_related=False)
+            assert "Record 'unknown' not found in cache, skipping" in caplog.text
+
     @pytest.mark.cov()
     def test_filter_cache_invalid(self, fx_gitlab_store_cached: GitLabStore):
         """Cannot filter records by including and excepting records at the same time."""
@@ -301,7 +317,23 @@ class TestGitLabStore:
         if mode == "update":
             assert "Committing 0 additional records, 1 updated records across 2 modified files" in caplog.text
 
-    def test_populate(self, fx_gitlab_store_cached: GitLabStore):
+    def test_commit_no_changes(
+        self, mocker: MockerFixture, caplog: pytest.LogCaptureFixture, fx_gitlab_store_cached: GitLabStore
+    ):
+        """Does not commit records that haven't changed."""
+        mocker.patch.object(fx_gitlab_store_cached, "_cache_is_current", return_value=True)
+        fx_gitlab_store_cached.populate()
+        record = fx_gitlab_store_cached.get("a1b2c3")
+        # override record index to ensure hashes will match
+        with fx_gitlab_store_cached._cache_index_path.open("w") as f:
+            json.dump({"index": {record.file_identifier: record.sha1}}, f)
+
+        fx_gitlab_store_cached._commit(records=[record], title="x", message="x", author=("x", "x@example.com"))
+
+        assert "No actions to perform, skipping" in caplog.text
+
+    @pytest.mark.parametrize(("inc_records", "exc_records"), [(None, None), ([], [])])
+    def test_populate(self, fx_gitlab_store_cached: GitLabStore, inc_records: list | None, exc_records: list | None):
         """
         Can populate the store with records from the remote repository, via a local cache.
 
@@ -310,7 +342,7 @@ class TestGitLabStore:
         assert len(fx_gitlab_store_cached.records) == 0
         assert len(fx_gitlab_store_cached.summaries) == 0
 
-        fx_gitlab_store_cached.populate()
+        fx_gitlab_store_cached.populate(inc_records=inc_records, exc_records=exc_records)
         assert len(fx_gitlab_store_cached.records) > 0
         assert len(fx_gitlab_store_cached.summaries) > 0
 

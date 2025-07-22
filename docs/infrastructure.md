@@ -51,5 +51,6 @@ Development environments may be created and destroyed as needed. Staging and Pro
   - For [Exporters](/docs/exporters.md) to publish content
 
 > [!IMPORTANT]
-> For auditing and to follow best practice, per-user IAM credentials, with suitable permissions to manage items in one
-> or both of these buckets, SHOULD be used over common credentials.
+> For auditing and to follow best practice, per-user IAM credentials, with
+> [Suitable Permissions](/docs/setup.md#iam-policy-for-static-website-hosting) to manage items in one these buckets,
+> SHOULD be used over common credentials.

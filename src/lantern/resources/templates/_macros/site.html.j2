@@ -89,7 +89,7 @@
 {% endmacro %}
 
 {% macro script_sticky_tabs() %}
-  <script>
+  <script defer>
     /* Based on jQuery Plugin Sticky Tabs by Aidan Lister <aidan@php.net> */
     (function () {
       const selectTab = (tabId) => {
@@ -126,7 +126,7 @@
 {% endmacro %}
 
 {% macro script_collapsible() %}
-  <script>
+  <script defer>
     document.addEventListener('DOMContentLoaded', () => {
       // Find all elements with the `data-target` attribute and add click event listeners to hide/show a target element
       const toggles = document.querySelectorAll('[data-target]');
@@ -145,7 +145,7 @@
 {% endmacro %}
 
 {% macro script_schema_org(data) %}
-  <script type="application/ld+json">{{ data }}</script>
+  <script defer type="application/ld+json">{{ data }}</script>
 {% endmacro %}
 
 {% macro top_anchor() %}

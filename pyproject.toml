@@ -45,14 +45,26 @@ test = [
     "pytest-unordered>=0.7.0",
 ]
 
+[tool.taskipy.variables]
+targets = "src/ tasks/ tests/"
+
 [tool.taskipy.tasks]
+# generic dev
+format = { cmd = "ruff format {targets}", help = "Lint app", use_vars = true }
+lint = { cmd = "ruff check {targets}", help = "Lint app", use_vars = true }
+pre-commit = { cmd = "pre-commit run --all-files", help = "Run pre-commit hooks on all files" }
+test = { cmd = "pytest", help = "Run tests" }
+test-cov = { cmd = "pytest --cov --cov-report=html", help = "Run tests with coverage" }
+test-reset = { cmd = "pytest --cache-clear", help = "Reset pytest cache and run tests" }
+safety = { cmd = "safety scan --detailed-output", help = "Check for insecure dependencies" }
+# app dev
+config-init = { cmd = "op inject --in-file .env.tpl --out-file .env", help = "Initialise config file" }
+check-config = { cmd = "python -m tasks.config", help = "Check app config" }
 tailwind = { cmd = "python -m tasks.tailwind", help = "Regenerate tailwind styles" }
-lint = { cmd = "ruff check src/ tasks/ tests/ build.py load.py", help = "Lint app" }
-test = { cmd = "pytest", help = "Test app" }
-test-reset = { cmd = "pytest --cache-clear", help = "Reset pytest cache" }
-load-records = { cmd = "python load.py", help = "Load records from a directory" }
-build-records = { cmd = "python build.py", help = "Build records as a catalogue site" }
 build-test-records = { cmd = "python tests/scripts/build_test.py", help = "Build test records as a catalogue site" }
+# fake CLI
+build-records = { cmd = "python -m tasks.build", help = "Build records as a catalogue site" }
+load-records = { cmd = "python -m tasks.load", help = "Load records from a directory" }
 serve = { cmd = "python -m http.server 9000 --directory export", help = "Serve local catalogue site" }
 
 [tool.ruff]

@@ -7,7 +7,7 @@
 > a valid [Configuration](/docs/config.md#config-options) before running these instructions.
 
 > [!TIP]
-> Run the `check-config` [Development Task](/docs/dev.md#development-tasks) to validate the current configuration.
+> Run the `config-check` [Development Task](/docs/dev.md#development-tasks) to validate the current configuration.
 
 ## Logging
 

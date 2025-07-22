@@ -6,6 +6,7 @@ import pytest
 from bs4 import BeautifulSoup
 from pytest_mock import MockerFixture
 
+from lantern.lib.metadata_library.models.record import Record
 from lantern.lib.metadata_library.models.record.elements.common import (
     Address,
     Citation,
@@ -18,9 +19,7 @@ from lantern.lib.metadata_library.models.record.elements.common import (
     OnlineResource,
     Series,
 )
-from lantern.lib.metadata_library.models.record import Record
-from lantern.lib.metadata_library.models.record.elements.data_quality import DataQuality
-from lantern.lib.metadata_library.models.record.elements.projection import Code, ReferenceSystemInfo
+from lantern.lib.metadata_library.models.record.elements.data_quality import DataQuality, DomainConsistency, Lineage
 from lantern.lib.metadata_library.models.record.elements.distribution import Distribution, Format, Size, TransferOption
 from lantern.lib.metadata_library.models.record.elements.identification import (
     Aggregation,
@@ -35,7 +34,7 @@ from lantern.lib.metadata_library.models.record.elements.identification import (
     Maintenance,
     TemporalPeriod,
 )
-from lantern.lib.metadata_library.models.record.elements.data_quality import DomainConsistency, Lineage
+from lantern.lib.metadata_library.models.record.elements.projection import Code, ReferenceSystemInfo
 from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,
     AggregationInitiativeCode,

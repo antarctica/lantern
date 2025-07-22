@@ -30,6 +30,3 @@ scripts/tailwind
 import/
 export/
 .cache/
-
-# Temporary files for refactoring
-_scripts/

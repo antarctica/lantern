@@ -109,10 +109,6 @@
       {% set alt = item.description or item.identifier %}
       <img id="graphics-{{ item.identifier }}" class="w-full" src="{{ item.href }}" alt="{{ alt }}"/>
     {% endif %}
-{#    {% for item in data %}#}
-{#      {% set alt = item.description or item.identifier %}#}
-{#      <img id="graphics-{{ item.identifier }}" class="w-full" src="{{ item.href }}" alt="{{ alt }}"/>#}
-{#    {% endfor %}#}
   </aside>
 {% endmacro %}
 

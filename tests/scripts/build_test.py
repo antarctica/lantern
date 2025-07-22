@@ -6,30 +6,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 import logging
 
 from boto3 import client as S3Client  # noqa: N812
-from build import time_task
 from moto import mock_aws
+from tasks.build import time_task
 from tests.resources.stores.fake_records_store import FakeRecordsStore
 
 from lantern.config import Config as Config
 from lantern.exporters.site import SiteExporter
 from lantern.log import init as init_logging
-
-# def time_task(label: str) -> callable:
-#     """Time a task and log duration."""
-#
-#     def decorator(func: callable) -> callable:
-#         @functools.wraps(func)
-#         def wrapper(self, *args, **kwargs):
-#             start = datetime.now(tz=UTC)
-#             result = func(self, *args, **kwargs)
-#             end = datetime.now(tz=UTC)
-#             self._logger.info(f"{label} took {round((end - start).total_seconds())} seconds")
-#             return result
-#
-#         return wrapper
-#
-#     return decorator
-#
 
 
 class FakeCatalogue:

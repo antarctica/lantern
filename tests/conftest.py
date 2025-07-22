@@ -1,6 +1,7 @@
 import logging
 import os
 import shutil
+import socket
 import sys
 import time
 from copy import deepcopy
@@ -34,6 +35,29 @@ from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhys
 from lantern.stores.gitlab import GitLabStore
 from tests.resources.exporters.fake_exporter import FakeExporter, FakeResourceExporter
 from tests.resources.stores.fake_records_store import FakeRecordsStore
+
+
+def has_network() -> bool:
+    """
+    Determine if network access is available.
+
+    Intended for use with `pytest.mark.skipif()` statements for tests that require online resources.
+
+    E.g.:
+    ```
+    from tests.conftest import has_network
+
+    @pytest.mark.skipif(not has_network(), reason="network unavailable")
+    def test_foo():
+        ...
+    ```
+    """
+    try:
+        socket.create_connection(("1.1.1.1", 53), timeout=1)
+    except OSError:
+        return False
+    else:
+        return True
 
 
 @pytest.fixture(scope="module")

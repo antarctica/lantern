@@ -404,9 +404,13 @@ class TestAggregations:
 
     @pytest.mark.parametrize(
         ("excluded", "expected"),
-        [([], [test_filter_a.identifier.identifier]), ([test_filter_a.identifier.identifier], [])],
+        [
+            (None, [test_filter_a.identifier.identifier]),
+            ([], [test_filter_a.identifier.identifier]),
+            ([test_filter_a.identifier.identifier], []),
+        ],
     )
-    def test_identifiers(self, excluded: list[str], expected: list[str]):
+    def test_identifiers(self, excluded: list[str] | None, expected: list[str]):
         """Can get identifiers from items in an Aggregation element."""
         value = Aggregations([self.test_filter_a])
         result = value.identifiers(exclude=excluded)

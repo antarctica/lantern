@@ -272,18 +272,24 @@ class TestItemCataloguePhysicalMap:
         assert isinstance(fx_item_catalogue_min_physical_map._extent, ExtentTab)
         assert isinstance(fx_item_catalogue_min_physical_map._additional_info, AdditionalInfoTab)
 
+    @pytest.mark.parametrize(
+        ("value", "expected"), [(json.dumps({}), None), (json.dumps({"sheet_number": "x"}), "x"), ("invalid", None)]
+    )
     def test_tab_additional_info_series_page(
-        self, mocker: MockerFixture, fx_item_catalogue_min_physical_map: ItemCataloguePhysicalMap
+        self,
+        mocker: MockerFixture,
+        fx_item_catalogue_min_physical_map: ItemCataloguePhysicalMap,
+        value: str,
+        expected: str,
     ):
         """Can set series page property if included in supplemental info."""
-        page = "x"
         assert fx_item_catalogue_min_physical_map._sides[0].identification.series == Series()
 
         side = fx_item_catalogue_min_physical_map._sides[0]
-        side.identification.supplemental_information = json.dumps({"sheet_number": page})
+        side.identification.supplemental_information = value
         mocker.patch.object(ItemCataloguePhysicalMap, "_sides", new_callable=PropertyMock, return_value=[side])
 
-        assert fx_item_catalogue_min_physical_map._additional_info._serieses[0].page == page
+        assert fx_item_catalogue_min_physical_map._additional_info._serieses[0].page == expected
 
     @staticmethod
     def _get_record_graphics(identifier: str) -> Record:

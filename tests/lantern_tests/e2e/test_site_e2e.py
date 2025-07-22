@@ -1,8 +1,14 @@
+import sys
 from subprocess import Popen
 
+import pytest
 from playwright.sync_api import Page, expect
 
+from tests.conftest import has_network
 
+
+@pytest.mark.skipif("--cov" in sys.argv, reason="skipping under coverage")
+@pytest.mark.skipif(not has_network(), reason="network unavailable")
 class TestSentry:
     """Test Sentry feedback in Catalogue template."""
 

@@ -1,7 +1,10 @@
+import sys
 from subprocess import Popen
 
+import pytest
 from playwright.sync_api import Page, Route, expect
 
+from tests.conftest import has_network
 from tests.resources.records.item_cat_data import record as product_data
 from tests.resources.records.item_cat_product_min import record as product_min_supported
 
@@ -58,11 +61,25 @@ class TestItemTabs:
         expect(page.locator("dt", has_text="Item ID")).to_be_visible()
 
 
+@pytest.mark.skipif("--cov" in sys.argv, reason="skipping under coverage")
+@pytest.mark.skipif(not has_network(), reason="network unavailable")
 class TestItemEmbeddedMap:
-    """Test embedded extent map in Catalogue Item template."""
+    """
+    Test embedded extent map in Catalogue Item template.
+
+    As this test checks the contents of the iframe loaded from an external service, it is skipped if offline.
+    """
 
     def test_load(self, fx_exporter_static_server: Popen, page: Page):
         """Can load embedded map."""
+
+        def handle(route: Route) -> None:
+            route.fulfill(
+                status=200, content_type="text/html", body="<html><body>BAS Embedded Maps Service</body></html>"
+            )
+
+        page.route("https://embedded-maps.data.bas.ac.uk/*", handle)
+
         endpoint = f"http://localhost:8123/items/{product_min_supported.file_identifier}/index.html#tab-extent"
         page.goto(endpoint)
         status_code = page.evaluate("window.performance.getEntries()[0].responseStatus")

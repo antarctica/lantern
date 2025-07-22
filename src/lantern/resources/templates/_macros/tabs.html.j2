@@ -58,9 +58,6 @@
   <article class="border-1 border-grey-100 p-2 space-y-2">
     {% if data.individual.name %}<div class="font-bold">{{ data.individual.name }}</div>{% endif %}
     {% if data.organisation.name %}<div class="font-bold">{{ data.organisation.name }}</div>{% endif %}
-    {% if data.email %}
-      <div><i class="fa-fw far fa-at"></i> Email: <a class="{{ com.link_classes() }}" href="mailto:{{ data.email }}">{{ data.email }}</a></div>
-    {% endif %}
     {% if data.orcid %}
       <div><i class="fa-fw fab fa-orcid text-[#A6CE39]"></i> ORCID: <a class="{{ com.link_classes() }}" href="{{ data.orcid }}">{{ data.orcid }} {{ com.ext_link_i() }}</a></div>
     {% endif %}

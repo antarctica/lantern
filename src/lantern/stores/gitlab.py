@@ -6,7 +6,6 @@ import shutil
 import tarfile
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import TYPE_CHECKING
 
 from gitlab import Gitlab
 from gitlab.v4.objects import Project
@@ -15,10 +14,6 @@ from requests.exceptions import ConnectionError as RequestsConnectionError
 from lantern.lib.metadata_library.models.record import Record
 from lantern.lib.metadata_library.models.record.summary import RecordSummary
 from lantern.stores.base import RecordNotFoundError, Store
-
-if TYPE_CHECKING:
-    # False at run time, only for type checker
-    pass
 
 
 class RemoteStoreUnavailableError(Exception):

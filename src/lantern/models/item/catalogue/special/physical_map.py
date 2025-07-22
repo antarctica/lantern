@@ -88,16 +88,12 @@ class AdditionalInfoTab(CatalogueAdditionalInfoTab):
         """
         Check if values are distinct or all None.
 
-        Where values are a side indexed dict of a given property (e.g. scales for each side).
+        Where values is a side indexed dict of a given property (e.g. scales for each side).
 
         Util method to avoid duplicating logic.
         """
-        # TODO: test
-
-        distinct = {v for v in items.values()}
-        if len(distinct) <= 1 or distinct == {None}:
-            return False
-        return True
+        distinct = set(items.values())
+        return len(distinct) > 1 or distinct == {None}
 
     def _series_property(self, property_name: str) -> list[str | None] | None:
         """
@@ -116,32 +112,18 @@ class AdditionalInfoTab(CatalogueAdditionalInfoTab):
     @property
     def series_names(self) -> list[str | None] | None:
         """Formatted descriptive series names if set and all the same."""
-        # TODO: test
         return self._series_property("name")
-
-        # items: dict[int, str | None] = {
-        #     i: series.name if series.name else "-" for i, series in enumerate(self._serieses)
-        # }
-        # if not self._distinct_values(items):
-        #     return None
-        # return [f"{value} (Side {side_index_label(i)})" for i, value in items.items()]
 
     @property
     def sheet_numbers(self) -> list[str | None] | None:
         """Formatted descriptive series sheet numbers if set and not all the same."""
-        # TODO: test
         return self._series_property("page")
-
-        # items: dict[int, str | None] = {
-        #     i: series.page if series.page else "-" for i, series in enumerate(self._serieses)
-        # }
-        # if not self._distinct_values(items):
-        #     return None
-        # return [f"{value} (Side {side_index_label(i)})" for i, value in items.items()]
 
     @property
     def scales(self) -> list[str] | None:
         """Formatted scales if set."""
+        if all(scale is None for scale in self._scales):
+            return None
         items: dict[int, str | None] = {
             i: self._format_scale(scale) if scale else "-" for i, scale in enumerate(self._scales)
         }
@@ -224,7 +206,6 @@ class ItemCataloguePhysicalMap(ItemCatalogue):
         kwargs = {k.lstrip("_"): v for k, v in super()._additional_info.__dict__.items()}
 
         # Workaround for series.page being set by supplemental information in V4 config
-        # TODO: Test
         for side in self._sides:
             if side.identification.supplemental_information is None:
                 continue

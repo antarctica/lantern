@@ -1,7 +1,7 @@
 [project]
 name = "lantern"
 version = "0.1.0"
-description = "Placeholder catalogue app."
+description = "Prototype data catalogue for discovery metadata."
 readme = "README.md"
 license = "MIT"
 authors = [

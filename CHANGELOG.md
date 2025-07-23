@@ -9,6 +9,12 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 
 ## [Unreleased]
 
+## [0.1.1] - 2025-07-23
+
+### Added
+
+* Continuous Integration
+
 ## [0.1.0] - 2024-07-22
 
 ###  Added

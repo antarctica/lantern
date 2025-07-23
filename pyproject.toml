@@ -22,7 +22,6 @@ dependencies = [
     "jinja2>=3.1.6",
     "jsonschema>=4.23.0",
     "markdown>=3.8.2",
-    "pytailwindcss>=0.2.0",
     "python-gitlab>=6.0.0",
     "sentry-sdk>=2.32.0",
 ]
@@ -32,6 +31,10 @@ dev = [
     "ruff>=0.12.4",
     "safety>=3.5.2",
     "taskipy>=1.14.1",
+]
+tasks = [
+    "dunamai>=1.25.0",
+    "pytailwindcss>=0.2.0",
 ]
 test = [
     "moto[s3]>=5.1.6",
@@ -45,8 +48,15 @@ test = [
     "pytest-unordered>=0.7.0",
 ]
 
+[[tool.uv.index]]
+name = "self"
+url = "https://gitlab.data.bas.ac.uk/api/v4/projects/1355/packages/pypi/simple"
+publish-url = "https://gitlab.data.bas.ac.uk/api/v4/projects/1355/packages/pypi"
+explicit = true
+
 [tool.taskipy.variables]
 targets = "src/ tasks/ tests/"
+cov_options = "--cov --cov-report=html"
 
 [tool.taskipy.tasks]
 # generic dev
@@ -54,15 +64,19 @@ format = { cmd = "ruff format {targets}", help = "Lint app", use_vars = true }
 lint = { cmd = "ruff check {targets}", help = "Lint app", use_vars = true }
 pre-commit = { cmd = "pre-commit run --all-files", help = "Run pre-commit hooks on all files" }
 test = { cmd = "pytest", help = "Run tests" }
-test-cov = { cmd = "pytest --cov --cov-report=html", help = "Run tests with coverage" }
+test-cov = { cmd = "pytest {cov_options}", help = "Run tests with coverage", use_vars = true }
 test-reset = { cmd = "pytest --cache-clear", help = "Reset pytest cache and run tests" }
 safety = { cmd = "safety scan --detailed-output", help = "Check for insecure dependencies" }
+# CI
+ci-test = { cmd = "pytest {cov_options} -o junit_family=xunit2 --junitxml=test-results.xml --continue-on-collection-errors", help = "Called by CI", use_vars = true }
 # app dev
+release = { cmd = "python -m tasks.release", help = "Prepapre app release" }
 config-init = { cmd = "op inject --in-file .env.tpl --out-file .env", help = "Initialise config file" }
 check-config = { cmd = "python -m tasks.config", help = "Check app config" }
 tailwind = { cmd = "python -m tasks.tailwind", help = "Regenerate tailwind styles" }
 build-test-records = { cmd = "python tests/scripts/build_test.py", help = "Build test records as a catalogue site" }
 # fake CLI
+version = { cmd = "python -m tasks.version", help = "Show app version" }
 build-records = { cmd = "python -m tasks.build", help = "Build records as a catalogue site" }
 load-records = { cmd = "python -m tasks.load", help = "Load records from a directory" }
 serve = { cmd = "python -m http.server 9000 --directory export", help = "Serve local catalogue site" }

@@ -28,14 +28,13 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "dunamai>=1.25.0",
+    "pytailwindcss>=0.2.0",
     "ruff>=0.12.4",
     "safety>=3.5.2",
     "taskipy>=1.14.1",
 ]
-tasks = [
-    "dunamai>=1.25.0",
-    "pytailwindcss>=0.2.0",
-]
+tasks = []
 test = [
     "moto[s3]>=5.1.6",
     "pytest>=8.4.1",

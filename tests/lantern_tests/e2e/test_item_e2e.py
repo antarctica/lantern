@@ -1,4 +1,3 @@
-import sys
 from subprocess import Popen
 
 import pytest
@@ -61,7 +60,6 @@ class TestItemTabs:
         expect(page.locator("dt", has_text="Item ID")).to_be_visible()
 
 
-@pytest.mark.skipif("--cov" in sys.argv, reason="skipping under coverage")
 @pytest.mark.skipif(not has_network(), reason="network unavailable")
 class TestItemEmbeddedMap:
     """

@@ -13,7 +13,6 @@ stages:
 
 variables:
   # Image
-  UV_CACHE_DIR: "/tmp/uv-cache"
   UV_VERSION: "0.8.2"
   PYTHON_VERSION: "3.11"
 
@@ -149,6 +148,7 @@ prerelease:
   needs: []
   before_script:
     - *before_script_python
+    - uv sync --frozen --group=dev --python $PYTHON_VERSION
     - $TASK_BIN release prerelease
     - echo "DEPLOY_APP_VERSION=$("$TASK_BIN" version)" >> build.env
   script:

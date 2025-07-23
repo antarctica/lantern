@@ -705,13 +705,11 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
+    { name = "dunamai" },
+    { name = "pytailwindcss" },
     { name = "ruff" },
     { name = "safety" },
     { name = "taskipy" },
-]
-tasks = [
-    { name = "dunamai" },
-    { name = "pytailwindcss" },
 ]
 test = [
     { name = "moto", extra = ["s3"] },
@@ -746,14 +744,13 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
+    { name = "dunamai", specifier = ">=1.25.0" },
+    { name = "pytailwindcss", specifier = ">=0.2.0" },
     { name = "ruff", specifier = ">=0.12.4" },
     { name = "safety", specifier = ">=3.5.2" },
     { name = "taskipy", specifier = ">=1.14.1" },
 ]
-tasks = [
-    { name = "dunamai", specifier = ">=1.25.0" },
-    { name = "pytailwindcss", specifier = ">=0.2.0" },
-]
+tasks = []
 test = [
     { name = "moto", extras = ["s3"], specifier = ">=5.1.6" },
     { name = "pytest", specifier = ">=8.4.1" },

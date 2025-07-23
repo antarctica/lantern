@@ -437,6 +437,18 @@ wheels = [
 ]
 
 [[package]]
+name = "dunamai"
+version = "1.25.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "packaging" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/f1/2f/194d9a34c4d831c6563d2d990720850f0baef9ab60cb4ad8ae0eff6acd34/dunamai-1.25.0.tar.gz", hash = "sha256:a7f8360ea286d3dbaf0b6a1473f9253280ac93d619836ad4514facb70c0719d1", size = 46155, upload-time = "2025-07-04T19:25:56.082Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/36/41/04e2a649058b0713b00d6c9bd22da35618bb157289e05d068e51fddf8d7e/dunamai-1.25.0-py3-none-any.whl", hash = "sha256:7f9dc687dd3256e613b6cc978d9daabfd2bb5deb8adc541fc135ee423ffa98ab", size = 27022, upload-time = "2025-07-04T19:25:54.863Z" },
+]
+
+[[package]]
 name = "editor"
 version = "1.6.6"
 source = { registry = "https://pypi.org/simple" }
@@ -687,7 +699,6 @@ dependencies = [
     { name = "jinja2" },
     { name = "jsonschema" },
     { name = "markdown" },
-    { name = "pytailwindcss" },
     { name = "python-gitlab" },
     { name = "sentry-sdk" },
 ]
@@ -697,6 +708,10 @@ dev = [
     { name = "ruff" },
     { name = "safety" },
     { name = "taskipy" },
+]
+tasks = [
+    { name = "dunamai" },
+    { name = "pytailwindcss" },
 ]
 test = [
     { name = "moto", extra = ["s3"] },
@@ -725,7 +740,6 @@ requires-dist = [
     { name = "jinja2", specifier = ">=3.1.6" },
     { name = "jsonschema", specifier = ">=4.23.0" },
     { name = "markdown", specifier = ">=3.8.2" },
-    { name = "pytailwindcss", specifier = ">=0.2.0" },
     { name = "python-gitlab", specifier = ">=6.0.0" },
     { name = "sentry-sdk", specifier = ">=2.32.0" },
 ]
@@ -735,6 +749,10 @@ dev = [
     { name = "ruff", specifier = ">=0.12.4" },
     { name = "safety", specifier = ">=3.5.2" },
     { name = "taskipy", specifier = ">=1.14.1" },
+]
+tasks = [
+    { name = "dunamai", specifier = ">=1.25.0" },
+    { name = "pytailwindcss", specifier = ">=0.2.0" },
 ]
 test = [
     { name = "moto", extras = ["s3"], specifier = ">=5.1.6" },

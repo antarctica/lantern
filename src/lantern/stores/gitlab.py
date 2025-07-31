@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
+import pickle
 import shutil
 import tarfile
 from pathlib import Path
@@ -87,12 +88,24 @@ class GitLabStore(Store):
         """The ID of the current head commit in the remote project repo."""
         return self._project.commits.list(get_all=False)[0].id
 
-    def _load_record(self, record_path: Path) -> Record:
-        """Load selected records from a file."""
-        self._logger.debug(f"Loading record from '{record_path.resolve()}'")
+    @staticmethod
+    def _load_record_pickle(record_path: Path) -> Record:
+        """Load record from Python pickle file."""
+        with record_path.open(mode="rb") as file:
+            return pickle.load(file)  # noqa: S301
+
+    def _load_record_json(self, record_path: Path) -> Record:
+        """Load record from JSON file."""
         with record_path.open() as file:
-            config = json.load(file)
-        return Record.loads(config, check_supported=True, logger=self._logger)
+            record_data = json.load(file)
+        return Record.loads(record_data, check_supported=True, logger=self._logger)
+
+    def _load_record(self, record_path: Path) -> Record:
+        """Load record from a file."""
+        self._logger.debug(f"Loading record from '{record_path.resolve()}'")
+        if record_path.suffix == ".pickle":
+            return self._load_record_pickle(record_path)
+        return self._load_record_json(record_path)
 
     def _add_record(self, record: Record) -> None:
         """Include record and its summary in the local subset."""
@@ -132,6 +145,7 @@ class GitLabStore(Store):
         - parse each record config file as a Record
         - index each Record by file identifier and SHA1 hash of its configuration
         - derive a RecordSummary from each Record
+        - save a pickled version of each Record to the cache directory
         - save RecordSummary configs to a summaries file
         - save the index of file identifiers and SHA1 hashes to a file
         - save details of the current head commit to a file for cache validation
@@ -142,11 +156,16 @@ class GitLabStore(Store):
         summaries = []
 
         for config_path in config_paths:
-            shutil.copy2(config_path, records_path.joinpath(config_path.name))
+            record_path = records_path / config_path.name
+            shutil.copy2(config_path, record_path)
             record = self._load_record(config_path)
             index[record.file_identifier] = record.sha1
             summary = RecordSummary.loads(record)
             summaries.append(summary.dumps())
+
+            with record_path.with_suffix(".pickle").open(mode="wb") as f:
+                # noinspection PyTypeChecker
+                pickle.dump(record, f, pickle.HIGHEST_PROTOCOL)
 
         with self._cache_head_path.open(mode="w") as f:
             json.dump(head_commit, f, indent=2)
@@ -225,7 +244,7 @@ class GitLabStore(Store):
             else "Loading all records from cache"
         )
         self._logger.info(msg)
-        for record_path in self._cache_path.glob("records/*.json"):
+        for record_path in self._cache_path.glob("records/*.pickle"):
             if record_path.stem in file_identifiers:
                 self._logger.info(f"Record '{record_path.stem}' excluded, skipping")
                 continue
@@ -242,7 +261,7 @@ class GitLabStore(Store):
         `inc_related` parameter can be used also include directly related records for each selected record.
         """
         for file_identifier in file_identifiers:
-            record_path = self._cache_path / self._records_path_name / f"{file_identifier}.json"
+            record_path = self._cache_path / self._records_path_name / f"{file_identifier}.pickle"
             if not record_path.exists():
                 self._logger.warning(f"Record '{file_identifier}' not found in cache, skipping")
                 return

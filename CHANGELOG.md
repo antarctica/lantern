@@ -12,6 +12,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 ### Added
 
 * Pickled records in the GitLab store cache for improved performance
+* Data Protection Impact Assessment (DPIA)
 
 ## [0.1.1] - 2025-07-23
 

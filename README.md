@@ -59,7 +59,8 @@ Project lead: [@felnne](https://www.bas.ac.uk/profile/felnne).
 
 ## Data protection
 
-A Data Protection Impact Assessment (DPIA) is in progress for this project.
+A Data Protection Impact Assessment (DPIA) is in place for this project, ref:
+[4213 🔒](https://app-uk.onetrust.com/assessment/details/5ef15cb7-5736-446c-9a3c-c5d0d2751109).
 
 ## Licence
 

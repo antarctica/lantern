@@ -83,6 +83,8 @@ cache contains:
 
 ```
 ├── records/
+│     ├── *.json
+│     └── *.pickle
 ├── head_commit.json
 ├── index.json
 └── summaries.json
@@ -90,7 +92,7 @@ cache contains:
 
 | Path               | Description                                                                     |
 |--------------------|---------------------------------------------------------------------------------|
-| `records/`         | Record configurations in BAS 19115 JSON format                                  |
+| `records/`         | Record configurations in BAS 19115 JSON format and as pickled Record objects    |
 | `head_commit.json` | Details of the head commit from remote repository when the cache was created    |
 | `index.json`       | SHA1 checksums for each Record indexed by file identifier                       |
 | `summaries.json`   | List of dicts with properties needed to create Record Summaries for all Records |
@@ -101,6 +103,7 @@ A cache is created by:
 - storing details of the current head commit, to later determine whether the cache is stale
 - hashing the contents of each record and indexing by their file identifier, to later determine if a record has changed
 - storing subsets of each record needed to create Record Summaries, to avoiding needing to load full Records later
+- storing a pickled version of each record loaded as Record, to avoid needing to parse the JSON representation later
 
 The store will automatically try to check whether the cache is stale before [Populating](#loading-remote-records) it,
 or [Committing](#committing-records) records by checking the `head_commit.json` file against the remote repository's

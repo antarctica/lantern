@@ -68,10 +68,11 @@ class TestGitLabStore:
 
     # summary and record methods tested in base store tests
 
-    def test_load_add_record(self, fx_gitlab_store_cached: GitLabStore):
+    @pytest.mark.parametrize("suffix", [".json", ".pickle"])
+    def test_load_add_record(self, fx_gitlab_store_cached: GitLabStore, suffix: str):
         """Can load a record config from the local cache as a Record and add to local (loaded) subset."""
         records_path = fx_gitlab_store_cached._cache_path / fx_gitlab_store_cached._records_path_name
-        record_path = records_path / "a1b2c3.json"
+        record_path = records_path / f"a1b2c3{suffix}"
         assert len(fx_gitlab_store_cached.records) == 0
 
         record = fx_gitlab_store_cached._load_record(record_path)

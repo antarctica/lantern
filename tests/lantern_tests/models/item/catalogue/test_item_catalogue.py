@@ -41,7 +41,6 @@ class TestItemCatalogue:
             record=fx_record_minimal_item_catalogue,
             get_record_summary=_get_record_summary,
         )
-
         assert isinstance(item, ItemCatalogue)
         assert item._record == fx_record_minimal_item_catalogue
 

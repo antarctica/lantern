@@ -49,7 +49,7 @@ class ItemCatalogue(ItemBase):
     Catalogue items structure a base item into the (HTML) page structure used in the BAS Data Catalogue website using
     Jinja2 templates and classes representing the various tabs and other sections that form these pages.
 
-    In addition to a catalogue Record instance, this Item implementation requires:
+    In addition to a catalogue Record instance, this Item variant requires:
     - endpoints for external services used in this template, such as the item contact form and extent map
     - a callable to get a RecordSummary for a given identifier (used for related items from aggregations)
 

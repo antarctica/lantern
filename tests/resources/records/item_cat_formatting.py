@@ -80,6 +80,34 @@ lines = [
 ]
 </pre>
 
+Admonitions:
+
+> [!NOTE]
+> Highlights information that users should take into account,
+> even when skimming.
+
+...
+
+> [!TIP]
+> Optional information to help a user be more successful.
+>
+> Can span multiple paragraphs.
+
+...
+
+> [!IMPORTANT]
+> Crucial information necessary for users to succeed.
+
+...
+
+> [!WARNING]
+> Critical content demanding immediate user attention due to potential risks.
+
+...
+
+> [!CAUTION]
+> Negative potential consequences of an action.
+
 Table:
 
 | Column 1 | Column 2 | Column 3 |
@@ -90,7 +118,9 @@ Table:
 Horizontal rule:
 
 I didn't get into this business to please sophomore Tracy Schwartzman, so… onward and upward. On… Why, Tracy?! Why?!!
+
 ---
+
 You're a good guy, mon frere. That means brother in French.
 
 Markdown Image:

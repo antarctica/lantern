@@ -750,7 +750,6 @@ dev = [
     { name = "safety", specifier = ">=3.5.2" },
     { name = "taskipy", specifier = ">=1.14.1" },
 ]
-tasks = []
 test = [
     { name = "moto", extras = ["s3"], specifier = ">=5.1.6" },
     { name = "pytest", specifier = ">=8.4.1" },

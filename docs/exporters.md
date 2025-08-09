@@ -14,6 +14,7 @@ Exporters can be split into:
 
 Exporters use these options from the app `lantern.Config` class:
 
+- `BASE_URL`: root URL for the static site, used to generate fully qualified links to content
 - `EXPORT_PATH`: base path for all local outputs, will be created if it does not exist
 - `AWS_ACCESS_ID`: credential for AWS IAM principle, MUST have permissions to manage content in the S3 bucket
 - `AWS_ACCESS_SECRET`: corresponding secret for the `AWS_ACCESS_ID` credential
@@ -113,6 +114,26 @@ Generates static pages using [Site Templates](/docs/site.md#item-templates) for:
 
 - 404 error page
 - legal policies (copyright, cookies and privacy)
+
+### Public Website search exporter
+
+`lantern.exporters.website.WebsiteSearchExporter`
+
+Generates resources for including [Selected Items](#public-website-search-criteria) in the
+[BAS Public Website](https://www.bas.ac.uk) search to aid discovery.
+
+**Note:** Resources are temporarily published as static files for review, and until an interface to the aggregating
+API feeding the public website sync is available.
+
+#### Public Website search criteria
+
+The public website is not intended as another catalogue of resources, and should only include relevant and more
+significant items applicable to the public. Filtering is applied to only export Items meeting these criteria:
+
+1. are unrestricted (contain an `unrestricted` access constraint)
+   - directing users to Items that can't access is not helpful
+2. are not superseded by another Item (are not the subject of a `RevisionOf` aggregation in another Item)
+   - we don't want to confuse users by showing multiple versions of the same resource
 
 ### Site exporter
 

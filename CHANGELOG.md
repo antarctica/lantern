@@ -13,6 +13,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 
 * Pickled records in the GitLab store cache for improved performance
 * Data Protection Impact Assessment (DPIA)
+* Initial support to export select items into the Public Website global search
 
 ## [0.1.1] - 2025-07-23
 

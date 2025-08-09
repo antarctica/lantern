@@ -13,3 +13,12 @@ class AccessType(Enum):
     PUBLIC = "public"
     BAS_ALL = "bas_all"
     BAS_SOME = "bas_some"
+
+
+class ResourceTypeLabel(Enum):
+    """Partial mapping of the Hierarchy Level code list to friendlier terms."""
+
+    COLLECTION = "COLLECTION"
+    DATASET = "DATASET"
+    PRODUCT = "PRODUCT (MAP)"
+    PAPER_MAP_PRODUCT = "PRODUCT (PAPER MAP)"

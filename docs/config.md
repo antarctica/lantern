@@ -19,6 +19,7 @@ Application configuration is managed by the `lantern.Config` class.
 | `AWS_ACCESS_SECRET`               | String  | Yes          | Yes      | Yes       | v0.1.x        | AWS IAM user secret for site exporter remote uploads                     | *None*                                    | 'x'                                       |
 | `AWS_ACCESS_SECRET_SAFE`          | String  | No           | -        | -         | v0.1.x        | Redacted version of `STORE_GITLAB_TOKEN`                                 | *N/A*                                     | 'REDACTED'                                |
 | `AWS_S3_BUCKET`                   | String  | Yes          | Yes      | No        | v0.1.x        | AWS S3 bucket used for remote static site builds                         | *None*                                    | 'example.com'                             |
+| `BASE_URL`                        | String  | No           | -        | No        | v0.2.x        | Root URL for the static site, used to generate fully qualified links     | `https://{AWS_S3_BUCKET}`                 | 'https://example.com'                     |
 | `ENABLE_FEATURE_SENTRY`           | Boolean | Yes          | No       | No        | v0.1.x        | Enables Sentry monitoring if true                                        | *True*                                    | *True*                                    |
 | `EXPORT_PATH`                     | Path    | Yes          | Yes      | No        | v0.1.x        | Location for local static site exporter builds                           | *None*                                    | '/data/exports/records'                   |
 | `LOG_LEVEL`                       | Number  | Yes          | No       | No        | v0.1.x        | A logging level name or number to set the application logging level      | 30                                        | 20                                        |
@@ -63,6 +64,7 @@ See the [Stores](/docs/stores.md#stores-configuration) docs for more information
 See the [Exporters](/docs/exporters.md#exporters-configuration) docs for more information on how these
 [Config Options](#config-options) are used by exporters:
 
+- `BASE_URL`
 - `EXPORT_PATH`
 - `AWS_ACCESS_ID`
 - `AWS_ACCESS_SECRET`

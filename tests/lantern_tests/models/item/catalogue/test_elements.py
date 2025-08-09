@@ -29,9 +29,10 @@ from lantern.lib.metadata_library.models.record.summary import RecordSummary
 from lantern.models.item.base import AccessType
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.base.elements import Link
+from lantern.models.item.base.enums import ResourceTypeLabel
 from lantern.models.item.catalogue import Aggregations, Dates, Extent, PageHeader, PageSummary
 from lantern.models.item.catalogue.elements import FormattedDate, Identifiers, ItemSummaryCatalogue, Maintenance
-from lantern.models.item.catalogue.enums import ResourceTypeIcon, ResourceTypeLabel
+from lantern.models.item.catalogue.enums import ResourceTypeIcon
 from tests.conftest import _get_record_summary
 
 

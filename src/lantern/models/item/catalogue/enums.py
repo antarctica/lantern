@@ -1,15 +1,6 @@
 from enum import Enum
 
 
-class ResourceTypeLabel(Enum):
-    """Partial mapping of the Hierarchy Level code list to friendlier terms."""
-
-    COLLECTION = "COLLECTION"
-    DATASET = "DATASET"
-    PRODUCT = "PRODUCT (MAP)"
-    PAPER_MAP_PRODUCT = "PRODUCT (PAPER MAP)"
-
-
 class ResourceTypeIcon(Enum):
     """Partial mapping of the Hierarchy Level code list against Font Awesome icon classes."""
 

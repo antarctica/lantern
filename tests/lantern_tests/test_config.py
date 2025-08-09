@@ -55,6 +55,7 @@ class TestConfig:
         """
         redacted_value = "[**REDACTED**]"
         expected: fx_config.ConfigDumpSafe = {
+            "NAME": fx_config.NAME,
             "VERSION": fx_package_version,
             "LOG_LEVEL": 20,
             "LOG_LEVEL_NAME": "INFO",
@@ -70,6 +71,7 @@ class TestConfig:
             "TEMPLATES_PLAUSIBLE_DOMAIN": "x",
             "TEMPLATES_ITEM_MAPS_ENDPOINT": "https://embedded-maps.data.bas.ac.uk/v1",
             "TEMPLATES_ITEM_CONTACT_ENDPOINT": "https://example.com/contact",
+            "BASE_URL": "https://x",
             "EXPORT_PATH": str(fx_config.EXPORT_PATH),
             "AWS_S3_BUCKET": "x",
             "AWS_ACCESS_ID": "x",

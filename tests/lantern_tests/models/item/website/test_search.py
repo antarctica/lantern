@@ -1,0 +1,143 @@
+from datetime import date
+
+import pytest
+
+from lantern.config import Config
+from lantern.lib.metadata_library.models.record import Record
+from lantern.lib.metadata_library.models.record.elements.common import Date
+from lantern.lib.metadata_library.models.record.elements.identification import Constraint, GraphicOverview
+from lantern.lib.metadata_library.models.record.enums import ConstraintRestrictionCode, ConstraintTypeCode, ProgressCode
+from lantern.models.item.base.enums import ResourceTypeLabel
+from lantern.models.item.website.search import ItemWebsiteSearch
+
+
+class TestItemWebsiteSearch:
+    """Test BAS Public Website search item."""
+
+    base_url = "https://example.com"
+
+    def test_init(self, fx_config: Config, fx_record_minimal_item: Record):
+        """Can create an ItemWebsiteSearch."""
+        item = ItemWebsiteSearch(record=fx_record_minimal_item, source=fx_config.NAME, base_url=self.base_url)
+        assert isinstance(item, ItemWebsiteSearch)
+        assert item._record == fx_record_minimal_item
+
+    def test_dumps_min(self, fx_config: Config, fx_record_minimal_item: Record):
+        """Can dump a valid Catalogue / Public Website sync API entity for an item with minimal properties."""
+        expected = {
+            "file_identifier": fx_record_minimal_item.file_identifier,
+            "file_revision": None,
+            "source": "lantern",
+            "content": {
+                "id": fx_record_minimal_item.file_identifier,
+                "type": ResourceTypeLabel.DATASET.value,
+                "title": "x",
+                "description": "<p>x</p>",
+                "date": "2014-06-30",
+                "version": None,
+                "thumbnail_href": None,
+                "keywords": [],
+                "href": f"{self.base_url}/items/{fx_record_minimal_item.file_identifier}/",
+            },
+            "deleted": False,
+        }
+        item = ItemWebsiteSearch(record=fx_record_minimal_item, source=fx_config.NAME, base_url=self.base_url)
+
+        assert item.dumps() == expected
+
+    def test_dumps_max(self, fx_config: Config, fx_record_minimal_item: Record):
+        """Can dump a valid Catalogue / Public Website sync API entity for an item with all supported properties."""
+        edition = "x"
+        thumbnail_href = "x.jpg"
+
+        expected = {
+            "file_identifier": fx_record_minimal_item.file_identifier,
+            "file_revision": None,
+            "source": "lantern",
+            "content": {
+                "id": fx_record_minimal_item.file_identifier,
+                "type": ResourceTypeLabel.DATASET.value,
+                "title": "x",
+                "description": "<p>x</p>",
+                "date": "2014-06-30",
+                "version": edition,
+                "thumbnail_href": thumbnail_href,
+                "keywords": [],
+                "href": f"{self.base_url}/items/{fx_record_minimal_item.file_identifier}/",
+            },
+            "deleted": False,
+        }
+        fx_record_minimal_item.identification.edition = edition
+        fx_record_minimal_item.identification.graphic_overviews.append(
+            GraphicOverview(identifier="overview", href=thumbnail_href, mime_type="image/jpeg")
+        )
+
+        item = ItemWebsiteSearch(record=fx_record_minimal_item, source=fx_config.NAME, base_url=self.base_url)
+
+        assert item.dumps() == expected
+
+    @pytest.mark.cov()
+    @pytest.mark.parametrize(
+        ("has_purpose", "expected"),
+        [(False, "<p>x</p>"), (True, "<p>y</p>")],
+    )
+    def test_description(self, fx_config: Config, fx_record_minimal_item: Record, has_purpose: bool, expected: str):
+        """Can select preferred date from available options."""
+        if has_purpose:
+            fx_record_minimal_item.identification.purpose = "y"
+
+        item = ItemWebsiteSearch(record=fx_record_minimal_item, source=fx_config.NAME, base_url=self.base_url)
+
+        assert item._description == expected
+
+    @pytest.mark.cov()
+    @pytest.mark.parametrize(
+        ("has_publication", "has_revision", "expected"),
+        [
+            (False, False, "2014-06-30"),
+            (True, False, "2015-01-01"),
+            (False, True, "2016-01-01"),
+            (True, True, "2016-01-01"),
+        ],
+    )
+    def test_dates(
+        self,
+        fx_config: Config,
+        fx_record_minimal_item: Record,
+        has_publication: bool,
+        has_revision: bool,
+        expected: str,
+    ):
+        """Can select preferred date from available options."""
+        publication = Date(date=date(2015, 1, 1))
+        revision = Date(date=date(2016, 1, 1))
+        if has_publication:
+            fx_record_minimal_item.identification.dates.publication = publication
+        if has_revision:
+            fx_record_minimal_item.identification.dates.revision = revision
+
+        item = ItemWebsiteSearch(record=fx_record_minimal_item, source=fx_config.NAME, base_url=self.base_url)
+
+        assert item._date == expected
+
+    @pytest.mark.cov()
+    @pytest.mark.parametrize(
+        ("progress", "expected"),
+        [(None, False), (ProgressCode.OBSOLETE, True), (ProgressCode.HISTORICAL_ARCHIVE, True)],
+    )
+    def test_deleted(self, fx_config: Config, fx_record_minimal_item: Record, progress: ProgressCode, expected: bool):
+        """Can determine if item should be marked as removed from maintenance info."""
+        fx_record_minimal_item.identification.maintenance.progress = progress
+        item = ItemWebsiteSearch(record=fx_record_minimal_item, source=fx_config.NAME, base_url=self.base_url)
+        assert item._deleted == expected
+
+    @pytest.mark.parametrize("open_access", [False, True])
+    def test_open_access(self, fx_config: Config, fx_record_minimal_item: Record, open_access: bool):
+        """Can determine if resource is open access."""
+        if open_access:
+            fx_record_minimal_item.identification.constraints.append(
+                Constraint(type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.UNRESTRICTED)
+            )
+
+        item = ItemWebsiteSearch(record=fx_record_minimal_item, source=fx_config.NAME, base_url=self.base_url)
+        assert item.open_access == open_access

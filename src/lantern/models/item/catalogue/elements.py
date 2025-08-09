@@ -22,9 +22,9 @@ from lantern.lib.metadata_library.models.record.summary import RecordSummary
 from lantern.models.item.base import ItemSummaryBase
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.base.elements import Link, unpack
-from lantern.models.item.base.enums import AccessType
+from lantern.models.item.base.enums import AccessType, ResourceTypeLabel
 from lantern.models.item.base.utils import md_as_html
-from lantern.models.item.catalogue.enums import ResourceTypeIcon, ResourceTypeLabel
+from lantern.models.item.catalogue.enums import ResourceTypeIcon
 
 TFormattedDate = TypeVar("TFormattedDate", bound="FormattedDate")
 

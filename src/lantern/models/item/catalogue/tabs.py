@@ -14,6 +14,7 @@ from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
 from lantern.models.item.base import AccessType
 from lantern.models.item.base.elements import Contact, Link
 from lantern.models.item.base.elements import Extent as ItemExtent
+from lantern.models.item.base.enums import ResourceTypeLabel
 from lantern.models.item.catalogue.distributions import (
     ArcGisFeatureLayer,
     ArcGisOgcApiFeatures,
@@ -35,7 +36,7 @@ from lantern.models.item.catalogue.elements import (
     ItemSummaryCatalogue,
     Maintenance,
 )
-from lantern.models.item.catalogue.enums import Licence, ResourceTypeIcon, ResourceTypeLabel
+from lantern.models.item.catalogue.enums import Licence, ResourceTypeIcon
 
 
 class Tab(ABC):

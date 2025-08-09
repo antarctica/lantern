@@ -1,4 +1,5 @@
 from markdown import Markdown, markdown
+from markdown_gfm_admonition import GfmAdmonitionExtension
 
 from lantern.lib.markdown.extensions.links import LinkifyExtension
 from lantern.lib.markdown.extensions.prepend_new_line import PrependNewLineExtension
@@ -11,7 +12,11 @@ def md_as_html(string: str) -> str:
 
     At a minimum the string will be returned as a paragraph.
     """
-    return markdown(string, output_format="html", extensions=["tables", PrependNewLineExtension(), LinkifyExtension()])
+    return markdown(
+        string,
+        output_format="html",
+        extensions=["tables", "admonition", GfmAdmonitionExtension(), PrependNewLineExtension(), LinkifyExtension()],
+    )
 
 
 def md_as_plain(string: str | None) -> str:

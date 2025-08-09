@@ -234,3 +234,15 @@ URL computed within each Item.
 The contact tab within the [Item Templates](#item-templates) includes a form for users to send item enquires. This is
 implemented as a static HTML form with a POST action to a Microsoft Power Automate flow. This routes enquires to a
 relevant system and team, then returns a conformation page linking back to the Item.
+
+#### Markdown
+
+Freetext item properties including title, abstract, summary, lineage, etc. support Markdown formatting.
+
+In addition to typical syntax, some additional features are supported:
+
+- tables
+- admonitions (notes, tips, warnings, etc.)
+- automatically formatting inline URLs and email addresses as links
+
+See the [Formatting Test Record](/tests/resources/records/item_cat_formatting.py) for examples.

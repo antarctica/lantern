@@ -138,6 +138,38 @@
   --tw-prose-pre-bg: var(--color-grey-900);
   --tw-prose-th-borders: var(--color-grey-300);
   --tw-prose-td-borders: var(--color-grey-300);
+
+  .admonition {
+    @apply p-4 pr-0 border-l-5;
+  }
+
+  .admonition .admonition-title {
+    @apply mt-0;
+  }
+
+  .admonition-title {
+    @apply text-lg font-bold;
+  }
+
+  .admonition.note {
+    @apply border-l-sky-blue-500;
+  }
+
+  .admonition.tip {
+    @apply border-l-green-500;
+  }
+
+  .admonition.important {
+    @apply border-l-mauve-500;
+  }
+
+  .admonition.warning {
+    @apply border-l-red-500;
+  }
+
+  .admonition.caution {
+    @apply border-l-yellow-500;
+  }
 }
 
 /*

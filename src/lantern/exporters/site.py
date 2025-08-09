@@ -12,6 +12,7 @@ from lantern.config import Config
 from lantern.exporters.base import Exporter
 from lantern.exporters.base import Exporter as BaseExporter
 from lantern.exporters.records import RecordsExporter
+from lantern.exporters.website import WebsiteSearchExporter
 from lantern.lib.metadata_library.models.record import Record
 from lantern.lib.metadata_library.models.record.summary import RecordSummary
 from lantern.models.templates import PageMetadata
@@ -369,6 +370,7 @@ class SiteExporter(Exporter):
         self._pages_exporter = SitePagesExporter(config=self._config, logger=logger, s3=self._s3_client)
         self._index_exporter = SiteIndexExporter(config=self._config, logger=logger, s3=self._s3_client)
         self._records_exporter = RecordsExporter(config=self._config, logger=logger, s3=self._s3_client)
+        self._website_exporter = WebsiteSearchExporter(config=self._config, logger=logger, s3=self._s3_client)
 
     @property
     def name(self) -> str:
@@ -387,6 +389,7 @@ class SiteExporter(Exporter):
         """Populate exporter."""
         self._records_exporter.loads(summaries=summaries, records=records)
         self._index_exporter.loads(summaries=summaries, records=records)
+        self._website_exporter.loads(records=records)
 
     def export(self) -> None:
         """Export site contents to a directory."""
@@ -394,6 +397,7 @@ class SiteExporter(Exporter):
         self._pages_exporter.export()
         self._records_exporter.export()
         self._index_exporter.export()
+        self._website_exporter.export()
 
     def publish(self) -> None:
         """Publish site contents to S3."""
@@ -401,3 +405,4 @@ class SiteExporter(Exporter):
         self._pages_exporter.publish()
         self._records_exporter.publish()
         self._index_exporter.publish()
+        self._website_exporter.publish()

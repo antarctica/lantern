@@ -166,7 +166,25 @@ A general convention determines whether a single common value is shown, or multi
 - if the values in each side are the same they are ignored and the value from the overall Record is shown
 - if different, values for each side are shown - the value from the overall Record is ignored
 
-## Item Aliases
+### Public website search items
+
+Public website search items (`lantern.models.item.public_website.ItemWebsiteSearch`) are used to include items in the
+[BAS Public Website](https://www.bas.ac.uk) global search. Search items are limited to the properties needed to
+describe an item within these search results. A sync API aggregates these search items across the different catalogues
+used in BAS for harvesting by the Public Website.
+
+This sync API defines:
+
+- a JSON Schema for the content of these items
+- additional properties required to identify the source system of each item, whether it should be marked as deleted, etc.
+
+This schema and requirements are implicitly implemented within this class. Other features include:
+
+- selecting the most relevant date for the item (revision > publication > creation)
+- selecting the most suitable description for the item (purpose > abstract)
+- determining whether an item should be marked as removed/deleted (based item maintenance info)
+
+### Item Aliases
 
 Items are identified by their Record's UUIDv4 `file_identifier` property, including in URLs for item pages. These
 values are intentionally non-meaningful and due to their length and randomness not memorable. Whilst useful for ensuring

@@ -66,6 +66,7 @@ class Config:
     class ConfigDumpSafe(TypedDict):
         """Types and keys for `dumps_safe`."""
 
+        NAME: str
         VERSION: str
         LOG_LEVEL: int
         LOG_LEVEL_NAME: str
@@ -81,6 +82,7 @@ class Config:
         TEMPLATES_PLAUSIBLE_DOMAIN: str
         TEMPLATES_ITEM_MAPS_ENDPOINT: str
         TEMPLATES_ITEM_CONTACT_ENDPOINT: str
+        BASE_URL: str
         EXPORT_PATH: str
         AWS_S3_BUCKET: str
         AWS_ACCESS_ID: str
@@ -89,6 +91,7 @@ class Config:
     def dumps_safe(self) -> ConfigDumpSafe:
         """Dump config for output to the user with sensitive data redacted."""
         return {
+            "NAME": self.NAME,
             "VERSION": self.VERSION,
             "LOG_LEVEL": self.LOG_LEVEL,
             "LOG_LEVEL_NAME": self.LOG_LEVEL_NAME,
@@ -104,11 +107,17 @@ class Config:
             "TEMPLATES_PLAUSIBLE_DOMAIN": self.TEMPLATES_PLAUSIBLE_DOMAIN,
             "TEMPLATES_ITEM_MAPS_ENDPOINT": self.TEMPLATES_ITEM_MAPS_ENDPOINT,
             "TEMPLATES_ITEM_CONTACT_ENDPOINT": self.TEMPLATES_ITEM_CONTACT_ENDPOINT,
+            "BASE_URL": self.BASE_URL,
             "EXPORT_PATH": str(self.EXPORT_PATH.resolve()),
             "AWS_S3_BUCKET": self.AWS_S3_BUCKET,
             "AWS_ACCESS_ID": self.AWS_ACCESS_ID,
             "AWS_ACCESS_SECRET": self.AWS_ACCESS_SECRET_SAFE,
         }
+
+    @property
+    def NAME(self) -> str:
+        """Application name."""
+        return self._app_package
 
     @property
     def VERSION(self) -> str:
@@ -117,7 +126,7 @@ class Config:
 
         Read from package metadata.
         """
-        return version(self._app_package)
+        return version(self.NAME)
 
     @property
     def LOG_LEVEL(self) -> int:
@@ -210,6 +219,11 @@ class Config:
         """Endpoint for contact form in items contact tab."""
         with self.env.prefixed(self._app_prefix), self.env.prefixed("TEMPLATES_"), self.env.prefixed("ITEM_"):
             return self.env("CONTACT_ENDPOINT")
+
+    @property
+    def BASE_URL(self) -> str:
+        """Root URL for site output."""
+        return f"https://{self.AWS_S3_BUCKET}"
 
     @property
     def EXPORT_PATH(self) -> Path:

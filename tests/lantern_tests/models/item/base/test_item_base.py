@@ -455,6 +455,34 @@ class TestItemBase:
         assert item.lineage_html == expected
 
     @pytest.mark.parametrize(
+        "value",
+        [
+            GraphicOverviews([]),
+            GraphicOverviews([GraphicOverview(identifier="x", href="x", mime_type="x")]),
+            GraphicOverviews([GraphicOverview(identifier="overview", href="x", mime_type="x")]),
+            GraphicOverviews(
+                [
+                    GraphicOverview(identifier="overview", href="x", mime_type="x"),
+                    GraphicOverview(identifier="overview", href="y", mime_type="y"),
+                ]
+            ),
+        ],
+    )
+    def test_overview_graphic(self, fx_record_minimal_item: Record, value: GraphicOverviews):
+        """Can get graphic overviews from record."""
+        fx_record_minimal_item.identification.graphic_overviews = value
+        item = ItemBase(fx_record_minimal_item)
+
+        result = item.overview_graphic
+
+        if len(value) == 0:
+            assert result is None
+        if len(value) > 0 and value[0].identifier != "overview":
+            assert result is None
+        if len(value) > 0 and value[0].identifier == "overview":
+            assert isinstance(result, GraphicOverview)
+
+    @pytest.mark.parametrize(
         ("value", "expected"),
         [
             (None, None),

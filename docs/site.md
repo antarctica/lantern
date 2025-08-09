@@ -32,7 +32,7 @@ Secondary top-level items:
 |---------------|-----------------------------------------------------------------------------------------------------|-------------------------------------------------------------------|
 | `404.html`    | Not found error page                                                                                | [Site Pages](/docs/exporters.md#site-pages-exporter)              |
 | `favicon.ico` | Site favicon                                                                                        | [Site Resources](/docs/exporters.md#site-resources-exporter)      |
-| `-/`          | Internal (but not secret) site index                                                                | [Site Index](/docs/exporters.md#site-index-exporter)              |
+| `-/`          | Internal (but not secret) pages, such as the site index                                             | *Various*                                                         |
 | `{aliases}/`  | [Item Aliases](/docs/data-model.md#item-aliases) redirect pages (for `collections/`, `maps/`, etc.) | [HTML Aliases](/docs/exporters.md#html-aliases-resource-exporter) |
 | `legal/`      | Legal policy pages                                                                                  | [Site Pages](/docs/exporters.md#site-pages-exporter)              |
 
@@ -60,9 +60,17 @@ Secondary top-level items:
 
 ```
 └── -/
-    └── index/
-         └── index.html -> 'hidden' index page
+     ├── index/
+     │    └── index.html -> 'hidden' index page
+     └── public-website-search/
+          ├── items.json -> temporary static list of aggregation API resources
+          └── mockup.html -> temporary results rendering
 ```
+
+| Path                       | Description                                  | Exporter                                                      |
+|----------------------------|----------------------------------------------|---------------------------------------------------------------|
+| `-/index/`                 | Hidden index page                            | [Site Index](/docs/exporters.md#site-index-exporter)          |
+| `-/public-website-search/` | Temporary public website search items output | [Website Search](/docs/exporters.md#site-pages-exporter) |
 
 ### Site assets structure
 

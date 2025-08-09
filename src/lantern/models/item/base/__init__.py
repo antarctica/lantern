@@ -10,6 +10,7 @@ from lantern.lib.metadata_library.models.record.elements.identification import (
     Aggregations,
     Constraint,
     Constraints,
+    GraphicOverview,
     GraphicOverviews,
 )
 from lantern.lib.metadata_library.models.record.enums import (
@@ -222,7 +223,11 @@ class ItemBase:
 
     @property
     def graphics(self) -> GraphicOverviews:
-        """Graphic overviews."""
+        """
+        Graphic overviews (thumbnails).
+
+        See `overview_graphic` for accessing primary/default overview.
+        """
         return self._record.identification.graphic_overviews
 
     @property
@@ -283,6 +288,17 @@ class ItemBase:
     def lineage_html(self) -> str | None:
         """Optional lineage statement with Markdown formatting, if present, encoded as HTML."""
         return md_as_html(self.lineage_md) if self.lineage_md is not None else None
+
+    @property
+    def overview_graphic(self) -> GraphicOverview | None:
+        """
+        Optional primary/default graphic overview.
+
+        I.e. Item thumbnail.
+
+        For convenience. Where 'overview' is a conventional and presumed unique identifier.
+        """
+        return next((graphic for graphic in self.graphics.filter(identifier="overview")), None)
 
     @property
     def projection(self) -> Identifier | None:
@@ -415,11 +431,10 @@ class ItemSummaryBase:
 
     @property
     def href_graphic(self) -> str | None:
-        """Graphic URL."""
-        for graphic in self._record_summary.graphic_overviews:
-            if graphic.identifier == "overview":
-                return graphic.href
-        return None
+        """Primary/default graphic URL."""
+        return next(
+            (graphic.href for graphic in self._record_summary.graphic_overviews.filter(identifier="overview")), None
+        )
 
     @property
     def resource_id(self) -> str:

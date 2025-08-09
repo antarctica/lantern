@@ -23,10 +23,16 @@ from lantern.exporters.base import Exporter, ResourceExporter, S3Utils
 from lantern.exporters.html import HtmlAliasesExporter, HtmlExporter
 from lantern.exporters.records import RecordsExporter
 from lantern.exporters.site import SiteExporter, SiteIndexExporter, SitePagesExporter, SiteResourcesExporter
+from lantern.exporters.website import WebsiteSearchExporter
 from lantern.exporters.xml import IsoXmlHtmlExporter
 from lantern.lib.metadata_library.models.record import Record
 from lantern.lib.metadata_library.models.record.elements.common import Date, Dates, Identifier, Identifiers
-from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
+from lantern.lib.metadata_library.models.record.elements.identification import Constraint
+from lantern.lib.metadata_library.models.record.enums import (
+    ConstraintRestrictionCode,
+    ConstraintTypeCode,
+    HierarchyLevelCode,
+)
 from lantern.lib.metadata_library.models.record.summary import RecordSummary
 from lantern.models.item.catalogue import AdditionalInfoTab, ItemCatalogue
 from lantern.models.item.catalogue.elements import Dates as ItemCatDates
@@ -614,6 +620,37 @@ def fx_exporter_site_index_pop(
     summaries = [RecordSummary.loads(fx_record_minimal_item)]
     fx_exporter_site_index.loads(summaries=summaries, records=records)
     return fx_exporter_site_index
+
+
+@pytest.fixture()
+def fx_exporter_website_search(
+    mocker: MockerFixture, fx_s3_bucket_name: str, fx_logger: logging.Logger, fx_s3_client: S3Client
+) -> WebsiteSearchExporter:
+    """
+    Public website search exporter (empty).
+
+    With a mocked config and S3 client.
+    """
+    with TemporaryDirectory() as tmp_path:
+        output_path = Path(tmp_path)
+    mock_config = mocker.Mock()
+    type(mock_config).NAME = PropertyMock(return_value="lantern")
+    type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
+    type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
+
+    return WebsiteSearchExporter(config=mock_config, s3=fx_s3_client, logger=fx_logger)
+
+
+@pytest.fixture()
+def fx_exporter_website_search_pop(
+    fx_exporter_website_search: WebsiteSearchExporter, fx_record_minimal_item: Record
+) -> WebsiteSearchExporter:
+    """Public website search exporter populated with a single record summary."""
+    fx_record_minimal_item.identification.constraints.append(
+        Constraint(type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.UNRESTRICTED)
+    )
+    fx_exporter_website_search.loads(records=[fx_record_minimal_item])
+    return fx_exporter_website_search
 
 
 @pytest.fixture()

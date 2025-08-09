@@ -14,9 +14,9 @@ from lantern.lib.metadata_library.models.record.elements.common import (
 )
 from lantern.lib.metadata_library.models.record.elements.identification import GraphicOverview, GraphicOverviews
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
+from lantern.models.item.base.enums import ResourceTypeLabel
 from lantern.models.item.catalogue import ItemCatalogue, ItemInvalidError
 from lantern.models.item.catalogue.elements import PageSummary
-from lantern.models.item.catalogue.enums import ResourceTypeLabel
 from lantern.models.item.catalogue.tabs import (
     AdditionalInfoTab,
     AuthorsTab,
@@ -80,25 +80,6 @@ class TestItemCatalogue:
                 get_record_summary=_get_record_summary,
             )
 
-    @pytest.mark.parametrize(
-        ("graphics", "expected"),
-        [
-            (GraphicOverviews([]), None),
-            (GraphicOverviews([GraphicOverview(identifier="x", href="x", mime_type="x")]), None),
-            (
-                GraphicOverviews([GraphicOverview(identifier="overview", href="x", mime_type="x")]),
-                GraphicOverview(identifier="overview", href="x", mime_type="x"),
-            ),
-        ],
-    )
-    def test_overview_graphic(
-        self, fx_item_catalogue_min: ItemCatalogue, graphics: GraphicOverviews, expected: GraphicOverview | None
-    ):
-        """Can get optional item overview graphic."""
-        fx_item_catalogue_min._record.identification.graphic_overviews = graphics
-
-        assert fx_item_catalogue_min._overview_graphic == expected
-
     def test_html_title(self, fx_item_catalogue_min: ItemCatalogue):
         """Can get HTML title."""
         expected = "x | BAS Data Catalogue"
@@ -115,7 +96,12 @@ class TestItemCatalogue:
         ],
     )
     def test_html_open_graph(
-        self, fx_item_catalogue_min: ItemCatalogue, summary: str | None, published: bool, graphics: GraphicOverviews
+        self,
+        fx_config: Config,
+        fx_item_catalogue_min: ItemCatalogue,
+        summary: str | None,
+        published: bool,
+        graphics: GraphicOverviews,
     ):
         """Can get HTML open graph tags."""
         expected = {
@@ -123,7 +109,7 @@ class TestItemCatalogue:
             "og:site_name": "BAS Data Catalogue",
             "og:type": "article",
             "og:title": fx_item_catalogue_min.title_plain,
-            "og:url": f"https://data.bas.ac.uk/items/{fx_item_catalogue_min.resource_id}",
+            "og:url": f"{fx_config.BASE_URL}/items/{fx_item_catalogue_min.resource_id}",
         }
 
         if summary is not None:
@@ -136,8 +122,8 @@ class TestItemCatalogue:
             expected["og:article:published_time"] = date_.date.isoformat()
 
         fx_item_catalogue_min._record.identification.graphic_overviews = graphics
-        if fx_item_catalogue_min._overview_graphic is not None:
-            expected["og:image"] = fx_item_catalogue_min._overview_graphic.href
+        if fx_item_catalogue_min.overview_graphic is not None:
+            expected["og:image"] = fx_item_catalogue_min.overview_graphic.href
 
         assert fx_item_catalogue_min.page_metadata.html_open_graph == expected
 
@@ -184,6 +170,7 @@ class TestItemCatalogue:
     )
     def test_html_schema_org(
         self,
+        fx_config: Config,
         fx_item_catalogue_min: ItemCatalogue,
         summary: str | None,
         graphics: GraphicOverviews,
@@ -196,7 +183,7 @@ class TestItemCatalogue:
             "@type": "Article",
             "name": "BAS Data Catalogue",
             "headline": fx_item_catalogue_min.title_plain,
-            "url": f"https://data.bas.ac.uk/items/{fx_item_catalogue_min.resource_id}",
+            "url": f"{fx_config.BASE_URL}/items/{fx_item_catalogue_min.resource_id}",
         }
 
         if summary is not None:
@@ -204,8 +191,8 @@ class TestItemCatalogue:
             expected["description"] = summary
 
         fx_item_catalogue_min._record.identification.graphic_overviews = graphics
-        if fx_item_catalogue_min._overview_graphic is not None:
-            expected["image"] = fx_item_catalogue_min._overview_graphic.href
+        if fx_item_catalogue_min.overview_graphic is not None:
+            expected["image"] = fx_item_catalogue_min.overview_graphic.href
 
         fx_item_catalogue_min._record.identification.contacts = contacts
         if contacts_exp is not None:

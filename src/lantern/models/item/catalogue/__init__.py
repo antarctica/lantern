@@ -7,7 +7,6 @@ from jinja2 import Environment, PackageLoader, select_autoescape
 
 from lantern.config import Config
 from lantern.lib.metadata_library.models.record import Record
-from lantern.lib.metadata_library.models.record.elements.identification import GraphicOverview
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
 from lantern.lib.metadata_library.models.record.summary import RecordSummary
 from lantern.models.item.base import ItemBase
@@ -237,15 +236,6 @@ class ItemCatalogue(ItemBase):
         )
 
     @property
-    def _overview_graphic(self) -> GraphicOverview | None:
-        """
-        Optional 'overview' graphic overview.
-
-        I.e. a default graphic.
-        """
-        return next((graphic for graphic in self.graphics if graphic.identifier == "overview"), None)
-
-    @property
     def page_metadata(self) -> PageMetadata:
         """Templates page metadata."""
         return PageMetadata(
@@ -276,7 +266,7 @@ class ItemCatalogue(ItemBase):
             "og:site_name": "BAS Data Catalogue",
             "og:type": "article",
             "og:title": self.title_plain,
-            "og:url": f"https://data.bas.ac.uk/items/{self.resource_id}",
+            "og:url": f"{self._config.BASE_URL}/items/{self.resource_id}",
         }
 
         if self.summary_plain:
@@ -284,8 +274,8 @@ class ItemCatalogue(ItemBase):
         if self._dates.publication:
             # noinspection PyUnresolvedReferences
             tags["og:article:published_time"] = self._dates.publication.datetime
-        if self._overview_graphic:
-            tags["og:image"] = self._overview_graphic.href
+        if self.overview_graphic:
+            tags["og:image"] = self.overview_graphic.href
 
         return tags
 
@@ -304,14 +294,14 @@ class ItemCatalogue(ItemBase):
             "@type": "Article",
             "name": "BAS Data Catalogue",
             "headline": self.title_plain,
-            "url": f"https://data.bas.ac.uk/items/{self.resource_id}",
+            "url": f"{self._config.BASE_URL}/items/{self.resource_id}",
         }
 
         if self.summary_plain:
             doc["description"] = self.summary_plain
 
-        if self._overview_graphic:
-            doc["image"] = self._overview_graphic.href
+        if self.overview_graphic:
+            doc["image"] = self.overview_graphic.href
 
         author_names = []
         for author in self.contacts.filter(roles=ContactRoleCode.AUTHOR):

@@ -79,7 +79,7 @@ class HtmlAliasesExporter(ResourceExporter):
         """
         Initialise.
 
-        The `export_base` and `export_name` parameters required by the base Exporter aren't used by this class. The
+        The `export_base` and `export_name` parameters required by the base Exporter are not used by this class. The
         values used can be ignored.
 
         The `site_base` parameter MUST be the root of the overall site/catalogue output directory, so aliases under

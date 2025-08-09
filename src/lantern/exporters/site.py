@@ -22,8 +22,6 @@ class SiteResourcesExporter(Exporter):
     Static site resource exporters.
 
     A non-record specific exporter for static resources used across the static site (CSS, fonts, etc.).
-
-    Due to its global nature, does not subclass the BaseExporter to avoid hacking around its requirements.
     """
 
     def __init__(self, config: Config, logger: logging.Logger, s3: S3Client) -> None:
@@ -137,11 +135,9 @@ class SiteIndexExporter(Exporter):
     """
     Proto Data Catalogue index exporter.
 
-    Note: Intended for internal use only and unstyled.
+    Note: Intended for internal use only and intentionally unstyled.
 
     Generates a basic site index from a set of record summaries.
-
-    Due to its global nature, does not subclass the BaseExporter to avoid hacking around its requirements.
     """
 
     def __init__(self, config: Config, logger: logging.Logger, s3: S3Client) -> None:
@@ -296,8 +292,6 @@ class SitePagesExporter(Exporter):
     Static site pages exporter.
 
     Renders static site pages from Jinja2 templates for legal pages, 404, etc.
-
-    Due to its global nature, does not subclass the BaseExporter to avoid hacking around its requirements.
     """
 
     def __init__(self, config: Config, s3: S3Client, logger: logging.Logger) -> None:

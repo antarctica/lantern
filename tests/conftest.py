@@ -591,9 +591,7 @@ def fx_exporter_site_index(
     """
     Site index exporter (empty).
 
-    With:
-    - a mocked config and S3 client
-    - a minimal sample record
+    With a mocked config and S3 client.
     """
     with TemporaryDirectory() as tmp_path:
         output_path = Path(tmp_path)
@@ -606,14 +604,14 @@ def fx_exporter_site_index(
 
 @pytest.fixture()
 def fx_exporter_site_index_pop(
-    fx_exporter_site_index: SiteIndexExporter, fx_record_minimal_item_catalogue: Record
+    fx_exporter_site_index: SiteIndexExporter, fx_record_minimal_item: Record
 ) -> SiteIndexExporter:
     """Site index exporter populated with a single record summary."""
-    fx_record_minimal_item_catalogue.identification.identifiers.append(
+    fx_record_minimal_item.identification.identifiers.append(
         Identifier(identifier="x", href="https://data.bas.ac.uk/datasets/x", namespace="alias.data.bas.ac.uk")
     )
-    records = [fx_record_minimal_item_catalogue]
-    summaries = [RecordSummary.loads(fx_record_minimal_item_catalogue)]
+    records = [fx_record_minimal_item]
+    summaries = [RecordSummary.loads(fx_record_minimal_item)]
     fx_exporter_site_index.loads(summaries=summaries, records=records)
     return fx_exporter_site_index
 

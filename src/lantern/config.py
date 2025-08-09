@@ -27,7 +27,7 @@ class Config:
         if read_env:
             self.env.read_env()
 
-    def validate(self) -> None:  # noqa: C901
+    def validate(self) -> None:
         """
         Validate configuration.
 
@@ -37,71 +37,31 @@ class Config:
 
         If invalid a ConfigurationError is raised.
         """
-        try:
-            _ = self.STORE_GITLAB_ENDPOINT
-        except EnvError as e:
-            msg = "STORE_GITLAB_ENDPOINT must be set."
-            raise ConfigurationError(msg) from e
+        required = [
+            "STORE_GITLAB_ENDPOINT",
+            "STORE_GITLAB_TOKEN",
+            "STORE_GITLAB_PROJECT_ID",
+            "STORE_GITLAB_CACHE_PATH",
+            "TEMPLATES_PLAUSIBLE_DOMAIN",
+            "TEMPLATES_ITEM_CONTACT_ENDPOINT",
+            "EXPORT_PATH",
+            "AWS_S3_BUCKET",
+            "AWS_ACCESS_ID",
+            "AWS_ACCESS_SECRET",
+        ]
+        directories = ["STORE_GITLAB_CACHE_PATH", "EXPORT_PATH"]
 
-        try:
-            _ = self.STORE_GITLAB_TOKEN
-        except EnvError as e:
-            msg = "STORE_GITLAB_TOKEN must be set."
-            raise ConfigurationError(msg) from e
+        for prop in required:
+            try:
+                _ = getattr(self, prop)
+            except EnvError as e:
+                msg = f"{prop} must be set."
+                raise ConfigurationError(msg) from e
 
-        try:
-            _ = self.STORE_GITLAB_PROJECT_ID
-        except EnvError as e:
-            msg = "STORE_GITLAB_PROJECT_ID must be set."
-            raise ConfigurationError(msg) from e
-
-        try:
-            _ = self.STORE_GITLAB_CACHE_PATH
-        except EnvError as e:
-            msg = "STORE_GITLAB_CACHE_PATH must be set."
-            raise ConfigurationError(msg) from e
-        if Path(self.STORE_GITLAB_CACHE_PATH).exists() and not Path(self.STORE_GITLAB_CACHE_PATH).is_dir():
-            msg = "STORE_GITLAB_CACHE_PATH must be a directory."
-            raise ConfigurationError(msg)
-
-        try:
-            _ = self.TEMPLATES_PLAUSIBLE_DOMAIN
-        except EnvError as e:
-            msg = "TEMPLATES_PLAUSIBLE_DOMAIN must be set."
-            raise ConfigurationError(msg) from e
-
-        try:
-            _ = self.TEMPLATES_ITEM_CONTACT_ENDPOINT
-        except EnvError as e:
-            msg = "TEMPLATES_ITEM_CONTACT_ENDPOINT must be set."
-            raise ConfigurationError(msg) from e
-
-        try:
-            _ = self.EXPORT_PATH
-        except EnvError as e:
-            msg = "EXPORT_PATH must be set."
-            raise ConfigurationError(msg) from e
-        if Path(self.EXPORT_PATH).exists() and not Path(self.EXPORT_PATH).is_dir():
-            msg = "EXPORT_PATH must be a directory."
-            raise ConfigurationError(msg)
-
-        try:
-            _ = self.AWS_S3_BUCKET
-        except EnvError as e:
-            msg = "AWS_S3_BUCKET must be set."
-            raise ConfigurationError(msg) from e
-
-        try:
-            _ = self.AWS_ACCESS_ID
-        except EnvError as e:
-            msg = "AWS_ACCESS_ID must be set."
-            raise ConfigurationError(msg) from e
-
-        try:
-            _ = self.AWS_ACCESS_SECRET
-        except EnvError as e:
-            msg = "AWS_ACCESS_SECRET must be set."
-            raise ConfigurationError(msg) from e
+        for prop in directories:
+            if Path(getattr(self, prop)).exists() and not Path(getattr(self, prop)).is_dir():
+                msg = f"{prop} must be a directory."
+                raise ConfigurationError(msg)
 
     class ConfigDumpSafe(TypedDict):
         """Types and keys for `dumps_safe`."""

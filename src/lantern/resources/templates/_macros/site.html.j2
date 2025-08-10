@@ -160,7 +160,7 @@
 {% endmacro %}
 
 {% macro navbar() %}
-  <nav id="site-nav" class="bg-grey-950 text-white">
+  <nav id="site-nav" class="bg-grey-950 dark:bg-black text-white">
     <div class="{{ com.container_classes() }} py-4">
       <a id="site-title" class="block font-bold text-lg text-center lg:text-left" href="/">BAS Data Catalogue</a>
     </div>
@@ -178,7 +178,7 @@
 {% endmacro %}
 
 {% macro footer(data) %}
-  <footer id="site-footer" class="font-light bg-grey-950 text-grey-100">
+  <footer id="site-footer" class="font-light bg-grey-950 dark:bg-black text-grey-100">
     <div class="{{ com.container_classes() }} py-8 space-y-8">
       <div class="flex flex-col justify-between space-y-4 lg:space-y-0 lg:flex-row">
         <button class="{{ com.sentry_trigger() }} {{ com.footer_link_classes() }} cursor-pointer">Is something wrong with this page?</button>

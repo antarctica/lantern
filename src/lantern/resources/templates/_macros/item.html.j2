@@ -21,7 +21,7 @@
 {% endmacro %}
 
 {% macro summary(data) %}
-  <section id="item-summary" class="col-span-2 bg-grey-100 space-y-8 p-4 h-full">
+  <section id="item-summary" class="col-span-2 h-full p-4 space-y-8 bg-grey-100 dark:bg-grey-900">
     {% if data.grid_enabled %}
       {{ summary_grid(data) }}
     {% endif %}
@@ -126,7 +126,18 @@
 
   {% if data.tab.enabled %}
     <input id="{{ tab_id }}" type="radio" name="tabs" class="peer/{{ tab_id }} opacity-0 absolute" {% if is_default_tab %}checked="checked"{% endif %} />
-    <label for="{{ tab_id }}" class="block relative p-4 cursor-pointer hover:underline hover:bg-grey-100 hover:text-sky-blue-500 hover:border-b-grey-300 border-1 border-transparent text-grey-500 peer-checked/{{ tab_id }}:text-grey-900 peer-checked/{{ tab_id }}:border-grey-300 peer-checked/{{ tab_id }}:border-b-white peer-checked/{{ tab_id }}:hover:bg-white peer-checked/{{ tab_id }}:hover:border-b-white">
+    <label for="{{ tab_id }}" class="block relative p-4 cursor-pointer hover:underline border-1 border-transparent
+      text-grey-500 bg:text-grey-300
+      hover:bg-grey-100 dark:hover:bg-grey-900
+      hover:text-sky-blue-500 dark:hover:text-sky-blue-300
+      hover:border-b-grey-300 dark:hover:border-b-grey-500
+      peer-checked/{{ tab_id }}:text-grey-900 dark:peer-checked/{{ tab_id }}:text-grey-100
+      peer-checked/{{ tab_id }}:hover:text-grey-900 dark:peer-checked/{{ tab_id }}:hover:text-grey-100
+      peer-checked/{{ tab_id }}:border-grey-300 dark:peer-checked/{{ tab_id }}:border-grey-500
+      peer-checked/{{ tab_id }}:border-b-white dark:peer-checked/{{ tab_id }}:border-b-grey-950
+      peer-checked/{{ tab_id }}:hover:bg-white dark:peer-checked/{{ tab_id }}:hover:bg-grey-950
+      peer-checked/{{ tab_id }}:hover:border-b-white dark:peer-checked/{{ tab_id }}:hover:border-b-grey-950
+      peer-checked/{{ tab_id }}:hover:no-underline peer-checked/{{ tab_id }}:hover:cursor-default">
       <i class="{{ data.tab.icon }}"></i> {{ data.tab.title }}
     </label>
   {% endif %}
@@ -135,7 +146,7 @@
 {% macro nav_content(data) %}
   {% set tab_id = "tab-" + data.anchor %}
   {% if data.enabled %}
-    <div class="border-1 border-grey-300 p-4 -mt-px w-full hidden peer-checked/{{ tab_id }}:block">
+    <div class="border-1 border-grey-300 dark:border-grey-500 p-4 -mt-px w-full hidden peer-checked/{{ tab_id }}:block">
       {{ tab[data.anchor](data) }}
     </div>
   {% endif %}

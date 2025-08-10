@@ -19,7 +19,7 @@
   </div>
 {% endmacro %}
 
-{% macro licence(id, href, name, img=None) %}
+{% macro licence(id, href, name, img=None, img_dark=None) %}
   <section id="{{ id }}" class="grid grid-cols-1 gap-y-4 lg:gap-x-8 lg:grid-cols-[auto_1fr]">
     <div><strong>Item licence</strong></div>
     <div class="flex justify-between items-top">
@@ -27,9 +27,11 @@
         <a class="{{ com.link_classes() }}" href="{{ href }}">{{ name }} {{ com.ext_link_i() }}</a>
       </div>
       {% if img %}
-        <div>
+        <picture>
+          <source srcset="{{ img }}" media="(prefers-color-scheme: light)" />
+          <source srcset="{{ img_dark }}" media="(prefers-color-scheme: dark)" />
           <img src="{{ img }}" alt="Licence symbol" />
-        </div>
+        </picture>
       {% endif %}
     </div>
 
@@ -48,7 +50,8 @@
     id='licence-ogl-uk-3-0',
     href='https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/',
     name='Open Government Licence (OGL 3.0)',
-    img='https://cdn.web.bas.ac.uk/bas-style-kit/0.6.0/img/logos-symbols/ogl-symbol-default-transparent-64.png'
+    img='https://cdn.web.bas.ac.uk/bas-style-kit/0.6.0/img/logos-symbols/ogl-symbol-default-transparent-64.png',
+    img_dark='https://cdn.web.bas.ac.uk/bas-style-kit/0.6.0/img/logos-symbols/ogl-symbol-inverse-transparent-64.png'
   ) %}
     {% if content == 'rights' %}
       {% call clauses(alert_variant='green', label='You are free to:') %}

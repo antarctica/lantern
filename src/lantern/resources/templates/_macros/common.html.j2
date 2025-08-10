@@ -1,6 +1,6 @@
 {% macro container_classes() %}container mx-auto{% endmacro %}
 
-{% macro link_classes() %}text-sky-blue-500 hover:underline{% endmacro %}
+{% macro link_classes() %}hover:underline text-sky-blue-500 dark:text-sky-blue-300{% endmacro %}
 
 {% macro btn_base_classes() %}cursor-pointer{% endmacro %}
 
@@ -10,19 +10,19 @@
 
 {% macro btn_warning_classes() %}{{ btn_base_classes() }} bg-yellow-500 text-black hover:bg-yellow-700{% endmacro %}
 
-{% macro footer_link_classes() %}text-sky-blue-300 hover:underline{% endmacro %}
+{% macro footer_link_classes() %}hover:underline text-sky-blue-300 dark:text-sky-blue-500{% endmacro %}
 
 {% macro back_to_top_id() %}site-top{% endmacro %}
 
 {% macro sentry_trigger() %}site-feedback-trigger{% endmacro %}
 
 {% macro prose(value) %}
-  <div class="max-w-none prose prose-base prose-headings:font-bold prose-li:my-0">{{ value }}</div>
+  <div class="max-w-none prose prose-base dark:prose-invert prose-headings:font-bold prose-li:my-0">{{ value }}</div>
 {% endmacro %}
 
 {% macro dl_item(title, id, dd_class=None) %}
   <div class="space-y-2">
-    <dt class="font-bold">{{ title }}</dt>
+    <dt class="font-bold text-black dark:text-white">{{ title }}</dt>
     <dd {% if dd_class %}class="{{ dd_class }}"{% endif %} id="{{ id }}">{{ caller() }}</dd>
   </div>
 {% endmacro %}
@@ -38,9 +38,9 @@
 {% endmacro %}
 
 {% macro page_header(id_wrapper=None, id_sub=None, id_main=None, sub=None, sub_i=None, main=None) %}
-  <header {% if id_wrapper %}id="{{ id_wrapper }}"{% endif %} class="border-b-1 border-grey-100 pb-4">
+  <header {% if id_wrapper %}id="{{ id_wrapper }}"{% endif %} class="pb-4 border-b-1 border-grey-100 dark:border-grey-900">
     {% if sub %}
-      <small {% if id_sub %}id="{{ id_sub }}"{% endif %} class="text-grey-500 uppercase">
+      <small {% if id_sub %}id="{{ id_sub }}"{% endif %} class="text-grey-500 dark:text-grey-300 uppercase">
         {% if sub_i %}<i class="{{ sub_i }}"></i>{% endif %} {{ sub }}
       </small>
     {% endif %}
@@ -49,7 +49,7 @@
 {% endmacro %}
 
 {% macro item_border(classes="") %}
-  <div class="border-1 border-grey-100 p-2 {{ classes }}">
+  <div class="p-2 border-1 border-grey-100 border-grey-700 {{ classes }}">
     {{ caller() }}
   </div>
 {% endmacro %}
@@ -67,7 +67,7 @@
       <div class="w-5/6 flex flex-col h-full ml-2">
         <header><a class="text-lg {{ link_classes() }}" href="{{item.href}}">{{ item.title_html }}</a></header>
         <article class="py-2 flex-grow overflow-auto">{{ prose(item.summary_html) }}</article>
-        <footer class="mt-auto flex items-center space-x-2 text-sm text-grey-500">
+        <footer class="mt-auto flex items-center space-x-2 text-sm text-grey-500 dark:text-grey-300">
           {{ item_summary_fragments(item.fragments) }}
         </footer>
       </div>
@@ -75,22 +75,26 @@
   {% endcall %}
 {% endmacro %}
 
+{% macro item_summary_fragment_divider() %}
+  <span class="text-grey-100 dark:text-grey-700">|</span>
+{% endmacro %}
+
 {% macro item_summary_fragments(data) %}
   <span><i class="{{ data.item_type_icon }}"></i> {{ data.item_type }}</span>
   {% if data.edition %}
-    <span class="text-grey-100">|</span>
+    {{ item_summary_fragment_divider() }}
     <span>{{ data.edition }}</span>
   {% endif %}
   {% if data.published %}
-    <span class="text-grey-100">|</span>
+    {{ item_summary_fragment_divider() }}
     {{ time(data.published) }}
   {% endif %}
   {% if data.children %}
-    <span class="text-grey-100">|</span>
+    {{ item_summary_fragment_divider() }}
     <span>{{ data.children }}</span>
   {% endif %}
   {% if data.access.name != 'PUBLIC' %}
-    <span class="text-grey-100">|</span>
+    {{ item_summary_fragment_divider() }}
     <span><i class="far fa-lock-alt"></i> Restricted</span>
   {% endif %}
 {% endmacro %}

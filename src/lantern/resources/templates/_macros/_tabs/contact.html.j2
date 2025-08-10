@@ -1,9 +1,17 @@
 {% import '_macros/common.html.j2' as com %}
 
+{%  macro form_item_classes() %}w-full border-1 border-grey-300 dark:border-grey-500 dark:bg-grey-900 dark:text-white{% endmacro %}
+
 {% macro form_input(id, name, value, placeholder, required) %}
   <div class="space-y-2">
     <label class="block font-bold" for="{{ id }}">{{ name }}</label>
-    <input class="w-full border-1 border-grey-300" type="text" name="{{ id }}" id="{{ id }}" {% if placeholder %}placeholder="{{ placeholder }}"{% endif %} {% if value %}value="{{ value }}"{% endif %} {% if required %}required{% endif %}>
+    <input
+      class="{{ form_item_classes() }}"
+      type="text" name="{{ id }}" id="{{ id }}"
+      {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
+      {% if value %}value="{{ value }}"{% endif %}
+      {% if required %}required{% endif %}
+    >
   </div>
 {% endmacro %}
 
@@ -19,8 +27,11 @@
           {{ form_input(id="message-subject", name="Subject", value=data.subject_default, required=True) }}
           <div class="space-y-2">
             <label class="block font-bold" for="message-content">Details</label>
-            <textarea class="w-full border-1 border-grey-300" name="message-content" id="message-content" rows="8" required></textarea>
             <div class="border-l-5 border-l-yellow-500 p-4 pr-0">
+            <textarea
+              class="{{ form_item_classes() }}"
+              name="message-content" id="message-content" rows="8" required
+            ></textarea>
               Do not any include any sensitive information in your message.
             </div>
           </div>

@@ -124,6 +124,7 @@ The `pytailwindcss` package is used to manage a standalone
 
 Input styles are defined in `src/lantern/resources/css/main.css.j2`, which is a Jinja2 template so the search path to
 content can be set dynamically.
+### Styling guidelines
 
 A search path needs to explicitly defined to ensure the Tailwind compiler finds all classes used in the build static
 site, as the [Site Templates](#templates) use interpolation to build class names. This search path needs to be set
@@ -147,6 +148,23 @@ version as a SHA1 hash, e.g. `main.css?v=f053ddb` for version 0.1.0.
 
 > [!CAUTION]
 > Asset references are not automatically amended, make sure any references in templates are suitably configured.
+#### Dark mode
+
+Consideration SHOULD be given the user's colour preference by providing a dark mode using the Tailwind `dark:` modifier.
+
+Common pairings, which SHOULD be used and re-enforced where sensible, are:
+
+| Light Mode | Dark Mode |
+|------------|-----------|
+| `black`    | `white`   |
+| `*-100`    | `*-900`   |
+| `*-500`    | `*-300`   |
+
+#### Colour audit
+
+A [Colour Audit](/docs/supplemental/colour-audit.md) and reference is manually maintained to coordinate and constrain
+the range of colours used across the site. Update this document if changing or adding colours.
+
 
 ## Scripts
 

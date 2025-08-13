@@ -91,7 +91,7 @@ For example:
 > creating [MAGIC Discovery ISO 19115 Profile](https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery-v1)
 > compliant records.
 
-### Catalogue record requirements
+### Record requirements
 
 The Data Catalogue itself requires these properties to be set in all records:
 

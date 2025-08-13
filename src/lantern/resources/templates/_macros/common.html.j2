@@ -97,7 +97,7 @@
   {% endif %}
   {% if data.access.name != 'PUBLIC' %}
     {{ item_summary_fragment_divider() }}
-    <span><i class="far fa-lock-alt"></i> Restricted</span>
+    <span>{{ restricted_i }} Restricted</span>
   {% endif %}
 {% endmacro %}
 

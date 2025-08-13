@@ -255,7 +255,15 @@ To run a specific test file with visible output:
 % uv run pytest --headed tests/lantern_tests/e2e/test_item_e2e.py
 ```
 
+Playwright tests require a real website to test against, which is provided by the `fx_exporter_static_server` fixture.
+This hosts a local [Static Site](/docs/architecture.md#static-site) served from a temporary directory using Python's
+simple HTTP server. The site is built by the `fx_exporter_static_site` fixture and contains all
+[Test Records](#test-records).
 
+> [!NOTE]
+> This local server cannot be used directly in CI. Instead, a Python simple server serving a known (initially empty)
+> path in the build directory is started before Pytest runs. The `fx_exporter_static_server` detects the CI environment
+> and copies the static site build to this path, then quits, giving an equivalent outcome.
 
 ### Test records
 
@@ -271,6 +279,17 @@ To aid in debugging and testing, a set of fake records are included in `tests/re
 These records are used within tests but can and should also be used when developing [Templates](/docs/site.md#templates).
 
 An in-memory [Store](/docs/architecture.md#stores) is provided to load these records for use with [Exporters](/docs/architecture.md#exporters).
+
+To add a new test record:
+
+> [!CAUTION]
+> This section is Work in Progress (WIP) and may not be complete/accurate.
+
+1. create new `tests/resources/records/item_cat_*.py` file or clone from minimal examples
+    - records MUST use a unique `file_identifier`
+    - the `tests.resources.records.utils.make_record()` method SHOULD be used as a base (properties can be unset later)
+2. include the record in the `tests.resources.records.item_cat_collection_all.collection_members` list
+3. include the record in the `resources.stores.fake_records_store.FakeRecordsStore._fake_records()` method
 
 > [!TIP]
 > Run the `build-test-records` [Development Task](#development-tasks) to export a static site using these records.

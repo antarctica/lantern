@@ -166,6 +166,8 @@ class TestRecord:
         record = Record.loads(config, check_supported=check_supported)
 
         assert record._schema is not None
+        assert record._schema == config["$schema"]
+
         assert record.identification.title == expected_str  # specially nested property
         assert record.data_quality.lineage.statement == expected_str  # moved property
         assert record.hierarchy_level == expected_enums["hierarchy_level"]  # enum property
@@ -176,6 +178,25 @@ class TestRecord:
         assert (
             record.identification.constraints[0].restriction_code == expected_enums["constraint_code"]
         )  # enum property
+
+    def test_loads_invalid_schema(self):
+        """Cannot create a Record from a JSON serialised dict referencing an unsupported JSON Schema."""
+        config = {
+            "$schema": "x",
+            "hierarchy_level": HierarchyLevelCode.DATASET,
+            "metadata": {
+                "contacts": [{"organisation": {"name": "x"}, "role": [ContactRoleCode.POINT_OF_CONTACT]}],
+                "date_stamp": date(2014, 6, 30).isoformat(),
+            },
+            "identification": {
+                "title": {"value": "x"},
+                "dates": {"creation": date(2014, 6, 30).isoformat()},
+                "abstract": "x",
+            },
+        }
+
+        with pytest.raises(ValueError, match="Unsupported JSON Schema in data."):
+            _ = Record.loads(config)
 
     def test_dumps(self, fx_record_minimal_iso: Record):
         """

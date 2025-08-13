@@ -113,7 +113,7 @@ class TestItemContactForm:
         assert status_code == 200
 
         expect(page.locator("textarea#message-content")).to_be_visible()
-        page.get_by_label("Details").fill("x")
+        page.get_by_label("Message").fill("x")
         page.get_by_label("Your email address").fill("conwat@bas.ac.uk")
         page.get_by_text("Send Message").click()
 

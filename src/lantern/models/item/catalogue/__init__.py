@@ -110,6 +110,8 @@ class ItemCatalogue(ItemBase):
         """
         Validate underlying record against Data Catalogue requirements.
 
+        See also `docs/data_model.md#record-requirements`.
+
         Validation based on [1]. Failed validation will raise a `RecordInvalidError` exception.
 
         Note: The requirement for a file_identifier is already checked in ItemBase.

@@ -20,11 +20,29 @@ Additional data classes are used to implement other properties (e.g. an `Identif
 code lists of allowed values are implemented using `Enum` classes.
 
 > [!NOTE]
-> Unless stated otherwise, references to 'Records' elsewhere refer to the `Record` data class.
+> Unless stated otherwise, references to 'Records' elsewhere refer to the [`RecordRevision`](#record-revisions) class.
 
 > [!NOTE]
 > The Records model is considered part of the BAS Metadata Library but was developed for this project and not
 yet upstreamed. See the [Library](/docs/libraries.md#bas-metadata-library) docs for more information.
+
+### Record revisions
+
+Record Revisions represent a [Record](#record) at a particular point in time by recording a revision identifier
+alongside Record data. This identifier is a local addition and is not part of the ISO 19115 information model.
+
+Identifiers are intended to come from a version Control system (VCS) such as Git, where values are unique across the
+history of a Record but may be shared by multiple Records, to represent a coordinated set of changes (AKA a changeset).
+
+For use within Python, a Record Revision data class (`lantern.models.record.revisiob.RecordRevision`), a subclass of
+`Record` is defined which:
+
+* inherits all `Record` properties and methods
+* allows setting a `file_revision` property
+* optionally (and not by default) allows dumping the Record config including `file_revision` to plain types (not JSON/XML)
+
+> [!NOTE]
+> Unless stated otherwise, references to 'Records' elsewhere refer to the `RecordRevision` data class.
 
 ### Record summaries
 
@@ -34,11 +52,13 @@ records. They contain a subset of record properties, such as title, identifiers,
 > [!NOTE]
 > There is no formal specification for record summaries. See the class definition for the properties they include.
 
-A Record Summary data class (`lantern.lib.metadata_library.models.record.summary.RecordSummary`) is used to implement
-record summaries. `RecordSummary` instances be configured directly, or created from a `Record` instance.
+A Record Summary data class (`lantern.lib.metadata_library.models.record.summary.RecordSummary`) and
+(`lantern.models.record.revision.RecordRevisionSummary`), a subclass corresponding to the `RecordRevision` class, are
+used to implement record summaries. `RecordSummary`/`RecordRevisionSummary` instances can be configured directly, or
+created from a `Record`/`RecordRevision` instance.
 
 > [!NOTE]
-> Unless stated otherwise, references to 'Record Summaries' elsewhere refer to the `RecordSummary` data class.
+> Unless stated otherwise, references to 'Record Summaries' elsewhere refer to the `RecordRevisionSummary` data class.
 
 > [!NOTE]
 > The Record Summary model is considered part of the BAS Metadata Library but was developed for this project

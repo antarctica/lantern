@@ -53,11 +53,11 @@ interactions:
       - application/json
       User-Agent:
       - python-gitlab/6.0.0
-    method: GET
-    uri: https://gitlab.example.com/api/v4/projects/1234
+    method: HEAD
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/files/records%2Fa1%2Fb2%2Fa1b2c3.json?ref=main
   response:
     body:
-      string: '{"id":1234}'
+      string: ''
     headers:
       Cache-Control:
       - max-age=0, private, must-revalidate
@@ -69,8 +69,6 @@ interactions:
       - strict-origin-when-cross-origin
       Strict-Transport-Security:
       - max-age=63072000
-      Transfer-Encoding:
-      - chunked
       Vary:
       - Accept-Encoding
       - Origin
@@ -78,47 +76,26 @@ interactions:
       - nosniff
       X-Frame-Options:
       - SAMEORIGIN
-    status:
-      code: 200
-      message: OK
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      Content-type:
-      - application/json
-      User-Agent:
-      - python-gitlab/6.0.0
-    method: GET
-    uri: https://gitlab.example.com/api/v4/projects/1234/repository/commits
-  response:
-    body:
-      string: '[{"id": "abc123"}]'
-    headers:
-      Cache-Control:
-      - max-age=0, private, must-revalidate
-      Content-Encoding:
-      - gzip
-      Content-Type:
-      - application/json
-      Referrer-Policy:
-      - strict-origin-when-cross-origin
-      Strict-Transport-Security:
-      - max-age=63072000
-      Transfer-Encoding:
-      - chunked
-      Vary:
-      - Accept-Encoding
-      - Origin
-      X-Content-Type-Options:
-      - nosniff
-      X-Frame-Options:
-      - SAMEORIGIN
+      X-Gitlab-Blob-Id:
+      - x9876
+      X-Gitlab-Commit-Id:
+      - abc123
+      X-Gitlab-Content-Sha256:
+      - 740bd24fb6c1add4d71ed3bab3abd5848c22e135
+      X-Gitlab-Encoding:
+      - base64
+      X-Gitlab-Execute-Filemode:
+      - 'false'
+      X-Gitlab-File-Name:
+      - a1b2c3.json
+      X-Gitlab-File-Path:
+      - records/a1/b2/a1b2c3.json
+      X-Gitlab-Last-Commit-Id:
+      - abc123
+      X-Gitlab-Ref:
+      - main
+      X-Gitlab-Size:
+      - '123'
     status:
       code: 200
       message: OK

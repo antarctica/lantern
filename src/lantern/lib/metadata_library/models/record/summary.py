@@ -52,6 +52,21 @@ class RecordSummary:
         if self.aggregations is None:
             self.aggregations = Aggregations()
 
+    @staticmethod
+    def _converter_up() -> cattrs.Converter:
+        """
+        Cattrs converter for structuring data.
+
+        Standalone method for easier subclassing.
+        """
+        converter = cattrs.Converter()
+        converter.register_structure_hook(date, lambda d, t: date.fromisoformat(d))
+        converter.register_structure_hook(Date, lambda d, t: Date.structure(d))
+        converter.register_structure_hook(Aggregations, lambda d, t: Aggregations.structure(d))
+        converter.register_structure_hook(Constraints, lambda d, t: Constraints.structure(d))
+        converter.register_structure_hook(GraphicOverviews, lambda d, t: GraphicOverviews.structure(d))
+        return converter
+
     @classmethod
     def structure(cls: type[TRecordSummary], value: dict) -> "RecordSummary":
         """
@@ -61,21 +76,15 @@ class RecordSummary:
         E.g. `converter.register_structure_hook(RecordSummary, lambda d, t: RecordSummary.structure(d))`
         """
         value_ = deepcopy(value)
-
-        converter = cattrs.Converter()
-        converter.register_structure_hook(date, lambda d, t: date.fromisoformat(d))
-        converter.register_structure_hook(Date, lambda d, t: Date.structure(d))
-        converter.register_structure_hook(Aggregations, lambda d, t: Aggregations.structure(d))
-        converter.register_structure_hook(Constraints, lambda d, t: Constraints.structure(d))
-        converter.register_structure_hook(GraphicOverviews, lambda d, t: GraphicOverviews.structure(d))
+        converter = cls._converter_up()
         return converter.structure(value_, cls)
 
-    def unstructure(self) -> dict:
+    @staticmethod
+    def _converter_down() -> cattrs.Converter:
         """
-        Convert RecordSummary to plain types.
+        Cattrs converter for unstructuring data.
 
-        Intended to be used as a cattrs unstructure hook.
-        E.g. `converter.register_unstructure_hook(Record, lambda d: d.unstructure())`
+        Standalone method for easier subclassing.
         """
         converter = cattrs.Converter()
         converter.register_unstructure_hook(date, lambda d: d.isoformat())
@@ -83,10 +92,20 @@ class RecordSummary:
         converter.register_unstructure_hook(Aggregations, lambda d: d.unstructure())
         converter.register_unstructure_hook(Constraints, lambda d: d.unstructure())
         converter.register_unstructure_hook(GraphicOverviews, lambda d: d.unstructure())
+        return converter
+
+    def unstructure(self) -> dict:
+        """
+        Convert to plain types.
+
+        Intended to be used as a cattrs unstructure hook.
+        E.g. `converter.register_unstructure_hook(RecordSummary, lambda d: d.unstructure())`
+        """
+        converter = self._converter_down()
         return clean_dict(converter.unstructure(self))
 
     def dumps(self) -> dict:
-        """Create a JSON safe dict from RecordSummary."""
+        """Create a JSON safe dict."""
         converter = cattrs.Converter()
         converter.register_unstructure_hook(RecordSummary, lambda d: d.unstructure())
         return converter.unstructure(self)

@@ -94,17 +94,6 @@ Secondary top-level items:
          └── manifest.webmanifest
 ```
 
-## Templates configuration
-
-Templates use these options from the app `lantern.Config` class:
-
-- `TEMPLATES_CACHE_BUST_VALUE`: See [Cache busting](#cache-busting)
-- `TEMPLATES_ITEM_CONTACT_ENDPOINT`: See [Contact form](#contact-form)
-- `TEMPLATES_ITEM_MAPS_ENDPOINT`: See [Extent maps](#extent-maps)
-- `TEMPLATES_PLAUSIBLE_DOMAIN`: Plausible site identifier for [Frontend Analytics](/docs/monitoring.md#plausible)
-
-See the [Config](/docs/config.md#config-options) docs for how to set these config options.
-
 ## Styling
 
 [Tailwind](https://tailwindcss.com) is used as a base CSS framework, extended to:
@@ -182,6 +171,19 @@ A limited number of scripts are loaded using [Site Macros](#site-macros) for:
 ## Templates
 
 HTML templates use the [Jinja2](https://jinja.palletsprojects.com/) framework.
+
+### Templates configuration
+
+Templates use these options from the app `lantern.Config` class:
+
+- `TEMPLATES_CACHE_BUST_VALUE`: See [Cache busting](#cache-busting)
+- `TEMPLATES_ITEM_CONTACT_ENDPOINT`: See [Contact form](#contact-form)
+- `TEMPLATES_ITEM_MAPS_ENDPOINT`: See [Extent maps](#extent-maps)
+- `TEMPLATES_ITEM_VERSIONS_ENDPOINT`: Base URL for constructing links to view
+  [Record Revisions](/docs/data-model.md#record-revisions)
+- `TEMPLATES_PLAUSIBLE_DOMAIN`: Plausible site identifier for [Frontend Analytics](/docs/monitoring.md#plausible)
+
+See the [Config](/docs/config.md#config-options) docs for how to set these config options.
 
 ### Layout
 

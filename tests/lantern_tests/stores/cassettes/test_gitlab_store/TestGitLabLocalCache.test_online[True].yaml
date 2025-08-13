@@ -19,24 +19,24 @@ interactions:
       string: '{"id":1234}'
     headers:
       Cache-Control:
-      - max-age=0, private, must-revalidate
+        - max-age=0, private, must-revalidate
       Content-Encoding:
-      - gzip
+        - gzip
       Content-Type:
-      - application/json
+        - application/json
       Referrer-Policy:
-      - strict-origin-when-cross-origin
+        - strict-origin-when-cross-origin
       Strict-Transport-Security:
-      - max-age=63072000
+        - max-age=63072000
       Transfer-Encoding:
-      - chunked
+        - chunked
       Vary:
-      - Accept-Encoding
-      - Origin
+        - Accept-Encoding
+        - Origin
       X-Content-Type-Options:
-      - nosniff
+        - nosniff
       X-Frame-Options:
-      - SAMEORIGIN
+        - SAMEORIGIN
     status:
       code: 200
       message: OK

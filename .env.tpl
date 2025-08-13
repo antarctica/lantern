@@ -10,6 +10,7 @@ LANTERN_STORE_GITLAB_CACHE_PATH=".cache"
 
 LANTERN_TEMPLATES_PLAUSIBLE_DOMAIN="op://Infrastructure/SCAR ADD Metadata Toolbox - Plausible domain/password"
 LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT="op://Infrastructure/SCAR ADD Metadata Toolbox - Power Automate item feedback flow/password"
+LANTERN_TEMPLATES_ITEM_VERSIONS_ENDPOINT="op://Infrastructure/SCAR ADD Metadata Toolbox - GitLab Store/GitLab Project Web URL/web_url"
 
 LANTERN_EXPORT_PATH="./export"
 LANTERN_AWS_ACCESS_ID="" # populate with per-user IAM credentials

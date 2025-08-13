@@ -15,6 +15,7 @@ from unittest.mock import PropertyMock
 
 import pytest
 from boto3 import client as S3Client  # noqa: N812
+from gitlab import Gitlab
 from moto import mock_aws
 from pytest_mock import MockerFixture
 
@@ -38,7 +39,8 @@ from lantern.models.item.catalogue import AdditionalInfoTab, ItemCatalogue
 from lantern.models.item.catalogue.elements import Dates as ItemCatDates
 from lantern.models.item.catalogue.elements import Identifiers as ItemCatIdentifiers
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
-from lantern.stores.gitlab import GitLabStore
+from lantern.models.record.revision import RecordRevision
+from lantern.stores.gitlab import GitLabLocalCache, GitLabStore
 from tests.resources.exporters.fake_exporter import FakeExporter, FakeResourceExporter
 from tests.resources.stores.fake_records_store import FakeRecordsStore
 
@@ -196,6 +198,13 @@ def fx_record_minimal_iso(fx_record_config_minimal_iso: dict) -> Record:
 
 
 @pytest.fixture()
+def fx_record_revision_minimal_iso(fx_record_config_minimal_iso: dict) -> RecordRevision:
+    """Minimal record revision instance (ISO)."""
+    config = {"file_revision": "x", **fx_record_config_minimal_iso}
+    return RecordRevision.loads(config)
+
+
+@pytest.fixture()
 def fx_record_minimal_item(fx_record_config_minimal_item: dict) -> Record:
     """Minimal record instance (Item)."""
     return Record.loads(fx_record_config_minimal_item)
@@ -205,6 +214,13 @@ def fx_record_minimal_item(fx_record_config_minimal_item: dict) -> Record:
 def fx_record_minimal_item_catalogue(fx_record_config_minimal_item_catalogue: dict) -> Record:
     """Minimal record instance (ItemCatalogue)."""
     return Record.loads(fx_record_config_minimal_item_catalogue)
+
+
+@pytest.fixture()
+def fx_record_revision_minimal_item_catalogue(fx_record_config_minimal_item_catalogue: dict) -> RecordRevision:
+    """Minimal record instance (ItemCatalogue)."""
+    config = {"file_revision": "x", **fx_record_config_minimal_item_catalogue}
+    return RecordRevision.loads(config)
 
 
 @pytest.fixture()
@@ -220,6 +236,18 @@ def fx_record_minimal_item_catalogue_physical_map(fx_record_config_minimal_item_
         }
     ]
     return Record.loads(config)
+
+
+@pytest.fixture()
+def fx_record_revision_minimal_item_catalogue_physical_map(
+    fx_record_minimal_item_catalogue_physical_map: Record,
+) -> RecordRevision:
+    """Minimal record revision instance (ItemCataloguePhysicalMap)."""
+    config = {
+        "file_revision": "83fake487e5671f4a1dd7074b92fb94aa68d26bd",
+        **fx_record_minimal_item_catalogue_physical_map.dumps(),
+    }
+    return RecordRevision.loads(config)
 
 
 @pytest.fixture()
@@ -279,6 +307,7 @@ def fx_item_cat_info_tab_minimal() -> AdditionalInfoTab:
         dates=dates,
         datestamp=datetime(2014, 6, 30, 14, 30, second=45, tzinfo=UTC).date(),
         kv={},
+        revision=None,
     )
 
 
@@ -332,6 +361,44 @@ def fx_fake_store(fx_logger: logging.Logger) -> FakeRecordsStore:
 
 
 @pytest.fixture()
+def fx_gitlab_cache(fx_logger: logging.Logger, fx_config: Config) -> GitLabLocalCache:
+    """GitLab local cache."""
+    with TemporaryDirectory() as tmp_path:
+        cache_path = Path(tmp_path) / ".cache"
+
+    return GitLabLocalCache(
+        logger=fx_logger,
+        path=cache_path,
+        project_id=fx_config.STORE_GITLAB_PROJECT_ID,
+        gitlab_client=Gitlab(url=fx_config.STORE_GITLAB_ENDPOINT, private_token=fx_config.STORE_GITLAB_TOKEN),
+    )
+
+
+def _gitlab_cache_create(cache: fx_gitlab_cache) -> None:
+    """
+    Copy static GitLab local cache to simulate cloning from remote repository.
+
+    Intended to be used as a side effect when mocking the `GitLabStore._create` method.
+    """
+    cache_src = Path(__file__).resolve().parent / "resources" / "stores" / "gitlab_cache"
+    # noinspection PyProtectedMember
+    shutil.copytree(cache_src, cache._path)
+
+
+@pytest.fixture()
+def fx_gitlab_cache_pop(mocker: MockerFixture, fx_gitlab_cache: GitLabLocalCache) -> GitLabLocalCache:
+    """
+    GitLab local cache populated with records.
+
+    To simulate and bypass fetching records from remote repository.
+    """
+    mocker.patch.object(fx_gitlab_cache, "_create", side_effect=lambda: _gitlab_cache_create(fx_gitlab_cache))
+    # noinspection PyProtectedMember
+    fx_gitlab_cache._create()
+    return fx_gitlab_cache
+
+
+@pytest.fixture()
 def fx_gitlab_store(fx_logger: logging.Logger, fx_config: Config) -> GitLabStore:
     """GitLab store."""
     with TemporaryDirectory() as tmp_path:
@@ -346,32 +413,17 @@ def fx_gitlab_store(fx_logger: logging.Logger, fx_config: Config) -> GitLabStore
     )
 
 
-def _gitlab_store_cached_create_cache(store: GitLabStore) -> None:
-    """Copy static GitLab Store cache to simulate cloning from remote repository."""
-    cache_src = Path(__file__).resolve().parent / "resources" / "stores" / "gitlab_cache"
-    # noinspection PyProtectedMember
-    shutil.copytree(cache_src, store._cache_path)
-
-
 @pytest.fixture()
-def fx_gitlab_store_cached(mocker: MockerFixture, fx_gitlab_store: GitLabStore) -> GitLabStore:
-    """
-    GitLab store with existing cache.
-
-    The `_create_cache()` method is mocked to prevent needing to mock GitLab API calls.
-    A static cache is copied from test resources instead.
-    """
-    mocker.patch.object(
-        fx_gitlab_store, "_create_cache", side_effect=lambda: _gitlab_store_cached_create_cache(fx_gitlab_store)
-    )
+def fx_gitlab_store_cached(fx_gitlab_store: GitLabStore, fx_gitlab_cache_pop: GitLabLocalCache) -> GitLabStore:
+    """GitLab store with populated/existing cache."""
     # noinspection PyProtectedMember
-    fx_gitlab_store._create_cache()
+    fx_gitlab_store._cache = fx_gitlab_cache_pop
     return fx_gitlab_store
 
 
 @pytest.fixture()
 def fx_gitlab_store_pop(fx_gitlab_store_cached: GitLabStore) -> GitLabStore:
-    """GitLab store with existing cache and populated with records."""
+    """GitLab store populated with records from a populated/existing local cache."""
     fx_gitlab_store_cached.populate()
     return fx_gitlab_store_cached
 

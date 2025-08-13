@@ -54,10 +54,10 @@ interactions:
       User-Agent:
       - python-gitlab/6.0.0
     method: GET
-    uri: https://gitlab.example.com/api/v4/projects/1234
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/commits
   response:
     body:
-      string: '{"id":1234}'
+      string: '[{"id":"xyz789"}]'
     headers:
       Cache-Control:
       - max-age=0, private, must-revalidate
@@ -67,6 +67,8 @@ interactions:
       - application/json
       Referrer-Policy:
       - strict-origin-when-cross-origin
+      Server:
+      - nginx
       Strict-Transport-Security:
       - max-age=63072000
       Transfer-Encoding:

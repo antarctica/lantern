@@ -41,21 +41,21 @@ A specific Record can be selected by its file identifier using `store.get()`.
 Stores and tracks Records in a [GitLab](/docs/architecture.md#gitlab) project repository.
 
 Supports reading, creating and updating Records using [`python-gitlab`](https://python-gitlab.readthedocs.io/en/stable/)
-with a local cache for performance.
+with a [Local Cache](#gitlab-local-cache) for performance.
 
-Records are stored in a hashed directory structure as both BAS 19115 JSON and ISO 19139 XML files. For example a Record
-with a file identifier `123abc` is stored as `/records/12/3a/123abc.json` and `/records/12/3a/123abc.xml`.
+Records are stored in the remote repository in a hashed directory structure as both BAS 19115 JSON and ISO 19139 XML.
+For example a Record with file identifier `123abc` is stored as `/records/12/3a/123abc.json` and `/records/12/3a/123abc.xml`.
 
 ### Loading remote records
 
 `GitLabStore` instances are initially empty. Use `store.populate()` to load Records from the remote repository via the
-[Local Cache](#local-cache). Supports optional filtering to:
+[Local Cache](#gitlab-local-cache). By default, all records are selected. Alternatively, records can be filtered to:
 
-- include specific file identifiers (and optionally records related to these selections)
+- only include specific file identifiers (and optionally records related to these selections)
 - exclude specific file identifiers
 
-These options cannot be used together. By default, all records are selected. Including related records is needed where
-full rather than Summary Records are needed. For example to build physical maps, full Records are needed for each side.
+These options cannot be used together. Including related records is needed where full rather than Summary Records are
+needed. For example to build physical maps where full Records are needed for each side.
 
 > [!NOTE]
 > The `GitLabStore` can be later emptied using `store.purge()`.
@@ -71,40 +71,50 @@ requires:
 
 Commits include both the author and the Catalogue application as the committer.
 
-The [Local Cache](#local-cache) is invalidated and recreated where:
+The [Local Cache](#gitlab-local-cache) is recreated where a record has changed compared to the remote repository.
 
-- the list of Records is not empty
-- and at least one Record has a different hash to those in the remote repository
+### GitLab Local cache
 
-### Local cache
-
-For performance, `GitLabStore` instances maintain a local cache of Records and Record Summaries automatically. The
-cache contains:
+For increased performance, GitLab stores use a `GitLabLocalCache` to automatically maintain a local cache of Records
+and Record Summaries. The cache contains:
 
 ```
 ├── records/
 │     ├── *.json
 │     └── *.pickle
+├── commits.json
+├── hashes.json
 ├── head_commit.json
-├── index.json
 └── summaries.json
 ```
 
-| Path               | Description                                                                     |
-|--------------------|---------------------------------------------------------------------------------|
-| `records/`         | Record configurations in BAS 19115 JSON format and as pickled Record objects    |
-| `head_commit.json` | Details of the head commit from remote repository when the cache was created    |
-| `index.json`       | SHA1 checksums for each Record indexed by file identifier                       |
-| `summaries.json`   | List of dicts with properties needed to create Record Summaries for all Records |
+| Path                | Description                                                                               |
+|---------------------|-------------------------------------------------------------------------------------------|
+| `records/`          | Record configurations in BAS 19115 JSON format and as pickled Record objects              |
+| `commits.json`      | Mapping of record file identifiers to the latest Git commit for the record in remote repo |
+| `hashes.json`       | Mapping of record file identifiers to SHA1 checksums of the record contents               |
+| `head_commit.json`  | Details of the head commit from remote repository when the cache was created              |
+| `summaries.json`    | List of dicts with properties needed to create Record Summaries for all Records           |
 
 A cache is created by:
 
-- extracting an archive of the remote repository, to avoid downloading each record or iterating through each commit
-- storing details of the current head commit, to later determine whether the cache is stale
-- hashing the contents of each record and indexing by their file identifier, to later determine if a record has changed
-- storing subsets of each record needed to create Record Summaries, to avoiding needing to load full Records later
-- storing a pickled version of each record loaded as Record, to avoid needing to parse the JSON representation later
+- fetching:
+  - and extracting an archive of the remote repository
+  - the latest commit for each record file in this archive
+  - details of the current head commit for the overall remote repository
+- storing:
+  - a JSON version of each record config
+  - a pickled version of each record loaded as Record
+  - a mapping of each record's contents hash by its file identifier
+  - a mapping of each record's latest commit by its file identifier
+  - details of the current head commit
+  - subsets of each record needed to create Record Summaries
 
-The store will automatically try to check whether the cache is stale before [Populating](#loading-remote-records) it,
-or [Committing](#committing-records) records by checking the `head_commit.json` file against the remote repository's
-current head commit. If the remote repository is unavailable (due to being offline for example), a warning is logged.
+### GitLab Local cache testing
+
+For testing, a pre-populated cache contents can be copied into a cache instance to give reproducible results. To update
+this fixed cache update files in `tests/resources/stores/gitlab_cache`, then run:
+
+```
+% uv run python tests/resources/stores/gitlab_cache/refresh.py
+```

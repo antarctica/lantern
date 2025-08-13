@@ -1,6 +1,5 @@
 from datetime import UTC, date, datetime
 
-from lantern.lib.metadata_library.models.record import Record
 from lantern.lib.metadata_library.models.record.elements.common import (
     Address,
     Contact,
@@ -36,11 +35,12 @@ from lantern.lib.metadata_library.models.record.enums import (
 )
 from lantern.lib.metadata_library.models.record.presets.base import RecordMagicDiscoveryV1
 from lantern.lib.metadata_library.models.record.presets.extents import make_bbox_extent, make_temporal_extent
+from lantern.models.record.revision import RecordRevision
 
 
 def make_record(
     file_identifier: str, hierarchy_level: HierarchyLevelCode, title: str, abstract: str, purpose: str | None = None
-) -> Record:
+) -> RecordRevision:
     """Make a record for testing based on RecordMagicDiscoveryV1."""
     record = RecordMagicDiscoveryV1(
         file_identifier=file_identifier,
@@ -136,4 +136,6 @@ def make_record(
 
     record.data_quality.lineage = Lineage(statement="x")
 
-    return record
+    # Convert to RecordRevision
+    config = {"file_revision": "83fake487e5671f4a1dd7074b92fb94aa68d26bd", **record.dumps()}
+    return RecordRevision.loads(config)

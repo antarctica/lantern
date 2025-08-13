@@ -1,3 +1,4 @@
+from lantern.lib.metadata_library.models.record import Record
 from lantern.lib.metadata_library.models.record.elements.identification import Aggregations
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode, HierarchyLevelCode
 from tests.resources.records.utils import make_record
@@ -10,6 +11,10 @@ record = make_record(
     title="Test Resource - Product with minimum required fields",
     abstract="Item to test all minimal Product are supported and presented correctly.",
 )
+
+# Convert back to (non-revisioned) Record to unset file revision
+record = Record.loads(record.dumps())
+
 # un-set non-required fields set by `make_record()`
 record.identification.contacts[0].role = [ContactRoleCode.POINT_OF_CONTACT]
 record.identification.aggregations = Aggregations([])

@@ -32,6 +32,7 @@ from lantern.models.item.catalogue.special.physical_map import (
     ItemCataloguePhysicalMap,
     side_index_label,
 )
+from lantern.models.record.revision import RecordRevision
 from tests.conftest import _get_record, _get_record_summary
 
 
@@ -149,6 +150,7 @@ class TestAdditionalInfoTab:
             dates=dates,
             datestamp=datestamp,
             kv={},
+            revision=None,
         )
 
         assert isinstance(tab, AdditionalInfoTab)
@@ -191,6 +193,7 @@ class TestAdditionalInfoTab:
             dates=dates,
             datestamp=datestamp,
             kv={},
+            revision=None,
         )
 
         assert tab.series_names == expected_names
@@ -224,6 +227,7 @@ class TestAdditionalInfoTab:
             dates=dates,
             datestamp=datestamp,
             kv={},
+            revision=None,
         )
 
         assert tab.scales == expected
@@ -232,27 +236,27 @@ class TestAdditionalInfoTab:
 class TestItemCataloguePhysicalMap:
     """Test catalogue item."""
 
-    def test_init(self, fx_config: Config, fx_record_minimal_item_catalogue_physical_map: Record):
+    def test_init(self, fx_config: Config, fx_record_revision_minimal_item_catalogue_physical_map: RecordRevision):
         """Can create an ItemCatalogue."""
         item = ItemCataloguePhysicalMap(
             config=fx_config,
-            record=fx_record_minimal_item_catalogue_physical_map,
+            record=fx_record_revision_minimal_item_catalogue_physical_map,
             get_record=_get_record,
             get_record_summary=_get_record_summary,
         )
 
         assert isinstance(item, ItemCataloguePhysicalMap)
-        assert item._record == fx_record_minimal_item_catalogue_physical_map
+        assert item._record == fx_record_revision_minimal_item_catalogue_physical_map
 
     @pytest.mark.parametrize("matches", [True, False])
     def test_matches(
         self,
         matches: bool,
-        fx_record_minimal_item_catalogue_physical_map: Record,
+        fx_record_revision_minimal_item_catalogue_physical_map: Record,
         fx_record_minimal_item_catalogue: Record,
     ):
         """Can determine if record matches this subclass."""
-        record = fx_record_minimal_item_catalogue_physical_map if matches else fx_record_minimal_item_catalogue
+        record = fx_record_revision_minimal_item_catalogue_physical_map if matches else fx_record_minimal_item_catalogue
         assert ItemCataloguePhysicalMap.matches(record) == matches
 
     def test_sides(self, fx_config: Config, fx_item_catalogue_min_physical_map: ItemCataloguePhysicalMap):
@@ -301,16 +305,16 @@ class TestItemCataloguePhysicalMap:
     def test_graphics(
         self,
         fx_config: Config,
-        fx_record_minimal_item_catalogue_physical_map: Record,
+        fx_record_revision_minimal_item_catalogue_physical_map: RecordRevision,
         fx_get_record_summary: callable,
     ):
         """Can get any graphics for the physical map and each side."""
-        fx_record_minimal_item_catalogue_physical_map.identification.graphic_overviews.append(
+        fx_record_revision_minimal_item_catalogue_physical_map.identification.graphic_overviews.append(
             GraphicOverview(identifier="x", href="x", mime_type="image/png")
         )
         item = ItemCataloguePhysicalMap(
             config=fx_config,
-            record=fx_record_minimal_item_catalogue_physical_map,
+            record=fx_record_revision_minimal_item_catalogue_physical_map,
             get_record=self._get_record_graphics,
             get_record_summary=_get_record_summary,
         )

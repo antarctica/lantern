@@ -119,4 +119,4 @@ The `Config.dumps_safe()` method returns a typed dict of [Config Options](#confi
 
 ## Adding configuration options
 
-See the [Developing](/docs/dev.md#adding-configuration-options) documentation.
+See the [Development](/docs/dev.md#adding-configuration-options) documentation.

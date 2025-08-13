@@ -111,32 +111,15 @@ Secondary top-level items:
 The `pytailwindcss` package is used to manage a standalone
 [Tailwind CLI](https://tailwindcss.com/docs/installation/tailwind-cli) install to avoid needing Node.js.
 
-Input styles are defined in `src/lantern/resources/css/main.css.j2`, which is a Jinja2 template so the search path to
-content can be set dynamically.
 ### Styling guidelines
 
-A search path needs to explicitly defined to ensure the Tailwind compiler finds all classes used in the build static
-site, as the [Site Templates](#templates) use interpolation to build class names. This search path needs to be set
-dynamically to allow the static site build directory to be set at runtime.
 
-The compiled and minified output MUST be stored as `src/lantern/resources/css/main.css`, as this file will be copied
-into the site build directory and is referenced within generated pages.
 
-> [!TIP]
-> To recompile the CSS styles, run the `tailwind` [Development Task](/docs/dev.md#development-tasks), which will
-> perform all these steps automatically using a temporary site build.
 
-## Cache busting
 
-To ensure the latest CSS and JS files are used by browsers, a query string value is appended to the URLs of static
-assets, e.g. `main.css?v=123`. For reproducibility, this value is set to the first 7 characters of the current package
-version as a SHA1 hash, e.g. `main.css?v=f053ddb` for version 0.1.0.
 
 > [!NOTE]
-> You may need to manually clear caches locally as this value will not change until the next release.
 
-> [!CAUTION]
-> Asset references are not automatically amended, make sure any references in templates are suitably configured.
 #### Dark mode
 
 Consideration SHOULD be given the user's colour preference by providing a dark mode using the Tailwind `dark:` modifier.
@@ -154,6 +137,21 @@ Common pairings, which SHOULD be used and re-enforced where sensible, are:
 A [Colour Audit](/docs/supplemental/colour-audit.md) and reference is manually maintained to coordinate and constrain
 the range of colours used across the site. Update this document if changing or adding colours.
 
+### Style definitions
+
+Styles are defined in `src/lantern/resources/css/main.css.j2`, which is a Jinja2 template to allow the search path for
+content to be set dynamically at runtime. This content is needed for the Tailwind compiler to find classes used in the
+built static site.
+
+> [!NOTE]
+> Using the [Site Templates](#templates) as the content path will not work as they contain interpolated class names
+> which the Tailwind compiler cannot resolve, which would lead to missing styles.
+
+Compiled and minified output MUST be stored as `src/lantern/resources/css/main.css`, as this file will be copied into
+the site build directory and referenced within generated pages.
+
+> [!TIP]
+> See the [Development](/docs/dev.md#updating-styles) documentation for how to update styles.
 
 ## Scripts
 
@@ -167,6 +165,18 @@ A limited number of scripts are loaded using [Site Macros](#site-macros) for:
 
 > [!NOTE]
 > Scripts are intended to be used sparingly, with functionality implemented using HTML and CSS alone where possible.
+
+## Cache busting
+
+To ensure the latest CSS and JS files are used by browsers, a query string value is appended to the URLs of static
+assets, e.g. `main.css?v=123`. For reproducibility, this value is set to the first 7 characters of the current package
+version as a SHA1 hash, e.g. `main.css?v=f053ddb` for version 0.1.0.
+
+> [!NOTE]
+> You may need to manually clear caches locally as this value will not change until the next release.
+
+> [!CAUTION]
+> Asset references are not automatically amended, make sure any references in templates are suitably configured.
 
 ## Templates
 
@@ -232,16 +242,22 @@ Common macros are intended for use across templates to avoid inconsistencies and
 [Items](/docs/data-model.md#items) use a complex template when rendered, with the Item passed as a context variable. It
 extends the [Site Layout](#layout) with three parts:
 
-- a top part, consisting of a page header
-- a middle part, consisting of a summary section and optional item thumbnail
-- a bottom part, with dynamic tabs, where a macro is called based on a series of tab names
+1. a top part, consisting of a page header
+2. a middle part, consisting of a summary section and optional item thumbnail
+3. a bottom part, with dynamic tabs, where a macro is called based on a series of tab names
 
-All elements across these parts use [Item Macros](#item-macros) to organise and breakdown the template's content.
+Elements across these parts use [Item Macros](#item-macros) to organise and breakdown the template's content.
+
+> [!TIP]
+> See the [Development](/docs/dev.md#adding-properties-to-item-templates) documentation for how to add new elements.
 
 #### Item macros
 
-`src/lantern/resources/templates/_macros/site.html.j2`, `src/lantern/resources/templates/_macros/tabs.html.j2` and
-`src/lantern/resources/templates/_macros/_tabs/*.j2` define a large number of macros to render various parts of an Item.
+These files define a lage number of macros to assemble Items:
+
+- `src/lantern/resources/templates/_macros/site.html.j2`
+- `src/lantern/resources/templates/_macros/tabs.html.j2`
+- `src/lantern/resources/templates/_macros/_tabs/*.j2`
 
 #### Extent maps
 

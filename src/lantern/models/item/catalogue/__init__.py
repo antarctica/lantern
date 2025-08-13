@@ -10,6 +10,7 @@ from lantern.lib.metadata_library.models.record import Record
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
 from lantern.lib.metadata_library.models.record.summary import RecordSummary
 from lantern.models.item.base import ItemBase
+from lantern.models.item.base.elements import Link
 from lantern.models.item.catalogue.elements import (
     Aggregations,
     Dates,
@@ -31,6 +32,7 @@ from lantern.models.item.catalogue.tabs import (
     RelatedTab,
     Tab,
 )
+from lantern.models.record.revision import RecordRevision
 from lantern.models.templates import PageMetadata
 
 
@@ -166,6 +168,17 @@ class ItemCatalogue(ItemBase):
         return Maintenance(self._record.identification.maintenance)
 
     @property
+    def _revision(self) -> Link | None:
+        """Link to the record revision, if available."""
+        if not isinstance(self._record, RecordRevision):
+            return None
+
+        path = f"records/{self.resource_id[:2]}/{self.resource_id[2:4]}/{self.resource_id}.json"
+        href = f"{self._config.TEMPLATES_ITEM_VERSIONS_ENDPOINT}/-/blob/{self._record.file_revision}/{path}"
+        short_ref = self._record.file_revision[:8]
+        return Link(value=short_ref, href=href, external=True)
+
+    @property
     def _items(self) -> ItemsTab:
         """Items tab."""
         return ItemsTab(aggregations=self._aggregations)
@@ -222,6 +235,7 @@ class ItemCatalogue(ItemBase):
             standard=self._record.metadata.metadata_standard,
             profiles=self._record.data_quality.domain_consistency if self._record.data_quality else None,
             kv=self.kv,
+            revision=self._revision,
         )
 
     @property

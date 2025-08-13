@@ -360,6 +360,7 @@ class AdditionalInfoTab(Tab):
         dates: Dates,
         datestamp: date,
         kv: dict[str, str],
+        revision: str | None,
         series: Series | None = None,
         scale: str | None = None,
         projection: Identifier | None = None,
@@ -379,6 +380,7 @@ class AdditionalInfoTab(Tab):
         self._standard = standard
         self._profiles = profiles if profiles is not None else []
         self._kv = kv
+        self._revision = revision
 
     @staticmethod
     def _format_scale(value: int | None) -> str | None:
@@ -553,6 +555,11 @@ class AdditionalInfoTab(Tab):
     def record_links(self) -> list[Link]:
         """Record links."""
         return [self.record_link_xml, self.record_link_html, self.record_link_json]
+
+    @property
+    def revision_link(self) -> str | None:
+        """Link to record revision if known."""
+        return self._revision
 
 
 class InvalidItemContactError(Exception):

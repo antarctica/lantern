@@ -54,25 +54,39 @@ interactions:
       User-Agent:
       - python-gitlab/6.0.0
     method: GET
-    uri: https://gitlab.example.com/api/v4/projects/1234
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/archive.tgz
   response:
     body:
-      string: '{"id":1234}'
+      string: !!binary |
+        H4sIAC2dY2gAA+1Xz0/bMBQu22FSjjvsbIVdJpHUzk9AQloLTJSxwUAbAoSQm7ppWOIE2606VZW2
+        07TT7lyn7TCJwy477K+bk/5gTGsQrIAQ/S6O/Z7f++LPz3HaWoQDquGqhwyzWLgSQAhd1wZZ6/Ra
+        aFi9tg+AbGhCF5muBQFEpuVaBWBfDZ2zaHKBmaRSJ2HQzvGTbvV6jr3/HsP2lqB9Rn9GvJjV+Jj3
+        wQX0t10n1d9GFprofx04q//mcmnpxbIe1caaQ66H41g5+tuorz80ETKl/rL8YQHAsbIYgTuu/7OY
+        AUG4CKgP+tUPGpjWwnQgoGANU0EY1ZWbJjrBleDf5z9G4/wEXOj8d7Pz37LMyfl/HRipf9UY2xa4
+        yP3PclGqv2sZE/2vA3n6b+D2CsE1wmS/animfshjeokc533/XccZ1r+8AABoINuxCyBPjrHhjutv
+        QhCJICILyLWRac9KBXQHzkLDkFIotgvWKuXS5uJK5c2y3sZCMN2LIx0nSUj0hMUtQjH1yELpVaUk
+        KCz75edi119WrDmwJSet7eRNmrpX+Nmdev/wpD6lINPMSxVhL1wow8WN5GhbHNGXq9HRenm7sbNU
+        schqaUxQELRH0c4IPHj6+dvXk++8cvzlw+6j+9MfP11u0RVnLu9lQ8xFk5NaDQsyvbG1sJ0khzhj
+        uNhuHr5O+mztkWv8d4DdY6+R5v3xy36S5T+lklf//1f1pzi3/pF7tv6R66DJ/f9a0FEAUB9zr0Ei
+        rM4DtSFEwueLxYgILLcP1hjhcZN5hOtpV69irmNPb74tyidt6OUTShgWMdO8mNYDvyk7QUy1XmBe
+        bBnFgMcamkPI1gytZWW7Sp1Js9eDkBwENUJFUA8IS1m0e5aG7GLmNd4dhKRFwtSSZuNEZHbpMSAg
+        TZ1sRI5JBgJ7gsuxvY4aMx/TgGd0Ui+V4oj0cnRngMriMO3tqUkcULFeX+xNVve7+zODgGkZHUj9
+        oySdZ8jfUw06mglV6dDNiA7Ye8M0PXoiEFn4jtrCYXOYVhmG5ZnRY2Qw8c/wA0dc5YKlpIYrIwdD
+        TP0m9rOYhPoZF6V709tpggkmuEX4Dd36d5sAGAAA
     headers:
       Cache-Control:
       - max-age=0, private, must-revalidate
-      Content-Encoding:
-      - gzip
+      Content-Disposition:
+      - attachment; filename="x-main-abc123.tar.gz"
+      Content-Transfer-Encoding:
+      - binary
       Content-Type:
-      - application/json
+      - application/octet-stream
       Referrer-Policy:
       - strict-origin-when-cross-origin
       Strict-Transport-Security:
       - max-age=63072000
-      Transfer-Encoding:
-      - chunked
       Vary:
-      - Accept-Encoding
       - Origin
       X-Content-Type-Options:
       - nosniff

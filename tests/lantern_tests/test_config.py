@@ -71,6 +71,7 @@ class TestConfig:
             "TEMPLATES_PLAUSIBLE_DOMAIN": "x",
             "TEMPLATES_ITEM_MAPS_ENDPOINT": "https://embedded-maps.data.bas.ac.uk/v1",
             "TEMPLATES_ITEM_CONTACT_ENDPOINT": "https://example.com/contact",
+            "TEMPLATES_ITEM_VERSIONS_ENDPOINT": "x",
             "BASE_URL": "https://x",
             "EXPORT_PATH": str(fx_config.EXPORT_PATH),
             "AWS_S3_BUCKET": "x",
@@ -123,8 +124,27 @@ class TestConfig:
                     "LANTERN_STORE_GITLAB_CACHE_PATH": None,
                 }
             ),
-            ({"LANTERN_TEMPLATES_PLAUSIBLE_DOMAIN": None, "LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT": "x"}),
-            ({"LANTERN_TEMPLATES_PLAUSIBLE_DOMAIN": "x", "LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT": None}),
+            (
+                {
+                    "LANTERN_TEMPLATES_PLAUSIBLE_DOMAIN": None,
+                    "LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT": "x",
+                    "LANTERN_TEMPLATES_ITEM_VERSIONS_ENDPOINT": "x",
+                }
+            ),
+            (
+                {
+                    "LANTERN_TEMPLATES_PLAUSIBLE_DOMAIN": "x",
+                    "LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT": None,
+                    "LANTERN_TEMPLATES_ITEM_VERSIONS_ENDPOINT": "x",
+                }
+            ),
+            (
+                {
+                    "LANTERN_TEMPLATES_PLAUSIBLE_DOMAIN": "x",
+                    "LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT": "x",
+                    "LANTERN_TEMPLATES_ITEM_VERSIONS_ENDPOINT": None,
+                }
+            ),
             ({"LANTERN_EXPORT_PATH": None}),
             ({"LANTERN_AWS_S3_BUCKET": None, "LANTERN_AWS_ACCESS_ID": "x", "LANTERN_AWS_ACCESS_SECRET": "x"}),
             ({"LANTERN_AWS_S3_BUCKET": "x", "LANTERN_AWS_ACCESS_ID": None, "LANTERN_AWS_ACCESS_SECRET": "x"}),

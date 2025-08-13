@@ -413,7 +413,13 @@ class TestAdditionalInfoTab:
         json_href = f"/records/{item_id}.json"
 
         tab = AdditionalInfoTab(
-            item_id=item_id, item_type=item_type, identifiers=identifiers, dates=dates, datestamp=datestamp, kv={}
+            item_id=item_id,
+            item_type=item_type,
+            identifiers=identifiers,
+            dates=dates,
+            datestamp=datestamp,
+            kv={},
+            revision=None,
         )
 
         assert tab.enabled is True
@@ -652,6 +658,12 @@ class TestAdditionalInfoTab:
         """Can get any data quality profiles if set."""
         fx_item_cat_info_tab_minimal._profiles = profiles
         assert fx_item_cat_info_tab_minimal.profiles == expected
+
+    @pytest.mark.parametrize("expected", [None, Link(value="x", href="x", external=True)])
+    def test_revision(self, fx_item_cat_info_tab_minimal: AdditionalInfoTab, expected: Link | None):
+        """Can get item revision if set."""
+        fx_item_cat_info_tab_minimal._revision = expected
+        assert fx_item_cat_info_tab_minimal.revision_link == expected
 
 
 class TestContactTab:

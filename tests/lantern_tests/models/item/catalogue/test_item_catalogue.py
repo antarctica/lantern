@@ -14,6 +14,7 @@ from lantern.lib.metadata_library.models.record.elements.common import (
 )
 from lantern.lib.metadata_library.models.record.elements.identification import GraphicOverview, GraphicOverviews
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
+from lantern.models.item.base.elements import Link
 from lantern.models.item.base.enums import ResourceTypeLabel
 from lantern.models.item.catalogue import ItemCatalogue, ItemInvalidError
 from lantern.models.item.catalogue.elements import PageSummary
@@ -28,6 +29,7 @@ from lantern.models.item.catalogue.tabs import (
     LineageTab,
     RelatedTab,
 )
+from lantern.models.record.revision import RecordRevision
 from tests.conftest import _get_record_summary
 
 
@@ -79,6 +81,30 @@ class TestItemCatalogue:
                 record=fx_record_minimal_item_catalogue,
                 get_record_summary=_get_record_summary,
             )
+
+    @pytest.mark.parametrize("has_revision", [False, True])
+    def test_revision(
+        self,
+        fx_config: Config,
+        fx_item_catalogue_min: ItemCatalogue,
+        fx_record_revision_minimal_item_catalogue: RecordRevision,
+        has_revision: bool,
+    ):
+        """Can compute link to record revision where available."""
+        expected = None
+
+        # realistic values needed over 'x' so substrings can be extracted safely
+        id_ = "ee21f4a7-7e87-4074-b92f-9fa27a68d26d"
+        commit = "3401c9880d4bc42aed8dabd7b41acec8817a293a"
+
+        if has_revision:
+            fx_record_revision_minimal_item_catalogue.file_identifier = id_
+            fx_record_revision_minimal_item_catalogue.file_revision = commit
+            fx_item_catalogue_min._record = fx_record_revision_minimal_item_catalogue
+            href = f"{fx_config.TEMPLATES_ITEM_VERSIONS_ENDPOINT}/-/blob/{commit}/records/ee/21/{id_}.json"
+            expected = Link(value="3401c988", href=href, external=True)
+
+        assert fx_item_catalogue_min._revision == expected
 
     def test_html_title(self, fx_item_catalogue_min: ItemCatalogue):
         """Can get HTML title."""

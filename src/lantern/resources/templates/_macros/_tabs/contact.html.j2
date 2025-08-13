@@ -26,17 +26,17 @@
         <div class="space-y-4">
           {{ form_input(id="message-subject", name="Subject", value=data.subject_default, required=True) }}
           <div class="space-y-2">
-            <label class="block font-bold" for="message-content">Details</label>
-            <div class="border-l-5 border-l-yellow-500 p-4 pr-0">
+            <label class="block font-bold" for="message-content">Message</label>
             <textarea
               class="{{ form_item_classes() }}"
               name="message-content" id="message-content" rows="8" required
             ></textarea>
+            {% call com.alert(variant='yellow', classes="space-y-2") %}
               Do not any include any sensitive information in your message.
-            </div>
+            {% endcall %}
           </div>
-          {{ form_input(id="message-sender-name", name="Your name", placeholder="Your Name") }}
-          {{ form_input(id="message-sender-email", name="Your email address", placeholder="your.name@example.org", required=True) }}
+          {{ form_input(id="message-sender-name", name="Your name", placeholder="Connie Watson") }}
+          {{ form_input(id="message-sender-email", name="Your email address", placeholder="conwat@bas.ac.uk", required=True) }}
           <div>
             <button class="{{ com.btn_primary_classes() }} p-4" type="submit">
                 Send Message <i class="fas fa-arrow-right"></i>

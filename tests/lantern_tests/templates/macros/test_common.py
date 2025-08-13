@@ -185,7 +185,7 @@ class TestItemSummary:
             assert result is None
 
 
-class TestDlItem:
+class TestDefinitionListItem:
     """Test DL item common macro."""
 
     @staticmethod

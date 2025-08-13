@@ -212,13 +212,15 @@ To (re-)record all responses:
 To update a specific test:
 
 ```
-% uv run pytest --record-mode=once tests/path/to/test_module.py::<class>.<method>
+% uv run pytest --record-mode=once tests/path/to/test_module.py::<class>::<method>
+# E.g.
+% uv run pytest --record-mode=once tests/lantern_tests/stores/test_gitlab_store.py::TestGitLabLocalCache::test_fetch_file_commits
 ```
 
 To incrementally build up a set of related tests (including parameterised tests) use the `new_episodes` recording mode:
 
 ```
-% uv run pytest --record-mode=new_episodes tests/path/to/test_module.py::<class>.<method>
+% uv run pytest --record-mode=new_episodes tests/path/to/test_module.py::<class>::<method>
 ```
 
 #### Pytest-recording binary data
@@ -236,6 +238,12 @@ To update a pytest-recording response that contains binary data (e.g. a `.tar.gz
 tar -czvf 'bar.tar.gz' 'foo'
 ```
 
+### Static site template tests
+
+Pytest parameterised tests with [BeautifulSoup](https://www.crummy.com/software/BeautifulSoup/bs4/doc/) are used to
+check expected content is returned for each variant of [Static Site Templates](/docs/site.md#item-templates), e.g. with
+and without an optional property.
+
 ### Playwright tests
 
 [Playwright](https://playwright.dev/) Python tests are used to verify the behaviour of dynamic JavaScript content,
@@ -247,11 +255,15 @@ To run a specific test file with visible output:
 % uv run pytest --headed tests/lantern_tests/e2e/test_item_e2e.py
 ```
 
-### Static site template tests
+Playwright tests require a real website to test against, which is provided by the `fx_exporter_static_server` fixture.
+This hosts a local [Static Site](/docs/architecture.md#static-site) served from a temporary directory using Python's
+simple HTTP server. The site is built by the `fx_exporter_static_site` fixture and contains all
+[Test Records](#test-records).
 
-Pytest parameterised tests with [BeautifulSoup](https://www.crummy.com/software/BeautifulSoup/bs4/doc/) are used to
-check expected content is returned for each variant of [Static Site Templates](/docs/site.md#item-templates), e.g. with
-and without an optional property.
+> [!NOTE]
+> This local server cannot be used directly in CI. Instead, a Python simple server serving a known (initially empty)
+> path in the build directory is started before Pytest runs. The `fx_exporter_static_server` detects the CI environment
+> and copies the static site build to this path, then quits, giving an equivalent outcome.
 
 ### Test records
 
@@ -259,14 +271,25 @@ To aid in debugging and testing, a set of fake records are included in `tests/re
 
 - example collections and products with only minimal properties set
 - example collections and products with all optional properties set
-- example items to test formatting free-text properties
-- example items with all supported distribution options
+- example items to test supported formatting options in free-text properties
+- example items to test supported distribution options
 - example items for each supported licence
-- example special items, such as physical maps
+- examples of special items, such as physical maps
 
-These records are used within tests but can and should also be used when developing template changes etc.
+These records are used within tests but can and should also be used when developing [Templates](/docs/site.md#templates).
 
-An in-memory [Store](/docs/architecture.md#stores) is provided containing these test/fake records.
+An in-memory [Store](/docs/architecture.md#stores) is provided to load these records for use with [Exporters](/docs/architecture.md#exporters).
+
+To add a new test record:
+
+> [!CAUTION]
+> This section is Work in Progress (WIP) and may not be complete/accurate.
+
+1. create new `tests/resources/records/item_cat_*.py` file or clone from minimal examples
+    - records MUST use a unique `file_identifier`
+    - the `tests.resources.records.utils.make_record()` method SHOULD be used as a base (properties can be unset later)
+2. include the record in the `tests.resources.records.item_cat_collection_all.collection_members` list
+3. include the record in the `resources.stores.fake_records_store.FakeRecordsStore._fake_records()` method
 
 > [!TIP]
 > Run the `build-test-records` [Development Task](#development-tasks) to export a static site using these records.
@@ -310,6 +333,9 @@ In the `tests.lantern_tests.config` module:
 3. add new properties to the relevant item tab class in `lantern.models.item.catalogue.tabs`
     - work backwards to include additional Record properties in the main `lantern.models.item.catalogue` class
     - and/or `lantern.models.item.catalogue.elements` classes
+    - amend tests that directly instantiate these classes to include the new property
+        - some of these are not obvious where `kwargs` are used to pass properties such as:
+          `lantern.models.item.catalogue.special.physical_map.AdditionalInfoTab`
 4. update the [Site Template](/docs/site.md#templates) to include the new property as needed
 5. add tests as needed for:
     - Record properties

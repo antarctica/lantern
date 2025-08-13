@@ -115,10 +115,30 @@ The `pytailwindcss` package is used to manage a standalone
 
 
 
+#### Responsive design
 
+As per the [BAS Style Kit](https://style-kit.web.bas.ac.uk/start/standards-accessibility/#responsiveness-and-mobile-first),
+the Catalogue site MUST use
+[Responsive design](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Responsive_Design).
 
+This means designing for the smallest (mobile) viewport by default with Tailwind's modifiers used for larger viewports.
+For example, stacking content in a single column by default then using two or more where the viewport allows.
 
 > [!NOTE]
+> Whilst mobiles aren't expected to be the primary device type for this site, it should still be usable and functional,
+> avoiding common pitfalls such as overflowing images, tables, and needing to pan horizontally.
+
+#### Spacing
+
+A consistent, and constrained, spacing scale SHOULD be used wherever possible:
+
+- small: `-2`
+- medium: `-4`
+- large: `-8`
+
+Exceptions to this scale MAY and will be made for specific use cases.
+
+Tailwind's `space-x-*` and `space-y-*` classes SHOULD be used for spacing between elements for consistency.
 
 #### Dark mode
 
@@ -136,6 +156,18 @@ Common pairings, which SHOULD be used and re-enforced where sensible, are:
 
 A [Colour Audit](/docs/supplemental/colour-audit.md) and reference is manually maintained to coordinate and constrain
 the range of colours used across the site. Update this document if changing or adding colours.
+
+#### Icons
+
+[Font Awesome Pro 5](https://fontawesome.com/v5/search?o=r) is available for adding icons.
+
+Icons SHOULD be used sparingly. For consistency these icons SHOULD be used where relevant:
+
+- restricted: `far fa-lock`
+- external link: `far fa-external-link`
+
+> [!TIP]
+> In templates, [Macros](#common-macros) are available to include these icons.
 
 ### Style definitions
 

@@ -83,7 +83,7 @@ class Record:
     """
     Representation of a resource within the BAS Data Catalogue / Metadata ecosystem.
 
-    Records are low-level view of a resource using the ISO 19115 information model. This class is an incomplete mapping
+    Records are low-level views of a resource using the ISO 19115 information model. This class is an incomplete mapping
     of the BAS Metadata Library ISO 19115:2003 / 19115-2:2009 v4 configuration schema [1] to Python dataclasses, with
     code lists represented by Python enums. See [4]/[5] for (un)supported config elements.
 
@@ -201,6 +201,19 @@ class Record:
         return normalised
 
     @staticmethod
+    def _check_supported(candidate: dict, comparison: dict, logger: logging.Logger | None = None) -> bool:
+        """Inner logic to check if two record configurations are the same."""
+        normalised = Record._normalise_static_config_values(candidate)
+        supported = normalised == comparison
+        if logger and not supported:
+            logger.warning(
+                f"Record '{candidate.get('file_identifier')}' contains unsupported content that will be ignored."
+            )
+            diff = DeepDiff(comparison, normalised, verbose_level=2)
+            logger.debug(diff.pretty(prefix="Diff: "))
+        return supported
+
+    @staticmethod
     def _config_supported(config: dict, logger: logging.Logger | None = None) -> bool:
         """
         Check if a record configuration is supported by this class.
@@ -208,26 +221,26 @@ class Record:
         To ensure an accurate comparison, default/hard-coded values are added to a copy of the config before comparison.
 
         Set `logger` to enable optional logging of any unsupported content as a debug message.
+
+        This method acts as a wrapper for `_check_supported` to allow easier subclassing.
         """
         record = Record.loads(config)
-        check = record.dumps()
-        normalised = Record._normalise_static_config_values(config)
-        supported = normalised == check
-        if logger and not supported:
-            logger.warning(
-                f"Record '{config.get('file_identifier')}' contains unsupported content that will be ignored."
-            )
-            diff = DeepDiff(check, normalised, verbose_level=2)
-            logger.debug(diff.pretty(prefix="Diff: "))
-        return supported
+        return Record._check_supported(candidate=config, comparison=record.dumps(), logger=logger)
 
     @staticmethod
-    def _move_dq_elements(value: dict) -> dict:
+    def _pre_structure(value: dict) -> None:
         """
-        Move any data quality elements out of identification until v5 schema available.
+        Steps needed before structuring a Record.
 
-        See https://gitlab.data.bas.ac.uk/uk-pdc/metadata-infrastructure/metadata-library/-/issues/255.
-        """
+        Standalone method for easier subclassing.
+        """  # noqa: D401
+        # Where data contains a `$schema` key, check it matches the class schema or raise an error.
+        if "$schema" in value and value["$schema"] != Record._schema:
+            msg = "Unsupported JSON Schema in data."
+            raise ValueError(msg) from None
+
+        # Move any data quality elements out of identification until v5 schema available.
+        # See https://gitlab.data.bas.ac.uk/uk-pdc/metadata-infrastructure/metadata-library/-/issues/255.
         dq = {}
         if (
             "identification" in value
@@ -239,7 +252,20 @@ class Record:
             dq["domain_consistency"] = value["identification"]["domain_consistency"]
         if dq:
             value["data_quality"] = dq
-        return value
+
+    @staticmethod
+    def _converter_up() -> cattrs.Converter:
+        """
+        Cattrs converter for structuring data.
+
+        Standalone method for easier subclassing.
+        """
+        converter = cattrs.Converter()
+        converter.register_structure_hook(Metadata, lambda d, t: Metadata.structure(d))
+        converter.register_structure_hook(ReferenceSystemInfo, lambda d, t: ReferenceSystemInfo.structure(d))
+        converter.register_structure_hook(Identification, lambda d, t: Identification.structure(d))
+        converter.register_structure_hook(DataQuality, lambda d, t: DataQuality.structure(d))
+        return converter
 
     @classmethod
     def structure(cls: type[TRecord], value: dict) -> "Record":
@@ -250,32 +276,31 @@ class Record:
         E.g. `converter.register_structure_hook(Record, lambda d, t: Record.structure(d))`
         """
         value_ = deepcopy(value)
-
-        # move any data quality elements out of identification
-        # https://gitlab.data.bas.ac.uk/uk-pdc/metadata-infrastructure/metadata-library/-/issues/255
-        value_ = cls._move_dq_elements(value_)
-
-        converter = cattrs.Converter()
-        converter.register_structure_hook(Metadata, lambda d, t: Metadata.structure(d))
-        converter.register_structure_hook(ReferenceSystemInfo, lambda d, t: ReferenceSystemInfo.structure(d))
-        converter.register_structure_hook(Identification, lambda d, t: Identification.structure(d))
-        converter.register_structure_hook(DataQuality, lambda d, t: DataQuality.structure(d))
+        cls._pre_structure(value_)
+        converter = cls._converter_up()
         return converter.structure(value_, cls)
 
-    def unstructure(self) -> dict:
+    @staticmethod
+    def _converter_down() -> cattrs.Converter:
         """
-        Convert Record to plain types.
+        Cattrs converter for unstructuring data.
 
-        Intended to be used as a cattrs unstructure hook.
-        E.g. `converter.register_unstructure_hook(Record, lambda d: d.unstructure())`
+        Standalone method for easier subclassing.
         """
         converter = cattrs.Converter()
         converter.register_unstructure_hook(Metadata, lambda d: d.unstructure())
         converter.register_unstructure_hook(ReferenceSystemInfo, lambda d: d.unstructure())
         converter.register_unstructure_hook(Identification, lambda d: d.unstructure())
         converter.register_unstructure_hook(DataQuality, lambda d: d.unstructure())
-        value = clean_dict(converter.unstructure(self))
+        return converter
 
+    @staticmethod
+    def _post_unstructure(value: dict) -> None:
+        """
+        Additional steps needed to unstructure a Record.
+
+        Standalone method for easier subclassing.
+        """
         # move data quality elements into identification until v5 schema available
         # https://gitlab.data.bas.ac.uk/uk-pdc/metadata-infrastructure/metadata-library/-/issues/255
         if "data_quality" in value:
@@ -285,6 +310,16 @@ class Record:
         # remove internal keys (ensuring order)
         value.pop("_schema", None)
 
+    def unstructure(self) -> dict:
+        """
+        Convert Record to plain types.
+
+        Intended to be used as a cattrs unstructure hook.
+        E.g. `converter.register_unstructure_hook(Record, lambda d: d.unstructure())`
+        """
+        converter = self._converter_down()
+        value = clean_dict(converter.unstructure(self))
+        self._post_unstructure(value)
         return value
 
     @classmethod

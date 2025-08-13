@@ -31,7 +31,12 @@ Includes classes for [Records](/docs/data-model.md#records) and [Record Summarie
 
 These redesigned and refactored classes will replace core parts of the Metadata Library project.
 
-For adding a new Record config element:
+### Adding new Record properties
+
+> [!CAUTION]
+> This section is Work in Progress (WIP) and may not be complete/accurate.
+
+To add support for a new ISO element within Records:
 
 1. create a new data class for the new element in the relevant top module (i.e. `identification.py`)
 2. define enums for code lists if needed

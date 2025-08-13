@@ -31,6 +31,8 @@
   <time {% if id %}id="{{ id }}"{% endif %} datetime="{{ data.datetime }}">{{ data.value }}</time>
 {% endmacro %}
 
+{% macro restricted_i() %}<i class="far fa-lock-alt"></i>{% endmacro %}
+
 {% macro ext_link_i() %}<i class="far fa-external-link"></i>{% endmacro %}
 
 {% macro ext_link_a(href, value) %}

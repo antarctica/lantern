@@ -21,6 +21,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 ### Changed
 
 * Split GitLab Store into `GitLabStore` and `GitLabLocalCache` for better structure
+* Upgraded dependencies
 
 ## [0.1.1] - 2025-07-23
 

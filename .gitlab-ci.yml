@@ -30,7 +30,7 @@ variables:
   # - SAFETY_API_KEY
   #   - https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=swbuhnii4ego6qycyqknvtk7gi&h=magic.1password.eu
 
-image: mcr.microsoft.com/playwright/python:v1.53.0-noble
+image: mcr.microsoft.com/playwright/python:v1.54.0-noble
 
 .before_script_python: &before_script_python
   # setup UV

@@ -86,6 +86,9 @@ Checks are run automatically in [Continuous Integration](#continuous-integration
 - run [Tests](#testing) manually
 - commit changes
 
+> [!TIP]
+> If playwright is upgraded, update the image used in CI to match the new version.
+
 ## Linting
 
 ### Ruff

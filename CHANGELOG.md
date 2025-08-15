@@ -17,6 +17,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Admonition support for tips, warnings in markdown supported record abstracts, etc.
 * Initial dark mode styling
 * Record Revision support
+* Accessibility statement
 
 ### Fixed
 

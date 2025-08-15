@@ -385,5 +385,5 @@ class ItemCatalogue(ItemBase):
 
     def render(self) -> str:
         """Render HTML representation of item."""
-        raw = self._jinja.get_template("item.html.j2").render(item=self, meta=self.page_metadata)
+        raw = self._jinja.get_template("_views/item.html.j2").render(item=self, meta=self.page_metadata)
         return self._prettify_html(raw)

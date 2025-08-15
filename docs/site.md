@@ -227,18 +227,44 @@ Templates use these options from the app `lantern.Config` class:
 
 See the [Config](/docs/config.md#config-options) docs for how to set these config options.
 
-### Layout
+### Layouts
 
-A base [Jinja2](https://jinja.palletsprojects.com/) layout is available in
-`src/lantern/resources/templates/_layouts/base.html.j2`. It a common HTML structure including:
+A set of layouts are available in `src/lantern/resources/templates/_layouts/`. All pages SHOULD extend from the
+`base.html.j2` layout.
 
-- a `<head>` element with page metadata and include site styles and scripts
+#### Base layout
+
+The `base.html.j2` layout provides a common HTML structure including:
+
+- a `<head>` element with HTML metadata and imports for site styles and scripts
 - a `<header>` element with site navigation, development phase banner and user feedback link
-- a 'content' block for each page's content
+- a `<main>` element containing a 'content' block for each HTML page's content
 - a `<footer>` element with site feedback link and legal information
 
-All pages SHOULD extend from this base layout. Uses of this layout require a `lantern.models.templates.PageMetadata`
-class instance passed as a `meta` template context variable.
+ Uses of this layout require a `lantern.models.templates.PageMetadata` class instance passed as a `meta` template
+ context variable.
+
+#### Page templates
+
+The `page.html.j2` template provides a simple page structure for legal policies, error documents, guides, etc.
+
+It extends the parent 'content' block with:
+
+- a page header
+- a 'page_content' block for each page's content
+
+> [!IMPORTANT]
+> Child templates MUST set a `main_title` variable for setting the page header title. E.g.:
+>
+> ```html
+> {% extends "_layouts/page.html.j2" %}
+>
+> {% set header_main = "Foo" %}
+>
+> {% block page_content %}
+>  <p>...</p>
+> {% endblock %}
+> ```
 
 ### Macros
 
@@ -272,7 +298,7 @@ Common macros are intended for use across templates to avoid inconsistencies and
 ### Item templates
 
 [Items](/docs/data-model.md#items) use a complex template when rendered, with the Item passed as a context variable. It
-extends the [Site Layout](#layout) with three parts:
+extends the [Base Layout](#layouts) with three parts:
 
 1. a top part, consisting of a page header
 2. a middle part, consisting of a summary section and optional item thumbnail

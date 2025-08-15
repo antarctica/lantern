@@ -1,0 +1,13 @@
+{% macro policy_section(slug="", title="") %}
+  <section id="{{ slug }}" class="space-y-4">
+    <h2 class="text-2xl">{{ title }}</h2>
+    {{ caller() }}
+  </section>
+{% endmacro %}
+
+{% macro policy_subsection(title="") %}
+  <section class="space-y-2">
+    <h2 class="text-lg">{{ title }}</h2>
+    {{ caller() }}
+  </section>
+{% endmacro %}

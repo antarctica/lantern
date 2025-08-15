@@ -300,6 +300,7 @@ class SitePagesExporter(Exporter):
         super().__init__(config=config, logger=logger, s3=s3)
         _loader = PackageLoader("lantern", "resources/templates")
         self._jinja = Environment(loader=_loader, autoescape=select_autoescape(), trim_blocks=True, lstrip_blocks=True)
+        self._templates_base = "_views"
         self._templates = ["404.html.j2", "legal/cookies.html.j2", "legal/copyright.html.j2", "legal/privacy.html.j2"]
 
     def _get_page_metadata(self, template_path: str) -> PageMetadata:
@@ -325,7 +326,8 @@ class SitePagesExporter(Exporter):
 
     def _dumps(self, template_path: str) -> str:
         """Build a page."""
-        return self._jinja.get_template(template_path).render(meta=self._get_page_metadata(template_path))
+        prefixed_path = f"{self._templates_base}/{template_path}"
+        return self._jinja.get_template(prefixed_path).render(meta=self._get_page_metadata(template_path))
 
     @property
     def name(self) -> str:

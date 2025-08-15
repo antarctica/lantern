@@ -1,0 +1,11 @@
+{% extends "_layouts/page.html.j2" %}
+{% import '_macros/common.html.j2' as com %}
+
+{# reminder: use `{% set header_main = "..." %}` in child templates to set page title from parent template.  #}
+
+{% block page_content %}
+  {% call com.alert(variant='yellow') %}
+    This policy does not apply to all pages on this website. Check the policy on each page to see which applies.
+  {% endcall %}
+  {% block legal_content %}{% endblock %}
+{% endblock %}

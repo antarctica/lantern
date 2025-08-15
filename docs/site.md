@@ -128,6 +128,10 @@ For example, stacking content in a single column by default then using two or mo
 > Whilst mobiles aren't expected to be the primary device type for this site, it should still be usable and functional,
 > avoiding common pitfalls such as overflowing images, tables, and needing to pan horizontally.
 
+#### Sizing
+
+Ration based sizing SHOULD be used over fixed sizes (e.g. `w-1/2`).
+
 #### Spacing
 
 A consistent, and constrained, spacing scale SHOULD be used wherever possible:
@@ -138,7 +142,8 @@ A consistent, and constrained, spacing scale SHOULD be used wherever possible:
 
 Exceptions to this scale MAY and will be made for specific use cases.
 
-Tailwind's `space-x-*` and `space-y-*` classes SHOULD be used for spacing between elements for consistency.
+Tailwind's `space-x-*` and `space-y-*` classes SHOULD be used for spacing between elements for consistency. Padding
+SHOULD be used over margins where possible to limit the number of classes.
 
 > [!TIP]
 > Run the `css-audit` [Development Task](/docs/dev.md#development-tasks) to check currently used classes in templates.

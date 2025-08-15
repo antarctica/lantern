@@ -140,6 +140,9 @@ Exceptions to this scale MAY and will be made for specific use cases.
 
 Tailwind's `space-x-*` and `space-y-*` classes SHOULD be used for spacing between elements for consistency.
 
+> [!TIP]
+> Run the `css-audit` [Development Task](/docs/dev.md#development-tasks) to check currently used classes in templates.
+
 #### Dark mode
 
 Consideration SHOULD be given the user's colour preference by providing a dark mode using the Tailwind `dark:` modifier.
@@ -156,6 +159,9 @@ Common pairings, which SHOULD be used and re-enforced where sensible, are:
 
 A [Colour Audit](/docs/supplemental/colour-audit.md) and reference is manually maintained to coordinate and constrain
 the range of colours used across the site. Update this document if changing or adding colours.
+
+> [!TIP]
+> Run the `css-audit` [Development Task](/docs/dev.md#development-tasks) to check currently used classes in templates.
 
 #### Icons
 

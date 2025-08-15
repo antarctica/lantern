@@ -73,6 +73,7 @@ release = { cmd = "python -m tasks.release", help = "Prepapre app release" }
 config-init = { cmd = "op inject --in-file .env.tpl --out-file .env", help = "Initialise config file" }
 check-config = { cmd = "python -m tasks.config", help = "Check app config" }
 tailwind = { cmd = "python -m tasks.tailwind", help = "Regenerate tailwind styles" }
+css-audit = { cmd = "python -m tasks.css_audit", help = "List CSS styles used in app templates" }
 build-test-records = { cmd = "python tests/scripts/build_test.py", help = "Build test records as a catalogue site" }
 # fake CLI
 version = { cmd = "python -m tasks.version", help = "Show app version" }

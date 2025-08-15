@@ -128,6 +128,10 @@ For example, stacking content in a single column by default then using two or mo
 > Whilst mobiles aren't expected to be the primary device type for this site, it should still be usable and functional,
 > avoiding common pitfalls such as overflowing images, tables, and needing to pan horizontally.
 
+#### Sizing
+
+Ration based sizing SHOULD be used over fixed sizes (e.g. `w-1/2`).
+
 #### Spacing
 
 A consistent, and constrained, spacing scale SHOULD be used wherever possible:
@@ -138,7 +142,11 @@ A consistent, and constrained, spacing scale SHOULD be used wherever possible:
 
 Exceptions to this scale MAY and will be made for specific use cases.
 
-Tailwind's `space-x-*` and `space-y-*` classes SHOULD be used for spacing between elements for consistency.
+Tailwind's `space-x-*` and `space-y-*` classes SHOULD be used for spacing between elements for consistency. Padding
+SHOULD be used over margins where possible to limit the number of classes.
+
+> [!TIP]
+> Run the `css-audit` [Development Task](/docs/dev.md#development-tasks) to check currently used classes in templates.
 
 #### Dark mode
 
@@ -156,6 +164,9 @@ Common pairings, which SHOULD be used and re-enforced where sensible, are:
 
 A [Colour Audit](/docs/supplemental/colour-audit.md) and reference is manually maintained to coordinate and constrain
 the range of colours used across the site. Update this document if changing or adding colours.
+
+> [!TIP]
+> Run the `css-audit` [Development Task](/docs/dev.md#development-tasks) to check currently used classes in templates.
 
 #### Icons
 
@@ -227,18 +238,44 @@ Templates use these options from the app `lantern.Config` class:
 
 See the [Config](/docs/config.md#config-options) docs for how to set these config options.
 
-### Layout
+### Layouts
 
-A base [Jinja2](https://jinja.palletsprojects.com/) layout is available in
-`src/lantern/resources/templates/_layouts/base.html.j2`. It a common HTML structure including:
+A set of layouts are available in `src/lantern/resources/templates/_layouts/`. All pages SHOULD extend from the
+`base.html.j2` layout.
 
-- a `<head>` element with page metadata and include site styles and scripts
+#### Base layout
+
+The `base.html.j2` layout provides a common HTML structure including:
+
+- a `<head>` element with HTML metadata and imports for site styles and scripts
 - a `<header>` element with site navigation, development phase banner and user feedback link
-- a 'content' block for each page's content
+- a `<main>` element containing a 'content' block for each HTML page's content
 - a `<footer>` element with site feedback link and legal information
 
-All pages SHOULD extend from this base layout. Uses of this layout require a `lantern.models.templates.PageMetadata`
-class instance passed as a `meta` template context variable.
+ Uses of this layout require a `lantern.models.templates.PageMetadata` class instance passed as a `meta` template
+ context variable.
+
+#### Page templates
+
+The `page.html.j2` template provides a simple page structure for legal policies, error documents, guides, etc.
+
+It extends the parent 'content' block with:
+
+- a page header
+- a 'page_content' block for each page's content
+
+> [!IMPORTANT]
+> Child templates MUST set a `main_title` variable for setting the page header title. E.g.:
+>
+> ```html
+> {% extends "_layouts/page.html.j2" %}
+>
+> {% set header_main = "Foo" %}
+>
+> {% block page_content %}
+>  <p>...</p>
+> {% endblock %}
+> ```
 
 ### Macros
 
@@ -272,7 +309,7 @@ Common macros are intended for use across templates to avoid inconsistencies and
 ### Item templates
 
 [Items](/docs/data-model.md#items) use a complex template when rendered, with the Item passed as a context variable. It
-extends the [Site Layout](#layout) with three parts:
+extends the [Base Layout](#layouts) with three parts:
 
 1. a top part, consisting of a page header
 2. a middle part, consisting of a summary section and optional item thumbnail

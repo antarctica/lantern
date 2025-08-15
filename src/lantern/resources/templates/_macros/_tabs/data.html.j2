@@ -31,7 +31,7 @@
 {% endmacro %}
 
 {% macro content(data) %}
-  <div id="{{ data.access_target | replace("#", "") }}" class="mt-2 hidden">
+  <div id="{{ data.access_target | replace("#", "") }}" class="pt-2 hidden">
     {% if data.format_type.name == "ARCGIS_FEATURE_LAYER" %}
       {{ arc_feature_layer(data) }}
     {% elif data.format_type.name == "ARCGIS_OGC_FEATURE_LAYER"  %}

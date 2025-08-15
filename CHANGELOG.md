@@ -18,10 +18,15 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Initial dark mode styling
 * Record Revision support
 
+### Fixed
+
+* Missing padding on legal pages when viewed on mobile
+
 ### Changed
 
 * Split GitLab Store into `GitLabStore` and `GitLabLocalCache` for better structure
 * Upgraded dependencies
+* Improving template composition to reduce repetition
 
 ## [0.1.1] - 2025-07-23
 

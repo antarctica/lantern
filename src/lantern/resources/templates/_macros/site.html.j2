@@ -161,8 +161,9 @@
 
 {% macro navbar() %}
   <nav id="site-nav" class="bg-grey-950 dark:bg-black text-white">
-    <div class="{{ com.container_classes() }} py-4">
+    <div class="{{ com.container_classes() }} py-4 lg:flex lg:justify-between lg:items-center">
       <a id="site-title" class="block font-bold text-lg text-center lg:text-left" href="/">BAS Data Catalogue</a>
+      <a class="hidden lg:block hover:underline" href="https://www.bas.ac.uk">Part of British Antarctic Survey</a>
     </div>
   </nav>
 {% endmacro %}
@@ -178,14 +179,14 @@
 {% endmacro %}
 
 {% macro footer(data) %}
-  <footer id="site-footer" class="font-light bg-grey-950 dark:bg-black text-grey-100">
-    <div class="{{ com.container_classes() }} py-8 space-y-8">
+  <footer id="site-footer" class="font-light bg-grey-950 dark:bg-black text-grey-100 text-center">
+    <div class="{{ com.container_classes() }} py-8 space-y-4 lg:space-y-8">
       <div class="flex flex-col justify-between space-y-4 lg:space-y-0 lg:flex-row">
         <button class="{{ com.sentry_trigger() }} {{ com.footer_link_classes() }} cursor-pointer">Is something wrong with this page?</button>
-        <a class="{{ com.footer_link_classes() }} text-center lg:text-right" href="#{{ com.back_to_top_id() }}">Back to top</a>
+        <a class="{{ com.footer_link_classes() }} lg:text-right" href="#{{ com.back_to_top_id() }}">Back to top</a>
       </div>
       <div class="flex flex-col justify-between space-y-4 lg:space-y-0 lg:flex-row">
-        <div class="text-center lg:text-left lg:flex lg:space-x-2">
+        <div class="lg:text-left lg:flex lg:space-x-2">
           <p>© <a class="{{ com.footer_link_classes() }}" href="https://www.bas.ac.uk">British Antarctic Survey</a> {{ data.current_year }}<span class="hidden lg:inline">.</span></p>
         </div>
         <ul class="flex justify-center space-x-2 lg:justify-end">
@@ -194,6 +195,7 @@
           <li><a class="{{ com.footer_link_classes() }}" href="/legal/privacy">Privacy</a></li>
         </ul>
       </div>
+      <a class="block lg:hidden {{ com.footer_link_classes() }}" href="https://www.bas.ac.uk">Part of British Antarctic Survey</a>
     </div>
   </footer>
 {% endmacro %}

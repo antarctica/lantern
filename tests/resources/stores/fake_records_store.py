@@ -10,6 +10,7 @@ from tests.resources.records.item_cat_formatting import record as formatting_sup
 from tests.resources.records.item_cat_licence import cc_record, ogl_record, ops_record, rights_reversed_record
 from tests.resources.records.item_cat_product_all import record as product_all_supported
 from tests.resources.records.item_cat_product_min import record as product_min_supported
+from tests.resources.records.item_cat_product_replaced import record as product_replaced
 from tests.resources.records.item_cat_product_restricted import record as product_restricted
 from tests.resources.records.item_cat_pub_map import combined as product_published_map_combined
 from tests.resources.records.item_cat_pub_map import side_a as product_published_map_side_a
@@ -37,6 +38,7 @@ class FakeRecordsStore(Store):
             collection_all_supported,
             product_min_supported,
             product_restricted,
+            product_replaced,
             product_all_supported,
             formatting_supported,
             data_all_supported,

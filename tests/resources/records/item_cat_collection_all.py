@@ -34,6 +34,7 @@ collection_members = [
     "3c77ffae-6aa0-4c26-bc34-5521dbf4bf23",
     "57327327-4623-4247-af86-77fb43b7f45b",
     "09dbc743-cc96-46ff-8449-1709930b73ad",
+    "7e3611a6-8dbf-4813-aaf9-dadf9decff5b",
 ]
 
 abstract = """

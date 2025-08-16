@@ -473,6 +473,11 @@ class AdditionalInfoTab(Tab):
         return None
 
     @property
+    def aliases(self) -> list[Link]:
+        """Catalogue alias identifiers if set."""
+        return self._identifiers.aliases
+
+    @property
     def doi(self) -> list[Link]:
         """DOI identifiers if set."""
         return self._identifiers.doi

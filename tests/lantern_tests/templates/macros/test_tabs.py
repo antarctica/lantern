@@ -896,6 +896,29 @@ class TestInfoTab:
         [
             [],
             [
+                Identifier(identifier="x/x", href=f"https://{CATALOGUE_NAMESPACE}/x/x", namespace=ALIAS_NAMESPACE),
+                Identifier(identifier="y/y", href=f"https://{CATALOGUE_NAMESPACE}/y/y", namespace=ALIAS_NAMESPACE),
+            ],
+        ],
+    )
+    def test_aliases(self, fx_item_catalogue_min: ItemCatalogue, value: list[Identifier]):
+        """Can get optional item DOIs based on value from item."""
+        fx_item_catalogue_min._record.identification.identifiers.extend(value)
+        expected = fx_item_catalogue_min._additional_info.aliases
+        html = BeautifulSoup(fx_item_catalogue_min.render(), parser="html.parser", features="lxml")
+
+        alias = html.select_one("#info-aliases")
+        if expected:
+            for item in expected:
+                assert alias.select_one(f"a[href='{item.href}']") is not None
+        else:
+            assert alias is None
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            [],
+            [
                 Identifier(identifier="x", href="x", namespace="doi"),
                 Identifier(identifier="y", href="y", namespace="doi"),
             ],

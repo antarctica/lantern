@@ -63,6 +63,16 @@
         {% endcall %}
       {% endif %}
 
+      {% if data.aliases %}
+        {% call com.dl_item(title='Aliases', id='info-aliases') %}
+          <ul class="space-y-2">
+            {% for item in data.aliases %}
+              <li>{{ com.ext_link_a(href=item.href, value=item.value) }}</li>
+            {% endfor %}
+          </ul>
+        {% endcall %}
+      {% endif %}
+
       {% if data.doi %}
         {% call com.dl_item(title='DOIs', id='info-doi') %}
           <ul class="space-y-2">

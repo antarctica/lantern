@@ -19,6 +19,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Record Revision support
 * Accessibility statement
 * Adding file identifier and revision metadata to published S3 objects
+* Showing item aliases in additional information section
 
 ### Fixed
 

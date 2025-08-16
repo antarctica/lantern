@@ -9,6 +9,7 @@ from lantern.config import Config
 from lantern.lib.metadata_library.models.record import Record
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
 from lantern.models.item.base import ItemBase
+from lantern.models.item.base.const import CATALOGUE_NAMESPACE
 from lantern.models.item.base.elements import Link
 from lantern.models.item.catalogue.elements import (
     Aggregations,
@@ -117,13 +118,13 @@ class ItemCatalogue(ItemBase):
         """
         record.validate()
 
-        self_identifiers = record.identification.identifiers.filter(namespace="data.bas.ac.uk")
+        self_identifiers = record.identification.identifiers.filter(namespace=CATALOGUE_NAMESPACE)
         if not self_identifiers:
-            msg = "Record must include an identification identifier with the 'data.bas.ac.uk' namespace."
+            msg = f"Record must include an identification identifier with the '{CATALOGUE_NAMESPACE}' namespace."
             exp = ValueError(msg)
             raise ItemInvalidError(validation_error=exp)
         if self_identifiers[0].identifier != record.file_identifier:
-            msg = "Record 'data.bas.ac.uk' identifier must match file identifier."
+            msg = f"Record '{CATALOGUE_NAMESPACE}' identifier must match file identifier."
             exp = ValueError(msg)
             raise ItemInvalidError(validation_error=exp)
 

@@ -1,5 +1,6 @@
 from lantern.lib.metadata_library.models.record import HierarchyLevelCode
 from lantern.lib.metadata_library.models.record.elements.common import Date, Identifier
+from lantern.models.item.base.const import CATALOGUE_NAMESPACE
 
 
 def make_magic_citation(
@@ -19,7 +20,7 @@ def make_magic_citation(
     identifiers = [] if identifiers is None else identifiers
     href = "?"
     try:
-        self_identifier = next(identifier for identifier in identifiers if identifier.namespace == "data.bas.ac.uk")
+        self_identifier = next(identifier for identifier in identifiers if identifier.namespace == CATALOGUE_NAMESPACE)
         href = self_identifier.href
     except StopIteration:
         pass

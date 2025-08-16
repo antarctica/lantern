@@ -28,6 +28,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Split GitLab Store into `GitLabStore` and `GitLabLocalCache` for better structure
 * Upgraded dependencies
 * Improving template composition to reduce repetition
+* Refactoring alias and catalogue namespace references into constants
 
 ### Removed
 

@@ -10,6 +10,8 @@ from mypy_boto3_s3 import S3Client
 
 from lantern.config import Config
 from lantern.lib.metadata_library.models.record import Record
+from lantern.lib.metadata_library.models.record.elements.common import Identifier
+from lantern.models.item.base.const import ALIAS_NAMESPACE
 
 
 class S3Utils:
@@ -175,3 +177,8 @@ class ResourceExporter(Exporter, ABC):
         media_type = guess_type(self._export_path.name)[0] or "application/octet-stream"
         key = self._s3_utils.calc_key(self._export_path)
         self._s3_utils.upload_content(key=key, content_type=media_type, body=self.dumps())
+
+
+def get_record_aliases(record: Record) -> list[Identifier]:
+    """Get optional aliases for record as relative file paths / S3 keys."""
+    return record.identification.identifiers.filter(namespace=ALIAS_NAMESPACE)

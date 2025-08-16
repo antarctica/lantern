@@ -26,7 +26,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     MaintenanceFrequencyCode,
     ProgressCode,
 )
-from lantern.models.item.base import AccessType
+from lantern.models.item.base import AccessLevel
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.base.elements import Link
 from lantern.models.item.base.enums import ResourceTypeLabel
@@ -519,7 +519,7 @@ class TestPageSummary:
                     ),
                     get_record=_get_record,
                 ),
-                AccessType.PUBLIC,
+                AccessLevel.PUBLIC,
                 "x",
             ),
             (
@@ -527,7 +527,7 @@ class TestPageSummary:
                 None,
                 None,
                 Aggregations(aggregations=RecordAggregations([]), get_record=_get_record),
-                AccessType.BAS_SOME,
+                AccessLevel.BAS_SOME,
                 None,
             ),
             (
@@ -546,7 +546,7 @@ class TestPageSummary:
                     ),
                     get_record=_get_record,
                 ),
-                AccessType.PUBLIC,
+                AccessLevel.PUBLIC,
                 "x",
             ),
         ],
@@ -557,7 +557,7 @@ class TestPageSummary:
         edition: str | None,
         published: str | None,
         aggregations: Aggregations,
-        access: AccessType,
+        access: AccessLevel,
         citation: str | None,
     ):
         """Can create class for summary panel."""
@@ -570,7 +570,7 @@ class TestPageSummary:
             published_date=published,
             revision_date=None,
             aggregations=aggregations,
-            access_type=access,
+            access_level=access,
             citation=citation,
             abstract="x",
         )
@@ -596,7 +596,7 @@ class TestPageSummary:
                 HierarchyLevelCode.PRODUCT,
                 "1",
                 "x",
-                AccessType.PUBLIC,
+                AccessLevel.PUBLIC,
                 Aggregations(
                     aggregations=RecordAggregations(
                         [
@@ -620,7 +620,7 @@ class TestPageSummary:
                 HierarchyLevelCode.PRODUCT,
                 "1",
                 None,
-                AccessType.PUBLIC,
+                AccessLevel.PUBLIC,
                 Aggregations(
                     aggregations=RecordAggregations(
                         [
@@ -639,7 +639,7 @@ class TestPageSummary:
                 HierarchyLevelCode.PRODUCT,
                 None,
                 "x",
-                AccessType.PUBLIC,
+                AccessLevel.PUBLIC,
                 Aggregations(
                     aggregations=RecordAggregations(
                         [
@@ -658,7 +658,7 @@ class TestPageSummary:
                 HierarchyLevelCode.PRODUCT,
                 None,
                 None,
-                AccessType.PUBLIC,
+                AccessLevel.PUBLIC,
                 Aggregations(aggregations=RecordAggregations([]), get_record=_get_record),
                 False,
             ),
@@ -666,7 +666,7 @@ class TestPageSummary:
                 HierarchyLevelCode.COLLECTION,
                 "1",
                 "x",
-                AccessType.PUBLIC,
+                AccessLevel.PUBLIC,
                 Aggregations(aggregations=RecordAggregations([]), get_record=_get_record),
                 False,
             ),
@@ -674,7 +674,7 @@ class TestPageSummary:
                 HierarchyLevelCode.COLLECTION,
                 "1",
                 "x",
-                AccessType.BAS_SOME,
+                AccessLevel.BAS_SOME,
                 Aggregations(aggregations=RecordAggregations([]), get_record=_get_record),
                 True,
             ),
@@ -685,7 +685,7 @@ class TestPageSummary:
         item_type: HierarchyLevelCode,
         edition: str | None,
         published: str | None,
-        access: AccessType,
+        access: AccessLevel,
         aggregations: Aggregations,
         expected: bool,
     ):
@@ -695,7 +695,7 @@ class TestPageSummary:
             edition=edition,
             published_date=published,
             revision_date=None,
-            access_type=access,
+            access_level=access,
             aggregations=aggregations,
             citation=None,
             abstract="x",
@@ -747,7 +747,7 @@ class TestPageSummary:
             edition=None,
             published_date=published,
             revision_date=revision,
-            access_type=AccessType.PUBLIC,
+            access_level=AccessLevel.PUBLIC,
             aggregations=Aggregations(aggregations=RecordAggregations([]), get_record=_get_record),
             citation=None,
             abstract="x",
@@ -773,7 +773,7 @@ class TestPageSummary:
         summary = PageSummary(
             item_type=item_type,
             aggregations=Aggregations(aggregations=RecordAggregations(aggregations), get_record=_get_record),
-            access_type=AccessType.PUBLIC,
+            access_level=AccessLevel.PUBLIC,
             edition=None,
             published_date=None,
             revision_date=None,

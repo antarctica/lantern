@@ -22,7 +22,7 @@ from lantern.lib.metadata_library.models.record.enums import (
 )
 from lantern.models.item.base.const import PERMISSIONS_BAS_GROUP, PERMISSIONS_NERC_DIRECTORY
 from lantern.models.item.base.elements import Contact, Contacts, Extent, Extents
-from lantern.models.item.base.enums import AccessType
+from lantern.models.item.base.enums import AccessLevel
 from lantern.models.item.base.utils import md_as_html, md_as_plain
 
 
@@ -50,7 +50,7 @@ class ItemBase:
             raise ValueError(msg)
 
     @staticmethod
-    def _parse_permissions(href: str | None) -> list[AccessType]:
+    def _parse_permissions(href: str | None) -> list[AccessLevel]:
         """
         Decode permissions encoded in an access constraint.
 
@@ -89,12 +89,12 @@ class ItemBase:
             ):
                 continue
             if item["directoryId"] == PERMISSIONS_NERC_DIRECTORY and item["objectId"] == PERMISSIONS_BAS_GROUP:
-                permissions.append(AccessType.BAS_ALL)
+                permissions.append(AccessLevel.BAS_ALL)
 
         return permissions
 
     @staticmethod
-    def _parse_access(constraints: Constraints) -> AccessType:
+    def _parse_access(constraints: Constraints) -> AccessLevel:
         """
         Determine item access based on access constraints.
 
@@ -104,24 +104,24 @@ class ItemBase:
         May set other options based on any permissions set in constraints.
         """
         if len(constraints) == 0:
-            return AccessType.NONE
+            return AccessLevel.NONE
 
         if len(constraints) == 1 and constraints[0].restriction_code == ConstraintRestrictionCode.UNRESTRICTED:
-            return AccessType.PUBLIC
+            return AccessLevel.PUBLIC
 
         if (
             len(constraints) == 1
             and constraints[0].restriction_code == ConstraintRestrictionCode.RESTRICTED
             and constraints[0].href is None
         ):
-            return AccessType.BAS_SOME
+            return AccessLevel.BAS_SOME
 
         permissions = [perm for constraint in constraints for perm in ItemBase._parse_permissions(constraint.href)]
-        if AccessType.BAS_ALL in permissions:
-            return AccessType.BAS_ALL
+        if AccessLevel.BAS_ALL in permissions:
+            return AccessLevel.BAS_ALL
 
         # fail-safe
-        return AccessType.NONE
+        return AccessLevel.NONE
 
     @property
     def abstract_raw(self) -> str:
@@ -139,7 +139,7 @@ class ItemBase:
         return md_as_html(self.abstract_md)
 
     @property
-    def access_type(self) -> AccessType:
+    def access_level(self) -> AccessLevel:
         """Resource access."""
         return self._parse_access(self.constraints.filter(types=ConstraintTypeCode.ACCESS))
 

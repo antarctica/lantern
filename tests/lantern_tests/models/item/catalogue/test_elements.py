@@ -303,18 +303,18 @@ class TestItemCatalogueSummaryCatalogue:
         assert isinstance(summary, ItemCatalogueSummary)
         assert summary._record == fx_record_minimal_item
 
-    @pytest.mark.parametrize(("value", "expected"), [("x", "<p>x</p>"), ("_x_", "<p><em>x</em></p>")])
-    def test_title_html(self, fx_record_minimal_item: Record, value: str, expected: str):
-        """Can get title with Markdown formatting, if present, encoded as HTML."""
-        fx_record_minimal_item.identification.title = value
-        summary = ItemCatalogueSummary(fx_record_minimal_item)
-
-        assert summary.title_html == expected
-
     def test_resource_type_icon(self, fx_record_minimal_item: Record):
         """Can get icon for resource type."""
         summary = ItemCatalogueSummary(fx_record_minimal_item)
         assert summary._resource_type_icon == ResourceTypeIcon[summary.resource_type.name].value
+
+    @pytest.mark.parametrize(("value", "expected"), [(None, ""), ("x", "<p>x</p>"), ("_x_", "<p><em>x</em></p>")])
+    def test_summary_html(self, fx_record_minimal_item: Record, value: str, expected: str):
+        """Can get summary with Markdown formatting encoded as HTML if present, or a blank string."""
+        fx_record_minimal_item.identification.purpose = value
+        summary = ItemCatalogueSummary(fx_record_minimal_item)
+
+        assert summary.summary_html == expected
 
     @pytest.mark.parametrize("has_date", [True, False])
     def test_date(self, fx_record_minimal_item: Record, has_date: bool):

@@ -93,11 +93,6 @@ class ItemCatalogueSummary(ItemBase):
     """
 
     @property
-    def title_html(self) -> str | None:
-        """Title with Markdown formatting, if present, encoded as HTML."""
-        return md_as_html(self.title_md)
-
-    @property
     def _resource_type_label(self) -> str:
         """Resource type label."""
         return ResourceTypeLabel[self.resource_type.name].value
@@ -140,6 +135,11 @@ class ItemCatalogueSummary(ItemBase):
         if count > 1:
             return f"{count} items"
         return None
+
+    @property
+    def summary_html(self) -> str:
+        """Summary with Markdown formatting encoded as HTML if present or a blank string."""
+        return md_as_html(self.summary_md) if self.summary_md else md_as_html(" ")
 
     @property
     def fragments(self) -> ItemSummaryFragments:

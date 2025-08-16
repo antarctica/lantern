@@ -1,10 +1,13 @@
 import json
+from datetime import UTC, datetime
 
 import pytest
 from bs4 import BeautifulSoup
+from freezegun.api import FrozenDateTimeFactory
 from jinja2 import Environment, PackageLoader, select_autoescape
 
 from lantern.models.templates import PageMetadata
+from tests.conftest import freezer_time
 
 
 class TestMacrosSite:
@@ -12,7 +15,9 @@ class TestMacrosSite:
 
     @staticmethod
     def _page_meta() -> PageMetadata:
-        return PageMetadata(build_key="x", html_title="x", sentry_src="x", plausible_domain="x")
+        return PageMetadata(
+            build_key="x", build_time=freezer_time(), html_title="x", sentry_src="x", plausible_domain="x"
+        )
 
     @staticmethod
     def _render(template: str, page_meta: PageMetadata | None = None) -> str:
@@ -41,17 +46,23 @@ class TestMacrosSite:
 
         assert html.head.title.string == expected
 
-    def test_head_open_graph(self):
+    def test_head_open_graph(self, freezer: FrozenDateTimeFactory, fx_freezer_time: datetime):
         """
         Can get Open Graph <meta> tags with expected values from page.
 
         This only checks that Open Graph properties are rendered. The specific properties that should (not) be
         included are tested elsewhere.
         """
+        freezer.move_to(fx_freezer_time)
         expected = {"x": "y"}
         template = """{% import '_macros/site.html.j2' as site %}{{ site.head_open_graph(meta.html_open_graph) }}"""
         meta = PageMetadata(
-            build_key="x", html_title="x", sentry_src="x", plausible_domain="x", html_open_graph=expected
+            build_key="x",
+            build_time=datetime.now(tz=UTC),
+            html_title="x",
+            sentry_src="x",
+            plausible_domain="x",
+            html_open_graph=expected,
         )
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
 
@@ -89,17 +100,23 @@ class TestMacrosSite:
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
         assert html.head.find(name="script", attrs={"data-domain": meta.plausible_domain}) is not None
 
-    def test_head_schema_org(self):
+    def test_head_schema_org(self, freezer: FrozenDateTimeFactory, fx_freezer_time: datetime):
         """
         Can get schema.org script content with expected values from page.
 
         This only checks that schema.org properties are rendered. The specific properties that should (not) be
         included are tested elsewhere.
         """
+        freezer.move_to(fx_freezer_time)
         expected = {"x": "y"}
         template = """{% import '_macros/site.html.j2' as site %}{{ site.script_schema_org(meta.html_schema_org) }}"""
         meta = PageMetadata(
-            build_key="x", html_title="x", sentry_src="x", plausible_domain="x", html_schema_org=json.dumps(expected)
+            build_key="x",
+            build_time=datetime.now(tz=UTC),
+            html_title="x",
+            sentry_src="x",
+            plausible_domain="x",
+            html_schema_org=json.dumps(expected),
         )
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
         data = json.loads(html.head.find(name="script", type="application/ld+json").string)
@@ -109,9 +126,12 @@ class TestMacrosSite:
     @pytest.mark.parametrize(
         "meta",
         [
-            PageMetadata(build_key="x", html_title="x", sentry_src="x", plausible_domain="x"),
+            PageMetadata(
+                build_key="x", build_time=freezer_time(), html_title="x", sentry_src="x", plausible_domain="x"
+            ),
             PageMetadata(
                 build_key="x",
+                build_time=freezer_time(),
                 html_title="x",
                 sentry_src="x",
                 plausible_domain="x",
@@ -169,12 +189,13 @@ class TestMacrosSite:
 
         assert html.find(id="site-dev-phase").string.strip() == "alpha"
 
-    def test_footer(self):
+    def test_footer(self, freezer: FrozenDateTimeFactory, fx_freezer_time: datetime):
         """Can get static site footer."""
-        expected = "666"
+        freezer.move_to(fx_freezer_time)
+        expected = datetime.now(tz=UTC)
         template = """{% import '_macros/site.html.j2' as site %}{{ site.footer(meta) }}"""
-        meta = PageMetadata(build_key="x", html_title="x", sentry_src="x", plausible_domain="x", current_year=666)
+        meta = PageMetadata(build_key="x", build_time=expected, html_title="x", sentry_src="x", plausible_domain="x")
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
 
         assert html.find(id="site-footer") is not None
-        assert expected in html.find(id="site-footer").text
+        assert str(expected.year) in html.find(id="site-footer").text

@@ -1,4 +1,5 @@
 import json
+from datetime import UTC, datetime
 
 from bs4 import BeautifulSoup
 from jinja2 import Environment, PackageLoader, select_autoescape
@@ -14,6 +15,7 @@ class TestLayoutBase:
         """Get page metadata."""
         return PageMetadata(
             build_key="x",
+            build_time=datetime.now(tz=UTC),
             html_title="x",
             sentry_src="x",
             plausible_domain="x",

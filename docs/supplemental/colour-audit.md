@@ -24,7 +24,8 @@ Colours:
 * `sky-blue-500`
 * `red-500`
 * `mauve-500` (once for 'important' admonition)
-* `bg-turquoise-500` (once for primary buttons)
+* `turquoise-500` (once for primary buttons)
+* `pink-500` (once for development status badge)
 
 ## Reference
 
@@ -34,6 +35,8 @@ Colours:
 |                            | Background             | white           | grey-950        |                                 |
 | Navbar                     | Text                   | white           | white           | For 'brand' text specifically   |
 |                            | Background             | grey-950        | black           |                                 |
+| Development Status         | Text                   | white           | grey-950        |                                 |
+|                            | Background             | pink-500        | pink-500        |                                 |
 | Footer                     | Text                   | grey-100        | grey-100        |                                 |
 |                            | Background             | grey-950        | black           |                                 |
 | Footer (Links)             | Text                   | sky-blue-300    | sky-blue-500    |                                 |

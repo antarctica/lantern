@@ -44,7 +44,7 @@ class TestS3Utils:
         assert f"s3://{fx_s3_bucket_name}/{expected}" in caplog.text
 
     def test_upload_content_redirect(self, fx_s3_bucket_name: str, fx_s3_utils: S3Utils):
-        """Can write output to an object with a object redirect."""
+        """Can write output to an object with an object redirect."""
         key = "x"
         expected = "y"
 

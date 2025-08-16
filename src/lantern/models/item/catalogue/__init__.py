@@ -8,7 +8,6 @@ from jinja2 import Environment, PackageLoader, select_autoescape
 from lantern.config import Config
 from lantern.lib.metadata_library.models.record import Record
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
-from lantern.lib.metadata_library.models.record.summary import RecordSummary
 from lantern.models.item.base import ItemBase
 from lantern.models.item.base.elements import Link
 from lantern.models.item.catalogue.elements import (
@@ -94,12 +93,10 @@ class ItemCatalogue(ItemBase):
     - distribution.distributor
     """
 
-    def __init__(
-        self, config: Config, record: Record, get_record_summary: Callable[[str], RecordSummary], **kwargs: Any
-    ) -> None:
+    def __init__(self, config: Config, record: Record, get_record: Callable[[str], Record], **kwargs: Any) -> None:
         super().__init__(record)
         self._config = config
-        self._get_summary = get_record_summary
+        self._get_record = get_record
         _loader = PackageLoader("lantern", "resources/templates")
         self._jinja = Environment(loader=_loader, autoescape=select_autoescape(), trim_blocks=True, lstrip_blocks=True)
 
@@ -152,7 +149,7 @@ class ItemCatalogue(ItemBase):
     @property
     def _aggregations(self) -> Aggregations:
         """Aggregations."""
-        return Aggregations(aggregations=self.aggregations, get_summary=self._get_summary)
+        return Aggregations(aggregations=self.aggregations, get_record=self._get_record)
 
     @property
     def _dates(self) -> Dates:

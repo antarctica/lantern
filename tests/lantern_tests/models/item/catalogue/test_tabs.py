@@ -50,7 +50,7 @@ from lantern.models.item.catalogue.elements import (
     Extent,
     FormattedDate,
     Identifiers,
-    ItemSummaryCatalogue,
+    ItemCatalogueSummary,
     Maintenance,
 )
 from lantern.models.item.catalogue.enums import Licence
@@ -66,7 +66,7 @@ from lantern.models.item.catalogue.tabs import (
     LineageTab,
     RelatedTab,
 )
-from tests.conftest import _get_record_summary
+from tests.conftest import _get_record
 
 
 class TestItemsTab:
@@ -84,7 +84,7 @@ class TestItemsTab:
                     )
                 ]
             ),
-            get_summary=_get_record_summary,
+            get_record=_get_record,
         )
 
         tab = ItemsTab(aggregations=aggregations)
@@ -333,14 +333,14 @@ class TestRelatedTab:
                     )
                 ]
             ),
-            get_summary=_get_record_summary,
+            get_record=_get_record,
         )
 
         tab = RelatedTab(aggregations=aggregations, item_type=HierarchyLevelCode.PRODUCT)
 
         assert tab.enabled is True
         assert len(tab.parent_collections) > 0
-        assert all(isinstance(collection, ItemSummaryCatalogue) for collection in tab.parent_collections)
+        assert all(isinstance(collection, ItemCatalogueSummary) for collection in tab.parent_collections)
         # cov
         assert tab.title != ""
         assert tab.icon != ""
@@ -392,7 +392,7 @@ class TestRelatedTab:
     )
     def test_enabled(self, level: HierarchyLevelCode, value: RecordAggregations, expected: bool):
         """Can disable related tab if not applicable."""
-        aggregations = Aggregations(aggregations=value, get_summary=_get_record_summary)
+        aggregations = Aggregations(aggregations=value, get_record=_get_record)
         tab = RelatedTab(aggregations=aggregations, item_type=level)
         assert tab.enabled is expected
 

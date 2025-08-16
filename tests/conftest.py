@@ -34,7 +34,6 @@ from lantern.lib.metadata_library.models.record.enums import (
     ConstraintTypeCode,
     HierarchyLevelCode,
 )
-from lantern.lib.metadata_library.models.record.summary import RecordSummary
 from lantern.models.item.catalogue import AdditionalInfoTab, ItemCatalogue
 from lantern.models.item.catalogue.elements import Dates as ItemCatDates
 from lantern.models.item.catalogue.elements import Identifiers as ItemCatIdentifiers
@@ -250,12 +249,6 @@ def fx_record_revision_minimal_item_catalogue_physical_map(
     return RecordRevision.loads(config)
 
 
-@pytest.fixture()
-def fx_record_summary_minimal_item(fx_record_minimal_item_catalogue: Record) -> RecordSummary:
-    """Minimal record summary instance (Item)."""
-    return RecordSummary.loads(fx_record_minimal_item_catalogue)
-
-
 def _get_record(identifier: str) -> Record:
     """
     Minimal record lookup method.
@@ -271,28 +264,6 @@ def _get_record(identifier: str) -> Record:
 def fx_get_record() -> callable:
     """Minimal record lookup method."""
     return _get_record
-
-
-def _get_record_summary(identifier: str) -> RecordSummary:
-    """
-    Minimal record summary lookup method.
-
-    Standalone method to allow use outside of fixtures.
-    """
-    date_ = Date(date=datetime(2014, 6, 30, tzinfo=UTC).date())
-    return RecordSummary(
-        file_identifier=identifier,
-        hierarchy_level=HierarchyLevelCode.PRODUCT,
-        date_stamp=date_.date,
-        title="x",
-        creation=date_,
-    )
-
-
-@pytest.fixture()
-def fx_get_record_summary() -> callable:
-    """Minimal record summary lookup method."""
-    return _get_record_summary
 
 
 @pytest.fixture()
@@ -322,19 +293,19 @@ def _item_catalogue_min() -> ItemCatalogue:
         record=Record.loads(
             _record_config_minimal_item_catalogue(_record_config_minimal_item(_record_config_minimal_iso()))
         ),
-        get_record_summary=_get_record_summary,
+        get_record=_get_record,
     )
 
 
 @pytest.fixture()
 def fx_item_catalogue_min(
-    fx_config: Config, fx_record_minimal_item_catalogue: Record, fx_get_record_summary: callable
+    fx_config: Config, fx_record_minimal_item_catalogue: Record, fx_get_record: callable
 ) -> ItemCatalogue:
     """ItemCatalogue based on minimal catalogue record."""
     return ItemCatalogue(
         config=fx_config,
         record=fx_record_minimal_item_catalogue,
-        get_record_summary=fx_get_record_summary,
+        get_record=fx_get_record,
     )
 
 
@@ -343,14 +314,12 @@ def fx_item_catalogue_min_physical_map(
     fx_config: Config,
     fx_record_minimal_item_catalogue_physical_map: Record,
     fx_get_record: callable,
-    fx_get_record_summary: callable,
 ) -> ItemCataloguePhysicalMap:
     """ItemCataloguePhysicalMap based on minimal catalogue record for a physical map."""
     return ItemCataloguePhysicalMap(
         config=fx_config,
         record=fx_record_minimal_item_catalogue_physical_map,
         get_record=fx_get_record,
-        get_record_summary=fx_get_record_summary,
     )
 
 
@@ -564,7 +533,6 @@ def fx_exporter_html(
         record=fx_record_minimal_item_catalogue,
         export_base=output_path,
         get_record=_get_record,
-        get_record_summary=_get_record_summary,
     )
 
 
@@ -623,8 +591,7 @@ def fx_exporter_records_pop(
     fx_exporter_records: RecordsExporter, fx_record_minimal_item_catalogue: Record
 ) -> RecordsExporter:
     """Site records exporter populated with a single record."""
-    summary = RecordSummary.loads(fx_record_minimal_item_catalogue)
-    fx_exporter_records.loads(summaries=[summary], records=[fx_record_minimal_item_catalogue])
+    fx_exporter_records.loads(records=[fx_record_minimal_item_catalogue])
     return fx_exporter_records
 
 
@@ -669,8 +636,7 @@ def fx_exporter_site_index_pop(
         Identifier(identifier="x", href="https://data.bas.ac.uk/datasets/x", namespace="alias.data.bas.ac.uk")
     )
     records = [fx_record_minimal_item]
-    summaries = [RecordSummary.loads(fx_record_minimal_item)]
-    fx_exporter_site_index.loads(summaries=summaries, records=records)
+    fx_exporter_site_index.loads(records=records)
     return fx_exporter_site_index
 
 
@@ -775,7 +741,7 @@ def fx_exporter_static_site(module_mocker: MockerFixture) -> TemporaryDirectory:
     store = FakeRecordsStore(logger=logger)
     store.populate()
     exporter = SiteExporter(config=config, s3=s3_client, logger=logger)
-    exporter.loads(summaries=store.summaries, records=store.records)
+    exporter.loads(records=store.records)
     exporter.export()
 
     if not Path(site_dir.name).joinpath("favicon.ico").exists():

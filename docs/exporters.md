@@ -43,6 +43,9 @@ Resource exporters create format specific outputs derived from [Records](/docs/d
 [Items](/docs/data-model.md#items). Resource exporters inherit from the `lantern.exporters.base.ResourceExporter` base
 class.
 
+When published to S3, user metadata is set to indicate the `file_identifier` and `file_revision` of the relevant
+[Record Revision](/docs/data-model.md#record-revisions).
+
 ### JSON resource exporter
 
 Outputs a Record as a JSON file. Intended for internal consumption within the BAS metadata ecosystem.

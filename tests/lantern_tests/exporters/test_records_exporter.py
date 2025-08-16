@@ -8,20 +8,15 @@ from pytest_mock import MockerFixture
 
 from lantern.exporters.base import S3Utils
 from lantern.exporters.records import RecordsExporter
-from lantern.lib.metadata_library.models.record import Record
 from lantern.lib.metadata_library.models.record.elements.common import Identifier
+from lantern.models.record.revision import RecordRevision
 
 
 class TestRecordsExporter:
     """Test meta records exporter."""
 
     def test_init(
-        self,
-        mocker: MockerFixture,
-        fx_logger: logging.Logger,
-        fx_s3_bucket_name: str,
-        fx_s3_client: S3Client,
-        fx_record_minimal_item_catalogue: Record,
+        self, mocker: MockerFixture, fx_logger: logging.Logger, fx_s3_bucket_name: str, fx_s3_client: S3Client
     ):
         """Can create an empty Records Exporter."""
         with TemporaryDirectory() as tmp_path:
@@ -36,26 +31,34 @@ class TestRecordsExporter:
         assert exporter.name == "Records"
         assert len(exporter._records) == 0
 
-    def test_loads(self, fx_exporter_records: RecordsExporter, fx_record_minimal_item_catalogue: Record):
+    def test_loads(
+        self, fx_exporter_records: RecordsExporter, fx_record_revision_minimal_item_catalogue: RecordRevision
+    ):
         """Can load records and summaries."""
-        records = [fx_record_minimal_item_catalogue]
+        records = [fx_record_revision_minimal_item_catalogue]
         fx_exporter_records.loads(records)
 
-    def test_get_record(self, fx_exporter_records_pop: RecordsExporter, fx_record_minimal_item_catalogue: Record):
+    def test_get_record(
+        self, fx_exporter_records_pop: RecordsExporter, fx_record_revision_minimal_item_catalogue: RecordRevision
+    ):
         """Can get record."""
-        record = fx_record_minimal_item_catalogue
+        record = fx_record_revision_minimal_item_catalogue
         assert fx_exporter_records_pop._get_record(record.file_identifier) == record
 
-    def test_get_exporters(self, fx_exporter_records_pop: RecordsExporter, fx_record_minimal_item_catalogue: Record):
+    def test_get_exporters(
+        self, fx_exporter_records_pop: RecordsExporter, fx_record_revision_minimal_item_catalogue: RecordRevision
+    ):
         """Can get exporter instances."""
-        result = fx_exporter_records_pop._get_exporters(fx_record_minimal_item_catalogue)
+        result = fx_exporter_records_pop._get_exporters(fx_record_revision_minimal_item_catalogue)
         names = sorted([exporter.name for exporter in result])
         assert names == sorted(["Item HTML", "Item Aliases", "BAS JSON", "ISO XML", "ISO XML HTML"])
 
-    def test_export_record(self, fx_exporter_records_pop: RecordsExporter, fx_record_minimal_item_catalogue: Record):
+    def test_export_record(
+        self, fx_exporter_records_pop: RecordsExporter, fx_record_revision_minimal_item_catalogue: RecordRevision
+    ):
         """Can export a record to local files."""
         site_path = fx_exporter_records_pop._config.EXPORT_PATH
-        record_id = fx_record_minimal_item_catalogue.file_identifier
+        record_id = fx_record_revision_minimal_item_catalogue.file_identifier
         expected = [
             site_path.joinpath("records", f"{record_id}.json"),
             site_path.joinpath("records", f"{record_id}.xml"),
@@ -69,7 +72,7 @@ class TestRecordsExporter:
             )
         )
 
-        fx_exporter_records_pop.export_record(fx_record_minimal_item_catalogue.file_identifier)
+        fx_exporter_records_pop.export_record(fx_record_revision_minimal_item_catalogue.file_identifier)
 
         result = list(fx_exporter_records_pop._config.EXPORT_PATH.glob("**/*.*"))
         for path in expected:
@@ -78,11 +81,11 @@ class TestRecordsExporter:
     def test_publish_record(
         self,
         fx_exporter_records_pop: RecordsExporter,
-        fx_record_minimal_item_catalogue: Record,
+        fx_record_revision_minimal_item_catalogue: RecordRevision,
         fx_s3_bucket_name: str,
     ):
         """Can export a record to S3 objects."""
-        record_id = fx_record_minimal_item_catalogue.file_identifier
+        record_id = fx_record_revision_minimal_item_catalogue.file_identifier
         s3_utils = S3Utils(
             logger=fx_exporter_records_pop._logger,
             s3=fx_exporter_records_pop._s3_client,
@@ -102,7 +105,7 @@ class TestRecordsExporter:
             )
         )
 
-        fx_exporter_records_pop.publish_record(fx_record_minimal_item_catalogue.file_identifier)
+        fx_exporter_records_pop.publish_record(fx_record_revision_minimal_item_catalogue.file_identifier)
 
         result = s3_utils._s3.list_objects(Bucket=fx_s3_bucket_name)
         keys = [o["Key"] for o in result["Contents"]]

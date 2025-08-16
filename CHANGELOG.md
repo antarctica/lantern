@@ -18,16 +18,19 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Initial dark mode styling
 * Record Revision support
 * Accessibility statement
+* Adding file identifier and revision metadata to published S3 objects
 
 ### Fixed
 
 * Missing padding on legal pages when viewed on mobile
+* Fallback feedback link shown where JavaScript is disabled
 
 ### Changed
 
 * Split GitLab Store into `GitLabStore` and `GitLabLocalCache` for better structure
 * Upgraded dependencies
 * Improving template composition to reduce repetition
+* Refactoring alias and catalogue namespace references into constants
 
 ### Removed
 

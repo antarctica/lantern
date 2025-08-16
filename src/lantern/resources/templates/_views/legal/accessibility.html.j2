@@ -58,8 +58,8 @@
 
   {% call legal.policy_section(slug='accessibility-feedback', title='Feedback and requesting accessible content') %}
     <p>
-      To request information on this website in a different format please contact the
-      {{ com.ext_link_a(href='mailto:webapps@bas.ac.uk', value="BAS Web & Applications Team") }} including:
+      To request information on this website in a different format please
+      <a class="{{ com.link_classes() }}" href="mailto:{{ meta.fallback_email }}">contact us</a> with the following:
     </p>
     <ul class="list-disc pl-5">
       <li>the web address (URL) of the content</li>

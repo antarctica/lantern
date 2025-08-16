@@ -8,6 +8,7 @@ from lantern.config import Config
 from lantern.exporters.base import Exporter
 from lantern.lib.metadata_library.models.record import Record
 from lantern.lib.metadata_library.models.record.enums import AggregationAssociationCode
+from lantern.models.item.base.const import CATALOGUE_NAMESPACE
 from lantern.models.item.website.search import ItemWebsiteSearch
 
 
@@ -126,7 +127,7 @@ class WebsiteSearchExporter(Exporter):
         supersedes = set()
         for record in records:
             aggregations = record.identification.aggregations.filter(
-                namespace="data.bas.ac.uk", associations=AggregationAssociationCode.REVISION_OF
+                namespace=CATALOGUE_NAMESPACE, associations=AggregationAssociationCode.REVISION_OF
             )
             supersedes.update(aggregations.identifiers())
         return list(supersedes)

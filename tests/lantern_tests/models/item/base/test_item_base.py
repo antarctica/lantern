@@ -39,7 +39,7 @@ from lantern.lib.metadata_library.models.record.enums import (
 from lantern.lib.metadata_library.models.record.presets.projections import EPSG_4326
 from lantern.models.item.base import ItemBase
 from lantern.models.item.base.elements import Contact, Contacts, Extent, Extents
-from lantern.models.item.base.enums import AccessType
+from lantern.models.item.base.enums import AccessLevel
 
 
 class TestItemBase:
@@ -70,11 +70,11 @@ class TestItemBase:
             ),
             (
                 f"#{json.dumps([{'scheme': 'ms_graph', 'schemeVersion': '1', 'directoryId': 'b311db95-32ad-438f-a101-7ba061712a4e', 'objectId': '6fa3b48c-393c-455f-b787-c006f839b51f'}])}",
-                [AccessType.BAS_ALL],
+                [AccessLevel.BAS_ALL],
             ),
         ],
     )
-    def test_parse_permissions(self, value: str, expected: list[AccessType]):
+    def test_parse_permissions(self, value: str, expected: list[AccessLevel]):
         """Can parse permissions string."""
         result = ItemBase._parse_permissions(value)
         assert result == expected
@@ -82,7 +82,7 @@ class TestItemBase:
     @pytest.mark.parametrize(
         ("value", "expected"),
         [
-            (Constraints([]), AccessType.NONE),
+            (Constraints([]), AccessLevel.NONE),
             (
                 Constraints(
                     [
@@ -91,7 +91,7 @@ class TestItemBase:
                         )
                     ]
                 ),
-                AccessType.PUBLIC,
+                AccessLevel.PUBLIC,
             ),
             (
                 Constraints(
@@ -104,13 +104,13 @@ class TestItemBase:
                         ),
                     ]
                 ),
-                AccessType.NONE,
+                AccessLevel.NONE,
             ),
             (
                 Constraints(
                     [Constraint(type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.RESTRICTED)]
                 ),
-                AccessType.BAS_SOME,
+                AccessLevel.BAS_SOME,
             ),
             (
                 Constraints(
@@ -123,7 +123,7 @@ class TestItemBase:
                         ),
                     ]
                 ),
-                AccessType.NONE,
+                AccessLevel.NONE,
             ),
             (
                 Constraints(
@@ -136,7 +136,7 @@ class TestItemBase:
                         ),
                     ]
                 ),
-                AccessType.NONE,
+                AccessLevel.NONE,
             ),
             (
                 Constraints(
@@ -148,7 +148,7 @@ class TestItemBase:
                         ),
                     ]
                 ),
-                AccessType.BAS_ALL,
+                AccessLevel.BAS_ALL,
             ),
             (
                 Constraints(
@@ -166,11 +166,11 @@ class TestItemBase:
                         ),
                     ]
                 ),
-                AccessType.BAS_ALL,
+                AccessLevel.BAS_ALL,
             ),
         ],
     )
-    def test_parse_access(self, value: Constraints, expected: AccessType):
+    def test_parse_access(self, value: Constraints, expected: AccessLevel):
         """Can resolve access type from constraints."""
         result = ItemBase._parse_access(value)
         assert result == expected
@@ -205,18 +205,18 @@ class TestItemBase:
         [
             (
                 Constraint(type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.UNRESTRICTED),
-                AccessType.PUBLIC,
+                AccessLevel.PUBLIC,
             ),
-            (None, AccessType.NONE),
+            (None, AccessLevel.NONE),
         ],
     )
-    def test_access(self, fx_record_minimal_item: Record, value: Constraint | None, expected: AccessType):
+    def test_access(self, fx_record_minimal_item: Record, value: Constraint | None, expected: AccessLevel):
         """Can get optional access constraint and any associated permissions."""
         if value is not None:
             fx_record_minimal_item.identification.constraints = Constraints([value])
         item = ItemBase(fx_record_minimal_item)
 
-        assert item.access_type == expected
+        assert item.access_level == expected
 
     def test_aggregations(self, fx_record_minimal_item: Record):
         """Can get aggregations from record."""

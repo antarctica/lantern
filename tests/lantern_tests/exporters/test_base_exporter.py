@@ -7,8 +7,11 @@ import pytest
 from boto3 import client as S3Client  # noqa: N812
 from pytest_mock import MockerFixture
 
-from lantern.exporters.base import Exporter, ResourceExporter, S3Utils
+from lantern.exporters.base import Exporter, ResourceExporter, S3Utils, get_record_aliases
 from lantern.lib.metadata_library.models.record import Record
+from lantern.lib.metadata_library.models.record.elements.common import Identifier
+from lantern.models.item.base.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
+from lantern.models.record.revision import RecordRevision
 from tests.resources.exporters.fake_exporter import FakeExporter, FakeResourceExporter
 
 
@@ -35,12 +38,10 @@ class TestS3Utils:
         """Can write output to an object at a low level."""
         expected = "x"
 
-        fx_s3_utils.upload_content(key=expected, content_type="text/plain", body="x")
+        fx_s3_utils.upload_content(key=expected, content_type="text/plain", body="x", meta={expected: "..."})
 
-        result = fx_s3_utils._s3.list_objects_v2(Bucket=fx_s3_bucket_name)
-        assert len(result["Contents"]) == 1
-        result = result["Contents"][0]
-        assert result["Key"] == expected
+        result = fx_s3_utils._s3.get_object(Bucket=fx_s3_bucket_name, Key=expected)
+        assert result["Metadata"][expected] == "..."
         assert f"s3://{fx_s3_bucket_name}/{expected}" in caplog.text
 
     def test_upload_content_redirect(self, fx_s3_bucket_name: str, fx_s3_utils: S3Utils):
@@ -138,7 +139,7 @@ class TestBaseResourceExporter:
         fx_exporter_base: Exporter,
         fx_s3_bucket_name: str,
         fx_s3_client: S3Client,
-        fx_record_minimal_item: Record,
+        fx_record_revision_minimal_item: RecordRevision,
     ):
         """Can create an Exporter."""
         with TemporaryDirectory() as tmp_path:
@@ -152,20 +153,22 @@ class TestBaseResourceExporter:
             config=mock_config,
             logger=fx_logger,
             s3=fx_s3_client,
-            record=fx_record_minimal_item,
+            record=fx_record_revision_minimal_item,
             export_base=output_path.joinpath("x"),
             export_name="x.txt",
         )
         assert isinstance(exporter, ResourceExporter)
 
-    def test_invalid_record(self, fx_exporter_resource_base: ResourceExporter, fx_record_minimal_iso: Record):
+    def test_invalid_record(
+        self, fx_exporter_resource_base: ResourceExporter, fx_record_revision_minimal_iso: RecordRevision
+    ):
         """Cannot create an ItemBase with an invalid record."""
         with pytest.raises(ValueError, match="File identifier must be set to export record."):
             FakeResourceExporter(
                 config=fx_exporter_resource_base._config,
                 logger=fx_exporter_resource_base._logger,
                 s3=fx_exporter_resource_base._s3_client,
-                record=fx_record_minimal_iso,
+                record=fx_record_revision_minimal_iso,
                 export_base=fx_exporter_resource_base._export_path.parent,
                 export_name="x",
             )
@@ -196,6 +199,11 @@ class TestBaseResourceExporter:
         result = fx_exporter_resource_base._s3_utils._s3.list_objects_v2(Bucket=fx_s3_bucket_name)
         assert len(result["Contents"]) == 1
 
+        key = result["Contents"][0]["Key"]
+        result2 = fx_exporter_resource_base._s3_utils._s3.get_object(Bucket=fx_s3_bucket_name, Key=key)
+        meta_keys = ["file_identifier", "file_revision"]
+        assert all(key in result2["Metadata"] for key in meta_keys)
+
     def test_publish_unknown_media_type(self, fx_s3_bucket_name: str, fx_exporter_resource_base: ResourceExporter):
         """Can write output with default media type where unknown to an object."""
         fx_exporter_resource_base._export_path = fx_exporter_resource_base._export_path / "x.unknown"
@@ -203,3 +211,16 @@ class TestBaseResourceExporter:
 
         result = fx_exporter_resource_base._s3_utils._s3.get_object(Bucket=fx_s3_bucket_name, Key="x/x.txt/x.unknown")
         assert result["ContentType"] == "application/octet-stream"
+
+
+class TestGetRecordAliases:
+    """Test get_record_aliases function."""
+
+    def test_get_record_aliases(self, fx_record_minimal_item: Record):
+        """Can get any aliases in a record."""
+        alias = Identifier(identifier="x", href=f"https://{CATALOGUE_NAMESPACE}/datasets/x", namespace=ALIAS_NAMESPACE)
+
+        fx_record_minimal_item.identification.identifiers.append(alias)
+        result = get_record_aliases(fx_record_minimal_item)
+        assert len(result) == 1
+        assert result[0] == alias

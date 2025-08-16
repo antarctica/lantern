@@ -20,6 +20,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     ProgressCode,
 )
 from lantern.models.item.base import ItemBase
+from lantern.models.item.base.const import GITLAB_NAMESPACE
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.base.elements import Link, unpack
 from lantern.models.item.base.enums import AccessLevel, ResourceTypeLabel
@@ -398,7 +399,7 @@ class Identifiers(RecordIdentifiers):
 
         Returned as references rather than links to add discourage others viewing issues.
         """
-        return [self._make_gitlab_issue_ref(identifier.href) for identifier in self.filter("gitlab.data.bas.ac.uk")]
+        return [self._make_gitlab_issue_ref(identifier.href) for identifier in self.filter(GITLAB_NAMESPACE)]
 
 
 class Maintenance(RecordMaintenance):

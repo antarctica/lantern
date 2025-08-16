@@ -7,8 +7,10 @@ import pytest
 from boto3 import client as S3Client  # noqa: N812
 from pytest_mock import MockerFixture
 
-from lantern.exporters.base import Exporter, ResourceExporter, S3Utils
+from lantern.exporters.base import Exporter, ResourceExporter, S3Utils, get_record_aliases
 from lantern.lib.metadata_library.models.record import Record
+from lantern.lib.metadata_library.models.record.elements.common import Identifier
+from lantern.models.item.base.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from tests.resources.exporters.fake_exporter import FakeExporter, FakeResourceExporter
 
 
@@ -203,3 +205,16 @@ class TestBaseResourceExporter:
 
         result = fx_exporter_resource_base._s3_utils._s3.get_object(Bucket=fx_s3_bucket_name, Key="x/x.txt/x.unknown")
         assert result["ContentType"] == "application/octet-stream"
+
+
+class TestGetRecordAliases:
+    """Test get_record_aliases function."""
+
+    def test_get_record_aliases(self, fx_record_minimal_item: Record):
+        """Can get any aliases in a record."""
+        alias = Identifier(identifier="x", href=f"https://{CATALOGUE_NAMESPACE}/datasets/x", namespace=ALIAS_NAMESPACE)
+
+        fx_record_minimal_item.identification.identifiers.append(alias)
+        result = get_record_aliases(fx_record_minimal_item)
+        assert len(result) == 1
+        assert result[0] == alias

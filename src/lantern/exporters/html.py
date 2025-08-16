@@ -5,8 +5,9 @@ from pathlib import Path
 from mypy_boto3_s3 import S3Client
 
 from lantern.config import Config
-from lantern.exporters.base import ResourceExporter
+from lantern.exporters.base import ResourceExporter, get_record_aliases
 from lantern.lib.metadata_library.models.record import Record
+from lantern.models.item.base.const import CATALOGUE_NAMESPACE
 from lantern.models.item.catalogue import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
 
@@ -90,8 +91,8 @@ class HtmlAliasesExporter(ResourceExporter):
 
     def _get_aliases(self) -> list[str]:
         """Get optional aliases for record as relative file paths / S3 keys."""
-        identifiers = self._record.identification.identifiers.filter(namespace="alias.data.bas.ac.uk")
-        return [identifier.href.replace("https://data.bas.ac.uk/", "") for identifier in identifiers]
+        identifiers = get_record_aliases(self._record)
+        return [identifier.href.replace(f"https://{CATALOGUE_NAMESPACE}/", "") for identifier in identifiers]
 
     @property
     def target(self) -> str:

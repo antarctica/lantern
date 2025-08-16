@@ -9,7 +9,7 @@ from jinja2 import Environment, PackageLoader, select_autoescape
 from mypy_boto3_s3 import S3Client
 
 from lantern.config import Config
-from lantern.exporters.base import Exporter
+from lantern.exporters.base import Exporter, get_record_aliases
 from lantern.exporters.base import Exporter as BaseExporter
 from lantern.exporters.records import RecordsExporter
 from lantern.exporters.website import WebsiteSearchExporter
@@ -162,7 +162,7 @@ class SiteIndexExporter(Exporter):
         """Get a list of aliases from records."""
         aliases = []
         for record in self._records:
-            identifiers = record.identification.identifiers.filter(namespace="alias.data.bas.ac.uk")
+            identifiers = get_record_aliases(record)
             aliases.extend(
                 [
                     {

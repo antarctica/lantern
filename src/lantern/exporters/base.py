@@ -12,6 +12,7 @@ from lantern.config import Config
 from lantern.lib.metadata_library.models.record import Record
 from lantern.lib.metadata_library.models.record.elements.common import Identifier
 from lantern.models.item.base.const import ALIAS_NAMESPACE
+from lantern.models.record.revision import RecordRevision
 
 
 class S3Utils:
@@ -31,7 +32,9 @@ class S3Utils:
         """
         return str(path.relative_to(self._relative_base))
 
-    def upload_content(self, key: str, content_type: str, body: str | bytes, redirect: str | None = None) -> None:
+    def upload_content(
+        self, key: str, content_type: str, body: str | bytes, redirect: str | None = None, meta: dict | None = None
+    ) -> None:
         """
         Upload string or binary content as an S3 object.
 
@@ -44,6 +47,10 @@ class S3Utils:
             params["Body"] = body.encode("utf-8")
         if redirect is not None:
             params["WebsiteRedirectLocation"] = redirect
+        if meta is not None:
+            # noinspection PyTypeChecker
+            params["Metadata"] = meta
+
         self._logger.debug(f"Writing key: s3://{self._bucket}/{key}")
         self._s3.put_object(**params)
 
@@ -141,7 +148,13 @@ class ResourceExporter(Exporter, ABC):
     """
 
     def __init__(
-        self, config: Config, logger: logging.Logger, s3: S3Client, record: Record, export_base: Path, export_name: str
+        self,
+        config: Config,
+        logger: logging.Logger,
+        s3: S3Client,
+        record: RecordRevision,
+        export_base: Path,
+        export_name: str,
     ) -> None:
         super().__init__(config=config, logger=logger, s3=s3)
         self._export_path = export_base.joinpath(export_name)
@@ -176,7 +189,8 @@ class ResourceExporter(Exporter, ABC):
         """Save dumped output to remote S3 bucket."""
         media_type = guess_type(self._export_path.name)[0] or "application/octet-stream"
         key = self._s3_utils.calc_key(self._export_path)
-        self._s3_utils.upload_content(key=key, content_type=media_type, body=self.dumps())
+        meta = {"file_identifier": self._record.file_identifier, "file_revision": self._record.file_revision}
+        self._s3_utils.upload_content(key=key, content_type=media_type, body=self.dumps(), meta=meta)
 
 
 def get_record_aliases(record: Record) -> list[Identifier]:

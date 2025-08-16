@@ -20,6 +20,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Accessibility statement
 * Adding file identifier and revision metadata to published S3 objects
 * Showing item aliases in additional information section
+* Showing a page build/render time in additional information section
 
 ### Fixed
 

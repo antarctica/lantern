@@ -75,6 +75,11 @@ def regenerate_styles(tw_bin: Path, site_path: Path, output_path: Path) -> None:
         subprocess.run(  # noqa: S603
             [tw_bin, "-i", str(src_path.resolve()), "-o", str(output_path.resolve()), "--minify"], check=True
         )
+
+    # append trailing new line
+    with output_path.open("a") as out_file:
+        out_file.write("\n")
+
     print(f"Saved regenerated styles to '{output_path.resolve()}'")
 
 

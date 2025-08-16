@@ -301,12 +301,19 @@ class SitePagesExporter(Exporter):
         _loader = PackageLoader("lantern", "resources/templates")
         self._jinja = Environment(loader=_loader, autoescape=select_autoescape(), trim_blocks=True, lstrip_blocks=True)
         self._templates_base = "_views"
-        self._templates = ["404.html.j2", "legal/cookies.html.j2", "legal/copyright.html.j2", "legal/privacy.html.j2"]
+        self._templates = [
+            "404.html.j2",
+            "legal/accessibility.html.j2",
+            "legal/cookies.html.j2",
+            "legal/copyright.html.j2",
+            "legal/privacy.html.j2",
+        ]
 
     def _get_page_metadata(self, template_path: str) -> PageMetadata:
         """Get metadata for a page based on its template."""
         mapping = {
             "404.html.j2": "Not Found",
+            "legal/accessibility.html.j2": "Accessibility Statement",
             "legal/cookies.html.j2": "Cookies Policy",
             "legal/copyright.html.j2": "Copyright Policy",
             "legal/privacy.html.j2": "Privacy Policy",

@@ -136,6 +136,7 @@ class TestSitePageExporter:
         site_path = fx_exporter_site_pages._config.EXPORT_PATH
         expected = [
             site_path.joinpath("404.html"),
+            site_path.joinpath("legal/accessibility/index.html"),
             site_path.joinpath("legal/cookies/index.html"),
             site_path.joinpath("legal/copyright/index.html"),
             site_path.joinpath("legal/privacy/index.html"),
@@ -151,6 +152,7 @@ class TestSitePageExporter:
         """Can publish site pages to S3."""
         expected = [
             "404.html",
+            "legal/accessibility/index.html",
             "legal/cookies/index.html",
             "legal/copyright/index.html",
             "legal/privacy/index.html",

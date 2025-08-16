@@ -20,7 +20,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     ProgressCode,
 )
 from lantern.models.item.base import ItemBase
-from lantern.models.item.base.const import GITLAB_NAMESPACE
+from lantern.models.item.base.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE, GITLAB_NAMESPACE
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.base.elements import Link, unpack
 from lantern.models.item.base.enums import AccessLevel, ResourceTypeLabel
@@ -245,6 +245,25 @@ class Aggregations:
             associations=AggregationAssociationCode.CROSS_REFERENCE,
             initiatives=AggregationInitiativeCode.COLLECTION,
         )
+
+    @property
+    def peer_cross_reference(self) -> list[ItemCatalogueSummary]:
+        """
+        Other items item is related with.
+
+        Returns cross-references not in scope of other aggregation types (such as peer collections).
+        """
+        results = self._aggregations.filter(
+            namespace=CATALOGUE_NAMESPACE, associations=AggregationAssociationCode.CROSS_REFERENCE
+        )
+        non_exclusive = [item.resource_id for item in self.peer_collections]
+        exclusive = [aggregation for aggregation in results if aggregation.identifier.identifier not in non_exclusive]
+        return [self._summaries[aggregation.identifier.identifier] for aggregation in exclusive]
+
+    @property
+    def peer_supersedes(self) -> list[ItemCatalogueSummary]:
+        """Items item supersedes (replaces)."""
+        return self._filter(associations=AggregationAssociationCode.REVISION_OF)
 
     @property
     def peer_opposite_side(self) -> ItemCatalogueSummary | None:

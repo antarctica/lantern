@@ -45,6 +45,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     OnlineResourceFunctionCode,
     ProgressCode,
 )
+from lantern.models.item.base.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.item.catalogue import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
 from lantern.models.record.revision import RecordRevision
@@ -656,6 +657,72 @@ class TestRelatedTab:
                 assert items.select_one(f"a[href='{item.href}']") is not None
         else:
             assert items is None
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            Aggregations([]),
+            Aggregations(
+                [
+                    Aggregation(
+                        identifier=Identifier(identifier="x", href="x", namespace="x"),
+                        association_type=AggregationAssociationCode.CROSS_REFERENCE,
+                    ),
+                    Aggregation(
+                        identifier=Identifier(identifier="y", href="y", namespace="y"),
+                        association_type=AggregationAssociationCode.CROSS_REFERENCE,
+                    ),
+                ]
+            ),
+        ],
+    )
+    def test_peer_cross_reference(self, fx_item_catalogue_min: ItemCatalogue, value: Aggregations):
+        """
+        Can get optional peer cross-references unrelated to other cross-reference contexts with expected values from item.
+
+        Detailed item summary tests are run in common macro tests.
+        """
+        fx_item_catalogue_min._record.identification.aggregations = value
+        expected = fx_item_catalogue_min._related.peer_cross_reference
+        html = BeautifulSoup(fx_item_catalogue_min.render(), parser="html.parser", features="lxml")
+
+        related = html.select_one("#related-peer-items")
+        if len(expected) > 0:
+            for item in expected:
+                assert related.select_one(f"a[href='{item.href}']") is not None
+        else:
+            assert related is None
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            Aggregations([]),
+            Aggregations(
+                [
+                    Aggregation(
+                        identifier=Identifier(identifier="x", href="x", namespace="x"),
+                        association_type=AggregationAssociationCode.REVISION_OF,
+                    ),
+                ]
+            ),
+        ],
+    )
+    def test_peer_supersedes(self, fx_item_catalogue_min: ItemCatalogue, value: Aggregations):
+        """
+        Can get optional peer items item supersedes with expected values from item.
+
+        Detailed item summary tests are run in common macro tests.
+        """
+        fx_item_catalogue_min._record.identification.aggregations = value
+        expected = fx_item_catalogue_min._related.peer_supersedes
+        html = BeautifulSoup(fx_item_catalogue_min.render(), parser="html.parser", features="lxml")
+
+        replaced = html.select_one("#related-peer-supersedes")
+        if len(expected) > 0:
+            for item in expected:
+                assert replaced.select_one(f"a[href='{item.href}']") is not None
+        else:
+            assert replaced is None
 
     @pytest.mark.parametrize(
         "value",

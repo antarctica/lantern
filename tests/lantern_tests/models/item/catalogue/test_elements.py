@@ -27,6 +27,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     ProgressCode,
 )
 from lantern.models.item.base import AccessLevel
+from lantern.models.item.base.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.base.elements import Link
 from lantern.models.item.base.enums import ResourceTypeLabel
@@ -107,6 +108,39 @@ class TestAggregations:
         aggregations = Aggregations(record_aggregations, get_record=_get_record)
 
         assert len(aggregations.peer_collections) > 0
+
+    def test_peer_cross_reference(self):
+        """Can get any cross-reference not related to another context (e.g. collections)."""
+        record_aggregations = RecordAggregations(
+            [
+                Aggregation(
+                    identifier=Identifier(identifier="x", href="x", namespace=CATALOGUE_NAMESPACE),
+                    association_type=AggregationAssociationCode.CROSS_REFERENCE,
+                ),
+                Aggregation(
+                    identifier=Identifier(identifier="y", href="y", namespace=CATALOGUE_NAMESPACE),
+                    association_type=AggregationAssociationCode.CROSS_REFERENCE,
+                    initiative_type=AggregationInitiativeCode.COLLECTION,
+                ),
+            ]
+        )
+        aggregations = Aggregations(record_aggregations, get_record=_get_record)
+
+        assert len(aggregations.peer_cross_reference) == 1
+
+    def test_peer_superseded(self):
+        """Can get any superseded items."""
+        record_aggregations = RecordAggregations(
+            [
+                Aggregation(
+                    identifier=Identifier(identifier="x", href="x", namespace=CATALOGUE_NAMESPACE),
+                    association_type=AggregationAssociationCode.REVISION_OF,
+                ),
+            ]
+        )
+        aggregations = Aggregations(record_aggregations, get_record=_get_record)
+
+        assert len(aggregations.peer_supersedes) > 0
 
     def test_peer_opposite_side(self):
         """Can get any item that forms the opposite side of a published map."""

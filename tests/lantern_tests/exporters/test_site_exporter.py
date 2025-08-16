@@ -383,11 +383,11 @@ class TestSiteExporter:
             assert path in result
 
     def test_publish(
-        self, fx_s3_bucket_name: str, fx_exporter_site: SiteExporter, fx_record_minimal_item_catalogue: Record
+        self, fx_s3_bucket_name: str, fx_exporter_site: SiteExporter, fx_record_revision_minimal_item_catalogue: Record
     ):
         """Can publish site index to S3."""
         s3 = fx_exporter_site._index_exporter._s3_utils._s3
-        record = fx_record_minimal_item_catalogue
+        record = fx_record_revision_minimal_item_catalogue
         fx_exporter_site.loads([record])
         expected = [
             "favicon.ico",

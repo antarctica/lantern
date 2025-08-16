@@ -211,6 +211,13 @@ def fx_record_minimal_item(fx_record_config_minimal_item: dict) -> Record:
 
 
 @pytest.fixture()
+def fx_record_revision_minimal_item(fx_record_config_minimal_item: dict) -> RecordRevision:
+    """Minimal record instance (Item)."""
+    config = {"file_revision": "x", **fx_record_config_minimal_item}
+    return RecordRevision.loads(config)
+
+
+@pytest.fixture()
 def fx_record_minimal_item_catalogue(fx_record_config_minimal_item_catalogue: dict) -> Record:
     """Minimal record instance (ItemCatalogue)."""
     return Record.loads(fx_record_config_minimal_item_catalogue)
@@ -459,7 +466,7 @@ def fx_exporter_resource_base(
     fx_exporter_base: Exporter,
     fx_s3_bucket_name: str,
     fx_s3_client: S3Client,
-    fx_record_minimal_item: Record,
+    fx_record_revision_minimal_item: RecordRevision,
 ) -> ResourceExporter:
     """
     Base resource exporter.
@@ -479,7 +486,7 @@ def fx_exporter_resource_base(
         config=mock_config,
         logger=fx_logger,
         s3=fx_s3_client,
-        record=fx_record_minimal_item,
+        record=fx_record_revision_minimal_item,
         export_base=output_path.joinpath("x"),
         export_name="x.txt",
     )
@@ -589,10 +596,10 @@ def fx_exporter_records(
 
 @pytest.fixture()
 def fx_exporter_records_pop(
-    fx_exporter_records: RecordsExporter, fx_record_minimal_item_catalogue: Record
+    fx_exporter_records: RecordsExporter, fx_record_revision_minimal_item_catalogue: RecordRevision
 ) -> RecordsExporter:
     """Site records exporter populated with a single record."""
-    fx_exporter_records.loads(records=[fx_record_minimal_item_catalogue])
+    fx_exporter_records.loads(records=[fx_record_revision_minimal_item_catalogue])
     return fx_exporter_records
 
 

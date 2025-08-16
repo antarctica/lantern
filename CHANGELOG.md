@@ -18,6 +18,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Initial dark mode styling
 * Record Revision support
 * Accessibility statement
+* Adding file identifier and revision metadata to published S3 objects
 
 ### Fixed
 

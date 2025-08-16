@@ -14,7 +14,7 @@ from gitlab.v4.objects import Project
 from requests.exceptions import ConnectionError as RequestsConnectionError
 
 from lantern.lib.metadata_library.models.record import Record
-from lantern.models.record.revision import RecordRevision, RecordRevisionSummary
+from lantern.models.record.revision import RecordRevision
 from lantern.stores.base import RecordNotFoundError, Store
 
 
@@ -58,7 +58,6 @@ class GitLabLocalCache:
         self._commits_path = self._path / "commits.json"
         self._head_path = self._path / "head_commit.json"
         self._hashes_path = self._path / "hashes.json"
-        self._summaries_path = self._path / "summaries.json"
 
     @cached_property
     def _online(self) -> bool:
@@ -169,17 +168,14 @@ class GitLabLocalCache:
         - copy each record config file to the cache directory
         - parse each record config file as a RecordRevision
         - create a mapping of each RecordRevision by file identifier and SHA1 hash of its configuration
-        - derive a RecordRevisionSummary from each RecordRevision
         - save a pickled version of each RecordRevision to the cache directory
         - save details of the current head commit to a file for cache validation
         - save the mapping of file identifiers to SHA1 hashes for each record config to a file
         - save the mapping of file identifiers to Git commits for each record config to a file
-        - save a list of RecordSummary configs to a file
         """
         self._logger.info("Populating local cache")
 
         hashes = {}
-        summaries = []
 
         records_path = self._records_path
         records_path.mkdir(parents=True, exist_ok=True)
@@ -190,8 +186,6 @@ class GitLabLocalCache:
             commit = config_commits[config_path.stem]
             record = self._load_record(config_path, file_revision=commit)
             hashes[record.file_identifier] = record.sha1
-            summary = RecordRevisionSummary.loads(record)
-            summaries.append(summary.dumps())
 
             with record_path.with_suffix(".pickle").open(mode="wb") as f:
                 # noinspection PyTypeChecker
@@ -206,10 +200,6 @@ class GitLabLocalCache:
 
         with self._commits_path.open(mode="w") as f:
             data = {"commits": config_commits}
-            json.dump(data, f, indent=2)
-
-        with self._summaries_path.open(mode="w") as f:
-            data = {"summaries": {summary["file_identifier"]: summary for summary in summaries}}
             json.dump(data, f, indent=2)
 
     def _fetch_file_commits(self, record_paths: list[str]) -> dict[str, str]:
@@ -276,7 +266,7 @@ class GitLabLocalCache:
         self._logger.info("Fetching repo archive")
         config_paths, config_urls = self._fetch_project_archive(tmp_path)
 
-        self._logger.info(f"Fetching file commits for {len(config_urls)} records")
+        self._logger.info(f"Fetching file commits for {len(config_urls)} records (this may take some time)")
         commits_mapping = self._fetch_file_commits(config_urls)
 
         self._logger.info("Fetching head commit")
@@ -311,119 +301,84 @@ class GitLabLocalCache:
 
         self._logger.info("Records cache exists and is current, no changes needed.")
 
-    def _get_summaries(self, file_identifiers: list[str] | None = None) -> list[RecordRevisionSummary]:
-        """Load all or selected record summaries."""
-        with self._summaries_path.open() as file:
-            summaries_data = json.load(file)["summaries"]
-        with self._commits_path.open() as file:
-            commits_data = json.load(file)["commits"]
-
-        summaries = []
-
-        if not file_identifiers:
-            self._logger.info("Loading all record summaries from cache.")
-            for summary in summaries_data.values():
-                config = {**summary, "file_revision": commits_data[summary["file_identifier"]]}
-                summaries.append(RecordRevisionSummary.loads(config))
-            return summaries
-
-        self._logger.info(f"Loading {len(file_identifiers)} selected record summaries from cache.")
-        for identifier in file_identifiers:
-            try:
-                # noinspection PyUnboundLocalVariable
-                config = {**summaries_data[identifier], "file_revision": commits_data[identifier]}
-                summaries.append(RecordRevisionSummary.loads(config))
-            except KeyError:
-                self._logger.warning(f"Summary for record '{identifier}' not found in cache, skipping")
-                continue
-        return summaries
-
-    def _get_record(self, file_identifier: str) -> RecordRevision:
+    def _get_record(self, file_identifier: str, raise_for_missing: bool = True) -> RecordRevision | None:
         """Load a record from the cache."""
         record_path = self._records_path / f"{file_identifier}.pickle"
         try:
             return self._load_record(record_path)
         except FileNotFoundError:
+            if not raise_for_missing:
+                return None
             raise RecordNotFoundError(file_identifier) from None
 
-    def _get_except(self, file_identifiers: list[str]) -> tuple[list[RecordRevisionSummary], list[RecordRevision]]:
-        """
-        Load records with specified exceptions.
-
-        All summaries are loaded in case they are referenced by included records
-        """
+    def _get_except(self, file_identifiers: list[str]) -> list[RecordRevision]:
+        """Load all records except specified file identifiers."""
         msg = "Loading all records from cache"
         if file_identifiers:
             msg = f"Loading all records from cache except {len(file_identifiers)} excluded"
         self._logger.info(msg)
 
-        records = []
+        record_paths = []
         for record_path in self._path.glob("records/*.pickle"):
             if record_path.stem in file_identifiers:
-                self._logger.info(f"Record '{record_path.stem}' excluded, skipping")
+                self._logger.debug(f"Record '{record_path.stem}' excluded, skipping")
                 continue
-            records.append(self._load_record(record_path))
+            record_paths.append(record_path)
 
-        return self._get_summaries(), records
+        return [self._load_record(record_path) for record_path in record_paths]
 
-    def _get_only(
-        self, file_identifiers: list[str], inc_related: bool
-    ) -> tuple[list[RecordRevisionSummary], list[RecordRevision]]:
-        """
-        Load specific records.
-
-        As this method is restrictive but some records are composites (e.g. physical maps with multiple sides), the
-        `inc_related` parameter can additionally include any directly related records for each selected record.
-
-        Note: So item summaries of related items can be rendered, Record Summaries for directly related records are
-        always included (whereas `inc_related` includes directly related records as full Records).
-        """
-        summaries = []
-        records = []
-
-        self._logger.info("Loading selected records")
+    def _include_records(self, file_identifiers: list[str]) -> list[str]:
+        """Load records related to specified file identifiers."""
+        related = set()
         for file_identifier in file_identifiers:
             try:
                 record = self._get_record(file_identifier)
-                records.append(record)
-                self._logger.info(f"Record '{file_identifier}' loaded")
             except RecordNotFoundError:
                 self._logger.warning(f"Record '{file_identifier}' not found in cache, skipping")
                 continue
 
-            related_identifiers = record.identification.aggregations.identifiers(exclude=[record.file_identifier])
-            if related_identifiers:
-                summaries.extend(self._get_summaries(related_identifiers))
+            relations = record.identification.aggregations.identifiers(exclude=[record.file_identifier])
+            self._logger.info(f"Selecting {len(relations)} records related to '{file_identifier}'.")
+            self._logger.debug(f"Related records: {relations}")
+            related.update(relations)
+        return list(related)
 
-        if not inc_related:
-            self._logger.info(f"{len(file_identifiers)} selected records loaded from cache without direct relations")
-            return summaries, records
+    def _get_only(self, file_identifiers: list[str]) -> list[RecordRevision]:
+        """
+        Load records only for specified file identifiers.
 
-        additional_identifiers = set()
-        for file_identifier in file_identifiers:
-            # load directly related records as Records (e.g. so all sides of a physical map are built)
-            record = self._get_record(file_identifier)
+        Records related to selected records, and records these records relate to, will all be returned [depth=2].
 
-            related_identifiers = record.identification.aggregations.identifiers(exclude=[record.file_identifier])
-            for related_identifier in related_identifiers:
-                related_record = self._get_record(related_identifier)
-                records.append(related_record)
-                sub_related_identifiers = related_record.identification.aggregations.identifiers(
-                    exclude=[related_record.file_identifier]
-                )
-                additional_identifiers.update(sub_related_identifiers)
+        This is needed to ensure related records are available relations for resources such as collections that are
+        comprised of other records, and/or physical maps, which are composites of multiple records.
 
-        # load summaries for all related records of directly related records
-        summaries.extend(self._get_summaries(list(additional_identifiers)))
+        For example:
+        - selected record A has aggregations to records C [a parent collection]
+            - record A is included as it is selected
+            - record C is included as it is related to A [depth=1]
+            - records D - M are included as they are related to C [depth=2]
+        - selected record X has aggregations to records Y and Z [two physical map sides]
+            - record X is included as it is selected
+            - records Y amd Z are included as they are related to X [depth=1]
+            - records C, Q, R, S are included as they related to either Y or Z [depth=2]
+        """
+        direct_identifiers = self._include_records(file_identifiers)
+        self._logger.info(f"Selecting {len(direct_identifiers)} directly related records [depth=1]")
 
-        self._logger.info(f"{len(file_identifiers)} selected records loaded from cache with direct relations")
-        return summaries, records
+        indirect_identifiers = self._include_records(direct_identifiers)
+        self._logger.info(f"Selecting {len(indirect_identifiers)} indirectly related records [depth=2]")
 
-    def get(
-        self, inc_records: list[str], exc_records: list[str], inc_related: bool
-    ) -> tuple[list[RecordRevisionSummary], list[RecordRevision]]:
+        selected = set(file_identifiers + direct_identifiers + indirect_identifiers)
+        self._logger.info(f"Loading {len(selected)} records")
+        records = [self._get_record(file_identifier, raise_for_missing=False) for file_identifier in selected]
+        # filter any 'None' values for originally selected records that were not found (due to `raise_for_missing=False`)
+        return [record for record in records if record is not None]
+
+    def get(self, inc_records: list[str], exc_records: list[str]) -> list[RecordRevision]:
         """
         Load some or all records.
+
+        To select all records set `inc_records` and `exc_records` to any empty list.
 
         This method is a router for the filtering pathway to use.
         """
@@ -436,7 +391,7 @@ class GitLabLocalCache:
         if not inc_records:
             return self._get_except(exc_records)
 
-        return self._get_only(inc_records, inc_related)
+        return self._get_only(inc_records)
 
     def get_hashes(self, file_identifiers: list[str] | None = None) -> dict[str, str]:
         """
@@ -474,7 +429,6 @@ class GitLabStore(Store):
     ) -> None:
         self._logger = logger
 
-        self._summaries: dict[str, RecordRevisionSummary] = {}
         self._records: dict[str, RecordRevision] = {}
 
         self._client = Gitlab(url=endpoint, private_token=access_token)
@@ -486,10 +440,6 @@ class GitLabStore(Store):
             logger=self._logger, path=self._cache_path, gitlab_client=self._client, project_id=self._project_id
         )
 
-    def __len__(self) -> int:
-        """Record count."""
-        return len(self._records)
-
     @cached_property
     def _project(self) -> Project:
         """
@@ -498,11 +448,6 @@ class GitLabStore(Store):
         Cached for lifetime of instance as caches are implicitly tied to a single project.
         """
         return self._client.projects.get(self._project_id)
-
-    @property
-    def summaries(self) -> list[RecordRevisionSummary]:
-        """Loaded RecordSummaries."""
-        return list(self._summaries.values())
 
     @property
     def records(self) -> list[RecordRevision]:
@@ -598,27 +543,23 @@ class GitLabStore(Store):
         self._project.commits.create(data)
         return stats
 
-    def populate(
-        self, inc_records: list[str] | None = None, exc_records: list[str] | None = None, inc_related: bool = False
-    ) -> None:
+    def populate(self, inc_records: list[str] | None = None, exc_records: list[str] | None = None) -> None:
         """
-        Load records and summaries from local cache into the local subset, optionally filtered by file identifier.
+        Load records from local cache into the local subset, optionally filtered by file identifier.
 
-        Existing summaries and records are preserved. Call `purge()` to clear before this method to reset the subset.
+        Existing records are preserved. Call `purge()` to clear before this method to reset the subset.
         """
         inc_records = inc_records or []
         exc_records = exc_records or []
-        summaries, records = self._cache.get(inc_records=inc_records, exc_records=exc_records, inc_related=inc_related)
-        self._summaries = {**self._summaries, **{summary.file_identifier: summary for summary in summaries}}
+        records = self._cache.get(inc_records=inc_records, exc_records=exc_records)
         self._records = {**self._records, **{record.file_identifier: record for record in records}}
 
     def purge(self) -> None:
         """
-        Clear in-memory records/summaries.
+        Clear in-memory records.
 
         Note this does not purge the underlying local cache.
         """
-        self._summaries = {}
         self._records = {}
 
     def get(self, file_identifier: str) -> RecordRevision:

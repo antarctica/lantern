@@ -33,7 +33,7 @@ from lantern.models.item.catalogue.elements import (
     Dates,
     FormattedDate,
     Identifiers,
-    ItemSummaryCatalogue,
+    ItemCatalogueSummary,
     Maintenance,
 )
 from lantern.models.item.catalogue.enums import Licence, ResourceTypeIcon
@@ -95,7 +95,7 @@ class ItemsTab(Tab):
         return "far fa-grip-horizontal"
 
     @property
-    def items(self) -> list[ItemSummaryCatalogue]:
+    def items(self) -> list[ItemCatalogueSummary]:
         """Items that form the current item."""
         return self._items
 

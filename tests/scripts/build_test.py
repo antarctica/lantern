@@ -38,8 +38,8 @@ class FakeCatalogue:
         """Load records into catalogue store and site exporter."""
         self._logger.info("Loading records")
         self._store.populate(inc_records=inc_records, inc_related=inc_related)
-        self._site.loads(summaries=self._store.summaries, records=self._store.records)
-        self._logger.info(f"Loaded {len(self._store.summaries)} summaries and {len(self._store.records)} records")
+        self._site.loads(records=self._store.records)
+        self._logger.info(f"Loaded {len(self._store.records)} records")
 
     @time_task(label="Purge")
     def purge(self) -> None:

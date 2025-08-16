@@ -54,8 +54,7 @@ For example a Record with file identifier `123abc` is stored as `/records/12/3a/
 - only include specific file identifiers (and optionally records related to these selections)
 - exclude specific file identifiers
 
-These options cannot be used together. Including related records is needed where full rather than Summary Records are
-needed. For example to build physical maps where full Records are needed for each side.
+These options cannot be used together. Including related records is needed to build collections or physical maps.
 
 > [!NOTE]
 > The `GitLabStore` can be later emptied using `store.purge()`.

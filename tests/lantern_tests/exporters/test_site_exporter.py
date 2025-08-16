@@ -152,7 +152,7 @@ class TestSitePageExporter:
         """Can publish site pages to S3."""
         expected = [
             "404.html",
-            "legal/accessibility.html",
+            "legal/accessibility/index.html",
             "legal/cookies/index.html",
             "legal/copyright/index.html",
             "legal/privacy/index.html",

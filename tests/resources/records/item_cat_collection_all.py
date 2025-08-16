@@ -151,7 +151,7 @@ for collection_member in collection_members:
             initiative_type=AggregationInitiativeCode.COLLECTION,
         ),
     )
-# add a related collection
+# add a peer collection
 record.identification.aggregations.append(
     Aggregation(
         identifier=Identifier(
@@ -163,3 +163,8 @@ record.identification.aggregations.append(
         initiative_type=AggregationInitiativeCode.COLLECTION,
     )
 )
+# Can't add a parent collection as root record
+# Can't add a peer cross-reference as a collection and already has a related collection
+# Can't add a superseded peer as no suitable target (is added in max product)
+# Can't add opposite side relation as not a physical map side
+# Can't add a parent physical map as not a physical map side

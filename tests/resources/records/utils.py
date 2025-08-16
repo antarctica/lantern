@@ -56,8 +56,7 @@ def make_record(
 
     record.identification.edition = "1"
 
-    if purpose:
-        record.identification.purpose = purpose
+    record.identification.purpose = abstract if purpose is None else purpose
 
     record.identification.contacts = Contacts(
         [

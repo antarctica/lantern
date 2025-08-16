@@ -14,7 +14,6 @@ from lantern.exporters.base import Exporter as BaseExporter
 from lantern.exporters.records import RecordsExporter
 from lantern.exporters.website import WebsiteSearchExporter
 from lantern.lib.metadata_library.models.record import Record
-from lantern.lib.metadata_library.models.record.summary import RecordSummary
 from lantern.models.templates import PageMetadata
 
 
@@ -145,7 +144,6 @@ class SiteIndexExporter(Exporter):
         """Initialise exporter."""
         super().__init__(config=config, logger=logger, s3=s3)
         self._index_path = self._config.EXPORT_PATH / "-" / "index" / "index.html"
-        self._summaries: list[RecordSummary] = []
         self._records: list[Record] = []
         self._record_ids = set()
 
@@ -154,9 +152,8 @@ class SiteIndexExporter(Exporter):
         """Exporter name."""
         return "Site Index"
 
-    def loads(self, summaries: list[RecordSummary], records: list[Record]) -> None:
+    def loads(self, records: list[Record]) -> None:
         """Populate exporter."""
-        self._summaries = summaries
         self._records = records
         self._record_ids = {record.file_identifier for record in records}
 
@@ -183,30 +180,14 @@ class SiteIndexExporter(Exporter):
         """Version 1 implementation."""
         item_links = "\n".join(
             [
-                f'<li><a href="/items/{summary.file_identifier}/index.html">[{summary.hierarchy_level.name}] {summary.file_identifier} - {summary.title} ({summary.edition})</a></li>'
-                for summary in self._summaries
+                f'<li><a href="/items/{record.file_identifier}/index.html">[{record.hierarchy_level.name}] {record.file_identifier} - {record.identification.title} ({record.identification.edition})</a></li>'
+                for record in self._records
             ]
         )
         return f"<section><h2>V1</h2><ul>{item_links}</ul></section>"
 
     def _dumps_v2(self) -> str:
         """Version 2 implementation."""
-        summary_rows = "\n".join(
-            [
-                f"""
-                <tr>
-                    <td>ItemSummary</td>
-                    <td>{summary.hierarchy_level.name}</td>
-                    <td>{summary.file_identifier}</td>
-                    <td>{summary.title}</td>
-                    <td>{summary.edition}</td>
-                    <td>-</td>
-                </tr>
-                """
-                for summary in self._summaries
-                if summary.file_identifier not in self._record_ids
-            ]
-        )
         record_rows = "\n".join(
             [
                 f"""
@@ -252,7 +233,6 @@ class SiteIndexExporter(Exporter):
                     </tr>
                 </thead>
                 <tbody>
-                    {summary_rows}
                     {record_rows}
                     {alias_rows}
                 </tbody>
@@ -394,10 +374,10 @@ class SiteExporter(Exporter):
         self._logger.info("Purging S3 publishing bucket")
         self._s3_utils.empty_bucket()
 
-    def loads(self, summaries: list[RecordSummary], records: list[Record]) -> None:
+    def loads(self, records: list[Record]) -> None:
         """Populate exporter."""
-        self._records_exporter.loads(summaries=summaries, records=records)
-        self._index_exporter.loads(summaries=summaries, records=records)
+        self._records_exporter.loads(records=records)
+        self._index_exporter.loads(records=records)
         self._website_exporter.loads(records=records)
 
     def export(self) -> None:

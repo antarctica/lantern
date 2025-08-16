@@ -1,7 +1,6 @@
 from abc import ABC, abstractmethod
 
 from lantern.lib.metadata_library.models.record import Record
-from lantern.lib.metadata_library.models.record.summary import RecordSummary
 
 
 class RecordNotFoundError(Exception):
@@ -24,16 +23,9 @@ class Store(ABC):
     This class defines the abstract interface Stores must implement to manage Records and RecordSummaries.
     """
 
-    @abstractmethod
     def __len__(self) -> int:
         """Record count."""
-        ...
-
-    @property
-    @abstractmethod
-    def summaries(self) -> list[RecordSummary]:
-        """All record summaries."""
-        ...
+        return len(self.records)
 
     @property
     @abstractmethod

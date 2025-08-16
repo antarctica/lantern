@@ -12,15 +12,17 @@ import pytest
 from bs4 import BeautifulSoup
 from jinja2 import Environment, PackageLoader, select_autoescape
 
-from lantern.lib.metadata_library.models.record.elements.common import Date
-from lantern.lib.metadata_library.models.record.elements.identification import Constraint, Constraints
+from lantern.lib.metadata_library.models.record import Record
+from lantern.lib.metadata_library.models.record.elements.common import Date, Identifier
+from lantern.lib.metadata_library.models.record.elements.identification import Aggregation, Constraint, Constraints
 from lantern.lib.metadata_library.models.record.enums import (
+    AggregationAssociationCode,
     ConstraintRestrictionCode,
     ConstraintTypeCode,
     HierarchyLevelCode,
 )
-from lantern.lib.metadata_library.models.record.summary import RecordSummary
-from lantern.models.item.catalogue.elements import ItemSummaryCatalogue
+from lantern.models.item.catalogue.elements import ItemCatalogueSummary
+from tests.conftest import _record_config_minimal_iso
 
 
 class TestPageHeader:
@@ -64,20 +66,16 @@ class TestPageHeader:
 class TestItemSummary:
     """Test item summary common macro."""
 
-    date_ = Date(date=date(2023, 10, 31))
-    summary_base = ItemSummaryCatalogue(
-        record_summary=RecordSummary(
-            file_identifier="x",
-            hierarchy_level=HierarchyLevelCode.PRODUCT,
-            date_stamp=date_.date,
-            title="y",
-            purpose="z",
-            creation=date_,
-        )
-    )
+    record = Record.loads(_record_config_minimal_iso())
+    record.file_identifier = "x"
+    record.hierarchy_level = HierarchyLevelCode.PRODUCT
+    record.identification.title = "y"
+    record.identification.purpose = "z"
+
+    summary_base = ItemCatalogueSummary(record=record)
 
     @staticmethod
-    def _render(item: ItemSummaryCatalogue) -> str:
+    def _render(item: ItemCatalogueSummary) -> str:
         _loader = PackageLoader("lantern", "resources/templates")
         jinja = Environment(loader=_loader, autoescape=select_autoescape(), trim_blocks=True, lstrip_blocks=True)
         template = """{% import '_macros/common.html.j2' as com %}{{ com.item_summary(item) }}"""
@@ -115,7 +113,7 @@ class TestItemSummary:
     def test_edition(self, edition: str | None):
         """Can get optional edition with expected value from summary."""
         summary = deepcopy(self.summary_base)
-        summary._record_summary.edition = edition
+        summary._record.identification.edition = edition
         expected = summary.fragments.edition
         html = BeautifulSoup(self._render(summary), parser="html.parser", features="lxml")
 
@@ -126,7 +124,7 @@ class TestItemSummary:
     def test_published(self, published: Date | None):
         """Can get optional publication date with expected value from summary."""
         summary = deepcopy(self.summary_base)
-        summary._record_summary.publication = published
+        summary._record.identification.dates.publication = published
         expected = summary.fragments.published
         html = BeautifulSoup(self._render(summary), parser="html.parser", features="lxml")
 
@@ -138,7 +136,14 @@ class TestItemSummary:
     def test_items(self, value: int | None):
         """Can get optional child item count with expected value from summary."""
         summary = deepcopy(self.summary_base)
-        summary._record_summary.child_aggregations_count = value
+
+        agg = Aggregation(
+            identifier=Identifier(identifier="x", namespace="x"),
+            association_type=AggregationAssociationCode.IS_COMPOSED_OF,
+        )
+        for _ in range(value):
+            summary._record.identification.aggregations.append(agg)
+
         expected = summary.fragments.children
         html = BeautifulSoup(self._render(summary), parser="html.parser", features="lxml")
 
@@ -175,7 +180,7 @@ class TestItemSummary:
         Only shown if restricted.
         """
         summary = deepcopy(self.summary_base)
-        summary._record_summary.constraints = Constraints([value])
+        summary._record.identification.constraints = Constraints([value])
         html = BeautifulSoup(self._render(summary), parser="html.parser", features="lxml")
 
         result = html.find(lambda tag: tag.name == "span" and "Restricted" in tag.get_text())

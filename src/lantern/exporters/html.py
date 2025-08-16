@@ -7,7 +7,6 @@ from mypy_boto3_s3 import S3Client
 from lantern.config import Config
 from lantern.exporters.base import ResourceExporter
 from lantern.lib.metadata_library.models.record import Record
-from lantern.lib.metadata_library.models.record.summary import RecordSummary
 from lantern.models.item.catalogue import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
 
@@ -28,7 +27,6 @@ class HtmlExporter(ResourceExporter):
         s3: S3Client,
         record: Record,
         export_base: Path,
-        get_record_summary: Callable[[str], RecordSummary],
         get_record: Callable[[str], Record],
     ) -> None:
         """
@@ -41,7 +39,6 @@ class HtmlExporter(ResourceExporter):
         super().__init__(
             config=config, logger=logger, s3=s3, record=record, export_base=export_base, export_name=export_name
         )
-        self._get_summary = get_record_summary
         self._get_record = get_record
 
     @property
@@ -61,7 +58,6 @@ class HtmlExporter(ResourceExporter):
         return item_class(
             config=self._config,
             record=self._record,
-            get_record_summary=self._get_summary,
             get_record=self._get_record,
         ).render()
 

@@ -10,7 +10,6 @@ from lantern.exporters.base import S3Utils
 from lantern.exporters.records import RecordsExporter
 from lantern.lib.metadata_library.models.record import Record
 from lantern.lib.metadata_library.models.record.elements.common import Identifier
-from lantern.lib.metadata_library.models.record.summary import RecordSummary
 
 
 class TestRecordsExporter:
@@ -35,26 +34,17 @@ class TestRecordsExporter:
 
         assert isinstance(exporter, RecordsExporter)
         assert exporter.name == "Records"
-        assert len(exporter._summaries) == 0
         assert len(exporter._records) == 0
 
     def test_loads(self, fx_exporter_records: RecordsExporter, fx_record_minimal_item_catalogue: Record):
         """Can load records and summaries."""
-        summaries = [RecordSummary.loads(fx_record_minimal_item_catalogue)]
         records = [fx_record_minimal_item_catalogue]
-        fx_exporter_records.loads(summaries, records)
+        fx_exporter_records.loads(records)
 
     def test_get_record(self, fx_exporter_records_pop: RecordsExporter, fx_record_minimal_item_catalogue: Record):
         """Can get record."""
         record = fx_record_minimal_item_catalogue
         assert fx_exporter_records_pop._get_record(record.file_identifier) == record
-
-    def test_get_record_summary(
-        self, fx_exporter_records_pop: RecordsExporter, fx_record_minimal_item_catalogue: Record
-    ):
-        """Can get record summary."""
-        summary = RecordSummary.loads(fx_record_minimal_item_catalogue)
-        assert fx_exporter_records_pop._get_record_summary(summary.file_identifier) == summary
 
     def test_get_exporters(self, fx_exporter_records_pop: RecordsExporter, fx_record_minimal_item_catalogue: Record):
         """Can get exporter instances."""

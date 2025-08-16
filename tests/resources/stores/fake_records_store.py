@@ -1,8 +1,7 @@
 import logging
 
 from lantern.lib.metadata_library.models.record import Record
-from lantern.lib.metadata_library.models.record.summary import RecordSummary
-from lantern.models.record.revision import RecordRevision, RecordRevisionSummary
+from lantern.models.record.revision import RecordRevision
 from lantern.stores.base import RecordNotFoundError, Store
 from tests.resources.records.item_cat_collection_all import record as collection_all_supported
 from tests.resources.records.item_cat_collection_min import record as collection_min_supported
@@ -29,13 +28,7 @@ class FakeRecordsStore(Store):
 
     def __init__(self, logger: logging.Logger) -> None:
         self._logger = logger
-
-        self._summaries: list[RecordSummary | RecordRevisionSummary] = []
         self._records: list[Record | RecordRevision] = []
-
-    def __len__(self) -> int:
-        """Record count."""
-        return len(self._records)
 
     @property
     def _fake_records(self) -> list[Record | RecordRevision]:
@@ -69,11 +62,6 @@ class FakeRecordsStore(Store):
         }
 
     @property
-    def summaries(self) -> list[RecordSummary | RecordRevisionSummary]:
-        """All record summaries."""
-        return self._summaries
-
-    @property
     def records(self) -> list[Record | RecordRevision]:
         """All records."""
         return self._records
@@ -82,11 +70,6 @@ class FakeRecordsStore(Store):
         """Load test records, optionally limited to a set of file identifiers and their direct dependencies."""
         if inc_records is None:
             inc_records = []
-
-        self._summaries = [RecordSummary.loads(record) for record in self._fake_records if isinstance(record, Record)]
-        self._summaries.extend(
-            [RecordRevisionSummary.loads(record) for record in self._fake_records if isinstance(record, RecordRevision)]
-        )
 
         if not inc_records:
             self._logger.info("Loading all test records")

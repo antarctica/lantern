@@ -30,7 +30,7 @@ from lantern.models.item.catalogue.tabs import (
     RelatedTab,
 )
 from lantern.models.record.revision import RecordRevision
-from tests.conftest import _get_record_summary
+from tests.conftest import _get_record
 
 
 class TestItemCatalogue:
@@ -41,7 +41,7 @@ class TestItemCatalogue:
         item = ItemCatalogue(
             config=fx_config,
             record=fx_record_minimal_item_catalogue,
-            get_record_summary=_get_record_summary,
+            get_record=_get_record,
         )
         assert isinstance(item, ItemCatalogue)
         assert item._record == fx_record_minimal_item_catalogue
@@ -79,7 +79,7 @@ class TestItemCatalogue:
             _ = ItemCatalogue(
                 config=fx_config,
                 record=fx_record_minimal_item_catalogue,
-                get_record_summary=_get_record_summary,
+                get_record=_get_record,
             )
 
     @pytest.mark.parametrize("has_revision", [False, True])

@@ -9,7 +9,6 @@ from pytest_mock import MockerFixture
 
 from lantern.exporters.site import SiteExporter, SiteIndexExporter, SitePagesExporter, SiteResourcesExporter
 from lantern.lib.metadata_library.models.record import Record
-from lantern.lib.metadata_library.models.record.summary import RecordSummary
 
 
 class TestSiteIndexExporter:
@@ -27,14 +26,13 @@ class TestSiteIndexExporter:
 
         assert isinstance(exporter, SiteIndexExporter)
         assert exporter.name == "Site Index"
-        assert len(exporter._summaries) == 0
+        assert len(exporter._records) == 0
 
     def test_loads(self, fx_exporter_site_index: SiteIndexExporter, fx_record_minimal_item_catalogue: Record):
         """Can load summaries."""
         records = [fx_record_minimal_item_catalogue]
-        summaries = [RecordSummary.loads(fx_record_minimal_item_catalogue)]
-        fx_exporter_site_index.loads(summaries=summaries, records=records)
-        assert len(fx_exporter_site_index._summaries) == len(summaries)
+        fx_exporter_site_index.loads(records=records)
+        assert len(fx_exporter_site_index._records) == len(records)
 
     def test_dumps_v1(self, fx_exporter_site_index_pop: SiteIndexExporter):
         """Can dump site index (V1)."""
@@ -312,7 +310,6 @@ class TestSiteExporter:
 
         assert isinstance(exporter, SiteExporter)
         assert exporter.name == "Site"
-        assert len(exporter._index_exporter._summaries) == 0
         assert len(exporter._records_exporter._records) == 0
 
     def test_purge(
@@ -360,17 +357,15 @@ class TestSiteExporter:
     def test_loads(self, fx_exporter_site: SiteExporter, fx_record_minimal_item_catalogue: Record):
         """Can load summaries and records."""
         records = [fx_record_minimal_item_catalogue]
-        summaries = [RecordSummary.loads(record) for record in records]
-        fx_exporter_site.loads(summaries, records)
+        fx_exporter_site.loads(records)
 
-        assert len(fx_exporter_site._index_exporter._summaries) == len(summaries)
         assert len(fx_exporter_site._records_exporter._records) == len(records)
 
     def test_export(self, fx_exporter_site: SiteExporter, fx_record_minimal_item_catalogue: Record):
         """Can export all site components to local files."""
         record = fx_record_minimal_item_catalogue
         site_path = fx_exporter_site._config.EXPORT_PATH
-        fx_exporter_site.loads([RecordSummary.loads(record)], [record])
+        fx_exporter_site.loads([record])
         expected = [
             site_path.joinpath("favicon.ico"),
             site_path.joinpath("404.html"),
@@ -393,7 +388,7 @@ class TestSiteExporter:
         """Can publish site index to S3."""
         s3 = fx_exporter_site._index_exporter._s3_utils._s3
         record = fx_record_minimal_item_catalogue
-        fx_exporter_site.loads([RecordSummary.loads(record)], [record])
+        fx_exporter_site.loads([record])
         expected = [
             "favicon.ico",
             "404.html",

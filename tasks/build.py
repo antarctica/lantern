@@ -46,17 +46,16 @@ class ToyCatalogue:
 
     # noinspection PyMethodOverriding
     @time_task(label="Load")
-    def loads(self, inc_records: list[str], exc_records: list[str], inc_related: bool) -> None:
+    def loads(self, inc_records: list[str], exc_records: list[str]) -> None:
         """Load records into catalogue store and site exporter."""
         self._logger.info("Loading records")
-        self._store.populate(inc_records=inc_records, exc_records=exc_records, inc_related=inc_related)
-        self._site.loads(summaries=self._store.summaries, records=self._store.records)
-        self._logger.info(f"Loaded {len(self._store.summaries)} summaries and {len(self._store.records)} records")
+        self._store.populate(inc_records=inc_records, exc_records=exc_records)
+        self._site.loads(records=self._store.records)
 
     @time_task(label="Purge")
     def purge(self) -> None:
         """Empty records from catalogue store and site exporter."""
-        self._logger.info("Purging catalogue store and site exporter outputs")
+        self._logger.info("Purging store and site exporter outputs")
         self._store.purge()
         self._site.purge()
 
@@ -75,9 +74,8 @@ def main() -> None:
     """Entrypoint."""
     inc_records = []
     exc_records = []
-    inc_related = True
-    export = False
-    publish = True
+    export = True
+    publish = False
     purge = False
 
     init_logging()
@@ -97,7 +95,7 @@ def main() -> None:
 
     if purge:
         cat.purge()
-    cat.loads(inc_records=inc_records, exc_records=exc_records, inc_related=inc_related)
+    cat.loads(inc_records=inc_records, exc_records=exc_records)
     if export:
         cat.export()
     if publish:

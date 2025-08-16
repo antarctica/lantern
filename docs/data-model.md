@@ -44,26 +44,6 @@ For use within Python, a Record Revision data class (`lantern.models.record.revi
 > [!NOTE]
 > Unless stated otherwise, references to 'Records' elsewhere refer to the `RecordRevision` data class.
 
-### Record summaries
-
-Conceptually, record summaries are a lightweight representations of a record entity, typically used for listing sets of
-records. They contain a subset of record properties, such as title, identifiers, publication date, etc.
-
-> [!NOTE]
-> There is no formal specification for record summaries. See the class definition for the properties they include.
-
-A Record Summary data class (`lantern.lib.metadata_library.models.record.summary.RecordSummary`) and
-(`lantern.models.record.revision.RecordRevisionSummary`), a subclass corresponding to the `RecordRevision` class, are
-used to implement record summaries. `RecordSummary`/`RecordRevisionSummary` instances can be configured directly, or
-created from a `Record`/`RecordRevision` instance.
-
-> [!NOTE]
-> Unless stated otherwise, references to 'Record Summaries' elsewhere refer to the `RecordRevisionSummary` data class.
-
-> [!NOTE]
-> The Record Summary model is considered part of the BAS Metadata Library but was developed for this project
-and not yet upstreamed. See the [Library](/docs/libraries.md#bas-metadata-library) docs for more information.
-
 ### Record authoring
 
 Records can be authored using any tool or system that can produce a valid record configuration. These may be created
@@ -136,13 +116,6 @@ For example:
 - `Item.kv` returns a dict of key-values if `identification.supplemental_information` is a suitable JSON encoded object
 - `Item.access` returns a local access type enumeration value by parsing access constraints from `identification.constraints`
 
-### Item summaries
-
-Item Summaries are created from Record Summaries and include relevant convenience properties.
-
-The `lantern.models.item.base.ItemSummaryBase` class provides a base implementation that can be subclassed by Item
-subclasses if needed.
-
 ### Catalogue items
 
 Catalogue Items (`lantern.models.item.catalogue.ItemCatalogue`) are tightly coupled to the Data Catalogue and its user
@@ -152,7 +125,7 @@ interface. Features include:
 - local enums mapping Record properties to UI values for improved readability
 - a `render()` method to output an HTML page for each item
 - classes (`lantern.models.item.catalogue.distributions`) for processing distribution options for the catalogue UI
-- a local summary implementation (`lantern.models.item.catalogue.elements.ItemSummaryCatalogue`)
+- an item summary implementation (`lantern.models.item.catalogue.elements.ItemSummaryCatalogue`)
 
 ### Special catalogue items
 

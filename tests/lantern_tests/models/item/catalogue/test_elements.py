@@ -395,6 +395,22 @@ class TestIdentifiers:
         [
             ([], []),
             (
+                [Identifier(identifier="x/x", href="https://data.bas.ac.uk/x/x", namespace=ALIAS_NAMESPACE)],
+                [Link(value="x/x", href="/x/x", external=False)],
+            ),
+        ],
+    )
+    def test_aliases(self, identifiers: list[Identifier], expected: list[str]):
+        """Can get any aliases."""
+        identifiers = Identifiers(RecordIdentifiers(identifiers))
+        result = identifiers.aliases
+        assert result == expected
+
+    @pytest.mark.parametrize(
+        ("identifiers", "expected"),
+        [
+            ([], []),
+            (
                 [
                     Identifier(
                         identifier="10.123/30825673-6276-4e5a-8a97-f97f2094cd25",

@@ -401,6 +401,18 @@ class Identifiers(RecordIdentifiers):
         """
         return [self._make_gitlab_issue_ref(identifier.href) for identifier in self.filter(GITLAB_NAMESPACE)]
 
+    @property
+    def aliases(self) -> list[Link]:
+        """
+        Aliases for Item.
+
+        Alias URLs are converted to relative links so they can be tested in non-production environments.
+        """
+        return [
+            Link(href=identifier.href.replace(f"https://{CATALOGUE_NAMESPACE}", ""), value=identifier.identifier)
+            for identifier in self.filter(ALIAS_NAMESPACE)
+        ]
+
 
 class Maintenance(RecordMaintenance):
     """

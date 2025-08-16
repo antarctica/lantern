@@ -226,7 +226,6 @@ class Aggregations:
 
     def _filter(
         self,
-        namespace: str | None = None,
         associations: AggregationAssociationCode | list[AggregationAssociationCode] | None = None,
         initiatives: AggregationInitiativeCode | list[AggregationInitiativeCode] | None = None,
     ) -> list[ItemCatalogueSummary]:
@@ -234,8 +233,12 @@ class Aggregations:
         Filter aggregations as item summaries, by namespace and/or association(s) and/or initiative(s).
 
         Wrapper around Record Aggregations.filter() returning results as ItemSummaryCatalogue instances.
+
+        Note: Aggregations are scoped to the BAS Data Catalogue namespace so they can be returned as item summaries.
         """
-        results = self._aggregations.filter(namespace=namespace, associations=associations, initiatives=initiatives)
+        results = self._aggregations.filter(
+            namespace=CATALOGUE_NAMESPACE, associations=associations, initiatives=initiatives
+        )
         return [self._summaries[aggregation.identifier.identifier] for aggregation in results]
 
     @property

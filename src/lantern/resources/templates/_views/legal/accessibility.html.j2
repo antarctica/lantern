@@ -2,125 +2,66 @@
 {% import '_macros/common.html.j2' as com %}
 {% import '_macros/legal.html.j2' as legal %}
 
-{% set header_main = "Accessibility Statement" %}
+{% set header_main = "Basic Accessibility Check" %}
 
 {% block legal_content %}
-  {% call legal.policy_section(slug='accessibility-scope', title='About this statement') %}
+  {% call legal.policy_section(slug='accessibility-notice', title='Accessibility notice') %}
     <p>
-      This accessibility statement applies to the <em>BAS Data Catalogue</em> available at
+      A {{ com.ext_link_a(href='https://www.gov.uk/government/publications/doing-a-basic-accessibility-check-if-you-cant-do-a-detailed-one/doing-a-basic-accessibility-check-if-you-cant-do-a-detailed-one', value="Basic accessibility check") }}
+      has been completed for this website, the <em>BAS Data Catalogue</em>, available at
       <a class="{{ com.link_classes() }}" href="https://data.bas.ac.uk">data.bas.ac.uk</a> (and several preview URLs).
-      Accessibility statements from other BAS websites do not apply here.
     </p>
-    <p>This website is run by the {{ com.ext_link_a(href='https://www.bas.ac.uk/', value="British Antarctic Survey (BAS)") }}.</p>
-  {% endcall %}
-
-  {% call legal.policy_section(slug='accessibility-how', title='Supported accessibility options') %}
-    <p>We want as many people as possible to be able to use this website. You should be able to:</p>
-    <ul class="list-disc pl-5">
-        <li>change colours, contrast levels and fonts using browser or device settings</li>
-        <li>zoom in up to 400% without the text spilling off the screen</li>
-        <li>navigate most of the website using a keyboard or speech recognition software</li>
-        <li>listen to most of the website using a screen reader</li>
-    </ul>
-    <p>AbilityNet has advice on {{ com.ext_link_a(href='https://mcmw.abilitynet.org.uk/', value="making your device easier to use") }} if you have a disability.</p>
-  {% endcall %}
-
-  {% call legal.policy_section(slug='accessibility-summary', title='Accessibility status') %}
-    {% call com.alert(variant='red') %}
-      Additional items likely need adding.
+    {% call com.alert(variant='blue') %}
+      This check is not intended as a formal accessibility assessment.
     {% endcall %}
-    <p>Parts of this website are not fully accessible. For example:</p>
+  {% endcall %}
+
+  {% call legal.policy_section(slug='accessibility-exclusions', title='Limitations of this check') %}
+    <p>This check does not cover the homepage for this website as it belongs to a separate service.</p>
+    <p>This check does not cover downloads linked to from item pages as:</p>
     <ul class="list-disc pl-5">
-      <li>some descriptions in pages describing item are not written in plain English</li>
-      <li>some item downloads have poor colour contrast</li>
-      <li>many images do not have image descriptions</li>
-      <li>some images used to convey information have poor colour contrast</li>
-      <li>some images are low resolution</li>
-      <li>many item downloads in PDF format are not accessible</li>
+      <li>they use technical and/or scientific data formats that cannot be easily provided in an accessible alternative</li>
+      <li>they contain detailed and specialist information that cannot be easily conveyed in plain language</li>
+    </ul>
+    <p>This check does not cover interactive maps used to show the geographic extent of items.</p>
+  {% endcall %}
+
+  {% call legal.policy_section(slug='accessibility-sample', title='Content reviewed by this check') %}
+    <p>A sample of this website's content was reviewed including:</p>
+    <ul class="list-disc pl-5">
+      <li>legal pages (including this accessibility check)</li>
+      <li>a collection page</li>
+      <li>an item page (including the item enquiry form but excluding the item extent map)</li>
     </ul>
   {% endcall %}
 
-  {% call legal.policy_section(slug='accessibility-legal', title='Technical information about this website’s accessibility') %}
-    <p>
-      The British Antarctic Survey is committed to making its websites accessible, in accordance with the Public Sector
-      Bodies (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018.
-    </p>
-    <p>
-      This website is partially compliant with the
-      {{ com.ext_link_a(href='https://www.w3.org/TR/WCAG22/', value="Web Content Accessibility Guidelines version 2.2") }}
-      AA standard, due to the non-compliances and exemptions listed below.
-    </p>
-  {% endcall %}
-
-  {% call legal.policy_section(slug='accessibility-limitations', title='Non-accessible content') %}
-    {% call com.alert(variant='red') %}
-      Needs reformatting to break up each item
-      Content needs verifying.
-      Additional items likely need adding.
-    {% endcall %}
-    <p>The content listed below is non-accessible for the following reasons.</p>
-    <ol class="list-decimal pl-5">
-      <li>Some images do not always have suitable image descriptions. This fails WCAG 2.2 success criterion 1.1.1 (Non-text Content).</li>
-      <li>Some images use colour as the only way to convey meaning. This fails WCAG 2.2 success criterion 1.4.1 (Use of Color).</li>
-      <li>Some images include text with poor colour contrast to its background. This fails WCAG 2.2 success criterion 1.4.3 (Contrast (Minimum)).</li>
-      <li>Some images include elements with poor colour contrast to the background. This fails WCAG 2.2 success criterion 1.4.11 (Non-text Contrast).</li>
-      <li>Feedback links at top and bottom of each page behave in an unexpected way that could be confusing for screen reader users. This fails WCAG 2.2 success criterion 4.1.2 (Name, Role, Value).</li>
-    </ol>
-    <p>
-      Most downloads are in non-HTML formats, such as images and PDF, and specialist scientific or geospatial formats
-      such as GeoPackages. These formats are not accessible in a number of ways including missing text alternatives.
-    </p>
-  {% endcall %}
-
-  {% call legal.policy_section(slug='accessibility-exempt', title='Exempted content') %}
-    {% call com.alert(variant='red') %}
-      Needs an intro sentence.
-      Content needs reviewing.
-    {% endcall %}
+  {% call legal.policy_section(slug='accessibility-review', title='Results of this check') %}
+    <p>Some issues were found when reviewing the sample content:</p>
     <ul class="list-disc pl-5">
-      <li>we cannot include meaningful alternative text to most images due to limitations with the standard used to populate item pages</li>
-      <li>we do not plan to provide accessible alternatives to interactive maps because maps are exempt from these accessibility regulations</li>
-      <li>we do not plan to provide accessible alternatives to static maps represented as images because maps are exempt from these accessibility regulations</li>
+      <li>the website feedback widget does not work when CSS styles are disabled</li>
+      <li>some links within item descriptions may not include sufficient context (such as DOIs)</li>
+      <li>whilst images include alternate text, values do only explain the context of each image, not their contents</li>
+      <li>item tabs are not visually highlighted when using a keyword to navigate</li>
+      <li>some page elements have poor colour contrast</li>
     </ul>
+    <p>We will regularly review these issues, and repeat this review, as part of improving and maintaining this website.</p>
   {% endcall %}
 
-  {% call legal.policy_section(slug='accessibility-roadmap', title='What we’re doing to improve accessibility') %}
-    <p>As we continue to develop this website and its content we will regularly re-audit and test the website for accessibility issues.</p>
-  {% endcall %}
-
-  {% call legal.policy_section(slug='accessibility-preparation', title='Preparation of this accessibility statement') %}
-    <p>This statement was prepared on 15 August 2025. It was last reviewed 15 August 2025.</p>
+  {% call legal.policy_section(slug='accessibility-feedback', title='Feedback and requesting accessible content') %}
     <p>
-      A representative sample of pages in this website was tested in August 2025 against the WCAG 2.2 AA standard.
-      This was a self-assessment carried out by the British Antarctic Survey.
+      To request information on this website in a different format please contact the
+      {{ com.ext_link_a(href='mailto:webapps@bas.ac.uk', value="BAS Web & Applications Team") }} including:
     </p>
-  {% endcall %}
-
-  {% call legal.policy_section(slug='accessibility-feedback', title='Feedback and contact information') %}
-    <p>To request information on this website in a different format please contact ?.</p>
-    <p>Include in your message:</p>
     <ul class="list-disc pl-5">
       <li>the web address (URL) of the content</li>
       <li>your email address and name</li>
-      <li>the format you need - for example, plain text, braille, BSL, large print or audio recording</li>
+      <li>the format you need - for example, large print</li>
     </ul>
-    <p>If you find any problems not listed on this page or think we’re not meeting accessibility requirements, please contact: ?.</p>
   {% endcall %}
 
-  {% call legal.policy_section(slug='accessibility-enforcement', title='Enforcement procedure') %}
-    <p>
-      The Equality and Human Rights Commission (EHRC) is responsible for enforcing the Public Sector Bodies
-      (Websites and Mobile Applications) (No. 2) Accessibility Regulations 2018 (the ‘accessibility regulations’).
-    </p>
-    <p>
-      If you’re not happy with how we respond to your complaint, contact the
-      {{ com.ext_link_a(href='https://www.equalityadvisoryservice.com/', value="Equality Advisory and Support Service (EASS)") }}.
-    </p>
-  {% endcall %}
-
-  {% call legal.policy_section(slug='changelog', title='Changes to this policy') %}
+  {% call legal.policy_section(slug='changelog', title='Changes to this page') %}
     {% call legal.policy_subsection(title='2025-08-15') %}
-      <p>Initial policy.</p>
+      <p>Initial accessibility check.</p>
     {% endcall %}
   {% endcall %}
 {% endblock %}

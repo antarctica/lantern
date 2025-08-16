@@ -1,5 +1,4 @@
 import json
-from collections.abc import Callable
 from json import JSONDecodeError
 from typing import Any
 
@@ -11,12 +10,11 @@ from lantern.lib.metadata_library.models.record.enums import (
     AggregationInitiativeCode,
     HierarchyLevelCode,
 )
-from lantern.lib.metadata_library.models.record.summary import RecordSummary
 from lantern.models.item.catalogue import AdditionalInfoTab as CatalogueAdditionalInfoTab
 from lantern.models.item.catalogue import Extent as CatalogueExtent
 from lantern.models.item.catalogue import ExtentTab as CatalogueExtentTab
 from lantern.models.item.catalogue import ItemCatalogue
-from lantern.models.item.catalogue.elements import ItemSummaryCatalogue
+from lantern.models.item.catalogue.elements import ItemCatalogueSummary
 
 
 def side_index_label(index: int) -> str:
@@ -145,10 +143,6 @@ class ItemCataloguePhysicalMap(ItemCatalogue):
     - item summaries for each side
     """
 
-    def __init__(self, get_record: Callable[[str], Record], **kwargs: Any) -> None:
-        super().__init__(**kwargs)
-        self._get_record = get_record
-
     @classmethod
     def matches(cls, record: Record) -> bool:
         """Whether this class matches the record."""
@@ -231,9 +225,6 @@ class ItemCataloguePhysicalMap(ItemCatalogue):
         )
 
     @property
-    def sides(self) -> list[tuple[str, ItemSummaryCatalogue]]:
+    def sides(self) -> list[tuple[str, ItemCatalogueSummary]]:
         """Item summaries for the items that make up the physical map."""
-        return [
-            (f"Side {side_index_label(i)}", ItemSummaryCatalogue(RecordSummary.loads(side)))
-            for i, side in enumerate(self._sides)
-        ]
+        return [(f"Side {side_index_label(i)}", ItemCatalogueSummary(side)) for i, side in enumerate(self._sides)]

@@ -2,6 +2,7 @@ from datetime import UTC, date, datetime
 
 import pytest
 
+from lantern.lib.metadata_library.models.record import Record
 from lantern.lib.metadata_library.models.record.elements.common import Date, Identifier
 from lantern.lib.metadata_library.models.record.elements.common import Dates as RecordDates
 from lantern.lib.metadata_library.models.record.elements.common import Identifiers as RecordIdentifiers
@@ -25,15 +26,14 @@ from lantern.lib.metadata_library.models.record.enums import (
     MaintenanceFrequencyCode,
     ProgressCode,
 )
-from lantern.lib.metadata_library.models.record.summary import RecordSummary
 from lantern.models.item.base import AccessType
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.base.elements import Link
 from lantern.models.item.base.enums import ResourceTypeLabel
 from lantern.models.item.catalogue import Aggregations, Dates, Extent, PageHeader, PageSummary
-from lantern.models.item.catalogue.elements import FormattedDate, Identifiers, ItemSummaryCatalogue, Maintenance
+from lantern.models.item.catalogue.elements import FormattedDate, Identifiers, ItemCatalogueSummary, Maintenance
 from lantern.models.item.catalogue.enums import ResourceTypeIcon
-from tests.conftest import _get_record_summary
+from tests.conftest import _get_record
 
 
 class TestFormattedDate:
@@ -86,15 +86,15 @@ class TestAggregations:
             association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
             initiative_type=AggregationInitiativeCode.COLLECTION,
         )
-        expected_summary = _get_record_summary("x")
+        expected_record = _get_record("x")
         record_aggregations = RecordAggregations([expected_aggregation])
 
-        aggregations = Aggregations(aggregations=record_aggregations, get_summary=_get_record_summary)
+        aggregations = Aggregations(aggregations=record_aggregations, get_record=_get_record)
 
         assert isinstance(aggregations, Aggregations)
         assert len(aggregations) == 1
         assert aggregations._aggregations[0] == expected_aggregation
-        assert aggregations._summaries["x"]._record_summary == expected_summary
+        assert aggregations._summaries["x"]._record == expected_record
 
     def test_peer_collections(self):
         """Can get any collection aggregations (item is part of)."""
@@ -104,7 +104,7 @@ class TestAggregations:
             initiative_type=AggregationInitiativeCode.COLLECTION,
         )
         record_aggregations = RecordAggregations([expected])
-        aggregations = Aggregations(record_aggregations, get_summary=_get_record_summary)
+        aggregations = Aggregations(record_aggregations, get_record=_get_record)
 
         assert len(aggregations.peer_collections) > 0
 
@@ -116,7 +116,7 @@ class TestAggregations:
             initiative_type=AggregationInitiativeCode.PAPER_MAP,
         )
         record_aggregations = RecordAggregations([expected])
-        aggregations = Aggregations(record_aggregations, get_summary=_get_record_summary)
+        aggregations = Aggregations(record_aggregations, get_record=_get_record)
 
         assert aggregations.peer_opposite_side is not None
 
@@ -128,7 +128,7 @@ class TestAggregations:
             initiative_type=AggregationInitiativeCode.COLLECTION,
         )
         record_aggregations = RecordAggregations([expected])
-        aggregations = Aggregations(record_aggregations, get_summary=_get_record_summary)
+        aggregations = Aggregations(record_aggregations, get_record=_get_record)
 
         assert len(aggregations.parent_collections) > 0
 
@@ -140,7 +140,7 @@ class TestAggregations:
             initiative_type=AggregationInitiativeCode.COLLECTION,
         )
         record_aggregations = RecordAggregations([expected])
-        aggregations = Aggregations(record_aggregations, get_summary=_get_record_summary)
+        aggregations = Aggregations(record_aggregations, get_record=_get_record)
 
         assert len(aggregations.child_items) > 0
 
@@ -152,7 +152,7 @@ class TestAggregations:
             initiative_type=AggregationInitiativeCode.PAPER_MAP,
         )
         record_aggregations = RecordAggregations([expected])
-        aggregations = Aggregations(record_aggregations, get_summary=_get_record_summary)
+        aggregations = Aggregations(record_aggregations, get_record=_get_record)
 
         assert aggregations.parent_printed_map is not None
 
@@ -255,41 +255,41 @@ class TestExtent:
         assert extent.map_iframe == expected
 
 
-class TestItemSummaryCatalogue:
+class TestItemCatalogueSummaryCatalogue:
     """
     Test Catalogue Item summary.
 
     Used for showing summaries of other items.
     """
 
-    def test_init(self, fx_record_summary_minimal_item: RecordSummary):
-        """Can create an ItemSummaryCatalogue."""
-        summary = ItemSummaryCatalogue(fx_record_summary_minimal_item)
+    def test_init(self, fx_record_minimal_item: Record):
+        """Can create an ItemCatalogueSummaryCatalogue."""
+        summary = ItemCatalogueSummary(fx_record_minimal_item)
 
-        assert isinstance(summary, ItemSummaryCatalogue)
-        assert summary._record_summary == fx_record_summary_minimal_item
+        assert isinstance(summary, ItemCatalogueSummary)
+        assert summary._record == fx_record_minimal_item
 
     @pytest.mark.parametrize(("value", "expected"), [("x", "<p>x</p>"), ("_x_", "<p><em>x</em></p>")])
-    def test_title_html(self, fx_record_summary_minimal_item: RecordSummary, value: str, expected: str):
+    def test_title_html(self, fx_record_minimal_item: Record, value: str, expected: str):
         """Can get title with Markdown formatting, if present, encoded as HTML."""
-        fx_record_summary_minimal_item.title = value
-        summary = ItemSummaryCatalogue(fx_record_summary_minimal_item)
+        fx_record_minimal_item.identification.title = value
+        summary = ItemCatalogueSummary(fx_record_minimal_item)
 
         assert summary.title_html == expected
 
-    def test_resource_type_icon(self, fx_record_summary_minimal_item: RecordSummary):
+    def test_resource_type_icon(self, fx_record_minimal_item: Record):
         """Can get icon for resource type."""
-        summary = ItemSummaryCatalogue(fx_record_summary_minimal_item)
+        summary = ItemCatalogueSummary(fx_record_minimal_item)
         assert summary._resource_type_icon == ResourceTypeIcon[summary.resource_type.name].value
 
     @pytest.mark.parametrize("has_date", [True, False])
-    def test_date(self, fx_record_summary_minimal_item: RecordSummary, has_date: bool):
+    def test_date(self, fx_record_minimal_item: Record, has_date: bool):
         """Can get formatted publication date if set."""
         publication = Date(date=datetime(2014, 6, 30, tzinfo=UTC).date())
         expected = "30 June 2014" if has_date else None
         if has_date:
-            fx_record_summary_minimal_item.publication = publication
-        summary = ItemSummaryCatalogue(fx_record_summary_minimal_item)
+            fx_record_minimal_item.identification.dates.publication = publication
+        summary = ItemCatalogueSummary(fx_record_minimal_item)
         if has_date:
             assert summary._date.value == expected
         else:
@@ -312,7 +312,7 @@ class TestItemSummaryCatalogue:
     )
     def test_fragments(
         self,
-        fx_record_summary_minimal_item: RecordSummary,
+        fx_record_minimal_item: Record,
         resource_type: HierarchyLevelCode,
         edition: str | None,
         exp_edition: str | None,
@@ -323,19 +323,21 @@ class TestItemSummaryCatalogue:
     ):
         """Can get fragments to use as part of item summary UI."""
         exp_resource_type = ResourceTypeLabel[resource_type.name]
-        fx_record_summary_minimal_item.hierarchy_level = resource_type
-        fx_record_summary_minimal_item.edition = edition
+        fx_record_minimal_item.hierarchy_level = resource_type
+        fx_record_minimal_item.identification.edition = edition
         if has_pub:
-            fx_record_summary_minimal_item.publication = Date(date=datetime(2014, 6, 30, tzinfo=UTC).date())
+            fx_record_minimal_item.identification.dates.publication = Date(
+                date=datetime(2014, 6, 30, tzinfo=UTC).date()
+            )
         for _ in range(child_count):
-            fx_record_summary_minimal_item.aggregations.append(
+            fx_record_minimal_item.identification.aggregations.append(
                 Aggregation(
                     identifier=Identifier(identifier="x", namespace="x"),
                     association_type=AggregationAssociationCode.IS_COMPOSED_OF,
                 )
             )
-        fx_record_summary_minimal_item.child_aggregations_count = child_count
-        summary = ItemSummaryCatalogue(fx_record_summary_minimal_item)
+        fx_record_minimal_item.child_aggregations_count = child_count
+        summary = ItemCatalogueSummary(fx_record_minimal_item)
 
         result = summary.fragments
 
@@ -357,14 +359,14 @@ class TestItemSummaryCatalogue:
             ),
         ],
     )
-    def test_href_graphic(self, fx_record_summary_minimal_item: RecordSummary, href: str | None, expected: str):
+    def test_href_graphic(self, fx_record_minimal_item: Record, href: str | None, expected: str):
         """Can get href graphic."""
         if href is not None:
-            fx_record_summary_minimal_item.graphic_overviews.append(
+            fx_record_minimal_item.identification.graphic_overviews.append(
                 GraphicOverview(identifier="overview", href=href, mime_type="x")
             )
 
-        summary = ItemSummaryCatalogue(fx_record_summary_minimal_item)
+        summary = ItemCatalogueSummary(fx_record_minimal_item)
 
         if href is not None:
             assert summary.href_graphic == expected
@@ -515,7 +517,7 @@ class TestPageSummary:
                             )
                         ]
                     ),
-                    get_summary=_get_record_summary,
+                    get_record=_get_record,
                 ),
                 AccessType.PUBLIC,
                 "x",
@@ -524,7 +526,7 @@ class TestPageSummary:
                 HierarchyLevelCode.PRODUCT,
                 None,
                 None,
-                Aggregations(aggregations=RecordAggregations([]), get_summary=_get_record_summary),
+                Aggregations(aggregations=RecordAggregations([]), get_record=_get_record),
                 AccessType.BAS_SOME,
                 None,
             ),
@@ -542,7 +544,7 @@ class TestPageSummary:
                             )
                         ]
                     ),
-                    get_summary=_get_record_summary,
+                    get_record=_get_record,
                 ),
                 AccessType.PUBLIC,
                 "x",
@@ -610,7 +612,7 @@ class TestPageSummary:
                             ),
                         ]
                     ),
-                    get_summary=_get_record_summary,
+                    get_record=_get_record,
                 ),
                 True,
             ),
@@ -629,7 +631,7 @@ class TestPageSummary:
                             )
                         ]
                     ),
-                    get_summary=_get_record_summary,
+                    get_record=_get_record,
                 ),
                 True,
             ),
@@ -648,7 +650,7 @@ class TestPageSummary:
                             )
                         ]
                     ),
-                    get_summary=_get_record_summary,
+                    get_record=_get_record,
                 ),
                 True,
             ),
@@ -657,7 +659,7 @@ class TestPageSummary:
                 None,
                 None,
                 AccessType.PUBLIC,
-                Aggregations(aggregations=RecordAggregations([]), get_summary=_get_record_summary),
+                Aggregations(aggregations=RecordAggregations([]), get_record=_get_record),
                 False,
             ),
             (
@@ -665,7 +667,7 @@ class TestPageSummary:
                 "1",
                 "x",
                 AccessType.PUBLIC,
-                Aggregations(aggregations=RecordAggregations([]), get_summary=_get_record_summary),
+                Aggregations(aggregations=RecordAggregations([]), get_record=_get_record),
                 False,
             ),
             (
@@ -673,7 +675,7 @@ class TestPageSummary:
                 "1",
                 "x",
                 AccessType.BAS_SOME,
-                Aggregations(aggregations=RecordAggregations([]), get_summary=_get_record_summary),
+                Aggregations(aggregations=RecordAggregations([]), get_record=_get_record),
                 True,
             ),
         ],
@@ -746,7 +748,7 @@ class TestPageSummary:
             published_date=published,
             revision_date=revision,
             access_type=AccessType.PUBLIC,
-            aggregations=Aggregations(aggregations=RecordAggregations([]), get_summary=_get_record_summary),
+            aggregations=Aggregations(aggregations=RecordAggregations([]), get_record=_get_record),
             citation=None,
             abstract="x",
         )
@@ -770,7 +772,7 @@ class TestPageSummary:
             )
         summary = PageSummary(
             item_type=item_type,
-            aggregations=Aggregations(aggregations=RecordAggregations(aggregations), get_summary=_get_record_summary),
+            aggregations=Aggregations(aggregations=RecordAggregations(aggregations), get_record=_get_record),
             access_type=AccessType.PUBLIC,
             edition=None,
             published_date=None,

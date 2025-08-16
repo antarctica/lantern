@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
 from typing import TypeVar
 
+from lantern.lib.metadata_library.models.record import Record
 from lantern.lib.metadata_library.models.record.elements.common import Date
 from lantern.lib.metadata_library.models.record.elements.common import Dates as RecordDates
 from lantern.lib.metadata_library.models.record.elements.common import Identifiers as RecordIdentifiers
@@ -18,8 +19,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     MaintenanceFrequencyCode,
     ProgressCode,
 )
-from lantern.lib.metadata_library.models.record.summary import RecordSummary
-from lantern.models.item.base import ItemSummaryBase
+from lantern.models.item.base import ItemBase
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.base.elements import Link, unpack
 from lantern.models.item.base.enums import AccessType, ResourceTypeLabel
@@ -83,16 +83,13 @@ class ItemSummaryFragments:
     children: str | None
 
 
-class ItemSummaryCatalogue(ItemSummaryBase):
+class ItemCatalogueSummary(ItemBase):
     """
     Summary of a resource within the BAS Data Catalogue.
 
     Catalogue item summaries provide additional context for base summaries for use when presenting search results or
     resources related to the current item within the BAS Data Catalogue website.
     """
-
-    def __init__(self, record_summary: RecordSummary) -> None:
-        super().__init__(record_summary)
 
     @property
     def title_html(self) -> str | None:
@@ -112,7 +109,8 @@ class ItemSummaryCatalogue(ItemSummaryBase):
     @property
     def _date(self) -> FormattedDate | None:
         """Formatted date."""
-        return FormattedDate.from_rec_date(self.date) if self.date else None
+        publication = self._record.identification.dates.publication
+        return FormattedDate.from_rec_date(publication) if publication else None
 
     @property
     def _edition(self) -> str | None:
@@ -133,7 +131,9 @@ class ItemSummaryCatalogue(ItemSummaryBase):
 
         E.g. For collections, the number of items it contains.
         """
-        count = len(self._record_summary.aggregations.filter(associations=AggregationAssociationCode.IS_COMPOSED_OF))
+        count = len(
+            self._record.identification.aggregations.filter(associations=AggregationAssociationCode.IS_COMPOSED_OF)
+        )
         if count == 1:
             return "1 item"
         if count > 1:
@@ -145,7 +145,7 @@ class ItemSummaryCatalogue(ItemSummaryBase):
         """UI fragments (icons and labels) for item summary."""
         published = self._date if self.resource_type != HierarchyLevelCode.COLLECTION else None
         return ItemSummaryFragments(
-            access=self.access,
+            access=self.access_type,
             item_type=self._resource_type_label,
             item_type_icon=self._resource_type_icon,
             edition=self._edition,
@@ -197,7 +197,7 @@ class ItemSummaryCatalogue(ItemSummaryBase):
             "+XJVXzdjIDdS/HSAqTM7Umq8FyN/ekvB2mM5xhG25FM6N+k+g1dEJlK2n3+i9cSO3K9je7JXxX84sVWGEaXi6p3w8O2PdbqvIob"
             "08LT2JFXP6/VJeERYhy/CfpFvwp511ll/jv4HlCh/6hhCrcIAAAAASUVORK5CYII="
         )
-        return super().href_graphic if super().href_graphic else default
+        return self.overview_graphic.href if self.overview_graphic else default
 
 
 class Aggregations:
@@ -207,16 +207,16 @@ class Aggregations:
     Container for ItemBase Aggregations formatted as links and grouped by type.
     """
 
-    def __init__(self, aggregations: RecordAggregations, get_summary: Callable[[str], RecordSummary]) -> None:
+    def __init__(self, aggregations: RecordAggregations, get_record: Callable[[str], Record]) -> None:
         self._aggregations = aggregations
-        self._summaries = self._generate_summaries(get_summary)
+        self._summaries = self._generate_summaries(get_record)
 
-    def _generate_summaries(self, get_summary: Callable[[str], RecordSummary]) -> dict[str, ItemSummaryCatalogue]:
+    def _generate_summaries(self, get_summary: Callable[[str], Record]) -> dict[str, ItemCatalogueSummary]:
         """Generate item summaries for aggregations indexed by resource identifier."""
         summaries = {}
         for aggregation in self._aggregations:
             identifier = aggregation.identifier.identifier
-            summaries[identifier] = ItemSummaryCatalogue(get_summary(identifier))
+            summaries[identifier] = ItemCatalogueSummary(get_summary(identifier))
         return summaries
 
     def __len__(self) -> int:
@@ -228,7 +228,7 @@ class Aggregations:
         namespace: str | None = None,
         associations: AggregationAssociationCode | list[AggregationAssociationCode] | None = None,
         initiatives: AggregationInitiativeCode | list[AggregationInitiativeCode] | None = None,
-    ) -> list[ItemSummaryCatalogue]:
+    ) -> list[ItemCatalogueSummary]:
         """
         Filter aggregations as item summaries, by namespace and/or association(s) and/or initiative(s).
 
@@ -238,7 +238,7 @@ class Aggregations:
         return [self._summaries[aggregation.identifier.identifier] for aggregation in results]
 
     @property
-    def peer_collections(self) -> list[ItemSummaryCatalogue]:
+    def peer_collections(self) -> list[ItemCatalogueSummary]:
         """Collections item is related with."""
         return self._filter(
             associations=AggregationAssociationCode.CROSS_REFERENCE,
@@ -246,7 +246,7 @@ class Aggregations:
         )
 
     @property
-    def peer_opposite_side(self) -> ItemSummaryCatalogue | None:
+    def peer_opposite_side(self) -> ItemCatalogueSummary | None:
         """Item that forms the opposite side of a published map."""
         items = self._filter(
             associations=AggregationAssociationCode.PHYSICAL_REVERSE_OF,
@@ -255,7 +255,7 @@ class Aggregations:
         return items[0] if items else None
 
     @property
-    def parent_collections(self) -> list[ItemSummaryCatalogue]:
+    def parent_collections(self) -> list[ItemCatalogueSummary]:
         """Collections item is contained within."""
         return self._filter(
             associations=AggregationAssociationCode.LARGER_WORK_CITATION,
@@ -263,7 +263,7 @@ class Aggregations:
         )
 
     @property
-    def child_items(self) -> list[ItemSummaryCatalogue]:
+    def child_items(self) -> list[ItemCatalogueSummary]:
         """Items contained within item."""
         return self._filter(
             associations=AggregationAssociationCode.IS_COMPOSED_OF,
@@ -271,7 +271,7 @@ class Aggregations:
         )
 
     @property
-    def parent_printed_map(self) -> ItemSummaryCatalogue | None:
+    def parent_printed_map(self) -> ItemCatalogueSummary | None:
         """Printed map item is a side of."""
         items = self._filter(
             associations=AggregationAssociationCode.LARGER_WORK_CITATION,

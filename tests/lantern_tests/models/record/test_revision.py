@@ -5,8 +5,7 @@ import pytest
 from lantern.lib.metadata_library.models.record import Identification, Metadata, Record
 from lantern.lib.metadata_library.models.record.elements.common import Contact, ContactIdentity, Contacts, Date, Dates
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode, HierarchyLevelCode
-from lantern.lib.metadata_library.models.record.summary import RecordSummary
-from lantern.models.record.revision import RecordRevision, RecordRevisionSummary
+from lantern.models.record.revision import RecordRevision
 
 
 class TestRecordRevision:
@@ -111,58 +110,3 @@ class TestRecordRevision:
         fx_record_config_minimal_iso = {**fx_record_config_minimal_iso, "file_revision": None}
         with pytest.raises(ValueError, match="RecordRevision cannot be empty."):
             _ = RecordRevision.loads(fx_record_config_minimal_iso)
-
-
-class TestRecordRevisionSummary:
-    """Test derived Record Revision Summary class."""
-
-    def test_init(self):
-        """Can create a minimal RecordRevisionSummary element from directly assigned properties."""
-        expected = "x"
-        expected_hierarchy_level = HierarchyLevelCode.DATASET
-        expected_date = Date(date=date(2014, 6, 30))
-
-        summary = RecordRevisionSummary(
-            file_revision="x",
-            hierarchy_level=expected_hierarchy_level,
-            date_stamp=expected_date.date,
-            title=expected,
-            creation=expected_date,
-        )
-
-        assert isinstance(summary, RecordSummary)
-        assert isinstance(summary, RecordRevisionSummary)
-        assert summary.file_revision == "x"
-
-    def test_loads_json_config(self):
-        """Can create a RecordRevisionSummary from a dict loaded from JSON."""
-        base_config = {
-            "file_identifier": "59be7b09-4024-48e2-b7b3-6a0799196400",
-            "hierarchy_level": "dataset",
-            "date_stamp": "2025-05-18",
-            "title": "x",
-            "creation": "2014",
-        }
-        config = {"file_revision": "x", **base_config}
-
-        summary = RecordRevisionSummary.loads(config)
-
-        assert isinstance(summary, RecordRevisionSummary)
-        assert summary.file_revision == "x"
-        assert summary.creation.date.year == 2014
-
-    def test_loads_record(self, fx_record_revision_minimal_iso: RecordRevision):
-        """Can create a RecordRevisionSummary from a RecordRevision."""
-        summary = RecordRevisionSummary.loads(fx_record_revision_minimal_iso)
-
-        assert isinstance(summary, RecordRevisionSummary)
-        assert summary.file_revision == "x"
-        assert summary.creation.date.year == 2014
-
-    def test_dumps(self, fx_record_revision_minimal_iso: RecordRevision):
-        """Can create a dict that can be serialised to JSON from a RecordRevisionSummary."""
-        summary = RecordRevisionSummary.loads(fx_record_revision_minimal_iso)
-        result = summary.dumps()
-        assert isinstance(result, dict)
-        assert result["file_revision"] == "x"
-        assert result["creation"] == "2014-06-30"

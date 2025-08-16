@@ -8,7 +8,6 @@ from lantern.exporters.html import HtmlAliasesExporter, HtmlExporter
 from lantern.exporters.json import JsonExporter
 from lantern.exporters.xml import IsoXmlExporter, IsoXmlHtmlExporter
 from lantern.lib.metadata_library.models.record import Record
-from lantern.lib.metadata_library.models.record.summary import RecordSummary
 
 
 class RecordsExporter(Exporter):
@@ -25,15 +24,6 @@ class RecordsExporter(Exporter):
         """Initialise exporter."""
         super().__init__(config=config, logger=logger, s3=s3)
         self._records: dict[str, Record] = {}
-        self._summaries: dict[str, RecordSummary] = {}
-
-    def _get_record_summary(self, identifier: str) -> RecordSummary:
-        """
-        Get record summary for a record identifier.
-
-        Crude implementation of a record repository interface.
-        """
-        return self._summaries[identifier]
 
     def _get_record(self, identifier: str) -> Record:
         """
@@ -52,7 +42,6 @@ class RecordsExporter(Exporter):
             s3=self._s3_client,
             record=record,
             export_base=output_path,
-            get_record_summary=self._get_record_summary,
             get_record=self._get_record,
         )
 
@@ -99,9 +88,8 @@ class RecordsExporter(Exporter):
         """Exporter name."""
         return "Records"
 
-    def loads(self, summaries: list[RecordSummary], records: list[Record]) -> None:
+    def loads(self, records: list[Record]) -> None:
         """Populate exporter."""
-        self._summaries = {summary.file_identifier: summary for summary in summaries}
         self._records = {record.file_identifier: record for record in records}
 
     def export_record(self, file_identifier: str) -> None:

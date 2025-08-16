@@ -1,5 +1,4 @@
 import json
-from datetime import UTC, datetime
 
 import pytest
 
@@ -7,7 +6,6 @@ from lantern.lib.metadata_library.models.record import Record
 from lantern.lib.metadata_library.models.record.elements.common import Contact as RecordContact
 from lantern.lib.metadata_library.models.record.elements.common import (
     ContactIdentity,
-    Date,
     Identifier,
     Identifiers,
     OnlineResource,
@@ -39,8 +37,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     OnlineResourceFunctionCode,
 )
 from lantern.lib.metadata_library.models.record.presets.projections import EPSG_4326
-from lantern.lib.metadata_library.models.record.summary import RecordSummary
-from lantern.models.item.base import ItemBase, ItemSummaryBase
+from lantern.models.item.base import ItemBase
 from lantern.models.item.base.elements import Contact, Contacts, Extent, Extents
 from lantern.models.item.base.enums import AccessType
 
@@ -396,6 +393,13 @@ class TestItemBase:
         assert isinstance(result, GraphicOverviews)
         assert len(result) > 0
 
+    def test_href(self, fx_record_minimal_item: Record):
+        """Can get item href."""
+        expected = f"/items/{fx_record_minimal_item.file_identifier}/"
+        item = ItemBase(fx_record_minimal_item)
+
+        assert item.href == expected
+
     def test_identifiers(self, fx_record_minimal_item: Record):
         """Can get identifiers from record."""
         expected = Identifier(identifier="x", href="x", namespace="x")
@@ -601,141 +605,3 @@ class TestItemBase:
         item = ItemBase(fx_record_minimal_item)
 
         assert item.title_plain == expected
-
-
-class TestItemSummaryBase:
-    """Test base item summary."""
-
-    def test_init(self, fx_record_summary_minimal_item: RecordSummary):
-        """Can create an ItemSummaryBase from a Record."""
-        summary = ItemSummaryBase(fx_record_summary_minimal_item)
-        assert summary._record_summary == fx_record_summary_minimal_item
-
-    def test_init_invalid(self, fx_record_summary_minimal_item: RecordSummary):
-        """Cannot create an ItemSummaryBase with an invalid record."""
-        fx_record_summary_minimal_item.file_identifier = None
-        with pytest.raises(ValueError, match="Item Summaries require a file_identifier."):
-            ItemSummaryBase(fx_record_summary_minimal_item)
-
-    @pytest.mark.parametrize(
-        ("value", "expected"),
-        [
-            (
-                Constraint(type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.UNRESTRICTED),
-                AccessType.PUBLIC,
-            ),
-            (None, AccessType.NONE),
-        ],
-    )
-    def test_access(
-        self, fx_record_summary_minimal_item: RecordSummary, value: Constraint | None, expected: AccessType
-    ):
-        """Can get optional access constraint and any associated permissions."""
-        if value is not None:
-            fx_record_summary_minimal_item.constraints = Constraints([value])
-        item = ItemSummaryBase(fx_record_summary_minimal_item)
-
-        assert item.access == expected
-
-    @pytest.mark.parametrize("has_pub", [True, False])
-    def test_date(self, fx_record_summary_minimal_item: RecordSummary, has_pub: bool):
-        """Can get publication date if set."""
-        expected = Date(date=datetime(2014, 6, 30, tzinfo=UTC).date()) if has_pub else None
-        if has_pub:
-            fx_record_summary_minimal_item.publication = expected
-        summary = ItemSummaryBase(fx_record_summary_minimal_item)
-
-        assert summary.date == expected
-
-    @pytest.mark.parametrize("expected", ["x", None])
-    def test_edition(self, fx_record_summary_minimal_item: RecordSummary, expected: str | None):
-        """Can get edition if defined."""
-        fx_record_summary_minimal_item.edition = expected
-        summary = ItemSummaryBase(fx_record_summary_minimal_item)
-
-        assert summary.edition == expected
-
-    def test_href(self, fx_record_summary_minimal_item: RecordSummary):
-        """Can get item href."""
-        expected = f"/items/{fx_record_summary_minimal_item.file_identifier}/"
-        summary = ItemSummaryBase(fx_record_summary_minimal_item)
-
-        assert summary.href == expected
-
-    @pytest.mark.parametrize(
-        ("value", "expected"),
-        [
-            (GraphicOverviews([]), None),
-            (GraphicOverviews([GraphicOverview(identifier="x", href="x", mime_type="x")]), None),
-            (GraphicOverviews([GraphicOverview(identifier="overview", href="x", mime_type="x")]), "x"),
-        ],
-    )
-    def test_href_graphic(
-        self, fx_record_summary_minimal_item: RecordSummary, value: GraphicOverviews, expected: str | None
-    ):
-        """Can get href to overview graphic if defined."""
-        fx_record_summary_minimal_item.graphic_overviews = value
-        summary = ItemSummaryBase(fx_record_summary_minimal_item)
-
-        assert summary.href_graphic == expected
-
-    def test_resource_id(self, fx_record_summary_minimal_item: RecordSummary):
-        """Can get resource/file identifier."""
-        summary = ItemSummaryBase(fx_record_summary_minimal_item)
-        assert summary.resource_id == fx_record_summary_minimal_item.file_identifier
-
-    def test_resource_type(self, fx_record_summary_minimal_item: RecordSummary):
-        """Can get resource type / hierarchy level."""
-        summary = ItemSummaryBase(fx_record_summary_minimal_item)
-        assert summary.resource_type == fx_record_summary_minimal_item.hierarchy_level
-
-    @pytest.mark.parametrize(("value", "expected"), [("x", "x"), (None, None)])
-    def test_summary_raw(self, fx_record_summary_minimal_item: RecordSummary, value: str | None, expected: str):
-        """Can get summary as either purpose or if not set, abstract."""
-        fx_record_summary_minimal_item.purpose = value
-        summary = ItemSummaryBase(fx_record_summary_minimal_item)
-
-        assert summary.summary_raw == expected
-
-    @pytest.mark.parametrize(("value", "expected"), [("_x_", "_x_"), (None, None)])
-    def test_summary_md(self, fx_record_summary_minimal_item: RecordSummary, value: str | None, expected: str):
-        """Can get optional summary (purpose) with Markdown formatting."""
-        fx_record_summary_minimal_item.purpose = value
-        summary = ItemSummaryBase(fx_record_summary_minimal_item)
-
-        assert summary.summary_md == expected
-
-    @pytest.mark.parametrize(("value", "expected"), [("x", "<p>x</p>"), ("_x_", "<p><em>x</em></p>"), (None, None)])
-    def test_summary_html(self, fx_record_summary_minimal_item: RecordSummary, value: str | None, expected: str | None):
-        """Can get summary (purpose) with Markdown formatting, if present, encoded as HTML."""
-        if expected is not None:
-            fx_record_summary_minimal_item.purpose = value
-        summary = ItemSummaryBase(fx_record_summary_minimal_item)
-
-        assert summary.summary_html == expected
-
-    @pytest.mark.parametrize(("value", "expected"), [("_x_", "x"), (None, None)])
-    def test_summary_plain(self, fx_record_summary_minimal_item: RecordSummary, value: str, expected: str):
-        """Can get optional summary (purpose) without Markdown formatting."""
-        fx_record_summary_minimal_item.purpose = value
-        summary = ItemSummaryBase(fx_record_summary_minimal_item)
-
-        assert summary.summary_plain == expected
-
-    def test_title_raw(self, fx_record_summary_minimal_item: RecordSummary):
-        """Can get raw title."""
-        summary = ItemSummaryBase(fx_record_summary_minimal_item)
-        assert summary.title_raw == "x"
-
-    def test_title_md(self, fx_record_summary_minimal_item: RecordSummary):
-        """Can get title with Markdown formatting."""
-        summary = ItemSummaryBase(fx_record_summary_minimal_item)
-        assert summary.title_md == "x"
-
-    @pytest.mark.parametrize(("value", "expected"), [("x", "x"), ("_x_", "x")])
-    def test_title_plain(self, fx_record_summary_minimal_item: RecordSummary, value: str, expected: str):
-        """Can get title without Markdown formatting."""
-        fx_record_summary_minimal_item.title = value
-        summary = ItemSummaryBase(fx_record_summary_minimal_item)
-
-        assert summary.title_plain == expected

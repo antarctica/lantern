@@ -3,7 +3,7 @@ from json import JSONDecodeError
 from urllib.parse import unquote
 
 from lantern.lib.metadata_library.models.record import Record
-from lantern.lib.metadata_library.models.record.elements.common import Date, Identifier, Identifiers, Series
+from lantern.lib.metadata_library.models.record.elements.common import Identifier, Identifiers, Series
 from lantern.lib.metadata_library.models.record.elements.distribution import Distribution
 from lantern.lib.metadata_library.models.record.elements.identification import (
     Aggregation,
@@ -20,7 +20,6 @@ from lantern.lib.metadata_library.models.record.enums import (
     ConstraintTypeCode,
     HierarchyLevelCode,
 )
-from lantern.lib.metadata_library.models.record.summary import RecordSummary
 from lantern.models.item.base.const import PERMISSIONS_BAS_GROUP, PERMISSIONS_NERC_DIRECTORY
 from lantern.models.item.base.elements import Contact, Contacts, Extent, Extents
 from lantern.models.item.base.enums import AccessType
@@ -231,6 +230,11 @@ class ItemBase:
         return self._record.identification.graphic_overviews
 
     @property
+    def href(self) -> str:
+        """Item catalogue URL."""
+        return f"/items/{self.resource_id}/"
+
+    @property
     def identifiers(self) -> Identifiers:
         """Identifiers."""
         return self._record.identification.identifiers
@@ -381,108 +385,6 @@ class ItemBase:
     def title_html(self) -> str | None:
         """Title with Markdown formatting, if present, encoded as HTML."""
         return md_as_html(self.title_md)
-
-    @property
-    def title_plain(self) -> str:
-        """Title without Markdown formatting."""
-        return md_as_plain(self.title_md)
-
-
-class ItemSummaryBase:
-    """
-    Base summary of a resource within the BAS Data Catalogue / Metadata ecosystem.
-
-    ItemSummaries are a high-level, read-only, and non-standards specific view of a resource via an underlying
-    RecordSummary instance, as a counterpart to Item classes.
-
-    Note that ItemSummaries must include a file_identifier.
-
-    Multiple ItemSummaries classes may be used for different contexts and systems. This base representation contains
-    core/common properties and methods shared between all summary classes. It is not expected to be used directly.
-    """
-
-    def __init__(self, record_summary: RecordSummary) -> None:
-        self._record_summary = record_summary
-
-        if self.resource_id is None:
-            msg = "Item Summaries require a file_identifier."
-            raise ValueError(msg)
-
-    @property
-    def access(self) -> AccessType:
-        """Resource access."""
-        # noinspection PyProtectedMember
-        return ItemBase._parse_access(self._record_summary.constraints.filter(types=ConstraintTypeCode.ACCESS))
-
-    @property
-    def date(self) -> Date | None:
-        """Item publication date if available."""
-        return self._record_summary.publication
-
-    @property
-    def edition(self) -> str | None:
-        """Edition."""
-        return self._record_summary.edition
-
-    @property
-    def href(self) -> str:
-        """Item catalogue URL."""
-        return f"/items/{self.resource_id}/"
-
-    @property
-    def href_graphic(self) -> str | None:
-        """Primary/default graphic URL."""
-        return next(
-            (graphic.href for graphic in self._record_summary.graphic_overviews.filter(identifier="overview")), None
-        )
-
-    @property
-    def resource_id(self) -> str:
-        """
-        Resource identifier.
-
-        AKA resource/record/item/file identifier.
-        """
-        return self._record_summary.file_identifier
-
-    @property
-    def resource_type(self) -> HierarchyLevelCode:
-        """
-        Resource type.
-
-        AKA hierarchy-level/scope-code.
-        """
-        return self._record_summary.hierarchy_level
-
-    @property
-    def summary_raw(self) -> str | None:
-        """Raw Summary, if present."""
-        return self._record_summary.purpose
-
-    @property
-    def summary_md(self) -> str | None:
-        """Summary with Markdown formatting, if present."""
-        return self.summary_raw
-
-    @property
-    def summary_html(self) -> str | None:
-        """Summary with Markdown formatting, if present, encoded as HTML."""
-        return md_as_html(self.summary_md) if self.summary_md is not None else None
-
-    @property
-    def summary_plain(self) -> str | None:
-        """Summary without Markdown formatting, if present."""
-        return md_as_plain(self.summary_md) if self.summary_md is not None else None
-
-    @property
-    def title_raw(self) -> str:
-        """Raw Title."""
-        return self._record_summary.title
-
-    @property
-    def title_md(self) -> str:
-        """Title with Markdown formatting."""
-        return self.title_raw
 
     @property
     def title_plain(self) -> str:

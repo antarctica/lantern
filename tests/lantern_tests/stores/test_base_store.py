@@ -1,7 +1,6 @@
 import pytest
 
 from lantern.lib.metadata_library.models.record import Record
-from lantern.lib.metadata_library.models.record.summary import RecordSummary
 from lantern.stores.base import RecordNotFoundError
 from tests.resources.stores.fake_records_store import FakeRecordsStore
 
@@ -31,12 +30,6 @@ class TestBaseStore:
         assert len(fx_fake_store) == 0
         fx_fake_store.populate()
         assert len(fx_fake_store) > 0
-
-    def test_summaries(self, fx_fake_store: FakeRecordsStore):
-        """Can get all summaries from store."""
-        fx_fake_store.populate()
-        assert len(fx_fake_store.summaries) > 0
-        assert all(isinstance(summary, RecordSummary) for summary in fx_fake_store.summaries)
 
     def test_records(self, fx_fake_store: FakeRecordsStore):
         """Can get all records from store."""

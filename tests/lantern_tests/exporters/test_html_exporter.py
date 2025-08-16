@@ -11,7 +11,7 @@ from lantern.exporters.html import HtmlAliasesExporter, HtmlExporter
 from lantern.lib.metadata_library.models.record import Record
 from lantern.models.item.catalogue import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
-from tests.conftest import _get_record, _get_record_summary
+from tests.conftest import _get_record
 
 
 class TestHtmlExporter:
@@ -40,7 +40,6 @@ class TestHtmlExporter:
             record=fx_record_minimal_item,
             export_base=output_path,
             get_record=_get_record,
-            get_record_summary=_get_record_summary,
         )
 
         assert isinstance(exporter, HtmlExporter)

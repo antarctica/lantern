@@ -24,7 +24,7 @@ from lantern.lib.metadata_library.models.record.enums import (
 )
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.catalogue import Dates, Identifiers
-from lantern.models.item.catalogue.elements import ItemSummaryCatalogue
+from lantern.models.item.catalogue.elements import ItemCatalogueSummary
 from lantern.models.item.catalogue.special.physical_map import (
     AdditionalInfoTab,
     Extent,
@@ -33,7 +33,7 @@ from lantern.models.item.catalogue.special.physical_map import (
     side_index_label,
 )
 from lantern.models.record.revision import RecordRevision
-from tests.conftest import _get_record, _get_record_summary
+from tests.conftest import _get_record
 
 
 @pytest.mark.parametrize(("value", "expected"), [(0, "A"), (25, "Z"), (26, "AA")])
@@ -242,7 +242,6 @@ class TestItemCataloguePhysicalMap:
             config=fx_config,
             record=fx_record_revision_minimal_item_catalogue_physical_map,
             get_record=_get_record,
-            get_record_summary=_get_record_summary,
         )
 
         assert isinstance(item, ItemCataloguePhysicalMap)
@@ -306,7 +305,6 @@ class TestItemCataloguePhysicalMap:
         self,
         fx_config: Config,
         fx_record_revision_minimal_item_catalogue_physical_map: RecordRevision,
-        fx_get_record_summary: callable,
     ):
         """Can get any graphics for the physical map and each side."""
         fx_record_revision_minimal_item_catalogue_physical_map.identification.graphic_overviews.append(
@@ -316,7 +314,6 @@ class TestItemCataloguePhysicalMap:
             config=fx_config,
             record=fx_record_revision_minimal_item_catalogue_physical_map,
             get_record=self._get_record_graphics,
-            get_record_summary=_get_record_summary,
         )
 
         graphics = item.graphics
@@ -328,6 +325,6 @@ class TestItemCataloguePhysicalMap:
         assert len(sides) > 0
         # assert sides are a tuple of (side_index, ItemSummaryCatalogue)
         assert all(
-            isinstance(side, tuple) and len(side) == 2 and isinstance(side[1], ItemSummaryCatalogue) for side in sides
+            isinstance(side, tuple) and len(side) == 2 and isinstance(side[1], ItemCatalogueSummary) for side in sides
         )
         assert sides[0][0] == "Side A"

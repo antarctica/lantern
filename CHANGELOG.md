@@ -29,6 +29,10 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Upgraded dependencies
 * Improving template composition to reduce repetition
 
+### Removed
+
+* Record and item summary classes (except for `ItemCatalogueSummary`) to reduce unnecessary complexity
+
 ## [0.1.1] - 2025-07-23
 
 ### Added

@@ -6,10 +6,8 @@ from typing import TypeVar
 import cattrs
 
 from lantern.lib.metadata_library.models.record import Record, clean_dict
-from lantern.lib.metadata_library.models.record.summary import RecordSummary
 
 TRecordRevision = TypeVar("TRecordRevision", bound="RecordRevision")
-TRecordRevisionSummary = TypeVar("TRecordRevisionSummary", bound="RecordRevisionSummary")
 
 
 @dataclass()
@@ -111,81 +109,3 @@ class RecordRevision(Record):
         if not with_revision:
             data.pop("file_revision", None)
         return data
-
-
-@dataclass()
-class RecordRevisionSummary(RecordSummary):
-    """
-    Summary of a resource at a given time within the BAS Data Catalogue / Metadata ecosystem.
-
-    RecordSummaries are low-level views of key aspects of a resource, using the ISO 19115 information model. Record
-    Revision Summaries represent a summary of a record at a specific point in time, when they had a particular
-    configuration.
-
-    As RecordSummaries are intended to be derived from Records, RecordRevisionSummaries are intended to be derived from
-    RecordRevisions using `loads()`.
-    """
-
-    file_revision: str
-
-    @classmethod
-    def structure(cls: type[TRecordRevisionSummary], value: dict) -> "RecordRevisionSummary":
-        """
-        Create a RecordSummary instance from plain types.
-
-        Intended to be used as a cattrs structure hook.
-        E.g. `converter.register_structure_hook(RecordRevisionSummary, lambda d, t: RecordRevisionSummary.structure(d))`
-        """
-        value_ = deepcopy(value)
-        converter = cls._converter_up()
-        return converter.structure(value_, cls)
-
-    def unstructure(self) -> dict:
-        """
-        Convert to plain types.
-
-        Intended to be used as a cattrs unstructure hook.
-        E.g. `converter.register_unstructure_hook(RecordRevisionSummary, lambda d: d.unstructure())`
-        """
-        converter = self._converter_down()
-        return clean_dict(converter.unstructure(self))
-
-    def dumps(self) -> dict:
-        """Create a JSON safe dict."""
-        converter = cattrs.Converter()
-        converter.register_unstructure_hook(RecordRevisionSummary, lambda d: d.unstructure())
-        return converter.unstructure(self)
-
-    @classmethod
-    def _loads_json_dict(cls: type[TRecordRevisionSummary], value: dict) -> "RecordRevisionSummary":
-        """Create a RecordSummary from a config dict loaded from JSON."""
-        converter = cattrs.Converter()
-        converter.register_structure_hook(RecordRevisionSummary, lambda d, t: RecordRevisionSummary.structure(d))
-        return converter.structure(value, cls)
-
-    # noinspection DuplicatedCode
-    @classmethod
-    def _loads_record(cls: type[TRecordRevisionSummary], record: RecordRevision) -> "RecordRevisionSummary":
-        """Create a RecordRevisionSummary from a Record."""
-        return cls(
-            file_revision=record.file_revision,
-            file_identifier=record.file_identifier,
-            hierarchy_level=record.hierarchy_level,
-            date_stamp=record.metadata.date_stamp,
-            title=record.identification.title,
-            purpose=record.identification.purpose,
-            edition=record.identification.edition,
-            creation=record.identification.dates.creation,
-            revision=record.identification.dates.revision,
-            publication=record.identification.dates.publication,
-            graphic_overviews=record.identification.graphic_overviews,
-            constraints=record.identification.constraints,
-            aggregations=record.identification.aggregations,
-        )
-
-    @classmethod
-    def loads(cls: type[TRecordRevisionSummary], value: RecordRevision | dict) -> "RecordRevisionSummary":
-        """Create a RecordRevisionSummary from a Record."""
-        if isinstance(value, Record):
-            return cls._loads_record(value)
-        return cls._loads_json_dict(value)

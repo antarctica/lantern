@@ -147,10 +147,6 @@ class TestGitLabLocalCache:
             data = json.load(f)
             assert data == {"commits": {"x": "x"}}
 
-        with fx_gitlab_cache._summaries_path.open() as f:
-            data = json.load(f)
-            assert data is not None
-
     @pytest.mark.vcr
     @pytest.mark.block_network
     def test_fetch_file_commits(self, fx_gitlab_cache: GitLabLocalCache):
@@ -251,42 +247,35 @@ class TestGitLabLocalCache:
 
         assert fx_gitlab_cache_pop._exists
 
-    @pytest.mark.parametrize(("value", "error"), [(None, False), (["a1b2c3"], False), (["invalid"], True)])
-    def test_get_summaries(self, fx_gitlab_cache_pop: GitLabLocalCache, value: list[str] | None, error: bool):
-        """Can get record summaries from cache."""
-        expected = ["a1b2c3"] if not error else []
+    @pytest.mark.parametrize("exists", [True, False])
+    def test_get_record(self, fx_gitlab_cache_pop: GitLabLocalCache, exists: bool):
+        """Can get specific record from cache if it exists."""
+        expected = "a1b2c3" if exists else "invalid"
 
-        summaries = [summary.file_identifier for summary in fx_gitlab_cache_pop._get_summaries(file_identifiers=value)]
-        assert summaries == expected
-
-    def test_get_record(self, fx_gitlab_cache_pop: GitLabLocalCache):
-        """Can get specific record from cache."""
-        expected = "a1b2c3"
+        if not exists:
+            with pytest.raises(RecordNotFoundError):
+                fx_gitlab_cache_pop._get_record(expected)
+            return
 
         record = fx_gitlab_cache_pop._get_record(expected)
         assert record.file_identifier == expected
 
     @pytest.mark.parametrize(
-        ("include", "exclude", "include_related", "expected_summaries", "expected_records"),
+        ("include", "exclude", "expected_records"),
         [
             (
                 [],
                 [],
-                False,
-                ["8fd6a7cc-e696-4a82-b5f6-fb04dfa4cbea", "53ed9f6a-2d68-46c2-b5c5-f15422aaf5b2"],
                 ["8fd6a7cc-e696-4a82-b5f6-fb04dfa4cbea", "53ed9f6a-2d68-46c2-b5c5-f15422aaf5b2"],
             ),
             (
                 ["8fd6a7cc-e696-4a82-b5f6-fb04dfa4cbea"],
-                [],
-                False,
                 [],
                 ["8fd6a7cc-e696-4a82-b5f6-fb04dfa4cbea"],
             ),
             (
                 ["53ed9f6a-2d68-46c2-b5c5-f15422aaf5b2"],
                 [],
-                True,
                 [
                     "e30ac1c0-ed6a-49bd-8ca3-205610bf91bf",
                     "dbe5f712-696a-47d8-b4a7-3b173e47e3ab",
@@ -298,28 +287,22 @@ class TestGitLabLocalCache:
                     "f90013f6-2893-4c72-953a-a1a6bc1919d7",
                     "09dbc743-cc96-46ff-8449-1709930b73ad",
                     "8fd6a7cc-e696-4a82-b5f6-fb04dfa4cbea",
-                    "bcacfe16-52da-4b26-94db-8a567e4292db",
                     "589408f0-f46b-4609-b537-2f90a2f61243",
                     "30825673-6276-4e5a-8a97-f97f2094cd25",
-                    "e30ac1c0-ed6a-49bd-8ca3-205610bf91bf",
                     "3c77ffae-6aa0-4c26-bc34-5521dbf4bf23",
                     "c993ea2b-d44e-4ca0-9007-9a972f7dd117",
-                    "dbe5f712-696a-47d8-b4a7-3b173e47e3ab",
                     "53ed9f6a-2d68-46c2-b5c5-f15422aaf5b2",
-                ],
-                [
-                    "53ed9f6a-2d68-46c2-b5c5-f15422aaf5b2",
-                    "bcacfe16-52da-4b26-94db-8a567e4292db",
-                    "dbe5f712-696a-47d8-b4a7-3b173e47e3ab",
-                    "e30ac1c0-ed6a-49bd-8ca3-205610bf91bf",
                 ],
             ),
             (
                 [],
                 ["8fd6a7cc-e696-4a82-b5f6-fb04dfa4cbea"],
-                False,
-                ["53ed9f6a-2d68-46c2-b5c5-f15422aaf5b2", "8fd6a7cc-e696-4a82-b5f6-fb04dfa4cbea"],
                 ["53ed9f6a-2d68-46c2-b5c5-f15422aaf5b2"],
+            ),
+            (
+                ["unknown"],
+                [],
+                [],
             ),
         ],
     )
@@ -328,8 +311,6 @@ class TestGitLabLocalCache:
         fx_gitlab_cache: GitLabLocalCache,
         include: list[str],
         exclude: list[str],
-        include_related: bool,
-        expected_summaries: list[str],
         expected_records: list[str],
     ):
         """
@@ -342,10 +323,31 @@ class TestGitLabLocalCache:
         """
         fake_store = FakeRecordsStore(logger=fx_gitlab_cache._logger)
         _inc_records = ["8fd6a7cc-e696-4a82-b5f6-fb04dfa4cbea", "53ed9f6a-2d68-46c2-b5c5-f15422aaf5b2"]
-        fake_store.populate(
-            inc_records=_inc_records if not include_related else [],
-            inc_related=include_related,
-        )
+        _related_records = [
+            "e30ac1c0-ed6a-49bd-8ca3-205610bf91bf",
+            "dbe5f712-696a-47d8-b4a7-3b173e47e3ab",
+            "bcacfe16-52da-4b26-94db-8a567e4292db",
+            "4ba929ac-ca32-4932-a15f-38c1640c0b0f",
+            "e0df252c-fb8b-49ff-9711-f91831b66ea2",
+            "5ab58461-5ba7-404d-a904-2b4efcb7556e",
+            "57327327-4623-4247-af86-77fb43b7f45b",
+            "f90013f6-2893-4c72-953a-a1a6bc1919d7",
+            "09dbc743-cc96-46ff-8449-1709930b73ad",
+            "8fd6a7cc-e696-4a82-b5f6-fb04dfa4cbea",
+            "bcacfe16-52da-4b26-94db-8a567e4292db",
+            "589408f0-f46b-4609-b537-2f90a2f61243",
+            "30825673-6276-4e5a-8a97-f97f2094cd25",
+            "e30ac1c0-ed6a-49bd-8ca3-205610bf91bf",
+            "3c77ffae-6aa0-4c26-bc34-5521dbf4bf23",
+            "c993ea2b-d44e-4ca0-9007-9a972f7dd117",
+            "dbe5f712-696a-47d8-b4a7-3b173e47e3ab",
+            "53ed9f6a-2d68-46c2-b5c5-f15422aaf5b2",
+        ]
+        if include:
+            # when only including certain records, related records will also be returned
+            _inc_records = [*_inc_records, *_related_records]
+
+        fake_store.populate(inc_records=_inc_records)
 
         with TemporaryDirectory() as tmp_path:
             temp_path = Path(tmp_path)
@@ -357,17 +359,14 @@ class TestGitLabLocalCache:
             commits = {record.file_identifier: "x" for record in fake_store.records}
             fx_gitlab_cache._build_cache(config_paths=config_paths, config_commits=commits, head_commit={"x": "x"})
 
-            results = fx_gitlab_cache.get(inc_records=include, exc_records=exclude, inc_related=include_related)
-
-            summaries = [s.file_identifier for s in results[0]]
-            records = [r.file_identifier for r in results[1]]
-            assert sorted(expected_summaries) == sorted(summaries)
+            results = fx_gitlab_cache.get(inc_records=include, exc_records=exclude)
+            records = [r.file_identifier for r in results]
             assert sorted(expected_records) == sorted(records)
 
     def test_get_invalid(self, fx_gitlab_cache_pop: GitLabLocalCache):
         """Cannot get records where both include and exclude parameters are set."""
         with pytest.raises(ValueError, match="Including and excluding records is not supported."):
-            fx_gitlab_cache_pop.get(inc_records=["x"], exc_records=["x"], inc_related=False)
+            fx_gitlab_cache_pop.get(inc_records=["x"], exc_records=["x"])
 
     def test_get_hashes(self, fx_gitlab_cache_pop: GitLabLocalCache):
         """Can get SHA1 hashes of specified records."""
@@ -387,10 +386,6 @@ class TestGitLabLocalCache:
 
         assert not fx_gitlab_cache_pop._exists
         assert not fx_gitlab_cache_pop._records_path.exists()
-
-        with pytest.raises(FileNotFoundError):
-            # getting records from an unpopulated cache should fail to read cache files
-            _ = fx_gitlab_cache_pop.get(inc_records=[], exc_records=[], inc_related=False)
 
 
 class TestGitLabStore:
@@ -500,11 +495,8 @@ class TestGitLabStore:
         High level public method.
         """
         assert len(fx_gitlab_store_cached.records) == 0
-        assert len(fx_gitlab_store_cached.summaries) == 0
-
         fx_gitlab_store_cached.populate(inc_records=inc_records, exc_records=exc_records)
         assert len(fx_gitlab_store_cached.records) > 0
-        assert len(fx_gitlab_store_cached.summaries) > 0
 
     @pytest.mark.parametrize("exists", [True, False])
     def test_get(self, fx_gitlab_store_pop: GitLabStore, exists: bool):
@@ -552,6 +544,8 @@ class TestGitLabStore:
         mocker.patch.object(
             type(fx_gitlab_store_cached._cache), "_current", new_callable=PropertyMock, return_value=True
         )
+        # ignore repopulating cache after push as we fake commit so cache won't be able to load new records
+        mocker.patch.object(fx_gitlab_store_cached, "populate", return_value=None)
 
         fx_gitlab_store_cached.push(records=records, title="title", message="x", author=("x", "x@example.com"))
 
@@ -566,10 +560,8 @@ class TestGitLabStore:
     def test_purge(self, fx_gitlab_store_pop: GitLabStore, exists: bool):
         """Can purge loaded records."""
         if not exists:
-            fx_gitlab_store_pop._summaries = {}
             fx_gitlab_store_pop._records = {}
 
         fx_gitlab_store_pop.purge()
 
         assert len(fx_gitlab_store_pop.records) == 0
-        assert len(fx_gitlab_store_pop.summaries) == 0

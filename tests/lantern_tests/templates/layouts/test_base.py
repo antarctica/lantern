@@ -6,8 +6,8 @@ from jinja2 import Environment, PackageLoader, select_autoescape
 from lantern.models.templates import PageMetadata
 
 
-class TestMacrosSite:
-    """Test site template macros."""
+class TestLayoutBase:
+    """Test base layout template."""
 
     @property
     def page_metadata(self) -> PageMetadata:

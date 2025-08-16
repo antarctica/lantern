@@ -7,7 +7,7 @@ from lantern.exporters.base import Exporter, ResourceExporter
 from lantern.exporters.html import HtmlAliasesExporter, HtmlExporter
 from lantern.exporters.json import JsonExporter
 from lantern.exporters.xml import IsoXmlExporter, IsoXmlHtmlExporter
-from lantern.lib.metadata_library.models.record import Record
+from lantern.models.record.revision import RecordRevision
 
 
 class RecordsExporter(Exporter):
@@ -23,9 +23,9 @@ class RecordsExporter(Exporter):
     def __init__(self, config: Config, logger: logging.Logger, s3: S3Client) -> None:
         """Initialise exporter."""
         super().__init__(config=config, logger=logger, s3=s3)
-        self._records: dict[str, Record] = {}
+        self._records: dict[str, RecordRevision] = {}
 
-    def _get_record(self, identifier: str) -> Record:
+    def _get_record(self, identifier: str) -> RecordRevision:
         """
         Get record for a record identifier.
 
@@ -33,7 +33,7 @@ class RecordsExporter(Exporter):
         """
         return self._records[identifier]
 
-    def _get_html_exporter(self, record: Record) -> HtmlExporter:
+    def _get_html_exporter(self, record: RecordRevision) -> HtmlExporter:
         """Record as item HTML."""
         output_path = self._config.EXPORT_PATH / "items"
         return HtmlExporter(
@@ -45,35 +45,35 @@ class RecordsExporter(Exporter):
             get_record=self._get_record,
         )
 
-    def _get_html_aliases_exporter(self, record: Record) -> HtmlAliasesExporter:
+    def _get_html_aliases_exporter(self, record: RecordRevision) -> HtmlAliasesExporter:
         """Record aliases as redirects to item HTML."""
         output_path = self._config.EXPORT_PATH
         return HtmlAliasesExporter(
             config=self._config, logger=self._logger, s3=self._s3_client, record=record, site_base=output_path
         )
 
-    def _get_json_exporter(self, record: Record) -> JsonExporter:
+    def _get_json_exporter(self, record: RecordRevision) -> JsonExporter:
         """Record as BAS Metadata Library JSON."""
         output_path = self._config.EXPORT_PATH / "records"
         return JsonExporter(
             config=self._config, logger=self._logger, s3=self._s3_client, record=record, export_base=output_path
         )
 
-    def _get_iso_xml_exporter(self, record: Record) -> IsoXmlExporter:
+    def _get_iso_xml_exporter(self, record: RecordRevision) -> IsoXmlExporter:
         """Record as ISO XML."""
         output_path = self._config.EXPORT_PATH / "records"
         return IsoXmlExporter(
             config=self._config, logger=self._logger, s3=self._s3_client, record=record, export_base=output_path
         )
 
-    def _get_iso_xml_html_exporter(self, record: Record) -> IsoXmlHtmlExporter:
+    def _get_iso_xml_html_exporter(self, record: RecordRevision) -> IsoXmlHtmlExporter:
         """Record as ISO XML with HTML stylesheet."""
         output_path = self._config.EXPORT_PATH / "records"
         return IsoXmlHtmlExporter(
             config=self._config, logger=self._logger, s3=self._s3_client, record=record, export_base=output_path
         )
 
-    def _get_exporters(self, record: Record) -> list[ResourceExporter]:
+    def _get_exporters(self, record: RecordRevision) -> list[ResourceExporter]:
         """Get exporters for record."""
         return [
             self._get_html_exporter(record),
@@ -88,7 +88,7 @@ class RecordsExporter(Exporter):
         """Exporter name."""
         return "Records"
 
-    def loads(self, records: list[Record]) -> None:
+    def loads(self, records: list[RecordRevision]) -> None:
         """Populate exporter."""
         self._records = {record.file_identifier: record for record in records}
 

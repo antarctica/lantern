@@ -20,9 +20,10 @@ from lantern.lib.metadata_library.models.record.enums import (
     ProgressCode,
 )
 from lantern.models.item.base import ItemBase
+from lantern.models.item.base.const import GITLAB_NAMESPACE
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.base.elements import Link, unpack
-from lantern.models.item.base.enums import AccessType, ResourceTypeLabel
+from lantern.models.item.base.enums import AccessLevel, ResourceTypeLabel
 from lantern.models.item.base.utils import md_as_html
 from lantern.models.item.catalogue.enums import ResourceTypeIcon
 
@@ -75,7 +76,7 @@ class FormattedDate:
 class ItemSummaryFragments:
     """Properties shown as part of an ItemSummaryCatalogue."""
 
-    access: AccessType
+    access: AccessLevel
     item_type: str
     item_type_icon: str
     edition: str | None
@@ -145,7 +146,7 @@ class ItemCatalogueSummary(ItemBase):
         """UI fragments (icons and labels) for item summary."""
         published = self._date if self.resource_type != HierarchyLevelCode.COLLECTION else None
         return ItemSummaryFragments(
-            access=self.access_type,
+            access=self.access_level,
             item_type=self._resource_type_label,
             item_type_icon=self._resource_type_icon,
             edition=self._edition,
@@ -398,7 +399,7 @@ class Identifiers(RecordIdentifiers):
 
         Returned as references rather than links to add discourage others viewing issues.
         """
-        return [self._make_gitlab_issue_ref(identifier.href) for identifier in self.filter("gitlab.data.bas.ac.uk")]
+        return [self._make_gitlab_issue_ref(identifier.href) for identifier in self.filter(GITLAB_NAMESPACE)]
 
 
 class Maintenance(RecordMaintenance):
@@ -484,7 +485,7 @@ class PageSummary:
         published_date: FormattedDate | None,
         revision_date: FormattedDate | None,
         aggregations: Aggregations,
-        access_type: AccessType,
+        access_level: AccessLevel,
         citation: str | None,
         abstract: str,
     ) -> None:
@@ -493,7 +494,7 @@ class PageSummary:
         self._published_date = published_date
         self._revision_date = revision_date
         self._aggregations = aggregations
-        self._access_type = access_type
+        self._access_type = access_level
         self._citation = citation
         self._abstract = abstract
 
@@ -504,7 +505,7 @@ class PageSummary:
 
         Contains all properties except abstract and citation.
         """
-        if self.access != AccessType.PUBLIC:
+        if self.access != AccessLevel.PUBLIC:
             return True
         if self._item_type == HierarchyLevelCode.COLLECTION:
             return False
@@ -550,7 +551,7 @@ class PageSummary:
         return len(self._aggregations.child_items)
 
     @property
-    def access(self) -> AccessType:
+    def access(self) -> AccessLevel:
         """Access restrictions."""
         return self._access_type
 

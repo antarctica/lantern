@@ -1,6 +1,6 @@
 from lantern.lib.metadata_library.models.record import Record
 from lantern.lib.metadata_library.models.record.enums import ProgressCode
-from lantern.models.item.base import AccessType, ItemBase
+from lantern.models.item.base import AccessLevel, ItemBase
 from lantern.models.item.base.enums import ResourceTypeLabel
 
 
@@ -120,7 +120,7 @@ class ItemWebsiteSearch(ItemBase):
 
         As determined by access constraints.
         """
-        return self.access_type == AccessType.PUBLIC
+        return self.access_level == AccessLevel.PUBLIC
 
     def dumps(self) -> dict:
         """

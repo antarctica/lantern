@@ -19,6 +19,7 @@ class TestPageMetadata:
         assert meta.html_open_graph == {}
         assert meta.html_schema_org is None
         assert meta.current_year == date.today().year  # noqa: DTZ011
+        assert "@" in meta.fallback_email
 
     def test_all(self):
         """Can create a PageMetadata instance with all possible values."""

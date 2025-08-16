@@ -34,6 +34,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     ConstraintTypeCode,
     HierarchyLevelCode,
 )
+from lantern.models.item.base.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.item.catalogue import AdditionalInfoTab, ItemCatalogue
 from lantern.models.item.catalogue.elements import Dates as ItemCatDates
 from lantern.models.item.catalogue.elements import Identifiers as ItemCatIdentifiers
@@ -207,6 +208,13 @@ def fx_record_revision_minimal_iso(fx_record_config_minimal_iso: dict) -> Record
 def fx_record_minimal_item(fx_record_config_minimal_item: dict) -> Record:
     """Minimal record instance (Item)."""
     return Record.loads(fx_record_config_minimal_item)
+
+
+@pytest.fixture()
+def fx_record_revision_minimal_item(fx_record_config_minimal_item: dict) -> RecordRevision:
+    """Minimal record instance (Item)."""
+    config = {"file_revision": "x", **fx_record_config_minimal_item}
+    return RecordRevision.loads(config)
 
 
 @pytest.fixture()
@@ -458,7 +466,7 @@ def fx_exporter_resource_base(
     fx_exporter_base: Exporter,
     fx_s3_bucket_name: str,
     fx_s3_client: S3Client,
-    fx_record_minimal_item: Record,
+    fx_record_revision_minimal_item: RecordRevision,
 ) -> ResourceExporter:
     """
     Base resource exporter.
@@ -478,7 +486,7 @@ def fx_exporter_resource_base(
         config=mock_config,
         logger=fx_logger,
         s3=fx_s3_client,
-        record=fx_record_minimal_item,
+        record=fx_record_revision_minimal_item,
         export_base=output_path.joinpath("x"),
         export_name="x.txt",
     )
@@ -552,7 +560,7 @@ def fx_exporter_html_alias(
     type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
 
     fx_record_minimal_item_catalogue.identification.identifiers.append(
-        Identifier(identifier="x", href="https://data.bas.ac.uk/datasets/x", namespace="alias.data.bas.ac.uk")
+        Identifier(identifier="x", href=f"https://{CATALOGUE_NAMESPACE}/datasets/x", namespace=ALIAS_NAMESPACE)
     )
 
     return HtmlAliasesExporter(
@@ -588,10 +596,10 @@ def fx_exporter_records(
 
 @pytest.fixture()
 def fx_exporter_records_pop(
-    fx_exporter_records: RecordsExporter, fx_record_minimal_item_catalogue: Record
+    fx_exporter_records: RecordsExporter, fx_record_revision_minimal_item_catalogue: RecordRevision
 ) -> RecordsExporter:
     """Site records exporter populated with a single record."""
-    fx_exporter_records.loads(records=[fx_record_minimal_item_catalogue])
+    fx_exporter_records.loads(records=[fx_record_revision_minimal_item_catalogue])
     return fx_exporter_records
 
 

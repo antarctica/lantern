@@ -9,6 +9,7 @@ from lantern.config import Config
 from lantern.lib.metadata_library.models.record import Record
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
 from lantern.models.item.base import ItemBase
+from lantern.models.item.base.const import CATALOGUE_NAMESPACE
 from lantern.models.item.base.elements import Link
 from lantern.models.item.catalogue.elements import (
     Aggregations,
@@ -117,13 +118,13 @@ class ItemCatalogue(ItemBase):
         """
         record.validate()
 
-        self_identifiers = record.identification.identifiers.filter(namespace="data.bas.ac.uk")
+        self_identifiers = record.identification.identifiers.filter(namespace=CATALOGUE_NAMESPACE)
         if not self_identifiers:
-            msg = "Record must include an identification identifier with the 'data.bas.ac.uk' namespace."
+            msg = f"Record must include an identification identifier with the '{CATALOGUE_NAMESPACE}' namespace."
             exp = ValueError(msg)
             raise ItemInvalidError(validation_error=exp)
         if self_identifiers[0].identifier != record.file_identifier:
-            msg = "Record 'data.bas.ac.uk' identifier must match file identifier."
+            msg = f"Record '{CATALOGUE_NAMESPACE}' identifier must match file identifier."
             exp = ValueError(msg)
             raise ItemInvalidError(validation_error=exp)
 
@@ -185,7 +186,7 @@ class ItemCatalogue(ItemBase):
     @property
     def _data(self) -> DataTab:
         """Data tab."""
-        return DataTab(access_type=self.access_type, distributions=self.distributions)
+        return DataTab(access_level=self.access_level, distributions=self.distributions)
 
     @property
     def _authors(self) -> AuthorsTab:
@@ -344,7 +345,7 @@ class ItemCatalogue(ItemBase):
             published_date=self._dates.publication,
             revision_date=self._dates.revision,
             aggregations=self._aggregations,
-            access_type=self.access_type,
+            access_level=self.access_level,
             citation=self.citation_html,
             abstract=self.abstract_html,
         )

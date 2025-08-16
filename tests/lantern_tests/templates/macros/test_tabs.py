@@ -196,7 +196,10 @@ class TestDataTab:
         - templates could repeat if multiple distribution options of the same type are defined
 
         This test is therefore a best efforts attempt, checking for a freetext value. anywhere in the item template.
-        Using a single distribution option set, with an otherwise minimal item, can hopefully limit irrelevant content.
+        Using a single distribution option set, with an otherwise minimal item, to hopefully limit irrelevant content.
+
+        This value will always appear twice in rendered content, as we include a <noscript> version for gracefully
+        handling JavaScript disabled browsers. Text should therefore be in the collapsible section, and the <noscript>.
 
         Note: This test does not check the contents of the rendered template, except for the freetext value. For
         example, it doesn't verify a service endpoint (if used) is populated correctly.
@@ -216,7 +219,11 @@ class TestDataTab:
 
         assert html.select_one(f"button[data-target='{expected.access_target}']") is not None
         assert html.find(name="div", string=expected.format_type.value) is not None
-        assert str(html).count(text) == 1
+        assert str(html).count(text) == 2  # one in collapsible, one in <noscript>
+
+        for tag in html.find_all("noscript"):
+            tag.decompose()  # drop
+        assert str(html).count(text) == 1  # only collapsible
 
     @pytest.mark.parametrize(
         ("value", "expected"),

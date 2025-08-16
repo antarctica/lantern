@@ -18,6 +18,8 @@
 
 {% macro show_js_class() %}show-js{% endmacro %}
 
+{% macro show_js_only() %}show-js hidden{% endmacro %}
+
 {% macro feedback_trigger(classes, fallback, text) %}
   <noscript><a class="{{ classes }}" href="mailto:{{ fallback }}">{{ text }}</a></noscript>
   <button class="{{ show_js_class() }} {{ sentry_trigger() }} hidden cursor-pointer {{ classes }}">{{ text }}</button>

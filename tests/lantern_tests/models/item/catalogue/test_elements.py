@@ -83,7 +83,7 @@ class TestAggregations:
     def test_init(self):
         """Can create an Aggregations collection."""
         expected_aggregation = Aggregation(
-            identifier=Identifier(identifier="x", href="x", namespace="x"),
+            identifier=Identifier(identifier="x", href="x", namespace=CATALOGUE_NAMESPACE),
             association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
             initiative_type=AggregationInitiativeCode.COLLECTION,
         )
@@ -99,12 +99,15 @@ class TestAggregations:
 
     def test_peer_collections(self):
         """Can get any collection aggregations (item is part of)."""
-        expected = Aggregation(
-            identifier=Identifier(identifier="x", href="x", namespace="x"),
-            association_type=AggregationAssociationCode.CROSS_REFERENCE,
-            initiative_type=AggregationInitiativeCode.COLLECTION,
+        record_aggregations = RecordAggregations(
+            [
+                Aggregation(
+                    identifier=Identifier(identifier="x", href="x", namespace=CATALOGUE_NAMESPACE),
+                    association_type=AggregationAssociationCode.CROSS_REFERENCE,
+                    initiative_type=AggregationInitiativeCode.COLLECTION,
+                )
+            ]
         )
-        record_aggregations = RecordAggregations([expected])
         aggregations = Aggregations(record_aggregations, get_record=_get_record)
 
         assert len(aggregations.peer_collections) > 0
@@ -144,48 +147,60 @@ class TestAggregations:
 
     def test_peer_opposite_side(self):
         """Can get any item that forms the opposite side of a published map."""
-        expected = Aggregation(
-            identifier=Identifier(identifier="x", href="x", namespace="x"),
-            association_type=AggregationAssociationCode.PHYSICAL_REVERSE_OF,
-            initiative_type=AggregationInitiativeCode.PAPER_MAP,
+        record_aggregations = RecordAggregations(
+            [
+                Aggregation(
+                    identifier=Identifier(identifier="x", href="x", namespace=CATALOGUE_NAMESPACE),
+                    association_type=AggregationAssociationCode.PHYSICAL_REVERSE_OF,
+                    initiative_type=AggregationInitiativeCode.PAPER_MAP,
+                )
+            ]
         )
-        record_aggregations = RecordAggregations([expected])
         aggregations = Aggregations(record_aggregations, get_record=_get_record)
 
         assert aggregations.peer_opposite_side is not None
 
     def test_parent_collections(self):
         """Can get any collection aggregations (item is part of)."""
-        expected = Aggregation(
-            identifier=Identifier(identifier="x", href="x", namespace="x"),
-            association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
-            initiative_type=AggregationInitiativeCode.COLLECTION,
+        record_aggregations = RecordAggregations(
+            [
+                Aggregation(
+                    identifier=Identifier(identifier="x", href="x", namespace=CATALOGUE_NAMESPACE),
+                    association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
+                    initiative_type=AggregationInitiativeCode.COLLECTION,
+                )
+            ]
         )
-        record_aggregations = RecordAggregations([expected])
         aggregations = Aggregations(record_aggregations, get_record=_get_record)
 
         assert len(aggregations.parent_collections) > 0
 
     def test_child_items(self):
         """Can get any item aggregations (item is made up of)."""
-        expected = Aggregation(
-            identifier=Identifier(identifier="x", href="x", namespace="x"),
-            association_type=AggregationAssociationCode.IS_COMPOSED_OF,
-            initiative_type=AggregationInitiativeCode.COLLECTION,
+        record_aggregations = RecordAggregations(
+            [
+                Aggregation(
+                    identifier=Identifier(identifier="x", href="x", namespace=CATALOGUE_NAMESPACE),
+                    association_type=AggregationAssociationCode.IS_COMPOSED_OF,
+                    initiative_type=AggregationInitiativeCode.COLLECTION,
+                )
+            ]
         )
-        record_aggregations = RecordAggregations([expected])
         aggregations = Aggregations(record_aggregations, get_record=_get_record)
 
         assert len(aggregations.child_items) > 0
 
     def test_parent_printed_map(self):
         """Can get printed map item that this item is a side of."""
-        expected = Aggregation(
-            identifier=Identifier(identifier="x", href="x", namespace="x"),
-            association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
-            initiative_type=AggregationInitiativeCode.PAPER_MAP,
+        record_aggregations = RecordAggregations(
+            [
+                Aggregation(
+                    identifier=Identifier(identifier="x", href="x", namespace=CATALOGUE_NAMESPACE),
+                    association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
+                    initiative_type=AggregationInitiativeCode.PAPER_MAP,
+                )
+            ]
         )
-        record_aggregations = RecordAggregations([expected])
         aggregations = Aggregations(record_aggregations, get_record=_get_record)
 
         assert aggregations.parent_printed_map is not None
@@ -815,7 +830,7 @@ class TestPageSummary:
         if has_aggregation:
             aggregations.append(
                 Aggregation(
-                    identifier=Identifier(identifier="x", href="x", namespace="x"),
+                    identifier=Identifier(identifier="x", href="x", namespace=CATALOGUE_NAMESPACE),
                     association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
                     initiative_type=AggregationInitiativeCode.PAPER_MAP,
                 )

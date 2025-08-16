@@ -33,6 +33,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Upgraded dependencies
 * Improving template composition to reduce repetition
 * Refactoring alias and catalogue namespace references into constants
+* Restricting item related tab to Catalogue items via namespace filtering
 
 ### Removed
 

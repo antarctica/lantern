@@ -1176,6 +1176,17 @@ class TestInfoTab:
         else:
             assert link is None
 
+    def test_build_time(
+        self,
+        fx_item_catalogue_min: ItemCatalogue,
+        fx_record_revision_minimal_item_catalogue: RecordRevision,
+    ):
+        """Can get link to record revision based on values from item."""
+        html = BeautifulSoup(fx_item_catalogue_min.render(), parser="html.parser", features="lxml")
+
+        build = html.select_one("#info-build")
+        assert build.select_one("time") is not None
+
 
 class TestContactTab:
     """Test contact tab template macros."""

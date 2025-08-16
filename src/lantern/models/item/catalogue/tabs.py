@@ -1,6 +1,6 @@
 import locale
 from abc import ABC, abstractmethod
-from datetime import date
+from datetime import UTC, date, datetime
 from urllib.parse import parse_qs, urlparse
 
 from jinja2 import Environment
@@ -565,6 +565,12 @@ class AdditionalInfoTab(Tab):
     def revision_link(self) -> str | None:
         """Link to record revision if known."""
         return self._revision
+
+    @property
+    def build_time(self) -> FormattedDate:
+        """Build time of the item."""
+        now = datetime.now(tz=UTC)
+        return FormattedDate(value=now.strftime("%d %B %Y %H:%M:%S %Z"), datetime=now.isoformat())
 
 
 class InvalidItemContactError(Exception):

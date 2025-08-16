@@ -1,9 +1,9 @@
 from enum import Enum
 
 
-class AccessType(Enum):
+class AccessLevel(Enum):
     """
-    Item access types.
+    Item access levels.
 
     Where 'NONE' is a fallback value that should not be needed (as items with no access would not be catalogued).
     Where 'BAS_SOME' represents undefined access that will be resolved when accessing the item.

@@ -11,7 +11,7 @@ from lantern.lib.metadata_library.models.record.elements.distribution import Dis
 from lantern.lib.metadata_library.models.record.elements.identification import Constraint
 from lantern.lib.metadata_library.models.record.elements.metadata import MetadataStandard
 from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
-from lantern.models.item.base import AccessType
+from lantern.models.item.base import AccessLevel
 from lantern.models.item.base.elements import Contact, Link
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.base.enums import ResourceTypeLabel
@@ -103,8 +103,8 @@ class ItemsTab(Tab):
 class DataTab(Tab):
     """Data tab."""
 
-    def __init__(self, access_type: AccessType, distributions: list[RecordDistribution]) -> None:
-        self._access = access_type
+    def __init__(self, access_level: AccessLevel, distributions: list[RecordDistribution]) -> None:
+        self._access = access_level
         self._resource_distributions = distributions
         self._supported_distributions = [
             ArcGisFeatureLayer,
@@ -133,7 +133,7 @@ class DataTab(Tab):
                     # noinspection PyTypeChecker
                     processed.append(
                         dist_type(
-                            option=dist_option, other_options=self._resource_distributions, access_type=self._access
+                            option=dist_option, other_options=self._resource_distributions, access_level=self._access
                         )
                     )
         return processed
@@ -159,7 +159,7 @@ class DataTab(Tab):
         return "far fa-cube"
 
     @property
-    def access(self) -> AccessType:
+    def access(self) -> AccessLevel:
         """Access restrictions for item."""
         return self._access
 

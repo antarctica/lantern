@@ -4,7 +4,7 @@ from lantern.lib.metadata_library.models.record import Distribution as RecordDis
 from lantern.lib.metadata_library.models.record.elements.common import Contact, ContactIdentity, OnlineResource
 from lantern.lib.metadata_library.models.record.elements.distribution import Format, Size, TransferOption
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode, OnlineResourceFunctionCode
-from lantern.models.item.base import AccessType
+from lantern.models.item.base import AccessLevel
 from lantern.models.item.base.elements import Link
 from lantern.models.item.catalogue.distributions import (
     ArcGISDistribution,
@@ -202,35 +202,37 @@ class TestFileDistribution:
     )
     def test_size(self, size: Size | None, expected: str):
         """Can format file size."""
-        dist = FakeFileDistributionType(option=_make_dist("x"), access_type=AccessType.PUBLIC)
+        dist = FakeFileDistributionType(option=_make_dist("x"), access_level=AccessLevel.PUBLIC)
         dist._option.transfer_option.size = size
         assert dist.size == expected
 
     @pytest.mark.parametrize(
-        ("access", "expected"), [(AccessType.PUBLIC, "Download"), (AccessType.BAS_SOME, "Download")]
+        ("access", "expected"), [(AccessLevel.PUBLIC, "Download"), (AccessLevel.BAS_SOME, "Download")]
     )
-    def test_action(self, access: AccessType, expected: str):
+    def test_action(self, access: AccessLevel, expected: str):
         """Can get action link."""
-        dist = FakeFileDistributionType(option=_make_dist("x"), access_type=access)
+        dist = FakeFileDistributionType(option=_make_dist("x"), access_level=access)
         assert dist.action == Link(value=expected, href="x")
 
-    @pytest.mark.parametrize(("access", "expected"), [(AccessType.PUBLIC, "default"), (AccessType.BAS_SOME, "warning")])
-    def test_action_btn_variant(self, access: AccessType, expected: str):
+    @pytest.mark.parametrize(
+        ("access", "expected"), [(AccessLevel.PUBLIC, "default"), (AccessLevel.BAS_SOME, "warning")]
+    )
+    def test_action_btn_variant(self, access: AccessLevel, expected: str):
         """Can get action variant."""
-        dist = FakeFileDistributionType(option=_make_dist("x"), access_type=access)
+        dist = FakeFileDistributionType(option=_make_dist("x"), access_level=access)
         assert dist.action_btn_variant == expected
 
     @pytest.mark.parametrize(
-        ("access", "expected"), [(AccessType.PUBLIC, "far fa-download"), (AccessType.BAS_SOME, "far fa-lock-alt")]
+        ("access", "expected"), [(AccessLevel.PUBLIC, "far fa-download"), (AccessLevel.BAS_SOME, "far fa-lock-alt")]
     )
-    def test_action_btn_icon(self, access: AccessType, expected: str):
+    def test_action_btn_icon(self, access: AccessLevel, expected: str):
         """Can get action icon."""
-        dist = FakeFileDistributionType(option=_make_dist("x"), access_type=access)
+        dist = FakeFileDistributionType(option=_make_dist("x"), access_level=access)
         assert dist.action_btn_icon == expected
 
     def test_access_target(self):
         """Can get null action target."""
-        dist = FakeFileDistributionType(option=_make_dist("x"), access_type=AccessType.PUBLIC)
+        dist = FakeFileDistributionType(option=_make_dist("x"), access_level=AccessLevel.PUBLIC)
         assert dist.access_target is None
 
 
@@ -365,7 +367,7 @@ class TestDistributionGeoJson:
         """Can create a distribution."""
         dist = GeoJson(
             option=_make_dist("https://www.iana.org/assignments/media-types/application/geo+json"),
-            access_type=AccessType.PUBLIC,
+            access_level=AccessLevel.PUBLIC,
         )
 
         assert dist.format_type == DistributionType.GEOJSON
@@ -391,7 +393,7 @@ class TestDistributionGeoPackage:
     )
     def test_init(self, href: str, format_type: DistributionType, compressed: bool):
         """Can create a distribution."""
-        dist = GeoPackage(option=_make_dist(format_href=href), access_type=AccessType.PUBLIC)
+        dist = GeoPackage(option=_make_dist(format_href=href), access_level=AccessLevel.PUBLIC)
 
         assert dist.format_type == format_type
         assert dist._compressed == compressed
@@ -402,7 +404,7 @@ class TestDistributionJpeg:
 
     def test_init(self):
         """Can create a distribution."""
-        dist = Jpeg(option=_make_dist("https://jpeg.org/jpeg/"), access_type=AccessType.PUBLIC)
+        dist = Jpeg(option=_make_dist("https://jpeg.org/jpeg/"), access_level=AccessLevel.PUBLIC)
         assert dist.format_type == DistributionType.JPEG
 
 
@@ -426,7 +428,7 @@ class TestDistributionPdf:
     )
     def test_init(self, href: str, format_type: DistributionType, georeferenced: bool):
         """Can create a distribution."""
-        dist = Pdf(option=_make_dist(format_href=href), access_type=AccessType.PUBLIC)
+        dist = Pdf(option=_make_dist(format_href=href), access_level=AccessLevel.PUBLIC)
 
         assert dist.format_type == format_type
         assert dist._georeferenced == georeferenced
@@ -439,7 +441,7 @@ class TestDistributionPng:
         """Can create a distribution."""
         dist = Png(
             option=_make_dist("https://www.iana.org/assignments/media-types/image/png"),
-            access_type=AccessType.PUBLIC,
+            access_level=AccessLevel.PUBLIC,
         )
         assert dist.format_type == DistributionType.PNG
 
@@ -451,6 +453,6 @@ class TestDistributionShapefile:
         """Can create a distribution."""
         dist = Shapefile(
             option=_make_dist("https://metadata-resources.data.bas.ac.uk/media-types/application/vnd.shp+zip"),
-            access_type=AccessType.PUBLIC,
+            access_level=AccessLevel.PUBLIC,
         )
         assert dist.format_type == DistributionType.SHAPEFILE_ZIP

@@ -113,7 +113,16 @@ The `pytailwindcss` package is used to manage a standalone
 
 ### Styling guidelines
 
+#### Accessibility
 
+> [!CAUTION]
+> This section is Work in Progress (WIP) and not yet complete.
+
+As per the [BAS Style Kit](https://style-kit.web.bas.ac.uk/start/standards-accessibility), and wider UK Government
+guidance, the Catalogue site MUST be designed with accessibility in mind.
+
+We maintain a basic accessibility check in `src/lantern/resources/templates/_views/legal/accessibility.html.j2`, which
+should be reviewed and revised on a regular basis.
 
 #### Responsive design
 

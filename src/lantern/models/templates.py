@@ -13,6 +13,7 @@ class PageMetadata:
     html_open_graph: dict = field(default_factory=dict)
     html_schema_org: str | None = None
     current_year: int = date.today().year  # noqa: DTZ011
+    fallback_email: str = "magic@bas.ac.uk"
 
     def __post_init__(self) -> None:
         """Configure values."""

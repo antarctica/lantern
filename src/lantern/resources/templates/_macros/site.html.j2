@@ -43,6 +43,7 @@
 {% macro head_scripts(data) %}
   {{ script_sentry(data.sentry_src) }}
   {{ script_plausible(data.plausible_domain) }}
+  {{ script_show_js(com.show_js_class()) }}
   {{ script_sticky_tabs() }}
   {{ script_collapsible() }}
   {% if data.html_schema_org %}
@@ -86,6 +87,14 @@
 
 {% macro script_plausible(value) %}
     <script defer data-domain="{{ value }}" src="https://plausible.io/js/script.hash.outbound-links.js"></script>
+{% endmacro %}
+
+{% macro script_show_js(value) %}
+  <script defer>
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.{{ value }}').forEach(el => el.classList.remove('hidden'));
+    });
+  </script>
 {% endmacro %}
 
 {% macro script_sticky_tabs() %}
@@ -152,10 +161,10 @@
   <div id="{{ com.back_to_top_id() }}"></div>
 {% endmacro %}
 
-{% macro header() %}
+{% macro header(data) %}
   <header id="site-header" class="space-y-4">
     {{ navbar() }}
-    {{ dev_phase() }}
+    {{ dev_phase(data.fallback_email) }}
   </header>
 {% endmacro %}
 
@@ -168,12 +177,12 @@
   </nav>
 {% endmacro %}
 
-{% macro dev_phase() %}
+{% macro dev_phase(fallback_email) %}
   <div id="site-dev" class="{{ com.container_classes() }} px-2 lg:px-0 space-x-2">
     <span id="site-dev-phase" class="uppercase text-sm font-bold bg-pink-500 text-white dark:text-grey-950 py-1 px-2">alpha</span>
     <span>
-      This is a new website, your
-      <button class="{{ com.sentry_trigger() }} {{ com.link_classes() }}">feedback</button> will help us to improve it.
+      This is a new website, your {{ com.feedback_trigger(classes=com.link_classes(), fallback=fallback_email, text='feedback') }}
+      will help us to improve it.
     </span>
   </div>
 {% endmacro %}
@@ -182,7 +191,7 @@
   <footer id="site-footer" class="font-light bg-grey-950 dark:bg-black text-grey-100 text-center">
     <div class="{{ com.container_classes() }} py-8 space-y-4 lg:space-y-8">
       <div class="flex flex-col justify-between space-y-4 lg:space-y-0 lg:flex-row">
-        <button class="{{ com.sentry_trigger() }} {{ com.footer_link_classes() }} cursor-pointer">Is something wrong with this page?</button>
+        {{ com.feedback_trigger(classes=com.footer_link_classes(), fallback=data.fallback_email, text='Is something wrong with this page?') }}
         <a class="{{ com.footer_link_classes() }} lg:text-right" href="#{{ com.back_to_top_id() }}">Back to top</a>
       </div>
       <div class="flex flex-col justify-between space-y-4 lg:space-y-0 lg:flex-row">
@@ -196,7 +205,7 @@
           <li><a class="{{ com.footer_link_classes() }}" href="/legal/privacy">Privacy</a></li>
         </ul>
       </div>
-      <a class="block lg:hidden {{ com.footer_link_classes() }}" href="https://www.bas.ac.uk">Part of British Antarctic Survey</a>
+      <a class="block lg:hidden {{ com.footer_link_classes() }}" target="_blank" href="https://www.bas.ac.uk">Part of British Antarctic Survey {{ com.ext_link_i() }}</a>
     </div>
   </footer>
 {% endmacro %}

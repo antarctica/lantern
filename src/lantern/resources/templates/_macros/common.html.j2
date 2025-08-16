@@ -16,6 +16,13 @@
 
 {% macro sentry_trigger() %}site-feedback-trigger{% endmacro %}
 
+{% macro show_js_class() %}show-js{% endmacro %}
+
+{% macro feedback_trigger(classes, fallback, text) %}
+  <noscript><a class="{{ classes }}" href="mailto:{{ fallback }}">{{ text }}</a></noscript>
+  <button class="{{ show_js_class() }} {{ sentry_trigger() }} hidden cursor-pointer {{ classes }}">{{ text }}</button>
+{% endmacro %}
+
 {% macro prose(value) %}
   <div class="max-w-none prose prose-base dark:prose-invert prose-headings:font-bold prose-li:my-0">{{ value }}</div>
 {% endmacro %}

@@ -22,6 +22,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 ### Fixed
 
 * Missing padding on legal pages when viewed on mobile
+* Fallback feedback link shown where JavaScript is disabled
 
 ### Changed
 

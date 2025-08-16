@@ -214,6 +214,7 @@ A limited number of scripts are loaded using [Site Macros](#site-macros) for:
 - enabling 'sticky tabs', where the active tab is reflected in the URL fragment
   - this includes setting the active tab on page load if a fragment is present
 - enabling 'collapsible' sections, to show or hide additional information for select distribution options
+- showing content where JavaScript is enabled, as an 'else' to `<noscript>`
 
 > [!NOTE]
 > Scripts are intended to be used sparingly, with functionality implemented using HTML and CSS alone where possible.

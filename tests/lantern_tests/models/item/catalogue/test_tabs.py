@@ -39,6 +39,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     ProgressCode,
 )
 from lantern.models.item.base import AccessLevel
+from lantern.models.item.base.const import CATALOGUE_NAMESPACE
 from lantern.models.item.base.elements import Contact, Contacts, Link
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.base.enums import ResourceTypeLabel
@@ -78,7 +79,7 @@ class TestItemsTab:
             aggregations=RecordAggregations(
                 [
                     Aggregation(
-                        identifier=Identifier(identifier="x", href="x", namespace="x"),
+                        identifier=Identifier(identifier="x", href="x", namespace=CATALOGUE_NAMESPACE),
                         association_type=AggregationAssociationCode.IS_COMPOSED_OF,
                         initiative_type=AggregationInitiativeCode.COLLECTION,
                     )
@@ -327,7 +328,7 @@ class TestRelatedTab:
             aggregations=RecordAggregations(
                 [
                     Aggregation(
-                        identifier=Identifier(identifier="x", href="x", namespace="x"),
+                        identifier=Identifier(identifier="x", href="x", namespace=CATALOGUE_NAMESPACE),
                         association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
                         initiative_type=AggregationInitiativeCode.COLLECTION,
                     )
@@ -354,7 +355,7 @@ class TestRelatedTab:
                 RecordAggregations(
                     [
                         Aggregation(
-                            identifier=Identifier(identifier="x", href="x", namespace="x"),
+                            identifier=Identifier(identifier="x", href="x", namespace=CATALOGUE_NAMESPACE),
                             association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
                             initiative_type=AggregationInitiativeCode.COLLECTION,
                         )
@@ -367,7 +368,7 @@ class TestRelatedTab:
                 RecordAggregations(
                     [
                         Aggregation(
-                            identifier=Identifier(identifier="x", href="x", namespace="x"),
+                            identifier=Identifier(identifier="x", href="x", namespace=CATALOGUE_NAMESPACE),
                             association_type=AggregationAssociationCode.IS_COMPOSED_OF,
                             initiative_type=AggregationInitiativeCode.COLLECTION,
                         )
@@ -380,7 +381,7 @@ class TestRelatedTab:
                 RecordAggregations(
                     [
                         Aggregation(
-                            identifier=Identifier(identifier="x", href="x", namespace="x"),
+                            identifier=Identifier(identifier="x", href="x", namespace=CATALOGUE_NAMESPACE),
                             association_type=AggregationAssociationCode.CROSS_REFERENCE,
                             initiative_type=AggregationInitiativeCode.COLLECTION,
                         )

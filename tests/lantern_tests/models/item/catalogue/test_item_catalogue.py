@@ -14,6 +14,7 @@ from lantern.lib.metadata_library.models.record.elements.common import (
 )
 from lantern.lib.metadata_library.models.record.elements.identification import GraphicOverview, GraphicOverviews
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
+from lantern.models.item.base.const import CATALOGUE_NAMESPACE
 from lantern.models.item.base.elements import Link
 from lantern.models.item.base.enums import ResourceTypeLabel
 from lantern.models.item.catalogue import ItemCatalogue, ItemInvalidError
@@ -280,7 +281,7 @@ class TestItemCatalogue:
                         **base_record["identification"],
                         "aggregations": [
                             {
-                                "identifier": {"identifier": "x", "href": "x", "namespace": "x"},
+                                "identifier": {"identifier": "x", "href": "x", "namespace": CATALOGUE_NAMESPACE},
                                 "association_type": "isComposedOf",
                                 "initiative_type": "collection",
                             }
@@ -378,7 +379,7 @@ class TestItemCatalogue:
                         **base_record["identification"],
                         "aggregations": [
                             {
-                                "identifier": {"identifier": "x", "href": "x", "namespace": "x"},
+                                "identifier": {"identifier": "x", "href": "x", "namespace": CATALOGUE_NAMESPACE},
                                 "association_type": "largerWorkCitation",
                                 "initiative_type": "collection",
                             }

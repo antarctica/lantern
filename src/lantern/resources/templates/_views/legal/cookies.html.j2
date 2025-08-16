@@ -3,17 +3,24 @@
 {% import '_macros/legal.html.j2' as legal %}
 
 {% set header_main = "Cookies Policy" %}
-
+{% set toc = {
+  "cookies-notice": "Cookies notice",
+  "cookies-about": "What are cookies?",
+  "changelog": "Changes to this policy",
+  }
+%}
 {% block legal_content %}
   {% call legal.policy_section(slug='cookies-notice', title='Cookies notice') %}
     <p>This website does not use cookies.</p>
   {% endcall %}
+
   {% call legal.policy_section(slug='cookies-about', title='What are cookies?') %}
     <p>
       Cookies are small files stored within your web browser on your device.
       See {{ com.ext_link_a(href='https://www.aboutcookies.org', value="aboutcookies.org") }} to learn more.
     </p>
   {% endcall %}
+
   {% call legal.policy_section(slug='changelog', title='Changes to this policy') %}
     {% call legal.policy_subsection(title='2025-05-08') %}
       <p>Removed Google Analytics cookies, removing the need to use cookies.</p>

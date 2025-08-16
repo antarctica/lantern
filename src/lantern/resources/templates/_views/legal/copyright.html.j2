@@ -3,7 +3,13 @@
 {% import '_macros/legal.html.j2' as legal %}
 
 {% set header_main = "Copyright Policy" %}
-
+{% set toc = {
+  "copyright-notice": "Copyright notice",
+  "copyright-items": "Item copyright",
+  "copyright-questions": "Questions about copyright",
+  "changelog": "Changes to this policy",
+  }
+%}
 {% block legal_content %}
   {% call legal.policy_section(slug='copyright-notice', title='Copyright notice') %}
     <p>
@@ -16,6 +22,7 @@
       {{ com.ext_link_a(href='https://www.ukri.org/councils/nerc/', value="Natural Environment Research Council (NERC)") }}, both belong.</p>
     <p>Where content has different copyright arrangements, we’ll credit the author and/or copyright holder as appropriate.</p>
   {% endcall %}
+
   {% call legal.policy_section(slug='copyright-items', title='Item copyright') %}
     <p>
       This website contains pages providing information about items (covering a range of material from maps to
@@ -27,6 +34,7 @@
     </p>
     <p><strong>This copyright policy is limited to these information pages, not the items themselves.</strong></p>
   {% endcall %}
+
     {% call legal.policy_section(slug='copyright-questions', title='Questions about copyright') %}
       <p>
         If you have a question about copyright for an item (a map, dataset, etc.), please use the contact tab on
@@ -38,6 +46,7 @@
         submitting feedback.
       </p>
   {% endcall %}
+
   {% call legal.policy_section(slug='changelog', title='Changes to this policy') %}
     {% call legal.policy_subsection(title='2025-05-08') %}
       <p>Simplifying and clarifying how policy applies to items vs website pages.</p>

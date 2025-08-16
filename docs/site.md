@@ -217,7 +217,7 @@ A limited number of scripts are loaded using [Site Macros](#site-macros) for:
 - showing content where JavaScript is enabled, as an 'else' to `<noscript>`
 
 > [!NOTE]
-> Scripts are intended to be used sparingly, with functionality implemented using HTML and CSS alone where possible.
+> Scripts are intended to be used sparingly, with functionality implemented using HTML and CSS alone where practical.
 
 ## Cache busting
 

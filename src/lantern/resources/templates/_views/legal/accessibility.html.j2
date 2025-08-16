@@ -1,0 +1,76 @@
+{% extends "_layouts/page-legal.html.j2" %}
+{% import '_macros/common.html.j2' as com %}
+{% import '_macros/legal.html.j2' as legal %}
+
+{% set header_main = "Basic Accessibility Check" %}
+{% set toc = {
+  "accessibility-notice": "Accessibility notice",
+  "accessibility-exclusions": "Limitations of this check",
+  "accessibility-sample": "Content reviewed by this check",
+  "accessibility-review": "Results of this check",
+  "accessibility-feedback": "Feedback and requesting accessible content",
+  "changelog": "Changes to this page",
+  }
+%}
+
+{% block legal_content %}
+  {% call legal.policy_section(slug='accessibility-notice', title='Accessibility notice') %}
+    <p>
+      A {{ com.ext_link_a(href='https://www.gov.uk/government/publications/doing-a-basic-accessibility-check-if-you-cant-do-a-detailed-one/doing-a-basic-accessibility-check-if-you-cant-do-a-detailed-one', value="Basic accessibility check") }}
+      has been completed for this website, the <em>BAS Data Catalogue</em>, available at
+      <a class="{{ com.link_classes() }}" href="https://data.bas.ac.uk">data.bas.ac.uk</a> (and several preview URLs).
+    </p>
+    {% call com.alert(variant='blue') %}
+      This check is not intended as a formal accessibility assessment.
+    {% endcall %}
+  {% endcall %}
+
+  {% call legal.policy_section(slug='accessibility-exclusions', title='Limitations of this check') %}
+    <p>This check does not cover the homepage for this website as it belongs to a separate service.</p>
+    <p>This check does not cover downloads linked to from item pages as:</p>
+    <ul class="list-disc pl-5">
+      <li>they use technical and/or scientific data formats that cannot be easily provided in an accessible alternative</li>
+      <li>they contain detailed and specialist information that cannot be easily conveyed in plain language</li>
+    </ul>
+    <p>This check does not cover interactive maps used to show the geographic extent of items.</p>
+  {% endcall %}
+
+  {% call legal.policy_section(slug='accessibility-sample', title='Content reviewed by this check') %}
+    <p>A sample of this website's content was reviewed including:</p>
+    <ul class="list-disc pl-5">
+      <li>legal pages (including this accessibility check)</li>
+      <li>a collection page</li>
+      <li>an item page (including the item enquiry form but excluding the item extent map)</li>
+    </ul>
+  {% endcall %}
+
+  {% call legal.policy_section(slug='accessibility-review', title='Results of this check') %}
+    <p>Some issues were found when reviewing the sample content:</p>
+    <ul class="list-disc pl-5">
+      <li>the website feedback widget does not work when CSS styles are disabled</li>
+      <li>some links within item descriptions may not include sufficient context (such as DOIs)</li>
+      <li>whilst images include alternate text, values do only explain the context of each image, not their contents</li>
+      <li>item tabs are not visually highlighted when using a keyword to navigate</li>
+      <li>some page elements have poor colour contrast</li>
+    </ul>
+    <p>We will regularly review these issues, and repeat this review, as part of improving and maintaining this website.</p>
+  {% endcall %}
+
+  {% call legal.policy_section(slug='accessibility-feedback', title='Feedback and requesting accessible content') %}
+    <p>
+      To request information on this website in a different format please contact the
+      {{ com.ext_link_a(href='mailto:webapps@bas.ac.uk', value="BAS Web & Applications Team") }} including:
+    </p>
+    <ul class="list-disc pl-5">
+      <li>the web address (URL) of the content</li>
+      <li>your email address and name</li>
+      <li>the format you need - for example, large print</li>
+    </ul>
+  {% endcall %}
+
+  {% call legal.policy_section(slug='changelog', title='Changes to this page') %}
+    {% call legal.policy_subsection(title='2025-08-15') %}
+      <p>Initial accessibility check.</p>
+    {% endcall %}
+  {% endcall %}
+{% endblock %}

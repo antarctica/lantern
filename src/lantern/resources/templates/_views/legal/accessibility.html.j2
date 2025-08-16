@@ -3,6 +3,15 @@
 {% import '_macros/legal.html.j2' as legal %}
 
 {% set header_main = "Basic Accessibility Check" %}
+{% set toc = {
+  "accessibility-notice": "Accessibility notice",
+  "accessibility-exclusions": "Limitations of this check",
+  "accessibility-sample": "Content reviewed by this check",
+  "accessibility-review": "Results of this check",
+  "accessibility-feedback": "Feedback and requesting accessible content",
+  "changelog": "Changes to this page",
+  }
+%}
 
 {% block legal_content %}
   {% call legal.policy_section(slug='accessibility-notice', title='Accessibility notice') %}

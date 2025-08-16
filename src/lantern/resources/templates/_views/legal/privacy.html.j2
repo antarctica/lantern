@@ -3,6 +3,19 @@
 {% import '_macros/legal.html.j2' as legal %}
 
 {% set header_main = "Copyright Policy" %}
+{% set toc = {
+  "privacy-notice": "Privacy notice",
+  "privacy-collected": "Information we collect about you",
+  "privacy-purpose": "Why we collect this information",
+  "privacy-actions": "How we use your information",
+  "privacy-item-enquires": "Item enquires (Microsoft)",
+  "privacy-site-feedback": "Website feedback (Sentry)",
+  "privacy-site-errors": "Website error and performance monitoring (Sentry)",
+  "privacy-site-analytics": "Website analytics (Plausible)",
+  "privacy-scope": "Other privacy policies",
+  "changelog": "Changes to this policy",
+  }
+%}
 
 {% block legal_content %}
   {% call legal.policy_section(slug='privacy-notice', title='Privacy notice') %}
@@ -14,17 +27,20 @@
       and {{ com.ext_link_a(href='https://www.ukri.org/', value="UK Research and Innovation (UKRI)") }}.
     </p>
   {% endcall %}
+
   {% call legal.policy_section(slug='privacy-collected', title='Information we collect about you') %}
     <p>We do not collect any information about you, unless you contact us or provide feedback.</p>
     <p>We do collect anonymous analytics about the pages you visit and basic information about your web browser.</p>
     <p>We use third-party providers to enable these functions, as explained in this policy.</p>
   {% endcall %}
+
   {% call legal.policy_section(slug='privacy-purpose', title='Why we collect this information') %}
     <p>We collect your contact information so we can reply to your enquires about items (maps, datasets, etc.).</p>
     <p>We invite feedback from users to improve this website or answer your questions.</p>
     <p>We collect anonymous analytics to help guide how we develop and update this website.</p>
     <p>We collect basic information about your web browser to ensure this website works well for most people.</p>
   {% endcall %}
+
   {% call legal.policy_section(slug='privacy-actions', title='How we use your information') %}
     <p>
       If you enquire about an item, your personal information will be retained for up to three years and then
@@ -43,6 +59,7 @@
     </p>
     <p>We process your information under the {{ com.ext_link_a(href='https://www.ukri.org/about-us/privacy-notice/', value="UK Research & Innovation (UKRI) Privacy Notice") }}.</p>
   {% endcall %}
+
   {% call legal.policy_section(slug='privacy-item-enquires', title='Item enquires (Microsoft)') %}
     <p>
       We use the {{ com.ext_link_a(href='https://www.microsoft.com/en-gb/power-platform/products/power-automate', value="Microsoft Power Automate") }}
@@ -53,6 +70,7 @@
       for general details about how they process information.
     </p>
   {% endcall %}
+
   {% call legal.policy_section(slug='privacy-site-feedback', title='Website feedback (Sentry)') %}
     <p>
       We use {{ com.ext_link_a(href='https://sentry.io/', value="Sentry") }} to collect user feedback for this
@@ -63,6 +81,7 @@
       device (such as the web browser you use) which may be relevant to reviewing and responding to your feedback.
     </p>
   {% endcall %}
+
   {% call legal.policy_section(slug='privacy-site-errors', title='Website error and performance monitoring (Sentry)') %}
     <p>
       We use {{ com.ext_link_a(href='https://sentry.io/', value="Sentry") }} to monitor errors and/or performance
@@ -77,6 +96,7 @@
       address). Sentry will collect basic information about your device (such as the web browser you use).
     </p>
   {% endcall %}
+
   {% call legal.policy_section(slug='privacy-site-analytics', title='Website analytics (Plausible)') %}
     <p>
       We use {{ com.ext_link_a(href='https://plausible.io', value="Plausible") }} to collect website analytics.
@@ -88,6 +108,7 @@
       how Plausible processes information.
     </p>
   {% endcall %}
+
   {% call legal.policy_section(slug='privacy-scope', title='Other privacy policies') %}
     <p>Privacy policies from other BAS websites do not apply here.</p>
     <p>This website has links to other websites for which we are not responsible.</p>

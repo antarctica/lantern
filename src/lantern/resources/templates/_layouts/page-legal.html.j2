@@ -1,11 +1,21 @@
 {% extends "_layouts/page.html.j2" %}
 {% import '_macros/common.html.j2' as com %}
 
-{# reminder: use `{% set header_main = "..." %}` in child templates to set page title from parent template.  #}
+{#
+  - reminder: use `{% set header_main = "..." %}` in child templates to set page title from parent template
+  - use `{% set toc = {"foo-bar": "Foo bar"} %}` in child templates to set table of contents links
+#}
 
 {% block page_content %}
   {% call com.alert(variant='yellow') %}
     This policy does not apply to all pages on this website. Check the policy on each page to see which applies.
+  {% endcall %}
+  {% call legal.policy_section(slug='toc', title='Contents') %}
+    <ul class="list-disc pl-5">
+      {% for slug, title in toc.items() %}
+        <li><a class="{{ com.link_classes() }}" href="#{{ slug }}">{{  title }}</a></li>
+      {% endfor %}
+    </ul>
   {% endcall %}
   {% block legal_content %}{% endblock %}
 {% endblock %}

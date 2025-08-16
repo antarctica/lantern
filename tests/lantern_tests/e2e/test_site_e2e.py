@@ -33,4 +33,6 @@ class TestSentry:
         expect(fallback_link).to_be_visible()
         href = fallback_link.get_attribute("href")
         assert href.startswith("mailto:")
+
+        expect(no_js_page.get_by_role("button", name="Is something wrong with this page?")).to_be_hidden()
         context.close()

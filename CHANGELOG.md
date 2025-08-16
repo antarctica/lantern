@@ -21,6 +21,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Adding file identifier and revision metadata to published S3 objects
 * Showing item aliases in additional information section
 * Showing a page build/render time in additional information section
+* Support for item cross-references in related items section
+* initial support for items a record supersedes in related items section
 
 ### Fixed
 
@@ -32,8 +34,10 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 
 * Split GitLab Store into `GitLabStore` and `GitLabLocalCache` for better structure
 * Upgraded dependencies
-* Improving template composition to reduce repetition
+* Improved template composition to reduce repetition
 * Refactoring alias and catalogue namespace references into constants
+* Improved test records to cover additional property combinations
+* Improved item summaries to prevent showing 'None' for an empty summary
 * Restricting item related tab to Catalogue items via namespace filtering
 
 ### Removed

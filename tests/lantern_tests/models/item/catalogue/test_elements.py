@@ -27,6 +27,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     ProgressCode,
 )
 from lantern.models.item.base import AccessLevel
+from lantern.models.item.base.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.base.elements import Link
 from lantern.models.item.base.enums import ResourceTypeLabel
@@ -82,7 +83,7 @@ class TestAggregations:
     def test_init(self):
         """Can create an Aggregations collection."""
         expected_aggregation = Aggregation(
-            identifier=Identifier(identifier="x", href="x", namespace="x"),
+            identifier=Identifier(identifier="x", href="x", namespace=CATALOGUE_NAMESPACE),
             association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
             initiative_type=AggregationInitiativeCode.COLLECTION,
         )
@@ -98,60 +99,108 @@ class TestAggregations:
 
     def test_peer_collections(self):
         """Can get any collection aggregations (item is part of)."""
-        expected = Aggregation(
-            identifier=Identifier(identifier="x", href="x", namespace="x"),
-            association_type=AggregationAssociationCode.CROSS_REFERENCE,
-            initiative_type=AggregationInitiativeCode.COLLECTION,
+        record_aggregations = RecordAggregations(
+            [
+                Aggregation(
+                    identifier=Identifier(identifier="x", href="x", namespace=CATALOGUE_NAMESPACE),
+                    association_type=AggregationAssociationCode.CROSS_REFERENCE,
+                    initiative_type=AggregationInitiativeCode.COLLECTION,
+                )
+            ]
         )
-        record_aggregations = RecordAggregations([expected])
         aggregations = Aggregations(record_aggregations, get_record=_get_record)
 
         assert len(aggregations.peer_collections) > 0
 
+    def test_peer_cross_reference(self):
+        """Can get any cross-reference not related to another context (e.g. collections)."""
+        record_aggregations = RecordAggregations(
+            [
+                Aggregation(
+                    identifier=Identifier(identifier="x", href="x", namespace=CATALOGUE_NAMESPACE),
+                    association_type=AggregationAssociationCode.CROSS_REFERENCE,
+                ),
+                Aggregation(
+                    identifier=Identifier(identifier="y", href="y", namespace=CATALOGUE_NAMESPACE),
+                    association_type=AggregationAssociationCode.CROSS_REFERENCE,
+                    initiative_type=AggregationInitiativeCode.COLLECTION,
+                ),
+            ]
+        )
+        aggregations = Aggregations(record_aggregations, get_record=_get_record)
+
+        assert len(aggregations.peer_cross_reference) == 1
+
+    def test_peer_superseded(self):
+        """Can get any superseded items."""
+        record_aggregations = RecordAggregations(
+            [
+                Aggregation(
+                    identifier=Identifier(identifier="x", href="x", namespace=CATALOGUE_NAMESPACE),
+                    association_type=AggregationAssociationCode.REVISION_OF,
+                ),
+            ]
+        )
+        aggregations = Aggregations(record_aggregations, get_record=_get_record)
+
+        assert len(aggregations.peer_supersedes) > 0
+
     def test_peer_opposite_side(self):
         """Can get any item that forms the opposite side of a published map."""
-        expected = Aggregation(
-            identifier=Identifier(identifier="x", href="x", namespace="x"),
-            association_type=AggregationAssociationCode.PHYSICAL_REVERSE_OF,
-            initiative_type=AggregationInitiativeCode.PAPER_MAP,
+        record_aggregations = RecordAggregations(
+            [
+                Aggregation(
+                    identifier=Identifier(identifier="x", href="x", namespace=CATALOGUE_NAMESPACE),
+                    association_type=AggregationAssociationCode.PHYSICAL_REVERSE_OF,
+                    initiative_type=AggregationInitiativeCode.PAPER_MAP,
+                )
+            ]
         )
-        record_aggregations = RecordAggregations([expected])
         aggregations = Aggregations(record_aggregations, get_record=_get_record)
 
         assert aggregations.peer_opposite_side is not None
 
     def test_parent_collections(self):
         """Can get any collection aggregations (item is part of)."""
-        expected = Aggregation(
-            identifier=Identifier(identifier="x", href="x", namespace="x"),
-            association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
-            initiative_type=AggregationInitiativeCode.COLLECTION,
+        record_aggregations = RecordAggregations(
+            [
+                Aggregation(
+                    identifier=Identifier(identifier="x", href="x", namespace=CATALOGUE_NAMESPACE),
+                    association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
+                    initiative_type=AggregationInitiativeCode.COLLECTION,
+                )
+            ]
         )
-        record_aggregations = RecordAggregations([expected])
         aggregations = Aggregations(record_aggregations, get_record=_get_record)
 
         assert len(aggregations.parent_collections) > 0
 
     def test_child_items(self):
         """Can get any item aggregations (item is made up of)."""
-        expected = Aggregation(
-            identifier=Identifier(identifier="x", href="x", namespace="x"),
-            association_type=AggregationAssociationCode.IS_COMPOSED_OF,
-            initiative_type=AggregationInitiativeCode.COLLECTION,
+        record_aggregations = RecordAggregations(
+            [
+                Aggregation(
+                    identifier=Identifier(identifier="x", href="x", namespace=CATALOGUE_NAMESPACE),
+                    association_type=AggregationAssociationCode.IS_COMPOSED_OF,
+                    initiative_type=AggregationInitiativeCode.COLLECTION,
+                )
+            ]
         )
-        record_aggregations = RecordAggregations([expected])
         aggregations = Aggregations(record_aggregations, get_record=_get_record)
 
         assert len(aggregations.child_items) > 0
 
     def test_parent_printed_map(self):
         """Can get printed map item that this item is a side of."""
-        expected = Aggregation(
-            identifier=Identifier(identifier="x", href="x", namespace="x"),
-            association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
-            initiative_type=AggregationInitiativeCode.PAPER_MAP,
+        record_aggregations = RecordAggregations(
+            [
+                Aggregation(
+                    identifier=Identifier(identifier="x", href="x", namespace=CATALOGUE_NAMESPACE),
+                    association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
+                    initiative_type=AggregationInitiativeCode.PAPER_MAP,
+                )
+            ]
         )
-        record_aggregations = RecordAggregations([expected])
         aggregations = Aggregations(record_aggregations, get_record=_get_record)
 
         assert aggregations.parent_printed_map is not None
@@ -269,18 +318,18 @@ class TestItemCatalogueSummaryCatalogue:
         assert isinstance(summary, ItemCatalogueSummary)
         assert summary._record == fx_record_minimal_item
 
-    @pytest.mark.parametrize(("value", "expected"), [("x", "<p>x</p>"), ("_x_", "<p><em>x</em></p>")])
-    def test_title_html(self, fx_record_minimal_item: Record, value: str, expected: str):
-        """Can get title with Markdown formatting, if present, encoded as HTML."""
-        fx_record_minimal_item.identification.title = value
-        summary = ItemCatalogueSummary(fx_record_minimal_item)
-
-        assert summary.title_html == expected
-
     def test_resource_type_icon(self, fx_record_minimal_item: Record):
         """Can get icon for resource type."""
         summary = ItemCatalogueSummary(fx_record_minimal_item)
         assert summary._resource_type_icon == ResourceTypeIcon[summary.resource_type.name].value
+
+    @pytest.mark.parametrize(("value", "expected"), [(None, ""), ("x", "<p>x</p>"), ("_x_", "<p><em>x</em></p>")])
+    def test_summary_html(self, fx_record_minimal_item: Record, value: str, expected: str):
+        """Can get summary with Markdown formatting encoded as HTML if present, or a blank string."""
+        fx_record_minimal_item.identification.purpose = value
+        summary = ItemCatalogueSummary(fx_record_minimal_item)
+
+        assert summary.summary_html == expected
 
     @pytest.mark.parametrize("has_date", [True, False])
     def test_date(self, fx_record_minimal_item: Record, has_date: bool):
@@ -388,6 +437,22 @@ class TestIdentifiers:
         expected = "MAGIC/foo#123"
 
         result = Identifiers._make_gitlab_issue_ref(value)
+        assert result == expected
+
+    @pytest.mark.parametrize(
+        ("identifiers", "expected"),
+        [
+            ([], []),
+            (
+                [Identifier(identifier="x/x", href="https://data.bas.ac.uk/x/x", namespace=ALIAS_NAMESPACE)],
+                [Link(value="x/x", href="/x/x", external=False)],
+            ),
+        ],
+    )
+    def test_aliases(self, identifiers: list[Identifier], expected: list[str]):
+        """Can get any aliases."""
+        identifiers = Identifiers(RecordIdentifiers(identifiers))
+        result = identifiers.aliases
         assert result == expected
 
     @pytest.mark.parametrize(
@@ -765,7 +830,7 @@ class TestPageSummary:
         if has_aggregation:
             aggregations.append(
                 Aggregation(
-                    identifier=Identifier(identifier="x", href="x", namespace="x"),
+                    identifier=Identifier(identifier="x", href="x", namespace=CATALOGUE_NAMESPACE),
                     association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
                     initiative_type=AggregationInitiativeCode.PAPER_MAP,
                 )

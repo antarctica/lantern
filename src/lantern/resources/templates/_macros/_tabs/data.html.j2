@@ -1,12 +1,17 @@
 {% import '_macros/common.html.j2' as com %}
 
 {% macro item(data) %}
-  {% call com.item_border(classes="grid grid-cols-1 gap-y-2 lg:grid-cols-3 items-center data-option") %}
+  {% call com.item_border(classes="grid grid-cols-1 gap-y-2 lg:gap-y-0 lg:grid-cols-3 items-center data-option") %}
     <div class="text-center lg:text-left">{{ data.format_type.value }}</div>
     <div class="text-center">{{ data.size }}</div>
     <div class="text-center lg:text-right">{{ action(data) }}</div>
     {% if data.access_target %}
-      <div class="lg:col-span-3">{{ content(data) }}</div>
+      <div class="lg:col-span-3">
+        <noscript><div class="pt-2">{{ panel(data) }}</div></noscript>
+        <div id="{{ data.access_target | replace("#", "") }}" class="pt-2 hidden">
+          {{ panel(data) }}
+        </div>
+      </div>
     {% endif %}
   {% endcall %}
 {% endmacro %}
@@ -20,28 +25,26 @@
   {% endif %}
 
   {% if data.action.href %}
-    <a class="{{ classes }} inline-block p-2" href="{{ data.action.href }}">
+    <a class="inline-block p-2 {{ classes }}" href="{{ data.action.href }}">
       {{ data.action.value }} <i class="{{ data.action_btn_icon }}"></i>
     </a>
   {% else %}
-    <button class="{{ classes }} p-2" data-target="{{ data.access_target }}">
+    <button class="{{ com.show_js_only() }} p-2 {{ classes }}" data-target="{{ data.access_target }}">
       {{ data.action.value }} <i class="{{ data.action_btn_icon }}"></i>
     </button>
   {% endif %}
 {% endmacro %}
 
-{% macro content(data) %}
-  <div id="{{ data.access_target | replace("#", "") }}" class="pt-2 hidden">
-    {% if data.format_type.name == "ARCGIS_FEATURE_LAYER" %}
-      {{ arc_feature_layer(data) }}
-    {% elif data.format_type.name == "ARCGIS_OGC_FEATURE_LAYER"  %}
-      {{ arc_ogc_features(data) }}
-    {% elif data.format_type.name == "ARCGIS_VECTOR_TILE_LAYER"  %}
-      {{ arc_vector_tile_layer(data) }}
-    {% elif data.format_type.name == "X_PAPER_MAP"  %}
-      {{ bas_published_map() }}
-    {% endif %}
-  </div>
+{% macro panel(data) %}
+  {% if data.format_type.name == "ARCGIS_FEATURE_LAYER" %}
+    {{ arc_feature_layer(data) }}
+  {% elif data.format_type.name == "ARCGIS_OGC_FEATURE_LAYER"  %}
+    {{ arc_ogc_features(data) }}
+  {% elif data.format_type.name == "ARCGIS_VECTOR_TILE_LAYER"  %}
+    {{ arc_vector_tile_layer(data) }}
+  {% elif data.format_type.name == "X_PAPER_MAP"  %}
+    {{ bas_published_map() }}
+  {% endif %}
 {% endmacro %}
 
 {% macro arc_feature_layer(data) %}

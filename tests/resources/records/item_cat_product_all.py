@@ -257,6 +257,11 @@ record.identification.aggregations.append(
         association_type=AggregationAssociationCode.REVISION_OF,
     )
 )
+# Haven't added a parent collection as one already set
+# Can't add a collection cross-reference as not a collection (is added in max collection)
+# Can't add opposite side relation as not a physical map side
+# Can't add a parent physical map as not a physical map side
+
 record.distribution = [
     Distribution(
         distributor=Contact(

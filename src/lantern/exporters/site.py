@@ -1,5 +1,6 @@
 import logging
 import shutil
+from datetime import UTC, datetime
 from pathlib import Path
 from shutil import copy
 
@@ -300,6 +301,7 @@ class SitePagesExporter(Exporter):
         }
         return PageMetadata(
             build_key=self._config.TEMPLATES_CACHE_BUST_VALUE,
+            build_time=datetime.now(tz=UTC),
             sentry_src=self._config.TEMPLATES_SENTRY_SRC,
             plausible_domain=self._config.TEMPLATES_PLAUSIBLE_DOMAIN,
             html_title=mapping[template_path],

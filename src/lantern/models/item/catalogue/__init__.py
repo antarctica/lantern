@@ -1,5 +1,6 @@
 import json
 from collections.abc import Callable
+from datetime import UTC, datetime
 from typing import Any
 
 from bs4 import BeautifulSoup
@@ -254,6 +255,7 @@ class ItemCatalogue(ItemBase):
         """Templates page metadata."""
         return PageMetadata(
             build_key=self._config.TEMPLATES_CACHE_BUST_VALUE,
+            build_time=datetime.now(tz=UTC),
             sentry_src=self._config.TEMPLATES_SENTRY_SRC,
             plausible_domain=self._config.TEMPLATES_PLAUSIBLE_DOMAIN,
             html_title=self._html_title,

@@ -419,7 +419,7 @@ class Identifiers(RecordIdentifiers):
         """
         GitLab issues for Item.
 
-        Returned as references rather than links to add discourage others viewing issues.
+        Returned as references rather than links to discourage others viewing issues.
         """
         return [self._make_gitlab_issue_ref(identifier.href) for identifier in self.filter(GITLAB_NAMESPACE)]
 

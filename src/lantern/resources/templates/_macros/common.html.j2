@@ -22,7 +22,7 @@
 
 {% macro feedback_trigger(classes, fallback, text) %}
   <noscript><a class="{{ classes }}" href="mailto:{{ fallback }}">{{ text }}</a></noscript>
-  <button class="{{ show_js_class() }} {{ sentry_trigger() }} hidden cursor-pointer {{ classes }}">{{ text }}</button>
+  <button class="{{ sentry_trigger() }} {{ show_js_only() }} cursor-pointer {{ classes }}">{{ text }}</button>
 {% endmacro %}
 
 {% macro prose(value) %}
@@ -106,7 +106,7 @@
   {% endif %}
   {% if data.access.name != 'PUBLIC' %}
     {{ item_summary_fragment_divider() }}
-    <span>{{ restricted_i }} Restricted</span>
+    <span>{{ restricted_i() }} Restricted</span>
   {% endif %}
 {% endmacro %}
 

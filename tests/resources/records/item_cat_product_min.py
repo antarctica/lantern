@@ -18,3 +18,4 @@ record = Record.loads(record.dumps())
 # un-set non-required fields set by `make_record()`
 record.identification.contacts[0].role = [ContactRoleCode.POINT_OF_CONTACT]
 record.identification.aggregations = Aggregations([])
+record.identification.purpose = None

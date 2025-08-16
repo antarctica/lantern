@@ -20,6 +20,7 @@ from lantern.lib.metadata_library.models.record.elements.distribution import (
     TransferOption,
 )
 from lantern.lib.metadata_library.models.record.elements.identification import (
+    Aggregation,
     GraphicOverview,
     GraphicOverviews,
 )
@@ -28,6 +29,7 @@ from lantern.lib.metadata_library.models.record.elements.projection import (
     ReferenceSystemInfo,
 )
 from lantern.lib.metadata_library.models.record.enums import (
+    AggregationAssociationCode,
     ContactRoleCode,
     DatePrecisionCode,
     HierarchyLevelCode,
@@ -232,6 +234,33 @@ record.identification.other_citation_details = "Produced by the Mapping and Geog
 record.identification.supplemental_information = json.dumps(
     {"physical_size_width_mm": "210", "physical_size_height_mm": "297", "sheet_number": "4"}
 )
+
+# add a related peer
+record.identification.aggregations.append(
+    Aggregation(
+        identifier=Identifier(
+            identifier="30825673-6276-4e5a-8a97-f97f2094cd25",
+            href="https://data.bas.ac.uk/items/30825673-6276-4e5a-8a97-f97f2094cd25",
+            namespace="data.bas.ac.uk",
+        ),
+        association_type=AggregationAssociationCode.CROSS_REFERENCE,
+    )
+)
+# add a superseded peer
+record.identification.aggregations.append(
+    Aggregation(
+        identifier=Identifier(
+            identifier="7e3611a6-8dbf-4813-aaf9-dadf9decff5b",
+            href="https://data.bas.ac.uk/items/7e3611a6-8dbf-4813-aaf9-dadf9decff5b",
+            namespace="data.bas.ac.uk",
+        ),
+        association_type=AggregationAssociationCode.REVISION_OF,
+    )
+)
+# Haven't added a parent collection as one already set
+# Can't add a collection cross-reference as not a collection (is added in max collection)
+# Can't add opposite side relation as not a physical map side
+# Can't add a parent physical map as not a physical map side
 
 record.distribution = [
     Distribution(

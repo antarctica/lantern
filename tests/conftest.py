@@ -74,6 +74,17 @@ def vcr_config():
     return {"filter_headers": ["PRIVATE-TOKEN"]}
 
 
+def freezer_time() -> datetime:
+    """Freezer time for tests."""
+    return datetime(2014, 6, 30, 14, 30, second=45, tzinfo=UTC)
+
+
+@pytest.fixture()
+def fx_freezer_time() -> datetime:
+    """Freezer time for tests."""
+    return freezer_time()
+
+
 @pytest.fixture()
 def fx_package_version() -> str:
     """Package version."""

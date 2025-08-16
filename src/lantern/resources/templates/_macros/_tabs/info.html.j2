@@ -63,6 +63,16 @@
         {% endcall %}
       {% endif %}
 
+      {% if data.aliases %}
+        {% call com.dl_item(title='Aliases', id='info-aliases') %}
+          <ul class="space-y-2">
+            {% for item in data.aliases %}
+              <li>{{ com.ext_link_a(href=item.href, value=item.value) }}</li>
+            {% endfor %}
+          </ul>
+        {% endcall %}
+      {% endif %}
+
       {% if data.doi %}
         {% call com.dl_item(title='DOIs', id='info-doi') %}
           <ul class="space-y-2">
@@ -145,6 +155,10 @@
           <a class="{{ com.link_classes() }}" href="{{ data.revision_link.href }}">{{ data.revision_link.value }} {{ com.restricted_i() }} {{ com.ext_link_i() }}</a>
         {% endcall %}
       {% endif %}
+
+    {% call com.dl_item(title='Metadata build time', id='info-build') %}
+      {{ com.time(data.build_time) }}
+    {% endcall %}
     </dl>
   {% endcall %}
 {% endmacro %}

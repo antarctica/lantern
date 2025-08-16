@@ -18,3 +18,6 @@ record = Record.loads(record.dumps())
 
 # Reset collection members
 record.identification.aggregations = Aggregations([])
+
+# un-set non-required fields set by `make_record()`
+record.identification.purpose = None

@@ -45,6 +45,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     OnlineResourceFunctionCode,
     ProgressCode,
 )
+from lantern.models.item.base.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.item.catalogue import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
 from lantern.models.record.revision import RecordRevision
@@ -195,7 +196,10 @@ class TestDataTab:
         - templates could repeat if multiple distribution options of the same type are defined
 
         This test is therefore a best efforts attempt, checking for a freetext value. anywhere in the item template.
-        Using a single distribution option set, with an otherwise minimal item, can hopefully limit irrelevant content.
+        Using a single distribution option set, with an otherwise minimal item, to hopefully limit irrelevant content.
+
+        This value will always appear twice in rendered content, as we include a <noscript> version for gracefully
+        handling JavaScript disabled browsers. Text should therefore be in the collapsible section, and the <noscript>.
 
         Note: This test does not check the contents of the rendered template, except for the freetext value. For
         example, it doesn't verify a service endpoint (if used) is populated correctly.
@@ -215,7 +219,11 @@ class TestDataTab:
 
         assert html.select_one(f"button[data-target='{expected.access_target}']") is not None
         assert html.find(name="div", string=expected.format_type.value) is not None
-        assert str(html).count(text) == 1
+        assert str(html).count(text) == 2  # one in collapsible, one in <noscript>
+
+        for tag in html.find_all("noscript"):
+            tag.decompose()  # drop
+        assert str(html).count(text) == 1  # only collapsible
 
     @pytest.mark.parametrize(
         ("value", "expected"),
@@ -665,6 +673,72 @@ class TestRelatedTab:
                 [
                     Aggregation(
                         identifier=Identifier(identifier="x", href="x", namespace="x"),
+                        association_type=AggregationAssociationCode.CROSS_REFERENCE,
+                    ),
+                    Aggregation(
+                        identifier=Identifier(identifier="y", href="y", namespace="y"),
+                        association_type=AggregationAssociationCode.CROSS_REFERENCE,
+                    ),
+                ]
+            ),
+        ],
+    )
+    def test_peer_cross_reference(self, fx_item_catalogue_min: ItemCatalogue, value: Aggregations):
+        """
+        Can get optional peer cross-references unrelated to other cross-reference contexts with expected values from item.
+
+        Detailed item summary tests are run in common macro tests.
+        """
+        fx_item_catalogue_min._record.identification.aggregations = value
+        expected = fx_item_catalogue_min._related.peer_cross_reference
+        html = BeautifulSoup(fx_item_catalogue_min.render(), parser="html.parser", features="lxml")
+
+        related = html.select_one("#related-peer-items")
+        if len(expected) > 0:
+            for item in expected:
+                assert related.select_one(f"a[href='{item.href}']") is not None
+        else:
+            assert related is None
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            Aggregations([]),
+            Aggregations(
+                [
+                    Aggregation(
+                        identifier=Identifier(identifier="x", href="x", namespace="x"),
+                        association_type=AggregationAssociationCode.REVISION_OF,
+                    ),
+                ]
+            ),
+        ],
+    )
+    def test_peer_supersedes(self, fx_item_catalogue_min: ItemCatalogue, value: Aggregations):
+        """
+        Can get optional peer items item supersedes with expected values from item.
+
+        Detailed item summary tests are run in common macro tests.
+        """
+        fx_item_catalogue_min._record.identification.aggregations = value
+        expected = fx_item_catalogue_min._related.peer_supersedes
+        html = BeautifulSoup(fx_item_catalogue_min.render(), parser="html.parser", features="lxml")
+
+        replaced = html.select_one("#related-peer-supersedes")
+        if len(expected) > 0:
+            for item in expected:
+                assert replaced.select_one(f"a[href='{item.href}']") is not None
+        else:
+            assert replaced is None
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            Aggregations([]),
+            Aggregations(
+                [
+                    Aggregation(
+                        identifier=Identifier(identifier="x", href="x", namespace="x"),
                         association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
                         initiative_type=AggregationInitiativeCode.COLLECTION,
                     ),
@@ -896,6 +970,29 @@ class TestInfoTab:
         [
             [],
             [
+                Identifier(identifier="x/x", href=f"https://{CATALOGUE_NAMESPACE}/x/x", namespace=ALIAS_NAMESPACE),
+                Identifier(identifier="y/y", href=f"https://{CATALOGUE_NAMESPACE}/y/y", namespace=ALIAS_NAMESPACE),
+            ],
+        ],
+    )
+    def test_aliases(self, fx_item_catalogue_min: ItemCatalogue, value: list[Identifier]):
+        """Can get optional item DOIs based on value from item."""
+        fx_item_catalogue_min._record.identification.identifiers.extend(value)
+        expected = fx_item_catalogue_min._additional_info.aliases
+        html = BeautifulSoup(fx_item_catalogue_min.render(), parser="html.parser", features="lxml")
+
+        alias = html.select_one("#info-aliases")
+        if expected:
+            for item in expected:
+                assert alias.select_one(f"a[href='{item.href}']") is not None
+        else:
+            assert alias is None
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            [],
+            [
                 Identifier(identifier="x", href="x", namespace="doi"),
                 Identifier(identifier="y", href="y", namespace="doi"),
             ],
@@ -1085,6 +1182,17 @@ class TestInfoTab:
             assert link.select_one("a") is not None
         else:
             assert link is None
+
+    def test_build_time(
+        self,
+        fx_item_catalogue_min: ItemCatalogue,
+        fx_record_revision_minimal_item_catalogue: RecordRevision,
+    ):
+        """Can get link to record revision based on values from item."""
+        html = BeautifulSoup(fx_item_catalogue_min.render(), parser="html.parser", features="lxml")
+
+        build = html.select_one("#info-build")
+        assert build.select_one("time") is not None
 
 
 class TestContactTab:

@@ -34,6 +34,7 @@ collection_members = [
     "3c77ffae-6aa0-4c26-bc34-5521dbf4bf23",
     "57327327-4623-4247-af86-77fb43b7f45b",
     "09dbc743-cc96-46ff-8449-1709930b73ad",
+    "7e3611a6-8dbf-4813-aaf9-dadf9decff5b",
 ]
 
 abstract = """
@@ -150,7 +151,7 @@ for collection_member in collection_members:
             initiative_type=AggregationInitiativeCode.COLLECTION,
         ),
     )
-# add a related collection
+# add a peer collection
 record.identification.aggregations.append(
     Aggregation(
         identifier=Identifier(
@@ -162,3 +163,8 @@ record.identification.aggregations.append(
         initiative_type=AggregationInitiativeCode.COLLECTION,
     )
 )
+# Can't add a parent collection as root record
+# Can't add a peer cross-reference as a collection and already has a related collection
+# Can't add a superseded peer as no suitable target (is added in max product)
+# Can't add opposite side relation as not a physical map side
+# Can't add a parent physical map as not a physical map side

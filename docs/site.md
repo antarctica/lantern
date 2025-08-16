@@ -217,7 +217,19 @@ A limited number of scripts are loaded using [Site Macros](#site-macros) for:
 - showing content where JavaScript is enabled, as an 'else' to `<noscript>`
 
 > [!NOTE]
-> Scripts are intended to be used sparingly, with functionality implemented using HTML and CSS alone where practical.
+> Scripts are intended to be used sparingly, with functionality implemented using HTML and CSS alone where practical
+> and using graceful degradation for JavaScript wherever possible.
+
+For graceful degradation:
+
+- use a `<noscript>` element to show a static fallback of some content for users without JavaScript
+- use `class="{{ com.show_js_only() }} ..."` on the full/interactive version which will add a `.hidden` class
+- if a user has JavaScript enabled:
+  - `<noscript>` elements will be automatically hidden by the browser
+  - a site script will remove the `.hidden` class from any elements using the `show_js_only()` macro
+
+This approach is used for distribution options for example where collapsible sections are normally used to hide optional
+data. Where JavaScript is disabled, `<noscript>` elements show the full content statically as a fallback.
 
 ## Cache busting
 

@@ -20,7 +20,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     ProgressCode,
 )
 from lantern.models.item.base import ItemBase
-from lantern.models.item.base.const import GITLAB_NAMESPACE
+from lantern.models.item.base.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE, GITLAB_NAMESPACE
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.base.elements import Link, unpack
 from lantern.models.item.base.enums import AccessLevel, ResourceTypeLabel
@@ -93,11 +93,6 @@ class ItemCatalogueSummary(ItemBase):
     """
 
     @property
-    def title_html(self) -> str | None:
-        """Title with Markdown formatting, if present, encoded as HTML."""
-        return md_as_html(self.title_md)
-
-    @property
     def _resource_type_label(self) -> str:
         """Resource type label."""
         return ResourceTypeLabel[self.resource_type.name].value
@@ -140,6 +135,11 @@ class ItemCatalogueSummary(ItemBase):
         if count > 1:
             return f"{count} items"
         return None
+
+    @property
+    def summary_html(self) -> str:
+        """Summary with Markdown formatting encoded as HTML if present or a blank string."""
+        return md_as_html(self.summary_md) if self.summary_md else md_as_html(" ")
 
     @property
     def fragments(self) -> ItemSummaryFragments:
@@ -226,7 +226,6 @@ class Aggregations:
 
     def _filter(
         self,
-        namespace: str | None = None,
         associations: AggregationAssociationCode | list[AggregationAssociationCode] | None = None,
         initiatives: AggregationInitiativeCode | list[AggregationInitiativeCode] | None = None,
     ) -> list[ItemCatalogueSummary]:
@@ -234,8 +233,12 @@ class Aggregations:
         Filter aggregations as item summaries, by namespace and/or association(s) and/or initiative(s).
 
         Wrapper around Record Aggregations.filter() returning results as ItemSummaryCatalogue instances.
+
+        Note: Aggregations are scoped to the BAS Data Catalogue namespace so they can be returned as item summaries.
         """
-        results = self._aggregations.filter(namespace=namespace, associations=associations, initiatives=initiatives)
+        results = self._aggregations.filter(
+            namespace=CATALOGUE_NAMESPACE, associations=associations, initiatives=initiatives
+        )
         return [self._summaries[aggregation.identifier.identifier] for aggregation in results]
 
     @property
@@ -245,6 +248,25 @@ class Aggregations:
             associations=AggregationAssociationCode.CROSS_REFERENCE,
             initiatives=AggregationInitiativeCode.COLLECTION,
         )
+
+    @property
+    def peer_cross_reference(self) -> list[ItemCatalogueSummary]:
+        """
+        Other items item is related with.
+
+        Returns cross-references not in scope of other aggregation types (such as peer collections).
+        """
+        results = self._aggregations.filter(
+            namespace=CATALOGUE_NAMESPACE, associations=AggregationAssociationCode.CROSS_REFERENCE
+        )
+        non_exclusive = [item.resource_id for item in self.peer_collections]
+        exclusive = [aggregation for aggregation in results if aggregation.identifier.identifier not in non_exclusive]
+        return [self._summaries[aggregation.identifier.identifier] for aggregation in exclusive]
+
+    @property
+    def peer_supersedes(self) -> list[ItemCatalogueSummary]:
+        """Items item supersedes (replaces)."""
+        return self._filter(associations=AggregationAssociationCode.REVISION_OF)
 
     @property
     def peer_opposite_side(self) -> ItemCatalogueSummary | None:
@@ -397,9 +419,21 @@ class Identifiers(RecordIdentifiers):
         """
         GitLab issues for Item.
 
-        Returned as references rather than links to add discourage others viewing issues.
+        Returned as references rather than links to discourage others viewing issues.
         """
         return [self._make_gitlab_issue_ref(identifier.href) for identifier in self.filter(GITLAB_NAMESPACE)]
+
+    @property
+    def aliases(self) -> list[Link]:
+        """
+        Aliases for Item.
+
+        Alias URLs are converted to relative links so they can be tested in non-production environments.
+        """
+        return [
+            Link(href=identifier.href.replace(f"https://{CATALOGUE_NAMESPACE}", ""), value=identifier.identifier)
+            for identifier in self.filter(ALIAS_NAMESPACE)
+        ]
 
 
 class Maintenance(RecordMaintenance):

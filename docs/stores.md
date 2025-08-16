@@ -51,7 +51,7 @@ For example a Record with file identifier `123abc` is stored as `/records/12/3a/
 `GitLabStore` instances are initially empty. Use `store.populate()` to load Records from the remote repository via the
 [Local Cache](#gitlab-local-cache). By default, all records are selected. Alternatively, records can be filtered to:
 
-- only include specific file identifiers (and optionally records related to these selections)
+- only include specific file identifiers (plus records related to these selections, and their related records)
 - exclude specific file identifiers
 
 These options cannot be used together. Including related records is needed to build collections or physical maps.

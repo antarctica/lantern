@@ -136,7 +136,7 @@ class TestSitePageExporter:
         site_path = fx_exporter_site_pages._config.EXPORT_PATH
         expected = [
             site_path.joinpath("404.html"),
-            site_path.joinpath("legal/accessibility.html.j2"),
+            site_path.joinpath("legal/accessibility/index.html"),
             site_path.joinpath("legal/cookies/index.html"),
             site_path.joinpath("legal/copyright/index.html"),
             site_path.joinpath("legal/privacy/index.html"),

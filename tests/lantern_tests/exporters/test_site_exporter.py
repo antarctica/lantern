@@ -1,6 +1,7 @@
 import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from typing import ClassVar
 from unittest.mock import PropertyMock
 
 import pytest
@@ -89,6 +90,15 @@ class TestSiteIndexExporter:
 class TestSitePageExporter:
     """Test site pages exporter."""
 
+    relative_paths: ClassVar[list[str]] = [
+        "404.html",
+        "legal/accessibility/index.html",
+        "legal/cookies/index.html",
+        "legal/copyright/index.html",
+        "legal/privacy/index.html",
+        "-/formatting/index.html",
+    ]
+
     def test_init(self, mocker: MockerFixture, fx_logger: logging.Logger):
         """Can create an Exporter."""
         with TemporaryDirectory() as tmp_path:
@@ -132,13 +142,7 @@ class TestSitePageExporter:
     def test_export(self, fx_exporter_site_pages: SitePagesExporter):
         """Can export site pages to local files."""
         site_path = fx_exporter_site_pages._config.EXPORT_PATH
-        expected = [
-            site_path.joinpath("404.html"),
-            site_path.joinpath("legal/accessibility/index.html"),
-            site_path.joinpath("legal/cookies/index.html"),
-            site_path.joinpath("legal/copyright/index.html"),
-            site_path.joinpath("legal/privacy/index.html"),
-        ]
+        expected = [site_path.joinpath(path) for path in self.relative_paths]
 
         fx_exporter_site_pages.export()
 
@@ -148,13 +152,7 @@ class TestSitePageExporter:
 
     def test_publish(self, fx_exporter_site_pages: SitePagesExporter, fx_s3_bucket_name: str):
         """Can publish site pages to S3."""
-        expected = [
-            "404.html",
-            "legal/accessibility/index.html",
-            "legal/cookies/index.html",
-            "legal/copyright/index.html",
-            "legal/privacy/index.html",
-        ]
+        expected = self.relative_paths
 
         fx_exporter_site_pages.publish()
 

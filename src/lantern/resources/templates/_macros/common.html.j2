@@ -25,8 +25,8 @@
   <button class="{{ sentry_trigger() }} {{ show_js_only() }} cursor-pointer {{ classes }}">{{ text }}</button>
 {% endmacro %}
 
-{% macro prose(value) %}
-  <div class="max-w-none prose prose-base dark:prose-invert prose-headings:font-bold prose-li:my-0">{{ value }}</div>
+{% macro prose() %}
+  <div class="max-w-none prose prose-base dark:prose-invert prose-headings:font-bold prose-li:my-0">{{ caller() }}</div>
 {% endmacro %}
 
 {% macro dl_item(title, id, dd_class=None) %}
@@ -77,7 +77,7 @@
       </div>
       <div class="w-5/6 flex flex-col h-full pl-2">
         <header><a class="text-lg {{ link_classes() }}" href="{{item.href}}">{{ item.title_html }}</a></header>
-        <article class="py-2 flex-grow overflow-auto">{{ prose(item.summary_html) }}</article>
+        <article class="py-2 flex-grow overflow-auto">{% call prose() %}{{ item.summary_html }}{% endcall %}</article>
         <footer class="mt-auto flex items-center space-x-2 text-sm text-grey-500 dark:text-grey-300">
           {{ item_summary_fragments(item.fragments) }}
         </footer>

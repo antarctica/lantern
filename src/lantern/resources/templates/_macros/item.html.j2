@@ -88,14 +88,14 @@
 {% macro citation(value) %}
   <section class="space-y-2">
     <h2 class="text-2xl">Citation</h2>
-    <article id="summary-citation">{{ com.prose(value) }}</article>
+    <article id="summary-citation">{% call com.prose() %}{{ value }}{% endcall %}</article>
   </section>
 {% endmacro %}
 
 {% macro abstract(value) %}
   <section class="space-y-2">
     <h2 class="text-2xl">Abstract</h2>
-    <article id="summary-abstract">{{ com.prose(value) }}</article>
+    <article id="summary-abstract">{% call com.prose() %}{{ value }}{% endcall %}</article>
   </section>
 {% endmacro %}
 

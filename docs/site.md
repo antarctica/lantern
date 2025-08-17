@@ -372,4 +372,8 @@ In addition to typical syntax, some additional features are supported:
 - admonitions (notes, tips, warnings, etc.)
 - automatically formatting inline URLs and email addresses as links
 
-See the [Formatting Test Record](/tests/resources/records/item_cat_formatting.py) for examples.
+The guide in `src/resources/templates/_views/-/formatting.html.j2` SHOULD be maintained to show end-users how supported
+formatting will appear.
+
+For development, use the [Formatting Test Record](/tests/resources/records/item_cat_formatting.py) for more exciting
+examples.

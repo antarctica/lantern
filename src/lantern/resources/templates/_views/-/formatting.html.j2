@@ -1,0 +1,220 @@
+{% extends "_layouts/page.html.j2" %}
+{% import '_macros/common.html.j2' as com %}
+
+{% macro section(slug, title, input, output, danger=None, tip=None) %}
+  <section id="{{ slug }}" class="space-y-4">
+    <h2 class="text-2xl">{{ title }}</h2>
+    {% if danger %}
+      {% call com.alert(variant='red') %}{{ danger }}{% endcall %}
+    {% endif %}
+    {% if tip %}
+      {% call com.alert(variant='green') %}{{ tip }}{% endcall %}
+    {% endif %}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-y-4 lg:gap-x-4">
+      {% call com.item_border() %}
+        <pre>{{ input }}</pre>
+      {% endcall %}
+      {% call com.item_border() %}
+        {% call com.prose() %}{{ output }}{% endcall %}
+      {% endcall %}
+    </div>
+  </section>
+{% endmacro %}
+
+{% set header_main = "Content formatting guide" %}
+{% set toc = {
+  "italics": "Italics",
+  "bold": "Bold",
+  "strikethrough": "Strikethrough",
+  "code-inline": "Inline code",
+  "links": "Links",
+  "emails": "Email addresses",
+  "unordered-list": "Unordered list",
+  "ordered-list": "Ordered list",
+  "divider": "Horizontal rule",
+  "blockquote": "Blockquote",
+  "code-block": "Code block",
+  "admonition-note": "Admonition (Note)",
+  "admonition-tip": "Admonition (Tip)",
+  "admonition-important": "Admonition (Important)",
+  "admonition-warning": "Admonition (Warning)",
+  "admonition-caution": "Admonition (Caution)",
+  "headings": "Headings",
+  "table": "Tables",
+  "image": "Images",
+  "changelog": "Changes to this guide",
+  }
+%}
+
+{% block content %}
+  <article class="space-y-4 lg:space-y-8">
+    {{ com.page_header(main=header_main)}}
+    <section id="toc" class="space-y-4">
+      <h2 class="text-2xl">Contents</h2>
+      <ul class="list-disc pl-5 columns-2">
+        {% for slug, title in toc.items() %}
+          <li><a class="{{ com.link_classes() }}" href="#{{ slug }}">{{  title }}</a></li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    {% call com.alert(variant='blue') %}
+      <div class="space-y-4">
+        <p>This guide applies to these Markdown enabled fields:</p>
+        <ul class="list-disc pl-5">
+          <li><code>identification.title</code></li>
+          <li><code>identification.abstract</code></li>
+          <li><code>identification.purpose</code></li>
+          <li><code>identification.lineage.statement</code></li>
+        </ul>
+      </div>
+    {% endcall %}
+
+    {{ section(slug='italics', title='Italics', input='Some *italic* text.', output='<p>Some <em>italic</em> text.</p>') }}
+
+    {{ section(slug='bold', title='Bold', input='Some **bold** text.', output='<p>Some <strong>bold</strong> text.</p>') }}
+
+    {{ section(slug='strikethrough', title='Strikethrough', input='Some ~~strikethrough~~ text.', output='<p>Some <del>strikethrough</del> text.</p>') }}
+
+    {{ section(slug='code-inline', title='Inline code', input='Some `code` in text.', output='<p>Some <code>code</code> in text.</p>') }}
+
+    {{ section(slug='links', title='Links', tip='Inline URLs such as DOIs will be automatically converted to links.',
+      input='https://example.com
+[example.com](https://example.com)',
+      output='<p><a href="https://example.com">https://example.com</a></p>
+      <p><a href="https://example.com">example.com</a></p>'
+    ) }}
+
+    {{ section(slug='emails', title='Email addresses', tip='Inline email address will be automatically converted to links.',
+      input='connie.watson@example.com
+[Contact Us](mailto:hello@example.com)',
+      output='<p><a href="mailto:connie.watson@example.com">connie.watson@example.com</a></p>
+      <p><a href="mailto:hello@example.com">Contact Us</a></p>'
+    ) }}
+
+      {{ section(slug='divider', title='Horizontal Rule', danger='Do not use horizontal rules in item titles.',
+      input='...
+---
+...',
+      output='<p>...</p><hr /><p>...</p>'
+    ) }}
+
+    {{ section(slug='unordered-list', title='Unordered list', danger='Do not use lists in item titles.',
+      input='...
+* list item 1
+* list item 2
+  * list item 2.1
+* list item 3
+...',
+      output='<p>...</p><ul><li>an item</li><li>another item</li><ul><li>a sub-item</li></ul><li>another item</li></ul><p>...</p>'
+    ) }}
+
+    {{ section(slug='ordered-list', title='Ordered list', danger='Do not use lists in item titles.',
+      input='...
+1. first item
+2. second item
+    1. second item sub-item
+3. third item
+...',
+      output='<p>...</p><ol><li>first item</li><li>second item</li><ol><li>second item sub-item</li></ol><li>third item</li></ol><p>...</p>'
+    ) }}
+
+    {{ section(slug='blockquote', title='Blockquote', danger='Do not use blockquotes in item titles.',
+      input='...
+> Some text in a blockquote ...
+>
+> ... over multiple lines.
+...',
+      output='<p>...</p><blockquote><p>Some text in a blockquote ...</p><p>... over multiple lines.</p></blockquote><p>...</p>'
+    ) }}
+
+    {{ section(slug='code-block', title='Code block', danger='Do not use code blocks in item titles.',
+      input='...
+```
+Some text in a code block.
+```
+...',
+      output='<p>...</p><pre>Some text in a code block.</pre><p>...</p>'
+    ) }}
+
+    {% for style in [('note', 'Note', 'NOTE'), ('tip', 'Tip', 'TIP'), ('important', 'Important', 'IMPORTANT'), ('warning', 'Warning', 'WARNING'), ('caution', 'Caution', 'CAUTION')] %}
+      {{ section(slug='admonition-' + style[0], title='Admonition (' + style[1] + ')', danger='Do not use ' + style[0] + 's in item titles.',
+        input='...
+> ![' + style[2] +']
+> Some text shown as a ' + style[0] +'.
+...',
+        output='<p>...</p><div class="admonition ' + style[0] + '"><p class="admonition-title">' + style[1] + '</p><p>Some text shown as a ' + style[0] + '.</p></div><p>...</p>'
+      ) }}
+    {% endfor %}
+
+      {{ section(slug='headings', title='Headings', danger='Do not use headings in item titles.',
+      input='# Heading 1\n...
+## Heading 2\n...
+### Heading 3\n...
+#### Heading 4\n...
+##### Heading 5\n...
+###### Heading 6\n...',
+      output='<h1>Heading 1</h1><p>...</p>
+      <h2>Heading 2</h2><p>...</p>
+      <h3>Heading 3</h3><p>...</p>
+      <h4>Heading 4</h4><p>...</p>
+      <h5>Heading 5</h5><p>...</p>
+      <h6>Heading 6</h6>'
+    ) }}
+
+    {{ section(slug='table', title='Tables', danger='Do not use tables in item titles.',
+      input='...
+| Header 1 | Header 2 | Header 3 |
+|----------|----------|----------|
+| Row 1 Col 1 | Row 1 Col 2 | Row 1 Col 3 |
+| Row 2 Col 1 | Row 2 Col 2 | Row 2 Col 3 |
+| Row 3 Col 1 | Row 3 Col 2 | Row 3 Col 3 |
+...',
+      output='
+<p>...</p>
+<table>
+  <thead>
+    <tr>
+      <th>Header 1</th>
+      <th>Header 2</th>
+      <th>Header 3</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Row 1 Col 1</td>
+      <td>Row 1 Col 2</td>
+      <td>Row 1 Col 3</td>
+    </tr>
+    <tr>
+      <td>Row 2 Col 1</td>
+      <td>Row 2 Col 2</td>
+      <td>Row 2 Col 3</td>
+    </tr>
+    <tr>
+      <td>Row 3 Col 1</td>
+      <td>Row 3 Col 2</td>
+      <td>Row 3 Col 3</td>
+    </tr>
+  </tbody>
+</table>
+<p>...</p>
+      '
+    ) }}
+
+    {% set img_src = 'https://images.unsplash.com/photo-1494216928456-ae75fd96603d?q=80&w=1080&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D' %}
+    {{ section(slug='image', title='Images', danger='Do not use images in item titles.',
+      input='...
+```
+![Trees & snow](https://images.unsplash.com/photo-149...)
+```
+...',
+      output='<p>...</p><img src="' + img_src + '" /><p>...</p>'
+    ) }}
+
+    <section id="changelog" class="space-y-4">
+      <h2 class="text-2xl">Changes to this guide</h2>
+      <p>...</p>
+    </section>
+  </article>
+{% endblock %}

@@ -288,6 +288,7 @@ class SitePagesExporter(Exporter):
             "legal/cookies.html.j2",
             "legal/copyright.html.j2",
             "legal/privacy.html.j2",
+            "-/formatting.html.j2",
         ]
 
     def _get_page_metadata(self, template_path: str) -> PageMetadata:
@@ -298,6 +299,7 @@ class SitePagesExporter(Exporter):
             "legal/cookies.html.j2": "Cookies Policy",
             "legal/copyright.html.j2": "Copyright Policy",
             "legal/privacy.html.j2": "Privacy Policy",
+            "-/formatting.html.j2": "Supported Formatting Guide",
         }
         return PageMetadata(
             build_key=self._config.TEMPLATES_CACHE_BUST_VALUE,

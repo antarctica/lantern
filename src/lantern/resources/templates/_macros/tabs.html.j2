@@ -98,7 +98,7 @@
       <div class="p-2 space-y-8">
         {% call com.item_title() %}Lineage Statement{% endcall %}
         {% call com.item_border() %}
-          <article id="lineage-statement">{{ com.prose(data.statement) }}</article>
+          <article id="lineage-statement">{% call com.prose() %}{{ data.statement }}{% endcall %}</article>
         {% endcall %}
       </div>
     </div>

@@ -23,6 +23,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Showing a page build/render time in additional information section
 * Support for item cross-references in related items section
 * initial support for items a record supersedes in related items section
+* markdown formatting guide
 
 ### Fixed
 

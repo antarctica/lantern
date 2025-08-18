@@ -509,7 +509,7 @@ def fx_exporter_iso_xml_html(
     fx_logger: logging.Logger,
     fx_s3_bucket_name: str,
     fx_s3_client: S3Client,
-    fx_record_minimal_item: Record,
+    fx_record_revision_minimal_item: RecordRevision,
 ) -> Exporter:
     """ISO 19115 XML as HTML exporter with a mocked config and S3 client."""
     with TemporaryDirectory() as tmp_path:
@@ -523,7 +523,7 @@ def fx_exporter_iso_xml_html(
         config=mock_config,
         logger=fx_logger,
         s3=fx_s3_client,
-        record=fx_record_minimal_item,
+        record=fx_record_revision_minimal_item,
         export_base=exports_path,
     )
 

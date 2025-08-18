@@ -14,9 +14,24 @@
 Log messages at or above the *warning* level are written to `stderr` by default. The logging level can be changed via
 the `LOG_LEVEL` [Config Option](/docs/config.md#config-options) set to a valid Python logging level.
 
+## Author records
+
+Records can be authored manually using any editor or constructed automatically by other applications.
+
+> [!TIP]
+> For manual editing, use an editor that supports JSON schemas for validation and auto-completion of enum values.
+
+> [!TIP]
+> If creating records in Python applications, consider using the `lantern.lib.metadata_library.models.record.Record`
+> data class for typed record properties, validation and serialisation to JSON for loading.
+
+> [!TIP]
+> See the [Guide](https://data.bas.ac.uk/-/formatting) for how titles, summaries, abstracts and lineage statements can
+> be formatted.
+
 ## Load records
 
-To load a set of new or updated existing records:
+To load a set of new or updated records:
 
 1. copy record configurations as JSON files to the `import/` directory
 1. run the `load-records` [Development Task](/docs/dev.md#development-tasks)

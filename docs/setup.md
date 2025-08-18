@@ -8,6 +8,19 @@ Resources for managing:
 * the [AWS S3](/docs/architecture.md#amazon-s3) based static website hosting
   * are reused from and managed by the
     [ADD Metadata Toolbox](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/blob/main/docs/setup.md) project
+## Sentry
+
+1. register a new Sentry project
+2. from *Project Settings* > *Client Keys*:
+  1. from the *Credentials* section, copy the *DSN* and set as the `SENTRY_DSN` [Config](/docs/config.md) fixed value
+  2. from the *JavaScript Loader Script* section:
+     1. set the SDK version to the highest/latest available
+     2. enable the *Session Reply* option (needed for the user feedback widget to work)
+     3. copy the script and set as the `TEMPLATES_SENTRY_SRC` [Config](/docs/config.md) fixed value
+
+> ![NOTE]
+> The Sentry DSN and JavaScript Loader Script are not considered secrets.
+
 
 ## IAM policy for static website hosting
 

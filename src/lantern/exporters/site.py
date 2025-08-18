@@ -15,6 +15,7 @@ from lantern.exporters.base import Exporter as BaseExporter
 from lantern.exporters.records import RecordsExporter
 from lantern.exporters.website import WebsiteSearchExporter
 from lantern.lib.metadata_library.models.record import Record
+from lantern.models.record.revision import RecordRevision
 from lantern.models.templates import PageMetadata
 
 
@@ -378,7 +379,7 @@ class SiteExporter(Exporter):
         self._logger.info("Purging S3 publishing bucket")
         self._s3_utils.empty_bucket()
 
-    def loads(self, records: list[Record]) -> None:
+    def loads(self, records: list[RecordRevision]) -> None:
         """Populate exporter."""
         self._records_exporter.loads(records=records)
         self._index_exporter.loads(records=records)

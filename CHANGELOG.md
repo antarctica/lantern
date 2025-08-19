@@ -31,6 +31,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Fallback feedback link shown where JavaScript is disabled
 * Fallback static sections for distribution options shown where JavaScript is disabled
 * Incorrect Sentry DSN
+* Inconsistent padding within item tabs
 
 ### Changed
 

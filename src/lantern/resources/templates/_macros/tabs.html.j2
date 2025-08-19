@@ -94,13 +94,11 @@
 
 {% macro lineage(data) %}
   <section id="tab-content-lineage">
-    <div class="w-full lg:w-2/3">
-      <div class="p-2 space-y-8">
-        {% call com.item_title() %}Lineage Statement{% endcall %}
-        {% call com.item_border() %}
-          <article id="lineage-statement">{% call com.prose() %}{{ data.statement }}{% endcall %}</article>
-        {% endcall %}
-      </div>
+    <div class="w-full lg:w-2/3 space-y-8">
+      {% call com.item_title() %}Lineage Statement{% endcall %}
+      {% call com.item_border() %}
+        <article id="lineage-statement">{% call com.prose() %}{{ data.statement }}{% endcall %}</article>
+      {% endcall %}
     </div>
   </section>
 {% endmacro %}
@@ -133,10 +131,10 @@
 {% macro info(data) %}
   <section id="tab-content-info">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-y-4 lg:gap-x-4">
-      <div class="p-2 col-span-1 space-y-8">
+      <div class="col-span-1 space-y-8">
         {{ info_tab.item(data) }}
       </div>
-      <div class="p-2 col-span-1 space-y-8">
+      <div class="col-span-1 space-y-8">
         {{ info_tab.metadata(data) }}
       </div>
     </div>
@@ -149,10 +147,10 @@
       Contact the <strong>{{ data.team }}</strong> with any questions or comments about this item.
     {% endcall %}
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-y-4 lg:gap-x-4">
-      <div class="p-2 col-span-1 space-y-8">
+      <div class="col-span-1 space-y-8">
         {{ contact_tab.form(data) }}
       </div>
-      <div class="p-2 col-span-1 space-y-8">
+      <div class="col-span-1 space-y-8">
         {{ contact_tab.alternate(data) }}
         {{ contact_tab.privacy_notice() }}
       </div>

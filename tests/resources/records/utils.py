@@ -35,6 +35,7 @@ from lantern.lib.metadata_library.models.record.enums import (
 )
 from lantern.lib.metadata_library.models.record.presets.base import RecordMagicDiscoveryV1
 from lantern.lib.metadata_library.models.record.presets.extents import make_bbox_extent, make_temporal_extent
+from lantern.models.item.base.const import CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 
 
@@ -107,8 +108,8 @@ def make_record(
             Aggregation(
                 identifier=Identifier(
                     identifier="dbe5f712-696a-47d8-b4a7-3b173e47e3ab",
-                    href="https://data.bas.ac.uk/items/dbe5f712-696a-47d8-b4a7-3b173e47e3ab",
-                    namespace="data.bas.ac.uk",
+                    href=f"https://{CATALOGUE_NAMESPACE}/items/dbe5f712-696a-47d8-b4a7-3b173e47e3ab",
+                    namespace=CATALOGUE_NAMESPACE,
                 ),
                 association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
                 initiative_type=AggregationInitiativeCode.COLLECTION,

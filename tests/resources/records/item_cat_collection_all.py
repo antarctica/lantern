@@ -18,6 +18,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     DatePrecisionCode,
     HierarchyLevelCode,
 )
+from lantern.models.item.base.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE, GITLAB_NAMESPACE
 from tests.resources.records.utils import make_record
 
 # A record for an ItemCatalogue instance with all supported fields for collections.
@@ -96,23 +97,23 @@ record.identification.identifiers = Identifiers(
     [
         Identifier(
             identifier="dbe5f712-696a-47d8-b4a7-3b173e47e3ab",
-            href="https://data.bas.ac.uk/items/dbe5f712-696a-47d8-b4a7-3b173e47e3ab",
-            namespace="data.bas.ac.uk",
+            href=f"https://{CATALOGUE_NAMESPACE}/items/dbe5f712-696a-47d8-b4a7-3b173e47e3ab",
+            namespace=CATALOGUE_NAMESPACE,
         ),
         Identifier(
-            identifier="https://gitlab.data.bas.ac.uk/MAGIC/test/-/issues/123",
-            href="https://gitlab.data.bas.ac.uk/MAGIC/test/-/issues/123",
-            namespace="gitlab.data.bas.ac.uk",
+            identifier=f"https://{GITLAB_NAMESPACE}/MAGIC/test/-/issues/123",
+            href=f"https://{GITLAB_NAMESPACE}/MAGIC/test/-/issues/123",
+            namespace=GITLAB_NAMESPACE,
         ),
         Identifier(
             identifier="collections/test123",
-            href="https://data.bas.ac.uk/collections/test123",
-            namespace="alias.data.bas.ac.uk",
+            href=f"https://{CATALOGUE_NAMESPACE}/collections/test123",
+            namespace=ALIAS_NAMESPACE,
         ),
         Identifier(
             identifier="collections/test123alt",
-            href="https://data.bas.ac.uk/collections/test123alt",
-            namespace="alias.data.bas.ac.uk",
+            href=f"https://{CATALOGUE_NAMESPACE}/collections/test123alt",
+            namespace=ALIAS_NAMESPACE,
         ),
         Identifier(
             identifier="10.123/dbe5f712-696a-47d8-b4a7-3b173e47e3ab",
@@ -144,8 +145,8 @@ for collection_member in collection_members:
         Aggregation(
             identifier=Identifier(
                 identifier=collection_member,
-                href=f"https://data.bas.ac.uk/items/{collection_member}",
-                namespace="data.bas.ac.uk",
+                href=f"https://{CATALOGUE_NAMESPACE}/items/{collection_member}",
+                namespace=CATALOGUE_NAMESPACE,
             ),
             association_type=AggregationAssociationCode.IS_COMPOSED_OF,
             initiative_type=AggregationInitiativeCode.COLLECTION,
@@ -156,8 +157,8 @@ record.identification.aggregations.append(
     Aggregation(
         identifier=Identifier(
             identifier="8fd6a7cc-e696-4a82-b5f6-fb04dfa4cbea",
-            href="https://data.bas.ac.uk/items/8fd6a7cc-e696-4a82-b5f6-fb04dfa4cbea",
-            namespace="data.bas.ac.uk",
+            href=f"https://{CATALOGUE_NAMESPACE}/items/8fd6a7cc-e696-4a82-b5f6-fb04dfa4cbea",
+            namespace=CATALOGUE_NAMESPACE,
         ),
         association_type=AggregationAssociationCode.CROSS_REFERENCE,
         initiative_type=AggregationInitiativeCode.COLLECTION,

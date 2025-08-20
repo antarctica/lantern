@@ -35,6 +35,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     HierarchyLevelCode,
     OnlineResourceFunctionCode,
 )
+from lantern.models.item.base.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE, GITLAB_NAMESPACE
 from tests.resources.records.utils import make_record
 
 # A record for an ItemCatalogue instance with all supported fields for products.
@@ -125,23 +126,23 @@ record.identification.identifiers = Identifiers(
     [
         Identifier(
             identifier="30825673-6276-4e5a-8a97-f97f2094cd25",
-            href="https://data.bas.ac.uk/items/30825673-6276-4e5a-8a97-f97f2094cd25",
-            namespace="data.bas.ac.uk",
+            href=f"https://{CATALOGUE_NAMESPACE}/items/30825673-6276-4e5a-8a97-f97f2094cd25",
+            namespace=CATALOGUE_NAMESPACE,
         ),
         Identifier(
-            identifier="https://gitlab.data.bas.ac.uk/MAGIC/test/-/issues/123",
-            href="https://gitlab.data.bas.ac.uk/MAGIC/test/-/issues/123",
-            namespace="gitlab.data.bas.ac.uk",
+            identifier=f"https://{GITLAB_NAMESPACE}/MAGIC/test/-/issues/123",
+            href=f"https://{GITLAB_NAMESPACE}/MAGIC/test/-/issues/123",
+            namespace=GITLAB_NAMESPACE,
         ),
         Identifier(
             identifier="maps/test123",
-            href="https://data.bas.ac.uk/maps/test123",
-            namespace="alias.data.bas.ac.uk",
+            href=f"https://{CATALOGUE_NAMESPACE}/maps/test123",
+            namespace=ALIAS_NAMESPACE,
         ),
         Identifier(
             identifier="maps/test123alt",
-            href="https://data.bas.ac.uk/maps/test123alt",
-            namespace="alias.data.bas.ac.uk",
+            href=f"https://{CATALOGUE_NAMESPACE}/maps/test123alt",
+            namespace=ALIAS_NAMESPACE,
         ),
         Identifier(
             identifier="10.123/30825673-6276-4e5a-8a97-f97f2094cd25",
@@ -240,8 +241,8 @@ record.identification.aggregations.append(
     Aggregation(
         identifier=Identifier(
             identifier="30825673-6276-4e5a-8a97-f97f2094cd25",
-            href="https://data.bas.ac.uk/items/30825673-6276-4e5a-8a97-f97f2094cd25",
-            namespace="data.bas.ac.uk",
+            href=f"https://{CATALOGUE_NAMESPACE}/items/30825673-6276-4e5a-8a97-f97f2094cd25",
+            namespace=CATALOGUE_NAMESPACE,
         ),
         association_type=AggregationAssociationCode.CROSS_REFERENCE,
     )
@@ -251,8 +252,8 @@ record.identification.aggregations.append(
     Aggregation(
         identifier=Identifier(
             identifier="7e3611a6-8dbf-4813-aaf9-dadf9decff5b",
-            href="https://data.bas.ac.uk/items/7e3611a6-8dbf-4813-aaf9-dadf9decff5b",
-            namespace="data.bas.ac.uk",
+            href=f"https://{CATALOGUE_NAMESPACE}/items/7e3611a6-8dbf-4813-aaf9-dadf9decff5b",
+            namespace=CATALOGUE_NAMESPACE,
         ),
         association_type=AggregationAssociationCode.REVISION_OF,
     )

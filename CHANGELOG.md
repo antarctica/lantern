@@ -42,6 +42,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Improved test records to cover additional property combinations
 * Improved item summaries to prevent showing 'None' for an empty summary
 * Restricting item related tab to Catalogue items via namespace filtering
+* Always underline links on pages for better accessibility given poor colour contrast
 
 ### Removed
 

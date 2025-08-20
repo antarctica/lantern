@@ -188,6 +188,7 @@ def _process_magic_collections(
         "d0d91e22-18c1-4c7f-8dfc-20e94cd2c107",  # BAS General Interest Maps
         "e74543c0-4c4e-4b41-aa33-5bb2f67df389",  # SCAR Antarctic Digital Database (ADD)
         "ef7bc35e-7ad8-4ae5-9ae8-dd708d6e966e",  # BAS Operations Maps
+        "cf64dd21-545a-465b-9a67-c28bb4ce9024",  # BAS Basemaps
     ]
     collections = [store.get(record_id) for record_id in magic_collection_ids]
     collections_updated = {c.file_identifier: deepcopy(c) for c in collections}

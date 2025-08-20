@@ -10,6 +10,7 @@ from pytest_mock import MockerFixture
 
 from lantern.exporters.site import SiteExporter, SiteIndexExporter, SitePagesExporter, SiteResourcesExporter
 from lantern.lib.metadata_library.models.record import Record
+from lantern.models.record.revision import RecordRevision
 
 
 class TestSiteIndexExporter:
@@ -352,16 +353,16 @@ class TestSiteExporter:
         result = fx_exporter_site._s3_client.list_objects(Bucket=fx_s3_bucket_name)
         assert "contents" not in result
 
-    def test_loads(self, fx_exporter_site: SiteExporter, fx_record_minimal_item_catalogue: Record):
+    def test_loads(self, fx_exporter_site: SiteExporter, fx_record_revision_minimal_item_catalogue: RecordRevision):
         """Can load summaries and records."""
-        records = [fx_record_minimal_item_catalogue]
+        records = [fx_record_revision_minimal_item_catalogue]
         fx_exporter_site.loads(records)
 
         assert len(fx_exporter_site._records_exporter._records) == len(records)
 
-    def test_export(self, fx_exporter_site: SiteExporter, fx_record_minimal_item_catalogue: Record):
+    def test_export(self, fx_exporter_site: SiteExporter, fx_record_revision_minimal_item_catalogue: RecordRevision):
         """Can export all site components to local files."""
-        record = fx_record_minimal_item_catalogue
+        record = fx_record_revision_minimal_item_catalogue
         site_path = fx_exporter_site._config.EXPORT_PATH
         fx_exporter_site.loads([record])
         expected = [
@@ -381,7 +382,10 @@ class TestSiteExporter:
             assert path in result
 
     def test_publish(
-        self, fx_s3_bucket_name: str, fx_exporter_site: SiteExporter, fx_record_revision_minimal_item_catalogue: Record
+        self,
+        fx_s3_bucket_name: str,
+        fx_exporter_site: SiteExporter,
+        fx_record_revision_minimal_item_catalogue: RecordRevision,
     ):
         """Can publish site index to S3."""
         s3 = fx_exporter_site._index_exporter._s3_utils._s3

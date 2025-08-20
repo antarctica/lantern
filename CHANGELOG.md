@@ -22,14 +22,18 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Showing item aliases in additional information section
 * Showing a page build/render time in additional information section
 * Support for item cross-references in related items section
-* initial support for items a record supersedes in related items section
-* markdown formatting guide
+* Initial support for items a record supersedes in related items section
+* Markdown formatting guide
+* Validation styles for item contact forms (invalid only)
 
 ### Fixed
 
 * Missing padding on legal pages when viewed on mobile
 * Fallback feedback link shown where JavaScript is disabled
 * Fallback static sections for distribution options shown where JavaScript is disabled
+* Incorrect Sentry DSN
+* Inconsistent padding within item tabs
+* Accessibility improvements for invalid contact form fields and link underlining
 
 ### Changed
 
@@ -40,6 +44,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Improved test records to cover additional property combinations
 * Improved item summaries to prevent showing 'None' for an empty summary
 * Restricting item related tab to Catalogue items via namespace filtering
+* Always underline links on pages for better accessibility given poor colour contrast
 
 ### Removed
 

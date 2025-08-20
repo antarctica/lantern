@@ -149,7 +149,7 @@ class Config:
     @property
     def SENTRY_DSN(self) -> str:
         """Connection string for Sentry monitoring."""
-        return "https://db9543e7b68f4b2596b189ff444438e3@o39753.ingest.us.sentry.io/5197036"
+        return "https://7ee10f6777ab8ec05ffe8b84c4c3039e@o39753.ingest.us.sentry.io/4507147658919936"
 
     @property
     def ENABLE_FEATURE_SENTRY(self) -> bool:
@@ -204,7 +204,7 @@ class Config:
     @property
     def TEMPLATES_SENTRY_SRC(self) -> str:
         """Sentry dynamic CDN script."""
-        return "https://js.sentry-cdn.com/57698b6483c7ac43b7c9c905cdb79943.min.js"
+        return "https://js.sentry-cdn.com/7ee10f6777ab8ec05ffe8b84c4c3039e.min.js"
 
     @property
     def TEMPLATES_PLAUSIBLE_DOMAIN(self) -> str:

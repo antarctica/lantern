@@ -45,7 +45,7 @@
 
       {% if data.projection %}
         {% call com.dl_item(title='Projection', id='info-projection') %}
-          <a class="{{ com.link_classes() }}" href="{{ data.projection.href }}">{{ data.projection.value }} {{ com.ext_link_i() }}</a>
+          {{ com.ext_link_a(href=data.projection.href, value=data.projection.value) }}
         {% endcall %}
       {% endif %}
 
@@ -67,7 +67,7 @@
         {% call com.dl_item(title='Aliases', id='info-aliases') %}
           <ul class="space-y-2">
             {% for item in data.aliases %}
-              <li>{{ com.ext_link_a(href=item.href, value=item.value) }}</li>
+              <li><a class="{{ com.link_classes() }}" href="{{ item.href }}">{{ item.value }}</a></li>
             {% endfor %}
           </ul>
         {% endcall %}

@@ -1,12 +1,13 @@
 {% import '_macros/common.html.j2' as com %}
 
 {%  macro form_item_classes() %}w-full border-1 border-grey-300 dark:border-grey-500 dark:bg-grey-900 dark:text-white{% endmacro %}
+{%  macro form_invalid_classes() %}user-invalid:border-red-500 user-invalid:border-2{% endmacro %}
 
 {% macro form_input(id, name, value, placeholder, required) %}
   <div class="space-y-2">
     <label class="block font-bold" for="{{ id }}">{{ name }}</label>
     <input
-      class="{{ form_item_classes() }}"
+      class="{{ form_item_classes() }} {% if required %}{{ form_invalid_classes() }}{% endif %}"
       type="text" name="{{ id }}" id="{{ id }}"
       {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
       {% if value %}value="{{ value }}"{% endif %}
@@ -28,7 +29,7 @@
           <div class="space-y-2">
             <label class="block font-bold" for="message-content">Message</label>
             <textarea
-              class="{{ form_item_classes() }}"
+              class="{{ form_item_classes() }} {{ form_invalid_classes() }}"
               name="message-content" id="message-content" rows="8" required
             ></textarea>
             {% call com.alert(variant='yellow', classes="space-y-2") %}

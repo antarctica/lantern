@@ -7,7 +7,7 @@ import logging
 
 from boto3 import client as S3Client  # noqa: N812
 from moto import mock_aws
-from tasks.build import time_task
+from tasks.build_records import time_task
 from tests.resources.stores.fake_records_store import FakeRecordsStore
 
 from lantern.config import Config as Config

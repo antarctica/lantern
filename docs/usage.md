@@ -1,5 +1,9 @@
 # Lantern - Usage
 
+> [!NOTE]
+> These are draft workflows and are not intended for use by general end-users.
+
+
 ## Setup
 
 > [!IMPORTANT]
@@ -14,12 +18,46 @@
 Log messages at or above the *warning* level are written to `stderr` by default. The logging level can be changed via
 the `LOG_LEVEL` [Config Option](/docs/config.md#config-options) set to a valid Python logging level.
 
-## Load records
+## Creating records
 
-To load a set of new or updated existing records:
+1. create new records as JSON files in the import directory as per [Authoring Records](#authoring-records)
+2. then run the [Import Records](#import-records) workflow
+
+## Updating records
+
+For updating individual records:
+
+- run the `select-records` [Development Task](/docs/dev.md#development-tasks)
+- update records in the import directory as per [Authoring Records](#authoring-records)
+- then run the [Import Records](#import-records) workflow
+
+For updating large numbers of records from an external working copy of the records repository:
+
+- update records in the working copy as per [Authoring Records](#authoring-records)
+- run the `load-records` [Development Task](/docs/dev.md#development-tasks)
+- then run the [Import Records](#import-records) workflow
+
+## Authoring records
+
+Records can be authored manually using any editor or constructed automatically by other applications.
+
+> [!TIP]
+> For manual editing, use an editor that supports JSON schemas for validation and auto-completion of enum values.
+
+> [!TIP]
+> If creating records in Python applications, consider using the `lantern.lib.metadata_library.models.record.Record`
+> data class for typed record properties, validation and serialisation to JSON for loading.
+
+> [!TIP]
+> See the [Guide](https://data.bas.ac.uk/-/formatting) for how titles, summaries, abstracts and lineage statements can
+> be formatted.
+
+## Import records
+
+To import a set of new or updated records:
 
 1. copy record configurations as JSON files to the `import/` directory
-1. run the `load-records` [Development Task](/docs/dev.md#development-tasks)
+1. run the `import-records` [Development Task](/docs/dev.md#development-tasks)
 
 > [!NOTE]
 > Records are considered existing if a record with the same `file_identifier` exists.
@@ -28,7 +66,7 @@ To load a set of new or updated existing records:
 > All records in the `import/` directory will be committed together. Consider separating unrelated changes by splitting
 > records into sets and running this workflow multiple times.
 
-The `load-records` task will:
+The `import-records` task will:
 
 1. prompt for information to use when commiting updates:
     - a changeset title and description (which will open your `$EDITOR`)

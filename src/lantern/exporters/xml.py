@@ -9,7 +9,7 @@ from mypy_boto3_s3 import S3Client
 from lantern.config import Config
 from lantern.exporters.base import Exporter as BaseExporter
 from lantern.exporters.base import ResourceExporter
-from lantern.lib.metadata_library.models.record import Record
+from lantern.models.record.revision import RecordRevision
 
 
 class IsoXmlExporter(ResourceExporter):
@@ -21,7 +21,9 @@ class IsoXmlExporter(ResourceExporter):
     Intended for interoperability with clients that prefer ISO XML, or need access to the full underlying record.
     """
 
-    def __init__(self, config: Config, logger: logging.Logger, s3: S3Client, record: Record, export_base: Path) -> None:
+    def __init__(
+        self, config: Config, logger: logging.Logger, s3: S3Client, record: RecordRevision, export_base: Path
+    ) -> None:
         export_name = f"{record.file_identifier}.xml"
         super().__init__(
             config=config, logger=logger, s3=s3, record=record, export_base=export_base, export_name=export_name
@@ -51,7 +53,9 @@ class IsoXmlHtmlExporter(ResourceExporter):
     [1] https://metadata-standards.data.bas.ac.uk/standards/iso-19115-19139#iso-html
     """
 
-    def __init__(self, config: Config, logger: logging.Logger, s3: S3Client, record: Record, export_base: Path) -> None:
+    def __init__(
+        self, config: Config, logger: logging.Logger, s3: S3Client, record: RecordRevision, export_base: Path
+    ) -> None:
         """Initialise exporter."""
         export_name = f"{record.file_identifier}.html"
         super().__init__(

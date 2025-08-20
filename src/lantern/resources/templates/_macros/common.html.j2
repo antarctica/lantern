@@ -1,6 +1,8 @@
 {% macro container_classes() %}container mx-auto{% endmacro %}
 
-{% macro link_classes() %}hover:underline text-sky-blue-500 dark:text-sky-blue-300{% endmacro %}
+{% macro link_base_classes() %}underline{% endmacro %}
+
+{% macro link_classes() %}{{ link_base_classes() }} text-sky-blue-500 dark:text-sky-blue-300{% endmacro %}
 
 {% macro btn_base_classes() %}cursor-pointer{% endmacro %}
 
@@ -10,7 +12,7 @@
 
 {% macro btn_warning_classes() %}{{ btn_base_classes() }} bg-yellow-500 text-black hover:bg-yellow-700{% endmacro %}
 
-{% macro footer_link_classes() %}hover:underline text-sky-blue-300 dark:text-sky-blue-500{% endmacro %}
+{% macro footer_link_classes() %}{{ link_base_classes() }} text-sky-blue-300 dark:text-sky-blue-500{% endmacro %}
 
 {% macro back_to_top_id() %}site-top{% endmacro %}
 

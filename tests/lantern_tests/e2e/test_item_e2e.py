@@ -1,7 +1,7 @@
 from subprocess import Popen
 
 import pytest
-from playwright.sync_api import Page, Route, expect
+from playwright.sync_api import Browser, Page, Route, expect
 
 from tests.conftest import has_network
 from tests.resources.records.item_cat_data import record as product_data
@@ -139,3 +139,22 @@ class TestItemDataActions:
         # click trigger and expect content to be visible
         trigger.click()
         expect(page.locator(f"{data_target}")).to_be_visible()
+
+    def test_access_info_fallback(self, fx_exporter_static_server: Popen, browser: Browser):
+        """Can see data access information sections when JavaScript is disabled."""
+        context = browser.new_context(java_script_enabled=False)
+        page = context.new_page()
+
+        endpoint = f"http://localhost:8123/items/{product_data.file_identifier}/index.html#tab-data"
+        page.goto(endpoint)
+        status_code = page.evaluate("window.performance.getEntries()[0].responseStatus")
+        assert status_code == 200
+
+        # find expected text is visible
+        text = "Add item to a desktop or online GIS that supports ArcGIS Feature Services"
+        text_locator = page.locator("p", has_text=text).first
+        expect(text_locator).to_be_visible()
+
+        # find interactive trigger is not visible
+        trigger = page.locator("#tab-content-data button[data-target]").first
+        expect(trigger).not_to_be_visible()

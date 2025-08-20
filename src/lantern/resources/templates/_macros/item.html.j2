@@ -146,7 +146,7 @@
 {% macro nav_content(data) %}
   {% set tab_id = "tab-" + data.anchor %}
   {% if data.enabled %}
-    <div class="border-1 border-grey-300 dark:border-grey-500 p-4 -mt-px w-full hidden peer-checked/{{ tab_id }}:block">
+    <div class="border-1 border-grey-300 dark:border-grey-500 p-4 pt-8 -mt-px w-full hidden peer-checked/{{ tab_id }}:block">
       {{ tab[data.anchor](data) }}
     </div>
   {% endif %}
@@ -160,5 +160,5 @@
     {% for tab in data.tabs %}
       {{ nav_content(tab) }}
     {% endfor %}
- </nav>
+  </nav>
 {% endmacro %}

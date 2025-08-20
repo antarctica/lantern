@@ -23,12 +23,22 @@ from lantern.stores.gitlab import GitLabStore
 
 
 def _parse_configs(search_path: Path) -> Generator[dict, None, None]:
+    """
+    Try to load any record configurations from JSON files from a directory.
+
+    Subdirectories are NOT searched.
+    """
     for json_path in search_path.glob("*.json"):
         with json_path.open("r") as f:
             yield json.load(f)
 
 
 def _parse_records(logger: logging.Logger, search_path: Path) -> list[Record]:
+    """
+    Try to create Records from record configurations within a directory.
+
+    Records must validate.
+    """
     records = []
     configs = list(_parse_configs(search_path))
     for config in configs:
@@ -210,6 +220,12 @@ def _process_records(logger: logging.Logger, records: list[Record], store: GitLa
     return additional_records
 
 
+def _clean_input_path(input_path: Path) -> None:
+    """Remove imported files."""
+    for json_path in input_path.glob("*.json"):
+        json_path.unlink(missing_ok=True)
+
+
 def _get_args() -> tuple[str, str, str, str]:
     """Get user input."""
     answers = inquirer.prompt(
@@ -246,6 +262,7 @@ def main() -> None:
     records = _parse_records(logger=logger, search_path=input_path)
     records.extend(_process_records(logger=logger, records=records, store=store))
     store.push(records=records, title=title, message=message, author=(author_name, author_email))
+    _clean_input_path(input_path=input_path)
 
 
 if __name__ == "__main__":

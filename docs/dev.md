@@ -48,7 +48,7 @@ All changes except minor tweaks (typos, comments, etc.) MUST:
 - be associated with an issue (either directly or by reference)
 - be included in the [Change Log](/CHANGELOG.md)
 
-Conventions:
+### Conventions
 
 - all deployable code should be contained in the `lantern` package
 - use `Path.resolve()` if displaying or logging file/directory paths
@@ -57,6 +57,84 @@ Conventions:
   - created in `lantern.lib`
   - documented in [Libraries](/docs/libraries.md)
   - tested in `tests.lib_tests/`
+
+### Adding configuration options
+
+In the `lantern.Config` class:
+
+- define a new property
+- add property to `ConfigDumpSafe` typed dict
+- add property to `dumps_safe()` method
+- if needed, add logic to `validate()` method
+
+In the [Configuration](/docs/config.md) documentation:
+
+- add to [Options Table](/docs/config.md#config-options) in alphabetical order
+- if needed, add a subsection to explain the option in more detail
+- if configurable, update the `.env.tpl` template and existing `.env` file
+- if configurable, update the `[tool.pytest_env]` section in `pyproject.toml`
+
+In the `tests.lantern_tests.config` module:
+
+- update the expected response in the `test_dumps_safe` method
+- if validated, update the `test_validate` (valid) method and add new `test_validate_` (invalid) tests
+- update or create other tests as needed
+
+### Adding properties to item templates
+
+> [!CAUTION]
+> This section is Work in Progress (WIP) and may not be complete/accurate.
+
+1. if needed, [Support New Record Properties](/docs/libraries.md#adding-new-record-properties)
+2. if needed, update [Item](/docs/data-model.md#items) classes to process new and/or existing properties
+    - existing properties may need updating such as `ItemBase.kv` handling
+3. add new properties to the relevant item tab class in `lantern.models.item.catalogue.tabs`
+    - work backwards to include additional Record properties in the main `lantern.models.item.catalogue` class
+    - and/or `lantern.models.item.catalogue.elements` classes
+    - amend tests that directly instantiate these classes to include the new property
+        - some of these are not obvious where `kwargs` are used to pass properties such as:
+          `lantern.models.item.catalogue.special.physical_map.AdditionalInfoTab`
+4. update the [Site Template](/docs/site.md#templates) to include the new property as needed
+5. add tests as needed for:
+    - Record properties
+    - Item properties
+    - Item Catalogue tab, element and base classes
+    - Item templates (static HTML tests and Playwright if needed)
+6. update any relevant record authoring guides to explain how new properties are handled by the Catalogue
+7. if a property is required for all items:
+    - update the [Record Requirements](/docs/data-model.md#record-requirements) documentation
+    - in future this may include updating a corresponding JSON Schema too
+
+### Adding development tasks
+
+See the [Taskipy](https://github.com/taskipy/taskipy?tab=readme-ov-file#adding-tasks) documentation.
+
+### Updating site templates
+
+> [!CAUTION]
+> This section is Work in Progress (WIP) and may not be complete/accurate.
+
+- ...
+- ... *What is this actually covering? Not referenced from `site.md` yet.* ...
+- ... tests ...
+
+### Updating styles
+
+> [!IMPORTANT]
+> Follow the [Styling Guidelines](/docs/site.md#styling-guidelines) when updating styles.
+
+1. if needed, add styles/rules to `src/lantern/resources/css/main.css.j2`
+2. apply classes as necessary to elements in [Templates](/docs/site.md#templates)
+3. run the `tailwind` [Development Task](/docs/dev.md#development-tasks) which will:
+   - build a temporary [Static Site](/docs/architecture.md#static-site) containing [Test Records](#test-records)
+   - run Tailwind compiler against this site, adding or removing classes as needed
+   - copy the resulting minified CSS to `src/lantern/resources/css/main.css`
+4. run the `build-test-records` or `build-records` [Development Task](/docs/dev.md#development-tasks) to rebuild the
+   static site
+    - needed as builds reference a local copy of `main.css` that will need refreshing
+
+> [!TIP]
+> You can run `uv run task tailwind && uv run task build-test-records` to chain these tasks together.
 
 ## Python version
 
@@ -302,72 +380,3 @@ To add a new test record:
 ### Continuous Integration
 
 All commits will trigger Continuous Integration using GitLab's CI/CD platform, configured in `.gitlab-ci.yml`.
-
-## Adding configuration options
-
-In the `lantern.Config` class:
-
-- define a new property
-- add property to `ConfigDumpSafe` typed dict
-- add property to `dumps_safe()` method
-- if needed, add logic to `validate()` method
-
-In the [Configuration](/docs/config.md) documentation:
-
-- add to [Options Table](/docs/config.md#config-options) in alphabetical order
-- if needed, add a subsection to explain the option in more detail
-- if configurable, update the `.env.tpl` template and existing `.env` file
-- if configurable, update the `[tool.pytest_env]` section in `pyproject.toml`
-
-In the `tests.lantern_tests.config` module:
-
-- update the expected response in the `test_dumps_safe` method
-- if validated, update the `test_validate` (valid) method and add new `test_validate_` (invalid) tests
-- update or create other tests as needed
-
-## Adding properties to item templates
-
-> [!CAUTION]
-> This section is Work in Progress (WIP) and may not be complete/accurate.
-
-1. if needed, [Support New Record Properties](/docs/libraries.md#adding-new-record-properties)
-2. if needed, update [Item](/docs/data-model.md#items) classes to process new and/or existing properties
-    - existing properties may need updating such as `ItemBase.kv` handling
-3. add new properties to the relevant item tab class in `lantern.models.item.catalogue.tabs`
-    - work backwards to include additional Record properties in the main `lantern.models.item.catalogue` class
-    - and/or `lantern.models.item.catalogue.elements` classes
-    - amend tests that directly instantiate these classes to include the new property
-        - some of these are not obvious where `kwargs` are used to pass properties such as:
-          `lantern.models.item.catalogue.special.physical_map.AdditionalInfoTab`
-4. update the [Site Template](/docs/site.md#templates) to include the new property as needed
-5. add tests as needed for:
-    - Record properties
-    - Item properties
-    - Item Catalogue tab, element and base classes
-    - Item templates (static HTML tests and Playwright if needed)
-6. update any relevant record authoring guides to explain how new properties are handled by the Catalogue
-7. if a property is required for all items:
-    - update the [Record Requirements](/docs/data-model.md#record-requirements) documentation
-    - in future this may include updating a corresponding JSON Schema too
-
-## Adding development tasks
-
-See the [Taskipy](https://github.com/taskipy/taskipy?tab=readme-ov-file#adding-tasks) documentation.
-
-## Updating styles
-
-> [!IMPORTANT]
-> Follow the [Styling Guidelines](/docs/site.md#styling-guidelines) when updating styles.
-
-1. if needed, add styles/rules to `src/lantern/resources/css/main.css.j2`
-2. apply classes as necessary to elements in [Templates](/docs/site.md#templates)
-3. run the `tailwind` [Development Task](/docs/dev.md#development-tasks) which will:
-   - build a temporary [Static Site](/docs/architecture.md#static-site) containing [Test Records](#test-records)
-   - run Tailwind compiler against this site, adding or removing classes as needed
-   - copy the resulting minified CSS to `src/lantern/resources/css/main.css`
-4. run the `build-test-records` or `build-records` [Development Task](/docs/dev.md#development-tasks) to rebuild the
-   static site
-    - needed as builds reference a local copy of `main.css` that will need refreshing
-
-> [!TIP]
-> You can run `uv run task tailwind && uv run task build-test-records` to chain these tasks together.

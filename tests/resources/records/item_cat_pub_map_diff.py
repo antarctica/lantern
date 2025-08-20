@@ -31,6 +31,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     OnlineResourceFunctionCode,
 )
 from lantern.lib.metadata_library.models.record.presets.extents import make_bbox_extent, make_temporal_extent
+from lantern.models.item.base.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from tests.resources.records.utils import make_record
 
 # A trio of records to demonstrate a published map with two dissimilar sides
@@ -123,8 +124,8 @@ combined.identification.identifiers.append(Identifier(identifier="123-0-22222-00
 combined.identification.identifiers.append(
     Identifier(
         identifier="maps/test-pub-map2",
-        href="https://data.bas.ac.uk/maps/test-pub-map2",
-        namespace="alias.data.bas.ac.uk",
+        href=f"https://{CATALOGUE_NAMESPACE}/maps/test-pub-map2",
+        namespace=ALIAS_NAMESPACE,
     ),
 )
 combined.identification.edition = "1"
@@ -150,8 +151,8 @@ combined.identification.aggregations.extend(
         Aggregation(
             identifier=Identifier(
                 identifier=ids["a"],
-                href=f"https://data.bas.ac.uk/items/{ids['a']}",
-                namespace="data.bas.ac.uk",
+                href=f"https://{CATALOGUE_NAMESPACE}/items/{ids['a']}",
+                namespace=CATALOGUE_NAMESPACE,
             ),
             association_type=AggregationAssociationCode.IS_COMPOSED_OF,
             initiative_type=AggregationInitiativeCode.PAPER_MAP,
@@ -159,8 +160,8 @@ combined.identification.aggregations.extend(
         Aggregation(
             identifier=Identifier(
                 identifier=ids["b"],
-                href=f"https://data.bas.ac.uk/items/{ids['b']}",
-                namespace="data.bas.ac.uk",
+                href=f"https://{CATALOGUE_NAMESPACE}/items/{ids['b']}",
+                namespace=CATALOGUE_NAMESPACE,
             ),
             association_type=AggregationAssociationCode.IS_COMPOSED_OF,
             initiative_type=AggregationInitiativeCode.PAPER_MAP,
@@ -210,8 +211,8 @@ side_a.identification.aggregations.extend(
         Aggregation(
             identifier=Identifier(
                 identifier=ids["c"],
-                href=f"https://data.bas.ac.uk/items/{ids['c']}",
-                namespace="data.bas.ac.uk",
+                href=f"https://{CATALOGUE_NAMESPACE}/items/{ids['c']}",
+                namespace=CATALOGUE_NAMESPACE,
             ),
             association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
             initiative_type=AggregationInitiativeCode.PAPER_MAP,
@@ -219,8 +220,8 @@ side_a.identification.aggregations.extend(
         Aggregation(
             identifier=Identifier(
                 identifier=ids["b"],
-                href=f"https://data.bas.ac.uk/items/{ids['b']}",
-                namespace="data.bas.ac.uk",
+                href=f"https://{CATALOGUE_NAMESPACE}/items/{ids['b']}",
+                namespace=CATALOGUE_NAMESPACE,
             ),
             association_type=AggregationAssociationCode.PHYSICAL_REVERSE_OF,
             initiative_type=AggregationInitiativeCode.PAPER_MAP,
@@ -270,8 +271,8 @@ side_b.identification.aggregations.extend(
         Aggregation(
             identifier=Identifier(
                 identifier=ids["c"],
-                href=f"https://data.bas.ac.uk/items/{ids['c']}",
-                namespace="data.bas.ac.uk",
+                href=f"https://{CATALOGUE_NAMESPACE}/items/{ids['c']}",
+                namespace=CATALOGUE_NAMESPACE,
             ),
             association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
             initiative_type=AggregationInitiativeCode.PAPER_MAP,
@@ -279,8 +280,8 @@ side_b.identification.aggregations.extend(
         Aggregation(
             identifier=Identifier(
                 identifier=ids["a"],
-                href=f"https://data.bas.ac.uk/items/{ids['a']}",
-                namespace="data.bas.ac.uk",
+                href=f"https://{CATALOGUE_NAMESPACE}/items/{ids['a']}",
+                namespace=CATALOGUE_NAMESPACE,
             ),
             association_type=AggregationAssociationCode.PHYSICAL_REVERSE_OF,
             initiative_type=AggregationInitiativeCode.PAPER_MAP,

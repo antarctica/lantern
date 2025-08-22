@@ -10,6 +10,7 @@ from lantern.models.item.catalogue.distributions import (
     ArcGISDistribution,
     ArcGisFeatureLayer,
     ArcGisOgcApiFeatures,
+    ArcGisRasterTileLayer,
     ArcGisVectorTileLayer,
     Distribution,
     FileDistribution,
@@ -309,6 +310,54 @@ class TestDistributionArcGisOgcApiFeatures:
     def test_matches(self, main: RecordDistribution, others: list[Distribution], expected: bool):
         """Can determine if a record distribution matches this catalogue distribution."""
         result = ArcGisOgcApiFeatures.matches(main, others)
+        assert result == expected
+
+
+class TestDistributionArcGisRasterTileLayer:
+    """Test ArcGIS Raster Tile Layer catalogue distribution."""
+
+    def test_init(self):
+        """Can create a distribution."""
+        main = _make_dist("https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+tile+raster")
+        others = [
+            _make_dist("https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+raster")
+        ]
+
+        dist = ArcGisRasterTileLayer(main, others)
+        assert dist.format_type == DistributionType.ARCGIS_RASTER_TILE_LAYER
+
+    @pytest.mark.parametrize(
+        ("main", "others", "expected"),
+        [
+            (
+                _make_dist("https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+tile+raster"),
+                [
+                    _make_dist(
+                        "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+raster"
+                    )
+                ],
+                True,
+            ),
+            (
+                _make_dist("https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+tile+raster"),
+                [_make_dist("x")],
+                False,
+            ),
+            (
+                _make_dist("x"),
+                [
+                    _make_dist(
+                        "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+raster"
+                    )
+                ],
+                False,
+            ),
+            (_make_dist("x"), [_make_dist("y")], False),
+        ],
+    )
+    def test_matches(self, main: RecordDistribution, others: list[Distribution], expected: bool):
+        """Can determine if a record distribution matches this catalogue distribution."""
+        result = ArcGisRasterTileLayer.matches(main, others)
         assert result == expected
 
 

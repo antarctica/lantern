@@ -24,6 +24,7 @@ Item to test all supported data formats:
 
 - ArcGIS Feature Layer
 - ArcGIS OGC Feature Layer
+- ArcGIS Raster Tile Layer
 - ArcGIS Vector Tile Layer
 - GeoJSON
 - GeoPackage (optional compression)
@@ -168,6 +169,72 @@ record.distribution = [
                 function=OnlineResourceFunctionCode.DOWNLOAD,
                 title="ArcGIS Online",
                 description="Access information as an ArcGIS OGC feature layer.",
+            )
+        ),
+    ),
+    Distribution(
+        distributor=Contact(
+            organisation=ContactIdentity(
+                name="Environmental Systems Research Institute", href="https://ror.org/0428exr50", title="ror"
+            ),
+            address=Address(
+                delivery_point="380 New York Street",
+                city="Redlands",
+                administrative_area="California",
+                postal_code="92373",
+                country="United States of America",
+            ),
+            online_resource=OnlineResource(
+                href="https://www.esri.com",
+                title="GIS Mapping Software, Location Intelligence & Spatial Analytics | Esri",
+                description="Corporate website for Environmental Systems Research Institute (ESRI).",
+                function=OnlineResourceFunctionCode.INFORMATION,
+            ),
+            role=[ContactRoleCode.DISTRIBUTOR],
+        ),
+        format=Format(
+            format="ArcGIS Raster Tile Layer",
+            href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+tile+raster",
+        ),
+        transfer_option=TransferOption(
+            online_resource=OnlineResource(
+                href="za",
+                function=OnlineResourceFunctionCode.DOWNLOAD,
+                title="ArcGIS Online",
+                description="Access information as an ArcGIS raster tile layer.",
+            )
+        ),
+    ),
+    Distribution(
+        distributor=Contact(
+            organisation=ContactIdentity(
+                name="Environmental Systems Research Institute", href="https://ror.org/0428exr50", title="ror"
+            ),
+            address=Address(
+                delivery_point="380 New York Street",
+                city="Redlands",
+                administrative_area="California",
+                postal_code="92373",
+                country="United States of America",
+            ),
+            online_resource=OnlineResource(
+                href="https://www.esri.com",
+                title="GIS Mapping Software, Location Intelligence & Spatial Analytics | Esri",
+                description="Corporate website for Environmental Systems Research Institute (ESRI).",
+                function=OnlineResourceFunctionCode.INFORMATION,
+            ),
+            role=[ContactRoleCode.DISTRIBUTOR],
+        ),
+        format=Format(
+            format="ArcGIS Raster Tile Service",
+            href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+raster",
+        ),
+        transfer_option=TransferOption(
+            online_resource=OnlineResource(
+                href="za",
+                function=OnlineResourceFunctionCode.DOWNLOAD,
+                title="ArcGIS Online",
+                description="Access information as an ArcGIS raster tile service.",
             )
         ),
     ),

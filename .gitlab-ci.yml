@@ -90,6 +90,7 @@ ruff:
   script:
     - $TASK_BIN lint $RUFF_TARGETS
     - $TASK_BIN format --check $RUFF_TARGETS
+    - $TASK_BIN types
   rules:
     -
       changes:

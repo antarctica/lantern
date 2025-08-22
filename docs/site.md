@@ -340,7 +340,7 @@ extends the [Base Layout](#layouts) with three parts:
 Elements across these parts use [Item Macros](#item-macros) to organise and breakdown the template's content.
 
 > [!TIP]
-> See the [Development](/docs/dev.md#adding-properties-to-item-templates) documentation for how to add new elements.
+> See the [Development](/docs/dev.md#adding-properties-to-items) documentation for how to add new elements.
 
 #### Item macros
 

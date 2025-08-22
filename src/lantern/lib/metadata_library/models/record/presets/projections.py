@@ -35,7 +35,7 @@ def make_epsg_projection(code: str) -> ReferenceSystemInfo:
                             description="The EPSG Geodetic Parameter Dataset is a structured dataset of Coordinate Reference Systems and Coordinate Transformations, accessible through this online registry.",
                             function=OnlineResourceFunctionCode.INFORMATION,
                         ),
-                        role=[ContactRoleCode.PUBLISHER],
+                        role={ContactRoleCode.PUBLISHER},
                     )
                 ]
             ),

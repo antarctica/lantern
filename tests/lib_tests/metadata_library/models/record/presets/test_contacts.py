@@ -32,10 +32,10 @@ class TestMakeMagicRole:
                 "description": "General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
                 "function": "information",
             },
-            "role": ["pointOfContact"],
+            "role": {"pointOfContact"},
         }
 
-        contact = make_magic_role(roles=[ContactRoleCode.POINT_OF_CONTACT])
+        contact = make_magic_role(roles={ContactRoleCode.POINT_OF_CONTACT})
         converter = cattrs.Converter()
         result = clean_dict(converter.unstructure(contact))
 
@@ -43,6 +43,6 @@ class TestMakeMagicRole:
 
     def test_roles(self):
         """Can get contact element with configured roles."""
-        expected = [ContactRoleCode.AUTHOR, ContactRoleCode.EDITOR]
+        expected = {ContactRoleCode.AUTHOR, ContactRoleCode.EDITOR}
         result = make_magic_role(roles=expected)
         assert set(result.role) == set(expected)  # order doesn't matter

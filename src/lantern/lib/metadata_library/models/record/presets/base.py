@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Any
 
 from lantern.lib.metadata_library.models.record import DataQuality, Metadata, Record
@@ -26,13 +27,9 @@ class RecordMagicDiscoveryV1(Record):
 
     def __init__(self, **kwargs: Any) -> None:
         """Process defaults for required properties."""
-        date_stamp = None
-        if "date_stamp" in kwargs:
-            date_stamp = kwargs["date_stamp"]
-            del kwargs["date_stamp"]
-
+        date_stamp: date | None = kwargs.pop("date_stamp", None)
         kwargs["metadata"] = Metadata(
-            contacts=Contacts([make_magic_role([ContactRoleCode.POINT_OF_CONTACT])]), date_stamp=date_stamp
+            contacts=Contacts([make_magic_role({ContactRoleCode.POINT_OF_CONTACT})]), date_stamp=date_stamp
         )
         super().__init__(**kwargs)
 
@@ -55,7 +52,7 @@ class RecordMagicDiscoveryV1(Record):
     @staticmethod
     def _set_magic_poc(contacts: list[Contact]) -> None:
         """Ensure a list of contacts contains MAGIC as a point of contact."""
-        poc = make_magic_role([ContactRoleCode.POINT_OF_CONTACT])
+        poc = make_magic_role({ContactRoleCode.POINT_OF_CONTACT})
 
         # skip exact match
         if poc in contacts:
@@ -69,13 +66,14 @@ class RecordMagicDiscoveryV1(Record):
         # append to existing contact with non-overlapping roles
         for i, contact in enumerate(contacts):
             if contact.eq_no_roles(poc):
-                contacts[i].role.extend(poc.role)
+                contacts[i].role = contacts[i].role.union(poc.role)
                 return
 
         # append new contact
         contacts.append(poc)
 
     @classmethod
+    # noinspection PyMethodOverridingInspection
     def loads(cls, value: dict) -> "RecordMagicDiscoveryV1":
         """Create a Record from a dict loaded from a JSON schema instance."""
         record = super().loads(value)

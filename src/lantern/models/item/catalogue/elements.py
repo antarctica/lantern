@@ -364,12 +364,12 @@ class Extent(ItemExtent):
         self._map_endpoint = embedded_maps_endpoint
 
     @property
-    def start(self) -> str | None:
+    def start(self) -> FormattedDate | None:
         """Temporal period start."""
         return FormattedDate.from_rec_date(super().start) if super().start else None
 
     @property
-    def end(self) -> str | None:
+    def end(self) -> FormattedDate | None:
         """Temporal period end."""
         return FormattedDate.from_rec_date(super().end) if super().end else None
 

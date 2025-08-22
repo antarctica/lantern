@@ -32,7 +32,7 @@ Secondary top-level items:
 |---------------|-----------------------------------------------------------------------------------------------------|-------------------------------------------------------------------|
 | `404.html`    | Not found error page                                                                                | [Site Pages](/docs/exporters.md#site-pages-exporter)              |
 | `favicon.ico` | Site favicon                                                                                        | [Site Resources](/docs/exporters.md#site-resources-exporter)      |
-| `-/`          | Internal (but not secret) pages, such as the site index                                             | *Various*                                                         |
+| `-/`          | Internal (but not secret) pages, such as the site index and formatting guide                        | *Various*                                                         |
 | `{aliases}/`  | [Item Aliases](/docs/data-model.md#item-aliases) redirect pages (for `collections/`, `maps/`, etc.) | [HTML Aliases](/docs/exporters.md#html-aliases-resource-exporter) |
 | `legal/`      | Legal policy pages                                                                                  | [Site Pages](/docs/exporters.md#site-pages-exporter)              |
 
@@ -62,6 +62,8 @@ Secondary top-level items:
 └── -/
      ├── index/
      │    └── index.html -> 'hidden' index page
+     ├── formatting/
+     │    └── index.html -> 'hidden' formatting guide
      └── public-website-search/
           ├── items.json -> temporary static list of aggregation API resources
           └── mockup.html -> temporary results rendering
@@ -70,6 +72,7 @@ Secondary top-level items:
 | Path                       | Description                                  | Exporter                                                      |
 |----------------------------|----------------------------------------------|---------------------------------------------------------------|
 | `-/index/`                 | Hidden index page                            | [Site Index](/docs/exporters.md#site-index-exporter)          |
+| `-/formatting/`            | Hidden record content formatting guide       | [Site Pages](/docs/exporters.md#site-pages-exporter)          |
 | `-/public-website-search/` | Temporary public website search items output | [Website Search](/docs/exporters.md#site-pages-exporter) |
 
 ### Site assets structure
@@ -122,7 +125,7 @@ As per the [BAS Style Kit](https://style-kit.web.bas.ac.uk/start/standards-acces
 guidance, the Catalogue site MUST be designed with accessibility in mind.
 
 We maintain a basic accessibility check in `src/lantern/resources/templates/_views/legal/accessibility.html.j2`, which
-should be reviewed and revised on a regular basis.
+SHOULD be reviewed and revised on a regular basis.
 
 #### Responsive design
 
@@ -131,31 +134,31 @@ the Catalogue site MUST use
 [Responsive design](https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/CSS_layout/Responsive_Design).
 
 This means designing for the smallest (mobile) viewport by default with Tailwind's modifiers used for larger viewports.
-For example, stacking content in a single column by default then using two or more where the viewport allows.
+For example, stacking content in a single column by default and two or more where the viewport allows.
 
 > [!NOTE]
-> Whilst mobiles aren't expected to be the primary device type for this site, it should still be usable and functional,
-> avoiding common pitfalls such as overflowing images, tables, and needing to pan horizontally.
-
-#### Sizing
-
-Ration based sizing SHOULD be used over fixed sizes (e.g. `w-1/2`).
-
-#### Spacing
-
-A consistent, and constrained, spacing scale SHOULD be used wherever possible:
-
-- small: `-2`
-- medium: `-4`
-- large: `-8`
-
-Exceptions to this scale MAY and will be made for specific use cases.
-
-Tailwind's `space-x-*` and `space-y-*` classes SHOULD be used for spacing between elements for consistency. Padding
-SHOULD be used over margins where possible to limit the number of classes.
-
-> [!TIP]
-> Run the `css-audit` [Development Task](/docs/dev.md#development-tasks) to check currently used classes in templates.
+> Whilst mobiles aren't expected to be the primary device type for this site, designing responsively to avoid common
+> pitfalls (such as overflowing content) also helps with accessibility and so MUST be considered.
+                                                    `                                                                                                                    `
+#### Sizing                                                                                                                                                             ``
+                                                                                                                                                                        `
+Ratio based sizing SHOULD be used over fixed sizes (e.g. `w-1/2`).                                                                                                     `
+                                                                                                                                                                        ``
+#### Spacing                                                                                                                                                            ``
+                                                                                                                                                                        `
+A consistent, and constrained, spacing scale SHOULD `be used wherever possible:                                                                                          `
+                                                                                                                                                                        ``
+- small: `-2`                                                                                                                                                           `
+- medium: `-4`                                                                                                                                                          `
+- large: `-8`                                                                                                                                                           `
+                                                                                                                                                                        ``
+Exceptions to this scale MAY and will be made for sp`ecific use cases.                                                                                                   `
+                                                                                                                                                                        ``
+Tailwind's `space-x-*` and `space-y-*` classes SHOUL`D be used for spacing between elements for consistency. Padding                                                     `
+SHOULD be used over margins where possible to limit `the number of classes.                                                                                              `
+                                                                                                                                                                        ``
+> [!TIP]                                                                                                                                                                ``
+> Run the `css-audit` [Development Task](/docs/dev.m`d#development-tasks) to check currently used classes in templates.                                                  `
 
 #### Dark mode
 

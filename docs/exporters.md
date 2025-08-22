@@ -116,7 +116,8 @@ Generates a basic index page with minimal styling and links to all [Records](/do
 Generates static pages using [Site Templates](/docs/site.md#item-templates) for:
 
 - 404 error page
-- legal policies (copyright, cookies and privacy)
+- legal policies (accessibility, copyright, cookies and privacy)
+- content formatting guide (for abstracts, etc.)
 
 ### Public Website search exporter
 

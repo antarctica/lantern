@@ -9,6 +9,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 
 ## [Unreleased]
 
+## [0.2.0] - 2025-08-22
+
 ### Added
 
 * Pickled records in the GitLab store cache for improved performance

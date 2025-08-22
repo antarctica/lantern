@@ -2,7 +2,7 @@ from lantern.lib.metadata_library.models.record.elements.common import Address, 
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode, OnlineResourceFunctionCode
 
 
-def make_magic_role(roles: list[ContactRoleCode]) -> Contact:
+def make_magic_role(roles: set[ContactRoleCode]) -> Contact:
     """MAGIC team with configurable roles."""
     return Contact(
         organisation=ContactIdentity(
@@ -48,5 +48,5 @@ def make_esri_distributor() -> Contact:
             description="Corporate website for Environmental Systems Research Institute (ESRI).",
             function=OnlineResourceFunctionCode.INFORMATION,
         ),
-        role=[ContactRoleCode.DISTRIBUTOR],
+        role={ContactRoleCode.DISTRIBUTOR},
     )

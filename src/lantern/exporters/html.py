@@ -10,6 +10,7 @@ from lantern.lib.metadata_library.models.record import Record
 from lantern.models.item.base.const import CATALOGUE_NAMESPACE
 from lantern.models.item.catalogue import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
+from lantern.models.record.revision import RecordRevision
 
 
 class HtmlExporter(ResourceExporter):
@@ -26,7 +27,7 @@ class HtmlExporter(ResourceExporter):
         config: Config,
         logger: logging.Logger,
         s3: S3Client,
-        record: Record,
+        record: RecordRevision,
         export_base: Path,
         get_record: Callable[[str], Record],
     ) -> None:
@@ -72,7 +73,9 @@ class HtmlAliasesExporter(ResourceExporter):
     Uses S3 object redirects with a minimal HTML page as a fallback.
     """
 
-    def __init__(self, config: Config, logger: logging.Logger, s3: S3Client, record: Record, site_base: Path) -> None:
+    def __init__(
+        self, config: Config, logger: logging.Logger, s3: S3Client, record: RecordRevision, site_base: Path
+    ) -> None:
         """
         Initialise.
 
@@ -92,7 +95,7 @@ class HtmlAliasesExporter(ResourceExporter):
     def _get_aliases(self) -> list[str]:
         """Get optional aliases for record as relative file paths / S3 keys."""
         identifiers = get_record_aliases(self._record)
-        return [identifier.href.replace(f"https://{CATALOGUE_NAMESPACE}/", "") for identifier in identifiers]
+        return [(identifier.href or "").replace(f"https://{CATALOGUE_NAMESPACE}/", "") for identifier in identifiers]
 
     @property
     def target(self) -> str:

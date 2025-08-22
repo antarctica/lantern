@@ -168,7 +168,7 @@ class SiteIndexExporter(Exporter):
             aliases.extend(
                 [
                     {
-                        "alias": identifier.href.replace("https://data.bas.ac.uk/", ""),
+                        "alias": (identifier.href or "").replace("https://data.bas.ac.uk/", ""),
                         "href": f"/items/{record.file_identifier}",
                         "file_identifier": record.file_identifier,
                         "title": record.identification.title,

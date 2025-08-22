@@ -52,6 +52,14 @@ class TestCleanDict:
         result = clean_dict(value)
         assert result == expected
 
+    # noinspection PyTypeChecker
+    @pytest.mark.cov()
+    def test_clean_dict_wrong(self):
+        """Cannot clean a non-dict."""
+        with pytest.raises(TypeError, match="Value must be a dict"):
+            # noinspection PyTypeChecker
+            clean_dict([])
+
 
 class TestCleanList:
     """Test clean_list util function."""
@@ -74,6 +82,13 @@ class TestCleanList:
         """Can clean a list containing None values."""
         result = clean_list(value)
         assert result == expected
+
+    @pytest.mark.cov()
+    def test_clean_list_wrong(self):
+        """Cannot clean a non-list."""
+        with pytest.raises(TypeError, match="Value must be a list"):
+            # noinspection PyTypeChecker
+            clean_list({})
 
 
 class TestAddress:
@@ -130,7 +145,7 @@ class TestCitation:
             {**MIN_CITATION, "identifiers": [Identifier(identifier="x", href="x", namespace="x")]},
             {
                 **MIN_CITATION,
-                "contacts": [Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.POINT_OF_CONTACT])],
+                "contacts": [Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT})],
             },
             {**MIN_CITATION, "series": Series(name="x", edition="x", page="x")},
         ],
@@ -309,31 +324,30 @@ class TestContact:
     def test_invalid_identity(self):
         """Can't create a Contact if neither individual nor organisation is provided."""
         with pytest.raises(ValueError, match="At least one of individual or organisation is required"):
-            Contact(role=[])
+            Contact(role=set())
 
     def test_invalid_roles(self):
         """Can't create a Contact without a role."""
         with pytest.raises(ValueError, match="At least one role is required"):
-            Contact(individual=ContactIdentity(name="x"), role=[])
+            Contact(individual=ContactIdentity(name="x"), role=set())
 
     def test_unique_roles(self):
         """Contact.role property does not contain duplicate values."""
-        contact = Contact(
-            organisation=ContactIdentity(name="x"), role=[ContactRoleCode.PUBLISHER, ContactRoleCode.PUBLISHER]
-        )
-        assert contact.role == [ContactRoleCode.PUBLISHER]
+        role = ContactRoleCode.PUBLISHER
+        contact = Contact(organisation=ContactIdentity(name="x"), role={role, role})
+        assert list(contact.role) == [role]
 
     @pytest.mark.parametrize(
         ("first", "second", "expected"),
         [
             (
-                Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.POINT_OF_CONTACT]),
-                Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.PUBLISHER]),
+                Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT}),
+                Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.PUBLISHER}),
                 True,
             ),
             (
-                Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.POINT_OF_CONTACT]),
-                Contact(organisation=ContactIdentity(name="y"), role=[ContactRoleCode.POINT_OF_CONTACT]),
+                Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT}),
+                Contact(organisation=ContactIdentity(name="y"), role={ContactRoleCode.POINT_OF_CONTACT}),
                 False,
             ),
         ],
@@ -348,24 +362,24 @@ class TestContact:
             (
                 Contact(
                     organisation=ContactIdentity(name="x"),
-                    role=[ContactRoleCode.POINT_OF_CONTACT, ContactRoleCode.PUBLISHER],
+                    role={ContactRoleCode.POINT_OF_CONTACT, ContactRoleCode.PUBLISHER},
                 ),
-                Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.PUBLISHER]),
+                Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.PUBLISHER}),
                 True,
             ),
             (
-                Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.POINT_OF_CONTACT]),
-                Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.AUTHOR]),
+                Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT}),
+                Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.AUTHOR}),
                 False,
             ),
             (
-                Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.POINT_OF_CONTACT]),
-                Contact(organisation=ContactIdentity(name="y"), role=[ContactRoleCode.POINT_OF_CONTACT]),
+                Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT}),
+                Contact(organisation=ContactIdentity(name="y"), role={ContactRoleCode.POINT_OF_CONTACT}),
                 False,
             ),
             (
-                Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.POINT_OF_CONTACT]),
-                Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.POINT_OF_CONTACT]),
+                Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT}),
+                Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT}),
                 True,
             ),
         ],
@@ -381,7 +395,7 @@ class TestContact:
         Ensures roles are sorted alphabetically to avoid noise in comparisons.
         """
         value = Contact(
-            organisation=ContactIdentity(name="x"), role=[ContactRoleCode.POINT_OF_CONTACT, ContactRoleCode.AUTHOR]
+            organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT, ContactRoleCode.AUTHOR}
         )
         expected = {"organisation": {"name": "x"}, "role": ["author", "pointOfContact"]}
 
@@ -397,16 +411,16 @@ class TestContacts:
 
     def test_init(self):
         """Can create a Contacts container from directly assigned properties."""
-        expected = Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.POINT_OF_CONTACT])
+        expected = Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT})
         contacts = Contacts([expected])
 
         assert len(contacts) == 1
         assert contacts[0] == expected
 
-    test_filer_roles_poc = Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.POINT_OF_CONTACT])
-    test_filer_roles_author = Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.AUTHOR])
+    test_filer_roles_poc = Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT})
+    test_filer_roles_author = Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.AUTHOR})
     test_filer_roles_poc_publisher = Contact(
-        organisation=ContactIdentity(name="x"), role=[ContactRoleCode.POINT_OF_CONTACT, ContactRoleCode.PUBLISHER]
+        organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT, ContactRoleCode.PUBLISHER}
     )
 
     @pytest.mark.parametrize(
@@ -434,7 +448,7 @@ class TestContacts:
 
     def test_structure(self):
         """Can create a Contacts container by converting a list of plain types."""
-        expected = Contacts([Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.POINT_OF_CONTACT])])
+        expected = Contacts([Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT})])
         result = Contacts.structure([{"organisation": {"name": "x"}, "role": ["pointOfContact"]}])
 
         assert type(result) is type(expected)
@@ -443,7 +457,7 @@ class TestContacts:
     def test_structure_cattrs(self):
         """Can use Cattrs to create a Contacts instance from plain types."""
         value = [{"organisation": {"name": "x"}, "role": ["pointOfContact"]}]
-        expected = Contacts([Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.POINT_OF_CONTACT])])
+        expected = Contacts([Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT})])
 
         converter = cattrs.Converter()
         converter.register_structure_hook(Contacts, lambda d, t: Contacts.structure(d))
@@ -453,7 +467,7 @@ class TestContacts:
 
     def test_unstructure_cattrs(self):
         """Can use Cattrs to convert a Contacts instance into plain types."""
-        value = Contacts([Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.POINT_OF_CONTACT])])
+        value = Contacts([Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT})])
         expected = [{"organisation": {"name": "x"}, "role": ["pointOfContact"]}]
 
         converter = cattrs.Converter()

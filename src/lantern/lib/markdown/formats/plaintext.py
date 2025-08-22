@@ -19,6 +19,9 @@ def _serialize_plain_text(data: list, elem: Element) -> None:
 def to_plain_text(element: Element) -> str:
     """Recursively convert HTML elements to plain text."""
     root = ElementTree(element).getroot()
+    if not isinstance(root, Element):
+        msg = "Cannot get root element"
+        raise ValueError(msg) from None  # noqa: TRY004
     text = []
     _serialize_plain_text(text, root)
     return "".join(text)
@@ -33,4 +36,4 @@ class PlainTextExtension(Extension):
         md.stripTopLevelTags = False
 
         # Prevent rewriting serializer we have just changed
-        md.set_output_format = lambda x: x
+        md.set_output_format = lambda x: x  # ty: ignore[invalid-assignment]

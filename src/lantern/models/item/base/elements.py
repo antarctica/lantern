@@ -19,7 +19,6 @@ class Contact(RecordContact):
         """Initialise from an underlying Record Contact."""
         # noinspection PyTypeChecker
         props = unpack(contact)
-        props.pop("_role")
         super().__init__(**props)
 
     @property

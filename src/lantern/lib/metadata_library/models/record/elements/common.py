@@ -18,7 +18,7 @@ TContacts = TypeVar("TContacts", bound="Contacts")
 TCitation = TypeVar("TCitation", bound="Citation")
 
 
-def _clean_val(value: dict | list | str | float) -> dict | list | str | float:
+def _clean_val(value: dict | list | str | float) -> dict | list | str | int | float | None:
     if isinstance(value, dict):
         cleaned_dict = {k: _clean_val(v) for k, v in value.items() if v not in (None, [], {})}
         return {k: v for k, v in cleaned_dict.items() if v not in (None, [], {})}
@@ -31,13 +31,21 @@ def _clean_val(value: dict | list | str | float) -> dict | list | str | float:
 def clean_dict(d: dict) -> dict:
     """Remove any None or empty list/dict values from a dict."""
     cleaned = _clean_val(d)
+    if not isinstance(cleaned, dict):
+        msg = "Value must be a dict"
+        raise TypeError(msg) from None
     return {k: v for k, v in cleaned.items() if v not in (None, [], {})}
 
 
 def clean_list(l: list) -> list:  # noqa: E741
     """Remove any None or empty list/dict values from a list."""
     cleaned = _clean_val(l)
-    return [v for v in cleaned if v not in (None, [], {})] if cleaned is not None else []
+    if cleaned is None:
+        cleaned = []
+    if not isinstance(cleaned, list):
+        msg = "Value must be a list"
+        raise TypeError(msg) from None
+    return [v for v in cleaned if v not in (None, [], {})]
 
 
 @dataclass(kw_only=True)
@@ -116,8 +124,7 @@ class Contact:
     address: Address | None = None
     email: str | None = None
     online_resource: OnlineResource | None = None
-    role: list[ContactRoleCode]
-    _role: list[ContactRoleCode] = field(init=False, repr=False)
+    role: set[ContactRoleCode]
 
     def __post_init__(self) -> None:
         """Process defaults."""
@@ -133,7 +140,7 @@ class Contact:
         """
         Convert to plain types.
 
-        Ensures roles are sorted alphabetically.
+        Ensures roles are sorted alphabetically as a list.
 
         Intended to be used as a cattrs unstructure hook.
         E.g. `converter.register_unstructure_hook(Contact, lambda d: d.unstructure())`
@@ -147,28 +154,18 @@ class Contact:
         contact["role"] = sorted(contact["role"])
         return contact
 
-    @property
-    def role(self) -> list[ContactRoleCode]:
-        """Role(s)."""
-        return self._role
-
-    @role.setter
-    def role(self, roles: list[ContactRoleCode]) -> None:
-        # set to unique values
-        self._role = list(set(roles))
-
     def eq_no_roles(self, other: "Contact") -> bool:
         """Compare if contacts are the same if roles are ignored."""
         self_ = deepcopy(self)
-        self_.role = []
+        self_.role = set()
         other_ = deepcopy(other)
-        other_.role = []
+        other_.role = set()
 
         return self_ == other_
 
     def eq_contains_roles(self, other: "Contact") -> bool:
         """Compare if contacts are the same if contact contains all roles of another."""
-        if all(role in self.role for role in other.role):
+        if other.role <= self.role:
             return self.eq_no_roles(other)
         return False
 

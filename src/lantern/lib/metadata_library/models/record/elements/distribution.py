@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 
+import cattrs
+
 from lantern.lib.metadata_library.models.record.elements.common import Contact, OnlineResource
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
 
@@ -73,3 +75,14 @@ class Distribution:
         if ContactRoleCode.DISTRIBUTOR not in self.distributor.role:
             msg = "Distributor contact must include the 'distributor' role."
             raise ValueError(msg) from None
+
+    def unstructure(self) -> dict:
+        """
+        Convert Metadata class into plain types.
+
+        Intended to be used as a cattrs unstructure hook.
+        E.g. `converter.register_unstructure_hook(Distribution, lambda d: d.unstructure())`
+        """
+        converter = cattrs.Converter()
+        converter.register_unstructure_hook(Contact, lambda d: d.unstructure())
+        return converter.unstructure(self)

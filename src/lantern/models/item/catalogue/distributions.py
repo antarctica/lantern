@@ -105,10 +105,21 @@ class ArcGISDistribution(Distribution, ABC):
     def _get_service_option(options: list[RecordDistribution], target_href: str) -> RecordDistribution:
         """Get corresponding service option for layer."""
         try:
-            return next(option for option in options if option.format.href == target_href)
+            return next(option for option in options if option.format is not None and option.format.href == target_href)
         except StopIteration:
             msg = "Required corresponding service option not found in resource distributions."
             raise ValueError(msg) from None
+
+    @staticmethod
+    def _matches(target_hrefs: list[str], option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:
+        """Whether this class matches the distribution option."""
+        if option.format is None or option.format.href is None:
+            return False
+
+        item_hrefs = [option.format.href for option in [option, *other_options]]
+        match = all(href in item_hrefs for href in target_hrefs)
+        # avoid matching for each target href by only returning True if the first target matches
+        return match and option.format.href == target_hrefs[0]
 
     @property
     def size(self) -> str:
@@ -207,15 +218,7 @@ class ArcGisFeatureLayer(ArcGISDistribution):
             "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+feature",
             "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+feature",
         ]
-        item_hrefs = [
-            option.format.href
-            for option in [option, *other_options]
-            if option.format is not None and option.format.href is not None
-        ]
-
-        match = all(href in item_hrefs for href in target_hrefs)
-        # avoid matching for each target href by only returning True if the first target matches
-        return match and option.format.href == target_hrefs[0]
+        return ArcGisFeatureLayer._matches(target_hrefs=target_hrefs, option=option, other_options=other_options)
 
     @property
     def format_type(self) -> DistributionType:
@@ -243,15 +246,7 @@ class ArcGisOgcApiFeatures(ArcGISDistribution):
             "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+feature+ogc",
             "https://metadata-resources.data.bas.ac.uk/media-types/x-service/ogc+api+feature",
         ]
-        item_hrefs = [
-            option.format.href
-            for option in [option, *other_options]
-            if option.format is not None and option.format.href is not None
-        ]
-
-        match = all(href in item_hrefs for href in target_hrefs)
-        # avoid matching for each target href by only returning True if the first target matches
-        return match and option.format.href == target_hrefs[0]
+        return ArcGisFeatureLayer._matches(target_hrefs=target_hrefs, option=option, other_options=other_options)
 
     @property
     def format_type(self) -> DistributionType:
@@ -279,15 +274,7 @@ class ArcGisVectorTileLayer(ArcGISDistribution):
             "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+tile+vector",
             "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+vector",
         ]
-        item_hrefs = [
-            option.format.href
-            for option in [option, *other_options]
-            if option.format is not None and option.format.href is not None
-        ]
-
-        match = all(href in item_hrefs for href in target_hrefs)
-        # avoid matching for each target href by only returning True if the first target matches
-        return match and option.format.href == target_hrefs[0]
+        return ArcGisFeatureLayer._matches(target_hrefs=target_hrefs, option=option, other_options=other_options)
 
     @property
     def format_type(self) -> DistributionType:
@@ -315,15 +302,7 @@ class ArcGisRasterTileLayer(ArcGISDistribution):
             "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+tile+raster",
             "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+raster",
         ]
-        item_hrefs = [
-            option.format.href
-            for option in [option, *other_options]
-            if option.format is not None and option.format.href is not None
-        ]
-
-        match = all(href in item_hrefs for href in target_hrefs)
-        # avoid matching for each target href by only returning True if the first target matches
-        return match and option.format.href == target_hrefs[0]
+        return ArcGisFeatureLayer._matches(target_hrefs=target_hrefs, option=option, other_options=other_options)
 
     @property
     def format_type(self) -> DistributionType:
@@ -416,7 +395,8 @@ class GeoPackage(FileDistribution):
     def _is_compressed(option: RecordDistribution) -> bool:
         """Check if GeoPackage is compressed based on self-reported format."""
         target_href = "https://metadata-resources.data.bas.ac.uk/media-types/application/geopackage+sqlite3+zip"
-        return option.format.href == target_href
+        # TYPING: This assumes option.format is not None but given `matches()` this will never be the case.
+        return option.format.href == target_href  # ty: ignore[possibly-unbound-attribute]
 
     @property
     def format_type(self) -> DistributionType:
@@ -467,7 +447,8 @@ class Pdf(FileDistribution):
     def _is_georeferenced(option: RecordDistribution) -> bool:
         """Check if PDF is georeferenced based on self-reported format."""
         target_href = "https://metadata-resources.data.bas.ac.uk/media-types/application/pdf+geo"
-        return option.format.href == target_href
+        # TYPING: This assumes option.format is not None but given `matches()` this will never be the case.
+        return option.format.href == target_href  # ty: ignore[possibly-unbound-attribute]
 
     @property
     def format_type(self) -> DistributionType:

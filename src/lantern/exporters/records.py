@@ -1,6 +1,6 @@
 import logging
 
-from boto3 import client as S3Client  # noqa: N812
+from mypy_boto3_s3 import S3Client
 
 from lantern.config import Config
 from lantern.exporters.base import Exporter, ResourceExporter

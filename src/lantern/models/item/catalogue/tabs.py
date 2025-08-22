@@ -18,6 +18,7 @@ from lantern.models.item.base.enums import ResourceTypeLabel
 from lantern.models.item.catalogue.distributions import (
     ArcGisFeatureLayer,
     ArcGisOgcApiFeatures,
+    ArcGisRasterTileLayer,
     ArcGisVectorTileLayer,
     BasPublishedMap,
     Distribution,
@@ -109,6 +110,7 @@ class DataTab(Tab):
         self._supported_distributions = [
             ArcGisFeatureLayer,
             ArcGisOgcApiFeatures,
+            ArcGisRasterTileLayer,
             ArcGisVectorTileLayer,
             BasPublishedMap,
             GeoPackage,

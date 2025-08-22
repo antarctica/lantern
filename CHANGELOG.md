@@ -9,6 +9,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 
 ## [Unreleased]
 
+## [0.2.1] - 2025-08-22
+
 ### Added
 
 * Type checking using Astral Ty

@@ -1,6 +1,7 @@
+import cattrs
 import pytest
 
-from lantern.lib.metadata_library.models.record.elements.common import Contact, ContactIdentity
+from lantern.lib.metadata_library.models.record.elements.common import Contact, ContactIdentity, clean_dict
 from lantern.lib.metadata_library.models.record.elements.distribution import (
     Distribution,
     Format,
@@ -69,13 +70,13 @@ class TestDistribution:
         "values",
         [
             {
-                "distributor": Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.DISTRIBUTOR]),
+                "distributor": Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
                 "transfer_option": TransferOption(
                     online_resource=OnlineResource(href="x", function=OnlineResourceFunctionCode.DOWNLOAD)
                 ),
             },
             {
-                "distributor": Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.DISTRIBUTOR]),
+                "distributor": Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
                 "transfer_option": TransferOption(
                     online_resource=OnlineResource(href="x", function=OnlineResourceFunctionCode.DOWNLOAD)
                 ),
@@ -98,8 +99,32 @@ class TestDistribution:
         """Can't create a Distribution without a Contact with the distributor role."""
         with pytest.raises(ValueError, match="Distributor contact must include the 'distributor' role."):
             Distribution(
-                distributor=Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.POINT_OF_CONTACT]),
+                distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.AUTHOR}),
                 transfer_option=TransferOption(
                     online_resource=OnlineResource(href="x", function=OnlineResourceFunctionCode.DOWNLOAD)
                 ),
             )
+
+    def test_unstructure_cattrs(self):
+        """Can use Cattrs to convert a Distribution instance into plain types."""
+        expected_enum = ContactRoleCode.DISTRIBUTOR
+        value = Distribution(
+            format=Format(format="x", href="x"),
+            distributor=Contact(organisation=ContactIdentity(name="x"), role={expected_enum}),
+            transfer_option=TransferOption(
+                online_resource=OnlineResource(href="x", function=OnlineResourceFunctionCode.DOWNLOAD)
+            ),
+        )
+        expected = {
+            "distributor": {"organisation": {"name": "x"}, "role": [expected_enum.value]},
+            "format": {"format": "x", "href": "x"},
+            "transfer_option": {
+                "online_resource": {"href": "x", "function": OnlineResourceFunctionCode.DOWNLOAD.value}
+            },
+        }
+
+        converter = cattrs.Converter()
+        converter.register_unstructure_hook(Distribution, lambda d: d.unstructure())
+        result = clean_dict(converter.unstructure(value))
+
+        assert result == expected

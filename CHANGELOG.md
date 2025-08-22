@@ -13,6 +13,10 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 
 * Type checking using Astral Ty
 
+### Changed
+
+* Various fixes from enabling static type checking
+
 ## [0.2.0] - 2025-08-22
 
 ### Added

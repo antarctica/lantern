@@ -234,6 +234,7 @@ class Record:
         converter.register_unstructure_hook(ReferenceSystemInfo, lambda d: d.unstructure())
         converter.register_unstructure_hook(Identification, lambda d: d.unstructure())
         converter.register_unstructure_hook(DataQuality, lambda d: d.unstructure())
+        converter.register_unstructure_hook(Distribution, lambda d: d.unstructure())
         return converter
 
     @staticmethod

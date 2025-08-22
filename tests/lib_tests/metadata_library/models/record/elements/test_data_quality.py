@@ -91,7 +91,7 @@ class TestDataQuality:
                         title="x",
                         dates=Dates(creation=Date(date=expected_date)),
                         contacts=Contacts(
-                            [Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.PUBLISHER])]
+                            [Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.PUBLISHER})]
                         ),
                     ),
                     explanation="x",
@@ -117,7 +117,7 @@ class TestDataQuality:
                         title="x",
                         dates=Dates(creation=Date(date=expected_date)),
                         contacts=Contacts(
-                            [Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.PUBLISHER])]
+                            [Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.PUBLISHER})]
                         ),
                     ),
                     explanation="x",

@@ -35,6 +35,7 @@ dev = [
     "safety>=3.5.2",
     "taskipy>=1.14.1",
     "ty>=0.0.1a19",
+    "types-lxml>=2025.3.30",
 ]
 test = [
     "moto[s3]>=5.1.6",

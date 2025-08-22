@@ -79,7 +79,7 @@ class TestRecord:
             hierarchy_level=hierarchy_level,
             metadata=Metadata(
                 contacts=Contacts(
-                    [Contact(organisation=ContactIdentity(name=value), role=[ContactRoleCode.POINT_OF_CONTACT])]
+                    [Contact(organisation=ContactIdentity(name=value), role={ContactRoleCode.POINT_OF_CONTACT})]
                 ),
                 date_stamp=date_stamp,
             ),
@@ -171,7 +171,7 @@ class TestRecord:
         assert record.identification.title == expected_str  # specially nested property
         assert record.data_quality.lineage.statement == expected_str  # moved property
         assert record.hierarchy_level == expected_enums["hierarchy_level"]  # enum property
-        assert record.metadata.contacts[0].role[0] == expected_enums["contact_role"]  # enum property
+        assert next(iter(record.metadata.contacts[0].role)) == expected_enums["contact_role"]  # enum property
         assert record.metadata.date_stamp == expected_date  # date property
         assert record.identification.dates.creation.date == expected_date  # date property
         assert record.identification.constraints[0].type == expected_enums["constraint_type"]  # enum property
@@ -283,7 +283,7 @@ class TestRecord:
             hierarchy_level=HierarchyLevelCode.DATASET,
             metadata=Metadata(
                 contacts=Contacts(
-                    [Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.POINT_OF_CONTACT])]
+                    [Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT})]
                 ),
                 date_stamp=datetime(2014, 6, 30, tzinfo=UTC).date(),
             ),
@@ -323,7 +323,7 @@ class TestRecord:
                                 description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
                                 function=OnlineResourceFunctionCode.INFORMATION,
                             ),
-                            role=[ContactRoleCode.POINT_OF_CONTACT],
+                            role={ContactRoleCode.POINT_OF_CONTACT},
                         )
                     ]
                 ),
@@ -360,7 +360,7 @@ class TestRecord:
                                 description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
                                 function=OnlineResourceFunctionCode.INFORMATION,
                             ),
-                            role=[ContactRoleCode.POINT_OF_CONTACT],
+                            role={ContactRoleCode.POINT_OF_CONTACT},
                         )
                     ]
                 ),
@@ -427,7 +427,7 @@ class TestRecord:
                                             description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
                                             function=OnlineResourceFunctionCode.INFORMATION,
                                         ),
-                                        role=[ContactRoleCode.PUBLISHER],
+                                        role={ContactRoleCode.PUBLISHER},
                                     )
                                 ]
                             ),
@@ -481,7 +481,7 @@ class TestRecord:
                                         description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
                                         function=OnlineResourceFunctionCode.INFORMATION,
                                     ),
-                                    role=[ContactRoleCode.PUBLISHER],
+                                    role={ContactRoleCode.PUBLISHER},
                                 )
                             ]
                         ),
@@ -533,7 +533,7 @@ class TestRecord:
                                         description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
                                         function=OnlineResourceFunctionCode.INFORMATION,
                                     ),
-                                    role=[ContactRoleCode.PUBLISHER],
+                                    role={ContactRoleCode.PUBLISHER},
                                 )
                             ]
                         ),

@@ -1,7 +1,8 @@
 import pytest
 from markdown import Markdown
+from pytest_mock import MockerFixture
 
-from lantern.lib.markdown.formats.plaintext import PlainTextExtension
+from lantern.lib.markdown.formats.plaintext import PlainTextExtension, to_plain_text
 
 
 class TestPlainTextExtension:
@@ -41,3 +42,8 @@ class TestPlainTextExtension:
         """Can remove Markdown formatting as per commonmark spec."""
         md = Markdown(extensions=[PlainTextExtension()])
         assert md.convert(value) == expected
+
+    def test_error(self, mocker: MockerFixture):
+        """Cannot convert value without a root element."""
+        with pytest.raises(ValueError, match="Cannot get root element"):
+            to_plain_text(None)

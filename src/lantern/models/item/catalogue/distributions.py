@@ -295,6 +295,42 @@ class ArcGisVectorTileLayer(ArcGISDistribution):
         return DistributionType.ARCGIS_VECTOR_TILE_LAYER
 
 
+class ArcGisRasterTileLayer(ArcGISDistribution):
+    """
+    ArcGIS Raster Tile Layer distribution option.
+
+    Consisting of a (raster) tile service and (raster) tile layer option.
+    """
+
+    def __init__(self, option: RecordDistribution, other_options: list[RecordDistribution], **kwargs: Any) -> None:
+        service_media_href = (
+            "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+raster"
+        )
+        super().__init__(option, other_options, service_media_href, **kwargs)
+
+    @classmethod
+    def matches(cls, option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:
+        """Whether this class matches the distribution option."""
+        target_hrefs = [
+            "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+tile+raster",
+            "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+raster",
+        ]
+        item_hrefs = [
+            option.format.href
+            for option in [option, *other_options]
+            if option.format is not None and option.format.href is not None
+        ]
+
+        match = all(href in item_hrefs for href in target_hrefs)
+        # avoid matching for each target href by only returning True if the first target matches
+        return match and option.format.href == target_hrefs[0]
+
+    @property
+    def format_type(self) -> DistributionType:
+        """Format type."""
+        return DistributionType.ARCGIS_RASTER_TILE_LAYER
+
+
 class BasPublishedMap(Distribution):
     """
     BAS published map distribution option.

@@ -25,6 +25,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Initial support for items a record supersedes in related items section
 * Markdown formatting guide
 * Validation styles for item contact forms (invalid only)
+* Support for ArcGIS Raster (Map) distribution options
 
 ### Fixed
 

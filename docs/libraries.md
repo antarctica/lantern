@@ -27,7 +27,7 @@ correctly paragraphs from lists in Markdown and ensure proper formatting.
 
 Package: `lantern.lib.metadata_library`
 
-Includes classes for [Records](/docs/data-model.md#records) and [Record Summaries](/docs/data-model.md#record-summaries)
+Includes classes for [Records](/docs/data-model.md#records).
 
 These redesigned and refactored classes will replace core parts of the Metadata Library project.
 
@@ -53,3 +53,4 @@ To add support for a new ISO element within Records:
 9. amend tests for root-level class (i.e. `TestRecord`):
 	1. amend tests for root-level cattrs hooks if top-level hooks changed (as an integration check)
 	2. amend variants in `test_loop` as needed (include all possible options in complete variant)
+10. amend list of unsupported properties in `/docs/data-model.md#record-limitations` as needed

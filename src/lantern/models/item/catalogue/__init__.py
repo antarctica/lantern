@@ -56,43 +56,7 @@ class ItemCatalogue(ItemBase):
     - a callable to get a RecordSummary for a given identifier (used for related items from aggregations)
 
     Note: This class is an incomplete rendering of Record properties (which is itself an incomplete mapping of the
-    ISO 19115:2003 / 19115-2:2009 standards). The list below is a work in progress.
-
-    Supported properties:
-    - file_identifier
-    - hierarchy_level
-    - reference_system_info
-    - identification.citation.title
-    - identification.citation.dates
-    - identification.citation.edition
-    - identification.citation.contacts ('author' roles and a single 'point of contact' role only, and except `contact.position`)
-    - identification.citation.series
-    - identification.citation.identifiers[namespace='doi']
-    - identification.citation.identifiers[namespace='isbn']
-    - identification.citation.identifiers[namespace='gitlab.data.bas.ac.uk'] (as references only)
-    - identification.abstract
-    - identification.aggregations ('collections' and 'items' only)
-    - identification.constraints ('licence' only)
-    - identification.maintenance
-    - identification.extent (single bounding temporal and geographic bounding box extent only)
-    - identification.other_citation_details
-    - identification.graphic_overviews
-    - identification.spatial_resolution
-    - identification.supplemental_information (for physical dimensions only)
-    - data_quality.lineage.statement
-    - data_quality.domain_consistency
-    - distributor.format (`format` and `href` only)
-    - distributor.transfer_option (except `online_resource.protocol`)
-
-    Unsupported properties:
-    - identification.purpose (except as used in ItemSummaries)
-
-    Intentionally omitted properties:
-    - *.character_set (not useful to end-users, present in underlying record)
-    - *.language (not useful to end-users, present in underlying record)
-    - *.online_resource.protocol (not useful to end-users, present in underlying record)
-    - identification.citation.identifiers[namespace='data.bas.ac.uk'] (maybe shown in citation, otherwise intended for external use)
-    - distribution.distributor
+    ISO 19115:2003 / 19115-2:2009 standards). See `docs/data_model.md#catalogue-item-limitations` for more information.
     """
 
     def __init__(self, config: Config, record: Record, get_record: Callable[[str], Record], **kwargs: Any) -> None:

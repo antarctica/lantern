@@ -2,22 +2,26 @@
 
 ## Records
 
-Records are the primary entity within the Data Catalogue, representing metadata about resources (maps, (products),
-datasets, collections, etc.) using the [ISO 19115](https://metadata-standards.data.bas.ac.uk/standards/iso-19115-19139)
-information model. Records are not specific to the Data Catalogue.
+Records are a partial representation of the [ISO 19115](https://metadata-standards.data.bas.ac.uk/standards/iso-19115-19139)
+information model implemented as a data class (`lantern.lib.metadata_library.models.record.Record`). They describe
+resources (maps [products], datasets, collections, etc.) and form the primary entity within the Data Catalogue.
 
-Record configurations represent the contents of these metadata instances, typically expressed as a JSON document.
+> [!NOTE]
+> When encoded as XML records are interoperable with applications that support ISO 19139 encoded records.
 
-For use within Python, a Record data class (`lantern.lib.metadata_library.models.record.Record`) is defined which
-allows for:
+> [!WARNING]
+>When encoded as JSON, records are only interoperable with applications that support the
+> [BAS ISO 19115](https://metadata-standards.data.bas.ac.uk/standards/iso-19115-19139#json-schemas) JSON Schema.
 
-- easier discoverability of record properties
-- configuration validation
+The Record data class provides:
+
+- access to typed record properties
+- record configuration validation
 - filtering list based properties such as contacts, aggregations, etc.
-- loading and dumping record configurations (which may be loaded from or dumped to JSON documents)
+- loading and dumping record configurations (including from/to JSON documents)
 
-Additional data classes are used to implement other properties (e.g. an `Identification` class). Properties which use
-code lists of allowed values are implemented using `Enum` classes.
+Additional data classes are used to implement sub-properties (e.g. an `Identification` class). Code list properties are
+implemented using `Enum` classes.
 
 > [!NOTE]
 > Unless stated otherwise, references to 'Records' elsewhere refer to the [`RecordRevision`](#record-revisions) class.
@@ -25,6 +29,10 @@ code lists of allowed values are implemented using `Enum` classes.
 > [!NOTE]
 > The Records model is considered part of the BAS Metadata Library but was developed for this project and not
 yet upstreamed. See the [Library](/docs/libraries.md#bas-metadata-library) docs for more information.
+
+> [!IMPORTANT]
+> The Records model does not support all properties supported by the BAS ISO 19115 JSON Schema. See the
+> [Record Limitations](#record-limitations) section for more information.
 
 ### Record revisions
 
@@ -49,10 +57,20 @@ For use within Python, a Record Revision data class (`lantern.models.record.revi
 Records can be authored using any tool or system that can produce a valid record configuration. These may be created
 directly as JSON documents, or dumped from `Record` data class instances.
 
+> [!TIP]
+> For manual editing, consider an editor that supports JSON schemas for inline validation and enum auto-completion.
+>
+> Within Python applications or scripts, consider using `Record` data classes for typed record properties, validation
+> and serialisation to JSON.
+
 > [!NOTE]
 > There is no formal guidance on what to include in record configurations. However, a starting point may be the
 > [Examples Records](https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery-v1#example-records) defined
 > for the MAGIC Discovery ISO 19115 Profile.
+
+> [!TIP]
+> See the [Guide](https://data.bas.ac.uk/-/formatting) for how titles, summaries, abstracts and lineage statements can
+> be formatted.
 
 ### Record presets
 
@@ -98,13 +116,78 @@ The `Record` data class includes a `validate()` method which will:
 Records will be validated automatically when needed. Invalid records will raise a
 `lantern.lib.metadata_library.models.record.RecordInvalidError` exception.
 
+### Record limitations
+
+Supported common elements (references not normative or exhaustive):
+
+- `*.citation.title`
+- `*.citation.dates`
+- `*.citation.edition`
+- `*.citation.contacts` (except `contact.position`)
+- `*.citation.identifiers`
+- `*.citation.series` (with local workaround for `series.page` until v5 schema)
+- `*.online resource` (partial)
+
+Supported elements (references not normative or exhaustive):
+
+- `$schema`
+- `file_identifier`
+- `file_revision` (non-ISO 19115 property, see RecordRevision)
+- `hierarchy_level`
+- `metadata.character_set` (hard-coded to 'utf8')
+- `metadata.language` (hard-coded to 'eng')
+- `metadata.contacts` (see `*.citation.contacts`)
+- `metadata.date_stamp`
+- `metadata.metadata_standard`
+- `reference_system_info`
+- `identification.title` (via `*.citation.title`)
+- `identification.dates` (via `*.citation.dates`)
+- `identification.edition` (via `*.citation.edition`)
+- `identification.identifiers` (via `*.citation.identifiers`)
+- `identification.contacts` (except `*.citation.contacts`)
+- `identification.abstract`
+- `identification.purpose`
+- `identification.other_citation_details`
+- `identification.supplemental_information`
+- `identification.constraints` (except permissions)
+- `identification.aggregations`
+- `identification.extents` (temporal and bounding box extents only)
+- `identification.graphic_overviews`
+- `identification.spatial_resolution`
+- `identification.maintenance`
+- `identification.character_set` (hard-coded to 'utf8')
+- `identification.language` (hard-coded to 'eng')
+- `(identification.)data_quality.domain_consistency`
+- `(identification.)data_quality.lineage.statement`
+- `distribution.distributor`
+- `distribution.format` (`format` and `href` only)
+- `distribution.transfer_option`
+
+Unsupported elements (not normative or exhaustive):
+
+- `*.contact.position`
+- `*.online_resource.protocol`
+- `(identification.)data_quality.lineage.process_step`
+- `(identification.)data_quality.lineage.sources`
+- `distribution.format` (except name and URL)
+- `identification.credit`
+- `identification.constraint.permissions`
+- `identification.extent.geographic.identifier`
+- `identification.extent.vertical`
+- `identification.keywords`
+- `identification.resource_formats`
+- `identification.spatial_representation_type`
+- `identification.status`
+- `identification.topics`
+- `metadata.maintenance` (`identification.metadata` is supported)
+
 ## Items
 
 Items are wrappers around Records to provide convenience properties and methods to access an underlying Record's
 configuration for use in a specific context.
 
 > [!NOTE]
-> Items do not follow a formal specification and are not designed to be interoperable outside of this project.
+> Items do not follow a formal specification and are not interoperable outside of this project.
 
 ### Item base
 
@@ -126,6 +209,56 @@ interface. Features include:
 - a `render()` method to output an HTML page for each item
 - classes (`lantern.models.item.catalogue.distributions`) for processing distribution options for the catalogue UI
 - an item summary implementation (`lantern.models.item.catalogue.elements.ItemSummaryCatalogue`)
+
+#### Catalogue item limitations
+
+> [!CAUTION]
+> This section is Work in Progress (WIP) and may not be complete/accurate.
+
+Supported properties (references not normative or exhaustive):
+
+- `file_identifier`
+- `file_revision`
+- `hierarchy_level`
+- `reference_system_info`
+- `identification.citation.title`
+- `identification.citation.dates`
+- `identification.citation.edition`
+- `identification.citation.contacts` ('author' and single 'point of contact' roles only, excludes `contact.position`)
+- `identification.citation.series`
+- `identification.citation.identifiers[namespace='doi']`
+- `identification.citation.identifiers[namespace='isbn']`
+- `identification.citation.identifiers[namespace='alias.data.bas.ac.uk']`
+- `identification.citation.identifiers[namespace='gitlab.data.bas.ac.uk'] (as references only)`
+- `identification.abstract`
+- `identification.aggregations` (only as below)
+  - 'part of' (items in collections)
+  - item and collection cross-references
+  - supersedes (not 'superseded by')
+  - 'one side of' (physical maps only)
+  - 'opposite side of' (physical maps only)
+- `identification.constraints` ('licence' only)
+- `identification.maintenance`
+- `identification.extent` (single bounding temporal and geographic bounding box extent only)
+- `identification.other_citation_details`
+- `identification.graphic_overviews` ('overview' image only)
+- `identification.spatial_resolution`
+- `identification.supplemental_information` (for 'physical dimensions' and 'sheet number' only)
+- `data_quality.lineage.statement`
+- `data_quality.domain_consistency`
+- distributor.format (`format` and `href` only)
+- distributor.transfer_option (except `online_resource.protocol`)
+
+Unsupported properties (references not normative or exhaustive):
+
+- `identification.purpose` (except as used in ItemSummaries)
+
+Intentionally omitted properties (references not normative or exhaustive):
+
+- `*.character_set` (not useful to end-users, present in underlying record)
+- `*.language` (not useful to end-users, present in underlying record)
+- `*.online_resource.protocol` (not useful to end-users, present in underlying record)
+- `distribution.distributor` (not useful to end-users)
 
 ### Special catalogue items
 

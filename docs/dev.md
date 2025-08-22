@@ -80,7 +80,7 @@ In the `tests.lantern_tests.config` module:
 - if validated, update the `test_validate` (valid) method and add new `test_validate_` (invalid) tests
 - update or create other tests as needed
 
-### Adding properties to item templates
+### Adding properties to items
 
 > [!CAUTION]
 > This section is Work in Progress (WIP) and may not be complete/accurate.
@@ -104,6 +104,28 @@ In the `tests.lantern_tests.config` module:
 7. if a property is required for all items:
     - update the [Record Requirements](/docs/data-model.md#record-requirements) documentation
     - in future this may include updating a corresponding JSON Schema too
+8. amend list of unsupported properties in `/docs/data-model.md#catalogue-item-limitations` as needed
+
+### Adding new distribution formats
+
+> [!CAUTION]
+> This section is Work in Progress (WIP) and may not be complete/accurate.
+
+1. create a new class under `lantern.models.item.catalogue.distributions` inheriting from `Distribution` or a relevant
+   subclass
+2. if needed register new media-types under the Metadata Standards resources site (`metadata-resources.data.bas.ac.uk`)
+3. configure the new class:
+    * set the `matches` class method to determine a exclusive match for the distribution (typically via media types)
+    * add an item to the `lantern.models.item.catalogue.enums.DistributionType` enum for the distribution type
+4. add the new class to `lantern.models.item.catalogue.tabs.DataTab._supported_distributions` list
+5. if the distribution should use a collapsible information panel, edit the
+   `src/lantern/resources/templates/_macros/_tabs/data.html.j2` macros in the [Site Templates](/docs/site.md#templates):
+    * create a new macro for the distribution format
+    * update the `panel` macro to call the new macro
+7. update the `tests.resources.records/item_cat_data::record` test record to include the new distribution format
+8. add a new tests to:
+    - `lantern_tests.models.item.catalogue.test_distributions`
+    - `lantern_tests.templates.macros.test_tabs.TestDataTab.test_data_info` (if using a collapsible information panel)
 
 ### Adding development tasks
 

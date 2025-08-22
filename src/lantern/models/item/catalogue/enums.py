@@ -15,6 +15,7 @@ class DistributionType(Enum):
 
     ARCGIS_FEATURE_LAYER = "ArcGIS Feature Layer"
     ARCGIS_OGC_FEATURE_LAYER = "OGC API Features (ArcGIS)"
+    ARCGIS_RASTER_TILE_LAYER = "ArcGIS Raster Tile Layer"
     ARCGIS_VECTOR_TILE_LAYER = "ArcGIS Vector Tile Layer"
     GEOJSON = "GeoJSON"
     GEOPACKAGE = "GeoPackage"

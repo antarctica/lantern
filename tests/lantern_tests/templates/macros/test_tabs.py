@@ -179,6 +179,13 @@ class TestDataTab:
             ),
             (
                 [
+                    "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+tile+raster",
+                    "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+raster",
+                ],
+                "ArcGIS Raster (Map) Tiles",
+            ),
+            (
+                [
                     "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+tile+vector",
                     "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+vector",
                 ],

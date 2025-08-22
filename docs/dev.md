@@ -191,6 +191,17 @@ Checks are run automatically in [Continuous Integration](#continuous-integration
 
 ## Linting
 
+### Ty
+
+[Ty](https://docs.astral.sh/ty/) is used for static type checking in main application Python files (not tests, etc.).
+Default options are used. Type checks are run automatically in [Continuous Integration](#continuous-integration).
+
+> [!NOTE]
+> Ty is an experimental tool and may report false positives. Type checking may be removed if it becomes a burden.
+
+> [!TIP]
+> To check types manually run the `types` [Development Task](#development-tasks).
+
 ### Ruff
 
 [Ruff](https://docs.astral.sh/ruff/) is used to lint and format Python files. Specific checks and config options are

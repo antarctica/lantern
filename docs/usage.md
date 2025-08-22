@@ -3,7 +3,6 @@
 > [!NOTE]
 > These are draft workflows and are not intended for use by general end-users.
 
-
 ## Setup
 
 > [!IMPORTANT]
@@ -20,7 +19,8 @@ the `LOG_LEVEL` [Config Option](/docs/config.md#config-options) set to a valid P
 
 ## Creating records
 
-1. create new records as JSON files in the import directory as per [Authoring Records](#authoring-records)
+1. create new records as JSON files in the import directory as per the
+   [Record Authoring](/docs/data-model.md#record-authoring) section
 2. then run the [Import Records](#import-records) workflow
 
 ## Updating records
@@ -28,29 +28,14 @@ the `LOG_LEVEL` [Config Option](/docs/config.md#config-options) set to a valid P
 For updating individual records:
 
 - run the `select-records` [Development Task](/docs/dev.md#development-tasks)
-- update records in the import directory as per [Authoring Records](#authoring-records)
+- update records in the import directory as per the [Record Authoring](/docs/data-model.md#record-authoring) section
 - then run the [Import Records](#import-records) workflow
 
 For updating large numbers of records from an external working copy of the records repository:
 
-- update records in the working copy as per [Authoring Records](#authoring-records)
+- update records in the working copy as per the [Record Authoring](/docs/data-model.md#record-authoring) section
 - run the `load-records` [Development Task](/docs/dev.md#development-tasks)
 - then run the [Import Records](#import-records) workflow
-
-## Authoring records
-
-Records can be authored manually using any editor or constructed automatically by other applications.
-
-> [!TIP]
-> For manual editing, use an editor that supports JSON schemas for validation and auto-completion of enum values.
-
-> [!TIP]
-> If creating records in Python applications, consider using the `lantern.lib.metadata_library.models.record.Record`
-> data class for typed record properties, validation and serialisation to JSON for loading.
-
-> [!TIP]
-> See the [Guide](https://data.bas.ac.uk/-/formatting) for how titles, summaries, abstracts and lineage statements can
-> be formatted.
 
 ## Import records
 

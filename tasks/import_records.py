@@ -18,6 +18,7 @@ from lantern.lib.metadata_library.models.record.enums import (
 from lantern.lib.metadata_library.models.record.presets.aggregations import make_bas_cat_collection_member
 from lantern.log import init as init_logging
 from lantern.log import init_sentry
+from lantern.models.item.base.const import CATALOGUE_NAMESPACE
 from lantern.stores.base import RecordNotFoundError
 from lantern.stores.gitlab import GitLabStore
 
@@ -153,7 +154,7 @@ def _update_record_collections(logger: logging.Logger, record: Record, collectio
     - update relevant properties for each of these collections via sub-methods
     """
     parent_collections = record.identification.aggregations.filter(
-        namespace="data.bas.ac.uk",
+        namespace=CATALOGUE_NAMESPACE,
         associations=AggregationAssociationCode.LARGER_WORK_CITATION,
         initiatives=AggregationInitiativeCode.COLLECTION,
     )

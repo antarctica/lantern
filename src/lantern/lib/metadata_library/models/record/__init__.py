@@ -85,7 +85,7 @@ class Record:
 
     Records are low-level views of a resource using the ISO 19115 information model. This class is an incomplete mapping
     of the BAS Metadata Library ISO 19115:2003 / 19115-2:2009 v4 configuration schema [1] to Python dataclasses, with
-    code lists represented by Python enums. See [4]/[5] for (un)supported config elements.
+    code lists represented by Python enums. See docs/data-model.md#record-limitations for (un)supported config elements.
 
     Complete record configurations can be loaded from a plain Python dict using `loads_schema()` and dumped back using
     `dumps_schema()`. This class cannot be used to load/dump from/to XML.
@@ -96,64 +96,6 @@ class Record:
     [1] https://metadata-resources.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-2-v4.json
     [2] https://github.com/antarctica/metadata-library/blob/v0.15.1/src/bas_metadata_library/schemas/dist/iso_19115_2_v4.json#L1430
     [3] https://www.datypic.com/sc/niem21/e-gmd_MD_Metadata.html
-    [4] Supported elements (not exhaustive):
-        - `*.citation.title`
-        - `*.citation.dates`
-        - `*.citation.edition`
-        - `*.citation.contacts` (except `contact.position`)
-        - `*.citation.identifiers`
-        - `*.citation.series` (with local workaround for `series.page`)
-
-        - `$schema`
-        - `file_identifier`
-        - `hierarchy_level`
-        - `metadata.character_set` (hard-coded)
-        - `metadata.language` (hard-coded)
-        - `metadata.contacts` (see `*.citation.contacts`)
-        - `metadata.date_stamp`
-        - `metadata.metadata_standard`
-        - `reference_system_info`
-        - `identification.title` (via `*.citation.title`)
-        - `identification.dates` (via `*.citation.dates`)
-        - `identification.edition` (via `*.citation.edition`)
-        - `identification.identifiers` (via `*.citation.identifiers`)
-        - `identification.contacts` (except `*.citation.contacts`)
-        - `identification.abstract`
-        - `identification.purpose`
-        - `identification.other_citation_details`
-        - `identification.supplemental_information`
-        - `identification.constraints` (except permissions)
-        - `identification.aggregations`
-        - `identification.extents` (temporal and bounding box extents only)
-        - `identification.graphic_overviews`
-        - `identification.spatial_resolution`
-        - `identification.maintenance`
-        - `identification.character_set` (hard-coded)
-        - `identification.language` (hard-coded)
-        - `(identification.)data_quality.domain_consistency`
-        - `(identification.)data_quality.lineage.statement`
-        - `distribution.distributor`
-        - `distribution.format` (`format` and `href` only)
-        - `distribution.transfer_option`
-
-    ? online resource ?
-
-    [5] Unsupported elements (not exhaustive):
-        - `*.contact.position`
-        - `*.online_resource.protocol`
-        - `(identification.)data_quality.lineage.process_step`
-        - `(identification.)data_quality.lineage.sources`
-        - `distribution.format` (except name and URL)
-        - `identification.credit`
-        - `identification.constraint.permissions`
-        - `identification.extent.geographic.identifier`
-        - `identification.extent.vertical`
-        - `identification.keywords`
-        - `identification.resource_formats`
-        - `identification.spatial_representation_type`
-        - `identification.status`
-        - `identification.topics`
-        - `metadata.maintenance` (identification only)
     """
 
     _schema: str = (

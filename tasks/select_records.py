@@ -1,4 +1,5 @@
 import logging
+import re
 from pathlib import Path
 
 import inquirer
@@ -16,6 +17,7 @@ def _get_args() -> list[str]:
 
     print("File identifiers can be URLs, file names, or bare identifiers.")
     print("Examples:")
+    print("- https://example.com/items/123/index.html#tab-info")
     print("- https://example.com/items/123/index.html")
     print("- https://example.com/items/123/")
     print("- https://example.com/items/123")
@@ -43,8 +45,10 @@ def _process_selections(file_identifiers: list[str]) -> None:
     """
     for i, fid in enumerate(file_identifiers):
         if "https://" in fid:
-            # for 'https://example.com/items/123' or 'https://example.com/items/123/' or 'https://example.com/items/123/index.html' as '123'
-            file_identifiers[i] = fid.replace("index.html", "").rstrip("/").split("/")[-1]
+            # for 'https://example.com/items/123' or 'https://example.com/items/123/' or
+            # 'https://example.com/items/123/index.html' or 'https://example.com/items/123/index.html#tab-foo'  as '123'
+            fid_clean = re.sub(r"(index\.html.*|[#?].*)$", "", fid)
+            file_identifiers[i] = fid_clean.rstrip("/").split("/")[-1]
         if ".json" in fid:
             # for '123.json' use '123'
             file_identifiers[i] = fid.replace(".json", "")

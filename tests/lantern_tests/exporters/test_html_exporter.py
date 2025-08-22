@@ -11,6 +11,7 @@ from lantern.exporters.html import HtmlAliasesExporter, HtmlExporter
 from lantern.lib.metadata_library.models.record import Record
 from lantern.models.item.catalogue import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
+from lantern.models.record.revision import RecordRevision
 from tests.conftest import _get_record
 
 
@@ -23,7 +24,7 @@ class TestHtmlExporter:
         fx_logger: logging.Logger,
         fx_s3_bucket_name: str,
         fx_s3_client: S3Client,
-        fx_record_minimal_item: Record,
+        fx_record_revision_minimal_item: RecordRevision,
     ):
         """Can create an HTML Exporter."""
         with TemporaryDirectory() as tmp_path:
@@ -31,13 +32,13 @@ class TestHtmlExporter:
         mock_config = mocker.Mock()
         type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
         type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
-        expected = output_path.joinpath(f"{fx_record_minimal_item.file_identifier}/index.html")
+        expected = output_path.joinpath(f"{fx_record_revision_minimal_item.file_identifier}/index.html")
 
         exporter = HtmlExporter(
             config=mock_config,
             logger=fx_logger,
             s3=fx_s3_client,
-            record=fx_record_minimal_item,
+            record=fx_record_revision_minimal_item,
             export_base=output_path,
             get_record=_get_record,
         )
@@ -75,7 +76,7 @@ class TestHtmlAliasesExporter:
         fx_logger: logging.Logger,
         fx_s3_bucket_name: str,
         fx_s3_client: S3Client,
-        fx_record_minimal_item: Record,
+        fx_record_revision_minimal_item: RecordRevision,
     ):
         """Can create an HTML alias Exporter."""
         with TemporaryDirectory() as tmp_path:
@@ -88,7 +89,7 @@ class TestHtmlAliasesExporter:
             config=mock_config,
             logger=fx_logger,
             s3=fx_s3_client,
-            record=fx_record_minimal_item,
+            record=fx_record_revision_minimal_item,
             site_base=output_path,
         )
 

@@ -91,7 +91,7 @@ class TestReferenceSystemInfo:
                 title="x",
                 href="x",
                 dates=Dates(creation=Date(date=expected_date)),
-                contacts=Contacts([Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.PUBLISHER])]),
+                contacts=Contacts([Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.PUBLISHER})]),
             ),
         )
 
@@ -111,7 +111,7 @@ class TestReferenceSystemInfo:
                 title="x",
                 href="x",
                 dates=Dates(creation=Date(date=expected_date)),
-                contacts=Contacts([Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.PUBLISHER])]),
+                contacts=Contacts([Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.PUBLISHER})]),
             ),
         )
         expected = {

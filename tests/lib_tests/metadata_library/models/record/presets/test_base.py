@@ -45,11 +45,11 @@ EXPECTED_POC = Contact(
         description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
         function=OnlineResourceFunctionCode.INFORMATION,
     ),
-    role=[ContactRoleCode.POINT_OF_CONTACT],
+    role={ContactRoleCode.POINT_OF_CONTACT},
 )
 
 EXPECTED_PUBLISHER = deepcopy(EXPECTED_POC)
-EXPECTED_PUBLISHER.role = [ContactRoleCode.PUBLISHER]
+EXPECTED_PUBLISHER.role = {ContactRoleCode.PUBLISHER}
 EXPECTED_PROFILE = DomainConsistency(
     specification=Citation(
         title="British Antarctic Survey (BAS) Mapping and Geographic Information Centre (MAGIC) Discovery Metadata Profile",
@@ -230,7 +230,7 @@ class TestRecordMagicDiscoveryV1:
         ]
         assert len(matches) == 1
         # noinspection PyUnresolvedReferences
-        assert ContactRoleCode.POINT_OF_CONTACT in matches[0].role
+        assert ContactRoleCode.POINT_OF_CONTACT in list(matches[0].role)
 
     def test_profile(self, fx_record_config_minimal_magic_preset: dict):
         """Includes domain consistency element for profile."""

@@ -17,7 +17,7 @@ class TestMetadata:
             (
                 {
                     "contacts": [
-                        Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.POINT_OF_CONTACT])
+                        Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT})
                     ]
                 },
                 datetime.now(tz=UTC).date(),
@@ -25,7 +25,7 @@ class TestMetadata:
             (
                 {
                     "contacts": [
-                        Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.POINT_OF_CONTACT])
+                        Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT})
                     ],
                     "date_stamp": None,
                 },
@@ -34,7 +34,7 @@ class TestMetadata:
             (
                 {
                     "contacts": [
-                        Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.POINT_OF_CONTACT])
+                        Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT})
                     ],
                     "date_stamp": datetime(2014, 6, 30, tzinfo=UTC).date(),
                 },
@@ -69,7 +69,7 @@ class TestMetadata:
             "date_stamp": expected_date.isoformat(),
         }
         expected = Metadata(
-            contacts=Contacts([Contact(organisation=ContactIdentity(name="x"), role=[expected_enum])]),
+            contacts=Contacts([Contact(organisation=ContactIdentity(name="x"), role={expected_enum})]),
             date_stamp=expected_date,
         )
 
@@ -84,7 +84,7 @@ class TestMetadata:
         expected_date = date(2014, 6, 30)
         expected_enum = ContactRoleCode.POINT_OF_CONTACT
         value = Metadata(
-            contacts=Contacts([Contact(organisation=ContactIdentity(name="x"), role=[expected_enum])]),
+            contacts=Contacts([Contact(organisation=ContactIdentity(name="x"), role={expected_enum})]),
             date_stamp=expected_date,
         )
         expected = {

@@ -161,6 +161,26 @@ class TestArcGISDistribution:
         dist = FakeArcGISDistributionType(option=_make_dist("x"), other_options=[service_dist])
         assert dist.service_endpoint == "x"
 
+    @pytest.mark.cov()
+    def test_service_endpoint_missing(self):
+        """Cannot get endpoint to ArcGIS service if format is missing but does not fail due to missing format."""
+        option = _make_dist("x")
+        option.format = None
+
+        with pytest.raises(
+            ValueError, match="Required corresponding service option not found in resource distributions."
+        ):
+            FakeArcGISDistributionType._get_service_option(options=[option], target_href="x")
+
+    @pytest.mark.cov()
+    def test_matches(self):
+        """Cannot match if format is missing."""
+        option = _make_dist("x")
+        option.format = None
+
+        result = FakeArcGISDistributionType._matches(target_hrefs=[], option=option, other_options=[])
+        assert result is False
+
     def test_action(self):
         """Can get action link."""
         service_dist = _make_dist(

@@ -393,7 +393,7 @@ class GitLabLocalCache:
 
         return self._get_only(inc_records)
 
-    def get_hashes(self, file_identifiers: list[str] | None = None) -> dict[str, str]:
+    def get_hashes(self, file_identifiers: list[str]) -> dict[str, str]:
         """
         Get SHA1 hashes for a set of records to determine if any have changed compared to the cache.
 

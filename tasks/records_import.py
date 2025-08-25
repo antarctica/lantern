@@ -22,6 +22,16 @@ from lantern.models.item.base.const import CATALOGUE_NAMESPACE
 from lantern.stores.base import RecordNotFoundError
 from lantern.stores.gitlab import GitLabStore
 
+magic_collection_ids = [
+    "0ed7da71-72e1-46e4-a482-064433d4c73d",  # SCAR Antarctic Digital Database (ADD) Supplemental Datasets
+    "6f5102ae-dfae-4d72-ad07-6ce4c85f5db8",  # BAS Published Maps
+    "8ff8240d-dcfa-4906-ad3b-507929842012",  # SCAR Antarctic Digital Database (ADD) Previous Datasets
+    "d0d91e22-18c1-4c7f-8dfc-20e94cd2c107",  # BAS General Interest Maps
+    "e74543c0-4c4e-4b41-aa33-5bb2f67df389",  # SCAR Antarctic Digital Database (ADD)
+    "ef7bc35e-7ad8-4ae5-9ae8-dd708d6e966e",  # BAS Operations Maps
+    "cf64dd21-545a-465b-9a67-c28bb4ce9024",  # BAS Basemaps
+]
+
 
 def _parse_configs(search_path: Path) -> Generator[dict, None, None]:
     """
@@ -182,15 +192,6 @@ def _process_magic_collections(
     - b85852eb-c7fb-435f-8239-e13a28612ef4 (Assets Tracking Service) - externally managed
     - b8b78c6c-fac2-402c-a772-9f518c7121e5 (MAGIC team) - manually managed
     """
-    magic_collection_ids = [
-        "0ed7da71-72e1-46e4-a482-064433d4c73d",  # SCAR Antarctic Digital Database (ADD) Supplemental Datasets
-        "6f5102ae-dfae-4d72-ad07-6ce4c85f5db8",  # BAS Published Maps
-        "8ff8240d-dcfa-4906-ad3b-507929842012",  # SCAR Antarctic Digital Database (ADD) Previous Datasets
-        "d0d91e22-18c1-4c7f-8dfc-20e94cd2c107",  # BAS General Interest Maps
-        "e74543c0-4c4e-4b41-aa33-5bb2f67df389",  # SCAR Antarctic Digital Database (ADD)
-        "ef7bc35e-7ad8-4ae5-9ae8-dd708d6e966e",  # BAS Operations Maps
-        "cf64dd21-545a-465b-9a67-c28bb4ce9024",  # BAS Basemaps
-    ]
     collections = [store.get(record_id) for record_id in magic_collection_ids]
     collections_updated = {c.file_identifier: deepcopy(c) for c in collections}
 

@@ -8,6 +8,7 @@ The BAS Data Catalogue is data discovery tool used to find, evaluate and access 
 by the [British Antarctic Survey](https://www.bas.ac.uk) and [UK Polar Data Centre](https://www.bas.ac.uk/data/uk-pdc/).
 This includes datasets, products (maps), services and other information.
 
+<!-- pyml disable md028 -->
 > [!IMPORTANT]
 > This project is temporary to formalise and build out refactored components initially developed in the
 > [BAS Assets Tracking Service](https://github.com/antarctica/assets-tracking-service) that will form the next release
@@ -18,6 +19,7 @@ This includes datasets, products (maps), services and other information.
 > This project is focused on needs within the British Antarctic Survey. It has been open-sourced in case parts are of
 > interest to others. Some resources, indicated with a '🛡' or '🔒' symbol, can only be accessed by BAS staff or
 > project members respectively. Contact the [Project Maintainer](#project-maintainer) to request access.
+<!-- pyml enable md028 -->
 
 ## Usage
 
@@ -48,7 +50,8 @@ See [Development](/docs/dev.md) documentation.
 ### Release workflow
 
 Create a
-[release issue 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/lantern-exp/-/issues/new?issue[title]=x.x.x%20release&issuable_template=release) and follow its instructions.
+[release issue 🛡](https://gitlab.data.bas.ac.uk/MAGIC/lantern-exp/-/issues/new?issue[title]=x.x.x%20release&issuable_template=release)
+and follow its instructions.
 
 ## Project maintainer
 

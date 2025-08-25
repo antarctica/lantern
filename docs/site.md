@@ -6,21 +6,23 @@ The Data Catalogue website is built as a static site using the [Site Exporter](/
 
 Simplified, primary, top level structure:
 
-```
+```text
 ├── items/
 ├── records/
 └── static/
 ```
 
+<!-- pyml disable md013 -->
 | Path       | Description                                                    | Exporter                                                                                                                                                      |
 |------------|----------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `items/`   | Rendered [Item](/docs/data-model.md#items) pages               | [HTML](/docs/exporters.md#html-resource-exporter)                                                                                                             |
 | `records/` | [Record](/docs/data-model.md#records) files in various formats | [JSON](/docs/exporters.md#json-resource-exporter), [XML](/docs/exporters.md#xml-resource-exporter), [XML HTML](/docs/exporters.md#xml-html-resource-exporter) |
 | `static/`  | CSS, images, and other assets                                  | [Site Resources Exporter](/docs/exporters.md#site-resources-exporter)                                                                                         |
+<!-- pyml enable md013 -->
 
 Secondary top-level items:
 
-```
+```text
 ├── 404.html
 ├── favicon.ico
 ├── -/
@@ -28,6 +30,7 @@ Secondary top-level items:
 └── legal/
 ```
 
+<!-- pyml disable md013 -->
 | Path          | Description                                                                                         | Exporter                                                          |
 |---------------|-----------------------------------------------------------------------------------------------------|-------------------------------------------------------------------|
 | `404.html`    | Not found error page                                                                                | [Site Pages](/docs/exporters.md#site-pages-exporter)              |
@@ -35,10 +38,11 @@ Secondary top-level items:
 | `-/`          | Internal (but not secret) pages, such as the site index and formatting guide                        | *Various*                                                         |
 | `{aliases}/`  | [Item Aliases](/docs/data-model.md#item-aliases) redirect pages (for `collections/`, `maps/`, etc.) | [HTML Aliases](/docs/exporters.md#html-aliases-resource-exporter) |
 | `legal/`      | Legal policy pages                                                                                  | [Site Pages](/docs/exporters.md#site-pages-exporter)              |
+<!-- pyml enable md013 -->
 
 ### Record pages structure
 
-```
+```text
 ├── maps/
 │     ├── foo/
 │     │    └── index.html -> redirecting to /items/123/
@@ -58,7 +62,7 @@ Secondary top-level items:
 
 ### Hidden pages structure
 
-```
+```text
 └── -/
      ├── index/
      │    └── index.html -> 'hidden' index page
@@ -69,15 +73,17 @@ Secondary top-level items:
           └── mockup.html -> temporary results rendering
 ```
 
-| Path                       | Description                                  | Exporter                                                      |
-|----------------------------|----------------------------------------------|---------------------------------------------------------------|
-| `-/index/`                 | Hidden index page                            | [Site Index](/docs/exporters.md#site-index-exporter)          |
-| `-/formatting/`            | Hidden record content formatting guide       | [Site Pages](/docs/exporters.md#site-pages-exporter)          |
+<!-- pyml disable md013 -->
+| Path                       | Description                                  | Exporter                                                 |
+|----------------------------|----------------------------------------------|----------------------------------------------------------|
+| `-/index/`                 | Hidden index page                            | [Site Index](/docs/exporters.md#site-index-exporter)     |
+| `-/formatting/`            | Hidden record content formatting guide       | [Site Pages](/docs/exporters.md#site-pages-exporter)     |
 | `-/public-website-search/` | Temporary public website search items output | [Website Search](/docs/exporters.md#site-pages-exporter) |
+<!-- pyml enable md013 -->
 
 ### Site assets structure
 
-```
+```text
 ├── favicon.ico
 └── static/
     ├── css/
@@ -139,26 +145,26 @@ For example, stacking content in a single column by default and two or more wher
 > [!NOTE]
 > Whilst mobiles aren't expected to be the primary device type for this site, designing responsively to avoid common
 > pitfalls (such as overflowing content) also helps with accessibility and so MUST be considered.
-                                                    `                                                                                                                    `
-#### Sizing                                                                                                                                                             ``
-                                                                                                                                                                        `
-Ratio based sizing SHOULD be used over fixed sizes (e.g. `w-1/2`).                                                                                                     `
-                                                                                                                                                                        ``
-#### Spacing                                                                                                                                                            ``
-                                                                                                                                                                        `
-A consistent, and constrained, spacing scale SHOULD `be used wherever possible:                                                                                          `
-                                                                                                                                                                        ``
-- small: `-2`                                                                                                                                                           `
-- medium: `-4`                                                                                                                                                          `
-- large: `-8`                                                                                                                                                           `
-                                                                                                                                                                        ``
-Exceptions to this scale MAY and will be made for sp`ecific use cases.                                                                                                   `
-                                                                                                                                                                        ``
-Tailwind's `space-x-*` and `space-y-*` classes SHOUL`D be used for spacing between elements for consistency. Padding                                                     `
-SHOULD be used over margins where possible to limit `the number of classes.                                                                                              `
-                                                                                                                                                                        ``
-> [!TIP]                                                                                                                                                                ``
-> Run the `css-audit` [Development Task](/docs/dev.m`d#development-tasks) to check currently used classes in templates.                                                  `
+
+#### Sizing
+
+Ratio based sizing SHOULD be used over fixed sizes (e.g. `w-1/2`).
+
+#### Spacing
+
+A consistent, and constrained, spacing scale SHOULD be used wherever possible:
+
+- small: `-2`
+- medium: `-4`
+- large: `-8`
+
+Exceptions to this scale MAY and will be made for specific use cases.
+
+Tailwind's `space-x-*` and `space-y-*` classes SHOULD be used for spacing between elements for consistency. Padding
+SHOULD be used over margins where possible to limit `the number of classes.
+
+> [!TIP]
+> Run the `css-audit` [Development Task](/docs/dev.md#development-tasks) to check currently used classes in templates.
 
 #### Dark mode
 
@@ -240,11 +246,13 @@ To ensure the latest CSS and JS files are used by browsers, a query string value
 assets, e.g. `main.css?v=123`. For reproducibility, this value is set to the first 7 characters of the current package
 version as a SHA1 hash, e.g. `main.css?v=f053ddb` for version 0.1.0.
 
+<!-- pyml disable md028 -->
 > [!NOTE]
 > You may need to manually clear caches locally as this value will not change until the next release.
 
 > [!CAUTION]
 > Asset references are not automatically amended, make sure any references in templates are suitably configured.
+<!-- pyml enable md028 -->
 
 ## Templates
 

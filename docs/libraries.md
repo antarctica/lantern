@@ -45,12 +45,12 @@ To add support for a new ISO element within Records:
 5. register the cattrs (un)structure hook in the top-level class hooks if needed
 6. add tests for the new class testing all permutations, and cattrs hook if needed
 7. amend tests for top-level class (i.e. `TestIdentification`) variant:
-	1. add variant for minimal instance of the new class if optional
-	2. amend all variants with a minimal instance of the new class if required
-	3. amend asserts to check new class as required
-	4. amend tests for top-level cattrs hooks if changed
+   1. add variant for minimal instance of the new class if optional
+   2. amend all variants with a minimal instance of the new class if required
+   3. amend asserts to check new class as required
+   4. amend tests for top-level cattrs hooks if changed
 8. if new class part of minimal record, update `fx_record_config_minimal` fixture
 9. amend tests for root-level class (i.e. `TestRecord`):
-	1. amend tests for root-level cattrs hooks if top-level hooks changed (as an integration check)
-	2. amend variants in `test_loop` as needed (include all possible options in complete variant)
+   1. amend tests for root-level cattrs hooks if top-level hooks changed (as an integration check)
+   2. amend variants in `test_loop` as needed (include all possible options in complete variant)
 10. amend list of unsupported properties in `/docs/data-model.md#record-limitations` as needed

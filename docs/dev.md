@@ -219,6 +219,38 @@ set in [`pyproject.toml`](/pyproject.toml). Linting checks are run automatically
 > As with all security tools, Bandit is an aid for spotting common mistakes, not a guarantee of secure code.
 > In particular this tool can't check for issues that are only be detectable when running code.
 
+### Markdown
+
+[PyMarkdown](https://pymarkdown.readthedocs.io/en/latest/) is used to lint Markdown files. Specific checks and config
+options are set in [`pyproject.toml`](/pyproject.toml). Linting checks are run automatically in
+[Continuous Integration](#continuous-integration) and the [Pre-Commit Hook](#pre-commit-hook).
+
+> [!TIP]
+> To check linting manually run the `markdown` [Development Task](#development-tasks).
+
+Wide tables will fail rule `MD013` (max line length). Wrap such tables with pragma disable/enable exceptions:
+
+```markdown
+<!-- pyml disable md013 -->
+| Header | Header |
+|--------|--------|
+| Value  | Value  |
+<!-- pyml enable md013 -->
+```
+
+Stacked admonitions will fail rule `MD028` (blank lines in blockquote) as it's ambiguous whether a new blockquote has
+started where another element isn't inbetween. Wrap such instances with pragma disable/enable exceptions:
+
+```markdown
+<!-- pyml disable md028 -->
+> [!NOTE]
+> ...
+
+> [!NOTE]
+> ...
+<!-- pyml enable md028 -->
+```
+
 ### Editorconfig
 
 For consistency, it's strongly recommended to configure your IDE or other editor to use the

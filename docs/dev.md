@@ -194,7 +194,8 @@ Checks are run automatically in [Continuous Integration](#continuous-integration
 ### Ty
 
 [Ty](https://docs.astral.sh/ty/) is used for static type checking in main application Python files (not tests, etc.).
-Default options are used. Type checks are run automatically in [Continuous Integration](#continuous-integration).
+Default options are used. Type checks are run automatically in [Continuous Integration](#continuous-integration) and
+the [Pre-Commit Hook](#pre-commit-hook).
 
 <!-- pyml disable md028 -->
 > [!NOTE]
@@ -208,7 +209,7 @@ Default options are used. Type checks are run automatically in [Continuous Integ
 
 [Ruff](https://docs.astral.sh/ruff/) is used to lint and format Python files. Specific checks and config options are
 set in [`pyproject.toml`](/pyproject.toml). Linting checks are run automatically in
-[Continuous Integration](#continuous-integration).
+[Continuous Integration](#continuous-integration) and the [Pre-Commit Hook](#pre-commit-hook).
 
 > [!TIP]
 > To check linting manually run the `lint` [Development Task](#development-tasks), for formatting run the `format` task.
@@ -261,6 +262,12 @@ For consistency, it's strongly recommended to configure your IDE or other editor
 ### Pre-commit hook
 
 A [Pre-Commit](https://pre-commit.com) hook is configured in `.pre-commit-config.yaml`.
+
+To update Pre-Commit and configured hooks:
+
+```shell
+% pre-commit autoupdate
+```
 
 > [!TIP]
 > To run pre-commit checks against all files manually run the `pre-commit` [Development Task](#development-tasks).

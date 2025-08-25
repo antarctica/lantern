@@ -107,7 +107,6 @@ def main() -> None:
 
     logger.info(f"Dumping {len(file_identifiers)} selected records from Store")
     _dump_records(logger, file_identifiers, store, import_path)
-
     logger.info(f"{len(file_identifiers)} records in {import_path.resolve()} for editing.")
 
 

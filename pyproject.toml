@@ -30,6 +30,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "dunamai>=1.25.0",
+    "pymarkdownlnt>=0.9.32",
     "pytailwindcss>=0.2.0",
     "ruff>=0.12.4",
     "safety>=3.5.2",
@@ -57,6 +58,7 @@ publish-url = "https://gitlab.data.bas.ac.uk/api/v4/projects/1355/packages/pypi"
 explicit = true
 
 [tool.taskipy.variables]
+docs_targets = "docs/"
 types_targets = "src/"
 targets = "src/ tasks/ tests/"
 cov_options = "--cov --cov-report=html"
@@ -66,6 +68,7 @@ cov_options = "--cov --cov-report=html"
 format = { cmd = "ruff format {targets}", help = "Lint app", use_vars = true }
 lint = { cmd = "ruff check {targets}", help = "Lint app", use_vars = true }
 types = { cmd = "ty check {types_targets}", help = "Type check app", use_vars = true }
+markdown = { cmd = "pymarkdown scan --recurse {docs_targets}", help = "Lint docs", use_vars = true }
 pre-commit = { cmd = "pre-commit run --all-files", help = "Run pre-commit hooks on all files" }
 test = { cmd = "pytest", help = "Run tests" }
 test-cov = { cmd = "pytest {cov_options}", help = "Run tests with coverage", use_vars = true }
@@ -146,6 +149,10 @@ ignore = ["D100", "D104", "D107", "D203", "D212", "D402", "E501", "PT001", "PT02
 
 [tool.ruff.lint.flake8-annotations]
 allow-star-arg-any = true
+
+[tool.pymarkdown]
+plugins.md013.line_length = 120
+extensions.markdown-extended-autolinks.enabled = true
 
 [tool.pytest_env]
 # `LANTERN_TEMPLATES_SENTRY_SRC` needs to be real to load the Sentry feedback widget

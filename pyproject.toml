@@ -85,10 +85,11 @@ css-audit = { cmd = "python -m tasks.css_audit", help = "List CSS styles used in
 build-test-records = { cmd = "python tests/scripts/build_test.py", help = "Build test records as a catalogue site" }
 # fake CLI
 version = { cmd = "python -m tasks.version", help = "Show app version" }
-load-records = { cmd = "python -m tasks.load_records", help = "Copy externally edited records into import directory" }
-select-records = { cmd = "python -m tasks.select_records", help = "Copy records from cache to import directory for editing" }
-import-records = { cmd = "python -m tasks.import_records", help = "Import records from directory" }
-build-records = { cmd = "python -m tasks.build_records", help = "Build records as a catalogue site" }
+load-records = { cmd = "python -m tasks.records_load", help = "Copy externally edited records into import directory" }
+select-records = { cmd = "python -m tasks.records_select", help = "Copy records from cache to import directory for editing" }
+import-records = { cmd = "python -m tasks.records_import", help = "Import records from directory" }
+build-records = { cmd = "python -m tasks.records_build", help = "Build records as a catalogue site" }
+bootstrap-records = { cmd = "python -m tasks.records_boostrap", help = "Bootstrap a new records repo" }
 serve = { cmd = "python -m http.server 9000 --directory export", help = "Serve local catalogue site" }
 
 [tool.ruff]

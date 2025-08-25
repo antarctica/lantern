@@ -13,6 +13,11 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 ### Added
 
 * Markdown linting for project documentation
+* Dev command for bootstrapping a remote GitLab records repo
+
+### Fixed
+
+* Pre-commit config for Python type checking
 
 ## [0.2.1] - 2025-08-22
 

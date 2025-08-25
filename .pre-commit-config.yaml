@@ -27,3 +27,7 @@ repos:
       name: ty check
       entry: uvx ty check src/ --ignore unresolved-import
       language: python
+- repo: https://github.com/jackdewinter/pymarkdown
+  rev: v0.9.32
+  hooks:
+      - id: pymarkdown

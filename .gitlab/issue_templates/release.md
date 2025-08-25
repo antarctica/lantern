@@ -1,3 +1,4 @@
+<!-- pyml disable-next-line md041 -->
 /label ~"meta: release"
 
 1. [x] create a release issue (title: 'x.x.x release', milestone: x.x.x)

@@ -77,7 +77,7 @@ The [Local Cache](#gitlab-local-cache) is recreated where a record has changed c
 For increased performance, GitLab stores use a `GitLabLocalCache` to automatically maintain a local cache of Records
 and Record Summaries. The cache contains:
 
-```
+```text
 ├── records/
 │     ├── *.json
 │     └── *.pickle
@@ -114,6 +114,6 @@ A cache is created by:
 For testing, a pre-populated cache contents can be copied into a cache instance to give reproducible results. To update
 this fixed cache update files in `tests/resources/stores/gitlab_cache`, then run:
 
-```
+```shell
 % uv run python tests/resources/stores/gitlab_cache/refresh.py
 ```

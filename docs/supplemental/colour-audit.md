@@ -29,6 +29,7 @@ Colours:
 
 ## Reference
 
+<!-- pyml disable md013 -->
 | Component                  | Aspect                 | Light           | Dark            | Comment                         |
 |----------------------------|------------------------|-----------------|-----------------|---------------------------------|
 | Body                       | Text                   | grey-900        | grey-100        |                                 |
@@ -41,7 +42,7 @@ Colours:
 |                            | Background             | grey-950        | black           |                                 |
 | Footer (Links)             | Text                   | sky-blue-300    | sky-blue-500    |                                 |
 | Page Header                | Border                 | grey-100        | grey-900        |                                 |
-| Page Header <br>(Sub-text) | Text                   | grey-500        | grey-300        |                                 |
+| Page Header (Sub-text)     | Text                   | grey-500        | grey-300        |                                 |
 | Item Summary               | Background             | grey-100        | grey-900        |                                 |
 | Item Restricted            | Background             | yellow-500      | yellow-500      |                                 |
 | Item Tabs                  | Text                   | grey-500        | grey-300        |                                 |
@@ -100,3 +101,4 @@ Colours:
 | Buttons (Primary)          | Text                   | `white`         | `white`         | Equal (as background equal)     |
 |                            | Background             | `turquoise-500` | `turquoise-500` | Equal                           |
 |                            | Background (Hover)     | `turquoise-700` | `turquoise-700` | Equal                           |
+<!-- pyml enable md013 -->

@@ -5,12 +5,14 @@
 
 ## Setup
 
+<!-- pyml disable md028 -->
 > [!IMPORTANT]
 > Ensure you have a working [Local Development Environment](/docs/dev.md#local-development-environment) available with
 > a valid [Configuration](/docs/config.md#config-options) before running these instructions.
 
 > [!TIP]
 > Run the `config-check` [Development Task](/docs/dev.md#development-tasks) to validate the current configuration.
+<!-- pyml enable md028 -->
 
 ## Logging
 
@@ -44,18 +46,20 @@ To import a set of new or updated records:
 1. copy record configurations as JSON files to the `import/` directory
 1. run the `import-records` [Development Task](/docs/dev.md#development-tasks)
 
+<!-- pyml disable md028 -->
 > [!NOTE]
 > Records are considered existing if a record with the same `file_identifier` exists.
 
 > [!TIP]
 > All records in the `import/` directory will be committed together. Consider separating unrelated changes by splitting
 > records into sets and running this workflow multiple times.
+<!-- pyml enable md028 -->
 
 The `import-records` task will:
 
 1. prompt for information to use when commiting updates:
-    - a changeset title and description (which will open your `$EDITOR`)
-    - an author name and email
+   - a changeset title and description (which will open your `$EDITOR`)
+   - an author name and email
 1. populate a [GitLab Store](/docs/stores.md#gitlab-store) (to check for existing records and updating related records)
 1. parse and validate `import/*.json` files (ignoring subfolders) as [Records](/docs/data-model.md#records)
 1. process parsed records:

@@ -6,12 +6,14 @@ Records are a partial representation of the [ISO 19115](https://metadata-standar
 information model implemented as a data class (`lantern.lib.metadata_library.models.record.Record`). They describe
 resources (maps [products], datasets, collections, etc.) and form the primary entity within the Data Catalogue.
 
+<!-- pyml disable md028 -->
 > [!NOTE]
 > When encoded as XML records are interoperable with applications that support ISO 19139 encoded records.
 
 > [!WARNING]
 >When encoded as JSON, records are only interoperable with applications that support the
 > [BAS ISO 19115](https://metadata-standards.data.bas.ac.uk/standards/iso-19115-19139#json-schemas) JSON Schema.
+<!-- pyml enable md028 -->
 
 The Record data class provides:
 
@@ -23,6 +25,7 @@ The Record data class provides:
 Additional data classes are used to implement sub-properties (e.g. an `Identification` class). Code list properties are
 implemented using `Enum` classes.
 
+<!-- pyml disable md028 -->
 > [!NOTE]
 > Unless stated otherwise, references to 'Records' elsewhere refer to the [`RecordRevision`](#record-revisions) class.
 
@@ -33,6 +36,7 @@ yet upstreamed. See the [Library](/docs/libraries.md#bas-metadata-library) docs 
 > [!IMPORTANT]
 > The Records model does not support all properties supported by the BAS ISO 19115 JSON Schema. See the
 > [Record Limitations](#record-limitations) section for more information.
+<!-- pyml enable md028 -->
 
 ### Record revisions
 
@@ -45,9 +49,9 @@ history of a Record but may be shared by multiple Records, to represent a coordi
 For use within Python, a Record Revision data class (`lantern.models.record.revisiob.RecordRevision`), a subclass of
 `Record` is defined which:
 
-* inherits all `Record` properties and methods
-* allows setting a `file_revision` property
-* optionally (and not by default) allows dumping the Record config including `file_revision` to plain types (not JSON/XML)
+- inherits all `Record` properties and methods
+- allows setting a `file_revision` property
+- optionally (and not by default) allows dumping the Record config including `file_revision` to plain types (not JSON/XML)
 
 > [!NOTE]
 > Unless stated otherwise, references to 'Records' elsewhere refer to the `RecordRevision` data class.
@@ -57,6 +61,7 @@ For use within Python, a Record Revision data class (`lantern.models.record.revi
 Records can be authored using any tool or system that can produce a valid record configuration. These may be created
 directly as JSON documents, or dumped from `Record` data class instances.
 
+<!-- pyml disable md028 -->
 > [!TIP]
 > For manual editing, consider an editor that supports JSON schemas for inline validation and enum auto-completion.
 >
@@ -71,6 +76,7 @@ directly as JSON documents, or dumped from `Record` data class instances.
 > [!TIP]
 > See the [Guide](https://data.bas.ac.uk/-/formatting) for how titles, summaries, abstracts and lineage statements can
 > be formatted.
+<!-- pyml enable md028 -->
 
 ### Record presets
 
@@ -322,6 +328,7 @@ existing codes or shorthand.
 Aliases are defined as Record identifiers using the `alias.data.bas.ac.uk` namespace. By convention alias, values are
 prefixed by a pluralised version of the Record hierarchy level (e.g. `collections/foo`).
 
+<!-- pyml disable md028 -->
 > [!WARNING]
 > The catalogue does not currently enforce this convention but may in the future. To avoid invaliding previous aliases,
 > this convention SHOULD be followed.
@@ -329,3 +336,4 @@ prefixed by a pluralised version of the Record hierarchy level (e.g. `collection
 > [!CAUTION]
 > The catalogue does not currently enforce uniqueness of aliases and will not be aware of (or error for) conflicts. The
 > behavior of conflicting aliases is undefined. Any implicit behaviour MUST NOT be relied upon.
+<!-- pyml enable md028 -->

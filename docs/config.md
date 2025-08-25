@@ -2,6 +2,7 @@
 
 Application configuration is managed by the `lantern.Config` class.
 
+<!-- pyml disable md028 -->
 > [!TIP]
 > User configurable options can be defined using environment variables and/or an `.env` file, with environment
 > variables taking precedence. Variables are prefixed with `LANTERN_` to avoid conflicts with other applications.
@@ -10,9 +11,11 @@ Application configuration is managed by the `lantern.Config` class.
 
 > [!NOTE]
 > Config option values may be [Overridden](/docs/dev.md#pytest-env) in application tests.
+<!-- pyml enable md028 -->
 
 ## Config options
 
+<!-- pyml disable md013 -->
 | Option                             | Type    | Configurable | Required | Sensitive | Since Version | Summary                                                                  | Default                                   | Example                                   |
 |------------------------------------|---------|--------------|----------|-----------|---------------|--------------------------------------------------------------------------|-------------------------------------------|-------------------------------------------|
 | `AWS_ACCESS_ID`                    | String  | Yes          | Yes      | No        | v0.1.x        | AWS IAM user identifier for site exporter remote uploads                 | *None*                                    | 'x'                                       |
@@ -38,6 +41,7 @@ Application configuration is managed by the `lantern.Config` class.
 | `TEMPLATES_PLAUSIBLE_DOMAIN`       | String  | No           | -        | -         | v0.1.x        | Plausible site identifier for frontend analytics                         | *None*                                    | 'example'                                 |
 | `TEMPLATES_SENTRY_SRC`             | String  | No           | -        | No        | v0.1.x        | Sentry CDN project URL for frontend error tracking and user feedback     | *N/A*                                     | 'https://example.com'                     |
 | `VERSION`                          | String  | No           | -        | -         | v0.1.x        | Application package version                                              | *N/A*                                     | '0.3.0'                                   |
+<!-- pyml enable md013 -->
 
 ### Monitoring config options
 
@@ -109,6 +113,7 @@ The `Config.dumps_safe()` method returns a typed dict of [Config Options](#confi
 
 ## Generate an environment config file
 
+<!-- pyml disable md028 -->
 > [!TIP]
 > Run the `config-init` [Development Task](/docs/dev.md#development-tasks) to generate a new `.env` file from the
 > `.env.tpl` template.
@@ -116,6 +121,7 @@ The `Config.dumps_safe()` method returns a typed dict of [Config Options](#confi
 > [!IMPORTANT]
 > This uses the [1Password CLI](https://developer.1password.com/docs/cli/) to inject relevant secrets. You must have
 > access to the MAGIC 1Password vault to run this task.
+<!-- pyml enable md028 -->
 
 ## Adding configuration options
 

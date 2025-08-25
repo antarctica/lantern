@@ -18,7 +18,7 @@ Setup:
 
 [2]
 
-```
+```shell
 % git clone https://gitlab.data.bas.ac.uk/MAGIC/lantern-exp.git
 % cd lantern-exp/
 % pre-commit install
@@ -87,23 +87,23 @@ In the `tests.lantern_tests.config` module:
 
 1. if needed, [Support New Record Properties](/docs/libraries.md#adding-new-record-properties)
 2. if needed, update [Item](/docs/data-model.md#items) classes to process new and/or existing properties
-    - existing properties may need updating such as `ItemBase.kv` handling
+   - existing properties may need updating such as `ItemBase.kv` handling
 3. add new properties to the relevant item tab class in `lantern.models.item.catalogue.tabs`
-    - work backwards to include additional Record properties in the main `lantern.models.item.catalogue` class
-    - and/or `lantern.models.item.catalogue.elements` classes
-    - amend tests that directly instantiate these classes to include the new property
-        - some of these are not obvious where `kwargs` are used to pass properties such as:
-          `lantern.models.item.catalogue.special.physical_map.AdditionalInfoTab`
+   - work backwards to include additional Record properties in the main `lantern.models.item.catalogue` class
+   - and/or `lantern.models.item.catalogue.elements` classes
+   - amend tests that directly instantiate these classes to include the new property
+     - some of these are not obvious where `kwargs` are used to pass properties such as:
+       `lantern.models.item.catalogue.special.physical_map.AdditionalInfoTab`
 4. update the [Site Template](/docs/site.md#templates) to include the new property as needed
 5. add tests as needed for:
-    - Record properties
-    - Item properties
-    - Item Catalogue tab, element and base classes
-    - Item templates (static HTML tests and Playwright if needed)
+   - Record properties
+   - Item properties
+   - Item Catalogue tab, element and base classes
+   - Item templates (static HTML tests and Playwright if needed)
 6. update any relevant record authoring guides to explain how new properties are handled by the Catalogue
 7. if a property is required for all items:
-    - update the [Record Requirements](/docs/data-model.md#record-requirements) documentation
-    - in future this may include updating a corresponding JSON Schema too
+   - update the [Record Requirements](/docs/data-model.md#record-requirements) documentation
+   - in future this may include updating a corresponding JSON Schema too
 8. amend list of unsupported properties in `/docs/data-model.md#catalogue-item-limitations` as needed
 
 ### Adding new distribution formats
@@ -115,17 +115,17 @@ In the `tests.lantern_tests.config` module:
    subclass
 2. if needed register new media-types under the Metadata Standards resources site (`metadata-resources.data.bas.ac.uk`)
 3. configure the new class:
-    * set the `matches` class method to determine a exclusive match for the distribution (typically via media types)
-    * add an item to the `lantern.models.item.catalogue.enums.DistributionType` enum for the distribution type
+   - set the `matches` class method to determine a exclusive match for the distribution (typically via media types)
+   - add an item to the `lantern.models.item.catalogue.enums.DistributionType` enum for the distribution type
 4. add the new class to `lantern.models.item.catalogue.tabs.DataTab._supported_distributions` list
 5. if the distribution should use a collapsible information panel, edit the
    `src/lantern/resources/templates/_macros/_tabs/data.html.j2` macros in the [Site Templates](/docs/site.md#templates):
-    * create a new macro for the distribution format
-    * update the `panel` macro to call the new macro
-7. update the `tests.resources.records/item_cat_data::record` test record to include the new distribution format
-8. add a new tests to:
-    - `lantern_tests.models.item.catalogue.test_distributions`
-    - `lantern_tests.templates.macros.test_tabs.TestDataTab.test_data_info` (if using a collapsible information panel)
+   - create a new macro for the distribution format
+   - update the `panel` macro to call the new macro
+6. update the `tests.resources.records/item_cat_data::record` test record to include the new distribution format
+7. add a new tests to:
+   - `lantern_tests.models.item.catalogue.test_distributions`
+   - `lantern_tests.templates.macros.test_tabs.TestDataTab.test_data_info` (if using a collapsible information panel)
 
 ### Adding development tasks
 
@@ -153,7 +153,7 @@ See the [Taskipy](https://github.com/taskipy/taskipy?tab=readme-ov-file#adding-t
    - copy the resulting minified CSS to `src/lantern/resources/css/main.css`
 4. run the `build-test-records` or `build-records` [Development Task](/docs/dev.md#development-tasks) to rebuild the
    static site
-    - needed as builds reference a local copy of `main.css` that will need refreshing
+   - needed as builds reference a local copy of `main.css` that will need refreshing
 
 > [!TIP]
 > You can run `uv run task tailwind && uv run task build-test-records` to chain these tasks together.
@@ -196,11 +196,13 @@ Checks are run automatically in [Continuous Integration](#continuous-integration
 [Ty](https://docs.astral.sh/ty/) is used for static type checking in main application Python files (not tests, etc.).
 Default options are used. Type checks are run automatically in [Continuous Integration](#continuous-integration).
 
+<!-- pyml disable md028 -->
 > [!NOTE]
 > Ty is an experimental tool and may report false positives. Type checking may be removed if it becomes a burden.
 
 > [!TIP]
 > To check types manually run the `types` [Development Task](#development-tasks).
+<!-- pyml enable md028 -->
 
 ### Ruff
 
@@ -272,13 +274,14 @@ in `pyproject.toml`. Tests are defined in the `tests` package.
 
 Tests are run automatically in [Continuous Integration](#continuous-integration).
 
+<!-- pyml disable md028 -->
 > [!TIP]
 > To run tests manually run the `test` [Development Task](#development-tasks).
 
 > [!TIP]
 > To run a specific test:
 >
-> ```
+> ```shell
 > % uv run pytest tests/path/to/test_module.py::<class>.<method>
 > ```
 
@@ -292,6 +295,7 @@ Tests are run automatically in [Continuous Integration](#continuous-integration)
 > - the cached reference no longer exists triggering an error which isn't handled by the `pytest-random-order` plugin
 >
 > Running this task clears Pytest's cache and re-runs all tests, skipping the `--failed-first` option.
+<!-- pyml enable md028 -->
 
 ### Pytest fixtures
 
@@ -317,15 +321,17 @@ fine with good justification:
 
 [Continuous Integration](#continuous-integration) will check coverage automatically.
 
+<!-- pyml disable md028 -->
 > [!TIP]
 > To check coverage manually run the `test-cov` [Development Task](#development-tasks).
 
 > [!TIP]
 > To run tests for a specific module locally:
 >
-> ```
+> ```shell
 > % uv run pytest --cov=lantern.some.module --cov-report=html tests/lantern_tests/some/module
 > ```
+<!-- pyml enable md028 -->
 
 Where tests are added to ensure coverage, use the `cov` [mark](https://docs.pytest.org/en/7.1.x/how-to/mark.html), e.g:
 
@@ -349,7 +355,7 @@ known values are used in tests).
 
 To (re-)record all responses:
 
-```
+```shell
 % uv run pytest --record-mode=all
 ```
 
@@ -357,7 +363,7 @@ To (re-)record all responses:
 
 To update a specific test:
 
-```
+```shell
 % uv run pytest --record-mode=once tests/path/to/test_module.py::<class>::<method>
 # E.g.
 % uv run pytest --record-mode=once tests/lantern_tests/stores/test_gitlab_store.py::TestGitLabLocalCache::test_fetch_file_commits
@@ -365,7 +371,7 @@ To update a specific test:
 
 To incrementally build up a set of related tests (including parameterised tests) use the `new_episodes` recording mode:
 
-```
+```shell
 % uv run pytest --record-mode=new_episodes tests/path/to/test_module.py::<class>::<method>
 ```
 
@@ -397,7 +403,7 @@ such as switching tabs in items and opening/closing the feedback widget.
 
 To run a specific test file with visible output:
 
-```
+```shell
 % uv run pytest --headed tests/lantern_tests/e2e/test_item_e2e.py
 ```
 
@@ -432,8 +438,8 @@ To add a new test record:
 > This section is Work in Progress (WIP) and may not be complete/accurate.
 
 1. create new `tests/resources/records/item_cat_*.py` file or clone from minimal examples
-    - records MUST use a unique `file_identifier`
-    - the `tests.resources.records.utils.make_record()` method SHOULD be used as a base (properties can be unset later)
+   - records MUST use a unique `file_identifier`
+   - the `tests.resources.records.utils.make_record()` method SHOULD be used as a base (properties can be unset later)
 2. include the record in the `tests.resources.records.item_cat_collection_all.collection_members` list
 3. include the record in the `resources.stores.fake_records_store.FakeRecordsStore._fake_records()` method
 

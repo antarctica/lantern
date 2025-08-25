@@ -9,6 +9,10 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 
 ## [Unreleased]
 
+### Added
+
+* Markdown linting for project documentation
+
 ## [0.2.1] - 2025-08-22
 
 ### Added

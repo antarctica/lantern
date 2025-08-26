@@ -6,7 +6,7 @@ from lantern.lib.metadata_library.models.record.presets.identifiers import make_
 def make_bas_cat(
     item_id: str, association: AggregationAssociationCode, initiative: AggregationInitiativeCode | None = None
 ) -> Aggregation:
-    """An item within BAS Data Catalogue."""  # noqa: D401
+    """An item within BAS Data Catalogue."""
     return Aggregation(
         identifier=make_bas_cat_id(item_id),
         association_type=association,

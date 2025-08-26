@@ -175,7 +175,7 @@ class Record:
         Steps needed before structuring a Record.
 
         Standalone method for easier subclassing.
-        """  # noqa: D401
+        """
         # Where data contains a `$schema` key, check it matches the class schema or raise an error.
         if "$schema" in value and value["$schema"] != Record._schema:
             msg = "Unsupported JSON Schema in data."

@@ -129,12 +129,13 @@ select = ["A", "ANN", "B", "B9", "C90", "C4", "D", "DTZ", "E", "EM", "ERA", "F",
 #   D104 | for avoding package level docstrings
 #   D203 | for requring blank line before classes (which looks silly)
 #   D212 | for docstring requring multi-line comments to start on first line (which looks silly)
+#   D401 | for requring imperative mood in docstrings (finally had enough, too annoying)
 #   D402 | for docstring that can't resemble their signatures (despite them being completely different)
 #   E501 | for bug-bear compatibility (as B905 overrides line length checks)
 #  PT001 | for `@pytest.fixture` parentheses (as it's unstable/unreliable)
 #  PT023 | for `@pytest.mark.cov` parentheses (as it's unstable/unreliable)
 #  TD002 | for TODOs without an author (as an issue should assign ownership)
-ignore = ["D100", "D104", "D107", "D203", "D212", "D402", "E501", "PT001", "PT023", "TD002"]
+ignore = ["D100", "D104", "D107", "D203", "D212", "D401", "D402", "E501", "PT001", "PT023", "TD002"]
 
 [tool.ruff.lint.per-file-ignores]
 # config.py   |   D401 | ignore imperative mood in docstrings (too unreliable)

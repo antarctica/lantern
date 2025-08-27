@@ -24,7 +24,7 @@ from lantern.exporters.base import Exporter, ResourceExporter, S3Utils
 from lantern.exporters.html import HtmlAliasesExporter, HtmlExporter
 from lantern.exporters.records import RecordsExporter
 from lantern.exporters.site import SiteExporter, SiteIndexExporter, SitePagesExporter, SiteResourcesExporter
-from lantern.exporters.website import WebsiteSearchExporter
+from lantern.exporters.website import WebsiteSearchExporter, WordPressClient
 from lantern.exporters.xml import IsoXmlHtmlExporter
 from lantern.lib.metadata_library.models.record import Record
 from lantern.lib.metadata_library.models.record.elements.common import Date, Dates, Identifier, Identifiers
@@ -71,7 +71,7 @@ def has_network() -> bool:
 @pytest.fixture(scope="module")
 def vcr_config():
     """Pytest Recording config."""
-    return {"filter_headers": ["PRIVATE-TOKEN"]}
+    return {"filter_headers": ["Authorization", "PRIVATE-TOKEN"]}
 
 
 def freezer_time() -> datetime:
@@ -534,7 +534,7 @@ def fx_exporter_html(
     fx_logger: logging.Logger,
     fx_s3_bucket_name: str,
     fx_s3_client: S3Client,
-    fx_record_minimal_item_catalogue: Record,
+    fx_record_revision_minimal_item_catalogue: RecordRevision,
 ) -> HtmlExporter:
     """HTML exporter with a mocked config and S3 client."""
     with TemporaryDirectory() as tmp_path:
@@ -549,7 +549,7 @@ def fx_exporter_html(
         config=mock_config,
         logger=fx_logger,
         s3=fx_s3_client,
-        record=fx_record_minimal_item_catalogue,
+        record=fx_record_revision_minimal_item_catalogue,
         export_base=output_path,
         get_record=_get_record,
     )
@@ -561,7 +561,7 @@ def fx_exporter_html_alias(
     fx_logger: logging.Logger,
     fx_s3_bucket_name: str,
     fx_s3_client: S3Client,
-    fx_record_minimal_item_catalogue: Record,
+    fx_record_revision_minimal_item_catalogue: RecordRevision,
 ) -> HtmlAliasesExporter:
     """HTML alias exporter with a mocked config and S3 client."""
     with TemporaryDirectory() as tmp_path:
@@ -570,7 +570,7 @@ def fx_exporter_html_alias(
     type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
     type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
 
-    fx_record_minimal_item_catalogue.identification.identifiers.append(
+    fx_record_revision_minimal_item_catalogue.identification.identifiers.append(
         Identifier(identifier="x", href=f"https://{CATALOGUE_NAMESPACE}/datasets/x", namespace=ALIAS_NAMESPACE)
     )
 
@@ -578,7 +578,7 @@ def fx_exporter_html_alias(
         config=mock_config,
         logger=fx_logger,
         s3=fx_s3_client,
-        record=fx_record_minimal_item_catalogue,
+        record=fx_record_revision_minimal_item_catalogue,
         site_base=output_path,
     )
 
@@ -660,6 +660,16 @@ def fx_exporter_site_index_pop(
 
 
 @pytest.fixture()
+def fx_wordpress_client(fx_logger: logging.Logger, fx_config: Config) -> WordPressClient:
+    """
+    Public website search WordPress client.
+
+    With mocked config.
+    """
+    return WordPressClient(logger=fx_logger, config=fx_config)
+
+
+@pytest.fixture()
 def fx_exporter_website_search(
     mocker: MockerFixture, fx_s3_bucket_name: str, fx_logger: logging.Logger, fx_s3_client: S3Client
 ) -> WebsiteSearchExporter:
@@ -680,13 +690,13 @@ def fx_exporter_website_search(
 
 @pytest.fixture()
 def fx_exporter_website_search_pop(
-    fx_exporter_website_search: WebsiteSearchExporter, fx_record_minimal_item: Record
+    fx_exporter_website_search: WebsiteSearchExporter, fx_record_revision_minimal_item: RecordRevision
 ) -> WebsiteSearchExporter:
-    """Public website search exporter populated with a single record summary."""
-    fx_record_minimal_item.identification.constraints.append(
+    """Public website search exporter populated with a single record."""
+    fx_record_revision_minimal_item.identification.constraints.append(
         Constraint(type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.UNRESTRICTED)
     )
-    fx_exporter_website_search.loads(records=[fx_record_minimal_item])
+    fx_exporter_website_search.loads(records=[fx_record_revision_minimal_item])
     return fx_exporter_website_search
 
 

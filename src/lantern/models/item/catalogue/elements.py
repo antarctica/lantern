@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
 from typing import TypeVar
 
-from lantern.lib.metadata_library.models.record import Record
 from lantern.lib.metadata_library.models.record.elements.common import Date
 from lantern.lib.metadata_library.models.record.elements.common import Dates as RecordDates
 from lantern.lib.metadata_library.models.record.elements.common import Identifiers as RecordIdentifiers
@@ -26,6 +25,7 @@ from lantern.models.item.base.elements import Link, unpack
 from lantern.models.item.base.enums import AccessLevel, ResourceTypeLabel
 from lantern.models.item.base.utils import md_as_html
 from lantern.models.item.catalogue.enums import ResourceTypeIcon
+from lantern.models.record.revision import RecordRevision
 
 TFormattedDate = TypeVar("TFormattedDate", bound="FormattedDate")
 
@@ -208,16 +208,16 @@ class Aggregations:
     Container for ItemBase Aggregations formatted as links and grouped by type.
     """
 
-    def __init__(self, aggregations: RecordAggregations, get_record: Callable[[str], Record]) -> None:
+    def __init__(self, aggregations: RecordAggregations, get_record: Callable[[str], RecordRevision]) -> None:
         self._aggregations = aggregations
         self._summaries = self._generate_summaries(get_record)
 
-    def _generate_summaries(self, get_summary: Callable[[str], Record]) -> dict[str, ItemCatalogueSummary]:
+    def _generate_summaries(self, get_record: Callable[[str], RecordRevision]) -> dict[str, ItemCatalogueSummary]:
         """Generate item summaries for aggregations indexed by resource identifier."""
         summaries = {}
         for aggregation in self._aggregations:
             identifier = aggregation.identifier.identifier
-            summaries[identifier] = ItemCatalogueSummary(get_summary(identifier))
+            summaries[identifier] = ItemCatalogueSummary(get_record(identifier))
         return summaries
 
     def __len__(self) -> int:

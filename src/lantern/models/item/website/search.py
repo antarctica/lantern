@@ -1,7 +1,7 @@
-from lantern.lib.metadata_library.models.record import Record
 from lantern.lib.metadata_library.models.record.enums import ProgressCode
 from lantern.models.item.base import AccessLevel, ItemBase
 from lantern.models.item.base.enums import ResourceTypeLabel
+from lantern.models.record.revision import RecordRevision
 
 
 class ItemWebsiteSearch(ItemBase):
@@ -25,7 +25,7 @@ class ItemWebsiteSearch(ItemBase):
     Note: This class supports a limited subset of Record properties, as determined by the needs of the Public Website.
     """
 
-    def __init__(self, record: Record, source: str, base_url: str) -> None:
+    def __init__(self, record: RecordRevision, source: str, base_url: str) -> None:
         super().__init__(record)
         self._source = source
         self._base_url = base_url
@@ -103,6 +103,7 @@ class ItemWebsiteSearch(ItemBase):
         """
         return {
             "id": self.resource_id,
+            "revision": self.resource_revision,
             "type": self._type_label,
             "title": self.title_plain,
             "description": self._description,
@@ -130,7 +131,7 @@ class ItemWebsiteSearch(ItemBase):
         """
         return {
             "file_identifier": self.resource_id,
-            "file_revision": None,
+            "file_revision": self.resource_revision,
             "source": self._source,
             "content": self._content,
             "deleted": self._deleted,

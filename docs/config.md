@@ -27,6 +27,11 @@ Application configuration is managed by the `lantern.Config` class.
 | `EXPORT_PATH`                      | Path    | Yes          | Yes      | No        | v0.1.x        | Location for local static site exporter builds                           | *None*                                    | '/data/exports/records'                   |
 | `LOG_LEVEL`                        | Number  | Yes          | No       | No        | v0.1.x        | A logging level name or number to set the application logging level      | 30                                        | 20                                        |
 | `LOG_LEVEL_NAME`                   | String  | No           | -        | No        | v0.1.x        | Logging level name for the configured application logging level          | 'WARNING'                                 | 'INFO'                                    |
+| `PUBLIC_WEBSITE_ENDPOINT`          | String  | Yes          | Yes      | No        | v0.3.x        | Endpoint to WordPress REST API for search integration                    | *N/A*                                     | 'https://example.com/...'                 |
+| `PUBLIC_WEBSITE_PASSWORD`          | String  | Yes          | Yes      | Yes       | v0.3.x        | Application Password for accessing WordPress REST API                    | *N/A*                                     | 'x'                                       |
+| `PUBLIC_WEBSITE_PASSWORD_SAFE`     | String  | No           | -        | No        | v0.3.x        | Redacted version of `PUBLIC_WEBSITE_PASSWORD`                            | *N/A*                                     | 'REDACTED'                                |
+| `PUBLIC_WEBSITE_POST_TYPE`         | String  | No           | -        | No        | v0.3.x        | WordPress post type representing catalogue items for search integration  | `data_catalogue_stub`                     | 'x'                                       |
+| `PUBLIC_WEBSITE_USERNAME`          | String  | No           | Yes      | No        | v0.3.x        | User for accessing WordPress REST API                                    | *N/A*                                     | 'x'                                       |
 | `SENTRY_DSN`                       | String  | No           | -        | No        | v0.4.x        | Sentry connection string for backend error monitoring (not sensitive)    | *N/A*                                     | 'https://123@example.com/123'             |
 | `SENTRY_ENVIRONMENT`               | String  | Yes          | No       | No        | v0.1.x        | Application runtime environment to include in Sentry errors              | 'development'                             | 'production'                              |
 | `STORE_GITLAB_STORE_CACHE_PATH`    | Path    | Yes          | Yes      | No        | v0.1.x        | Location for GitLab store's local records cache                          | *None*                                    | '/tmp/gitlab_cache/'                      |
@@ -75,6 +80,10 @@ See the [Exporters](/docs/exporters.md#exporters-configuration) docs for more in
 - `AWS_ACCESS_SECRET`
 - `AWS_ACCESS_SECRET_SAFE`
 - `AWS_S3_BUCKET`
+- `PUBLIC_WEBSITE_PASSWORD`
+- `PUBLIC_WEBSITE_PASSWORD_SAFE`
+- `PUBLIC_WEBSITE_POST_TYPE`
+- `PUBLIC_WEBSITE_USERNAME`
 
 ### Site templates config options
 

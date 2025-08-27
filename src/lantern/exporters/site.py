@@ -386,12 +386,15 @@ class SiteExporter(Exporter):
         self._website_exporter.loads(records=records)
 
     def export(self) -> None:
-        """Export site contents to a directory."""
+        """
+        Export site contents to a directory.
+
+        Public website search exporter does not support local export.
+        """
         self._resources_exporter.export()
         self._pages_exporter.export()
         self._records_exporter.export()
         self._index_exporter.export()
-        self._website_exporter.export()
 
     def publish(self) -> None:
         """Publish site contents to S3."""

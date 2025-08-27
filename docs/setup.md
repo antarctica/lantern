@@ -55,3 +55,15 @@ The following IAM policy can be attached to users for managing content in the
     ]
 }
 ```
+
+## Public Website Search
+
+To configure a WordPress site to work with the
+[Public Website Search Exporter](/docs/exporters.md#public-website-search-exporter):
+
+1. create a WordPress site
+2. as an administrator, install and activate the prototype plugin from `/support/public-website-search/wp-plugin.zip`
+3. as an administrator, install and activate the prototype theme from `/support/public-website-search/wp-theme.zip`
+4. create a new user with the *author* role to represent this integration, recording the password in 1Password
+5. update the [Infrastructure](/docs/infrastructure.md) documentation
+6. set the relevant [Config](/docs/config.md) values for the integration

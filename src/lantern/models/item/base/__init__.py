@@ -2,7 +2,6 @@ import json
 from json import JSONDecodeError
 from urllib.parse import unquote
 
-from lantern.lib.metadata_library.models.record import Record
 from lantern.lib.metadata_library.models.record.elements.common import Identifier, Identifiers, Series
 from lantern.lib.metadata_library.models.record.elements.distribution import Distribution
 from lantern.lib.metadata_library.models.record.elements.identification import (
@@ -24,6 +23,7 @@ from lantern.models.item.base.const import PERMISSIONS_BAS_GROUP, PERMISSIONS_NE
 from lantern.models.item.base.elements import Contact, Contacts, Extent, Extents
 from lantern.models.item.base.enums import AccessLevel
 from lantern.models.item.base.utils import md_as_html, md_as_plain
+from lantern.models.record.revision import RecordRevision
 
 
 class ItemBase:
@@ -42,7 +42,7 @@ class ItemBase:
     available by this class. Especially for properties this class would simply pass through to the record.
     """
 
-    def __init__(self, record: Record) -> None:
+    def __init__(self, record: RecordRevision) -> None:
         self._record = record
 
         if self.resource_id is None:
@@ -325,6 +325,15 @@ class ItemBase:
         AKA resource/record/item/file identifier.
         """
         return self._record.file_identifier
+
+    @property
+    def resource_revision(self) -> str:
+        """
+        Resource revision.
+
+        AKA commit.
+        """
+        return self._record.file_revision
 
     @property
     def resource_type(self) -> HierarchyLevelCode:

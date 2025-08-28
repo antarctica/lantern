@@ -383,11 +383,18 @@ class TestSiteExporter:
 
     def test_publish(
         self,
+        mocker: MockerFixture,
         fx_s3_bucket_name: str,
         fx_exporter_site: SiteExporter,
         fx_record_revision_minimal_item_catalogue: RecordRevision,
     ):
-        """Can publish site index to S3."""
+        """
+        Can publish site index to S3 or external services.
+
+        Skips public website search publishing.
+        """
+        mocker.patch.object(fx_exporter_site._website_exporter, "publish", return_value=None)
+
         s3 = fx_exporter_site._index_exporter._s3_utils._s3
         record = fx_record_revision_minimal_item_catalogue
         fx_exporter_site.loads([record])

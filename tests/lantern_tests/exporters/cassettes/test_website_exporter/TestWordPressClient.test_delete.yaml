@@ -1,0 +1,32 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '0'
+      User-Agent:
+      - python-requests/2.32.4
+    method: DELETE
+    uri: https://example.com/wp-json/wp/v2/data_catalogue_stub/115
+  response:
+    body:
+      string: '{"id":123,"status":"trash","type":"data_catalogue_stub","link":"http://example.com/items/x","title":{"raw":"x","rendered":"x"},"content":{"raw":"<p>x</p>","rendered":"<p>x</p>\n","protected":false,"block_version":0},"meta":{"file_identifier":"x","file_revision":"x","href":"http://example.com/items/x","hierarchy_level":"DATASET","publication_date":"2014-06-30","edition":"","source":"x","href_thumbnail":""}}'
+    headers:
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Transfer-Encoding:
+      - chunked
+    status:
+      code: 200
+      message: OK
+version: 1

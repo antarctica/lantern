@@ -24,6 +24,7 @@ dependencies = [
     "markdown>=3.8.2",
     "markdown-gfm-admonition>=0.1.1",
     "python-gitlab>=6.0.0",
+    "requests>=2.32.4",
     "sentry-sdk>=2.32.0",
 ]
 
@@ -173,6 +174,9 @@ LANTERN_EXPORT_PATH="export"
 LANTERN_AWS_ACCESS_ID="x"
 LANTERN_AWS_ACCESS_SECRET="x"
 LANTERN_AWS_S3_BUCKET="x"
+LANTERN_PUBLIC_WEBSITE_ENDPOINT="https://example.com/wp-json/wp/v2"
+LANTERN_PUBLIC_WEBSITE_USERNAME="x"
+LANTERN_PUBLIC_WEBSITE_PASSWORD="x"
 
 [tool.pytest.ini_options]
 # --strict-markers | fail if unknown markers are used

@@ -1,15 +1,149 @@
-import json
 import logging
+from dataclasses import asdict, dataclass
+from functools import cached_property
 
-from jinja2 import Template
+import requests
 from mypy_boto3_s3 import S3Client
+from requests.auth import HTTPBasicAuth
 
 from lantern.config import Config
 from lantern.exporters.base import Exporter
-from lantern.lib.metadata_library.models.record import Record
 from lantern.lib.metadata_library.models.record.enums import AggregationAssociationCode
 from lantern.models.item.base.const import CATALOGUE_NAMESPACE
 from lantern.models.item.website.search import ItemWebsiteSearch
+from lantern.models.record.revision import RecordRevision
+
+
+@dataclass(kw_only=True)
+class WordPressSearchItem:
+    """
+    Workaround class for items within WordPress.
+
+    Needed because there is a disconnect between the ItemWebsiteSearch and the prototype WordPress custom post type.
+    Specifically the ItemWebsiteSearch class assumed a sync API would be used to aggregate in-scope items between
+    catalogues, and a plugin within WordPress would determine which of these items existed, needed creating or removing.
+
+    This class represents an experient to simplify this process by syncing items as a custom post type directly with
+    WordPress via its REST API. This avoids the aggregation API and allows for a reduced WordPress plugin.
+
+    If this approach is adopted, the ItemWebsiteSearch class should be updated accordingly and this class removed.
+
+    Differences (ItemWebsiteSearch -> WordPressSearchItem):
+    - id -> file_identifier
+    - revision -> file_revision
+    - type -> hierarchy_level
+    - description -> content (to match WordPress core field)
+    - date -> publication_date (should change back to date as it may not represent publication)
+    - version -> edition
+    - keywords -> **not included**
+    - thumbnail_href -> href_thumbnail
+    (These changes bring fields much closer to the original (ISO) record properties, much may or may not be better.)
+    """
+
+    # WordPress core fields
+    title: str
+    content: str
+
+    # Additional meta fields
+    file_identifier: str
+    file_revision: str
+    href: str
+    hierarchy_level: str
+    publication_date: str
+    source: str
+    edition: str | None = None
+    href_thumbnail: str | None = None
+
+    @classmethod
+    def loads(cls, item: ItemWebsiteSearch) -> "WordPressSearchItem":
+        """Create from ItemWebsiteSearch."""
+        data = item.dumps()
+        return cls(
+            file_identifier=data["content"]["id"],
+            file_revision=data["content"]["revision"],
+            href=data["content"]["href"],
+            title=data["content"]["title"],
+            content=data["content"]["description"],
+            hierarchy_level=data["content"]["type"],
+            publication_date=data["content"]["date"],
+            edition=data["content"]["version"],
+            source=data["source"],
+            href_thumbnail=data["content"]["thumbnail_href"],
+        )
+
+
+class WordPressClient:
+    """
+    Simple WordPress client.
+
+    Intended for manging posts of a single type. Limited to the logic needed for the Public Website search exporter.
+    """
+
+    def __init__(self, logger: logging.Logger, config: Config) -> None:
+        """Initialise client."""
+        self._config = config
+        self._logger = logger
+
+        self._base_url = f"{self._config.PUBLIC_WEBSITE_ENDPOINT}/{self._config.PUBLIC_WEBSITE_POST_TYPE}"
+        self._auth = HTTPBasicAuth(
+            username=self._config.PUBLIC_WEBSITE_USERNAME, password=self._config.PUBLIC_WEBSITE_PASSWORD
+        )
+
+    @cached_property
+    def posts(self) -> dict[str, dict]:
+        """Posts indexed by WordPress post ID."""
+        return {post["id"]: post for post in self._fetch_posts()}
+
+    def _fetch_posts(self) -> list[dict]:
+        """
+        All posts of relevant type.
+
+        Includes basic pagination support.
+        """
+        _posts = []
+        page = 1
+        params = {
+            "per_page": 100,
+            "orderby": "id",
+            "order": "asc",
+        }
+
+        self._logger.info("Fetching existing posts from WordPress.")
+        while True:
+            params["page"] = page
+            r = requests.get(auth=self._auth, timeout=10, url=self._base_url, params=params)
+            r.raise_for_status()
+            posts = r.json()
+            _posts.extend(posts)
+            if int(r.headers["X-WP-TotalPages"]) <= page:
+                break
+            page += 1
+
+        return _posts
+
+    def upsert(self, fields: dict, post_id: str | None = None) -> str | None:
+        """
+        Insert or update a post.
+
+        If a post ID is provided it is updated, otherwise a new post is created.
+
+        Posts are always set as published.
+        """
+        url = self._base_url
+        params = {}
+        fields["status"] = "publish"
+        if post_id:
+            url = f"{url}/{post_id}"
+            params["context"] = "edit"
+        r = requests.post(auth=self._auth, timeout=10, url=url, params=params, data=fields)
+        r.raise_for_status()
+
+    def delete(self, post_id: str) -> None:
+        """Delete a post."""
+        url = f"{self._base_url}/{post_id}"
+        params = {}
+        r = requests.delete(auth=self._auth, timeout=10, url=url, params=params)
+        r.raise_for_status()
 
 
 class WebsiteSearchExporter(Exporter):
@@ -18,111 +152,39 @@ class WebsiteSearchExporter(Exporter):
 
     Note: Intended for BAS use only.
 
-    Generates items for inclusion in the search of the BAS public website (www.bas.ac.uk) to aid discovery. These items
-    are intended for insertion into the BAS operated API which acts as an aggregator across BAS data catalogues, and
-    the endpoint used by the public website sync.
+    Manages items for searching selected records within the BAS public website (www.bas.ac.uk) to aid discovery. Items
+    are stored in WordPress as a custom post type.
 
-    See https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/450 for initial implementation and background.
+    See https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/450 for background information.
 
-    This exporter filters items to those which are:
+    This exporter:
 
-    1. open access (based on an `unrestricted` access constraint)
-    2. not superseded by another record (based on `RevisionOf` aggregations)
+    1. creates Website Search Items from records (which provide methods called during filtering)
+    2. filters items locally to those which are:
+        1. open access (based on an `unrestricted` access constraint)
+        2. not superseded by another record (based on `RevisionOf` aggregations)
 
-    Due to this second condition, this exporter cannot be implemented as a RecordExporter as foreign records determine
-    whether a record is superseded rather than each target record.
-
-    Note: This prototype does not yet insert items into the BAS aggregating API, rather it exports and/or publishes
-    items as a static file for testing.
-
-    Note: This prototype additionally (and temporarily) generates, exports and/or publishes a HTML mockup of what these
-    items may look as rendered search results in the public website.
-    """
-
-    # This template is defined in-line as it won't be used long-term.
-    _mockup_template = """
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>British Antarctic Survey</title>
-  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Work+Sans:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-  <style>
-    .work-sans {
-      font-family: "Work Sans", sans-serif;
-      font-optical-sizing: auto;
-      font-weight: 400;
-      font-style: normal;
-    }
-  </style>
-</head>
-<body class="bg-white work-sans">
-  <nav class="bg-[#013B5C] text-white p-4">
-    <div class="container mx-auto flex justify-between items-center">
-      <div>
-        <img src="https://cdn.web.bas.ac.uk/bas-style-kit/0.7.3/img/logos-symbols/bas-logo-inverse-transparent-64.png" alt="BAS logo" />
-      </div>
-      <ul class="flex space-x-4">
-        <li><a href="#" class="hover:underline">About</a></li>
-        <li><a href="#" class="hover:underline">Science</a></li>
-        <li><a href="#" class="hover:underline">Data</a></li>
-        <li><a href="#" class="hover:underline">Polar Operations</a></li>
-        <li><a href="#" class="hover:underline">People</a></li>
-        <li><a href="#" class="hover:underline">News & media</a></li>
-        <li><a href="#" class="hover:underline">Jobs</a></li>
-        <li><a href="#" class="hover:underline">Contact</a></li>
-        <li>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"></path>
-          </svg>
-        </li>
-      </ul>
-    </div>
-  </nav>
-
-  <div class="mx-38 mt-2">
-    <p class="text-sm text-gray-600">Home / Search results for “South Georgia”</p>
-  </div>
-
-  <main class="mx-68 mt-16 space-y-16">
-    {% for item in items %}
-      <article class="flex gap-6 items-start">
-        <img src="{{ item.thumbnail_href }}" alt="Image" class="w-72 h-48 object-contain flex-shrink-0" />
-        <div class="flex flex-col space-y-4">
-          <small class="uppercase">{{ item.type }}</small>
-          <h1 class="text-2xl font-semibold"><a class="text-[#013B5C]" href="{{ item.href }}">{{ item.title }}</a></h1>
-          <div class="text-gray-700">{{ item.description }}</div>
-        </div>
-      </article>
-      <hr class="border-gray-300" />
-    {% endfor %}
-  </main>
-</body>
-</html>
+    Note: Due to the second filtering condition, this exporter cannot be implemented as a RecordExporter as foreign
+    records determine whether a record is superseded rather than each target record independently.
     """
 
     def __init__(self, config: Config, logger: logging.Logger, s3: S3Client) -> None:
         """Initialise exporter."""
         super().__init__(config, logger, s3)
-        self._export_path = self._config.EXPORT_PATH / "-" / "public-website-search" / "items.json"
-        self._mockup_path = self._export_path.parent / "mockup.html"
-        self._records: list[Record] = []
+        self._wordpress_client = WordPressClient(logger=logger, config=config)
+        self._records: list[RecordRevision] = []
 
     @property
     def name(self) -> str:
         """Exporter name."""
         return "Public Website search results"
 
-    def loads(self, records: list[Record]) -> None:
+    def loads(self, records: list[RecordRevision]) -> None:
         """Populate exporter."""
         self._records = records
 
     @staticmethod
-    def _get_superseded_records(records: list[Record]) -> list[str]:
+    def _get_superseded_records(records: list[RecordRevision]) -> list[str]:
         """List identifiers of records superseded by other records."""
         supersedes = set()
         for record in records:
@@ -132,51 +194,84 @@ class WebsiteSearchExporter(Exporter):
             supersedes.update(aggregations.identifiers())
         return list(supersedes)
 
-    def _filter_items(self, items: list[ItemWebsiteSearch]) -> list[ItemWebsiteSearch]:
+    @property
+    def _items(self) -> list[ItemWebsiteSearch]:
+        """Records as website search items."""
+        return [
+            ItemWebsiteSearch(record=record, source=self._config.NAME, base_url=self._config.BASE_URL)
+            for record in self._records
+        ]
+
+    @property
+    def _in_scope_items(self) -> list[ItemWebsiteSearch]:
         """
-        Select in-scope items.
+        Items in-scope for website search.
 
         See https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/450/#note_142966 for initial criteria.
         """
         superseded = self._get_superseded_records(self._records)
-        return [item for item in items if item.resource_id not in superseded and item.open_access]
+        return [item for item in self._items if item.resource_id not in superseded and item.open_access]
 
-    def _dumps(self) -> str:
-        """Generate aggregation API resources for in-scope items."""
-        items = [
-            ItemWebsiteSearch(record=record, source=self._config.NAME, base_url=self._config.BASE_URL)
-            for record in self._records
-        ]
-        payload = [item.dumps() for item in self._filter_items(items)]
-        return json.dumps(payload, indent=2, ensure_ascii=False)
+    @property
+    def _in_scope_references(self) -> dict[str, str]:
+        """References for in-scope items."""
+        return {item.resource_id: item.resource_revision for item in self._in_scope_items}
 
-    def _dumps_mockup(self) -> str:
+    @property
+    def _remote_references(self) -> dict[str, tuple[str, str]]:
         """
-        Generate HTML mockup of search results.
+        References for items currently in WordPress.
 
-        Based on initial public website designs.
-
-        Note: This is a temporary output.
+        Includes file_revision [0] and WordPress post_id [1].
         """
-        items = json.loads(self._dumps())
-        content = [item["content"] for item in items]
-        return Template(self._mockup_template).render(items=content)
+        return {
+            post["meta"]["file_identifier"]: (post["meta"]["file_revision"], post["id"])
+            for post in self._wordpress_client.posts.values()
+        }
+
+    @property
+    def _new_outdated_items(self) -> list[ItemWebsiteSearch]:
+        """In-scope items which are different to WordPress."""
+        new_outdated = []
+        for file_identifier, file_revision in self._in_scope_references.items():
+            if file_identifier not in self._remote_references or (
+                file_identifier in self._remote_references
+                and file_revision != self._remote_references[file_identifier][0]
+            ):
+                new_outdated.append(file_identifier)
+
+        return [item for item in self._in_scope_items if item.resource_id in new_outdated]
+
+    @property
+    def _orphaned_items(self) -> dict[str, str]:
+        """
+        Items in WordPress which are no longer in-scope.
+
+        Returns WordPress post_ids indexed by file_identifier.
+        """
+        in_scope_ids = self._in_scope_references.keys()
+        return {
+            file_identifier: post_id
+            for file_identifier, (file_revision, post_id) in self._remote_references.items()
+            if file_identifier not in in_scope_ids
+        }
 
     def export(self) -> None:
-        """Export aggregation API resources and HTML mockup to directory."""
-        self._export_path.parent.mkdir(parents=True, exist_ok=True)
-        with self._export_path.open("w") as f:
-            f.write(self._dumps())
-        with self._mockup_path.open("w") as f:
-            f.write(self._dumps_mockup())
+        """Not supported, exporter depends on external system."""
+        raise NotImplementedError() from None
 
     def publish(self) -> None:
-        """
-        Publish aggregation API resources and HTML mockup to S3.
-
-        This is a temporary measure until an agreed interface is available to insert or push these API resources.
-        """
-        index_key = self._s3_utils.calc_key(self._export_path)
-        self._s3_utils.upload_content(key=index_key, content_type="application/json", body=self._dumps())
-        mockup_key = self._s3_utils.calc_key(self._mockup_path)
-        self._s3_utils.upload_content(key=mockup_key, content_type="text/html", body=self._dumps_mockup())
+        """Publish items to WordPress that are new or outdated and remove orphaned items."""
+        remote_references = self._remote_references
+        new_outdated = self._new_outdated_items
+        for item in new_outdated:
+            fields = asdict(WordPressSearchItem.loads(item))
+            post_id = remote_references.get(item.resource_id, (None, None))[1]
+            self._wordpress_client.upsert(post_id=post_id, fields=fields)
+            self._logger.info(f"Synced item for record '{item.resource_id}'")
+        for file_identifier, post_id in self._orphaned_items.items():
+            self._wordpress_client.delete(post_id=post_id)
+            self._logger.info(f"Deleted orphaned item for record '{file_identifier}'")
+        for item in self._in_scope_items:
+            if item not in new_outdated:
+                self._logger.debug(f"Item for record '{item.resource_id}' unchanged, skipped.")

@@ -19,6 +19,10 @@ Exporters use these options from the app `lantern.Config` class:
 - `AWS_ACCESS_ID`: credential for AWS IAM principle, MUST have permissions to manage content in the S3 bucket
 - `AWS_ACCESS_SECRET`: corresponding secret for the `AWS_ACCESS_ID` credential
 - `AWS_S3_BUCKET`: AWS S3 bucket for published content, MUST exist and will be wholly managed by this application
+- `PUBLIC_WEBSITE_ENDPOINT`: WordPress API endpoint for the public website search exporter
+- `PUBLIC_WEBSITE_POST_TYPE`: custom WordPress post type for the public website search exporter
+- `PUBLIC_WEBSITE_USERNAME`: WordPress user credential for the public website search exporter
+- `PUBLIC_WEBSITE_PASSWORD`: WordPress application password for the public website search exporter
 
 See the [Config](/docs/config.md#config-options) docs for how to set these config options.
 
@@ -83,14 +87,23 @@ In other cases, or as a general fallback, a `<meta http-equiv="refresh">` tag in
 
 ### Records resource exporter
 
-Combines the outputs of all [Resource Exporters](#resource-exporters) for a set of Records and Record Summaries.
+Combines the outputs of all [Resource Exporters](#resource-exporters) for a set of Records.
 
-The `loads()` method is used to dynamically set the loaded Records and Record Summaries.
+The `loads()` method dynamically sets which [Records](/docs/data-model.md#records) to include.
 
 ## Site exporters
 
-Site exporters assemble the static site from [Resource Exporters](#resource-exporters), static resources such as CSS
-files and general pages such as legal pages.
+Site exporters complete the static site by including static resources such as CSS files, pages such as legal policies
+and outputs that look across multiple Records.
+
+### Site exporter
+
+`lantern.exporters.site.SiteExporter`
+
+Generates a complete static site by combining outputs from the
+[Records Exporter](#records-resource-exporter) and other [Site Exporters](#site-exporters).
+
+The `loads()` method dynamically sets which [Records](/docs/data-model.md#records) to include.
 
 ### Site resources exporter
 
@@ -123,27 +136,47 @@ Generates static pages using [Site Templates](/docs/site.md#item-templates) for:
 
 `lantern.exporters.website.WebsiteSearchExporter`
 
-Generates resources for including [Selected Items](#public-website-search-criteria) in the
-[BAS Public Website](https://www.bas.ac.uk) search to aid discovery.
+<!-- pyml disable md028 -->
+> [!IMPORTANT]
+> This exporter is experimental. Its implementation may change significantly without warning.
 
-**Note:** Resources are temporarily published as static files for review, and until an interface to the aggregating
-API feeding the public website sync is available.
+> [!IMPORTANT]
+> This exporter depends on an external service (WordPress) and does not support local exporting.
+<!-- pyml enable md028 -->
+
+Populates a WordPress website with information on items using a custom post type via the WordPress REST API. Intended
+to allow users to search for [Selected Items](#public-website-search-criteria) within the
+[BAS Public Website](https://www.bas.ac.uk) to aid discovery.
+
+A WordPress plugin is required to register this custom post type and its [Schema](#public-website-search-schema). A
+WordPress theme is available to demonstrate how this exporter could work. See the
+[Setup](/docs/setup.md#public-website-search) documentation for more information.
 
 #### Public Website search criteria
 
-The public website is not intended as another catalogue of resources, and should only include relevant and more
-significant items applicable to the public. Filtering is applied to only export Items meeting these criteria:
+The public website is not intended as another catalogue of resources, and should only include more significant items
+relevant to the public. Items meeting all these criteria are deemed relevant:
 
-1. are unrestricted (contain an `unrestricted` access constraint)
-   - directing users to Items that can't access is not helpful
-2. are not superseded by another Item (are not the subject of a `RevisionOf` aggregation in another Item)
+1. unrestricted (contain an `unrestricted` access constraint)
+   - directing users to Items they can't access is not helpful
+2. not superseded by another Item (are not the subject of a `RevisionOf` aggregation in another Item)
    - we don't want to confuse users by showing multiple versions of the same resource
 
-### Site exporter
+#### Public Website search schema
 
-`lantern.exporters.site.SiteExporter`
+The WordPress custom post consists of these fields:
 
-Generates a complete static site from a set of Records and Record Summaries by combining the outputs of the
-[Records Resource Exporter](#records-resource-exporter) and other [Site Exporters](#site-exporters).
-
-The `loads()` method is used to dynamically set the loaded Records and Record Summaries.
+<!-- pyml disable md013 -->
+| WordPress Field    | Kind | Item Property                  | Type   | Required | Description                                                 |
+|--------------------|------|--------------------------------|--------|----------|-------------------------------------------------------------|
+| `title`            | Core | `title_plain`                  | String | Yes      | -                                                           |
+| `content`          | Core | `summary_html`                 | String | Yes      | Includes HTML formatting                                    |
+| `file_identifier`  | Meta | `file_identifier`              | String | Yes      | -                                                           |
+| `file_revision`    | Meta | `file_revision`                | String | Yes      | -                                                           |
+| `href`             | Meta | `href`                         | String | Yes      | Fully qualified URL to the catalogue item page              |
+| `hierarchy_level`  | Meta | `hierarchy_level`              | String | Yes      | ResourceTypeLabel value (field needs renaming)              |
+| `publication_date` | Meta | `_record.identification.dates` | String | Yes      | One of revision/publication/creation (field needs renaming) |
+| `edition`          | Meta | `edition`                      | String | No       | -                                                           |
+| `href_thumbnail`   | Meta | `overview_graphic`             | String | No       | URL to a thumbnail image (if available)                     |
+| `source`           | Meta | -                              | String | Yes      | Static identifier for catalogue application (`lantern`)     |
+<!-- pyml enable md013 -->

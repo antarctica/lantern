@@ -774,6 +774,7 @@ dependencies = [
     { name = "markdown" },
     { name = "markdown-gfm-admonition" },
     { name = "python-gitlab" },
+    { name = "requests" },
     { name = "sentry-sdk" },
 ]
 
@@ -818,6 +819,7 @@ requires-dist = [
     { name = "markdown", specifier = ">=3.8.2" },
     { name = "markdown-gfm-admonition", specifier = ">=0.1.1" },
     { name = "python-gitlab", specifier = ">=6.0.0" },
+    { name = "requests", specifier = ">=2.32.4" },
     { name = "sentry-sdk", specifier = ">=2.32.0" },
 ]
 

@@ -15,6 +15,10 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Markdown linting for project documentation
 * Dev command for bootstrapping a remote GitLab records repo
 
+### Changed
+
+* Replacing public website search prototype to use WordPress REST API
+
 ### Fixed
 
 * Pre-commit config for Python type checking

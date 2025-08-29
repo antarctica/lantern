@@ -18,7 +18,7 @@ class TestRecordRevision:
             hierarchy_level=HierarchyLevelCode.DATASET,
             metadata=Metadata(
                 contacts=Contacts(
-                    [Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.POINT_OF_CONTACT])]
+                    [Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT})]
                 ),
                 date_stamp=date(2014, 6, 30),
             ),

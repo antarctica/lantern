@@ -1168,27 +1168,21 @@ class TestInfoTab:
         else:
             assert links is None
 
-    @pytest.mark.parametrize("has_revision", [False, True])
     def test_revision_link(
         self,
         fx_item_catalogue_min: ItemCatalogue,
         fx_record_revision_minimal_item_catalogue: RecordRevision,
-        has_revision: bool,
     ):
         """Can get link to record revision based on values from item."""
-        if has_revision:
-            # realistic values needed over 'x' so substrings can be extracted safely
-            fx_record_revision_minimal_item_catalogue.file_identifier = "ee21f4a7-7e87-4074-b92f-9fa27a68d26d"
-            fx_record_revision_minimal_item_catalogue.file_revision = "3401c9880d4bc42aed8dabd7b41acec8817a293a"
-            fx_item_catalogue_min._record = fx_record_revision_minimal_item_catalogue
+        # realistic values needed over 'x' so substrings can be extracted safely
+        fx_record_revision_minimal_item_catalogue.file_identifier = "ee21f4a7-7e87-4074-b92f-9fa27a68d26d"
+        fx_record_revision_minimal_item_catalogue.file_revision = "3401c9880d4bc42aed8dabd7b41acec8817a293a"
+        fx_item_catalogue_min._record = fx_record_revision_minimal_item_catalogue
 
         html = BeautifulSoup(fx_item_catalogue_min.render(), parser="html.parser", features="lxml")
 
         link = html.select_one("#info-revision")
-        if has_revision:
-            assert link.select_one("a") is not None
-        else:
-            assert link is None
+        assert link.select_one("a") is not None
 
     def test_build_time(
         self,

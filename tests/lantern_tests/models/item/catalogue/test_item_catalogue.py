@@ -4,7 +4,6 @@ from datetime import UTC, datetime
 import pytest
 
 from lantern.config import Config
-from lantern.lib.metadata_library.models.record import Record
 from lantern.lib.metadata_library.models.record.elements.common import (
     Contact,
     ContactIdentity,
@@ -37,15 +36,15 @@ from tests.conftest import _get_record
 class TestItemCatalogue:
     """Test catalogue item."""
 
-    def test_init(self, fx_config: Config, fx_record_minimal_item_catalogue: Record):
+    def test_init(self, fx_config: Config, fx_record_revision_minimal_item_catalogue: RecordRevision):
         """Can create an ItemCatalogue."""
         item = ItemCatalogue(
             config=fx_config,
-            record=fx_record_minimal_item_catalogue,
+            record=fx_record_revision_minimal_item_catalogue,
             get_record=_get_record,
         )
         assert isinstance(item, ItemCatalogue)
-        assert item._record == fx_record_minimal_item_catalogue
+        assert item._record == fx_record_revision_minimal_item_catalogue
 
     @pytest.mark.parametrize(
         ("element", "exception_cls"),
@@ -60,50 +59,46 @@ class TestItemCatalogue:
     def test_invalid(
         self,
         fx_config: Config,
-        fx_record_minimal_item_catalogue: Record,
+        fx_record_revision_minimal_item_catalogue: RecordRevision,
         element: str,
         exception_cls: type[Exception],
     ):
         """Cannot create a catalogue item from an invalid record."""
         if element == "file_identifier":
-            fx_record_minimal_item_catalogue.file_identifier = None
+            fx_record_revision_minimal_item_catalogue.file_identifier = None
         elif element == "self_identifier":
-            fx_record_minimal_item_catalogue.identification.identifiers = Identifiers([])
+            fx_record_revision_minimal_item_catalogue.identification.identifiers = Identifiers([])
         elif element == "self_identifier_match":
-            fx_record_minimal_item_catalogue.identification.identifiers[0].identifier = "y"
+            fx_record_revision_minimal_item_catalogue.identification.identifiers[0].identifier = "y"
         elif element == "self_identifier_namespace":
-            fx_record_minimal_item_catalogue.identification.identifiers[0].namespace = "y"
+            fx_record_revision_minimal_item_catalogue.identification.identifiers[0].namespace = "y"
         elif element == "point_of_contact":
-            fx_record_minimal_item_catalogue.identification.contacts = Contacts([])
+            fx_record_revision_minimal_item_catalogue.identification.contacts = Contacts([])
 
         with pytest.raises(exception_cls):
             _ = ItemCatalogue(
                 config=fx_config,
-                record=fx_record_minimal_item_catalogue,
+                record=fx_record_revision_minimal_item_catalogue,
                 get_record=_get_record,
             )
 
-    @pytest.mark.parametrize("has_revision", [False, True])
     def test_revision(
         self,
         fx_config: Config,
         fx_item_catalogue_min: ItemCatalogue,
         fx_record_revision_minimal_item_catalogue: RecordRevision,
-        has_revision: bool,
     ):
         """Can compute link to record revision where available."""
-        expected = None
-
         # realistic values needed over 'x' so substrings can be extracted safely
         id_ = "ee21f4a7-7e87-4074-b92f-9fa27a68d26d"
         commit = "3401c9880d4bc42aed8dabd7b41acec8817a293a"
 
-        if has_revision:
-            fx_record_revision_minimal_item_catalogue.file_identifier = id_
-            fx_record_revision_minimal_item_catalogue.file_revision = commit
-            fx_item_catalogue_min._record = fx_record_revision_minimal_item_catalogue
-            href = f"{fx_config.TEMPLATES_ITEM_VERSIONS_ENDPOINT}/-/blob/{commit}/records/ee/21/{id_}.json"
-            expected = Link(value="3401c988", href=href, external=True)
+        fx_record_revision_minimal_item_catalogue.file_identifier = id_
+        fx_record_revision_minimal_item_catalogue.file_revision = commit
+        fx_item_catalogue_min._record = fx_record_revision_minimal_item_catalogue
+
+        href = f"{fx_config.TEMPLATES_ITEM_VERSIONS_ENDPOINT}/-/blob/{commit}/records/ee/21/{id_}.json"
+        expected = Link(value="3401c988", href=href, external=True)
 
         assert fx_item_catalogue_min._revision == expected
 
@@ -259,6 +254,7 @@ class TestItemCatalogue:
     base_record = {  # noqa: RUF012
         "$schema": "https://metadata-resources.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-2-v4.json",
         "file_identifier": "x",
+        "file_revision": "x",
         "hierarchy_level": "dataset",
         "metadata": {
             "contacts": [{"organisation": {"name": "x"}, "role": ["pointOfContact"]}],
@@ -396,7 +392,7 @@ class TestItemCatalogue:
     )
     def test_default_tab_anchor(self, fx_item_catalogue_min: ItemCatalogue, values: dict, anchor: str):
         """Can get default tab anchor depending on enabled tabs."""
-        record = Record.loads(values)
+        record = RecordRevision.loads(values)
         fx_item_catalogue_min._record = record
 
         assert fx_item_catalogue_min.default_tab_anchor == anchor

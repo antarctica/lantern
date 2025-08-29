@@ -159,20 +159,6 @@ class TestBaseResourceExporter:
         )
         assert isinstance(exporter, ResourceExporter)
 
-    def test_invalid_record(
-        self, fx_exporter_resource_base: ResourceExporter, fx_record_revision_minimal_iso: RecordRevision
-    ):
-        """Cannot create an ItemBase with an invalid record."""
-        with pytest.raises(ValueError, match="File identifier must be set to export record."):
-            FakeResourceExporter(
-                config=fx_exporter_resource_base._config,
-                logger=fx_exporter_resource_base._logger,
-                s3=fx_exporter_resource_base._s3_client,
-                record=fx_record_revision_minimal_iso,
-                export_base=fx_exporter_resource_base._export_path.parent,
-                export_name="x",
-            )
-
     def test_init_invalid_base_path(self, fx_exporter_resource_base: ResourceExporter):
         """Cannot create an ItemBase with a base path that isn't relative to overall output_path."""
         with TemporaryDirectory() as tmp_path_exporter:

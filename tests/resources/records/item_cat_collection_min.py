@@ -1,4 +1,3 @@
-from lantern.lib.metadata_library.models.record import Record
 from lantern.lib.metadata_library.models.record.elements.identification import Aggregations
 from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
 from tests.resources.records.utils import make_record
@@ -12,9 +11,6 @@ record = make_record(
     abstract="Item to test a minimal Collection is accepted and presented correctly.",
     purpose="Item to test a minimal Collection is accepted and presented correctly.",
 )
-
-# Convert back to (non-revisioned) Record to unset file revision
-record = Record.loads(record.dumps())
 
 # Reset collection members
 record.identification.aggregations = Aggregations([])

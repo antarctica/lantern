@@ -30,6 +30,7 @@ magic_collection_ids = [
     "e74543c0-4c4e-4b41-aa33-5bb2f67df389",  # SCAR Antarctic Digital Database (ADD)
     "ef7bc35e-7ad8-4ae5-9ae8-dd708d6e966e",  # BAS Operations Maps
     "cf64dd21-545a-465b-9a67-c28bb4ce9024",  # BAS Basemaps
+    "faaeca6f-e67a-45df-ad6d-10c3049daab3",  # BAS Geology Maps
 ]
 
 

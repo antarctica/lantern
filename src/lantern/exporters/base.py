@@ -158,15 +158,11 @@ class ResourceExporter(Exporter, ABC):
     ) -> None:
         super().__init__(config=config, logger=logger, s3=s3)
         self._export_path = export_base.joinpath(export_name)
-        self._validate(record, export_base)
+        self._validate(export_base)
         self._record = record
 
-    def _validate(self, record: Record, export_base: Path) -> None:
+    def _validate(self, export_base: Path) -> None:
         """Validate exporter configuration."""
-        if record.file_identifier is None:
-            msg = "File identifier must be set to export record."
-            raise ValueError(msg) from None
-
         try:
             _ = export_base.relative_to(self._config.EXPORT_PATH)
         except ValueError as e:

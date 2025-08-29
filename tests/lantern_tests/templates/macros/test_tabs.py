@@ -175,7 +175,7 @@ class TestDataTab:
             ),
             (
                 ["https://www.bas.ac.uk/data/our-data/maps/how-to-order-a-map/"],
-                "This item is currently only available to purchase as a physical paper map",
+                "This item is available to purchase as a physical paper map",
             ),
             (
                 [

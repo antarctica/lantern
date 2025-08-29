@@ -18,6 +18,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 ### Changed
 
 * Replacing public website search prototype to use WordPress REST API
+* Paper map distribution option text updated to be less exclusive
 
 ### Fixed
 

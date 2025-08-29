@@ -59,7 +59,9 @@ class ItemCatalogue(ItemBase):
     ISO 19115:2003 / 19115-2:2009 standards). See `docs/data_model.md#catalogue-item-limitations` for more information.
     """
 
-    def __init__(self, config: Config, record: Record, get_record: Callable[[str], Record], **kwargs: Any) -> None:
+    def __init__(
+        self, config: Config, record: RecordRevision, get_record: Callable[[str], RecordRevision], **kwargs: Any
+    ) -> None:
         super().__init__(record)
         self._config = config
         self._get_record = get_record
@@ -135,9 +137,6 @@ class ItemCatalogue(ItemBase):
     @property
     def _revision(self) -> Link | None:
         """Link to the record revision, if available."""
-        if not isinstance(self._record, RecordRevision):
-            return None
-
         path = f"records/{self.resource_id[:2]}/{self.resource_id[2:4]}/{self.resource_id}.json"
         href = f"{self._config.TEMPLATES_ITEM_VERSIONS_ENDPOINT}/-/blob/{self._record.file_revision}/{path}"
         short_ref = self._record.file_revision[:8]

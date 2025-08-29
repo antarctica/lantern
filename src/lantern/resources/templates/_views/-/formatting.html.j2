@@ -42,9 +42,7 @@
   "headings": "Headings",
   "table": "Tables",
   "image": "Images",
-  "changelog": "Changes to this guide",
-  }
-%}
+} %}
 
 {% block content %}
   <article class="space-y-4 lg:space-y-8">
@@ -78,14 +76,14 @@
 
     {{ section(slug='code-inline', title='Inline code', input='Some `code` in text.', output='<p>Some <code>code</code> in text.</p>') }}
 
-    {{ section(slug='links', title='Links', tip='Inline URLs such as DOIs will be automatically converted to links.',
+    {{ section(slug='links', title='Links', danger='Do not include links in item titles.', tip='Inline URLs such as DOIs will be automatically converted to links.',
       input='https://example.com
 [example.com](https://example.com)',
       output='<p><a href="https://example.com">https://example.com</a></p>
       <p><a href="https://example.com">example.com</a></p>'
     ) }}
 
-    {{ section(slug='emails', title='Email addresses', tip='Inline email address will be automatically converted to links.',
+    {{ section(slug='emails', title='Email addresses', danger='Do not include email addresses in item titles.', tip='Inline email address will be automatically converted to links.',
       input='connie.watson@example.com
 [Contact Us](mailto:hello@example.com)',
       output='<p><a href="mailto:connie.watson@example.com">connie.watson@example.com</a></p>
@@ -128,7 +126,7 @@
       output='<p>...</p><blockquote><p>Some text in a blockquote ...</p><p>... over multiple lines.</p></blockquote><p>...</p>'
     ) }}
 
-    {{ section(slug='code-block', title='Code block', danger='Do not use code blocks in item titles.',
+    {{ section(slug='code-block', title='Code block', danger='Do not use code blocks in item titles.', tip="Code blocks do not support syntax highlighting.",
       input='...
 ```
 Some text in a code block.
@@ -162,7 +160,7 @@ Some text in a code block.
       <h6>Heading 6</h6>'
     ) }}
 
-    {{ section(slug='table', title='Tables', danger='Do not use tables in item titles.',
+    {{ section(slug='table', title='Tables', danger='Do not use tables in item titles.', tip="Table rows do not need padding to align them, as shown in this example.",
       input='...
 | Header 1 | Header 2 | Header 3 |
 |----------|----------|----------|

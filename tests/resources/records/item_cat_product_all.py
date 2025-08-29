@@ -97,7 +97,7 @@ record.reference_system_info = ReferenceSystemInfo(
                         description="The EPSG Geodetic Parameter Dataset is a structured dataset of Coordinate Reference Systems and Coordinate Transformations, accessible through this online registry.",
                         function=OnlineResourceFunctionCode.INFORMATION,
                     ),
-                    role=[ContactRoleCode.PUBLISHER],
+                    role={ContactRoleCode.PUBLISHER},
                 )
             ]
         ),
@@ -194,7 +194,7 @@ record.identification.contacts = Contacts(
                 description="Personal profile for Connie Watson from the British Antarctic Survey (BAS) public website.",
                 function=OnlineResourceFunctionCode.INFORMATION,
             ),
-            role=[ContactRoleCode.AUTHOR],
+            role={ContactRoleCode.AUTHOR},
         ),
         Contact(
             organisation=ContactIdentity(
@@ -217,7 +217,7 @@ record.identification.contacts = Contacts(
                 description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
                 function=OnlineResourceFunctionCode.INFORMATION,
             ),
-            role=[ContactRoleCode.AUTHOR, ContactRoleCode.PUBLISHER, ContactRoleCode.POINT_OF_CONTACT],
+            role={ContactRoleCode.AUTHOR, ContactRoleCode.PUBLISHER, ContactRoleCode.POINT_OF_CONTACT},
         ),
     ]
 )
@@ -282,7 +282,7 @@ record.distribution = [
                 description="Corporate website for Environmental Systems Research Institute (ESRI).",
                 function=OnlineResourceFunctionCode.INFORMATION,
             ),
-            role=[ContactRoleCode.DISTRIBUTOR],
+            role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
             format="ArcGIS Feature Service",
@@ -315,7 +315,7 @@ record.distribution = [
                 description="Corporate website for Environmental Systems Research Institute (ESRI).",
                 function=OnlineResourceFunctionCode.INFORMATION,
             ),
-            role=[ContactRoleCode.DISTRIBUTOR],
+            role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
             format="ArcGIS Feature Layer",
@@ -348,7 +348,7 @@ record.distribution = [
                 description="Corporate website for Environmental Systems Research Institute (ESRI).",
                 function=OnlineResourceFunctionCode.INFORMATION,
             ),
-            role=[ContactRoleCode.DISTRIBUTOR],
+            role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
             format="OGC API Features Service",
@@ -381,7 +381,7 @@ record.distribution = [
                 description="Corporate website for Environmental Systems Research Institute (ESRI).",
                 function=OnlineResourceFunctionCode.INFORMATION,
             ),
-            role=[ContactRoleCode.DISTRIBUTOR],
+            role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
             format="ArcGIS OGC Feature Layer",

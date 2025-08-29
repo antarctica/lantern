@@ -150,11 +150,9 @@
         </ul>
       {% endcall %}
 
-      {% if data.revision_link %}
-        {% call com.dl_item(title='Metadata revision', id='info-revision') %}
-          <a class="{{ com.link_classes() }}" href="{{ data.revision_link.href }}">{{ data.revision_link.value }} {{ com.restricted_i() }} {{ com.ext_link_i() }}</a>
-        {% endcall %}
-      {% endif %}
+      {% call com.dl_item(title='Metadata revision', id='info-revision') %}
+        <a class="{{ com.link_classes() }}" href="{{ data.revision_link.href }}">{{ data.revision_link.value }} {{ com.restricted_i() }} {{ com.ext_link_i() }}</a>
+      {% endcall %}
 
     {% call com.dl_item(title='Metadata build time', id='info-build') %}
       {{ com.time(data.build_time) }}

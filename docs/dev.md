@@ -360,13 +360,8 @@ class to fake values when testing. Values are configured in the `[tool.pytest_en
 [pytest-recording](https://github.com/kiwicom/pytest-recording) is used to mock HTTP calls to provider APIs (ensuring
 known values are used in tests).
 
-To (re-)record all responses:
-
-```shell
-% uv run pytest --record-mode=all
-```
-
-**Note:** Review recorded responses to check for any sensitive information.
+> [!CAUTION]
+> Review recorded responses to check for any sensitive information.
 
 To update a specific test:
 

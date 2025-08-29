@@ -58,7 +58,7 @@ record.distribution = [
                 description="Corporate website for Environmental Systems Research Institute (ESRI).",
                 function=OnlineResourceFunctionCode.INFORMATION,
             ),
-            role=[ContactRoleCode.DISTRIBUTOR],
+            role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
             format="ArcGIS Feature Service",
@@ -91,7 +91,7 @@ record.distribution = [
                 description="Corporate website for Environmental Systems Research Institute (ESRI).",
                 function=OnlineResourceFunctionCode.INFORMATION,
             ),
-            role=[ContactRoleCode.DISTRIBUTOR],
+            role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
             format="ArcGIS Feature Layer",
@@ -124,7 +124,7 @@ record.distribution = [
                 description="Corporate website for Environmental Systems Research Institute (ESRI).",
                 function=OnlineResourceFunctionCode.INFORMATION,
             ),
-            role=[ContactRoleCode.DISTRIBUTOR],
+            role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
             format="OGC API Features Service",
@@ -157,7 +157,7 @@ record.distribution = [
                 description="Corporate website for Environmental Systems Research Institute (ESRI).",
                 function=OnlineResourceFunctionCode.INFORMATION,
             ),
-            role=[ContactRoleCode.DISTRIBUTOR],
+            role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
             format="ArcGIS OGC Feature Layer",
@@ -190,7 +190,7 @@ record.distribution = [
                 description="Corporate website for Environmental Systems Research Institute (ESRI).",
                 function=OnlineResourceFunctionCode.INFORMATION,
             ),
-            role=[ContactRoleCode.DISTRIBUTOR],
+            role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
             format="ArcGIS Raster Tile Layer",
@@ -223,7 +223,7 @@ record.distribution = [
                 description="Corporate website for Environmental Systems Research Institute (ESRI).",
                 function=OnlineResourceFunctionCode.INFORMATION,
             ),
-            role=[ContactRoleCode.DISTRIBUTOR],
+            role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
             format="ArcGIS Raster Tile Service",
@@ -256,7 +256,7 @@ record.distribution = [
                 description="Corporate website for Environmental Systems Research Institute (ESRI).",
                 function=OnlineResourceFunctionCode.INFORMATION,
             ),
-            role=[ContactRoleCode.DISTRIBUTOR],
+            role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
             format="ArcGIS Vector Tile Layer",
@@ -289,7 +289,7 @@ record.distribution = [
                 description="Corporate website for Environmental Systems Research Institute (ESRI).",
                 function=OnlineResourceFunctionCode.INFORMATION,
             ),
-            role=[ContactRoleCode.DISTRIBUTOR],
+            role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
             format="ArcGIS Vector Tile Service",
@@ -326,7 +326,7 @@ record.distribution = [
                 description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
                 function=OnlineResourceFunctionCode.INFORMATION,
             ),
-            role=[ContactRoleCode.DISTRIBUTOR],
+            role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
             format="GeoJSON",
@@ -364,7 +364,7 @@ record.distribution = [
                 description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
                 function=OnlineResourceFunctionCode.INFORMATION,
             ),
-            role=[ContactRoleCode.DISTRIBUTOR],
+            role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
             format="GeoPackage",
@@ -402,7 +402,7 @@ record.distribution = [
                 description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
                 function=OnlineResourceFunctionCode.INFORMATION,
             ),
-            role=[ContactRoleCode.DISTRIBUTOR],
+            role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
             format="GeoPackage (Zipped)",
@@ -440,7 +440,7 @@ record.distribution = [
                 description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
                 function=OnlineResourceFunctionCode.INFORMATION,
             ),
-            role=[ContactRoleCode.DISTRIBUTOR],
+            role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
             format="JPEG",
@@ -478,7 +478,7 @@ record.distribution = [
                 description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
                 function=OnlineResourceFunctionCode.INFORMATION,
             ),
-            role=[ContactRoleCode.DISTRIBUTOR],
+            role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
             format="PDF",
@@ -516,7 +516,7 @@ record.distribution = [
                 description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
                 function=OnlineResourceFunctionCode.INFORMATION,
             ),
-            role=[ContactRoleCode.DISTRIBUTOR],
+            role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
             format="PDF (Georeferenced)",
@@ -554,7 +554,7 @@ record.distribution = [
                 description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
                 function=OnlineResourceFunctionCode.INFORMATION,
             ),
-            role=[ContactRoleCode.DISTRIBUTOR],
+            role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
             format="PNG",
@@ -592,7 +592,7 @@ record.distribution = [
                 description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
                 function=OnlineResourceFunctionCode.INFORMATION,
             ),
-            role=[ContactRoleCode.DISTRIBUTOR],
+            role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
             format="Shapefile (Zipped)",

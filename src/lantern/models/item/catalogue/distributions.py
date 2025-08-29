@@ -116,7 +116,11 @@ class ArcGISDistribution(Distribution, ABC):
         if option.format is None or option.format.href is None:
             return False
 
-        item_hrefs = [option.format.href for option in [option, *other_options]]
+        item_hrefs = [
+            option.format.href
+            for option in [option, *other_options]
+            if option.format is not None and option.format.href is not None
+        ]
         match = all(href in item_hrefs for href in target_hrefs)
         # avoid matching for each target href by only returning True if the first target matches
         return match and option.format.href == target_hrefs[0]

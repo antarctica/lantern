@@ -152,12 +152,15 @@ def _record_config_minimal_item(base_config: dict) -> dict:
     """
     config = deepcopy(base_config)
     config["file_identifier"] = "x"
+    config["file_revision"] = "x"
     return config
 
 
 @pytest.fixture()
 def fx_record_config_minimal_item(fx_record_config_minimal_iso: dict) -> dict:
     """Minimal record configuration (Item)."""
+    fx_record_config_minimal_iso["file_identifier"] = "x"
+    fx_record_config_minimal_iso["file_revision"] = "x"
     return _record_config_minimal_item(fx_record_config_minimal_iso)
 
 
@@ -229,9 +232,9 @@ def fx_record_revision_minimal_item(fx_record_config_minimal_item: dict) -> Reco
 
 
 @pytest.fixture()
-def fx_record_minimal_item_catalogue(fx_record_config_minimal_item_catalogue: dict) -> Record:
+def fx_record_minimal_item_catalogue(fx_record_config_minimal_item_catalogue: dict) -> RecordRevision:
     """Minimal record instance (ItemCatalogue)."""
-    return Record.loads(fx_record_config_minimal_item_catalogue)
+    return RecordRevision.loads(fx_record_config_minimal_item_catalogue)
 
 
 @pytest.fixture()
@@ -242,7 +245,7 @@ def fx_record_revision_minimal_item_catalogue(fx_record_config_minimal_item_cata
 
 
 @pytest.fixture()
-def fx_record_minimal_item_catalogue_physical_map(fx_record_config_minimal_item_catalogue: dict) -> Record:
+def fx_record_minimal_item_catalogue_physical_map(fx_record_config_minimal_item_catalogue: dict) -> RecordRevision:
     """Minimal record instance (ItemCataloguePhysicalMap)."""
     config = deepcopy(fx_record_config_minimal_item_catalogue)
     config["hierarchy_level"] = HierarchyLevelCode.PAPER_MAP_PRODUCT.value
@@ -253,7 +256,7 @@ def fx_record_minimal_item_catalogue_physical_map(fx_record_config_minimal_item_
             "initiative_type": "paperMap",
         }
     ]
-    return Record.loads(config)
+    return RecordRevision.loads(config)
 
 
 @pytest.fixture()
@@ -268,7 +271,7 @@ def fx_record_revision_minimal_item_catalogue_physical_map(
     return RecordRevision.loads(config)
 
 
-def _get_record(identifier: str) -> Record:
+def _get_record(identifier: str) -> RecordRevision:
     """
     Minimal record lookup method.
 
@@ -276,7 +279,8 @@ def _get_record(identifier: str) -> Record:
     """
     config = deepcopy(_record_config_minimal_iso())
     config["file_identifier"] = identifier
-    return Record.loads(config)
+    config["file_revision"] = "x"
+    return RecordRevision.loads(config)
 
 
 @pytest.fixture()
@@ -309,7 +313,7 @@ def _item_catalogue_min() -> ItemCatalogue:
     """
     return ItemCatalogue(
         config=Config(),
-        record=Record.loads(
+        record=RecordRevision.loads(
             _record_config_minimal_item_catalogue(_record_config_minimal_item(_record_config_minimal_iso()))
         ),
         get_record=_get_record,
@@ -318,7 +322,7 @@ def _item_catalogue_min() -> ItemCatalogue:
 
 @pytest.fixture()
 def fx_item_catalogue_min(
-    fx_config: Config, fx_record_minimal_item_catalogue: Record, fx_get_record: callable
+    fx_config: Config, fx_record_minimal_item_catalogue: RecordRevision, fx_get_record: callable
 ) -> ItemCatalogue:
     """ItemCatalogue based on minimal catalogue record."""
     return ItemCatalogue(
@@ -331,7 +335,7 @@ def fx_item_catalogue_min(
 @pytest.fixture()
 def fx_item_catalogue_min_physical_map(
     fx_config: Config,
-    fx_record_minimal_item_catalogue_physical_map: Record,
+    fx_record_minimal_item_catalogue_physical_map: RecordRevision,
     fx_get_record: callable,
 ) -> ItemCataloguePhysicalMap:
     """ItemCataloguePhysicalMap based on minimal catalogue record for a physical map."""

@@ -15,6 +15,7 @@ from lantern.models.item.catalogue import Extent as CatalogueExtent
 from lantern.models.item.catalogue import ExtentTab as CatalogueExtentTab
 from lantern.models.item.catalogue import ItemCatalogue
 from lantern.models.item.catalogue.elements import ItemCatalogueSummary
+from lantern.models.record.revision import RecordRevision
 
 
 def side_index_label(index: int) -> str:
@@ -159,7 +160,7 @@ class ItemCataloguePhysicalMap(ItemCatalogue):
         )
 
     @property
-    def _sides(self) -> list[Record]:
+    def _sides(self) -> list[RecordRevision]:
         """Records that make up the sides/pages of a physical map."""
         side_identifiers = self._record.identification.aggregations.filter(
             associations=AggregationAssociationCode.IS_COMPOSED_OF,

@@ -65,7 +65,7 @@ distributor = Contact(
         description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
         function=OnlineResourceFunctionCode.INFORMATION,
     ),
-    role=[ContactRoleCode.DISTRIBUTOR],
+    role={ContactRoleCode.DISTRIBUTOR},
 )
 
 record.distribution = [

@@ -118,7 +118,7 @@ class TestDataTab:
             [],
             [
                 Distribution(
-                    distributor=Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.DISTRIBUTOR]),
+                    distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
                     transfer_option=TransferOption(
                         online_resource=OnlineResource(href="x", function=OnlineResourceFunctionCode.DOWNLOAD)
                     ),
@@ -141,7 +141,7 @@ class TestDataTab:
         """Can get individual data elements for download distributions based on values from item."""
         fx_item_catalogue_min._record.distribution = [
             Distribution(
-                distributor=Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.DISTRIBUTOR]),
+                distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
                 format=Format(format="x", href="https://www.iana.org/assignments/media-types/image/png"),
                 transfer_option=TransferOption(
                     size=Size(unit="bytes", magnitude=1024),
@@ -214,7 +214,7 @@ class TestDataTab:
         for href in value:
             fx_item_catalogue_min._record.distribution.append(
                 Distribution(
-                    distributor=Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.DISTRIBUTOR]),
+                    distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
                     format=Format(format="x", href=href),
                     transfer_option=TransferOption(
                         online_resource=OnlineResource(href=href, function=OnlineResourceFunctionCode.DOWNLOAD)
@@ -257,7 +257,7 @@ class TestDataTab:
         """Shows restricted access panel if item is restricted."""
         fx_item_catalogue_min._record.distribution.append(
             Distribution(
-                distributor=Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.DISTRIBUTOR]),
+                distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
                 format=Format(format="x", href="https://www.iana.org/assignments/media-types/image/png"),
                 transfer_option=TransferOption(
                     size=Size(unit="bytes", magnitude=1024),
@@ -278,7 +278,7 @@ class TestDataTab:
 class TestAuthorsTab:
     """Test authors tab template macros."""
 
-    base_contact = Contact(organisation=ContactIdentity(name="x"), email="x", role=[ContactRoleCode.POINT_OF_CONTACT])
+    base_contact = Contact(organisation=ContactIdentity(name="x"), email="x", role={ContactRoleCode.POINT_OF_CONTACT})
 
     @pytest.mark.parametrize(
         "value",
@@ -287,7 +287,7 @@ class TestAuthorsTab:
             Contacts(
                 [
                     base_contact,
-                    Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.AUTHOR]),
+                    Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.AUTHOR}),
                 ]
             ),
         ],
@@ -316,8 +316,8 @@ class TestAuthorsTab:
         items = Contacts(
             [
                 self.base_contact,
-                Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.AUTHOR]),
-                Contact(organisation=ContactIdentity(name="y"), role=[ContactRoleCode.AUTHOR]),
+                Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.AUTHOR}),
+                Contact(organisation=ContactIdentity(name="y"), role={ContactRoleCode.AUTHOR}),
             ]
         )
         fx_item_catalogue_min._record.identification.contacts = items
@@ -330,15 +330,15 @@ class TestAuthorsTab:
     @pytest.mark.parametrize(
         "value",
         [
-            Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.AUTHOR]),
-            Contact(individual=ContactIdentity(name="x"), role=[ContactRoleCode.AUTHOR]),
+            Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.AUTHOR}),
+            Contact(individual=ContactIdentity(name="x"), role={ContactRoleCode.AUTHOR}),
             Contact(
                 individual=ContactIdentity(name="x"),
                 organisation=ContactIdentity(name="y"),
-                role=[ContactRoleCode.AUTHOR],
+                role={ContactRoleCode.AUTHOR},
             ),
-            Contact(individual=ContactIdentity(name="x"), email="x", role=[ContactRoleCode.AUTHOR]),
-            Contact(individual=ContactIdentity(name="x", href="x"), role=[ContactRoleCode.AUTHOR]),
+            Contact(individual=ContactIdentity(name="x"), email="x", role={ContactRoleCode.AUTHOR}),
+            Contact(individual=ContactIdentity(name="x", href="x"), role={ContactRoleCode.AUTHOR}),
         ],
     )
     def test_author(self, fx_item_catalogue_min: ItemCatalogue, value: Contact):
@@ -1215,15 +1215,15 @@ class TestContactTab:
     @pytest.mark.parametrize(
         "value",
         [
-            Contact(organisation=ContactIdentity(name="x"), email="x", role=[ContactRoleCode.POINT_OF_CONTACT]),
+            Contact(organisation=ContactIdentity(name="x"), email="x", role={ContactRoleCode.POINT_OF_CONTACT}),
             Contact(
-                organisation=ContactIdentity(name="x"), phone="x", email="x", role=[ContactRoleCode.POINT_OF_CONTACT]
+                organisation=ContactIdentity(name="x"), phone="x", email="x", role={ContactRoleCode.POINT_OF_CONTACT}
             ),
             Contact(
                 organisation=ContactIdentity(name="x"),
                 address=Address(delivery_point="x"),
                 email="x",
-                role=[ContactRoleCode.POINT_OF_CONTACT],
+                role={ContactRoleCode.POINT_OF_CONTACT},
             ),
         ],
     )

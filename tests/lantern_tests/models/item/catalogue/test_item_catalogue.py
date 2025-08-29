@@ -156,13 +156,13 @@ class TestItemCatalogue:
             (
                 "x",
                 GraphicOverviews([GraphicOverview(identifier="x", href="x", mime_type="x")]),
-                Contacts([Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.POINT_OF_CONTACT])]),
+                Contacts([Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT})]),
                 None,
             ),
             (
                 None,
                 GraphicOverviews([GraphicOverview(identifier="overview", href="x", mime_type="x")]),
-                Contacts([Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.AUTHOR])]),
+                Contacts([Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.AUTHOR})]),
                 "x",
             ),
             (
@@ -170,8 +170,8 @@ class TestItemCatalogue:
                 GraphicOverviews([]),
                 Contacts(
                     [
-                        Contact(individual=ContactIdentity(name="x"), role=[ContactRoleCode.AUTHOR]),
-                        Contact(individual=ContactIdentity(name="y"), role=[ContactRoleCode.AUTHOR]),
+                        Contact(individual=ContactIdentity(name="x"), role={ContactRoleCode.AUTHOR}),
+                        Contact(individual=ContactIdentity(name="y"), role={ContactRoleCode.AUTHOR}),
                     ]
                 ),
                 "x & y",
@@ -181,9 +181,9 @@ class TestItemCatalogue:
                 GraphicOverviews([]),
                 Contacts(
                     [
-                        Contact(individual=ContactIdentity(name="x"), role=[ContactRoleCode.AUTHOR]),
-                        Contact(individual=ContactIdentity(name="y"), role=[ContactRoleCode.AUTHOR]),
-                        Contact(individual=ContactIdentity(name="z"), role=[ContactRoleCode.AUTHOR]),
+                        Contact(individual=ContactIdentity(name="x"), role={ContactRoleCode.AUTHOR}),
+                        Contact(individual=ContactIdentity(name="y"), role={ContactRoleCode.AUTHOR}),
+                        Contact(individual=ContactIdentity(name="z"), role={ContactRoleCode.AUTHOR}),
                     ]
                 ),
                 "x, y & z",

@@ -85,7 +85,7 @@ class Record:
 
     Records are low-level views of a resource using the ISO 19115 information model. This class is an incomplete mapping
     of the BAS Metadata Library ISO 19115:2003 / 19115-2:2009 v4 configuration schema [1] to Python dataclasses, with
-    code lists represented by Python enums. See docs/data-model.md#record-limitations for (un)supported config elements.
+    code lists represented by Python enums. See docs/libraries.md#record-limitations for (un)supported config elements.
 
     Complete record configurations can be loaded from a plain Python dict using `loads_schema()` and dumped back using
     `dumps_schema()`. This class cannot be used to load/dump from/to XML.

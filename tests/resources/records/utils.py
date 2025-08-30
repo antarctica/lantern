@@ -35,7 +35,7 @@ from lantern.lib.metadata_library.models.record.enums import (
 )
 from lantern.lib.metadata_library.models.record.presets.base import RecordMagicDiscoveryV1
 from lantern.lib.metadata_library.models.record.presets.extents import make_bbox_extent, make_temporal_extent
-from lantern.models.item.base.const import CATALOGUE_NAMESPACE
+from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 
 

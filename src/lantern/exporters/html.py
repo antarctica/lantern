@@ -6,9 +6,9 @@ from mypy_boto3_s3 import S3Client
 
 from lantern.config import Config
 from lantern.exporters.base import ResourceExporter, get_record_aliases
-from lantern.models.item.base.const import CATALOGUE_NAMESPACE
 from lantern.models.item.catalogue import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
+from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 
 

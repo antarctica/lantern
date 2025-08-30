@@ -39,7 +39,6 @@ from lantern.lib.metadata_library.models.record.enums import (
     ProgressCode,
 )
 from lantern.models.item.base import AccessLevel
-from lantern.models.item.base.const import CATALOGUE_NAMESPACE
 from lantern.models.item.base.elements import Contact, Contacts, Link
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.base.enums import ResourceTypeLabel
@@ -67,6 +66,7 @@ from lantern.models.item.catalogue.tabs import (
     LineageTab,
     RelatedTab,
 )
+from lantern.models.record.const import CATALOGUE_NAMESPACE
 from tests.conftest import _get_record
 
 

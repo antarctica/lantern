@@ -19,12 +19,12 @@ from lantern.lib.metadata_library.models.record.enums import (
     ProgressCode,
 )
 from lantern.models.item.base import ItemBase
-from lantern.models.item.base.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE, GITLAB_NAMESPACE
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.base.elements import Link, unpack
 from lantern.models.item.base.enums import AccessLevel, ResourceTypeLabel
 from lantern.models.item.base.utils import md_as_html
 from lantern.models.item.catalogue.enums import ResourceTypeIcon
+from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE, GITLAB_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 
 TFormattedDate = TypeVar("TFormattedDate", bound="FormattedDate")

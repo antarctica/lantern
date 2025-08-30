@@ -90,7 +90,7 @@ load-records = { cmd = "python -m tasks.records_load", help = "Copy externally e
 select-records = { cmd = "python -m tasks.records_select", help = "Copy records from cache to import directory for editing" }
 import-records = { cmd = "python -m tasks.records_import", help = "Import records from directory" }
 build-records = { cmd = "python -m tasks.records_build", help = "Build records as a catalogue site" }
-bootstrap-records = { cmd = "python -m tasks.records_boostrap", help = "Bootstrap a new records repo" }
+bootstrap-records = { cmd = "python -m tasks.records_bootstrap", help = "Bootstrap a new records repo" }
 serve = { cmd = "python -m http.server 9000 --directory export", help = "Serve local catalogue site" }
 
 [tool.ruff]

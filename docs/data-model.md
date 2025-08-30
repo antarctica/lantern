@@ -2,59 +2,42 @@
 
 ## Records
 
+### Base records
+
 Records are a partial representation of the [ISO 19115](https://metadata-standards.data.bas.ac.uk/standards/iso-19115-19139)
-information model implemented as a data class (`lantern.lib.metadata_library.models.record.Record`). They describe
-resources (maps [products], datasets, collections, etc.) and form the primary entity within the Data Catalogue.
+information model implemented as a base data class (`lantern.lib.metadata_library.models.record.Record`). They
+generically describe resources (maps [products], datasets, collections, etc.).
 
 <!-- pyml disable md028 -->
 > [!NOTE]
-> When encoded as XML records are interoperable with applications that support ISO 19139 encoded records.
+> The base Records model is considered part of the BAS Metadata Library. See the
+> [Library](/docs/libraries.md#bas-metadata-library) docs for more information.
 
-> [!WARNING]
->When encoded as JSON, records are only interoperable with applications that support the
-> [BAS ISO 19115](https://metadata-standards.data.bas.ac.uk/standards/iso-19115-19139#json-schemas) JSON Schema.
-<!-- pyml enable md028 -->
-
-The Record data class provides:
-
-- access to typed record properties
-- record configuration validation
-- filtering list based properties such as contacts, aggregations, etc.
-- loading and dumping record configurations (including from/to JSON documents)
-
-Additional data classes are used to implement sub-properties (e.g. an `Identification` class). Code list properties are
-implemented using `Enum` classes.
-
-<!-- pyml disable md028 -->
 > [!NOTE]
 > Unless stated otherwise, references to 'Records' elsewhere refer to the [`RecordRevision`](#record-revisions) class.
-
-> [!NOTE]
-> The Records model is considered part of the BAS Metadata Library but was developed for this project and not
-yet upstreamed. See the [Library](/docs/libraries.md#bas-metadata-library) docs for more information.
-
-> [!IMPORTANT]
-> The Records model does not support all properties supported by the BAS ISO 19115 JSON Schema. See the
-> [Record Limitations](#record-limitations) section for more information.
 <!-- pyml enable md028 -->
+
+### Catalogue records
+
+Catalogue Records represent [Records](#records) within the Data Catalogue specifically as a `Record` subclass
+(`lantern.models.record.Record`). This subclass SHOULD be used for any additional subclasses within the Catalogue.
+
+Catalogue Records extend the [Base Record](#base-records) class by implementing the Catalogue's
+[Record Requirements](#record-requirements).
 
 ### Record revisions
 
-Record Revisions represent a [Record](#record) at a particular point in time by recording a revision identifier
-alongside Record data. This identifier is a local addition and is not part of the ISO 19115 information model.
+Record Revisions represent [Records](#records) at a particular point in time indicated by a revision identifier.
 
-Identifiers are intended to come from a version Control system (VCS) such as Git, where values are unique across the
-history of a Record but may be shared by multiple Records, to represent a coordinated set of changes (AKA a changeset).
+Revision identifiers are a local addition and not part of the ISO 19115 information model. Identifiers SHOULD come from
+a version Control system (VCS) such as Git. Identifiers MUST be unique within the history of each Record but MAY be
+shared across multiple Records, to represent a coordinated set of changes for example (i.e. a records  changeset).
 
-For use within Python, a Record Revision data class (`lantern.models.record.revisiob.RecordRevision`), a subclass of
-`Record` is defined which:
-
-- inherits all `Record` properties and methods
-- allows setting a `file_revision` property
-- optionally (and not by default) allows dumping the Record config including `file_revision` to plain types (not JSON/XML)
+Record Revisions are implemented as a [Catalogue Record](#catalogue-records) subclass
+(`lantern.models.record.revision.RecordRevision`) adding a `file_revision` property.
 
 > [!NOTE]
-> Unless stated otherwise, references to 'Records' elsewhere refer to the `RecordRevision` data class.
+> Unless stated otherwise, references to 'Records' elsewhere in this documentation refer to the `RecordRevision` class.
 
 ### Record authoring
 
@@ -99,93 +82,22 @@ For example:
 
 The Data Catalogue itself requires these properties to be set in all records:
 
-1. the `file_identifier`, so records can be distinguished, without relying on a value that may change or not be unique
-1. the `hierarchy_level`, so item types can be distinguished
-1. an `identification.identifier`, as per [1] to determine if a record is part of the Catalogue
-1. an `identification.identifier.contacts[role='pointOfContact']`, for the item contact tab
+- the `file_identifier`
+  - so records can be distinguished without relying on a value that may change or not be unique
+- the `hierarchy_level`
+  - so [Item](#items) types can be distinguished
+- an `identification.identifier`, as per [1]
+  - to determine if a record is part of the Catalogue
+- an `identification.identifier.contacts[role='pointOfContact']`
+  - for use with the item contact tab
+
+These requirements are implemented and enforced by the [Catalogue Record](#catalogue-records) class.
 
 [1]
 
 - identifier: `{file_identifier}`
 - href: `https://data.bas.ac.uk/items/{file_identifier}`
 - namespace: `data.bas.ac.uk`
-
-### Record validation
-
-The `Record` data class includes a `validate()` method which will:
-
-- validate the record configuration against the
-  [BAS ISO 19115 JSON schema](https://metadata-standards.data.bas.ac.uk/standards/iso-19115-19139#json-schemas)
-- validate the record configuration against any of these supported profiles:
-  - the [MAGIC Discovery Profile (v1)](https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery-v1).
-
-Records will be validated automatically when needed. Invalid records will raise a
-`lantern.lib.metadata_library.models.record.RecordInvalidError` exception.
-
-### Record limitations
-
-Supported common elements (references not normative or exhaustive):
-
-- `*.citation.title`
-- `*.citation.dates`
-- `*.citation.edition`
-- `*.citation.contacts` (except `contact.position`)
-- `*.citation.identifiers`
-- `*.citation.series` (with local workaround for `series.page` until v5 schema)
-- `*.online resource` (partial)
-
-Supported elements (references not normative or exhaustive):
-
-- `$schema`
-- `file_identifier`
-- `file_revision` (non-ISO 19115 property, see RecordRevision)
-- `hierarchy_level`
-- `metadata.character_set` (hard-coded to 'utf8')
-- `metadata.language` (hard-coded to 'eng')
-- `metadata.contacts` (see `*.citation.contacts`)
-- `metadata.date_stamp`
-- `metadata.metadata_standard`
-- `reference_system_info`
-- `identification.title` (via `*.citation.title`)
-- `identification.dates` (via `*.citation.dates`)
-- `identification.edition` (via `*.citation.edition`)
-- `identification.identifiers` (via `*.citation.identifiers`)
-- `identification.contacts` (except `*.citation.contacts`)
-- `identification.abstract`
-- `identification.purpose`
-- `identification.other_citation_details`
-- `identification.supplemental_information`
-- `identification.constraints` (except permissions)
-- `identification.aggregations`
-- `identification.extents` (temporal and bounding box extents only)
-- `identification.graphic_overviews`
-- `identification.spatial_resolution`
-- `identification.maintenance`
-- `identification.character_set` (hard-coded to 'utf8')
-- `identification.language` (hard-coded to 'eng')
-- `(identification.)data_quality.domain_consistency`
-- `(identification.)data_quality.lineage.statement`
-- `distribution.distributor`
-- `distribution.format` (`format` and `href` only)
-- `distribution.transfer_option`
-
-Unsupported elements (not normative or exhaustive):
-
-- `*.contact.position`
-- `*.online_resource.protocol`
-- `(identification.)data_quality.lineage.process_step`
-- `(identification.)data_quality.lineage.sources`
-- `distribution.format` (except name and URL)
-- `identification.credit`
-- `identification.constraint.permissions`
-- `identification.extent.geographic.identifier`
-- `identification.extent.vertical`
-- `identification.keywords`
-- `identification.resource_formats`
-- `identification.spatial_representation_type`
-- `identification.status`
-- `identification.topics`
-- `metadata.maintenance` (`identification.metadata` is supported)
 
 ## Items
 

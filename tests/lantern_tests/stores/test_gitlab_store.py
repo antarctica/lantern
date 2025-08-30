@@ -9,7 +9,7 @@ from gitlab import Gitlab
 from pytest_mock import MockerFixture
 from requests.exceptions import ConnectionError as RequestsConnectionError
 
-from lantern.lib.metadata_library.models.record import Record
+from lantern.models.record import Record
 from lantern.models.record.revision import RecordRevision
 from lantern.stores.base import RecordNotFoundError
 from lantern.stores.gitlab import GitLabLocalCache, GitLabStore, RemoteStoreUnavailableError
@@ -88,14 +88,14 @@ class TestGitLabLocalCache:
         result = cache._current
         assert result == current
 
-    def test_load_record_json(self, fx_gitlab_cache: GitLabLocalCache, fx_record_config_minimal_item: dict):
+    def test_load_record_json(self, fx_gitlab_cache: GitLabLocalCache, fx_revision_config_min: dict):
         """Can load a record from a JSON record config and file identifier."""
         with TemporaryDirectory() as tmp_path:
             temp_path = Path(tmp_path)
 
-            config_path = temp_path / f"{fx_record_config_minimal_item['file_identifier']}.json"
+            config_path = temp_path / f"{fx_revision_config_min['file_identifier']}.json"
             with config_path.open("w") as f:
-                json.dump(fx_record_config_minimal_item, f, indent=2)
+                json.dump(fx_revision_config_min, f, indent=2)
 
             record = fx_gitlab_cache._load_record(config_path, file_revision="x")
             assert isinstance(record, RecordRevision)
@@ -111,23 +111,19 @@ class TestGitLabLocalCache:
     def test_build_cache(
         self,
         fx_gitlab_cache: GitLabLocalCache,
-        fx_record_config_minimal_item: dict,
+        fx_record_config_min: dict,
     ):
-        """
-        Can populate cache with record configurations and other required context.
-
-        `fx_record_config_minimal_item` needed to include `file_identifier` in test record.
-        """
+        """Can populate cache with record configurations and other required context."""
         head_commit = {"x": "x"}
         with TemporaryDirectory() as tmp_path:
             temp_path = Path(tmp_path)
 
-            config_path = temp_path / f"{fx_record_config_minimal_item['file_identifier']}.json"
+            config_path = temp_path / f"{fx_record_config_min['file_identifier']}.json"
             with config_path.open("w") as f:
-                json.dump(fx_record_config_minimal_item, f, indent=2)
+                json.dump(fx_record_config_min, f, indent=2)
 
             config_paths = [config_path]
-            commits = {fx_record_config_minimal_item["file_identifier"]: "x"}
+            commits = {fx_record_config_min["file_identifier"]: "x"}
 
             fx_gitlab_cache._build_cache(config_paths=config_paths, config_commits=commits, head_commit=head_commit)
 
@@ -141,7 +137,7 @@ class TestGitLabLocalCache:
 
         with fx_gitlab_cache._hashes_path.open() as f:
             data = json.load(f)
-            assert data == {"hashes": {"x": "e9dc256d287ce17eb8feeddc4cb34e53da61d459"}}
+            assert data == {"hashes": {"x": "0705d7272694779f2f4ee812cba66bd53e476f6d"}}
 
         with fx_gitlab_cache._commits_path.open() as f:
             data = json.load(f)
@@ -171,9 +167,7 @@ class TestGitLabLocalCache:
         assert f"{expected}.json" in [path.name for path in local_paths]
         assert f"records/{expected[:2]}/{expected[2:4]}/{expected}.json" in remote_paths
 
-    def test_create(
-        self, mocker: MockerFixture, fx_gitlab_cache: GitLabLocalCache, fx_record_config_minimal_item: dict
-    ):
+    def test_create(self, mocker: MockerFixture, fx_gitlab_cache: GitLabLocalCache, fx_record_config_min: dict):
         """
         Can fetch and populate cache with records from remote repository.
 
@@ -185,10 +179,10 @@ class TestGitLabLocalCache:
         with TemporaryDirectory() as tmp_path:
             temp_path = Path(tmp_path)
 
-            fx_record_config_minimal_item["file_identifier"] = fid
-            config_path = temp_path / f"{fx_record_config_minimal_item['file_identifier']}.json"
+            fx_record_config_min["file_identifier"] = fid
+            config_path = temp_path / f"{fx_record_config_min['file_identifier']}.json"
             with config_path.open("w") as f:
-                json.dump(fx_record_config_minimal_item, f, indent=2)
+                json.dump(fx_record_config_min, f, indent=2)
             config_paths = [config_path]
             config_urls = [f"records/{fid[:2]}/{fid[2:4]}/{fid}.json"]
             mocker.patch.object(fx_gitlab_cache, "_fetch_project_archive", return_value=(config_paths, config_urls))
@@ -441,7 +435,7 @@ class TestGitLabStore:
         mocker: MockerFixture,
         caplog: pytest.LogCaptureFixture,
         fx_gitlab_store_cached: GitLabStore,
-        fx_record_revision_minimal_iso: RecordRevision,
+        fx_revision_model_min: RecordRevision,
         mode: str,
         expected: dict[str, int],
     ):
@@ -449,8 +443,8 @@ class TestGitLabStore:
         records = []
 
         if mode == "add":
-            fx_record_revision_minimal_iso.file_identifier = "d4e5f6"
-            records.append(fx_record_revision_minimal_iso)
+            fx_revision_model_min.file_identifier = "d4e5f6"
+            records.append(fx_revision_model_min)
         if mode == "update":
             mocker.patch.object(
                 type(fx_gitlab_store_cached._cache), "_current", new_callable=PropertyMock, return_value=True
@@ -528,7 +522,7 @@ class TestGitLabStore:
         mocker: MockerFixture,
         caplog: pytest.LogCaptureFixture,
         fx_gitlab_store_cached: GitLabStore,
-        fx_record_minimal_item: Record,
+        fx_record_model_min: Record,
         mode: str,
         stats: dict[str, int],
     ):
@@ -539,7 +533,7 @@ class TestGitLabStore:
 
         No-op case for submitted records that don't trigger any changes to remote repo.
         """
-        records = [] if mode == "none" else [fx_record_minimal_item]
+        records = [] if mode == "none" else [fx_record_model_min]
         mocker.patch.object(fx_gitlab_store_cached, "_commit", return_value=stats)
         mocker.patch.object(
             type(fx_gitlab_store_cached._cache), "_current", new_callable=PropertyMock, return_value=True

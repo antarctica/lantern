@@ -2,7 +2,6 @@ from datetime import UTC, date, datetime
 
 import pytest
 
-from lantern.lib.metadata_library.models.record import Record
 from lantern.lib.metadata_library.models.record.elements.common import Date, Identifier
 from lantern.lib.metadata_library.models.record.elements.common import Dates as RecordDates
 from lantern.lib.metadata_library.models.record.elements.common import Identifiers as RecordIdentifiers
@@ -26,7 +25,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     MaintenanceFrequencyCode,
     ProgressCode,
 )
-from lantern.models.item.base import AccessLevel
+from lantern.models.item.base import AccessLevel, ItemBase
 from lantern.models.item.base.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.base.elements import Link
@@ -311,34 +310,38 @@ class TestItemCatalogueSummaryCatalogue:
     Used for showing summaries of other items.
     """
 
-    def test_init(self, fx_record_minimal_item: Record):
+    def test_init(self, fx_item_base_model_min: ItemBase):
         """Can create an ItemCatalogueSummaryCatalogue."""
-        summary = ItemCatalogueSummary(fx_record_minimal_item)
+        record = fx_item_base_model_min._record
+        summary = ItemCatalogueSummary(record)
 
         assert isinstance(summary, ItemCatalogueSummary)
-        assert summary._record == fx_record_minimal_item
+        assert summary._record == record
 
-    def test_resource_type_icon(self, fx_record_minimal_item: Record):
+    def test_resource_type_icon(self, fx_item_base_model_min: ItemBase):
         """Can get icon for resource type."""
-        summary = ItemCatalogueSummary(fx_record_minimal_item)
+        record = fx_item_base_model_min._record
+        summary = ItemCatalogueSummary(record)
         assert summary._resource_type_icon == ResourceTypeIcon[summary.resource_type.name].value
 
     @pytest.mark.parametrize(("value", "expected"), [(None, ""), ("x", "<p>x</p>"), ("_x_", "<p><em>x</em></p>")])
-    def test_summary_html(self, fx_record_minimal_item: Record, value: str, expected: str):
+    def test_summary_html(self, fx_item_base_model_min: ItemBase, value: str, expected: str):
         """Can get summary with Markdown formatting encoded as HTML if present, or a blank string."""
-        fx_record_minimal_item.identification.purpose = value
-        summary = ItemCatalogueSummary(fx_record_minimal_item)
+        record = fx_item_base_model_min._record
+        record.identification.purpose = value
+        summary = ItemCatalogueSummary(record)
 
         assert summary.summary_html == expected
 
     @pytest.mark.parametrize("has_date", [True, False])
-    def test_date(self, fx_record_minimal_item: Record, has_date: bool):
+    def test_date(self, fx_item_base_model_min: ItemBase, has_date: bool):
         """Can get formatted publication date if set."""
+        record = fx_item_base_model_min._record
         publication = Date(date=datetime(2014, 6, 30, tzinfo=UTC).date())
         expected = "30 June 2014" if has_date else None
         if has_date:
-            fx_record_minimal_item.identification.dates.publication = publication
-        summary = ItemCatalogueSummary(fx_record_minimal_item)
+            record.identification.dates.publication = publication
+        summary = ItemCatalogueSummary(record)
         if has_date:
             assert summary._date.value == expected
         else:
@@ -361,7 +364,7 @@ class TestItemCatalogueSummaryCatalogue:
     )
     def test_fragments(
         self,
-        fx_record_minimal_item: Record,
+        fx_item_base_model_min: ItemBase,
         resource_type: HierarchyLevelCode,
         edition: str | None,
         exp_edition: str | None,
@@ -371,22 +374,21 @@ class TestItemCatalogueSummaryCatalogue:
         exp_child_count: str | None,
     ):
         """Can get fragments to use as part of item summary UI."""
+        record = fx_item_base_model_min._record
         exp_resource_type = ResourceTypeLabel[resource_type.name]
-        fx_record_minimal_item.hierarchy_level = resource_type
-        fx_record_minimal_item.identification.edition = edition
+        record.hierarchy_level = resource_type
+        record.identification.edition = edition
         if has_pub:
-            fx_record_minimal_item.identification.dates.publication = Date(
-                date=datetime(2014, 6, 30, tzinfo=UTC).date()
-            )
+            record.identification.dates.publication = Date(date=datetime(2014, 6, 30, tzinfo=UTC).date())
         for _ in range(child_count):
-            fx_record_minimal_item.identification.aggregations.append(
+            record.identification.aggregations.append(
                 Aggregation(
                     identifier=Identifier(identifier="x", namespace="x"),
                     association_type=AggregationAssociationCode.IS_COMPOSED_OF,
                 )
             )
-        fx_record_minimal_item.child_aggregations_count = child_count
-        summary = ItemCatalogueSummary(fx_record_minimal_item)
+        record.child_aggregations_count = child_count
+        summary = ItemCatalogueSummary(record)
 
         result = summary.fragments
 
@@ -408,14 +410,15 @@ class TestItemCatalogueSummaryCatalogue:
             ),
         ],
     )
-    def test_href_graphic(self, fx_record_minimal_item: Record, href: str | None, expected: str):
+    def test_href_graphic(self, fx_item_base_model_min: ItemBase, href: str | None, expected: str):
         """Can get href graphic."""
+        record = fx_item_base_model_min._record
         if href is not None:
-            fx_record_minimal_item.identification.graphic_overviews.append(
+            record.identification.graphic_overviews.append(
                 GraphicOverview(identifier="overview", href=href, mime_type="x")
             )
 
-        summary = ItemCatalogueSummary(fx_record_minimal_item)
+        summary = ItemCatalogueSummary(record)
 
         if href is not None:
             assert summary.href_graphic == expected

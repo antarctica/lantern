@@ -9,9 +9,9 @@ from importlib_resources import files as resources_files
 from mypy_boto3_s3 import S3Client
 
 from lantern.config import Config
-from lantern.lib.metadata_library.models.record import Record
 from lantern.lib.metadata_library.models.record.elements.common import Identifier
 from lantern.models.item.base.const import ALIAS_NAMESPACE
+from lantern.models.record import Record
 from lantern.models.record.revision import RecordRevision
 
 

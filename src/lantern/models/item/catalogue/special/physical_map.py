@@ -2,7 +2,6 @@ import json
 from json import JSONDecodeError
 from typing import Any
 
-from lantern.lib.metadata_library.models.record import Record
 from lantern.lib.metadata_library.models.record.elements.common import Series
 from lantern.lib.metadata_library.models.record.elements.identification import GraphicOverviews
 from lantern.lib.metadata_library.models.record.enums import (
@@ -15,6 +14,7 @@ from lantern.models.item.catalogue import Extent as CatalogueExtent
 from lantern.models.item.catalogue import ExtentTab as CatalogueExtentTab
 from lantern.models.item.catalogue import ItemCatalogue
 from lantern.models.item.catalogue.elements import ItemCatalogueSummary
+from lantern.models.record import Record
 from lantern.models.record.revision import RecordRevision
 
 

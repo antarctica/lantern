@@ -26,7 +26,7 @@ from lantern.models.item.catalogue.enums import DistributionType
 
 def _make_dist(format_href: str) -> RecordDistribution:
     return RecordDistribution(
-        distributor=Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.DISTRIBUTOR]),
+        distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
         transfer_option=TransferOption(
             online_resource=OnlineResource(href="x", function=OnlineResourceFunctionCode.DOWNLOAD)
         ),

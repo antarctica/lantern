@@ -7,10 +7,8 @@ from bs4 import BeautifulSoup
 from jinja2 import Environment, PackageLoader, select_autoescape
 
 from lantern.config import Config
-from lantern.lib.metadata_library.models.record import Record
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
 from lantern.models.item.base import ItemBase
-from lantern.models.item.base.const import CATALOGUE_NAMESPACE
 from lantern.models.item.base.elements import Link
 from lantern.models.item.catalogue.elements import (
     Aggregations,
@@ -37,13 +35,6 @@ from lantern.models.record.revision import RecordRevision
 from lantern.models.templates import PageMetadata
 
 
-class ItemInvalidError(Exception):
-    """Raised when an item is based on an invalid record."""
-
-    def __init__(self, validation_error: Exception) -> None:
-        self.validation_error = validation_error
-
-
 class ItemCatalogue(ItemBase):
     """
     Representation of a resource within the BAS Data Catalogue.
@@ -67,39 +58,6 @@ class ItemCatalogue(ItemBase):
         self._get_record = get_record
         _loader = PackageLoader("lantern", "resources/templates")
         self._jinja = Environment(loader=_loader, autoescape=select_autoescape(), trim_blocks=True, lstrip_blocks=True)
-
-        self.validate(record)
-
-    @staticmethod
-    def validate(record: Record) -> None:
-        """
-        Validate underlying record against Data Catalogue requirements.
-
-        See also `docs/data_model.md#record-requirements`.
-
-        Validation based on [1]. Failed validation will raise a `RecordInvalidError` exception.
-
-        Note: The requirement for a file_identifier is already checked in ItemBase.
-
-        [1] https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/blob/v0.7.5/docs/implementation.md#minimum-record-requirements
-        """
-        record.validate()
-
-        self_identifiers = record.identification.identifiers.filter(namespace=CATALOGUE_NAMESPACE)
-        if not self_identifiers:
-            msg = f"Record must include an identification identifier with the '{CATALOGUE_NAMESPACE}' namespace."
-            exp = ValueError(msg)
-            raise ItemInvalidError(validation_error=exp)
-        if self_identifiers[0].identifier != record.file_identifier:
-            msg = f"Record '{CATALOGUE_NAMESPACE}' identifier must match file identifier."
-            exp = ValueError(msg)
-            raise ItemInvalidError(validation_error=exp)
-
-        pocs = record.identification.contacts.filter(roles=ContactRoleCode.POINT_OF_CONTACT)
-        if not pocs:
-            msg = "Record must include an identification contact with the Point of Contact role."
-            exp = ValueError(msg)
-            raise ItemInvalidError(validation_error=exp)
 
     @staticmethod
     def _prettify_html(html: str) -> str:

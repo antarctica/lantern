@@ -1,6 +1,5 @@
 import logging
 
-from lantern.lib.metadata_library.models.record import Record
 from lantern.models.record.revision import RecordRevision
 from lantern.stores.base import RecordNotFoundError, Store
 from tests.resources.records.item_cat_collection_all import record as collection_all_supported
@@ -29,10 +28,10 @@ class FakeRecordsStore(Store):
 
     def __init__(self, logger: logging.Logger) -> None:
         self._logger = logger
-        self._records: list[Record | RecordRevision] = []
+        self._records: list[RecordRevision] = []
 
     @property
-    def _fake_records(self) -> list[Record | RecordRevision]:
+    def _fake_records(self) -> list[RecordRevision]:
         return [
             collection_min_supported,
             collection_all_supported,
@@ -55,7 +54,7 @@ class FakeRecordsStore(Store):
         ]
 
     @staticmethod
-    def _get_related_identifiers(record: Record) -> set[str]:
+    def _get_related_identifiers(record: RecordRevision) -> set[str]:
         """For building a single item with its direct relations."""
         return {
             related.identifier.identifier
@@ -64,7 +63,7 @@ class FakeRecordsStore(Store):
         }
 
     @property
-    def records(self) -> list[Record | RecordRevision]:
+    def records(self) -> list[RecordRevision]:
         """All records."""
         return self._records
 
@@ -94,7 +93,7 @@ class FakeRecordsStore(Store):
             related_records = [records_indexed[related_id] for related_id in self._get_related_identifiers(record)]
             self._records.extend(related_records)
 
-    def get(self, file_identifier: str) -> Record:
+    def get(self, file_identifier: str) -> RecordRevision:
         """
         Get record by file identifier.
 

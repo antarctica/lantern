@@ -40,11 +40,11 @@ class TestWordPressSearchItem:
         )
         assert isinstance(item, WordPressSearchItem)
 
-    def test_loads(self, fx_record_revision_minimal_item: RecordRevision):
+    def test_loads(self, fx_revision_model_min: RecordRevision):
         """Can create an instance from a ItemWebsiteSearch instance."""
         source = "y"
         base_url = "z"
-        search_item = ItemWebsiteSearch(record=fx_record_revision_minimal_item, source=source, base_url=base_url)
+        search_item = ItemWebsiteSearch(record=fx_revision_model_min, source=source, base_url=base_url)
         item = WordPressSearchItem.loads(search_item)
 
         assert item.source == source
@@ -109,10 +109,10 @@ class TestWordPressClient:
     @pytest.mark.block_network
     @pytest.mark.parametrize("post_id", [None, 123])
     def test_upsert(
-        self, fx_wordpress_client: WordPressClient, fx_record_revision_minimal_item: RecordRevision, post_id: int | None
+        self, fx_wordpress_client: WordPressClient, fx_revision_model_min: RecordRevision, post_id: int | None
     ):
         """Can insert or update a post of a given type."""
-        item = ItemWebsiteSearch(record=fx_record_revision_minimal_item, source="x", base_url="x")
+        item = ItemWebsiteSearch(record=fx_revision_model_min, source="x", base_url="x")
         fields = asdict(WordPressSearchItem.loads(item))
         fx_wordpress_client.upsert(fields=fields, post_id=post_id)
 
@@ -140,52 +140,44 @@ class TestWebsiteSearchExporter:
         assert exporter.name == "Public Website search results"
         assert len(exporter._records) == 0
 
-    def test_loads(
-        self, fx_exporter_website_search: WebsiteSearchExporter, fx_record_revision_minimal_item: RecordRevision
-    ):
+    def test_loads(self, fx_exporter_website_search: WebsiteSearchExporter, fx_revision_model_min: RecordRevision):
         """Can load records."""
-        records = [fx_record_revision_minimal_item]
+        records = [fx_revision_model_min]
         fx_exporter_website_search.loads(records=records)
         assert len(fx_exporter_website_search._records) == len(records)
 
     def test_get_superseded_records(
-        self, fx_exporter_website_search: WebsiteSearchExporter, fx_record_revision_minimal_item: RecordRevision
+        self, fx_exporter_website_search: WebsiteSearchExporter, fx_revision_model_min: RecordRevision
     ):
         """Can determine superseded records."""
-        successor = deepcopy(fx_record_revision_minimal_item)
+        successor = deepcopy(fx_revision_model_min)
         successor.file_identifier = "y"
         successor.identification.aggregations.append(
             Aggregation(
-                identifier=Identifier(
-                    identifier=fx_record_revision_minimal_item.file_identifier, namespace="data.bas.ac.uk"
-                ),
+                identifier=Identifier(identifier=fx_revision_model_min.file_identifier, namespace="data.bas.ac.uk"),
                 association_type=AggregationAssociationCode.REVISION_OF,
             )
         )
 
-        results = fx_exporter_website_search._get_superseded_records(
-            records=[fx_record_revision_minimal_item, successor]
-        )
-        assert results == [fx_record_revision_minimal_item.file_identifier]
+        results = fx_exporter_website_search._get_superseded_records(records=[fx_revision_model_min, successor])
+        assert results == [fx_revision_model_min.file_identifier]
 
-    def test_items(
-        self, fx_exporter_website_search: WebsiteSearchExporter, fx_record_revision_minimal_item: RecordRevision
-    ):
+    def test_items(self, fx_exporter_website_search: WebsiteSearchExporter, fx_revision_model_min: RecordRevision):
         """Can get search items from loaded records."""
-        fx_exporter_website_search.loads(records=[fx_record_revision_minimal_item])
+        fx_exporter_website_search.loads(records=[fx_revision_model_min])
         results = fx_exporter_website_search._items
         assert all(isinstance(item, ItemWebsiteSearch) for item in results)
 
     def test_in_scope_items(
-        self, fx_exporter_website_search: WebsiteSearchExporter, fx_record_revision_minimal_item: RecordRevision
+        self, fx_exporter_website_search: WebsiteSearchExporter, fx_revision_model_min: RecordRevision
     ):
         """Can select items in-scope for inclusion in website search."""
-        out_scope_superseded = deepcopy(fx_record_revision_minimal_item)
+        out_scope_superseded = deepcopy(fx_revision_model_min)
 
-        out_scope_not_open = deepcopy(fx_record_revision_minimal_item)
+        out_scope_not_open = deepcopy(fx_revision_model_min)
         out_scope_not_open.file_identifier = "y"
 
-        in_scope = deepcopy(fx_record_revision_minimal_item)
+        in_scope = deepcopy(fx_revision_model_min)
         in_scope.file_identifier = "z"
         in_scope.identification.constraints.append(
             Constraint(type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.UNRESTRICTED)
@@ -207,10 +199,10 @@ class TestWebsiteSearchExporter:
         self,
         mocker: MockerFixture,
         fx_exporter_website_search: WebsiteSearchExporter,
-        fx_record_revision_minimal_item: RecordRevision,
+        fx_revision_model_min: RecordRevision,
     ):
         """Can get in-scope record references."""
-        record = fx_record_revision_minimal_item
+        record = fx_revision_model_min
         mocker.patch.object(
             type(fx_exporter_website_search),
             "_in_scope_items",
@@ -226,7 +218,7 @@ class TestWebsiteSearchExporter:
         self,
         mocker: MockerFixture,
         fx_exporter_website_search: WebsiteSearchExporter,
-        fx_record_revision_minimal_item: RecordRevision,
+        fx_revision_model_min: RecordRevision,
     ):
         """Can get record references from remote resources."""
         file_identifier = "x"
@@ -249,7 +241,7 @@ class TestWebsiteSearchExporter:
         self,
         mocker: MockerFixture,
         fx_exporter_website_search: WebsiteSearchExporter,
-        fx_record_revision_minimal_item: RecordRevision,
+        fx_revision_model_min: RecordRevision,
     ):
         """Can determine new and outdated items from loaded local items and remote items."""
         new_item = {"file_identifier": "a", "file_revision": "1"}
@@ -282,11 +274,11 @@ class TestWebsiteSearchExporter:
 
         # generate full items for local records (must be open access to evaluate as in-scope)
         items: list[ItemWebsiteSearch] = []
-        fx_record_revision_minimal_item.identification.constraints.append(
+        fx_revision_model_min.identification.constraints.append(
             Constraint(type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.UNRESTRICTED)
         )
         for fid, fir in local_references.items():
-            record = deepcopy(fx_record_revision_minimal_item)
+            record = deepcopy(fx_revision_model_min)
             record.file_identifier = fid
             record.file_revision = fir
             items.append(ItemWebsiteSearch(record=record, source="x", base_url="x"))
@@ -305,7 +297,7 @@ class TestWebsiteSearchExporter:
         self,
         mocker: MockerFixture,
         fx_exporter_website_search: WebsiteSearchExporter,
-        fx_record_revision_minimal_item: RecordRevision,
+        fx_revision_model_min: RecordRevision,
     ):
         """Can determine items that exist remotely but not locally."""
         item_a = {"file_identifier": "a", "file_revision": "1", "post_id": 101}
@@ -345,7 +337,7 @@ class TestWebsiteSearchExporter:
         caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
         fx_exporter_website_search: WebsiteSearchExporter,
-        fx_record_revision_minimal_item: RecordRevision,
+        fx_revision_model_min: RecordRevision,
     ):
         """Can add, update or delete items from WordPress site as needed."""
         new_item = {"file_identifier": "a", "file_revision": "a1", "post_id": 1}
@@ -369,11 +361,11 @@ class TestWebsiteSearchExporter:
 
         # items
         items: dict[str, ItemWebsiteSearch] = {}
-        fx_record_revision_minimal_item.identification.constraints.append(
+        fx_revision_model_min.identification.constraints.append(
             Constraint(type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.UNRESTRICTED)
         )
         for _item in _items:
-            record = deepcopy(fx_record_revision_minimal_item)
+            record = deepcopy(fx_revision_model_min)
             record.file_identifier = _item["file_identifier"]
             record.file_revision = _item["file_revision"]
             items[_item["file_identifier"]] = ItemWebsiteSearch(record=record, source="x", base_url="x")

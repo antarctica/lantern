@@ -90,8 +90,9 @@ class TestRecordRevision:
     def test_no_revision_loads(self, fx_revision_config_min: dict):
         """Cannot create a RecordRevision from a record config without a file_revision."""
         del fx_revision_config_min["file_revision"]
-        with pytest.raises(ClassValidationError):
+        with pytest.raises(ClassValidationError) as excinfo:
             _ = RecordRevision.loads(fx_revision_config_min)
+        assert any(isinstance(e, KeyError) and e.args[0] == "file_revision" for e in excinfo.value.exceptions)
 
     @pytest.mark.parametrize("inc_revision", [False, True])
     def test_dumps(self, fx_revision_config_min: dict, fx_revision_model_min: RecordRevision, inc_revision: bool):

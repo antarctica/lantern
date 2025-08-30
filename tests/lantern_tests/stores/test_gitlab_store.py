@@ -88,24 +88,12 @@ class TestGitLabLocalCache:
         result = cache._current
         assert result == current
 
-    def test_load_record_json(self, fx_gitlab_cache: GitLabLocalCache, fx_revision_config_min: dict):
-        """Can load a record from a JSON record config and file identifier."""
-        with TemporaryDirectory() as tmp_path:
-            temp_path = Path(tmp_path)
-
-            config_path = temp_path / f"{fx_revision_config_min['file_identifier']}.json"
-            with config_path.open("w") as f:
-                json.dump(fx_revision_config_min, f, indent=2)
-
-            record = fx_gitlab_cache._load_record(config_path, file_revision="x")
-            assert isinstance(record, RecordRevision)
-
     def test_load_record_pickle(self, fx_gitlab_cache_pop: GitLabLocalCache):
         """Can load a pickled RecordRevision record from populated cache."""
         id_ = "a1b2c3"
         record_path = fx_gitlab_cache_pop._records_path / f"{id_}.pickle"
 
-        record = fx_gitlab_cache_pop._load_record(record_path)
+        record = fx_gitlab_cache_pop._load_record_pickle(record_path)
         assert record.file_identifier == id_
 
     def test_build_cache(
@@ -114,21 +102,13 @@ class TestGitLabLocalCache:
         fx_record_config_min: dict,
     ):
         """Can populate cache with record configurations and other required context."""
-        head_commit = {"x": "x"}
-        with TemporaryDirectory() as tmp_path:
-            temp_path = Path(tmp_path)
+        commit = "x"
+        head_commit = {"x": commit}
+        records = [(json.dumps(fx_record_config_min, ensure_ascii=False), commit)]
 
-            config_path = temp_path / f"{fx_record_config_min['file_identifier']}.json"
-            with config_path.open("w") as f:
-                json.dump(fx_record_config_min, f, indent=2)
-
-            config_paths = [config_path]
-            commits = {fx_record_config_min["file_identifier"]: "x"}
-
-            fx_gitlab_cache._build_cache(config_paths=config_paths, config_commits=commits, head_commit=head_commit)
+        fx_gitlab_cache._build_cache(records=records, head_commit=head_commit)
 
         assert fx_gitlab_cache._exists
-        assert len(list(fx_gitlab_cache._records_path.glob("*.json"))) == 1
         assert len(list(fx_gitlab_cache._records_path.glob("*.pickle"))) == 1
 
         with fx_gitlab_cache._head_path.open() as f:
@@ -141,31 +121,19 @@ class TestGitLabLocalCache:
 
         with fx_gitlab_cache._commits_path.open() as f:
             data = json.load(f)
-            assert data == {"commits": {"x": "x"}}
+            assert data == {"commits": head_commit}
 
     @pytest.mark.vcr
     @pytest.mark.block_network
-    def test_fetch_file_commits(self, fx_gitlab_cache: GitLabLocalCache):
+    def test_fetch_record_commits(self, fx_gitlab_cache: GitLabLocalCache, fx_record_config_min: dict):
         """Can fetch latest commit for a set of files in the remote repository."""
-        expected = {"a1b2c3": "abc123"}
-        paths = ["records/a1/b2/a1b2c3.json"]
+        file_identifier = "a1b2c3"
+        commit = "abc123"
+        fx_record_config_min["file_identifier"] = file_identifier
+        expected = [(json.dumps(fx_record_config_min, ensure_ascii=False), commit)]
 
-        results = fx_gitlab_cache._fetch_file_commits(record_paths=paths)
+        results = fx_gitlab_cache._fetch_record_commits()
         assert results == expected
-
-    @pytest.mark.vcr
-    @pytest.mark.block_network
-    def test_fetch_project_archive(self, fx_gitlab_cache: GitLabLocalCache):
-        """Can fetch and extract an archive all record files in the remote repository."""
-        expected = "a1b2c3"
-
-        with TemporaryDirectory() as tmp_path:
-            temp_path = Path(tmp_path)
-
-            local_paths, remote_paths = fx_gitlab_cache._fetch_project_archive(workspace=temp_path)
-
-        assert f"{expected}.json" in [path.name for path in local_paths]
-        assert f"records/{expected[:2]}/{expected[2:4]}/{expected}.json" in remote_paths
 
     def test_create(self, mocker: MockerFixture, fx_gitlab_cache: GitLabLocalCache, fx_record_config_min: dict):
         """
@@ -173,29 +141,17 @@ class TestGitLabLocalCache:
 
         This mocks fetching data as `_create()` is a high-level method and fetch methods are tested elsewhere.
         """
-        fid = "a1b2c3"
         commit = "abc123"
 
-        with TemporaryDirectory() as tmp_path:
-            temp_path = Path(tmp_path)
+        records = [(json.dumps(fx_record_config_min, ensure_ascii=False), commit)]
+        mocker.patch.object(fx_gitlab_cache, "_fetch_record_commits", return_value=records)
 
-            fx_record_config_min["file_identifier"] = fid
-            config_path = temp_path / f"{fx_record_config_min['file_identifier']}.json"
-            with config_path.open("w") as f:
-                json.dump(fx_record_config_min, f, indent=2)
-            config_paths = [config_path]
-            config_urls = [f"records/{fid[:2]}/{fid[2:4]}/{fid}.json"]
-            mocker.patch.object(fx_gitlab_cache, "_fetch_project_archive", return_value=(config_paths, config_urls))
+        head_commit = {"id": commit}
+        mock_project = MagicMock()
+        mock_project.commits.get.return_value.attributes = head_commit
+        mocker.patch.object(type(fx_gitlab_cache), "_project", new_callable=PropertyMock, return_value=mock_project)
 
-            commit_mapping = {fid: commit}
-            mocker.patch.object(fx_gitlab_cache, "_fetch_file_commits", return_value=commit_mapping)
-
-            head_commit = {"id": commit}
-            mock_project = MagicMock()
-            mock_project.commits.get.return_value.attributes = head_commit
-            mocker.patch.object(type(fx_gitlab_cache), "_project", new_callable=PropertyMock, return_value=mock_project)
-
-            fx_gitlab_cache._create()
+        fx_gitlab_cache._create()
 
         assert fx_gitlab_cache._exists
 

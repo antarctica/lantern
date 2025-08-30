@@ -46,10 +46,10 @@ class ToyCatalogue:
 
     # noinspection PyMethodOverriding
     @time_task(label="Load")
-    def loads(self, inc_records: list[str], exc_records: list[str]) -> None:
+    def loads(self) -> None:
         """Load records into catalogue store and site exporter."""
         self._logger.info("Loading records")
-        self._store.populate(inc_records=inc_records, exc_records=exc_records)
+        self._store.populate()
         self._site.loads(records=self._store.records)
 
     @time_task(label="Purge")
@@ -72,8 +72,6 @@ class ToyCatalogue:
 
 def main() -> None:
     """Entrypoint."""
-    inc_records = []
-    exc_records = []
     export = True
     publish = False
     purge = False
@@ -95,7 +93,7 @@ def main() -> None:
 
     if purge:
         cat.purge()
-    cat.loads(inc_records=inc_records, exc_records=exc_records)
+    cat.loads()
     if export:
         cat.export()
     if publish:

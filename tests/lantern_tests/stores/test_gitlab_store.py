@@ -13,7 +13,6 @@ from lantern.models.record import Record
 from lantern.models.record.revision import RecordRevision
 from lantern.stores.base import RecordNotFoundError
 from lantern.stores.gitlab import GitLabLocalCache, GitLabStore, RemoteStoreUnavailableError
-from tests.resources.stores.fake_records_store import FakeRecordsStore
 
 
 class TestGitLabLocalCache:
@@ -197,126 +196,13 @@ class TestGitLabLocalCache:
 
         assert fx_gitlab_cache_pop._exists
 
-    @pytest.mark.parametrize("exists", [True, False])
-    def test_get_record(self, fx_gitlab_cache_pop: GitLabLocalCache, exists: bool):
-        """Can get specific record from cache if it exists."""
-        expected = "a1b2c3" if exists else "invalid"
-
-        if not exists:
-            with pytest.raises(RecordNotFoundError):
-                fx_gitlab_cache_pop._get_record(expected)
-            return
-
-        record = fx_gitlab_cache_pop._get_record(expected)
-        assert record.file_identifier == expected
-
-    @pytest.mark.parametrize(
-        ("include", "exclude", "expected_records"),
-        [
-            (
-                [],
-                [],
-                ["8fd6a7cc-e696-4a82-b5f6-fb04dfa4cbea", "53ed9f6a-2d68-46c2-b5c5-f15422aaf5b2"],
-            ),
-            (
-                ["8fd6a7cc-e696-4a82-b5f6-fb04dfa4cbea"],
-                [],
-                ["8fd6a7cc-e696-4a82-b5f6-fb04dfa4cbea"],
-            ),
-            (
-                ["53ed9f6a-2d68-46c2-b5c5-f15422aaf5b2"],
-                [],
-                [
-                    "e30ac1c0-ed6a-49bd-8ca3-205610bf91bf",
-                    "dbe5f712-696a-47d8-b4a7-3b173e47e3ab",
-                    "bcacfe16-52da-4b26-94db-8a567e4292db",
-                    "4ba929ac-ca32-4932-a15f-38c1640c0b0f",
-                    "e0df252c-fb8b-49ff-9711-f91831b66ea2",
-                    "5ab58461-5ba7-404d-a904-2b4efcb7556e",
-                    "57327327-4623-4247-af86-77fb43b7f45b",
-                    "f90013f6-2893-4c72-953a-a1a6bc1919d7",
-                    "09dbc743-cc96-46ff-8449-1709930b73ad",
-                    "8fd6a7cc-e696-4a82-b5f6-fb04dfa4cbea",
-                    "589408f0-f46b-4609-b537-2f90a2f61243",
-                    "30825673-6276-4e5a-8a97-f97f2094cd25",
-                    "3c77ffae-6aa0-4c26-bc34-5521dbf4bf23",
-                    "c993ea2b-d44e-4ca0-9007-9a972f7dd117",
-                    "53ed9f6a-2d68-46c2-b5c5-f15422aaf5b2",
-                ],
-            ),
-            (
-                [],
-                ["8fd6a7cc-e696-4a82-b5f6-fb04dfa4cbea"],
-                ["53ed9f6a-2d68-46c2-b5c5-f15422aaf5b2"],
-            ),
-            (
-                ["unknown"],
-                [],
-                [],
-            ),
-        ],
-    )
-    def test_get(
-        self,
-        fx_gitlab_cache: GitLabLocalCache,
-        include: list[str],
-        exclude: list[str],
-        expected_records: list[str],
-    ):
-        """
-        Can get records and summaries from cache by including or excluding certain records.
-
-        Cache is populated with records from the FakeRecordsStore to give a pool of records to filter.
-
-        - 8fd6a7cc-e696-4a82-b5f6-fb04dfa4cbea is a single standalone record
-        - 53ed9f6a-2d68-46c2-b5c5-f15422aaf5b2 is a record with two related records
-        """
-        fake_store = FakeRecordsStore(logger=fx_gitlab_cache._logger)
-        _inc_records = ["8fd6a7cc-e696-4a82-b5f6-fb04dfa4cbea", "53ed9f6a-2d68-46c2-b5c5-f15422aaf5b2"]
-        _related_records = [
-            "e30ac1c0-ed6a-49bd-8ca3-205610bf91bf",
-            "dbe5f712-696a-47d8-b4a7-3b173e47e3ab",
-            "bcacfe16-52da-4b26-94db-8a567e4292db",
-            "4ba929ac-ca32-4932-a15f-38c1640c0b0f",
-            "e0df252c-fb8b-49ff-9711-f91831b66ea2",
-            "5ab58461-5ba7-404d-a904-2b4efcb7556e",
-            "57327327-4623-4247-af86-77fb43b7f45b",
-            "f90013f6-2893-4c72-953a-a1a6bc1919d7",
-            "09dbc743-cc96-46ff-8449-1709930b73ad",
-            "8fd6a7cc-e696-4a82-b5f6-fb04dfa4cbea",
-            "bcacfe16-52da-4b26-94db-8a567e4292db",
-            "589408f0-f46b-4609-b537-2f90a2f61243",
-            "30825673-6276-4e5a-8a97-f97f2094cd25",
-            "e30ac1c0-ed6a-49bd-8ca3-205610bf91bf",
-            "3c77ffae-6aa0-4c26-bc34-5521dbf4bf23",
-            "c993ea2b-d44e-4ca0-9007-9a972f7dd117",
-            "dbe5f712-696a-47d8-b4a7-3b173e47e3ab",
-            "53ed9f6a-2d68-46c2-b5c5-f15422aaf5b2",
-        ]
-        if include:
-            # when only including certain records, related records will also be returned
-            _inc_records = [*_inc_records, *_related_records]
-
-        fake_store.populate(inc_records=_inc_records)
-
-        with TemporaryDirectory() as tmp_path:
-            temp_path = Path(tmp_path)
-            for record in fake_store.records:
-                config_path = temp_path / f"{record.file_identifier}.json"
-                with config_path.open("w") as f:
-                    json.dump(record.dumps(), f, indent=2)
-            config_paths = list(temp_path.glob("*.json"))
-            commits = {record.file_identifier: "x" for record in fake_store.records}
-            fx_gitlab_cache._build_cache(config_paths=config_paths, config_commits=commits, head_commit={"x": "x"})
-
-            results = fx_gitlab_cache.get(inc_records=include, exc_records=exclude)
-            records = [r.file_identifier for r in results]
-            assert sorted(expected_records) == sorted(records)
-
-    def test_get_invalid(self, fx_gitlab_cache_pop: GitLabLocalCache):
-        """Cannot get records where both include and exclude parameters are set."""
-        with pytest.raises(ValueError, match="Including and excluding records is not supported."):
-            fx_gitlab_cache_pop.get(inc_records=["x"], exc_records=["x"])
+    def test_get(self, fx_gitlab_cache_pop: GitLabLocalCache):
+        """Can get records from cache."""
+        expected_file_identifier = "a1b2c3"
+        expected_file_revision = "abc123"
+        results = fx_gitlab_cache_pop.get()
+        assert results[0].file_identifier == expected_file_identifier
+        assert results[0].file_revision == expected_file_revision
 
     def test_get_hashes(self, fx_gitlab_cache_pop: GitLabLocalCache):
         """Can get SHA1 hashes of specified records."""
@@ -437,15 +323,14 @@ class TestGitLabStore:
 
         assert "No actions to perform, skipping" in caplog.text
 
-    @pytest.mark.parametrize(("inc_records", "exc_records"), [(None, None), ([], [])])
-    def test_populate(self, fx_gitlab_store_cached: GitLabStore, inc_records: list | None, exc_records: list | None):
+    def test_populate(self, fx_gitlab_store_cached: GitLabStore):
         """
         Can populate the store with records from the remote repository, via a local cache.
 
         High level public method.
         """
         assert len(fx_gitlab_store_cached.records) == 0
-        fx_gitlab_store_cached.populate(inc_records=inc_records, exc_records=exc_records)
+        fx_gitlab_store_cached.populate()
         assert len(fx_gitlab_store_cached.records) > 0
 
     @pytest.mark.parametrize("exists", [True, False])

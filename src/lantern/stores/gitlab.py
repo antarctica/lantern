@@ -243,97 +243,12 @@ class GitLabLocalCache:
 
         self._logger.info("Records cache exists and is current, no changes needed.")
 
-    def _get_record(self, file_identifier: str, raise_for_missing: bool = True) -> RecordRevision | None:
-        """Load a record from the cache."""
-        record_path = self._records_path / f"{file_identifier}.pickle"
-        try:
-            return self._load_record_pickle(record_path)
-        except FileNotFoundError:
-            if not raise_for_missing:
-                return None
-            raise RecordNotFoundError(file_identifier) from None
-
-    def _get_except(self, file_identifiers: list[str]) -> list[RecordRevision]:
-        """Load all records except specified file identifiers."""
-        msg = "Loading all records from cache"
-        if file_identifiers:
-            msg = f"Loading all records from cache except {len(file_identifiers)} excluded"
-        self._logger.info(msg)
-
-        record_paths = []
-        for record_path in self._path.glob("records/*.pickle"):
-            if record_path.stem in file_identifiers:
-                self._logger.debug(f"Record '{record_path.stem}' excluded, skipping")
-                continue
-            record_paths.append(record_path)
-
-        return [self._load_record_pickle(record_path) for record_path in record_paths]
-
-    def _include_records(self, file_identifiers: list[str]) -> list[str]:
-        """Load records related to specified file identifiers."""
-        related = set()
-        for file_identifier in file_identifiers:
-            try:
-                record = self._get_record(file_identifier)
-            except RecordNotFoundError:
-                self._logger.warning(f"Record '{file_identifier}' not found in cache, skipping")
-                continue
-
-            relations = record.identification.aggregations.identifiers(exclude=[record.file_identifier])
-            self._logger.info(f"Selecting {len(relations)} records related to '{file_identifier}'.")
-            self._logger.debug(f"Related records: {relations}")
-            related.update(relations)
-        return list(related)
-
-    def _get_only(self, file_identifiers: list[str]) -> list[RecordRevision]:
-        """
-        Load records only for specified file identifiers.
-
-        Records related to selected records, and records these records relate to, will all be returned [depth=2].
-
-        This is needed to ensure related records are available relations for resources such as collections that are
-        comprised of other records, and/or physical maps, which are composites of multiple records.
-
-        For example:
-        - selected record A has aggregations to records C [a parent collection]
-            - record A is included as it is selected
-            - record C is included as it is related to A [depth=1]
-            - records D - M are included as they are related to C [depth=2]
-        - selected record X has aggregations to records Y and Z [two physical map sides]
-            - record X is included as it is selected
-            - records Y amd Z are included as they are related to X [depth=1]
-            - records C, Q, R, S are included as they related to either Y or Z [depth=2]
-        """
-        direct_identifiers = self._include_records(file_identifiers)
-        self._logger.info(f"Selecting {len(direct_identifiers)} directly related records [depth=1]")
-
-        indirect_identifiers = self._include_records(direct_identifiers)
-        self._logger.info(f"Selecting {len(indirect_identifiers)} indirectly related records [depth=2]")
-
-        selected = set(file_identifiers + direct_identifiers + indirect_identifiers)
-        self._logger.info(f"Loading {len(selected)} records")
-        records = [self._get_record(file_identifier, raise_for_missing=False) for file_identifier in selected]
-        # filter any 'None' values for originally selected records that were not found (due to `raise_for_missing=False`)
-        return [record for record in records if record is not None]
-
-    def get(self, inc_records: list[str], exc_records: list[str]) -> list[RecordRevision]:
-        """
-        Load some or all records.
-
-        To select all records set `inc_records` and `exc_records` to any empty list.
-
-        This method is a router for the filtering pathway to use.
-        """
+    def get(self) -> list[RecordRevision]:
+        """Load all available records from cache."""
         self._ensure_exists()
-
-        if inc_records and exc_records:
-            msg = "Including and excluding records is not supported."
-            raise ValueError(msg) from None
-
-        if not inc_records:
-            return self._get_except(exc_records)
-
-        return self._get_only(inc_records)
+        record_paths = list(self._path.glob("records/*.pickle"))
+        self._logger.info(f"Loading {len(record_paths)} records from cache")
+        return [self._load_record_pickle(record_path) for record_path in record_paths]
 
     def get_hashes(self, file_identifiers: list[str]) -> dict[str, str]:
         """
@@ -485,16 +400,13 @@ class GitLabStore(Store):
         self._project.commits.create(data)
         return stats
 
-    def populate(self, inc_records: list[str] | None = None, exc_records: list[str] | None = None) -> None:
+    def populate(self) -> None:
         """
-        Load records from local cache into the local subset, optionally filtered by file identifier.
+        Load records from local cache into the local subset.
 
         Existing records are preserved. Call `purge()` to clear before this method to reset the subset.
         """
-        inc_records = inc_records or []
-        exc_records = exc_records or []
-        records = self._cache.get(inc_records=inc_records, exc_records=exc_records)
-        self._records = {**self._records, **{record.file_identifier: record for record in records}}
+        self._records = {**self._records, **{record.file_identifier: record for record in self._cache.get()}}
 
     def purge(self) -> None:
         """
@@ -506,9 +418,7 @@ class GitLabStore(Store):
 
     def get(self, file_identifier: str) -> RecordRevision:
         """
-        Get record from local subset if possible.
-
-        Record must exist in selected local subset (via `filter()`) rather than wider local cache.
+        Get record by file identifier.
 
         Raises RecordNotFoundError exception if not found.
         """
@@ -538,4 +448,4 @@ class GitLabStore(Store):
         self._logger.info("Recreating cache to reflect pushed changes")
         self._cache.purge()
         self._logger.info("Reloading pushed records into subset to reflect changes.")
-        self.populate(inc_records=[record.file_identifier for record in records])
+        self.populate()

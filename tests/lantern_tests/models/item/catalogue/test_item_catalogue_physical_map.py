@@ -7,7 +7,6 @@ import pytest
 from pytest_mock import MockerFixture
 
 from lantern.config import Config
-from lantern.lib.metadata_library.models.record import Record
 from lantern.lib.metadata_library.models.record.elements.common import Date, Series
 from lantern.lib.metadata_library.models.record.elements.common import Dates as RecordDates
 from lantern.lib.metadata_library.models.record.elements.common import Identifiers as RecordIdentifiers
@@ -23,7 +22,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     HierarchyLevelCode,
 )
 from lantern.models.item.base.elements import Extent as ItemExtent
-from lantern.models.item.catalogue import Dates, Identifiers
+from lantern.models.item.catalogue import Dates, Identifiers, ItemCatalogue
 from lantern.models.item.catalogue.elements import ItemCatalogueSummary
 from lantern.models.item.catalogue.special.physical_map import (
     AdditionalInfoTab,
@@ -236,44 +235,44 @@ class TestAdditionalInfoTab:
 class TestItemCataloguePhysicalMap:
     """Test catalogue item."""
 
-    def test_init(self, fx_config: Config, fx_record_revision_minimal_item_catalogue_physical_map: RecordRevision):
+    def test_init(self, fx_config: Config, fx_item_physical_map_model_min: ItemCataloguePhysicalMap):
         """Can create an ItemCatalogue."""
         item = ItemCataloguePhysicalMap(
             config=fx_config,
-            record=fx_record_revision_minimal_item_catalogue_physical_map,
+            record=fx_item_physical_map_model_min._record,
             get_record=_get_record,
         )
 
         assert isinstance(item, ItemCataloguePhysicalMap)
-        assert item._record == fx_record_revision_minimal_item_catalogue_physical_map
+        assert item._record == fx_item_physical_map_model_min._record
 
     @pytest.mark.parametrize("matches", [True, False])
     def test_matches(
         self,
         matches: bool,
-        fx_record_revision_minimal_item_catalogue_physical_map: Record,
-        fx_record_minimal_item_catalogue: Record,
+        fx_item_catalogue_model_min: ItemCatalogue,
+        fx_item_physical_map_model_min: ItemCataloguePhysicalMap,
     ):
         """Can determine if record matches this subclass."""
-        record = fx_record_revision_minimal_item_catalogue_physical_map if matches else fx_record_minimal_item_catalogue
+        record = fx_item_physical_map_model_min._record if matches else fx_item_catalogue_model_min._record
         assert ItemCataloguePhysicalMap.matches(record) == matches
 
-    def test_sides(self, fx_config: Config, fx_item_catalogue_min_physical_map: ItemCataloguePhysicalMap):
-        """Can get records representing the sides of a physical map."""
+    def test_sides(self, fx_config: Config, fx_item_physical_map_model_min: ItemCataloguePhysicalMap):
+        """Can get records repressenting the sides of a physical map."""
         expected = [
             _get_record(side.identifier.identifier)
-            for side in fx_item_catalogue_min_physical_map._record.identification.aggregations.filter(
+            for side in fx_item_physical_map_model_min._record.identification.aggregations.filter(
                 associations=AggregationAssociationCode.IS_COMPOSED_OF,
                 initiatives=AggregationInitiativeCode.PAPER_MAP,
             )
         ]
 
-        assert fx_item_catalogue_min_physical_map._sides == expected
+        assert fx_item_physical_map_model_min._sides == expected
 
-    def test_tabs(self, fx_item_catalogue_min_physical_map: ItemCataloguePhysicalMap):
+    def test_tabs(self, fx_item_physical_map_model_min: ItemCataloguePhysicalMap):
         """Can get physical map specific tabs."""
-        assert isinstance(fx_item_catalogue_min_physical_map._extent, ExtentTab)
-        assert isinstance(fx_item_catalogue_min_physical_map._additional_info, AdditionalInfoTab)
+        assert isinstance(fx_item_physical_map_model_min._extent, ExtentTab)
+        assert isinstance(fx_item_physical_map_model_min._additional_info, AdditionalInfoTab)
 
     @pytest.mark.parametrize(
         ("value", "expected"), [(json.dumps({}), None), (json.dumps({"sheet_number": "x"}), "x"), ("invalid", None)]
@@ -281,21 +280,21 @@ class TestItemCataloguePhysicalMap:
     def test_tab_additional_info_series_page(
         self,
         mocker: MockerFixture,
-        fx_item_catalogue_min_physical_map: ItemCataloguePhysicalMap,
+        fx_item_physical_map_model_min: ItemCataloguePhysicalMap,
         value: str,
         expected: str,
     ):
         """Can set series page property if included in supplemental info."""
-        assert fx_item_catalogue_min_physical_map._sides[0].identification.series == Series()
+        assert fx_item_physical_map_model_min._sides[0].identification.series == Series()
 
-        side = fx_item_catalogue_min_physical_map._sides[0]
+        side = fx_item_physical_map_model_min._sides[0]
         side.identification.supplemental_information = value
         mocker.patch.object(ItemCataloguePhysicalMap, "_sides", new_callable=PropertyMock, return_value=[side])
 
-        assert fx_item_catalogue_min_physical_map._additional_info._serieses[0].page == expected
+        assert fx_item_physical_map_model_min._additional_info._serieses[0].page == expected
 
     @staticmethod
-    def _get_record_graphics(identifier: str) -> Record:
+    def _get_record_graphics(identifier: str) -> RecordRevision:
         """Extension of `_lib_get_record` to include graphic overviews."""
         record = _get_record(identifier=identifier)
         record.identification.graphic_overviews.append(GraphicOverview(identifier="x", href="x", mime_type="image/png"))
@@ -304,24 +303,38 @@ class TestItemCataloguePhysicalMap:
     def test_graphics(
         self,
         fx_config: Config,
-        fx_record_revision_minimal_item_catalogue_physical_map: RecordRevision,
+        fx_revision_config_min: dict,
+        fx_item_physical_map_model_min: ItemCataloguePhysicalMap,
     ):
         """Can get any graphics for the physical map and each side."""
-        fx_record_revision_minimal_item_catalogue_physical_map.identification.graphic_overviews.append(
-            GraphicOverview(identifier="x", href="x", mime_type="image/png")
-        )
+
+        def _get_local_record(identifier: str) -> RecordRevision:
+            """
+            Minimal record lookup method.
+
+            Standalone method to allow use outside of fixtures.
+            """
+            side = RecordRevision.loads(deepcopy(fx_revision_config_min))
+            side.file_identifier = identifier
+            side.identification.graphic_overviews.append(
+                GraphicOverview(identifier="x", href="x", mime_type="image/png")
+            )
+            return side
+
+        record = fx_item_physical_map_model_min._record
+        record.identification.graphic_overviews.append(GraphicOverview(identifier="x", href="x", mime_type="image/png"))
         item = ItemCataloguePhysicalMap(
             config=fx_config,
-            record=fx_record_revision_minimal_item_catalogue_physical_map,
-            get_record=self._get_record_graphics,
+            record=record,
+            get_record=_get_local_record,
         )
 
         graphics = item.graphics
         assert len(graphics) > 1
 
-    def test_side_summaries(self, fx_item_catalogue_min_physical_map: ItemCataloguePhysicalMap):
+    def test_side_summaries(self, fx_item_physical_map_model_min: ItemCataloguePhysicalMap):
         """Can get ItemSummaries for each map side."""
-        sides = fx_item_catalogue_min_physical_map.sides
+        sides = fx_item_physical_map_model_min.sides
         assert len(sides) > 0
         # assert sides are a tuple of (side_index, ItemSummaryCatalogue)
         assert all(

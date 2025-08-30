@@ -30,7 +30,7 @@ class TestPageMetadata:
         assert meta.html_schema_org is None
         assert "@" in meta.fallback_email
 
-    def test_all(self, freezer: FrozenDateTimeFactory, fx_freezer_time: datetime):
+    def test_all(self, fx_freezer_time: datetime):
         """Can create a PageMetadata instance with all possible values."""
         expected_str = "x"
         expected_dict = {"x": "y"}

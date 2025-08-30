@@ -26,7 +26,7 @@ from lantern.exporters.records import RecordsExporter
 from lantern.exporters.site import SiteExporter, SiteIndexExporter, SitePagesExporter, SiteResourcesExporter
 from lantern.exporters.website import WebsiteSearchExporter, WordPressClient
 from lantern.exporters.xml import IsoXmlHtmlExporter
-from lantern.lib.metadata_library.models.record import Record
+from lantern.lib.metadata_library.models.record import Record as RecordBase
 from lantern.lib.metadata_library.models.record.elements.common import Date, Dates, Identifier, Identifiers
 from lantern.lib.metadata_library.models.record.elements.identification import Constraint
 from lantern.lib.metadata_library.models.record.enums import (
@@ -34,11 +34,13 @@ from lantern.lib.metadata_library.models.record.enums import (
     ConstraintTypeCode,
     HierarchyLevelCode,
 )
+from lantern.models.item.base import ItemBase
 from lantern.models.item.base.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.item.catalogue import AdditionalInfoTab, ItemCatalogue
 from lantern.models.item.catalogue.elements import Dates as ItemCatDates
 from lantern.models.item.catalogue.elements import Identifiers as ItemCatIdentifiers
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
+from lantern.models.record import Record
 from lantern.models.record.revision import RecordRevision
 from lantern.stores.gitlab import GitLabLocalCache, GitLabStore
 from tests.resources.exporters.fake_exporter import FakeExporter, FakeResourceExporter
@@ -105,9 +107,30 @@ def fx_config() -> Config:
     return Config()
 
 
-def _record_config_minimal_iso() -> dict:
+"""
+Record (Configs) and Item fixtures
+
+| Package         | Type                     | Fixture                         | Inherits                        |
+| --------------- | ------------------------ | ------------------------------- | ------------------------------- |
+| MetadataLibrary | dict                     | fx_lib_record_config_min_iso    | -                               |
+|                 | dict                     | fx_lib_record_config_min_magic  | fx_lib_record_config_min_iso    |
+|                 | Record (RecordBase)      | fx_lib_record_model_min_iso     | fx_lib_record_config_min_iso    |
+| Lantern         | dict                     | fx_record_config_min            | fx_lib_record_config_min_iso    |
+|                 | dict                     | fx_revision_config_min          | fx_record_config_min            |
+|                 | dict                     | fx_item_config_min_base         | fx_revision_config_min          |
+|                 | dict                     | fx_item_config_min_catalogue    | fx_item_config_min_base         |
+|                 | dict                     | fx_item_config_min_physical_map | fx_item_config_min_catalogue    |
+|                 | Record                   | fx_record_model_min             | fx_record_config_min            |
+|                 | RecordRevision           | fx_revision_model_min           | fx_revision_config_min          |
+|                 | ItemBase                 | fx_item_base_model_min          | fx_item_config_min_base         |
+|                 | ItemCatalogue            | fx_item_catalogue_model_min     | fx_item_config_min_catalogue    |
+|                 | ItemCataloguePhysicalMap | fx_item_physical_map_model_min  | fx_item_config_min_physical_map |
+"""
+
+
+def _lib_record_config_min_iso() -> dict:
     """
-    Minimal record configuration (ISO).
+    Minimal (base) record configuration (ISO).
 
     Minimal record that will validate against the BAS Metadata Library ISO 19115:2003 / 19115-2:2009 v4 schema.
 
@@ -131,144 +154,212 @@ def _record_config_minimal_iso() -> dict:
 
 
 @pytest.fixture()
-def fx_record_config_minimal_iso() -> dict:
+def fx_lib_record_config_min_iso() -> dict:
     """
-    Minimal record configuration (ISO).
+    Minimal (base) record configuration (ISO).
 
-    Minimal record that will validate against the BAS Metadata Library ISO 19115:2003 / 19115-2:2009 v4 schema.
-
-    Types must be safe to encode as JSON.
+    Fixture wrapper for `_lib_record_config_min_iso()`.
     """
-    return _record_config_minimal_iso()
-
-
-def _record_config_minimal_item(base_config: dict) -> dict:
-    """
-    Minimal record configuration (Item).
-
-    Minimal record that can be used with an ItemBase. Types must be safe to encode as JSON.
-
-    Standalone method to allow use outside of fixtures in test parametrisation.
-    """
-    config = deepcopy(base_config)
-    config["file_identifier"] = "x"
-    config["file_revision"] = "x"
-    return config
+    return _lib_record_config_min_iso()
 
 
 @pytest.fixture()
-def fx_record_config_minimal_item(fx_record_config_minimal_iso: dict) -> dict:
-    """Minimal record configuration (Item)."""
-    fx_record_config_minimal_iso["file_identifier"] = "x"
-    fx_record_config_minimal_iso["file_revision"] = "x"
-    return _record_config_minimal_item(fx_record_config_minimal_iso)
-
-
-@pytest.fixture()
-def fx_record_config_minimal_magic_preset(fx_record_config_minimal_item: dict) -> dict:
+def fx_lib_record_config_min_magic(fx_lib_record_config_min_iso: dict) -> dict:
     """
-    Minimal record configuration (MAGIC Preset).
+    Minimal (base) record configuration (MAGIC preset).
 
     Minimal record that can create a valid RecordMagicDiscoveryV1 instance. Does not include properties the preset will
     configure automatically (such as identifiers, contacts, domain consistencies).
 
     Types must be safe to encode as JSON.
     """
-    return deepcopy(fx_record_config_minimal_item)
+    return {"file_identifier": "x", **fx_lib_record_config_min_iso}
 
 
-def _record_config_minimal_item_catalogue(base_config: dict) -> dict:
+@pytest.fixture()
+def fx_lib_record_model_min_iso(fx_lib_record_config_min_iso: dict) -> RecordBase:
+    """Minimal (base) Record model instance."""
+    return RecordBase.loads(fx_lib_record_config_min_iso)
+
+
+def _record_config_min() -> dict:
     """
-    Minimal record configuration (ItemCatalogue).
+    Minimal record configuration (catalogue).
 
-    Minimal record that can be used with an ItemCatalogue. Types must be safe to encode as JSON.
+    Minimal configuration that will validate against the Data Catalogue Record model.
+
+    Types must be safe to encode as JSON.
 
     Standalone method to allow use outside of fixtures in test parametrisation.
     """
-    config = deepcopy(base_config)
-    config["identification"]["contacts"] = deepcopy(config["metadata"]["contacts"])
-    config["identification"]["contacts"][0]["email"] = "x"
+    config: dict = {"file_identifier": "x", **deepcopy(_lib_record_config_min_iso())}
     config["identification"]["identifiers"] = [
         {
             "identifier": config["file_identifier"],
-            "href": f"https://data.bas.ac.uk/items/{_record_config_minimal_item}",
-            "namespace": "data.bas.ac.uk",
+            "href": f"https://{CATALOGUE_NAMESPACE}/items/{config['file_identifier']}",
+            "namespace": CATALOGUE_NAMESPACE,
         }
     ]
+    config["identification"]["contacts"] = [{**deepcopy(config["metadata"]["contacts"][0]), "email": "x"}]
 
     return config
 
 
 @pytest.fixture()
-def fx_record_config_minimal_item_catalogue(fx_record_config_minimal_item: dict) -> dict:
-    """Minimal record configuration (ItemCatalogue)."""
-    return _record_config_minimal_item_catalogue(fx_record_config_minimal_item)
+def fx_record_config_min() -> dict:
+    """
+    Minimal record configuration (catalogue).
+
+    Wrapper for `_record_config_min()`.
+    """
+    return _record_config_min()
+
+
+def _revision_config_min() -> dict:
+    """
+    Minimal record configuration (catalogue revision).
+
+    Minimal configuration for a Data Catalogue Record Revision model.
+
+    Types must be safe to encode as JSON.
+
+    Standalone method to allow use outside of fixtures in test parametrisation.
+    """
+    return {"file_revision": "x", **deepcopy(_record_config_min())}
 
 
 @pytest.fixture()
-def fx_record_minimal_iso(fx_record_config_minimal_iso: dict) -> Record:
-    """Minimal record instance (ISO)."""
-    return Record.loads(fx_record_config_minimal_iso)
+def fx_revision_config_min(fx_record_config_min: dict) -> dict:
+    """
+    Minimal record configuration (catalogue revision).
+
+    Wrapper for `_revision_config_min()`.
+    """
+    return _revision_config_min()
+
+
+def _item_config_min_base() -> dict:
+    """
+    Minimal record configuration (catalogue).
+
+    Minimal configuration for an ItemBase model.
+
+    Types must be safe to encode as JSON.
+
+    Standalone method to allow use outside of fixtures in test parametrisation.
+    """
+    return deepcopy(_revision_config_min())
 
 
 @pytest.fixture()
-def fx_record_revision_minimal_iso(fx_record_config_minimal_iso: dict) -> RecordRevision:
-    """Minimal record revision instance (ISO)."""
-    config = {"file_revision": "x", **fx_record_config_minimal_iso}
-    return RecordRevision.loads(config)
+def fx_item_config_min_base(fx_revision_config_min: dict) -> dict:
+    """
+    Minimal record configuration (catalogue).
+
+    Wrapper for `_item_config_min_base()`.
+    """
+    return _item_config_min_base()
+
+
+def _item_config_min_catalogue() -> dict:
+    """
+    Minimal record configuration (catalogue).
+
+    Minimal configuration for an ItemCatalogue model.
+
+    Types must be safe to encode as JSON.
+
+    Standalone method to allow use outside of fixtures in test parametrisation.
+    """
+    config = deepcopy(_item_config_min_base())
+    config["identification"]["contacts"] = deepcopy(config["metadata"]["contacts"])
+    config["identification"]["contacts"][0]["email"] = "x"
+
+    return config
 
 
 @pytest.fixture()
-def fx_record_minimal_item(fx_record_config_minimal_item: dict) -> Record:
-    """Minimal record instance (Item)."""
-    return Record.loads(fx_record_config_minimal_item)
+def fx_item_config_min_catalogue() -> dict:
+    """
+    Minimal record configuration (catalogue).
+
+    Wrapper for `_item_config_min_catalogue()`.
+    """
+    return _item_config_min_catalogue()
 
 
 @pytest.fixture()
-def fx_record_revision_minimal_item(fx_record_config_minimal_item: dict) -> RecordRevision:
-    """Minimal record instance (Item)."""
-    config = {"file_revision": "x", **fx_record_config_minimal_item}
-    return RecordRevision.loads(config)
+def fx_item_config_min_physical_map(fx_item_config_min_catalogue: dict) -> dict:
+    """
+    Minimal record configuration (catalogue physical maps).
 
+    Minimal configuration for a Data Catalogue Record Revision model.
 
-@pytest.fixture()
-def fx_record_minimal_item_catalogue(fx_record_config_minimal_item_catalogue: dict) -> RecordRevision:
-    """Minimal record instance (ItemCatalogue)."""
-    return RecordRevision.loads(fx_record_config_minimal_item_catalogue)
-
-
-@pytest.fixture()
-def fx_record_revision_minimal_item_catalogue(fx_record_config_minimal_item_catalogue: dict) -> RecordRevision:
-    """Minimal record instance (ItemCatalogue)."""
-    config = {"file_revision": "x", **fx_record_config_minimal_item_catalogue}
-    return RecordRevision.loads(config)
-
-
-@pytest.fixture()
-def fx_record_minimal_item_catalogue_physical_map(fx_record_config_minimal_item_catalogue: dict) -> RecordRevision:
-    """Minimal record instance (ItemCataloguePhysicalMap)."""
-    config = deepcopy(fx_record_config_minimal_item_catalogue)
+    Types must be safe to encode as JSON.
+    """
+    config = deepcopy(fx_item_config_min_catalogue)
     config["hierarchy_level"] = HierarchyLevelCode.PAPER_MAP_PRODUCT.value
     config["identification"]["aggregations"] = [
         {
-            "identifier": {"identifier": "x", "href": "x", "namespace": "x"},
+            "identifier": {
+                "identifier": "x",
+                "href": f"https://{CATALOGUE_NAMESPACE}/items/x",
+                "namespace": CATALOGUE_NAMESPACE,
+            },
             "association_type": "isComposedOf",
             "initiative_type": "paperMap",
         }
     ]
-    return RecordRevision.loads(config)
+    return config
 
 
 @pytest.fixture()
-def fx_record_revision_minimal_item_catalogue_physical_map(
-    fx_record_minimal_item_catalogue_physical_map: Record,
-) -> RecordRevision:
-    """Minimal record revision instance (ItemCataloguePhysicalMap)."""
-    config = {
-        "file_revision": "83fake487e5671f4a1dd7074b92fb94aa68d26bd",
-        **fx_record_minimal_item_catalogue_physical_map.dumps(),
-    }
-    return RecordRevision.loads(config)
+def fx_record_model_min(fx_record_config_min: dict) -> Record:
+    """Minimal record model instance."""
+    return Record.loads(fx_record_config_min)
+
+
+@pytest.fixture()
+def fx_revision_model_min(fx_revision_config_min: dict) -> RecordRevision:
+    """Minimal record revision model instance."""
+    return RecordRevision.loads(fx_revision_config_min)
+
+
+@pytest.fixture()
+def fx_item_base_model_min(fx_item_config_min_base: dict) -> ItemBase:
+    """Minimal ItemBase model instance."""
+    return ItemBase(record=RecordRevision.loads(fx_item_config_min_base))
+
+
+def _item_catalogue_model_min() -> ItemCatalogue:
+    """
+    Minimal ItemCatalogue model instance.
+
+    Standalone method to allow use outside of fixtures in test parametrisation.
+    """
+    return ItemCatalogue(
+        config=Config(), record=RecordRevision.loads(_item_config_min_catalogue()), get_record=_get_record
+    )
+
+
+@pytest.fixture()
+def fx_item_catalogue_model_min(
+    fx_config: Config, fx_item_config_min_catalogue: dict, fx_get_record: callable
+) -> ItemCatalogue:
+    """Minimal ItemCatalogue model instance."""
+    return ItemCatalogue(
+        config=fx_config, record=RecordRevision.loads(fx_item_config_min_catalogue), get_record=fx_get_record
+    )
+
+
+@pytest.fixture()
+def fx_item_physical_map_model_min(
+    fx_config: Config, fx_item_config_min_physical_map: dict, fx_get_record: callable
+) -> ItemCataloguePhysicalMap:
+    """Minimal ItemCataloguePhysicalMap model instance."""
+    return ItemCataloguePhysicalMap(
+        config=fx_config, record=RecordRevision.loads(fx_item_config_min_physical_map), get_record=fx_get_record
+    )
 
 
 def _get_record(identifier: str) -> RecordRevision:
@@ -277,15 +368,18 @@ def _get_record(identifier: str) -> RecordRevision:
 
     Standalone method to allow use outside of fixtures.
     """
-    config = deepcopy(_record_config_minimal_iso())
-    config["file_identifier"] = identifier
-    config["file_revision"] = "x"
-    return RecordRevision.loads(config)
+    record = RecordRevision.loads(deepcopy(_revision_config_min()))
+    record.file_identifier = identifier
+    return record
 
 
 @pytest.fixture()
 def fx_get_record() -> callable:
-    """Minimal record lookup method."""
+    """
+    Minimal record lookup method.
+
+    Wrapper for `_get_record()`.
+    """
     return _get_record
 
 
@@ -305,45 +399,7 @@ def fx_item_cat_info_tab_minimal() -> AdditionalInfoTab:
     )
 
 
-def _item_catalogue_min() -> ItemCatalogue:
-    """
-    ItemCatalogue based on minimal catalogue record.
-
-    Standalone method to allow use outside of fixtures in test parametrisation.
-    """
-    return ItemCatalogue(
-        config=Config(),
-        record=RecordRevision.loads(
-            _record_config_minimal_item_catalogue(_record_config_minimal_item(_record_config_minimal_iso()))
-        ),
-        get_record=_get_record,
-    )
-
-
-@pytest.fixture()
-def fx_item_catalogue_min(
-    fx_config: Config, fx_record_minimal_item_catalogue: RecordRevision, fx_get_record: callable
-) -> ItemCatalogue:
-    """ItemCatalogue based on minimal catalogue record."""
-    return ItemCatalogue(
-        config=fx_config,
-        record=fx_record_minimal_item_catalogue,
-        get_record=fx_get_record,
-    )
-
-
-@pytest.fixture()
-def fx_item_catalogue_min_physical_map(
-    fx_config: Config,
-    fx_record_minimal_item_catalogue_physical_map: RecordRevision,
-    fx_get_record: callable,
-) -> ItemCataloguePhysicalMap:
-    """ItemCataloguePhysicalMap based on minimal catalogue record for a physical map."""
-    return ItemCataloguePhysicalMap(
-        config=fx_config,
-        record=fx_record_minimal_item_catalogue_physical_map,
-        get_record=fx_get_record,
-    )
+### OLD
 
 
 @pytest.fixture()
@@ -481,7 +537,7 @@ def fx_exporter_resource_base(
     fx_exporter_base: Exporter,
     fx_s3_bucket_name: str,
     fx_s3_client: S3Client,
-    fx_record_revision_minimal_item: RecordRevision,
+    fx_revision_model_min: RecordRevision,
 ) -> ResourceExporter:
     """
     Base resource exporter.
@@ -501,7 +557,7 @@ def fx_exporter_resource_base(
         config=mock_config,
         logger=fx_logger,
         s3=fx_s3_client,
-        record=fx_record_revision_minimal_item,
+        record=fx_revision_model_min,
         export_base=output_path.joinpath("x"),
         export_name="x.txt",
     )
@@ -513,7 +569,7 @@ def fx_exporter_iso_xml_html(
     fx_logger: logging.Logger,
     fx_s3_bucket_name: str,
     fx_s3_client: S3Client,
-    fx_record_revision_minimal_item: RecordRevision,
+    fx_revision_model_min: RecordRevision,
 ) -> Exporter:
     """ISO 19115 XML as HTML exporter with a mocked config and S3 client."""
     with TemporaryDirectory() as tmp_path:
@@ -527,7 +583,7 @@ def fx_exporter_iso_xml_html(
         config=mock_config,
         logger=fx_logger,
         s3=fx_s3_client,
-        record=fx_record_revision_minimal_item,
+        record=fx_revision_model_min,
         export_base=exports_path,
     )
 
@@ -538,7 +594,7 @@ def fx_exporter_html(
     fx_logger: logging.Logger,
     fx_s3_bucket_name: str,
     fx_s3_client: S3Client,
-    fx_record_revision_minimal_item_catalogue: RecordRevision,
+    fx_revision_model_min: RecordRevision,
 ) -> HtmlExporter:
     """HTML exporter with a mocked config and S3 client."""
     with TemporaryDirectory() as tmp_path:
@@ -553,7 +609,7 @@ def fx_exporter_html(
         config=mock_config,
         logger=fx_logger,
         s3=fx_s3_client,
-        record=fx_record_revision_minimal_item_catalogue,
+        record=fx_revision_model_min,
         export_base=output_path,
         get_record=_get_record,
     )
@@ -565,7 +621,7 @@ def fx_exporter_html_alias(
     fx_logger: logging.Logger,
     fx_s3_bucket_name: str,
     fx_s3_client: S3Client,
-    fx_record_revision_minimal_item_catalogue: RecordRevision,
+    fx_revision_model_min: RecordRevision,
 ) -> HtmlAliasesExporter:
     """HTML alias exporter with a mocked config and S3 client."""
     with TemporaryDirectory() as tmp_path:
@@ -574,7 +630,7 @@ def fx_exporter_html_alias(
     type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
     type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
 
-    fx_record_revision_minimal_item_catalogue.identification.identifiers.append(
+    fx_revision_model_min.identification.identifiers.append(
         Identifier(identifier="x", href=f"https://{CATALOGUE_NAMESPACE}/datasets/x", namespace=ALIAS_NAMESPACE)
     )
 
@@ -582,7 +638,7 @@ def fx_exporter_html_alias(
         config=mock_config,
         logger=fx_logger,
         s3=fx_s3_client,
-        record=fx_record_revision_minimal_item_catalogue,
+        record=fx_revision_model_min,
         site_base=output_path,
     )
 
@@ -611,10 +667,10 @@ def fx_exporter_records(
 
 @pytest.fixture()
 def fx_exporter_records_pop(
-    fx_exporter_records: RecordsExporter, fx_record_revision_minimal_item_catalogue: RecordRevision
+    fx_exporter_records: RecordsExporter, fx_revision_model_min: RecordRevision
 ) -> RecordsExporter:
     """Site records exporter populated with a single record."""
-    fx_exporter_records.loads(records=[fx_record_revision_minimal_item_catalogue])
+    fx_exporter_records.loads(records=[fx_revision_model_min])
     return fx_exporter_records
 
 
@@ -652,13 +708,13 @@ def fx_exporter_site_index(
 
 @pytest.fixture()
 def fx_exporter_site_index_pop(
-    fx_exporter_site_index: SiteIndexExporter, fx_record_minimal_item: Record
+    fx_exporter_site_index: SiteIndexExporter, fx_revision_model_min: RecordRevision
 ) -> SiteIndexExporter:
     """Site index exporter populated with a single record summary."""
-    fx_record_minimal_item.identification.identifiers.append(
-        Identifier(identifier="x", href="https://data.bas.ac.uk/datasets/x", namespace="alias.data.bas.ac.uk")
+    fx_revision_model_min.identification.identifiers.append(
+        Identifier(identifier="x", href="https://data.bas.ac.uk/datasets/x", namespace=ALIAS_NAMESPACE)
     )
-    records = [fx_record_minimal_item]
+    records = [fx_revision_model_min]
     fx_exporter_site_index.loads(records=records)
     return fx_exporter_site_index
 
@@ -694,13 +750,13 @@ def fx_exporter_website_search(
 
 @pytest.fixture()
 def fx_exporter_website_search_pop(
-    fx_exporter_website_search: WebsiteSearchExporter, fx_record_revision_minimal_item: RecordRevision
+    fx_exporter_website_search: WebsiteSearchExporter, fx_revision_model_min: RecordRevision
 ) -> WebsiteSearchExporter:
     """Public website search exporter populated with a single record."""
-    fx_record_revision_minimal_item.identification.constraints.append(
+    fx_revision_model_min.identification.constraints.append(
         Constraint(type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.UNRESTRICTED)
     )
-    fx_exporter_website_search.loads(records=[fx_record_revision_minimal_item])
+    fx_exporter_website_search.loads(records=[fx_revision_model_min])
     return fx_exporter_website_search
 
 

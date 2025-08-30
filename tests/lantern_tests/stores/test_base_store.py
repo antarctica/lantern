@@ -1,6 +1,6 @@
 import pytest
 
-from lantern.lib.metadata_library.models.record import Record
+from lantern.models.record import Record
 from lantern.stores.base import RecordNotFoundError
 from tests.resources.stores.fake_records_store import FakeRecordsStore
 

@@ -6,7 +6,6 @@ from mypy_boto3_s3 import S3Client
 
 from lantern.config import Config
 from lantern.exporters.base import ResourceExporter, get_record_aliases
-from lantern.lib.metadata_library.models.record import Record
 from lantern.models.item.base.const import CATALOGUE_NAMESPACE
 from lantern.models.item.catalogue import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
@@ -29,7 +28,7 @@ class HtmlExporter(ResourceExporter):
         s3: S3Client,
         record: RecordRevision,
         export_base: Path,
-        get_record: Callable[[str], Record],
+        get_record: Callable[[str], RecordRevision],
     ) -> None:
         """
         Initialise.

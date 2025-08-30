@@ -14,11 +14,13 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 
 * Markdown linting for project documentation
 * Dev command for bootstrapping a remote GitLab records repo
+* Dedicated Catalogue Record class to enforce Catalogue specific requirements
 
 ### Changed
 
 * Replacing public website search prototype to use WordPress REST API
 * Paper map distribution option text updated to be less exclusive
+* Record and Item test fixtures refactored into a more logical structure
 
 ### Fixed
 

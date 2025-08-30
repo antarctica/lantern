@@ -28,15 +28,13 @@ from lantern.models.record.revision import RecordRevision
 
 class ItemBase:
     """
-    Base representation of a resource within the BAS Data Catalogue / Metadata ecosystem.
+    Base representation of a resource within the BAS Data Catalogue.
 
     Items are a high-level, read-only, and non-standards specific view of a resource via an underlying Record instance,
     to make it easier and less cumbersome to use through various filtering, processing and formatting methods.
 
-    Note that Items must include a file_identifier.
-
-    Multiple Item classes are used for different contexts and systems. This base representation contains core/common
-    properties and methods shared between all Item classes. It is not expected to be used directly.
+    Item subclasses are used for different contexts and systems. This base class contains core/common properties and
+    methods and is not expected to be used directly.
 
     It is expected, and acceptable, to use the underlying `_record` property to access information not made directly
     available by this class. Especially for properties this class would simply pass through to the record.
@@ -44,10 +42,6 @@ class ItemBase:
 
     def __init__(self, record: RecordRevision) -> None:
         self._record = record
-
-        if self.resource_id is None:
-            msg = "Items require a file_identifier."
-            raise ValueError(msg)
 
     @staticmethod
     def _parse_permissions(href: str | None) -> list[AccessLevel]:

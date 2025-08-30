@@ -9,7 +9,6 @@ from bs4 import BeautifulSoup
 from pytest_mock import MockerFixture
 
 from lantern.exporters.site import SiteExporter, SiteIndexExporter, SitePagesExporter, SiteResourcesExporter
-from lantern.lib.metadata_library.models.record import Record
 from lantern.models.record.revision import RecordRevision
 
 
@@ -30,9 +29,9 @@ class TestSiteIndexExporter:
         assert exporter.name == "Site Index"
         assert len(exporter._records) == 0
 
-    def test_loads(self, fx_exporter_site_index: SiteIndexExporter, fx_record_minimal_item_catalogue: Record):
+    def test_loads(self, fx_exporter_site_index: SiteIndexExporter, fx_revision_model_min: RecordRevision):
         """Can load summaries."""
-        records = [fx_record_minimal_item_catalogue]
+        records = [fx_revision_model_min]
         fx_exporter_site_index.loads(records=records)
         assert len(fx_exporter_site_index._records) == len(records)
 
@@ -315,7 +314,6 @@ class TestSiteExporter:
         self,
         mocker: MockerFixture,
         fx_exporter_site: SiteExporter,
-        fx_record_minimal_item_catalogue: Record,
         fx_s3_bucket_name: str,
     ):
         """Can empty export directory and publishing bucket."""
@@ -339,7 +337,7 @@ class TestSiteExporter:
         self,
         mocker: MockerFixture,
         fx_exporter_site: SiteExporter,
-        fx_record_minimal_item_catalogue: Record,
+        fx_revision_model_min: RecordRevision,
         fx_s3_bucket_name: str,
     ):
         """Can empty export directory and publishing bucket when neither exist."""
@@ -353,16 +351,16 @@ class TestSiteExporter:
         result = fx_exporter_site._s3_client.list_objects(Bucket=fx_s3_bucket_name)
         assert "contents" not in result
 
-    def test_loads(self, fx_exporter_site: SiteExporter, fx_record_revision_minimal_item_catalogue: RecordRevision):
+    def test_loads(self, fx_exporter_site: SiteExporter, fx_revision_model_min: RecordRevision):
         """Can load summaries and records."""
-        records = [fx_record_revision_minimal_item_catalogue]
+        records = [fx_revision_model_min]
         fx_exporter_site.loads(records)
 
         assert len(fx_exporter_site._records_exporter._records) == len(records)
 
-    def test_export(self, fx_exporter_site: SiteExporter, fx_record_revision_minimal_item_catalogue: RecordRevision):
+    def test_export(self, fx_exporter_site: SiteExporter, fx_revision_model_min: RecordRevision):
         """Can export all site components to local files."""
-        record = fx_record_revision_minimal_item_catalogue
+        record = fx_revision_model_min
         site_path = fx_exporter_site._config.EXPORT_PATH
         fx_exporter_site.loads([record])
         expected = [
@@ -386,7 +384,7 @@ class TestSiteExporter:
         mocker: MockerFixture,
         fx_s3_bucket_name: str,
         fx_exporter_site: SiteExporter,
-        fx_record_revision_minimal_item_catalogue: RecordRevision,
+        fx_revision_model_min: RecordRevision,
     ):
         """
         Can publish site index to S3 or external services.
@@ -396,7 +394,7 @@ class TestSiteExporter:
         mocker.patch.object(fx_exporter_site._website_exporter, "publish", return_value=None)
 
         s3 = fx_exporter_site._index_exporter._s3_utils._s3
-        record = fx_record_revision_minimal_item_catalogue
+        record = fx_revision_model_min
         fx_exporter_site.loads([record])
         expected = [
             "favicon.ico",

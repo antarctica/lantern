@@ -7,7 +7,7 @@ from boto3 import client as S3Client  # noqa: N812
 from pytest_mock import MockerFixture
 
 from lantern.exporters.json import JsonExporter
-from lantern.lib.metadata_library.models.record import Record
+from lantern.models.record.revision import RecordRevision
 
 
 class TestIsoXmlExporter:
@@ -19,7 +19,7 @@ class TestIsoXmlExporter:
         fx_logger: logging.Logger,
         fx_s3_bucket_name: str,
         fx_s3_client: S3Client,
-        fx_record_minimal_item: Record,
+        fx_revision_model_min: RecordRevision,
     ):
         """Can create a JSON Exporter."""
         with TemporaryDirectory() as tmp_path:
@@ -32,7 +32,7 @@ class TestIsoXmlExporter:
             config=mock_config,
             logger=fx_logger,
             s3=fx_s3_client,
-            record=fx_record_minimal_item,
+            record=fx_revision_model_min,
             export_base=output_path,
         )
 
@@ -45,7 +45,7 @@ class TestIsoXmlExporter:
         fx_logger: logging.Logger,
         fx_s3_bucket_name: str,
         fx_s3_client: S3Client,
-        fx_record_minimal_item: Record,
+        fx_revision_model_min: RecordRevision,
     ):
         """Can encode record as a JSON schema instance string."""
         with TemporaryDirectory() as tmp_path:
@@ -58,7 +58,7 @@ class TestIsoXmlExporter:
             config=mock_config,
             logger=fx_logger,
             s3=fx_s3_client,
-            record=fx_record_minimal_item,
+            record=fx_revision_model_min,
             export_base=output_path,
         )
 

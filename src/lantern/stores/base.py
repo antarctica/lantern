@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from lantern.lib.metadata_library.models.record import Record
+from lantern.models.record.revision import RecordRevision
 
 
 class RecordNotFoundError(Exception):
@@ -29,11 +29,11 @@ class Store(ABC):
 
     @property
     @abstractmethod
-    def records(self) -> list[Record]:
+    def records(self) -> list[RecordRevision]:
         """All records."""
         ...
 
     @abstractmethod
-    def get(self, file_identifier: str) -> Record:
+    def get(self, file_identifier: str) -> RecordRevision:
         """Return a specific record or raise a RecordNotFoundError."""
         ...

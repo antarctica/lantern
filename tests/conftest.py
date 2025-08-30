@@ -214,7 +214,7 @@ def fx_record_minimal_iso(fx_record_config_minimal_iso: dict) -> Record:
 @pytest.fixture()
 def fx_record_revision_minimal_iso(fx_record_config_minimal_iso: dict) -> RecordRevision:
     """Minimal record revision instance (ISO)."""
-    config = {"file_revision": "x", **fx_record_config_minimal_iso}
+    config = {"file_identifier": "x", "file_revision": "x", **fx_record_config_minimal_iso}
     return RecordRevision.loads(config)
 
 

@@ -66,7 +66,7 @@ class TestContact:
 
     def test_init(self):
         """Creates a Contact."""
-        rec_contact = RecordContact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.POINT_OF_CONTACT])
+        rec_contact = RecordContact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT})
         item_contact = Contact(rec_contact)
         assert isinstance(item_contact, Contact)
 
@@ -74,7 +74,7 @@ class TestContact:
     def test_ror(self, value: str | None):
         """Can get ROR."""
         rec_contact = RecordContact(
-            organisation=ContactIdentity(name="x", title="ror", href=value), role=[ContactRoleCode.POINT_OF_CONTACT]
+            organisation=ContactIdentity(name="x", title="ror", href=value), role={ContactRoleCode.POINT_OF_CONTACT}
         )
         item_contact = Contact(rec_contact)
         assert item_contact.ror == value
@@ -83,7 +83,7 @@ class TestContact:
     def test_orcid(self, value: str | None):
         """Can get ORCID."""
         rec_contact = RecordContact(
-            individual=ContactIdentity(name="x", title="orcid", href=value), role=[ContactRoleCode.POINT_OF_CONTACT]
+            individual=ContactIdentity(name="x", title="orcid", href=value), role={ContactRoleCode.POINT_OF_CONTACT}
         )
         item_contact = Contact(rec_contact)
         assert item_contact.orcid == value
@@ -95,7 +95,7 @@ class TestContacts:
     def test_init(self):
         """Creates a Contacts container."""
         role = ContactRoleCode.POINT_OF_CONTACT
-        rec_contact = RecordContact(organisation=ContactIdentity(name="x"), role=[role])
+        rec_contact = RecordContact(organisation=ContactIdentity(name="x"), role={role})
         item_contact = Contact(rec_contact)
 
         item_contacts = Contacts([item_contact])

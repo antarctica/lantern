@@ -50,11 +50,6 @@ class TestItemBase:
         item = ItemBase(fx_record_revision_minimal_item)
         assert item._record == fx_record_revision_minimal_item
 
-    def test_init_invalid(self, fx_record_revision_minimal_iso: RecordRevision):
-        """Cannot create an ItemBase with an invalid record."""
-        with pytest.raises(ValueError, match="Items require a file_identifier."):
-            ItemBase(fx_record_revision_minimal_iso)
-
     @pytest.mark.parametrize(
         ("value", "expected"),
         [

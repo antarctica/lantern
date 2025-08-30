@@ -91,6 +91,8 @@ class TestRecord:
         assert record.metadata.contacts[0].organisation.name == value
         assert record.metadata.date_stamp == date_stamp
         assert record.identification.abstract == value
+        assert isinstance(record.distribution, list)
+        assert len(record.distribution) == 0
 
     def test_sha1(self, fx_record_minimal_iso: Record):
         """Can calculate a SHA1 hash of the record config."""
@@ -178,6 +180,7 @@ class TestRecord:
         assert (
             record.identification.constraints[0].restriction_code == expected_enums["constraint_code"]
         )  # enum property
+        assert isinstance(record.distribution, list)  # post-init default property
 
     def test_loads_invalid_schema(self):
         """Cannot create a Record from a JSON serialised dict referencing an unsupported JSON Schema."""

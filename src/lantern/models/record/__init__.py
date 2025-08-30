@@ -2,10 +2,14 @@ import logging
 from copy import deepcopy
 from dataclasses import dataclass
 from typing import TypeVar
+from uuid import UUID
 
 import cattrs
 
 from lantern.lib.metadata_library.models.record import Record as RecordBase
+from lantern.lib.metadata_library.models.record import RecordInvalidError, RecordSchema
+from lantern.lib.metadata_library.models.record.enums import ContactRoleCode, HierarchyLevelCode
+from lantern.models.item.base.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 
 TRecord = TypeVar("TRecord", bound="Record")
 
@@ -63,3 +67,83 @@ class Record(RecordBase):
         converter = cattrs.Converter()
         converter.register_structure_hook(Record, lambda d, t: cls.structure(d))
         return converter.structure(value, cls)
+
+    def _validate_identifiers(self) -> None:
+        """Verify record resource identifier."""
+        try:
+            identifier = self.identification.identifiers.filter(CATALOGUE_NAMESPACE)[0]
+        except IndexError as e:
+            msg = "No resource identifier with catalogue namespace."
+            raise RecordInvalidError(validation_error=ValueError(msg)) from e
+        if identifier.identifier != self.file_identifier:
+            msg = "Invalid identifier value in Catalogue resource identifier."
+            raise RecordInvalidError(validation_error=ValueError(msg)) from None
+        if identifier.href != f"https://data.bas.ac.uk/items/{self.file_identifier}":
+            msg = "Invalid href in Catalogue resource identifier."
+            raise RecordInvalidError(validation_error=ValueError(msg)) from None
+
+    def _validate_poc(self) -> None:
+        """Verify record resource point of contact."""
+        pocs = self.identification.contacts.filter(roles=ContactRoleCode.POINT_OF_CONTACT)
+        if not pocs:
+            msg = "No resource contact with Point of Contact role."
+            exp = ValueError(msg)
+            raise RecordInvalidError(validation_error=exp)
+
+    def _validate_extents(self) -> None:
+        """Verify record extents."""
+        extent_ids = []
+        for extent in self.identification.extents:
+            if extent.identifier in extent_ids:
+                msg = f"Duplicate extent identifier '{extent.identifier}', must be unique."
+                exp = ValueError(msg)
+                raise RecordInvalidError(validation_error=exp)
+            extent_ids.append(extent.identifier)
+
+    def _validate_aliases(self) -> None:
+        """Verify record alias values."""
+        product_prefixes = ["products", "maps"]
+        prefixes = {
+            HierarchyLevelCode.COLLECTION: ["collections"],
+            HierarchyLevelCode.DATASET: ["datasets"],
+            HierarchyLevelCode.PRODUCT: product_prefixes,
+            HierarchyLevelCode.PAPER_MAP_PRODUCT: product_prefixes,
+        }
+
+        for alias in self.identification.identifiers.filter(ALIAS_NAMESPACE):
+            expected = f"https://data.bas.ac.uk/{alias.identifier}"
+            if alias.href != expected:
+                msg = f"Invalid alias href '{alias.href}' must be '{expected}'."
+                exp = ValueError(msg)
+                raise RecordInvalidError(validation_error=exp)
+
+            if alias.identifier.split("/")[0] not in prefixes.get(self.hierarchy_level, []):
+                msg = f"Invalid prefix in alias identifier '{alias.identifier}' for hierarchy level."
+                exp = ValueError(msg)
+                raise RecordInvalidError(validation_error=exp)
+
+            try:
+                UUID(alias.identifier.split("/")[-1])
+                msg = f"Invalid alias identifier '{alias.identifier}' must not contain a UUID."
+                exp = ValueError(msg)
+                raise RecordInvalidError(validation_error=exp)
+            except ValueError:
+                pass
+
+    def validate(self, use_profiles: bool = True, force_schemas: list[RecordSchema] | None = None) -> None:
+        """
+        Verify records against Catalogue specific requirements.
+
+        Checks that records:
+        - include an identifier with the catalogue namespace and file_identifier value
+        - include a contact with the 'Point of Contact' role
+        - use unique extent identifiers if included
+        - don't use UUIDs as aliases
+
+        See docs/data_model.md#record-validation for more information.
+        """
+        super().validate(use_profiles, force_schemas)
+        self._validate_identifiers()
+        self._validate_poc()
+        self._validate_extents()
+        self._validate_aliases()

@@ -80,24 +80,40 @@ For example:
 
 ### Record requirements
 
-The Data Catalogue itself requires these properties to be set in all records:
+In addition to ISO 19115 mandatory properties, the Data Catalogue requires these properties are set in all records:
 
-- the `file_identifier`
-  - so records can be distinguished without relying on a value that may change or not be unique
-- the `hierarchy_level`
-  - so [Item](#items) types can be distinguished
+- `file_identifier`
+  - so records can be distinguished without relying on a value such as title that may change or not be unique
 - an `identification.identifier`, as per [1]
   - to determine if a record is part of the Catalogue
-- an `identification.identifier.contacts[role='pointOfContact']`
+- an `identification.identifier.contacts.*.contact` with at least the 'pointOfContact' role
   - for use with the item contact tab
 
-These requirements are implemented and enforced by the [Catalogue Record](#catalogue-records) class.
+The Catalogue also requires:
+
+- extents, if included, MUST use unique identifiers
+- aliases, if included:
+  - MUST values in the form: `{prefix}/{value}`
+  - MUST use an allowed prefix for each hierarchy level, as per [2]
+  - MUST NOT use UUIDs in values (to avoid conflicts with `file_identifier` values)
+  - MUST set the `href` property to `https://data.bas.ac.uk/{alias}` (e.g. `https://data.bas.ac.uk/collections/foo`)
+
+These requirements are enforced by the `validate()` method in the [Catalogue Record](#catalogue-records) class.
 
 [1]
 
 - identifier: `{file_identifier}`
 - href: `https://data.bas.ac.uk/items/{file_identifier}`
 - namespace: `data.bas.ac.uk`
+
+[2]
+
+| Hierarchy level           | Allowed Prefixes   |
+|---------------------------|--------------------|
+| `collections`             | `collections`      |
+| `dataset`                 | `datasets`         |
+| `products`                | `products`, `maps` |
+| `paperMapProduct` (local) | `products`, `maps` |
 
 ## Items
 
@@ -237,15 +253,10 @@ uniqueness, they are useful when sharing URLs.
 Item aliases provide a way to create additional URLs for an item with more useful values, such as a slugified title or
 existing codes or shorthand.
 
-Aliases are defined as Record identifiers using the `alias.data.bas.ac.uk` namespace. By convention alias, values are
-prefixed by a pluralised version of the Record hierarchy level (e.g. `collections/foo`).
-
-<!-- pyml disable md028 -->
-> [!WARNING]
-> The catalogue does not currently enforce this convention but may in the future. To avoid invaliding previous aliases,
-> this convention SHOULD be followed.
+Aliases are defined as Record identifiers using the `alias.data.bas.ac.uk` namespace. Values are prefixed by a
+pluralised term related to the Record hierarchy level (e.g. `collections/foo` for a collection record). See the
+[Record requirements](#record-requirements) section for specific requirements.
 
 > [!CAUTION]
-> The catalogue does not currently enforce uniqueness of aliases and will not be aware of (or error for) conflicts. The
-> behavior of conflicting aliases is undefined. Any implicit behaviour MUST NOT be relied upon.
-<!-- pyml enable md028 -->
+> The catalogue does not enforce aliases to be unique across records and the behavior of conflicting aliases is left
+> undefined. Any implicit behaviour MUST NOT be relied upon.

@@ -9,14 +9,13 @@ from lantern.lib.metadata_library.models.record.elements.common import (
     ContactIdentity,
     Contacts,
     Date,
-    Identifiers,
 )
 from lantern.lib.metadata_library.models.record.elements.identification import GraphicOverview, GraphicOverviews
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
 from lantern.models.item.base.const import CATALOGUE_NAMESPACE
 from lantern.models.item.base.elements import Link
 from lantern.models.item.base.enums import ResourceTypeLabel
-from lantern.models.item.catalogue import ItemCatalogue, ItemInvalidError
+from lantern.models.item.catalogue import ItemCatalogue
 from lantern.models.item.catalogue.elements import PageSummary
 from lantern.models.item.catalogue.tabs import (
     AdditionalInfoTab,
@@ -44,43 +43,7 @@ class TestItemCatalogue:
             get_record=_get_record,
         )
         assert isinstance(item, ItemCatalogue)
-        assert item._record == fx_record_revision_minimal_item_catalogue
-
-    @pytest.mark.parametrize(
-        ("element", "exception_cls"),
-        [
-            ("file_identifier", ValueError),
-            ("self_identifier", ItemInvalidError),
-            ("self_identifier_match", ItemInvalidError),
-            ("self_identifier_namespace", ItemInvalidError),
-            ("point_of_contact", ItemInvalidError),
-        ],
-    )
-    def test_invalid(
-        self,
-        fx_config: Config,
-        fx_record_revision_minimal_item_catalogue: RecordRevision,
-        element: str,
-        exception_cls: type[Exception],
-    ):
-        """Cannot create a catalogue item from an invalid record."""
-        if element == "file_identifier":
-            fx_record_revision_minimal_item_catalogue.file_identifier = None
-        elif element == "self_identifier":
-            fx_record_revision_minimal_item_catalogue.identification.identifiers = Identifiers([])
-        elif element == "self_identifier_match":
-            fx_record_revision_minimal_item_catalogue.identification.identifiers[0].identifier = "y"
-        elif element == "self_identifier_namespace":
-            fx_record_revision_minimal_item_catalogue.identification.identifiers[0].namespace = "y"
-        elif element == "point_of_contact":
-            fx_record_revision_minimal_item_catalogue.identification.contacts = Contacts([])
-
-        with pytest.raises(exception_cls):
-            _ = ItemCatalogue(
-                config=fx_config,
-                record=fx_record_revision_minimal_item_catalogue,
-                get_record=_get_record,
-            )
+        assert item._record == fx_revision_model_min
 
     def test_revision(
         self,

@@ -9,7 +9,7 @@ from pytest_mock import MockerFixture
 
 from lantern.exporters.base import Exporter, ResourceExporter, S3Utils, get_record_aliases
 from lantern.lib.metadata_library.models.record.elements.common import Identifier
-from lantern.models.item.base.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
+from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 from tests.resources.exporters.fake_exporter import FakeExporter, FakeResourceExporter
 

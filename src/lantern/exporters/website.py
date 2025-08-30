@@ -9,8 +9,8 @@ from requests.auth import HTTPBasicAuth
 from lantern.config import Config
 from lantern.exporters.base import Exporter
 from lantern.lib.metadata_library.models.record.enums import AggregationAssociationCode
-from lantern.models.item.base.const import CATALOGUE_NAMESPACE
 from lantern.models.item.website.search import ItemWebsiteSearch
+from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 
 

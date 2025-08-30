@@ -19,10 +19,10 @@ from lantern.lib.metadata_library.models.record.enums import (
     ConstraintTypeCode,
     HierarchyLevelCode,
 )
-from lantern.models.item.base.const import PERMISSIONS_BAS_GROUP, PERMISSIONS_NERC_DIRECTORY
 from lantern.models.item.base.elements import Contact, Contacts, Extent, Extents
 from lantern.models.item.base.enums import AccessLevel
 from lantern.models.item.base.utils import md_as_html, md_as_plain
+from lantern.models.record.const import PERMISSIONS_BAS_GROUP, PERMISSIONS_NERC_DIRECTORY
 from lantern.models.record.revision import RecordRevision
 
 

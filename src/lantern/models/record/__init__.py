@@ -9,7 +9,7 @@ import cattrs
 from lantern.lib.metadata_library.models.record import Record as RecordBase
 from lantern.lib.metadata_library.models.record import RecordInvalidError, RecordSchema
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode, HierarchyLevelCode
-from lantern.models.item.base.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
+from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 
 TRecord = TypeVar("TRecord", bound="Record")
 

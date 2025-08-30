@@ -1,6 +1,6 @@
 from lantern.lib.metadata_library.models.record import HierarchyLevelCode
 from lantern.lib.metadata_library.models.record.elements.common import Date, Identifier
-from lantern.models.item.base.const import CATALOGUE_NAMESPACE
+from lantern.models.record.const import CATALOGUE_NAMESPACE
 
 
 def make_magic_citation(

@@ -35,12 +35,12 @@ from lantern.lib.metadata_library.models.record.enums import (
     HierarchyLevelCode,
 )
 from lantern.models.item.base import ItemBase
-from lantern.models.item.base.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.item.catalogue import AdditionalInfoTab, ItemCatalogue
 from lantern.models.item.catalogue.elements import Dates as ItemCatDates
 from lantern.models.item.catalogue.elements import Identifiers as ItemCatIdentifiers
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
 from lantern.models.record import Record
+from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 from lantern.stores.gitlab import GitLabLocalCache, GitLabStore
 from tests.resources.exporters.fake_exporter import FakeExporter, FakeResourceExporter

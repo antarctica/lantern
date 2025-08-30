@@ -12,7 +12,6 @@ from lantern.lib.metadata_library.models.record.elements.common import (
 )
 from lantern.lib.metadata_library.models.record.elements.identification import GraphicOverview, GraphicOverviews
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
-from lantern.models.item.base.const import CATALOGUE_NAMESPACE
 from lantern.models.item.base.elements import Link
 from lantern.models.item.base.enums import ResourceTypeLabel
 from lantern.models.item.catalogue import ItemCatalogue
@@ -28,6 +27,7 @@ from lantern.models.item.catalogue.tabs import (
     LineageTab,
     RelatedTab,
 )
+from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 from tests.conftest import _get_record
 

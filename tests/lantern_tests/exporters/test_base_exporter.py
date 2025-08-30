@@ -8,7 +8,6 @@ from boto3 import client as S3Client  # noqa: N812
 from pytest_mock import MockerFixture
 
 from lantern.exporters.base import Exporter, ResourceExporter, S3Utils, get_record_aliases
-from lantern.lib.metadata_library.models.record import Record
 from lantern.lib.metadata_library.models.record.elements.common import Identifier
 from lantern.models.item.base.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
@@ -139,7 +138,7 @@ class TestBaseResourceExporter:
         fx_exporter_base: Exporter,
         fx_s3_bucket_name: str,
         fx_s3_client: S3Client,
-        fx_record_revision_minimal_item: RecordRevision,
+        fx_revision_model_min: RecordRevision,
     ):
         """Can create an Exporter."""
         with TemporaryDirectory() as tmp_path:
@@ -153,7 +152,7 @@ class TestBaseResourceExporter:
             config=mock_config,
             logger=fx_logger,
             s3=fx_s3_client,
-            record=fx_record_revision_minimal_item,
+            record=fx_revision_model_min,
             export_base=output_path.joinpath("x"),
             export_name="x.txt",
         )
@@ -202,11 +201,11 @@ class TestBaseResourceExporter:
 class TestGetRecordAliases:
     """Test get_record_aliases function."""
 
-    def test_get_record_aliases(self, fx_record_minimal_item: Record):
+    def test_get_record_aliases(self, fx_revision_model_min: RecordRevision):
         """Can get any aliases in a record."""
         alias = Identifier(identifier="x", href=f"https://{CATALOGUE_NAMESPACE}/datasets/x", namespace=ALIAS_NAMESPACE)
 
-        fx_record_minimal_item.identification.identifiers.append(alias)
-        result = get_record_aliases(fx_record_minimal_item)
+        fx_revision_model_min.identification.identifiers.append(alias)
+        result = get_record_aliases(fx_revision_model_min)
         assert len(result) == 1
         assert result[0] == alias

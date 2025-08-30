@@ -13,7 +13,7 @@ from gitlab import Gitlab
 from gitlab.v4.objects import Project
 from requests.exceptions import ConnectionError as RequestsConnectionError
 
-from lantern.lib.metadata_library.models.record import Record
+from lantern.models.record import Record
 from lantern.models.record.revision import RecordRevision
 from lantern.stores.base import RecordNotFoundError, Store
 

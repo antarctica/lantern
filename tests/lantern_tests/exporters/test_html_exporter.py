@@ -8,7 +8,6 @@ from boto3 import client as S3Client  # noqa: N812
 from pytest_mock import MockerFixture
 
 from lantern.exporters.html import HtmlAliasesExporter, HtmlExporter
-from lantern.lib.metadata_library.models.record import Record
 from lantern.models.item.catalogue import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
 from lantern.models.record.revision import RecordRevision
@@ -24,7 +23,7 @@ class TestHtmlExporter:
         fx_logger: logging.Logger,
         fx_s3_bucket_name: str,
         fx_s3_client: S3Client,
-        fx_record_revision_minimal_item: RecordRevision,
+        fx_revision_model_min: RecordRevision,
     ):
         """Can create an HTML Exporter."""
         with TemporaryDirectory() as tmp_path:
@@ -32,13 +31,13 @@ class TestHtmlExporter:
         mock_config = mocker.Mock()
         type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
         type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
-        expected = output_path.joinpath(f"{fx_record_revision_minimal_item.file_identifier}/index.html")
+        expected = output_path.joinpath(f"{fx_revision_model_min.file_identifier}/index.html")
 
         exporter = HtmlExporter(
             config=mock_config,
             logger=fx_logger,
             s3=fx_s3_client,
-            record=fx_record_revision_minimal_item,
+            record=fx_revision_model_min,
             export_base=output_path,
             get_record=_get_record,
         )
@@ -51,12 +50,12 @@ class TestHtmlExporter:
     def test_item_class(
         self,
         fx_exporter_html: HtmlExporter,
-        fx_record_minimal_item_catalogue_physical_map: Record,
+        fx_item_config_min_physical_map: dict,
         expected: type[ItemCatalogue],
     ):
         """Can determine which Data Catalogue item class to use based on record."""
         if expected == ItemCataloguePhysicalMap:
-            fx_exporter_html._record = fx_record_minimal_item_catalogue_physical_map
+            fx_exporter_html._record = RecordRevision.loads(fx_item_config_min_physical_map)
 
         result = fx_exporter_html._item_class()
         assert result == expected
@@ -76,7 +75,7 @@ class TestHtmlAliasesExporter:
         fx_logger: logging.Logger,
         fx_s3_bucket_name: str,
         fx_s3_client: S3Client,
-        fx_record_revision_minimal_item: RecordRevision,
+        fx_revision_model_min: RecordRevision,
     ):
         """Can create an HTML alias Exporter."""
         with TemporaryDirectory() as tmp_path:
@@ -89,7 +88,7 @@ class TestHtmlAliasesExporter:
             config=mock_config,
             logger=fx_logger,
             s3=fx_s3_client,
-            record=fx_record_revision_minimal_item,
+            record=fx_revision_model_min,
             site_base=output_path,
         )
 

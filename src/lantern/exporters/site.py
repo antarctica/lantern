@@ -14,7 +14,6 @@ from lantern.exporters.base import Exporter, get_record_aliases
 from lantern.exporters.base import Exporter as BaseExporter
 from lantern.exporters.records import RecordsExporter
 from lantern.exporters.website import WebsiteSearchExporter
-from lantern.lib.metadata_library.models.record import Record
 from lantern.models.record.revision import RecordRevision
 from lantern.models.templates import PageMetadata
 
@@ -146,7 +145,7 @@ class SiteIndexExporter(Exporter):
         """Initialise exporter."""
         super().__init__(config=config, logger=logger, s3=s3)
         self._index_path = self._config.EXPORT_PATH / "-" / "index" / "index.html"
-        self._records: list[Record] = []
+        self._records: list[RecordRevision] = []
         self._record_ids = set()
 
     @property
@@ -154,7 +153,7 @@ class SiteIndexExporter(Exporter):
         """Exporter name."""
         return "Site Index"
 
-    def loads(self, records: list[Record]) -> None:
+    def loads(self, records: list[RecordRevision]) -> None:
         """Populate exporter."""
         self._records = records
         self._record_ids = {record.file_identifier for record in records}

@@ -20,6 +20,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 
 * Replacing public website search prototype to use WordPress REST API
 * Paper map distribution option text updated to be less exclusive
+* Record and Item test fixtures refactored into a more logical structure
 
 ### Fixed
 

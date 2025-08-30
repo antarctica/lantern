@@ -266,7 +266,9 @@ class TestLicenceTab:
             href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
             statement="x",
         )
-        tab = LicenceTab(jinja=fx_item_catalogue_min._jinja, item_type=HierarchyLevelCode.PRODUCT, licence=constraint)
+        tab = LicenceTab(
+            jinja=fx_item_catalogue_model_min._jinja, item_type=HierarchyLevelCode.PRODUCT, licence=constraint
+        )
 
         assert tab.enabled is True
         assert tab.slug == Licence.OGL_UK_3_0
@@ -283,7 +285,11 @@ class TestLicenceTab:
         ],
     )
     def test_disabled(
-        self, fx_item_catalogue_min: ItemCatalogue, item_type: HierarchyLevelCode, has_licence: bool, expected: bool
+        self,
+        fx_item_catalogue_model_min: ItemCatalogue,
+        item_type: HierarchyLevelCode,
+        has_licence: bool,
+        expected: bool,
     ):
         """Can disable licence tab based on item type and if item has a licence."""
         constraint = Constraint(
@@ -294,7 +300,7 @@ class TestLicenceTab:
         )
         licence = constraint if has_licence else None
 
-        tab = LicenceTab(jinja=fx_item_catalogue_min._jinja, item_type=item_type, licence=licence)
+        tab = LicenceTab(jinja=fx_item_catalogue_model_min._jinja, item_type=item_type, licence=licence)
 
         assert tab.enabled == expected
         if has_licence:

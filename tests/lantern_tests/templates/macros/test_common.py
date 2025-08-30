@@ -12,7 +12,6 @@ import pytest
 from bs4 import BeautifulSoup
 from jinja2 import Environment, PackageLoader, select_autoescape
 
-from lantern.lib.metadata_library.models.record import Record
 from lantern.lib.metadata_library.models.record.elements.common import Date, Identifier
 from lantern.lib.metadata_library.models.record.elements.identification import Aggregation, Constraint, Constraints
 from lantern.lib.metadata_library.models.record.enums import (
@@ -22,7 +21,8 @@ from lantern.lib.metadata_library.models.record.enums import (
     HierarchyLevelCode,
 )
 from lantern.models.item.catalogue.elements import ItemCatalogueSummary
-from tests.conftest import _record_config_minimal_iso
+from lantern.models.record.revision import RecordRevision
+from tests.conftest import _revision_config_min
 
 
 class TestPageHeader:
@@ -66,7 +66,7 @@ class TestPageHeader:
 class TestItemSummary:
     """Test item summary common macro."""
 
-    record = Record.loads(_record_config_minimal_iso())
+    record = RecordRevision.loads(_revision_config_min())
     record.file_identifier = "x"
     record.hierarchy_level = HierarchyLevelCode.PRODUCT
     record.identification.title = "y"

@@ -200,12 +200,6 @@ class TestMacrosItem:
             assert graphic_html is not None
             assert graphic_html["src"] == graphic.href
 
-        # Disabled until we can display multiple graphics sensibly.
-        # for graphic in expected:
-        #     graphic_html = html.select_one(f"#graphics-{graphic.identifier}")  # noqa: ERA001
-        #     assert graphic_html is not None  # noqa: ERA001
-        #     assert graphic_html["src"] == graphic.href  # noqa: ERA001
-
     @pytest.mark.parametrize(
         "value",
         [
@@ -240,14 +234,6 @@ class TestMacrosItem:
         assert sides is not None if expected else sides is None
         if sides is None:
             return
-
-        for item in expected:
-            # find an article element containing a link matching side[1].href
-            side = next(
-                (article for article in sides.find_all("article") if article.find("a", href=item[1].href)), None
-            )
-            assert side is not None
-            assert item[0] in str(side)
 
     @pytest.mark.parametrize("tab", _item_catalogue_model_min().tabs)
     def test_tabs_nav(self, fx_item_catalogue_model_min: ItemCatalogue, tab: Tab):

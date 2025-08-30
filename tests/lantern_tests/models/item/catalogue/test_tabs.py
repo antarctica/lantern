@@ -104,7 +104,7 @@ class TestDataTab:
         """Can create data tab."""
         distributions = [
             RecordDistribution(
-                distributor=RecordContact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.DISTRIBUTOR]),
+                distributor=RecordContact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
                 transfer_option=TransferOption(
                     online_resource=OnlineResource(href="x", function=OnlineResourceFunctionCode.DOWNLOAD)
                 ),
@@ -122,7 +122,7 @@ class TestDataTab:
         """Can enable data tab with supported distribution options."""
         distributions = [
             RecordDistribution(
-                distributor=RecordContact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.DISTRIBUTOR]),
+                distributor=RecordContact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
                 format=Format(
                     format="x",
                     href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+feature",
@@ -132,7 +132,7 @@ class TestDataTab:
                 ),
             ),
             RecordDistribution(
-                distributor=RecordContact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.DISTRIBUTOR]),
+                distributor=RecordContact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
                 format=Format(
                     format="x",
                     href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+feature",
@@ -150,7 +150,7 @@ class TestDataTab:
         access_type = AccessLevel.PUBLIC
         distributions = [
             RecordDistribution(
-                distributor=RecordContact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.DISTRIBUTOR]),
+                distributor=RecordContact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
                 format=Format(
                     format="x",
                     href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+feature",
@@ -160,7 +160,7 @@ class TestDataTab:
                 ),
             ),
             RecordDistribution(
-                distributor=RecordContact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.DISTRIBUTOR]),
+                distributor=RecordContact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
                 format=Format(
                     format="x",
                     href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+feature",
@@ -224,7 +224,7 @@ class TestAuthorsTab:
     def test_init(self):
         """Can create authors tab."""
         contacts = Contacts(
-            [Contact(RecordContact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.AUTHOR]))]
+            [Contact(RecordContact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.AUTHOR}))]
         )
 
         tab = AuthorsTab(item_type=HierarchyLevelCode.PRODUCT, authors=contacts)
@@ -245,7 +245,7 @@ class TestAuthorsTab:
     )
     def test_disabled(self, item_type: HierarchyLevelCode, has_authors: bool, expected: bool):
         """Can disable authors tab based on item type and if item has any authors."""
-        contact = Contact(RecordContact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.AUTHOR]))
+        contact = Contact(RecordContact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.AUTHOR}))
         contacts = Contacts([])
         if has_authors:
             contacts.append(contact)
@@ -258,7 +258,7 @@ class TestAuthorsTab:
 class TestLicenceTab:
     """Test licence tab."""
 
-    def test_init(self, fx_item_catalogue_min: ItemCatalogue):
+    def test_init(self, fx_item_catalogue_model_min: ItemCatalogue):
         """Can create licence tab."""
         constraint = Constraint(
             type=ConstraintTypeCode.USAGE,
@@ -681,7 +681,7 @@ class TestContactTab:
         expected = "x"
         contact = Contact(
             RecordContact(
-                organisation=ContactIdentity(name=expected), email=expected, role=[ContactRoleCode.POINT_OF_CONTACT]
+                organisation=ContactIdentity(name=expected), email=expected, role={ContactRoleCode.POINT_OF_CONTACT}
             )
         )
 
@@ -705,7 +705,7 @@ class TestContactTab:
     def test_form(self, endpoint: str, action: str, params: dict[str, str]) -> None:
         """Can get contact form action and parameters."""
         contact = Contact(
-            RecordContact(organisation=ContactIdentity(name="x"), email="x", role=[ContactRoleCode.POINT_OF_CONTACT])
+            RecordContact(organisation=ContactIdentity(name="x"), email="x", role={ContactRoleCode.POINT_OF_CONTACT})
         )
 
         tab = ContactTab(contact=contact, item_id="x", item_title="x", form_action=endpoint)
@@ -721,7 +721,7 @@ class TestContactTab:
                 organisation=ContactIdentity(name="x"),
                 email="x",
                 phone=expected,
-                role=[ContactRoleCode.POINT_OF_CONTACT],
+                role={ContactRoleCode.POINT_OF_CONTACT},
             )
         )
 
@@ -742,7 +742,7 @@ class TestContactTab:
                 organisation=ContactIdentity(name="x"),
                 email="x",
                 address=address,
-                role=[ContactRoleCode.POINT_OF_CONTACT],
+                role={ContactRoleCode.POINT_OF_CONTACT},
             )
         )
 
@@ -752,7 +752,7 @@ class TestContactTab:
     def test_no_team(self):
         """Can't create a contact tab without a Contact with an organisation name."""
         contact = Contact(
-            RecordContact(individual=ContactIdentity(name="x"), email="x", role=[ContactRoleCode.POINT_OF_CONTACT])
+            RecordContact(individual=ContactIdentity(name="x"), email="x", role={ContactRoleCode.POINT_OF_CONTACT})
         )
         tab = ContactTab(contact=contact, item_id="x", item_title="x", form_action="x")
 
@@ -762,7 +762,7 @@ class TestContactTab:
     def test_no_email(self):
         """Can't create a contact tab without a Contact with an organisation name."""
         contact = Contact(
-            RecordContact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.POINT_OF_CONTACT])
+            RecordContact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT})
         )
         tab = ContactTab(contact=contact, item_id="x", item_title="x", form_action="x")
 

@@ -143,7 +143,7 @@ class Record:
         return normalised
 
     @staticmethod
-    def _check_supported(candidate: dict, comparison: dict, logger: logging.Logger | None = None) -> bool:
+    def _eq(candidate: dict, comparison: dict, logger: logging.Logger | None = None) -> bool:
         """Inner logic to check if two record configurations are the same."""
         normalised = Record._normalise_static_config_values(candidate)
         supported = normalised == comparison
@@ -167,7 +167,7 @@ class Record:
         This method acts as a wrapper for `_check_supported` to allow easier subclassing.
         """
         record = Record.loads(config)
-        return Record._check_supported(candidate=config, comparison=record.dumps(), logger=logger)
+        return Record._eq(candidate=config, comparison=record.dumps(), logger=logger)
 
     @staticmethod
     def _pre_structure(value: dict) -> None:

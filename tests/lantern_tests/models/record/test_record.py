@@ -68,6 +68,13 @@ class TestRecord:
                 identification=record.identification,
             )
 
+    @pytest.mark.parametrize(("extra_config", "expected"), [({}, True), ({"x": "x"}, False)])
+    def test_config_supported(self, fx_record_config_min: dict, extra_config: dict, expected: bool):
+        """Can accurately determine if a record config contains unsupported properties."""
+        config = {**fx_record_config_min, **extra_config}
+        result = Record._config_supported(config=config)
+        assert result == expected
+
     @pytest.mark.parametrize("has_schema", [False, True])
     def test_loads(self, fx_record_config_min: dict, has_schema: bool):
         """
@@ -83,7 +90,8 @@ class TestRecord:
         if has_schema:
             fx_record_config_min["$schema"] = schema
 
-        record = Record.loads(fx_record_config_min)
+        # has_schema used as coverage branching workaround
+        record = Record.loads(fx_record_config_min, check_supported=has_schema)
 
         assert record.identification.title == expected_str  # base record property
         assert record.file_identifier == expected_str  # record property
@@ -92,8 +100,9 @@ class TestRecord:
     def test_loads_no_file_identifier(self, fx_record_config_min: dict):
         """Cannot create a Record class instance from a JSON serialised dict without a file_identifier."""
         del fx_record_config_min["file_identifier"]
-        with pytest.raises(ClassValidationError):
+        with pytest.raises(ClassValidationError) as excinfo:
             Record.loads(fx_record_config_min)
+        assert "Records require a file_identifier." in str(excinfo.value.exceptions[0])
 
     def test_valid(self):
         """Can validate a Record complying with catalogue record requirements."""

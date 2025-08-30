@@ -60,12 +60,6 @@ class RecordRevision(Record):
         cls._pre_structure(value_)  # from parent class
         converter = cls._converter_up()  # from parent class
         instance = converter.structure(value_, cls)
-
-        # workaround where file_revision is None which cattrs casts to a string as 'None'
-        if instance.file_revision == "None" and value.get("file_revision") is None:
-            # noinspection PyTypeChecker
-            instance.file_revision = None
-
         instance.__post_init__()
         return instance
 

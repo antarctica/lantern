@@ -75,6 +75,7 @@ class TestRecord:
         expected_schema = "https://metadata-resources.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-2-v4.json"
         date_stamp = datetime(2014, 6, 30, tzinfo=UTC).date()
         hierarchy_level = HierarchyLevelCode.DATASET
+
         record = Record(
             hierarchy_level=hierarchy_level,
             metadata=Metadata(
@@ -94,38 +95,38 @@ class TestRecord:
         assert isinstance(record.distribution, list)
         assert len(record.distribution) == 0
 
-    def test_sha1(self, fx_record_minimal_iso: Record):
+    def test_sha1(self, fx_lib_record_model_min_iso: Record):
         """Can calculate a SHA1 hash of the record config."""
-        assert fx_record_minimal_iso.sha1 == "12e1d01105a5c77e3315e493acf5eb590129ffca"
+        assert fx_lib_record_model_min_iso.sha1 == "12e1d01105a5c77e3315e493acf5eb590129ffca"
 
     @pytest.mark.cov()
     @pytest.mark.parametrize("maintenance", [False, True])
-    def test_normalise_static_config_values(self, fx_record_config_minimal_iso: dict, maintenance: bool):
+    def test_normalise_static_config_values(self, fx_lib_record_config_min_iso: dict, maintenance: bool):
         """Can normalise record."""
         if maintenance:
-            fx_record_config_minimal_iso["metadata"]["maintenance"] = {"progress": ProgressCode.ON_GOING.value}
+            fx_lib_record_config_min_iso["metadata"]["maintenance"] = {"progress": ProgressCode.ON_GOING.value}
 
-        result = Record._normalise_static_config_values(fx_record_config_minimal_iso)
+        result = Record._normalise_static_config_values(fx_lib_record_config_min_iso)
         assert "maintenance" not in result["metadata"]
 
     @pytest.mark.parametrize("value", [{}, {"invalid": "x"}, {"hierarchy_level": HierarchyLevelCode.DIMENSION_GROUP}])
-    def test_config_supported(self, fx_record_config_minimal_iso: dict, value: dict):
+    def test_config_supported(self, fx_lib_record_config_min_iso: dict, value: dict):
         """Can determine if a record config is supported or not."""
         if value:
-            fx_record_config_minimal_iso = {**fx_record_config_minimal_iso, **value}
+            fx_lib_record_config_min_iso = {**fx_lib_record_config_min_iso, **value}
         expected = not bool(value)
 
-        result = Record._config_supported(fx_record_config_minimal_iso)
+        result = Record._config_supported(fx_lib_record_config_min_iso)
         assert result == expected
 
     @pytest.mark.cov()
-    def test_config_supported_log(self, caplog: pytest.LogCaptureFixture, fx_record_config_minimal_iso: dict):
+    def test_config_supported_log(self, caplog: pytest.LogCaptureFixture, fx_lib_record_config_min_iso: dict):
         """Can log unsupported record config contents if set."""
-        fx_record_config_minimal_iso["invalid"] = "x"
+        fx_lib_record_config_min_iso["invalid"] = "x"
         logger = logging.getLogger("test")
         logger.setLevel(logging.DEBUG)
 
-        Record._config_supported(config=fx_record_config_minimal_iso, logger=logger)
+        Record._config_supported(config=fx_lib_record_config_min_iso, logger=logger)
 
         assert "Diff: Item root['invalid'] (\"x\") added to dictionary." in caplog.text
 
@@ -165,11 +166,11 @@ class TestRecord:
                 "lineage": {"statement": expected_str},
             },
         }
+
         record = Record.loads(config, check_supported=check_supported)
 
         assert record._schema is not None
         assert record._schema == config["$schema"]
-
         assert record.identification.title == expected_str  # specially nested property
         assert record.data_quality.lineage.statement == expected_str  # moved property
         assert record.hierarchy_level == expected_enums["hierarchy_level"]  # enum property
@@ -201,7 +202,7 @@ class TestRecord:
         with pytest.raises(ValueError, match="Unsupported JSON Schema in data."):
             _ = Record.loads(config)
 
-    def test_dumps(self, fx_record_minimal_iso: Record):
+    def test_dumps(self, fx_lib_record_model_min_iso: Record):
         """
         Can encode record as a dict that can be serialised to JSON.
 
@@ -221,7 +222,7 @@ class TestRecord:
                 "character_set": "utf8",
                 "language": "eng",
                 "contacts": [{"organisation": {"name": value_str}, "role": [value_enums["contact_role"].value]}],
-                "date_stamp": fx_record_minimal_iso.metadata.date_stamp.isoformat(),
+                "date_stamp": fx_lib_record_model_min_iso.metadata.date_stamp.isoformat(),
                 "metadata_standard": {
                     "name": "ISO 19115-2 Geographic Information - Metadata - Part 2: Extensions for Imagery and Gridded Data",
                     "version": "ISO 19115-2:2009(E)",
@@ -241,14 +242,14 @@ class TestRecord:
                 "language": "eng",
             },
         }
-        fx_record_minimal_iso.identification.constraints = Constraints(
+        fx_lib_record_model_min_iso.identification.constraints = Constraints(
             [Constraint(type=value_enums["constraint_type"], restriction_code=value_enums["constraint_code"])]
         )
-        config = fx_record_minimal_iso.dumps()
+        config = fx_lib_record_model_min_iso.dumps()
 
         assert config == expected
 
-    def test_dumps_json(self, fx_record_minimal_iso: Record):
+    def test_dumps_json(self, fx_lib_record_model_min_iso: Record):
         """
         Can encode record as a JSON schema instance encoded as a string.
 
@@ -256,13 +257,13 @@ class TestRecord:
         """
         expected = "https://metadata-resources.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-2-v4.json"
 
-        result = fx_record_minimal_iso.dumps_json()
+        result = fx_lib_record_model_min_iso.dumps_json()
         assert isinstance(result, str)
 
         decoded = json.loads(result)
         assert decoded["$schema"] == expected
 
-    def test_dumps_xml(self, fx_record_minimal_iso: Record):
+    def test_dumps_xml(self, fx_lib_record_model_min_iso: Record):
         """
         Can encode record as ISO 19139 XML string.
 
@@ -271,9 +272,9 @@ class TestRecord:
         The Metadata Library's tests verify the conversion to and from a JSON dict extensively. As a result, this test
         is not intended as an exhaustive/comprehensive of this process.
         """
-        expected = fx_record_minimal_iso.dumps()
+        expected = fx_lib_record_model_min_iso.dumps()
 
-        result = fx_record_minimal_iso.dumps_xml()
+        result = fx_lib_record_model_min_iso.dumps_xml()
         config = _encode_date_properties(MetadataRecord(record=result).make_config().config)
         del config["$schema"]
 
@@ -444,16 +445,16 @@ class TestRecord:
 
         assert record.validate() is None
 
-    def test_validate_invalid_iso(self, mocker: MockerFixture, fx_record_minimal_iso: Record):
+    def test_validate_invalid_iso(self, mocker: MockerFixture, fx_lib_record_model_min_iso: Record):
         """Can't validate a record that does not comply with the ISO schema."""
-        mocker.patch.object(fx_record_minimal_iso, "dumps", return_value={"invalid": "invalid"})
+        mocker.patch.object(fx_lib_record_model_min_iso, "dumps", return_value={"invalid": "invalid"})
 
         with pytest.raises(RecordInvalidError):
-            fx_record_minimal_iso.validate()
+            fx_lib_record_model_min_iso.validate()
 
-    def test_validate_invalid_profile(self, fx_record_minimal_iso: Record):
+    def test_validate_invalid_profile(self, fx_lib_record_model_min_iso: Record):
         """Can't validate a record that does not comply with a schema inferred from a domain consistency element."""
-        fx_record_minimal_iso.data_quality = DataQuality(
+        fx_lib_record_model_min_iso.data_quality = DataQuality(
             domain_consistency=[
                 DomainConsistency(
                     specification=Citation(
@@ -496,16 +497,16 @@ class TestRecord:
         )
 
         with pytest.raises(RecordInvalidError):
-            fx_record_minimal_iso.validate()
+            fx_lib_record_model_min_iso.validate()
 
-    def test_validate_invalid_forced_schemas(self, fx_record_minimal_iso: Record):
+    def test_validate_invalid_forced_schemas(self, fx_lib_record_model_min_iso: Record):
         """Can't validate a record that does not comply with a forced set of schemas."""
         with pytest.raises(RecordInvalidError):
-            fx_record_minimal_iso.validate(force_schemas=[RecordSchema.MAGIC_V1])
+            fx_lib_record_model_min_iso.validate(force_schemas=[RecordSchema.MAGIC_V1])
 
-    def test_validate_ignore_profiles(self, fx_record_minimal_iso: Record):
+    def test_validate_ignore_profiles(self, fx_lib_record_model_min_iso: Record):
         """Can validate a record that would not normally comply because of a schema indicated via domain consistency."""
-        fx_record_minimal_iso.data_quality = DataQuality(
+        fx_lib_record_model_min_iso.data_quality = DataQuality(
             domain_consistency=[
                 DomainConsistency(
                     specification=Citation(
@@ -547,7 +548,7 @@ class TestRecord:
             ]
         )
 
-        fx_record_minimal_iso.validate(use_profiles=False)
+        fx_lib_record_model_min_iso.validate(use_profiles=False)
 
     @pytest.mark.parametrize(
         ("run", "values"),

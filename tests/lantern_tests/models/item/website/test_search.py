@@ -16,21 +16,21 @@ class TestItemWebsiteSearch:
 
     base_url = "https://example.com"
 
-    def test_init(self, fx_config: Config, fx_record_revision_minimal_item: RecordRevision):
+    def test_init(self, fx_config: Config, fx_revision_model_min: RecordRevision):
         """Can create an ItemWebsiteSearch."""
-        item = ItemWebsiteSearch(record=fx_record_revision_minimal_item, source=fx_config.NAME, base_url=self.base_url)
+        item = ItemWebsiteSearch(record=fx_revision_model_min, source=fx_config.NAME, base_url=self.base_url)
         assert isinstance(item, ItemWebsiteSearch)
-        assert item._record == fx_record_revision_minimal_item
+        assert item._record == fx_revision_model_min
 
-    def test_dumps_min(self, fx_config: Config, fx_record_revision_minimal_item: RecordRevision):
+    def test_dumps_min(self, fx_config: Config, fx_revision_model_min: RecordRevision):
         """Can dump a valid Catalogue / Public Website sync API entity for an item with minimal properties."""
         expected = {
-            "file_identifier": fx_record_revision_minimal_item.file_identifier,
-            "file_revision": fx_record_revision_minimal_item.file_revision,
+            "file_identifier": fx_revision_model_min.file_identifier,
+            "file_revision": fx_revision_model_min.file_revision,
             "source": "lantern",
             "content": {
-                "id": fx_record_revision_minimal_item.file_identifier,
-                "revision": fx_record_revision_minimal_item.file_revision,
+                "id": fx_revision_model_min.file_identifier,
+                "revision": fx_revision_model_min.file_revision,
                 "type": ResourceTypeLabel.DATASET.value,
                 "title": "x",
                 "description": "<p>x</p>",
@@ -38,26 +38,26 @@ class TestItemWebsiteSearch:
                 "version": None,
                 "thumbnail_href": None,
                 "keywords": [],
-                "href": f"{self.base_url}/items/{fx_record_revision_minimal_item.file_identifier}/",
+                "href": f"{self.base_url}/items/{fx_revision_model_min.file_identifier}/",
             },
             "deleted": False,
         }
-        item = ItemWebsiteSearch(record=fx_record_revision_minimal_item, source=fx_config.NAME, base_url=self.base_url)
+        item = ItemWebsiteSearch(record=fx_revision_model_min, source=fx_config.NAME, base_url=self.base_url)
 
         assert item.dumps() == expected
 
-    def test_dumps_max(self, fx_config: Config, fx_record_revision_minimal_item: RecordRevision):
+    def test_dumps_max(self, fx_config: Config, fx_revision_model_min: RecordRevision):
         """Can dump a valid Catalogue / Public Website sync API entity for an item with all supported properties."""
         edition = "x"
         thumbnail_href = "x.jpg"
 
         expected = {
-            "file_identifier": fx_record_revision_minimal_item.file_identifier,
-            "file_revision": fx_record_revision_minimal_item.file_revision,
+            "file_identifier": fx_revision_model_min.file_identifier,
+            "file_revision": fx_revision_model_min.file_revision,
             "source": "lantern",
             "content": {
-                "id": fx_record_revision_minimal_item.file_identifier,
-                "revision": fx_record_revision_minimal_item.file_revision,
+                "id": fx_revision_model_min.file_identifier,
+                "revision": fx_revision_model_min.file_revision,
                 "type": ResourceTypeLabel.DATASET.value,
                 "title": "x",
                 "description": "<p>x</p>",
@@ -65,16 +65,16 @@ class TestItemWebsiteSearch:
                 "version": edition,
                 "thumbnail_href": thumbnail_href,
                 "keywords": [],
-                "href": f"{self.base_url}/items/{fx_record_revision_minimal_item.file_identifier}/",
+                "href": f"{self.base_url}/items/{fx_revision_model_min.file_identifier}/",
             },
             "deleted": False,
         }
-        fx_record_revision_minimal_item.identification.edition = edition
-        fx_record_revision_minimal_item.identification.graphic_overviews.append(
+        fx_revision_model_min.identification.edition = edition
+        fx_revision_model_min.identification.graphic_overviews.append(
             GraphicOverview(identifier="overview", href=thumbnail_href, mime_type="image/jpeg")
         )
 
-        item = ItemWebsiteSearch(record=fx_record_revision_minimal_item, source=fx_config.NAME, base_url=self.base_url)
+        item = ItemWebsiteSearch(record=fx_revision_model_min, source=fx_config.NAME, base_url=self.base_url)
 
         assert item.dumps() == expected
 
@@ -84,13 +84,13 @@ class TestItemWebsiteSearch:
         [(False, "<p>x</p>"), (True, "<p>y</p>")],
     )
     def test_description(
-        self, fx_config: Config, fx_record_revision_minimal_item: RecordRevision, has_purpose: bool, expected: str
+        self, fx_config: Config, fx_revision_model_min: RecordRevision, has_purpose: bool, expected: str
     ):
         """Can select preferred date from available options."""
         if has_purpose:
-            fx_record_revision_minimal_item.identification.purpose = "y"
+            fx_revision_model_min.identification.purpose = "y"
 
-        item = ItemWebsiteSearch(record=fx_record_revision_minimal_item, source=fx_config.NAME, base_url=self.base_url)
+        item = ItemWebsiteSearch(record=fx_revision_model_min, source=fx_config.NAME, base_url=self.base_url)
 
         assert item._description == expected
 
@@ -107,7 +107,7 @@ class TestItemWebsiteSearch:
     def test_dates(
         self,
         fx_config: Config,
-        fx_record_revision_minimal_item: RecordRevision,
+        fx_revision_model_min: RecordRevision,
         has_publication: bool,
         has_revision: bool,
         expected: str,
@@ -116,11 +116,11 @@ class TestItemWebsiteSearch:
         publication = Date(date=date(2015, 1, 1))
         revision = Date(date=date(2016, 1, 1))
         if has_publication:
-            fx_record_revision_minimal_item.identification.dates.publication = publication
+            fx_revision_model_min.identification.dates.publication = publication
         if has_revision:
-            fx_record_revision_minimal_item.identification.dates.revision = revision
+            fx_revision_model_min.identification.dates.revision = revision
 
-        item = ItemWebsiteSearch(record=fx_record_revision_minimal_item, source=fx_config.NAME, base_url=self.base_url)
+        item = ItemWebsiteSearch(record=fx_revision_model_min, source=fx_config.NAME, base_url=self.base_url)
 
         assert item._date == expected
 
@@ -130,20 +130,20 @@ class TestItemWebsiteSearch:
         [(None, False), (ProgressCode.OBSOLETE, True), (ProgressCode.HISTORICAL_ARCHIVE, True)],
     )
     def test_deleted(
-        self, fx_config: Config, fx_record_revision_minimal_item: RecordRevision, progress: ProgressCode, expected: bool
+        self, fx_config: Config, fx_revision_model_min: RecordRevision, progress: ProgressCode, expected: bool
     ):
         """Can determine if item should be marked as removed from maintenance info."""
-        fx_record_revision_minimal_item.identification.maintenance.progress = progress
-        item = ItemWebsiteSearch(record=fx_record_revision_minimal_item, source=fx_config.NAME, base_url=self.base_url)
+        fx_revision_model_min.identification.maintenance.progress = progress
+        item = ItemWebsiteSearch(record=fx_revision_model_min, source=fx_config.NAME, base_url=self.base_url)
         assert item._deleted == expected
 
     @pytest.mark.parametrize("open_access", [False, True])
-    def test_open_access(self, fx_config: Config, fx_record_revision_minimal_item: RecordRevision, open_access: bool):
+    def test_open_access(self, fx_config: Config, fx_revision_model_min: RecordRevision, open_access: bool):
         """Can determine if resource is open access."""
         if open_access:
-            fx_record_revision_minimal_item.identification.constraints.append(
+            fx_revision_model_min.identification.constraints.append(
                 Constraint(type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.UNRESTRICTED)
             )
 
-        item = ItemWebsiteSearch(record=fx_record_revision_minimal_item, source=fx_config.NAME, base_url=self.base_url)
+        item = ItemWebsiteSearch(record=fx_revision_model_min, source=fx_config.NAME, base_url=self.base_url)
         assert item.open_access == open_access

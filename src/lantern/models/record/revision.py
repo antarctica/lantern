@@ -5,7 +5,8 @@ from typing import TypeVar
 
 import cattrs
 
-from lantern.lib.metadata_library.models.record import Record, clean_dict
+from lantern.lib.metadata_library.models.record.elements.common import clean_dict
+from lantern.models.record import Record
 
 TRecordRevision = TypeVar("TRecordRevision", bound="RecordRevision")
 
@@ -29,11 +30,11 @@ class RecordRevision(Record):
 
     def __post_init__(self) -> None:
         """Post-initialisation checks."""
-        if not self.file_revision:
-            msg = "RecordRevision cannot be empty."
-            raise ValueError(msg)
-
         super().__post_init__()
+
+        if not self.file_revision:
+            msg = "Record Revisions require a file_revision."
+            raise ValueError(msg)
 
     @staticmethod
     def _config_supported(config: dict, logger: logging.Logger | None = None) -> bool:
@@ -59,6 +60,12 @@ class RecordRevision(Record):
         cls._pre_structure(value_)  # from parent class
         converter = cls._converter_up()  # from parent class
         instance = converter.structure(value_, cls)
+
+        # workaround where file_revision is None which cattrs casts to a string as 'None'
+        if instance.file_revision == "None" and value.get("file_revision") is None:
+            # noinspection PyTypeChecker
+            instance.file_revision = None
+
         instance.__post_init__()
         return instance
 
@@ -85,10 +92,6 @@ class RecordRevision(Record):
 
         See the parent class for details on other parameters.
         """
-        if "file_revision" not in value or not value["file_revision"]:
-            msg = "RecordRevision cannot be empty."
-            raise ValueError(msg)
-
         if check_supported:
             cls._config_supported(value, logger=logger)
 

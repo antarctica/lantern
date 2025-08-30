@@ -8,7 +8,7 @@ from pathlib import Path
 import inquirer
 
 from lantern.config import Config
-from lantern.lib.metadata_library.models.record import Record, RecordInvalidError
+from lantern.lib.metadata_library.models.record import RecordInvalidError
 from lantern.lib.metadata_library.models.record.elements.common import Date
 from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,
@@ -19,6 +19,7 @@ from lantern.lib.metadata_library.models.record.presets.aggregations import make
 from lantern.log import init as init_logging
 from lantern.log import init_sentry
 from lantern.models.item.base.const import CATALOGUE_NAMESPACE
+from lantern.models.record import Record
 from lantern.stores.base import RecordNotFoundError
 from lantern.stores.gitlab import GitLabStore
 

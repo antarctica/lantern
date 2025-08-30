@@ -79,14 +79,14 @@ class TestRecordMagicDiscoveryV1:
 
         assert isinstance(record, RecordMagicDiscoveryV1)
 
-    def test_loads(self, fx_record_config_minimal_magic_preset: dict):
+    def test_loads(self, fx_lib_record_config_min_magic: dict):
         """Can create a minimal Record from a JSON serialised dict."""
-        record = RecordMagicDiscoveryV1.loads(fx_record_config_minimal_magic_preset)
+        record = RecordMagicDiscoveryV1.loads(fx_lib_record_config_min_magic)
         assert isinstance(record, RecordMagicDiscoveryV1)
 
-    def test_metadata_contact(self, fx_record_config_minimal_magic_preset: dict):
+    def test_metadata_contact(self, fx_lib_record_config_min_magic: dict):
         """Includes MAGIC as metadata point of contact."""
-        record = RecordMagicDiscoveryV1.loads(fx_record_config_minimal_magic_preset)
+        record = RecordMagicDiscoveryV1.loads(fx_lib_record_config_min_magic)
         assert record.metadata.contacts == [EXPECTED_POC]
 
     def test_metadata_datestamp(self):
@@ -103,26 +103,26 @@ class TestRecordMagicDiscoveryV1:
 
         assert record.metadata.contacts == [EXPECTED_POC]
 
-    def test_catalogue_identifier(self, fx_record_config_minimal_magic_preset: dict):
+    def test_catalogue_identifier(self, fx_lib_record_config_min_magic: dict):
         """Includes a catalogue identifier."""
         expected = Identifier(identifier="x", href="https://data.bas.ac.uk/items/x", namespace="data.bas.ac.uk")
-        record = RecordMagicDiscoveryV1.loads(fx_record_config_minimal_magic_preset)
+        record = RecordMagicDiscoveryV1.loads(fx_lib_record_config_min_magic)
 
         assert expected in record.identification.identifiers
 
-    def test_catalogue_identifier_existing(self, fx_record_config_minimal_magic_preset: dict):
+    def test_catalogue_identifier_existing(self, fx_lib_record_config_min_magic: dict):
         """Does not include a duplicate catalogue identifier if already in record."""
         expected = Identifier(identifier="x", href="https://data.bas.ac.uk/items/x", namespace="data.bas.ac.uk")
         # noinspection PyTypeChecker
-        fx_record_config_minimal_magic_preset["identification"]["identifiers"] = [asdict(expected)]
-        record = RecordMagicDiscoveryV1.loads(fx_record_config_minimal_magic_preset)
+        fx_lib_record_config_min_magic["identification"]["identifiers"] = [asdict(expected)]
+        record = RecordMagicDiscoveryV1.loads(fx_lib_record_config_min_magic)
 
         matches = [i for i in record.identification.identifiers if i == expected]
         assert len(matches) == 1
 
-    def test_poc(self, fx_record_config_minimal_magic_preset: dict):
+    def test_poc(self, fx_lib_record_config_min_magic: dict):
         """Includes MAGIC as a point of contact."""
-        record = RecordMagicDiscoveryV1.loads(fx_record_config_minimal_magic_preset)
+        record = RecordMagicDiscoveryV1.loads(fx_lib_record_config_min_magic)
         assert record.identification.contacts == [EXPECTED_POC]
 
     @pytest.mark.parametrize(
@@ -217,10 +217,10 @@ class TestRecordMagicDiscoveryV1:
             ],
         ],
     )
-    def test_poc_existing(self, fx_record_config_minimal_magic_preset: dict, contacts: list[dict]):
+    def test_poc_existing(self, fx_lib_record_config_min_magic: dict, contacts: list[dict]):
         """Includes MAGIC as a point of contact."""
-        fx_record_config_minimal_magic_preset["identification"]["contacts"] = contacts
-        record = RecordMagicDiscoveryV1.loads(fx_record_config_minimal_magic_preset)
+        fx_lib_record_config_min_magic["identification"]["contacts"] = contacts
+        record = RecordMagicDiscoveryV1.loads(fx_lib_record_config_min_magic)
 
         # noinspection PyUnresolvedReferences
         matches = [
@@ -232,12 +232,12 @@ class TestRecordMagicDiscoveryV1:
         # noinspection PyUnresolvedReferences
         assert ContactRoleCode.POINT_OF_CONTACT in list(matches[0].role)
 
-    def test_profile(self, fx_record_config_minimal_magic_preset: dict):
+    def test_profile(self, fx_lib_record_config_min_magic: dict):
         """Includes domain consistency element for profile."""
-        record = RecordMagicDiscoveryV1.loads(fx_record_config_minimal_magic_preset)
+        record = RecordMagicDiscoveryV1.loads(fx_lib_record_config_min_magic)
         assert EXPECTED_PROFILE in record.data_quality.domain_consistency
 
-    def test_catalogue_profile_existing(self, fx_record_config_minimal_magic_preset: dict):
+    def test_catalogue_profile_existing(self, fx_lib_record_config_min_magic: dict):
         """Does not include a duplicate profile if already in record."""
         profile = {
             "specification": {
@@ -274,17 +274,17 @@ class TestRecordMagicDiscoveryV1:
             "explanation": "Resource within scope of British Antarctic Survey (BAS) Mapping and Geographic Information Centre (MAGIC) Discovery Metadata Profile.",
             "result": True,
         }
-        fx_record_config_minimal_magic_preset["identification"]["domain_consistency"] = [profile]
-        record = RecordMagicDiscoveryV1.loads(fx_record_config_minimal_magic_preset)
+        fx_lib_record_config_min_magic["identification"]["domain_consistency"] = [profile]
+        record = RecordMagicDiscoveryV1.loads(fx_lib_record_config_min_magic)
 
         matches = [p for p in record.data_quality.domain_consistency if p == EXPECTED_PROFILE]
         assert len(matches) == 1
 
-    def test_lineage_statement(self, fx_record_config_minimal_magic_preset: dict):
+    def test_lineage_statement(self, fx_lib_record_config_min_magic: dict):
         """Can set a lineage statement."""
         expected = "x"
-        fx_record_config_minimal_magic_preset["identification"]["lineage"] = {"statement": expected}
-        record = RecordMagicDiscoveryV1.loads(fx_record_config_minimal_magic_preset)
+        fx_lib_record_config_min_magic["identification"]["lineage"] = {"statement": expected}
+        record = RecordMagicDiscoveryV1.loads(fx_lib_record_config_min_magic)
 
         assert record.data_quality.lineage.statement == expected
 

@@ -4,10 +4,9 @@ import json
 import logging
 import pickle
 import shutil
-import tarfile
+from base64 import b64decode
 from functools import cached_property
 from pathlib import Path
-from tempfile import TemporaryDirectory
 
 from gitlab import Gitlab
 from gitlab.v4.objects import Project
@@ -31,7 +30,6 @@ class GitLabLocalCache:
     Intended for efficiency and basic offline support.
 
     Loads record configuration files from a GitLab project repository and processes them into:
-    - record configurations (stored as JSON files)
     - RecordRevision objects (stored as Python pickle files for efficiency)
     - a mapping of record file identifiers to their latest commits
     - a mapping of record file identifiers to their SHA1 hashes
@@ -122,71 +120,43 @@ class GitLabLocalCache:
             cache_commit = json.load(f)
         return cache_commit["id"] == self._head_commit_id
 
-    @staticmethod
-    def _load_record_pickle(record_path: Path) -> RecordRevision:
+    def _load_record_pickle(self, record_path: Path) -> RecordRevision:
         """Load record from Python pickle file."""
+        self._logger.debug(f"Loading record from '{record_path.resolve()}'")
         with record_path.open(mode="rb") as file:
             return pickle.load(file)  # noqa: S301
 
-    def _load_record_json(self, record_path: Path, file_revision: str) -> RecordRevision:
-        """Load record revision from JSON file and file revision."""
-        with record_path.open() as file:
-            record_data = json.load(file)
-
-        record_data["file_revision"] = file_revision
-
-        return RecordRevision.loads(
-            value=record_data,
-            check_supported=True,
-            logger=self._logger,
-        )
-
-    def _load_record(self, record_path: Path, file_revision: str | None = None) -> RecordRevision:
+    def _build_cache(self, records: list[tuple[str, str]], head_commit: dict) -> None:
         """
-        Load record from a file.
-
-        JSON files require a file revision to load as a RecordRevision. Pickle files are RecordRevisions already.
-        """
-        self._logger.debug(f"Loading record from '{record_path.resolve()}'")
-        if record_path.suffix == ".pickle":
-            return self._load_record_pickle(record_path)
-
-        return self._load_record_json(record_path, file_revision)
-
-    def _build_cache(self, config_paths: list[Path], config_commits: dict[str, str], head_commit: dict) -> None:
-        """
-        Persist a set of record configuration files to the local cache.
+        Persist a set of record configurations to the local cache.
 
         Where:
-        - `config_paths` is a list of file paths containing record configurations
-        - `config_commits` is a mapping of file identifiers to Git commit IDs
+        - `records` is a list of ('record configuration JSON strings', 'Git commit') tuples
         - `head_commit` is the current head commit of the remote project repository
 
-        Note: `config_commits` must include entries for all record configurations defined in `config_paths`.
-
         Steps:
-        - copy each record config file to the cache directory
-        - parse each record config file as a RecordRevision
-        - create a mapping of each RecordRevision by file identifier and SHA1 hash of its configuration
-        - save a pickled version of each RecordRevision to the cache directory
+        - parse each record config as a RecordRevision
+        - create a mapping of file identifier to SHA1 hash of each record's configuration
+        - create a mapping of file identifier to Git commit of each record version
+        - pickle each RecordRevision to the cache directory
         - save details of the current head commit to a file for cache validation
-        - save the mapping of file identifiers to SHA1 hashes for each record config to a file
-        - save the mapping of file identifiers to Git commits for each record config to a file
+        - save the mapping of SHA1 hashes
+        - save the mapping of Git commits
         """
-        self._logger.info("Populating local cache")
-
         hashes = {}
+        commits = {}
 
         records_path = self._records_path
         records_path.mkdir(parents=True, exist_ok=True)
-        self._logger.info(f"Processing {len(config_paths)} record configurations")
-        for config_path in config_paths:
-            record_path = records_path / config_path.name
-            shutil.copy2(config_path, record_path)
-            commit = config_commits[config_path.stem]
-            record = self._load_record(config_path, file_revision=commit)
-            hashes[record.file_identifier] = record.sha1
+        self._logger.info(f"Processing {len(records)} records")
+        for record_data in records:
+            config_str, commit_hash = record_data
+            record_config = {"file_revision": commit_hash, **json.loads(config_str)}
+            record = RecordRevision.loads(value=record_config, check_supported=True, logger=self._logger)
+            record_path = records_path.joinpath(f"{record.file_identifier}.json")
 
+            hashes[record.file_identifier] = record.sha1
+            commits[record.file_identifier] = commit_hash
             with record_path.with_suffix(".pickle").open(mode="wb") as f:
                 # noinspection PyTypeChecker
                 pickle.dump(record, f, pickle.HIGHEST_PROTOCOL)
@@ -199,45 +169,28 @@ class GitLabLocalCache:
             json.dump(data, f, indent=2)
 
         with self._commits_path.open(mode="w") as f:
-            data = {"commits": config_commits}
+            data = {"commits": commits}
             json.dump(data, f, indent=2)
 
-    def _fetch_file_commits(self, record_paths: list[str]) -> dict[str, str]:
+    def _fetch_record_commits(self) -> list[tuple[str, str]]:
         """
-        Get a mapping of file identifiers and commit IDs for a set of record configuration files.
+        Get all record configuration files and their head commit IDs from the GitLab project repository.
 
-        This method is annoyingly inefficient as a separate HTTP request to the GitLab project repository is needed.
-        The returned mapping should therefore be cached for efficiency.
+        Returns a list of tuples ('record configuration as JSON string', 'record commit string').
+
+        This method is annoyingly inefficient as a separate HTTP request is needed per-file to get the commit ID.
+        This method won't scale to large numbers of records due to returning all record configurations in memory.
         """
-        header = "X-Gitlab-Last-Commit-Id"
-        file_commits = {}
+        records = []
 
-        for record_path in record_paths:
-            file_identifier = Path(record_path).stem
-            file_commits[file_identifier] = self._project.files.head(file_path=record_path, ref=self._ref)[header]
+        for item in self._project.repository_tree(path="records", ref=self._ref, recursive=True, iterator=True):
+            if item["type"] != "blob" or not item["path"].endswith(".json"):
+                continue
 
-        return file_commits
+            file_contents = self._project.files.get(file_path=item["path"], ref=self._ref)
+            records.append((b64decode(file_contents.content).decode("utf-8"), file_contents.last_commit_id))
 
-    def _fetch_project_archive(self, workspace: Path) -> tuple[list[Path], list[str]]:
-        """
-        Get all record configuration files from the GitLab project repository.
-
-        Uses the project repository archive to efficiently download all records in a single request.
-
-        Returns a tuple of paths:
-        - local paths: file system paths to each downloaded record for processing as records into the cache
-        - remote paths: URL paths to each record for use with `_get_file_commits()`
-        """
-        export_path = workspace / "export.tgz"
-        with export_path.open(mode="wb") as f:
-            self._project.repository_archive(format="tgz", streamed=True, action=f.write)
-        with tarfile.open(export_path, "r:gz") as tar:
-            tar.extractall(path=workspace, filter="data")
-
-        records_base_path = next(workspace.glob("**/records")).parent
-        local_paths = list(workspace.glob("**/records/**/*.json"))
-        remote_paths = [str(path.relative_to(records_base_path)) for path in local_paths]
-        return local_paths, remote_paths
+        return records
 
     def _create(self) -> None:
         """
@@ -245,35 +198,24 @@ class GitLabLocalCache:
 
         Any existing cache is removed and recreated, regardless of whether it's up-to-date.
 
-        For efficiency, records are fetched together using a GitLab project repo archive.
         Annoyingly, and inefficiently, Git commits for records must be fetched using individual HTTP requests.
 
         Steps:
-        - remove existing cache directory if present
-        - create cache directory
-        - create a project repo archive via the GitLab API as a tar.gz archive
-        - extract the contents of the archive to a temporary directory
-        - query the GitLab API for the commit of each record in the archive
+        - remove any existing cache directory if present
+        - query the GitLab API for the JSON config and commit of each record in the archive
         - query the GitLab API for the head commit of the project repo
         - build and populate the local cache
         """
         self.purge()
 
-        self._logger.info("Caching records from repo export")
-        tmp_dir = TemporaryDirectory()
-        tmp_path = Path(tmp_dir.name)
-
-        self._logger.info("Fetching repo archive")
-        config_paths, config_urls = self._fetch_project_archive(tmp_path)
-
-        self._logger.info(f"Fetching file commits for {len(config_urls)} records (this may take some time)")
-        commits_mapping = self._fetch_file_commits(config_urls)
+        self._logger.info("Fetching records (this will take some time)")
+        records = self._fetch_record_commits()
 
         self._logger.info("Fetching head commit")
         head_commit = self._project.commits.get(self._head_commit_id)
 
-        self._build_cache(config_paths=config_paths, config_commits=commits_mapping, head_commit=head_commit.attributes)
-        tmp_dir.cleanup()
+        self._logger.info("Populating local cache")
+        self._build_cache(records=records, head_commit=head_commit.attributes)
 
     def _ensure_exists(self) -> None:
         """
@@ -305,7 +247,7 @@ class GitLabLocalCache:
         """Load a record from the cache."""
         record_path = self._records_path / f"{file_identifier}.pickle"
         try:
-            return self._load_record(record_path)
+            return self._load_record_pickle(record_path)
         except FileNotFoundError:
             if not raise_for_missing:
                 return None
@@ -325,7 +267,7 @@ class GitLabLocalCache:
                 continue
             record_paths.append(record_path)
 
-        return [self._load_record(record_path) for record_path in record_paths]
+        return [self._load_record_pickle(record_path) for record_path in record_paths]
 
     def _include_records(self, file_identifiers: list[str]) -> list[str]:
         """Load records related to specified file identifiers."""

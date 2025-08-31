@@ -18,8 +18,8 @@ from lantern.lib.metadata_library.models.record.enums import (
 from lantern.lib.metadata_library.models.record.presets.aggregations import make_bas_cat_collection_member
 from lantern.log import init as init_logging
 from lantern.log import init_sentry
-from lantern.models.item.base.const import CATALOGUE_NAMESPACE
 from lantern.models.record import Record
+from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.stores.base import RecordNotFoundError
 from lantern.stores.gitlab import GitLabStore
 

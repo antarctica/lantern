@@ -1,4 +1,5 @@
 import logging
+from collections.abc import Callable
 
 from mypy_boto3_s3 import S3Client
 
@@ -20,21 +21,30 @@ class RecordsExporter(Exporter):
     It will be replaced with a more capable record repository in the future.
     """
 
-    def __init__(self, config: Config, logger: logging.Logger, s3: S3Client) -> None:
+    def __init__(
+        self, config: Config, logger: logging.Logger, s3: S3Client, get_record: Callable[[str], RecordRevision]
+    ) -> None:
         """Initialise exporter."""
         super().__init__(config=config, logger=logger, s3=s3)
-        self._records: dict[str, RecordRevision] = {}
+        self._selected_identifiers: set[str] = set()
+        self._get_record = get_record
 
-    def _get_record(self, identifier: str) -> RecordRevision:
-        """
-        Get record for a record identifier.
+    @property
+    def selected_identifiers(self) -> set[str]:
+        """Selected file identifiers."""
+        return self._selected_identifiers
 
-        Crude implementation of a record repository interface.
-        """
-        return self._records[identifier]
+    @selected_identifiers.setter
+    def selected_identifiers(self, identifiers: set[str]) -> None:
+        """Selected file identifiers."""
+        self._selected_identifiers = identifiers
 
     def _get_html_exporter(self, record: RecordRevision) -> HtmlExporter:
-        """Record as item HTML."""
+        """
+        Record as item HTML.
+
+        The HTML exporter requires a get record callable for creating related items summaries.
+        """
         output_path = self._config.EXPORT_PATH / "items"
         return HtmlExporter(
             config=self._config,
@@ -88,14 +98,10 @@ class RecordsExporter(Exporter):
         """Exporter name."""
         return "Records"
 
-    def loads(self, records: list[RecordRevision]) -> None:
-        """Populate exporter."""
-        self._records = {record.file_identifier: record for record in records}
-
     def export_record(self, file_identifier: str) -> None:
         """Export a record to a directory."""
         self._logger.info(f"Exporting record '{file_identifier}'")
-        record = self._records[file_identifier]
+        record = self._get_record(file_identifier)
         for exporter in self._get_exporters(record):
             self._logger.debug(f"Exporting record '{file_identifier}' using {exporter.name} exporter")
             exporter.export()
@@ -103,17 +109,17 @@ class RecordsExporter(Exporter):
     def publish_record(self, file_identifier: str) -> None:
         """Publish a records to S3."""
         self._logger.info(f"Publishing record '{file_identifier}'")
-        record = self._records[file_identifier]
+        record = self._get_record(file_identifier)
         for exporter in self._get_exporters(record):
             self._logger.debug(f"Publishing record '{file_identifier}' using {exporter.name} exporter")
             exporter.publish()
 
     def export(self) -> None:
-        """Export all records to a directory."""
-        for file_identifier in self._records:
+        """Export selected records to a directory."""
+        for file_identifier in self._selected_identifiers:
             self.export_record(file_identifier)
 
     def publish(self) -> None:
-        """Publish all records to S3."""
-        for file_identifier in self._records:
+        """Publish selected records to S3."""
+        for file_identifier in self._selected_identifiers:
             self.publish_record(file_identifier)

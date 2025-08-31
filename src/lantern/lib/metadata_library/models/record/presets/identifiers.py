@@ -1,5 +1,5 @@
 from lantern.lib.metadata_library.models.record.elements.common import Identifier
-from lantern.models.item.base.const import CATALOGUE_NAMESPACE
+from lantern.models.record.const import CATALOGUE_NAMESPACE
 
 
 def make_bas_cat(item_id: str) -> Identifier:

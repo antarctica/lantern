@@ -44,9 +44,9 @@ from lantern.lib.metadata_library.models.record.enums import (
     OnlineResourceFunctionCode,
     ProgressCode,
 )
-from lantern.models.item.base.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.item.catalogue import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
+from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 from tests.conftest import _get_record
 

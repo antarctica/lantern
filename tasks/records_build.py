@@ -8,6 +8,7 @@ from lantern.config import Config as Config
 from lantern.exporters.site import SiteExporter
 from lantern.log import init as init_logging
 from lantern.log import init_sentry
+from lantern.models.record.revision import RecordRevision
 from lantern.stores.gitlab import GitLabStore
 
 
@@ -42,15 +43,14 @@ class ToyCatalogue:
             project_id=self._config.STORE_GITLAB_PROJECT_ID,
             cache_path=self._config.STORE_GITLAB_CACHE_PATH,
         )
-        self._site = SiteExporter(config=self._config, logger=self._logger, s3=self._s3)
+        self._site = SiteExporter(config=self._config, logger=self._logger, s3=self._s3, get_record=self._get_record)
 
     # noinspection PyMethodOverriding
     @time_task(label="Load")
-    def loads(self, inc_records: list[str], exc_records: list[str]) -> None:
+    def loads(self) -> None:
         """Load records into catalogue store and site exporter."""
         self._logger.info("Loading records")
-        self._store.populate(inc_records=inc_records, exc_records=exc_records)
-        self._site.loads(records=self._store.records)
+        self._store.populate()
 
     @time_task(label="Purge")
     def purge(self) -> None:
@@ -59,21 +59,32 @@ class ToyCatalogue:
         self._store.purge()
         self._site.purge()
 
+    def _get_record(self, identifier: str) -> RecordRevision:
+        """Get record for a record identifier from store."""
+        return self._store.get(identifier)
+
+    def _get_selections(self, selection: set[str] | None) -> set[str]:
+        """Select all identifiers if none specified."""
+        if selection is not None and len(selection) > 0:
+            return selection
+        return {record.file_identifier for record in self._store.records}
+
     @time_task(label="Export")
-    def export(self) -> None:
+    def export(self, file_identifiers: set[str] | None = None) -> None:
         """Export catalogue to file system."""
+        self._site.select(file_identifiers=self._get_selections(file_identifiers))
         self._site.export()
 
     @time_task(label="Export")
-    def publish(self) -> None:
+    def publish(self, file_identifiers: set[str] | None = None) -> None:
         """Publish catalogue to S3."""
+        self._site.select(file_identifiers=self._get_selections(file_identifiers))
         self._site.publish()
 
 
 def main() -> None:
     """Entrypoint."""
-    inc_records = []
-    exc_records = []
+    selected = set()
     export = True
     publish = False
     purge = False
@@ -95,11 +106,11 @@ def main() -> None:
 
     if purge:
         cat.purge()
-    cat.loads(inc_records=inc_records, exc_records=exc_records)
+    cat.loads()
     if export:
-        cat.export()
+        cat.export(file_identifiers=selected)
     if publish:
-        cat.publish()
+        cat.publish(file_identifiers=selected)
 
 
 if __name__ == "__main__":

@@ -10,8 +10,8 @@ from mypy_boto3_s3 import S3Client
 
 from lantern.config import Config
 from lantern.lib.metadata_library.models.record.elements.common import Identifier
-from lantern.models.item.base.const import ALIAS_NAMESPACE
 from lantern.models.record import Record
+from lantern.models.record.const import ALIAS_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 
 
@@ -85,10 +85,13 @@ class Exporter(ABC):
     """
     Abstract base class for exporters.
 
-    Exporters:
-    - produce representations of a Record in a particular format, encoding or other form as string output
-    - persist this output as files, stored on a local file system and remote object store (AWS S3)
-    - require records to set Record.file_identifier
+    Exporters typically:
+    - produce some form of content or output, typically for specific resources via a `dumps` method
+    - persist this output as files, stored on a local file system and/or remote object store (AWS S3)
+
+    Some providers act at a site level, such as SiteExporter (which coordinates other exporters).
+
+    This base exporter class is intended to be generic with subclasses being more opinionated.
     """
 
     def __init__(self, config: Config, logger: logging.Logger, s3: S3Client) -> None:
@@ -144,7 +147,7 @@ class ResourceExporter(Exporter, ABC):
     """
     Base exporter for resource records or items.
 
-    Base class for exporters related to Record or Item variants created from resources.
+    Base class for exporters related to Record and Item variants created for resources.
     """
 
     def __init__(

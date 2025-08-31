@@ -52,12 +52,12 @@ interactions:
       Content-type:
       - application/json
       User-Agent:
-      - python-gitlab/6.0.0
-    method: HEAD
+      - python-gitlab/6.2.0
+    method: GET
     uri: https://gitlab.example.com/api/v4/projects/1234/repository/files/records%2Fa1%2Fb2%2Fa1b2c3.json?ref=main
   response:
     body:
-      string: ''
+      string: '{"file_name":"a1b2c3.json","file_path":"records/a1/b2/a1b2c3.json","size":0,"encoding":"base64","content_sha256":"b32935dd421d2a61eca213d08c452db2d6a22ec3c2ee5de4cd83ebbf8aa94d1b","ref":"main","blob_id":"000","commit_id":"000","last_commit_id":"abc123","execute_filemode":false,"content":"eyJmaWxlX2lkZW50aWZpZXIiOiAiYTFiMmMzIiwgImhpZXJhcmNoeV9sZXZlbCI6ICJkYXRhc2V0IiwgIm1ldGFkYXRhIjogeyJjb250YWN0cyI6IFt7Im9yZ2FuaXNhdGlvbiI6IHsibmFtZSI6ICJ4In0sICJyb2xlIjogWyJwb2ludE9mQ29udGFjdCJdfV0sICJkYXRlX3N0YW1wIjogIjIwMTQtMDYtMzAifSwgImlkZW50aWZpY2F0aW9uIjogeyJ0aXRsZSI6IHsidmFsdWUiOiAieCJ9LCAiZGF0ZXMiOiB7ImNyZWF0aW9uIjogIjIwMTQtMDYtMzAifSwgImFic3RyYWN0IjogIngiLCAibGFuZ3VhZ2UiOiAiZW5nIiwgImlkZW50aWZpZXJzIjogW3siaWRlbnRpZmllciI6ICJ4IiwgImhyZWYiOiAiaHR0cHM6Ly9kYXRhLmJhcy5hYy51ay9pdGVtcy94IiwgIm5hbWVzcGFjZSI6ICJkYXRhLmJhcy5hYy51ayJ9XSwgImNvbnRhY3RzIjogW3sib3JnYW5pc2F0aW9uIjogeyJuYW1lIjogIngifSwgInJvbGUiOiBbInBvaW50T2ZDb250YWN0Il0sICJlbWFpbCI6ICJ4In1dfX0="}'
     headers:
       Cache-Control:
       - max-age=0, private, must-revalidate
@@ -69,6 +69,8 @@ interactions:
       - strict-origin-when-cross-origin
       Strict-Transport-Security:
       - max-age=63072000
+      Transfer-Encoding:
+      - chunked
       Vary:
       - Accept-Encoding
       - Origin
@@ -77,11 +79,11 @@ interactions:
       X-Frame-Options:
       - SAMEORIGIN
       X-Gitlab-Blob-Id:
-      - x9876
+      - '000'
       X-Gitlab-Commit-Id:
-      - abc123
+      - '000'
       X-Gitlab-Content-Sha256:
-      - 740bd24fb6c1add4d71ed3bab3abd5848c22e135
+      - b32935dd421d2a61eca213d08c452db2d6a22ec3c2ee5de4cd83ebbf8aa94d1b
       X-Gitlab-Encoding:
       - base64
       X-Gitlab-Execute-Filemode:
@@ -95,7 +97,7 @@ interactions:
       X-Gitlab-Ref:
       - main
       X-Gitlab-Size:
-      - '123'
+      - '0'
     status:
       code: 200
       message: OK

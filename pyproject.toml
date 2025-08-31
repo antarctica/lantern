@@ -20,6 +20,7 @@ dependencies = [
     "humanize>=4.12.3",
     "inquirer>=3.4.0",
     "jinja2>=3.1.6",
+    "joblib>=1.5.1",
     "jsonschema>=4.23.0",
     "markdown>=3.8.2",
     "markdown-gfm-admonition>=0.1.1",
@@ -90,7 +91,7 @@ load-records = { cmd = "python -m tasks.records_load", help = "Copy externally e
 select-records = { cmd = "python -m tasks.records_select", help = "Copy records from cache to import directory for editing" }
 import-records = { cmd = "python -m tasks.records_import", help = "Import records from directory" }
 build-records = { cmd = "python -m tasks.records_build", help = "Build records as a catalogue site" }
-bootstrap-records = { cmd = "python -m tasks.records_boostrap", help = "Bootstrap a new records repo" }
+bootstrap-records = { cmd = "python -m tasks.records_bootstrap", help = "Bootstrap a new records repo" }
 serve = { cmd = "python -m http.server 9000 --directory export", help = "Serve local catalogue site" }
 
 [tool.ruff]
@@ -160,6 +161,7 @@ extensions.markdown-extended-autolinks.enabled = true
 [tool.pytest_env]
 # `LANTERN_TEMPLATES_SENTRY_SRC` needs to be real to load the Sentry feedback widget
 LANTERN_LOG_LEVEL = "INFO"
+LANTERN_PARALLEL_JOBS="1"
 LANTERN_ENABLE_FEATURE_SENTRY = "false"
 LANTERN_SENTRY_ENVIRONMENT = "test"
 LANTERN_STORE_GITLAB_ENDPOINT = "https://gitlab.example.com"

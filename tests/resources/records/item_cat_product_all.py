@@ -35,7 +35,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     HierarchyLevelCode,
     OnlineResourceFunctionCode,
 )
-from lantern.models.item.base.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE, GITLAB_NAMESPACE
+from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE, GITLAB_NAMESPACE
 from tests.resources.records.utils import make_record
 
 # A record for an ItemCatalogue instance with all supported fields for products.

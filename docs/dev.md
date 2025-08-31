@@ -279,6 +279,10 @@ To update Pre-Commit and configured hooks:
 [pytest](https://docs.pytest.org) with a number of plugins is used for testing the application. Config options are set
 in `pyproject.toml`. Tests are defined in the `tests` package.
 
+> [!NOTE]
+> Parallel processing is disabled for tests to avoid issues with [HTTP recording](#pytest-recording) by setting the
+> `PARALLEL_JOBS` [config option](#pytest-env).
+
 Tests are run automatically in [Continuous Integration](#continuous-integration).
 
 <!-- pyml disable md028 -->

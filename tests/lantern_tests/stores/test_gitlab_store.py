@@ -9,22 +9,30 @@ from gitlab import Gitlab
 from pytest_mock import MockerFixture
 from requests.exceptions import ConnectionError as RequestsConnectionError
 
+from lantern.config import Config
 from lantern.models.record import Record
 from lantern.models.record.revision import RecordRevision
 from lantern.stores.base import RecordNotFoundError
-from lantern.stores.gitlab import CacheIntegrityError, GitLabLocalCache, GitLabStore, RemoteStoreUnavailableError
+from lantern.stores.gitlab import (
+    CacheIntegrityError,
+    GitLabLocalCache,
+    GitLabStore,
+    RemoteStoreUnavailableError,
+    _fetch_record_commit,
+)
 
 
 class TestGitLabLocalCache:
     """Test GitLab local cache."""
 
-    def test_init(self, fx_logger: logging.Logger):
+    def test_init(self, fx_logger: logging.Logger, fx_config: Config):
         """Can initialise store."""
         with TemporaryDirectory() as tmp_path:
             cache_path = Path(tmp_path) / ".cache"
 
         GitLabLocalCache(
             logger=fx_logger,
+            parallel_jobs=fx_config.PARALLEL_JOBS,
             path=cache_path,
             project_id="x",
             gitlab_client=Gitlab(url="x", private_token="x"),  # noqa: S106
@@ -187,8 +195,7 @@ class TestGitLabLocalCache:
         path = "records/a1/b2/a1b2c3.json"
         fx_record_config_min["file_identifier"] = file_identifier
         expected = (json.dumps(fx_record_config_min, ensure_ascii=False), commit)
-
-        results = fx_gitlab_cache._fetch_record_commit(path=path, ref=fx_gitlab_cache._ref)
+        results = _fetch_record_commit(project=fx_gitlab_cache._project, path=path, ref=fx_gitlab_cache._ref)
         assert results == expected
 
     @pytest.mark.vcr
@@ -199,6 +206,7 @@ class TestGitLabLocalCache:
         commit = "abc123"
         fx_record_config_min["file_identifier"] = file_identifier
         expected = [(json.dumps(fx_record_config_min, ensure_ascii=False), commit)]
+        fx_gitlab_cache._parallel_jobs = 1  # disable parallelism to handle HTTP recording
 
         results = fx_gitlab_cache._fetch_record_commits()
         assert results == expected
@@ -222,6 +230,7 @@ class TestGitLabLocalCache:
         fx_record_config_min["file_identifier"] = file_identifier
         fx_record_config_min["identification"]["edition"] = "2"
         expected = [(json.dumps(fx_record_config_min, ensure_ascii=False), remote_head)]
+        fx_gitlab_cache._parallel_jobs = 1  # disable parallelism to handle HTTP recording
 
         if mode is not None:
             with pytest.raises(CacheIntegrityError):
@@ -375,13 +384,14 @@ class TestGitLabStore:
     Note: Summary and record methods are tested in base store tests and not repeated here.
     """
 
-    def test_init(self, fx_logger: logging.Logger):
+    def test_init(self, fx_logger: logging.Logger, fx_config: Config):
         """Can initialise store."""
         with TemporaryDirectory() as tmp_path:
             cache_path = Path(tmp_path) / ".cache"
 
         GitLabStore(
             logger=fx_logger,
+            parallel_jobs=fx_config.PARALLEL_JOBS,
             endpoint="https://gitlab.example.com",
             access_token="x",  # noqa: S106
             project_id="x",

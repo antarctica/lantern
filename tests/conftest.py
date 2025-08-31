@@ -417,6 +417,7 @@ def fx_gitlab_cache(fx_logger: logging.Logger, fx_config: Config) -> GitLabLocal
 
     return GitLabLocalCache(
         logger=fx_logger,
+        parallel_jobs=fx_config.PARALLEL_JOBS,
         path=cache_path,
         project_id=fx_config.STORE_GITLAB_PROJECT_ID,
         gitlab_client=Gitlab(url=fx_config.STORE_GITLAB_ENDPOINT, private_token=fx_config.STORE_GITLAB_TOKEN),
@@ -455,6 +456,7 @@ def fx_gitlab_store(fx_logger: logging.Logger, fx_config: Config) -> GitLabStore
 
     return GitLabStore(
         logger=fx_logger,
+        parallel_jobs=fx_config.PARALLEL_JOBS,
         endpoint=fx_config.STORE_GITLAB_ENDPOINT,
         access_token=fx_config.STORE_GITLAB_TOKEN,
         project_id=fx_config.STORE_GITLAB_PROJECT_ID,

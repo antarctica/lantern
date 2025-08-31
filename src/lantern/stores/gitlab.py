@@ -5,11 +5,13 @@ import logging
 import pickle
 import shutil
 from base64 import b64decode
+from copy import deepcopy
 from functools import cached_property
 from pathlib import Path
 
 from gitlab import Gitlab
 from gitlab.v4.objects import Project
+from joblib import Parallel, delayed
 from requests.exceptions import ConnectionError as RequestsConnectionError
 
 from lantern.models.record import Record
@@ -27,6 +29,29 @@ class CacheIntegrityError(Exception):
     """Raised when the local cache integrity cannot be guaranteed."""
 
     pass
+
+
+def _process_record(logger: logging.Logger, records_path: Path, record_data: tuple[str, str]) -> tuple[str, str, str]:
+    """Process a single record as parallel job."""
+    config_str, commit_hash = record_data
+    record_config = {"file_revision": commit_hash, **json.loads(config_str)}
+    record = RecordRevision.loads(value=record_config, check_supported=True, logger=logger)
+    record_path = records_path.joinpath(f"{record.file_identifier}.json")
+
+    with record_path.with_suffix(".pickle").open(mode="wb") as f:
+        # noinspection PyTypeChecker
+        pickle.dump(record, f, pickle.HIGHEST_PROTOCOL)
+    return record.file_identifier, record.sha1, record.file_revision
+
+
+def _fetch_record_commit(project: Project, path: str, ref: str) -> tuple[str, str]:
+    """
+    Get a record configuration and its head commit ID from the GitLab project repository.
+
+    Returns a tuple ('record configuration as JSON string', 'record commit string').
+    """
+    file_contents = project.files.get(file_path=path, ref=ref)
+    return b64decode(file_contents.content).decode("utf-8"), file_contents.last_commit_id
 
 
 class GitLabLocalCache:
@@ -50,9 +75,12 @@ class GitLabLocalCache:
     the head commit in the remote project repository.
     """
 
-    def __init__(self, logger: logging.Logger, path: Path, project_id: str, gitlab_client: Gitlab) -> None:
+    def __init__(
+        self, logger: logging.Logger, parallel_jobs: int, path: Path, project_id: str, gitlab_client: Gitlab
+    ) -> None:
         """Initialize cache."""
         self._logger = logger
+        self._parallel_jobs = parallel_jobs
         self._path = path
         self._project_id = project_id
         self._client = gitlab_client
@@ -170,18 +198,18 @@ class GitLabLocalCache:
 
         records_path = self._records_path
         records_path.mkdir(parents=True, exist_ok=True)
-        self._logger.info(f"Processing {len(records)} records")
-        for record_data in records:
-            config_str, commit_hash = record_data
-            record_config = {"file_revision": commit_hash, **json.loads(config_str)}
-            record = RecordRevision.loads(value=record_config, check_supported=True, logger=self._logger)
-            record_path = records_path.joinpath(f"{record.file_identifier}.json")
 
-            hashes[record.file_identifier] = record.sha1
-            commits[record.file_identifier] = commit_hash
-            with record_path.with_suffix(".pickle").open(mode="wb") as f:
-                # noinspection PyTypeChecker
-                pickle.dump(record, f, pickle.HIGHEST_PROTOCOL)
+        # copy to allow use in parallel processing
+        logger_ = deepcopy(self._logger)
+        records_path_ = deepcopy(records_path)
+        self._logger.info(f"Processing {len(records)} records")
+        results = Parallel(n_jobs=self._parallel_jobs)(
+            delayed(_process_record)(logger_, records_path_, record_data) for record_data in records
+        )
+        # results are list of (file_identifier, sha1, commit) tuples
+        for result in results:
+            hashes[result[0]] = result[1]
+            commits[result[0]] = result[2]
 
         with self._head_path.open(mode="w") as f:
             json.dump(head_commit, f, indent=2)
@@ -194,15 +222,6 @@ class GitLabLocalCache:
             data = {"commits": commits}
             json.dump(data, f, indent=2)
 
-    def _fetch_record_commit(self, path: str, ref: str) -> tuple[str, str]:
-        """
-        Get a record configuration and its head commit ID from the GitLab project repository.
-
-        Returns a tuple ('record configuration as JSON string', 'record commit string').
-        """
-        file_contents = self._project.files.get(file_path=path, ref=ref)
-        return b64decode(file_contents.content).decode("utf-8"), file_contents.last_commit_id
-
     def _fetch_record_commits(self) -> list[tuple[str, str]]:
         """
         Get all record configurations and their head commit IDs from the GitLab project repository.
@@ -212,14 +231,21 @@ class GitLabLocalCache:
         This method is annoyingly inefficient as a separate HTTP request is needed per-file to get the commit ID.
         This method won't scale to large numbers of records due to returning all record configurations in memory.
         """
-        records = []
+        paths = []
 
         for item in self._project.repository_tree(path="records", ref=self._ref, recursive=True, iterator=True):
             if item["type"] != "blob" or not item["path"].endswith(".json"):
                 continue
-            records.append(self._fetch_record_commit(path=item["path"], ref=self._ref))
+            paths.append(item["path"])
 
-        return records
+        self._logger.info(f"Fetching {len(paths)} records")
+        # copy to allow use in parallel processing
+        project_ = deepcopy(self._project)
+        ref_ = deepcopy(self._ref)
+        return Parallel(n_jobs=self._parallel_jobs)(
+            delayed(_fetch_record_commit)(project_, path, ref_) for path in paths
+        )
+        # results are list of ('record configuration as JSON string', 'record commit string') tuples
 
     def _fetch_latest_records(self) -> list[tuple[str, str]]:
         """
@@ -236,8 +262,7 @@ class GitLabLocalCache:
         limited number of commits since the last refresh, and a limited set of records in each commit, this will be more
         efficient than a full purge and create cycle.
         """
-        records = []
-        changed_paths = set()
+        paths = []
 
         commit_range = f"{self._head_commit_local}..{self._head_commit_remote}"
         self._logger.info(f"Fetching commits in range {commit_range}")
@@ -251,13 +276,15 @@ class GitLabLocalCache:
                 if diff["deleted_file"]:
                     msg = "Deleted file in remote store, skipping. Partial updates do not support deleted files, use purge and recreate to ensure cache integrity."
                     raise CacheIntegrityError(msg)
+                paths.append(diff["new_path"])
 
-                changed_paths.add(diff["new_path"])
-
-        for path in changed_paths:
-            records.append(self._fetch_record_commit(path=path, ref=self._ref))
-
-        return records
+        # copy to allow use in parallel processing
+        project_ = deepcopy(self._project)
+        ref_ = deepcopy(self._ref)
+        return Parallel(n_jobs=self._parallel_jobs)(
+            delayed(_fetch_record_commit)(project_, path, ref_) for path in paths
+        )
+        # results are list of ('record configuration as JSON string', 'record commit string') tuples
 
     def _create_refresh(self, records: list[tuple[str, str]]) -> None:
         """Common tasks for creating or refreshing the cache."""
@@ -380,7 +407,13 @@ class GitLabStore(Store):
     """
 
     def __init__(
-        self, logger: logging.Logger, endpoint: str, access_token: str, project_id: str, cache_path: Path
+        self,
+        logger: logging.Logger,
+        parallel_jobs: int,
+        endpoint: str,
+        access_token: str,
+        project_id: str,
+        cache_path: Path,
     ) -> None:
         self._logger = logger
 
@@ -392,7 +425,11 @@ class GitLabStore(Store):
 
         self._cache_path = cache_path
         self._cache = GitLabLocalCache(
-            logger=self._logger, path=self._cache_path, gitlab_client=self._client, project_id=self._project_id
+            logger=self._logger,
+            parallel_jobs=parallel_jobs,
+            path=self._cache_path,
+            gitlab_client=self._client,
+            project_id=self._project_id,
         )
 
     @cached_property

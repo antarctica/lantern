@@ -17,6 +17,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Dedicated Catalogue Record class to enforce Catalogue specific requirements
 * Support for dynamically including required related records when exporting records
 * Support for partial local cache updates in GitLab store
+* Support for parallel local cache creation in GitLab store
 
 ### Changed
 

@@ -15,6 +15,7 @@ from lantern.models.record.revision import RecordRevision
 from lantern.stores.base import RecordNotFoundError
 from lantern.stores.gitlab import (
     CacheIntegrityError,
+    CommitResults,
     GitLabLocalCache,
     GitLabStore,
     RemoteStoreUnavailableError,
@@ -416,14 +417,30 @@ class TestGitLabStore:
 
         assert fx_gitlab_store._get_remote_hashed_path(value) == expected
 
+    @staticmethod
+    def _make_commit_results(
+        additions_ids: int, additions_total: int, updates_ids: int, updates_total: int
+    ) -> CommitResults:
+        """Helper to create expected CommitResults."""
+        commit = "def456" if (additions_total + updates_total) > 0 else None
+        changes = {
+            "create": ["d4e5f6" for _ in range(0, additions_ids)],
+            "update": ["a1b2c3" for _ in range(0, updates_ids)],
+        }
+        actions = [
+            *[{"action": "create"} for _ in range(0, additions_total)],
+            *[{"action": "update"} for _ in range(0, updates_total)],
+        ]
+        return CommitResults(commit=commit, changes=changes, actions=actions)
+
     @pytest.mark.block_network
     @pytest.mark.vcr
     @pytest.mark.parametrize(
         ("mode", "expected"),
         [
-            ("none", {"additions_ids": 0, "additions_total": 0, "updates_ids": 0, "updates_total": 0}),
-            ("add", {"additions_ids": 1, "additions_total": 2, "updates_ids": 0, "updates_total": 0}),
-            ("update", {"additions_ids": 0, "additions_total": 0, "updates_ids": 1, "updates_total": 2}),
+            ("none", _make_commit_results(additions_ids=0, additions_total=0, updates_ids=0, updates_total=0)),
+            ("add", _make_commit_results(additions_ids=1, additions_total=2, updates_ids=0, updates_total=0)),
+            ("update", _make_commit_results(additions_ids=0, additions_total=0, updates_ids=1, updates_total=2)),
         ],
     )
     def test_commit(
@@ -433,7 +450,7 @@ class TestGitLabStore:
         fx_gitlab_store_cached: GitLabStore,
         fx_revision_model_min: RecordRevision,
         mode: str,
-        expected: dict[str, int],
+        expected: CommitResults,
     ):
         """Can create, update or delete one or more records in the remote repository."""
         records = []
@@ -453,12 +470,12 @@ class TestGitLabStore:
         results = fx_gitlab_store_cached._commit(records=records, title="x", message="x", author=("x", "x@example.com"))
         assert results == expected
         if mode == "none":
-            assert "No actions to perform, skipping" in caplog.text
+            assert "No actions to perform, aborting." in caplog.text
             return
         if mode == "add":
-            assert "Committing 1 added records across 2 new files, 0 updated records" in caplog.text
+            assert "Committing 1 added records across 2 new files, 0 updated records." in caplog.text
         if mode == "update":
-            assert "Committing 0 additional records, 1 updated records across 2 modified files" in caplog.text
+            assert "Committing 0 additional records, 1 updated records across 2 modified files." in caplog.text
 
     def test_commit_no_changes(
         self, mocker: MockerFixture, caplog: pytest.LogCaptureFixture, fx_gitlab_store_cached: GitLabStore
@@ -475,7 +492,7 @@ class TestGitLabStore:
 
         fx_gitlab_store_cached._commit(records=[record], title="x", message="x", author=("x", "x@example.com"))
 
-        assert "No actions to perform, skipping" in caplog.text
+        assert "No actions to perform, aborting." in caplog.text
 
     def test_populate(self, fx_gitlab_store_cached: GitLabStore):
         """
@@ -504,12 +521,12 @@ class TestGitLabStore:
     @pytest.mark.vcr
     @pytest.mark.block_network
     @pytest.mark.parametrize(
-        ("mode", "stats"),
+        ("mode", "expected"),
         [
-            ("none", {"additions": 0, "updates": 0}),
-            ("noop", {"additions": 0, "updates": 0}),
-            ("add", {"additions": 1, "updates": 0}),
-            ("update", {"additions": 0, "updates": 1}),
+            ("none", _make_commit_results(additions_ids=0, additions_total=0, updates_ids=0, updates_total=0)),
+            ("noop", _make_commit_results(additions_ids=0, additions_total=0, updates_ids=0, updates_total=0)),
+            ("add", _make_commit_results(additions_ids=1, additions_total=2, updates_ids=0, updates_total=0)),
+            ("update", _make_commit_results(additions_ids=0, additions_total=0, updates_ids=1, updates_total=2)),
         ],
     )
     def test_push(
@@ -519,7 +536,7 @@ class TestGitLabStore:
         fx_gitlab_store_cached: GitLabStore,
         fx_record_model_min: Record,
         mode: str,
-        stats: dict[str, int],
+        expected: CommitResults,
     ):
         """
         Can create, update or delete Records in the remote repository.
@@ -529,21 +546,24 @@ class TestGitLabStore:
         No-op case for submitted records that don't trigger any changes to remote repo.
         """
         records = [] if mode == "none" else [fx_record_model_min]
-        mocker.patch.object(fx_gitlab_store_cached, "_commit", return_value=stats)
+        mocker.patch.object(fx_gitlab_store_cached, "_commit", return_value=expected)
         mocker.patch.object(
             type(fx_gitlab_store_cached._cache), "_current", new_callable=PropertyMock, return_value=True
         )
         # ignore repopulating cache after push as we fake commit so cache won't be able to load new records
         mocker.patch.object(fx_gitlab_store_cached, "populate", return_value=None)
 
-        fx_gitlab_store_cached.push(records=records, title="title", message="x", author=("x", "x@example.com"))
+        results = fx_gitlab_store_cached.push(
+            records=records, title="title", message="x", author=("x", "x@example.com")
+        )
 
+        assert results == expected
         if mode == "none":
-            assert "No records to push, skipping" in caplog.text
+            assert "No records to push, skipping." in caplog.text
         elif mode == "noop":
-            assert "No records pushed, skipping cache invalidation" in caplog.text
+            assert "No records pushed, skipping cache invalidation." in caplog.text
         else:
-            assert "Recreating cache to reflect pushed changes" in caplog.text
+            assert "Refreshing cache and reloading records into store to reflect pushed changes." in caplog.text
 
     @pytest.mark.parametrize("exists", [True, False])
     def test_purge(self, fx_gitlab_store_pop: GitLabStore, exists: bool):

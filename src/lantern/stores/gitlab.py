@@ -392,6 +392,57 @@ class GitLabLocalCache:
             shutil.rmtree(self._path)
 
 
+class CommitResultsStats:
+    """Statistics for a commit transaction."""
+
+    def __init__(self, changes: dict, actions: list) -> None:
+        # *_total tracks individual files not records so cannot rely on `len(*_id)`
+        self.new_records = len(changes["create"])
+        self.new_files = sum(1 for action in actions if action["action"] == "create")
+        self.updated_records = len(changes["update"])
+        self.updated_files = sum(1 for action in actions if action["action"] == "update")
+
+    @property
+    def new_msg(self) -> str:
+        """Log message for new records."""
+        return (
+            f"{self.new_records} added records across {self.new_files} new files"
+            if self.new_records >= 1
+            else "0 additional records"
+        )
+
+    @property
+    def updated_msg(self) -> str:
+        """Log message for updated records."""
+        return (
+            f"{self.updated_records} updated records across {self.updated_files} modified files"
+            if self.updated_records >= 1
+            else "0 updated records"
+        )
+
+
+class CommitResults:
+    """Results from a commit transaction."""
+
+    def __init__(self, commit: str | None, changes: dict, actions: list) -> None:
+        self.commit = commit
+        self.new_identifiers = changes["create"]
+        self.updated_identifiers = changes["update"]
+        self.stats = CommitResultsStats(changes=changes, actions=actions)
+
+    def __eq__(self, other: CommitResults) -> bool:
+        """Equality comparison for tests."""
+        return (
+            self.commit == other.commit
+            and self.new_identifiers == other.new_identifiers
+            and self.updated_identifiers == other.updated_identifiers
+            and self.stats.new_records == other.stats.new_records
+            and self.stats.new_files == other.stats.new_files
+            and self.stats.updated_records == other.stats.updated_records
+            and self.stats.updated_files == other.stats.updated_files
+        )
+
+
 class GitLabStore(Store):
     """
     Basic read-write store backed by a remote GitLab project.
@@ -458,7 +509,7 @@ class GitLabStore(Store):
         """
         return f"records/{file_name[:2]}/{file_name[2:4]}/{file_name}"
 
-    def _commit(self, records: list[Record], title: str, message: str, author: tuple[str, str]) -> dict[str, int]:
+    def _commit(self, records: list[Record], title: str, message: str, author: tuple[str, str]) -> CommitResults:
         """
         Generate commit for a set of records.
 
@@ -468,8 +519,8 @@ class GitLabStore(Store):
         - if the SHA1 does not match, the record is classed as an update
         - if where a SHA1 is not found, the record is classed as a new record
 
-        Where a commit is generated, statistics are returned recording the number of new/updated records and underlying
-        files (where each record is stored as a JSON and XML file).
+        Where a commit is generated, file identifiers are returned for new and/or updated records, and statistics on
+        the number of underlying files changed (where each record is stored as a JSON and XML file).
         """
         actions: list[dict] = []
         changes: dict[str, list[str]] = {"update": [], "create": []}
@@ -482,7 +533,6 @@ class GitLabStore(Store):
         }
 
         existing_hashes = self._cache.get_hashes(file_identifiers=[record.file_identifier for record in records])
-
         for record in records:
             if record.sha1 == existing_hashes[record.file_identifier]:
                 self._logger.debug(f"Record '{record.file_identifier}' is unchanged, skipping")
@@ -508,32 +558,16 @@ class GitLabStore(Store):
                     },
                 ]
             )
-
-        # *_total tracks individual files not records so cannot rely on `len(*_id)`
-        stats = {
-            "additions_ids": len(changes["create"]),
-            "additions_total": sum(1 for action in data["actions"] if action["action"] == "create"),
-            "updates_ids": len(changes["update"]),
-            "updates_total": sum(1 for action in data["actions"] if action["action"] == "update"),
-        }
+        results = CommitResults(commit=None, changes=changes, actions=data["actions"])
 
         if not data["actions"]:
-            self._logger.info("No actions to perform, skipping")
-            return stats
+            self._logger.info("No actions to perform, aborting.")
+            return results
 
-        _additions = (
-            f"{stats['additions_ids']} added records across {stats['additions_total']} new files"
-            if stats["additions_ids"] >= 1
-            else "0 additional records"
-        )
-        _updates = (
-            f"{stats['updates_ids']} updated records across {stats['updates_total']} modified files"
-            if stats["updates_ids"] >= 1
-            else "0 updated records"
-        )
-        self._logger.info(f"Committing {_additions}, {_updates}")
-        self._project.commits.create(data)
-        return stats
+        self._logger.info(f"Committing {results.stats.new_msg}, {results.stats.updated_msg}.")
+        commit = self._project.commits.create(data)
+        results.commit = commit.id
+        return results
 
     def populate(self) -> None:
         """
@@ -562,25 +596,31 @@ class GitLabStore(Store):
         except KeyError:
             raise RecordNotFoundError(file_identifier) from None
 
-    def push(self, records: list[Record], title: str, message: str, author: tuple[str, str]) -> None:
+    def push(self, records: list[Record], title: str, message: str, author: tuple[str, str]) -> CommitResults:
         """
         Add or update records in remote GitLab project repo.
 
         Requires a local cache to determine if records are additions or updates.
 
-        Invalidates the local cache if needed so new/changed records are included.
+        Refreshes the local cache if needed so new/changed records are included.
+
+        Returns commit results including resulting commit for further optional processing.
         """
+        empty_results = CommitResults(commit=None, changes={"create": [], "update": []}, actions=[])
         if len(records) == 0:
-            self._logger.info("No records to push, skipping")
-            return
+            self._logger.info("No records to push, skipping.")
+            return empty_results
 
-        stats = self._commit(records=records, title=title, message=message, author=author)
+        results = self._commit(records=records, title=title, message=message, author=author)
 
-        if not any(stats.values()):
-            self._logger.info("No records pushed, skipping cache invalidation")
-            return
+        if results.commit is None:
+            self._logger.info("No records pushed, skipping cache invalidation.")
+            return empty_results
 
-        self._logger.info("Recreating cache to reflect pushed changes")
-        self._cache.purge()
-        self._logger.info("Reloading pushed records into subset to reflect changes.")
+        self._logger.info(f"Push successful as commit '{results.commit}'.")
+
+        # calling `.populate()` will call `._cache.get()` which will refresh the cache
+        self._logger.info("Refreshing cache and reloading records into store to reflect pushed changes.")
         self.populate()
+
+        return results

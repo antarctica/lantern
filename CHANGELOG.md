@@ -18,12 +18,14 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Support for dynamically including required related records when exporting records
 * Support for partial local cache updates in GitLab store
 * Support for parallel local cache creation in GitLab store
+* GitLab store push returns resulting commit ID
 
 ### Changed
 
 * Replacing public website search prototype to use WordPress REST API
 * Paper map distribution option text updated to be less exclusive
 * Record and Item test fixtures refactored into a more logical structure
+* GitLab store push return type changed to a CommitResults class
 
 ### Fixed
 

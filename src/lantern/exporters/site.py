@@ -186,18 +186,8 @@ class SiteIndexExporter(Exporter):
             )
         return aliases
 
-    def _dumps_v1(self) -> str:
-        """Version 1 implementation."""
-        item_links = "\n".join(
-            [
-                f'<li><a href="/items/{record.file_identifier}/index.html">[{record.hierarchy_level.name}] {record.file_identifier} - {record.identification.title} ({record.identification.edition})</a></li>'
-                for record in self._records
-            ]
-        )
-        return f"<section><h2>V1</h2><ul>{item_links}</ul></section>"
-
-    def _dumps_v2(self) -> str:
-        """Version 2 implementation."""
+    def _dumps(self) -> str:
+        """Generate proto-index."""
         record_rows = "\n".join(
             [
                 f"""
@@ -229,30 +219,6 @@ class SiteIndexExporter(Exporter):
             ]
         )
         return f"""
-        <section>
-            <h2>V2</h2>
-            <table border="1" cellpadding="5" cellspacing="0">
-                <thead>
-                    <tr>
-                        <th>Kind</th>
-                        <th>Type</th>
-                        <th>File Identifier</th>
-                        <th>Title</th>
-                        <th>Edition</th>
-                        <th>Alias</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {record_rows}
-                    {alias_rows}
-                </tbody>
-            </table>
-        </section>
-        """
-
-    def _dumps(self) -> str:
-        """Build proto/backstage index."""
-        return f"""
         <html>
             <head>
                 <meta charset="utf-8">
@@ -260,8 +226,22 @@ class SiteIndexExporter(Exporter):
             </head>
             <body>
                 <h1>Proto Items Index</h1>
-                {self._dumps_v2()}
-                {self._dumps_v1()}
+                <table border="1" cellpadding="5" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Kind</th>
+                            <th>Type</th>
+                            <th>File Identifier</th>
+                            <th>Title</th>
+                            <th>Edition</th>
+                            <th>Alias</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {record_rows}
+                        {alias_rows}
+                    </tbody>
+                </table>
             </body>
         </html>
         """

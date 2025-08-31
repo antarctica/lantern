@@ -57,6 +57,7 @@ class TestConfig:
         expected: fx_config.ConfigDumpSafe = {
             "NAME": fx_config.NAME,
             "VERSION": fx_package_version,
+            "PARALLEL_JOBS": 1,
             "LOG_LEVEL": 20,
             "LOG_LEVEL_NAME": "INFO",
             "SENTRY_DSN": fx_config.SENTRY_DSN,
@@ -215,6 +216,7 @@ class TestConfig:
     @pytest.mark.parametrize(
         ("property_name", "expected", "sensitive"),
         [
+            ("PARALLEL_JOBS", 2, False),
             ("STORE_GITLAB_ENDPOINT", "x", False),
             ("STORE_GITLAB_TOKEN", "x", True),
             ("STORE_GITLAB_PROJECT_ID", "x", False),

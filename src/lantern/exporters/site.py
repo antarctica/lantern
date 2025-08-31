@@ -1,5 +1,6 @@
 import logging
 import shutil
+from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
 from shutil import copy
@@ -141,28 +142,36 @@ class SiteIndexExporter(Exporter):
     Generates a basic site index from a set of record summaries.
     """
 
-    def __init__(self, config: Config, logger: logging.Logger, s3: S3Client) -> None:
+    def __init__(
+        self, config: Config, logger: logging.Logger, s3: S3Client, get_record: Callable[[str], RecordRevision]
+    ) -> None:
         """Initialise exporter."""
         super().__init__(config=config, logger=logger, s3=s3)
         self._index_path = self._config.EXPORT_PATH / "-" / "index" / "index.html"
-        self._records: list[RecordRevision] = []
-        self._record_ids = set()
+        self._get_record = get_record
+        self._selected_identifiers: set[str] = set()
+
+    @property
+    def selected_identifiers(self) -> set[str]:
+        """Selected file identifiers."""
+        return self._selected_identifiers
+
+    @selected_identifiers.setter
+    def selected_identifiers(self, identifiers: set[str]) -> None:
+        """Selected file identifiers."""
+        self._selected_identifiers = identifiers
 
     @property
     def name(self) -> str:
         """Exporter name."""
         return "Site Index"
 
-    def loads(self, records: list[RecordRevision]) -> None:
-        """Populate exporter."""
-        self._records = records
-        self._record_ids = {record.file_identifier for record in records}
-
     @property
     def _aliases(self) -> list[dict]:
         """Get a list of aliases from records."""
         aliases = []
-        for record in self._records:
+        for file_identifier in self._selected_identifiers:
+            record = self._get_record(file_identifier)
             identifiers = get_record_aliases(record)
             aliases.extend(
                 [
@@ -177,18 +186,8 @@ class SiteIndexExporter(Exporter):
             )
         return aliases
 
-    def _dumps_v1(self) -> str:
-        """Version 1 implementation."""
-        item_links = "\n".join(
-            [
-                f'<li><a href="/items/{record.file_identifier}/index.html">[{record.hierarchy_level.name}] {record.file_identifier} - {record.identification.title} ({record.identification.edition})</a></li>'
-                for record in self._records
-            ]
-        )
-        return f"<section><h2>V1</h2><ul>{item_links}</ul></section>"
-
-    def _dumps_v2(self) -> str:
-        """Version 2 implementation."""
+    def _dumps(self) -> str:
+        """Generate proto-index."""
         record_rows = "\n".join(
             [
                 f"""
@@ -201,7 +200,7 @@ class SiteIndexExporter(Exporter):
                             <td>-</td>
                         </tr>
                         """
-                for record in self._records
+                for record in [self._get_record(file_identifier) for file_identifier in self._selected_identifiers]
             ]
         )
         alias_rows = "\n".join(
@@ -220,30 +219,6 @@ class SiteIndexExporter(Exporter):
             ]
         )
         return f"""
-        <section>
-            <h2>V2</h2>
-            <table border="1" cellpadding="5" cellspacing="0">
-                <thead>
-                    <tr>
-                        <th>Kind</th>
-                        <th>Type</th>
-                        <th>File Identifier</th>
-                        <th>Title</th>
-                        <th>Edition</th>
-                        <th>Alias</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {record_rows}
-                    {alias_rows}
-                </tbody>
-            </table>
-        </section>
-        """
-
-    def _dumps(self) -> str:
-        """Build proto/backstage index."""
-        return f"""
         <html>
             <head>
                 <meta charset="utf-8">
@@ -251,8 +226,22 @@ class SiteIndexExporter(Exporter):
             </head>
             <body>
                 <h1>Proto Items Index</h1>
-                {self._dumps_v2()}
-                {self._dumps_v1()}
+                <table border="1" cellpadding="5" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Kind</th>
+                            <th>Type</th>
+                            <th>File Identifier</th>
+                            <th>Title</th>
+                            <th>Edition</th>
+                            <th>Alias</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {record_rows}
+                        {alias_rows}
+                    </tbody>
+                </table>
             </body>
         </html>
         """
@@ -356,14 +345,22 @@ class SiteExporter(Exporter):
     Combines exporters for records and static resources to create a standalone static website.
     """
 
-    def __init__(self, config: Config, logger: logging.Logger, s3: S3Client) -> None:
+    def __init__(
+        self, config: Config, logger: logging.Logger, s3: S3Client, get_record: Callable[[str], RecordRevision]
+    ) -> None:
         """Initialise exporter."""
         super().__init__(config=config, logger=logger, s3=s3)
         self._resources_exporter = SiteResourcesExporter(config=self._config, logger=logger, s3=self._s3_client)
         self._pages_exporter = SitePagesExporter(config=self._config, logger=logger, s3=self._s3_client)
-        self._index_exporter = SiteIndexExporter(config=self._config, logger=logger, s3=self._s3_client)
-        self._records_exporter = RecordsExporter(config=self._config, logger=logger, s3=self._s3_client)
-        self._website_exporter = WebsiteSearchExporter(config=self._config, logger=logger, s3=self._s3_client)
+        self._index_exporter = SiteIndexExporter(
+            config=self._config, logger=logger, s3=self._s3_client, get_record=get_record
+        )
+        self._records_exporter = RecordsExporter(
+            config=self._config, logger=logger, s3=self._s3_client, get_record=get_record
+        )
+        self._website_exporter = WebsiteSearchExporter(
+            config=self._config, logger=logger, s3=self._s3_client, get_record=get_record
+        )
 
     @property
     def name(self) -> str:
@@ -378,11 +375,15 @@ class SiteExporter(Exporter):
         self._logger.info("Purging S3 publishing bucket")
         self._s3_utils.empty_bucket()
 
-    def loads(self, records: list[RecordRevision]) -> None:
-        """Populate exporter."""
-        self._records_exporter.loads(records=records)
-        self._index_exporter.loads(records=records)
-        self._website_exporter.loads(records=records)
+    def select(self, file_identifiers: set[str]) -> None:
+        """
+        Select a subset of records to export and/or publish.
+
+        Only applies to exporters that relate to individual resources.
+        """
+        self._records_exporter.selected_identifiers = file_identifiers
+        self._index_exporter.selected_identifiers = file_identifiers
+        self._website_exporter.selected_identifiers = file_identifiers
 
     def export(self) -> None:
         """

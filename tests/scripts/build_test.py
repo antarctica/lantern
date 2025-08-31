@@ -48,15 +48,15 @@ class FakeCatalogue:
                 region_name="eu-west-1",
             )
         self._store = FakeRecordsStore(logger=self._logger)
-        self._site = SiteExporter(config=self._config, logger=self._logger, s3=self._s3)
+        self._site = SiteExporter(config=self._config, logger=self._logger, s3=self._s3, get_record=self._store.get)
 
     # noinspection PyMethodOverriding
     @time_task(label="Load")
-    def loads(self, inc_records: list[str], inc_related: bool) -> None:
+    def loads(self, inc_records: list[str]) -> None:
         """Load records into catalogue store and site exporter."""
         self._logger.info("Loading records")
-        self._store.populate(inc_records=inc_records, inc_related=inc_related)
-        self._site.loads(records=self._store.records)
+        self._store.populate(inc_records=inc_records)
+        self._site.select(file_identifiers={record.file_identifier for record in self._store.records})
         self._logger.info(f"Loaded {len(self._store.records)} records")
 
     @time_task(label="Purge")
@@ -74,7 +74,6 @@ class FakeCatalogue:
 def main() -> None:
     """Entrypoint."""
     inc_records = []
-    inc_related = True
     purge = False
 
     init_logging()
@@ -86,7 +85,7 @@ def main() -> None:
 
     if purge:
         cat.purge()
-    cat.loads(inc_records=inc_records, inc_related=inc_related)
+    cat.loads(inc_records=inc_records)
     cat.export()
 
 

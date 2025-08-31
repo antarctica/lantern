@@ -1,4 +1,5 @@
 import logging
+from collections.abc import Callable
 from dataclasses import asdict, dataclass
 from functools import cached_property
 
@@ -9,8 +10,8 @@ from requests.auth import HTTPBasicAuth
 from lantern.config import Config
 from lantern.exporters.base import Exporter
 from lantern.lib.metadata_library.models.record.enums import AggregationAssociationCode
-from lantern.models.item.base.const import CATALOGUE_NAMESPACE
 from lantern.models.item.website.search import ItemWebsiteSearch
+from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 
 
@@ -168,20 +169,29 @@ class WebsiteSearchExporter(Exporter):
     records determine whether a record is superseded rather than each target record independently.
     """
 
-    def __init__(self, config: Config, logger: logging.Logger, s3: S3Client) -> None:
+    def __init__(
+        self, config: Config, logger: logging.Logger, s3: S3Client, get_record: Callable[[str], RecordRevision]
+    ) -> None:
         """Initialise exporter."""
         super().__init__(config, logger, s3)
         self._wordpress_client = WordPressClient(logger=logger, config=config)
-        self._records: list[RecordRevision] = []
+        self._get_record = get_record
+        self._selected_identifiers: set[str] = set()
+
+    @property
+    def selected_identifiers(self) -> set[str]:
+        """Selected file identifiers."""
+        return self._selected_identifiers
+
+    @selected_identifiers.setter
+    def selected_identifiers(self, identifiers: set[str]) -> None:
+        """Selected file identifiers."""
+        self._selected_identifiers = identifiers
 
     @property
     def name(self) -> str:
         """Exporter name."""
         return "Public Website search results"
-
-    def loads(self, records: list[RecordRevision]) -> None:
-        """Populate exporter."""
-        self._records = records
 
     @staticmethod
     def _get_superseded_records(records: list[RecordRevision]) -> list[str]:
@@ -195,22 +205,19 @@ class WebsiteSearchExporter(Exporter):
         return list(supersedes)
 
     @property
-    def _items(self) -> list[ItemWebsiteSearch]:
-        """Records as website search items."""
-        return [
-            ItemWebsiteSearch(record=record, source=self._config.NAME, base_url=self._config.BASE_URL)
-            for record in self._records
-        ]
-
-    @property
     def _in_scope_items(self) -> list[ItemWebsiteSearch]:
         """
         Items in-scope for website search.
 
         See https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/450/#note_142966 for initial criteria.
         """
-        superseded = self._get_superseded_records(self._records)
-        return [item for item in self._items if item.resource_id not in superseded and item.open_access]
+        records = [self._get_record(file_identifier) for file_identifier in self._selected_identifiers]
+        superseded = self._get_superseded_records(records)
+        items = [
+            ItemWebsiteSearch(record=record, source=self._config.NAME, base_url=self._config.BASE_URL)
+            for record in [self._get_record(file_identifier) for file_identifier in self._selected_identifiers]
+        ]
+        return [item for item in items if item.resource_id not in superseded and item.open_access]
 
     @property
     def _in_scope_references(self) -> dict[str, str]:

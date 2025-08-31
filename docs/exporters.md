@@ -1,14 +1,25 @@
 # Lantern - Exporters
 
-Exporters create the catalogue [Static Site](/docs/architecture.md#static-site). They provide a consistent public
-interface to output information to a local path and/or to a remote AWS S3 bucket (for local debugging and external
-access respectively).
+Exporters create the catalogue [Static Site](/docs/architecture.md#static-site). They can be split into:
 
-Exporters can be split into:
+- [Resource Exporters](#resource-exporters) - which create derived outputs of [Records](/docs/data-model.md#records) and
+  [Items](/docs/data-model.md#items)
+- [Site Exporters](#site-exporters) - which assemble and/or round out the static site with additional content
 
-- [Resource Exporters](#resource-exporters) - which create derived outputs of [Records](/docs/data-model.md#records)
-  and [Items](/docs/data-model.md#items)
-- [Site Exporters](#site-exporters) - which assemble and round out the static site
+## Exporters usage
+
+All exporters implement a [Common Interface](#exporter-classes) supporting:
+
+- exporting to a local path using `export()`
+- and/or publishing to a remote service (typically [AWS S3](/docs/architecture.md#amazon-s3)) using `publish()`
+
+[Resource Exporters](#resource-exporters) use a callable from a [Store](/docs/architecture.md#stores) to get Records by
+file identifier as needed. The `selected_identifiers` property controls which Records are output, for full or partial
+site builds.
+
+> [!TIP]
+> The [Site Exporter](#site-exporter) sets the records callable and selected identifiers (via the `select()` method)
+> in all relevant (sub-)exporters.
 
 ## Exporters configuration
 

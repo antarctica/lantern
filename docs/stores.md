@@ -1,8 +1,19 @@
 # Lantern - Stores
 
 Stores act as containers for [Records](/docs/data-model.md#records) and typically relate to a storage system such as a
-database, file system or object store. Stores provide a consistent public interface to load and access Records and
-[Record Summaries](/docs/data-model.md#record-summaries).
+database, file system or object store. Stores provide a consistent public interface to load and access Records.
+
+## Stores usage
+
+All stores implement a [Common Interface](#store-classes) supporting:
+
+- accessing all loaded Records using the `store.records` list property
+- accessing a specific Record by file identifier using `store.get()`
+
+Stores MAY support additional functionality, such as writing new/updated Records back to a storage system.
+
+> [!TIP]
+> Store `get()` methods SHOULD be used as [Exporter](/docs/architecture.md#exporters) record lookup callables.
 
 ## Stores configuration
 
@@ -28,12 +39,6 @@ public interface to:
 
 - allow access to Records and Record Summaries
 
-### Selecting records
-
-All store classes support selecting Records and Record Summaries via `store.records` and `store.summaries` properties.
-
-A specific Record can be selected by its file identifier using `store.get()`.
-
 ## GitLab store
 
 `lantern.stores.gitlab.GitLabStore`
@@ -49,15 +54,7 @@ For example a Record with file identifier `123abc` is stored as `/records/12/3a/
 ### Loading remote records
 
 `GitLabStore` instances are initially empty. Use `store.populate()` to load Records from the remote repository via the
-[Local Cache](#gitlab-local-cache). By default, all records are selected. Alternatively, records can be filtered to:
-
-- only include specific file identifiers (plus records related to these selections, and their related records)
-- exclude specific file identifiers
-
-These options cannot be used together. Including related records is needed to build collections or physical maps.
-
-> [!NOTE]
-> The `GitLabStore` can be later emptied using `store.purge()`.
+[Local Cache](#gitlab-local-cache).
 
 ### Committing records
 
@@ -70,49 +67,64 @@ requires:
 
 Commits include both the author and the Catalogue application as the committer.
 
-The [Local Cache](#gitlab-local-cache) is recreated where a record has changed compared to the remote repository.
+<!-- pyml disable md028 -->
+> [!TIP]
+> The [Local Cache](#gitlab-local-cache) is refreshed automatically to reflect the updated remote repository.
+
+> [!NOTE]
+> Records cannot be deleted using the store, as records should generally be marked as withdrawn rather than removed.
+> Records can be deleted directly in the remote repository, and local caches purged, if needed.
+<!-- pyml enable md028 -->
 
 ### GitLab Local cache
 
-For increased performance, GitLab stores use a `GitLabLocalCache` to automatically maintain a local cache of Records
-and Record Summaries. The cache contains:
+For increased performance, GitLab stores use a `GitLabLocalCache` to automatically maintain a local cache of Records.
+
+The cache is a local folder consisting of:
 
 ```text
 ├── records/
-│     ├── *.json
 │     └── *.pickle
 ├── commits.json
 ├── hashes.json
-├── head_commit.json
-└── summaries.json
+└── head_commit.json
 ```
 
 | Path                | Description                                                                               |
 |---------------------|-------------------------------------------------------------------------------------------|
-| `records/`          | Record configurations in BAS 19115 JSON format and as pickled Record objects              |
-| `commits.json`      | Mapping of record file identifiers to the latest Git commit for the record in remote repo |
+| `records/`          | Record configurations as pickled Record objects                                           |
+| `commits.json`      | Mapping of record file identifiers to the last known head commit in the remote repository |
 | `hashes.json`       | Mapping of record file identifiers to SHA1 checksums of the record contents               |
-| `head_commit.json`  | Details of the head commit from remote repository when the cache was created              |
-| `summaries.json`    | List of dicts with properties needed to create Record Summaries for all Records           |
+| `head_commit.json`  | Details of the head commit in the remote repository when the cache was created            |
 
 A cache is created by:
 
 - fetching:
-  - and extracting an archive of the remote repository
-  - the latest commit for each record file in this archive
+  - all record configurations and their latest commit from the remote repository
   - details of the current head commit for the overall remote repository
 - storing:
-  - a JSON version of each record config
-  - a pickled version of each record loaded as Record
-  - a mapping of each record's contents hash by its file identifier
-  - a mapping of each record's latest commit by its file identifier
-  - details of the current head commit
-  - subsets of each record needed to create Record Summaries
+  - pickled versions of each record configuration loaded as a Record
+  - a mapping of each record's SHA1 hash by file identifier
+  - a mapping of each record's last known commit by file identifier
+  - details of the current head commit for the overall remote repository
+
+A cache is refreshed by:
+
+- fetching:
+  - any commits that may have occurred since the last known head commit
+  - record configurations from these commits
+  - details of the current head commit for the overall remote repository
+- storing:
+  - updated records, and the head commit are stored as described above
+
+> [!IMPORTANT]
+> Caches do not support moving or deleting files within the related remote repository. If detected when refreshing the
+> local cache is automatically purged and recreated in full to ensure consistency.
 
 ### GitLab Local cache testing
 
-For testing, a pre-populated cache contents can be copied into a cache instance to give reproducible results. To update
-this fixed cache update files in `tests/resources/stores/gitlab_cache`, then run:
+For testing, a pre-populated cache can be used to give reproducible results. To update this fixed cache, update files
+in `tests/resources/stores/gitlab_cache` and then run:
 
 ```shell
 % uv run python tests/resources/stores/gitlab_cache/refresh.py

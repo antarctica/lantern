@@ -27,6 +27,7 @@ Application configuration is managed by the `lantern.Config` class.
 | `EXPORT_PATH`                      | Path    | Yes          | Yes      | No        | v0.1.x        | Location for local static site exporter builds                           | *None*                                    | '/data/exports/records'                   |
 | `LOG_LEVEL`                        | Number  | Yes          | No       | No        | v0.1.x        | A logging level name or number to set the application logging level      | 30                                        | 20                                        |
 | `LOG_LEVEL_NAME`                   | String  | No           | -        | No        | v0.1.x        | Logging level name for the configured application logging level          | 'WARNING'                                 | 'INFO'                                    |
+| `PARALLEL_JOBS`                    | Number  | Yes          | No       | No        | v0.3.x        | Number of parallel jobs to run for applicable tasks                      | 1                                         | 4                                         |
 | `PUBLIC_WEBSITE_ENDPOINT`          | String  | Yes          | Yes      | No        | v0.3.x        | Endpoint to WordPress REST API for search integration                    | *N/A*                                     | 'https://example.com/...'                 |
 | `PUBLIC_WEBSITE_PASSWORD`          | String  | Yes          | Yes      | Yes       | v0.3.x        | Application Password for accessing WordPress REST API                    | *N/A*                                     | 'x'                                       |
 | `PUBLIC_WEBSITE_PASSWORD_SAFE`     | String  | No           | -        | No        | v0.3.x        | Redacted version of `PUBLIC_WEBSITE_PASSWORD`                            | *N/A*                                     | 'REDACTED'                                |
@@ -47,6 +48,13 @@ Application configuration is managed by the `lantern.Config` class.
 | `TEMPLATES_SENTRY_SRC`             | String  | No           | -        | No        | v0.1.x        | Sentry CDN project URL for frontend error tracking and user feedback     | *N/A*                                     | 'https://example.com'                     |
 | `VERSION`                          | String  | No           | -        | No        | v0.1.x        | Application package version                                              | *N/A*                                     | '0.3.0'                                   |
 <!-- pyml enable md013 -->
+
+### Performance config options
+
+- `PARALLEL_JOBS`
+
+Some tasks such as populating caches can run in parallel for better performance. The `PARALLEL_JOBS` option sets the
+maximum number of parallel jobs to run. Where `1` disables parallelism and `-1` uses all available CPU cores.
 
 ### Monitoring config options
 

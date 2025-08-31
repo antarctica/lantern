@@ -19,8 +19,8 @@ from lantern.lib.metadata_library.models.record.enums import ContactRoleCode, Hi
 from lantern.lib.metadata_library.models.record.presets.contacts import make_magic_role
 from lantern.lib.metadata_library.models.record.presets.extents import make_bbox_extent
 from lantern.lib.metadata_library.models.record.presets.identifiers import make_bas_cat
-from lantern.models.item.base.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record import Record
+from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 
 
 class TestRecord:

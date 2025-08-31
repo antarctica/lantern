@@ -31,7 +31,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     OnlineResourceFunctionCode,
 )
 from lantern.lib.metadata_library.models.record.presets.extents import make_bbox_extent, make_temporal_extent
-from lantern.models.item.base.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
+from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from tests.resources.records.utils import make_record
 
 # A trio of records to demonstrate a published map with two, mostly similar, sides.

@@ -1,4 +1,5 @@
 import logging
+from collections.abc import Callable
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import ClassVar
@@ -15,7 +16,12 @@ from lantern.models.record.revision import RecordRevision
 class TestSiteIndexExporter:
     """Test site index exporter."""
 
-    def test_init(self, mocker: MockerFixture, fx_logger: logging.Logger):
+    def test_init(
+        self,
+        mocker: MockerFixture,
+        fx_logger: logging.Logger,
+        fx_get_record: Callable[[str], RecordRevision],
+    ):
         """Can create an Exporter."""
         with TemporaryDirectory() as tmp_path:
             output_path = Path(tmp_path)
@@ -23,66 +29,41 @@ class TestSiteIndexExporter:
         mock_config = mocker.Mock()
         type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
 
-        exporter = SiteIndexExporter(config=mock_config, s3=s3_client, logger=fx_logger)
+        exporter = SiteIndexExporter(config=mock_config, s3=s3_client, logger=fx_logger, get_record=fx_get_record)
 
         assert isinstance(exporter, SiteIndexExporter)
         assert exporter.name == "Site Index"
-        assert len(exporter._records) == 0
 
-    def test_loads(self, fx_exporter_site_index: SiteIndexExporter, fx_revision_model_min: RecordRevision):
-        """Can load summaries."""
-        records = [fx_revision_model_min]
-        fx_exporter_site_index.loads(records=records)
-        assert len(fx_exporter_site_index._records) == len(records)
-
-    def test_dumps_v1(self, fx_exporter_site_index_pop: SiteIndexExporter):
-        """Can dump site index (V1)."""
-        expected = '<ul><li><a href="/items/x/index.html">[DATASET] x - x (None)</a></li></ul>'
-        html = BeautifulSoup(fx_exporter_site_index_pop._dumps_v1(), parser="html.parser", features="lxml")
-
-        result = str(html).replace("\n", "")
-        assert "<h2>V1</h2>" in result
-        assert expected in result
-
-    def test_dumps_v2(self, fx_exporter_site_index_pop: SiteIndexExporter):
-        """Can dump site index (V2)."""
+    def test_dumps(self, fx_exporter_site_index_sel: SiteIndexExporter):
+        """Can dump site index."""
         expected_item = '<tr><td>Item</td><td>DATASET</td><td><a href="/items/x/index.html">x</a></td><td>x</td><td>None</td><td>-</td></tr>'
         expected_alias = '<td>Alias</td><td>-</td><td><a href="/items/x">x</a></td><td>x</td><td>-</td><td><a href="/datasets/x">datasets/x</a></td></tr>'
-        html = BeautifulSoup(fx_exporter_site_index_pop._dumps_v2(), parser="html.parser", features="lxml")
-
-        result = str(html).replace("\n", "")
-        assert "<h2>V2</h2>" in result
-        assert expected_item in result
-        assert expected_alias in result
-
-    def test_dumps(self, fx_exporter_site_index_pop: SiteIndexExporter):
-        """Can dump site index."""
-        html = BeautifulSoup(fx_exporter_site_index_pop._dumps(), parser="html.parser", features="lxml")
+        html = BeautifulSoup(fx_exporter_site_index_sel._dumps(), parser="html.parser", features="lxml")
 
         result = str(html).replace("\n", "")
         assert "<h1>Proto Items Index</h1>" in result
-        assert "<h2>V1</h2>" in result
-        assert "<h2>V2</h2>" in result
+        assert expected_item in result
+        assert expected_alias in result
 
-    def test_export(self, fx_exporter_site_index_pop: SiteIndexExporter):
+    def test_export(self, fx_exporter_site_index_sel: SiteIndexExporter):
         """Can export site index to a local file."""
-        site_path = fx_exporter_site_index_pop._config.EXPORT_PATH
+        site_path = fx_exporter_site_index_sel._config.EXPORT_PATH
         expected = site_path.joinpath("-", "index", "index.html")
 
-        fx_exporter_site_index_pop.export()
+        fx_exporter_site_index_sel.export()
 
-        result = list(fx_exporter_site_index_pop._config.EXPORT_PATH.glob("**/*.*"))
+        result = list(fx_exporter_site_index_sel._config.EXPORT_PATH.glob("**/*.*"))
         assert expected in result
 
-    def test_publish(self, fx_exporter_site_index_pop: SiteIndexExporter, fx_s3_bucket_name: str):
+    def test_publish(self, fx_exporter_site_index_sel: SiteIndexExporter, fx_s3_bucket_name: str):
         """Can publish site index to S3."""
-        site_path = fx_exporter_site_index_pop._config.EXPORT_PATH
+        site_path = fx_exporter_site_index_sel._config.EXPORT_PATH
 
-        fx_exporter_site_index_pop.publish()
+        fx_exporter_site_index_sel.publish()
 
-        output = fx_exporter_site_index_pop._s3_utils._s3.get_object(
+        output = fx_exporter_site_index_sel._s3_utils._s3.get_object(
             Bucket=fx_s3_bucket_name,
-            Key=fx_exporter_site_index_pop._s3_utils.calc_key(site_path.joinpath("-", "index", "index.html")),
+            Key=fx_exporter_site_index_sel._s3_utils.calc_key(site_path.joinpath("-", "index", "index.html")),
         )
         assert output["ResponseMetadata"]["HTTPStatusCode"] == 200
 
@@ -296,7 +277,9 @@ class TestSiteResourcesExporter:
 class TestSiteExporter:
     """Test site index exporter."""
 
-    def test_init(self, mocker: MockerFixture, fx_logger: logging.Logger):
+    def test_init(
+        self, mocker: MockerFixture, fx_logger: logging.Logger, fx_get_record: Callable[[str], RecordRevision]
+    ):
         """Can create an Exporter."""
         with TemporaryDirectory() as tmp_path:
             output_path = Path(tmp_path)
@@ -304,11 +287,10 @@ class TestSiteExporter:
         mock_config = mocker.Mock()
         type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
 
-        exporter = SiteExporter(config=mock_config, s3=s3_client, logger=fx_logger)
+        exporter = SiteExporter(config=mock_config, s3=s3_client, logger=fx_logger, get_record=fx_get_record)
 
         assert isinstance(exporter, SiteExporter)
         assert exporter.name == "Site"
-        assert len(exporter._records_exporter._records) == 0
 
     def test_purge(
         self,
@@ -351,18 +333,20 @@ class TestSiteExporter:
         result = fx_exporter_site._s3_client.list_objects(Bucket=fx_s3_bucket_name)
         assert "contents" not in result
 
-    def test_loads(self, fx_exporter_site: SiteExporter, fx_revision_model_min: RecordRevision):
-        """Can load summaries and records."""
-        records = [fx_revision_model_min]
-        fx_exporter_site.loads(records)
+    def test_select(self, fx_exporter_site: SiteExporter, fx_revision_model_min: RecordRevision):
+        """Can select file_identifiers in sub-exporters."""
+        expected = {fx_revision_model_min.file_revision}
+        fx_exporter_site.select(expected)
 
-        assert len(fx_exporter_site._records_exporter._records) == len(records)
+        assert fx_exporter_site._records_exporter.selected_identifiers == expected
+        assert fx_exporter_site._index_exporter.selected_identifiers == expected
+        assert fx_exporter_site._website_exporter.selected_identifiers == expected
 
     def test_export(self, fx_exporter_site: SiteExporter, fx_revision_model_min: RecordRevision):
         """Can export all site components to local files."""
         record = fx_revision_model_min
         site_path = fx_exporter_site._config.EXPORT_PATH
-        fx_exporter_site.loads([record])
+        fx_exporter_site.select({record.file_revision})
         expected = [
             site_path.joinpath("favicon.ico"),
             site_path.joinpath("404.html"),
@@ -395,7 +379,7 @@ class TestSiteExporter:
 
         s3 = fx_exporter_site._index_exporter._s3_utils._s3
         record = fx_revision_model_min
-        fx_exporter_site.loads([record])
+        fx_exporter_site.select({record.file_revision})
         expected = [
             "favicon.ico",
             "404.html",

@@ -15,6 +15,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Markdown linting for project documentation
 * Dev command for bootstrapping a remote GitLab records repo
 * Dedicated Catalogue Record class to enforce Catalogue specific requirements
+* Support for partial local cache updates in GitLab store
 
 ### Changed
 

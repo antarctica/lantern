@@ -23,6 +23,12 @@ class RemoteStoreUnavailableError(Exception):
     pass
 
 
+class CacheIntegrityError(Exception):
+    """Raised when the local cache integrity cannot be guaranteed."""
+
+    pass
+
+
 class GitLabLocalCache:
     """
     A simple file based cache for records held in a GitLab project repository.
@@ -30,8 +36,8 @@ class GitLabLocalCache:
     Intended for efficiency and basic offline support.
 
     Loads record configuration files from a GitLab project repository and processes them into:
-    - RecordRevision objects (stored as Python pickle files for efficiency)
-    - a mapping of record file identifiers to their latest commits
+    - Pickled RecordRevision objects
+    - a mapping of record file identifiers to their last known head commit
     - a mapping of record file identifiers to their SHA1 hashes
 
     The cache will automatically be populated or refreshed when records are accessed using `get()`. To manually
@@ -93,9 +99,20 @@ class GitLabLocalCache:
         return data["commits"]
 
     @property
-    def _head_commit_id(self) -> str:
+    def _head_commit_local(self) -> str:
         """
-        ID of the head commit in remote project.
+        ID of the latest commit in the local cache.
+
+        Not valid if called before `_create()` is called where cache does not exist.
+        """
+        with self._head_path.open() as f:
+            cache_commit = json.load(f)
+        return cache_commit["id"]
+
+    @property
+    def _head_commit_remote(self) -> str:
+        """
+        ID of the latest commit in remote project.
 
         Not valid if called before `_create()` is called where cache does not exist.
         """
@@ -116,9 +133,7 @@ class GitLabLocalCache:
         if not self._exists:
             return False
 
-        with self._head_path.open() as f:
-            cache_commit = json.load(f)
-        return cache_commit["id"] == self._head_commit_id
+        return self._head_commit_local == self._head_commit_remote
 
     def _load_record_pickle(self, record_path: Path) -> RecordRevision:
         """Load record from Python pickle file."""
@@ -146,6 +161,13 @@ class GitLabLocalCache:
         hashes = {}
         commits = {}
 
+        if self._hashes_path.exists():
+            with self._hashes_path.open() as f:
+                hashes = json.load(f)["hashes"]
+        if self._commits_path.exists():
+            with self._commits_path.open() as f:
+                commits = json.load(f)["commits"]
+
         records_path = self._records_path
         records_path.mkdir(parents=True, exist_ok=True)
         self._logger.info(f"Processing {len(records)} records")
@@ -172,9 +194,18 @@ class GitLabLocalCache:
             data = {"commits": commits}
             json.dump(data, f, indent=2)
 
+    def _fetch_record_commit(self, path: str, ref: str) -> tuple[str, str]:
+        """
+        Get a record configuration and its head commit ID from the GitLab project repository.
+
+        Returns a tuple ('record configuration as JSON string', 'record commit string').
+        """
+        file_contents = self._project.files.get(file_path=path, ref=ref)
+        return b64decode(file_contents.content).decode("utf-8"), file_contents.last_commit_id
+
     def _fetch_record_commits(self) -> list[tuple[str, str]]:
         """
-        Get all record configuration files and their head commit IDs from the GitLab project repository.
+        Get all record configurations and their head commit IDs from the GitLab project repository.
 
         Returns a list of tuples ('record configuration as JSON string', 'record commit string').
 
@@ -186,36 +217,102 @@ class GitLabLocalCache:
         for item in self._project.repository_tree(path="records", ref=self._ref, recursive=True, iterator=True):
             if item["type"] != "blob" or not item["path"].endswith(".json"):
                 continue
-
-            file_contents = self._project.files.get(file_path=item["path"], ref=self._ref)
-            records.append((b64decode(file_contents.content).decode("utf-8"), file_contents.last_commit_id))
+            records.append(self._fetch_record_commit(path=item["path"], ref=self._ref))
 
         return records
 
+    def _fetch_latest_records(self) -> list[tuple[str, str]]:
+        """
+        Get record configurations and their latest commit IDs from the GitLab project repository from after a commit.
+
+        Steps:
+        - get a list of commits since the cache was last updated
+        - get a list of files changed across any subsequent commits
+        - get the contents and head commit ID for any changed files
+
+        Returns a list of tuples ('record configuration as JSON string', 'record commit string').
+
+        This method is inefficient as each file within each commit needs separate HTTP requests. However, providing a
+        limited number of commits since the last refresh, and a limited set of records in each commit, this will be more
+        efficient than a full purge and create cycle.
+        """
+        records = []
+        changed_paths = set()
+
+        commit_range = f"{self._head_commit_local}..{self._head_commit_remote}"
+        self._logger.info(f"Fetching commits in range {commit_range}")
+        for commit in self._project.commits.list(ref_name=commit_range, all=True):
+            for diff in commit.diff():
+                if not diff["new_path"].startswith("records/") or not diff["new_path"].endswith(".json"):
+                    continue
+                if diff["renamed_file"]:
+                    msg = "Renamed file in remote store, skipping. Partial updates do not support renamed files, use purge and recreate to ensure cache integrity."
+                    raise CacheIntegrityError(msg)
+                if diff["deleted_file"]:
+                    msg = "Deleted file in remote store, skipping. Partial updates do not support deleted files, use purge and recreate to ensure cache integrity."
+                    raise CacheIntegrityError(msg)
+
+                changed_paths.add(diff["new_path"])
+
+        for path in changed_paths:
+            records.append(self._fetch_record_commit(path=path, ref=self._ref))
+
+        return records
+
+    def _create_refresh(self, records: list[tuple[str, str]]) -> None:
+        """Common tasks for creating or refreshing the cache."""
+        self._logger.info("Fetching head commit")
+        head_commit = self._project.commits.get(self._head_commit_remote)
+
+        self._logger.info("Populating local cache")
+        self._build_cache(records=records, head_commit=head_commit.attributes)
+
     def _create(self) -> None:
         """
-        Cache records from remote store locally.
+        Cache all records from remote store locally.
 
-        Any existing cache is removed and recreated, regardless of whether it's up-to-date.
+        Any existing cache is removed and recreated, regardless of whether it's up-to-date. Use `_refresh()` to update
+        an existing cache instead.
 
         Annoyingly, and inefficiently, Git commits for records must be fetched using individual HTTP requests.
 
         Steps:
         - remove any existing cache directory if present
-        - query the GitLab API for the JSON config and commit of each record in the archive
+        - query the GitLab API for the JSON config and commit of all records
         - query the GitLab API for the head commit of the project repo
         - build and populate the local cache
         """
         self.purge()
 
-        self._logger.info("Fetching records (this will take some time)")
+        self._logger.info("Fetching all records (this will take some time)")
         records = self._fetch_record_commits()
+        self._create_refresh(records=records)
 
-        self._logger.info("Fetching head commit")
-        head_commit = self._project.commits.get(self._head_commit_id)
+    def _refresh(self) -> None:
+        """
+        Update cache with records that have changed in the remote store.
 
-        self._logger.info("Populating local cache")
-        self._build_cache(records=records, head_commit=head_commit.attributes)
+        The existing cache is preserved, only records changed in subsequent commits to the remote store are updated.
+        Use `_create()` to start a new cache instead.
+
+        Annoyingly, and inefficiently, Git commits and each record must be fetched using individual HTTP requests.
+
+        Steps:
+        - query the GitLab API for JSON configs and commits of changed records
+        - query the GitLab API for the new head commit of the project repo
+        - update and partially repopulate the local cache
+        """
+        pass
+        self._logger.info("Fetching changed records (this may take some time)")
+        try:
+            records = self._fetch_latest_records()
+        except CacheIntegrityError:
+            self._logger.warning("Cannot refresh cache due to integrity issues, recreating entire cache instead.")
+            self._create()
+            return
+
+        self._logger.info(f"{len(records)} records have been in remote repository")
+        self._create_refresh(records=records)
 
     def _ensure_exists(self) -> None:
         """
@@ -228,17 +325,17 @@ class GitLabLocalCache:
             raise RemoteStoreUnavailableError(msg) from None
 
         if self._online and not self._exists:
+            self._logger.info("Local cache unavailable, creating from GitLab.")
             self._create()
             return
 
         if not self._online:
-            self._logger.warning("Cannot check if records cache is current, loading possibly stale records")
+            self._logger.warning("Cannot check if records cache is current, loading possibly stale records.")
             return
 
         if self._online and not self._current:
-            self._logger.warning("Cached records are not up to date, reloading from GitLab")
-            self.purge()
-            self._ensure_exists()
+            self._logger.warning("Cached records are not up to date, updating from GitLab.")
+            self._refresh()
             return
 
         self._logger.info("Records cache exists and is current, no changes needed.")
@@ -264,6 +361,7 @@ class GitLabLocalCache:
     def purge(self) -> None:
         """Clear cache contents."""
         if self._path.exists():
+            self._logger.info("Purging cache")
             shutil.rmtree(self._path)
 
 

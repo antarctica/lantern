@@ -12,7 +12,7 @@ from requests.exceptions import ConnectionError as RequestsConnectionError
 from lantern.models.record import Record
 from lantern.models.record.revision import RecordRevision
 from lantern.stores.base import RecordNotFoundError
-from lantern.stores.gitlab import GitLabLocalCache, GitLabStore, RemoteStoreUnavailableError
+from lantern.stores.gitlab import CacheIntegrityError, GitLabLocalCache, GitLabStore, RemoteStoreUnavailableError
 
 
 class TestGitLabLocalCache:
@@ -55,11 +55,17 @@ class TestGitLabLocalCache:
         assert isinstance(result, dict)
         assert len(result) > 0
 
+    def test_head_commit_local(self, fx_gitlab_cache_pop: GitLabLocalCache):
+        """Can get ID of the latest commit known to the local cache."""
+        result = fx_gitlab_cache_pop._head_commit_local
+        assert isinstance(result, str)
+        assert len(result) > 0
+
     @pytest.mark.vcr
     @pytest.mark.block_network
-    def test_head_commit_id(self, fx_gitlab_cache_pop: GitLabLocalCache):
+    def test_head_commit_remote(self, fx_gitlab_cache_pop: GitLabLocalCache):
         """Can get ID of the latest commit known to the cache."""
-        result = fx_gitlab_cache_pop._head_commit_id
+        result = fx_gitlab_cache_pop._head_commit_remote
         assert isinstance(result, str)
         assert len(result) > 0
 
@@ -95,12 +101,12 @@ class TestGitLabLocalCache:
         record = fx_gitlab_cache_pop._load_record_pickle(record_path)
         assert record.file_identifier == id_
 
-    def test_build_cache(
+    def test_build_cache_create(
         self,
         fx_gitlab_cache: GitLabLocalCache,
         fx_record_config_min: dict,
     ):
-        """Can populate cache with record configurations and other required context."""
+        """Can populate an empty cache with record configurations and other required context."""
         commit = "x"
         head_commit = {"x": commit}
         records = [(json.dumps(fx_record_config_min, ensure_ascii=False), commit)]
@@ -122,6 +128,69 @@ class TestGitLabLocalCache:
             data = json.load(f)
             assert data == {"commits": head_commit}
 
+    def test_build_cache_update(
+        self,
+        fx_gitlab_cache_pop: GitLabLocalCache,
+        fx_record_config_min: dict,
+    ):
+        """Can update an existing cache with changed record configurations and other required context."""
+        file_identifier = "a1b2c3"
+        commit = "y"
+        head_commit = {"y": commit}
+        fx_record_config_min["file_identifier"] = file_identifier
+        fx_record_config_min["identification"]["edition"] = "2"
+        records = [(json.dumps(fx_record_config_min, ensure_ascii=False), commit)]
+
+        # get original record to ensure it's replaced
+        original_record = fx_gitlab_cache_pop.get()[0]
+        assert original_record.file_identifier == file_identifier
+
+        # add additional entries to hashes and commit files to ensure they are not overwritten
+        with fx_gitlab_cache_pop._hashes_path.open() as f:
+            hashes = json.load(f)["hashes"]
+        hashes["nochange"] = "nochange"
+        with fx_gitlab_cache_pop._hashes_path.open(mode="w") as f:
+            json.dump({"hashes": hashes}, f)
+        with fx_gitlab_cache_pop._commits_path.open() as f:
+            commits = json.load(f)["commits"]
+        commits["nochange"] = "nochange"
+        with fx_gitlab_cache_pop._commits_path.open(mode="w") as f:
+            json.dump({"commits": commits}, f)
+
+        fx_gitlab_cache_pop._build_cache(records=records, head_commit=head_commit)
+
+        assert fx_gitlab_cache_pop._exists
+        assert len(list(fx_gitlab_cache_pop._records_path.glob("*.pickle"))) == 1
+        updated_record = fx_gitlab_cache_pop.get()[0]
+        assert updated_record.file_identifier == file_identifier
+        assert updated_record.file_revision != original_record.file_revision
+        assert updated_record.sha1 != original_record.sha1
+
+        with fx_gitlab_cache_pop._head_path.open() as f:
+            data = json.load(f)
+        assert data == head_commit
+
+        with fx_gitlab_cache_pop._hashes_path.open() as f:
+            data = json.load(f)
+        assert data["hashes"] == {"a1b2c3": "1bdcf7143d1e3f2294741b733fe679ec776a57e7", "nochange": "nochange"}
+
+        with fx_gitlab_cache_pop._commits_path.open() as f:
+            data = json.load(f)
+        assert data["commits"] == {"a1b2c3": commit, "nochange": "nochange"}
+
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    def test_fetch_record_commit(self, fx_gitlab_cache: GitLabLocalCache, fx_record_config_min: dict):
+        """Can fetch latest commit for a file in the remote repository."""
+        file_identifier = "a1b2c3"
+        commit = "abc123"
+        path = "records/a1/b2/a1b2c3.json"
+        fx_record_config_min["file_identifier"] = file_identifier
+        expected = (json.dumps(fx_record_config_min, ensure_ascii=False), commit)
+
+        results = fx_gitlab_cache._fetch_record_commit(path=path, ref=fx_gitlab_cache._ref)
+        assert results == expected
+
     @pytest.mark.vcr
     @pytest.mark.block_network
     def test_fetch_record_commits(self, fx_gitlab_cache: GitLabLocalCache, fx_record_config_min: dict):
@@ -132,6 +201,36 @@ class TestGitLabLocalCache:
         expected = [(json.dumps(fx_record_config_min, ensure_ascii=False), commit)]
 
         results = fx_gitlab_cache._fetch_record_commits()
+        assert results == expected
+
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    @pytest.mark.parametrize("mode", [None, "renamed", "deleted"])
+    def test_fetch_latest_records(
+        self, mocker: MockerFixture, fx_gitlab_cache: GitLabLocalCache, fx_record_config_min: dict, mode: str | None
+    ):
+        """Can fetch record configurations for future commits from remote repository."""
+        file_identifier = "a1b2c3"
+        local_head = "abc123"
+        remote_head = "def456"
+        mocker.patch.object(
+            type(fx_gitlab_cache), "_head_commit_local", new_callable=PropertyMock, return_value=local_head
+        )
+        mocker.patch.object(
+            type(fx_gitlab_cache), "_head_commit_remote", new_callable=PropertyMock, return_value=remote_head
+        )
+        fx_record_config_min["file_identifier"] = file_identifier
+        fx_record_config_min["identification"]["edition"] = "2"
+        expected = [(json.dumps(fx_record_config_min, ensure_ascii=False), remote_head)]
+
+        if mode is not None:
+            with pytest.raises(CacheIntegrityError):
+                _ = fx_gitlab_cache._fetch_latest_records()
+            return
+
+        results = fx_gitlab_cache._fetch_latest_records()
+
+        assert results[0][1] == expected[0][1]
         assert results == expected
 
     def test_create(self, mocker: MockerFixture, fx_gitlab_cache: GitLabLocalCache, fx_record_config_min: dict):
@@ -154,9 +253,53 @@ class TestGitLabLocalCache:
 
         assert fx_gitlab_cache._exists
 
+    def test_refresh(self, mocker: MockerFixture, fx_gitlab_cache_pop: GitLabLocalCache, fx_record_config_min: dict):
+        """
+        Can fetch and populate existing cache with changed records from remote repository.
+
+        This mocks fetching data as `_refresh()` is a high-level method and fetch methods are tested elsewhere.
+        """
+        commit = "def456"
+
+        records = [(json.dumps(fx_record_config_min, ensure_ascii=False), commit)]
+        mocker.patch.object(fx_gitlab_cache_pop, "_fetch_latest_records", return_value=records)
+        original_head = fx_gitlab_cache_pop._head_commit_local
+
+        head_commit = {"id": commit}
+        mock_project = MagicMock()
+        mock_project.commits.get.return_value.attributes = head_commit
+        mocker.patch.object(type(fx_gitlab_cache_pop), "_project", new_callable=PropertyMock, return_value=mock_project)
+
+        fx_gitlab_cache_pop._refresh()
+
+        assert fx_gitlab_cache_pop._exists
+        assert fx_gitlab_cache_pop._head_commit_local != original_head
+
+    def test_refresh_integrity(
+        self, mocker: MockerFixture, fx_gitlab_cache_pop: GitLabLocalCache, fx_record_config_min: dict
+    ):
+        """
+        Cannot refresh repository if update triggers integrity issues (renamed/removed files in remote).
+
+        This mocks fetching data as `_refresh()` is a high-level method and fetch methods are tested elsewhere.
+        """
+        mocker.patch.object(fx_gitlab_cache_pop, "_fetch_latest_records", side_effect=CacheIntegrityError())
+        mocker.patch.object(fx_gitlab_cache_pop, "_create", return_value=None)
+
+        fx_gitlab_cache_pop._refresh()
+
+        # Verify _create was called due to the integrity error
+        fx_gitlab_cache_pop._create.assert_called_once()
+
     @pytest.mark.parametrize(
         ("online", "cached", "current"),
-        [(False, False, False), (True, False, False), (False, True, False), (True, True, False), (True, True, True)],
+        [
+            (False, False, False),  # remote unavailable, no local cache (abort)
+            (True, False, False),  # remote available, no local cache (create)
+            (False, True, False),  # remote unavailable, local cache (warn stale)
+            (True, True, False),  # remote available, local cache outdated (refresh)
+            (True, True, True),  # remote available, local cache current (skip)
+        ],
     )
     def test_ensure_exists(
         self,
@@ -170,13 +313,11 @@ class TestGitLabLocalCache:
         """Can make sure an up-to-date local cache of the remote repository exists."""
         mocker.patch.object(type(fx_gitlab_cache_pop), "_online", new_callable=PropertyMock, return_value=online)
         mocker.patch.object(type(fx_gitlab_cache_pop), "_current", new_callable=PropertyMock, return_value=current)
-
+        # `fx_gitlab_cache_pop` mocks `_create()` to copy reference cache so safe to call directly
+        mocker.patch.object(type(fx_gitlab_cache_pop), "_refresh", return_value=None)
         if not cached:
             fx_gitlab_cache_pop.purge()
             assert not fx_gitlab_cache_pop._path.exists()
-        if online and not cached:
-            # in `fx_gitlab_cache_pop`, `_create()` is mocked to copy reference cache so safe
-            fx_gitlab_cache_pop._create()
 
         if not online and not cached:
             with pytest.raises(RemoteStoreUnavailableError):
@@ -185,11 +326,14 @@ class TestGitLabLocalCache:
 
         fx_gitlab_cache_pop._ensure_exists()
 
-        if not online:
-            assert "Cannot check if records cache is current, loading possibly stale records" in caplog.text
+        if online and not cached:
+            assert "Local cache unavailable, creating from GitLab." in caplog.text
 
-        if online and not current:
-            assert "Cached records are not up to date, reloading from GitLab" in caplog.text
+        if not online:
+            assert "Cannot check if records cache is current, loading possibly stale records." in caplog.text
+
+        if online and cached and not current:
+            assert "Cached records are not up to date, updating from GitLab." in caplog.text
 
         if online and current:
             assert "Records cache exists and is current, no changes needed." in caplog.text

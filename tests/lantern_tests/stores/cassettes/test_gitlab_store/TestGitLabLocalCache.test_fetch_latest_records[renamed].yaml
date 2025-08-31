@@ -1,0 +1,153 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/6.0.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234
+  response:
+    body:
+      string: '{"id":1234}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/6.2.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/commits?ref_name=abc123..def456
+  response:
+    body:
+      string: '[{"id":"def456"}]'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Link:
+      - <https://gitlab.example.com/api/v4/projects/1234/repository/commits?id=1234&order=default&page=1&per_page=20&ref_name=abc123..def456&trailers=false>;
+        rel="first", <https://gitlab.example.com/api/v4/projects/1234/repository/commits?id=1234&order=default&page=1&per_page=20&ref_name=abc123..def456&trailers=false>;
+        rel="last"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Next-Page:
+      - ''
+      X-Page:
+      - '1'
+      X-Per-Page:
+      - '20'
+      X-Prev-Page:
+      - ''
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/6.2.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/commits/def456/diff
+  response:
+    body:
+      string: '[{"diff":"","new_path":"records/a1/b2/a1b2c3.json","old_path":"records/x0/x0/x0x0.json","a_mode":"100644","b_mode":"100644","new_file":false,"renamed_file":true,"deleted_file":false}]'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Link:
+      - <https://gitlab.example.com/api/v4/projects/1234/repository/commits/def456/diff?id=1345&page=1&per_page=20&sha=def456>;
+        rel="first", <https://gitlab.example.com/api/v4/projects/1234/repository/commits/def456/diff?id=1345&page=1&per_page=20&sha=def456>;
+        rel="last"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Next-Page:
+      - ''
+      X-Page:
+      - '1'
+      X-Per-Page:
+      - '20'
+      X-Prev-Page:
+      - ''
+      X-Total:
+      - '1'
+      X-Total-Pages:
+      - '1'
+    status:
+      code: 200
+      message: OK
+version: 1

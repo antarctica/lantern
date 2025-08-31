@@ -19,6 +19,7 @@ from lantern.lib.metadata_library.models.record.enums import (
 )
 from lantern.models.item.website.search import ItemWebsiteSearch
 from lantern.models.record.revision import RecordRevision
+from tests.conftest import _get_record_open, _revision_config_min
 
 
 class TestWordPressSearchItem:
@@ -134,17 +135,12 @@ class TestWebsiteSearchExporter:
         mock_config = mocker.Mock()
         type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
 
-        exporter = WebsiteSearchExporter(config=mock_config, s3=s3_client, logger=fx_logger)
+        exporter = WebsiteSearchExporter(
+            config=mock_config, s3=s3_client, logger=fx_logger, get_record=_get_record_open
+        )
 
         assert isinstance(exporter, WebsiteSearchExporter)
         assert exporter.name == "Public Website search results"
-        assert len(exporter._records) == 0
-
-    def test_loads(self, fx_exporter_website_search: WebsiteSearchExporter, fx_revision_model_min: RecordRevision):
-        """Can load records."""
-        records = [fx_revision_model_min]
-        fx_exporter_website_search.loads(records=records)
-        assert len(fx_exporter_website_search._records) == len(records)
 
     def test_get_superseded_records(
         self, fx_exporter_website_search: WebsiteSearchExporter, fx_revision_model_min: RecordRevision
@@ -162,38 +158,33 @@ class TestWebsiteSearchExporter:
         results = fx_exporter_website_search._get_superseded_records(records=[fx_revision_model_min, successor])
         assert results == [fx_revision_model_min.file_identifier]
 
-    def test_items(self, fx_exporter_website_search: WebsiteSearchExporter, fx_revision_model_min: RecordRevision):
-        """Can get search items from loaded records."""
-        fx_exporter_website_search.loads(records=[fx_revision_model_min])
-        results = fx_exporter_website_search._items
-        assert all(isinstance(item, ItemWebsiteSearch) for item in results)
+    @staticmethod
+    def _get_record_in_scope(identifier: str) -> RecordRevision:
+        """Record lookup method for testing in_scope_items method."""
+        record = RecordRevision.loads(deepcopy(_revision_config_min()))
+        record.file_identifier = identifier
 
-    def test_in_scope_items(
-        self, fx_exporter_website_search: WebsiteSearchExporter, fx_revision_model_min: RecordRevision
-    ):
-        """Can select items in-scope for inclusion in website search."""
-        out_scope_superseded = deepcopy(fx_revision_model_min)
-
-        out_scope_not_open = deepcopy(fx_revision_model_min)
-        out_scope_not_open.file_identifier = "y"
-
-        in_scope = deepcopy(fx_revision_model_min)
-        in_scope.file_identifier = "z"
-        in_scope.identification.constraints.append(
-            Constraint(type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.UNRESTRICTED)
-        )
-        in_scope.identification.aggregations.append(
-            Aggregation(
-                identifier=Identifier(identifier=out_scope_superseded.file_identifier, namespace="data.bas.ac.uk"),
-                association_type=AggregationAssociationCode.REVISION_OF,
+        if identifier == "in_scope":
+            record.identification.constraints.append(
+                Constraint(type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.UNRESTRICTED)
             )
-        )
+            record.identification.aggregations.append(
+                Aggregation(
+                    identifier=Identifier(identifier="out_scope_superseded", namespace="data.bas.ac.uk"),
+                    association_type=AggregationAssociationCode.REVISION_OF,
+                )
+            )
 
-        fx_exporter_website_search.loads(records=[out_scope_superseded, out_scope_not_open, in_scope])
+        return record
+
+    def test_in_scope_items(self, fx_exporter_website_search: WebsiteSearchExporter):
+        """Can select items in-scope for inclusion in website search."""
+        fx_exporter_website_search._get_record = self._get_record_in_scope
+        fx_exporter_website_search.selected_identifiers = {"out_scope_superseded", "out_scope_not_open", "in_scope"}
 
         results = fx_exporter_website_search._in_scope_items
         assert len(results) == 1
-        assert results[0].resource_id == in_scope.file_identifier
+        assert results[0].resource_id == "in_scope"
 
     def test_in_scope_references(
         self,
@@ -237,6 +228,20 @@ class TestWebsiteSearchExporter:
         assert len(results) == 1
         assert results == {file_identifier: (file_revision, post_id)}
 
+    @staticmethod
+    def _get_record_new_outdated(identifier: str) -> RecordRevision:
+        """Record lookup method for testing new_outdated_items method."""
+        _revisions = {"a": "1", "b": "2", "c": "3"}
+
+        record = RecordRevision.loads(deepcopy(_revision_config_min()))
+        record.file_identifier = identifier
+        record.file_revision = _revisions[identifier]
+        record.identification.constraints.append(
+            Constraint(type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.UNRESTRICTED)
+        )
+
+        return record
+
     def test_new_outdated_items(
         self,
         mocker: MockerFixture,
@@ -248,17 +253,10 @@ class TestWebsiteSearchExporter:
         outdated_item = {"file_identifier": "b", "file_revision": "2"}
         unchanged_item = {"file_identifier": "c", "file_revision": "3"}
 
-        # include all items locally
-        local_references = {
-            reference["file_identifier"]: reference["file_revision"]
-            for reference in [new_item, outdated_item, unchanged_item]
+        fx_exporter_website_search._get_record = self._get_record_new_outdated
+        fx_exporter_website_search.selected_identifiers = {
+            reference["file_identifier"] for reference in [new_item, outdated_item, unchanged_item]
         }
-        mocker.patch.object(
-            type(fx_exporter_website_search),
-            "_in_scope_references",
-            new_callable=PropertyMock,
-            return_value=local_references,
-        )
 
         # include unchanged and previous revision of outdated item remotely
         remote_references = {
@@ -272,26 +270,9 @@ class TestWebsiteSearchExporter:
             return_value=remote_references,
         )
 
-        # generate full items for local records (must be open access to evaluate as in-scope)
-        items: list[ItemWebsiteSearch] = []
-        fx_revision_model_min.identification.constraints.append(
-            Constraint(type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.UNRESTRICTED)
-        )
-        for fid, fir in local_references.items():
-            record = deepcopy(fx_revision_model_min)
-            record.file_identifier = fid
-            record.file_revision = fir
-            items.append(ItemWebsiteSearch(record=record, source="x", base_url="x"))
-        mocker.patch.object(
-            type(fx_exporter_website_search),
-            "_items",
-            new_callable=PropertyMock,
-            return_value=items,
-        )
-
-        expected_items = [item for item in items if item.resource_id != unchanged_item["file_identifier"]]
-
-        assert fx_exporter_website_search._new_outdated_items == expected_items
+        expected = sorted([new_item["file_identifier"], outdated_item["file_identifier"]])
+        results = sorted([item.resource_id for item in fx_exporter_website_search._new_outdated_items])
+        assert results == expected
 
     def test_orphaned_items(
         self,

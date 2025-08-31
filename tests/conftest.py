@@ -4,6 +4,7 @@ import shutil
 import socket
 import sys
 import time
+from collections.abc import Callable
 from copy import deepcopy
 from datetime import UTC, datetime
 from http.client import HTTPConnection
@@ -344,7 +345,7 @@ def _item_catalogue_model_min() -> ItemCatalogue:
 
 @pytest.fixture()
 def fx_item_catalogue_model_min(
-    fx_config: Config, fx_item_config_min_catalogue: dict, fx_get_record: callable
+    fx_config: Config, fx_item_config_min_catalogue: dict, fx_get_record: Callable[[str], RecordRevision]
 ) -> ItemCatalogue:
     """Minimal ItemCatalogue model instance."""
     return ItemCatalogue(
@@ -354,7 +355,7 @@ def fx_item_catalogue_model_min(
 
 @pytest.fixture()
 def fx_item_physical_map_model_min(
-    fx_config: Config, fx_item_config_min_physical_map: dict, fx_get_record: callable
+    fx_config: Config, fx_item_config_min_physical_map: dict, fx_get_record: Callable[[str], RecordRevision]
 ) -> ItemCataloguePhysicalMap:
     """Minimal ItemCataloguePhysicalMap model instance."""
     return ItemCataloguePhysicalMap(
@@ -374,7 +375,7 @@ def _get_record(identifier: str) -> RecordRevision:
 
 
 @pytest.fixture()
-def fx_get_record() -> callable:
+def fx_get_record() -> Callable[[str], RecordRevision]:
     """
     Minimal record lookup method.
 
@@ -645,7 +646,11 @@ def fx_exporter_html_alias(
 
 @pytest.fixture()
 def fx_exporter_records(
-    mocker: MockerFixture, fx_logger: logging.Logger, fx_s3_bucket_name: str, fx_s3_client: S3Client
+    mocker: MockerFixture,
+    fx_logger: logging.Logger,
+    fx_s3_bucket_name: str,
+    fx_s3_client: S3Client,
+    fx_get_record: Callable[[str], RecordRevision],
 ) -> RecordsExporter:
     """
     Site records exporter (empty).
@@ -662,15 +667,15 @@ def fx_exporter_records(
     type(mock_config).TEMPLATES_ITEM_MAPS_ENDPOINT = PropertyMock(return_value="x")
     type(mock_config).TEMPLATES_ITEM_CONTACT_ENDPOINT = PropertyMock(return_value="x")
 
-    return RecordsExporter(config=mock_config, logger=fx_logger, s3=fx_s3_client)
+    return RecordsExporter(config=mock_config, logger=fx_logger, s3=fx_s3_client, get_record=fx_get_record)
 
 
 @pytest.fixture()
-def fx_exporter_records_pop(
+def fx_exporter_records_sel(
     fx_exporter_records: RecordsExporter, fx_revision_model_min: RecordRevision
 ) -> RecordsExporter:
-    """Site records exporter populated with a single record."""
-    fx_exporter_records.loads(records=[fx_revision_model_min])
+    """Site records exporter with a single record selected."""
+    fx_exporter_records.selected_identifiers = {fx_revision_model_min.file_identifier}
     return fx_exporter_records
 
 
@@ -688,6 +693,16 @@ def fx_exporter_site_resources(
     return SiteResourcesExporter(config=mock_config, logger=fx_logger, s3=fx_s3_client)
 
 
+def _get_record_alias(identifier: str) -> RecordRevision:
+    """Minimal record lookup method with an alias identifier."""
+    record = RecordRevision.loads(deepcopy(_revision_config_min()))
+    record.file_identifier = identifier
+    record.identification.identifiers.append(
+        Identifier(identifier="x", href="https://data.bas.ac.uk/datasets/x", namespace=ALIAS_NAMESPACE)
+    )
+    return record
+
+
 @pytest.fixture()
 def fx_exporter_site_index(
     mocker: MockerFixture, fx_s3_bucket_name: str, fx_logger: logging.Logger, fx_s3_client: S3Client
@@ -703,19 +718,15 @@ def fx_exporter_site_index(
     type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
     type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
 
-    return SiteIndexExporter(config=mock_config, s3=fx_s3_client, logger=fx_logger)
+    return SiteIndexExporter(config=mock_config, s3=fx_s3_client, logger=fx_logger, get_record=_get_record_alias)
 
 
 @pytest.fixture()
-def fx_exporter_site_index_pop(
+def fx_exporter_site_index_sel(
     fx_exporter_site_index: SiteIndexExporter, fx_revision_model_min: RecordRevision
 ) -> SiteIndexExporter:
-    """Site index exporter populated with a single record summary."""
-    fx_revision_model_min.identification.identifiers.append(
-        Identifier(identifier="x", href="https://data.bas.ac.uk/datasets/x", namespace=ALIAS_NAMESPACE)
-    )
-    records = [fx_revision_model_min]
-    fx_exporter_site_index.loads(records=records)
+    """Site index exporter with a single record selected."""
+    fx_exporter_site_index.selected_identifiers = {fx_revision_model_min.file_identifier}
     return fx_exporter_site_index
 
 
@@ -727,6 +738,16 @@ def fx_wordpress_client(fx_logger: logging.Logger, fx_config: Config) -> WordPre
     With mocked config.
     """
     return WordPressClient(logger=fx_logger, config=fx_config)
+
+
+def _get_record_open(identifier: str) -> RecordRevision:
+    """Minimal record lookup method with an open access constraint."""
+    record = RecordRevision.loads(deepcopy(_revision_config_min()))
+    record.file_identifier = identifier
+    record.identification.constraints.append(
+        Constraint(type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.UNRESTRICTED)
+    )
+    return record
 
 
 @pytest.fixture()
@@ -745,18 +766,15 @@ def fx_exporter_website_search(
     type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
     type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
 
-    return WebsiteSearchExporter(config=mock_config, s3=fx_s3_client, logger=fx_logger)
+    return WebsiteSearchExporter(config=mock_config, s3=fx_s3_client, logger=fx_logger, get_record=_get_record_open)
 
 
 @pytest.fixture()
-def fx_exporter_website_search_pop(
+def fx_exporter_website_search_sel(
     fx_exporter_website_search: WebsiteSearchExporter, fx_revision_model_min: RecordRevision
 ) -> WebsiteSearchExporter:
-    """Public website search exporter populated with a single record."""
-    fx_revision_model_min.identification.constraints.append(
-        Constraint(type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.UNRESTRICTED)
-    )
-    fx_exporter_website_search.loads(records=[fx_revision_model_min])
+    """Public website search exporter with a single record selected."""
+    fx_exporter_website_search.selected_identifiers = {fx_revision_model_min.file_identifier}
     return fx_exporter_website_search
 
 
@@ -776,7 +794,11 @@ def fx_exporter_site_pages(
 
 @pytest.fixture()
 def fx_exporter_site(
-    mocker: MockerFixture, fx_s3_bucket_name: str, fx_logger: logging.Logger, fx_s3_client: S3Client
+    mocker: MockerFixture,
+    fx_s3_bucket_name: str,
+    fx_logger: logging.Logger,
+    fx_s3_client: S3Client,
+    fx_get_record: Callable[[str], RecordRevision],
 ) -> SiteExporter:
     """
     Site exporter (empty records).
@@ -793,7 +815,7 @@ def fx_exporter_site(
     type(mock_config).TEMPLATES_ITEM_MAPS_ENDPOINT = PropertyMock(return_value="x")
     type(mock_config).TEMPLATES_ITEM_CONTACT_ENDPOINT = PropertyMock(return_value="x")
 
-    return SiteExporter(config=mock_config, s3=fx_s3_client, logger=fx_logger)
+    return SiteExporter(config=mock_config, s3=fx_s3_client, logger=fx_logger, get_record=fx_get_record)
 
 
 @pytest.fixture(scope="module")
@@ -801,8 +823,8 @@ def fx_exporter_static_site(module_mocker: MockerFixture) -> TemporaryDirectory:
     """
     Build static site and export to a temp directory.
 
-    Module scoped for performance. Means usual fixtures for config, S3Client and FakeRecordsStore can't be used and are
-    duplicated.
+    Module scoped for performance. Means usual fixtures for config, S3Client, get_record and FakeRecordsStore can't be
+    used and are duplicated.
     """
     site_dir = TemporaryDirectory()
 
@@ -829,8 +851,8 @@ def fx_exporter_static_site(module_mocker: MockerFixture) -> TemporaryDirectory:
 
     store = FakeRecordsStore(logger=logger)
     store.populate()
-    exporter = SiteExporter(config=config, s3=s3_client, logger=logger)
-    exporter.loads(records=store.records)
+    exporter = SiteExporter(config=config, s3=s3_client, logger=logger, get_record=store.get)
+    exporter.select({record.file_identifier for record in store.records})
     exporter.export()
 
     if not Path(site_dir.name).joinpath("favicon.ico").exists():

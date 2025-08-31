@@ -56,8 +56,8 @@ def export_test_site(export_path: Path) -> None:
             region_name="eu-west-1",
         )
 
-    exporter = SiteExporter(config=config, s3=s3_client, logger=logger)
-    exporter.loads(records=store.records)
+    exporter = SiteExporter(config=config, s3=s3_client, logger=logger, get_record=store.get)
+    exporter.select(file_identifiers={record.file_identifier for record in store.records})
     exporter.export()
     print(f"Exported test records as a temporary static site to '{export_path.resolve()}'")
 

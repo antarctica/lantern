@@ -72,6 +72,7 @@ class Config:
 
         NAME: str
         VERSION: str
+        PARALLEL_JOBS: int
         LOG_LEVEL: int
         LOG_LEVEL_NAME: str
         SENTRY_DSN: str
@@ -102,6 +103,7 @@ class Config:
         return {
             "NAME": self.NAME,
             "VERSION": self.VERSION,
+            "PARALLEL_JOBS": self.PARALLEL_JOBS,
             "LOG_LEVEL": self.LOG_LEVEL,
             "LOG_LEVEL_NAME": self.LOG_LEVEL_NAME,
             "SENTRY_DSN": self.SENTRY_DSN,
@@ -141,6 +143,12 @@ class Config:
         Read from package metadata.
         """
         return version(self.NAME)
+
+    @property
+    def PARALLEL_JOBS(self) -> int:
+        """Number of parallel jobs to use for relevant tasks."""
+        with self.env.prefixed(self._app_prefix):
+            return self.env.int("PARALLEL_JOBS", 1)
 
     @property
     def LOG_LEVEL(self) -> int:

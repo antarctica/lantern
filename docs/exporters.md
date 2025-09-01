@@ -147,21 +147,19 @@ Generates static pages using [Site Templates](/docs/site.md#item-templates) for:
 
 `lantern.exporters.website.WebsiteSearchExporter`
 
-<!-- pyml disable md028 -->
 > [!IMPORTANT]
 > This exporter is experimental. Its implementation may change significantly without warning.
 
-> [!IMPORTANT]
-> This exporter depends on an external service (WordPress) and does not support local exporting.
-<!-- pyml enable md028 -->
+Generates a listing of 'BAS Public Website Catalogue Sync API' resources. Intended to allow users to discover
+[Selected Items](#public-website-search-criteria) within the [BAS Public Website](https://www.bas.ac.uk).
 
-Populates a WordPress website with information on items using a custom post type via the WordPress REST API. Intended
-to allow users to search for [Selected Items](#public-website-search-criteria) within the
-[BAS Public Website](https://www.bas.ac.uk) to aid discovery.
+These resources consist of:
 
-A WordPress plugin is required to register this custom post type and its [Schema](#public-website-search-schema). A
-WordPress theme is available to demonstrate how this exporter could work. See the
-[Setup](/docs/setup.md#public-website-search) documentation for more information.
+- information about each item (title, thumbnail, etc.)
+- meta information for the Sync API (revision, status, etc.)
+
+This Sync API is an aggregator for items across BAS Data Catalogues and is maintained outside of this project. It is
+configured to include items from this exporter via the published items listing.
 
 #### Public Website search criteria
 
@@ -172,22 +170,3 @@ relevant to the public. Items meeting all these criteria are deemed relevant:
    - directing users to Items they can't access is not helpful
 2. not superseded by another Item (are not the subject of a `RevisionOf` aggregation in another Item)
    - we don't want to confuse users by showing multiple versions of the same resource
-
-#### Public Website search schema
-
-The WordPress custom post consists of these fields:
-
-<!-- pyml disable md013 -->
-| WordPress Field    | Kind | Item Property                  | Type   | Required | Description                                                 |
-|--------------------|------|--------------------------------|--------|----------|-------------------------------------------------------------|
-| `title`            | Core | `title_plain`                  | String | Yes      | -                                                           |
-| `content`          | Core | `summary_html`                 | String | Yes      | Includes HTML formatting                                    |
-| `file_identifier`  | Meta | `file_identifier`              | String | Yes      | -                                                           |
-| `file_revision`    | Meta | `file_revision`                | String | Yes      | -                                                           |
-| `href`             | Meta | `href`                         | String | Yes      | Fully qualified URL to the catalogue item page              |
-| `hierarchy_level`  | Meta | `hierarchy_level`              | String | Yes      | ResourceTypeLabel value (field needs renaming)              |
-| `publication_date` | Meta | `_record.identification.dates` | String | Yes      | One of revision/publication/creation (field needs renaming) |
-| `edition`          | Meta | `edition`                      | String | No       | -                                                           |
-| `href_thumbnail`   | Meta | `overview_graphic`             | String | No       | URL to a thumbnail image (if available)                     |
-| `source`           | Meta | -                              | String | Yes      | Static identifier for catalogue application (`lantern`)     |
-<!-- pyml enable md013 -->

@@ -49,9 +49,6 @@ class Config:
             "AWS_S3_BUCKET",
             "AWS_ACCESS_ID",
             "AWS_ACCESS_SECRET",
-            "PUBLIC_WEBSITE_ENDPOINT",
-            "PUBLIC_WEBSITE_USERNAME",
-            "PUBLIC_WEBSITE_PASSWORD",
         ]
         directories = ["STORE_GITLAB_CACHE_PATH", "EXPORT_PATH"]
 
@@ -93,10 +90,6 @@ class Config:
         AWS_S3_BUCKET: str
         AWS_ACCESS_ID: str
         AWS_ACCESS_SECRET: str
-        PUBLIC_WEBSITE_ENDPOINT: str
-        PUBLIC_WEBSITE_USERNAME: str
-        PUBLIC_WEBSITE_PASSWORD: str
-        PUBLIC_WEBSITE_POST_TYPE: str
 
     def dumps_safe(self) -> ConfigDumpSafe:
         """Dump config for output to the user with sensitive data redacted."""
@@ -124,10 +117,6 @@ class Config:
             "AWS_S3_BUCKET": self.AWS_S3_BUCKET,
             "AWS_ACCESS_ID": self.AWS_ACCESS_ID,
             "AWS_ACCESS_SECRET": self.AWS_ACCESS_SECRET_SAFE,
-            "PUBLIC_WEBSITE_ENDPOINT": self.PUBLIC_WEBSITE_ENDPOINT,
-            "PUBLIC_WEBSITE_USERNAME": self.PUBLIC_WEBSITE_USERNAME,
-            "PUBLIC_WEBSITE_PASSWORD": self.PUBLIC_WEBSITE_PASSWORD_SAFE,
-            "PUBLIC_WEBSITE_POST_TYPE": self.PUBLIC_WEBSITE_POST_TYPE,
         }
 
     @property
@@ -285,31 +274,3 @@ class Config:
     def AWS_ACCESS_SECRET_SAFE(self) -> str:
         """AWS_ACCESS_SECRET with value redacted."""
         return self._safe_value if self.AWS_ACCESS_SECRET else ""
-
-    @property
-    def PUBLIC_WEBSITE_ENDPOINT(self) -> str:
-        """WordPress rest API endpoint for the BAS public website search integration."""
-        with self.env.prefixed(self._app_prefix), self.env.prefixed("PUBLIC_WEBSITE_"):
-            return self.env("ENDPOINT")
-
-    @property
-    def PUBLIC_WEBSITE_USERNAME(self) -> str:
-        """Username for WordPress user used for the BAS public website search integration."""
-        with self.env.prefixed(self._app_prefix), self.env.prefixed("PUBLIC_WEBSITE_"):
-            return self.env("USERNAME")
-
-    @property
-    def PUBLIC_WEBSITE_PASSWORD(self) -> str:
-        """Application password for WordPress user used for the BAS public website search integration."""
-        with self.env.prefixed(self._app_prefix), self.env.prefixed("PUBLIC_WEBSITE_"):
-            return self.env("PASSWORD")
-
-    @property
-    def PUBLIC_WEBSITE_PASSWORD_SAFE(self) -> str:
-        """PUBLIC_WEBSITE_PASSWORD with value redacted."""
-        return self._safe_value if self.PUBLIC_WEBSITE_PASSWORD else ""
-
-    @property
-    def PUBLIC_WEBSITE_POST_TYPE(self) -> str:
-        """WordPress post type for catalogue items for the BAS public website search integration."""
-        return "data_catalogue_stub"

@@ -78,10 +78,6 @@ class TestConfig:
             "AWS_S3_BUCKET": "x",
             "AWS_ACCESS_ID": "x",
             "AWS_ACCESS_SECRET": redacted_value,
-            "PUBLIC_WEBSITE_ENDPOINT": "https://example.com/wp-json/wp/v2",
-            "PUBLIC_WEBSITE_USERNAME": "x",
-            "PUBLIC_WEBSITE_PASSWORD": redacted_value,
-            "PUBLIC_WEBSITE_POST_TYPE": fx_config.PUBLIC_WEBSITE_POST_TYPE,
         }
 
         output = fx_config.dumps_safe()
@@ -154,27 +150,6 @@ class TestConfig:
             ({"LANTERN_AWS_S3_BUCKET": None, "LANTERN_AWS_ACCESS_ID": "x", "LANTERN_AWS_ACCESS_SECRET": "x"}),
             ({"LANTERN_AWS_S3_BUCKET": "x", "LANTERN_AWS_ACCESS_ID": None, "LANTERN_AWS_ACCESS_SECRET": "x"}),
             ({"LANTERN_AWS_S3_BUCKET": "x", "LANTERN_AWS_ACCESS_ID": "x", "LANTERN_AWS_ACCESS_SECRET": None}),
-            (
-                {
-                    "LANTERN_PUBLIC_WEBSITE_ENDPOINT": None,
-                    "LANTERN_PUBLIC_WEBSITE_USERNAME": "x",
-                    "LANTERN_PUBLIC_WEBSITE_PASSWORD": "x",
-                }
-            ),
-            (
-                {
-                    "LANTERN_PUBLIC_WEBSITE_ENDPOINT": "x",
-                    "LANTERN_PUBLIC_WEBSITE_USERNAME": None,
-                    "LANTERN_PUBLIC_WEBSITE_PASSWORD": "x",
-                }
-            ),
-            (
-                {
-                    "LANTERN_PUBLIC_WEBSITE_ENDPOINT": "x",
-                    "LANTERN_PUBLIC_WEBSITE_USERNAME": "x",
-                    "LANTERN_PUBLIC_WEBSITE_PASSWORD": None,
-                }
-            ),
         ],
     )
     def test_validate_missing_required_option(self, envs: dict):
@@ -227,9 +202,6 @@ class TestConfig:
             ("AWS_S3_BUCKET", "x", False),
             ("AWS_ACCESS_ID", "x", False),
             ("AWS_ACCESS_SECRET", "x", True),
-            ("PUBLIC_WEBSITE_ENDPOINT", "x", False),
-            ("PUBLIC_WEBSITE_USERNAME", "x", False),
-            ("PUBLIC_WEBSITE_PASSWORD", "x", True),
         ],
     )
     def test_configurable_property(self, property_name: str, expected: Any, sensitive: bool):
@@ -248,7 +220,7 @@ class TestConfig:
 
         self._unset_envs(envs, envs_bck)
 
-    @pytest.mark.parametrize("property_name", ["STORE_GITLAB_TOKEN", "AWS_ACCESS_SECRET", "PUBLIC_WEBSITE_PASSWORD"])
+    @pytest.mark.parametrize("property_name", ["STORE_GITLAB_TOKEN", "AWS_ACCESS_SECRET"])
     def test_redacted_property(self, mocker: MockerFixture, property_name: str):
         """Redacted values only return value if secret value has value."""
         for has_value in [True, False]:

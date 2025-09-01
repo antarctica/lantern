@@ -25,7 +25,7 @@ from lantern.exporters.base import Exporter, ResourceExporter, S3Utils
 from lantern.exporters.html import HtmlAliasesExporter, HtmlExporter
 from lantern.exporters.records import RecordsExporter
 from lantern.exporters.site import SiteExporter, SiteIndexExporter, SitePagesExporter, SiteResourcesExporter
-from lantern.exporters.website import WebsiteSearchExporter, WordPressClient
+from lantern.exporters.website import WebsiteSearchExporter
 from lantern.exporters.xml import IsoXmlHtmlExporter
 from lantern.lib.metadata_library.models.record import Record as RecordBase
 from lantern.lib.metadata_library.models.record.elements.common import Date, Dates, Identifier, Identifiers
@@ -730,16 +730,6 @@ def fx_exporter_site_index_sel(
     """Site index exporter with a single record selected."""
     fx_exporter_site_index.selected_identifiers = {fx_revision_model_min.file_identifier}
     return fx_exporter_site_index
-
-
-@pytest.fixture()
-def fx_wordpress_client(fx_logger: logging.Logger, fx_config: Config) -> WordPressClient:
-    """
-    Public website search WordPress client.
-
-    With mocked config.
-    """
-    return WordPressClient(logger=fx_logger, config=fx_config)
 
 
 def _get_record_open(identifier: str) -> RecordRevision:

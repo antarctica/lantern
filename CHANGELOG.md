@@ -26,6 +26,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Paper map distribution option text updated to be less exclusive
 * Record and Item test fixtures refactored into a more logical structure
 * GitLab store push return type changed to a CommitResults class
+* Minor fixes and improvements to dev tasks
 
 ### Fixed
 

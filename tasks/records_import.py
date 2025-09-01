@@ -254,6 +254,7 @@ def main() -> None:
     config = Config()
     store = GitLabStore(
         logger=logger,
+        parallel_jobs=config.PARALLEL_JOBS,
         endpoint=config.STORE_GITLAB_ENDPOINT,
         access_token=config.STORE_GITLAB_TOKEN,
         project_id=config.STORE_GITLAB_PROJECT_ID,

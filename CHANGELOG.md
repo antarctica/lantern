@@ -32,6 +32,10 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 
 * Pre-commit config for Python type checking
 
+### Removed
+
+* Reverting WordPress REST API based replacement of public website search prototype back to static JSON output
+
 ## [0.2.1] - 2025-08-22
 
 ### Added

@@ -295,18 +295,19 @@ Tests are run automatically in [Continuous Integration](#continuous-integration)
 > ```shell
 > % uv run pytest tests/path/to/test_module.py::<class>.<method>
 > ```
-
-> [!TIP]
-> If a test run fails with a `NotImplementedError` exception run the `test-reset` [Development Task](#development-tasks).
->
-> This occurs where:
->
-> - a test fails and the failed test is then renamed or parameterised options changed
-> - the reference to the previously failed test has been cached to enable the `--failed-first` runtime option
-> - the cached reference no longer exists triggering an error which isn't handled by the `pytest-random-order` plugin
->
-> Running this task clears Pytest's cache and re-runs all tests, skipping the `--failed-first` option.
 <!-- pyml enable md028 -->
+
+### Pytest fast fail
+
+If a test run fails with a `NotImplementedError` exception run the `test-reset` [Development Task](#development-tasks).
+
+This occurs where:
+
+- a test fails and the failed test is then renamed or parameterised options changed
+- the reference to the previously failed test has been cached to enable the `--failed-first` runtime option
+- the cached reference no longer exists triggering an error which isn't handled by the `pytest-random-order` plugin
+
+Running this task clears Pytest's cache and re-runs all tests, skipping the `--failed-first` option.
 
 ### Pytest fixtures
 

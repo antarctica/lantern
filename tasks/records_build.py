@@ -1,5 +1,6 @@
 import functools
 import logging
+import shutil
 from datetime import UTC, datetime
 
 from boto3 import client as S3Client  # noqa: N812
@@ -8,7 +9,6 @@ from lantern.config import Config as Config
 from lantern.exporters.site import SiteExporter
 from lantern.log import init as init_logging
 from lantern.log import init_sentry
-from lantern.models.record.revision import RecordRevision
 from lantern.stores.gitlab import GitLabStore
 
 
@@ -32,10 +32,11 @@ def time_task(label: str) -> callable:
 class ToyCatalogue:
     """Toy catalogue for prototyping."""
 
-    def __init__(self, config: Config, logger: logging.Logger, s3: S3Client) -> None:
+    def __init__(self, logger: logging.Logger, config: Config, s3: S3Client) -> None:
+        self._logger = logger
         self._config = config
         self._s3 = s3
-        self._logger = logger
+
         self._store = GitLabStore(
             logger=self._logger,
             endpoint=self._config.STORE_GITLAB_ENDPOINT,
@@ -43,7 +44,7 @@ class ToyCatalogue:
             project_id=self._config.STORE_GITLAB_PROJECT_ID,
             cache_path=self._config.STORE_GITLAB_CACHE_PATH,
         )
-        self._site = SiteExporter(config=self._config, logger=self._logger, s3=self._s3, get_record=self._get_record)
+        self._site = SiteExporter(config=self._config, logger=self._logger, s3=self._s3, get_record=self._store.get)
 
     # noinspection PyMethodOverriding
     @time_task(label="Load")
@@ -52,16 +53,20 @@ class ToyCatalogue:
         self._logger.info("Loading records")
         self._store.populate()
 
+    # noinspection PyProtectedMember
     @time_task(label="Purge")
-    def purge(self) -> None:
+    def purge(self, purge_export: bool = False, purge_publish: bool = False) -> None:
         """Empty records from catalogue store and site exporter."""
-        self._logger.info("Purging store and site exporter outputs")
+        self._logger.info("Purging store and store cache")
         self._store.purge()
-        self._site.purge()
+        self._store._cache.purge()
 
-    def _get_record(self, identifier: str) -> RecordRevision:
-        """Get record for a record identifier from store."""
-        return self._store.get(identifier)
+        if purge_export and self._site._config.EXPORT_PATH.exists():
+            self._site._logger.info("Purging file system export directory")
+            shutil.rmtree(self._config.EXPORT_PATH)
+        if purge_publish:
+            self._logger.info("Purging S3 publishing bucket")
+            self._site._s3_utils.empty_bucket()
 
     def _get_selections(self, selection: set[str] | None) -> set[str]:
         """Select all identifiers if none specified."""

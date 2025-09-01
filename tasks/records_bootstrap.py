@@ -158,7 +158,7 @@ def main() -> None:
     logger = logging.getLogger("app")
     logger.info("Initialising")
 
-    print("This script is to boostrap new GitLab stores.")
+    print("This script is for bootstrapping new GitLab stores.")
     print("It requires an existing/working store to copy required records from.")
     print(f"It has {max_stage} stages.\n")
 

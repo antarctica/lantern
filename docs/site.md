@@ -69,8 +69,7 @@ Secondary top-level items:
      ├── formatting/
      │    └── index.html -> 'hidden' formatting guide
      └── public-website-search/
-          ├── items.json -> temporary static list of aggregation API resources
-          └── mockup.html -> temporary results rendering
+          └── items.json -> static list of aggregation API resources
 ```
 
 <!-- pyml disable md013 -->

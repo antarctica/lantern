@@ -217,7 +217,43 @@ record.identification.contacts = Contacts(
                 description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
                 function=OnlineResourceFunctionCode.INFORMATION,
             ),
-            role={ContactRoleCode.AUTHOR, ContactRoleCode.PUBLISHER, ContactRoleCode.POINT_OF_CONTACT},
+            role={ContactRoleCode.AUTHOR, ContactRoleCode.POINT_OF_CONTACT},
+        ),
+        Contact(
+            organisation=ContactIdentity(
+                name="UK Research and Innovation",
+                href="https://ror.org/001aqnf71",
+                title="ror",
+            ),
+            address=Address(
+                delivery_point="UK Research and Innovation, Polaris House",
+                city="Swindon",
+                administrative_area="Hampshire",
+                postal_code="SN2 1FL",
+                country="United Kingdom",
+            ),
+            online_resource=OnlineResource(
+                href="https://www.ukri.org",
+                title="UK Research and Innovation public website",
+                description="Public information about UK Research and Innovation (UKRI).",
+                function=OnlineResourceFunctionCode.INFORMATION,
+            ),
+            role={ContactRoleCode.RIGHTS_HOLDER},
+        ),
+        Contact(
+            individual=ContactIdentity(name="Count Dracula"),
+            role={ContactRoleCode.RIGHTS_HOLDER},
+        ),
+        Contact(
+            organisation=ContactIdentity(name="MegaDodo Publications"),
+            role={ContactRoleCode.RIGHTS_HOLDER},
+        ),
+        Contact(
+            individual=ContactIdentity(name="William Smyth III"),
+            online_resource=OnlineResource(
+                href="https://www.smyth-holdings.com", function=OnlineResourceFunctionCode.INFORMATION
+            ),
+            role={ContactRoleCode.RIGHTS_HOLDER},
         ),
     ]
 )

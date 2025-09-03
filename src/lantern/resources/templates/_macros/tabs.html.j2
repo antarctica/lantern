@@ -65,9 +65,11 @@
 {% endmacro %}
 
 {% macro licence(data) %}
+  {% set slug = data.slug.name | lower %}
   <section id="tab-content-licence">
-    {% set slug = data.slug.name | lower %}
-    <article id="licence">{{ licence_tab[slug]() }}</article>
+    <article id="licence">
+      {{ licence_tab[slug](copyright_holders=data.copyright_holders) }}
+    </article>
   </section>
 {% endmacro %}
 

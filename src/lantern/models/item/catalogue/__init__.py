@@ -118,7 +118,11 @@ class ItemCatalogue(ItemBase):
     @property
     def _licence(self) -> LicenceTab:
         """Licence tab."""
-        return LicenceTab(jinja=self._jinja, item_type=self.resource_type, licence=super().licence)
+        return LicenceTab(
+            item_type=self.resource_type,
+            licence=super().licence,
+            rights_holders=self.contacts.filter(roles=ContactRoleCode.RIGHTS_HOLDER),
+        )
 
     @property
     def _extent(self) -> ExtentTab:

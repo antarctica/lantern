@@ -418,6 +418,51 @@ class TestLicenceTab:
         assert licence is not None
         assert licence.text.strip() == expected
 
+    @pytest.mark.parametrize(
+        ("value", "expected"),
+        [
+            ([], []),
+            ([Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.RIGHTS_HOLDER})], ["x"]),
+            (
+                [
+                    Contact(
+                        organisation=ContactIdentity(name="x"),
+                        online_resource=OnlineResource(href="x", function=OnlineResourceFunctionCode.INFORMATION),
+                        role={ContactRoleCode.RIGHTS_HOLDER},
+                    ),
+                    Contact(individual=ContactIdentity(name="y"), role={ContactRoleCode.RIGHTS_HOLDER}),
+                ],
+                ["x", "y"],
+            ),
+        ],
+    )
+    def test_copyright_holders(self, fx_item_catalogue_model_min: ItemCatalogue, value: list[Contact], expected: str):
+        """Can get optional copyright holders based on value from item."""
+        # needed to enable tab
+        fx_item_catalogue_model_min._record.identification.constraints = Constraints(
+            [
+                Constraint(
+                    type=ConstraintTypeCode.USAGE,
+                    restriction_code=ConstraintRestrictionCode.LICENSE,
+                    href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+                )
+            ]
+        )
+        fx_item_catalogue_model_min._record.identification.contacts.extend(value)
+        html = BeautifulSoup(fx_item_catalogue_model_min.render(), parser="html.parser", features="lxml")
+
+        label_text = "Copyright Holder" if len(expected) < 2 else "Copyright Holders"
+        label = html.find(name="strong", string=label_text)
+        assert label is not None if expected else label is None
+
+        expected_string = ", ".join(expected)
+        output = html.select_one("#licence-copyright")
+        if not expected:
+            assert output is None
+            return
+        output_normalised = ", ".join([el.strip() for el in output.text.split(",")])
+        assert output_normalised == expected_string
+
 
 class TestExtentTab:
     """Test extent tab template macros."""

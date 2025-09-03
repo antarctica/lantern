@@ -19,6 +19,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Support for partial local cache updates in GitLab store
 * Support for parallel local cache creation in GitLab store
 * GitLab store push returns resulting commit ID
+* Copyright holders in licence tab
 
 ### Changed
 

@@ -19,21 +19,35 @@
   </div>
 {% endmacro %}
 
-{% macro licence(id, href, name, img=None, img_dark=None) %}
-  <section id="{{ id }}" class="grid grid-cols-1 gap-y-4 lg:gap-x-8 lg:grid-cols-[auto_1fr]">
+{% macro licence(id, href, name, copyright_holders, img=None, img_dark=None) %}
+  <section id="{{ id }}" class="grid grid-cols-1 gap-y-4 lg:gap-y-8 lg:gap-x-8 lg:grid-cols-[auto_1fr]">
     <div><strong>Item licence</strong></div>
-    <div class="flex justify-between items-top">
+    <div class="relative flex justify-between items-top">
       <div>
         <a class="{{ com.link_classes() }}" href="{{ href }}">{{ name }} {{ com.ext_link_i() }}</a>
       </div>
       {% if img %}
-        <picture>
+        <picture class="absolute top-0 right-0">
           <source srcset="{{ img }}" media="(prefers-color-scheme: light)" />
           <source srcset="{{ img_dark }}" media="(prefers-color-scheme: dark)" />
           <img src="{{ img }}" alt="Licence symbol" />
         </picture>
       {% endif %}
     </div>
+
+    {% if copyright_holders %}
+      <div><strong>Copyright Holder{% if copyright_holders | length > 1 %}s{% endif %}</strong></div>
+      <div id="licence-copyright">
+        {% for item in copyright_holders %}
+          {% if item.href %}
+            {{ com.ext_link_a(href=item.href, value=item.value) }}
+          {% else %}
+            <span>{{ item }}</span>
+          {% endif %}
+          {% if not loop.last %},{% endif %}
+        {% endfor %}
+      </div>
+    {% endif %}
 
     <div><strong>Licence summary</strong></div>
     <div class="space-y-8">
@@ -45,11 +59,12 @@
   </section>
 {% endmacro %}
 
-{% macro ogl_uk_3_0() %}
+{% macro ogl_uk_3_0(copyright_holders) %}
   {% call(content) licence(
     id='licence-ogl-uk-3-0',
     href='https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/',
     name='Open Government Licence (OGL 3.0)',
+    copyright_holders=copyright_holders,
     img='https://cdn.web.bas.ac.uk/bas-style-kit/0.6.0/img/logos-symbols/ogl-symbol-default-transparent-64.png',
     img_dark='https://cdn.web.bas.ac.uk/bas-style-kit/0.6.0/img/logos-symbols/ogl-symbol-inverse-transparent-64.png'
   ) %}
@@ -86,11 +101,12 @@
   {% endcall %}
 {% endmacro %}
 
-{% macro cc_by_4_0() %}
+{% macro cc_by_4_0(copyright_holders) %}
   {% call(content) licence(
     id='licence-cc-4-0',
     href='https://creativecommons.org/licenses/by/4.0/',
-    name='Creative Commons Attribution 4.0 International Licence (CC BY 4.0)'
+    name='Creative Commons Attribution 4.0 International Licence (CC BY 4.0)',
+    copyright_holders=copyright_holders
   ) %}
     {% if content == 'rights' %}
       {% call clauses(alert_variant='green', label='You are free to:') %}
@@ -125,11 +141,12 @@
   {% endcall %}
 {% endmacro %}
 
-{% macro x_operations_mapping_1() %}
+{% macro x_operations_mapping_1(copyright_holders) %}
   {% call(content) licence(
     id='licence-x-operations-mapping-1',
     href='https://metadata-resources.data.bas.ac.uk/licences/operations-mapping-v1/',
-    name='BAS Operations Mapping Internal Use Licence (v1)'
+    name='BAS Operations Mapping Internal Use Licence (v1)',
+    copyright_holders=copyright_holders
   ) %}
     {% if content == 'rights' %}
       {% call clauses(alert_variant='green', label='You are free to:') %}
@@ -161,11 +178,12 @@
   {% endcall %}
 {% endmacro %}
 
-{% macro x_all_rights_reserved_1() %}
+{% macro x_all_rights_reserved_1(copyright_holders) %}
 {% call(content) licence(
     id='all-rights-reserved-1-0',
     href='https://metadata-resources.data.bas.ac.uk/licences/all-rights-reserved-v1/',
-    name='BAS All Rights Reserved Licence (v1)'
+    name='BAS All Rights Reserved Licence (v1)',
+    copyright_holders=copyright_holders
   ) %}
     {% if content == 'restrictions' %}
       {% call clauses(alert_variant='red', label='Important notes:') %}

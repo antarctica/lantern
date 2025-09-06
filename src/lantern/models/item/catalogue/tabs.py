@@ -3,8 +3,6 @@ from abc import ABC, abstractmethod
 from datetime import UTC, date, datetime
 from urllib.parse import parse_qs, urlparse
 
-from jinja2 import Environment
-
 from lantern.lib.metadata_library.models.record.elements.common import Date, Identifier, Series
 from lantern.lib.metadata_library.models.record.elements.data_quality import DomainConsistency
 from lantern.lib.metadata_library.models.record.elements.distribution import Distribution as RecordDistribution
@@ -245,10 +243,15 @@ class AuthorsTab(Tab):
 class LicenceTab(Tab):
     """Licence tab."""
 
-    def __init__(self, jinja: Environment, item_type: HierarchyLevelCode, licence: Constraint | None) -> None:
-        self._jinja = jinja
+    def __init__(
+        self,
+        item_type: HierarchyLevelCode,
+        licence: Constraint | None,
+        rights_holders: list[Contact] | None = None,
+    ) -> None:
         self._item_type = item_type
         self._licence = licence
+        self._copyright_holders = rights_holders if rights_holders is not None else []
 
     @property
     def enabled(self) -> bool:
@@ -276,6 +279,22 @@ class LicenceTab(Tab):
     def slug(self) -> Licence | None:
         """Licence reference."""
         return Licence(self._licence.href) if self._licence is not None else None
+
+    @property
+    def copyright_holders(self) -> list[Link | str]:
+        """
+        Copyright/rights holders.
+
+        Supports both individuals and organisations, with an optional link to a website.
+        """
+        holders = []
+        for contact in self._copyright_holders:
+            name = contact.organisation.name if contact.organisation else contact.individual.name
+            if not contact.online_resource:
+                holders.append(name)
+                continue
+            holders.append(Link(value=name, href=contact.online_resource.href, external=True))
+        return holders
 
 
 class LineageTab(Tab):

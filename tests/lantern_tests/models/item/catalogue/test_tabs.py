@@ -266,12 +266,9 @@ class TestLicenceTab:
             href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
             statement="x",
         )
-        tab = LicenceTab(
-            jinja=fx_item_catalogue_model_min._jinja, item_type=HierarchyLevelCode.PRODUCT, licence=constraint
-        )
+        tab = LicenceTab(item_type=HierarchyLevelCode.PRODUCT, licence=constraint)
 
         assert tab.enabled is True
-        assert tab.slug == Licence.OGL_UK_3_0
         # cov
         assert tab.title != ""
         assert tab.icon != ""
@@ -300,13 +297,79 @@ class TestLicenceTab:
         )
         licence = constraint if has_licence else None
 
-        tab = LicenceTab(jinja=fx_item_catalogue_model_min._jinja, item_type=item_type, licence=licence)
+        tab = LicenceTab(item_type=item_type, licence=licence)
 
         assert tab.enabled == expected
         if has_licence:
             assert isinstance(tab.slug, Licence)
         else:
             assert tab.slug is None
+
+    def test_slug(self, fx_item_catalogue_model_min: ItemCatalogue):
+        """Can get licence macro name from licence constraint href."""
+        constraint = Constraint(
+            type=ConstraintTypeCode.USAGE,
+            restriction_code=ConstraintRestrictionCode.LICENSE,
+            href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+            statement="x",
+        )
+
+        tab = LicenceTab(item_type=HierarchyLevelCode.PRODUCT, licence=constraint)
+
+        assert tab.slug == Licence.OGL_UK_3_0
+
+    @pytest.mark.parametrize(
+        ("contacts", "expected"),
+        [
+            (Contacts([]), []),
+            (
+                Contacts(
+                    [
+                        Contact(
+                            RecordContact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.RIGHTS_HOLDER})
+                        ),
+                        Contact(
+                            RecordContact(individual=ContactIdentity(name="y"), role={ContactRoleCode.RIGHTS_HOLDER})
+                        ),
+                    ]
+                ),
+                ["x", "y"],
+            ),
+            (
+                Contacts(
+                    [
+                        Contact(
+                            RecordContact(
+                                organisation=ContactIdentity(name="x"),
+                                online_resource=OnlineResource(
+                                    href="x",
+                                    function=OnlineResourceFunctionCode.INFORMATION,
+                                ),
+                                role={ContactRoleCode.RIGHTS_HOLDER},
+                            ),
+                        ),
+                        Contact(
+                            RecordContact(
+                                individual=ContactIdentity(name="y"),
+                                online_resource=OnlineResource(
+                                    href="y",
+                                    function=OnlineResourceFunctionCode.INFORMATION,
+                                ),
+                                role={ContactRoleCode.RIGHTS_HOLDER},
+                            ),
+                        ),
+                    ]
+                ),
+                [Link(value="x", href="x", external=True), Link(value="y", href="y", external=True)],
+            ),
+        ],
+    )
+    def test_copyright_holders(
+        self, fx_item_catalogue_model_min: ItemCatalogue, contacts: Contacts, expected: list[Link, str]
+    ):
+        """Can get licence macro name from licence constraint href."""
+        tab = LicenceTab(item_type=HierarchyLevelCode.PRODUCT, licence=None, rights_holders=contacts)
+        assert tab.copyright_holders == expected
 
 
 class TestLineageTab:

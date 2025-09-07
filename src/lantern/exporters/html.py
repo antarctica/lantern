@@ -73,20 +73,19 @@ class HtmlAliasesExporter(ResourceExporter):
     """
 
     def __init__(
-        self, config: Config, logger: logging.Logger, s3: S3Client, record: RecordRevision, site_base: Path
+        self, config: Config, logger: logging.Logger, s3: S3Client, record: RecordRevision, export_base: Path
     ) -> None:
         """
         Initialise.
 
-        The `export_base` and `export_name` parameters required by the base Exporter are not used by this class. The
-        values used can be ignored.
+        The `export_name` parameter required by the base Exporter is not used by this class, its value is not used.
 
-        The `site_base` parameter MUST be the root of the overall site/catalogue output directory, so aliases under
+        The `export_base` parameter MUST be the root of the overall site/catalogue output directory, so aliases under
         various prefixes can be generated.
         """
         export_name = f"{record.file_identifier}.html"
-        export_base = site_base
-        self._site_base = site_base
+        export_base = export_base
+        self._site_base = export_base
         super().__init__(
             config=config, logger=logger, s3=s3, record=record, export_base=export_base, export_name=export_name
         )
@@ -119,7 +118,7 @@ class HtmlAliasesExporter(ResourceExporter):
     def export(self) -> None:
         """Write redirect pages for each alias to export directory."""
         for alias in self._get_aliases():
-            alias_path = self._site_base / alias / "index.html"
+            alias_path = self._export_path.parent / alias / "index.html"
             alias_path.parent.mkdir(parents=True, exist_ok=True)
             self._logger.debug(f"Writing file: {alias_path.resolve()}")
             with alias_path.open("w") as alias_file:

@@ -89,7 +89,7 @@ class TestHtmlAliasesExporter:
             logger=fx_logger,
             s3=fx_s3_client,
             record=fx_revision_model_min,
-            site_base=output_path,
+            export_base=output_path,
         )
 
         assert isinstance(exporter, HtmlAliasesExporter)

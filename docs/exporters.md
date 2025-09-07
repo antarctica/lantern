@@ -98,9 +98,10 @@ In other cases, or as a general fallback, a `<meta http-equiv="refresh">` tag in
 
 ### Records resource exporter
 
-Combines the outputs of all [Resource Exporters](#resource-exporters) for a set of Records.
+Coordinates other [Resource Exporters](#resource-exporters) for selected [Records](/docs/data-model.md#records).
 
-The `loads()` method dynamically sets which [Records](/docs/data-model.md#records) to include.
+Internally, the records exporter generates a set of individual jobs (per record and exporter) which are processed in
+parallel using a worker pool for better performance.
 
 ## Site exporters
 

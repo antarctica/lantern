@@ -18,8 +18,13 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Support for dynamically including required related records when exporting records
 * Support for partial local cache updates in GitLab store
 * Support for parallel local cache creation in GitLab store
+* Support for parallel exports in Records exporter
 * GitLab store push returns resulting commit ID
 * Copyright holders in licence tab
+
+### Fixed
+
+* Pre-commit config for Python type checking
 
 ### Changed
 
@@ -28,10 +33,6 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Record and Item test fixtures refactored into a more logical structure
 * GitLab store push return type changed to a CommitResults class
 * Minor fixes and improvements to dev tasks
-
-### Fixed
-
-* Pre-commit config for Python type checking
 
 ### Removed
 

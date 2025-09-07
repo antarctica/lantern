@@ -642,7 +642,7 @@ def fx_exporter_html_alias(
         logger=fx_logger,
         s3=fx_s3_client,
         record=fx_revision_model_min,
-        site_base=output_path,
+        export_base=output_path,
     )
 
 
@@ -664,6 +664,7 @@ def fx_exporter_records(
     with TemporaryDirectory() as tmp_path:
         output_path = Path(tmp_path)
     mock_config = mocker.Mock()
+    type(mock_config).PARALLEL_JOBS = PropertyMock(return_value=1)
     type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
     type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
     type(mock_config).TEMPLATES_ITEM_MAPS_ENDPOINT = PropertyMock(return_value="x")
@@ -802,10 +803,13 @@ def fx_exporter_site(
     with TemporaryDirectory() as tmp_path:
         output_path = Path(tmp_path)
     mock_config = mocker.Mock()
+    type(mock_config).PARALLEL_JOBS = PropertyMock(return_value=1)
     type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
     type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
     type(mock_config).TEMPLATES_ITEM_MAPS_ENDPOINT = PropertyMock(return_value="x")
     type(mock_config).TEMPLATES_ITEM_CONTACT_ENDPOINT = PropertyMock(return_value="x")
+    mocker.patch("lantern.exporters.records._job_config", return_value=mock_config)
+    mocker.patch("lantern.exporters.records._job_s3", return_value=fx_s3_client)
 
     return SiteExporter(config=mock_config, s3=fx_s3_client, logger=fx_logger, get_record=fx_get_record)
 

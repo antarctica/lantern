@@ -76,11 +76,11 @@ def main() -> None:
     inc_records = []
     purge = False
 
-    init_logging()
+    config = Config()
+    init_logging(config.LOG_LEVEL)
     logger = logging.getLogger("app")
     logger.info("Initialising")
 
-    config = Config()
     cat = FakeCatalogue(config=config, logger=logger)
 
     if purge:

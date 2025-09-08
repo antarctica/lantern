@@ -17,7 +17,7 @@ from lantern.exporters.html import HtmlAliasesExporter, HtmlExporter
 from lantern.exporters.json import JsonExporter
 
 # noinspection PyProtectedMember
-from lantern.exporters.records import JobMethod, RecordsExporter, _job, _job_config, _job_s3
+from lantern.exporters.records import JobMethod, RecordsExporter, _job, _job_s3
 from lantern.exporters.xml import IsoXmlExporter, IsoXmlHtmlExporter
 from lantern.lib.metadata_library.models.record.elements.common import Identifier
 from lantern.models.record import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
@@ -26,12 +26,6 @@ from lantern.models.record.revision import RecordRevision
 
 class TestRecordExporterJob:
     """Test functions related to record parallel processing jobs."""
-
-    @pytest.mark.cov()
-    def test_job_config(self):
-        """Can create standalone config instance."""
-        result = _job_config()
-        assert isinstance(result, Config)
 
     @pytest.mark.cov()
     def test_job_s3(self, fx_config: Config):
@@ -64,7 +58,6 @@ class TestRecordExporterJob:
         method: JobMethod,
     ):
         """Can export or publish a record using a record exporter class."""
-        mocker.patch("lantern.exporters.records._job_config", return_value=fx_exporter_records_sel._config)
         mocker.patch("lantern.exporters.records._job_s3", return_value=fx_exporter_records_sel._s3_client)
         fx_revision_model_min.identification.identifiers.append(
             Identifier(identifier="x", href=f"https://{CATALOGUE_NAMESPACE}/datasets/x", namespace=ALIAS_NAMESPACE)
@@ -75,6 +68,7 @@ class TestRecordExporterJob:
         # noinspection PyTypeChecker
         _job(
             logger=fx_logger,
+            config=fx_exporter_records_sel._config,
             exporter=exporter,
             record=fx_revision_model_min,
             get_record=fx_get_record,
@@ -114,7 +108,6 @@ class TestRecordsExporter:
 
     def test_export(self, mocker: MockerFixture, fx_exporter_records_sel: RecordsExporter):
         """Can export selected records."""
-        mocker.patch("lantern.exporters.records._job_config", return_value=fx_exporter_records_sel._config)
         mocker.patch("lantern.exporters.records._job_s3", return_value=fx_exporter_records_sel._s3_client)
 
         fx_exporter_records_sel.export()
@@ -130,7 +123,6 @@ class TestRecordsExporter:
         fx_s3_utils: S3Utils,
     ):
         """Can publish selected records."""
-        mocker.patch("lantern.exporters.records._job_config", return_value=fx_exporter_records_sel._config)
         mocker.patch("lantern.exporters.records._job_s3", return_value=fx_exporter_records_sel._s3_client)
 
         fx_exporter_records_sel.publish()

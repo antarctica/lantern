@@ -14,6 +14,7 @@ from gitlab.v4.objects import Project
 from joblib import Parallel, delayed
 from requests.exceptions import ConnectionError as RequestsConnectionError
 
+from lantern.log import init as init_logging
 from lantern.models.record import Record
 from lantern.models.record.revision import RecordRevision
 from lantern.stores.base import RecordNotFoundError, Store
@@ -31,8 +32,15 @@ class CacheIntegrityError(Exception):
     pass
 
 
-def _process_record(logger: logging.Logger, records_path: Path, record_data: tuple[str, str]) -> tuple[str, str, str]:
-    """Process a single record as parallel job."""
+def _process_record(
+    logger: logging.Logger, log_level: int, records_path: Path, record_data: tuple[str, str]
+) -> tuple[str, str, str]:
+    """
+    Create and pickle a record instance from a record configuration data and revision identifier.
+
+    Standalone function for use in parallel processing.
+    """
+    init_logging(log_level)
     config_str, commit_hash = record_data
     record_config = {"file_revision": commit_hash, **json.loads(config_str)}
     record = RecordRevision.loads(value=record_config, check_supported=True, logger=logger)
@@ -49,6 +57,8 @@ def _fetch_record_commit(project: Project, path: str, ref: str) -> tuple[str, st
     Get a record configuration and its head commit ID from the GitLab project repository.
 
     Returns a tuple ('record configuration as JSON string', 'record commit string').
+
+    Standalone function for use in parallel processing.
     """
     file_contents = project.files.get(file_path=path, ref=ref)
     return b64decode(file_contents.content).decode("utf-8"), file_contents.last_commit_id
@@ -73,6 +83,10 @@ class GitLabLocalCache:
 
     Basic cache-validation is performed by comparing the head commit from when the cache was last refreshed, against
     the head commit in the remote project repository.
+
+    Parallel processing is optionally available to improve the performance of:
+    - fetching individual record configurations from GitLab
+    - processing record configurations into Record instances
     """
 
     def __init__(
@@ -199,12 +213,10 @@ class GitLabLocalCache:
         records_path = self._records_path
         records_path.mkdir(parents=True, exist_ok=True)
 
-        # copy to allow use in parallel processing
-        logger_ = deepcopy(self._logger)
-        records_path_ = deepcopy(records_path)
         self._logger.info(f"Processing {len(records)} records")
         results = Parallel(n_jobs=self._parallel_jobs)(
-            delayed(_process_record)(logger_, records_path_, record_data) for record_data in records
+            delayed(_process_record)(self._logger, self._logger.level, records_path, record_data)
+            for record_data in records
         )
         # results are list of (file_identifier, sha1, commit) tuples
         for result in results:
@@ -241,9 +253,8 @@ class GitLabLocalCache:
         self._logger.info(f"Fetching {len(paths)} records")
         # copy to allow use in parallel processing
         project_ = deepcopy(self._project)
-        ref_ = deepcopy(self._ref)
         return Parallel(n_jobs=self._parallel_jobs)(
-            delayed(_fetch_record_commit)(project_, path, ref_) for path in paths
+            delayed(_fetch_record_commit)(project_, path, self._ref) for path in paths
         )
         # results are list of ('record configuration as JSON string', 'record commit string') tuples
 
@@ -278,11 +289,9 @@ class GitLabLocalCache:
                     raise CacheIntegrityError(msg)
                 paths.append(diff["new_path"])
 
-        # copy to allow use in parallel processing
         project_ = deepcopy(self._project)
-        ref_ = deepcopy(self._ref)
         return Parallel(n_jobs=self._parallel_jobs)(
-            delayed(_fetch_record_commit)(project_, path, ref_) for path in paths
+            delayed(_fetch_record_commit)(project_, path, self._ref) for path in paths
         )
         # results are list of ('record configuration as JSON string', 'record commit string') tuples
 
@@ -338,7 +347,7 @@ class GitLabLocalCache:
             self._create()
             return
 
-        self._logger.info(f"{len(records)} records have been in remote repository")
+        self._logger.info(f"{len(records)} records have been updated in remote repository")
         self._create_refresh(records=records)
 
     def _ensure_exists(self) -> None:

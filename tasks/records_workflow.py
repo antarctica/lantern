@@ -75,12 +75,12 @@ def _build(logger: logging.Logger, site: SiteExporter, commit: CommitResults, bu
 @_time_task(label="Workflow")
 def main() -> None:
     """Entrypoint."""
-    init_logging()
+    config = Config()
+    init_logging(config.LOG_LEVEL)
     init_sentry()
     logger = logging.getLogger("app")
     logger.info("Initialising")
 
-    config = Config()
     store = GitLabStore(
         logger=logger,
         parallel_jobs=config.PARALLEL_JOBS,
@@ -98,15 +98,17 @@ def main() -> None:
     site = SiteExporter(config=config, logger=logger, s3=s3, get_record=store.get)
 
     import_path = Path("./import")
+    production_bucket = "add-catalogue.data.bas.ac.uk"
+
+    if production_bucket == config.AWS_S3_BUCKET:
+        logger.error("No. Production bucket selected.")
+        sys.exit(1)
 
     print("\nThis script is for adding or updating records in the Catalogue.")
     print("It combines the 'records-import' and 'records-build' tasks with some additional workflow logic.")
     print(f"\nTo begin stage records for import in '{import_path.resolve()}'.")
     print("TIP! See the 'records-select' and/or 'records-load' tasks if useful.")
     _confirm(logger, "Are records staged in import directory?")
-
-    print(f"Records will be published to the '{config.AWS_S3_BUCKET}' S3 bucket.")
-    _confirm(logger, "Is this correct?")
 
     commit = _import(logger=logger, config=config, store=store, import_path=import_path)
     _build(logger=logger, site=site, commit=commit, bucket=config.AWS_S3_BUCKET)

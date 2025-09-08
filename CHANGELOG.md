@@ -25,6 +25,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 ### Fixed
 
 * Pre-commit config for Python type checking
+* Fixing false positives when checking if records have changed in import task
 
 ### Changed
 
@@ -33,6 +34,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Record and Item test fixtures refactored into a more logical structure
 * GitLab store push return type changed to a CommitResults class
 * Minor fixes and improvements to dev tasks
+* Config classes now support pickling
 
 ### Removed
 

@@ -32,6 +32,7 @@ magic_collection_ids = [
     "ef7bc35e-7ad8-4ae5-9ae8-dd708d6e966e",  # BAS Operations Maps
     "cf64dd21-545a-465b-9a67-c28bb4ce9024",  # BAS Basemaps
     "faaeca6f-e67a-45df-ad6d-10c3049daab3",  # BAS Geology Maps
+    "2fc581f3-8c7c-4ea5-a4a2-b133a437ff41",  # BAS Map Catalogue
 ]
 
 
@@ -91,7 +92,7 @@ def _revise_records(logger: logging.Logger, records: list[Record], store: GitLab
     for record in records:
         try:
             existing_record = store.get(record.file_identifier)
-            if record != existing_record:
+            if record.dumps() != existing_record.dumps():
                 logger.info(f"Record '{record.file_identifier}' is different to stored version, revising")
                 _revise_record(record)
         except RecordNotFoundError:
@@ -246,12 +247,12 @@ def _get_args() -> tuple[str, str, str, str]:
 
 def main() -> None:
     """Entrypoint."""
-    init_logging()
+    config = Config()
+    init_logging(config.LOG_LEVEL)
     init_sentry()
     logger = logging.getLogger("app")
     logger.info("Initialising")
 
-    config = Config()
     store = GitLabStore(
         logger=logger,
         parallel_jobs=config.PARALLEL_JOBS,

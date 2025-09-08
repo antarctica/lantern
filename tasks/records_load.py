@@ -102,7 +102,8 @@ def _get_args(default_path: str | None) -> Path:
 
 def main() -> None:
     """Entrypoint."""
-    init_logging()
+    config = Config()
+    init_logging(config.LOG_LEVEL)
     init_sentry()
     logger = logging.getLogger("app")
     logger.info("Initialising")
@@ -111,9 +112,9 @@ def main() -> None:
     env.read_env()
     default_path = env.str("LANTERN_TASK_RECORDS_LOAD_FROM")
 
-    config = Config()
     store = GitLabStore(
         logger=logger,
+        parallel_jobs=config.PARALLEL_JOBS,
         endpoint=config.STORE_GITLAB_ENDPOINT,
         access_token=config.STORE_GITLAB_TOKEN,
         project_id=config.STORE_GITLAB_PROJECT_ID,

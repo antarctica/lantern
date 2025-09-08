@@ -111,6 +111,11 @@ class Record(RecordBase):
                 exp = ValueError(msg)
                 raise RecordInvalidError(validation_error=exp)
 
+            if len(alias.identifier.split("/")) > 2:
+                msg = f"Invalid alias identifier '{alias.identifier}' must not contain additional '/' values."
+                exp = ValueError(msg)
+                raise RecordInvalidError(validation_error=exp)
+
             if alias.identifier.split("/")[0] not in prefixes.get(self.hierarchy_level, []):
                 msg = f"Invalid prefix in alias identifier '{alias.identifier}' for hierarchy level."
                 exp = ValueError(msg)
@@ -132,7 +137,7 @@ class Record(RecordBase):
         - include an identifier with the catalogue namespace and file_identifier value
         - include a contact with the 'Point of Contact' role
         - use unique extent identifiers if included
-        - don't use UUIDs as aliases
+        - don't use UUIDs as aliases, and/or include additional `/` values
 
         See docs/data_model.md#record-validation for more information.
         """

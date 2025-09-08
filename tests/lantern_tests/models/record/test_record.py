@@ -179,6 +179,10 @@ class TestRecord:
                 "Invalid alias href '/x' must be 'https://data.bas.ac.uk/x'.",
             ),
             (
+                Identifier(identifier="x/x/x", href="https://data.bas.ac.uk/x/x/x", namespace=ALIAS_NAMESPACE),
+                "Invalid alias identifier 'x/x/x' must not contain additional '/' values.",
+            ),
+            (
                 Identifier(identifier="x/x", href="https://data.bas.ac.uk/x/x", namespace=ALIAS_NAMESPACE),
                 "Invalid prefix in alias identifier 'x/x' for hierarchy level.",
             ),

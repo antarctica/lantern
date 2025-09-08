@@ -37,20 +37,18 @@ def _confirm(logger: logging.Logger) -> None:
         sys.exit(1)
 
 
-def _stage0(logger: logging.Logger, working_path: Path) -> None:
+def _stage0(logger: logging.Logger, config: Config, working_path: Path) -> None:
     """Save required records from existing store."""
     stage = 0
     print(f"This is stage {stage} [{stage + 1}/{max_stage}].")
     print("Set `LANTERN_STORE_GITLAB_TOKEN` and `LANTERN_STORE_GITLAB_PROJECT_ID` in the `.env` to a working remote")
     print("Records for MAGIC collections used during record import need stashing from a working remote.")
-
-    config = Config()
-
     print(f"Confirm this GitLab project ID is an existing/working project: {config.STORE_GITLAB_PROJECT_ID}")
     _confirm(logger)
 
     store = GitLabStore(
         logger=logger,
+        parallel_jobs=config.PARALLEL_JOBS,
         endpoint=config.STORE_GITLAB_ENDPOINT,
         access_token=config.STORE_GITLAB_TOKEN,
         project_id=config.STORE_GITLAB_PROJECT_ID,
@@ -70,15 +68,12 @@ def _stage0(logger: logging.Logger, working_path: Path) -> None:
     sys.exit(0)
 
 
-def stage1(logger: logging.Logger, working_path: Path) -> None:
+def stage1(logger: logging.Logger, config: Config, working_path: Path) -> None:
     """Load required records into new store."""
     stage = 1
     print(f"This is stage {stage} [{stage + 1}/{max_stage}].")
     print("Ensure you have completed previous stages.")
-
     _confirm(logger)
-
-    config = Config()
 
     print(f"Confirm this GitLab project ID is the new project: {config.STORE_GITLAB_PROJECT_ID}")
     _confirm(logger)
@@ -95,6 +90,7 @@ def stage1(logger: logging.Logger, working_path: Path) -> None:
 
     store = GitLabStore(
         logger=logger,
+        parallel_jobs=config.PARALLEL_JOBS,
         endpoint=config.STORE_GITLAB_ENDPOINT,
         access_token=config.STORE_GITLAB_TOKEN,
         project_id=config.STORE_GITLAB_PROJECT_ID,
@@ -128,22 +124,27 @@ def stage1(logger: logging.Logger, working_path: Path) -> None:
     sys.exit(0)
 
 
-def stage2(logger: logging.Logger) -> None:
+# noinspection PyProtectedMember
+def stage2(logger: logging.Logger, config: Config) -> None:
     """Create local cache from new remote project."""
     stage = 2
     print(f"This is stage {stage} [{stage + 1}/{max_stage}].")
     print("Ensure you have completed previous stages.")
-
     _confirm(logger)
 
-    config = Config()
     store = GitLabStore(
         logger=logger,
+        parallel_jobs=config.PARALLEL_JOBS,
         endpoint=config.STORE_GITLAB_ENDPOINT,
         access_token=config.STORE_GITLAB_TOKEN,
         project_id=config.STORE_GITLAB_PROJECT_ID,
         cache_path=config.STORE_GITLAB_CACHE_PATH,
     )
+
+    if store._cache._exists:
+        print(f"Local cache path {config.STORE_GITLAB_CACHE_PATH.resolve()} exists and needs purging.")
+        store._cache.purge()
+
     store.populate()
 
     print(f"Stage {stage} complete.")
@@ -153,7 +154,8 @@ def stage2(logger: logging.Logger) -> None:
 
 def main() -> None:
     """Entrypoint."""
-    init_logging()
+    config = Config()
+    init_logging(config.LOG_LEVEL)
     init_sentry()
     logger = logging.getLogger("app")
     logger.info("Initialising")
@@ -177,11 +179,11 @@ def main() -> None:
         ]
     )
     if answers["stage"] == "stage0":
-        _stage0(logger, import_path)
+        _stage0(logger, config, import_path)
     elif answers["stage"] == "stage1":
-        stage1(logger, import_path)
+        stage1(logger, config, import_path)
     elif answers["stage"] == "stage2":
-        stage2(logger)
+        stage2(logger, config)
     else:
         logger.error(f"Unknown stage '{answers['stage']}'")
         sys.exit(1)

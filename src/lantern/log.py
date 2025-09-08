@@ -4,15 +4,10 @@ from importlib.metadata import version
 import sentry_sdk
 
 
-def init() -> None:
+def init(logging_level: int) -> None:
     """Initialize application logging."""
-    # can't import Config normally due to circular imports
-    from lantern.config import Config
-
-    config = Config()
-
     # noinspection SpellCheckingInspection
-    logging.basicConfig(level=config.LOG_LEVEL, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    logging.basicConfig(level=logging_level, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     logging.getLogger("app")
 
 

@@ -18,8 +18,7 @@ file identifier as needed. The `selected_identifiers` property controls which Re
 site builds.
 
 > [!TIP]
-> The [Site Exporter](#site-exporter) sets the records callable and selected identifiers (via the `select()` method)
-> in all relevant (sub-)exporters.
+> The [Site Exporter](#site-exporter) sets selected identifiers in relevant (sub-)exporters via the `select()` method.
 
 ## Exporters configuration
 

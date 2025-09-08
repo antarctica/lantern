@@ -375,8 +375,6 @@ class TestSiteExporter:
 
         Skips public website search publishing.
         """
-        mocker.patch.object(fx_exporter_site._website_exporter, "publish", return_value=None)
-
         s3 = fx_exporter_site._index_exporter._s3_utils._s3
         record = fx_revision_model_min
         fx_exporter_site.select({record.file_revision})
@@ -388,6 +386,7 @@ class TestSiteExporter:
             f"records/{record.file_identifier}.html",
             "legal/privacy/index.html",
             "-/index/index.html",
+            "-/public-website-search/items.json",
         ]  # representative sample
 
         fx_exporter_site.publish()

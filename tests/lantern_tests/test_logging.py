@@ -12,7 +12,7 @@ class TestLogging:
 
     def test_logging(self, caplog: pytest.LogCaptureFixture):
         """Can use app logger."""
-        init_logging()
+        init_logging(logging.WARNING)
         init_sentry()
         logger = logging.getLogger("app")
         logger.setLevel(logging.DEBUG)

@@ -808,7 +808,6 @@ def fx_exporter_site(
     type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
     type(mock_config).TEMPLATES_ITEM_MAPS_ENDPOINT = PropertyMock(return_value="x")
     type(mock_config).TEMPLATES_ITEM_CONTACT_ENDPOINT = PropertyMock(return_value="x")
-    mocker.patch("lantern.exporters.records._job_config", return_value=mock_config)
     mocker.patch("lantern.exporters.records._job_s3", return_value=fx_s3_client)
 
     return SiteExporter(config=mock_config, s3=fx_s3_client, logger=fx_logger, get_record=fx_get_record)

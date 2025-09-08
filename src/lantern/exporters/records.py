@@ -23,16 +23,6 @@ class JobMethod(Enum):
     PUBLISH = "publish"
 
 
-def _job_config() -> Config:
-    """
-    Create config instance.
-
-    Config instances cannot be pickled and so the config instance passed to RecordsExporter class cannot be passed to
-    parallel processing jobs. This function exists to allow easier config mocking in tests.
-    """
-    return Config()
-
-
 def _job_s3(config: Config) -> S3ClientT:
     """
     Create AWS S3 client instance.
@@ -50,6 +40,7 @@ def _job_s3(config: Config) -> S3ClientT:
 
 def _job(
     logger: logging.Logger,
+    config: Config,
     exporter: Callable[..., ResourceExporter],
     record: RecordRevision,
     get_record: Callable[[str], RecordRevision],
@@ -63,8 +54,7 @@ def _job(
 
     Standalone function for use in parallel processing.
     """
-    init_logging()
-    config = _job_config()
+    init_logging(logger.level)  # each process needs logging initialising
     s3 = _job_s3(config=config)
 
     if exporter == HtmlAliasesExporter:
@@ -124,7 +114,9 @@ class RecordsExporter(Exporter):
             jobs.extend([(cls, record) for cls in parallel_classes])
         # where job[0] is an exporter class and job[1] a record
         Parallel(n_jobs=self._parallel_jobs)(
-            delayed(_job)(logging.getLogger("app"), job[0], job[1], self._get_record, self._config.EXPORT_PATH, method)
+            delayed(_job)(
+                self._logger, self._config, job[0], job[1], self._get_record, self._config.EXPORT_PATH, method
+            )
             for job in jobs
         )
 

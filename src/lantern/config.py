@@ -27,6 +27,21 @@ class Config:
         if read_env:
             self.env.read_env()
 
+    def __getstate__(self) -> dict:
+        """
+        Support pickling by removing unsupported attributes.
+
+        Environs instances cannot be pickled.
+        """
+        state = self.__dict__.copy()
+        del state["env"]
+        return state
+
+    def __setstate__(self, state: dict) -> None:
+        """Restore unsupported attributes when unpickling."""
+        self.__dict__.update(state)
+        self.env = Env()
+
     def validate(self) -> None:
         """
         Validate configuration.

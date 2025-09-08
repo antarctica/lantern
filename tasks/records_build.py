@@ -39,6 +39,7 @@ class ToyCatalogue:
 
         self._store = GitLabStore(
             logger=self._logger,
+            parallel_jobs=self._config.PARALLEL_JOBS,
             endpoint=self._config.STORE_GITLAB_ENDPOINT,
             access_token=self._config.STORE_GITLAB_TOKEN,
             project_id=self._config.STORE_GITLAB_PROJECT_ID,
@@ -89,17 +90,17 @@ class ToyCatalogue:
 
 def main() -> None:
     """Entrypoint."""
-    selected = set()
     export = True
     publish = False
+    selected = set()  # to set use the form {"abc", "..."}
     purge = False
 
-    init_logging()
+    config = Config()
+    init_logging(config.LOG_LEVEL)
     init_sentry()
     logger = logging.getLogger("app")
     logger.info("Initialising")
 
-    config = Config()
     s3 = S3Client(
         "s3",
         aws_access_key_id=config.AWS_ACCESS_ID,

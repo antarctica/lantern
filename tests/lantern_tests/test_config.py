@@ -1,4 +1,5 @@
 import os
+import pickle
 from importlib.metadata import version
 from pathlib import Path
 from typing import Any
@@ -41,6 +42,12 @@ class TestConfig:
         for env in envs:
             if env in envs_bck:
                 os.environ[env] = str(envs_bck[env])
+
+    def test_pickle(self, fx_config: Config, mocker: MockerFixture):
+        """Config can be pickled and unpickled."""
+        result = pickle.dumps(fx_config, pickle.HIGHEST_PROTOCOL)
+        config = pickle.loads(result)  # noqa: S301
+        assert config.dumps_safe() == fx_config.dumps_safe()
 
     def test_version(self):
         """Version is read from package metadata."""

@@ -81,14 +81,15 @@ def _dump_records(logger: logging.Logger, file_identifiers: list[str], store: St
 
 def main() -> None:
     """Entrypoint."""
-    init_logging()
+    config = Config()
+    init_logging(config.LOG_LEVEL)
     init_sentry()
     logger = logging.getLogger("app")
     logger.info("Initialising")
 
-    config = Config()
     store = GitLabStore(
         logger=logger,
+        parallel_jobs=config.PARALLEL_JOBS,
         endpoint=config.STORE_GITLAB_ENDPOINT,
         access_token=config.STORE_GITLAB_TOKEN,
         project_id=config.STORE_GITLAB_PROJECT_ID,

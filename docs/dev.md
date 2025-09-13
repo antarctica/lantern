@@ -106,7 +106,7 @@ In the `tests.lantern_tests.config` module:
    - in future this may include updating a corresponding JSON Schema too
 8. amend list of unsupported properties in `/docs/data-model.md#catalogue-item-limitations` as needed
 
-### Adding new distribution formats
+### Adding distribution formats
 
 > [!CAUTION]
 > This section is Work in Progress (WIP) and may not be complete/accurate.
@@ -122,8 +122,11 @@ In the `tests.lantern_tests.config` module:
    `src/lantern/resources/templates/_macros/_tabs/data.html.j2` macros in the [Site Templates](/docs/site.md#templates):
    - create a new macro for the distribution format
    - update the `panel` macro to call the new macro
-6. update the `tests.resources.records/item_cat_data::record` test record to include the new distribution format
-7. add a new tests to:
+6. include the new distribution format in [Test Records](#test-records):
+   - `tests.resources.records/item_cat_data::record`
+   - `tests.resources.records/item_cat_verify::record`
+7. update `lantern.models.verification.elements.VerificationDistribution`
+8. add a new tests to:
    - `lantern_tests.models.item.catalogue.test_distributions`
    - `lantern_tests.templates.macros.test_tabs.TestDataTab.test_data_info` (if using a collapsible information panel)
 
@@ -431,7 +434,7 @@ To aid in debugging and testing, a set of fake records are included in `tests/re
 - example collections and products with only minimal properties set
 - example collections and products with all optional properties set
 - example items to test supported formatting options in free-text properties
-- example items to test supported distribution options
+- example items to test supported distribution options and verification types
 - example items for each supported licence
 - examples of special items, such as physical maps
 

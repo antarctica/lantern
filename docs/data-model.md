@@ -260,3 +260,12 @@ pluralised term related to the Record hierarchy level (e.g. `collections/foo` fo
 > [!CAUTION]
 > The catalogue does not enforce aliases to be unique across records and the behavior of conflicting aliases is left
 > undefined. Any implicit behaviour MUST NOT be relied upon.
+
+## Verification Jobs
+
+Verification jobs represent individual checks run as part of [Site Verification](/docs/monitoring.md#site-verification).
+
+The `lantern.models.verification.jobs.VerificationJob` Python data class implements a structure for each job/check.
+
+A typed dict, `lantern.models.verification.types.VerificationContext`, defines available keys for the context object
+used by each job. Various enumerations are used to define values for check types and job status/results.

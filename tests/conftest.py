@@ -6,7 +6,7 @@ import sys
 import time
 from collections.abc import Callable
 from copy import deepcopy
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from http.client import HTTPConnection
 from importlib.metadata import version
 from pathlib import Path
@@ -25,6 +25,7 @@ from lantern.exporters.base import Exporter, ResourceExporter, S3Utils
 from lantern.exporters.html import HtmlAliasesExporter, HtmlExporter
 from lantern.exporters.records import RecordsExporter
 from lantern.exporters.site import SiteExporter, SiteIndexExporter, SitePagesExporter, SiteResourcesExporter
+from lantern.exporters.verification import VerificationExporter
 from lantern.exporters.website import WebsiteSearchExporter
 from lantern.exporters.xml import IsoXmlHtmlExporter
 from lantern.lib.metadata_library.models.record import Record as RecordBase
@@ -43,6 +44,9 @@ from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhys
 from lantern.models.record import Record
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
+from lantern.models.verification.enums import VerificationResult, VerificationType
+from lantern.models.verification.jobs import VerificationJob
+from lantern.models.verification.types import VerificationContext
 from lantern.stores.gitlab import GitLabLocalCache, GitLabStore
 from tests.resources.exporters.fake_exporter import FakeExporter, FakeResourceExporter
 from tests.resources.stores.fake_records_store import FakeRecordsStore
@@ -811,6 +815,68 @@ def fx_exporter_site(
     mocker.patch("lantern.exporters.records._job_s3", return_value=fx_s3_client)
 
     return SiteExporter(config=mock_config, s3=fx_s3_client, logger=fx_logger, get_record=fx_get_record)
+
+
+@pytest.fixture()
+def fx_exporter_verify(
+    mocker: MockerFixture,
+    fx_s3_bucket_name: str,
+    fx_logger: logging.Logger,
+    fx_s3_client: S3Client,
+    fx_get_record: Callable[[str], RecordRevision],
+) -> VerificationExporter:
+    """
+    Verification exporter (empty records).
+
+    With:
+    - a mocked config and S3 client
+    - global verification context
+    """
+    with TemporaryDirectory() as tmp_path:
+        output_path = Path(tmp_path)
+    mock_config = mocker.Mock()
+    type(mock_config).PARALLEL_JOBS = PropertyMock(return_value=1)
+    type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
+    type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
+    type(mock_config).TEMPLATES_ITEM_MAPS_ENDPOINT = PropertyMock(return_value="x")
+    type(mock_config).TEMPLATES_ITEM_CONTACT_ENDPOINT = PropertyMock(return_value="x")
+
+    context: VerificationContext = {"BASE_URL": "https://example.com", "SHAREPOINT_PROXY_ENDPOINT": "x"}
+
+    return VerificationExporter(
+        logger=fx_logger, config=mock_config, s3=fx_s3_client, get_record=fx_get_record, context=context
+    )
+
+
+@pytest.fixture()
+def fx_exporter_verify_sel(
+    fx_exporter_verify: VerificationExporter, fx_revision_model_min: RecordRevision
+) -> VerificationExporter:
+    """Verification exporter with a single record selected."""
+    fx_exporter_verify.selected_identifiers = {fx_revision_model_min.file_identifier}
+    return fx_exporter_verify
+
+
+@pytest.fixture()
+def fx_exporter_verify_post_run(fx_exporter_verify_sel: VerificationExporter) -> VerificationExporter:
+    """Verification exporter with a single record selected and applicable jobs in a PASS state."""
+    fx_exporter_verify_sel._jobs = [
+        VerificationJob(
+            result=VerificationResult.PASS,
+            type=VerificationType.SITE_PAGES,
+            url="https://data.bas.ac.uk/-/index",
+            context=fx_exporter_verify_sel._context,
+            data={"duration": timedelta(microseconds=1)},
+        ),
+        VerificationJob(
+            result=VerificationResult.PASS,
+            type=VerificationType.ITEM_PAGES,
+            url="https://data.bas.ac.uk/items/123",
+            context=fx_exporter_verify_sel._context,
+            data={"file_identifier": "x", "duration": timedelta(microseconds=1)},
+        ),
+    ]
+    return fx_exporter_verify_sel
 
 
 @pytest.fixture(scope="module")

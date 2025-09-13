@@ -679,7 +679,7 @@ class TestRelatedTab:
         items = html.select_one("#related-parent-printed-map")
         if expected:
             for item in expected:
-                assert items.select_one(f"a[href='{item.href}']") is not None
+                assert items.select_one(f"a[href='{item._href}']") is not None
         else:
             assert items is None
 
@@ -712,7 +712,7 @@ class TestRelatedTab:
         items = html.select_one("#related-peer-opposite-side")
         if expected:
             for item in expected:
-                assert items.select_one(f"a[href='{item.href}']") is not None
+                assert items.select_one(f"a[href='{item._href}']") is not None
         else:
             assert items is None
 
@@ -747,7 +747,7 @@ class TestRelatedTab:
         related = html.select_one("#related-peer-items")
         if len(expected) > 0:
             for item in expected:
-                assert related.select_one(f"a[href='{item.href}']") is not None
+                assert related.select_one(f"a[href='{item._href}']") is not None
         else:
             assert related is None
 
@@ -778,7 +778,7 @@ class TestRelatedTab:
         replaced = html.select_one("#related-peer-supersedes")
         if len(expected) > 0:
             for item in expected:
-                assert replaced.select_one(f"a[href='{item.href}']") is not None
+                assert replaced.select_one(f"a[href='{item._href}']") is not None
         else:
             assert replaced is None
 
@@ -815,7 +815,7 @@ class TestRelatedTab:
         collections = html.select_one("#related-parent-collections")
         if len(expected) > 0:
             for item in expected:
-                assert collections.select_one(f"a[href='{item.href}']") is not None
+                assert collections.select_one(f"a[href='{item._href}']") is not None
         else:
             assert collections is None
 
@@ -852,7 +852,7 @@ class TestRelatedTab:
         collections = html.select_one("#related-peer-collections")
         if len(expected) > 0:
             for item in expected:
-                assert collections.select_one(f"a[href='{item.href}']") is not None
+                assert collections.select_one(f"a[href='{item._href}']") is not None
         else:
             assert collections is None
 

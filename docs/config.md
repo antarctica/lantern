@@ -42,6 +42,7 @@ Application configuration is managed by the `lantern.Config` class.
 | `TEMPLATES_PLAUSIBLE_DOMAIN`       | String  | No           | -        | No        | v0.1.x        | Plausible site identifier for frontend analytics                         | *None*                                    | 'example'                                 |
 | `TEMPLATES_SENTRY_SRC`             | String  | No           | -        | No        | v0.1.x        | Sentry CDN project URL for frontend error tracking and user feedback     | *N/A*                                     | 'https://example.com'                     |
 | `VERSION`                          | String  | No           | -        | No        | v0.1.x        | Application package version                                              | *N/A*                                     | '0.3.0'                                   |
+| `VERIFY_SHAREPOINT_PROXY_ENDPOINT` | String  | Yes          | Yes      | No        | v0.3.x        | Microsoft Power Automate trigger endpoint for checking SharePoint hosted downloads | *N/A*                                     | 'https://example.com'                     |
 <!-- pyml enable md013 -->
 
 ### Performance config options
@@ -60,6 +61,7 @@ See the [Monitoring](/docs/monitoring.md#monitoring-configuration) docs for more
 - `SENTRY_ENVIRONMENT`
 - `SENTRY_DSN`
 - `TEMPLATES_SENTRY_SRC`
+- `VERIFY_SHAREPOINT_PROXY_ENDPOINT`
 
 ### GitLab Store config options
 
@@ -87,6 +89,7 @@ See the [Exporters](/docs/exporters.md#exporters-configuration) docs for more in
 - `PUBLIC_WEBSITE_PASSWORD_SAFE`
 - `PUBLIC_WEBSITE_POST_TYPE`
 - `PUBLIC_WEBSITE_USERNAME`
+- `VERIFY_SHAREPOINT_PROXY_ENDPOINT`
 
 ### Site templates config options
 

@@ -141,7 +141,7 @@ class GitLabLocalCache:
         return data["commits"]
 
     @property
-    def _head_commit_local(self) -> str:
+    def head_commit_local(self) -> str:
         """
         ID of the latest commit in the local cache.
 
@@ -175,7 +175,7 @@ class GitLabLocalCache:
         if not self._exists:
             return False
 
-        return self._head_commit_local == self._head_commit_remote
+        return self.head_commit_local == self._head_commit_remote
 
     def _load_record_pickle(self, record_path: Path) -> RecordRevision:
         """Load record from Python pickle file."""
@@ -275,7 +275,7 @@ class GitLabLocalCache:
         """
         paths = []
 
-        commit_range = f"{self._head_commit_local}..{self._head_commit_remote}"
+        commit_range = f"{self.head_commit_local}..{self._head_commit_remote}"
         self._logger.info(f"Fetching commits in range {commit_range}")
         for commit in self._project.commits.list(ref_name=commit_range, all=True):
             for diff in commit.diff():
@@ -505,6 +505,11 @@ class GitLabStore(Store):
     def records(self) -> list[RecordRevision]:
         """Loaded Records."""
         return list(self._records.values())
+
+    @property
+    def head_commit(self) -> str:
+        """Local head commit reference."""
+        return self._cache.head_commit_local
 
     @staticmethod
     def _get_remote_hashed_path(file_name: str) -> str:

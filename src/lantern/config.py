@@ -64,6 +64,7 @@ class Config:
             "AWS_S3_BUCKET",
             "AWS_ACCESS_ID",
             "AWS_ACCESS_SECRET",
+            "VERIFY_SHAREPOINT_PROXY_ENDPOINT",
         ]
         directories = ["STORE_GITLAB_CACHE_PATH", "EXPORT_PATH"]
 
@@ -105,6 +106,7 @@ class Config:
         AWS_S3_BUCKET: str
         AWS_ACCESS_ID: str
         AWS_ACCESS_SECRET: str
+        VERIFY_SHAREPOINT_PROXY_ENDPOINT: str
 
     def dumps_safe(self) -> ConfigDumpSafe:
         """Dump config for output to the user with sensitive data redacted."""
@@ -132,6 +134,7 @@ class Config:
             "AWS_S3_BUCKET": self.AWS_S3_BUCKET,
             "AWS_ACCESS_ID": self.AWS_ACCESS_ID,
             "AWS_ACCESS_SECRET": self.AWS_ACCESS_SECRET_SAFE,
+            "VERIFY_SHAREPOINT_PROXY_ENDPOINT": self.VERIFY_SHAREPOINT_PROXY_ENDPOINT,
         }
 
     @property
@@ -289,3 +292,9 @@ class Config:
     def AWS_ACCESS_SECRET_SAFE(self) -> str:
         """AWS_ACCESS_SECRET with value redacted."""
         return self._safe_value if self.AWS_ACCESS_SECRET else ""
+
+    @property
+    def VERIFY_SHAREPOINT_PROXY_ENDPOINT(self) -> str:
+        """Endpoint for checking SharePoint hosted downloads in verification jobs."""
+        with self.env.prefixed(self._app_prefix), self.env.prefixed("VERIFY_"):
+            return self.env("SHAREPOINT_PROXY_ENDPOINT")

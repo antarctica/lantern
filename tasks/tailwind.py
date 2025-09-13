@@ -1,5 +1,6 @@
 import logging
 import subprocess
+from datetime import timedelta
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -10,6 +11,10 @@ from tests.resources.stores.fake_records_store import FakeRecordsStore
 
 from lantern.config import Config as BaseConfig
 from lantern.exporters.site import SiteExporter
+from lantern.exporters.verification import VerificationReport
+from lantern.models.verification.enums import VerificationResult, VerificationType
+from lantern.models.verification.jobs import VerificationJob
+from lantern.models.verification.types import VerificationContext
 
 
 # noinspection PyPep8Naming
@@ -40,10 +45,16 @@ class Config(BaseConfig):
         """AWS access key secret."""
         return "x"
 
+    @property
+    def VERIFY_SHAREPOINT_PROXY_ENDPOINT(self) -> str:
+        """SharePoint proxy endpoint."""
+        return "x"
+
 
 def export_test_site(export_path: Path) -> None:
     """Export test records as a static site."""
     logger = logging.getLogger("app")
+    logger.setLevel(logging.INFO)
     config = Config(export_path=export_path)
     store = FakeRecordsStore(logger=logger)
     store.populate()
@@ -59,7 +70,42 @@ def export_test_site(export_path: Path) -> None:
     exporter = SiteExporter(config=config, s3=s3_client, logger=logger, get_record=store.get)
     exporter.select(file_identifiers={record.file_identifier for record in store.records})
     exporter.export()
-    print(f"Exported test records as a temporary static site to '{export_path.resolve()}'")
+
+    # Include verification report
+    report_path = export_path / "-" / "verification" / "index.html"
+    context: VerificationContext = {
+        "BASE_URL": "https://example.com",
+        "SHAREPOINT_PROXY_ENDPOINT": config.VERIFY_SHAREPOINT_PROXY_ENDPOINT,
+    }
+    jobs = [
+        VerificationJob(
+            result=VerificationResult.PASS,
+            type=VerificationType.SITE_PAGES,
+            url="https://example.com/-/index",
+            context=context,
+            data={"duration": timedelta(microseconds=1)},
+        ),
+        VerificationJob(
+            result=VerificationResult.FAIL,
+            type=VerificationType.ITEM_PAGES,
+            url="https://example.com/items/123",
+            context=context,
+            data={"file_identifier": "x", "duration": timedelta(microseconds=1)},
+        ),
+        VerificationJob(
+            result=VerificationResult.SKIP,
+            type=VerificationType.ITEM_PAGES,
+            url="https://example.com/items/123",
+            context=context,
+            data={"file_identifier": "x"},
+        ),
+    ]
+    report = VerificationReport(config=config, jobs=jobs, context=context)
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    with report_path.open("w") as report_file:
+        report_file.write(report.dumps())
+
+    print(f"Exported test site inc. verification report to '{export_path.resolve()}'")
 
 
 def regenerate_styles(tw_bin: Path, site_path: Path, output_path: Path) -> None:

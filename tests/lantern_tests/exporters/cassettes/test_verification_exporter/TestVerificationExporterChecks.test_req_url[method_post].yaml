@@ -1,0 +1,30 @@
+interactions:
+- request:
+    body: '{"path": "/x"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '15'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.32.4
+    method: POST
+    uri: https://example.com/
+  response:
+    body:
+      string: '123'
+    headers:
+      Content-Type:
+      - text/plain
+      Content-Length:
+        - '4'
+    status:
+      code: 200
+      message: OK
+version: 1

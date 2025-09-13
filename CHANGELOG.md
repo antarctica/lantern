@@ -21,6 +21,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Support for parallel exports in Records exporter
 * GitLab store push returns resulting commit ID
 * Copyright holders in licence tab
+* Catalogue site verification
 
 ### Fixed
 

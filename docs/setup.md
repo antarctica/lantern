@@ -55,3 +55,11 @@ The following IAM policy can be attached to users for managing content in the
     ]
 }
 ```
+
+## Power Automate
+
+### Power Automate SharePoint proxy
+
+1. import `src/lantern/resources/flows/lantern-sharepoint-proxy.zip` into Power Automate as a new flow
+2. configure the flow connections and generate a HTTP endpoint
+3. set the `VERIFY_SHAREPOINT_PROXY_ENDPOINT` [Config](/docs/config.md) option

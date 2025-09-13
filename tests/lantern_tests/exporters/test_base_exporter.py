@@ -5,9 +5,10 @@ from unittest.mock import PropertyMock
 
 import pytest
 from boto3 import client as S3Client  # noqa: N812
+from jinja2 import Environment
 from pytest_mock import MockerFixture
 
-from lantern.exporters.base import Exporter, ResourceExporter, S3Utils, get_record_aliases
+from lantern.exporters.base import Exporter, ResourceExporter, S3Utils, get_jinja_env, get_record_aliases
 from lantern.lib.metadata_library.models.record.elements.common import Identifier
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
@@ -198,8 +199,8 @@ class TestBaseResourceExporter:
         assert result["ContentType"] == "application/octet-stream"
 
 
-class TestGetRecordAliases:
-    """Test get_record_aliases function."""
+class TestUtils:
+    """Test util functions."""
 
     def test_get_record_aliases(self, fx_revision_model_min: RecordRevision):
         """Can get any aliases in a record."""
@@ -209,3 +210,9 @@ class TestGetRecordAliases:
         result = get_record_aliases(fx_revision_model_min)
         assert len(result) == 1
         assert result[0] == alias
+
+    def test_get_jinja_env(self):
+        """Can get app Jinja environment."""
+        result = get_jinja_env()
+        assert isinstance(result, Environment)
+        assert "_macros/common.html.j2" in result.loader.list_templates()

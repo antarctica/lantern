@@ -1,0 +1,246 @@
+interactions:
+# site pages
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.32.4
+    method: HEAD
+    uri: https://example.com/-/404
+  response:
+    body:
+      string: ''
+    headers:
+      Content-type:
+      - text/html
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.32.4
+    method: HEAD
+    uri: https://example.com/legal/accessibility/
+  response:
+    body:
+      string: ''
+    headers:
+      Content-type:
+      - text/html
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.32.4
+    method: HEAD
+    uri: https://example.com/legal/cookies/
+  response:
+    body:
+      string: ''
+    headers:
+      Content-type:
+      - text/html
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.32.4
+    method: HEAD
+    uri: https://example.com/legal/copyright/
+  response:
+    body:
+      string: ''
+    headers:
+      Content-type:
+      - text/html
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.32.4
+    method: HEAD
+    uri: https://example.com/legal/privacy/
+  response:
+    body:
+      string: ''
+    headers:
+      Content-type:
+      - text/html
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.32.4
+    method: HEAD
+    uri: https://example.com/-/index/
+  response:
+    body:
+      string: ''
+    headers:
+      Content-type:
+      - text/html
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.32.4
+    method: HEAD
+    uri: https://example.com/-/formatting/
+  response:
+    body:
+      string: ''
+    headers:
+      Content-type:
+      - text/html
+    status:
+      code: 200
+      message: OK
+# resource pages
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.32.4
+    method: HEAD
+    uri: https://example.com/records/x.json
+  response:
+    body:
+      string: ''
+    headers:
+      Content-type:
+      - text/html
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.32.4
+    method: HEAD
+    uri: https://example.com/records/x.xml
+  response:
+    body:
+      string: ''
+    headers:
+      Content-type:
+      - text/html
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.32.4
+    method: HEAD
+    uri: https://example.com/records/x.html
+  response:
+    body:
+      string: ''
+    headers:
+      Content-type:
+      - text/html
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.32.4
+    method: HEAD
+    uri: https://example.com/items/x/index.html
+  response:
+    body:
+      string: ''
+    headers:
+      Content-type:
+      - text/html
+    status:
+      code: 200
+      message: OK
+version: 1

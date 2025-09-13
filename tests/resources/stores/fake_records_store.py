@@ -17,6 +17,7 @@ from tests.resources.records.item_cat_pub_map import side_b as product_published
 from tests.resources.records.item_cat_pub_map_diff import combined as product_diff_published_map_combined
 from tests.resources.records.item_cat_pub_map_diff import side_a as product_diff_published_map_side_a
 from tests.resources.records.item_cat_pub_map_diff import side_b as product_diff_published_map_side_b
+from tests.resources.records.item_cat_verify import record as verify
 
 
 class FakeRecordsStore(Store):
@@ -41,6 +42,7 @@ class FakeRecordsStore(Store):
             product_all_supported,
             formatting_supported,
             data_all_supported,
+            verify,
             ogl_record,
             cc_record,
             ops_record,

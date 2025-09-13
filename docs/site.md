@@ -69,7 +69,10 @@ Secondary top-level items:
      ├── formatting/
      │    └── index.html -> 'hidden' formatting guide
      └── public-website-search/
-          └── items.json -> static list of aggregation API resources
+     │    └── items.json -> static list of aggregation API resources
+     └── verification/
+          ├── data.json -> site verification data
+          └── index.html -> site verification report
 ```
 
 <!-- pyml disable md013 -->
@@ -78,6 +81,7 @@ Secondary top-level items:
 | `-/index/`                 | Hidden index page                            | [Site Index](/docs/exporters.md#site-index-exporter)     |
 | `-/formatting/`            | Hidden record content formatting guide       | [Site Pages](/docs/exporters.md#site-pages-exporter)     |
 | `-/public-website-search/` | Temporary public website search items output | [Website Search](/docs/exporters.md#site-pages-exporter) |
+| `-/verification/`          | Site verification report and data            | [Site Verification](/docs/exporters.md#verification-exporter) |
 <!-- pyml enable md013 -->
 
 ### Site assets structure

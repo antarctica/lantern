@@ -6,6 +6,7 @@ from shutil import copytree
 
 from importlib_resources import as_file as resources_as_file
 from importlib_resources import files as resources_files
+from jinja2 import Environment, PackageLoader, select_autoescape
 from mypy_boto3_s3 import S3Client
 
 from lantern.config import Config
@@ -195,3 +196,9 @@ class ResourceExporter(Exporter, ABC):
 def get_record_aliases(record: Record) -> list[Identifier]:
     """Get optional aliases for record as relative file paths / S3 keys."""
     return record.identification.identifiers.filter(namespace=ALIAS_NAMESPACE)
+
+
+def get_jinja_env() -> Environment:
+    """Get Jinja environment with app templates."""
+    _loader = PackageLoader("lantern", "resources/templates")
+    return Environment(loader=_loader, autoescape=select_autoescape(), trim_blocks=True, lstrip_blocks=True)

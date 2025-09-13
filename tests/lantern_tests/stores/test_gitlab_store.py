@@ -66,7 +66,7 @@ class TestGitLabLocalCache:
 
     def test_head_commit_local(self, fx_gitlab_cache_pop: GitLabLocalCache):
         """Can get ID of the latest commit known to the local cache."""
-        result = fx_gitlab_cache_pop._head_commit_local
+        result = fx_gitlab_cache_pop.head_commit_local
         assert isinstance(result, str)
         assert len(result) > 0
 
@@ -223,7 +223,7 @@ class TestGitLabLocalCache:
         local_head = "abc123"
         remote_head = "def456"
         mocker.patch.object(
-            type(fx_gitlab_cache), "_head_commit_local", new_callable=PropertyMock, return_value=local_head
+            type(fx_gitlab_cache), "head_commit_local", new_callable=PropertyMock, return_value=local_head
         )
         mocker.patch.object(
             type(fx_gitlab_cache), "_head_commit_remote", new_callable=PropertyMock, return_value=remote_head
@@ -273,7 +273,7 @@ class TestGitLabLocalCache:
 
         records = [(json.dumps(fx_record_config_min, ensure_ascii=False), commit)]
         mocker.patch.object(fx_gitlab_cache_pop, "_fetch_latest_records", return_value=records)
-        original_head = fx_gitlab_cache_pop._head_commit_local
+        original_head = fx_gitlab_cache_pop.head_commit_local
 
         head_commit = {"id": commit}
         mock_project = MagicMock()
@@ -283,7 +283,7 @@ class TestGitLabLocalCache:
         fx_gitlab_cache_pop._refresh()
 
         assert fx_gitlab_cache_pop._exists
-        assert fx_gitlab_cache_pop._head_commit_local != original_head
+        assert fx_gitlab_cache_pop.head_commit_local != original_head
 
     def test_refresh_integrity(
         self, mocker: MockerFixture, fx_gitlab_cache_pop: GitLabLocalCache, fx_record_config_min: dict
@@ -409,6 +409,12 @@ class TestGitLabStore:
         """Can get the remote GitLab project object for the store."""
         result = fx_gitlab_store._project
         assert result.id == 1234
+
+    def test_head_commit(self, fx_gitlab_store_cached: GitLabStore):
+        """Can get ID of the latest commit known to the local cache."""
+        result = fx_gitlab_store_cached.head_commit
+        assert isinstance(result, str)
+        assert len(result) > 0
 
     def test_get_remote_hashed_path(self, fx_gitlab_store: GitLabStore):
         """Can get the path to a record within the remote repository."""

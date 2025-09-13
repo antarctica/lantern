@@ -1,6 +1,6 @@
 # Lantern - Exporters
 
-Exporters create the catalogue [Static Site](/docs/architecture.md#static-site). They can be split into:
+Exporters create the catalogue [Static Site](/docs/architecture.md#static-site). They can broadly be split into:
 
 - [Resource Exporters](#resource-exporters) - which create derived outputs of [Records](/docs/data-model.md#records) and
   [Items](/docs/data-model.md#items)
@@ -13,9 +13,9 @@ All exporters implement a [Common Interface](#exporter-classes) supporting:
 - exporting to a local path using `export()`
 - and/or publishing to a remote service (typically [AWS S3](/docs/architecture.md#amazon-s3)) using `publish()`
 
-[Resource Exporters](#resource-exporters) use a callable from a [Store](/docs/architecture.md#stores) to get Records by
-file identifier as needed. The `selected_identifiers` property controls which Records are output, for full or partial
-site builds.
+Exporters that access Records use a callable from a [Store](/docs/architecture.md#stores) to get Records by file
+identifier as needed. A `selected_identifiers` property typically controls which Records are output to allow for full
+or partial site builds.
 
 > [!TIP]
 > The [Site Exporter](#site-exporter) sets selected identifiers in relevant (sub-)exporters via the `select()` method.
@@ -33,6 +33,7 @@ Exporters use these options from the app `lantern.Config` class:
 - `PUBLIC_WEBSITE_POST_TYPE`: custom WordPress post type for the public website search exporter
 - `PUBLIC_WEBSITE_USERNAME`: WordPress user credential for the public website search exporter
 - `PUBLIC_WEBSITE_PASSWORD`: WordPress application password for the public website search exporter
+- `VERIFY_SHAREPOINT_PROXY_ENDPOINT`: the [SharePoint Proxy](/docs/monitoring.md#verification-sharepoint-proxy) endpoint
 
 See the [Config](/docs/config.md#config-options) docs for how to set these config options.
 
@@ -170,3 +171,16 @@ relevant to the public. Items meeting all these criteria are deemed relevant:
    - directing users to Items they can't access is not helpful
 2. not superseded by another Item (are not the subject of a `RevisionOf` aggregation in another Item)
    - we don't want to confuse users by showing multiple versions of the same resource
+
+## Other exporters
+
+### Verification exporter
+
+`lantern.exporters.verification.VerificationExporter`
+
+Generates and runs a set of [Site Verification Tasks](/docs/data-model.md#verification-jobs) for
+[Site Verification Checks](/docs/monitoring.md#verification-checks) and processes their results into a
+[Verification Report](/docs/monitoring.md#verification-report).
+
+Internally, the verification exporter generates a set of individual jobs (per check) which are processed in parallel
+using a worker pool for better performance.

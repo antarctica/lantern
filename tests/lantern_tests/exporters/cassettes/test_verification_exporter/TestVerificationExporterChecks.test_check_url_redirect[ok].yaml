@@ -1,0 +1,68 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.32.4
+    method: HEAD
+    uri: https://example.com/
+  response:
+    body:
+      string: ''
+    headers:
+      Location:
+      - https://example.com/redirected
+    status:
+      code: 302
+      message: Moved Temporarily
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.32.4
+    method: HEAD
+    uri: https://example.com/
+  response:
+    body:
+      string: ''
+    headers:
+      Location:
+      - https://example.com/redirected
+    status:
+      code: 302
+      message: Moved Temporarily
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.32.4
+    method: HEAD
+    uri: https://example.com/redirected
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Type:
+      - text/html
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -14,6 +14,12 @@
 
 {% macro footer_link_classes() %}{{ link_base_classes() }} text-sky-blue-300 dark:text-sky-blue-500{% endmacro %}
 
+{% macro table_border_classes() %}border-grey-100 dark:border-grey-900{% endmacro %}
+
+{% macro table_header_classes() %}p-2 font-bold border-b border-grey-500 dark:border-grey-300 bg-grey-100 dark:bg-grey-900{% endmacro %}
+
+{% macro table_row_classes() %}p-2 border-b {{ table_border_classes() }}{% endmacro %}
+
 {% macro back_to_top_id() %}site-top{% endmacro %}
 
 {% macro sentry_trigger() %}site-feedback-trigger{% endmacro %}

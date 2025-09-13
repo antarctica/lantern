@@ -1,0 +1,102 @@
+{% extends "_layouts/page.html.j2" %}
+{% import '_macros/common.html.j2' as com %}
+
+{% macro result_label(value) %}
+  {% if value == 'skipped' %}
+    <div class="w-18 p-1 border-1 text-center text-grey-500 border-grey-500">{{ value | upper }}</div>
+  {% elif value == 'passed' %}
+    <div class="w-18 p-1 border-1 text-center text-green-500 border-green-500">{{ value | upper }}</div>
+  {% elif value == 'failed' %}
+    <div class="w-18 p-1 border-1 text-center text-white bg-red-500 border-red-500">{{ value | upper }}</div>
+  {% else %}
+    <span>{{ value | upper }}</span>
+  {% endif %}
+{% endmacro %}
+
+{% block content %}
+  <article class="space-y-4 lg:space-y-8">
+    {{ com.page_header(main="Catalogue verification results", sub='Admin', sub_i='fas fa-fw fa-tools')}}
+    <section class="space-y-4 space-y-8">
+      {% if data.pass_fail %}
+        {% call com.alert(variant='green') %}All tests passed 😀{% endcall %}
+      {% else %}
+        {% call com.alert(variant='red') %}Some tests failed 😣{% endcall %}
+      {% endif %}
+
+      {% call com.alert(variant='blue') %}
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-y-4 lg:gap-x-4">
+          <div class="grid grid-cols-1 gap-y-4 lg:gap-x-8 lg:grid-cols-[auto_1fr]">
+            <div class="font-bold">Site tested</div>
+            <div><a class="{{ com.link_classes() }}" href="{{ data.base_url }}">{{ data.base_url }}</a></div>
+            <div class="font-bold">Revision tested</div>
+            <div><a class="{{ com.link_classes() }}" href="{{ data.commit.href }}">{{ data.commit.value }} {{ com.restricted_i() }} {{ com.ext_link_i() }}</a></div>
+            <div class="font-bold">Tested at</div>
+            <div>{{ com.time(data.time) }}</div>
+          </div>
+          <div class="grid grid-cols-1 gap-y-4 lg:gap-x-8 lg:grid-cols-[auto_1fr]">
+            {% for label, count in data.stats.items() %}
+              <div>{{ result_label(label) }}</div>
+              <div>{{ count }}</div>
+            {% endfor %}
+          </div>
+        </div>
+      {% endcall %}
+    </section>
+
+    <section class="space-y-8">
+      {% call com.item_title() %}Site level tests{% endcall %}
+      <div class="grid grid-cols-4 lg:grid-cols-[2fr_1fr_1fr_3fr] border {{ com.table_border_classes() }} overflow-hidden">
+        <!-- Header -->
+      {% for label in ['', 'Check', 'Result', 'URL'] %}
+          <div class="{{ com.table_header_classes() }}">{{ label }}</div>
+        {% endfor %}
+        <!-- Body -->
+        {% for test in data.site_checks %}
+          <div class="{{ com.table_row_classes() }}"></div>
+          <div class="{{ com.table_row_classes() }}">
+            {{ test.type }}
+          </div>
+          <div class="{{ com.table_row_classes() }} flex items-center">
+              {{ result_label(test.result) }}
+            </div>
+            <div class="{{ com.table_row_classes() }} break-all">
+              <a class="{{ com.link_classes() }}" href="{{ test.url }}" target="_blank">{{ test.url }}</a>
+            </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section>
+      {% call com.alert(variant='blue') %}
+        The underlying data for this report is <a class="{{ com.link_classes() }}" href="/-/verification/data.json">available as JSON</a> for further processing.
+      {% endcall %}
+    </section>
+
+    <section class="space-y-8">
+      {% call com.item_title() %}Record and Item level tests{% endcall %}
+      <div class="grid grid-cols-4 lg:grid-cols-[2fr_1fr_1fr_2fr] border {{ com.table_border_classes() }} overflow-hidden">
+        <!-- Header -->
+        {% for label in ['File Identifier', 'Check', 'Result', 'URL'] %}
+          <div class="{{ com.table_header_classes() }}">{{ label }}</div>
+        {% endfor %}
+        <!-- Body -->
+        {% for file_identifier, resource_checks in data.resource_checks.items() %}
+          {% for test in resource_checks %}
+            <div class="{{ com.table_row_classes() }}">
+              {% if loop.first %}<code>{{ file_identifier }}</code>{% else %}↑{% endif %}
+            </div>
+            <div class="{{ com.table_row_classes() }}">
+              {{ test.type }}
+            </div>
+            <div class="{{ com.table_row_classes() }} flex items-center">
+              {{ result_label(test.result) }}
+            </div>
+            <div class="{{ com.table_row_classes() }} break-all">
+              <a class="{{ com.link_classes() }}" href="{{ test.url }}" target="_blank">{{ test.url }}</a>
+            </div>
+          {% endfor %}
+        {% endfor %}
+      </div>
+    </section>
+  </article>
+{% endblock %}

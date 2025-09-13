@@ -86,3 +86,17 @@ The `build-records` task will:
 1. load all records into a [Site Exporter](/docs/exporters.md#site-exporter)
 1. if the export option is enabled, build the static site and export it to a local path
 1. if the publish option is enabled, build the static site and upload it to a remote S3 bucket
+
+## Verify static site
+
+To [Verify](/docs/monitoring.md#site-verification) the [Static Site](/docs/architecture.md#static-site):
+
+1. set the options in `tasks/records_verify.py` for the site to check (`base_url`)
+1. run the `verify-records` [Development Task](/docs/dev.md#development-tasks)
+
+The `verify-records` task will:
+
+1. populate a [GitLab Store](/docs/stores.md#gitlab-store) with current [Records](/docs/data-model.md#records)
+1. load all records into a [Verification Exporter](/docs/exporters.md#verification-exporter)
+1. run [Verification checks](/docs/monitoring.md#verification-checks) against the specified site
+1. compile and export/publish a [Verification report](/docs/monitoring.md#verification-report)

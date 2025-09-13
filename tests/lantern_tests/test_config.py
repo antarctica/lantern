@@ -85,6 +85,7 @@ class TestConfig:
             "AWS_S3_BUCKET": "x",
             "AWS_ACCESS_ID": "x",
             "AWS_ACCESS_SECRET": redacted_value,
+            "VERIFY_SHAREPOINT_PROXY_ENDPOINT": "x",
         }
 
         output = fx_config.dumps_safe()
@@ -157,6 +158,7 @@ class TestConfig:
             ({"LANTERN_AWS_S3_BUCKET": None, "LANTERN_AWS_ACCESS_ID": "x", "LANTERN_AWS_ACCESS_SECRET": "x"}),
             ({"LANTERN_AWS_S3_BUCKET": "x", "LANTERN_AWS_ACCESS_ID": None, "LANTERN_AWS_ACCESS_SECRET": "x"}),
             ({"LANTERN_AWS_S3_BUCKET": "x", "LANTERN_AWS_ACCESS_ID": "x", "LANTERN_AWS_ACCESS_SECRET": None}),
+            ({"LANTERN_VERIFY_SHAREPOINT_PROXY_ENDPOINT": None}),
         ],
     )
     def test_validate_missing_required_option(self, envs: dict):
@@ -209,6 +211,7 @@ class TestConfig:
             ("AWS_S3_BUCKET", "x", False),
             ("AWS_ACCESS_ID", "x", False),
             ("AWS_ACCESS_SECRET", "x", True),
+            ("VERIFY_SHAREPOINT_PROXY_ENDPOINT", "x", False),
         ],
     )
     def test_configurable_property(self, property_name: str, expected: Any, sensitive: bool):

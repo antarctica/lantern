@@ -101,4 +101,9 @@ Colours:
 | Buttons (Primary)          | Text                   | `white`         | `white`         | Equal (as background equal)     |
 |                            | Background             | `turquoise-500` | `turquoise-500` | Equal                           |
 |                            | Background (Hover)     | `turquoise-700` | `turquoise-700` | Equal                           |
+| Tables                     | Border                 | `grey-100`      | `grey-900`      |                                 |
+| Tables (Header)            | Background             | `grey-100`      | `grey-900`      |                                 |
+|                            | Border (Bottom)        | `grey-500`      | `grey-300`      |                                 |
+| Tables (Body)              | Border (Bottom)        | `grey-100`      | `grey-900`      |                                 |
+
 <!-- pyml enable md013 -->

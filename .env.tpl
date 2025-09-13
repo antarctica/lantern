@@ -18,3 +18,5 @@ LANTERN_AWS_ACCESS_ID="" # populate with per-user IAM credentials
 LANTERN_AWS_ACCESS_SECRET="" # populate with per-user IAM credentials
 LANTERN_AWS_S3_BUCKET="op://Infrastructure/rnv7zb3jzviwsvziknpxicvqaq/password"  # integration
 #LANTERN_AWS_S3_BUCKET="op://Infrastructure/hksogwx7zqx3ct2jr36cshoqpy/password"  # production
+
+LANTERN_VERIFY_SHAREPOINT_PROXY_ENDPOINT="op://Infrastructure/SCAR ADD Metadata Toolbox - SharePoint proxy URL/password"

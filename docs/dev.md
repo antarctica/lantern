@@ -130,18 +130,16 @@ In the `tests.lantern_tests.config` module:
    - `lantern_tests.models.item.catalogue.test_distributions`
    - `lantern_tests.templates.macros.test_tabs.TestDataTab.test_data_info` (if using a collapsible information panel)
 
-### Adding development tasks
-
-See the [Taskipy](https://github.com/taskipy/taskipy?tab=readme-ov-file#adding-tasks) documentation.
-
-### Updating site templates
+### Adding site pages
 
 > [!CAUTION]
 > This section is Work in Progress (WIP) and may not be complete/accurate.
 
-- ...
-- ... *What is this actually covering? Not referenced from `site.md` yet.* ...
-- ... tests ...
+- ... include in `VerificationExporter.site_pages` list
+
+### Adding development tasks
+
+See the [Taskipy](https://github.com/taskipy/taskipy?tab=readme-ov-file#adding-tasks) documentation.
 
 ### Updating styles
 
@@ -383,21 +381,6 @@ To incrementally build up a set of related tests (including parameterised tests)
 
 ```shell
 % uv run pytest --record-mode=new_episodes tests/path/to/test_module.py::<class>::<method>
-```
-
-#### Pytest-recording binary data
-
-To update a pytest-recording response that contains binary data (e.g. a `.tar.gz` archive) in a captured response:
-
-1. set the binary content and output filename in `./tests/scripts/decode_binary_response.py` and run
-2. update the output file as needed (e.g. extract the output, update as needed and re-compress [1])
-3. set the input filename in `./tests/scripts/encode_binary_response.py` and run
-4. copy the output string back into the pytest-recording response
-
-[1] To compress a `foo` directory as `bar.tar.gz`:
-
-```shell
-tar -czvf 'bar.tar.gz' 'foo'
 ```
 
 ### Static site template tests

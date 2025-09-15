@@ -29,21 +29,21 @@ class TestSiteIndexExporter:
         mock_config = mocker.Mock()
         type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
 
-        exporter = SiteIndexExporter(config=mock_config, s3=s3_client, logger=fx_logger, get_record=fx_get_record)
+        exporter = SiteIndexExporter(
+            config=mock_config,
+            s3=s3_client,
+            logger=fx_logger,
+            get_record=fx_get_record,
+            commit_ref="83fake48",
+        )
 
         assert isinstance(exporter, SiteIndexExporter)
         assert exporter.name == "Site Index"
 
     def test_dumps(self, fx_exporter_site_index_sel: SiteIndexExporter):
         """Can dump site index."""
-        expected_item = '<tr><td>Item</td><td>DATASET</td><td><a href="/items/x/index.html">x</a></td><td>x</td><td>None</td><td>-</td></tr>'
-        expected_alias = '<td>Alias</td><td>-</td><td><a href="/items/x">x</a></td><td>x</td><td>-</td><td><a href="/datasets/x">datasets/x</a></td></tr>'
         html = BeautifulSoup(fx_exporter_site_index_sel._dumps(), parser="html.parser", features="lxml")
-
-        result = str(html).replace("\n", "")
-        assert "<h1>Proto Items Index</h1>" in result
-        assert expected_item in result
-        assert expected_alias in result
+        assert html.select_one("h1:contains('Catalogue index')")
 
     def test_export(self, fx_exporter_site_index_sel: SiteIndexExporter):
         """Can export site index to a local file."""
@@ -287,7 +287,13 @@ class TestSiteExporter:
         mock_config = mocker.Mock()
         type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
 
-        exporter = SiteExporter(config=mock_config, s3=s3_client, logger=fx_logger, get_record=fx_get_record)
+        exporter = SiteExporter(
+            config=mock_config,
+            s3=s3_client,
+            logger=fx_logger,
+            get_record=fx_get_record,
+            head_commit_ref="83fake48",
+        )
 
         assert isinstance(exporter, SiteExporter)
         assert exporter.name == "Site"

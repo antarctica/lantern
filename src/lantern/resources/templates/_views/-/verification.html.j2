@@ -45,7 +45,7 @@
 
     <section class="space-y-8">
       {% call com.item_title() %}Site level tests{% endcall %}
-      <div class="grid grid-cols-4 lg:grid-cols-[2fr_1fr_1fr_3fr] border {{ com.table_border_classes() }} overflow-hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-[2fr_1fr_1fr_3fr] border {{ com.table_border_classes() }} overflow-hidden">
         <!-- Header -->
       {% for label in ['', 'Check', 'Result', 'URL'] %}
           <div class="{{ com.table_header_classes() }}">{{ label }}</div>
@@ -57,11 +57,11 @@
             {{ test.type }}
           </div>
           <div class="{{ com.table_row_classes() }} flex items-center">
-              {{ result_label(test.result) }}
-            </div>
-            <div class="{{ com.table_row_classes() }} break-all">
-              <a class="{{ com.link_classes() }}" href="{{ test.url }}" target="_blank">{{ test.url }}</a>
-            </div>
+            {{ result_label(test.result) }}
+          </div>
+          <div class="{{ com.table_row_classes() }} break-all">
+            <a class="{{ com.link_classes() }}" href="{{ test.url }}" target="_blank">{{ test.url }}</a>
+          </div>
         {% endfor %}
       </div>
     </section>
@@ -74,7 +74,7 @@
 
     <section class="space-y-8">
       {% call com.item_title() %}Record and Item level tests{% endcall %}
-      <div class="grid grid-cols-4 lg:grid-cols-[2fr_1fr_1fr_2fr] border {{ com.table_border_classes() }} overflow-hidden">
+      <div class="grid grid-cols-1 lg:grid-cols-[2fr_1fr_1fr_2fr] border {{ com.table_border_classes() }} overflow-hidden">
         <!-- Header -->
         {% for label in ['File Identifier', 'Check', 'Result', 'URL'] %}
           <div class="{{ com.table_header_classes() }}">{{ label }}</div>

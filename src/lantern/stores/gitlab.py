@@ -476,9 +476,7 @@ class GitLabStore(Store):
         cache_path: Path,
     ) -> None:
         self._logger = logger
-
         self._records: dict[str, RecordRevision] = {}
-
         self._client = Gitlab(url=endpoint, private_token=access_token)
         self._project_id = project_id
         self._branch = "main"

@@ -23,12 +23,9 @@ This includes datasets, products (maps), services and other information.
 
 ## Usage
 
-See [Usage](/docs/usage.md) documentation to load records and build the catalogue static site.
+See [Access](/docs/access.md) documentation for how to access catalogue records.
 
-The proto-index contains a list of available records and items:
-
-- [integration/testing](https://add-catalogue-integration.data.bas.ac.uk/-/index/)
-- [production](https://add-catalogue.data.bas.ac.uk/-/index/)
+See [Usage](/docs/usage.md) documentation for how to load records and build the catalogue static site.
 
 ## Architecture
 

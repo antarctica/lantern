@@ -8,6 +8,7 @@ from pytest_mock import MockerFixture
 
 from lantern.exporters.json import JsonExporter
 from lantern.models.record.revision import RecordRevision
+from lantern.models.site import ExportMeta
 
 
 class TestIsoXmlExporter:
@@ -27,14 +28,9 @@ class TestIsoXmlExporter:
         mock_config = mocker.Mock()
         type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
         type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
+        meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
-        exporter = JsonExporter(
-            config=mock_config,
-            logger=fx_logger,
-            s3=fx_s3_client,
-            record=fx_revision_model_min,
-            export_base=output_path,
-        )
+        exporter = JsonExporter(meta=meta, logger=fx_logger, s3=fx_s3_client, record=fx_revision_model_min)
 
         assert isinstance(exporter, JsonExporter)
         assert exporter.name == "BAS JSON"
@@ -53,14 +49,9 @@ class TestIsoXmlExporter:
         mock_config = mocker.Mock()
         type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
         type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
+        meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
-        exporter = JsonExporter(
-            config=mock_config,
-            logger=fx_logger,
-            s3=fx_s3_client,
-            record=fx_revision_model_min,
-            export_base=output_path,
-        )
+        exporter = JsonExporter(meta=meta, logger=fx_logger, s3=fx_s3_client, record=fx_revision_model_min)
 
         result = exporter.dumps()
         assert '{\n  "$schema": "https://' in result

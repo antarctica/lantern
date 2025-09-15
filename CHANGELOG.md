@@ -40,6 +40,9 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Refactoring catalogue item rendering into associated exporter for consistency
 * Applying HTML prettifying to all rendered HTML outputs
 * Refactoring proto-index into a regular page
+* Refactoring PageMetadata into SiteMetadata with additional properties (commit, formatted build time)
+* Refactoring exporters to use avoid using Config classes
+* Refactoring item aliases exporter to generate HTML content using an element tree
 
 ### Removed
 

@@ -11,13 +11,10 @@ from joblib import Parallel, delayed
 from mypy_boto3_s3 import S3Client
 from requests import Response
 
-from lantern.config import Config
 from lantern.exporters.base import Exporter, get_jinja_env
-from lantern.lib.metadata_library.models.record.elements.common import Date
-from lantern.models.item.catalogue.elements import FormattedDate
 from lantern.models.record import CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
-from lantern.models.templates import PageMetadata
+from lantern.models.site import ExportMeta, SiteMeta
 from lantern.models.verification.elements import VerificationRecord
 from lantern.models.verification.enums import VerificationResult, VerificationType
 from lantern.models.verification.jobs import VerificationJob
@@ -193,9 +190,9 @@ class VerificationReport:
     Processes a list of verification jobs into a JSON and HTML report with calculated statistics and overall result.
     """
 
-    def __init__(self, config: Config, jobs: list[VerificationJob], context: VerificationContext) -> None:
+    def __init__(self, meta: SiteMeta, jobs: list[VerificationJob], context: VerificationContext) -> None:
         """Initialise."""
-        self._config = config
+        self._meta = meta
         self._context = context
         self._jobs = jobs
 
@@ -245,7 +242,7 @@ class VerificationReport:
         converter = cattrs.Converter()
         converter.register_unstructure_hook(timedelta, lambda td: td.microseconds)
 
-        commit = self._context.get("COMMIT", None)
+        commit = self._meta.build_ref
         if commit:
             commit = converter.unstructure(commit)
 
@@ -272,16 +269,9 @@ class VerificationReport:
 
     def dumps(self) -> str:
         """Render report as HTML page."""
-        meta = PageMetadata(
-            build_key=self._config.TEMPLATES_CACHE_BUST_VALUE,
-            build_time=datetime.now(tz=UTC),
-            sentry_src=self._config.TEMPLATES_SENTRY_SRC,
-            plausible_domain=self._config.TEMPLATES_PLAUSIBLE_DOMAIN,
-            html_title="Verification Results",
-        )
         data = self.data
-        data["time"] = FormattedDate.from_rec_date(Date(date=datetime.fromisoformat(data["time"])))
-        return self._jinja.get_template(self._template_path).render(data=data, meta=meta)
+        self._meta.html_title = "Verification Results"
+        return self._jinja.get_template(self._template_path).render(data=data, meta=self._meta)
 
 
 class VerificationExporter(Exporter):
@@ -303,19 +293,19 @@ class VerificationExporter(Exporter):
 
     def __init__(
         self,
-        config: Config,
         logger: logging.Logger,
+        meta: ExportMeta,
         s3: S3Client,
         get_record: Callable[[str], RecordRevision],
         context: VerificationContext,
     ) -> None:
         """Initialise exporter."""
-        super().__init__(config, logger, s3)
+        super().__init__(logger=logger, meta=meta, s3=s3)
         self._get_record = get_record
         self._context = context
         self._jobs: list[VerificationJob] = []
         self._selected_identifiers: set[str] = set()
-        self._export_path = self._config.EXPORT_PATH / "-" / "verification"
+        self._export_path = self._meta.export_path / "-" / "verification"
 
     @property
     def selected_identifiers(self) -> set[str]:
@@ -388,12 +378,12 @@ class VerificationExporter(Exporter):
     @property
     def report(self) -> VerificationReport:
         """Generate a verification report from verification jobs."""
-        return VerificationReport(config=self._config, jobs=self._jobs, context=self._context)
+        return VerificationReport(meta=self._meta.site_metadata, jobs=self._jobs, context=self._context)
 
     def run(self) -> None:
         """Execute verification jobs."""
         self._init_jobs()
-        self._jobs = Parallel(n_jobs=self._config.PARALLEL_JOBS)(delayed(run_job)(job) for job in self._jobs)
+        self._jobs = Parallel(n_jobs=self._meta.parallel_jobs)(delayed(run_job)(job) for job in self._jobs)
 
     def export(self) -> None:
         """Export JSON and HTML report files to local directory."""

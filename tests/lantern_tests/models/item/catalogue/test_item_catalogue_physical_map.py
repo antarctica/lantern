@@ -22,8 +22,8 @@ from lantern.lib.metadata_library.models.record.enums import (
     HierarchyLevelCode,
 )
 from lantern.models.item.base.elements import Extent as ItemExtent
-from lantern.models.item.catalogue import Dates, Identifiers, ItemCatalogue
-from lantern.models.item.catalogue.elements import ItemCatalogueSummary
+from lantern.models.item.catalogue.elements import Dates, Identifiers, ItemCatalogueSummary
+from lantern.models.item.catalogue.item import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import (
     AdditionalInfoTab,
     Extent,
@@ -32,6 +32,7 @@ from lantern.models.item.catalogue.special.physical_map import (
     side_index_label,
 )
 from lantern.models.record.revision import RecordRevision
+from lantern.models.site import SiteMeta
 from tests.conftest import _get_record
 
 
@@ -235,10 +236,10 @@ class TestAdditionalInfoTab:
 class TestItemCataloguePhysicalMap:
     """Test catalogue item."""
 
-    def test_init(self, fx_config: Config, fx_item_physical_map_model_min: ItemCataloguePhysicalMap):
+    def test_init(self, fx_site_meta: SiteMeta, fx_item_physical_map_model_min: ItemCataloguePhysicalMap):
         """Can create an ItemCatalogue."""
         item = ItemCataloguePhysicalMap(
-            config=fx_config,
+            site_meta=fx_site_meta,
             record=fx_item_physical_map_model_min._record,
             get_record=_get_record,
         )
@@ -302,7 +303,7 @@ class TestItemCataloguePhysicalMap:
 
     def test_graphics(
         self,
-        fx_config: Config,
+        fx_site_meta: SiteMeta,
         fx_revision_config_min: dict,
         fx_item_physical_map_model_min: ItemCataloguePhysicalMap,
     ):
@@ -324,7 +325,7 @@ class TestItemCataloguePhysicalMap:
         record = fx_item_physical_map_model_min._record
         record.identification.graphic_overviews.append(GraphicOverview(identifier="x", href="x", mime_type="image/png"))
         item = ItemCataloguePhysicalMap(
-            config=fx_config,
+            site_meta=fx_site_meta,
             record=record,
             get_record=_get_local_record,
         )

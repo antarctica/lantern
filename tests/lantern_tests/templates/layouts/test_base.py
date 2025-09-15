@@ -4,21 +4,24 @@ from datetime import UTC, datetime
 from bs4 import BeautifulSoup
 from jinja2 import Environment, PackageLoader, select_autoescape
 
-from lantern.models.templates import PageMetadata
+from lantern.models.site import SiteMeta
 
 
 class TestLayoutBase:
     """Test base layout template."""
 
     @property
-    def page_metadata(self) -> PageMetadata:
+    def page_metadata(self) -> SiteMeta:
         """Get page metadata."""
-        return PageMetadata(
+        return SiteMeta(
+            base_url="x",
             build_key="x",
             build_time=datetime.now(tz=UTC),
             html_title="x",
             sentry_src="x",
             plausible_domain="x",
+            embedded_maps_endpoint="x",
+            items_enquires_endpoint="x",
             html_open_graph={"x": "y"},
             html_schema_org=json.dumps({"x": "y"}),
         )
@@ -34,7 +37,7 @@ class TestLayoutBase:
         meta = self.page_metadata
         html = BeautifulSoup(self._render(), parser="html.parser", features="lxml")
 
-        assert html.head.title.string == meta.html_title
+        assert html.head.title.string == meta.html_title_suffixed
 
         for key, val in meta.html_open_graph.items():
             assert html.head.find(name="meta", property=key)["content"] == val

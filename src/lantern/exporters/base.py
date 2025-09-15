@@ -10,11 +10,11 @@ from importlib_resources import files as resources_files
 from jinja2 import Environment, PackageLoader, select_autoescape
 from mypy_boto3_s3 import S3Client
 
-from lantern.config import Config
 from lantern.lib.metadata_library.models.record.elements.common import Identifier
 from lantern.models.record import Record
 from lantern.models.record.const import ALIAS_NAMESPACE
 from lantern.models.record.revision import RecordRevision
+from lantern.models.site import ExportMeta
 
 
 class S3Utils:
@@ -94,23 +94,21 @@ class Exporter(ABC):
     Some providers act at a site level, such as SiteExporter (which coordinates other exporters).
 
     This base exporter class is intended to be generic with subclasses being more opinionated.
+
+    Exporters include an ExportMetadata instance which extends SiteMetadata to provide both internal information such
+    as the local export path and information intended for templates such as the build time.
     """
 
-    def __init__(self, config: Config, logger: logging.Logger, s3: S3Client) -> None:
-        """
-        Initialise exporter.
-
-        Where `export_base` is an output directory for each export type which MUST be relative to
-        `Config.EXPORT_PATH`, so that a base S3 key can be generated from it.
-        """
-        self._config = config
+    def __init__(self, logger: logging.Logger, meta: ExportMeta, s3: S3Client) -> None:
+        """Initialise exporter."""
         self._logger = logger
+        self._meta = meta
         self._s3_client = s3
         self._s3_utils = S3Utils(
             logger=logger,
             s3=self._s3_client,
-            s3_bucket=self._config.AWS_S3_BUCKET,
-            relative_base=self._config.EXPORT_PATH,
+            s3_bucket=self._meta.s3_bucket,
+            relative_base=self._meta.export_path,
         )
 
     @staticmethod
@@ -146,22 +144,25 @@ class Exporter(ABC):
 
 
 class ResourceExporter(Exporter, ABC):
-    """
-    Base exporter for resource records or items.
-
-    Base class for exporters related to Record and Item variants created for resources.
-    """
+    """Base class for exporters handling an individual Record or Item instance."""
 
     def __init__(
         self,
-        config: Config,
         logger: logging.Logger,
+        meta: ExportMeta,
         s3: S3Client,
         record: RecordRevision,
         export_base: Path,
         export_name: str,
     ) -> None:
-        super().__init__(config=config, logger=logger, s3=s3)
+        """
+        Initialise resource exporter.
+
+        Where:
+        - export_base is a directory for the exporter type
+        - export_name is a name of the file to be created in export_base based on the associated record
+        """
+        super().__init__(logger=logger, meta=meta, s3=s3)
         self._export_path = export_base.joinpath(export_name)
         self._validate(export_base)
         self._record = record
@@ -169,7 +170,7 @@ class ResourceExporter(Exporter, ABC):
     def _validate(self, export_base: Path) -> None:
         """Validate exporter configuration."""
         try:
-            _ = export_base.relative_to(self._config.EXPORT_PATH)
+            _ = export_base.relative_to(self._meta.export_path)
         except ValueError as e:
             msg = "Export base must be relative to EXPORT_PATH."
             raise ValueError(msg) from e

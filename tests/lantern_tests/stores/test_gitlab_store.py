@@ -83,7 +83,7 @@ class TestGitLabLocalCache:
         """Can determine if cache is populated or not."""
         cache = request.getfixturevalue(fixture)
         # noinspection PyTestUnpassedFixture
-        assert cache._exists == exists
+        assert cache.exists == exists
 
     @pytest.mark.vcr
     @pytest.mark.block_network
@@ -122,7 +122,7 @@ class TestGitLabLocalCache:
 
         fx_gitlab_cache._build_cache(records=records, head_commit=head_commit)
 
-        assert fx_gitlab_cache._exists
+        assert fx_gitlab_cache.exists
         assert len(list(fx_gitlab_cache._records_path.glob("*.pickle"))) == 1
 
         with fx_gitlab_cache._head_path.open() as f:
@@ -168,7 +168,7 @@ class TestGitLabLocalCache:
 
         fx_gitlab_cache_pop._build_cache(records=records, head_commit=head_commit)
 
-        assert fx_gitlab_cache_pop._exists
+        assert fx_gitlab_cache_pop.exists
         assert len(list(fx_gitlab_cache_pop._records_path.glob("*.pickle"))) == 1
         updated_record = fx_gitlab_cache_pop.get()[0]
         assert updated_record.file_identifier == file_identifier
@@ -261,7 +261,7 @@ class TestGitLabLocalCache:
 
         fx_gitlab_cache._create()
 
-        assert fx_gitlab_cache._exists
+        assert fx_gitlab_cache.exists
 
     def test_refresh(self, mocker: MockerFixture, fx_gitlab_cache_pop: GitLabLocalCache, fx_record_config_min: dict):
         """
@@ -282,7 +282,7 @@ class TestGitLabLocalCache:
 
         fx_gitlab_cache_pop._refresh()
 
-        assert fx_gitlab_cache_pop._exists
+        assert fx_gitlab_cache_pop.exists
         assert fx_gitlab_cache_pop.head_commit_local != original_head
 
     def test_refresh_integrity(
@@ -348,7 +348,7 @@ class TestGitLabLocalCache:
         if online and current:
             assert "Records cache exists and is current, no changes needed." in caplog.text
 
-        assert fx_gitlab_cache_pop._exists
+        assert fx_gitlab_cache_pop.exists
 
     def test_get(self, fx_gitlab_cache_pop: GitLabLocalCache):
         """Can get records from cache."""
@@ -370,11 +370,11 @@ class TestGitLabLocalCache:
         """Can clear cache contents."""
         mocker.patch.object(fx_gitlab_cache_pop, "_ensure_exists", return_value=None)
 
-        assert fx_gitlab_cache_pop._exists
+        assert fx_gitlab_cache_pop.exists
 
         fx_gitlab_cache_pop.purge()
 
-        assert not fx_gitlab_cache_pop._exists
+        assert not fx_gitlab_cache_pop.exists
         assert not fx_gitlab_cache_pop._records_path.exists()
 
 
@@ -415,6 +415,12 @@ class TestGitLabStore:
         result = fx_gitlab_store_cached.head_commit
         assert isinstance(result, str)
         assert len(result) > 0
+
+    @pytest.mark.cov()
+    def test_head_commit_no_cache(self, fx_gitlab_store: GitLabStore):
+        """Can get ID of the latest commit known to the local cache."""
+        result = fx_gitlab_store.head_commit
+        assert result is None
 
     def test_get_remote_hashed_path(self, fx_gitlab_store: GitLabStore):
         """Can get the path to a record within the remote repository."""

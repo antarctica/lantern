@@ -1,7 +1,6 @@
 import logging
 from collections.abc import Callable
 from enum import Enum
-from pathlib import Path
 
 from boto3 import client as S3Client  # noqa: N812
 from joblib import Parallel, delayed
@@ -14,6 +13,7 @@ from lantern.exporters.json import JsonExporter
 from lantern.exporters.xml import IsoXmlExporter, IsoXmlHtmlExporter
 from lantern.log import init as init_logging
 from lantern.models.record.revision import RecordRevision
+from lantern.models.site import ExportMeta
 
 
 class JobMethod(Enum):
@@ -41,10 +41,10 @@ def _job_s3(config: Config) -> S3ClientT:
 def _job(
     logger: logging.Logger,
     config: Config,
+    meta: ExportMeta,
     exporter: Callable[..., ResourceExporter],
     record: RecordRevision,
     get_record: Callable[[str], RecordRevision],
-    export_base: Path,
     method: JobMethod,
 ) -> None:
     """
@@ -58,15 +58,11 @@ def _job(
     s3 = _job_s3(config=config)
 
     if exporter == HtmlAliasesExporter:
-        exporter_ = HtmlAliasesExporter(logger=logger, config=config, s3=s3, record=record, export_base=export_base)
+        exporter_ = HtmlAliasesExporter(logger=logger, meta=meta, s3=s3, record=record)
     elif exporter == HtmlExporter:
-        export_base = export_base / "items"
-        exporter_ = HtmlExporter(
-            logger=logger, config=config, s3=s3, record=record, export_base=export_base, get_record=get_record
-        )
+        exporter_ = HtmlExporter(logger=logger, meta=meta, s3=s3, record=record, get_record=get_record)
     else:
-        export_base = export_base / "records"
-        exporter_ = exporter(logger=logger, config=config, s3=s3, record=record, export_base=export_base)
+        exporter_ = exporter(logger=logger, meta=meta, s3=s3, record=record)
 
     msg = f"{method.value.capitalize()}ing record '{record.file_identifier}' using {exporter_.name} exporter"
     logger.info(msg)
@@ -79,15 +75,23 @@ class RecordsExporter(Exporter):
 
     Coordinates exporting/publishing a selected set of records using format specific exporters.
 
-    Records are processed in parallel where config.PARALLEL_JOBS != 1.
+    Records are processed in parallel where meta.parallel_jobs != 1.
+
+    Config class needed for S3 client creation in parallel jobs.
     """
 
     def __init__(
-        self, config: Config, logger: logging.Logger, s3: S3ClientT, get_record: Callable[[str], RecordRevision]
+        self,
+        logger: logging.Logger,
+        config: Config,
+        meta: ExportMeta,
+        s3: S3ClientT,
+        get_record: Callable[[str], RecordRevision],
     ) -> None:
         """Initialise exporter."""
-        super().__init__(config=config, logger=logger, s3=s3)
-        self._parallel_jobs = config.PARALLEL_JOBS
+        super().__init__(logger=logger, meta=meta, s3=s3)
+        self._config = config
+        self._parallel_jobs = meta.parallel_jobs
         self._selected_identifiers: set[str] = set()
         self._get_record = get_record
 
@@ -115,7 +119,13 @@ class RecordsExporter(Exporter):
         # where job[0] is an exporter class and job[1] a record
         Parallel(n_jobs=self._parallel_jobs)(
             delayed(_job)(
-                self._logger, self._config, job[0], job[1], self._get_record, self._config.EXPORT_PATH, method
+                self._logger,
+                self._config,
+                self._meta,
+                job[0],
+                job[1],
+                self._get_record,
+                method,
             )
             for job in jobs
         )

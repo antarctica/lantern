@@ -3,7 +3,7 @@
 {% macro html_head(data) %}
   <head>
     {{ head_meta() }}
-    {{ head_title(data.html_title) }}
+    {{ head_title(data.html_title_suffixed) }}
     {% if data.html_open_graph %}
       {{ head_open_graph(data.html_open_graph) }}
     {% endif %}

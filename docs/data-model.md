@@ -269,3 +269,16 @@ The `lantern.models.verification.jobs.VerificationJob` Python data class impleme
 
 A typed dict, `lantern.models.verification.types.VerificationContext`, defines available keys for the context object
 used by each job. Various enumerations are used to define values for check types and job status/results.
+
+## Static site metadata
+
+Site metadata represents context about a catalogue site, such as its URL base, build time, etc.
+
+The `lantern.models.site.SiteMeta` Python data class implements this concept.
+
+## Exporter metadata
+
+Exporter metadata is a superset of [Site metadata](#static-site-metadata) including additional properties such as the
+export path to avoid needing to pass [Config](/docs/config.md) instances to exporters.
+
+The `lantern.models.site.ExportMeta` Python data class implements this concept, inheriting from `SiteMeta`.

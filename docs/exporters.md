@@ -39,6 +39,9 @@ See the [Config](/docs/config.md#config-options) docs for how to set these confi
 
 See the [Infrastructure](/docs/infrastructure.md#exporters) docs for credentials used by exporters.
 
+In most cases, these properties are accessed indirectly via an [Exporter Metadata](/docs/data-model.md#exporter-metadata)
+instance, which provides additional context such as the build time and associated commit for exported content.
+
 > [!IMPORTANT]
 > For auditing and to follow best practice, per-user IAM credentials, with suitable, limited, permissions to manage
 > items in the referenced bucket, SHOULD be used over common credentials.
@@ -114,6 +117,9 @@ Coordinates other [Resource Exporters](#resource-exporters) for selected [Record
 
 Internally, the records exporter generates a set of individual jobs (per record and exporter) which are processed in
 parallel using a worker pool for better performance.
+
+This exporter requires a [Config](/docs/config.md) object to access credentials for standalone AWS S3 client instances
+used in parallel processing.
 
 ## Site exporters
 

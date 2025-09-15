@@ -112,6 +112,25 @@ Secondary top-level items:
          └── manifest.webmanifest
 ```
 
+## Site navigation
+
+### Primary navigation
+
+All pages inheriting from the [Base Layout](#base-layout) will include primary navigation links shown in either the
+site header or footer (for desktop and mobile respectively).
+
+These links always included:
+
+- the catalogue root
+- the [BAS Public Website](https://www.bas.ac.uk)
+
+Additional links MAY be included for significant sections of the site, such as the BAS Maps Catalogue, or relevant
+external resources, such as data access guides. Additional links are defined in the `primary_nav_items` variable within
+the [Site Macros](#site-macros).
+
+> [!NOTE]
+> A high bar SHOULD apply items included in the primary navigation.
+
 ## Styling
 
 [Tailwind](https://tailwindcss.com) is used as a base CSS framework, extended to:
@@ -342,6 +361,7 @@ Common macros are intended for use across templates to avoid inconsistencies and
 
 `src/lantern/resources/templates/_macros/site.html.j2` defines:
 
+- a `primary_nav_items` variable for [Primary Navigation](#primary-navigation)
 - a `html_head` macro builds a `<head>` element
   - requires a [Site Metadata](/docs/data-model.md#static-site-metadata) context object
 - a `header` macro builds a site wide `<header>` element with side wide navigation and development phase banner

@@ -1,5 +1,8 @@
 {% import '_macros/common.html.j2' as com %}
 
+{# tuples of ('label', 'href', 'icon class') #}
+{% set primary_nav_items = [] %}
+
 {% macro html_head(data) %}
   <head>
     {{ head_meta() }}
@@ -157,6 +160,12 @@
   <script defer type="application/ld+json">{{ data }}</script>
 {% endmacro %}
 
+{% macro primary_nav() %}
+  {% for item in primary_nav_items %}
+    <a class="hover:underline" href="{{ item[1] }}"><i class="fa-fw {{ item[2] }}"></i> {{ item[0] }}</a>
+  {% endfor %}
+{% endmacro %}
+
 {% macro top_anchor() %}
   <div id="{{ com.back_to_top_id() }}"></div>
 {% endmacro %}
@@ -169,10 +178,17 @@
 {% endmacro %}
 
 {% macro navbar() %}
-  <nav id="site-nav" class="bg-grey-950 dark:bg-black text-white">
-    <div class="{{ com.container_classes() }} py-4 lg:flex lg:justify-between lg:items-center">
-      <a id="site-title" class="block font-bold text-lg text-center lg:text-left" href="/">BAS Data Catalogue</a>
-      <a class="hidden lg:block hover:underline" href="https://www.bas.ac.uk">Part of British Antarctic Survey</a>
+  <nav id="site-nav" class="lg:p-4 bg-grey-950 dark:bg-black text-white">
+    <div class="{{ com.container_classes() }} py-4 lg:flex lg:gap-8 lg:justify-between lg:items-end">
+      <div class="flex-none flex justify-center lg:justify-start items-center">
+        <a id="site-title" class="block font-bold text-lg text-center lg:text-left" href="/">BAS Data Catalogue</a>
+      </div>
+      <div class="flex-1 hidden lg:flex items-center gap-4 justify-start">
+        {{ primary_nav() }}
+      </div>
+      <div class="flex-1 flex self-center justify-end">
+        <a class="hidden lg:block hover:underline" href="https://www.bas.ac.uk">Part of British Antarctic Survey</a>
+      </div>
     </div>
   </nav>
 {% endmacro %}
@@ -193,6 +209,9 @@
       <div class="flex flex-col justify-between space-y-4 lg:space-y-0 lg:flex-row">
         {{ com.feedback_trigger(classes=com.footer_link_classes(), fallback=data.fallback_email, text='Is something wrong with this page?') }}
         <a class="{{ com.footer_link_classes() }} lg:text-right" href="#{{ com.back_to_top_id() }}">Back to top</a>
+      </div>
+      <div class="block lg:hidden flex justify-center justify-between {{ com.footer_link_classes() }}">
+        {{ primary_nav() }}
       </div>
       <div class="flex flex-col justify-between space-y-4 lg:space-y-0 lg:flex-row">
         <div class="lg:text-left lg:flex lg:space-x-2">

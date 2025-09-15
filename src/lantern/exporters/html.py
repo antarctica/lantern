@@ -1,15 +1,17 @@
 import logging
+
+# noinspection PyPep8Naming
+import xml.etree.ElementTree as ET
 from collections.abc import Callable
-from pathlib import Path
 
 from mypy_boto3_s3 import S3Client
 
-from lantern.config import Config
 from lantern.exporters.base import ResourceExporter, get_jinja_env, get_record_aliases, prettify_html
-from lantern.models.item.catalogue import ItemCatalogue
+from lantern.models.item.catalogue.item import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
 from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
+from lantern.models.site import ExportMeta
 
 
 class HtmlExporter(ResourceExporter):
@@ -23,22 +25,21 @@ class HtmlExporter(ResourceExporter):
 
     def __init__(
         self,
-        config: Config,
         logger: logging.Logger,
+        meta: ExportMeta,
         s3: S3Client,
         record: RecordRevision,
-        export_base: Path,
         get_record: Callable[[str], RecordRevision],
     ) -> None:
         """
         Initialise.
 
-        `get_record_summary` requires a callable to get a RecordSummary for a given identifier (used for related items).
+        `get_record` requires a callable to get items related to the subject record.
         """
-        export_base = export_base / record.file_identifier
+        export_base = meta.export_path / "items" / record.file_identifier
         export_name = "index.html"
         super().__init__(
-            config=config, logger=logger, s3=s3, record=record, export_base=export_base, export_name=export_name
+            logger=logger, meta=meta, s3=s3, record=record, export_base=export_base, export_name=export_name
         )
         self._get_record = get_record
         self._jinja = get_jinja_env()
@@ -59,11 +60,12 @@ class HtmlExporter(ResourceExporter):
         """Encode record as data catalogue item in HTML."""
         item_class = self._item_class()
         item = item_class(
-            config=self._config,
+            site_meta=self._meta.site_metadata,
             record=self._record,
             get_record=self._get_record,
         )
-        raw = self._jinja.get_template(self._template_path).render(item=item, meta=item.page_metadata)
+
+        raw = self._jinja.get_template(self._template_path).render(item=item, meta=item.site_metadata)
         return prettify_html(raw)
 
 
@@ -76,9 +78,7 @@ class HtmlAliasesExporter(ResourceExporter):
     Uses S3 object redirects with a minimal HTML page as a fallback.
     """
 
-    def __init__(
-        self, config: Config, logger: logging.Logger, s3: S3Client, record: RecordRevision, export_base: Path
-    ) -> None:
+    def __init__(self, logger: logging.Logger, meta: ExportMeta, s3: S3Client, record: RecordRevision) -> None:
         """
         Initialise.
 
@@ -87,11 +87,11 @@ class HtmlAliasesExporter(ResourceExporter):
         The `export_base` parameter MUST be the root of the overall site/catalogue output directory, so aliases under
         various prefixes can be generated.
         """
-        export_name = f"{record.file_identifier}.html"
-        export_base = export_base
+        export_base = meta.export_path
+        export_name = f"--{record.file_identifier}--"
         self._site_base = export_base
         super().__init__(
-            config=config, logger=logger, s3=s3, record=record, export_base=export_base, export_name=export_name
+            logger=logger, meta=meta, s3=s3, record=record, export_base=export_base, export_name=export_name
         )
 
     def _get_aliases(self) -> list[str]:
@@ -111,13 +111,16 @@ class HtmlAliasesExporter(ResourceExporter):
 
     def dumps(self) -> str:
         """Generate redirect page for record."""
-        return f"""
-<!DOCTYPE html>
-<html lang="en-GB">
-    <head><title>BAS Data Catalogue</title><meta http-equiv="refresh" content="0;url={self.target}" /></head>
-    <body>Click <a href="{self.target}">here</a> if you are not redirected after a few seconds.</body>
-</html>
-        """
+        html = ET.Element("html", attrib={"lang": "en-GB"})
+        head = ET.SubElement(html, "head")
+        title = ET.SubElement(head, "title")
+        title.text = "BAS Data Catalogue"
+        ET.SubElement(head, "meta", attrib={"http-equiv": "refresh", "content": f"0;url={self.target}"})
+        body = ET.SubElement(html, "body")
+        a = ET.SubElement(body, "a", attrib={"href": self.target})
+        a.text = "Click here if you are not redirected after a few seconds."
+        html_str = ET.tostring(html, encoding="unicode", method="html")
+        return f"<!DOCTYPE html>\n{html_str}"
 
     def export(self) -> None:
         """Write redirect pages for each alias to export directory."""

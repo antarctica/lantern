@@ -141,7 +141,7 @@ def stage2(logger: logging.Logger, config: Config) -> None:
         cache_path=config.STORE_GITLAB_CACHE_PATH,
     )
 
-    if store._cache._exists:
+    if store._cache.exists:
         print(f"Local cache path {config.STORE_GITLAB_CACHE_PATH.resolve()} exists and needs purging.")
         store._cache.purge()
 

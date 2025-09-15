@@ -8,9 +8,10 @@ from boto3 import client as S3Client  # noqa: N812
 from pytest_mock import MockerFixture
 
 from lantern.exporters.html import HtmlAliasesExporter, HtmlExporter
-from lantern.models.item.catalogue import ItemCatalogue
+from lantern.models.item.catalogue.item import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
 from lantern.models.record.revision import RecordRevision
+from lantern.models.site import ExportMeta
 from tests.conftest import _get_record
 
 
@@ -31,15 +32,11 @@ class TestHtmlExporter:
         mock_config = mocker.Mock()
         type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
         type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
-        expected = output_path.joinpath(f"{fx_revision_model_min.file_identifier}/index.html")
+        meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
+        expected = output_path / "items" / f"{fx_revision_model_min.file_identifier}/index.html"
 
         exporter = HtmlExporter(
-            config=mock_config,
-            logger=fx_logger,
-            s3=fx_s3_client,
-            record=fx_revision_model_min,
-            export_base=output_path,
-            get_record=_get_record,
+            meta=meta, logger=fx_logger, s3=fx_s3_client, record=fx_revision_model_min, get_record=_get_record
         )
 
         assert isinstance(exporter, HtmlExporter)
@@ -83,14 +80,9 @@ class TestHtmlAliasesExporter:
         mock_config = mocker.Mock()
         type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
         type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
+        meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
-        exporter = HtmlAliasesExporter(
-            config=mock_config,
-            logger=fx_logger,
-            s3=fx_s3_client,
-            record=fx_revision_model_min,
-            export_base=output_path,
-        )
+        exporter = HtmlAliasesExporter(meta=meta, logger=fx_logger, s3=fx_s3_client, record=fx_revision_model_min)
 
         assert isinstance(exporter, HtmlAliasesExporter)
         assert exporter.name == "Item Aliases"

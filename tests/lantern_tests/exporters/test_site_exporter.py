@@ -11,6 +11,7 @@ from pytest_mock import MockerFixture
 
 from lantern.exporters.site import SiteExporter, SiteIndexExporter, SitePagesExporter, SiteResourcesExporter
 from lantern.models.record.revision import RecordRevision
+from lantern.models.site import ExportMeta
 
 
 class TestSiteIndexExporter:
@@ -28,14 +29,9 @@ class TestSiteIndexExporter:
         s3_client = mocker.MagicMock()
         mock_config = mocker.Mock()
         type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
+        meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
-        exporter = SiteIndexExporter(
-            config=mock_config,
-            s3=s3_client,
-            logger=fx_logger,
-            get_record=fx_get_record,
-            commit_ref="83fake48",
-        )
+        exporter = SiteIndexExporter(meta=meta, s3=s3_client, logger=fx_logger, get_record=fx_get_record)
 
         assert isinstance(exporter, SiteIndexExporter)
         assert exporter.name == "Site Index"
@@ -43,21 +39,21 @@ class TestSiteIndexExporter:
     def test_dumps(self, fx_exporter_site_index_sel: SiteIndexExporter):
         """Can dump site index."""
         html = BeautifulSoup(fx_exporter_site_index_sel._dumps(), parser="html.parser", features="lxml")
-        assert html.select_one("h1:contains('Catalogue index')")
+        assert html.select_one("h1:-soup-contains('Catalogue index')")
 
     def test_export(self, fx_exporter_site_index_sel: SiteIndexExporter):
         """Can export site index to a local file."""
-        site_path = fx_exporter_site_index_sel._config.EXPORT_PATH
+        site_path = fx_exporter_site_index_sel._meta.export_path
         expected = site_path.joinpath("-", "index", "index.html")
 
         fx_exporter_site_index_sel.export()
 
-        result = list(fx_exporter_site_index_sel._config.EXPORT_PATH.glob("**/*.*"))
+        result = list(fx_exporter_site_index_sel._meta.export_path.glob("**/*.*"))
         assert expected in result
 
     def test_publish(self, fx_exporter_site_index_sel: SiteIndexExporter, fx_s3_bucket_name: str):
         """Can publish site index to S3."""
-        site_path = fx_exporter_site_index_sel._config.EXPORT_PATH
+        site_path = fx_exporter_site_index_sel._meta.export_path
 
         fx_exporter_site_index_sel.publish()
 
@@ -87,8 +83,9 @@ class TestSitePageExporter:
         s3_client = mocker.MagicMock()
         mock_config = mocker.Mock()
         type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
+        meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
-        exporter = SitePagesExporter(config=mock_config, s3=s3_client, logger=fx_logger)
+        exporter = SitePagesExporter(meta=meta, s3=s3_client, logger=fx_logger)
 
         assert isinstance(exporter, SitePagesExporter)
         assert exporter.name == "Site Pages"
@@ -96,7 +93,7 @@ class TestSitePageExporter:
     def test_dumps(self, fx_exporter_site_pages: SitePagesExporter):
         """Can dump a site page with expected title and site title."""
         expected = "Privacy Policy | BAS Data Catalogue"
-        result = fx_exporter_site_pages._dumps("legal/privacy.html.j2")
+        result = fx_exporter_site_pages._dumps("_views/legal/privacy.html.j2")
         html = BeautifulSoup(result, parser="html.parser", features="lxml")
 
         assert html.head.title.string == expected
@@ -104,10 +101,10 @@ class TestSitePageExporter:
 
     def test_export_page(self, fx_exporter_site_pages: SitePagesExporter):
         """Can export a site page to a local file."""
-        site_path = fx_exporter_site_pages._config.EXPORT_PATH
+        site_path = fx_exporter_site_pages._meta.export_path
         expected = site_path.joinpath("legal/privacy/index.html")
 
-        fx_exporter_site_pages.export_page("legal/privacy.html.j2")
+        fx_exporter_site_pages._export_page("_views/legal/privacy.html.j2")
 
         assert expected.exists()
 
@@ -115,19 +112,19 @@ class TestSitePageExporter:
         """Can publish a site page to S3."""
         expected = "legal/privacy/index.html"
 
-        fx_exporter_site_pages.publish_page("legal/privacy.html.j2")
+        fx_exporter_site_pages._publish_page("_views/legal/privacy.html.j2")
 
         result = fx_exporter_site_pages._s3_utils._s3.get_object(Bucket=fx_s3_bucket_name, Key=expected)
         assert result["ResponseMetadata"]["HTTPStatusCode"] == 200
 
     def test_export(self, fx_exporter_site_pages: SitePagesExporter):
         """Can export site pages to local files."""
-        site_path = fx_exporter_site_pages._config.EXPORT_PATH
+        site_path = fx_exporter_site_pages._meta.export_path
         expected = [site_path.joinpath(path) for path in self.relative_paths]
 
         fx_exporter_site_pages.export()
 
-        result = list(fx_exporter_site_pages._config.EXPORT_PATH.glob("**/*.*"))
+        result = list(fx_exporter_site_pages._meta.export_path.glob("**/*.*"))
         for path in expected:
             assert path in result
 
@@ -153,8 +150,9 @@ class TestSiteResourcesExporter:
         s3_client = mocker.MagicMock()
         mock_config = mocker.Mock()
         type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
+        meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
-        exporter = SiteResourcesExporter(config=mock_config, logger=fx_logger, s3=s3_client)
+        exporter = SiteResourcesExporter(meta=meta, logger=fx_logger, s3=s3_client)
 
         assert isinstance(exporter, SiteResourcesExporter)
         assert exporter.name == "Site Resources"
@@ -286,14 +284,9 @@ class TestSiteExporter:
         s3_client = mocker.MagicMock()
         mock_config = mocker.Mock()
         type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
+        meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
-        exporter = SiteExporter(
-            config=mock_config,
-            s3=s3_client,
-            logger=fx_logger,
-            get_record=fx_get_record,
-            head_commit_ref="83fake48",
-        )
+        exporter = SiteExporter(config=mock_config, meta=meta, s3=s3_client, logger=fx_logger, get_record=fx_get_record)
 
         assert isinstance(exporter, SiteExporter)
         assert exporter.name == "Site"
@@ -309,14 +302,15 @@ class TestSiteExporter:
             output_path = Path(tmp_path)
             mock_config = mocker.Mock()
             type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
-            fx_exporter_site._config = mock_config
+            meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
+            fx_exporter_site._meta = meta
 
-            fx_exporter_site._config.EXPORT_PATH.joinpath("x").touch()
+            fx_exporter_site._meta.export_path.joinpath("x").touch()
             fx_exporter_site._s3_utils.upload_content(key="x", content_type="text/plain", body="x")
 
             fx_exporter_site.purge()
 
-            assert fx_exporter_site._config.EXPORT_PATH.joinpath("x").exists() is False
+            assert fx_exporter_site._meta.export_path.joinpath("x").exists() is False
             result = fx_exporter_site._s3_client.list_objects(Bucket=fx_s3_bucket_name)
             assert "contents" not in result
 
@@ -335,7 +329,7 @@ class TestSiteExporter:
 
         fx_exporter_site.purge()
 
-        assert list(fx_exporter_site._config.EXPORT_PATH.glob("**/*.*")) == []
+        assert list(fx_exporter_site._meta.export_path.glob("**/*.*")) == []
         result = fx_exporter_site._s3_client.list_objects(Bucket=fx_s3_bucket_name)
         assert "contents" not in result
 
@@ -351,7 +345,7 @@ class TestSiteExporter:
     def test_export(self, fx_exporter_site: SiteExporter, fx_revision_model_min: RecordRevision):
         """Can export all site components to local files."""
         record = fx_revision_model_min
-        site_path = fx_exporter_site._config.EXPORT_PATH
+        site_path = fx_exporter_site._meta.export_path
         fx_exporter_site.select({record.file_revision})
         expected = [
             site_path.joinpath("favicon.ico"),
@@ -365,7 +359,7 @@ class TestSiteExporter:
 
         fx_exporter_site.export()
 
-        result = list(fx_exporter_site._config.EXPORT_PATH.glob("**/*.*"))
+        result = list(fx_exporter_site._meta.export_path.glob("**/*.*"))
         for path in expected:
             assert path in result
 

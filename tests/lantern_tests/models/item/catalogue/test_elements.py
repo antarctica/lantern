@@ -29,8 +29,17 @@ from lantern.models.item.base import AccessLevel, ItemBase
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.base.elements import Link
 from lantern.models.item.base.enums import ResourceTypeLabel
-from lantern.models.item.catalogue import Aggregations, Dates, Extent, PageHeader, PageSummary
-from lantern.models.item.catalogue.elements import FormattedDate, Identifiers, ItemCatalogueSummary, Maintenance
+from lantern.models.item.catalogue.elements import (
+    Aggregations,
+    Dates,
+    Extent,
+    FormattedDate,
+    Identifiers,
+    ItemCatalogueSummary,
+    Maintenance,
+    PageHeader,
+    PageSummary,
+)
 from lantern.models.item.catalogue.enums import ResourceTypeIcon
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from tests.conftest import _get_record

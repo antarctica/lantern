@@ -331,7 +331,7 @@ Macros are used extensively within templates, to emulate the component pattern c
 
 `src/lantern/resources/templates/_macros/site.html.j2` defines macros for:
 
-- classes for layouts, links, buttons, icons and other common elements
+- classes for layouts, links, buttons, tables, icons and other common elements
 - common identifiers for 'back to top' links, user feedback widget triggers, etc.
 - low level components such as internal and external links, page and item headers, layout containers, etc.
 - higher level components such as item summaries, alerts, etc.
@@ -343,11 +343,11 @@ Common macros are intended for use across templates to avoid inconsistencies and
 `src/lantern/resources/templates/_macros/site.html.j2` defines:
 
 - a `html_head` macro builds a `<head>` element
-  - requires a `PageMetadata` context object
+  - requires a [Site Metadata](/docs/data-model.md#static-site-metadata) context object
 - a `header` macro builds a site wide `<header>` element with side wide navigation and development phase banner
   including site feedback
 - a `footer` macro builds a side wide `<footer>` element with site feedback and legal information
-  - requires a `PageMetadata` context object
+  - requires a [Site Metadata](/docs/data-model.md#static-site-metadata) context object
 
 ### Item templates
 

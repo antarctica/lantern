@@ -58,8 +58,12 @@ public interface to:
 ## Resource exporters
 
 Resource exporters create format specific outputs derived from [Records](/docs/data-model.md#records) or
-[Items](/docs/data-model.md#items). Resource exporters inherit from the `lantern.exporters.base.ResourceExporter` base
-class.
+[Items](/docs/data-model.md#items). Exporters inherit from either:
+
+- `lantern.exporters.base.ResourcesExporter` where the exporter processes multiple Records or Items
+- `lantern.exporters.base.ResourceExporter` where the exporter processes a single Record or Item
+
+The `ResourcesExporter` base class includes a `selected_identifiers` property to set which Records/Items to process.
 
 When published to S3, user-defined object metadata is set to indicate the `file_identifier` and `file_revision` of the
 relevant [Record Revision](/docs/data-model.md#record-revisions).
@@ -133,7 +137,7 @@ and outputs that look across multiple Records.
 Generates a complete static site by combining outputs from the
 [Records Exporter](#records-resource-exporter) and other [Site Exporters](#site-exporters).
 
-The `loads()` method dynamically sets which [Records](/docs/data-model.md#records) to include.
+The `select()` method controls which [Records](/docs/data-model.md#records) to include.
 
 ### Site resources exporter
 

@@ -1,5 +1,6 @@
 import logging
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from mimetypes import guess_type
 from pathlib import Path
 from shutil import copytree
@@ -141,6 +142,31 @@ class Exporter(ABC):
     def publish(self) -> None:
         """Save dumped output to remote S3 bucket."""
         ...
+
+
+class ResourcesExporter(Exporter, ABC):
+    """Base class for exporters handling multiple Record or Item instances."""
+
+    def __init__(
+        self,
+        logger: logging.Logger,
+        meta: ExportMeta,
+        s3: S3Client,
+        get_record: Callable[[str], RecordRevision],
+    ) -> None:
+        super().__init__(logger=logger, meta=meta, s3=s3)
+        self._get_record = get_record
+        self._selected_identifiers = set()
+
+    @property
+    def selected_identifiers(self) -> set[str]:
+        """Selected file identifiers."""
+        return self._selected_identifiers
+
+    @selected_identifiers.setter
+    def selected_identifiers(self, identifiers: set[str]) -> None:
+        """Selected file identifiers."""
+        self._selected_identifiers = identifiers
 
 
 class ResourceExporter(Exporter, ABC):

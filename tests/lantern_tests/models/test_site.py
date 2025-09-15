@@ -27,21 +27,26 @@ class TestSiteMetadata:
             plausible_domain=expected,
             embedded_maps_endpoint=expected,
             items_enquires_endpoint=expected,
+            generator=expected,
+            version=expected,
         )
 
         assert meta.base_url == expected
         assert meta.build_key == expected
-        assert meta.build_time == fx_freezer_time
         assert meta.html_title == expected
         assert meta.sentry_src == expected
         assert meta.plausible_domain == expected
         assert meta.embedded_maps_endpoint == expected
         assert meta.items_enquires_endpoint == expected
+        assert meta.generator == expected
+        assert meta.version == expected
+        assert meta.build_time == fx_freezer_time
         assert meta.fallback_email == "magic@bas.ac.uk"
         assert meta.build_repo_ref is None
         assert meta.build_repo_base_url is None
         assert meta.html_open_graph == {}
         assert meta.html_schema_org is None
+        assert meta.html_description is None
 
     def test_all(self):
         """Can create a SiteMetadata instance with all possible values."""
@@ -57,12 +62,15 @@ class TestSiteMetadata:
             plausible_domain=expected_str,
             embedded_maps_endpoint=expected_str,
             items_enquires_endpoint=expected_str,
+            generator=expected_str,
+            version=expected_str,
             build_time=expected_time,
             fallback_email=expected_str,
             build_repo_ref=expected_str,
             build_repo_base_url=expected_str,
             html_open_graph=expected_dict,
             html_schema_org=json.dumps(expected_dict),
+            html_description=expected_str,
         )
 
         assert meta.build_time == expected_time
@@ -71,6 +79,7 @@ class TestSiteMetadata:
         assert meta.build_repo_base_url == expected_str
         assert meta.html_open_graph == expected_dict
         assert json.loads(meta.html_schema_org) == expected_dict
+        assert meta.html_description == expected_str
 
     def test_html_title_suffixed(self, fx_site_meta: SiteMeta):
         """Can get HTML title with site name."""
@@ -124,24 +133,23 @@ class TestExportMetadata:
             plausible_domain=expected_str,
             embedded_maps_endpoint=expected_str,
             items_enquires_endpoint=expected_str,
+            generator=expected_str,
+            version=expected_str,
             export_path=expected_path,
             s3_bucket=expected_str,
             parallel_jobs=expected_int,
-            source=expected_str,
         )
 
         assert meta.base_url == expected_str
         assert meta.export_path == expected_path
         assert meta.s3_bucket == expected_str
         assert meta.parallel_jobs == expected_int
-        assert meta.source == expected_str
 
     def test_from_config_store(self, fx_config: Config):
         """Can create export metadata from config."""
         result = ExportMeta.from_config_store(config=fx_config)
         assert isinstance(result, ExportMeta)
         assert result.embedded_maps_endpoint == fx_config.TEMPLATES_ITEM_MAPS_ENDPOINT
-        assert result.source == fx_config.NAME
 
     def test_as_site_metadata(self, fx_export_meta: ExportMeta):
         """Can create derived site metadata."""

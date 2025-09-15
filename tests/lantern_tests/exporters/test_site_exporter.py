@@ -366,6 +366,24 @@ class TestSiteExporter:
         for path in expected:
             assert path in result
 
+    def test_html_titles(self, fx_exporter_site: SiteExporter, fx_revision_model_min: RecordRevision):
+        """
+        Check all pages have a unique and non-default HTML title value.
+
+        As a guard against `lantern.models.site.SiteMeta.from_config_store` setting title to an empty string.
+        """
+        record = fx_revision_model_min
+        fx_exporter_site.select({record.file_revision})
+        fx_exporter_site.export()
+
+        result = list(fx_exporter_site._meta.export_path.glob("**/*.html"))
+        for path in result:
+            with path.open() as f:
+                html = BeautifulSoup(f.read(), parser="html.parser", features="lxml")
+            if html.head is None:
+                continue
+            assert html.head.title.string != " | BAS Data Catalogue"
+
     def test_publish(
         self,
         mocker: MockerFixture,

@@ -159,15 +159,11 @@ class ItemCatalogue(ItemBase):
     @property
     def site_metadata(self) -> SiteMeta:
         """Site metadata for item."""
-        self._meta.html_title = self._html_title
+        self._meta.html_title = self.title_plain
+        self._meta.html_description = self.summary_plain
         self._meta.html_open_graph = self._html_open_graph
         self._meta.html_schema_org = self._html_schema_org
         return self._meta
-
-    @property
-    def _html_title(self) -> str:
-        """Title with without formatting with site name appended, for HTML title element."""
-        return f"{self.title_plain}"
 
     @property
     def _html_open_graph(self) -> dict[str, str]:

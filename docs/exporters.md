@@ -58,18 +58,24 @@ Resource exporters create format specific outputs derived from [Records](/docs/d
 [Items](/docs/data-model.md#items). Resource exporters inherit from the `lantern.exporters.base.ResourceExporter` base
 class.
 
-When published to S3, user metadata is set to indicate the `file_identifier` and `file_revision` of the relevant
-[Record Revision](/docs/data-model.md#record-revisions).
+When published to S3, user-defined object metadata is set to indicate the `file_identifier` and `file_revision` of the
+relevant [Record Revision](/docs/data-model.md#record-revisions).
 
 ### JSON resource exporter
+
+`lantern.exporters.json.JsonExporter`
 
 Outputs a Record as a JSON file. Intended for internal consumption within the BAS metadata ecosystem.
 
 ### XML resource exporter
 
+`lantern.exporters.xml.IsoXmlExporter`
+
 Outputs a Record as a ISO 19139 XML file. Intended for interoperability for use across other providers and tools.
 
 ### XML HTML resource exporter
+
+`lantern.exporters.xml.IsoXmlHtmlExporter`
 
 Outputs an HTML page with minimal styling for a ISO 19139 XML document from the [XML Exporter](#xml-resource-exporter)
 by applying an XSLT transformation. Intended for easier review of ISO metadata by humans.
@@ -80,6 +86,8 @@ by applying an XSLT transformation. Intended for easier review of ISO metadata b
 
 ### HTML resource exporter
 
+`lantern.exporters.records.HtmlExporter`
+
 Outputs a [Catalogue Item](/docs/data-model.md#catalogue-items) as an HTML page using the
 [Site Templates](/docs/site.md#item-templates) for use by humans.
 
@@ -87,6 +95,8 @@ The `_item_class()` method determines if a [Special Catalogue Item](/docs/data-m
 should be used for each Record.
 
 ### HTML aliases resource exporter
+
+`lantern.exporters.records.HtmlAliasesExporter`
 
 Outputs minimal HTML redirect pages for [Item Aliases](/docs/data-model.md#item-aliases) in a Record.
 
@@ -97,6 +107,8 @@ header is added to each redirect page.
 In other cases, or as a general fallback, a `<meta http-equiv="refresh">` tag in each page performs the redirect.
 
 ### Records resource exporter
+
+`lantern.exporters.records.RecordsExporter`
 
 Coordinates other [Resource Exporters](#resource-exporters) for selected [Records](/docs/data-model.md#records).
 
@@ -128,11 +140,11 @@ internal `lantern.exporters.resources` package.
 
 `lantern.exporters.site.SiteIndexExporter`
 
-Generates a basic index page with minimal styling and links to all [Records](/docs/data-model.md#records),
-[Items](/docs/data-model.md#items) and [Item Aliases](/docs/data-model.md#item-aliases) in the static site.
+Generates a basic index page with links to all [Items](/docs/data-model.md#items) and
+[Item Aliases](/docs/data-model.md#item-aliases) in the static site.
 
 > [!CAUTION]
-> This isn't intended as a proper, public, homepage, more for quick access to site content when developing.
+> This is intended as a quick reference to site content, not a proper, public, homepage.
 
 ### Site pages exporter
 

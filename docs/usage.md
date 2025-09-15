@@ -72,9 +72,9 @@ The `import-records` task will:
 
 ## Build static site
 
-To build the [Static Site](/docs/site.md):
+To build the [Static Site](/docs/architecture.md#static-site):
 
-1. set the options in `tasks/build.py` for whether to export the site locally and/or publish remotely
+1. set the options in `tasks/records_build.py` for whether to export the site locally and/or publish remotely
 1. run the `build-records` [Development Task](/docs/dev.md#development-tasks)
 
 > [!IMPORTANT]

@@ -14,7 +14,7 @@ from lantern.models.record.revision import RecordRevision
 
 class WebsiteSearchExporter(Exporter):
     """
-    Proto Public Website search exporter.
+    Public Website search exporter.
 
     Note: Intended for BAS use only.
 
@@ -56,7 +56,7 @@ class WebsiteSearchExporter(Exporter):
     @property
     def name(self) -> str:
         """Exporter name."""
-        return "Public Website search results"
+        return "BAS Public Website Search Results"
 
     @staticmethod
     def _get_superseded_records(records: list[RecordRevision]) -> list[str]:

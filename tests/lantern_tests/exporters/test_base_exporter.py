@@ -8,7 +8,7 @@ from boto3 import client as S3Client  # noqa: N812
 from jinja2 import Environment
 from pytest_mock import MockerFixture
 
-from lantern.exporters.base import Exporter, ResourceExporter, S3Utils, get_jinja_env, get_record_aliases
+from lantern.exporters.base import Exporter, ResourceExporter, S3Utils, get_jinja_env, get_record_aliases, prettify_html
 from lantern.lib.metadata_library.models.record.elements.common import Identifier
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
@@ -216,3 +216,10 @@ class TestUtils:
         result = get_jinja_env()
         assert isinstance(result, Environment)
         assert "_macros/common.html.j2" in result.loader.list_templates()
+
+    def test_prettify_html(self):
+        """Can format HTML."""
+        assert (
+            prettify_html(html="<html>\n\n\n\n\n<body><p>...</p></body></html>")
+            == "<html>\n<body><p>...</p></body></html>"
+        )

@@ -200,7 +200,7 @@ class VerificationReport:
         self._jobs = jobs
 
         self._jinja = get_jinja_env()
-        self._template_path = "_views/-/verification.j2"
+        self._template_path = "_views/-/verification.html.j2"
         self._created: datetime = datetime.now(tz=UTC)
         self._duration: timedelta = timedelta(0)
 

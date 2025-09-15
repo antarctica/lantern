@@ -7,14 +7,16 @@ from shutil import copy
 
 from importlib_resources import as_file as resources_as_file
 from importlib_resources import files as resources_files
-from jinja2 import Environment, PackageLoader, select_autoescape
 from mypy_boto3_s3 import S3Client
 
 from lantern.config import Config
-from lantern.exporters.base import Exporter, get_record_aliases
+from lantern.exporters.base import Exporter, get_jinja_env, get_record_aliases, prettify_html
 from lantern.exporters.base import Exporter as BaseExporter
 from lantern.exporters.records import RecordsExporter
 from lantern.exporters.website import WebsiteSearchExporter
+from lantern.lib.metadata_library.models.record.elements.common import Date
+from lantern.models.item.base.elements import Link
+from lantern.models.item.catalogue.elements import FormattedDate
 from lantern.models.record.revision import RecordRevision
 from lantern.models.templates import PageMetadata
 
@@ -143,13 +145,21 @@ class SiteIndexExporter(Exporter):
     """
 
     def __init__(
-        self, config: Config, logger: logging.Logger, s3: S3Client, get_record: Callable[[str], RecordRevision]
+        self,
+        config: Config,
+        logger: logging.Logger,
+        s3: S3Client,
+        get_record: Callable[[str], RecordRevision],
+        commit_ref: str,
     ) -> None:
         """Initialise exporter."""
         super().__init__(config=config, logger=logger, s3=s3)
+        self._jinja = get_jinja_env()
+        self._template_path = "_views/-/index.html.j2"
         self._index_path = self._config.EXPORT_PATH / "-" / "index" / "index.html"
         self._get_record = get_record
         self._selected_identifiers: set[str] = set()
+        self._commit_ref = commit_ref
 
     @property
     def selected_identifiers(self) -> set[str]:
@@ -167,11 +177,26 @@ class SiteIndexExporter(Exporter):
         return "Site Index"
 
     @property
-    def _aliases(self) -> list[dict]:
-        """Get a list of aliases from records."""
+    def _commit(self) -> Link:
+        """Commit reference."""
+        href = f"{self._config.TEMPLATES_ITEM_VERSIONS_ENDPOINT}/-/commit/{self._commit_ref}"
+        return Link(value=self._commit_ref[:8], href=href, external=True)
+
+    def _dumps(self) -> str:
+        """Generate index."""
+        records = []
         aliases = []
+
         for file_identifier in self._selected_identifiers:
             record = self._get_record(file_identifier)
+            records.append(
+                {
+                    "type": record.hierarchy_level.name,
+                    "file_identifier": record.file_identifier,
+                    "title": record.identification.title,
+                    "edition": record.identification.edition,
+                }
+            )
             identifiers = get_record_aliases(record)
             aliases.extend(
                 [
@@ -184,67 +209,22 @@ class SiteIndexExporter(Exporter):
                     for identifier in identifiers
                 ]
             )
-        return aliases
 
-    def _dumps(self) -> str:
-        """Generate proto-index."""
-        record_rows = "\n".join(
-            [
-                f"""
-                        <tr>
-                            <td>Item</td>
-                            <td>{record.hierarchy_level.name}</td>
-                            <td><a href="/items/{record.file_identifier}/index.html">{record.file_identifier}</a></td>
-                            <td>{record.identification.title}</td>
-                            <td>{record.identification.edition}</td>
-                            <td>-</td>
-                        </tr>
-                        """
-                for record in [self._get_record(file_identifier) for file_identifier in self._selected_identifiers]
-            ]
+        meta = PageMetadata(
+            build_key=self._config.TEMPLATES_CACHE_BUST_VALUE,
+            build_time=datetime.now(tz=UTC),
+            sentry_src=self._config.TEMPLATES_SENTRY_SRC,
+            plausible_domain=self._config.TEMPLATES_PLAUSIBLE_DOMAIN,
+            html_title="Index",
         )
-        alias_rows = "\n".join(
-            [
-                f"""
-                <tr>
-                    <td>Alias</td>
-                    <td>-</td>
-                    <td><a href="{alias["href"]}">{alias["file_identifier"]}</a></td>
-                    <td>{alias["title"]}</td>
-                    <td>-</td>
-                    <td><a href="/{alias["alias"]}">{alias["alias"]}</a></td>
-                </tr>
-                """
-                for alias in self._aliases
-            ]
-        )
-        return f"""
-        <html>
-            <head>
-                <meta charset="utf-8">
-                <title>Proto Items Index</title>
-            </head>
-            <body>
-                <h1>Proto Items Index</h1>
-                <table border="1" cellpadding="5" cellspacing="0">
-                    <thead>
-                        <tr>
-                            <th>Kind</th>
-                            <th>Type</th>
-                            <th>File Identifier</th>
-                            <th>Title</th>
-                            <th>Edition</th>
-                            <th>Alias</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {record_rows}
-                        {alias_rows}
-                    </tbody>
-                </table>
-            </body>
-        </html>
-        """
+        data = {
+            "commit": self._commit,
+            "time": FormattedDate.from_rec_date(Date(date=datetime.fromisoformat(meta.build_time.isoformat()))),
+            "records": records,
+            "aliases": aliases,
+        }
+        raw = self._jinja.get_template(self._template_path).render(data=data, meta=meta)
+        return prettify_html(raw)
 
     def export(self) -> None:
         """Export proto index to directory."""
@@ -268,8 +248,7 @@ class SitePagesExporter(Exporter):
     def __init__(self, config: Config, s3: S3Client, logger: logging.Logger) -> None:
         """Initialise exporter."""
         super().__init__(config=config, logger=logger, s3=s3)
-        _loader = PackageLoader("lantern", "resources/templates")
-        self._jinja = Environment(loader=_loader, autoescape=select_autoescape(), trim_blocks=True, lstrip_blocks=True)
+        self._jinja = get_jinja_env()
         self._templates_base = "_views"
         self._templates = [
             "404.html.j2",
@@ -307,7 +286,8 @@ class SitePagesExporter(Exporter):
     def _dumps(self, template_path: str) -> str:
         """Build a page."""
         prefixed_path = f"{self._templates_base}/{template_path}"
-        return self._jinja.get_template(prefixed_path).render(meta=self._get_page_metadata(template_path))
+        raw = self._jinja.get_template(prefixed_path).render(meta=self._get_page_metadata(template_path))
+        return prettify_html(raw)
 
     @property
     def name(self) -> str:
@@ -346,14 +326,19 @@ class SiteExporter(Exporter):
     """
 
     def __init__(
-        self, config: Config, logger: logging.Logger, s3: S3Client, get_record: Callable[[str], RecordRevision]
+        self,
+        config: Config,
+        logger: logging.Logger,
+        s3: S3Client,
+        get_record: Callable[[str], RecordRevision],
+        head_commit_ref: str,
     ) -> None:
         """Initialise exporter."""
         super().__init__(config=config, logger=logger, s3=s3)
         self._resources_exporter = SiteResourcesExporter(config=self._config, logger=logger, s3=self._s3_client)
         self._pages_exporter = SitePagesExporter(config=self._config, logger=logger, s3=self._s3_client)
         self._index_exporter = SiteIndexExporter(
-            config=self._config, logger=logger, s3=self._s3_client, get_record=get_record
+            config=self._config, logger=logger, s3=self._s3_client, get_record=get_record, commit_ref=head_commit_ref
         )
         self._records_exporter = RecordsExporter(
             config=self._config, logger=logger, s3=self._s3_client, get_record=get_record
@@ -386,15 +371,12 @@ class SiteExporter(Exporter):
         self._website_exporter.selected_identifiers = file_identifiers
 
     def export(self) -> None:
-        """
-        Export site contents to a directory.
-
-        Public website search exporter does not support local export.
-        """
+        """Export site contents to a directory."""
         self._resources_exporter.export()
         self._pages_exporter.export()
         self._records_exporter.export()
         self._index_exporter.export()
+        self._website_exporter.export()
 
     def publish(self) -> None:
         """Publish site contents to S3."""

@@ -48,7 +48,13 @@ class FakeCatalogue:
                 region_name="eu-west-1",
             )
         self._store = FakeRecordsStore(logger=self._logger)
-        self._site = SiteExporter(config=self._config, logger=self._logger, s3=self._s3, get_record=self._store.get)
+        self._site = SiteExporter(
+            config=self._config,
+            logger=self._logger,
+            s3=self._s3,
+            get_record=self._store.get,
+            head_commit_ref="83fake48",
+        )
 
     # noinspection PyMethodOverriding
     @time_task(label="Load")

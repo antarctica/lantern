@@ -3,7 +3,6 @@ from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import Any
 
-from bs4 import BeautifulSoup
 from jinja2 import Environment, PackageLoader, select_autoescape
 
 from lantern.config import Config
@@ -58,19 +57,6 @@ class ItemCatalogue(ItemBase):
         self._get_record = get_record
         _loader = PackageLoader("lantern", "resources/templates")
         self._jinja = Environment(loader=_loader, autoescape=select_autoescape(), trim_blocks=True, lstrip_blocks=True)
-
-    @staticmethod
-    def _prettify_html(html: str) -> str:
-        """
-        Prettify HTML string, removing any empty lines.
-
-        Without very careful whitespace control, Jinja templates quickly look messy where conditionals and other logic
-        is used. Whilst this doesn't strictly matter, it is nicer if output looks well-formed by removing empty lines.
-
-        This gives a 'flat' structure when viewed as source. Browser dev tools will reformat this into a tree structure.
-        The `prettify()` method is not used as it splits all elements onto new lines, which causes layout/spacing bugs.
-        """
-        return str(BeautifulSoup(html, parser="html.parser", features="lxml"))
 
     @property
     def _aggregations(self) -> Aggregations:
@@ -307,8 +293,3 @@ class ItemCatalogue(ItemBase):
             if tab.enabled:
                 return tab.anchor
         return self._additional_info.anchor
-
-    def render(self) -> str:
-        """Render HTML representation of item."""
-        raw = self._jinja.get_template("_views/item.html.j2").render(item=self, meta=self.page_metadata)
-        return self._prettify_html(raw)

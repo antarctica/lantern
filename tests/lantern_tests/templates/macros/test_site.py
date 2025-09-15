@@ -205,6 +205,15 @@ class TestMacrosSite:
 
         assert html.find(id="site-title").string.strip() == "BAS Data Catalogue"
 
+    def test_navbar_primary_nav(self):
+        """Can get expected primary navigation links from navbar."""
+        expected_labels = ["Part of British Antarctic Survey"]
+        template = """{% import '_macros/site.html.j2' as site %}{{ site.navbar() }}"""
+        html = BeautifulSoup(self._render(template), parser="html.parser", features="lxml")
+
+        for label in expected_labels:
+            assert any(label in a.text for a in html.find(id="site-nav").find_all("a"))
+
     def test_dev_phase(self):
         """Can get site dev phase label with expected static value."""
         template = """{% import '_macros/site.html.j2' as site %}{{ site.dev_phase() }}"""

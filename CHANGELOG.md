@@ -23,6 +23,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Copyright holders in licence tab
 * Catalogue site verification
 * e2e accessibility test for back to top link
+* e2e responsive design test for primary navigation links
+* additional primary navigation items
 * exporter base class for resources (i.e. that process multiple records)
 * Web Accessible Folders (WAF) exporter
 

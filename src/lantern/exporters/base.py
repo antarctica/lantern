@@ -4,6 +4,7 @@ from mimetypes import guess_type
 from pathlib import Path
 from shutil import copytree
 
+from bs4 import BeautifulSoup
 from importlib_resources import as_file as resources_as_file
 from importlib_resources import files as resources_files
 from jinja2 import Environment, PackageLoader, select_autoescape
@@ -202,3 +203,16 @@ def get_jinja_env() -> Environment:
     """Get Jinja environment with app templates."""
     _loader = PackageLoader("lantern", "resources/templates")
     return Environment(loader=_loader, autoescape=select_autoescape(), trim_blocks=True, lstrip_blocks=True)
+
+
+def prettify_html(html: str) -> str:
+    """
+    Prettify HTML string, removing any empty lines.
+
+    Without very careful whitespace control, Jinja templates quickly look messy where conditionals and other logic are
+    used. Whilst this doesn't strictly matter, it is nicer if output looks well-formed by removing empty lines.
+
+    This gives a 'flat' structure when viewed as source. Browser dev tools will reformat this into a tree structure.
+    The `prettify()` method is not used as it splits all elements onto new lines, which causes layout/spacing bugs.
+    """
+    return str(BeautifulSoup(html, parser="html.parser", features="lxml"))

@@ -1,7 +1,7 @@
 [project]
 name = "lantern"
 version = "0.2.1"
-description = "Prototype data catalogue for discovery metadata."
+description = "Prototype data catalogue for BAS discovery metadata."
 readme = "README.md"
 license = "MIT"
 authors = [
@@ -178,9 +178,6 @@ LANTERN_EXPORT_PATH="export"
 LANTERN_AWS_ACCESS_ID="x"
 LANTERN_AWS_ACCESS_SECRET="x"
 LANTERN_AWS_S3_BUCKET="x"
-LANTERN_PUBLIC_WEBSITE_ENDPOINT="https://example.com/wp-json/wp/v2"
-LANTERN_PUBLIC_WEBSITE_USERNAME="x"
-LANTERN_PUBLIC_WEBSITE_PASSWORD="x"
 LANTERN_VERIFY_SHAREPOINT_PROXY_ENDPOINT="x"
 
 [tool.pytest.ini_options]

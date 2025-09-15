@@ -35,7 +35,7 @@ class TestWebsiteSearchExporter:
         )
 
         assert isinstance(exporter, WebsiteSearchExporter)
-        assert exporter.name == "Public Website search results"
+        assert exporter.name == "BAS Public Website Search Results"
 
     def test_get_superseded_records(
         self, fx_exporter_website_search: WebsiteSearchExporter, fx_revision_model_min: RecordRevision
@@ -88,7 +88,7 @@ class TestWebsiteSearchExporter:
         assert len(items) > 0
 
     def test_export(self, fx_exporter_website_search_sel: WebsiteSearchExporter):
-        """Can export search items a local file."""
+        """Can export search items to a local file."""
         site_path = fx_exporter_website_search_sel._config.EXPORT_PATH
         expected = site_path.joinpath("-", "public-website-search", "items.json")
 
@@ -97,7 +97,7 @@ class TestWebsiteSearchExporter:
         assert expected.exists()
 
     def test_publish(self, fx_exporter_website_search_sel: WebsiteSearchExporter, fx_s3_bucket_name: str):
-        """Can publish site index to S3."""
+        """Can publish site items to S3."""
         site_path = fx_exporter_website_search_sel._config.EXPORT_PATH
         expected = "-/public-website-search/items.json"
 

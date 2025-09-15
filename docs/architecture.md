@@ -74,8 +74,9 @@ to enable HTTPS support using a custom domain.
 
 AWS S3 is used as a web host for:
 
-- it's high availability
+- its high availability
 - support for server side redirects
+- support for object metadata
 - ease of automated provisioning
 
 See the [Site Exporter](/docs/exporters.md#site-exporter) docs for how information is managed in S3.
@@ -85,6 +86,6 @@ See the [Static Site](/docs/site.md) docs for more information about what is sto
 ### Reverse proxying
 
 The BAS IT general load balancer is used to reverse proxy the production CloudFront distribution such that its content
-is accessible within the existing `data.bas.ac.uk` domain (which currently hosts the legacy Discovery Metadata System)
+is accessible within the existing `data.bas.ac.uk` domain (which currently hosts the legacy Discovery Metadata System).
 
 See `data_redirect.txt` in the load balancer config for proxied paths based on the [Static Site](#static-site).

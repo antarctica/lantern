@@ -45,7 +45,13 @@ class ToyCatalogue:
             project_id=self._config.STORE_GITLAB_PROJECT_ID,
             cache_path=self._config.STORE_GITLAB_CACHE_PATH,
         )
-        self._site = SiteExporter(config=self._config, logger=self._logger, s3=self._s3, get_record=self._store.get)
+        self._site = SiteExporter(
+            config=self._config,
+            logger=self._logger,
+            s3=self._s3,
+            get_record=self._store.get,
+            head_commit_ref=self._store.head_commit,
+        )
 
     # noinspection PyMethodOverriding
     @time_task(label="Load")

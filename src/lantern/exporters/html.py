@@ -5,7 +5,7 @@ from pathlib import Path
 from mypy_boto3_s3 import S3Client
 
 from lantern.config import Config
-from lantern.exporters.base import ResourceExporter, get_record_aliases
+from lantern.exporters.base import ResourceExporter, get_jinja_env, get_record_aliases, prettify_html
 from lantern.models.item.catalogue import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
 from lantern.models.record.const import CATALOGUE_NAMESPACE
@@ -41,6 +41,8 @@ class HtmlExporter(ResourceExporter):
             config=config, logger=logger, s3=s3, record=record, export_base=export_base, export_name=export_name
         )
         self._get_record = get_record
+        self._jinja = get_jinja_env()
+        self._template_path = "_views/item.html.j2"
 
     @property
     def name(self) -> str:
@@ -56,11 +58,13 @@ class HtmlExporter(ResourceExporter):
     def dumps(self) -> str:
         """Encode record as data catalogue item in HTML."""
         item_class = self._item_class()
-        return item_class(
+        item = item_class(
             config=self._config,
             record=self._record,
             get_record=self._get_record,
-        ).render()
+        )
+        raw = self._jinja.get_template(self._template_path).render(item=item, meta=item.page_metadata)
+        return prettify_html(raw)
 
 
 class HtmlAliasesExporter(ResourceExporter):

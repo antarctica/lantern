@@ -67,7 +67,13 @@ def export_test_site(export_path: Path) -> None:
             region_name="eu-west-1",
         )
 
-    exporter = SiteExporter(config=config, s3=s3_client, logger=logger, get_record=store.get)
+    exporter = SiteExporter(
+        config=config,
+        s3=s3_client,
+        logger=logger,
+        get_record=store.get,
+        head_commit_ref="83fake48",
+    )
     exporter.select(file_identifiers={record.file_identifier for record in store.records})
     exporter.export()
 

@@ -4,7 +4,7 @@ from collections.abc import Callable
 
 from mypy_boto3_s3 import S3Client
 
-from lantern.exporters.base import Exporter
+from lantern.exporters.base import ResourcesExporter
 from lantern.lib.metadata_library.models.record.enums import AggregationAssociationCode
 from lantern.models.item.website.search import ItemWebsiteSearch
 from lantern.models.record.const import CATALOGUE_NAMESPACE
@@ -12,7 +12,7 @@ from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
 
 
-class WebsiteSearchExporter(Exporter):
+class WebsiteSearchExporter(ResourcesExporter):
     """
     Public Website search exporter.
 
@@ -42,20 +42,8 @@ class WebsiteSearchExporter(Exporter):
         get_record: Callable[[str], RecordRevision],
     ) -> None:
         """Initialise exporter."""
-        super().__init__(logger=logger, meta=meta, s3=s3)
-        self._get_record = get_record
-        self._selected_identifiers: set[str] = set()
+        super().__init__(logger=logger, meta=meta, s3=s3, get_record=get_record)
         self._export_path = self._meta.export_path / "-" / "public-website-search" / "items.json"
-
-    @property
-    def selected_identifiers(self) -> set[str]:
-        """Selected file identifiers."""
-        return self._selected_identifiers
-
-    @selected_identifiers.setter
-    def selected_identifiers(self, identifiers: set[str]) -> None:
-        """Selected file identifiers."""
-        self._selected_identifiers = identifiers
 
     @property
     def name(self) -> str:

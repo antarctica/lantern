@@ -9,7 +9,7 @@ from importlib_resources import files as resources_files
 from mypy_boto3_s3 import S3Client
 
 from lantern.config import Config
-from lantern.exporters.base import Exporter, get_jinja_env, get_record_aliases, prettify_html
+from lantern.exporters.base import Exporter, ResourcesExporter, get_jinja_env, get_record_aliases, prettify_html
 from lantern.exporters.base import Exporter as BaseExporter
 from lantern.exporters.records import RecordsExporter
 from lantern.exporters.website import WebsiteSearchExporter
@@ -131,7 +131,7 @@ class SiteResourcesExporter(Exporter):
         self._publish_txt()
 
 
-class SiteIndexExporter(Exporter):
+class SiteIndexExporter(ResourcesExporter):
     """
     Proto Data Catalogue index exporter.
 
@@ -148,22 +148,10 @@ class SiteIndexExporter(Exporter):
         get_record: Callable[[str], RecordRevision],
     ) -> None:
         """Initialise exporter."""
-        super().__init__(logger=logger, meta=meta, s3=s3)
+        super().__init__(logger=logger, meta=meta, s3=s3, get_record=get_record)
         self._jinja = get_jinja_env()
         self._template_path = "_views/-/index.html.j2"
         self._index_path = self._meta.export_path / "-" / "index" / "index.html"
-        self._get_record = get_record
-        self._selected_identifiers: set[str] = set()
-
-    @property
-    def selected_identifiers(self) -> set[str]:
-        """Selected file identifiers."""
-        return self._selected_identifiers
-
-    @selected_identifiers.setter
-    def selected_identifiers(self, identifiers: set[str]) -> None:
-        """Selected file identifiers."""
-        self._selected_identifiers = identifiers
 
     @property
     def name(self) -> str:

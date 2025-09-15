@@ -431,13 +431,6 @@ class TestVerificationExporter:
         assert isinstance(exporter, VerificationExporter)
         assert exporter.name == "Verification"
 
-    def test_select(self, fx_exporter_verify: VerificationExporter, fx_revision_model_min: RecordRevision):
-        """Can select file_identifiers in sub-exporters."""
-        expected = {fx_revision_model_min.file_revision}
-        fx_exporter_verify.selected_identifiers = expected
-
-        assert fx_exporter_verify.selected_identifiers == expected
-
     def test_jobs(self, fx_exporter_verify_sel: VerificationExporter):
         """Can generate jobs for site and selected records."""
         fx_exporter_verify_sel._init_jobs()

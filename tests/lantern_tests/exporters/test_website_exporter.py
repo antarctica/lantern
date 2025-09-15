@@ -16,6 +16,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     ConstraintTypeCode,
 )
 from lantern.models.record.revision import RecordRevision
+from lantern.models.site import ExportMeta
 from tests.conftest import _get_record_open, _revision_config_min
 
 
@@ -29,10 +30,9 @@ class TestWebsiteSearchExporter:
         s3_client = mocker.MagicMock()
         mock_config = mocker.Mock()
         type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
+        meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
-        exporter = WebsiteSearchExporter(
-            config=mock_config, s3=s3_client, logger=fx_logger, get_record=_get_record_open
-        )
+        exporter = WebsiteSearchExporter(meta=meta, s3=s3_client, logger=fx_logger, get_record=_get_record_open)
 
         assert isinstance(exporter, WebsiteSearchExporter)
         assert exporter.name == "BAS Public Website Search Results"
@@ -89,7 +89,7 @@ class TestWebsiteSearchExporter:
 
     def test_export(self, fx_exporter_website_search_sel: WebsiteSearchExporter):
         """Can export search items to a local file."""
-        site_path = fx_exporter_website_search_sel._config.EXPORT_PATH
+        site_path = fx_exporter_website_search_sel._meta.export_path
         expected = site_path.joinpath("-", "public-website-search", "items.json")
 
         fx_exporter_website_search_sel.export()
@@ -98,7 +98,7 @@ class TestWebsiteSearchExporter:
 
     def test_publish(self, fx_exporter_website_search_sel: WebsiteSearchExporter, fx_s3_bucket_name: str):
         """Can publish site items to S3."""
-        site_path = fx_exporter_website_search_sel._config.EXPORT_PATH
+        site_path = fx_exporter_website_search_sel._meta.export_path
         expected = "-/public-website-search/items.json"
 
         fx_exporter_website_search_sel.publish()

@@ -2,7 +2,7 @@ import json
 
 from bs4 import BeautifulSoup
 
-from lantern.models.item.catalogue import ItemCatalogue
+from lantern.models.item.catalogue.item import ItemCatalogue
 from tests.conftest import render_item_catalogue
 
 
@@ -15,10 +15,10 @@ class TestItemTemplate:
 
         Integration test between item template and site layout.
         """
-        expected = fx_item_catalogue_model_min.page_metadata
+        expected = fx_item_catalogue_model_min.site_metadata
         html = BeautifulSoup(render_item_catalogue(fx_item_catalogue_model_min), parser="html.parser", features="lxml")
 
-        assert html.head.title.string == expected.html_title
+        assert html.head.title.string == expected.html_title_suffixed
 
         for key, val in expected.html_open_graph.items():
             assert html.head.find(name="meta", property=key)["content"] == val

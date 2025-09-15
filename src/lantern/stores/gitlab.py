@@ -161,7 +161,7 @@ class GitLabLocalCache:
         return self._project.commits.list(get_all=False)[0].id
 
     @property
-    def _exists(self) -> bool:
+    def exists(self) -> bool:
         """Determine if the cache exists."""
         return self._records_path.exists()
 
@@ -172,7 +172,7 @@ class GitLabLocalCache:
 
         Where the cache does not exist, or a head commit ID isn't available, the cache is considered stale.
         """
-        if not self._exists:
+        if not self.exists:
             return False
 
         return self.head_commit_local == self._head_commit_remote
@@ -356,11 +356,11 @@ class GitLabLocalCache:
 
         An existing, up-to-date, cache is not modified.
         """
-        if not self._online and not self._exists:
+        if not self._online and not self.exists:
             msg = "Local cache and GitLab unavailable. Cannot load records."
             raise RemoteStoreUnavailableError(msg) from None
 
-        if self._online and not self._exists:
+        if self._online and not self.exists:
             self._logger.info("Local cache unavailable, creating from GitLab.")
             self._create()
             return
@@ -505,9 +505,9 @@ class GitLabStore(Store):
         return list(self._records.values())
 
     @property
-    def head_commit(self) -> str:
-        """Local head commit reference."""
-        return self._cache.head_commit_local
+    def head_commit(self) -> str | None:
+        """Local head commit reference if available."""
+        return self._cache.head_commit_local if self._cache.exists else None
 
     @staticmethod
     def _get_remote_hashed_path(file_name: str) -> str:

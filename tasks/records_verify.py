@@ -6,7 +6,7 @@ from lantern.config import Config
 from lantern.exporters.verification import VerificationExporter
 from lantern.log import init as init_logging
 from lantern.log import init_sentry
-from lantern.models.item.base.elements import Link
+from lantern.models.site import ExportMeta
 from lantern.models.verification.types import VerificationContext
 from lantern.stores.gitlab import GitLabStore
 
@@ -39,16 +39,13 @@ def main() -> None:
     )
     store.populate()
 
-    commit_ref = store.head_commit
-    href = f"{config.TEMPLATES_ITEM_VERSIONS_ENDPOINT}/-/commit/{commit_ref}"
-    commit = Link(value=commit_ref[:8], href=href, external=True)
     context: VerificationContext = {
         "BASE_URL": base_url,
         "SHAREPOINT_PROXY_ENDPOINT": config.VERIFY_SHAREPOINT_PROXY_ENDPOINT,
-        "COMMIT": commit,
     }
+    meta = ExportMeta.from_config_store(config=config, store=None, build_repo_ref=store.head_commit)
 
-    exporter = VerificationExporter(logger=logger, config=config, s3=s3, get_record=store.get, context=context)
+    exporter = VerificationExporter(logger=logger, meta=meta, s3=s3, get_record=store.get, context=context)
     exporter.selected_identifiers = {record.file_identifier for record in store.records}
     if selected:
         exporter.selected_identifiers = selected

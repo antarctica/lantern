@@ -37,13 +37,15 @@ from lantern.lib.metadata_library.models.record.enums import (
     HierarchyLevelCode,
 )
 from lantern.models.item.base import ItemBase
-from lantern.models.item.catalogue import AdditionalInfoTab, ItemCatalogue
 from lantern.models.item.catalogue.elements import Dates as ItemCatDates
 from lantern.models.item.catalogue.elements import Identifiers as ItemCatIdentifiers
+from lantern.models.item.catalogue.item import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
+from lantern.models.item.catalogue.tabs import AdditionalInfoTab
 from lantern.models.record import Record
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
+from lantern.models.site import ExportMeta, SiteMeta
 from lantern.models.verification.enums import VerificationResult, VerificationType
 from lantern.models.verification.jobs import VerificationJob
 from lantern.models.verification.types import VerificationContext
@@ -110,6 +112,18 @@ def fx_logger() -> logging.Logger:
 def fx_config() -> Config:
     """App configuration."""
     return Config()
+
+
+@pytest.fixture()
+def fx_site_meta(fx_config: Config) -> SiteMeta:
+    """Site build metadata."""
+    return SiteMeta.from_config_store(config=fx_config, store=None, build_repo_ref="83fake48")
+
+
+@pytest.fixture()
+def fx_export_meta(fx_config: Config) -> ExportMeta:
+    """Exporter build metadata (superset of site metadata)."""
+    return ExportMeta.from_config_store(config=fx_config, store=None, build_repo_ref="83fake48")
 
 
 """
@@ -340,7 +354,7 @@ def render_item_catalogue(item: ItemCatalogue) -> str:
     """Render item to HTML."""
     _jinja = get_jinja_env()
     _template_path = "_views/item.html.j2"
-    raw = _jinja.get_template(_template_path).render(item=item, meta=item.page_metadata)
+    raw = _jinja.get_template(_template_path).render(item=item, meta=item.site_metadata)
     return prettify_html(raw)
 
 
@@ -350,28 +364,29 @@ def _item_catalogue_model_min() -> ItemCatalogue:
 
     Standalone method to allow use outside of fixtures in test parametrisation.
     """
+    meta = SiteMeta.from_config_store(config=Config(), store=None, build_repo_ref="83fake48")
     return ItemCatalogue(
-        config=Config(), record=RecordRevision.loads(_item_config_min_catalogue()), get_record=_get_record
+        site_meta=meta, record=RecordRevision.loads(_item_config_min_catalogue()), get_record=_get_record
     )
 
 
 @pytest.fixture()
 def fx_item_catalogue_model_min(
-    fx_config: Config, fx_item_config_min_catalogue: dict, fx_get_record: Callable[[str], RecordRevision]
+    fx_site_meta: SiteMeta, fx_item_config_min_catalogue: dict, fx_get_record: Callable[[str], RecordRevision]
 ) -> ItemCatalogue:
     """Minimal ItemCatalogue model instance."""
     return ItemCatalogue(
-        config=fx_config, record=RecordRevision.loads(fx_item_config_min_catalogue), get_record=fx_get_record
+        site_meta=fx_site_meta, record=RecordRevision.loads(fx_item_config_min_catalogue), get_record=fx_get_record
     )
 
 
 @pytest.fixture()
 def fx_item_physical_map_model_min(
-    fx_config: Config, fx_item_config_min_physical_map: dict, fx_get_record: Callable[[str], RecordRevision]
+    fx_site_meta: SiteMeta, fx_item_config_min_physical_map: dict, fx_get_record: Callable[[str], RecordRevision]
 ) -> ItemCataloguePhysicalMap:
     """Minimal ItemCataloguePhysicalMap model instance."""
     return ItemCataloguePhysicalMap(
-        config=fx_config, record=RecordRevision.loads(fx_item_config_min_physical_map), get_record=fx_get_record
+        site_meta=fx_site_meta, record=RecordRevision.loads(fx_item_config_min_physical_map), get_record=fx_get_record
     )
 
 
@@ -541,8 +556,9 @@ def fx_exporter_base(
     """
     mock_config = mocker.Mock()
     type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
+    meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
-    return FakeExporter(config=mock_config, logger=fx_logger, s3=fx_s3_client)
+    return FakeExporter(logger=fx_logger, meta=meta, s3=fx_s3_client)
 
 
 @pytest.fixture()
@@ -567,10 +583,11 @@ def fx_exporter_resource_base(
     type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
     type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
     fx_exporter_base._config = mock_config
+    meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
     return FakeResourceExporter(
-        config=mock_config,
         logger=fx_logger,
+        meta=meta,
         s3=fx_s3_client,
         record=fx_revision_model_min,
         export_base=output_path.joinpath("x"),
@@ -588,19 +605,13 @@ def fx_exporter_iso_xml_html(
 ) -> Exporter:
     """ISO 19115 XML as HTML exporter with a mocked config and S3 client."""
     with TemporaryDirectory() as tmp_path:
-        base_path = Path(tmp_path)
-        exports_path = base_path.joinpath("exports")
+        output_path = Path(tmp_path)
     mock_config = mocker.Mock()
-    type(mock_config).EXPORT_PATH = PropertyMock(return_value=base_path)
+    type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
     type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
+    meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
-    return IsoXmlHtmlExporter(
-        config=mock_config,
-        logger=fx_logger,
-        s3=fx_s3_client,
-        record=fx_revision_model_min,
-        export_base=exports_path,
-    )
+    return IsoXmlHtmlExporter(logger=fx_logger, meta=meta, s3=fx_s3_client, record=fx_revision_model_min)
 
 
 @pytest.fixture()
@@ -619,14 +630,10 @@ def fx_exporter_html(
     type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
     type(mock_config).TEMPLATES_ITEM_MAPS_ENDPOINT = PropertyMock(return_value="x")
     type(mock_config).TEMPLATES_ITEM_CONTACT_ENDPOINT = PropertyMock(return_value="x")
+    meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
     return HtmlExporter(
-        config=mock_config,
-        logger=fx_logger,
-        s3=fx_s3_client,
-        record=fx_revision_model_min,
-        export_base=output_path,
-        get_record=_get_record,
+        logger=fx_logger, meta=meta, s3=fx_s3_client, record=fx_revision_model_min, get_record=_get_record
     )
 
 
@@ -644,18 +651,13 @@ def fx_exporter_html_alias(
     mock_config = mocker.Mock()
     type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
     type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
+    meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
     fx_revision_model_min.identification.identifiers.append(
         Identifier(identifier="x", href=f"https://{CATALOGUE_NAMESPACE}/datasets/x", namespace=ALIAS_NAMESPACE)
     )
 
-    return HtmlAliasesExporter(
-        config=mock_config,
-        logger=fx_logger,
-        s3=fx_s3_client,
-        record=fx_revision_model_min,
-        export_base=output_path,
-    )
+    return HtmlAliasesExporter(logger=fx_logger, meta=meta, s3=fx_s3_client, record=fx_revision_model_min)
 
 
 @pytest.fixture()
@@ -681,8 +683,9 @@ def fx_exporter_records(
     type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
     type(mock_config).TEMPLATES_ITEM_MAPS_ENDPOINT = PropertyMock(return_value="x")
     type(mock_config).TEMPLATES_ITEM_CONTACT_ENDPOINT = PropertyMock(return_value="x")
+    meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
-    return RecordsExporter(config=mock_config, logger=fx_logger, s3=fx_s3_client, get_record=fx_get_record)
+    return RecordsExporter(logger=fx_logger, config=mock_config, meta=meta, s3=fx_s3_client, get_record=fx_get_record)
 
 
 @pytest.fixture()
@@ -704,8 +707,9 @@ def fx_exporter_site_resources(
     mock_config = mocker.Mock()
     type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
     type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
+    meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
-    return SiteResourcesExporter(config=mock_config, logger=fx_logger, s3=fx_s3_client)
+    return SiteResourcesExporter(logger=fx_logger, meta=meta, s3=fx_s3_client)
 
 
 def _get_record_alias(identifier: str) -> RecordRevision:
@@ -732,14 +736,9 @@ def fx_exporter_site_index(
     mock_config = mocker.Mock()
     type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
     type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
+    meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
-    return SiteIndexExporter(
-        config=mock_config,
-        s3=fx_s3_client,
-        logger=fx_logger,
-        get_record=_get_record_alias,
-        commit_ref="83fake48",
-    )
+    return SiteIndexExporter(logger=fx_logger, meta=meta, s3=fx_s3_client, get_record=_get_record_alias)
 
 
 @pytest.fixture()
@@ -776,8 +775,9 @@ def fx_exporter_website_search(
     type(mock_config).NAME = PropertyMock(return_value="lantern")
     type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
     type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
+    meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
-    return WebsiteSearchExporter(config=mock_config, s3=fx_s3_client, logger=fx_logger, get_record=_get_record_open)
+    return WebsiteSearchExporter(logger=fx_logger, meta=meta, s3=fx_s3_client, get_record=_get_record_open)
 
 
 @pytest.fixture()
@@ -799,8 +799,9 @@ def fx_exporter_site_pages(
     mock_config = mocker.Mock()
     type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
     type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
+    meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
-    return SitePagesExporter(config=mock_config, s3=fx_s3_client, logger=fx_logger)
+    return SitePagesExporter(logger=fx_logger, meta=meta, s3=fx_s3_client)
 
 
 @pytest.fixture()
@@ -825,14 +826,9 @@ def fx_exporter_site(
     type(mock_config).TEMPLATES_ITEM_MAPS_ENDPOINT = PropertyMock(return_value="x")
     type(mock_config).TEMPLATES_ITEM_CONTACT_ENDPOINT = PropertyMock(return_value="x")
     mocker.patch("lantern.exporters.records._job_s3", return_value=fx_s3_client)
+    meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
-    return SiteExporter(
-        config=mock_config,
-        s3=fx_s3_client,
-        logger=fx_logger,
-        get_record=fx_get_record,
-        head_commit_ref="83fake48",
-    )
+    return SiteExporter(logger=fx_logger, config=mock_config, meta=meta, s3=fx_s3_client, get_record=fx_get_record)
 
 
 @pytest.fixture()
@@ -858,12 +854,12 @@ def fx_exporter_verify(
     type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
     type(mock_config).TEMPLATES_ITEM_MAPS_ENDPOINT = PropertyMock(return_value="x")
     type(mock_config).TEMPLATES_ITEM_CONTACT_ENDPOINT = PropertyMock(return_value="x")
+    type(mock_config).BASE_URL = PropertyMock(return_value="https://example.com")
+    meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
-    context: VerificationContext = {"BASE_URL": "https://example.com", "SHAREPOINT_PROXY_ENDPOINT": "x"}
+    context: VerificationContext = {"BASE_URL": meta.base_url, "SHAREPOINT_PROXY_ENDPOINT": "x"}
 
-    return VerificationExporter(
-        logger=fx_logger, config=mock_config, s3=fx_s3_client, get_record=fx_get_record, context=context
-    )
+    return VerificationExporter(logger=fx_logger, meta=meta, s3=fx_s3_client, get_record=fx_get_record, context=context)
 
 
 @pytest.fixture()
@@ -919,6 +915,7 @@ def fx_exporter_static_site(module_mocker: MockerFixture) -> TemporaryDirectory:
     )
     module_mocker.patch.object(type(config), attribute="AWS_ACCESS_ID", new_callable=PropertyMock, return_value="x")
     module_mocker.patch.object(type(config), attribute="AWS_ACCESS_SECRET", new_callable=PropertyMock, return_value="x")
+    meta = ExportMeta.from_config_store(config=config, store=None, build_repo_ref="83fake48")
 
     with mock_aws():
         s3_client = S3Client(
@@ -930,13 +927,7 @@ def fx_exporter_static_site(module_mocker: MockerFixture) -> TemporaryDirectory:
 
     store = FakeRecordsStore(logger=logger)
     store.populate()
-    exporter = SiteExporter(
-        config=config,
-        s3=s3_client,
-        logger=logger,
-        get_record=store.get,
-        head_commit_ref="83fake48",
-    )
+    exporter = SiteExporter(logger=logger, config=config, meta=meta, s3=s3_client, get_record=store.get)
     exporter.select({record.file_identifier for record in store.records})
     exporter.export()
 

@@ -5,10 +5,10 @@ from tempfile import TemporaryDirectory
 from lxml import etree
 from mypy_boto3_s3 import S3Client
 
-from lantern.config import Config
 from lantern.exporters.base import Exporter as BaseExporter
 from lantern.exporters.base import ResourceExporter
 from lantern.models.record.revision import RecordRevision
+from lantern.models.site import ExportMeta
 
 
 class IsoXmlExporter(ResourceExporter):
@@ -20,12 +20,11 @@ class IsoXmlExporter(ResourceExporter):
     Intended for interoperability with clients that prefer ISO XML, or need access to the full underlying record.
     """
 
-    def __init__(
-        self, config: Config, logger: logging.Logger, s3: S3Client, record: RecordRevision, export_base: Path
-    ) -> None:
+    def __init__(self, logger: logging.Logger, meta: ExportMeta, s3: S3Client, record: RecordRevision) -> None:
+        export_base = meta.export_path / "records"
         export_name = f"{record.file_identifier}.xml"
         super().__init__(
-            config=config, logger=logger, s3=s3, record=record, export_base=export_base, export_name=export_name
+            logger=logger, meta=meta, s3=s3, record=record, export_base=export_base, export_name=export_name
         )
 
     @property
@@ -52,13 +51,12 @@ class IsoXmlHtmlExporter(ResourceExporter):
     [1] https://metadata-standards.data.bas.ac.uk/standards/iso-19115-19139#iso-html
     """
 
-    def __init__(
-        self, config: Config, logger: logging.Logger, s3: S3Client, record: RecordRevision, export_base: Path
-    ) -> None:
+    def __init__(self, logger: logging.Logger, meta: ExportMeta, s3: S3Client, record: RecordRevision) -> None:
         """Initialise exporter."""
+        export_base = meta.export_path / "records"
         export_name = f"{record.file_identifier}.html"
         super().__init__(
-            config=config, logger=logger, s3=s3, record=record, export_base=export_base, export_name=export_name
+            logger=logger, meta=meta, s3=s3, record=record, export_base=export_base, export_name=export_name
         )
         self._xsl_src_ref = "lantern.resources.xsl"
 
@@ -82,11 +80,7 @@ class IsoXmlHtmlExporter(ResourceExporter):
             xsl_doc = etree.parse(entrypoint_path)
 
             record_xml = IsoXmlExporter(
-                config=self._config,
-                logger=self._logger,
-                s3=self._s3_client,
-                record=self._record,
-                export_base=self._export_path.parent,
+                logger=self._logger, meta=self._meta, s3=self._s3_client, record=self._record
             ).dumps()
             record_doc = etree.ElementTree(etree.fromstring(record_xml.encode()))
 

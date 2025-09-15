@@ -22,6 +22,7 @@ from lantern.exporters.xml import IsoXmlExporter, IsoXmlHtmlExporter
 from lantern.lib.metadata_library.models.record.elements.common import Identifier
 from lantern.models.record import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
+from lantern.models.site import ExportMeta
 
 
 class TestRecordExporterJob:
@@ -69,10 +70,10 @@ class TestRecordExporterJob:
         _job(
             logger=fx_logger,
             config=fx_exporter_records_sel._config,
+            meta=fx_exporter_records_sel._meta,
             exporter=exporter,
             record=fx_revision_model_min,
             get_record=fx_get_record,
-            export_base=fx_exporter_records_sel._config.EXPORT_PATH,
             method=method,
         )
 
@@ -100,8 +101,11 @@ class TestRecordsExporter:
         mock_config = mocker.Mock()
         type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
         type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
+        meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
-        exporter = RecordsExporter(config=mock_config, s3=fx_s3_client, logger=fx_logger, get_record=fx_get_record)
+        exporter = RecordsExporter(
+            config=mock_config, meta=meta, s3=fx_s3_client, logger=fx_logger, get_record=fx_get_record
+        )
 
         assert isinstance(exporter, RecordsExporter)
         assert exporter.name == "Records"

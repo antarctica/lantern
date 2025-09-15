@@ -17,8 +17,9 @@ from lantern.lib.metadata_library.models.record.enums import (
     ConstraintRestrictionCode,
     ConstraintTypeCode,
 )
-from lantern.models.item.catalogue import ItemCatalogue, Tab
+from lantern.models.item.catalogue.item import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
+from lantern.models.item.catalogue.tabs import Tab
 from tests.conftest import _item_catalogue_model_min, render_item_catalogue
 
 

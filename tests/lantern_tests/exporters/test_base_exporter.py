@@ -12,6 +12,7 @@ from lantern.exporters.base import Exporter, ResourceExporter, S3Utils, get_jinj
 from lantern.lib.metadata_library.models.record.elements.common import Identifier
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
+from lantern.models.site import ExportMeta
 from tests.resources.exporters.fake_exporter import FakeExporter, FakeResourceExporter
 
 
@@ -92,12 +93,11 @@ class TestS3Utils:
 class TestBaseExporter:
     """Test base exporter."""
 
-    def test_init(self, mocker: MockerFixture, fx_logger: logging.Logger):
+    def test_init(self, mocker: MockerFixture, fx_logger: logging.Logger, fx_export_meta: ExportMeta):
         """Can create an Exporter."""
         s3_client = mocker.MagicMock()
-        mock_config = mocker.Mock()
 
-        base = FakeExporter(config=mock_config, logger=fx_logger, s3=s3_client)
+        base = FakeExporter(logger=fx_logger, meta=fx_export_meta, s3=s3_client)
 
         assert isinstance(base, Exporter)
 
@@ -147,11 +147,11 @@ class TestBaseResourceExporter:
         mock_config = mocker.Mock()
         type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
         type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
-        fx_exporter_base._config = mock_config
+        meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
         exporter = FakeResourceExporter(
-            config=mock_config,
             logger=fx_logger,
+            meta=meta,
             s3=fx_s3_client,
             record=fx_revision_model_min,
             export_base=output_path.joinpath("x"),
@@ -165,8 +165,8 @@ class TestBaseResourceExporter:
             alt_path = Path(tmp_path_exporter)
         with pytest.raises(ValueError, match="Export base must be relative to EXPORT_PATH."):
             FakeResourceExporter(
-                config=fx_exporter_resource_base._config,
                 logger=fx_exporter_resource_base._logger,
+                meta=fx_exporter_resource_base._meta,
                 s3=fx_exporter_resource_base._s3_client,
                 record=fx_exporter_resource_base._record,
                 export_base=alt_path,

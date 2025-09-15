@@ -1,7 +1,6 @@
 import logging
 import shutil
 from collections.abc import Callable
-from datetime import UTC, datetime
 from pathlib import Path
 from shutil import copy
 
@@ -14,11 +13,8 @@ from lantern.exporters.base import Exporter, get_jinja_env, get_record_aliases, 
 from lantern.exporters.base import Exporter as BaseExporter
 from lantern.exporters.records import RecordsExporter
 from lantern.exporters.website import WebsiteSearchExporter
-from lantern.lib.metadata_library.models.record.elements.common import Date
-from lantern.models.item.base.elements import Link
-from lantern.models.item.catalogue.elements import FormattedDate
 from lantern.models.record.revision import RecordRevision
-from lantern.models.templates import PageMetadata
+from lantern.models.site import ExportMeta
 
 
 class SiteResourcesExporter(Exporter):
@@ -28,13 +24,13 @@ class SiteResourcesExporter(Exporter):
     A non-record specific exporter for static resources used across the static site (CSS, fonts, etc.).
     """
 
-    def __init__(self, config: Config, logger: logging.Logger, s3: S3Client) -> None:
-        super().__init__(config=config, logger=logger, s3=s3)
+    def __init__(self, meta: ExportMeta, logger: logging.Logger, s3: S3Client) -> None:
+        super().__init__(logger=logger, meta=meta, s3=s3)
         self._css_src_ref = "lantern.resources.css"
         self._fonts_src_ref = "lantern.resources.fonts"
         self._img_src_ref = "lantern.resources.img"
         self._txt_src_ref = "lantern.resources.txt"
-        self._export_base = config.EXPORT_PATH.joinpath("static")
+        self._export_base = self._meta.export_path / "static"
 
     def _dump_css(self) -> None:
         """
@@ -61,7 +57,7 @@ class SiteResourcesExporter(Exporter):
         with resources_as_file(resources_files(self._img_src_ref)) as src_base:
             name = "favicon.ico"
             src_path = src_base / name
-            dst_path = self._export_base.parent.joinpath(name)
+            dst_path = self._export_base.parent / name
             dst_path.parent.mkdir(parents=True, exist_ok=True)
             copy(src_path, dst_path)
 
@@ -146,20 +142,18 @@ class SiteIndexExporter(Exporter):
 
     def __init__(
         self,
-        config: Config,
         logger: logging.Logger,
+        meta: ExportMeta,
         s3: S3Client,
         get_record: Callable[[str], RecordRevision],
-        commit_ref: str,
     ) -> None:
         """Initialise exporter."""
-        super().__init__(config=config, logger=logger, s3=s3)
+        super().__init__(logger=logger, meta=meta, s3=s3)
         self._jinja = get_jinja_env()
         self._template_path = "_views/-/index.html.j2"
-        self._index_path = self._config.EXPORT_PATH / "-" / "index" / "index.html"
+        self._index_path = self._meta.export_path / "-" / "index" / "index.html"
         self._get_record = get_record
         self._selected_identifiers: set[str] = set()
-        self._commit_ref = commit_ref
 
     @property
     def selected_identifiers(self) -> set[str]:
@@ -177,13 +171,8 @@ class SiteIndexExporter(Exporter):
         return "Site Index"
 
     @property
-    def _commit(self) -> Link:
-        """Commit reference."""
-        href = f"{self._config.TEMPLATES_ITEM_VERSIONS_ENDPOINT}/-/commit/{self._commit_ref}"
-        return Link(value=self._commit_ref[:8], href=href, external=True)
-
-    def _dumps(self) -> str:
-        """Generate index."""
+    def _data(self) -> dict:
+        """Assemble index data."""
         records = []
         aliases = []
 
@@ -210,20 +199,15 @@ class SiteIndexExporter(Exporter):
                 ]
             )
 
-        meta = PageMetadata(
-            build_key=self._config.TEMPLATES_CACHE_BUST_VALUE,
-            build_time=datetime.now(tz=UTC),
-            sentry_src=self._config.TEMPLATES_SENTRY_SRC,
-            plausible_domain=self._config.TEMPLATES_PLAUSIBLE_DOMAIN,
-            html_title="Index",
-        )
-        data = {
-            "commit": self._commit,
-            "time": FormattedDate.from_rec_date(Date(date=datetime.fromisoformat(meta.build_time.isoformat()))),
+        return {
             "records": records,
             "aliases": aliases,
         }
-        raw = self._jinja.get_template(self._template_path).render(data=data, meta=meta)
+
+    def _dumps(self) -> str:
+        """Generate index."""
+        self._meta.html_title = "Index"
+        raw = self._jinja.get_template(self._template_path).render(meta=self._meta.site_metadata, data=self._data)
         return prettify_html(raw)
 
     def export(self) -> None:
@@ -245,48 +229,37 @@ class SitePagesExporter(Exporter):
     Renders static site pages from Jinja2 templates for legal pages, 404, etc.
     """
 
-    def __init__(self, config: Config, s3: S3Client, logger: logging.Logger) -> None:
+    def __init__(self, logger: logging.Logger, meta: ExportMeta, s3: S3Client) -> None:
         """Initialise exporter."""
-        super().__init__(config=config, logger=logger, s3=s3)
+        super().__init__(logger=logger, meta=meta, s3=s3)
         self._jinja = get_jinja_env()
-        self._templates_base = "_views"
         self._templates = [
-            "404.html.j2",
-            "legal/accessibility.html.j2",
-            "legal/cookies.html.j2",
-            "legal/copyright.html.j2",
-            "legal/privacy.html.j2",
-            "-/formatting.html.j2",
+            "_views/404.html.j2",
+            "_views/legal/accessibility.html.j2",
+            "_views/legal/cookies.html.j2",
+            "_views/legal/copyright.html.j2",
+            "_views/legal/privacy.html.j2",
+            "_views/-/formatting.html.j2",
         ]
-
-    def _get_page_metadata(self, template_path: str) -> PageMetadata:
-        """Get metadata for a page based on its template."""
-        mapping = {
-            "404.html.j2": "Not Found",
-            "legal/accessibility.html.j2": "Accessibility Statement",
-            "legal/cookies.html.j2": "Cookies Policy",
-            "legal/copyright.html.j2": "Copyright Policy",
-            "legal/privacy.html.j2": "Privacy Policy",
-            "-/formatting.html.j2": "Supported Formatting Guide",
+        self._html_title = {
+            "_views/404.html.j2": "Not Found",
+            "_views/legal/accessibility.html.j2": "Accessibility Statement",
+            "_views/legal/cookies.html.j2": "Cookies Policy",
+            "_views/legal/copyright.html.j2": "Copyright Policy",
+            "_views/legal/privacy.html.j2": "Privacy Policy",
+            "_views/-/formatting.html.j2": "Supported Formatting Guide",
         }
-        return PageMetadata(
-            build_key=self._config.TEMPLATES_CACHE_BUST_VALUE,
-            build_time=datetime.now(tz=UTC),
-            sentry_src=self._config.TEMPLATES_SENTRY_SRC,
-            plausible_domain=self._config.TEMPLATES_PLAUSIBLE_DOMAIN,
-            html_title=mapping[template_path],
-        )
 
     def _get_page_path(self, template_path: str) -> Path:
         """Get path within exported site for a page based on its template."""
-        if template_path == "404.html.j2":
-            return self._config.EXPORT_PATH / "404.html"
-        return self._config.EXPORT_PATH / template_path.split(".")[0] / "index.html"
+        if template_path == "_views/404.html.j2":
+            return self._meta.export_path / "404.html"
+        return self._meta.export_path / template_path.replace("_views/", "").split(".")[0] / "index.html"
 
     def _dumps(self, template_path: str) -> str:
         """Build a page."""
-        prefixed_path = f"{self._templates_base}/{template_path}"
-        raw = self._jinja.get_template(prefixed_path).render(meta=self._get_page_metadata(template_path))
+        self._meta.html_title = self._html_title[template_path]
+        raw = self._jinja.get_template(template_path).render(meta=self._meta)
         return prettify_html(raw)
 
     @property
@@ -294,14 +267,14 @@ class SitePagesExporter(Exporter):
         """Exporter name."""
         return "Site Pages"
 
-    def export_page(self, template_path: str) -> None:
+    def _export_page(self, template_path: str) -> None:
         """Export a page to directory."""
         page_path = self._get_page_path(template_path)
         page_path.parent.mkdir(parents=True, exist_ok=True)
         with page_path.open("w") as f:
             f.write(self._dumps(template_path))
 
-    def publish_page(self, template_path: str) -> None:
+    def _publish_page(self, template_path: str) -> None:
         """Publish a page to S3."""
         page_path = self._get_page_path(template_path)
         page_key = self._s3_utils.calc_key(page_path)
@@ -310,12 +283,12 @@ class SitePagesExporter(Exporter):
     def export(self) -> None:
         """Export static pages to directory."""
         for template in self._templates:
-            self.export_page(template_path=template)
+            self._export_page(template_path=template)
 
     def publish(self) -> None:
         """Publish static pages to S3."""
         for template in self._templates:
-            self.publish_page(template_path=template)
+            self._publish_page(template_path=template)
 
 
 class SiteExporter(Exporter):
@@ -323,28 +296,28 @@ class SiteExporter(Exporter):
     Data Catalogue static site exporter.
 
     Combines exporters for records and static resources to create a standalone static website.
+
+    Config instance needed for RecordsExporter.
     """
 
     def __init__(
         self,
-        config: Config,
         logger: logging.Logger,
+        config: Config,
+        meta: ExportMeta,
         s3: S3Client,
         get_record: Callable[[str], RecordRevision],
-        head_commit_ref: str,
     ) -> None:
         """Initialise exporter."""
-        super().__init__(config=config, logger=logger, s3=s3)
-        self._resources_exporter = SiteResourcesExporter(config=self._config, logger=logger, s3=self._s3_client)
-        self._pages_exporter = SitePagesExporter(config=self._config, logger=logger, s3=self._s3_client)
-        self._index_exporter = SiteIndexExporter(
-            config=self._config, logger=logger, s3=self._s3_client, get_record=get_record, commit_ref=head_commit_ref
-        )
+        super().__init__(logger=logger, meta=meta, s3=s3)
+        self._resources_exporter = SiteResourcesExporter(logger=logger, meta=meta, s3=self._s3_client)
+        self._pages_exporter = SitePagesExporter(logger=logger, meta=meta, s3=self._s3_client)
+        self._index_exporter = SiteIndexExporter(logger=logger, meta=meta, s3=self._s3_client, get_record=get_record)
         self._records_exporter = RecordsExporter(
-            config=self._config, logger=logger, s3=self._s3_client, get_record=get_record
+            logger=logger, config=config, meta=meta, s3=self._s3_client, get_record=get_record
         )
         self._website_exporter = WebsiteSearchExporter(
-            config=self._config, logger=logger, s3=self._s3_client, get_record=get_record
+            logger=logger, meta=meta, s3=self._s3_client, get_record=get_record
         )
 
     @property
@@ -354,9 +327,9 @@ class SiteExporter(Exporter):
 
     def purge(self) -> None:
         """Empty file system export directory and S3 publishing bucket."""
-        if self._config.EXPORT_PATH.exists():
+        if self._meta.export_path.exists():
             self._logger.info("Purging file system export directory")
-            shutil.rmtree(self._config.EXPORT_PATH)
+            shutil.rmtree(self._meta.export_path)
         self._logger.info("Purging S3 publishing bucket")
         self._s3_utils.empty_bucket()
 

@@ -10,7 +10,6 @@ import pytest
 from pytest_mock import MockerFixture
 from requests import Response
 
-from lantern.config import Config
 from lantern.exporters.verification import (
     VerificationExporter,
     VerificationReport,
@@ -22,9 +21,9 @@ from lantern.exporters.verification import (
     run_job,
 )
 from lantern.lib.metadata_library.models.record.elements.common import Identifier
-from lantern.models.item.base.elements import Link
 from lantern.models.record import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
+from lantern.models.site import ExportMeta, SiteMeta
 from lantern.models.verification.enums import VerificationResult, VerificationType
 from lantern.models.verification.jobs import VerificationJob
 from lantern.models.verification.types import VerificationContext
@@ -303,7 +302,7 @@ class TestVerificationExporterChecks:
 class TestVerificationReport:
     """Test Verification report."""
 
-    def test_init(self, fx_config: Config):
+    def test_init(self, fx_site_meta: SiteMeta):
         """Can instantiate report."""
         context: VerificationContext = {"BASE_URL": "https://data.bas.ac.uk", "SHAREPOINT_PROXY_ENDPOINT": "x"}
         jobs = [
@@ -323,7 +322,7 @@ class TestVerificationReport:
             ),
         ]
 
-        report = VerificationReport(config=fx_config, jobs=jobs, context=context)
+        report = VerificationReport(meta=fx_site_meta, jobs=jobs, context=context)
         assert isinstance(report._created, datetime)
         assert report._duration.microseconds == 2
         assert len(report._site_jobs) > 0
@@ -336,7 +335,7 @@ class TestVerificationReport:
             VerificationResult.FAIL: 0,
         }
 
-    def test_failed(self, fx_config: Config):
+    def test_failed(self, fx_site_meta: SiteMeta):
         """
         Any failed jobs are reflected in report.
 
@@ -367,7 +366,7 @@ class TestVerificationReport:
             ),
         ]
 
-        report = VerificationReport(config=fx_config, jobs=jobs, context=context)
+        report = VerificationReport(meta=fx_site_meta, jobs=jobs, context=context)
         assert report._result == VerificationResult.FAIL
         assert report._summary == {
             VerificationResult.PENDING: 0,
@@ -387,10 +386,22 @@ class TestVerificationReport:
         assert isinstance(json.dumps(result), str)  # JSON safe types
         assert "context" not in result["site_checks"][0]  # context not shown in output
 
+    @pytest.mark.cov()
+    def test_data_no_commit(self, fx_exporter_verify_post_run: VerificationExporter):
+        """Can get report data without commit in context."""
+        fx_exporter_verify_post_run._meta.build_repo_ref = None
+        fx_exporter_verify_post_run._meta.build_repo_base_url = None
+
+        report = fx_exporter_verify_post_run.report
+        result = report.data
+        assert isinstance(result, dict)
+        assert result["commit"] is None
+
     def test_dumps(self, fx_exporter_verify_post_run: VerificationExporter):
         """Can get report data as HTML."""
         commit = "abc123"
-        fx_exporter_verify_post_run._context["COMMIT"] = Link(value=commit, href="x", external=True)
+        fx_exporter_verify_post_run._meta.build_repo_ref = commit
+        fx_exporter_verify_post_run._meta.build_repo_base_url = "x"
         report = fx_exporter_verify_post_run.report
         result = report.dumps()
         assert isinstance(result, str)
@@ -410,10 +421,11 @@ class TestVerificationExporter:
         s3_client = mocker.MagicMock()
         mock_config = mocker.Mock()
         type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
-        context: VerificationContext = {"BASE_URL": "https://data.bas.ac.uk", "SHAREPOINT_PROXY_ENDPOINT": "x"}
+        meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
+        context: VerificationContext = {"BASE_URL": meta.base_url, "SHAREPOINT_PROXY_ENDPOINT": "x"}
 
         exporter = VerificationExporter(
-            logger=fx_logger, config=mock_config, s3=s3_client, get_record=fx_get_record, context=context
+            logger=fx_logger, meta=meta, s3=s3_client, get_record=fx_get_record, context=context
         )
 
         assert isinstance(exporter, VerificationExporter)

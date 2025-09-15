@@ -340,6 +340,7 @@ class TestSiteExporter:
 
         assert fx_exporter_site._records_exporter.selected_identifiers == expected
         assert fx_exporter_site._index_exporter.selected_identifiers == expected
+        assert fx_exporter_site._waf_exporter.selected_identifiers == expected
         assert fx_exporter_site._website_exporter.selected_identifiers == expected
 
     def test_export(self, fx_exporter_site: SiteExporter, fx_revision_model_min: RecordRevision):
@@ -355,6 +356,8 @@ class TestSiteExporter:
             site_path.joinpath("records", f"{record.file_identifier}.xml"),
             site_path.joinpath("legal", "privacy", "index.html"),
             site_path.joinpath("-", "index", "index.html"),
+            site_path.joinpath("waf", "iso-19139-all", "index.html"),
+            site_path.joinpath("-", "public-website-search", "items.json"),
         ]  # representative sample
 
         fx_exporter_site.export()
@@ -386,6 +389,7 @@ class TestSiteExporter:
             f"records/{record.file_identifier}.html",
             "legal/privacy/index.html",
             "-/index/index.html",
+            "waf/iso-19139-all/index.html",
             "-/public-website-search/items.json",
         ]  # representative sample
 

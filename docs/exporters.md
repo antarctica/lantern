@@ -14,7 +14,7 @@ All exporters implement a [Common Interface](#exporter-classes) supporting:
 - and/or publishing to a remote service (typically [AWS S3](/docs/architecture.md#amazon-s3)) using `publish()`
 
 Exporters that access Records use a callable from a [Store](/docs/architecture.md#stores) to get Records by file
-identifier as needed. A `selected_identifiers` property typically controls which Records are output to allow for full
+identifier as needed. A `selected_identifiers` property typically controls which Records are output, allowing for full
 or partial site builds.
 
 > [!TIP]

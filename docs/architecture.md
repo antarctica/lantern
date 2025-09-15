@@ -41,8 +41,8 @@ Currently, a [GitLab](#gitlab) based store is used. See the [Stores](/docs/store
 
 ## Exporters
 
-Exporters create different parts of the [Static Site](#static-site), such as Item pages, Record files and general
-resources such as CSS.
+Exporters create different parts of the [Static Site](#static-site), such as Item pages, general resources such as CSS
+and endpoints intended for programmatic consumption.
 
 See the [Exporters](/docs/exporters.md) docs for more information.
 

@@ -7,17 +7,19 @@ The Data Catalogue website is built as a static site using the [Site Exporter](/
 Simplified, primary, top level structure:
 
 ```text
+├── waf/
 ├── items/
 ├── records/
 └── static/
 ```
 
 <!-- pyml disable md013 -->
-| Path       | Description                                                    | Exporter                                                                                                                                                      |
-|------------|----------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `items/`   | Rendered [Item](/docs/data-model.md#items) pages               | [HTML](/docs/exporters.md#html-resource-exporter)                                                                                                             |
-| `records/` | [Record](/docs/data-model.md#records) files in various formats | [JSON](/docs/exporters.md#json-resource-exporter), [XML](/docs/exporters.md#xml-resource-exporter), [XML HTML](/docs/exporters.md#xml-html-resource-exporter) |
-| `static/`  | CSS, images, and other assets                                  | [Site Resources Exporter](/docs/exporters.md#site-resources-exporter)                                                                                         |
+| Path       | Description                                                                    | Exporter                                                              |
+|------------|--------------------------------------------------------------------------------|-----------------------------------------------------------------------|
+| `waf/`     | [Web Accessible Folder (WAF)](/docs/access.md#web-accessible-folder) endpoints | [HTML](/docs/exporters.md#web-accessible-folder-resource-exporter)    |
+| `items/`   | Rendered [Item](/docs/data-model.md#items) pages                               | [HTML](/docs/exporters.md#html-resource-exporter)                     |
+| `records/` | [Record](/docs/data-model.md#records) files in various formats                 | [Records](/docs/exporters.md#records-resource-exporter)               |
+| `static/`  | CSS, images, and other assets                                                  | [Site Resources Exporter](/docs/exporters.md#site-resources-exporter) |
 <!-- pyml enable md013 -->
 
 Secondary top-level items:
@@ -53,10 +55,14 @@ Secondary top-level items:
 │     │    └── index.html
 │     └── .../
 │          └── index.html
-└── records/
-    ├── 123.html
-    ├── 123.json
-    ├── 123.xml
+├── records/
+│     ├── 123.html
+│     ├── 123.json
+│     ├── 123.xml
+│     └── ...
+└── waf/
+    ├── iso-19139-all/
+    │    └── index.html -> linking to /records/*.xml
     └── ...
 ```
 

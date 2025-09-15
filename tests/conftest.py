@@ -26,6 +26,7 @@ from lantern.exporters.html import HtmlAliasesExporter, HtmlExporter
 from lantern.exporters.records import RecordsExporter
 from lantern.exporters.site import SiteExporter, SiteIndexExporter, SitePagesExporter, SiteResourcesExporter
 from lantern.exporters.verification import VerificationExporter
+from lantern.exporters.waf import WebAccessibleFolderExporter
 from lantern.exporters.website import WebsiteSearchExporter
 from lantern.exporters.xml import IsoXmlHtmlExporter
 from lantern.lib.metadata_library.models.record import Record as RecordBase
@@ -748,6 +749,34 @@ def fx_exporter_site_index_sel(
     """Site index exporter with a single record selected."""
     fx_exporter_site_index.selected_identifiers = {fx_revision_model_min.file_identifier}
     return fx_exporter_site_index
+
+
+@pytest.fixture()
+def fx_exporter_waf(
+    mocker: MockerFixture, fx_s3_bucket_name: str, fx_logger: logging.Logger, fx_s3_client: S3Client
+) -> WebAccessibleFolderExporter:
+    """
+    Web Accessible Folder exporter (empty).
+
+    With a mocked config and S3 client.
+    """
+    with TemporaryDirectory() as tmp_path:
+        output_path = Path(tmp_path)
+    mock_config = mocker.Mock()
+    type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
+    type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
+    meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
+
+    return WebAccessibleFolderExporter(logger=fx_logger, meta=meta, s3=fx_s3_client, get_record=_get_record_alias)
+
+
+@pytest.fixture()
+def fx_exporter_waf_sel(
+    fx_exporter_waf: WebAccessibleFolderExporter, fx_revision_model_min: RecordRevision
+) -> WebAccessibleFolderExporter:
+    """Web Accessible Folder exporter with a single record selected."""
+    fx_exporter_waf.selected_identifiers = {fx_revision_model_min.file_identifier}
+    return fx_exporter_waf
 
 
 def _get_record_open(identifier: str) -> RecordRevision:

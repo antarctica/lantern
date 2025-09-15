@@ -41,6 +41,7 @@ dev = [
     "types-lxml>=2025.3.30",
 ]
 test = [
+    "lxml>=5.4.0",
     "moto[s3]>=5.1.6",
     "pytest>=8.4.1",
     "pytest-cov>=6.2.1",

@@ -12,6 +12,7 @@ from lantern.config import Config
 from lantern.exporters.base import Exporter, ResourcesExporter, get_jinja_env, get_record_aliases, prettify_html
 from lantern.exporters.base import Exporter as BaseExporter
 from lantern.exporters.records import RecordsExporter
+from lantern.exporters.waf import WebAccessibleFolderExporter
 from lantern.exporters.website import WebsiteSearchExporter
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
@@ -304,6 +305,9 @@ class SiteExporter(Exporter):
         self._records_exporter = RecordsExporter(
             logger=logger, config=config, meta=meta, s3=self._s3_client, get_record=get_record
         )
+        self._waf_exporter = WebAccessibleFolderExporter(
+            logger=logger, meta=meta, s3=self._s3_client, get_record=get_record
+        )
         self._website_exporter = WebsiteSearchExporter(
             logger=logger, meta=meta, s3=self._s3_client, get_record=get_record
         )
@@ -329,6 +333,7 @@ class SiteExporter(Exporter):
         """
         self._records_exporter.selected_identifiers = file_identifiers
         self._index_exporter.selected_identifiers = file_identifiers
+        self._waf_exporter.selected_identifiers = file_identifiers
         self._website_exporter.selected_identifiers = file_identifiers
 
     def export(self) -> None:
@@ -337,6 +342,7 @@ class SiteExporter(Exporter):
         self._pages_exporter.export()
         self._records_exporter.export()
         self._index_exporter.export()
+        self._waf_exporter.export()
         self._website_exporter.export()
 
     def publish(self) -> None:
@@ -345,4 +351,5 @@ class SiteExporter(Exporter):
         self._pages_exporter.publish()
         self._records_exporter.publish()
         self._index_exporter.publish()
+        self._waf_exporter.publish()
         self._website_exporter.publish()

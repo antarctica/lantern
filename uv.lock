@@ -791,6 +791,7 @@ dev = [
     { name = "types-lxml" },
 ]
 test = [
+    { name = "lxml" },
     { name = "moto", extra = ["s3"] },
     { name = "pytest" },
     { name = "pytest-cov" },
@@ -837,6 +838,7 @@ dev = [
     { name = "types-lxml", specifier = ">=2025.3.30" },
 ]
 test = [
+    { name = "lxml", specifier = ">=5.4.0" },
     { name = "moto", extras = ["s3"], specifier = ">=5.1.6" },
     { name = "pytest", specifier = ">=8.4.1" },
     { name = "pytest-cov", specifier = ">=6.2.1" },

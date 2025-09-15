@@ -23,6 +23,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Copyright holders in licence tab
 * Catalogue site verification
 * exporter base class for resources (i.e. that process multiple records)
+* Web Accessible Folders (WAF) exporter
 
 ### Fixed
 

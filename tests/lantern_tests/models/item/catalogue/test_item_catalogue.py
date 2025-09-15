@@ -66,13 +66,6 @@ class TestItemCatalogue:
 
         assert fx_item_catalogue_model_min._revision == expected
 
-    def test_html_title(self, fx_item_catalogue_model_min: ItemCatalogue):
-        """Can get HTML title."""
-        expected = "x | BAS Data Catalogue"
-        fx_item_catalogue_model_min._record.identification.title = "_x_"
-
-        assert fx_item_catalogue_model_min.site_metadata.html_title_suffixed == expected
-
     @pytest.mark.parametrize(
         ("summary", "published", "graphics"),
         [

@@ -22,6 +22,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * GitLab store push returns resulting commit ID
 * Copyright holders in licence tab
 * Catalogue site verification
+* e2e accessibility test for back to top link
 * exporter base class for resources (i.e. that process multiple records)
 * Web Accessible Folders (WAF) exporter
 

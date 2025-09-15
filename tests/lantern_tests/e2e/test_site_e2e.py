@@ -36,3 +36,21 @@ class TestSentry:
 
         expect(no_js_page.get_by_role("button", name="Is something wrong with this page?")).to_be_hidden()
         context.close()
+
+
+class TestBackToTop:
+    """Test back to top link."""
+
+    def test_link(self, fx_exporter_static_server: Popen, page: Page):
+        """
+        Can navigate to the top of the page.
+
+        Privacy page chosen as it's long enough to scroll.
+        """
+        page.goto("http://localhost:8123/legal/privacy/index.html")
+        status_code = page.evaluate("window.performance.getEntries()[0].responseStatus")
+        assert status_code == 200
+
+        back_to_top = page.get_by_role("link", name="Back to Top")
+        back_to_top.click()
+        expect(back_to_top).not_to_be_in_viewport()  # link is off-screen when at top of page

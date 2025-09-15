@@ -5,7 +5,7 @@
 
 {% macro html_head(data) %}
   <head>
-    {{ head_meta() }}
+    {{ head_meta(data) }}
     {{ head_title(data.html_title_suffixed) }}
     {% if data.html_open_graph %}
       {{ head_open_graph(data.html_open_graph) }}
@@ -16,9 +16,14 @@
   </head>
 {% endmacro %}
 
-{% macro head_meta() %}
+{% macro head_meta(data) %}
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="generator" content="{{ data.generator }}">
+  <meta name="version" content="{{ data.version }}">
+  <meta name="generated" content="{{ data.build_time.isoformat() }}">
+  {% if data.build_ref %}<meta name="store-ref" content="{{ data.build_ref.value }}">{% endif %}
+  {% if data.html_description %}<meta name="description" content="{{ data.html_description }}">{% endif %}
 {% endmacro %}
 
 {% macro head_title(value) %}

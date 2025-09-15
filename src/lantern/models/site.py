@@ -16,17 +16,20 @@ class SiteMeta:
 
     - base_url: endpoint needed to construct absolute URLs (e.g. 'https://example.com')
     - build_key: cache busting value
-    - build_time: time the build was triggered
     - html_title: HTML head title value (will be combined with site name)
     - sentry_src: Sentry CDN URL
     - plausible_domain: Plausible Analytics site identifier
     - embedded_maps_endpoint: BAS Embedded Maps Service endpoint
     - items_enquires_endpoint: endpoint for item enquiries form
+    - generator: name of application and source of records
+    - version: version of application
+    - build_time: time the build was triggered
+    - fallback_email: email address used when Sentry feedback is unavailable
     - build_repo_ref: optional commit reference of a working copy associated with the build
     - build_repo_base_url: optional URL to a remote the `build_repo_ref` reference exists within
     - html_open_graph: optional Open Graph metadata
     - html_schema_org: optional Schema.org metadata
-    - fallback_email: email address used when Sentry feedback is unavailable
+    - html_description: optional description meta tag
     """
 
     base_url: str
@@ -36,12 +39,15 @@ class SiteMeta:
     plausible_domain: str
     embedded_maps_endpoint: str
     items_enquires_endpoint: str
+    generator: str
+    version: str
     build_time: datetime = field(default_factory=lambda: datetime.now(tz=UTC).replace(microsecond=0))
     fallback_email: str = "magic@bas.ac.uk"
     build_repo_ref: str | None = None
     build_repo_base_url: str | None = None
     html_open_graph: dict = field(default_factory=dict)
     html_schema_org: str | None = None
+    html_description: str | None = None
 
     @property
     def html_title_suffixed(self) -> str:
@@ -84,7 +90,9 @@ class SiteMeta:
         - plausible_domain
         - embedded_maps_domain
         - items_enquires_endpoint
+        - generator
         - build_repo_base_url
+        - version
 
         The optional GitLab Store provides values for:
         - build_repo_ref
@@ -104,6 +112,8 @@ class SiteMeta:
                 "plausible_domain": config.TEMPLATES_PLAUSIBLE_DOMAIN,
                 "embedded_maps_endpoint": config.TEMPLATES_ITEM_MAPS_ENDPOINT,
                 "items_enquires_endpoint": config.TEMPLATES_ITEM_CONTACT_ENDPOINT,
+                "generator": config.NAME,
+                "version": config.VERSION,
                 "build_repo_ref": build_ref,
                 "build_repo_base_url": config.TEMPLATES_ITEM_VERSIONS_ENDPOINT,
                 "html_title": "",
@@ -122,13 +132,11 @@ class ExportMeta(SiteMeta):
     - export_path: base path for local site output
     - s3_bucket: S3 bucket name for published site output
     - parallel_jobs: number of jobs to run in parallel
-    - source: application source name (for public website exporter)
     """
 
     export_path: Path
     s3_bucket: str
     parallel_jobs: int
-    source: str
 
     @property
     def site_metadata(self) -> SiteMeta:
@@ -137,7 +145,6 @@ class ExportMeta(SiteMeta):
         meta.pop("export_path", None)
         meta.pop("s3_bucket", None)
         meta.pop("parallel_jobs", None)
-        meta.pop("source", None)
         return SiteMeta(**meta)  # ty: ignore[missing-argument]
 
     @classmethod
@@ -151,7 +158,6 @@ class ExportMeta(SiteMeta):
         - export_path: from EXPORT_PATH
         - s3_bucket: from AWS_S3_BUCKET
         - parallel_jobs: from PARALLEL_JOBS
-        - source: from NAME
         """
         super_meta = asdict(SiteMeta.from_config_store(config, store, **kwargs))
 
@@ -161,7 +167,6 @@ class ExportMeta(SiteMeta):
                 "export_path": config.EXPORT_PATH,
                 "s3_bucket": config.AWS_S3_BUCKET,
                 "parallel_jobs": config.PARALLEL_JOBS,
-                "source": config.NAME,
                 **kwargs,
             }
         )

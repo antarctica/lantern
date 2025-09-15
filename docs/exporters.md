@@ -125,6 +125,15 @@ parallel using a worker pool for better performance.
 This exporter requires a [Config](/docs/config.md) object to access credentials for standalone AWS S3 client instances
 used in parallel processing.
 
+### Web Accessible Folder resource exporter
+
+`lantern.exporters.waf.WebAccessibleFolderExporter`
+
+Outputs a [Web Accessible Folder (WAF)](/docs/access.md#web-accessible-folder) (WAF) endpoint.
+
+Consists of a directory containing a minimal index page linking to existing ISO 19139 encoded
+[Records](/docs/data-model.md#records) output by the [XML Resource Exporter](#xml-resource-exporter).
+
 ## Site exporters
 
 Site exporters complete the static site by including static resources such as CSS files, pages such as legal policies

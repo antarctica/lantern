@@ -11,6 +11,7 @@ from lantern.config import Config
 from lantern.exporters.site import SiteExporter
 from lantern.log import init as init_logging
 from lantern.log import init_sentry
+from lantern.models.site import ExportMeta
 from lantern.stores.gitlab import CommitResults, GitLabStore
 from tasks.records_import import _clean_input_path, _parse_records, _process_records
 from tasks.records_import import _get_args as _get_import_args
@@ -65,6 +66,7 @@ def _build(logger: logging.Logger, site: SiteExporter, commit: CommitResults, bu
     """Build."""
     identifiers = set(commit.new_identifiers + commit.updated_identifiers)
     logger.info(f"Publishing {len(identifiers)} records to {bucket}.")
+    site._meta.build_repo_ref = commit.commit  # set build context
     site.select(file_identifiers=identifiers)
     site.publish()
     logger.info("Records published:")
@@ -95,7 +97,8 @@ def main() -> None:
         aws_secret_access_key=config.AWS_ACCESS_SECRET,
         region_name="eu-west-1",
     )
-    site = SiteExporter(config=config, logger=logger, s3=s3, get_record=store.get, head_commit_ref=store.head_commit)
+    meta = ExportMeta.from_config_store(config=config, store=None, build_repo_ref=store.head_commit)
+    site = SiteExporter(config=config, meta=meta, logger=logger, s3=s3, get_record=store.get)
 
     import_path = Path("./import")
     production_bucket = "add-catalogue.data.bas.ac.uk"

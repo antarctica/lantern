@@ -8,6 +8,7 @@ from pytest_mock import MockerFixture
 
 from lantern.exporters.xml import IsoXmlExporter, IsoXmlHtmlExporter
 from lantern.models.record.revision import RecordRevision
+from lantern.models.site import ExportMeta
 
 
 class TestIsoXmlExporter:
@@ -27,15 +28,10 @@ class TestIsoXmlExporter:
         mock_config = mocker.Mock()
         type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
         type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
-        expected = output_path.joinpath(f"{fx_revision_model_min.file_identifier}.xml")
+        meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
+        expected = output_path / "records" / f"{fx_revision_model_min.file_identifier}.xml"
 
-        exporter = IsoXmlExporter(
-            config=mock_config,
-            logger=fx_logger,
-            s3=fx_s3_client,
-            record=fx_revision_model_min,
-            export_base=output_path,
-        )
+        exporter = IsoXmlExporter(meta=meta, logger=fx_logger, s3=fx_s3_client, record=fx_revision_model_min)
 
         assert isinstance(exporter, IsoXmlExporter)
         assert exporter.name == "ISO XML"
@@ -55,14 +51,9 @@ class TestIsoXmlExporter:
         mock_config = mocker.Mock()
         type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
         type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
+        meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
-        exporter = IsoXmlExporter(
-            config=mock_config,
-            logger=fx_logger,
-            s3=fx_s3_client,
-            record=fx_revision_model_min,
-            export_base=output_path,
-        )
+        exporter = IsoXmlExporter(meta=meta, logger=fx_logger, s3=fx_s3_client, record=fx_revision_model_min)
 
         result = exporter.dumps()
         assert "<gmi:MI_Metadata" in result
@@ -82,18 +73,13 @@ class TestIsoXmlHtmlExporter:
         """Can create an ISO XML HTML Exporter."""
         with TemporaryDirectory() as tmp_path:
             base_path = Path(tmp_path)
-            exports_path = base_path.joinpath("exports")
+            exports_path = base_path.joinpath("records")
         mock_config = mocker.Mock()
         type(mock_config).EXPORT_PATH = PropertyMock(return_value=base_path)
         type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
+        meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
-        exporter = IsoXmlHtmlExporter(
-            config=mock_config,
-            logger=fx_logger,
-            s3=fx_s3_client,
-            record=fx_revision_model_min,
-            export_base=exports_path,
-        )
+        exporter = IsoXmlHtmlExporter(meta=meta, logger=fx_logger, s3=fx_s3_client, record=fx_revision_model_min)
         expected = exports_path.joinpath(f"{fx_revision_model_min.file_identifier}.html")
 
         assert isinstance(exporter, IsoXmlHtmlExporter)

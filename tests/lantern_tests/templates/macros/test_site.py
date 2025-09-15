@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from freezegun.api import FrozenDateTimeFactory
 from jinja2 import Environment, PackageLoader, select_autoescape
 
-from lantern.models.templates import PageMetadata
+from lantern.models.site import SiteMeta
 from tests.conftest import freezer_time
 
 
@@ -14,13 +14,20 @@ class TestMacrosSite:
     """Test site template macros."""
 
     @staticmethod
-    def _page_meta() -> PageMetadata:
-        return PageMetadata(
-            build_key="x", build_time=freezer_time(), html_title="x", sentry_src="x", plausible_domain="x"
+    def _page_meta() -> SiteMeta:
+        return SiteMeta(
+            base_url="x",
+            build_key="x",
+            build_time=freezer_time(),
+            html_title="x",
+            sentry_src="x",
+            plausible_domain="x",
+            embedded_maps_endpoint="x",
+            items_enquires_endpoint="x",
         )
 
     @staticmethod
-    def _render(template: str, page_meta: PageMetadata | None = None) -> str:
+    def _render(template: str, page_meta: SiteMeta | None = None) -> str:
         if page_meta is None:
             page_meta = TestMacrosSite._page_meta()
         _loader = PackageLoader("lantern", "resources/templates")
@@ -41,7 +48,7 @@ class TestMacrosSite:
     def test_head_title(self):
         """Can get <title> with expected value from page."""
         expected = "x | BAS Data Catalogue"
-        template = """{% import '_macros/site.html.j2' as site %}{{ site.head_title(meta.html_title) }}"""
+        template = """{% import '_macros/site.html.j2' as site %}{{ site.head_title(meta.html_title_suffixed) }}"""
         html = BeautifulSoup(self._render(template), parser="html.parser", features="lxml")
 
         assert html.head.title.string == expected
@@ -56,12 +63,15 @@ class TestMacrosSite:
         freezer.move_to(fx_freezer_time)
         expected = {"x": "y"}
         template = """{% import '_macros/site.html.j2' as site %}{{ site.head_open_graph(meta.html_open_graph) }}"""
-        meta = PageMetadata(
+        meta = SiteMeta(
+            base_url="x",
             build_key="x",
             build_time=datetime.now(tz=UTC),
             html_title="x",
             sentry_src="x",
             plausible_domain="x",
+            embedded_maps_endpoint="x",
+            items_enquires_endpoint="x",
             html_open_graph=expected,
         )
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
@@ -110,12 +120,15 @@ class TestMacrosSite:
         freezer.move_to(fx_freezer_time)
         expected = {"x": "y"}
         template = """{% import '_macros/site.html.j2' as site %}{{ site.script_schema_org(meta.html_schema_org) }}"""
-        meta = PageMetadata(
+        meta = SiteMeta(
+            base_url="x",
             build_key="x",
             build_time=datetime.now(tz=UTC),
             html_title="x",
             sentry_src="x",
             plausible_domain="x",
+            embedded_maps_endpoint="x",
+            items_enquires_endpoint="x",
             html_schema_org=json.dumps(expected),
         )
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
@@ -126,21 +139,31 @@ class TestMacrosSite:
     @pytest.mark.parametrize(
         "meta",
         [
-            PageMetadata(
-                build_key="x", build_time=freezer_time(), html_title="x", sentry_src="x", plausible_domain="x"
-            ),
-            PageMetadata(
+            SiteMeta(
+                base_url="x",
                 build_key="x",
                 build_time=freezer_time(),
                 html_title="x",
                 sentry_src="x",
                 plausible_domain="x",
+                embedded_maps_endpoint="x",
+                items_enquires_endpoint="x",
+            ),
+            SiteMeta(
+                base_url="x",
+                build_key="x",
+                build_time=freezer_time(),
+                html_title="x",
+                sentry_src="x",
+                plausible_domain="x",
+                embedded_maps_endpoint="x",
+                items_enquires_endpoint="x",
                 html_open_graph={"x": "y"},
                 html_schema_org=json.dumps({"x": "y"}),
             ),
         ],
     )
-    def test_html_head(self, meta: PageMetadata):
+    def test_html_head(self, meta: SiteMeta):
         """
         Can get HTML head elements.
 
@@ -151,7 +174,7 @@ class TestMacrosSite:
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
 
         assert html.head.meta["charset"] == "utf-8"
-        assert html.head.title.string == meta.html_title
+        assert html.head.title.string == meta.html_title_suffixed
         assert html.head.find(name="script", src=meta.sentry_src) is not None
         assert html.head.find(name="script", attrs={"data-domain": meta.plausible_domain}) is not None
 
@@ -194,7 +217,16 @@ class TestMacrosSite:
         freezer.move_to(fx_freezer_time)
         expected = datetime.now(tz=UTC)
         template = """{% import '_macros/site.html.j2' as site %}{{ site.footer(meta) }}"""
-        meta = PageMetadata(build_key="x", build_time=expected, html_title="x", sentry_src="x", plausible_domain="x")
+        meta = SiteMeta(
+            base_url="x",
+            build_key="x",
+            build_time=expected,
+            html_title="x",
+            sentry_src="x",
+            plausible_domain="x",
+            embedded_maps_endpoint="x",
+            items_enquires_endpoint="x",
+        )
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
 
         assert html.find(id="site-footer") is not None

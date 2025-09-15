@@ -42,7 +42,6 @@ from lantern.models.item.base import AccessLevel
 from lantern.models.item.base.elements import Contact, Contacts, Link
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.base.enums import ResourceTypeLabel
-from lantern.models.item.catalogue import ItemCatalogue
 from lantern.models.item.catalogue.distributions import ArcGisFeatureLayer
 from lantern.models.item.catalogue.elements import (
     Aggregations,
@@ -54,6 +53,7 @@ from lantern.models.item.catalogue.elements import (
     Maintenance,
 )
 from lantern.models.item.catalogue.enums import Licence
+from lantern.models.item.catalogue.item import ItemCatalogue
 from lantern.models.item.catalogue.tabs import (
     AdditionalInfoTab,
     AuthorsTab,

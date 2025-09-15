@@ -4,12 +4,12 @@ from collections.abc import Callable
 
 from mypy_boto3_s3 import S3Client
 
-from lantern.config import Config
 from lantern.exporters.base import Exporter
 from lantern.lib.metadata_library.models.record.enums import AggregationAssociationCode
 from lantern.models.item.website.search import ItemWebsiteSearch
 from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
+from lantern.models.site import ExportMeta
 
 
 class WebsiteSearchExporter(Exporter):
@@ -35,13 +35,17 @@ class WebsiteSearchExporter(Exporter):
     """
 
     def __init__(
-        self, config: Config, logger: logging.Logger, s3: S3Client, get_record: Callable[[str], RecordRevision]
+        self,
+        logger: logging.Logger,
+        meta: ExportMeta,
+        s3: S3Client,
+        get_record: Callable[[str], RecordRevision],
     ) -> None:
         """Initialise exporter."""
-        super().__init__(config, logger, s3)
+        super().__init__(logger=logger, meta=meta, s3=s3)
         self._get_record = get_record
         self._selected_identifiers: set[str] = set()
-        self._export_path = self._config.EXPORT_PATH / "-" / "public-website-search" / "items.json"
+        self._export_path = self._meta.export_path / "-" / "public-website-search" / "items.json"
 
     @property
     def selected_identifiers(self) -> set[str]:
@@ -79,7 +83,7 @@ class WebsiteSearchExporter(Exporter):
         records = [self._get_record(file_identifier) for file_identifier in self._selected_identifiers]
         superseded = self._get_superseded_records(records)
         items = [
-            ItemWebsiteSearch(record=record, source=self._config.NAME, base_url=self._config.BASE_URL)
+            ItemWebsiteSearch(record=record, source=self._meta.source, base_url=self._meta.base_url)
             for record in [self._get_record(file_identifier) for file_identifier in self._selected_identifiers]
         ]
         return [item for item in items if item.resource_id not in superseded and item.open_access]

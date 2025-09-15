@@ -14,8 +14,8 @@ from lantern.lib.metadata_library.models.record.elements.identification import G
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
 from lantern.models.item.base.elements import Link
 from lantern.models.item.base.enums import ResourceTypeLabel
-from lantern.models.item.catalogue import ItemCatalogue
 from lantern.models.item.catalogue.elements import PageSummary
+from lantern.models.item.catalogue.item import ItemCatalogue
 from lantern.models.item.catalogue.tabs import (
     AdditionalInfoTab,
     AuthorsTab,
@@ -29,16 +29,17 @@ from lantern.models.item.catalogue.tabs import (
 )
 from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
+from lantern.models.site import SiteMeta
 from tests.conftest import _get_record
 
 
 class TestItemCatalogue:
     """Test catalogue item."""
 
-    def test_init(self, fx_config: Config, fx_revision_model_min: RecordRevision):
+    def test_init(self, fx_site_meta: SiteMeta, fx_revision_model_min: RecordRevision):
         """Can create an ItemCatalogue."""
         item = ItemCatalogue(
-            config=fx_config,
+            site_meta=fx_site_meta,
             record=fx_revision_model_min,
             get_record=_get_record,
         )
@@ -47,7 +48,7 @@ class TestItemCatalogue:
 
     def test_revision(
         self,
-        fx_config: Config,
+        fx_site_meta: SiteMeta,
         fx_item_catalogue_model_min: ItemCatalogue,
     ):
         """Can compute link to record revision where available."""
@@ -60,7 +61,7 @@ class TestItemCatalogue:
         record.file_revision = commit
         fx_item_catalogue_model_min._record = record
 
-        href = f"{fx_config.TEMPLATES_ITEM_VERSIONS_ENDPOINT}/-/blob/{commit}/records/ee/21/{id_}.json"
+        href = f"{fx_site_meta.build_repo_base_url}/-/blob/{commit}/records/ee/21/{id_}.json"
         expected = Link(value="3401c988", href=href, external=True)
 
         assert fx_item_catalogue_model_min._revision == expected
@@ -70,7 +71,7 @@ class TestItemCatalogue:
         expected = "x | BAS Data Catalogue"
         fx_item_catalogue_model_min._record.identification.title = "_x_"
 
-        assert fx_item_catalogue_model_min.page_metadata.html_title == expected
+        assert fx_item_catalogue_model_min.site_metadata.html_title_suffixed == expected
 
     @pytest.mark.parametrize(
         ("summary", "published", "graphics"),
@@ -110,7 +111,7 @@ class TestItemCatalogue:
         if fx_item_catalogue_model_min.overview_graphic is not None:
             expected["og:image"] = fx_item_catalogue_model_min.overview_graphic.href
 
-        assert fx_item_catalogue_model_min.page_metadata.html_open_graph == expected
+        assert fx_item_catalogue_model_min.site_metadata.html_open_graph == expected
 
     @pytest.mark.parametrize(
         ("summary", "graphics", "contacts", "contacts_exp"),
@@ -183,7 +184,7 @@ class TestItemCatalogue:
         if contacts_exp is not None:
             expected["creator"] = contacts_exp
 
-        assert fx_item_catalogue_model_min.page_metadata.html_schema_org == json.dumps(expected, indent=2)
+        assert fx_item_catalogue_model_min.site_metadata.html_schema_org == json.dumps(expected, indent=2)
 
     def test_page_header(self, fx_item_catalogue_model_min: ItemCatalogue):
         """Can get page header element."""

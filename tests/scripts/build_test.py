@@ -3,6 +3,8 @@ import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
+from lantern.models.site import ExportMeta
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 import logging
@@ -36,9 +38,9 @@ def time_task(label: str) -> callable:
 class FakeCatalogue:
     """Catalogue for fake records."""
 
-    def __init__(self, config: Config, logger: logging.Logger) -> None:
-        self._config = config
+    def __init__(self, logger: logging.Logger, config: Config) -> None:
         self._logger = logger
+        self._config = config
 
         with mock_aws():
             self._s3 = S3Client(
@@ -47,13 +49,16 @@ class FakeCatalogue:
                 aws_secret_access_key="x",  # noqa: S106
                 region_name="eu-west-1",
             )
+
         self._store = FakeRecordsStore(logger=self._logger)
+
+        meta = ExportMeta.from_config_store(config=self._config, store=None, build_repo_ref="83fake48")
         self._site = SiteExporter(
-            config=self._config,
             logger=self._logger,
+            config=self._config,
+            meta=meta,
             s3=self._s3,
             get_record=self._store.get,
-            head_commit_ref="83fake48",
         )
 
     # noinspection PyMethodOverriding

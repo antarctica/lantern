@@ -9,11 +9,11 @@ from lantern.lib.metadata_library.models.record.enums import (
     AggregationInitiativeCode,
     HierarchyLevelCode,
 )
-from lantern.models.item.catalogue import AdditionalInfoTab as CatalogueAdditionalInfoTab
-from lantern.models.item.catalogue import Extent as CatalogueExtent
-from lantern.models.item.catalogue import ExtentTab as CatalogueExtentTab
-from lantern.models.item.catalogue import ItemCatalogue
+from lantern.models.item.catalogue.elements import Extent as CatalogueExtent
 from lantern.models.item.catalogue.elements import ItemCatalogueSummary
+from lantern.models.item.catalogue.item import ItemCatalogue
+from lantern.models.item.catalogue.tabs import AdditionalInfoTab as CatalogueAdditionalInfoTab
+from lantern.models.item.catalogue.tabs import ExtentTab as CatalogueExtentTab
 from lantern.models.record import Record
 from lantern.models.record.revision import RecordRevision
 
@@ -185,7 +185,7 @@ class ItemCataloguePhysicalMap(ItemCatalogue):
                 bounding_extent = Extent(
                     label=label,
                     extent=bounding_extent,
-                    embedded_maps_endpoint=self._config.TEMPLATES_ITEM_MAPS_ENDPOINT,
+                    embedded_maps_endpoint=self._meta.embedded_maps_endpoint,
                 )
                 extents.append(bounding_extent)
 

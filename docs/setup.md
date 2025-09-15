@@ -21,7 +21,7 @@ Resources for managing:
       2. enable the *Session Reply* option (needed for the user feedback widget to work)
       3. copy the script and set as the `TEMPLATES_SENTRY_SRC` [Config](/docs/config.md) fixed value
 
-> ![NOTE]
+> [!NOTE]
 > The Sentry DSN and JavaScript Loader Script are not considered secrets.
 
 ## Static website hosting

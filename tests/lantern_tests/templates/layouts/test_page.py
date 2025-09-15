@@ -22,6 +22,8 @@ class TestLayoutPage:
             plausible_domain="x",
             embedded_maps_endpoint="x",
             items_enquires_endpoint="x",
+            generator="x",
+            version="x",
             html_open_graph={"x": "y"},
             html_schema_org=json.dumps({"x": "y"}),
         )

@@ -282,6 +282,16 @@ version as a SHA1 hash, e.g. `main.css?v=f053ddb` for version 0.1.0.
 > Asset references are not automatically amended, make sure any references in templates are suitably configured.
 <!-- pyml enable md028 -->
 
+## HTML metadata
+
+HTML metadata elements are included by the `html_head` site macro for:
+
+- `viewport` - for enabling [Responsive design](#responsive-design)
+- `generator` and `version` - for reporting the application name and version
+- `generated` - when the page was generated (for debugging)
+- `store-ref` - optional commit associated with the site build's [Store](/docs/architecture.md#stores) (for debugging)
+- `description` - page summary
+
 ## Templates
 
 HTML templates use the [Jinja2](https://jinja.palletsprojects.com/) framework.

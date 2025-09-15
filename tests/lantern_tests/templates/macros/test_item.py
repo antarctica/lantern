@@ -19,7 +19,7 @@ from lantern.lib.metadata_library.models.record.enums import (
 )
 from lantern.models.item.catalogue import ItemCatalogue, Tab
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
-from tests.conftest import _item_catalogue_model_min
+from tests.conftest import _item_catalogue_model_min, render_item_catalogue
 
 
 class TestMacrosItem:
@@ -27,7 +27,7 @@ class TestMacrosItem:
 
     def test_header(self, fx_item_catalogue_model_min: ItemCatalogue):
         """Can get item header with expected values from item."""
-        html = BeautifulSoup(fx_item_catalogue_model_min.render(), parser="html.parser", features="lxml")
+        html = BeautifulSoup(render_item_catalogue(fx_item_catalogue_model_min), parser="html.parser", features="lxml")
         expected = fx_item_catalogue_model_min.page_header
 
         assert html.select_one("#item-header-type i")["class"] == expected.subtitle[1].split(" ")
@@ -67,7 +67,7 @@ class TestMacrosItem:
         """Can get item collections with expected values from item."""
         fx_item_catalogue_model_min._record.identification.aggregations = value
         expected = fx_item_catalogue_model_min.summary.collections
-        html = BeautifulSoup(fx_item_catalogue_model_min.render(), parser="html.parser", features="lxml")
+        html = BeautifulSoup(render_item_catalogue(fx_item_catalogue_model_min), parser="html.parser", features="lxml")
 
         if len(expected) > 0:
             assert html.select_one("#summary-collections") is not None
@@ -96,7 +96,9 @@ class TestMacrosItem:
         """Can get item physical map parent with expected value from item."""
         fx_item_physical_map_model_min._record.identification.aggregations = value
         expected = fx_item_physical_map_model_min.summary.physical_parent
-        html = BeautifulSoup(fx_item_physical_map_model_min.render(), parser="html.parser", features="lxml")
+        html = BeautifulSoup(
+            render_item_catalogue(fx_item_physical_map_model_min), parser="html.parser", features="lxml"
+        )
 
         if expected:
             assert html.select_one(f"#summary-physical-parent a[href='{expected.href}']") is not None
@@ -108,7 +110,7 @@ class TestMacrosItem:
         """Can get item edition with expected value from item."""
         fx_item_catalogue_model_min._record.identification.edition = value
         expected = fx_item_catalogue_model_min.summary.edition
-        html = BeautifulSoup(fx_item_catalogue_model_min.render(), parser="html.parser", features="lxml")
+        html = BeautifulSoup(render_item_catalogue(fx_item_catalogue_model_min), parser="html.parser", features="lxml")
 
         if expected is None:
             assert html.select_one("#summary-edition") is None
@@ -120,7 +122,7 @@ class TestMacrosItem:
         """Can get item publication with expected value from item."""
         fx_item_catalogue_model_min._record.identification.dates.publication = value
         expected = fx_item_catalogue_model_min.summary.published
-        html = BeautifulSoup(fx_item_catalogue_model_min.render(), parser="html.parser", features="lxml")
+        html = BeautifulSoup(render_item_catalogue(fx_item_catalogue_model_min), parser="html.parser", features="lxml")
 
         if expected is None:
             assert html.select_one("#summary-published") is None
@@ -146,7 +148,7 @@ class TestMacrosItem:
     def test_access(self, fx_item_catalogue_model_min: ItemCatalogue, value: Constraint):
         """Can get item access with expected value from item."""
         fx_item_catalogue_model_min._record.identification.constraints.append(value)
-        html = BeautifulSoup(fx_item_catalogue_model_min.render(), parser="html.parser", features="lxml")
+        html = BeautifulSoup(render_item_catalogue(fx_item_catalogue_model_min), parser="html.parser", features="lxml")
 
         if value.restriction_code == ConstraintRestrictionCode.UNRESTRICTED:
             assert html.select_one("#summary-access") is None
@@ -158,7 +160,7 @@ class TestMacrosItem:
         """Can get item citation with expected value from item."""
         fx_item_catalogue_model_min._record.identification.other_citation_details = value
         expected = fx_item_catalogue_model_min.summary.citation
-        html = BeautifulSoup(fx_item_catalogue_model_min.render(), parser="html.parser", features="lxml")
+        html = BeautifulSoup(render_item_catalogue(fx_item_catalogue_model_min), parser="html.parser", features="lxml")
 
         if expected is None:
             assert html.select_one("#summary-citation") is None
@@ -169,7 +171,7 @@ class TestMacrosItem:
 
     def test_abstract(self, fx_item_catalogue_model_min: ItemCatalogue):
         """Can get item abstract with expected value from item."""
-        html = BeautifulSoup(fx_item_catalogue_model_min.render(), parser="html.parser", features="lxml")
+        html = BeautifulSoup(render_item_catalogue(fx_item_catalogue_model_min), parser="html.parser", features="lxml")
         expected = fx_item_catalogue_model_min.summary.abstract
         assert expected in str(html.select_one("#summary-abstract"))
 
@@ -190,7 +192,7 @@ class TestMacrosItem:
         """Can get item graphics with expected values from item."""
         fx_item_catalogue_model_min._record.identification.graphic_overviews = value
         expected = fx_item_catalogue_model_min.graphics
-        html = BeautifulSoup(fx_item_catalogue_model_min.render(), parser="html.parser", features="lxml")
+        html = BeautifulSoup(render_item_catalogue(fx_item_catalogue_model_min), parser="html.parser", features="lxml")
 
         assert html.select_one("#item-graphics") is not None
 
@@ -228,7 +230,9 @@ class TestMacrosItem:
         """
         fx_item_physical_map_model_min._record.identification.aggregations = value
         expected: list | None = fx_item_physical_map_model_min.sides
-        html = BeautifulSoup(fx_item_physical_map_model_min.render(), parser="html.parser", features="lxml")
+        html = BeautifulSoup(
+            render_item_catalogue(fx_item_physical_map_model_min), parser="html.parser", features="lxml"
+        )
 
         sides = html.select_one("#item-sides")
         assert sides is not None if expected else sides is None
@@ -238,7 +242,7 @@ class TestMacrosItem:
     @pytest.mark.parametrize("tab", _item_catalogue_model_min().tabs)
     def test_tabs_nav(self, fx_item_catalogue_model_min: ItemCatalogue, tab: Tab):
         """Can get enabled tabs based on item."""
-        html = BeautifulSoup(fx_item_catalogue_model_min.render(), parser="html.parser", features="lxml")
+        html = BeautifulSoup(render_item_catalogue(fx_item_catalogue_model_min), parser="html.parser", features="lxml")
         tab_input = html.select_one(f"#tab-{tab.anchor}")
         tab_label = html.select_one(f"label[for=tab-{tab.anchor}]")
         tab_content = html.select_one(f"#tab-content-{tab.anchor}")
@@ -259,7 +263,7 @@ class TestMacrosItem:
 
         Tab switching is not tested here as it's dynamic, see e2e tests.
         """
-        html = BeautifulSoup(fx_item_catalogue_model_min.render(), parser="html.parser", features="lxml")
+        html = BeautifulSoup(render_item_catalogue(fx_item_catalogue_model_min), parser="html.parser", features="lxml")
         expected = fx_item_catalogue_model_min.default_tab_anchor
 
         tab_input = html.select_one(f"#tab-{expected}")["checked"]

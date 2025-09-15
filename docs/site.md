@@ -76,11 +76,11 @@ Secondary top-level items:
 ```
 
 <!-- pyml disable md013 -->
-| Path                       | Description                                  | Exporter                                                 |
-|----------------------------|----------------------------------------------|----------------------------------------------------------|
-| `-/index/`                 | Hidden index page                            | [Site Index](/docs/exporters.md#site-index-exporter)     |
-| `-/formatting/`            | Hidden record content formatting guide       | [Site Pages](/docs/exporters.md#site-pages-exporter)     |
-| `-/public-website-search/` | Temporary public website search items output | [Website Search](/docs/exporters.md#site-pages-exporter) |
+| Path                       | Description                                  | Exporter                                                      |
+|----------------------------|----------------------------------------------|---------------------------------------------------------------|
+| `-/index/`                 | Hidden index page                            | [Site Index](/docs/exporters.md#site-index-exporter)          |
+| `-/formatting/`            | Hidden record content formatting guide       | [Site Pages](/docs/exporters.md#site-pages-exporter)          |
+| `-/public-website-search/` | Temporary public website search items output | [Website Search](/docs/exporters.md#site-pages-exporter)      |
 | `-/verification/`          | Site verification report and data            | [Site Verification](/docs/exporters.md#verification-exporter) |
 <!-- pyml enable md013 -->
 
@@ -276,8 +276,8 @@ See the [Config](/docs/config.md#config-options) docs for how to set these confi
 
 ### Layouts
 
-A set of layouts are available in `src/lantern/resources/templates/_layouts/`. All pages SHOULD extend from the
-`base.html.j2` layout.
+A set of layouts are available in `src/lantern/resources/templates/_layouts/`. All pages SHOULD ultimately extend the
+[Base Layout](#base-layout).
 
 #### Base layout
 
@@ -288,8 +288,9 @@ The `base.html.j2` layout provides a common HTML structure including:
 - a `<main>` element containing a 'content' block for each HTML page's content
 - a `<footer>` element with site feedback link and legal information
 
- Uses of this layout require a `lantern.models.templates.PageMetadata` class instance passed as a `meta` template
- context variable.
+> [!NOTE]
+> This layout requires a [Site Context](/docs/data-model.md#static-site-context) instance as a `meta` template context
+> variable.
 
 #### Page templates
 

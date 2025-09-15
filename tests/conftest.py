@@ -21,7 +21,7 @@ from moto import mock_aws
 from pytest_mock import MockerFixture
 
 from lantern.config import Config
-from lantern.exporters.base import Exporter, ResourceExporter, S3Utils
+from lantern.exporters.base import Exporter, ResourceExporter, S3Utils, get_jinja_env, prettify_html
 from lantern.exporters.html import HtmlAliasesExporter, HtmlExporter
 from lantern.exporters.records import RecordsExporter
 from lantern.exporters.site import SiteExporter, SiteIndexExporter, SitePagesExporter, SiteResourcesExporter
@@ -334,6 +334,14 @@ def fx_revision_model_min(fx_revision_config_min: dict) -> RecordRevision:
 def fx_item_base_model_min(fx_item_config_min_base: dict) -> ItemBase:
     """Minimal ItemBase model instance."""
     return ItemBase(record=RecordRevision.loads(fx_item_config_min_base))
+
+
+def render_item_catalogue(item: ItemCatalogue) -> str:
+    """Render item to HTML."""
+    _jinja = get_jinja_env()
+    _template_path = "_views/item.html.j2"
+    raw = _jinja.get_template(_template_path).render(item=item, meta=item.page_metadata)
+    return prettify_html(raw)
 
 
 def _item_catalogue_model_min() -> ItemCatalogue:
@@ -725,7 +733,13 @@ def fx_exporter_site_index(
     type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
     type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
 
-    return SiteIndexExporter(config=mock_config, s3=fx_s3_client, logger=fx_logger, get_record=_get_record_alias)
+    return SiteIndexExporter(
+        config=mock_config,
+        s3=fx_s3_client,
+        logger=fx_logger,
+        get_record=_get_record_alias,
+        commit_ref="83fake48",
+    )
 
 
 @pytest.fixture()
@@ -800,9 +814,7 @@ def fx_exporter_site(
     """
     Site exporter (empty records).
 
-    With:
-    - a mocked config and S3 client
-    - a minimal sample record
+    With: a mocked config and S3 client
     """
     with TemporaryDirectory() as tmp_path:
         output_path = Path(tmp_path)
@@ -814,7 +826,13 @@ def fx_exporter_site(
     type(mock_config).TEMPLATES_ITEM_CONTACT_ENDPOINT = PropertyMock(return_value="x")
     mocker.patch("lantern.exporters.records._job_s3", return_value=fx_s3_client)
 
-    return SiteExporter(config=mock_config, s3=fx_s3_client, logger=fx_logger, get_record=fx_get_record)
+    return SiteExporter(
+        config=mock_config,
+        s3=fx_s3_client,
+        logger=fx_logger,
+        get_record=fx_get_record,
+        head_commit_ref="83fake48",
+    )
 
 
 @pytest.fixture()
@@ -912,7 +930,13 @@ def fx_exporter_static_site(module_mocker: MockerFixture) -> TemporaryDirectory:
 
     store = FakeRecordsStore(logger=logger)
     store.populate()
-    exporter = SiteExporter(config=config, s3=s3_client, logger=logger, get_record=store.get)
+    exporter = SiteExporter(
+        config=config,
+        s3=s3_client,
+        logger=logger,
+        get_record=store.get,
+        head_commit_ref="83fake48",
+    )
     exporter.select({record.file_identifier for record in store.records})
     exporter.export()
 

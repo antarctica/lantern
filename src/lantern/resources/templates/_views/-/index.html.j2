@@ -1,0 +1,59 @@
+{% extends "_layouts/page.html.j2" %}
+{% import '_macros/common.html.j2' as com %}
+
+{% block content %}
+  <article class="space-y-4 lg:space-y-8">
+    {{ com.page_header(main="Catalogue index", sub='Admin', sub_i='fas fa-fw fa-tools')}}
+    <section class="space-y-4 space-y-8">
+      {% call com.alert(variant='blue') %}
+        <div class="grid grid-cols-1 gap-y-4 lg:gap-x-8 lg:grid-cols-[auto_1fr]">
+          <div class="font-bold">Items count</div>
+          <div>{{ data.records | length }}</div>
+          <div class="font-bold">Revision</div>
+          <div><a class="{{ com.link_classes() }}" href="{{ data.commit.href }}">{{ data.commit.value }} {{ com.restricted_i() }} {{ com.ext_link_i() }}</a></div>
+          <div class="font-bold">Built at</div>
+          <div>{{ com.time(data.time) }}</div>
+        </div>
+      {% endcall %}
+    </section>
+
+    <section id="items" class="space-y-8">
+      {% call com.item_title() %}Items{% endcall %}
+      <div class="grid grid-cols-1 lg:grid-cols-[2fr_3fr_4fr_1fr] border {{ com.table_border_classes() }} overflow-hidden">
+        <!-- Header -->
+      {% for label in ['Type', 'File Identifier', 'Title', 'Edition'] %}
+          <div class="{{ com.table_header_classes() }}">{{ label }}</div>
+        {% endfor %}
+        <!-- Body -->
+        {% for item in data.records %}
+          <div class="{{ com.table_row_classes() }}">{{ item.type }}</div>
+          <div class="{{ com.table_row_classes() }}">
+            <a class="{{ com.link_classes() }}" href="/items/{{ item.file_identifier }}/">{{ item.file_identifier }}</a>
+          </div>
+          <div class="{{ com.table_row_classes() }}">{{ item.title }}</div>
+          <div class="{{ com.table_row_classes() }}">{{ item.edition }}</div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section id="aliases" class="space-y-8">
+      {% call com.item_title() %}Aliases{% endcall %}
+      <div class="grid grid-cols-1 lg:grid-cols-[2fr_3fr_1fr] border {{ com.table_border_classes() }} overflow-hidden">
+        <!-- Header -->
+      {% for label in ['File Identifier', 'Title', 'Alias'] %}
+          <div class="{{ com.table_header_classes() }}">{{ label }}</div>
+        {% endfor %}
+        <!-- Body -->
+        {% for item in data.aliases %}
+          <div class="{{ com.table_row_classes() }}">
+            <a class="{{ com.link_classes() }}" href="/items/{{ item.file_identifier }}/">{{ item.file_identifier }}</a>
+          </div>
+          <div class="{{ com.table_row_classes() }}">{{ item.title }}</div>
+          <div class="{{ com.table_row_classes() }}">
+            <a class="{{ com.link_classes() }}" href="{{ item.href }}/">{{ item.alias }}</a>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+  </article>
+{% endblock %}

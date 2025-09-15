@@ -359,12 +359,3 @@ class TestItemCatalogue:
         fx_item_catalogue_model_min._record = record
 
         assert fx_item_catalogue_model_min.default_tab_anchor == anchor
-
-    def test_render(self, fx_item_catalogue_model_min: ItemCatalogue):
-        """
-        Can render template for item.
-
-        This is a basic sanity check that the template can be rendered without error.
-        It does not check the content of the rendered template in any detail.
-        """
-        assert fx_item_catalogue_model_min.render() != ""

@@ -95,7 +95,7 @@ def main() -> None:
         aws_secret_access_key=config.AWS_ACCESS_SECRET,
         region_name="eu-west-1",
     )
-    site = SiteExporter(config=config, logger=logger, s3=s3, get_record=store.get)
+    site = SiteExporter(config=config, logger=logger, s3=s3, get_record=store.get, head_commit_ref=store.head_commit)
 
     import_path = Path("./import")
     production_bucket = "add-catalogue.data.bas.ac.uk"

@@ -36,6 +36,10 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * GitLab store push return type changed to a CommitResults class
 * Minor fixes and improvements to dev tasks
 * Config classes now support pickling
+* Refactoring template rendering and HTML prettifying into base exporter utilities
+* Refactoring catalogue item rendering into associated exporter for consistency
+* Applying HTML prettifying to all rendered HTML outputs
+* Refactoring proto-index into a regular page
 
 ### Removed
 

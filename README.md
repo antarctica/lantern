@@ -1,10 +1,10 @@
 # Lantern
 
-Prototype data catalogue for discovery metadata.
+Prototype [Data Catalogue](https://data.bas.ac.uk/-/index) for BAS discovery metadata.
 
 ## Overview
 
-The BAS Data Catalogue is data discovery tool used to find, evaluate and access resources produced, managed and/or used
+The BAS Data Catalogue is a data discovery tool used to find, evaluate and access resources produced, managed and/or used
 by the [British Antarctic Survey](https://www.bas.ac.uk) and [UK Polar Data Centre](https://www.bas.ac.uk/data/uk-pdc/).
 This includes datasets, products (maps), services and other information.
 

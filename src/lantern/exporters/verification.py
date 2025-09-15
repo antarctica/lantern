@@ -11,7 +11,7 @@ from joblib import Parallel, delayed
 from mypy_boto3_s3 import S3Client
 from requests import Response
 
-from lantern.exporters.base import Exporter, get_jinja_env
+from lantern.exporters.base import ResourcesExporter, get_jinja_env
 from lantern.models.record import CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta, SiteMeta
@@ -274,7 +274,7 @@ class VerificationReport:
         return self._jinja.get_template(self._template_path).render(data=data, meta=self._meta)
 
 
-class VerificationExporter(Exporter):
+class VerificationExporter(ResourcesExporter):
     """
     Site verification exporter.
 
@@ -300,22 +300,11 @@ class VerificationExporter(Exporter):
         context: VerificationContext,
     ) -> None:
         """Initialise exporter."""
-        super().__init__(logger=logger, meta=meta, s3=s3)
+        super().__init__(logger=logger, meta=meta, s3=s3, get_record=get_record)
         self._get_record = get_record
         self._context = context
         self._jobs: list[VerificationJob] = []
-        self._selected_identifiers: set[str] = set()
         self._export_path = self._meta.export_path / "-" / "verification"
-
-    @property
-    def selected_identifiers(self) -> set[str]:
-        """Selected file identifiers."""
-        return self._selected_identifiers
-
-    @selected_identifiers.setter
-    def selected_identifiers(self, identifiers: set[str]) -> None:
-        """Selected file identifiers."""
-        self._selected_identifiers = identifiers
 
     @property
     def name(self) -> str:

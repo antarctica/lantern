@@ -8,12 +8,20 @@ from boto3 import client as S3Client  # noqa: N812
 from jinja2 import Environment
 from pytest_mock import MockerFixture
 
-from lantern.exporters.base import Exporter, ResourceExporter, S3Utils, get_jinja_env, get_record_aliases, prettify_html
+from lantern.exporters.base import (
+    Exporter,
+    ResourceExporter,
+    ResourcesExporter,
+    S3Utils,
+    get_jinja_env,
+    get_record_aliases,
+    prettify_html,
+)
 from lantern.lib.metadata_library.models.record.elements.common import Identifier
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
-from tests.resources.exporters.fake_exporter import FakeExporter, FakeResourceExporter
+from tests.resources.exporters.fake_exporter import FakeExporter, FakeResourceExporter, FakeResourcesExporter
 
 
 class TestS3Utils:
@@ -129,6 +137,41 @@ class TestBaseExporter:
         assert init_time == rpt_time
 
 
+class TestBaseResourcesExporter:
+    """Test base resources exporter."""
+
+    def test_init(
+        self, fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_s3_client: S3Client, fx_get_record: callable
+    ):
+        """Can create an Exporter."""
+        exporter = FakeResourcesExporter(
+            logger=fx_logger,
+            meta=fx_export_meta,
+            s3=fx_s3_client,
+            get_record=fx_get_record,
+        )
+        assert isinstance(exporter, ResourcesExporter)
+
+    def test_selected(
+        self,
+        fx_logger: logging.Logger,
+        fx_export_meta: ExportMeta,
+        fx_s3_client: S3Client,
+        fx_revision_model_min: RecordRevision,
+        fx_get_record: callable,
+    ):
+        """Can set and get selected records."""
+        exporter = FakeResourcesExporter(
+            logger=fx_logger,
+            meta=fx_export_meta,
+            s3=fx_s3_client,
+            get_record=fx_get_record,
+        )
+        assert len(exporter.selected_identifiers) == 0
+        exporter.selected_identifiers = {fx_revision_model_min.file_identifier}
+        assert exporter.selected_identifiers == {fx_revision_model_min.file_identifier}
+
+
 class TestBaseResourceExporter:
     """Test base resource exporter."""
 
@@ -136,7 +179,6 @@ class TestBaseResourceExporter:
         self,
         mocker: MockerFixture,
         fx_logger: logging.Logger,
-        fx_exporter_base: Exporter,
         fx_s3_bucket_name: str,
         fx_s3_client: S3Client,
         fx_revision_model_min: RecordRevision,

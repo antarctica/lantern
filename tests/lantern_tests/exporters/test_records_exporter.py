@@ -68,7 +68,7 @@ class TestRecordExporterJob:
 
         # noinspection PyTypeChecker
         _job(
-            logger=fx_logger,
+            logging_level=fx_logger.level,
             config=fx_exporter_records_sel._config,
             meta=fx_exporter_records_sel._meta,
             exporter=exporter,

@@ -25,10 +25,10 @@ from lantern.lib.metadata_library.models.record.enums import (
     MaintenanceFrequencyCode,
     ProgressCode,
 )
-from lantern.models.item.base import AccessLevel, ItemBase
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.base.elements import Link
-from lantern.models.item.base.enums import ResourceTypeLabel
+from lantern.models.item.base.enums import AccessLevel, ResourceTypeLabel
+from lantern.models.item.base.item import ItemBase
 from lantern.models.item.catalogue.elements import (
     Aggregations,
     Dates,

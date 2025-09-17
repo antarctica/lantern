@@ -6,7 +6,7 @@ from typing import TypeVar
 import cattrs
 
 from lantern.lib.metadata_library.models.record.elements.common import clean_dict
-from lantern.models.record import Record
+from lantern.models.record.record import Record
 
 TRecordRevision = TypeVar("TRecordRevision", bound="RecordRevision")
 

@@ -1,11 +1,11 @@
 import pytest
 
-from lantern.lib.metadata_library.models.record import Distribution as RecordDistribution
 from lantern.lib.metadata_library.models.record.elements.common import Contact, ContactIdentity, OnlineResource
+from lantern.lib.metadata_library.models.record.elements.distribution import Distribution as RecordDistribution
 from lantern.lib.metadata_library.models.record.elements.distribution import Format, Size, TransferOption
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode, OnlineResourceFunctionCode
-from lantern.models.item.base import AccessLevel
 from lantern.models.item.base.elements import Link
+from lantern.models.item.base.enums import AccessLevel
 from lantern.models.item.catalogue.distributions import (
     ArcGISDistribution,
     ArcGisFeatureLayer,

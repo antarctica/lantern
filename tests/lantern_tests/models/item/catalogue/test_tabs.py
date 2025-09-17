@@ -2,7 +2,6 @@ from datetime import UTC, datetime
 
 import pytest
 
-from lantern.lib.metadata_library.models.record import Distribution as RecordDistribution
 from lantern.lib.metadata_library.models.record.elements.common import (
     Address,
     Citation,
@@ -16,6 +15,7 @@ from lantern.lib.metadata_library.models.record.elements.common import Contact a
 from lantern.lib.metadata_library.models.record.elements.common import Dates as RecordDates
 from lantern.lib.metadata_library.models.record.elements.common import Identifiers as RecordIdentifiers
 from lantern.lib.metadata_library.models.record.elements.data_quality import DomainConsistency
+from lantern.lib.metadata_library.models.record.elements.distribution import Distribution as RecordDistribution
 from lantern.lib.metadata_library.models.record.elements.distribution import Format, TransferOption
 from lantern.lib.metadata_library.models.record.elements.identification import (
     Aggregation,
@@ -38,10 +38,9 @@ from lantern.lib.metadata_library.models.record.enums import (
     OnlineResourceFunctionCode,
     ProgressCode,
 )
-from lantern.models.item.base import AccessLevel
 from lantern.models.item.base.elements import Contact, Contacts, Link
 from lantern.models.item.base.elements import Extent as ItemExtent
-from lantern.models.item.base.enums import ResourceTypeLabel
+from lantern.models.item.base.enums import AccessLevel, ResourceTypeLabel
 from lantern.models.item.catalogue.distributions import ArcGisFeatureLayer
 from lantern.models.item.catalogue.elements import (
     Aggregations,

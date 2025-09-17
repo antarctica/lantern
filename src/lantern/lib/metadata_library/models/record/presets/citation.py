@@ -1,5 +1,5 @@
-from lantern.lib.metadata_library.models.record import HierarchyLevelCode
 from lantern.lib.metadata_library.models.record.elements.common import Date, Identifier
+from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
 from lantern.models.record.const import CATALOGUE_NAMESPACE
 
 

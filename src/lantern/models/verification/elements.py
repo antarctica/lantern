@@ -1,8 +1,8 @@
 from typing import Final, cast
 from urllib.parse import unquote, urlparse
 
-from lantern.lib.metadata_library.models.record import Distribution
-from lantern.models.record import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
+from lantern.lib.metadata_library.models.record.elements.distribution import Distribution
+from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 from lantern.models.verification.enums import VerificationDistributionType, VerificationType
 from lantern.models.verification.jobs import VerificationJob

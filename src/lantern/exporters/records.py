@@ -39,7 +39,7 @@ def _job_s3(config: Config) -> S3ClientT:
 
 
 def _job(
-    logger: logging.Logger,
+    logging_level: int,
     config: Config,
     meta: ExportMeta,
     exporter: Callable[..., ResourceExporter],
@@ -54,7 +54,8 @@ def _job(
 
     Standalone function for use in parallel processing.
     """
-    init_logging(logger.level)  # each process needs logging initialising
+    init_logging(logging_level)  # each process needs logging initialising
+    logger = logging.getLogger("app")
     s3 = _job_s3(config=config)
 
     if exporter == HtmlAliasesExporter:
@@ -119,7 +120,7 @@ class RecordsExporter(Exporter):
         # where job[0] is an exporter class and job[1] a record
         Parallel(n_jobs=self._parallel_jobs)(
             delayed(_job)(
-                self._logger,
+                self._logger.level,
                 self._config,
                 self._meta,
                 job[0],

@@ -50,6 +50,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Refactoring PageMetadata into SiteMetadata with additional properties (commit, formatted build time)
 * Refactoring exporters to use avoid using Config classes
 * Refactoring item aliases exporter to generate HTML content using an element tree
+* Refactoring record import task to separate out Zap ⚡️ editor specific processing
 
 ### Removed
 

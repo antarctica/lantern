@@ -3,10 +3,11 @@ from datetime import date
 import pytest
 from cattrs import ClassValidationError
 
-from lantern.lib.metadata_library.models.record import Identification, Metadata
 from lantern.lib.metadata_library.models.record.elements.common import Contact, ContactIdentity, Contacts, Date, Dates
+from lantern.lib.metadata_library.models.record.elements.identification import Identification
+from lantern.lib.metadata_library.models.record.elements.metadata import Metadata
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode, HierarchyLevelCode
-from lantern.models.record import Record
+from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
 
 

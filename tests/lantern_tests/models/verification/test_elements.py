@@ -1,15 +1,15 @@
 import pytest
 
-from lantern.lib.metadata_library.models.record import Distribution
 from lantern.lib.metadata_library.models.record.elements.common import (
     Contact,
     ContactIdentity,
     Identifier,
     OnlineResource,
 )
-from lantern.lib.metadata_library.models.record.elements.distribution import Format, Size, TransferOption
+from lantern.lib.metadata_library.models.record.elements.distribution import Distribution, Format, Size, TransferOption
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode, OnlineResourceFunctionCode
-from lantern.models.record import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE, Record
+from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
+from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
 from lantern.models.verification.elements import VerificationDistribution, VerificationRecord
 from lantern.models.verification.enums import VerificationDistributionType, VerificationType

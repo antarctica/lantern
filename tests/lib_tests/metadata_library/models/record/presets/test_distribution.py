@@ -1,4 +1,4 @@
-from lantern.lib.metadata_library.models.record import Distribution
+from lantern.lib.metadata_library.models.record.elements.distribution import Distribution
 from lantern.lib.metadata_library.models.record.presets.contacts import make_esri_distributor
 from lantern.lib.metadata_library.models.record.presets.distribution import make_esri_feature_layer
 

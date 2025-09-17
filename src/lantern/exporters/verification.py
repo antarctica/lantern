@@ -12,7 +12,7 @@ from mypy_boto3_s3 import S3Client
 from requests import Response
 
 from lantern.exporters.base import ResourcesExporter, get_jinja_env
-from lantern.models.record import CATALOGUE_NAMESPACE
+from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta, SiteMeta
 from lantern.models.verification.elements import VerificationRecord

@@ -5,8 +5,8 @@ from typing import Any
 from jinja2 import Environment, PackageLoader, select_autoescape
 
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
-from lantern.models.item.base import ItemBase
 from lantern.models.item.base.elements import Link
+from lantern.models.item.base.item import ItemBase
 from lantern.models.item.catalogue.elements import Dates, Extent, PageHeader, PageSummary
 from lantern.models.item.catalogue.tabs import (
     AdditionalInfoTab,

@@ -15,7 +15,7 @@ from joblib import Parallel, delayed
 from requests.exceptions import ConnectionError as RequestsConnectionError
 
 from lantern.log import init as init_logging
-from lantern.models.record import Record
+from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
 from lantern.stores.base import RecordNotFoundError, Store
 

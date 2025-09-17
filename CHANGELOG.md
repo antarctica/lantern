@@ -33,6 +33,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 
 * Pre-commit config for Python type checking
 * Fixing false positives when checking if records have changed in import task
+* Logging in parallel tasks
 
 ### Changed
 

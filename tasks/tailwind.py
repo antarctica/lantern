@@ -12,6 +12,7 @@ from tests.resources.stores.fake_records_store import FakeRecordsStore
 from lantern.config import Config as BaseConfig
 from lantern.exporters.site import SiteExporter
 from lantern.exporters.verification import VerificationReport
+from lantern.models.site import ExportMeta
 from lantern.models.verification.enums import VerificationResult, VerificationType
 from lantern.models.verification.jobs import VerificationJob
 from lantern.models.verification.types import VerificationContext
@@ -21,19 +22,8 @@ from lantern.models.verification.types import VerificationContext
 class Config(BaseConfig):
     """Local config class."""
 
-    def __init__(self, export_path: Path) -> None:
+    def __init__(self) -> None:
         super().__init__()
-        self._path = export_path
-
-    @property
-    def EXPORT_PATH(self) -> Path:
-        """Export path."""
-        return self._path
-
-    @property
-    def AWS_S3_BUCKET(self) -> str:
-        """S3 bucket name."""
-        return "x"
 
     @property
     def AWS_ACCESS_ID(self) -> str:
@@ -45,17 +35,11 @@ class Config(BaseConfig):
         """AWS access key secret."""
         return "x"
 
-    @property
-    def VERIFY_SHAREPOINT_PROXY_ENDPOINT(self) -> str:
-        """SharePoint proxy endpoint."""
-        return "x"
-
 
 def export_test_site(export_path: Path) -> None:
     """Export test records as a static site."""
     logger = logging.getLogger("app")
     logger.setLevel(logging.INFO)
-    config = Config(export_path=export_path)
     store = FakeRecordsStore(logger=logger)
     store.populate()
 
@@ -67,13 +51,22 @@ def export_test_site(export_path: Path) -> None:
             region_name="eu-west-1",
         )
 
-    exporter = SiteExporter(
-        config=config,
-        s3=s3_client,
-        logger=logger,
-        get_record=store.get,
-        head_commit_ref="83fake48",
+    meta = ExportMeta(
+        base_url="x",
+        build_key="x",
+        html_title="",
+        sentry_src="x",
+        plausible_domain="x",
+        embedded_maps_endpoint="x",
+        items_enquires_endpoint="x",
+        generator="x",
+        version="x",
+        export_path=export_path,
+        s3_bucket="x",
+        parallel_jobs=1,
     )
+
+    exporter = SiteExporter(config=Config(), meta=meta, s3=s3_client, logger=logger, get_record=store.get)
     exporter.select(file_identifiers={record.file_identifier for record in store.records})
     exporter.export()
 
@@ -81,7 +74,7 @@ def export_test_site(export_path: Path) -> None:
     report_path = export_path / "-" / "verification" / "index.html"
     context: VerificationContext = {
         "BASE_URL": "https://example.com",
-        "SHAREPOINT_PROXY_ENDPOINT": config.VERIFY_SHAREPOINT_PROXY_ENDPOINT,
+        "SHAREPOINT_PROXY_ENDPOINT": "x",
     }
     jobs = [
         VerificationJob(
@@ -106,7 +99,7 @@ def export_test_site(export_path: Path) -> None:
             data={"file_identifier": "x"},
         ),
     ]
-    report = VerificationReport(config=config, jobs=jobs, context=context)
+    report = VerificationReport(meta.site_metadata, jobs=jobs, context=context)
     report_path.parent.mkdir(parents=True, exist_ok=True)
     with report_path.open("w") as report_file:
         report_file.write(report.dumps())

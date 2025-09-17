@@ -9,9 +9,11 @@ from boto3 import client as S3Client  # noqa: N812
 
 from lantern.config import Config
 from lantern.exporters.site import SiteExporter
+from lantern.exporters.verification import VerificationExporter
 from lantern.log import init as init_logging
 from lantern.log import init_sentry
 from lantern.models.site import ExportMeta
+from lantern.models.verification.types import VerificationContext
 from lantern.stores.gitlab import CommitResults, GitLabStore
 from tasks.records_import import _clean_input_path, _parse_records, _process_records
 from tasks.records_import import _get_args as _get_import_args
@@ -62,7 +64,7 @@ def _import(logger: logging.Logger, config: Config, store: GitLabStore, import_p
 
 
 @_time_task(label="Build")
-def _build(logger: logging.Logger, site: SiteExporter, commit: CommitResults, bucket: str) -> None:
+def _build(logger: logging.Logger, commit: CommitResults, site: SiteExporter, bucket: str) -> None:
     """Build."""
     identifiers = set(commit.new_identifiers + commit.updated_identifiers)
     logger.info(f"Publishing {len(identifiers)} records to {bucket}.")
@@ -72,6 +74,24 @@ def _build(logger: logging.Logger, site: SiteExporter, commit: CommitResults, bu
     logger.info("Records published:")
     for identifier in sorted(identifiers):
         logger.info(f"* https://{bucket}/items/{identifier}")
+
+
+def _verify(logger: logging.Logger, config: Config, commit: CommitResults, store: GitLabStore, s3: S3Client) -> None:
+    """Verify."""
+    identifiers = set(commit.new_identifiers + commit.updated_identifiers)
+    logger.info(f"Verifying {len(identifiers)} records.")
+    context: VerificationContext = {
+        "BASE_URL": config.BASE_URL,
+        "SHAREPOINT_PROXY_ENDPOINT": config.VERIFY_SHAREPOINT_PROXY_ENDPOINT,
+    }
+    meta = ExportMeta.from_config_store(config=config, store=store, build_repo_ref=store.head_commit)
+    exporter = VerificationExporter(logger=logger, meta=meta, s3=s3, get_record=store.get, context=context)
+    exporter.selected_identifiers = identifiers
+    exporter.run()
+    exporter.publish()
+
+    logger.info(f"Verification complete, result: {exporter.report.data['pass_fail']}.")
+    logger.info(f"See '{config.BASE_URL}/-/verification' for report.")
 
 
 @_time_task(label="Workflow")
@@ -108,13 +128,14 @@ def main() -> None:
         sys.exit(1)
 
     print("\nThis script is for adding or updating records in the Catalogue.")
-    print("It combines the 'records-import' and 'records-build' tasks with some additional workflow logic.")
-    print(f"\nTo begin stage records for import in '{import_path.resolve()}'.")
+    print("It combines the 'records-import', 'records-build' and `records-verify' scripts with some workflow logic.")
+    print(f"\nTo begin, stage records for import in '{import_path.resolve()}'.")
     print("TIP! See the 'records-select' and/or 'records-load' tasks if useful.")
     _confirm(logger, "Are records staged in import directory?")
 
     commit = _import(logger=logger, config=config, store=store, import_path=import_path)
     _build(logger=logger, site=site, commit=commit, bucket=config.AWS_S3_BUCKET)
+    _verify(logger=logger, config=config, commit=commit, store=store, s3=s3)
 
 
 if __name__ == "__main__":

@@ -1,6 +1,6 @@
 from lantern.lib.metadata_library.models.record.enums import ProgressCode
-from lantern.models.item.base import AccessLevel, ItemBase
-from lantern.models.item.base.enums import ResourceTypeLabel
+from lantern.models.item.base.enums import AccessLevel, ResourceTypeLabel
+from lantern.models.item.base.item import ItemBase
 from lantern.models.record.revision import RecordRevision
 
 

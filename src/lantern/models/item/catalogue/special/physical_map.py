@@ -14,7 +14,7 @@ from lantern.models.item.catalogue.elements import ItemCatalogueSummary
 from lantern.models.item.catalogue.item import ItemCatalogue
 from lantern.models.item.catalogue.tabs import AdditionalInfoTab as CatalogueAdditionalInfoTab
 from lantern.models.item.catalogue.tabs import ExtentTab as CatalogueExtentTab
-from lantern.models.record import Record
+from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
 
 

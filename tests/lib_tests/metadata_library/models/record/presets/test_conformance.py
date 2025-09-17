@@ -1,6 +1,7 @@
 import cattrs
 
-from lantern.lib.metadata_library.models.record import DataQuality, clean_dict
+from lantern.lib.metadata_library.models.record.elements.common import clean_dict
+from lantern.lib.metadata_library.models.record.elements.data_quality import DataQuality
 from lantern.lib.metadata_library.models.record.presets.conformance import MAGIC_PROFILE_V1
 
 

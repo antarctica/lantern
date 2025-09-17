@@ -1,6 +1,5 @@
-from lantern.lib.metadata_library.models.record import Distribution
 from lantern.lib.metadata_library.models.record.elements.common import OnlineResource
-from lantern.lib.metadata_library.models.record.elements.distribution import Format, TransferOption
+from lantern.lib.metadata_library.models.record.elements.distribution import Distribution, Format, TransferOption
 from lantern.lib.metadata_library.models.record.enums import OnlineResourceFunctionCode
 from lantern.lib.metadata_library.models.record.presets.contacts import make_esri_distributor
 

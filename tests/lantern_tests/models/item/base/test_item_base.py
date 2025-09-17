@@ -36,9 +36,9 @@ from lantern.lib.metadata_library.models.record.enums import (
     OnlineResourceFunctionCode,
 )
 from lantern.lib.metadata_library.models.record.presets.projections import EPSG_4326
-from lantern.models.item.base import ItemBase
 from lantern.models.item.base.elements import Contact, Contacts, Extent, Extents
 from lantern.models.item.base.enums import AccessLevel
+from lantern.models.item.base.item import ItemBase
 from lantern.models.record.revision import RecordRevision
 
 

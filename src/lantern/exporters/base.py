@@ -12,8 +12,8 @@ from jinja2 import Environment, PackageLoader, select_autoescape
 from mypy_boto3_s3 import S3Client
 
 from lantern.lib.metadata_library.models.record.elements.common import Identifier
-from lantern.models.record import Record
 from lantern.models.record.const import ALIAS_NAMESPACE
+from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
 

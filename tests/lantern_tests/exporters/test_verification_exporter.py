@@ -98,7 +98,9 @@ class TestVerificationExporterChecks:
             ),
         ],
     )
-    def test_req_url(self, url: str, context: VerificationContext, expected: VerificationResult):
+    def test_req_url(
+        self, fx_logger: logging.Logger, url: str, context: VerificationContext, expected: VerificationResult
+    ):
         """Can make HTTP request."""
         job = VerificationJob(
             type=VerificationType.ITEM_PAGES,
@@ -106,12 +108,12 @@ class TestVerificationExporterChecks:
             context=context,
         )
         assert job.result == VerificationResult.PENDING
-        result = _req_url(job)
+        result = _req_url(fx_logger, job)
         assert isinstance(result, Response)
         assert job.result == expected
 
     @pytest.mark.cov()
-    def test_req_url_invalid_method(self):
+    def test_req_url_invalid_method(self, fx_logger: logging.Logger):
         """Cannot make HTTP request with unsupported method."""
         context: VerificationContext = {
             "BASE_URL": "https://data.bas.ac.uk",
@@ -124,11 +126,11 @@ class TestVerificationExporterChecks:
             context=context,
         )
         with pytest.raises(ValueError, match=r"Unsupported HTTP method: x"):
-            _ = _req_url(job)
+            _ = _req_url(fx_logger, job)
 
     @pytest.mark.vcr
     @pytest.mark.block_network
-    def test_check_url(self):
+    def test_check_url(self, fx_logger: logging.Logger):
         """Can check a URL."""
         context: VerificationContext = {
             "BASE_URL": "https://data.bas.ac.uk",
@@ -141,7 +143,7 @@ class TestVerificationExporterChecks:
         )
         assert job.result == VerificationResult.PENDING
 
-        check_url(job)
+        check_url(fx_logger, job)
         assert job.result == VerificationResult.PASS
 
     @pytest.mark.vcr
@@ -181,7 +183,9 @@ class TestVerificationExporterChecks:
             ),
         ],
     )
-    def test_check_url_redirect(self, url: str, context: VerificationContext, expected: VerificationResult):
+    def test_check_url_redirect(
+        self, fx_logger: logging.Logger, url: str, context: VerificationContext, expected: VerificationResult
+    ):
         """Can check a redirect URL."""
         job = VerificationJob(
             type=VerificationType.ITEM_PAGES,
@@ -190,7 +194,7 @@ class TestVerificationExporterChecks:
         )
         assert job.result == VerificationResult.PENDING
 
-        check_url_redirect(job)
+        check_url_redirect(fx_logger, job)
         assert job.result == expected
 
     @pytest.mark.vcr
@@ -218,7 +222,9 @@ class TestVerificationExporterChecks:
             ),
         ],
     )
-    def test_check_url_arcgis(self, url: str, context: VerificationContext, expected: VerificationResult):
+    def test_check_url_arcgis(
+        self, fx_logger: logging.Logger, url: str, context: VerificationContext, expected: VerificationResult
+    ):
         """Can check an ArcGIS API URL."""
         job = VerificationJob(
             type=VerificationType.ITEM_PAGES,
@@ -227,7 +233,7 @@ class TestVerificationExporterChecks:
         )
         assert job.result == VerificationResult.PENDING
 
-        check_url_arcgis(job)
+        check_url_arcgis(fx_logger, job)
         assert job.result == expected
 
     @pytest.mark.parametrize(
@@ -256,7 +262,12 @@ class TestVerificationExporterChecks:
         ],
     )
     def test_check_item_download(
-        self, label: str, url: str, context: VerificationContext, expected: VerificationResult
+        self,
+        fx_logger: logging.Logger,
+        label: str,
+        url: str,
+        context: VerificationContext,
+        expected: VerificationResult,
     ):
         """Can check a download URL on an item page."""
         job = VerificationJob(
@@ -266,12 +277,12 @@ class TestVerificationExporterChecks:
         )
         assert job.result == VerificationResult.PENDING
 
-        check_item_download(job)
+        check_item_download(fx_logger, job)
         assert job.result == expected
 
     @pytest.mark.vcr
     @pytest.mark.block_network
-    def test_run_job(self):
+    def test_run_job(self, fx_logger: logging.Logger):
         """Can run job with relevant check function."""
         job = VerificationJob(
             type=VerificationType.ITEM_PAGES,
@@ -280,12 +291,12 @@ class TestVerificationExporterChecks:
         )
         assert job.result == VerificationResult.PENDING
 
-        _ = run_job(job)
+        _ = run_job(fx_logger.level, job)
         assert job.result == VerificationResult.PASS
         assert job.data["duration"].microseconds > 0
 
     @pytest.mark.cov()
-    def test_run_job_complete(self):
+    def test_run_job_complete(self, fx_logger: logging.Logger):
         """Cannot run job that isn't pending."""
         job = VerificationJob(
             result=VerificationResult.PASS,
@@ -294,7 +305,7 @@ class TestVerificationExporterChecks:
             context={"BASE_URL": "https://example.com", "SHAREPOINT_PROXY_ENDPOINT": "x"},
         )
 
-        _ = run_job(job)
+        _ = run_job(fx_logger.level, job)
         assert job.result == VerificationResult.PASS
         assert "duration" not in job.data
 

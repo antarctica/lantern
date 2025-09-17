@@ -12,6 +12,7 @@ from mypy_boto3_s3 import S3Client
 from requests import Response
 
 from lantern.exporters.base import ResourcesExporter, get_jinja_env
+from lantern.log import init as init_logging
 from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta, SiteMeta
@@ -21,7 +22,7 @@ from lantern.models.verification.jobs import VerificationJob
 from lantern.models.verification.types import VerificationContext
 
 
-def _req_url(job: VerificationJob, params: dict | None = None) -> Response:
+def _req_url(logger: logging.Logger, job: VerificationJob, params: dict | None = None) -> Response:
     """
     Request a URL as part of a site verification job.
 
@@ -50,6 +51,8 @@ def _req_url(job: VerificationJob, params: dict | None = None) -> Response:
     params_ = {"url": url, "timeout": 30, "headers": headers, "allow_redirects": False}
     if params is not None:
         params_.update(params)
+    logger.info(f"Fetching {url}")
+    logger.debug(params)
 
     match method:
         case "get":
@@ -81,7 +84,7 @@ def _req_url(job: VerificationJob, params: dict | None = None) -> Response:
     return r
 
 
-def check_url(job: VerificationJob) -> None:
+def check_url(logger: logging.Logger, job: VerificationJob) -> None:
     """
     Default URL check.
 
@@ -89,11 +92,11 @@ def check_url(job: VerificationJob) -> None:
 
     Standalone function for use in parallel processing.
     """
-    _req_url(job)
+    _req_url(logger, job)
     job.result = VerificationResult.PASS
 
 
-def check_url_redirect(job: VerificationJob) -> None:
+def check_url_redirect(logger: logging.Logger, job: VerificationJob) -> None:
     """
     Redirect URL check.
 
@@ -104,7 +107,7 @@ def check_url_redirect(job: VerificationJob) -> None:
     """
     # check redirect
     job.context["EXPECTED_STATUS"] = 301
-    redirect_req = _req_url(job)
+    redirect_req = _req_url(logger, job)
     if "location" not in redirect_req.headers or redirect_req.headers["Location"] != job.context["TARGET"]:
         # fail if redirect location is missing or not expected
         job.result = VerificationResult.FAIL
@@ -112,13 +115,13 @@ def check_url_redirect(job: VerificationJob) -> None:
 
     # check redirect target
     job.context["EXPECTED_STATUS"] = 200
-    _req_url(job, {"allow_redirects": True})
+    _req_url(logger, job, {"allow_redirects": True})
 
     job.result = VerificationResult.PASS
     return
 
 
-def check_url_arcgis(job: VerificationJob) -> None:
+def check_url_arcgis(logger: logging.Logger, job: VerificationJob) -> None:
     """
     ArcGIS item URL check.
 
@@ -129,7 +132,7 @@ def check_url_arcgis(job: VerificationJob) -> None:
     Standalone function for use in parallel processing.
     """
     job.context["METHOD"] = "get"
-    req = _req_url(job)
+    req = _req_url(logger, job)
     if "error" in req.json():
         job.result = VerificationResult.FAIL
         job.data["error"] = req.json()
@@ -139,7 +142,7 @@ def check_url_arcgis(job: VerificationJob) -> None:
     return
 
 
-def check_item_download(job: VerificationJob) -> None:
+def check_item_download(logger: logging.Logger, job: VerificationJob) -> None:
     """
     Catalogue item download option check.
 
@@ -150,7 +153,7 @@ def check_item_download(job: VerificationJob) -> None:
     Standalone function for use in parallel processing.
     """
     job.context["METHOD"] = "get"
-    req = _req_url(job)
+    req = _req_url(logger, job)
     html = BeautifulSoup(req.content, features="html.parser")
     url = job.url.replace("&", "&amp;")  # Escape & for HTML parsing
 
@@ -163,12 +166,15 @@ def check_item_download(job: VerificationJob) -> None:
     return
 
 
-def run_job(job: VerificationJob) -> VerificationJob:
+def run_job(logging_level: int, job: VerificationJob) -> VerificationJob:
     """
     Execute a verification job.
 
     Standalone function for use in parallel processing.
     """
+    init_logging(logging_level)  # each process needs logging initialising
+    logger = logging.getLogger("app")
+
     if job.result != VerificationResult.PENDING:
         return job
 
@@ -177,7 +183,7 @@ def run_job(job: VerificationJob) -> VerificationJob:
 
     start = datetime.now(tz=UTC)
     check_func = globals()[check_func_ref]
-    check_func(job)
+    check_func(logger, job)
     end = datetime.now(tz=UTC)
     job.data["duration"] = end - start
     return job
@@ -372,7 +378,9 @@ class VerificationExporter(ResourcesExporter):
     def run(self) -> None:
         """Execute verification jobs."""
         self._init_jobs()
-        self._jobs = Parallel(n_jobs=self._meta.parallel_jobs)(delayed(run_job)(job) for job in self._jobs)
+        self._jobs = Parallel(n_jobs=self._meta.parallel_jobs)(
+            delayed(run_job)(self._logger.level, job) for job in self._jobs
+        )
 
     def export(self) -> None:
         """Export JSON and HTML report files to local directory."""

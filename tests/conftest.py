@@ -29,7 +29,6 @@ from lantern.exporters.verification import VerificationExporter
 from lantern.exporters.waf import WebAccessibleFolderExporter
 from lantern.exporters.website import WebsiteSearchExporter
 from lantern.exporters.xml import IsoXmlHtmlExporter
-from lantern.lib.metadata_library.models.record import Record as RecordBase
 from lantern.lib.metadata_library.models.record.elements.common import Date, Dates, Identifier, Identifiers
 from lantern.lib.metadata_library.models.record.elements.identification import Constraint
 from lantern.lib.metadata_library.models.record.enums import (
@@ -37,14 +36,15 @@ from lantern.lib.metadata_library.models.record.enums import (
     ConstraintTypeCode,
     HierarchyLevelCode,
 )
-from lantern.models.item.base import ItemBase
+from lantern.lib.metadata_library.models.record.record import Record as RecordBase
+from lantern.models.item.base.item import ItemBase
 from lantern.models.item.catalogue.elements import Dates as ItemCatDates
 from lantern.models.item.catalogue.elements import Identifiers as ItemCatIdentifiers
 from lantern.models.item.catalogue.item import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
 from lantern.models.item.catalogue.tabs import AdditionalInfoTab
-from lantern.models.record import Record
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
+from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta, SiteMeta
 from lantern.models.verification.enums import VerificationResult, VerificationType

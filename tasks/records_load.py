@@ -8,10 +8,10 @@ import inquirer
 from environs import Env
 
 from lantern.config import Config
-from lantern.lib.metadata_library.models.record import RecordInvalidError
+from lantern.lib.metadata_library.models.record.record import RecordInvalidError
 from lantern.log import init as init_logging
 from lantern.log import init_sentry
-from lantern.models.record import Record
+from lantern.models.record.record import Record
 from lantern.stores.base import Store
 from lantern.stores.gitlab import GitLabStore
 

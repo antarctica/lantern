@@ -7,7 +7,6 @@ from bas_metadata_library.standards.iso_19115_2 import MetadataRecord
 from bas_metadata_library.standards.iso_19115_common.utils import _encode_date_properties
 from pytest_mock import MockerFixture
 
-from lantern.lib.metadata_library.models.record import Record, RecordInvalidError, RecordSchema
 from lantern.lib.metadata_library.models.record.elements.common import (
     Address,
     Citation,
@@ -41,6 +40,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     OnlineResourceFunctionCode,
     ProgressCode,
 )
+from lantern.lib.metadata_library.models.record.record import Record, RecordInvalidError, RecordSchema
 
 
 class TestRecordSchema:

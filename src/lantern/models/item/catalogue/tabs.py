@@ -9,10 +9,9 @@ from lantern.lib.metadata_library.models.record.elements.distribution import Dis
 from lantern.lib.metadata_library.models.record.elements.identification import Constraint
 from lantern.lib.metadata_library.models.record.elements.metadata import MetadataStandard
 from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
-from lantern.models.item.base import AccessLevel
 from lantern.models.item.base.elements import Contact, Link
 from lantern.models.item.base.elements import Extent as ItemExtent
-from lantern.models.item.base.enums import ResourceTypeLabel
+from lantern.models.item.base.enums import AccessLevel, ResourceTypeLabel
 from lantern.models.item.catalogue.distributions import (
     ArcGisFeatureLayer,
     ArcGisOgcApiFeatures,

@@ -1,13 +1,15 @@
 from datetime import date
 from typing import Any
 
-from lantern.lib.metadata_library.models.record import DataQuality, Metadata, Record
 from lantern.lib.metadata_library.models.record.elements.common import Contact, Contacts
+from lantern.lib.metadata_library.models.record.elements.data_quality import DataQuality
+from lantern.lib.metadata_library.models.record.elements.metadata import Metadata
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
 from lantern.lib.metadata_library.models.record.presets.citation import make_magic_citation
 from lantern.lib.metadata_library.models.record.presets.conformance import MAGIC_PROFILE_V1
 from lantern.lib.metadata_library.models.record.presets.contacts import make_magic_role
 from lantern.lib.metadata_library.models.record.presets.identifiers import make_bas_cat
+from lantern.lib.metadata_library.models.record.record import Record
 
 
 class RecordMagicDiscoveryV1(Record):

@@ -10,7 +10,7 @@ from pytest_mock import MockerFixture
 from requests.exceptions import ConnectionError as RequestsConnectionError
 
 from lantern.config import Config
-from lantern.models.record import Record
+from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
 from lantern.stores.base import RecordNotFoundError
 from lantern.stores.gitlab import (

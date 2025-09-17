@@ -4,8 +4,6 @@ from datetime import date
 import pytest
 from cattrs import ClassValidationError
 
-from lantern.lib.metadata_library.models.record import Identification, Metadata, RecordInvalidError
-from lantern.lib.metadata_library.models.record import Record as RecordBase
 from lantern.lib.metadata_library.models.record.elements.common import (
     Contact,
     ContactIdentity,
@@ -14,13 +12,16 @@ from lantern.lib.metadata_library.models.record.elements.common import (
     Dates,
     Identifier,
 )
-from lantern.lib.metadata_library.models.record.elements.identification import Extent
+from lantern.lib.metadata_library.models.record.elements.identification import Extent, Identification
+from lantern.lib.metadata_library.models.record.elements.metadata import Metadata
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode, HierarchyLevelCode
 from lantern.lib.metadata_library.models.record.presets.contacts import make_magic_role
 from lantern.lib.metadata_library.models.record.presets.extents import make_bbox_extent
 from lantern.lib.metadata_library.models.record.presets.identifiers import make_bas_cat
-from lantern.models.record import Record
+from lantern.lib.metadata_library.models.record.record import Record as RecordBase
+from lantern.lib.metadata_library.models.record.record import RecordInvalidError
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
+from lantern.models.record.record import Record
 
 
 class TestRecord:

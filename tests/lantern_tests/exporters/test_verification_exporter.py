@@ -21,7 +21,7 @@ from lantern.exporters.verification import (
     run_job,
 )
 from lantern.lib.metadata_library.models.record.elements.common import Identifier
-from lantern.models.record import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
+from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta, SiteMeta
 from lantern.models.verification.enums import VerificationResult, VerificationType

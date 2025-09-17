@@ -20,7 +20,7 @@ from lantern.exporters.json import JsonExporter
 from lantern.exporters.records import JobMethod, RecordsExporter, _job, _job_s3
 from lantern.exporters.xml import IsoXmlExporter, IsoXmlHtmlExporter
 from lantern.lib.metadata_library.models.record.elements.common import Identifier
-from lantern.models.record import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
+from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
 

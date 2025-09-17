@@ -25,6 +25,22 @@ the `LOG_LEVEL` [Config Option](/docs/config.md#config-options) set to a valid P
    [Record Authoring](/docs/data-model.md#record-authoring) section
 2. then run the [Import Records](#import-records) workflow
 
+## Publishing records workflow
+
+A workflow is available to [Import](#import-records), [Build](#build-static-site) and [Verify](#verify-static-site)
+tasks for a set of new and/or updated records as a publishing workflow.
+
+> [!IMPORTANT]
+> This is intended as a convenience for the Business As Usual (BAU) process of publishing records from GitLab issues.
+>
+> For other use-cases, see the documentation for each individual task.
+
+1. copy record configurations as JSON files to the `import/` directory
+1. run the `records-workflow` [Development Task](/docs/dev.md#development-tasks)
+1. verify the record author is happy with the changes in the integration environment
+1. update the `AWS_S3_BUCKET` config option to the production bucket
+1. run the `build-records` [Development Task](/docs/dev.md#development-tasks)
+
 ## Updating records
 
 For updating individual records:
@@ -40,6 +56,14 @@ For updating large numbers of records from an external working copy of the recor
 - then run the [Import Records](#import-records) workflow
 
 ## Import records
+
+> [!IMPORTANT]
+> Run the `zap-records` [Development Task](/docs/dev.md#development-tasks) first if importing records from the Zap ⚡️
+> editor to:
+>
+> - update collections referenced in records
+> - update metadata datestamps in any revised records, and edition in any revised collection records
+> - save any revised records in the import directory and remove any original records exported from Zap ⚡️
 
 To import a set of new or updated records:
 
@@ -62,13 +86,6 @@ The `import-records` task will:
    - an author name and email
 1. populate a [GitLab Store](/docs/stores.md#gitlab-store) (to check for existing records and updating related records)
 1. parse and validate `import/*.json` files (ignoring subfolders) as [Records](/docs/data-model.md#records)
-1. process parsed records:
-   1. where a record has a 'parent collection' aggregation targeting one or more selected MAGIC managed collection:
-      1. each target collection is updated to include a backref 'in collection' aggregation
-      1. each target collection's bounding extent is updated to account for the record
-   1. where any existing records have changed (including records from previous processing steps):
-      1. the metadata revision date is updated
-      1. if a collection, the revision date and edition are updated
 
 ## Build static site
 

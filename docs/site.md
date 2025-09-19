@@ -407,11 +407,11 @@ The extent tab within the [Item Templates](#item-templates) includes a map for t
 use the [BAS Embedded Maps Service](https://github.com/antarctica/embedded-maps), embedded as an `<iframe>` with a src
 URL computed within each Item.
 
-#### Contact form
+#### Item enquires
 
-The contact tab within the [Item Templates](#item-templates) includes a form for users to send item enquires. This is
-implemented as a static HTML form with a POST action to a Microsoft Power Automate flow. This routes enquires to a
-relevant system and team, then returns a conformation page linking back to the Item.
+The contact tab within the [Item Templates](#item-templates) includes a form for users to send item enquires. These
+forms submit to a Microsoft Power Automate flow which routes enquires to the relevant team and returns a conformation
+page to the user.
 
 #### Markdown
 

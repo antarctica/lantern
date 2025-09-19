@@ -45,7 +45,7 @@ a widget shown in the [Static Site](/docs/site.md).
 
 ## Site verification
 
-Automated checks are used to verify the contents of a generated site against expected values.
+A series of checks can be run to verify the contents of a generated site against expected values.
 
 [Verification checks](#verification-checks) are run and compiled into a [Verification report](#verification-report) by
 the [Verification Exporter](/docs/exporters.md#verification-exporter).

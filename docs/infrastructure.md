@@ -39,7 +39,7 @@ Development environments may be created and destroyed as needed. Staging and Pro
 ## Plausible
 
 - [Dashboard 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=ffy5l25mjdv577qj6izuk6lo4m&i=lesr4cnv35csmuptgqqcionbf4&h=magic.1password.eu)
-  - For [Web Analytics](/docs/monitoring.md#plausible)
+  - for [Web Analytics](/docs/monitoring.md#plausible)
 
 ## Exporters
 

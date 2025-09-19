@@ -20,7 +20,7 @@ def main() -> None:
     logger.info("Initialising")
 
     base_url = "https://data.bas.ac.uk"
-    selected = set()  # {"4bd20a2b-df7d-46a2-acdf-5104c82ff4c7"}  # to set use the form {"abc", "..."}
+    selected = set()  # to set use the form {"abc", "..."}
 
     s3 = S3Client(
         "s3",

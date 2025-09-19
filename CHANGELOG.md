@@ -24,10 +24,11 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Catalogue site verification
 * e2e accessibility test for back to top link
 * e2e responsive design test for primary navigation links
-* additional primary navigation items
-* exporter base class for resources (i.e. that process multiple records)
+* Additional primary navigation items
+* Exporter base class for resources (i.e. that process multiple records)
 * Web Accessible Folders (WAF) exporter
 * HTML meta tags for application and build information
+* Scheduled verification of the production static site contents
 * Deployment to BAS central workstations as a custom environment module
 
 ### Fixed

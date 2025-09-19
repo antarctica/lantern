@@ -217,7 +217,8 @@ prerelease:
     - *before_script_python
     - uv sync --frozen --group=dev --python $PYTHON_VERSION
     - $TASK_BIN release prerelease
-    - echo "DEPLOY_APP_VERSION=$("$TASK_BIN" version)" >> build.env
+    - TASK_CMD=($TASK_BIN)
+    - echo "DEPLOY_APP_VERSION=$("${TASK_CMD[@]}" version)" >> build.env
   script:
     - $TASK_BIN build
     - uv publish --index=self --username=gitlab-ci-token --password=$CI_JOB_TOKEN

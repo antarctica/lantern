@@ -6,6 +6,9 @@ from pathlib import Path
 
 import inquirer
 from boto3 import client as S3Client  # noqa: N812
+from tasks.records_import import _clean_input_path, _parse_records
+from tasks.records_import import _get_args as _get_import_args
+from tasks.records_zap import _process_records
 
 from lantern.config import Config
 from lantern.exporters.site import SiteExporter
@@ -15,9 +18,6 @@ from lantern.log import init_sentry
 from lantern.models.site import ExportMeta
 from lantern.models.verification.types import VerificationContext
 from lantern.stores.gitlab import CommitResults, GitLabStore
-from tasks.records_import import _clean_input_path, _parse_records
-from tasks.records_import import _get_args as _get_import_args
-from tasks.records_zap import _process_records
 
 
 def _time_task(label: str) -> callable:

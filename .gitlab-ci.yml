@@ -142,7 +142,7 @@ build:
   before_script:
     - *before_script_python
   script:
-    - uv build
+    - $TASK_BIN build
   artifacts:
     paths:
       - dist/
@@ -178,7 +178,7 @@ prerelease:
     - $TASK_BIN release prerelease
     - echo "DEPLOY_APP_VERSION=$("$TASK_BIN" version)" >> build.env
   script:
-    - uv build
+    - $TASK_BIN build
     - uv publish --index=self --username=gitlab-ci-token --password=$CI_JOB_TOKEN
   retry:
     max: 2

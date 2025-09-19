@@ -101,4 +101,14 @@ The results from [Verification Checks](#verification-checks) are compiled into a
 and/or optional additional processing:
 
 - JSON report: `/-/verification/data.json`
-- HTML report: `/-/verification/index.html` (e.g. [data.bas.ac.uk/-/verification/](https://data.bas.ac.uk/-/verification/))
+- HTML report: `/-/verification/index.html`
+
+### Scheduled verification
+
+The production environment is automatically verified via a cron job running on the BAS central workstations:
+
+- scope: all items
+- frequency: Wednesdays at 12:15 (local time)
+- results: [data.bas.ac.uk/-/verification/](https://data.bas.ac.uk/-/verification/))
+- logs: `/users/geoweb/cron_logs/lantern/lantern-verify-*.log`
+- log retention: 90 days (enforced monthly)

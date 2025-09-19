@@ -92,7 +92,7 @@ image: mcr.microsoft.com/playwright/python:v1.54.0-noble
   - apt-get install -y openssh-client
   - mkdir -p ~/.ssh
   - chmod 700 ~/.ssh
-  - op read --out-file ~/.ssh/$DEPLOY_SSH_PRIVATE_KEY ""op://Infrastructure/SCAR ADD Metadata Toolbox - GitLab CI deploy private key/private key?ssh-format=openssh"
+  - op read --out-file ~/.ssh/$DEPLOY_SSH_PRIVATE_KEY "op://Infrastructure/SCAR ADD Metadata Toolbox - GitLab CI deploy private key/private key?ssh-format=openssh"
   - eval $(ssh-agent -s)
   - chmod 400 ~/.ssh/$DEPLOY_SSH_PRIVATE_KEY
   - ssh-add ~/.ssh/$DEPLOY_SSH_PRIVATE_KEY

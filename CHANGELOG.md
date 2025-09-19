@@ -28,6 +28,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * exporter base class for resources (i.e. that process multiple records)
 * Web Accessible Folders (WAF) exporter
 * HTML meta tags for application and build information
+* Deployment to BAS central workstations as a custom environment module
 
 ### Fixed
 

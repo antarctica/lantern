@@ -54,3 +54,7 @@ Development environments may be created and destroyed as needed. Staging and Pro
 > For auditing and to follow best practice, per-user IAM credentials, with
 > [Suitable Permissions](/docs/setup.md#iam-policy-for-static-website-hosting) to manage items in one these buckets,
 > SHOULD be used over common credentials.
+## Deployment
+
+- BAS Workstations:
+  - [Ansible Playbook 🛡️](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/playbooks/magic/lantern.yml)

@@ -23,12 +23,25 @@ variables:
   # Packaging
   PACKAGE_ACCESS_IDENTIFIER: "gitlab-ci"
 
+  # Deployment
+  DEPLOY_ANSIBLE_REPO: "gitlab.data.bas.ac.uk/station-data-management/ansible.git"
+  DEPLOY_ANSIBLE_BRANCH: "master"
+  DEPLOY_ANSIBLE_VENV: "/tmp/.venv/ansible"
+  DEPLOY_ANSIBLE_ROOT_PATH: "/tmp/ansible"
+  DEPLOY_ANSIBLE_VAULT_PATH: ".vault_magic.password"
+  ANSIBLE_HOST_KEY_CHECKING: "False"
+  DEPLOY_GROUP: "magic"
+  DEPLOY_SSH_PRIVATE_KEY: "id_ed25519.pem"
+  DEPLOY_PLAYBOOK: "lantern.yml"
+
   # Secrets (set in GitLab CI/CD settings)
   # - PROJECT_ACCESS_TOKEN
   #   - https://gitlab.data.bas.ac.uk/MAGIC/lantern-exp/-/settings/access_tokens
   #   - (name: 'gitlab_ci' scope: 'read_api', role: 'reporter')
   # - SAFETY_API_KEY
   #   - https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=swbuhnii4ego6qycyqknvtk7gi&h=magic.1password.eu
+  # - OP_SERVICE_ACCOUNT_TOKEN
+  #   - https://magic.1password.eu/developer-tools/infrastructure-secrets/serviceaccount/4MR5NL7W45AA3GAFGRZMVN2H2I
 
 image: mcr.microsoft.com/playwright/python:v1.54.0-noble
 
@@ -55,6 +68,34 @@ image: mcr.microsoft.com/playwright/python:v1.54.0-noble
   - uv sync --frozen --all-groups --python $PYTHON_VERSION
   # start static site for e2e tests
   - python -m http.server 8123 --directory "$STATIC_SITE_PATH" &
+
+.before_script_deploy: &before_script_deploy
+  - apt-get update
+
+  # setup 1Password CLI
+  - apt-get install -y curl unzip
+  - curl -sSfo op.zip https://cache.agilebits.com/dist/1P/op2/pkg/v2.28.0/op_linux_amd64_v2.28.0.zip
+  - unzip -od /usr/local/bin/ op.zip
+
+  # setup Ansible
+  - apt-get install -y git ssh build-essential
+  - git clone --branch $DEPLOY_ANSIBLE_BRANCH https://gitlab-ci-token:$CI_JOB_TOKEN@$DEPLOY_ANSIBLE_REPO $DEPLOY_ANSIBLE_ROOT_PATH
+  - python -m venv $DEPLOY_ANSIBLE_VENV
+  - $DEPLOY_ANSIBLE_VENV/bin/python -m pip install --upgrade pip
+  - $DEPLOY_ANSIBLE_VENV/bin/python -m pip install -r $DEPLOY_ANSIBLE_ROOT_PATH/requirements.txt
+  - export PATH=$DEPLOY_ANSIBLE_VENV/bin:$PATH
+
+  # setup Ansible vault
+  - op read --out-file ~/$DEPLOY_ANSIBLE_VAULT_PATH "op://Infrastructure/Ansible Vault - BAS IT Ansible MAGIC/password"
+
+  # setup SSH
+  - apt-get install -y openssh-client
+  - mkdir -p ~/.ssh
+  - chmod 700 ~/.ssh
+  - op read --out-file ~/.ssh/$DEPLOY_SSH_PRIVATE_KEY ""op://Infrastructure/SCAR ADD Metadata Toolbox - GitLab CI deploy private key/private key?ssh-format=openssh"
+  - eval $(ssh-agent -s)
+  - chmod 400 ~/.ssh/$DEPLOY_SSH_PRIVATE_KEY
+  - ssh-add ~/.ssh/$DEPLOY_SSH_PRIVATE_KEY
 
 # Jobs
 
@@ -187,6 +228,45 @@ prerelease:
       dotenv: build.env
   rules:
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_COMMIT_TAG == null'
+
+deploy_stage:
+  stage: 🚀 deploy
+  needs:
+    - job: prerelease
+      artifacts: true
+  image: python:3.6-slim
+  variables:
+    DEPLOY_ENV: "staging"
+  before_script:
+    - *before_script_deploy
+  script:
+    - cd $DEPLOY_ANSIBLE_ROOT_PATH
+    - ansible workstations -m ping -i inventory/$DEPLOY_GROUP/$DEPLOY_ENV
+    - ansible-playbook -v -b -e env=$DEPLOY_ENV -e group=$DEPLOY_GROUP -e project=$DEPLOY_ANSIBLE_ROOT_PATH -e app_version=$DEPLOY_APP_VERSION --vault-id ~/$DEPLOY_ANSIBLE_VAULT_PATH -i inventory/$DEPLOY_GROUP/$DEPLOY_ENV playbooks/$DEPLOY_GROUP/$DEPLOY_PLAYBOOK
+  environment:
+    name: staging
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main" && $CI_COMMIT_TAG == null'
+  when: manual
+
+deploy_prod:
+  stage: 🚀 deploy
+  needs:
+    - job: publish
+  image: python:3.6-slim
+  variables:
+    DEPLOY_ENV: "production"
+  before_script:
+    - *before_script_deploy
+    - export DEPLOY_APP_VERSION=$(echo $CI_COMMIT_TAG | cut -c 2-)  # remove 'v' prefix
+  script:
+    - cd $DEPLOY_ANSIBLE_ROOT_PATH
+    - ansible workstations -m ping -i inventory/$DEPLOY_GROUP/$DEPLOY_ENV
+    - ansible-playbook -v -b -e env=$DEPLOY_ENV -e group=$DEPLOY_GROUP -e project=$DEPLOY_ANSIBLE_ROOT_PATH -e app_version=$DEPLOY_APP_VERSION --vault-id ~/$DEPLOY_ANSIBLE_VAULT_PATH -i inventory/$DEPLOY_GROUP/$DEPLOY_ENV playbooks/$DEPLOY_GROUP/$DEPLOY_PLAYBOOK
+  environment:
+    name: production
+  rules:
+    - if: $CI_COMMIT_TAG
 
 gitlab_release:
   stage: 📣 release

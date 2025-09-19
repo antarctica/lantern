@@ -3,13 +3,13 @@ import sys
 from pathlib import Path
 
 import inquirer
+from tasks.records_zap import magic_collection_ids
 
 from lantern.config import Config
 from lantern.log import init as init_logging
 from lantern.log import init_sentry
 from lantern.stores.base import Store
 from lantern.stores.gitlab import GitLabStore
-from tasks.records_zap import magic_collection_ids
 
 max_stage = 3
 

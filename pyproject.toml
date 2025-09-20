@@ -161,6 +161,7 @@ allow-star-arg-any = true
 
 [tool.pymarkdown]
 plugins.md013.line_length = 120
+plugins.md014.enabled = false
 extensions.markdown-extended-autolinks.enabled = true
 
 [tool.pytest_env]

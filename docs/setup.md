@@ -3,6 +3,13 @@
 > [!CAUTION]
 > This section is Work in Progress (WIP) and is not complete/accurate.
 
+## 1Password
+
+For managing secrets and common [Config](/docs/config.md) options.
+
+1. create a new 1Password [service account](https://developer.1password.com/docs/service-accounts/) with access to the
+  *infrastructure* vault
+
 ## GitLab
 
 > [!NOTE]

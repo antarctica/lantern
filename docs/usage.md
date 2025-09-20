@@ -19,6 +19,44 @@
 Log messages at or above the *warning* level are written to `stderr` by default. The logging level can be changed via
 the `LOG_LEVEL` [Config Option](/docs/config.md#config-options) set to a valid Python logging level.
 
+## Workstation module
+
+A minimal installation of this project is available on the BAS central workstations for integrating directly with other
+projects to manage and/or publish records.
+
+> [!NOTE]
+> This is a preview feature and does not directly relate to the workflows and tasks below.
+
+To use this installation, you will need access to MAGIC custom environment modules in the module search path [1].
+
+```text
+$ ssh BAS_WORKSTATION
+$ module load lantern
+```
+
+> [!TIP]
+> This will load the latest stable [Release](/README.md#releases). To load a preview of the next release (built from
+> `main`) use `module load lantern/0.0.0.STAGING`.
+
+[1]
+
+To include modules once:
+
+```text
+$ module use --append /data/magic/.Modules/modulefiles
+```
+
+To include modules on login via a shell profile:
+
+```shell
+# include MAGIC custom environment modules
+type module >/dev/null 2>&1
+if [ $? -eq 0 ]; then
+    module use --append /data/magic/.Modules/modulefiles
+    echo "MAGIC custom modules are available"
+fi
+```
+
 ## Creating records
 
 1. create new records as JSON files in the import directory as per the

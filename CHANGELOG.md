@@ -10,6 +10,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 <!-- pyml disable no-duplicate-heading,no-duplicate-header -->
 ## [Unreleased]
 
+## [0.3.0] - 2025-09-20
+
 ### Added
 
 * Markdown linting for project documentation

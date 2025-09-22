@@ -63,13 +63,16 @@ fi
    [Record Authoring](/docs/data-model.md#record-authoring) section
 2. then run the [Import Records](#import-records) workflow
 
-## Publishing records workflow
+## Interactive record publishing workflow
 
 A workflow is available to [Import](#import-records), [Build](#build-static-site) and [Verify](#verify-static-site)
-tasks for a set of new and/or updated records as a publishing workflow.
+sets of manually authored records using interactive prompts for required information.
 
 > [!IMPORTANT]
-> This is intended as a convenience for the Business As Usual (BAU) process of publishing records from GitLab issues.
+> This workflow is intended as a convenience for the Business As Usual (BAU) process of publishing records from GitLab
+> issues.
+>
+> To publish records on a schedule, use the [Non-interactive Workflow](#non-interactive-record-publishing-workflow).
 >
 > For other use-cases, see the documentation for each individual task.
 
@@ -78,6 +81,51 @@ tasks for a set of new and/or updated records as a publishing workflow.
 1. verify the record author is happy with the changes in the integration environment
 1. update the `AWS_S3_BUCKET` config option to the production bucket
 1. run the `build-records` [Development Task](/docs/dev.md#development-tasks)
+
+## Non-interactive record publishing workflow
+
+A workflow is available to [Import](#import-records) and [Build](#build-static-site) sets of records updated on a
+schedule by other projects as a background task.
+
+> [!IMPORTANT]
+> This workflow is intended for routine updates to records owned by automated systems.
+>
+> To publish ad-hoc, manually authored records, use the [Interactive Workflow](#interactive-record-publishing-workflow).
+>
+> For other use-cases, see the documentation for each individual task.
+
+1. export a set of record configurations as JSON files to a directory
+2. call `/data/magic/projects/lantern/prod/tasks/pub-cat` with required arguments [1]
+
+> [!CAUTION]
+> This will publish any records to the production S3 catalogue environment.
+
+This workflow is experimental with major limitations:
+
+- record files must be accessible from the BAS central workstations
+- publishing scripts must have access to the [Environment Module](#workstation-module) on the BAS central workstations
+- no authentication or authorization is performed on calling scripts
+- the workflow is locked to the production publishing environment
+
+[1] Example script:
+
+```shell
+#!/usr/bin/env bash
+set -e -u -o pipefail
+
+PUB_CAT_PATH="/data/magic/projects/PROJECT/prod/exports/records"
+PUB_CAT_COMMIT_TITLE="Updating PROJECT records"
+PUB_CAT_COMMIT_MESSAGE="Routine update to reflect latest extents."
+PUB_CAT_AUTHOR_NAME="PROJECT-SLUG"
+PUB_CAT_AUTHOR_EMAIL="magicdev@bas.ac.uk"
+
+/data/magic/projects/lantern/prod/tasks/pub-cat \
+--path "$PUB_CAT_PATH" \
+--commit-title "$PUB_CAT_COMMIT_TITLE" \
+--commit-message "$PUB_CAT_COMMIT_MESSAGE" \
+--author-name "$PUB_CAT_AUTHOR_NAME" \
+--author-email "$PUB_CAT_AUTHOR_EMAIL"
+```
 
 ## Updating records
 

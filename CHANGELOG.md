@@ -10,6 +10,10 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 <!-- pyml disable no-duplicate-heading,no-duplicate-header -->
 ## [Unreleased]
 
+### Added
+
+* Non-interactive record publishing workflow for integrating with other projects hosted on the central workstations
+
 ## [0.3.0] - 2025-09-20
 
 ### Added

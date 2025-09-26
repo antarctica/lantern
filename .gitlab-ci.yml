@@ -18,6 +18,8 @@ variables:
 
   # App
   STATIC_SITE_PATH: "$CI_PROJECT_DIR/_site"
+
+  # Linting
   TASK_BIN: "uv run task"
 
   # Packaging
@@ -74,7 +76,7 @@ image: mcr.microsoft.com/playwright/python:v1.54.0-noble
 
   # setup 1Password CLI
   - apt-get install -y curl unzip
-  - curl -sSfo op.zip https://cache.agilebits.com/dist/1P/op2/pkg/v2.28.0/op_linux_amd64_v2.28.0.zip
+  - curl -sSfo op.zip https://cache.agilebits.com/dist/1P/op2/pkg/v2.32.0/op_linux_amd64_v2.32.0.zip
   - unzip -od /usr/local/bin/ op.zip
 
   # setup Ansible
@@ -156,7 +158,7 @@ safety:
   before_script:
     - *before_script_python
   script:
-    - uv run --only-group dev --frozen safety --stage cicd scan --detailed-output
+    - $TASK_BIN ci-safety
   rules:
     -
       changes:
@@ -174,6 +176,7 @@ markdown:
   rules:
     -
       changes:
+        - 'README.md'
         - 'docs/**/*.md'
       if: '$CI_COMMIT_BRANCH != "main" && $CI_COMMIT_TAG == null'
 

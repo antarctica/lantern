@@ -31,9 +31,9 @@ Setup:
 [Taskipy](https://github.com/taskipy/taskipy?tab=readme-ov-file#general) is used to define development tasks, such as
 running tests and rebuilding site styles. These tasks are akin to NPM scripts or similar concepts.
 
-Run `uv run task --list` for available commands.
+Run `task --list` (or `uv run task --list`) for available commands.
 
-Run `uv run task [task]` to run a specific task.
+Run `task [task]` (`uv run task [task]`) to run a specific task.
 
 See [Adding development tasks](#adding-development-tasks) for how to add new tasks.
 
@@ -71,8 +71,11 @@ In the [Configuration](/docs/config.md) documentation:
 
 - add to [Options Table](/docs/config.md#config-options) in alphabetical order
 - if needed, add a subsection to explain the option in more detail
-- if configurable, update the `.env.tpl` template and existing `.env` file
-- if configurable, update the `[tool.pytest_env]` section in `pyproject.toml`
+
+If configurable:
+
+- update the `.env.tpl` template and any existing `.env` files
+- update the `[tool.pytest_env]` section in `pyproject.toml`
 
 In the `tests.lantern_tests.config` module:
 
@@ -137,10 +140,6 @@ In the `tests.lantern_tests.config` module:
 
 - ... include in `VerificationExporter.site_pages` list
 
-### Adding development tasks
-
-See the [Taskipy](https://github.com/taskipy/taskipy?tab=readme-ov-file#adding-tasks) documentation.
-
 ### Updating styles
 
 > [!IMPORTANT]
@@ -158,6 +157,10 @@ See the [Taskipy](https://github.com/taskipy/taskipy?tab=readme-ov-file#adding-t
 
 > [!TIP]
 > You can run `uv run task tailwind && uv run task build-test-records` to chain these tasks together.
+
+### Adding development tasks
+
+See the [Taskipy](https://github.com/taskipy/taskipy?tab=readme-ov-file#adding-tasks) documentation.
 
 ## Python version
 
@@ -181,6 +184,7 @@ Checks are run automatically in [Continuous Integration](#continuous-integration
 ### Updating dependencies
 
 - create an issue and switch to branch
+- run `uv tree --outdated --depth=1` to list outdated packages
 - follow https://docs.astral.sh/uv/concepts/projects/sync/#upgrading-locked-package-versions
 - note upgrades in the issue
 - review any major/breaking upgrades
@@ -371,7 +375,7 @@ known values are used in tests).
 
 To update a specific test:
 
-```shell
+```text
 % uv run pytest --record-mode=once tests/path/to/test_module.py::<class>::<method>
 # E.g.
 % uv run pytest --record-mode=once tests/lantern_tests/stores/test_gitlab_store.py::TestGitLabLocalCache::test_fetch_file_commits
@@ -379,7 +383,7 @@ To update a specific test:
 
 To incrementally build up a set of related tests (including parameterised tests) use the `new_episodes` recording mode:
 
-```shell
+```text
 % uv run pytest --record-mode=new_episodes tests/path/to/test_module.py::<class>::<method>
 ```
 

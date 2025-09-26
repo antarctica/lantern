@@ -17,8 +17,13 @@ Exporters that access Records use a callable from a [Store](/docs/architecture.m
 identifier as needed. A `selected_identifiers` property typically controls which Records are output, allowing for full
 or partial site builds.
 
+<!-- pyml disable md028 -->
 > [!TIP]
 > The [Site Exporter](#site-exporter) sets selected identifiers in relevant (sub-)exporters via the `select()` method.
+
+> [!CAUTION]
+> The `select()` method is only respected for the `RecordsExporter` whilst issues with partial builds are resolved.
+<!-- pyml enable md028 -->
 
 ## Exporters configuration
 

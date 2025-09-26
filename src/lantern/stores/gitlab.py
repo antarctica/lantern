@@ -32,6 +32,12 @@ class CacheIntegrityError(Exception):
     pass
 
 
+class CacheTooOutdatedError(Exception):
+    """Raised when the local cache is too out-of-date to make sense refreshing."""
+
+    pass
+
+
 def _process_record(
     logger: logging.Logger, log_level: int, records_path: Path, record_data: tuple[str, str]
 ) -> tuple[str, str, str]:
@@ -264,6 +270,7 @@ class GitLabLocalCache:
 
         Steps:
         - get a list of commits since the cache was last updated
+        - raise a `CacheTooOutdated` exception if the number of commits is too high (as recreating the cache would be faster)
         - get a list of files changed across any subsequent commits
         - get the contents and head commit ID for any changed files
 
@@ -273,11 +280,17 @@ class GitLabLocalCache:
         limited number of commits since the last refresh, and a limited set of records in each commit, this will be more
         efficient than a full purge and create cycle.
         """
+        limit = 50
         paths = []
 
         commit_range = f"{self.head_commit_local}..{self._head_commit_remote}"
+        commits = self._project.commits.list(ref_name=commit_range, all=True)
+
+        if len(commits) > limit:
+            raise CacheTooOutdatedError() from None
+
         self._logger.info(f"Fetching commits in range {commit_range}")
-        for commit in self._project.commits.list(ref_name=commit_range, all=True):
+        for commit in commits:
             for diff in commit.diff():
                 if not diff["new_path"].startswith("records/") or not diff["new_path"].endswith(".json"):
                     continue
@@ -344,6 +357,10 @@ class GitLabLocalCache:
             records = self._fetch_latest_records()
         except CacheIntegrityError:
             self._logger.warning("Cannot refresh cache due to integrity issues, recreating entire cache instead.")
+            self._create()
+            return
+        except CacheTooOutdatedError:
+            self._logger.warning("Refreshing the cache would take too long, recreating entire cache instead.")
             self._create()
             return
 

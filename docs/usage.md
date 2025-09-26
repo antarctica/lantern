@@ -25,7 +25,7 @@ A minimal installation of this project is available on the BAS central workstati
 projects to manage and/or publish records.
 
 > [!NOTE]
-> This is a preview feature and does not directly relate to the workflows and tasks below.
+> This is a preview feature and does not directly relate to the workflows and tasks below unless noted.
 
 To use this installation, you will need access to MAGIC custom environment modules in the module search path [1].
 
@@ -35,8 +35,9 @@ $ module load lantern
 ```
 
 > [!TIP]
-> This will load the latest stable [Release](/README.md#releases). To load a preview of the next release (built from
-> `main`) use `module load lantern/0.0.0.STAGING`.
+> This will load the latest stable [Release](/README.md#releases).
+>
+> To load a preview of the next release (built from `main`) use `module load lantern/0.0.0.STAGING`.
 
 [1]
 

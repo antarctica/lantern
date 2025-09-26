@@ -124,15 +124,12 @@ The `Config.dumps_safe()` method returns a typed dict of [Config Options](#confi
 
 ## Generate an environment config file
 
-<!-- pyml disable md028 -->
-> [!TIP]
-> Run the `config-init` [Development Task](/docs/dev.md#development-tasks) to generate a new `.env` file from the
-> `.env.tpl` template.
+Run the `config-init` [Development Task](/docs/dev.md#development-tasks) to generate a new `.env` file from the
+`resources/env/.env.tpl` template.
 
 > [!IMPORTANT]
 > This uses the [1Password CLI](https://developer.1password.com/docs/cli/) to inject relevant secrets. You must have
 > access to the MAGIC 1Password vault to run this task.
-<!-- pyml enable md028 -->
 
 ## Adding configuration options
 

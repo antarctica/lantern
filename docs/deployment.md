@@ -7,7 +7,8 @@ This application is distributed as a Python (Pip) package.
 [Continuous Deployment](#continuous-deployment) will build the package and publish it to the project
 [Package Registry 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/lantern-exp/-/packages) automatically.
 
-The package can be built manually by running the `build` [Development Task](/docs/dev.md#development-tasks).
+> [!TIP]
+> The package can be built manually by running the `build` [Development Task](/docs/dev.md#development-tasks).
 
 ## Environment module
 
@@ -49,4 +50,4 @@ and context:
 Tagged commits created for [Releases](/README.md#releases) will trigger a continuous deployment workflow for the release
 to the production environment using GitLab's CI/CD configured in [`.gitlab-ci.yml`](/.gitlab-ci.yml).
 
-Pre-releases can optionally be deployed to the staging environment by triggering
+Pre-releases can optionally be deployed to the staging environment by triggering the relevant CI job manually.

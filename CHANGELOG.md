@@ -14,6 +14,10 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 
 * Non-interactive record publishing workflow for integrating with other projects hosted on the central workstations
 
+### Changed
+
+* Documentation improvements
+
 ## [0.3.0] - 2025-09-20
 
 ### Added
@@ -129,4 +133,4 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 ### Added
 
 * Initial implementation based on the [BAS Assets Tracking Service v0.7.0 release](https://github.com/antarctica/assets-tracking-service/tree/v0.7.0)
-<!-- pyml enable no-duplicate-heading,no-duplicate-header) -->
+<!-- pyml enable no-duplicate-heading,no-duplicate-header -->

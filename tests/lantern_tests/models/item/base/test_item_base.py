@@ -39,16 +39,19 @@ from lantern.lib.metadata_library.models.record.presets.projections import EPSG_
 from lantern.models.item.base.elements import Contact, Contacts, Extent, Extents
 from lantern.models.item.base.enums import AccessLevel
 from lantern.models.item.base.item import ItemBase
+from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
 
 
 class TestItemBase:
     """Test base item."""
 
-    def test_init(self, fx_revision_model_min: RecordRevision):
+    @pytest.mark.parametrize("class_", ["Record", "RecordRevision"])
+    def test_init(self, fx_record_model_min: Record, fx_revision_model_min: RecordRevision, class_: str):
         """Can create an ItemBase from a Record."""
-        item = ItemBase(fx_revision_model_min)
-        assert item._record == fx_revision_model_min
+        model = fx_record_model_min if class_ == "Record" else fx_revision_model_min
+        item = ItemBase(model)
+        assert item._record == model
 
     @pytest.mark.parametrize(
         ("value", "expected"),
@@ -516,11 +519,14 @@ class TestItemBase:
 
         assert item.resource_id == expected
 
-    def test_resource_revision(self, fx_revision_model_min: RecordRevision):
+    @pytest.mark.parametrize("class_", ["Record", "RecordRevision"])
+    def test_resource_revision(self, fx_record_model_min: Record, fx_revision_model_min: RecordRevision, class_: str):
         """Can get resource/file revision."""
-        expected = "x"
-        item = ItemBase(fx_revision_model_min)
-        item._record.file_revision = expected
+        expected = "x" if class_ == "RecordRevision" else None
+        model = fx_record_model_min if class_ == "Record" else fx_revision_model_min
+        item = ItemBase(model)
+        if class_ == "RecordRevision":
+            item._record.file_revision = expected
 
         assert item.resource_revision == expected
 

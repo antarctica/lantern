@@ -65,6 +65,10 @@ environment.
 
 ## Power Automate
 
+### Power Automate item enquires
+
+...
+
 ### Power Automate SharePoint proxy
 
 1. import `resources/flows/lantern-sharepoint-proxy.zip` into Power Automate as a new flow

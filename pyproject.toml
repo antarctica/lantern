@@ -1,7 +1,7 @@
 [project]
 name = "lantern"
 version = "0.3.0"
-description = "Prototype data catalogue for BAS discovery metadata."
+description = "A prototype data catalogue for BAS discovery metadata."
 readme = "README.md"
 license = "MIT"
 authors = [
@@ -61,7 +61,7 @@ publish-url = "https://gitlab.data.bas.ac.uk/api/v4/projects/1355/packages/pypi"
 explicit = true
 
 [tool.taskipy.variables]
-docs_targets = "docs/"
+docs_targets = "docs/ README.md CHANGELOG.md"
 types_targets = "src/"
 targets = "src/ tasks/ tests/"
 cov_options = "--cov --cov-report=html"
@@ -80,6 +80,7 @@ test-reset = { cmd = "pytest --cache-clear", help = "Reset pytest cache and run 
 safety = { cmd = "safety scan --detailed-output", help = "Check for insecure dependencies" }
 # CI
 ci-test = { cmd = "pytest {cov_options} -o junit_family=xunit2 --junitxml=test-results.xml --continue-on-collection-errors", help = "Called by CI", use_vars = true }
+ci-safety = { cmd = "safety --stage cicd scan --detailed-output", help = "Called by CI" }
 # app dev
 release = { cmd = "python -m tasks.release", help = "Prepapre app release" }
 config-init = { cmd = "op inject --in-file resources/env/.env.tpl --out-file .env", help = "Initialise config file" }
@@ -152,7 +153,6 @@ ignore = ["D100", "D104", "D107", "D203", "D212", "D401", "D402", "E501", "PT001
 "tasks/tailwind.py" = ["N802"]
 #   tests/*   | ANN201 | ignore public functions
 #   tests/*   | ANN401 | ignore use of 'Any' type
-#   tests/*   |   D401 | ignore imperative mood in docstrings (too unreliable)
 #   tests/*   |   S101 | ignore use of assert
 "tests/*" = ["ANN201", "ANN401", "D401", "S101"]
 

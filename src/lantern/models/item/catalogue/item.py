@@ -2,8 +2,6 @@ import json
 from collections.abc import Callable
 from typing import Any
 
-from jinja2 import Environment, PackageLoader, select_autoescape
-
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
 from lantern.models.item.base.elements import Link
 from lantern.models.item.base.item import ItemBase
@@ -52,8 +50,11 @@ class ItemCatalogue(ItemBase):
         super().__init__(record)
         self._meta = site_meta
         self._get_record = get_record
-        _loader = PackageLoader("lantern", "resources/templates")
-        self._jinja = Environment(loader=_loader, autoescape=select_autoescape(), trim_blocks=True, lstrip_blocks=True)
+
+        if not isinstance(self._record, RecordRevision):
+            msg = "record must be a RecordRevision instance"
+            raise TypeError(msg) from None
+        self._record: RecordRevision
 
     @property
     def _aggregations(self) -> Aggregations:
@@ -75,6 +76,7 @@ class ItemCatalogue(ItemBase):
         """Formatted dates."""
         return Maintenance(self._record.identification.maintenance)
 
+    # noinspection PyUnresolvedReferences
     @property
     def _revision(self) -> Link | None:
         """Link to the record revision, if available."""

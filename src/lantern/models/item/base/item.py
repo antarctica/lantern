@@ -23,6 +23,7 @@ from lantern.models.item.base.elements import Contact, Contacts, Extent, Extents
 from lantern.models.item.base.enums import AccessLevel
 from lantern.models.item.base.utils import md_as_html, md_as_plain
 from lantern.models.record.const import PERMISSIONS_BAS_GROUP, PERMISSIONS_NERC_DIRECTORY
+from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
 
 
@@ -40,7 +41,7 @@ class ItemBase:
     available by this class. Especially for properties this class would simply pass through to the record.
     """
 
-    def __init__(self, record: RecordRevision) -> None:
+    def __init__(self, record: Record) -> None:
         self._record = record
 
     @staticmethod
@@ -321,13 +322,15 @@ class ItemBase:
         return self._record.file_identifier
 
     @property
-    def resource_revision(self) -> str:
+    def resource_revision(self) -> str | None:
         """
-        Resource revision.
+        Optional resource revision (commit).
 
-        AKA commit.
+        If item relates to a RecordRevision.
         """
-        return self._record.file_revision
+        if isinstance(self._record, RecordRevision):
+            return self._record.file_revision
+        return None
 
     @property
     def resource_type(self) -> HierarchyLevelCode:

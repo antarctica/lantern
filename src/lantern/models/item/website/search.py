@@ -18,7 +18,7 @@ class ItemWebsiteSearch(ItemBase):
     - a wrapper around this info for the API the Public Website harvests from to populate catalogue items
         - provided by the `dumps()` method
 
-    In addition to a catalogue Record instance, this Item variant requires:
+    In addition to a catalogue RecordRevision instance, this Item variant requires:
     - a static identifier to identify the system each item originates from
     - a base URL to generate fully qualified URLs to each item (dynamic to support testing and production environments)
 
@@ -29,6 +29,11 @@ class ItemWebsiteSearch(ItemBase):
         super().__init__(record)
         self._source = source
         self._base_url = base_url
+
+        if not isinstance(self._record, RecordRevision):
+            msg = "record must be a RecordRevision instance"
+            raise TypeError(msg) from None
+        self._record: RecordRevision
 
     @property
     def _type_label(self) -> str:

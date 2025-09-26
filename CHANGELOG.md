@@ -17,6 +17,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 ### Fixed
 
 * Refactoring `ItemBase` to work with Records or Record Revisions (previously required RecordRevision's)
+* Invalidating cache where a significant number of commits have occurred since the last update
+* Workaround for partial builds leading to incomplete exports for (index, website search and WAF)
 
 ### Changed
 

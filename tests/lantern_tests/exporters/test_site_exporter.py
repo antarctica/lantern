@@ -334,14 +334,19 @@ class TestSiteExporter:
         assert "contents" not in result
 
     def test_select(self, fx_exporter_site: SiteExporter, fx_revision_model_min: RecordRevision):
-        """Can select file_identifiers in sub-exporters."""
+        """
+        Can select file_identifiers in sub-exporters.
+
+        Until a better solution is available to stop automatically triggered partial updates clobbering full updates,
+        non-record exporters temporarily ignore this selection.
+        """
         expected = {fx_revision_model_min.file_revision}
         fx_exporter_site.select(expected)
 
         assert fx_exporter_site._records_exporter.selected_identifiers == expected
-        assert fx_exporter_site._index_exporter.selected_identifiers == expected
-        assert fx_exporter_site._waf_exporter.selected_identifiers == expected
-        assert fx_exporter_site._website_exporter.selected_identifiers == expected
+        assert fx_exporter_site._index_exporter.selected_identifiers == set()
+        assert fx_exporter_site._waf_exporter.selected_identifiers == set()
+        assert fx_exporter_site._website_exporter.selected_identifiers == set()
 
     def test_export(self, fx_exporter_site: SiteExporter, fx_revision_model_min: RecordRevision):
         """Can export all site components to local files."""

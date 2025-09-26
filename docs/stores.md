@@ -117,9 +117,15 @@ A cache is refreshed by:
 - storing:
   - updated records, and the head commit are stored as described above
 
+<!-- pyml disable md028 -->
+> [!NOTE]
+> Where 50 or more commits have passed since the last cache update, the local cache will be automatically purged and
+> recreated in full as this will be quicker than incrementally processing commits to refresh the cache.
+
 > [!IMPORTANT]
 > Caches do not support moving or deleting files within the related remote repository. If detected when refreshing the
 > local cache is automatically purged and recreated in full to ensure consistency.
+<!-- pyml enable md028 -->
 
 ### GitLab Local cache testing
 

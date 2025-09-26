@@ -28,6 +28,7 @@ from lantern.models.item.catalogue.tabs import (
     RelatedTab,
 )
 from lantern.models.record.const import CATALOGUE_NAMESPACE
+from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import SiteMeta
 from tests.conftest import _get_record
@@ -45,6 +46,16 @@ class TestItemCatalogue:
         )
         assert isinstance(item, ItemCatalogue)
         assert item._record == fx_revision_model_min
+
+    def test_init_invalid_type(self, fx_site_meta: SiteMeta, fx_record_model_min: Record):
+        """Cannot create an ItemCatalogue if not a RecordRevision."""
+        with pytest.raises(TypeError, match="record must be a RecordRevision instance"):
+            # noinspection PyTypeChecker
+            _ = ItemCatalogue(
+                site_meta=fx_site_meta,
+                record=fx_record_model_min,
+                get_record=_get_record,
+            )
 
     def test_revision(
         self,

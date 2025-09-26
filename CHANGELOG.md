@@ -14,6 +14,10 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 
 * Non-interactive record publishing workflow for integrating with other projects hosted on the central workstations
 
+### Fixed
+
+* Refactoring `ItemBase` to work with Records or Record Revisions (previously required RecordRevision's)
+
 ### Changed
 
 * Documentation improvements

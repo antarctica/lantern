@@ -15,6 +15,7 @@ from lantern.models.record.revision import RecordRevision
 from lantern.stores.base import RecordNotFoundError
 from lantern.stores.gitlab import (
     CacheIntegrityError,
+    CacheTooOutdatedError,
     CommitResults,
     GitLabLocalCache,
     GitLabStore,
@@ -243,6 +244,28 @@ class TestGitLabLocalCache:
         assert results[0][1] == expected[0][1]
         assert results == expected
 
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    def test_fetch_latest_records_excessive(
+        self,
+        mocker: MockerFixture,
+        fx_gitlab_cache: GitLabLocalCache,
+        fx_record_config_min: dict,
+    ):
+        """Can fetch record configurations for future commits from remote repository."""
+        local_head = "abc123"
+        remote_head = "def456"
+        mocker.patch.object(
+            type(fx_gitlab_cache), "head_commit_local", new_callable=PropertyMock, return_value=local_head
+        )
+        mocker.patch.object(
+            type(fx_gitlab_cache), "_head_commit_remote", new_callable=PropertyMock, return_value=remote_head
+        )
+        fx_gitlab_cache._parallel_jobs = 1  # disable parallelism to handle HTTP recording
+
+        with pytest.raises(CacheTooOutdatedError):
+            _ = fx_gitlab_cache._fetch_latest_records()
+
     def test_create(self, mocker: MockerFixture, fx_gitlab_cache: GitLabLocalCache, fx_record_config_min: dict):
         """
         Can fetch and populate cache with records from remote repository.
@@ -299,6 +322,22 @@ class TestGitLabLocalCache:
         fx_gitlab_cache_pop._refresh()
 
         # Verify _create was called due to the integrity error
+        fx_gitlab_cache_pop._create.assert_called_once()
+
+    def test_refresh_outdated(
+        self, mocker: MockerFixture, fx_gitlab_cache_pop: GitLabLocalCache, fx_record_config_min: dict
+    ):
+        """
+        Does not refresh repository if there are to many outstanding commits for that to make sense.
+
+        This mocks fetching data as `_refresh()` is a high-level method and fetch methods are tested elsewhere.
+        """
+        mocker.patch.object(fx_gitlab_cache_pop, "_fetch_latest_records", side_effect=CacheTooOutdatedError())
+        mocker.patch.object(fx_gitlab_cache_pop, "_create", return_value=None)
+
+        fx_gitlab_cache_pop._refresh()
+
+        # Verify _create was called due to the outdated error
         fx_gitlab_cache_pop._create.assert_called_once()
 
     @pytest.mark.parametrize(

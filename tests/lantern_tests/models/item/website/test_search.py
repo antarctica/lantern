@@ -2,13 +2,14 @@ from datetime import date
 
 import pytest
 
-from lantern.config import Config
 from lantern.lib.metadata_library.models.record.elements.common import Date
 from lantern.lib.metadata_library.models.record.elements.identification import Constraint, GraphicOverview
 from lantern.lib.metadata_library.models.record.enums import ConstraintRestrictionCode, ConstraintTypeCode, ProgressCode
 from lantern.models.item.base.enums import ResourceTypeLabel
 from lantern.models.item.website.search import ItemWebsiteSearch
+from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
+from lantern.models.site import SiteMeta
 
 
 class TestItemWebsiteSearch:
@@ -16,13 +17,19 @@ class TestItemWebsiteSearch:
 
     base_url = "https://example.com"
 
-    def test_init(self, fx_config: Config, fx_revision_model_min: RecordRevision):
+    def test_init(self, fx_site_meta: SiteMeta, fx_revision_model_min: RecordRevision):
         """Can create an ItemWebsiteSearch."""
-        item = ItemWebsiteSearch(record=fx_revision_model_min, source=fx_config.NAME, base_url=self.base_url)
+        item = ItemWebsiteSearch(record=fx_revision_model_min, source=fx_site_meta.generator, base_url=self.base_url)
         assert isinstance(item, ItemWebsiteSearch)
         assert item._record == fx_revision_model_min
 
-    def test_dumps_min(self, fx_config: Config, fx_revision_model_min: RecordRevision):
+    def test_init_invalid_type(self, fx_site_meta: SiteMeta, fx_record_model_min: Record):
+        """Cannot create an ItemCatalogue if not a RecordRevision."""
+        with pytest.raises(TypeError, match="record must be a RecordRevision instance"):
+            # noinspection PyTypeChecker
+            _ = ItemWebsiteSearch(record=fx_record_model_min, source=fx_site_meta.generator, base_url=self.base_url)
+
+    def test_dumps_min(self, fx_site_meta: SiteMeta, fx_revision_model_min: RecordRevision):
         """Can dump a valid Catalogue / Public Website sync API entity for an item with minimal properties."""
         expected = {
             "file_identifier": fx_revision_model_min.file_identifier,
@@ -42,11 +49,11 @@ class TestItemWebsiteSearch:
             },
             "deleted": False,
         }
-        item = ItemWebsiteSearch(record=fx_revision_model_min, source=fx_config.NAME, base_url=self.base_url)
+        item = ItemWebsiteSearch(record=fx_revision_model_min, source=fx_site_meta.generator, base_url=self.base_url)
 
         assert item.dumps() == expected
 
-    def test_dumps_max(self, fx_config: Config, fx_revision_model_min: RecordRevision):
+    def test_dumps_max(self, fx_site_meta: SiteMeta, fx_revision_model_min: RecordRevision):
         """Can dump a valid Catalogue / Public Website sync API entity for an item with all supported properties."""
         edition = "x"
         thumbnail_href = "x.jpg"
@@ -74,7 +81,7 @@ class TestItemWebsiteSearch:
             GraphicOverview(identifier="overview", href=thumbnail_href, mime_type="image/jpeg")
         )
 
-        item = ItemWebsiteSearch(record=fx_revision_model_min, source=fx_config.NAME, base_url=self.base_url)
+        item = ItemWebsiteSearch(record=fx_revision_model_min, source=fx_site_meta.generator, base_url=self.base_url)
 
         assert item.dumps() == expected
 
@@ -84,13 +91,13 @@ class TestItemWebsiteSearch:
         [(False, "<p>x</p>"), (True, "<p>y</p>")],
     )
     def test_description(
-        self, fx_config: Config, fx_revision_model_min: RecordRevision, has_purpose: bool, expected: str
+        self, fx_site_meta: SiteMeta, fx_revision_model_min: RecordRevision, has_purpose: bool, expected: str
     ):
         """Can select preferred date from available options."""
         if has_purpose:
             fx_revision_model_min.identification.purpose = "y"
 
-        item = ItemWebsiteSearch(record=fx_revision_model_min, source=fx_config.NAME, base_url=self.base_url)
+        item = ItemWebsiteSearch(record=fx_revision_model_min, source=fx_site_meta.generator, base_url=self.base_url)
 
         assert item._description == expected
 
@@ -106,7 +113,7 @@ class TestItemWebsiteSearch:
     )
     def test_dates(
         self,
-        fx_config: Config,
+        fx_site_meta: SiteMeta,
         fx_revision_model_min: RecordRevision,
         has_publication: bool,
         has_revision: bool,
@@ -120,7 +127,7 @@ class TestItemWebsiteSearch:
         if has_revision:
             fx_revision_model_min.identification.dates.revision = revision
 
-        item = ItemWebsiteSearch(record=fx_revision_model_min, source=fx_config.NAME, base_url=self.base_url)
+        item = ItemWebsiteSearch(record=fx_revision_model_min, source=fx_site_meta.generator, base_url=self.base_url)
 
         assert item._date == expected
 
@@ -130,20 +137,20 @@ class TestItemWebsiteSearch:
         [(None, False), (ProgressCode.OBSOLETE, True), (ProgressCode.HISTORICAL_ARCHIVE, True)],
     )
     def test_deleted(
-        self, fx_config: Config, fx_revision_model_min: RecordRevision, progress: ProgressCode, expected: bool
+        self, fx_site_meta: SiteMeta, fx_revision_model_min: RecordRevision, progress: ProgressCode, expected: bool
     ):
         """Can determine if item should be marked as removed from maintenance info."""
         fx_revision_model_min.identification.maintenance.progress = progress
-        item = ItemWebsiteSearch(record=fx_revision_model_min, source=fx_config.NAME, base_url=self.base_url)
+        item = ItemWebsiteSearch(record=fx_revision_model_min, source=fx_site_meta.generator, base_url=self.base_url)
         assert item._deleted == expected
 
     @pytest.mark.parametrize("open_access", [False, True])
-    def test_open_access(self, fx_config: Config, fx_revision_model_min: RecordRevision, open_access: bool):
+    def test_open_access(self, fx_site_meta: SiteMeta, fx_revision_model_min: RecordRevision, open_access: bool):
         """Can determine if resource is open access."""
         if open_access:
             fx_revision_model_min.identification.constraints.append(
                 Constraint(type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.UNRESTRICTED)
             )
 
-        item = ItemWebsiteSearch(record=fx_revision_model_min, source=fx_config.NAME, base_url=self.base_url)
+        item = ItemWebsiteSearch(record=fx_revision_model_min, source=fx_site_meta.generator, base_url=self.base_url)
         assert item.open_access == open_access

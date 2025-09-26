@@ -330,11 +330,14 @@ class SiteExporter(Exporter):
         Select a subset of records to export and/or publish.
 
         Only applies to exporters that relate to individual resources.
+
+        Until a better solution is available to stop automatically triggered partial updates clobbering full updates,
+        non-record exporters temporarily ignore this selection.
         """
         self._records_exporter.selected_identifiers = file_identifiers
-        self._index_exporter.selected_identifiers = file_identifiers
-        self._waf_exporter.selected_identifiers = file_identifiers
-        self._website_exporter.selected_identifiers = file_identifiers
+        self._index_exporter.selected_identifiers = set()
+        self._waf_exporter.selected_identifiers = set()
+        self._website_exporter.selected_identifiers = set()
 
     def export(self) -> None:
         """Export site contents to a directory."""

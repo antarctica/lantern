@@ -133,6 +133,8 @@ class Record(RecordBase):
         """
         Verify records against Catalogue specific requirements.
 
+        Raises `RecordInvalidError` exception if invalid.
+
         Checks that records:
         - include an identifier with the catalogue namespace and file_identifier value
         - include a contact with the 'Point of Contact' role

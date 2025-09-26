@@ -1,6 +1,6 @@
 # Lantern
 
-Prototype [Data Catalogue](https://data.bas.ac.uk/-/index) for BAS discovery metadata.
+A prototype [Data Catalogue](https://data.bas.ac.uk/-/index) for BAS discovery metadata.
 
 ## Overview
 

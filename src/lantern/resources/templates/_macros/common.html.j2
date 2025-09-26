@@ -67,6 +67,14 @@
   </header>
 {% endmacro %}
 
+{% macro img_light_dark(src_light, src_dark, alt_text, classes) %}
+  <picture class="{{ classes }}">
+    <source srcset="{{ src_light }}" media="(prefers-color-scheme: light)" />
+    <source srcset="{{ src_dark }}" media="(prefers-color-scheme: dark)" />
+    <img src="{{ src_light }}" alt="{{ alt_text }}" />
+  </picture>
+{% endmacro %}
+
 {% macro item_border(classes="") %}
   <div class="p-2 border-1 border-grey-100 dark:border-grey-700 {{ classes }}">
     {{ caller() }}
@@ -81,7 +89,12 @@
   {% call item_border(classes="p-2 flex flex-col h-full") %}
     <div class="flex h-full">
       <div class="w-1/6 shrink-0 self-center">
-        <img class="w-full h-auto object-contain" src="{{ item.href_graphic }}" alt="thumbnail for {{ item.title_plain }}">
+        {{ img_light_dark(
+          item.href_graphic[0],
+          item.href_graphic[1],
+          "thumbnail for " + item.title_plain,
+          "w-full h-auto object-contain"
+        ) }}
       </div>
       <div class="w-5/6 flex flex-col h-full pl-2">
         <header><a class="text-lg {{ link_classes() }}" href="{{item.href}}">{{ item.title_html }}</a></header>

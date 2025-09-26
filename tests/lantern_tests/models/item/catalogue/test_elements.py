@@ -369,6 +369,8 @@ class TestItemCatalogueSummaryCatalogue:
             (HierarchyLevelCode.COLLECTION, None, None, False, None, 0, None),
             (HierarchyLevelCode.COLLECTION, None, None, False, None, 1, "1 item"),
             (HierarchyLevelCode.COLLECTION, None, None, False, None, 2, "2 items"),
+            (HierarchyLevelCode.PAPER_MAP_PRODUCT, None, None, False, None, 1, "1 side"),
+            (HierarchyLevelCode.PAPER_MAP_PRODUCT, None, None, False, None, 2, "2 sides"),
         ],
     )
     def test_fragments(
@@ -390,12 +392,18 @@ class TestItemCatalogueSummaryCatalogue:
         if has_pub:
             record.identification.dates.publication = Date(date=datetime(2014, 6, 30, tzinfo=UTC).date())
         for _ in range(child_count):
-            record.identification.aggregations.append(
-                Aggregation(
+            aggregation = Aggregation(
+                identifier=Identifier(identifier="x", namespace="x"),
+                association_type=AggregationAssociationCode.IS_COMPOSED_OF,
+                initiative_type=AggregationInitiativeCode.COLLECTION,
+            )
+            if resource_type.name == HierarchyLevelCode.PAPER_MAP_PRODUCT:
+                aggregation = Aggregation(
                     identifier=Identifier(identifier="x", namespace="x"),
                     association_type=AggregationAssociationCode.IS_COMPOSED_OF,
+                    initiative_type=AggregationInitiativeCode.PAPER_MAP,
                 )
-            )
+            record.identification.aggregations.append(aggregation)
         record.child_aggregations_count = child_count
         summary = ItemCatalogueSummary(record)
 

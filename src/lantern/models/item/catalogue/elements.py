@@ -130,11 +130,12 @@ class ItemCatalogueSummary(ItemBase):
         count = len(
             self._record.identification.aggregations.filter(associations=AggregationAssociationCode.IS_COMPOSED_OF)
         )
-        if count == 1:
-            return "1 item"
-        if count > 1:
-            return f"{count} items"
-        return None
+        if count < 1:
+            return None
+
+        unit = "side" if self.resource_type == HierarchyLevelCode.PAPER_MAP_PRODUCT else "item"
+        unit = unit if count == 1 else f"{unit}s"
+        return f"{count} {unit}"
 
     @property
     def summary_html(self) -> str:

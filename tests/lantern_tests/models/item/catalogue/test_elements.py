@@ -412,15 +412,22 @@ class TestItemCatalogueSummaryCatalogue:
     @pytest.mark.parametrize(
         ("href", "expected"),
         [
-            ("x", "x"),
+            ("x", ("x", "x")),
             (
                 None,
-                "data:image/png;base64, iVB",
+                (
+                    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAMAAAAKE/YAAAAC+lBMVEUAAADu7u739/fz8/Pt7e3w",
+                    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAMAAAAKE/YAAAADAFBMVEUAAAAODg4qKiozMzMBAQEVF",
+                ),
             ),
         ],
     )
-    def test_href_graphic(self, fx_item_base_model_min: ItemBase, href: str | None, expected: str):
-        """Can get href graphic."""
+    def test_href_graphic(self, fx_item_base_model_min: ItemBase, href: str | None, expected: tuple[str, str]):
+        """
+        Can get href graphics.
+
+        If present in a record the same image is returned twice as a light and dark image.
+        """
         record = fx_item_base_model_min._record
         if href is not None:
             record.identification.graphic_overviews.append(
@@ -432,7 +439,8 @@ class TestItemCatalogueSummaryCatalogue:
         if href is not None:
             assert summary.href_graphic == expected
         else:
-            assert summary.href_graphic.startswith(expected)
+            assert summary.href_graphic[0].startswith(expected[0])
+            assert summary.href_graphic[1].startswith(expected[1])
 
 
 class TestIdentifiers:

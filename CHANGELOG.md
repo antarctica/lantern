@@ -13,6 +13,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 ### Added
 
 * Non-interactive record publishing workflow for integrating with other projects hosted on the central workstations
+* Dark mode variant of item summary default thumbnail
 
 ### Fixed
 
@@ -23,6 +24,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 ### Changed
 
 * Documentation improvements
+* Contextualising items fragment in item summaries for physical map products (sides rather than items)
 
 ## [0.3.0] - 2025-09-20
 

@@ -369,6 +369,8 @@ class TestItemCatalogueSummaryCatalogue:
             (HierarchyLevelCode.COLLECTION, None, None, False, None, 0, None),
             (HierarchyLevelCode.COLLECTION, None, None, False, None, 1, "1 item"),
             (HierarchyLevelCode.COLLECTION, None, None, False, None, 2, "2 items"),
+            (HierarchyLevelCode.PAPER_MAP_PRODUCT, None, None, False, None, 1, "1 side"),
+            (HierarchyLevelCode.PAPER_MAP_PRODUCT, None, None, False, None, 2, "2 sides"),
         ],
     )
     def test_fragments(
@@ -390,12 +392,18 @@ class TestItemCatalogueSummaryCatalogue:
         if has_pub:
             record.identification.dates.publication = Date(date=datetime(2014, 6, 30, tzinfo=UTC).date())
         for _ in range(child_count):
-            record.identification.aggregations.append(
-                Aggregation(
+            aggregation = Aggregation(
+                identifier=Identifier(identifier="x", namespace="x"),
+                association_type=AggregationAssociationCode.IS_COMPOSED_OF,
+                initiative_type=AggregationInitiativeCode.COLLECTION,
+            )
+            if resource_type.name == HierarchyLevelCode.PAPER_MAP_PRODUCT:
+                aggregation = Aggregation(
                     identifier=Identifier(identifier="x", namespace="x"),
                     association_type=AggregationAssociationCode.IS_COMPOSED_OF,
+                    initiative_type=AggregationInitiativeCode.PAPER_MAP,
                 )
-            )
+            record.identification.aggregations.append(aggregation)
         record.child_aggregations_count = child_count
         summary = ItemCatalogueSummary(record)
 
@@ -412,15 +420,22 @@ class TestItemCatalogueSummaryCatalogue:
     @pytest.mark.parametrize(
         ("href", "expected"),
         [
-            ("x", "x"),
+            ("x", ("x", "x")),
             (
                 None,
-                "data:image/png;base64, iVB",
+                (
+                    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAMAAAAKE/YAAAAC+lBMVEUAAADu7u739/fz8/Pt7e3w",
+                    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAMAAAAKE/YAAAADAFBMVEUAAAAODg4qKiozMzMBAQEVF",
+                ),
             ),
         ],
     )
-    def test_href_graphic(self, fx_item_base_model_min: ItemBase, href: str | None, expected: str):
-        """Can get href graphic."""
+    def test_href_graphic(self, fx_item_base_model_min: ItemBase, href: str | None, expected: tuple[str, str]):
+        """
+        Can get href graphics.
+
+        If present in a record the same image is returned twice as a light and dark image.
+        """
         record = fx_item_base_model_min._record
         if href is not None:
             record.identification.graphic_overviews.append(
@@ -432,7 +447,8 @@ class TestItemCatalogueSummaryCatalogue:
         if href is not None:
             assert summary.href_graphic == expected
         else:
-            assert summary.href_graphic.startswith(expected)
+            assert summary.href_graphic[0].startswith(expected[0])
+            assert summary.href_graphic[1].startswith(expected[1])
 
 
 class TestIdentifiers:

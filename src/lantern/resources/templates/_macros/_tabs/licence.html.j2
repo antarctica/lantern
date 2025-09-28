@@ -27,11 +27,7 @@
         <a class="{{ com.link_classes() }}" href="{{ href }}">{{ name }} {{ com.ext_link_i() }}</a>
       </div>
       {% if img %}
-        <picture class="absolute top-0 right-0">
-          <source srcset="{{ img }}" media="(prefers-color-scheme: light)" />
-          <source srcset="{{ img_dark }}" media="(prefers-color-scheme: dark)" />
-          <img src="{{ img }}" alt="Licence symbol" />
-        </picture>
+        {{ com.img_light_dark(img, img_dark, "licence symbol", "hidden lg:block absolute top-0 right-0") }}
       {% endif %}
     </div>
 

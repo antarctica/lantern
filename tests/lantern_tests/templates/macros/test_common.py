@@ -98,7 +98,7 @@ class TestItemSummary:
         """Can get graphic with expected value from summary."""
         summary = self.summary_base
         html = BeautifulSoup(self._render(summary), parser="html.parser", features="lxml")
-        assert html.select_one("img")["src"] == summary.href_graphic
+        assert html.select_one("img")["src"] == summary.href_graphic[0]
 
     def test_type(self):
         """Can get item type with expected value from summary."""

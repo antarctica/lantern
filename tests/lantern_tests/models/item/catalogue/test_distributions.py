@@ -481,12 +481,11 @@ class TestDistributionGeoJson:
 
     def test_init(self):
         """Can create a distribution."""
-        dist = GeoJson(
-            option=_make_dist("https://www.iana.org/assignments/media-types/application/geo+json"),
-            access_level=AccessLevel.PUBLIC,
-        )
+        option = _make_dist("https://www.iana.org/assignments/media-types/application/geo+json")
+        dist = GeoJson(option=option, access_level=AccessLevel.PUBLIC)
 
         assert dist.format_type == DistributionType.GEOJSON
+        assert dist.matches(option, [])
 
 
 class TestDistributionGeoPackage:
@@ -509,10 +508,12 @@ class TestDistributionGeoPackage:
     )
     def test_init(self, href: str, format_type: DistributionType, compressed: bool):
         """Can create a distribution."""
-        dist = GeoPackage(option=_make_dist(format_href=href), access_level=AccessLevel.PUBLIC)
+        option = _make_dist(format_href=href)
+        dist = GeoPackage(option=option, access_level=AccessLevel.PUBLIC)
 
         assert dist.format_type == format_type
         assert dist._compressed == compressed
+        assert dist.matches(option, [])
 
 
 class TestDistributionGpx:
@@ -532,8 +533,11 @@ class TestDistributionJpeg:
 
     def test_init(self):
         """Can create a distribution."""
-        dist = Jpeg(option=_make_dist("https://jpeg.org/jpeg/"), access_level=AccessLevel.PUBLIC)
+        option = _make_dist("https://www.iana.org/assignments/media-types/image/jpeg")
+        dist = Jpeg(option=option, access_level=AccessLevel.PUBLIC)
+
         assert dist.format_type == DistributionType.JPEG
+        assert dist.matches(option, [])
 
 
 class TestDistributionPdf:
@@ -556,10 +560,12 @@ class TestDistributionPdf:
     )
     def test_init(self, href: str, format_type: DistributionType, georeferenced: bool):
         """Can create a distribution."""
-        dist = Pdf(option=_make_dist(format_href=href), access_level=AccessLevel.PUBLIC)
+        option = _make_dist(format_href=href)
+        dist = Pdf(option=option, access_level=AccessLevel.PUBLIC)
 
         assert dist.format_type == format_type
         assert dist._georeferenced == georeferenced
+        assert dist.matches(option, [])
 
 
 class TestDistributionPng:
@@ -567,11 +573,10 @@ class TestDistributionPng:
 
     def test_init(self):
         """Can create a distribution."""
-        dist = Png(
-            option=_make_dist("https://www.iana.org/assignments/media-types/image/png"),
-            access_level=AccessLevel.PUBLIC,
-        )
+        option = _make_dist("https://www.iana.org/assignments/media-types/image/png")
+        dist = Png(option=option, access_level=AccessLevel.PUBLIC)
         assert dist.format_type == DistributionType.PNG
+        assert dist.matches(option, [])
 
 
 class TestDistributionShapefile:
@@ -579,8 +584,7 @@ class TestDistributionShapefile:
 
     def test_init(self):
         """Can create a distribution."""
-        dist = Shapefile(
-            option=_make_dist("https://metadata-resources.data.bas.ac.uk/media-types/application/vnd.shp+zip"),
-            access_level=AccessLevel.PUBLIC,
-        )
+        option = _make_dist("https://metadata-resources.data.bas.ac.uk/media-types/application/vnd.shp+zip")
+        dist = Shapefile(option=option, access_level=AccessLevel.PUBLIC)
         assert dist.format_type == DistributionType.SHAPEFILE_ZIP
+        assert dist.matches(option, [])

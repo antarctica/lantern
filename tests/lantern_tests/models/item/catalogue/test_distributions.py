@@ -12,10 +12,14 @@ from lantern.models.item.catalogue.distributions import (
     ArcGisOgcApiFeatures,
     ArcGisRasterTileLayer,
     ArcGisVectorTileLayer,
+    BasPublishedMap,
+    Csv,
     Distribution,
     FileDistribution,
+    Fpl,
     GeoJson,
     GeoPackage,
+    Gpx,
     Jpeg,
     Pdf,
     Png,
@@ -257,6 +261,25 @@ class TestFileDistribution:
         assert dist.access_target is None
 
 
+class TestDistributionBasPublishedMap:
+    """Test BAS Published Map ordering distribution."""
+
+    def test_init(self):
+        """Can create a distribution."""
+        option = RecordDistribution(
+            distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
+            transfer_option=TransferOption(
+                online_resource=OnlineResource(
+                    href="https://www.bas.ac.uk/data/our-data/maps/how-to-order-a-map/",
+                    function=OnlineResourceFunctionCode.DOWNLOAD,
+                )
+            ),
+        )
+        dist = BasPublishedMap(option=option, access_level=AccessLevel.PUBLIC)
+
+        assert dist.matches(option, [])
+
+
 class TestDistributionArcGisFeatureLayer:
     """Test ArcGIS Feature Layer catalogue distribution."""
 
@@ -429,17 +452,40 @@ class TestDistributionArcGisVectorTileLayer:
         assert result == expected
 
 
+class TestDistributionCsv:
+    """Test CSV catalogue distribution."""
+
+    def test_init(self):
+        """Can create a distribution."""
+        option = _make_dist("https://www.iana.org/assignments/media-types/text/csv")
+        dist = Csv(option=option, access_level=AccessLevel.PUBLIC)
+
+        assert dist.format_type == DistributionType.CSV
+        assert dist.matches(option, [])
+
+
+class TestDistributionFpl:
+    """Test FPL catalogue distribution."""
+
+    def test_init(self):
+        """Can create a distribution."""
+        option = _make_dist("https://metadata-resources.data.bas.ac.uk/media-types/application/fpl+xml")
+        dist = Fpl(option=option, access_level=AccessLevel.PUBLIC)
+
+        assert dist.format_type == DistributionType.FPL
+        assert dist.matches(option, [])
+
+
 class TestDistributionGeoJson:
     """Test GeoJSON catalogue distribution."""
 
     def test_init(self):
         """Can create a distribution."""
-        dist = GeoJson(
-            option=_make_dist("https://www.iana.org/assignments/media-types/application/geo+json"),
-            access_level=AccessLevel.PUBLIC,
-        )
+        option = _make_dist("https://www.iana.org/assignments/media-types/application/geo+json")
+        dist = GeoJson(option=option, access_level=AccessLevel.PUBLIC)
 
         assert dist.format_type == DistributionType.GEOJSON
+        assert dist.matches(option, [])
 
 
 class TestDistributionGeoPackage:
@@ -462,10 +508,24 @@ class TestDistributionGeoPackage:
     )
     def test_init(self, href: str, format_type: DistributionType, compressed: bool):
         """Can create a distribution."""
-        dist = GeoPackage(option=_make_dist(format_href=href), access_level=AccessLevel.PUBLIC)
+        option = _make_dist(format_href=href)
+        dist = GeoPackage(option=option, access_level=AccessLevel.PUBLIC)
 
         assert dist.format_type == format_type
         assert dist._compressed == compressed
+        assert dist.matches(option, [])
+
+
+class TestDistributionGpx:
+    """Test GPX catalogue distribution."""
+
+    def test_init(self):
+        """Can create a distribution."""
+        option = _make_dist("https://metadata-resources.data.bas.ac.uk/media-types/application/gpx+xml")
+        dist = Gpx(option=option, access_level=AccessLevel.PUBLIC)
+
+        assert dist.format_type == DistributionType.GPX
+        assert dist.matches(option, [])
 
 
 class TestDistributionJpeg:
@@ -473,8 +533,11 @@ class TestDistributionJpeg:
 
     def test_init(self):
         """Can create a distribution."""
-        dist = Jpeg(option=_make_dist("https://jpeg.org/jpeg/"), access_level=AccessLevel.PUBLIC)
+        option = _make_dist("https://www.iana.org/assignments/media-types/image/jpeg")
+        dist = Jpeg(option=option, access_level=AccessLevel.PUBLIC)
+
         assert dist.format_type == DistributionType.JPEG
+        assert dist.matches(option, [])
 
 
 class TestDistributionPdf:
@@ -497,10 +560,12 @@ class TestDistributionPdf:
     )
     def test_init(self, href: str, format_type: DistributionType, georeferenced: bool):
         """Can create a distribution."""
-        dist = Pdf(option=_make_dist(format_href=href), access_level=AccessLevel.PUBLIC)
+        option = _make_dist(format_href=href)
+        dist = Pdf(option=option, access_level=AccessLevel.PUBLIC)
 
         assert dist.format_type == format_type
         assert dist._georeferenced == georeferenced
+        assert dist.matches(option, [])
 
 
 class TestDistributionPng:
@@ -508,11 +573,10 @@ class TestDistributionPng:
 
     def test_init(self):
         """Can create a distribution."""
-        dist = Png(
-            option=_make_dist("https://www.iana.org/assignments/media-types/image/png"),
-            access_level=AccessLevel.PUBLIC,
-        )
+        option = _make_dist("https://www.iana.org/assignments/media-types/image/png")
+        dist = Png(option=option, access_level=AccessLevel.PUBLIC)
         assert dist.format_type == DistributionType.PNG
+        assert dist.matches(option, [])
 
 
 class TestDistributionShapefile:
@@ -520,8 +584,7 @@ class TestDistributionShapefile:
 
     def test_init(self):
         """Can create a distribution."""
-        dist = Shapefile(
-            option=_make_dist("https://metadata-resources.data.bas.ac.uk/media-types/application/vnd.shp+zip"),
-            access_level=AccessLevel.PUBLIC,
-        )
+        option = _make_dist("https://metadata-resources.data.bas.ac.uk/media-types/application/vnd.shp+zip")
+        dist = Shapefile(option=option, access_level=AccessLevel.PUBLIC)
         assert dist.format_type == DistributionType.SHAPEFILE_ZIP
+        assert dist.matches(option, [])

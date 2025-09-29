@@ -26,6 +26,9 @@ class DistributionType(Enum):
     PNG = "PNG"
     SHAPEFILE_ZIP = "Shapefile (Zipped)"
     X_PAPER_MAP = "Flat or folded paper map"
+    CSV = "CSV"
+    FPL = "FPL"
+    GPX = "GPX"
 
 
 class Licence(Enum):

@@ -111,9 +111,6 @@ In the `tests.lantern_tests.config` module:
 
 ### Adding distribution formats
 
-> [!CAUTION]
-> This section is Work in Progress (WIP) and may not be complete/accurate.
-
 1. create a new class under `lantern.models.item.catalogue.distributions` inheriting from `Distribution` or a relevant
    subclass
 2. if needed register new media-types under the Metadata Standards resources site (`metadata-resources.data.bas.ac.uk`)
@@ -130,8 +127,8 @@ In the `tests.lantern_tests.config` module:
    - `tests.resources.records/item_cat_verify::record`
 7. update `lantern.models.verification.elements.VerificationDistribution`
 8. add a new tests to:
-   - `lantern_tests.models.item.catalogue.test_distributions`
-   - `lantern_tests.templates.macros.test_tabs.TestDataTab.test_data_info` (if using a collapsible information panel)
+   - `tests.lantern_tests.models.item.catalogue.test_distributions`
+   - `tests.lantern_tests.templates.macros.test_tabs.TestDataTab.test_data_info` (if using a collapsible panel)
 
 ### Adding site pages
 

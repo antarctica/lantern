@@ -26,8 +26,11 @@ Item to test all supported data formats:
 - ArcGIS OGC Feature Layer
 - ArcGIS Raster Tile Layer
 - ArcGIS Vector Tile Layer
+- CSV
+- FPL
 - GeoJSON
 - GeoPackage (optional compression)
+- GPX
 - PNG
 - PDF (optional georeferenced)
 - Shapefile (required compression)
@@ -329,6 +332,82 @@ record.distribution = [
             role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
+            format="CSV",
+            href="https://www.iana.org/assignments/media-types/text/csv",
+        ),
+        transfer_option=TransferOption(
+            size=Size(unit="bytes", magnitude=12 * 1024),
+            online_resource=OnlineResource(
+                href="x",
+                function=OnlineResourceFunctionCode.DOWNLOAD,
+                title="CSV",
+                description="Access information as a CSV file.",
+            ),
+        ),
+    ),
+    Distribution(
+        distributor=Contact(
+            organisation=ContactIdentity(
+                name="Mapping and Geographic Information Centre, British Antarctic Survey",
+                href="https://ror.org/01rhff309",
+                title="ror",
+            ),
+            phone="+44 (0)1223 221400",
+            email="magic@bas.ac.uk",
+            address=Address(
+                delivery_point="British Antarctic Survey, High Cross, Madingley Road",
+                city="Cambridge",
+                administrative_area="Cambridgeshire",
+                postal_code="CB3 0ET",
+                country="United Kingdom",
+            ),
+            online_resource=OnlineResource(
+                href="https://www.bas.ac.uk/teams/magic",
+                title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
+                description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
+                function=OnlineResourceFunctionCode.INFORMATION,
+            ),
+            role={ContactRoleCode.DISTRIBUTOR},
+        ),
+        format=Format(
+            format="FPL",
+            href="https://metadata-resources.data.bas.ac.uk/media-types/application/fpl+xml",
+        ),
+        transfer_option=TransferOption(
+            size=Size(unit="bytes", magnitude=12 * 1024 * 1024),
+            online_resource=OnlineResource(
+                href="x",
+                function=OnlineResourceFunctionCode.DOWNLOAD,
+                title="FPL",
+                description="Access information as a FPL file.",
+            ),
+        ),
+    ),
+    Distribution(
+        distributor=Contact(
+            organisation=ContactIdentity(
+                name="Mapping and Geographic Information Centre, British Antarctic Survey",
+                href="https://ror.org/01rhff309",
+                title="ror",
+            ),
+            phone="+44 (0)1223 221400",
+            email="magic@bas.ac.uk",
+            address=Address(
+                delivery_point="British Antarctic Survey, High Cross, Madingley Road",
+                city="Cambridge",
+                administrative_area="Cambridgeshire",
+                postal_code="CB3 0ET",
+                country="United Kingdom",
+            ),
+            online_resource=OnlineResource(
+                href="https://www.bas.ac.uk/teams/magic",
+                title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
+                description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
+                function=OnlineResourceFunctionCode.INFORMATION,
+            ),
+            role={ContactRoleCode.DISTRIBUTOR},
+        ),
+        format=Format(
             format="GeoJSON",
             href="https://www.iana.org/assignments/media-types/application/geo+json",
         ),
@@ -443,8 +522,46 @@ record.distribution = [
             role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
+            format="GPX",
+            href="https://metadata-resources.data.bas.ac.uk/media-types/application/gpx+xml",
+        ),
+        transfer_option=TransferOption(
+            size=Size(unit="bytes", magnitude=12 * 1024 * 1024 * 1024),
+            online_resource=OnlineResource(
+                href="x",
+                function=OnlineResourceFunctionCode.DOWNLOAD,
+                title="GPX",
+                description="Access information as a GPX file.",
+            ),
+        ),
+    ),
+    Distribution(
+        distributor=Contact(
+            organisation=ContactIdentity(
+                name="Mapping and Geographic Information Centre, British Antarctic Survey",
+                href="https://ror.org/01rhff309",
+                title="ror",
+            ),
+            phone="+44 (0)1223 221400",
+            email="magic@bas.ac.uk",
+            address=Address(
+                delivery_point="British Antarctic Survey, High Cross, Madingley Road",
+                city="Cambridge",
+                administrative_area="Cambridgeshire",
+                postal_code="CB3 0ET",
+                country="United Kingdom",
+            ),
+            online_resource=OnlineResource(
+                href="https://www.bas.ac.uk/teams/magic",
+                title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
+                description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
+                function=OnlineResourceFunctionCode.INFORMATION,
+            ),
+            role={ContactRoleCode.DISTRIBUTOR},
+        ),
+        format=Format(
             format="JPEG",
-            href="https://jpeg.org/jpeg/",
+            href="https://www.iana.org/assignments/media-types/image/jpeg",
         ),
         transfer_option=TransferOption(
             size=Size(unit="bytes", magnitude=15 * 1024 * 1024 * 1024 * 1024),

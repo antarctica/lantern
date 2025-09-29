@@ -12,10 +12,13 @@ from lantern.models.item.catalogue.distributions import (
     ArcGisOgcApiFeatures,
     ArcGisRasterTileLayer,
     ArcGisVectorTileLayer,
+    Csv,
     Distribution,
     FileDistribution,
+    Fpl,
     GeoJson,
     GeoPackage,
+    Gpx,
     Jpeg,
     Pdf,
     Png,
@@ -429,6 +432,30 @@ class TestDistributionArcGisVectorTileLayer:
         assert result == expected
 
 
+class TestDistributionCsv:
+    """Test CSV catalogue distribution."""
+
+    def test_init(self):
+        """Can create a distribution."""
+        option = _make_dist("https://www.iana.org/assignments/media-types/text/csv")
+        dist = Csv(option=option, access_level=AccessLevel.PUBLIC)
+
+        assert dist.format_type == DistributionType.CSV
+        assert dist.matches(option, [])
+
+
+class TestDistributionFpl:
+    """Test FPL catalogue distribution."""
+
+    def test_init(self):
+        """Can create a distribution."""
+        option = _make_dist("https://metadata-resources.data.bas.ac.uk/media-types/application/fpl+xml")
+        dist = Fpl(option=option, access_level=AccessLevel.PUBLIC)
+
+        assert dist.format_type == DistributionType.FPL
+        assert dist.matches(option, [])
+
+
 class TestDistributionGeoJson:
     """Test GeoJSON catalogue distribution."""
 
@@ -466,6 +493,18 @@ class TestDistributionGeoPackage:
 
         assert dist.format_type == format_type
         assert dist._compressed == compressed
+
+
+class TestDistributionGpx:
+    """Test GPX catalogue distribution."""
+
+    def test_init(self):
+        """Can create a distribution."""
+        option = _make_dist("https://metadata-resources.data.bas.ac.uk/media-types/application/gpx+xml")
+        dist = Gpx(option=option, access_level=AccessLevel.PUBLIC)
+
+        assert dist.format_type == DistributionType.GPX
+        assert dist.matches(option, [])
 
 
 class TestDistributionJpeg:

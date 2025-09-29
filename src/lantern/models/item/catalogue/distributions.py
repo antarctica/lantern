@@ -358,6 +358,39 @@ class BasPublishedMap(Distribution):
         return "#item-data-info-map-purchase"
 
 
+class Csv(FileDistribution):
+    """CSV distribution option."""
+
+    @classmethod
+    def matches(cls, option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:
+        """Whether this class matches the distribution option."""
+        return (
+            option.format is not None and option.format.href == "https://www.iana.org/assignments/media-types/text/csv"
+        )
+
+    @property
+    def format_type(self) -> DistributionType:
+        """Format type."""
+        return DistributionType.CSV
+
+
+class Fpl(FileDistribution):
+    """FPL distribution option."""
+
+    @classmethod
+    def matches(cls, option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:
+        """Whether this class matches the distribution option."""
+        return (
+            option.format is not None
+            and option.format.href == "https://metadata-resources.data.bas.ac.uk/media-types/application/fpl+xml"
+        )
+
+    @property
+    def format_type(self) -> DistributionType:
+        """Format type."""
+        return DistributionType.FPL
+
+
 class GeoJson(FileDistribution):
     """GeoJSON distribution option."""
 
@@ -408,6 +441,23 @@ class GeoPackage(FileDistribution):
         if self._compressed:
             return DistributionType.GEOPACKAGE_ZIP
         return DistributionType.GEOPACKAGE
+
+
+class Gpx(FileDistribution):
+    """GPX distribution option."""
+
+    @classmethod
+    def matches(cls, option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:
+        """Whether this class matches the distribution option."""
+        return (
+            option.format is not None
+            and option.format.href == "https://metadata-resources.data.bas.ac.uk/media-types/application/gpx+xml"
+        )
+
+    @property
+    def format_type(self) -> DistributionType:
+        """Format type."""
+        return DistributionType.GPX
 
 
 class Jpeg(FileDistribution):

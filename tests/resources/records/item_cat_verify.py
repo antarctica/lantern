@@ -33,8 +33,11 @@ Distribution option URLs all need to parse as URLs. Some must match a specific f
 """
 
 file_formats = [
+    "https://www.iana.org/assignments/media-types/text/csv",
+    "https://metadata-resources.data.bas.ac.uk/media-types/application/fpl+xml",
     "https://www.iana.org/assignments/media-types/application/geo+json",
     "https://www.iana.org/assignments/media-types/application/geopackage+sqlite3",
+    "https://metadata-resources.data.bas.ac.uk/media-types/application/gpx+xml",
     "https://metadata-resources.data.bas.ac.uk/media-types/application/geopackage+sqlite3+zip",
     "https://www.iana.org/assignments/media-types/image/jpeg",
     "https://www.iana.org/assignments/media-types/application/pdf",

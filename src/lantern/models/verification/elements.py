@@ -17,8 +17,11 @@ class VerificationDistribution:
     """
 
     file_media_types: Final[list[str]] = [
+        "https://www.iana.org/assignments/media-types/text/csv",
+        "https://metadata-resources.data.bas.ac.uk/media-types/application/fpl+xml",
         "https://www.iana.org/assignments/media-types/application/geo+json",
         "https://www.iana.org/assignments/media-types/application/geopackage+sqlite3",
+        "https://metadata-resources.data.bas.ac.uk/media-types/application/gpx+xml",
         "https://metadata-resources.data.bas.ac.uk/media-types/application/geopackage+sqlite3+zip",
         "https://www.iana.org/assignments/media-types/image/jpeg",
         "https://www.iana.org/assignments/media-types/application/pdf",

@@ -12,6 +12,7 @@ from lantern.models.item.catalogue.distributions import (
     ArcGisOgcApiFeatures,
     ArcGisRasterTileLayer,
     ArcGisVectorTileLayer,
+    BasPublishedMap,
     Csv,
     Distribution,
     FileDistribution,
@@ -258,6 +259,25 @@ class TestFileDistribution:
         """Can get null action target."""
         dist = FakeFileDistributionType(option=_make_dist("x"), access_level=AccessLevel.PUBLIC)
         assert dist.access_target is None
+
+
+class TestDistributionBasPublishedMap:
+    """Test BAS Published Map ordering distribution."""
+
+    def test_init(self):
+        """Can create a distribution."""
+        option = RecordDistribution(
+            distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
+            transfer_option=TransferOption(
+                online_resource=OnlineResource(
+                    href="https://www.bas.ac.uk/data/our-data/maps/how-to-order-a-map/",
+                    function=OnlineResourceFunctionCode.DOWNLOAD,
+                )
+            ),
+        )
+        dist = BasPublishedMap(option=option, access_level=AccessLevel.PUBLIC)
+
+        assert dist.matches(option, [])
 
 
 class TestDistributionArcGisFeatureLayer:

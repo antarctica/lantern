@@ -21,6 +21,7 @@ from lantern.models.item.catalogue.distributions import (
     GeoPackage,
     Gpx,
     Jpeg,
+    MapboxVectorTiles,
     Pdf,
     Png,
     Shapefile,
@@ -537,6 +538,18 @@ class TestDistributionJpeg:
         dist = Jpeg(option=option, access_level=AccessLevel.PUBLIC)
 
         assert dist.format_type == DistributionType.JPEG
+        assert dist.matches(option, [])
+
+
+class TestDistributionMapBoxVectorTiles:
+    """Test MapBox vector tiles catalogue distribution."""
+
+    def test_init(self):
+        """Can create a distribution."""
+        option = _make_dist("https://www.iana.org/assignments/media-types/application/vnd.mapbox-vector-tile")
+        dist = MapboxVectorTiles(option=option, access_level=AccessLevel.PUBLIC)
+
+        assert dist.format_type == DistributionType.MAP_BOX_VECTOR_TILE
         assert dist.matches(option, [])
 
 

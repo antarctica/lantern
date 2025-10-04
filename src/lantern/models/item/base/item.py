@@ -39,6 +39,8 @@ class ItemBase:
 
     It is expected, and acceptable, to use the underlying `_record` property to access information not made directly
     available by this class. Especially for properties this class would simply pass through to the record.
+
+    Base items are compatible with Records and RecordRevisions, depending on available context.
     """
 
     def __init__(self, record: Record) -> None:

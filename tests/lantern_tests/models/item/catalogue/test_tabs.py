@@ -52,7 +52,6 @@ from lantern.models.item.catalogue.elements import (
     Maintenance,
 )
 from lantern.models.item.catalogue.enums import Licence
-from lantern.models.item.catalogue.item import ItemCatalogue
 from lantern.models.item.catalogue.tabs import (
     AdditionalInfoTab,
     AuthorsTab,
@@ -257,7 +256,7 @@ class TestAuthorsTab:
 class TestLicenceTab:
     """Test licence tab."""
 
-    def test_init(self, fx_item_catalogue_model_min: ItemCatalogue):
+    def test_init(self):
         """Can create licence tab."""
         constraint = Constraint(
             type=ConstraintTypeCode.USAGE,
@@ -280,13 +279,7 @@ class TestLicenceTab:
             (HierarchyLevelCode.COLLECTION, True, False),
         ],
     )
-    def test_disabled(
-        self,
-        fx_item_catalogue_model_min: ItemCatalogue,
-        item_type: HierarchyLevelCode,
-        has_licence: bool,
-        expected: bool,
-    ):
+    def test_disabled(self, item_type: HierarchyLevelCode, has_licence: bool, expected: bool):
         """Can disable licence tab based on item type and if item has a licence."""
         constraint = Constraint(
             type=ConstraintTypeCode.USAGE,
@@ -374,9 +367,7 @@ class TestLicenceTab:
             ),
         ],
     )
-    def test_copyright_holders(
-        self, fx_item_catalogue_model_min: ItemCatalogue, contacts: Contacts, expected: list[Link, str]
-    ):
+    def test_copyright_holders(self, contacts: Contacts, expected: list[Link, str]):
         """Can get licence macro name from licence constraint href."""
         tab = LicenceTab(item_type=HierarchyLevelCode.PRODUCT, licence=None, rights_holders=contacts)
         assert tab.copyright_holders == expected

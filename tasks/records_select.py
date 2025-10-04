@@ -44,6 +44,7 @@ def _process_selections(file_identifiers: list[str]) -> None:
     Handles common references such as URLs or file names for convenience.
     """
     for i, fid in enumerate(file_identifiers):
+        fid = fid.strip()
         if "https://" in fid:
             # for 'https://example.com/items/123' or 'https://example.com/items/123/' or
             # 'https://example.com/items/123/index.html' or 'https://example.com/items/123/index.html#tab-foo'  as '123'

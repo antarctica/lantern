@@ -44,6 +44,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     OnlineResourceFunctionCode,
     ProgressCode,
 )
+from lantern.models.item.catalogue.enums import Licence
 from lantern.models.item.catalogue.item import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
@@ -367,7 +368,24 @@ class TestLicenceTab:
                     Constraint(
                         type=ConstraintTypeCode.USAGE,
                         restriction_code=ConstraintRestrictionCode.LICENSE,
-                        href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+                    )
+                ]
+            ),
+            Constraints(
+                [
+                    Constraint(
+                        type=ConstraintTypeCode.USAGE,
+                        restriction_code=ConstraintRestrictionCode.LICENSE,
+                        href="x",
+                    )
+                ]
+            ),
+            Constraints(
+                [
+                    Constraint(
+                        type=ConstraintTypeCode.USAGE,
+                        restriction_code=ConstraintRestrictionCode.LICENSE,
+                        href=Licence.OGL_UK_3_0.value,
                     )
                 ]
             ),

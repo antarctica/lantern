@@ -31,6 +31,7 @@ Item to test all supported data formats:
 - GeoJSON
 - GeoPackage (optional compression)
 - GPX
+- JPEG
 - Mapbox Vector Tiles (MBTiles)
 - PNG
 - PDF (optional georeferenced)

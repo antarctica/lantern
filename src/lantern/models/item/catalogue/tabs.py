@@ -265,7 +265,7 @@ class LicenceTab(Tab):
         """Whether tab is enabled."""
         if self._item_type == HierarchyLevelCode.COLLECTION:
             return False
-        return self._licence is not None
+        return self.slug is not None
 
     @property
     def anchor(self) -> str:

@@ -31,6 +31,9 @@ magic_collection_ids = [
     "cf64dd21-545a-465b-9a67-c28bb4ce9024",  # BAS Basemaps
     "faaeca6f-e67a-45df-ad6d-10c3049daab3",  # BAS Geology Maps
     "2fc581f3-8c7c-4ea5-a4a2-b133a437ff41",  # BAS Map Catalogue
+    "00203387-0840-447c-b9ae-f25088501031",  # BAS Air Operations Planning Maps
+    "6793faf5-16c5-42dc-a835-b214db7f3e85",  # SCAR Air Operations Planning Maps
+    "5dc748d4-0e6e-4cdc-acc8-f24283bc585c",  # BAS Operations Datasets
 ]
 
 

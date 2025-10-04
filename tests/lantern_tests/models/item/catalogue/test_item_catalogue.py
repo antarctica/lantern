@@ -15,6 +15,7 @@ from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
 from lantern.models.item.base.elements import Link
 from lantern.models.item.base.enums import ResourceTypeLabel
 from lantern.models.item.catalogue.elements import PageSummary
+from lantern.models.item.catalogue.enums import Licence
 from lantern.models.item.catalogue.item import ItemCatalogue
 from lantern.models.item.catalogue.tabs import (
     AdditionalInfoTab,
@@ -298,7 +299,12 @@ class TestItemCatalogue:
                     "identification": {
                         **base_record["identification"],
                         "constraints": [
-                            {"type": "usage", "restriction_code": "license", "statement": "x", "href": "x"}
+                            {
+                                "type": "usage",
+                                "restriction_code": "license",
+                                "statement": "x",
+                                "href": Licence.OGL_UK_3_0.value,
+                            }
                         ],
                     },
                 },

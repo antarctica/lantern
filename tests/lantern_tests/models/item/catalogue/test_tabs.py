@@ -304,18 +304,29 @@ class TestLicenceTab:
         else:
             assert tab.slug is None
 
-    def test_slug(self, fx_item_catalogue_model_min: ItemCatalogue):
-        """Can get licence macro name from licence constraint href."""
+    @pytest.mark.parametrize(
+        ("licence", "href", "expected"),
+        [
+            (False, None, None),
+            (True, None, None),
+            (True, "x", None),
+            (True, Licence.OGL_UK_3_0.value, Licence.OGL_UK_3_0),
+        ],
+    )
+    def test_slug(self, licence: bool, href: str | None, expected: Licence | None):
+        """Can get licence macro name from licence constraint href if set."""
         constraint = Constraint(
             type=ConstraintTypeCode.USAGE,
             restriction_code=ConstraintRestrictionCode.LICENSE,
-            href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+            href=href,
             statement="x",
         )
+        if not licence:
+            constraint = None
 
         tab = LicenceTab(item_type=HierarchyLevelCode.PRODUCT, licence=constraint)
 
-        assert tab.slug == Licence.OGL_UK_3_0
+        assert tab.slug == expected
 
     @pytest.mark.parametrize(
         ("contacts", "expected"),

@@ -20,6 +20,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 
 * Refactoring `ItemBase` to work with Records or Record Revisions (previously required RecordRevision's)
 * Invalidating cache where a significant number of commits have occurred since the last update
+* Preventing licences unknown to catalogue items breaking exports
 
 ### Changed
 

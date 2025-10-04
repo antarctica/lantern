@@ -282,8 +282,20 @@ class LicenceTab(Tab):
 
     @property
     def slug(self) -> Licence | None:
-        """Licence reference."""
-        return Licence(self._licence.href) if self._licence is not None else None
+        """
+        Licence reference.
+
+        Returns a licence enum value or None if not defined or recognised.
+
+        Defensive check as records are not limited to licences supported by catalogue items and so should not fail if
+        an unknown value is used. If records should be limited, a check should be added in `Record.validate()` instead.
+        """
+        if not (self._licence and self._licence.href):
+            return None
+        try:
+            return Licence(self._licence.href)
+        except ValueError:
+            return None
 
     @property
     def copyright_holders(self) -> list[Link | str]:

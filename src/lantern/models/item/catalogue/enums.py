@@ -29,6 +29,7 @@ class DistributionType(Enum):
     CSV = "CSV"
     FPL = "FPL"
     GPX = "GPX"
+    MAP_BOX_VECTOR_TILE = "MapBox Vector Tiles (MBTile)"
 
 
 class Licence(Enum):

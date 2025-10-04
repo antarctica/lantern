@@ -477,6 +477,23 @@ class Jpeg(FileDistribution):
         return DistributionType.JPEG
 
 
+class MapboxVectorTiles(FileDistribution):
+    """Mapbox Vector Tiles distribution option."""
+
+    @classmethod
+    def matches(cls, option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:
+        """Whether this class matches the distribution option."""
+        return (
+            option.format is not None
+            and option.format.href == "https://www.iana.org/assignments/media-types/application/vnd.mapbox-vector-tile"
+        )
+
+    @property
+    def format_type(self) -> DistributionType:
+        """Format type."""
+        return DistributionType.MAP_BOX_VECTOR_TILE
+
+
 class Pdf(FileDistribution):
     """
     PDF distribution option.

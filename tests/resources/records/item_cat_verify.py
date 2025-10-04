@@ -40,6 +40,7 @@ file_formats = [
     "https://metadata-resources.data.bas.ac.uk/media-types/application/gpx+xml",
     "https://metadata-resources.data.bas.ac.uk/media-types/application/geopackage+sqlite3+zip",
     "https://www.iana.org/assignments/media-types/image/jpeg",
+    "https://www.iana.org/assignments/media-types/application/vnd.mapbox-vector-tile",
     "https://www.iana.org/assignments/media-types/application/pdf",
     "https://metadata-resources.data.bas.ac.uk/media-types/application/pdf+geo",
     "https://www.iana.org/assignments/media-types/image/png",

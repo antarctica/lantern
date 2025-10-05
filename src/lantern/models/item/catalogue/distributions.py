@@ -39,7 +39,28 @@ class Distribution(ABC):
     @property
     @abstractmethod
     def format_type(self) -> DistributionType:
-        """Format type including label."""
+        """
+        Format type including label.
+
+        No longer shown in item template but retained for future use.
+        """
+        ...
+
+    @property
+    @abstractmethod
+    def label(self) -> str:
+        """Distinguishing identifier."""
+        ...
+
+    @property
+    @abstractmethod
+    def description(self) -> str | None:
+        """
+        Optional hint or additional context.
+
+        Values are not visible on mobile due to using a hover tooltip.
+        For detailed information, use an action that opens an info box or similar.
+        """
         ...
 
     @property
@@ -126,6 +147,16 @@ class ArcGISDistribution(Distribution, ABC):
         return match and option.format.href == target_hrefs[0]
 
     @property
+    def label(self) -> str:
+        """Generic label based on layer type."""
+        return self.format_type.value
+
+    @property
+    def description(self) -> None:
+        """Not applicable as info box provides additional context."""
+        return None
+
+    @property
     def size(self) -> str:
         """Not applicable."""
         return ""
@@ -174,6 +205,17 @@ class FileDistribution(Distribution, ABC):
         self._access = access_level
 
     @property
+    def label(self) -> str:
+        """Distinguishing identifier from transfer option if available, or generic value based on file type."""
+        title = self._option.transfer_option.online_resource.title
+        return title if title else self.format_type.value
+
+    @property
+    def description(self) -> None:
+        """Optional hint or additional context."""
+        return self._option.transfer_option.online_resource.description
+
+    @property
     def size(self) -> str:
         """Size if known."""
         size = self._option.transfer_option.size
@@ -185,7 +227,7 @@ class FileDistribution(Distribution, ABC):
 
     @property
     def action(self) -> Link:
-        """Link to distribution."""
+        """Link to resource artefact."""
         return Link(value="Download", href=self._option.transfer_option.online_resource.href)
 
     @property
@@ -336,6 +378,16 @@ class BasPublishedMap(Distribution):
     def format_type(self) -> DistributionType:
         """Format type."""
         return DistributionType.X_PAPER_MAP
+
+    @property
+    def label(self) -> str:
+        """Fixed value."""
+        return self.format_type.value
+
+    @property
+    def description(self) -> None:
+        """Not applicable as info box provides additional context."""
+        return None
 
     @property
     def size(self) -> str:
@@ -491,7 +543,7 @@ class MapboxVectorTiles(FileDistribution):
     @property
     def format_type(self) -> DistributionType:
         """Format type."""
-        return DistributionType.MAP_BOX_VECTOR_TILE
+        return DistributionType.MAPBOX_VECTOR_TILE
 
 
 class Pdf(FileDistribution):

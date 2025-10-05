@@ -53,6 +53,16 @@ class FakeDistributionType(Distribution):
         return DistributionType.ARCGIS_FEATURE_LAYER
 
     @property
+    def label(self) -> str:
+        """Label."""
+        return "x"
+
+    @property
+    def description(self) -> None:
+        """Optional description."""
+        return None
+
+    @property
     def size(self) -> str:
         """Size."""
         return "x"
@@ -142,8 +152,24 @@ class TestArcGISDistribution:
         ):
             FakeArcGISDistributionType(option=_make_dist("x"), other_options=[])
 
+    def test_label(self):
+        """Can get generic label based on format."""
+        service_dist = _make_dist(
+            "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+feature"
+        )
+        dist = FakeArcGISDistributionType(option=_make_dist("x"), other_options=[service_dist])
+        assert dist.label == dist.format_type.value
+
+    def test_description(self):
+        """Cannot get non-applicable optional description."""
+        service_dist = _make_dist(
+            "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+feature"
+        )
+        dist = FakeArcGISDistributionType(option=_make_dist("x"), other_options=[service_dist])
+        assert dist.description is None
+
     def test_size(self):
-        """Can get non-applicable size."""
+        """Cannot get non-applicable optional size."""
         service_dist = _make_dist(
             "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+feature"
         )
@@ -221,6 +247,23 @@ class TestArcGISDistribution:
 
 class TestFileDistribution:
     """Test base file based Catalogue distribution."""
+
+    @pytest.mark.parametrize(
+        ("title", "expected"),
+        [(None, DistributionType.GEOJSON.value), ("x", "x")],
+    )
+    def test_label(self, title: str | None, expected: str):
+        """Can get label based on transfer option or format."""
+        dist = FakeFileDistributionType(option=_make_dist("x"), access_level=AccessLevel.PUBLIC)
+        dist._option.transfer_option.online_resource.title = title
+        assert dist.label == expected
+
+    @pytest.mark.parametrize("value", [None, "x"])
+    def test_description(self, value: str | None):
+        """Can get optional description from transfer option."""
+        dist = FakeFileDistributionType(option=_make_dist("x"), access_level=AccessLevel.PUBLIC)
+        dist._option.transfer_option.online_resource.description = value
+        assert dist.description == value
 
     @pytest.mark.parametrize(
         ("size", "expected"),
@@ -549,7 +592,7 @@ class TestDistributionMapBoxVectorTiles:
         option = _make_dist("https://www.iana.org/assignments/media-types/application/vnd.mapbox-vector-tile")
         dist = MapboxVectorTiles(option=option, access_level=AccessLevel.PUBLIC)
 
-        assert dist.format_type == DistributionType.MAP_BOX_VECTOR_TILE
+        assert dist.format_type == DistributionType.MAPBOX_VECTOR_TILE
         assert dist.matches(option, [])
 
 

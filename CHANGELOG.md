@@ -15,6 +15,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Non-interactive record publishing workflow for integrating with other projects hosted on the central workstations
 * Dark mode variant of item summary default thumbnail
 * Support for CSV, FPL, GPX and MBTile file distribution options
+* Support for custom labels and optional descriptions in distribution options
 
 ### Fixed
 

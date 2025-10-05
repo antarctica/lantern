@@ -185,7 +185,7 @@ class FileDistribution(Distribution, ABC):
 
     @property
     def action(self) -> Link:
-        """Link to distribution."""
+        """Link to resource artefact."""
         return Link(value="Download", href=self._option.transfer_option.online_resource.href)
 
     @property
@@ -491,7 +491,7 @@ class MapboxVectorTiles(FileDistribution):
     @property
     def format_type(self) -> DistributionType:
         """Format type."""
-        return DistributionType.MAP_BOX_VECTOR_TILE
+        return DistributionType.MAPBOX_VECTOR_TILE
 
 
 class Pdf(FileDistribution):

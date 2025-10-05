@@ -143,7 +143,7 @@ class TestArcGISDistribution:
             FakeArcGISDistributionType(option=_make_dist("x"), other_options=[])
 
     def test_size(self):
-        """Can get non-applicable size."""
+        """Cannot get non-applicable optional size."""
         service_dist = _make_dist(
             "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+feature"
         )
@@ -549,7 +549,7 @@ class TestDistributionMapBoxVectorTiles:
         option = _make_dist("https://www.iana.org/assignments/media-types/application/vnd.mapbox-vector-tile")
         dist = MapboxVectorTiles(option=option, access_level=AccessLevel.PUBLIC)
 
-        assert dist.format_type == DistributionType.MAP_BOX_VECTOR_TILE
+        assert dist.format_type == DistributionType.MAPBOX_VECTOR_TILE
         assert dist.matches(option, [])
 
 

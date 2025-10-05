@@ -153,8 +153,28 @@ class TestDataTab:
         html = BeautifulSoup(render_item_catalogue(fx_item_catalogue_model_min), parser="html.parser", features="lxml")
 
         assert html.select_one(f"a[href='{expected.action.href}']") is not None
-        assert html.find(name="div", string=expected.format_type.value) is not None
+        assert html.find(name="span", string=expected.format_type.value) is not None
         assert html.find(name="div", string=expected.size) is not None
+
+    @pytest.mark.parametrize("value", [None, "x"])
+    def test_data_description(self, fx_item_catalogue_model_min: ItemCatalogue, value: str | None):
+        """Can get optional data descriptions based on values from item."""
+        fx_item_catalogue_model_min._record.distribution = [
+            Distribution(
+                distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
+                format=Format(format="x", href="https://www.iana.org/assignments/media-types/image/png"),
+                transfer_option=TransferOption(
+                    size=Size(unit="bytes", magnitude=1024),
+                    online_resource=OnlineResource(
+                        href="x", description=value, function=OnlineResourceFunctionCode.DOWNLOAD
+                    ),
+                ),
+            )
+        ]
+        html = BeautifulSoup(render_item_catalogue(fx_item_catalogue_model_min), parser="html.parser", features="lxml")
+
+        result = html.select_one(f"span[title='{value}']") is not None
+        assert result is not None if value else result is False
 
     @pytest.mark.parametrize(
         ("value", "text"),
@@ -225,7 +245,7 @@ class TestDataTab:
         html = BeautifulSoup(render_item_catalogue(fx_item_catalogue_model_min), parser="html.parser", features="lxml")
 
         assert html.select_one(f"button[data-target='{expected.access_target}']") is not None
-        assert html.find(name="div", string=expected.format_type.value) is not None
+        assert html.find(name="span", string=expected.format_type.value) is not None
         assert str(html).count(text) == 2  # one in collapsible, one in <noscript>
 
         for tag in html.find_all("noscript"):

@@ -104,7 +104,7 @@
     {% if data | length > 0 %}
       {% set item = data[0] %}
       {% set alt = item.description or item.identifier %}
-      <img id="graphics-{{ item.identifier }}" class="w-full" src="{{ item.href }}" alt="{{ alt }}"/>
+      <img id="graphics-{{ item.identifier }}" class="w-full" src="{{ item.href }}" alt="{{ alt }}" aria-details="summary-abstract"/>
     {% endif %}
   </aside>
 {% endmacro %}

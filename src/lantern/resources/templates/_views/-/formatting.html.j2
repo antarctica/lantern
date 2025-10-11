@@ -138,7 +138,7 @@ Some text in a code block.
     {% for style in [('note', 'Note', 'NOTE'), ('tip', 'Tip', 'TIP'), ('important', 'Important', 'IMPORTANT'), ('warning', 'Warning', 'WARNING'), ('caution', 'Caution', 'CAUTION')] %}
       {{ section(slug='admonition-' + style[0], title='Admonition (' + style[1] + ')', danger='Do not use ' + style[0] + 's in item titles.',
         input='...
-> ![' + style[2] +']
+> [!' + style[2] +']
 > Some text shown as a ' + style[0] +'.
 ...',
         output='<p>...</p><div class="admonition ' + style[0] + '"><p class="admonition-title">' + style[1] + '</p><p>Some text shown as a ' + style[0] + '.</p></div><p>...</p>'

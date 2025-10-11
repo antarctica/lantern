@@ -1,5 +1,11 @@
 # Lantern - Infrastructure
 
+## Overview
+
+This diagram shows this project's infrastructure components:
+
+![Infrastructure Diagram](/docs/img/infrastructure.png)
+
 ## Environments
 
 Available environments:

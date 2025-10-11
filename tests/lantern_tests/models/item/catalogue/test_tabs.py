@@ -749,7 +749,7 @@ class TestContactTab:
             )
         )
 
-        tab = ContactTab(contact=contact, item_id=expected, item_title=expected, form_action="x")
+        tab = ContactTab(contact=contact, item_id=expected, item_title=expected, form_action="x", turnstile_key="x")
 
         assert tab.enabled is True
         assert tab.subject_default == f"Message about '{expected}'"
@@ -772,9 +772,9 @@ class TestContactTab:
             RecordContact(organisation=ContactIdentity(name="x"), email="x", role={ContactRoleCode.POINT_OF_CONTACT})
         )
 
-        tab = ContactTab(contact=contact, item_id="x", item_title="x", form_action=endpoint)
         assert tab.form_action == action
         assert tab.form_params == params
+        tab = ContactTab(contact=contact, item_id=item_id, item_title="x", form_action=endpoint, turnstile_key="x")
 
     @pytest.mark.parametrize("has_value", [True, False])
     def test_phone(self, has_value: bool):
@@ -789,7 +789,7 @@ class TestContactTab:
             )
         )
 
-        tab = ContactTab(contact=contact, item_id="x", item_title="x", form_action="x")
+        tab = ContactTab(contact=contact, item_id="x", item_title="x", form_action="x", turnstile_key="x")
         assert tab.phone == expected
 
     @pytest.mark.parametrize("has_value", [True, False])
@@ -810,7 +810,7 @@ class TestContactTab:
             )
         )
 
-        tab = ContactTab(contact=contact, item_id="x", item_title="x", form_action="x")
+        tab = ContactTab(contact=contact, item_id="x", item_title="x", form_action="x", turnstile_key="x")
         assert tab.address == expected
 
     def test_no_team(self):
@@ -818,7 +818,7 @@ class TestContactTab:
         contact = Contact(
             RecordContact(individual=ContactIdentity(name="x"), email="x", role={ContactRoleCode.POINT_OF_CONTACT})
         )
-        tab = ContactTab(contact=contact, item_id="x", item_title="x", form_action="x")
+        tab = ContactTab(contact=contact, item_id="x", item_title="x", form_action="x", turnstile_key="x")
 
         with pytest.raises(InvalidItemContactError):
             _ = tab.team
@@ -828,7 +828,7 @@ class TestContactTab:
         contact = Contact(
             RecordContact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT})
         )
-        tab = ContactTab(contact=contact, item_id="x", item_title="x", form_action="x")
+        tab = ContactTab(contact=contact, item_id="x", item_title="x", form_action="x", turnstile_key="x")
 
         with pytest.raises(InvalidItemContactError):
             _ = tab.email

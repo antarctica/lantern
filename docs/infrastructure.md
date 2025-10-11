@@ -43,6 +43,11 @@ Development environments may be created and destroyed as needed. Staging and Pro
 - [Dashboard 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=ffy5l25mjdv577qj6izuk6lo4m&i=lesr4cnv35csmuptgqqcionbf4&h=magic.1password.eu)
   - for [Web Analytics](/docs/monitoring.md#plausible)
 
+## Cloudflare
+
+- [Turnstile 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=ffy5l25mjdv577qj6izuk6lo4m&i=sdwj5bvfuyrhtinexxxizk7mw4&h=magic.1password.eu)
+    - for [Bot protection](/docs/site.md#bot-protection)
+
 ## Exporters
 
 - AWS S3 publishing bucket:

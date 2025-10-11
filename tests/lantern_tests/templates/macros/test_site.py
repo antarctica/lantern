@@ -24,6 +24,7 @@ class TestMacrosSite:
             plausible_domain="x",
             embedded_maps_endpoint="x",
             items_enquires_endpoint="x",
+            items_enquires_turnstile_key="x",
             generator="x",
             version="x",
         )
@@ -43,18 +44,7 @@ class TestMacrosSite:
         Basic sanity check.
         """
         template = """{% import '_macros/site.html.j2' as site %}{{ site.head_meta(meta) }}"""
-        meta = SiteMeta(
-            base_url="x",
-            build_key="x",
-            build_time=datetime.now(tz=UTC),
-            html_title="x",
-            sentry_src="x",
-            plausible_domain="x",
-            embedded_maps_endpoint="x",
-            items_enquires_endpoint="x",
-            generator="x",
-            version="x",
-        )
+        meta = self._site_meta()
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
         assert html.head.meta["charset"] == "utf-8"
 
@@ -76,19 +66,8 @@ class TestMacrosSite:
         freezer.move_to(fx_freezer_time)
         expected = {"x": "y"}
         template = """{% import '_macros/site.html.j2' as site %}{{ site.head_open_graph(meta.html_open_graph) }}"""
-        meta = SiteMeta(
-            base_url="x",
-            build_key="x",
-            build_time=datetime.now(tz=UTC),
-            html_title="x",
-            sentry_src="x",
-            plausible_domain="x",
-            embedded_maps_endpoint="x",
-            items_enquires_endpoint="x",
-            generator="x",
-            version="x",
-            html_open_graph=expected,
-        )
+        meta = self._site_meta()
+        meta.html_open_graph = expected
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
 
         for key, val in expected.items():
@@ -135,19 +114,8 @@ class TestMacrosSite:
         freezer.move_to(fx_freezer_time)
         expected = {"x": "y"}
         template = """{% import '_macros/site.html.j2' as site %}{{ site.script_schema_org(meta.html_schema_org) }}"""
-        meta = SiteMeta(
-            base_url="x",
-            build_key="x",
-            build_time=datetime.now(tz=UTC),
-            html_title="x",
-            sentry_src="x",
-            plausible_domain="x",
-            embedded_maps_endpoint="x",
-            items_enquires_endpoint="x",
-            generator="x",
-            version="x",
-            html_schema_org=json.dumps(expected),
-        )
+        meta = self._site_meta()
+        meta.html_schema_org = json.dumps(expected)
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
         data = json.loads(html.head.find(name="script", type="application/ld+json").string)
 
@@ -165,6 +133,7 @@ class TestMacrosSite:
                 plausible_domain="x",
                 embedded_maps_endpoint="x",
                 items_enquires_endpoint="x",
+                items_enquires_turnstile_key="x",
                 generator="x",
                 version="x",
             ),
@@ -176,6 +145,7 @@ class TestMacrosSite:
                 plausible_domain="x",
                 embedded_maps_endpoint="x",
                 items_enquires_endpoint="x",
+                items_enquires_turnstile_key="x",
                 generator="x",
                 version="x",
                 build_time=freezer_time(),
@@ -194,6 +164,7 @@ class TestMacrosSite:
         Integration test for head HTML macro. Checks dynamic elements only.
         Also acts as an implicit integration test for `head_scripts` macro.
         """
+        cf_turnstile = "https://challenges.cloudflare.com/turnstile/v0/api.js"
         template = """{% import '_macros/site.html.j2' as site %}{{ site.html_head(meta) }}"""
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
 
@@ -209,6 +180,7 @@ class TestMacrosSite:
             assert html.head.find("meta", attrs={"name": "description"})["content"] == meta.html_description
 
         assert html.head.find(name="script", src=meta.sentry_src) is not None
+        assert html.head.find(name="script", src=cf_turnstile) is not None
         assert html.head.find(name="script", attrs={"data-domain": meta.plausible_domain}) is not None
 
         if meta.html_open_graph:
@@ -259,18 +231,8 @@ class TestMacrosSite:
         freezer.move_to(fx_freezer_time)
         expected = datetime.now(tz=UTC)
         template = """{% import '_macros/site.html.j2' as site %}{{ site.footer(meta) }}"""
-        meta = SiteMeta(
-            base_url="x",
-            build_key="x",
-            build_time=expected,
-            html_title="x",
-            sentry_src="x",
-            plausible_domain="x",
-            embedded_maps_endpoint="x",
-            items_enquires_endpoint="x",
-            generator="x",
-            version="x",
-        )
+        meta = self._site_meta()
+        meta.build_time = expected
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
 
         assert html.find(id="site-footer") is not None

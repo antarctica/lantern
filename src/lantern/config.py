@@ -60,6 +60,7 @@ class Config:
             "TEMPLATES_PLAUSIBLE_DOMAIN",
             "TEMPLATES_ITEM_CONTACT_ENDPOINT",
             "TEMPLATES_ITEM_VERSIONS_ENDPOINT",
+            "TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY",
             "EXPORT_PATH",
             "AWS_S3_BUCKET",
             "AWS_ACCESS_ID",
@@ -101,6 +102,7 @@ class Config:
         TEMPLATES_ITEM_MAPS_ENDPOINT: str
         TEMPLATES_ITEM_CONTACT_ENDPOINT: str
         TEMPLATES_ITEM_VERSIONS_ENDPOINT: str
+        TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY: str
         BASE_URL: str
         EXPORT_PATH: str
         AWS_S3_BUCKET: str
@@ -128,6 +130,7 @@ class Config:
             "TEMPLATES_PLAUSIBLE_DOMAIN": self.TEMPLATES_PLAUSIBLE_DOMAIN,
             "TEMPLATES_ITEM_MAPS_ENDPOINT": self.TEMPLATES_ITEM_MAPS_ENDPOINT,
             "TEMPLATES_ITEM_CONTACT_ENDPOINT": self.TEMPLATES_ITEM_CONTACT_ENDPOINT,
+            "TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": self.TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY,
             "TEMPLATES_ITEM_VERSIONS_ENDPOINT": self.TEMPLATES_ITEM_VERSIONS_ENDPOINT,
             "BASE_URL": self.BASE_URL,
             "EXPORT_PATH": str(self.EXPORT_PATH.resolve()),
@@ -248,6 +251,12 @@ class Config:
         """Endpoint for contact form in items contact tab."""
         with self.env.prefixed(self._app_prefix), self.env.prefixed("TEMPLATES_"), self.env.prefixed("ITEM_"):
             return self.env("CONTACT_ENDPOINT")
+
+    @property
+    def TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY(self) -> str:
+        """Site key for public facing Cloudflare Turnstile bot protection widget."""
+        with self.env.prefixed(self._app_prefix), self.env.prefixed("TEMPLATES_"), self.env.prefixed("ITEM_"):
+            return self.env("CONTACT_TURNSTILE_KEY")
 
     @property
     def TEMPLATES_ITEM_VERSIONS_ENDPOINT(self) -> str:

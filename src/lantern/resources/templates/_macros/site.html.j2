@@ -51,6 +51,7 @@
 {% macro head_scripts(data) %}
   {{ script_sentry(data.sentry_src) }}
   {{ script_plausible(data.plausible_domain) }}
+  {{ script_turnstile() }}
   {{ script_show_js(com.show_js_class()) }}
   {{ script_sticky_tabs() }}
   {{ script_collapsible() }}
@@ -95,6 +96,10 @@
 
 {% macro script_plausible(value) %}
     <script defer data-domain="{{ value }}" src="https://plausible.io/js/script.hash.outbound-links.js"></script>
+{% endmacro %}
+
+{% macro script_turnstile() %}
+    <script defer async src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>
 {% endmacro %}
 
 {% macro script_show_js(value) %}

@@ -52,7 +52,7 @@ Development environments may be created and destroyed as needed. Staging and Pro
 ## Cloudflare
 
 - [Turnstile 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=ffy5l25mjdv577qj6izuk6lo4m&i=sdwj5bvfuyrhtinexxxizk7mw4&h=magic.1password.eu)
-    - for [Bot protection](/docs/site.md#bot-protection)
+  - for [Bot protection](/docs/site.md#bot-protection)
 
 ## Exporters
 
@@ -71,9 +71,9 @@ Development environments may be created and destroyed as needed. Staging and Pro
 
 Endpoints:
 
-- development: http://localhost:9000/
-- integration: https://data-testing.data.bas.ac.uk/
-- production: https://data.bas.ac.uk/
+- development: [localhost:9000](http://localhost:9000/)
+- integration: [data-testing.data.bas.ac.uk](https://data-testing.data.bas.ac.uk/)
+- production: [data.bas.ac.uk](https://data.bas.ac.uk/)
 
 The integration and production environments share domains with the legacy Discovery Metadata System (DMS), coexisting
 via reverse proxying using the BAS HAProxy load balancer.

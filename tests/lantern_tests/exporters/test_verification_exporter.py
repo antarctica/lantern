@@ -236,16 +236,18 @@ class TestVerificationExporterChecks:
         check_url_arcgis(fx_logger, job)
         assert job.result == expected
 
+    @pytest.mark.vcr
+    @pytest.mark.block_network
     @pytest.mark.parametrize(
         ("label", "url", "context", "expected"),
         [
             (
                 "ok",
-                "https://nercacuk-my.sharepoint.com/:i:/r/personal/eleeld_bas_ac_uk/Documents/2025/Operations/Ops%20Map%20Collection/ops-rothera-site-hazards-2425.jpg?csf=1&web=1&e=t9zPRd",
+                "https://valid",
                 {
                     "BASE_URL": "https://data.bas.ac.uk",
                     "SHAREPOINT_PROXY_ENDPOINT": "x",
-                    "URL": "https://data.bas.ac.uk/items/1680a763-02b0-4718-802c-bf6f89744f4e/",
+                    "URL": "https://data.bas.ac.uk/items/123/",
                 },
                 VerificationResult.PASS,
             ),
@@ -255,7 +257,7 @@ class TestVerificationExporterChecks:
                 {
                     "BASE_URL": "https://data.bas.ac.uk",
                     "SHAREPOINT_PROXY_ENDPOINT": "x",
-                    "URL": "https://data.bas.ac.uk/items/1680a763-02b0-4718-802c-bf6f89744f4e/",
+                    "URL": "https://data.bas.ac.uk/items/123/",
                 },
                 VerificationResult.FAIL,
             ),

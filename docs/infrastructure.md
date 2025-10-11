@@ -1,5 +1,11 @@
 # Lantern - Infrastructure
 
+## Overview
+
+This diagram shows this project's infrastructure components:
+
+![Infrastructure Diagram](/docs/img/infrastructure.png)
+
 ## Environments
 
 Available environments:
@@ -50,7 +56,7 @@ Development environments may be created and destroyed as needed. Staging and Pro
 
 ## Exporters
 
-- AWS S3 publishing bucket:
+- AWS S3 publishing buckets & CloudFront distributions:
   - [Integration 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=rnv7zb3jzviwsvziknpxicvqaq&h=magic.1password.eu):
   - [Production 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=hksogwx7zqx3ct2jr36cshoqpy&h=magic.1password.eu):
   - [IAM policy 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=6wawslwrjk42cbff7qanfswz6q&h=magic.1password.eu)
@@ -60,3 +66,16 @@ Development environments may be created and destroyed as needed. Staging and Pro
 
 - BAS Workstations:
   - [Ansible Playbook 🛡️](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/playbooks/magic/lantern.yml)
+
+## Hosting
+
+Endpoints:
+
+- development: http://localhost:9000/
+- integration: https://data-testing.data.bas.ac.uk/
+- production: https://data.bas.ac.uk/
+
+The integration and production environments share domains with the legacy Discovery Metadata System (DMS), coexisting
+via reverse proxying using the BAS HAProxy load balancer.
+
+See the `data_redirect.txt` file within the load balancer configuration (🔒) for proxied paths.

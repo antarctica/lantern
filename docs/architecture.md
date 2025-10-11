@@ -2,13 +2,13 @@
 
 ## Overview
 
-This diagram shows the high-level components in this project and how they interact:
+This diagram shows this project's components at a high level and the project interacts with other systems:
 
-![Architecture Diagram](/docs/img/architecture-high.png)
+![Architecture Diagram](/docs/img/architecture-wide.png)
 
-This diagram shows a more low-level and detailed view:
+This diagram shows this project's components at lower and more detailed level:
 
-![Architecture Diagram](/docs/img/architecture-low.png)
+![Architecture Diagram](/docs/img/architecture-narrow.png)
 
 ## Catalogue application
 

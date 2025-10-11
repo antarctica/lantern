@@ -2,6 +2,15 @@
 
 The Data Catalogue website is built as a static site using the [Site Exporter](/docs/exporters.md#site-exporter).
 
+## Site access
+
+The static site is publicly accessible without authentication. It is available at:
+
+- [data.bas.ac.uk](https://data.bas.ac.uk/-/index) (production)
+- [data-testing.bas.ac.uk](https://data-testing.bas.ac.uk/-/index) (integration/testing)
+
+See the [Infrastructure](/docs/infrastructure.md#hosting) documentation for hosting details.
+
 ## Site structure
 
 Simplified, primary, top level structure:
@@ -139,7 +148,7 @@ the [Site Macros](#site-macros).
 - use the [Tailwind typography](https://github.com/tailwindlabs/tailwindcss-typography) plugin to style user generated
   content in Records (such as abstracts)
 - use the [Tailwind forms](https://github.com/tailwindlabs/tailwindcss-forms) plugin to apply base styles to the
-  [Contact Form](#contact-form)
+  [Contact Form](#item-enquires)
 
 > [!NOTE]
 > For practical reasons, the licenced Gill Sans font used for headings in the 2015 Style Kit is not used in this
@@ -307,7 +316,7 @@ HTML templates use the [Jinja2](https://jinja.palletsprojects.com/) framework.
 Templates use these options from the app `lantern.Config` class:
 
 - `TEMPLATES_CACHE_BUST_VALUE`: See [Cache busting](#cache-busting)
-- `TEMPLATES_ITEM_CONTACT_ENDPOINT`: See [Contact form](#contact-form)
+- `TEMPLATES_ITEM_CONTACT_ENDPOINT`: See [Contact form](#item-enquires)
 - `TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY`: Turnstile site key for item form [Bot Protection](#bot-protection)
 - `TEMPLATES_ITEM_MAPS_ENDPOINT`: See [Extent maps](#extent-maps)
 - `TEMPLATES_ITEM_VERSIONS_ENDPOINT`: Base URL for constructing links to view
@@ -331,7 +340,7 @@ The `base.html.j2` layout provides a common HTML structure including:
 - a `<footer>` element with site feedback link and legal information
 
 > [!NOTE]
-> This layout requires a [Site Context](/docs/data-model.md#static-site-context) instance as a `meta` template context
+> This layout requires a [Site Context](/docs/data-model.md#static-site-metadata) instance as a `meta` template context
 > variable.
 
 #### Page templates
@@ -438,8 +447,8 @@ URL computed within each Item.
 #### Item enquires
 
 The contact tab within the [Item Templates](#item-templates) includes a form for users to send item enquires. These
-forms submit to a Microsoft Power Automate flow which routes enquires to the relevant team and returns a conformation
-page to the user.
+forms submit to a Microsoft Power Automate flow which routes enquires to the relevant team and returns a result page to
+the user.
 
 To protect against spam and abuse, the form includes a hidden [Bot Protection](#bot-protection) field, validated in the
 Power Automate flow. Where this validation fails, the flow returns an error page to the user.

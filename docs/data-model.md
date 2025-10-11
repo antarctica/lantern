@@ -93,7 +93,7 @@ The Catalogue also requires:
 
 - extents, if included, MUST use unique identifiers
 - aliases, if included:
-  - MUST values in the form: `{prefix}/{value}`
+  - MUST use values in the form: `{prefix}/{value}`
   - MUST use an allowed prefix for each hierarchy level, as per [2]
   - MUST NOT use UUIDs in values (to avoid conflicts with `file_identifier` values)
   - MUST set the `href` property to `https://data.bas.ac.uk/{alias}` (e.g. `https://data.bas.ac.uk/collections/foo`)

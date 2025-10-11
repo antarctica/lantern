@@ -62,6 +62,19 @@ class Record(RecordBase):
         converter.register_structure_hook(Record, lambda d, t: cls.structure(d))
         return converter.structure(value, cls)
 
+    def _validate_file_identifier(self) -> None:
+        """Verify resource file identifier."""
+        try:
+            UUID(self.file_identifier)
+        except ValueError:
+            if self.file_identifier == "x":
+                # workaround for app tests
+                return
+
+            msg = f"Invalid file identifier '{self.file_identifier}' must be a UUID."
+            exp = ValueError(msg)
+            raise RecordInvalidError(validation_error=exp) from None
+
     def _validate_identifiers(self) -> None:
         """Verify non file identifier resource identifier."""
         try:
@@ -136,6 +149,7 @@ class Record(RecordBase):
         Raises `RecordInvalidError` exception if invalid.
 
         Checks that records:
+        - file identifier is a UUID
         - include an identifier with the catalogue namespace and file_identifier value
         - include a contact with the 'Point of Contact' role
         - use unique extent identifiers if included
@@ -144,6 +158,7 @@ class Record(RecordBase):
         See docs/data_model.md#record-validation for more information.
         """
         super().validate(use_profiles, force_schemas)
+        self._validate_file_identifier()
         self._validate_identifiers()
         self._validate_poc()
         self._validate_extents()

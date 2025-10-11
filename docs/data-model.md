@@ -83,7 +83,9 @@ For example:
 In addition to ISO 19115 mandatory properties, the Data Catalogue requires these properties are set in all records:
 
 - `file_identifier`
-  - so records can be distinguished without relying on a value such as title that may change or not be unique
+  - MUST use UUIDs in values
+  - to ensure resources can be distinguished without relying on a value such as title that may change or not be unique
+  - to ensure resource identifiers and aliases are distinct and can't be ambiguous
 - an `identification.identifier`, as per [1]
   - to determine if a record is part of the Catalogue
 - an `identification.identifier.contacts.*.contact` with at least the 'pointOfContact' role

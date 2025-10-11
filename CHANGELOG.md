@@ -31,6 +31,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 
 * Documentation improvements
 * Contextualising items fragment in item summaries for physical map products (sides rather than items)
+* Increasing Catalogue specific record requirements to ensure file identifiers are UUIDs
 
 ## [0.3.0] - 2025-09-20
 

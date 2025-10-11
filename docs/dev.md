@@ -80,7 +80,8 @@ If configurable:
 In the `tests.lantern_tests.config` module:
 
 - update the expected response in the `test_dumps_safe` method
-- if validated, update the `test_validate` (valid) method and add new `test_validate_` (invalid) tests
+- if validated, update the `test_validate` (valid) method and add new `test_validate_` (invalid) tests if needed
+- if configurable, update the `test_configurable_property` method
 - update or create other tests as needed
 
 ### Adding properties to items

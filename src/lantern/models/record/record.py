@@ -63,7 +63,7 @@ class Record(RecordBase):
         return converter.structure(value, cls)
 
     def _validate_identifiers(self) -> None:
-        """Verify record resource identifier."""
+        """Verify non file identifier resource identifier."""
         try:
             identifier = self.identification.identifiers.filter(CATALOGUE_NAMESPACE)[0]
         except IndexError as e:

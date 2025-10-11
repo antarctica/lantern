@@ -65,7 +65,7 @@ def _import(logger: logging.Logger, config: Config, store: GitLabStore, import_p
 
 
 @_time_task(label="Build")
-def _build(logger: logging.Logger, commit: CommitResults, site: SiteExporter, bucket: str) -> None:
+def _build(logger: logging.Logger, commit: CommitResults, site: SiteExporter, bucket: str, base_url: str) -> None:
     """Build."""
     identifiers = set(commit.new_identifiers + commit.updated_identifiers)
     logger.info(f"Publishing {len(identifiers)} records to {bucket}.")
@@ -74,15 +74,17 @@ def _build(logger: logging.Logger, commit: CommitResults, site: SiteExporter, bu
     site.publish()
     logger.info("Records published:")
     for identifier in sorted(identifiers):
-        logger.info(f"* https://{bucket}/items/{identifier}")
+        logger.info(f"* {base_url}/items/{identifier}")
 
 
-def _verify(logger: logging.Logger, config: Config, commit: CommitResults, store: GitLabStore, s3: S3Client) -> None:
+def _verify(
+    logger: logging.Logger, config: Config, commit: CommitResults, store: GitLabStore, s3: S3Client, base_url: str
+) -> None:
     """Verify."""
     identifiers = set(commit.new_identifiers + commit.updated_identifiers)
     logger.info(f"Verifying {len(identifiers)} records.")
     context: VerificationContext = {
-        "BASE_URL": config.BASE_URL,
+        "BASE_URL": base_url,
         "SHAREPOINT_PROXY_ENDPOINT": config.VERIFY_SHAREPOINT_PROXY_ENDPOINT,
     }
     meta = ExportMeta.from_config_store(config=config, store=store, build_repo_ref=store.head_commit)
@@ -92,7 +94,7 @@ def _verify(logger: logging.Logger, config: Config, commit: CommitResults, store
     exporter.publish()
 
     logger.info(f"Verification complete, result: {exporter.report.data['pass_fail']}.")
-    logger.info(f"See '{config.BASE_URL}/-/verification' for report.")
+    logger.info(f"See '{base_url}/-/verification' for report.")
 
 
 @_time_task(label="Workflow")
@@ -122,8 +124,9 @@ def main() -> None:
     site = SiteExporter(config=config, meta=meta, logger=logger, s3=s3, get_record=store.get)
 
     import_path = Path("./import")
-    production_bucket = "add-catalogue.data.bas.ac.uk"
+    base_url = "https://data-testing.data.bas.ac.uk"
 
+    production_bucket = "add-catalogue.data.bas.ac.uk"
     if production_bucket == config.AWS_S3_BUCKET:
         logger.error("No. Production bucket selected.")
         sys.exit(1)
@@ -135,8 +138,8 @@ def main() -> None:
     _confirm(logger, "Are records staged in import directory?")
 
     commit = _import(logger=logger, config=config, store=store, import_path=import_path)
-    _build(logger=logger, site=site, commit=commit, bucket=config.AWS_S3_BUCKET)
-    _verify(logger=logger, config=config, commit=commit, store=store, s3=s3)
+    _build(logger=logger, site=site, commit=commit, bucket=config.AWS_S3_BUCKET, base_url=base_url)
+    _verify(logger=logger, config=config, commit=commit, store=store, s3=s3, base_url=base_url)
 
 
 if __name__ == "__main__":

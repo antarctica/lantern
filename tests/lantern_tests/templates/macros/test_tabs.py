@@ -173,8 +173,8 @@ class TestDataTab:
         ]
         html = BeautifulSoup(render_item_catalogue(fx_item_catalogue_model_min), parser="html.parser", features="lxml")
 
-        result = html.select_one(f"span[title='{value}']") is not None
-        assert result is not None if value else result is False
+        result = html.find(name="aside", string=value)
+        assert result is not None
 
     @pytest.mark.parametrize(
         ("value", "text"),

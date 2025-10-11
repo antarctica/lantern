@@ -156,6 +156,7 @@ class ItemCatalogue(ItemBase):
             item_id=self.resource_id,
             item_title=self.title_plain,
             form_action=self._meta.items_enquires_endpoint,
+            turnstile_key=self._meta.items_enquires_turnstile_key,
         )
 
     @property

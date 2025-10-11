@@ -79,6 +79,7 @@ class TestConfig:
             "TEMPLATES_PLAUSIBLE_DOMAIN": "x",
             "TEMPLATES_ITEM_MAPS_ENDPOINT": "https://embedded-maps.data.bas.ac.uk/v1",
             "TEMPLATES_ITEM_CONTACT_ENDPOINT": "https://example.com/contact",
+            "TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": "x",
             "TEMPLATES_ITEM_VERSIONS_ENDPOINT": "x",
             "BASE_URL": "https://x",
             "EXPORT_PATH": str(fx_config.EXPORT_PATH),
@@ -137,6 +138,7 @@ class TestConfig:
                 {
                     "LANTERN_TEMPLATES_PLAUSIBLE_DOMAIN": None,
                     "LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT": "x",
+                    "LANTERN_TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": "x",
                     "LANTERN_TEMPLATES_ITEM_VERSIONS_ENDPOINT": "x",
                 }
             ),
@@ -144,6 +146,7 @@ class TestConfig:
                 {
                     "LANTERN_TEMPLATES_PLAUSIBLE_DOMAIN": "x",
                     "LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT": None,
+                    "LANTERN_TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": "x",
                     "LANTERN_TEMPLATES_ITEM_VERSIONS_ENDPOINT": "x",
                 }
             ),
@@ -151,6 +154,15 @@ class TestConfig:
                 {
                     "LANTERN_TEMPLATES_PLAUSIBLE_DOMAIN": "x",
                     "LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT": "x",
+                    "LANTERN_TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": None,
+                    "LANTERN_TEMPLATES_ITEM_VERSIONS_ENDPOINT": "x",
+                }
+            ),
+            (
+                {
+                    "LANTERN_TEMPLATES_PLAUSIBLE_DOMAIN": "x",
+                    "LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT": "x",
+                    "LANTERN_TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": "x",
                     "LANTERN_TEMPLATES_ITEM_VERSIONS_ENDPOINT": None,
                 }
             ),
@@ -207,6 +219,8 @@ class TestConfig:
             ("STORE_GITLAB_CACHE_PATH", Path("x").resolve(), False),
             ("TEMPLATES_PLAUSIBLE_DOMAIN", "x", False),
             ("TEMPLATES_ITEM_CONTACT_ENDPOINT", "x", False),
+            ("TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY", "x", False),
+            ("TEMPLATES_ITEM_VERSIONS_ENDPOINT", "x", False),
             ("EXPORT_PATH", Path("x").resolve(), False),
             ("AWS_S3_BUCKET", "x", False),
             ("AWS_ACCESS_ID", "x", False),

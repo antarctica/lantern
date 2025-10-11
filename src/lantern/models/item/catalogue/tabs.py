@@ -622,7 +622,7 @@ class InvalidItemContactError(Exception):
 class ContactTab(Tab):
     """Content tab."""
 
-    def __init__(self, contact: Contact, item_id: str, item_title: str, form_action: str) -> None:
+    def __init__(self, contact: Contact, item_id: str, item_title: str, form_action: str, turnstile_key: str) -> None:
         self._contact = contact
         self._id = item_id
         self._title = item_title
@@ -646,6 +646,7 @@ class ContactTab(Tab):
         params = {k: v[0] for k, v in query_params.items()}
 
         return base_url, params
+        self._turnstile_key = turnstile_key
 
     @property
     def enabled(self) -> bool:
@@ -720,3 +721,8 @@ class ContactTab(Tab):
             address.country,
         ]
         return "<br/>".join([part for part in parts if part is not None])
+
+    @property
+    def turnstile_site_key(self) -> str:
+        """Cloudflare Turnstile widget site key."""
+        return self._turnstile_key

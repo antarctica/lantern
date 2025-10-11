@@ -27,6 +27,7 @@ class TestSiteMetadata:
             plausible_domain=expected,
             embedded_maps_endpoint=expected,
             items_enquires_endpoint=expected,
+            items_enquires_turnstile_key=expected,
             generator=expected,
             version=expected,
         )
@@ -38,6 +39,7 @@ class TestSiteMetadata:
         assert meta.plausible_domain == expected
         assert meta.embedded_maps_endpoint == expected
         assert meta.items_enquires_endpoint == expected
+        assert meta.items_enquires_turnstile_key == expected
         assert meta.generator == expected
         assert meta.version == expected
         assert meta.build_time == fx_freezer_time
@@ -62,6 +64,7 @@ class TestSiteMetadata:
             plausible_domain=expected_str,
             embedded_maps_endpoint=expected_str,
             items_enquires_endpoint=expected_str,
+            items_enquires_turnstile_key=expected_str,
             generator=expected_str,
             version=expected_str,
             build_time=expected_time,
@@ -133,6 +136,7 @@ class TestExportMetadata:
             plausible_domain=expected_str,
             embedded_maps_endpoint=expected_str,
             items_enquires_endpoint=expected_str,
+            items_enquires_turnstile_key=expected_str,
             generator=expected_str,
             version=expected_str,
             export_path=expected_path,

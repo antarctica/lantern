@@ -59,6 +59,7 @@ def export_test_site(export_path: Path) -> None:
         plausible_domain="x",
         embedded_maps_endpoint="x",
         items_enquires_endpoint="x",
+        items_enquires_turnstile_key="x",
         generator="x",
         version="x",
         export_path=export_path,

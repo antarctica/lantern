@@ -43,6 +43,7 @@ Application configuration is managed by the `lantern.Config` class.
 | `TEMPLATES_SENTRY_SRC`             | String  | No           | -        | No        | v0.1.x        | Sentry CDN project URL for frontend error tracking and user feedback               | *N/A*                                     | 'https://example.com'                     |
 | `VERIFY_SHAREPOINT_PROXY_ENDPOINT` | String  | Yes          | Yes      | No        | v0.3.x        | Microsoft Power Automate trigger endpoint for checking SharePoint hosted downloads | *N/A*                                     | 'https://example.com'                     |
 | `VERSION`                          | String  | No           | -        | No        | v0.1.x        | Application package version                                                        | *N/A*                                     | '0.3.0'                                   |
+| `TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY` | String  | Yes          | Yes      | No        | v0.4.x        | Cloudflare Turnstile site key for item contact form                                | *N/A*                                     | 'x'                                       |
 <!-- pyml enable md013 -->
 
 ### Performance config options
@@ -94,6 +95,7 @@ See the [Templates](/docs/site.md#templates-configuration) docs for more informa
 
 - `TEMPLATES_CACHE_BUST_VALUE`
 - `TEMPLATES_ITEM_CONTACT_ENDPOINT`
+- `TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY`
 - `TEMPLATES_ITEM_MAPS_ENDPOINT`
 - `TEMPLATES_ITEM_VERSIONS_ENDPOINT`
 - `TEMPLATES_PLAUSIBLE_DOMAIN`

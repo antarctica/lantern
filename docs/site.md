@@ -292,6 +292,12 @@ HTML metadata elements are included by the `html_head` site macro for:
 - `store-ref` - optional commit associated with the site build's [Store](/docs/architecture.md#stores) (for debugging)
 - `description` - page summary
 
+## Bot protection
+
+For features vulnerable to spam and abuse, such as the [Item Enquires](#item-enquires),
+[Cloudflare Turnstile](https://www.cloudflare.com/en-gb/application-services/products/turnstile/) is used to
+distinguish humans from bot agents. Typically, this check is non-interactive but may require the user to check a box.
+
 ## Templates
 
 HTML templates use the [Jinja2](https://jinja.palletsprojects.com/) framework.
@@ -302,6 +308,7 @@ Templates use these options from the app `lantern.Config` class:
 
 - `TEMPLATES_CACHE_BUST_VALUE`: See [Cache busting](#cache-busting)
 - `TEMPLATES_ITEM_CONTACT_ENDPOINT`: See [Contact form](#contact-form)
+- `TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY`: Turnstile site key for item form [Bot Protection](#bot-protection)
 - `TEMPLATES_ITEM_MAPS_ENDPOINT`: See [Extent maps](#extent-maps)
 - `TEMPLATES_ITEM_VERSIONS_ENDPOINT`: Base URL for constructing links to view
   [Record Revisions](/docs/data-model.md#record-revisions)
@@ -433,6 +440,9 @@ URL computed within each Item.
 The contact tab within the [Item Templates](#item-templates) includes a form for users to send item enquires. These
 forms submit to a Microsoft Power Automate flow which routes enquires to the relevant team and returns a conformation
 page to the user.
+
+To protect against spam and abuse, the form includes a hidden [Bot Protection](#bot-protection) field, validated in the
+Power Automate flow. Where this validation fails, the flow returns an error page to the user.
 
 #### Markdown
 

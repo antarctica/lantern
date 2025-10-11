@@ -12,6 +12,7 @@
   "privacy-site-feedback": "Website feedback (Sentry)",
   "privacy-site-errors": "Website error and performance monitoring (Sentry)",
   "privacy-site-analytics": "Website analytics (Plausible)",
+  "privacy-bot-protection": "Bot protection (Cloudflare)",
   "privacy-scope": "Other privacy policies",
   "changelog": "Changes to this policy",
   }
@@ -39,6 +40,7 @@
     <p>We invite feedback from users to improve this website or answer your questions.</p>
     <p>We collect anonymous analytics to help guide how we develop and update this website.</p>
     <p>We collect basic information about your web browser to ensure this website works well for most people.</p>
+    <p>We collect device and interaction information to distinguish human users from bots to protect against malicious use of this website.</p>
   {% endcall %}
 
   {% call legal.policy_section(slug='privacy-actions', title='How we use your information') %}
@@ -109,11 +111,27 @@
     </p>
   {% endcall %}
 
+  {% call legal.policy_section(slug='privacy-bot-protection', title='Bot protection (Cloudflare)') %}
+    <p>
+      We use the {{ com.ext_link_a(href='http://cloudflare.com/en-gb/application-services/products/turnstile', value="Turnstile") }}
+      service from Cloudflare to protect item enquiry forms from malicious activity by non-human agents (bots). This
+      includes information about your device and how you interact with this website. Cloudflare cannot directly identify
+      you from this information.
+    </p>
+    <p>
+      See Cloudflare's {{ com.ext_link_a(href='https://www.cloudflare.com/en-gb/turnstile-privacy-policy/', value="privacy policy") }}
+      for more information about how they process information.
+    </p>
+  {% endcall %}
+
   {% call legal.policy_section(slug='privacy-scope', title='Other privacy policies') %}
     <p>Privacy policies from other BAS websites do not apply here.</p>
     <p>This website has links to other websites for which we are not responsible.</p>
   {% endcall %}
   {% call legal.policy_section(slug='changelog', title='Changes to this policy') %}
+    {% call legal.policy_subsection(title='2025-10-10') %}
+      <p>Updated to reflect adding Cloudflare Turnstile for spam protection.</p>
+    {% endcall %}
     {% call legal.policy_subsection(title='2025-05-08') %}
       <p>Updating policy to better explain its scope and reflect changes to the providers we use.</p>
     {% endcall %}

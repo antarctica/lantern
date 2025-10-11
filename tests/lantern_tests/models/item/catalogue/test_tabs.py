@@ -759,22 +759,20 @@ class TestContactTab:
         assert tab.title != ""
         assert tab.icon != ""
 
-    @pytest.mark.parametrize(
-        ("endpoint", "action", "params"),
-        [
-            ("x", "://x", {"item-id": "x", "item-poc": "x"}),
-            ("https://example.com?x=x", "https://example.com", {"item-id": "x", "item-poc": "x", "x": "x"}),
-        ],
-    )
-    def test_form(self, endpoint: str, action: str, params: dict[str, str]) -> None:
+    def test_form(self) -> None:
         """Can get contact form action and parameters."""
+        endpoint = "https://example.com?x=x"
+        item_id = "y"
+        item_poc = "z"
         contact = Contact(
-            RecordContact(organisation=ContactIdentity(name="x"), email="x", role={ContactRoleCode.POINT_OF_CONTACT})
+            RecordContact(
+                organisation=ContactIdentity(name="x"), email=item_poc, role={ContactRoleCode.POINT_OF_CONTACT}
+            )
         )
 
-        assert tab.form_action == action
-        assert tab.form_params == params
         tab = ContactTab(contact=contact, item_id=item_id, item_title="x", form_action=endpoint, turnstile_key="x")
+        assert tab.form_action == endpoint
+        assert tab.form_params == {"item-id": item_id, "item-poc": item_poc}
 
     @pytest.mark.parametrize("has_value", [True, False])
     def test_phone(self, has_value: bool):

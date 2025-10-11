@@ -17,7 +17,7 @@
 {% endmacro %}
 
 {% macro form(data) %}
-  <form action="{{ data.form_action}}" method="GET">
+  <form action="{{ data.form_action }}" method="POST">
     {% for param, value in data.form_params | items %}
       <input type="hidden" name="{{ param }}" value="{{ value }}">
     {% endfor %}

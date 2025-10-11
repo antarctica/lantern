@@ -63,6 +63,13 @@ environment.
 3. set the relevant [Config](/docs/config.md) option in a local `.env` file or Ansible Vault for use in the
    [Environment Module](/docs/deployment.md#environment-module) template as appropriate
 
+## CloudFlare Turnstile
+
+1. register a new Turnstile widget with hostnames for each [Hosting](/docs/infrastructure.md#hosting) endpoint
+2. store site and secret keys in 1Password
+3. set the relevant [Config](/docs/config.md) option in the `.env` template and Ansible Vault for use in the
+   [Environment Module](/docs/deployment.md#environment-module) template
+
 ## Power Automate
 
 ### Power Automate item enquires

@@ -120,6 +120,18 @@ class TestRecord:
 
         record.validate()
 
+    def test_file_identifier(self):
+        """Cannot validate a Record with file identifier that isn't a UUID."""
+        record = deepcopy(self.base_record)
+        record.file_identifier = "⭐️"
+
+        with pytest.raises(RecordInvalidError) as excinfo:
+            record.validate()
+        assert isinstance(excinfo.value.validation_error, ValueError)
+        assert f"Invalid file identifier '{record.file_identifier}' must be a UUID" in str(
+            excinfo.value.validation_error
+        )
+
     @pytest.mark.parametrize(
         ("identifier", "match"),
         [

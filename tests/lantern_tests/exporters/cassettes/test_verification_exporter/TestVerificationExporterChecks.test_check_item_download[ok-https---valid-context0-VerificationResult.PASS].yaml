@@ -1,0 +1,34 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.32.4
+    method: GET
+    uri: 'https://data.bas.ac.uk/items/123/'
+  response:
+    body:
+      string: "<!DOCTYPE html><html lang=\"en\"><div>Page with expected URL: <a href=\"https://valid\">Download</a></div></html>"
+    headers:
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - text/html
+      Server:
+      - AmazonS3
+      Transfer-Encoding:
+      - chunked
+      x-amz-meta-file_identifier:
+      - '123'
+      x-amz-meta-file_revision:
+      - 'x'
+    status:
+      code: 200
+      message: OK
+version: 1

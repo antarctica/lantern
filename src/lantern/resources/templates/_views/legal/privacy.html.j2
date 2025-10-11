@@ -8,12 +8,14 @@
   "privacy-collected": "Information we collect about you",
   "privacy-purpose": "Why we collect this information",
   "privacy-actions": "How we use your information",
+  "privacy-processors": "Data Processors summary",
   "privacy-item-enquires": "Item enquires (Microsoft)",
   "privacy-site-feedback": "Website feedback (Sentry)",
   "privacy-site-errors": "Website error and performance monitoring (Sentry)",
   "privacy-site-analytics": "Website analytics (Plausible)",
   "privacy-bot-protection": "Bot protection (Cloudflare)",
   "privacy-scope": "Other privacy policies",
+  "privacy-assessment": "Data Protection Impact Assessment",
   "changelog": "Changes to this policy",
   }
 %}
@@ -30,8 +32,9 @@
   {% endcall %}
 
   {% call legal.policy_section(slug='privacy-collected', title='Information we collect about you') %}
-    <p>We do not collect any information about you, unless you contact us or provide feedback.</p>
+    <p>We do not collect any personal information about you, unless you contact us or provide feedback.</p>
     <p>We do collect anonymous analytics about the pages you visit and basic information about your web browser.</p>
+    <p>We do collect non-identifying information about your device and how you interact with this website.</p>
     <p>We use third-party providers to enable these functions, as explained in this policy.</p>
   {% endcall %}
 
@@ -60,6 +63,23 @@
       be used to identify you. It is only used for statistics and to better understand errors and performance issues.
     </p>
     <p>We process your information under the {{ com.ext_link_a(href='https://www.ukri.org/about-us/privacy-notice/', value="UK Research & Innovation (UKRI) Privacy Notice") }}.</p>
+  {% endcall %}
+
+  {% call legal.policy_section(slug='privacy-processors', title='Data Processors summary') %}
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr__1fr] border {{ com.table_border_classes() }} overflow-hidden">
+      <!-- Header -->
+      <div class="{{ com.table_header_classes() }}">Activity</div>
+      <div class="{{ com.table_header_classes() }}">Processors</div>
+
+      <!-- Body -->
+      <div class="{{ com.table_row_classes() }}">Replying to item enquires</div>
+      <div class="{{ com.table_row_classes() }}">Microsoft, Cloudflare</div>
+      <div class="{{ com.table_row_classes() }}">Collecting user feedback</div>
+      <div class="{{ com.table_row_classes() }}">Sentry</div>
+      <div class="{{ com.table_row_classes() }}">Collecting website analytics</div>
+      <div class="{{ com.table_row_classes() }}">Plausible</div>
+    </div>
+
   {% endcall %}
 
   {% call legal.policy_section(slug='privacy-item-enquires', title='Item enquires (Microsoft)') %}
@@ -128,12 +148,19 @@
     <p>Privacy policies from other BAS websites do not apply here.</p>
     <p>This website has links to other websites for which we are not responsible.</p>
   {% endcall %}
+
+  {% call legal.policy_section(slug='privacy-assessment', title='Data Protection Impact Assessment') %}
+    <p>A Data Protection Impact Assessment (DPIA) has been completed for this website.</p>
+  {% endcall %}
+
   {% call legal.policy_section(slug='changelog', title='Changes to this policy') %}
     {% call legal.policy_subsection(title='2025-10-10') %}
       <p>Updated to reflect adding Cloudflare Turnstile for spam protection.</p>
+      <p>Added data processors summary.</p>
+      <p>Recording DPIA completion.</p>
     {% endcall %}
     {% call legal.policy_subsection(title='2025-05-08') %}
-      <p>Updating policy to better explain its scope and reflect changes to the providers we use.</p>
+      <p>Updated to better explain policy scope and reflect changes to providers.</p>
     {% endcall %}
     {% call legal.policy_subsection(title='2025-05-11') %}
       <p>Initial policy.</p>

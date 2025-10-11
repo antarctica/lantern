@@ -36,9 +36,8 @@
               Do not include any sensitive information in your message.
             {% endcall %}
           </div>
-          {{ form_input(id="message-sender-name", name="Your name", placeholder="Connie Watson") }}
-          {{ form_input(id="message-sender-email", name="Your email address", placeholder="conwat@bas.ac.uk", required=True) }}
-          <div>
+          {{ form_input(id="message-sender-name", name="Your name") }}
+          {{ form_input(id="message-sender-email", name="Your email address", required=True) }}
           <div class="space-y-2">
             <div class="cf-turnstile" data-sitekey="{{ data.turnstile_site_key }}" data-theme="auto" data-size="flexible"></div>
             <button class="{{ com.btn_primary_classes() }} p-4" type="submit">

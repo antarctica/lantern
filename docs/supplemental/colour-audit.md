@@ -105,4 +105,5 @@ Colours:
 | Tables (Header)               | Background             | `grey-100`      | `grey-900`      |                                 |
 |                               | Border (Bottom)        | `grey-500`      | `grey-300`      |                                 |
 | Tables (Body)                 | Border (Bottom)        | `grey-100`      | `grey-900`      |                                 |
+| Item Downloads (Descriptions) | Text                   | `grey-500`      | `grey-300`      |                                 |
 <!-- pyml enable md013 -->

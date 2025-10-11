@@ -2,6 +2,15 @@
 
 The Data Catalogue website is built as a static site using the [Site Exporter](/docs/exporters.md#site-exporter).
 
+## Site access
+
+The static site is publicly accessible without authentication. It is available at:
+
+- [data.bas.ac.uk](https://data.bas.ac.uk/-/index) (production)
+- [data-testing.bas.ac.uk](https://data-testing.bas.ac.uk/-/index) (integration/testing)
+
+See the [Infrastructure](/docs/infrastructure.md#hosting) documentation for hosting details.
+
 ## Site structure
 
 Simplified, primary, top level structure:

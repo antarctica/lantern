@@ -1,7 +1,6 @@
 import locale
 from abc import ABC, abstractmethod
 from datetime import UTC, date, datetime
-from urllib.parse import parse_qs, urlparse
 
 from lantern.lib.metadata_library.models.record.elements.common import Date, Identifier, Series
 from lantern.lib.metadata_library.models.record.elements.data_quality import DomainConsistency
@@ -626,26 +625,7 @@ class ContactTab(Tab):
         self._contact = contact
         self._id = item_id
         self._title = item_title
-        self._form_action, self._form_required_params = self._parse_form_action(form_action)
-
-    @staticmethod
-    def _parse_form_action(form_action: str) -> tuple[str, dict[str, str]]:
-        """
-        Parse form action into base URL and required parameters.
-
-        The item contact form uses Power Automate which uses an endpoint with required query parameters. When submitted
-        the form fields are appended to the URL as query parameters, replacing Power Automates.
-
-        To work around this, required parameters are converted to form parameters (as hidden inputs), which will then
-        be included as query parameters when the form is submitted.
-        """
-        parsed_url = urlparse(form_action)
-        base_url = f"{parsed_url.scheme}://{parsed_url.netloc}{parsed_url.path}"
-        query_params = parse_qs(parsed_url.query)
-        # parse_qs returns dict[str, list[str]] so convert to single values
-        params = {k: v[0] for k, v in query_params.items()}
-
-        return base_url, params
+        self._form_action = form_action
         self._turnstile_key = turnstile_key
 
     @property
@@ -676,7 +656,7 @@ class ContactTab(Tab):
     @property
     def form_params(self) -> dict[str, str]:
         """Contact form required parameters."""
-        return {"item-id": self._id, "item-poc": self._contact.email, **self._form_required_params}
+        return {"item-id": self._id, "item-poc": self._contact.email}
 
     @property
     def subject_default(self) -> str:

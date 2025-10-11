@@ -74,7 +74,12 @@ environment.
 
 ### Power Automate item enquires
 
-...
+1. import `resources/flows/lantern-item-enquires.zip` into Power Automate as a new flow
+2. for MAGIC point of contact branch, create a GitLab access token with the *reporter* role and *api* scope in the
+  [MAGIC Helpdesk 🔒](https://gitlab.data.bas.ac.uk/MAGIC/helpdesk/-/settings/access_tokens) project
+3. set this token in the authentication value property in the 'create-issue' action
+4. set the relevant [Config](/docs/config.md) option in the `.env` template and Ansible Vault for use in the
+   [Environment Module](/docs/deployment.md#environment-module) template
 
 ### Power Automate SharePoint proxy
 

@@ -419,24 +419,32 @@ These files define a lage number of macros to assemble Items:
 
 #### Item downloads
 
-The data tab within the [Item Templates](#item-templates) shows any available downloads or other distribution methods
-(distribution items) in a grid based table-like layout. Each grid row consists of:
+The data tab within the [Item Templates](#item-templates) shows any available downloads, services or other distribution
+methods (collectively distribution items) in a grid-based table layout. Each grid row consists of:
 
 - columns for:
-  - a distinguishing label: which may be the file format if distinct or a more specific value
-  - an optional download size: with automatic formatting to appropriate units if measured in bytes
+  - a distinguishing label: which may be the file format if unique or a custom value
+  - an optional download size: automatically formatted with appropriate units if measured in bytes
   - an action link or button: either to an external URL or to trigger a collapsible section
-- an optional collapsible section, spanning all columns, for additional information: such as guides and instructions
+- optional descriptive text: shown full-width without any HTML formatting
+- an optional collapsible section, shown full-width using a template snippet
+
+> [!NOTE]
+> It isn't intended for descriptive text and a collapsible section to be used together.
 
 Distribution items are defined by the `lantern.models.item.catalogue.distributions.Distribution`) class with properties
-for the *label*, *size*, *action*, etc. Subclasses for file and service based options (e.g. feature services) are used
-to set common defaults.
+for the *label*, *action*, *description*, etc. Subclasses for file and service based options (e.g. feature services)
+set common defaults.
 
-For file based options, *Label* and *description* properties map to the *title* and *description* if set in the online
-resource in each transfer option within item records. Where the *title* is not set, the file format is used instead.
+For file based options, *label* and *description* properties map to the *title* and *description* if set in the
+transfer option online resource. Where the *title* is not set, the file format is used as a default.
 
-For service based options, *labels* are hard-coded to the service type name. *Descriptions* are disabled as collapsible
-sections are used for showing service endpoints and usage instructions.
+> [!IMPORTANT]
+> For consistency, file based options should use the file format as the online title using values defined by the
+> `lantern.models.item.catalogue.enums.DistributionType` enum.
+
+For service based options, *labels* are hard-coded to the service type name and *descriptions* are disabled as
+collapsible sections are used for showing service endpoints and usage instructions.
 
 #### Extent maps
 

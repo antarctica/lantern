@@ -485,7 +485,7 @@ class GeoPackage(FileDistribution):
         """Check if GeoPackage is compressed based on self-reported format."""
         target_href = "https://metadata-resources.data.bas.ac.uk/media-types/application/geopackage+sqlite3+zip"
         # TYPING: This assumes option.format is not None but given `matches()` this will never be the case.
-        return option.format.href == target_href  # ty: ignore[possibly-unbound-attribute]
+        return option.format.href == target_href  # ty: ignore[possibly-missing-attribute]
 
     @property
     def format_type(self) -> DistributionType:
@@ -571,7 +571,7 @@ class Pdf(FileDistribution):
         """Check if PDF is georeferenced based on self-reported format."""
         target_href = "https://metadata-resources.data.bas.ac.uk/media-types/application/pdf+geo"
         # TYPING: This assumes option.format is not None but given `matches()` this will never be the case.
-        return option.format.href == target_href  # ty: ignore[possibly-unbound-attribute]
+        return option.format.href == target_href  # ty: ignore[possibly-missing-attribute]
 
     @property
     def format_type(self) -> DistributionType:

@@ -153,7 +153,7 @@ class ExportMeta(SiteMeta):
 
     @classmethod
     def from_config_store(
-        cls, config: Config, store: GitLabStore | None = None, **kwargs: Link | dict | str
+        cls, config: Config, store: GitLabStore | None = None, **kwargs: datetime | dict | str
     ) -> "ExportMeta":
         """
         Create an Export Metadata instance from an app Config instance, optional GitLab Store and additional properties.

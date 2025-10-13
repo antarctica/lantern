@@ -8,6 +8,7 @@ from base64 import b64decode
 from copy import deepcopy
 from functools import cached_property
 from pathlib import Path
+from typing import TypedDict
 
 from gitlab import Gitlab
 from gitlab.v4.objects import Project
@@ -418,6 +419,16 @@ class GitLabLocalCache:
             shutil.rmtree(self._path)
 
 
+class CommitData(TypedDict):
+    """GitLab API commit structure."""
+
+    branch: str
+    commit_message: str
+    author_name: str
+    author_email: str
+    actions: list[dict]
+
+
 class CommitResultsStats:
     """Statistics for a commit transaction."""
 
@@ -551,14 +562,13 @@ class GitLabStore(Store):
         Where a commit is generated, file identifiers are returned for new and/or updated records, and statistics on
         the number of underlying files changed (where each record is stored as a JSON and XML file).
         """
-        actions: list[dict] = []
         changes: dict[str, list[str]] = {"update": [], "create": []}
-        data = {
+        data: CommitData = {
             "branch": self._branch,
             "commit_message": f"{title}\n{message}",
             "author_name": author[0],
             "author_email": author[1],
-            "actions": actions,
+            "actions": [],
         }
 
         existing_hashes = self._cache.get_hashes(file_identifiers=[record.file_identifier for record in records])

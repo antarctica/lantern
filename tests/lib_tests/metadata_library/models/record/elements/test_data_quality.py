@@ -16,6 +16,38 @@ from lantern.lib.metadata_library.models.record.elements.data_quality import Dat
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
 
 
+class TestDomainConsistency:
+    """Test DomainConsistency element."""
+
+    def test_init(self):
+        """Can create a DomainConsistency element from directly assigned properties."""
+        expected = "x"
+        values = {
+            "specification": Citation(
+                title="x", dates=Dates(creation=Date(date=datetime(2014, 6, 30, 14, 30, second=45, tzinfo=UTC)))
+            ),
+            "explanation": expected,
+            "result": True,
+        }
+        domain_consistency = DomainConsistency(**values)
+
+        assert domain_consistency.specification.title == "x"
+        assert domain_consistency.explanation == expected
+        assert domain_consistency.result is True
+
+
+class TestLineage:
+    """Test Lineage element."""
+
+    def test_init(self):
+        """Can create a Lineage element from directly assigned properties."""
+        expected = "x"
+        values = {"statement": expected}
+        lineage = Lineage(**values)
+
+        assert lineage.statement == expected
+
+
 class TestDataQuality:
     """Test DataQuality element."""
 
@@ -145,35 +177,3 @@ class TestDataQuality:
         result = clean_dict(converter.unstructure(value))
 
         assert result == expected
-
-
-class TestDomainConsistency:
-    """Test DomainConsistency element."""
-
-    def test_init(self):
-        """Can create a DomainConsistency element from directly assigned properties."""
-        expected = "x"
-        values = {
-            "specification": Citation(
-                title="x", dates=Dates(creation=Date(date=datetime(2014, 6, 30, 14, 30, second=45, tzinfo=UTC)))
-            ),
-            "explanation": expected,
-            "result": True,
-        }
-        domain_consistency = DomainConsistency(**values)
-
-        assert domain_consistency.specification.title == "x"
-        assert domain_consistency.explanation == expected
-        assert domain_consistency.result is True
-
-
-class TestLineage:
-    """Test Lineage element."""
-
-    def test_init(self):
-        """Can create a Lineage element from directly assigned properties."""
-        expected = "x"
-        values = {"statement": expected}
-        lineage = Lineage(**values)
-
-        assert lineage.statement == expected

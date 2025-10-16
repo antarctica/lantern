@@ -479,9 +479,6 @@ def fx_item_cat_info_tab_minimal() -> AdditionalInfoTab:
     )
 
 
-### OLD
-
-
 @pytest.fixture()
 def fx_fake_store(fx_logger: logging.Logger) -> FakeRecordsStore:
     """Fake records store."""

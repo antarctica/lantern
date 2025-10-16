@@ -3,9 +3,10 @@ from datetime import UTC, date, datetime
 import cattrs
 import pytest
 
-from lantern.lib.metadata_library.models.record.elements.common import Contact, ContactIdentity, Contacts, clean_dict
+from lantern.lib.metadata_library.models.record.elements.common import Contact, ContactIdentity, Contacts
 from lantern.lib.metadata_library.models.record.elements.metadata import Metadata, MetadataStandard
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
+from lantern.lib.metadata_library.models.record.utils.clean import clean_dict
 
 
 class TestMetadata:

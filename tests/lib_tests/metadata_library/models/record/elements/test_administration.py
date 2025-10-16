@@ -5,7 +5,7 @@ import cattrs
 import pytest
 
 from lantern.lib.metadata_library.models.record.elements.administration import Administration, Permission
-from lantern.lib.metadata_library.models.record.elements.common import clean_dict
+from lantern.lib.metadata_library.models.record.utils.clean import clean_dict
 
 
 class TestPermission:

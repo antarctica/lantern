@@ -1,7 +1,7 @@
 from lantern.lib.metadata_library.models.record.elements.common import OnlineResource
 from lantern.lib.metadata_library.models.record.elements.distribution import Distribution, Format, TransferOption
 from lantern.lib.metadata_library.models.record.enums import OnlineResourceFunctionCode
-from lantern.lib.metadata_library.models.record.presets.contacts import make_esri_distributor
+from lantern.lib.metadata_library.models.record.presets.contacts import ESRI_DISTRIBUTOR
 
 
 def make_esri_feature_layer(
@@ -16,7 +16,7 @@ def make_esri_feature_layer(
     Optionally, a feature layer can be published as an OGC API Features service, consisting of a separate server
     endpoint and portal item. If this portal item ID is provided, additional distribution options will be included.
     """
-    distributor = make_esri_distributor()
+    distributor = ESRI_DISTRIBUTOR
 
     portal_url = f"{portal_endpoint}/home/item.html?id={item_id}"
     service_url = f"{server_endpoint}/rest/services/{service_name}/FeatureServer"

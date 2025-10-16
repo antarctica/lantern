@@ -6,6 +6,7 @@ from lantern.lib.metadata_library.models.record.enums import AggregationAssociat
 from lantern.lib.metadata_library.models.record.presets.aggregations import (
     make_bas_cat,
     make_bas_cat_collection_member,
+    make_bas_cat_cross_ref,
     make_in_bas_cat_collection,
 )
 
@@ -73,5 +74,19 @@ class TestMakeBasCatCollectionMember:
             initiative_type=AggregationInitiativeCode.COLLECTION,
         )
         result = make_bas_cat_collection_member("x")
+
+        assert result == expected
+
+
+class TestMakeBasCatCrossRef:
+    """Test `make_bas_cat_cross_ref()` preset."""
+
+    def test_default(self):
+        """Can make an aggregation for an item related to another."""
+        expected = Aggregation(
+            identifier=Identifier(identifier="x", href="https://data.bas.ac.uk/items/x", namespace="data.bas.ac.uk"),
+            association_type=AggregationAssociationCode.CROSS_REFERENCE,
+        )
+        result = make_bas_cat_cross_ref("x")
 
         assert result == expected

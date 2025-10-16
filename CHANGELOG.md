@@ -18,6 +18,9 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Support for custom labels and optional descriptions in distribution options
 * Bot protection for item enquiry forms
 * Infrastructure diagram and hosting information
+* Initial administrative metadata support (GitLab issues and initial access permissions)
+* Record utility methods for key values in supplemental information
+* Item cross-reference record preset
 
 ### Fixed
 
@@ -32,6 +35,9 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Documentation improvements
 * Contextualising items fragment in item summaries for physical map products (sides rather than items)
 * Increasing Catalogue specific record requirements to ensure file identifiers are UUIDs
+* Catalogue items use binary restricted access control, defaulting to restricted
+* Moving dict/list cleaning utils into new records utils package
+* Improving distribution record presets
 
 ## [0.3.0] - 2025-09-20
 

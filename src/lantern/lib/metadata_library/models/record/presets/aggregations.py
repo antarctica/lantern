@@ -32,3 +32,8 @@ def make_bas_cat_collection_member(item_id: str) -> Aggregation:
     Inverse of `make_in_bas_cat_collection()`.
     """
     return make_bas_cat(item_id, AggregationAssociationCode.IS_COMPOSED_OF, AggregationInitiativeCode.COLLECTION)
+
+
+def make_bas_cat_cross_ref(item_id: str) -> Aggregation:
+    """Cross-reference to another item."""
+    return make_bas_cat(item_id, AggregationAssociationCode.CROSS_REFERENCE)

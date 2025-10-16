@@ -137,6 +137,45 @@ Unsupported elements (not normative or exhaustive):
 - `identification.topics`
 - `metadata.maintenance` (`identification.metadata` is supported)
 
+### Record authoring
+
+Records can be authored using any tool or system that can produce a valid record configuration. These may be created
+directly as JSON documents, or dumped from `Record` data class instances.
+
+<!-- pyml disable md028 -->
+> [!TIP]
+> For manual editing, consider an editor that supports JSON schemas for inline validation and enum auto-completion.
+>
+> Within Python applications or scripts, consider using `Record` data classes for typed record properties, validation
+> and serialisation to JSON.
+
+> [!NOTE]
+> There is no formal guidance on what to include in record configurations. However, a starting point may be the
+> [Examples Records](https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery-v1#example-records) defined
+> for the MAGIC Discovery ISO 19115 Profile.
+
+> [!TIP]
+> See the [Guide](https://data.bas.ac.uk/-/formatting) for how titles, summaries, abstracts and lineage statements can
+> be formatted.
+<!-- pyml enable md028 -->
+
+### Record presets
+
+If authoring Records using data classes, a set of *presents* in the `lantern.lib.metadata_library.models.record.presets`
+package are available to create common config subsets and improve consistency across records.
+
+For example:
+
+- `lantern.lib.metadata_library.models.record.presets.extents.make_bbox_extent`:
+  - simplifies creating a bounding box extent from a set of coordinates
+- `lantern.lib.metadata_library.models.record.presets.constraints.OGL_V3`:
+  - provides a constant for the Open Government Licence
+
+> [!TIP]
+> A larger scale present (`lantern.lib.metadata_library.models.record.presets.base.RecordMagicDiscoveryV1`) exists for
+> creating [MAGIC Discovery ISO 19115 Profile](https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery-v1)
+> compliant records.
+
 ### Record utilities
 
 A set of utility functions in the `lantern.lib.metadata_library.models.record.utils` package are available to perform

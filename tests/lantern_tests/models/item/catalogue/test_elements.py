@@ -2,6 +2,7 @@ from datetime import UTC, date, datetime
 
 import pytest
 
+from lantern.lib.metadata_library.models.record.elements.administration import Administration
 from lantern.lib.metadata_library.models.record.elements.common import Date, Identifier
 from lantern.lib.metadata_library.models.record.elements.common import Dates as RecordDates
 from lantern.lib.metadata_library.models.record.elements.common import Identifiers as RecordIdentifiers
@@ -25,9 +26,11 @@ from lantern.lib.metadata_library.models.record.enums import (
     MaintenanceFrequencyCode,
     ProgressCode,
 )
+from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
+from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, set_admin
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.base.elements import Link
-from lantern.models.item.base.enums import AccessLevel, ResourceTypeLabel
+from lantern.models.item.base.enums import ResourceTypeLabel
 from lantern.models.item.base.item import ItemBase
 from lantern.models.item.catalogue.elements import (
     Aggregations,
@@ -357,25 +360,37 @@ class TestItemCatalogueSummaryCatalogue:
             assert summary._date is None
 
     @pytest.mark.parametrize(
-        ("resource_type", "edition", "exp_edition", "has_pub", "exp_published", "child_count", "exp_child_count"),
+        (
+            "restricted",
+            "resource_type",
+            "edition",
+            "exp_edition",
+            "has_pub",
+            "exp_published",
+            "child_count",
+            "exp_child_count",
+        ),
         [
-            (HierarchyLevelCode.PRODUCT, "x", "Ed. x", True, "30 June 2014", 0, None),
-            (HierarchyLevelCode.PRODUCT, "x", "Ed. x", False, None, 0, None),
-            (HierarchyLevelCode.PRODUCT, None, None, True, "30 June 2014", 0, None),
-            (HierarchyLevelCode.PAPER_MAP_PRODUCT, None, None, True, "30 June 2014", 0, None),
-            (HierarchyLevelCode.DATASET, "X", "vX", False, None, 0, None),
-            (HierarchyLevelCode.COLLECTION, "x", None, True, None, 0, None),
-            (HierarchyLevelCode.COLLECTION, "x", None, False, None, 0, None),
-            (HierarchyLevelCode.COLLECTION, None, None, False, None, 0, None),
-            (HierarchyLevelCode.COLLECTION, None, None, False, None, 1, "1 item"),
-            (HierarchyLevelCode.COLLECTION, None, None, False, None, 2, "2 items"),
-            (HierarchyLevelCode.PAPER_MAP_PRODUCT, None, None, False, None, 1, "1 side"),
-            (HierarchyLevelCode.PAPER_MAP_PRODUCT, None, None, False, None, 2, "2 sides"),
+            (False, HierarchyLevelCode.PRODUCT, "x", "Ed. x", True, "30 June 2014", 0, None),
+            (False, HierarchyLevelCode.PRODUCT, "x", "Ed. x", False, None, 0, None),
+            (False, HierarchyLevelCode.PRODUCT, None, None, True, "30 June 2014", 0, None),
+            (False, HierarchyLevelCode.PAPER_MAP_PRODUCT, None, None, True, "30 June 2014", 0, None),
+            (False, HierarchyLevelCode.DATASET, "X", "vX", False, None, 0, None),
+            (False, HierarchyLevelCode.COLLECTION, "x", None, True, None, 0, None),
+            (False, HierarchyLevelCode.COLLECTION, "x", None, False, None, 0, None),
+            (False, HierarchyLevelCode.COLLECTION, None, None, False, None, 0, None),
+            (False, HierarchyLevelCode.COLLECTION, None, None, False, None, 1, "1 item"),
+            (False, HierarchyLevelCode.COLLECTION, None, None, False, None, 2, "2 items"),
+            (False, HierarchyLevelCode.PAPER_MAP_PRODUCT, None, None, False, None, 1, "1 side"),
+            (False, HierarchyLevelCode.PAPER_MAP_PRODUCT, None, None, False, None, 2, "2 sides"),
+            (True, HierarchyLevelCode.PRODUCT, None, None, False, None, 0, None),
         ],
     )
     def test_fragments(
         self,
         fx_item_base_model_min: ItemBase,
+        fx_admin_meta_keys: AdministrationKeys,
+        restricted: bool,
         resource_type: HierarchyLevelCode,
         edition: str | None,
         exp_edition: str | None,
@@ -386,6 +401,9 @@ class TestItemCatalogueSummaryCatalogue:
     ):
         """Can get fragments to use as part of item summary UI."""
         record = fx_item_base_model_min._record
+        if not restricted:
+            admin_meta = Administration(id=record.file_identifier, access_permissions=[OPEN_ACCESS])
+            set_admin(keys=fx_item_base_model_min._admin_keys, record=record, admin_meta=admin_meta)
         exp_resource_type = ResourceTypeLabel[resource_type.name]
         record.hierarchy_level = resource_type
         record.identification.edition = edition
@@ -405,10 +423,11 @@ class TestItemCatalogueSummaryCatalogue:
                 )
             record.identification.aggregations.append(aggregation)
         record.child_aggregations_count = child_count
-        summary = ItemCatalogueSummary(record)
 
+        summary = ItemCatalogueSummary(record=record, admin_keys=fx_admin_meta_keys)
         result = summary.fragments
 
+        assert result.restricted == restricted
         assert result.item_type == exp_resource_type.value
         assert result.edition == exp_edition
         if exp_published is not None:
@@ -458,14 +477,6 @@ class TestIdentifiers:
         """Can create an Identifiers element."""
         identifiers = Identifiers(RecordIdentifiers([]))
         assert isinstance(identifiers, Identifiers)
-
-    def test_make_gitlab_issue_ref(self):
-        """Can compute GitLab issue reference."""
-        value = "https://gitlab.data.bas.ac.uk/MAGIC/foo/-/issues/123"
-        expected = "MAGIC/foo#123"
-
-        result = Identifiers._make_gitlab_issue_ref(value)
-        assert result == expected
 
     @pytest.mark.parametrize(
         ("identifiers", "expected"),
@@ -521,28 +532,6 @@ class TestIdentifiers:
         result = identifiers.isbn
         assert result == expected
 
-    @pytest.mark.parametrize(
-        ("identifiers", "expected"),
-        [
-            ([], []),
-            (
-                [
-                    Identifier(
-                        identifier="https://gitlab.data.bas.ac.uk/MAGIC/foo/-/issues/123",
-                        href="https://gitlab.data.bas.ac.uk/MAGIC/foo/-/issues/123",
-                        namespace="gitlab.data.bas.ac.uk",
-                    )
-                ],
-                ["MAGIC/foo#123"],
-            ),
-        ],
-    )
-    def test_gitlab_issues(self, identifiers: list[Identifier], expected: list[str]):
-        """Can compute GitLab issue reference."""
-        identifiers = Identifiers(RecordIdentifiers(identifiers))
-        result = identifiers.gitlab_issues
-        assert result == expected
-
 
 class TestMaintenance:
     """Test Catalogue Item maintenance."""
@@ -594,7 +583,7 @@ class TestPageSummary:
     """Test Catalogue Item summary panel."""
 
     @pytest.mark.parametrize(
-        ("item_type", "edition", "published", "aggregations", "access", "citation"),
+        ("item_type", "edition", "published", "aggregations", "restricted", "citation"),
         [
             (
                 HierarchyLevelCode.PRODUCT,
@@ -612,7 +601,7 @@ class TestPageSummary:
                     ),
                     get_record=_get_record,
                 ),
-                AccessLevel.PUBLIC,
+                False,
                 "x",
             ),
             (
@@ -620,7 +609,7 @@ class TestPageSummary:
                 None,
                 None,
                 Aggregations(aggregations=RecordAggregations([]), get_record=_get_record),
-                AccessLevel.BAS_SOME,
+                True,
                 None,
             ),
             (
@@ -639,7 +628,7 @@ class TestPageSummary:
                     ),
                     get_record=_get_record,
                 ),
-                AccessLevel.PUBLIC,
+                False,
                 "x",
             ),
         ],
@@ -650,7 +639,7 @@ class TestPageSummary:
         edition: str | None,
         published: str | None,
         aggregations: Aggregations,
-        access: AccessLevel,
+        restricted: bool,
         citation: str | None,
     ):
         """Can create class for summary panel."""
@@ -663,7 +652,7 @@ class TestPageSummary:
             published_date=published,
             revision_date=None,
             aggregations=aggregations,
-            access_level=access,
+            restricted=restricted,
             citation=citation,
             abstract="x",
         )
@@ -671,7 +660,7 @@ class TestPageSummary:
         assert summary.abstract == "x"
         assert summary.collections == collections
         assert summary.items_count == items_count
-        assert summary.access == access
+        assert summary.restricted == restricted
 
         if item_type != HierarchyLevelCode.COLLECTION:
             assert summary.edition == edition
@@ -683,13 +672,13 @@ class TestPageSummary:
             assert summary.citation is None
 
     @pytest.mark.parametrize(
-        ("item_type", "edition", "published", "access", "aggregations", "expected"),
+        ("item_type", "edition", "published", "restricted", "aggregations", "expected"),
         [
             (
                 HierarchyLevelCode.PRODUCT,
                 "1",
                 "x",
-                AccessLevel.PUBLIC,
+                False,
                 Aggregations(
                     aggregations=RecordAggregations(
                         [
@@ -713,7 +702,7 @@ class TestPageSummary:
                 HierarchyLevelCode.PRODUCT,
                 "1",
                 None,
-                AccessLevel.PUBLIC,
+                False,
                 Aggregations(
                     aggregations=RecordAggregations(
                         [
@@ -732,7 +721,7 @@ class TestPageSummary:
                 HierarchyLevelCode.PRODUCT,
                 None,
                 "x",
-                AccessLevel.PUBLIC,
+                False,
                 Aggregations(
                     aggregations=RecordAggregations(
                         [
@@ -751,7 +740,7 @@ class TestPageSummary:
                 HierarchyLevelCode.PRODUCT,
                 None,
                 None,
-                AccessLevel.PUBLIC,
+                False,
                 Aggregations(aggregations=RecordAggregations([]), get_record=_get_record),
                 False,
             ),
@@ -759,7 +748,7 @@ class TestPageSummary:
                 HierarchyLevelCode.COLLECTION,
                 "1",
                 "x",
-                AccessLevel.PUBLIC,
+                False,
                 Aggregations(aggregations=RecordAggregations([]), get_record=_get_record),
                 False,
             ),
@@ -767,7 +756,7 @@ class TestPageSummary:
                 HierarchyLevelCode.COLLECTION,
                 "1",
                 "x",
-                AccessLevel.BAS_SOME,
+                True,
                 Aggregations(aggregations=RecordAggregations([]), get_record=_get_record),
                 True,
             ),
@@ -778,7 +767,7 @@ class TestPageSummary:
         item_type: HierarchyLevelCode,
         edition: str | None,
         published: str | None,
-        access: AccessLevel,
+        restricted: bool,
         aggregations: Aggregations,
         expected: bool,
     ):
@@ -788,7 +777,7 @@ class TestPageSummary:
             edition=edition,
             published_date=published,
             revision_date=None,
-            access_level=access,
+            restricted=restricted,
             aggregations=aggregations,
             citation=None,
             abstract="x",
@@ -840,7 +829,7 @@ class TestPageSummary:
             edition=None,
             published_date=published,
             revision_date=revision,
-            access_level=AccessLevel.PUBLIC,
+            restricted=False,
             aggregations=Aggregations(aggregations=RecordAggregations([]), get_record=_get_record),
             citation=None,
             abstract="x",
@@ -866,7 +855,7 @@ class TestPageSummary:
         summary = PageSummary(
             item_type=item_type,
             aggregations=Aggregations(aggregations=RecordAggregations(aggregations), get_record=_get_record),
-            access_level=AccessLevel.PUBLIC,
+            restricted=False,
             edition=None,
             published_date=None,
             revision_date=None,

@@ -7,7 +7,6 @@ from humanize import naturalsize
 
 from lantern.lib.metadata_library.models.record.elements.distribution import Distribution as RecordDistribution
 from lantern.models.item.base.elements import Link
-from lantern.models.item.base.enums import AccessLevel
 from lantern.models.item.catalogue.enums import DistributionType
 
 
@@ -200,9 +199,9 @@ class FileDistribution(Distribution, ABC):
     Represents common properties of file based distribution types supported by the BAS Data Catalogue.
     """
 
-    def __init__(self, option: RecordDistribution, access_level: AccessLevel, **kwargs: Any) -> None:
+    def __init__(self, option: RecordDistribution, restricted: bool, **kwargs: Any) -> None:
         self._option = option
-        self._access = access_level
+        self._restricted = restricted
 
     @property
     def label(self) -> str:
@@ -233,12 +232,12 @@ class FileDistribution(Distribution, ABC):
     @property
     def action_btn_variant(self) -> str:
         """Variant of button to display for action link based on resource access."""
-        return super().action_btn_variant if self._access == AccessLevel.PUBLIC else "warning"
+        return super().action_btn_variant if not self._restricted else "warning"
 
     @property
     def action_btn_icon(self) -> str:
         """Action button icon classes."""
-        return "far fa-download" if self._access == AccessLevel.PUBLIC else "far fa-lock-alt"
+        return "far fa-download" if not self._restricted else "far fa-lock-alt"
 
     @property
     def access_target(self) -> None:
@@ -467,8 +466,8 @@ class GeoPackage(FileDistribution):
     With support for optional zip compression.
     """
 
-    def __init__(self, option: RecordDistribution, access_level: AccessLevel, **kwargs: Any) -> None:
-        super().__init__(option, access_level, **kwargs)
+    def __init__(self, option: RecordDistribution, restricted: bool, **kwargs: Any) -> None:
+        super().__init__(option, restricted, **kwargs)
         self._compressed = self._is_compressed(option)
 
     @classmethod
@@ -553,8 +552,8 @@ class Pdf(FileDistribution):
     With support for distinguishing optional georeferencing.
     """
 
-    def __init__(self, option: RecordDistribution, access_level: AccessLevel, **kwargs: Any) -> None:
-        super().__init__(option, access_level, **kwargs)
+    def __init__(self, option: RecordDistribution, restricted: bool, **kwargs: Any) -> None:
+        super().__init__(option, restricted, **kwargs)
         self._georeferenced = self._is_georeferenced(option)
 
     @classmethod

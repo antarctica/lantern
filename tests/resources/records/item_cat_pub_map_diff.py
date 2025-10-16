@@ -1,4 +1,3 @@
-import json
 from datetime import UTC, date, datetime
 
 from lantern.lib.metadata_library.models.record.elements.common import (
@@ -31,6 +30,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     OnlineResourceFunctionCode,
 )
 from lantern.lib.metadata_library.models.record.presets.extents import make_bbox_extent, make_temporal_extent
+from lantern.lib.metadata_library.models.record.utils.kv import set_kv
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from tests.resources.records.utils import make_record
 
@@ -132,9 +132,7 @@ combined.identification.edition = "1"
 combined.identification.series = Series(name="Catalogue Test Resources", edition="1")
 combined.identification.dates.creation = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
 combined.identification.dates.published = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
-combined.identification.supplemental_information = json.dumps(
-    {"physical_size_width_mm": 890, "physical_size_height_mm": 840, "sheet_number": "3"}
-)
+set_kv({"physical_size_width_mm": 890, "physical_size_height_mm": 840, "sheet_number": "3"}, combined)
 combined.identification.constraints = constraints
 combined.distribution = distribution
 combined.identification.graphic_overviews = GraphicOverviews(
@@ -192,9 +190,7 @@ side_a.identification.series = Series(name="Catalogue Test Resources", edition="
 side_a.identification.dates.creation = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
 side_a.identification.dates.published = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
 side_a.identification.spatial_resolution = 200_000
-side_a.identification.supplemental_information = json.dumps(
-    {"physical_size_width_mm": 890, "physical_size_height_mm": 840, "sheet_number": "3(⬆️)"}
-)
+set_kv({"physical_size_width_mm": 890, "physical_size_height_mm": 840, "sheet_number": "3(⬆️)"}, side_a)
 side_a.identification.constraints = constraints
 side_a.distribution = distribution
 side_a.identification.graphic_overviews = GraphicOverviews(
@@ -252,9 +248,7 @@ side_b.identification.series = Series(name="Alt Catalogue Test Resources", editi
 side_b.identification.dates.creation = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
 side_b.identification.dates.published = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
 side_b.identification.spatial_resolution = 800_000
-side_b.identification.supplemental_information = json.dumps(
-    {"physical_size_width_mm": 890, "physical_size_height_mm": 840, "sheet_number": "3(⬇️)"}
-)
+set_kv({"physical_size_width_mm": 890, "physical_size_height_mm": 840, "sheet_number": "3(⬇️)"}, side_b)
 side_b.identification.constraints = constraints
 side_b.distribution = distribution
 side_b.identification.graphic_overviews = GraphicOverviews(

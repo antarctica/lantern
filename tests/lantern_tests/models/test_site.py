@@ -6,6 +6,7 @@ import pytest
 from freezegun.api import FrozenDateTimeFactory
 
 from lantern.config import Config
+from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 from lantern.models.item.base.elements import Link
 from lantern.models.item.catalogue.elements import FormattedDate
 from lantern.models.site import ExportMeta, SiteMeta
@@ -122,7 +123,9 @@ class TestSiteMetadata:
 class TestExportMetadata:
     """Test export metadata/context as an exception to SiteMetadata."""
 
-    def test_init(self, freezer: FrozenDateTimeFactory, fx_freezer_time: datetime):
+    def test_init(
+        self, freezer: FrozenDateTimeFactory, fx_freezer_time: datetime, fx_admin_meta_keys: AdministrationKeys
+    ):
         """Can create a SiteMetadata instance with required values."""
         freezer.move_to(fx_freezer_time)
         expected_str = "x"
@@ -142,12 +145,14 @@ class TestExportMetadata:
             export_path=expected_path,
             s3_bucket=expected_str,
             parallel_jobs=expected_int,
+            admin_meta_keys=fx_admin_meta_keys,
         )
 
         assert meta.base_url == expected_str
         assert meta.export_path == expected_path
         assert meta.s3_bucket == expected_str
         assert meta.parallel_jobs == expected_int
+        assert meta.admin_meta_keys == fx_admin_meta_keys
 
     def test_from_config_store(self, fx_config: Config):
         """Can create export metadata from config."""

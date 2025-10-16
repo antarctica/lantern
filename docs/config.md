@@ -44,7 +44,14 @@ Application configuration is managed by the `lantern.Config` class.
 | `TEMPLATES_SENTRY_SRC`                 | String  | No           | -        | No        | v0.1.x        | Sentry CDN project URL for frontend error tracking and user feedback               | *N/A*                                     | 'https://example.com'                     |
 | `VERIFY_SHAREPOINT_PROXY_ENDPOINT`     | String  | Yes          | Yes      | No        | v0.3.x        | Microsoft Power Automate trigger endpoint for checking SharePoint hosted downloads | *N/A*                                     | 'https://example.com'                     |
 | `VERSION`                              | String  | No           | -        | No        | v0.1.x        | Application package version                                                        | *N/A*                                     | '0.3.0'                                   |
+| `ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE` | JSON Web Key | Yes          | Yes      | Yes       | v0.4.x        | JSON Web Key (JWK) for accessing administrative metadata                           | *None*                                    | '{"kid": "magic_metadata_encryption_key", ...}' |
+| `ADMIN_METADATA_SIGNING_KEY_PUBLIC`     | JSON Web Key | Yes          | Yes      | No        | v0.4.x        | JSON Web Key (JWK) for verifying administrative metadata                           | *None*                                    | '{"kid": "magic_metadata_signing_key", ...}'    |
 <!-- pyml enable md013 -->
+
+### Data model config options
+
+- `ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE`
+- `ADMIN_METADATA_SIGNING_KEY_PUBLIC`
 
 ### Performance config options
 

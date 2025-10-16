@@ -3,7 +3,9 @@ from collections.abc import Callable
 from typing import Any
 
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
+from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 from lantern.models.item.base.elements import Link
+from lantern.models.item.base.enums import AccessLevel
 from lantern.models.item.base.item import ItemBase
 from lantern.models.item.catalogue.elements import Dates, Extent, PageHeader, PageSummary
 from lantern.models.item.catalogue.tabs import (
@@ -33,7 +35,8 @@ class ItemCatalogue(ItemBase):
     Jinja2 templates and classes representing the various tabs and other sections that form these pages.
 
     In addition to a catalogue Record instance, this Item variant requires:
-    - endpoints for external services used in this template, such as the item contact form and extent map
+    - endpoints for external services used in this template, such as the item contact form and extent map, via site_meta
+    - keys to decrypt and verify administrative metadata for reading the record's administrative metadata
     - a callable to get a RecordSummary for a given identifier (used for related items from aggregations)
 
     Note: This class is an incomplete rendering of Record properties (which is itself an incomplete mapping of the
@@ -44,10 +47,11 @@ class ItemCatalogue(ItemBase):
         self,
         site_meta: SiteMeta,
         record: RecordRevision,
+        admin_meta_keys: AdministrationKeys | None,
         get_record: Callable[[str], RecordRevision],
         **kwargs: Any,
     ) -> None:
-        super().__init__(record)
+        super().__init__(record=record, admin_keys=admin_meta_keys)
         self._meta = site_meta
         self._get_record = get_record
 
@@ -86,6 +90,11 @@ class ItemCatalogue(ItemBase):
         return Link(value=short_ref, href=href, external=True)
 
     @property
+    def _restricted(self) -> bool:
+        """Whether the item is restricted."""
+        return self.admin_access_level != AccessLevel.PUBLIC
+
+    @property
     def _items(self) -> ItemsTab:
         """Items tab."""
         return ItemsTab(aggregations=self._aggregations)
@@ -93,7 +102,7 @@ class ItemCatalogue(ItemBase):
     @property
     def _data(self) -> DataTab:
         """Data tab."""
-        return DataTab(access_level=self.access_level, distributions=self.distributions)
+        return DataTab(restricted=self._restricted, distributions=self.distributions)
 
     @property
     def _authors(self) -> AuthorsTab:
@@ -135,6 +144,7 @@ class ItemCatalogue(ItemBase):
             item_id=self.resource_id,
             item_type=self.resource_type,
             identifiers=self._identifiers,
+            gitlab_issues=self.admin_gitlab_issues,
             dates=self._dates,
             series=self.series_descriptive,
             scale=self._record.identification.spatial_resolution,
@@ -247,7 +257,7 @@ class ItemCatalogue(ItemBase):
             published_date=self._dates.publication,
             revision_date=self._dates.revision,
             aggregations=self._aggregations,
-            access_level=self.access_level,
+            restricted=self._restricted,
             citation=self.citation_html,
             abstract=self.abstract_html,
         )

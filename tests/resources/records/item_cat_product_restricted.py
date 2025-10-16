@@ -18,6 +18,9 @@ from lantern.lib.metadata_library.models.record.enums import (
     HierarchyLevelCode,
     OnlineResourceFunctionCode,
 )
+from lantern.lib.metadata_library.models.record.presets.admin import BAS_STAFF
+from lantern.lib.metadata_library.models.record.utils.admin import get_admin, set_admin
+from tests.resources.records.admin_keys.testing_keys import load_keys as load_test_keys
 from tests.resources.records.utils import make_record
 
 # A record for an ItemCatalogue instance with minimum required fields for products.
@@ -43,6 +46,11 @@ record.identification.constraints = Constraints(
         ),
     ]
 )
+
+keys = load_test_keys()
+administration = get_admin(keys=keys, record=record)
+administration.access_permissions = [BAS_STAFF]
+set_admin(keys=keys, record=record, admin_meta=administration)
 
 distributor = Contact(
     organisation=ContactIdentity(

@@ -425,7 +425,17 @@ To aid in debugging and testing, a set of fake records are included in `tests/re
 
 These records are used within tests but can and should also be used when developing [Templates](/docs/site.md#templates).
 
-An in-memory [Store](/docs/architecture.md#stores) is provided to load these records for use with [Exporters](/docs/architecture.md#exporters).
+A set of test keys are used for signing and encrypting
+[Administrative Metadata](/docs/data-model.md#item-administrative-metadata) within test records. These keys are
+were generated using `tests.resources.records.admin_keys.testing_keys._make_keys()` and intended as static values
+available via [Pytest-Env](#pytest-env) and `tests.conftest._admin_meta_keys` and its related fixture.
+
+> [!TIP]
+> An additional `X_ADMIN_METADATA_SIGNING_KEY_PRIVATE` environment variable is set to load the private signing key for
+> use signing admin metadata instances for use in tests and test records.
+
+An in-memory [Store](/docs/architecture.md#stores) is provided to load these records for use with
+[Exporters](/docs/architecture.md#exporters).
 
 To add a new test record:
 

@@ -39,62 +39,19 @@ Record Revisions are implemented as a [Catalogue Record](#catalogue-records) sub
 > [!NOTE]
 > Unless stated otherwise, references to 'Records' elsewhere in this documentation refer to the `RecordRevision` class.
 
-### Record authoring
-
-Records can be authored using any tool or system that can produce a valid record configuration. These may be created
-directly as JSON documents, or dumped from `Record` data class instances.
-
-<!-- pyml disable md028 -->
-> [!TIP]
-> For manual editing, consider an editor that supports JSON schemas for inline validation and enum auto-completion.
->
-> Within Python applications or scripts, consider using `Record` data classes for typed record properties, validation
-> and serialisation to JSON.
-
-> [!NOTE]
-> There is no formal guidance on what to include in record configurations. However, a starting point may be the
-> [Examples Records](https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery-v1#example-records) defined
-> for the MAGIC Discovery ISO 19115 Profile.
-
-> [!TIP]
-> See the [Guide](https://data.bas.ac.uk/-/formatting) for how titles, summaries, abstracts and lineage statements can
-> be formatted.
-<!-- pyml enable md028 -->
-
-### Record presets
-
-If authoring Records using data classes, a set of *presents* in the `lantern.lib.metadata_library.models.record.presets`
-package are available to create common config subsets and improve consistency across records.
-
-For example:
-
-- `lantern.lib.metadata_library.models.record.presets.extents.make_bbox_extent`:
-  - simplifies creating a bounding box extent from a set of coordinates
-- `lantern.lib.metadata_library.models.record.presets.constraints.OGL_V3`:
-  - provides a constant for the Open Government Licence
-
-> [!TIP]
-> A larger scale present (`lantern.lib.metadata_library.models.record.presets.base.RecordMagicDiscoveryV1`) exists for
-> creating [MAGIC Discovery ISO 19115 Profile](https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery-v1)
-> compliant records.
-
 ### Record requirements
 
-In addition to ISO 19115 mandatory properties, the Data Catalogue requires these properties are set in all records:
+In addition to [Record Validation](/docs/libraries.md#record-validation), the Data Catalogue requires all records:
 
-- `file_identifier`
-  - MUST use UUIDs in values
+- use a UUID value for the `file_identifier`:
   - to ensure resources can be distinguished without relying on a value such as title that may change or not be unique
   - to ensure resource identifiers and aliases are distinct and can't be ambiguous
-- an `identification.identifier`, as per [1]
+- include an `identification.identifier`, as per [1]
   - to determine if a record is part of the Catalogue
-- an `identification.identifier.contacts.*.contact` with at least the 'pointOfContact' role
+- include an `identification.identifier.contacts.*.contact` with at least the 'pointOfContact' role
   - for use with the item contact tab
-
-The Catalogue also requires:
-
-- extents, if included, MUST use unique identifiers
-- aliases, if included:
+- MUST use unique identifiers for extents if included
+- MUST structure any [Aliases](#item-aliases) as below if included:
   - MUST use values in the form: `{prefix}/{value}`
   - MUST use an allowed prefix for each hierarchy level, as per [2]
   - MUST NOT use UUIDs in values (to avoid conflicts with `file_identifier` values)
@@ -246,7 +203,7 @@ This schema and requirements are implicitly implemented within this class. Other
 - selecting the most suitable description for the item (purpose > abstract)
 - determining whether an item should be marked as removed/deleted (based item maintenance info)
 
-### Item Aliases
+### Item aliases
 
 Items are identified by their Record's UUIDv4 `file_identifier` property, including in URLs for item pages. These
 values are intentionally non-meaningful and due to their length and randomness not memorable. Whilst useful for ensuring

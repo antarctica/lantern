@@ -24,7 +24,7 @@ from lantern.models.item.base.enums import AccessLevel, ResourceTypeLabel
 from lantern.models.item.base.item import ItemBase
 from lantern.models.item.base.utils import md_as_html
 from lantern.models.item.catalogue.enums import ResourceTypeIcon
-from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE, GITLAB_NAMESPACE
+from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 
 TFormattedDate = TypeVar("TFormattedDate", bound="FormattedDate")
@@ -76,7 +76,7 @@ class FormattedDate:
 class ItemSummaryFragments:
     """Properties shown as part of an ItemSummaryCatalogue."""
 
-    access: AccessLevel
+    restricted: bool
     item_type: str
     item_type_icon: str
     edition: str | None
@@ -138,6 +138,11 @@ class ItemCatalogueSummary(ItemBase):
         return f"{count} {unit}"
 
     @property
+    def _restricted(self) -> bool:
+        """Whether the item is restricted."""
+        return self.admin_access_level != AccessLevel.PUBLIC
+
+    @property
     def summary_html(self) -> str:
         """Summary with Markdown formatting encoded as HTML if present or a blank string."""
         return md_as_html(self.summary_md) if self.summary_md else md_as_html(" ")
@@ -147,7 +152,7 @@ class ItemCatalogueSummary(ItemBase):
         """UI fragments (icons and labels) for item summary."""
         published = self._date if self.resource_type != HierarchyLevelCode.COLLECTION else None
         return ItemSummaryFragments(
-            access=self.access_level,
+            restricted=self._restricted,
             item_type=self._resource_type_label,
             item_type_icon=self._resource_type_icon,
             edition=self._edition,
@@ -457,15 +462,6 @@ class Identifiers(RecordIdentifiers):
         # noinspection PyTypeChecker
         super().__init__(identifiers)
 
-    @staticmethod
-    def _make_gitlab_issue_ref(href: str) -> str:
-        """
-        Create GitLab issue reference.
-
-        E.g. https://gitlab.data.bas.ac.uk/MAGIC/foo/-/issues/123 -> MAGIC/foo#123                                                                                                                                                                              .
-        """
-        return f"{href.split('/')[-5]}/{href.split('/')[-4]}#{href.split('/')[-1]}"
-
     @property
     def doi(self) -> list[Link]:
         """DOIs for Item."""
@@ -478,15 +474,6 @@ class Identifiers(RecordIdentifiers):
         """ISBNs for Item."""
         # noinspection PyTypeChecker
         return [identifier.identifier for identifier in self.filter("isbn")]
-
-    @property
-    def gitlab_issues(self) -> list[str]:
-        """
-        GitLab issues for Item.
-
-        Returned as references rather than links to discourage others viewing issues.
-        """
-        return [self._make_gitlab_issue_ref(identifier.href) for identifier in self.filter(GITLAB_NAMESPACE)]
 
     @property
     def aliases(self) -> list[Link]:
@@ -584,7 +571,7 @@ class PageSummary:
         published_date: FormattedDate | None,
         revision_date: FormattedDate | None,
         aggregations: Aggregations,
-        access_level: AccessLevel,
+        restricted: bool,
         citation: str | None,
         abstract: str,
     ) -> None:
@@ -593,7 +580,7 @@ class PageSummary:
         self._published_date = published_date
         self._revision_date = revision_date
         self._aggregations = aggregations
-        self._access_type = access_level
+        self._restricted = restricted
         self._citation = citation
         self._abstract = abstract
 
@@ -604,7 +591,7 @@ class PageSummary:
 
         Contains all properties except abstract and citation.
         """
-        if self.access != AccessLevel.PUBLIC:
+        if self.restricted:
             return True
         if self._item_type == HierarchyLevelCode.COLLECTION:
             return False
@@ -650,9 +637,9 @@ class PageSummary:
         return len(self._aggregations.child_items)
 
     @property
-    def access(self) -> AccessLevel:
+    def restricted(self) -> bool:
         """Access restrictions."""
-        return self._access_type
+        return self._restricted
 
     @property
     def citation(self) -> str | None:

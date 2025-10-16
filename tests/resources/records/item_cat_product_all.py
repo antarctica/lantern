@@ -1,4 +1,3 @@
-import json
 from datetime import date
 
 from lantern.lib.metadata_library.models.record.elements.common import (
@@ -36,7 +35,10 @@ from lantern.lib.metadata_library.models.record.enums import (
     HierarchyLevelCode,
     OnlineResourceFunctionCode,
 )
-from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE, GITLAB_NAMESPACE
+from lantern.lib.metadata_library.models.record.utils.admin import get_admin, set_admin
+from lantern.lib.metadata_library.models.record.utils.kv import set_kv
+from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
+from tests.resources.records.admin_keys.testing_keys import load_keys as load_test_keys
 from tests.resources.records.utils import make_record
 
 # A record for an ItemCatalogue instance with all supported fields for products.
@@ -129,11 +131,6 @@ record.identification.identifiers = Identifiers(
             identifier="30825673-6276-4e5a-8a97-f97f2094cd25",
             href=f"https://{CATALOGUE_NAMESPACE}/items/30825673-6276-4e5a-8a97-f97f2094cd25",
             namespace=CATALOGUE_NAMESPACE,
-        ),
-        Identifier(
-            identifier=f"https://{GITLAB_NAMESPACE}/MAGIC/test/-/issues/123",
-            href=f"https://{GITLAB_NAMESPACE}/MAGIC/test/-/issues/123",
-            namespace=GITLAB_NAMESPACE,
         ),
         Identifier(
             identifier="maps/test123",
@@ -269,9 +266,7 @@ record.identification.graphic_overviews = GraphicOverviews(
     ]
 )
 record.identification.other_citation_details = "Produced by the Mapping and Geographic Information Centre, British Antarctic Survey, 2025, version 1, https://data.bas.ac.uk/maps/1005."
-record.identification.supplemental_information = json.dumps(
-    {"physical_size_width_mm": "210", "physical_size_height_mm": "297", "sheet_number": "4"}
-)
+set_kv({"physical_size_width_mm": "210", "physical_size_height_mm": "297", "sheet_number": "4"}, record)
 
 # add a related peer
 record.identification.aggregations.append(
@@ -508,3 +503,8 @@ record.distribution = [
         ),
     ),
 ]
+
+keys = load_test_keys()
+administration = get_admin(keys=keys, record=record)
+administration.gitlab_issues = ["https://gitlab.data.bas.ac.uk/MAGIC/test/-/issues/123"]
+set_admin(keys=keys, record=record, admin_meta=administration)

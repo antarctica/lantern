@@ -5,14 +5,17 @@ class AccessLevel(Enum):
     """
     Item access levels.
 
-    Where 'NONE' is a fallback value that should not be needed (as items with no access would not be catalogued).
-    Where 'BAS_SOME' represents undefined access that will be resolved when accessing the item.
+    Where:
+    - 'NONE' is a fallback value that should not be needed (as items with no access would not be catalogued)
+    - 'UNKNOWN' represents undefined access that will be resolved when accessing the item (legacy measure)
+    - 'BAS_STAFF' represents general access by staff employed by UKRI at BAS
+    - 'PUBLIC' represents unrestricted public access
     """
 
     NONE = "none"
+    UNKNOWN = "unknown"
+    BAS_STAFF = "bas_staff"
     PUBLIC = "public"
-    BAS_ALL = "bas_all"
-    BAS_SOME = "bas_some"
 
 
 class ResourceTypeLabel(Enum):

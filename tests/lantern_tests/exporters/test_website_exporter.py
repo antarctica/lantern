@@ -8,6 +8,7 @@ from unittest.mock import PropertyMock
 from pytest_mock import MockerFixture
 
 from lantern.exporters.website import WebsiteSearchExporter
+from lantern.lib.metadata_library.models.record.elements.administration import Administration
 from lantern.lib.metadata_library.models.record.elements.common import Identifier
 from lantern.lib.metadata_library.models.record.elements.identification import Aggregation, Constraint
 from lantern.lib.metadata_library.models.record.enums import (
@@ -15,9 +16,11 @@ from lantern.lib.metadata_library.models.record.enums import (
     ConstraintRestrictionCode,
     ConstraintTypeCode,
 )
+from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
+from lantern.lib.metadata_library.models.record.utils.admin import set_admin
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
-from tests.conftest import _get_record_open, _revision_config_min
+from tests.conftest import _admin_meta_keys, _get_record_open, _revision_config_min
 
 
 class TestWebsiteSearchExporter:
@@ -60,9 +63,14 @@ class TestWebsiteSearchExporter:
         record.file_identifier = identifier
 
         if identifier == "in_scope":
+            # access permissions
+            admin_meta = Administration(id=record.file_identifier, access_permissions=[OPEN_ACCESS])
+            set_admin(keys=_admin_meta_keys(), record=record, admin_meta=admin_meta)
+            # constraint
             record.identification.constraints.append(
                 Constraint(type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.UNRESTRICTED)
             )
+
             record.identification.aggregations.append(
                 Aggregation(
                     identifier=Identifier(identifier="out_scope_superseded", namespace="data.bas.ac.uk"),

@@ -1,4 +1,5 @@
 from lantern.lib.metadata_library.models.record.enums import ProgressCode
+from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 from lantern.models.item.base.enums import AccessLevel, ResourceTypeLabel
 from lantern.models.item.base.item import ItemBase
 from lantern.models.record.revision import RecordRevision
@@ -25,8 +26,10 @@ class ItemWebsiteSearch(ItemBase):
     Note: This class supports a limited subset of Record properties, as determined by the needs of the Public Website.
     """
 
-    def __init__(self, record: RecordRevision, source: str, base_url: str) -> None:
-        super().__init__(record)
+    def __init__(
+        self, record: RecordRevision, admin_meta_keys: AdministrationKeys | None, source: str, base_url: str
+    ) -> None:
+        super().__init__(record=record, admin_keys=admin_meta_keys)
         self._source = source
         self._base_url = base_url
 
@@ -124,9 +127,9 @@ class ItemWebsiteSearch(ItemBase):
         """
         Whether item is open access.
 
-        As determined by access constraints.
+        As determined by administrative metadata.
         """
-        return self.access_level == AccessLevel.PUBLIC
+        return self.admin_access_level == AccessLevel.PUBLIC
 
     def dumps(self) -> dict:
         """

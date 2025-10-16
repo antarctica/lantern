@@ -7,6 +7,8 @@ from boto3 import client as S3Client  # noqa: N812
 from pytest_mock import MockerFixture
 
 from lantern.exporters.xml import IsoXmlExporter, IsoXmlHtmlExporter
+from lantern.lib.metadata_library.models.record.elements.administration import Administration
+from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, set_admin
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
 
@@ -57,6 +59,38 @@ class TestIsoXmlExporter:
 
         result = exporter.dumps()
         assert "<gmi:MI_Metadata" in result
+
+    def test_dumps_no_admin_metadata(
+        self,
+        mocker: MockerFixture,
+        fx_logger: logging.Logger,
+        fx_admin_meta_keys: AdministrationKeys,
+        fx_s3_bucket_name: str,
+        fx_s3_client: S3Client,
+        fx_revision_model_min: RecordRevision,
+    ):
+        """Can verify dumped records do not include administrative metadata."""
+        with TemporaryDirectory() as tmp_path:
+            output_path = Path(tmp_path)
+        mock_config = mocker.Mock()
+        type(mock_config).ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE = PropertyMock(
+            return_value=fx_admin_meta_keys.encryption_private
+        )
+        type(mock_config).ADMIN_METADATA_SIGNING_KEY_PUBLIC = PropertyMock(
+            return_value=fx_admin_meta_keys.signing_public
+        )
+        type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
+        type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
+        meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
+
+        value_admin = Administration(id=fx_revision_model_min.file_identifier)
+        set_admin(keys=fx_admin_meta_keys, record=fx_revision_model_min, admin_meta=value_admin)
+
+        exporter = IsoXmlExporter(meta=meta, logger=fx_logger, s3=fx_s3_client, record=fx_revision_model_min)
+
+        result = exporter.dumps()
+        assert "<gmi:MI_Metadata" in result
+        assert "administrative_metadata" not in result
 
 
 class TestIsoXmlHtmlExporter:

@@ -2,6 +2,7 @@ import json
 
 import pytest
 
+from lantern.lib.metadata_library.models.record.elements.administration import Administration, Permission
 from lantern.lib.metadata_library.models.record.elements.common import Contact as RecordContact
 from lantern.lib.metadata_library.models.record.elements.common import (
     ContactIdentity,
@@ -36,7 +37,8 @@ from lantern.lib.metadata_library.models.record.enums import (
     OnlineResourceFunctionCode,
 )
 from lantern.lib.metadata_library.models.record.presets.projections import EPSG_4326
-from lantern.models.item.base.elements import Contact, Contacts, Extent, Extents
+from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, set_admin
+from lantern.models.item.base.elements import Contact, Contacts, Extent, Extents, Link
 from lantern.models.item.base.enums import AccessLevel
 from lantern.models.item.base.item import ItemBase
 from lantern.models.record.record import Record
@@ -47,131 +49,94 @@ class TestItemBase:
     """Test base item."""
 
     @pytest.mark.parametrize("class_", ["Record", "RecordRevision"])
-    def test_init(self, fx_record_model_min: Record, fx_revision_model_min: RecordRevision, class_: str):
-        """Can create an ItemBase from a Record."""
+    @pytest.mark.parametrize("has_admin_keys", [False, True])
+    def test_init(
+        self,
+        fx_record_model_min: Record,
+        fx_revision_model_min: RecordRevision,
+        fx_admin_meta_keys: AdministrationKeys,
+        class_: str,
+        has_admin_keys: bool,
+    ):
+        """Can create an ItemBase from a Record and optional admin access keys."""
         model = fx_record_model_min if class_ == "Record" else fx_revision_model_min
-        item = ItemBase(model)
+        keys = fx_admin_meta_keys if has_admin_keys else None
+
+        item = ItemBase(record=model, admin_keys=keys)
         assert item._record == model
+        assert item._admin_keys == keys
+
+    @pytest.mark.parametrize("has_admin", [False, True])
+    def test_admin_metadata(
+        self,
+        fx_revision_model_min: RecordRevision,
+        fx_admin_meta_element: Administration,
+        fx_admin_meta_keys: AdministrationKeys,
+        has_admin: bool,
+    ):
+        """Can get admin metadata if present."""
+        if has_admin:
+            fx_admin_meta_element.id = fx_revision_model_min.file_identifier
+            set_admin(keys=fx_admin_meta_keys, record=fx_revision_model_min, admin_meta=fx_admin_meta_element)
+
+        item = ItemBase(record=fx_revision_model_min, admin_keys=fx_admin_meta_keys)
+        if has_admin:
+            assert item._admin_metadata == fx_admin_meta_element
+        else:
+            assert item._admin_metadata is None
 
     @pytest.mark.parametrize(
-        ("value", "expected"),
+        ("has_admin_metadata", "permissions", "expected"),
         [
-            ("", []),
-            ("invalid", []),
-            (
-                f"#{json.dumps([{'scheme': 'x', 'schemeVersion': 'x'}])}",
-                [],
-            ),
-            (
-                f"#{json.dumps([{'scheme': 'ms_graph', 'schemeVersion': '1', 'directoryId': 'x', 'objectId': 'x'}])}",
-                [],
-            ),
-            (
-                f"#{json.dumps([{'scheme': 'ms_graph', 'schemeVersion': '1', 'directoryId': 'b311db95-32ad-438f-a101-7ba061712a4e', 'objectId': '6fa3b48c-393c-455f-b787-c006f839b51f'}])}",
-                [AccessLevel.BAS_ALL],
-            ),
+            (False, [], AccessLevel.NONE),
+            (True, [], AccessLevel.NONE),
+            (True, [Permission(directory="*", group="~public")], AccessLevel.PUBLIC),
+            (True, [Permission(directory="x", group="x"), Permission(directory="y", group="y")], AccessLevel.UNKNOWN),
         ],
     )
-    def test_parse_permissions(self, value: str, expected: list[AccessLevel]):
-        """Can parse permissions string."""
-        result = ItemBase._parse_permissions(value)
-        assert result == expected
+    def test_admin_access_level(
+        self,
+        fx_revision_model_min: RecordRevision,
+        fx_admin_meta_element: Administration,
+        fx_admin_meta_keys: AdministrationKeys,
+        has_admin_metadata: bool,
+        permissions: list[Permission],
+        expected: AccessLevel,
+    ):
+        """Can resolve access type from admin metadata."""
+        if has_admin_metadata:
+            fx_admin_meta_element.id = fx_revision_model_min.file_identifier
+            fx_admin_meta_element.access_permissions = permissions
+            set_admin(keys=fx_admin_meta_keys, record=fx_revision_model_min, admin_meta=fx_admin_meta_element)
+
+        item = ItemBase(record=fx_revision_model_min, admin_keys=fx_admin_meta_keys)
+        assert item.admin_access_level == expected
 
     @pytest.mark.parametrize(
-        ("value", "expected"),
+        ("has_admin_metadata", "issues", "expected"),
         [
-            (Constraints([]), AccessLevel.NONE),
-            (
-                Constraints(
-                    [
-                        Constraint(
-                            type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.UNRESTRICTED
-                        )
-                    ]
-                ),
-                AccessLevel.PUBLIC,
-            ),
-            (
-                Constraints(
-                    [
-                        Constraint(
-                            type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.UNRESTRICTED
-                        ),
-                        Constraint(
-                            type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.UNRESTRICTED
-                        ),
-                    ]
-                ),
-                AccessLevel.NONE,
-            ),
-            (
-                Constraints(
-                    [Constraint(type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.RESTRICTED)]
-                ),
-                AccessLevel.BAS_SOME,
-            ),
-            (
-                Constraints(
-                    [
-                        Constraint(
-                            type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.RESTRICTED
-                        ),
-                        Constraint(
-                            type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.RESTRICTED
-                        ),
-                    ]
-                ),
-                AccessLevel.NONE,
-            ),
-            (
-                Constraints(
-                    [
-                        Constraint(
-                            type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.UNRESTRICTED
-                        ),
-                        Constraint(
-                            type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.RESTRICTED
-                        ),
-                    ]
-                ),
-                AccessLevel.NONE,
-            ),
-            (
-                Constraints(
-                    [
-                        Constraint(
-                            type=ConstraintTypeCode.ACCESS,
-                            restriction_code=ConstraintRestrictionCode.RESTRICTED,
-                            href=f"#{json.dumps([{'scheme': 'ms_graph', 'schemeVersion': '1', 'directoryId': 'b311db95-32ad-438f-a101-7ba061712a4e', 'objectId': '6fa3b48c-393c-455f-b787-c006f839b51f'}])}",
-                        ),
-                    ]
-                ),
-                AccessLevel.BAS_ALL,
-            ),
-            (
-                Constraints(
-                    [
-                        Constraint(
-                            type=ConstraintTypeCode.ACCESS,
-                            restriction_code=ConstraintRestrictionCode.RESTRICTED,
-                            href=f"#{json.dumps([{'scheme': 'ms_graph', 'schemeVersion': '1', 'directoryId': 'b311db95-32ad-438f-a101-7ba061712a4e', 'objectId': '6fa3b48c-393c-455f-b787-c006f839b51f'}])}",
-                        ),
-                        Constraint(
-                            type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.UNRESTRICTED
-                        ),
-                        Constraint(
-                            type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.RESTRICTED
-                        ),
-                    ]
-                ),
-                AccessLevel.BAS_ALL,
-            ),
+            (False, [], []),
+            (True, [], []),
+            (True, ["x"], [Link(value="x", href="x", external=True)]),
         ],
     )
-    def test_parse_access(self, value: Constraints, expected: AccessLevel):
-        """Can resolve access type from constraints."""
-        result = ItemBase._parse_access(value)
-        assert result == expected
+    def test_admin_gitlab_issues(
+        self,
+        fx_revision_model_min: RecordRevision,
+        fx_admin_meta_element: Administration,
+        fx_admin_meta_keys: AdministrationKeys,
+        has_admin_metadata: bool,
+        issues: list[str],
+        expected: list[Link],
+    ):
+        """Can get GitLab issues from admin metadata if present."""
+        if has_admin_metadata:
+            fx_admin_meta_element.id = fx_revision_model_min.file_identifier
+            fx_admin_meta_element.gitlab_issues = issues
+            set_admin(keys=fx_admin_meta_keys, record=fx_revision_model_min, admin_meta=fx_admin_meta_element)
+
+        item = ItemBase(record=fx_revision_model_min, admin_keys=fx_admin_meta_keys)
+        assert item.admin_gitlab_issues == expected
 
     def test_abstract_raw(self, fx_revision_model_min: RecordRevision):
         """Can get aw Abstract."""
@@ -197,24 +162,6 @@ class TestItemBase:
         item = ItemBase(fx_revision_model_min)
 
         assert item.abstract_html == expected
-
-    @pytest.mark.parametrize(
-        ("value", "expected"),
-        [
-            (
-                Constraint(type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.UNRESTRICTED),
-                AccessLevel.PUBLIC,
-            ),
-            (None, AccessLevel.NONE),
-        ],
-    )
-    def test_access(self, fx_revision_model_min: RecordRevision, value: Constraint | None, expected: AccessLevel):
-        """Can get optional access constraint and any associated permissions."""
-        if value is not None:
-            fx_revision_model_min.identification.constraints = Constraints([value])
-        item = ItemBase(fx_revision_model_min)
-
-        assert item.access_level == expected
 
     def test_aggregations(self, fx_revision_model_min: RecordRevision):
         """Can get aggregations from record."""
@@ -593,7 +540,9 @@ class TestItemBase:
 
         assert item.summary_plain == expected
 
-    @pytest.mark.parametrize(("value", "expected"), [(None, {}), ("", {}), ({}, {}), ('{"x":"x"}', {"x": "x"})])
+    @pytest.mark.parametrize(
+        ("value", "expected"), [(None, {}), ("", {}), ({}, {}), ('{"x":"x"}', {"x": "x"}), ("[]", {}), ("⭐", {})]
+    )
     def test_kv(self, fx_revision_model_min: RecordRevision, value: str | None, expected: dict[str, str]):
         """Can get supplemental information as a key value dict."""
         fx_revision_model_min.identification.supplemental_information = value

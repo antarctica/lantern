@@ -18,7 +18,9 @@ from lantern.lib.metadata_library.models.record.enums import (
     DatePrecisionCode,
     HierarchyLevelCode,
 )
-from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE, GITLAB_NAMESPACE
+from lantern.lib.metadata_library.models.record.utils.admin import get_admin, set_admin
+from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
+from tests.resources.records.admin_keys.testing_keys import load_keys as load_test_keys
 from tests.resources.records.utils import make_record
 
 # A record for an ItemCatalogue instance with all supported fields for collections.
@@ -102,11 +104,6 @@ record.identification.identifiers = Identifiers(
             namespace=CATALOGUE_NAMESPACE,
         ),
         Identifier(
-            identifier=f"https://{GITLAB_NAMESPACE}/MAGIC/test/-/issues/123",
-            href=f"https://{GITLAB_NAMESPACE}/MAGIC/test/-/issues/123",
-            namespace=GITLAB_NAMESPACE,
-        ),
-        Identifier(
             identifier="collections/test123",
             href=f"https://{CATALOGUE_NAMESPACE}/collections/test123",
             namespace=ALIAS_NAMESPACE,
@@ -170,3 +167,8 @@ record.identification.aggregations.append(
 # Can't add a superseded peer as no suitable target (is added in max product)
 # Can't add opposite side relation as not a physical map side
 # Can't add a parent physical map as not a physical map side
+
+keys = load_test_keys()
+administration = get_admin(keys=keys, record=record)
+administration.gitlab_issues = ["https://gitlab.data.bas.ac.uk/MAGIC/test/-/issues/123"]
+set_admin(keys=keys, record=record, admin_meta=administration)

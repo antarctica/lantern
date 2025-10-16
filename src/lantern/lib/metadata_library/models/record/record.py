@@ -280,19 +280,60 @@ class Record:
         converter.register_structure_hook(Record, lambda d, t: Record.structure(d))
         return converter.structure(value, cls)
 
-    def dumps(self) -> dict:
-        """Export Record as a dict with plain, JSON safe, types."""
+    def strip_admin_metadata(self) -> None:
+        """
+        Remove any administrative metadata instance included in the record.
+
+        Can't use get/set_kv due to circular import.
+        If admin metadata was the only KV, set supplemental_information to None rather than an empty dict.
+        """
+        sinfo = self.identification.supplemental_information
+        if sinfo is None:
+            return
+        try:
+            kv = json.loads(sinfo)
+        except json.JSONDecodeError:
+            return
+        if not isinstance(kv, dict):
+            return
+        kv.pop("administrative_metadata", None)
+        if len(kv) == 0:
+            self.identification.supplemental_information = None
+            return
+        self.identification.supplemental_information = json.dumps(kv)
+
+    def dumps(self, strip_admin: bool = True) -> dict:
+        """
+        Export Record as a dict with plain, JSON safe, types.
+
+        If `strip_admin` is true, any administrative metadata instance included in the record is removed.
+        """
+        if strip_admin:
+            self.strip_admin_metadata()
+
         converter = cattrs.Converter()
         converter.register_unstructure_hook(Record, lambda d: d.unstructure())
         return converter.unstructure(self)
 
-    def dumps_json(self) -> str:
-        """Export Record as JSON Schema instance string."""
-        return json.dumps({"$schema": self._schema, **self.dumps()}, indent=2, ensure_ascii=False)
+    def dumps_json(self, strip_admin: bool = True) -> str:
+        """
+        Export Record as JSON Schema instance string.
 
-    def dumps_xml(self) -> str:
-        """Export Record as an ISO 19115 XML document using the BAS Metadata Library."""
-        config = MetadataRecordConfigV4(**_decode_date_properties(self.dumps()))
+        Note: Indentation is automatically enabled.
+
+        If `strip_admin` is true, any administrative metadata instance included in the record is removed.
+        """
+        return json.dumps(
+            {"$schema": self._schema, **self.dumps(strip_admin=strip_admin)}, indent=2, ensure_ascii=False
+        )
+
+    def dumps_xml(self, strip_admin: bool = True) -> str:
+        """
+        Export Record as an ISO 19115 XML document using the BAS Metadata Library.
+
+        If `strip_admin` is true, any administrative metadata instance included in the record is removed.
+        """
+        config = MetadataRecordConfigV4(**_decode_date_properties(self.dumps(strip_admin=strip_admin)))
         record = MetadataRecord(configuration=config)
         return record.generate_xml_document().decode()
 

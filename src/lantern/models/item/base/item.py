@@ -1,7 +1,6 @@
-import json
-from json import JSONDecodeError
-from urllib.parse import unquote
+from functools import cached_property
 
+from lantern.lib.metadata_library.models.record.elements.administration import Administration
 from lantern.lib.metadata_library.models.record.elements.common import Identifier, Identifiers, Series
 from lantern.lib.metadata_library.models.record.elements.distribution import Distribution
 from lantern.lib.metadata_library.models.record.elements.identification import (
@@ -19,10 +18,13 @@ from lantern.lib.metadata_library.models.record.enums import (
     ConstraintTypeCode,
     HierarchyLevelCode,
 )
-from lantern.models.item.base.elements import Contact, Contacts, Extent, Extents
+from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
+from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys as AdminMetadataKeys
+from lantern.lib.metadata_library.models.record.utils.admin import get_admin
+from lantern.lib.metadata_library.models.record.utils.kv import get_kv
+from lantern.models.item.base.elements import Contact, Contacts, Extent, Extents, Link
 from lantern.models.item.base.enums import AccessLevel
 from lantern.models.item.base.utils import md_as_html, md_as_plain
-from lantern.models.record.const import PERMISSIONS_BAS_GROUP, PERMISSIONS_NERC_DIRECTORY
 from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
 
@@ -34,91 +36,61 @@ class ItemBase:
     Items are a high-level, read-only, and non-standards specific view of a resource via an underlying Record instance,
     to make it easier and less cumbersome to use through various filtering, processing and formatting methods.
 
+    Items provide access to administrative metadata if defined and encryption and signing keys are set via the
+    `admin_keys` argument.
+
     Item subclasses are used for different contexts and systems. This base class contains core/common properties and
     methods and is not expected to be used directly.
 
     It is expected, and acceptable, to use the underlying `_record` property to access information not made directly
     available by this class. Especially for properties this class would simply pass through to the record.
 
+    Properties for administrative metadata elements can be accessed from the `_admin_metadata` property. All admin
+    metadata properties are optional and return `None` or a suitable equivalent where admin metadata is not included in
+    the record, or keys are not provided to access it.
+
     Base items are compatible with Records and RecordRevisions, depending on available context.
     """
 
-    def __init__(self, record: Record) -> None:
+    def __init__(self, record: Record | RecordRevision, admin_keys: AdminMetadataKeys | None = None) -> None:
         self._record = record
+        self._admin_keys = admin_keys
 
-    @staticmethod
-    def _parse_permissions(href: str | None) -> list[AccessLevel]:
+    @cached_property
+    def _admin_metadata(self) -> Administration | None:
         """
-        Decode permissions encoded in an access constraint.
+        Optional administrative metadata.
 
-        Decodes and maps supported payloads to members of the AccessType enum.
-
-        The ISO 19115 information model does not provide for detailed access permissions to be defined. As a workaround
-        a local convention is used to encode permissions via a URL fragment containing URL encoded serialised JSON data.
-
-        These permissions are only understood (and only intended to be understood) by systems and tools within the BAS
-        Data Catalogue / Metadata ecosystem. They are not considered sensitive information.
-
-        If configured, the JSON data defines a payload defined, and specific to, a scheme name and version. Payloads are
-        not intended to be portable between these schemes. Resources may contain multiple payloads, either to encode
-        multiple permissions within a given scheme (e.g. using logical OR) or to encode permissions in multiple schemes.
-
-        This method only returns of a list of supported/parsable permissions. Other methods will use this list to
-        determine which permissions are applicable in a given context.
+        If present, value is decrypted and verified in terms of its signature and subject resource.
         """
-        permissions = []
+        if self._admin_keys is None:
+            return None
+        return get_admin(keys=self._admin_keys, record=self._record)
 
-        if href is None:
-            return permissions
-
-        href_decoded = unquote(href.replace("#", ""))
-        try:
-            data = json.loads(href_decoded)
-        except JSONDecodeError:
-            return permissions
-
-        for item in data:
-            if (
-                "scheme" not in item
-                or item["scheme"] != "ms_graph"
-                or "schemeVersion" not in item
-                or item["schemeVersion"] != "1"
-            ):
-                continue
-            if item["directoryId"] == PERMISSIONS_NERC_DIRECTORY and item["objectId"] == PERMISSIONS_BAS_GROUP:
-                permissions.append(AccessLevel.BAS_ALL)
-
-        return permissions
-
-    @staticmethod
-    def _parse_access(constraints: Constraints) -> AccessLevel:
+    @property
+    def admin_access_level(self) -> AccessLevel:
         """
-        Determine item access based on access constraints.
+        Resource access.
 
-        Defaults to no access if no access constraints are set.
-        Sets public access if a single unrestricted access constraint is set.
-        Sets intentionally ambiguous 'BAS_SOME' access if a single restricted constraint is set without permissions.
-        May set other options based on any permissions set in constraints.
+        Determined by admin access permissions. Defaults to no access if no access permissions are set.
         """
-        if len(constraints) == 0:
+        if self._admin_metadata is None:
+            return AccessLevel.NONE
+        permissions = self._admin_metadata.access_permissions
+        if len(permissions) == 0:
             return AccessLevel.NONE
 
-        if len(constraints) == 1 and constraints[0].restriction_code == ConstraintRestrictionCode.UNRESTRICTED:
+        if permissions == [OPEN_ACCESS]:
             return AccessLevel.PUBLIC
 
-        if (
-            len(constraints) == 1
-            and constraints[0].restriction_code == ConstraintRestrictionCode.RESTRICTED
-            and constraints[0].href is None
-        ):
-            return AccessLevel.BAS_SOME
+        return AccessLevel.UNKNOWN
 
-        permissions = [perm for constraint in constraints for perm in ItemBase._parse_permissions(constraint.href)]
-        if AccessLevel.BAS_ALL in permissions:
-            return AccessLevel.BAS_ALL
-
-        # fail-safe
-        return AccessLevel.NONE
+    @property
+    def admin_gitlab_issues(self) -> list[Link]:
+        """Optional list of associated GitLab issues."""
+        if self._admin_metadata is None:
+            return []
+        return [Link(value=issue, href=issue, external=True) for issue in self._admin_metadata.gitlab_issues]
 
     @property
     def abstract_raw(self) -> str:
@@ -134,11 +106,6 @@ class ItemBase:
     def abstract_html(self) -> str:
         """Abstract with Markdown formatting, if present, encoded as HTML."""
         return md_as_html(self.abstract_md)
-
-    @property
-    def access_level(self) -> AccessLevel:
-        """Resource access."""
-        return self._parse_access(self.constraints.filter(types=ConstraintTypeCode.ACCESS))
 
     @property
     def aggregations(self) -> Aggregations:
@@ -249,17 +216,17 @@ class ItemBase:
         external record that uses this element another way), an empty dict is returned.
 
         Known (but optional) keys:
+        - administrative_metadata: see `admin_metadata` property
         - width: width of resource when printed in mm
         - height: height of resource when printed in mm
+        - sheet_number: series page/sheet number (due to an oversight in the BAS ISO JSON Schema)
 
         This is not intended to be portable/interoperable across other systems, and is used only within the BAS
         metadata ecosystem of tools but is human-readable to an extent so could be shown elsewhere.
         """
         try:
-            return json.loads(self._record.identification.supplemental_information)
-        except TypeError:
-            return {}
-        except JSONDecodeError:
+            return get_kv(self._record)
+        except (ValueError, TypeError):
             return {}
 
     @property

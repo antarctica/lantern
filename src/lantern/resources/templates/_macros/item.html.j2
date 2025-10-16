@@ -46,7 +46,7 @@
     {% if data.published %}
       {{ published(data.published) }}
     {% endif %}
-    {% if data.access.name != 'PUBLIC' %}
+    {% if data.restricted %}
       {{ access() }}
     {% endif %}
   </section>

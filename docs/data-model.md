@@ -263,6 +263,56 @@ pluralised term related to the Record hierarchy level (e.g. `collections/foo` fo
 > The catalogue does not enforce aliases to be unique across records and the behavior of conflicting aliases is left
 > undefined. Any implicit behaviour MUST NOT be relied upon.
 
+### Item key value data
+
+The `ItemBase` class includes a `kv` property returning a dictionary of:
+
+- parsed [Key Value](/docs/libraries.md#record-key-value-data)
+- or, an empty dict if no KV value is defined, or is malformed
+
+### Item administrative metadata
+
+The `ItemBase` class includes an `admin_metadata` property returning:
+
+- parsed [Administrative Metadata](/docs/libraries.md#record-administrative-metadata)
+- or, `None` if no Admin Metadata is defined, or cannot be decrypted and verified
+
+Additional Item properties, prefixed with `admin_` are provide access to admin metadata properties, or also return `None`.
+
+JSON Web Keys (JWKs) for decrypting JWEs and verifying the signature of JWTs should be configured using
+`ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE` and `ADMIN_METADATA_SIGNING_KEY_PUBLIC`
+[Config Options](/docs/config.md#config-options) respectively.
+
+> [!TIP]
+> Keys can be accessed from [Exporter Metadata](#exporter-metadata) if created from a Config object.
+
+### Item access levels
+
+An access level for each item is available via the `Item.admin_access_level` property. Levels are defined by the
+`lantern.models.item.base.enums.AccessLevel` enum determined by evaluating permissions within the `access_permissions`
+[Administrative Metadata](#item-administrative-metadata) property.
+
+> [!IMPORTANT]
+> External data access systems are responsible for enforcing any access permissions that may apply. The catalogue only
+> indicates whether restrictions may apply at an informative level.
+
+The `ItemBase` class includes an `admin_access_level` property returning the evaluated access level.
+
+> [!NOTE]
+> Items default to the `AccessLevel.NONE` access level where admin metadata is unavailable, or does not include access
+> permissions, allowing open access (as per `lantern.lib.metadata_library.models.record.presets.admin.OPEN_ACCESS`).
+
+[Catalogue Items](#catalogue-items) simplify access levels to a binary *is restricted* value via the `restricted`
+property, returning and defaulting to true unless `Item.admin_access_level == AccessLevel.PUBLIC`.
+
+Where restricted, [Item Templates](/docs/site.md#templates) display additional context in item summaries and
+the data tab (if applicable).
+
+> [!NOTE]
+> Access constraints set in `identification.constraints` within the underlying record are not used to determine access
+> levels, as they are not signed as authentic and so cannot be trusted. They should still be set for information and
+> interoperability with other systems.
+
 ## Verification Jobs
 
 Verification jobs represent individual checks run as part of [Site Verification](/docs/monitoring.md#site-verification).
@@ -281,6 +331,7 @@ The `lantern.models.site.SiteMeta` Python data class implements this concept.
 ## Exporter metadata
 
 Exporter metadata is a superset of [Site metadata](#static-site-metadata) including additional properties such as the
-export path to avoid needing to pass [Config](/docs/config.md) instances to exporters.
+export path and keys for accessing [Administrative Metadata](#item-administrative-metadata) to avoid needing to pass
+[Config](/docs/config.md) and other related instances to exporters.
 
 The `lantern.models.site.ExportMeta` Python data class implements this concept, inheriting from `SiteMeta`.

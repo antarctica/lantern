@@ -137,6 +137,53 @@ Unsupported elements (not normative or exhaustive):
 - `identification.topics`
 - `metadata.maintenance` (`identification.metadata` is supported)
 
+### Record utilities
+
+A set of utility functions in the `lantern.lib.metadata_library.models.record.utils` package are available to perform
+common or complex tasks.
+
+### Record key value data
+
+To support properties that cannot be represented natively in the ISO 19115 information model, key value data can be
+encoded in a JSON string within the `identifification.supplemental_information` element of a Record.
+
+<!-- pyml disable md028 -->
+> [!CAUTION]
+> The use of key values is non-standard and exclusive. If used, other content MUST NOT be included in the element.
+>
+> Keys in this data are not controlled and must be accessed defensively.
+
+> [!TIP]
+> The `lantern.lib.metadata_library.models.record.utils.kv.get_kv` and `set_kv` [Utility Functions](#record-utilities)
+> MAY be used to access and update key value data.
+<!-- pyml enable md028 -->
+
+### Record administrative metadata
+
+To support the internal management of metadata records, additional
+[Administrative metadata](https://gist.github.com/felnne/307bfa81672fbac2cd9cd7dd632a410c#file-schema-md) (as opposed
+to discovery, calibration or other metadata) can be included in Records.
+
+> [!NOTE]
+> Administrative metadata uses an internally developed schema and is not intended for external use. Administrative
+> metadata is stored in the supplemental information element within the ISO 19115 information model but is stripped
+> from exported records.
+
+The `lantern.lib.metadata_library.models.record.elements.administration.Administration` Python data class implements
+this concept and supports encoding/decoding to/from a JSON encoded string.
+
+This string value is included as a custom `pyd` (payload) claim within an asymmetrically signed long-lived JSON Web
+Token (JWT), nested within a symmetrically encrypted JWE (JSON Web Encryption) using the
+`lantern.lib.metadata_library.models.record.utils.admin.AdministrationWrapper` utility class. JWE values should be
+stored in Records a [Key Value](#record-key-value-data) item under a `administrative_metadata` key.
+
+The JSON Web Keys (JWKs) for signing/verifying JWTs and encrypting/decrypting JWEs are held in the
+`lantern.lib.metadata_library.models.record.utils.admin.AdministrationKeys` data class.
+
+> [!TIP]
+> The `lantern.lib.metadata_library.models.record.utils.admin.get_admin` and `set_admin` utility functions SHOULD be
+> used to access and update administrative metadata.
+
 ### Adding new Record properties
 
 > [!CAUTION]

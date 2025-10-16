@@ -93,12 +93,16 @@ class RecordRevision(Record):
         converter.register_structure_hook(RecordRevision, lambda d, t: cls.structure(d))
         return converter.structure(value, cls)
 
-    def dumps(self, with_revision: bool = False) -> dict:
+    def dumps(self, strip_admin: bool = True, with_revision: bool = False) -> dict:
         """
         Export Record Revision as a dict with plain, JSON safe, types.
 
-        `with_revision` False by default for compatibility `dumps_xml()`, `validate()`, etc. from parent class.
+        If `strip_admin` is true, any administrative metadata instance included in the record is removed.
+        `with_revision` is false by default for compatibility `dumps_xml()`, `validate()`, etc. from parent class.
         """
+        if strip_admin:
+            self.strip_admin_metadata()
+
         converter = cattrs.Converter()
         converter.register_unstructure_hook(RecordRevision, lambda d: d.unstructure())
         data = converter.unstructure(self)

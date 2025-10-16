@@ -4,6 +4,9 @@ LANTERN_PARALLEL_JOBS="-1"  # normally -1 (all CPUs)
 LANTERN_ENABLE_FEATURE_SENTRY="false"  # normally false
 LANTERN_SENTRY_ENVIRONMENT="development" # normally development
 
+LANTERN_ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE="op://Shared/MAGIC administrative metadata encryption key/private-jwk-escaped"
+LANTERN_ADMIN_METADATA_SIGNING_KEY_PUBLIC="op://Shared/MAGIC administrative metadata signing key/public-jwk-escaped"
+
 LANTERN_STORE_GITLAB_ENDPOINT="op://Infrastructure/SCAR ADD Metadata Toolbox - GitLab Store/GitLab Instance/password"
 LANTERN_STORE_GITLAB_PROJECT_ID="op://Infrastructure/SCAR ADD Metadata Toolbox - GitLab Store/Project ID/project_id"
 LANTERN_STORE_GITLAB_TOKEN=""  # populate with per-user token with 'developer' role and 'api' scopes

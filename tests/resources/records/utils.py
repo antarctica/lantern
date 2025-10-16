@@ -1,5 +1,6 @@
 from datetime import UTC, date, datetime
 
+from lantern.lib.metadata_library.models.record.elements.administration import Administration
 from lantern.lib.metadata_library.models.record.elements.common import (
     Address,
     Contact,
@@ -33,10 +34,13 @@ from lantern.lib.metadata_library.models.record.enums import (
     OnlineResourceFunctionCode,
     ProgressCode,
 )
+from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.presets.base import RecordMagicDiscoveryV1
 from lantern.lib.metadata_library.models.record.presets.extents import make_bbox_extent, make_temporal_extent
+from lantern.lib.metadata_library.models.record.utils.admin import set_admin
 from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
+from tests.resources.records.admin_keys.testing_keys import load_keys as load_test_keys
 
 
 def make_record(
@@ -136,6 +140,14 @@ def make_record(
 
     record.data_quality.lineage = Lineage(statement="x")
 
+    administration = Administration(
+        id=record.file_identifier,
+        gitlab_issues=[],
+        access_permissions=[OPEN_ACCESS],
+    )
+    keys = load_test_keys()
+    set_admin(keys=keys, record=record, admin_meta=administration)
+
     # Convert to RecordRevision
-    config = {"file_revision": "83fake487e5671f4a1dd7074b92fb94aa68d26bd", **record.dumps()}
+    config = {"file_revision": "83fake487e5671f4a1dd7074b92fb94aa68d26bd", **record.dumps(strip_admin=False)}
     return RecordRevision.loads(config)

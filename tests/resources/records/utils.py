@@ -86,7 +86,7 @@ def make_record(
                     description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
                     function=OnlineResourceFunctionCode.INFORMATION,
                 ),
-                role=[ContactRoleCode.PUBLISHER, ContactRoleCode.POINT_OF_CONTACT],
+                role={ContactRoleCode.PUBLISHER, ContactRoleCode.POINT_OF_CONTACT},
             )
         ]
     )

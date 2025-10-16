@@ -29,24 +29,24 @@ def make_magic_role(roles: set[ContactRoleCode]) -> Contact:
     )
 
 
-def make_esri_distributor() -> Contact:
-    """Esri as distributor."""
-    return Contact(
-        organisation=ContactIdentity(
-            name="Environmental Systems Research Institute", href="https://ror.org/0428exr50", title="ror"
-        ),
-        address=Address(
-            delivery_point="380 New York Street",
-            city="Redlands",
-            administrative_area="California",
-            postal_code="92373",
-            country="United States of America",
-        ),
-        online_resource=OnlineResource(
-            href="https://www.esri.com",
-            title="GIS Mapping Software, Location Intelligence & Spatial Analytics | Esri",
-            description="Corporate website for Environmental Systems Research Institute (ESRI).",
-            function=OnlineResourceFunctionCode.INFORMATION,
-        ),
-        role={ContactRoleCode.DISTRIBUTOR},
-    )
+ESRI_DISTRIBUTOR = Contact(
+    organisation=ContactIdentity(
+        name="Environmental Systems Research Institute", href="https://ror.org/0428exr50", title="ror"
+    ),
+    address=Address(
+        delivery_point="380 New York Street",
+        city="Redlands",
+        administrative_area="California",
+        postal_code="92373",
+        country="United States of America",
+    ),
+    online_resource=OnlineResource(
+        href="https://www.esri.com",
+        title="GIS Mapping Software, Location Intelligence & Spatial Analytics | Esri",
+        description="Corporate website for Environmental Systems Research Institute (ESRI).",
+        function=OnlineResourceFunctionCode.INFORMATION,
+    ),
+    role={ContactRoleCode.DISTRIBUTOR},
+)
+
+MAGIC_DISTRIBUTOR = make_magic_role(roles={ContactRoleCode.DISTRIBUTOR})

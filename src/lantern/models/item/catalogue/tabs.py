@@ -10,7 +10,7 @@ from lantern.lib.metadata_library.models.record.elements.metadata import Metadat
 from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
 from lantern.models.item.base.elements import Contact, Link
 from lantern.models.item.base.elements import Extent as ItemExtent
-from lantern.models.item.base.enums import AccessLevel, ResourceTypeLabel
+from lantern.models.item.base.enums import ResourceTypeLabel
 from lantern.models.item.catalogue.distributions import (
     ArcGisFeatureLayer,
     ArcGisOgcApiFeatures,
@@ -104,8 +104,8 @@ class ItemsTab(Tab):
 class DataTab(Tab):
     """Data tab."""
 
-    def __init__(self, access_level: AccessLevel, distributions: list[RecordDistribution]) -> None:
-        self._access = access_level
+    def __init__(self, restricted: bool, distributions: list[RecordDistribution]) -> None:
+        self._restricted = restricted
         self._resource_distributions = distributions
         self._supported_distributions = [
             ArcGisFeatureLayer,
@@ -139,7 +139,9 @@ class DataTab(Tab):
                     # noinspection PyTypeChecker
                     processed.append(
                         dist_type(
-                            option=dist_option, other_options=self._resource_distributions, access_level=self._access
+                            option=dist_option,
+                            other_options=self._resource_distributions,
+                            restricted=self._restricted,
                         )
                     )
         return processed
@@ -165,9 +167,9 @@ class DataTab(Tab):
         return "far fa-cube"
 
     @property
-    def access(self) -> AccessLevel:
+    def restricted(self) -> bool:
         """Access restrictions for item."""
-        return self._access
+        return self._restricted
 
     @property
     def items(self) -> list[Distribution]:
@@ -396,6 +398,7 @@ class AdditionalInfoTab(Tab):
         item_id: str,
         item_type: HierarchyLevelCode,
         identifiers: Identifiers,
+        gitlab_issues: list[Link],
         dates: Dates,
         datestamp: date,
         kv: dict[str, str],
@@ -413,6 +416,7 @@ class AdditionalInfoTab(Tab):
         self._scale = scale
         self._projection = projection
         self._identifiers = identifiers
+        self._gitlab_issues = gitlab_issues
         self._dates = dates
         self._datestamp = datestamp
         self._maintenance = maintenance
@@ -420,6 +424,15 @@ class AdditionalInfoTab(Tab):
         self._profiles = profiles if profiles is not None else []
         self._kv = kv
         self._revision = revision
+
+    @staticmethod
+    def _make_gitlab_issue_ref(href: str) -> str:
+        """
+        Create GitLab issue reference.
+
+        E.g. https://gitlab.data.bas.ac.uk/MAGIC/foo/-/issues/123 -> MAGIC/foo#123                                                                                                                                                                              .
+        """
+        return f"{href.split('/')[-5]}/{href.split('/')[-4]}#{href.split('/')[-1]}"
 
     @staticmethod
     def _format_scale(value: int | None) -> str | None:
@@ -529,7 +542,7 @@ class AdditionalInfoTab(Tab):
     @property
     def gitlab_issues(self) -> list[str]:
         """GitLab issue references if set."""
-        return self._identifiers.gitlab_issues
+        return [self._make_gitlab_issue_ref(issue.href) for issue in self._gitlab_issues]
 
     @property
     def dates(self) -> dict[str, FormattedDate]:

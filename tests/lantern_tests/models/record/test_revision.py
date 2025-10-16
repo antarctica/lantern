@@ -3,10 +3,13 @@ from datetime import date
 import pytest
 from cattrs import ClassValidationError
 
+from lantern.lib.metadata_library.models.record.elements.administration import Administration
 from lantern.lib.metadata_library.models.record.elements.common import Contact, ContactIdentity, Contacts, Date, Dates
 from lantern.lib.metadata_library.models.record.elements.identification import Identification
 from lantern.lib.metadata_library.models.record.elements.metadata import Metadata
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode, HierarchyLevelCode
+from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, set_admin
+from lantern.lib.metadata_library.models.record.utils.kv import get_kv
 from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
 
@@ -95,17 +98,33 @@ class TestRecordRevision:
             _ = RecordRevision.loads(fx_revision_config_min)
         assert any(isinstance(e, KeyError) and e.args[0] == "file_revision" for e in excinfo.value.exceptions)
 
+    @pytest.mark.parametrize("strip_admin", [False, True])
     @pytest.mark.parametrize("inc_revision", [False, True])
-    def test_dumps(self, fx_revision_config_min: dict, fx_revision_model_min: RecordRevision, inc_revision: bool):
+    def test_dumps(
+        self,
+        fx_revision_config_min: dict,
+        fx_revision_model_min: RecordRevision,
+        fx_admin_meta_keys: AdministrationKeys,
+        strip_admin: bool,
+        inc_revision: bool,
+    ):
         """
         Can encode record revision as a dict that can be serialised to JSON with optional file revision property.
 
         This only tests revision specific properties can be optionally included along with regular Record properties.
         """
-        config = fx_revision_model_min.dumps(with_revision=inc_revision)
+        value_admin = Administration(id=fx_revision_model_min.file_identifier)
+        set_admin(keys=fx_admin_meta_keys, record=fx_revision_model_min, admin_meta=value_admin)
+
+        config = fx_revision_model_min.dumps(strip_admin=strip_admin, with_revision=inc_revision)
+        kv = get_kv(fx_revision_model_min)
 
         assert config["identification"]["title"]["value"] == fx_revision_config_min["identification"]["title"]["value"]
         if inc_revision:
             assert config["file_revision"] == "x"
         else:
             assert "file_revision" not in config
+        if strip_admin:
+            assert "administrative_metadata" not in kv
+        else:
+            assert "administrative_metadata" in kv

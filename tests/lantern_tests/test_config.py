@@ -14,6 +14,8 @@ from lantern.config import Config, ConfigurationError
 class TestConfig:
     """Test app config."""
 
+    JWK = '{"kty":"EC","kid":"config_testing_public_key","alg":"ES256","crv":"P-256","x":"nBe5t7mCgi-SWLmVbB9OgYdQBeh3OgymE9xyCsOiy1g","y":"-pGsEOdH-LQc9m8fo3xqwila4z1kdOkQkhBcWUhnAls"}'
+
     @staticmethod
     def _set_envs(envs: dict) -> dict:
         envs_bck = {}
@@ -70,6 +72,8 @@ class TestConfig:
             "SENTRY_DSN": fx_config.SENTRY_DSN,
             "ENABLE_FEATURE_SENTRY": False,  # would be True by default but Sentry disabled in tests
             "SENTRY_ENVIRONMENT": "test",
+            "ADMIN_METADATA_SIGNING_KEY_PUBLIC": fx_config.ADMIN_METADATA_SIGNING_KEY_PUBLIC.to_json(compact=True),
+            "ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE": redacted_value,
             "STORE_GITLAB_ENDPOINT": "https://gitlab.example.com",
             "STORE_GITLAB_TOKEN": redacted_value,
             "STORE_GITLAB_PROJECT_ID": "1234",
@@ -89,7 +93,10 @@ class TestConfig:
             "VERIFY_SHAREPOINT_PROXY_ENDPOINT": "x",
         }
 
+        _signing_key_public = "ADMIN_METADATA_SIGNING_KEY_PUBLIC"
         output = fx_config.dumps_safe()
+        output[_signing_key_public] = output[_signing_key_public].to_json(compact=True)
+
         assert output == expected
         assert len(output["EXPORT_PATH"]) > 0
         assert len(output["STORE_GITLAB_CACHE_PATH"]) > 0
@@ -102,6 +109,18 @@ class TestConfig:
     @pytest.mark.parametrize(
         "envs",
         [
+            (
+                {
+                    "LANTERN_ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE": None,
+                    "LANTERN_ADMIN_METADATA_SIGNING_KEY_PUBLIC": "x",
+                }
+            ),
+            (
+                {
+                    "LANTERN_ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE": "x",
+                    "LANTERN_ADMIN_METADATA_SIGNING_KEY_PUBLIC": None,
+                }
+            ),
             (
                 {
                     "LANTERN_STORE_GITLAB_ENDPOINT": None,
@@ -213,6 +232,8 @@ class TestConfig:
         ("property_name", "expected", "sensitive"),
         [
             ("PARALLEL_JOBS", 2, False),
+            ("ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE", JWK, True),
+            ("ADMIN_METADATA_SIGNING_KEY_PUBLIC", JWK, False),
             ("STORE_GITLAB_ENDPOINT", "x", False),
             ("STORE_GITLAB_TOKEN", "x", True),
             ("STORE_GITLAB_PROJECT_ID", "x", False),

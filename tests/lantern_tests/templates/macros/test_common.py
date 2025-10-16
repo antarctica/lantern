@@ -12,6 +12,7 @@ import pytest
 from bs4 import BeautifulSoup
 from jinja2 import Environment, PackageLoader, select_autoescape
 
+from lantern.lib.metadata_library.models.record.elements.administration import Administration
 from lantern.lib.metadata_library.models.record.elements.common import Date, Identifier
 from lantern.lib.metadata_library.models.record.elements.identification import Aggregation, Constraint, Constraints
 from lantern.lib.metadata_library.models.record.enums import (
@@ -20,9 +21,11 @@ from lantern.lib.metadata_library.models.record.enums import (
     ConstraintTypeCode,
     HierarchyLevelCode,
 )
+from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
+from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, set_admin
 from lantern.models.item.catalogue.elements import ItemCatalogueSummary
 from lantern.models.record.revision import RecordRevision
-from tests.conftest import _revision_config_min
+from tests.conftest import _admin_meta_keys, _revision_config_min
 
 
 class TestPageHeader:
@@ -72,7 +75,7 @@ class TestItemSummary:
     record.identification.title = "y"
     record.identification.purpose = "z"
 
-    summary_base = ItemCatalogueSummary(record=record)
+    summary_base = ItemCatalogueSummary(record=record, admin_keys=_admin_meta_keys())
 
     @staticmethod
     def _render(item: ItemCatalogueSummary) -> str:
@@ -112,8 +115,9 @@ class TestItemSummary:
     @pytest.mark.parametrize("edition", [None, "x"])
     def test_edition(self, edition: str | None):
         """Can get optional edition with expected value from summary."""
-        summary = deepcopy(self.summary_base)
-        summary._record.identification.edition = edition
+        record = deepcopy(self.summary_base._record)
+        record.identification.edition = edition
+        summary = ItemCatalogueSummary(record=record, admin_keys=self.summary_base._admin_keys)
         expected = summary.fragments.edition
         html = BeautifulSoup(self._render(summary), parser="html.parser", features="lxml")
 
@@ -123,8 +127,9 @@ class TestItemSummary:
     @pytest.mark.parametrize("published", [None, Date(date=date(2023, 10, 31))])
     def test_published(self, published: Date | None):
         """Can get optional publication date with expected value from summary."""
-        summary = deepcopy(self.summary_base)
-        summary._record.identification.dates.publication = published
+        record = deepcopy(self.summary_base._record)
+        record.identification.dates.publication = published
+        summary = ItemCatalogueSummary(record=record, admin_keys=self.summary_base._admin_keys)
         expected = summary.fragments.published
         html = BeautifulSoup(self._render(summary), parser="html.parser", features="lxml")
 
@@ -135,15 +140,13 @@ class TestItemSummary:
     @pytest.mark.parametrize("value", [0, 1, 2])
     def test_items(self, value: int | None):
         """Can get optional child item count with expected value from summary."""
-        summary = deepcopy(self.summary_base)
-
         agg = Aggregation(
             identifier=Identifier(identifier="x", namespace="x"),
             association_type=AggregationAssociationCode.IS_COMPOSED_OF,
         )
-        for _ in range(value):
-            summary._record.identification.aggregations.append(agg)
-
+        record = deepcopy(self.summary_base._record)
+        record.identification.aggregations.extend([agg for _ in range(value)])
+        summary = ItemCatalogueSummary(record=record, admin_keys=self.summary_base._admin_keys)
         expected = summary.fragments.children
         html = BeautifulSoup(self._render(summary), parser="html.parser", features="lxml")
 
@@ -173,16 +176,20 @@ class TestItemSummary:
             ),
         ],
     )
-    def test_access(self, value: Constraint, expected: bool):
+    def test_access(self, fx_admin_meta_keys: AdministrationKeys, value: Constraint, expected: bool):
         """
         Can get access type with expected value from summary.
 
         Only shown if restricted.
         """
-        summary = deepcopy(self.summary_base)
-        summary._record.identification.constraints = Constraints([value])
-        html = BeautifulSoup(self._render(summary), parser="html.parser", features="lxml")
+        record = deepcopy(self.summary_base._record)
+        record.identification.constraints = Constraints([value])
+        if value.restriction_code == ConstraintRestrictionCode.UNRESTRICTED:
+            admin_meta = Administration(id=record.file_identifier, access_permissions=[OPEN_ACCESS])
+            set_admin(keys=fx_admin_meta_keys, record=record, admin_meta=admin_meta)
+        summary = ItemCatalogueSummary(record=record, admin_keys=self.summary_base._admin_keys)
 
+        html = BeautifulSoup(self._render(summary), parser="html.parser", features="lxml")
         result = html.find(lambda tag: tag.name == "span" and "Restricted" in tag.get_text())
         if expected:
             assert result is not None

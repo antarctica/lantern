@@ -1,9 +1,10 @@
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, fields
 from datetime import UTC, datetime
 from pathlib import Path
 
 from lantern.config import Config
 from lantern.lib.metadata_library.models.record.elements.common import Date
+from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 from lantern.models.item.base.elements import Link
 from lantern.models.item.catalogue.elements import FormattedDate
 from lantern.stores.gitlab import GitLabStore
@@ -136,20 +137,21 @@ class ExportMeta(SiteMeta):
     - export_path: base path for local site output
     - s3_bucket: S3 bucket name for published site output
     - parallel_jobs: number of jobs to run in parallel
+    - admin_meta_keys: keys accessing administration metadata in records
     """
 
     export_path: Path
     s3_bucket: str
     parallel_jobs: int
+    admin_meta_keys: AdministrationKeys | None
 
     @property
     def site_metadata(self) -> SiteMeta:
         """Metadata without export-specific properties."""
-        meta = asdict(self)
-        meta.pop("export_path", None)
-        meta.pop("s3_bucket", None)
-        meta.pop("parallel_jobs", None)
-        return SiteMeta(**meta)  # ty: ignore[missing-argument]
+        _site_meta = {}
+        for site_field in fields(SiteMeta):
+            _site_meta[site_field.name] = getattr(self, site_field.name)
+        return SiteMeta(**_site_meta)  # ty: ignore[missing-argument]
 
     @classmethod
     def from_config_store(
@@ -162,6 +164,7 @@ class ExportMeta(SiteMeta):
         - export_path: from EXPORT_PATH
         - s3_bucket: from AWS_S3_BUCKET
         - parallel_jobs: from PARALLEL_JOBS
+        - admin_meta_keys: from ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE and ADMIN_METADATA_SIGNING_KEY_PUBLIC
         """
         super_meta = asdict(SiteMeta.from_config_store(config, store, **kwargs))
 
@@ -171,6 +174,10 @@ class ExportMeta(SiteMeta):
                 "export_path": config.EXPORT_PATH,
                 "s3_bucket": config.AWS_S3_BUCKET,
                 "parallel_jobs": config.PARALLEL_JOBS,
+                "admin_meta_keys": AdministrationKeys(
+                    encryption_private=config.ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE,
+                    signing_public=config.ADMIN_METADATA_SIGNING_KEY_PUBLIC,
+                ),
                 **kwargs,
             }
         )

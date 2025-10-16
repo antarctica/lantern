@@ -71,7 +71,12 @@ class WebsiteSearchExporter(ResourcesExporter):
         records = [self._get_record(file_identifier) for file_identifier in self._selected_identifiers]
         superseded = self._get_superseded_records(records)
         items = [
-            ItemWebsiteSearch(record=record, source=self._meta.generator, base_url=self._meta.base_url)
+            ItemWebsiteSearch(
+                record=record,
+                admin_meta_keys=self._meta.admin_meta_keys,
+                source=self._meta.generator,
+                base_url=self._meta.base_url,
+            )
             for record in [self._get_record(file_identifier) for file_identifier in self._selected_identifiers]
         ]
         return [item for item in items if item.resource_id not in superseded and item.open_access]

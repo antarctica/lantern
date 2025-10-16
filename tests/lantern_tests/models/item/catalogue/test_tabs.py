@@ -40,7 +40,7 @@ from lantern.lib.metadata_library.models.record.enums import (
 )
 from lantern.models.item.base.elements import Contact, Contacts, Link
 from lantern.models.item.base.elements import Extent as ItemExtent
-from lantern.models.item.base.enums import AccessLevel, ResourceTypeLabel
+from lantern.models.item.base.enums import ResourceTypeLabel
 from lantern.models.item.catalogue.distributions import ArcGisFeatureLayer
 from lantern.models.item.catalogue.elements import (
     Aggregations,
@@ -109,7 +109,7 @@ class TestDataTab:
             )
         ]
 
-        tab = DataTab(access_level=AccessLevel.PUBLIC, distributions=distributions)
+        tab = DataTab(restricted=False, distributions=distributions)
 
         assert tab.enabled is False
         # cov
@@ -140,12 +140,12 @@ class TestDataTab:
                 ),
             ),
         ]
-        tab = DataTab(access_level=AccessLevel.PUBLIC, distributions=distributions)
+        tab = DataTab(restricted=False, distributions=distributions)
         assert tab.enabled is True
 
     def test_items(self):
         """Can get processed distribution options."""
-        access_type = AccessLevel.PUBLIC
+        restricted = False
         distributions = [
             RecordDistribution(
                 distributor=RecordContact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
@@ -168,17 +168,17 @@ class TestDataTab:
                 ),
             ),
         ]
-        expected = ArcGisFeatureLayer(distributions[0], [distributions[1]], access_type=access_type)
-        tab = DataTab(access_level=access_type, distributions=distributions)
+        expected = ArcGisFeatureLayer(distributions[0], [distributions[1]], restricted=restricted)
+        tab = DataTab(restricted=restricted, distributions=distributions)
 
         assert tab.items[0].format_type == expected.format_type
         assert tab.items[0].action.href == expected.action.href
 
     def test_access(self):
         """Can get item access type."""
-        expected = AccessLevel.PUBLIC
-        tab = DataTab(access_level=expected, distributions=[])
-        assert tab.access == expected
+        expected = False
+        tab = DataTab(restricted=expected, distributions=[])
+        assert tab.restricted == expected
 
 
 class TestExtentTab:
@@ -487,6 +487,7 @@ class TestAdditionalInfoTab:
             item_id=item_id,
             item_type=item_type,
             identifiers=identifiers,
+            gitlab_issues=[],
             dates=dates,
             datestamp=datestamp,
             kv={},
@@ -506,6 +507,14 @@ class TestAdditionalInfoTab:
         # cov
         assert tab.title != ""
         assert tab.icon != ""
+
+    def test_make_gitlab_issue_ref(self):
+        """Can compute GitLab issue reference."""
+        value = "https://gitlab.data.bas.ac.uk/MAGIC/foo/-/issues/123"
+        expected = "MAGIC/foo#123"
+
+        result = AdditionalInfoTab._make_gitlab_issue_ref(value)
+        assert result == expected
 
     @pytest.mark.parametrize(("value", "expected"), [(None, None), (1, "1:1"), (1234567890, "1:1,234,567,890")])
     def test_format_scale(self, value: int | None, expected: str | None):
@@ -625,28 +634,26 @@ class TestAdditionalInfoTab:
         assert fx_item_cat_info_tab_minimal.isbn == expected
 
     @pytest.mark.parametrize(
-        ("identifiers", "expected"),
+        ("issues", "expected"),
         [
-            (RecordIdentifiers([]), []),
+            ([], []),
             (
-                RecordIdentifiers(
-                    [
-                        Identifier(
-                            identifier="https://gitlab.data.bas.ac.uk/MAGIC/foo/-/issues/123",
-                            href="https://gitlab.data.bas.ac.uk/MAGIC/foo/-/issues/123",
-                            namespace="gitlab.data.bas.ac.uk",
-                        )
-                    ]
-                ),
+                [
+                    Link(
+                        value="https://gitlab.data.bas.ac.uk/MAGIC/foo/-/issues/123",
+                        href="https://gitlab.data.bas.ac.uk/MAGIC/foo/-/issues/123",
+                        external=True,
+                    )
+                ],
                 ["MAGIC/foo#123"],
             ),
         ],
     )
     def test_gitlab_issues(
-        self, fx_item_cat_info_tab_minimal: AdditionalInfoTab, identifiers: RecordIdentifiers, expected: list[str]
+        self, fx_item_cat_info_tab_minimal: AdditionalInfoTab, issues: list[Link], expected: list[str]
     ):
         """Can get any resource GitLab issue references if set."""
-        fx_item_cat_info_tab_minimal._identifiers = Identifiers(identifiers)
+        fx_item_cat_info_tab_minimal._gitlab_issues = issues
         assert fx_item_cat_info_tab_minimal.gitlab_issues == expected
 
     @pytest.mark.parametrize(

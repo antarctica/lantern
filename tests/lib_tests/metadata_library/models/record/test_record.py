@@ -7,6 +7,7 @@ from bas_metadata_library.standards.iso_19115_2 import MetadataRecord
 from bas_metadata_library.standards.iso_19115_common.utils import _encode_date_properties
 from pytest_mock import MockerFixture
 
+from lantern.lib.metadata_library.models.record.elements.administration import Administration
 from lantern.lib.metadata_library.models.record.elements.common import (
     Address,
     Citation,
@@ -41,6 +42,8 @@ from lantern.lib.metadata_library.models.record.enums import (
     ProgressCode,
 )
 from lantern.lib.metadata_library.models.record.record import Record, RecordInvalidError, RecordSchema
+from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, set_admin
+from lantern.lib.metadata_library.models.record.utils.kv import set_kv
 
 
 class TestRecordSchema:
@@ -202,7 +205,33 @@ class TestRecord:
         with pytest.raises(ValueError, match="Unsupported JSON Schema in data."):
             _ = Record.loads(config)
 
-    def test_dumps(self, fx_lib_record_model_min_iso: Record):
+    @pytest.mark.parametrize(
+        ("sinfo", "expected"),
+        [
+            (None, None),
+            ("x", "x"),  # can't parse so not changed
+            (json.dumps([]), json.dumps([])),  # can't parse so not changed
+            (json.dumps({}), None),
+            (json.dumps({"administrative_metadata": {}, "x": "x"}), json.dumps({"x": "x"})),
+            (json.dumps({"administrative_metadata": {}}), None),
+        ],
+    )
+    def test_strip_admin_metadata(
+        self,
+        fx_admin_meta_keys: AdministrationKeys,
+        fx_lib_record_model_min_iso: Record,
+        sinfo: str | None,
+        expected: str,
+    ):
+        """Can strip admin metadata from a record if present."""
+        fx_lib_record_model_min_iso.identification.supplemental_information = sinfo
+        fx_lib_record_model_min_iso.strip_admin_metadata()
+        assert fx_lib_record_model_min_iso.identification.supplemental_information == expected
+
+    @pytest.mark.parametrize("strip_admin", [False, True])
+    def test_dumps(
+        self, fx_admin_meta_keys: AdministrationKeys, fx_lib_record_model_min_iso: Record, strip_admin: bool
+    ):
         """
         Can encode record as a dict that can be serialised to JSON.
 
@@ -216,6 +245,21 @@ class TestRecord:
             "constraint_type": ConstraintTypeCode.USAGE,
             "constraint_code": ConstraintRestrictionCode.LICENSE,
         }
+        value_admin = Administration(id=fx_lib_record_model_min_iso.file_identifier)
+        value_kv = {"x": "x"}
+        fx_lib_record_model_min_iso.identification.constraints = Constraints(
+            [Constraint(type=value_enums["constraint_type"], restriction_code=value_enums["constraint_code"])]
+        )
+        set_kv(kv=value_kv, record=fx_lib_record_model_min_iso)
+        set_admin(keys=fx_admin_meta_keys, record=fx_lib_record_model_min_iso, admin_meta=value_admin)
+
+        if not strip_admin:
+            # `set_admin()` ensures an admin metadata key-value member is always added regardless of `strip_admin`,
+            # this logic is to control whether that member is expected in the output.
+            #
+            # If included, we can't know the exact JWE to expect, as each is unique regardless of whether the data is
+            # different. Therefore, a dummy value is expected.
+            value_kv["administrative_metadata"] = "x"
         expected = {
             "hierarchy_level": value_enums["hierarchy_level"].value,
             "metadata": {
@@ -240,13 +284,16 @@ class TestRecord:
                 ],
                 "character_set": "utf8",
                 "language": "eng",
+                "supplemental_information": json.dumps(value_kv),
             },
         }
-        fx_lib_record_model_min_iso.identification.constraints = Constraints(
-            [Constraint(type=value_enums["constraint_type"], restriction_code=value_enums["constraint_code"])]
-        )
-        config = fx_lib_record_model_min_iso.dumps()
 
+        config = fx_lib_record_model_min_iso.dumps(strip_admin=strip_admin)
+        kv = json.loads(config["identification"]["supplemental_information"])
+        if not strip_admin:
+            # admin meta values are a JWE, which are unique even when using the same data, so expected value is replaced
+            kv["administrative_metadata"] = value_kv["administrative_metadata"]
+            config["identification"]["supplemental_information"] = json.dumps(kv)
         assert config == expected
 
     def test_dumps_json(self, fx_lib_record_model_min_iso: Record):
@@ -983,7 +1030,7 @@ class TestRecord:
         Tests various configurations from minimal to complete.
         """
         record = Record.loads(values)
-        result = json.loads(record.dumps_json())
+        result = json.loads(record.dumps_json(strip_admin=False))
         expected = values
 
         if run == "minimal-iso" or run == "minimal-magic":

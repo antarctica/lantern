@@ -125,7 +125,7 @@
     {{ item_summary_fragment_divider() }}
     <span>{{ data.children }}</span>
   {% endif %}
-  {% if data.access.name != 'PUBLIC' %}
+  {% if data.restricted %}
     {{ item_summary_fragment_divider() }}
     <span>{{ restricted_i() }} Restricted</span>
   {% endif %}

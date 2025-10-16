@@ -21,6 +21,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     AggregationInitiativeCode,
     HierarchyLevelCode,
 )
+from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.catalogue.elements import Dates, Identifiers, ItemCatalogueSummary
 from lantern.models.item.catalogue.item import ItemCatalogue
@@ -147,6 +148,7 @@ class TestAdditionalInfoTab:
             item_id=item_id,
             item_type=item_type,
             identifiers=identifiers,
+            gitlab_issues=[],
             dates=dates,
             datestamp=datestamp,
             kv={},
@@ -190,6 +192,7 @@ class TestAdditionalInfoTab:
             item_id=item_id,
             item_type=item_type,
             identifiers=identifiers,
+            gitlab_issues=[],
             dates=dates,
             datestamp=datestamp,
             kv={},
@@ -224,6 +227,7 @@ class TestAdditionalInfoTab:
             item_id=item_id,
             item_type=item_type,
             identifiers=identifiers,
+            gitlab_issues=[],
             dates=dates,
             datestamp=datestamp,
             kv={},
@@ -236,11 +240,17 @@ class TestAdditionalInfoTab:
 class TestItemCataloguePhysicalMap:
     """Test catalogue item."""
 
-    def test_init(self, fx_site_meta: SiteMeta, fx_item_physical_map_model_min: ItemCataloguePhysicalMap):
+    def test_init(
+        self,
+        fx_site_meta: SiteMeta,
+        fx_item_physical_map_model_min: ItemCataloguePhysicalMap,
+        fx_admin_meta_keys: AdministrationKeys,
+    ) -> None:
         """Can create an ItemCatalogue."""
         item = ItemCataloguePhysicalMap(
             site_meta=fx_site_meta,
             record=fx_item_physical_map_model_min._record,
+            admin_meta_keys=fx_admin_meta_keys,
             get_record=_get_record,
         )
 
@@ -259,7 +269,7 @@ class TestItemCataloguePhysicalMap:
         assert ItemCataloguePhysicalMap.matches(record) == matches
 
     def test_sides(self, fx_config: Config, fx_item_physical_map_model_min: ItemCataloguePhysicalMap):
-        """Can get records repressenting the sides of a physical map."""
+        """Can get records representing the sides of a physical map."""
         expected = [
             _get_record(side.identifier.identifier)
             for side in fx_item_physical_map_model_min._record.identification.aggregations.filter(
@@ -306,6 +316,7 @@ class TestItemCataloguePhysicalMap:
         fx_site_meta: SiteMeta,
         fx_revision_config_min: dict,
         fx_item_physical_map_model_min: ItemCataloguePhysicalMap,
+        fx_admin_meta_keys: AdministrationKeys,
     ):
         """Can get any graphics for the physical map and each side."""
 
@@ -327,6 +338,7 @@ class TestItemCataloguePhysicalMap:
         item = ItemCataloguePhysicalMap(
             site_meta=fx_site_meta,
             record=record,
+            admin_meta_keys=fx_admin_meta_keys,
             get_record=_get_local_record,
         )
 

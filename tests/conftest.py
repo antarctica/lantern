@@ -7,6 +7,7 @@ import time
 from collections.abc import Callable
 from copy import deepcopy
 from datetime import UTC, datetime, timedelta
+from functools import lru_cache
 from http.client import HTTPConnection
 from importlib.metadata import version
 from pathlib import Path
@@ -29,6 +30,7 @@ from lantern.exporters.verification import VerificationExporter
 from lantern.exporters.waf import WebAccessibleFolderExporter
 from lantern.exporters.website import WebsiteSearchExporter
 from lantern.exporters.xml import IsoXmlHtmlExporter
+from lantern.lib.metadata_library.models.record.elements.administration import Administration
 from lantern.lib.metadata_library.models.record.elements.common import Date, Dates, Identifier, Identifiers
 from lantern.lib.metadata_library.models.record.elements.identification import Constraint
 from lantern.lib.metadata_library.models.record.enums import (
@@ -36,7 +38,9 @@ from lantern.lib.metadata_library.models.record.enums import (
     ConstraintTypeCode,
     HierarchyLevelCode,
 )
+from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.record import Record as RecordBase
+from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, AdministrationWrapper, set_admin
 from lantern.models.item.base.item import ItemBase
 from lantern.models.item.catalogue.elements import Dates as ItemCatDates
 from lantern.models.item.catalogue.elements import Identifiers as ItemCatIdentifiers
@@ -52,6 +56,7 @@ from lantern.models.verification.jobs import VerificationJob
 from lantern.models.verification.types import VerificationContext
 from lantern.stores.gitlab import GitLabLocalCache, GitLabStore
 from tests.resources.exporters.fake_exporter import FakeExporter, FakeResourceExporter
+from tests.resources.records.admin_keys.testing_keys import load_keys
 from tests.resources.stores.fake_records_store import FakeRecordsStore
 
 
@@ -125,6 +130,36 @@ def fx_site_meta(fx_config: Config) -> SiteMeta:
 def fx_export_meta(fx_config: Config) -> ExportMeta:
     """Exporter build metadata (superset of site metadata)."""
     return ExportMeta.from_config_store(config=fx_config, store=None, build_repo_ref="83fake48")
+
+
+@lru_cache(maxsize=1)
+def _admin_meta_keys() -> AdministrationKeys:
+    """
+    Administration keys for signing and encrypting administrative metadata.
+
+    Standalone method to allow use outside of fixtures in test parametrisation.
+
+    Cached for better performance.
+    """
+    return load_keys()
+
+
+@pytest.fixture()
+def fx_admin_meta_keys() -> AdministrationKeys:
+    """Administration keys for signing and encrypting administrative metadata."""
+    return _admin_meta_keys()
+
+
+@pytest.fixture()
+def fx_admin_meta_element() -> Administration:
+    """Administrative metadata element."""
+    return Administration(id="x")
+
+
+@pytest.fixture()
+def fx_admin_wrapper(fx_admin_meta_keys: AdministrationKeys):
+    """Administrative metadata wrapper."""
+    return AdministrationWrapper(fx_admin_meta_keys)
 
 
 """
@@ -346,9 +381,9 @@ def fx_revision_model_min(fx_revision_config_min: dict) -> RecordRevision:
 
 
 @pytest.fixture()
-def fx_item_base_model_min(fx_item_config_min_base: dict) -> ItemBase:
+def fx_item_base_model_min(fx_item_config_min_base: dict, fx_admin_meta_keys: AdministrationKeys) -> ItemBase:
     """Minimal ItemBase model instance."""
-    return ItemBase(record=RecordRevision.loads(fx_item_config_min_base))
+    return ItemBase(record=RecordRevision.loads(fx_item_config_min_base), admin_keys=fx_admin_meta_keys)
 
 
 def render_item_catalogue(item: ItemCatalogue) -> str:
@@ -367,27 +402,42 @@ def _item_catalogue_model_min() -> ItemCatalogue:
     """
     meta = SiteMeta.from_config_store(config=Config(), store=None, build_repo_ref="83fake48")
     return ItemCatalogue(
-        site_meta=meta, record=RecordRevision.loads(_item_config_min_catalogue()), get_record=_get_record
+        site_meta=meta,
+        record=RecordRevision.loads(_item_config_min_catalogue()),
+        admin_meta_keys=_admin_meta_keys(),
+        get_record=_get_record,
     )
 
 
 @pytest.fixture()
 def fx_item_catalogue_model_min(
-    fx_site_meta: SiteMeta, fx_item_config_min_catalogue: dict, fx_get_record: Callable[[str], RecordRevision]
+    fx_site_meta: SiteMeta,
+    fx_item_config_min_catalogue: dict,
+    fx_admin_meta_keys: AdministrationKeys,
+    fx_get_record: Callable[[str], RecordRevision],
 ) -> ItemCatalogue:
     """Minimal ItemCatalogue model instance."""
     return ItemCatalogue(
-        site_meta=fx_site_meta, record=RecordRevision.loads(fx_item_config_min_catalogue), get_record=fx_get_record
+        site_meta=fx_site_meta,
+        record=RecordRevision.loads(fx_item_config_min_catalogue),
+        admin_meta_keys=fx_admin_meta_keys,
+        get_record=fx_get_record,
     )
 
 
 @pytest.fixture()
 def fx_item_physical_map_model_min(
-    fx_site_meta: SiteMeta, fx_item_config_min_physical_map: dict, fx_get_record: Callable[[str], RecordRevision]
+    fx_site_meta: SiteMeta,
+    fx_item_config_min_physical_map: dict,
+    fx_admin_meta_keys: AdministrationKeys,
+    fx_get_record: Callable[[str], RecordRevision],
 ) -> ItemCataloguePhysicalMap:
     """Minimal ItemCataloguePhysicalMap model instance."""
     return ItemCataloguePhysicalMap(
-        site_meta=fx_site_meta, record=RecordRevision.loads(fx_item_config_min_physical_map), get_record=fx_get_record
+        site_meta=fx_site_meta,
+        record=RecordRevision.loads(fx_item_config_min_physical_map),
+        admin_meta_keys=fx_admin_meta_keys,
+        get_record=fx_get_record,
     )
 
 
@@ -421,6 +471,7 @@ def fx_item_cat_info_tab_minimal() -> AdditionalInfoTab:
         item_id="x",
         item_type=HierarchyLevelCode.PRODUCT,
         identifiers=identifiers,
+        gitlab_issues=[],
         dates=dates,
         datestamp=datetime(2014, 6, 30, 14, 30, second=45, tzinfo=UTC).date(),
         kv={},
@@ -665,6 +716,7 @@ def fx_exporter_html_alias(
 def fx_exporter_records(
     mocker: MockerFixture,
     fx_logger: logging.Logger,
+    fx_admin_meta_keys: AdministrationKeys,
     fx_s3_bucket_name: str,
     fx_s3_client: S3Client,
     fx_get_record: Callable[[str], RecordRevision],
@@ -680,6 +732,10 @@ def fx_exporter_records(
         output_path = Path(tmp_path)
     mock_config = mocker.Mock()
     type(mock_config).PARALLEL_JOBS = PropertyMock(return_value=1)
+    type(mock_config).ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE = PropertyMock(
+        return_value=fx_admin_meta_keys.encryption_private
+    )
+    type(mock_config).ADMIN_METADATA_SIGNING_KEY_PUBLIC = PropertyMock(return_value=fx_admin_meta_keys.signing_public)
     type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
     type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
     type(mock_config).TEMPLATES_ITEM_MAPS_ENDPOINT = PropertyMock(return_value="x")
@@ -780,9 +836,15 @@ def fx_exporter_waf_sel(
 
 
 def _get_record_open(identifier: str) -> RecordRevision:
-    """Minimal record lookup method with an open access constraint."""
+    """Minimal record lookup method with open access constraint and admin access permissions."""
     record = RecordRevision.loads(deepcopy(_revision_config_min()))
     record.file_identifier = identifier
+
+    # access permissions
+    admin_meta = Administration(id=record.file_identifier, access_permissions=[OPEN_ACCESS])
+    set_admin(keys=_admin_meta_keys(), record=record, admin_meta=admin_meta)
+
+    # access constraints (informative)
     record.identification.constraints.append(
         Constraint(type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.UNRESTRICTED)
     )
@@ -791,7 +853,11 @@ def _get_record_open(identifier: str) -> RecordRevision:
 
 @pytest.fixture()
 def fx_exporter_website_search(
-    mocker: MockerFixture, fx_s3_bucket_name: str, fx_logger: logging.Logger, fx_s3_client: S3Client
+    mocker: MockerFixture,
+    fx_admin_meta_keys: AdministrationKeys,
+    fx_s3_bucket_name: str,
+    fx_logger: logging.Logger,
+    fx_s3_client: S3Client,
 ) -> WebsiteSearchExporter:
     """
     Public website search exporter (empty).
@@ -802,16 +868,25 @@ def fx_exporter_website_search(
         output_path = Path(tmp_path)
     mock_config = mocker.Mock()
     type(mock_config).NAME = PropertyMock(return_value="lantern")
+    type(mock_config).ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE = PropertyMock(
+        return_value=fx_admin_meta_keys.encryption_private
+    )
+    type(mock_config).ADMIN_METADATA_SIGNING_KEY_PUBLIC = PropertyMock(return_value=fx_admin_meta_keys.signing_public)
     type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
     type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
+
     meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
+    # Inject private signing key so admin metadata can be signed in other fixtures and tests
+    meta.admin_meta_keys = fx_admin_meta_keys
 
     return WebsiteSearchExporter(logger=fx_logger, meta=meta, s3=fx_s3_client, get_record=_get_record_open)
 
 
 @pytest.fixture()
 def fx_exporter_website_search_sel(
-    fx_exporter_website_search: WebsiteSearchExporter, fx_revision_model_min: RecordRevision
+    fx_exporter_website_search: WebsiteSearchExporter,
+    fx_revision_model_min: RecordRevision,
+    fx_admin_meta_keys: AdministrationKeys,
 ) -> WebsiteSearchExporter:
     """Public website search exporter with a single record selected."""
     fx_exporter_website_search.selected_identifiers = {fx_revision_model_min.file_identifier}
@@ -838,6 +913,7 @@ def fx_exporter_site(
     mocker: MockerFixture,
     fx_s3_bucket_name: str,
     fx_logger: logging.Logger,
+    fx_admin_meta_keys: AdministrationKeys,
     fx_s3_client: S3Client,
     fx_get_record: Callable[[str], RecordRevision],
 ) -> SiteExporter:
@@ -850,6 +926,10 @@ def fx_exporter_site(
         output_path = Path(tmp_path)
     mock_config = mocker.Mock()
     type(mock_config).PARALLEL_JOBS = PropertyMock(return_value=1)
+    type(mock_config).ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE = PropertyMock(
+        return_value=fx_admin_meta_keys.encryption_private
+    )
+    type(mock_config).ADMIN_METADATA_SIGNING_KEY_PUBLIC = PropertyMock(return_value=fx_admin_meta_keys.signing_public)
     type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
     type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
     type(mock_config).TEMPLATES_ITEM_MAPS_ENDPOINT = PropertyMock(return_value="x")

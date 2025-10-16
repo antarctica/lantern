@@ -62,6 +62,7 @@ class HtmlExporter(ResourceExporter):
         item = item_class(
             site_meta=self._meta.site_metadata,
             record=self._record,
+            admin_meta_keys=self._meta.admin_meta_keys,
             get_record=self._get_record,
         )
 

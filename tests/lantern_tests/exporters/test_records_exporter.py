@@ -20,6 +20,7 @@ from lantern.exporters.json import JsonExporter
 from lantern.exporters.records import JobMethod, RecordsExporter, _job, _job_s3
 from lantern.exporters.xml import IsoXmlExporter, IsoXmlHtmlExporter
 from lantern.lib.metadata_library.models.record.elements.common import Identifier
+from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
@@ -45,6 +46,7 @@ class TestRecordExporterJob:
         ],
     )
     @pytest.mark.parametrize("method", [JobMethod.EXPORT, JobMethod.PUBLISH])
+    @pytest.mark.parametrize("has_admin_keys", [True, False])
     def test_job(
         self,
         mocker: MockerFixture,
@@ -54,9 +56,11 @@ class TestRecordExporterJob:
         fx_s3_bucket_name: str,
         fx_s3_utils: S3Utils,
         fx_exporter_records_sel: RecordsExporter,
+        fx_admin_meta_keys: AdministrationKeys,
         exporter: RecordsExporter,
         expected: str,
         method: JobMethod,
+        has_admin_keys: bool,
     ):
         """Can export or publish a record using a record exporter class."""
         mocker.patch("lantern.exporters.records._job_s3", return_value=fx_exporter_records_sel._s3_client)
@@ -66,11 +70,17 @@ class TestRecordExporterJob:
         expected = expected.replace("FILE_IDENTIFIER", fx_revision_model_min.file_identifier)
         expected_path = fx_exporter_records_sel._config.EXPORT_PATH / expected
 
+        admin_meta_keys_json = {}
+        if has_admin_keys:
+            admin_meta_keys_json = fx_exporter_records_sel._meta.admin_meta_keys.dumps_json()
+        fx_exporter_records_sel._meta.admin_meta_keys = None
+
         # noinspection PyTypeChecker
         _job(
             logging_level=fx_logger.level,
             config=fx_exporter_records_sel._config,
             meta=fx_exporter_records_sel._meta,
+            admin_meta_keys_json=admin_meta_keys_json,
             exporter=exporter,
             record=fx_revision_model_min,
             get_record=fx_get_record,

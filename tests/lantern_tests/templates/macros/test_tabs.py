@@ -6,6 +6,7 @@ import pytest
 from bs4 import BeautifulSoup
 from pytest_mock import MockerFixture
 
+from lantern.lib.metadata_library.models.record.elements.administration import Administration
 from lantern.lib.metadata_library.models.record.elements.common import (
     Address,
     Citation,
@@ -44,6 +45,8 @@ from lantern.lib.metadata_library.models.record.enums import (
     OnlineResourceFunctionCode,
     ProgressCode,
 )
+from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
+from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, set_admin
 from lantern.models.item.catalogue.enums import Licence
 from lantern.models.item.catalogue.item import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
@@ -273,7 +276,13 @@ class TestDataTab:
             ),
         ],
     )
-    def test_restricted_access(self, fx_item_catalogue_model_min: ItemCatalogue, value: Constraint, expected: bool):
+    def test_restricted_access(
+        self,
+        fx_item_catalogue_model_min: ItemCatalogue,
+        fx_admin_meta_keys: AdministrationKeys,
+        value: Constraint,
+        expected: bool,
+    ):
         """Shows restricted access panel if item is restricted."""
         fx_item_catalogue_model_min._record.distribution.append(
             Distribution(
@@ -286,7 +295,19 @@ class TestDataTab:
             )
         )
         fx_item_catalogue_model_min._record.identification.constraints = Constraints([value])
-        html = BeautifulSoup(render_item_catalogue(fx_item_catalogue_model_min), parser="html.parser", features="lxml")
+        if value.restriction_code == ConstraintRestrictionCode.UNRESTRICTED:
+            admin_meta = Administration(
+                id=fx_item_catalogue_model_min._record.file_identifier, access_permissions=[OPEN_ACCESS]
+            )
+            set_admin(keys=fx_admin_meta_keys, record=fx_item_catalogue_model_min._record, admin_meta=admin_meta)
+
+        item = ItemCatalogue(
+            site_meta=fx_item_catalogue_model_min._meta,
+            record=fx_item_catalogue_model_min._record,
+            admin_meta_keys=fx_item_catalogue_model_min._admin_keys,
+            get_record=fx_item_catalogue_model_min._get_record,
+        )
+        html = BeautifulSoup(render_item_catalogue(item), parser="html.parser", features="lxml")
 
         result = html.select_one("#data-restricted-info")
         if expected:

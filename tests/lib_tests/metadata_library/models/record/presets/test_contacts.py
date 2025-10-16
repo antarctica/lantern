@@ -1,8 +1,8 @@
 import cattrs
 
-from lantern.lib.metadata_library.models.record.elements.common import clean_dict
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
 from lantern.lib.metadata_library.models.record.presets.contacts import make_magic_role
+from lantern.lib.metadata_library.models.record.utils.clean import clean_dict
 
 
 class TestMakeMagicRole:

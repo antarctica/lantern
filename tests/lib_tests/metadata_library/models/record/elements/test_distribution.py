@@ -1,7 +1,7 @@
 import cattrs
 import pytest
 
-from lantern.lib.metadata_library.models.record.elements.common import Contact, ContactIdentity, clean_dict
+from lantern.lib.metadata_library.models.record.elements.common import Contact, ContactIdentity
 from lantern.lib.metadata_library.models.record.elements.distribution import (
     Distribution,
     Format,
@@ -10,6 +10,7 @@ from lantern.lib.metadata_library.models.record.elements.distribution import (
     TransferOption,
 )
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode, OnlineResourceFunctionCode
+from lantern.lib.metadata_library.models.record.utils.clean import clean_dict
 
 
 class TestFormat:

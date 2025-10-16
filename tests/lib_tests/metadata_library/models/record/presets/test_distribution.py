@@ -1,5 +1,5 @@
 from lantern.lib.metadata_library.models.record.elements.distribution import Distribution
-from lantern.lib.metadata_library.models.record.presets.contacts import make_esri_distributor
+from lantern.lib.metadata_library.models.record.presets.contacts import ESRI_DISTRIBUTOR
 from lantern.lib.metadata_library.models.record.presets.distribution import make_esri_feature_layer
 
 
@@ -8,7 +8,7 @@ class TestMakeEsriFeatureLayer:
 
     def test_default(self):
         """Can generate expected distribution options for an ArcGIS feature layer."""
-        distributor = make_esri_distributor()
+        distributor = ESRI_DISTRIBUTOR
         portal_endpoint = "https://example.com"
         server_endpoint = f"{portal_endpoint}/arcgis"
         service_name = "x"
@@ -37,7 +37,7 @@ class TestMakeEsriFeatureLayer:
 
     def test_with_ogc(self):
         """Can generate expected distribution options for an ArcGIS feature layer with optional OGC features layer."""
-        distributor = make_esri_distributor()
+        distributor = ESRI_DISTRIBUTOR
         portal_endpoint = "https://example.com"
         server_endpoint = f"{portal_endpoint}/arcgis"
         service_name = "x"

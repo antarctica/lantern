@@ -29,6 +29,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Preventing licences unknown to catalogue items breaking exports
 * Item thumbnail alt text not describing content by associating with abstract via `aria-details`
 * Minimum padding for all device sizes where auto centering would give zero margin
+* Privacy policy page title
 
 ### Changed
 

@@ -8,8 +8,6 @@ from lantern.lib.metadata_library.models.record.elements.common import (
     Date,
     Dates,
     Identifier,
-    clean_dict,
-    clean_list,
 )
 from lantern.lib.metadata_library.models.record.elements.identification import (
     Aggregation,
@@ -36,6 +34,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     MaintenanceFrequencyCode,
     ProgressCode,
 )
+from lantern.lib.metadata_library.models.record.utils.clean import clean_dict, clean_list
 
 MIN_IDENTIFICATION = {
     "title": "x",

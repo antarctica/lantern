@@ -15,13 +15,13 @@ from importlib_resources import as_file as resources_as_file
 from importlib_resources import files as resources_files
 from jsonschema import ValidationError, validate
 
-from lantern.lib.metadata_library.models.record.elements.common import clean_dict
 from lantern.lib.metadata_library.models.record.elements.data_quality import DataQuality
 from lantern.lib.metadata_library.models.record.elements.distribution import Distribution
 from lantern.lib.metadata_library.models.record.elements.identification import Identification
 from lantern.lib.metadata_library.models.record.elements.metadata import Metadata
 from lantern.lib.metadata_library.models.record.elements.projection import ReferenceSystemInfo
 from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
+from lantern.lib.metadata_library.models.record.utils.clean import clean_dict
 
 TRecord = TypeVar("TRecord", bound="Record")
 

@@ -46,7 +46,9 @@ class RecordRevision(Record):
         Set `logger` to enable optional logging of any unsupported content as a debug message.
         """
         record = RecordRevision.loads(config)
-        return Record._eq(candidate=config, comparison=record.dumps(with_revision=True), logger=logger)
+        return Record._eq(
+            candidate=config, comparison=record.dumps(strip_admin=False, with_revision=True), logger=logger
+        )
 
     @classmethod
     def structure(cls: type[TRecordRevision], value: dict) -> "RecordRevision":

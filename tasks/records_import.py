@@ -39,7 +39,7 @@ def _parse_records(logger: logging.Logger, search_path: Path) -> list[Record]:
         except RecordInvalidError:
             logger.warning(f"Record '{config['file_identifier']}' does not validate, skipping.")
             continue
-        if not Record._config_supported(config):
+        if not Record._config_supported(config=config, logger=logger):
             logger.warning(
                 f"Record '{config['file_identifier']}' contains unsupported content the catalogue will ignore."
             )

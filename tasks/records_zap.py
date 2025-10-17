@@ -63,7 +63,7 @@ def _parse_records(logger: logging.Logger, search_path: Path) -> list[Record]:
         except RecordInvalidError:
             logger.warning(f"Record '{config['file_identifier']}' does not validate, skipping.")
             continue
-        if not Record._config_supported(config):
+        if not Record._config_supported(config, logger):
             logger.warning(
                 f"Record '{config['file_identifier']}' contains unsupported content the catalogue will ignore."
             )
@@ -112,6 +112,8 @@ def _revise_records(logger: logging.Logger, records: list[Record], store: GitLab
             if record.dumps() != existing_record.dumps():
                 logger.info(f"Record '{record.file_identifier}' is different to stored version, revising")
                 _revise_record(record)
+            else:
+                logger.info(f"Record '{record.file_identifier}' unchanged, skipping revision")
         except RecordNotFoundError:
             logger.info(f"Record '{record.file_identifier}' not found in store, skipping revision")
             continue

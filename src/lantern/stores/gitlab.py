@@ -573,6 +573,7 @@ class GitLabStore(Store):
 
         existing_hashes = self._cache.get_hashes(file_identifiers=[record.file_identifier for record in records])
         for record in records:
+            self._logger.debug(f"Existing: '{existing_hashes[record.file_identifier]}', New: '{record.sha1}'")
             if record.sha1 == existing_hashes[record.file_identifier]:
                 self._logger.debug(f"Record '{record.file_identifier}' is unchanged, skipping")
                 continue

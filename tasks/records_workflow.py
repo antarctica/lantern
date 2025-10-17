@@ -6,6 +6,8 @@ from pathlib import Path
 
 import inquirer
 from boto3 import client as S3Client  # noqa: N812
+from environs import Env
+from jwskate import Jwk
 from tasks.records_import import _clean_input_path, _parse_records
 from tasks.records_import import _get_args as _get_import_args
 from tasks.records_zap import _process_records
@@ -13,6 +15,7 @@ from tasks.records_zap import _process_records
 from lantern.config import Config
 from lantern.exporters.site import SiteExporter
 from lantern.exporters.verification import VerificationExporter
+from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 from lantern.log import init as init_logging
 from lantern.log import init_sentry
 from lantern.models.site import ExportMeta
@@ -49,13 +52,15 @@ def _confirm(logger: logging.Logger, message: str) -> None:
         sys.exit(1)
 
 
-def _import(logger: logging.Logger, config: Config, store: GitLabStore, import_path: Path) -> CommitResults:
+def _import(
+    logger: logging.Logger, config: Config, store: GitLabStore, admin_keys: AdministrationKeys, import_path: Path
+) -> CommitResults:
     """Import."""
     logger.info(f"Importing records from '{import_path.resolve()}'")
     title, message, author_name, author_email = _get_import_args()
     store.populate()  # to ensure cache is populated to check if any files are updates
     records = _parse_records(logger=logger, search_path=import_path)
-    records.extend(_process_records(logger=logger, records=records, store=store))
+    records.extend(_process_records(logger=logger, records=records, store=store, admin_keys=admin_keys))
     results = store.push(records=records, title=title, message=message, author=(author_name, author_email))
     logger.info("Cleaning records from import path")
     _clean_input_path(input_path=import_path)
@@ -100,7 +105,10 @@ def _verify(
 @_time_task(label="Workflow")
 def main() -> None:
     """Entrypoint."""
+    env = Env()  # needed for loading private signing key for admin metadata
+    env.read_env()
     config = Config()
+
     init_logging(config.LOG_LEVEL)
     init_sentry()
     logger = logging.getLogger("app")
@@ -120,8 +128,14 @@ def main() -> None:
         aws_secret_access_key=config.AWS_ACCESS_SECRET,
         region_name="eu-west-1",
     )
+
     meta = ExportMeta.from_config_store(config=config, store=None, build_repo_ref=store.head_commit)
     site = SiteExporter(config=config, meta=meta, logger=logger, s3=s3, get_record=store.get)
+    admin_keys = AdministrationKeys(
+        encryption_private=config.ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE,
+        signing_private=Jwk(env.json("X_ADMIN_METADATA_SIGNING_KEY_PUBLIC")),
+        signing_public=config.ADMIN_METADATA_SIGNING_KEY_PUBLIC,
+    )
 
     import_path = Path("./import")
     base_url = "https://data-testing.data.bas.ac.uk"
@@ -137,7 +151,7 @@ def main() -> None:
     print("TIP! See the 'records-select' and/or 'records-load' tasks if useful.")
     _confirm(logger, "Are records staged in import directory?")
 
-    commit = _import(logger=logger, config=config, store=store, import_path=import_path)
+    commit = _import(logger=logger, config=config, store=store, admin_keys=admin_keys, import_path=import_path)
     _build(logger=logger, site=site, commit=commit, bucket=config.AWS_S3_BUCKET, base_url=base_url)
     _verify(logger=logger, config=config, commit=commit, store=store, s3=s3, base_url=base_url)
 

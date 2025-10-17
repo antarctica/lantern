@@ -5,15 +5,23 @@ from copy import deepcopy
 from datetime import UTC, datetime
 from pathlib import Path
 
+from environs import Env
+from jwskate import Jwk
+
 from lantern.config import Config
+from lantern.lib.metadata_library.models.record.elements.administration import Administration, Permission
 from lantern.lib.metadata_library.models.record.elements.common import Date
 from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,
     AggregationInitiativeCode,
+    ConstraintRestrictionCode,
+    ConstraintTypeCode,
     HierarchyLevelCode,
 )
+from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.presets.aggregations import make_bas_cat_collection_member
 from lantern.lib.metadata_library.models.record.record import RecordInvalidError
+from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, set_admin
 from lantern.log import init as init_logging
 from lantern.log import init_sentry
 from lantern.models.record.const import CATALOGUE_NAMESPACE
@@ -34,6 +42,7 @@ magic_collection_ids = [
     "00203387-0840-447c-b9ae-f25088501031",  # BAS Air Operations Planning Maps
     "6793faf5-16c5-42dc-a835-b214db7f3e85",  # SCAR Air Operations Planning Maps
     "5dc748d4-0e6e-4cdc-acc8-f24283bc585c",  # BAS Operations Datasets
+    "7ed4d15e-952f-4be6-893a-9a9fef197426",  # BAS Polar Estates Maps
 ]
 
 
@@ -78,7 +87,7 @@ def _dump_records(logger: logging.Logger, records: list[Record], output_path: Pa
     for record in records:
         record_path = output_path / f"{record.file_identifier}.json"
         with record_path.open("w") as f:
-            f.write(record.dumps_json())
+            f.write(record.dumps_json(strip_admin=False))
         logger.info(f"Dumped new or revised record '{record.file_identifier}' to '{record_path.resolve()}'")
 
 
@@ -109,7 +118,7 @@ def _revise_records(logger: logging.Logger, records: list[Record], store: GitLab
     for record in records:
         try:
             existing_record = store.get(record.file_identifier)
-            if record.dumps() != existing_record.dumps():
+            if record.dumps(strip_admin=False) != existing_record.dumps(strip_admin=False):
                 logger.info(f"Record '{record.file_identifier}' is different to stored version, revising")
                 _revise_record(record)
             else:
@@ -218,11 +227,7 @@ def _process_magic_collections(
     collections_updated = {c.file_identifier: deepcopy(c) for c in collections}
 
     for record in records:
-        _update_record_collections(
-            logger=logger,
-            record=record,
-            collections=collections_updated,
-        )
+        _update_record_collections(logger=logger, record=record, collections=collections_updated)
 
     for collection in collections:
         updated_collection = collections_updated[collection.file_identifier]
@@ -231,7 +236,80 @@ def _process_magic_collections(
             additional_records.append(updated_collection)
 
 
-def _process_records(logger: logging.Logger, records: list[Record], store: GitLabStore) -> list[Record]:
+def _get_gitlab_issues(logger: logging.Logger, record: Record) -> list[str]:
+    """
+    Get and remove GitLab issues from record identifiers if present.
+
+    Return issue URLs to add to admin metadata instead.
+    """
+    glab_identifiers = record.identification.identifiers.filter(namespace="gitlab.data.bas.ac.uk")
+    logger.info(f"Record '{record.file_identifier}' has {len(glab_identifiers)} GitLab issues")
+
+    issues = [i.identifier for i in glab_identifiers]
+    count_before = len(record.identification.identifiers)
+    non_glab_identifiers = [i for i in record.identification.identifiers if i.identifier not in issues]
+    record.identification.identifiers.clear()
+    record.identification.identifiers.extend(non_glab_identifiers)
+    count_after = len(record.identification.identifiers)
+    logger.info(f"Removed {count_before - count_after} GitLab issue identifiers from record '{record.file_identifier}'")
+
+    logger.info(f"Will set {len(issues)} GitLab issues admin metadata for Record '{record.file_identifier}'")
+    return issues
+
+
+def _get_access_permissions(logger: logging.Logger, record: Record) -> list[Permission]:
+    """
+    Get access permissions from record access constraints.
+
+    Zap ⚡️'s restricted options don't map to access permissions used in admin metadata so aren't supported.
+    """
+    constraints = record.identification.constraints.filter(types=ConstraintTypeCode.ACCESS)
+    logger.info(f"Record '{record.file_identifier}' has {len(constraints)} access constraints")
+    if len(constraints) == 1 and constraints[0].restriction_code == ConstraintRestrictionCode.UNRESTRICTED:
+        logger.info(f"Record '{record.file_identifier}' has unrestricted access constraint, setting to OPEN ACCESS")
+        return [OPEN_ACCESS]
+    logger.info(f"Record '{record.file_identifier}' has no supported access constraints, no access permissions set")
+    return []
+
+
+def _create_admin_metadata(logger: logging.Logger, admin_keys: AdministrationKeys, record: Record) -> None:
+    """
+    Add administrative metadata to record.
+
+    The input record is not modified.
+
+    Zap ⚡️ authored records do not support administrative metadata natively however a mapping of discovery properties
+    can be used:
+
+    - admin.access_permissions -> identification.constraints[type=access]
+    - admin.gitlab_issues -> identification.identifiers[namespace=gitlab.data.bas.ac.uk]
+
+    Note: This assumes discovery metadata is trustworthy and requires a suitable chain of custody.
+    Note: This method clobbers any existing admin metadata if already present in the record.
+    """
+    admin_meta = Administration(
+        id=record.file_identifier,
+        gitlab_issues=_get_gitlab_issues(logger, record),
+        access_permissions=_get_access_permissions(logger, record),
+    )
+    set_admin(keys=admin_keys, record=record, admin_meta=admin_meta)
+    logger.info(f"Added administrative metadata to record '{record.file_identifier}':")
+    logger.info(record.identification.supplemental_information)
+
+
+def _process_admin_metadata(logger: logging.Logger, admin_keys: AdministrationKeys, records: list[Record]) -> None:
+    """
+    Add administrative metadata to records.
+
+    Requires private signing key to author admin metadata instances.
+    """
+    for record in records:
+        _create_admin_metadata(logger=logger, admin_keys=admin_keys, record=record)
+
+
+def _process_records(
+    logger: logging.Logger, records: list[Record], store: GitLabStore, admin_keys: AdministrationKeys
+) -> list[Record]:
     """
     Process records as needed.
 
@@ -240,6 +318,7 @@ def _process_records(logger: logging.Logger, records: list[Record], store: GitLa
     Where any of these records are modified, the date_stamp and other relevant properties are revised.
     """
     additional_records: list[Record] = []
+    _process_admin_metadata(logger=logger, admin_keys=admin_keys, records=records)
     _process_magic_collections(logger=logger, records=records, additional_records=additional_records, store=store)
     _revise_records(logger=logger, records=[*records, *additional_records], store=store)
     return additional_records
@@ -247,7 +326,10 @@ def _process_records(logger: logging.Logger, records: list[Record], store: GitLa
 
 def main() -> None:
     """Entrypoint."""
+    env = Env()  # needed for loading private signing key for admin metadata
+    env.read_env()
     config = Config()
+
     init_logging(config.LOG_LEVEL)
     init_sentry()
     logger = logging.getLogger("app")
@@ -262,11 +344,17 @@ def main() -> None:
         cache_path=config.STORE_GITLAB_CACHE_PATH,
     )
 
+    admin_keys = AdministrationKeys(
+        encryption_private=config.ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE,
+        signing_private=Jwk(env.json("X_ADMIN_METADATA_SIGNING_KEY_PUBLIC")),
+        signing_public=config.ADMIN_METADATA_SIGNING_KEY_PUBLIC,
+    )
+
     input_path = Path("./import")
     logger.info(f"Loading records from: '{input_path.resolve()}'")
     store.populate()
     records = _parse_records(logger=logger, search_path=input_path)
-    records.extend(_process_records(logger=logger, records=records, store=store))
+    records.extend(_process_records(logger=logger, records=records, store=store, admin_keys=admin_keys))
     _dump_records(logger=logger, records=records, output_path=input_path)
     _clean_input_path(input_path=input_path)
 

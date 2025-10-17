@@ -588,12 +588,12 @@ class GitLabStore(Store):
                     {
                         "action": action,
                         "file_path": self._get_remote_hashed_path(f"{record.file_identifier}.json"),
-                        "content": record.dumps_json(),
+                        "content": record.dumps_json(strip_admin=False),
                     },
                     {
                         "action": action,
                         "file_path": self._get_remote_hashed_path(f"{record.file_identifier}.xml"),
-                        "content": record.dumps_xml(),
+                        "content": record.dumps_xml(strip_admin=False),
                     },
                 ]
             )

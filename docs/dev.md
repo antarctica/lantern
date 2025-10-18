@@ -131,6 +131,30 @@ In the `tests.lantern_tests.config` module:
    - `tests.lantern_tests.models.item.catalogue.test_distributions`
    - `tests.lantern_tests.templates.macros.test_tabs.TestDataTab.test_data_info` (if using a collapsible panel)
 
+### Adding catalogue item tabs
+
+> [!CAUTION]
+> This section is Work in Progress (WIP) and may not be complete/accurate.
+
+1. create a new class in `lantern.models.item.catalogue.tabs` inheriting from `lantern.models.item.catalogue.tabs.Tab`
+   - set the `anchor`, `title`, `icon` properties
+   - add tab specific properties and logic
+   - create catalogue specif elements or element subclasses in `lantern.models.item.catalogue.elements` as needed
+   - set logic for the `enables` property based on relevant tab properties
+2. in `lantern.models.item.catalogue.item.ItemCatalogue`:
+   - add a private property returning an instance of the tab class
+   - call property in `tabs` property
+   - update `default_tab_anchor` property if tab is optional and/or should be shown before additional information tab
+3. create a new macro in `lantern.resources.templates._macros.tabs` named after the tab anchor
+   - ensure the section ID attribute is set correctly for tab navigation to work
+   - populate tab macro as needed
+   - create additional macros nearby (if one or two), or under `lantern.resources.templates._macros._tabs`
+4. run `tailwind` [Development Task](#development-tasks) to update styles (for tab classes to work)
+5. update `lantern_tests.models.item.catalogue.test_tabs` to cover new tab class
+6. update `lantern_tests.models.item.catalogue.test_item_catalogue.TestItemCatalogue.test_tabs` to include new tab class
+7. update `TestItemCatalogue.test_default_tab_anchor` if tab should be shown before additional information tab
+8. updates tests within `lantern_tests.templates` as needed
+
 ### Adding site pages
 
 > [!CAUTION]

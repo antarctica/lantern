@@ -9,14 +9,14 @@ from tests.conftest import render_item_catalogue
 class TestItemTemplate:
     """Test base catalogue item template."""
 
-    def test_html_head(self, fx_item_catalogue_model_min: ItemCatalogue):
+    def test_html_head(self, fx_item_cat_model_min: ItemCatalogue):
         """
         Can set common page elements in site layout.
 
         Integration test between item template and site layout.
         """
-        expected = fx_item_catalogue_model_min.site_metadata
-        html = BeautifulSoup(render_item_catalogue(fx_item_catalogue_model_min), parser="html.parser", features="lxml")
+        expected = fx_item_cat_model_min.site_metadata
+        html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
 
         assert html.head.title.string == expected.html_title_suffixed
 

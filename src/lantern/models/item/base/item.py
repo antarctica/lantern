@@ -22,7 +22,7 @@ from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys as AdminMetadataKeys
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin
 from lantern.lib.metadata_library.models.record.utils.kv import get_kv
-from lantern.models.item.base.elements import Contact, Contacts, Extent, Extents, Link
+from lantern.models.item.base.elements import Contact, Contacts, Extent, Extents
 from lantern.models.item.base.enums import AccessLevel
 from lantern.models.item.base.utils import md_as_html, md_as_plain
 from lantern.models.record.record import Record
@@ -86,11 +86,11 @@ class ItemBase:
         return AccessLevel.UNKNOWN
 
     @property
-    def admin_gitlab_issues(self) -> list[Link]:
+    def admin_gitlab_issues(self) -> list[str]:
         """Optional list of associated GitLab issues."""
         if self._admin_metadata is None:
             return []
-        return [Link(value=issue, href=issue, external=True) for issue in self._admin_metadata.gitlab_issues]
+        return self._admin_metadata.gitlab_issues
 
     @property
     def abstract_raw(self) -> str:

@@ -41,12 +41,14 @@ from lantern.lib.metadata_library.models.record.enums import (
 from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.record import Record as RecordBase
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, AdministrationWrapper, set_admin
+from lantern.models.item.base.elements import Link
+from lantern.models.item.base.enums import AccessLevel
 from lantern.models.item.base.item import ItemBase
 from lantern.models.item.catalogue.elements import Dates as ItemCatDates
 from lantern.models.item.catalogue.elements import Identifiers as ItemCatIdentifiers
 from lantern.models.item.catalogue.item import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
-from lantern.models.item.catalogue.tabs import AdditionalInfoTab
+from lantern.models.item.catalogue.tabs import AdditionalInfoTab, AdminTab
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
@@ -513,6 +515,18 @@ def fx_item_cat_info_tab_minimal() -> AdditionalInfoTab:
         datestamp=datetime(2014, 6, 30, 14, 30, second=45, tzinfo=UTC).date(),
         kv={},
         revision=None,
+
+
+@pytest.fixture()
+def fx_item_cat_admin_tab_min() -> AdminTab:
+    """Minimal ItemCatalogue admin tab."""
+    return AdminTab(
+        item_id="x",
+        revision=Link(value="x", href="x", external=True),
+        gitlab_issues=[],
+        restricted=False,
+        access_level=AccessLevel.NONE,
+        access_permissions=[],
     )
 
 

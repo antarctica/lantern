@@ -38,7 +38,7 @@ from lantern.lib.metadata_library.models.record.enums import (
 )
 from lantern.lib.metadata_library.models.record.presets.projections import EPSG_4326
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, set_admin
-from lantern.models.item.base.elements import Contact, Contacts, Extent, Extents, Link
+from lantern.models.item.base.elements import Contact, Contacts, Extent, Extents
 from lantern.models.item.base.enums import AccessLevel
 from lantern.models.item.base.item import ItemBase
 from lantern.models.record.record import Record
@@ -117,7 +117,7 @@ class TestItemBase:
         [
             (False, [], []),
             (True, [], []),
-            (True, ["x"], [Link(value="x", href="x", external=True)]),
+            (True, ["x"], ["x"]),
         ],
     )
     def test_admin_gitlab_issues(
@@ -127,7 +127,7 @@ class TestItemBase:
         fx_admin_meta_keys: AdministrationKeys,
         has_admin_metadata: bool,
         issues: list[str],
-        expected: list[Link],
+        expected: list[str],
     ):
         """Can get GitLab issues from admin metadata if present."""
         if has_admin_metadata:

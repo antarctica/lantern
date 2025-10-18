@@ -84,6 +84,7 @@ Colours:
 | Alerts (Warning)              | Border                 | yellow-500      | yellow-500      | Equal                           |
 | Alerts (Danger)               | Border                 | red-500         | red-500         | Equal                           |
 | Alerts (Info)                 | Border                 | sky-blue-500    | sky-blue-500    | Equal                           |
+| Alerts (Experimental)         | Border                 | mauve-500       | mauve-500       | Equal                           |
 | Admonition (Note)             | Border                 | sky-blue-500    | sky-blue-500    | Equal                           |
 | Admonition (Tip)              | Border                 | green-500       | green-500       | Equal                           |
 | Admonition (Important)        | Border                 | mauve-500       | mauve-500       | Equal                           |

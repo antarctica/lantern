@@ -20,6 +20,7 @@ from lantern.models.item.catalogue.enums import Licence
 from lantern.models.item.catalogue.item import ItemCatalogue
 from lantern.models.item.catalogue.tabs import (
     AdditionalInfoTab,
+    AdminTab,
     AuthorsTab,
     ContactTab,
     DataTab,
@@ -245,6 +246,7 @@ class TestItemCatalogue:
         assert isinstance(fx_item_cat_model_min.tabs[6], RelatedTab)
         assert isinstance(fx_item_cat_model_min.tabs[7], AdditionalInfoTab)
         assert isinstance(fx_item_cat_model_min.tabs[8], ContactTab)
+        assert isinstance(fx_item_cat_model_min.tabs[9], AdminTab)
 
     base_record = {  # noqa: RUF012
         "$schema": "https://metadata-resources.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-2-v4.json",

@@ -49,11 +49,13 @@ class ItemCatalogue(ItemBase):
         site_meta: SiteMeta,
         record: RecordRevision,
         admin_meta_keys: AdministrationKeys | None,
+        trusted_context: bool,
         get_record: Callable[[str], RecordRevision],
         **kwargs: Any,
     ) -> None:
         super().__init__(record=record, admin_keys=admin_meta_keys)
         self._meta = site_meta
+        self._trusted_context = trusted_context
         self._get_record = get_record
 
         if not isinstance(self._record, RecordRevision):
@@ -174,6 +176,7 @@ class ItemCatalogue(ItemBase):
     def _admin(self) -> AdminTab:
         """Admin tab (secure contexts only)."""
         return AdminTab(
+            trusted=self._trusted_context,
             item_id=self.resource_id,
             revision=self._revision,
             gitlab_issues=self.admin_gitlab_issues,

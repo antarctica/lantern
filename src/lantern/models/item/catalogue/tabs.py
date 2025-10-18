@@ -1,7 +1,9 @@
+import json
 import locale
 from abc import ABC, abstractmethod
 from datetime import UTC, date, datetime
 
+from lantern.lib.metadata_library.models.record.elements.administration import Permission
 from lantern.lib.metadata_library.models.record.elements.common import Date, Identifier, Series
 from lantern.lib.metadata_library.models.record.elements.data_quality import DomainConsistency
 from lantern.lib.metadata_library.models.record.elements.distribution import Distribution as RecordDistribution
@@ -10,7 +12,7 @@ from lantern.lib.metadata_library.models.record.elements.metadata import Metadat
 from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
 from lantern.models.item.base.elements import Contact, Link
 from lantern.models.item.base.elements import Extent as ItemExtent
-from lantern.models.item.base.enums import ResourceTypeLabel
+from lantern.models.item.base.enums import AccessLevel, ResourceTypeLabel
 from lantern.models.item.catalogue.distributions import (
     ArcGisFeatureLayer,
     ArcGisOgcApiFeatures,
@@ -398,7 +400,7 @@ class AdditionalInfoTab(Tab):
         item_id: str,
         item_type: HierarchyLevelCode,
         identifiers: Identifiers,
-        gitlab_issues: list[Link],
+        gitlab_issues: list[str],
         dates: Dates,
         datestamp: date,
         kv: dict[str, str],
@@ -424,15 +426,6 @@ class AdditionalInfoTab(Tab):
         self._profiles = profiles if profiles is not None else []
         self._kv = kv
         self._revision = revision
-
-    @staticmethod
-    def _make_gitlab_issue_ref(href: str) -> str:
-        """
-        Create GitLab issue reference.
-
-        E.g. https://gitlab.data.bas.ac.uk/MAGIC/foo/-/issues/123 -> MAGIC/foo#123                                                                                                                                                                              .
-        """
-        return f"{href.split('/')[-5]}/{href.split('/')[-4]}#{href.split('/')[-1]}"
 
     @staticmethod
     def _format_scale(value: int | None) -> str | None:
@@ -542,7 +535,7 @@ class AdditionalInfoTab(Tab):
     @property
     def gitlab_issues(self) -> list[str]:
         """GitLab issue references if set."""
-        return [self._make_gitlab_issue_ref(issue.href) for issue in self._gitlab_issues]
+        return [AdminTab._make_gitlab_issue_ref(issue) for issue in self._gitlab_issues]
 
     @property
     def dates(self) -> dict[str, FormattedDate]:
@@ -719,3 +712,100 @@ class ContactTab(Tab):
     def turnstile_site_key(self) -> str:
         """Cloudflare Turnstile widget site key."""
         return self._turnstile_key
+
+
+class AdminTab(Tab):
+    """Admin tab."""
+
+    def __init__(
+        self,
+        item_id: str,
+        revision: Link,
+        gitlab_issues: list[str],
+        restricted: bool,
+        access_level: AccessLevel,
+        access_permissions: list[Permission],
+    ) -> None:
+        self._item_id = item_id
+        self._revision = revision
+        self._gitlab_issues = gitlab_issues
+        self._restricted = restricted
+        self._access_level = access_level
+        self._access_permissions = access_permissions
+
+    @staticmethod
+    def _make_gitlab_issue_ref(href: str) -> str:
+        """
+        Create GitLab issue reference.
+
+        E.g. https://gitlab.data.bas.ac.uk/MAGIC/foo/-/issues/123 -> MAGIC/foo#123                                                                                                                                                                              .
+        """
+        return f"{href.split('/')[-5]}/{href.split('/')[-4]}#{href.split('/')[-1]}"
+
+    @property
+    def enabled(self) -> bool:
+        """Whether tab is enabled."""
+        return True
+
+    @property
+    def anchor(self) -> str:
+        """HTML anchor for tab."""
+        return "admin"
+
+    @property
+    def title(self) -> str:
+        """Tab title."""
+        return "ADMIN"
+
+    @property
+    def icon(self) -> str:
+        """Tab icon class."""
+        return "far fa-shield-alt"
+
+    @property
+    def item_id(self) -> str:
+        """Item ID."""
+        return self._item_id
+
+    @property
+    def revision_link(self) -> Link | None:
+        """Link to record revision if known."""
+        return self._revision
+
+    @property
+    def gitlab_issues(self) -> list[Link]:
+        """GitLab issue references if set."""
+        return [
+            Link(value=self._make_gitlab_issue_ref(issue), href=issue, external=True) for issue in self._gitlab_issues
+        ]
+
+    @property
+    def restricted(self) -> bool:
+        """Catalogue item access."""
+        return self._restricted
+
+    @property
+    def access_level(self) -> str:
+        """Base item access level."""
+        return self._access_level.name
+
+    @property
+    def access(self) -> list[str]:
+        """
+        Access permissions if set.
+
+        Temporary encoding.
+        """
+        return [
+            json.dumps(
+                {
+                    "directory": permission.directory,
+                    "group": permission.group,
+                    "expiry": permission.expiry.isoformat(),
+                    "comments": permission.comments,
+                },
+                indent=2,
+                ensure_ascii=False,
+            )
+            for permission in self._access_permissions
+        ]

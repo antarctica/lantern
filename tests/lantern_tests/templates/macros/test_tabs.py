@@ -1,4 +1,5 @@
 import json
+from copy import deepcopy
 from datetime import date
 from unittest.mock import PropertyMock
 
@@ -6,6 +7,7 @@ import pytest
 from bs4 import BeautifulSoup
 from pytest_mock import MockerFixture
 
+from lantern.lib.metadata_library.models.record.elements.administration import Permission
 from lantern.lib.metadata_library.models.record.elements.common import (
     Address,
     Citation,
@@ -45,7 +47,8 @@ from lantern.lib.metadata_library.models.record.enums import (
     ProgressCode,
 )
 from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
-from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, set_admin
+from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, get_admin, set_admin
+from lantern.models.item.base.enums import AccessLevel
 from lantern.models.item.catalogue.enums import Licence
 from lantern.models.item.catalogue.item import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
@@ -1148,24 +1151,18 @@ class TestInfoTab:
         [
             [],
             [
-                Identifier(
-                    identifier="x",
-                    href="https://gitlab.data.bas.ac.uk/MAGIC/x/-/issues/123",
-                    namespace="gitlab.data.bas.ac.uk",
-                ),
-                Identifier(
-                    identifier="y",
-                    href="https://gitlab.data.bas.ac.uk/MAGIC/x/-/issues/234",
-                    namespace="gitlab.data.bas.ac.uk",
-                ),
+                "https://gitlab.data.bas.ac.uk/MAGIC/x/-/issues/123",
+                "https://gitlab.data.bas.ac.uk/MAGIC/x/-/issues/234",
             ],
         ],
     )
-    def test_issues(self, fx_item_catalogue_model_min: ItemCatalogue, value: list[Identifier]):
+    def test_issues(self, fx_item_cat_model_min: ItemCatalogue, value: list[str]):
         """Can get optional item GitLab issues based on value from item."""
-        fx_item_catalogue_model_min._record.identification.identifiers.extend(value)
-        expected = fx_item_catalogue_model_min._additional_info.gitlab_issues
-        html = BeautifulSoup(render_item_catalogue(fx_item_catalogue_model_min), parser="html.parser", features="lxml")
+        admin_meta = get_admin(keys=fx_item_cat_model_min._admin_keys, record=fx_item_cat_model_min._record)
+        admin_meta.gitlab_issues = value
+        set_admin(keys=fx_item_cat_model_min._admin_keys, record=fx_item_cat_model_min._record, admin_meta=admin_meta)
+        expected = fx_item_cat_model_min._additional_info.gitlab_issues
+        html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
 
         issues = html.select_one("#info-issues")
         if expected:
@@ -1347,3 +1344,100 @@ class TestContactTab:
             assert post.text == expected.address
         else:
             assert post is None
+
+
+class TestAdminTab:
+    """Test admin tab template macros."""
+
+    def test_enabled(self, fx_item_cat_model_min: ItemCatalogue):
+        """Can get admin tab (always enabled in secure contexts)."""
+        html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
+
+        assert html.select_one("#tab-content-admin") is not None
+
+    def test_id(self, fx_item_cat_model_min: ItemCatalogue):
+        """Can get item id based on value from item."""
+        expected = fx_item_cat_model_min._admin.item_id
+        html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
+
+        assert html.select_one("#admin-id").text.strip() == expected
+
+    def test_revision_link(self, fx_item_cat_model_min: ItemCatalogue):
+        """Can get link to record revision based on values from item."""
+        # realistic values needed over 'x' so substrings can be extracted safely
+        fx_item_cat_model_min._record = deepcopy(fx_item_cat_model_min._record)
+        fx_item_cat_model_min.file_identifier = "ee21f4a7-7e87-4074-b92f-9fa27a68d26d"
+        fx_item_cat_model_min.file_revision = "3401c9880d4bc42aed8dabd7b41acec8817a293a"
+
+        html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
+
+        link = html.select_one("#admin-revision")
+        assert link.select_one("a") is not None
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            [],
+            [
+                "https://gitlab.data.bas.ac.uk/MAGIC/x/-/issues/123",
+                "https://gitlab.data.bas.ac.uk/MAGIC/x/-/issues/234",
+            ],
+        ],
+    )
+    def test_issues(self, fx_item_cat_model_min: ItemCatalogue, value: list[str]):
+        """Can get optional item GitLab issues based on value from item."""
+        admin_meta = get_admin(keys=fx_item_cat_model_min._admin_keys, record=fx_item_cat_model_min._record)
+        admin_meta.gitlab_issues = value
+        set_admin(keys=fx_item_cat_model_min._admin_keys, record=fx_item_cat_model_min._record, admin_meta=admin_meta)
+        expected = fx_item_cat_model_min._admin.gitlab_issues
+        html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
+
+        issues = html.select_one("#admin-issues")
+        if expected:
+            for item in expected:
+                assert item.value in issues.find(name="a", href=item.href).get_text()
+        else:
+            assert issues is None
+
+    @pytest.mark.parametrize("restricted", [True, False])
+    def test_restricted(
+        self, fx_item_cat_model_min: ItemCatalogue, fx_item_cat_model_open: ItemCatalogue, restricted: bool
+    ):
+        """Can get item restriction status based on value from item."""
+        model = fx_item_cat_model_min if restricted else fx_item_cat_model_open
+        expected = model._admin.restricted
+        html = BeautifulSoup(render_item_catalogue(model), parser="html.parser", features="lxml")
+
+        result = html.select_one("#admin-restricted")
+        assert result.text.strip().lower() == str(expected).lower()
+
+    @pytest.mark.parametrize("value", [AccessLevel.NONE, AccessLevel.PUBLIC])
+    def test_access_level(self, fx_item_cat_model_min: ItemCatalogue, value: AccessLevel):
+        """Can get item access level based on value from item."""
+        if value == AccessLevel.PUBLIC:
+            admin_meta = get_admin(keys=fx_item_cat_model_min._admin_keys, record=fx_item_cat_model_min._record)
+            admin_meta.access_permissions = [OPEN_ACCESS]
+            set_admin(
+                keys=fx_item_cat_model_min._admin_keys, record=fx_item_cat_model_min._record, admin_meta=admin_meta
+            )
+        expected = fx_item_cat_model_min._admin.access_level
+        html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
+
+        result = html.select_one("#admin-level")
+        assert result.text.strip() == str(expected)
+
+    @pytest.mark.parametrize("value", [AccessLevel.NONE, AccessLevel.PUBLIC])
+    def test_access_permissions(self, fx_item_cat_model_min: ItemCatalogue, value: list[Permission]):
+        """Can get item access permissions based on value from item."""
+        if value == AccessLevel.PUBLIC:
+            admin_meta = get_admin(keys=fx_item_cat_model_min._admin_keys, record=fx_item_cat_model_min._record)
+            admin_meta.access_permissions = [OPEN_ACCESS]
+            set_admin(
+                keys=fx_item_cat_model_min._admin_keys, record=fx_item_cat_model_min._record, admin_meta=admin_meta
+            )
+        expected = fx_item_cat_model_min._admin.access
+        html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
+
+        access_permissions = html.select_one("#admin-access")
+        for permission in expected:
+            assert access_permissions.find(name="pre", string=permission) is not None

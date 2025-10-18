@@ -123,11 +123,12 @@ In the `tests.lantern_tests.config` module:
    `src/lantern/resources/templates/_macros/_tabs/data.html.j2` macros in the [Site Templates](/docs/site.md#templates):
    - create a new macro for the distribution format
    - update the `panel` macro to call the new macro
-6. include the new distribution format in [Test Records](#test-records):
+6. include the new distribution format in`lantern.models.verification.elements.VerificationDistribution`
+7. include the new distribution format in [Test Records](#test-records):
    - `tests.resources.records/item_cat_data::record`
    - `tests.resources.records/item_cat_verify::record`
-7. update `lantern.models.verification.elements.VerificationDistribution`
-8. add a new tests to:
+8. update `lantern.models.verification.elements.VerificationDistribution`
+9. add a new tests to:
    - `tests.lantern_tests.models.item.catalogue.test_distributions`
    - `tests.lantern_tests.templates.macros.test_tabs.TestDataTab.test_data_info` (if using a collapsible panel)
 

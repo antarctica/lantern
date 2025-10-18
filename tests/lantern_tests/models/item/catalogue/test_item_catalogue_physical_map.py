@@ -134,7 +134,7 @@ class TestExtentTab:
 class TestAdditionalInfoTab:
     """Test catalogue physical map additional information tab."""
 
-    def test_init(self):
+    def test_init(self, fx_site_meta: SiteMeta) -> None:
         """Can create an AdditionalInformation tab."""
         item_id = "x"
         item_type = HierarchyLevelCode.PRODUCT
@@ -152,7 +152,7 @@ class TestAdditionalInfoTab:
             dates=dates,
             datestamp=datestamp,
             kv={},
-            revision=None,
+            build_time=fx_site_meta.build_time,
         )
 
         assert isinstance(tab, AdditionalInfoTab)
@@ -177,7 +177,11 @@ class TestAdditionalInfoTab:
         ],
     )
     def test_series(
-        self, serieses: list[Series | None], expected_names: list[str] | None, expected_sheets: list[str] | None
+        self,
+        fx_site_meta: SiteMeta,
+        serieses: list[Series | None],
+        expected_names: list[str] | None,
+        expected_sheets: list[str] | None,
     ) -> None:
         """Can get multiple scales if different."""
         item_id = "x"
@@ -196,7 +200,7 @@ class TestAdditionalInfoTab:
             dates=dates,
             datestamp=datestamp,
             kv={},
-            revision=None,
+            build_time=fx_site_meta.build_time,
         )
 
         assert tab.series_names == expected_names
@@ -213,7 +217,7 @@ class TestAdditionalInfoTab:
             ([1_000_000, 2_000_000], ["1:1,000,000 (Side A)", "1:2,000,000 (Side B)"]),
         ],
     )
-    def test_scales(self, scales: list[int | None], expected: list[str] | None) -> None:
+    def test_scales(self, fx_site_meta: SiteMeta, scales: list[int | None], expected: list[str] | None) -> None:
         """Can get multiple scales if different."""
         item_id = "x"
         item_type = HierarchyLevelCode.PRODUCT
@@ -231,7 +235,7 @@ class TestAdditionalInfoTab:
             dates=dates,
             datestamp=datestamp,
             kv={},
-            revision=None,
+            build_time=fx_site_meta.build_time,
         )
 
         assert tab.scales == expected
@@ -261,11 +265,11 @@ class TestItemCataloguePhysicalMap:
     def test_matches(
         self,
         matches: bool,
-        fx_item_catalogue_model_min: ItemCatalogue,
+        fx_item_cat_model_min: ItemCatalogue,
         fx_item_physical_map_model_min: ItemCataloguePhysicalMap,
     ):
         """Can determine if record matches this subclass."""
-        record = fx_item_physical_map_model_min._record if matches else fx_item_catalogue_model_min._record
+        record = fx_item_physical_map_model_min._record if matches else fx_item_cat_model_min._record
         assert ItemCataloguePhysicalMap.matches(record) == matches
 
     def test_sides(self, fx_config: Config, fx_item_physical_map_model_min: ItemCataloguePhysicalMap):

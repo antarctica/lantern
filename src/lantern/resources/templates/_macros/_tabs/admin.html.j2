@@ -1,0 +1,38 @@
+{% import '_macros/common.html.j2' as com %}
+
+{% macro item(data) %}
+  {% call com.item_title() %}Administrative Information{% endcall %}
+  {% call com.item_border() %}
+    <dl class="space-y-4">
+      {% call com.dl_item(title='Resource ID', id='admin-id') %}{{ data.item_id }}{% endcall %}
+
+      {% call com.dl_item(title='Metadata Revision', id='admin-revision') %}
+        <a class="{{ com.link_classes() }}" href="{{ data.revision_link.href }}">{{ data.revision_link.value }} {{ com.restricted_i() }} {{ com.ext_link_i() }}</a>
+      {% endcall %}
+
+      {% if data.gitlab_issues %}
+        {% call com.dl_item(title='GitLab Issues', id='admin-issues') %}
+          <ul class="space-y-2">
+            {% for item in data.gitlab_issues %}
+              <li>{{ com.ext_link_a(href=item.href, value=item.value) }}</li>
+            {% endfor %}
+          </ul>
+        {% endcall %}
+      {% endif %}
+
+      {% call com.dl_item(title='Item Restricted', id='admin-restricted') %}
+        {{ data.restricted }}
+      {% endcall %}
+
+      {% call com.dl_item(title='Item Access Level', id='admin-level') %}
+        {{ data.access_level }}
+      {% endcall %}
+
+      {% call com.dl_item(title='Item Access Permissions', id='admin-access') %}
+        {% for permission in data.access %}
+          <pre>{{ permission }}</pre>
+        {% endfor %}
+      {% endcall %}
+    </dl>
+  {% endcall %}
+{% endmacro %}

@@ -41,12 +41,14 @@ from lantern.lib.metadata_library.models.record.enums import (
 from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.record import Record as RecordBase
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, AdministrationWrapper, set_admin
+from lantern.models.item.base.elements import Link
+from lantern.models.item.base.enums import AccessLevel
 from lantern.models.item.base.item import ItemBase
 from lantern.models.item.catalogue.elements import Dates as ItemCatDates
 from lantern.models.item.catalogue.elements import Identifiers as ItemCatIdentifiers
 from lantern.models.item.catalogue.item import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
-from lantern.models.item.catalogue.tabs import AdditionalInfoTab
+from lantern.models.item.catalogue.tabs import AdditionalInfoTab, AdminTab
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
@@ -178,7 +180,8 @@ Record (Configs) and Item fixtures
 |                 | Record                   | fx_record_model_min             | fx_record_config_min            |
 |                 | RecordRevision           | fx_revision_model_min           | fx_revision_config_min          |
 |                 | ItemBase                 | fx_item_base_model_min          | fx_item_config_min_base         |
-|                 | ItemCatalogue            | fx_item_catalogue_model_min     | fx_item_config_min_catalogue    |
+|                 | ItemCatalogue            | fx_item_cat_model_min           | fx_item_config_min_catalogue    |
+|                 | ItemCatalogue            | fx_item_cat_model_min_open      | _item_cat_model_min             |
 |                 | ItemCataloguePhysicalMap | fx_item_physical_map_model_min  | fx_item_config_min_physical_map |
 """
 
@@ -394,35 +397,64 @@ def render_item_catalogue(item: ItemCatalogue) -> str:
     return prettify_html(raw)
 
 
-def _item_catalogue_model_min() -> ItemCatalogue:
+def _item_cat_model_min() -> ItemCatalogue:
     """
     Minimal ItemCatalogue model instance.
+
+    Includes minimal admin metadata required by admin tab.
 
     Standalone method to allow use outside of fixtures in test parametrisation.
     """
     meta = SiteMeta.from_config_store(config=Config(), store=None, build_repo_ref="83fake48")
-    return ItemCatalogue(
+    model = ItemCatalogue(
         site_meta=meta,
         record=RecordRevision.loads(_item_config_min_catalogue()),
         admin_meta_keys=_admin_meta_keys(),
         get_record=_get_record,
     )
+    # noinspection PyProtectedMember
+    set_admin(keys=model._admin_keys, record=model._record, admin_meta=Administration(id=model.resource_id))
+    return model
 
 
 @pytest.fixture()
-def fx_item_catalogue_model_min(
+def fx_item_cat_model_min(
     fx_site_meta: SiteMeta,
     fx_item_config_min_catalogue: dict,
     fx_admin_meta_keys: AdministrationKeys,
     fx_get_record: Callable[[str], RecordRevision],
 ) -> ItemCatalogue:
-    """Minimal ItemCatalogue model instance."""
-    return ItemCatalogue(
+    """
+    Minimal ItemCatalogue model instance.
+
+    Includes minimal admin metadata required by admin tab.
+    """
+    model = ItemCatalogue(
         site_meta=fx_site_meta,
         record=RecordRevision.loads(fx_item_config_min_catalogue),
         admin_meta_keys=fx_admin_meta_keys,
         get_record=fx_get_record,
     )
+    # noinspection PyProtectedMember
+    set_admin(keys=model._admin_keys, record=model._record, admin_meta=Administration(id=model.resource_id))
+    return model
+
+
+# noinspection PyProtectedMember
+@pytest.fixture()
+def fx_item_cat_model_open(
+    fx_item_cat_model_min: ItemCatalogue,
+    fx_item_config_min_catalogue: dict,
+) -> ItemCatalogue:
+    """Minimal cloned ItemCatalogue model instance with minimal admin metadata to allow open access."""
+    model = _item_cat_model_min()
+    # noinspection PyProtectedMember
+    set_admin(
+        keys=model._admin_keys,
+        record=model._record,
+        admin_meta=Administration(id=model.resource_id, access_permissions=[OPEN_ACCESS]),
+    )
+    return model
 
 
 @pytest.fixture()
@@ -432,13 +464,20 @@ def fx_item_physical_map_model_min(
     fx_admin_meta_keys: AdministrationKeys,
     fx_get_record: Callable[[str], RecordRevision],
 ) -> ItemCataloguePhysicalMap:
-    """Minimal ItemCataloguePhysicalMap model instance."""
-    return ItemCataloguePhysicalMap(
+    """
+    Minimal ItemCataloguePhysicalMap model instance.
+
+    Includes minimal admin metadata required by admin tab.
+    """
+    model = ItemCataloguePhysicalMap(
         site_meta=fx_site_meta,
         record=RecordRevision.loads(fx_item_config_min_physical_map),
         admin_meta_keys=fx_admin_meta_keys,
         get_record=fx_get_record,
     )
+    # noinspection PyProtectedMember
+    set_admin(keys=model._admin_keys, record=model._record, admin_meta=Administration(id=model.resource_id))
+    return model
 
 
 def _get_record(identifier: str) -> RecordRevision:
@@ -463,7 +502,7 @@ def fx_get_record() -> Callable[[str], RecordRevision]:
 
 
 @pytest.fixture()
-def fx_item_cat_info_tab_minimal() -> AdditionalInfoTab:
+def fx_item_cat_info_tab_minimal(fx_site_meta: SiteMeta) -> AdditionalInfoTab:
     """Minimal ItemCatalogue additional information tab."""
     dates = ItemCatDates(dates=Dates(creation=Date(date=datetime(2014, 6, 30, 14, 30, second=45, tzinfo=UTC))))
     identifiers = ItemCatIdentifiers(Identifiers([]))
@@ -475,7 +514,20 @@ def fx_item_cat_info_tab_minimal() -> AdditionalInfoTab:
         dates=dates,
         datestamp=datetime(2014, 6, 30, 14, 30, second=45, tzinfo=UTC).date(),
         kv={},
-        revision=None,
+        build_time=fx_site_meta.build_time,
+    )
+
+
+@pytest.fixture()
+def fx_item_cat_admin_tab_min() -> AdminTab:
+    """Minimal ItemCatalogue admin tab."""
+    return AdminTab(
+        item_id="x",
+        revision=Link(value="x", href="x", external=True),
+        gitlab_issues=[],
+        restricted=False,
+        access_level=AccessLevel.NONE,
+        access_permissions=[],
     )
 
 
@@ -1022,6 +1074,8 @@ def fx_exporter_static_site(module_mocker: MockerFixture) -> TemporaryDirectory:
     module_mocker.patch.object(type(config), attribute="AWS_ACCESS_ID", new_callable=PropertyMock, return_value="x")
     module_mocker.patch.object(type(config), attribute="AWS_ACCESS_SECRET", new_callable=PropertyMock, return_value="x")
     meta = ExportMeta.from_config_store(config=config, store=None, build_repo_ref="83fake48")
+    # load private signing key so admin metadata can be signed in other fixtures and tests
+    meta.admin_meta_keys = _admin_meta_keys()
 
     with mock_aws():
         s3_client = S3Client(

@@ -1,7 +1,9 @@
+import json
 from datetime import UTC, datetime
 
 import pytest
 
+from lantern.lib.metadata_library.models.record.elements.administration import Permission
 from lantern.lib.metadata_library.models.record.elements.common import (
     Address,
     Citation,
@@ -40,7 +42,7 @@ from lantern.lib.metadata_library.models.record.enums import (
 )
 from lantern.models.item.base.elements import Contact, Contacts, Link
 from lantern.models.item.base.elements import Extent as ItemExtent
-from lantern.models.item.base.enums import ResourceTypeLabel
+from lantern.models.item.base.enums import AccessLevel, ResourceTypeLabel
 from lantern.models.item.catalogue.distributions import ArcGisFeatureLayer
 from lantern.models.item.catalogue.elements import (
     Aggregations,
@@ -54,6 +56,7 @@ from lantern.models.item.catalogue.elements import (
 from lantern.models.item.catalogue.enums import Licence
 from lantern.models.item.catalogue.tabs import (
     AdditionalInfoTab,
+    AdminTab,
     AuthorsTab,
     ContactTab,
     DataTab,
@@ -65,6 +68,7 @@ from lantern.models.item.catalogue.tabs import (
     RelatedTab,
 )
 from lantern.models.record.const import CATALOGUE_NAMESPACE
+from lantern.models.site import SiteMeta
 from tests.conftest import _get_record
 
 
@@ -471,7 +475,7 @@ class TestRelatedTab:
 class TestAdditionalInfoTab:
     """Test additional information tab."""
 
-    def test_init(self):
+    def test_init(self, fx_site_meta: SiteMeta):
         """Can create additional information tab."""
         item_id = "x"
         item_type = HierarchyLevelCode.PRODUCT
@@ -491,7 +495,7 @@ class TestAdditionalInfoTab:
             dates=dates,
             datestamp=datestamp,
             kv={},
-            revision=None,
+            build_time=fx_site_meta.build_time,
         )
 
         assert tab.enabled is True
@@ -507,14 +511,6 @@ class TestAdditionalInfoTab:
         # cov
         assert tab.title != ""
         assert tab.icon != ""
-
-    def test_make_gitlab_issue_ref(self):
-        """Can compute GitLab issue reference."""
-        value = "https://gitlab.data.bas.ac.uk/MAGIC/foo/-/issues/123"
-        expected = "MAGIC/foo#123"
-
-        result = AdditionalInfoTab._make_gitlab_issue_ref(value)
-        assert result == expected
 
     @pytest.mark.parametrize(("value", "expected"), [(None, None), (1, "1:1"), (1234567890, "1:1,234,567,890")])
     def test_format_scale(self, value: int | None, expected: str | None):
@@ -638,13 +634,7 @@ class TestAdditionalInfoTab:
         [
             ([], []),
             (
-                [
-                    Link(
-                        value="https://gitlab.data.bas.ac.uk/MAGIC/foo/-/issues/123",
-                        href="https://gitlab.data.bas.ac.uk/MAGIC/foo/-/issues/123",
-                        external=True,
-                    )
-                ],
+                ["https://gitlab.data.bas.ac.uk/MAGIC/foo/-/issues/123"],
                 ["MAGIC/foo#123"],
             ),
         ],
@@ -736,12 +726,6 @@ class TestAdditionalInfoTab:
         """Can get any data quality profiles if set."""
         fx_item_cat_info_tab_minimal._profiles = profiles
         assert fx_item_cat_info_tab_minimal.profiles == expected
-
-    @pytest.mark.parametrize("expected", [None, Link(value="x", href="x", external=True)])
-    def test_revision(self, fx_item_cat_info_tab_minimal: AdditionalInfoTab, expected: Link | None):
-        """Can get item revision if set."""
-        fx_item_cat_info_tab_minimal._revision = expected
-        assert fx_item_cat_info_tab_minimal.revision_link == expected
 
 
 class TestContactTab:
@@ -837,3 +821,90 @@ class TestContactTab:
 
         with pytest.raises(InvalidItemContactError):
             _ = tab.email
+
+
+class TestAdminTab:
+    """Test admin tab."""
+
+    def test_init(self, fx_site_meta: SiteMeta):
+        """Can create admin tab."""
+        item_id = "x"
+        revision_link = Link(value="x", href="x", external=True)
+
+        tab = AdminTab(
+            item_id=item_id,
+            revision=revision_link,
+            gitlab_issues=[],
+            restricted=True,
+            access_level=AccessLevel.NONE,
+            access_permissions=[],
+        )
+
+        assert tab.enabled is True
+        assert tab.item_id == item_id
+        assert tab.revision_link == revision_link
+        assert tab.restricted is True
+        assert tab.access_level == AccessLevel.NONE.name
+        assert tab.access == []
+        # cov
+        assert tab.title != ""
+        assert tab.icon != ""
+
+    def test_make_gitlab_issue_ref(self):
+        """Can compute GitLab issue reference."""
+        value = "https://gitlab.data.bas.ac.uk/MAGIC/foo/-/issues/123"
+        expected = "MAGIC/foo#123"
+
+        result = AdminTab._make_gitlab_issue_ref(value)
+        assert result == expected
+
+    @pytest.mark.parametrize(
+        ("issues", "expected"),
+        [
+            ([], []),
+            (
+                ["https://gitlab.data.bas.ac.uk/MAGIC/foo/-/issues/123"],
+                [
+                    Link(
+                        value="MAGIC/foo#123",
+                        href="https://gitlab.data.bas.ac.uk/MAGIC/foo/-/issues/123",
+                        external=True,
+                    )
+                ],
+            ),
+        ],
+    )
+    def test_gitlab_issues(self, fx_item_cat_admin_tab_min: AdminTab, issues: list[Link], expected: list[str]):
+        """Can get any resource GitLab issue references if set."""
+        fx_item_cat_admin_tab_min._gitlab_issues = issues
+        assert fx_item_cat_admin_tab_min.gitlab_issues == expected
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            [],
+            [Permission(directory="x", group="x")],
+            [Permission(directory="y", group="y", expiry=datetime(2014, 6, 30, tzinfo=UTC), comments="...")],
+        ],
+    )
+    def test_access_permissions(self, fx_item_cat_admin_tab_min: AdminTab, value: list[Permission]):
+        """Can get base item access."""
+        fx_item_cat_admin_tab_min._access_permissions = value
+
+        result = fx_item_cat_admin_tab_min.access
+        assert len(result) == len(value)
+        assert all(isinstance(item, str) for item in result)
+
+        decoded = [json.loads(permission) for permission in result]
+        # each decoded permission should have a 'expiry' key as a string, recast to a datetime for comparison
+        parsed = [
+            Permission(
+                **{
+                    **{key: val for key, val in permission.items() if key != "expiry"},
+                    "expiry": datetime.fromisoformat(permission["expiry"]),
+                }
+            )
+            for permission in decoded
+        ]
+        for permission in value:
+            assert permission in parsed

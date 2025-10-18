@@ -61,7 +61,7 @@ class TestRecord:
     def test_no_file_identifier(self):
         """Cannot create a Record class instance directly without a file_identifier."""
         record = deepcopy(self.base_record)
-        with pytest.raises(ValueError, match="Records require a file_identifier."):
+        with pytest.raises(ValueError, match=r"Records require a file_identifier."):
             # noinspection PyArgumentList
             _ = Record(
                 hierarchy_level=record.hierarchy_level,

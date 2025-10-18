@@ -1263,28 +1263,9 @@ class TestInfoTab:
         else:
             assert links is None
 
-    def test_revision_link(
-        self,
-        fx_item_catalogue_model_min: ItemCatalogue,
-        fx_revision_model_min: RecordRevision,
-    ):
+    def test_build_time(self, fx_item_cat_model_min: ItemCatalogue):
         """Can get link to record revision based on values from item."""
-        # realistic values needed over 'x' so substrings can be extracted safely
-        fx_revision_model_min.file_identifier = "ee21f4a7-7e87-4074-b92f-9fa27a68d26d"
-        fx_revision_model_min.file_revision = "3401c9880d4bc42aed8dabd7b41acec8817a293a"
-        fx_item_catalogue_model_min._record = fx_revision_model_min
-
-        html = BeautifulSoup(render_item_catalogue(fx_item_catalogue_model_min), parser="html.parser", features="lxml")
-
-        link = html.select_one("#info-revision")
-        assert link.select_one("a") is not None
-
-    def test_build_time(
-        self,
-        fx_item_catalogue_model_min: ItemCatalogue,
-    ):
-        """Can get link to record revision based on values from item."""
-        html = BeautifulSoup(render_item_catalogue(fx_item_catalogue_model_min), parser="html.parser", features="lxml")
+        html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
 
         build = html.select_one("#info-build")
         assert build.select_one("time") is not None

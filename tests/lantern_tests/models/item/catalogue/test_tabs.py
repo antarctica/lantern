@@ -68,6 +68,7 @@ from lantern.models.item.catalogue.tabs import (
     RelatedTab,
 )
 from lantern.models.record.const import CATALOGUE_NAMESPACE
+from lantern.models.site import SiteMeta
 from tests.conftest import _get_record
 
 
@@ -474,7 +475,7 @@ class TestRelatedTab:
 class TestAdditionalInfoTab:
     """Test additional information tab."""
 
-    def test_init(self):
+    def test_init(self, fx_site_meta: SiteMeta):
         """Can create additional information tab."""
         item_id = "x"
         item_type = HierarchyLevelCode.PRODUCT
@@ -494,7 +495,7 @@ class TestAdditionalInfoTab:
             dates=dates,
             datestamp=datestamp,
             kv={},
-            revision=None,
+            build_time=fx_site_meta.build_time,
         )
 
         assert tab.enabled is True
@@ -725,12 +726,6 @@ class TestAdditionalInfoTab:
         """Can get any data quality profiles if set."""
         fx_item_cat_info_tab_minimal._profiles = profiles
         assert fx_item_cat_info_tab_minimal.profiles == expected
-
-    @pytest.mark.parametrize("expected", [None, Link(value="x", href="x", external=True)])
-    def test_revision(self, fx_item_cat_info_tab_minimal: AdditionalInfoTab, expected: Link | None):
-        """Can get item revision if set."""
-        fx_item_cat_info_tab_minimal._revision = expected
-        assert fx_item_cat_info_tab_minimal.revision_link == expected
 
 
 class TestContactTab:

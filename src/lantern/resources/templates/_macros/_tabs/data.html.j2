@@ -1,12 +1,12 @@
 {% import '_macros/common.html.j2' as com %}
 
 {% macro item(data) %}
-  {% call com.item_border(classes="grid grid-cols-1 gap-y-2 lg:gap-y-0 lg:grid-cols-3 items-center data-option") %}
+  {% call com.item_border(classes="grid grid-cols-1 gap-y-2 lg:grid-cols-3 items-center data-option") %}
     <div class="text-center lg:text-left"><span>{{ data.label }}</span>
     </div>
     <div class="text-center">{{ data.size }}</div>
     <div class="text-center lg:text-right">{{ action(data) }}</div>
-    {% if data.description %}<aside class="text-sm text-grey-500 dark:text-grey-300">{{ data.description }}</aside>{% endif %}
+    {% if data.description %}<aside class="lg:col-span-3 text-sm text-grey-500 dark:text-grey-300">{{ data.description }}</aside>{% endif %}
     {% if data.access_target %}
       <div class="lg:col-span-3">
         <noscript><div class="pt-2">{{ panel(data) }}</div></noscript>

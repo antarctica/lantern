@@ -307,6 +307,32 @@ def _process_admin_metadata(logger: logging.Logger, admin_keys: AdministrationKe
         _create_admin_metadata(logger=logger, admin_keys=admin_keys, record=record)
 
 
+def _process_distribution_descriptions(logger: logging.Logger, records: list[Record]) -> None:
+    """Remove unnecessary online resource descriptions for simple distributions or align values."""
+    format_descriptions = {
+        "https://www.iana.org/assignments/media-types/application/geo+json": None,
+        "https://www.iana.org/assignments/media-types/application/geopackage+sqlite3": None,
+        "https://metadata-resources.data.bas.ac.uk/media-types/application/geopackage+sqlite3+zip": "Download information as a GeoPackage file compressed as a Zip archive.",
+        "https://www.iana.org/assignments/media-types/image/jpeg": None,
+        "https://www.iana.org/assignments/media-types/application/vnd.mapbox-vector-tile": None,
+        "https://www.iana.org/assignments/media-types/application/pdf": None,
+        "https://metadata-resources.data.bas.ac.uk/media-types/application/pdf+geo": "Download information as a PDF file with embedded georeferencing.",
+        "https://www.iana.org/assignments/media-types/image/png": None,
+        "https://metadata-resources.data.bas.ac.uk/media-types/application/shapefile+zip": "Download information as a Shapefile compressed as a Zip archive.",
+    }
+    for record in records:
+        for distribution in record.distribution:
+            format_href = None if distribution.format is None else distribution.format.href
+            if (
+                distribution.transfer_option.online_resource.description is not None
+                and format_href in format_descriptions
+            ):
+                logger.info(
+                    f"Updating distribution description for format '{distribution.format.format}' in Record '{record.file_identifier}'"
+                )
+                distribution.transfer_option.online_resource.description = format_descriptions[distribution.format.href]
+
+
 def _process_records(
     logger: logging.Logger, records: list[Record], store: GitLabStore, admin_keys: AdministrationKeys
 ) -> list[Record]:
@@ -318,6 +344,7 @@ def _process_records(
     Where any of these records are modified, the date_stamp and other relevant properties are revised.
     """
     additional_records: list[Record] = []
+    _process_distribution_descriptions(logger=logger, records=records)
     _process_admin_metadata(logger=logger, admin_keys=admin_keys, records=records)
     _process_magic_collections(logger=logger, records=records, additional_records=additional_records, store=store)
     _revise_records(logger=logger, records=[*records, *additional_records], store=store)

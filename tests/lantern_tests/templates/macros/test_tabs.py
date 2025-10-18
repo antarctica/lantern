@@ -6,7 +6,6 @@ import pytest
 from bs4 import BeautifulSoup
 from pytest_mock import MockerFixture
 
-from lantern.lib.metadata_library.models.record.elements.administration import Administration
 from lantern.lib.metadata_library.models.record.elements.common import (
     Address,
     Citation,
@@ -278,13 +277,17 @@ class TestDataTab:
     )
     def test_restricted_access(
         self,
-        fx_item_catalogue_model_min: ItemCatalogue,
+        fx_item_cat_model_min: ItemCatalogue,
+        fx_item_cat_model_open: ItemCatalogue,
         fx_admin_meta_keys: AdministrationKeys,
         value: Constraint,
         expected: bool,
     ):
         """Shows restricted access panel if item is restricted."""
-        fx_item_catalogue_model_min._record.distribution.append(
+        model = fx_item_cat_model_min
+        if value.restriction_code == ConstraintRestrictionCode.UNRESTRICTED:
+            model = fx_item_cat_model_open
+        model._record.distribution.append(
             Distribution(
                 distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
                 format=Format(format="x", href="https://www.iana.org/assignments/media-types/image/png"),
@@ -294,20 +297,8 @@ class TestDataTab:
                 ),
             )
         )
-        fx_item_catalogue_model_min._record.identification.constraints = Constraints([value])
-        if value.restriction_code == ConstraintRestrictionCode.UNRESTRICTED:
-            admin_meta = Administration(
-                id=fx_item_catalogue_model_min._record.file_identifier, access_permissions=[OPEN_ACCESS]
-            )
-            set_admin(keys=fx_admin_meta_keys, record=fx_item_catalogue_model_min._record, admin_meta=admin_meta)
-
-        item = ItemCatalogue(
-            site_meta=fx_item_catalogue_model_min._meta,
-            record=fx_item_catalogue_model_min._record,
-            admin_meta_keys=fx_item_catalogue_model_min._admin_keys,
-            get_record=fx_item_catalogue_model_min._get_record,
-        )
-        html = BeautifulSoup(render_item_catalogue(item), parser="html.parser", features="lxml")
+        model._record.identification.constraints = Constraints([value])
+        html = BeautifulSoup(render_item_catalogue(model), parser="html.parser", features="lxml")
 
         result = html.select_one("#data-restricted-info")
         if expected:

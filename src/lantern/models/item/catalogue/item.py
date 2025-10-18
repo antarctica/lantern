@@ -10,6 +10,7 @@ from lantern.models.item.base.item import ItemBase
 from lantern.models.item.catalogue.elements import Dates, Extent, PageHeader, PageSummary
 from lantern.models.item.catalogue.tabs import (
     AdditionalInfoTab,
+    AdminTab,
     Aggregations,
     AuthorsTab,
     ContactTab,
@@ -154,7 +155,7 @@ class ItemCatalogue(ItemBase):
             standard=self._record.metadata.metadata_standard,
             profiles=self._record.data_quality.domain_consistency if self._record.data_quality else None,
             kv=self.kv,
-            revision=self._revision,
+            build_time=self._meta.build_time,
         )
 
     @property
@@ -167,6 +168,18 @@ class ItemCatalogue(ItemBase):
             item_title=self.title_plain,
             form_action=self._meta.items_enquires_endpoint,
             turnstile_key=self._meta.items_enquires_turnstile_key,
+        )
+
+    @property
+    def _admin(self) -> AdminTab:
+        """Admin tab (secure contexts only)."""
+        return AdminTab(
+            item_id=self.resource_id,
+            revision=self._revision,
+            gitlab_issues=self.admin_gitlab_issues,
+            restricted=self._restricted,
+            access_level=self.admin_access_level,
+            access_permissions=self._admin_metadata.access_permissions,
         )
 
     @property
@@ -275,6 +288,7 @@ class ItemCatalogue(ItemBase):
             self._related,
             self._additional_info,
             self._contact,
+            self._admin,
         ]
 
     @property

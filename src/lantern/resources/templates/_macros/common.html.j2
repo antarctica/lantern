@@ -141,6 +141,8 @@
     {% set variant_colour = "red-500" %}
   {% elif variant == "blue" %}
     {% set variant_colour = "sky-blue-500" %}
+  {% elif variant == "purple" %}
+    {% set variant_colour = "mauve-500" %}
   {% endif %}
   <div class="p-4 pr-0 border-l-5 border-l-{{ variant_colour }} {{ classes }}">
     {{ caller() }}

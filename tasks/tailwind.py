@@ -7,6 +7,7 @@ from tempfile import TemporaryDirectory
 from boto3 import client as S3Client  # noqa: N812
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from moto import mock_aws
+from resources.records.admin_keys.testing_keys import load_keys
 from tests.resources.stores.fake_records_store import FakeRecordsStore
 
 from lantern.config import Config as BaseConfig
@@ -65,6 +66,7 @@ def export_test_site(export_path: Path) -> None:
         export_path=export_path,
         s3_bucket="x",
         parallel_jobs=1,
+        admin_meta_keys=load_keys(),
     )
 
     exporter = SiteExporter(config=Config(), meta=meta, s3=s3_client, logger=logger, get_record=store.get)

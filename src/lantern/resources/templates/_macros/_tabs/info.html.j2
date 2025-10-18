@@ -10,7 +10,7 @@
         <i class="{{ data.item_type_icon }}"></i> {{ data.item_type }}
       {% endcall %}
 
-    {% if data.series_name or data.series_names %}
+      {% if data.series_name or data.series_names %}
         {% set names = data.series_names if data.series_names else [data.series_name] %}
         {% call com.dl_item(title='Series', id='info-series-name') %}
           <ul class="space-y-2">
@@ -21,7 +21,7 @@
         {% endcall %}
       {% endif %}
 
-    {% if data.sheet_number or data.sheet_numbers %}
+      {% if data.sheet_number or data.sheet_numbers %}
         {% set numbers = data.sheet_numbers if data.sheet_numbers else [data.sheet_number] %}
         {% call com.dl_item(title='Sheet number', id='info-sheet-number') %}
           <ul class="space-y-2">
@@ -142,7 +142,7 @@
         {% endcall %}
       {% endif %}
 
-      {% call com.dl_item(title='Metadata links', id='info-records') %}
+      {% call com.dl_item(title='Metadata Links', id='info-records') %}
         <ul class="space-y-2">
           {% for item in data.record_links %}
             <li><a class="{{ com.link_classes() }}" href="{{ item.href }}">{{ item.value }}</a></li>
@@ -150,13 +150,9 @@
         </ul>
       {% endcall %}
 
-      {% call com.dl_item(title='Metadata revision', id='info-revision') %}
-        <a class="{{ com.link_classes() }}" href="{{ data.revision_link.href }}">{{ data.revision_link.value }} {{ com.restricted_i() }} {{ com.ext_link_i() }}</a>
+      {% call com.dl_item(title='Metadata build time', id='info-build') %}
+        {{ com.time(data.build_time) }}
       {% endcall %}
-
-    {% call com.dl_item(title='Metadata build time', id='info-build') %}
-      {{ com.time(data.build_time) }}
-    {% endcall %}
     </dl>
   {% endcall %}
 {% endmacro %}

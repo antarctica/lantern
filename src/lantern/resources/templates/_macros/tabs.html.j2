@@ -4,6 +4,7 @@
 {% import '_macros/_tabs/licence.html.j2' as licence_tab %}
 {% import '_macros/_tabs/info.html.j2' as info_tab %}
 {% import '_macros/_tabs/contact.html.j2' as contact_tab %}
+{% import '_macros/_tabs/admin.html.j2' as admin_tab %}
 
 {% macro items(data) %}
   <section id="tab-content-items" class="grid grid-cols-1 lg:grid-cols-2 gap-y-4 lg:gap-x-4">
@@ -155,6 +156,24 @@
       <div class="col-span-1 space-y-8">
         {{ contact_tab.alternate(data) }}
         {{ contact_tab.privacy_notice() }}
+      </div>
+    </div>
+  </section>
+{% endmacro %}
+
+{% macro admin(data) %}
+  <section id="tab-content-admin">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-y-4 lg:gap-x-4">
+      <div class="col-span-1 space-y-8">
+        {{ admin_tab.item(data) }}
+      </div>
+      <div class="col-span-1 space-y-8">
+        {% call com.item_title() %}About Administrative Metadata{% endcall %}
+        {% call com.item_border() %}
+          {% call com.alert(variant='purple', classes="space-y-2") %}
+            This is an experimental feature still in initial development.
+          {% endcall %}
+        {% endcall %}
       </div>
     </div>
   </section>

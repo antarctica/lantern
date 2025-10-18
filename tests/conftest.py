@@ -178,7 +178,8 @@ Record (Configs) and Item fixtures
 |                 | Record                   | fx_record_model_min             | fx_record_config_min            |
 |                 | RecordRevision           | fx_revision_model_min           | fx_revision_config_min          |
 |                 | ItemBase                 | fx_item_base_model_min          | fx_item_config_min_base         |
-|                 | ItemCatalogue            | fx_item_catalogue_model_min     | fx_item_config_min_catalogue    |
+|                 | ItemCatalogue            | fx_item_cat_model_min           | fx_item_config_min_catalogue    |
+|                 | ItemCatalogue            | fx_item_cat_model_min_open      | _item_cat_model_min             |
 |                 | ItemCataloguePhysicalMap | fx_item_physical_map_model_min  | fx_item_config_min_physical_map |
 """
 
@@ -394,35 +395,64 @@ def render_item_catalogue(item: ItemCatalogue) -> str:
     return prettify_html(raw)
 
 
-def _item_catalogue_model_min() -> ItemCatalogue:
+def _item_cat_model_min() -> ItemCatalogue:
     """
     Minimal ItemCatalogue model instance.
+
+    Includes minimal admin metadata required by admin tab.
 
     Standalone method to allow use outside of fixtures in test parametrisation.
     """
     meta = SiteMeta.from_config_store(config=Config(), store=None, build_repo_ref="83fake48")
-    return ItemCatalogue(
+    model = ItemCatalogue(
         site_meta=meta,
         record=RecordRevision.loads(_item_config_min_catalogue()),
         admin_meta_keys=_admin_meta_keys(),
         get_record=_get_record,
     )
+    # noinspection PyProtectedMember
+    set_admin(keys=model._admin_keys, record=model._record, admin_meta=Administration(id=model.resource_id))
+    return model
 
 
 @pytest.fixture()
-def fx_item_catalogue_model_min(
+def fx_item_cat_model_min(
     fx_site_meta: SiteMeta,
     fx_item_config_min_catalogue: dict,
     fx_admin_meta_keys: AdministrationKeys,
     fx_get_record: Callable[[str], RecordRevision],
 ) -> ItemCatalogue:
-    """Minimal ItemCatalogue model instance."""
-    return ItemCatalogue(
+    """
+    Minimal ItemCatalogue model instance.
+
+    Includes minimal admin metadata required by admin tab.
+    """
+    model = ItemCatalogue(
         site_meta=fx_site_meta,
         record=RecordRevision.loads(fx_item_config_min_catalogue),
         admin_meta_keys=fx_admin_meta_keys,
         get_record=fx_get_record,
     )
+    # noinspection PyProtectedMember
+    set_admin(keys=model._admin_keys, record=model._record, admin_meta=Administration(id=model.resource_id))
+    return model
+
+
+# noinspection PyProtectedMember
+@pytest.fixture()
+def fx_item_cat_model_open(
+    fx_item_cat_model_min: ItemCatalogue,
+    fx_item_config_min_catalogue: dict,
+) -> ItemCatalogue:
+    """Minimal cloned ItemCatalogue model instance with minimal admin metadata to allow open access."""
+    model = _item_cat_model_min()
+    # noinspection PyProtectedMember
+    set_admin(
+        keys=model._admin_keys,
+        record=model._record,
+        admin_meta=Administration(id=model.resource_id, access_permissions=[OPEN_ACCESS]),
+    )
+    return model
 
 
 @pytest.fixture()
@@ -432,13 +462,20 @@ def fx_item_physical_map_model_min(
     fx_admin_meta_keys: AdministrationKeys,
     fx_get_record: Callable[[str], RecordRevision],
 ) -> ItemCataloguePhysicalMap:
-    """Minimal ItemCataloguePhysicalMap model instance."""
-    return ItemCataloguePhysicalMap(
+    """
+    Minimal ItemCataloguePhysicalMap model instance.
+
+    Includes minimal admin metadata required by admin tab.
+    """
+    model = ItemCataloguePhysicalMap(
         site_meta=fx_site_meta,
         record=RecordRevision.loads(fx_item_config_min_physical_map),
         admin_meta_keys=fx_admin_meta_keys,
         get_record=fx_get_record,
     )
+    # noinspection PyProtectedMember
+    set_admin(keys=model._admin_keys, record=model._record, admin_meta=Administration(id=model.resource_id))
+    return model
 
 
 def _get_record(identifier: str) -> RecordRevision:

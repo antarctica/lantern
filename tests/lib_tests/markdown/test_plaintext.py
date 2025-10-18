@@ -45,5 +45,5 @@ class TestPlainTextExtension:
 
     def test_error(self, mocker: MockerFixture):
         """Cannot convert value without a root element."""
-        with pytest.raises(ValueError, match="Cannot get root element"):
+        with pytest.raises(ValueError, match=r"Cannot get root element"):
             to_plain_text(None)

@@ -119,7 +119,7 @@ class TestAdministration:
         converter = cattrs.Converter()
         converter.register_structure_hook(Administration, lambda d, t: Administration.structure(d))
 
-        with pytest.raises(ValueError, match="Unsupported JSON Schema in data."):
+        with pytest.raises(ValueError, match=r"Unsupported JSON Schema in data."):
             converter.structure({"$schema": "x"}, Administration)
 
     def test_unstructure_cattrs(self):

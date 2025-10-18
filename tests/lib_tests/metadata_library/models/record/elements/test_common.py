@@ -263,12 +263,12 @@ class TestContact:
 
     def test_invalid_identity(self):
         """Can't create a Contact if neither individual nor organisation is provided."""
-        with pytest.raises(ValueError, match="At least one of individual or organisation is required"):
+        with pytest.raises(ValueError, match=r"At least one of individual or organisation is required"):
             Contact(role=set())
 
     def test_invalid_roles(self):
         """Can't create a Contact without a role."""
-        with pytest.raises(ValueError, match="At least one role is required"):
+        with pytest.raises(ValueError, match=r"At least one role is required"):
             Contact(individual=ContactIdentity(name="x"), role=set())
 
     def test_unique_roles(self):
@@ -623,7 +623,7 @@ class TestDates:
 
     def test_invalid_empty(self):
         """Can't create a Dates container without any dates."""
-        with pytest.raises(ValueError, match="At least one date is required"):
+        with pytest.raises(ValueError, match=r"At least one date is required"):
             Dates()
 
     @pytest.mark.parametrize(

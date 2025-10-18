@@ -45,7 +45,7 @@ class TestRecordRevision:
 
     def test_no_revision(self):
         """Cannot create a RecordRevision directly without a file_revision."""
-        with pytest.raises(ValueError, match="Record Revisions require a file_revision."):
+        with pytest.raises(ValueError, match=r"Record Revisions require a file_revision."):
             # noinspection PyTypeChecker
             _ = RecordRevision(
                 file_identifier="x",

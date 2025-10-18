@@ -60,7 +60,7 @@ class TestItemCatalogue:
         fx_admin_meta_keys: AdministrationKeys,
     ):
         """Cannot create an ItemCatalogue if not a RecordRevision."""
-        with pytest.raises(TypeError, match="record must be a RecordRevision instance"):
+        with pytest.raises(TypeError, match=r"record must be a RecordRevision instance"):
             # noinspection PyTypeChecker
             _ = ItemCatalogue(
                 site_meta=fx_site_meta,

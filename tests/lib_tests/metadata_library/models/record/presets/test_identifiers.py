@@ -19,6 +19,6 @@ class TestMakeBasCat:
 
     def test_no_id(self):
         """Can't make an identifier when an item isn't specified."""
-        with pytest.raises(ValueError, match="Item identifier is required"):
+        with pytest.raises(ValueError, match=r"Item identifier is required"):
             # noinspection PyTypeChecker
             _ = make_bas_cat(None)

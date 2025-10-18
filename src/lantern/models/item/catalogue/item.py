@@ -83,8 +83,8 @@ class ItemCatalogue(ItemBase):
 
     # noinspection PyUnresolvedReferences
     @property
-    def _revision(self) -> Link | None:
-        """Link to the record revision, if available."""
+    def _revision(self) -> Link:
+        """Link to the record revision."""
         path = f"records/{self.resource_id[:2]}/{self.resource_id[2:4]}/{self.resource_id}.json"
         href = f"{self._meta.build_repo_base_url}/-/blob/{self._record.file_revision}/{path}"
         short_ref = self._record.file_revision[:8]

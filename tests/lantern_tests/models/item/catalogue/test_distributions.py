@@ -147,7 +147,7 @@ class TestArcGISDistribution:
     def test_get_service_option_missing(self):
         """Cannot get distribution option for relevant ArcGIS service if missing."""
         with pytest.raises(
-            ValueError, match="Required corresponding service option not found in resource distributions."
+            ValueError, match=r"Required corresponding service option not found in resource distributions."
         ):
             FakeArcGISDistributionType(option=_make_dist("x"), other_options=[])
 
@@ -198,7 +198,7 @@ class TestArcGISDistribution:
         option.format = None
 
         with pytest.raises(
-            ValueError, match="Required corresponding service option not found in resource distributions."
+            ValueError, match=r"Required corresponding service option not found in resource distributions."
         ):
             FakeArcGISDistributionType._get_service_option(options=[option], target_href="x")
 

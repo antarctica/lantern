@@ -30,7 +30,7 @@ class TestItemWebsiteSearch:
 
     def test_init_invalid_type(self, fx_site_meta: SiteMeta, fx_record_model_min: Record):
         """Cannot create an ItemCatalogue if not a RecordRevision."""
-        with pytest.raises(TypeError, match="record must be a RecordRevision instance"):
+        with pytest.raises(TypeError, match=r"record must be a RecordRevision instance"):
             # noinspection PyTypeChecker
             _ = ItemWebsiteSearch(
                 record=fx_record_model_min, admin_meta_keys=None, source=fx_site_meta.generator, base_url=self.base_url

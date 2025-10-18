@@ -156,6 +156,11 @@ class RecordsExporter(Exporter):
             for job in jobs
         )
 
+        # restore admin keys
+        self._meta.admin_meta_keys = AdministrationKeys(  # ty: ignore[missing-argument]
+            **{key: Jwk(value) for key, value in admin_meta_keys_json.items()}
+        )
+
     @property
     def name(self) -> str:
         """Exporter name."""

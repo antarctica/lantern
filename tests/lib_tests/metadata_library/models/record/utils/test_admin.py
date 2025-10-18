@@ -40,7 +40,7 @@ class TestAdministrationKeys:
 
     def test_init_no_signing(self):
         """Cannot create administrative key's container without a signing key."""
-        with pytest.raises(ValueError, match="Public or private signing_key must be provided."):
+        with pytest.raises(ValueError, match=r"Public or private signing_key must be provided."):
             AdministrationKeys(
                 signing_public=None,
                 signing_private=None,
@@ -91,7 +91,7 @@ class TestAdministrationSeal:
                 signing_public=fx_admin_wrapper._keys.signing_public,
             )
         )
-        with pytest.raises(ValueError, match="Private signing key is required for writing metadata."):
+        with pytest.raises(ValueError, match=r"Private signing key is required for writing metadata."):
             wrapper.encode(fx_admin_meta_element)
 
     def test_decode(self, fx_admin_wrapper: AdministrationWrapper, fx_admin_meta_element: Administration):

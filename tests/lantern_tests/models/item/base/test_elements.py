@@ -57,7 +57,7 @@ class TestUnpack:
         """Cannot unpack something that isn't a dataclass."""
         c = UnpackRegularClass()
 
-        with pytest.raises(TypeError, match="Value must be a dataclass."):
+        with pytest.raises(TypeError, match=r"Value must be a dataclass."):
             unpack(c)
 
 

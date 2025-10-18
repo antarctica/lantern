@@ -98,7 +98,7 @@ class TestDistribution:
 
     def test_invalid_distributor_role(self):
         """Can't create a Distribution without a Contact with the distributor role."""
-        with pytest.raises(ValueError, match="Distributor contact must include the 'distributor' role."):
+        with pytest.raises(ValueError, match=r"Distributor contact must include the 'distributor' role."):
             Distribution(
                 distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.AUTHOR}),
                 transfer_option=TransferOption(

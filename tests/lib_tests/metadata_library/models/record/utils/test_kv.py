@@ -19,13 +19,13 @@ class TestKv:
     def test_get_kv_non_json(self, fx_lib_record_model_min_iso: Record):
         """Cannot parse key-values from non-JSON string."""
         fx_lib_record_model_min_iso.identification.supplemental_information = "x"
-        with pytest.raises(ValueError, match="Supplemental information isn't JSON parsable."):
+        with pytest.raises(ValueError, match=r"Supplemental information isn't JSON parsable."):
             get_kv(fx_lib_record_model_min_iso)
 
     def test_get_kv_non_dict(self, fx_lib_record_model_min_iso: Record):
         """Cannot parse key-values from non-dict JSON string."""
         fx_lib_record_model_min_iso.identification.supplemental_information = json.dumps(["x"])
-        with pytest.raises(TypeError, match="Supplemental information isn't parsed as a dict."):
+        with pytest.raises(TypeError, match=r"Supplemental information isn't parsed as a dict."):
             get_kv(fx_lib_record_model_min_iso)
 
     @pytest.mark.parametrize(

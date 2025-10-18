@@ -58,7 +58,7 @@ class TestMetadata:
 
     def test_invalid_contacts(self):
         """Can't create a Metadata element without any contacts."""
-        with pytest.raises(ValueError, match="At least one contact is required"):
+        with pytest.raises(ValueError, match=r"At least one contact is required"):
             Metadata(contacts=Contacts([]))
 
     def test_structure_cattrs(self):

@@ -123,11 +123,13 @@ class TestRecordsExporter:
     def test_export(self, mocker: MockerFixture, fx_exporter_records_sel: RecordsExporter):
         """Can export selected records."""
         mocker.patch("lantern.exporters.records._job_s3", return_value=fx_exporter_records_sel._s3_client)
+        # patching S3 is a fail-safe, S3 logic shouldn't be called during export
 
         fx_exporter_records_sel.export()
 
         result = list(fx_exporter_records_sel._config.EXPORT_PATH.glob("**/*.*"))
         assert len(result) > 0
+        assert fx_exporter_records_sel._meta.admin_meta_keys is not None
 
     def test_publish(
         self,

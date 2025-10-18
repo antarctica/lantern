@@ -4,7 +4,6 @@ from datetime import UTC, datetime
 import pytest
 
 from lantern.config import Config
-from lantern.lib.metadata_library.models.record.elements.administration import Administration
 from lantern.lib.metadata_library.models.record.elements.common import (
     Contact,
     ContactIdentity,
@@ -13,8 +12,7 @@ from lantern.lib.metadata_library.models.record.elements.common import (
 )
 from lantern.lib.metadata_library.models.record.elements.identification import GraphicOverview, GraphicOverviews
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
-from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
-from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, set_admin
+from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 from lantern.models.item.base.elements import Link
 from lantern.models.item.base.enums import ResourceTypeLabel
 from lantern.models.item.catalogue.elements import PageSummary
@@ -91,20 +89,20 @@ class TestItemCatalogue:
         assert fx_item_cat_model_min._revision == expected
 
     @pytest.mark.parametrize("restricted", [False, True])
-    def test_restricted(self, fx_site_meta: SiteMeta, fx_item_catalogue_model_min: ItemCatalogue, restricted: bool):
+    def test_restricted(
+        self,
+        fx_site_meta: SiteMeta,
+        fx_item_cat_model_min: ItemCatalogue,
+        fx_item_cat_model_open: ItemCatalogue,
+        restricted: bool,
+    ):
         """
         Can compute whether record is open access.
 
         Defaults to restricted.
         """
-        record = fx_item_catalogue_model_min._record
-        if not restricted:
-            admin_meta = Administration(id=record.file_identifier, access_permissions=[OPEN_ACCESS])
-            set_admin(keys=fx_item_catalogue_model_min._admin_keys, record=record, admin_meta=admin_meta)
-        fx_item_catalogue_model_min._record = record
-        expected = restricted
-
-        assert fx_item_catalogue_model_min._restricted == expected
+        model = fx_item_cat_model_min if restricted else fx_item_cat_model_open
+        assert model._restricted == restricted
 
     @pytest.mark.parametrize(
         ("summary", "published", "graphics"),

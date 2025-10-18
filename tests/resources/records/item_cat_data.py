@@ -32,7 +32,7 @@ Item to test all supported data formats:
 - GeoPackage (optional compression)
 - GPX
 - JPEG
-- Mapbox Vector Tiles (MBTiles)
+- Mapbox Vector Tiles
 - PNG
 - PDF (optional georeferenced)
 - Shapefile (required compression)
@@ -74,7 +74,7 @@ record.distribution = [
                 href="x",
                 function=OnlineResourceFunctionCode.DOWNLOAD,
                 title="ArcGIS Online",
-                description="Download information as an ArcGIS feature service.",
+                description="Access information as an ArcGIS feature service.",
             )
         ),
     ),
@@ -107,7 +107,7 @@ record.distribution = [
                 href="x",
                 function=OnlineResourceFunctionCode.DOWNLOAD,
                 title="ArcGIS Online",
-                description="Download information as an ArcGIS feature layer.",
+                description="Access information as an ArcGIS feature layer.",
             )
         ),
     ),
@@ -140,7 +140,7 @@ record.distribution = [
                 href="y",
                 function=OnlineResourceFunctionCode.DOWNLOAD,
                 title="ArcGIS Online",
-                description="Download information as an OGC API feature service.",
+                description="Access information as an OGC API feature service.",
             )
         ),
     ),
@@ -173,7 +173,7 @@ record.distribution = [
                 href="y",
                 function=OnlineResourceFunctionCode.DOWNLOAD,
                 title="ArcGIS Online",
-                description="Download information as an ArcGIS OGC feature layer.",
+                description="Access information as an ArcGIS OGC feature layer.",
             )
         ),
     ),
@@ -206,7 +206,7 @@ record.distribution = [
                 href="za",
                 function=OnlineResourceFunctionCode.DOWNLOAD,
                 title="ArcGIS Online",
-                description="Download information as an ArcGIS raster tile layer.",
+                description="Access information as an ArcGIS raster tile layer.",
             )
         ),
     ),
@@ -239,7 +239,7 @@ record.distribution = [
                 href="za",
                 function=OnlineResourceFunctionCode.DOWNLOAD,
                 title="ArcGIS Online",
-                description="Download information as an ArcGIS raster tile service.",
+                description="Access information as an ArcGIS raster tile service.",
             )
         ),
     ),
@@ -272,7 +272,7 @@ record.distribution = [
                 href="z",
                 function=OnlineResourceFunctionCode.DOWNLOAD,
                 title="ArcGIS Online",
-                description="Download information as an ArcGIS vector tile layer.",
+                description="Access information as an ArcGIS vector tile layer.",
             )
         ),
     ),
@@ -305,7 +305,7 @@ record.distribution = [
                 href="z",
                 function=OnlineResourceFunctionCode.DOWNLOAD,
                 title="ArcGIS Online",
-                description="Download information as an ArcGIS vector tile service.",
+                description="Access information as an ArcGIS vector tile service.",
             )
         ),
     ),
@@ -343,7 +343,6 @@ record.distribution = [
                 href="x",
                 function=OnlineResourceFunctionCode.DOWNLOAD,
                 title="CSV",
-                description="Download information as a CSV file.",
             ),
         ),
     ),
@@ -381,7 +380,7 @@ record.distribution = [
                 href="x",
                 function=OnlineResourceFunctionCode.DOWNLOAD,
                 title="FPL",
-                description="Download information as a FPL file.",
+                description="Download information as a file suitable for Garmin Aircraft GPS devices.",
             ),
         ),
     ),
@@ -419,7 +418,6 @@ record.distribution = [
                 href="x",
                 function=OnlineResourceFunctionCode.DOWNLOAD,
                 title="GeoJSON",
-                description="Download information as a GeoJSON file.",
             ),
         ),
     ),
@@ -457,7 +455,6 @@ record.distribution = [
                 href="x",
                 function=OnlineResourceFunctionCode.DOWNLOAD,
                 title="GeoJSON",
-                description="Download information as a GeoPackage file.",
             ),
         ),
     ),
@@ -494,7 +491,7 @@ record.distribution = [
             online_resource=OnlineResource(
                 href="x",
                 function=OnlineResourceFunctionCode.DOWNLOAD,
-                title="GeoJSON (Zipped)",
+                title="GeoPackage (Zipped)",
                 description="Download information as a GeoPackage file compressed as a Zip archive.",
             ),
         ),
@@ -533,7 +530,7 @@ record.distribution = [
                 href="x",
                 function=OnlineResourceFunctionCode.DOWNLOAD,
                 title="GPX",
-                description="Download information as a GPX file.",
+                description="Download information as a file suitable for most GPS devices.",
             ),
         ),
     ),
@@ -571,7 +568,6 @@ record.distribution = [
                 href="x",
                 function=OnlineResourceFunctionCode.DOWNLOAD,
                 title="JPEG",
-                description="Download information as a JPEG image.",
             ),
         ),
     ),
@@ -609,7 +605,6 @@ record.distribution = [
                 href="x",
                 function=OnlineResourceFunctionCode.DOWNLOAD,
                 title="MapBox Vector Tiles",
-                description="Download information as MapBox vector tiles.",
             ),
         ),
     ),
@@ -647,7 +642,6 @@ record.distribution = [
                 href="x",
                 function=OnlineResourceFunctionCode.DOWNLOAD,
                 title="PDF",
-                description="Download information as a PDF file.",
             ),
         ),
     ),
@@ -685,7 +679,7 @@ record.distribution = [
                 href="x",
                 function=OnlineResourceFunctionCode.DOWNLOAD,
                 title="PDF (Georeferenced)",
-                description="Download information as a PDF file with georeferencing.",
+                description="Download information as a PDF with embedded georeferencing.",
             ),
         ),
     ),
@@ -723,7 +717,6 @@ record.distribution = [
                 href="x",
                 function=OnlineResourceFunctionCode.DOWNLOAD,
                 title="PNG",
-                description="Download information as a PNG image.",
             ),
         ),
     ),
@@ -794,7 +787,6 @@ record.distribution = [
                 href="https://www.bas.ac.uk/data/our-data/maps/how-to-order-a-map/",
                 function=OnlineResourceFunctionCode.ORDER,
                 title="Map ordering information - BAS public website",
-                description="Download information on how to order item.",
             ),
         ),
     ),

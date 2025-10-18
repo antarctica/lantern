@@ -202,7 +202,7 @@ class TestRecord:
             },
         }
 
-        with pytest.raises(ValueError, match="Unsupported JSON Schema in data."):
+        with pytest.raises(ValueError, match=r"Unsupported JSON Schema in data."):
             _ = Record.loads(config)
 
     @pytest.mark.parametrize(

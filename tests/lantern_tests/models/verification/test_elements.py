@@ -107,7 +107,7 @@ class TestVerificationDistribution:
             ),
         )
         distribution = VerificationDistribution(distribution=record_distribution, file_identifier="x")
-        with pytest.raises(ValueError, match="Unsupported verification distribution type"):
+        with pytest.raises(ValueError, match=r"Unsupported verification distribution type"):
             _ = distribution._type
 
     @pytest.mark.parametrize(

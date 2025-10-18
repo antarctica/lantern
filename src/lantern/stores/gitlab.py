@@ -292,7 +292,7 @@ class GitLabLocalCache:
 
         self._logger.info(f"Fetching commits in range {commit_range}")
         for commit in commits:
-            for diff in commit.diff():
+            for diff in commit.diff(get_all=True):
                 if not diff["new_path"].startswith("records/") or not diff["new_path"].endswith(".json"):
                     continue
                 if diff["renamed_file"]:
@@ -605,6 +605,7 @@ class GitLabStore(Store):
             return results
 
         self._logger.info(f"Committing {results.stats.new_msg}, {results.stats.updated_msg}.")
+        # noinspection PyTypeChecker
         commit = self._project.commits.create(data)
         results.commit = commit.id
         return results

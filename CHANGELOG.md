@@ -21,6 +21,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Initial administrative metadata support (GitLab issues and initial access permissions)
 * Record utility methods for key values in supplemental information
 * Item cross-reference record preset
+* Initial admin tab for administrative metadata
 
 ### Fixed
 

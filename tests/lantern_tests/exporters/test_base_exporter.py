@@ -205,7 +205,7 @@ class TestBaseResourceExporter:
         """Cannot create an ItemBase with a base path that isn't relative to overall output_path."""
         with TemporaryDirectory() as tmp_path_exporter:
             alt_path = Path(tmp_path_exporter)
-        with pytest.raises(ValueError, match="Export base must be relative to EXPORT_PATH."):
+        with pytest.raises(ValueError, match=r"Export base must be relative to EXPORT_PATH."):
             FakeResourceExporter(
                 logger=fx_exporter_resource_base._logger,
                 meta=fx_exporter_resource_base._meta,

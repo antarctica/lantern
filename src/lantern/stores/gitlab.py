@@ -292,7 +292,7 @@ class GitLabLocalCache:
 
         self._logger.info(f"Fetching commits in range {commit_range}")
         for commit in commits:
-            for diff in commit.diff():
+            for diff in commit.diff(get_all=True):
                 if not diff["new_path"].startswith("records/") or not diff["new_path"].endswith(".json"):
                     continue
                 if diff["renamed_file"]:

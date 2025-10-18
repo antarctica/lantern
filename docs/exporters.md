@@ -20,6 +20,14 @@ or partial site builds.
 > [!TIP]
 > The [Site Exporter](#site-exporter) sets selected identifiers in relevant (sub-)exporters via the `select()` method.
 
+### Trusted publishing
+
+To restrict access to [Administrative Metadata](/docs/data-model.md#item-administrative-metadata) the admin tab is
+only shown if the `trusted` [Export](/docs/data-model.md#export-metadata) flag is set to true (default is false).
+
+> [!CAUTION]
+> Access control MUST be used for any publishing locations where the trusted flag is set to true.
+
 ## Exporters configuration
 
 Exporters use these options from the app `lantern.Config` class:

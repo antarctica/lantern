@@ -715,6 +715,7 @@ class AdminTab(Tab):
 
     def __init__(
         self,
+        trusted: bool,
         item_id: str,
         revision: Link,
         gitlab_issues: list[str],
@@ -722,6 +723,7 @@ class AdminTab(Tab):
         access_level: AccessLevel,
         access_permissions: list[Permission],
     ) -> None:
+        self._trusted = trusted
         self._item_id = item_id
         self._revision = revision
         self._gitlab_issues = gitlab_issues
@@ -740,8 +742,8 @@ class AdminTab(Tab):
 
     @property
     def enabled(self) -> bool:
-        """Whether tab is enabled."""
-        return True
+        """Whether tab is enabled based on whether export destination is trusted."""
+        return self._trusted
 
     @property
     def anchor(self) -> str:

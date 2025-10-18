@@ -52,7 +52,7 @@ class FakeCatalogue:
 
         self._store = FakeRecordsStore(logger=self._logger)
 
-        meta = ExportMeta.from_config_store(config=self._config, store=None, build_repo_ref="83fake48")
+        meta = ExportMeta.from_config_store(config=self._config, store=None, build_repo_ref="83fake48", trusted=True)
         self._site = SiteExporter(
             logger=self._logger,
             config=self._config,

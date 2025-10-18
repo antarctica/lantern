@@ -33,10 +33,11 @@ def time_task(label: str) -> callable:
 class ToyCatalogue:
     """Toy catalogue for prototyping."""
 
-    def __init__(self, logger: logging.Logger, config: Config, s3: S3Client) -> None:
+    def __init__(self, logger: logging.Logger, config: Config, s3: S3Client, trusted: bool = False) -> None:
         self._logger = logger
         self._config = config
         self._s3 = s3
+        self._trusted = trusted
 
         self._store = GitLabStore(
             logger=self._logger,
@@ -48,7 +49,7 @@ class ToyCatalogue:
         )
 
         self._meta = ExportMeta.from_config_store(
-            config=self._config, store=None, build_repo_ref=self._store.head_commit
+            config=self._config, store=None, build_repo_ref=self._store.head_commit, trusted=self._trusted
         )
         self._site = SiteExporter(
             config=self._config, meta=self._meta, logger=self._logger, s3=self._s3, get_record=self._store.get
@@ -103,6 +104,7 @@ def main() -> None:
     publish = False
     selected = set()  # to set use the form {"abc", "..."}
     purge = False
+    trusted = False
 
     config = Config()
     init_logging(config.LOG_LEVEL)
@@ -117,7 +119,7 @@ def main() -> None:
         region_name="eu-west-1",
     )
 
-    cat = ToyCatalogue(config=config, logger=logger, s3=s3)
+    cat = ToyCatalogue(config=config, logger=logger, s3=s3, trusted=trusted)
 
     if purge:
         cat.purge()

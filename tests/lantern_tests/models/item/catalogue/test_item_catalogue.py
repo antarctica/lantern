@@ -48,6 +48,7 @@ class TestItemCatalogue:
             site_meta=fx_site_meta,
             record=fx_revision_model_min,
             admin_meta_keys=fx_admin_meta_keys,
+            trusted_context=True,
             get_record=_get_record,
         )
         assert isinstance(item, ItemCatalogue)
@@ -66,6 +67,7 @@ class TestItemCatalogue:
                 site_meta=fx_site_meta,
                 record=fx_record_model_min,
                 admin_meta_keys=fx_admin_meta_keys,
+                trusted_context=True,
                 get_record=_get_record,
             )
 

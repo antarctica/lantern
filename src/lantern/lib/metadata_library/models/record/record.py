@@ -117,7 +117,9 @@ class Record:
     @property
     def sha1(self) -> str:
         """SHA1 hash of Record configuration."""
-        return sha1(json.dumps(self.dumps(), indent=0, sort_keys=True, ensure_ascii=True).encode("utf-8")).hexdigest()  # noqa: S324
+        return sha1(  # noqa: S324
+            json.dumps(self.dumps(strip_admin=False), indent=0, sort_keys=True, ensure_ascii=True).encode("utf-8")
+        ).hexdigest()
 
     @staticmethod
     def _normalise_static_config_values(value: dict) -> dict:
@@ -166,7 +168,7 @@ class Record:
         This method acts as a wrapper for `_check_supported` to allow easier subclassing.
         """
         record = Record.loads(config)
-        return Record._eq(candidate=config, comparison=record.dumps(), logger=logger)
+        return Record._eq(candidate=config, comparison=record.dumps(strip_admin=False), logger=logger)
 
     @staticmethod
     def _pre_structure(value: dict) -> None:
@@ -373,7 +375,7 @@ class Record:
 
         Any failed validation will raise a `RecordInvalidError` exception.
         """
-        config = {"$schema": self._schema, **self.dumps()}
+        config = {"$schema": self._schema, **self.dumps(strip_admin=False)}
         schemas = self._get_validation_schemas(use_profiles=use_profiles, force_schemas=force_schemas)
 
         for schema in schemas:

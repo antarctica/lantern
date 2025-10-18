@@ -573,6 +573,7 @@ class GitLabStore(Store):
 
         existing_hashes = self._cache.get_hashes(file_identifiers=[record.file_identifier for record in records])
         for record in records:
+            self._logger.debug(f"Existing: '{existing_hashes[record.file_identifier]}', New: '{record.sha1}'")
             if record.sha1 == existing_hashes[record.file_identifier]:
                 self._logger.debug(f"Record '{record.file_identifier}' is unchanged, skipping")
                 continue
@@ -588,12 +589,12 @@ class GitLabStore(Store):
                     {
                         "action": action,
                         "file_path": self._get_remote_hashed_path(f"{record.file_identifier}.json"),
-                        "content": record.dumps_json(),
+                        "content": record.dumps_json(strip_admin=False),
                     },
                     {
                         "action": action,
                         "file_path": self._get_remote_hashed_path(f"{record.file_identifier}.xml"),
-                        "content": record.dumps_xml(),
+                        "content": record.dumps_xml(strip_admin=False),
                     },
                 ]
             )

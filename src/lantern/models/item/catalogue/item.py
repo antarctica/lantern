@@ -155,7 +155,7 @@ class ItemCatalogue(ItemBase):
             standard=self._record.metadata.metadata_standard,
             profiles=self._record.data_quality.domain_consistency if self._record.data_quality else None,
             kv=self.kv,
-            revision=self._revision,
+            build_time=self._meta.build_time,
         )
 
     @property

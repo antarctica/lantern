@@ -150,13 +150,9 @@
         </ul>
       {% endcall %}
 
-      {% call com.dl_item(title='Metadata revision', id='info-revision') %}
-        <a class="{{ com.link_classes() }}" href="{{ data.revision_link.href }}">{{ data.revision_link.value }} {{ com.restricted_i() }} {{ com.ext_link_i() }}</a>
+      {% call com.dl_item(title='Metadata build time', id='info-build') %}
+        {{ com.time(data.build_time) }}
       {% endcall %}
-
-    {% call com.dl_item(title='Metadata build time', id='info-build') %}
-      {{ com.time(data.build_time) }}
-    {% endcall %}
     </dl>
   {% endcall %}
 {% endmacro %}

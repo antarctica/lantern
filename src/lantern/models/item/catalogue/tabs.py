@@ -1,7 +1,7 @@
 import json
 import locale
 from abc import ABC, abstractmethod
-from datetime import UTC, date, datetime
+from datetime import date, datetime
 
 from lantern.lib.metadata_library.models.record.elements.administration import Permission
 from lantern.lib.metadata_library.models.record.elements.common import Date, Identifier, Series
@@ -404,7 +404,7 @@ class AdditionalInfoTab(Tab):
         dates: Dates,
         datestamp: date,
         kv: dict[str, str],
-        revision: str | None,
+        build_time: datetime,
         series: Series | None = None,
         scale: str | None = None,
         projection: Identifier | None = None,
@@ -425,7 +425,7 @@ class AdditionalInfoTab(Tab):
         self._standard = standard
         self._profiles = profiles if profiles is not None else []
         self._kv = kv
-        self._revision = revision
+        self._build_time = build_time
 
     @staticmethod
     def _format_scale(value: int | None) -> str | None:
@@ -607,15 +607,11 @@ class AdditionalInfoTab(Tab):
         return [self.record_link_xml, self.record_link_html, self.record_link_json]
 
     @property
-    def revision_link(self) -> str | None:
-        """Link to record revision if known."""
-        return self._revision
-
-    @property
     def build_time(self) -> FormattedDate:
         """Build time of the item."""
-        now = datetime.now(tz=UTC)
-        return FormattedDate(value=now.strftime("%d %B %Y %H:%M:%S %Z"), datetime=now.isoformat())
+        return FormattedDate(
+            value=self._build_time.strftime("%d %B %Y %H:%M:%S %Z"), datetime=self._build_time.isoformat()
+        )
 
 
 class InvalidItemContactError(Exception):

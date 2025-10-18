@@ -502,7 +502,7 @@ def fx_get_record() -> Callable[[str], RecordRevision]:
 
 
 @pytest.fixture()
-def fx_item_cat_info_tab_minimal() -> AdditionalInfoTab:
+def fx_item_cat_info_tab_minimal(fx_site_meta: SiteMeta) -> AdditionalInfoTab:
     """Minimal ItemCatalogue additional information tab."""
     dates = ItemCatDates(dates=Dates(creation=Date(date=datetime(2014, 6, 30, 14, 30, second=45, tzinfo=UTC))))
     identifiers = ItemCatIdentifiers(Identifiers([]))
@@ -514,7 +514,8 @@ def fx_item_cat_info_tab_minimal() -> AdditionalInfoTab:
         dates=dates,
         datestamp=datetime(2014, 6, 30, 14, 30, second=45, tzinfo=UTC).date(),
         kv={},
-        revision=None,
+        build_time=fx_site_meta.build_time,
+    )
 
 
 @pytest.fixture()

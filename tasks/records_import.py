@@ -36,8 +36,9 @@ def _parse_records(logger: logging.Logger, search_path: Path) -> list[Record]:
         try:
             record = Record.loads(config)
             record.validate()
-        except RecordInvalidError:
+        except RecordInvalidError as e:
             logger.warning(f"Record '{config['file_identifier']}' does not validate, skipping.")
+            logger.info(e.validation_error)
             continue
         if not Record._config_supported(config=config, logger=logger):
             logger.warning(

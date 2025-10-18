@@ -605,6 +605,7 @@ class GitLabStore(Store):
             return results
 
         self._logger.info(f"Committing {results.stats.new_msg}, {results.stats.updated_msg}.")
+        # noinspection PyTypeChecker
         commit = self._project.commits.create(data)
         results.commit = commit.id
         return results

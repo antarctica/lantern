@@ -128,6 +128,7 @@ class TestRecordsExporter:
 
         result = list(fx_exporter_records_sel._config.EXPORT_PATH.glob("**/*.*"))
         assert len(result) > 0
+        assert fx_exporter_records_sel._meta.admin_meta_keys is not None
 
     def test_publish(
         self,

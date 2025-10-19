@@ -4,6 +4,7 @@ from datetime import date
 import pytest
 from cattrs import ClassValidationError
 
+from lantern.lib.metadata_library.models.record.elements.administration import Administration
 from lantern.lib.metadata_library.models.record.elements.common import (
     Contact,
     ContactIdentity,
@@ -20,15 +21,18 @@ from lantern.lib.metadata_library.models.record.presets.extents import make_bbox
 from lantern.lib.metadata_library.models.record.presets.identifiers import make_bas_cat
 from lantern.lib.metadata_library.models.record.record import Record as RecordBase
 from lantern.lib.metadata_library.models.record.record import RecordInvalidError
+from lantern.lib.metadata_library.models.record.utils.admin import set_admin
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.record import Record
+from tests.conftest import _admin_meta_keys
 
 
 class TestRecord:
     """Test derived Record class."""
 
+    file_identifier = "x"
     base_record = Record(
-        file_identifier="x",
+        file_identifier=file_identifier,
         hierarchy_level=HierarchyLevelCode.DATASET,
         metadata=Metadata(
             contacts=Contacts(
@@ -44,6 +48,7 @@ class TestRecord:
     valid_record = deepcopy(base_record)
     valid_record.identification.identifiers.append(make_bas_cat(base_record.file_identifier))
     valid_record.identification.contacts.append(make_magic_role(roles={ContactRoleCode.POINT_OF_CONTACT}))
+    set_admin(keys=_admin_meta_keys(), record=valid_record, admin_meta=Administration(id=file_identifier))
 
     def test_init(self):
         """Can create a minimal Record class instance from directly assigned properties."""
@@ -218,3 +223,13 @@ class TestRecord:
             record.validate()
         assert isinstance(excinfo.value.validation_error, ValueError)
         assert match in str(excinfo.value.validation_error)
+
+    def test_invalid_admin_meta(self):
+        """Cannot validate a Record without admin metadata."""
+        record = deepcopy(self.valid_record)
+        record.identification.supplemental_information = None
+
+        with pytest.raises(RecordInvalidError) as excinfo:
+            record.validate()
+        assert isinstance(excinfo.value.validation_error, ValueError)
+        assert "No administrative metadata." in str(excinfo.value.validation_error)

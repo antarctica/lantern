@@ -1,7 +1,7 @@
 import json
 from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
-from typing import TypeVar
+from typing import Final, TypeVar
 
 import cattrs
 
@@ -58,7 +58,7 @@ class Administration:
     [2] https://gist.github.com/felnne/307bfa81672fbac2cd9cd7dd632a410c/83fa75e3c35ded8a105fb4c9abd1122d118aefef#file-schema-json-L99
     """
 
-    _schema: str = (
+    _schema: Final[str] = (
         "https://metadata-resources.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/magic-admin-v1.json"
     )
 

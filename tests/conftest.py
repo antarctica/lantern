@@ -1077,7 +1077,7 @@ def fx_exporter_static_site(module_mocker: MockerFixture) -> TemporaryDirectory:
     )
     module_mocker.patch.object(type(config), attribute="AWS_ACCESS_ID", new_callable=PropertyMock, return_value="x")
     module_mocker.patch.object(type(config), attribute="AWS_ACCESS_SECRET", new_callable=PropertyMock, return_value="x")
-    meta = ExportMeta.from_config_store(config=config, store=None, build_repo_ref="83fake48")
+    meta = ExportMeta.from_config_store(config=config, store=None, build_repo_ref="83fake48", trusted=True)
     # load private signing key so admin metadata can be signed in other fixtures and tests
     meta.admin_meta_keys = _admin_meta_keys()
 

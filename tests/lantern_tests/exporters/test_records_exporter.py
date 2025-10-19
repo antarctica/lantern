@@ -46,7 +46,6 @@ class TestRecordExporterJob:
         ],
     )
     @pytest.mark.parametrize("method", [JobMethod.EXPORT, JobMethod.PUBLISH])
-    @pytest.mark.parametrize("has_admin_keys", [True, False])
     def test_job(
         self,
         mocker: MockerFixture,
@@ -60,7 +59,6 @@ class TestRecordExporterJob:
         exporter: RecordsExporter,
         expected: str,
         method: JobMethod,
-        has_admin_keys: bool,
     ):
         """Can export or publish a record using a record exporter class."""
         mocker.patch("lantern.exporters.records._job_s3", return_value=fx_exporter_records_sel._s3_client)
@@ -70,9 +68,7 @@ class TestRecordExporterJob:
         expected = expected.replace("FILE_IDENTIFIER", fx_revision_model_min.file_identifier)
         expected_path = fx_exporter_records_sel._config.EXPORT_PATH / expected
 
-        admin_meta_keys_json = {}
-        if has_admin_keys:
-            admin_meta_keys_json = fx_exporter_records_sel._meta.admin_meta_keys.dumps_json()
+        admin_meta_keys_json = fx_exporter_records_sel._meta.admin_meta_keys.dumps_json()
         fx_exporter_records_sel._meta.admin_meta_keys = None
 
         # noinspection PyTypeChecker

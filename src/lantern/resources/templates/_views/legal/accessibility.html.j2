@@ -45,12 +45,13 @@
   {% endcall %}
 
   {% call legal.policy_section(slug='accessibility-review', title='Results of this check') %}
-    <p>Some issues were found when reviewing the sample content:</p>
+    <p>Issues we found when reviewing the sample content:</p>
     <ul class="list-disc pl-5">
       <li>the website feedback widget does not work when CSS styles are disabled</li>
       <li>some links within item descriptions may not include sufficient context (such as DOIs)</li>
       <li>item tabs are not visually highlighted when using a keyword to navigate</li>
       <li>some page elements have poor colour contrast</li>
+      <li>anti-spam checks on item enquiry forms may not work with all assistive technologies</li>
     </ul>
     <p>We will regularly review these issues, and repeat this review, as part of improving and maintaining this website.</p>
   {% endcall %}
@@ -70,6 +71,7 @@
   {% call legal.policy_section(slug='changelog', title='Changes to this page') %}
     {% call legal.policy_subsection(title='2025-10-10') %}
       <p>Resolved issue with item thumbnail alternate text using <code>aria-describes</code> to link images with abstracts.</p>
+      <p>Added potential issue caused by spam protection added to item enquiry forms</p>
     {% endcall %}
     {% call legal.policy_subsection(title='2025-08-15') %}
       <p>Initial accessibility check.</p>

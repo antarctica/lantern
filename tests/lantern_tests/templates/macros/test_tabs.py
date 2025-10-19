@@ -158,7 +158,9 @@ class TestDataTab:
         html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
 
         assert html.select_one(f"a[href='{expected.action.href}']") is not None
+        # noinspection PyTypeChecker
         assert html.find(name="span", string=expected.format_type.value) is not None
+        # noinspection PyTypeChecker
         assert html.find(name="div", string=expected.size) is not None
 
     @pytest.mark.parametrize("value", [None, "x"])
@@ -250,6 +252,7 @@ class TestDataTab:
         html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
 
         assert html.select_one(f"button[data-target='{expected.access_target}']") is not None
+        # noinspection PyTypeChecker
         assert html.find(name="span", string=expected.format_type.value) is not None
         assert str(html).count(text) == 2  # one in collapsible, one in <noscript>
 
@@ -360,6 +363,7 @@ class TestAuthorsTab:
         html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
 
         for item in expected:
+            # noinspection PyTypeChecker
             assert html.find("div", string=item.organisation.name) is not None
 
     @pytest.mark.parametrize(
@@ -384,8 +388,10 @@ class TestAuthorsTab:
         html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
 
         if expected.organisation is not None:
+            # noinspection PyTypeChecker
             assert html.find("div", string=expected.organisation.name) is not None
         if expected.individual is not None:
+            # noinspection PyTypeChecker
             assert html.find("div", string=expected.individual.name) is not None
         if expected.orcid is not None:
             assert html.find("a", href=expected.orcid) is not None
@@ -465,6 +471,7 @@ class TestLicenceTab:
         )
         html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
 
+        # noinspection PyTypeChecker
         assert html.find(name="strong", string="Item licence") is not None
 
         licence = html.select_one(f"a[href='{value}']")
@@ -505,6 +512,7 @@ class TestLicenceTab:
         html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
 
         label_text = "Copyright Holder" if len(expected) < 2 else "Copyright Holders"
+        # noinspection PyTypeChecker
         label = html.find(name="strong", string=label_text)
         assert label is not None if expected else label is None
 
@@ -1142,6 +1150,7 @@ class TestInfoTab:
         isbn = html.select_one("#info-isbn")
         if expected:
             for item in expected:
+                # noinspection PyTypeChecker
                 assert isbn.find(name="li", string=item) is not None
         else:
             assert isbn is None
@@ -1167,6 +1176,7 @@ class TestInfoTab:
         issues = html.select_one("#info-issues")
         if expected:
             for item in expected:
+                # noinspection PyTypeChecker
                 assert issues.find(name="li", string=item) is not None
         else:
             assert issues is None
@@ -1425,4 +1435,5 @@ class TestAdminTab:
 
         access_permissions = html.select_one("#admin-access")
         for permission in expected:
+            # noinspection PyTypeChecker
             assert access_permissions.find(name="pre", string=permission) is not None

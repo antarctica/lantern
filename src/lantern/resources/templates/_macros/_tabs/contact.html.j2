@@ -40,6 +40,13 @@
           {{ form_input(id="message-sender-email", name="Your email address", required=True) }}
           <div class="space-y-2">
             <div class="cf-turnstile" data-sitekey="{{ data.turnstile_site_key }}" data-theme="auto" data-size="flexible"></div>
+            <noscript>
+              {% call com.alert(variant='red', classes="space-y-2") %}
+                <p>This form requires JavaScript to protect against spam.</p>
+                <p>Without JavaScript, submitting this form will fail due to a missing bot detection value.</p>
+                <p>Please use a alternative contact method if you cannot enable JavaScript.</p>
+              {% endcall %}
+            </noscript>
             <button class="{{ com.btn_primary_classes() }} p-4" type="submit">
                 Send Message <i class="fas fa-arrow-right"></i>
             </button>
@@ -89,7 +96,7 @@
         only be used to contact you regarding your enquiry. If this item relates to an external organisation, we may
         share an anonymised version of your enquiry with them to help answer your query.
       </p>
-      <p>We use Cloudflare, a third-party service, to protect against spam and verify you are human.</p>
+      <p>We use Cloudflare Turnstile, a third-party service, to protect against spam enquires.</p>
       <p>See our <a class="{{ com.link_classes() }}" href="/legal/privacy">privacy policy</a> for more information.</p>
     {% endcall %}
   </div>

@@ -47,7 +47,7 @@ See the [Config](/docs/config.md#config-options) docs for how to set these confi
 
 See the [Infrastructure](/docs/infrastructure.md#exporters) docs for credentials used by exporters.
 
-In most cases, these properties are accessed indirectly via an [Exporter Metadata](/docs/data-model.md#exporter-metadata)
+In most cases, these properties are accessed indirectly via an [Export Metadata](/docs/data-model.md#export-metadata)
 instance, which provides additional context such as the build time and associated commit for exported content.
 
 > [!IMPORTANT]

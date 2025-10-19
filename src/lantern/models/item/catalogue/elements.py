@@ -18,6 +18,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     MaintenanceFrequencyCode,
     ProgressCode,
 )
+from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.base.elements import Link, unpack
 from lantern.models.item.base.enums import AccessLevel, ResourceTypeLabel
@@ -91,6 +92,13 @@ class ItemCatalogueSummary(ItemBase):
     Catalogue item summaries provide additional context for base summaries for use when presenting search results or
     resources related to the current item within the BAS Data Catalogue website.
     """
+
+    def __init__(self, record: RecordRevision, admin_meta_keys: AdministrationKeys) -> None:
+        super().__init__(record=record, admin_keys=admin_meta_keys)
+
+        if not isinstance(self._admin_keys, AdministrationKeys):
+            msg = "administration metadata keys must be provided"
+            raise TypeError(msg) from None
 
     @property
     def _resource_type_label(self) -> str:
@@ -278,7 +286,13 @@ class Aggregations:
     Container for ItemBase Aggregations formatted as links and grouped by type.
     """
 
-    def __init__(self, aggregations: RecordAggregations, get_record: Callable[[str], RecordRevision]) -> None:
+    def __init__(
+        self,
+        admin_meta_keys: AdministrationKeys,
+        aggregations: RecordAggregations,
+        get_record: Callable[[str], RecordRevision],
+    ) -> None:
+        self._admin_keys = admin_meta_keys
         self._aggregations = aggregations
         self._summaries = self._generate_summaries(get_record)
 
@@ -287,7 +301,7 @@ class Aggregations:
         summaries = {}
         for aggregation in self._aggregations:
             identifier = aggregation.identifier.identifier
-            summaries[identifier] = ItemCatalogueSummary(get_record(identifier))
+            summaries[identifier] = ItemCatalogueSummary(get_record(identifier), admin_meta_keys=self._admin_keys)
         return summaries
 
     def __len__(self) -> int:

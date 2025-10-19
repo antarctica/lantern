@@ -45,7 +45,7 @@ from lantern.models.item.catalogue.elements import (
 )
 from lantern.models.item.catalogue.enums import ResourceTypeIcon
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
-from tests.conftest import _get_record
+from tests.conftest import _admin_meta_keys, _get_record
 
 
 class TestFormattedDate:
@@ -91,7 +91,7 @@ class TestFormattedDate:
 class TestAggregations:
     """Test Catalogue Item aggregations."""
 
-    def test_init(self):
+    def test_init(self, fx_admin_meta_keys: AdministrationKeys):
         """Can create an Aggregations collection."""
         expected_aggregation = Aggregation(
             identifier=Identifier(identifier="x", href="x", namespace=CATALOGUE_NAMESPACE),
@@ -101,14 +101,16 @@ class TestAggregations:
         expected_record = _get_record("x")
         record_aggregations = RecordAggregations([expected_aggregation])
 
-        aggregations = Aggregations(aggregations=record_aggregations, get_record=_get_record)
+        aggregations = Aggregations(
+            admin_meta_keys=fx_admin_meta_keys, aggregations=record_aggregations, get_record=_get_record
+        )
 
         assert isinstance(aggregations, Aggregations)
         assert len(aggregations) == 1
         assert aggregations._aggregations[0] == expected_aggregation
         assert aggregations._summaries["x"]._record == expected_record
 
-    def test_peer_collections(self):
+    def test_peer_collections(self, fx_admin_meta_keys: AdministrationKeys):
         """Can get any collection aggregations (item is part of)."""
         record_aggregations = RecordAggregations(
             [
@@ -119,11 +121,13 @@ class TestAggregations:
                 )
             ]
         )
-        aggregations = Aggregations(record_aggregations, get_record=_get_record)
+        aggregations = Aggregations(
+            admin_meta_keys=fx_admin_meta_keys, aggregations=record_aggregations, get_record=_get_record
+        )
 
         assert len(aggregations.peer_collections) > 0
 
-    def test_peer_cross_reference(self):
+    def test_peer_cross_reference(self, fx_admin_meta_keys: AdministrationKeys):
         """Can get any cross-reference not related to another context (e.g. collections)."""
         record_aggregations = RecordAggregations(
             [
@@ -138,11 +142,13 @@ class TestAggregations:
                 ),
             ]
         )
-        aggregations = Aggregations(record_aggregations, get_record=_get_record)
+        aggregations = Aggregations(
+            admin_meta_keys=fx_admin_meta_keys, aggregations=record_aggregations, get_record=_get_record
+        )
 
         assert len(aggregations.peer_cross_reference) == 1
 
-    def test_peer_superseded(self):
+    def test_peer_superseded(self, fx_admin_meta_keys: AdministrationKeys):
         """Can get any superseded items."""
         record_aggregations = RecordAggregations(
             [
@@ -152,11 +158,13 @@ class TestAggregations:
                 ),
             ]
         )
-        aggregations = Aggregations(record_aggregations, get_record=_get_record)
+        aggregations = Aggregations(
+            admin_meta_keys=fx_admin_meta_keys, aggregations=record_aggregations, get_record=_get_record
+        )
 
         assert len(aggregations.peer_supersedes) > 0
 
-    def test_peer_opposite_side(self):
+    def test_peer_opposite_side(self, fx_admin_meta_keys: AdministrationKeys):
         """Can get any item that forms the opposite side of a published map."""
         record_aggregations = RecordAggregations(
             [
@@ -167,11 +175,13 @@ class TestAggregations:
                 )
             ]
         )
-        aggregations = Aggregations(record_aggregations, get_record=_get_record)
+        aggregations = Aggregations(
+            admin_meta_keys=fx_admin_meta_keys, aggregations=record_aggregations, get_record=_get_record
+        )
 
         assert aggregations.peer_opposite_side is not None
 
-    def test_parent_collections(self):
+    def test_parent_collections(self, fx_admin_meta_keys: AdministrationKeys):
         """Can get any collection aggregations (item is part of)."""
         record_aggregations = RecordAggregations(
             [
@@ -182,11 +192,13 @@ class TestAggregations:
                 )
             ]
         )
-        aggregations = Aggregations(record_aggregations, get_record=_get_record)
+        aggregations = Aggregations(
+            admin_meta_keys=fx_admin_meta_keys, aggregations=record_aggregations, get_record=_get_record
+        )
 
         assert len(aggregations.parent_collections) > 0
 
-    def test_child_items(self):
+    def test_child_items(self, fx_admin_meta_keys: AdministrationKeys):
         """Can get any item aggregations (item is made up of)."""
         record_aggregations = RecordAggregations(
             [
@@ -197,11 +209,13 @@ class TestAggregations:
                 )
             ]
         )
-        aggregations = Aggregations(record_aggregations, get_record=_get_record)
+        aggregations = Aggregations(
+            admin_meta_keys=fx_admin_meta_keys, aggregations=record_aggregations, get_record=_get_record
+        )
 
         assert len(aggregations.child_items) > 0
 
-    def test_parent_printed_map(self):
+    def test_parent_printed_map(self, fx_admin_meta_keys: AdministrationKeys):
         """Can get printed map item that this item is a side of."""
         record_aggregations = RecordAggregations(
             [
@@ -212,7 +226,9 @@ class TestAggregations:
                 )
             ]
         )
-        aggregations = Aggregations(record_aggregations, get_record=_get_record)
+        aggregations = Aggregations(
+            admin_meta_keys=fx_admin_meta_keys, aggregations=record_aggregations, get_record=_get_record
+        )
 
         assert aggregations.parent_printed_map is not None
 
@@ -324,16 +340,25 @@ class TestItemCatalogueSummaryCatalogue:
 
     def test_init(self, fx_item_base_model_min: ItemBase):
         """Can create an ItemCatalogueSummaryCatalogue."""
-        record = fx_item_base_model_min._record
-        summary = ItemCatalogueSummary(record)
+        summary = ItemCatalogueSummary(
+            record=fx_item_base_model_min._record, admin_meta_keys=fx_item_base_model_min._admin_keys
+        )
 
         assert isinstance(summary, ItemCatalogueSummary)
-        assert summary._record == record
+        assert summary._record == fx_item_base_model_min._record
+        assert isinstance(summary._admin_keys, AdministrationKeys)
+
+    def test_init_invalid_admin_keys(self, fx_item_base_model_min: ItemBase):
+        """Cannot create an ItemCatalogueSummaryCatalogue if admin keys are not provided."""
+        with pytest.raises(TypeError, match=r"administration metadata keys must be provided"):
+            # noinspection PyTypeChecker
+            _ = ItemCatalogueSummary(record=fx_item_base_model_min._record, admin_meta_keys=None)
 
     def test_resource_type_icon(self, fx_item_base_model_min: ItemBase):
         """Can get icon for resource type."""
-        record = fx_item_base_model_min._record
-        summary = ItemCatalogueSummary(record)
+        summary = ItemCatalogueSummary(
+            record=fx_item_base_model_min._record, admin_meta_keys=fx_item_base_model_min._admin_keys
+        )
         assert summary._resource_type_icon == ResourceTypeIcon[summary.resource_type.name].value
 
     @pytest.mark.parametrize(("value", "expected"), [(None, ""), ("x", "<p>x</p>"), ("_x_", "<p><em>x</em></p>")])
@@ -341,7 +366,7 @@ class TestItemCatalogueSummaryCatalogue:
         """Can get summary with Markdown formatting encoded as HTML if present, or a blank string."""
         record = fx_item_base_model_min._record
         record.identification.purpose = value
-        summary = ItemCatalogueSummary(record)
+        summary = ItemCatalogueSummary(record=record, admin_meta_keys=fx_item_base_model_min._admin_keys)
 
         assert summary.summary_html == expected
 
@@ -353,7 +378,7 @@ class TestItemCatalogueSummaryCatalogue:
         expected = "30 June 2014" if has_date else None
         if has_date:
             record.identification.dates.publication = publication
-        summary = ItemCatalogueSummary(record)
+        summary = ItemCatalogueSummary(record=record, admin_meta_keys=fx_item_base_model_min._admin_keys)
         if has_date:
             assert summary._date.value == expected
         else:
@@ -389,7 +414,6 @@ class TestItemCatalogueSummaryCatalogue:
     def test_fragments(
         self,
         fx_item_base_model_min: ItemBase,
-        fx_admin_meta_keys: AdministrationKeys,
         restricted: bool,
         resource_type: HierarchyLevelCode,
         edition: str | None,
@@ -424,7 +448,7 @@ class TestItemCatalogueSummaryCatalogue:
             record.identification.aggregations.append(aggregation)
         record.child_aggregations_count = child_count
 
-        summary = ItemCatalogueSummary(record=record, admin_keys=fx_admin_meta_keys)
+        summary = ItemCatalogueSummary(record=record, admin_meta_keys=fx_item_base_model_min._admin_keys)
         result = summary.fragments
 
         assert result.restricted == restricted
@@ -461,7 +485,7 @@ class TestItemCatalogueSummaryCatalogue:
                 GraphicOverview(identifier="overview", href=href, mime_type="x")
             )
 
-        summary = ItemCatalogueSummary(record)
+        summary = ItemCatalogueSummary(record=record, admin_meta_keys=fx_item_base_model_min._admin_keys)
 
         if href is not None:
             assert summary.href_graphic == expected
@@ -590,6 +614,7 @@ class TestPageSummary:
                 "x",
                 "x",
                 Aggregations(
+                    admin_meta_keys=_admin_meta_keys(),
                     aggregations=RecordAggregations(
                         [
                             Aggregation(
@@ -608,7 +633,9 @@ class TestPageSummary:
                 HierarchyLevelCode.PRODUCT,
                 None,
                 None,
-                Aggregations(aggregations=RecordAggregations([]), get_record=_get_record),
+                Aggregations(
+                    admin_meta_keys=_admin_meta_keys(), aggregations=RecordAggregations([]), get_record=_get_record
+                ),
                 True,
                 None,
             ),
@@ -617,6 +644,7 @@ class TestPageSummary:
                 "x",
                 "x",
                 Aggregations(
+                    admin_meta_keys=_admin_meta_keys(),
                     aggregations=RecordAggregations(
                         [
                             Aggregation(
@@ -680,6 +708,7 @@ class TestPageSummary:
                 "x",
                 False,
                 Aggregations(
+                    admin_meta_keys=_admin_meta_keys(),
                     aggregations=RecordAggregations(
                         [
                             Aggregation(
@@ -704,6 +733,7 @@ class TestPageSummary:
                 None,
                 False,
                 Aggregations(
+                    admin_meta_keys=_admin_meta_keys(),
                     aggregations=RecordAggregations(
                         [
                             Aggregation(
@@ -723,6 +753,7 @@ class TestPageSummary:
                 "x",
                 False,
                 Aggregations(
+                    admin_meta_keys=_admin_meta_keys(),
                     aggregations=RecordAggregations(
                         [
                             Aggregation(
@@ -741,7 +772,9 @@ class TestPageSummary:
                 None,
                 None,
                 False,
-                Aggregations(aggregations=RecordAggregations([]), get_record=_get_record),
+                Aggregations(
+                    admin_meta_keys=_admin_meta_keys(), aggregations=RecordAggregations([]), get_record=_get_record
+                ),
                 False,
             ),
             (
@@ -749,7 +782,9 @@ class TestPageSummary:
                 "1",
                 "x",
                 False,
-                Aggregations(aggregations=RecordAggregations([]), get_record=_get_record),
+                Aggregations(
+                    admin_meta_keys=_admin_meta_keys(), aggregations=RecordAggregations([]), get_record=_get_record
+                ),
                 False,
             ),
             (
@@ -757,7 +792,9 @@ class TestPageSummary:
                 "1",
                 "x",
                 True,
-                Aggregations(aggregations=RecordAggregations([]), get_record=_get_record),
+                Aggregations(
+                    admin_meta_keys=_admin_meta_keys(), aggregations=RecordAggregations([]), get_record=_get_record
+                ),
                 True,
             ),
         ],
@@ -818,6 +855,7 @@ class TestPageSummary:
     )
     def test_published(
         self,
+        fx_admin_meta_keys: AdministrationKeys,
         item_type: HierarchyLevelCode,
         published: FormattedDate | None,
         revision: FormattedDate | None,
@@ -830,7 +868,9 @@ class TestPageSummary:
             published_date=published,
             revision_date=revision,
             restricted=False,
-            aggregations=Aggregations(aggregations=RecordAggregations([]), get_record=_get_record),
+            aggregations=Aggregations(
+                admin_meta_keys=fx_admin_meta_keys, aggregations=RecordAggregations([]), get_record=_get_record
+            ),
             citation=None,
             abstract="x",
         )
@@ -841,7 +881,9 @@ class TestPageSummary:
         ("item_type", "has_aggregation"),
         [(HierarchyLevelCode.PRODUCT, False), (HierarchyLevelCode.PRODUCT, True)],
     )
-    def test_physical_map(self, item_type: HierarchyLevelCode, has_aggregation: bool):
+    def test_physical_map(
+        self, fx_admin_meta_keys: AdministrationKeys, item_type: HierarchyLevelCode, has_aggregation: bool
+    ):
         """Can show combination of publication and revision date if relevant."""
         aggregations = []
         if has_aggregation:
@@ -854,7 +896,11 @@ class TestPageSummary:
             )
         summary = PageSummary(
             item_type=item_type,
-            aggregations=Aggregations(aggregations=RecordAggregations(aggregations), get_record=_get_record),
+            aggregations=Aggregations(
+                admin_meta_keys=fx_admin_meta_keys,
+                aggregations=RecordAggregations(aggregations),
+                get_record=_get_record,
+            ),
             restricted=False,
             edition=None,
             published_date=None,

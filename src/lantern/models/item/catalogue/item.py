@@ -48,7 +48,7 @@ class ItemCatalogue(ItemBase):
         self,
         site_meta: SiteMeta,
         record: RecordRevision,
-        admin_meta_keys: AdministrationKeys | None,
+        admin_meta_keys: AdministrationKeys,
         trusted_context: bool,
         get_record: Callable[[str], RecordRevision],
         **kwargs: Any,
@@ -58,6 +58,9 @@ class ItemCatalogue(ItemBase):
         self._trusted_context = trusted_context
         self._get_record = get_record
 
+        if not isinstance(self._admin_keys, AdministrationKeys):
+            msg = "administration metadata keys must be provided"
+            raise TypeError(msg) from None
         if not isinstance(self._record, RecordRevision):
             msg = "record must be a RecordRevision instance"
             raise TypeError(msg) from None
@@ -66,7 +69,9 @@ class ItemCatalogue(ItemBase):
     @property
     def _aggregations(self) -> Aggregations:
         """Aggregations."""
-        return Aggregations(aggregations=self.aggregations, get_record=self._get_record)
+        return Aggregations(
+            admin_meta_keys=self._admin_keys, aggregations=self.aggregations, get_record=self._get_record
+        )
 
     @property
     def _dates(self) -> Dates:

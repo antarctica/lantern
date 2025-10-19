@@ -40,6 +40,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     OnlineResourceFunctionCode,
     ProgressCode,
 )
+from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 from lantern.models.item.base.elements import Contact, Contacts, Link
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.base.enums import AccessLevel, ResourceTypeLabel
@@ -75,9 +76,10 @@ from tests.conftest import _get_record
 class TestItemsTab:
     """Test items tab."""
 
-    def test_init(self):
+    def test_init(self, fx_admin_meta_keys: AdministrationKeys):
         """Can create items tab."""
         aggregations = Aggregations(
+            admin_meta_keys=fx_admin_meta_keys,
             aggregations=RecordAggregations(
                 [
                     Aggregation(
@@ -396,9 +398,10 @@ class TestLineageTab:
 class TestRelatedTab:
     """Test related tab."""
 
-    def test_init(self):
+    def test_init(self, fx_admin_meta_keys: AdministrationKeys):
         """Can create related tab."""
         aggregations = Aggregations(
+            admin_meta_keys=fx_admin_meta_keys,
             aggregations=RecordAggregations(
                 [
                     Aggregation(
@@ -465,9 +468,15 @@ class TestRelatedTab:
             ),
         ],
     )
-    def test_enabled(self, level: HierarchyLevelCode, value: RecordAggregations, expected: bool):
+    def test_enabled(
+        self,
+        fx_admin_meta_keys: AdministrationKeys,
+        level: HierarchyLevelCode,
+        value: RecordAggregations,
+        expected: bool,
+    ):
         """Can disable related tab if not applicable."""
-        aggregations = Aggregations(aggregations=value, get_record=_get_record)
+        aggregations = Aggregations(admin_meta_keys=fx_admin_meta_keys, aggregations=value, get_record=_get_record)
         tab = RelatedTab(aggregations=aggregations, item_type=level)
         assert tab.enabled is expected
 

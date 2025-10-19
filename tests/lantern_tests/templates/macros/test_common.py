@@ -75,7 +75,7 @@ class TestItemSummary:
     record.identification.title = "y"
     record.identification.purpose = "z"
 
-    summary_base = ItemCatalogueSummary(record=record, admin_keys=_admin_meta_keys())
+    summary_base = ItemCatalogueSummary(record=record, admin_meta_keys=_admin_meta_keys())
 
     @staticmethod
     def _render(item: ItemCatalogueSummary) -> str:
@@ -117,11 +117,12 @@ class TestItemSummary:
         """Can get optional edition with expected value from summary."""
         record = deepcopy(self.summary_base._record)
         record.identification.edition = edition
-        summary = ItemCatalogueSummary(record=record, admin_keys=self.summary_base._admin_keys)
+        summary = ItemCatalogueSummary(record=record, admin_meta_keys=self.summary_base._admin_keys)
         expected = summary.fragments.edition
         html = BeautifulSoup(self._render(summary), parser="html.parser", features="lxml")
 
         if expected:
+            # noinspection PyTypeChecker
             assert html.find(name="span", string=expected) is not None
 
     @pytest.mark.parametrize("published", [None, Date(date=date(2023, 10, 31))])
@@ -129,7 +130,7 @@ class TestItemSummary:
         """Can get optional publication date with expected value from summary."""
         record = deepcopy(self.summary_base._record)
         record.identification.dates.publication = published
-        summary = ItemCatalogueSummary(record=record, admin_keys=self.summary_base._admin_keys)
+        summary = ItemCatalogueSummary(record=record, admin_meta_keys=self.summary_base._admin_keys)
         expected = summary.fragments.published
         html = BeautifulSoup(self._render(summary), parser="html.parser", features="lxml")
 
@@ -146,13 +147,15 @@ class TestItemSummary:
         )
         record = deepcopy(self.summary_base._record)
         record.identification.aggregations.extend([agg for _ in range(value)])
-        summary = ItemCatalogueSummary(record=record, admin_keys=self.summary_base._admin_keys)
+        summary = ItemCatalogueSummary(record=record, admin_meta_keys=self.summary_base._admin_keys)
         expected = summary.fragments.children
         html = BeautifulSoup(self._render(summary), parser="html.parser", features="lxml")
 
         if expected:
+            # noinspection PyTypeChecker
             assert html.find(name="span", string=expected) is not None
         else:
+            # noinspection PyTypeChecker
             assert html.find(name="span", string="0 items") is None
 
     @pytest.mark.parametrize(
@@ -187,7 +190,7 @@ class TestItemSummary:
         if value.restriction_code == ConstraintRestrictionCode.UNRESTRICTED:
             admin_meta = Administration(id=record.file_identifier, access_permissions=[OPEN_ACCESS])
             set_admin(keys=fx_admin_meta_keys, record=record, admin_meta=admin_meta)
-        summary = ItemCatalogueSummary(record=record, admin_keys=self.summary_base._admin_keys)
+        summary = ItemCatalogueSummary(record=record, admin_meta_keys=self.summary_base._admin_keys)
 
         html = BeautifulSoup(self._render(summary), parser="html.parser", features="lxml")
         result = html.find(lambda tag: tag.name == "span" and "Restricted" in tag.get_text())

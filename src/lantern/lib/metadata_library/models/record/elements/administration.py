@@ -66,6 +66,12 @@ class Administration:
     gitlab_issues: list[str] = field(default_factory=list)
     access_permissions: list[Permission] = field(default_factory=list)
 
+    def __post_init__(self) -> None:
+        """Validate."""
+        if not self.id:
+            msg = "Administration metadata requires an id."
+            raise TypeError(msg) from None
+
     @classmethod
     def structure(cls: type[TAdministration], value: dict) -> "Administration":
         """

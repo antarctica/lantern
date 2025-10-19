@@ -22,6 +22,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Record utility methods for key values in supplemental information
 * Item cross-reference record preset
 * Initial admin tab for administrative metadata
+* Development task for setting administrative metadata access permissions in records
 
 ### Fixed
 
@@ -40,6 +41,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Catalogue items use binary restricted access control, defaulting to restricted
 * Moving dict/list cleaning utils into new records utils package
 * Improving distribution record presets
+* Updating accessibility statement
 
 ## [0.3.0] - 2025-09-20
 

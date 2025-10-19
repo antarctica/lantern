@@ -97,6 +97,7 @@ zap-records = { cmd = "python -m tasks.records_zap", help = "Process Zap ⚡️ 
 import-records = { cmd = "python -m tasks.records_import", help = "Import records from directory" }
 build-records = { cmd = "python -m tasks.records_build", help = "Build records as a catalogue site" }
 verify-records = { cmd = "python -m tasks.records_verify", help = "Verify static site contents" }
+restrict-records = { cmd = "python -m tasks.records_permissions", help = "Set access permissions for chosen records" }
 bootstrap-records = { cmd = "python -m tasks.records_bootstrap", help = "Bootstrap a new records repo" }
 records-workflow = { cmd = "python -m tasks.records_workflow", help = "Combined records import and build workflow" }
 serve = { cmd = "python -m http.server 9000 --directory export", help = "Serve local catalogue site" }

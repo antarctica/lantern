@@ -91,6 +91,12 @@ class TestAdministration:
         else:
             assert administration.access_permissions == []
 
+    def test_no_id(self):
+        """Cannot create an Administration element without an ID."""
+        with pytest.raises(TypeError):
+            # noinspection PyTypeChecker
+            Administration(id=None)
+
     def test_structure_cattrs(self):
         """Can use Cattrs to create an Administration instance from plain types."""
         expected_date = datetime(2014, 6, 30, 14, 30, second=45, tzinfo=UTC)

@@ -77,7 +77,7 @@ def _dump_records(logger: logging.Logger, file_identifiers: list[str], store: St
         record = store.get(file_identifier)
         logger.debug(f"Writing {record_path.resolve()}")
         with record_path.open(mode="w") as f:
-            f.write(record.dumps_json())
+            f.write(record.dumps_json(strip_admin=False))
 
 
 def main() -> None:

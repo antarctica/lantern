@@ -168,11 +168,17 @@
         {{ admin_tab.item(data) }}
       </div>
       <div class="col-span-1 space-y-8">
-        {% call com.item_title() %}About Administrative Metadata{% endcall %}
+        {% call com.item_title() %}&nbsp;{% endcall %}
         {% call com.item_border() %}
-          {% call com.alert(variant='purple', classes="space-y-2") %}
-            This is an experimental feature still in initial development.
-          {% endcall %}
+          <div class="space-y-2">
+            {% call com.alert(variant='purple') %}
+              {{ com.experimental_link_i(fixed_width=True) }} This is an experimental feature in
+              <a class="{{ com.link_classes() }}" href="https://gist.github.com/felnne/307bfa81672fbac2cd9cd7dd632a410c">initial development {{ com.ext_link_i() }}</a>.
+            {% endcall %}
+            {% call com.alert(variant='blue') %}
+              {{ com.restricted_i(fixed_width=True) }} This tab can only be seen by members of MAGIC.
+            {% endcall %}
+          </div>
         {% endcall %}
       </div>
     </div>

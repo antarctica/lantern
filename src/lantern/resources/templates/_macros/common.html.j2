@@ -48,9 +48,11 @@
   <time {% if id %}id="{{ id }}"{% endif %} datetime="{{ data.datetime }}">{{ data.value }}</time>
 {% endmacro %}
 
-{% macro restricted_i() %}<i class="far fa-lock-alt"></i>{% endmacro %}
+{% macro restricted_i(fixed_width=False) %}<i class="far {% if fixed_width %}fa-fw{% endif %} fa-lock-alt"></i>{% endmacro %}
 
-{% macro ext_link_i() %}<i class="far fa-external-link"></i>{% endmacro %}
+{% macro ext_link_i(fixed_width=False) %}<i class="far {% if fixed_width %}fa-fw{% endif %} fa-external-link"></i>{% endmacro %}
+
+{% macro experimental_link_i(fixed_width=False) %}<i class="far {% if fixed_width %}fa-fw{% endif %} fa-flask-potion"></i>{% endmacro %}
 
 {% macro ext_link_a(href, value) %}
   <a class="{{ link_classes() }}" href="{{ href }}" target="_blank">{{ value }} {{ ext_link_i() }}</a>

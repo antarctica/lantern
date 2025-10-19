@@ -1380,20 +1380,25 @@ class TestAdminTab:
         else:
             assert issues is None
 
-    @pytest.mark.parametrize("restricted", [True, False])
+    @pytest.mark.parametrize(("restricted", "expected"), [(True, "Yes"), (False, "No")])
     def test_restricted(
-        self, fx_item_cat_model_min: ItemCatalogue, fx_item_cat_model_open: ItemCatalogue, restricted: bool
+        self,
+        fx_item_cat_model_min: ItemCatalogue,
+        fx_item_cat_model_open: ItemCatalogue,
+        restricted: bool,
+        expected: str,
     ):
         """Can get item restriction status based on value from item."""
         model = fx_item_cat_model_min if restricted else fx_item_cat_model_open
-        expected = model._admin.restricted
         html = BeautifulSoup(render_item_catalogue(model), parser="html.parser", features="lxml")
 
         result = html.select_one("#admin-restricted")
-        assert result.text.strip().lower() == str(expected).lower()
+        assert result.text.strip() == expected
 
-    @pytest.mark.parametrize("value", [AccessLevel.NONE, AccessLevel.PUBLIC])
-    def test_access_level(self, fx_item_cat_model_min: ItemCatalogue, value: AccessLevel):
+    @pytest.mark.parametrize(
+        ("value", "expected"), [(AccessLevel.NONE, "NONE"), (AccessLevel.PUBLIC, "Public (Open Access)")]
+    )
+    def test_access_level(self, fx_item_cat_model_min: ItemCatalogue, value: AccessLevel, expected: str):
         """Can get item access level based on value from item."""
         if value == AccessLevel.PUBLIC:
             admin_meta = get_admin(keys=fx_item_cat_model_min._admin_keys, record=fx_item_cat_model_min._record)
@@ -1401,7 +1406,6 @@ class TestAdminTab:
             set_admin(
                 keys=fx_item_cat_model_min._admin_keys, record=fx_item_cat_model_min._record, admin_meta=admin_meta
             )
-        expected = fx_item_cat_model_min._admin.access_level
         html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
 
         result = html.select_one("#admin-level")

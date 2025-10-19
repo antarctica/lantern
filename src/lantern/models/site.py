@@ -138,12 +138,14 @@ class ExportMeta(SiteMeta):
     - s3_bucket: S3 bucket name for published site output
     - parallel_jobs: number of jobs to run in parallel
     - admin_meta_keys: keys accessing administration metadata in records
+    - trusted: whether sensitive information can be shown in public site output
     """
 
     export_path: Path
     s3_bucket: str
     parallel_jobs: int
     admin_meta_keys: AdministrationKeys | None
+    trusted: bool = False
 
     @property
     def site_metadata(self) -> SiteMeta:
@@ -155,7 +157,7 @@ class ExportMeta(SiteMeta):
 
     @classmethod
     def from_config_store(
-        cls, config: Config, store: GitLabStore | None = None, **kwargs: datetime | dict | str
+        cls, config: Config, store: GitLabStore | None = None, **kwargs: datetime | dict | str | bool
     ) -> "ExportMeta":
         """
         Create an Export Metadata instance from an app Config instance, optional GitLab Store and additional properties.
@@ -166,7 +168,8 @@ class ExportMeta(SiteMeta):
         - parallel_jobs: from PARALLEL_JOBS
         - admin_meta_keys: from ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE and ADMIN_METADATA_SIGNING_KEY_PUBLIC
         """
-        super_meta = asdict(SiteMeta.from_config_store(config, store, **kwargs))
+        site_kwargs = {k: v for k, v in kwargs.items() if k in {f.name for f in fields(SiteMeta)}}
+        super_meta = asdict(SiteMeta.from_config_store(config, store, **site_kwargs))
 
         return cls(
             **{

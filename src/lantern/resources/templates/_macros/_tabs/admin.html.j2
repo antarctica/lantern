@@ -6,7 +6,7 @@
     <dl class="space-y-4">
       {% call com.dl_item(title='Resource ID', id='admin-id') %}{{ data.item_id }}{% endcall %}
 
-      {% call com.dl_item(title='Metadata Revision', id='admin-revision') %}
+      {% call com.dl_item(title='Resource Revision', id='admin-revision') %}
         <a class="{{ com.link_classes() }}" href="{{ data.revision_link.href }}">{{ data.revision_link.value }} {{ com.restricted_i() }} {{ com.ext_link_i() }}</a>
       {% endcall %}
 
@@ -21,14 +21,22 @@
       {% endif %}
 
       {% call com.dl_item(title='Item Restricted', id='admin-restricted') %}
-        {{ data.restricted }}
+        {% if data.restricted %}
+          {% call com.alert(variant='yellow') %}Yes{% endcall %}
+        {% else %}
+          {% call com.alert(variant='green') %}No{% endcall %}
+        {% endif %}
       {% endcall %}
 
-      {% call com.dl_item(title='Item Access Level', id='admin-level') %}
-        {{ data.access_level }}
+      {% call com.dl_item(title='Resource Access Level', id='admin-level') %}
+        {% if data.access_level == 'PUBLIC' %}
+          {% call com.alert(variant='green') %}Public (Open Access){% endcall %}
+        {% else %}
+          {% call com.alert(variant='red') %}{{ data.access_level }}{% endcall %}
+        {% endif %}
       {% endcall %}
 
-      {% call com.dl_item(title='Item Access Permissions', id='admin-access') %}
+      {% call com.dl_item(title='Access Permissions', id='admin-access') %}
         {% for permission in data.access %}
           <pre>{{ permission }}</pre>
         {% endfor %}

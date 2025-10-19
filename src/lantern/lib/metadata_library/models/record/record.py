@@ -282,14 +282,15 @@ class Record:
         converter.register_structure_hook(Record, lambda d, t: Record.structure(d))
         return converter.structure(value, cls)
 
-    def strip_admin_metadata(self) -> None:
+    @staticmethod
+    def _strip_admin_metadata(model: "Record") -> None:
         """
-        Remove any administrative metadata instance included in the record.
+        Remove any administrative metadata instance included in a record.
 
         Can't use get/set_kv due to circular import.
         If admin metadata was the only KV, set supplemental_information to None rather than an empty dict.
         """
-        sinfo = self.identification.supplemental_information
+        sinfo = model.identification.supplemental_information
         if sinfo is None:
             return
         try:
@@ -300,22 +301,25 @@ class Record:
             return
         kv.pop("administrative_metadata", None)
         if len(kv) == 0:
-            self.identification.supplemental_information = None
+            model.identification.supplemental_information = None
             return
-        self.identification.supplemental_information = json.dumps(kv)
+        model.identification.supplemental_information = json.dumps(kv)
 
     def dumps(self, strip_admin: bool = True) -> dict:
         """
         Export Record as a dict with plain, JSON safe, types.
 
         If `strip_admin` is true, any administrative metadata instance included in the record is removed.
+        If used, the record instance needs to be cloned to avoid modifying the original.
         """
+        model = self
         if strip_admin:
-            self.strip_admin_metadata()
+            model = deepcopy(self)
+            self._strip_admin_metadata(model)
 
         converter = cattrs.Converter()
         converter.register_unstructure_hook(Record, lambda d: d.unstructure())
-        return converter.unstructure(self)
+        return converter.unstructure(model)
 
     def dumps_json(self, strip_admin: bool = True) -> str:
         """

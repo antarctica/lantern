@@ -255,6 +255,7 @@ class TestItemCataloguePhysicalMap:
             site_meta=fx_site_meta,
             record=fx_item_physical_map_model_min._record,
             admin_meta_keys=fx_admin_meta_keys,
+            trusted_context=True,
             get_record=_get_record,
         )
 
@@ -343,6 +344,7 @@ class TestItemCataloguePhysicalMap:
             site_meta=fx_site_meta,
             record=record,
             admin_meta_keys=fx_admin_meta_keys,
+            trusted_context=True,
             get_record=_get_local_record,
         )
 

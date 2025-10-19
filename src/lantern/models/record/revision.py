@@ -100,14 +100,18 @@ class RecordRevision(Record):
         Export Record Revision as a dict with plain, JSON safe, types.
 
         If `strip_admin` is true, any administrative metadata instance included in the record is removed.
-        `with_revision` is false by default for compatibility `dumps_xml()`, `validate()`, etc. from parent class.
+        If true, the record instance needs to be cloned to avoid modifying the original.
+
+        `with_revision` is false by default for compatibility with `dumps_xml()`, `validate()`, etc. from parent class.
         """
+        model = self
         if strip_admin:
-            self.strip_admin_metadata()
+            model = deepcopy(self)
+            self._strip_admin_metadata(model)
 
         converter = cattrs.Converter()
         converter.register_unstructure_hook(RecordRevision, lambda d: d.unstructure())
-        data = converter.unstructure(self)
+        data = converter.unstructure(model)
 
         if not with_revision:
             data.pop("file_revision", None)

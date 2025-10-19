@@ -67,6 +67,7 @@ def export_test_site(export_path: Path) -> None:
         s3_bucket="x",
         parallel_jobs=1,
         admin_meta_keys=load_keys(),
+        trusted=True,
     )
 
     exporter = SiteExporter(config=Config(), meta=meta, s3=s3_client, logger=logger, get_record=store.get)

@@ -8,7 +8,7 @@ from lantern.lib.metadata_library.models.record.elements.common import Contact, 
 from lantern.lib.metadata_library.models.record.elements.identification import Identification
 from lantern.lib.metadata_library.models.record.elements.metadata import Metadata
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode, HierarchyLevelCode
-from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, set_admin
+from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, get_admin, set_admin
 from lantern.lib.metadata_library.models.record.utils.kv import get_kv
 from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
@@ -117,7 +117,10 @@ class TestRecordRevision:
         set_admin(keys=fx_admin_meta_keys, record=fx_revision_model_min, admin_meta=value_admin)
 
         config = fx_revision_model_min.dumps(strip_admin=strip_admin, with_revision=inc_revision)
-        kv = get_kv(fx_revision_model_min)
+        result = Record.loads(config)
+        if inc_revision:
+            result = RecordRevision.loads(config)
+        kv = get_kv(result)
 
         assert config["identification"]["title"]["value"] == fx_revision_config_min["identification"]["title"]["value"]
         if inc_revision:
@@ -126,5 +129,8 @@ class TestRecordRevision:
             assert "file_revision" not in config
         if strip_admin:
             assert "administrative_metadata" not in kv
+            # guard against original record being modified
+            assert get_admin(keys=fx_admin_meta_keys, record=fx_revision_model_min) is not None
+            assert get_admin(keys=fx_admin_meta_keys, record=result) is None
         else:
             assert "administrative_metadata" in kv

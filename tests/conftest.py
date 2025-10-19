@@ -410,6 +410,7 @@ def _item_cat_model_min() -> ItemCatalogue:
         site_meta=meta,
         record=RecordRevision.loads(_item_config_min_catalogue()),
         admin_meta_keys=_admin_meta_keys(),
+        trusted_context=True,
         get_record=_get_record,
     )
     # noinspection PyProtectedMember
@@ -433,6 +434,7 @@ def fx_item_cat_model_min(
         site_meta=fx_site_meta,
         record=RecordRevision.loads(fx_item_config_min_catalogue),
         admin_meta_keys=fx_admin_meta_keys,
+        trusted_context=True,
         get_record=fx_get_record,
     )
     # noinspection PyProtectedMember
@@ -473,6 +475,7 @@ def fx_item_physical_map_model_min(
         site_meta=fx_site_meta,
         record=RecordRevision.loads(fx_item_config_min_physical_map),
         admin_meta_keys=fx_admin_meta_keys,
+        trusted_context=True,
         get_record=fx_get_record,
     )
     # noinspection PyProtectedMember
@@ -522,6 +525,7 @@ def fx_item_cat_info_tab_minimal(fx_site_meta: SiteMeta) -> AdditionalInfoTab:
 def fx_item_cat_admin_tab_min() -> AdminTab:
     """Minimal ItemCatalogue admin tab."""
     return AdminTab(
+        trusted=True,
         item_id="x",
         revision=Link(value="x", href="x", external=True),
         gitlab_issues=[],
@@ -1073,7 +1077,7 @@ def fx_exporter_static_site(module_mocker: MockerFixture) -> TemporaryDirectory:
     )
     module_mocker.patch.object(type(config), attribute="AWS_ACCESS_ID", new_callable=PropertyMock, return_value="x")
     module_mocker.patch.object(type(config), attribute="AWS_ACCESS_SECRET", new_callable=PropertyMock, return_value="x")
-    meta = ExportMeta.from_config_store(config=config, store=None, build_repo_ref="83fake48")
+    meta = ExportMeta.from_config_store(config=config, store=None, build_repo_ref="83fake48", trusted=True)
     # load private signing key so admin metadata can be signed in other fixtures and tests
     meta.admin_meta_keys = _admin_meta_keys()
 

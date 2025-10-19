@@ -153,6 +153,7 @@ class TestExportMetadata:
         assert meta.s3_bucket == expected_str
         assert meta.parallel_jobs == expected_int
         assert meta.admin_meta_keys == fx_admin_meta_keys
+        assert meta.trusted is False  # default
 
     def test_from_config_store(self, fx_config: Config):
         """Can create export metadata from config."""

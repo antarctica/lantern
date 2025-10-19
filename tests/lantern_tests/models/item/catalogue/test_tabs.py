@@ -832,6 +832,7 @@ class TestAdminTab:
         revision_link = Link(value="x", href="x", external=True)
 
         tab = AdminTab(
+            trusted=True,
             item_id=item_id,
             revision=revision_link,
             gitlab_issues=[],
@@ -857,6 +858,21 @@ class TestAdminTab:
 
         result = AdminTab._make_gitlab_issue_ref(value)
         assert result == expected
+
+    @pytest.mark.parametrize("trusted", [False, True])
+    def test_enabled(self, fx_site_meta: SiteMeta, trusted: bool):
+        """Can determine tab visibility based on trusted context status."""
+        tab = AdminTab(
+            trusted=trusted,
+            item_id="x",
+            revision=Link(value="x", href="x", external=True),
+            gitlab_issues=[],
+            restricted=True,
+            access_level=AccessLevel.NONE,
+            access_permissions=[],
+        )
+
+        assert tab.enabled is trusted
 
     @pytest.mark.parametrize(
         ("issues", "expected"),

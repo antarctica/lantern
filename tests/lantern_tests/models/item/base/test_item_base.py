@@ -66,21 +66,24 @@ class TestItemBase:
         assert item._record == model
         assert item._admin_keys == keys
 
+    @pytest.mark.parametrize("has_keys", [False, True])
     @pytest.mark.parametrize("has_admin", [False, True])
     def test_admin_metadata(
         self,
         fx_revision_model_min: RecordRevision,
         fx_admin_meta_element: Administration,
         fx_admin_meta_keys: AdministrationKeys,
+        has_keys: bool,
         has_admin: bool,
     ):
         """Can get admin metadata if present."""
+        keys = fx_admin_meta_keys if has_keys else None
         if has_admin:
             fx_admin_meta_element.id = fx_revision_model_min.file_identifier
             set_admin(keys=fx_admin_meta_keys, record=fx_revision_model_min, admin_meta=fx_admin_meta_element)
 
-        item = ItemBase(record=fx_revision_model_min, admin_keys=fx_admin_meta_keys)
-        if has_admin:
+        item = ItemBase(record=fx_revision_model_min, admin_keys=keys)
+        if has_admin and has_keys:
             assert item._admin_metadata == fx_admin_meta_element
         else:
             assert item._admin_metadata is None

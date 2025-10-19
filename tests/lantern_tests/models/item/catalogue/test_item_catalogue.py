@@ -54,7 +54,7 @@ class TestItemCatalogue:
         assert isinstance(item, ItemCatalogue)
         assert item._record == fx_revision_model_min
 
-    def test_init_invalid_type(
+    def test_init_invalid_record(
         self,
         fx_site_meta: SiteMeta,
         fx_record_model_min: Record,
@@ -67,6 +67,22 @@ class TestItemCatalogue:
                 site_meta=fx_site_meta,
                 record=fx_record_model_min,
                 admin_meta_keys=fx_admin_meta_keys,
+                trusted_context=True,
+                get_record=_get_record,
+            )
+
+    def test_init_invalid_admin_keys(
+        self,
+        fx_site_meta: SiteMeta,
+        fx_revision_model_min: RecordRevision,
+    ):
+        """Cannot create an ItemCatalogue if admin keys are not provided."""
+        with pytest.raises(TypeError, match=r"administration metadata keys must be provided"):
+            # noinspection PyTypeChecker
+            _ = ItemCatalogue(
+                site_meta=fx_site_meta,
+                record=fx_revision_model_min,
+                admin_meta_keys=None,
                 trusted_context=True,
                 get_record=_get_record,
             )

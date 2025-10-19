@@ -50,6 +50,7 @@ In addition to [Record Validation](/docs/libraries.md#record-validation), the Da
   - to determine if a record is part of the Catalogue
 - include an `identification.identifier.contacts.*.contact` with at least the 'pointOfContact' role
   - for use with the item contact tab
+- include [Administrative Metadata](#item-administrative-metadata)
 - use unique identifiers for extents
 - structure any [Aliases](#item-aliases) as below if included:
   - MUST use values in the form: `{prefix}/{value}`

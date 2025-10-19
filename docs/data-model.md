@@ -41,7 +41,7 @@ Record Revisions are implemented as a [Catalogue Record](#catalogue-records) sub
 
 ### Record requirements
 
-In addition to [Record Validation](/docs/libraries.md#record-validation), the Data Catalogue requires all records:
+In addition to [Record Validation](/docs/libraries.md#record-validation), the Data Catalogue requires all records MUST:
 
 - use a UUID value for the `file_identifier`:
   - to ensure resources can be distinguished without relying on a value such as title that may change or not be unique
@@ -50,8 +50,8 @@ In addition to [Record Validation](/docs/libraries.md#record-validation), the Da
   - to determine if a record is part of the Catalogue
 - include an `identification.identifier.contacts.*.contact` with at least the 'pointOfContact' role
   - for use with the item contact tab
-- MUST use unique identifiers for extents if included
-- MUST structure any [Aliases](#item-aliases) as below if included:
+- use unique identifiers for extents
+- structure any [Aliases](#item-aliases) as below if included:
   - MUST use values in the form: `{prefix}/{value}`
   - MUST use an allowed prefix for each hierarchy level, as per [2]
   - MUST NOT use UUIDs in values (to avoid conflicts with `file_identifier` values)
@@ -241,7 +241,7 @@ JSON Web Keys (JWKs) for decrypting JWEs and verifying the signature of JWTs sho
 [Config Options](/docs/config.md#config-options) respectively.
 
 > [!TIP]
-> Keys can be accessed from [Exporter Metadata](#exporter-metadata) if created from a Config object.
+> Keys can be accessed from [Export Metadata](#export-metadata) if created from a Config object.
 
 ### Item access levels
 
@@ -285,7 +285,7 @@ Site metadata represents context about a catalogue site, such as its URL base, b
 
 The `lantern.models.site.SiteMeta` Python data class implements this concept.
 
-## Exporter metadata
+## Export metadata
 
 Exporter metadata is a superset of [Site metadata](#static-site-metadata) including additional properties such as the
 export path and keys for accessing [Administrative Metadata](#item-administrative-metadata) to avoid needing to pass

@@ -42,7 +42,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     ProgressCode,
 )
 from lantern.lib.metadata_library.models.record.record import Record, RecordInvalidError, RecordSchema
-from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, set_admin
+from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, get_admin, set_admin
 from lantern.lib.metadata_library.models.record.utils.kv import set_kv
 
 
@@ -225,7 +225,7 @@ class TestRecord:
     ):
         """Can strip admin metadata from a record if present."""
         fx_lib_record_model_min_iso.identification.supplemental_information = sinfo
-        fx_lib_record_model_min_iso.strip_admin_metadata()
+        Record._strip_admin_metadata(fx_lib_record_model_min_iso)
         assert fx_lib_record_model_min_iso.identification.supplemental_information == expected
 
     @pytest.mark.parametrize("strip_admin", [False, True])
@@ -245,6 +245,7 @@ class TestRecord:
             "constraint_type": ConstraintTypeCode.USAGE,
             "constraint_code": ConstraintRestrictionCode.LICENSE,
         }
+        fx_lib_record_model_min_iso.file_identifier = value_str  # required for administrative metadata
         value_admin = Administration(id=fx_lib_record_model_min_iso.file_identifier)
         value_kv = {"x": "x"}
         fx_lib_record_model_min_iso.identification.constraints = Constraints(
@@ -261,6 +262,7 @@ class TestRecord:
             # different. Therefore, a dummy value is expected.
             value_kv["administrative_metadata"] = "x"
         expected = {
+            "file_identifier": value_str,
             "hierarchy_level": value_enums["hierarchy_level"].value,
             "metadata": {
                 "character_set": "utf8",
@@ -295,6 +297,10 @@ class TestRecord:
             kv["administrative_metadata"] = value_kv["administrative_metadata"]
             config["identification"]["supplemental_information"] = json.dumps(kv)
         assert config == expected
+
+        if strip_admin:
+            # guard against original record being modified
+            assert get_admin(keys=fx_admin_meta_keys, record=fx_lib_record_model_min_iso) is not None
 
     def test_dumps_json(self, fx_lib_record_model_min_iso: Record):
         """

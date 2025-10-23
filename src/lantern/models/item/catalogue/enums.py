@@ -39,3 +39,4 @@ class Licence(Enum):
     CC_BY_4_0 = "https://creativecommons.org/licenses/by/4.0/"
     X_ALL_RIGHTS_RESERVED_1 = "https://metadata-resources.data.bas.ac.uk/licences/all-rights-reserved-v1/"
     X_OPERATIONS_MAPPING_1 = "https://metadata-resources.data.bas.ac.uk/licences/operations-mapping-v1/"
+    X_MAGIC_PRODUCTS_1 = "https://metadata-resources.data.bas.ac.uk/licences/magic-products-v1/"

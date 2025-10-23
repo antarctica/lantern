@@ -156,6 +156,19 @@ In the `tests.lantern_tests.config` module:
 7. update `TestItemCatalogue.test_default_tab_anchor` if tab should be shown before additional information tab
 8. updates tests within `lantern_tests.templates` as needed
 
+### Adding catalogue licences
+
+> [!CAUTION]
+> This section is Work in Progress (WIP) and may not be complete/accurate.
+
+1. update `lantern.models.item.catalogue.enums.Licence`
+2. in `src/lantern/resources/templates/_macros/_tabs/licence.html.j2`:
+   - create a new macro calling the `licence` macro, named after a lower case version of the Licence enum item
+3. create a new test record in `tests.resources.records.item_cat_licence`
+4. add test record to:
+   - `tests.resources.records.item_cat_collection_all`
+   - `tests.resources.stores.fake_records_store.FakeRecordsStore._fake_records`
+
 ### Adding site pages
 
 > [!CAUTION]

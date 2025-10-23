@@ -114,6 +114,8 @@ def main() -> None:
     logger = logging.getLogger("app")
     logger.info("Initialising")
 
+    verify = True
+
     store = GitLabStore(
         logger=logger,
         parallel_jobs=config.PARALLEL_JOBS,
@@ -153,7 +155,8 @@ def main() -> None:
 
     commit = _import(logger=logger, config=config, store=store, admin_keys=admin_keys, import_path=import_path)
     _build(logger=logger, site=site, commit=commit, bucket=config.AWS_S3_BUCKET, base_url=base_url)
-    _verify(logger=logger, config=config, commit=commit, store=store, s3=s3, base_url=base_url)
+    if verify:
+        _verify(logger=logger, config=config, commit=commit, store=store, s3=s3, base_url=base_url)
 
 
 if __name__ == "__main__":

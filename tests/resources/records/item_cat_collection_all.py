@@ -32,6 +32,7 @@ collection_members = [
     "589408f0-f46b-4609-b537-2f90a2f61243",
     "4ba929ac-ca32-4932-a15f-38c1640c0b0f",
     "5ab58461-5ba7-404d-a904-2b4efcb7556e",
+    "60c05109-d15e-4b43-9e36-d4fd9d7c606b",
     "c993ea2b-d44e-4ca0-9007-9a972f7dd117",
     "53ed9f6a-2d68-46c2-b5c5-f15422aaf5b2",
     "3c77ffae-6aa0-4c26-bc34-5521dbf4bf23",

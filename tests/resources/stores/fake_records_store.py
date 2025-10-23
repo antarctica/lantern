@@ -6,7 +6,13 @@ from tests.resources.records.item_cat_collection_all import record as collection
 from tests.resources.records.item_cat_collection_min import record as collection_min_supported
 from tests.resources.records.item_cat_data import record as data_all_supported
 from tests.resources.records.item_cat_formatting import record as formatting_supported
-from tests.resources.records.item_cat_licence import cc_record, ogl_record, ops_record, rights_reversed_record
+from tests.resources.records.item_cat_licence import (
+    cc_record,
+    magic_products_record,
+    ogl_record,
+    ops_record,
+    rights_reversed_record,
+)
 from tests.resources.records.item_cat_product_all import record as product_all_supported
 from tests.resources.records.item_cat_product_min import record as product_min_supported
 from tests.resources.records.item_cat_product_replaced import record as product_replaced
@@ -46,6 +52,7 @@ class FakeRecordsStore(Store):
             ogl_record,
             cc_record,
             ops_record,
+            magic_products_record,
             rights_reversed_record,
             product_published_map_combined,
             product_published_map_side_a,

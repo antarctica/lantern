@@ -14,6 +14,7 @@ Item to test all supported licences:
 - OGL v3
 - CC BY v4
 - X Operations Mapping v1
+- X MAGIC Products v1
 - X All Rights Reversed v1
 """
 
@@ -82,6 +83,29 @@ ops_record.identification.constraints = Constraints(
             restriction_code=ConstraintRestrictionCode.LICENSE,
             href="https://metadata-resources.data.bas.ac.uk/licences/operations-mapping-v1/",
             statement="This information is licensed under the (Local) Operations Mapping v1 licence. To view this licence, visit https://metadata-resources.data.bas.ac.uk/licences/operations-mapping-v1/.",
+        ),
+    ]
+)
+
+magic_products_record = make_record(
+    file_identifier="60c05109-d15e-4b43-9e36-d4fd9d7c606b",
+    hierarchy_level=HierarchyLevelCode.PRODUCT,
+    title="Test Resource - Item to test licences (MAGIC Products v1)",
+    abstract=abstract,
+    purpose="Item to test all supported licence usage constraints are presented correctly.",
+)
+magic_products_record.identification.constraints = Constraints(
+    [
+        Constraint(
+            type=ConstraintTypeCode.ACCESS,
+            restriction_code=ConstraintRestrictionCode.RESTRICTED,
+            statement="Closed Access",
+        ),
+        Constraint(
+            type=ConstraintTypeCode.USAGE,
+            restriction_code=ConstraintRestrictionCode.LICENSE,
+            href="https://metadata-resources.data.bas.ac.uk/licences/magic-products-v1/",
+            statement="This information is licensed under the (Local) MAGIC Products v1 licence. To view this licence, visit https://metadata-resources.data.bas.ac.uk/licences/operations-mapping-v1/.",
         ),
     ]
 )

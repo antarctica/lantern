@@ -23,6 +23,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Item cross-reference record preset
 * Initial admin tab for administrative metadata
 * Development task for setting administrative metadata access permissions in records
+* Support for MAGIC Products internal use licence
 
 ### Fixed
 

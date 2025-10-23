@@ -6,10 +6,9 @@ from pathlib import Path
 import inquirer
 
 from lantern.config import Config
-from lantern.lib.metadata_library.models.record.record import RecordInvalidError
+from lantern.lib.metadata_library.models.record.record import Record, RecordInvalidError
 from lantern.log import init as init_logging
 from lantern.log import init_sentry
-from lantern.models.record.record import Record
 from lantern.stores.gitlab import GitLabStore
 
 

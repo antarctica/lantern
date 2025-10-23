@@ -18,7 +18,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     ConstraintTypeCode,
     HierarchyLevelCode,
 )
-from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
+from lantern.lib.metadata_library.models.record.presets.admin import BAS_STAFF, OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys as AdminMetadataKeys
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin
 from lantern.lib.metadata_library.models.record.utils.kv import get_kv
@@ -74,12 +74,12 @@ class ItemBase:
 
         Determined by admin access permissions. Defaults to no access if no access permissions are set.
         """
-        if self._admin_metadata is None:
-            return AccessLevel.NONE
-        permissions = self._admin_metadata.access_permissions
-        if len(permissions) == 0:
+        if self._admin_metadata is None or len(self._admin_metadata.access_permissions) == 0:
             return AccessLevel.NONE
 
+        permissions = self._admin_metadata.access_permissions
+        if permissions == [BAS_STAFF]:
+            return AccessLevel.BAS_STAFF
         if permissions == [OPEN_ACCESS]:
             return AccessLevel.PUBLIC
 

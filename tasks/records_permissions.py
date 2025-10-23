@@ -11,12 +11,11 @@ from jwskate import Jwk
 from lantern.config import Config
 from lantern.lib.metadata_library.models.record.elements.administration import Administration, Permission
 from lantern.lib.metadata_library.models.record.presets.admin import BAS_STAFF, OPEN_ACCESS
-from lantern.lib.metadata_library.models.record.record import RecordInvalidError
+from lantern.lib.metadata_library.models.record.record import Record, RecordInvalidError
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, get_admin, set_admin
 from lantern.log import init as init_logging
 from lantern.log import init_sentry
 from lantern.models.item.base.enums import AccessLevel
-from lantern.models.record.record import Record
 
 
 def _parse_configs(search_path: Path) -> Generator[dict, None, None]:

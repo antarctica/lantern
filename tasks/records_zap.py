@@ -20,12 +20,11 @@ from lantern.lib.metadata_library.models.record.enums import (
 )
 from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.presets.aggregations import make_bas_cat_collection_member
-from lantern.lib.metadata_library.models.record.record import RecordInvalidError
-from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, set_admin
+from lantern.lib.metadata_library.models.record.record import Record, RecordInvalidError
+from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, get_admin, set_admin
 from lantern.log import init as init_logging
 from lantern.log import init_sentry
 from lantern.models.record.const import CATALOGUE_NAMESPACE
-from lantern.models.record.record import Record
 from lantern.stores.base import RecordNotFoundError
 from lantern.stores.gitlab import GitLabStore
 
@@ -43,6 +42,8 @@ magic_collection_ids = [
     "6793faf5-16c5-42dc-a835-b214db7f3e85",  # SCAR Air Operations Planning Maps
     "5dc748d4-0e6e-4cdc-acc8-f24283bc585c",  # BAS Operations Datasets
     "7ed4d15e-952f-4be6-893a-9a9fef197426",  # BAS Polar Estates Maps
+    "b8b78c6c-fac2-402c-a772-9f518c7121e5",  # BAS MAGIC
+    "cf6dee46-493f-464c-8380-c8b2c5356508",  # BAS Legacy Maps
 ]
 
 
@@ -69,8 +70,9 @@ def _parse_records(logger: logging.Logger, search_path: Path) -> list[Record]:
         try:
             record = Record.loads(config)
             record.validate()
-        except RecordInvalidError:
+        except RecordInvalidError as e:
             logger.warning(f"Record '{config['file_identifier']}' does not validate, skipping.")
+            logger.info(e.validation_error)
             continue
         if not Record._config_supported(config, logger):
             logger.warning(
@@ -236,7 +238,7 @@ def _process_magic_collections(
             additional_records.append(updated_collection)
 
 
-def _get_gitlab_issues(logger: logging.Logger, record: Record) -> list[str]:
+def _get_gitlab_issues(logger: logging.Logger, record: Record) -> list[str] | None:
     """
     Get and remove GitLab issues from record identifiers if present.
 
@@ -244,6 +246,9 @@ def _get_gitlab_issues(logger: logging.Logger, record: Record) -> list[str]:
     """
     glab_identifiers = record.identification.identifiers.filter(namespace="gitlab.data.bas.ac.uk")
     logger.info(f"Record '{record.file_identifier}' has {len(glab_identifiers)} GitLab issues")
+    if len(glab_identifiers) == 0:
+        logger.info("No GitLab issues to process, skipping.")
+        return None
 
     issues = [i.identifier for i in glab_identifiers]
     count_before = len(record.identification.identifiers)
@@ -287,13 +292,26 @@ def _create_admin_metadata(logger: logging.Logger, admin_keys: AdministrationKey
     Note: This assumes discovery metadata is trustworthy and requires a suitable chain of custody.
     Note: This method clobbers any existing admin metadata if already present in the record.
     """
-    admin_meta = Administration(
-        id=record.file_identifier,
-        gitlab_issues=_get_gitlab_issues(logger, record),
-        access_permissions=_get_access_permissions(logger, record),
-    )
+    admin_meta = get_admin(keys=admin_keys, record=record)
+    if admin_meta:
+        logger.info(f"Existing administrative metadata loaded for record '{record.file_identifier}'")
+    else:
+        logger.info(f"No administrative metadata found for record '{record.file_identifier}', creating")
+        admin_meta = Administration(id=record.file_identifier)
+
+    gitlab_issues = _get_gitlab_issues(logger, record)
+    if gitlab_issues:
+        logger.info(f"GitLab issues in identifiers, setting in administrative record for '{record.file_identifier}'")
+        admin_meta.gitlab_issues = gitlab_issues
+
+    access_permissions = _get_access_permissions(logger, record)
+    if len(access_permissions) > 0 and access_permissions != admin_meta.access_permissions:
+        logger.info(f"Access permissions different to administrative record for '{record.file_identifier}', updating")
+        admin_meta.access_permissions = access_permissions
+
     set_admin(keys=admin_keys, record=record, admin_meta=admin_meta)
-    logger.info(f"Added administrative metadata to record '{record.file_identifier}':")
+    logger.info(f"Administrative metadata for record '{record.file_identifier}':")
+    logger.info(admin_meta.dumps_json())
     logger.info(record.identification.supplemental_information)
 
 

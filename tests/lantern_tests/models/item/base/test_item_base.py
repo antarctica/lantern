@@ -93,6 +93,7 @@ class TestItemBase:
         [
             (False, [], AccessLevel.NONE),
             (True, [], AccessLevel.NONE),
+            (True, [Permission(directory="~nerc", group="~bas-staff")], AccessLevel.BAS_STAFF),
             (True, [Permission(directory="*", group="~public")], AccessLevel.PUBLIC),
             (True, [Permission(directory="x", group="x"), Permission(directory="y", group="y")], AccessLevel.UNKNOWN),
         ],

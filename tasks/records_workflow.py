@@ -135,7 +135,7 @@ def main() -> None:
     site = SiteExporter(config=config, meta=meta, logger=logger, s3=s3, get_record=store.get)
     admin_keys = AdministrationKeys(
         encryption_private=config.ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE,
-        signing_private=Jwk(env.json("X_ADMIN_METADATA_SIGNING_KEY_PUBLIC")),
+        signing_private=Jwk(env.json("X_ADMIN_METADATA_SIGNING_KEY_PRIVATE")),
         signing_public=config.ADMIN_METADATA_SIGNING_KEY_PUBLIC,
     )
 

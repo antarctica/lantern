@@ -10,6 +10,10 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 <!-- pyml disable no-duplicate-heading,no-duplicate-header -->
 ## [Unreleased]
 
+### Fixed
+
+* Correcting dates in legal policy change logs
+
 ### Changed
 
 * Upgraded to use BAS Embedded Maps Service v0.3.0 with BAS Style Kit v1 theme

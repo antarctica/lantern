@@ -70,7 +70,7 @@ cov_options = "--cov --cov-report=html"
 [tool.taskipy.tasks]
 # generic dev
 build = { cmd = "uv build", help = "Build app package" }
-format = { cmd = "ruff format {targets}", help = "Lint app", use_vars = true }
+format = { cmd = "ruff format {targets}", help = "Format app", use_vars = true }
 lint = { cmd = "ruff check {targets}", help = "Lint app", use_vars = true }
 types = { cmd = "ty check {types_targets}", help = "Type check app", use_vars = true }
 markdown = { cmd = "pymarkdown scan --recurse {docs_targets}", help = "Lint docs", use_vars = true }

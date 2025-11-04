@@ -325,7 +325,7 @@ class TestExtent:
             )
         )
         expected_bbox = "[1.0,3.0,2.0,4.0]"
-        expected = f"https://example.com/?bbox={expected_bbox}&globe-overview"
+        expected = f"https://example.com/?theme=bsk1&bbox={expected_bbox}&globe-overview"
 
         extent = Extent(extent=item_extent, embedded_maps_endpoint="https://example.com")
         assert extent.map_iframe == expected

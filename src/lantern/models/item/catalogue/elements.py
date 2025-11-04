@@ -461,7 +461,7 @@ class Extent(ItemExtent):
     def map_iframe(self) -> str:
         """Visualise bounding box as an embedded map using the BAS Embedded Maps Service."""
         bbox = json.dumps(list(self.bounding_box)).replace(" ", "")
-        params = f"bbox={bbox}&globe-overview"
+        params = f"theme=bsk1&bbox={bbox}&globe-overview"
         return f"{self._map_endpoint}/?{params}"
 
 

@@ -79,7 +79,12 @@ class WebsiteSearchExporter(ResourcesExporter):
             )
             for record in [self._get_record(file_identifier) for file_identifier in self._selected_identifiers]
         ]
-        return [item for item in items if item.resource_id not in superseded and item.open_access]
+        filtered_items = [item for item in items if item.resource_id not in superseded and item.open_access]
+        self._logger.debug(
+            f"{len(filtered_items)} items of {len(items)} in-scope for website search ({len(superseded)} superseded, "
+            f"{len(filtered_items) - len(superseded)} not open-access)."
+        )
+        return filtered_items
 
     def _dumps(self) -> str:
         """Generate aggregation API resources for in-scope items."""
@@ -88,11 +93,13 @@ class WebsiteSearchExporter(ResourcesExporter):
 
     def export(self) -> None:
         """Export aggregation API resources to local directory."""
+        self._logger.info("Exporting public website search items.")
         self._export_path.parent.mkdir(parents=True, exist_ok=True)
         with self._export_path.open("w") as f:
             f.write(self._dumps())
 
     def publish(self) -> None:
         """Publish aggregation API resources to S3."""
+        self._logger.info("Publishing public website search items.")
         index_key = self._s3_utils.calc_key(self._export_path)
         self._s3_utils.upload_content(key=index_key, content_type="application/json", body=self._dumps())

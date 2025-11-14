@@ -200,13 +200,12 @@ encoded in a JSON string within the `identifification.supplemental_information` 
 ### Record administrative metadata
 
 To support the internal management of metadata records, additional
-[Administrative metadata](https://gist.github.com/felnne/307bfa81672fbac2cd9cd7dd632a410c#file-schema-md) (as opposed
+[Administrative metadata](https://metadata-standards.data.bas.ac.uk/profiles/magic-administration-v1/) (as opposed
 to discovery, calibration or other metadata) can be included in Records.
 
 > [!NOTE]
 > Administrative metadata uses an internally developed schema and is not intended for external use. Administrative
-> metadata is stored in the supplemental information element within the ISO 19115 information model but is stripped
-> from exported records.
+> metadata is stored in the supplemental information element within the ISO 19115 information model.
 
 The `lantern.lib.metadata_library.models.record.elements.administration.Administration` Python data class implements
 this concept and supports encoding/decoding to/from a JSON encoded string.

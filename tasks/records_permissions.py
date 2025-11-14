@@ -12,7 +12,12 @@ from lantern.config import Config
 from lantern.lib.metadata_library.models.record.elements.administration import Administration, Permission
 from lantern.lib.metadata_library.models.record.presets.admin import BAS_STAFF, OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.record import Record, RecordInvalidError
-from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, get_admin, set_admin
+from lantern.lib.metadata_library.models.record.utils.admin import (
+    AdministrationKeys,
+    AdministrativeMetadataSubjectMismatchError,
+    get_admin,
+    set_admin,
+)
 from lantern.log import init as init_logging
 from lantern.log import init_sentry
 from lantern.models.item.base.enums import AccessLevel
@@ -100,7 +105,20 @@ def _set_permission(
 ) -> None:
     """Set single access permission in records, overwriting any possible existing permissions."""
     for record in records:
-        admin = get_admin(keys=keys, record=record)
+        admin = None
+        try:
+            admin = get_admin(keys=keys, record=record)
+        except AdministrativeMetadataSubjectMismatchError as e:
+            # prompt user whether to ignore mismatch by clearing existing admin metadata
+            if inquirer.confirm(
+                message=(
+                    "Existing administrative metadata references the wrong record. Drop existing metadata (if record is cloned)?"
+                ),
+                default=False,
+            ):
+                pass
+            else:
+                raise e from e
         if admin is None:
             admin = Administration(id=record.file_identifier)
         admin.access_permissions = [permission]

@@ -10,6 +10,10 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 <!-- pyml disable no-duplicate-heading,no-duplicate-header -->
 ## [Unreleased]
 
+### Added
+
+* Support for configuring the GitLab store branch name
+
 ### Fixed
 
 * Correcting dates in legal policy change logs

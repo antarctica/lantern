@@ -45,6 +45,7 @@ class ToyCatalogue:
             endpoint=self._config.STORE_GITLAB_ENDPOINT,
             access_token=self._config.STORE_GITLAB_TOKEN,
             project_id=self._config.STORE_GITLAB_PROJECT_ID,
+            branch=self._config.STORE_GITLAB_BRANCH,
             cache_path=self._config.STORE_GITLAB_CACHE_PATH,
         )
 

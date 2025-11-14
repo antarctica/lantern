@@ -117,6 +117,7 @@ class SiteResourcesExporter(Exporter):
 
     def export(self) -> None:
         """Copy site resources to their respective directories."""
+        self._logger.info("Exporting site resources.")
         self._dump_css()
         self._dump_fonts()
         self._dump_favicon_ico()
@@ -125,6 +126,7 @@ class SiteResourcesExporter(Exporter):
 
     def publish(self) -> None:
         """Copy site resources to S3 bucket."""
+        self._logger.info("Publishing site resources.")
         self._publish_css()
         self._publish_fonts()
         self._publish_favicon_ico()
@@ -201,12 +203,14 @@ class SiteIndexExporter(ResourcesExporter):
 
     def export(self) -> None:
         """Export proto index to directory."""
+        self._logger.info("Exporting site index.")
         self._index_path.parent.mkdir(parents=True, exist_ok=True)
         with self._index_path.open("w") as f:
             f.write(self._dumps())
 
     def publish(self) -> None:
         """Publish proto index to S3."""
+        self._logger.info("Publishing site index.")
         index_key = self._s3_utils.calc_key(self._index_path)
         self._s3_utils.upload_content(key=index_key, content_type="text/html", body=self._dumps())
 
@@ -271,11 +275,13 @@ class SitePagesExporter(Exporter):
 
     def export(self) -> None:
         """Export static pages to directory."""
+        self._logger.info("Exporting site pages.")
         for template in self._templates:
             self._export_page(template_path=template)
 
     def publish(self) -> None:
         """Publish static pages to S3."""
+        self._logger.info("Publishing site pages.")
         for template in self._templates:
             self._publish_page(template_path=template)
 

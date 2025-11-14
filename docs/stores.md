@@ -19,6 +19,7 @@ Stores MAY support additional functionality, such as writing new/updated Records
 
 Stores use these options from the app `lantern.Config` class:
 
+- `STORE_GITLAB_BRANCH`: remote branch name for [GitLab Store](#gitlab-store) records cache, must already exist
 - `STORE_GITLAB_STORE_CACHE_PATH`: local path for [GitLab Store](#gitlab-store) records cache, will be created if it
   does not exist
 - `STORE_GITLAB_STORE_ENDPOINT`: API endpoint of a GitLab instance for [GitLab Store](#gitlab-store)
@@ -48,8 +49,9 @@ Stores and tracks Records in a [GitLab](/docs/architecture.md#gitlab) project re
 Supports reading, creating and updating Records using [`python-gitlab`](https://python-gitlab.readthedocs.io/en/stable/)
 with a [Local Cache](#gitlab-local-cache) for performance.
 
-Records are stored in the remote repository in a hashed directory structure as both BAS 19115 JSON and ISO 19139 XML.
-For example a Record with file identifier `123abc` is stored as `/records/12/3a/123abc.json` and `/records/12/3a/123abc.xml`.
+Records are stored in the remote repository in a given branch. A hashed directory structure is used to store records as
+in BAS 19115 JSON and ISO 19139 XML formats. For example a Record with file identifier `123abc` is stored as
+`/records/12/3a/123abc.json` and `/records/12/3a/123abc.xml`.
 
 ### Loading remote records
 
@@ -80,6 +82,9 @@ Commits include both the author and the Catalogue application as the committer.
 
 For increased performance, GitLab stores use a `GitLabLocalCache` to automatically maintain a local cache of Records.
 
+> [!NOTE]
+> Local caches are branch specific. Changing branch will automatically invalidate an existing cache.
+
 The cache is a local folder consisting of:
 
 ```text
@@ -90,41 +95,43 @@ The cache is a local folder consisting of:
 └── head_commit.json
 ```
 
-| Path                | Description                                                                               |
-|---------------------|-------------------------------------------------------------------------------------------|
-| `records/`          | Record configurations as pickled Record objects                                           |
-| `commits.json`      | Mapping of record file identifiers to the last known head commit in the remote repository |
-| `hashes.json`       | Mapping of record file identifiers to SHA1 checksums of the record contents               |
-| `head_commit.json`  | Details of the head commit in the remote repository when the cache was created            |
+| Path                | Description                                                                                  |
+|---------------------|----------------------------------------------------------------------------------------------|
+| `records/`          | Record configurations as pickled Record objects                                              |
+| `commits.json`      | Mapping of record file identifiers to the last known head commit in the remote repository    |
+| `hashes.json`       | Mapping of record file identifiers to SHA1 checksums of the record contents                  |
+| `head_commit.json`  | Details of the head commit in the branch of the remote repository when the cache was created |
 
 A cache is created by:
 
 - fetching:
-  - all record configurations and their latest commit from the remote repository
-  - details of the current head commit for the overall remote repository
+  - all record configurations and their latest commit from the given branch in the remote repository
+  - details of the current head commit in this branch
 - storing:
   - pickled versions of each record configuration loaded as a Record
   - a mapping of each record's SHA1 hash by file identifier
   - a mapping of each record's last known commit by file identifier
-  - details of the current head commit for the overall remote repository
+  - details of the current head commit and branch name
 
 A cache is refreshed by:
 
+- checking:
+  - the current branch name matches the cached name
 - fetching:
   - any commits that may have occurred since the last known head commit
   - record configurations from these commits
   - details of the current head commit for the overall remote repository
 - storing:
-  - updated records, and the head commit are stored as described above
+  - updated records and head commit are stored as described above
 
 <!-- pyml disable md028 -->
-> [!NOTE]
-> Where 50 or more commits have passed since the last cache update, the local cache will be automatically purged and
-> recreated in full as this will be quicker than incrementally processing commits to refresh the cache.
-
 > [!IMPORTANT]
-> Caches do not support moving or deleting files within the related remote repository. If detected when refreshing the
-> local cache is automatically purged and recreated in full to ensure consistency.
+> Caches do not support moving or deleting files within the related remote repository, or changing branch. If detected
+> when refreshing, the local cache is automatically purged and recreated in full to ensure consistency.
+
+> [!NOTE]
+> Where 50 or more commits have passed since the last cache update, the local cache will also be purged and recreated
+> as this will be quicker than incrementally processing commits to refresh the cache.
 <!-- pyml enable md028 -->
 
 ### GitLab Local cache testing

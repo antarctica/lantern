@@ -32,6 +32,7 @@ Application configuration is managed by the `lantern.Config` class.
 | `PARALLEL_JOBS`                         | Number       | Yes          | No       | No        | v0.3.x        | Number of parallel jobs to run for applicable tasks                                | 1                                         | 4                                               |
 | `SENTRY_DSN`                            | String       | No           | -        | No        | v0.1.x        | Sentry connection string for backend error monitoring (not sensitive)              | *N/A*                                     | 'https://example.com'                           |
 | `SENTRY_ENVIRONMENT`                    | String       | Yes          | No       | No        | v0.1.x        | Application runtime environment to include in Sentry errors                        | 'development'                             | 'production'                                    |
+| `STORE_GITLAB_BRANCH`                   | String       | Yes          | Yes      | No        | v0.5.x        | GitLab store's remote branch name                                                  | *None*                                    | 'main'                                          |
 | `STORE_GITLAB_STORE_CACHE_PATH`         | Path         | Yes          | Yes      | No        | v0.1.x        | Location for GitLab store's local records cache                                    | *None*                                    | '/tmp/gitlab_cache/'                            |
 | `STORE_GITLAB_STORE_ENDPOINT`           | String       | Yes          | Yes      | No        | v0.1.x        | base API endpoint for GitLab store's remote instance                               | *None*                                    | 'https://gitlab.com'                            |
 | `STORE_GITLAB_STORE_PROJECT_ID`         | String       | Yes          | Yes      | No        | v0.1.x        | GitLab project ID for GitLab store's remote instance                               | *None*                                    | '123'                                           |
@@ -76,6 +77,7 @@ See the [Monitoring](/docs/monitoring.md#monitoring-configuration) docs for more
 See the [Stores](/docs/stores.md#stores-configuration) docs for more information on how these
 [Config Options](#config-options) are used by stores:
 
+- `STORE_GITLAB_BRANCH`
 - `STORE_GITLAB_STORE_CACHE_PATH`
 - `STORE_GITLAB_STORE_ENDPOINT`
 - `STORE_GITLAB_STORE_PROJECT_ID`

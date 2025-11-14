@@ -35,6 +35,7 @@ def main() -> None:
         endpoint=config.STORE_GITLAB_ENDPOINT,
         access_token=config.STORE_GITLAB_TOKEN,
         project_id=config.STORE_GITLAB_PROJECT_ID,
+        branch=config.STORE_GITLAB_BRANCH,
         cache_path=config.STORE_GITLAB_CACHE_PATH,
     )
     store.populate()

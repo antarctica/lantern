@@ -67,11 +67,13 @@ class WebAccessibleFolderExporter(ResourcesExporter):
 
     def export(self) -> None:
         """Export listing to local directory."""
+        self._logger.info("Exporting all items WAF.")
         self._export_path.parent.mkdir(parents=True, exist_ok=True)
         with self._export_path.open("w") as f:
             f.write(self._dumps())
 
     def publish(self) -> None:
         """Publish listing to S3."""
+        self._logger.info("Publishing all items WAF.")
         index_key = self._s3_utils.calc_key(self._export_path)
         self._s3_utils.upload_content(key=index_key, content_type="text/html", body=self._dumps())

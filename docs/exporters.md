@@ -66,7 +66,12 @@ public interface to:
 ## Resource exporters
 
 Resource exporters create format specific outputs derived from [Records](/docs/data-model.md#records) or
-[Items](/docs/data-model.md#items). Exporters inherit from either:
+[Items](/docs/data-model.md#items).
+
+> [!NOTE]
+> [Administrative Metadata](/docs/libraries.md#record-administrative-metadata) is stripped from exported records.
+
+Exporters inherit from either:
 
 - `lantern.exporters.base.ResourcesExporter` where the exporter processes multiple Records or Items
 - `lantern.exporters.base.ResourceExporter` where the exporter processes a single Record or Item

@@ -10,7 +10,7 @@ from functools import cached_property
 from pathlib import Path
 from typing import TypedDict
 
-from gitlab import Gitlab
+from gitlab import Gitlab, GitlabGetError
 from gitlab.v4.objects import Project
 from joblib import Parallel, delayed
 from requests.exceptions import ConnectionError as RequestsConnectionError
@@ -246,6 +246,8 @@ class GitLabLocalCache:
         Get all record configurations and their head commit IDs from the GitLab project repository.
 
         Returns a list of tuples ('record configuration as JSON string', 'record commit string').
+
+        This method will fail with a generic GitLab SDK exception where the requested branch/ref does not exist.
 
         This method is annoyingly inefficient as a separate HTTP request is needed per-file to get the commit ID.
         This method won't scale to large numbers of records due to returning all record configurations in memory.
@@ -561,6 +563,18 @@ class GitLabStore(Store):
         """
         return f"records/{file_name[:2]}/{file_name[2:4]}/{file_name}"
 
+    def _ensure_branch(self, branch: str) -> None:
+        """
+        Ensure branch exists in remote project.
+
+        New branches are created from `main`.
+        """
+        try:
+            _ = self._project.branches.get(branch)
+        except GitlabGetError:
+            self._logger.info(f"Branch '{branch}' does not exist, creating.")
+            self._project.branches.create({"branch": branch, "ref": "main"})
+
     def _commit(self, records: list[Record], title: str, message: str, author: tuple[str, str]) -> CommitResults:
         """
         Generate commit for a set of records.
@@ -615,6 +629,9 @@ class GitLabStore(Store):
         if not data["actions"]:
             self._logger.info("No actions to perform, aborting.")
             return results
+
+        self._logger.debug(f"Ensuring target branch {self._branch} exists.")
+        self._ensure_branch(branch=self._branch)
 
         self._logger.info(f"Committing {results.stats.new_msg}, {results.stats.updated_msg}.")
         # noinspection PyTypeChecker

@@ -19,7 +19,8 @@ Stores MAY support additional functionality, such as writing new/updated Records
 
 Stores use these options from the app `lantern.Config` class:
 
-- `STORE_GITLAB_BRANCH`: remote branch name for [GitLab Store](#gitlab-store) records cache, must already exist
+- `STORE_GITLAB_BRANCH`: remote branch name for [GitLab Store](#gitlab-store) records cache, will be created if it
+  does not exist
 - `STORE_GITLAB_STORE_CACHE_PATH`: local path for [GitLab Store](#gitlab-store) records cache, will be created if it
   does not exist
 - `STORE_GITLAB_STORE_ENDPOINT`: API endpoint of a GitLab instance for [GitLab Store](#gitlab-store)

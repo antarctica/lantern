@@ -496,6 +496,17 @@ class TestGitLabStore:
 
         assert fx_gitlab_store._get_remote_hashed_path(value) == expected
 
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    @pytest.mark.parametrize("exists", [False, True])
+    def test_ensure_branch(self, fx_gitlab_store: GitLabStore, exists: bool):
+        """Can get the path to a record within the remote repository."""
+        value = "existing" if exists else "new"
+
+        fx_gitlab_store._ensure_branch(value)
+        result = fx_gitlab_store._project.branches.list()
+        assert any(branch.name == value for branch in result)
+
     @staticmethod
     def _make_commit_results(
         additions_ids: int, additions_total: int, updates_ids: int, updates_total: int
@@ -513,8 +524,8 @@ class TestGitLabStore:
         ]
         return CommitResults(branch=branch, commit=commit, changes=changes, actions=actions)
 
-    @pytest.mark.block_network
     @pytest.mark.vcr
+    @pytest.mark.block_network
     @pytest.mark.parametrize(
         ("mode", "expected"),
         [

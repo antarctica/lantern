@@ -57,6 +57,15 @@ def _import(
 ) -> CommitResults:
     """Import."""
     logger.info(f"Importing records from '{import_path.resolve()}'")
+    logger.info(f"Committing records to branch: {store._branch}.")
+    answers = inquirer.prompt(
+        [
+            inquirer.Confirm(name="confirm", message="Confirm target branch?", default=True),
+        ]
+    )
+    if not answers["confirm"]:
+        logger.info("Cancelled by the user.")
+        sys.exit(1)
     title, message, author_name, author_email = _get_import_args()
     store.populate()  # to ensure cache is populated to check if any files are updates
     records = _parse_records(logger=logger, search_path=import_path)
@@ -122,6 +131,7 @@ def main() -> None:
         endpoint=config.STORE_GITLAB_ENDPOINT,
         access_token=config.STORE_GITLAB_TOKEN,
         project_id=config.STORE_GITLAB_PROJECT_ID,
+        branch=config.STORE_GITLAB_BRANCH,
         cache_path=config.STORE_GITLAB_CACHE_PATH,
     )
     s3 = S3Client(

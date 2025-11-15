@@ -37,6 +37,7 @@ class TestGitLabLocalCache:
             parallel_jobs=fx_config.PARALLEL_JOBS,
             path=cache_path,
             project_id="x",
+            ref="x",
             gitlab_client=Gitlab(url="x", private_token="x"),  # noqa: S106
         )
 
@@ -118,7 +119,7 @@ class TestGitLabLocalCache:
     ):
         """Can populate an empty cache with record configurations and other required context."""
         commit = "x"
-        head_commit = {"x": commit}
+        head_commit = {"x": commit, "ref": fx_gitlab_cache._ref}
         records = [(json.dumps(fx_record_config_min, ensure_ascii=False), commit)]
 
         fx_gitlab_cache._build_cache(records=records, head_commit=head_commit)
@@ -128,6 +129,7 @@ class TestGitLabLocalCache:
 
         with fx_gitlab_cache._head_path.open() as f:
             data = json.load(f)
+            assert data["ref"] == fx_gitlab_cache._ref
             assert data == head_commit
 
         with fx_gitlab_cache._hashes_path.open() as f:
@@ -136,7 +138,7 @@ class TestGitLabLocalCache:
 
         with fx_gitlab_cache._commits_path.open() as f:
             data = json.load(f)
-            assert data == {"commits": head_commit}
+            assert data == {"commits": {commit: commit}}
 
     def test_build_cache_update(
         self,
@@ -146,7 +148,7 @@ class TestGitLabLocalCache:
         """Can update an existing cache with changed record configurations and other required context."""
         file_identifier = "a1b2c3"
         commit = "y"
-        head_commit = {"y": commit}
+        head_commit = {"y": commit, "ref": fx_gitlab_cache_pop._ref}
         fx_record_config_min["file_identifier"] = file_identifier
         fx_record_config_min["identification"]["edition"] = "2"
         records = [(json.dumps(fx_record_config_min, ensure_ascii=False), commit)]
@@ -178,6 +180,7 @@ class TestGitLabLocalCache:
 
         with fx_gitlab_cache_pop._head_path.open() as f:
             data = json.load(f)
+        assert data["ref"] == fx_gitlab_cache_pop._ref
         assert data == head_commit
 
         with fx_gitlab_cache_pop._hashes_path.open() as f:
@@ -187,6 +190,25 @@ class TestGitLabLocalCache:
         with fx_gitlab_cache_pop._commits_path.open() as f:
             data = json.load(f)
         assert data["commits"] == {"a1b2c3": commit, "nochange": "nochange"}
+
+    @pytest.mark.cov()
+    def test_create_refresh(self, mocker: MockerFixture, fx_gitlab_cache_pop: GitLabLocalCache):
+        """Check `_create_refresh()` correctly adds branch/ref into head commit info."""
+        mocker.patch.object(fx_gitlab_cache_pop, "_build_cache", return_value=None)
+        # mock fx_gitlab_cache_pop._project.commits.get to return an object with an 'attributes' dict property
+        mock_project = MagicMock()
+        mock_commit = MagicMock()
+        mock_commit.attributes = {}
+        mock_project.commits.get.return_value = mock_commit
+        mocker.patch.object(type(fx_gitlab_cache_pop), "_project", new_callable=PropertyMock, return_value=mock_project)
+
+        fx_gitlab_cache_pop._create_refresh(records=[])
+
+        # assert _build_cache called with ref in head commit
+        fx_gitlab_cache_pop._build_cache.assert_called_once()
+        args, kwargs = fx_gitlab_cache_pop._build_cache.call_args
+        head_commit = kwargs.get("head_commit", args[1] if len(args) > 1 else {})
+        assert head_commit["ref"] == fx_gitlab_cache_pop._ref
 
     @pytest.mark.vcr
     @pytest.mark.block_network
@@ -217,29 +239,29 @@ class TestGitLabLocalCache:
     @pytest.mark.block_network
     @pytest.mark.parametrize("mode", [None, "renamed", "deleted"])
     def test_fetch_latest_records(
-        self, mocker: MockerFixture, fx_gitlab_cache: GitLabLocalCache, fx_record_config_min: dict, mode: str | None
+        self, mocker: MockerFixture, fx_gitlab_cache_pop: GitLabLocalCache, fx_record_config_min: dict, mode: str | None
     ):
         """Can fetch record configurations for future commits from remote repository."""
         file_identifier = "a1b2c3"
         local_head = "abc123"
         remote_head = "def456"
         mocker.patch.object(
-            type(fx_gitlab_cache), "head_commit_local", new_callable=PropertyMock, return_value=local_head
+            type(fx_gitlab_cache_pop), "head_commit_local", new_callable=PropertyMock, return_value=local_head
         )
         mocker.patch.object(
-            type(fx_gitlab_cache), "_head_commit_remote", new_callable=PropertyMock, return_value=remote_head
+            type(fx_gitlab_cache_pop), "_head_commit_remote", new_callable=PropertyMock, return_value=remote_head
         )
         fx_record_config_min["file_identifier"] = file_identifier
         fx_record_config_min["identification"]["edition"] = "2"
         expected = [(json.dumps(fx_record_config_min, ensure_ascii=False), remote_head)]
-        fx_gitlab_cache._parallel_jobs = 1  # disable parallelism to handle HTTP recording
+        fx_gitlab_cache_pop._parallel_jobs = 1  # disable parallelism to handle HTTP recording
 
         if mode is not None:
             with pytest.raises(CacheIntegrityError):
-                _ = fx_gitlab_cache._fetch_latest_records()
+                _ = fx_gitlab_cache_pop._fetch_latest_records()
             return
 
-        results = fx_gitlab_cache._fetch_latest_records()
+        results = fx_gitlab_cache_pop._fetch_latest_records()
 
         assert results[0][1] == expected[0][1]
         assert results == expected
@@ -247,24 +269,29 @@ class TestGitLabLocalCache:
     @pytest.mark.vcr
     @pytest.mark.block_network
     def test_fetch_latest_records_excessive(
-        self,
-        mocker: MockerFixture,
-        fx_gitlab_cache: GitLabLocalCache,
-        fx_record_config_min: dict,
+        self, mocker: MockerFixture, fx_gitlab_cache_pop: GitLabLocalCache, fx_record_config_min: dict
     ):
         """Can fetch record configurations for future commits from remote repository."""
         local_head = "abc123"
         remote_head = "def456"
         mocker.patch.object(
-            type(fx_gitlab_cache), "head_commit_local", new_callable=PropertyMock, return_value=local_head
+            type(fx_gitlab_cache_pop), "head_commit_local", new_callable=PropertyMock, return_value=local_head
         )
         mocker.patch.object(
-            type(fx_gitlab_cache), "_head_commit_remote", new_callable=PropertyMock, return_value=remote_head
+            type(fx_gitlab_cache_pop), "_head_commit_remote", new_callable=PropertyMock, return_value=remote_head
         )
-        fx_gitlab_cache._parallel_jobs = 1  # disable parallelism to handle HTTP recording
+        fx_gitlab_cache_pop._parallel_jobs = 1  # disable parallelism to handle HTTP recording
 
         with pytest.raises(CacheTooOutdatedError):
-            _ = fx_gitlab_cache._fetch_latest_records()
+            _ = fx_gitlab_cache_pop._fetch_latest_records()
+
+    def test_fetch_latest_records_wrong_branch(self, fx_gitlab_cache_pop: GitLabLocalCache, fx_record_config_min: dict):
+        """Cannot fetch record configurations for future commits if branch has changed since cached created."""
+        fx_gitlab_cache_pop._ref = "invalid"
+        fx_gitlab_cache_pop._parallel_jobs = 1  # disable parallelism to handle HTTP recording
+
+        with pytest.raises(CacheIntegrityError):
+            _ = fx_gitlab_cache_pop._fetch_latest_records()
 
     def test_create(self, mocker: MockerFixture, fx_gitlab_cache: GitLabLocalCache, fx_record_config_min: dict):
         """
@@ -435,6 +462,7 @@ class TestGitLabStore:
             endpoint="https://gitlab.example.com",
             access_token="x",  # noqa: S106
             project_id="x",
+            branch="x",
             cache_path=cache_path,
         )
 
@@ -468,11 +496,23 @@ class TestGitLabStore:
 
         assert fx_gitlab_store._get_remote_hashed_path(value) == expected
 
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    @pytest.mark.parametrize("exists", [False, True])
+    def test_ensure_branch(self, fx_gitlab_store: GitLabStore, exists: bool):
+        """Can get the path to a record within the remote repository."""
+        value = "existing" if exists else "new"
+
+        fx_gitlab_store._ensure_branch(value)
+        result = fx_gitlab_store._project.branches.list()
+        assert any(branch.name == value for branch in result)
+
     @staticmethod
     def _make_commit_results(
         additions_ids: int, additions_total: int, updates_ids: int, updates_total: int
     ) -> CommitResults:
         """Helper to create expected CommitResults."""
+        branch = "main"
         commit = "def456" if (additions_total + updates_total) > 0 else None
         changes = {
             "create": ["d4e5f6" for _ in range(0, additions_ids)],
@@ -482,10 +522,10 @@ class TestGitLabStore:
             *[{"action": "create"} for _ in range(0, additions_total)],
             *[{"action": "update"} for _ in range(0, updates_total)],
         ]
-        return CommitResults(commit=commit, changes=changes, actions=actions)
+        return CommitResults(branch=branch, commit=commit, changes=changes, actions=actions)
 
-    @pytest.mark.block_network
     @pytest.mark.vcr
+    @pytest.mark.block_network
     @pytest.mark.parametrize(
         ("mode", "expected"),
         [

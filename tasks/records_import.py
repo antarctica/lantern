@@ -1,5 +1,6 @@
 import json
 import logging
+import sys
 from collections.abc import Generator
 from pathlib import Path
 
@@ -81,11 +82,21 @@ def main() -> None:
         endpoint=config.STORE_GITLAB_ENDPOINT,
         access_token=config.STORE_GITLAB_TOKEN,
         project_id=config.STORE_GITLAB_PROJECT_ID,
+        branch=config.STORE_GITLAB_BRANCH,
         cache_path=config.STORE_GITLAB_CACHE_PATH,
     )
 
     input_path = Path("./import")
     logger.info(f"Loading records from: '{input_path.resolve()}'")
+    logger.info(f"Committing records to branch: {store._branch}.")
+    answers = inquirer.prompt(
+        [
+            inquirer.Confirm(name="confirm", message="Confirm target branch?", default=True),
+        ]
+    )
+    if not answers["confirm"]:
+        logger.info("Cancelled by the user.")
+        sys.exit(1)
     title, message, author_name, author_email = _get_args()
     store.populate()
     records = _parse_records(logger=logger, search_path=input_path)

@@ -82,6 +82,47 @@ interactions:
       code: 200
       message: OK
 - request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/6.5.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/branches/main
+  response:
+    body:
+      string: '{"name":"main"}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+    status:
+      code: 200
+      message: OK
+- request:
     body: '{"branch": "main", "commit_message": "x", "author_name": "x", "author_email":
       "x@example.com", "actions": [{"action": "update", "file_path": "records/a1/b2/a1b2c3.json",
       "content": "{\n  \"$schema\": \"https://metadata-resources.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-2-v4.json\",\n  \"file_identifier\":

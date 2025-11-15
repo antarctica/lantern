@@ -52,6 +52,7 @@ def _stage0(logger: logging.Logger, config: Config, working_path: Path) -> None:
         endpoint=config.STORE_GITLAB_ENDPOINT,
         access_token=config.STORE_GITLAB_TOKEN,
         project_id=config.STORE_GITLAB_PROJECT_ID,
+        branch=config.STORE_GITLAB_BRANCH,
         cache_path=config.STORE_GITLAB_CACHE_PATH,
     )
     store.populate()
@@ -94,6 +95,7 @@ def stage1(logger: logging.Logger, config: Config, working_path: Path) -> None:
         endpoint=config.STORE_GITLAB_ENDPOINT,
         access_token=config.STORE_GITLAB_TOKEN,
         project_id=config.STORE_GITLAB_PROJECT_ID,
+        branch=config.STORE_GITLAB_BRANCH,
         cache_path=config.STORE_GITLAB_CACHE_PATH,
     )
 
@@ -138,6 +140,7 @@ def stage2(logger: logging.Logger, config: Config) -> None:
         endpoint=config.STORE_GITLAB_ENDPOINT,
         access_token=config.STORE_GITLAB_TOKEN,
         project_id=config.STORE_GITLAB_PROJECT_ID,
+        branch=config.STORE_GITLAB_BRANCH,
         cache_path=config.STORE_GITLAB_CACHE_PATH,
     )
 

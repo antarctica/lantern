@@ -59,6 +59,7 @@ class Config:
             "STORE_GITLAB_ENDPOINT",
             "STORE_GITLAB_TOKEN",
             "STORE_GITLAB_PROJECT_ID",
+            "STORE_GITLAB_BRANCH",
             "STORE_GITLAB_CACHE_PATH",
             "TEMPLATES_PLAUSIBLE_DOMAIN",
             "TEMPLATES_ITEM_CONTACT_ENDPOINT",
@@ -100,6 +101,7 @@ class Config:
         STORE_GITLAB_ENDPOINT: str
         STORE_GITLAB_TOKEN: str
         STORE_GITLAB_PROJECT_ID: str
+        STORE_GITLAB_BRANCH: str
         STORE_GITLAB_CACHE_PATH: str
         TEMPLATES_CACHE_BUST_VALUE: str
         TEMPLATES_SENTRY_SRC: str
@@ -131,6 +133,7 @@ class Config:
             "STORE_GITLAB_ENDPOINT": self.STORE_GITLAB_ENDPOINT,
             "STORE_GITLAB_TOKEN": self.STORE_GITLAB_TOKEN_SAFE,
             "STORE_GITLAB_PROJECT_ID": self.STORE_GITLAB_PROJECT_ID,
+            "STORE_GITLAB_BRANCH": self.STORE_GITLAB_BRANCH,
             "STORE_GITLAB_CACHE_PATH": str(self.STORE_GITLAB_CACHE_PATH.resolve()),
             "TEMPLATES_CACHE_BUST_VALUE": self.TEMPLATES_CACHE_BUST_VALUE,
             "TEMPLATES_SENTRY_SRC": self.TEMPLATES_SENTRY_SRC,
@@ -238,6 +241,12 @@ class Config:
         """Project ID for GitLab store."""
         with self.env.prefixed(self._app_prefix), self.env.prefixed("STORE_GITLAB_"):
             return self.env.str("PROJECT_ID")
+
+    @property
+    def STORE_GITLAB_BRANCH(self) -> str:
+        """Branch name for GitLab store."""
+        with self.env.prefixed(self._app_prefix), self.env.prefixed("STORE_GITLAB_"):
+            return self.env.str("BRANCH")
 
     @property
     def STORE_GITLAB_CACHE_PATH(self) -> Path:

@@ -10,7 +10,7 @@ from functools import cached_property
 from pathlib import Path
 from typing import TypedDict
 
-from gitlab import Gitlab
+from gitlab import Gitlab, GitlabGetError
 from gitlab.v4.objects import Project
 from joblib import Parallel, delayed
 from requests.exceptions import ConnectionError as RequestsConnectionError
@@ -97,7 +97,7 @@ class GitLabLocalCache:
     """
 
     def __init__(
-        self, logger: logging.Logger, parallel_jobs: int, path: Path, project_id: str, gitlab_client: Gitlab
+        self, logger: logging.Logger, parallel_jobs: int, path: Path, project_id: str, ref: str, gitlab_client: Gitlab
     ) -> None:
         """Initialize cache."""
         self._logger = logger
@@ -106,7 +106,7 @@ class GitLabLocalCache:
         self._project_id = project_id
         self._client = gitlab_client
 
-        self._ref = "main"
+        self._ref = ref
         self._records_path = self._path / "records"
         self._commits_path = self._path / "commits.json"
         self._head_path = self._path / "head_commit.json"
@@ -203,7 +203,7 @@ class GitLabLocalCache:
         - create a mapping of file identifier to SHA1 hash of each record's configuration
         - create a mapping of file identifier to Git commit of each record version
         - pickle each RecordRevision to the cache directory
-        - save details of the current head commit to a file for cache validation
+        - save details of the current head commit to a file for future cache validation
         - save the mapping of SHA1 hashes
         - save the mapping of Git commits
         """
@@ -247,6 +247,8 @@ class GitLabLocalCache:
 
         Returns a list of tuples ('record configuration as JSON string', 'record commit string').
 
+        This method will fail with a generic GitLab SDK exception where the requested branch/ref does not exist.
+
         This method is annoyingly inefficient as a separate HTTP request is needed per-file to get the commit ID.
         This method won't scale to large numbers of records due to returning all record configurations in memory.
         """
@@ -270,6 +272,7 @@ class GitLabLocalCache:
         Get record configurations and their latest commit IDs from the GitLab project repository from after a commit.
 
         Steps:
+        - check branch/ref has not changed since last cache update
         - get a list of commits since the cache was last updated
         - raise a `CacheTooOutdated` exception if the number of commits is too high (as recreating the cache would be faster)
         - get a list of files changed across any subsequent commits
@@ -283,6 +286,12 @@ class GitLabLocalCache:
         """
         limit = 50
         paths = []
+
+        with self._head_path.open(mode="r") as f:
+            cached_ref = json.load(f)["ref"]
+        if cached_ref != self._ref:
+            msg = "Tracked branch has changed since last update, cannot refresh cache."
+            raise CacheIntegrityError(msg)
 
         commit_range = f"{self.head_commit_local}..{self._head_commit_remote}"
         commits = self._project.commits.list(ref_name=commit_range, all=True)
@@ -312,10 +321,11 @@ class GitLabLocalCache:
     def _create_refresh(self, records: list[tuple[str, str]]) -> None:
         """Common tasks for creating or refreshing the cache."""
         self._logger.info("Fetching head commit")
-        head_commit = self._project.commits.get(self._head_commit_remote)
+        # append current ref to head commit
+        head_commit = {**self._project.commits.get(self._head_commit_remote).attributes, "ref": self._ref}
 
         self._logger.info("Populating local cache")
-        self._build_cache(records=records, head_commit=head_commit.attributes)
+        self._build_cache(records=records, head_commit=head_commit)
 
     def _create(self) -> None:
         """
@@ -461,7 +471,8 @@ class CommitResultsStats:
 class CommitResults:
     """Results from a commit transaction."""
 
-    def __init__(self, commit: str | None, changes: dict, actions: list) -> None:
+    def __init__(self, branch: str, commit: str | None, changes: dict, actions: list) -> None:
+        self.branch = branch
         self.commit = commit
         self.new_identifiers = changes["create"]
         self.updated_identifiers = changes["update"]
@@ -470,7 +481,8 @@ class CommitResults:
     def __eq__(self, other: CommitResults) -> bool:
         """Equality comparison for tests."""
         return (
-            self.commit == other.commit
+            self.branch == other.branch
+            and self.commit == other.commit
             and self.new_identifiers == other.new_identifiers
             and self.updated_identifiers == other.updated_identifiers
             and self.stats.new_records == other.stats.new_records
@@ -501,13 +513,14 @@ class GitLabStore(Store):
         endpoint: str,
         access_token: str,
         project_id: str,
+        branch: str,
         cache_path: Path,
     ) -> None:
         self._logger = logger
         self._records: dict[str, RecordRevision] = {}
         self._client = Gitlab(url=endpoint, private_token=access_token)
         self._project_id = project_id
-        self._branch = "main"
+        self._branch = branch
 
         self._cache_path = cache_path
         self._cache = GitLabLocalCache(
@@ -516,6 +529,7 @@ class GitLabStore(Store):
             path=self._cache_path,
             gitlab_client=self._client,
             project_id=self._project_id,
+            ref=self._branch,
         )
 
     @cached_property
@@ -548,6 +562,18 @@ class GitLabStore(Store):
         return: 'records/0b/e5/0b5339c-9d35-44c9-a10f-da4b5356840b.json'
         """
         return f"records/{file_name[:2]}/{file_name[2:4]}/{file_name}"
+
+    def _ensure_branch(self, branch: str) -> None:
+        """
+        Ensure branch exists in remote project.
+
+        New branches are created from `main`.
+        """
+        try:
+            _ = self._project.branches.get(branch)
+        except GitlabGetError:
+            self._logger.info(f"Branch '{branch}' does not exist, creating.")
+            self._project.branches.create({"branch": branch, "ref": "main"})
 
     def _commit(self, records: list[Record], title: str, message: str, author: tuple[str, str]) -> CommitResults:
         """
@@ -598,11 +624,14 @@ class GitLabStore(Store):
                     },
                 ]
             )
-        results = CommitResults(commit=None, changes=changes, actions=data["actions"])
+        results = CommitResults(branch=self._branch, commit=None, changes=changes, actions=data["actions"])
 
         if not data["actions"]:
             self._logger.info("No actions to perform, aborting.")
             return results
+
+        self._logger.debug(f"Ensuring target branch {self._branch} exists.")
+        self._ensure_branch(branch=self._branch)
 
         self._logger.info(f"Committing {results.stats.new_msg}, {results.stats.updated_msg}.")
         # noinspection PyTypeChecker
@@ -647,7 +676,9 @@ class GitLabStore(Store):
 
         Returns commit results including resulting commit for further optional processing.
         """
-        empty_results = CommitResults(commit=None, changes={"create": [], "update": []}, actions=[])
+        empty_results = CommitResults(
+            branch=self._branch, commit=None, changes={"create": [], "update": []}, actions=[]
+        )
         if len(records) == 0:
             self._logger.info("No records to push, skipping.")
             return empty_results

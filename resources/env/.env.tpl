@@ -10,6 +10,7 @@ LANTERN_ADMIN_METADATA_SIGNING_KEY_PUBLIC="op://Shared/MAGIC administrative meta
 LANTERN_STORE_GITLAB_ENDPOINT="op://Infrastructure/SCAR ADD Metadata Toolbox - GitLab Store/GitLab Instance/password"
 LANTERN_STORE_GITLAB_PROJECT_ID="op://Infrastructure/SCAR ADD Metadata Toolbox - GitLab Store/Project ID/project_id"
 LANTERN_STORE_GITLAB_TOKEN=""  # populate with per-user token with 'developer' role and 'api' scopes
+LANTERN_STORE_GITLAB_BRANCH="main"
 LANTERN_STORE_GITLAB_CACHE_PATH=".cache"
 
 LANTERN_TEMPLATES_PLAUSIBLE_DOMAIN="op://Infrastructure/SCAR ADD Metadata Toolbox - Plausible domain/password"

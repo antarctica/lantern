@@ -565,7 +565,7 @@ def _gitlab_cache_create(cache: fx_gitlab_cache) -> None:
     """
     cache_src = Path(__file__).resolve().parent / "resources" / "stores" / "gitlab_cache"
     # noinspection PyProtectedMember
-    shutil.copytree(cache_src, cache._path)
+    shutil.copytree(cache_src, cache._path, dirs_exist_ok=True)
 
 
 @pytest.fixture()

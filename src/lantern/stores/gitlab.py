@@ -148,7 +148,7 @@ class GitLabLocalCache:
         return data["commits"]
 
     @property
-    def head_commit_local(self) -> str:
+    def head_commit_cached(self) -> str:
         """
         ID of the latest commit in the local cache.
 
@@ -161,16 +161,39 @@ class GitLabLocalCache:
     @property
     def _head_commit_remote(self) -> str:
         """
-        ID of the latest commit in remote project.
+        ID of the latest commit in branch of remote project.
 
         Not valid if called before `_create()` is called where cache does not exist.
         """
-        return self._project.commits.list(get_all=False)[0].id
+        return self._project.commits.list(ref_name=self._ref, get_all=False)[0].id
+
+    @property
+    def _cached_ref(self) -> str | None:
+        """
+        Branch/ref used by local cache.
+
+        Not valid if called before `_create()` is called where cache does not exist.
+        """
+        try:
+            with self._head_path.open(mode="r") as f:
+                return json.load(f)["ref"]
+        except FileNotFoundError:
+            return None
 
     @property
     def exists(self) -> bool:
         """Determine if the cache exists."""
         return self._records_path.exists()
+
+    @property
+    def _applicable(self) -> bool:
+        """Ensure cache is applicable to the current branch/ref."""
+        if not self.exists:
+            return False
+
+        cached_ref = self._cached_ref
+        self._logger.debug(f"Cached ref: '{cached_ref}', Current ref: '{self._ref}'")
+        return cached_ref == self._ref
 
     @property
     def _current(self) -> bool:
@@ -182,7 +205,8 @@ class GitLabLocalCache:
         if not self.exists:
             return False
 
-        return self.head_commit_local == self._head_commit_remote
+        self._logger.debug(f"{self.head_commit_cached} ?= {self._head_commit_remote}")
+        return self.head_commit_cached == self._head_commit_remote
 
     def _load_record_pickle(self, record_path: Path) -> RecordRevision:
         """Load record from Python pickle file."""
@@ -247,7 +271,7 @@ class GitLabLocalCache:
 
         Returns a list of tuples ('record configuration as JSON string', 'record commit string').
 
-        This method will fail with a generic GitLab SDK exception where the requested branch/ref does not exist.
+        This method will fail with a '404 Tree Not Found' error where the requested branch/ref does not exist.
 
         This method is annoyingly inefficient as a separate HTTP request is needed per-file to get the commit ID.
         This method won't scale to large numbers of records due to returning all record configurations in memory.
@@ -287,13 +311,7 @@ class GitLabLocalCache:
         limit = 50
         paths = []
 
-        with self._head_path.open(mode="r") as f:
-            cached_ref = json.load(f)["ref"]
-        if cached_ref != self._ref:
-            msg = "Tracked branch has changed since last update, cannot refresh cache."
-            raise CacheIntegrityError(msg)
-
-        commit_range = f"{self.head_commit_local}..{self._head_commit_remote}"
+        commit_range = f"{self.head_commit_cached}..{self._head_commit_remote}"
         commits = self._project.commits.list(ref_name=commit_range, all=True)
 
         if len(commits) > limit:
@@ -362,16 +380,15 @@ class GitLabLocalCache:
         - query the GitLab API for the new head commit of the project repo
         - update and partially repopulate the local cache
         """
-        pass
         self._logger.info("Fetching changed records (this may take some time)")
         try:
             records = self._fetch_latest_records()
         except CacheIntegrityError:
-            self._logger.warning("Cannot refresh cache due to integrity issues, recreating entire cache instead.")
+            self._logger.warning("Cannot refresh cache due to integrity issues, recreating entire cache instead")
             self._create()
             return
         except CacheTooOutdatedError:
-            self._logger.warning("Refreshing the cache would take too long, recreating entire cache instead.")
+            self._logger.warning("Refreshing the cache would take too long, recreating entire cache instead")
             self._create()
             return
 
@@ -389,20 +406,30 @@ class GitLabLocalCache:
             raise RemoteStoreUnavailableError(msg) from None
 
         if self._online and not self.exists:
-            self._logger.info("Local cache unavailable, creating from GitLab.")
+            self._logger.info("Local cache unavailable, creating from GitLab")
             self._create()
             return
 
         if not self._online:
-            self._logger.warning("Cannot check if records cache is current, loading possibly stale records.")
+            if not self._applicable:
+                msg = "Local cache does not match branch and cannot access GitLab to recreate."
+                raise RemoteStoreUnavailableError(msg) from None
+            self._logger.warning("Cannot check if records cache is current, loading possibly stale records")
+            return
+
+        if not self._applicable:
+            self._logger.warning(
+                f"Cached branch '{self._cached_ref}' does not match current branch '{self._ref}', recreating cache"
+            )
+            self._create()
             return
 
         if self._online and not self._current:
-            self._logger.warning("Cached records are not up to date, updating from GitLab.")
+            self._logger.warning("Cached records are not up to date, updating from GitLab")
             self._refresh()
             return
 
-        self._logger.info("Records cache exists and is current, no changes needed.")
+        self._logger.info("Records cache exists and is current, no changes needed")
 
     def get(self) -> list[RecordRevision]:
         """Load all available records from cache."""
@@ -533,13 +560,18 @@ class GitLabStore(Store):
         )
 
     @cached_property
-    def _project(self) -> Project:
+    def project(self) -> Project:
         """
         GitLab project.
 
         Cached for lifetime of instance as caches are implicitly tied to a single project.
         """
         return self._client.projects.get(self._project_id)
+
+    @property
+    def branch(self) -> str:
+        """Selected branch."""
+        return self._branch
 
     @property
     def records(self) -> list[RecordRevision]:
@@ -549,7 +581,7 @@ class GitLabStore(Store):
     @property
     def head_commit(self) -> str | None:
         """Local head commit reference if available."""
-        return self._cache.head_commit_local if self._cache.exists else None
+        return self._cache.head_commit_cached if self._cache.exists else None
 
     @staticmethod
     def _get_remote_hashed_path(file_name: str) -> str:
@@ -567,13 +599,13 @@ class GitLabStore(Store):
         """
         Ensure branch exists in remote project.
 
-        New branches are created from `main`.
+        New branches are always created from `main`.
         """
         try:
-            _ = self._project.branches.get(branch)
+            _ = self.project.branches.get(branch)
         except GitlabGetError:
-            self._logger.info(f"Branch '{branch}' does not exist, creating.")
-            self._project.branches.create({"branch": branch, "ref": "main"})
+            self._logger.info(f"Branch '{branch}' does not exist, creating")
+            self.project.branches.create({"branch": branch, "ref": "main"})
 
     def _commit(self, records: list[Record], title: str, message: str, author: tuple[str, str]) -> CommitResults:
         """
@@ -627,15 +659,15 @@ class GitLabStore(Store):
         results = CommitResults(branch=self._branch, commit=None, changes=changes, actions=data["actions"])
 
         if not data["actions"]:
-            self._logger.info("No actions to perform, aborting.")
+            self._logger.info("No actions to perform, aborting")
             return results
 
-        self._logger.debug(f"Ensuring target branch {self._branch} exists.")
+        self._logger.debug(f"Ensuring target branch {self._branch} exists")
         self._ensure_branch(branch=self._branch)
 
-        self._logger.info(f"Committing {results.stats.new_msg}, {results.stats.updated_msg}.")
+        self._logger.info(f"Committing {results.stats.new_msg}, {results.stats.updated_msg}")
         # noinspection PyTypeChecker
-        commit = self._project.commits.create(data)
+        commit = self.project.commits.create(data)
         results.commit = commit.id
         return results
 
@@ -680,19 +712,19 @@ class GitLabStore(Store):
             branch=self._branch, commit=None, changes={"create": [], "update": []}, actions=[]
         )
         if len(records) == 0:
-            self._logger.info("No records to push, skipping.")
+            self._logger.info("No records to push, skipping")
             return empty_results
 
         results = self._commit(records=records, title=title, message=message, author=author)
 
         if results.commit is None:
-            self._logger.info("No records pushed, skipping cache invalidation.")
+            self._logger.info("No records pushed, skipping cache invalidation")
             return empty_results
 
-        self._logger.info(f"Push successful as commit '{results.commit}'.")
+        self._logger.info(f"Push successful as commit '{results.commit}'")
 
         # calling `.populate()` will call `._cache.get()` which will refresh the cache
-        self._logger.info("Refreshing cache and reloading records into store to reflect pushed changes.")
+        self._logger.info("Refreshing cache and reloading records into store to reflect pushed changes")
         self.populate()
 
         return results

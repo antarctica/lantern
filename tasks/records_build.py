@@ -4,11 +4,10 @@ import shutil
 from datetime import UTC, datetime
 
 from boto3 import client as S3Client  # noqa: N812
+from tasks._record_utils import init
 
 from lantern.config import Config as Config
 from lantern.exporters.site import SiteExporter
-from lantern.log import init as init_logging
-from lantern.log import init_sentry
 from lantern.models.site import ExportMeta
 from lantern.stores.gitlab import GitLabStore
 
@@ -60,7 +59,7 @@ class ToyCatalogue:
     @time_task(label="Load")
     def loads(self) -> None:
         """Load records into catalogue store and site exporter."""
-        self._logger.info("Loading records")
+        self._logger.info(f"Loading available records from branch '{self._store.branch}' of store")
         self._store.populate()
         # update head commit in meta as cache will now exist
         self._meta.build_repo_ref = self._store.head_commit
@@ -107,19 +106,7 @@ def main() -> None:
     purge = False
     trusted = False
 
-    config = Config()
-    init_logging(config.LOG_LEVEL)
-    init_sentry()
-    logger = logging.getLogger("app")
-    logger.info("Initialising")
-
-    s3 = S3Client(
-        "s3",
-        aws_access_key_id=config.AWS_ACCESS_ID,
-        aws_secret_access_key=config.AWS_ACCESS_SECRET,
-        region_name="eu-west-1",
-    )
-
+    logger, config, _store, s3, _keys = init()
     cat = ToyCatalogue(config=config, logger=logger, s3=s3, trusted=trusted)
 
     if purge:

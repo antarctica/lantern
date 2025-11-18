@@ -1,28 +1,33 @@
 import logging
 import sys
+from itertools import chain
 from pathlib import Path
 
 import inquirer
+from tasks._record_utils import init, init_store
 from tasks.records_zap import magic_collection_ids
 
 from lantern.config import Config
-from lantern.log import init as init_logging
-from lantern.log import init_sentry
 from lantern.stores.base import Store
-from lantern.stores.gitlab import GitLabStore
 
 max_stage = 3
 
 
 def _dump_records(logger: logging.Logger, file_identifiers: list[str], store: Store, output_path: Path) -> None:
-    """Dump selected records from the store to a path."""
+    """Dump selected records from the store to a path as JSON and XML."""
     output_path.mkdir(parents=True, exist_ok=True)
     for file_identifier in file_identifiers:
-        record_path = output_path / f"{file_identifier}.json"
         record = store.get(file_identifier)
-        logger.debug(f"Writing {record_path.resolve()}")
-        with record_path.open(mode="w") as f:
+
+        record_path_json = output_path / f"{file_identifier}.json"
+        logger.debug(f"Writing {record_path_json.resolve()}")
+        with record_path_json.open(mode="w") as f:
             f.write(record.dumps_json(strip_admin=False))
+
+        record_path_xml = output_path / f"{file_identifier}.xml"
+        logger.debug(f"Writing {record_path_xml.resolve()}")
+        with record_path_xml.open(mode="w") as f:
+            f.write(record.dumps_xml(strip_admin=False))
 
 
 def _confirm(logger: logging.Logger) -> None:
@@ -46,15 +51,7 @@ def _stage0(logger: logging.Logger, config: Config, working_path: Path) -> None:
     print(f"Confirm this GitLab project ID is an existing/working project: {config.STORE_GITLAB_PROJECT_ID}")
     _confirm(logger)
 
-    store = GitLabStore(
-        logger=logger,
-        parallel_jobs=config.PARALLEL_JOBS,
-        endpoint=config.STORE_GITLAB_ENDPOINT,
-        access_token=config.STORE_GITLAB_TOKEN,
-        project_id=config.STORE_GITLAB_PROJECT_ID,
-        branch=config.STORE_GITLAB_BRANCH,
-        cache_path=config.STORE_GITLAB_CACHE_PATH,
-    )
+    store = init_store(logger=logger, config=config)
     store.populate()
 
     logger.info("Dumping required collection records from existing store")
@@ -69,7 +66,7 @@ def _stage0(logger: logging.Logger, config: Config, working_path: Path) -> None:
     sys.exit(0)
 
 
-def stage1(logger: logging.Logger, config: Config, working_path: Path) -> None:
+def _stage1(logger: logging.Logger, config: Config, working_path: Path) -> None:
     """Load required records into new store."""
     stage = 1
     print(f"This is stage {stage} [{stage + 1}/{max_stage}].")
@@ -89,15 +86,7 @@ def stage1(logger: logging.Logger, config: Config, working_path: Path) -> None:
         ]
     )
 
-    store = GitLabStore(
-        logger=logger,
-        parallel_jobs=config.PARALLEL_JOBS,
-        endpoint=config.STORE_GITLAB_ENDPOINT,
-        access_token=config.STORE_GITLAB_TOKEN,
-        project_id=config.STORE_GITLAB_PROJECT_ID,
-        branch=config.STORE_GITLAB_BRANCH,
-        cache_path=config.STORE_GITLAB_CACHE_PATH,
-    )
+    store = init_store(logger=logger, config=config)
 
     data = {
         "branch": "main",
@@ -107,7 +96,7 @@ def stage1(logger: logging.Logger, config: Config, working_path: Path) -> None:
         "actions": [],
     }
 
-    for record_path in working_path.glob("*.json"):
+    for record_path in chain(working_path.glob("*.json"), working_path.glob("*.xml")):
         with record_path.open(mode="r") as f:
             content = f.read()
         data["actions"].append(
@@ -119,7 +108,11 @@ def stage1(logger: logging.Logger, config: Config, working_path: Path) -> None:
         )
 
     logger.info(f"Committing {len(data['actions'])} records.")
-    store._project.commits.create(data)
+    store.project.commits.create(data)
+
+    for record_path in chain(working_path.glob("*.json"), working_path.glob("*.xml")):
+        if record_path.exists():
+            record_path.unlink()
 
     print(f"Stage {stage} complete.")
     print(f"Re-run this script and select Stage {stage + 1}.")
@@ -127,22 +120,18 @@ def stage1(logger: logging.Logger, config: Config, working_path: Path) -> None:
 
 
 # noinspection PyProtectedMember
-def stage2(logger: logging.Logger, config: Config) -> None:
+def _stage2(logger: logging.Logger, config: Config) -> None:
     """Create local cache from new remote project."""
     stage = 2
     print(f"This is stage {stage} [{stage + 1}/{max_stage}].")
     print("Ensure you have completed previous stages.")
     _confirm(logger)
 
-    store = GitLabStore(
-        logger=logger,
-        parallel_jobs=config.PARALLEL_JOBS,
-        endpoint=config.STORE_GITLAB_ENDPOINT,
-        access_token=config.STORE_GITLAB_TOKEN,
-        project_id=config.STORE_GITLAB_PROJECT_ID,
-        branch=config.STORE_GITLAB_BRANCH,
-        cache_path=config.STORE_GITLAB_CACHE_PATH,
-    )
+    if config.STORE_GITLAB_BRANCH != "main":
+        print("Selected branch is not 'main', this is unusual.")
+        _confirm(logger)
+
+    store = init_store(logger=logger, config=config)
 
     if store._cache.exists:
         print(f"Local cache path {config.STORE_GITLAB_CACHE_PATH.resolve()} exists and needs purging.")
@@ -157,11 +146,7 @@ def stage2(logger: logging.Logger, config: Config) -> None:
 
 def main() -> None:
     """Entrypoint."""
-    config = Config()
-    init_logging(config.LOG_LEVEL)
-    init_sentry()
-    logger = logging.getLogger("app")
-    logger.info("Initialising")
+    logger, config, _store, _s3, _keys = init()
 
     print("This script is for bootstrapping new GitLab stores.")
     print("It requires an existing/working store to copy required records from.")
@@ -184,9 +169,9 @@ def main() -> None:
     if answers["stage"] == "stage0":
         _stage0(logger, config, import_path)
     elif answers["stage"] == "stage1":
-        stage1(logger, config, import_path)
+        _stage1(logger, config, import_path)
     elif answers["stage"] == "stage2":
-        stage2(logger, config)
+        _stage2(logger, config)
     else:
         logger.error(f"Unknown stage '{answers['stage']}'")
         sys.exit(1)

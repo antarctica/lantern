@@ -1,14 +1,10 @@
-import json
 import logging
-from collections.abc import Generator
 from copy import deepcopy
 from datetime import UTC, datetime
 from pathlib import Path
 
-from environs import Env
-from jwskate import Jwk
+from tasks._record_utils import dump_records, init, parse_records
 
-from lantern.config import Config
 from lantern.lib.metadata_library.models.record.elements.administration import Administration, Permission
 from lantern.lib.metadata_library.models.record.elements.common import Date
 from lantern.lib.metadata_library.models.record.enums import (
@@ -20,10 +16,8 @@ from lantern.lib.metadata_library.models.record.enums import (
 )
 from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.presets.aggregations import make_bas_cat_collection_member
-from lantern.lib.metadata_library.models.record.record import Record, RecordInvalidError
+from lantern.lib.metadata_library.models.record.record import Record
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, get_admin, set_admin
-from lantern.log import init as init_logging
-from lantern.log import init_sentry
 from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.stores.base import RecordNotFoundError
 from lantern.stores.gitlab import GitLabStore
@@ -47,56 +41,11 @@ magic_collection_ids = [
 ]
 
 
-def _parse_configs(search_path: Path) -> Generator[dict, None, None]:
-    """
-    Try to load any record configurations from JSON files from a directory.
-
-    Subdirectories are NOT searched.
-    """
-    for json_path in search_path.glob("*.json"):
-        with json_path.open("r") as f:
-            yield json.load(f)
-
-
-def _parse_records(logger: logging.Logger, search_path: Path) -> list[Record]:
-    """
-    Try to create Records from record configurations within a directory.
-
-    Records must validate.
-    """
-    records = []
-    configs = list(_parse_configs(search_path))
-    for config in configs:
-        try:
-            record = Record.loads(config)
-            record.validate()
-        except RecordInvalidError as e:
-            logger.warning(f"Record '{config['file_identifier']}' does not validate, skipping.")
-            logger.info(e.validation_error)
-            continue
-        if not Record._config_supported(config, logger):
-            logger.warning(
-                f"Record '{config['file_identifier']}' contains unsupported content the catalogue will ignore."
-            )
-        records.append(record)
-    logger.info(f"Discovered {len(records)} valid records")
-    return records
-
-
-def _dump_records(logger: logging.Logger, records: list[Record], output_path: Path) -> None:
-    """Dump records to JSON files in a directory."""
-    output_path.mkdir(parents=True, exist_ok=True)
-    for record in records:
-        record_path = output_path / f"{record.file_identifier}.json"
-        with record_path.open("w") as f:
-            f.write(record.dumps_json(strip_admin=False))
-        logger.info(f"Dumped new or revised record '{record.file_identifier}' to '{record_path.resolve()}'")
-
-
-def _clean_input_path(input_path: Path) -> None:
-    """Remove imported zap authored files."""
-    for json_path in input_path.glob("zap-*.json"):
-        json_path.unlink(missing_ok=True)
+def clean_input_path(input_record_paths: list[tuple[Record, Path]], processed_ids: list[str]) -> None:
+    """Remove processed zap authored files."""
+    for record_path in input_record_paths:
+        if record_path[0].file_identifier in processed_ids:
+            record_path[1].unlink()
 
 
 def _revise_collection(time: datetime, collection: Record) -> None:
@@ -310,9 +259,9 @@ def _create_admin_metadata(logger: logging.Logger, admin_keys: AdministrationKey
         admin_meta.access_permissions = access_permissions
 
     set_admin(keys=admin_keys, record=record, admin_meta=admin_meta)
-    logger.info(f"Administrative metadata for record '{record.file_identifier}':")
-    logger.info(admin_meta.dumps_json())
-    logger.info(record.identification.supplemental_information)
+    logger.debug(f"Administrative metadata for record '{record.file_identifier}':")
+    logger.debug(admin_meta.dumps_json())
+    logger.debug(record.identification.supplemental_information)
 
 
 def _process_admin_metadata(logger: logging.Logger, admin_keys: AdministrationKeys, records: list[Record]) -> None:
@@ -351,7 +300,7 @@ def _process_distribution_descriptions(logger: logging.Logger, records: list[Rec
                 distribution.transfer_option.online_resource.description = format_descriptions[distribution.format.href]
 
 
-def _process_records(
+def process_records(
     logger: logging.Logger, records: list[Record], store: GitLabStore, admin_keys: AdministrationKeys
 ) -> list[Record]:
     """
@@ -371,38 +320,17 @@ def _process_records(
 
 def main() -> None:
     """Entrypoint."""
-    env = Env()  # needed for loading private signing key for admin metadata
-    env.read_env()
-    config = Config()
-
-    init_logging(config.LOG_LEVEL)
-    init_sentry()
-    logger = logging.getLogger("app")
-    logger.info("Initialising")
-
-    store = GitLabStore(
-        logger=logger,
-        parallel_jobs=config.PARALLEL_JOBS,
-        endpoint=config.STORE_GITLAB_ENDPOINT,
-        access_token=config.STORE_GITLAB_TOKEN,
-        project_id=config.STORE_GITLAB_PROJECT_ID,
-        branch=config.STORE_GITLAB_BRANCH,
-        cache_path=config.STORE_GITLAB_CACHE_PATH,
-    )
-
-    admin_keys = AdministrationKeys(
-        encryption_private=config.ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE,
-        signing_private=Jwk(env.json("X_ADMIN_METADATA_SIGNING_KEY_PRIVATE")),
-        signing_public=config.ADMIN_METADATA_SIGNING_KEY_PUBLIC,
-    )
+    logger, _config, store, _s3, keys = init()
 
     input_path = Path("./import")
     logger.info(f"Loading records from: '{input_path.resolve()}'")
+    record_paths = parse_records(logger=logger, search_path=input_path, glob_pattern="zap-*.json")
+    records = [record_path[0] for record_path in record_paths]
+
     store.populate()
-    records = _parse_records(logger=logger, search_path=input_path)
-    records.extend(_process_records(logger=logger, records=records, store=store, admin_keys=admin_keys))
-    _dump_records(logger=logger, records=records, output_path=input_path)
-    _clean_input_path(input_path=input_path)
+    records.extend(process_records(logger=logger, records=records, store=store, admin_keys=keys))
+    dump_records(logger=logger, records=records, output_path=input_path)
+    clean_input_path(input_record_paths=record_paths, processed_ids=[r.file_identifier for r in records])
 
 
 if __name__ == "__main__":

@@ -54,6 +54,23 @@ Records are stored in the remote repository in a given branch. A hashed director
 in BAS 19115 JSON and ISO 19139 XML formats. For example a Record with file identifier `123abc` is stored as
 `/records/12/3a/123abc.json` and `/records/12/3a/123abc.xml`.
 
+### GitLab store branches
+
+`GitLabStore` instances track a given branch. Multiple branches can be used to maintain different sets of Records.
+
+> [!WARNING]
+> The branch for a store SHOULD NOT be changed once initialised to avoid cache inconsistency errors.
+>
+> A separate, or replacement, store SHOULD be instantiated to switch branches.
+
+Branches will be created automatically from `main` if they don't exist when [Committing Records](#committing-records).
+
+Branches can be used for:
+
+- drafting new or updated Records to be merging back into the conventional `main` branch when approved
+- keeping records that change frequently (via automation) separate from other records, either as a long-lived parallel
+  branch, or periodically merged and rebased back into `main`
+
 ### Loading remote records
 
 `GitLabStore` instances are initially empty. Use `store.populate()` to load Records from the remote repository via the
@@ -79,7 +96,7 @@ Commits include both the author and the Catalogue application as the committer.
 > Records can be deleted directly in the remote repository, and local caches purged, if needed.
 <!-- pyml enable md028 -->
 
-### GitLab Local cache
+### GitLab local cache
 
 For increased performance, GitLab stores use a `GitLabLocalCache` to automatically maintain a local cache of Records.
 

@@ -66,9 +66,9 @@ class TestGitLabLocalCache:
         assert isinstance(result, dict)
         assert len(result) > 0
 
-    def test_head_commit_local(self, fx_gitlab_cache_pop: GitLabLocalCache):
+    def test_head_commit_cached(self, fx_gitlab_cache_pop: GitLabLocalCache):
         """Can get ID of the latest commit known to the local cache."""
-        result = fx_gitlab_cache_pop.head_commit_local
+        result = fx_gitlab_cache_pop.head_commit_cached
         assert isinstance(result, str)
         assert len(result) > 0
 
@@ -80,12 +80,36 @@ class TestGitLabLocalCache:
         assert isinstance(result, str)
         assert len(result) > 0
 
+    @pytest.mark.parametrize("fixture", ["fx_gitlab_cache", "fx_gitlab_cache_pop"])
+    def test_cached_ref(self, request: pytest.FixtureRequest, fixture: str):
+        """Can get branch/ref used by the cache."""
+        cache: GitLabLocalCache = request.getfixturevalue(fixture)
+        expected = None
+        if fixture == "fx_gitlab_cache_pop":
+            expected = cache._ref
+
+        assert cache._cached_ref == expected
+
     @pytest.mark.parametrize(("fixture", "exists"), [("fx_gitlab_cache", False), ("fx_gitlab_cache_pop", True)])
     def test_exists(self, request: pytest.FixtureRequest, fixture: str, exists: bool):
         """Can determine if cache is populated or not."""
-        cache = request.getfixturevalue(fixture)
+        cache: GitLabLocalCache = request.getfixturevalue(fixture)
         # noinspection PyTestUnpassedFixture
         assert cache.exists == exists
+
+    @pytest.mark.parametrize(
+        ("cached", "current", "expected"), [(None, "y", False), ("x", "y", False), ("x", "x", True)]
+    )
+    def test_applicable(
+        self, mocker: MockerFixture, fx_gitlab_cache_pop: GitLabLocalCache, cached: str, current: str, expected: bool
+    ):
+        """Can determine whether cache applicable based on current and cached refs."""
+        exists = cached is not None
+        mocker.patch.object(type(fx_gitlab_cache_pop), "exists", new_callable=PropertyMock, return_value=exists)
+        mocker.patch.object(type(fx_gitlab_cache_pop), "_cached_ref", new_callable=PropertyMock, return_value=cached)
+        fx_gitlab_cache_pop._ref = current
+
+        assert fx_gitlab_cache_pop._applicable == expected
 
     @pytest.mark.vcr
     @pytest.mark.block_network
@@ -204,9 +228,11 @@ class TestGitLabLocalCache:
 
         fx_gitlab_cache_pop._create_refresh(records=[])
 
-        # assert _build_cache called with ref in head commit
-        fx_gitlab_cache_pop._build_cache.assert_called_once()
+        # noinspection PyUnresolvedReferences
+        fx_gitlab_cache_pop._build_cache.assert_called_once()  # assert _build_cache called with ref in head commit
+        # noinspection PyUnresolvedReferences
         args, kwargs = fx_gitlab_cache_pop._build_cache.call_args
+
         head_commit = kwargs.get("head_commit", args[1] if len(args) > 1 else {})
         assert head_commit["ref"] == fx_gitlab_cache_pop._ref
 
@@ -246,7 +272,7 @@ class TestGitLabLocalCache:
         local_head = "abc123"
         remote_head = "def456"
         mocker.patch.object(
-            type(fx_gitlab_cache_pop), "head_commit_local", new_callable=PropertyMock, return_value=local_head
+            type(fx_gitlab_cache_pop), "head_commit_cached", new_callable=PropertyMock, return_value=local_head
         )
         mocker.patch.object(
             type(fx_gitlab_cache_pop), "_head_commit_remote", new_callable=PropertyMock, return_value=remote_head
@@ -275,7 +301,7 @@ class TestGitLabLocalCache:
         local_head = "abc123"
         remote_head = "def456"
         mocker.patch.object(
-            type(fx_gitlab_cache_pop), "head_commit_local", new_callable=PropertyMock, return_value=local_head
+            type(fx_gitlab_cache_pop), "head_commit_cached", new_callable=PropertyMock, return_value=local_head
         )
         mocker.patch.object(
             type(fx_gitlab_cache_pop), "_head_commit_remote", new_callable=PropertyMock, return_value=remote_head
@@ -283,14 +309,6 @@ class TestGitLabLocalCache:
         fx_gitlab_cache_pop._parallel_jobs = 1  # disable parallelism to handle HTTP recording
 
         with pytest.raises(CacheTooOutdatedError):
-            _ = fx_gitlab_cache_pop._fetch_latest_records()
-
-    def test_fetch_latest_records_wrong_branch(self, fx_gitlab_cache_pop: GitLabLocalCache, fx_record_config_min: dict):
-        """Cannot fetch record configurations for future commits if branch has changed since cached created."""
-        fx_gitlab_cache_pop._ref = "invalid"
-        fx_gitlab_cache_pop._parallel_jobs = 1  # disable parallelism to handle HTTP recording
-
-        with pytest.raises(CacheIntegrityError):
             _ = fx_gitlab_cache_pop._fetch_latest_records()
 
     def test_create(self, mocker: MockerFixture, fx_gitlab_cache: GitLabLocalCache, fx_record_config_min: dict):
@@ -323,7 +341,7 @@ class TestGitLabLocalCache:
 
         records = [(json.dumps(fx_record_config_min, ensure_ascii=False), commit)]
         mocker.patch.object(fx_gitlab_cache_pop, "_fetch_latest_records", return_value=records)
-        original_head = fx_gitlab_cache_pop.head_commit_local
+        original_head = fx_gitlab_cache_pop.head_commit_cached
 
         head_commit = {"id": commit}
         mock_project = MagicMock()
@@ -333,7 +351,7 @@ class TestGitLabLocalCache:
         fx_gitlab_cache_pop._refresh()
 
         assert fx_gitlab_cache_pop.exists
-        assert fx_gitlab_cache_pop.head_commit_local != original_head
+        assert fx_gitlab_cache_pop.head_commit_cached != original_head
 
     def test_refresh_integrity(
         self, mocker: MockerFixture, fx_gitlab_cache_pop: GitLabLocalCache, fx_record_config_min: dict
@@ -348,8 +366,8 @@ class TestGitLabLocalCache:
 
         fx_gitlab_cache_pop._refresh()
 
-        # Verify _create was called due to the integrity error
-        fx_gitlab_cache_pop._create.assert_called_once()
+        # noinspection PyUnresolvedReferences
+        fx_gitlab_cache_pop._create.assert_called_once()  # Verify _create was called due to the integrity error
 
     def test_refresh_outdated(
         self, mocker: MockerFixture, fx_gitlab_cache_pop: GitLabLocalCache, fx_record_config_min: dict
@@ -364,17 +382,19 @@ class TestGitLabLocalCache:
 
         fx_gitlab_cache_pop._refresh()
 
-        # Verify _create was called due to the outdated error
-        fx_gitlab_cache_pop._create.assert_called_once()
+        # noinspection PyUnresolvedReferences
+        fx_gitlab_cache_pop._create.assert_called_once()  # Verify _create was called due to the outdated error
 
     @pytest.mark.parametrize(
-        ("online", "cached", "current"),
+        ("online", "cached", "current", "applicable"),
         [
-            (False, False, False),  # remote unavailable, no local cache (abort)
-            (True, False, False),  # remote available, no local cache (create)
-            (False, True, False),  # remote unavailable, local cache (warn stale)
-            (True, True, False),  # remote available, local cache outdated (refresh)
-            (True, True, True),  # remote available, local cache current (skip)
+            (False, False, False, False),  # remote unavailable, no local cache - current/applicable irrelevant (abort)
+            (True, False, False, False),  # remote available, no local cache - current/applicable irrelevant (create)
+            (False, True, False, False),  # remote unavailable, local cache, not applicable (abort)
+            (False, True, False, True),  # remote unavailable, local cache, applicable (warn stale)
+            (True, True, True, False),  # remote available, local cache, not applicable (recreate)
+            (True, True, False, True),  # remote available, local cache outdated, applicable (refresh)
+            (True, True, True, True),  # remote available, local cache current, applicable (no-op)
         ],
     )
     def test_ensure_exists(
@@ -385,12 +405,21 @@ class TestGitLabLocalCache:
         online: bool,
         cached: bool,
         current: bool,
+        applicable: bool,
     ):
-        """Can make sure an up-to-date local cache of the remote repository exists."""
+        """Can make sure an up-to-date local cache of the remote repository with applicable branch exists."""
         mocker.patch.object(type(fx_gitlab_cache_pop), "_online", new_callable=PropertyMock, return_value=online)
         mocker.patch.object(type(fx_gitlab_cache_pop), "_current", new_callable=PropertyMock, return_value=current)
+        mocker.patch.object(
+            type(fx_gitlab_cache_pop), "_applicable", new_callable=PropertyMock, return_value=applicable
+        )
         # `fx_gitlab_cache_pop` mocks `_create()` to copy reference cache so safe to call directly
-        mocker.patch.object(type(fx_gitlab_cache_pop), "_refresh", return_value=None)
+        mocker.patch.object(fx_gitlab_cache_pop, "_refresh", return_value=None)
+        # set `_cached_ref`
+        applicable_value = fx_gitlab_cache_pop._ref if applicable else "invalid"
+        mocker.patch.object(
+            type(fx_gitlab_cache_pop), "_cached_ref", new_callable=PropertyMock, return_value=applicable_value
+        )
         if not cached:
             fx_gitlab_cache_pop.purge()
             assert not fx_gitlab_cache_pop._path.exists()
@@ -400,19 +429,31 @@ class TestGitLabLocalCache:
                 fx_gitlab_cache_pop._ensure_exists()
             return
 
+        if not online and not applicable:
+            with pytest.raises(RemoteStoreUnavailableError):
+                fx_gitlab_cache_pop._ensure_exists()
+            return
+
         fx_gitlab_cache_pop._ensure_exists()
 
         if online and not cached:
-            assert "Local cache unavailable, creating from GitLab." in caplog.text
+            assert "Local cache unavailable, creating from GitLab" in caplog.text
 
         if not online:
-            assert "Cannot check if records cache is current, loading possibly stale records." in caplog.text
+            assert "Cannot check if records cache is current, loading possibly stale records" in caplog.text
+
+        if online and cached and not applicable:
+            assert (
+                f"Cached branch '{fx_gitlab_cache_pop._cached_ref}' does not match current branch '{fx_gitlab_cache_pop._ref}', recreating cache"
+                in caplog.text
+            )
+            return
 
         if online and cached and not current:
-            assert "Cached records are not up to date, updating from GitLab." in caplog.text
+            assert "Cached records are not up to date, updating from GitLab" in caplog.text
 
         if online and current:
-            assert "Records cache exists and is current, no changes needed." in caplog.text
+            assert "Records cache exists and is current, no changes needed" in caplog.text
 
         assert fx_gitlab_cache_pop.exists
 
@@ -474,8 +515,12 @@ class TestGitLabStore:
     @pytest.mark.block_network
     def test_project(self, fx_gitlab_store: GitLabStore):
         """Can get the remote GitLab project object for the store."""
-        result = fx_gitlab_store._project
+        result = fx_gitlab_store.project
         assert result.id == 1234
+
+    def test_branch(self, fx_gitlab_store_pop: GitLabStore):
+        """Can get selected branch."""
+        assert fx_gitlab_store_pop.branch == fx_gitlab_store_pop._branch
 
     def test_head_commit(self, fx_gitlab_store_cached: GitLabStore):
         """Can get ID of the latest commit known to the local cache."""
@@ -504,7 +549,7 @@ class TestGitLabStore:
         value = "existing" if exists else "new"
 
         fx_gitlab_store._ensure_branch(value)
-        result = fx_gitlab_store._project.branches.list()
+        result = fx_gitlab_store.project.branches.list()
         assert any(branch.name == value for branch in result)
 
     @staticmethod
@@ -561,12 +606,12 @@ class TestGitLabStore:
         results = fx_gitlab_store_cached._commit(records=records, title="x", message="x", author=("x", "x@example.com"))
         assert results == expected
         if mode == "none":
-            assert "No actions to perform, aborting." in caplog.text
+            assert "No actions to perform, aborting" in caplog.text
             return
         if mode == "add":
-            assert "Committing 1 added records across 2 new files, 0 updated records." in caplog.text
+            assert "Committing 1 added records across 2 new files, 0 updated records" in caplog.text
         if mode == "update":
-            assert "Committing 0 additional records, 1 updated records across 2 modified files." in caplog.text
+            assert "Committing 0 additional records, 1 updated records across 2 modified files" in caplog.text
 
     def test_commit_no_changes(
         self, mocker: MockerFixture, caplog: pytest.LogCaptureFixture, fx_gitlab_store_cached: GitLabStore
@@ -583,7 +628,7 @@ class TestGitLabStore:
 
         fx_gitlab_store_cached._commit(records=[record], title="x", message="x", author=("x", "x@example.com"))
 
-        assert "No actions to perform, aborting." in caplog.text
+        assert "No actions to perform, aborting" in caplog.text
 
     def test_populate(self, fx_gitlab_store_cached: GitLabStore):
         """
@@ -650,11 +695,11 @@ class TestGitLabStore:
 
         assert results == expected
         if mode == "none":
-            assert "No records to push, skipping." in caplog.text
+            assert "No records to push, skipping" in caplog.text
         elif mode == "noop":
-            assert "No records pushed, skipping cache invalidation." in caplog.text
+            assert "No records pushed, skipping cache invalidation" in caplog.text
         else:
-            assert "Refreshing cache and reloading records into store to reflect pushed changes." in caplog.text
+            assert "Refreshing cache and reloading records into store to reflect pushed changes" in caplog.text
 
     @pytest.mark.parametrize("exists", [True, False])
     def test_purge(self, fx_gitlab_store_pop: GitLabStore, exists: bool):

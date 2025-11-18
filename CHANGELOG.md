@@ -13,14 +13,25 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 ### Added
 
 * Support for configuring the GitLab store branch name
+* Development task for minimally cloning a record
+* Support for branch-based changesets in interactive publishing workflow
 
 ### Fixed
 
 * Correcting dates in legal policy change logs
+* Records repository bootstrap development task includes missing XML record files
 
 ### Changed
 
 * Upgraded to use BAS Embedded Maps Service v0.3.0 with BAS Style Kit v1 theme
+* Supporting command line arguments in selecting records development task
+* Supporting additional identifier formats in selecting records development task
+* Refactoring record related development tasks to use common functions via (`tasks._record_utils` module)
+* Refactoring and improving interactive publishing workflow
+
+### Removed
+
+* Records load development task
 
 ## [0.4.0] - 2025-10-24
 

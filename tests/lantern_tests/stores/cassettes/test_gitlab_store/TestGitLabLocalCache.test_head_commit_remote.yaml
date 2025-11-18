@@ -54,7 +54,7 @@ interactions:
       User-Agent:
       - python-gitlab/6.0.0
     method: GET
-    uri: https://gitlab.example.com/api/v4/projects/1234/repository/commits
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/commits?ref_name=main
   response:
     body:
       string: '[{"id": "abc123"}]'

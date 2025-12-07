@@ -4,7 +4,6 @@ from lantern.lib.metadata_library.models.record.elements.administration import A
 from lantern.lib.metadata_library.models.record.elements.common import Identifier, Identifiers, Series
 from lantern.lib.metadata_library.models.record.elements.distribution import Distribution
 from lantern.lib.metadata_library.models.record.elements.identification import (
-    Aggregation,
     Aggregations,
     Constraint,
     Constraints,
@@ -12,8 +11,6 @@ from lantern.lib.metadata_library.models.record.elements.identification import (
     GraphicOverviews,
 )
 from lantern.lib.metadata_library.models.record.enums import (
-    AggregationAssociationCode,
-    AggregationInitiativeCode,
     ConstraintRestrictionCode,
     ConstraintTypeCode,
     HierarchyLevelCode,
@@ -136,18 +133,6 @@ class ItemBase:
         """Optional citation with Markdown formatting, if present, encoded as HTML."""
         _citation = self.citation_md
         return None if _citation is None else md_as_html(_citation)
-
-    @property
-    def collections(self) -> list[Aggregation]:
-        """
-        Collections.
-
-        Limited to collections the item states it is part of (child -> parent), which is non-typical.
-        """
-        return self.aggregations.filter(
-            associations=AggregationAssociationCode.LARGER_WORK_CITATION,
-            initiatives=AggregationInitiativeCode.COLLECTION,
-        )
 
     @property
     def contacts(self) -> Contacts:

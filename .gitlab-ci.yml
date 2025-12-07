@@ -19,7 +19,7 @@ variables:
   # App
   STATIC_SITE_PATH: "$CI_PROJECT_DIR/_site"
 
-  # Linting
+  # Task runner
   TASK_BIN: "uv run task"
 
   # Packaging

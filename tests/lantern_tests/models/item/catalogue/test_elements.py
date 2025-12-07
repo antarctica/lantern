@@ -112,7 +112,7 @@ class TestAggregations:
         assert aggregations._summaries["x"]._record == expected_record
 
     def test_peer_collections(self, fx_admin_meta_keys: AdministrationKeys):
-        """Can get any collection aggregations (item is part of)."""
+        """Can get any collection aggregations (item is a sibling of)."""
         record_aggregations = RecordAggregations(
             [
                 Aggregation(
@@ -743,6 +743,7 @@ class TestPageSummary:
     @pytest.mark.parametrize(
         ("item_type", "edition", "published", "restricted", "aggregations", "expected"),
         [
+            # [all triggers]
             (
                 HierarchyLevelCode.PRODUCT,
                 "1",
@@ -773,6 +774,7 @@ class TestPageSummary:
                 ),
                 True,
             ),
+            # edition & collections
             (
                 HierarchyLevelCode.PRODUCT,
                 "1",
@@ -793,6 +795,7 @@ class TestPageSummary:
                 ),
                 True,
             ),
+            # published & projects
             (
                 HierarchyLevelCode.PRODUCT,
                 None,
@@ -813,6 +816,7 @@ class TestPageSummary:
                 ),
                 True,
             ),
+            # [no triggers]
             (
                 HierarchyLevelCode.PRODUCT,
                 None,
@@ -823,6 +827,7 @@ class TestPageSummary:
                 ),
                 False,
             ),
+            # [container type]
             (
                 HierarchyLevelCode.COLLECTION,
                 "1",
@@ -833,6 +838,7 @@ class TestPageSummary:
                 ),
                 False,
             ),
+            # [container type, restricted]
             (
                 HierarchyLevelCode.COLLECTION,
                 "1",
@@ -854,7 +860,7 @@ class TestPageSummary:
         aggregations: Aggregations,
         expected: bool,
     ):
-        """Can show combination of publication and revision date if relevant."""
+        """Can determine whether to show item summary grid."""
         super_type = ItemSuperType.CONTAINER if item_type in CONTAINER_SUPER_TYPES else ItemSuperType.RESOURCE
 
         summary = PageSummary(

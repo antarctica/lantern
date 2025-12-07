@@ -23,7 +23,8 @@ correctly paragraphs from lists in Markdown and ensure proper formatting.
 
 ## BAS Metadata Library
 
-**Note:** These are rough/working notes that will be written up properly when this module is extracted.
+> [!IMPORTANT]
+> These are rough/working notes that will be written up properly when this module is extracted.
 
 Package: `lantern.lib.metadata_library`
 
@@ -141,14 +142,14 @@ Unsupported elements (not normative or exhaustive):
 ### Record authoring
 
 Records can be authored using any tool or system that can produce a valid record configuration. These may be created
-directly as JSON documents, or dumped from `Record` data class instances.
+directly as JSON documents, or constructed as `Record` data class instances and then dumped to JSON.
 
 <!-- pyml disable md028 -->
 > [!TIP]
 > For manual editing, consider an editor that supports JSON schemas for inline validation and enum auto-completion.
 >
 > Within Python applications or scripts, consider using `Record` data classes for typed record properties, validation
-> and serialisation to JSON.
+> and easy serialisation to JSON.
 
 > [!NOTE]
 > There is no formal guidance on what to include in record configurations. However, a starting point may be the

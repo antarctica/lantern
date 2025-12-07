@@ -233,7 +233,7 @@ See the [Taskipy](https://github.com/taskipy/taskipy?tab=readme-ov-file#adding-t
 
 ## Python version
 
-The Python version is limited to 3.11 for consistency with related projects.
+The minimum Python version is 3.11 for consistency with related projects.
 
 ## Dependencies
 

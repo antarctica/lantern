@@ -1,7 +1,8 @@
 import json
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, date, timedelta
+from datetime import datetime as DateTime  # noqa: N812
 from itertools import chain
 from typing import TypeVar
 
@@ -40,7 +41,7 @@ class FormattedDate:
     datetime: str
 
     @classmethod
-    def from_rec_date(cls: type[TFormattedDate], value: Date, relative_to: datetime | None = None) -> "FormattedDate":
+    def from_rec_date(cls: type[TFormattedDate], value: Date, relative_to: DateTime | None = None) -> "FormattedDate":
         """
         Format a Record date for use in HTML time elements.
 
@@ -59,9 +60,9 @@ class FormattedDate:
 
         dt = value.date.strftime("%Y-%m-%d")
         val = value.date.strftime("%d %B %Y")
-        relative_to = relative_to or datetime.now(tz=UTC)
+        relative_to = relative_to or DateTime.now(tz=UTC)
 
-        if isinstance(value.date, datetime) and not relative_to - value.date > timedelta(hours=24):
+        if isinstance(value.date, DateTime) and not relative_to - value.date > timedelta(hours=24):
             val = value.date.strftime("%d %B %Y %H:%M:%S %Z")
             dt = value.date.isoformat()
         if isinstance(value.date, date) and value.precision is DatePrecisionCode.YEAR:

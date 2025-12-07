@@ -6,6 +6,8 @@ from tests.resources.records.item_cat_collection_all import record as collection
 from tests.resources.records.item_cat_collection_min import record as collection_min_supported
 from tests.resources.records.item_cat_data import record as data_all_supported
 from tests.resources.records.item_cat_formatting import record as formatting_supported
+from tests.resources.records.item_cat_initiative_all import record as initiative_all_supported
+from tests.resources.records.item_cat_initiative_min import record as initiative_min_required
 from tests.resources.records.item_cat_licence import (
     cc_record,
     magic_products_record,
@@ -41,6 +43,8 @@ class FakeRecordsStore(Store):
     def _fake_records(self) -> list[RecordRevision]:
         return [
             collection_min_supported,
+            initiative_min_required,
+            initiative_all_supported,
             collection_all_supported,
             product_min_supported,
             product_restricted,

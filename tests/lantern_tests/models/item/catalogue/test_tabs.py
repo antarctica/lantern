@@ -44,6 +44,7 @@ from lantern.lib.metadata_library.models.record.utils.admin import Administratio
 from lantern.models.item.base.elements import Contact, Contacts, Link
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.base.enums import AccessLevel, ResourceTypeLabel
+from lantern.models.item.catalogue.const import CONTAINER_SUPER_TYPES
 from lantern.models.item.catalogue.distributions import ArcGisFeatureLayer
 from lantern.models.item.catalogue.elements import (
     Aggregations,
@@ -54,7 +55,7 @@ from lantern.models.item.catalogue.elements import (
     ItemCatalogueSummary,
     Maintenance,
 )
-from lantern.models.item.catalogue.enums import Licence
+from lantern.models.item.catalogue.enums import ItemSuperType, Licence
 from lantern.models.item.catalogue.tabs import (
     AdditionalInfoTab,
     AdminTab,
@@ -231,7 +232,7 @@ class TestAuthorsTab:
             [Contact(RecordContact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.AUTHOR}))]
         )
 
-        tab = AuthorsTab(item_type=HierarchyLevelCode.PRODUCT, authors=contacts)
+        tab = AuthorsTab(item_super_type=ItemSuperType.RESOURCE, authors=contacts)
 
         assert tab.enabled is True
         assert tab.items == contacts
@@ -249,12 +250,13 @@ class TestAuthorsTab:
     )
     def test_disabled(self, item_type: HierarchyLevelCode, has_authors: bool, expected: bool):
         """Can disable authors tab based on item type and if item has any authors."""
+        super_type = ItemSuperType.CONTAINER if item_type in CONTAINER_SUPER_TYPES else ItemSuperType.RESOURCE
         contact = Contact(RecordContact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.AUTHOR}))
         contacts = Contacts([])
         if has_authors:
             contacts.append(contact)
 
-        tab = AuthorsTab(item_type=item_type, authors=contacts)
+        tab = AuthorsTab(item_super_type=super_type, authors=contacts)
 
         assert tab.enabled == expected
 
@@ -270,7 +272,7 @@ class TestLicenceTab:
             href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
             statement="x",
         )
-        tab = LicenceTab(item_type=HierarchyLevelCode.PRODUCT, licence=constraint)
+        tab = LicenceTab(item_super_type=ItemSuperType.RESOURCE, licence=constraint)
 
         assert tab.enabled is True
         # cov
@@ -287,6 +289,7 @@ class TestLicenceTab:
     )
     def test_disabled(self, item_type: HierarchyLevelCode, has_licence: bool, expected: bool):
         """Can disable licence tab based on item type and if item has a licence."""
+        super_type = ItemSuperType.CONTAINER if item_type in CONTAINER_SUPER_TYPES else ItemSuperType.RESOURCE
         constraint = Constraint(
             type=ConstraintTypeCode.USAGE,
             restriction_code=ConstraintRestrictionCode.LICENSE,
@@ -295,7 +298,7 @@ class TestLicenceTab:
         )
         licence = constraint if has_licence else None
 
-        tab = LicenceTab(item_type=item_type, licence=licence)
+        tab = LicenceTab(item_super_type=super_type, licence=licence)
 
         assert tab.enabled == expected
         if has_licence:
@@ -323,7 +326,7 @@ class TestLicenceTab:
         if not licence:
             constraint = None
 
-        tab = LicenceTab(item_type=HierarchyLevelCode.PRODUCT, licence=constraint)
+        tab = LicenceTab(item_super_type=ItemSuperType.RESOURCE, licence=constraint)
 
         assert tab.slug == expected
 
@@ -375,7 +378,7 @@ class TestLicenceTab:
     )
     def test_copyright_holders(self, contacts: Contacts, expected: list[Link, str]):
         """Can get licence macro name from licence constraint href."""
-        tab = LicenceTab(item_type=HierarchyLevelCode.PRODUCT, licence=None, rights_holders=contacts)
+        tab = LicenceTab(item_super_type=ItemSuperType.RESOURCE, licence=None, rights_holders=contacts)
         assert tab.copyright_holders == expected
 
 

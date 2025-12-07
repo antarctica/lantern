@@ -890,6 +890,43 @@ class TestRelatedTab:
                 [
                     Aggregation(
                         identifier=Identifier(identifier="x", href="x", namespace="x"),
+                        association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
+                        initiative_type=AggregationInitiativeCode.PROJECT,
+                    ),
+                    Aggregation(
+                        identifier=Identifier(identifier="y", href="y", namespace="y"),
+                        association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
+                        initiative_type=AggregationInitiativeCode.PROJECT,
+                    ),
+                ]
+            ),
+        ],
+    )
+    def test_parent_projects(self, fx_item_cat_model_min: ItemCatalogue, value: Aggregations):
+        """
+        Can get optional parent projects with expected values from item.
+
+        Detailed item summary tests are run in common macro tests.
+        """
+        fx_item_cat_model_min._record.identification.aggregations = value
+        expected = fx_item_cat_model_min._related.parent_projects
+        html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
+
+        projects = html.select_one("#related-parent-projects")
+        if len(expected) > 0:
+            for item in expected:
+                assert projects.select_one(f"a[href='{item._href}']") is not None
+        else:
+            assert projects is None
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            Aggregations([]),
+            Aggregations(
+                [
+                    Aggregation(
+                        identifier=Identifier(identifier="x", href="x", namespace="x"),
                         association_type=AggregationAssociationCode.CROSS_REFERENCE,
                         initiative_type=AggregationInitiativeCode.COLLECTION,
                     ),
@@ -918,6 +955,43 @@ class TestRelatedTab:
                 assert collections.select_one(f"a[href='{item._href}']") is not None
         else:
             assert collections is None
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            Aggregations([]),
+            Aggregations(
+                [
+                    Aggregation(
+                        identifier=Identifier(identifier="x", href="x", namespace="x"),
+                        association_type=AggregationAssociationCode.CROSS_REFERENCE,
+                        initiative_type=AggregationInitiativeCode.PROJECT,
+                    ),
+                    Aggregation(
+                        identifier=Identifier(identifier="y", href="y", namespace="y"),
+                        association_type=AggregationAssociationCode.CROSS_REFERENCE,
+                        initiative_type=AggregationInitiativeCode.PROJECT,
+                    ),
+                ]
+            ),
+        ],
+    )
+    def test_peer_projects(self, fx_item_cat_model_min: ItemCatalogue, value: Aggregations):
+        """
+        Can get optional peer projects with expected values from item.
+
+        Detailed item summary tests are run in common macro tests.
+        """
+        fx_item_cat_model_min._record.identification.aggregations = value
+        expected = fx_item_cat_model_min._related.peer_projects
+        html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
+
+        projects = html.select_one("#related-peer-projects")
+        if len(expected) > 0:
+            for item in expected:
+                assert projects.select_one(f"a[href='{item._href}']") is not None
+        else:
+            assert projects is None
 
 
 class TestInfoTab:

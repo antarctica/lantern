@@ -233,7 +233,7 @@ See the [Taskipy](https://github.com/taskipy/taskipy?tab=readme-ov-file#adding-t
 
 ## Python version
 
-The Python version is limited to 3.11 for consistency with related projects.
+The minimum Python version is 3.11 for consistency with related projects.
 
 ## Dependencies
 
@@ -496,6 +496,11 @@ To aid in debugging and testing, a set of fake records are included in `tests/re
 
 These records are used within tests but can and should also be used when developing [Templates](/docs/site.md#templates).
 
+An in-memory [Store](/docs/architecture.md#stores) is provided to load these records for use with
+[Exporters](/docs/architecture.md#exporters).
+
+### Test records signing keys
+
 A set of test keys are used for signing and encrypting
 [Administrative Metadata](/docs/data-model.md#item-administrative-metadata) within test records. These keys are
 were generated using `tests.resources.records.admin_keys.testing_keys._make_keys()` and intended as static values
@@ -505,10 +510,7 @@ available via [Pytest-Env](#pytest-env) and `tests.conftest._admin_meta_keys` an
 > An additional `X_ADMIN_METADATA_SIGNING_KEY_PRIVATE` environment variable is set to load the private signing key for
 > use signing admin metadata instances for use in tests and test records.
 
-An in-memory [Store](/docs/architecture.md#stores) is provided to load these records for use with
-[Exporters](/docs/architecture.md#exporters).
-
-To add a new test record:
+#### Adding new test records
 
 > [!CAUTION]
 > This section is Work in Progress (WIP) and may not be complete/accurate.
@@ -518,6 +520,9 @@ To add a new test record:
    - the `tests.resources.records.utils.make_record()` method SHOULD be used as a base (properties can be unset later)
 2. include the record in the `tests.resources.records.item_cat_collection_all.collection_members` list
 3. include the record in the `resources.stores.fake_records_store.FakeRecordsStore._fake_records()` method
+
+If adding a [New Item Type](#adding-catalogue-item-types), you SHOULD create a minimum (`_min`) and full (`_all`) test
+record.
 
 > [!TIP]
 > Run the `build-test-records` [Development Task](#development-tasks) to export a static site using these records.

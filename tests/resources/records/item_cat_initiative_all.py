@@ -122,7 +122,7 @@ record.identification.graphic_overviews = GraphicOverviews(
     ]
 )
 
-# reset collection members
+# reset aggregations to add project members
 record.identification.aggregations = Aggregations([])
 for initiative_member in initiative_members:
     record.identification.aggregations.append(
@@ -160,6 +160,7 @@ record.identification.aggregations.append(
         initiative_type=AggregationInitiativeCode.PROJECT,
     )
 )
+# Can't add a superseded peer as no suitable target (is added in max product)
 # Can't add opposite side relation as not a physical map side
 # Can't add a parent physical map as not a physical map side
 

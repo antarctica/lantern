@@ -1,7 +1,8 @@
 import json
 from collections.abc import Callable
 from dataclasses import dataclass
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, date, timedelta
+from datetime import datetime as DateTime  # noqa: N812
 from itertools import chain
 from typing import TypeVar
 
@@ -40,7 +41,7 @@ class FormattedDate:
     datetime: str
 
     @classmethod
-    def from_rec_date(cls: type[TFormattedDate], value: Date, relative_to: datetime | None = None) -> "FormattedDate":
+    def from_rec_date(cls: type[TFormattedDate], value: Date, relative_to: DateTime | None = None) -> "FormattedDate":
         """
         Format a Record date for use in HTML time elements.
 
@@ -59,9 +60,9 @@ class FormattedDate:
 
         dt = value.date.strftime("%Y-%m-%d")
         val = value.date.strftime("%d %B %Y")
-        relative_to = relative_to or datetime.now(tz=UTC)
+        relative_to = relative_to or DateTime.now(tz=UTC)
 
-        if isinstance(value.date, datetime) and not relative_to - value.date > timedelta(hours=24):
+        if isinstance(value.date, DateTime) and not relative_to - value.date > timedelta(hours=24):
             val = value.date.strftime("%d %B %Y %H:%M:%S %Z")
             dt = value.date.isoformat()
         if isinstance(value.date, date) and value.precision is DatePrecisionCode.YEAR:
@@ -642,7 +643,11 @@ class PageSummary:
 
     @property
     def published(self) -> FormattedDate | None:
-        """Formatted published date with revision date if set and different to publication."""
+        """
+        Formatted published date.
+
+        With revision date if set and different to publication.
+        """
         if self._published_date is None:
             return None
         if self._published_date != self._revision_date and self._revision_date is not None:
@@ -669,13 +674,8 @@ class PageSummary:
         return Link(value=item.title_html, href=item.href) if item else None
 
     @property
-    def items_count(self) -> int:
-        """Number of items that form item."""
-        return len(self._aggregations.child_items)
-
-    @property
     def restricted(self) -> bool:
-        """Access restrictions."""
+        """Access restricted."""
         return self._restricted
 
     @property

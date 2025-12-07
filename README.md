@@ -4,9 +4,8 @@ A prototype [Data Catalogue](https://data.bas.ac.uk/-/index) for BAS discovery m
 
 ## Overview
 
-The BAS Data Catalogue is a data discovery tool used to find, evaluate and access resources produced, managed and/or used
-by the [British Antarctic Survey](https://www.bas.ac.uk) and [UK Polar Data Centre](https://www.bas.ac.uk/data/uk-pdc/).
-This includes datasets, products (maps), services and other information.
+A data discovery tool used to find, evaluate and access resources produced, managed and/or used by the
+[British Antarctic Survey](https://www.bas.ac.uk) and [UK Polar Data Centre](https://www.bas.ac.uk/data/uk-pdc/).
 
 <!-- pyml disable md028 -->
 > [!IMPORTANT]

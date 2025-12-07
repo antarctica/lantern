@@ -642,7 +642,11 @@ class PageSummary:
 
     @property
     def published(self) -> FormattedDate | None:
-        """Formatted published date with revision date if set and different to publication."""
+        """
+        Formatted published date.
+
+        With revision date if set and different to publication.
+        """
         if self._published_date is None:
             return None
         if self._published_date != self._revision_date and self._revision_date is not None:
@@ -675,7 +679,7 @@ class PageSummary:
 
     @property
     def restricted(self) -> bool:
-        """Access restrictions."""
+        """Access restricted."""
         return self._restricted
 
     @property

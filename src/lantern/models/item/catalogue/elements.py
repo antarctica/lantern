@@ -674,11 +674,6 @@ class PageSummary:
         return Link(value=item.title_html, href=item.href) if item else None
 
     @property
-    def items_count(self) -> int:
-        """Number of items that form item."""
-        return len(self._aggregations.child_items)
-
-    @property
     def restricted(self) -> bool:
         """Access restricted."""
         return self._restricted

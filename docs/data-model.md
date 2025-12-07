@@ -73,6 +73,7 @@ These requirements are enforced by the `validate()` method in the [Catalogue Rec
 | `collections`             | `collections`      |
 | `dataset`                 | `datasets`         |
 | `products`                | `products`, `maps` |
+| `initiative`              | `projects`         |
 | `paperMapProduct` (local) | `products`, `maps` |
 
 ## Items
@@ -203,6 +204,20 @@ This schema and requirements are implicitly implemented within this class. Other
 - selecting the most relevant date for the item (revision > publication > creation)
 - selecting the most suitable description for the item (purpose > abstract)
 - determining whether an item should be marked as removed/deleted (based item maintenance info)
+
+### Item super-types
+
+Item types (set by their underlying Record's `hierarchy_level` property) can be sorted into two broad 'super-types':
+
+- *containers*: for types such as collections and projects that group and organise records
+- *resources*: for types such as datasets and products that represent actual data holdings
+
+This higher level grouping is useful to simplify and generalise logic in catalogue item tabs and other elements. For
+example, whether to enable the licence tab.
+
+Super-types are defined by the `lantern.models.item.catalogue.enums.ItemSuperType` enum.
+
+The super-type for each item is available via the `Item._super_type` private property (for passing to tabs and elements).
 
 ### Item aliases
 

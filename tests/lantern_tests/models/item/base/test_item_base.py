@@ -232,25 +232,6 @@ class TestItemBase:
         if value == "_Markdown_":
             assert "<em>Markdown</em>" in item.citation_html
 
-    def test_collections(self, fx_revision_model_min: RecordRevision):
-        """Can filter collection aggregations from record."""
-        expected = Aggregation(
-            identifier=Identifier(identifier="x", href="x", namespace="x"),
-            association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
-            initiative_type=AggregationInitiativeCode.COLLECTION,
-        )
-        fx_revision_model_min.identification.aggregations = Aggregations([expected])
-        item = ItemBase(fx_revision_model_min)
-
-        result = item.collections
-
-        assert isinstance(result, Aggregations)
-        assert len(result) > 0
-
-        assert expected in result
-        assert len(result) == 1
-        assert result[0] == expected
-
     def test_contacts(self, fx_revision_model_min: RecordRevision):
         """Can get record contacts as item contacts."""
         rec_contact = RecordContact(

@@ -2,6 +2,7 @@ import json
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, date, datetime, timedelta
+from itertools import chain
 from typing import TypeVar
 
 from lantern.lib.metadata_library.models.record.elements.common import Date
@@ -24,7 +25,7 @@ from lantern.models.item.base.elements import Link, unpack
 from lantern.models.item.base.enums import AccessLevel, ResourceTypeLabel
 from lantern.models.item.base.item import ItemBase
 from lantern.models.item.base.utils import md_as_html
-from lantern.models.item.catalogue.enums import ResourceTypeIcon
+from lantern.models.item.catalogue.enums import ItemSuperType, ResourceTypeIcon
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 
@@ -334,6 +335,14 @@ class Aggregations:
         )
 
     @property
+    def peer_projects(self) -> list[ItemCatalogueSummary]:
+        """Collections item is related with."""
+        return self._filter(
+            associations=AggregationAssociationCode.CROSS_REFERENCE,
+            initiatives=AggregationInitiativeCode.PROJECT,
+        )
+
+    @property
     def peer_cross_reference(self) -> list[ItemCatalogueSummary]:
         """
         Other items item is related with.
@@ -343,7 +352,7 @@ class Aggregations:
         results = self._aggregations.filter(
             namespace=CATALOGUE_NAMESPACE, associations=AggregationAssociationCode.CROSS_REFERENCE
         )
-        non_exclusive = [item.resource_id for item in self.peer_collections]
+        non_exclusive = [item.resource_id for item in chain(self.peer_collections, self.peer_projects)]
         exclusive = [aggregation for aggregation in results if aggregation.identifier.identifier not in non_exclusive]
         return [self._summaries[aggregation.identifier.identifier] for aggregation in exclusive]
 
@@ -370,11 +379,19 @@ class Aggregations:
         )
 
     @property
+    def parent_projects(self) -> list[ItemCatalogueSummary]:
+        """Projects item is contained within."""
+        return self._filter(
+            associations=AggregationAssociationCode.LARGER_WORK_CITATION,
+            initiatives=AggregationInitiativeCode.PROJECT,
+        )
+
+    @property
     def child_items(self) -> list[ItemCatalogueSummary]:
         """Items contained within item."""
         return self._filter(
             associations=AggregationAssociationCode.IS_COMPOSED_OF,
-            initiatives=AggregationInitiativeCode.COLLECTION,
+            initiatives=[AggregationInitiativeCode.COLLECTION, AggregationInitiativeCode.PROJECT],
         )
 
     @property
@@ -580,7 +597,7 @@ class PageSummary:
 
     def __init__(
         self,
-        item_type: HierarchyLevelCode,
+        item_super_type: ItemSuperType,
         edition: str | None,
         published_date: FormattedDate | None,
         revision_date: FormattedDate | None,
@@ -589,7 +606,7 @@ class PageSummary:
         citation: str | None,
         abstract: str,
     ) -> None:
-        self._item_type = item_type
+        self._item_super_type = item_super_type
         self._edition = edition
         self._published_date = published_date
         self._revision_date = revision_date
@@ -603,28 +620,29 @@ class PageSummary:
         """
         Whether to show summary grid section in UI.
 
-        Contains all properties except abstract and citation.
+        Contains all item summary properties except abstract and citation.
+
+        Shown if item has any summary grid properties (e.g. restricted, edition, one or more collections, etc.),
+        unless item is a container super-type (e.g. a collection. project, etc.).
         """
-        if self.restricted:
-            return True
-        if self._item_type == HierarchyLevelCode.COLLECTION:
+        if self._item_super_type == ItemSuperType.CONTAINER:
             return False
         return (
-            self.edition is not None or self.published is not None or len(self.collections) > 0 or self.items_count > 0
+            self.restricted
+            or self.edition is not None
+            or self.published is not None
+            or len(self.collections) > 0
+            or len(self.projects) > 0
         )
 
     @property
     def edition(self) -> str | None:
         """Edition."""
-        if self._item_type == HierarchyLevelCode.COLLECTION:
-            return None
         return self._edition
 
     @property
     def published(self) -> FormattedDate | None:
         """Formatted published date with revision date if set and different to publication."""
-        if self._item_type == HierarchyLevelCode.COLLECTION:
-            return None
         if self._published_date is None:
             return None
         if self._published_date != self._revision_date and self._revision_date is not None:
@@ -638,6 +656,11 @@ class PageSummary:
     def collections(self) -> list[Link]:
         """Collections item is part of."""
         return [Link(value=summary.title_html, href=summary.href) for summary in self._aggregations.parent_collections]
+
+    @property
+    def projects(self) -> list[Link]:
+        """Projects item is part of."""
+        return [Link(value=summary.title_html, href=summary.href) for summary in self._aggregations.parent_projects]
 
     @property
     def physical_parent(self) -> Link | None:
@@ -657,8 +680,12 @@ class PageSummary:
 
     @property
     def citation(self) -> str | None:
-        """Citation."""
-        if self._item_type == HierarchyLevelCode.COLLECTION:
+        """
+        Citation.
+
+        Not shown for container type items (e.g. collections).
+        """
+        if self._item_super_type == ItemSuperType.CONTAINER:
             return None
         return self._citation
 

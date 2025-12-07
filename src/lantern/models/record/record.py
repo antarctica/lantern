@@ -114,6 +114,7 @@ class Record(RecordBase):
         prefixes = {
             HierarchyLevelCode.COLLECTION: ["collections"],
             HierarchyLevelCode.DATASET: ["datasets"],
+            HierarchyLevelCode.INITIATIVE: ["projects"],
             HierarchyLevelCode.PRODUCT: product_prefixes,
             HierarchyLevelCode.PAPER_MAP_PRODUCT: product_prefixes,
         }

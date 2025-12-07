@@ -149,8 +149,8 @@ record.identification.identifiers = Identifiers(
             namespace="doi",
         ),
         Identifier(
-            identifier="10.123/test123",
-            href="https://doi.org/10.123/test123",
+            identifier="10.123/test-p-123",
+            href="https://doi.org/10.123/test-p-123",
             namespace="doi",
         ),
         Identifier(
@@ -285,8 +285,8 @@ record.identification.aggregations.append(
 record.identification.aggregations.append(
     Aggregation(
         identifier=Identifier(
-            identifier="30825673-6276-4e5a-8a97-f97f2094cd25",
-            href=f"https://{CATALOGUE_NAMESPACE}/items/30825673-6276-4e5a-8a97-f97f2094cd25",
+            identifier="57327327-4623-4247-af86-77fb43b7f45b",
+            href=f"https://{CATALOGUE_NAMESPACE}/items/57327327-4623-4247-af86-77fb43b7f45b",
             namespace=CATALOGUE_NAMESPACE,
         ),
         association_type=AggregationAssociationCode.CROSS_REFERENCE,

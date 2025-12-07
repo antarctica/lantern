@@ -1,7 +1,7 @@
 import cattrs
 
 from lantern.lib.metadata_library.models.record.elements.data_quality import DataQuality
-from lantern.lib.metadata_library.models.record.presets.conformance import MAGIC_PROFILE_V1
+from lantern.lib.metadata_library.models.record.presets.conformance import MAGIC_DISCOVERY_V1
 from lantern.lib.metadata_library.models.record.utils.clean import clean_dict
 
 
@@ -10,12 +10,12 @@ class TestMagicProfileV1:
 
     def test_magic_profile_v1(self):
         """Can get domain consistency element consistent with reference value."""
-        # from https://github.com/antarctica/metadata-library/blob/v0.15.1/tests/resources/configs/magic-discovery-profile/minimal_product_v1.json#L114
+        # from https://github.com/antarctica/metadata-library/blob/v0.16.0/tests/resources/configs/magic-discovery-profile/minimal_product_v1_alt.json#L114
         expected = {
             "specification": {
                 "title": {
                     "value": "British Antarctic Survey (BAS) Mapping and Geographic Information Centre (MAGIC) Discovery Metadata Profile",
-                    "href": "https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery-v1/",
+                    "href": "https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery/v1/",
                 },
                 "dates": {"publication": "2024-11-01"},
                 "edition": "1",
@@ -49,7 +49,7 @@ class TestMagicProfileV1:
 
         converter = cattrs.Converter()
         converter.register_unstructure_hook(DataQuality, lambda d: d.unstructure())
-        container = DataQuality(domain_consistency=[MAGIC_PROFILE_V1])
+        container = DataQuality(domain_consistency=[MAGIC_DISCOVERY_V1])
         result = clean_dict(converter.unstructure(container))["domain_consistency"][0]
 
         assert result == expected

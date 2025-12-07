@@ -50,3 +50,20 @@ ESRI_DISTRIBUTOR = Contact(
 )
 
 MAGIC_DISTRIBUTOR = make_magic_role(roles={ContactRoleCode.DISTRIBUTOR})
+
+UKRI_RIGHTS_HOLDER = Contact(
+    organisation=ContactIdentity(name="UK Research and Innovation", href="https://ror.org/001aqnf71", title="ror"),
+    address=Address(
+        delivery_point="Polaris House",
+        city="Swindon",
+        postal_code="SN2 1FL",
+        country="United Kingdom",
+    ),
+    online_resource=OnlineResource(
+        href="https://www.ukri.org",
+        title="UKRI - UK Research and Innovation",
+        description="Corporate website for UK Research and Innovation (UKRI).",
+        function=OnlineResourceFunctionCode.INFORMATION,
+    ),
+    role={ContactRoleCode.RIGHTS_HOLDER},
+)

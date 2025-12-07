@@ -2,14 +2,9 @@ from datetime import UTC, date, datetime
 
 from lantern.lib.metadata_library.models.record.elements.administration import Administration
 from lantern.lib.metadata_library.models.record.elements.common import (
-    Address,
-    Contact,
-    ContactIdentity,
-    Contacts,
     Date,
     Dates,
     Identifier,
-    OnlineResource,
 )
 from lantern.lib.metadata_library.models.record.elements.data_quality import Lineage
 from lantern.lib.metadata_library.models.record.elements.identification import (
@@ -31,11 +26,11 @@ from lantern.lib.metadata_library.models.record.enums import (
     DatePrecisionCode,
     HierarchyLevelCode,
     MaintenanceFrequencyCode,
-    OnlineResourceFunctionCode,
     ProgressCode,
 )
 from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
-from lantern.lib.metadata_library.models.record.presets.base import RecordMagicDiscoveryV1
+from lantern.lib.metadata_library.models.record.presets.base import RecordMagicDiscoveryV2
+from lantern.lib.metadata_library.models.record.presets.contacts import make_magic_role
 from lantern.lib.metadata_library.models.record.presets.extents import make_bbox_extent, make_temporal_extent
 from lantern.lib.metadata_library.models.record.utils.admin import set_admin
 from lantern.models.record.const import CATALOGUE_NAMESPACE
@@ -47,7 +42,7 @@ def make_record(
     file_identifier: str, hierarchy_level: HierarchyLevelCode, title: str, abstract: str, purpose: str | None = None
 ) -> RecordRevision:
     """Make a record for testing based on RecordMagicDiscoveryV1."""
-    record = RecordMagicDiscoveryV1(
+    record = RecordMagicDiscoveryV2(
         file_identifier=file_identifier,
         hierarchy_level=hierarchy_level,
         identification=Identification(
@@ -63,33 +58,18 @@ def make_record(
 
     record.identification.purpose = abstract if purpose is None else purpose
 
-    record.identification.contacts = Contacts(
-        [
-            Contact(
-                organisation=ContactIdentity(
-                    name="Mapping and Geographic Information Centre, British Antarctic Survey",
-                    href="https://ror.org/01rhff309",
-                    title="ror",
-                ),
-                phone="+44 (0)1223 221400",
-                email="magic@bas.ac.uk",
-                address=Address(
-                    delivery_point="British Antarctic Survey, High Cross, Madingley Road",
-                    city="Cambridge",
-                    administrative_area="Cambridgeshire",
-                    postal_code="CB3 0ET",
-                    country="United Kingdom",
-                ),
-                online_resource=OnlineResource(
-                    href="https://www.bas.ac.uk/teams/magic",
-                    title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-                    description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
-                    function=OnlineResourceFunctionCode.INFORMATION,
-                ),
-                role={ContactRoleCode.PUBLISHER, ContactRoleCode.POINT_OF_CONTACT},
-            )
-        ]
+    # Include additional role for existing magic contact
+    magic_contact = make_magic_role({ContactRoleCode.POINT_OF_CONTACT, ContactRoleCode.PUBLISHER})
+    magic_index = next(
+        (
+            i
+            for i, c in enumerate(record.identification.contacts)
+            if c.organisation.name == magic_contact.organisation.name
+        ),
+        None,
     )
+    if magic_index is not None:
+        record.identification.contacts[magic_index] = magic_contact
 
     record.identification.constraints = Constraints(
         [
@@ -134,7 +114,7 @@ def make_record(
     )
 
     record.identification.maintenance = Maintenance(
-        progress=ProgressCode.ON_GOING,
+        progress=ProgressCode.COMPLETED,
         maintenance_frequency=MaintenanceFrequencyCode.AS_NEEDED,
     )
 

@@ -32,6 +32,7 @@ from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.base.elements import Link
 from lantern.models.item.base.enums import ResourceTypeLabel
 from lantern.models.item.base.item import ItemBase
+from lantern.models.item.catalogue.const import CONTAINER_SUPER_TYPES
 from lantern.models.item.catalogue.elements import (
     Aggregations,
     Dates,
@@ -43,7 +44,7 @@ from lantern.models.item.catalogue.elements import (
     PageHeader,
     PageSummary,
 )
-from lantern.models.item.catalogue.enums import ResourceTypeIcon
+from lantern.models.item.catalogue.enums import ItemSuperType, ResourceTypeIcon
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from tests.conftest import _admin_meta_keys, _get_record
 
@@ -127,8 +128,25 @@ class TestAggregations:
 
         assert len(aggregations.peer_collections) > 0
 
+    def test_peer_projects(self, fx_admin_meta_keys: AdministrationKeys):
+        """Can get any project aggregations (item is a sibling of)."""
+        record_aggregations = RecordAggregations(
+            [
+                Aggregation(
+                    identifier=Identifier(identifier="x", href="x", namespace=CATALOGUE_NAMESPACE),
+                    association_type=AggregationAssociationCode.CROSS_REFERENCE,
+                    initiative_type=AggregationInitiativeCode.PROJECT,
+                )
+            ]
+        )
+        aggregations = Aggregations(
+            admin_meta_keys=fx_admin_meta_keys, aggregations=record_aggregations, get_record=_get_record
+        )
+
+        assert len(aggregations.peer_projects) > 0
+
     def test_peer_cross_reference(self, fx_admin_meta_keys: AdministrationKeys):
-        """Can get any cross-reference not related to another context (e.g. collections)."""
+        """Can get any cross-reference not related to another context (e.g. collections, projects)."""
         record_aggregations = RecordAggregations(
             [
                 Aggregation(
@@ -139,6 +157,11 @@ class TestAggregations:
                     identifier=Identifier(identifier="y", href="y", namespace=CATALOGUE_NAMESPACE),
                     association_type=AggregationAssociationCode.CROSS_REFERENCE,
                     initiative_type=AggregationInitiativeCode.COLLECTION,
+                ),
+                Aggregation(
+                    identifier=Identifier(identifier="y", href="y", namespace=CATALOGUE_NAMESPACE),
+                    association_type=AggregationAssociationCode.CROSS_REFERENCE,
+                    initiative_type=AggregationInitiativeCode.PROJECT,
                 ),
             ]
         )
@@ -198,6 +221,23 @@ class TestAggregations:
 
         assert len(aggregations.parent_collections) > 0
 
+    def test_parent_projects(self, fx_admin_meta_keys: AdministrationKeys):
+        """Can get any project aggregations (item is part of)."""
+        record_aggregations = RecordAggregations(
+            [
+                Aggregation(
+                    identifier=Identifier(identifier="x", href="x", namespace=CATALOGUE_NAMESPACE),
+                    association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
+                    initiative_type=AggregationInitiativeCode.PROJECT,
+                )
+            ]
+        )
+        aggregations = Aggregations(
+            admin_meta_keys=fx_admin_meta_keys, aggregations=record_aggregations, get_record=_get_record
+        )
+
+        assert len(aggregations.parent_projects) > 0
+
     def test_child_items(self, fx_admin_meta_keys: AdministrationKeys):
         """Can get any item aggregations (item is made up of)."""
         record_aggregations = RecordAggregations(
@@ -206,14 +246,19 @@ class TestAggregations:
                     identifier=Identifier(identifier="x", href="x", namespace=CATALOGUE_NAMESPACE),
                     association_type=AggregationAssociationCode.IS_COMPOSED_OF,
                     initiative_type=AggregationInitiativeCode.COLLECTION,
-                )
+                ),
+                Aggregation(
+                    identifier=Identifier(identifier="y", href="y", namespace=CATALOGUE_NAMESPACE),
+                    association_type=AggregationAssociationCode.IS_COMPOSED_OF,
+                    initiative_type=AggregationInitiativeCode.PROJECT,
+                ),
             ]
         )
         aggregations = Aggregations(
             admin_meta_keys=fx_admin_meta_keys, aggregations=record_aggregations, get_record=_get_record
         )
 
-        assert len(aggregations.child_items) > 0
+        assert len(aggregations.child_items) == len(record_aggregations)
 
     def test_parent_printed_map(self, fx_admin_meta_keys: AdministrationKeys):
         """Can get printed map item that this item is a side of."""
@@ -671,11 +716,11 @@ class TestPageSummary:
         citation: str | None,
     ):
         """Can create class for summary panel."""
+        super_type = ItemSuperType.CONTAINER if item_type in CONTAINER_SUPER_TYPES else ItemSuperType.RESOURCE
         collections = [Link(value=summary.title_html, href=summary.href) for summary in aggregations.parent_collections]
-        items_count = len(aggregations.child_items)
 
         summary = PageSummary(
-            item_type=item_type,
+            item_super_type=super_type,
             edition=edition,
             published_date=published,
             revision_date=None,
@@ -684,19 +729,15 @@ class TestPageSummary:
             citation=citation,
             abstract="x",
         )
-
-        assert summary.abstract == "x"
         assert summary.collections == collections
-        assert summary.items_count == items_count
+        assert summary.edition == edition
+        assert summary.published == published
         assert summary.restricted == restricted
+        assert summary.abstract == "x"
 
-        if item_type != HierarchyLevelCode.COLLECTION:
-            assert summary.edition == edition
-            assert summary.published == published
+        if super_type == ItemSuperType.RESOURCE:
             assert summary.citation == citation
         else:
-            assert summary.edition is None
-            assert summary.published is None
             assert summary.citation is None
 
     @pytest.mark.parametrize(
@@ -721,6 +762,11 @@ class TestPageSummary:
                                 association_type=AggregationAssociationCode.IS_COMPOSED_OF,
                                 initiative_type=AggregationInitiativeCode.COLLECTION,
                             ),
+                            Aggregation(
+                                identifier=Identifier(identifier="x", href="x", namespace="x"),
+                                association_type=AggregationAssociationCode.IS_COMPOSED_OF,
+                                initiative_type=AggregationInitiativeCode.PROJECT,
+                            ),
                         ]
                     ),
                     get_record=_get_record,
@@ -759,7 +805,7 @@ class TestPageSummary:
                             Aggregation(
                                 identifier=Identifier(identifier="x", href="x", namespace="x"),
                                 association_type=AggregationAssociationCode.IS_COMPOSED_OF,
-                                initiative_type=AggregationInitiativeCode.COLLECTION,
+                                initiative_type=AggregationInitiativeCode.PROJECT,
                             )
                         ]
                     ),
@@ -795,7 +841,7 @@ class TestPageSummary:
                 Aggregations(
                     admin_meta_keys=_admin_meta_keys(), aggregations=RecordAggregations([]), get_record=_get_record
                 ),
-                True,
+                False,
             ),
         ],
     )
@@ -809,8 +855,10 @@ class TestPageSummary:
         expected: bool,
     ):
         """Can show combination of publication and revision date if relevant."""
+        super_type = ItemSuperType.CONTAINER if item_type in CONTAINER_SUPER_TYPES else ItemSuperType.RESOURCE
+
         summary = PageSummary(
-            item_type=item_type,
+            item_super_type=super_type,
             edition=edition,
             published_date=published,
             revision_date=None,
@@ -849,7 +897,7 @@ class TestPageSummary:
                 HierarchyLevelCode.COLLECTION,
                 FormattedDate(datetime="x", value="x"),
                 FormattedDate(datetime="y", value="y"),
-                None,
+                FormattedDate(datetime="x", value="x (last updated: y)"),
             ),
         ],
     )
@@ -862,8 +910,10 @@ class TestPageSummary:
         expected: str,
     ):
         """Can show combination of publication and revision date if relevant."""
+        super_type = ItemSuperType.CONTAINER if item_type in CONTAINER_SUPER_TYPES else ItemSuperType.RESOURCE
+
         summary = PageSummary(
-            item_type=item_type,
+            item_super_type=super_type,
             edition=None,
             published_date=published,
             revision_date=revision,
@@ -885,6 +935,7 @@ class TestPageSummary:
         self, fx_admin_meta_keys: AdministrationKeys, item_type: HierarchyLevelCode, has_aggregation: bool
     ):
         """Can show combination of publication and revision date if relevant."""
+        super_type = ItemSuperType.CONTAINER if item_type in CONTAINER_SUPER_TYPES else ItemSuperType.RESOURCE
         aggregations = []
         if has_aggregation:
             aggregations.append(
@@ -895,7 +946,7 @@ class TestPageSummary:
                 )
             )
         summary = PageSummary(
-            item_type=item_type,
+            item_super_type=super_type,
             aggregations=Aggregations(
                 admin_meta_keys=fx_admin_meta_keys,
                 aggregations=RecordAggregations(aggregations),

@@ -30,6 +30,7 @@ from lantern.lib.metadata_library.models.record.elements.projection import (
 )
 from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,
+    AggregationInitiativeCode,
     ContactRoleCode,
     DatePrecisionCode,
     HierarchyLevelCode,
@@ -268,6 +269,18 @@ record.identification.graphic_overviews = GraphicOverviews(
 record.identification.other_citation_details = "Produced by the Mapping and Geographic Information Centre, British Antarctic Survey, 2025, version 1, https://data.bas.ac.uk/maps/1005."
 set_kv({"physical_size_width_mm": "210", "physical_size_height_mm": "297", "sheet_number": "4"}, record)
 
+# add a containing project
+record.identification.aggregations.append(
+    Aggregation(
+        identifier=Identifier(
+            identifier="fd126357-0f88-4b89-81b8-fe33654ef045",
+            href=f"https://{CATALOGUE_NAMESPACE}/items/fd126357-0f88-4b89-81b8-fe33654ef045",
+            namespace=CATALOGUE_NAMESPACE,
+        ),
+        association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
+        initiative_type=AggregationInitiativeCode.PROJECT,
+    )
+)
 # add a related peer
 record.identification.aggregations.append(
     Aggregation(

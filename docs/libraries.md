@@ -67,7 +67,8 @@ The `Record` data class includes a `validate()` method which will:
 - validate the record configuration against the
   [BAS ISO 19115 JSON schema](https://metadata-standards.data.bas.ac.uk/standards/iso-19115-19139#json-schemas)
 - validate the record configuration against any of these supported profiles:
-  - the [MAGIC Discovery Profile (v1)](https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery-v1).
+  - the [MAGIC Discovery Profile (v1)](https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery/v1).
+  - the [MAGIC Discovery Profile (v2)](https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery/v2).
 
 Records will be validated automatically when needed. Invalid records will raise a
 `lantern.lib.metadata_library.models.record.RecordInvalidError` exception.
@@ -172,8 +173,8 @@ For example:
   - provides a constant for the Open Government Licence
 
 > [!TIP]
-> A larger scale present (`lantern.lib.metadata_library.models.record.presets.base.RecordMagicDiscoveryV1`) exists for
-> creating [MAGIC Discovery ISO 19115 Profile](https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery-v1)
+> A larger scale present (`lantern.lib.metadata_library.models.record.presets.base.RecordMagicDiscoveryV2`) exists for
+> creating [MAGIC Discovery ISO 19115 Profile](https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery/v2)
 > compliant records.
 
 ### Record utilities

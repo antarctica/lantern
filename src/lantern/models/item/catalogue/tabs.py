@@ -39,7 +39,7 @@ from lantern.models.item.catalogue.elements import (
     ItemCatalogueSummary,
     Maintenance,
 )
-from lantern.models.item.catalogue.enums import Licence, ResourceTypeIcon
+from lantern.models.item.catalogue.enums import ItemSuperType, Licence, ResourceTypeIcon
 
 
 class Tab(ABC):
@@ -218,14 +218,14 @@ class ExtentTab(Tab):
 class AuthorsTab(Tab):
     """Authors tab."""
 
-    def __init__(self, item_type: HierarchyLevelCode, authors: list[Contact]) -> None:
-        self._item_type = item_type
+    def __init__(self, item_super_type: ItemSuperType, authors: list[Contact]) -> None:
+        self._item_super_type = item_super_type
         self._authors = authors
 
     @property
     def enabled(self) -> bool:
         """Whether tab is enabled."""
-        if self._item_type == HierarchyLevelCode.COLLECTION:
+        if self._item_super_type == ItemSuperType.CONTAINER:
             return False
         return len(self._authors) > 0
 
@@ -255,18 +255,18 @@ class LicenceTab(Tab):
 
     def __init__(
         self,
-        item_type: HierarchyLevelCode,
+        item_super_type: ItemSuperType,
         licence: Constraint | None,
         rights_holders: list[Contact] | None = None,
     ) -> None:
-        self._item_type = item_type
+        self._item_super_type = item_super_type
         self._licence = licence
         self._copyright_holders = rights_holders if rights_holders is not None else []
 
     @property
     def enabled(self) -> bool:
         """Whether tab is enabled."""
-        if self._item_type == HierarchyLevelCode.COLLECTION:
+        if self._item_super_type == ItemSuperType.CONTAINER:
             return False
         return self.slug is not None
 

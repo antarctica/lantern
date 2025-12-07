@@ -88,6 +88,49 @@ class TestMacrosItem:
                     Aggregation(
                         identifier=Identifier(identifier="x", href="x", namespace="x"),
                         association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
+                        initiative_type=AggregationInitiativeCode.PROJECT,
+                    )
+                ]
+            ),
+            Aggregations(
+                [
+                    Aggregation(
+                        identifier=Identifier(identifier="x", href="x", namespace="x"),
+                        association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
+                        initiative_type=AggregationInitiativeCode.PROJECT,
+                    ),
+                    Aggregation(
+                        identifier=Identifier(identifier="y", href="x", namespace="y"),
+                        association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
+                        initiative_type=AggregationInitiativeCode.PROJECT,
+                    ),
+                ]
+            ),
+        ],
+    )
+    def test_projects(self, fx_item_cat_model_min: ItemCatalogue, value: Aggregations):
+        """Can get item projects with expected values from item."""
+        fx_item_cat_model_min._record.identification.aggregations = value
+        expected = fx_item_cat_model_min.summary.projects
+        html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
+
+        if len(expected) > 0:
+            assert html.select_one("#summary-projects") is not None
+        else:
+            assert html.select_one("#summary-projects") is None
+
+        for project in expected:
+            assert html.select_one(f"a[href='{project.href}']") is not None
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            Aggregations([]),
+            Aggregations(
+                [
+                    Aggregation(
+                        identifier=Identifier(identifier="x", href="x", namespace="x"),
+                        association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
                         initiative_type=AggregationInitiativeCode.PAPER_MAP,
                     )
                 ]

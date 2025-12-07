@@ -84,6 +84,39 @@ In the `tests.lantern_tests.config` module:
 - if configurable, update the `test_configurable_property` method
 - update or create other tests as needed
 
+### Adding catalogue item types
+
+> [!CAUTION]
+> This section is Work in Progress (WIP) and may not be complete/accurate.
+
+Update record schema to allow new item type in records:
+
+1. if the type is not a member of the ISO 19115 `MD_ScopeCode` code list, create and agree a proposal in the
+   [BAS Metadata Standards](https://gitlab.data.bas.ac.uk/uk-pdc/metadata-infrastructure/metadata-standards) project
+2. if needed, add the type to the `hierarchy_level` enum in the ISO 19115 JSON Schema within the
+   [BAS Metadata Library](https://github.com/antarctica/metadata-library) and make a new release as needed
+
+Within this project:
+
+1. if needed, upgrade the 'bas-metadata-library' dependency to a version including the new item type
+2. add new [Test Records](#adding-new-test-records) as needed using the new item type
+3. update the `prefixes` mapping in `lantern.models.record.record.Record._validate_aliases()` to set allowed aliases
+4. update the allowed prefixes table in the [Record requirements](/docs/data-model.md#record-requirements) documentation
+5. add item type to `lantern.models.item.base.enums.ResourceTypeLabel` enum
+6. add item type to `lantern.models.item.catalogue.enums.ResourceTypeIcon` enum (see https://fontawesome.com/v5/search)
+7. if a 'container' [Super Type](/docs/data-model.md#item-super-types), update the
+  `lantern.models.item.catalogue.item.ItemCatalogue._super_type` property
+8. verify the [Test Records](#test-records) build as a local site
+
+If additional item relationships are needed:
+
+1. add relevant properties to `lantern.models.item.catalogue.elements.Aggregations`
+2. call new properties in `lantern.resources.templates._macros.related`
+3. add tests as needed in:
+   - `tests.lantern_tests.models.item.catalogue.test_elements.TestAggregations`
+   - `tests.lantern_tests.templates.macros.test_tabs.TestRelatedTab`
+4. update [Test records](#test-records) to set aggregations as needed
+
 ### Adding properties to items
 
 > [!CAUTION]

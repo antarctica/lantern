@@ -126,8 +126,10 @@
     {{ related_section({'id': 'peer-opposite-side', 'title': 'Opposite side of', 'related': data.peer_opposite_side}) }}
     {{ related_section({'id': 'peer-items', 'title': 'Related to', 'related': data.peer_cross_reference}) }}
     {{ related_section({'id': 'peer-supersedes', 'title': 'Replaces', 'related': data.peer_supersedes}) }}
-    {{ related_section({'id': 'parent-collections', 'title': 'Part of these collections', 'related': data.parent_collections}) }}
-    {{ related_section({'id': 'peer-collections', 'title': 'Related collections', 'related': data.peer_collections}) }}
+    {{ related_section({'id': 'parent-collections', 'title': 'Part of these collections', 'related': data.parent_collections }) }}
+    {{ related_section({'id': 'parent-projects', 'title': 'Part of these projects', 'related': data.parent_projects }) }}
+    {{ related_section({'id': 'peer-collections', 'title': 'Related collections', 'related': data.peer_collections }) }}
+    {{ related_section({'id': 'peer-projects', 'title': 'Related projects', 'related': data.peer_projects }) }}
   </section>
 {% endmacro %}
 

@@ -7,7 +7,9 @@ from lantern.lib.metadata_library.models.record.utils.admin import Administratio
 from lantern.models.item.base.elements import Link
 from lantern.models.item.base.enums import AccessLevel
 from lantern.models.item.base.item import ItemBase
+from lantern.models.item.catalogue.const import CONTAINER_SUPER_TYPES
 from lantern.models.item.catalogue.elements import Dates, Extent, PageHeader, PageSummary
+from lantern.models.item.catalogue.enums import ItemSuperType
 from lantern.models.item.catalogue.tabs import (
     AdditionalInfoTab,
     AdminTab,
@@ -67,6 +69,13 @@ class ItemCatalogue(ItemBase):
         self._record: RecordRevision
 
     @property
+    def _super_type(self) -> ItemSuperType:
+        """Resource type mapped to a general 'super' type."""
+        if self.resource_type in CONTAINER_SUPER_TYPES:
+            return ItemSuperType.CONTAINER
+        return ItemSuperType.RESOURCE
+
+    @property
     def _aggregations(self) -> Aggregations:
         """Aggregations."""
         return Aggregations(
@@ -115,13 +124,13 @@ class ItemCatalogue(ItemBase):
     @property
     def _authors(self) -> AuthorsTab:
         """Authors tab."""
-        return AuthorsTab(item_type=self.resource_type, authors=self.contacts.filter(roles=ContactRoleCode.AUTHOR))
+        return AuthorsTab(item_super_type=self._super_type, authors=self.contacts.filter(roles=ContactRoleCode.AUTHOR))
 
     @property
     def _licence(self) -> LicenceTab:
         """Licence tab."""
         return LicenceTab(
-            item_type=self.resource_type,
+            item_super_type=self._super_type,
             licence=super().licence,
             rights_holders=self.contacts.filter(roles=ContactRoleCode.RIGHTS_HOLDER),
         )
@@ -273,7 +282,7 @@ class ItemCatalogue(ItemBase):
     def summary(self) -> PageSummary:
         """Item summary."""
         return PageSummary(
-            item_type=self.resource_type,
+            item_super_type=self._super_type,
             edition=self.edition,
             published_date=self._dates.publication,
             revision_date=self._dates.revision,

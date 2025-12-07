@@ -37,6 +37,9 @@
     {% if data.collections %}
       {{ collections(data.collections) }}
     {% endif %}
+    {% if data.projects %}
+      {{ projects(data.projects) }}
+    {% endif %}
     {% if data.physical_parent %}
       {{ physical_parent(data.physical_parent) }}
     {% endif %}
@@ -56,6 +59,17 @@
   <div class="font-bold">Collections</div>
   <div>
     <ul id="summary-collections" class="space-y-2">
+      {% for item in data %}
+        <li><a class="{{ com.link_classes() }}" href="{{ item.href }}">{{ item.value }}</a></li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endmacro %}
+
+{% macro projects(data) %}
+  <div class="font-bold">Projects</div>
+  <div>
+    <ul id="summary-projects" class="space-y-2">
       {% for item in data %}
         <li><a class="{{ com.link_classes() }}" href="{{ item.href }}">{{ item.value }}</a></li>
       {% endfor %}

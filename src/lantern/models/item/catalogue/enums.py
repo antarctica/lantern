@@ -1,11 +1,25 @@
 from enum import Enum
 
 
+class ItemSuperType(Enum):
+    """
+    High-level grouping of ResourceType members.
+
+    To distinguish between:
+     - 'container' items that group other items (collections, projects, etc.)
+    - 'resource' items represent actual data holdings (datasets, products, etc.)
+    """
+
+    CONTAINER = "container"
+    RESOURCE = "resource"
+
+
 class ResourceTypeIcon(Enum):
     """Partial mapping of the Hierarchy Level code list against Font Awesome icon classes."""
 
     COLLECTION = "fa-fw far fa-shapes"
     DATASET = "fa-fw far fa-cube"
+    INITIATIVE = "fa-fw far fa-betamax"
     PRODUCT = "fa-fw far fa-map"
     PAPER_MAP_PRODUCT = "fa-fw far fa-map"
 

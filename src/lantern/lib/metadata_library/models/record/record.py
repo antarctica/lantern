@@ -38,6 +38,7 @@ class RecordSchema(Enum):
 
     ISO_2_V4 = "iso_2_v4"
     MAGIC_V1 = "magic_discovery_v1"
+    MAGIC_V2 = "magic_discovery_v2"
 
     @staticmethod
     def map_href(href: str) -> "RecordSchema":
@@ -49,6 +50,8 @@ class RecordSchema(Enum):
         mapping = {
             "https://metadata-resources.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-2-v4.json": RecordSchema.ISO_2_V4,
             "https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery-v1/": RecordSchema.MAGIC_V1,
+            "https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery/v1/": RecordSchema.MAGIC_V1,
+            "https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery/v2/": RecordSchema.MAGIC_V2,
         }
         return mapping[href]
 
@@ -67,6 +70,10 @@ class RecordSchema(Enum):
             RecordSchema.MAGIC_V1: (
                 "bas_metadata_library.schemas.dist",
                 "magic_discovery_v1.json",
+            ),
+            RecordSchema.MAGIC_V2: (
+                "bas_metadata_library.schemas.dist",
+                "magic_discovery_v2.json",
             ),
         }
         schema_ref, schema_file = mapping[schema]
@@ -387,3 +394,10 @@ class Record:
                 validate(instance=config, schema=schema)
             except ValidationError as e:
                 raise RecordInvalidError(e) from e
+
+        # Additional non-schema validation for MAGIC Discovery profile
+        profiles = self._profile_schemas if use_profiles else []
+        if RecordSchema.MAGIC_V1 in profiles or RecordSchema.MAGIC_V2 in profiles:  # noqa: SIM102
+            if self.identification.dates.released is None:
+                msg = "Records using the MAGIC Discovery profile must include a released date (Req. 06)."
+                raise RecordInvalidError(ValueError(msg)) from None

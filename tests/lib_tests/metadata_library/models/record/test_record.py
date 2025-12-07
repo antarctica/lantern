@@ -1,5 +1,6 @@
 import json
 import logging
+from copy import deepcopy
 from datetime import UTC, date, datetime
 
 import pytest
@@ -41,6 +42,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     OnlineResourceFunctionCode,
     ProgressCode,
 )
+from lantern.lib.metadata_library.models.record.presets.conformance import MAGIC_DISCOVERY_V1, MAGIC_DISCOVERY_V2
 from lantern.lib.metadata_library.models.record.record import Record, RecordInvalidError, RecordSchema
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, get_admin, set_admin
 from lantern.lib.metadata_library.models.record.utils.kv import set_kv
@@ -59,18 +61,179 @@ class TestRecordSchema:
         with pytest.raises(KeyError):
             RecordSchema.map_href("unknown")
 
-    def test_get_schema_contents(self):
+    @pytest.mark.parametrize(
+        ("schema", "schema_id"),
+        [
+            (
+                RecordSchema.ISO_2_V4,
+                "https://metadata-resources.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-2-v4.json",
+            ),
+            (
+                RecordSchema.MAGIC_V1,
+                "https://metadata-resources.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/magic-discovery-v1.json",
+            ),
+            (
+                RecordSchema.MAGIC_V2,
+                "https://metadata-resources.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/magic-discovery-v2.json",
+            ),
+        ],
+    )
+    def test_get_schema_contents(self, schema: RecordSchema, schema_id: str):
         """Can get the contents of a supported schema."""
-        result = RecordSchema.get_schema_contents(RecordSchema.ISO_2_V4)
+        result = RecordSchema.get_schema_contents(schema)
         assert isinstance(result, dict)
-        assert (
-            result["$id"]
-            == "https://metadata-resources.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-2-v4.json"
-        )
+        assert result["$id"] == schema_id
 
 
 class TestRecord:
     """Test root Record element."""
+
+    magic_discovery_v1_valid = Record(
+        file_identifier="x",
+        hierarchy_level=HierarchyLevelCode.DATASET,
+        metadata=Metadata(
+            contacts=Contacts(
+                [
+                    Contact(
+                        organisation=ContactIdentity(
+                            name="Mapping and Geographic Information Centre, British Antarctic Survey",
+                            href="https://ror.org/01rhff309",
+                            title="ror",
+                        ),
+                        phone="+44 (0)1223 221400",
+                        email="magic@bas.ac.uk",
+                        address=Address(
+                            delivery_point="British Antarctic Survey, High Cross, Madingley Road",
+                            city="Cambridge",
+                            administrative_area="Cambridgeshire",
+                            postal_code="CB3 0ET",
+                            country="United Kingdom",
+                        ),
+                        online_resource=OnlineResource(
+                            href="https://www.bas.ac.uk/teams/magic",
+                            title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
+                            description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
+                            function=OnlineResourceFunctionCode.INFORMATION,
+                        ),
+                        role={ContactRoleCode.POINT_OF_CONTACT},
+                    )
+                ]
+            ),
+            date_stamp=datetime(2014, 6, 30, tzinfo=UTC).date(),
+        ),
+        identification=Identification(
+            title="x",
+            edition="x",
+            identifiers=Identifiers(
+                [Identifier(identifier="x", href="https://data.bas.ac.uk/items/x", namespace="data.bas.ac.uk")]
+            ),
+            abstract="x",
+            dates=Dates(
+                creation=Date(date=datetime(2014, 6, 30, tzinfo=UTC).date()),
+                released=Date(date=datetime(2014, 6, 30, tzinfo=UTC).date()),
+            ),
+            contacts=Contacts(
+                [
+                    Contact(
+                        organisation=ContactIdentity(
+                            name="Mapping and Geographic Information Centre, British Antarctic Survey",
+                            href="https://ror.org/01rhff309",
+                            title="ror",
+                        ),
+                        phone="+44 (0)1223 221400",
+                        email="magic@bas.ac.uk",
+                        address=Address(
+                            delivery_point="British Antarctic Survey, High Cross, Madingley Road",
+                            city="Cambridge",
+                            administrative_area="Cambridgeshire",
+                            postal_code="CB3 0ET",
+                            country="United Kingdom",
+                        ),
+                        online_resource=OnlineResource(
+                            href="https://www.bas.ac.uk/teams/magic",
+                            title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
+                            description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
+                            function=OnlineResourceFunctionCode.INFORMATION,
+                        ),
+                        role={ContactRoleCode.POINT_OF_CONTACT},
+                    )
+                ]
+            ),
+            maintenance=Maintenance(
+                maintenance_frequency=MaintenanceFrequencyCode.AS_NEEDED,
+                progress=ProgressCode.COMPLETED,
+            ),
+            constraints=Constraints(
+                [
+                    Constraint(
+                        type=ConstraintTypeCode.ACCESS,
+                        restriction_code=ConstraintRestrictionCode.UNRESTRICTED,
+                        statement="Open Access (Anonymous)",
+                    ),
+                    Constraint(
+                        type=ConstraintTypeCode.USAGE,
+                        restriction_code=ConstraintRestrictionCode.LICENSE,
+                        href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+                        statement="This information is licensed under the Open Government Licence v3.0. To view this licence, visit https://www.nationalarchives.gov.uk/doc/open-government-licence/.",
+                    ),
+                ]
+            ),
+            extents=Extents(
+                [
+                    Extent(
+                        identifier="bounding",
+                        geographic=ExtentGeographic(
+                            bounding_box=BoundingBox(
+                                west_longitude=0, east_longitude=0, south_latitude=0, north_latitude=0
+                            )
+                        ),
+                    )
+                ]
+            ),
+        ),
+        data_quality=DataQuality(
+            lineage=Lineage(statement="x"),
+            domain_consistency=[
+                DomainConsistency(
+                    specification=Citation(
+                        title="British Antarctic Survey (BAS) Mapping and Geographic Information Centre (MAGIC) Discovery Metadata Profile",
+                        href="https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery-v1/",
+                        dates=Dates(publication=Date(date=date(2024, 11, 1))),
+                        edition="1",
+                        contacts=Contacts(
+                            [
+                                Contact(
+                                    organisation=ContactIdentity(
+                                        name="Mapping and Geographic Information Centre, British Antarctic Survey",
+                                        href="https://ror.org/01rhff309",
+                                        title="ror",
+                                    ),
+                                    phone="+44 (0)1223 221400",
+                                    email="magic@bas.ac.uk",
+                                    address=Address(
+                                        delivery_point="British Antarctic Survey, High Cross, Madingley Road",
+                                        city="Cambridge",
+                                        administrative_area="Cambridgeshire",
+                                        postal_code="CB3 0ET",
+                                        country="United Kingdom",
+                                    ),
+                                    online_resource=OnlineResource(
+                                        href="https://www.bas.ac.uk/teams/magic",
+                                        title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
+                                        description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
+                                        function=OnlineResourceFunctionCode.INFORMATION,
+                                    ),
+                                    role={ContactRoleCode.PUBLISHER},
+                                )
+                            ]
+                        ),
+                    ),
+                    explanation="Resource within scope of British Antarctic Survey (BAS) Mapping and Geographic Information Centre (MAGIC) Discovery Metadata Profile.",
+                    result=True,
+                )
+            ],
+        ),
+    )
 
     def test_init(self):
         """Can create a minimal Record element from directly assigned properties."""
@@ -351,151 +514,30 @@ class TestRecord:
 
         assert record.validate() is None
 
-    def test_validate_min_magic(self):
-        """A minimally valid MAGIC profile record can be validated."""
-        record = Record(
-            file_identifier="x",
-            hierarchy_level=HierarchyLevelCode.DATASET,
-            metadata=Metadata(
-                contacts=Contacts(
-                    [
-                        Contact(
-                            organisation=ContactIdentity(
-                                name="Mapping and Geographic Information Centre, British Antarctic Survey",
-                                href="https://ror.org/01rhff309",
-                                title="ror",
-                            ),
-                            phone="+44 (0)1223 221400",
-                            email="magic@bas.ac.uk",
-                            address=Address(
-                                delivery_point="British Antarctic Survey, High Cross, Madingley Road",
-                                city="Cambridge",
-                                administrative_area="Cambridgeshire",
-                                postal_code="CB3 0ET",
-                                country="United Kingdom",
-                            ),
-                            online_resource=OnlineResource(
-                                href="https://www.bas.ac.uk/teams/magic",
-                                title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-                                description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
-                                function=OnlineResourceFunctionCode.INFORMATION,
-                            ),
-                            role={ContactRoleCode.POINT_OF_CONTACT},
-                        )
-                    ]
-                ),
-                date_stamp=datetime(2014, 6, 30, tzinfo=UTC).date(),
-            ),
-            identification=Identification(
-                title="x",
-                edition="x",
-                identifiers=Identifiers(
-                    [Identifier(identifier="x", href="https://data.bas.ac.uk/items/x", namespace="data.bas.ac.uk")]
-                ),
-                abstract="x",
-                dates=Dates(creation=Date(date=datetime(2014, 6, 30, tzinfo=UTC).date())),
-                contacts=Contacts(
-                    [
-                        Contact(
-                            organisation=ContactIdentity(
-                                name="Mapping and Geographic Information Centre, British Antarctic Survey",
-                                href="https://ror.org/01rhff309",
-                                title="ror",
-                            ),
-                            phone="+44 (0)1223 221400",
-                            email="magic@bas.ac.uk",
-                            address=Address(
-                                delivery_point="British Antarctic Survey, High Cross, Madingley Road",
-                                city="Cambridge",
-                                administrative_area="Cambridgeshire",
-                                postal_code="CB3 0ET",
-                                country="United Kingdom",
-                            ),
-                            online_resource=OnlineResource(
-                                href="https://www.bas.ac.uk/teams/magic",
-                                title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-                                description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
-                                function=OnlineResourceFunctionCode.INFORMATION,
-                            ),
-                            role={ContactRoleCode.POINT_OF_CONTACT},
-                        )
-                    ]
-                ),
-                maintenance=Maintenance(
-                    maintenance_frequency=MaintenanceFrequencyCode.AS_NEEDED, progress=ProgressCode.ON_GOING
-                ),
-                constraints=Constraints(
-                    [
-                        Constraint(
-                            type=ConstraintTypeCode.ACCESS,
-                            restriction_code=ConstraintRestrictionCode.UNRESTRICTED,
-                            statement="Open Access (Anonymous)",
-                        ),
-                        Constraint(
-                            type=ConstraintTypeCode.USAGE,
-                            restriction_code=ConstraintRestrictionCode.LICENSE,
-                            href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
-                            statement="This information is licensed under the Open Government Licence v3.0. To view this licence, visit https://www.nationalarchives.gov.uk/doc/open-government-licence/.",
-                        ),
-                    ]
-                ),
-                extents=Extents(
-                    [
-                        Extent(
-                            identifier="bounding",
-                            geographic=ExtentGeographic(
-                                bounding_box=BoundingBox(
-                                    west_longitude=0, east_longitude=0, south_latitude=0, north_latitude=0
-                                )
-                            ),
-                        )
-                    ]
-                ),
-            ),
-            data_quality=DataQuality(
-                lineage=Lineage(statement="x"),
-                domain_consistency=[
-                    DomainConsistency(
-                        specification=Citation(
-                            title="British Antarctic Survey (BAS) Mapping and Geographic Information Centre (MAGIC) Discovery Metadata Profile",
-                            href="https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery-v1/",
-                            dates=Dates(publication=Date(date=date(2024, 11, 1))),
-                            edition="1",
-                            contacts=Contacts(
-                                [
-                                    Contact(
-                                        organisation=ContactIdentity(
-                                            name="Mapping and Geographic Information Centre, British Antarctic Survey",
-                                            href="https://ror.org/01rhff309",
-                                            title="ror",
-                                        ),
-                                        phone="+44 (0)1223 221400",
-                                        email="magic@bas.ac.uk",
-                                        address=Address(
-                                            delivery_point="British Antarctic Survey, High Cross, Madingley Road",
-                                            city="Cambridge",
-                                            administrative_area="Cambridgeshire",
-                                            postal_code="CB3 0ET",
-                                            country="United Kingdom",
-                                        ),
-                                        online_resource=OnlineResource(
-                                            href="https://www.bas.ac.uk/teams/magic",
-                                            title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-                                            description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
-                                            function=OnlineResourceFunctionCode.INFORMATION,
-                                        ),
-                                        role={ContactRoleCode.PUBLISHER},
-                                    )
-                                ]
-                            ),
-                        ),
-                        explanation="Resource within scope of British Antarctic Survey (BAS) Mapping and Geographic Information Centre (MAGIC) Discovery Metadata Profile.",
-                        result=True,
-                    )
-                ],
-            ),
-        )
+    def test_validate_min_magic_discovery_v1(self):
+        """Can validate a valid record using the MAGIC Discovery profile (v1, original href)."""
+        record = deepcopy(self.magic_discovery_v1_valid)
+        assert record._profile_schemas == [RecordSchema.MAGIC_V1]
+        assert record.validate() is None
 
+    def test_validate_min_magic_discovery_v1_alt(self):
+        """Can validate a valid record using the MAGIC Discovery profile (v1, replacement href)."""
+        record = deepcopy(self.magic_discovery_v1_valid)
+        record.data_quality.domain_consistency = [MAGIC_DISCOVERY_V1]
+
+        assert record._profile_schemas == [RecordSchema.MAGIC_V1]
+        assert record.validate() is None
+
+    def test_validate_min_magic_discovery_v2(self):
+        """Can validate a valid record using the MAGIC Discovery profile (v2)."""
+        record = deepcopy(self.magic_discovery_v1_valid)
+        record.identification.other_citation_details = "x"
+        record.identification.contacts.append(
+            Contact(organisation=ContactIdentity(name="UKRI"), role={ContactRoleCode.RIGHTS_HOLDER})
+        )
+        record.data_quality.domain_consistency = [MAGIC_DISCOVERY_V2]
+
+        assert record._profile_schemas == [RecordSchema.MAGIC_V2]
         assert record.validate() is None
 
     def test_validate_invalid_iso(self, mocker: MockerFixture, fx_lib_record_model_min_iso: Record):
@@ -505,49 +547,18 @@ class TestRecord:
         with pytest.raises(RecordInvalidError):
             fx_lib_record_model_min_iso.validate()
 
+    def test_validate_invalid_magic_discovery_released_date(self):
+        """Can't validate a record that does not comply with non-schema validation for MAGIC discovery profile."""
+        record = deepcopy(self.magic_discovery_v1_valid)
+        record.identification.dates.released = None
+
+        assert record._profile_schemas == [RecordSchema.MAGIC_V1]
+        with pytest.raises(RecordInvalidError):
+            record.validate()
+
     def test_validate_invalid_profile(self, fx_lib_record_model_min_iso: Record):
         """Can't validate a record that does not comply with a schema inferred from a domain consistency element."""
-        fx_lib_record_model_min_iso.data_quality = DataQuality(
-            domain_consistency=[
-                DomainConsistency(
-                    specification=Citation(
-                        title="British Antarctic Survey (BAS) Mapping and Geographic Information Centre (MAGIC) Discovery Metadata Profile",
-                        href="https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery-v1/",
-                        dates=Dates(publication=Date(date=date(2024, 11, 1))),
-                        edition="1",
-                        contacts=Contacts(
-                            [
-                                Contact(
-                                    organisation=ContactIdentity(
-                                        name="Mapping and Geographic Information Centre, British Antarctic Survey",
-                                        href="https://ror.org/01rhff309",
-                                        title="ror",
-                                    ),
-                                    phone="+44 (0)1223 221400",
-                                    email="magic@bas.ac.uk",
-                                    address=Address(
-                                        delivery_point="British Antarctic Survey, High Cross, Madingley Road",
-                                        city="Cambridge",
-                                        administrative_area="Cambridgeshire",
-                                        postal_code="CB3 0ET",
-                                        country="United Kingdom",
-                                    ),
-                                    online_resource=OnlineResource(
-                                        href="https://www.bas.ac.uk/teams/magic",
-                                        title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-                                        description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
-                                        function=OnlineResourceFunctionCode.INFORMATION,
-                                    ),
-                                    role={ContactRoleCode.PUBLISHER},
-                                )
-                            ]
-                        ),
-                    ),
-                    explanation="Resource within scope of British Antarctic Survey (BAS) Mapping and Geographic Information Centre (MAGIC) Discovery Metadata Profile.",
-                    result=True,
-                )
-            ]
-        )
+        fx_lib_record_model_min_iso.data_quality = DataQuality(domain_consistency=[MAGIC_DISCOVERY_V2])
 
         with pytest.raises(RecordInvalidError):
             fx_lib_record_model_min_iso.validate()
@@ -555,52 +566,11 @@ class TestRecord:
     def test_validate_invalid_forced_schemas(self, fx_lib_record_model_min_iso: Record):
         """Can't validate a record that does not comply with a forced set of schemas."""
         with pytest.raises(RecordInvalidError):
-            fx_lib_record_model_min_iso.validate(force_schemas=[RecordSchema.MAGIC_V1])
+            fx_lib_record_model_min_iso.validate(force_schemas=[RecordSchema.MAGIC_V2])
 
     def test_validate_ignore_profiles(self, fx_lib_record_model_min_iso: Record):
         """Can validate a record that would not normally comply because of a schema indicated via domain consistency."""
-        fx_lib_record_model_min_iso.data_quality = DataQuality(
-            domain_consistency=[
-                DomainConsistency(
-                    specification=Citation(
-                        title="British Antarctic Survey (BAS) Mapping and Geographic Information Centre (MAGIC) Discovery Metadata Profile",
-                        href="https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery-v1/",
-                        dates=Dates(publication=Date(date=date(2024, 11, 1))),
-                        edition="1",
-                        contacts=Contacts(
-                            [
-                                Contact(
-                                    organisation=ContactIdentity(
-                                        name="Mapping and Geographic Information Centre, British Antarctic Survey",
-                                        href="https://ror.org/01rhff309",
-                                        title="ror",
-                                    ),
-                                    phone="+44 (0)1223 221400",
-                                    email="magic@bas.ac.uk",
-                                    address=Address(
-                                        delivery_point="British Antarctic Survey, High Cross, Madingley Road",
-                                        city="Cambridge",
-                                        administrative_area="Cambridgeshire",
-                                        postal_code="CB3 0ET",
-                                        country="United Kingdom",
-                                    ),
-                                    online_resource=OnlineResource(
-                                        href="https://www.bas.ac.uk/teams/magic",
-                                        title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-                                        description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
-                                        function=OnlineResourceFunctionCode.INFORMATION,
-                                    ),
-                                    role={ContactRoleCode.PUBLISHER},
-                                )
-                            ]
-                        ),
-                    ),
-                    explanation="Resource within scope of British Antarctic Survey (BAS) Mapping and Geographic Information Centre (MAGIC) Discovery Metadata Profile.",
-                    result=True,
-                )
-            ]
-        )
-
+        fx_lib_record_model_min_iso.data_quality = DataQuality(domain_consistency=[MAGIC_DISCOVERY_V2])
         fx_lib_record_model_min_iso.validate(use_profiles=False)
 
     @pytest.mark.parametrize(
@@ -623,7 +593,7 @@ class TestRecord:
                 },
             ),
             (
-                "minimal-magic",
+                "minimal-magic-discovery",
                 {
                     "$schema": "https://metadata-resources.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-2-v4.json",
                     "file_identifier": "x",
@@ -701,18 +671,24 @@ class TestRecord:
                                 },
                                 "phone": "+44 (0)1223 221400",
                                 "role": ["pointOfContact"],
-                            }
+                            },
+                            {
+                                "organisation": {
+                                    "name": "UKRI",
+                                },
+                                "role": ["rightsHolder"],
+                            },
                         ],
-                        "dates": {"creation": "2014-06-30"},
+                        "dates": {"creation": "2014-06-30", "released": "2014-06-30"},
                         "domain_consistency": [
                             {
                                 "specification": {
                                     "title": {
                                         "value": "British Antarctic Survey (BAS) Mapping and Geographic Information Centre (MAGIC) Discovery Metadata Profile",
-                                        "href": "https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery-v1/",
+                                        "href": "https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery/v2/",
                                     },
-                                    "dates": {"publication": "2024-11-01"},
-                                    "edition": "1",
+                                    "dates": {"publication": "2025-11-24"},
+                                    "edition": "2",
                                     "contact": {
                                         "organisation": {
                                             "name": "Mapping and Geographic Information Centre, British Antarctic Survey",
@@ -760,7 +736,8 @@ class TestRecord:
                         ],
                         "language": "eng",
                         "lineage": {"statement": "x"},
-                        "maintenance": {"maintenance_frequency": "asNeeded", "progress": "onGoing"},
+                        "maintenance": {"maintenance_frequency": "asNeeded", "progress": "completed"},
+                        "other_citation_details": "x",
                         "title": {"value": "x"},
                     },
                 },

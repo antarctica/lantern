@@ -22,7 +22,8 @@ from lantern.lib.metadata_library.models.record.enums import (
     HierarchyLevelCode,
     OnlineResourceFunctionCode,
 )
-from lantern.lib.metadata_library.models.record.presets.base import RecordMagicDiscoveryV1
+from lantern.lib.metadata_library.models.record.presets.base import RecordMagicDiscoveryV2
+from lantern.lib.metadata_library.models.record.presets.contacts import UKRI_RIGHTS_HOLDER
 
 EXPECTED_POC = Contact(
     organisation=ContactIdentity(
@@ -53,9 +54,9 @@ EXPECTED_PUBLISHER.role = {ContactRoleCode.PUBLISHER}
 EXPECTED_PROFILE = DomainConsistency(
     specification=Citation(
         title="British Antarctic Survey (BAS) Mapping and Geographic Information Centre (MAGIC) Discovery Metadata Profile",
-        href="https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery-v1/",
-        dates=Dates(publication=Date(date=date(2024, 11, 1))),
-        edition="1",
+        href="https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery/v2/",
+        dates=Dates(publication=Date(date=date(2025, 11, 24))),
+        edition="2",
         contacts=Contacts([EXPECTED_PUBLISHER]),
     ),
     explanation="Resource within scope of British Antarctic Survey (BAS) Mapping and Geographic Information Centre (MAGIC) Discovery Metadata Profile.",
@@ -63,30 +64,30 @@ EXPECTED_PROFILE = DomainConsistency(
 )
 
 
-class TestRecordMagicDiscoveryV1:
-    """Test record with magic discovery v1 profile."""
+class TestRecordMagicDiscoveryV2:
+    """Test record with magic discovery v2 profile."""
 
     def test_init(self):
         """Can create a minimal Record element from directly assigned properties."""
         date_stamp = datetime(2014, 6, 30, tzinfo=UTC).date()
         hierarchy_level = HierarchyLevelCode.DATASET
         value = "x"
-        record = RecordMagicDiscoveryV1(
+        record = RecordMagicDiscoveryV2(
             file_identifier="x",
             hierarchy_level=hierarchy_level,
             identification=Identification(title=value, abstract=value, dates=Dates(creation=Date(date=date_stamp))),
         )
 
-        assert isinstance(record, RecordMagicDiscoveryV1)
+        assert isinstance(record, RecordMagicDiscoveryV2)
 
     def test_loads(self, fx_lib_record_config_min_magic: dict):
         """Can create a minimal Record from a JSON serialised dict."""
-        record = RecordMagicDiscoveryV1.loads(fx_lib_record_config_min_magic)
-        assert isinstance(record, RecordMagicDiscoveryV1)
+        record = RecordMagicDiscoveryV2.loads(fx_lib_record_config_min_magic)
+        assert isinstance(record, RecordMagicDiscoveryV2)
 
     def test_metadata_contact(self, fx_lib_record_config_min_magic: dict):
         """Includes MAGIC as metadata point of contact."""
-        record = RecordMagicDiscoveryV1.loads(fx_lib_record_config_min_magic)
+        record = RecordMagicDiscoveryV2.loads(fx_lib_record_config_min_magic)
         assert record.metadata.contacts == [EXPECTED_POC]
 
     def test_metadata_datestamp(self):
@@ -94,7 +95,7 @@ class TestRecordMagicDiscoveryV1:
         date_stamp = datetime(2014, 6, 30, tzinfo=UTC).date()
         hierarchy_level = HierarchyLevelCode.DATASET
         value = "x"
-        record = RecordMagicDiscoveryV1(
+        record = RecordMagicDiscoveryV2(
             file_identifier="x",
             hierarchy_level=hierarchy_level,
             date_stamp=date_stamp,
@@ -106,7 +107,7 @@ class TestRecordMagicDiscoveryV1:
     def test_catalogue_identifier(self, fx_lib_record_config_min_magic: dict):
         """Includes a catalogue identifier."""
         expected = Identifier(identifier="x", href="https://data.bas.ac.uk/items/x", namespace="data.bas.ac.uk")
-        record = RecordMagicDiscoveryV1.loads(fx_lib_record_config_min_magic)
+        record = RecordMagicDiscoveryV2.loads(fx_lib_record_config_min_magic)
 
         assert expected in record.identification.identifiers
 
@@ -115,15 +116,20 @@ class TestRecordMagicDiscoveryV1:
         expected = Identifier(identifier="x", href="https://data.bas.ac.uk/items/x", namespace="data.bas.ac.uk")
         # noinspection PyTypeChecker
         fx_lib_record_config_min_magic["identification"]["identifiers"] = [asdict(expected)]
-        record = RecordMagicDiscoveryV1.loads(fx_lib_record_config_min_magic)
+        record = RecordMagicDiscoveryV2.loads(fx_lib_record_config_min_magic)
 
         matches = [i for i in record.identification.identifiers if i == expected]
         assert len(matches) == 1
 
     def test_poc(self, fx_lib_record_config_min_magic: dict):
-        """Includes MAGIC as a point of contact."""
-        record = RecordMagicDiscoveryV1.loads(fx_lib_record_config_min_magic)
-        assert record.identification.contacts == [EXPECTED_POC]
+        """Does include MAGIC as a point of contact."""
+        record = RecordMagicDiscoveryV2.loads(fx_lib_record_config_min_magic)
+        assert EXPECTED_POC in record.identification.contacts
+
+    def test_rights_holder(self, fx_lib_record_config_min_magic: dict):
+        """Does include UKRI as a default copyright holder contact."""
+        record = RecordMagicDiscoveryV2.loads(fx_lib_record_config_min_magic)
+        assert UKRI_RIGHTS_HOLDER in record.identification.contacts
 
     @pytest.mark.parametrize(
         "contacts",
@@ -218,9 +224,9 @@ class TestRecordMagicDiscoveryV1:
         ],
     )
     def test_poc_existing(self, fx_lib_record_config_min_magic: dict, contacts: list[dict]):
-        """Includes MAGIC as a point of contact."""
+        """Does include MAGIC as a point of contact only if needed."""
         fx_lib_record_config_min_magic["identification"]["contacts"] = contacts
-        record = RecordMagicDiscoveryV1.loads(fx_lib_record_config_min_magic)
+        record = RecordMagicDiscoveryV2.loads(fx_lib_record_config_min_magic)
 
         # noinspection PyUnresolvedReferences
         matches = [
@@ -234,7 +240,7 @@ class TestRecordMagicDiscoveryV1:
 
     def test_profile(self, fx_lib_record_config_min_magic: dict):
         """Includes domain consistency element for profile."""
-        record = RecordMagicDiscoveryV1.loads(fx_lib_record_config_min_magic)
+        record = RecordMagicDiscoveryV2.loads(fx_lib_record_config_min_magic)
         assert EXPECTED_PROFILE in record.data_quality.domain_consistency
 
     def test_catalogue_profile_existing(self, fx_lib_record_config_min_magic: dict):
@@ -243,10 +249,10 @@ class TestRecordMagicDiscoveryV1:
             "specification": {
                 "title": {
                     "value": "British Antarctic Survey (BAS) Mapping and Geographic Information Centre (MAGIC) Discovery Metadata Profile",
-                    "href": "https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery-v1/",
+                    "href": "https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery/v2/",
                 },
-                "dates": {"publication": "2024-11-01"},
-                "edition": "1",
+                "dates": {"publication": "2025-11-24"},
+                "edition": "2",
                 "contact": {
                     "organisation": {
                         "name": "Mapping and Geographic Information Centre, British Antarctic Survey",
@@ -275,7 +281,7 @@ class TestRecordMagicDiscoveryV1:
             "result": True,
         }
         fx_lib_record_config_min_magic["identification"]["domain_consistency"] = [profile]
-        record = RecordMagicDiscoveryV1.loads(fx_lib_record_config_min_magic)
+        record = RecordMagicDiscoveryV2.loads(fx_lib_record_config_min_magic)
 
         matches = [p for p in record.data_quality.domain_consistency if p == EXPECTED_PROFILE]
         assert len(matches) == 1
@@ -284,7 +290,7 @@ class TestRecordMagicDiscoveryV1:
         """Can set a lineage statement."""
         expected = "x"
         fx_lib_record_config_min_magic["identification"]["lineage"] = {"statement": expected}
-        record = RecordMagicDiscoveryV1.loads(fx_lib_record_config_min_magic)
+        record = RecordMagicDiscoveryV2.loads(fx_lib_record_config_min_magic)
 
         assert record.data_quality.lineage.statement == expected
 
@@ -329,8 +335,7 @@ class TestRecordMagicDiscoveryV1:
         ],
     )
     def test_set_citation(self, values: dict, expected: str):
-        """Can set citation from record."""
-        record = RecordMagicDiscoveryV1.loads(values)
-        record.set_citation()
+        """Can get default citation based on record."""
+        record = RecordMagicDiscoveryV2.loads(values)
 
         assert record.identification.other_citation_details == expected

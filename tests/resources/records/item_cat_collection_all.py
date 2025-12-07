@@ -122,8 +122,8 @@ record.identification.identifiers = Identifiers(
             namespace="doi",
         ),
         Identifier(
-            identifier="10.123/test123",
-            href="https://doi.org/10.123/test123",
+            identifier="10.123/test-c-123",
+            href="https://doi.org/10.123/test-c-123",
             namespace="doi",
         ),
     ]
@@ -187,3 +187,6 @@ keys = load_test_keys()
 administration = get_admin(keys=keys, record=record)
 administration.gitlab_issues = ["https://gitlab.data.bas.ac.uk/MAGIC/test/-/issues/123"]
 set_admin(keys=keys, record=record, admin_meta=administration)
+
+# Set to check value is not output
+record.identification.other_citation_details = "white t-shirt"

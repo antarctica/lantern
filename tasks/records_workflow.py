@@ -369,11 +369,11 @@ def main() -> None:
     print("TIP! See the 'records-clone', 'records-select' and/or 'records-load' tasks if useful.")
     _confirm(logger, "Are records staged in import directory?")
 
-    # open a changeset if needed
-    store, issue_url = _changeset(logger=logger, config=config, store=store, keys=keys, import_path=import_path)
-
     # process any zap authored records
     _zap(logger=logger, store=store, admin_keys=keys, import_path=import_path)
+
+    # open a changeset if needed
+    store, issue_url = _changeset(logger=logger, config=config, store=store, keys=keys, import_path=import_path)
 
     # import records and create merge request if needed
     commit = _import(logger=logger, config=config, store=store, import_path=import_path)

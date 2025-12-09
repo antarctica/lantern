@@ -187,6 +187,11 @@ class TestVerificationDistribution:
                 [VerificationType.ITEM_DOWNLOADS, VerificationType.DOWNLOADS_SHAREPOINT],
             ),
             (
+                "sftp://san.nerc-bas.ac.uk/data/x",
+                None,
+                [VerificationType.ITEM_DOWNLOADS, VerificationType.SAN_REFERENCE],
+            ),
+            (
                 "x",
                 VerificationDistribution.arcgis_layer_media_types[0],
                 [VerificationType.ITEM_DOWNLOADS, VerificationType.DOWNLOADS_ARCGIS_LAYERS],
@@ -198,19 +203,24 @@ class TestVerificationDistribution:
             ),
         ],
     )
-    def test_jobs(self, href: str, format_href: str, expected: list[VerificationType]):
+    def test_jobs(self, href: str, format_href: str | None, expected: list[VerificationType]):
         """Can generate verification jobs relevant to distribution."""
         record_distribution = Distribution(
-            format=Format(format="x", href=format_href),
             distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
             transfer_option=TransferOption(
                 online_resource=OnlineResource(href=href, function=OnlineResourceFunctionCode.DOWNLOAD)
             ),
         )
+        if format_href:
+            record_distribution.format = Format(format="x", href=format_href)
         distribution = VerificationDistribution(distribution=record_distribution, file_identifier="x")
 
         results = distribution.jobs(
-            context={"BASE_URL": "https://example.com", "SHAREPOINT_PROXY_ENDPOINT": "https://proxy.com"}
+            context={
+                "BASE_URL": "https://example.com",
+                "SHAREPOINT_PROXY_ENDPOINT": "https://proxy.com",
+                "SAN_PROXY_ENDPOINT": "https://proxy.com",
+            }
         )
 
         job_types = sorted([result.type.name for result in results])
@@ -232,13 +242,39 @@ class TestVerificationDistribution:
         )
         distribution = VerificationDistribution(distribution=record_distribution, file_identifier="x")
 
-        results = distribution.jobs(context={"BASE_URL": "https://example.com", "SHAREPOINT_PROXY_ENDPOINT": proxy})
+        results = distribution.jobs(
+            context={"BASE_URL": "https://example.com", "SHAREPOINT_PROXY_ENDPOINT": proxy, "SAN_PROXY_ENDPOINT": "x"}
+        )
         job = next((result for result in results if result.type == VerificationType.DOWNLOADS_SHAREPOINT), None)
 
         assert job is not None
         assert job.type == VerificationType.DOWNLOADS_SHAREPOINT
         assert job.context["URL"] == proxy
         assert job.context["JSON"] == {"path": "/foo bar.jpg"}
+
+    def test_job_san(self):
+        """Specifically check that SAN reference jobs are generated correctly."""
+        proxy = "https://proxy.com"
+        record_distribution = Distribution(
+            distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
+            transfer_option=TransferOption(
+                online_resource=OnlineResource(
+                    href="sftp://san.nerc-bas.ac.uk/data/x",
+                    function=OnlineResourceFunctionCode.DOWNLOAD,
+                )
+            ),
+        )
+        distribution = VerificationDistribution(distribution=record_distribution, file_identifier="x")
+
+        results = distribution.jobs(
+            context={"BASE_URL": "https://example.com", "SHAREPOINT_PROXY_ENDPOINT": "x", "SAN_PROXY_ENDPOINT": proxy}
+        )
+        job = next((result for result in results if result.type == VerificationType.SAN_REFERENCE), None)
+
+        assert job is not None
+        assert job.type == VerificationType.SAN_REFERENCE
+        assert job.context["URL"] == proxy
+        assert job.context["JSON"] == {"path": "/data/x"}
 
 
 class TestVerificationRecord:
@@ -256,6 +292,7 @@ class TestVerificationRecord:
         context: VerificationContext = {
             "BASE_URL": "https://example.com",
             "SHAREPOINT_PROXY_ENDPOINT": "https://proxy.com",
+            "SAN_PROXY_ENDPOINT": "https://proxy.com",
         }
         distribution = Distribution(
             distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),

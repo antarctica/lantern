@@ -25,3 +25,4 @@ LANTERN_AWS_S3_BUCKET="op://Infrastructure/rnv7zb3jzviwsvziknpxicvqaq/password" 
 #LANTERN_AWS_S3_BUCKET="op://Infrastructure/hksogwx7zqx3ct2jr36cshoqpy/password"  # production
 
 LANTERN_VERIFY_SHAREPOINT_PROXY_ENDPOINT="op://Infrastructure/SCAR ADD Metadata Toolbox - SharePoint proxy URL/password"
+LANTERN_VERIFY_SAN_PROXY_ENDPOINT="op://Infrastructure/SCAR ADD Metadata Toolbox - SAN proxy URL/password"

@@ -87,3 +87,14 @@ environment.
 2. configure the flow connections and generate a HTTP endpoint
 3. set the relevant [Config](/docs/config.md) option in the `.env` template and Ansible Vault for use in the
    [Environment Module](/docs/deployment.md#environment-module) template
+
+### Power Automate SAN proxy
+
+1. import `resources/flows/lantern-san-proxy.zip` into Power Automate as a new flow
+2. configure the flow connections and generate a HTTP endpoint
+3. set the relevant [Config](/docs/config.md) option in the `.env` template and Ansible Vault for use in the
+   [Environment Module](/docs/deployment.md#environment-module) template
+
+> [!TIP]
+> See [this note](https://gitlab.data.bas.ac.uk/MAGIC/dev-docs/-/blob/32f4adf63fae42acab7b8fb749362432b68ad397/tool-power-automate.md#sftp-connector)
+> on getting the SSH server fingerprint in Power Automate expected format.

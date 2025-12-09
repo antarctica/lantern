@@ -92,6 +92,7 @@ class TestConfig:
             "AWS_ACCESS_ID": "x",
             "AWS_ACCESS_SECRET": redacted_value,
             "VERIFY_SHAREPOINT_PROXY_ENDPOINT": "x",
+            "VERIFY_SAN_PROXY_ENDPOINT": "x",
         }
 
         _signing_key_public = "ADMIN_METADATA_SIGNING_KEY_PUBLIC"
@@ -203,7 +204,8 @@ class TestConfig:
             ({"LANTERN_AWS_S3_BUCKET": None, "LANTERN_AWS_ACCESS_ID": "x", "LANTERN_AWS_ACCESS_SECRET": "x"}),
             ({"LANTERN_AWS_S3_BUCKET": "x", "LANTERN_AWS_ACCESS_ID": None, "LANTERN_AWS_ACCESS_SECRET": "x"}),
             ({"LANTERN_AWS_S3_BUCKET": "x", "LANTERN_AWS_ACCESS_ID": "x", "LANTERN_AWS_ACCESS_SECRET": None}),
-            ({"LANTERN_VERIFY_SHAREPOINT_PROXY_ENDPOINT": None}),
+            ({"LANTERN_VERIFY_SHAREPOINT_PROXY_ENDPOINT": None, "LANTERN_VERIFY_SAN_PROXY_ENDPOINT": "x"}),
+            ({"LANTERN_VERIFY_SHAREPOINT_PROXY_ENDPOINT": "x", "LANTERN_VERIFY_SAN_PROXY_ENDPOINT": None}),
         ],
     )
     def test_validate_missing_required_option(self, envs: dict):
@@ -262,6 +264,7 @@ class TestConfig:
             ("AWS_ACCESS_ID", "x", False),
             ("AWS_ACCESS_SECRET", "x", True),
             ("VERIFY_SHAREPOINT_PROXY_ENDPOINT", "x", False),
+            ("VERIFY_SAN_PROXY_ENDPOINT", "x", False),
         ],
     )
     def test_configurable_property(self, property_name: str, expected: Any, sensitive: bool):

@@ -36,6 +36,7 @@ class VerificationType(Enum):
     DOWNLOADS_SHAREPOINT = "SharePoint Downloads"
     DOWNLOADS_ARCGIS_LAYERS = "ArcGIS Layers"
     DOWNLOADS_ARCGIS_SERVICES = "ArcGIS Services"
+    SAN_REFERENCE = "BAS SAN Reference"
 
 
 class VerificationDistributionType(Enum):
@@ -55,3 +56,4 @@ class VerificationDistributionType(Enum):
     NORA = "nora"
     PUBLISHED_MAP = "published_map"
     SHAREPOINT = "sharepoint"
+    SAN = "san"

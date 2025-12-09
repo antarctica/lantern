@@ -1021,7 +1021,11 @@ def fx_exporter_verify(
     type(mock_config).BASE_URL = PropertyMock(return_value="https://example.com")
     meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
-    context: VerificationContext = {"BASE_URL": meta.base_url, "SHAREPOINT_PROXY_ENDPOINT": "x"}
+    context: VerificationContext = {
+        "BASE_URL": meta.base_url,
+        "SHAREPOINT_PROXY_ENDPOINT": "x",
+        "SAN_PROXY_ENDPOINT": "x",
+    }
 
     return VerificationExporter(logger=fx_logger, meta=meta, s3=fx_s3_client, get_record=fx_get_record, context=context)
 

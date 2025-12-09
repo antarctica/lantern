@@ -28,6 +28,7 @@ Item to test all VerificationDistributionType enum members:
 - NORA file
 - SharePoint file
 - published map purchase option
+- BAS SAN reference
 
 Distribution option URLs all need to parse as URLs. Some must match a specific format to be matched to the right enum.
 """
@@ -275,6 +276,39 @@ map_purchase = Distribution(
     ),
 )
 
+san_reference = Distribution(
+    distributor=Contact(
+        organisation=ContactIdentity(
+            name="Mapping and Geographic Information Centre, British Antarctic Survey",
+            href="https://ror.org/01rhff309",
+            title="ror",
+        ),
+        phone="+44 (0)1223 221400",
+        email="magic@bas.ac.uk",
+        address=Address(
+            delivery_point="British Antarctic Survey, High Cross, Madingley Road",
+            city="Cambridge",
+            administrative_area="Cambridgeshire",
+            postal_code="CB3 0ET",
+            country="United Kingdom",
+        ),
+        online_resource=OnlineResource(
+            href="https://www.bas.ac.uk/teams/magic",
+            title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
+            description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
+            function=OnlineResourceFunctionCode.INFORMATION,
+        ),
+        role={ContactRoleCode.DISTRIBUTOR},
+    ),
+    transfer_option=TransferOption(
+        online_resource=OnlineResource(
+            href="sftp://san.nerc-bas.ac.uk/data/x",
+            function=OnlineResourceFunctionCode.DOWNLOAD,
+            title="Access data from BAS SAN (restricted and internal use).",
+        ),
+    ),
+)
+
 record = make_record(
     file_identifier="cf80b941-3de6-4a04-8f5a-a2349c1e3ae0",
     hierarchy_level=HierarchyLevelCode.DATASET,
@@ -289,4 +323,5 @@ record.distribution = [
     nora_file,
     sharepoint_file,
     map_purchase,
+    san_reference,
 ]

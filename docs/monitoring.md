@@ -9,6 +9,7 @@ These options from the app `lantern.Config` class are used to configure applicat
 - `SENTRY_DSN`: Sentry backend Data Source Name (DSN) for error logging
 - `TEMPLATES_SENTRY_SRC`: Sentry CDN URL for frontend error tracking and user feedback
 - `VERIFY_SHAREPOINT_PROXY_ENDPOINT`: the [SharePoint Proxy](#verification-sharepoint-proxy) used for site checks
+- `VERIFY_SAN_PROXY_ENDPOINT`: the [SAN Proxy](#verification-san-proxy) used for site checks
 
 See the [Config](/docs/config.md#config-options) docs for how to set these config options.
 
@@ -62,6 +63,7 @@ Checks are run for:
 - Item DOI redirects
 - Item distribution options (as links on Item pages)
 - File distribution options
+- SAN reference distribution options
 - ArcGIS layers and services (via the ArcGIS API)
 
 For Record and Item checks, all records in the [Store](/docs/architecture.md) are checked.
@@ -73,6 +75,7 @@ any content. In addition:
 - for files, the `content-length` header is optionally checked if an expected value is known
 - for NORA hosted files, a GET request with a byte range is used as NORA gives false negatives using HEAD requests
 - for SharePoint hosted files, a [Proxy](#verification-sharepoint-proxy) is used to allow access to restricted content
+- for SAN references, a [Proxy](#verification-san-proxy) is used to allow to validate target paths
 - for ArcGIS layers and services, the response is checked for errors (as ArcGIS returns a `200` even for missing items)
 
 Checks are not run for:
@@ -94,6 +97,17 @@ See the [Setup](/docs/setup.md#power-automate-sharepoint-proxy) docs for more in
 > [!NOTE]
 > The 'GetFileMetadataByPath' operation within this flow MUST be connected to an account that can access all files
 > across all Items hosted in SharePoint.
+
+#### Verification SAN proxy
+
+SAN references cannot be accessed anonymously. A Power Automate flow is used as a basic proxy to validate the specified
+path exists on the SAN. This check does not verify the path contains expected data (as we don't know what to expect).
+
+See the [Setup](/docs/setup.md#power-automate-san-proxy) docs for more information on setting up this proxy.
+
+> [!NOTE]
+> The 'List files in folder' operation within this flow MUST be connected to an account that can access all files
+> across all Items referenced from the SAN.
 
 ### Verification report
 

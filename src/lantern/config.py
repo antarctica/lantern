@@ -70,6 +70,7 @@ class Config:
             "AWS_ACCESS_ID",
             "AWS_ACCESS_SECRET",
             "VERIFY_SHAREPOINT_PROXY_ENDPOINT",
+            "VERIFY_SAN_PROXY_ENDPOINT",
         ]
         directories = ["STORE_GITLAB_CACHE_PATH", "EXPORT_PATH"]
 
@@ -116,6 +117,7 @@ class Config:
         AWS_ACCESS_ID: str
         AWS_ACCESS_SECRET: str
         VERIFY_SHAREPOINT_PROXY_ENDPOINT: str
+        VERIFY_SAN_PROXY_ENDPOINT: str
 
     def dumps_safe(self) -> ConfigDumpSafe:
         """Dump config for output to the user with sensitive data redacted."""
@@ -148,6 +150,7 @@ class Config:
             "AWS_ACCESS_ID": self.AWS_ACCESS_ID,
             "AWS_ACCESS_SECRET": self.AWS_ACCESS_SECRET_SAFE,
             "VERIFY_SHAREPOINT_PROXY_ENDPOINT": self.VERIFY_SHAREPOINT_PROXY_ENDPOINT,
+            "VERIFY_SAN_PROXY_ENDPOINT": self.VERIFY_SAN_PROXY_ENDPOINT,
         }
 
     @property
@@ -340,3 +343,9 @@ class Config:
         """Endpoint for checking SharePoint hosted downloads in verification jobs."""
         with self.env.prefixed(self._app_prefix), self.env.prefixed("VERIFY_"):
             return self.env("SHAREPOINT_PROXY_ENDPOINT")
+
+    @property
+    def VERIFY_SAN_PROXY_ENDPOINT(self) -> str:
+        """Endpoint for checking SAN references in verification jobs."""
+        with self.env.prefixed(self._app_prefix), self.env.prefixed("VERIFY_"):
+            return self.env("SAN_PROXY_ENDPOINT")

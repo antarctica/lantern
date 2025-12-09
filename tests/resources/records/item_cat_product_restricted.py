@@ -109,4 +109,14 @@ record.distribution = [
             ),
         ),
     ),
+    Distribution(
+        distributor=distributor,
+        transfer_option=TransferOption(
+            online_resource=OnlineResource(
+                href="sftp://san.nerc-bas.ac.uk/data/x",
+                function=OnlineResourceFunctionCode.DOWNLOAD,
+                title="Access from the BAS SAN",
+            ),
+        ),
+    ),
 ]

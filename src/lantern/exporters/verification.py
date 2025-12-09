@@ -157,7 +157,7 @@ def check_item_download(logger: logging.Logger, job: VerificationJob) -> None:
     html = BeautifulSoup(req.content, features="html.parser")
     url = job.url.replace("&", "&amp;")  # Escape & for HTML parsing
 
-    # download href is typically in an <a> tag but for service endpoints may be in a <code> tag instead.
+    # download href is typically in an <a> tag but may be in a <code> tag instead, so allow for either
     if url not in str(html):
         job.result = VerificationResult.FAIL
         return
@@ -214,10 +214,6 @@ class VerificationReport:
 
         self._post_init()
 
-    def __len__(self) -> int:
-        """Number of jobs."""
-        return len(self._jobs)
-
     def _post_init(self) -> None:
         """Process job results."""
         for job in self._jobs:
@@ -233,7 +229,7 @@ class VerificationReport:
                 self._resource_jobs[file_identifier] = []
             self._resource_jobs[file_identifier].append(job)
 
-        if self._summary[VerificationResult.PASS] == len(self):
+        if self._summary[VerificationResult.FAIL] == 0:
             self._result = VerificationResult.PASS
         else:
             self._result = VerificationResult.FAIL
@@ -324,7 +320,7 @@ class VerificationExporter(ResourcesExporter):
             type=VerificationType.SITE_PAGES,
             exporter="SitePagesExporter",
             url=f"{self._context['BASE_URL']}/-/404",
-            context=cast(VerificationContext, {"EXPECTED_STATUS": 404, **self._context}),
+            context=cast(VerificationContext, cast(object, {"EXPECTED_STATUS": 404, **self._context})),
             data={"path": "404"},
         )
         if "localhost" in self._context["BASE_URL"]:

@@ -157,7 +157,7 @@ def check_item_download(logger: logging.Logger, job: VerificationJob) -> None:
     html = BeautifulSoup(req.content, features="html.parser")
     url = job.url.replace("&", "&amp;")  # Escape & for HTML parsing
 
-    # download href is typically in an <a> tag but for service endpoints may be in a <code> tag instead.
+    # download href is typically in an <a> tag but may be in a <code> tag instead, so allow for either
     if url not in str(html):
         job.result = VerificationResult.FAIL
         return
@@ -324,7 +324,7 @@ class VerificationExporter(ResourcesExporter):
             type=VerificationType.SITE_PAGES,
             exporter="SitePagesExporter",
             url=f"{self._context['BASE_URL']}/-/404",
-            context=cast(VerificationContext, {"EXPECTED_STATUS": 404, **self._context}),
+            context=cast(VerificationContext, cast(object, {"EXPECTED_STATUS": 404, **self._context})),
             data={"path": "404"},
         )
         if "localhost" in self._context["BASE_URL"]:

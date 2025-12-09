@@ -214,10 +214,6 @@ class VerificationReport:
 
         self._post_init()
 
-    def __len__(self) -> int:
-        """Number of jobs."""
-        return len(self._jobs)
-
     def _post_init(self) -> None:
         """Process job results."""
         for job in self._jobs:
@@ -233,7 +229,7 @@ class VerificationReport:
                 self._resource_jobs[file_identifier] = []
             self._resource_jobs[file_identifier].append(job)
 
-        if self._summary[VerificationResult.PASS] == len(self):
+        if self._summary[VerificationResult.FAIL] == 0:
             self._result = VerificationResult.PASS
         else:
             self._result = VerificationResult.FAIL

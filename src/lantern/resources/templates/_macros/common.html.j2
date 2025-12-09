@@ -48,6 +48,13 @@
   <time {% if id %}id="{{ id }}"{% endif %} datetime="{{ data.datetime }}">{{ data.value }}</time>
 {% endmacro %}
 
+{% macro copyable_path(value) %}
+<div class="grid grid-cols-[minmax(0,1fr)_auto] gap-2 items-center">
+  <div class="overflow-x-auto"><code class="whitespace-nowrap inline-block">{{ value }}</code></div>
+  <button type="button" class="{{ show_js_only() }} p-2 {{ btn_default_classes() }}" data-copy="{{ value }}"><i class="far fa-copy"></i></button>
+</div>
+{% endmacro %}
+
 {% macro restricted_i(fixed_width=False) %}<i class="far {% if fixed_width %}fa-fw{% endif %} fa-lock-alt"></i>{% endmacro %}
 
 {% macro ext_link_i(fixed_width=False) %}<i class="far {% if fixed_width %}fa-fw{% endif %} fa-external-link"></i>{% endmacro %}

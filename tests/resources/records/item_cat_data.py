@@ -26,6 +26,8 @@ Item to test all supported data formats:
 - ArcGIS OGC Feature Layer
 - ArcGIS Raster Tile Layer
 - ArcGIS Vector Tile Layer
+- BAS SAN (not format based/aware)
+- BAS Paper Map ordering (not format based/aware)
 - CSV
 - FPL
 - GeoJSON
@@ -37,15 +39,9 @@ Item to test all supported data formats:
 - PDF (optional georeferenced)
 - Shapefile (required compression)
 """
-record = make_record(
-    file_identifier="f90013f6-2893-4c72-953a-a1a6bc1919d7",
-    hierarchy_level=HierarchyLevelCode.DATASET,
-    title="Test Resource - Item to test data formats",
-    abstract=abstract,
-    purpose="Item to test all supported data formats are recognised and presented correctly.",
-)
-record.distribution = [
-    Distribution(
+
+distributions = {
+    "ArcGIS Feature Service": Distribution(
         distributor=Contact(
             organisation=ContactIdentity(
                 name="Environmental Systems Research Institute", href="https://ror.org/0428exr50", title="ror"
@@ -78,7 +74,7 @@ record.distribution = [
             )
         ),
     ),
-    Distribution(
+    "ArcGIS Feature Layer": Distribution(
         distributor=Contact(
             organisation=ContactIdentity(
                 name="Environmental Systems Research Institute", href="https://ror.org/0428exr50", title="ror"
@@ -111,7 +107,7 @@ record.distribution = [
             )
         ),
     ),
-    Distribution(
+    "OGC API Features Service": Distribution(
         distributor=Contact(
             organisation=ContactIdentity(
                 name="Environmental Systems Research Institute", href="https://ror.org/0428exr50", title="ror"
@@ -144,7 +140,7 @@ record.distribution = [
             )
         ),
     ),
-    Distribution(
+    "ArcGIS OGC Feature Layer": Distribution(
         distributor=Contact(
             organisation=ContactIdentity(
                 name="Environmental Systems Research Institute", href="https://ror.org/0428exr50", title="ror"
@@ -177,7 +173,7 @@ record.distribution = [
             )
         ),
     ),
-    Distribution(
+    "ArcGIS Raster Tile Layer": Distribution(
         distributor=Contact(
             organisation=ContactIdentity(
                 name="Environmental Systems Research Institute", href="https://ror.org/0428exr50", title="ror"
@@ -210,7 +206,7 @@ record.distribution = [
             )
         ),
     ),
-    Distribution(
+    "ArcGIS Raster Tile Service": Distribution(
         distributor=Contact(
             organisation=ContactIdentity(
                 name="Environmental Systems Research Institute", href="https://ror.org/0428exr50", title="ror"
@@ -243,7 +239,7 @@ record.distribution = [
             )
         ),
     ),
-    Distribution(
+    "ArcGIS Vector Tile Layer": Distribution(
         distributor=Contact(
             organisation=ContactIdentity(
                 name="Environmental Systems Research Institute", href="https://ror.org/0428exr50", title="ror"
@@ -276,7 +272,7 @@ record.distribution = [
             )
         ),
     ),
-    Distribution(
+    "ArcGIS Vector Tile Service": Distribution(
         distributor=Contact(
             organisation=ContactIdentity(
                 name="Environmental Systems Research Institute", href="https://ror.org/0428exr50", title="ror"
@@ -309,7 +305,7 @@ record.distribution = [
             )
         ),
     ),
-    Distribution(
+    "csv": Distribution(
         distributor=Contact(
             organisation=ContactIdentity(
                 name="Mapping and Geographic Information Centre, British Antarctic Survey",
@@ -346,7 +342,7 @@ record.distribution = [
             ),
         ),
     ),
-    Distribution(
+    "FPL": Distribution(
         distributor=Contact(
             organisation=ContactIdentity(
                 name="Mapping and Geographic Information Centre, British Antarctic Survey",
@@ -384,7 +380,7 @@ record.distribution = [
             ),
         ),
     ),
-    Distribution(
+    "GeoJSON": Distribution(
         distributor=Contact(
             organisation=ContactIdentity(
                 name="Mapping and Geographic Information Centre, British Antarctic Survey",
@@ -421,7 +417,7 @@ record.distribution = [
             ),
         ),
     ),
-    Distribution(
+    "GeoPackage": Distribution(
         distributor=Contact(
             organisation=ContactIdentity(
                 name="Mapping and Geographic Information Centre, British Antarctic Survey",
@@ -458,7 +454,7 @@ record.distribution = [
             ),
         ),
     ),
-    Distribution(
+    "GeoPackage (Zipped)": Distribution(
         distributor=Contact(
             organisation=ContactIdentity(
                 name="Mapping and Geographic Information Centre, British Antarctic Survey",
@@ -496,7 +492,7 @@ record.distribution = [
             ),
         ),
     ),
-    Distribution(
+    "GPX": Distribution(
         distributor=Contact(
             organisation=ContactIdentity(
                 name="Mapping and Geographic Information Centre, British Antarctic Survey",
@@ -534,7 +530,7 @@ record.distribution = [
             ),
         ),
     ),
-    Distribution(
+    "JPEG": Distribution(
         distributor=Contact(
             organisation=ContactIdentity(
                 name="Mapping and Geographic Information Centre, British Antarctic Survey",
@@ -571,7 +567,7 @@ record.distribution = [
             ),
         ),
     ),
-    Distribution(
+    "MapBox Vector Tile": Distribution(
         distributor=Contact(
             organisation=ContactIdentity(
                 name="Mapping and Geographic Information Centre, British Antarctic Survey",
@@ -608,7 +604,7 @@ record.distribution = [
             ),
         ),
     ),
-    Distribution(
+    "PDF": Distribution(
         distributor=Contact(
             organisation=ContactIdentity(
                 name="Mapping and Geographic Information Centre, British Antarctic Survey",
@@ -645,7 +641,7 @@ record.distribution = [
             ),
         ),
     ),
-    Distribution(
+    "PDF (GeoReferenced)": Distribution(
         distributor=Contact(
             organisation=ContactIdentity(
                 name="Mapping and Geographic Information Centre, British Antarctic Survey",
@@ -683,7 +679,7 @@ record.distribution = [
             ),
         ),
     ),
-    Distribution(
+    "PNG": Distribution(
         distributor=Contact(
             organisation=ContactIdentity(
                 name="Mapping and Geographic Information Centre, British Antarctic Survey",
@@ -720,7 +716,7 @@ record.distribution = [
             ),
         ),
     ),
-    Distribution(
+    "Shapefile (Zipped)": Distribution(
         distributor=Contact(
             organisation=ContactIdentity(
                 name="Mapping and Geographic Information Centre, British Antarctic Survey",
@@ -758,7 +754,7 @@ record.distribution = [
             ),
         ),
     ),
-    Distribution(
+    "X - BAS Published Map Ordering": Distribution(
         distributor=Contact(
             organisation=ContactIdentity(
                 name="Mapping and Geographic Information Centre, British Antarctic Survey",
@@ -790,4 +786,45 @@ record.distribution = [
             ),
         ),
     ),
-]
+    "X - BAS SAN Access": Distribution(
+        distributor=Contact(
+            organisation=ContactIdentity(
+                name="Mapping and Geographic Information Centre, British Antarctic Survey",
+                href="https://ror.org/01rhff309",
+                title="ror",
+            ),
+            phone="+44 (0)1223 221400",
+            email="magic@bas.ac.uk",
+            address=Address(
+                delivery_point="British Antarctic Survey, High Cross, Madingley Road",
+                city="Cambridge",
+                administrative_area="Cambridgeshire",
+                postal_code="CB3 0ET",
+                country="United Kingdom",
+            ),
+            online_resource=OnlineResource(
+                href="https://www.bas.ac.uk/teams/magic",
+                title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
+                description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
+                function=OnlineResourceFunctionCode.INFORMATION,
+            ),
+            role={ContactRoleCode.DISTRIBUTOR},
+        ),
+        transfer_option=TransferOption(
+            online_resource=OnlineResource(
+                href="sftp://san.nerc-bas.ac.uk/data/x",
+                function=OnlineResourceFunctionCode.DOWNLOAD,
+                title="Access data from BAS SAN (restricted and internal use).",
+            ),
+        ),
+    ),
+}
+
+record = make_record(
+    file_identifier="f90013f6-2893-4c72-953a-a1a6bc1919d7",
+    hierarchy_level=HierarchyLevelCode.DATASET,
+    title="Test Resource - Item to test data formats",
+    abstract=abstract,
+    purpose="Item to test all supported data formats are recognised and presented correctly.",
+)
+record.distribution = list(distributions.values())

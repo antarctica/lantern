@@ -20,7 +20,9 @@ from lantern.exporters.verification import (
     check_url_redirect,
     run_job,
 )
-from lantern.lib.metadata_library.models.record.elements.common import Identifier
+from lantern.lib.metadata_library.models.record.elements.common import (
+    Identifier,
+)
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta, SiteMeta
@@ -118,6 +120,7 @@ class TestVerificationExporterChecks:
         context: VerificationContext = {
             "BASE_URL": "https://data.bas.ac.uk",
             "SHAREPOINT_PROXY_ENDPOINT": "x",
+            "SAN_PROXY_ENDPOINT": "x",
             "METHOD": "x",
         }
         job = VerificationJob(
@@ -135,6 +138,7 @@ class TestVerificationExporterChecks:
         context: VerificationContext = {
             "BASE_URL": "https://data.bas.ac.uk",
             "SHAREPOINT_PROXY_ENDPOINT": "x",
+            "SAN_PROXY_ENDPOINT": "x",
         }
         job = VerificationJob(
             type=VerificationType.ITEM_PAGES,
@@ -289,7 +293,7 @@ class TestVerificationExporterChecks:
         job = VerificationJob(
             type=VerificationType.ITEM_PAGES,
             url="https://example.com",
-            context={"BASE_URL": "https://example.com", "SHAREPOINT_PROXY_ENDPOINT": "x"},
+            context={"BASE_URL": "https://example.com", "SHAREPOINT_PROXY_ENDPOINT": "x", "SAN_PROXY_ENDPOINT": "x"},
         )
         assert job.result == VerificationResult.PENDING
 
@@ -304,7 +308,7 @@ class TestVerificationExporterChecks:
             result=VerificationResult.PASS,
             type=VerificationType.ITEM_PAGES,
             url="https://example.com",
-            context={"BASE_URL": "https://example.com", "SHAREPOINT_PROXY_ENDPOINT": "x"},
+            context={"BASE_URL": "https://example.com", "SHAREPOINT_PROXY_ENDPOINT": "x", "SAN_PROXY_ENDPOINT": "x"},
         )
 
         _ = run_job(fx_logger.level, job)
@@ -317,7 +321,11 @@ class TestVerificationReport:
 
     def test_init(self, fx_site_meta: SiteMeta):
         """Can instantiate report."""
-        context: VerificationContext = {"BASE_URL": "https://data.bas.ac.uk", "SHAREPOINT_PROXY_ENDPOINT": "x"}
+        context: VerificationContext = {
+            "BASE_URL": "https://data.bas.ac.uk",
+            "SHAREPOINT_PROXY_ENDPOINT": "x",
+            "SAN_PROXY_ENDPOINT": "x",
+        }
         jobs = [
             VerificationJob(
                 result=VerificationResult.PASS,
@@ -354,7 +362,11 @@ class TestVerificationReport:
 
         Second job for same record added for coverage.
         """
-        context: VerificationContext = {"BASE_URL": "https://data.bas.ac.uk", "SHAREPOINT_PROXY_ENDPOINT": "x"}
+        context: VerificationContext = {
+            "BASE_URL": "https://data.bas.ac.uk",
+            "SHAREPOINT_PROXY_ENDPOINT": "x",
+            "SAN_PROXY_ENDPOINT": "x",
+        }
         jobs = [
             VerificationJob(
                 result=VerificationResult.PASS,
@@ -435,7 +447,11 @@ class TestVerificationExporter:
         mock_config = mocker.Mock()
         type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
         meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
-        context: VerificationContext = {"BASE_URL": meta.base_url, "SHAREPOINT_PROXY_ENDPOINT": "x"}
+        context: VerificationContext = {
+            "BASE_URL": meta.base_url,
+            "SHAREPOINT_PROXY_ENDPOINT": "x",
+            "SAN_PROXY_ENDPOINT": "x",
+        }
 
         exporter = VerificationExporter(
             logger=fx_logger, meta=meta, s3=s3_client, get_record=fx_get_record, context=context

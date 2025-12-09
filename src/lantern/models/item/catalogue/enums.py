@@ -43,7 +43,8 @@ class DistributionType(Enum):
     PDF_GEO = "PDF (Georeferenced)"
     PNG = "PNG"
     SHAPEFILE_ZIP = "Shapefile (Zipped)"
-    X_PAPER_MAP = "Flat or folded paper map"
+    X_BAS_PAPER_MAP = "Flat or folded paper map"
+    X_BAS_SAN = "SAN path reference"
 
 
 class Licence(Enum):

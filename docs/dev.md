@@ -89,12 +89,13 @@ In the `tests.lantern_tests.config` module:
 > [!CAUTION]
 > This section is Work in Progress (WIP) and may not be complete/accurate.
 
-Update record schema to allow new item type in records:
+Update record schemas to allow the new item type in records:
 
 1. if the type is not a member of the ISO 19115 `MD_ScopeCode` code list, create and agree a proposal in the
    [BAS Metadata Standards](https://gitlab.data.bas.ac.uk/uk-pdc/metadata-infrastructure/metadata-standards) project
 2. if needed, add the type to the `hierarchy_level` enum in the ISO 19115 JSON Schema within the
    [BAS Metadata Library](https://github.com/antarctica/metadata-library) and make a new release as needed
+3. if needed, allow the type to profiles that restrict allowed item types (e.g. the MAGIC Discovery profile)
 
 Within this project:
 
@@ -161,7 +162,7 @@ If additional item relationships are needed:
    - `tests.resources.records/item_cat_data::record`
    - `tests.resources.records/item_cat_verify::record`
 8. update `lantern.models.verification.elements.VerificationDistribution`
-9. add a new tests to:
+9. add new tests to:
    - `tests.lantern_tests.models.item.catalogue.test_distributions`
    - `tests.lantern_tests.templates.macros.test_tabs.TestDataTab.test_data_info` (if using a collapsible panel)
 

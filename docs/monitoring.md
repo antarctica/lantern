@@ -62,7 +62,7 @@ Checks are run for:
 - [Item Alias](/docs/data-model.md#item-aliases) redirects
 - Item DOI redirects
 - Item distribution options (as links on Item pages)
-- File distribution options
+- File distribution options (with special support for SharePoint and NORA hosted files)
 - SAN reference distribution options
 - ArcGIS layers and services (via the ArcGIS API)
 

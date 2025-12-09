@@ -165,8 +165,10 @@
   {% set id_base = data.access_target | replace("#", "") %}
   <div class="space-y-4">
     {% call com.alert(variant='blue', classes='space-y-4') %}
-      <p>Access this item from the BAS Storage Area Network (SAN).</p>
-      <p>(This is the same system as 'Samba', and the 'U drive').</p>
+      <p>Access this item from the BAS SAN (also known as 'Samba' or the 'U drive').</p>
+      {% if not data.restricted %}
+        <p>The BAS SAN is an internal service. Please <a class="{{ com.link_classes() }}" href="#tab-contact">make an enquiry</a> if you are an external user.</p>
+      {% endif %}
     {% endcall %}
     <dl class="space-y-4">
       {% call com.dl_item(title='Posix Path (for Unix, HPC and central workstations)', id=id_base + '-posix') %}

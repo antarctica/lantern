@@ -433,14 +433,13 @@ class BasSan(Distribution):
     BAS SAN distribution option.
 
     Provides information to users on how to access data from the SAN.
-
-    As the SAN is inherently internal and authenticated, SAN distribution options are always considered restricted.
     """
 
     _sigil = "sftp://san.nerc-bas.ac.uk/"
 
-    def __init__(self, option: RecordDistribution, **kwargs: Any) -> None:
-        self.option = option
+    def __init__(self, option: RecordDistribution, restricted: bool, **kwargs: Any) -> None:
+        self._option = option
+        self._restricted = restricted
 
     @classmethod
     def matches(cls, option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:
@@ -454,8 +453,9 @@ class BasSan(Distribution):
 
     @property
     def label(self) -> str:
-        """Fixed value."""
-        return "BAS SAN"
+        """Distinguishing identifier from transfer option if available, or generic value based on file type."""
+        title = self._option.transfer_option.online_resource.title
+        return title if title else "BAS SAN"
 
     @property
     def description(self) -> None:
@@ -470,7 +470,7 @@ class BasSan(Distribution):
     @property
     def posix_path(self) -> str:
         """SAN path formatted for use on Linux machines where SAN volumes are mounted under `/data`."""
-        return urlparse(unquote(self.option.transfer_option.online_resource.href)).path
+        return urlparse(unquote(self._option.transfer_option.online_resource.href)).path
 
     @property
     def unc_path(self) -> str:
@@ -480,6 +480,11 @@ class BasSan(Distribution):
         return samba_endpoint + raw.replace("/", "\\")
 
     @property
+    def restricted(self) -> bool:
+        """Restricted status."""
+        return self._restricted
+
+    @property
     def action(self) -> Link:
         """Link to distribution without href due to using `access_trigger`."""
         return Link(value="Access Data", href=None)
@@ -487,12 +492,12 @@ class BasSan(Distribution):
     @property
     def action_btn_variant(self) -> str:
         """Variant of button to display for action link."""
-        return super().action_btn_variant_restricted
+        return super().action_btn_variant if not self._restricted else super().action_btn_variant_restricted
 
     @property
     def action_btn_icon(self) -> str:
         """Action button icon classes."""
-        return super().action_btn_icon_restricted
+        return "far fa-hdd" if not self._restricted else super().action_btn_icon_restricted
 
     @property
     def access_target(self) -> str | None:

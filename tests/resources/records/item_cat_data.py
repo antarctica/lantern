@@ -2,6 +2,7 @@ from lantern.lib.metadata_library.models.record.elements.common import (
     Address,
     Contact,
     ContactIdentity,
+    Identifier,
     OnlineResource,
 )
 from lantern.lib.metadata_library.models.record.elements.distribution import (
@@ -10,11 +11,14 @@ from lantern.lib.metadata_library.models.record.elements.distribution import (
     Size,
     TransferOption,
 )
+from lantern.lib.metadata_library.models.record.elements.identification import Aggregation
 from lantern.lib.metadata_library.models.record.enums import (
+    AggregationAssociationCode,
     ContactRoleCode,
     HierarchyLevelCode,
     OnlineResourceFunctionCode,
 )
+from lantern.models.record.const import CATALOGUE_NAMESPACE
 from tests.resources.records.utils import make_record
 
 # A record with all supported distribution options.
@@ -814,7 +818,7 @@ distributions = {
             online_resource=OnlineResource(
                 href="sftp://san.nerc-bas.ac.uk/data/x",
                 function=OnlineResourceFunctionCode.DOWNLOAD,
-                title="Access data from BAS SAN (restricted and internal use).",
+                # title deliberately not set to use default value in distribution option
             ),
         ),
     ),
@@ -827,4 +831,15 @@ record = make_record(
     abstract=abstract,
     purpose="Item to test all supported data formats are recognised and presented correctly.",
 )
+record.identification.aggregations.append(
+    Aggregation(
+        identifier=Identifier(
+            identifier="57327327-4623-4247-af86-77fb43b7f45b",
+            href=f"https://{CATALOGUE_NAMESPACE}/items/57327327-4623-4247-af86-77fb43b7f45b",
+            namespace=CATALOGUE_NAMESPACE,
+        ),
+        association_type=AggregationAssociationCode.CROSS_REFERENCE,
+    )
+)
+
 record.distribution = list(distributions.values())

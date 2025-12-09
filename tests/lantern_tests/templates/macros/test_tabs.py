@@ -261,7 +261,7 @@ class TestDataTab:
         assert str(html).count(text) == 1  # only collapsible
 
     @pytest.mark.parametrize(
-        ("value", "text"), [("sftp://san.nerc-bas.ac.uk/data/x", "Access this item from the BAS Storage Area Network")]
+        ("value", "text"), [("sftp://san.nerc-bas.ac.uk/data/x", "Access this item from the BAS SAN")]
     )
     def test_data_info_href(self, fx_item_cat_model_min: ItemCatalogue, value: str, text: str):
         """

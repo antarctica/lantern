@@ -46,8 +46,6 @@ class VerificationDistributionType(Enum):
     Effectively represents the data access system used for distributions, and whether these are directly downloads,
     services, etc. Used internally to guide how to verify each distribution. For example, files hosted in SharePoint
     require authentication to access.
-
-    'UNKNOWN' is a fallback value where a distribution is not understood.
     """
 
     ARCGIS_LAYER = "arcgis_layer"

@@ -46,6 +46,7 @@ class VerificationDistribution:
     ]
 
     published_maps_url: Final[str] = "https://www.bas.ac.uk/data/our-data/maps/how-to-order-a-map/"
+    nora_sigil: Final[str] = "https://nora.nerc.ac.uk/"
     bas_san_sigil: Final[str] = "sftp://san.nerc-bas.ac.uk/"
 
     def __init__(self, distribution: Distribution, file_identifier: str) -> None:
@@ -69,7 +70,7 @@ class VerificationDistribution:
         """
         if "sharepoint.com" in self._distribution.transfer_option.online_resource.href:
             return VerificationDistributionType.SHAREPOINT
-        if self._distribution.transfer_option.online_resource.href.startswith("https://nora.nerc.ac.uk/"):
+        if self._distribution.transfer_option.online_resource.href.startswith(self.nora_sigil):
             return VerificationDistributionType.NORA
         if self._distribution.transfer_option.online_resource.href.startswith(self.bas_san_sigil):
             return VerificationDistributionType.SAN

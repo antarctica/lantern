@@ -2,6 +2,7 @@ import base64
 import re
 from abc import ABC, abstractmethod
 from typing import Any
+from urllib.parse import unquote, urlparse
 
 from humanize import naturalsize
 
@@ -469,13 +470,13 @@ class BasSan(Distribution):
     @property
     def posix_path(self) -> str:
         """SAN path formatted for use on Linux machines where SAN volumes are mounted under `/data`."""
-        return self.option.transfer_option.online_resource.href.replace(self._sigil, "/")
+        return urlparse(unquote(self.option.transfer_option.online_resource.href)).path
 
     @property
     def unc_path(self) -> str:
-        """SAN path formatted for use on Windows machines where SAN volumes are accessed via Samba."""
+        """SAN path formatted as a UNC path for use on Windows machines where SAN volumes can be accessed via Samba."""
         samba_endpoint = r"\\samba.nerc-bas.ac.uk\data"
-        raw = self.option.transfer_option.online_resource.href.replace(self._sigil, "/").replace("/data", "")
+        raw = self.posix_path.replace("/data", "")
         return samba_endpoint + raw.replace("/", "\\")
 
     @property

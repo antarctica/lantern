@@ -97,6 +97,7 @@ class TestConfig:
 
         _signing_key_public = "ADMIN_METADATA_SIGNING_KEY_PUBLIC"
         output = fx_config.dumps_safe()
+        # noinspection PyUnresolvedReferences
         output[_signing_key_public] = output[_signing_key_public].to_json(compact=True)
 
         assert output == expected

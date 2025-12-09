@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 import pytest
 
 from lantern.lib.metadata_library.models.record.elements.common import Contact, ContactIdentity, OnlineResource
@@ -321,36 +323,57 @@ class TestDistributionBasPublishedMap:
 class TestDistributionBasSan:
     """Test BAS SAN access distribution."""
 
+    _base_option = RecordDistribution(
+        distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
+        transfer_option=TransferOption(
+            online_resource=OnlineResource(
+                href="sftp://san.nerc-bas.ac.uk/data/x",
+                function=OnlineResourceFunctionCode.DOWNLOAD,
+            )
+        ),
+    )
+
     def test_init(self):
         """Can create a distribution."""
-        option = RecordDistribution(
-            distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
-            transfer_option=TransferOption(
-                online_resource=OnlineResource(
-                    href="sftp://san.nerc-bas.ac.uk/data/x",
-                    function=OnlineResourceFunctionCode.DOWNLOAD,
-                )
-            ),
-        )
-        dist = BasSan(option=option, restricted=False)
+        dist = BasSan(option=self._base_option, restricted=False)
+        assert dist.matches(self._base_option, [])
 
-        assert dist.matches(option, [])
+    @pytest.mark.parametrize(
+        ("title", "expected"),
+        [(None, "BAS SAN"), ("x", "x")],
+    )
+    def test_label(self, title: str | None, expected: str):
+        """Can get label based on transfer option or format."""
+        option = deepcopy(self._base_option)
+        option.transfer_option.online_resource.title = title
+
+        dist = BasSan(option=option, restricted=False)
+        assert dist.label == expected
+
+    @pytest.mark.parametrize("value", [False, True])
+    def test_restricted(self, value: bool):
+        """Can pass through restricted status."""
+        option = deepcopy(self._base_option)
+        dist = BasSan(option=option, restricted=value)
+        assert dist.restricted == value
 
     def test_paths(self):
         """Can parse and format SAN path into posix and UNC paths for a distribution."""
-        option = RecordDistribution(
-            distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
-            transfer_option=TransferOption(
-                online_resource=OnlineResource(
-                    href="sftp://san.nerc-bas.ac.uk/data/x",
-                    function=OnlineResourceFunctionCode.DOWNLOAD,
-                )
-            ),
-        )
-        dist = BasSan(option=option, restricted=False)
-
+        dist = BasSan(option=self._base_option, restricted=False)
         assert dist.posix_path == "/data/x"
         assert dist.unc_path == r"\\samba.nerc-bas.ac.uk\data\x"
+
+    @pytest.mark.parametrize(("restricted", "expected"), [(False, "default"), (True, "warning")])
+    def test_action_btn_variant(self, restricted: bool, expected: str):
+        """Can get action variant."""
+        dist = BasSan(option=self._base_option, restricted=restricted)
+        assert dist.action_btn_variant == expected
+
+    @pytest.mark.parametrize(("restricted", "expected"), [(False, "far fa-hdd"), (True, "far fa-lock-alt")])
+    def test_action_btn_icon(self, restricted: bool, expected: str):
+        """Can get action icon."""
+        dist = BasSan(option=self._base_option, restricted=restricted)
+        assert dist.action_btn_icon == expected
 
 
 class TestDistributionArcGisFeatureLayer:

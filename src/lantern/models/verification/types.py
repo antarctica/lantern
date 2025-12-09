@@ -6,6 +6,7 @@ class VerificationContext(TypedDict):
 
     BASE_URL: str
     SHAREPOINT_PROXY_ENDPOINT: str
+    SAN_PROXY_ENDPOINT: str
 
     CHECK_FUNC: NotRequired[str]
     URL: NotRequired[str]

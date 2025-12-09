@@ -88,6 +88,15 @@ class Distribution(ABC):
         return "default"
 
     @property
+    def action_btn_variant_restricted(self) -> str:
+        """
+        Variant of button to display for action link or trigger in a restricted context.
+
+        See https://style-kit.web.bas.ac.uk/core/buttons/#variants for available variants.
+        """
+        return "warning"
+
+    @property
     @abstractmethod
     def action_btn_icon(self) -> str:
         """
@@ -96,6 +105,15 @@ class Distribution(ABC):
         See https://fontawesome.com/v5/search?o=r&s=regular for choices (in available version and recommended style).
         """
         ...
+
+    @property
+    def action_btn_icon_restricted(self) -> str:
+        """
+        Font Awesome icon classes to display in action link or trigger in a restricted context.
+
+        See https://fontawesome.com/v5/search?o=r&s=regular for choices (in available version and recommended style).
+        """
+        return "far fa-lock-alt"
 
     @property
     @abstractmethod
@@ -210,7 +228,7 @@ class FileDistribution(Distribution, ABC):
         return title if title else self.format_type.value
 
     @property
-    def description(self) -> None:
+    def description(self) -> str | None:
         """Optional hint or additional context."""
         return self._option.transfer_option.online_resource.description
 
@@ -232,12 +250,12 @@ class FileDistribution(Distribution, ABC):
     @property
     def action_btn_variant(self) -> str:
         """Variant of button to display for action link based on resource access."""
-        return super().action_btn_variant if not self._restricted else "warning"
+        return super().action_btn_variant if not self._restricted else super().action_btn_variant_restricted
 
     @property
     def action_btn_icon(self) -> str:
         """Action button icon classes."""
-        return "far fa-download" if not self._restricted else "far fa-lock-alt"
+        return "far fa-download" if not self._restricted else super().action_btn_icon_restricted
 
     @property
     def access_target(self) -> None:
@@ -376,7 +394,7 @@ class BasPublishedMap(Distribution):
     @property
     def format_type(self) -> DistributionType:
         """Format type."""
-        return DistributionType.X_PAPER_MAP
+        return DistributionType.X_BAS_PAPER_MAP
 
     @property
     def label(self) -> str:
@@ -407,6 +425,78 @@ class BasPublishedMap(Distribution):
     def access_target(self) -> str | None:
         """DOM selector of element showing more information on purchasing item."""
         return "#item-data-info-map-purchase"
+
+
+class BasSan(Distribution):
+    """
+    BAS SAN distribution option.
+
+    Provides information to users on how to access data from the SAN.
+
+    As the SAN is inherently internal and authenticated, SAN distribution options are always considered restricted.
+    """
+
+    _sigil = "sftp://san.nerc-bas.ac.uk/"
+
+    def __init__(self, option: RecordDistribution, **kwargs: Any) -> None:
+        self.option = option
+
+    @classmethod
+    def matches(cls, option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:
+        """Whether this class matches the distribution option."""
+        return option.transfer_option.online_resource.href.startswith(BasSan._sigil)
+
+    @property
+    def format_type(self) -> DistributionType:
+        """Fixed (fake) Format type."""
+        return DistributionType.X_BAS_SAN
+
+    @property
+    def label(self) -> str:
+        """Fixed value."""
+        return "BAS SAN"
+
+    @property
+    def description(self) -> None:
+        """Not applicable as info box provides additional context."""
+        return None
+
+    @property
+    def size(self) -> str:
+        """Not applicable."""
+        return ""
+
+    @property
+    def posix_path(self) -> str:
+        """SAN path formatted for use on Linux machines where SAN volumes are mounted under `/data`."""
+        return self.option.transfer_option.online_resource.href.replace(self._sigil, "/")
+
+    @property
+    def unc_path(self) -> str:
+        """SAN path formatted for use on Windows machines where SAN volumes are accessed via Samba."""
+        samba_endpoint = r"\\samba.nerc-bas.ac.uk\data"
+        raw = self.option.transfer_option.online_resource.href.replace(self._sigil, "/").replace("/data", "")
+        return samba_endpoint + raw.replace("/", "\\")
+
+    @property
+    def action(self) -> Link:
+        """Link to distribution without href due to using `access_trigger`."""
+        return Link(value="Access Data", href=None)
+
+    @property
+    def action_btn_variant(self) -> str:
+        """Variant of button to display for action link."""
+        return super().action_btn_variant_restricted
+
+    @property
+    def action_btn_icon(self) -> str:
+        """Action button icon classes."""
+        return super().action_btn_icon_restricted
+
+    @property
+    def access_target(self) -> str | None:
+        """DOM selector of element showing more information on accessing item."""
+        return "#item-data-info-san-access"
 
 
 class Csv(FileDistribution):

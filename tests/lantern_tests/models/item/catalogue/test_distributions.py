@@ -12,6 +12,7 @@ from lantern.models.item.catalogue.distributions import (
     ArcGisRasterTileLayer,
     ArcGisVectorTileLayer,
     BasPublishedMap,
+    BasSan,
     Csv,
     Distribution,
     FileDistribution,
@@ -315,6 +316,41 @@ class TestDistributionBasPublishedMap:
         dist = BasPublishedMap(option=option, restricted=False)
 
         assert dist.matches(option, [])
+
+
+class TestDistributionBasSan:
+    """Test BAS SAN access distribution."""
+
+    def test_init(self):
+        """Can create a distribution."""
+        option = RecordDistribution(
+            distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
+            transfer_option=TransferOption(
+                online_resource=OnlineResource(
+                    href="sftp://san.nerc-bas.ac.uk/data/x",
+                    function=OnlineResourceFunctionCode.DOWNLOAD,
+                )
+            ),
+        )
+        dist = BasSan(option=option, restricted=False)
+
+        assert dist.matches(option, [])
+
+    def test_paths(self):
+        """Can parse and format SAN path into posix and UNC paths for a distribution."""
+        option = RecordDistribution(
+            distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
+            transfer_option=TransferOption(
+                online_resource=OnlineResource(
+                    href="sftp://san.nerc-bas.ac.uk/data/x",
+                    function=OnlineResourceFunctionCode.DOWNLOAD,
+                )
+            ),
+        )
+        dist = BasSan(option=option, restricted=False)
+
+        assert dist.posix_path == "/data/x"
+        assert dist.unc_path == r"\\samba.nerc-bas.ac.uk\data\x"
 
 
 class TestDistributionArcGisFeatureLayer:

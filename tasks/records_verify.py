@@ -14,6 +14,7 @@ def main() -> None:
     context: VerificationContext = {
         "BASE_URL": base_url,
         "SHAREPOINT_PROXY_ENDPOINT": config.VERIFY_SHAREPOINT_PROXY_ENDPOINT,
+        "SAN_PROXY_ENDPOINT": config.VERIFY_SAN_PROXY_ENDPOINT,
     }
 
     confirm_branch(logger=logger, store=store, action="Validating records from")

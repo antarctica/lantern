@@ -46,6 +46,7 @@ class VerificationDistribution:
     ]
 
     published_maps_url: Final[str] = "https://www.bas.ac.uk/data/our-data/maps/how-to-order-a-map/"
+    bas_san_sigil: Final[str] = "sftp://san.nerc-bas.ac.uk/"
 
     def __init__(self, distribution: Distribution, file_identifier: str) -> None:
         """Initialise from an underlying Record Distribution and associated Record file identifier."""
@@ -70,6 +71,8 @@ class VerificationDistribution:
             return VerificationDistributionType.SHAREPOINT
         if self._distribution.transfer_option.online_resource.href.startswith("https://nora.nerc.ac.uk/"):
             return VerificationDistributionType.NORA
+        if self._distribution.transfer_option.online_resource.href.startswith(self.bas_san_sigil):
+            return VerificationDistributionType.SAN
         if self._distribution.transfer_option.online_resource.href == self.published_maps_url:
             return VerificationDistributionType.PUBLISHED_MAP
         if self._distribution.format and self._distribution.format.href in self.file_media_types:
@@ -95,8 +98,10 @@ class VerificationDistribution:
         - for ArcGIS layers, the item ID is extracted to build item URL return item data as JSON
         - for ArcGIS services, service information is returned as JSON
         - for SharePoint, the path to the file is extracted from the URL for use with a SharePoint access proxy [1]
+        - for the SAN, the path to the folder is extracted from the URL for use with a SAN access proxy [2]
 
         [1] For 'https://example.com/:i:/r/personal/conwat_example_com/Documents/foo%20bar.jpg?x=y' -> '/foo bar.jpg'
+        [2] For 'sftp://san.nerc-bas.ac.uk/data/foo/bar' -> '/data/foo/bar'
         """
         if self._type == VerificationDistributionType.ARCGIS_LAYER:
             item_id = self._href_raw.split("id=")[-1]
@@ -106,6 +111,8 @@ class VerificationDistribution:
         if self._type == VerificationDistributionType.SHAREPOINT:
             path = urlparse(unquote(self._href_raw)).path
             return path.split("/Documents")[-1]
+        if self._type == VerificationDistributionType.SAN:
+            return urlparse(unquote(self._href_raw)).path
 
         return self._href_raw
 
@@ -136,11 +143,14 @@ class VerificationDistribution:
                 href=self._href_raw,
                 context=cast(
                     VerificationContext,
-                    {
-                        "CHECK_FUNC": "check_item_download",
-                        "URL": f"{context['BASE_URL']}/items/{self._file_identifier}/index.html",
-                        **context,
-                    },
+                    cast(
+                        object,
+                        {
+                            "CHECK_FUNC": "check_item_download",
+                            "URL": f"{context['BASE_URL']}/items/{self._file_identifier}/index.html",
+                            **context,
+                        },
+                    ),
                 ),
             )
         ]
@@ -150,41 +160,61 @@ class VerificationDistribution:
                 self._make_job(
                     job_type=VerificationType.DOWNLOADS_OPEN,
                     href=self._href,
-                    context=cast(VerificationContext, {"EXPECTED_LENGTH": self._bytes, **context}),
+                    context=cast(VerificationContext, cast(object, {"EXPECTED_LENGTH": self._bytes, **context})),
                 )
             )
         elif self._type == VerificationDistributionType.NORA:
             context_ = cast(
                 VerificationContext,
-                {
-                    "METHOD": "get",  # NORA reacts differently to HEAD vs GET requests
-                    "HEADERS": {"Range": "bytes=0-253"},
-                    "EXPECTED_STATUS": 206,
-                    "EXPECTED_LENGTH": self._bytes,
-                    **context,
-                },
+                cast(
+                    object,
+                    {
+                        "METHOD": "get",  # NORA reacts differently to HEAD vs GET requests
+                        "HEADERS": {"Range": "bytes=0-253"},
+                        "EXPECTED_STATUS": 206,
+                        "EXPECTED_LENGTH": self._bytes,
+                        **context,
+                    },
+                ),
             )
             jobs.append(self._make_job(job_type=VerificationType.DOWNLOADS_NORA, href=self._href, context=context_))
         elif self._type == VerificationDistributionType.SHAREPOINT:
             context_ = cast(
                 VerificationContext,
-                {
-                    "METHOD": "post",
-                    "URL": context["SHAREPOINT_PROXY_ENDPOINT"],
-                    "JSON": {"path": self._href},
-                    **context,
-                },
+                cast(
+                    object,
+                    {
+                        "METHOD": "post",
+                        "URL": context["SHAREPOINT_PROXY_ENDPOINT"],
+                        "JSON": {"path": self._href},
+                        **context,
+                    },
+                ),
             )
             jobs.append(
                 self._make_job(job_type=VerificationType.DOWNLOADS_SHAREPOINT, href=self._href_raw, context=context_)
             )
+        elif self._type == VerificationDistributionType.SAN:
+            context_ = cast(
+                VerificationContext,
+                cast(
+                    object,
+                    {
+                        "METHOD": "post",
+                        "URL": context["SAN_PROXY_ENDPOINT"],
+                        "JSON": {"path": self._href},
+                        **context,
+                    },
+                ),
+            )
+            jobs.append(self._make_job(job_type=VerificationType.SAN_REFERENCE, href=self._href_raw, context=context_))
         elif self._type == VerificationDistributionType.ARCGIS_LAYER:
-            context_ = cast(VerificationContext, {"CHECK_FUNC": "check_url_arcgis", **context})
+            context_ = cast(VerificationContext, cast(object, {"CHECK_FUNC": "check_url_arcgis", **context}))
             jobs.append(
                 self._make_job(job_type=VerificationType.DOWNLOADS_ARCGIS_LAYERS, href=self._href, context=context_)
             )
         elif self._type == VerificationDistributionType.ARCGIS_SERVICE:  # pragma: no branch
-            context_ = cast(VerificationContext, {"CHECK_FUNC": "check_url_arcgis", **context})
+            context_ = cast(VerificationContext, cast(object, {"CHECK_FUNC": "check_url_arcgis", **context}))
             jobs.append(
                 self._make_job(job_type=VerificationType.DOWNLOADS_ARCGIS_SERVICES, href=self._href, context=context_)
             )
@@ -245,11 +275,14 @@ class VerificationRecord:
                     url=f"{context['BASE_URL']}/{alias.identifier}/",
                     context=cast(
                         VerificationContext,
-                        {
-                            "CHECK_FUNC": "check_url_redirect",
-                            "TARGET": f"/items/{self._record.file_identifier}/index.html",
-                            **context,
-                        },
+                        cast(
+                            object,
+                            {
+                                "CHECK_FUNC": "check_url_redirect",
+                                "TARGET": f"/items/{self._record.file_identifier}/index.html",
+                                **context,
+                            },
+                        ),
                     ),
                     data={"file_identifier": self._record.file_identifier, "slug": alias.identifier},
                 )
@@ -262,11 +295,14 @@ class VerificationRecord:
                     url=f"https://doi.org/{doi.identifier}",
                     context=cast(
                         VerificationContext,
-                        {
-                            "CHECK_FUNC": "check_url_redirect",
-                            "TARGET": f"https://{CATALOGUE_NAMESPACE}/items/{self._record.file_identifier}",
-                            **context,
-                        },
+                        cast(
+                            object,
+                            {
+                                "CHECK_FUNC": "check_url_redirect",
+                                "TARGET": f"https://{CATALOGUE_NAMESPACE}/items/{self._record.file_identifier}",
+                                **context,
+                            },
+                        ),
                     ),
                     data={"file_identifier": self._record.file_identifier, "slug": doi.identifier},
                 )

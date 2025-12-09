@@ -55,6 +55,7 @@
   {{ script_show_js(com.show_js_class()) }}
   {{ script_sticky_tabs() }}
   {{ script_collapsible() }}
+  {{ script_copyable() }}
   {% if data.html_schema_org %}
     {{ script_schema_org(data.html_schema_org) }}
   {% endif %}
@@ -161,6 +162,38 @@
             targetElement.classList.toggle('hidden');
           }
         });
+      });
+    });
+  </script>
+{% endmacro %}
+
+{% macro script_copyable() %}
+  <script defer>
+    document.addEventListener('DOMContentLoaded', () => {
+      const writeToClipboard = async (text) => {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(text);
+        }
+      };
+
+      document.addEventListener('click', async (event) => {
+        const trigger = event.target.closest('[data-copy]');
+        if (!trigger) {
+          return;
+        }
+
+        event.preventDefault();
+        const value = trigger.getAttribute('data-copy');
+        if (!value) {
+          return;
+        }
+
+        try {
+          await writeToClipboard(value);
+          trigger.dispatchEvent(new CustomEvent('copy:success', { bubbles: true }));
+        } catch (error) {
+          trigger.dispatchEvent(new CustomEvent('copy:error', { bubbles: true, detail: error }));
+        }
       });
     });
   </script>

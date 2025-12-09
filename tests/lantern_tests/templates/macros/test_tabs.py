@@ -220,9 +220,9 @@ class TestDataTab:
             ),
         ],
     )
-    def test_data_info(self, fx_item_cat_model_min: ItemCatalogue, value: list[str], text: str):
+    def test_data_info_format(self, fx_item_cat_model_min: ItemCatalogue, value: list[str], text: str):
         """
-        Can get matching data access template based on values from item.
+        Can get matching data access template based on format href values from item.
 
         Checking these templates is tricky:
         - templates vary significantly and don't contain any single common/predictable value to check against
@@ -254,6 +254,33 @@ class TestDataTab:
         assert html.select_one(f"button[data-target='{expected.access_target}']") is not None
         # noinspection PyTypeChecker
         assert html.find(name="span", string=expected.format_type.value) is not None
+        assert str(html).count(text) == 2  # one in collapsible, one in <noscript>
+
+        for tag in html.find_all("noscript"):
+            tag.decompose()  # drop
+        assert str(html).count(text) == 1  # only collapsible
+
+    @pytest.mark.parametrize(
+        ("value", "text"), [("sftp://san.nerc-bas.ac.uk/data/x", "Access this item from the BAS Storage Area Network")]
+    )
+    def test_data_info_href(self, fx_item_cat_model_min: ItemCatalogue, value: str, text: str):
+        """
+        Can get matching data access template based on online resource href values from item.
+
+        (See the `test_data_info_format()` test for limitations of these checks).
+        """
+        fx_item_cat_model_min._record.distribution.append(
+            Distribution(
+                distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
+                transfer_option=TransferOption(
+                    online_resource=OnlineResource(href=value, function=OnlineResourceFunctionCode.DOWNLOAD)
+                ),
+            )
+        )
+        expected = fx_item_cat_model_min._data.items[0]
+        html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
+
+        assert html.select_one(f"button[data-target='{expected.access_target}']") is not None
         assert str(html).count(text) == 2  # one in collapsible, one in <noscript>
 
         for tag in html.find_all("noscript"):

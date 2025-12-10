@@ -289,7 +289,7 @@ class ItemCatalogue(ItemBase):
             aggregations=self._aggregations,
             restricted=self._restricted,
             citation=self.citation_html,
-            abstract=self.abstract_html,
+            description=self.description_html,
         )
 
     @property

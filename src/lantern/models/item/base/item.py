@@ -90,21 +90,6 @@ class ItemBase:
         return self._admin_metadata.gitlab_issues
 
     @property
-    def abstract_raw(self) -> str:
-        """Raw Abstract."""
-        return self._record.identification.abstract
-
-    @property
-    def abstract_md(self) -> str:
-        """Abstract with Markdown formatting if present."""
-        return self.abstract_raw
-
-    @property
-    def abstract_html(self) -> str:
-        """Abstract with Markdown formatting, if present, encoded as HTML."""
-        return md_as_html(self.abstract_md)
-
-    @property
     def aggregations(self) -> Aggregations:
         """Aggregations."""
         return self._record.identification.aggregations
@@ -148,6 +133,21 @@ class ItemBase:
     def constraints(self) -> Constraints:
         """Constraints."""
         return self._record.identification.constraints
+
+    @property
+    def description_raw(self) -> str:
+        """Raw Abstract."""
+        return self._record.identification.abstract
+
+    @property
+    def description_md(self) -> str:
+        """Abstract with Markdown formatting if present."""
+        return self.description_raw
+
+    @property
+    def description_html(self) -> str:
+        """Abstract with Markdown formatting, if present, encoded as HTML."""
+        return md_as_html(self.description_md)
 
     @property
     def distributions(self) -> list[Distribution]:

@@ -10,6 +10,10 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 <!-- pyml disable no-duplicate-heading,no-duplicate-header -->
 ## [Unreleased]
 
+### Changed [!BREAKING]
+
+* `ItemBase.abstract*` methods changed to `ItemBase.description*` (impacts externally maintained item subclasses)
+
 ### Added
 
 * Support for configuring the GitLab store branch name

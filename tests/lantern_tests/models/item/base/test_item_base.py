@@ -142,31 +142,6 @@ class TestItemBase:
         item = ItemBase(record=fx_revision_model_min, admin_keys=fx_admin_meta_keys)
         assert item.admin_gitlab_issues == expected
 
-    def test_abstract_raw(self, fx_revision_model_min: RecordRevision):
-        """Can get aw Abstract."""
-        expected = "x"
-        fx_revision_model_min.identification.abstract = expected
-        item = ItemBase(fx_revision_model_min)
-
-        assert item.abstract_raw == expected
-
-    def test_abstract_md(self, fx_revision_model_min: RecordRevision):
-        """Can get abstract with Markdown formatting if present."""
-        expected = "x"
-        fx_revision_model_min.identification.abstract = expected
-        item = ItemBase(fx_revision_model_min)
-
-        assert item.abstract_md == expected
-
-    def test_abstract_html(self, fx_revision_model_min: RecordRevision):
-        """Can get abstract with Markdown formatting, if present, encoded as HTML."""
-        value = "_x_"
-        expected = "<p><em>x</em></p>"
-        fx_revision_model_min.identification.abstract = value
-        item = ItemBase(fx_revision_model_min)
-
-        assert item.abstract_html == expected
-
     def test_aggregations(self, fx_revision_model_min: RecordRevision):
         """Can get aggregations from record."""
         expected = Aggregation(
@@ -263,6 +238,31 @@ class TestItemBase:
 
         assert isinstance(result, Constraints)
         assert len(result) > 0
+
+    def test_description_raw(self, fx_revision_model_min: RecordRevision):
+        """Can get raw abstract/description."""
+        expected = "x"
+        fx_revision_model_min.identification.abstract = expected
+        item = ItemBase(fx_revision_model_min)
+
+        assert item.description_raw == expected
+
+    def test_description_md(self, fx_revision_model_min: RecordRevision):
+        """Can get abstract/description with Markdown formatting if present."""
+        expected = "x"
+        fx_revision_model_min.identification.abstract = expected
+        item = ItemBase(fx_revision_model_min)
+
+        assert item.description_md == expected
+
+    def test_description_html(self, fx_revision_model_min: RecordRevision):
+        """Can get abstract/description with Markdown formatting, if present, encoded as HTML."""
+        value = "_x_"
+        expected = "<p><em>x</em></p>"
+        fx_revision_model_min.identification.abstract = value
+        item = ItemBase(fx_revision_model_min)
+
+        assert item.description_html == expected
 
     def test_distributions(self, fx_revision_model_min: RecordRevision):
         """Can get record distributions as item distributions."""

@@ -223,11 +223,11 @@ class TestMacrosItem:
 
     _published = Date(date=date(2023, month=10, day=31))
 
-    def test_abstract(self, fx_item_cat_model_min: ItemCatalogue):
-        """Can get item abstract with expected value from item."""
+    def test_about(self, fx_item_cat_model_min: ItemCatalogue):
+        """Can get item description with expected value from item."""
         html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
-        expected = fx_item_cat_model_min.summary.abstract
-        assert expected in str(html.select_one("#summary-abstract"))
+        expected = fx_item_cat_model_min.summary.about
+        assert expected in str(html.select_one("#summary-about"))
 
     @pytest.mark.parametrize(
         "value",

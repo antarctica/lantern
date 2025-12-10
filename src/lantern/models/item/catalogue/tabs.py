@@ -324,12 +324,15 @@ class LicenceTab(Tab):
 class LineageTab(Tab):
     """Lineage tab."""
 
-    def __init__(self, statement: str | None) -> None:
+    def __init__(self, item_super_type: ItemSuperType, statement: str | None) -> None:
+        self._item_super_type = item_super_type
         self._statement = statement
 
     @property
     def enabled(self) -> bool:
         """Whether tab is enabled."""
+        if self._item_super_type == ItemSuperType.CONTAINER:
+            return False
         return self._statement is not None
 
     @property

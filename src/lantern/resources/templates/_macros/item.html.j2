@@ -28,7 +28,7 @@
     {% if data.citation %}
       {{ citation(data.citation) }}
     {% endif %}
-    {{ abstract(data.abstract) }}
+    {{ about(data.about) }}
   </section>
 {% endmacro %}
 
@@ -106,10 +106,10 @@
   </section>
 {% endmacro %}
 
-{% macro abstract(value) %}
+{% macro about(value) %}
   <section class="space-y-2">
-    <h2 class="text-2xl">Abstract</h2>
-    <article id="summary-abstract">{% call com.prose() %}{{ value }}{% endcall %}</article>
+    <h2 class="text-2xl">About</h2>
+    <article id="summary-about">{% call com.prose() %}{{ value }}{% endcall %}</article>
   </section>
 {% endmacro %}
 
@@ -118,7 +118,7 @@
     {% if data | length > 0 %}
       {% set item = data[0] %}
       {% set alt = item.description or item.identifier %}
-      <img id="graphics-{{ item.identifier }}" class="w-full" src="{{ item.href }}" alt="{{ alt }}" aria-details="summary-abstract"/>
+      <img id="graphics-{{ item.identifier }}" class="w-full" src="{{ item.href }}" alt="{{ alt }}" aria-details="summary-about"/>
     {% endif %}
   </aside>
 {% endmacro %}

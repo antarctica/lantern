@@ -727,13 +727,13 @@ class TestPageSummary:
             aggregations=aggregations,
             restricted=restricted,
             citation=citation,
-            abstract="x",
+            description="x",
         )
         assert summary.collections == collections
         assert summary.edition == edition
         assert summary.published == published
         assert summary.restricted == restricted
-        assert summary.abstract == "x"
+        assert summary.about == "x"
 
         if super_type == ItemSuperType.RESOURCE:
             assert summary.citation == citation
@@ -871,7 +871,7 @@ class TestPageSummary:
             restricted=restricted,
             aggregations=aggregations,
             citation=None,
-            abstract="x",
+            description="x",
         )
 
         assert summary.grid_enabled == expected
@@ -928,7 +928,7 @@ class TestPageSummary:
                 admin_meta_keys=fx_admin_meta_keys, aggregations=RecordAggregations([]), get_record=_get_record
             ),
             citation=None,
-            abstract="x",
+            description="x",
         )
 
         assert summary.published == expected
@@ -963,7 +963,7 @@ class TestPageSummary:
             published_date=None,
             revision_date=None,
             citation=None,
-            abstract="x",
+            description="x",
         )
 
         physical_parent = summary.physical_parent

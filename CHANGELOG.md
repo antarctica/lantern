@@ -20,6 +20,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 
 * Correcting dates in legal policy change logs
 * Records repository bootstrap development task includes missing XML record files
+* Disabling lineage statement in container item types
 
 ### Changed
 

@@ -147,7 +147,7 @@ class ItemCatalogue(ItemBase):
     @property
     def _lineage(self) -> LineageTab:
         """Lineage tab."""
-        return LineageTab(statement=self.lineage_html)
+        return LineageTab(item_super_type=self._super_type, statement=self.lineage_html)
 
     @property
     def _related(self) -> RelatedTab:

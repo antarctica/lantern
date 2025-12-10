@@ -389,13 +389,29 @@ class TestLineageTab:
         """Can create lineage tab."""
         expected = "x"
 
-        tab = LineageTab(statement=expected)
+        tab = LineageTab(item_super_type=ItemSuperType.RESOURCE, statement=expected)
 
         assert tab.enabled is True
         assert tab.statement == expected
         # cov
         assert tab.title != ""
         assert tab.icon != ""
+
+    @pytest.mark.parametrize(
+        ("item_type", "has_statement", "expected"),
+        [
+            (HierarchyLevelCode.PRODUCT, True, True),
+            (HierarchyLevelCode.PRODUCT, False, False),
+            (HierarchyLevelCode.COLLECTION, True, False),
+        ],
+    )
+    def test_disabled(self, item_type: HierarchyLevelCode, has_statement: bool, expected: bool):
+        """Can disable licence tab based on item type and if item has a licence."""
+        super_type = ItemSuperType.CONTAINER if item_type in CONTAINER_SUPER_TYPES else ItemSuperType.RESOURCE
+        statement = "x" if has_statement else None
+
+        tab = LineageTab(item_super_type=super_type, statement=statement)
+        assert tab.enabled == expected
 
 
 class TestRelatedTab:

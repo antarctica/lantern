@@ -605,7 +605,7 @@ class PageSummary:
         aggregations: Aggregations,
         restricted: bool,
         citation: str | None,
-        abstract: str,
+        description: str,
     ) -> None:
         self._item_super_type = item_super_type
         self._edition = edition
@@ -614,7 +614,7 @@ class PageSummary:
         self._aggregations = aggregations
         self._restricted = restricted
         self._citation = citation
-        self._abstract = abstract
+        self._description = description
 
     @property
     def grid_enabled(self) -> bool:
@@ -690,6 +690,6 @@ class PageSummary:
         return self._citation
 
     @property
-    def abstract(self) -> str:
-        """Abstract."""
-        return self._abstract
+    def about(self) -> str:
+        """Abstract/description."""
+        return self._description

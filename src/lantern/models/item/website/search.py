@@ -52,7 +52,7 @@ class ItemWebsiteSearch(ItemBase):
 
         Returned in order of preference to prefer explicitly summarised content. The first available value is returned.
         """
-        return self.summary_html if self.summary_html is not None else self.abstract_html
+        return self.summary_html if self.summary_html is not None else self.description_html
 
     @property
     def _date(self) -> str:

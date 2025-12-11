@@ -63,7 +63,7 @@ explicit = true
 
 [tool.taskipy.variables]
 docs_targets = "docs/ README.md CHANGELOG.md"
-types_targets = "src/ tasks/"
+types_targets = "src/"
 targets = "src/ tasks/ tests/"
 cov_options = "--cov --cov-report=html"
 

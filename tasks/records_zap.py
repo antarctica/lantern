@@ -67,6 +67,10 @@ def _revise_record(record: Record) -> None:
 def _revise_records(logger: logging.Logger, records: list[Record], store: GitLabStore) -> None:
     """Indicate record change via relevant properties if needed."""
     for record in records:
+        if record.file_identifier is None:
+            msg = "Record missing file identifier."
+            logger.error(msg)
+            raise ValueError(msg) from None
         try:
             existing_record = store.get(record.file_identifier)
             if record.dumps(strip_admin=False) != existing_record.dumps(strip_admin=False):
@@ -81,6 +85,10 @@ def _revise_records(logger: logging.Logger, records: list[Record], store: GitLab
 
 def _update_collection_aggregations(logger: logging.Logger, record: Record, collection: Record) -> None:
     """Add aggregation back-refs if missing to a collections a record is part of."""
+    if record.file_identifier is None:
+        msg = "Record must have a file identifier to create back-refs."
+        logger.error(msg)
+        raise ValueError(msg) from None
     if (
         record.file_identifier
         in collection.identification.aggregations.filter(identifiers=record.file_identifier).identifiers()
@@ -242,6 +250,10 @@ def _create_admin_metadata(logger: logging.Logger, admin_keys: AdministrationKey
     Note: This method clobbers any existing admin metadata if already present in the record.
     """
     admin_meta = get_admin(keys=admin_keys, record=record)
+    if record.file_identifier is None:
+        msg = "Record must have a file identifier to create administrative metadata."
+        logger.error(msg)
+        raise ValueError(msg) from None
     if admin_meta:
         logger.info(f"Existing administrative metadata loaded for record '{record.file_identifier}'")
     else:
@@ -295,9 +307,10 @@ def _process_distribution_descriptions(logger: logging.Logger, records: list[Rec
                 and format_href in format_descriptions
             ):
                 logger.info(
-                    f"Updating distribution description for format '{distribution.format.format}' in Record '{record.file_identifier}'"
+                    f"Updating distribution description for format '{distribution.format.format}' "  # ty: ignore[possibly-missing-attribute]
+                    f"in Record '{record.file_identifier}'"
                 )
-                distribution.transfer_option.online_resource.description = format_descriptions[distribution.format.href]
+                distribution.transfer_option.online_resource.description = format_descriptions[distribution.format.href]  # ty: ignore[possibly-missing-attribute]
 
 
 def process_records(

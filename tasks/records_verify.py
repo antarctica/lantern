@@ -19,14 +19,16 @@ def main() -> None:
 
     confirm_branch(logger=logger, store=store, action="Validating records from")
     store.populate()
-    meta = ExportMeta.from_config_store(config=config, store=None, build_repo_ref=store.head_commit)
+    meta = ExportMeta.from_config_store(
+        config=config, store=None, build_repo_ref=store.head_commit if store.head_commit else "unknown", trusted=False
+    )
     exporter = VerificationExporter(logger=logger, meta=meta, s3=s3, get_record=store.get, context=context)
     exporter.selected_identifiers = {record.file_identifier for record in store.records}
     if selected:
         exporter.selected_identifiers = selected
     exporter.run()
     exporter.export()
-    logger.info(f"Verify report with {len(exporter.report)} tests saved.")
+    logger.info("Verify report saved.")
 
 
 if __name__ == "__main__":

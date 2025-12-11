@@ -68,8 +68,7 @@ def make_record(
         ),
         None,
     )
-    if magic_index is not None:
-        record.identification.contacts[magic_index] = magic_contact
+    record.identification.contacts[magic_index] = magic_contact
 
     record.identification.constraints = Constraints(
         [

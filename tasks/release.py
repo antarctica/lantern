@@ -26,7 +26,7 @@ def _bump_pyproject_version(bumped_version: str) -> None:
     with path.open(mode="r") as f:
         data = toml_parse(f.read())
 
-    data["project"]["version"] = bumped_version
+    data.get("project", {})["version"] = bumped_version
 
     with path.open(mode="w") as f:
         toml_dump(data, f)

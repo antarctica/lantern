@@ -99,7 +99,7 @@ def _stage1(logger: logging.Logger, config: Config, working_path: Path) -> None:
     for record_path in chain(working_path.glob("*.json"), working_path.glob("*.xml")):
         with record_path.open(mode="r") as f:
             content = f.read()
-        data["actions"].append(
+        data["actions"].append(  # ty: ignore[possibly-missing-attribute]
             {
                 "action": "create",
                 "file_path": store._get_remote_hashed_path(record_path.name),

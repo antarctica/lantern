@@ -157,20 +157,22 @@ class TestItemBase:
         assert isinstance(result, Aggregations)
         assert len(result) > 0
 
-    def test_bounding_extent(self, fx_revision_model_min: RecordRevision):
-        """Can get bounding extent from record."""
+    @pytest.mark.parametrize("has_extent", [False, True])
+    def test_bounding_extent(self, fx_revision_model_min: RecordRevision, has_extent: bool):
+        """Can get bounding extent from record if present."""
+        expected = None
         rec_extent = RecordExtent(
             identifier="bounding",
             geographic=ExtentGeographic(
                 bounding_box=BoundingBox(west_longitude=1.0, east_longitude=1.0, south_latitude=1.0, north_latitude=1.0)
             ),
         )
-        fx_revision_model_min.identification.extents = RecordExtents([rec_extent])
-        expected = Extent(rec_extent)
+        if has_extent:
+            fx_revision_model_min.identification.extents = RecordExtents([rec_extent])
+            expected = Extent(rec_extent)
         item = ItemBase(fx_revision_model_min)
 
         result = item.bounding_extent
-        assert isinstance(result, Extent)
         assert result == expected
 
     @pytest.mark.parametrize("expected", ["x", None])

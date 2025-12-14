@@ -53,8 +53,12 @@ class Contacts(RecordContacts):
     Wrapper around Record Contacts to reflect correct type.
     """
 
-    def __getitem__(self, index: int) -> Contact:
-        """Override type."""
+    def __getitem__(self, index: int) -> Contact:  # ty: ignore[invalid-method-override]
+        """
+        Override type.
+
+        Known to violate method override rules due to differing return type.
+        """
         return cast(Contact, super().__getitem__(index))
 
 
@@ -98,8 +102,12 @@ class Extents(RecordExtents):
     Wrapper around Record Extents to reflect correct type.
     """
 
-    def __getitem__(self, index: int) -> Extent:
-        """Override type."""
+    def __getitem__(self, index: int) -> Extent:  # ty: ignore[invalid-method-override]
+        """
+        Override type.
+
+        Known to violate method override rules due to differing return type.
+        """
         return cast(Extent, super().__getitem__(index))
 
 

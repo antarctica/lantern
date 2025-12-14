@@ -505,8 +505,10 @@ class CommitResults:
         self.updated_identifiers = changes["update"]
         self.stats = CommitResultsStats(changes=changes, actions=actions)
 
-    def __eq__(self, other: CommitResults) -> bool:
+    def __eq__(self, other: CommitResults | object) -> bool:
         """Equality comparison for tests."""
+        if not isinstance(other, CommitResults):
+            return False
         return (
             self.branch == other.branch
             and self.commit == other.commit

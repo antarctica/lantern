@@ -95,12 +95,12 @@ class ItemCatalogueSummary(ItemBase):
     resources related to the current item within the BAS Data Catalogue website.
     """
 
-    def __init__(self, record: RecordRevision, admin_meta_keys: AdministrationKeys) -> None:
-        super().__init__(record=record, admin_keys=admin_meta_keys)
-
-        if not isinstance(self._admin_keys, AdministrationKeys):
+    def __init__(self, record: RecordRevision, admin_meta_keys: AdministrationKeys | None) -> None:
+        if not isinstance(admin_meta_keys, AdministrationKeys):
             msg = "administration metadata keys must be provided"
             raise TypeError(msg) from None
+
+        super().__init__(record=record, admin_keys=admin_meta_keys)
 
     @property
     def _resource_type_label(self) -> str:
@@ -290,7 +290,7 @@ class Aggregations:
 
     def __init__(
         self,
-        admin_meta_keys: AdministrationKeys,
+        admin_meta_keys: AdministrationKeys | None,
         aggregations: RecordAggregations,
         get_record: Callable[[str], RecordRevision],
     ) -> None:
@@ -426,10 +426,14 @@ class Dates(RecordDates):
             return None
         return FormattedDate.from_rec_date(val)
 
-    def as_dict_enum(self) -> dict[DateTypeCode, FormattedDate]:
-        """Non-None values as a dictionary with DateTypeCode enum keys."""
+    def as_dict_enum(self) -> dict[DateTypeCode, FormattedDate]:  # ty: ignore[invalid-method-override]
+        """
+        Non-None values as a dictionary with DateTypeCode enum keys.
+
+        Known to violate method override rules due to differing return type.
+        """
         # noinspection PyTypeChecker
-        return super().as_dict_enum()
+        return super().as_dict_enum()  # ty: ignore[invalid-return-type]
 
     def as_dict_labeled(self) -> dict[str, FormattedDate]:
         """Non-None values as a dictionary with human-readable labels as keys."""
@@ -468,12 +472,12 @@ class Extent(ItemExtent):
     @property
     def start(self) -> FormattedDate | None:
         """Temporal period start."""
-        return FormattedDate.from_rec_date(super().start) if super().start else None
+        return FormattedDate.from_rec_date(super().start) if super().start else None  # ty: ignore[invalid-argument-type]
 
     @property
     def end(self) -> FormattedDate | None:
         """Temporal period end."""
-        return FormattedDate.from_rec_date(super().end) if super().end else None
+        return FormattedDate.from_rec_date(super().end) if super().end else None  # ty: ignore[invalid-argument-type]
 
     @property
     def map_iframe(self) -> str:
@@ -515,7 +519,10 @@ class Identifiers(RecordIdentifiers):
         Alias URLs are converted to relative links so they can be tested in non-production environments.
         """
         return [
-            Link(href=identifier.href.replace(f"https://{CATALOGUE_NAMESPACE}", ""), value=identifier.identifier)
+            Link(
+                href=identifier.href.replace(f"https://{CATALOGUE_NAMESPACE}", ""),  # ty: ignore[possibly-missing-attribute]
+                value=identifier.identifier,
+            )
             for identifier in self.filter(ALIAS_NAMESPACE)
         ]
 

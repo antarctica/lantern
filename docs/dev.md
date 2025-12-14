@@ -276,8 +276,12 @@ Default options are used. Type checks are run automatically in [Continuous Integ
 the [Pre-Commit Hook](#pre-commit-hook).
 
 <!-- pyml disable md028 -->
-> [!NOTE]
-> Ty is an experimental tool and may report false positives. Type checking may be removed if it becomes a burden.
+> [!IMPORTANT]
+> Ty is an experimental tool and includes many false positive findings.
+>
+> Known-positive findings are frequently ignored, where it would require effort to fix, as a pragmatic/lax approach.
+>
+> Aa stricter approach may be adopted as `ty` matures, and/or specific bugs are fixed.
 
 > [!TIP]
 > To check types manually run the `types` [Development Task](#development-tasks).

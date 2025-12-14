@@ -19,6 +19,11 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Support for configuring the GitLab store branch name
 * Development task for minimally cloning a record
 * Support for branch-based changesets in interactive publishing workflow
+* Support for v2 MAGIC discovery profile
+* Support for initiative records as 'project' items
+* Support for container and resource 'super types' to more flexibly support similar item types
+* Support for SAN based distribution options
+* Additional validation for MAGIC Discovery profile Req. 06 (released date presence)
 
 ### Fixed
 
@@ -33,6 +38,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Supporting additional identifier formats in selecting records development task
 * Refactoring record related development tasks to use common functions via (`tasks._record_utils` module)
 * Refactoring and improving interactive publishing workflow
+* Switching to dedicated GitLab bot user for GitLab Store and record publishing workflow (to post comments across projects)
 
 ### Removed
 

@@ -2,11 +2,12 @@ import functools
 import logging
 import re
 import sys
+from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
 
 import inquirer
-from boto3 import client as S3Client  # noqa: N812
+from mypy_boto3_s3 import S3Client
 from tasks._record_utils import get_records, init, init_store, parse_records
 from tasks.records_import import clean as import_clean
 from tasks.records_import import load as import_load
@@ -89,7 +90,9 @@ class OutputComment:
         self._commit = commit
         self._merge_url = merge_url
         self._issue_url = issue_url
-        self._meta = ExportMeta.from_config_store(config=config, store=store, build_repo_ref=store.head_commit)
+        self._meta = ExportMeta.from_config_store(
+            config=config, store=store, build_repo_ref=store.head_commit if store.head_commit else "-"
+        )
 
     @property
     def _records(self) -> list[RecordRevision]:
@@ -153,10 +156,10 @@ class OutputComment:
         issue.notes.create({"body": self.render()})
 
 
-def _time_task(label: str) -> callable:
+def _time_task(label: str) -> Callable:
     """Time a task and log duration."""
 
-    def decorator(func: callable) -> callable:
+    def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         def wrapper(*args, **kwargs):  # noqa: ANN002, ANN003, ANN202,
             start = datetime.now(tz=UTC)
@@ -227,7 +230,8 @@ def _changeset(
     record_issues = {"<NONE>"}
     for record in records:
         admin = get_admin(keys=keys, record=record)
-        record_issues = record_issues.union(admin.gitlab_issues)
+        if admin:
+            record_issues = record_issues.union(admin.gitlab_issues)
     record_issues.add("<OTHER>")
 
     issue = inquirer.prompt([inquirer.List("issue", message="Issue URL", choices=record_issues)])["issue"]
@@ -295,7 +299,9 @@ def _merge_request(logger: logging.Logger, store: GitLabStore, issue_href: str |
 @_time_task(label="Build")
 def _build(logger: logging.Logger, config: Config, store: GitLabStore, s3: S3Client, identifiers: set[str]) -> None:
     """Build items for committed records."""
-    meta = ExportMeta.from_config_store(config=config, store=store, build_repo_ref=store.head_commit)
+    meta = ExportMeta.from_config_store(
+        config=config, store=store, build_repo_ref=store.head_commit if store.head_commit else "-"
+    )
     site = SiteExporter(config=config, meta=meta, logger=logger, s3=s3, get_record=store.get)
     logger.info(f"Publishing {len(identifiers)} records to {config.AWS_S3_BUCKET}.")
     site.select(file_identifiers=identifiers)
@@ -311,8 +317,11 @@ def _verify(
     context: VerificationContext = {
         "BASE_URL": base_url,
         "SHAREPOINT_PROXY_ENDPOINT": config.VERIFY_SHAREPOINT_PROXY_ENDPOINT,
+        "SAN_PROXY_ENDPOINT": config.VERIFY_SAN_PROXY_ENDPOINT,
     }
-    meta = ExportMeta.from_config_store(config=config, store=store, build_repo_ref=store.head_commit)
+    meta = ExportMeta.from_config_store(
+        config=config, store=store, build_repo_ref=store.head_commit if store.head_commit else "-"
+    )
     exporter = VerificationExporter(logger=logger, meta=meta, s3=s3, get_record=store.get, context=context)
     exporter.selected_identifiers = identifiers
     exporter.run()

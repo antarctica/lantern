@@ -2,7 +2,6 @@ from datetime import date
 from typing import Any
 
 from lantern.lib.metadata_library.models.record.elements.common import Contact, Contacts
-from lantern.lib.metadata_library.models.record.elements.data_quality import DataQuality
 from lantern.lib.metadata_library.models.record.elements.metadata import Metadata
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
 from lantern.lib.metadata_library.models.record.presets.citation import make_magic_citation
@@ -29,7 +28,7 @@ class RecordMagicDiscoveryV2(Record):
     """
 
     def __init__(self, **kwargs: Any) -> None:
-        """Process defaults for required properties."""
+        """Process defaults."""
         date_stamp: date | None = kwargs.pop("date_stamp", None)
         kwargs["metadata"] = Metadata(
             contacts=Contacts([make_magic_role({ContactRoleCode.POINT_OF_CONTACT})]), date_stamp=date_stamp
@@ -48,8 +47,6 @@ class RecordMagicDiscoveryV2(Record):
         self._set_citation()
 
         profile = MAGIC_DISCOVERY_V2
-        if self.data_quality is None:
-            self.data_quality = DataQuality()
         if profile not in self.data_quality.domain_consistency:
             self.data_quality.domain_consistency.append(profile)
 
@@ -97,6 +94,7 @@ class RecordMagicDiscoveryV2(Record):
             identifiers=self.identification.identifiers,
         )
 
+    # noinspection PyMethodOverriding
     @classmethod
     # noinspection PyMethodOverridingInspection
     def loads(cls, value: dict) -> "RecordMagicDiscoveryV2":

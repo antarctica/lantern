@@ -5,7 +5,7 @@ import inquirer
 from tasks._record_utils import clean_configs, confirm_branch, init, parse_records
 
 from lantern.config import Config
-from lantern.lib.metadata_library.models.record.record import Record
+from lantern.models.record.record import Record
 from lantern.stores.gitlab import CommitResults, GitLabStore
 
 
@@ -28,7 +28,7 @@ def load(logger: logging.Logger, input_path: Path) -> dict[Path, Record]:
 
     Records must pass catalogue validation.
 
-    Returned as a dict of {RecordPath: Record} to allow targeted cleanup later.
+    Returned as a dict of {RecordPath: Record} to allow targeted clean-up later.
     """
     logger.info(f"Loading records from: '{input_path.resolve()}'")
     records = list(parse_records(logger=logger, search_path=input_path, validate_catalogue=True))

@@ -2,7 +2,7 @@ import json
 import logging
 import re
 import sys
-from collections.abc import Generator
+from collections.abc import Generator, Mapping, Sequence
 from pathlib import Path
 
 import inquirer
@@ -15,6 +15,7 @@ from lantern.lib.metadata_library.models.record.record import Record, RecordInva
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 from lantern.log import init as _init_logging
 from lantern.models.record.record import Record as CatalogueRecord
+from lantern.models.record.record import Record as RecordCatalogue
 from lantern.models.record.revision import RecordRevision
 from lantern.stores.gitlab import GitLabStore
 
@@ -42,7 +43,7 @@ def init_store(logger: logging.Logger, config: Config, branch: str | None = None
     )
 
 
-def init_s3(config: Config) -> S3Client:
+def init_s3(config: Config) -> S3Client:  # ty: ignore[invalid-type-form]
     """Initialise S3 client."""
     return S3Client(
         "s3",
@@ -63,7 +64,7 @@ def init_admin_keys(config: Config) -> AdministrationKeys:
     )
 
 
-def init() -> tuple[logging.Logger, Config, GitLabStore, S3Client, AdministrationKeys]:
+def init() -> tuple[logging.Logger, Config, GitLabStore, S3Client, AdministrationKeys]:  # ty: ignore[invalid-type-form]
     """Initialise common objects."""
     config = Config()
     logger = init_logging(config)
@@ -204,7 +205,7 @@ def get_records(logger: logging.Logger, store: GitLabStore, file_identifiers: li
     return records
 
 
-def dump_records(logger: logging.Logger, output_path: Path, records: list[Record]) -> None:
+def dump_records(logger: logging.Logger, output_path: Path, records: Sequence[Record | RecordRevision]) -> None:
     """Dump records to a path."""
     output_path.mkdir(parents=True, exist_ok=True)
     for record in records:
@@ -214,7 +215,9 @@ def dump_records(logger: logging.Logger, output_path: Path, records: list[Record
             f.write(record.dumps_json(strip_admin=False))
 
 
-def clean_configs(logger: logging.Logger, records: dict[Path, Record], file_identifiers: list[str]) -> None:
+def clean_configs(
+    logger: logging.Logger, records: Mapping[Path, Record | RecordCatalogue], file_identifiers: list[str]
+) -> None:
     """Clean up input path."""
     input_files_indexed = {}
     for path, record in records.items():

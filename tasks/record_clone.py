@@ -74,6 +74,9 @@ def _clone_record(
 
     # admin metadata
     admin_meta = get_admin(keys=admin_keys, record=source_record)  # can't use cloned record as ID will mismatch
+    if admin_meta is None:
+        msg = "Missing administrative metadata in source record."
+        raise ValueError(msg) from None
     admin_meta.id = cloned_record.file_identifier
     set_admin(keys=admin_keys, record=cloned_record, admin_meta=admin_meta)
 

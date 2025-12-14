@@ -161,6 +161,10 @@ ignore = ["D100", "D104", "D107", "D203", "D212", "D401", "D402", "E501", "PT001
 [tool.ruff.lint.flake8-annotations]
 allow-star-arg-any = true
 
+[tool.ty.src]
+include = ["src", "tasks"]
+exclude = ["tests"]
+
 [tool.pymarkdown]
 plugins.md013.line_length = 120
 plugins.md014.enabled = false

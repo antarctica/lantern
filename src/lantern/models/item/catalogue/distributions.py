@@ -382,7 +382,7 @@ class BasPublishedMap(Distribution):
     """
 
     def __init__(self, option: RecordDistribution, **kwargs: Any) -> None:
-        self.option = option
+        self._option = option
 
     @classmethod
     def matches(cls, option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:

@@ -7,7 +7,7 @@ from tempfile import TemporaryDirectory
 from boto3 import client as S3Client  # noqa: N812
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from moto import mock_aws
-from resources.records.admin_keys.testing_keys import load_keys
+from tests.resources.records.admin_keys.testing_keys import load_keys
 from tests.resources.stores.fake_records_store import FakeRecordsStore
 
 from lantern.config import Config as BaseConfig
@@ -79,6 +79,7 @@ def export_test_site(export_path: Path) -> None:
     context: VerificationContext = {
         "BASE_URL": "https://example.com",
         "SHAREPOINT_PROXY_ENDPOINT": "x",
+        "SAN_PROXY_ENDPOINT": "x",
     }
     jobs = [
         VerificationJob(

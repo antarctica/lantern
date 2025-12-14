@@ -1,9 +1,10 @@
 import functools
 import logging
 import shutil
+from collections.abc import Callable
 from datetime import UTC, datetime
 
-from boto3 import client as S3Client  # noqa: N812
+from mypy_boto3_s3 import S3Client
 from tasks._record_utils import init
 
 from lantern.config import Config as Config
@@ -12,10 +13,10 @@ from lantern.models.site import ExportMeta
 from lantern.stores.gitlab import GitLabStore
 
 
-def time_task(label: str) -> callable:
+def time_task(label: str) -> Callable:
     """Time a task and log duration."""
 
-    def decorator(func: callable) -> callable:
+    def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
         def wrapper(self, *args, **kwargs):  # noqa: ANN001, ANN002, ANN003, ANN202,
             start = datetime.now(tz=UTC)

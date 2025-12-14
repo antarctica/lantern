@@ -485,6 +485,25 @@ class TestGitLabLocalCache:
         assert not fx_gitlab_cache_pop._records_path.exists()
 
 
+class TestCommitResults:
+    """Test commit results data class."""
+
+    @pytest.mark.cov()
+    @pytest.mark.parametrize(
+        ("other", "expected"),
+        [
+            (CommitResults(branch="x", commit="x", changes={"create": [], "update": []}, actions=[]), True),
+            (CommitResults(branch="x", commit="y", changes={"create": [], "update": []}, actions=[]), False),
+            (1, False),
+        ],
+    )
+    def test_eq(self, other: object, expected: bool):
+        """Can compare instances."""
+        base = CommitResults(branch="x", commit="x", changes={"create": [], "update": []}, actions=[])
+
+        assert (base == other) is expected
+
+
 class TestGitLabStore:
     """
     Test GitLab store.

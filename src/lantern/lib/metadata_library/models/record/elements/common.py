@@ -387,7 +387,7 @@ class Identifiers(list[Identifier]):
         Example output: Identifiers([Identifier(identifier="x", href="x", namespace="x")])
         """
         converter = cattrs.Converter()
-        return cls([converter.structure(identifier, Identifier) for identifier in value])
+        return cls([converter.structure(identifier, Identifier) for identifier in value])  # ty: ignore[invalid-argument-type]
 
     def unstructure(self) -> list[dict]:
         """
@@ -461,7 +461,7 @@ class Citation:
         converter.register_unstructure_hook(Contacts, lambda d: d.unstructure())
         converter.register_structure_hook(Dates, lambda d, t: Dates.structure(d))
         converter.register_unstructure_hook(Dates, lambda d: d.unstructure())
-        converter.register_structure_hook(Identifiers, lambda d, t: Identifiers.structure(d))
+        converter.register_structure_hook(Identifiers, lambda d, t: Identifiers.structure(d))  # ty: ignore[invalid-argument-type]
         converter.register_unstructure_hook(Identifiers, lambda d: d.unstructure())
         return converter
 

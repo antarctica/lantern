@@ -43,7 +43,7 @@ class AdministrationKeys:
         """Dump keys as JSON."""
         keys_json = {
             "encryption_private": self.encryption_private.to_json(),
-            "signing_public": self.signing_public.to_json(),
+            "signing_public": self.signing_public.to_json(),  # ty: ignore[possibly-missing-attribute]
         }
         if self.signing_private:
             keys_json["signing_private"] = self.signing_private.to_json()

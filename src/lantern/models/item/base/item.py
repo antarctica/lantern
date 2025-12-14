@@ -98,7 +98,7 @@ class ItemBase:
     def bounding_extent(self) -> Extent | None:
         """Bounding extent."""
         try:
-            return self.extents.filter(identifier="bounding")[0]
+            return self.extents.filter(identifier="bounding")[0]  # ty: ignore[invalid-return-type]
         except IndexError:
             return None
 
@@ -342,7 +342,7 @@ class ItemBase:
         return self.title_raw
 
     @property
-    def title_html(self) -> str | None:
+    def title_html(self) -> str:
         """Title with Markdown formatting, if present, encoded as HTML."""
         return md_as_html(self.title_md)
 

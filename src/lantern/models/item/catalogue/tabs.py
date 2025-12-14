@@ -313,7 +313,7 @@ class LicenceTab(Tab):
         """
         holders = []
         for contact in self._copyright_holders:
-            name = contact.organisation.name if contact.organisation else contact.individual.name
+            name = contact.organisation.name if contact.organisation else contact.individual.name  # ty: ignore[possibly-missing-attribute]
             if not contact.online_resource:
                 holders.append(name)
                 continue
@@ -377,8 +377,8 @@ class RelatedTab(Tab):
         """Whether tab is enabled."""
         all_agg = len(self._aggregations)
         if self._item_type == HierarchyLevelCode.COLLECTION:
-            # if all aggregations are a collections items, disable tab as these are shown in item tab
-            return len(self.child_items) != all_agg
+            # if all aggregations are a container's items, disable tab as these are shown in item tab
+            return len(self.child_items) != all_agg  # ty: ignore[invalid-argument-type]
         return all_agg > 0
 
     @property
@@ -411,7 +411,7 @@ class AdditionalInfoTab(Tab):
         kv: dict[str, str],
         build_time: datetime,
         series: Series | None = None,
-        scale: str | None = None,
+        scale: int | None = None,
         projection: Identifier | None = None,
         maintenance: Maintenance | None = None,
         standard: MetadataStandard | None = None,
@@ -478,12 +478,12 @@ class AdditionalInfoTab(Tab):
     @property
     def series_name(self) -> str | None:
         """Descriptive series name if set."""
-        return self._series.name
+        return self._series.name if self._series is not None else None
 
     @property
     def sheet_number(self) -> str | None:
         """Descriptive series sheet number if set."""
-        return self._series.page
+        return self._series.page if self._series is not None else None
 
     @property
     def scale(self) -> str | None:
@@ -666,7 +666,7 @@ class ContactTab(Tab):
         return self._form_action
 
     @property
-    def form_params(self) -> dict[str, str]:
+    def form_params(self) -> dict[str, str | None]:
         """Contact form required parameters."""
         return {"item-id": self._id, "item-poc": self._contact.email}
 
@@ -706,12 +706,14 @@ class ContactTab(Tab):
 
         address = self._contact.address
         parts = [
-            *address.delivery_point.split(", "),
             address.city,
             address.administrative_area,
             address.postal_code,
             address.country,
         ]
+        if isinstance(address.delivery_point, str):
+            delivery_parts = [part.strip() for part in address.delivery_point.split(",")]
+            parts = delivery_parts + parts
         return "<br/>".join([part for part in parts if part is not None])
 
     @property

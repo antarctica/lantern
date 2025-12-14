@@ -124,7 +124,7 @@ class ItemCatalogue(ItemBase):
     @property
     def _authors(self) -> AuthorsTab:
         """Authors tab."""
-        return AuthorsTab(item_super_type=self._super_type, authors=self.contacts.filter(roles=ContactRoleCode.AUTHOR))
+        return AuthorsTab(item_super_type=self._super_type, authors=self.contacts.filter(roles=ContactRoleCode.AUTHOR))  # ty: ignore[invalid-argument-type]
 
     @property
     def _licence(self) -> LicenceTab:
@@ -132,7 +132,7 @@ class ItemCatalogue(ItemBase):
         return LicenceTab(
             item_super_type=self._super_type,
             licence=super().licence,
-            rights_holders=self.contacts.filter(roles=ContactRoleCode.RIGHTS_HOLDER),
+            rights_holders=self.contacts.filter(roles=ContactRoleCode.RIGHTS_HOLDER),  # ty: ignore[invalid-argument-type]
         )
 
     @property
@@ -179,7 +179,7 @@ class ItemCatalogue(ItemBase):
         """Contact tab."""
         poc = self.contacts.filter(roles=ContactRoleCode.POINT_OF_CONTACT)[0]
         return ContactTab(
-            contact=poc,
+            contact=poc,  # ty: ignore[invalid-argument-type]
             item_id=self.resource_id,
             item_title=self.title_plain,
             form_action=self._meta.items_enquires_endpoint,
@@ -229,7 +229,7 @@ class ItemCatalogue(ItemBase):
             tags["og:description"] = self.summary_plain
         if self._dates.publication:
             # noinspection PyUnresolvedReferences
-            tags["og:article:published_time"] = self._dates.publication.datetime
+            tags["og:article:published_time"] = self._dates.publication.datetime  # ty: ignore[unresolved-attribute]
         if self.overview_graphic:
             tags["og:image"] = self.overview_graphic.href
 
@@ -264,7 +264,7 @@ class ItemCatalogue(ItemBase):
             if author.individual is not None:
                 author_names.append(author.individual.name)
                 continue
-            author_names.append(author.organisation.name)
+            author_names.append(author.organisation.name)  # ty: ignore[possibly-missing-attribute]
         if len(author_names) > 0:
             # set as comma separated list of names, except last element which uses '&'
             doc["creator"] = (
@@ -284,8 +284,8 @@ class ItemCatalogue(ItemBase):
         return PageSummary(
             item_super_type=self._super_type,
             edition=self.edition,
-            published_date=self._dates.publication,
-            revision_date=self._dates.revision,
+            published_date=self._dates.publication,  # ty: ignore[invalid-argument-type]
+            revision_date=self._dates.revision,  # ty: ignore[invalid-argument-type]
             aggregations=self._aggregations,
             restricted=self._restricted,
             citation=self.citation_html,

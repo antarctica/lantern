@@ -394,10 +394,3 @@ class Record:
                 validate(instance=config, schema=schema)
             except ValidationError as e:
                 raise RecordInvalidError(e) from e
-
-        # Additional non-schema validation for MAGIC Discovery profile
-        profiles = self._profile_schemas if use_profiles else []
-        if RecordSchema.MAGIC_V1 in profiles or RecordSchema.MAGIC_V2 in profiles:  # noqa: SIM102
-            if self.identification.dates.released is None:
-                msg = "Records using the MAGIC Discovery profile must include a released date (Req. 06)."
-                raise RecordInvalidError(ValueError(msg)) from None

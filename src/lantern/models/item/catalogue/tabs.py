@@ -584,7 +584,12 @@ class AdditionalInfoTab(Tab):
     def profiles(self) -> list[Link]:
         """Metadata profiles if set."""
         return [
-            Link(value=profile.specification.title, href=profile.specification.href, external=True)
+            Link(
+                value=profile.specification.title
+                + (f" (v{profile.specification.edition})" if profile.specification.edition is not None else ""),
+                href=profile.specification.href,
+                external=True,
+            )
             for profile in self._profiles
         ]
 

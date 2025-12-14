@@ -547,15 +547,6 @@ class TestRecord:
         with pytest.raises(RecordInvalidError):
             fx_lib_record_model_min_iso.validate()
 
-    def test_validate_invalid_magic_discovery_released_date(self):
-        """Can't validate a record that does not comply with non-schema validation for MAGIC discovery profile."""
-        record = deepcopy(self.magic_discovery_v1_valid)
-        record.identification.dates.released = None
-
-        assert record._profile_schemas == [RecordSchema.MAGIC_V1]
-        with pytest.raises(RecordInvalidError):
-            record.validate()
-
     def test_validate_invalid_profile(self, fx_lib_record_model_min_iso: Record):
         """Can't validate a record that does not comply with a schema inferred from a domain consistency element."""
         fx_lib_record_model_min_iso.data_quality = DataQuality(domain_consistency=[MAGIC_DISCOVERY_V2])

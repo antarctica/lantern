@@ -40,7 +40,7 @@ class RecordMagicDiscoveryV2(Record):
         RecordMagicDiscoveryV2._set_magic_poc(self.identification.contacts)
         RecordMagicDiscoveryV2._set_ukri_rights(self.identification.contacts)
 
-        self_identifier = make_bas_cat(self.file_identifier)
+        self_identifier = make_bas_cat(self.file_identifier)  # ty: ignore[invalid-argument-type]
         if self_identifier not in self.identification.identifiers:
             self.identification.identifiers.append(self_identifier)
 
@@ -97,8 +97,12 @@ class RecordMagicDiscoveryV2(Record):
     # noinspection PyMethodOverriding
     @classmethod
     # noinspection PyMethodOverridingInspection
-    def loads(cls, value: dict) -> "RecordMagicDiscoveryV2":
-        """Create a Record from a dict loaded from a JSON schema instance."""
+    def loads(cls, value: dict) -> "RecordMagicDiscoveryV2":  # ty: ignore[invalid-method-override]
+        """
+        Create a Record from a dict loaded from a JSON schema instance.
+
+        Known to violate method override rules due to differing signature.
+        """
         record = super().loads(value)
         return cls(
             file_identifier=record.file_identifier,

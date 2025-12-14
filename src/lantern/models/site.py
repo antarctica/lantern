@@ -1,6 +1,7 @@
 from dataclasses import asdict, dataclass, field, fields
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 from lantern.config import Config
 from lantern.lib.metadata_library.models.record.elements.common import Date
@@ -80,9 +81,7 @@ class SiteMeta:
         return FormattedDate.from_rec_date(Date(date=datetime.fromisoformat(self.build_time.isoformat())))
 
     @classmethod
-    def from_config_store(
-        cls, config: Config, store: GitLabStore | None = None, **kwargs: datetime | dict | str
-    ) -> "SiteMeta":
+    def from_config_store(cls, config: Config, store: GitLabStore | None = None, **kwargs: Any) -> "SiteMeta":
         """
         Create a Site Metadata instance from an app Config instance, optional GitLab Store and additional properties.
 
@@ -109,7 +108,7 @@ class SiteMeta:
             build_ref = store.head_commit
 
         return cls(
-            **{
+            **{  # ty: ignore[invalid-argument-type]
                 "base_url": config.BASE_URL,
                 "build_key": config.TEMPLATES_CACHE_BUST_VALUE,
                 "sentry_src": config.TEMPLATES_SENTRY_SRC,
@@ -157,7 +156,10 @@ class ExportMeta(SiteMeta):
 
     @classmethod
     def from_config_store(
-        cls, config: Config, store: GitLabStore | None = None, **kwargs: datetime | dict | str | bool
+        cls,
+        config: Config,
+        store: GitLabStore | None = None,
+        **kwargs: bool | int | str | dict | Path | datetime | AdministrationKeys | None,
     ) -> "ExportMeta":
         """
         Create an Export Metadata instance from an app Config instance, optional GitLab Store and additional properties.
@@ -172,7 +174,7 @@ class ExportMeta(SiteMeta):
         super_meta = asdict(SiteMeta.from_config_store(config, store, **site_kwargs))
 
         return cls(
-            **{
+            **{  # ty: ignore[invalid-argument-type]
                 **super_meta,
                 "export_path": config.EXPORT_PATH,
                 "s3_bucket": config.AWS_S3_BUCKET,

@@ -213,7 +213,7 @@ class ItemCataloguePhysicalMap(ItemCatalogue):
 
         series: list[Series] = [side.identification.series for side in self._sides]
         scales = [side.identification.spatial_resolution for side in self._sides]
-        return AdditionalInfoTab(serieses=series, scales=scales, **kwargs)
+        return AdditionalInfoTab(serieses=series, scales=scales, **kwargs)  # ty: ignore[invalid-argument-type]
 
     @property
     def graphics(self) -> GraphicOverviews:

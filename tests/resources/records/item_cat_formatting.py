@@ -80,7 +80,7 @@ lines = [
 ]
 </pre>
 
-Admonitions:
+Admonitions (default triggers and headings):
 
 > [!NOTE]
 > Highlights information that users should take into account,
@@ -106,6 +106,31 @@ Admonitions:
 ...
 
 > [!CAUTION]
+> Negative potential consequences of an action.
+
+Admonitions (lower-case triggers and custom headings):
+
+> [!NOTE] Please note
+> ...
+
+...
+
+> [!TIP] Top Tip!
+> ...
+
+...
+
+> [!IMPORTANT] I'm purple
+> ...
+
+...
+
+> [!WARNING] Wow there
+> ...
+
+...
+
+> [!CAUTION] _Something terrible has happened 😧_
 > Negative potential consequences of an action.
 
 Table:

@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TypeVar
 
 import cattrs
@@ -56,12 +56,7 @@ class DataQuality:
     """
 
     lineage: Lineage | None = None
-    domain_consistency: list[DomainConsistency] | None = None
-
-    def __post_init__(self) -> None:
-        """Process defaults."""
-        if self.domain_consistency is None:
-            self.domain_consistency = []
+    domain_consistency: list[DomainConsistency] = field(default_factory=list)
 
     @classmethod
     def structure(cls: type[TDataQuality], value: dict) -> "DataQuality":

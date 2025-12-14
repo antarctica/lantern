@@ -52,7 +52,7 @@ def _get_args(logger: logging.Logger, records: list[Record]) -> tuple[list[Recor
     elif answers["level"] == AccessLevel.BAS_STAFF.name:
         permission = BAS_STAFF
     if permission and answers["comment"] != "":
-        permission.comment = answers["comment"]
+        permission.comment = answers["comment"]  # ty: ignore[invalid-assignment]
     logger.info(f"Selected permission: {permission}")
 
     return selected_records, permission
@@ -61,6 +61,9 @@ def _get_args(logger: logging.Logger, records: list[Record]) -> tuple[list[Recor
 def _set_permission(logger: logging.Logger, keys: AdministrationKeys, record: Record, permission: Permission) -> None:
     """Set single access permission in a record, overwriting any possible existing permissions."""
     admin = None
+    if record.file_identifier is None:
+        msg = "File identifier required."
+        raise ValueError(msg) from None
     try:
         admin = get_admin(keys=keys, record=record)
     except AdministrativeMetadataSubjectMismatchError as e:
@@ -103,7 +106,7 @@ def main() -> None:
         sys.exit(0)
 
     for record in records:
-        _set_permission(logger, keys, record, permission)
+        _set_permission(logger, keys, record, permission)  # ty: ignore[invalid-argument-type]
     dump_records(logger=logger, records=selected_records, output_path=input_path)
 
 

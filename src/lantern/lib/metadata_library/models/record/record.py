@@ -2,7 +2,7 @@ import contextlib
 import json
 import logging
 from copy import deepcopy
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
 from hashlib import sha1
 from typing import TypeVar
@@ -113,13 +113,16 @@ class Record:
     metadata: Metadata
     reference_system_info: ReferenceSystemInfo | None = None
     identification: Identification
-    data_quality: DataQuality | None = None
-    distribution: list[Distribution] | None = None
+    data_quality: DataQuality = field(default_factory=DataQuality)
+    distribution: list[Distribution] = field(default_factory=list)
 
     def __post_init__(self) -> None:
-        """Process defaults."""
-        if self.distribution is None:
-            self.distribution = []
+        """
+        Process defaults.
+
+        Retained for subclasses to override.
+        """
+        pass
 
     @property
     def sha1(self) -> str:
@@ -353,9 +356,6 @@ class Record:
     @property
     def _profile_schemas(self) -> list[RecordSchema]:
         """Load any supported validation schemas based on any domain consistency elements within the Record."""
-        if self.data_quality is None:
-            return []
-
         schemas = []
         for dc in self.data_quality.domain_consistency:
             with contextlib.suppress(KeyError):

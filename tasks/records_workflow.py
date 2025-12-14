@@ -131,6 +131,8 @@ class OutputComment:
   - {{ item.item_url }}
   - {{ item.revision_link }}
 {% endfor %}
+
+_This comment was left automatically by the Lantern Experiment's [Interactive record publishing workflow](https://github.com/antarctica/lantern/blob/main/docs/usage.md#interactive-record-publishing-workflow]._
         """
 
     def render(self) -> str:
@@ -380,6 +382,12 @@ def main() -> None:
 
     # process any zap authored records
     _zap(logger=logger, store=store, admin_keys=keys, import_path=import_path)
+
+    # stop if no valid (zap) records present
+    records = import_load(logger=logger, input_path=import_path)
+    if len(records) < 1:
+        logger.warning("No records to import, exiting.")
+        sys.exit(0)
 
     # open a changeset if needed
     store, issue_url = _changeset(logger=logger, config=config, store=store, keys=keys, import_path=import_path)

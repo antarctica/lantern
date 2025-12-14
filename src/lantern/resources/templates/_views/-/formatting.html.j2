@@ -140,8 +140,11 @@ Some text in a code block.
         input='...
 > [!' + style[2] +']
 > Some text shown as a ' + style[0] +'.
+...
+> [!' + style[0] +'] Custom ' + style[0] +'
+> A ' + style[0] +', with custom title (and lower-case trigger).
 ...',
-        output='<p>...</p><div class="admonition ' + style[0] + '"><p class="admonition-title">' + style[1] + '</p><p>Some text shown as a ' + style[0] + '.</p></div><p>...</p>'
+        output='<p>...</p><div class="admonition ' + style[0] + '"><p class="admonition-title">' + style[1] + '</p><p>Some text shown as a ' + style[0] + '.</p></div><p>...</p><div class="admonition ' + style[0] + '"><p class="admonition-title">Custom ' + style[0] + '</p><p>A ' + style[0] + ', with custom title (and lower-case trigger).</p></div><p>...</p>'
       ) }}
     {% endfor %}
 

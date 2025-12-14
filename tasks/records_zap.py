@@ -39,6 +39,7 @@ magic_collection_ids = [
     "7ed4d15e-952f-4be6-893a-9a9fef197426",  # BAS Polar Estates Maps
     "b8b78c6c-fac2-402c-a772-9f518c7121e5",  # BAS MAGIC
     "cf6dee46-493f-464c-8380-c8b2c5356508",  # BAS Legacy Maps
+    "8b60e3b1-ccbf-48de-acaf-adf74382d6ea",  # BAS Geomatics Catalogue
 ]
 
 

@@ -95,15 +95,17 @@ def parse_records(
     search_path: Path,
     glob_pattern: str | None = None,
     validate_base: bool = True,
+    validate_profiles: bool = True,
     validate_catalogue: bool = False,
 ) -> list[tuple[Record, Path]]:
     """
     Try to create Records from record configurations within a directory.
 
-    Records are validated against base metadata library requirements by default, and optionally against catalogue
-    specific requirements if appropriate (some tasks work with records before they'll validate).
+    Records are validated against base metadata library requirements by default (including profiles), and optionally
+    against catalogue specific requirements if appropriate (some tasks work with records before they'll validate).
 
-    Invalid records are skipped with a warning.
+    If needed, profiles validation can be disabled. Invalid records are skipped with a warning.
+
     Valid records are checked for unsupported content but will not be skipped if present.
 
     Records are returned as a list of (Record, RecordPath) tuples, where 'RecordPath' is the Path to the source file.
@@ -117,7 +119,7 @@ def parse_records(
         try:
             record = RecordClass.loads(config)
             if validate_base or validate_catalogue:
-                record.validate()
+                record.validate(use_profiles=validate_profiles)
         except RecordInvalidError as e:
             logger.warning(f"Record '{config['file_identifier']}' does not validate, skipping.")
             logger.info(e.validation_error)

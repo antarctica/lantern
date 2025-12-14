@@ -101,7 +101,6 @@ To preview records in the testing catalogue:
 
 1. copy record configurations as JSON files to the `import/` directory (see [Creating Records](#creating-records))
 1. run the `records-workflow` [Development Task](/docs/dev.md#development-tasks)
-1. copy the output comment into the issue tracking the changeset to notify the record author
 
 Repeat this process (using the [`select-records`](#updating-records) task to update the now existing records) as needed
 until the record author is happy for them to be live.

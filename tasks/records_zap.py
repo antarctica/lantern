@@ -16,6 +16,7 @@ from lantern.lib.metadata_library.models.record.enums import (
 )
 from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.presets.aggregations import make_bas_cat_collection_member
+from lantern.lib.metadata_library.models.record.presets.conformance import MAGIC_DISCOVERY_V1, MAGIC_DISCOVERY_V2
 from lantern.lib.metadata_library.models.record.record import Record
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, get_admin, set_admin
 from lantern.models.record.const import CATALOGUE_NAMESPACE
@@ -38,6 +39,7 @@ magic_collection_ids = [
     "7ed4d15e-952f-4be6-893a-9a9fef197426",  # BAS Polar Estates Maps
     "b8b78c6c-fac2-402c-a772-9f518c7121e5",  # BAS MAGIC
     "cf6dee46-493f-464c-8380-c8b2c5356508",  # BAS Legacy Maps
+    "8b60e3b1-ccbf-48de-acaf-adf74382d6ea",  # BAS Geomatics Catalogue
 ]
 
 
@@ -46,6 +48,25 @@ def clean_input_path(input_record_paths: list[tuple[Record, Path]], processed_id
     for record_path in input_record_paths:
         if record_path[0].file_identifier in processed_ids:
             record_path[1].unlink()
+
+
+def _upgrade_discovery_profile(logger: logging.Logger, records: list[Record]) -> None:
+    """Upgrade MAGIC discovery profile to V2 if record contains V1."""
+    for record in records:
+        discovery_v1_index = next(
+            (
+                i
+                for i, c in enumerate(record.data_quality.domain_consistency)
+                if c.specification.href == MAGIC_DISCOVERY_V1.specification.href
+                or c.specification.href == "https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery-v1/"
+            ),
+            None,
+        )
+        if discovery_v1_index is None:
+            logger.debug("MAGIC discovery profile V1 not found in record, skipping upgrade")
+            continue
+        logger.info("Upgrading MAGIC discovery profile from V1 to V2")
+        record.data_quality.domain_consistency[discovery_v1_index] = MAGIC_DISCOVERY_V2
 
 
 def _revise_collection(time: datetime, collection: Record) -> None:
@@ -327,8 +348,33 @@ def process_records(
     _process_distribution_descriptions(logger=logger, records=records)
     _process_admin_metadata(logger=logger, admin_keys=admin_keys, records=records)
     _process_magic_collections(logger=logger, records=records, additional_records=additional_records, store=store)
+    _upgrade_discovery_profile(logger=logger, records=records)
     _revise_records(logger=logger, records=[*records, *additional_records], store=store)
     return additional_records
+
+
+def _parse_records(logger: logging.Logger, input_path: Path) -> list[tuple[Record, Path]]:
+    """
+    Wrapper for records parsing logic to support MAGIC discovery profile changes.
+
+    The V2 discovery profile supports additional hierarchy levels the V1 schema rejects but which is used in Zap ⚡️
+    authored records, preventing their use.
+
+    This wrapper loads records without profile validation first, saves them using the V2 schema, then calls the
+    `parse_records()` method as normal.
+    """
+    record_paths = parse_records(
+        logger=logger, search_path=input_path, validate_profiles=False, glob_pattern="zap-*.json"
+    )
+    for record, record_path in record_paths:
+        original_record = deepcopy(record)
+        _upgrade_discovery_profile(logger=logger, records=[record])
+        if original_record.sha1 != record.sha1:
+            logger.info(f"Saving upgraded record '{record.file_identifier}' to '{record_path}'")
+            with record_path.open("w") as f:
+                f.write(record.dumps_json(strip_admin=False))
+
+    return parse_records(logger=logger, search_path=input_path, glob_pattern="zap-*.json")
 
 
 def main() -> None:
@@ -337,7 +383,7 @@ def main() -> None:
 
     input_path = Path("./import")
     logger.info(f"Loading records from: '{input_path.resolve()}'")
-    record_paths = parse_records(logger=logger, search_path=input_path, glob_pattern="zap-*.json")
+    record_paths = _parse_records(logger=logger, input_path=input_path)
     records = [record_path[0] for record_path in record_paths]
 
     store.populate()

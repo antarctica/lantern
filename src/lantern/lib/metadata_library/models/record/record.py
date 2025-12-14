@@ -359,7 +359,7 @@ class Record:
         schemas = []
         for dc in self.data_quality.domain_consistency:
             with contextlib.suppress(KeyError):
-                schemas.append(RecordSchema.map_href(dc.specification.href))
+                schemas.append(RecordSchema.map_href(dc.specification.href))  # ty: ignore[invalid-argument-type]
 
         return schemas
 

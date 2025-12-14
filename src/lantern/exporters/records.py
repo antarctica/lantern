@@ -138,7 +138,7 @@ class RecordsExporter(Exporter):
             record = self._get_record(file_identifier)
             jobs.extend([(cls, record) for cls in parallel_classes])
 
-        admin_meta_keys_json = self._meta.admin_meta_keys.dumps_json()
+        admin_meta_keys_json = self._meta.admin_meta_keys.dumps_json()  # ty: ignore[possibly-missing-attribute]
         self._meta.admin_meta_keys = None
 
         # where job[0] is an exporter class and job[1] a record

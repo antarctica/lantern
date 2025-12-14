@@ -809,12 +809,20 @@ class TestContactTab:
         tab = ContactTab(contact=contact, item_id="x", item_title="x", form_action="x", turnstile_key="x")
         assert tab.phone == expected
 
-    @pytest.mark.parametrize("has_value", [True, False])
-    def test_address(self, has_value: bool):
+    @pytest.mark.parametrize(
+        ("has_value", "delivery", "country", "expected"),
+        [
+            (False, None, None, None),
+            (True, None, None, "b<br/>c<br/>d"),
+            (True, "a", "e", "a<br/>b<br/>c<br/>d<br/>e"),
+            (True, "a,1", "e", "a<br/>1<br/>b<br/>c<br/>d<br/>e"),
+            (True, "a, 1", "e", "a<br/>1<br/>b<br/>c<br/>d<br/>e"),
+        ],
+    )
+    def test_address(self, has_value: bool, delivery: str | None, country: str | None, expected: str | None):
         """Can get address if set."""
-        expected = "x<br/>y<br/>z<br/>a<br/>b<br/>c" if has_value else None
         address = (
-            Address(delivery_point="x, y", city="z", administrative_area="a", postal_code="b", country="c")
+            Address(delivery_point=delivery, city="b", administrative_area="c", postal_code="d", country=country)
             if has_value
             else None
         )

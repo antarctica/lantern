@@ -208,7 +208,7 @@ class ArcGISDistribution(Distribution, ABC):
     @property
     def access_target(self) -> str:
         """DOM selector of element showing more information on accessing layer."""
-        return f"#item-data-info-{self._encode_url(self.item_link.href)}"
+        return f"#item-data-info-{self._encode_url(self.item_link.href)}"  # ty: ignore[invalid-argument-type]
 
 
 class FileDistribution(Distribution, ABC):

@@ -16,17 +16,28 @@ For managing secrets and common [Config](/docs/config.md) options.
 > Resources for the [GitLab](/docs/architecture.md#gitlab) records store are managed by the
 > [ADD Metadata Toolbox 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/blob/main/docs/setup.md) project.
 
+### GitLab User Access
+
+Invite the GitLab bot user, with the developer role, to:
+
+- the [lantern-records-exp](https://gitlab.data.bas.ac.uk/felnne/lantern-records-exp) GitLab Store project
+- projects used in the [Interactive record publishing workflow](/docs/usage.md#interactive-record-publishing-workflow)
+
 ### GitLab API token
 
-For managing records. Create separate tokens for each [Deployment](/docs/deployment.md) or [Development](/docs/dev.md)
-environment.
+To manage records and workflow actions (posting comments etc.).
 
-1. create a [Project Access Token](https://gitlab.data.bas.ac.uk/felnne/lantern-records-exp/-/settings/access_tokens):
-   - role: *developer*
+As a GitLab administrator impersonating the GitLab bot user, for each deployment and local development environment:
+
+1. create a [Personal Access Token](https://gitlab.data.bas.ac.uk/-/profile/personal_access_tokens):
+   - token name: (e.g. 'ansible-prod', 'conwat-local-dev', etc.)
    - scopes: *api*
-2. store the token in 1Password
-3. set the relevant [Config](/docs/config.md) option in a local `.env` file or Ansible Vault for use in the
-  [Environment Module](/docs/deployment.md#environment-module) template as appropriate
+2. store the token in 1Password:
+   - in the *infrastructure* vault, for deployment environments
+   - in your *employee* vault, for local development environments
+3. set the relevant [Config](/docs/config.md) option in:
+   - a local `.env` file, for local development environments
+   - per-environment Ansible Vault, for deployment environments
 
 ## Sentry
 

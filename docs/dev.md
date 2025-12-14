@@ -254,15 +254,18 @@ Checks are run automatically in [Continuous Integration](#continuous-integration
 ### Updating dependencies
 
 - create an issue and switch to branch
-- run `uv tree --outdated --depth=1` to list outdated packages
+- run the `outdated` [Development Task](#development-tasks) to list outdated direct packages
 - follow https://docs.astral.sh/uv/concepts/projects/sync/#upgrading-locked-package-versions
 - note upgrades in the issue
 - review any major/breaking upgrades
+- run `uv sync --all-groups` to apply upgrades
 - run [Tests](#testing) manually
 - commit changes
 
 > [!TIP]
-> If playwright is upgraded, update the image used in CI to match the new version.
+> If playwright is upgraded, run `uv playwright install` locally and update CI image to match new version.
+>
+> To list all (direct and indirect) outdated dependencies, run `uv tree --outdated`.
 
 ## Linting
 

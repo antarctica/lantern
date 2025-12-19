@@ -3,6 +3,7 @@ import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import MagicMock, PropertyMock
+from urllib.parse import urlparse
 
 import pytest
 from gitlab import Gitlab
@@ -38,6 +39,7 @@ class TestGitLabLocalCache:
             path=cache_path,
             project_id="x",
             ref="x",
+            gitlab_token="x",  # noqa: S106
             gitlab_client=Gitlab(url="x", private_token="x"),  # noqa: S106
         )
 
@@ -80,15 +82,22 @@ class TestGitLabLocalCache:
         assert isinstance(result, str)
         assert len(result) > 0
 
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    def test_source(self, fx_config: Config, fx_gitlab_cache: GitLabLocalCache):
+        """Can get configured GitLab instance and branch/ref."""
+        result = fx_gitlab_cache._source
+        assert result == f"{urlparse(fx_config.STORE_GITLAB_ENDPOINT).hostname},{fx_gitlab_cache._ref}"
+
     @pytest.mark.parametrize("fixture", ["fx_gitlab_cache", "fx_gitlab_cache_pop"])
-    def test_cached_ref(self, request: pytest.FixtureRequest, fixture: str):
-        """Can get branch/ref used by the cache."""
+    def test_cached_source(self, fx_config: Config, request: pytest.FixtureRequest, fixture: str):
+        """Can get GitLab instance and branch/ref used by the cache."""
         cache: GitLabLocalCache = request.getfixturevalue(fixture)
         expected = None
         if fixture == "fx_gitlab_cache_pop":
-            expected = cache._ref
+            expected = f"{urlparse(fx_config.STORE_GITLAB_ENDPOINT).hostname},{cache._ref}"
 
-        assert cache._cached_ref == expected
+        assert cache._cached_source == expected
 
     @pytest.mark.parametrize(("fixture", "exists"), [("fx_gitlab_cache", False), ("fx_gitlab_cache_pop", True)])
     def test_exists(self, request: pytest.FixtureRequest, fixture: str, exists: bool):
@@ -103,11 +112,11 @@ class TestGitLabLocalCache:
     def test_applicable(
         self, mocker: MockerFixture, fx_gitlab_cache_pop: GitLabLocalCache, cached: str, current: str, expected: bool
     ):
-        """Can determine whether cache applicable based on current and cached refs."""
+        """Can determine whether cache applicable based on current and cached sources."""
         exists = cached is not None
         mocker.patch.object(type(fx_gitlab_cache_pop), "exists", new_callable=PropertyMock, return_value=exists)
-        mocker.patch.object(type(fx_gitlab_cache_pop), "_cached_ref", new_callable=PropertyMock, return_value=cached)
-        fx_gitlab_cache_pop._ref = current
+        mocker.patch.object(type(fx_gitlab_cache_pop), "_source", new_callable=PropertyMock, return_value=current)
+        mocker.patch.object(type(fx_gitlab_cache_pop), "_cached_source", new_callable=PropertyMock, return_value=cached)
 
         assert fx_gitlab_cache_pop._applicable == expected
 
@@ -143,7 +152,14 @@ class TestGitLabLocalCache:
     ):
         """Can populate an empty cache with record configurations and other required context."""
         commit = "x"
-        head_commit = {"x": commit, "ref": fx_gitlab_cache._ref}
+        head_commit = {
+            "id": commit,
+            "project_id": "1234",
+            "...": "...",
+            "instance": "gitlab.example.com",
+            "ref": fx_gitlab_cache._ref,
+        }
+
         records = [(json.dumps(fx_record_config_min, ensure_ascii=False), commit)]
 
         fx_gitlab_cache._build_cache(records=records, head_commit=head_commit)
@@ -153,7 +169,6 @@ class TestGitLabLocalCache:
 
         with fx_gitlab_cache._head_path.open() as f:
             data = json.load(f)
-            assert data["ref"] == fx_gitlab_cache._ref
             assert data == head_commit
 
         with fx_gitlab_cache._hashes_path.open() as f:
@@ -166,27 +181,38 @@ class TestGitLabLocalCache:
 
     def test_build_cache_update(
         self,
+        mocker: MockerFixture,
         fx_gitlab_cache_pop: GitLabLocalCache,
         fx_record_config_min: dict,
     ):
         """Can update an existing cache with changed record configurations and other required context."""
         file_identifier = "a1b2c3"
         commit = "y"
-        head_commit = {"y": commit, "ref": fx_gitlab_cache_pop._ref}
+        head_commit = {
+            "id": commit,
+            "project_id": "1234",
+            "...": "...",
+            "instance": "gitlab.example.com",
+            "ref": fx_gitlab_cache_pop._ref,
+        }
         fx_record_config_min["file_identifier"] = file_identifier
         fx_record_config_min["identification"]["edition"] = "2"
         records = [(json.dumps(fx_record_config_min, ensure_ascii=False), commit)]
+
+        # skip logic
+        mocker.patch.object(fx_gitlab_cache_pop, "_ensure_exists", return_value=None)
 
         # get original record to ensure it's replaced
         original_record = fx_gitlab_cache_pop.get()[0]
         assert original_record.file_identifier == file_identifier
 
-        # add additional entries to hashes and commit files to ensure they are not overwritten
+        # add additional entries to hashes file to ensure they are not overwritten
         with fx_gitlab_cache_pop._hashes_path.open() as f:
             hashes = json.load(f)["hashes"]
         hashes["nochange"] = "nochange"
         with fx_gitlab_cache_pop._hashes_path.open(mode="w") as f:
             json.dump({"hashes": hashes}, f)
+        # add additional entries to commit file to ensure they are not overwritten
         with fx_gitlab_cache_pop._commits_path.open() as f:
             commits = json.load(f)["commits"]
         commits["nochange"] = "nochange"
@@ -204,7 +230,6 @@ class TestGitLabLocalCache:
 
         with fx_gitlab_cache_pop._head_path.open() as f:
             data = json.load(f)
-        assert data["ref"] == fx_gitlab_cache_pop._ref
         assert data == head_commit
 
         with fx_gitlab_cache_pop._hashes_path.open() as f:
@@ -219,11 +244,14 @@ class TestGitLabLocalCache:
     def test_create_refresh(self, mocker: MockerFixture, fx_gitlab_cache_pop: GitLabLocalCache):
         """Check `_create_refresh()` correctly adds branch/ref into head commit info."""
         mocker.patch.object(fx_gitlab_cache_pop, "_build_cache", return_value=None)
-        # mock fx_gitlab_cache_pop._project.commits.get to return an object with an 'attributes' dict property
+        # mock:
+        # - fx_gitlab_cache_pop._project.commits.get to return an object with an 'attributes' dict property
+        # - fx_gitlab_cache_pop._project.http_url_to_repo to return a URL
         mock_project = MagicMock()
         mock_commit = MagicMock()
         mock_commit.attributes = {}
         mock_project.commits.get.return_value = mock_commit
+        mock_project.http_url_to_repo = "https://gitlab.example.com/x.git"
         mocker.patch.object(type(fx_gitlab_cache_pop), "_project", new_callable=PropertyMock, return_value=mock_project)
 
         fx_gitlab_cache_pop._create_refresh(records=[])
@@ -235,6 +263,7 @@ class TestGitLabLocalCache:
 
         head_commit = kwargs.get("head_commit", args[1] if len(args) > 1 else {})
         assert head_commit["ref"] == fx_gitlab_cache_pop._ref
+        assert head_commit["instance"] == "gitlab.example.com"
 
     @pytest.mark.vcr
     @pytest.mark.block_network
@@ -325,6 +354,7 @@ class TestGitLabLocalCache:
         head_commit = {"id": commit}
         mock_project = MagicMock()
         mock_project.commits.get.return_value.attributes = head_commit
+        mock_project.http_url_to_repo = "https://gitlab.example.com/x.git"
         mocker.patch.object(type(fx_gitlab_cache), "_project", new_callable=PropertyMock, return_value=mock_project)
 
         fx_gitlab_cache._create()
@@ -338,7 +368,6 @@ class TestGitLabLocalCache:
         This mocks fetching data as `_refresh()` is a high-level method and fetch methods are tested elsewhere.
         """
         commit = "def456"
-
         records = [(json.dumps(fx_record_config_min, ensure_ascii=False), commit)]
         mocker.patch.object(fx_gitlab_cache_pop, "_fetch_latest_records", return_value=records)
         original_head = fx_gitlab_cache_pop.head_commit_cached
@@ -346,6 +375,7 @@ class TestGitLabLocalCache:
         head_commit = {"id": commit}
         mock_project = MagicMock()
         mock_project.commits.get.return_value.attributes = head_commit
+        mock_project.http_url_to_repo = "https://gitlab.example.com/x.git"
         mocker.patch.object(type(fx_gitlab_cache_pop), "_project", new_callable=PropertyMock, return_value=mock_project)
 
         fx_gitlab_cache_pop._refresh()
@@ -401,6 +431,7 @@ class TestGitLabLocalCache:
         self,
         caplog: pytest.LogCaptureFixture,
         mocker: MockerFixture,
+        fx_config: Config,
         fx_gitlab_cache_pop: GitLabLocalCache,
         online: bool,
         cached: bool,
@@ -415,11 +446,16 @@ class TestGitLabLocalCache:
         )
         # `fx_gitlab_cache_pop` mocks `_create()` to copy reference cache so safe to call directly
         mocker.patch.object(fx_gitlab_cache_pop, "_refresh", return_value=None)
-        # set `_cached_ref`
-        applicable_value = fx_gitlab_cache_pop._ref if applicable else "invalid"
+        # set `_cached_source`
+        applicable_value = f"{fx_config.STORE_GITLAB_ENDPOINT},{fx_gitlab_cache_pop._ref}" if applicable else "invalid"
         mocker.patch.object(
-            type(fx_gitlab_cache_pop), "_cached_ref", new_callable=PropertyMock, return_value=applicable_value
+            type(fx_gitlab_cache_pop), "_cached_source", new_callable=PropertyMock, return_value=applicable_value
         )
+        # mock fx_gitlab_cache_pop._project.get to return a Project mock with an 'http_url_to_repo' property
+        mock_project = MagicMock()
+        mock_project.http_url_to_repo = "https://gitlab.example.com/x.git"
+        mocker.patch.object(type(fx_gitlab_cache_pop), "_project", new_callable=PropertyMock, return_value=mock_project)
+
         if not cached:
             fx_gitlab_cache_pop.purge()
             assert not fx_gitlab_cache_pop._path.exists()
@@ -444,7 +480,7 @@ class TestGitLabLocalCache:
 
         if online and cached and not applicable:
             assert (
-                f"Cached branch '{fx_gitlab_cache_pop._cached_ref}' does not match current branch '{fx_gitlab_cache_pop._ref}', recreating cache"
+                f"Cached source '{fx_gitlab_cache_pop._cached_source}' does not match current instance and branch '{fx_gitlab_cache_pop._source}', recreating cache"
                 in caplog.text
             )
             return
@@ -457,8 +493,12 @@ class TestGitLabLocalCache:
 
         assert fx_gitlab_cache_pop.exists
 
-    def test_get(self, fx_gitlab_cache_pop: GitLabLocalCache):
+    def test_get(self, mocker: MockerFixture, fx_gitlab_cache_pop: GitLabLocalCache):
         """Can get records from cache."""
+        mock_project = MagicMock()
+        mock_project.http_url_to_repo = "https://gitlab.example.com/x.git"
+        mocker.patch.object(type(fx_gitlab_cache_pop), "_project", new_callable=PropertyMock, return_value=mock_project)
+
         expected_file_identifier = "a1b2c3"
         expected_file_revision = "abc123"
         results = fx_gitlab_cache_pop.get()

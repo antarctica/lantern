@@ -39,6 +39,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Refactoring record related development tasks to use common functions via (`tasks._record_utils` module)
 * Refactoring and improving interactive publishing workflow
 * Switching to dedicated GitLab bot user for GitLab Store and record publishing workflow (to post comments across projects)
+* Including GitLab endpoint/instance in determining GitLab local cache validity (in addition to branch/ref)
 
 ### Removed
 

@@ -26,6 +26,60 @@ Setup:
 % uv run playwright install
 ```
 
+### Local GitLab instance
+
+A GitLab instance can be used for the [GitLab Store](/docs/stores.md#gitlab-store) via a container.
+
+Requirements:
+
+- [OrbStack](https://orbstack.dev/)
+- [OpenTofu](https://opentofu.org) (installed by OrbStack)
+
+Setup:
+
+- install tools `brew install --cask orbstack opentofu`
+- start GitLab stack using the `local-gitlab-start` [Development Task](#development-tasks)
+- once initialised, login to [GitLab](https://gitlab.gitlab.orb.local) using 'root' and [1]
+- create a new [Admin User](https://gitlab.gitlab.orb.local/admin/users/new)
+- open [Local Email Server](https://mail.gitlab.orb.local) and follow link in signup email to set password
+- create a [Personal Access Token](https://gitlab.gitlab.orb.local/-/user_settings/personal_access_tokens):
+  - token name: `{host}-lantern-dev-tf`
+  - scopes: `api`
+- configure GitLab via OpenTofu [2]
+- impersonate the [Lantern Bot User](https://gitlab.gitlab.orb.local/admin/users/lantern_bot)
+- create a [Personal Access Token](https://gitlab.gitlab.orb.local/-/user_settings/personal_access_tokens):
+  - token name: 'local-env'
+  - scopes: `api`
+- add relevant [Config Options](/docs/config.md) in `.env` file (as a parallel configuration)
+- run the `bootstrap-records` [Development Task](#development-tasks)
+- when no longer needed, stop GitLab stack using the `local-gitlab-stop` [Development Task](#development-tasks)
+
+<!-- pyml disable md028 -->
+> [!TIP]
+> The [`truststore`](https://pypi.org/project/truststore/) dev dependency is used to trust the OrbStack local CA in
+> the GitLab Store.
+
+> [!TIP]
+> To reset the GitLab instance:
+>
+> - run the `local-gitlab-stop` dev task, `rm -rf ./resources/dev/gitlab/data/` then the `local-gitlab-start` task
+> - `rm ./resources/dev/terraform.tfstate*`
+<!-- pyml enable md028 -->
+
+[1]
+
+```shell
+% docker compose -f ./resources/dev/gitlab/docker-compose.yml exec -it gitlab grep 'Password:' /etc/gitlab/initial_root_password
+```
+
+[2]
+
+```shell
+% cd ./resources/dev/gitlab/
+% tofu init
+% GITLAB_TOKEN=xxx tofu apply
+```
+
 ## Development tasks
 
 [Taskipy](https://github.com/taskipy/taskipy?tab=readme-ov-file#general) is used to define development tasks, such as

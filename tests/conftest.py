@@ -13,7 +13,7 @@ from importlib.metadata import version
 from pathlib import Path
 from subprocess import PIPE, Popen
 from tempfile import TemporaryDirectory
-from unittest.mock import PropertyMock
+from unittest.mock import MagicMock, PropertyMock
 
 import pytest
 from boto3 import client as S3Client  # noqa: N812
@@ -553,6 +553,7 @@ def fx_gitlab_cache(fx_logger: logging.Logger, fx_config: Config) -> GitLabLocal
         path=cache_path,
         project_id=fx_config.STORE_GITLAB_PROJECT_ID,
         ref=fx_config.STORE_GITLAB_BRANCH,
+        gitlab_token="x",  # noqa: S106
         gitlab_client=Gitlab(url=fx_config.STORE_GITLAB_ENDPOINT, private_token=fx_config.STORE_GITLAB_TOKEN),
     )
 
@@ -599,8 +600,14 @@ def fx_gitlab_store(fx_logger: logging.Logger, fx_config: Config) -> GitLabStore
 
 
 @pytest.fixture()
-def fx_gitlab_store_cached(fx_gitlab_store: GitLabStore, fx_gitlab_cache_pop: GitLabLocalCache) -> GitLabStore:
+def fx_gitlab_store_cached(
+    mocker: MockerFixture, fx_gitlab_store: GitLabStore, fx_gitlab_cache_pop: GitLabLocalCache
+) -> GitLabStore:
     """GitLab store with populated/existing cache."""
+    mock_project = MagicMock()
+    mock_project.http_url_to_repo = "https://gitlab.example.com/x.git"
+    mocker.patch.object(type(fx_gitlab_cache_pop), "_project", new_callable=PropertyMock, return_value=mock_project)
+
     # noinspection PyProtectedMember
     fx_gitlab_store._cache = fx_gitlab_cache_pop
     return fx_gitlab_store

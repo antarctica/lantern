@@ -9,6 +9,7 @@ from copy import deepcopy
 from functools import cached_property
 from pathlib import Path
 from typing import TypedDict
+from urllib.parse import urlparse
 
 from gitlab import Gitlab, GitlabGetError
 from gitlab.v4.objects import Project
@@ -18,6 +19,7 @@ from requests.exceptions import ConnectionError as RequestsConnectionError
 from lantern.log import init as init_logging
 from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
+from lantern.shim import inject_truststore_into_ssl_boto_fix
 from lantern.stores.base import RecordNotFoundError, Store
 
 
@@ -67,6 +69,7 @@ def _fetch_record_commit(project: Project, path: str, ref: str) -> tuple[str, st
 
     Standalone function for use in parallel processing.
     """
+    inject_truststore_into_ssl_boto_fix()
     file_contents = project.files.get(file_path=path, ref=ref)
     return b64decode(file_contents.content).decode("utf-8"), file_contents.last_commit_id
 
@@ -97,16 +100,24 @@ class GitLabLocalCache:
     """
 
     def __init__(
-        self, logger: logging.Logger, parallel_jobs: int, path: Path, project_id: str, ref: str, gitlab_client: Gitlab
+        self,
+        logger: logging.Logger,
+        parallel_jobs: int,
+        path: Path,
+        project_id: str,
+        ref: str,
+        gitlab_token: str,
+        gitlab_client: Gitlab,
     ) -> None:
         """Initialize cache."""
         self._logger = logger
         self._parallel_jobs = parallel_jobs
         self._path = path
         self._project_id = project_id
+        self._token = gitlab_token
+        self._ref = ref
         self._client = gitlab_client
 
-        self._ref = ref
         self._records_path = self._path / "records"
         self._commits_path = self._path / "commits.json"
         self._head_path = self._path / "head_commit.json"
@@ -168,15 +179,21 @@ class GitLabLocalCache:
         return self._project.commits.list(ref_name=self._ref, get_all=False)[0].id
 
     @property
-    def _cached_ref(self) -> str | None:
+    def _source(self) -> str:
+        """GitLab instance and branch/ref for checking whether cache applies to current configuration."""
+        return f"{urlparse(self._project.http_url_to_repo).hostname},{self._ref}"
+
+    @property
+    def _cached_source(self) -> str | None:
         """
-        Branch/ref used by local cache.
+        GitLab instance and branch/ref used by local cache.
 
         Not valid if called before `_create()` is called where cache does not exist.
         """
         try:
             with self._head_path.open(mode="r") as f:
-                return json.load(f)["ref"]
+                data = json.load(f)
+                return f"{data['instance']},{data['ref']}"
         except FileNotFoundError:
             return None
 
@@ -187,13 +204,14 @@ class GitLabLocalCache:
 
     @property
     def _applicable(self) -> bool:
-        """Ensure cache is applicable to the current branch/ref."""
+        """Ensure cache is applicable to the current GitLab instance and branch/ref."""
         if not self.exists:
             return False
 
-        cached_ref = self._cached_ref
-        self._logger.debug(f"Cached ref: '{cached_ref}', Current ref: '{self._ref}'")
-        return cached_ref == self._ref
+        cached_source = self._cached_source
+        current_source = self._source
+        self._logger.debug(f"Cached instance-ref: '{cached_source}', Current instance-ref: '{current_source}'")
+        return cached_source == current_source
 
     @property
     def _current(self) -> bool:
@@ -220,7 +238,7 @@ class GitLabLocalCache:
 
         Where:
         - `records` is a list of ('record configuration JSON strings', 'Git commit') tuples
-        - `head_commit` is the current head commit of the remote project repository
+        - `head_commit` is the current head commit of the remote project repository (and other metadata)
 
         Steps:
         - parse each record config as a RecordRevision
@@ -339,8 +357,12 @@ class GitLabLocalCache:
     def _create_refresh(self, records: list[tuple[str, str]]) -> None:
         """Common tasks for creating or refreshing the cache."""
         self._logger.info("Fetching head commit")
-        # append current ref to head commit
-        head_commit = {**self._project.commits.get(self._head_commit_remote).attributes, "ref": self._ref}
+        head_commit = {
+            **self._project.commits.get(self._head_commit_remote).attributes,
+            # append current GitLab instance and ref/branch
+            "instance": urlparse(self._project.http_url_to_repo).hostname,
+            "ref": self._ref,
+        }
 
         self._logger.info("Populating local cache")
         self._build_cache(records=records, head_commit=head_commit)
@@ -412,14 +434,14 @@ class GitLabLocalCache:
 
         if not self._online:
             if not self._applicable:
-                msg = "Local cache does not match branch and cannot access GitLab to recreate."
+                msg = "Local cache source does not match remote and cannot access GitLab to recreate."
                 raise RemoteStoreUnavailableError(msg) from None
             self._logger.warning("Cannot check if records cache is current, loading possibly stale records")
             return
 
         if not self._applicable:
             self._logger.warning(
-                f"Cached branch '{self._cached_ref}' does not match current branch '{self._ref}', recreating cache"
+                f"Cached source '{self._cached_source}' does not match current instance and branch '{self._source}', recreating cache"
             )
             self._create()
             return
@@ -547,17 +569,21 @@ class GitLabStore(Store):
     ) -> None:
         self._logger = logger
         self._records: dict[str, RecordRevision] = {}
-        self._client = Gitlab(url=endpoint, private_token=access_token)
         self._project_id = project_id
         self._branch = branch
-
         self._cache_path = cache_path
+        self._access_token = access_token
+
+        inject_truststore_into_ssl_boto_fix()
+        self._client = Gitlab(url=endpoint, private_token=self._access_token)
+
         self._cache = GitLabLocalCache(
             logger=self._logger,
             parallel_jobs=parallel_jobs,
             path=self._cache_path,
             gitlab_client=self._client,
             project_id=self._project_id,
+            gitlab_token=self._access_token,
             ref=self._branch,
         )
 

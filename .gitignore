@@ -20,8 +20,12 @@ wheels/
 htmlcov/
 .coverage
 
-# Terraform generated files
-/provisioning/terraform/.terraform
+# Local GitLab stack generated files
+/resources/dev/gitlab/run/
+/resources/dev/gitlab/.terraform/
+/resources/dev/gitlab/.terraform.lock.hcl
+/resources/dev/gitlab/terraform.tfstate
+/resources/dev/gitlab/terraform.tfstate.backup
 
 # App generated files
 import/

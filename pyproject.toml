@@ -38,6 +38,7 @@ dev = [
     "ruff>=0.12.4",
     "safety>=3.5.2",
     "taskipy>=1.14.1",
+    "truststore>=0.10.4",
     "ty>=0.0.1a23",
     "types-lxml>=2025.3.30",
 ]
@@ -66,6 +67,7 @@ docs_targets = "docs/ README.md CHANGELOG.md"
 types_targets = "src/"
 targets = "src/ tasks/ tests/"
 cov_options = "--cov --cov-report=html"
+gitlab_local_compose = "./resources/dev/gitlab/docker-compose.yml"
 
 [tool.taskipy.tasks]
 # generic dev
@@ -83,6 +85,9 @@ outdated = { cmd = "uv tree --outdated --depth=1", help = "List outdated directe
 # CI
 ci-test = { cmd = "pytest {cov_options} -o junit_family=xunit2 --junitxml=test-results.xml --continue-on-collection-errors", help = "Called by CI", use_vars = true }
 ci-safety = { cmd = "safety --stage cicd scan --detailed-output", help = "Called by CI" }
+# local stack
+local-gitlab-start = { cmd = "docker-compose -f {gitlab_local_compose} up -d", help = "Start local GitLab instance", use_vars = true }
+local-gitlab-stop = { cmd = "docker-compose -f {gitlab_local_compose} down", help = "Stop local GitLab instance", use_vars = true }
 # app dev
 release = { cmd = "python -m tasks.release", help = "Prepapre app release" }
 config-init = { cmd = "op inject --in-file resources/env/.env.tpl --out-file .env", help = "Initialise config file" }
@@ -92,6 +97,7 @@ css-audit = { cmd = "python -m tasks.css_audit", help = "List CSS styles used in
 build-test-records = { cmd = "python tests/scripts/build_test.py", help = "Build test records as a catalogue site" }
 # fake CLI
 version = { cmd = "python -m tasks.version", help = "Show app version" }
+init-cache = { cmd = "python -m tasks.cache_init", help = "Initialize records cache" }
 clone-record = { cmd = "python -m tasks.record_clone", help = "Clone record from cache into import directory" }
 select-records = { cmd = "python -m tasks.records_select", help = "Copy records from cache to import directory for editing" }
 zap-records = { cmd = "python -m tasks.records_zap", help = "Process Zap ⚡️ authored records from import directory" }
@@ -168,6 +174,7 @@ exclude = ["tests"]
 
 [tool.pymarkdown]
 plugins.md013.line_length = 120
+plugins.md013.code_blocks = false
 plugins.md014.enabled = false
 extensions.markdown-extended-autolinks.enabled = true
 

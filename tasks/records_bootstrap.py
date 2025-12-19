@@ -46,9 +46,13 @@ def _stage0(logger: logging.Logger, config: Config, working_path: Path) -> None:
     """Save required records from existing store."""
     stage = 0
     print(f"This is stage {stage} [{stage + 1}/{max_stage}].")
-    print("Set `LANTERN_STORE_GITLAB_TOKEN` and `LANTERN_STORE_GITLAB_PROJECT_ID` in the `.env` to a working remote")
     print("Records for MAGIC collections used during record import need stashing from a working remote.")
-    print(f"Confirm this GitLab project ID is an existing/working project: {config.STORE_GITLAB_PROJECT_ID}")
+    print(
+        "ACTION: Set `LANTERN_STORE_GITLAB_ENDPOINT`, `LANTERN_STORE_GITLAB_TOKEN` and `LANTERN_STORE_GITLAB_PROJECT_ID` in `.env` to a working remote."
+    )
+    print(
+        f"Confirm this GitLab project ID is an existing/working project: {config.STORE_GITLAB_PROJECT_ID} ({config.STORE_GITLAB_ENDPOINT})"
+    )
     _confirm(logger)
 
     store = init_store(logger=logger, config=config)
@@ -59,10 +63,12 @@ def _stage0(logger: logging.Logger, config: Config, working_path: Path) -> None:
     logger.info(f"{len(magic_collection_ids)} records stashed in {working_path.resolve()}.")
 
     print(f"Stage {stage} complete.")
-    print("Set `LANTERN_STORE_GITLAB_TOKEN` and `LANTERN_STORE_GITLAB_PROJECT_ID` in the `.env` to the new remote.")
+    print(
+        "ACTION: Set `LANTERN_STORE_GITLAB_ENDPOINT`, `LANTERN_STORE_GITLAB_TOKEN` and `LANTERN_STORE_GITLAB_PROJECT_ID` in `.env` to the new remote."
+    )
     _confirm(logger)
 
-    print(f"Re-run this script and select Stage {stage + 1}.")
+    print(f"ACTION: Re-run this script and select Stage {stage + 1}.")
     sys.exit(0)
 
 
@@ -70,13 +76,15 @@ def _stage1(logger: logging.Logger, config: Config, working_path: Path) -> None:
     """Load required records into new store."""
     stage = 1
     print(f"This is stage {stage} [{stage + 1}/{max_stage}].")
-    print("Ensure you have completed previous stages.")
+    print("Confirm you have completed previous stages.")
     _confirm(logger)
 
-    print(f"Confirm this GitLab project ID is the new project: {config.STORE_GITLAB_PROJECT_ID}")
+    print(
+        f"Confirm this GitLab project ID is the new project: {config.STORE_GITLAB_PROJECT_ID}  ({config.STORE_GITLAB_ENDPOINT})"
+    )
     _confirm(logger)
 
-    print("This stage is NOT idempotent and will fail if re-run.")
+    print("Confirm this stage is NOT idempotent and will fail if re-run.")
     _confirm(logger)
 
     answers = inquirer.prompt(
@@ -115,7 +123,7 @@ def _stage1(logger: logging.Logger, config: Config, working_path: Path) -> None:
             record_path.unlink()
 
     print(f"Stage {stage} complete.")
-    print(f"Re-run this script and select Stage {stage + 1}.")
+    print(f"ACTION: Re-run this script and select Stage {stage + 1}.")
     sys.exit(0)
 
 
@@ -124,7 +132,7 @@ def _stage2(logger: logging.Logger, config: Config) -> None:
     """Create local cache from new remote project."""
     stage = 2
     print(f"This is stage {stage} [{stage + 1}/{max_stage}].")
-    print("Ensure you have completed previous stages.")
+    print("Confirm you have completed previous stages.")
     _confirm(logger)
 
     if config.STORE_GITLAB_BRANCH != "main":
@@ -132,11 +140,9 @@ def _stage2(logger: logging.Logger, config: Config) -> None:
         _confirm(logger)
 
     store = init_store(logger=logger, config=config)
-
     if store._cache.exists:
         print(f"Local cache path {config.STORE_GITLAB_CACHE_PATH.resolve()} exists and needs purging.")
         store._cache.purge()
-
     store.populate()
 
     print(f"Stage {stage} complete.")
@@ -149,7 +155,7 @@ def main() -> None:
     logger, config, _store, _s3, _keys = init()
 
     print("This script is for bootstrapping new GitLab stores.")
-    print("It requires an existing/working store to copy required records from.")
+    print("It requires an existing/working remote to copy required records from and a new, empty, remote to copy to.")
     print(f"It has {max_stage} stages.\n")
 
     import_path = Path("./import")

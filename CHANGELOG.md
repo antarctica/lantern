@@ -26,6 +26,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Support for SAN based distribution options
 * Support for running GitLab instance locally in development environments
 * Additional validation for MAGIC Discovery profile Req. 06 (released date presence)
+* Setup documentation for Plausible
 
 ### Fixed
 

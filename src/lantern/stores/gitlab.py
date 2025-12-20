@@ -238,7 +238,7 @@ class GitLabLocalCache:
 
         Where:
         - `records` is a list of ('record configuration JSON strings', 'Git commit') tuples
-        - `head_commit` is the current head commit of the remote project repository (and other metadata)
+        - `head_commit` is the head commit of the remote repo and other metadata (see `_create_refresh()` for details)
 
         Steps:
         - parse each record config as a RecordRevision
@@ -267,7 +267,7 @@ class GitLabLocalCache:
             delayed(_process_record)(self._logger, self._logger.level, records_path, record_data)
             for record_data in records
         )
-        # results are list of (file_identifier, sha1, commit) tuples
+        # results are a list of (file_identifier, sha1, commit) tuples
         for result in results:
             hashes[result[0]] = result[1]
             commits[result[0]] = result[2]

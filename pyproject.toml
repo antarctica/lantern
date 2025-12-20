@@ -97,7 +97,7 @@ css-audit = { cmd = "python -m tasks.css_audit", help = "List CSS styles used in
 build-test-records = { cmd = "python tests/scripts/build_test.py", help = "Build test records as a catalogue site" }
 # fake CLI
 version = { cmd = "python -m tasks.version", help = "Show app version" }
-init-cache = { cmd = "python -m tasks.cache_init", help = "Initialize records cache" }
+cache-init = { cmd = "python -m tasks.cache_init", help = "Initialize records cache" }
 clone-record = { cmd = "python -m tasks.record_clone", help = "Clone record from cache into import directory" }
 select-records = { cmd = "python -m tasks.records_select", help = "Copy records from cache to import directory for editing" }
 zap-records = { cmd = "python -m tasks.records_zap", help = "Process Zap ⚡️ authored records from import directory" }

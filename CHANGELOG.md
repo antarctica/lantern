@@ -26,6 +26,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Support for SAN based distribution options
 * Support for running GitLab instance locally in development environments
 * Additional validation for MAGIC Discovery profile Req. 06 (released date presence)
+* Setup documentation for Plausible
 
 ### Fixed
 
@@ -35,7 +36,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 
 ### Changed
 
-* Upgraded to use BAS Embedded Maps Service v0.3.0 with BAS Style Kit v1 theme
+* Upgrading to BAS Embedded Maps Service v0.3.0 with BAS Style Kit v1 theme
+* Upgrading to latest linting and UV versions
 * Supporting command line arguments in selecting records development task
 * Supporting additional identifier formats in selecting records development task
 * Refactoring record related development tasks to use common functions via (`tasks._record_utils` module)

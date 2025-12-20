@@ -74,6 +74,13 @@ environment.
 3. set the relevant [Config](/docs/config.md) option in a local `.env` file or Ansible Vault for use in the
    [Environment Module](/docs/deployment.md#environment-module) template as appropriate
 
+## Plausible Analytics
+
+1. register a new Plausible Analytics site for the production [Hosting](/docs/infrastructure.md#hosting) endpoint
+2. record the domain in 1Password
+3. set the relevant [Config](/docs/config.md) option in the `.env` template and Ansible Vault for use in the
+   [Environment Module](/docs/deployment.md#environment-module) template
+
 ## CloudFlare Turnstile
 
 1. register a new Turnstile widget with hostnames for each [Hosting](/docs/infrastructure.md#hosting) endpoint

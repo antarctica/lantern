@@ -6,6 +6,7 @@ def main() -> None:
     logger, _config, store, _s3, _keys = init()
 
     confirm_branch(logger=logger, store=store, action="Selecting records from")
+    store.purge()
     store.populate()
 
 

@@ -74,7 +74,7 @@ def _revise_collection(time: datetime, collection: Record) -> None:
     if collection.identification.dates.revision is None:
         collection.identification.dates.revision = Date(date=time)
     collection.identification.dates.revision.date = time
-    collection.identification.edition = str(int(collection.identification.edition) + 1)
+    collection.identification.edition = str(int(collection.identification.edition) + 1)  # ty:ignore[invalid-argument-type]
 
 
 def _revise_record(record: Record) -> None:
@@ -389,7 +389,7 @@ def main() -> None:
     store.populate()
     records.extend(process_records(logger=logger, records=records, store=store, admin_keys=keys))
     dump_records(logger=logger, records=records, output_path=input_path)
-    clean_input_path(input_record_paths=record_paths, processed_ids=[r.file_identifier for r in records])
+    clean_input_path(input_record_paths=record_paths, processed_ids=[r.file_identifier for r in records])  # ty:ignore[invalid-argument-type]
 
 
 if __name__ == "__main__":

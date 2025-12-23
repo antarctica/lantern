@@ -38,5 +38,5 @@ class TestLogging:
 
     @pytest.mark.cov()
     def test_sentry(self):
-        """Can initialize Sentry SDK."""
+        """Can initialise Sentry SDK."""
         init_sentry()

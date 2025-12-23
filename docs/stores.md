@@ -98,65 +98,30 @@ Commits include both the author and the Catalogue application as the committer.
 
 ### GitLab local cache
 
-For increased performance, GitLab stores use a `GitLabLocalCache` to automatically maintain a local cache of Records.
+For increased performance, GitLab stores use a `GitLabLocalCache` to maintain a local SQLite based cache of Records.
 
 > [!NOTE]
-> Local caches are branch specific. Changing branch will automatically invalidate an existing cache.
-
-The cache is a local folder consisting of:
-
-```text
-├── records/
-│     └── *.pickle
-├── commits.json
-├── hashes.json
-└── head_commit.json
-```
-
-| Path                | Description                                                                                  |
-|---------------------|----------------------------------------------------------------------------------------------|
-| `records/`          | Record configurations as pickled Record objects                                              |
-| `commits.json`      | Mapping of record file identifiers to the last known head commit in the remote repository    |
-| `hashes.json`       | Mapping of record file identifiers to SHA1 checksums of the record contents                  |
-| `head_commit.json`  | Details of the head commit in the branch of the remote repository when the cache was created |
+> These caches are branch and GitLab instance specific. Changing either will automatically invalidate an existing cache.
 
 A cache is created by:
 
-- fetching:
-  - all record configurations and their latest commit from the given branch in the remote repository
-  - details of the current head commit in this branch
-- storing:
-  - pickled versions of each record configuration loaded as a Record
-  - a mapping of each record's SHA1 hash by file identifier
-  - a mapping of each record's last known commit by file identifier
-  - details of the current head commit and branch name
+- fetching record configurations, their latest commits, and the latest overall commit from the configured GitLab instance
+- storing pickled versions of each record as RecordRevisions, and details of the latest commit and configured instance
 
 A cache is refreshed by:
 
-- checking:
-  - the current branch name matches the cached name
-- fetching:
-  - any commits that may have occurred since the last known head commit
-  - record configurations from these commits
-  - details of the current head commit for the overall remote repository
-- storing:
-  - updated records and head commit are stored as described above
+- checking the current branch and configured instance match the cached details
+- fetching any commits since the cached last commit, and configurations for records these contain
+- updating any relevant records and the head commit as described in the creation process
 
 <!-- pyml disable md028 -->
 > [!IMPORTANT]
-> Caches do not support moving or deleting files within the related remote repository, or changing branch. If detected
-> when refreshing, the local cache is automatically purged and recreated in full to ensure consistency.
+> Caches do not support renaming or deleting records within the related remote repository. If detected when refreshing,
+> the cache is automatically purged and recreated in full to ensure consistency.
 
 > [!NOTE]
 > Where 50 or more commits have passed since the last cache update, the local cache will also be purged and recreated
 > as this will be quicker than incrementally processing commits to refresh the cache.
 <!-- pyml enable md028 -->
 
-### GitLab Local cache testing
-
-For testing, a pre-populated cache can be used to give reproducible results. To update this fixed cache, update files
-in `tests/resources/stores/gitlab_cache` and then run:
-
-```shell
-% uv run python tests/resources/stores/gitlab_cache/refresh.py
-```
+For testing, a [pre-populated cache database](/docs/dev.md#test-gitlab-local-cache) is available.

@@ -604,7 +604,13 @@ def fx_gitlab_store_cached(
     mocker: MockerFixture, fx_gitlab_store: GitLabStore, fx_gitlab_cache_pop: GitLabLocalCache
 ) -> GitLabStore:
     """GitLab store with populated/existing cache."""
+    # mock:
+    # - fx_gitlab_cache_pop._project.commits.get to return an object with an 'attributes' dict property
+    # - fx_gitlab_cache_pop._project.http_url_to_repo to return a URL
     mock_project = MagicMock()
+    mock_commit = MagicMock()
+    mock_commit.attributes = {"id": "x"}
+    mock_project.commits.get.return_value = mock_commit
     mock_project.http_url_to_repo = "https://gitlab.example.com/x.git"
     mocker.patch.object(type(fx_gitlab_cache_pop), "_project", new_callable=PropertyMock, return_value=mock_project)
 

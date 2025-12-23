@@ -591,6 +591,19 @@ record.
 >
 > Run the `serve` task to host an exported static site, with real or test records, locally.
 
+### Test stores
+
+#### Test GitLab local cache
+
+To aid in debugging and testing a [GitLab local cache](/docs/stores.md#gitlab-local-cache), a backing SQLite database
+representing a minimally populated cache is available from `tests/resources/stores/gitlab_cache/cache.db`.
+
+This database is populated independently of the `GitLabLocalCache`'s implementation, but uses an aligned structure.
+It contains a single record, with a simplified file identifier and Git commit ID.
+
+> [!TIP]
+> Run the `build-test-cache` [Development Task](#development-tasks) to recreate the test cache database.
+
 ### Continuous Integration
 
 All commits will trigger Continuous Integration using GitLab's CI/CD platform, configured in `.gitlab-ci.yml`.

@@ -10,7 +10,7 @@ from tasks._record_utils import init
 from lantern.config import Config as Config
 from lantern.exporters.site import SiteExporter
 from lantern.models.site import ExportMeta
-from lantern.stores.gitlab import GitLabStore
+from lantern.utils import init_gitlab_store
 
 
 def time_task(label: str) -> Callable:
@@ -39,15 +39,7 @@ class ToyCatalogue:
         self._s3 = s3
         self._trusted = trusted
 
-        self._store = GitLabStore(
-            logger=self._logger,
-            parallel_jobs=self._config.PARALLEL_JOBS,
-            endpoint=self._config.STORE_GITLAB_ENDPOINT,
-            access_token=self._config.STORE_GITLAB_TOKEN,
-            project_id=self._config.STORE_GITLAB_PROJECT_ID,
-            branch=self._config.STORE_GITLAB_BRANCH,
-            cache_path=self._config.STORE_GITLAB_CACHE_PATH,
-        )
+        self._store = init_gitlab_store(logger=self._logger, config=self._config)
 
         self._meta = ExportMeta.from_config_store(
             config=self._config, store=None, build_repo_ref=self._store.head_commit, trusted=self._trusted

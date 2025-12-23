@@ -8,13 +8,14 @@ from base64 import b64decode
 from copy import deepcopy
 from functools import cached_property
 from pathlib import Path
-from typing import TypedDict
+from typing import NamedTuple, TypedDict
 from urllib.parse import urlparse
 
 from gitlab import Gitlab, GitlabGetError
 from gitlab.v4.objects import Project
 from joblib import Parallel, delayed
 from requests.exceptions import ConnectionError as RequestsConnectionError
+from sqlorm import SQL, Engine
 
 from lantern.log import init as init_logging
 from lantern.models.record.record import Record
@@ -35,68 +36,111 @@ class CacheIntegrityError(Exception):
     pass
 
 
+class CacheNotInitialisedError(Exception):
+    """Raised when the local cache has not been initialised yet."""
+
+    pass
+
+
 class CacheTooOutdatedError(Exception):
     """Raised when the local cache is too out-of-date to make sense refreshing."""
 
     pass
 
 
-def _process_record(
-    logger: logging.Logger, log_level: int, records_path: Path, record_data: tuple[str, str]
-) -> tuple[str, str, str]:
+class RawRecord(NamedTuple):
+    """Raw record data from GitLab API."""
+
+    config_str: str
+    commit_id: str
+
+
+class ProcessedRecord:
     """
-    Create and pickle a record instance from a record configuration data and revision identifier.
+    Represents a metadata record in raw and processed forms.
+
+    Available representations:
+    - record revision configuration dict
+    - RecordRevision instance
+    - pickled RecordRevision
+    """
+
+    def __init__(self, logger: logging.Logger | None, config_str: str, commit_id: str) -> None:
+        self._config = {"file_revision": commit_id, **json.loads(config_str)}
+        self._record = RecordRevision.loads(value=self.config, check_supported=True, logger=logger)
+        self._pickled = pickle.dumps(self.record, pickle.HIGHEST_PROTOCOL)
+
+    @property
+    def config(self) -> dict:
+        """Record revision config dict."""
+        return self._config
+
+    @property
+    def record(self) -> RecordRevision:
+        """RecordRevision instance."""
+        return self._record
+
+    @property
+    def pickled(self) -> bytes:
+        """Pre-pickled RecordRevision."""
+        return self._pickled
+
+
+class Source(TypedDict):
+    """
+    Elements of a cache source.
+
+    As currently configured or stored in the cache.
+    """
+
+    ref: str
+    project: str
+    instance: str
+
+
+def _process_record(logger: logging.Logger, log_level: int, record_data: RawRecord) -> ProcessedRecord:
+    """
+    Create and pickle a record from a record configuration and revision identifier.
 
     Standalone function for use in parallel processing.
     """
     init_logging(log_level)
-    config_str, commit_hash = record_data
-    record_config = {"file_revision": commit_hash, **json.loads(config_str)}
-    record = RecordRevision.loads(value=record_config, check_supported=True, logger=logger)
-    record_path = records_path.joinpath(f"{record.file_identifier}.json")
-
-    with record_path.with_suffix(".pickle").open(mode="wb") as f:
-        # noinspection PyTypeChecker
-        pickle.dump(record, f, pickle.HIGHEST_PROTOCOL)
-    return record.file_identifier, record.sha1, record.file_revision
+    return ProcessedRecord(logger=logger, config_str=record_data.config_str, commit_id=record_data.commit_id)
 
 
-def _fetch_record_commit(project: Project, path: str, ref: str) -> tuple[str, str]:
+def _fetch_record_commit(project: Project, path: str, ref: str) -> RawRecord:
     """
-    Get a record configuration and its head commit ID from the GitLab project repository.
+    Get a record configuration and the ID of its head commit from the GitLab project's repository.
 
-    Returns a tuple ('record configuration as JSON string', 'record commit string').
+    A truststore inject is used to allow the use of local development GitLab instances.
 
     Standalone function for use in parallel processing.
     """
     inject_truststore_into_ssl_boto_fix()
     file_contents = project.files.get(file_path=path, ref=ref)
-    return b64decode(file_contents.content).decode("utf-8"), file_contents.last_commit_id
+    return RawRecord(
+        config_str=b64decode(file_contents.content).decode("utf-8"), commit_id=file_contents.last_commit_id
+    )
 
 
 class GitLabLocalCache:
     """
-    A simple file based cache for records held in a GitLab project repository.
+    Cache of records from a GitLab project repository using a SQLite backing database.
 
-    Intended for efficiency and basic offline support.
+    Stores:
+    - record configurations as pre-pickled RecordRevision objects (for efficiency)
+    - the last known commit for each record (the head commit for each record file when cached)
+    - the SHA1 hash for each record (for refreshing the cache)
+    - the configured GitLab instance, project ID, branch/ref and head commit from the last cache refresh
 
-    Loads record configuration files from a GitLab project repository and processes them into:
-    - Pickled RecordRevision objects
-    - a mapping of record file identifiers to their last known head commit
-    - a mapping of record file identifiers to their SHA1 hashes
+    The cache is automatically populated and/or refreshed when records are accessed using `get()`. The cache can be
+    manually invalidated using `purge()` - which will trigger cache recreation on the next `get()` call.
 
-    The cache will automatically be populated or refreshed when records are accessed using `get()`. To manually
-    invalidate the cache, call `purge()`, which will trigger a recreation of the cache on the next request for records.
-
-    Once populated, the cache can be used in a basic offline mode, which may led to stale records being returned,
-    indicated via a warning log message.
-
-    Basic cache-validation is performed by comparing the head commit from when the cache was last refreshed, against
-    the head commit in the remote project repository.
+    If needed, and once populated, the cache can be used in a basic offline mode - which may led to stale records.
 
     Parallel processing is optionally available to improve the performance of:
-    - fetching individual record configurations from GitLab
-    - processing record configurations into Record instances
+    - fetching record configurations from GitLab
+    - processing and pre-pickling record instances
     """
 
     def __init__(
@@ -117,11 +161,13 @@ class GitLabLocalCache:
         self._token = gitlab_token
         self._ref = ref
         self._client = gitlab_client
+        self._cache_path = path / "cache.db"
 
-        self._records_path = self._path / "records"
-        self._commits_path = self._path / "commits.json"
-        self._head_path = self._path / "head_commit.json"
-        self._hashes_path = self._path / "hashes.json"
+    @cached_property
+    def _engine(self) -> Engine:
+        """Engine for backing database."""
+        self._logger.info(f"Connecting to SQLite database at: '{self._cache_path.resolve()}'")
+        return Engine.from_uri(f"sqlite://{self._cache_path.resolve()}")
 
     @cached_property
     def _online(self) -> bool:
@@ -146,71 +192,73 @@ class GitLabLocalCache:
         return self._client.projects.get(self._project_id)
 
     @cached_property
-    def _commits_mapping(self) -> dict[str, str]:
-        """
-        Load mapping of file identifiers to Git commits.
-
-        Not valid if called before `_create()` is called where cache does not exist.
-
-        Cached for lifetime of instance on the assumption they are short-lived.
-        """
-        with self._commits_path.open() as f:
-            data = json.load(f)
-        return data["commits"]
+    def _instance(self) -> str:
+        """GitLab instance."""
+        return urlparse(self._project.http_url_to_repo).hostname
 
     @property
-    def head_commit_cached(self) -> str:
-        """
-        ID of the latest commit in the local cache.
-
-        Not valid if called before `_create()` is called where cache does not exist.
-        """
-        with self._head_path.open() as f:
-            cache_commit = json.load(f)
-        return cache_commit["id"]
-
-    @property
-    def _head_commit_remote(self) -> str:
-        """
-        ID of the latest commit in branch of remote project.
-
-        Not valid if called before `_create()` is called where cache does not exist.
-        """
+    def _head_commit(self) -> str:
+        """ID of the latest commit in the source GitLab project repository."""
         return self._project.commits.list(ref_name=self._ref, get_all=False)[0].id
 
     @property
-    def _source(self) -> str:
-        """GitLab instance and branch/ref for checking whether cache applies to current configuration."""
-        return f"{urlparse(self._project.http_url_to_repo).hostname},{self._ref}"
+    def cached_head_commit(self) -> str:
+        """ID of the latest commit known to the local cache."""
+        if not self.exists:
+            msg = "Head commit unavailable, cache not initialised."
+            raise CacheNotInitialisedError(msg) from None
+        with self._engine as tx:
+            return tx.fetchscalar("SELECT value FROM meta WHERE key = 'head_commit'")
 
     @property
-    def _cached_source(self) -> str | None:
+    def _source(self) -> Source:
         """
-        GitLab instance and branch/ref used by local cache.
+        Remote repository information, not including head commit.
 
-        Not valid if called before `_create()` is called where cache does not exist.
+        For checking whether cache is applicable to the current/future configuration.
         """
-        try:
-            with self._head_path.open(mode="r") as f:
-                data = json.load(f)
-                return f"{data['instance']},{data['ref']}"
-        except FileNotFoundError:
-            return None
+        return Source(ref=self._ref, project=self._project_id, instance=self._instance)
+
+    @property
+    def _cached_source(self) -> Source:
+        """
+        Cached remote repository information.
+
+        For checking whether cache is applicable to the current/future configuration.
+        """
+        if not self.exists:
+            msg = 'Source unavailable, cache not initialised."'
+            raise CacheNotInitialisedError(msg) from None
+        with self._engine as tx:
+            results = tx.fetchscalars(
+                "SELECT value FROM meta WHERE key in ('source_instance', 'source_project', 'source_ref') ORDER BY key;"
+            )
+        if len(results) != 3:
+            msg = 'Source incomplete, cache not initialised."'
+            raise CacheNotInitialisedError(msg) from None
+        return Source(ref=results[2], project=results[1], instance=results[0])
 
     @property
     def exists(self) -> bool:
         """Determine if the cache exists."""
-        return self._records_path.exists()
+        if not self._cache_path.exists():
+            return False
+        with self._engine as tx:
+            result = tx.fetchone("SELECT name FROM sqlite_master WHERE type='table' AND name='record';")
+            if result is None:
+                return False
+        return True
 
     @property
     def _applicable(self) -> bool:
         """Ensure cache is applicable to the current GitLab instance and branch/ref."""
-        if not self.exists:
+        try:
+            cached_source = self._cached_source
+        except CacheNotInitialisedError:
             return False
 
-        cached_source = self._cached_source
         current_source = self._source
-        self._logger.debug(f"Cached instance-ref: '{cached_source}', Current instance-ref: '{current_source}'")
+        self._logger.debug(f"Cached: '{cached_source}' ?= Current: '{current_source}'")
         return cached_source == current_source
 
     @property
@@ -220,70 +268,113 @@ class GitLabLocalCache:
 
         Where the cache does not exist, or a head commit ID isn't available, the cache is considered stale.
         """
-        if not self.exists:
+        try:
+            cached_head = self.cached_head_commit
+        except CacheNotInitialisedError:
             return False
 
-        self._logger.debug(f"{self.head_commit_cached} ?= {self._head_commit_remote}")
-        return self.head_commit_cached == self._head_commit_remote
+        head = self._head_commit
+        self._logger.debug(f"Cached {cached_head} ?= Current: {head}")
+        return cached_head == head
 
-    def _load_record_pickle(self, record_path: Path) -> RecordRevision:
-        """Load record from Python pickle file."""
-        self._logger.debug(f"Loading record from '{record_path.resolve()}'")
-        with record_path.open(mode="rb") as file:
-            return pickle.load(file)  # noqa: S301
-
-    def _build_cache(self, records: list[tuple[str, str]], head_commit: dict) -> None:
+    @staticmethod
+    def _init_db(engine: Engine) -> None:
         """
-        Persist a set of record configurations to the local cache.
+        Initialise backing database with required structure.
 
-        Where:
-        - `records` is a list of ('record configuration JSON strings', 'Git commit') tuples
-        - `head_commit` is the head commit of the remote repo and other metadata (see `_create_refresh()` for details)
+        Simplistic implementation which does not support structure alterations once initialised.
+        Static method for cherry-picking in tests.
+        """
+        with engine as tx:
+            tx.execute(
+                """
+                -- noinspection SqlSignature @ routine/"jsonb_extract"
+                CREATE TABLE IF NOT EXISTS record
+                (
+                    record_pickled  BLOB NOT NULL,
+                    record_jsonb    BLOB NOT NULL,
+                    sha1            TEXT PRIMARY KEY,
+                    file_identifier TEXT GENERATED ALWAYS AS (jsonb_extract(record_jsonb, '$.file_identifier')) STORED UNIQUE,
+                    file_revision   TEXT GENERATED ALWAYS AS (jsonb_extract(record_jsonb, '$.file_revision')) STORED
+                );
+                """
+            )
+            tx.execute(
+                """
+                CREATE TABLE IF NOT EXISTS meta
+               (
+                    key    TEXT PRIMARY KEY
+                   ,value  TEXT NOT NULL
+               );
+                """
+            )
+
+    @staticmethod
+    def _record_upsert(record: ProcessedRecord) -> SQL:
+        """Generates SQL for upserting a record."""
+        insert = SQL.insert(
+            table="record",
+            values={
+                "record_pickled": record.pickled,
+                "record_jsonb": SQL.funcs.jsonb(json.dumps(record.config)),  # ty:ignore[unresolved-attribute]
+                "sha1": record.record.sha1,
+            },
+        )
+        upsert = SQL(
+            """
+            ON CONFLICT(file_identifier)
+            DO UPDATE
+            SET
+                 record_pickled = excluded.record_pickled
+                ,record_jsonb   = excluded.record_jsonb
+                ,sha1           = excluded.sha1
+            """
+        )
+        return insert + upsert
+
+    @staticmethod
+    def _meta_upsert(key: str, value: str) -> SQL:
+        """Generates SQL for upserting a meta key-value."""
+        insert = SQL.insert(table="meta", values={"key": key, "value": value})
+        upsert = SQL("ON CONFLICT(key) DO UPDATE SET value = excluded.value")
+        return insert + upsert
+
+    def _ensure_db(self) -> None:
+        """Ensure backing database exists."""
+        self._logger.info("Ensuring DB path")
+        self._cache_path.parent.mkdir(parents=True, exist_ok=True)
+
+        self._logger.info("Ensuring DB structure")
+        self._init_db(engine=self._engine)
+
+    def _build_cache(self, records: list[RawRecord], source: Source, head_commit_id: str) -> None:
+        """
+        Persist a set of records and metadata to the cache.
 
         Steps:
-        - parse each record config as a RecordRevision
-        - create a mapping of file identifier to SHA1 hash of each record's configuration
-        - create a mapping of file identifier to Git commit of each record version
-        - pickle each RecordRevision to the cache directory
-        - save details of the current head commit to a file for future cache validation
-        - save the mapping of SHA1 hashes
-        - save the mapping of Git commits
+        - setting up required database structure
+        - pre-processing records (as record configurations, (pickled) record instance and SHA1 hashes)
+        - upserting processed records and source metadata in the backing database (in a single transaction)
         """
-        hashes = {}
-        commits = {}
-
-        if self._hashes_path.exists():
-            with self._hashes_path.open() as f:
-                hashes = json.load(f)["hashes"]
-        if self._commits_path.exists():
-            with self._commits_path.open() as f:
-                commits = json.load(f)["commits"]
-
-        records_path = self._records_path
-        records_path.mkdir(parents=True, exist_ok=True)
+        self._ensure_db()
 
         self._logger.info(f"Processing {len(records)} records")
-        results = Parallel(n_jobs=self._parallel_jobs)(
-            delayed(_process_record)(self._logger, self._logger.level, records_path, record_data)
-            for record_data in records
+        results: list[ProcessedRecord] = Parallel(n_jobs=self._parallel_jobs)(
+            delayed(_process_record)(self._logger, self._logger.level, record_data) for record_data in records
         )
-        # results are a list of (file_identifier, sha1, commit) tuples
-        for result in results:
-            hashes[result[0]] = result[1]
-            commits[result[0]] = result[2]
 
-        with self._head_path.open(mode="w") as f:
-            json.dump(head_commit, f, indent=2)
+        with self._engine as tx:
+            self._logger.info("Storing records")
+            for record in results:
+                tx.execute(self._record_upsert(record))
+            self._logger.info(f"Stored {len(records)} records")
+            self._logger.info("Storing source and head commit metadata")
+            for key, value in source.items():
+                tx.execute(self._meta_upsert(key=f"source_{key}", value=value))  # ty:ignore[invalid-argument-type]
+            tx.execute(self._meta_upsert(key="head_commit", value=head_commit_id))
+            self._logger.info("Stored cache metadata")
 
-        with self._hashes_path.open(mode="w") as f:
-            data = {"hashes": hashes}
-            json.dump(data, f, indent=2)
-
-        with self._commits_path.open(mode="w") as f:
-            data = {"commits": commits}
-            json.dump(data, f, indent=2)
-
-    def _fetch_record_commits(self) -> list[tuple[str, str]]:
+    def _fetch_record_commits(self) -> list[RawRecord]:
         """
         Get all record configurations and their head commit IDs from the GitLab project repository.
 
@@ -302,14 +393,13 @@ class GitLabLocalCache:
             paths.append(item["path"])
 
         self._logger.info(f"Fetching {len(paths)} records")
-        # copy to allow use in parallel processing
-        project_ = deepcopy(self._project)
+        project_ = deepcopy(self._project)  # copy to allow use in parallel processing
         return Parallel(n_jobs=self._parallel_jobs)(
             delayed(_fetch_record_commit)(project_, path, self._ref) for path in paths
         )
-        # results are list of ('record configuration as JSON string', 'record commit string') tuples
+        # results are list of RawRecord tuples
 
-    def _fetch_latest_records(self) -> list[tuple[str, str]]:
+    def _fetch_latest_records(self) -> list[RawRecord]:
         """
         Get record configurations and their latest commit IDs from the GitLab project repository from after a commit.
 
@@ -322,14 +412,15 @@ class GitLabLocalCache:
 
         Returns a list of tuples ('record configuration as JSON string', 'record commit string').
 
-        This method is inefficient as each file within each commit needs separate HTTP requests. However, providing a
-        limited number of commits since the last refresh, and a limited set of records in each commit, this will be more
-        efficient than a full purge and create cycle.
+        This method is inefficient as each file within each commit needs separate HTTP requests,
+        however where a record has been updated multiple times, only the latest version is fetched.
+
+        Past a given (and arbitrary) number of commits, updating is aborted as it's faster to recreate the cache.
         """
         limit = 50
         paths = []
 
-        commit_range = f"{self.head_commit_cached}..{self._head_commit_remote}"
+        commit_range = f"{self.cached_head_commit}..{self._head_commit}"
         commits = self._project.commits.list(ref_name=commit_range, all=True)
 
         if len(commits) > limit:
@@ -347,25 +438,23 @@ class GitLabLocalCache:
                     msg = "Deleted file in remote store, skipping. Partial updates do not support deleted files, use purge and recreate to ensure cache integrity."
                     raise CacheIntegrityError(msg)
                 paths.append(diff["new_path"])
+        paths = set(paths)
 
+        self._logger.info(f"Fetching {len(paths)} changed records")
         project_ = deepcopy(self._project)
         return Parallel(n_jobs=self._parallel_jobs)(
             delayed(_fetch_record_commit)(project_, path, self._ref) for path in paths
         )
-        # results are list of ('record configuration as JSON string', 'record commit string') tuples
+        # results are a list of RawRecord tuples
 
-    def _create_refresh(self, records: list[tuple[str, str]]) -> None:
+    def _create_refresh(self, records: list[RawRecord]) -> None:
         """Common tasks for creating or refreshing the cache."""
         self._logger.info("Fetching head commit")
-        head_commit = {
-            **self._project.commits.get(self._head_commit_remote).attributes,
-            # append current GitLab instance and ref/branch
-            "instance": urlparse(self._project.http_url_to_repo).hostname,
-            "ref": self._ref,
-        }
+        head_commit = self._project.commits.get(self._head_commit).attributes
 
         self._logger.info("Populating local cache")
-        self._build_cache(records=records, head_commit=head_commit)
+        source = Source(ref=self._ref, project=self._project_id, instance=self._instance)
+        self._build_cache(records=records, source=source, head_commit_id=head_commit["id"])
 
     def _create(self) -> None:
         """
@@ -439,10 +528,15 @@ class GitLabLocalCache:
             self._logger.warning("Cannot check if records cache is current, loading possibly stale records")
             return
 
-        if not self._applicable:
-            self._logger.warning(
-                f"Cached source '{self._cached_source}' does not match current instance and branch '{self._source}', recreating cache"
-            )
+        try:
+            if not self._applicable:
+                self._logger.warning(
+                    f"Cached source '{self._cached_source}' does not match current instance and branch '{self._source}', recreating cache"
+                )
+                self._create()
+                return
+        except CacheNotInitialisedError:
+            self._logger.info("Local cache source unavailable, recreating from GitLab")
             self._create()
             return
 
@@ -454,22 +548,33 @@ class GitLabLocalCache:
         self._logger.info("Records cache exists and is current, no changes needed")
 
     def get(self) -> list[RecordRevision]:
-        """Load all available records from cache."""
+        """Load all cached records."""
         self._ensure_exists()
-        record_paths = list(self._path.glob("records/*.pickle"))
-        self._logger.info(f"Loading {len(record_paths)} records from cache")
-        return [self._load_record_pickle(record_path) for record_path in record_paths]
+        with self._engine as tx:
+            records = tx.fetchscalars("SELECT record_pickled FROM record")
 
-    def get_hashes(self, file_identifiers: list[str]) -> dict[str, str]:
+        self._logger.info(f"Loading {len(records)} records from cache")
+        return [pickle.loads(record) for record in records]  # noqa: S301
+
+    def get_hashes(self, file_identifiers: set[str]) -> dict[str, str | None]:
         """
-        Get SHA1 hashes for a set of records to determine if any have changed compared to the cache.
+        Get SHA1 hashes for a set of records.
 
-        Returns a mapping of file identifiers to SHA1 hashes, or `None` if the record isn't in the cache.
+        For determining records that have changed when refreshing the cache.
+
+        Returns a mapping of file identifiers to SHA1 hashes, or `None` if a record isn't in the cache.
         """
-        with self._hashes_path.open() as f:
-            hashes = json.load(f)["hashes"]
-
-        return {identifier: hashes.get(identifier, None) for identifier in file_identifiers}
+        with self._engine as tx:
+            results = tx.fetchall(
+                f"""
+                SELECT file_identifier, sha1
+                FROM record
+                WHERE file_identifier IN ({("?," * len(file_identifiers))[:-1]});
+                """,  # noqa: S608
+                tuple(file_identifiers),
+            )
+        hashes = {result["file_identifier"]: result["sha1"] for result in results}
+        return {file_id: hashes.get(file_id) for file_id in file_identifiers}
 
     def purge(self) -> None:
         """Clear cache contents."""
@@ -548,13 +653,15 @@ class GitLabStore(Store):
     Basic read-write store backed by a remote GitLab project.
 
     Uses:
-    - `GitLabLocalCache` class to access records from the remote repository for efficiency and offline support
+    - `GitLabLocalCache` class to cache records from the remote repository for efficiency and offline support
     - https://python-gitlab.readthedocs.io/ to interact with the GitLab API, rather than use the generic Git protocol
 
     The store is initially empty, with records loaded from the local cache using `populate()`. This can be called
-    multiple times to append additional records, or emptied using `purge()`.
+    multiple times to append additional records, or emptied using `purge()` (this does not clear the underlying cache).
 
-    Records can be added or updated using `push()`, which commits the changes to the remote GitLab project repository.
+    Records can be added or updated using `push()`, which commits changes to the remote GitLab project repository.
+
+    A truststore inject is used to allow the use of local development GitLab instances.
     """
 
     def __init__(
@@ -609,7 +716,7 @@ class GitLabStore(Store):
     @property
     def head_commit(self) -> str | None:
         """Local head commit reference if available."""
-        return self._cache.head_commit_cached if self._cache.exists else None
+        return self._cache.cached_head_commit if self._cache.exists else None
 
     @staticmethod
     def _get_remote_hashed_path(file_name: str) -> str:
@@ -657,7 +764,7 @@ class GitLabStore(Store):
             "actions": [],
         }
 
-        existing_hashes = self._cache.get_hashes(file_identifiers=[record.file_identifier for record in records])
+        existing_hashes = self._cache.get_hashes(file_identifiers={record.file_identifier for record in records})
         for record in records:
             self._logger.debug(f"Existing: '{existing_hashes[record.file_identifier]}', New: '{record.sha1}'")
             if record.sha1 == existing_hashes[record.file_identifier]:

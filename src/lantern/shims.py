@@ -3,7 +3,7 @@ import truststore
 
 def inject_truststore_into_ssl_boto_fix() -> None:
     """
-    Extent truststore injection to workaround botocore SSL context recursion error.
+    Extend truststore injection to workaround botocore SSL context recursion error.
 
     See https://github.com/sethmlarson/truststore/pull/180 for details and workaround source by @mckirk.
     """

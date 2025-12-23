@@ -31,19 +31,25 @@ class TestBaseStore:
         fx_fake_store.populate()
         assert len(fx_fake_store) > 0
 
+    def test_populate(self, fx_fake_store: FakeRecordsStore):
+        """Can load records into store."""
+        fx_fake_store.populate()
+        assert len(fx_fake_store.records) > 0
+
     def test_records(self, fx_fake_store: FakeRecordsStore):
         """Can get all records from store."""
         fx_fake_store.populate()
-        assert len(fx_fake_store.records) > 0
+
         assert all(isinstance(record, Record) for record in fx_fake_store.records)
 
     def test_get(self, fx_fake_store: FakeRecordsStore):
         """Can get a specific record from store."""
         fx_fake_store.populate()
         expected = fx_fake_store.records[0]
+
         assert fx_fake_store.get(expected.file_identifier) == expected
 
     def test_get_unknown(self, fx_fake_store: FakeRecordsStore):
-        """Can raise error when record is not found."""
+        """Cannot get an unknown record."""
         with pytest.raises(RecordNotFoundError):
-            fx_fake_store.get("x")
+            fx_fake_store.get("invalid")

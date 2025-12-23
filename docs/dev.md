@@ -558,10 +558,12 @@ To aid in debugging and testing, a set of fake records are included in `tests/re
 
 These records are used within tests but can and should also be used when developing [Templates](/docs/site.md#templates).
 
-An in-memory [Store](/docs/architecture.md#stores) is provided to load these records for use with
-[Exporters](/docs/architecture.md#exporters).
+#### Test records store
 
-### Test records signing keys
+An in-memory [Store](/docs/architecture.md#stores), `resources.stores.fake_records_store.FakeRecordsStore`, is provided
+to load these records for use with [Exporters](/docs/architecture.md#exporters).
+
+#### Test records signing keys
 
 A set of test keys are used for signing and encrypting
 [Administrative Metadata](/docs/data-model.md#item-administrative-metadata) within test records. These keys are

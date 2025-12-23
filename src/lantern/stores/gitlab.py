@@ -20,7 +20,7 @@ from sqlorm import SQL, Engine
 from lantern.log import init as init_logging
 from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
-from lantern.shim import inject_truststore_into_ssl_boto_fix
+from lantern.shims import inject_truststore_into_ssl_boto_fix
 from lantern.stores.base import RecordNotFoundError, Store
 
 

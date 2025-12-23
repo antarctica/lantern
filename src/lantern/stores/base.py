@@ -34,6 +34,11 @@ class Store(ABC):
         ...
 
     @abstractmethod
+    def populate(self) -> None:
+        """Load records into store."""
+        ...
+
+    @abstractmethod
     def get(self, file_identifier: str) -> RecordRevision:
         """Return a specific record or raise a RecordNotFoundError."""
         ...

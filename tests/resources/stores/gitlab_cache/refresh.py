@@ -1,29 +1,50 @@
-# run this script if record is changed to re-generated pickle file
 import json
-import pickle
 from pathlib import Path
 
-from lantern.models.record.revision import RecordRevision
+from sqlorm import SQL, Engine
 
-base_path = Path("tests/resources/stores/gitlab_cache")
-record_path = base_path / "records/a1b2c3.json"
+from lantern.stores.gitlab import GitLabLocalCache, ProcessedRecord
 
-with base_path.joinpath("head_commit.json").open() as f:
-    head_commit = json.load(f)
 
-with record_path.open() as f:
-    record_data = json.load(f)
+def _load_record(record_path: Path, commit_id: str) -> ProcessedRecord:
+    with record_path.open() as f:
+        record_data = f.read()
+    return ProcessedRecord(logger=None, config_str=record_data, commit_id=commit_id)
 
-record = RecordRevision.loads({"file_revision": head_commit["id"], **record_data})
 
-with record_path.with_suffix(".pickle").open(mode="wb") as f:
-    # noinspection PyTypeChecker
-    pickle.dump(record, f, pickle.HIGHEST_PROTOCOL)
+def _init_db(db_path: Path, record: ProcessedRecord, meta: dict) -> None:
+    if db_path.exists():
+        db_path.unlink()
+    engine = Engine.from_uri(f"sqlite://{db_path.resolve()}")
+    # noinspection PyProtectedMember
+    GitLabLocalCache._init_db(engine)
+    with engine as tx:
+        tx.execute(
+            SQL.insert(
+                table="record",
+                values={
+                    "record_pickled": record.pickled,
+                    "record_jsonb": SQL.funcs.jsonb(json.dumps(record.config)),
+                    "sha1": record.record.sha1,
+                },
+            )
+        )
+        tx.execute(SQL.insert(table="meta", values={"key": "source_ref", "value": meta["ref"]}))
+        tx.execute(SQL.insert(table="meta", values={"key": "source_project", "value": meta["project_id"]}))
+        tx.execute(SQL.insert(table="meta", values={"key": "source_instance", "value": meta["instance"]}))
+        tx.execute(SQL.insert(table="meta", values={"key": "head_commit", "value": meta["id"]}))
 
-with base_path.joinpath("commits.json").open(mode="w") as f:
-    data = {"commits": {record.file_identifier: record.file_revision}}
-    json.dump(data, f, indent=2)
 
-with base_path.joinpath("hashes.json").open(mode="w") as f:
-    data = {"hashes": {record.file_identifier: record.sha1}}
-    json.dump(data, f, indent=2)
+def main() -> None:
+    """Entrypoint."""
+    meta = {"instance": "gitlab.example.com", "project_id": "1234", "ref": "main", "id": "abc123"}
+    base_path = Path("tests/resources/stores/gitlab_cache")
+    record_path = base_path / "record.json"
+    cache_path = base_path / "cache.db"
+
+    record = _load_record(record_path, meta["id"])
+    _init_db(db_path=cache_path, record=record, meta=meta)
+
+
+if __name__ == "__main__":
+    main()

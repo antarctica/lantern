@@ -18,6 +18,7 @@ from lantern.models.record.record import Record as CatalogueRecord
 from lantern.models.record.record import Record as RecordCatalogue
 from lantern.models.record.revision import RecordRevision
 from lantern.stores.gitlab import GitLabStore
+from lantern.utils import init_gitlab_store
 
 
 def init_logging(config: Config) -> logging.Logger:
@@ -30,17 +31,7 @@ def init_logging(config: Config) -> logging.Logger:
 
 def init_store(logger: logging.Logger, config: Config, branch: str | None = None) -> GitLabStore:
     """Initialise store."""
-    if branch is None:
-        branch = config.STORE_GITLAB_BRANCH
-    return GitLabStore(
-        logger=logger,
-        parallel_jobs=config.PARALLEL_JOBS,
-        endpoint=config.STORE_GITLAB_ENDPOINT,
-        access_token=config.STORE_GITLAB_TOKEN,
-        project_id=config.STORE_GITLAB_PROJECT_ID,
-        branch=branch,
-        cache_path=config.STORE_GITLAB_CACHE_PATH,
-    )
+    return init_gitlab_store(logger=logger, config=config, branch=branch)
 
 
 def init_s3(config: Config) -> S3Client:  # ty: ignore[invalid-type-form]

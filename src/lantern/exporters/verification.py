@@ -10,7 +10,7 @@ from joblib import Parallel, delayed
 from mypy_boto3_s3 import S3Client
 from requests import Response
 
-from lantern.exporters.base import ResourcesExporter, get_jinja_env
+from lantern.exporters.base import ResourcesExporter
 from lantern.log import init as init_logging
 from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.site import ExportMeta, SiteMeta
@@ -19,6 +19,7 @@ from lantern.models.verification.enums import VerificationResult, VerificationTy
 from lantern.models.verification.jobs import VerificationJob
 from lantern.models.verification.types import VerificationContext
 from lantern.stores.base import SelectRecordsProtocol
+from lantern.utils import get_jinja_env
 
 
 def _req_url(logger: logging.Logger, job: VerificationJob, params: dict | None = None) -> Response:

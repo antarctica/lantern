@@ -5,13 +5,14 @@ import xml.etree.ElementTree as ET
 
 from mypy_boto3_s3 import S3Client
 
-from lantern.exporters.base import ResourceExporter, get_jinja_env, get_record_aliases, prettify_html
+from lantern.exporters.base import ResourceExporter
 from lantern.models.item.catalogue.item import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
 from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
 from lantern.stores.base import SelectRecordProtocol
+from lantern.utils import get_jinja_env, get_record_aliases, prettify_html
 
 
 class HtmlExporter(ResourceExporter):

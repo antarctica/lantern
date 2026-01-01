@@ -11,7 +11,6 @@ from mypy_boto3_s3 import S3Client
 from pytest_mock import MockerFixture
 
 from lantern.config import Config
-from lantern.exporters.base import S3Utils
 from lantern.exporters.html import HtmlAliasesExporter, HtmlExporter
 from lantern.exporters.json import JsonExporter
 
@@ -30,6 +29,7 @@ from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
 from lantern.stores.base import Store
+from lantern.utils import S3Utils
 from tests.conftest import _init_fake_store
 
 

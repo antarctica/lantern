@@ -34,6 +34,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Correcting dates in legal policy change logs
 * Records repository bootstrap development task includes missing XML record files
 * Disabling lineage statement in container item types
+* Missing datestamp update in the clone record development task
+* Correcting names for `STORE_GITLAB_CACHE_PATH`, `STORE_GITLAB_ENDPOINT` and `STORE_GITLAB_PROJECT_ID` config options
 
 ### Changed
 
@@ -50,6 +52,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Using SQLite for GitLab store local cache for flexibility and performance
 * Improving, simplified and streamlining exporters
 * Using typing protocols for Store select methods to avoid duplicate inline type definitions
+* Reorganising exporter utility methods
 
 ### Removed
 

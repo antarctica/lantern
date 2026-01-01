@@ -17,7 +17,6 @@ from tasks.records_zap import dump_records as zap_dump_records
 from tasks.records_zap import process_records as zap_process_records
 
 from lantern.config import Config
-from lantern.exporters.base import get_jinja_env, get_record_aliases
 from lantern.exporters.site import SiteExporter
 from lantern.exporters.verification import VerificationExporter
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, get_admin
@@ -27,7 +26,7 @@ from lantern.models.verification.types import VerificationContext
 from lantern.stores.base import Store
 from lantern.stores.gitlab import CommitResults
 from lantern.stores.gitlab_cache import GitLabCachedStore
-from lantern.utils import init_gitlab_store
+from lantern.utils import get_jinja_env, get_record_aliases, init_gitlab_store
 
 
 class OutputCommentItem:

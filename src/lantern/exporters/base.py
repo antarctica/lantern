@@ -4,84 +4,14 @@ from mimetypes import guess_type
 from pathlib import Path
 from shutil import copytree
 
-from bs4 import BeautifulSoup
 from importlib_resources import as_file as resources_as_file
 from importlib_resources import files as resources_files
-from jinja2 import Environment, PackageLoader, select_autoescape
 from mypy_boto3_s3 import S3Client
 
-from lantern.lib.metadata_library.models.record.elements.common import Identifier
-from lantern.models.record.const import ALIAS_NAMESPACE
-from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
 from lantern.stores.base import SelectRecordsProtocol
-
-
-class S3Utils:
-    """Wrapper around Boto S3 client with high-level and/or convenience methods."""
-
-    def __init__(self, logger: logging.Logger, s3: S3Client, s3_bucket: str, relative_base: Path) -> None:
-        self._logger = logger
-        self._s3 = s3
-        self._bucket = s3_bucket
-        self._relative_base = relative_base
-
-    def calc_key(self, path: Path) -> str:
-        """
-        Calculate `path` relative to `self._config.EXPORT_PATH`.
-
-        E.g. `/data/site/html/123/index.html` gives `html/123/index.html` where EXPORT_PATH is `/data/site/`.
-        """
-        return str(path.relative_to(self._relative_base))
-
-    def upload_content(
-        self, key: str, content_type: str, body: str | bytes, redirect: str | None = None, meta: dict | None = None
-    ) -> None:
-        """
-        Upload string or binary content as an S3 object.
-
-        Optionally, a redirect can be set to redirect to another object as per [1].
-
-        [1] https://docs.aws.amazon.com/AmazonS3/latest/userguide/how-to-page-redirect.html#redirect-requests-object-metadata
-        """
-        params = {"Bucket": self._bucket, "Key": key, "Body": body, "ContentType": content_type}
-        if isinstance(body, str):
-            params["Body"] = body.encode("utf-8")
-        if redirect is not None:
-            params["WebsiteRedirectLocation"] = redirect
-        if meta is not None:
-            # noinspection PyTypeChecker
-            params["Metadata"] = meta
-
-        self._logger.debug(f"Writing key: s3://{self._bucket}/{key}")
-        self._s3.put_object(**params)
-
-    def upload_package_resources(self, src_ref: str, base_key: str) -> None:
-        """
-        Upload package resources as S3 objects if they do not already exist.
-
-        `src_ref` MUST be a reference to a directory within a Python package compatible with `importlib_resources.files`.
-        All files within this directory will be uploaded under a `base_key` if it does not already exist.
-        """
-        # abort if base_key already exists in bucket
-        response = self._s3.list_objects_v2(Bucket=self._bucket, Prefix=base_key, MaxKeys=1)
-        if "Contents" in response:
-            return
-
-        with resources_as_file(resources_files(src_ref)) as resources_path:
-            for path in resources_path.glob("**/*.*"):
-                relative_path = path.relative_to(resources_path)
-                self._s3.upload_file(Filename=path, Bucket=self._bucket, Key=f"{base_key}/{relative_path}")
-
-    def empty_bucket(self) -> None:
-        """Delete all keys from the S3 bucket."""
-        for page in self._s3.get_paginator("list_objects_v2").paginate(Bucket=self._bucket):
-            keys = [{"Key": obj["Key"]} for obj in page.get("Contents", [])]
-            if not keys:
-                continue
-            # noinspection PyTypeChecker
-            self._s3.delete_objects(Bucket=self._bucket, Delete={"Objects": keys})
+from lantern.utils import S3Utils
 
 
 class Exporter(ABC):
@@ -204,27 +134,3 @@ class ResourceExporter(Exporter, ABC):
         key = self._s3_utils.calc_key(self._export_path)
         meta = {"file_identifier": self._record.file_identifier, "file_revision": self._record.file_revision}
         self._s3_utils.upload_content(key=key, content_type=media_type, body=self.dumps(), meta=meta)
-
-
-def get_record_aliases(record: Record) -> list[Identifier]:
-    """Get optional aliases for record as relative file paths / S3 keys."""
-    return record.identification.identifiers.filter(namespace=ALIAS_NAMESPACE)
-
-
-def get_jinja_env() -> Environment:
-    """Get Jinja environment with app templates."""
-    _loader = PackageLoader("lantern", "resources/templates")
-    return Environment(loader=_loader, autoescape=select_autoescape(), trim_blocks=True, lstrip_blocks=True)
-
-
-def prettify_html(html: str) -> str:
-    """
-    Prettify HTML string, removing any empty lines.
-
-    Without very careful whitespace control, Jinja templates quickly look messy where conditionals and other logic are
-    used. Whilst this doesn't strictly matter, it is nicer if output looks well-formed by removing empty lines.
-
-    This gives a 'flat' structure when viewed as source. Browser dev tools will reformat this into a tree structure.
-    The `prettify()` method is not used as it splits all elements onto new lines, which causes layout/spacing bugs.
-    """
-    return str(BeautifulSoup(html, parser="html.parser", features="lxml"))

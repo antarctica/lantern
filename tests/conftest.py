@@ -22,7 +22,7 @@ from moto import mock_aws
 from pytest_mock import MockerFixture
 
 from lantern.config import Config
-from lantern.exporters.base import Exporter, ResourceExporter, S3Utils, get_jinja_env, prettify_html
+from lantern.exporters.base import Exporter, ResourceExporter
 from lantern.exporters.html import HtmlAliasesExporter, HtmlExporter
 from lantern.exporters.records import RecordsExporter
 from lantern.exporters.site import SiteExporter, SiteIndexExporter, SitePagesExporter, SiteResourcesExporter
@@ -59,6 +59,7 @@ from lantern.models.verification.types import VerificationContext
 from lantern.stores.base import SelectRecordProtocol, SelectRecordsProtocol
 from lantern.stores.gitlab import GitLabSource, GitLabStore
 from lantern.stores.gitlab_cache import GitLabCachedStore, GitLabLocalCache
+from lantern.utils import S3Utils, get_jinja_env, prettify_html
 from tests.resources.exporters.fake_exporter import FakeExporter, FakeResourceExporter
 from tests.resources.records.admin_keys.testing_keys import load_keys
 from tests.resources.stores.fake_records_store import FakeRecordsStore

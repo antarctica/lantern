@@ -8,13 +8,14 @@ from importlib_resources import files as resources_files
 from mypy_boto3_s3 import S3Client
 
 from lantern.config import Config
-from lantern.exporters.base import Exporter, ResourcesExporter, get_jinja_env, get_record_aliases, prettify_html
+from lantern.exporters.base import Exporter, ResourcesExporter
 from lantern.exporters.base import Exporter as BaseExporter
 from lantern.exporters.records import RecordsExporter
 from lantern.exporters.waf import WebAccessibleFolderExporter
 from lantern.exporters.website import WebsiteSearchExporter
 from lantern.models.site import ExportMeta
 from lantern.stores.base import SelectRecordsProtocol, StoreInitProtocol
+from lantern.utils import get_jinja_env, get_record_aliases, prettify_html
 
 
 class SiteResourcesExporter(Exporter):

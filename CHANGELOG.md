@@ -50,6 +50,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Using SQLite for GitLab store local cache for flexibility and performance
 * Improving, simplified and streamlining exporters
 * Using typing protocols for Store select methods to avoid duplicate inline type definitions
+* Reorganising exporter utility methods
 
 ### Removed
 

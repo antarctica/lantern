@@ -28,7 +28,7 @@ dependencies = [
     "python-gitlab>=6.0.0",
     "requests>=2.32.4",
     "sentry-sdk>=2.32.0",
-    "sqlorm-py",
+    "sqlorm-py>=0.4.1",
 ]
 
 [dependency-groups]
@@ -62,10 +62,6 @@ name = "self"
 url = "https://gitlab.data.bas.ac.uk/api/v4/projects/1355/packages/pypi/simple"
 publish-url = "https://gitlab.data.bas.ac.uk/api/v4/projects/1355/packages/pypi"
 explicit = true
-
-[tool.uv.sources]
-# To workaround https://github.com/hyperflask/sqlorm/issues/1
-sqlorm-py = { url = "https://github.com/felnne/sqlorm/releases/download/v0.4.2/sqlorm_py-0.4.2-py3-none-any.whl" }
 
 [tool.taskipy.variables]
 docs_targets = "docs/ README.md CHANGELOG.md"
@@ -102,7 +98,7 @@ css-audit = { cmd = "python -m tasks.css_audit", help = "List CSS styles used in
 build-test-records = { cmd = "python tests/scripts/build_test.py", help = "Build test records as a catalogue site" }
 build-test-cache = { cmd = "python tests/resources/stores/gitlab_cache/refresh.py", help = "Build test/resource cache" }
 # fake CLI
-version = { cmd = "python -m tasks.version", help = "Show app version" }
+version = { cmd = "uv version", help = "Show app version" }
 cache-init = { cmd = "python -m tasks.cache_init", help = "Initialize records cache" }
 clone-record = { cmd = "python -m tasks.record_clone", help = "Clone record from cache into import directory" }
 select-records = { cmd = "python -m tasks.records_select", help = "Copy records from cache to import directory for editing" }

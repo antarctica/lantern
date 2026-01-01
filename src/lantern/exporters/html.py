@@ -2,7 +2,6 @@ import logging
 
 # noinspection PyPep8Naming
 import xml.etree.ElementTree as ET
-from collections.abc import Callable
 
 from mypy_boto3_s3 import S3Client
 
@@ -12,6 +11,7 @@ from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhys
 from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
+from lantern.stores.base import SelectRecordProtocol
 
 
 class HtmlExporter(ResourceExporter):
@@ -29,19 +29,15 @@ class HtmlExporter(ResourceExporter):
         meta: ExportMeta,
         s3: S3Client,
         record: RecordRevision,
-        get_record: Callable[[str], RecordRevision],
+        select_record: SelectRecordProtocol,
     ) -> None:
-        """
-        Initialise.
-
-        `get_record` requires a callable to get items related to the subject record.
-        """
+        """Initialise."""
         export_base = meta.export_path / "items" / record.file_identifier
         export_name = "index.html"
         super().__init__(
             logger=logger, meta=meta, s3=s3, record=record, export_base=export_base, export_name=export_name
         )
-        self._get_record = get_record
+        self._select_record = select_record
         self._jinja = get_jinja_env()
         self._template_path = "_views/item.html.j2"
 
@@ -64,7 +60,7 @@ class HtmlExporter(ResourceExporter):
             record=self._record,
             admin_meta_keys=self._meta.admin_meta_keys,  # ty: ignore[invalid-argument-type]
             trusted_context=self._meta.trusted,
-            get_record=self._get_record,
+            select_record=self._select_record,
         )
 
         raw = self._jinja.get_template(self._template_path).render(item=item, meta=item.site_metadata)

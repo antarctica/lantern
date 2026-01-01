@@ -1,3 +1,4 @@
+import logging
 from datetime import date
 
 import pytest
@@ -90,6 +91,11 @@ class TestRecordRevision:
         assert record.identification.title == expected_str  # record property
         assert record.file_revision == expected_str  # record revision property
         assert isinstance(record.distribution, list)  # parent post-init property
+
+    @pytest.mark.cov()
+    def test_loads_check(self, fx_logger: logging.Logger, fx_revision_config_min: dict):
+        """Can check if record configuration has unsupported properties."""
+        _ = RecordRevision.loads(value=fx_revision_config_min, check_supported=True, logger=fx_logger)
 
     def test_no_revision_loads(self, fx_revision_config_min: dict):
         """Cannot create a RecordRevision from a record config without a file_revision."""

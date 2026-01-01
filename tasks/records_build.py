@@ -10,6 +10,7 @@ from tasks._record_utils import init
 from lantern.config import Config as Config
 from lantern.exporters.site import SiteExporter
 from lantern.models.site import ExportMeta
+from lantern.stores.base import Store
 from lantern.utils import init_gitlab_store
 
 
@@ -30,40 +31,64 @@ def time_task(label: str) -> Callable:
     return decorator
 
 
+def _init_store_adapter(logger: logging.Logger, config: Config | None, frozen: bool = False) -> Store:
+    """To resolve type errors."""
+    if config is None:
+        raise TypeError()
+
+    return init_gitlab_store(logger=logger, config=config, frozen=frozen)
+
+
 class ToyCatalogue:
     """Toy catalogue for prototyping."""
 
-    def __init__(self, logger: logging.Logger, config: Config, s3: S3Client, trusted: bool = False) -> None:
+    def __init__(
+        self,
+        logger: logging.Logger,
+        config: Config,
+        s3: S3Client,
+        trusted: bool = False,
+        selected_identifiers: set[str] | None = None,
+    ) -> None:
         self._logger = logger
         self._config = config
         self._s3 = s3
         self._trusted = trusted
+        self._selected_identifiers = selected_identifiers
 
         self._store = init_gitlab_store(logger=self._logger, config=self._config)
-
+        if self._store.head_commit is None:
+            # noinspection PyProtectedMember
+            self._store._cache._ensure_exists()  # ensure cache exists to get head commit for ExportMeta
         self._meta = ExportMeta.from_config_store(
             config=self._config, store=None, build_repo_ref=self._store.head_commit, trusted=self._trusted
         )
+
         self._site = SiteExporter(
-            config=self._config, meta=self._meta, logger=self._logger, s3=self._s3, get_record=self._store.get
+            config=self._config,
+            meta=self._meta,
+            logger=self._logger,
+            s3=self._s3,
+            init_store=_init_store_adapter,
+            selected_identifiers=selected_identifiers,
         )
 
-    # noinspection PyMethodOverriding
-    @time_task(label="Load")
-    def loads(self) -> None:
-        """Load records into catalogue store and site exporter."""
-        self._logger.info(f"Loading available records from branch '{self._store.branch}' of store")
-        self._store.populate()
-        # update head commit in meta as cache will now exist
-        self._meta.build_repo_ref = self._store.head_commit
+    @time_task(label="Export")
+    def export(self) -> None:
+        """Export catalogue to file system."""
+        self._site.export()
+
+    @time_task(label="Publish")
+    def publish(self) -> None:
+        """Publish catalogue to S3."""
+        self._site.publish()
 
     # noinspection PyProtectedMember
     @time_task(label="Purge")
     def purge(self, purge_export: bool = False, purge_publish: bool = False) -> None:
         """Empty records from catalogue store and site exporter."""
-        self._logger.info("Purging store and store cache")
+        self._logger.info("Purging store")
         self._store.purge()
-        self._store._cache.purge()
 
         if purge_export and self._site._meta.export_path.exists():
             self._site._logger.info("Purging file system export directory")
@@ -72,43 +97,21 @@ class ToyCatalogue:
             self._logger.info("Purging S3 publishing bucket")
             self._site._s3_utils.empty_bucket()
 
-    def _get_selections(self, selection: set[str] | None) -> set[str]:
-        """Select all identifiers if none specified."""
-        if selection is not None and len(selection) > 0:
-            return selection
-        return {record.file_identifier for record in self._store.records}
-
-    @time_task(label="Export")
-    def export(self, file_identifiers: set[str] | None = None) -> None:
-        """Export catalogue to file system."""
-        self._site.select(file_identifiers=self._get_selections(file_identifiers))
-        self._site.export()
-
-    @time_task(label="Export")
-    def publish(self, file_identifiers: set[str] | None = None) -> None:
-        """Publish catalogue to S3."""
-        self._site.select(file_identifiers=self._get_selections(file_identifiers))
-        self._site.publish()
-
 
 def main() -> None:
     """Entrypoint."""
     export = True
     publish = False
     selected = set()  # to set use the form {"abc", "..."}
-    purge = False
     trusted = False
 
     logger, config, _store, s3, _keys = init()
-    cat = ToyCatalogue(config=config, logger=logger, s3=s3, trusted=trusted)
+    cat = ToyCatalogue(config=config, logger=logger, s3=s3, trusted=trusted, selected_identifiers=selected)
 
-    if purge:
-        cat.purge()
-    cat.loads()
     if export:
-        cat.export(file_identifiers=selected)
+        cat.export()
     if publish:
-        cat.publish(file_identifiers=selected)
+        cat.publish()
 
 
 if __name__ == "__main__":

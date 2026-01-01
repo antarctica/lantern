@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 from pathlib import Path
 
 import inquirer
-from tasks._record_utils import confirm_branch, dump_records, get_records, init, process_record_selections
+from tasks._record_utils import confirm_source, dump_records, init, process_record_selections
 
 
 def _get_cli_args() -> dict:
@@ -67,7 +67,7 @@ def _get_args(cli_identifiers: str | None) -> list[str]:
     return identifiers
 
 
-def _confirm_selection(file_identifiers: list[str]) -> bool:
+def _confirm_selection(file_identifiers: set[str]) -> bool:
     """Confirm the selected file identifiers with the user."""
     if len(file_identifiers) == 0:
         print("No records selected, aborting.")
@@ -89,7 +89,7 @@ def main() -> None:
     """Entrypoint."""
     logger, _config, store, _s3, _keys = init()
 
-    confirm_branch(logger=logger, store=store, action="Selecting records from")
+    confirm_source(logger=logger, store=store, action="Selecting records from")
     args = _get_cli_args()
     identifiers = _get_args(cli_identifiers=args.get("ids", None))
 
@@ -100,9 +100,9 @@ def main() -> None:
 
     import_path = Path("./import")
     logger.info("Loading records from Store")
-    records = get_records(logger=logger, store=store, file_identifiers=file_identifiers)
+    records = store.select(file_identifiers=file_identifiers)
 
-    logger.info(f"Dumping {len(file_identifiers)} selected records from '{store.branch}' in Store")
+    logger.info(f"Dumping {len(file_identifiers)} selected records from '{store._source.ref}' in Store")
     dump_records(logger=logger, output_path=import_path, records=records)
     logger.info(f"{len(file_identifiers)} records in {import_path.resolve()} for editing.")
 

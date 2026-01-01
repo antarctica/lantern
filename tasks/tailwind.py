@@ -7,6 +7,7 @@ from tempfile import TemporaryDirectory
 from boto3 import client as S3Client  # noqa: N812
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from moto import mock_aws
+from tests.conftest import _init_fake_store
 from tests.resources.records.admin_keys.testing_keys import load_keys
 from tests.resources.stores.fake_records_store import FakeRecordsStore
 
@@ -42,7 +43,6 @@ def export_test_site(export_path: Path) -> None:
     logger = logging.getLogger("app")
     logger.setLevel(logging.INFO)
     store = FakeRecordsStore(logger=logger)
-    store.populate()
 
     with mock_aws():
         s3_client = S3Client(
@@ -70,8 +70,14 @@ def export_test_site(export_path: Path) -> None:
         trusted=True,
     )
 
-    exporter = SiteExporter(config=Config(), meta=meta, s3=s3_client, logger=logger, get_record=store.get)
-    exporter.select(file_identifiers={record.file_identifier for record in store.records})
+    exporter = SiteExporter(
+        config=Config(),
+        meta=meta,
+        s3=s3_client,
+        logger=logger,
+        init_store=_init_fake_store,
+        selected_identifiers={record.file_identifier for record in store.select()},
+    )
     exporter.export()
 
     # Include verification report

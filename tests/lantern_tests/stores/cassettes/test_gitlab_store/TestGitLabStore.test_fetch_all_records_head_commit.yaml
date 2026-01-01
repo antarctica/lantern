@@ -1,0 +1,101 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/6.0.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234
+  response:
+    body:
+      string: '{"id":1234}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/6.2.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/tree?recursive=True&path=records&ref=main
+  response:
+    body:
+      string: '[{"id": "000", "name": "a1", "type": "tree", "path": "records/a1", "mode": "040000"}, {"id": "000", "name": "b2", "type": "tree", "path": "records/a1/b2", "mode": "040000"}, {"id": "000", "name": "a1b2c3.json", "type": "blob", "path": "records/a1/b2/a1b2c3.json", "mode": "100644"}]'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Link:
+      - <https://gitlab.example.com/api/v4/projects/1234/repository/tree?id=1234&page=2&pagination=legacy&path=records&per_page=20&recursive=true&ref=main>;
+        rel="next"
+        rel="first", <https://gitlab.example.com/api/v4/projects/1234/repository/tree?id=1234&page=2&pagination=legacy&path=records&per_page=20&recursive=true&ref=main>;
+        rel="last"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Next-Page:
+      - ''
+      X-Page:
+      - '1'
+      X-Per-Page:
+      - '20'
+      X-Prev-Page:
+      - ''
+      X-Total:
+      - '3'
+      X-Total-Pages:
+      - '1'
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -54,7 +54,7 @@ from lantern.models.item.catalogue.item import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
-from tests.conftest import _get_record, render_item_catalogue
+from tests.conftest import _select_record, render_item_catalogue
 
 
 class TestItemsTab:
@@ -654,7 +654,7 @@ class TestExtentTab:
     @staticmethod
     def _get_record_extents(identifier: str) -> RecordRevision:
         """Local get_record method returning related records with an extent."""
-        record = _get_record(identifier)
+        record = _select_record(identifier)
         record.identification.extents = Extents(
             [
                 Extent(
@@ -677,7 +677,7 @@ class TestExtentTab:
         E.g. for physical maps.
         """
         item = fx_item_physical_map_model_min
-        item._get_record = self._get_record_extents
+        item._select_record = self._get_record_extents
         html = BeautifulSoup(
             render_item_catalogue(fx_item_physical_map_model_min), parser="html.parser", features="lxml"
         )

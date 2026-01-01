@@ -1,7 +1,8 @@
 import logging
+from copy import copy
 
 from lantern.models.record.revision import RecordRevision
-from lantern.stores.base import RecordNotFoundError, Store
+from lantern.stores.base import RecordNotFoundError, RecordsNotFoundError, Store
 from tests.resources.records.item_cat_collection_all import record as collection_all_supported
 from tests.resources.records.item_cat_collection_min import record as collection_min_required
 from tests.resources.records.item_cat_data import record as data_all_supported
@@ -32,16 +33,26 @@ class FakeRecordsStore(Store):
     """
     Simple in-memory store of fake/test records.
 
-    Termed 'fake' rather than 'test' to avoid confusion between testing a store, vs. a store used for testing.
+    Termed 'fake' rather than 'test' to avoid confusion between testing a store, and a store used for that testing.
     """
 
-    def __init__(self, logger: logging.Logger) -> None:
+    def __init__(self, logger: logging.Logger, frozen: bool = False) -> None:
         self._logger = logger
-        self._records: list[RecordRevision] = []
+        self._records: list[RecordRevision] = self._fake_records
+        self._frozen = frozen
+
+    @property
+    def frozen(self) -> bool:
+        """
+        Whether store can be modified/updated.
+
+        Not used for anything in this store but tracked for checking in tests
+        """
+        return self._frozen
 
     @property
     def _fake_records(self) -> list[RecordRevision]:
-        return [
+        records = [
             initiative_min_required,
             initiative_all_supported,
             collection_min_required,
@@ -65,54 +76,34 @@ class FakeRecordsStore(Store):
             product_diff_published_map_side_a,
             product_diff_published_map_side_b,
         ]
+        return [copy(record) for record in records]
 
-    @staticmethod
-    def _get_related_identifiers(record: RecordRevision) -> set[str]:
-        """For building a single item with its direct relations."""
-        return {
-            related.identifier.identifier
-            for related in record.identification.aggregations
-            if related.identifier.identifier != record.file_identifier
-        }
+    def select(self, file_identifiers: set[str] | None = None) -> list[RecordRevision]:
+        """
+        Get all records optionally filtered by file identifier.
 
-    @property
-    def records(self) -> list[RecordRevision]:
-        """All records."""
-        return self._records
+        Raises a `RecordsNotFoundError` exception if any selected record not found.
+        """
+        if file_identifiers is None or len(file_identifiers) == 0:
+            return sorted(self._fake_records, key=lambda r: r.file_identifier)
 
-    def populate(self, inc_records: list[str] | None = None, inc_related: bool = False) -> None:
-        """Load test records, optionally limited to a set of file identifiers and their direct dependencies."""
-        if inc_records is None:
-            inc_records = []
+        records = []
+        for record in self._records:
+            if record.file_identifier in file_identifiers:
+                records.append(record)
 
-        if not inc_records:
-            self._logger.info("Loading all test records")
-            self._records = self._fake_records
-            return
+        missing_ids = file_identifiers - {r.file_identifier for r in records}
+        if not missing_ids:
+            return sorted(records, key=lambda r: r.file_identifier)
+        raise RecordsNotFoundError(missing_ids) from None
 
-        records_indexed = {record.file_identifier: record for record in self._fake_records}
-        for file_identifier in inc_records:
-            if file_identifier not in records_indexed:
-                self._logger.warning(f"No test record found with identifier '{file_identifier}', skipping.")
-                continue
-
-            record = records_indexed[file_identifier]
-            self._records.append(record)
-            if not inc_related:
-                self._logger.info(f"Loading single test record '{file_identifier}'")
-                continue
-
-            self._logger.info(f"Loading single test record '{file_identifier}' with direct dependencies")
-            related_records = [records_indexed[related_id] for related_id in self._get_related_identifiers(record)]
-            self._records.extend(related_records)
-
-    def get(self, file_identifier: str) -> RecordRevision:
+    def select_one(self, file_identifier: str) -> RecordRevision:
         """
         Get record by file identifier.
 
-        Raises RecordNotFoundError exception if not found.
+        Raises a `RecordNotFoundError` exception if not found.
         """
-        for record in self.records:
-            if record.file_identifier == file_identifier:
-                return record
-        raise RecordNotFoundError(file_identifier) from None
+        try:
+            return self.select(file_identifiers={file_identifier})[0]
+        except RecordsNotFoundError as e:
+            raise RecordNotFoundError(file_identifier) from e

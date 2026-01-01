@@ -71,7 +71,7 @@ from lantern.models.item.catalogue.tabs import (
 )
 from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.site import SiteMeta
-from tests.conftest import _get_record
+from tests.conftest import _select_record
 
 
 class TestItemsTab:
@@ -90,7 +90,7 @@ class TestItemsTab:
                     )
                 ]
             ),
-            get_record=_get_record,
+            select_record=_select_record,
         )
 
         tab = ItemsTab(aggregations=aggregations)
@@ -430,7 +430,7 @@ class TestRelatedTab:
                     )
                 ]
             ),
-            get_record=_get_record,
+            select_record=_select_record,
         )
 
         tab = RelatedTab(aggregations=aggregations, item_type=HierarchyLevelCode.PRODUCT)
@@ -495,7 +495,9 @@ class TestRelatedTab:
         expected: bool,
     ):
         """Can disable related tab if not applicable."""
-        aggregations = Aggregations(admin_meta_keys=fx_admin_meta_keys, aggregations=value, get_record=_get_record)
+        aggregations = Aggregations(
+            admin_meta_keys=fx_admin_meta_keys, aggregations=value, select_record=_select_record
+        )
         tab = RelatedTab(aggregations=aggregations, item_type=level)
         assert tab.enabled is expected
 

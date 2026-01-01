@@ -1,35 +1,31 @@
 # Lantern - Stores
 
 Stores act as containers for [Records](/docs/data-model.md#records) and typically relate to a storage system such as a
-database, file system or object store. Stores provide a consistent public interface to load and access Records.
+database, file system or object store. Stores provide a consistent public interface to access Records.
 
 ## Stores usage
 
 All stores implement a [Common Interface](#store-classes) supporting:
 
-- accessing some or all available Records using the `store.select()`
+- accessing some or all available Records using `store.select()`
 - accessing a specific Record by file identifier using `store.select_one()`
 - configuring a Store as [Frozen](#frozen-stores) (read-only)
 
-Stores MAY support additional functionality, such as persisting Records in a backing database or other system.
-
-> [!TIP]
-> Store `select_one()` methods SHOULD be used as [Exporter](/docs/architecture.md#exporters) record lookup callables.
+Stores MAY support additional functionality, such as persisting new or updated Records in a backing system.
 
 ## Stores configuration
 
 Stores use these options from the app `lantern.Config` class:
 
-- `STORE_GITLAB_BRANCH`: remote branch name for [GitLab Store](#gitlab-store) records cache, will be created if it
-  does not exist
-- `STORE_GITLAB_STORE_CACHE_PATH`: local path for [GitLab Store](#gitlab-store) records cache, will be created if it
+- `STORE_GITLAB_BRANCH`: remote branch name for [GitLab Store](#gitlab-store), will be created if it does not exist
+- `STORE_GITLAB_STORE_CACHE_PATH`: local path for [GitLab Cached Store](#gitlab-cached-store), will be created if it
   does not exist
 - `STORE_GITLAB_STORE_ENDPOINT`: API endpoint of a GitLab instance for [GitLab Store](#gitlab-store)
 - `STORE_GITLAB_STORE_PROJECT_ID`: project ID within GitLab instance set by `STORE_GITLAB_STORE_ENDPOINT` for
   [GitLab Store](#gitlab-store)
-- `STORE_GITLAB_TOKEN`: GitLab access token [GitLab Store](#gitlab-store)
-  - SHOULD use a project access token with the `developer` role
-  - MUST be granted the `api` scope and have access to the GitLab project set by `STORE_GITLAB_STORE_PROJECT_ID`
+- `STORE_GITLAB_TOKEN`: GitLab access token for [GitLab Store](#gitlab-store)
+  - MUST be granted the `api` scope with at least *developer* access to the GitLab project set by
+    `STORE_GITLAB_STORE_PROJECT_ID`
 
 See the [Config](/docs/config.md#config-options) docs for how to set these config options.
 

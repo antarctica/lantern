@@ -1,10 +1,12 @@
 # Lantern - Exporters
 
-Exporters create the catalogue [Static Site](/docs/architecture.md#static-site). They can broadly be split into:
+Exporters create the catalogue [Static Site](/docs/architecture.md#static-site). They can be broadly split into:
 
-- [Resource Exporters](#resource-exporters) - which create derived outputs of [Records](/docs/data-model.md#records) and
-  [Items](/docs/data-model.md#items)
-- [Site Exporters](#site-exporters) - which assemble and/or round out the static site with additional content
+- [Resource Exporters](#resource-exporters) - which create derived outputs of individual
+  [Records](/docs/data-model.md#records) and [Items](/docs/data-model.md#items)
+- [Resources Exporters](#resources-exporters) - which create outputs based on all or selected
+  [Records](/docs/data-model.md#records) and [Items](/docs/data-model.md#items)
+- [Other Exporters](#other-exporters) - which round out and/or coordinate the static site
 
 ## Exporters usage
 
@@ -13,20 +15,17 @@ All exporters implement a [Common Interface](#exporter-classes) supporting:
 - exporting to a local path using `export()`
 - and/or publishing to a remote service (typically [AWS S3](/docs/architecture.md#amazon-s3)) using `publish()`
 
-Exporters that access Records use a callable from a [Store](/docs/architecture.md#stores) to get Records by file
-identifier as needed. A `selected_identifiers` property typically controls which Records are output, allowing for full
-or partial site builds.
-
-> [!TIP]
-> The [Site Exporter](#site-exporter) sets selected identifiers in relevant (sub-)exporters via the `select()` method.
+Exporters that access Records use a callable from a [Store](/docs/architecture.md#stores) to select single or multiple
+Records as needed. A `selected_identifiers` property MAY control which Records are output, for partial site builds.
 
 ### Trusted publishing
 
-To restrict access to [Administrative Metadata](/docs/data-model.md#item-administrative-metadata) the admin tab is
-only shown if the `trusted` [Export](/docs/data-model.md#export-metadata) flag is set to true (default is false).
+Access to [Administrative Metadata](/docs/data-model.md#item-administrative-metadata) (such as the admin tab of
+[Catalogue Item](/docs/data-model.md#catalogue-items) outputs) is controlled by the `trusted`
+[Export](/docs/data-model.md#export-metadata) flag, which defaults to false (disabled).
 
 > [!CAUTION]
-> Access control MUST be used for any publishing locations where the trusted flag is set to true.
+> Access control MUST be used for any outputs created where the `trusted` flag is true.
 
 ## Exporters configuration
 
@@ -51,8 +50,8 @@ In most cases, these properties are accessed indirectly via an [Export Metadata]
 instance, which provides additional context such as the build time and associated commit for exported content.
 
 > [!IMPORTANT]
-> For auditing and to follow best practice, per-user IAM credentials, with suitable, limited, permissions to manage
-> items in the referenced bucket, SHOULD be used over common credentials.
+> Per-user AWS IAM credentials, with suitable, limited, permissions to manage items in the referenced bucket, SHOULD be
+> used over common credentials.
 
 ## Exporter classes
 
@@ -65,78 +64,69 @@ public interface to:
 
 ## Resource exporters
 
-Resource exporters create format specific outputs derived from [Records](/docs/data-model.md#records) or
-[Items](/docs/data-model.md#items).
+Resource exporters inherit from `lantern.exporters.base.ResourceExporter` to create outputs for individual
+[Records](/docs/data-model.md#records) or [Items](/docs/data-model.md#items).
 
-> [!NOTE]
-> [Administrative Metadata](/docs/libraries.md#record-administrative-metadata) is stripped from exported records.
-
-Exporters inherit from either:
-
-- `lantern.exporters.base.ResourcesExporter` where the exporter processes multiple Records or Items
-- `lantern.exporters.base.ResourceExporter` where the exporter processes a single Record or Item
-
-The `ResourcesExporter` base class includes a `selected_identifiers` property to set which Records/Items to process.
-
-When published to S3, user-defined object metadata is set to indicate the `file_identifier` and `file_revision` of the
-relevant [Record Revision](/docs/data-model.md#record-revisions).
+When published to S3, [user-defined](https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingMetadata.html#UserMetadata)
+object metadata includes the `file_identifier` and `file_revision` from the relevant
+[Record Revision](/docs/data-model.md#record-revisions).
 
 ### JSON resource exporter
 
 `lantern.exporters.json.JsonExporter`
 
-Outputs a Record as a JSON file. Intended for internal consumption within the BAS metadata ecosystem.
+Simple exporter outputting Records as JSON files (using the BAS ISO 19115 schema). Intended for internal consumption
+within the BAS metadata ecosystem.
 
 ### XML resource exporter
 
 `lantern.exporters.xml.IsoXmlExporter`
 
-Outputs a Record as a ISO 19139 XML file. Intended for interoperability for use across other providers and tools.
+Simple exporter outputting Records as ISO 19139 XML files. Intended for interoperability for use across wider providers
+and tools.
 
 ### XML HTML resource exporter
 
 `lantern.exporters.xml.IsoXmlHtmlExporter`
 
-Outputs an HTML page with minimal styling for a ISO 19139 XML document from the [XML Exporter](#xml-resource-exporter)
+Extends the [XML Resource Exporter](#xml-resource-exporter) outputting Records as HTML pages with minimal formatting,
 by applying an XSLT transformation. Intended for easier review of ISO metadata by humans.
 
 > [!NOTE]
-> This exporter applies the XSLT transformation server side, exporting the resulting HTML, rather than performing the
-> transformation client side which proved unreliable.
+> The XSLT transformation is applied server side, outputting the resulting HTML, to avoid problems with client side
+> transformations.
 
 ### HTML resource exporter
 
 `lantern.exporters.records.HtmlExporter`
 
-Outputs a [Catalogue Item](/docs/data-model.md#catalogue-items) as an HTML page using the
-[Site Templates](/docs/site.md#item-templates) for use by humans.
+More complex exporter outputting Records as [Catalogue Item](/docs/data-model.md#catalogue-items) HTML pages. Uses
+[Site Templates](/docs/site.md#item-templates) for consumption by (human) end-users.
 
-The `_item_class()` method determines if a [Special Catalogue Item](/docs/data-model.md#special-catalogue-items) class
-should be used for each Record.
+Uses a [Store](/docs/architecture.md#stores) select record callable to generate item summaries for related records, and
+an `_item_class()` method to determine if a [Special Catalogue Item](/docs/data-model.md#special-catalogue-items) class
+should be used for a Record.
 
 ### HTML aliases resource exporter
 
 `lantern.exporters.records.HtmlAliasesExporter`
 
-Outputs minimal HTML redirect pages for [Item Aliases](/docs/data-model.md#item-aliases) in a Record.
+Simple exporter outputting minimal HTML redirect pages for [Item Aliases](/docs/data-model.md#item-aliases) in Records.
 
-For efficiency, when published to S3, the `x-amz-website-redirect-location`
+Uses a `<meta http-equiv="refresh">` tag in each page.
+
+When published to S3, also uses the `x-amz-website-redirect-location`
 [Object Redirect](https://docs.aws.amazon.com/AmazonS3/latest/userguide/how-to-page-redirect.html#redirect-requests-object-metadata)
-header is added to each redirect page.
+header for efficiency.
 
-In other cases, or as a general fallback, a `<meta http-equiv="refresh">` tag in each page performs the redirect.
+## Resources exporters
 
-### Records resource exporter
+Resources exporters typically inherit from `lantern.exporters.base.ResourcesExporter` to create outputs for all
+[Records](/docs/data-model.md#records) or [Items](/docs/data-model.md#items).
 
-`lantern.exporters.records.RecordsExporter`
-
-Coordinates other [Resource Exporters](#resource-exporters) for selected [Records](/docs/data-model.md#records).
-
-Internally, the records exporter generates a set of individual jobs (per record and exporter) which are processed in
-parallel using a worker pool for better performance.
-
-This exporter requires a [Config](/docs/config.md) object to access credentials for standalone AWS S3 client instances
-used in parallel processing.
+> [!NOTE]
+> These exporters do not support partial record selections, as they produce single outputs containing or referencing
+> all Records or Items, which could omit previously generated, non-selected (but still valid), items in partial builds.
 
 ### Web Accessible Folder resource exporter
 
@@ -144,58 +134,25 @@ used in parallel processing.
 
 Outputs a [Web Accessible Folder (WAF)](/docs/access.md#web-accessible-folder) (WAF) endpoint.
 
-Consists of a directory containing a minimal index page linking to existing ISO 19139 encoded
+Formed of a directory with a basic, unstyled, HTML index page linking to ISO 19139 encoded
 [Records](/docs/data-model.md#records) output by the [XML Resource Exporter](#xml-resource-exporter).
-
-## Site exporters
-
-Site exporters complete the static site by including static resources such as CSS files, pages such as legal policies
-and outputs that look across multiple Records.
-
-### Site exporter
-
-`lantern.exporters.site.SiteExporter`
-
-Generates a complete static site by combining outputs from the
-[Records Exporter](#records-resource-exporter) and other [Site Exporters](#site-exporters).
-
-The `select()` method controls which [Records](/docs/data-model.md#records) to include.
-
-### Site resources exporter
-
-`lantern.exporters.site.SiteResourcesExporter`
-
-Copies CSS files, web fonts, images (e.g. favicons) and text files (for [Monitoring](/docs/monitoring.md)) from the
-internal `lantern.exporters.resources` package.
 
 ### Site index exporter
 
 `lantern.exporters.site.SiteIndexExporter`
 
-Generates a basic index page with links to all [Items](/docs/data-model.md#items) and
-[Item Aliases](/docs/data-model.md#item-aliases) in the static site.
+Outputs a styled HTML page linking to [Items](/docs/data-model.md#items) and
+[Item Aliases](/docs/data-model.md#item-aliases) output by the [HTML Exporter](#html-resource-exporter) and
+[HTML Aliases Exporter](#html-aliases-resource-exporter).
 
 > [!CAUTION]
-> This is intended as a quick reference to site content, not a proper, public, homepage.
-
-### Site pages exporter
-
-`lantern.exporters.site.SitePagesExporter`
-
-Generates static pages using [Site Templates](/docs/site.md#item-templates) for:
-
-- 404 error page
-- legal policies (accessibility, copyright, cookies and privacy)
-- content formatting guide (for abstracts, etc.)
+> This page is intended as a basic, internal, reference to site content - not a proper, public, homepage.
 
 ### Public Website search exporter
 
 `lantern.exporters.website.WebsiteSearchExporter`
 
-> [!IMPORTANT]
-> This exporter is experimental. Its implementation may change significantly without warning.
-
-Generates a listing of 'BAS Public Website Catalogue Sync API' resources. Intended to allow users to discover
+Outputs a listing of 'BAS Public Website Catalogue Sync API' resources. Intended to allow users to discover
 [Selected Items](#public-website-search-criteria) within the [BAS Public Website](https://www.bas.ac.uk).
 
 These resources consist of:
@@ -203,8 +160,9 @@ These resources consist of:
 - information about each item (title, thumbnail, etc.)
 - meta information for the Sync API (revision, status, etc.)
 
-This Sync API is an aggregator for items across BAS Data Catalogues and is maintained outside of this project. It is
-configured to include items from this exporter via the published items listing.
+> [!NOTE]
+> This Sync API is an aggregator for items across BAS Data Catalogues and is maintained outside of this project. It is
+> configured to include items from this exporter via the published items listing.
 
 #### Public Website search criteria
 
@@ -218,13 +176,47 @@ relevant to the public. Items meeting all these criteria are deemed relevant:
 
 ## Other exporters
 
+Other exporters inherit from `lantern.exporters.base.Exporter` to create non-record/item related outputs, or to
+coordinate other exporters.
+
+### Records resource exporter
+
+`lantern.exporters.records.RecordsExporter`
+
+Coordinates [Resource Exporters](#resource-exporters) for all or selected [Records](/docs/data-model.md#records).
+
+Uses a set of parallel processing workers to process `{record}:{exporter}` jobs (per record and exporter) for better
+performance. Singletons are used to share resources (such as a Store) between jobs in each worker. This requires
+passing a [Config](/docs/config.md) object and a [Store](/docs/architecture.md#stores) initialisation callable.
+
+### Site resources exporter
+
+`lantern.exporters.site.SiteResourcesExporter`
+
+Copies CSS files, web fonts, images (for favicons) and text files (for [Monitoring](/docs/monitoring.md)) from the
+internal `lantern.exporters.resources` module.
+
+### Site pages exporter
+
+`lantern.exporters.site.SitePagesExporter`
+
+Outputs HTML pages styled using [Site Templates](/docs/site.md#item-templates) for:
+
+- 404 error page
+- legal policies (accessibility, copyright, cookies and privacy)
+- content formatting guide (for abstracts, etc.)
+
+### Site exporter
+
+`lantern.exporters.site.SiteExporter`
+
+Coordinates other exporters to create complete static site, including a [Records Exporter](#records-resource-exporter).
+which can be optionally limited to a set of selected record identifiers for partial site builds.
+
 ### Verification exporter
 
 `lantern.exporters.verification.VerificationExporter`
 
-Generates and runs a set of [Site Verification Tasks](/docs/data-model.md#verification-jobs) for
-[Site Verification Checks](/docs/monitoring.md#verification-checks) and processes their results into a
+Generates and runs a set of [Tasks](/docs/data-model.md#verification-jobs) run in parallel for
+[Site Verification Checks](/docs/monitoring.md#verification-checks), then processes their results to output a
 [Verification Report](/docs/monitoring.md#verification-report).
-
-Internally, the verification exporter generates a set of individual jobs (per check) which are processed in parallel
-using a worker pool for better performance.

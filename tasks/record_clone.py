@@ -1,6 +1,7 @@
 import logging
 from argparse import ArgumentParser
 from copy import deepcopy
+from datetime import UTC, datetime
 from pathlib import Path
 from uuid import uuid4
 
@@ -59,12 +60,17 @@ def _clone_record(
     """
     Clone a record with a new identifier.
 
-    Replaces the file identifier, catalogue identifier and administrative metadata identifier only.
+    Replaces the metadata datestamp, file identifier, catalogue identifier and administrative metadata identifier only.
 
     Other references to the original record such as other identifiers, citations, etc. are not changed.
     """
     logger.info(f"Cloning record [{source_record.file_identifier}] as [{new_identifier}]")
     cloned_record = deepcopy(source_record)
+
+    # datestamp
+    cloned_record.metadata.date_stamp = datetime.now(tz=UTC).date()
+
+    # file identifier
     cloned_record.file_identifier = new_identifier
 
     # catalogue identifier

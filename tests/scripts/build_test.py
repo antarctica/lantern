@@ -4,6 +4,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from lantern.models.site import ExportMeta
+from lantern.stores.base import Store
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
@@ -35,13 +36,20 @@ def time_task(label: str) -> callable:
     return decorator
 
 
+# noinspection PyUnusedLocal
+def _init_store_adapter(logger: logging.Logger, config: Config | None, frozen: bool = False) -> Store:
+    """To resolve type errors."""
+    return FakeRecordsStore(logger=logger, frozen=frozen)
+
+
 class FakeCatalogue:
     """Catalogue for fake records."""
 
-    def __init__(self, logger: logging.Logger, config: Config) -> None:
+    def __init__(self, logger: logging.Logger, config: Config, inc_records: set[str] | None = None) -> None:
         self._logger = logger
         self._config = config
 
+        meta = ExportMeta.from_config_store(config=self._config, store=None, build_repo_ref="83fake48", trusted=True)
         with mock_aws():
             self._s3 = S3Client(
                 "s3",
@@ -49,26 +57,14 @@ class FakeCatalogue:
                 aws_secret_access_key="x",  # noqa: S106
                 region_name="eu-west-1",
             )
-
-        self._store = FakeRecordsStore(logger=self._logger)
-
-        meta = ExportMeta.from_config_store(config=self._config, store=None, build_repo_ref="83fake48", trusted=True)
         self._site = SiteExporter(
             logger=self._logger,
             config=self._config,
             meta=meta,
             s3=self._s3,
-            get_record=self._store.get,
+            init_store=_init_store_adapter,
+            selected_identifiers=inc_records,
         )
-
-    # noinspection PyMethodOverriding
-    @time_task(label="Load")
-    def loads(self, inc_records: list[str]) -> None:
-        """Load records into catalogue store and site exporter."""
-        self._logger.info("Loading records")
-        self._store.populate(inc_records=inc_records)
-        self._site.select(file_identifiers={record.file_identifier for record in self._store.records})
-        self._logger.info(f"Loaded {len(self._store.records)} records")
 
     @time_task(label="Purge")
     def purge(self) -> None:
@@ -84,7 +80,7 @@ class FakeCatalogue:
 
 def main() -> None:
     """Entrypoint."""
-    inc_records = []
+    inc_records = set()
     purge = False
 
     config = Config()
@@ -92,11 +88,10 @@ def main() -> None:
     logger = logging.getLogger("app")
     logger.info("Initialising")
 
-    cat = FakeCatalogue(config=config, logger=logger)
+    cat = FakeCatalogue(config=config, logger=logger, inc_records=inc_records)
 
     if purge:
         cat.purge()
-    cat.loads(inc_records=inc_records)
     cat.export()
 
 

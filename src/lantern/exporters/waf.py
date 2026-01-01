@@ -2,13 +2,12 @@ import logging
 
 # noinspection PyPep8Naming
 import xml.etree.ElementTree as ET
-from collections.abc import Callable
 
 from mypy_boto3_s3 import S3Client
 
 from lantern.exporters.base import ResourcesExporter
-from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
+from lantern.stores.base import SelectRecordsProtocol
 
 
 class WebAccessibleFolderExporter(ResourcesExporter):
@@ -23,11 +22,10 @@ class WebAccessibleFolderExporter(ResourcesExporter):
         logger: logging.Logger,
         meta: ExportMeta,
         s3: S3Client,
-        get_record: Callable[[str], RecordRevision],
+        select_records: SelectRecordsProtocol,
     ) -> None:
         """Initialise exporter."""
-        super().__init__(logger=logger, meta=meta, s3=s3, get_record=get_record)
-        self._get_record = get_record
+        super().__init__(logger=logger, meta=meta, s3=s3, select_records=select_records)
         self._export_path = self._meta.export_path / "waf" / "iso-19139-all" / "index.html"
 
     @property
@@ -58,7 +56,8 @@ class WebAccessibleFolderExporter(ResourcesExporter):
 
         main = ET.SubElement(body, "main")
         ul = ET.SubElement(main, "ul")
-        for fid in self._selected_identifiers:
+        for record in self._select_records():
+            fid = record.file_identifier
             li = ET.SubElement(ul, "li")
             a = ET.SubElement(li, "a", attrib={"href": f"{self._meta.base_url}/records/{fid}.xml"})
             a.text = fid

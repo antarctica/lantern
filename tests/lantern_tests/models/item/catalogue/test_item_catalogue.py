@@ -34,7 +34,7 @@ from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import SiteMeta
-from tests.conftest import _get_record
+from tests.conftest import _select_record
 
 
 class TestItemCatalogue:
@@ -49,7 +49,7 @@ class TestItemCatalogue:
             record=fx_revision_model_min,
             admin_meta_keys=fx_admin_meta_keys,
             trusted_context=True,
-            get_record=_get_record,
+            select_record=_select_record,
         )
         assert isinstance(item, ItemCatalogue)
         assert item._record == fx_revision_model_min
@@ -68,7 +68,7 @@ class TestItemCatalogue:
                 record=fx_record_model_min,
                 admin_meta_keys=fx_admin_meta_keys,
                 trusted_context=True,
-                get_record=_get_record,
+                select_record=_select_record,
             )
 
     def test_init_invalid_admin_keys(
@@ -84,7 +84,7 @@ class TestItemCatalogue:
                 record=fx_revision_model_min,
                 admin_meta_keys=None,
                 trusted_context=True,
-                get_record=_get_record,
+                select_record=_select_record,
             )
 
     def test_revision(

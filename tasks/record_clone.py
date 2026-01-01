@@ -5,7 +5,7 @@ from pathlib import Path
 from uuid import uuid4
 
 import inquirer
-from tasks._record_utils import dump_records, get_records, init, process_record_selections
+from tasks._record_utils import dump_records, init, process_record_selections
 
 from lantern.lib.metadata_library.models.record.presets.identifiers import make_bas_cat
 from lantern.lib.metadata_library.models.record.record import Record
@@ -39,8 +39,8 @@ def _get_record(logger: logging.Logger, store: GitLabStore, identifier: str | No
     """Get record from store using flexible, and optionally preset, identifier."""
     if identifier is None:
         identifier = inquirer.prompt([inquirer.Text("id", message="Record identifier")])["id"]
-    file_identifier = process_record_selections(logger=logger, identifiers=[identifier])[0]
-    return get_records(logger=logger, store=store, file_identifiers=[file_identifier])[0]
+    file_identifier = next(iter(process_record_selections(logger=logger, identifiers=[identifier])))
+    return store.select_one(file_identifier=file_identifier)
 
 
 def _get_new_identifier(identifier: str | None = None) -> str:

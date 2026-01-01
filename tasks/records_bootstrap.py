@@ -17,7 +17,7 @@ def _dump_records(logger: logging.Logger, file_identifiers: list[str], store: St
     """Dump selected records from the store to a path as JSON and XML."""
     output_path.mkdir(parents=True, exist_ok=True)
     for file_identifier in file_identifiers:
-        record = store.get(file_identifier)
+        record = store.select_one(file_identifier)
 
         record_path_json = output_path / f"{file_identifier}.json"
         logger.debug(f"Writing {record_path_json.resolve()}")
@@ -56,7 +56,6 @@ def _stage0(logger: logging.Logger, config: Config, working_path: Path) -> None:
     _confirm(logger)
 
     store = init_store(logger=logger, config=config)
-    store.populate()
 
     logger.info("Dumping required collection records from existing store")
     _dump_records(logger, magic_collection_ids, store, working_path)
@@ -116,7 +115,7 @@ def _stage1(logger: logging.Logger, config: Config, working_path: Path) -> None:
         )
 
     logger.info(f"Committing {len(data['actions'])} records.")
-    store.project.commits.create(data)
+    store._project.commits.create(data)
 
     for record_path in chain(working_path.glob("*.json"), working_path.glob("*.xml")):
         if record_path.exists():
@@ -143,7 +142,6 @@ def _stage2(logger: logging.Logger, config: Config) -> None:
     if store._cache.exists:
         print(f"Local cache path {config.STORE_GITLAB_CACHE_PATH.resolve()} exists and needs purging.")
         store._cache.purge()
-    store.populate()
 
     print(f"Stage {stage} complete.")
     print("All stages complete.")

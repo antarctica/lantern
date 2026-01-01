@@ -34,7 +34,7 @@ from lantern.models.item.catalogue.special.physical_map import (
 )
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import SiteMeta
-from tests.conftest import _get_record
+from tests.conftest import _select_record
 
 
 @pytest.mark.parametrize(("value", "expected"), [(0, "A"), (25, "Z"), (26, "AA")])
@@ -256,7 +256,7 @@ class TestItemCataloguePhysicalMap:
             record=fx_item_physical_map_model_min._record,
             admin_meta_keys=fx_admin_meta_keys,
             trusted_context=True,
-            get_record=_get_record,
+            select_record=_select_record,
         )
 
         assert isinstance(item, ItemCataloguePhysicalMap)
@@ -276,7 +276,7 @@ class TestItemCataloguePhysicalMap:
     def test_sides(self, fx_config: Config, fx_item_physical_map_model_min: ItemCataloguePhysicalMap):
         """Can get records representing the sides of a physical map."""
         expected = [
-            _get_record(side.identifier.identifier)
+            _select_record(side.identifier.identifier)
             for side in fx_item_physical_map_model_min._record.identification.aggregations.filter(
                 associations=AggregationAssociationCode.IS_COMPOSED_OF,
                 initiatives=AggregationInitiativeCode.PAPER_MAP,
@@ -312,7 +312,7 @@ class TestItemCataloguePhysicalMap:
     @staticmethod
     def _get_record_graphics(identifier: str) -> RecordRevision:
         """Extension of `_lib_get_record` to include graphic overviews."""
-        record = _get_record(identifier=identifier)
+        record = _select_record(identifier=identifier)
         record.identification.graphic_overviews.append(GraphicOverview(identifier="x", href="x", mime_type="image/png"))
         return record
 
@@ -345,7 +345,7 @@ class TestItemCataloguePhysicalMap:
             record=record,
             admin_meta_keys=fx_admin_meta_keys,
             trusted_context=True,
-            get_record=_get_local_record,
+            select_record=_get_local_record,
         )
 
         graphics = item.graphics

@@ -20,7 +20,7 @@ from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.utils.admin import set_admin
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
-from tests.conftest import _admin_meta_keys, _get_record_open, _revision_config_min
+from tests.conftest import _admin_meta_keys, _revision_config_min, _select_records_open
 
 
 class TestWebsiteSearchExporter:
@@ -35,7 +35,7 @@ class TestWebsiteSearchExporter:
         type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
         meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
-        exporter = WebsiteSearchExporter(meta=meta, s3=s3_client, logger=fx_logger, get_record=_get_record_open)
+        exporter = WebsiteSearchExporter(meta=meta, s3=s3_client, logger=fx_logger, select_records=_select_records_open)
 
         assert isinstance(exporter, WebsiteSearchExporter)
         assert exporter.name == "BAS Public Website Search Results"
@@ -80,10 +80,15 @@ class TestWebsiteSearchExporter:
 
         return record
 
+    @staticmethod
+    def _get_records_in_scope(file_identifiers: set[str] | None = None) -> list[RecordRevision]:
+        """Wrapper for _get_record_in_scope."""
+        identifiers = {"out_scope_superseded", "out_scope_not_open", "in_scope"}
+        return [TestWebsiteSearchExporter._get_record_in_scope(identifier=id_) for id_ in identifiers]
+
     def test_in_scope_items(self, fx_exporter_website_search: WebsiteSearchExporter):
         """Can select items in-scope for inclusion in website search."""
-        fx_exporter_website_search._get_record = self._get_record_in_scope
-        fx_exporter_website_search.selected_identifiers = {"out_scope_superseded", "out_scope_not_open", "in_scope"}
+        fx_exporter_website_search._select_records = self._get_records_in_scope
 
         results = fx_exporter_website_search._in_scope_items
         assert len(results) == 1

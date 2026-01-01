@@ -56,7 +56,9 @@ from lantern.models.site import ExportMeta, SiteMeta
 from lantern.models.verification.enums import VerificationResult, VerificationType
 from lantern.models.verification.jobs import VerificationJob
 from lantern.models.verification.types import VerificationContext
-from lantern.stores.gitlab import GitLabLocalCache, GitLabStore
+from lantern.stores.base import SelectRecordProtocol, SelectRecordsProtocol
+from lantern.stores.gitlab import GitLabSource, GitLabStore
+from lantern.stores.gitlab_cache import GitLabCachedStore, GitLabLocalCache
 from tests.resources.exporters.fake_exporter import FakeExporter, FakeResourceExporter
 from tests.resources.records.admin_keys.testing_keys import load_keys
 from tests.resources.stores.fake_records_store import FakeRecordsStore
@@ -411,7 +413,7 @@ def _item_cat_model_min() -> ItemCatalogue:
         record=RecordRevision.loads(_item_config_min_catalogue()),
         admin_meta_keys=_admin_meta_keys(),
         trusted_context=True,
-        get_record=_get_record,
+        select_record=_select_record,
     )
     # noinspection PyProtectedMember
     set_admin(keys=model._admin_keys, record=model._record, admin_meta=Administration(id=model.resource_id))
@@ -423,7 +425,7 @@ def fx_item_cat_model_min(
     fx_site_meta: SiteMeta,
     fx_item_config_min_catalogue: dict,
     fx_admin_meta_keys: AdministrationKeys,
-    fx_get_record: Callable[[str], RecordRevision],
+    fx_select_record: SelectRecordProtocol,
 ) -> ItemCatalogue:
     """
     Minimal ItemCatalogue model instance.
@@ -435,7 +437,7 @@ def fx_item_cat_model_min(
         record=RecordRevision.loads(fx_item_config_min_catalogue),
         admin_meta_keys=fx_admin_meta_keys,
         trusted_context=True,
-        get_record=fx_get_record,
+        select_record=fx_select_record,
     )
     # noinspection PyProtectedMember
     set_admin(keys=model._admin_keys, record=model._record, admin_meta=Administration(id=model.resource_id))
@@ -464,7 +466,7 @@ def fx_item_physical_map_model_min(
     fx_site_meta: SiteMeta,
     fx_item_config_min_physical_map: dict,
     fx_admin_meta_keys: AdministrationKeys,
-    fx_get_record: Callable[[str], RecordRevision],
+    fx_select_record: SelectRecordProtocol,
 ) -> ItemCataloguePhysicalMap:
     """
     Minimal ItemCataloguePhysicalMap model instance.
@@ -476,14 +478,14 @@ def fx_item_physical_map_model_min(
         record=RecordRevision.loads(fx_item_config_min_physical_map),
         admin_meta_keys=fx_admin_meta_keys,
         trusted_context=True,
-        get_record=fx_get_record,
+        select_record=fx_select_record,
     )
     # noinspection PyProtectedMember
     set_admin(keys=model._admin_keys, record=model._record, admin_meta=Administration(id=model.resource_id))
     return model
 
 
-def _get_record(identifier: str) -> RecordRevision:
+def _select_record(identifier: str) -> RecordRevision:
     """
     Minimal record lookup method.
 
@@ -494,14 +496,25 @@ def _get_record(identifier: str) -> RecordRevision:
     return record
 
 
-@pytest.fixture()
-def fx_get_record() -> Callable[[str], RecordRevision]:
+def _select_records(file_identifiers: set[str]) -> list[RecordRevision]:
     """
-    Minimal record lookup method.
+    Minimal records fetch method.
 
-    Wrapper for `_get_record()`.
+    Standalone method to allow use outside of fixtures.
     """
-    return _get_record
+    return [_select_record(fid) for fid in file_identifiers]
+
+
+@pytest.fixture()
+def fx_select_record() -> Callable[[str], RecordRevision]:
+    """Minimal record lookup method."""
+    return _select_record
+
+
+@pytest.fixture()
+def fx_select_records() -> SelectRecordsProtocol:
+    """Minimal records lookup method."""
+    return _select_records
 
 
 @pytest.fixture()
@@ -535,14 +548,36 @@ def fx_item_cat_admin_tab_min() -> AdminTab:
     )
 
 
+# noinspection PyUnusedLocal
+def _init_fake_store(logger: logging.Logger, config: Config | None = None, frozen: bool = False) -> FakeRecordsStore:
+    """Callable to initialize a FakeRecordsStore."""
+    return FakeRecordsStore(logger=logger, frozen=frozen)
+
+
 @pytest.fixture()
 def fx_fake_store(fx_logger: logging.Logger) -> FakeRecordsStore:
     """Fake records store."""
-    return FakeRecordsStore(logger=fx_logger)
+    return _init_fake_store(fx_logger)
 
 
 @pytest.fixture()
-def fx_gitlab_cache(fx_logger: logging.Logger, fx_config: Config) -> GitLabLocalCache:
+def fx_gitlab_source(fx_config: Config) -> GitLabSource:
+    """GitLab store source."""
+    return GitLabSource(
+        endpoint=fx_config.STORE_GITLAB_ENDPOINT,
+        project=fx_config.STORE_GITLAB_PROJECT_ID,
+        ref=fx_config.STORE_GITLAB_BRANCH,
+    )
+
+
+@pytest.fixture()
+def fx_gitlab_store(fx_logger: logging.Logger, fx_config: Config, fx_gitlab_source: GitLabSource) -> GitLabStore:
+    """GitLab store."""
+    return GitLabStore(logger=fx_logger, source=fx_gitlab_source, access_token=fx_config.STORE_GITLAB_TOKEN)
+
+
+@pytest.fixture()
+def fx_gitlab_cache(fx_logger: logging.Logger, fx_config: Config, fx_gitlab_source: GitLabSource) -> GitLabLocalCache:
     """GitLab local cache."""
     with TemporaryDirectory() as tmp_path:
         cache_path = Path(tmp_path) / ".cache"
@@ -551,10 +586,9 @@ def fx_gitlab_cache(fx_logger: logging.Logger, fx_config: Config) -> GitLabLocal
         logger=fx_logger,
         parallel_jobs=fx_config.PARALLEL_JOBS,
         path=cache_path,
-        project_id=fx_config.STORE_GITLAB_PROJECT_ID,
-        ref=fx_config.STORE_GITLAB_BRANCH,
         gitlab_token="x",  # noqa: S106
-        gitlab_client=Gitlab(url=fx_config.STORE_GITLAB_ENDPOINT, private_token=fx_config.STORE_GITLAB_TOKEN),
+        gitlab_client=Gitlab(url=fx_gitlab_source.endpoint, private_token=fx_config.STORE_GITLAB_TOKEN),
+        gitlab_source=fx_gitlab_source,
     )
 
 
@@ -583,27 +617,40 @@ def fx_gitlab_cache_pop(mocker: MockerFixture, fx_gitlab_cache: GitLabLocalCache
 
 
 @pytest.fixture()
-def fx_gitlab_store(fx_logger: logging.Logger, fx_config: Config) -> GitLabStore:
-    """GitLab store."""
+def fx_gitlab_cache_frozen(fx_gitlab_cache_pop: GitLabLocalCache) -> GitLabLocalCache:
+    """Frozen GitLab local cache populated with records."""
+    # noinspection PyProtectedMember
+    fx_gitlab_cache_pop._frozen = True
+    return fx_gitlab_cache_pop
+
+
+@pytest.fixture()
+def fx_gitlab_cached_store(fx_logger: logging.Logger, fx_config: Config, fx_gitlab_source: GitLabSource) -> GitLabStore:
+    """GitLab cached store."""
     with TemporaryDirectory() as tmp_path:
         cache_path = Path(tmp_path) / ".cache"
 
-    return GitLabStore(
+    return GitLabCachedStore(
         logger=fx_logger,
-        parallel_jobs=fx_config.PARALLEL_JOBS,
-        endpoint=fx_config.STORE_GITLAB_ENDPOINT,
+        source=fx_gitlab_source,
         access_token=fx_config.STORE_GITLAB_TOKEN,
-        project_id=fx_config.STORE_GITLAB_PROJECT_ID,
-        branch=fx_config.STORE_GITLAB_BRANCH,
-        cache_path=cache_path,
+        parallel_jobs=fx_config.PARALLEL_JOBS,
+        cache_dir=cache_path,
     )
 
 
 @pytest.fixture()
-def fx_gitlab_store_cached(
-    mocker: MockerFixture, fx_gitlab_store: GitLabStore, fx_gitlab_cache_pop: GitLabLocalCache
-) -> GitLabStore:
-    """GitLab store with populated/existing cache."""
+def fx_gitlab_cached_store_frozen(fx_gitlab_cached_store: GitLabCachedStore) -> GitLabCachedStore:
+    """Frozen GitLab cached store."""
+    fx_gitlab_cached_store._frozen = True
+    return fx_gitlab_cached_store
+
+
+@pytest.fixture()
+def fx_gitlab_cached_store_pop(
+    mocker: MockerFixture, fx_gitlab_cached_store: GitLabCachedStore, fx_gitlab_cache_pop: GitLabLocalCache
+) -> GitLabCachedStore:
+    """GitLab cached store with a populated/existing cache."""
     # mock:
     # - fx_gitlab_cache_pop._project.commits.get to return an object with an 'attributes' dict property
     # - fx_gitlab_cache_pop._project.http_url_to_repo to return a URL
@@ -615,15 +662,8 @@ def fx_gitlab_store_cached(
     mocker.patch.object(type(fx_gitlab_cache_pop), "_project", new_callable=PropertyMock, return_value=mock_project)
 
     # noinspection PyProtectedMember
-    fx_gitlab_store._cache = fx_gitlab_cache_pop
-    return fx_gitlab_store
-
-
-@pytest.fixture()
-def fx_gitlab_store_pop(fx_gitlab_store_cached: GitLabStore) -> GitLabStore:
-    """GitLab store populated with records from a populated/existing local cache."""
-    fx_gitlab_store_cached.populate()
-    return fx_gitlab_store_cached
+    fx_gitlab_cached_store._cache = fx_gitlab_cache_pop
+    return fx_gitlab_cached_store
 
 
 @pytest.fixture()
@@ -753,7 +793,11 @@ def fx_exporter_html(
     meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
     return HtmlExporter(
-        logger=fx_logger, meta=meta, s3=fx_s3_client, record=fx_revision_model_min, get_record=_get_record
+        logger=fx_logger,
+        meta=meta,
+        s3=fx_s3_client,
+        record=fx_revision_model_min,
+        select_record=_select_record,
     )
 
 
@@ -787,7 +831,7 @@ def fx_exporter_records(
     fx_admin_meta_keys: AdministrationKeys,
     fx_s3_bucket_name: str,
     fx_s3_client: S3Client,
-    fx_get_record: Callable[[str], RecordRevision],
+    fx_select_record: SelectRecordProtocol,
 ) -> RecordsExporter:
     """
     Site records exporter (empty).
@@ -799,6 +843,7 @@ def fx_exporter_records(
     with TemporaryDirectory() as tmp_path:
         output_path = Path(tmp_path)
     mock_config = mocker.Mock()
+    type(mock_config).LOG_LEVEL = PropertyMock(return_value=logging.DEBUG)
     type(mock_config).PARALLEL_JOBS = PropertyMock(return_value=1)
     type(mock_config).ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE = PropertyMock(
         return_value=fx_admin_meta_keys.encryption_private
@@ -810,7 +855,13 @@ def fx_exporter_records(
     type(mock_config).TEMPLATES_ITEM_CONTACT_ENDPOINT = PropertyMock(return_value="x")
     meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
-    return RecordsExporter(logger=fx_logger, config=mock_config, meta=meta, s3=fx_s3_client, get_record=fx_get_record)
+    return RecordsExporter(
+        logger=fx_logger,
+        config=mock_config,
+        meta=meta,
+        s3=fx_s3_client,
+        init_store=_init_fake_store,
+    )
 
 
 @pytest.fixture()
@@ -837,7 +888,7 @@ def fx_exporter_site_resources(
     return SiteResourcesExporter(logger=fx_logger, meta=meta, s3=fx_s3_client)
 
 
-def _get_record_alias(identifier: str) -> RecordRevision:
+def _select_record_alias(identifier: str) -> RecordRevision:
     """Minimal record lookup method with an alias identifier."""
     record = RecordRevision.loads(deepcopy(_revision_config_min()))
     record.file_identifier = identifier
@@ -845,6 +896,11 @@ def _get_record_alias(identifier: str) -> RecordRevision:
         Identifier(identifier="x", href="https://data.bas.ac.uk/datasets/x", namespace=ALIAS_NAMESPACE)
     )
     return record
+
+
+def _select_records_alias(file_identifiers: set[str]) -> list[RecordRevision]:
+    """Wrapper for _get_record_alias."""
+    return [_select_record_alias(identifier) for identifier in file_identifiers]
 
 
 @pytest.fixture()
@@ -863,7 +919,7 @@ def fx_exporter_site_index(
     type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
     meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
-    return SiteIndexExporter(logger=fx_logger, meta=meta, s3=fx_s3_client, get_record=_get_record_alias)
+    return SiteIndexExporter(logger=fx_logger, meta=meta, s3=fx_s3_client, select_records=_select_records_alias)
 
 
 @pytest.fixture()
@@ -871,8 +927,34 @@ def fx_exporter_site_index_sel(
     fx_exporter_site_index: SiteIndexExporter, fx_revision_model_min: RecordRevision
 ) -> SiteIndexExporter:
     """Site index exporter with a single record selected."""
-    fx_exporter_site_index.selected_identifiers = {fx_revision_model_min.file_identifier}
+
+    # noinspection PyUnusedLocal
+    def select_records(file_identifiers: set[str] | None = None) -> list[RecordRevision]:
+        return [_select_record_alias("x")]
+
+    fx_exporter_site_index._select_records = select_records
     return fx_exporter_site_index
+
+
+def _select_record_open(identifier: str) -> RecordRevision:
+    """Minimal record lookup method with open access constraint and admin access permissions."""
+    record = RecordRevision.loads(deepcopy(_revision_config_min()))
+    record.file_identifier = identifier
+
+    # access permissions
+    admin_meta = Administration(id=record.file_identifier, access_permissions=[OPEN_ACCESS])
+    set_admin(keys=_admin_meta_keys(), record=record, admin_meta=admin_meta)
+
+    # access constraints (informative)
+    record.identification.constraints.append(
+        Constraint(type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.UNRESTRICTED)
+    )
+    return record
+
+
+def _select_records_open(file_identifiers: set[str]) -> list[RecordRevision]:
+    """Wrapper for _select_record_open."""
+    return [_select_record_open(identifier) for identifier in file_identifiers]
 
 
 @pytest.fixture()
@@ -891,32 +973,21 @@ def fx_exporter_waf(
     type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
     meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
-    return WebAccessibleFolderExporter(logger=fx_logger, meta=meta, s3=fx_s3_client, get_record=_get_record_alias)
+    return WebAccessibleFolderExporter(
+        logger=fx_logger, meta=meta, s3=fx_s3_client, select_records=_select_records_open
+    )
 
 
 @pytest.fixture()
-def fx_exporter_waf_sel(
-    fx_exporter_waf: WebAccessibleFolderExporter, fx_revision_model_min: RecordRevision
-) -> WebAccessibleFolderExporter:
+def fx_exporter_waf_sel(fx_exporter_waf: WebAccessibleFolderExporter) -> WebAccessibleFolderExporter:
     """Web Accessible Folder exporter with a single record selected."""
-    fx_exporter_waf.selected_identifiers = {fx_revision_model_min.file_identifier}
+
+    # noinspection PyUnusedLocal
+    def select_records(file_identifiers: set[str] | None = None) -> list[RecordRevision]:
+        return [_select_record_open("x")]
+
+    fx_exporter_waf._select_records = select_records
     return fx_exporter_waf
-
-
-def _get_record_open(identifier: str) -> RecordRevision:
-    """Minimal record lookup method with open access constraint and admin access permissions."""
-    record = RecordRevision.loads(deepcopy(_revision_config_min()))
-    record.file_identifier = identifier
-
-    # access permissions
-    admin_meta = Administration(id=record.file_identifier, access_permissions=[OPEN_ACCESS])
-    set_admin(keys=_admin_meta_keys(), record=record, admin_meta=admin_meta)
-
-    # access constraints (informative)
-    record.identification.constraints.append(
-        Constraint(type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.UNRESTRICTED)
-    )
-    return record
 
 
 @pytest.fixture()
@@ -947,17 +1018,18 @@ def fx_exporter_website_search(
     # Inject private signing key so admin metadata can be signed in other fixtures and tests
     meta.admin_meta_keys = fx_admin_meta_keys
 
-    return WebsiteSearchExporter(logger=fx_logger, meta=meta, s3=fx_s3_client, get_record=_get_record_open)
+    return WebsiteSearchExporter(logger=fx_logger, meta=meta, s3=fx_s3_client, select_records=_select_records_open)
 
 
 @pytest.fixture()
-def fx_exporter_website_search_sel(
-    fx_exporter_website_search: WebsiteSearchExporter,
-    fx_revision_model_min: RecordRevision,
-    fx_admin_meta_keys: AdministrationKeys,
-) -> WebsiteSearchExporter:
+def fx_exporter_website_search_sel(fx_exporter_website_search: WebsiteSearchExporter) -> WebsiteSearchExporter:
     """Public website search exporter with a single record selected."""
-    fx_exporter_website_search.selected_identifiers = {fx_revision_model_min.file_identifier}
+
+    # noinspection PyUnusedLocal
+    def select_records(file_identifiers: set[str] | None = None) -> list[RecordRevision]:
+        return [_select_record_open("x")]
+
+    fx_exporter_website_search._select_records = select_records
     return fx_exporter_website_search
 
 
@@ -983,7 +1055,6 @@ def fx_exporter_site(
     fx_logger: logging.Logger,
     fx_admin_meta_keys: AdministrationKeys,
     fx_s3_client: S3Client,
-    fx_get_record: Callable[[str], RecordRevision],
 ) -> SiteExporter:
     """
     Site exporter (empty records).
@@ -993,6 +1064,8 @@ def fx_exporter_site(
     with TemporaryDirectory() as tmp_path:
         output_path = Path(tmp_path)
     mock_config = mocker.Mock()
+    type(mock_config).NAME = PropertyMock(return_value="x")
+    type(mock_config).LOG_LEVEL = PropertyMock(return_value=logging.DEBUG)
     type(mock_config).PARALLEL_JOBS = PropertyMock(return_value=1)
     type(mock_config).ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE = PropertyMock(
         return_value=fx_admin_meta_keys.encryption_private
@@ -1002,10 +1075,17 @@ def fx_exporter_site(
     type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
     type(mock_config).TEMPLATES_ITEM_MAPS_ENDPOINT = PropertyMock(return_value="x")
     type(mock_config).TEMPLATES_ITEM_CONTACT_ENDPOINT = PropertyMock(return_value="x")
-    mocker.patch("lantern.exporters.records._job_s3", return_value=fx_s3_client)
+    mocker.patch("lantern.exporters.records._job_worker_s3", return_value=fx_s3_client)
     meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
-    return SiteExporter(logger=fx_logger, config=mock_config, meta=meta, s3=fx_s3_client, get_record=fx_get_record)
+    return SiteExporter(
+        logger=fx_logger,
+        config=mock_config,
+        meta=meta,
+        s3=fx_s3_client,
+        init_store=_init_fake_store,
+        selected_identifiers=set(),
+    )
 
 
 @pytest.fixture()
@@ -1014,7 +1094,7 @@ def fx_exporter_verify(
     fx_s3_bucket_name: str,
     fx_logger: logging.Logger,
     fx_s3_client: S3Client,
-    fx_get_record: Callable[[str], RecordRevision],
+    fx_select_records: SelectRecordsProtocol,
 ) -> VerificationExporter:
     """
     Verification exporter (empty records).
@@ -1040,7 +1120,9 @@ def fx_exporter_verify(
         "SAN_PROXY_ENDPOINT": "x",
     }
 
-    return VerificationExporter(logger=fx_logger, meta=meta, s3=fx_s3_client, get_record=fx_get_record, context=context)
+    return VerificationExporter(
+        logger=fx_logger, meta=meta, s3=fx_s3_client, select_records=fx_select_records, context=context
+    )
 
 
 @pytest.fixture()
@@ -1048,7 +1130,12 @@ def fx_exporter_verify_sel(
     fx_exporter_verify: VerificationExporter, fx_revision_model_min: RecordRevision
 ) -> VerificationExporter:
     """Verification exporter with a single record selected."""
-    fx_exporter_verify.selected_identifiers = {fx_revision_model_min.file_identifier}
+
+    # noinspection PyUnusedLocal
+    def select_records(file_identifiers: set[str] | None = None) -> list[RecordRevision]:
+        return [_select_record("x")]
+
+    fx_exporter_verify._select_records = select_records
     return fx_exporter_verify
 
 
@@ -1109,9 +1196,14 @@ def fx_exporter_static_site(module_mocker: MockerFixture) -> TemporaryDirectory:
         )
 
     store = FakeRecordsStore(logger=logger)
-    store.populate()
-    exporter = SiteExporter(logger=logger, config=config, meta=meta, s3=s3_client, get_record=store.get)
-    exporter.select({record.file_identifier for record in store.records})
+    exporter = SiteExporter(
+        logger=logger,
+        config=config,
+        meta=meta,
+        s3=s3_client,
+        init_store=_init_fake_store,
+        selected_identifiers={record.file_identifier for record in store.select()},
+    )
     exporter.export()
 
     if not Path(site_dir.name).joinpath("favicon.ico").exists():

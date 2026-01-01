@@ -1,6 +1,5 @@
 import logging
 import shutil
-from collections.abc import Callable
 from pathlib import Path
 from shutil import copy
 
@@ -14,8 +13,8 @@ from lantern.exporters.base import Exporter as BaseExporter
 from lantern.exporters.records import RecordsExporter
 from lantern.exporters.waf import WebAccessibleFolderExporter
 from lantern.exporters.website import WebsiteSearchExporter
-from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
+from lantern.stores.base import SelectRecordsProtocol, StoreInitProtocol
 
 
 class SiteResourcesExporter(Exporter):
@@ -148,10 +147,10 @@ class SiteIndexExporter(ResourcesExporter):
         logger: logging.Logger,
         meta: ExportMeta,
         s3: S3Client,
-        get_record: Callable[[str], RecordRevision],
+        select_records: SelectRecordsProtocol,
     ) -> None:
         """Initialise exporter."""
-        super().__init__(logger=logger, meta=meta, s3=s3, get_record=get_record)
+        super().__init__(logger=logger, meta=meta, s3=s3, select_records=select_records)
         self._jinja = get_jinja_env()
         self._template_path = "_views/-/index.html.j2"
         self._index_path = self._meta.export_path / "-" / "index" / "index.html"
@@ -164,12 +163,11 @@ class SiteIndexExporter(ResourcesExporter):
     @property
     def _data(self) -> dict:
         """Assemble index data."""
-        records = []
-        aliases = []
+        idx_records = []
+        idx_aliases = []
 
-        for file_identifier in self._selected_identifiers:
-            record = self._get_record(file_identifier)
-            records.append(
+        for record in self._select_records():
+            idx_records.append(
                 {
                     "type": record.hierarchy_level.name,
                     "file_identifier": record.file_identifier,
@@ -178,7 +176,7 @@ class SiteIndexExporter(ResourcesExporter):
                 }
             )
             identifiers = get_record_aliases(record)
-            aliases.extend(
+            idx_aliases.extend(
                 [
                     {
                         "alias": (identifier.href or "").replace("https://data.bas.ac.uk/", ""),
@@ -191,8 +189,8 @@ class SiteIndexExporter(ResourcesExporter):
             )
 
         return {
-            "records": records,
-            "aliases": aliases,
+            "records": idx_records,
+            "aliases": idx_aliases,
         }
 
     def _dumps(self) -> str:
@@ -301,22 +299,51 @@ class SiteExporter(Exporter):
         config: Config,
         meta: ExportMeta,
         s3: S3Client,
-        get_record: Callable[[str], RecordRevision],
+        init_store: StoreInitProtocol,
+        selected_identifiers: set[str] | None = None,
     ) -> None:
         """Initialise exporter."""
         super().__init__(logger=logger, meta=meta, s3=s3)
+        prefer_frozen = True
+        self._store = init_store(logger, config, prefer_frozen)
+
         self._resources_exporter = SiteResourcesExporter(logger=logger, meta=meta, s3=self._s3_client)
         self._pages_exporter = SitePagesExporter(logger=logger, meta=meta, s3=self._s3_client)
-        self._index_exporter = SiteIndexExporter(logger=logger, meta=meta, s3=self._s3_client, get_record=get_record)
         self._records_exporter = RecordsExporter(
-            logger=logger, config=config, meta=meta, s3=self._s3_client, get_record=get_record
+            logger=logger,
+            config=config,
+            meta=meta,
+            s3=self._s3_client,
+            init_store=init_store,
+            selected_identifiers=selected_identifiers,
+        )
+        self._index_exporter = SiteIndexExporter(
+            logger=logger,
+            meta=meta,
+            s3=self._s3_client,
+            select_records=self._store.select,
         )
         self._waf_exporter = WebAccessibleFolderExporter(
-            logger=logger, meta=meta, s3=self._s3_client, get_record=get_record
+            logger=logger,
+            meta=meta,
+            s3=self._s3_client,
+            select_records=self._store.select,
         )
         self._website_exporter = WebsiteSearchExporter(
-            logger=logger, meta=meta, s3=self._s3_client, get_record=get_record
+            logger=logger,
+            meta=meta,
+            s3=self._s3_client,
+            select_records=self._store.select,
         )
+
+        self._exporters: list[Exporter] = [
+            self._resources_exporter,
+            self._pages_exporter,
+            self._records_exporter,
+            self._index_exporter,
+            self._waf_exporter,
+            self._website_exporter,
+        ]
 
     @property
     def name(self) -> str:
@@ -331,31 +358,12 @@ class SiteExporter(Exporter):
         self._logger.info("Purging S3 publishing bucket")
         self._s3_utils.empty_bucket()
 
-    def select(self, file_identifiers: set[str]) -> None:
-        """
-        Select a subset of records to export and/or publish.
-
-        Only applies to exporters that relate to individual resources.
-        """
-        self._records_exporter.selected_identifiers = file_identifiers
-        self._index_exporter.selected_identifiers = file_identifiers
-        self._waf_exporter.selected_identifiers = file_identifiers
-        self._website_exporter.selected_identifiers = file_identifiers
-
     def export(self) -> None:
         """Export site contents to a directory."""
-        self._resources_exporter.export()
-        self._pages_exporter.export()
-        self._records_exporter.export()
-        self._index_exporter.export()
-        self._waf_exporter.export()
-        self._website_exporter.export()
+        for exporter in self._exporters:
+            exporter.export()
 
     def publish(self) -> None:
         """Publish site contents to S3."""
-        self._resources_exporter.publish()
-        self._pages_exporter.publish()
-        self._records_exporter.publish()
-        self._index_exporter.publish()
-        self._waf_exporter.publish()
-        self._website_exporter.publish()
+        for exporter in self._exporters:
+            exporter.publish()

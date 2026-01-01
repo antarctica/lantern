@@ -4,20 +4,24 @@ from boto3 import client as S3Client  # noqa: N812
 from mypy_boto3_s3 import S3Client as S3ClientT
 
 from lantern.config import Config
-from lantern.stores.gitlab import GitLabStore
+from lantern.stores.gitlab import GitLabSource
+from lantern.stores.gitlab_cache import GitLabCachedStore
 
 
-def init_gitlab_store(logger: logging.Logger, config: Config, branch: str | None = None) -> GitLabStore:
+def init_gitlab_store(
+    logger: logging.Logger, config: Config, branch: str | None = None, frozen: bool = False
+) -> GitLabCachedStore:
     """Initialise a GitLab store from app Config."""
     branch_ = branch or config.STORE_GITLAB_BRANCH
-    return GitLabStore(
+    source = GitLabSource(endpoint=config.STORE_GITLAB_ENDPOINT, project=config.STORE_GITLAB_PROJECT_ID, ref=branch_)
+
+    return GitLabCachedStore(
         logger=logger,
-        parallel_jobs=config.PARALLEL_JOBS,
-        endpoint=config.STORE_GITLAB_ENDPOINT,
+        source=source,
         access_token=config.STORE_GITLAB_TOKEN,
-        project_id=config.STORE_GITLAB_PROJECT_ID,
-        branch=branch_,
-        cache_path=config.STORE_GITLAB_CACHE_PATH,
+        parallel_jobs=config.PARALLEL_JOBS,
+        cache_dir=config.STORE_GITLAB_CACHE_PATH,
+        frozen=frozen,
     )
 
 

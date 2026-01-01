@@ -939,7 +939,7 @@ requires-dist = [
     { name = "python-gitlab", specifier = ">=6.0.0" },
     { name = "requests", specifier = ">=2.32.4" },
     { name = "sentry-sdk", specifier = ">=2.32.0" },
-    { name = "sqlorm-py", url = "https://github.com/felnne/sqlorm/releases/download/v0.4.2/sqlorm_py-0.4.2-py3-none-any.whl" },
+    { name = "sqlorm-py", specifier = ">=0.4.1" },
 ]
 
 [package.metadata.requires-dev]
@@ -2315,17 +2315,15 @@ wheels = [
 
 [[package]]
 name = "sqlorm-py"
-version = "0.4.2"
-source = { url = "https://github.com/felnne/sqlorm/releases/download/v0.4.2/sqlorm_py-0.4.2-py3-none-any.whl" }
+version = "0.4.1"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "blinker" },
 ]
+sdist = { url = "https://files.pythonhosted.org/packages/14/96/8179979c76b979d2b4910bd95caf25a568edc1999df1e25426089ee44cc8/sqlorm_py-0.4.1.tar.gz", hash = "sha256:3c894162626ae810b8d5f92de78250b0349dbe0de0e3064657749b7c5a46eedd", size = 30371, upload-time = "2025-09-24T20:08:06.567Z" }
 wheels = [
-    { url = "https://github.com/felnne/sqlorm/releases/download/v0.4.2/sqlorm_py-0.4.2-py3-none-any.whl", hash = "sha256:a0724b7e91a8874ca8c42722cc7c3d887f63952a58e5e798ca317c8468b8e983" },
+    { url = "https://files.pythonhosted.org/packages/89/42/2fe87e10589072461811ca71a4801be5a590ed1cf9177b36bd0538ca8c95/sqlorm_py-0.4.1-py3-none-any.whl", hash = "sha256:b061924060817c2c0604801437a59afc24e7d5ca5b48c23da54c82aad4cbbc48", size = 37243, upload-time = "2025-09-24T20:08:05.12Z" },
 ]
-
-[package.metadata]
-requires-dist = [{ name = "blinker", specifier = ">=1.9.0" }]
 
 [[package]]
 name = "strict-rfc3339"

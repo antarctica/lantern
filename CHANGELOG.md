@@ -27,6 +27,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Support for running GitLab instance locally in development environments
 * Additional validation for MAGIC Discovery profile Req. 06 (released date presence)
 * Setup documentation for Plausible
+* Store frozen (read-only) mode for publishing workflows
 
 ### Fixed
 
@@ -44,6 +45,11 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Refactoring and improving interactive publishing workflow
 * Switching to dedicated GitLab bot user for GitLab Store and record publishing workflow (to post comments across projects)
 * Including GitLab endpoint/instance in determining GitLab local cache validity (in addition to branch/ref)
+* Splitting GitLab store and local cache into separate modules and stores (`GitLabStore` and `GitLabCachedStore`)
+* Simplifying Store's to remove local subsets and `populate()` methods
+* Using SQLite for GitLab store local cache for flexibility and performance
+* Improving, simplified and streamlining exporters
+* Using typing protocols for Store select methods to avoid duplicate inline type definitions
 
 ### Removed
 

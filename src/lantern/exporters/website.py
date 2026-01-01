@@ -1,6 +1,5 @@
 import json
 import logging
-from collections.abc import Callable
 
 from mypy_boto3_s3 import S3Client
 
@@ -10,6 +9,7 @@ from lantern.models.item.website.search import ItemWebsiteSearch
 from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
+from lantern.stores.base import SelectRecordsProtocol
 
 
 class WebsiteSearchExporter(ResourcesExporter):
@@ -39,10 +39,10 @@ class WebsiteSearchExporter(ResourcesExporter):
         logger: logging.Logger,
         meta: ExportMeta,
         s3: S3Client,
-        get_record: Callable[[str], RecordRevision],
+        select_records: SelectRecordsProtocol,
     ) -> None:
         """Initialise exporter."""
-        super().__init__(logger=logger, meta=meta, s3=s3, get_record=get_record)
+        super().__init__(logger=logger, meta=meta, s3=s3, select_records=select_records)
         self._export_path = self._meta.export_path / "-" / "public-website-search" / "items.json"
 
     @property
@@ -68,7 +68,7 @@ class WebsiteSearchExporter(ResourcesExporter):
 
         See https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/450/#note_142966 for initial criteria.
         """
-        records = [self._get_record(file_identifier) for file_identifier in self._selected_identifiers]
+        records = self._select_records()
         superseded = self._get_superseded_records(records)
         items = [
             ItemWebsiteSearch(
@@ -77,7 +77,7 @@ class WebsiteSearchExporter(ResourcesExporter):
                 source=self._meta.generator,
                 base_url=self._meta.base_url,
             )
-            for record in [self._get_record(file_identifier) for file_identifier in self._selected_identifiers]
+            for record in records
         ]
         filtered_items = [item for item in items if item.resource_id not in superseded and item.open_access]
         self._logger.debug(

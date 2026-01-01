@@ -1,9 +1,11 @@
 import json
 from datetime import UTC, datetime
 from pathlib import Path
+from unittest.mock import PropertyMock
 
 import pytest
 from freezegun.api import FrozenDateTimeFactory
+from pytest_mock import MockerFixture
 
 from lantern.config import Config
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
@@ -109,13 +111,15 @@ class TestSiteMetadata:
 
     @pytest.mark.parametrize(("has_store", "kwargs"), [(False, {"fallback_email": "y"}), (True, {})])
     def test_from_config_store(
-        self, fx_config: Config, fx_gitlab_store_cached: GitLabStore, has_store: bool, kwargs: dict
+        self, mocker: MockerFixture, fx_config: Config, fx_gitlab_store: GitLabStore, has_store: bool, kwargs: dict
     ):
         """Can create site metadata from config and optional store."""
-        store = fx_gitlab_store_cached if has_store else None
+        mocker.patch.object(type(fx_gitlab_store), "head_commit", new_callable=PropertyMock, return_value="x")
+        store = fx_gitlab_store if has_store else None
+
         result = SiteMeta.from_config_store(config=fx_config, store=store, **kwargs)
         assert isinstance(result, SiteMeta)
-        assert result.build_repo_ref == None if not has_store else fx_gitlab_store_cached.head_commit  # noqa: E711
+        assert result.build_repo_ref == None if not has_store else fx_gitlab_store.head_commit  # noqa: E711
         for key, value in kwargs.items():
             assert getattr(result, key) == value
 

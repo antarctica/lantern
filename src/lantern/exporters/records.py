@@ -1,8 +1,8 @@
 import logging
 from collections.abc import Callable
 from enum import Enum
+from typing import NamedTuple
 
-from boto3 import client as S3Client  # noqa: N812
 from joblib import Parallel, delayed
 from jwskate import Jwk
 from mypy_boto3_s3 import S3Client as S3ClientT
@@ -16,6 +16,8 @@ from lantern.lib.metadata_library.models.record.utils.admin import Administratio
 from lantern.log import init as init_logging
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
+from lantern.stores.base import Store, StoreInitProtocol
+from lantern.utils import init_s3_client
 
 
 class JobMethod(Enum):
@@ -25,29 +27,65 @@ class JobMethod(Enum):
     PUBLISH = "publish"
 
 
-def _job_s3(config: Config) -> S3ClientT:
+class Job(NamedTuple):
+    """Record/exporter for processing job."""
+
+    record: RecordRevision
+    exporter: Callable[..., ResourceExporter]
+
+
+_LOGGING_SINGLETON: logging.Logger | None = None
+_META_SINGLETON: ExportMeta | None = None
+_STORE_SINGLETON: Store | None = None
+_S3_SINGLETON: S3ClientT | None = None
+
+
+def _job_worker_logging(level: int) -> logging.Logger:
     """
-    Create AWS S3 client instance.
+    Logging per worker process.
 
-    S3 instances cannot be pickled and so the S3 instance passed to RecordsExporter class cannot be passed to parallel
-    processing jobs. This function exists to allow s3 mocking in tests.
+    Singleton used to avoid initialising logging for each job.
     """
-    return S3Client(
-        "s3",
-        aws_access_key_id=config.AWS_ACCESS_ID,
-        aws_secret_access_key=config.AWS_ACCESS_SECRET,
-        region_name="eu-west-1",
-    )
+    global _LOGGING_SINGLETON
+    if _LOGGING_SINGLETON is None:
+        init_logging(level)
+        _LOGGING_SINGLETON = logging.getLogger("app")
+    return _LOGGING_SINGLETON
 
 
-def _job(
-    logging_level: int,
+def _job_worker_s3(config: Config) -> S3ClientT:
+    """
+    AWS S3 client per worker process.
+
+    Singleton used to avoid initialising store for each job as S3 clients cannot be pickled.
+    """
+    global _S3_SINGLETON
+    if _S3_SINGLETON is None:
+        _S3_SINGLETON = init_s3_client(config=config)
+    return _S3_SINGLETON
+
+
+def _job_worker_store(logger: logging.Logger, config: Config, store_init: StoreInitProtocol) -> Store:
+    """
+    Store per worker process.
+
+    Singleton used to avoid initialising store for each job as some stores cannot be pickled.
+    Frozen stores used to prevent checking store is up to date and/or modifying records.
+    """
+    global _STORE_SINGLETON
+    if _STORE_SINGLETON is None:
+        prefer_frozen = True
+        _STORE_SINGLETON = store_init(logger, config, prefer_frozen)
+    return _STORE_SINGLETON
+
+
+def _run_job(
     config: Config,
     meta: ExportMeta,
     admin_meta_keys_json: dict[str, str],
+    store_init: StoreInitProtocol,
     exporter: Callable[..., ResourceExporter],
     record: RecordRevision,
-    get_record: Callable[[str], RecordRevision],
     method: JobMethod,
 ) -> None:
     """
@@ -57,17 +95,18 @@ def _job(
 
     Standalone function for use in parallel processing.
     """
-    init_logging(logging_level)  # each process needs logging initialising
-    logger = logging.getLogger("app")
-    s3 = _job_s3(config=config)
+    logger = _job_worker_logging(config.LOG_LEVEL)
+    s3 = _job_worker_s3(config=config)
+    store = _job_worker_store(logger=logger, config=config, store_init=store_init)
+    select_record = store.select_one
 
     admin_meta_keys = {key: Jwk(value) for key, value in admin_meta_keys_json.items()}
-    meta.admin_meta_keys = AdministrationKeys(**admin_meta_keys) if admin_meta_keys else None  # type: ignore[missing-argument]
+    meta.admin_meta_keys = AdministrationKeys(**admin_meta_keys) if admin_meta_keys else None
 
     if exporter == HtmlAliasesExporter:
         exporter_ = HtmlAliasesExporter(logger=logger, meta=meta, s3=s3, record=record)
     elif exporter == HtmlExporter:
-        exporter_ = HtmlExporter(logger=logger, meta=meta, s3=s3, record=record, get_record=get_record)
+        exporter_ = HtmlExporter(logger=logger, meta=meta, s3=s3, record=record, select_record=select_record)
     else:
         exporter_ = exporter(logger=logger, meta=meta, s3=s3, record=record)
 
@@ -84,7 +123,7 @@ class RecordsExporter(Exporter):
 
     Records are processed in parallel where meta.parallel_jobs != 1.
 
-    Config class needed for S3 client creation in parallel jobs.
+    Config class and Store init callable needed for objects that cannot be passed into parallel jobs.
     """
 
     def __init__(
@@ -93,64 +132,60 @@ class RecordsExporter(Exporter):
         config: Config,
         meta: ExportMeta,
         s3: S3ClientT,
-        get_record: Callable[[str], RecordRevision],
+        init_store: StoreInitProtocol,
+        selected_identifiers: set[str] | None = None,
     ) -> None:
         """Initialise exporter."""
         super().__init__(logger=logger, meta=meta, s3=s3)
         self._config = config
         self._parallel_jobs = meta.parallel_jobs
-        self._selected_identifiers: set[str] = set()
-        self._get_record = get_record
+        self._selected_identifiers: set[str] = selected_identifiers or set()
+        self._init_store = init_store
 
-    @property
-    def selected_identifiers(self) -> set[str]:
-        """Selected file identifiers."""
-        return self._selected_identifiers
+    def _generate(self) -> list[Job]:
+        """
+        Generate parallel processing jobs for exporting or publishing all/selected records.
 
-    @selected_identifiers.setter
-    def selected_identifiers(self, identifiers: set[str]) -> None:
-        """Selected file identifiers."""
-        self._selected_identifiers = identifiers
+        Jobs = all/selected records * each record exporter class.
+        """
+        store_frozen = True
+        store = self._init_store(self._logger, self._config, store_frozen)
+        parallel_classes = [HtmlExporter, HtmlAliasesExporter, JsonExporter, IsoXmlExporter, IsoXmlHtmlExporter]
+
+        jobs: list[Job] = []
+        for record in store.select(self._selected_identifiers):
+            jobs.extend([Job(record=record, exporter=cls) for cls in parallel_classes])
+        return jobs
 
     def _run(self, method: JobMethod) -> None:
         """
-        Generate parallel processing jobs for exporting or publishing selected records.
-
-        Jobs are created for each record exporter class for each selected record.
+        Execute parallel processing jobs for exporting or publishing selected records.
 
         To debug, comment out Parallel loop and manually call _job() before with a selected job then return early. E.g:
         ```
-        _job(
-            self._logger.level, self._config, self._meta, admin_meta_keys_json,
-            jobs[0][0], jobs[0][1], self._get_record, method,
+        _run_job(
+            self._config, self._meta, admin_meta_keys_json, jobs[0].exporter, jobs[0].record, method,
         )
         return None
-        Parallel(n_jobs=self._parallel_jobs)(...
+        Parallel(n_jobs=self._parallel_jobs)(...)
         ```
-        jobs[15] = 30825673-6276-4e5a-8a97-f97f2094cd25 (complete product, html exporter)
+        jobs[15] = 30825673-6276-4e5a-8a97-f97f2094cd25 (complete product, HTML exporter)
 
         JSON Web Keys in `ExportMeta.admin_meta_keys` for accessing administrative metadata cannot be pickled due to
-        their underlying cryptography keys. Keys are encoded as JSON and reloaded in the job handler as a work around.
+        their underlying cryptography keys. Keys are encoded as JSON and reloaded in the job handler as a workaround.
         """
-        jobs = []
-        parallel_classes = [HtmlExporter, HtmlAliasesExporter, JsonExporter, IsoXmlExporter, IsoXmlHtmlExporter]
-        for file_identifier in sorted(self._selected_identifiers):
-            record = self._get_record(file_identifier)
-            jobs.extend([(cls, record) for cls in parallel_classes])
-
         admin_meta_keys_json = self._meta.admin_meta_keys.dumps_json()  # ty: ignore[possibly-missing-attribute]
         self._meta.admin_meta_keys = None
 
-        # where job[0] is an exporter class and job[1] a record
+        jobs = self._generate()
         Parallel(n_jobs=self._parallel_jobs)(
-            delayed(_job)(
-                self._logger.level,
+            delayed(_run_job)(
                 self._config,
                 self._meta,
                 admin_meta_keys_json,
-                job[0],
-                job[1],
-                self._get_record,
+                self._init_store,
+                job.exporter,
+                job.record,
                 method,
             )
             for job in jobs

@@ -1,5 +1,4 @@
 import json
-from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, date, timedelta
 from datetime import datetime as DateTime  # noqa: N812
@@ -29,6 +28,7 @@ from lantern.models.item.base.utils import md_as_html
 from lantern.models.item.catalogue.enums import ItemSuperType, ResourceTypeIcon
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
+from lantern.stores.base import SelectRecordProtocol
 
 TFormattedDate = TypeVar("TFormattedDate", bound="FormattedDate")
 
@@ -292,18 +292,18 @@ class Aggregations:
         self,
         admin_meta_keys: AdministrationKeys | None,
         aggregations: RecordAggregations,
-        get_record: Callable[[str], RecordRevision],
+        select_record: SelectRecordProtocol,
     ) -> None:
         self._admin_keys = admin_meta_keys
         self._aggregations = aggregations
-        self._summaries = self._generate_summaries(get_record)
+        self._summaries = self._generate_summaries(select_record)
 
-    def _generate_summaries(self, get_record: Callable[[str], RecordRevision]) -> dict[str, ItemCatalogueSummary]:
+    def _generate_summaries(self, select_record: SelectRecordProtocol) -> dict[str, ItemCatalogueSummary]:
         """Generate item summaries for aggregations indexed by resource identifier."""
         summaries = {}
         for aggregation in self._aggregations:
             identifier = aggregation.identifier.identifier
-            summaries[identifier] = ItemCatalogueSummary(get_record(identifier), admin_meta_keys=self._admin_keys)
+            summaries[identifier] = ItemCatalogueSummary(select_record(identifier), admin_meta_keys=self._admin_keys)
         return summaries
 
     def __len__(self) -> int:

@@ -1,5 +1,4 @@
 import logging
-from collections.abc import Callable
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import ClassVar
@@ -12,6 +11,8 @@ from pytest_mock import MockerFixture
 from lantern.exporters.site import SiteExporter, SiteIndexExporter, SitePagesExporter, SiteResourcesExporter
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
+from lantern.stores.base import SelectRecordsProtocol
+from tests.conftest import _init_fake_store
 
 
 class TestSiteIndexExporter:
@@ -21,7 +22,7 @@ class TestSiteIndexExporter:
         self,
         mocker: MockerFixture,
         fx_logger: logging.Logger,
-        fx_get_record: Callable[[str], RecordRevision],
+        fx_select_records: SelectRecordsProtocol,
     ):
         """Can create an Exporter."""
         with TemporaryDirectory() as tmp_path:
@@ -31,7 +32,7 @@ class TestSiteIndexExporter:
         type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
         meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
-        exporter = SiteIndexExporter(meta=meta, s3=s3_client, logger=fx_logger, get_record=fx_get_record)
+        exporter = SiteIndexExporter(meta=meta, s3=s3_client, logger=fx_logger, select_records=fx_select_records)
 
         assert isinstance(exporter, SiteIndexExporter)
         assert exporter.name == "Site Index"
@@ -275,9 +276,7 @@ class TestSiteResourcesExporter:
 class TestSiteExporter:
     """Test site index exporter."""
 
-    def test_init(
-        self, mocker: MockerFixture, fx_logger: logging.Logger, fx_get_record: Callable[[str], RecordRevision]
-    ):
+    def test_init(self, mocker: MockerFixture, fx_logger: logging.Logger):
         """Can create an Exporter."""
         with TemporaryDirectory() as tmp_path:
             output_path = Path(tmp_path)
@@ -286,7 +285,14 @@ class TestSiteExporter:
         type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
         meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
-        exporter = SiteExporter(config=mock_config, meta=meta, s3=s3_client, logger=fx_logger, get_record=fx_get_record)
+        exporter = SiteExporter(
+            config=mock_config,
+            meta=meta,
+            s3=s3_client,
+            logger=fx_logger,
+            init_store=_init_fake_store,
+            selected_identifiers=set(),
+        )
 
         assert isinstance(exporter, SiteExporter)
         assert exporter.name == "Site"
@@ -333,26 +339,10 @@ class TestSiteExporter:
         result = fx_exporter_site._s3_client.list_objects(Bucket=fx_s3_bucket_name)
         assert "contents" not in result
 
-    def test_select(self, fx_exporter_site: SiteExporter, fx_revision_model_min: RecordRevision):
-        """Can select file_identifiers in sub-exporters."""
-        expected = {fx_revision_model_min.file_revision}
-        fx_exporter_site.select(expected)
-
-        assert fx_exporter_site._records_exporter.selected_identifiers == expected
-        assert fx_exporter_site._index_exporter.selected_identifiers == expected
-        assert fx_exporter_site._waf_exporter.selected_identifiers == expected
-        assert fx_exporter_site._website_exporter.selected_identifiers == expected
-
-        assert len(fx_exporter_site._records_exporter.selected_identifiers) > 0
-        assert len(fx_exporter_site._index_exporter.selected_identifiers) > 0
-        assert len(fx_exporter_site._waf_exporter.selected_identifiers) > 0
-        assert len(fx_exporter_site._website_exporter.selected_identifiers) > 0
-
-    def test_export(self, fx_exporter_site: SiteExporter, fx_revision_model_min: RecordRevision):
+    def test_export(self, fx_exporter_site: SiteExporter):
         """Can export all site components to local files."""
-        record = fx_revision_model_min
+        record = fx_exporter_site._store.select()[0]
         site_path = fx_exporter_site._meta.export_path
-        fx_exporter_site.select({record.file_revision})
         expected = [
             site_path.joinpath("favicon.ico"),
             site_path.joinpath("404.html"),
@@ -377,8 +367,6 @@ class TestSiteExporter:
 
         As a guard against `lantern.models.site.SiteMeta.from_config_store` setting title to an empty string.
         """
-        record = fx_revision_model_min
-        fx_exporter_site.select({record.file_revision})
         fx_exporter_site.export()
 
         result = list(fx_exporter_site._meta.export_path.glob("**/*.html"))
@@ -389,21 +377,14 @@ class TestSiteExporter:
                 continue
             assert html.head.title.string != " | BAS Data Catalogue"
 
-    def test_publish(
-        self,
-        mocker: MockerFixture,
-        fx_s3_bucket_name: str,
-        fx_exporter_site: SiteExporter,
-        fx_revision_model_min: RecordRevision,
-    ):
+    def test_publish(self, fx_s3_bucket_name: str, fx_exporter_site: SiteExporter):
         """
         Can publish site index to S3 or external services.
 
         Skips public website search publishing.
         """
         s3 = fx_exporter_site._index_exporter._s3_utils._s3
-        record = fx_revision_model_min
-        fx_exporter_site.select({record.file_revision})
+        record = fx_exporter_site._store.select()[0]
         expected = [
             "favicon.ico",
             "404.html",

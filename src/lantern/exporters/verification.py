@@ -1,6 +1,5 @@
 import json
 import logging
-from collections.abc import Callable
 from datetime import UTC, datetime, timedelta
 from typing import Final, cast
 
@@ -14,12 +13,12 @@ from requests import Response
 from lantern.exporters.base import ResourcesExporter, get_jinja_env
 from lantern.log import init as init_logging
 from lantern.models.record.const import CATALOGUE_NAMESPACE
-from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta, SiteMeta
 from lantern.models.verification.elements import VerificationRecord
 from lantern.models.verification.enums import VerificationResult, VerificationType
 from lantern.models.verification.jobs import VerificationJob
 from lantern.models.verification.types import VerificationContext
+from lantern.stores.base import SelectRecordsProtocol
 
 
 def _req_url(logger: logging.Logger, job: VerificationJob, params: dict | None = None) -> Response:
@@ -298,13 +297,14 @@ class VerificationExporter(ResourcesExporter):
         logger: logging.Logger,
         meta: ExportMeta,
         s3: S3Client,
-        get_record: Callable[[str], RecordRevision],
         context: VerificationContext,
+        select_records: SelectRecordsProtocol,
+        selected_identifiers: set[str] | None = None,
     ) -> None:
         """Initialise exporter."""
-        super().__init__(logger=logger, meta=meta, s3=s3, get_record=get_record)
-        self._get_record = get_record
+        super().__init__(logger=logger, meta=meta, s3=s3, select_records=select_records)
         self._context = context
+        self._selected_identifiers: set[str] = selected_identifiers or set()
         self._jobs: list[VerificationJob] = []
         self._export_path = self._meta.export_path / "-" / "verification"
 
@@ -346,7 +346,7 @@ class VerificationExporter(ResourcesExporter):
     @property
     def _record_jobs(self) -> list[VerificationJob]:
         """Generate verification jobs for selected records."""
-        records = [self._get_record(file_identifier) for file_identifier in self._selected_identifiers]
+        records = self._select_records(self._selected_identifiers)
         jobs = [job for record in records for job in VerificationRecord(record).jobs(context=self._context)]
 
         # Skip checks that can't run based on BASE_URL

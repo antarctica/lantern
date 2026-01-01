@@ -46,7 +46,7 @@ from lantern.models.item.catalogue.elements import (
 )
 from lantern.models.item.catalogue.enums import ItemSuperType, ResourceTypeIcon
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
-from tests.conftest import _admin_meta_keys, _get_record
+from tests.conftest import _admin_meta_keys, _select_record
 
 
 class TestFormattedDate:
@@ -99,11 +99,11 @@ class TestAggregations:
             association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
             initiative_type=AggregationInitiativeCode.COLLECTION,
         )
-        expected_record = _get_record("x")
+        expected_record = _select_record("x")
         record_aggregations = RecordAggregations([expected_aggregation])
 
         aggregations = Aggregations(
-            admin_meta_keys=fx_admin_meta_keys, aggregations=record_aggregations, get_record=_get_record
+            admin_meta_keys=fx_admin_meta_keys, aggregations=record_aggregations, select_record=_select_record
         )
 
         assert isinstance(aggregations, Aggregations)
@@ -123,7 +123,7 @@ class TestAggregations:
             ]
         )
         aggregations = Aggregations(
-            admin_meta_keys=fx_admin_meta_keys, aggregations=record_aggregations, get_record=_get_record
+            admin_meta_keys=fx_admin_meta_keys, aggregations=record_aggregations, select_record=_select_record
         )
 
         assert len(aggregations.peer_collections) > 0
@@ -140,7 +140,7 @@ class TestAggregations:
             ]
         )
         aggregations = Aggregations(
-            admin_meta_keys=fx_admin_meta_keys, aggregations=record_aggregations, get_record=_get_record
+            admin_meta_keys=fx_admin_meta_keys, aggregations=record_aggregations, select_record=_select_record
         )
 
         assert len(aggregations.peer_projects) > 0
@@ -166,7 +166,7 @@ class TestAggregations:
             ]
         )
         aggregations = Aggregations(
-            admin_meta_keys=fx_admin_meta_keys, aggregations=record_aggregations, get_record=_get_record
+            admin_meta_keys=fx_admin_meta_keys, aggregations=record_aggregations, select_record=_select_record
         )
 
         assert len(aggregations.peer_cross_reference) == 1
@@ -182,7 +182,7 @@ class TestAggregations:
             ]
         )
         aggregations = Aggregations(
-            admin_meta_keys=fx_admin_meta_keys, aggregations=record_aggregations, get_record=_get_record
+            admin_meta_keys=fx_admin_meta_keys, aggregations=record_aggregations, select_record=_select_record
         )
 
         assert len(aggregations.peer_supersedes) > 0
@@ -199,7 +199,7 @@ class TestAggregations:
             ]
         )
         aggregations = Aggregations(
-            admin_meta_keys=fx_admin_meta_keys, aggregations=record_aggregations, get_record=_get_record
+            admin_meta_keys=fx_admin_meta_keys, aggregations=record_aggregations, select_record=_select_record
         )
 
         assert aggregations.peer_opposite_side is not None
@@ -216,7 +216,7 @@ class TestAggregations:
             ]
         )
         aggregations = Aggregations(
-            admin_meta_keys=fx_admin_meta_keys, aggregations=record_aggregations, get_record=_get_record
+            admin_meta_keys=fx_admin_meta_keys, aggregations=record_aggregations, select_record=_select_record
         )
 
         assert len(aggregations.parent_collections) > 0
@@ -233,7 +233,7 @@ class TestAggregations:
             ]
         )
         aggregations = Aggregations(
-            admin_meta_keys=fx_admin_meta_keys, aggregations=record_aggregations, get_record=_get_record
+            admin_meta_keys=fx_admin_meta_keys, aggregations=record_aggregations, select_record=_select_record
         )
 
         assert len(aggregations.parent_projects) > 0
@@ -255,7 +255,7 @@ class TestAggregations:
             ]
         )
         aggregations = Aggregations(
-            admin_meta_keys=fx_admin_meta_keys, aggregations=record_aggregations, get_record=_get_record
+            admin_meta_keys=fx_admin_meta_keys, aggregations=record_aggregations, select_record=_select_record
         )
 
         assert len(aggregations.child_items) == len(record_aggregations)
@@ -272,7 +272,7 @@ class TestAggregations:
             ]
         )
         aggregations = Aggregations(
-            admin_meta_keys=fx_admin_meta_keys, aggregations=record_aggregations, get_record=_get_record
+            admin_meta_keys=fx_admin_meta_keys, aggregations=record_aggregations, select_record=_select_record
         )
 
         assert aggregations.parent_printed_map is not None
@@ -669,7 +669,7 @@ class TestPageSummary:
                             )
                         ]
                     ),
-                    get_record=_get_record,
+                    select_record=_select_record,
                 ),
                 False,
                 "x",
@@ -679,7 +679,9 @@ class TestPageSummary:
                 None,
                 None,
                 Aggregations(
-                    admin_meta_keys=_admin_meta_keys(), aggregations=RecordAggregations([]), get_record=_get_record
+                    admin_meta_keys=_admin_meta_keys(),
+                    aggregations=RecordAggregations([]),
+                    select_record=_select_record,
                 ),
                 True,
                 None,
@@ -699,7 +701,7 @@ class TestPageSummary:
                             )
                         ]
                     ),
-                    get_record=_get_record,
+                    select_record=_select_record,
                 ),
                 False,
                 "x",
@@ -770,7 +772,7 @@ class TestPageSummary:
                             ),
                         ]
                     ),
-                    get_record=_get_record,
+                    select_record=_select_record,
                 ),
                 True,
             ),
@@ -791,7 +793,7 @@ class TestPageSummary:
                             )
                         ]
                     ),
-                    get_record=_get_record,
+                    select_record=_select_record,
                 ),
                 True,
             ),
@@ -812,7 +814,7 @@ class TestPageSummary:
                             )
                         ]
                     ),
-                    get_record=_get_record,
+                    select_record=_select_record,
                 ),
                 True,
             ),
@@ -823,7 +825,9 @@ class TestPageSummary:
                 None,
                 False,
                 Aggregations(
-                    admin_meta_keys=_admin_meta_keys(), aggregations=RecordAggregations([]), get_record=_get_record
+                    admin_meta_keys=_admin_meta_keys(),
+                    aggregations=RecordAggregations([]),
+                    select_record=_select_record,
                 ),
                 False,
             ),
@@ -834,7 +838,9 @@ class TestPageSummary:
                 "x",
                 False,
                 Aggregations(
-                    admin_meta_keys=_admin_meta_keys(), aggregations=RecordAggregations([]), get_record=_get_record
+                    admin_meta_keys=_admin_meta_keys(),
+                    aggregations=RecordAggregations([]),
+                    select_record=_select_record,
                 ),
                 False,
             ),
@@ -845,7 +851,9 @@ class TestPageSummary:
                 "x",
                 True,
                 Aggregations(
-                    admin_meta_keys=_admin_meta_keys(), aggregations=RecordAggregations([]), get_record=_get_record
+                    admin_meta_keys=_admin_meta_keys(),
+                    aggregations=RecordAggregations([]),
+                    select_record=_select_record,
                 ),
                 False,
             ),
@@ -925,7 +933,7 @@ class TestPageSummary:
             revision_date=revision,
             restricted=False,
             aggregations=Aggregations(
-                admin_meta_keys=fx_admin_meta_keys, aggregations=RecordAggregations([]), get_record=_get_record
+                admin_meta_keys=fx_admin_meta_keys, aggregations=RecordAggregations([]), select_record=_select_record
             ),
             citation=None,
             description="x",
@@ -956,7 +964,7 @@ class TestPageSummary:
             aggregations=Aggregations(
                 admin_meta_keys=fx_admin_meta_keys,
                 aggregations=RecordAggregations(aggregations),
-                get_record=_get_record,
+                select_record=_select_record,
             ),
             restricted=False,
             edition=None,

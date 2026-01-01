@@ -1,6 +1,5 @@
 import json
 import logging
-from collections.abc import Callable
 from datetime import datetime, timedelta
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -29,6 +28,7 @@ from lantern.models.site import ExportMeta, SiteMeta
 from lantern.models.verification.enums import VerificationResult, VerificationType
 from lantern.models.verification.jobs import VerificationJob
 from lantern.models.verification.types import VerificationContext
+from lantern.stores.base import SelectRecordsProtocol
 
 
 class TestVerificationExporterChecks:
@@ -437,9 +437,7 @@ class TestVerificationReport:
 class TestVerificationExporter:
     """Test Verification exporter."""
 
-    def test_init(
-        self, mocker: MockerFixture, fx_logger: logging.Logger, fx_get_record: Callable[[str], RecordRevision]
-    ):
+    def test_init(self, mocker: MockerFixture, fx_logger: logging.Logger, fx_select_records: SelectRecordsProtocol):
         """Can instantiate exporter."""
         with TemporaryDirectory() as tmp_path:
             output_path = Path(tmp_path)
@@ -454,7 +452,7 @@ class TestVerificationExporter:
         }
 
         exporter = VerificationExporter(
-            logger=fx_logger, meta=meta, s3=s3_client, get_record=fx_get_record, context=context
+            logger=fx_logger, meta=meta, s3=s3_client, select_records=fx_select_records, context=context
         )
 
         assert isinstance(exporter, VerificationExporter)
@@ -497,7 +495,7 @@ class TestVerificationExporter:
         fx_revision_model_min.identification.identifiers.append(
             Identifier(identifier="x/x", href=f"https://{CATALOGUE_NAMESPACE}/x/x", namespace=ALIAS_NAMESPACE)
         )
-        fx_exporter_verify_sel._get_record = mocker.MagicMock(return_value=fx_revision_model_min)
+        fx_exporter_verify_sel._select_records = mocker.MagicMock(return_value=[fx_revision_model_min])
 
         results = fx_exporter_verify_sel._record_jobs
         alias_job = next((result for result in results if result.type == VerificationType.ALIAS_REDIRECTS), None)
@@ -512,7 +510,7 @@ class TestVerificationExporter:
         fx_revision_model_min.identification.identifiers.append(
             Identifier(identifier="x/x", href="https://doi.org/x/x", namespace="doi")
         )
-        fx_exporter_verify_sel._get_record = mocker.MagicMock(return_value=fx_revision_model_min)
+        fx_exporter_verify_sel._select_records = mocker.MagicMock(return_value=[fx_revision_model_min])
 
         results = fx_exporter_verify_sel._record_jobs
         alias_job = next((result for result in results if result.type == VerificationType.DOI_REDIRECTS), None)
@@ -527,7 +525,7 @@ class TestVerificationExporter:
         fx_revision_model_min.identification.identifiers.append(
             Identifier(identifier="x/x", href="https://doi.org/x/x", namespace="doi")
         )
-        fx_exporter_verify_sel._get_record = mocker.MagicMock(return_value=fx_revision_model_min)
+        fx_exporter_verify_sel._select_records = mocker.MagicMock(return_value=[fx_revision_model_min])
 
         results = fx_exporter_verify_sel._record_jobs
         alias_job = next((result for result in results if result.type == VerificationType.DOI_REDIRECTS), None)

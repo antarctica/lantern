@@ -11,16 +11,16 @@ from lantern.utils import init_gitlab_store, init_s3_client
 class TestUtils:
     """Test app utils not tested elsewhere."""
 
-    def test_gitlab_store(self, fx_logger: logging.Logger, fx_config: Config):
+    @pytest.mark.parametrize("prefer_frozen", [True, False])
+    def test_gitlab_store(self, fx_logger: logging.Logger, fx_config: Config, prefer_frozen: bool) -> None:
         """
         Can init GitLab store.
 
         Only called in dev-tasks so not considered as run in coverage.
         """
-        store = init_gitlab_store(logger=fx_logger, config=fx_config)
+        store = init_gitlab_store(logger=fx_logger, config=fx_config, frozen=prefer_frozen)
         assert isinstance(store, GitLabStore)
 
-    @pytest.mark.cov()
     def test_s3_client(self, fx_logger: logging.Logger, fx_config: Config):
         """
         Can init S3 client.

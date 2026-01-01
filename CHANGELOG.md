@@ -35,6 +35,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Records repository bootstrap development task includes missing XML record files
 * Disabling lineage statement in container item types
 * Missing datestamp update in the clone record development task
+* Correcting names for `STORE_GITLAB_CACHE_PATH`, `STORE_GITLAB_ENDPOINT` and `STORE_GITLAB_PROJECT_ID` config options
 
 ### Changed
 

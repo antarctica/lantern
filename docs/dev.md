@@ -597,7 +597,7 @@ record.
 
 #### Test GitLab local cache
 
-To aid in debugging and testing a [GitLab local cache](/docs/stores.md#gitlab-local-cache), a backing SQLite database
+To aid in debugging and testing a [GitLab local cache](/docs/stores.md#gitlab-cached-store), a backing SQLite database
 representing a minimally populated cache is available from `tests/resources/stores/gitlab_cache/cache.db`.
 
 This database is populated independently of the `GitLabLocalCache`'s implementation, but uses an aligned structure.

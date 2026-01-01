@@ -1,5 +1,4 @@
 import json
-from collections.abc import Callable
 from typing import Any
 
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
@@ -28,6 +27,7 @@ from lantern.models.item.catalogue.tabs import (
 )
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import SiteMeta
+from lantern.stores.base import SelectRecordProtocol
 
 
 class ItemCatalogue(ItemBase):
@@ -46,19 +46,20 @@ class ItemCatalogue(ItemBase):
     ISO 19115:2003 / 19115-2:2009 standards). See `docs/data_model.md#catalogue-item-limitations` for more information.
     """
 
+    # noinspection PyUnusedLocal
     def __init__(
         self,
         site_meta: SiteMeta,
         record: RecordRevision,
         admin_meta_keys: AdministrationKeys,
         trusted_context: bool,
-        get_record: Callable[[str], RecordRevision],
+        select_record: SelectRecordProtocol,
         **kwargs: Any,
     ) -> None:
         super().__init__(record=record, admin_keys=admin_meta_keys)
         self._meta = site_meta
         self._trusted_context = trusted_context
-        self._get_record = get_record
+        self._select_record = select_record
 
         if not isinstance(self._admin_keys, AdministrationKeys):
             msg = "administration metadata keys must be provided"
@@ -79,7 +80,7 @@ class ItemCatalogue(ItemBase):
     def _aggregations(self) -> Aggregations:
         """Aggregations."""
         return Aggregations(
-            admin_meta_keys=self._admin_keys, aggregations=self.aggregations, get_record=self._get_record
+            admin_meta_keys=self._admin_keys, aggregations=self.aggregations, select_record=self._select_record
         )
 
     @property

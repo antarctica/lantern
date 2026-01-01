@@ -17,7 +17,7 @@ from lantern.log import init as _init_logging
 from lantern.models.record.record import Record as CatalogueRecord
 from lantern.models.record.record import Record as RecordCatalogue
 from lantern.models.record.revision import RecordRevision
-from lantern.stores.gitlab import GitLabStore
+from lantern.stores.gitlab_cache import GitLabCachedStore
 from lantern.utils import init_gitlab_store
 
 
@@ -29,7 +29,7 @@ def init_logging(config: Config) -> logging.Logger:
     return logger
 
 
-def init_store(logger: logging.Logger, config: Config, branch: str | None = None) -> GitLabStore:
+def init_store(logger: logging.Logger, config: Config, branch: str | None = None) -> GitLabCachedStore:
     """Initialise store."""
     return init_gitlab_store(logger=logger, config=config, branch=branch)
 
@@ -55,7 +55,7 @@ def init_admin_keys(config: Config) -> AdministrationKeys:
     )
 
 
-def init() -> tuple[logging.Logger, Config, GitLabStore, S3Client, AdministrationKeys]:  # ty: ignore[invalid-type-form]
+def init() -> tuple[logging.Logger, Config, GitLabCachedStore, S3Client, AdministrationKeys]:  # ty: ignore[invalid-type-form]
     """Initialise common objects."""
     config = Config()
     logger = init_logging(config)
@@ -88,7 +88,7 @@ def parse_records(
     validate_base: bool = True,
     validate_profiles: bool = True,
     validate_catalogue: bool = False,
-) -> list[tuple[Record, Path]]:
+) -> list[tuple[Record | CatalogueRecord, Path]]:
     """
     Try to create Records from record configurations within a directory.
 
@@ -103,7 +103,7 @@ def parse_records(
     """
     # noinspection PyPep8Naming
     RecordClass = Record if not validate_catalogue else CatalogueRecord  # noqa: N806
-    records: list[tuple[Record, Path]] = []
+    records: list[tuple[Record | CatalogueRecord, Path]] = []
 
     for config_path in _parse_configs(search_path, glob_pattern=glob_pattern):
         config, config_path = config_path
@@ -166,36 +166,24 @@ def _process_record_selection(identifier: str) -> str:
     raise ValueError(msg) from None
 
 
-def process_record_selections(logger: logging.Logger, identifiers: list[str]) -> list[str]:
+def process_record_selections(logger: logging.Logger, identifiers: list[str]) -> set[str]:
     """
     Process identifiers into record file identifiers.
 
     Identifiers can be selections of one or more identifiers separated by commas and/or spaces.
     Identifiers within selections that cannot be parsed are skipped with an error.
     """
-    file_identifiers = []
+    file_identifiers = set()
     for selection in identifiers:
         # split identifiers by commas and/or spaces
         selections = re.split(r"[\s,]+", selection)
         for identifier in selections:
             try:
-                file_identifiers.append(_process_record_selection(identifier))
+                file_identifiers.add(_process_record_selection(identifier))
             except ValueError:
                 logger.warning(f"Could not process '{identifier}' as a file identifier, skipping.")
                 continue
     return file_identifiers
-
-
-def get_records(logger: logging.Logger, store: GitLabStore, file_identifiers: list[str]) -> list[RecordRevision]:
-    records = []
-    store.populate()
-    for file_identifier in file_identifiers:
-        record = store.get(file_identifier=file_identifier)
-        logger.info(
-            f"Loaded record: {record.file_identifier} ('{record.identification.title}' {record.hierarchy_level.value})"
-        )
-        records.append(record)
-    return records
 
 
 def dump_records(logger: logging.Logger, output_path: Path, records: Sequence[Record | RecordRevision]) -> None:
@@ -221,10 +209,10 @@ def clean_configs(
         logger.info(f"Removed processed file: '{input_files_indexed[file_identifier]}'.")
 
 
-def confirm_branch(logger: logging.Logger, store: GitLabStore, action: str) -> None:
-    """Confirm target branch."""
-    logger.info(f"{action} branch '{store.branch}'")
-    answers = inquirer.prompt([inquirer.Confirm(name="confirm", message="Correct branch?", default=True)])
+def confirm_source(logger: logging.Logger, store: GitLabCachedStore, action: str) -> None:
+    """Confirm store source."""
+    logger.info(f"{action} branch '{store._source.ref}' on '{store._project.http_url_to_repo}'")
+    answers = inquirer.prompt([inquirer.Confirm(name="confirm", message="Correct source?", default=True)])
     if not answers["confirm"]:
-        logger.info("Aborting. Set `STORE_GITLAB_BRANCH` in config to change branch")
+        logger.info("Aborting. Set `STORE_GITLAB_*` in config to change source.")
         sys.exit(1)

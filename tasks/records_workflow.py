@@ -8,7 +8,7 @@ from pathlib import Path
 
 import inquirer
 from mypy_boto3_s3 import S3Client
-from tasks._record_utils import get_records, init, init_store, parse_records
+from tasks._record_utils import init, init_store, parse_records
 from tasks.records_import import clean as import_clean
 from tasks.records_import import load as import_load
 from tasks.records_import import push as import_push
@@ -24,7 +24,10 @@ from lantern.lib.metadata_library.models.record.utils.admin import Administratio
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
 from lantern.models.verification.types import VerificationContext
-from lantern.stores.gitlab import CommitResults, GitLabStore
+from lantern.stores.base import Store
+from lantern.stores.gitlab import CommitResults
+from lantern.stores.gitlab_cache import GitLabCachedStore
+from lantern.utils import init_gitlab_store
 
 
 class OutputCommentItem:
@@ -77,7 +80,7 @@ class OutputComment:
         self,
         logger: logging.Logger,
         config: Config,
-        store: GitLabStore,
+        store: GitLabCachedStore,
         base_url: str,
         commit: CommitResults,
         merge_url: str | None,
@@ -97,8 +100,8 @@ class OutputComment:
     @property
     def _records(self) -> list[RecordRevision]:
         """New/updated records from the commit."""
-        identifiers = sorted(self._commit.new_identifiers + self._commit.updated_identifiers)
-        return get_records(logger=logging.getLogger(__name__), store=self._store, file_identifiers=identifiers)
+        identifiers = set(self._commit.new_identifiers + self._commit.updated_identifiers)
+        return self._store.select(file_identifiers=identifiers)
 
     @property
     def _items(self) -> list[OutputCommentItem]:
@@ -115,7 +118,7 @@ class OutputComment:
             "commit_url": f"{self._config.TEMPLATES_ITEM_VERSIONS_ENDPOINT}/-/commit/{self._commit.commit}",
             "merge_url": self._merge_url,
             "items": [item.data for item in self._items],
-        }
+        }  # ty:ignore[invalid-return-type]
 
     @property
     def _template(self) -> str:
@@ -145,7 +148,7 @@ _This comment was left automatically by the Lantern Experiment's [Interactive re
         if not self._issue_url:
             self._logger.warning("Cannot post comment, no issue URL set.")
 
-        match = re.match(r"https?://[^/]+/(.+?)/-/issues/(\d+)", self._issue_url)
+        match = re.match(r"https?://[^/]+/(.+?)/-/issues/(\d+)", self._issue_url)  # ty:ignore[no-matching-overload]
         if not match:
             msg = f"Invalid GitLab issue URL: {self._issue_url}"
             raise ValueError(msg) from None
@@ -194,8 +197,16 @@ def _changeset_branch(issue: str) -> str:
     return f"changeset/{branch_safe_ref}"
 
 
+def _init_store_adapter(logger: logging.Logger, config: Config | None, frozen: bool = False) -> Store:
+    """To resolve type errors."""
+    if config is None:
+        raise TypeError()
+
+    return init_gitlab_store(logger=logger, config=config, frozen=frozen)
+
+
 @_time_task(label="Zap ⚡️")
-def _zap(logger: logging.Logger, store: GitLabStore, admin_keys: AdministrationKeys, import_path: Path) -> None:
+def _zap(logger: logging.Logger, store: GitLabCachedStore, admin_keys: AdministrationKeys, import_path: Path) -> None:
     """
     Load and process Zap ⚡️ authored records (`zap-records` task).
 
@@ -211,16 +222,15 @@ def _zap(logger: logging.Logger, store: GitLabStore, admin_keys: AdministrationK
         logger.info("No Zap records to process, skipping.")
         return
 
-    store.populate()
     records.extend(zap_process_records(logger=logger, records=records, store=store, admin_keys=admin_keys))
     zap_dump_records(logger=logger, records=records, output_path=import_path)
-    zap_clean_input_path(input_record_paths=record_paths, processed_ids=[r.file_identifier for r in records])
+    zap_clean_input_path(input_record_paths=record_paths, processed_ids=[r.file_identifier for r in records])  # ty:ignore[invalid-argument-type]
 
 
 @_time_task(label="Changeset")
 def _changeset(
-    logger: logging.Logger, config: Config, store: GitLabStore, keys: AdministrationKeys, import_path: Path
-) -> tuple[GitLabStore, str | None]:
+    logger: logging.Logger, config: Config, store: GitLabCachedStore, keys: AdministrationKeys, import_path: Path
+) -> tuple[GitLabCachedStore, str | None]:
     """
     Create, or use an existing changeset, to relate a set of commits for some records based on a GitLab issue.
 
@@ -252,12 +262,14 @@ def _changeset(
     store._ensure_branch(branch)
     # recreate store to use changeset branch
     store = init_store(logger=logger, config=config, branch=branch)
-    logger.info(f"Using changeset branch: '{store.branch}'")
+    logger.info(f"Using changeset branch: '{store._source.ref}'")
     return store, issue
 
 
 @_time_task(label="Import")
-def _import(logger: logging.Logger, config: Config, store: GitLabStore, import_path: Path) -> CommitResults | None:
+def _import(
+    logger: logging.Logger, config: Config, store: GitLabCachedStore, import_path: Path
+) -> CommitResults | None:
     """Import records."""
     records = import_load(logger=logger, input_path=import_path)
     if len(records) == 0:
@@ -268,7 +280,7 @@ def _import(logger: logging.Logger, config: Config, store: GitLabStore, import_p
 
 
 @_time_task(label="Merge request")
-def _merge_request(logger: logging.Logger, store: GitLabStore, issue_href: str | None) -> str | None:
+def _merge_request(logger: logging.Logger, store: GitLabCachedStore, issue_href: str | None) -> str | None:
     """
     Ensure merge request exists for changeset if used.
 
@@ -279,19 +291,19 @@ def _merge_request(logger: logging.Logger, store: GitLabStore, issue_href: str |
         return None
 
     # check for existing MR
-    mr = store.project.mergerequests.list(state="opened", source_branch=store.branch)
+    mr = store._project.mergerequests.list(state="opened", source_branch=store._source.ref)
     if mr:
         logger.info("Merge request exists for changeset")
         return mr[0].web_url
 
     # create MR
     logger.info("Creating merge request for changeset")
-    mr = store.project.mergerequests.create(
+    mr = store._project.mergerequests.create(
         {
-            "source_branch": store.branch,
+            "source_branch": store._source.ref,
             "target_branch": "main",
-            "title": f"Records publishing changeset: {store.branch}",
-            "description": f"Created for records related to {issue_href}.\n\nCreated by the experimemntal MAGIC Lantern interactive records publishing workflow.",
+            "title": f"Records publishing changeset: {store._source.ref}",
+            "description": f"Created for records related to {issue_href}.\n\nCreated by the experimental MAGIC Lantern interactive records publishing workflow.",
         }
     )
     logger.info(f"Merge request created: {mr.web_url}")
@@ -299,20 +311,23 @@ def _merge_request(logger: logging.Logger, store: GitLabStore, issue_href: str |
 
 
 @_time_task(label="Build")
-def _build(logger: logging.Logger, config: Config, store: GitLabStore, s3: S3Client, identifiers: set[str]) -> None:
+def _build(
+    logger: logging.Logger, config: Config, store: GitLabCachedStore, s3: S3Client, identifiers: set[str]
+) -> None:
     """Build items for committed records."""
     meta = ExportMeta.from_config_store(
         config=config, store=store, build_repo_ref=store.head_commit if store.head_commit else "-"
     )
-    site = SiteExporter(config=config, meta=meta, logger=logger, s3=s3, get_record=store.get)
+    site = SiteExporter(
+        config=config, meta=meta, logger=logger, s3=s3, init_store=_init_store_adapter, selected_identifiers=identifiers
+    )
     logger.info(f"Publishing {len(identifiers)} records to {config.AWS_S3_BUCKET}.")
-    site.select(file_identifiers=identifiers)
     site.publish()
 
 
 @_time_task(label="Verify")
 def _verify(
-    logger: logging.Logger, config: Config, store: GitLabStore, s3: S3Client, base_url: str, identifiers: set[str]
+    logger: logging.Logger, config: Config, store: GitLabCachedStore, s3: S3Client, base_url: str, identifiers: set[str]
 ) -> None:
     """Verify items for committed records."""
     logger.info(f"Verifying {len(identifiers)} records.")
@@ -324,8 +339,9 @@ def _verify(
     meta = ExportMeta.from_config_store(
         config=config, store=store, build_repo_ref=store.head_commit if store.head_commit else "-"
     )
-    exporter = VerificationExporter(logger=logger, meta=meta, s3=s3, get_record=store.get, context=context)
-    exporter.selected_identifiers = identifiers
+    exporter = VerificationExporter(
+        logger=logger, meta=meta, s3=s3, context=context, select_records=store.select, selected_identifiers=identifiers
+    )
     exporter.run()
     exporter.export()
     logger.info(f"Verification complete, result: {exporter.report.data['pass_fail']}.")
@@ -336,7 +352,7 @@ def _verify(
 def _output(
     logger: logging.Logger,
     config: Config,
-    store: GitLabStore,
+    store: GitLabCachedStore,
     base_url: str,
     commit: CommitResults,
     merge_url: str | None,

@@ -1,6 +1,21 @@
+import logging
 from abc import ABC, abstractmethod
+from typing import Protocol
 
+from lantern.config import Config
 from lantern.models.record.revision import RecordRevision
+
+
+class StoreFrozenUnsupportedError(Exception):
+    """Raised when attempting to freeze an unsupported store."""
+
+    pass
+
+
+class StoreFrozenError(Exception):
+    """Raised when attempting to modify a frozen store."""
+
+    pass
 
 
 class RecordNotFoundError(Exception):
@@ -14,6 +29,17 @@ class RecordNotFoundError(Exception):
         return f"Record '{self.file_identifier}' not found."
 
 
+class RecordsNotFoundError(Exception):
+    """Raised when one or more records cannot be retrieved."""
+
+    def __init__(self, file_identifiers: set[str]) -> None:
+        self.file_identifiers = file_identifiers
+
+    def __str__(self) -> str:
+        """Exception string representation."""
+        return f"Records '{', '.join(self.file_identifiers)}' not found."
+
+
 class Store(ABC):
     """
     Base representation for a container of resources.
@@ -23,22 +49,45 @@ class Store(ABC):
     This class defines the abstract interface Stores must implement to manage Records and RecordSummaries.
     """
 
-    def __len__(self) -> int:
-        """Record count."""
-        return len(self.records)
-
     @property
     @abstractmethod
-    def records(self) -> list[RecordRevision]:
-        """All records."""
+    def frozen(self) -> bool:
+        """Whether store can be modified/updated."""
         ...
 
     @abstractmethod
-    def populate(self) -> None:
-        """Load records into store."""
+    def select(self, file_identifiers: set[str] | None = None) -> list[RecordRevision]:
+        """Return all records or raise a `RecordsNotFoundError` exception."""
         ...
 
     @abstractmethod
-    def get(self, file_identifier: str) -> RecordRevision:
-        """Return a specific record or raise a RecordNotFoundError."""
+    def select_one(self, file_identifier: str) -> RecordRevision:
+        """Return a specific record or raise a `RecordNotFoundError` exception."""
         ...
+
+
+class StoreInitProtocol(Protocol):
+    """
+    Callable protocol for initialising a Store.
+
+    Where a Store's constructor signature doesn't match this protocol, use a helper function such as
+    `lantern.utils.init_gitlab_store`.
+    """
+
+    def __call__(  # pragma: no branch  # noqa: D102
+        self, logger: logging.Logger, config: Config | None, frozen: bool = False
+    ) -> Store: ...
+
+
+class SelectRecordsProtocol(Protocol):
+    """Callable protocol for selecting records from Store."""
+
+    def __call__(  # pragma: no branch  # noqa: D102
+        self, file_identifiers: set[str] | None = None
+    ) -> list[RecordRevision]: ...
+
+
+class SelectRecordProtocol(Protocol):
+    """Callable protocol for selecting a record from Store."""
+
+    def __call__(self, file_identifier: str) -> RecordRevision: ...  # pragma: no branch  # noqa: D102

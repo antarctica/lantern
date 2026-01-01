@@ -10,7 +10,7 @@ from pytest_mock import MockerFixture
 
 from lantern.exporters.waf import WebAccessibleFolderExporter
 from lantern.models.site import ExportMeta
-from tests.conftest import _get_record_open
+from tests.conftest import _select_records_open
 
 
 class TestWebAccessibleFolderExporter:
@@ -25,7 +25,9 @@ class TestWebAccessibleFolderExporter:
         type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
         meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
-        exporter = WebAccessibleFolderExporter(meta=meta, s3=s3_client, logger=fx_logger, get_record=_get_record_open)
+        exporter = WebAccessibleFolderExporter(
+            meta=meta, s3=s3_client, logger=fx_logger, select_records=_select_records_open
+        )
 
         assert isinstance(exporter, WebAccessibleFolderExporter)
         assert exporter.name == "Web Accessible Folder"
@@ -33,8 +35,11 @@ class TestWebAccessibleFolderExporter:
     def test_dumps(self, fx_exporter_waf_sel: WebAccessibleFolderExporter):
         """Can dump WAF index."""
         html = BeautifulSoup(fx_exporter_waf_sel._dumps(), parser="html.parser", features="lxml")
-        for file_identifier in fx_exporter_waf_sel.selected_identifiers:
-            link = html.find("a", string=file_identifier)
+        records = fx_exporter_waf_sel._select_records()
+        assert len(records) > 0
+        for record in records:
+            # noinspection PyTypeChecker
+            link = html.find("a", string=record.file_identifier)
             assert link is not None
 
     def test_export(self, fx_exporter_waf_sel: WebAccessibleFolderExporter):

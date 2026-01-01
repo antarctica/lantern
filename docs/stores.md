@@ -7,13 +7,14 @@ database, file system or object store. Stores provide a consistent public interf
 
 All stores implement a [Common Interface](#store-classes) supporting:
 
-- accessing all loaded Records using the `store.records` list property
-- accessing a specific Record by file identifier using `store.get()`
+- accessing some or all available Records using the `store.select()`
+- accessing a specific Record by file identifier using `store.select_one()`
+- configuring a Store as [Frozen](#frozen-stores) (read-only)
 
-Stores MAY support additional functionality, such as writing new/updated Records back to a storage system.
+Stores MAY support additional functionality, such as persisting Records in a backing database or other system.
 
 > [!TIP]
-> Store `get()` methods SHOULD be used as [Exporter](/docs/architecture.md#exporters) record lookup callables.
+> Store `select_one()` methods SHOULD be used as [Exporter](/docs/architecture.md#exporters) record lookup callables.
 
 ## Stores configuration
 
@@ -39,74 +40,85 @@ See the [Infrastructure](/docs/infrastructure.md#exporters) docs for credentials
 All exporters inherit from the `lantern.stores.base.Store` abstract base class and MUST implement its minimal
 public interface to:
 
-- allow access to Records and Record Summaries
+- select Records
+- configure a Store as [Frozen](#frozen-stores)
+
+## Frozen stores
+
+Stores can typically be created as frozen (read-only), by setting a `frozen` parameter on instantiation, which MAY
+implement more efficient access to Records. Frozen stores are intended for data integrity and fast access is critical,
+such as in distributed [Exporters](/docs/architecture.md#exporters).
+
+> [!WARNING]
+> Stores that do not support freezing will raise a `lantern.stores.exceptions.StoreFrozenUnsupportedError`.
+>
+> Frozen stores will raise a `lantern.stores.exceptions.StoreFrozenError` for any operations that would cause
+> modifications, including possible remote retrievals.
 
 ## GitLab store
 
 `lantern.stores.gitlab.GitLabStore`
 
-Stores and tracks Records in a [GitLab](/docs/architecture.md#gitlab) project repository.
+Stores Records in a [GitLab](/docs/architecture.md#gitlab) project repository using
+[`python-gitlab`](https://python-gitlab.readthedocs.io/en/stable/).
 
-Supports reading, creating and updating Records using [`python-gitlab`](https://python-gitlab.readthedocs.io/en/stable/)
-with a [Local Cache](#gitlab-local-cache) for performance.
+Supports reading, creating and updating Records. Does not support deleting or moving Records, or
+[Freezing](#frozen-stores) as Records are accessed directly from GitLab.
+
+> [!NOTE]
+> This store only supports reading the latest (head) revision of records.
 
 Records are stored in the remote repository in a given branch. A hashed directory structure is used to store records as
 in BAS 19115 JSON and ISO 19139 XML formats. For example a Record with file identifier `123abc` is stored as
 `/records/12/3a/123abc.json` and `/records/12/3a/123abc.xml`.
 
+> [!TIP]
+> The `GitLabStore` is a very inefficient if accessing large numbers of Records (e.g. for building the
+> [Static Site](/docs/architecture.md#static-site)), due to the number of GitLab API calls.
+>
+> It is highly recommended to use a [`GitLabCachedStore`](#gitlab-cached-store) instead for these use cases.
+
 ### GitLab store branches
 
-`GitLabStore` instances track a given branch. Multiple branches can be used to maintain different sets of Records.
-
-> [!WARNING]
-> The branch for a store SHOULD NOT be changed once initialised to avoid cache inconsistency errors.
->
-> A separate, or replacement, store SHOULD be instantiated to switch branches.
-
-Branches will be created automatically from `main` if they don't exist when [Committing Records](#committing-records).
-
-Branches can be used for:
+`GitLabStore` instances track a given branch. Multiple branches can be used to maintain different sets of Records for:
 
 - drafting new or updated Records to be merging back into the conventional `main` branch when approved
 - keeping records that change frequently (via automation) separate from other records, either as a long-lived parallel
   branch, or periodically merged and rebased back into `main`
 
-### Loading remote records
+Branches will be created automatically from `main` if they don't exist when [Committing Records](#gitlab-store-commits).
 
-`GitLabStore` instances are initially empty. Use `store.populate()` to load Records from the remote repository via the
-[Local Cache](#gitlab-local-cache).
+### GitLab store commits
 
-### Committing records
+Records can be added or updated using `store.push()`, which creates and pushes a commit to the remote repository.
 
-Records can be added or updated using `store.push()`. Internally this creates a commit to the remote repository and
-requires:
+> [!IMPORTANT]
+> Records cannot be deleted, removed or moved using this store, as records should generally be marked as withdrawn or
+> replaced and otherwise retained.
+
+Pushing a set of changes requires:
 
 - a list of new or updated Records
 - a commit title and message
-- an author name and email tuple
+- an author (name and email tuple)
 
-Commits include both the author and the Catalogue application as the committer.
+> [!NOTE]
+> The GitLab user associated with the access token will be set as the committer, in addition to the author.
 
-<!-- pyml disable md028 -->
+## GitLab cached store
+
+`lantern.stores.gitlab_cache.GitLabCachedStore`
+
+For increased read performance, GitLab cached stores extend [`GitLabStore`](#gitlab-store) with an automatically
+maintained SQLite Records cache and support [Freezing](#frozen-stores).
+
 > [!TIP]
-> The [Local Cache](#gitlab-local-cache) is refreshed automatically to reflect the updated remote repository.
-
-> [!NOTE]
-> Records cannot be deleted using the store, as records should generally be marked as withdrawn rather than removed.
-> Records can be deleted directly in the remote repository, and local caches purged, if needed.
-<!-- pyml enable md028 -->
-
-### GitLab local cache
-
-For increased performance, GitLab stores use a `GitLabLocalCache` to maintain a local SQLite based cache of Records.
-
-> [!NOTE]
-> These caches are branch and GitLab instance specific. Changing either will automatically invalidate an existing cache.
+> This backing cache is refreshed automatically when accessing records unless [Frozen](#frozen-stores).
 
 A cache is created by:
 
-- fetching record configurations, their latest commits, and the latest overall commit from the configured GitLab instance
-- storing pickled versions of each record as RecordRevisions, and details of the latest commit and configured instance
+- fetching record configurations, their latest commit ID, and the latest overall commit ID from GitLab
+- storing pickled versions of each record as RecordRevisions, details of latest commits and configured GitLab info
 
 A cache is refreshed by:
 
@@ -115,9 +127,13 @@ A cache is refreshed by:
 - updating any relevant records and the head commit as described in the creation process
 
 <!-- pyml disable md028 -->
-> [!IMPORTANT]
-> Caches do not support renaming or deleting records within the related remote repository. If detected when refreshing,
-> the cache is automatically purged and recreated in full to ensure consistency.
+> [!WARNING]
+> Cached stores are branch and GitLab instance specific. Changing either will automatically invalidate the cache to
+> avoid inconsistency errors. Separate, or replacement, (non-cached) stores SHOULD be used to switch branches.
+
+> [!WARNING]
+> If deleted, renamed or moved records are detected when refreshing, the cache is automatically purged and recreated in
+> full to ensure consistency.
 
 > [!NOTE]
 > Where 50 or more commits have passed since the last cache update, the local cache will also be purged and recreated

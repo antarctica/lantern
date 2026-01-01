@@ -166,7 +166,7 @@ class ItemCataloguePhysicalMap(ItemCatalogue):
             associations=AggregationAssociationCode.IS_COMPOSED_OF,
             initiatives=AggregationInitiativeCode.PAPER_MAP,
         )
-        return [self._get_record(side_identifier.identifier.identifier) for side_identifier in side_identifiers]
+        return [self._select_record(side_identifier.identifier.identifier) for side_identifier in side_identifiers]
 
     @property
     def _extent(self) -> ExtentTab:

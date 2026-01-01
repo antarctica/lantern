@@ -12,7 +12,7 @@ from lantern.models.item.catalogue.item import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
-from tests.conftest import _get_record
+from lantern.stores.base import SelectRecordProtocol
 
 
 class TestHtmlExporter:
@@ -25,6 +25,7 @@ class TestHtmlExporter:
         fx_s3_bucket_name: str,
         fx_s3_client: S3Client,
         fx_revision_model_min: RecordRevision,
+        fx_select_record: SelectRecordProtocol,
     ):
         """Can create an HTML Exporter."""
         with TemporaryDirectory() as tmp_path:
@@ -36,7 +37,7 @@ class TestHtmlExporter:
         expected = output_path / "items" / f"{fx_revision_model_min.file_identifier}/index.html"
 
         exporter = HtmlExporter(
-            meta=meta, logger=fx_logger, s3=fx_s3_client, record=fx_revision_model_min, get_record=_get_record
+            meta=meta, logger=fx_logger, s3=fx_s3_client, record=fx_revision_model_min, select_record=fx_select_record
         )
 
         assert isinstance(exporter, HtmlExporter)

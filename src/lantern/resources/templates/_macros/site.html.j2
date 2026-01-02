@@ -49,50 +49,18 @@
 {% endmacro %}
 
 {% macro head_scripts(data) %}
-  {{ script_sentry(data.sentry_src) }}
+  {{ script_sentry(data.build_key, data.sentry_src) }}
   {{ script_plausible(data.plausible_domain) }}
   {{ script_turnstile() }}
-  {{ script_show_js(com.show_js_class()) }}
-  {{ script_sticky_tabs() }}
-  {{ script_collapsible() }}
-  {{ script_copyable() }}
+  {{ script_enhancements(data.build_key) }}
   {% if data.html_schema_org %}
     {{ script_schema_org(data.html_schema_org) }}
   {% endif %}
 {% endmacro %}
 
-{% macro script_sentry(value) %}
-  <script>
-    window.sentryOnLoad = function() {
-      Sentry.init({
-        tracesSampleRate: 0,
-        replaysSessionSampleRate: 0,
-        replaysOnErrorSampleRate: 0,
-      });
-      Sentry.lazyLoadIntegration("feedbackIntegration").then(
-        (integration) => {
-          Sentry.addIntegration(integration({
-            autoInject: false,
-            showBranding: false,
-            colorScheme: "light",
-            formTitle: "Send Feedback",
-            submitButtonLabel: "Send Feedback",
-            messagePlaceholder: "",
-            successMessageText: "Thank you for your feedback.",
-          }));
-
-          const feedback = Sentry.getFeedback();
-          if (feedback) {
-            const triggers = document.querySelectorAll(".{{ com.sentry_trigger() }}");
-            triggers.forEach(trigger => {
-              feedback.attachTo(trigger, {});
-            });
-          }
-        }
-      );
-    };
-  </script>
-  <script src="{{ value }}" crossorigin="anonymous"></script>
+{% macro script_sentry(build_key, sentry_src) %}
+  <script src="/static/js/sentry-preload.js?v={{ build_key }}" crossorigin="anonymous"></script>
+  <script src="{{ sentry_src }}" crossorigin="anonymous"></script>
 {% endmacro %}
 
 {% macro script_plausible(value) %}
@@ -100,103 +68,11 @@
 {% endmacro %}
 
 {% macro script_turnstile() %}
-    <script defer async src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>
+  <script defer async src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>
 {% endmacro %}
 
-{% macro script_show_js(value) %}
-  <script defer>
-    document.addEventListener('DOMContentLoaded', function() {
-      document.querySelectorAll('.{{ value }}').forEach(el => el.classList.remove('hidden'));
-    });
-  </script>
-{% endmacro %}
-
-{% macro script_sticky_tabs() %}
-  <script defer>
-    /* Based on jQuery Plugin Sticky Tabs by Aidan Lister <aidan@php.net> */
-    (function () {
-      const selectTab = (tabId) => {
-        const input = document.getElementById(tabId);
-        if (input && input.type === "radio") {
-          input.checked = true;
-          window.history.pushState(null, null, `#${tabId}`);
-        }
-      };
-
-      const handleHashChange = () => {
-        const hash = window.location.hash;
-        if (hash) {
-          selectTab(hash.substring(1)); // Remove '#' from hash
-        }
-      };
-
-      document.addEventListener("DOMContentLoaded", function () {
-        handleHashChange(); // Handle initial hash on page load
-
-        const tabLabels = document.querySelectorAll('label[for^="tab-"]');
-        tabLabels.forEach((label) => {
-          label.addEventListener("click", () => {
-            const tabId = label.getAttribute("for");
-            selectTab(tabId);
-          });
-        });
-
-        // Listen for hash changes
-        window.addEventListener("hashchange", handleHashChange);
-      });
-    })();
-  </script>
-{% endmacro %}
-
-{% macro script_collapsible() %}
-  <script defer>
-    document.addEventListener('DOMContentLoaded', () => {
-      // Find all elements with the `data-target` attribute and add click event listeners to hide/show a target element
-      const toggles = document.querySelectorAll('[data-target]');
-
-      toggles.forEach(toggle => {
-        toggle.addEventListener('click', () => {
-          const targetSelector = toggle.getAttribute('data-target');
-          const targetElement = document.querySelector(targetSelector);
-          if (targetElement) {
-            targetElement.classList.toggle('hidden');
-          }
-        });
-      });
-    });
-  </script>
-{% endmacro %}
-
-{% macro script_copyable() %}
-  <script defer>
-    document.addEventListener('DOMContentLoaded', () => {
-      const writeToClipboard = async (text) => {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          await navigator.clipboard.writeText(text);
-        }
-      };
-
-      document.addEventListener('click', async (event) => {
-        const trigger = event.target.closest('[data-copy]');
-        if (!trigger) {
-          return;
-        }
-
-        event.preventDefault();
-        const value = trigger.getAttribute('data-copy');
-        if (!value) {
-          return;
-        }
-
-        try {
-          await writeToClipboard(value);
-          trigger.dispatchEvent(new CustomEvent('copy:success', { bubbles: true }));
-        } catch (error) {
-          trigger.dispatchEvent(new CustomEvent('copy:error', { bubbles: true, detail: error }));
-        }
-      });
-    });
-  </script>
+{% macro script_enhancements(build_key) %}
+  <script defer src="/static/js/enhancements.js?v={{ build_key }}"></script>
 {% endmacro %}
 
 {% macro script_schema_org(data) %}

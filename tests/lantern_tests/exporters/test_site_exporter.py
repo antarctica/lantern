@@ -197,6 +197,17 @@ class TestSiteResourcesExporter:
         for path in expected:
             assert path.exists()
 
+    def test_dump_js(self, fx_exporter_site_resources: SiteResourcesExporter):
+        """Can copy JavaScript files to output path."""
+        expected = [
+            fx_exporter_site_resources._export_base.joinpath("js/sentry-preload.js"),
+            fx_exporter_site_resources._export_base.joinpath("js/enhancements.js"),
+        ]
+
+        fx_exporter_site_resources._dump_js()
+        for path in expected:
+            assert path.exists()
+
     def test_publish_css(self, fx_exporter_site_resources: SiteResourcesExporter):
         """Can upload CSS to S3."""
         expected = "static/css/main.css"
@@ -248,6 +259,17 @@ class TestSiteResourcesExporter:
             )
             assert result["ResponseMetadata"]["HTTPStatusCode"] == 200
 
+    def test_publish_js(self, fx_exporter_site_resources: SiteResourcesExporter):
+        """Can upload JavaScript files to S3."""
+        expected = ["static/js/sentry-preload.js", "static/js/enhancements.js"]
+
+        fx_exporter_site_resources._publish_js()
+        for key in expected:
+            result = fx_exporter_site_resources._s3_utils._s3.get_object(
+                Bucket=fx_exporter_site_resources._s3_utils._bucket, Key=key
+            )
+            assert result["ResponseMetadata"]["HTTPStatusCode"] == 200
+
     def test_export(self, fx_exporter_site_resources: SiteResourcesExporter):
         """Can copy resources to output path."""
         fx_exporter_site_resources.export()
@@ -255,6 +277,7 @@ class TestSiteResourcesExporter:
         assert fx_exporter_site_resources._export_base.joinpath("fonts/open-sans.ttf").exists()
         assert fx_exporter_site_resources._export_base.joinpath("img/favicon.ico").exists()
         assert fx_exporter_site_resources._export_base.joinpath("txt/heartbeat.txt").exists()
+        assert fx_exporter_site_resources._export_base.joinpath("js/enhancements.js").exists()
 
     def test_publish(self, fx_s3_bucket_name: str, fx_exporter_site_resources: SiteResourcesExporter):
         """Can upload resources to S3."""
@@ -263,6 +286,7 @@ class TestSiteResourcesExporter:
             "static/fonts/open-sans.ttf",
             "static/img/favicon.ico",
             "static/txt/heartbeat.txt",
+            "static/js/enhancements.js",
         ]
 
         fx_exporter_site_resources.publish()

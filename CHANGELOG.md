@@ -28,6 +28,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Additional validation for MAGIC Discovery profile Req. 06 (released date presence)
 * Setup documentation for Plausible
 * Store frozen (read-only) mode for publishing workflows
+* 'js' development task for assembling JavaScript scripts
 
 ### Fixed
 
@@ -53,6 +54,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Improving, simplified and streamlining exporters
 * Using typing protocols for Store select methods to avoid duplicate inline type definitions
 * Reorganising exporter utility methods
+* Refactoring inline JavaScript in templates into standalone files
 
 ### Removed
 

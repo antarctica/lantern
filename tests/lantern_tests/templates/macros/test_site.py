@@ -92,9 +92,11 @@ class TestMacrosSite:
 
     def test_script_sentry(self):
         """Can get Sentry script from page."""
-        template = """{% import '_macros/site.html.j2' as site %}{{ site.script_sentry(meta.sentry_src) }}"""
+        expected = "/static/js/sentry-preload.js?v=000"
+        template = """{% import '_macros/site.html.j2' as site %}{{ site.script_sentry('000', meta.sentry_src) }}"""
         meta = self._site_meta()
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
+        assert html.head.find(name="script", src=expected) is not None
         assert html.head.find(name="script", src=meta.sentry_src) is not None
 
     def test_script_plausible(self):
@@ -103,6 +105,14 @@ class TestMacrosSite:
         meta = self._site_meta()
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
         assert html.head.find(name="script", attrs={"data-domain": meta.plausible_domain}) is not None
+
+    def test_script_enhancements(self):
+        """Can get progressive enhancements script from page."""
+        expected = "/static/js/enhancements.js?v=000"
+        template = """{% import '_macros/site.html.j2' as site %}{{ site.script_enhancements('000') }}"""
+        meta = self._site_meta()
+        html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
+        assert html.head.find(name="script", src=expected) is not None
 
     def test_head_schema_org(self, freezer: FrozenDateTimeFactory, fx_freezer_time: datetime):
         """
@@ -126,7 +136,7 @@ class TestMacrosSite:
         [
             SiteMeta(
                 base_url="x",
-                build_key="x",
+                build_key="000",
                 build_time=freezer_time(),
                 html_title="x",
                 sentry_src="x",
@@ -139,7 +149,7 @@ class TestMacrosSite:
             ),
             SiteMeta(
                 base_url="x",
-                build_key="x",
+                build_key="000",
                 html_title="x",
                 sentry_src="x",
                 plausible_domain="x",
@@ -179,9 +189,11 @@ class TestMacrosSite:
         if meta.html_description:
             assert html.head.find("meta", attrs={"name": "description"})["content"] == meta.html_description
 
+        assert html.head.find(name="script", src="/static/js/sentry-preload.js?v=000") is not None
         assert html.head.find(name="script", src=meta.sentry_src) is not None
         assert html.head.find(name="script", src=cf_turnstile) is not None
         assert html.head.find(name="script", attrs={"data-domain": meta.plausible_domain}) is not None
+        assert html.head.find(name="script", src="/static/js/enhancements.js?v=000") is not None
 
         if meta.html_open_graph:
             open_graph_key = next(iter(meta.html_open_graph.keys()))

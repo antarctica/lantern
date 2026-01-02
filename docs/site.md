@@ -28,7 +28,7 @@ Simplified, primary, top level structure:
 | `waf/`     | [Web Accessible Folder (WAF)](/docs/access.md#web-accessible-folder) endpoints | [HTML](/docs/exporters.md#web-accessible-folder-resource-exporter)    |
 | `items/`   | Rendered [Item](/docs/data-model.md#items) pages                               | [HTML](/docs/exporters.md#html-resource-exporter)                     |
 | `records/` | [Record](/docs/data-model.md#records) files in various formats                 | [Records](/docs/exporters.md#records-resource-exporter)               |
-| `static/`  | CSS, images, and other assets                                                  | [Site Resources Exporter](/docs/exporters.md#site-resources-exporter) |
+| `static/`  | CSS, JavaScript, images, and other assets                                      | [Site Resources Exporter](/docs/exporters.md#site-resources-exporter) |
 <!-- pyml enable md013 -->
 
 Secondary top-level items:
@@ -116,6 +116,9 @@ Secondary top-level items:
     │    ├── favicon.ico
     │    ├── favicon.svg
     │    └── safari-pinned-tab.svg
+    ├── js
+    │    ├── enhancements.js
+    │    └── sentry-preload.js
     └── txt
          ├── heartbeat.txt
          └── manifest.webmanifest
@@ -253,29 +256,48 @@ the site build directory and referenced within generated pages.
 
 ## Scripts
 
-A limited number of scripts are loaded using [Site Macros](#site-macros) for:
+A set of site wide scripts are included using [Site Macros](#site-macros) for:
 
-- including [Plausible](/docs/monitoring.md#plausible) analytics
-- including [Sentry](/docs/monitoring.md#sentry) error monitoring and user feedback
-- enabling 'sticky tabs', where the active tab is reflected in the URL fragment
-  - this includes setting the active tab on page load if a fragment is present
-- enabling 'collapsible' sections, to show or hide additional information for select distribution options
-- showing content where JavaScript is enabled, as an 'else' to `<noscript>`
+- [Sentry](/docs/monitoring.md#sentry) error monitoring and user feedback
+- [Plausible](/docs/monitoring.md#plausible) analytics
+- [Cloudflare Turnstile](#bot-protection) bot protection for forms
+- [Progressive Enhancements](#enhancements-script) for various bits of functionality
 
 > [!NOTE]
-> Scripts are intended to be used sparingly, with functionality implemented using HTML and CSS alone where practical
-> and using graceful degradation for JavaScript wherever possible.
+> Functionality SHOULD be preferably implemented using HTML and CSS alone where practical. Scripts SHOULD be used for
+> progressive enhancement and support graceful degradation where possible.
 
-For graceful degradation:
+First party JavaScript are defined in `src/lantern/resources/templates/_assets/js/*`, which are Jinja2 templates to
+allow using variables from [Common](#common-macros) and [Asset](#asset-macros) macros.
+
+Rendered versions of these templates MUST be stored in `src/lantern/resources/js/`, as this directory will be copied
+into the site build directory, and referenced within generated pages.
+
+> [!TIP]
+> See the [Development](/docs/dev.md#updating-scripts) documentation for how to update scripts.
+
+### Graceful degradation
+
+Where functionality relies on JavaScript, templates SHOULD:
 
 - use a `<noscript>` element to show a static fallback of some content for users without JavaScript
 - use `class="{{ com.show_js_only() }} ..."` on the full/interactive version which will add a `.hidden` class
-- if a user has JavaScript enabled:
-  - `<noscript>` elements will be automatically hidden by the browser
-  - a site script will remove the `.hidden` class from any elements using the `show_js_only()` macro
 
-This approach is used for distribution options for example where collapsible sections are normally used to hide optional
-data. Where JavaScript is disabled, `<noscript>` elements show the full content statically as a fallback.
+The [Enhancements](#enhancements-script) script will remove this `.hidden` class from any elements, and the browser
+will automatically hide any `<noscript>` elements, where JavaScript is available.
+
+This approach is used for distribution options for example, where collapsible sections are used to hide optional data
+where possible. Where JavaScript is disabled, `<noscript>` elements show the full content statically as a fallback.
+
+### Enhancements script
+
+A set of targeted enhancements to:
+
+- enable 'sticky tabs' where:
+  - the active tab is set in the URL fragment when switching tabs
+  - an initial tab is switched to automatically if a tab fragment is present on page load
+- enable progressive disclosure via simple collapsible sections, used for some distribution options (e.g. feature services)
+- show content where JavaScript is enabled, as an 'else' to `<noscript>`
 
 ## Cache busting
 
@@ -382,6 +404,12 @@ Macros are used extensively within templates, to emulate the component pattern c
 - higher level components such as item summaries, alerts, etc.
 
 Common macros are intended for use across templates to avoid inconsistencies and simplify maintenance.
+
+#### Asset macros
+
+`src/lantern/resources/templates/_macros/assets.html.j2` defines macros for:
+
+- JavaScript snippets for [Progressive Enhancements](#enhancements-script)
 
 #### Site macros
 

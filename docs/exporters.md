@@ -193,8 +193,8 @@ passing a [Config](/docs/config.md) object and a [Store](/docs/architecture.md#s
 
 `lantern.exporters.site.SiteResourcesExporter`
 
-Copies CSS files, web fonts, images (for favicons) and text files (for [Monitoring](/docs/monitoring.md)) from the
-internal `lantern.exporters.resources` module.
+Copies CSS, JavaScript, fonts, images (for favicons) and text files (for [Monitoring](/docs/monitoring.md)) from the
+internal `lantern.exporters.resources` module into the static site.
 
 ### Site pages exporter
 

@@ -31,6 +31,7 @@ class SiteResourcesExporter(Exporter):
         self._fonts_src_ref = "lantern.resources.fonts"
         self._img_src_ref = "lantern.resources.img"
         self._txt_src_ref = "lantern.resources.txt"
+        self._js_src_ref = "lantern.resources.js"
         self._export_base = self._meta.export_path / "static"
 
     def _dump_css(self) -> None:
@@ -69,6 +70,14 @@ class SiteResourcesExporter(Exporter):
     def _dump_txt(self) -> None:
         """Copy text files to directory if not already present."""
         BaseExporter._dump_package_resources(src_ref=self._txt_src_ref, dest_path=self._export_base.joinpath("txt"))
+
+    def _dump_js(self) -> None:
+        """
+        Copy JS files to directory if not already present.
+
+        Source JS files need generating from `resources/templates/_assets/*.j2` using the `js` dev task.
+        """
+        BaseExporter._dump_package_resources(src_ref=self._js_src_ref, dest_path=self._export_base.joinpath("js"))
 
     def _publish_css(self) -> None:
         """Upload CSS as an S3 object."""
@@ -110,6 +119,12 @@ class SiteResourcesExporter(Exporter):
             src_ref=self._txt_src_ref, base_key=self._s3_utils.calc_key(self._export_base.joinpath("txt"))
         )
 
+    def _publish_js(self) -> None:
+        """Upload JS files as S3 objects if they do not already exist."""
+        self._s3_utils.upload_package_resources(
+            src_ref=self._js_src_ref, base_key=self._s3_utils.calc_key(self._export_base.joinpath("js"))
+        )
+
     @property
     def name(self) -> str:
         """Exporter name."""
@@ -123,6 +138,7 @@ class SiteResourcesExporter(Exporter):
         self._dump_favicon_ico()
         self._dump_img()
         self._dump_txt()
+        self._dump_js()
 
     def publish(self) -> None:
         """Copy site resources to S3 bucket."""
@@ -132,6 +148,7 @@ class SiteResourcesExporter(Exporter):
         self._publish_favicon_ico()
         self._publish_img()
         self._publish_txt()
+        self._publish_js()
 
 
 class SiteIndexExporter(ResourcesExporter):

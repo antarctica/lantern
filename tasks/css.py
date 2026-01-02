@@ -28,12 +28,12 @@ class Config(BaseConfig):
         super().__init__()
 
     @property
-    def AWS_ACCESS_ID(self) -> str:
+    def AWS_ACCESS_ID(self) -> str:  # noqa: N802
         """AWS access key ID."""
         return "x"
 
     @property
-    def AWS_ACCESS_SECRET(self) -> str:
+    def AWS_ACCESS_SECRET(self) -> str:  # noqa: N802
         """AWS access key secret."""
         return "x"
 
@@ -118,21 +118,31 @@ def export_test_site(export_path: Path) -> None:
     print(f"Exported test site inc. verification report to '{export_path.resolve()}'")
 
 
-def regenerate_styles(tw_bin: Path, site_path: Path, output_path: Path) -> None:
-    """Regenerate app Tailwind CSS styles."""
-    _jinja = Environment(loader=FileSystemLoader("src/lantern/resources/css"), autoescape=select_autoescape())
-    src_css = _jinja.get_template("main.css.j2").render(site_path=site_path.resolve())
+def regenerate_styles(tw_bin: Path, site_path: Path, base_path: Path) -> None:
+    """
+    Regenerate app Tailwind CSS styles.
+
+    Steps:
+    - render a Jinja2 template to produce source CSS (to dynamically set the Tailwind content path) as a temp file
+    - process this with the Tailwind CLI into an output CSS file
+    - append a trailing new line to the output file (to satisfy linters)
+    """
+    templates_path = base_path / "templates"
+    output_path = base_path / "css" / "main.css"
+    _jinja = Environment(loader=FileSystemLoader(str(templates_path)), autoescape=select_autoescape())
+
+    src_css = _jinja.get_template("_assets/css/main.css.j2").render(site_path=site_path.resolve())
 
     with TemporaryDirectory() as tmp_dir:
         src_path = Path(tmp_dir) / "main.src.css"
+        # write templated source CSS to a temp file
         with src_path.open("w") as src_file:
             src_file.write(src_css)
-
+        # process with Tailwind CLI
         subprocess.run(  # noqa: S603
             [tw_bin, "-i", str(src_path.resolve()), "-o", str(output_path.resolve()), "--minify"], check=True
         )
-
-    # append trailing new line
+    # append trailing new line to output file
     with output_path.open("a") as out_file:
         out_file.write("\n")
 
@@ -144,10 +154,10 @@ def main() -> None:
     site_dir = TemporaryDirectory()
     site_path = Path(site_dir.name)
     tw_bin = Path(".venv/bin/tailwindcss")
-    styles_path = Path("src/lantern/resources/css/main.css")
+    base_path = Path("src/lantern/resources")
 
     export_test_site(export_path=site_path)
-    regenerate_styles(tw_bin=tw_bin, site_path=site_path, output_path=styles_path)
+    regenerate_styles(tw_bin=tw_bin, site_path=site_path, base_path=base_path)
     site_dir.cleanup()
     print("Updated site styles. Re-run build to apply.")
 

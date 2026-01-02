@@ -38,7 +38,7 @@ class SiteResourcesExporter(Exporter):
         """
         Copy CSS to directory if not already present.
 
-        The source CSS file needs generating from `main.css.j2` using the `tailwind` dev task.
+        The source CSS file needs generating from `resources/templates/_assets/css/main.css.j2` using the `css` dev task.
         """
         with resources_as_file(resources_files(self._css_src_ref)) as src_base:
             src_path = src_base / "main.css"

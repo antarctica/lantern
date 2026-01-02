@@ -240,9 +240,9 @@ Icons SHOULD be used sparingly. For consistency these icons SHOULD be used where
 
 ### Style definitions
 
-Styles are defined in `src/lantern/resources/css/main.css.j2`, which is a Jinja2 template to allow the search path for
-content to be set dynamically at runtime. This content is needed for the Tailwind compiler to find classes used in the
-built static site.
+Styles are defined in `src/lantern/resources/templates/_assets/css/main.css.j2`, which is a Jinja2 template to allow
+the search path for content to be set dynamically at runtime. This content is needed for the Tailwind compiler to find
+classes used in the built static site.
 
 > [!NOTE]
 > Using the [Site Templates](#templates) as the content path will not work as they contain interpolated class names

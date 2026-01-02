@@ -55,6 +55,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Using typing protocols for Store select methods to avoid duplicate inline type definitions
 * Reorganising exporter utility methods
 * Refactoring inline JavaScript in templates into standalone files
+* Refactored CSS build process consistency with new 'js' process, inc. renaming 'tailwind' development task to 'css'
 
 ### Removed
 

@@ -13,7 +13,7 @@ from lantern.exporters.base import Exporter as BaseExporter
 from lantern.exporters.records import RecordsExporter
 from lantern.exporters.waf import WebAccessibleFolderExporter
 from lantern.exporters.website import WebsiteSearchExporter
-from lantern.models.site import ExportMeta
+from lantern.models.site import ExportMeta, SitePageMeta
 from lantern.stores.base import SelectRecordsProtocol, StoreInitProtocol
 from lantern.utils import get_jinja_env, get_record_aliases, prettify_html
 
@@ -31,13 +31,14 @@ class SiteResourcesExporter(Exporter):
         self._fonts_src_ref = "lantern.resources.fonts"
         self._img_src_ref = "lantern.resources.img"
         self._txt_src_ref = "lantern.resources.txt"
+        self._js_src_ref = "lantern.resources.js"
         self._export_base = self._meta.export_path / "static"
 
     def _dump_css(self) -> None:
         """
         Copy CSS to directory if not already present.
 
-        The source CSS file needs generating from `main.css.j2` using the `tailwind` dev task.
+        The source CSS file needs generating from `resources/templates/_assets/css/main.css.j2` using the `css` dev task.
         """
         with resources_as_file(resources_files(self._css_src_ref)) as src_base:
             src_path = src_base / "main.css"
@@ -69,6 +70,14 @@ class SiteResourcesExporter(Exporter):
     def _dump_txt(self) -> None:
         """Copy text files to directory if not already present."""
         BaseExporter._dump_package_resources(src_ref=self._txt_src_ref, dest_path=self._export_base.joinpath("txt"))
+
+    def _dump_js(self) -> None:
+        """
+        Copy JS files to directory if not already present.
+
+        Source JS files need generating from `resources/templates/_assets/*.j2` using the `js` dev task.
+        """
+        BaseExporter._dump_package_resources(src_ref=self._js_src_ref, dest_path=self._export_base.joinpath("js"))
 
     def _publish_css(self) -> None:
         """Upload CSS as an S3 object."""
@@ -110,6 +119,12 @@ class SiteResourcesExporter(Exporter):
             src_ref=self._txt_src_ref, base_key=self._s3_utils.calc_key(self._export_base.joinpath("txt"))
         )
 
+    def _publish_js(self) -> None:
+        """Upload JS files as S3 objects if they do not already exist."""
+        self._s3_utils.upload_package_resources(
+            src_ref=self._js_src_ref, base_key=self._s3_utils.calc_key(self._export_base.joinpath("js"))
+        )
+
     @property
     def name(self) -> str:
         """Exporter name."""
@@ -123,6 +138,7 @@ class SiteResourcesExporter(Exporter):
         self._dump_favicon_ico()
         self._dump_img()
         self._dump_txt()
+        self._dump_js()
 
     def publish(self) -> None:
         """Copy site resources to S3 bucket."""
@@ -132,6 +148,7 @@ class SiteResourcesExporter(Exporter):
         self._publish_favicon_ico()
         self._publish_img()
         self._publish_txt()
+        self._publish_js()
 
 
 class SiteIndexExporter(ResourcesExporter):
@@ -225,21 +242,33 @@ class SitePagesExporter(Exporter):
         """Initialise exporter."""
         super().__init__(logger=logger, meta=meta, s3=s3)
         self._jinja = get_jinja_env()
-        self._templates = [
-            "_views/404.html.j2",
-            "_views/legal/accessibility.html.j2",
-            "_views/legal/cookies.html.j2",
-            "_views/legal/copyright.html.j2",
-            "_views/legal/privacy.html.j2",
-            "_views/-/formatting.html.j2",
-        ]
-        self._html_title = {
-            "_views/404.html.j2": "Not Found",
-            "_views/legal/accessibility.html.j2": "Accessibility Statement",
-            "_views/legal/cookies.html.j2": "Cookies Policy",
-            "_views/legal/copyright.html.j2": "Copyright Policy",
-            "_views/legal/privacy.html.j2": "Privacy Policy",
-            "_views/-/formatting.html.j2": "Supported Formatting Guide",
+        self._templates: dict[str, SitePageMeta] = {
+            "_views/404.html.j2": SitePageMeta(title="Not Found", url="-", meta=False),
+            "_views/legal/accessibility.html.j2": SitePageMeta(
+                title="Accessibility Statement",
+                url=f"{self._meta.base_url}/legal/accessibility",
+                description="Basic accessibility check for BAS Data Catalogue",
+            ),
+            "_views/legal/cookies.html.j2": SitePageMeta(
+                title="Cookies Policy",
+                url=f"{self._meta.base_url}/legal/cookies",
+                description="Cookies policy for BAS Data Catalogue",
+            ),
+            "_views/legal/copyright.html.j2": SitePageMeta(
+                title="Copyright Policy",
+                url=f"{self._meta.base_url}/legal/copyright",
+                description="Copyright policy for BAS Data Catalogue",
+            ),
+            "_views/legal/privacy.html.j2": SitePageMeta(
+                title="Privacy Policy",
+                url=f"{self._meta.base_url}/legal/privacy",
+                description="Privacy policy for BAS Data Catalogue",
+            ),
+            "_views/-/formatting.html.j2": SitePageMeta(
+                title="Formatting Guide",
+                url=f"{self._meta.base_url}/-/formatting",
+                description="Formatting guide for freetext record elements",
+            ),
         }
 
     def _get_page_path(self, template_path: str) -> Path:
@@ -250,7 +279,10 @@ class SitePagesExporter(Exporter):
 
     def _dumps(self, template_path: str) -> str:
         """Build a page."""
-        self._meta.html_title = self._html_title[template_path]
+        page_meta: SitePageMeta = self._templates[template_path]
+        self._meta.html_title = page_meta.title
+        self._meta.html_open_graph = page_meta.open_graph
+        self._meta.html_schema_org = page_meta.schema_org
         raw = self._jinja.get_template(template_path).render(meta=self._meta)
         return prettify_html(raw)
 

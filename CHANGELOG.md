@@ -28,6 +28,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Additional validation for MAGIC Discovery profile Req. 06 (released date presence)
 * Setup documentation for Plausible
 * Store frozen (read-only) mode for publishing workflows
+* 'js' development task for assembling JavaScript scripts
 
 ### Fixed
 
@@ -36,6 +37,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Disabling lineage statement in container item types
 * Missing datestamp update in the clone record development task
 * Correcting names for `STORE_GITLAB_CACHE_PATH`, `STORE_GITLAB_ENDPOINT` and `STORE_GITLAB_PROJECT_ID` config options
+* Missing Open Graph and Schema.org metadata for static site pages
 
 ### Changed
 
@@ -53,6 +55,9 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Improving, simplified and streamlining exporters
 * Using typing protocols for Store select methods to avoid duplicate inline type definitions
 * Reorganising exporter utility methods
+* Refactoring inline JavaScript in templates into standalone files
+* Refactored CSS build process consistency with new 'js' process, inc. renaming 'tailwind' development task to 'css'
+* Extracted Open Graph and Schema.org link preview metadata logic out of catalogue items into site data classes
 
 ### Removed
 

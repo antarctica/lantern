@@ -193,8 +193,8 @@ passing a [Config](/docs/config.md) object and a [Store](/docs/architecture.md#s
 
 `lantern.exporters.site.SiteResourcesExporter`
 
-Copies CSS files, web fonts, images (for favicons) and text files (for [Monitoring](/docs/monitoring.md)) from the
-internal `lantern.exporters.resources` module.
+Copies CSS, JavaScript, fonts, images (for favicons) and text files (for [Monitoring](/docs/monitoring.md)) from the
+internal `lantern.exporters.resources` module into the static site.
 
 ### Site pages exporter
 
@@ -205,6 +205,9 @@ Outputs HTML pages styled using [Site Templates](/docs/site.md#item-templates) f
 - 404 error page
 - legal policies (accessibility, copyright, cookies and privacy)
 - content formatting guide (for abstracts, etc.)
+
+Sharing previews, similar to [Item Pages](/docs/site.md#item-sharing-previews), are enabled via
+`lantern.models.site.SitePageMeta` instances with manually defined values.
 
 ### Site exporter
 

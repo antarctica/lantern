@@ -11,8 +11,223 @@ from lantern.config import Config
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 from lantern.models.item.base.elements import Link
 from lantern.models.item.catalogue.elements import FormattedDate
-from lantern.models.site import ExportMeta, SiteMeta
+from lantern.models.site import ExportMeta, OpenGraphMeta, SchemaOrgAuthor, SchemaOrgMeta, SiteMeta, SitePageMeta
 from lantern.stores.gitlab import GitLabStore
+
+
+class TestOpenGraphMeta:
+    """Test Open Graph metadata."""
+
+    def test_init(self):
+        """Can create an Open Graph metadata instance with required values."""
+        expected = "x"
+        meta = OpenGraphMeta(title=expected, url=expected)
+        assert meta.title == expected
+        assert meta.url == expected
+        assert meta.locale is not None
+        assert meta.site_name is not None
+        assert meta.type_ is not None
+        assert meta.description is None
+        assert meta.image is None
+        assert meta.published_at is None
+
+    def test_all(self):
+        """Can create an Open Graph metadata instance with all possible values."""
+        expected = "x"
+        meta = OpenGraphMeta(
+            locale=expected,
+            site_name=expected,
+            type_=expected,
+            title=expected,
+            url=expected,
+            description=expected,
+            image=expected,
+            published_at=expected,
+        )
+        assert meta.title == expected
+        assert meta.url == expected
+        assert meta.locale == expected
+        assert meta.site_name == expected
+        assert meta.type_ == expected
+        assert meta.description == expected
+        assert meta.image == expected
+        assert meta.published_at == expected
+
+
+class TestSchemaOrgAuthor:
+    """Test Schema.org author element."""
+
+    def test_init(self):
+        """Can create a Schema.org author instance with required values."""
+        expected = "x"
+        expected_type = "Person"
+        # noinspection PyTypeChecker
+        author = SchemaOrgAuthor(
+            type_=expected_type,
+            name=expected,
+        )
+        assert author.type_ == expected_type
+        assert author.name == expected
+        assert author.url is None
+
+    def test_all(self):
+        """Can create a Schema.org author instance with all possible values."""
+        expected = "x"
+        expected_type = "Organization"
+        # noinspection PyTypeChecker
+        author = SchemaOrgAuthor(
+            type_=expected_type,
+            name=expected,
+            url=expected,
+        )
+        assert author.type_ == expected_type
+        assert author.name == expected
+        assert author.url == expected
+
+    def test_dumps(self):
+        """Can dump a Schema.org author instance as a dict with correct keys."""
+        expected = {"@type": "Person", "name": "x", "url": "x"}
+        # noinspection PyTypeChecker
+        author = SchemaOrgAuthor(
+            type_=expected["@type"],
+            name=expected["name"],
+            url=expected["url"],
+        )
+        assert author.dumps() == expected
+
+
+class TestSchemaOrgMeta:
+    """Test Schema.org metadata."""
+
+    def test_init(self):
+        """Can create a Schema.org metadata instance with required values."""
+        expected = "x"
+        meta = SchemaOrgMeta(
+            headline=expected,
+            url=expected,
+        )
+        assert meta.headline == expected
+        assert meta.url == expected
+        assert meta.context == "https://schema.org/"
+        assert meta.type_ is not None
+        assert meta.name is not None
+        assert meta.description is None
+        assert meta.image is None
+        assert len(meta.creator) == 0
+
+    def test_all(self):
+        """Can create a Schema.org metadata instance with all possible values."""
+        expected = "x"
+        expected_type = "Article"
+        # noinspection PyTypeChecker
+        meta = SchemaOrgMeta(
+            type_=expected_type,
+            name=expected,
+            headline=expected,
+            url=expected,
+            description=expected,
+            image=expected,
+            creator=[SchemaOrgAuthor(type_="Person", name=expected)],
+        )
+        assert meta.type_ == expected_type
+        assert meta.name == expected
+        assert meta.headline == expected
+        assert meta.url == expected
+        assert meta.description == expected
+        assert meta.image == expected
+        assert len(meta.creator) == 1
+
+    def test_dumps(self):
+        """Can dump a Schema.org metadata instance as a dict with correct keys."""
+        expected = {
+            "@context": "https://schema.org/",
+            "@type": "Article",
+            "name": "x",
+            "headline": "x",
+            "url": "x",
+            "description": "x",
+            "image": "x",
+            "creator": [{"@type": "Person", "name": "x"}],
+        }
+        # noinspection PyTypeChecker
+        meta = SchemaOrgMeta(
+            type_=expected["@type"],
+            name=expected["name"],
+            headline=expected["headline"],
+            url=expected["url"],
+            description=expected["description"],
+            image=expected["image"],
+            creator=[SchemaOrgAuthor(type_=expected["creator"][0]["@type"], name=expected["creator"][0]["name"])],
+        )
+        assert meta._dumps() == expected
+
+        # noinspection PyTypeChecker
+        meta_no_list = SchemaOrgMeta(
+            type_=expected["@type"],
+            name=expected["name"],
+            headline=expected["headline"],
+            url=expected["url"],
+            description=expected["description"],
+            image=expected["image"],
+        )
+        assert "creator" not in meta_no_list._dumps()
+
+    def test_str(self):
+        """Can encode a Schema.org metadata instance as a string for use in templates."""
+        expected = {
+            "@context": "https://schema.org/",
+            "@type": "Article",
+            "name": "x",
+            "headline": "x",
+            "url": "x",
+            "description": "x",
+            "image": "x",
+            "creator": [{"@type": "Person", "name": "x"}],
+        }
+        # noinspection PyTypeChecker
+        meta = SchemaOrgMeta(
+            type_=expected["@type"],
+            name=expected["name"],
+            headline=expected["headline"],
+            url=expected["url"],
+            description=expected["description"],
+            image=expected["image"],
+            creator=[SchemaOrgAuthor(type_=expected["creator"][0]["@type"], name=expected["creator"][0]["name"])],
+        )
+        assert str(meta) == json.dumps(expected, indent=2)
+
+
+class TestSitePageMeta:
+    """Test site page metadata."""
+
+    def test_init(self):
+        """Can create a SitePageMeta instance with required values."""
+        expected = "x"
+        page_meta = SitePageMeta(
+            title=expected,
+            url=expected,
+        )
+
+        assert page_meta.title == expected
+        assert page_meta.url == expected
+        assert page_meta.description is None
+        assert page_meta.meta is True
+        assert page_meta.html_title == expected
+        assert isinstance(page_meta.open_graph, OpenGraphMeta)
+        assert isinstance(page_meta.schema_org, SchemaOrgMeta)
+
+    def test_all(self):
+        """Can create a SitePageMeta instance with all possible values."""
+        expected = "x"
+        page_meta = SitePageMeta(title=expected, url=expected, description=expected, meta=False)
+
+        assert page_meta.title == expected
+        assert page_meta.url == expected
+        assert page_meta.description == expected
+        assert page_meta.meta is False
+        assert page_meta.html_title == expected
+        assert page_meta.open_graph is None
+        assert page_meta.schema_org is None
 
 
 class TestSiteMetadata:
@@ -49,14 +264,15 @@ class TestSiteMetadata:
         assert meta.fallback_email == "magic@bas.ac.uk"
         assert meta.build_repo_ref is None
         assert meta.build_repo_base_url is None
-        assert meta.html_open_graph == {}
+        assert meta.html_open_graph is None
         assert meta.html_schema_org is None
         assert meta.html_description is None
 
     def test_all(self):
         """Can create a SiteMetadata instance with all possible values."""
         expected_str = "x"
-        expected_dict = {"x": "y"}
+        expected_open_graph = OpenGraphMeta(title=expected_str, url=expected_str)
+        expected_schema_org = SchemaOrgMeta(headline=expected_str, url=expected_str)
         expected_time = datetime(2014, 6, 30, 14, 30, 45, tzinfo=UTC)
 
         meta = SiteMeta(
@@ -74,8 +290,8 @@ class TestSiteMetadata:
             fallback_email=expected_str,
             build_repo_ref=expected_str,
             build_repo_base_url=expected_str,
-            html_open_graph=expected_dict,
-            html_schema_org=json.dumps(expected_dict),
+            html_open_graph=expected_open_graph,
+            html_schema_org=expected_schema_org,
             html_description=expected_str,
         )
 
@@ -83,8 +299,8 @@ class TestSiteMetadata:
         assert meta.fallback_email == expected_str
         assert meta.build_repo_ref == expected_str
         assert meta.build_repo_base_url == expected_str
-        assert meta.html_open_graph == expected_dict
-        assert json.loads(meta.html_schema_org) == expected_dict
+        assert meta.html_open_graph == expected_open_graph
+        assert meta.html_schema_org == expected_schema_org
         assert meta.html_description == expected_str
 
     def test_html_title_suffixed(self, fx_site_meta: SiteMeta):
@@ -108,6 +324,24 @@ class TestSiteMetadata:
     def test_build_time_formatted(self, fx_site_meta: SiteMeta):
         """Can get build time as formatted date."""
         assert isinstance(fx_site_meta.build_time_fmt, FormattedDate)
+
+    @pytest.mark.parametrize("has_value", [False, True])
+    def test_html_open_graph_tags(self, fx_site_meta: SiteMeta, has_value: str):
+        """Can get Open Graph tags as a dict, if set."""
+        fx_site_meta.html_open_graph = OpenGraphMeta(title="x", url="x") if has_value else None
+        if has_value:
+            assert isinstance(fx_site_meta.html_open_graph_tags, dict)
+            return
+        assert fx_site_meta.html_open_graph_tags is None
+
+    @pytest.mark.parametrize("has_value", [False, True])
+    def test_html_schema_org_content(self, fx_site_meta: SiteMeta, has_value: str):
+        """Can get Schema.org metadata as a str, if set."""
+        fx_site_meta.html_schema_org = SchemaOrgMeta(headline="x", url="x") if has_value else None
+        if has_value:
+            assert isinstance(fx_site_meta.html_schema_org_content, str)
+            return
+        assert fx_site_meta.html_schema_org_content is None
 
     @pytest.mark.parametrize(("has_store", "kwargs"), [(False, {"fallback_email": "y"}), (True, {})])
     def test_from_config_store(

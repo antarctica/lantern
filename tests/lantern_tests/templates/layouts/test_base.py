@@ -1,9 +1,7 @@
-import json
-
 from bs4 import BeautifulSoup
 from jinja2 import Environment, PackageLoader, select_autoescape
 
-from lantern.models.site import SiteMeta
+from lantern.models.site import OpenGraphMeta, SchemaOrgMeta, SiteMeta
 
 
 class TestLayoutBase:
@@ -19,18 +17,18 @@ class TestLayoutBase:
     def test_head(self, fx_site_meta: SiteMeta):
         """Can set common page elements."""
         fx_site_meta.html_title = "x"
-        fx_site_meta.html_open_graph = {"x": "y"}
-        fx_site_meta.html_schema_org = json.dumps({"x": "y"})
+        fx_site_meta.html_open_graph = OpenGraphMeta(title="x", url="x")
+        fx_site_meta.html_schema_org = SchemaOrgMeta(headline="x", url="x")
         html = BeautifulSoup(self._render(fx_site_meta), parser="html.parser", features="lxml")
 
         assert html.head.title.string == fx_site_meta.html_title_suffixed
 
-        for key, val in fx_site_meta.html_open_graph.items():
+        for key, val in fx_site_meta.html_open_graph_tags.items():
             assert html.head.find(name="meta", property=key)["content"] == val
 
-        schema_org_item = json.loads(fx_site_meta.html_schema_org)
-        schema_org_page = json.loads(html.head.find(name="script", type="application/ld+json").string)
-        assert schema_org_item == schema_org_page
+        schema_org_item = fx_site_meta.html_schema_org_content
+        schema_org_page = html.head.find(name="script", type="application/ld+json").string
+        assert schema_org_item.strip() == schema_org_page.strip()
 
     def test_cache_busting(self, fx_site_meta: SiteMeta):
         """Can set cache busting query string param on relevant resources."""

@@ -1,4 +1,3 @@
-import json
 from datetime import UTC, datetime
 
 import pytest
@@ -6,7 +5,7 @@ from bs4 import BeautifulSoup
 from freezegun.api import FrozenDateTimeFactory
 from jinja2 import Environment, PackageLoader, select_autoescape
 
-from lantern.models.site import SiteMeta
+from lantern.models.site import OpenGraphMeta, SchemaOrgMeta, SiteMeta
 from tests.conftest import freezer_time
 
 
@@ -64,13 +63,15 @@ class TestMacrosSite:
         included are tested elsewhere.
         """
         freezer.move_to(fx_freezer_time)
-        expected = {"x": "y"}
-        template = """{% import '_macros/site.html.j2' as site %}{{ site.head_open_graph(meta.html_open_graph) }}"""
+        og = OpenGraphMeta(title="x", url="x")
+        template = (
+            """{% import '_macros/site.html.j2' as site %}{{ site.head_open_graph(meta.html_open_graph_tags) }}"""
+        )
         meta = self._site_meta()
-        meta.html_open_graph = expected
+        meta.html_open_graph = og
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
 
-        for key, val in expected.items():
+        for key, val in meta.html_open_graph_tags.items():
             assert html.head.find(name="meta", property=key)["content"] == val
 
     def test_head_favicon(self):
@@ -81,20 +82,22 @@ class TestMacrosSite:
         assert html.head.find(name="link", rel="icon") is not None
 
     @pytest.mark.parametrize(
-        "href", ["https://cdn.web.bas.ac.uk/libs/font-awesome-pro/5.13.0/css/all.min.css", "/static/css/main.css"]
+        "href", ["https://cdn.web.bas.ac.uk/libs/font-awesome-pro/5.13.0/css/all.min.css", "/static/css/main.css?v=000"]
     )
     def test_head_styles(self, href: str):
         """Can get static CSS references."""
-        template = """{% import '_macros/site.html.j2' as site %}{{ site.head_styles() }}"""
+        template = """{% import '_macros/site.html.j2' as site %}{{ site.head_styles('000') }}"""
         html = BeautifulSoup(self._render(template), parser="html.parser", features="lxml")
 
-        assert html.head.find("link", rel="stylesheet", href=lambda h: h and h.startswith(href)) is not None
+        assert html.head.find(name="link", rel="stylesheet", href=lambda h: h and h.startswith(href)) is not None
 
     def test_script_sentry(self):
         """Can get Sentry script from page."""
-        template = """{% import '_macros/site.html.j2' as site %}{{ site.script_sentry(meta.sentry_src) }}"""
+        expected = "/static/js/sentry-preload.js?v=000"
+        template = """{% import '_macros/site.html.j2' as site %}{{ site.script_sentry('000', meta.sentry_src) }}"""
         meta = self._site_meta()
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
+        assert html.head.find(name="script", src=expected) is not None
         assert html.head.find(name="script", src=meta.sentry_src) is not None
 
     def test_script_plausible(self):
@@ -104,6 +107,22 @@ class TestMacrosSite:
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
         assert html.head.find(name="script", attrs={"data-domain": meta.plausible_domain}) is not None
 
+    def test_script_turnstile(self):
+        """Can get Cloudflare Turnstile script from page."""
+        expected = "https://challenges.cloudflare.com/turnstile/v0/api.js"
+        template = """{% import '_macros/site.html.j2' as site %}{{ site.script_turnstile() }}"""
+        meta = self._site_meta()
+        html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
+        assert html.head.find(name="script", attrs={"src": expected}) is not None
+
+    def test_script_enhancements(self):
+        """Can get progressive enhancements script from page."""
+        expected = "/static/js/enhancements.js?v=000"
+        template = """{% import '_macros/site.html.j2' as site %}{{ site.script_enhancements('000') }}"""
+        meta = self._site_meta()
+        html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
+        assert html.head.find(name="script", src=expected) is not None
+
     def test_head_schema_org(self, freezer: FrozenDateTimeFactory, fx_freezer_time: datetime):
         """
         Can get schema.org script content with expected values from page.
@@ -112,21 +131,23 @@ class TestMacrosSite:
         included are tested elsewhere.
         """
         freezer.move_to(fx_freezer_time)
-        expected = {"x": "y"}
-        template = """{% import '_macros/site.html.j2' as site %}{{ site.script_schema_org(meta.html_schema_org) }}"""
+        so = SchemaOrgMeta(headline="x", url="x")
+        template = (
+            """{% import '_macros/site.html.j2' as site %}{{ site.script_schema_org(meta.html_schema_org_content) }}"""
+        )
         meta = self._site_meta()
-        meta.html_schema_org = json.dumps(expected)
+        meta.html_schema_org = so
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
-        data = json.loads(html.head.find(name="script", type="application/ld+json").string)
+        result = html.head.find(name="script", type="application/ld+json").string
 
-        assert expected == data
+        assert meta.html_schema_org_content.strip() == result.strip()
 
     @pytest.mark.parametrize(
         "meta",
         [
             SiteMeta(
                 base_url="x",
-                build_key="x",
+                build_key="000",
                 build_time=freezer_time(),
                 html_title="x",
                 sentry_src="x",
@@ -139,7 +160,7 @@ class TestMacrosSite:
             ),
             SiteMeta(
                 base_url="x",
-                build_key="x",
+                build_key="000",
                 html_title="x",
                 sentry_src="x",
                 plausible_domain="x",
@@ -151,8 +172,8 @@ class TestMacrosSite:
                 build_time=freezer_time(),
                 build_repo_ref="x",
                 build_repo_base_url="x",
-                html_open_graph={"x": "y"},
-                html_schema_org=json.dumps({"x": "y"}),
+                html_open_graph=OpenGraphMeta(title="x", url="x"),
+                html_schema_org=SchemaOrgMeta(headline="x", url="x"),
                 html_description="x",
             ),
         ],
@@ -171,27 +192,31 @@ class TestMacrosSite:
         assert html.head.meta["charset"] == "utf-8"
         assert html.head.title.string == meta.html_title_suffixed
 
-        assert html.head.find("meta", attrs={"name": "generator"})["content"] == meta.generator
-        assert html.head.find("meta", attrs={"name": "version"})["content"] == meta.version
-        assert html.head.find("meta", attrs={"name": "generated"})["content"] == meta.build_time.isoformat()
+        assert html.head.find(name="meta", attrs={"name": "generator"})["content"] == meta.generator
+        assert html.head.find(name="meta", attrs={"name": "version"})["content"] == meta.version
+        assert html.head.find(name="meta", attrs={"name": "generated"})["content"] == meta.build_time.isoformat()
         if meta.build_ref:
-            assert html.head.find("meta", attrs={"name": "store-ref"})["content"] == meta.build_ref.value
+            assert html.head.find(name="meta", attrs={"name": "store-ref"})["content"] == meta.build_ref.value
         if meta.html_description:
-            assert html.head.find("meta", attrs={"name": "description"})["content"] == meta.html_description
+            assert html.head.find(name="meta", attrs={"name": "description"})["content"] == meta.html_description
 
+        assert html.head.find(name="link", rel="stylesheet", href="/static/css/main.css?v=000") is not None
+
+        assert html.head.find(name="script", src="/static/js/sentry-preload.js?v=000") is not None
         assert html.head.find(name="script", src=meta.sentry_src) is not None
-        assert html.head.find(name="script", src=cf_turnstile) is not None
         assert html.head.find(name="script", attrs={"data-domain": meta.plausible_domain}) is not None
+        assert html.head.find(name="script", src=cf_turnstile) is not None
+        assert html.head.find(name="script", src="/static/js/enhancements.js?v=000") is not None
 
-        if meta.html_open_graph:
-            open_graph_key = next(iter(meta.html_open_graph.keys()))
-            open_graph_val = meta.html_open_graph[open_graph_key]
+        if meta.html_open_graph_tags:
+            open_graph_key = next(iter(meta.html_open_graph_tags.keys()))
+            open_graph_val = meta.html_open_graph_tags[open_graph_key]
             assert html.head.find(name="meta", property=open_graph_key)["content"] == open_graph_val
         else:
             # check no open graph meta tags are defined
             assert all("og:" not in tag.get("property", "") for tag in html.head.find_all(name="meta"))
 
-        if meta.html_schema_org:
+        if meta.html_schema_org_content:
             assert html.head.find(name="script", type="application/ld+json") is not None
         else:
             assert html.head.find(name="script", type="application/ld+json") is None

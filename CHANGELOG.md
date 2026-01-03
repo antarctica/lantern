@@ -58,6 +58,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Refactoring inline JavaScript in templates into standalone files
 * Refactored CSS build process consistency with new 'js' process, inc. renaming 'tailwind' development task to 'css'
 * Extracted Open Graph and Schema.org link preview metadata logic out of catalogue items into site data classes
+* Minor page performance improvements
 
 ### Removed
 

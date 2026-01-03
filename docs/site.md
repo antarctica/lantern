@@ -4,7 +4,7 @@ The Data Catalogue website is built as a static site using the [Site Exporter](/
 
 ## Site access
 
-The static site is publicly accessible without authentication. It is available at:
+The static site is accessible without authentication via a placeholder index page at:
 
 - [data.bas.ac.uk](https://data.bas.ac.uk/-/index) (production)
 - [data-testing.bas.ac.uk](https://data-testing.bas.ac.uk/-/index) (integration/testing)
@@ -123,6 +123,16 @@ Secondary top-level items:
          ├── heartbeat.txt
          └── manifest.webmanifest
 ```
+
+## HTML metadata
+
+HTML metadata elements are included by the `html_head` [Site Macro](#site-macros) for:
+
+- `viewport` - for enabling [Responsive design](#responsive-design)
+- `generator` and `version` - for reporting the application name and version (for troubleshooting)
+- `generated` - when a page was generated (for troubleshooting)
+- `store-ref` - optional commit associated with the site build's [Store](/docs/architecture.md#stores) (for troubleshooting)
+- `description` - page summary (for SEO)
 
 ## Site navigation
 
@@ -245,8 +255,8 @@ the search path for content to be set dynamically at runtime. This content is ne
 classes used in the built static site.
 
 > [!NOTE]
-> Using the [Site Templates](#templates) as the content path will not work as they contain interpolated class names
-> which the Tailwind compiler cannot resolve, which would lead to missing styles.
+> Using the [Site Templates](#templates) as the content path will not work, as they contain interpolated class names
+> the Tailwind compiler cannot resolve, causing missing styles.
 
 Compiled and minified output MUST be stored as `src/lantern/resources/css/main.css`, as this file will be copied into
 the site build directory and referenced within generated pages.
@@ -313,17 +323,9 @@ version as a SHA1 hash, e.g. `main.css?v=f053ddb` for version 0.1.0.
 > Asset references are not automatically amended, make sure any references in templates are suitably configured.
 <!-- pyml enable md028 -->
 
-## HTML metadata
+## Security
 
-HTML metadata elements are included by the `html_head` site macro for:
-
-- `viewport` - for enabling [Responsive design](#responsive-design)
-- `generator` and `version` - for reporting the application name and version
-- `generated` - when the page was generated (for debugging)
-- `store-ref` - optional commit associated with the site build's [Store](/docs/architecture.md#stores) (for debugging)
-- `description` - page summary
-
-## Bot protection
+### Bot protection
 
 For features vulnerable to spam and abuse, such as the [Item Enquires](#item-enquires),
 [Cloudflare Turnstile](https://www.cloudflare.com/en-gb/application-services/products/turnstile/) is used to
@@ -340,7 +342,7 @@ Templates use these options from the app `lantern.Config` class:
 - `TEMPLATES_CACHE_BUST_VALUE`: See [Cache busting](#cache-busting)
 - `TEMPLATES_ITEM_CONTACT_ENDPOINT`: See [Contact form](#item-enquires)
 - `TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY`: Turnstile site key for item form [Bot Protection](#bot-protection)
-- `TEMPLATES_ITEM_MAPS_ENDPOINT`: See [Extent maps](#extent-maps)
+- `TEMPLATES_ITEM_MAPS_ENDPOINT`: See [Extent maps](#item-extent-maps)
 - `TEMPLATES_ITEM_VERSIONS_ENDPOINT`: Base URL for constructing links to view
   [Record Revisions](/docs/data-model.md#record-revisions)
 - `TEMPLATES_PLAUSIBLE_DOMAIN`: Plausible site identifier for [Frontend Analytics](/docs/monitoring.md#plausible)
@@ -396,7 +398,7 @@ Macros are used extensively within templates, to emulate the component pattern c
 
 #### Common macros
 
-`src/lantern/resources/templates/_macros/site.html.j2` defines macros for:
+`src/lantern/resources/templates/_macros/common.html.j2` defines macros for:
 
 - classes for layouts, links, buttons, tables, icons and other common elements
 - common identifiers for 'back to top' links, user feedback widget triggers, etc.
@@ -474,7 +476,7 @@ transfer option online resource. Where the *title* is not set, the file format i
 For service based options, *labels* are hard-coded to the service type name and *descriptions* are disabled as
 collapsible sections are used for showing service endpoints and usage instructions.
 
-#### Extent maps
+#### Item extent maps
 
 The extent tab within the [Item Templates](#item-templates) includes a map for the Item's geographic extent. These maps
 use the [BAS Embedded Maps Service](https://github.com/antarctica/embedded-maps), embedded as an `<iframe>` with a src
@@ -489,7 +491,7 @@ the user.
 To protect against spam and abuse, the form includes a hidden [Bot Protection](#bot-protection) field, validated in the
 Power Automate flow. Where this validation fails, the flow returns an error page to the user.
 
-#### Markdown
+#### Item Markdown
 
 Freetext item properties including title, abstract, summary, lineage, etc. support Markdown formatting.
 

@@ -309,8 +309,10 @@ The `lantern.models.site.SiteMeta` Python data class implements this concept.
 
 ## Export metadata
 
-Exporter metadata is a superset of [Site metadata](#static-site-metadata) including additional properties such as the
-export path and keys for accessing [Administrative Metadata](#item-administrative-metadata) to avoid needing to pass
-[Config](/docs/config.md) and other related instances to exporters.
+Exporter metadata is a superset of [Site metadata](#static-site-metadata) including additional properties without
+passing [Config](/docs/config.md) instances to exporters. This includes:
+
+- the export path
+- keys for accessing [Administrative Metadata](#item-administrative-metadata) .
 
 The `lantern.models.site.ExportMeta` Python data class implements this concept, inheriting from `SiteMeta`.

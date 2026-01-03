@@ -108,6 +108,9 @@ environment.
 
 ### Power Automate SAN proxy
 
+> [!IMPORTANT]
+> This proxy is not used for operational reasons.
+
 1. import `resources/flows/lantern-san-proxy.zip` into Power Automate as a new flow
 2. configure the flow connections and generate an HTTP endpoint
 3. set the relevant [Config](/docs/config.md) option in the `.env` template and Ansible Vault for use in the

@@ -202,7 +202,7 @@ If additional item relationships are needed:
 
 1. create a new class under `lantern.models.item.catalogue.distributions` inheriting from `Distribution` or a relevant
    subclass
-2. if needed register new media-types under the Metadata Standards resources site (`metadata-resources.data.bas.ac.uk`)
+2. if needed, register new media-types under the Metadata Standards resources site (`metadata-resources.data.bas.ac.uk`)
 3. configure the new class:
    - set the `matches` class method to determine a exclusive match for the distribution (typically via media types)
    - add an item to the `lantern.models.item.catalogue.enums.DistributionType` enum for the distribution type

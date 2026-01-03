@@ -504,3 +504,10 @@ formatting will appear.
 
 For development, use the [Formatting Test Record](/tests/resources/records/item_cat_formatting.py) for more exciting
 examples.
+
+#### Item Sharing previews
+
+Item pages include metadata to improve how items appear when shared on social media and messaging platforms:
+
+- [Open Graph](https://ogp.me) is included as part of [Site Metadata](/docs/data-model.md#static-site-metadata)
+- limited [Schema.org](https://schema.org) (JSON-LD) metadata is implemented via and for Microsoft Teams

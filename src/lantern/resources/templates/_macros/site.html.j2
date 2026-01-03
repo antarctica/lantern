@@ -7,8 +7,8 @@
   <head>
     {{ head_meta(data) }}
     {{ head_title(data.html_title_suffixed) }}
-    {% if data.html_open_graph %}
-      {{ head_open_graph(data.html_open_graph) }}
+    {% if data.html_open_graph_tags %}
+      {{ head_open_graph(data.html_open_graph_tags) }}
     {% endif %}
     {{ head_favicon(data.build_key) }}
     {{ head_styles(data.build_key) }}
@@ -53,8 +53,8 @@
   {{ script_plausible(data.plausible_domain) }}
   {{ script_turnstile() }}
   {{ script_enhancements(data.build_key) }}
-  {% if data.html_schema_org %}
-    {{ script_schema_org(data.html_schema_org) }}
+  {% if data.html_schema_org_content %}
+    {{ script_schema_org(data.html_schema_org_content) }}
   {% endif %}
 {% endmacro %}
 
@@ -75,8 +75,10 @@
   <script defer src="/static/js/enhancements.js?v={{ build_key }}"></script>
 {% endmacro %}
 
-{% macro script_schema_org(data) %}
-  <script defer type="application/ld+json">{{ data }}</script>
+{% macro script_schema_org(value) %}
+  <script defer rel="alternate" type="application/ld+json">
+{{ value }}
+  </script>
 {% endmacro %}
 
 {% macro primary_nav() %}

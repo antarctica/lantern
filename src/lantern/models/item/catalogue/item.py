@@ -1,4 +1,3 @@
-import json
 from typing import Any
 
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
@@ -26,7 +25,7 @@ from lantern.models.item.catalogue.tabs import (
     Tab,
 )
 from lantern.models.record.revision import RecordRevision
-from lantern.models.site import SiteMeta
+from lantern.models.site import OpenGraphMeta, SchemaOrgAuthor, SchemaOrgMeta, SiteMeta
 from lantern.stores.base import SelectRecordProtocol
 
 
@@ -210,69 +209,41 @@ class ItemCatalogue(ItemBase):
         return self._meta
 
     @property
-    def _html_open_graph(self) -> dict[str, str]:
+    def _html_open_graph(self) -> OpenGraphMeta:
         """
-        Open Graph meta tags.
+        Open Graph metadata tags.
 
-        For item link previews and unfurling in social media sites, chat clients, etc.
-        See https://ogp.me/ for details.
         See `self.schema_org` for more specific Microsoft Teams support.
+
+        `self._dates` returns values as `FormattedDates` not `Date` so `.datetime` returns a pre-formatted value.
         """
-        tags = {
-            "og:locale": "en_GB",
-            "og:site_name": "BAS Data Catalogue",
-            "og:type": "article",
-            "og:title": self.title_plain,
-            "og:url": f"{self._meta.base_url}/items/{self.resource_id}",
-        }
-
-        if self.summary_plain:
-            tags["og:description"] = self.summary_plain
-        if self._dates.publication:
-            # noinspection PyUnresolvedReferences
-            tags["og:article:published_time"] = self._dates.publication.datetime  # ty: ignore[unresolved-attribute]
-        if self.overview_graphic:
-            tags["og:image"] = self.overview_graphic.href
-
-        return tags
+        return OpenGraphMeta(
+            title=self.title_plain,
+            url=f"{self._meta.base_url}/items/{self.resource_id}",
+            description=self.summary_plain,
+            image=self.overview_graphic.href if self.overview_graphic else None,
+            published_at=self._dates.publication.datetime if self._dates.publication else None,  # ty:ignore[unresolved-attribute]
+        )
 
     @property
-    def _html_schema_org(self) -> str:
-        """
-        Schema.org metadata.
-
-        Support is limited to item link unfurling in Microsoft Teams.
-        See https://learn.microsoft.com/en-us/microsoftteams/platform/messaging-extensions/how-to/micro-capabilities-for-website-links?tabs=article
-
-        Other Schema.org use-cases may work but are not tested.
-        """
-        doc = {
-            "@context": "http://schema.org/",
-            "@type": "Article",
-            "name": "BAS Data Catalogue",
-            "headline": self.title_plain,
-            "url": f"{self._meta.base_url}/items/{self.resource_id}",
-        }
-
-        if self.summary_plain:
-            doc["description"] = self.summary_plain
-
-        if self.overview_graphic:
-            doc["image"] = self.overview_graphic.href
-
-        author_names = []
+    def _html_schema_org(self) -> SchemaOrgMeta:
+        """Schema.org metadata."""
+        authors: list[SchemaOrgAuthor] = []
         for author in self.contacts.filter(roles=ContactRoleCode.AUTHOR):
             if author.individual is not None:
-                author_names.append(author.individual.name)
-                continue
-            author_names.append(author.organisation.name)  # ty: ignore[possibly-missing-attribute]
-        if len(author_names) > 0:
-            # set as comma separated list of names, except last element which uses '&'
-            doc["creator"] = (
-                ", ".join(author_names[:-1]) + " & " + author_names[-1] if len(author_names) > 1 else author_names[0]
-            )
+                authors.append(SchemaOrgAuthor(type_="Person", name=author.individual.name, url=author.individual.href))
+            elif author.organisation is not None:  # pragma: no branch
+                authors.append(
+                    SchemaOrgAuthor(type_="Organization", name=author.organisation.name, url=author.organisation.href)
+                )
 
-        return json.dumps(doc, indent=2)
+        return SchemaOrgMeta(
+            headline=self.title_plain,
+            url=f"{self._meta.base_url}/items/{self.resource_id}",
+            description=self.summary_plain,
+            image=self.overview_graphic.href if self.overview_graphic else None,
+            creator=authors,
+        )
 
     @property
     def page_header(self) -> PageHeader:

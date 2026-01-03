@@ -4,7 +4,7 @@ from urllib.parse import unquote, urlparse
 from lantern.lib.metadata_library.models.record.elements.distribution import Distribution
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
-from lantern.models.verification.enums import VerificationDistributionType, VerificationType
+from lantern.models.verification.enums import VerificationDistributionType, VerificationResult, VerificationType
 from lantern.models.verification.jobs import VerificationJob
 from lantern.models.verification.types import VerificationContext
 
@@ -124,11 +124,18 @@ class VerificationDistribution:
             return None
         return int(self._distribution.transfer_option.size.magnitude)
 
-    def _make_job(self, job_type: VerificationType, href: str, context: VerificationContext) -> VerificationJob:
+    def _make_job(
+        self,
+        job_type: VerificationType,
+        href: str,
+        context: VerificationContext,
+        init_result: VerificationResult = VerificationResult.PENDING,
+    ) -> VerificationJob:
         return VerificationJob(
             type=job_type,
             url=href,
             context=context,
+            result=init_result,
             data={"file_identifier": self._file_identifier, "distribution_type": self._type},
         )
 
@@ -137,6 +144,8 @@ class VerificationDistribution:
         Generate verification jobs for distribution.
 
         Appends additional job context as needed.
+
+        SAN jobs are marked as skipped as they can't be verified automatically.
         """
         jobs = [
             self._make_job(
@@ -208,7 +217,14 @@ class VerificationDistribution:
                     },
                 ),
             )
-            jobs.append(self._make_job(job_type=VerificationType.SAN_REFERENCE, href=self._href_raw, context=context_))
+            jobs.append(
+                self._make_job(
+                    job_type=VerificationType.SAN_REFERENCE,
+                    href=self._href_raw,
+                    context=context_,
+                    init_result=VerificationResult.SKIP,
+                )
+            )
         elif self._type == VerificationDistributionType.ARCGIS_LAYER:
             context_ = cast(VerificationContext, cast(object, {"CHECK_FUNC": "check_url_arcgis", **context}))
             jobs.append(

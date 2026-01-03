@@ -1,7 +1,8 @@
+import json
 from dataclasses import asdict, dataclass, field, fields
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from lantern.config import Config
 from lantern.lib.metadata_library.models.record.elements.common import Date
@@ -9,6 +10,116 @@ from lantern.lib.metadata_library.models.record.utils.admin import Administratio
 from lantern.models.item.base.elements import Link
 from lantern.models.item.catalogue.elements import FormattedDate
 from lantern.stores.gitlab import GitLabStore
+
+
+@dataclass(kw_only=True)
+class OpenGraphMeta:
+    """
+    OpenGraph metadata for page link previews and unfurling in social media sites, chat clients, etc.
+
+    See https://ogp.me/ for details.
+
+    `published_at` should be an ISO 8601 formatted date string (assumed to be returned by `FormattedDate.datetime`)
+    """
+
+    locale: str = field(default="en_GB", metadata={"name": "og:locale"})
+    site_name: str = field(default="BAS Data Catalogue", metadata={"name": "og:site_name"})
+    type_: str = field(default="article", metadata={"name": "og:type"})
+    title: str = field(metadata={"name": "og:title"})
+    url: str = field(metadata={"name": "og:url"})
+    description: str | None = field(default=None, metadata={"name": "og:description"})
+    image: str | None = field(default=None, metadata={"name": "og:image"})
+    published_at: str | None = field(default=None, metadata={"name": "og:article:published_time"})
+
+    def dumps(self) -> dict[str, str]:
+        """Compiled tags."""
+        tags = {}
+        for f in fields(self):
+            value = getattr(self, f.name)
+            if value:
+                tags[f.metadata["name"]] = value
+        return tags
+
+
+@dataclass(kw_only=True)
+class SchemaOrgAuthor:
+    """Schema.org metadata for an author (Person or Organization)."""
+
+    type_: Literal["Person", "Organization"] = field(metadata={"name": "@type"})
+    name: str = field(metadata={"name": "name"})
+    url: str | None = field(default=None, metadata={"name": "url"})
+
+    def dumps(self) -> dict[str, str]:
+        """Compiled metadata."""
+        items = {}
+        for f in fields(self):
+            value = getattr(self, f.name)
+            if value:
+                items[f.metadata["name"]] = value
+        return items
+
+
+@dataclass(kw_only=True)
+class SchemaOrgMeta:
+    """
+    Schema.org metadata for page link previews and unfurling in social media sites, chat clients, etc.
+
+    Support is limited to item link unfurling in Microsoft Teams.
+    See https://learn.microsoft.com/en-us/microsoftteams/platform/messaging-extensions/how-to/micro-capabilities-for-website-links?tabs=article
+    """
+
+    context: Literal["https://schema.org/"] = field(default="https://schema.org/", metadata={"name": "@context"})
+    type_: Literal["Article"] = field(default="Article", metadata={"name": "@type"})
+    name: str = field(default="BAS Data Catalogue", metadata={"name": "name"})
+    headline: str = field(metadata={"name": "headline"})
+    url: str = field(metadata={"name": "url"})
+    description: str | None = field(default=None, metadata={"name": "description"})
+    image: str | None = field(default=None, metadata={"name": "image"})
+    creator: list[SchemaOrgAuthor] | None = field(default_factory=list, metadata={"name": "creator"})
+
+    def _dumps(self) -> dict[str, str]:
+        """Compiled metadata."""
+        doc = {}
+        for f in fields(self):
+            value = getattr(self, f.name)
+            if isinstance(value, str):
+                doc[f.metadata["name"]] = value
+            elif isinstance(value, list) and value:
+                doc[f.metadata["name"]] = [v.dumps() for v in value if hasattr(v, "dumps")]
+        return doc
+
+    def __str__(self) -> str:
+        """String representation for script tag."""
+        return json.dumps(self._dumps(), indent=2)
+
+
+@dataclass
+class SitePageMeta:
+    """Metadata for a static site page."""
+
+    title: str
+    url: str
+    description: str | None = None
+    meta: bool = True
+
+    @property
+    def html_title(self) -> str:
+        """HTML title."""
+        return self.title
+
+    @property
+    def open_graph(self) -> OpenGraphMeta | None:
+        """Optional OpenGraph metadata."""
+        if not self.meta:
+            return None
+        return OpenGraphMeta(title=self.title, url=self.url, description=self.description)
+
+    @property
+    def schema_org(self) -> SchemaOrgMeta | None:
+        """Optional Schema.org metadata."""
+        if not self.meta:
+            return None
+        return SchemaOrgMeta(type_="Article", headline=self.title, url=self.url, description=self.description)
 
 
 @dataclass(kw_only=True)
@@ -31,7 +142,7 @@ class SiteMeta:
     - build_repo_ref: optional commit reference of a working copy associated with the build
     - build_repo_base_url: optional URL to a remote the `build_repo_ref` reference exists within
     - html_open_graph: optional Open Graph metadata
-    - html_schema_org: optional Schema.org metadata
+    - html_schema_org: optional URL to Schema.org metadata
     - html_description: optional description meta tag
     """
 
@@ -49,8 +160,8 @@ class SiteMeta:
     fallback_email: str = "magic@bas.ac.uk"
     build_repo_ref: str | None = None
     build_repo_base_url: str | None = None
-    html_open_graph: dict = field(default_factory=dict)
-    html_schema_org: str | None = None
+    html_open_graph: OpenGraphMeta | None = None
+    html_schema_org: SchemaOrgMeta | None = None
     html_description: str | None = None
 
     @property
@@ -79,6 +190,20 @@ class SiteMeta:
     def build_time_fmt(self) -> FormattedDate:
         """Build time as formatted date for templates."""
         return FormattedDate.from_rec_date(Date(date=datetime.fromisoformat(self.build_time.isoformat())))
+
+    @property
+    def html_open_graph_tags(self) -> dict[str, str] | None:
+        """Compiled Open Graph tags for HTML head."""
+        if not self.html_open_graph:
+            return None
+        return self.html_open_graph.dumps()
+
+    @property
+    def html_schema_org_content(self) -> str | None:
+        """Schema.org script content."""
+        if not self.html_schema_org:
+            return None
+        return str(self.html_schema_org)
 
     @classmethod
     def from_config_store(cls, config: Config, store: GitLabStore | None = None, **kwargs: Any) -> "SiteMeta":

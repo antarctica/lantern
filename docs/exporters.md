@@ -206,6 +206,9 @@ Outputs HTML pages styled using [Site Templates](/docs/site.md#item-templates) f
 - legal policies (accessibility, copyright, cookies and privacy)
 - content formatting guide (for abstracts, etc.)
 
+Sharing previews, similar to [Item Pages](/docs/site.md#item-sharing-previews), are enabled via
+`lantern.models.site.SitePageMeta` instances with manually defined values.
+
 ### Site exporter
 
 `lantern.exporters.site.SiteExporter`

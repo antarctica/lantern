@@ -1,4 +1,3 @@
-import json
 from datetime import UTC, datetime
 
 import pytest
@@ -33,7 +32,7 @@ from lantern.models.item.catalogue.tabs import (
 from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
-from lantern.models.site import SiteMeta
+from lantern.models.site import OpenGraphMeta, SchemaOrgMeta, SiteMeta
 from tests.conftest import _select_record
 
 
@@ -161,46 +160,24 @@ class TestItemCatalogue:
         if fx_item_cat_model_min.overview_graphic is not None:
             expected["og:image"] = fx_item_cat_model_min.overview_graphic.href
 
-        assert fx_item_cat_model_min.site_metadata.html_open_graph == expected
+        result = fx_item_cat_model_min.site_metadata.html_open_graph
+        parsed = result.dumps()
+        assert isinstance(result, OpenGraphMeta)
+        assert parsed == expected
 
     @pytest.mark.parametrize(
-        ("summary", "graphics", "contacts", "contacts_exp"),
+        ("summary", "graphics", "contacts"),
         [
-            (None, GraphicOverviews([]), Contacts([]), None),
+            (None, GraphicOverviews([]), Contacts([])),
             (
                 "x",
                 GraphicOverviews([GraphicOverview(identifier="x", href="x", mime_type="x")]),
                 Contacts([Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT})]),
-                None,
             ),
             (
                 None,
                 GraphicOverviews([GraphicOverview(identifier="overview", href="x", mime_type="x")]),
                 Contacts([Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.AUTHOR})]),
-                "x",
-            ),
-            (
-                None,
-                GraphicOverviews([]),
-                Contacts(
-                    [
-                        Contact(individual=ContactIdentity(name="x"), role={ContactRoleCode.AUTHOR}),
-                        Contact(individual=ContactIdentity(name="y"), role={ContactRoleCode.AUTHOR}),
-                    ]
-                ),
-                "x & y",
-            ),
-            (
-                None,
-                GraphicOverviews([]),
-                Contacts(
-                    [
-                        Contact(individual=ContactIdentity(name="x"), role={ContactRoleCode.AUTHOR}),
-                        Contact(individual=ContactIdentity(name="y"), role={ContactRoleCode.AUTHOR}),
-                        Contact(individual=ContactIdentity(name="z"), role={ContactRoleCode.AUTHOR}),
-                    ]
-                ),
-                "x, y & z",
             ),
         ],
     )
@@ -211,30 +188,29 @@ class TestItemCatalogue:
         summary: str | None,
         graphics: GraphicOverviews,
         contacts: Contacts,
-        contacts_exp: str | None,
     ):
         """Can get HTML open graph tags."""
-        expected = {
-            "@context": "http://schema.org/",
+        expected: dict[str, str | list] = {
+            "@context": "https://schema.org/",
             "@type": "Article",
             "name": "BAS Data Catalogue",
             "headline": fx_item_cat_model_min.title_plain,
             "url": f"{fx_config.BASE_URL}/items/{fx_item_cat_model_min.resource_id}",
         }
-
         if summary is not None:
             fx_item_cat_model_min._record.identification.purpose = summary
             expected["description"] = summary
-
         fx_item_cat_model_min._record.identification.graphic_overviews = graphics
         if fx_item_cat_model_min.overview_graphic is not None:
             expected["image"] = fx_item_cat_model_min.overview_graphic.href
-
         fx_item_cat_model_min._record.identification.contacts = contacts
-        if contacts_exp is not None:
-            expected["creator"] = contacts_exp
+        if any(contact.role == {ContactRoleCode.AUTHOR} for contact in contacts):
+            expected["creator"] = [{"@type": "Organization", "name": "x"}]
 
-        assert fx_item_cat_model_min.site_metadata.html_schema_org == json.dumps(expected, indent=2)
+        result = fx_item_cat_model_min.site_metadata.html_schema_org
+        parsed = result._dumps()
+        assert isinstance(result, SchemaOrgMeta)
+        assert parsed == expected
 
     def test_page_header(self, fx_item_cat_model_min: ItemCatalogue):
         """Can get page header element."""

@@ -297,7 +297,13 @@ used by each job. Various enumerations are used to define values for check types
 
 ## Static site metadata
 
-Site metadata represents context about a catalogue site, such as its URL base, build time, etc.
+Site metadata represents site-wide information and page specific context, including:
+
+- base URL, build time, etc.
+- [Open Graph](https://ogp.me) metadata
+  - which can be constructed via the `lantern.models.site.OpenGraphMeta` class
+- [Schema.org](https://schema.org) metadata string
+  - which can be constructed via the `lantern.models.site.SchemaOrgMeta` class
 
 The `lantern.models.site.SiteMeta` Python data class implements this concept.
 

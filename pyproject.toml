@@ -93,8 +93,9 @@ local-gitlab-stop = { cmd = "docker-compose -f {gitlab_local_compose} down", hel
 release = { cmd = "python -m tasks.release", help = "Prepapre app release" }
 config-init = { cmd = "op inject --in-file resources/env/.env.tpl --out-file .env", help = "Initialise config file" }
 config-check = { cmd = "python -m tasks.config", help = "Check app config" }
-tailwind = { cmd = "python -m tasks.tailwind", help = "Regenerate tailwind styles" }
+css = { cmd = "python -m tasks.css", help = "Regenerate CSS via tailwind" }
 css-audit = { cmd = "python -m tasks.css_audit", help = "List CSS styles used in app templates" }
+js = { cmd = "python -m tasks.js", help = "Regenerate JavaScript" }
 build-test-records = { cmd = "python tests/scripts/build_test.py", help = "Build test records as a catalogue site" }
 build-test-cache = { cmd = "python tests/resources/stores/gitlab_cache/refresh.py", help = "Build test/resource cache" }
 # fake CLI

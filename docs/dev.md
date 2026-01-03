@@ -269,9 +269,9 @@ If additional item relationships are needed:
 > [!IMPORTANT]
 > Follow the [Styling Guidelines](/docs/site.md#styling-guidelines) when updating styles.
 
-1. if needed, add styles/rules to `src/lantern/resources/css/main.css.j2`
-2. apply classes as necessary to elements in [Templates](/docs/site.md#templates)
-3. run the `tailwind` [Development Task](/docs/dev.md#development-tasks) which will:
+1. make changes to `src/lantern/resources/templates/_assets/css/main.css.j2`
+2. apply classes as necessary to elements in [HTML Templates](/docs/site.md#templates)
+3. run the `css` [Development Task](/docs/dev.md#development-tasks) which will:
    - build a temporary [Static Site](/docs/architecture.md#static-site) containing [Test Records](#test-records)
    - run Tailwind compiler against this site, adding or removing classes as needed
    - copy the resulting minified CSS to `src/lantern/resources/css/main.css`
@@ -280,7 +280,20 @@ If additional item relationships are needed:
    - needed as builds reference a local copy of `main.css` that will need refreshing
 
 > [!TIP]
-> You can run `uv run task tailwind && uv run task build-test-records` to chain these tasks together.
+> You can run `uv run task css && uv run task build-test-records` to chain these tasks together.
+
+### Updating scripts
+
+1. make changes to `src/lantern/resources/templates/_assets/js/*.js.j2` and/or [Asset Macros](/docs/site.md#asset-macros)
+2. if needed, make changes to [HTML Templates](/docs/site.md#templates) and/or [Common Macros](/docs/site.md#common-macros)
+3. run the `js` [Development Task](/docs/dev.md#development-tasks) which will:
+   - template out scripts to `src/lantern/resources/js/`
+4. run the `build-test-records` or `build-records` [Development Task](/docs/dev.md#development-tasks) to rebuild the
+   static site
+   - needed as builds reference local copies of scripts that will need refreshing
+
+> [!TIP]
+> You can run `uv run task js && uv run task build-test-records` to chain these tasks together.
 
 ### Adding development tasks
 

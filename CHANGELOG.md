@@ -23,7 +23,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Support for v2 MAGIC discovery profile
 * Support for initiative records as 'project' items
 * Support for container and resource 'super types' to more flexibly support similar item types
-* Support for SAN based distribution options
+* Support for SAN based distribution options (skipped during verification)
 * Support for running GitLab instance locally in development environments
 * Additional validation for MAGIC Discovery profile Req. 06 (released date presence)
 * Setup documentation for Plausible
@@ -58,6 +58,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Refactoring inline JavaScript in templates into standalone files
 * Refactored CSS build process consistency with new 'js' process, inc. renaming 'tailwind' development task to 'css'
 * Extracted Open Graph and Schema.org link preview metadata logic out of catalogue items into site data classes
+* Minor page performance improvements
 
 ### Removed
 

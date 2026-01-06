@@ -63,8 +63,11 @@ Checks are run for:
 - Item DOI redirects
 - Item distribution options (as links on Item pages)
 - File distribution options (with special support for SharePoint and NORA hosted files)
-- SAN reference distribution options
 - ArcGIS layers and services (via the ArcGIS API)
+
+Checks are skipped for:
+
+- SAN reference distribution options (as there is no allowed access method)
 
 For Record and Item checks, all records in the [Store](/docs/architecture.md) are checked.
 
@@ -100,8 +103,12 @@ See the [Setup](/docs/setup.md#power-automate-sharepoint-proxy) docs for more in
 
 #### Verification SAN proxy
 
-SAN references cannot be accessed anonymously. A Power Automate flow is used as a basic proxy to validate the specified
-path exists on the SAN. This check does not verify the path contains expected data (as we don't know what to expect).
+> [!IMPORTANT]
+> This proxy is not used for operational reasons.
+
+SAN references cannot be accessed anonymously. A Power Automate flow can be used as a basic proxy to validate the
+specified path exists on the SAN. This check does not verify the path contains expected data (as we don't know what to
+expect).
 
 See the [Setup](/docs/setup.md#power-automate-san-proxy) docs for more information on setting up this proxy.
 

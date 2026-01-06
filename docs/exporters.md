@@ -200,7 +200,7 @@ internal `lantern.exporters.resources` module into the static site.
 
 `lantern.exporters.site.SitePagesExporter`
 
-Outputs HTML pages styled using [Site Templates](/docs/site.md#item-templates) for:
+Outputs a set of HTML pages using [Site Templates](/docs/site.md#item-templates) for:
 
 - 404 error page
 - legal policies (accessibility, copyright, cookies and privacy)

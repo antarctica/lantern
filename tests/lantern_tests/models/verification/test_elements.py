@@ -12,7 +12,7 @@ from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
 from lantern.models.verification.elements import VerificationDistribution, VerificationRecord
-from lantern.models.verification.enums import VerificationDistributionType, VerificationType
+from lantern.models.verification.enums import VerificationDistributionType, VerificationResult, VerificationType
 from lantern.models.verification.types import VerificationContext
 
 
@@ -253,7 +253,11 @@ class TestVerificationDistribution:
         assert job.context["JSON"] == {"path": "/foo bar.jpg"}
 
     def test_job_san(self):
-        """Specifically check that SAN reference jobs are generated correctly."""
+        """
+        Specifically check that SAN reference jobs are generated correctly.
+
+        Including SKIP status.
+        """
         proxy = "https://proxy.com"
         record_distribution = Distribution(
             distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
@@ -273,6 +277,7 @@ class TestVerificationDistribution:
 
         assert job is not None
         assert job.type == VerificationType.SAN_REFERENCE
+        assert job.result == VerificationResult.SKIP
         assert job.context["URL"] == proxy
         assert job.context["JSON"] == {"path": "/data/x"}
 

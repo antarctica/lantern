@@ -402,7 +402,7 @@ Power Automate flow. Where this validation fails, the flow returns an error page
 
 #### Item Markdown
 
-Freetext item properties including title, abstract, summary, lineage, etc. support Markdown formatting.
+Free-text item properties including title, abstract, summary, lineage, etc. support Markdown formatting.
 
 In addition to typical syntax, some additional features are supported:
 

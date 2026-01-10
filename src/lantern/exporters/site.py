@@ -248,22 +248,22 @@ class SitePagesExporter(Exporter):
             "_views/legal/accessibility.html.j2": SitePageMeta(
                 title="Accessibility Statement",
                 url=f"{self._meta.base_url}/legal/accessibility",
-                description="Basic accessibility check for BAS Data Catalogue",
+                description="Basic accessibility check for the BAS Data Catalogue",
             ),
             "_views/legal/cookies.html.j2": SitePageMeta(
                 title="Cookies Policy",
                 url=f"{self._meta.base_url}/legal/cookies",
-                description="Cookies policy for BAS Data Catalogue",
+                description="Cookies policy for the BAS Data Catalogue",
             ),
             "_views/legal/copyright.html.j2": SitePageMeta(
                 title="Copyright Policy",
                 url=f"{self._meta.base_url}/legal/copyright",
-                description="Copyright policy for BAS Data Catalogue",
+                description="Copyright policy for the BAS Data Catalogue",
             ),
             "_views/legal/privacy.html.j2": SitePageMeta(
                 title="Privacy Policy",
                 url=f"{self._meta.base_url}/legal/privacy",
-                description="Privacy policy for BAS Data Catalogue",
+                description="Privacy policy for the BAS Data Catalogue",
             ),
             "_views/-/formatting.html.j2": SitePageMeta(
                 title="Formatting Guide",

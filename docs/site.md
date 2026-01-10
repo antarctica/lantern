@@ -133,18 +133,6 @@ the range of colours used across the site. Update this document if changing or a
 > [!TIP]
 > Run the `css-audit` [Development Task](/docs/dev.md#development-tasks) to check currently used classes in templates.
 
-#### Icons
-
-[Font Awesome Pro 5](https://fontawesome.com/v5/search?o=r) is available for adding icons.
-
-Icons SHOULD be used sparingly. For consistency these icons SHOULD be used where relevant:
-
-- restricted: `far fa-lock`
-- external link: `far fa-external-link`
-
-> [!TIP]
-> In templates, [Macros](#common-macros) are available to include these icons.
-
 ### Style definitions
 
 Styles are defined in `src/lantern/resources/templates/_assets/css/main.css.j2`, which is a Jinja2 template to allow
@@ -160,6 +148,23 @@ the site build directory and referenced within generated pages.
 
 > [!TIP]
 > See the [Development](/docs/dev.md#updating-styles) documentation for how to update styles.
+
+## Icons
+
+[Font Awesome Pro 7](https://fontawesome.com/v7/search?o=r) MAY be used for adding icons.
+
+Font Awesome is included via a hosted [Kit](https://docs.fontawesome.com/web/setup/use-kit).
+
+> [!IMPORTANT]
+> Icons SHOULD be used sparingly and MUST NOT exclusively convey context or meaning.
+
+### Icons audit
+
+An [Icon Audit](/docs/supplemental/icon-audit.md) and reference is manually maintained to coordinate and constrain
+icons used across the site. Update this document if changing or adding icons.
+
+> [!TIP]
+> Run the `icons-audit` [Development Task](/docs/dev.md#development-tasks) to check currently used classes in templates.
 
 ## Scripts
 

@@ -103,7 +103,7 @@ class Distribution(ABC):
         """
         Font Awesome icon classes to display in action link or trigger.
 
-        See https://fontawesome.com/v5/search?o=r&s=regular for choices (in available version and recommended style).
+        See https://fontawesome.com/v7/search?ip=classic&s=regular for choices (in available version and recommended style).
         """
         ...
 
@@ -112,9 +112,9 @@ class Distribution(ABC):
         """
         Font Awesome icon classes to display in action link or trigger in a restricted context.
 
-        See https://fontawesome.com/v5/search?o=r&s=regular for choices (in available version and recommended style).
+        See https://fontawesome.com/v7/search?ip=classic&s=regular for choices (in available version and recommended style).
         """
-        return "far fa-lock-alt"
+        return "fa-regular fa-lock-keyhole"
 
     @property
     @abstractmethod
@@ -203,7 +203,7 @@ class ArcGISDistribution(Distribution, ABC):
     @property
     def action_btn_icon(self) -> str:
         """Action button icon classes."""
-        return "far fa-layer-plus"
+        return "fa-regular fa-layer-plus"
 
     @property
     def access_target(self) -> str:
@@ -256,7 +256,7 @@ class FileDistribution(Distribution, ABC):
     @property
     def action_btn_icon(self) -> str:
         """Action button icon classes."""
-        return "far fa-download" if not self._restricted else super().action_btn_icon_restricted
+        return "fa-regular fa-file-arrow-down" if not self._restricted else super().action_btn_icon_restricted
 
     @property
     def access_target(self) -> None:
@@ -420,7 +420,7 @@ class BasPublishedMap(Distribution):
     @property
     def action_btn_icon(self) -> str:
         """Action button icon classes."""
-        return "far fa-shopping-basket"
+        return "fa-regular fa-basket-shopping"
 
     @property
     def access_target(self) -> str | None:
@@ -497,7 +497,7 @@ class BasSan(Distribution):
     @property
     def action_btn_icon(self) -> str:
         """Action button icon classes."""
-        return "far fa-hdd" if not self._restricted else super().action_btn_icon_restricted
+        return "fa-regular fa-server" if not self._restricted else super().action_btn_icon_restricted
 
     @property
     def access_target(self) -> str | None:

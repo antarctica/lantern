@@ -23,7 +23,7 @@ class SiteResourcesExporter(Exporter):
     """
     Static site resource exporters.
 
-    A non-record specific exporter for static resources used across the static site (CSS, fonts, etc.).
+    A non-record specific exporter for static resources used across the static site (CSS, JS, fonts, etc.).
     """
 
     def __init__(self, meta: ExportMeta, logger: logging.Logger, s3: S3Client) -> None:
@@ -76,7 +76,7 @@ class SiteResourcesExporter(Exporter):
         """
         Copy JS files to directory if not already present.
 
-        Source JS files need generating from `resources/templates/_assets/*.j2` using the `js` dev task.
+        Some JS files need generating from `resources/templates/_assets/*.j2` first using the `js` dev task.
         """
         BaseExporter._dump_package_resources(src_ref=self._js_src_ref, dest_path=self._export_base.joinpath("js"))
 
@@ -287,11 +287,6 @@ class SitePagesExporter(Exporter):
         raw = self._jinja.get_template(template_path).render(meta=self._meta)
         return prettify_html(raw)
 
-    @property
-    def name(self) -> str:
-        """Exporter name."""
-        return "Site Pages"
-
     def _export_page(self, template_path: str) -> None:
         """Export a page to directory."""
         page_path = self._get_page_path(template_path)
@@ -304,6 +299,11 @@ class SitePagesExporter(Exporter):
         page_path = self._get_page_path(template_path)
         page_key = self._s3_utils.calc_key(page_path)
         self._s3_utils.upload_content(key=page_key, content_type="text/html", body=self._dumps(template_path))
+
+    @property
+    def name(self) -> str:
+        """Exporter name."""
+        return "Site Pages"
 
     def export(self) -> None:
         """Export static pages to directory."""

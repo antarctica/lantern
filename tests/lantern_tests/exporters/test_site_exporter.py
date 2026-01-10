@@ -285,6 +285,7 @@ class TestSiteResourcesExporter:
         assert fx_exporter_site_resources._export_base.joinpath("img/favicon.ico").exists()
         assert fx_exporter_site_resources._export_base.joinpath("txt/heartbeat.txt").exists()
         assert fx_exporter_site_resources._export_base.joinpath("js/enhancements.js").exists()
+        # representative sample
 
     def test_publish(self, fx_s3_bucket_name: str, fx_exporter_site_resources: SiteResourcesExporter):
         """Can upload resources to S3."""
@@ -294,7 +295,7 @@ class TestSiteResourcesExporter:
             "static/img/favicon.ico",
             "static/txt/heartbeat.txt",
             "static/js/enhancements.js",
-        ]
+        ]  # representative sample
 
         fx_exporter_site_resources.publish()
 

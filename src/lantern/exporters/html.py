@@ -1,8 +1,5 @@
 import logging
 
-# noinspection PyPep8Naming
-import xml.etree.ElementTree as ET
-
 from mypy_boto3_s3 import S3Client
 
 from lantern.exporters.base import ResourceExporter
@@ -12,7 +9,7 @@ from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
 from lantern.stores.base import SelectRecordProtocol
-from lantern.utils import get_jinja_env, get_record_aliases, prettify_html
+from lantern.utils import dumps_redirect, get_jinja_env, get_record_aliases, prettify_html
 
 
 class HtmlExporter(ResourceExporter):
@@ -110,16 +107,7 @@ class HtmlAliasesExporter(ResourceExporter):
 
     def dumps(self) -> str:
         """Generate redirect page for record."""
-        html = ET.Element("html", attrib={"lang": "en-GB"})
-        head = ET.SubElement(html, "head")
-        title = ET.SubElement(head, "title")
-        title.text = "BAS Data Catalogue"
-        ET.SubElement(head, "meta", attrib={"http-equiv": "refresh", "content": f"0;url={self.target}"})
-        body = ET.SubElement(html, "body")
-        a = ET.SubElement(body, "a", attrib={"href": self.target})
-        a.text = "Click here if you are not redirected after a few seconds."
-        html_str = ET.tostring(html, encoding="unicode", method="html")
-        return f"<!DOCTYPE html>\n{html_str}"
+        return dumps_redirect(self.target)
 
     def export(self) -> None:
         """Write redirect pages for each alias to export directory."""

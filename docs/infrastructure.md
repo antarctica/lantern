@@ -34,6 +34,9 @@ Development environments may be created and destroyed as needed. Staging and Pro
 
 ## GitLab
 
+- [Project Repository 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/lantern-exp)
+  - [Public Mirror](https://github.com/antarctica/lantern)
+- [Project User 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=el4eljwuhbgpunh7pvu3m7pvfy&h=magic.1password.eu)
 - [Records Repository 🛡️](https://gitlab.data.bas.ac.uk/felnne/lantern-records-exp)
   - for [Storing](/docs/stores.md#gitlab-store) records in GitLab
 
@@ -41,8 +44,9 @@ Development environments may be created and destroyed as needed. Staging and Pro
 
 - [Item Enquires 🔒](https://make.powerautomate.com/environments/Default-b311db95-32ad-438f-a101-7ba061712a4e/flows/shared/5e01b213-38ad-4a54-8f7c-25d3bee36101/details)
   - for [Item Enquires](/docs/site.md#item-enquires)
+  - uses Personal Access Token for GitLab Project User
 - [SharePoint Proxy 🔒](...)
-  - for
+  - for verifying SharePoint hosted record distribution options
 
 ## Plausible
 

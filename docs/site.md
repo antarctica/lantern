@@ -74,9 +74,6 @@ The `pytailwindcss` package is used to manage a standalone
 
 #### Accessibility
 
-> [!CAUTION]
-> This section is Work in Progress (WIP) and not yet complete.
-
 As per the [BAS Style Kit](https://style-kit.web.bas.ac.uk/start/standards-accessibility), and wider UK Government
 guidance, the Catalogue site MUST be designed with accessibility in mind.
 
@@ -216,11 +213,11 @@ assets, e.g. `main.css?v=123`. For reproducibility, this value is set to the fir
 version as a SHA1 hash, e.g. `main.css?v=f053ddb` for version 0.1.0.
 
 <!-- pyml disable md028 -->
-> [!NOTE]
-> You may need to manually clear caches locally as this value will not change until the next release.
+> [!IMPORTANT]
+> Asset references are not automatically changed. Rebuild the site after a release to update references.
 
-> [!CAUTION]
-> Asset references are not automatically amended, make sure any references in templates are suitably configured.
+> [!TIP]
+> You may need to manually clear caches locally when developing, as this value will not change until the next release.
 <!-- pyml enable md028 -->
 
 ## Security

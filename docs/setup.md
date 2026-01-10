@@ -1,6 +1,6 @@
 # Lantern - Setup
 
-> [!CAUTION]
+> [!WARNING]
 > This section is Work in Progress (WIP) and is not complete/accurate.
 
 ## 1Password
@@ -18,14 +18,21 @@ For managing secrets and common [Config](/docs/config.md) options.
 
 ### GitLab User Access
 
-Invite the GitLab bot user, with the developer role, to:
+Invite the GitLab bot user with the *developer* role to:
 
-- the [lantern-records-exp](https://gitlab.data.bas.ac.uk/felnne/lantern-records-exp) GitLab Store project
+- the [lantern-records-exp 🛡️](https://gitlab.data.bas.ac.uk/felnne/lantern-records-exp) GitLab Store project
 - projects used in the [Interactive record publishing workflow](/docs/usage.md#interactive-record-publishing-workflow)
+
+Invite the GitLab bot user with the *reporter* role to:
+
+- the [MAGIC Helpdesk 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/helpdesk) project for creating issues from item enquires
 
 ### GitLab API token
 
-To manage records and workflow actions (posting comments etc.).
+#### Workflows GitLab API token
+
+To manage records in the [GitLab Store](/docs/stores.md#gitlab-store) and comment on issues as part of the
+[Interactive Publishing Workflow](/docs/usage.md#interactive-record-publishing-workflow).
 
 As a GitLab administrator impersonating the GitLab bot user, for each deployment and local development environment:
 
@@ -38,6 +45,18 @@ As a GitLab administrator impersonating the GitLab bot user, for each deployment
 3. set the relevant [Config](/docs/config.md) option in:
    - a local `.env` file, for local development environments
    - per-environment Ansible Vault, for deployment environments
+
+#### Item enquires GitLab API token
+
+For Power Automate to create issues for [Item Enquires](#power-automate-item-enquires).
+
+As a GitLab administrator impersonating the GitLab bot user for the production environment:
+
+1. create a [Personal Access Token](https://gitlab.data.bas.ac.uk/-/profile/personal_access_tokens):
+   - token name: 'pa-item-enquires'
+   - scopes: *api*
+2. store the token in [1Password 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=dnsmipeiqjxbzd2qutbrhn3itu&h=magic.1password.eu)
+3. set the token as the authorisation header for the GitLab issue action in the Power Automate flow
 
 ## Sentry
 
@@ -93,18 +112,17 @@ environment.
 ### Power Automate item enquires
 
 1. import `resources/flows/lantern-item-enquires.zip` into Power Automate as a new flow
-2. for MAGIC point of contact branch, create a GitLab access token with the *reporter* role and *api* scope in the
-  [MAGIC Helpdesk 🔒](https://gitlab.data.bas.ac.uk/MAGIC/helpdesk/-/settings/access_tokens) project
-3. set this token in the authentication value property in the 'create-issue' action
-4. set the relevant [Config](/docs/config.md) option in the `.env` template and Ansible Vault for use in the
-   [Environment Module](/docs/deployment.md#environment-module) template
+2. for MAGIC point of contact branch, set the [GitLab Personal Access Token](#item-enquires-gitlab-api-token) in the
+   authentication value in the 'create-issue' action
+3. set the flow endpoint as the relevant [Config](/docs/config.md) option in the `.env` template and Ansible Vault for
+   use in the [Environment Module](/docs/deployment.md#environment-module) template
 
 ### Power Automate SharePoint proxy
 
 1. import `resources/flows/lantern-sharepoint-proxy.zip` into Power Automate as a new flow
 2. configure the flow connections and generate an HTTP endpoint
-3. set the relevant [Config](/docs/config.md) option in the `.env` template and Ansible Vault for use in the
-   [Environment Module](/docs/deployment.md#environment-module) template
+3. set the flow endpoint as the relevant [Config](/docs/config.md) option in the `.env` template and Ansible Vault for
+   use in the [Environment Module](/docs/deployment.md#environment-module) template
 
 ### Power Automate SAN proxy
 

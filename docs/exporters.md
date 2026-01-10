@@ -145,7 +145,7 @@ Outputs a styled HTML page linking to [Items](/docs/data-model.md#items) and
 [Item Aliases](/docs/data-model.md#item-aliases) output by the [HTML Exporter](#html-resource-exporter) and
 [HTML Aliases Exporter](#html-aliases-resource-exporter).
 
-> [!CAUTION]
+> [!NOTE]
 > This page is intended as a basic, internal, reference to site content - not a proper, public, homepage.
 
 ### Site API exporter

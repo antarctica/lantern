@@ -83,9 +83,8 @@ See the [Site Exporter](/docs/exporters.md#site-exporter) docs for how informati
 
 See the [Static Site](/docs/site.md) docs for more information about what is stored in S3.
 
-### Reverse proxying
+## Infrastructure
 
-The BAS IT general load balancer is used to reverse proxy the production CloudFront distribution such that its content
-is accessible within the existing `data.bas.ac.uk` domain (which currently hosts the legacy Discovery Metadata System).
-
-See `data_redirect.txt` in the load balancer config for proxied paths based on the [Static Site](#static-site).
+> [!NOTE]
+> See the [Infrastructure](/docs/infrastructure.md) docs for more information about the underlying infrastructure
+> components used.

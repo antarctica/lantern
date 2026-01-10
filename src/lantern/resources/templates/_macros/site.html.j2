@@ -11,6 +11,7 @@
       {{ head_open_graph(data.html_open_graph_tags) }}
     {% endif %}
     {{ head_favicon(data.build_key) }}
+    {{ head_api_catalogue() }}
     {{ head_styles(data.build_key) }}
     {{ head_scripts(data) }}
   </head>
@@ -41,6 +42,10 @@
   <link rel="icon" href="/static/img/favicon.svg?v={{ build_key }}" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/static/img/apple-touch-icon.png?v={{ build_key }}" sizes="180x180" />
   <link rel="manifest" href="/static/txt/manifest.webmanifest?v={{ build_key }}" />
+{% endmacro %}
+
+{% macro head_api_catalogue(build_key) %}
+  <link fetchpriority="low" rel="api-catalog" href="/static/json/api-catalog.json">
 {% endmacro %}
 
 {% macro head_styles(build_key) %}

@@ -36,16 +36,25 @@ class TestMacrosSite:
         jinja = Environment(loader=_loader, autoescape=select_autoescape(), trim_blocks=True, lstrip_blocks=True)
         return jinja.from_string(template).render(meta=site_meta)
 
-    def test_head_meta(self):
+    def test_head_preconnect(self):
+        """Can get preconnect tags."""
+        template = """{% import '_macros/site.html.j2' as site %}{{ site.head_preconnect() }}"""
+        meta = self._site_meta()
+        html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
         """
-        Can get static HTML character set.
+          <link rel="preconnect" href="https://cdn.web.bas.ac.uk">
+        """
+        assert html.head.find(name="link", rel="preconnect", href="https://cdn.web.bas.ac.uk") is not None
 
-        Basic sanity check.
-        """
+    def test_head_meta(self):
+        """Can get static HTML character set and other information meta tags."""
         template = """{% import '_macros/site.html.j2' as site %}{{ site.head_meta(meta) }}"""
         meta = self._site_meta()
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
         assert html.head.meta["charset"] == "utf-8"
+        assert html.head.find(name="meta", attrs={"name": "generator"})["content"] == meta.generator
+        assert html.head.find(name="meta", attrs={"name": "version"})["content"] == meta.version
+        assert html.head.find(name="meta", attrs={"name": "generated"})["content"] == meta.build_time.isoformat()
 
     def test_head_title(self):
         """Can get <title> with expected value from page."""
@@ -80,6 +89,13 @@ class TestMacrosSite:
         html = BeautifulSoup(self._render(template), parser="html.parser", features="lxml")
 
         assert html.head.find(name="link", rel="icon") is not None
+
+    def test_script_api_catalogue(self):
+        """Can get API catalogue link from page."""
+        template = """{% import '_macros/site.html.j2' as site %}{{ site.head_api_catalogue() }}"""
+        meta = self._site_meta()
+        html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
+        assert html.head.find(name="link", attrs={"rel": "api-catalog"}) is not None
 
     @pytest.mark.parametrize(
         "href", ["https://cdn.web.bas.ac.uk/libs/font-awesome-pro/5.13.0/css/all.min.css", "/static/css/main.css?v=000"]
@@ -189,6 +205,7 @@ class TestMacrosSite:
         template = """{% import '_macros/site.html.j2' as site %}{{ site.html_head(meta) }}"""
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
 
+        assert html.head.find(name="link", rel="preconnect", href="https://cdn.web.bas.ac.uk") is not None
         assert html.head.meta["charset"] == "utf-8"
         assert html.head.title.string == meta.html_title_suffixed
 

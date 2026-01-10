@@ -13,116 +13,16 @@ See the [Infrastructure](/docs/infrastructure.md#hosting) documentation for host
 
 ## Site structure
 
-Simplified, primary, top level structure:
+### OpenAPI definition
 
-```text
-├── waf/
-├── items/
-├── records/
-└── static/
-```
+An [OpenAPI](https://spec.openapis.org/oas/v3.1.0) definition describes the majority of the site structure. It is
+available as:
 
-<!-- pyml disable md013 -->
-| Path       | Description                                                                    | Exporter                                                              |
-|------------|--------------------------------------------------------------------------------|-----------------------------------------------------------------------|
-| `waf/`     | [Web Accessible Folder (WAF)](/docs/access.md#web-accessible-folder) endpoints | [HTML](/docs/exporters.md#web-accessible-folder-resource-exporter)    |
-| `items/`   | Rendered [Item](/docs/data-model.md#items) pages                               | [HTML](/docs/exporters.md#html-resource-exporter)                     |
-| `records/` | [Record](/docs/data-model.md#records) files in various formats                 | [Records](/docs/exporters.md#records-resource-exporter)               |
-| `static/`  | CSS, JavaScript, images, and other assets                                      | [Site Resources Exporter](/docs/exporters.md#site-resources-exporter) |
-<!-- pyml enable md013 -->
+- a JSON document (using the OAS 3.1 schema) at: `/static/json/openapi.json`
+- interactive documentation built from this JSON document at: `/guides/api/index.html`
 
-Secondary top-level items:
-
-```text
-├── 404.html
-├── favicon.ico
-├── -/
-├── {aliases}/
-└── legal/
-```
-
-<!-- pyml disable md013 -->
-| Path          | Description                                                                                         | Exporter                                                          |
-|---------------|-----------------------------------------------------------------------------------------------------|-------------------------------------------------------------------|
-| `404.html`    | Not found error page                                                                                | [Site Pages](/docs/exporters.md#site-pages-exporter)              |
-| `favicon.ico` | Site favicon                                                                                        | [Site Resources](/docs/exporters.md#site-resources-exporter)      |
-| `-/`          | Internal (but not secret) pages, such as the site index and formatting guide                        | *Various*                                                         |
-| `{aliases}/`  | [Item Aliases](/docs/data-model.md#item-aliases) redirect pages (for `collections/`, `maps/`, etc.) | [HTML Aliases](/docs/exporters.md#html-aliases-resource-exporter) |
-| `legal/`      | Legal policy pages                                                                                  | [Site Pages](/docs/exporters.md#site-pages-exporter)              |
-<!-- pyml enable md013 -->
-
-### Record pages structure
-
-```text
-├── maps/
-│     ├── foo/
-│     │    └── index.html -> redirecting to /items/123/
-│     └── .../
-│          └── index.html -> redirecting to /items/.../
-├── items/
-│     ├── 123/
-│     │    └── index.html
-│     └── .../
-│          └── index.html
-├── records/
-│     ├── 123.html
-│     ├── 123.json
-│     ├── 123.xml
-│     └── ...
-└── waf/
-    ├── iso-19139-all/
-    │    └── index.html -> linking to /records/*.xml
-    └── ...
-```
-
-### Hidden pages structure
-
-```text
-└── -/
-     ├── index/
-     │    └── index.html -> 'hidden' index page
-     ├── formatting/
-     │    └── index.html -> 'hidden' formatting guide
-     └── public-website-search/
-     │    └── items.json -> static list of aggregation API resources
-     └── verification/
-          ├── data.json -> site verification data
-          └── index.html -> site verification report
-```
-
-<!-- pyml disable md013 -->
-| Path                       | Description                                  | Exporter                                                      |
-|----------------------------|----------------------------------------------|---------------------------------------------------------------|
-| `-/index/`                 | Hidden index page                            | [Site Index](/docs/exporters.md#site-index-exporter)          |
-| `-/formatting/`            | Hidden record content formatting guide       | [Site Pages](/docs/exporters.md#site-pages-exporter)          |
-| `-/public-website-search/` | Temporary public website search items output | [Website Search](/docs/exporters.md#site-pages-exporter)      |
-| `-/verification/`          | Site verification report and data            | [Site Verification](/docs/exporters.md#verification-exporter) |
-<!-- pyml enable md013 -->
-
-### Site assets structure
-
-```text
-├── favicon.ico
-└── static/
-    ├── css/
-    │    └── main.css
-    ├── fonts
-    │    ├── open-sans-italic.ttf
-    │    └── open-sans.ttf
-    ├── img
-    │    ├── favicon-180.png
-    │    ├── favicon-512.png
-    │    ├── favicon-mask.png
-    │    ├── favicon.ico
-    │    ├── favicon.svg
-    │    └── safari-pinned-tab.svg
-    ├── js
-    │    ├── enhancements.js
-    │    └── sentry-preload.js
-    └── txt
-         ├── heartbeat.txt
-         └── manifest.webmanifest
-```
+Additional static content such as CSS, JS, fonts and images managed by the
+[Site Resources Exporter](/docs/exporters.md#site-resources-exporter) are not listed in this definition.
 
 ## HTML metadata
 
@@ -352,26 +252,35 @@ See the [Config](/docs/config.md#config-options) docs for how to set these confi
 ### Layouts
 
 A set of layouts are available in `src/lantern/resources/templates/_layouts/`. All pages SHOULD ultimately extend the
-[Base Layout](#base-layout).
+[Base Layout](#base-layout). Most pages SHOULD extend from the [Main Layout](#main-layout).
 
 #### Base layout
 
 The `base.html.j2` layout provides a common HTML structure including:
 
 - a `<head>` element with HTML metadata and imports for site styles and scripts
-- a `<header>` element with site navigation, development phase banner and user feedback link
-- a `<main>` element containing a 'content' block for each HTML page's content
-- a `<footer>` element with site feedback link and legal information
+- a `<body>` element with:
+  - a `<header>` element with site navigation, development phase banner and user feedback link
+  - a 'content' block for each HTML page's content with minimal padding
+  - a `<footer>` element with site feedback link and legal information
 
 > [!NOTE]
 > This layout requires a [Site Context](/docs/data-model.md#static-site-metadata) instance as a `meta` template context
 > variable.
 
+#### Main layout
+
+The `main.html.j2` layout extends the [Base Layout](#base-layout) with:
+
+- a `<main>` element containing a 'main' block for each HTML page's content, wrapped in a container at a standard
+  width
+
 #### Page templates
 
-The `page.html.j2` template provides a simple page structure for legal policies, error documents, guides, etc.
+The `page.html.j2` template extends the [Main Layout](#main-layout) providing a simple page structure for legal
+policies, error documents, guides, etc.
 
-It extends the parent 'content' block with:
+It extends the parent 'main' block with:
 
 - a page header
 - a 'page_content' block for each page's content
@@ -428,7 +337,7 @@ Common macros are intended for use across templates to avoid inconsistencies and
 ### Item templates
 
 [Items](/docs/data-model.md#items) use a complex template when rendered, with the Item passed as a context variable. It
-extends the [Base Layout](#layouts) with three parts:
+extends the [Main Layout](#main-layout) with:
 
 1. a top part, consisting of a page header
 2. a middle part, consisting of a summary section and optional item thumbnail

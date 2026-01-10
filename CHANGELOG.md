@@ -29,6 +29,9 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Setup documentation for Plausible
 * Store frozen (read-only) mode for publishing workflows
 * 'js' development task for assembling JavaScript scripts
+* OpenAPI definition and Scalar based interactive documentation for static site
+* Reverse engineered JSON schema for site verification report data (for use in OpenAPI definition)
+* Reverse engineered JSON schema for public website search items data (for use in OpenAPI definition)
 
 ### Fixed
 
@@ -59,6 +62,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Refactored CSS build process consistency with new 'js' process, inc. renaming 'tailwind' development task to 'css'
 * Extracted Open Graph and Schema.org link preview metadata logic out of catalogue items into site data classes
 * Minor page performance improvements
+* Splitting 'base' layout into 'base' and 'main' layouts to allow full-width content
+* Refactored HTML redirect page generation into utils module for sharing across exporters
 
 ### Removed
 

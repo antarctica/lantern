@@ -52,9 +52,9 @@
       {% if data.page_size %}
         {% set icon_class = None %}
         {% if 'portrait' in data.page_size | lower %}
-          {% set icon_class = "far fa-fw fa-rectangle-portrait" %}
+          {% set icon_class = "fa-regular fa-rectangle-vertical" %}
         {% elif 'landscape' in data.page_size | lower %}
-          {% set icon_class = "far fa-fw fa-rectangle-landscape" %}
+          {% set icon_class = "fa-regular fa-rectangle" %}
         {% endif %}
 
         {% call com.dl_item(title='Page Size', id='info-page-size') %}

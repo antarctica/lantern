@@ -15,7 +15,7 @@
 
 {% block content %}
   <article class="space-y-4 lg:space-y-8">
-    {{ com.page_header(main="Catalogue verification results", sub='Admin', sub_i='fas fa-fw fa-tools')}}
+    {{ com.page_header(main="Catalogue verification results", sub='Admin', sub_i=com.maintenance_i_classes())}}
     <section class="space-y-4 space-y-8">
       {% if data.pass_fail %}
         {% call com.alert(variant='green') %}All tests passed 😀{% endcall %}

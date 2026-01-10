@@ -17,11 +17,11 @@ class ItemSuperType(Enum):
 class ResourceTypeIcon(Enum):
     """Partial mapping of the Hierarchy Level code list against Font Awesome icon classes."""
 
-    COLLECTION = "fa-fw far fa-shapes"
-    DATASET = "fa-fw far fa-cube"
-    INITIATIVE = "fa-fw far fa-betamax"
-    PRODUCT = "fa-fw far fa-map"
-    PAPER_MAP_PRODUCT = "fa-fw far fa-map"
+    COLLECTION = "fa-regular fa-shapes"
+    DATASET = "fa-regular fa-cube"
+    INITIATIVE = "fa-regular fa-cassette-betamax"
+    PRODUCT = "fa-regular fa-map"
+    PAPER_MAP_PRODUCT = "fa-regular fa-map"
 
 
 class DistributionType(Enum):

@@ -531,7 +531,7 @@ class TestAdditionalInfoTab:
         assert tab.enabled is True
         assert tab.item_id == item_id
         assert tab.item_type == ResourceTypeLabel[item_type.name].value
-        assert tab.item_type_icon == "fa-fw far fa-map"
+        assert tab.item_type_icon == "fa-regular fa-map"
         assert isinstance(tab.dates, dict)
         assert tab.datestamp == FormattedDate.from_rec_date(Date(date=datestamp))
         assert tab.record_link_xml.href == xml_href

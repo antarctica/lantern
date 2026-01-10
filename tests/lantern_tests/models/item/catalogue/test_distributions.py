@@ -77,7 +77,7 @@ class FakeDistributionType(Distribution):
     @property
     def action_btn_icon(self) -> str:
         """Link icon."""
-        return "far fa-square"
+        return "fa-regular fa-square"
 
     @property
     def access_target(self) -> None:
@@ -236,7 +236,7 @@ class TestArcGISDistribution:
             "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+feature"
         )
         dist = FakeArcGISDistributionType(option=_make_dist("x"), other_options=[service_dist])
-        assert dist.action_btn_icon == "far fa-layer-plus"
+        assert dist.action_btn_icon == "fa-regular fa-layer-plus"
 
     def test_access_target(self):
         """Can get action target."""
@@ -289,7 +289,10 @@ class TestFileDistribution:
         dist = FakeFileDistributionType(option=_make_dist("x"), restricted=restricted)
         assert dist.action_btn_variant == expected
 
-    @pytest.mark.parametrize(("restricted", "expected"), [(False, "far fa-download"), (True, "far fa-lock-alt")])
+    @pytest.mark.parametrize(
+        ("restricted", "expected"),
+        [(False, "fa-regular fa-file-arrow-down"), (True, "fa-regular fa-lock-keyhole")],
+    )
     def test_action_btn_icon(self, restricted: bool, expected: str):
         """Can get action icon."""
         dist = FakeFileDistributionType(option=_make_dist("x"), restricted=restricted)
@@ -369,7 +372,9 @@ class TestDistributionBasSan:
         dist = BasSan(option=self._base_option, restricted=restricted)
         assert dist.action_btn_variant == expected
 
-    @pytest.mark.parametrize(("restricted", "expected"), [(False, "far fa-hdd"), (True, "far fa-lock-alt")])
+    @pytest.mark.parametrize(
+        ("restricted", "expected"), [(False, "fa-regular fa-server"), (True, "fa-regular fa-lock-keyhole")]
+    )
     def test_action_btn_icon(self, restricted: bool, expected: str):
         """Can get action icon."""
         dist = BasSan(option=self._base_option, restricted=restricted)

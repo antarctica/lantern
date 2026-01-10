@@ -48,7 +48,7 @@
               {% endcall %}
             </noscript>
             <button class="{{ com.btn_primary_classes() }} p-4" type="submit">
-                Send Message <i class="fas fa-arrow-right"></i>
+                Send Message <i class="fa-regular fa-paper-plane-top"></i>
             </button>
           </div>
         </div>
@@ -65,19 +65,19 @@
         <div class="space-y-4">
           {% if data.address %}
             <div class="space-y-2">
-              <h3 class="font-bold"><i class="far fa-envelope"></i> By post</h3>
+              <h3 class="font-bold"><i class="fa-regular fa-envelope"></i> By post</h3>
               <address id="contact-post">{{ data.address }}</address>
             </div>
           {% endif %}
           {% if data.phone %}
             <div class="space-y-2">
-              <h3 class="font-bold"><i class="far fa-phone-rotary"></i> By phone</h3>
+              <h3 class="font-bold"><i class="fa-regular fa-phone-rotary"></i> By phone</h3>
               <div id="contact-phone">{{ data.phone }}</div>
             </div>
           {% endif %}
           {% if data.email %}
             <div class="space-y-2">
-              <h3 class="font-bold"><i class="far fa-at"></i> By email</h3>
+              <h3 class="font-bold"><i class="fa-regular fa-at"></i> By email</h3>
               <div id="contact-email"><a class="{{ com.link_classes() }}" href="{{ data.email }}">{{ data.email }}</a></div>
             </div>
            {% endif %}

@@ -55,8 +55,12 @@
 {% endmacro %}
 
 {% macro head_styles(build_key) %}
-  <link rel="stylesheet" href="https://cdn.web.bas.ac.uk/libs/font-awesome-pro/5.13.0/css/all.min.css" integrity="sha256-DjbUjEiuM4tczO997cVF1zbf91BC9OzycscGGk/ZKks=" crossorigin="anonymous">
+  {{ styles_font_awesome() }}
   <link rel="stylesheet" href="/static/css/main.css?v={{ build_key }}" />
+{% endmacro %}
+
+{% macro styles_font_awesome() %}
+  <link rel="stylesheet" href="https://kit.fontawesome.com/032ef5c342.css" crossorigin="anonymous">
 {% endmacro %}
 
 {% macro head_scripts(data) %}
@@ -94,7 +98,7 @@
 
 {% macro primary_nav() %}
   {% for item in primary_nav_items %}
-    <a class="hover:underline" href="{{ item[1] }}"><i class="fa-fw {{ item[2] }}"></i> {{ item[0] }}</a>
+    <a class="hover:underline" href="{{ item[1] }}"><i class="{{ item[2] }}"></i> {{ item[0] }}</a>
   {% endfor %}
 {% endmacro %}
 

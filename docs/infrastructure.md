@@ -58,6 +58,11 @@ Development environments may be created and destroyed as needed. Staging and Pro
 - [Turnstile 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=ffy5l25mjdv577qj6izuk6lo4m&i=sdwj5bvfuyrhtinexxxizk7mw4&h=magic.1password.eu)
   - for [Bot protection](/docs/site.md#bot-protection)
 
+## Font Awesome
+
+- [Icon Kit 🔒](https://fontawesome.com/kits/032ef5c342)
+  - for [Icons](/docs/supplemental/icon-audit.md)
+
 ## Exporters
 
 - AWS S3 publishing buckets & CloudFront distributions:

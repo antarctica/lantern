@@ -107,7 +107,7 @@ interface. Features include:
 
 #### Catalogue item limitations
 
-> [!CAUTION]
+> [!WARNING]
 > This section is Work in Progress (WIP) and may not be complete/accurate.
 
 Supported properties (references not normative or exhaustive):

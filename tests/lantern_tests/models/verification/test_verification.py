@@ -11,6 +11,7 @@ class TestVerificationJob:
         context: VerificationContext = {
             "BASE_URL": "x",
             "SHAREPOINT_PROXY_ENDPOINT": "x",
+            "SAN_PROXY_ENDPOINT": "x",
         }
         job = VerificationJob(type=VerificationType.ITEM_PAGES, url="x", context=context)
 

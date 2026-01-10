@@ -13,6 +13,17 @@ These options from the app `lantern.Config` class are used to configure applicat
 
 See the [Config](/docs/config.md#config-options) docs for how to set these config options.
 
+## Health monitoring
+
+### Heartbeat
+
+A static text file is available as part of the [Static Site](/docs/architecture.md#static-site) for use as a basic,
+binary, health monitoring endpoint at: `/static/txt/heartbeat.txt`.
+
+This endpoint MAY be used by monitoring tools and/or load balancers to determine if the static site is available.
+
+A non-200 status code MUST be considered as the static site being unavailable.
+
 ## Sentry
 
 ### Error monitoring

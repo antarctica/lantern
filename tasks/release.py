@@ -69,9 +69,10 @@ def main() -> None:
     print("- updated pyproject.toml")
     _run_uv_lock()
     print("- updated lock file")
-    if args.version_element != "prerelease":
-        _bump_change_log_version(bumped_version)
-        print("- updated CHANGELOG.md")
+    if args.version_element == "prerelease":
+        return
+    _bump_change_log_version(bumped_version)
+    print("- updated CHANGELOG.md")
 
 
 if __name__ == "__main__":

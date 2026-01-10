@@ -140,7 +140,7 @@ schedule by other projects as a background task.
 1. export a set of record configurations as JSON files to a directory
 2. call `/data/magic/projects/lantern/prod/tasks/pub-cat` with required arguments [1]
 
-> [!CAUTION]
+> [!WARNING]
 > This will publish any records to the production S3 bucket / catalogue environment.
 
 This workflow is experimental with major limitations:

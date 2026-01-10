@@ -244,6 +244,7 @@ class TestSiteResourcesExporter:
             Bucket=fx_exporter_site_resources._s3_utils._bucket, Key=expected
         )
         assert result["ResponseMetadata"]["HTTPStatusCode"] == 200
+        assert result["ResponseMetadata"]["HTTPHeaders"]["content-type"] == "image/x-icon"
 
     def test_publish_img(self, fx_exporter_site_resources: SiteResourcesExporter):
         """Can upload images to S3."""

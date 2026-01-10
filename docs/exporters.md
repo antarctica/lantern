@@ -148,6 +148,23 @@ Outputs a styled HTML page linking to [Items](/docs/data-model.md#items) and
 > [!CAUTION]
 > This page is intended as a basic, internal, reference to site content - not a proper, public, homepage.
 
+### Site API exporter
+
+> [!WARNING]
+> This exporter is experimental.
+
+`lantern.exporters.site.SiteApiExporter`
+
+Outputs:
+
+- a [RFC 9727 API Catalog](https://datatracker.ietf.org/doc/html/rfc9727)
+- a raw [OpenAPI](/docs/site.md#openapi-definition) JSON document
+- interactive documentation based on this definition built using
+  [Scalar](https://guides.scalar.com/scalar/scalar-api-references)
+
+The API Catalog is rendered from a simple Python dict. The OpenAPI definition and documentation are rendered from Jinja
+templates.
+
 ### Public Website search exporter
 
 `lantern.exporters.website.WebsiteSearchExporter`

@@ -1,4 +1,7 @@
 import logging
+
+# noinspection PyPep8Naming
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from boto3 import client as S3Client  # noqa: N812
@@ -131,3 +134,18 @@ def prettify_html(html: str) -> str:
     The `prettify()` method is not used as it splits all elements onto new lines, which causes layout/spacing bugs.
     """
     return str(BeautifulSoup(html, parser="html.parser", features="lxml"))
+
+
+def dumps_redirect(target: str) -> str:
+    """Generate a minimal HTML redirect page."""
+    """Generate redirect page for record."""
+    html = ET.Element("html", attrib={"lang": "en-GB"})
+    head = ET.SubElement(html, "head")
+    title = ET.SubElement(head, "title")
+    title.text = "BAS Data Catalogue"
+    ET.SubElement(head, "meta", attrib={"http-equiv": "refresh", "content": f"0;url={target}"})
+    body = ET.SubElement(html, "body")
+    a = ET.SubElement(body, "a", attrib={"href": target})
+    a.text = "Click here if you are not redirected after a few seconds."
+    html_str = ET.tostring(html, encoding="unicode", method="html")
+    return f"<!DOCTYPE html>\n{html_str}"

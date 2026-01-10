@@ -1,3 +1,4 @@
+import json
 import logging
 import shutil
 from pathlib import Path
@@ -15,7 +16,7 @@ from lantern.exporters.waf import WebAccessibleFolderExporter
 from lantern.exporters.website import WebsiteSearchExporter
 from lantern.models.site import ExportMeta, SitePageMeta
 from lantern.stores.base import SelectRecordsProtocol, StoreInitProtocol
-from lantern.utils import get_jinja_env, get_record_aliases, prettify_html
+from lantern.utils import dumps_redirect, get_jinja_env, get_record_aliases, prettify_html
 
 
 class SiteResourcesExporter(Exporter):
@@ -317,6 +318,131 @@ class SitePagesExporter(Exporter):
             self._publish_page(template_path=template)
 
 
+class SiteApiExporter(Exporter):
+    """
+    Site API resources exporter.
+
+    Renders API Catalogue and OpenAPI schema, as JSON and interactive HTML documentation from Jinja2 templates.
+    """
+
+    def __init__(self, logger: logging.Logger, meta: ExportMeta, s3: S3Client) -> None:
+        """Initialise exporter."""
+        super().__init__(logger=logger, meta=meta, s3=s3)
+        self._jinja = get_jinja_env()
+        self._export_base = self._meta.export_path
+        self._catalog_path = self._export_base / "static" / "json" / "api-catalog.json"
+        self._catalog_well_known_path = self._export_base / ".well-known" / "api-catalog"
+        self._schema_path = self._export_base / "static" / "json" / "openapi.json"
+        self._docs_path = self._export_base / "guides" / "api" / "index.html"
+
+    def _dumps_catalog(self) -> dict:
+        """Build RFC 9727 API Catalog as a JSON document."""
+        return {
+            "linkset": [
+                {
+                    "anchor": f"{self._meta.base_url}/",
+                    "service-desc": [
+                        {
+                            "href": f"{self._meta.base_url}/static/json/openapi.json",
+                            "type": "application/vnd.oai.openapi+json;version=3.1",
+                        }
+                    ],
+                }
+            ]
+        }
+
+    @staticmethod
+    def _dumps_catalog_redirect() -> str:
+        """Generate redirect from .well-known path to API Catalog."""
+        return dumps_redirect("/static/json/api-catalog.json")
+
+    def _dumps_openapi_schema(self) -> dict:
+        """Build OpenAPI JSON schema."""
+        return json.loads(self._jinja.get_template("_views/openapi.json.j2").render(version=self._meta.version))
+
+    def _dumps_api_docs(self) -> str:
+        """Build OpenAPI JSON schema."""
+        page_meta: SitePageMeta = SitePageMeta(
+            title="API Documentation",
+            url=f"{self._meta.base_url}/legal/accessibility",
+            description="API documentation explorer for the BAS Data Catalogue",
+        )
+        self._meta.html_title = page_meta.title
+        self._meta.html_open_graph = page_meta.open_graph
+        self._meta.html_schema_org = page_meta.schema_org
+        raw = self._jinja.get_template("_views/guides/api.html.j2").render(meta=self._meta)
+        return prettify_html(raw)
+
+    def _export_catalog(self) -> None:
+        """Export API Catalog to directory."""
+        self._logger.info("Exporting API Catalog.")
+        self._catalog_path.parent.mkdir(parents=True, exist_ok=True)
+        with self._catalog_path.open("w") as f:
+            json.dump(self._dumps_catalog(), f, indent=2)
+        self._catalog_well_known_path.parent.mkdir(parents=True, exist_ok=True)
+        with self._catalog_well_known_path.open("w") as f:
+            f.write(self._dumps_catalog_redirect())
+
+    def _export_openapi_schema(self) -> None:
+        """Export OpenAPI schema to directory."""
+        self._logger.info("Exporting OpenAPI schema.")
+        self._schema_path.parent.mkdir(parents=True, exist_ok=True)
+        with self._schema_path.open("w") as f:
+            json.dump(self._dumps_openapi_schema(), f, indent=2)
+
+    def _export_api_docs(self) -> None:
+        """Export API documentation guide to directory."""
+        self._logger.info("Exporting API guide page.")
+        self._docs_path.parent.mkdir(parents=True, exist_ok=True)
+        with self._docs_path.open("w") as f:
+            f.write(self._dumps_api_docs())
+
+    def _publish_catalog(self) -> None:
+        """Publish API Catalog to S3."""
+        self._logger.info("Publishing API Catalog.")
+        catalogue_key = self._s3_utils.calc_key(self._catalog_path)
+        redirect_key = self._s3_utils.calc_key(self._catalog_well_known_path)
+        media_type = "application/linkset+json; profile=https://www.rfc-editor.org/info/rfc9727"
+        self._s3_utils.upload_content(
+            key=catalogue_key, content_type=media_type, body=json.dumps(self._dumps_catalog(), indent=2)
+        )
+        self._s3_utils.upload_content(
+            key=redirect_key, content_type="text/html", body=self._dumps_catalog_redirect(), redirect=catalogue_key
+        )
+
+    def _publish_openapi_schema(self) -> None:
+        """Publish OpenAPI schema to S3."""
+        self._logger.info("Publishing OpenAPI schema.")
+        key = self._s3_utils.calc_key(self._schema_path)
+        media_type = "application/vnd.oai.openapi+json;version=3.1"
+        data = json.dumps(self._dumps_openapi_schema(), indent=2)
+        self._s3_utils.upload_content(key=key, content_type=media_type, body=data)
+
+    def _publish_api_docs(self) -> None:
+        """Publish API documentation guide to S3."""
+        self._logger.info("Publishing API guide page.")
+        key = self._s3_utils.calc_key(self._docs_path)
+        data = self._dumps_api_docs()
+        self._s3_utils.upload_content(key=key, content_type="text/html", body=data)
+
+    @property
+    def name(self) -> str:
+        """Exporter name."""
+        return "Site API"
+
+    def export(self) -> None:
+        """Export API resources to directory."""
+        self._export_catalog()
+        self._export_openapi_schema()
+        self._export_api_docs()
+
+    def publish(self) -> None:
+        """Publish static pages to S3."""
+        self._publish_catalog()
+        self._publish_openapi_schema()
+        self._publish_api_docs()
+
+
 class SiteExporter(Exporter):
     """
     Data Catalogue static site exporter.
@@ -342,6 +468,7 @@ class SiteExporter(Exporter):
 
         self._resources_exporter = SiteResourcesExporter(logger=logger, meta=meta, s3=self._s3_client)
         self._pages_exporter = SitePagesExporter(logger=logger, meta=meta, s3=self._s3_client)
+        self._api_exporter = SiteApiExporter(logger=logger, meta=meta, s3=self._s3_client)
         self._records_exporter = RecordsExporter(
             logger=logger,
             config=config,
@@ -372,6 +499,7 @@ class SiteExporter(Exporter):
         self._exporters: list[Exporter] = [
             self._resources_exporter,
             self._pages_exporter,
+            self._api_exporter,
             self._records_exporter,
             self._index_exporter,
             self._waf_exporter,

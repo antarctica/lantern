@@ -8,7 +8,13 @@ import pytest
 from bs4 import BeautifulSoup
 from pytest_mock import MockerFixture
 
-from lantern.exporters.site import SiteExporter, SiteIndexExporter, SitePagesExporter, SiteResourcesExporter
+from lantern.exporters.site import (
+    SiteApiExporter,
+    SiteExporter,
+    SiteIndexExporter,
+    SitePagesExporter,
+    SiteResourcesExporter,
+)
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
 from lantern.stores.base import SelectRecordsProtocol
@@ -202,6 +208,7 @@ class TestSiteResourcesExporter:
         expected = [
             fx_exporter_site_resources._export_base.joinpath("js/sentry-preload.js"),
             fx_exporter_site_resources._export_base.joinpath("js/enhancements.js"),
+            fx_exporter_site_resources._export_base.joinpath("js/lib/scalar.min.js"),
         ]
 
         fx_exporter_site_resources._dump_js()
@@ -261,7 +268,7 @@ class TestSiteResourcesExporter:
 
     def test_publish_js(self, fx_exporter_site_resources: SiteResourcesExporter):
         """Can upload JavaScript files to S3."""
-        expected = ["static/js/sentry-preload.js", "static/js/enhancements.js"]
+        expected = ["static/js/sentry-preload.js", "static/js/enhancements.js", "static/js/lib/scalar.min.js"]
 
         fx_exporter_site_resources._publish_js()
         for key in expected:
@@ -295,6 +302,73 @@ class TestSiteResourcesExporter:
         keys = [o["Key"] for o in result["Contents"]]
         for key in expected:
             assert key in keys
+
+
+class TestSiteApiExporter:
+    """Test API definitions exporter."""
+
+    def test_init(self, mocker: MockerFixture, fx_logger: logging.Logger):
+        """Can create an Exporter."""
+        with TemporaryDirectory() as tmp_path:
+            output_path = Path(tmp_path)
+        s3_client = mocker.MagicMock()
+        mock_config = mocker.Mock()
+        type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
+        meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
+
+        exporter = SiteApiExporter(meta=meta, logger=fx_logger, s3=s3_client)
+
+        assert isinstance(exporter, SiteApiExporter)
+        assert exporter.name == "Site API"
+
+    def test_dumps_catalog(self, fx_exporter_site_api: SiteApiExporter):
+        """Can create RFC 9727 JSON API Catalog."""
+        result = fx_exporter_site_api._dumps_catalog()
+        assert isinstance(result, dict)
+        assert len(result["linkset"]) == 1
+        assert result["linkset"][0]["anchor"] == "https://example.com/"
+
+    def test_dumps_catalog_redirect(self, fx_exporter_site_api: SiteApiExporter):
+        """Can create .well-known redirect for API Catalog."""
+        expected = "/static/json/api-catalog.json"
+        result = fx_exporter_site_api._dumps_catalog_redirect()
+        assert f'refresh" content="0;url={expected}"' in result
+
+    def test_dumps_openapi_schema(self, fx_exporter_site_api: SiteApiExporter):
+        """Can create JSON OpenAPI schema."""
+        result = fx_exporter_site_api._dumps_openapi_schema()
+        assert isinstance(result, dict)
+        assert "openapi" in result
+
+    def test_dumps_api_docs(self, fx_exporter_site_api: SiteApiExporter):
+        """Can create OpenAPI docs."""
+        result = fx_exporter_site_api._dumps_api_docs()
+        assert isinstance(result, str)
+
+    def test_export(self, fx_exporter_site_api: SiteApiExporter):
+        """Can export API definitions to local directory."""
+        fx_exporter_site_api.export()
+        assert fx_exporter_site_api._export_base.joinpath(".well-known/api-catalog").exists()
+        assert fx_exporter_site_api._export_base.joinpath("static/json/api-catalog.json").exists()
+        assert fx_exporter_site_api._export_base.joinpath("static/json/openapi.json").exists()
+        assert fx_exporter_site_api._export_base.joinpath("guides/api/index.html").exists()
+
+    def test_publish(self, fx_exporter_site_api: SiteApiExporter):
+        """Can upload API definitions to S3 with expected content-types."""
+        expected = {
+            ".well-known/api-catalog": "text/html",
+            "static/json/api-catalog.json": "application/linkset+json; profile=https://www.rfc-editor.org/info/rfc9727",
+            "static/json/openapi.json": "application/vnd.oai.openapi+json;version=3.1",
+            "guides/api/index.html": "text/html",
+        }
+
+        fx_exporter_site_api.publish()
+        for key, content_type in expected.items():
+            result = fx_exporter_site_api._s3_utils._s3.get_object(
+                Bucket=fx_exporter_site_api._s3_utils._bucket, Key=key
+            )
+            assert result["ResponseMetadata"]["HTTPStatusCode"] == 200
+            assert result["ResponseMetadata"]["HTTPHeaders"]["content-type"] == content_type
 
 
 class TestSiteExporter:

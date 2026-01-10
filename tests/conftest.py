@@ -25,7 +25,13 @@ from lantern.config import Config
 from lantern.exporters.base import Exporter, ResourceExporter
 from lantern.exporters.html import HtmlAliasesExporter, HtmlExporter
 from lantern.exporters.records import RecordsExporter
-from lantern.exporters.site import SiteExporter, SiteIndexExporter, SitePagesExporter, SiteResourcesExporter
+from lantern.exporters.site import (
+    SiteApiExporter,
+    SiteExporter,
+    SiteIndexExporter,
+    SitePagesExporter,
+    SiteResourcesExporter,
+)
 from lantern.exporters.verification import VerificationExporter
 from lantern.exporters.waf import WebAccessibleFolderExporter
 from lantern.exporters.website import WebsiteSearchExporter
@@ -1047,6 +1053,24 @@ def fx_exporter_site_pages(
     meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
     return SitePagesExporter(logger=fx_logger, meta=meta, s3=fx_s3_client)
+
+
+@pytest.fixture()
+def fx_exporter_site_api(
+    mocker: MockerFixture, fx_logger: logging.Logger, fx_s3_bucket_name: str, fx_s3_client: S3Client
+) -> SiteApiExporter:
+    """Site API definitions exporter with a mocked config and S3 client."""
+    with TemporaryDirectory() as tmp_path:
+        output_path = Path(tmp_path)
+    mock_config = mocker.Mock()
+    type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
+    type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
+    type(mock_config).BASE_URL = PropertyMock(return_value="https://example.com")
+    type(mock_config).VERSION = PropertyMock(return_value="0.0.0")
+
+    meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
+
+    return SiteApiExporter(logger=fx_logger, meta=meta, s3=fx_s3_client)
 
 
 @pytest.fixture()

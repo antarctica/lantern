@@ -70,9 +70,9 @@ These requirements are enforced by the `validate()` method in the [Catalogue Rec
 
 | Hierarchy level           | Allowed Prefixes   |
 |---------------------------|--------------------|
-| `collections`             | `collections`      |
+| `collection`              | `collections`      |
 | `dataset`                 | `datasets`         |
-| `products`                | `products`, `maps` |
+| `product`                 | `products`, `maps` |
 | `initiative`              | `projects`         |
 | `paperMapProduct` (local) | `products`, `maps` |
 
@@ -233,7 +233,7 @@ pluralised term related to the Record hierarchy level (e.g. `collections/foo` fo
 [Record requirements](#record-requirements) section for specific requirements.
 
 > [!CAUTION]
-> The catalogue does not enforce aliases to be unique across records and the behavior of conflicting aliases is left
+> The catalogue does not enforce aliases to be unique across records and the behaviour of conflicting aliases is left
 > undefined. Any implicit behaviour MUST NOT be relied upon.
 
 ### Item key value data

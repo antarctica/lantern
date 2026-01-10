@@ -32,6 +32,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * OpenAPI definition and Scalar based interactive documentation for static site
 * Reverse engineered JSON schema for site verification report data (for use in OpenAPI definition)
 * Reverse engineered JSON schema for public website search items data (for use in OpenAPI definition)
+* Supplemental icon audit and development task
 
 ### Fixed
 
@@ -64,6 +65,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Minor page performance improvements
 * Splitting 'base' layout into 'base' and 'main' layouts to allow full-width content
 * Refactored HTML redirect page generation into utils module for sharing across exporters
+* Switching to Font Awesome 7 hosted kit
+* Refactored OGL symbol into a custom Font Awesome icon
 
 ### Removed
 

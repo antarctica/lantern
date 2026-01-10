@@ -95,6 +95,7 @@ config-init = { cmd = "op inject --in-file resources/env/.env.tpl --out-file .en
 config-check = { cmd = "python -m tasks.config", help = "Check app config" }
 css = { cmd = "python -m tasks.css", help = "Regenerate CSS via tailwind" }
 css-audit = { cmd = "python -m tasks.css_audit", help = "List CSS styles used in app templates" }
+icons-audit = { cmd = "python -m tasks.icons_audit", help = "List icons used in app templates" }
 js = { cmd = "python -m tasks.js", help = "Regenerate JavaScript" }
 build-test-records = { cmd = "python tests/scripts/build_test.py", help = "Build test records as a catalogue site" }
 build-test-cache = { cmd = "python tests/resources/stores/gitlab_cache/refresh.py", help = "Build test/resource cache" }

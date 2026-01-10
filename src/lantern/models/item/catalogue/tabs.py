@@ -96,7 +96,7 @@ class ItemsTab(Tab):
     @property
     def icon(self) -> str:
         """Tab icon class."""
-        return "far fa-grip-horizontal"
+        return "fa-regular fa-grid-2"
 
     @property
     def items(self) -> list[ItemCatalogueSummary]:
@@ -168,7 +168,7 @@ class DataTab(Tab):
     @property
     def icon(self) -> str:
         """Tab icon class."""
-        return "far fa-cube"
+        return "fa-regular fa-cube"
 
     @property
     def restricted(self) -> bool:
@@ -214,7 +214,7 @@ class ExtentTab(Tab):
     @property
     def icon(self) -> str:
         """Tab icon class."""
-        return "far fa-expand-arrows"
+        return "fa-regular fa-expand"
 
 
 class AuthorsTab(Tab):
@@ -244,7 +244,7 @@ class AuthorsTab(Tab):
     @property
     def icon(self) -> str:
         """Tab icon class."""
-        return "far fa-user-friends"
+        return "fa-regular fa-user-group-simple"
 
     @property
     def items(self) -> list[Contact]:
@@ -285,7 +285,7 @@ class LicenceTab(Tab):
     @property
     def icon(self) -> str:
         """Tab icon class."""
-        return "far fa-file-certificate"
+        return "fa-regular fa-file-certificate"
 
     @property
     def slug(self) -> Licence | None:
@@ -348,7 +348,7 @@ class LineageTab(Tab):
     @property
     def icon(self) -> str:
         """Tab icon class."""
-        return "far fa-scroll-old"
+        return "fa-regular fa-scroll"
 
     @property
     def statement(self) -> str | None:
@@ -394,7 +394,7 @@ class RelatedTab(Tab):
     @property
     def icon(self) -> str:
         """Tab icon class."""
-        return "far fa-project-diagram"
+        return "fa-regular fa-diagram-project"
 
 
 class AdditionalInfoTab(Tab):
@@ -458,7 +458,7 @@ class AdditionalInfoTab(Tab):
     @property
     def icon(self) -> str:
         """Tab icon class."""
-        return "far fa-info-square"
+        return "fa-regular fa-square-info"
 
     @property
     def item_id(self) -> str:
@@ -658,7 +658,7 @@ class ContactTab(Tab):
     @property
     def icon(self) -> str:
         """Tab icon class."""
-        return "far fa-comment-alt-lines"
+        return "fa-regular fa-comment-captions"
 
     @property
     def form_action(self) -> str:
@@ -770,7 +770,7 @@ class AdminTab(Tab):
     @property
     def icon(self) -> str:
         """Tab icon class."""
-        return "far fa-shield-alt"
+        return "fa-regular fa-shield-halved"
 
     @property
     def item_id(self) -> str:

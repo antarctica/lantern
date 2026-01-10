@@ -107,6 +107,15 @@ environment.
 3. set the relevant [Config](/docs/config.md) option in the `.env` template and Ansible Vault for use in the
    [Environment Module](/docs/deployment.md#environment-module) template
 
+## Font Awesome
+
+1. register a new Font Awesome kit with:
+   - version *7.x*
+   - *CSS only* embedding method (to support non-JavaScript clients)
+   - automatic subsetting (*classic* -> *regular*)
+   - hostnames for each [Hosting](/docs/infrastructure.md#hosting) endpoint
+2. set the kit CDN URL in the `styles_font_awesome()` [Common Macro](/docs/site.md#common-macros)
+
 ## Power Automate
 
 ### Power Automate item enquires

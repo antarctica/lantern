@@ -3,7 +3,7 @@
 
 {% block content %}
   <article class="space-y-4 lg:space-y-8">
-    {{ com.page_header(main="Catalogue index", sub='Admin', sub_i='fas fa-fw fa-tools')}}
+    {{ com.page_header(main="Catalogue index", sub='Admin', sub_i=com.maintenance_i_classes())}}
     <section class="space-y-4 space-y-8">
       {% call com.alert(variant='blue') %}
         <div class="grid grid-cols-1 gap-y-4 lg:gap-x-8 lg:grid-cols-[auto_1fr]">

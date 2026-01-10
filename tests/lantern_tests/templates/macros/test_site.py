@@ -97,9 +97,7 @@ class TestMacrosSite:
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
         assert html.head.find(name="link", attrs={"rel": "api-catalog"}) is not None
 
-    @pytest.mark.parametrize(
-        "href", ["https://cdn.web.bas.ac.uk/libs/font-awesome-pro/5.13.0/css/all.min.css", "/static/css/main.css?v=000"]
-    )
+    @pytest.mark.parametrize("href", ["https://kit.fontawesome.com", "/static/css/main.css?v=000"])
     def test_head_styles(self, href: str):
         """Can get static CSS references."""
         template = """{% import '_macros/site.html.j2' as site %}{{ site.head_styles('000') }}"""

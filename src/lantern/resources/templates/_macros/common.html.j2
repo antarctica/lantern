@@ -20,6 +20,8 @@
 
 {% macro table_row_classes() %}p-2 border-b {{ table_border_classes() }}{% endmacro %}
 
+{% macro maintenance_i_classes() %}fa-regular fa-screwdriver-wrench{% endmacro %}
+
 {% macro back_to_top_id() %}site-top{% endmacro %}
 
 {% macro sentry_trigger() %}site-feedback-trigger{% endmacro %}
@@ -51,15 +53,15 @@
 {% macro copyable_path(value) %}
 <div class="grid grid-cols-[minmax(0,1fr)_auto] gap-2 items-center">
   <div class="overflow-x-auto"><code class="whitespace-nowrap inline-block">{{ value }}</code></div>
-  <button type="button" class="{{ show_js_only() }} p-2 {{ btn_default_classes() }}" data-copy="{{ value }}"><i class="far fa-copy"></i></button>
+  <button type="button" class="{{ show_js_only() }} p-2 {{ btn_default_classes() }}" data-copy="{{ value }}"><i class="fa-regular fa-copy"></i></button>
 </div>
 {% endmacro %}
 
-{% macro restricted_i(fixed_width=False) %}<i class="far {% if fixed_width %}fa-fw{% endif %} fa-lock-alt"></i>{% endmacro %}
+{% macro restricted_i() %}<i class="fa-regular fa-lock-keyhole"></i>{% endmacro %}
 
-{% macro ext_link_i(fixed_width=False) %}<i class="far {% if fixed_width %}fa-fw{% endif %} fa-external-link"></i>{% endmacro %}
+{% macro ext_link_i() %}<i class="fa-regular fa-arrow-up-right-from-square"></i>{% endmacro %}
 
-{% macro experimental_link_i(fixed_width=False) %}<i class="far {% if fixed_width %}fa-fw{% endif %} fa-flask-potion"></i>{% endmacro %}
+{% macro experimental_i() %}<i class="fa-regular fa-flask-round-potion"></i>{% endmacro %}
 
 {% macro ext_link_a(href, value) %}
   <a class="{{ link_classes() }}" href="{{ href }}" target="_blank">{{ value }} {{ ext_link_i() }}</a>

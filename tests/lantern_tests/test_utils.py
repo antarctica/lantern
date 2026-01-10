@@ -11,7 +11,15 @@ from lantern.lib.metadata_library.models.record.elements.common import Identifie
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 from lantern.stores.gitlab import GitLabStore
-from lantern.utils import S3Utils, get_jinja_env, get_record_aliases, init_gitlab_store, init_s3_client, prettify_html
+from lantern.utils import (
+    S3Utils,
+    dumps_redirect,
+    get_jinja_env,
+    get_record_aliases,
+    init_gitlab_store,
+    init_s3_client,
+    prettify_html,
+)
 
 
 class TestS3Utils:
@@ -132,3 +140,10 @@ class TestUtils:
             prettify_html(html="<html>\n\n\n\n\n<body><p>...</p></body></html>")
             == "<html>\n<body><p>...</p></body></html>"
         )
+
+    def test_dumps_redirect(self):
+        """Can generate HTML redirection page."""
+        expected = "/x"
+        result = dumps_redirect(expected)
+        assert "<!DOCTYPE html>" in result
+        assert f'refresh" content="0;url={expected}"' in result

@@ -7,9 +7,7 @@
   <body id="{{ com.back_to_top_id() }}" class="font-sans text-base text-grey-900 dark:text-grey-100 bg-white dark:bg-grey-950">
     <div class="flex flex-col min-h-screen space-y-8 lg:space-y-12">
       {{ site.header(meta) }}
-      <main class="{{ com.container_classes() }} px-2 flex-1">
-        {% block content %}{% endblock %}
-      </main>
+      <div class="px-2 flex-1">{% block content %}{% endblock %}</div>
       {{ site.footer(meta) }}
     </div>
   </body>

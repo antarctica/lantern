@@ -1,0 +1,1065 @@
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "BAS Data Catalogue (Lantern)",
+    "summary": "Prototype data catalogue for discovery metadata.",
+    "description": "A data discovery tool to find, evaluate and access resources produced, managed and/or used by the [British Antarctic Survey](https://www.bas.ac.uk/) and [UK Polar Data Centre](https://www.bas.ac.uk/data/uk-pdc/). This includes datasets, products (maps), services and other information.\n\n> [!NOTE]\n> This documentation does not cover all services available under this domain. See the [API Catalogue](/.well-known/api-catalog) for all available services.",
+    "contact": {
+      "name": "MAGIC and Geographic Information Centre",
+      "url": "https://www.bas.ac.uk/teams/magic",
+      "email": "magic@bas.ac.uk"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/license/mit"
+    },
+    "version": "{{version}}"
+  },
+  "servers": [
+    {
+      "url": "https://data.bas.ac.uk",
+      "description": "Primary production environment, shared with other systems during transition."
+    },
+    {
+      "url": "https://data-testing.bas.ac.uk",
+      "description": "Pre-production environment, without availability guarantees (generally and for specific resources)"
+    }
+  ],
+  "externalDocs": {
+    "url": "https://github.com/antarctica/lantern",
+    "description": "Project documentation"
+  },
+  "security": [{}],
+  "tags": [
+    {
+      "name": "waf",
+      "x-displayName": "WAF",
+      "description": "Access to underpinning metadata records via a Web Accessible Folder.",
+      "externalDocs": {
+        "description": "More information",
+        "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/access.md#web-accessible-folder"
+      }
+    },
+    {
+      "name": "records",
+      "x-displayName": "Records",
+      "description": "Access to metadata records underpinning content items.",
+      "externalDocs": {
+        "description": "More information",
+        "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/data-model.md#records"
+      }
+    },
+    {
+      "name": "items",
+      "x-displayName": "Items",
+      "description": "Access to content items.",
+      "externalDocs": {
+        "description": "More information",
+        "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/data-model.md#items"
+      }
+    },
+    {
+      "name": "guides",
+      "x-displayName": "Guides",
+      "description": "Informational pages explaining how to use this catalogue."
+    },
+    {
+      "name": "legal",
+      "x-displayName": "Legal Policies",
+      "description": "Informational pages related to accessibility, privacy and copyright."
+    },
+    {
+      "name": "internal",
+      "x-displayName": "Internal",
+      "description": "Various, non-sensitive, informational pages related to content and system administration.",
+      "externalDocs": {
+        "description": "More information",
+        "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/site.md#internal-pages-structure"
+      }
+    },
+    {
+      "name": "static",
+      "x-displayName": "Static",
+      "description": "Various supporting content."
+    }
+  ],
+  "paths": {
+    "/-/index/index.html": {
+      "get": {
+        "tags": ["internal"],
+        "operationId": "getIndex",
+        "x-scalar-stability": "experimental",
+        "summary": "Internal content index",
+        "description": "Basic listing of any content items and item aliases in the catalogue.",
+        "externalDocs": {
+          "description": "More information",
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/exporters.md#site-index-exporter"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/htmlContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/-/formatting/index.html": {
+      "get": {
+        "tags": ["internal"],
+        "operationId": "getFormatting",
+        "x-scalar-stability": "stable",
+        "summary": "Internal content formatting guide",
+        "description": "Examples of supported Markdown formatting for authoring content items.",
+        "externalDocs": {
+          "description": "More information",
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/site.md#item-markdown"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/htmlContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/-/public-website-search/items.json": {
+      "get": {
+        "tags": ["internal"],
+        "operationId": "getPublicWebsiteSearchItems",
+        "x-scalar-stability": "experimental",
+        "summary": "BAS public website search items",
+        "description": "Subset of catalogue content as search index items for inclusion in the [BAS public website](https://www.bas.ac.uk).",
+        "externalDocs": {
+          "description": "More information",
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/exporters.md#public-website-search-exporter"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/publicWebsiteSearchItems"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/-/verification/data.json": {
+      "get":  {
+        "tags": ["internal"],
+        "operationId": "getVerificationData",
+        "x-scalar-stability": "experimental",
+        "summary": "Catalogue verification data",
+        "description": "Underlying data for the latest checks made against catalogue content (such as external downloads). Intended for further processing in other applications.",
+        "externalDocs": {
+          "description": "More information",
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/monitoring.md#verification-report"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/verificationReportData"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/-/verification/index.html": {
+      "get":  {
+        "tags": ["internal"],
+        "operationId": "getVerificationIndex",
+        "x-scalar-stability": "experimental",
+        "summary": "Catalogue verification report",
+        "description": "Latest Catalogue verification data formatted as a simple online report.",
+        "externalDocs": {
+          "description": "More information",
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/monitoring.md#verification-report"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/htmlContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/legal/accessibility/index.html": {
+      "get": {
+        "tags": ["legal"],
+        "operationId": "getAccessibilityIndex",
+        "x-scalar-stability": "experimental",
+        "summary": "Accessibility policy",
+        "description": "Get information about accessibility.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/htmlContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/legal/cookies/index.html": {
+      "get": {
+        "tags": ["legal"],
+        "operationId": "getCookiesIndex",
+        "x-scalar-stability": "stable",
+        "summary": "Cookies policy",
+        "description": "Get information about cookies.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/htmlContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/legal/copyright/index.html": {
+      "get": {
+        "tags": ["legal"],
+        "operationId": "getCopyrightIndex",
+        "x-scalar-stability": "stable",
+        "summary": "Copyright policy",
+        "description": "Get information about copyright.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/htmlContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/legal/privacy/index.html": {
+      "get": {
+        "tags": ["legal"],
+        "operationId": "getPrivacyIndex",
+        "x-scalar-stability": "stable",
+        "summary": "Privacy policy",
+        "description": "Get information about privacy.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/htmlContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/records/{fileIdentifier}.xml": {
+      "get":  {
+        "tags": ["records"],
+        "operationId": "getRecordXml",
+        "x-scalar-stability": "stable",
+        "summary": "ISO 19115 XML",
+        "description": "Get record as XML as per ISO 19139 (no profile).",
+        "externalDocs": {
+          "description": "More information",
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/exporters.md#xml-resource-exporter"
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/fileIdentifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Record found.",
+            "content": {
+              "application/xml": {
+                "schema": {
+                  "type": "string",
+                  "examples": [
+                    "<?xml version='1.0' encoding='utf-8'?>\n<gmi:MI_Metadata xmlns:gmd=\"http://www.isotc211.org/2005/gmd\" xmlns:gco=\"http://www.isotc211.org/2005/gco\" xmlns:gml=\"http://www.opengis.net/gml/3.2\" xmlns:gmx=\"http://www.isotc211.org/2005/gmx\" xmlns:srv=\"http://www.isotc211.org/2005/srv\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:gmi=\"http://www.isotc211.org/2005/gmi\" xmlns:gss=\"http://www.isotc211.org/2005/gss\" xmlns:gsr=\"http://www.isotc211.org/2005/gsr\" xmlns:gts=\"http://www.isotc211.org/2005/gts\" xsi:schemaLocation=\"http://www.isotc211.org/2005/gmd https://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/gmd/gmd.xsd http://www.isotc211.org/2005/gco https://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/gco/gco.xsd http://www.isotc211.org/2005/gmx https://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/gmx/gmx.xsd http://www.isotc211.org/2005/srv https://standards.iso.org/iso/19119/srv/srv.xsd http://www.isotc211.org/2005/gmi https://standards.iso.org/iso/19115/-2/gmi/1.0/gmi.xsd http://www.isotc211.org/2005/gss https://standards.iso.org/iso/19139/Schemas/gss/gss.xsd http://www.isotc211.org/2005/gsr https://standards.iso.org/iso/19139/Schemas/gsr/gsr.xsd http://www.isotc211.org/2005/gts https://standards.iso.org/iso/19139/Schemas/gts/gts.xsd\">\n  <gmd:contact>\n    <gmd:CI_ResponsibleParty>\n      <gmd:organisationName>\n        <gco:CharacterString>Mapping and Geographic Information Centre, British Antarctic Survey</gco:CharacterString>\n      </gmd:organisationName>\n      <gmd:role>\n        <gmd:CI_RoleCode codeList=\"https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_RoleCode\" codeListValue=\"pointOfContact\">pointOfContact</gmd:CI_RoleCode>\n      </gmd:role>\n    </gmd:CI_ResponsibleParty>\n  </gmd:contact>\n  <gmd:dateStamp>\n    <gco:Date>2018-10-18</gco:Date>\n  </gmd:dateStamp>\n  <gmd:identificationInfo>\n    <gmd:MD_DataIdentification>\n      <gmd:citation>\n        <gmd:CI_Citation>\n          <gmd:title>\n            <gco:CharacterString>Test Record</gco:CharacterString>\n          </gmd:title>\n          <gmd:date>\n            <gmd:CI_Date>\n              <gmd:date>\n                <gco:Date>2018</gco:Date>\n              </gmd:date>\n              <gmd:dateType>\n                <gmd:CI_DateTypeCode codeList=\"https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_DateTypeCode\" codeListValue=\"creation\">creation</gmd:CI_DateTypeCode>\n              </gmd:dateType>\n            </gmd:CI_Date>\n          </gmd:date>\n        </gmd:CI_Citation>\n      </gmd:citation>\n      <gmd:abstract>\n        <gco:CharacterString>Test Record for ISO 19115 metadata standard (no profile) with required properties only.</gco:CharacterString>\n      </gmd:abstract>\n      <gmd:language>\n        <gmd:LanguageCode codeList=\"http://www.loc.gov/standards/iso639-2/php/code_list.php\" codeListValue=\"eng\">eng</gmd:LanguageCode>\n      </gmd:language>\n    </gmd:MD_DataIdentification>\n  </gmd:identificationInfo>\n</gmi:MI_Metadata>"
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/recordNotFound"
+          }
+        }
+      }
+    },
+    "/records/{fileIdentifier}.html": {
+      "get":  {
+        "tags": ["records"],
+        "operationId": "getRecordHtml",
+        "x-scalar-stability": "stable",
+        "summary": "ISO 19115 XML with HTML stylesheet",
+        "description": "Get record as HTML with basic formatting.\n\nGenerated from XML records by applying an XSLT transformation.\n\nIntended for easier review of ISO metadata by humans.",
+        "externalDocs": {
+          "description": "More information",
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/exporters.md#xml-html-resource-exporter"
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/fileIdentifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Record found.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/htmlContent"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/recordNotFound"
+          }
+        }
+      }
+    },
+    "/records/{fileIdentifier}.json": {
+      "get":  {
+        "tags": ["records"],
+        "operationId": "getRecordXml",
+        "x-scalar-stability": "stable",
+        "summary": "BAS ISO 19115 JSON",
+        "description": "Get record as JSON as per [BAS ISO 19139 schema](https://metadata-standards.data.bas.ac.uk/standards/iso-19115-19139#json-schemas).",
+        "externalDocs": {
+          "description": "More information",
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/exporters.md#json-resource-exporter"
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/fileIdentifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Record found.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/jsonIso19115Record"
+                },
+                "example": {
+                    "$schema": "https://metadata-resources.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-0-v4.json",
+                    "metadata": {
+                        "contacts": [{"organisation": {"name": "Mapping and Geographic Information Centre, British Antarctic Survey"}, "role": ["pointOfContact"]}],
+                        "date_stamp": "2018-10-18"
+                    },
+                    "identification": {
+                        "title": {"value": "Test Record"},
+                        "dates": {"creation": {"date": "2018-01-01", "date_precision": "year"}},
+                        "abstract": "Test Record for ISO 19115 metadata standard (no profile) with required properties only.",
+                        "language": "eng"
+                    }
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/recordNotFound"
+          }
+        }
+      }
+    },
+    "/items/{fileIdentifier}/index.html": {
+      "get":  {
+        "tags": ["items"],
+        "operationId": "getItemHtml",
+        "x-scalar-stability": "stable",
+        "summary": "Content item",
+        "description": "Get content item.",
+        "externalDocs": {
+          "description": "More information",
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/data-model.md#catalogue-items"
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/fileIdentifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Item found.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/htmlContent"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Item not found.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/htmlNotFound"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/collections/{aliasIdentifier}/index.html": {
+      "get":  {
+        "tags": ["items"],
+        "operationId": "getCollectionHtml",
+        "x-scalar-stability": "stable",
+        "summary": "Collection alias redirect",
+        "description": "Get target content item for a collection alias.",
+        "externalDocs": {
+          "description": "More information",
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/data-model.md#item-aliases"
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/aliasIdentifier"
+          }
+        ],
+        "responses": {
+          "301": {
+            "$ref": "#/components/responses/aliasFound"
+          },
+          "404": {
+            "$ref": "#/components/responses/aliasNotFound"
+          }
+        }
+      }
+    },
+    "/datasets/{aliasIdentifier}/index.html": {
+      "get":  {
+        "tags": ["items"],
+        "operationId": "getDatasetHtml",
+        "x-scalar-stability": "stable",
+        "summary": "Dataset alias redirect",
+        "description": "Get target content item for a dataset alias.",
+        "externalDocs": {
+          "description": "More information",
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/data-model.md#item-aliases"
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/aliasIdentifier"
+          }
+        ],
+        "responses": {
+          "301": {
+            "$ref": "#/components/responses/aliasFound"
+          },
+          "404": {
+            "$ref": "#/components/responses/aliasNotFound"
+          }
+        }
+      }
+    },
+    "/products/{aliasIdentifier}/index.html": {
+      "get":  {
+        "tags": ["items"],
+        "operationId": "getProductHtml",
+        "x-scalar-stability": "stable",
+        "summary": "Product alias redirect",
+        "description": "Get target content item for a product alias.",
+        "externalDocs": {
+          "description": "More information",
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/data-model.md#item-aliases"
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/aliasIdentifier"
+          }
+        ],
+        "responses": {
+          "301": {
+            "$ref": "#/components/responses/aliasFound"
+          },
+          "404": {
+            "$ref": "#/components/responses/aliasNotFound"
+          }
+        }
+      }
+    },
+    "/projects/{aliasIdentifier}/index.html": {
+      "get":  {
+        "tags": ["items"],
+        "operationId": "getProjectHtml",
+        "x-scalar-stability": "stable",
+        "summary": "Project alias redirect",
+        "description": "Get target content item for a project alias.",
+        "externalDocs": {
+          "description": "More information",
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/data-model.md#item-aliases"
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/aliasIdentifier"
+          }
+        ],
+        "responses": {
+          "301": {
+            "$ref": "#/components/responses/aliasFound"
+          },
+          "404": {
+            "$ref": "#/components/responses/aliasNotFound"
+          }
+        }
+      }
+    },
+    "/maps/{aliasIdentifier}/index.html": {
+      "get":  {
+        "tags": ["items"],
+        "operationId": "getMapHtml",
+        "x-scalar-stability": "stable",
+        "summary": "Map alias redirect",
+        "description": "Get target content item for a map product alias.",
+        "externalDocs": {
+          "description": "More information",
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/data-model.md#item-aliases"
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/aliasIdentifier"
+          }
+        ],
+        "responses": {
+          "301": {
+            "$ref": "#/components/responses/aliasFound"
+          },
+          "404": {
+            "$ref": "#/components/responses/aliasNotFound"
+          }
+        }
+      }
+    },
+    "/waf/iso-19139-all/index.html": {
+      "get":  {
+        "tags": ["waf"],
+        "operationId": "getIso19139AllWafIndex",
+        "x-scalar-stability": "stable",
+        "summary": "All records WAF",
+        "description": "Get Web Accessible Folder listing all resources encoded as ISO 19139-2:2012 records.",
+        "externalDocs": {
+          "description": "More information",
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/access.md#web-accessible-folder"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string",
+                  "examples": [
+                    "<html>\n<body><h1>BAS Data Catalogue - Web Accessible Folder (WAF)</h1>\n<aside><p>This page contains links to ISO 19139 XML metadata records within this catalogue, for use by clients that harvest metadata records in bulk.</p><p>This endpoint was last updated at <time datetime=\"2014-06-30T14:20:42+00:00\">2014-06-30T14:20:42+00:00</time>. It is maintained by magic@bas.ac.uk.</p></aside>\n<main><ul><li><a href=\"https://data.bas.ac.uk/records/7b0cd3e3-069e-4fe2-92d4-f2387bfc40f1.xml\">7b0cd3e3-069e-4fe2-92d4-f2387bfc40f1</a></li></ul></main>\n</body>\n</html>"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/guides/api/index.html": {
+      "get": {
+        "tags": ["guides"],
+        "operationId": "getApiGuideIndex",
+        "x-scalar-stability": "experimental",
+        "summary": "API documentation",
+        "description": "Get interactive API documentation (this page) describing the catalogue structure and endpoints.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/htmlContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/static/json/openapi.json": {
+      "get": {
+        "tags": ["static"],
+        "operationId": "getOpenApiSchema",
+        "x-scalar-stability": "experimental",
+        "summary": "Open API Schema",
+        "description": "Get Open API Schema definition describing the catalogue structure.",
+        "externalDocs": {
+          "description": "More information",
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/site.md#openapi-definition"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/vnd.oai.openapi+json;version=3.1": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/static/json/api-catalog.json": {
+      "get": {
+        "tags": ["static"],
+        "operationId": "getApiCatalog",
+        "x-scalar-stability": "experimental",
+        "summary": "API Catalog",
+        "description": "Get [RFC 9727 API Catalog](https://datatracker.ietf.org/doc/html/rfc9727) describing available APIs.",
+        "externalDocs": {
+          "description": "More information",
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/access.md#api-catalog"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/linkset+json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/static/txt/heartbeat.txt": {
+      "get": {
+        "tags": ["static"],
+        "operationId": "getHeartbeat",
+        "x-scalar-stability": "stable",
+        "summary": "Heartbeat",
+        "description": "Get stable file for use as a simple health monitoring endpoint.",
+        "externalDocs": {
+          "description": "More information",
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/monitoring.md#heartbeat"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "examples": ["badump, badump"]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "htmlContent": {
+        "title": "HTML content",
+        "type": "string",
+        "examples": ["<!DOCTYPE html>\n\n<html lang=\"en-GB\">...</html>"]
+      },
+      "htmlRedirect": {
+        "title": "HTML redirect content",
+        "type": "string",
+        "examples": ["<!DOCTYPE html>\n\n<html lang=\"en-GB\"><head><title>BAS Data Catalogue</title><meta http-equiv=\"refresh\" content=\"0;url=/items/dbe5f712-696a-47d8-b4a7-3b173e47e3ab/\"></head><body><a href=\"/items/dbe5f712-696a-47d8-b4a7-3b173e47e3ab/\">Click here if you are not redirected after a few seconds.</a></body></html>"]
+      },
+      "htmlNotFound": {
+        "title": "HTML 404 content",
+        "type": "string",
+        "examples": ["<!DOCTYPE html>\n\n<html lang=\"en-GB\"><body>Page not found.</body></html>"]
+      },
+      "publicWebsiteSearchItems": {
+        "title": "BAS public website additional search items",
+        "description": "Subset of catalogue content (resources), for creating search index items in the [BAS public website](https://www.bas.ac.uk).",
+        "type": "array",
+        "items": {
+          "title": "BAS public website additional search item",
+          "type": "object",
+          "required": ["file_identifier", "file_revision", "source", "content", "deleted"],
+          "additionalProperties": false,
+          "properties": {
+            "file_identifier": {
+              "title": "File identifier",
+              "description": "Persistent and unique identifier for a resource.",
+              "type": "string",
+              "examples": ["7b0cd3e3-069e-4fe2-92d4-f2387bfc40f1"]
+            },
+            "file_revision": {
+              "title": "File revision",
+              "description": "Identifier for a resource at a specific revision.",
+              "type": "string",
+              "examples":  ["2d3358180f619996b6fcf06126b9b3ca4988c5e6"]
+            },
+            "source": {
+              "title": "Source",
+              "description": "Identifier to indicate the origin of a resource.",
+              "type": "string",
+              "enum": ["lantern"],
+              "examples": ["lantern"]
+            },
+            "content": {
+              "title": "Search item content",
+              "description": "Subset of resource information necessary for a search item.",
+              "type": "object",
+              "required": [
+                "id",
+                "type",
+                "title",
+                "description",
+                "date",
+                "version",
+                "href"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "title": "ID",
+                  "description": "Persistent and unique identifier for the item.\n\nNot intended to be shown in search results.",
+                  "type": "string",
+                  "examples": ["7b0cd3e3-069e-4fe2-92d4-f2387bfc40f1"]
+                },
+                "revision": {
+                  "title": "Revision",
+                  "description": "Optional reference for the version of the item.\n\nNot intended to be shown in search results.",
+                  "type": "string",
+                  "examples": ["2d3358180f619996b6fcf06126b9b3ca4988c5e6"]
+                },
+                "type": {
+                  "title": "Item Type",
+                  "description": "Derived from resource type.",
+                  "type": "string",
+                  "enum": ["COLLECTION", "DATASET", "INITIATIVE (PROJECT)", "PRODUCT (MAP)", "PRODUCT (PAPER MAP)"],
+                  "examples": ["PRODUCT (MAP)"]
+                },
+                "title": {
+                  "title": "Title",
+                  "description": "Mapped from the resource title.",
+                  "type": "string",
+                  "examples": ["Fictitious map of mermaid sightings in Antarctica"]
+                },
+                "description": {
+                  "title": "Description",
+                  "description": "Mapped from the resource summary or description.",
+                  "type": "string",
+                  "examples": ["..."]
+                },
+                "date": {
+                  "title": "Date",
+                  "description": "Mapped from a suitable resource date, typically the publication date.",
+                  "type": "date-time",
+                  "examples": ["2014-06-30T14:20:42+00:00"]
+                },
+                "version": {
+                  "title": "Version",
+                  "description": "Mapped from the resource edition if available.",
+                  "type": "string",
+                  "examples": ["1", "2014.2"]
+                },
+                "thumbnail_href": {
+                  "title": "Thumbnail URL",
+                  "description": "URL to an overview thumbnail for the resource if available.",
+                  "type": "string",
+                  "examples": ["https://cdn.web.bas.ac.uk/item-thumbnails/7b0cd3e3-069e-4fe2-92d4-f2387bfc40f1/overview.png"]
+                },
+                "keywords": {
+                  "title": "Search keywords",
+                  "description": "Derived from resource topic keywords if available.",
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "examples": [["mermaids", "sightings", "Antarctica", "map", "fictitious"]]
+                },
+                "href": {
+                  "title": "Item URL",
+                  "description": "URL to the item in the Catalogue.",
+                  "type": "string",
+                  "examples": ["https://data.bas.ac.uk/items/7b0cd3e3-069e-4fe2-92d4-f2387bfc40f1"]
+                }
+              }
+            },
+            "deleted": {
+              "title": "Deleted",
+              "description": "Flag to indicate whether the resource has been deleted and should be removed.",
+              "type": "boolean",
+              "examples": [false]
+            }
+          }
+        }
+      },
+      "verificationCheckData": {
+        "title": "Verification check data",
+        "description": "Structured data for a verification check.",
+        "type": "object",
+        "required": ["type", "url", "result"],
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "title": "Check type",
+            "description": "Identifier for the kind of verification check.",
+            "type": "string",
+            "examples": ["Site Pages", "Record Pages (JSON)"]
+          },
+          "url": {
+            "title": "URL",
+            "description": "URL checked (may be the URL to a proxy service).",
+            "type": "string",
+            "format": "uri",
+            "examples": [
+              "https://data.bas.ac.uk/legal/accessibility/",
+              "https://data.bas.ac.uk/records/260298c6-8b63-4def-b0c3-964986a8bd24.json"
+            ]
+          },
+          "exporter": {
+            "title": "Exporter",
+            "description": "Identifier of the internal exporter related to the check.",
+            "type": "string",
+            "examples": ["SitePagesExporter", "JsonExporter"]
+          },
+          "result": {
+            "title": "Result",
+            "description": "Outcome or status of the check.",
+            "type": "string",
+            "enum": ["passed", "failed", "skipped", "-"],
+            "examples": ["passed","passed"]
+          },
+          "params": {
+            "title": "Parameters",
+            "description": "Optional parameters that apply to the check.",
+            "type": "object",
+            "examples": [{},{}]
+          },
+          "data": {
+            "title": "Data",
+            "description": "Optional additional data that applies to the check.",
+            "type": "object",
+            "examples": [
+              {"path": "404", "status_code": 404, "duration": 100553},
+              {"file_identifier": "260298c6-8b63-4def-b0c3-964986a8bd24", "status_code": 200, "duration": 84403}]
+          }
+        }
+      },
+      "verificationReportData": {
+        "title": "Verification checks data",
+        "description": "Structured data for verification checks, aggregated statistics and contextual information.",
+        "type": "object",
+        "required": ["pass_fail", "base_url", "commit", "time", "stats", "site_checks", "resource_checks"],
+        "additionalProperties": false,
+        "properties": {
+          "pass_fail": {
+            "title": "Pass/Fail",
+            "description": "Overall status of all checks.",
+            "type": "string",
+            "enum": ["PASS", "FAIL"],
+            "examples": ["PASS"]
+          },
+          "base_url": {
+            "title": "Base URL",
+            "description": "Indication of which Catalogue instance has been checked.",
+            "type": "string",
+            "format": "uri",
+            "examples": ["https://data.bas.ac.uk"]
+          },
+          "commit": {
+            "title": "Commit",
+            "description": "Information about the head commit in the backing content store at the time of the report.",
+            "type": "object",
+            "required": ["value", "href", "external"],
+            "additionalProperties": false,
+            "properties": {
+              "value": {
+                "title": "Commit short ID",
+                "description":"Short commit reference, for link text.",
+                "type":"string",
+                "examples": ["2d33581"]
+              },
+              "href": {
+                "title":  "Commit URL",
+                "description": "URL to commit, for link target.",
+                "type": "string",
+                "format": "uri",
+                "examples":  ["https://gitlab.data.bas.ac.uk/MAGIC/lantern-records/-/commit/2d3358180f619996b6fcf06126b9b3ca4988c5e6"]
+              },
+              "external": {
+                "title":  "External URL",
+                "description": "Internal context for link rendering.",
+                "type": "boolean",
+                "examples":  [true]
+              }
+            }
+          },
+          "time": {
+            "title": "Timestamp",
+            "description": "Time instant at which the report started to be generated.",
+            "type": "string",
+            "format": "date-time",
+            "examples": ["2014-06-30T14:20:42+00:00"]
+          },
+          "stats": {
+            "title": "Statistics",
+            "description": "Aggregated check outcomes (count of successful/failed checks).",
+            "type": "object",
+            "required": ["pass", "fail", "skip"],
+            "additionalProperties": false,
+            "properties": {
+              "pass": {
+                "title": "Successful checks",
+                "description": "Count of any passed checks.",
+                "type": "integer",
+                "examples": [10]
+              },
+              "fail": {
+                "title":  "Failed checks",
+                "description":  "Count of any failed checks.",
+                "type":  "integer",
+                "examples": [0]
+              },
+              "skip": {
+                "title":  "Skipped checks",
+                "description":  "Count of any skipped checks.",
+                "type":  "integer",
+                "examples": [2]
+              }
+            }
+          },
+          "site_checks": {
+            "title": "Site verification checks",
+            "description": "Verification checks for site level content.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/verificationCheckData"
+            }
+          },
+          "resource_checks": {
+            "title": "Resources verification checks",
+            "description": "Verification checks for individual resource content.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/verificationCheckData"
+            }
+          }
+        }
+      },
+      "jsonIso19115Record": {
+        "$ref": "https://metadata-resources.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-0-v4.json"
+      }
+    },
+    "parameters": {
+      "fileIdentifier": {
+        "name": "File Identifier",
+        "in": "path",
+        "description": "Persistent and unique identifier for a resource.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "examples": ["7b0cd3e3-069e-4fe2-92d4-f2387bfc40f1"]
+        }
+      },
+      "aliasIdentifier": {
+        "name": "Alias Identifier",
+        "in": "path",
+        "description": "Alias currently assigned to a resource.",
+        "required": true,
+        "schema" : {
+          "type": "string",
+          "examples": ["mermaid-sightings-in-antarctica"]
+        }
+      }
+    },
+    "responses": {
+      "recordNotFound": {
+        "description": "Record not found.",
+        "content": {
+          "text/html": {
+            "schema": {
+              "$ref": "#/components/schemas/htmlNotFound"
+            }
+          }
+        }
+      },
+      "aliasFound": {
+        "description": "Alias found.",
+        "headers": {
+          "Location": {
+            "description": "Referenced content item URL.",
+            "schema": {
+              "type": "string",
+              "format": "uri",
+              "examples": ["https://data.bas.ac.uk/items/7b0cd3e3-069e-4fe2-92d4-f2387bfc40f1"]
+            }
+          }
+        },
+        "content": {
+          "text/html": {
+            "schema": {
+              "$ref": "#/components/schemas/htmlRedirect"
+            }
+          }
+        }
+      },
+      "aliasNotFound": {
+        "description": "Alias not found.",
+        "content": {
+          "text/html": {
+            "schema": {
+              "$ref": "#/components/schemas/htmlNotFound"
+            }
+          }
+        }
+      }
+    }
+  }
+}

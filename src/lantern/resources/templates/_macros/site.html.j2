@@ -5,6 +5,7 @@
 
 {% macro html_head(data) %}
   <head>
+    {{ head_preconnect() }}
     {{ head_meta(data) }}
     {{ head_title(data.html_title_suffixed) }}
     {% if data.html_open_graph_tags %}
@@ -15,6 +16,11 @@
     {{ head_styles(data.build_key) }}
     {{ head_scripts(data) }}
   </head>
+{% endmacro %}
+
+{% macro head_preconnect() %}
+  <link rel="preconnect" href="https://cdn.web.bas.ac.uk">
+  <link rel="preconnect" href="https://cdn.web.bas.ac.uk" crossorigin>
 {% endmacro %}
 
 {% macro head_meta(data) %}
@@ -38,10 +44,10 @@
 {% endmacro %}
 
 {% macro head_favicon(build_key) %}
-  <link rel="shortcut icon" href="/static/img/favicon.ico?v={{ build_key }}" />
-  <link rel="icon" href="/static/img/favicon.svg?v={{ build_key }}" type="image/svg+xml">
-  <link rel="apple-touch-icon" href="/static/img/apple-touch-icon.png?v={{ build_key }}" sizes="180x180" />
-  <link rel="manifest" href="/static/txt/manifest.webmanifest?v={{ build_key }}" />
+  <link fetchpriority="low" rel="shortcut icon" href="/static/img/favicon.ico?v={{ build_key }}" />
+  <link fetchpriority="low" rel="icon" href="/static/img/favicon.svg?v={{ build_key }}" type="image/svg+xml">
+  <link fetchpriority="low" rel="apple-touch-icon" href="/static/img/apple-touch-icon.png?v={{ build_key }}" sizes="180x180" />
+  <link fetchpriority="low" rel="manifest" href="/static/txt/manifest.webmanifest?v={{ build_key }}" />
 {% endmacro %}
 
 {% macro head_api_catalogue(build_key) %}
@@ -65,23 +71,23 @@
 
 {% macro script_sentry(build_key, sentry_src) %}
   <script src="/static/js/sentry-preload.js?v={{ build_key }}" crossorigin="anonymous"></script>
-  <script src="{{ sentry_src }}" crossorigin="anonymous"></script>
+  <script async src="{{ sentry_src }}" crossorigin="anonymous"></script>
 {% endmacro %}
 
 {% macro script_plausible(value) %}
-  <script defer data-domain="{{ value }}" src="https://plausible.io/js/script.hash.outbound-links.js"></script>
+  <script defer fetchpriority="low" data-domain="{{ value }}" src="https://plausible.io/js/script.hash.outbound-links.js"></script>
 {% endmacro %}
 
 {% macro script_turnstile() %}
-  <script defer async src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>
+  <script defer fetchpriority="low" async src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>
 {% endmacro %}
 
 {% macro script_enhancements(build_key) %}
-  <script defer src="/static/js/enhancements.js?v={{ build_key }}"></script>
+  <script defer fetchpriority="low" src="/static/js/enhancements.js?v={{ build_key }}"></script>
 {% endmacro %}
 
 {% macro script_schema_org(value) %}
-  <script defer rel="alternate" type="application/ld+json">
+  <script rel="alternate" type="application/ld+json">
 {{ value }}
   </script>
 {% endmacro %}

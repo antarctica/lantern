@@ -89,7 +89,7 @@ and tools.
 
 `lantern.exporters.xml.IsoXmlHtmlExporter`
 
-Extends the [XML Resource Exporter](#xml-resource-exporter) outputting Records as HTML pages with minimal formatting,
+Extends the [XML Resource Exporter](#xml-resource-exporter) outputting Records as HTML pages with minimal formatting
 by applying an XSLT transformation. Intended for easier review of ISO metadata by humans.
 
 > [!NOTE]
@@ -145,7 +145,7 @@ Outputs a styled HTML page linking to [Items](/docs/data-model.md#items) and
 [Item Aliases](/docs/data-model.md#item-aliases) output by the [HTML Exporter](#html-resource-exporter) and
 [HTML Aliases Exporter](#html-aliases-resource-exporter).
 
-> [!CAUTION]
+> [!NOTE]
 > This page is intended as a basic, internal, reference to site content - not a proper, public, homepage.
 
 ### Site API exporter

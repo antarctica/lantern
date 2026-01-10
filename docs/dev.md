@@ -140,7 +140,7 @@ In the `tests.lantern_tests.config` module:
 
 ### Adding catalogue item types
 
-> [!CAUTION]
+> [!WARNING]
 > This section is Work in Progress (WIP) and may not be complete/accurate.
 
 Update record schemas to allow the new item type in records:
@@ -157,11 +157,12 @@ Within this project:
 2. add new [Test Records](#adding-new-test-records) as needed using the new item type
 3. update the `prefixes` mapping in `lantern.models.record.record.Record._validate_aliases()` to set allowed aliases
 4. update the allowed prefixes table in the [Record requirements](/docs/data-model.md#record-requirements) documentation
-5. add item type to `lantern.models.item.base.enums.ResourceTypeLabel` enum
-6. add item type to `lantern.models.item.catalogue.enums.ResourceTypeIcon` enum (see https://fontawesome.com/v5/search)
-7. if a 'container' [Super Type](/docs/data-model.md#item-super-types), update the
+5. add new paths for prefixes in the [OpenAPI Definition](/docs/site.md#openapi-definition)
+6. add item type to `lantern.models.item.base.enums.ResourceTypeLabel` enum
+7. add item type to `lantern.models.item.catalogue.enums.ResourceTypeIcon` enum (see https://fontawesome.com/v5/search)
+8. if a 'container' [Super Type](/docs/data-model.md#item-super-types), update the
   `lantern.models.item.catalogue.item.ItemCatalogue._super_type` property
-8. verify the [Test Records](#test-records) build as a local site
+9. verify the [Test Records](#test-records) build as a local site
 
 If additional item relationships are needed:
 
@@ -174,7 +175,7 @@ If additional item relationships are needed:
 
 ### Adding properties to items
 
-> [!CAUTION]
+> [!WARNING]
 > This section is Work in Progress (WIP) and may not be complete/accurate.
 
 1. if needed, [Support New Record Properties](/docs/libraries.md#adding-new-record-properties)
@@ -222,7 +223,7 @@ If additional item relationships are needed:
 
 ### Adding catalogue item tabs
 
-> [!CAUTION]
+> [!WARNING]
 > This section is Work in Progress (WIP) and may not be complete/accurate.
 
 1. create a new class in `lantern.models.item.catalogue.tabs` inheriting from `lantern.models.item.catalogue.tabs.Tab`
@@ -246,7 +247,7 @@ If additional item relationships are needed:
 
 ### Adding catalogue licences
 
-> [!CAUTION]
+> [!WARNING]
 > This section is Work in Progress (WIP) and may not be complete/accurate.
 
 1. update `lantern.models.item.catalogue.enums.Licence`
@@ -259,10 +260,11 @@ If additional item relationships are needed:
 
 ### Adding site pages
 
-> [!CAUTION]
+> [!WARNING]
 > This section is Work in Progress (WIP) and may not be complete/accurate.
 
 - ... include in `VerificationExporter.site_pages` list
+- ... include in [OpenAPI Definition](/docs/site.md#openapi-definition)
 
 ### Updating styles
 
@@ -589,7 +591,7 @@ available via [Pytest-Env](#pytest-env) and `tests.conftest._admin_meta_keys` an
 
 #### Adding new test records
 
-> [!CAUTION]
+> [!WARNING]
 > This section is Work in Progress (WIP) and may not be complete/accurate.
 
 1. create new `tests/resources/records/item_cat_*.py` file or clone from minimal examples

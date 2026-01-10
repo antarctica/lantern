@@ -23,6 +23,6 @@ class ResourceTypeLabel(Enum):
 
     COLLECTION = "COLLECTION"
     DATASET = "DATASET"
-    INITIATIVE = "Initiative (Project)"
+    INITIATIVE = "INITIATIVE (PROJECT)"
     PRODUCT = "PRODUCT (MAP)"
     PAPER_MAP_PRODUCT = "PRODUCT (PAPER MAP)"

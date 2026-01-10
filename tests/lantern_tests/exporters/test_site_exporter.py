@@ -244,6 +244,7 @@ class TestSiteResourcesExporter:
             Bucket=fx_exporter_site_resources._s3_utils._bucket, Key=expected
         )
         assert result["ResponseMetadata"]["HTTPStatusCode"] == 200
+        assert result["ResponseMetadata"]["HTTPHeaders"]["content-type"] == "image/x-icon"
 
     def test_publish_img(self, fx_exporter_site_resources: SiteResourcesExporter):
         """Can upload images to S3."""
@@ -285,6 +286,7 @@ class TestSiteResourcesExporter:
         assert fx_exporter_site_resources._export_base.joinpath("img/favicon.ico").exists()
         assert fx_exporter_site_resources._export_base.joinpath("txt/heartbeat.txt").exists()
         assert fx_exporter_site_resources._export_base.joinpath("js/enhancements.js").exists()
+        # representative sample
 
     def test_publish(self, fx_s3_bucket_name: str, fx_exporter_site_resources: SiteResourcesExporter):
         """Can upload resources to S3."""
@@ -294,7 +296,7 @@ class TestSiteResourcesExporter:
             "static/img/favicon.ico",
             "static/txt/heartbeat.txt",
             "static/js/enhancements.js",
-        ]
+        ]  # representative sample
 
         fx_exporter_site_resources.publish()
 

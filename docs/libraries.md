@@ -189,7 +189,7 @@ To support properties that cannot be represented natively in the ISO 19115 infor
 encoded in a JSON string within the `identifification.supplemental_information` element of a Record.
 
 <!-- pyml disable md028 -->
-> [!CAUTION]
+> [!WARNING]
 > The use of key values is non-standard and exclusive. If used, other content MUST NOT be included in the element.
 >
 > Keys in this data are not controlled and must be accessed defensively.
@@ -226,7 +226,7 @@ The JSON Web Keys (JWKs) for signing/verifying JWTs and encrypting/decrypting JW
 
 ### Adding new Record properties
 
-> [!CAUTION]
+> [!WARNING]
 > This section is Work in Progress (WIP) and may not be complete/accurate.
 
 To add support for a new ISO element within Records:

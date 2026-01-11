@@ -35,6 +35,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Supplemental icon audit and development task
 * Icon added to back to top footer link
 * Pickling support for administrative metadata keys
+* Pickling support for GitLab store cache
 
 ### Fixed
 

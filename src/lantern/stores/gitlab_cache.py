@@ -137,15 +137,25 @@ class GitLabLocalCache:
         self._token = gitlab_token
         self._source_ = gitlab_source
         self._frozen = frozen
-
         self._cache_path = path / "cache.db"
-        self._flash: dict[str, RecordRevision] = {}
 
-    @cached_property
+        self._flash: dict[str, RecordRevision] = {}
+        self._conn: Engine | None = None
+
+    def __getstate__(self):  # noqa: ANN204
+        """Close and unset engine to allow pickling."""
+        if self._conn is not None:
+            self._engine.disconnect_all()
+            self._conn = None
+        return self.__dict__.copy()
+
+    @property
     def _engine(self) -> Engine:
         """Engine for backing database."""
-        self._logger.info(f"Connecting to SQLite database at: '{self._cache_path.resolve()}'")
-        return Engine.from_uri(f"sqlite://{self._cache_path.resolve()}")
+        if self._conn is None:
+            self._logger.info(f"Connecting to SQLite database at: '{self._cache_path.resolve()}'")
+            self._conn = Engine.from_uri(f"sqlite://{self._cache_path.resolve()}")
+        return self._conn
 
     @cached_property
     def _online(self) -> bool:

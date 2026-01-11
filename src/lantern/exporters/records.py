@@ -34,23 +34,9 @@ class Job(NamedTuple):
     exporter: Callable[..., ResourceExporter]
 
 
-_LOGGING_SINGLETON: logging.Logger | None = None
 _META_SINGLETON: ExportMeta | None = None
 _STORE_SINGLETON: Store | None = None
 _S3_SINGLETON: S3ClientT | None = None
-
-
-def _job_worker_logging(level: int) -> logging.Logger:
-    """
-    Logging per worker process.
-
-    Singleton used to avoid initialising logging for each job.
-    """
-    global _LOGGING_SINGLETON
-    if _LOGGING_SINGLETON is None:
-        init_logging(level)
-        _LOGGING_SINGLETON = logging.getLogger("app")
-    return _LOGGING_SINGLETON
 
 
 def _job_worker_s3(config: Config) -> S3ClientT:
@@ -95,7 +81,9 @@ def _run_job(
 
     Standalone function for use in parallel processing.
     """
-    logger = _job_worker_logging(config.LOG_LEVEL)
+    init_logging(config.LOG_LEVEL)
+    logger = logging.getLogger("app")
+
     s3 = _job_worker_s3(config=config)
     store = _job_worker_store(store=store)
     select_record = store.select_one

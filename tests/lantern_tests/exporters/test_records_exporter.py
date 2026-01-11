@@ -19,7 +19,6 @@ from lantern.exporters.json import JsonExporter
 from lantern.exporters.records import (
     JobMethod,
     RecordsExporter,
-    _job_worker_logging,
     _job_worker_s3,
     _job_worker_store,
     _run_job,
@@ -49,10 +48,6 @@ class TestRecordExporterJob:
     """Test functions related to record exporter parallel processing jobs."""
 
     @pytest.mark.cov()
-    def test_job_worker_logging(self):
-        """Can create standalone logger instance."""
-        result = _job_worker_logging(level=logging.INFO)
-        assert isinstance(result, logging.Logger)
     def test_job_worker_store(self, fx_reset_singletons, fx_fake_store: Store):  # noqa: ANN001
         """Can create store instance."""
         result = _job_worker_store(store=fx_fake_store)

@@ -45,23 +45,24 @@ class TestConfig:
             if env in envs_bck:
                 os.environ[env] = str(envs_bck[env])
 
-    def test_pickle(self, fx_config: Config, mocker: MockerFixture):
-        """Config can be pickled and unpickled."""
-        result = pickle.dumps(fx_config, pickle.HIGHEST_PROTOCOL)
-        config = pickle.loads(result)  # noqa: S301
-        assert config.dumps_safe() == fx_config.dumps_safe()
+    @pytest.mark.cov()
+    def test_not_eq(self, fx_config: Config):
+        """Cannot compare if non-config instances are equal."""
+        assert fx_config != 1
+
+    def test_pickle(self, fx_config: Config):
+        """Can pickle and unpickle config."""
+        pickled = pickle.dumps(fx_config, pickle.HIGHEST_PROTOCOL)
+        result: Config = pickle.loads(pickled)  # noqa: S301
+        assert result == fx_config
 
     def test_version(self):
-        """Version is read from package metadata."""
+        """Can get version from package metadata."""
         config = Config()
         assert version("lantern") == config.VERSION
 
     def test_dumps_safe(self, fx_package_version: str, fx_config: Config):
-        """
-        Config can be exported to a dict with sensitive values redacted.
-
-        `EXPORTER_DATA_CATALOGUE_SENTRY_SRC` uses a real value for e2e tests.
-        """
+        """Can export config to a dict safely with sensitive values redacted."""
         redacted_value = "[**REDACTED**]"
         expected: fx_config.ConfigDumpSafe = {
             "NAME": fx_config.NAME,
@@ -106,7 +107,7 @@ class TestConfig:
         assert len(output["TEMPLATES_CACHE_BUST_VALUE"]) > 0
 
     def test_validate(self, fx_config: Config):
-        """Valid configuration is ok."""
+        """Can validate config where the configuration is OK."""
         fx_config.validate()
 
     @pytest.mark.parametrize(
@@ -210,7 +211,7 @@ class TestConfig:
         ],
     )
     def test_validate_missing_required_option(self, envs: dict):
-        """Validation fails where a required provider or exporter config option is missing."""
+        """Cannot validate where a required provider or exporter config option is missing."""
         envs_bck = self._set_envs(envs)
 
         config = Config(read_env=False)
@@ -221,7 +222,7 @@ class TestConfig:
         self._unset_envs(envs, envs_bck)
 
     def test_validate_invalid_logging_level(self):
-        """Validation fails where logging level is invalid."""
+        """Cannot validate where the logging level is invalid."""
         envs = {"LANTERN_LOG_LEVEL": "INVALID"}
         envs_bck = self._set_envs(envs)
 
@@ -234,7 +235,7 @@ class TestConfig:
 
     @pytest.mark.parametrize("env", ["LANTERN_STORE_GITLAB_CACHE_PATH", "LANTERN_EXPORT_PATH"])
     def test_validate_invalid_path(self, env: str):
-        """Validation fails where required path is invalid."""
+        """Cannot validate where a required path is invalid."""
         envs = {env: str(Path(__file__).resolve())}
         envs_bck = self._set_envs(envs)
 
@@ -270,7 +271,7 @@ class TestConfig:
     )
     def test_configurable_property(self, property_name: str, expected: Any, sensitive: bool):
         """
-        Configurable properties can be accessed.
+        Can access configurable properties.
 
         Note: `ENABLE_FEATURE_SENTRY` and `SENTRY_ENVIRONMENT` are not tested here.
         """
@@ -286,7 +287,7 @@ class TestConfig:
 
     @pytest.mark.parametrize("property_name", ["STORE_GITLAB_TOKEN", "AWS_ACCESS_SECRET"])
     def test_redacted_property(self, mocker: MockerFixture, property_name: str):
-        """Redacted values only return value if secret value has value."""
+        """Can only get redacted value where secret values have a value."""
         for has_value in [True, False]:
             value = "x" if has_value else None
             expected = "[**REDACTED**]" if has_value else ""

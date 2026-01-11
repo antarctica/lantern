@@ -144,7 +144,9 @@
     <div class="{{ com.container_classes() }} px-2 py-8 space-y-4 lg:space-y-8">
       <div class="flex flex-col justify-between space-y-4 lg:space-y-0 lg:flex-row">
         {{ com.feedback_trigger(classes=com.footer_link_classes(), fallback=data.fallback_email, text='Is something wrong with this page?') }}
-        <a class="{{ com.footer_link_classes() }} lg:text-right" href="#{{ com.back_to_top_id() }}">Back to top</a>
+        <a class="{{ com.footer_link_classes() }} lg:text-right" href="#{{ com.back_to_top_id() }}">
+          Back to top <i class="fa-regular fa-arrow-up"></i>
+        </a>
       </div>
       <div class="block lg:hidden flex justify-center justify-between {{ com.footer_link_classes() }}">
         {{ primary_nav() }}

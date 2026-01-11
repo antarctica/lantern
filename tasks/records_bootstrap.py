@@ -150,7 +150,7 @@ def _stage2(logger: logging.Logger, config: Config) -> None:
 
 def main() -> None:
     """Entrypoint."""
-    logger, config, _store, _s3, _keys = init()
+    logger, config, _store, _s3 = init()
 
     print("This script is for bootstrapping new GitLab stores.")
     print("It requires an existing/working remote to copy required records from and a new, empty, remote to copy to.")

@@ -43,6 +43,12 @@ class Config:
         self.__dict__.update(state)
         self.env = Env()
 
+    def __eq__(self, other: object) -> bool:
+        """Check equality."""
+        if not isinstance(other, Config):
+            return NotImplemented
+        return self.dumps_safe() == other.dumps_safe()
+
     def validate(self) -> None:
         """
         Validate configuration.

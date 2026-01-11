@@ -784,6 +784,7 @@ def fx_exporter_iso_xml_html(
 @pytest.fixture()
 def fx_exporter_html(
     mocker: MockerFixture,
+    fx_admin_meta_keys: AdministrationKeys,
     fx_logger: logging.Logger,
     fx_s3_bucket_name: str,
     fx_s3_client: S3Client,
@@ -797,6 +798,7 @@ def fx_exporter_html(
     type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
     type(mock_config).TEMPLATES_ITEM_MAPS_ENDPOINT = PropertyMock(return_value="x")
     type(mock_config).TEMPLATES_ITEM_CONTACT_ENDPOINT = PropertyMock(return_value="x")
+    type(mock_config).ADMIN_METADATA_KEYS = fx_admin_meta_keys
     meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
     return HtmlExporter(
@@ -852,10 +854,7 @@ def fx_exporter_records(
     mock_config = mocker.Mock()
     type(mock_config).LOG_LEVEL = PropertyMock(return_value=logging.DEBUG)
     type(mock_config).PARALLEL_JOBS = PropertyMock(return_value=1)
-    type(mock_config).ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE = PropertyMock(
-        return_value=fx_admin_meta_keys.encryption_private
-    )
-    type(mock_config).ADMIN_METADATA_SIGNING_KEY_PUBLIC = PropertyMock(return_value=fx_admin_meta_keys.signing_public)
+    type(mock_config).ADMIN_METADATA_KEYS = fx_admin_meta_keys
     type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
     type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
     type(mock_config).TEMPLATES_ITEM_MAPS_ENDPOINT = PropertyMock(return_value="x")
@@ -1092,10 +1091,7 @@ def fx_exporter_site(
     type(mock_config).NAME = PropertyMock(return_value="x")
     type(mock_config).LOG_LEVEL = PropertyMock(return_value=logging.DEBUG)
     type(mock_config).PARALLEL_JOBS = PropertyMock(return_value=1)
-    type(mock_config).ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE = PropertyMock(
-        return_value=fx_admin_meta_keys.encryption_private
-    )
-    type(mock_config).ADMIN_METADATA_SIGNING_KEY_PUBLIC = PropertyMock(return_value=fx_admin_meta_keys.signing_public)
+    type(mock_config).ADMIN_METADATA_KEYS = fx_admin_meta_keys
     type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
     type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
     type(mock_config).TEMPLATES_ITEM_MAPS_ENDPOINT = PropertyMock(return_value="x")

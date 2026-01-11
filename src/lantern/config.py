@@ -7,6 +7,8 @@ from typing import TypedDict
 from environs import Env, EnvError, EnvValidationError
 from jwskate import Jwk
 
+from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
+
 
 class ConfigurationError(Exception):
     """Raised for configuration validation errors."""
@@ -47,7 +49,7 @@ class Config:
         """Check equality."""
         if not isinstance(other, Config):
             return NotImplemented
-        return self.dumps_safe() == other.dumps_safe()
+        return self.dumps_safe() == other.dumps_safe() and self.ADMIN_METADATA_KEYS == other.ADMIN_METADATA_KEYS
 
     def validate(self) -> None:
         """
@@ -81,8 +83,11 @@ class Config:
         directories = ["STORE_GITLAB_CACHE_PATH", "EXPORT_PATH"]
 
         for prop in required:
+            attr = prop
+            if prop == "ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE" or prop == "ADMIN_METADATA_SIGNING_KEY_PUBLIC":
+                attr = "ADMIN_METADATA_KEYS"
             try:
-                _ = getattr(self, prop)
+                _ = getattr(self, attr)
             except EnvError as e:
                 msg = f"{prop} must be set."
                 raise ConfigurationError(msg) from e
@@ -103,8 +108,8 @@ class Config:
         SENTRY_DSN: str
         ENABLE_FEATURE_SENTRY: bool
         SENTRY_ENVIRONMENT: str
-        ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE: str
-        ADMIN_METADATA_SIGNING_KEY_PUBLIC: Jwk
+        ADMIN_METADATA_KEYS_ENCRYPTION_KEY_PRIVATE: str
+        ADMIN_METADATA_KEYS_SIGNING_KEY_PUBLIC: str
         STORE_GITLAB_ENDPOINT: str
         STORE_GITLAB_TOKEN: str
         STORE_GITLAB_PROJECT_ID: str
@@ -136,8 +141,8 @@ class Config:
             "SENTRY_DSN": self.SENTRY_DSN,
             "ENABLE_FEATURE_SENTRY": self.ENABLE_FEATURE_SENTRY,
             "SENTRY_ENVIRONMENT": self.SENTRY_ENVIRONMENT,
-            "ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE": self.ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE_SAFE,
-            "ADMIN_METADATA_SIGNING_KEY_PUBLIC": self.ADMIN_METADATA_SIGNING_KEY_PUBLIC,
+            "ADMIN_METADATA_KEYS_ENCRYPTION_KEY_PRIVATE": self.ADMIN_METADATA_KEYS_ENCRYPTION_KEY_PRIVATE_SAFE,
+            "ADMIN_METADATA_KEYS_SIGNING_KEY_PUBLIC": self.ADMIN_METADATA_KEYS.signing_public.to_json(compact=True),
             "STORE_GITLAB_ENDPOINT": self.STORE_GITLAB_ENDPOINT,
             "STORE_GITLAB_TOKEN": self.STORE_GITLAB_TOKEN_SAFE,
             "STORE_GITLAB_PROJECT_ID": self.STORE_GITLAB_PROJECT_ID,
@@ -212,21 +217,18 @@ class Config:
             return self.env.str("SENTRY_ENVIRONMENT", "development")
 
     @property
-    def ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE(self) -> Jwk:
-        """JSON Web Key for decrypting administrative metadata."""
+    def ADMIN_METADATA_KEYS(self) -> AdministrationKeys:
+        """JSON Web Keys for decrypting and verifying administrative metadata."""
         with self.env.prefixed(self._app_prefix), self.env.prefixed("ADMIN_METADATA_"):
-            return Jwk(self.env.json("ENCRYPTION_KEY_PRIVATE"))
+            return AdministrationKeys(
+                encryption_private=Jwk(self.env.json("ENCRYPTION_KEY_PRIVATE")),
+                signing_public=Jwk(self.env.json("SIGNING_KEY_PUBLIC")),
+            )
 
     @property
-    def ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE_SAFE(self) -> str:
+    def ADMIN_METADATA_KEYS_ENCRYPTION_KEY_PRIVATE_SAFE(self) -> str:
         """ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE with value redacted."""
-        return self._safe_value if self.ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE else ""
-
-    @property
-    def ADMIN_METADATA_SIGNING_KEY_PUBLIC(self) -> Jwk:
-        """Public JSON Web Key for verifying administrative metadata."""
-        with self.env.prefixed(self._app_prefix), self.env.prefixed("ADMIN_METADATA_"):
-            return Jwk(self.env.json("SIGNING_KEY_PUBLIC"))
+        return self._safe_value if self.ADMIN_METADATA_KEYS.encryption_private else ""
 
     @property
     def STORE_GITLAB_ENDPOINT(self) -> str:

@@ -9,6 +9,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from lantern.config import Config, ConfigurationError
+from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 
 
 class TestConfig:
@@ -73,8 +74,10 @@ class TestConfig:
             "SENTRY_DSN": fx_config.SENTRY_DSN,
             "ENABLE_FEATURE_SENTRY": False,  # would be True by default but Sentry disabled in tests
             "SENTRY_ENVIRONMENT": "test",
-            "ADMIN_METADATA_SIGNING_KEY_PUBLIC": fx_config.ADMIN_METADATA_SIGNING_KEY_PUBLIC.to_json(compact=True),
-            "ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE": redacted_value,
+            "ADMIN_METADATA_KEYS_ENCRYPTION_KEY_PRIVATE": redacted_value,
+            "ADMIN_METADATA_KEYS_SIGNING_KEY_PUBLIC": fx_config.ADMIN_METADATA_KEYS.signing_public.to_json(
+                compact=True
+            ),
             "STORE_GITLAB_ENDPOINT": "https://gitlab.example.com",
             "STORE_GITLAB_TOKEN": redacted_value,
             "STORE_GITLAB_PROJECT_ID": "1234",
@@ -96,10 +99,7 @@ class TestConfig:
             "VERIFY_SAN_PROXY_ENDPOINT": "x",
         }
 
-        _signing_key_public = "ADMIN_METADATA_SIGNING_KEY_PUBLIC"
         output = fx_config.dumps_safe()
-        # noinspection PyUnresolvedReferences
-        output[_signing_key_public] = output[_signing_key_public].to_json(compact=True)
 
         assert output == expected
         assert len(output["EXPORT_PATH"]) > 0
@@ -250,8 +250,6 @@ class TestConfig:
         ("property_name", "expected", "sensitive"),
         [
             ("PARALLEL_JOBS", 2, False),
-            ("ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE", JWK, True),
-            ("ADMIN_METADATA_SIGNING_KEY_PUBLIC", JWK, False),
             ("STORE_GITLAB_ENDPOINT", "x", False),
             ("STORE_GITLAB_TOKEN", "x", True),
             ("STORE_GITLAB_PROJECT_ID", "x", False),
@@ -273,7 +271,7 @@ class TestConfig:
         """
         Can access configurable properties.
 
-        Note: `ENABLE_FEATURE_SENTRY` and `SENTRY_ENVIRONMENT` are not tested here.
+        Note: `ENABLE_FEATURE_SENTRY`, `SENTRY_ENVIRONMENT` and `ADMIN_METADATA_KEYS` are not tested here.
         """
         envs = {f"LANTERN_{property_name}": str(expected)}
         envs_bck = self._set_envs(envs)
@@ -295,3 +293,16 @@ class TestConfig:
             mocker.patch.object(type(config), property_name, new_callable=PropertyMock, return_value=value)
 
             assert getattr(config, f"{property_name}_SAFE") == expected
+
+    def test_admin_metadata_keys(self, fx_config: Config):
+        """Can get administrative metadata keys assembled from multiple environment variables."""
+        envs = {
+            "LANTERN_ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE": str(self.JWK),
+            "ADMIN_METADATA_SIGNING_KEY_PUBLIC": str(self.JWK),
+        }
+        envs_bck = self._set_envs(envs)
+        config = Config()
+
+        assert isinstance(config.ADMIN_METADATA_KEYS, AdministrationKeys)
+
+        self._unset_envs(envs, envs_bck)

@@ -6,26 +6,26 @@ Summary of colours used across site templates. Compiled and referenced manually 
 
 Greyscale:
 
-* `white`
-* `grey-50` (once for code in prose)
-* `grey-100`
-* `grey-300`
-* `grey-500`
-* `grey-700`
-* `grey-900`
-* `grey-950`
-* `black`
+- `white`
+- `grey-50` (once for code in prose)
+- `grey-100`
+- `grey-300`
+- `grey-500`
+- `grey-700`
+- `grey-900`
+- `grey-950`
+- `black`
 
 Colours:
 
-* `yellow-500`
-* `green-500`
-* `sky-blue-300`
-* `sky-blue-500`
-* `red-500`
-* `mauve-500` (once for 'important' admonition)
-* `turquoise-500` (once for primary buttons)
-* `pink-500` (once for development status badge)
+- `yellow-500`
+- `green-500`
+- `sky-blue-300`
+- `sky-blue-500`
+- `red-500`
+- `mauve-500` (once for 'important' admonition)
+- `turquoise-500` (once for primary buttons)
+- `pink-500` (once for development status badge)
 
 ## Reference
 

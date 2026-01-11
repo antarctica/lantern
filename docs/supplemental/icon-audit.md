@@ -3,20 +3,12 @@
 
 Summary of icons used across site templates. Compiled and referenced manually to encourage consistency in icon use.
 
-## Distinct icons
+## Uses
 
-- `fa-arrow-right`
-- `fa-at`
-- `fa-copy`
-- `fa-envelope`
-- `fa-external-link`
-- `fa-flask-potion`
-- `fa-lock-alt`
-- `fa-orcid`
-- `fa-phone-rotary`
-- `fa-rectangle-landscape`
-- `fa-rectangle-portrait`
-- `fa-tools`
+- directly in [Templates](/docs/site.md#templates)
+- via [Template Macros](/docs/site.md#macros)
+- `Tab.icon` properties in `lantern.models.item.catalogue.tabs`
+- `lantern.models.item.catalogue.enums.ResourceTypeIcon`
 
 ## Reference
 

@@ -88,9 +88,6 @@ class TestRecordExporterJob:
     ):
         """Can export or publish a record using a record exporter class."""
         mocker.patch("lantern.exporters.records._job_worker_s3", return_value=fx_exporter_records_sel._s3_client)
-        admin_meta_keys_json = fx_exporter_records_sel._meta.admin_meta_keys.dumps_json()
-        fx_exporter_records_sel._meta.admin_meta_keys = None
-
         fx_revision_model_min.identification.identifiers.append(
             Identifier(identifier="x", href=f"https://{CATALOGUE_NAMESPACE}/datasets/x", namespace=ALIAS_NAMESPACE)
         )
@@ -101,7 +98,6 @@ class TestRecordExporterJob:
         _run_job(
             config=fx_exporter_records_sel._config,
             meta=fx_exporter_records_sel._meta,
-            admin_meta_keys_json=admin_meta_keys_json,
             store_init=_init_fake_store,
             exporter=exporter,
             record=fx_revision_model_min,

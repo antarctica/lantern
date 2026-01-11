@@ -95,7 +95,7 @@ def _clone_record(
 
 def main() -> None:
     """Entrypoint."""
-    logger, _config, store, _s3, keys = init()
+    logger, config, store, _s3 = init()
 
     input_path = Path("./import")
     args = _get_cli_args()
@@ -103,7 +103,10 @@ def main() -> None:
     source_record = _get_record(logger=logger, store=store, identifier=args["source_id"])
     target_identifier = _get_new_identifier(identifier=args["target_id"])
     new_record = _clone_record(
-        logger=logger, admin_keys=keys, source_record=source_record, new_identifier=target_identifier
+        logger=logger,
+        admin_keys=config.ADMIN_METADATA_KEYS,
+        source_record=source_record,
+        new_identifier=target_identifier,
     )
     dump_records(logger=logger, output_path=input_path, records=[new_record])
 

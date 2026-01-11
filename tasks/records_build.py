@@ -10,8 +10,7 @@ from tasks._record_utils import init
 from lantern.config import Config as Config
 from lantern.exporters.site import SiteExporter
 from lantern.models.site import ExportMeta
-from lantern.stores.base import Store
-from lantern.utils import init_gitlab_store
+from lantern.stores.gitlab_cache import GitLabCachedStore
 
 
 def time_task(label: str) -> Callable:
@@ -31,14 +30,6 @@ def time_task(label: str) -> Callable:
     return decorator
 
 
-def _init_store_adapter(logger: logging.Logger, config: Config | None, frozen: bool = False) -> Store:
-    """To resolve type errors."""
-    if config is None:
-        raise TypeError()
-
-    return init_gitlab_store(logger=logger, config=config, frozen=frozen)
-
-
 class ToyCatalogue:
     """Toy catalogue for prototyping."""
 
@@ -47,29 +38,34 @@ class ToyCatalogue:
         logger: logging.Logger,
         config: Config,
         s3: S3Client,
+        store: GitLabCachedStore,
         trusted: bool = False,
         selected_identifiers: set[str] | None = None,
     ) -> None:
         self._logger = logger
         self._config = config
         self._s3 = s3
+        self._store = store
         self._trusted = trusted
         self._selected_identifiers = selected_identifiers
 
-        self._store = init_gitlab_store(logger=self._logger, config=self._config)
-        if self._store.head_commit is None:
-            # noinspection PyProtectedMember
-            self._store._cache._ensure_exists()  # ensure cache exists to get head commit for ExportMeta
+        # ensure cache exists to get head commit for ExportMeta and is up to date before freezing
+        self._store._cache._ensure_exists()
         self._meta = ExportMeta.from_config_store(
-            config=self._config, store=None, build_repo_ref=self._store.head_commit, trusted=self._trusted
+            config=self._config, store=self._store, build_repo_ref=self._store.head_commit, trusted=self._trusted
         )
+
+        # Freeze the store to prevent further changes.
+        self._logger.info("Freezing store.")
+        self._store._frozen = True
+        self._store._cache._frozen = True
 
         self._site = SiteExporter(
             config=self._config,
             meta=self._meta,
             logger=self._logger,
             s3=self._s3,
-            init_store=_init_store_adapter,
+            store=self._store,
             selected_identifiers=selected_identifiers,
         )
 
@@ -105,8 +101,8 @@ def main() -> None:
     selected = set()  # to set use the form {"abc", "..."}
     trusted = False
 
-    logger, config, _store, s3, _keys = init()
-    cat = ToyCatalogue(config=config, logger=logger, s3=s3, trusted=trusted, selected_identifiers=selected)
+    logger, config, store, s3 = init()
+    cat = ToyCatalogue(config=config, logger=logger, s3=s3, store=store, trusted=trusted, selected_identifiers=selected)
 
     if export:
         cat.export()

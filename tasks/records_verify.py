@@ -10,7 +10,7 @@ def main() -> None:
     base_url = "https://data.bas.ac.uk"
     selected = {"00203387-0840-447c-b9ae-f25088501031"}  # set()  # to set use the form {"abc", "..."}
 
-    logger, config, store, s3, _keys = init()
+    logger, config, store, s3 = init()
     context: VerificationContext = {
         "BASE_URL": base_url,
         "SHAREPOINT_PROXY_ENDPOINT": config.VERIFY_SHAREPOINT_PROXY_ENDPOINT,

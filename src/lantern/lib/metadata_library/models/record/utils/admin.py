@@ -1,5 +1,3 @@
-from dataclasses import dataclass
-
 from jwskate import JweCompact, Jwk, JwtSigner
 
 from lantern.lib.metadata_library.models.record.elements.administration import Administration
@@ -19,35 +17,59 @@ class AdministrativeMetadataIntegrityError(Exception):
     pass
 
 
-@dataclass(kw_only=True)
 class AdministrationKeys:
-    """
-    Encryption and signing keys for administrative metadata.
+    """Encryption and signing keys for administrative metadata."""
 
-    One of the public or private signing key is needed depending on whether metadata needs verification and/or signing.
-    """
+    def __init__(
+        self, encryption_private: Jwk, signing_public: Jwk | None = None, signing_private: Jwk | None = None
+    ) -> None:
+        """
+        Initialise.
 
-    encryption_private: Jwk
-    signing_public: Jwk | None = None
-    signing_private: Jwk | None = None
+        One of the public or private signing key is needed depending on whether metadata needs verification and/or signing.
+        """
+        self.encryption_private: Jwk = encryption_private
+        self.signing_private: Jwk | None = signing_private
 
-    def __post_init__(self) -> None:
-        """Validate."""
-        if self.signing_public is None and self.signing_private is None:
-            msg = "Public or private signing_key must be provided."
-            raise ValueError(msg) from None
-        if self.signing_public is None and self.signing_private is not None:
-            self.signing_public = self.signing_private.public_jwk()
+        if isinstance(signing_public, Jwk):
+            self.signing_public: Jwk = signing_public
+            return
+        if isinstance(signing_private, Jwk):
+            self.signing_public: Jwk = signing_private.public_jwk()
+            return
 
-    def dumps_json(self) -> dict[str, str]:
-        """Dump keys as JSON."""
-        keys_json = {
-            "encryption_private": self.encryption_private.to_json(),
-            "signing_public": self.signing_public.to_json(),  # ty: ignore[possibly-missing-attribute]
-        }
+        msg = "Public or private signing_key must be provided."
+        raise TypeError(msg) from None
+
+    def __getstate__(self) -> dict[str, str]:
+        """
+        Support pickling by dumping keys to JSON.
+
+        Crytography keys within JWKs cannot be pickled.
+        """
+        out = {"encryption_private": self.encryption_private.to_json(), "signing_public": self.signing_public.to_json()}
         if self.signing_private:
-            keys_json["signing_private"] = self.signing_private.to_json()
-        return keys_json
+            out["signing_private"] = self.signing_private.to_json()
+        return out
+
+    def __setstate__(self, state: dict[str, str]) -> None:
+        """Load keys from JSON when unpickling."""
+        self.encryption_private = Jwk.from_json(state["encryption_private"])
+        self.signing_public = Jwk.from_json(state["signing_public"])
+        try:
+            self.signing_private = Jwk.from_json(state["signing_private"])
+        except KeyError:
+            self.signing_private = None
+
+    def __eq__(self, other: object) -> bool:
+        """Check equality."""
+        if not isinstance(other, AdministrationKeys):
+            return NotImplemented
+        return (
+            self.encryption_private == other.encryption_private
+            and self.signing_public == other.signing_public
+            and self.signing_private == other.signing_private
+        )
 
 
 class AdministrationWrapper:

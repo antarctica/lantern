@@ -34,6 +34,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Reverse engineered JSON schema for public website search items data (for use in OpenAPI definition)
 * Supplemental icon audit and development task
 * Icon added to back to top footer link
+* Pickling support for administrative metadata keys
 
 ### Fixed
 

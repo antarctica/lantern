@@ -565,7 +565,7 @@ class GitLabLocalCache:
             and len(file_identifiers) > 0
             and all(fid in self._flash for fid in file_identifiers)
         ):
-            self._logger.info(f"Loading {len(file_identifiers)} records from flash")
+            self._logger.debug(f"Loading {len(file_identifiers)} records from flash")
             return [self._flash[fid] for fid in file_identifiers]
 
         query = SQL("SELECT record_pickled FROM record")

@@ -204,7 +204,7 @@ Coordinates [Resource Exporters](#resource-exporters) for all or selected [Recor
 
 Uses a set of parallel processing workers to process `{record}:{exporter}` jobs (per record and exporter) for better
 performance. Singletons are used to share resources (such as a Store) between jobs in each worker. This requires
-passing a [Config](/docs/config.md) object and a [Store](/docs/architecture.md#stores) initialisation callable.
+passing a [Config](/docs/config.md) object.
 
 ### Site resources exporter
 

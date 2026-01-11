@@ -317,9 +317,7 @@ def _build(
     meta = ExportMeta.from_config_store(
         config=config, store=store, build_repo_ref=store.head_commit if store.head_commit else "-"
     )
-    site = SiteExporter(
-        config=config, meta=meta, logger=logger, s3=s3, init_store=_init_store_adapter, selected_identifiers=identifiers
-    )
+    site = SiteExporter(config=config, meta=meta, logger=logger, s3=s3, store=store, selected_identifiers=identifiers)
     logger.info(f"Publishing {len(identifiers)} records to {config.AWS_S3_BUCKET}.")
     site.publish()
 
@@ -379,8 +377,8 @@ def _output(
 @_time_task(label="Workflow")
 def main() -> None:
     """Entrypoint."""
-    logger, config, store, s3, keys = init()
-
+    logger, config, store, s3 = init()
+    admin_keys = config.ADMIN_METADATA_KEYS
     import_path = Path("./import")
     base_url = "https://data-testing.data.bas.ac.uk"
     testing_bucket = "add-catalogue-integration.data.bas.ac.uk"
@@ -396,7 +394,7 @@ def main() -> None:
     _confirm(logger, "Are records staged in import directory?")
 
     # process any zap authored records
-    _zap(logger=logger, store=store, admin_keys=keys, import_path=import_path)
+    _zap(logger=logger, store=store, admin_keys=admin_keys, import_path=import_path)
 
     # stop if no valid (zap) records present
     records = import_load(logger=logger, input_path=import_path)
@@ -405,7 +403,7 @@ def main() -> None:
         sys.exit(0)
 
     # open a changeset if needed
-    store, issue_url = _changeset(logger=logger, config=config, store=store, keys=keys, import_path=import_path)
+    store, issue_url = _changeset(logger=logger, config=config, store=store, keys=admin_keys, import_path=import_path)
 
     # import records and create merge request if needed
     commit = _import(logger=logger, config=config, store=store, import_path=import_path)

@@ -1,4 +1,4 @@
-{% extends "_layouts/page.html.j2" %}
+{% extends "_layouts/main.html.j2" %}
 {% import '_macros/common.html.j2' as com %}
 
 {% macro section(slug, title, input, output, danger=None, tip=None) %}
@@ -44,7 +44,7 @@
   "image": "Images",
 } %}
 
-{% block content %}
+{% block main %}
   <article class="space-y-4 lg:space-y-8">
     {{ com.page_header(main=header_main)}}
     <section id="toc" class="space-y-4">

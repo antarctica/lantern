@@ -87,7 +87,7 @@ def _confirm_selection(file_identifiers: set[str]) -> bool:
 
 def main() -> None:
     """Entrypoint."""
-    logger, _config, store, _s3, _keys = init()
+    logger, _config, store, _s3 = init()
 
     confirm_source(logger=logger, store=store, action="Selecting records from")
     args = _get_cli_args()

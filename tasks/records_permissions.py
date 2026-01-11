@@ -94,7 +94,7 @@ def _set_permissions(
 
 def main() -> None:
     """Entrypoint."""
-    logger, _config, _store, _s3, keys = init()
+    logger, config, _store, _s3 = init()
 
     input_path = Path("./import")
     logger.info(f"Loading records from: '{input_path.resolve()}'")
@@ -106,7 +106,7 @@ def main() -> None:
         sys.exit(0)
 
     for record in records:
-        _set_permission(logger, keys, record, permission)  # ty: ignore[invalid-argument-type]
+        _set_permission(logger, config.ADMIN_METADATA_KEYS, record, permission)  # ty: ignore[invalid-argument-type]
     dump_records(logger=logger, records=selected_records, output_path=input_path)
 
 

@@ -1,10 +1,10 @@
 import logging
 from collections.abc import Callable
+from copy import deepcopy
 from enum import Enum
 from typing import NamedTuple
 
 from joblib import Parallel, delayed
-from jwskate import Jwk
 from mypy_boto3_s3 import S3Client as S3ClientT
 
 from lantern.config import Config
@@ -12,11 +12,11 @@ from lantern.exporters.base import Exporter, ResourceExporter
 from lantern.exporters.html import HtmlAliasesExporter, HtmlExporter
 from lantern.exporters.json import JsonExporter
 from lantern.exporters.xml import IsoXmlExporter, IsoXmlHtmlExporter
-from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 from lantern.log import init as init_logging
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
-from lantern.stores.base import Store, StoreInitProtocol
+from lantern.stores.base import Store
+from lantern.stores.gitlab_cache import GitLabCachedStore
 from lantern.utils import init_s3_client
 
 
@@ -34,23 +34,8 @@ class Job(NamedTuple):
     exporter: Callable[..., ResourceExporter]
 
 
-_LOGGING_SINGLETON: logging.Logger | None = None
-_META_SINGLETON: ExportMeta | None = None
 _STORE_SINGLETON: Store | None = None
 _S3_SINGLETON: S3ClientT | None = None
-
-
-def _job_worker_logging(level: int) -> logging.Logger:
-    """
-    Logging per worker process.
-
-    Singleton used to avoid initialising logging for each job.
-    """
-    global _LOGGING_SINGLETON
-    if _LOGGING_SINGLETON is None:
-        init_logging(level)
-        _LOGGING_SINGLETON = logging.getLogger("app")
-    return _LOGGING_SINGLETON
 
 
 def _job_worker_s3(config: Config) -> S3ClientT:
@@ -65,25 +50,25 @@ def _job_worker_s3(config: Config) -> S3ClientT:
     return _S3_SINGLETON
 
 
-def _job_worker_store(logger: logging.Logger, config: Config, store_init: StoreInitProtocol) -> Store:
+def _job_worker_store(store: Store) -> Store:
     """
     Store per worker process.
 
     Singleton used to avoid initialising store for each job as some stores cannot be pickled.
-    Frozen stores used to prevent checking store is up to date and/or modifying records.
     """
     global _STORE_SINGLETON
     if _STORE_SINGLETON is None:
-        prefer_frozen = True
-        _STORE_SINGLETON = store_init(logger, config, prefer_frozen)
+        _STORE_SINGLETON = store
+        if isinstance(store, GitLabCachedStore):
+            # recreate flash cache
+            _STORE_SINGLETON.select()
     return _STORE_SINGLETON
 
 
 def _run_job(
     config: Config,
     meta: ExportMeta,
-    admin_meta_keys_json: dict[str, str],
-    store_init: StoreInitProtocol,
+    store: Store,
     exporter: Callable[..., ResourceExporter],
     record: RecordRevision,
     method: JobMethod,
@@ -95,13 +80,12 @@ def _run_job(
 
     Standalone function for use in parallel processing.
     """
-    logger = _job_worker_logging(config.LOG_LEVEL)
-    s3 = _job_worker_s3(config=config)
-    store = _job_worker_store(logger=logger, config=config, store_init=store_init)
-    select_record = store.select_one
+    init_logging(config.LOG_LEVEL)
+    logger = logging.getLogger("app")
 
-    admin_meta_keys = {key: Jwk(value) for key, value in admin_meta_keys_json.items()}
-    meta.admin_meta_keys = AdministrationKeys(**admin_meta_keys) if admin_meta_keys else None
+    s3 = _job_worker_s3(config=config)
+    store = _job_worker_store(store=store)
+    select_record = store.select_one
 
     if exporter == HtmlAliasesExporter:
         exporter_ = HtmlAliasesExporter(logger=logger, meta=meta, s3=s3, record=record)
@@ -132,7 +116,7 @@ class RecordsExporter(Exporter):
         config: Config,
         meta: ExportMeta,
         s3: S3ClientT,
-        init_store: StoreInitProtocol,
+        store: Store,
         selected_identifiers: set[str] | None = None,
     ) -> None:
         """Initialise exporter."""
@@ -140,7 +124,7 @@ class RecordsExporter(Exporter):
         self._config = config
         self._parallel_jobs = meta.parallel_jobs
         self._selected_identifiers: set[str] = selected_identifiers or set()
-        self._init_store = init_store
+        self._store = store
 
     def _generate(self) -> list[Job]:
         """
@@ -148,14 +132,29 @@ class RecordsExporter(Exporter):
 
         Jobs = all/selected records * each record exporter class.
         """
-        store_frozen = True
-        store = self._init_store(self._logger, self._config, store_frozen)
         parallel_classes = [HtmlExporter, HtmlAliasesExporter, JsonExporter, IsoXmlExporter, IsoXmlHtmlExporter]
-
         jobs: list[Job] = []
-        for record in store.select(self._selected_identifiers):
+
+        for record in self._store.select(self._selected_identifiers):
             jobs.extend([Job(record=record, exporter=cls) for cls in parallel_classes])
         return jobs
+
+    def _prep_store(self) -> Store:
+        """
+        Prepare store for use in parallel processing jobs.
+
+        Applies specifically to GitLabCachedStore which contain an in-memory dict of pickled records, and add
+        significant overhead when pickling and unpickling these stores for each parallel job.
+
+        A copy of the store without the in-memory cache layer is made to avoid this, and the `_STORE_SINGLETON`
+        singleton will then recreate it for each worker process.
+        """
+        if not isinstance(self._store, GitLabCachedStore):
+            return self._store
+
+        store = deepcopy(self._store)
+        store._cache._flash.clear()
+        return store
 
     def _run(self, method: JobMethod) -> None:
         """
@@ -170,30 +169,11 @@ class RecordsExporter(Exporter):
         Parallel(n_jobs=self._parallel_jobs)(...)
         ```
         jobs[15] = 30825673-6276-4e5a-8a97-f97f2094cd25 (complete product, HTML exporter)
-
-        JSON Web Keys in `ExportMeta.admin_meta_keys` for accessing administrative metadata cannot be pickled due to
-        their underlying cryptography keys. Keys are encoded as JSON and reloaded in the job handler as a workaround.
         """
-        admin_meta_keys_json = self._meta.admin_meta_keys.dumps_json()  # ty: ignore[possibly-missing-attribute]
-        self._meta.admin_meta_keys = None
-
         jobs = self._generate()
+        store = self._prep_store()
         Parallel(n_jobs=self._parallel_jobs)(
-            delayed(_run_job)(
-                self._config,
-                self._meta,
-                admin_meta_keys_json,
-                self._init_store,
-                job.exporter,
-                job.record,
-                method,
-            )
-            for job in jobs
-        )
-
-        # restore admin keys
-        self._meta.admin_meta_keys = AdministrationKeys(  # ty: ignore[missing-argument]
-            **{key: Jwk(value) for key, value in admin_meta_keys_json.items()}
+            delayed(_run_job)(self._config, self._meta, store, job.exporter, job.record, method) for job in jobs
         )
 
     @property

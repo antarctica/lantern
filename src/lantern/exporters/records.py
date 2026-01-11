@@ -4,7 +4,6 @@ from enum import Enum
 from typing import NamedTuple
 
 from joblib import Parallel, delayed
-from jwskate import Jwk
 from mypy_boto3_s3 import S3Client as S3ClientT
 
 from lantern.config import Config
@@ -12,7 +11,6 @@ from lantern.exporters.base import Exporter, ResourceExporter
 from lantern.exporters.html import HtmlAliasesExporter, HtmlExporter
 from lantern.exporters.json import JsonExporter
 from lantern.exporters.xml import IsoXmlExporter, IsoXmlHtmlExporter
-from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 from lantern.log import init as init_logging
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
@@ -82,7 +80,6 @@ def _job_worker_store(logger: logging.Logger, config: Config, store_init: StoreI
 def _run_job(
     config: Config,
     meta: ExportMeta,
-    admin_meta_keys_json: dict[str, str],
     store_init: StoreInitProtocol,
     exporter: Callable[..., ResourceExporter],
     record: RecordRevision,
@@ -99,9 +96,6 @@ def _run_job(
     s3 = _job_worker_s3(config=config)
     store = _job_worker_store(logger=logger, config=config, store_init=store_init)
     select_record = store.select_one
-
-    admin_meta_keys = {key: Jwk(value) for key, value in admin_meta_keys_json.items()}
-    meta.admin_meta_keys = AdministrationKeys(**admin_meta_keys) if admin_meta_keys else None
 
     if exporter == HtmlAliasesExporter:
         exporter_ = HtmlAliasesExporter(logger=logger, meta=meta, s3=s3, record=record)
@@ -170,30 +164,18 @@ class RecordsExporter(Exporter):
         Parallel(n_jobs=self._parallel_jobs)(...)
         ```
         jobs[15] = 30825673-6276-4e5a-8a97-f97f2094cd25 (complete product, HTML exporter)
-
-        JSON Web Keys in `ExportMeta.admin_meta_keys` for accessing administrative metadata cannot be pickled due to
-        their underlying cryptography keys. Keys are encoded as JSON and reloaded in the job handler as a workaround.
         """
-        admin_meta_keys_json = self._meta.admin_meta_keys.dumps_json()  # ty: ignore[possibly-missing-attribute]
-        self._meta.admin_meta_keys = None
-
         jobs = self._generate()
         Parallel(n_jobs=self._parallel_jobs)(
             delayed(_run_job)(
                 self._config,
                 self._meta,
-                admin_meta_keys_json,
                 self._init_store,
                 job.exporter,
                 job.record,
                 method,
             )
             for job in jobs
-        )
-
-        # restore admin keys
-        self._meta.admin_meta_keys = AdministrationKeys(  # ty: ignore[missing-argument]
-            **{key: Jwk(value) for key, value in admin_meta_keys_json.items()}
         )
 
     @property

@@ -69,6 +69,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Refactored HTML redirect page generation into utils module for sharing across exporters
 * Switching to Font Awesome 7 hosted kit
 * Refactored OGL symbol into a custom Font Awesome icon
+* Refactored records exporter needing to deattach and reattach administrative metadata keys
 
 ### Removed
 

@@ -37,11 +37,11 @@ from lantern.utils import S3Utils
 def fx_reset_singletons():
     """Reset singletons for test isolation."""
     mod = importlib.import_module("lantern.exporters.records")
-    # Clear before test
+
+    yield
+
     mod._STORE_SINGLETON = None
     mod._S3_SINGLETON = None
-
-    return
 
 
 class TestRecordExporterJob:

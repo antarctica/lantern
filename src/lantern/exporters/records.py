@@ -34,7 +34,6 @@ class Job(NamedTuple):
     exporter: Callable[..., ResourceExporter]
 
 
-_META_SINGLETON: ExportMeta | None = None
 _STORE_SINGLETON: Store | None = None
 _S3_SINGLETON: S3ClientT | None = None
 

@@ -1,3 +1,4 @@
+import importlib
 import logging
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -29,8 +30,19 @@ from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
 from lantern.stores.base import Store
+from lantern.stores.gitlab_cache import GitLabCachedStore
 from lantern.utils import S3Utils
-from tests.conftest import _init_fake_store
+
+
+@pytest.fixture()
+def fx_reset_singletons():
+    """Reset singletons for test isolation."""
+    mod = importlib.import_module("lantern.exporters.records")
+    # Clear before test
+    mod._STORE_SINGLETON = None
+    mod._S3_SINGLETON = None
+
+    return
 
 
 class TestRecordExporterJob:
@@ -41,14 +53,19 @@ class TestRecordExporterJob:
         """Can create standalone logger instance."""
         result = _job_worker_logging(level=logging.INFO)
         assert isinstance(result, logging.Logger)
+    def test_job_worker_store(self, fx_reset_singletons, fx_fake_store: Store):  # noqa: ANN001
+        """Can create store instance."""
+        result = _job_worker_store(store=fx_fake_store)
+        assert isinstance(result, Store)
 
     @pytest.mark.cov()
-    def test_job_worker_store(self, fx_logger: logging.Logger, fx_config: Config):
-        """Can create standalone store instance."""
-        result = _job_worker_store(logger=fx_logger, config=fx_config, store_init=_init_fake_store)
-        assert isinstance(result, Store)
-        assert result.frozen
-        assert len(result.select()) > 0
+    def test_job_worker_store_gitlab_cache(self, fx_reset_singletons, fx_gitlab_cached_store_pop: GitLabCachedStore):  # noqa: ANN001
+        """Can create and re-warm GitLabCachedStore instance."""
+        fx_gitlab_cached_store_pop._cache._flash.clear()
+        # noinspection PyTypeChecker
+        result = _job_worker_store(store=fx_gitlab_cached_store_pop)
+        assert isinstance(result, GitLabCachedStore)
+        assert len(result._cache._flash) > 0
 
     @pytest.mark.cov()
     def test_job_worker_s3(self, fx_config: Config):
@@ -81,6 +98,7 @@ class TestRecordExporterJob:
         fx_select_record: callable,
         fx_s3_bucket_name: str,
         fx_s3_utils: S3Utils,
+        fx_fake_store: Store,
         fx_exporter_records_sel: RecordsExporter,
         exporter: RecordsExporter,
         expected: str,
@@ -98,7 +116,7 @@ class TestRecordExporterJob:
         _run_job(
             config=fx_exporter_records_sel._config,
             meta=fx_exporter_records_sel._meta,
-            store_init=_init_fake_store,
+            store=fx_fake_store,
             exporter=exporter,
             record=fx_revision_model_min,
             method=method,
@@ -120,6 +138,7 @@ class TestRecordsExporter:
         fx_logger: logging.Logger,
         fx_s3_bucket_name: str,
         fx_s3_client: S3Client,
+        fx_fake_store: Store,
     ):
         """Can create an empty Records Exporter."""
         with TemporaryDirectory() as tmp_path:
@@ -134,7 +153,7 @@ class TestRecordsExporter:
             meta=meta,
             s3=fx_s3_client,
             logger=fx_logger,
-            init_store=_init_fake_store,
+            store=fx_fake_store,
         )
 
         assert isinstance(exporter, RecordsExporter)
@@ -150,6 +169,19 @@ class TestRecordsExporter:
         result = list(fx_exporter_records_sel._config.EXPORT_PATH.glob("**/*.*"))
         assert len(result) > 0
         assert fx_exporter_records_sel._meta.admin_meta_keys is not None
+
+    @pytest.mark.cov()
+    def test_prep_store_gitlab_cache(
+        self, fx_exporter_records: RecordsExporter, fx_gitlab_cached_store_pop: GitLabCachedStore
+    ):
+        """Can clear the flash cache of a GitLabCachedStore prior to parallel processing."""
+        fx_exporter_records._store = fx_gitlab_cached_store_pop
+        _ = fx_gitlab_cached_store_pop.select()
+        assert len(fx_gitlab_cached_store_pop._cache._flash) > 0
+        # noinspection PyTypeChecker
+        result: GitLabCachedStore = fx_exporter_records._prep_store()
+        assert len(result._cache._flash) == 0
+        assert len(fx_gitlab_cached_store_pop._cache._flash) > 0
 
     def test_publish(
         self,

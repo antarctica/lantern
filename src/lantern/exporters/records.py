@@ -1,5 +1,6 @@
 import logging
 from collections.abc import Callable
+from copy import deepcopy
 from enum import Enum
 from typing import NamedTuple
 
@@ -14,7 +15,8 @@ from lantern.exporters.xml import IsoXmlExporter, IsoXmlHtmlExporter
 from lantern.log import init as init_logging
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
-from lantern.stores.base import Store, StoreInitProtocol
+from lantern.stores.base import Store
+from lantern.stores.gitlab_cache import GitLabCachedStore
 from lantern.utils import init_s3_client
 
 
@@ -63,24 +65,25 @@ def _job_worker_s3(config: Config) -> S3ClientT:
     return _S3_SINGLETON
 
 
-def _job_worker_store(logger: logging.Logger, config: Config, store_init: StoreInitProtocol) -> Store:
+def _job_worker_store(store: Store) -> Store:
     """
     Store per worker process.
 
     Singleton used to avoid initialising store for each job as some stores cannot be pickled.
-    Frozen stores used to prevent checking store is up to date and/or modifying records.
     """
     global _STORE_SINGLETON
     if _STORE_SINGLETON is None:
-        prefer_frozen = True
-        _STORE_SINGLETON = store_init(logger, config, prefer_frozen)
+        _STORE_SINGLETON = store
+        if isinstance(store, GitLabCachedStore):
+            # recreate flash cache
+            _STORE_SINGLETON.select()
     return _STORE_SINGLETON
 
 
 def _run_job(
     config: Config,
     meta: ExportMeta,
-    store_init: StoreInitProtocol,
+    store: Store,
     exporter: Callable[..., ResourceExporter],
     record: RecordRevision,
     method: JobMethod,
@@ -94,7 +97,7 @@ def _run_job(
     """
     logger = _job_worker_logging(config.LOG_LEVEL)
     s3 = _job_worker_s3(config=config)
-    store = _job_worker_store(logger=logger, config=config, store_init=store_init)
+    store = _job_worker_store(store=store)
     select_record = store.select_one
 
     if exporter == HtmlAliasesExporter:
@@ -126,7 +129,7 @@ class RecordsExporter(Exporter):
         config: Config,
         meta: ExportMeta,
         s3: S3ClientT,
-        init_store: StoreInitProtocol,
+        store: Store,
         selected_identifiers: set[str] | None = None,
     ) -> None:
         """Initialise exporter."""
@@ -134,7 +137,7 @@ class RecordsExporter(Exporter):
         self._config = config
         self._parallel_jobs = meta.parallel_jobs
         self._selected_identifiers: set[str] = selected_identifiers or set()
-        self._init_store = init_store
+        self._store = store
 
     def _generate(self) -> list[Job]:
         """
@@ -142,14 +145,29 @@ class RecordsExporter(Exporter):
 
         Jobs = all/selected records * each record exporter class.
         """
-        store_frozen = True
-        store = self._init_store(self._logger, self._config, store_frozen)
         parallel_classes = [HtmlExporter, HtmlAliasesExporter, JsonExporter, IsoXmlExporter, IsoXmlHtmlExporter]
-
         jobs: list[Job] = []
-        for record in store.select(self._selected_identifiers):
+
+        for record in self._store.select(self._selected_identifiers):
             jobs.extend([Job(record=record, exporter=cls) for cls in parallel_classes])
         return jobs
+
+    def _prep_store(self) -> Store:
+        """
+        Prepare store for use in parallel processing jobs.
+
+        Applies specifically to GitLabCachedStore which contain an in-memory dict of pickled records, and add
+        significant overhead when pickling and unpickling these stores for each parallel job.
+
+        A copy of the store without the in-memory cache layer is made to avoid this, and the `_STORE_SINGLETON`
+        singleton will then recreate it for each worker process.
+        """
+        if not isinstance(self._store, GitLabCachedStore):
+            return self._store
+
+        store = deepcopy(self._store)
+        store._cache._flash.clear()
+        return store
 
     def _run(self, method: JobMethod) -> None:
         """
@@ -166,16 +184,9 @@ class RecordsExporter(Exporter):
         jobs[15] = 30825673-6276-4e5a-8a97-f97f2094cd25 (complete product, HTML exporter)
         """
         jobs = self._generate()
+        store = self._prep_store()
         Parallel(n_jobs=self._parallel_jobs)(
-            delayed(_run_job)(
-                self._config,
-                self._meta,
-                self._init_store,
-                job.exporter,
-                job.record,
-                method,
-            )
-            for job in jobs
+            delayed(_run_job)(self._config, self._meta, store, job.exporter, job.record, method) for job in jobs
         )
 
     @property

@@ -624,11 +624,12 @@ def fx_gitlab_cache_pop(mocker: MockerFixture, fx_gitlab_cache: GitLabLocalCache
 
 
 @pytest.fixture()
-def fx_gitlab_cache_frozen(fx_gitlab_cache_pop: GitLabLocalCache) -> GitLabLocalCache:
+def fx_gitlab_cache_frozen(fx_gitlab_cache: GitLabLocalCache) -> GitLabLocalCache:
     """Frozen GitLab local cache populated with records."""
     # noinspection PyProtectedMember
-    fx_gitlab_cache_pop._frozen = True
-    return fx_gitlab_cache_pop
+    fx_gitlab_cache._frozen = True
+    _gitlab_cache_create(fx_gitlab_cache)
+    return fx_gitlab_cache
 
 
 @pytest.fixture()
@@ -840,6 +841,7 @@ def fx_exporter_records(
     fx_admin_meta_keys: AdministrationKeys,
     fx_s3_bucket_name: str,
     fx_s3_client: S3Client,
+    fx_fake_store: FakeRecordsStore,
     fx_select_record: SelectRecordProtocol,
 ) -> RecordsExporter:
     """
@@ -866,7 +868,7 @@ def fx_exporter_records(
         config=mock_config,
         meta=meta,
         s3=fx_s3_client,
-        init_store=_init_fake_store,
+        store=fx_fake_store,
     )
 
 
@@ -1079,6 +1081,7 @@ def fx_exporter_site(
     fx_logger: logging.Logger,
     fx_admin_meta_keys: AdministrationKeys,
     fx_s3_client: S3Client,
+    fx_fake_store: FakeRecordsStore,
 ) -> SiteExporter:
     """
     Site exporter (empty records).
@@ -1104,7 +1107,7 @@ def fx_exporter_site(
         config=mock_config,
         meta=meta,
         s3=fx_s3_client,
-        init_store=_init_fake_store,
+        store=fx_fake_store,
         selected_identifiers=set(),
     )
 
@@ -1222,7 +1225,7 @@ def fx_exporter_static_site(module_mocker: MockerFixture) -> TemporaryDirectory:
         config=config,
         meta=meta,
         s3=s3_client,
-        init_store=_init_fake_store,
+        store=store,
         selected_identifiers={record.file_identifier for record in store.select()},
     )
     exporter.export()

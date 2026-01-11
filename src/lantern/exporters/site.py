@@ -15,7 +15,7 @@ from lantern.exporters.records import RecordsExporter
 from lantern.exporters.waf import WebAccessibleFolderExporter
 from lantern.exporters.website import WebsiteSearchExporter
 from lantern.models.site import ExportMeta, SitePageMeta
-from lantern.stores.base import SelectRecordsProtocol, StoreInitProtocol
+from lantern.stores.base import SelectRecordsProtocol, Store
 from lantern.utils import dumps_redirect, get_jinja_env, get_record_aliases, prettify_html
 
 
@@ -358,7 +358,7 @@ class SiteApiExporter(Exporter):
 
     def _dumps_openapi_schema(self) -> dict:
         """Build OpenAPI JSON schema."""
-        return json.loads(self._jinja.get_template("_views/openapi.json.j2").render(version=self._meta.version))
+        return json.loads(self._jinja.get_template("_assets/json/openapi.json.j2").render(version=self._meta.version))
 
     def _dumps_api_docs(self) -> str:
         """Build OpenAPI JSON schema."""
@@ -458,13 +458,12 @@ class SiteExporter(Exporter):
         config: Config,
         meta: ExportMeta,
         s3: S3Client,
-        init_store: StoreInitProtocol,
+        store: Store,
         selected_identifiers: set[str] | None = None,
     ) -> None:
         """Initialise exporter."""
         super().__init__(logger=logger, meta=meta, s3=s3)
-        prefer_frozen = True
-        self._store = init_store(logger, config, prefer_frozen)
+        self._store = store
 
         self._resources_exporter = SiteResourcesExporter(logger=logger, meta=meta, s3=self._s3_client)
         self._pages_exporter = SitePagesExporter(logger=logger, meta=meta, s3=self._s3_client)
@@ -474,7 +473,7 @@ class SiteExporter(Exporter):
             config=config,
             meta=meta,
             s3=self._s3_client,
-            init_store=init_store,
+            store=self._store,
             selected_identifiers=selected_identifiers,
         )
         self._index_exporter = SiteIndexExporter(

@@ -1,4 +1,5 @@
 import json
+import pickle
 
 import pytest
 from cryptography.hazmat.primitives.keywrap import InvalidUnwrap
@@ -40,7 +41,7 @@ class TestAdministrationKeys:
 
     def test_init_no_signing(self):
         """Cannot create administrative key's container without a signing key."""
-        with pytest.raises(ValueError, match=r"Public or private signing_key must be provided."):
+        with pytest.raises(TypeError, match=r"Public or private signing_key must be provided."):
             AdministrationKeys(
                 signing_public=None,
                 signing_private=None,
@@ -48,25 +49,25 @@ class TestAdministrationKeys:
             )
 
     @pytest.mark.parametrize("signing_private", [signing_key_private, None])
-    def test_dumps_json(self, signing_private: Jwk | None):
-        """Can dump keys to JSON."""
+    def test_pickle(self, signing_private: Jwk | None):
+        """Can pickle/unpickle keys to JSON."""
         public = self.signing_key_public if signing_private is None else None
         keys = AdministrationKeys(
             signing_private=signing_private,
             signing_public=public,
             encryption_private=self.encryption_key_private,
         )
-        expected = {
-            "encryption_private": self.encryption_key_private.to_json(),
-            "signing_public": self.signing_key_public.to_json(),
-        }
-        if signing_private:
-            expected["signing_private"] = signing_private.to_json()
-        else:
-            assert "signing_private" not in expected
 
-        result = keys.dumps_json()
-        assert result == expected
+        pickled = pickle.dumps(keys, pickle.HIGHEST_PROTOCOL)
+        result: AdministrationKeys = pickle.loads(pickled)  # noqa: S301
+        assert result.encryption_private == keys.encryption_private
+        assert result.signing_private == keys.signing_private
+        assert result.signing_public == keys.signing_public
+
+    @pytest.mark.cov()
+    def test_not_eq(self, fx_admin_meta_keys: AdministrationKeys):
+        """Cannot compare if non-keys instances are equal."""
+        assert fx_admin_meta_keys != 1
 
 
 class TestAdministrationSeal:

@@ -71,6 +71,16 @@ class TestGitLabLocalCache:
         )
         assert len(cache._flash) == 0
 
+    def test_pickle(self, fx_gitlab_cache_frozen: GitLabLocalCache):
+        """Can pickle and unpickle cache."""
+        expected = len(fx_gitlab_cache_frozen.get())
+        assert expected > 0
+        pickled = pickle.dumps(fx_gitlab_cache_frozen, pickle.HIGHEST_PROTOCOL)
+        unpickled: GitLabLocalCache = pickle.loads(pickled)  # noqa: S301
+        assert isinstance(unpickled, GitLabLocalCache)
+        results = unpickled.get()
+        assert len(results) == expected
+
     @pytest.mark.vcr
     @pytest.mark.block_network
     @pytest.mark.parametrize("expected", [True, False])

@@ -7,12 +7,9 @@ from pathlib import Path
 
 import inquirer
 from boto3 import client as S3Client  # noqa: N812
-from environs import Env
-from jwskate import Jwk
 
 from lantern.config import Config
 from lantern.lib.metadata_library.models.record.record import Record, RecordInvalidError
-from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 from lantern.log import init as _init_logging
 from lantern.models.record.record import Record as CatalogueRecord
 from lantern.models.record.record import Record as RecordCatalogue
@@ -29,9 +26,11 @@ def init_logging(config: Config) -> logging.Logger:
     return logger
 
 
-def init_store(logger: logging.Logger, config: Config, branch: str | None = None) -> GitLabCachedStore:
+def init_store(
+    logger: logging.Logger, config: Config, branch: str | None = None, frozen: bool = False
+) -> GitLabCachedStore:
     """Initialise store."""
-    return init_gitlab_store(logger=logger, config=config, branch=branch)
+    return init_gitlab_store(logger=logger, config=config, branch=branch, frozen=frozen)
 
 
 def init_s3(config: Config) -> S3Client:  # ty: ignore[invalid-type-form]
@@ -44,25 +43,17 @@ def init_s3(config: Config) -> S3Client:  # ty: ignore[invalid-type-form]
     )
 
 
-def init_admin_keys(config: Config) -> AdministrationKeys:
-    """Initialise administration keys with private signing key for updating administrative metadata."""
-    env = Env()  # needed for loading private signing key for admin metadata
-    env.read_env()
-    return AdministrationKeys(
-        encryption_private=config.ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE,
-        signing_private=Jwk(env.json("X_ADMIN_METADATA_SIGNING_KEY_PRIVATE")),
-        signing_public=config.ADMIN_METADATA_SIGNING_KEY_PUBLIC,
-    )
+def init(frozen_store: bool = False) -> tuple[logging.Logger, Config, GitLabCachedStore, S3Client]:  # ty: ignore[invalid-type-form]
+    """
+    Initialise common objects.
 
-
-def init() -> tuple[logging.Logger, Config, GitLabCachedStore, S3Client, AdministrationKeys]:  # ty: ignore[invalid-type-form]
-    """Initialise common objects."""
+    Store is not frozen by default to allow fetching changes before processing.
+    """
     config = Config()
     logger = init_logging(config)
-    store = init_store(logger, config)
+    store = init_store(logger, config, frozen=frozen_store)
     s3 = init_s3(config)
-    keys = init_admin_keys(config)
-    return logger, config, store, s3, keys
+    return logger, config, store, s3
 
 
 def _parse_configs(search_path: Path, glob_pattern: str | None = None) -> Generator[tuple[dict, Path], None, None]:

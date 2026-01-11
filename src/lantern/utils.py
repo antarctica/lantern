@@ -88,7 +88,11 @@ class S3Utils:
 def init_gitlab_store(
     logger: logging.Logger, config: Config, branch: str | None = None, frozen: bool = False
 ) -> GitLabCachedStore:
-    """Initialise a GitLab store from app Config."""
+    """
+    Initialise a GitLab store from app Config.
+
+    Store is not frozen by default to allow fetching changes before processing.
+    """
     branch_ = branch or config.STORE_GITLAB_BRANCH
     source = GitLabSource(endpoint=config.STORE_GITLAB_ENDPOINT, project=config.STORE_GITLAB_PROJECT_ID, ref=branch_)
 

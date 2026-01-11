@@ -9,6 +9,7 @@ import pytest
 from pytest_mock import MockerFixture
 
 from lantern.config import Config, ConfigurationError
+from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 
 
 class TestConfig:
@@ -45,23 +46,24 @@ class TestConfig:
             if env in envs_bck:
                 os.environ[env] = str(envs_bck[env])
 
-    def test_pickle(self, fx_config: Config, mocker: MockerFixture):
-        """Config can be pickled and unpickled."""
-        result = pickle.dumps(fx_config, pickle.HIGHEST_PROTOCOL)
-        config = pickle.loads(result)  # noqa: S301
-        assert config.dumps_safe() == fx_config.dumps_safe()
+    @pytest.mark.cov()
+    def test_not_eq(self, fx_config: Config):
+        """Cannot compare if non-config instances are equal."""
+        assert fx_config != 1
+
+    def test_pickle(self, fx_config: Config):
+        """Can pickle and unpickle config."""
+        pickled = pickle.dumps(fx_config, pickle.HIGHEST_PROTOCOL)
+        result: Config = pickle.loads(pickled)  # noqa: S301
+        assert result == fx_config
 
     def test_version(self):
-        """Version is read from package metadata."""
+        """Can get version from package metadata."""
         config = Config()
         assert version("lantern") == config.VERSION
 
     def test_dumps_safe(self, fx_package_version: str, fx_config: Config):
-        """
-        Config can be exported to a dict with sensitive values redacted.
-
-        `EXPORTER_DATA_CATALOGUE_SENTRY_SRC` uses a real value for e2e tests.
-        """
+        """Can export config to a dict safely with sensitive values redacted."""
         redacted_value = "[**REDACTED**]"
         expected: fx_config.ConfigDumpSafe = {
             "NAME": fx_config.NAME,
@@ -72,8 +74,10 @@ class TestConfig:
             "SENTRY_DSN": fx_config.SENTRY_DSN,
             "ENABLE_FEATURE_SENTRY": False,  # would be True by default but Sentry disabled in tests
             "SENTRY_ENVIRONMENT": "test",
-            "ADMIN_METADATA_SIGNING_KEY_PUBLIC": fx_config.ADMIN_METADATA_SIGNING_KEY_PUBLIC.to_json(compact=True),
-            "ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE": redacted_value,
+            "ADMIN_METADATA_KEYS_ENCRYPTION_KEY_PRIVATE": redacted_value,
+            "ADMIN_METADATA_KEYS_SIGNING_KEY_PUBLIC": fx_config.ADMIN_METADATA_KEYS.signing_public.to_json(
+                compact=True
+            ),
             "STORE_GITLAB_ENDPOINT": "https://gitlab.example.com",
             "STORE_GITLAB_TOKEN": redacted_value,
             "STORE_GITLAB_PROJECT_ID": "1234",
@@ -95,10 +99,7 @@ class TestConfig:
             "VERIFY_SAN_PROXY_ENDPOINT": "x",
         }
 
-        _signing_key_public = "ADMIN_METADATA_SIGNING_KEY_PUBLIC"
         output = fx_config.dumps_safe()
-        # noinspection PyUnresolvedReferences
-        output[_signing_key_public] = output[_signing_key_public].to_json(compact=True)
 
         assert output == expected
         assert len(output["EXPORT_PATH"]) > 0
@@ -106,7 +107,7 @@ class TestConfig:
         assert len(output["TEMPLATES_CACHE_BUST_VALUE"]) > 0
 
     def test_validate(self, fx_config: Config):
-        """Valid configuration is ok."""
+        """Can validate config where the configuration is OK."""
         fx_config.validate()
 
     @pytest.mark.parametrize(
@@ -210,7 +211,7 @@ class TestConfig:
         ],
     )
     def test_validate_missing_required_option(self, envs: dict):
-        """Validation fails where a required provider or exporter config option is missing."""
+        """Cannot validate where a required provider or exporter config option is missing."""
         envs_bck = self._set_envs(envs)
 
         config = Config(read_env=False)
@@ -221,7 +222,7 @@ class TestConfig:
         self._unset_envs(envs, envs_bck)
 
     def test_validate_invalid_logging_level(self):
-        """Validation fails where logging level is invalid."""
+        """Cannot validate where the logging level is invalid."""
         envs = {"LANTERN_LOG_LEVEL": "INVALID"}
         envs_bck = self._set_envs(envs)
 
@@ -234,7 +235,7 @@ class TestConfig:
 
     @pytest.mark.parametrize("env", ["LANTERN_STORE_GITLAB_CACHE_PATH", "LANTERN_EXPORT_PATH"])
     def test_validate_invalid_path(self, env: str):
-        """Validation fails where required path is invalid."""
+        """Cannot validate where a required path is invalid."""
         envs = {env: str(Path(__file__).resolve())}
         envs_bck = self._set_envs(envs)
 
@@ -249,8 +250,6 @@ class TestConfig:
         ("property_name", "expected", "sensitive"),
         [
             ("PARALLEL_JOBS", 2, False),
-            ("ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE", JWK, True),
-            ("ADMIN_METADATA_SIGNING_KEY_PUBLIC", JWK, False),
             ("STORE_GITLAB_ENDPOINT", "x", False),
             ("STORE_GITLAB_TOKEN", "x", True),
             ("STORE_GITLAB_PROJECT_ID", "x", False),
@@ -270,9 +269,9 @@ class TestConfig:
     )
     def test_configurable_property(self, property_name: str, expected: Any, sensitive: bool):
         """
-        Configurable properties can be accessed.
+        Can access configurable properties.
 
-        Note: `ENABLE_FEATURE_SENTRY` and `SENTRY_ENVIRONMENT` are not tested here.
+        Note: `ENABLE_FEATURE_SENTRY`, `SENTRY_ENVIRONMENT` and `ADMIN_METADATA_KEYS` are not tested here.
         """
         envs = {f"LANTERN_{property_name}": str(expected)}
         envs_bck = self._set_envs(envs)
@@ -286,7 +285,7 @@ class TestConfig:
 
     @pytest.mark.parametrize("property_name", ["STORE_GITLAB_TOKEN", "AWS_ACCESS_SECRET"])
     def test_redacted_property(self, mocker: MockerFixture, property_name: str):
-        """Redacted values only return value if secret value has value."""
+        """Can only get redacted value where secret values have a value."""
         for has_value in [True, False]:
             value = "x" if has_value else None
             expected = "[**REDACTED**]" if has_value else ""
@@ -294,3 +293,16 @@ class TestConfig:
             mocker.patch.object(type(config), property_name, new_callable=PropertyMock, return_value=value)
 
             assert getattr(config, f"{property_name}_SAFE") == expected
+
+    def test_admin_metadata_keys(self, fx_config: Config):
+        """Can get administrative metadata keys assembled from multiple environment variables."""
+        envs = {
+            "LANTERN_ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE": str(self.JWK),
+            "ADMIN_METADATA_SIGNING_KEY_PUBLIC": str(self.JWK),
+        }
+        envs_bck = self._set_envs(envs)
+        config = Config()
+
+        assert isinstance(config.ADMIN_METADATA_KEYS, AdministrationKeys)
+
+        self._unset_envs(envs, envs_bck)

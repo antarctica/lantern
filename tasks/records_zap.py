@@ -93,7 +93,7 @@ def _revise_records(logger: logging.Logger, records: list[Record], store: GitLab
             logger.error(msg)
             raise ValueError(msg) from None
         try:
-            existing_record = store.get(record.file_identifier)
+            existing_record = store.select_one(record.file_identifier)
             if record.dumps(strip_admin=False) != existing_record.dumps(strip_admin=False):
                 logger.info(f"Record '{record.file_identifier}' is different to stored version, revising")
                 _revise_record(record)
@@ -203,7 +203,7 @@ def _process_magic_collections(
     - b85852eb-c7fb-435f-8239-e13a28612ef4 (Assets Tracking Service) - externally managed
     - b8b78c6c-fac2-402c-a772-9f518c7121e5 (MAGIC team) - manually managed
     """
-    collections = [store.get(record_id) for record_id in magic_collection_ids]
+    collections = [store.select_one(record_id) for record_id in magic_collection_ids]
     collections_updated = {c.file_identifier: deepcopy(c) for c in collections}
 
     for record in records:
@@ -379,15 +379,13 @@ def _parse_records(logger: logging.Logger, input_path: Path) -> list[tuple[Recor
 
 def main() -> None:
     """Entrypoint."""
-    logger, _config, store, _s3, keys = init()
+    logger, config, store, _s3 = init()
 
     input_path = Path("./import")
     logger.info(f"Loading records from: '{input_path.resolve()}'")
     record_paths = _parse_records(logger=logger, input_path=input_path)
     records = [record_path[0] for record_path in record_paths]
-
-    store.populate()
-    records.extend(process_records(logger=logger, records=records, store=store, admin_keys=keys))
+    records.extend(process_records(logger=logger, records=records, store=store, admin_keys=config.ADMIN_METADATA_KEYS))
     dump_records(logger=logger, records=records, output_path=input_path)
     clean_input_path(input_record_paths=record_paths, processed_ids=[r.file_identifier for r in records])  # ty:ignore[invalid-argument-type]
 

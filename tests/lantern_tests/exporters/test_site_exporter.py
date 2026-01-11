@@ -18,7 +18,7 @@ from lantern.exporters.site import (
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
 from lantern.stores.base import SelectRecordsProtocol
-from tests.conftest import _init_fake_store
+from tests.resources.stores.fake_records_store import FakeRecordsStore
 
 
 class TestSiteIndexExporter:
@@ -376,7 +376,7 @@ class TestSiteApiExporter:
 class TestSiteExporter:
     """Test site index exporter."""
 
-    def test_init(self, mocker: MockerFixture, fx_logger: logging.Logger):
+    def test_init(self, mocker: MockerFixture, fx_logger: logging.Logger, fx_fake_store: FakeRecordsStore):
         """Can create an Exporter."""
         with TemporaryDirectory() as tmp_path:
             output_path = Path(tmp_path)
@@ -390,7 +390,7 @@ class TestSiteExporter:
             meta=meta,
             s3=s3_client,
             logger=fx_logger,
-            init_store=_init_fake_store,
+            store=fx_fake_store,
             selected_identifiers=set(),
         )
 

@@ -304,10 +304,7 @@ class ExportMeta(SiteMeta):
                 "export_path": config.EXPORT_PATH,
                 "s3_bucket": config.AWS_S3_BUCKET,
                 "parallel_jobs": config.PARALLEL_JOBS,
-                "admin_meta_keys": AdministrationKeys(
-                    encryption_private=config.ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE,
-                    signing_public=config.ADMIN_METADATA_SIGNING_KEY_PUBLIC,
-                ),
+                "admin_meta_keys": config.ADMIN_METADATA_KEYS,
                 **kwargs,
             }
         )

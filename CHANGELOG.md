@@ -33,6 +33,9 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Reverse engineered JSON schema for site verification report data (for use in OpenAPI definition)
 * Reverse engineered JSON schema for public website search items data (for use in OpenAPI definition)
 * Supplemental icon audit and development task
+* Icon added to back to top footer link
+* Pickling support for administrative metadata keys
+* Pickling support for GitLab store cache
 
 ### Fixed
 
@@ -67,6 +70,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Refactored HTML redirect page generation into utils module for sharing across exporters
 * Switching to Font Awesome 7 hosted kit
 * Refactored OGL symbol into a custom Font Awesome icon
+* Refactored records exporter to prevent un/re-loading admin metadata keys and creating new stores per parallel worker
 
 ### Removed
 

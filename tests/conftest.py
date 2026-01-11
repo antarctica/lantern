@@ -624,11 +624,12 @@ def fx_gitlab_cache_pop(mocker: MockerFixture, fx_gitlab_cache: GitLabLocalCache
 
 
 @pytest.fixture()
-def fx_gitlab_cache_frozen(fx_gitlab_cache_pop: GitLabLocalCache) -> GitLabLocalCache:
+def fx_gitlab_cache_frozen(fx_gitlab_cache: GitLabLocalCache) -> GitLabLocalCache:
     """Frozen GitLab local cache populated with records."""
     # noinspection PyProtectedMember
-    fx_gitlab_cache_pop._frozen = True
-    return fx_gitlab_cache_pop
+    fx_gitlab_cache._frozen = True
+    _gitlab_cache_create(fx_gitlab_cache)
+    return fx_gitlab_cache
 
 
 @pytest.fixture()
@@ -784,6 +785,7 @@ def fx_exporter_iso_xml_html(
 @pytest.fixture()
 def fx_exporter_html(
     mocker: MockerFixture,
+    fx_admin_meta_keys: AdministrationKeys,
     fx_logger: logging.Logger,
     fx_s3_bucket_name: str,
     fx_s3_client: S3Client,
@@ -797,6 +799,7 @@ def fx_exporter_html(
     type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
     type(mock_config).TEMPLATES_ITEM_MAPS_ENDPOINT = PropertyMock(return_value="x")
     type(mock_config).TEMPLATES_ITEM_CONTACT_ENDPOINT = PropertyMock(return_value="x")
+    type(mock_config).ADMIN_METADATA_KEYS = fx_admin_meta_keys
     meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
     return HtmlExporter(
@@ -838,6 +841,7 @@ def fx_exporter_records(
     fx_admin_meta_keys: AdministrationKeys,
     fx_s3_bucket_name: str,
     fx_s3_client: S3Client,
+    fx_fake_store: FakeRecordsStore,
     fx_select_record: SelectRecordProtocol,
 ) -> RecordsExporter:
     """
@@ -852,10 +856,7 @@ def fx_exporter_records(
     mock_config = mocker.Mock()
     type(mock_config).LOG_LEVEL = PropertyMock(return_value=logging.DEBUG)
     type(mock_config).PARALLEL_JOBS = PropertyMock(return_value=1)
-    type(mock_config).ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE = PropertyMock(
-        return_value=fx_admin_meta_keys.encryption_private
-    )
-    type(mock_config).ADMIN_METADATA_SIGNING_KEY_PUBLIC = PropertyMock(return_value=fx_admin_meta_keys.signing_public)
+    type(mock_config).ADMIN_METADATA_KEYS = fx_admin_meta_keys
     type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
     type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
     type(mock_config).TEMPLATES_ITEM_MAPS_ENDPOINT = PropertyMock(return_value="x")
@@ -867,7 +868,7 @@ def fx_exporter_records(
         config=mock_config,
         meta=meta,
         s3=fx_s3_client,
-        init_store=_init_fake_store,
+        store=fx_fake_store,
     )
 
 
@@ -1080,6 +1081,7 @@ def fx_exporter_site(
     fx_logger: logging.Logger,
     fx_admin_meta_keys: AdministrationKeys,
     fx_s3_client: S3Client,
+    fx_fake_store: FakeRecordsStore,
 ) -> SiteExporter:
     """
     Site exporter (empty records).
@@ -1092,10 +1094,7 @@ def fx_exporter_site(
     type(mock_config).NAME = PropertyMock(return_value="x")
     type(mock_config).LOG_LEVEL = PropertyMock(return_value=logging.DEBUG)
     type(mock_config).PARALLEL_JOBS = PropertyMock(return_value=1)
-    type(mock_config).ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE = PropertyMock(
-        return_value=fx_admin_meta_keys.encryption_private
-    )
-    type(mock_config).ADMIN_METADATA_SIGNING_KEY_PUBLIC = PropertyMock(return_value=fx_admin_meta_keys.signing_public)
+    type(mock_config).ADMIN_METADATA_KEYS = fx_admin_meta_keys
     type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
     type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
     type(mock_config).TEMPLATES_ITEM_MAPS_ENDPOINT = PropertyMock(return_value="x")
@@ -1108,7 +1107,7 @@ def fx_exporter_site(
         config=mock_config,
         meta=meta,
         s3=fx_s3_client,
-        init_store=_init_fake_store,
+        store=fx_fake_store,
         selected_identifiers=set(),
     )
 
@@ -1226,7 +1225,7 @@ def fx_exporter_static_site(module_mocker: MockerFixture) -> TemporaryDirectory:
         config=config,
         meta=meta,
         s3=s3_client,
-        init_store=_init_fake_store,
+        store=store,
         selected_identifiers={record.file_identifier for record in store.select()},
     )
     exporter.export()

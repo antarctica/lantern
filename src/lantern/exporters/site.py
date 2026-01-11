@@ -358,7 +358,7 @@ class SiteApiExporter(Exporter):
 
     def _dumps_openapi_schema(self) -> dict:
         """Build OpenAPI JSON schema."""
-        return json.loads(self._jinja.get_template("_views/openapi.json.j2").render(version=self._meta.version))
+        return json.loads(self._jinja.get_template("_assets/json/openapi.json.j2").render(version=self._meta.version))
 
     def _dumps_api_docs(self) -> str:
         """Build OpenAPI JSON schema."""

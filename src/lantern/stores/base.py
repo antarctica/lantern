@@ -1,8 +1,6 @@
-import logging
 from abc import ABC, abstractmethod
 from typing import Protocol
 
-from lantern.config import Config
 from lantern.models.record.revision import RecordRevision
 
 
@@ -64,19 +62,6 @@ class Store(ABC):
     def select_one(self, file_identifier: str) -> RecordRevision:
         """Return a specific record or raise a `RecordNotFoundError` exception."""
         ...
-
-
-class StoreInitProtocol(Protocol):
-    """
-    Callable protocol for initialising a Store.
-
-    Where a Store's constructor signature doesn't match this protocol, use a helper function such as
-    `lantern.utils.init_gitlab_store`.
-    """
-
-    def __call__(  # pragma: no branch  # noqa: D102
-        self, logger: logging.Logger, config: Config | None, frozen: bool = False
-    ) -> Store: ...
 
 
 class SelectRecordsProtocol(Protocol):

@@ -4,7 +4,6 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 from lantern.models.site import ExportMeta
-from lantern.stores.base import Store
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
@@ -36,12 +35,6 @@ def time_task(label: str) -> callable:
     return decorator
 
 
-# noinspection PyUnusedLocal
-def _init_store_adapter(logger: logging.Logger, config: Config | None, frozen: bool = False) -> Store:
-    """To resolve type errors."""
-    return FakeRecordsStore(logger=logger, frozen=frozen)
-
-
 class FakeCatalogue:
     """Catalogue for fake records."""
 
@@ -49,6 +42,7 @@ class FakeCatalogue:
         self._logger = logger
         self._config = config
 
+        store = FakeRecordsStore(logger=logger, frozen=True)
         meta = ExportMeta.from_config_store(config=self._config, store=None, build_repo_ref="83fake48", trusted=True)
         with mock_aws():
             self._s3 = S3Client(
@@ -62,7 +56,7 @@ class FakeCatalogue:
             config=self._config,
             meta=meta,
             s3=self._s3,
-            init_store=_init_store_adapter,
+            store=store,
             selected_identifiers=inc_records,
         )
 

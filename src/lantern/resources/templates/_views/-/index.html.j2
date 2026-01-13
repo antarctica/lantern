@@ -10,7 +10,7 @@
           <div class="font-bold">Items count</div>
           <div>{{ data.records | length }}</div>
           <div class="font-bold">Revision</div>
-          <div><a class="{{ com.link_classes() }}" href="{{ meta.build_ref.href }}">{{ meta.build_ref.value }} {{ com.restricted_i() }} {{ com.ext_link_i() }}</a></div>
+          <div><a class="{{ com.link_classes() }}" href="{{ meta.build_ref.href }}">{{ meta.build_ref.value }} {{ com.restricted_i() }}{{ com.ext_link_i() }}</a></div>
           <div class="font-bold">Built at</div>
           <div>{{ com.time(meta.build_time_fmt) }}</div>
         </div>

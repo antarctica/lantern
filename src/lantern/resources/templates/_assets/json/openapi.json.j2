@@ -109,24 +109,15 @@
         }
       }
     },
-    "/-/formatting/index.html": {
-      "get": {
         "tags": ["internal"],
-        "operationId": "getFormatting",
-        "x-scalar-stability": "stable",
-        "summary": "Internal content formatting guide",
-        "description": "Examples of supported Markdown formatting for authoring content items.",
         "externalDocs": {
           "description": "More information",
-          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/site.md#item-markdown"
         },
         "responses": {
-          "200": {
             "description": "OK",
             "content": {
               "text/html": {
                 "schema": {
-                  "$ref": "#/components/schemas/htmlContent"
                 }
               }
             }
@@ -627,13 +618,34 @@
         }
       }
     },
+    "/guides/formatting/index.html": {
+      "get": {
+        "tags": ["guides"],
+        "operationId": "getFormattingGuideIndex",
+        "x-scalar-stability": "stable",
+        "summary": "Content formatting documentation",
+        "description": "Get examples of supported markdown syntax that can be used in content items.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/htmlContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/static/json/openapi.json": {
       "get": {
         "tags": ["static"],
         "operationId": "getOpenApiSchema",
         "x-scalar-stability": "experimental",
-        "summary": "Open API Schema",
-        "description": "Get Open API Schema definition describing the catalogue structure.",
+        "summary": "OpenAPI Schema",
+        "description": "Get Open APISchema definition describing the catalogue structure.",
         "externalDocs": {
           "description": "More information",
           "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/site.md#openapi-definition"

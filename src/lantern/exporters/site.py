@@ -265,10 +265,10 @@ class SitePagesExporter(Exporter):
                 url=f"{self._meta.base_url}/legal/privacy",
                 description="Privacy policy for the BAS Data Catalogue",
             ),
-            "_views/-/formatting.html.j2": SitePageMeta(
+            "_views/guides/formatting.html.j2": SitePageMeta(
                 title="Formatting Guide",
-                url=f"{self._meta.base_url}/-/formatting",
-                description="Formatting guide for freetext record elements",
+                url=f"{self._meta.base_url}/guides/formatting",
+                description="Formatting guide for content items",
             ),
         }
 

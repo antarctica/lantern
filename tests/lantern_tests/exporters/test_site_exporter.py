@@ -80,7 +80,7 @@ class TestSitePageExporter:
         "legal/cookies/index.html",
         "legal/copyright/index.html",
         "legal/privacy/index.html",
-        "-/formatting/index.html",
+        "guides/formatting/index.html",
     ]
 
     def test_init(self, mocker: MockerFixture, fx_logger: logging.Logger):

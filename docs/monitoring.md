@@ -24,6 +24,20 @@ This endpoint MAY be used by monitoring tools and/or load balancers to determine
 
 A non-200 status code MUST be considered as the static site being unavailable.
 
+### Health check endpoint
+
+A static JSON health check is available as part of the [Static Site](/docs/architecture.md#static-site), structured as
+per the [Draft API Health Check](https://datatracker.ietf.org/doc/html/draft-inadarei-api-health-check) specification,
+at: `/-/health`.
+
+This endpoint MAY be used by monitoring tools and/or load balancers to determine:
+
+- readiness: to determine if the site can process requests, expected to always be true
+- liveness: to determine if the site is running or not, expected to always be true
+
+> [!TIP]
+> The health check may be 'live' but not 'ready', during deployments or maintenance for example.
+
 ## Sentry
 
 ### Error monitoring

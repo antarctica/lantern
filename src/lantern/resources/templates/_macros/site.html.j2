@@ -142,27 +142,43 @@
 {% macro footer(data) %}
   <footer id="site-footer" class="font-light bg-grey-950 dark:bg-black text-grey-100 text-center">
     <div class="{{ com.container_classes() }} px-2 py-8 space-y-4 lg:space-y-8">
-      <div class="flex flex-col justify-between space-y-4 lg:space-y-0 lg:flex-row">
-        {{ com.feedback_trigger(classes=com.footer_link_classes(), fallback=data.fallback_email, text='Is something wrong with this page?') }}
-        <a class="{{ com.footer_link_classes() }} lg:text-right" href="#{{ com.back_to_top_id() }}">
-          Back to top <i class="fa-regular fa-arrow-up"></i>
-        </a>
-      </div>
-      <div class="block lg:hidden flex justify-center justify-between {{ com.footer_link_classes() }}">
-        {{ primary_nav() }}
-      </div>
-      <div class="flex flex-col justify-between space-y-4 lg:space-y-0 lg:flex-row">
-        <div class="lg:text-left lg:flex lg:space-x-2">
-          <p>© <a class="{{ com.footer_link_classes() }}" href="https://www.bas.ac.uk">British Antarctic Survey</a> {{ data.build_time.year }}<span class="hidden lg:inline">.</span></p>
-        </div>
-        <ul class="flex justify-center space-x-2 lg:justify-end">
-          <li><a class="{{ com.footer_link_classes() }}" href="/legal/accessibility">Accessibility</a></li>
-          <li><a class="{{ com.footer_link_classes() }}" href="/legal/cookies">Cookies</a></li>
-          <li><a class="{{ com.footer_link_classes() }}" href="/legal/copyright">Copyright</a></li>
-          <li><a class="{{ com.footer_link_classes() }}" href="/legal/privacy">Privacy</a></li>
-        </ul>
-      </div>
-      <a class="block lg:hidden {{ com.footer_link_classes() }}" target="_blank" href="https://www.bas.ac.uk">Part of British Antarctic Survey {{ com.ext_link_i() }}</a>
+      {{ footer_basics(data.fallback_email) }}
+      {{ footer_primary_nav() }}
+      {{ footer_legal(data.build_time.year) }}
+      {{ footer_network_nav() }}
     </div>
   </footer>
+{% endmacro %}
+
+{% macro footer_basics(fallback_email) %}
+  <div class="flex flex-col justify-between space-y-4 lg:space-y-0 lg:flex-row">
+    {{ com.feedback_trigger(classes=com.footer_link_classes(), fallback=fallback_email, text='Is something wrong with this page?') }}
+    <a class="{{ com.footer_link_classes() }} lg:text-right" href="#{{ com.back_to_top_id() }}">
+      Back to top <i class="fa-regular fa-arrow-up"></i>
+    </a>
+  </div>
+{% endmacro %}
+
+{% macro footer_primary_nav() %}
+  <div class="block lg:hidden flex justify-center justify-between {{ com.footer_link_classes() }}">
+    {{ primary_nav() }}
+  </div>
+{% endmacro %}
+
+{% macro footer_legal(copyright_year) %}
+  <div class="flex flex-col justify-between space-y-4 lg:space-y-0 lg:flex-row">
+    <div class="lg:text-left lg:flex lg:space-x-2">
+      <p>© <a class="{{ com.footer_link_classes() }}" href="https://www.bas.ac.uk">British Antarctic Survey</a> {{ copyright_year }}<span class="hidden lg:inline">.</span></p>
+    </div>
+    <ul class="flex justify-center space-x-2 lg:justify-end">
+      <li><a class="{{ com.footer_link_classes() }}" href="/legal/accessibility">Accessibility</a></li>
+      <li><a class="{{ com.footer_link_classes() }}" href="/legal/cookies">Cookies</a></li>
+      <li><a class="{{ com.footer_link_classes() }}" href="/legal/copyright">Copyright</a></li>
+      <li><a class="{{ com.footer_link_classes() }}" href="/legal/privacy">Privacy</a></li>
+    </ul>
+  </div>
+{% endmacro %}
+
+{% macro footer_network_nav() %}
+  <a class="block lg:hidden {{ com.footer_link_classes() }}" target="_blank" href="https://www.bas.ac.uk">Part of British Antarctic Survey {{ com.ext_link_i() }}</a>
 {% endmacro %}

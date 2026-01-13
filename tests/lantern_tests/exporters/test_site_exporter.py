@@ -80,7 +80,7 @@ class TestSitePageExporter:
         "legal/cookies/index.html",
         "legal/copyright/index.html",
         "legal/privacy/index.html",
-        "-/formatting/index.html",
+        "guides/formatting/index.html",
     ]
 
     def test_init(self, mocker: MockerFixture, fx_logger: logging.Logger):
@@ -447,6 +447,7 @@ class TestSiteExporter:
             site_path.joinpath("favicon.ico"),
             site_path.joinpath("404.html"),
             site_path.joinpath("static", "css", "main.css"),
+            site_path.joinpath("static", "json", "openapi.json"),
             site_path.joinpath("items", record.file_identifier, "index.html"),
             site_path.joinpath("records", f"{record.file_identifier}.xml"),
             site_path.joinpath("legal", "privacy", "index.html"),
@@ -489,6 +490,7 @@ class TestSiteExporter:
             "favicon.ico",
             "404.html",
             "static/css/main.css",
+            "static/json/openapi.json",
             f"items/{record.file_identifier}/index.html",
             f"records/{record.file_identifier}.html",
             "legal/privacy/index.html",

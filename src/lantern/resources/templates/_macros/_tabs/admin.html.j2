@@ -7,7 +7,7 @@
       {% call com.dl_item(title='Resource ID', id='admin-id') %}{{ data.item_id }}{% endcall %}
 
       {% call com.dl_item(title='Resource Revision', id='admin-revision') %}
-        <a class="{{ com.link_classes() }}" href="{{ data.revision_link.href }}">{{ data.revision_link.value }} {{ com.restricted_i() }} {{ com.ext_link_i() }}</a>
+        <a class="{{ com.link_classes() }}" href="{{ data.revision_link.href }}">{{ data.revision_link.value }} {{ com.restricted_i() }}{{ com.ext_link_i() }}</a>
       {% endcall %}
 
       {% if data.gitlab_issues %}

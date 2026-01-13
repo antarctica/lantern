@@ -603,6 +603,13 @@ class GitLabLocalCache:
         hashes = {result["file_identifier"]: result["sha1"] for result in results}
         return {file_id: hashes.get(file_id) for file_id in file_identifiers}
 
+    def get_count(self) -> int:
+        """Get number of cached records."""
+        self._ensure_exists()  # cache entrypoint and possibly initial interaction
+
+        with self._engine as tx:
+            return tx.fetchscalar("""SELECT count(file_identifier) FROM record;""")
+
     def purge(self) -> None:
         """Clear cache contents."""
         if self._path.exists():
@@ -643,6 +650,10 @@ class GitLabCachedStore(GitLabStore):
             frozen=self._frozen,
         )
         self._get_hashes_callable = self._cache.get_hashes
+
+    def __len__(self) -> int:
+        """Count of records in store."""
+        return self._cache.get_count()
 
     @property
     def frozen(self) -> bool:

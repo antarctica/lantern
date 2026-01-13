@@ -47,6 +47,11 @@ class Store(ABC):
     This class defines the abstract interface Stores must implement to manage Records and RecordSummaries.
     """
 
+    @abstractmethod
+    def __len__(self) -> int:
+        """Return the number of records a store contains."""
+        ...
+
     @property
     @abstractmethod
     def frozen(self) -> bool:

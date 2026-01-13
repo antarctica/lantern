@@ -148,23 +148,6 @@ Outputs a styled HTML page linking to [Items](/docs/data-model.md#items) and
 > [!NOTE]
 > This page is intended as a basic, internal, reference to site content - not a proper, public, homepage.
 
-### Site API exporter
-
-> [!WARNING]
-> This exporter is experimental.
-
-`lantern.exporters.site.SiteApiExporter`
-
-Outputs:
-
-- a [RFC 9727 API Catalog](https://datatracker.ietf.org/doc/html/rfc9727)
-- a raw [OpenAPI](/docs/site.md#openapi-definition) JSON document
-- interactive documentation based on this definition built using
-  [Scalar](https://guides.scalar.com/scalar/scalar-api-references)
-
-The API Catalog is rendered from a simple Python dict. The OpenAPI definition and documentation are rendered from Jinja
-templates.
-
 ### Public Website search exporter
 
 `lantern.exporters.website.WebsiteSearchExporter`
@@ -212,6 +195,23 @@ passing a [Config](/docs/config.md) object.
 
 Copies CSS, JavaScript, fonts, images (for favicons) and text files (for [Monitoring](/docs/monitoring.md)) from the
 internal `lantern.exporters.resources` module into the static site.
+
+### Site API exporter
+
+> [!WARNING]
+> This exporter is experimental.
+
+`lantern.exporters.site.SiteApiExporter`
+
+Outputs:
+
+- a [RFC 9727 API Catalog](https://datatracker.ietf.org/doc/html/rfc9727)
+- a raw [OpenAPI](/docs/site.md#openapi-definition) JSON document
+- interactive documentation based on this definition built using
+  [Scalar](https://guides.scalar.com/scalar/scalar-api-references)
+
+The API Catalog is rendered from a simple Python dict. The OpenAPI definition and documentation are rendered from Jinja
+templates.
 
 ### Site pages exporter
 

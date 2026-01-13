@@ -437,7 +437,7 @@ class SiteApiExporter(Exporter):
         self._export_api_docs()
 
     def publish(self) -> None:
-        """Publish static pages to S3."""
+        """Publish API resources to S3."""
         self._publish_catalog()
         self._publish_openapi_schema()
         self._publish_api_docs()

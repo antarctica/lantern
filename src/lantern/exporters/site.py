@@ -443,6 +443,101 @@ class SiteApiExporter(Exporter):
         self._publish_api_docs()
 
 
+class SiteHealthExporter(Exporter):
+    """
+    Site health check exporter.
+
+    Generates health and monitoring endpoint as static JSON.
+    """
+
+    def __init__(self, logger: logging.Logger, meta: ExportMeta, s3: S3Client, store: Store) -> None:
+        """Initialise exporter."""
+        super().__init__(logger=logger, meta=meta, s3=s3)
+        self._store = store
+        self._jinja = get_jinja_env()
+        self._export_base = self._meta.export_path
+        self._health_check_route = "static/json/health.json"
+        self._health_alias_route = "-/health"
+        self._health_check_path = self._export_base / self._health_check_route
+        self._health_alias_path = self._export_base / self._health_alias_route
+
+    def _dumps_health_check(self) -> dict:
+        """
+        Build Draft API Health Check as a JSON document.
+
+        [1] https://datatracker.ietf.org/doc/html/draft-inadarei-api-health-check
+        """
+        return {
+            "status": "pass",
+            "version": "1",
+            "releaseId": f"{self._meta.version}",
+            "notes": [
+                "This endpoint is intended for both liveness and readiness checks.",
+                f"It is a static resource, representing the health of this service at: {self._meta.build_time.isoformat()}.",
+            ],
+            "description": "Health of BAS Data Catalogue (Lantern)",
+            "checks": {
+                "site:records": {
+                    "componentId": "Site records",
+                    "componentType": "datastore",
+                    "observedValue": len(self._store),
+                    "observedUnit": "items",
+                    "status": "pass",
+                    "affectedEndpoints": [f"{self._meta.base_url}/records/{{fileIdentifier}}.json"],
+                    "time": f"{self._meta.build_time.isoformat()}",
+                }
+            },
+            "links": {
+                "about": "https://github.com/antarctica/lantern",
+                "describedby": f"https://github.com/antarctica/lantern/blob/v{self._meta.version}/docs/monitoring.md#health-check-endpoint",
+            },
+        }
+
+    def _dumps_health_redirect(self) -> str:
+        """
+        Generate redirect to static health response.
+
+        In advance of the health check being dynamic and not served as a static file.
+        """
+        return dumps_redirect(f"/{self._health_check_route}")
+
+    def _export_health(self) -> None:
+        """Export health check and alias to directory."""
+        self._logger.info("Exporting health check.")
+        self._health_check_path.parent.mkdir(parents=True, exist_ok=True)
+        with self._health_check_path.open("w") as f:
+            json.dump(self._dumps_health_check(), f, indent=2)
+        self._health_alias_path.parent.mkdir(parents=True, exist_ok=True)
+        with self._health_alias_path.open("w") as f:
+            f.write(self._dumps_health_redirect())
+
+    def _publish_health(self) -> None:
+        """Publish health check and alias to S3."""
+        self._logger.info("Publishing health check.")
+        health_key = self._s3_utils.calc_key(self._health_check_path)
+        redirect_key = self._s3_utils.calc_key(self._health_alias_path)
+        media_type = "application/health+json"
+        self._s3_utils.upload_content(
+            key=health_key, content_type=media_type, body=json.dumps(self._dumps_health_check(), indent=2)
+        )
+        self._s3_utils.upload_content(
+            key=redirect_key, content_type="text/html", body=self._dumps_health_redirect(), redirect=health_key
+        )
+
+    @property
+    def name(self) -> str:
+        """Exporter name."""
+        return "Site Health"
+
+    def export(self) -> None:
+        """Export health checks to directory."""
+        self._export_health()
+
+    def publish(self) -> None:
+        """Publish health checks to S3."""
+        self._publish_health()
+
+
 class SiteExporter(Exporter):
     """
     Data Catalogue static site exporter.
@@ -468,6 +563,7 @@ class SiteExporter(Exporter):
         self._resources_exporter = SiteResourcesExporter(logger=logger, meta=meta, s3=self._s3_client)
         self._pages_exporter = SitePagesExporter(logger=logger, meta=meta, s3=self._s3_client)
         self._api_exporter = SiteApiExporter(logger=logger, meta=meta, s3=self._s3_client)
+        self._health_exporter = SiteHealthExporter(logger=logger, meta=meta, s3=self._s3_client, store=self._store)
         self._records_exporter = RecordsExporter(
             logger=logger,
             config=config,
@@ -499,6 +595,7 @@ class SiteExporter(Exporter):
             self._resources_exporter,
             self._pages_exporter,
             self._api_exporter,
+            self._health_exporter,
             self._records_exporter,
             self._index_exporter,
             self._waf_exporter,

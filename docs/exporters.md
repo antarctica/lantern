@@ -213,6 +213,16 @@ Outputs:
 The API Catalog is rendered from a simple Python dict. The OpenAPI definition and documentation are rendered from Jinja
 templates.
 
+### Site health exporter
+
+`lantern.exporters.site.SiteHealthExporter`
+
+Outputs:
+
+- a [Draft API Health Check](https://datatracker.ietf.org/doc/html/draft-inadarei-api-health-check)
+
+The health check is rendered from a Python dict.
+
 ### Site pages exporter
 
 `lantern.exporters.site.SitePagesExporter`

@@ -615,6 +615,9 @@ class GitLabLocalCache:
         if self._path.exists():
             self._logger.info("Purging cache")
             shutil.rmtree(self._path)
+        self._flash.clear()
+        # prevent stale connections
+        self._conn = None
 
 
 class GitLabCachedStore(GitLabStore):

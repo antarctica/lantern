@@ -47,6 +47,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Missing datestamp update in the clone record development task
 * Correcting names for `STORE_GITLAB_CACHE_PATH`, `STORE_GITLAB_ENDPOINT` and `STORE_GITLAB_PROJECT_ID` config options
 * Missing Open Graph and Schema.org metadata for static site pages
+* Read-only database error when purging a GitLab local cache due to a stale connection
 
 ### Changed
 

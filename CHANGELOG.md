@@ -38,6 +38,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Pickling support for GitLab store cache
 * Static health check endpoint
 * Sized support for stores to get number of records a store contains
+* Additional footer navigation links
 
 ### Fixed
 

@@ -7,7 +7,6 @@ from tempfile import TemporaryDirectory
 from unittest.mock import MagicMock, PropertyMock
 
 import pytest
-from conftest import _gitlab_cache_create
 from gitlab import Gitlab
 from pytest_mock import MockerFixture
 from requests.exceptions import ConnectionError as RequestsConnectionError
@@ -28,6 +27,7 @@ from lantern.stores.gitlab_cache import (
     RemoteStoreUnavailableError,
     _fetch_record_commit,
 )
+from tests.conftest import _gitlab_cache_create
 
 
 @pytest.mark.cov()

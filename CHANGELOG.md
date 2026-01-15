@@ -36,6 +36,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Icon added to back to top footer link
 * Pickling support for administrative metadata keys
 * Pickling support for GitLab store cache
+* Static health check endpoint
+* Sized support for stores to get number of records a store contains
 
 ### Fixed
 

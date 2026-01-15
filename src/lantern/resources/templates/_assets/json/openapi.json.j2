@@ -109,15 +109,34 @@
         }
       }
     },
+    "/-/health/index.html": {
+      "get":  {
         "tags": ["internal"],
+        "operationId": "getHealthRedirect",
+        "x-scalar-stability": "experimental",
+        "summary": "Health check redirect",
+        "description": "Get target response for health check alias.\n\nRedirects to [Health Check](#tag/static/GET/static/json/health.json).",
         "externalDocs": {
           "description": "More information",
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/monitoring.md#health-check-endpoint"
         },
         "responses": {
+          "301": {
             "description": "OK",
+            "headers": {
+              "Location": {
+                "description": "Referenced resource.",
+                "schema": {
+                  "type": "string",
+                  "format": "uri",
+                  "examples": ["https://data.bas.ac.uk/static/json/health.json"]
+                }
+              }
+            },
             "content": {
               "text/html": {
                 "schema": {
+                  "$ref": "#/components/schemas/htmlRedirect"
                 }
               }
             }
@@ -695,7 +714,7 @@
         "operationId": "getHeartbeat",
         "x-scalar-stability": "stable",
         "summary": "Heartbeat",
-        "description": "Get stable file for use as a simple health monitoring endpoint.",
+        "description": "Get stable file for use as a simple health monitoring endpoint.\n\n> [!TIP]\n> In most cases you should use the [Health Check](#tag/internal/GET/-/health/index.html) endpoint instead.",
         "externalDocs": {
           "description": "More information",
           "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/monitoring.md#heartbeat"
@@ -708,6 +727,31 @@
                 "schema": {
                   "type": "string",
                   "examples": ["badump, badump"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/static/json/health.json": {
+      "get": {
+        "tags": ["static"],
+        "operationId": "getHealthJson",
+        "x-scalar-stability": "experimental",
+        "summary": "Health check",
+        "description": "Get [Draft API Health Check](https://datatracker.ietf.org/doc/html/draft-inadarei-api-health-check) as JSON reporting the site readiness and liveiness.",
+        "externalDocs": {
+          "description": "More information",
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/monitoring.md#health-check-endpoint"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/health+json": {
+                "schema": {
+                  "type": "object"
                 }
               }
             }

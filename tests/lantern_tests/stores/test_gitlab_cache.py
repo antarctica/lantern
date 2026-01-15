@@ -754,6 +754,13 @@ class TestGitLabLocalCache:
         results = fx_gitlab_cache.get_hashes(selected)
         assert results == expected
 
+    def test_get_count(self, mocker: MockerFixture, fx_gitlab_cache_pop: GitLabLocalCache):
+        """Can get cached record count."""
+        mocker.patch.object(fx_gitlab_cache_pop, "_ensure_exists", return_value=None)
+
+        result = fx_gitlab_cache_pop.get_count()
+        assert result == 1
+
     def test_purge(self, mocker: MockerFixture, fx_gitlab_cache_pop: GitLabLocalCache):
         """Can clear cache contents."""
         mocker.patch.object(fx_gitlab_cache_pop, "_ensure_exists", return_value=None)
@@ -781,6 +788,10 @@ class TestGitLabCachedStore:
             parallel_jobs=fx_config.PARALLEL_JOBS,
             cache_dir=cache_path,
         )
+
+    def test_len(self, fx_gitlab_cached_store_pop: GitLabCachedStore):
+        """Can get count of records in store."""
+        assert len(fx_gitlab_cached_store_pop) > 0
 
     @pytest.mark.cov()
     @pytest.mark.parametrize("frozen", [False, True])

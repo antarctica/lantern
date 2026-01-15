@@ -40,6 +40,10 @@ class TestBaseStore:
     The base store is an abstract class so for testing the FakeRecordsStore is used.
     """
 
+    def test_len(self, fx_fake_store: FakeRecordsStore):
+        """Can get count of records in store."""
+        assert len(fx_fake_store) > 0
+
     @pytest.mark.cov()
     @pytest.mark.parametrize("frozen", [False, True])
     def test_frozen(self, fx_logger: logging.Logger, frozen: bool):

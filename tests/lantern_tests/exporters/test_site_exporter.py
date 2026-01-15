@@ -11,6 +11,7 @@ from pytest_mock import MockerFixture
 from lantern.exporters.site import (
     SiteApiExporter,
     SiteExporter,
+    SiteHealthExporter,
     SiteIndexExporter,
     SitePagesExporter,
     SiteResourcesExporter,
@@ -373,6 +374,55 @@ class TestSiteApiExporter:
             assert result["ResponseMetadata"]["HTTPHeaders"]["content-type"] == content_type
 
 
+class TestSiteHealthExporter:
+    """Test health and monitoring resources exporter."""
+
+    def test_init(self, mocker: MockerFixture, fx_logger: logging.Logger, fx_fake_store: FakeRecordsStore):
+        """Can create an Exporter."""
+        with TemporaryDirectory() as tmp_path:
+            output_path = Path(tmp_path)
+        s3_client = mocker.MagicMock()
+        mock_config = mocker.Mock()
+        type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
+        meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
+
+        exporter = SiteHealthExporter(meta=meta, logger=fx_logger, s3=s3_client, store=fx_fake_store)
+
+        assert isinstance(exporter, SiteHealthExporter)
+        assert exporter.name == "Site Health"
+
+    def test_dumps_health_check(self, fx_exporter_site_health: SiteHealthExporter):
+        """Can create Draft API Health Check formatted response."""
+        result = fx_exporter_site_health._dumps_health_check()
+        assert isinstance(result, dict)
+        assert result["status"] == "pass"
+        assert result["checks"]["site:records"]["observedValue"] > 0
+
+    def test_dumps_health_redirect(self, fx_exporter_site_health: SiteHealthExporter):
+        """Can create alias redirect for health check."""
+        expected = "/static/json/health.json"
+        result = fx_exporter_site_health._dumps_health_redirect()
+        assert f'refresh" content="0;url={expected}"' in result
+
+    def test_export(self, fx_exporter_site_health: SiteHealthExporter):
+        """Can export health checks to local directory."""
+        fx_exporter_site_health.export()
+        assert fx_exporter_site_health._export_base.joinpath("-/health").exists()
+        assert fx_exporter_site_health._export_base.joinpath("static/json/health.json").exists()
+
+    def test_publish(self, fx_exporter_site_health: SiteHealthExporter):
+        """Can upload health checks to S3 with expected content-types."""
+        expected = {"-/health": "text/html", "static/json/health.json": "application/health+json"}
+
+        fx_exporter_site_health.publish()
+        for key, content_type in expected.items():
+            result = fx_exporter_site_health._s3_utils._s3.get_object(
+                Bucket=fx_exporter_site_health._s3_utils._bucket, Key=key
+            )
+            assert result["ResponseMetadata"]["HTTPStatusCode"] == 200
+            assert result["ResponseMetadata"]["HTTPHeaders"]["content-type"] == content_type
+
+
 class TestSiteExporter:
     """Test site index exporter."""
 
@@ -448,6 +498,7 @@ class TestSiteExporter:
             site_path.joinpath("404.html"),
             site_path.joinpath("static", "css", "main.css"),
             site_path.joinpath("static", "json", "openapi.json"),
+            site_path.joinpath("static", "json", "health.json"),
             site_path.joinpath("items", record.file_identifier, "index.html"),
             site_path.joinpath("records", f"{record.file_identifier}.xml"),
             site_path.joinpath("legal", "privacy", "index.html"),
@@ -491,6 +542,7 @@ class TestSiteExporter:
             "404.html",
             "static/css/main.css",
             "static/json/openapi.json",
+            "static/json/health.json",
             f"items/{record.file_identifier}/index.html",
             f"records/{record.file_identifier}.html",
             "legal/privacy/index.html",

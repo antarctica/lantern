@@ -114,6 +114,15 @@ class TestGitLabStore:
 
         assert fx_gitlab_store._get_remote_hashed_path(value) == expected
 
+    def test_len(self, mocker: MockerFixture, fx_gitlab_store: GitLabStore):
+        """Can get count of records in store."""
+        mocker.patch.object(fx_gitlab_store, "_fetch_record_head_commit", side_effect=self._fetch_record_head_commit)
+        mocker.patch.object(
+            fx_gitlab_store, "_fetch_all_records_head_commit", side_effect=self._fetch_all_records_head_commit
+        )
+
+        assert len(fx_gitlab_store) > 0
+
     @pytest.mark.cov()
     def test_frozen(self, fx_gitlab_store: GitLabStore):
         """Can get whether store is frozen."""

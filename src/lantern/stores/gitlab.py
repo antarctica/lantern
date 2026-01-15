@@ -174,6 +174,14 @@ class GitLabStore(Store):
         """
         return f"records/{file_name[:2]}/{file_name[2:4]}/{file_name}"
 
+    def __len__(self) -> int:
+        """
+        Count of records in store.
+
+        Deliberately simplistic as this method is not expected to be used for this store.
+        """
+        return len(self.select())
+
     @property
     def frozen(self) -> bool:
         """Static value, as GitLab stores cannot be frozen."""

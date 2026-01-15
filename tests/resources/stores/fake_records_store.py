@@ -41,6 +41,10 @@ class FakeRecordsStore(Store):
         self._records: list[RecordRevision] = self._fake_records
         self._frozen = frozen
 
+    def __len__(self) -> int:
+        """Count of records in store."""
+        return len(self.select())
+
     @property
     def frozen(self) -> bool:
         """

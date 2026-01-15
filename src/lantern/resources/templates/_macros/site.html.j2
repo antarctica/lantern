@@ -143,6 +143,7 @@
   <footer id="site-footer" class="font-light bg-grey-950 dark:bg-black text-grey-100 text-center">
     <div class="{{ com.container_classes() }} px-2 py-8 space-y-4 lg:space-y-8">
       {{ footer_basics(data.fallback_email) }}
+      {{ footer_nav() }}
       {{ footer_primary_nav() }}
       {{ footer_legal(data.build_time.year) }}
       {{ footer_network_nav() }}
@@ -156,6 +157,44 @@
     <a class="{{ com.footer_link_classes() }} lg:text-right" href="#{{ com.back_to_top_id() }}">
       Back to top <i class="fa-regular fa-arrow-up"></i>
     </a>
+  </div>
+{% endmacro %}
+
+{% macro footer_nav() %}
+  {% set
+    footer_nav_items = {
+      'Discover': [('https://www.bas.ac.uk/maps', 'Maps', false, false)],
+      'Portals': [
+        ('https://www.icelogistics.info', 'Ice Logistics Portal', true, false),
+        ('https://opsgis.web.bas.ac.uk/login', 'Operations GIS', true, true)
+       ],
+      'Guides': [
+        ('https://guides.geospatial.bas.ac.uk', 'Geospatial training', true, false),
+        ('https://metadata-standards.data.bas.ac.uk', 'Metadata standards', true, false),
+        ('/guides/formatting', 'Content formatting', false, false),
+        ('/guides/api', 'API documentation', false, false)
+      ],
+      'About': [
+        ('https://gitlab.data.bas.ac.uk/MAGIC/lantern-exp', 'GitLab project', true, true),
+        ('https://github.com/antarctica/lantern', 'GitHub mirror', true, false)
+      ]
+    }
+  %}
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:text-left">
+    {% for section_title, link in footer_nav_items.items() %}
+    <section class="space-y-4">
+      <h4>{{ section_title }}</h4>
+      <ul class="space-y-2">
+        {% for link in link %}
+          <li>
+            <a class="{{ com.footer_link_classes() }}" href="{{ link[0] }}">
+              {{ link[1] }}{% if link[2] %} {{ com.ext_link_i() }}{% endif %}{% if link[3] %}{{ com.restricted_i() }}{% endif %}
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endfor %}
   </div>
 {% endmacro %}
 

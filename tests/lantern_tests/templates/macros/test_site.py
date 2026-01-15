@@ -277,3 +277,15 @@ class TestMacrosSite:
 
         assert html.find(id="site-footer") is not None
         assert str(expected.year) in html.find(id="site-footer").text
+
+    def test_footer_nav(self):
+        """Can get footer specific navigation links."""
+        template = """{% import '_macros/site.html.j2' as site %}{{ site.footer_nav() }}"""
+        meta = self._site_meta()
+        html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
+
+        assert html.find(name="a", href="https://www.bas.ac.uk/maps") is not None
+        restricted_external = html.find(name="a", href="https://gitlab.data.bas.ac.uk/MAGIC/lantern-exp")
+        assert restricted_external is not None
+        assert restricted_external.find("i", class_="fa-arrow-up-right-from-square") is not None  # external status
+        assert restricted_external.find("i", class_="fa-lock-keyhole") is not None  # restricted status

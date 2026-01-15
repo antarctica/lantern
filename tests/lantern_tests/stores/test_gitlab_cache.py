@@ -7,6 +7,7 @@ from tempfile import TemporaryDirectory
 from unittest.mock import MagicMock, PropertyMock
 
 import pytest
+from conftest import _gitlab_cache_create
 from gitlab import Gitlab
 from pytest_mock import MockerFixture
 from requests.exceptions import ConnectionError as RequestsConnectionError
@@ -659,6 +660,47 @@ class TestGitLabLocalCache:
         fx_gitlab_cache_pop._ensure_exists()
         assert fx_gitlab_cache_pop.exists
         assert "Local cache not setup, recreating from GitLab" in caplog.text
+
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    def test_change_source(
+        self,
+        mocker: MockerFixture,
+        fx_gitlab_cache: GitLabLocalCache,
+        fx_logger: logging.Logger,
+        fx_config: Config,
+        fx_gitlab_source: GitLabSource,
+    ):
+        """Can recreate store when source changes without error."""
+        mocker.patch.object(type(fx_gitlab_cache), "_online", new_callable=PropertyMock, return_value=True)
+        # setup cache with initial source
+        _gitlab_cache_create(fx_gitlab_cache)
+        fx_gitlab_cache._create()
+        with fx_gitlab_cache._engine as tx:
+            initial = tx.fetchscalar("SELECT value FROM meta WHERE key = 'source_project';")
+        assert initial == "1234"
+        # create new instance with a different source but the same cache path
+        source = GitLabSource(
+            endpoint="https://gitlab.example.com",
+            project="5678",
+            ref="new",
+        )
+        cache = GitLabLocalCache(
+            logger=fx_logger,
+            parallel_jobs=fx_config.PARALLEL_JOBS,
+            path=fx_gitlab_cache._path,
+            gitlab_token="x",  # noqa: S106
+            gitlab_client=Gitlab(url=fx_gitlab_source.endpoint, private_token=fx_config.STORE_GITLAB_TOKEN),
+            gitlab_source=source,
+        )
+
+        # force cache recreation
+        cache._create()
+
+        assert cache.exists
+        with cache._engine as tx:
+            result = tx.fetchscalar("SELECT value FROM meta WHERE key = 'source_project';")
+        assert result != initial
 
     @pytest.mark.parametrize("selected", [None, {}, {"x"}, {"x", "y"}, {"invalid"}, {"x", "invalid"}])
     def test_get(

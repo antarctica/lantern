@@ -764,13 +764,17 @@ class TestGitLabLocalCache:
     def test_purge(self, mocker: MockerFixture, fx_gitlab_cache_pop: GitLabLocalCache):
         """Can clear cache contents."""
         mocker.patch.object(fx_gitlab_cache_pop, "_ensure_exists", return_value=None)
-
+        fx_gitlab_cache_pop.get()
         assert fx_gitlab_cache_pop.exists
+        assert len(fx_gitlab_cache_pop._flash) > 0
+        assert fx_gitlab_cache_pop._conn is not None
 
         fx_gitlab_cache_pop.purge()
 
         assert not fx_gitlab_cache_pop.exists
         assert not fx_gitlab_cache_pop._cache_path.exists()
+        assert len(fx_gitlab_cache_pop._flash) == 0
+        assert fx_gitlab_cache_pop._conn is None
 
 
 class TestGitLabCachedStore:

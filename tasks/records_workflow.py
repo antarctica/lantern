@@ -7,13 +7,16 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 import inquirer
+from gitlab.exceptions import GitlabGetError
 from mypy_boto3_s3 import S3Client
 from tasks._record_utils import init, init_store, parse_records
 from tasks.records_import import clean as import_clean
 from tasks.records_import import load as import_load
 from tasks.records_import import push as import_push
+from tasks.records_permissions import _init_admin_keys
 from tasks.records_zap import clean_input_path as zap_clean_input_path
 from tasks.records_zap import dump_records as zap_dump_records
+from tasks.records_zap import parse_records as zap_parse_records
 from tasks.records_zap import process_records as zap_process_records
 
 from lantern.config import Config
@@ -23,10 +26,9 @@ from lantern.lib.metadata_library.models.record.utils.admin import Administratio
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
 from lantern.models.verification.types import VerificationContext
-from lantern.stores.base import Store
-from lantern.stores.gitlab import CommitResults
+from lantern.stores.gitlab import CommitResults, GitLabStore
 from lantern.stores.gitlab_cache import GitLabCachedStore
-from lantern.utils import get_jinja_env, get_record_aliases, init_gitlab_store
+from lantern.utils import get_jinja_env, get_record_aliases
 
 
 class OutputCommentItem:
@@ -79,7 +81,7 @@ class OutputComment:
         self,
         logger: logging.Logger,
         config: Config,
-        store: GitLabCachedStore,
+        store: GitLabStore,
         base_url: str,
         commit: CommitResults,
         merge_url: str | None,
@@ -134,7 +136,7 @@ class OutputComment:
   - {{ item.revision_link }}
 {% endfor %}
 
-_This comment was left automatically by the Lantern Experiment's [Interactive record publishing workflow](https://github.com/antarctica/lantern/blob/main/docs/usage.md#interactive-record-publishing-workflow]._
+_This comment was left automatically by the Lantern Experiment's [Interactive record publishing workflow](https://github.com/antarctica/lantern/blob/main/docs/usage.md#interactive-record-publishing-workflow)._
         """
 
     def render(self) -> str:
@@ -154,8 +156,12 @@ _This comment was left automatically by the Lantern Experiment's [Interactive re
         project_path = match.group(1)  # "felnne/xdsz"
         issue_iid = int(match.group(2))  # 1
 
-        # noinspection PyProtectedMember
-        project = self._store._client.projects.get(project_path)
+        try:
+            # noinspection PyProtectedMember
+            project = self._store._client.projects.get(project_path)
+        except GitlabGetError:
+            msg = f"Cannot access GitLab project at path: {project_path}"
+            raise ValueError(msg) from None
         issue = project.issues.get(issue_iid)
         issue.notes.create({"body": self.render()})
 
@@ -189,23 +195,23 @@ def _confirm(logger: logging.Logger, message: str) -> None:
         sys.exit(1)
 
 
-def _changeset_branch(issue: str) -> str:
+def _changeset_branch_name(issue: str) -> str:
     """Create branch name from GitLab issue URL."""
     conventional_ref = f"{issue.split('/')[-5]}/{issue.split('/')[-4]}#{issue.split('/')[-1]}"  # MAGIC/foo#123
     branch_safe_ref = conventional_ref.replace("#", ".")  # MAGIC/foo.123
     return f"changeset/{branch_safe_ref}"
 
 
-def _init_store_adapter(logger: logging.Logger, config: Config | None, frozen: bool = False) -> Store:
-    """To resolve type errors."""
-    if config is None:
-        raise TypeError()
-
-    return init_gitlab_store(logger=logger, config=config, frozen=frozen)
+def _changeset_branch(logger: logging.Logger, issue: str | None, default: str) -> str:
+    """Select branch name from optional GitLab issue URL."""
+    if not issue:
+        logger.info("No GitLab issue selected, skipping changeset creation and using default branch")
+        return default
+    return _changeset_branch_name(issue=issue)
 
 
 @_time_task(label="Zap ⚡️")
-def _zap(logger: logging.Logger, store: GitLabCachedStore, admin_keys: AdministrationKeys, import_path: Path) -> None:
+def _zap(logger: logging.Logger, store: GitLabStore, admin_keys: AdministrationKeys, import_path: Path) -> None:
     """
     Load and process Zap ⚡️ authored records (`zap-records` task).
 
@@ -213,7 +219,7 @@ def _zap(logger: logging.Logger, store: GitLabCachedStore, admin_keys: Administr
     Processed records will include any collections these records appear within.
     """
     logger.info(f"Loading Zap authored records from: '{import_path.resolve()}'")
-    record_paths = parse_records(logger=logger, search_path=import_path, glob_pattern="zap-*.json")
+    record_paths = zap_parse_records(logger=logger, input_path=import_path)
     records = [record_path[0] for record_path in record_paths]
 
     logger.debug(f"Found {len(records)} Zap authored records to process.")
@@ -228,14 +234,17 @@ def _zap(logger: logging.Logger, store: GitLabCachedStore, admin_keys: Administr
 
 @_time_task(label="Changeset")
 def _changeset(
-    logger: logging.Logger, config: Config, store: GitLabCachedStore, keys: AdministrationKeys, import_path: Path
+    logger: logging.Logger, config: Config, keys: AdministrationKeys, import_path: Path
 ) -> tuple[GitLabCachedStore, str | None]:
     """
     Create, or use an existing changeset, to relate a set of commits for some records based on a GitLab issue.
 
-    For convenience, GitLab issues listed in admin metadata are offered as a suggestion.
+    Returns a suitable, cached, store to use, either using a changeset branch or the Config default.
 
-    If a changeset is used, creates and returns a new store with a branch based on the issue, and the issue URL.
+    For convenience, GitLab issues listed in admin metadata are offered as a suggestion for a changeset branch.
+
+    A cached store is used as a workaround for a race condition when switching to a new branch. Exiting records return
+    a 404 when fetched, causing updated records to be inaccurately marked as additions in commits which GitLab rejects.
     """
     records = [record_path[0] for record_path in list(parse_records(logger=logger, search_path=import_path))]
     record_issues = {"<NONE>"}
@@ -245,30 +254,24 @@ def _changeset(
             record_issues = record_issues.union(admin.gitlab_issues)
     record_issues.add("<OTHER>")
 
+    print("\nEnsure GitLab issue selected is where changeset should be linked (e.g. Helpdesk vs. Mapping Coordination.")
     issue = inquirer.prompt([inquirer.List("issue", message="Issue URL", choices=record_issues)])["issue"]
     print(issue)
     if issue == "<NONE>":
-        logger.info("No GitLab issue selected, skipping changeset creation.")
-        return store, None
-    if issue == "<OTHER>":
+        issue = None
+    elif issue == "<OTHER>":
         issue = inquirer.prompt([inquirer.Text(name="url", message="Issue URL", default="<NONE>")])["url"]
         if issue == "<NONE>":
-            logger.info("No GitLab issue URL provided, skipping changeset creation.")
-            return store, None
+            issue = None
 
-    branch = _changeset_branch(issue)
-    # noinspection PyProtectedMember
-    store._ensure_branch(branch)
-    # recreate store to use changeset branch
-    store = init_store(logger=logger, config=config, branch=branch)
+    branch = _changeset_branch(logger=logger, issue=issue, default=config.STORE_GITLAB_BRANCH)
+    store = init_store(logger=logger, config=config, branch=branch, cached=True)
     logger.info(f"Using changeset branch: '{store._source.ref}'")
-    return store, issue
+    return store, issue  # ty:ignore[invalid-return-type]
 
 
 @_time_task(label="Import")
-def _import(
-    logger: logging.Logger, config: Config, store: GitLabCachedStore, import_path: Path
-) -> CommitResults | None:
+def _import(logger: logging.Logger, config: Config, store: GitLabStore, import_path: Path) -> CommitResults | None:
     """Import records."""
     records = import_load(logger=logger, input_path=import_path)
     if len(records) == 0:
@@ -279,7 +282,7 @@ def _import(
 
 
 @_time_task(label="Merge request")
-def _merge_request(logger: logging.Logger, store: GitLabCachedStore, issue_href: str | None) -> str | None:
+def _merge_request(logger: logging.Logger, store: GitLabStore, issue_href: str | None) -> str | None:
     """
     Ensure merge request exists for changeset if used.
 
@@ -318,13 +321,16 @@ def _build(
         config=config, store=store, build_repo_ref=store.head_commit if store.head_commit else "-"
     )
     site = SiteExporter(config=config, meta=meta, logger=logger, s3=s3, store=store, selected_identifiers=identifiers)
+    logger.info("Freezing store.")
+    store._frozen = True
+    store._cache._frozen = True
     logger.info(f"Publishing {len(identifiers)} records to {config.AWS_S3_BUCKET}.")
     site.publish()
 
 
 @_time_task(label="Verify")
 def _verify(
-    logger: logging.Logger, config: Config, store: GitLabCachedStore, s3: S3Client, base_url: str, identifiers: set[str]
+    logger: logging.Logger, config: Config, store: GitLabStore, s3: S3Client, base_url: str, identifiers: set[str]
 ) -> None:
     """Verify items for committed records."""
     logger.info(f"Verifying {len(identifiers)} records.")
@@ -349,7 +355,7 @@ def _verify(
 def _output(
     logger: logging.Logger,
     config: Config,
-    store: GitLabCachedStore,
+    store: GitLabStore,
     base_url: str,
     commit: CommitResults,
     merge_url: str | None,
@@ -376,9 +382,14 @@ def _output(
 
 @_time_task(label="Workflow")
 def main() -> None:
-    """Entrypoint."""
+    """
+    Entrypoint.
+
+    This task uses a non-cached GitLab store as it's likely to be pushing to a new branch for a changeset, and operating
+    on a limited number of records.
+    """
     logger, config, store, s3 = init()
-    admin_keys = config.ADMIN_METADATA_KEYS
+    admin_keys = _init_admin_keys(config)
     import_path = Path("./import")
     base_url = "https://data-testing.data.bas.ac.uk"
     testing_bucket = "add-catalogue-integration.data.bas.ac.uk"
@@ -403,7 +414,7 @@ def main() -> None:
         sys.exit(0)
 
     # open a changeset if needed
-    store, issue_url = _changeset(logger=logger, config=config, store=store, keys=admin_keys, import_path=import_path)
+    store, issue_url = _changeset(logger=logger, config=config, keys=admin_keys, import_path=import_path)
 
     # import records and create merge request if needed
     commit = _import(logger=logger, config=config, store=store, import_path=import_path)

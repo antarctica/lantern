@@ -103,6 +103,7 @@ build-test-cache = { cmd = "python tests/resources/stores/gitlab_cache/refresh.p
 version = { cmd = "uv version", help = "Show app version" }
 cache-init = { cmd = "python -m tasks.cache_init", help = "Initialize records cache" }
 clone-record = { cmd = "python -m tasks.record_clone", help = "Clone record from cache into import directory" }
+admin-record = { cmd = "python -m tasks.record_dump_admin", help = "View administrative metadata for a record" }
 select-records = { cmd = "python -m tasks.records_select", help = "Copy records from cache to import directory for editing" }
 zap-records = { cmd = "python -m tasks.records_zap", help = "Process Zap ⚡️ authored records from import directory" }
 import-records = { cmd = "python -m tasks.records_import", help = "Import records from directory" }

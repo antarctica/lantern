@@ -15,7 +15,7 @@ from lantern.config import Config
 from lantern.lib.metadata_library.models.record.elements.common import Identifier
 from lantern.models.record.const import ALIAS_NAMESPACE
 from lantern.models.record.record import Record
-from lantern.stores.gitlab import GitLabSource
+from lantern.stores.gitlab import GitLabSource, GitLabStore
 from lantern.stores.gitlab_cache import GitLabCachedStore
 
 
@@ -86,15 +86,23 @@ class S3Utils:
 
 
 def init_gitlab_store(
-    logger: logging.Logger, config: Config, branch: str | None = None, frozen: bool = False
-) -> GitLabCachedStore:
+    logger: logging.Logger, config: Config, branch: str | None = None, cached: bool = False, frozen: bool = False
+) -> GitLabStore | GitLabCachedStore:
     """
     Initialise a GitLab store from app Config.
 
+    Store is not cached by default to allow switching between branches efficiently.
     Store is not frozen by default to allow fetching changes before processing.
     """
+    if not cached and frozen:
+        msg = "Cannot create a frozen GitLab store without caching."
+        raise ValueError(msg) from None
+
     branch_ = branch or config.STORE_GITLAB_BRANCH
     source = GitLabSource(endpoint=config.STORE_GITLAB_ENDPOINT, project=config.STORE_GITLAB_PROJECT_ID, ref=branch_)
+
+    if not cached:
+        return GitLabStore(logger=logger, source=source, access_token=config.STORE_GITLAB_TOKEN)
 
     return GitLabCachedStore(
         logger=logger,

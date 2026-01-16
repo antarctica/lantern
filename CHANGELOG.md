@@ -39,6 +39,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Static health check endpoint
 * Sized support for stores to get number of records a store contains
 * Additional footer navigation links
+* 'admin-record' development task for viewing administrative metadata for a record
 
 ### Fixed
 
@@ -75,6 +76,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Switching to Font Awesome 7 hosted kit
 * Refactored OGL symbol into a custom Font Awesome icon
 * Refactored records exporter to prevent un/re-loading admin metadata keys and creating new stores per parallel worker
+* Improving development tasks
 
 ### Removed
 

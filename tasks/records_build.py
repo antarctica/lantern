@@ -10,6 +10,7 @@ from tasks._record_utils import init
 from lantern.config import Config as Config
 from lantern.exporters.site import SiteExporter
 from lantern.models.site import ExportMeta
+from lantern.stores.gitlab import GitLabStore
 from lantern.stores.gitlab_cache import GitLabCachedStore
 
 
@@ -38,7 +39,7 @@ class ToyCatalogue:
         logger: logging.Logger,
         config: Config,
         s3: S3Client,
-        store: GitLabCachedStore,
+        store: GitLabStore | GitLabCachedStore,
         trusted: bool = False,
         selected_identifiers: set[str] | None = None,
     ) -> None:
@@ -49,16 +50,17 @@ class ToyCatalogue:
         self._trusted = trusted
         self._selected_identifiers = selected_identifiers
 
-        # ensure cache exists to get head commit for ExportMeta and is up to date before freezing
-        self._store._cache._ensure_exists()
+        if isinstance(self._store, GitLabCachedStore):
+            # ensure cache exists to get head commit for ExportMeta and is up to date before freezing
+            self._store._cache._ensure_exists()
         self._meta = ExportMeta.from_config_store(
             config=self._config, store=self._store, build_repo_ref=self._store.head_commit, trusted=self._trusted
         )
 
-        # Freeze the store to prevent further changes.
-        self._logger.info("Freezing store.")
-        self._store._frozen = True
-        self._store._cache._frozen = True
+        if isinstance(self._store, GitLabCachedStore):
+            self._logger.info("Freezing store.")
+            self._store._frozen = True
+            self._store._cache._frozen = True
 
         self._site = SiteExporter(
             config=self._config,
@@ -83,8 +85,9 @@ class ToyCatalogue:
     @time_task(label="Purge")
     def purge(self, purge_export: bool = False, purge_publish: bool = False) -> None:
         """Empty records from catalogue store and site exporter."""
-        self._logger.info("Purging store")
-        self._store.purge()
+        if isinstance(self._store, GitLabCachedStore):
+            self._logger.info("Purging store")
+            self._store.purge()
 
         if purge_export and self._site._meta.export_path.exists():
             self._site._logger.info("Purging file system export directory")
@@ -96,12 +99,15 @@ class ToyCatalogue:
 
 def main() -> None:
     """Entrypoint."""
-    export = True
-    publish = False
-    selected = set()  # to set use the form {"abc", "..."}
+    export = False
+    publish = True
+    selected = {"03db9faa-da9a-4d39-8381-12b218750089"}  # set() # to set use the form {"abc", "..."}
     trusted = False
 
-    logger, config, store, s3 = init()
+    cached = True
+    if len(selected) <= 3:
+        cached = False
+    logger, config, store, s3 = init(cached_store=cached)
     cat = ToyCatalogue(config=config, logger=logger, s3=s3, store=store, trusted=trusted, selected_identifiers=selected)
 
     if export:

@@ -6,8 +6,7 @@ from tasks._record_utils import clean_configs, confirm_source, init, parse_recor
 
 from lantern.config import Config
 from lantern.models.record.record import Record
-from lantern.stores.gitlab import CommitResults
-from lantern.stores.gitlab_cache import GitLabCachedStore
+from lantern.stores.gitlab import CommitResults, GitLabStore
 
 
 def _get_args() -> tuple[str, str, str, str]:
@@ -37,7 +36,7 @@ def load(logger: logging.Logger, input_path: Path) -> dict[Path, Record]:
     return {path: record for record, path in records}
 
 
-def push(logger: logging.Logger, config: Config, store: GitLabCachedStore, records: list[Record]) -> CommitResults:
+def push(logger: logging.Logger, config: Config, store: GitLabStore, records: list[Record]) -> CommitResults:
     """
     Prepare and apply a commit.
 
@@ -45,7 +44,6 @@ def push(logger: logging.Logger, config: Config, store: GitLabCachedStore, recor
     """
     confirm_source(logger=logger, store=store, action="Committing records to")
     title, message, author_name, author_email = _get_args()
-    store._cache._ensure_exists()  # to ensure cache is populated and check if any files are updates
     results = store.push(records=records, title=title, message=message, author=(author_name, author_email))
     if results.commit is None:
         return results

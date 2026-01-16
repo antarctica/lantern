@@ -3,8 +3,11 @@ import sys
 from pathlib import Path
 
 import inquirer
+from environs import Env
+from jwskate import Jwk
 from tasks._record_utils import dump_records, init, parse_records
 
+from lantern.config import Config
 from lantern.lib.metadata_library.models.record.elements.administration import Administration, Permission
 from lantern.lib.metadata_library.models.record.presets.admin import BAS_STAFF, OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.record import Record
@@ -58,6 +61,17 @@ def _get_args(logger: logging.Logger, records: list[Record]) -> tuple[list[Recor
     return selected_records, permission
 
 
+def _init_admin_keys(config: Config) -> AdministrationKeys:
+    """Initialise admin metadata keys with public signing to modify records."""
+    env = Env()  # needed for loading private signing key for admin metadata
+    env.read_env()
+
+    return AdministrationKeys(
+        encryption_private=config.ADMIN_METADATA_KEYS.encryption_private,
+        signing_private=Jwk(env.json("X_ADMIN_METADATA_SIGNING_KEY_PRIVATE")),
+    )
+
+
 def _set_permission(logger: logging.Logger, keys: AdministrationKeys, record: Record, permission: Permission) -> None:
     """Set single access permission in a record, overwriting any possible existing permissions."""
     admin = None
@@ -95,6 +109,7 @@ def _set_permissions(
 def main() -> None:
     """Entrypoint."""
     logger, config, _store, _s3 = init()
+    admin_keys = _init_admin_keys(config=config)
 
     input_path = Path("./import")
     logger.info(f"Loading records from: '{input_path.resolve()}'")
@@ -106,7 +121,7 @@ def main() -> None:
         sys.exit(0)
 
     for record in records:
-        _set_permission(logger, config.ADMIN_METADATA_KEYS, record, permission)  # ty: ignore[invalid-argument-type]
+        _set_permission(logger=logger, keys=admin_keys, record=record, permission=permission)  # ty: ignore[invalid-argument-type]
     dump_records(logger=logger, records=selected_records, output_path=input_path)
 
 

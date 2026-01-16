@@ -11,6 +11,7 @@ from lantern.lib.metadata_library.models.record.elements.common import Identifie
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 from lantern.stores.gitlab import GitLabStore
+from lantern.stores.gitlab_cache import GitLabCachedStore
 from lantern.utils import (
     S3Utils,
     dumps_redirect,
@@ -100,15 +101,24 @@ class TestS3Utils:
 class TestUtils:
     """Test app utils not tested elsewhere."""
 
-    @pytest.mark.parametrize("prefer_frozen", [True, False])
-    def test_gitlab_store(self, fx_logger: logging.Logger, fx_config: Config, prefer_frozen: bool) -> None:
+    @pytest.mark.parametrize("cached", [True, False])
+    @pytest.mark.parametrize("frozen", [True, False])
+    def test_gitlab_store(self, fx_logger: logging.Logger, fx_config: Config, cached: bool, frozen: bool) -> None:
         """
         Can init GitLab store.
 
         Only called in dev-tasks so not considered as run in coverage.
         """
-        store = init_gitlab_store(logger=fx_logger, config=fx_config, frozen=prefer_frozen)
+        if not cached and frozen:
+            with pytest.raises(ValueError, match=r"Cannot create a frozen GitLab store without caching."):
+                init_gitlab_store(logger=fx_logger, config=fx_config, cached=cached, frozen=frozen)
+            return
+
+        store = init_gitlab_store(logger=fx_logger, config=fx_config, cached=cached, frozen=frozen)
         assert isinstance(store, GitLabStore)
+        assert isinstance(store, GitLabCachedStore) == cached
+        if isinstance(store, GitLabCachedStore):
+            assert store.frozen == frozen
 
     def test_s3_client(self, fx_logger: logging.Logger, fx_config: Config):
         """

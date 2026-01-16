@@ -324,6 +324,9 @@ class GitLabStore(Store):
             "actions": [],
         }
 
+        self._logger.debug(f"Ensuring target branch {self._source.ref} exists")
+        self._ensure_branch(branch=self._source.ref)
+
         existing_hashes = self._get_hashes_callable(file_identifiers={record.file_identifier for record in records})
         for record in records:
             self._logger.debug(f"Existing: '{existing_hashes[record.file_identifier]}', New: '{record.sha1}'")
@@ -356,9 +359,6 @@ class GitLabStore(Store):
         if not data["actions"]:
             self._logger.info("No actions to perform, aborting")
             return results
-
-        self._logger.debug(f"Ensuring target branch {self._source.ref} exists")
-        self._ensure_branch(branch=self._source.ref)
 
         self._logger.info(f"Committing {results.stats.new_msg}, {results.stats.updated_msg}")
         # noinspection PyTypeChecker

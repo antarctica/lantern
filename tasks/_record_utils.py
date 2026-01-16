@@ -14,6 +14,7 @@ from lantern.log import init as _init_logging
 from lantern.models.record.record import Record as CatalogueRecord
 from lantern.models.record.record import Record as RecordCatalogue
 from lantern.models.record.revision import RecordRevision
+from lantern.stores.gitlab import GitLabStore
 from lantern.stores.gitlab_cache import GitLabCachedStore
 from lantern.utils import init_gitlab_store
 
@@ -27,10 +28,10 @@ def init_logging(config: Config) -> logging.Logger:
 
 
 def init_store(
-    logger: logging.Logger, config: Config, branch: str | None = None, frozen: bool = False
-) -> GitLabCachedStore:
+    logger: logging.Logger, config: Config, branch: str | None = None, cached: bool = False, frozen: bool = False
+) -> GitLabStore | GitLabCachedStore:
     """Initialise store."""
-    return init_gitlab_store(logger=logger, config=config, branch=branch, frozen=frozen)
+    return init_gitlab_store(logger=logger, config=config, branch=branch, cached=cached, frozen=frozen)
 
 
 def init_s3(config: Config) -> S3Client:  # ty: ignore[invalid-type-form]
@@ -43,15 +44,18 @@ def init_s3(config: Config) -> S3Client:  # ty: ignore[invalid-type-form]
     )
 
 
-def init(frozen_store: bool = False) -> tuple[logging.Logger, Config, GitLabCachedStore, S3Client]:  # ty: ignore[invalid-type-form]
+def init(
+    cached_store: bool = False, frozen_store: bool = False
+) -> tuple[logging.Logger, Config, GitLabStore | GitLabCachedStore, S3Client]:  # ty: ignore[invalid-type-form]
     """
     Initialise common objects.
 
+    Store is not cached by default to allow switching between branches efficiently.
     Store is not frozen by default to allow fetching changes before processing.
     """
     config = Config()
     logger = init_logging(config)
-    store = init_store(logger, config, frozen=frozen_store)
+    store = init_store(logger, config, cached=cached_store, frozen=frozen_store)
     s3 = init_s3(config)
     return logger, config, store, s3
 
@@ -200,7 +204,7 @@ def clean_configs(
         logger.info(f"Removed processed file: '{input_files_indexed[file_identifier]}'.")
 
 
-def confirm_source(logger: logging.Logger, store: GitLabCachedStore, action: str) -> None:
+def confirm_source(logger: logging.Logger, store: GitLabStore, action: str) -> None:
     """Confirm store source."""
     logger.info(f"{action} branch '{store._source.ref}' on '{store._project.http_url_to_repo}'")
     answers = inquirer.prompt([inquirer.Confirm(name="confirm", message="Correct source?", default=True)])

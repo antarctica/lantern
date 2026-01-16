@@ -3,16 +3,26 @@ from copy import deepcopy
 from datetime import UTC, datetime
 from pathlib import Path
 
-from tasks._record_utils import dump_records, init, parse_records
+from tasks._record_utils import dump_records, init
+from tasks._record_utils import parse_records as base_parse_records
+from tasks.records_permissions import _init_admin_keys
 
 from lantern.lib.metadata_library.models.record.elements.administration import Administration, Permission
-from lantern.lib.metadata_library.models.record.elements.common import Date
+from lantern.lib.metadata_library.models.record.elements.common import (
+    Address,
+    Contact,
+    ContactIdentity,
+    Date,
+    OnlineResource,
+)
 from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,
     AggregationInitiativeCode,
     ConstraintRestrictionCode,
     ConstraintTypeCode,
+    ContactRoleCode,
     HierarchyLevelCode,
+    OnlineResourceFunctionCode,
 )
 from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.presets.aggregations import make_bas_cat_collection_member
@@ -42,6 +52,23 @@ magic_collection_ids = [
     "8b60e3b1-ccbf-48de-acaf-adf74382d6ea",  # BAS Geomatics Catalogue
 ]
 
+default_copyright_contact = Contact(
+    organisation=ContactIdentity(name="UKRI Research and Innovation", href="https://ror.org/001aqnf71", title="ror"),
+    address=Address(
+        delivery_point="UK Research and Innovation, Polaris House",
+        city="Swindon",
+        postal_code="SN2 1FL",
+        country="United Kingdom",
+    ),
+    online_resource=OnlineResource(
+        href="https://www.ukri.org",
+        title="UKRI - UK Research and Innovation",
+        description="Public website for UK Research and Innovation.",
+        function=OnlineResourceFunctionCode.INFORMATION,
+    ),
+    role={ContactRoleCode.RIGHTS_HOLDER},
+)
+
 
 def clean_input_path(input_record_paths: list[tuple[Record, Path]], processed_ids: list[str]) -> None:
     """Remove processed zap authored files."""
@@ -51,7 +78,7 @@ def clean_input_path(input_record_paths: list[tuple[Record, Path]], processed_id
 
 
 def _upgrade_discovery_profile(logger: logging.Logger, records: list[Record]) -> None:
-    """Upgrade MAGIC discovery profile to V2 if record contains V1."""
+    """Upgrade MAGIC discovery profile to V2 if records contain V1."""
     for record in records:
         discovery_v1_index = next(
             (
@@ -66,6 +93,10 @@ def _upgrade_discovery_profile(logger: logging.Logger, records: list[Record]) ->
             logger.debug("MAGIC discovery profile V1 not found in record, skipping upgrade")
             continue
         logger.info("Upgrading MAGIC discovery profile from V1 to V2")
+        copyright_holders = record.identification.contacts.filter(roles=[ContactRoleCode.RIGHTS_HOLDER])
+        if len(copyright_holders) == 0:
+            logger.info("No rights holder found in record, setting default copyright holder for V2 profile")
+            record.identification.contacts.append(default_copyright_contact)
         record.data_quality.domain_consistency[discovery_v1_index] = MAGIC_DISCOVERY_V2
 
 
@@ -203,7 +234,18 @@ def _process_magic_collections(
     - b85852eb-c7fb-435f-8239-e13a28612ef4 (Assets Tracking Service) - externally managed
     - b8b78c6c-fac2-402c-a772-9f518c7121e5 (MAGIC team) - manually managed
     """
-    collections = [store.select_one(record_id) for record_id in magic_collection_ids]
+    collection_ids = set()
+    for record in records:
+        # only select parent collections referenced in records
+        parent_collections = record.identification.aggregations.filter(
+            namespace=CATALOGUE_NAMESPACE,
+            associations=AggregationAssociationCode.LARGER_WORK_CITATION,
+            initiatives=AggregationInitiativeCode.COLLECTION,
+        )
+        record_collection_ids = [c.identifier.identifier for c in parent_collections]
+        filtered_record_collection_ids = set(record_collection_ids).intersection(set(magic_collection_ids))
+        collection_ids.update(filtered_record_collection_ids)
+    collections = [store.select_one(record_id) for record_id in collection_ids]
     collections_updated = {c.file_identifier: deepcopy(c) for c in collections}
 
     for record in records:
@@ -236,8 +278,13 @@ def _get_gitlab_issues(logger: logging.Logger, record: Record) -> list[str] | No
     count_after = len(record.identification.identifiers)
     logger.info(f"Removed {count_before - count_after} GitLab issue identifiers from record '{record.file_identifier}'")
 
-    logger.info(f"Will set {len(issues)} GitLab issues admin metadata for Record '{record.file_identifier}'")
-    return issues
+    issue_urls = [i.href for i in glab_identifiers if i.href is not None]
+    if len(issue_urls) != len(issues):
+        msg = f"Record {record.file_identifier} has GitLab identifiers without href values."
+        raise ValueError(msg) from None
+
+    logger.info(f"Will set {len(issue_urls)} GitLab issues in admin metadata for Record '{record.file_identifier}'")
+    return issue_urls
 
 
 def _get_access_permissions(logger: logging.Logger, record: Record) -> list[Permission]:
@@ -348,22 +395,22 @@ def process_records(
     _process_distribution_descriptions(logger=logger, records=records)
     _process_admin_metadata(logger=logger, admin_keys=admin_keys, records=records)
     _process_magic_collections(logger=logger, records=records, additional_records=additional_records, store=store)
-    _upgrade_discovery_profile(logger=logger, records=records)
+    _upgrade_discovery_profile(logger=logger, records=additional_records)
     _revise_records(logger=logger, records=[*records, *additional_records], store=store)
     return additional_records
 
 
-def _parse_records(logger: logging.Logger, input_path: Path) -> list[tuple[Record, Path]]:
+def parse_records(logger: logging.Logger, input_path: Path) -> list[tuple[Record, Path]]:
     """
     Wrapper for records parsing logic to support MAGIC discovery profile changes.
 
-    The V2 discovery profile supports additional hierarchy levels the V1 schema rejects but which is used in Zap ⚡️
-    authored records, preventing their use.
+    The V2 discovery profile supports additional hierarchy levels the V1 schema rejects but which may be manually set
+    in records after exporting from Zap ⚡, preventing their use.
 
     This wrapper loads records without profile validation first, saves them using the V2 schema, then calls the
-    `parse_records()` method as normal.
+    `base_parse_records()` method as normal.
     """
-    record_paths = parse_records(
+    record_paths = base_parse_records(
         logger=logger, search_path=input_path, validate_profiles=False, glob_pattern="zap-*.json"
     )
     for record, record_path in record_paths:
@@ -374,18 +421,19 @@ def _parse_records(logger: logging.Logger, input_path: Path) -> list[tuple[Recor
             with record_path.open("w") as f:
                 f.write(record.dumps_json(strip_admin=False))
 
-    return parse_records(logger=logger, search_path=input_path, glob_pattern="zap-*.json")
+    return base_parse_records(logger=logger, search_path=input_path, glob_pattern="zap-*.json")
 
 
 def main() -> None:
     """Entrypoint."""
     logger, config, store, _s3 = init()
+    admin_keys = _init_admin_keys(config)
 
     input_path = Path("./import")
     logger.info(f"Loading records from: '{input_path.resolve()}'")
-    record_paths = _parse_records(logger=logger, input_path=input_path)
+    record_paths = parse_records(logger=logger, input_path=input_path)
     records = [record_path[0] for record_path in record_paths]
-    records.extend(process_records(logger=logger, records=records, store=store, admin_keys=config.ADMIN_METADATA_KEYS))
+    records.extend(process_records(logger=logger, records=records, store=store, admin_keys=admin_keys))
     dump_records(logger=logger, records=records, output_path=input_path)
     clean_input_path(input_record_paths=record_paths, processed_ids=[r.file_identifier for r in records])  # ty:ignore[invalid-argument-type]
 

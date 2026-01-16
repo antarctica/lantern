@@ -11,7 +11,7 @@ def _get_cli_args() -> dict:
 
     Missing arguments will be prompted for interactively and return as None here.
     """
-    parser = ArgumentParser(description="Copy records from cache to import directory for editing.")
+    parser = ArgumentParser(description="Copy records from store to import directory for editing.")
     parser.add_argument(
         "ids",
         nargs="?",
@@ -88,7 +88,6 @@ def _confirm_selection(file_identifiers: set[str]) -> bool:
 def main() -> None:
     """Entrypoint."""
     logger, _config, store, _s3 = init()
-
     confirm_source(logger=logger, store=store, action="Selecting records from")
     args = _get_cli_args()
     identifiers = _get_args(cli_identifiers=args.get("ids", None))

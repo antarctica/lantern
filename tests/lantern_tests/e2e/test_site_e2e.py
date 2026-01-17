@@ -7,19 +7,28 @@ from tests.conftest import has_network
 
 
 @pytest.mark.skipif(not has_network(), reason="network unavailable")
-class TestSentry:
-    """Test Sentry feedback in Catalogue template."""
+class TestFeedbackWidget:
+    """Test site feedback widget in Catalogue template."""
 
     def test_widget(self, fx_exporter_static_server: Popen, page: Page):
         """Can open feedback widget between tabs."""
         page.goto("http://localhost:8123/legal/privacy/index.html")
         status_code = page.evaluate("window.performance.getEntries()[0].responseStatus")
         assert status_code == 200
+        expect(page.locator("#site-feedback >> text=Site feedback")).not_to_be_visible()
 
-        page.wait_for_timeout(1000)  # wait for Sentry to init
-
+        # widget can be opened
         page.locator("text=Is something wrong with this page?").click()
-        expect(page.locator("text=Add a screenshot")).to_be_visible()
+        expect(page.locator("#site-feedback")).to_be_visible()
+
+        # clicking trigger again closes it
+        page.locator("text=Is something wrong with this page?").click()
+        expect(page.locator("#site-feedback")).not_to_be_visible()
+
+        # clicking close button inside widget when open closes it
+        page.locator("text=Is something wrong with this page?").click()
+        page.locator("#site-feedback >> button[data-target='#site-feedback']").click()
+        expect(page.locator("#site-feedback")).not_to_be_visible()
 
     def test_fallback(self, fx_exporter_static_server: Popen, page: Page):
         """Email link shown where JavaScript is unavailable."""

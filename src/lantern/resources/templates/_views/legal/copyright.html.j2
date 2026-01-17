@@ -42,7 +42,7 @@
       </p>
       <p>
         If your question relates to this website more generally, please
-        <button class="{{ com.sentry_trigger() }} {{ com.link_classes() }} cursor-pointer">contact us</button> by
+        {{ com.feedback_trigger(classes=com.link_classes(), fallback=fallback_email, text='contact us') }} by
         submitting feedback.
       </p>
   {% endcall %}

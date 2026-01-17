@@ -33,6 +33,7 @@ Included directly.
 | Component                              | Icon Name                   | Icon Style   | Comment         |
 |----------------------------------------|-----------------------------|--------------|-----------------|
 | Site Footer (Back to top link)         | `fa-arrow-up`               | `fa-regular` |                 |
+| Site Feedback (Submit button)          | `fa-paper-plane-top`        | `fa-regular` |                 |
 | Item Contact (Alternative - Post)      | `fa-envelope`               | `fa-regular` |                 |
 | Item Contact (Alternative - Email)     | `fa-at`                     | `fa-regular` |                 |
 | Item Contact (Alternative - Phone)     | `fa-phone-rotary`           | `fa-regular` |                 |

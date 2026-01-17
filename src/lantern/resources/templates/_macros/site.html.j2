@@ -154,6 +154,50 @@
   </div>
 {% endmacro %}
 
+{% macro feedback_widget(fallback_email) %}
+  <form
+    id="{{ com.feedback_widget_target() }}"
+    class="hidden fixed bottom-4 right-4 w-80 mb-0 p-4 text-sm space-y-4 {{ com.base_bg_text_classes() }} shadow-lg border border-grey-300 dark:border-grey-500"
+  >
+    <header class="flex items-center justify-between">
+      <h2 class="text-lg">Send feedback</h2>
+      <button
+        class="{{ com.btn_base_classes() }} text-grey-500 dark:text-grey-300 hover:text-grey-700"
+        data-target="#{{ com.feedback_widget_target() }}"
+      >
+        <i class="fa-regular fa-xmark fa-lg"></i>
+      </button>
+    </header>
+    <div class="space-y-2">
+      {{ com.form_textarea(
+        id="feedback-content", name="Message", rows=4, required=True, warning="Do not include any sensitive information."
+      ) }}
+      {{ com.form_input(id="feedback-email", name="Contact email (optional)") }}
+    </div>
+    <footer class="space-y-2">
+      {% call com.alert(variant='blue') %}
+        <p>Basic device information will be included with your feedback.
+          See our <a class="{{ com.link_classes() }}" href="/legal/privacy">privacy policy</a> for more information.</p>
+      {% endcall %}
+      <button class="{{ com.btn_primary_classes() }} w-full p-4 text-base" type="submit">
+        Send Feedback <i class="fa-regular fa-paper-plane-top"></i>
+      </button>
+    <div id="feedback-success" class="hidden">
+      {% call com.alert(variant='green') %}
+        <p>Thank you for your feedback!</p>
+      {% endcall %}
+    </div>
+    <div id="feedback-error" class="hidden">
+      {% call com.alert(variant='red', classes='space-y-2') %}
+        <p>Error sending feedback.</p>
+        <p>Please try again later or <a class="{{ com.link_classes() }}" href="mailto:{{ fallback_email }}">contact us</a>.</p>
+        <p>If you are using an ad-blocker, please ensure Sentry is allowed.</p>
+      {% endcall %}
+    </div>
+    </footer>
+  </form>
+{% endmacro %}
+
 {% macro footer(data) %}
   <footer id="site-footer" class="font-light bg-grey-950 dark:bg-black text-grey-100 text-center">
     <div class="{{ com.container_classes() }} px-2 py-8 space-y-4 lg:space-y-8">

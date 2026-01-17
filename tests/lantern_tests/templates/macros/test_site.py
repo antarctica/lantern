@@ -255,6 +255,13 @@ class TestMacrosSite:
 
         assert html.find(id="site-dev-phase").string.strip() == "alpha"
 
+    def test_feedback_widget(self):
+        """Can get site feedback widget."""
+        template = """{% import '_macros/site.html.j2' as site %}{{ site.feedback_widget('x') }}"""
+        html = BeautifulSoup(self._render(template), parser="html.parser", features="lxml")
+
+        assert html.find(id="site-feedback") is not None
+
     def test_footer(self, freezer: FrozenDateTimeFactory, fx_freezer_time: datetime):
         """Can get static site footer."""
         freezer.move_to(fx_freezer_time)

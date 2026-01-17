@@ -70,3 +70,36 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+/* feedback-processing */
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('site-feedback');
+  if (!form) return;
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const submitBtn = form.querySelector('button[type="submit"], [type="submit"]');
+    const contentEl = document.getElementById('feedback-content');
+    const emailEl = document.getElementById('feedback-email');
+    const successEl = document.getElementById('feedback-success');
+    const errorEl = document.getElementById('feedback-error');
+    const feedback = {
+      message: contentEl ? contentEl.value.trim() : '',
+      email: emailEl ? (emailEl.value.trim() || undefined) : undefined,
+    };
+    try {
+      if (typeof Sentry === 'undefined' || typeof Sentry.captureFeedback !== 'function') {
+        throw new Error('Sentry.captureFeedback is not available');
+      }
+      const res = Sentry.captureFeedback(feedback);
+      if (res && typeof res.then === 'function') {
+        await res;
+      } else {
+        throw new Error('Sentry.captureFeedback did not return a submission promise');
+      }
+      submitBtn.classList.add('hidden');
+      successEl.classList.remove('hidden');
+    } catch (err) {
+      submitBtn.classList.add('hidden');
+      errorEl.classList.remove('hidden');
+    }
+  });
+});

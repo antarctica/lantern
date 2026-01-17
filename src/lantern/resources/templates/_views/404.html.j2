@@ -5,5 +5,5 @@
 
 {% block page_content %}
   <p>If you typed or copied the website address, please check it is correct.</p>
-  <p>If the address is correct, or you clicked a link, please <button class="{{ com.sentry_trigger() }} {{ com.link_classes() }} cursor-pointer">let us know</button> so we can correct it.</p>
+  <p>If the address is correct, or you clicked a link, please {{ com.feedback_trigger(classes=com.link_classes(), fallback=fallback_email, text='let us know') }} so we can correct it.</p>
 {% endblock %}

@@ -1,4 +1,4 @@
-{% macro script_sentry(selector) %}
+{% macro script_sentry() %}
 window.sentryOnLoad = function() {
   Sentry.init({
     tracesSampleRate: 0,
@@ -7,26 +7,52 @@ window.sentryOnLoad = function() {
   });
   Sentry.lazyLoadIntegration("feedbackIntegration").then(
     (integration) => {
-      Sentry.addIntegration(integration({
-        autoInject: false,
-        showBranding: false,
-        colorScheme: "light",
-        formTitle: "Send Feedback",
-        submitButtonLabel: "Send Feedback",
-        messagePlaceholder: "",
-        successMessageText: "Thank you for your feedback.",
-      }));
-
-      const feedback = Sentry.getFeedback();
-      if (feedback) {
-        const triggers = document.querySelectorAll(".{{ selector }}");
-        triggers.forEach(trigger => {
-          feedback.attachTo(trigger, {});
-        });
-      }
+      Sentry.addIntegration(integration({autoInject: false}));
     }
   );
 };
+{% endmacro %}
+
+{% macro script_sentry_feedback_widget() %}
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('site-feedback');
+  if (!form) return;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const submitBtn = form.querySelector('button[type="submit"], [type="submit"]');
+    const contentEl = document.getElementById('feedback-content');
+    const emailEl = document.getElementById('feedback-email');
+    const successEl = document.getElementById('feedback-success');
+    const errorEl = document.getElementById('feedback-error');
+
+    const feedback = {
+      message: contentEl ? contentEl.value.trim() : '',
+      email: emailEl ? (emailEl.value.trim() || undefined) : undefined,
+    };
+
+    try {
+      if (typeof Sentry === 'undefined' || typeof Sentry.captureFeedback !== 'function') {
+        throw new Error('Sentry.captureFeedback is not available');
+      }
+
+      const res = Sentry.captureFeedback(feedback);
+
+      if (res && typeof res.then === 'function') {
+        await res;
+      } else {
+        throw new Error('Sentry.captureFeedback did not return a submission promise');
+      }
+
+      submitBtn.classList.add('hidden');
+      successEl.classList.remove('hidden');
+    } catch (err) {
+      submitBtn.classList.add('hidden');
+      errorEl.classList.remove('hidden');
+    }
+  });
+});
 {% endmacro %}
 
 {% macro script_show_js(selector) %}

@@ -1,21 +1,5 @@
 {% import '_macros/common.html.j2' as com %}
 
-{%  macro form_item_classes() %}w-full border-1 border-grey-300 dark:border-grey-500 dark:bg-grey-900 dark:text-white{% endmacro %}
-{%  macro form_invalid_classes() %}user-invalid:border-red-500 user-invalid:border-2{% endmacro %}
-
-{% macro form_input(id, name, value, placeholder, required) %}
-  <div class="space-y-2">
-    <label class="block font-bold" for="{{ id }}">{{ name }}</label>
-    <input
-      class="{{ form_item_classes() }} {% if required %}{{ form_invalid_classes() }}{% endif %}"
-      type="text" name="{{ id }}" id="{{ id }}"
-      {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
-      {% if value %}value="{{ value }}"{% endif %}
-      {% if required %}required{% endif %}
-    >
-  </div>
-{% endmacro %}
-
 {% macro form(data) %}
   <form action="{{ data.form_action }}" method="POST">
     {% for param, value in data.form_params | items %}
@@ -25,19 +9,13 @@
       {% call com.item_title() %}Contact us about this item{% endcall %}
       {% call com.item_border() %}
         <div class="space-y-4">
-          {{ form_input(id="message-subject", name="Subject", value=data.subject_default, required=True) }}
-          <div class="space-y-2">
-            <label class="block font-bold" for="message-content">Message</label>
-            <textarea
-              class="{{ form_item_classes() }} {{ form_invalid_classes() }}"
-              name="message-content" id="message-content" rows="8" required
-            ></textarea>
-            {% call com.alert(variant='yellow', classes="space-y-2") %}
-              Do not include any sensitive information in your message.
-            {% endcall %}
-          </div>
-          {{ form_input(id="message-sender-name", name="Your name") }}
-          {{ form_input(id="message-sender-email", name="Your email address", required=True) }}
+          {{ com.form_input(id="message-subject", name="Subject", value=data.subject_default, required=True) }}
+          {{ com.form_textarea(
+            id="message-content", name="Message", rows=8, required=True,
+            warning="Do not include any sensitive information in your message."
+          ) }}
+          {{ com.form_input(id="message-sender-name", name="Your name") }}
+          {{ com.form_input(id="message-sender-email", name="Your email address", required=True) }}
           <div class="space-y-2">
             <div class="cf-turnstile" data-sitekey="{{ data.turnstile_site_key }}" data-theme="auto" data-size="flexible"></div>
             <noscript>

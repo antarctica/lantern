@@ -209,8 +209,10 @@ A set of targeted enhancements to:
 - enable 'sticky tabs' where:
   - the active tab is set in the URL fragment when switching tabs
   - an initial tab is switched to automatically if a tab fragment is present on page load
-- enable progressive disclosure via simple collapsible sections, used for some distribution options (e.g. feature services)
+- enable progressive disclosure via simple collapsible sections
+  - used for [Site Feedback](#user-feedback) and some item distribution options (e.g. feature services)
 - show content where JavaScript is enabled, as an 'else' to `<noscript>`
+- process feedback from the [User Feedback](#user-feedback) widget when submitted
 
 ## Cache busting
 
@@ -233,6 +235,11 @@ version as a SHA1 hash, e.g. `main.css?v=f053ddb` for version 0.1.0.
 For features vulnerable to spam and abuse, such as the [Item Enquires](#item-enquires),
 [Cloudflare Turnstile](https://www.cloudflare.com/en-gb/application-services/products/turnstile/) is used to
 distinguish humans from bot agents. Typically, this check is non-interactive but may require the user to check a box.
+
+## User feedback
+
+A custom form for collecting [User Feedback](/docs/monitoring.md#user-feedback) via Sentry is included on all pages
+via a [Site Macro](#site-macros) included in the [Base Layout](#base-layout).
 
 ## Templates
 

@@ -133,7 +133,7 @@ class SiteMeta:
     - generator: name of application and source of records
     - version: version of application
     - build_time: time the build was triggered
-    - fallback_email: email address used when Sentry feedback is unavailable
+    - fallback_email: email address used when JS feedback widget can't be shown
     - build_repo_ref: optional commit reference of a working copy associated with the build
     - build_repo_base_url: optional URL to a remote the `build_repo_ref` reference exists within
     - html_open_graph: optional Open Graph metadata

@@ -40,6 +40,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Sized support for stores to get number of records a store contains
 * Additional footer navigation links
 * 'admin-record' development task for viewing administrative metadata for a record
+* custom Sentry user feedback widget
 
 ### Fixed
 
@@ -77,6 +78,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Refactored OGL symbol into a custom Font Awesome icon
 * Refactored records exporter to prevent un/re-loading admin metadata keys and creating new stores per parallel worker
 * Improving development tasks
+* Replaced native Sentry user feedback widget with custom implementation for better consistency
 
 ### Removed
 

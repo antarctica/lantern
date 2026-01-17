@@ -211,21 +211,19 @@ class TestSitePageMeta:
         assert page_meta.title == expected
         assert page_meta.url == expected
         assert page_meta.description is None
-        assert page_meta.meta is True
-        assert page_meta.html_title == expected
+        assert page_meta.inc_meta is True
         assert isinstance(page_meta.open_graph, OpenGraphMeta)
         assert isinstance(page_meta.schema_org, SchemaOrgMeta)
 
     def test_all(self):
         """Can create a SitePageMeta instance with all possible values."""
         expected = "x"
-        page_meta = SitePageMeta(title=expected, url=expected, description=expected, meta=False)
+        page_meta = SitePageMeta(title=expected, url=expected, description=expected, inc_meta=False)
 
         assert page_meta.title == expected
         assert page_meta.url == expected
         assert page_meta.description == expected
-        assert page_meta.meta is False
-        assert page_meta.html_title == expected
+        assert page_meta.inc_meta is False
         assert page_meta.open_graph is None
         assert page_meta.schema_org is None
 
@@ -342,6 +340,12 @@ class TestSiteMetadata:
             assert isinstance(fx_site_meta.html_schema_org_content, str)
             return
         assert fx_site_meta.html_schema_org_content is None
+
+    def test_from_page_meta(self, fx_site_meta: SiteMeta, fx_site_page_meta: SitePageMeta):
+        """Can apply page metadata."""
+        fx_site_meta.apply_page_meta(fx_site_page_meta)
+        assert fx_site_meta.html_title == fx_site_page_meta.title
+        assert fx_site_meta.html_description == fx_site_page_meta.description
 
     @pytest.mark.parametrize(("has_store", "kwargs"), [(False, {"fallback_email": "y"}), (True, {})])
     def test_from_config_store(

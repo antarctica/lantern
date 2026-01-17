@@ -214,10 +214,11 @@ class GitLabStore(Store):
         Fetches record configuration and the ID of its head commit.
         """
         file_path = self._get_remote_hashed_path(f"{file_identifier}.json")
-        self._logger.info(f"Fetching remote record '{file_path}'")
+        self._logger.info(f"Fetching remote record '{file_path}'.")
         try:
             file_contents = self._project.files.get(file_path=file_path, ref=self._source.ref)
         except GitlabGetError:
+            self._logger.warning(f"Record '{file_identifier}' not found in remote store.")
             return None
         return ProcessedRecord(
             logger=self._logger,
@@ -299,6 +300,7 @@ class GitLabStore(Store):
         hashes = {}
         self._logger.info(f"Getting hashes for {len(file_identifiers)} selected records.")
         for file_identifier in file_identifiers:
+            self._logger.debug(f"Getting hash for {file_identifier}.")
             record = self._fetch_record_head_commit(file_identifier)
             hashes[file_identifier] = record.sha1 if record else None
         return hashes
@@ -329,9 +331,9 @@ class GitLabStore(Store):
 
         existing_hashes = self._get_hashes_callable(file_identifiers={record.file_identifier for record in records})
         for record in records:
-            self._logger.debug(f"Existing: '{existing_hashes[record.file_identifier]}', New: '{record.sha1}'")
+            self._logger.info(f"Existing: '{existing_hashes[record.file_identifier]}', New: '{record.sha1}'")
             if record.sha1 == existing_hashes[record.file_identifier]:
-                self._logger.debug(f"Record '{record.file_identifier}' is unchanged, skipping")
+                self._logger.info(f"Record '{record.file_identifier}' is unchanged, skipping")
                 continue
 
             action = "update"

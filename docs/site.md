@@ -164,7 +164,8 @@ An [Icon Audit](/docs/supplemental/icon-audit.md) and reference is manually main
 icons used across the site. Update this document if changing or adding icons.
 
 > [!TIP]
-> Run the `icons-audit` [Development Task](/docs/dev.md#development-tasks) to check currently used classes in templates.
+> Run the `icons-audit` [Development Task](/docs/dev.md#development-tasks) to check currently used icons in templates
+> and a list of additional places to manually check.
 
 ## Scripts
 
@@ -352,7 +353,7 @@ Elements across these parts use [Item Macros](#item-macros) to organise and brea
 
 #### Item macros
 
-These files define a lage number of macros to assemble Items:
+Macros in these templates are used to assemble Items:
 
 - `src/lantern/resources/templates/_macros/site.html.j2`
 - `src/lantern/resources/templates/_macros/tabs.html.j2`

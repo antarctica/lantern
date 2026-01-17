@@ -44,7 +44,6 @@ Application configuration is managed by the `lantern.Config` class.
 | `TEMPLATES_ITEM_MAPS_ENDPOINT`          | String       | Yes          | No       | No        | v0.1.x        | Embedded Maps Service base endpoint                                                | `https://embedded-maps.data.bas.ac.uk/v1` | 'https://embedded-maps.data.bas.ac.uk/v1'       |
 | `TEMPLATES_ITEM_VERSIONS_ENDPOINT`      | String       | Yes          | Yes      | No        | v0.2.x        | Base URL to a GitLab project for viewing item record revisions                     | *None*                                    | 'https://example.com'                           |
 | `TEMPLATES_PLAUSIBLE_DOMAIN`            | String       | No           | -        | No        | v0.1.x        | Plausible site identifier for frontend analytics                                   | *None*                                    | 'example'                                       |
-| `TEMPLATES_SENTRY_SRC`                  | String       | No           | -        | No        | v0.1.x        | Sentry CDN project URL for frontend error tracking and user feedback               | *N/A*                                     | 'https://example.com'                           |
 | `VERIFY_SAN_PROXY_ENDPOINT`             | String       | Yes          | Yes      | No        | v0.5.x        | Microsoft Power Automate trigger endpoint for checking SAN references              | *N/A*                                     | 'https://example.com'                           |
 | `VERIFY_SHAREPOINT_PROXY_ENDPOINT`      | String       | Yes          | Yes      | No        | v0.3.x        | Microsoft Power Automate trigger endpoint for checking SharePoint hosted downloads | *N/A*                                     | 'https://example.com'                           |
 | `VERSION`                               | String       | No           | -        | No        | v0.1.x        | Application package version                                                        | *N/A*                                     | '0.3.0'                                         |
@@ -70,7 +69,6 @@ See the [Monitoring](/docs/monitoring.md#monitoring-configuration) docs for more
 - `ENABLE_FEATURE_SENTRY`
 - `SENTRY_ENVIRONMENT`
 - `SENTRY_DSN`
-- `TEMPLATES_SENTRY_SRC`
 - `VERIFY_SHAREPOINT_PROXY_ENDPOINT`
 - `VERIFY_SAN_PROXY_ENDPOINT`
 

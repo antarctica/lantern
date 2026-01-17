@@ -239,7 +239,6 @@ class TestSiteMetadata:
             base_url=expected,
             build_key=expected,
             html_title=expected,
-            sentry_src=expected,
             plausible_domain=expected,
             embedded_maps_endpoint=expected,
             items_enquires_endpoint=expected,
@@ -251,7 +250,6 @@ class TestSiteMetadata:
         assert meta.base_url == expected
         assert meta.build_key == expected
         assert meta.html_title == expected
-        assert meta.sentry_src == expected
         assert meta.plausible_domain == expected
         assert meta.embedded_maps_endpoint == expected
         assert meta.items_enquires_endpoint == expected
@@ -277,7 +275,6 @@ class TestSiteMetadata:
             base_url=expected_str,
             build_key=expected_str,
             html_title=expected_str,
-            sentry_src=expected_str,
             plausible_domain=expected_str,
             embedded_maps_endpoint=expected_str,
             items_enquires_endpoint=expected_str,
@@ -377,7 +374,6 @@ class TestExportMetadata:
             base_url=expected_str,
             build_key=expected_str,
             html_title=expected_str,
-            sentry_src=expected_str,
             plausible_domain=expected_str,
             embedded_maps_endpoint=expected_str,
             items_enquires_endpoint=expected_str,

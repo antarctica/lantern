@@ -79,6 +79,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Refactored records exporter to prevent un/re-loading admin metadata keys and creating new stores per parallel worker
 * Improving development tasks
 * Replaced native Sentry user feedback widget with custom implementation for better consistency
+* Vendored Sentry SDK to minimise external dependencies
 
 ### Removed
 

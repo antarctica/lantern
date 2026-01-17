@@ -116,7 +116,6 @@ class Config:
         STORE_GITLAB_BRANCH: str
         STORE_GITLAB_CACHE_PATH: str
         TEMPLATES_CACHE_BUST_VALUE: str
-        TEMPLATES_SENTRY_SRC: str
         TEMPLATES_PLAUSIBLE_DOMAIN: str
         TEMPLATES_ITEM_MAPS_ENDPOINT: str
         TEMPLATES_ITEM_CONTACT_ENDPOINT: str
@@ -149,7 +148,6 @@ class Config:
             "STORE_GITLAB_BRANCH": self.STORE_GITLAB_BRANCH,
             "STORE_GITLAB_CACHE_PATH": str(self.STORE_GITLAB_CACHE_PATH.resolve()),
             "TEMPLATES_CACHE_BUST_VALUE": self.TEMPLATES_CACHE_BUST_VALUE,
-            "TEMPLATES_SENTRY_SRC": self.TEMPLATES_SENTRY_SRC,
             "TEMPLATES_PLAUSIBLE_DOMAIN": self.TEMPLATES_PLAUSIBLE_DOMAIN,
             "TEMPLATES_ITEM_MAPS_ENDPOINT": self.TEMPLATES_ITEM_MAPS_ENDPOINT,
             "TEMPLATES_ITEM_CONTACT_ENDPOINT": self.TEMPLATES_ITEM_CONTACT_ENDPOINT,
@@ -273,11 +271,6 @@ class Config:
         Set to the first 7 characters of app version SHA1 hash. E.g. `main.css?v=f053ddb` for version 0.1.0.
         """
         return sha1(f"v{self.VERSION}".encode()).hexdigest()[:7]  # noqa: S324
-
-    @property
-    def TEMPLATES_SENTRY_SRC(self) -> str:
-        """Sentry dynamic CDN script."""
-        return "https://js.sentry-cdn.com/7ee10f6777ab8ec05ffe8b84c4c3039e.min.js"
 
     @property
     def TEMPLATES_PLAUSIBLE_DOMAIN(self) -> str:

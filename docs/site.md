@@ -341,6 +341,8 @@ Common macros are intended for use across templates to avoid inconsistencies and
   - requires a [Site Metadata](/docs/data-model.md#static-site-metadata) context object
 - a `header` macro builds a site wide `<header>` element with side wide navigation and development phase banner
   including site feedback
+- a `feedback_widget` macro creates a [User Feedback](#user-feedback) widget
+  - requires a [Site Metadata](/docs/data-model.md#static-site-metadata) context object
 - a `footer` macro builds a side wide `<footer>` element with site feedback and legal information
   - requires a [Site Metadata](/docs/data-model.md#static-site-metadata) context object
 

@@ -79,7 +79,7 @@
 {% endmacro %}
 
 {% macro head_scripts(data) %}
-  {{ script_sentry(data.build_key, data.sentry_src) }}
+  {{ script_sentry(data.build_key) }}
   {{ script_plausible(data.plausible_domain) }}
   {{ script_turnstile() }}
   {{ script_enhancements(data.build_key) }}
@@ -88,9 +88,9 @@
   {% endif %}
 {% endmacro %}
 
-{% macro script_sentry(build_key, sentry_src) %}
-  <script src="/static/js/sentry-preload.js?v={{ build_key }}" crossorigin="anonymous"></script>
-  <script async src="{{ sentry_src }}" crossorigin="anonymous"></script>
+{% macro script_sentry(build_key) %}
+  <script defer src="/static/js/sentry-preload.js?v={{ build_key }}" crossorigin="anonymous"></script>
+  <script defer src="/static/js/lib/sentry.min.js?v={{ build_key }}" crossorigin="anonymous"></script>
 {% endmacro %}
 
 {% macro script_plausible(value) %}

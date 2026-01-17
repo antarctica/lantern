@@ -1,7 +1,11 @@
 {% import '_macros/common.html.j2' as com %}
 {% import '_macros/assets.js.j2' as ast %}
 
+/* show-js */
 {{ ast.script_show_js(com.show_js_class()) }}
+/* sticky-tabs */
 {{ ast.script_sticky_tabs() }}
+/* collapsible */
 {{ ast.script_collapsible() }}
+/* clipboard-copy */
 {{ ast.script_copyable() }}

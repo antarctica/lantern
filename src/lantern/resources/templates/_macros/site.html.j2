@@ -3,9 +3,29 @@
 {# tuples of ('label', 'href', 'icon class') #}
 {% set primary_nav_items = [] %}
 
+{# dict of tuple lists of ('href', 'label', 'external', 'restricted' #}
+{% set
+  footer_nav_items = {
+    'Discover': [('https://www.bas.ac.uk/maps', 'Maps', false, false)],
+    'Portals': [
+      ('https://www.icelogistics.info', 'Ice Logistics Portal', true, false),
+      ('https://opsgis.web.bas.ac.uk/login', 'Operations GIS', true, true)
+     ],
+    'Guides': [
+      ('https://guides.geospatial.bas.ac.uk', 'Geospatial training', true, false),
+      ('https://metadata-standards.data.bas.ac.uk', 'Metadata standards', true, false),
+      ('/guides/formatting', 'Content formatting', false, false),
+      ('/guides/api', 'API documentation', false, false)
+    ],
+    'About': [
+      ('https://gitlab.data.bas.ac.uk/MAGIC/lantern-exp', 'GitLab project', true, true),
+      ('https://github.com/antarctica/lantern', 'GitHub mirror', true, false)
+    ]
+  }
+%}
+
 {% macro html_head(data) %}
   <head>
-    {{ head_preconnect() }}
     {{ head_meta(data) }}
     {{ head_title(data.html_title_suffixed) }}
     {% if data.html_open_graph_tags %}
@@ -16,11 +36,6 @@
     {{ head_styles(data.build_key) }}
     {{ head_scripts(data) }}
   </head>
-{% endmacro %}
-
-{% macro head_preconnect() %}
-  <link rel="preconnect" href="https://cdn.web.bas.ac.uk">
-  <link rel="preconnect" href="https://cdn.web.bas.ac.uk" crossorigin>
 {% endmacro %}
 
 {% macro head_meta(data) %}
@@ -161,25 +176,6 @@
 {% endmacro %}
 
 {% macro footer_nav() %}
-  {% set
-    footer_nav_items = {
-      'Discover': [('https://www.bas.ac.uk/maps', 'Maps', false, false)],
-      'Portals': [
-        ('https://www.icelogistics.info', 'Ice Logistics Portal', true, false),
-        ('https://opsgis.web.bas.ac.uk/login', 'Operations GIS', true, true)
-       ],
-      'Guides': [
-        ('https://guides.geospatial.bas.ac.uk', 'Geospatial training', true, false),
-        ('https://metadata-standards.data.bas.ac.uk', 'Metadata standards', true, false),
-        ('/guides/formatting', 'Content formatting', false, false),
-        ('/guides/api', 'API documentation', false, false)
-      ],
-      'About': [
-        ('https://gitlab.data.bas.ac.uk/MAGIC/lantern-exp', 'GitLab project', true, true),
-        ('https://github.com/antarctica/lantern', 'GitHub mirror', true, false)
-      ]
-    }
-  %}
   <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:text-left">
     {% for section_title, link in footer_nav_items.items() %}
     <section class="space-y-4">

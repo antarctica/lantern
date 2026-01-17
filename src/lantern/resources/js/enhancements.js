@@ -1,6 +1,8 @@
+/* show-js */
 document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('.show-js').forEach(el => el.classList.remove('hidden'));
 });
+/* sticky-tabs */
 /* Based on jQuery Plugin Sticky Tabs by Aidan Lister <aidan@php.net> */
 (function () {
   const selectTab = (tabId) => {
@@ -29,6 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener("hashchange", handleHashChange);
   });
 })();
+/* collapsible */
 document.addEventListener('DOMContentLoaded', () => {
   // Find all elements with the `data-target` attribute and add click event listeners to hide/show a target element
   const toggles = document.querySelectorAll('[data-target]');
@@ -42,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+/* clipboard-copy */
 document.addEventListener('DOMContentLoaded', () => {
   const writeToClipboard = async (text) => {
     if (navigator.clipboard && navigator.clipboard.writeText) {

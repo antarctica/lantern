@@ -100,24 +100,19 @@ class SitePageMeta:
     title: str
     url: str
     description: str | None = None
-    meta: bool = True
-
-    @property
-    def html_title(self) -> str:
-        """HTML title."""
-        return self.title
+    inc_meta: bool = True
 
     @property
     def open_graph(self) -> OpenGraphMeta | None:
         """Optional OpenGraph metadata."""
-        if not self.meta:
+        if not self.inc_meta:
             return None
         return OpenGraphMeta(title=self.title, url=self.url, description=self.description)
 
     @property
     def schema_org(self) -> SchemaOrgMeta | None:
         """Optional Schema.org metadata."""
-        if not self.meta:
+        if not self.inc_meta:
             return None
         return SchemaOrgMeta(type_="Article", headline=self.title, url=self.url, description=self.description)
 
@@ -204,6 +199,13 @@ class SiteMeta:
         if not self.html_schema_org:
             return None
         return str(self.html_schema_org)
+
+    def apply_page_meta(self, page_meta: SitePageMeta) -> None:
+        """Merge static page metadata."""
+        self.html_title = page_meta.title
+        self.html_description = page_meta.description
+        self.html_open_graph = page_meta.open_graph
+        self.html_schema_org = page_meta.schema_org
 
     @classmethod
     def from_config_store(cls, config: Config, store: GitLabStore | None = None, **kwargs: Any) -> "SiteMeta":

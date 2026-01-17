@@ -244,7 +244,7 @@ class SitePagesExporter(Exporter):
         super().__init__(logger=logger, meta=meta, s3=s3)
         self._jinja = get_jinja_env()
         self._templates: dict[str, SitePageMeta] = {
-            "_views/404.html.j2": SitePageMeta(title="Not Found", url="-", meta=False),
+            "_views/404.html.j2": SitePageMeta(title="Not Found", url="-", inc_meta=False),
             "_views/legal/accessibility.html.j2": SitePageMeta(
                 title="Accessibility Statement",
                 url=f"{self._meta.base_url}/legal/accessibility",
@@ -281,9 +281,7 @@ class SitePagesExporter(Exporter):
     def _dumps(self, template_path: str) -> str:
         """Build a page."""
         page_meta: SitePageMeta = self._templates[template_path]
-        self._meta.html_title = page_meta.title
-        self._meta.html_open_graph = page_meta.open_graph
-        self._meta.html_schema_org = page_meta.schema_org
+        self._meta.apply_page_meta(page_meta)
         raw = self._jinja.get_template(template_path).render(meta=self._meta)
         return prettify_html(raw)
 
@@ -407,7 +405,10 @@ class SiteApiExporter(Exporter):
             key=catalogue_key, content_type=media_type, body=json.dumps(self._dumps_catalog(), indent=2)
         )
         self._s3_utils.upload_content(
-            key=redirect_key, content_type="text/html", body=self._dumps_catalog_redirect(), redirect=catalogue_key
+            key=redirect_key,
+            content_type="text/html",
+            body=self._dumps_catalog_redirect(),
+            redirect=f"/{catalogue_key}",
         )
 
     def _publish_openapi_schema(self) -> None:
@@ -521,7 +522,7 @@ class SiteHealthExporter(Exporter):
             key=health_key, content_type=media_type, body=json.dumps(self._dumps_health_check(), indent=2)
         )
         self._s3_utils.upload_content(
-            key=redirect_key, content_type="text/html", body=self._dumps_health_redirect(), redirect=health_key
+            key=redirect_key, content_type="text/html", body=self._dumps_health_redirect(), redirect=f"/{health_key}"
         )
 
     @property

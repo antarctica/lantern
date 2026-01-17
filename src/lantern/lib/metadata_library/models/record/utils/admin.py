@@ -23,11 +23,7 @@ class AdministrationKeys:
     def __init__(
         self, encryption_private: Jwk, signing_public: Jwk | None = None, signing_private: Jwk | None = None
     ) -> None:
-        """
-        Initialise.
-
-        One of the public or private signing key is needed depending on whether metadata needs verification and/or signing.
-        """
+        """One of the public or private signing key is needed depending on whether metadata needs verification and/or signing."""
         self.encryption_private: Jwk = encryption_private
         self.signing_private: Jwk | None = signing_private
 

@@ -59,7 +59,7 @@ from lantern.models.item.catalogue.tabs import AdditionalInfoTab, AdminTab
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
-from lantern.models.site import ExportMeta, SiteMeta
+from lantern.models.site import ExportMeta, SiteMeta, SitePageMeta
 from lantern.models.verification.enums import VerificationResult, VerificationType
 from lantern.models.verification.jobs import VerificationJob
 from lantern.models.verification.types import VerificationContext
@@ -130,6 +130,12 @@ def fx_logger() -> logging.Logger:
 def fx_config() -> Config:
     """App configuration."""
     return Config()
+
+
+@pytest.fixture()
+def fx_site_page_meta() -> SitePageMeta:
+    """Site page metadata."""
+    return SitePageMeta(title="x", url="x", description="x", inc_meta=False)
 
 
 @pytest.fixture()

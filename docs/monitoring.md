@@ -7,7 +7,6 @@ These options from the app `lantern.Config` class are used to configure applicat
 - `ENABLE_FEATURE_SENTRY`: if true, enables backend [Error Monitoring](#error-monitoring) via Sentry
 - `SENTRY_ENVIRONMENT`: the Sentry [Environment](https://docs.sentry.io/platforms/python/configuration/environments/) name
 - `SENTRY_DSN`: Sentry backend Data Source Name (DSN) for error logging
-- `TEMPLATES_SENTRY_SRC`: Sentry CDN URL for frontend error tracking and user feedback
 - `VERIFY_SHAREPOINT_PROXY_ENDPOINT`: the [SharePoint Proxy](#verification-sharepoint-proxy) used for site checks
 - `VERIFY_SAN_PROXY_ENDPOINT`: the [SAN Proxy](#verification-san-proxy) used for site checks
 
@@ -58,7 +57,7 @@ environment every 5 minutes, automatically following the [Item Alias](/docs/data
 ### User feedback
 
 Sentry's [User Feedback](https://docs.sentry.io/product/user-feedback/) feature is used to collect user feedback via
-a widget shown in the [Static Site](/docs/site.md).
+a custom [widget](/docs/site.md#user-feedback).
 
 > [!WARNING]
 > Sentry user feedback is only retained for 90 days. An anonymous version can be copied to GitLab if needed.

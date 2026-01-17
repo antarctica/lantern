@@ -19,7 +19,6 @@ class TestMacrosSite:
             build_key="x",
             build_time=freezer_time(),
             html_title="x",
-            sentry_src="x",
             plausible_domain="x",
             embedded_maps_endpoint="x",
             items_enquires_endpoint="x",
@@ -95,14 +94,13 @@ class TestMacrosSite:
 
         assert html.head.find(name="link", rel="stylesheet", href=lambda h: h and h.startswith(href)) is not None
 
-    def test_script_sentry(self):
+    @pytest.mark.parametrize("href", ["/static/js/sentry-preload.js?v=000", "/static/js/lib/sentry.min.js?v=000"])
+    def test_script_sentry(self, href: str):
         """Can get Sentry script from page."""
-        expected = "/static/js/sentry-preload.js?v=000"
-        template = """{% import '_macros/site.html.j2' as site %}{{ site.script_sentry('000', meta.sentry_src) }}"""
+        template = """{% import '_macros/site.html.j2' as site %}{{ site.script_sentry('000') }}"""
         meta = self._site_meta()
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
-        assert html.head.find(name="script", src=expected) is not None
-        assert html.head.find(name="script", src=meta.sentry_src) is not None
+        assert html.head.find(name="script", src=href) is not None
 
     def test_script_plausible(self):
         """Can get Plausible script from page."""
@@ -154,7 +152,6 @@ class TestMacrosSite:
                 build_key="000",
                 build_time=freezer_time(),
                 html_title="x",
-                sentry_src="x",
                 plausible_domain="x",
                 embedded_maps_endpoint="x",
                 items_enquires_endpoint="x",
@@ -166,7 +163,6 @@ class TestMacrosSite:
                 base_url="x",
                 build_key="000",
                 html_title="x",
-                sentry_src="x",
                 plausible_domain="x",
                 embedded_maps_endpoint="x",
                 items_enquires_endpoint="x",
@@ -207,7 +203,6 @@ class TestMacrosSite:
         assert html.head.find(name="link", rel="stylesheet", href="/static/css/main.css?v=000") is not None
 
         assert html.head.find(name="script", src="/static/js/sentry-preload.js?v=000") is not None
-        assert html.head.find(name="script", src=meta.sentry_src) is not None
         assert html.head.find(name="script", attrs={"data-domain": meta.plausible_domain}) is not None
         assert html.head.find(name="script", src=cf_turnstile) is not None
         assert html.head.find(name="script", src="/static/js/enhancements.js?v=000") is not None
@@ -254,6 +249,13 @@ class TestMacrosSite:
         html = BeautifulSoup(self._render(template), parser="html.parser", features="lxml")
 
         assert html.find(id="site-dev-phase").string.strip() == "alpha"
+
+    def test_feedback_widget(self):
+        """Can get site feedback widget."""
+        template = """{% import '_macros/site.html.j2' as site %}{{ site.feedback_widget('x') }}"""
+        html = BeautifulSoup(self._render(template), parser="html.parser", features="lxml")
+
+        assert html.find(id="site-feedback") is not None
 
     def test_footer(self, freezer: FrozenDateTimeFactory, fx_freezer_time: datetime):
         """Can get static site footer."""

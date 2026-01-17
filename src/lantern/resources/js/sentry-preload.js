@@ -6,22 +6,7 @@ window.sentryOnLoad = function() {
   });
   Sentry.lazyLoadIntegration("feedbackIntegration").then(
     (integration) => {
-      Sentry.addIntegration(integration({
-        autoInject: false,
-        showBranding: false,
-        colorScheme: "light",
-        formTitle: "Send Feedback",
-        submitButtonLabel: "Send Feedback",
-        messagePlaceholder: "",
-        successMessageText: "Thank you for your feedback.",
-      }));
-      const feedback = Sentry.getFeedback();
-      if (feedback) {
-        const triggers = document.querySelectorAll(".site-feedback-trigger");
-        triggers.forEach(trigger => {
-          feedback.attachTo(trigger, {});
-        });
-      }
+      Sentry.addIntegration(integration({autoInject: false}));
     }
   );
 };

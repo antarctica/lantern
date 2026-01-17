@@ -1,5 +1,7 @@
 {% macro container_classes() %}container mx-auto{% endmacro %}
 
+{% macro base_bg_text_classes() %}text-grey-900 dark:text-grey-100 bg-white dark:bg-grey-950{% endmacro %}
+
 {% macro link_base_classes() %}underline{% endmacro %}
 
 {% macro link_classes() %}{{ link_base_classes() }} text-sky-blue-500 dark:text-sky-blue-300{% endmacro %}
@@ -20,11 +22,15 @@
 
 {% macro table_row_classes() %}p-2 border-b {{ table_border_classes() }}{% endmacro %}
 
+{%  macro form_item_classes() %}w-full border-1 border-grey-300 dark:border-grey-500 dark:bg-grey-900 dark:text-white{% endmacro %}
+
+{%  macro form_invalid_classes() %}user-invalid:border-red-500 user-invalid:border-2{% endmacro %}
+
 {% macro maintenance_i_classes() %}fa-regular fa-screwdriver-wrench{% endmacro %}
 
 {% macro back_to_top_id() %}site-top{% endmacro %}
 
-{% macro sentry_trigger() %}site-feedback-trigger{% endmacro %}
+{% macro feedback_widget_target() %}site-feedback{% endmacro %}
 
 {% macro show_js_class() %}show-js{% endmacro %}
 
@@ -32,7 +38,7 @@
 
 {% macro feedback_trigger(classes, fallback, text) %}
   <noscript><a class="{{ classes }}" href="mailto:{{ fallback }}">{{ text }}</a></noscript>
-  <button class="{{ sentry_trigger() }} {{ show_js_only() }} cursor-pointer {{ classes }}">{{ text }}</button>
+  <button class="{{ show_js_only() }} cursor-pointer {{ classes }}" data-target="#{{ feedback_widget_target() }}">{{ text }}</button>
 {% endmacro %}
 
 {% macro prose() %}
@@ -84,6 +90,38 @@
     <source srcset="{{ src_dark }}" media="(prefers-color-scheme: dark)" />
     <img src="{{ src_light }}" alt="{{ alt_text }}" />
   </picture>
+{% endmacro %}
+
+{% macro form_label(for, label) %}
+  <label class="block font-bold" for="{{ for }}">{{ label }}</label>
+{% endmacro %}
+
+{% macro form_input(id, name, value, placeholder, required) %}
+  <div class="space-y-2">
+    {{ form_label(for=id, label=name) }}
+    <input
+      class="{{ form_item_classes() }} {% if required %}{{ form_invalid_classes() }}{% endif %}"
+      type="text" name="{{ id }}" id="{{ id }}"
+      {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
+      {% if value %}value="{{ value }}"{% endif %}
+      {% if required %}required{% endif %}
+    >
+  </div>
+{% endmacro %}
+
+{% macro form_textarea(id, name, rows, placeholder, warning, required) %}
+  <div class="space-y-2">
+    {{ form_label(for=id, label=name) }}
+    <textarea
+      class="{{ form_item_classes() }} {% if required %}{{ form_invalid_classes() }}{% endif %}"
+      name="{{ id }}" id="{{ id }}" rows="{{ rows }}"
+      {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
+      {% if required %}required{% endif %}
+    ></textarea>
+    {% if warning %}
+      {% call alert(variant='yellow', classes="space-y-2") %}{{ warning }}{% endcall %}
+    {% endif %}
+  </div>
 {% endmacro %}
 
 {% macro item_border(classes="") %}

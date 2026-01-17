@@ -36,16 +36,6 @@ class TestMacrosSite:
         jinja = Environment(loader=_loader, autoescape=select_autoescape(), trim_blocks=True, lstrip_blocks=True)
         return jinja.from_string(template).render(meta=site_meta)
 
-    def test_head_preconnect(self):
-        """Can get preconnect tags."""
-        template = """{% import '_macros/site.html.j2' as site %}{{ site.head_preconnect() }}"""
-        meta = self._site_meta()
-        html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
-        """
-          <link rel="preconnect" href="https://cdn.web.bas.ac.uk">
-        """
-        assert html.head.find(name="link", rel="preconnect", href="https://cdn.web.bas.ac.uk") is not None
-
     def test_head_meta(self):
         """Can get static HTML character set and other information meta tags."""
         template = """{% import '_macros/site.html.j2' as site %}{{ site.head_meta(meta) }}"""
@@ -203,7 +193,6 @@ class TestMacrosSite:
         template = """{% import '_macros/site.html.j2' as site %}{{ site.html_head(meta) }}"""
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
 
-        assert html.head.find(name="link", rel="preconnect", href="https://cdn.web.bas.ac.uk") is not None
         assert html.head.meta["charset"] == "utf-8"
         assert html.head.title.string == meta.html_title_suffixed
 

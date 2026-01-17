@@ -99,9 +99,9 @@ class ToyCatalogue:
 
 def main() -> None:
     """Entrypoint."""
-    export = False
-    publish = True
-    selected = {"03db9faa-da9a-4d39-8381-12b218750089"}  # set() # to set use the form {"abc", "..."}
+    export = True
+    publish = False
+    selected = set()  # to set use the form {"abc", "..."}
     trusted = False
 
     cached = True

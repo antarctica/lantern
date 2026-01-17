@@ -1,7 +1,7 @@
 {% import '_macros/common.html.j2' as com %}
 
 {% macro form(data) %}
-  <form action="{{ data.form_action }}" method="POST">
+  <form id="item-enquiry" action="{{ data.form_action }}" method="POST">
     {% for param, value in data.form_params | items %}
       <input type="hidden" name="{{ param }}" value="{{ value }}">
     {% endfor %}

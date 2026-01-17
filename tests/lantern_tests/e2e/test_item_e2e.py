@@ -112,10 +112,10 @@ class TestItemContactForm:
         status_code = page.evaluate("window.performance.getEntries()[0].responseStatus")
         assert status_code == 200
 
-        expect(page.locator("textarea#message-content")).to_be_visible()
-        page.get_by_label("Message").fill("x")
-        page.get_by_label("Your email address").fill("conwat@bas.ac.uk")
-        page.get_by_text("Send Message").click()
+        expect(page.locator("#item-enquiry textarea#message-content")).to_be_visible()
+        page.locator("#item-enquiry").get_by_label("Message").fill("x")
+        page.locator("#item-enquiry").get_by_label("Your email address").fill("conwat@bas.ac.uk")
+        page.locator("#item-enquiry").get_by_text("Send Message").click()
 
         # Verify form submission
         expect(page.locator("body")).to_have_text("OK")

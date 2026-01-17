@@ -7,7 +7,6 @@ These options from the app `lantern.Config` class are used to configure applicat
 - `ENABLE_FEATURE_SENTRY`: if true, enables backend [Error Monitoring](#error-monitoring) via Sentry
 - `SENTRY_ENVIRONMENT`: the Sentry [Environment](https://docs.sentry.io/platforms/python/configuration/environments/) name
 - `SENTRY_DSN`: Sentry backend Data Source Name (DSN) for error logging
-- `TEMPLATES_SENTRY_SRC`: Sentry CDN URL for frontend error tracking and user feedback
 - `VERIFY_SHAREPOINT_PROXY_ENDPOINT`: the [SharePoint Proxy](#verification-sharepoint-proxy) used for site checks
 - `VERIFY_SAN_PROXY_ENDPOINT`: the [SAN Proxy](#verification-san-proxy) used for site checks
 

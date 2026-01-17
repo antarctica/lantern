@@ -84,7 +84,6 @@ class TestConfig:
             "STORE_GITLAB_BRANCH": "main",
             "STORE_GITLAB_CACHE_PATH": str(fx_config.STORE_GITLAB_CACHE_PATH),
             "TEMPLATES_CACHE_BUST_VALUE": fx_config.TEMPLATES_CACHE_BUST_VALUE,
-            "TEMPLATES_SENTRY_SRC": "https://js.sentry-cdn.com/7ee10f6777ab8ec05ffe8b84c4c3039e.min.js",
             "TEMPLATES_PLAUSIBLE_DOMAIN": "x",
             "TEMPLATES_ITEM_MAPS_ENDPOINT": "https://embedded-maps.data.bas.ac.uk/v1",
             "TEMPLATES_ITEM_CONTACT_ENDPOINT": "https://example.com/contact",

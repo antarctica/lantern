@@ -6,6 +6,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 6.27"
     }
+    gitlab = {
+      source  = "gitlabhq/gitlab"
+      version = "18.5.0"
+    }
   }
 
   # Source: https://gitlab.data.bas.ac.uk/WSF/terraform-remote-state
@@ -18,6 +22,10 @@ terraform {
 
 provider "aws" {
   region = "eu-west-1"
+}
+
+provider "gitlab" {
+  base_url = "https://gitlab.data.bas.ac.uk/api/v4/"
 }
 
 # Alias for resources that require the 'us-east-1' region, which is used as a control region by AWS for some services.
@@ -143,4 +151,61 @@ resource "aws_iam_user_policy" "workstation-prod" {
       }
     ]
   })
+}
+
+### GitLab store
+
+resource "gitlab_user" "lantern_bot" {
+  username          = "bot_magic_lantern"
+  name              = "MAGIC Lantern Exp (Bot)"
+  email             = "magicdev@bas.ac.uk"
+  note              = "Bot user for Lantern data catalogue. Mangaged by IaC via the Lantern project."
+  skip_confirmation = true
+  is_external       = true
+}
+
+resource "gitlab_project" "records_store" {
+  name             = "Lantern experiment - records" # "Lantern Records Store"
+  path             = "lantern-records-exp"
+  namespace_id     = 22 # felnne
+  description      = "Records store for Lantern experimental catalogue. Managed by IaC."
+  visibility_level = "internal"
+
+  # disable everything except repository and merge-requests
+  auto_devops_enabled                  = false
+  emails_enabled                       = false
+  lfs_enabled                          = false
+  packages_enabled                     = false
+  initialize_with_readme               = false
+  analytics_access_level               = "disabled"
+  builds_access_level                  = "disabled"
+  container_registry_access_level      = "disabled"
+  environments_access_level            = "disabled"
+  feature_flags_access_level           = "disabled"
+  forking_access_level                 = "disabled"
+  infrastructure_access_level          = "disabled"
+  issues_access_level                  = "disabled"
+  monitor_access_level                 = "disabled"
+  pages_access_level                   = "disabled"
+  releases_access_level                = "disabled"
+  security_and_compliance_access_level = "disabled"
+  snippets_access_level                = "disabled"
+  wiki_access_level                    = "disabled"
+  # model_experiments_access_level     = "disabled"  # not supported in GitLab 15.7
+  # model_registry_access_level        = "disabled"  # not supported in GitLab 15.7
+  # requirements_access_level          = "disabled"  # not supported in GitLab 15.7
+}
+
+resource "gitlab_project_membership" "lantern_records_lantern_bot" {
+  # To enable GitLab Store (see /docs/stores.md#gitlab-store)
+  project      = gitlab_project.records_store.id
+  user_id      = gitlab_user.lantern_bot.id
+  access_level = "maintainer"
+}
+
+resource "gitlab_project_membership" "magic_helpdesk_lantern_bot" {
+  # To enable item enquires via Power Automate (see /docs/site.md#item-enquiries)
+  project      = 462 # MAGIC Helpdesk
+  user_id      = gitlab_user.lantern_bot.id
+  access_level = "reporter"
 }

@@ -82,6 +82,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Replaced native Sentry user feedback widget with custom implementation for better consistency
 * Vendored Sentry SDK to minimise external dependencies
 * Recreating static site infrastructure within this project to use AWS static site Terraform module
+* Importing GitLab records project and bot user under Infrastructure as Code
 
 ### Removed
 

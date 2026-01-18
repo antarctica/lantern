@@ -41,6 +41,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Additional footer navigation links
 * 'admin-record' development task for viewing administrative metadata for a record
 * custom Sentry user feedback widget
+* Infrastructure as Code using OpenTofu
 
 ### Fixed
 
@@ -80,6 +81,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Improving development tasks
 * Replaced native Sentry user feedback widget with custom implementation for better consistency
 * Vendored Sentry SDK to minimise external dependencies
+* Recreating static site infrastructure within this project to use AWS static site Terraform module
 
 ### Removed
 

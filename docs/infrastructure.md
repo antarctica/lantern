@@ -23,6 +23,14 @@ Available environments:
 Development environments may be created and destroyed as needed. Staging and Production environments are long-lived.
 
 ## 1Password
+## Infrastructure as Code
+
+[OpenTofu](https://opentofu.org), an open-source fork of the [Terraform](https://www.terraform.io) infrastructure as
+code tool, is used to manage some project infrastructure in `resources/envs/main.tf`.
+
+Remote state is managed by the [BAS Terraform Remote State 🛡️](https://gitlab.data.bas.ac.uk/WSF/terraform-remote-state)
+project.
+
 
 - [Service Account 🔒](https://magic.1password.eu/developer-tools/infrastructure-secrets/serviceaccount/4MR5NL7W45AA3GAFGRZMVN2H2I)
   - to allow access to secrets in [Continuous Integration](/docs/dev.md#continuous-integration)

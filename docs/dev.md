@@ -29,12 +29,16 @@ Setup:
 ### Local GitLab instance
 ### Local development publishing
 
-To run the [Publishing Workflows](/docs/usage.md) locally, create an AWS IAM user with permissions to manage content in
-[AWS S3 publishing buckets](/docs/infrastructure.md#exporters).
+To run the [Publishing Workflows](/docs/usage.md) locally:
 
-1. use the [AWS Console](http://console.aws.amazon.com) to create a new user (e.g. `conwat-lantern`) with a suitable
+1. create a new AWS IAM user (e.g. `conwat-lantern`) with a suitable
    [Inline Policy 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=6wawslwrjk42cbff7qanfswz6q&h=magic.1password.eu)
-2. set the relevant [Config](/docs/config.md) options in your local `.env` file
+   to manage content in [AWS S3 publishing buckets](/docs/infrastructure.md#exporters)
+2. as a GitLab administrator impersonating the GitLab bot user, create a
+   [Personal Access Token](https://gitlab.data.bas.ac.uk/-/profile/personal_access_tokens):
+   - token name: `pa-item-enquires`
+   - scopes: *api*
+3. set the relevant [Config](/docs/config.md) options in your local `.env` file
 
 
 A GitLab instance can be used for the [GitLab Store](/docs/stores.md#gitlab-store) via a container.

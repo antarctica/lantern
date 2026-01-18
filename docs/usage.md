@@ -106,6 +106,10 @@ To preview records in the testing catalogue:
 1. repeat this process (using the [`select-records`](#updating-records) task to get the now existing records) until the
    record author is happy for them to be live
 
+> [!NOTE]
+> The Lantern GitLab bot user must have reporter permissions to post comments on a tracking issue (if specified).
+> Project access SHOULD be defined via [Infrastructure as Code](/docs/infrastructure.md#infrastructure-as-code).
+
 To publish records to the production catalogue:
 
 1. merge the relevant merge request for the changeset into `main`

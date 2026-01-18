@@ -12,20 +12,10 @@ For managing secrets and common [Config](/docs/config.md) options.
 
 ## GitLab
 
-> [!NOTE]
-> Resources for the [GitLab](/docs/architecture.md#gitlab) records store are managed by the
-> [ADD Metadata Toolbox 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/blob/main/docs/setup.md) project.
+Resources for the [GitLab Store](/docs/stores.md#gitlab-store) are managed using
+[Infrastructure as Code (IaC)](/docs/infrastructure.md#infrastructure-as-code).
 
-### GitLab User Access
-
-Invite the GitLab bot user with the *developer* role to:
-
-- the [lantern-records-exp 🛡️](https://gitlab.data.bas.ac.uk/felnne/lantern-records-exp) GitLab Store project
-- projects used in the [Interactive record publishing workflow](/docs/usage.md#interactive-record-publishing-workflow)
-
-Invite the GitLab bot user with the *reporter* role to:
-
-- the [MAGIC Helpdesk 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/helpdesk) project for creating issues from item enquires
+This includes a GitLab bot user and project memberships to enable various workflows.
 
 ### GitLab API token
 
@@ -34,17 +24,13 @@ Invite the GitLab bot user with the *reporter* role to:
 To manage records in the [GitLab Store](/docs/stores.md#gitlab-store) and comment on issues as part of the
 [Interactive Publishing Workflow](/docs/usage.md#interactive-record-publishing-workflow).
 
-As a GitLab administrator impersonating the GitLab bot user, for each deployment and local development environment:
+As a GitLab administrator impersonating the project GitLab bot user, and for each non-development environment:
 
 1. create a [Personal Access Token](https://gitlab.data.bas.ac.uk/-/profile/personal_access_tokens):
-   - token name: (e.g. 'ansible-prod', 'conwat-local-dev', etc.)
+   - token name: (e.g. 'ansible-prod', etc.)
    - scopes: *api*
-2. store the token in 1Password:
-   - in the *infrastructure* vault, for deployment environments
-   - in your *employee* vault, for local development environments
-3. set the relevant [Config](/docs/config.md) option in:
-   - a local `.env` file, for local development environments
-   - per-environment Ansible Vault, for deployment environments
+2. store the token in the *infrastructure* vault in 1Password
+3. set the relevant [Config](/docs/config.md) option in the relevant Ansible Vault
 
 #### Item enquires GitLab API token
 
@@ -56,7 +42,7 @@ As a GitLab administrator impersonating the GitLab bot user for the production e
    - token name: 'pa-item-enquires'
    - scopes: *api*
 2. store the token in [1Password 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=dnsmipeiqjxbzd2qutbrhn3itu&h=magic.1password.eu)
-3. set the token as the authorisation header for the GitLab issue action in the Power Automate flow
+3. set the token as the authorisation header for the GitLab issue action in the Power Automate flow as a shared resource
 
 ## Sentry
 

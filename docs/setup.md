@@ -76,20 +76,19 @@ As a GitLab administrator impersonating the GitLab bot user for the production e
 
 ## Static website hosting
 
->
-> This section is limited to granting this project access to these resources.
 The majority of the [Static Site](/docs/architecture.md#static-site) hosting setup is managed using
 [Infrastructure as Code (IaC)](/docs/infrastructure.md#infrastructure-as-code).
 
-### Static website hosting IAM user
+### Static website hosting IAM users
 
-For managing content. Create separate users for each [Deployment](/docs/deployment.md) or [Development](/docs/dev.md)
-environment.
+An IAM user for the [Workstation Module](/docs/usage.md#workstation-module) will be created via IaC for each
+non-development environment, with permissions to manage content in
+[AWS S3 publishing buckets](/docs/infrastructure.md#exporters).
 
-1. create a IAM user using the [AWS Console](http://console.aws.amazon.com) with an
-   [Inline Policy 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=6wawslwrjk42cbff7qanfswz6q&h=magic.1password.eu)
-2. create an access key for this user and store in 1Password
-3. set the relevant [Config](/docs/config.md) option in a local `.env` file or Ansible Vault for use in the
+Once created:
+
+1. create an access key for each user and store in 1Password
+2. set the relevant [Config](/docs/config.md) options in each Ansible Vault for use in the
    [Environment Module](/docs/deployment.md#environment-module) template as appropriate
 
 ## Plausible Analytics

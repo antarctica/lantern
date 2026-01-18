@@ -43,6 +43,8 @@ variable "static_site_ref" {
   description = "Static site module version."
 }
 
+### Static site hosting
+
 module "site_testing" {
   source = "git::https://github.com/felnne/tf-aws-static-site.git?ref=${var.static_site_ref}"
 
@@ -81,4 +83,64 @@ module "site_prod" {
     X-Project    = "BAS Lanern Experiment"
     X-Managed-By = "Terraform"
   }
+}
+
+### Workstation module access to static site content
+
+resource "aws_iam_user" "workstation-stage" {
+  name = "lantern-workstation-stage"
+}
+resource "aws_iam_user_policy" "workstation-stage" {
+  name = "staging-bucket"
+  user = aws_iam_user.workstation-stage.name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "MinimalContinuousDeploymentPermissions"
+        Effect = "Allow"
+        Action = [
+          "s3:ListBucket",
+          "s3:PutObject",
+          "s3:DeleteObject",
+          "s3:GetObjectAcl",
+          "s3:PutObjectAcl"
+        ]
+        Resource = [
+          module.site_testing.s3_bucket_arn,
+          "${module.site_testing.s3_bucket_arn}/*"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_user" "workstation-prod" {
+  name = "lantern-workstation-prod"
+}
+resource "aws_iam_user_policy" "workstation-prod" {
+  name = "production-bucket"
+  user = aws_iam_user.workstation-prod.name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "MinimalContinuousDeploymentPermissions"
+        Effect = "Allow"
+        Action = [
+          "s3:ListBucket",
+          "s3:PutObject",
+          "s3:DeleteObject",
+          "s3:GetObjectAcl",
+          "s3:PutObjectAcl"
+        ]
+        Resource = [
+          module.site_prod.s3_bucket_arn,
+          "${module.site_prod.s3_bucket_arn}/*"
+        ]
+      }
+    ]
+  })
 }

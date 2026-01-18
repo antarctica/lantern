@@ -76,11 +76,10 @@ As a GitLab administrator impersonating the GitLab bot user for the production e
 
 ## Static website hosting
 
-> [!NOTE]
-> Resources for the [AWS](/docs/architecture.md#amazon-s3) static website hosting are managed by the
-> [ADD Metadata Toolbox 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/blob/main/docs/setup.md) project.
 >
 > This section is limited to granting this project access to these resources.
+The majority of the [Static Site](/docs/architecture.md#static-site) hosting setup is managed using
+[Infrastructure as Code (IaC)](/docs/infrastructure.md#infrastructure-as-code).
 
 ### Static website hosting IAM user
 

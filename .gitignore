@@ -20,9 +20,11 @@ wheels/
 htmlcov/
 .coverage
 
+# Terraform/OpenTofu generated files
+.terraform/
+
 # Local GitLab stack generated files
 /resources/dev/gitlab/run/
-/resources/dev/gitlab/.terraform/
 /resources/dev/gitlab/.terraform.lock.hcl
 /resources/dev/gitlab/terraform.tfstate
 /resources/dev/gitlab/terraform.tfstate.backup

@@ -89,12 +89,23 @@ Manually:
 3. set the relevant [Config](/docs/config.md) option in the `.env` template and Ansible Vault for use in the
    [Environment Module](/docs/deployment.md#environment-module) template
 
-## CloudFlare Turnstile
+## Cloudflare Turnstile
 
-1. register a new Turnstile widget with hostnames for each [Hosting](/docs/infrastructure.md#hosting) endpoint
-2. store site and secret keys in 1Password
-3. set the relevant [Config](/docs/config.md) option in the `.env` template and Ansible Vault for use in the
-   [Environment Module](/docs/deployment.md#environment-module) template
+A Cloudflare Turnstile widget for [Bot Protection](/docs/site.md#bot-protection) in the static site is managed using
+[Infrastructure as Code (IaC)](/docs/infrastructure.md#infrastructure-as-code).
+
+IaC will:
+
+- create a Turnstile widget, including [Hosting Endpoints](/docs/infrastructure.md#hosting)
+- store the site and secret keys in 1Password
+
+Manually:
+
+- reference the site key as the relevant [Config](/docs/config.md) option in:
+  - the `/resources/dev/.env.tpl` template
+  - the relevant Ansible Vault template
+- set the secret key token as the 'secret' property value in the body of the 'turnstile-verify' action in the item
+  enquiries [Power Automate Flow](#power-automate-item-enquires)
 
 ## Font Awesome
 

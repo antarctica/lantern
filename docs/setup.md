@@ -69,15 +69,18 @@ The majority of the [Static Site](/docs/architecture.md#static-site) hosting set
 
 ### Static website hosting IAM users
 
-An IAM user for the [Workstation Module](/docs/usage.md#workstation-module) will be created via IaC for each
-non-development environment, with permissions to manage content in
-[AWS S3 publishing buckets](/docs/infrastructure.md#exporters).
+IaC will:
 
-Once created:
+- create an IAM user to enable the [Workstation Module](/docs/usage.md#workstation-module) with a suitable inline
+  policy to:
+  - manage content in the [Static Site](/docs/architecture.md#static-site) for the
+    [Interactive](/docs/usage.md#interactive-record-publishing-workflow) and
+    [Non-Interactive](/docs/usage.md#non-interactive-record-publishing-workflow) Publishing Workflows
+- create and store an access key in 1Password for each non-development environment
 
-1. create an access key for each user and store in 1Password
-2. set the relevant [Config](/docs/config.md) options in each Ansible Vault for use in the
-   [Environment Module](/docs/deployment.md#environment-module) template as appropriate
+Manually:
+
+- reference the relevant access key in the corresponding Ansible Vault templates to set [Config](/docs/config.md) options
 
 ## Plausible Analytics
 

@@ -117,12 +117,31 @@ module "site_prod" {
 
 ### Workstation module access to static site content
 
-resource "aws_iam_user" "workstation-stage" {
+resource "aws_iam_user" "workstation_stage" {
   name = "lantern-workstation-stage"
+
+  tags = {
+    X-Project     = "BAS Lantern Experiment"
+    X-Managed-By  = "Terraform"
+    X-Managed-For = "Ansible"
+  }
 }
-resource "aws_iam_user_policy" "workstation-stage" {
+resource "aws_iam_access_key" "workstation_stage" {
+  # would ideally be ephemeral https://github.com/hashicorp/terraform-provider-aws/issues/42182
+  user = aws_iam_user.workstation_stage.name
+}
+resource "onepassword_item" "workstation_stage_access_key" {
+  vault      = var.pvd_op_vault_id
+  category   = "login"
+  title      = "SCAR ADD Metadata Toolbox - Workstation AWS IAM S3 access key [Staging]"
+  username   = aws_iam_access_key.workstation_stage.id
+  password   = aws_iam_access_key.workstation_stage.secret
+  note_value = "Used in Ansible to set environment module config for Lantern workstation workflows.\n\nManaged by Terraform in Lantern."
+  tags       = ["SCAR ADD Metadata Toolbox"]
+}
+resource "aws_iam_user_policy" "workstation_stage" {
   name = "staging-bucket"
-  user = aws_iam_user.workstation-stage.name
+  user = aws_iam_user.workstation_stage.name
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -146,12 +165,30 @@ resource "aws_iam_user_policy" "workstation-stage" {
   })
 }
 
-resource "aws_iam_user" "workstation-prod" {
+resource "aws_iam_user" "workstation_prod" {
   name = "lantern-workstation-prod"
+
+  tags = {
+    X-Project     = "BAS Lantern Experiment"
+    X-Managed-By  = "Terraform"
+    X-Managed-For = "Ansible"
+  }
 }
-resource "aws_iam_user_policy" "workstation-prod" {
+resource "aws_iam_access_key" "workstation_prod" {
+  # would ideally be ephemeral https://github.com/hashicorp/terraform-provider-aws/issues/42182
+  user = aws_iam_user.workstation_prod.name
+}
+resource "onepassword_item" "workstation_prod_access_key" {
+  vault      = var.pvd_op_vault_id
+  category   = "login"
+  title      = "SCAR ADD Metadata Toolbox - Workstation AWS IAM S3 access key [Production]"
+  username   = aws_iam_access_key.workstation_prod.id
+  password   = aws_iam_access_key.workstation_prod.secret
+  note_value = "Used in Ansible to set environment module config for Lantern workstation workflows.\n\nManaged by Terraform in Lantern."
+}
+resource "aws_iam_user_policy" "workstation_prod" {
   name = "production-bucket"
-  user = aws_iam_user.workstation-prod.name
+  user = aws_iam_user.workstation_prod.name
 
   policy = jsonencode({
     Version = "2012-10-17"

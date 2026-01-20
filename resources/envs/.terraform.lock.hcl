@@ -1,6 +1,21 @@
 # This file is maintained automatically by "tofu init".
 # Manual edits may be lost in future updates.
 
+provider "registry.opentofu.org/1password/onepassword" {
+  version = "3.1.1"
+  hashes = [
+    "h1:DkBFWW8um7ERJeBz7pVS+Bd5Eb9mXhPwfdYeFCfhEDE=",
+    "zh:1c7945e3b213655e5aaaaa1b9141d9cccf2e897fb87792dd28cfeabea42e0ce9",
+    "zh:3ec46b37e0e50dd960ab4ed713df8be9c1c0a8195e74d74f623d5f0908f27c2e",
+    "zh:6306ec411d407ffc396e93545aaec567ff1179b0ee4b5fa4313faa3f3181cfb8",
+    "zh:726ac70483b674df4de1e4430eb13c283eed2ebe1967864937a1b26414b59df7",
+    "zh:890df766e9b839623b1f0437355032a3c006226a6c200cd911e15ee1a9014e9f",
+    "zh:8c78a66e2919fd1b8c3ca435874246549cd2bee64c5cf0ed5c60dc440a0122c4",
+    "zh:96c82dfcb3be1ad549f49ba4678fb7bd088de8518617372302ecc78039c2ea7b",
+    "zh:9f427d09bc5c0b0e2650e801cfb564f68a18e5d31f2aa7673a1e93e6f22f8867",
+  ]
+}
+
 provider "registry.opentofu.org/gitlabhq/gitlab" {
   version     = "18.5.0"
   constraints = "18.5.0"

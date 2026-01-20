@@ -209,3 +209,17 @@ resource "gitlab_project_membership" "magic_helpdesk_lantern_bot" {
   user_id      = gitlab_user.lantern_bot.id
   access_level = "reporter"
 }
+
+resource "gitlab_project_membership" "magic_data_management_lantern_bot" {
+  # To enable interactive publishing workflow (see /docs/usage.md#interactive-record-publishing-workflow)
+  project      = 667 # MAGIC data management
+  user_id      = gitlab_user.lantern_bot.id
+  access_level = "reporter"
+}
+
+resource "gitlab_project_membership" "magic_mapping_coordination_lantern_bot" {
+  # To enable interactive publishing workflow (see /docs/usage.md#interactive-record-publishing-workflow)
+  project      = 1254 # MAGIC mapping coordination
+  user_id      = gitlab_user.lantern_bot.id
+  access_level = "reporter"
+}

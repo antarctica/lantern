@@ -6,6 +6,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 6.27"
     }
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "5.15.0"
+    }
     gitlab = {
       source  = "gitlabhq/gitlab"
       version = "18.5.0"
@@ -29,6 +33,11 @@ variable "pvd_gitlab_pat" {
   description = "GitLab provider personal access token, for an admin user 'api' and 'sudo' scopes."
 }
 
+variable "pvd_cloudflare_api_token" {
+  type        = string
+  description = "Cloudflare provider API token, with edit permissions for Turnstile."
+}
+
 variable "pvd_op_account_id" {
   type        = string
   description = "1Password provider account ID to store secrets in."
@@ -41,6 +50,10 @@ variable "pvd_op_vault_id" {
 
 provider "aws" {
   region = "eu-west-1"
+}
+
+provider "cloudflare" {
+  api_token = var.pvd_cloudflare_api_token
 }
 
 provider "gitlab" {
@@ -313,4 +326,38 @@ resource "gitlab_project_membership" "magic_mapping_coordination_lantern_bot" {
   project      = 1254 # MAGIC mapping coordination
   user_id      = gitlab_user.lantern_bot.id
   access_level = "reporter"
+}
+
+# Turnstile bot protection
+
+variable "cloudflare_account_id" {
+  type        = string
+  description = "Cloudflare account identifier."
+}
+
+resource "cloudflare_turnstile_widget" "site" {
+  # To enable bot protection on item enquires (see /docs/site.md#bot-protection)
+  account_id      = var.cloudflare_account_id
+  domains         = [
+    module.site_testing.s3_bucket_name,
+    module.site_prod.s3_bucket_name,
+    "data-testing.data.bas.ac.uk",
+    "data.bas.ac.uk"
+  ]
+  mode            = "managed"
+  name            = "Lantern Item Enquires"
+  bot_fight_mode = false
+  ephemeral_id = false
+  offlabel = false
+  clearance_level = "no_clearance"
+  region          = "world"
+}
+resource "onepassword_item" "turnstile_site_secret_key" {
+  vault      = var.pvd_op_vault_id
+  category   = "login"
+  title      = "SCAR ADD Metadata Toolbox - Cloudflare Turnstile Captcha"
+  username   = cloudflare_turnstile_widget.site.sitekey
+  password   = cloudflare_turnstile_widget.site.secret
+  note_value = "Used in Ansible and local env to set config option.\n\nManaged by Terraform in Lantern."
+  tags       = ["SCAR ADD Metadata Toolbox"]
 }

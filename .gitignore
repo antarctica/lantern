@@ -22,6 +22,7 @@ htmlcov/
 
 # Terraform/OpenTofu generated files
 .terraform/
+terraform.tfvars
 
 # Local GitLab stack generated files
 /resources/dev/gitlab/run/

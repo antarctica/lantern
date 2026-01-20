@@ -89,6 +89,8 @@ ci-safety = { cmd = "safety --stage cicd scan --detailed-output", help = "Called
 # local stack
 local-gitlab-start = { cmd = "docker-compose -f {gitlab_local_compose} up -d", help = "Start local GitLab instance", use_vars = true }
 local-gitlab-stop = { cmd = "docker-compose -f {gitlab_local_compose} down", help = "Stop local GitLab instance", use_vars = true }
+# IaC
+tfvars-init = { cmd = "op inject --in-file resources/envs/terraform.tfvars.tpl --out-file resources/envs/terraform.tfvars", help = "Initialise Terraform/OpenTofu vars file" }
 # app dev
 release = { cmd = "python -m tasks.release", help = "Prepapre app release" }
 config-init = { cmd = "op inject --in-file resources/env/.env.tpl --out-file .env", help = "Initialise config file" }

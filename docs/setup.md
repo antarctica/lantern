@@ -15,35 +15,36 @@ For managing secrets and common [Config](/docs/config.md) options.
 Resources for the [GitLab Store](/docs/stores.md#gitlab-store) are managed using
 [Infrastructure as Code (IaC)](/docs/infrastructure.md#infrastructure-as-code).
 
-This includes a GitLab bot user and project memberships to enable various workflows.
+This includes a GitLab bot user to enable:
 
-### GitLab API token
+- the [Interactive Publishing Workflow](/docs/usage.md#interactive-record-publishing-workflow)
+- [Item Enquires](#gitlab-item-enquires)
 
-#### Workflows GitLab API token
+### GitLab publishing workflows
 
-To manage records in the [GitLab Store](/docs/stores.md#gitlab-store) and comment on issues as part of the
-[Interactive Publishing Workflow](/docs/usage.md#interactive-record-publishing-workflow).
+IaC will:
 
-As a GitLab administrator impersonating the project GitLab bot user, and for each non-development environment:
+- create and store in 1Password a personal access token to enable the
+  [Workstation Module](/docs/usage.md#workstation-module) to:
+  - access and manage records in the [GitLab Store](/docs/stores.md#gitlab-store)
+  - comment on issues for the [Interactive Publishing Workflow](/docs/usage.md#interactive-record-publishing-workflow)
 - add the bot user as a member of the GitLab projects containing these issues, with at least the *reporter* role
 
-1. create a [Personal Access Token](https://gitlab.data.bas.ac.uk/-/profile/personal_access_tokens):
-   - token name: (e.g. 'ansible-prod', etc.)
-   - scopes: *api*
-2. store the token in the *infrastructure* vault in 1Password
-3. set the relevant [Config](/docs/config.md) option in the relevant Ansible Vault
+Manually:
 
-#### Item enquires GitLab API token
+- reference this token in relevant Ansible Vault templates to set [Config](/docs/config.md) options
 
-For Power Automate to create issues for [Item Enquires](#power-automate-item-enquires).
+### GitLab item enquires
 
-As a GitLab administrator impersonating the GitLab bot user for the production environment:
+IaC will:
 
-1. create a [Personal Access Token](https://gitlab.data.bas.ac.uk/-/profile/personal_access_tokens):
-   - token name: 'pa-item-enquires'
-   - scopes: *api*
-2. store the token in [1Password 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=dnsmipeiqjxbzd2qutbrhn3itu&h=magic.1password.eu)
-3. set the token as the authorisation header for the GitLab issue action in the Power Automate flow as a shared resource
+- create a personal access token to enable the [Power Automate](#power-automate-item-enquires) flow for
+  [Item Enquires](/docs/site.md#item-enquires)
+- store this token in 1Password
+
+Manually:
+
+- set this token in the authorisation header for the 'create-issue' action in the Power Automate flow
 
 ## Sentry
 

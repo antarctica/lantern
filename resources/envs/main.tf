@@ -10,14 +10,33 @@ terraform {
       source  = "gitlabhq/gitlab"
       version = "18.5.0"
     }
+    onepassword = {
+      source = "1Password/onepassword"
+    }
   }
 
   # Source: https://gitlab.data.bas.ac.uk/WSF/terraform-remote-state
   backend "s3" {
-    bucket = "bas-terraform-remote-state-prod"
-    key    = "v2/BAS-LANTERN/terraform.tfstate"
-    region = "eu-west-1"
+    bucket  = "bas-terraform-remote-state-prod"
+    key     = "v2/BAS-LANTERN/terraform.tfstate"
+    region  = "eu-west-1"
+    encrypt = true
   }
+}
+
+variable "pvd_gitlab_pat" {
+  type        = string
+  description = "GitLab provider personal access token, for an admin user 'api' and 'sudo' scopes."
+}
+
+variable "pvd_op_account_id" {
+  type        = string
+  description = "1Password provider account ID to store secrets in."
+}
+
+variable "pvd_op_vault_id" {
+  type        = string
+  description = "1Password provider vault ID to store secrets in."
 }
 
 provider "aws" {
@@ -26,12 +45,15 @@ provider "aws" {
 
 provider "gitlab" {
   base_url = "https://gitlab.data.bas.ac.uk/api/v4/"
+  token    = var.pvd_gitlab_pat
 }
 
 # Alias for resources that require the 'us-east-1' region, which is used as a control region by AWS for some services.
 provider "aws" {
   alias  = "us-east-1"
   region = "us-east-1"
+provider "onepassword" {
+  account = var.pvd_op_account_id
 }
 
 # Source: https://gitlab.data.bas.ac.uk/WSF/bas-core-domains
@@ -162,6 +184,38 @@ resource "gitlab_user" "lantern_bot" {
   note              = "Bot user for Lantern data catalogue. Mangaged by IaC via the Lantern project."
   skip_confirmation = true
   is_external       = true
+}
+
+resource "gitlab_personal_access_token" "lantern_bot_pa_item_enquires" {
+  # To enable item enquires via Power Automate (see /docs/site.md#item-enquiries)
+  user_id    = gitlab_user.lantern_bot.id
+  name       = "pa-item-enquires"
+  expires_at = "2026-07-09"
+  scopes     = ["api"]
+}
+resource "onepassword_item" "lantern_bot_pa_item_enquires_token" {
+  vault      = var.pvd_op_vault_id
+  category   = "password"
+  title      = "SCAR ADD Metadata Toolbox - Item enquires GitLab bot PAT"
+  password   = gitlab_personal_access_token.lantern_bot_pa_item_enquires.token
+  note_value = "Used in Power Automate flow to create issues in the Helpdesk GitLab project for item enquires.\n\nManaged by Terraform in Lantern."
+  tags       = ["SCAR ADD Metadata Toolbox"]
+}
+
+resource "gitlab_personal_access_token" "lantern_bot_ansible_workstation_module" {
+  # To enable publishing workflows via Ansible managed workstation module (see /docs/usage.md)
+  user_id    = gitlab_user.lantern_bot.id
+  name       = "ansible-workstation-module"
+  expires_at = "2026-07-09"
+  scopes     = ["api"]
+}
+resource "onepassword_item" "lantern_bot_ansible_workstation_module_token" {
+  vault      = var.pvd_op_vault_id
+  category   = "password"
+  title      = "SCAR ADD Metadata Toolbox - Ansible workstation module GitLab bot PAT"
+  password   = gitlab_personal_access_token.lantern_bot_ansible_workstation_module.token
+  note_value = "Used in Ansible vaults to include in environment module deployed to workstations for record workflows.\n\nManaged by Terraform in Lantern."
+  tags       = ["SCAR ADD Metadata Toolbox"]
 }
 
 resource "gitlab_project" "records_store" {

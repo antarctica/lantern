@@ -31,6 +31,19 @@ code tool, is used to manage some project infrastructure in `resources/envs/main
 Remote state is managed by the [BAS Terraform Remote State 🛡️](https://gitlab.data.bas.ac.uk/WSF/terraform-remote-state)
 project.
 
+To apply this infrastructure:
+
+- install tools (`brew install awscli 1password-cli`)
+- configure credentials for the [BAS AWS 🛡️](https://gitlab.data.bas.ac.uk/WSF/bas-aws) account (`aws configure`)
+- copy `resources/envs/terraform.tfvars.tpl` to `resources/envs/terraform.tfvars` and populate values
+
+Then running:
+
+```text
+% cd resources/envs
+% opentofu init
+% opentofu apply
+```
 
 - [Service Account 🔒](https://magic.1password.eu/developer-tools/infrastructure-secrets/serviceaccount/4MR5NL7W45AA3GAFGRZMVN2H2I)
   - to allow access to secrets in [Continuous Integration](/docs/dev.md#continuous-integration)

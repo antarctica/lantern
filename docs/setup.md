@@ -25,6 +25,7 @@ To manage records in the [GitLab Store](/docs/stores.md#gitlab-store) and commen
 [Interactive Publishing Workflow](/docs/usage.md#interactive-record-publishing-workflow).
 
 As a GitLab administrator impersonating the project GitLab bot user, and for each non-development environment:
+- add the bot user as a member of the GitLab projects containing these issues, with at least the *reporter* role
 
 1. create a [Personal Access Token](https://gitlab.data.bas.ac.uk/-/profile/personal_access_tokens):
    - token name: (e.g. 'ansible-prod', etc.)

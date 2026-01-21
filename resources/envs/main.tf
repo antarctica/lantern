@@ -59,6 +59,14 @@ variable "pvd_sentry_api_token" {
 
 provider "aws" {
   region = "eu-west-1"
+  # credentials set by awscli profile
+}
+
+provider "aws" {
+  # alias for resources requiring the 'us-east-1' region, which is used as a control region by AWS for some services.
+  alias  = "us-east-1"
+  region = "us-east-1"
+  # credentials set by awscli profile
 }
 
 provider "cloudflare" {
@@ -70,20 +78,18 @@ provider "gitlab" {
   token    = var.pvd_gitlab_pat
 }
 
-# Alias for resources that require the 'us-east-1' region, which is used as a control region by AWS for some services.
-provider "aws" {
-  alias  = "us-east-1"
-  region = "us-east-1"
 provider "onepassword" {
   account = var.pvd_op_account_id
 }
 
-# Source: https://gitlab.data.bas.ac.uk/WSF/bas-core-domains
 provider "sentry" {
   token = var.pvd_sentry_api_token
 }
 
+### Static site hosting
+
 data "terraform_remote_state" "BAS-CORE-DOMAINS" {
+  # https://gitlab.data.bas.ac.uk/WSF/bas-core-domains
   backend = "s3"
 
   config = {
@@ -98,8 +104,6 @@ variable "static_site_ref" {
   default     = "v0.4.0"
   description = "Static site module version."
 }
-
-### Static site hosting
 
 module "site_testing" {
   source = "git::https://github.com/felnne/tf-aws-static-site.git?ref=${var.static_site_ref}"
@@ -116,7 +120,7 @@ module "site_testing" {
 
   tags = {
     Name         = "lantern-testing"
-    X-Project    = "BAS Lanern Experiment"
+    X-Project    = "BAS Lantern Experiment"
     X-Managed-By = "Terraform"
   }
 }
@@ -136,7 +140,7 @@ module "site_prod" {
 
   tags = {
     Name         = "lantern-prod"
-    X-Project    = "BAS Lanern Experiment"
+    X-Project    = "BAS Lantern Experiment"
     X-Managed-By = "Terraform"
   }
 }
@@ -211,6 +215,7 @@ resource "onepassword_item" "workstation_prod_access_key" {
   username   = aws_iam_access_key.workstation_prod.id
   password   = aws_iam_access_key.workstation_prod.secret
   note_value = "Used in Ansible to set environment module config for Lantern workstation workflows.\n\nManaged by Terraform in Lantern."
+  tags       = ["SCAR ADD Metadata Toolbox"]
 }
 resource "aws_iam_user_policy" "workstation_prod" {
   name = "production-bucket"
@@ -322,6 +327,7 @@ resource "gitlab_project_membership" "lantern_records_lantern_bot" {
 
 resource "gitlab_project_membership" "magic_helpdesk_lantern_bot" {
   # To enable item enquires via Power Automate (see /docs/site.md#item-enquiries)
+  # and interactive publishing workflow (see /docs/usage.md#interactive-record-publishing-workflow)
   project      = 462 # MAGIC Helpdesk
   user_id      = gitlab_user.lantern_bot.id
   access_level = "reporter"
@@ -350,18 +356,18 @@ variable "cloudflare_account_id" {
 
 resource "cloudflare_turnstile_widget" "site" {
   # To enable bot protection on item enquires (see /docs/site.md#bot-protection)
-  account_id      = var.cloudflare_account_id
-  domains         = [
+  account_id = var.cloudflare_account_id
+  domains = sort([
     module.site_testing.s3_bucket_name,
     module.site_prod.s3_bucket_name,
     "data-testing.data.bas.ac.uk",
     "data.bas.ac.uk"
-  ]
+  ])
   mode            = "managed"
   name            = "Lantern Item Enquires"
-  bot_fight_mode = false
-  ephemeral_id = false
-  offlabel = false
+  bot_fight_mode  = false
+  ephemeral_id    = false
+  offlabel        = false
   clearance_level = "no_clearance"
   region          = "world"
 }

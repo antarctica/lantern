@@ -7,6 +7,8 @@ pvd_op_vault_id = ""
 # Cloudflare -> Manage Account -> API Tokens -> Create Token -> Custom:
 # - Permissions: Account -> Turnstile -> Edit
 pvd_cloudflare_api_token = ""
+# https://antarctica.sentry.io/settings/account/api/auth-tokens/new-token/ -> 'project:admin' & 'organization:read' scopes
+pvd_sentry_api_token     = ""
 
 # Cloudflare -> Account home -> Copy account ID
 cloudflare_account_id = ""

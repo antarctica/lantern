@@ -50,8 +50,10 @@ Then running:
 
 ## Sentry
 
-- [Project 🔒](https://antarctica.sentry.io/issues/?project=5197036)
+- [Project 🔒](https://antarctica.sentry.io/issues/?project=4507147658919936)
   - for [Error monitoring](/docs/monitoring.md#error-monitoring)
+  - managed via [Infrastructure as Code](#infrastructure-as-code) and manually as per
+    [Setup](/docs/setup.md#sentry) documentation
 
 ## GitLab
 

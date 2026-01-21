@@ -46,22 +46,6 @@ Manually:
 
 - set this token in the authorisation header for the 'create-issue' action in the Power Automate flow
 
-## Sentry
-
-1. register a new Sentry project
-2. from *Project Settings* -> *Client Keys*:
-   1. from the *Credentials* section, copy the *DSN* and store in 1Password
-   2. from the *JavaScript Loader Script* section:
-      1. set the SDK version to the highest/latest available
-      2. enable the *Session Reply* option (needed for the user feedback widget to work)
-      3. store the script value in 1Password
-      4. and set as the `TEMPLATES_SENTRY_SRC` [Config](/docs/config.md) fixed value
-3. set the relevant [Config](/docs/config.md) options for the DSN and CDN script in the `.env` template and Ansible
-   Vault for use in the [Environment Module](/docs/deployment.md#environment-module) template
-
-> [!NOTE]
-> The Sentry DSN and JavaScript Loader Script are not considered secrets.
-
 ## Static website hosting
 
 The majority of the [Static Site](/docs/architecture.md#static-site) hosting setup is managed using
@@ -81,6 +65,29 @@ IaC will:
 Manually:
 
 - reference the relevant access key in the corresponding Ansible Vault templates to set [Config](/docs/config.md) options
+
+## Sentry
+
+A Sentry project for [Error Monitoring Protection](/docs/monitoring.md#error-monitoring) is managed using
+[Infrastructure as Code (IaC)](/docs/infrastructure.md#infrastructure-as-code).
+
+IaC will:
+
+- register a new Sentry project and create a `sentry_dsn` output for the default DSN
+
+> [!NOTE]
+> DSNs are not considered secret in newer Sentry versions.
+
+Manually:
+
+- set the relevant [Config](/docs/config.md) option for the DSN as a hard-coded value
+- create an [Uptime Check](https://docs.sentry.io/product/uptime-monitoring/) for the production environment:
+  - url: `https://data.bas.ac.uk/collections/bas-maps`
+  - interval: 5 minutes
+  - timeout: 3 seconds
+
+> [!TIP]
+> Uptime monitors [cannot be managed](https://github.com/jianyuan/terraform-provider-sentry/issues/643) via IaC.
 
 ## Plausible Analytics
 

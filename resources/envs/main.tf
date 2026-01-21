@@ -17,6 +17,10 @@ terraform {
     onepassword = {
       source = "1Password/onepassword"
     }
+    sentry = {
+      source  = "jianyuan/sentry"
+      version = "0.14.8"
+    }
   }
 
   # Source: https://gitlab.data.bas.ac.uk/WSF/terraform-remote-state
@@ -48,6 +52,11 @@ variable "pvd_op_vault_id" {
   description = "1Password provider vault ID to store secrets in."
 }
 
+variable "pvd_sentry_api_token" {
+  type        = string
+  description = "Sentry API token."
+}
+
 provider "aws" {
   region = "eu-west-1"
 }
@@ -70,6 +79,10 @@ provider "onepassword" {
 }
 
 # Source: https://gitlab.data.bas.ac.uk/WSF/bas-core-domains
+provider "sentry" {
+  token = var.pvd_sentry_api_token
+}
+
 data "terraform_remote_state" "BAS-CORE-DOMAINS" {
   backend = "s3"
 
@@ -360,4 +373,31 @@ resource "onepassword_item" "turnstile_site_secret_key" {
   password   = cloudflare_turnstile_widget.site.secret
   note_value = "Used in Ansible and local env to set config option.\n\nManaged by Terraform in Lantern."
   tags       = ["SCAR ADD Metadata Toolbox"]
+}
+
+# Sentry monitoring
+
+variable "sentry_org" {
+  type        = string
+  description = "Sentry organisation slug."
+  default     = "antarctica"
+}
+
+resource "sentry_project" "lantern" {
+  organization = var.sentry_org
+  teams        = ["magic"]
+  name         = "Lantern (Data Catalogue)"
+  slug         = "lantern"
+  platform     = "python"
+}
+
+data "sentry_key" "lantern_dsn" {
+  organization = var.sentry_org
+  project      = sentry_project.lantern.slug
+  first        = true # to select default key
+}
+output "sentry_dsn" {
+  # (public) DSNs are not sensitive in newer Sentry versions
+  value       = nonsensitive(data.sentry_key.lantern_dsn.dsn.public)
+  description = "Sentry DSN."
 }

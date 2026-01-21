@@ -26,7 +26,20 @@ Setup:
 % uv run playwright install
 ```
 
-### Local GitLab instance
+### Local development publishing
+
+To run [Publishing Workflows](/docs/usage.md) locally:
+
+1. manually create a named AWS IAM user (e.g. `lantern-conwat`) with a suitable
+   [Inline Policy 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=6wawslwrjk42cbff7qanfswz6q&h=magic.1password.eu)
+   to manage content in [AWS S3 Content Buckets](/docs/infrastructure.md#exporters)
+2. as a GitLab administrator impersonating the GitLab bot user, create a
+   [Personal Access Token 🔒](https://gitlab.data.bas.ac.uk/-/profile/personal_access_tokens):
+   - token name: `lantern-conwat`
+   - scopes: *api*
+3. set the relevant [Config](/docs/config.md) options in your local `.env` file
+
+### Local development GitLab
 
 A GitLab instance can be used for the [GitLab Store](/docs/stores.md#gitlab-store) via a container.
 
@@ -163,6 +176,8 @@ Within this project:
 8. if a 'container' [Super Type](/docs/data-model.md#item-super-types), update the
   `lantern.models.item.catalogue.item.ItemCatalogue._super_type` property
 9. verify the [Test Records](#test-records) build as a local site
+10. update static site endpoints for [Reverse Proxying](/docs/setup.md#static-website-hosting-reverse-proxying) to
+    include new aliases, and request updating the BAS Load Balancer config to match
 
 If additional item relationships are needed:
 

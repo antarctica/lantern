@@ -84,6 +84,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Recreating static site infrastructure within this project to use AWS static site Terraform module
 * Importing GitLab records project and bot user under Infrastructure as Code
 * Importing Cloudflare Turnstile config under Infrastructure as Code
+* Importing Sentry project under Infrastructure as Code
 
 ### Removed
 

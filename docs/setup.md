@@ -51,6 +51,33 @@ Manually:
 The majority of the [Static Site](/docs/architecture.md#static-site) hosting setup is managed using
 [Infrastructure as Code (IaC)](/docs/infrastructure.md#infrastructure-as-code).
 
+### Static website hosting reverse proxying
+
+Configuring the BAS HAProxy load balancer for [Reverse Proxying](/docs/infrastructure.md#hosting) requires a request
+to BAS IT. This should request:
+
+- frontend ACLs matching any of the static site endpoints [1] for each non-development environment
+- backends for each of these environments with:
+  - a single server pointing to the relevant AWS CloudFront Distribution
+  - a health check using the [Health Check Endpoint](/docs/monitoring.md#health-check-endpoint)
+
+[1] Static site endpoints:
+
+```text
+/-/
+/collections
+/features
+/items
+/legal
+/maps
+/records
+/series
+/static
+/teams
+/waf
+/.well-known/api-catalog
+```
+
 ### Static website hosting IAM users
 
 IaC will:
@@ -89,13 +116,6 @@ Manually:
 > [!TIP]
 > Uptime monitors [cannot be managed](https://github.com/jianyuan/terraform-provider-sentry/issues/643) via IaC.
 
-## Plausible Analytics
-
-1. register a new Plausible Analytics site for the production [Hosting](/docs/infrastructure.md#hosting) endpoint
-2. record the domain in 1Password
-3. set the relevant [Config](/docs/config.md) option in the `.env` template and Ansible Vault for use in the
-   [Environment Module](/docs/deployment.md#environment-module) template
-
 ## Cloudflare Turnstile
 
 A Cloudflare Turnstile widget for [Bot Protection](/docs/site.md#bot-protection) in the static site is managed using
@@ -114,7 +134,18 @@ Manually:
 - set the secret key token as the 'secret' property value in the body of the 'turnstile-verify' action in the item
   enquiries [Power Automate Flow](#power-automate-item-enquires)
 
+## Plausible Analytics
+
+Manually:
+
+1. register a new Plausible Analytics site for the production [Hosting](/docs/infrastructure.md#hosting) endpoint
+2. record the domain in 1Password
+3. set the relevant [Config](/docs/config.md) option in the `.env` template and Ansible Vault for use in the
+   [Environment Module](/docs/deployment.md#environment-module) template
+
 ## Font Awesome
+
+Manually:
 
 1. register a new Font Awesome kit with:
    - version *7.x*
@@ -127,13 +158,19 @@ Manually:
 
 ### Power Automate item enquires
 
+Manually:
+
 1. import `resources/flows/lantern-item-enquires.zip` into Power Automate as a new flow
-2. for MAGIC point of contact branch, set the [GitLab Personal Access Token](#item-enquires-gitlab-api-token) in the
-   authentication value in the 'create-issue' action
-3. set the flow endpoint as the relevant [Config](/docs/config.md) option in the `.env` template and Ansible Vault for
+2. set the 'secret' property value in the body of the 'turnstile-verify' action to the
+   [Cloudflare Turnstile](#cloudflare-turnstile) secret key from 1Password
+3. for MAGIC point of contact branch, set the [GitLab Personal Access Token](#gitlab-item-enquires) in the
+   authentication header in the 'create-issue' action
+4. set the flow endpoint as the relevant [Config](/docs/config.md) option in the `.env` template and Ansible Vault for
    use in the [Environment Module](/docs/deployment.md#environment-module) template
 
 ### Power Automate SharePoint proxy
+
+Manually:
 
 1. import `resources/flows/lantern-sharepoint-proxy.zip` into Power Automate as a new flow
 2. configure the flow connections and generate an HTTP endpoint
@@ -144,6 +181,8 @@ Manually:
 
 > [!IMPORTANT]
 > This proxy is not used for operational reasons.
+
+Manually:
 
 1. import `resources/flows/lantern-san-proxy.zip` into Power Automate as a new flow
 2. configure the flow connections and generate an HTTP endpoint

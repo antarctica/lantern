@@ -85,6 +85,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Importing GitLab records project and bot user under Infrastructure as Code
 * Importing Cloudflare Turnstile config under Infrastructure as Code
 * Importing Sentry project under Infrastructure as Code
+* Improving infrastructure and setup documentation
 
 ### Removed
 

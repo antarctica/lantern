@@ -12,102 +12,140 @@ For managing secrets and common [Config](/docs/config.md) options.
 
 ## GitLab
 
-> [!NOTE]
-> Resources for the [GitLab](/docs/architecture.md#gitlab) records store are managed by the
-> [ADD Metadata Toolbox 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/blob/main/docs/setup.md) project.
+Resources for the [GitLab Store](/docs/stores.md#gitlab-store) are managed using
+[Infrastructure as Code (IaC)](/docs/infrastructure.md#infrastructure-as-code).
 
-### GitLab User Access
+This includes a GitLab bot user to enable:
 
-Invite the GitLab bot user with the *developer* role to:
+- the [Interactive Publishing Workflow](/docs/usage.md#interactive-record-publishing-workflow)
+- [Item Enquires](#gitlab-item-enquires)
 
-- the [lantern-records-exp 🛡️](https://gitlab.data.bas.ac.uk/felnne/lantern-records-exp) GitLab Store project
-- projects used in the [Interactive record publishing workflow](/docs/usage.md#interactive-record-publishing-workflow)
+### GitLab publishing workflows
 
-Invite the GitLab bot user with the *reporter* role to:
+IaC will:
 
-- the [MAGIC Helpdesk 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/helpdesk) project for creating issues from item enquires
+- create and store in 1Password a personal access token to enable the
+  [Workstation Module](/docs/usage.md#workstation-module) to:
+  - access and manage records in the [GitLab Store](/docs/stores.md#gitlab-store)
+  - comment on issues for the [Interactive Publishing Workflow](/docs/usage.md#interactive-record-publishing-workflow)
+- add the bot user as a member of the GitLab projects containing these issues, with at least the *reporter* role
 
-### GitLab API token
+Manually:
 
-#### Workflows GitLab API token
+- reference this token in relevant Ansible Vault templates to set [Config](/docs/config.md) options
 
-To manage records in the [GitLab Store](/docs/stores.md#gitlab-store) and comment on issues as part of the
-[Interactive Publishing Workflow](/docs/usage.md#interactive-record-publishing-workflow).
+### GitLab item enquires
 
-As a GitLab administrator impersonating the GitLab bot user, for each deployment and local development environment:
+IaC will:
 
-1. create a [Personal Access Token](https://gitlab.data.bas.ac.uk/-/profile/personal_access_tokens):
-   - token name: (e.g. 'ansible-prod', 'conwat-local-dev', etc.)
-   - scopes: *api*
-2. store the token in 1Password:
-   - in the *infrastructure* vault, for deployment environments
-   - in your *employee* vault, for local development environments
-3. set the relevant [Config](/docs/config.md) option in:
-   - a local `.env` file, for local development environments
-   - per-environment Ansible Vault, for deployment environments
+- create a personal access token to enable the [Power Automate](#power-automate-item-enquires) flow for
+  [Item Enquires](/docs/site.md#item-enquires)
+- store this token in 1Password
 
-#### Item enquires GitLab API token
+Manually:
 
-For Power Automate to create issues for [Item Enquires](#power-automate-item-enquires).
-
-As a GitLab administrator impersonating the GitLab bot user for the production environment:
-
-1. create a [Personal Access Token](https://gitlab.data.bas.ac.uk/-/profile/personal_access_tokens):
-   - token name: 'pa-item-enquires'
-   - scopes: *api*
-2. store the token in [1Password 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=dnsmipeiqjxbzd2qutbrhn3itu&h=magic.1password.eu)
-3. set the token as the authorisation header for the GitLab issue action in the Power Automate flow
-
-## Sentry
-
-1. register a new Sentry project
-2. from *Project Settings* -> *Client Keys*:
-   1. from the *Credentials* section, copy the *DSN* and store in 1Password
-   2. from the *JavaScript Loader Script* section:
-      1. set the SDK version to the highest/latest available
-      2. enable the *Session Reply* option (needed for the user feedback widget to work)
-      3. store the script value in 1Password
-      4. and set as the `TEMPLATES_SENTRY_SRC` [Config](/docs/config.md) fixed value
-3. set the relevant [Config](/docs/config.md) options for the DSN and CDN script in the `.env` template and Ansible
-   Vault for use in the [Environment Module](/docs/deployment.md#environment-module) template
-
-> [!NOTE]
-> The Sentry DSN and JavaScript Loader Script are not considered secrets.
+- set this token in the authorisation header for the 'create-issue' action in the Power Automate flow
 
 ## Static website hosting
 
+The majority of the [Static Site](/docs/architecture.md#static-site) hosting setup is managed using
+[Infrastructure as Code (IaC)](/docs/infrastructure.md#infrastructure-as-code).
+
+### Static website hosting reverse proxying
+
+Configuring the BAS HAProxy load balancer for [Reverse Proxying](/docs/infrastructure.md#hosting) requires a request
+to BAS IT. This should request:
+
+- frontend ACLs matching any of the static site endpoints [1] for each non-development environment
+- backends for each of these environments with:
+  - a single server pointing to the relevant AWS CloudFront Distribution
+  - a health check using the [Health Check Endpoint](/docs/monitoring.md#health-check-endpoint)
+
+[1] Static site endpoints:
+
+```text
+/-/
+/collections
+/features
+/items
+/legal
+/maps
+/records
+/series
+/static
+/teams
+/waf
+/.well-known/api-catalog
+```
+
+### Static website hosting IAM users
+
+IaC will:
+
+- create an IAM user to enable the [Workstation Module](/docs/usage.md#workstation-module) with a suitable inline
+  policy to:
+  - manage content in the [Static Site](/docs/architecture.md#static-site) for the
+    [Interactive](/docs/usage.md#interactive-record-publishing-workflow) and
+    [Non-Interactive](/docs/usage.md#non-interactive-record-publishing-workflow) Publishing Workflows
+- create and store an access key in 1Password for each non-development environment
+
+Manually:
+
+- reference the relevant access key in the corresponding Ansible Vault templates to set [Config](/docs/config.md) options
+
+## Sentry
+
+A Sentry project for [Error Monitoring Protection](/docs/monitoring.md#error-monitoring) is managed using
+[Infrastructure as Code (IaC)](/docs/infrastructure.md#infrastructure-as-code).
+
+IaC will:
+
+- register a new Sentry project and create a `sentry_dsn` output for the default DSN
+
 > [!NOTE]
-> Resources for the [AWS](/docs/architecture.md#amazon-s3) static website hosting are managed by the
-> [ADD Metadata Toolbox 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/blob/main/docs/setup.md) project.
->
-> This section is limited to granting this project access to these resources.
+> DSNs are not considered secret in newer Sentry versions.
 
-### Static website hosting IAM user
+Manually:
 
-For managing content. Create separate users for each [Deployment](/docs/deployment.md) or [Development](/docs/dev.md)
-environment.
+- set the relevant [Config](/docs/config.md) option for the DSN as a hard-coded value
+- create an [Uptime Check](https://docs.sentry.io/product/uptime-monitoring/) for the production environment:
+  - url: `https://data.bas.ac.uk/collections/bas-maps`
+  - interval: 5 minutes
+  - timeout: 3 seconds
 
-1. create a IAM user using the [AWS Console](http://console.aws.amazon.com) with an
-   [Inline Policy 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=6wawslwrjk42cbff7qanfswz6q&h=magic.1password.eu)
-2. create an access key for this user and store in 1Password
-3. set the relevant [Config](/docs/config.md) option in a local `.env` file or Ansible Vault for use in the
-   [Environment Module](/docs/deployment.md#environment-module) template as appropriate
+> [!TIP]
+> Uptime monitors [cannot be managed](https://github.com/jianyuan/terraform-provider-sentry/issues/643) via IaC.
+
+## Cloudflare Turnstile
+
+A Cloudflare Turnstile widget for [Bot Protection](/docs/site.md#bot-protection) in the static site is managed using
+[Infrastructure as Code (IaC)](/docs/infrastructure.md#infrastructure-as-code).
+
+IaC will:
+
+- create a Turnstile widget, including [Hosting Endpoints](/docs/infrastructure.md#hosting)
+- store the site and secret keys in 1Password
+
+Manually:
+
+- reference the site key as the relevant [Config](/docs/config.md) option in:
+  - the `/resources/dev/.env.tpl` template
+  - the relevant Ansible Vault template
+- set the secret key token as the 'secret' property value in the body of the 'turnstile-verify' action in the item
+  enquiries [Power Automate Flow](#power-automate-item-enquires)
 
 ## Plausible Analytics
+
+Manually:
 
 1. register a new Plausible Analytics site for the production [Hosting](/docs/infrastructure.md#hosting) endpoint
 2. record the domain in 1Password
 3. set the relevant [Config](/docs/config.md) option in the `.env` template and Ansible Vault for use in the
    [Environment Module](/docs/deployment.md#environment-module) template
 
-## CloudFlare Turnstile
-
-1. register a new Turnstile widget with hostnames for each [Hosting](/docs/infrastructure.md#hosting) endpoint
-2. store site and secret keys in 1Password
-3. set the relevant [Config](/docs/config.md) option in the `.env` template and Ansible Vault for use in the
-   [Environment Module](/docs/deployment.md#environment-module) template
-
 ## Font Awesome
+
+Manually:
 
 1. register a new Font Awesome kit with:
    - version *7.x*
@@ -120,13 +158,19 @@ environment.
 
 ### Power Automate item enquires
 
+Manually:
+
 1. import `resources/flows/lantern-item-enquires.zip` into Power Automate as a new flow
-2. for MAGIC point of contact branch, set the [GitLab Personal Access Token](#item-enquires-gitlab-api-token) in the
-   authentication value in the 'create-issue' action
-3. set the flow endpoint as the relevant [Config](/docs/config.md) option in the `.env` template and Ansible Vault for
+2. set the 'secret' property value in the body of the 'turnstile-verify' action to the
+   [Cloudflare Turnstile](#cloudflare-turnstile) secret key from 1Password
+3. for MAGIC point of contact branch, set the [GitLab Personal Access Token](#gitlab-item-enquires) in the
+   authentication header in the 'create-issue' action
+4. set the flow endpoint as the relevant [Config](/docs/config.md) option in the `.env` template and Ansible Vault for
    use in the [Environment Module](/docs/deployment.md#environment-module) template
 
 ### Power Automate SharePoint proxy
+
+Manually:
 
 1. import `resources/flows/lantern-sharepoint-proxy.zip` into Power Automate as a new flow
 2. configure the flow connections and generate an HTTP endpoint
@@ -137,6 +181,8 @@ environment.
 
 > [!IMPORTANT]
 > This proxy is not used for operational reasons.
+
+Manually:
 
 1. import `resources/flows/lantern-san-proxy.zip` into Power Automate as a new flow
 2. configure the flow connections and generate an HTTP endpoint

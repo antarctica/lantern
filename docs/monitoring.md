@@ -51,7 +51,7 @@ Alerts are sent via email and to the `#dev` channel in the MAGIC Teams workspace
 ### Uptime checks
 
 A Sentry [Uptime Check](https://docs.sentry.io/product/uptime-monitoring/) checks the
-[MAGIC Team](https://data.bas.ac.uk/collections/magic) collection page returns a 2xx response in the production
+[BAS Map Catalogue](https://data.bas.ac.uk/collections/bas-maps) collection returns a 2xx response in the production
 environment every 5 minutes, automatically following the [Item Alias](/docs/data-model.md#item-aliases) redirect.
 
 ### User feedback

@@ -105,7 +105,7 @@ def main() -> None:
     trusted = False
 
     cached = True
-    if len(selected) <= 3:
+    if 0 < len(selected) <= 3:
         cached = False
     logger, config, store, s3 = init(cached_store=cached)
     cat = ToyCatalogue(config=config, logger=logger, s3=s3, store=store, trusted=trusted, selected_identifiers=selected)

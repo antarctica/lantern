@@ -225,6 +225,7 @@ class TestSiteResourcesExporter:
             Bucket=fx_exporter_site_resources._s3_utils._bucket, Key=expected
         )
         assert result["ResponseMetadata"]["HTTPStatusCode"] == 200
+        assert result["ResponseMetadata"]["HTTPHeaders"]["content-type"] == "text/css"
 
     def test_publish_fonts(self, fx_exporter_site_resources: SiteResourcesExporter):
         """Can upload fonts to S3."""
@@ -235,6 +236,7 @@ class TestSiteResourcesExporter:
             Bucket=fx_exporter_site_resources._s3_utils._bucket, Key=expected
         )
         assert result["ResponseMetadata"]["HTTPStatusCode"] == 200
+        assert result["ResponseMetadata"]["HTTPHeaders"]["content-type"] == "font/woff2"
 
     def test_publish_favicon_ico(self, fx_exporter_site_resources: SiteResourcesExporter):
         """Can upload favicon.ico to S3."""
@@ -249,13 +251,14 @@ class TestSiteResourcesExporter:
 
     def test_publish_img(self, fx_exporter_site_resources: SiteResourcesExporter):
         """Can upload images to S3."""
-        expected = "static/img/favicon.ico"
+        expected = "static/img/favicon.svg"
 
         fx_exporter_site_resources._publish_img()
         result = fx_exporter_site_resources._s3_utils._s3.get_object(
             Bucket=fx_exporter_site_resources._s3_utils._bucket, Key=expected
         )
         assert result["ResponseMetadata"]["HTTPStatusCode"] == 200
+        assert result["ResponseMetadata"]["HTTPHeaders"]["content-type"] == "image/svg+xml"
 
     def test_publish_txt(self, fx_exporter_site_resources: SiteResourcesExporter):
         """Can upload text files to S3."""
@@ -267,6 +270,7 @@ class TestSiteResourcesExporter:
                 Bucket=fx_exporter_site_resources._s3_utils._bucket, Key=key
             )
             assert result["ResponseMetadata"]["HTTPStatusCode"] == 200
+            assert result["ResponseMetadata"]["HTTPHeaders"]["content-type"] == "text/plain"
 
     def test_publish_js(self, fx_exporter_site_resources: SiteResourcesExporter):
         """Can upload JavaScript files to S3."""
@@ -278,6 +282,7 @@ class TestSiteResourcesExporter:
                 Bucket=fx_exporter_site_resources._s3_utils._bucket, Key=key
             )
             assert result["ResponseMetadata"]["HTTPStatusCode"] == 200
+            assert result["ResponseMetadata"]["HTTPHeaders"]["content-type"] == "application/javascript"
 
     def test_export(self, fx_exporter_site_resources: SiteResourcesExporter):
         """Can copy resources to output path."""

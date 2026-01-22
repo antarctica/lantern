@@ -24,20 +24,26 @@ the `LOG_LEVEL` [Config Option](/docs/config.md#config-options) set to a valid P
 A minimal installation of this project is available on the BAS central workstations for integrating directly with other
 projects to manage and/or publish records.
 
+<!-- pyml disable md028 -->
+> [!IMPORTANT]
+> This installation is restricted to MAGIC staff.
+
 > [!NOTE]
 > This is a preview feature and does not directly relate to the workflows and tasks below unless noted.
+<!-- pyml enable md028 -->
 
-To use this installation, you will need access to MAGIC custom environment modules in the module search path [1].
+To use this installation, you first need to include MAGIC custom environment modules in your module search path [1].
+
+Then load the `lantern` module:
 
 ```text
-$ ssh BAS_WORKSTATION
 $ module load lantern
 ```
 
 > [!TIP]
 > This will load the latest stable [Release](/README.md#releases).
 >
-> To load a preview of the next release (built from `main`) use `module load lantern/0.0.0.STAGING`.
+> To load a preview of the next release (built from `main`), use `module load lantern/0.0.0.STAGING` instead.
 
 [1]
 
@@ -113,9 +119,9 @@ To preview records in the testing catalogue:
 To publish records to the production catalogue:
 
 1. merge the relevant merge request for the changeset into `main`
-1. update the `AWS_S3_BUCKET` config option to the production bucket
+1. switch the `AWS_S3_BUCKET` config option to the production bucket
 1. run the `build-records` [Development Task](/docs/dev.md#development-tasks) with the publish option enabled
-1. update the `AWS_S3_BUCKET` config option back to the integration bucket
+1. switch the `AWS_S3_BUCKET` config option back to the integration bucket
 
 > [!NOTE]
 > As a precaution, the `records-workflow` [Development Task](/docs/dev.md#development-tasks) will not run if the
@@ -133,14 +139,13 @@ The `records-workflow` task calls and coordinates other tasks to:
 
 [1]
 
-> [!WARNING]
-> If needed, ensure the selected issue URL is for publishing the record(s), rather than an issue for authoring.
->
-> For example a Helpdesk issue may exist to track the request for a product, which is then set as a GitLab issue within
-> its metadata record. Later, when ready for publishing, a separate Mapping Coordination issue may be created.
->
-> In this case, the Mapping Coordination issue URL should be used in the workflow as an '< OTHER >' value, not the
-> Helpdesk issue recorded in the record.
+If needed, ensure the selected issue URL is for publishing the record(s), rather than an issue for authoring.
+
+For example a Helpdesk issue may exist to track the request for a product, which is then set as a GitLab issue within
+its metadata record. Later, when ready for publishing, a separate Mapping Coordination issue may be created.
+
+In this case, the Mapping Coordination issue URL should be used in the workflow as an '< OTHER >' value, not the
+Helpdesk issue recorded in the record.
 
 ## Non-interactive record publishing workflow
 

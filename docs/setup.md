@@ -17,7 +17,7 @@ Resources for the [GitLab Store](/docs/stores.md#gitlab-store) are managed using
 
 This includes a GitLab bot user to enable:
 
-- the [Interactive Publishing Workflow](/docs/usage.md#interactive-record-publishing-workflow)
+- the [Publishing Workflows](#gitlab-publishing-workflows)
 - [Item Enquires](#gitlab-item-enquires)
 
 ### GitLab publishing workflows
@@ -191,4 +191,4 @@ Manually:
 
 > [!TIP]
 > See [this note](https://gitlab.data.bas.ac.uk/MAGIC/dev-docs/-/blob/32f4adf63fae42acab7b8fb749362432b68ad397/tool-power-automate.md#sftp-connector)
-> on getting the SSH server fingerprint in Power Automate expected format.
+> on getting the SSH server fingerprint in the format Power Automate expects.

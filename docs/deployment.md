@@ -13,7 +13,7 @@ This application is distributed as a Python (Pip) package.
 ## Environment module
 
 This application is deployed as a custom [Environment Module](https://modules.readthedocs.io) on the BAS central
-workstations for running [Usage](/docs/usage.md) tasks and workflows.
+workstations for running [Usage](/docs/usage.md#workstation-module) tasks and workflows.
 
 The module:
 

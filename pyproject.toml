@@ -93,7 +93,7 @@ local-gitlab-stop = { cmd = "docker-compose -f {gitlab_local_compose} down", hel
 tfvars-init = { cmd = "op inject --in-file resources/envs/terraform.tfvars.tpl --out-file resources/envs/terraform.tfvars", help = "Initialise Terraform/OpenTofu vars file" }
 # app dev
 release = { cmd = "python -m tasks.release", help = "Prepapre app release" }
-config-init = { cmd = "op inject --in-file resources/env/.env.tpl --out-file .env", help = "Initialise config file" }
+config-init = { cmd = "op inject --in-file resources/dev/.env.tpl --out-file .env", help = "Initialise config file" }
 config-check = { cmd = "python -m tasks.config", help = "Check app config" }
 css = { cmd = "python -m tasks.css", help = "Regenerate CSS via tailwind" }
 css-audit = { cmd = "python -m tasks.css_audit", help = "List CSS styles used in app templates" }

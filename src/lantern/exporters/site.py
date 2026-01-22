@@ -105,25 +105,33 @@ class SiteResourcesExporter(Exporter):
     def _publish_fonts(self) -> None:
         """Upload fonts as S3 objects if they do not already exist."""
         self._s3_utils.upload_package_resources(
-            src_ref=self._fonts_src_ref, base_key=self._s3_utils.calc_key(self._export_base.joinpath("fonts"))
+            src_ref=self._fonts_src_ref,
+            base_key=self._s3_utils.calc_key(self._export_base.joinpath("fonts")),
+            content_type="font/woff2",
         )
 
     def _publish_img(self) -> None:
         """Upload images as S3 objects if they do not already exist."""
         self._s3_utils.upload_package_resources(
-            src_ref=self._img_src_ref, base_key=self._s3_utils.calc_key(self._export_base.joinpath("img"))
+            src_ref=self._img_src_ref,
+            base_key=self._s3_utils.calc_key(self._export_base.joinpath("img")),
+            content_type="image/*",
         )
 
     def _publish_txt(self) -> None:
         """Upload text files as S3 objects if they do not already exist."""
         self._s3_utils.upload_package_resources(
-            src_ref=self._txt_src_ref, base_key=self._s3_utils.calc_key(self._export_base.joinpath("txt"))
+            src_ref=self._txt_src_ref,
+            base_key=self._s3_utils.calc_key(self._export_base.joinpath("txt")),
+            content_type="text/plain",
         )
 
     def _publish_js(self) -> None:
         """Upload JS files as S3 objects if they do not already exist."""
         self._s3_utils.upload_package_resources(
-            src_ref=self._js_src_ref, base_key=self._s3_utils.calc_key(self._export_base.joinpath("js"))
+            src_ref=self._js_src_ref,
+            base_key=self._s3_utils.calc_key(self._export_base.joinpath("js")),
+            content_type="application/javascript",
         )
 
     @property

@@ -62,12 +62,31 @@ class TestS3Utils:
         result = fx_s3_utils._s3.get_object(Bucket=fx_s3_bucket_name, Key=key)
         assert result["WebsiteRedirectLocation"] == expected
 
+    @pytest.mark.parametrize(
+        ("ext", "expected"), [(None, None), (".png", "image/png"), (".ico", "image/x-icon"), (".svg", "image/svg+xml")]
+    )
+    def test_get_img_media_type(self, fx_s3_utils: S3Utils, ext: str | None, expected: str | None):
+        """Can get media type for select image extensions."""
+        if ext is None:
+            path = Path("x.x")
+            expected = f"Unsupported image file extension: {path.suffix}"
+            with pytest.raises(ValueError, match=expected):
+                fx_s3_utils._get_img_media_type(path=path)
+            return
+
+        path = Path("x")
+        path = path.with_suffix(ext)
+
+        result = fx_s3_utils._get_img_media_type(path=path)
+        assert result == expected
+
     def test_upload_package_resources(self, fx_s3_bucket_name: str, fx_s3_utils: S3Utils):
         """Can upload package resources to S3 bucket."""
         expected = "static/xsl/iso-html/xml-to-html-ISO.xsl"
         fx_s3_utils.upload_package_resources(
             src_ref="lantern.resources.xsl.iso-html",
             base_key="static/xsl/iso-html",
+            content_type="application/xml",
         )
 
         result = fx_s3_utils._s3.get_object(Bucket=fx_s3_bucket_name, Key=expected)
@@ -79,10 +98,10 @@ class TestS3Utils:
         base_key = "static/xsl/iso-html"
         key = "static/xsl/iso-html/xml-to-html-ISO.xsl"
 
-        fx_s3_utils.upload_package_resources(src_ref=src_ref, base_key=base_key)
+        fx_s3_utils.upload_package_resources(src_ref=src_ref, base_key=base_key, content_type="application/xml")
         initial = fx_s3_utils._s3.get_object(Bucket=fx_s3_bucket_name, Key=key)
 
-        fx_s3_utils.upload_package_resources(src_ref=src_ref, base_key=base_key)
+        fx_s3_utils.upload_package_resources(src_ref=src_ref, base_key=base_key, content_type="application/xml")
         repeat = fx_s3_utils._s3.get_object(Bucket=fx_s3_bucket_name, Key=key)
         assert initial["LastModified"] == repeat["LastModified"]
 

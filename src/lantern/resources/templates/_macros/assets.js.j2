@@ -1,20 +1,9 @@
-{% macro script_sentry() %}
-window.sentryOnLoad = function() {
-  Sentry.init({
-    tracesSampleRate: 0,
-    replaysSessionSampleRate: 0,
-    replaysOnErrorSampleRate: 0,
-  });
-  Sentry.lazyLoadIntegration("feedbackIntegration").then(
-    (integration) => {
-      Sentry.addIntegration(integration({autoInject: false}));
-    }
-  );
-};
-{% endmacro %}
-
-{% macro script_sentry_feedback_widget() %}
+{% macro script_sentry_feedback_widget(dsn) %}
 document.addEventListener('DOMContentLoaded', () => {
+  Sentry.init({
+    dsn: '{{ dsn }}'
+  });
+
   const form = document.getElementById('site-feedback');
   if (!form) return;
 
@@ -22,35 +11,25 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
 
     const submitBtn = form.querySelector('button[type="submit"], [type="submit"]');
-    const contentEl = document.getElementById('feedback-content');
-    const emailEl = document.getElementById('feedback-email');
     const successEl = document.getElementById('feedback-success');
     const errorEl = document.getElementById('feedback-error');
 
-    const feedback = {
-      message: contentEl ? contentEl.value.trim() : '',
-      email: emailEl ? (emailEl.value.trim() || undefined) : undefined,
-    };
-
-    try {
-      if (typeof Sentry === 'undefined' || typeof Sentry.captureFeedback !== 'function') {
-        throw new Error('Sentry.captureFeedback is not available');
-      }
-
-      const res = Sentry.captureFeedback(feedback);
-
-      if (res && typeof res.then === 'function') {
-        await res;
-      } else {
-        throw new Error('Sentry.captureFeedback did not return a submission promise');
-      }
-
-      submitBtn.classList.add('hidden');
-      successEl.classList.remove('hidden');
-    } catch (err) {
+    if (typeof Sentry === 'undefined' || typeof Sentry.captureFeedback !== 'function') {
       submitBtn.classList.add('hidden');
       errorEl.classList.remove('hidden');
+      throw new Error('Sentry is not available');
     }
+
+    const formData = new FormData(e.target);
+    const email = formData.get('feedback-email');
+    const content = formData.get('feedback-content');
+
+    Sentry.captureFeedback({
+      email: email,
+      message: content
+    });
+    submitBtn.classList.add('hidden');
+    successEl.classList.remove('hidden');
   });
 });
 {% endmacro %}

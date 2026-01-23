@@ -207,7 +207,6 @@ class TestSiteResourcesExporter:
     def test_dump_js(self, fx_exporter_site_resources: SiteResourcesExporter):
         """Can copy JavaScript files to output path."""
         expected = [
-            fx_exporter_site_resources._export_base.joinpath("js/sentry-preload.js"),
             fx_exporter_site_resources._export_base.joinpath("js/enhancements.js"),
             fx_exporter_site_resources._export_base.joinpath("js/lib/scalar.min.js"),
         ]
@@ -274,7 +273,7 @@ class TestSiteResourcesExporter:
 
     def test_publish_js(self, fx_exporter_site_resources: SiteResourcesExporter):
         """Can upload JavaScript files to S3."""
-        expected = ["static/js/sentry-preload.js", "static/js/enhancements.js", "static/js/lib/scalar.min.js"]
+        expected = ["static/js/enhancements.js", "static/js/lib/scalar.min.js"]
 
         fx_exporter_site_resources._publish_js()
         for key in expected:

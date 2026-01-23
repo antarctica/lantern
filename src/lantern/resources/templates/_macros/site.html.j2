@@ -89,7 +89,6 @@
 {% endmacro %}
 
 {% macro script_sentry(build_key) %}
-  <script defer src="/static/js/sentry-preload.js?v={{ build_key }}" crossorigin="anonymous"></script>
   <script defer src="/static/js/lib/sentry.min.js?v={{ build_key }}" crossorigin="anonymous"></script>
 {% endmacro %}
 

@@ -303,14 +303,15 @@ If additional item relationships are needed:
 
 1. make changes to `src/lantern/resources/templates/_assets/js/*.js.j2` and/or [Asset Macros](/docs/site.md#asset-macros)
 2. if needed, make changes to [HTML Templates](/docs/site.md#templates) and/or [Common Macros](/docs/site.md#common-macros)
-3. run the `js` [Development Task](/docs/dev.md#development-tasks) which will:
+3. delete an existing site build
+4. run the `js` [Development Task](/docs/dev.md#development-tasks) which will:
    - template out scripts to `src/lantern/resources/js/`
-4. run the `build-test-records` or `build-records` [Development Task](/docs/dev.md#development-tasks) to rebuild the
+5. run the `build-test-records` or `build-records` [Development Task](/docs/dev.md#development-tasks) to rebuild the
    static site
    - needed as builds reference local copies of scripts that will need refreshing
 
 > [!TIP]
-> You can run `uv run task js && uv run task build-test-records` to chain these tasks together.
+> You can run `trash export/ && task js && task build-test-records` to chain these tasks together.
 
 ### Adding development tasks
 

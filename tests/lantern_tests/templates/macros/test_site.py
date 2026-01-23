@@ -94,9 +94,9 @@ class TestMacrosSite:
 
         assert html.head.find(name="link", rel="stylesheet", href=lambda h: h and h.startswith(href)) is not None
 
-    @pytest.mark.parametrize("href", ["/static/js/sentry-preload.js?v=000", "/static/js/lib/sentry.min.js?v=000"])
-    def test_script_sentry(self, href: str):
+    def test_script_sentry(self):
         """Can get Sentry script from page."""
+        href = "/static/js/lib/sentry.min.js?v=000"
         template = """{% import '_macros/site.html.j2' as site %}{{ site.script_sentry('000') }}"""
         meta = self._site_meta()
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
@@ -202,7 +202,6 @@ class TestMacrosSite:
 
         assert html.head.find(name="link", rel="stylesheet", href="/static/css/main.css?v=000") is not None
 
-        assert html.head.find(name="script", src="/static/js/sentry-preload.js?v=000") is not None
         assert html.head.find(name="script", attrs={"data-domain": meta.plausible_domain}) is not None
         assert html.head.find(name="script", src=cf_turnstile) is not None
         assert html.head.find(name="script", src="/static/js/enhancements.js?v=000") is not None

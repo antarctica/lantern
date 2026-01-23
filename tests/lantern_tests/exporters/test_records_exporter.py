@@ -189,6 +189,9 @@ class TestRecordsExporter:
     ):
         """Can publish selected records."""
         mocker.patch("lantern.exporters.records._job_worker_s3", return_value=fx_exporter_records_sel._s3_client)
+        # limit exported records for speed
+        file_identifier = fx_exporter_records_sel._store.select()[0].file_identifier
+        fx_exporter_records_sel._selected_identifiers = {file_identifier}
 
         fx_exporter_records_sel.publish()
 

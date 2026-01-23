@@ -496,6 +496,7 @@ class TestSiteExporter:
     def test_export(self, fx_exporter_site: SiteExporter):
         """Can export all site components to local files."""
         record = fx_exporter_site._store.select()[0]
+        fx_exporter_site._records_exporter._selected_identifiers = {record.file_identifier}
         site_path = fx_exporter_site._meta.export_path
         expected = [
             site_path.joinpath("favicon.ico"),
@@ -523,6 +524,9 @@ class TestSiteExporter:
 
         As a guard against `lantern.models.site.SiteMeta.from_config_store` setting title to an empty string.
         """
+        file_identifiers = {fx_exporter_site._store.select()[i].file_identifier for i in range(2)}
+        fx_exporter_site._records_exporter._selected_identifiers = file_identifiers
+
         fx_exporter_site.export()
 
         result = list(fx_exporter_site._meta.export_path.glob("**/*.html"))
@@ -541,6 +545,7 @@ class TestSiteExporter:
         """
         s3 = fx_exporter_site._index_exporter._s3_utils._s3
         record = fx_exporter_site._store.select()[0]
+        fx_exporter_site._records_exporter._selected_identifiers = {record.file_identifier}
         expected = [
             "favicon.ico",
             "404.html",

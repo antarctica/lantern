@@ -136,7 +136,7 @@ The `Config.dumps_safe()` method returns a typed dict of [Config Options](#confi
 ## Generate an environment config file
 
 Run the `config-init` [Development Task](/docs/dev.md#development-tasks) to generate a new `.env` file from the
-`resources/env/.env.tpl` template.
+`resources/dev/.env.tpl` template.
 
 > [!IMPORTANT]
 > This uses the [1Password CLI](https://developer.1password.com/docs/cli/) to inject relevant secrets. You must have

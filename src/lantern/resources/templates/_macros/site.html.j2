@@ -89,20 +89,19 @@
 {% endmacro %}
 
 {% macro script_sentry(build_key) %}
-  <script defer src="/static/js/sentry-preload.js?v={{ build_key }}" crossorigin="anonymous"></script>
   <script defer src="/static/js/lib/sentry.min.js?v={{ build_key }}" crossorigin="anonymous"></script>
 {% endmacro %}
 
 {% macro script_plausible(value) %}
-  <script defer fetchpriority="low" data-domain="{{ value }}" src="https://plausible.io/js/script.hash.outbound-links.js"></script>
+  <script defer data-domain="{{ value }}" src="https://plausible.io/js/script.hash.outbound-links.js"></script>
 {% endmacro %}
 
 {% macro script_turnstile() %}
-  <script defer fetchpriority="low" async src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>
+  <script defer async src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>
 {% endmacro %}
 
 {% macro script_enhancements(build_key) %}
-  <script defer fetchpriority="low" src="/static/js/enhancements.js?v={{ build_key }}"></script>
+  <script defer src="/static/js/enhancements.js?v={{ build_key }}"></script>
 {% endmacro %}
 
 {% macro script_schema_org(value) %}

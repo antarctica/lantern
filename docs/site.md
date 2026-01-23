@@ -230,6 +230,18 @@ version as a SHA1 hash, e.g. `main.css?v=f053ddb` for version 0.1.0.
 
 ## Security
 
+### Content security policy
+
+A permissive [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP) is set via HTTP header.
+
+This policy allows resources from all origins and inline scripts (needed to support
+[Item Sharing Previews](#item-sharing-previews)).
+
+### CORS policy
+
+[CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) headers are set to allow access to all site resources
+from any origin.
+
 ### Bot protection
 
 For features vulnerable to spam and abuse, such as the [Item Enquires](#item-enquires),

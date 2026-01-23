@@ -72,34 +72,29 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 /* feedback-processing */
 document.addEventListener('DOMContentLoaded', () => {
+  Sentry.init({
+    dsn: 'https://7ee10f6777ab8ec05ffe8b84c4c3039e@o39753.ingest.us.sentry.io/4507147658919936'
+  });
   const form = document.getElementById('site-feedback');
   if (!form) return;
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const submitBtn = form.querySelector('button[type="submit"], [type="submit"]');
-    const contentEl = document.getElementById('feedback-content');
-    const emailEl = document.getElementById('feedback-email');
     const successEl = document.getElementById('feedback-success');
     const errorEl = document.getElementById('feedback-error');
-    const feedback = {
-      message: contentEl ? contentEl.value.trim() : '',
-      email: emailEl ? (emailEl.value.trim() || undefined) : undefined,
-    };
-    try {
-      if (typeof Sentry === 'undefined' || typeof Sentry.captureFeedback !== 'function') {
-        throw new Error('Sentry.captureFeedback is not available');
-      }
-      const res = Sentry.captureFeedback(feedback);
-      if (res && typeof res.then === 'function') {
-        await res;
-      } else {
-        throw new Error('Sentry.captureFeedback did not return a submission promise');
-      }
-      submitBtn.classList.add('hidden');
-      successEl.classList.remove('hidden');
-    } catch (err) {
+    if (typeof Sentry === 'undefined' || typeof Sentry.captureFeedback !== 'function') {
       submitBtn.classList.add('hidden');
       errorEl.classList.remove('hidden');
+      throw new Error('Sentry is not available');
     }
+    const formData = new FormData(e.target);
+    const email = formData.get('feedback-email');
+    const content = formData.get('feedback-content');
+    Sentry.captureFeedback({
+      email: email,
+      message: content
+    });
+    submitBtn.classList.add('hidden');
+    successEl.classList.remove('hidden');
   });
 });

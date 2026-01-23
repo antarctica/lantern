@@ -156,17 +156,6 @@ class TestRecordsExporter:
         assert isinstance(exporter, RecordsExporter)
         assert exporter.name == "Records"
 
-    def test_export(self, mocker: MockerFixture, fx_exporter_records_sel: RecordsExporter):
-        """Can export selected records."""
-        mocker.patch("lantern.exporters.records._job_worker_s3", return_value=fx_exporter_records_sel._s3_client)
-        # patching S3 is a fail-safe, S3 logic shouldn't be called during export
-
-        fx_exporter_records_sel.export()
-
-        result = list(fx_exporter_records_sel._config.EXPORT_PATH.glob("**/*.*"))
-        assert len(result) > 0
-        assert fx_exporter_records_sel._meta.admin_meta_keys is not None
-
     @pytest.mark.cov()
     def test_prep_store_gitlab_cache(
         self, fx_exporter_records: RecordsExporter, fx_gitlab_cached_store_pop: GitLabCachedStore
@@ -180,6 +169,21 @@ class TestRecordsExporter:
         assert len(result._cache._flash) == 0
         assert len(fx_gitlab_cached_store_pop._cache._flash) > 0
 
+    def test_export(self, mocker: MockerFixture, fx_exporter_records_sel: RecordsExporter):
+        """Can export selected records."""
+        # patching S3 is a fail-safe, S3 logic shouldn't be called during export
+        mocker.patch("lantern.exporters.records._job_worker_s3", return_value=fx_exporter_records_sel._s3_client)
+
+        # limit exported records for speed
+        file_identifier = fx_exporter_records_sel._store.select()[0].file_identifier
+        fx_exporter_records_sel._selected_identifiers = {file_identifier}
+
+        fx_exporter_records_sel.export()
+
+        result = list(fx_exporter_records_sel._config.EXPORT_PATH.glob("**/*.*"))
+        assert len(result) > 0
+        assert fx_exporter_records_sel._meta.admin_meta_keys is not None
+
     def test_publish(
         self,
         mocker: MockerFixture,
@@ -189,6 +193,9 @@ class TestRecordsExporter:
     ):
         """Can publish selected records."""
         mocker.patch("lantern.exporters.records._job_worker_s3", return_value=fx_exporter_records_sel._s3_client)
+        # limit exported records for speed
+        file_identifier = fx_exporter_records_sel._store.select()[0].file_identifier
+        fx_exporter_records_sel._selected_identifiers = {file_identifier}
 
         fx_exporter_records_sel.publish()
 

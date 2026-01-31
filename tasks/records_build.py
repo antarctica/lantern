@@ -7,9 +7,9 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from mypy_boto3_s3 import S3Client
+from tasks._config import ExtraConfig
 from tasks._record_utils import init
 
-from lantern.config import Config as Config
 from lantern.exporters.html import HtmlExporter
 from lantern.exporters.site import SiteExporter, SiteResourcesExporter
 from lantern.models.site import ExportMeta
@@ -79,7 +79,7 @@ class ToyCatalogue:
     def __init__(
         self,
         logger: logging.Logger,
-        config: Config,
+        config: ExtraConfig,
         s3: S3Client,
         store: GitLabStore | GitLabCachedStore,
         selected_identifiers: set[str] | None = None,

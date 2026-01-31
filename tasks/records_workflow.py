@@ -9,8 +9,8 @@ from pathlib import Path
 import inquirer
 from gitlab.exceptions import GitlabGetError
 from mypy_boto3_s3 import S3Client
-from tasks._record_utils import init, init_store, parse_records
 from tasks._config import ExtraConfig
+from tasks._record_utils import init, init_store, parse_records
 from tasks.records_build import upload_trusted
 from tasks.records_import import clean as import_clean
 from tasks.records_import import load as import_load
@@ -322,7 +322,7 @@ def _merge_request(logger: logging.Logger, store: GitLabStore, issue_href: str |
 
 @_time_task(label="Build")
 def _build(
-    logger: logging.Logger, config: Config, store: GitLabCachedStore, s3: S3Client, identifiers: set[str]
+    logger: logging.Logger, config: ExtraConfig, store: GitLabCachedStore, s3: S3Client, identifiers: set[str]
 ) -> None:
     """Build items for committed records."""
     meta = ExportMeta.from_config_store(
@@ -399,7 +399,7 @@ def main() -> None:
     on a limited number of records.
     """
     logger, config, store, s3 = init()
-    admin_keys = _init_admin_keys(config)
+    admin_keys = config.ADMIN_METADATA_KEYS_RW
     import_path = Path("./import")
     base_url = "https://data-testing.data.bas.ac.uk"
     testing_bucket = "lantern-testing.data.bas.ac.uk"

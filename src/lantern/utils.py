@@ -4,6 +4,7 @@ import logging
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+import sysrsync
 from boto3 import client as S3Client  # noqa: N812
 from bs4 import BeautifulSoup
 from importlib_resources import as_file as resources_as_file
@@ -103,6 +104,31 @@ class S3Utils:
                 continue
             # noinspection PyTypeChecker
             self._s3.delete_objects(Bucket=self._bucket, Delete={"Objects": keys})
+
+
+class RsyncUtils:
+    """Wrapper around https://github.com/gchamon/sysrsync client with high-level and/or convenience methods."""
+
+    def __init__(self, logger: logging.Logger, host: str) -> None:
+        self._logger = logger
+        self._host = host
+
+    def put(self, src_path: Path, target_path: Path) -> None:
+        """
+        Copy contents of source path to target on remote server.
+
+        E.g. for a source path './items' containing './items/123/index.html' and a target path of '/data/', this will
+        create '/data/123/index.html'.
+        """
+        self._logger.info(f"Syncing {src_path.resolve()} to {self._host}:{target_path}")
+        sysrsync.run(
+            strict=True,
+            source=str(src_path.resolve()),
+            sync_source_contents=True,
+            destination=str(target_path),
+            destination_ssh=self._host,
+            options=["-a"],
+        )
 
 
 def init_gitlab_store(

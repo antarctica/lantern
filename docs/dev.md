@@ -39,9 +39,9 @@ To run [Publishing Workflows](/docs/usage.md) locally:
    - scopes: *api*
 3. set the relevant [Config](/docs/config.md) options in your local `.env` file
 
-### Local development GitLab
+### Local development Stack
 
-A GitLab instance can be used for the [GitLab Store](/docs/stores.md#gitlab-store) via a container.
+Local versions of services used by Lantern can be run via containers.
 
 Requirements:
 
@@ -51,46 +51,59 @@ Requirements:
 Setup:
 
 - install tools `brew install --cask orbstack opentofu`
-- start GitLab stack using the `local-gitlab-start` [Development Task](#development-tasks)
-- once initialised, login to [GitLab](https://gitlab.gitlab.orb.local) using 'root' and [1]
-- create a new [Admin User](https://gitlab.gitlab.orb.local/admin/users/new)
-- open [Local Email Server](https://mail.gitlab.orb.local) and follow link in signup email to set password
-- create a [Personal Access Token](https://gitlab.gitlab.orb.local/-/user_settings/personal_access_tokens):
-  - token name: `{host}-lantern-dev-tf`
-  - scopes: `api`
-- configure GitLab via OpenTofu [2]
-- impersonate the [Lantern Bot User](https://gitlab.gitlab.orb.local/admin/users/lantern_bot)
-- create a [Personal Access Token](https://gitlab.gitlab.orb.local/-/user_settings/personal_access_tokens):
-  - token name: 'local-env'
-  - scopes: `api`
-- add relevant [Config Options](/docs/config.md) in `.env` file (as a parallel configuration)
-- run the `bootstrap-records` [Development Task](#development-tasks)
-- when no longer needed, stop GitLab stack using the `local-gitlab-stop` [Development Task](#development-tasks)
+- start stack using the `stack-start` [Development Task](#development-tasks)
+- Run [GitLab](#local-development-gitlab) manual pre-configuration
+- Run local Infrastructure as Code using OpenTofu [2]
+- Run [GitLab](#local-development-gitlab) manual post-configuration
 
-<!-- pyml disable md028 -->
-> [!TIP]
-> The [`truststore`](https://pypi.org/project/truststore/) dev dependency is used to trust the OrbStack local CA in
-> the GitLab Store.
+Stop:
 
-> [!TIP]
-> To reset the GitLab instance:
->
-> - run the `local-gitlab-stop` dev task, `rm -rf ./resources/dev/gitlab/data/` then the `local-gitlab-start` task
-> - `rm ./resources/dev/terraform.tfstate*`
-<!-- pyml enable md028 -->
+- stop stack using the `stack-stop` [Development Task](#development-tasks)
 
-[1]
+Reset:
 
-```shell
-% docker compose -f ./resources/dev/gitlab/docker-compose.yml exec -it gitlab grep 'Password:' /etc/gitlab/initial_root_password
+```text
+% task stack-stop
+% rm -rf ./resources/dev/gitlab/data/
+% task stack-start
 ```
 
 [2]
 
-```shell
-% cd ./resources/dev/gitlab/
+```text
+% cd ./resources/dev
 % tofu init
 % GITLAB_TOKEN=xxx tofu apply
+```
+
+### Local development GitLab
+
+Manual pre-configuration:
+
+- once [Local Stack](#local-development-stack) is up, login to [GitLab](https://gitlab.dev.orb.local) as 'root' [1]
+- create a new [Admin User](https://gitlab.dev.orb.local/admin/users/new)
+- open [Local Email Server](https://mail.dev.orb.local) and follow link in signup email to set password
+- create a [Personal Access Token](https://gitlab.dev.orb.local/-/user_settings/personal_access_tokens):
+  - token name: `lantern-dev-tf`
+  - scopes: `api`
+
+Manual post-configuration:
+
+- impersonate the [Lantern Bot User](https://gitlab.dev.orb.local/admin/users/lantern_bot)
+- create a [Personal Access Token](https://gitlab.dev.orb.local/-/user_settings/personal_access_tokens):
+  - token name: 'local-env'
+  - scopes: `api`
+- add relevant [Config Options](/docs/config.md) in `.env` file (as a parallel configuration)
+- run the `bootstrap-records` [Development Task](#development-tasks)
+
+> [!TIP]
+> The [`truststore`](https://pypi.org/project/truststore/) dev dependency is used to trust the OrbStack local CA in
+> the GitLab Store.
+
+[1] Root password:
+
+```shell
+% docker compose -f ./resources/dev/docker-compose.yml exec -it gitlab grep 'Password:' /etc/gitlab/initial_root_password
 ```
 
 ## Development tasks

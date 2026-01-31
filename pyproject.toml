@@ -38,6 +38,7 @@ dev = [
     "pytailwindcss>=0.2.0",
     "ruff>=0.12.4",
     "safety>=3.5.2",
+    "sysrsync>=1.1.1",
     "taskipy>=1.14.1",
     "truststore>=0.10.4",
     "ty>=0.0.1a23",

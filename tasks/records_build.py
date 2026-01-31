@@ -3,15 +3,19 @@ import logging
 import shutil
 from collections.abc import Callable
 from datetime import UTC, datetime
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from mypy_boto3_s3 import S3Client
 from tasks._record_utils import init
 
 from lantern.config import Config as Config
-from lantern.exporters.site import SiteExporter
+from lantern.exporters.html import HtmlExporter
+from lantern.exporters.site import SiteExporter, SiteResourcesExporter
 from lantern.models.site import ExportMeta
 from lantern.stores.gitlab import GitLabStore
 from lantern.stores.gitlab_cache import GitLabCachedStore
+from lantern.utils import RsyncUtils
 
 
 def time_task(label: str) -> Callable:
@@ -31,6 +35,44 @@ def time_task(label: str) -> Callable:
     return decorator
 
 
+def upload_trusted(
+    logger: logging.Logger, config: ExtraConfig, store: GitLabStore, s3: S3Client, identifiers: set[str] | None = None
+) -> None:
+    """
+    Publish trusted content to SFTP.
+
+    Group write permissions are set on uploaded files (660) and directories (770) to allow shared management.
+    """
+    sync = RsyncUtils(logger=logger, host=config.TRUSTED_UPLOAD_HOST)
+    export_meta = ExportMeta.from_config_store(
+        config=config, store=store, build_repo_ref=store.head_commit, trusted=True
+    )
+    with TemporaryDirectory() as tmp_path:
+        items_path = Path(tmp_path) / "items"
+    items_path.mkdir(parents=True, exist_ok=True)
+
+    env_path = "stage" if "integration" in config.AWS_S3_BUCKET else "prod"
+    items_target = config.TRUSTED_UPLOAD_PATH / env_path / "items"
+
+    assets_exporter = SiteResourcesExporter(logger=logger, meta=export_meta, s3=s3)
+    assets_exporter.export()
+
+    for record in store.select(identifiers):
+        fid = record.file_identifier
+        logger.info(f"Generating record '{fid}' using Item HTML exporter in a trusted context")
+        item_exporter = HtmlExporter(
+            logger=logger, meta=export_meta, s3=s3, record=record, select_record=store.select_one
+        )
+        item_path = items_path / fid / "index.html"
+        item_path.parent.mkdir(parents=True, exist_ok=True)
+        with item_path.open("w") as record_file:
+            record_file.write(item_exporter.dumps())
+        item_path.parent.chmod(0o770)
+        item_path.chmod(0o660)
+
+    sync.put(items_path, items_target)
+
+
 class ToyCatalogue:
     """Toy catalogue for prototyping."""
 
@@ -40,21 +82,19 @@ class ToyCatalogue:
         config: Config,
         s3: S3Client,
         store: GitLabStore | GitLabCachedStore,
-        trusted: bool = False,
         selected_identifiers: set[str] | None = None,
     ) -> None:
         self._logger = logger
         self._config = config
         self._s3 = s3
         self._store = store
-        self._trusted = trusted
         self._selected_identifiers = selected_identifiers
 
         if isinstance(self._store, GitLabCachedStore):
             # ensure cache exists to get head commit for ExportMeta and is up to date before freezing
             self._store._cache._ensure_exists()
         self._meta = ExportMeta.from_config_store(
-            config=self._config, store=self._store, build_repo_ref=self._store.head_commit, trusted=self._trusted
+            config=self._config, store=self._store, build_repo_ref=self._store.head_commit, trusted=False
         )
 
         if isinstance(self._store, GitLabCachedStore):
@@ -76,10 +116,25 @@ class ToyCatalogue:
         """Export catalogue to file system."""
         self._site.export()
 
+    def _publish_untrusted(self) -> None:
+        """Publish catalogue to S3 with unrestricted access."""
+        self._site.publish()
+
+    def _publish_trusted(self) -> None:
+        """Publish supplemental content with restricted access."""
+        upload_trusted(
+            logger=self._logger,
+            config=self._config,
+            store=self._store,
+            s3=self._s3,
+            identifiers=self._selected_identifiers,
+        )
+
     @time_task(label="Publish")
     def publish(self) -> None:
-        """Publish catalogue to S3."""
-        self._site.publish()
+        """Publish catalogue to remote (un)trusted location."""
+        self._publish_untrusted()
+        self._publish_trusted()
 
     # noinspection PyProtectedMember
     @time_task(label="Purge")
@@ -102,13 +157,11 @@ def main() -> None:
     export = True
     publish = False
     selected = set()  # to set use the form {"abc", "..."}
-    trusted = False
-
     cached = True
     if 0 < len(selected) <= 3:
         cached = False
     logger, config, store, s3 = init(cached_store=cached)
-    cat = ToyCatalogue(config=config, logger=logger, s3=s3, store=store, trusted=trusted, selected_identifiers=selected)
+    cat = ToyCatalogue(config=config, logger=logger, s3=s3, store=store, selected_identifiers=selected)
 
     if export:
         cat.export()

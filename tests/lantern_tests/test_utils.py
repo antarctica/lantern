@@ -5,6 +5,7 @@ from tempfile import TemporaryDirectory
 import pytest
 from boto3 import client as S3Client  # noqa: N812
 from jinja2 import Environment
+from pytest_mock import MockerFixture
 
 from lantern.config import Config
 from lantern.lib.metadata_library.models.record.elements.common import Identifier
@@ -13,6 +14,7 @@ from lantern.models.record.revision import RecordRevision
 from lantern.stores.gitlab import GitLabStore
 from lantern.stores.gitlab_cache import GitLabCachedStore
 from lantern.utils import (
+    RsyncUtils,
     S3Utils,
     dumps_redirect,
     get_jinja_env,
@@ -114,6 +116,31 @@ class TestS3Utils:
         fx_s3_utils.empty_bucket()
         result = fx_s3_utils._s3.list_objects_v2(Bucket=fx_s3_bucket_name)
         assert "contents" not in result
+
+
+class TestRsyncUtils:
+    """Test Rsync utility methods."""
+
+    def test_init(self, fx_logger: logging.Logger):
+        """Can create instance."""
+        rsync_utils = RsyncUtils(logger=fx_logger, host="x")
+        assert isinstance(rsync_utils, RsyncUtils)
+
+    def test_put(self, mocker: MockerFixture, fx_logger: logging.Logger):
+        """Can generate expected rsync command."""
+        mock = mocker.MagicMock()
+        # noinspection SpellCheckingInspection
+        mock.returncode = 0
+        mock_subproc = mocker.patch("sysrsync.runner.subprocess.run", return_value=mock)
+
+        host = "h"
+        source = Path("/x")
+        target = Path("y")
+        expected = f"rsync -a {source.resolve()}/ {host}:y"
+        rsync_utils = RsyncUtils(logger=fx_logger, host=host)
+
+        rsync_utils.put(source, target)
+        mock_subproc.assert_called_once_with(expected.split(" "), cwd=str(Path.cwd()), shell=False)
 
 
 @pytest.mark.cov()

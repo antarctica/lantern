@@ -42,6 +42,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * 'admin-record' development task for viewing administrative metadata for a record
 * custom Sentry user feedback widget
 * Infrastructure as Code using OpenTofu
+* Automatic publishing of trusted content for administrative metadata
 
 ### Fixed
 

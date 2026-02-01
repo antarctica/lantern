@@ -109,6 +109,11 @@ See the [Templates](/docs/site.md#templates-configuration) docs for more informa
 - `TEMPLATES_ITEM_VERSIONS_ENDPOINT`
 - `TEMPLATES_PLAUSIBLE_DOMAIN`
 
+### Development task options
+
+See the [Development Tasks Configuration](/docs/dev.md#development-tasks-config) docs for information on additional
+config options used by development tasks.
+
 ## Config option types
 
 All [Config Options](#config-options) are read as string values. They will then be parsed and cast to the listed type

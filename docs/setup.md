@@ -51,15 +51,73 @@ Manually:
 The majority of the [Static Site](/docs/architecture.md#static-site) hosting setup is managed using
 [Infrastructure as Code (IaC)](/docs/infrastructure.md#infrastructure-as-code).
 
-### Static website hosting reverse proxying
+Once applied, manually configure [Reverse Proxying](#reverse-proxying).
 
-Configuring the BAS HAProxy load balancer for [Reverse Proxying](/docs/infrastructure.md#hosting) requires a request
-to BAS IT. This should request:
+### Static website hosting IAM users
 
-- frontend ACLs matching any of the static site endpoints [1] for each non-development environment
+IaC will:
+
+- create an IAM user to enable the [Workstation Module](/docs/usage.md#workstation-module) with a suitable inline
+  policy to:
+  - manage content in the [Static Site](/docs/architecture.md#static-site) for the
+    [Interactive](/docs/usage.md#interactive-record-publishing-workflow) and
+    [Non-Interactive](/docs/usage.md#non-interactive-record-publishing-workflow) Publishing Workflows
+- create and store an access key in 1Password for each non-development environment
+
+Manually:
+
+- reference the relevant access key in the corresponding Ansible Vault templates to set [Config](/docs/config.md) options
+
+## Secure website hosting
+
+The [BAS Operations Data Store 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/ops-data-store) provides a web-server with LDAP
+authentication and authorisation for securely hosting restricted content. It is used by this project for
+[Trusted Publishing](/docs/exporters.md#trusted-publishing).
+
+Manually:
+
+- create an area in the Operations Data Store web root [1]
+- configure this area [2]
+- configure [Reverse Proxying](#reverse-proxying)
+
+[1] As the Ops Data Store control user from a server with ACLs enabled:
+
+```text
+$ mkdir -p $DOCUMENT_ROOT/content/cat
+$ chgrp magic $DOCUMENT_ROOT/content/cat
+$ setfacl -m g::rwx,g:apache:rx,o::--- -m d:g::rwx,d:g:apache:rx,d:o::--- $DOCUMENT_ROOT/content/cat
+```
+
+This ACL:
+
+- grants members of the default group (i.e. `magic`) full control
+- grants the web server user read access
+- revokes all access to others/world
+
+[2] As a user in the `magic` group:
+
+```text
+$ mkdir -p $DOCUMENT_ROOT/content/cat/stage/items $DOCUMENT_ROOT/content/cat/prod/items
+$ chmod -R g+w $DOCUMENT_ROOT/content/cat/stage $DOCUMENT_ROOT/content/cat/prod
+```
+
+## Reverse proxying
+
+Set up reverse proxying within the BAS HAProxy load balancer to direct traffic to either:
+
+- the legacy DMS catalogue
+- [Static Hosting](#static-website-hosting) for public content
+- [Secure Hosting](#secure-website-hosting) for [Trusted Publishing](/docs/exporters.md#trusted-publishing)
+
+This requires a request to BAS IT asking for:
+
+- frontend ACLs matching any of the static [1] or secure [2] site endpoints for each non-development environment
 - backends for each of these environments with:
-  - a single server pointing to the relevant AWS CloudFront Distribution
-  - a health check using the [Health Check Endpoint](/docs/monitoring.md#health-check-endpoint)
+  - a single server pointing to either:
+    - the relevant AWS CloudFront Distribution
+    - or the relevant Operations Data Store endpoint
+  - a health check using the [Health Check Endpoint](/docs/monitoring.md#health-check-endpoint) (for static hosting)
+  - URL rewriting as needed (for secure hosting)
 
 [1] Static site endpoints:
 
@@ -78,20 +136,11 @@ to BAS IT. This should request:
 /.well-known/api-catalog
 ```
 
-### Static website hosting IAM users
+[2] Secure site endpoints:
 
-IaC will:
-
-- create an IAM user to enable the [Workstation Module](/docs/usage.md#workstation-module) with a suitable inline
-  policy to:
-  - manage content in the [Static Site](/docs/architecture.md#static-site) for the
-    [Interactive](/docs/usage.md#interactive-record-publishing-workflow) and
-    [Non-Interactive](/docs/usage.md#non-interactive-record-publishing-workflow) Publishing Workflows
-- create and store an access key in 1Password for each non-development environment
-
-Manually:
-
-- reference the relevant access key in the corresponding Ansible Vault templates to set [Config](/docs/config.md) options
+```text
+/-/items/
+```
 
 ## Sentry
 

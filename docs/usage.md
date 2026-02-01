@@ -29,31 +29,31 @@ projects to manage and/or publish records.
 > This installation is restricted to MAGIC staff.
 
 > [!NOTE]
-> This is a preview feature and does not directly relate to the workflows and tasks below unless noted.
+> This is a preview feature limited to running the
+> [Non-Interactive Publishing Workflow](#non-interactive-record-publishing-workflow) only.
+>
+> It cannot be used for workflows or tasks that require [Development Tasks](/docs/dev.md#development-tasks).
 <!-- pyml enable md028 -->
 
-To use this installation, you first need to include MAGIC custom environment modules in your module search path [1].
+To use this installation:
 
-Then load the `lantern` module:
-
-```text
-$ module load lantern
-```
+- ensure MAGIC environment modules are included in your module search path [1]
+- load the `lantern` module `module load lantern`
 
 > [!TIP]
 > This will load the latest stable [Release](/README.md#releases).
 >
-> To load a preview of the next release (built from `main`), use `module load lantern/0.0.0.STAGING` instead.
+> To load a preview of the next release (built from `main`), run `module load lantern/0.0.0.STAGING` instead.
 
 [1]
 
-To include modules once:
+To include MAGIC modules in your current session:
 
 ```text
 $ module use --append /data/magic/.Modules/modulefiles
 ```
 
-To include modules on login via a shell profile:
+To always include MAGIC modules, add the above to your shell profile (e.g. in `~/.bash_profile`):
 
 ```shell
 # include MAGIC custom environment modules
@@ -199,6 +199,8 @@ PUB_CAT_AUTHOR_EMAIL="magicdev@bas.ac.uk"
 - if changing access permissions, run the `restrict-records` [Development Task](/docs/dev.md#development-tasks)
 - run the [Import Records](#import-records) workflow
 
+### Selecting records
+
 The `select-records` task will:
 
 1. repeatedly prompt interactively for the identifier(s) of existing records until:
@@ -211,6 +213,8 @@ The `select-records` task will:
 > [!TIP]
 > Record identifiers are intentionally flexible, supporting various catalogue URLs, file names, etc. optionally as a
 > comma and/or space separated list (e.g. `https://example.com/items/123/, 123.json`). Run task for supported formats.
+
+### Setting record permissions
 
 The `restrict-records` task (if needed) will:
 
@@ -283,7 +287,10 @@ The `build-records` task will:
 1. load some or all or records from a [GitLab Store](/docs/stores.md#gitlab-store) into a
    [Site Exporter](/docs/exporters.md#site-exporter)
 1. if the export option is enabled, output the static site to a local path
-1. if the publish option is enabled, upload the static site to a remote S3 bucket
+1. if the publish option is enabled:
+   - upload public static site content to a remote S3 bucket
+   - upload [Trusted Content](/docs/exporters.md#trusted-publishing) to the
+    [BAS Operations Data Store 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/ops-data-store) hosting server
 
 ## Verify static site
 

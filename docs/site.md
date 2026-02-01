@@ -24,6 +24,12 @@ available as:
 Additional static content such as CSS, JS, fonts and images managed by the
 [Site Resources Exporter](/docs/exporters.md#site-resources-exporter) are not listed in this definition.
 
+### Site dependencies
+
+This diagram shows the external services and resources the static site depends on and links out to.
+
+![Site IO Digram](/docs/img/site-io.png)
+
 ## HTML metadata
 
 HTML metadata elements are included by the `html_head` [Site Macro](#site-macros) for:

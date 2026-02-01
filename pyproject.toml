@@ -29,6 +29,7 @@ dependencies = [
     "requests>=2.32.4",
     "sentry-sdk>=2.32.0",
     "sqlorm-py>=0.4.1",
+    "truststore>=0.10.4",
 ]
 
 [dependency-groups]
@@ -40,7 +41,6 @@ dev = [
     "safety>=3.5.2",
     "sysrsync>=1.1.1",
     "taskipy>=1.14.1",
-    "truststore>=0.10.4",
     "ty>=0.0.1a23",
     "types-lxml>=2025.3.30",
 ]

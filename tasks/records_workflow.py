@@ -9,11 +9,12 @@ from pathlib import Path
 import inquirer
 from gitlab.exceptions import GitlabGetError
 from mypy_boto3_s3 import S3Client
+from tasks._config import ExtraConfig
 from tasks._record_utils import init, init_store, parse_records
+from tasks.records_build import upload_trusted
 from tasks.records_import import clean as import_clean
 from tasks.records_import import load as import_load
 from tasks.records_import import push as import_push
-from tasks.records_permissions import _init_admin_keys
 from tasks.records_zap import clean_input_path as zap_clean_input_path
 from tasks.records_zap import dump_records as zap_dump_records
 from tasks.records_zap import parse_records as zap_parse_records
@@ -45,6 +46,11 @@ class OutputCommentItem:
         return f"{self._base_url}/items/{self._record.file_identifier}"
 
     @property
+    def _trusted_item_url(self) -> str:
+        """Canonical URL to item."""
+        return f"{self._base_url}/-/items/{self._record.file_identifier}"
+
+    @property
     def _revision_url(self) -> str:
         """URL to record revision config in records repo."""
         repo = self._meta.build_repo_base_url
@@ -69,6 +75,7 @@ class OutputCommentItem:
             "type": self._record.hierarchy_level.value,
             "title": self._record.identification.title,
             "item_url": self._item_url,
+            "trusted_item_url": self._trusted_item_url,
             "alias_urls": ", ".join(self._aliases),
             "revision_link": self._revision_link,
         }
@@ -134,6 +141,7 @@ class OutputComment:
   {% endif %}
   - {{ item.item_url }}
   - {{ item.revision_link }}
+  - 🔒 {{ item.trusted_item_url }}
 {% endfor %}
 
 _This comment was left automatically by the Lantern Experiment's [Interactive record publishing workflow](https://github.com/antarctica/lantern/blob/main/docs/usage.md#interactive-record-publishing-workflow)._
@@ -314,7 +322,7 @@ def _merge_request(logger: logging.Logger, store: GitLabStore, issue_href: str |
 
 @_time_task(label="Build")
 def _build(
-    logger: logging.Logger, config: Config, store: GitLabCachedStore, s3: S3Client, identifiers: set[str]
+    logger: logging.Logger, config: ExtraConfig, store: GitLabCachedStore, s3: S3Client, identifiers: set[str]
 ) -> None:
     """Build items for committed records."""
     meta = ExportMeta.from_config_store(
@@ -326,6 +334,8 @@ def _build(
     store._cache._frozen = True
     logger.info(f"Publishing {len(identifiers)} records to {config.AWS_S3_BUCKET}.")
     site.publish()
+    logger.info("Publishing trusted items to a secure location.")
+    upload_trusted(logger=logger, config=config, store=store, s3=s3, identifiers=identifiers)
 
 
 @_time_task(label="Verify")
@@ -389,7 +399,7 @@ def main() -> None:
     on a limited number of records.
     """
     logger, config, store, s3 = init()
-    admin_keys = _init_admin_keys(config)
+    admin_keys = config.ADMIN_METADATA_KEYS_RW
     import_path = Path("./import")
     base_url = "https://data-testing.data.bas.ac.uk"
     testing_bucket = "lantern-testing.data.bas.ac.uk"

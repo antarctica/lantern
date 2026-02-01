@@ -38,6 +38,7 @@ dev = [
     "pytailwindcss>=0.2.0",
     "ruff>=0.12.4",
     "safety>=3.5.2",
+    "sysrsync>=1.1.1",
     "taskipy>=1.14.1",
     "truststore>=0.10.4",
     "ty>=0.0.1a23",
@@ -68,7 +69,7 @@ docs_targets = "docs/ README.md CHANGELOG.md"
 types_targets = "src/"
 targets = "src/ tasks/ tests/"
 cov_options = "--cov --cov-report=html"
-gitlab_local_compose = "./resources/dev/gitlab/docker-compose.yml"
+local_stack_compose = "./resources/dev/docker-compose.yml"
 
 [tool.taskipy.tasks]
 # generic dev
@@ -87,8 +88,8 @@ outdated = { cmd = "uv tree --outdated --depth=1", help = "List outdated directe
 ci-test = { cmd = "pytest {cov_options} -o junit_family=xunit2 --junitxml=test-results.xml --continue-on-collection-errors", help = "Called by CI", use_vars = true }
 ci-safety = { cmd = "safety --stage cicd scan --detailed-output", help = "Called by CI" }
 # local stack
-local-gitlab-start = { cmd = "docker-compose -f {gitlab_local_compose} up -d", help = "Start local GitLab instance", use_vars = true }
-local-gitlab-stop = { cmd = "docker-compose -f {gitlab_local_compose} down", help = "Stop local GitLab instance", use_vars = true }
+stack-start = { cmd = "docker-compose -f {local_stack_compose} up -d", help = "Start local dev stack", use_vars = true }
+stack-stop = { cmd = "docker-compose -f {local_stack_compose} down", help = "Stop local dev stack", use_vars = true }
 # IaC
 tfvars-init = { cmd = "op inject --in-file resources/envs/terraform.tfvars.tpl --out-file resources/envs/terraform.tfvars", help = "Initialise Terraform/OpenTofu vars file" }
 # app dev

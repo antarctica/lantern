@@ -5,7 +5,6 @@ from pathlib import Path
 
 from tasks._record_utils import dump_records, init
 from tasks._record_utils import parse_records as base_parse_records
-from tasks.records_permissions import _init_admin_keys
 
 from lantern.lib.metadata_library.models.record.elements.administration import Administration, Permission
 from lantern.lib.metadata_library.models.record.elements.common import (
@@ -427,7 +426,7 @@ def parse_records(logger: logging.Logger, input_path: Path) -> list[tuple[Record
 def main() -> None:
     """Entrypoint."""
     logger, config, store, _s3 = init()
-    admin_keys = _init_admin_keys(config)
+    admin_keys = config.ADMIN_METADATA_KEYS_RW
 
     input_path = Path("./import")
     logger.info(f"Loading records from: '{input_path.resolve()}'")

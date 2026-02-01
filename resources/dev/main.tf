@@ -10,7 +10,7 @@ terraform {
 }
 
 provider "gitlab" {
-  base_url = "https://gitlab.gitlab.orb.local/api/v4"
+  base_url = "https://gitlab.dev.orb.local/api/v4"
 }
 
 resource "gitlab_group" "magic" {

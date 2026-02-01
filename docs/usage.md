@@ -199,6 +199,43 @@ PUB_CAT_AUTHOR_EMAIL="magicdev@bas.ac.uk"
 - if changing access permissions, run the `restrict-records` [Development Task](/docs/dev.md#development-tasks)
 - run the [Import Records](#import-records) workflow
 
+### Replacing record thumbnails
+
+To replace the thumbnail for an existing resource:
+
+```text
+% aws s3 cp $IMAGE_FILE s3://cdn.web.bas.ac.uk/add-catalogue/0.0.0/img/items/$FILE_IDENTIFIER/
+% aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths "/add-catalogue/0.0.0/img/items/$FILE_IDENTIFIER/$IMAGE_FILE"
+% aws cloudfront get-invalidation --distribution-id $DISTRIBUTION_ID --id $INVALIDATION_ID --query "Invalidation.Status" --output text
+InProgress
+# ...
+% aws cloudfront get-invalidation --distribution-id $DISTRIBUTION_ID --id $INVALIDATION_ID --query "Invalidation.Status" --output text
+Completed
+```
+
+Where:
+
+- `$IMAGE_FILE` is the local path to the replacement thumbnail file
+- `$FILE_IDENTIFIER` is the identifier of the resource being updated
+- `$DISTRIBUTION_ID` is the CloudFront distribution hosting catalogue thumbnails
+- `$INVALIDATION_ID` is returned by the `create-invalidation` command
+
+If the thumbnail file name has changed:
+
+- select the record for the resource as per the generic update workflow
+- replace the relevant graphic overview URL
+- continue following the generic update workflow to complete updating the record
+
+### Replacing record artefacts
+
+To replace an artefact for an existing resource:
+
+- use the Zap ⚡️editor to select (but not upload) the replacement artefact to get an updated distribution option
+- select the record for the resource as per the generic update workflow
+- replace the relevant distribution option, preserving the transfer option URL (and amending if renamed)
+  - this should ensure the format and size are updated if needed but double-check this
+- continue following the generic update workflow to complete updating the record
+
 ### Selecting records
 
 The `select-records` task will:

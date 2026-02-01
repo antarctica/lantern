@@ -4,7 +4,7 @@
 
 This diagram shows this project's infrastructure components:
 
-![Infrastructure Diagram](/docs/img/infrastructure.png)
+![Infrastructure Diagram](/docs/img/infra-components.png)
 
 ## Environments
 
@@ -25,25 +25,31 @@ Development environments may be created and destroyed as needed. Staging and Pro
 ## Deployment
 
 - [Environment Module](/docs/deployment.md#environment-module)
-  - to BAS Workstations to run [Publishing Workflows](/docs/usage.md#workstation-module)
-  - managed via [Ansible Playbook 🛡️](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/playbooks/magic/lantern.yml)
+  - managed via [Ansible 🛡️](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/playbooks/magic/lantern.yml)
 
 ## Hosting
+
+This diagram shows this project's hosting components:
+
+![Hosting Diagram](/docs/img/infra-hosting.png)
 
 Endpoints:
 
 - development: [localhost:9000](http://localhost:9000/)
-- staging:
-  - [lantern-testing.data.bas.ac.uk](https://lantern-testing.data.bas.ac.uk)
-  - reverse proxied as [data-testing.data.bas.ac.uk](https://data-testing.data.bas.ac.uk/)
-- production:
-  - [lantern.data.bas.ac.uk](https://lantern.data.bas.ac.uk)
-  - reverse proxied as [data.bas.ac.uk](https://data.bas.ac.uk/)
+- staging (testing): [data-testing.data.bas.ac.uk](https://data-testing.data.bas.ac.uk/), composed of:
+  - [lantern-testing.data.bas.ac.uk](https://lantern-testing.data.bas.ac.uk) for public content
+  - BAS Operations Data Store for [Trusted Publishing](/docs/exporters.md#trusted-publishing)
+- production (live): [data.bas.ac.uk](https://data.bas.ac.uk/), composed of:
+  - [lantern.data.bas.ac.uk](https://lantern.data.bas.ac.uk) for public content
+  - BAS Operations Data Store for [Trusted Publishing](/docs/exporters.md#trusted-publishing)
 
-The staging and production environments share their endpoints with the legacy Discovery Metadata System (DMS), via
-reverse proxying. The BAS HAProxy load balancer proxies applicable requests to a relevant AWS Cloudfront Distribution.
+The testing and live environments share their endpoints with the legacy Discovery Metadata System (DMS), via
+reverse proxying. The BAS HAProxy load balancer proxies applicable requests to either:
 
-See the `data_redirect.txt` file within the load balancer configuration (🔒) for proxied paths.
+- a relevant AWS Cloudfront Distribution (for public content)
+  - controlled by the `data_redirect.txt` load balancer config file (🔒)
+- or a relevant part of the [BAS Operations Data Store 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/ops-data-store)
+  - controlled by the `data_internal_redirect.txt` load balancer config file (🔒)
 
 ## Infrastructure as Code
 
@@ -134,5 +140,14 @@ Then run:
     - [IAM user for workstation module 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=b3xyp2epz6qycjrbootkf3oaha&h=magic.1password.eu)
   - [Production 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=hksogwx7zqx3ct2jr36cshoqpy&h=magic.1password.eu):
     - [IAM user for workstation module 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=hgjc2sxfvctejscocydzmg2tge&h=magic.1password.eu)
-  - for [Exporters](/docs/exporters.md) to publish content
+  - for [Exporters](/docs/exporters.md) to publish public content
+  - DNS records for CloudFront aliases are registered in the relevant AWS Route53 zone
+  - TLS certificates for these aliases are managed via AWS Certificate Manager
   - managed via [Infrastructure as Code](#infrastructure-as-code)
+- Secure hosting:
+  - provided by the [BAS Operations Data Store 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/ops-data-store)
+  - which in turn uses the BAS LDAP directory for authentication and authorisation
+  - [All Environments 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=l2whnxwdbixs3xypq5ja6w6gr4&h=magic.1password.eu)
+    - [SSH credentials for workstation module 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=ydfrpsnqbmifpic5y5mp2du4pa&h=magic.1password.eu)
+  - for [Exporters](/docs/exporters.md) to publish trusted content
+  - managed manually as per [Setup](/docs/setup.md#secure-website-hosting) documentation

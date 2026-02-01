@@ -290,7 +290,7 @@ resource "gitlab_project" "records_store" {
   name             = "Lantern experiment - records" # "Lantern Records Store"
   path             = "lantern-records-exp"
   namespace_id     = 22 # felnne
-  description      = "Records store for Lantern experimental catalogue. Managed by IaC."
+  description      = "Records store for Lantern experimental catalogue. This project is managed using Infrastructure as Code."
   visibility_level = "internal"
 
   # disable everything except repository and merge-requests

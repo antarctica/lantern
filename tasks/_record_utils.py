@@ -192,7 +192,7 @@ def dump_records(logger: logging.Logger, output_path: Path, records: Sequence[Re
             f.write(record.dumps_json(strip_admin=False))
 
 
-def clean_configs(
+def clean_record_configs(
     logger: logging.Logger, records: Mapping[Path, Record | RecordCatalogue], file_identifiers: list[str]
 ) -> None:
     """Clean up input path."""

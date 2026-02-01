@@ -890,6 +890,7 @@ dependencies = [
     { name = "requests" },
     { name = "sentry-sdk" },
     { name = "sqlorm-py" },
+    { name = "truststore" },
 ]
 
 [package.dev-dependencies]
@@ -901,7 +902,6 @@ dev = [
     { name = "safety" },
     { name = "sysrsync" },
     { name = "taskipy" },
-    { name = "truststore" },
     { name = "ty" },
     { name = "types-lxml" },
 ]
@@ -941,6 +941,7 @@ requires-dist = [
     { name = "requests", specifier = ">=2.32.4" },
     { name = "sentry-sdk", specifier = ">=2.32.0" },
     { name = "sqlorm-py", specifier = ">=0.4.1" },
+    { name = "truststore", specifier = ">=0.10.4" },
 ]
 
 [package.metadata.requires-dev]
@@ -952,7 +953,6 @@ dev = [
     { name = "safety", specifier = ">=3.5.2" },
     { name = "sysrsync", specifier = ">=1.1.1" },
     { name = "taskipy", specifier = ">=1.14.1" },
-    { name = "truststore", specifier = ">=0.10.4" },
     { name = "ty", specifier = ">=0.0.1a23" },
     { name = "types-lxml", specifier = ">=2025.3.30" },
 ]

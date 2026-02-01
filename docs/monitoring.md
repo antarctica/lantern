@@ -89,9 +89,10 @@ Checks are run for:
 - File distribution options (with special support for SharePoint and NORA hosted files)
 - ArcGIS layers and services (via the ArcGIS API)
 
-Checks are skipped for:
+Checks are not run for:
 
 - SAN reference distribution options (as there is no allowed access method)
+- [Trusted Publishing](/docs/exporters.md#trusted-publishing) content
 
 For Record and Item checks, all records in the [Store](/docs/architecture.md) are checked.
 

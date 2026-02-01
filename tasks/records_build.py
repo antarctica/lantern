@@ -103,9 +103,9 @@ class ToyCatalogue:
             self._store._cache._frozen = True
 
         self._site = SiteExporter(
+            logger=self._logger,
             config=self._config,
             meta=self._meta,
-            logger=self._logger,
             s3=self._s3,
             store=self._store,
             selected_identifiers=selected_identifiers,
@@ -157,9 +157,8 @@ def main() -> None:
     export = True
     publish = False
     selected = set()  # to set use the form {"abc", "..."}
-    cached = True
-    if 0 < len(selected) <= 3:
-        cached = False
+
+    cached = True  # always cached as index and website search exporters always select all records
     logger, config, store, s3 = init(cached_store=cached)
     cat = ToyCatalogue(config=config, logger=logger, s3=s3, store=store, selected_identifiers=selected)
 

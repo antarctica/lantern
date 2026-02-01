@@ -262,7 +262,9 @@ def _changeset(
             record_issues = record_issues.union(admin.gitlab_issues)
     record_issues.add("<OTHER>")
 
-    print("\nEnsure GitLab issue selected is where changeset should be linked (e.g. Helpdesk vs. Mapping Coordination.")
+    print(
+        "\nEnsure GitLab issue selected is where changeset should be linked (e.g. Helpdesk vs. Mapping Coordination)."
+    )
     issue = inquirer.prompt([inquirer.List("issue", message="Issue URL", choices=record_issues)])["issue"]
     print(issue)
     if issue == "<NONE>":
@@ -402,7 +404,7 @@ def main() -> None:
     admin_keys = config.ADMIN_METADATA_KEYS_RW
     import_path = Path("./import")
     base_url = "https://data-testing.data.bas.ac.uk"
-    testing_bucket = "lantern-testing.data.bas.ac.uk"
+    testing_bucket = "add-catalogue-integration.data.bas.ac.uk"
 
     if testing_bucket != config.AWS_S3_BUCKET:
         logger.error("No. Non-testing bucket selected.")

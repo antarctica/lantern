@@ -26,7 +26,7 @@ class SiteResourcesExporter(Exporter):
     A non-record specific exporter for static resources used across the static site (CSS, JS, fonts, etc.).
     """
 
-    def __init__(self, meta: ExportMeta, logger: logging.Logger, s3: S3Client) -> None:
+    def __init__(self, logger: logging.Logger, meta: ExportMeta, s3: S3Client) -> None:
         super().__init__(logger=logger, meta=meta, s3=s3)
         self._css_src_ref = "lantern.resources.css"
         self._fonts_src_ref = "lantern.resources.fonts"

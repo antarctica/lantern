@@ -8,11 +8,9 @@
     <div class="text-center lg:text-right">{{ action(data) }}</div>
     {% if data.description %}<aside class="lg:col-span-3 text-sm text-grey-500 dark:text-grey-300">{{ data.description }}</aside>{% endif %}
     {% if data.access_target %}
-      <div class="lg:col-span-3">
-        <noscript><div class="pt-2">{{ panel(data) }}</div></noscript>
-        <div id="{{ data.access_target | replace("#", "") }}" class="pt-2 hidden">
-          {{ panel(data) }}
-        </div>
+      <noscript class="lg:col-span-3"><div class="pt-2">{{ panel(data) }}</div></noscript>
+      <div id="{{ data.access_target | replace("#", "") }}" class="lg:col-span-3 hidden pt-2">
+        {{ panel(data) }}
       </div>
     {% endif %}
   {% endcall %}

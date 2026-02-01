@@ -37,7 +37,24 @@ To run [Publishing Workflows](/docs/usage.md) locally:
    [Personal Access Token 🔒](https://gitlab.data.bas.ac.uk/-/profile/personal_access_tokens):
    - token name: `lantern-conwat`
    - scopes: *api*
-3. set the relevant [Config](/docs/config.md) options in your local `.env` file
+3. for [Trusted Publishing](/docs/exporters.md#trusted-publishing):
+   - ensure you can access the Ops Data Store web root with a user in the `magic` group
+   - if needed, create an SSH key and add the public key to the relevant remote authorised keys file
+   - if needed, configure SSH to access the relevant server with the relevant credentials automatically [1]
+4. set the relevant [Config](/docs/config.md) options in your local `.env` file
+
+[1] E.g. in `~/.ssh/config`:
+
+```text
+Host lantern-trusted-content
+    HostName server.example.com
+    User conwat
+    IdentityFile ~/.ssh/lantern_trusted_content.pub
+```
+
+The`IdentityFile` is a public key as a hint for the 1Password SSH agent.
+
+Needed for `rsync` to automatically authenticate.
 
 ### Local development Stack
 
@@ -76,7 +93,57 @@ Reset:
 % GITLAB_TOKEN=xxx tofu apply
 ```
 
+### Local development web server
+
+Part of [Local Development Stack](#local-development-stack).
+
+For simulating secure content hosting for [Trusted Publishing](/docs/exporters.md#trusted-publishing).
+
+Set relevant [Config Options](/docs/config.md) in `.env` file.
+
+Once the [Local Stack](#local-development-stack) is up, visit
+[web.dev.orb.local/cat/stage/items](https://user:password@web.dev.orb.local/cat/stage/items).
+
+### Local development load balancer
+
+Part of [Local Development Stack](#local-development-stack).
+
+For simulating reverse proxying similar to the BAS HAProxy Load Balancer.
+
+To externally test HAProxy request handling:
+
+- Public static hosting (via `serve` dev task):
+  - https://haproxy.dev.orb.local/static/txt/heartbeat.txt
+  - https://haproxy.dev.orb.local/-/index
+- Secure hosting (via `web` service in Local Stack): https://haproxy.dev.orb.local/-/items/ (`user`:`password`)
+- Non-proxied fallback: https://haproxy.dev.orb.local/x
+
+> [!TIP]
+> Add a `x-use-aws` header (with any/no value) to test public hosting using the non-local AWS testing environment.
+
+To internally test backends within HAProxy using the OrbStack terminal:
+
+```shell
+# 'lantern_public_exported' backend: Public static hosting (via `serve` dev task on host)
+> curl http://host.docker.internal:9000/static/txt/heartbeat.txt
+
+# 'lantern_public_published' backend: Public static hosting (via AWS testing environment)
+> curl -H "x-use-aws: true" http://host.docker.internal:9000/static/txt/heartbeat.txt
+
+# 'lantern_secure' backend: Secure hosting (via `web` service in Local Stack)
+> curl -I -u user:password https://haproxy.dev.orb.local/-/items/
+
+# 'dms_fallback' backend: (DMS/non-proxied error)
+> curl http://localhost/x
+```
+
+To view HAProxy internal stats:
+
+- visit [haproxy.dev.orb.local/haproxy_stats](https://admin:password@haproxy.dev.orb.local/haproxy_stats)
+
 ### Local development GitLab
+
+Part of [Local Development Stack](#local-development-stack).
 
 Manual pre-configuration:
 
@@ -120,6 +187,30 @@ See [Adding development tasks](#adding-development-tasks) for how to add new tas
 > [!TIP]
 > If offline, use `uv run --offline task ...` to avoid lookup errors trying to the unconstrained build system
 > requirements in `pyproject.toml`, which is a [Known Issue](https://github.com/astral-sh/uv/issues/5190) within UV.
+
+### Development tasks config
+
+The `tasks._record_utils.ExtraConfig` class extends the main [`lantern.Config`](/docs/config.md) class with extra
+config options used by development tasks.
+
+> [!NOTE]
+> These extra variables are prefixed with `X` rather than `LANTERN_`.
+
+<!-- pyml disable md013 -->
+| Option                                 | Type         | Sensitive | Since Version | Summary                                                      | Default | Example                                      |
+|----------------------------------------|--------------|-----------|---------------|--------------------------------------------------------------|---------|----------------------------------------------|
+| `X_ADMIN_METADATA_SIGNING_KEY_PRIVATE` | JSON Web Key | Yes       | v0.4.x        | JSON Web Key (JWK) for updating administrative metadata      | *None*  | '{"kid": "magic_metadata_signing_key", ...}' |
+| `X_TRUSTED_UPLOAD_HOST`                | String       | No        | v0.5.x        | SSH config alias for trusted content hosting server          | *None*  | 'lantern-trusted-content'                    |
+| `X_TRUSTED_UPLOAD_PATH`                | String       | No        | v0.5.x        | Directory for uploaded content within trusted content server | *None*  | '/data/lantern'                              |
+<!-- pyml enable md013 -->
+
+<!-- pyml disable md028 -->
+> [!TIP]
+> See [Local Development Publishing](#local-development-publishing) for how to configure `X_TRUSTED_UPLOAD_HOST`.
+
+> [!WARNING]
+> These config options are not validated. Manually ensure any options needed by a task are set.
+<!-- pyml enable md028 -->
 
 ## Contributing
 
@@ -189,7 +280,7 @@ Within this project:
 8. if a 'container' [Super Type](/docs/data-model.md#item-super-types), update the
   `lantern.models.item.catalogue.item.ItemCatalogue._super_type` property
 9. verify the [Test Records](#test-records) build as a local site
-10. update static site endpoints for [Reverse Proxying](/docs/setup.md#static-website-hosting-reverse-proxying) to
+10. update static site endpoints in [Reverse Proxying](/docs/setup.md#reverse-proxying) and `resources/dev/haproxy` to
     include new aliases, and request updating the BAS Load Balancer config to match
 
 If additional item relationships are needed:

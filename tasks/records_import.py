@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 
 import inquirer
-from tasks._record_utils import clean_configs, confirm_source, init, parse_records
+from tasks._record_utils import clean_record_configs, confirm_source, init, parse_records
 
 from lantern.config import Config
 from lantern.models.record.record import Record
@@ -55,7 +55,9 @@ def push(logger: logging.Logger, config: Config, store: GitLabStore, records: li
 
 def clean(logger: logging.Logger, records: dict[Path, Record], commit: CommitResults) -> None:
     """Clean up input path."""
-    clean_configs(logger=logger, records=records, file_identifiers=commit.new_identifiers + commit.updated_identifiers)
+    clean_record_configs(
+        logger=logger, records=records, file_identifiers=commit.new_identifiers + commit.updated_identifiers
+    )
 
 
 def main() -> None:

@@ -137,11 +137,11 @@ class OutputComment:
 {% for item in items %}
 - {{ item.title }} ({{ item.type }})
   {% if item.alias_urls %}
-  - {{ item.alias_urls }}
+  - 🔗 {{ item.alias_urls }}
   {% endif %}
-  - {{ item.item_url }}
-  - {{ item.revision_link }}
+  - 🌏 {{ item.item_url }}
   - 🔒 {{ item.trusted_item_url }}
+  - 💾️ {{ item.revision_link }}
 {% endfor %}
 
 _This comment was left automatically by the Lantern Experiment's [Interactive record publishing workflow](https://github.com/antarctica/lantern/blob/main/docs/usage.md#interactive-record-publishing-workflow)._

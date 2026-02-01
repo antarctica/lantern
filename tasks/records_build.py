@@ -43,7 +43,7 @@ def upload_trusted(
 
     Group write permissions are set on uploaded files (660) and directories (770) to allow shared management.
     """
-    sync = RsyncUtils(logger=logger, host=config.TRUSTED_UPLOAD_HOST)
+    sync = RsyncUtils(logger=logger)
     export_meta = ExportMeta.from_config_store(
         config=config, store=store, build_repo_ref=store.head_commit, trusted=True
     )
@@ -70,7 +70,7 @@ def upload_trusted(
         item_path.parent.chmod(0o770)
         item_path.chmod(0o660)
 
-    sync.put(items_path, items_target)
+    sync.put(src_path=items_path, target_path=items_target, target_host=config.TRUSTED_UPLOAD_HOST)
 
 
 class ToyCatalogue:

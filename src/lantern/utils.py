@@ -109,26 +109,28 @@ class S3Utils:
 class RsyncUtils:
     """Wrapper around https://github.com/gchamon/sysrsync client with high-level and/or convenience methods."""
 
-    def __init__(self, logger: logging.Logger, host: str) -> None:
+    def __init__(self, logger: logging.Logger) -> None:
         self._logger = logger
-        self._host = host
 
-    def put(self, src_path: Path, target_path: Path) -> None:
+    def put(self, src_path: Path, target_path: Path, target_host: str | None = None) -> None:
         """
-        Copy contents of source path to target on remote server.
+        Copy contents of source path to target on local or remote server.
 
         E.g. for a source path './items' containing './items/123/index.html' and a target path of '/data/', this will
         create '/data/123/index.html'.
         """
-        self._logger.info(f"Syncing {src_path.resolve()} to {self._host}:{target_path}")
-        sysrsync.run(
-            strict=True,
-            source=str(src_path.resolve()),
-            sync_source_contents=True,
-            destination=str(target_path),
-            destination_ssh=self._host,
-            options=["-a"],
-        )
+        target = f"{target_host}:{target_path}" if target_host else str(target_path)
+        kwargs = {
+            "source": str(src_path.resolve()),
+            "sync_source_contents": True,
+            "destination": str(target_path),
+            "options": ["-a"],
+        }
+        if target_host:
+            kwargs["destination_ssh"] = target_host
+
+        self._logger.info(f"Syncing '{src_path.resolve()}' to '{target}'")
+        sysrsync.run(strict=True, **kwargs)
 
 
 def init_gitlab_store(

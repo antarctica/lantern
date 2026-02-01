@@ -123,23 +123,24 @@ class TestRsyncUtils:
 
     def test_init(self, fx_logger: logging.Logger):
         """Can create instance."""
-        rsync_utils = RsyncUtils(logger=fx_logger, host="x")
+        rsync_utils = RsyncUtils(logger=fx_logger)
         assert isinstance(rsync_utils, RsyncUtils)
 
-    def test_put(self, mocker: MockerFixture, fx_logger: logging.Logger):
+    @pytest.mark.parametrize("host", [None, "h"])
+    def test_put(self, mocker: MockerFixture, fx_logger: logging.Logger, host: str | None):
         """Can generate expected rsync command."""
         mock = mocker.MagicMock()
         # noinspection SpellCheckingInspection
         mock.returncode = 0
         mock_subproc = mocker.patch("sysrsync.runner.subprocess.run", return_value=mock)
 
-        host = "h"
         source = Path("/x")
         target = Path("y")
-        expected = f"rsync -a {source.resolve()}/ {host}:y"
-        rsync_utils = RsyncUtils(logger=fx_logger, host=host)
+        expected_target = f"{host}:{target}" if host else str(target)
+        expected = f"rsync -a {source.resolve()}/ {expected_target}"
+        rsync_utils = RsyncUtils(logger=fx_logger)
 
-        rsync_utils.put(source, target)
+        rsync_utils.put(src_path=source, target_path=target, target_host=host)
         mock_subproc.assert_called_once_with(expected.split(" "), cwd=str(Path.cwd()), shell=False)
 
 

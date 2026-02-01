@@ -1,6 +1,20 @@
 ---
 
 services:
+  haproxy:
+    image: haproxy:3.3-alpine
+    volumes:
+      - './haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro'
+      - './haproxy/data_redirect.txt:/usr/local/etc/haproxy/data_redirect.txt:ro'
+      - './haproxy/data_internal_redirect.txt:/usr/local/etc/haproxy/data_internal_redirect.txt:ro'
+    depends_on:
+      - web
+  web:
+    build:
+      context: ./apache
+      dockerfile: Dockerfile
+    volumes:
+        - './apache/run/cat/stage/items:/data/web/ops-data-store/www/content/cat/stage/items'
   mail:
     image: rnwood/smtp4dev:v3
   gitlab:

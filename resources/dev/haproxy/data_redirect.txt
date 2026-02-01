@@ -1,0 +1,12 @@
+/-/
+/collections
+/features
+/items
+/legal
+/maps
+/records
+/series
+/static
+/teams
+/waf
+/.well-known/api-catalog

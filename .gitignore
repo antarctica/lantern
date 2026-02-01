@@ -24,11 +24,11 @@ htmlcov/
 .terraform/
 terraform.tfvars
 
-# Local GitLab stack generated files
+# Local stack generated files
+/resources/dev/terraform.tfstate
+/resources/dev/terraform.tfstate.backup
 /resources/dev/gitlab/run/
-/resources/dev/gitlab/.terraform.lock.hcl
-/resources/dev/gitlab/terraform.tfstate
-/resources/dev/gitlab/terraform.tfstate.backup
+/resources/dev/apache/run/
 
 # App generated files
 import/

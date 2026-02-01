@@ -1,0 +1,42 @@
+---
+
+services:
+  haproxy:
+    image: haproxy:3.3-alpine
+    volumes:
+      - './haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro'
+      - './haproxy/data_redirect.txt:/usr/local/etc/haproxy/data_redirect.txt:ro'
+      - './haproxy/data_internal_redirect.txt:/usr/local/etc/haproxy/data_internal_redirect.txt:ro'
+    depends_on:
+      - web
+  web:
+    build:
+      context: ./apache
+      dockerfile: Dockerfile
+    volumes:
+        - './apache/run/cat/stage/items:/data/web/ops-data-store/www/content/cat/stage/items'
+  mail:
+    image: rnwood/smtp4dev:v3
+  gitlab:
+    image: gitlab/gitlab-ce:18.6.2-ce.0
+    container_name: gitlab
+    restart: always
+    hostname: 'gitlab.dev.orb.local'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        # Add any gitlab.rb configuration here, each on its own line
+        external_url 'https://gitlab.dev.orb.local'
+        gitlab_rails['smtp_enable'] = true
+        gitlab_rails['smtp_address'] = 'mail'
+        gitlab_rails['smtp_port'] = 25
+        gitlab_rails['smtp_domain'] = 'mta'
+        gitlab_rails['smtp_tls'] = false
+        gitlab_rails['smtp_ssl'] = false
+        gitlab_rails['smtp_force_ssl'] = false
+        gitlab_rails['smtp_openssl_verify_mode'] = 'none'
+        gitlab_rails['smtp_enable_starttls_auto'] = falses
+    volumes:
+      - './gitlab/run/config:/etc/gitlab'
+      - './gitlab/run/logs:/var/log/gitlab'
+      - './gitlab/run/data:/var/opt/gitlab'
+    shm_size: '256m'

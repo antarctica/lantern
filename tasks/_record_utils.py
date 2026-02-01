@@ -7,6 +7,7 @@ from pathlib import Path
 
 import inquirer
 from boto3 import client as S3Client  # noqa: N812
+from tasks._config import ExtraConfig
 
 from lantern.config import Config
 from lantern.lib.metadata_library.models.record.record import Record, RecordInvalidError
@@ -46,14 +47,14 @@ def init_s3(config: Config) -> S3Client:  # ty: ignore[invalid-type-form]
 
 def init(
     cached_store: bool = False, frozen_store: bool = False
-) -> tuple[logging.Logger, Config, GitLabStore | GitLabCachedStore, S3Client]:  # ty: ignore[invalid-type-form]
+) -> tuple[logging.Logger, ExtraConfig, GitLabStore | GitLabCachedStore, S3Client]:  # ty: ignore[invalid-type-form]
     """
     Initialise common objects.
 
     Store is not cached by default to allow switching between branches efficiently.
     Store is not frozen by default to allow fetching changes before processing.
     """
-    config = Config()
+    config = ExtraConfig()
     logger = init_logging(config)
     store = init_store(logger, config, cached=cached_store, frozen=frozen_store)
     s3 = init_s3(config)

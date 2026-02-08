@@ -72,13 +72,28 @@ class SiteResourcesExporter(Exporter):
         """Copy text files to directory if not already present."""
         BaseExporter._dump_package_resources(src_ref=self._txt_src_ref, dest_path=self._export_base.joinpath("txt"))
 
-    def _dump_js(self) -> None:
-        """
-        Copy JS files to directory if not already present.
+    def _dump_js_dynamic(self, output_base: Path) -> None:
+        """Generate templated JS files."""
+        _jinja = get_jinja_env()
+        package_path = "lantern.resources.templates._assets.js"
 
-        Some JS files need generating from `resources/templates/_assets/*.j2` first using the `js` dev task.
-        """
-        BaseExporter._dump_package_resources(src_ref=self._js_src_ref, dest_path=self._export_base.joinpath("js"))
+        with resources_as_file(resources_files(package_path)) as resources_path:
+            for source_path in resources_path.glob("**/*.js.j2"):
+                relative_source_path = source_path.relative_to(resources_path)
+                template_path = f"_assets/js/{relative_source_path.as_posix()}"
+                output_path = output_base / relative_source_path.stem
+
+                rnd = _jinja.get_template(str(template_path)).render(data=self._meta.site_metadata)
+                rnd = "\n".join([line.rstrip() for line in rnd.splitlines() if line.strip() != ""])  # trim blank lines
+                with output_path.open("w") as f:
+                    f.write(rnd)
+                    f.write("\n")  # append trailing new line
+
+    def _dump_js(self) -> None:
+        """Copy static and templated JS files to directory if not already present."""
+        output_base = self._export_base.joinpath("js")
+        BaseExporter._dump_package_resources(src_ref=self._js_src_ref, dest_path=output_base)
+        self._dump_js_dynamic(output_base=output_base)
 
     def _publish_css(self) -> None:
         """Upload CSS as an S3 object."""

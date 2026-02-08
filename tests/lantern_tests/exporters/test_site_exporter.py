@@ -207,8 +207,8 @@ class TestSiteResourcesExporter:
     def test_dump_js(self, fx_exporter_site_resources: SiteResourcesExporter):
         """Can copy JavaScript files to output path."""
         expected = [
-            fx_exporter_site_resources._export_base.joinpath("js/enhancements.js"),
-            fx_exporter_site_resources._export_base.joinpath("js/lib/scalar.min.js"),
+            fx_exporter_site_resources._export_base.joinpath("js/enhancements.js"),  # templated
+            fx_exporter_site_resources._export_base.joinpath("js/lib/scalar.min.js"),  # static
         ]
 
         fx_exporter_site_resources._dump_js()

@@ -195,8 +195,10 @@ passing a [Config](/docs/config.md) object.
 
 `lantern.exporters.site.SiteResourcesExporter`
 
-Copies CSS, JavaScript, fonts, images (for favicons) and text files (for [Monitoring](/docs/monitoring.md)) from the
-internal `lantern.exporters.resources` module into the static site.
+Copies [CSS](/docs/site.md#styling), [JavaScript](/docs/site.md#scripts), fonts, images (for favicons) and text files
+(for [Monitoring](/docs/monitoring.md)) from the internal `lantern.exporters.resources` module into the static site.
+
+Jinja2 templates are used for including variables in JavaScript files.
 
 ### Site API exporter
 

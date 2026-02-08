@@ -186,11 +186,10 @@ A set of site wide scripts are included using [Site Macros](#site-macros) for:
 > Functionality SHOULD be preferably implemented using HTML and CSS alone where practical. Scripts SHOULD be used for
 > progressive enhancement and support graceful degradation where possible.
 
-First party JavaScript are defined in `src/lantern/resources/templates/_assets/js/*`, which are Jinja2 templates to
-allow using variables from [Common](#common-macros) and [Asset](#asset-macros) macros.
+First party JavaScript are defined in:
 
-Rendered versions of these templates MUST be stored in `src/lantern/resources/js/`, as this directory will be copied
-into the site build directory, and referenced within generated pages.
+- `src/lantern/resources/js/` for static files
+- `src/lantern/resources/templates/_assets/js/*` for scripts including variables from macros
 
 > [!TIP]
 > See the [Development](/docs/dev.md#updating-scripts) documentation for how to update scripts.

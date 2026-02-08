@@ -1,4 +1,3 @@
-from copy import deepcopy
 from datetime import date
 
 import pytest
@@ -30,32 +29,41 @@ from tests.conftest import _admin_meta_keys
 class TestRecord:
     """Test derived Record class."""
 
-    file_identifier = "x"
-    base_record = Record(
-        file_identifier=file_identifier,
-        hierarchy_level=HierarchyLevelCode.DATASET,
-        metadata=Metadata(
-            contacts=Contacts(
-                [Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT})]
+    @staticmethod
+    def _make_record(file_identifier: str) -> Record:
+        return Record(
+            file_identifier=file_identifier,
+            hierarchy_level=HierarchyLevelCode.DATASET,
+            metadata=Metadata(
+                contacts=Contacts(
+                    [Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT})]
+                ),
+                date_stamp=date(2014, 6, 30),
             ),
-            date_stamp=date(2014, 6, 30),
-        ),
-        identification=Identification(
-            title="expected_str", abstract="x", dates=Dates(creation=Date(date=date(2014, 6, 30)))
-        ),
-    )
+            identification=Identification(title="x", abstract="x", dates=Dates(creation=Date(date=date(2014, 6, 30)))),
+        )
 
-    valid_record = deepcopy(base_record)
-    valid_record.identification.identifiers.append(make_bas_cat(base_record.file_identifier))
-    valid_record.identification.contacts.append(make_magic_role(roles={ContactRoleCode.POINT_OF_CONTACT}))
-    set_admin(keys=_admin_meta_keys(), record=valid_record, admin_meta=Administration(id=file_identifier))
+    @staticmethod
+    def _make_valid_record(file_identifier: str | None = "5d5b4e21-fd32-409c-be83-ca1c339903e5") -> Record:
+        record = TestRecord._make_record(file_identifier)
+        record.identification.identifiers.append(make_bas_cat(record.file_identifier))
+        record.identification.contacts.append(make_magic_role(roles={ContactRoleCode.POINT_OF_CONTACT}))
+        record.identification.identifiers.append(
+            Identifier(identifier="datasets/x", href="https://data.bas.ac.uk/datasets/x", namespace=ALIAS_NAMESPACE)
+        )
+        record.identification.extents.extend(
+            [
+                Extent(identifier="x", geographic=make_bbox_extent(0, 0, 0, 0)),
+                Extent(identifier="y", geographic=make_bbox_extent(0, 0, 0, 0)),
+            ]
+        )
+        set_admin(keys=_admin_meta_keys(), record=record, admin_meta=Administration(id=record.file_identifier))
+        return record
 
     def test_init(self):
         """Can create a minimal Record class instance from directly assigned properties."""
         expected_str = "x"
-        record = deepcopy(self.base_record)
-        record.file_identifier = "x"
-        record.identification.title = "x"
+        record = self._make_record(file_identifier=expected_str)
 
         assert isinstance(record, RecordBase)
         assert isinstance(record, Record)
@@ -65,7 +73,7 @@ class TestRecord:
 
     def test_no_file_identifier(self):
         """Cannot create a Record class instance directly without a file_identifier."""
-        record = deepcopy(self.base_record)
+        record = self._make_record(file_identifier="x")
         with pytest.raises(ValueError, match=r"Records require a file_identifier."):
             # noinspection PyArgumentList
             _ = Record(
@@ -112,23 +120,18 @@ class TestRecord:
 
     def test_valid(self):
         """Can validate a Record complying with catalogue record requirements."""
-        record = deepcopy(self.valid_record)
-        record.identification.identifiers.append(
-            Identifier(identifier="datasets/x", href="https://data.bas.ac.uk/datasets/x", namespace=ALIAS_NAMESPACE)
-        )
-        record.identification.extents.extend(
-            [
-                Extent(identifier="x", geographic=make_bbox_extent(0, 0, 0, 0)),
-                Extent(identifier="y", geographic=make_bbox_extent(0, 0, 0, 0)),
-            ]
-        )
-
+        record = self._make_valid_record()
         record.validate()
 
+    @pytest.mark.cov()
     def test_file_identifier(self):
+        """Can use testing value as file identifier."""
+        record = self._make_valid_record(file_identifier="x")
+        record.validate()
+
+    def test_invalid_file_identifier(self):
         """Cannot validate a Record with file identifier that isn't a UUID."""
-        record = deepcopy(self.base_record)
-        record.file_identifier = "⭐️"
+        record = self._make_valid_record(file_identifier="⭐️")
 
         with pytest.raises(RecordInvalidError) as excinfo:
             record.validate()
@@ -149,14 +152,15 @@ class TestRecord:
                 "Invalid identifier value in Catalogue resource identifier.",
             ),
             (
-                Identifier(identifier="x", href="y", namespace=CATALOGUE_NAMESPACE),
+                Identifier(identifier="5d5b4e21-fd32-409c-be83-ca1c339903e5", href="y", namespace=CATALOGUE_NAMESPACE),
                 "Invalid href in Catalogue resource identifier.",
             ),
         ],
     )
     def test_invalid_identifier(self, identifier: Identifier, match: str):
         """Cannot validate a Record with an invalid resource identifier."""
-        record = deepcopy(self.base_record)
+        record = self._make_valid_record()
+        record.identification.identifiers.clear()
         record.identification.identifiers.append(identifier)
 
         with pytest.raises(RecordInvalidError) as excinfo:
@@ -166,8 +170,8 @@ class TestRecord:
 
     def test_invalid_poc(self):
         """Cannot validate a Record with a missing point of contact."""
-        record = deepcopy(self.base_record)
-        record.identification.identifiers.append(make_bas_cat(record.file_identifier))
+        record = self._make_valid_record()
+        record.identification.contacts.clear()
 
         with pytest.raises(RecordInvalidError) as excinfo:
             record.validate()
@@ -176,8 +180,9 @@ class TestRecord:
 
     def test_invalid_extents(self):
         """Cannot validate a Record with non-distinct extent identifiers."""
-        record = deepcopy(self.valid_record)
+        record = self._make_valid_record()
         extent = Extent(identifier="x", geographic=make_bbox_extent(0, 0, 0, 0))
+        record.identification.extents.clear()
         record.identification.extents.extend([extent, extent])
 
         with pytest.raises(RecordInvalidError) as excinfo:
@@ -216,7 +221,7 @@ class TestRecord:
     )
     def test_invalid_aliases(self, identifier: Identifier, match: str):
         """Cannot validate a Record with invalid aliases."""
-        record = deepcopy(self.valid_record)
+        record = self._make_valid_record()
         record.identification.identifiers.append(identifier)
 
         with pytest.raises(RecordInvalidError) as excinfo:
@@ -226,7 +231,7 @@ class TestRecord:
 
     def test_invalid_admin_meta(self):
         """Cannot validate a Record without admin metadata."""
-        record = deepcopy(self.valid_record)
+        record = self._make_valid_record()
         record.identification.supplemental_information = None
 
         with pytest.raises(RecordInvalidError) as excinfo:

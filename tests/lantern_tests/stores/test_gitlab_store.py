@@ -48,6 +48,29 @@ class TestCommitResults:
 
         assert (base == other) is expected
 
+    def test_unstructure(self):
+        """Can serialise as JSON."""
+        expected = {
+            "branch": "x",
+            "commit": "x",
+            "new_identifiers": ["a", "b", "c"],
+            "updated_identifiers": ["d", "e", "f"],
+            "stats": {
+                "new_records": 3,
+                "new_files": 1,
+                "updated_records": 3,
+                "updated_files": 1,
+            },
+        }
+        base = CommitResults(
+            branch=expected["branch"],
+            commit=expected["commit"],
+            changes={"create": expected["new_identifiers"], "update": expected["updated_identifiers"]},
+            actions=[{"action": "create", "...": "..."}, {"action": "update", "...": "..."}],
+        )
+        result = base.unstructure()
+        assert result == expected
+
 
 class TestGitLabSource:
     """Test GitLab source data class."""

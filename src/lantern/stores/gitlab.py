@@ -105,6 +105,15 @@ class CommitResultsStats:
             else "0 updated records"
         )
 
+    def unstructure(self) -> dict:
+        """Convert CommitResults to plain types."""
+        return {
+            "new_records": self.new_records,
+            "new_files": self.new_files,
+            "updated_records": self.updated_records,
+            "updated_files": self.updated_files,
+        }
+
 
 class CommitResults:
     """Results from a commit transaction."""
@@ -112,8 +121,8 @@ class CommitResults:
     def __init__(self, branch: str, commit: str | None, changes: dict, actions: list) -> None:
         self.branch = branch
         self.commit = commit
-        self.new_identifiers = changes["create"]
-        self.updated_identifiers = changes["update"]
+        self.new_identifiers: list[str] = changes["create"]
+        self.updated_identifiers: list[str] = changes["update"]
         self.stats = CommitResultsStats(changes=changes, actions=actions)
 
     def __eq__(self, other: object) -> bool:
@@ -130,6 +139,16 @@ class CommitResults:
             and self.stats.updated_records == other.stats.updated_records
             and self.stats.updated_files == other.stats.updated_files
         )
+
+    def unstructure(self) -> dict:
+        """Convert CommitResults to plain types."""
+        return {
+            "branch": self.branch,
+            "commit": self.commit,
+            "new_identifiers": self.new_identifiers,
+            "updated_identifiers": self.updated_identifiers,
+            "stats": self.stats.unstructure(),
+        }
 
 
 class GetHashesProtocol(Protocol):

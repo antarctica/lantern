@@ -6,6 +6,10 @@ This diagram shows this project's infrastructure components:
 
 ![Infrastructure Diagram](/docs/img/infra-components.png)
 
+> [!TIP]
+> The _Processing Scripts_ component shown in the diagram currently consists of the
+> [Non-Interactive Publishing Script](/docs/deployment.md#non-interactive-record-publishing-script).
+
 ## Environments
 
 Available environments:
@@ -25,6 +29,8 @@ Development environments may be created and destroyed as needed. Staging and Pro
 ## Deployment
 
 - [Environment Module](/docs/deployment.md#environment-module)
+  - managed via [Ansible 🛡️](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/playbooks/magic/lantern.yml)
+- [Non-Interactive Publishing Script](/docs/deployment.md#non-interactive-record-publishing-script)
   - managed via [Ansible 🛡️](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/playbooks/magic/lantern.yml)
 
 ## Hosting

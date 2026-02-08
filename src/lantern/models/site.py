@@ -125,6 +125,7 @@ class SiteMeta:
     - base_url: endpoint needed to construct absolute URLs (e.g. 'https://example.com')
     - build_key: cache busting value
     - html_title: HTML head title value (will be combined with site name)
+    - sentry_dsn: Sentry project identifier
     - plausible_id: Plausible Analytics site identifier
     - embedded_maps_endpoint: BAS Embedded Maps Service endpoint
     - items_enquires_endpoint: endpoint for item enquiries form
@@ -143,6 +144,7 @@ class SiteMeta:
     base_url: str
     build_key: str
     html_title: str
+    sentry_dsn: str
     plausible_id: str
     embedded_maps_endpoint: str
     items_enquires_endpoint: str
@@ -213,6 +215,7 @@ class SiteMeta:
         The Config instance provides values for:
         - base_url
         - build_key
+        - sentry_dsn
         - plausible_id
         - embedded_maps_domain
         - items_enquires_endpoint
@@ -235,6 +238,7 @@ class SiteMeta:
             **{  # ty: ignore[invalid-argument-type]
                 "base_url": config.BASE_URL,
                 "build_key": config.TEMPLATES_CACHE_BUST_VALUE,
+                "sentry_dsn": config.SENTRY_DSN,
                 "plausible_id": config.TEMPLATES_PLAUSIBLE_ID,
                 "embedded_maps_endpoint": config.TEMPLATES_ITEM_MAPS_ENDPOINT,
                 "items_enquires_endpoint": config.TEMPLATES_ITEM_CONTACT_ENDPOINT,

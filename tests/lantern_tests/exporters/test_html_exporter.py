@@ -59,7 +59,7 @@ class TestHtmlExporter:
         assert result == expected
 
     def test_dumps(self, fx_exporter_html: HtmlExporter):
-        """Can encode record as a form of Data Catalogue item page."""
+        """Can encode record as an item page."""
         result = fx_exporter_html.dumps()
         assert "<!DOCTYPE html>" in result
 

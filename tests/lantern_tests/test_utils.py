@@ -146,13 +146,15 @@ class TestRsyncUtils:
     @pytest.mark.parametrize("host", [None, "h"])
     def test_put(self, mocker: MockerFixture, fx_logger: logging.Logger, host: str | None):
         """Can generate expected rsync command."""
+        with TemporaryDirectory() as tmp_path:
+            target_path = Path(tmp_path) / "y"
         mock = mocker.MagicMock()
         # noinspection SpellCheckingInspection
         mock.returncode = 0
         mock_subproc = mocker.patch("sysrsync.runner.subprocess.run", return_value=mock)
 
         source = Path("/x")
-        target = Path("y")
+        target = target_path
         expected_target = f"{host}:{target}" if host else str(target)
         expected = f"rsync -a {source.resolve()}/ {expected_target}"
         rsync_utils = RsyncUtils(logger=fx_logger)

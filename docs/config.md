@@ -97,6 +97,8 @@ See the [Exporters](/docs/exporters.md#exporters-configuration) docs for more in
 - `AWS_ACCESS_SECRET`
 - `AWS_ACCESS_SECRET_SAFE`
 - `AWS_S3_BUCKET`
+- `TRUSTED_UPLOAD_HOST`
+- `TRUSTED_UPLOAD_PATH`
 - `VERIFY_SHAREPOINT_PROXY_ENDPOINT`
 
 ### Site templates config options

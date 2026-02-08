@@ -56,11 +56,11 @@ def _req_url(logger: logging.Logger, job: VerificationJob, params: dict | None =
 
     match method:
         case "get":
-            r = requests.get(**params_)  # noqa: S113 # ty: ignore[missing-argument]
+            r = requests.get(**params_)  # noqa: S113
         case "post":
-            r = requests.post(**params_, json=body)  # noqa: S113 # ty: ignore[missing-argument]
+            r = requests.post(**params_, json=body)  # noqa: S113
         case "head":
-            r = requests.head(**params_)  # noqa: S113 # ty: ignore[missing-argument]
+            r = requests.head(**params_)  # noqa: S113
         case _:
             msg = f"Unsupported HTTP method: {method}"
             raise ValueError(msg) from None

@@ -196,7 +196,7 @@ class ItemCatalogue(ItemBase):
             gitlab_issues=self.admin_gitlab_issues,
             restricted=self._restricted,
             access_level=self.admin_access_level,
-            access_permissions=self._admin_metadata.access_permissions,
+            access_permissions=self._admin_metadata.access_permissions,  # ty:ignore[possibly-missing-attribute]
         )
 
     @property

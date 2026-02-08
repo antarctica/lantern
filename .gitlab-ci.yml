@@ -45,7 +45,7 @@ variables:
   # - OP_SERVICE_ACCOUNT_TOKEN
   #   - https://magic.1password.eu/developer-tools/infrastructure-secrets/serviceaccount/4MR5NL7W45AA3GAFGRZMVN2H2I
 
-image: mcr.microsoft.com/playwright/python:v1.57.0-noble
+image: mcr.microsoft.com/playwright/python:v1.58.0-noble
 
 .before_script_python: &before_script_python
   # setup UV

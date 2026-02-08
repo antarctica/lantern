@@ -285,7 +285,7 @@ class ExportMeta(SiteMeta):
         _site_meta = {}
         for site_field in fields(SiteMeta):
             _site_meta[site_field.name] = getattr(self, site_field.name)
-        return SiteMeta(**_site_meta)  # ty: ignore[missing-argument]
+        return SiteMeta(**_site_meta)
 
     @classmethod
     def from_config_store(

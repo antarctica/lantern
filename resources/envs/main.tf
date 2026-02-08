@@ -105,7 +105,7 @@ variable "static_site_ref" {
   description = "Static site module version."
 }
 
-module "site_testing" {
+module "site_stage" {
   source = "git::https://github.com/felnne/tf-aws-static-site.git?ref=${var.static_site_ref}"
 
   providers = {
@@ -187,8 +187,8 @@ resource "aws_iam_user_policy" "workstation_stage" {
           "s3:PutObjectAcl"
         ]
         Resource = [
-          module.site_testing.s3_bucket_arn,
-          "${module.site_testing.s3_bucket_arn}/*"
+          module.site_stage.s3_bucket_arn,
+          "${module.site_stage.s3_bucket_arn}/*"
         ]
       }
     ]
@@ -358,7 +358,7 @@ resource "cloudflare_turnstile_widget" "site" {
   # To enable bot protection on item enquires (see /docs/site.md#bot-protection)
   account_id = var.cloudflare_account_id
   domains = sort([
-    module.site_testing.s3_bucket_name,
+    module.site_stage.s3_bucket_name,
     module.site_prod.s3_bucket_name,
     "data-testing.data.bas.ac.uk",
     "data.bas.ac.uk"

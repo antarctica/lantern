@@ -16,13 +16,16 @@ Available environments:
 
 - development:
   - for prototyping and making changes (see [Development](/docs/dev.md) documentation)
-  - hosted locally
+  - hosted locally with an optional [Local Stack](/docs/dev.md#local-development-stack) for external infrastructure
 - staging:
-  - for pre-release testing and experimentation
+  - referred to as _testing_ publicly
   - externally accessible
+  - for infrastructure testing (i.e. HTTPS configuration, deployment workflows, etc.)
+  - for experimentation and previewing content by authors and invited testers
 - production:
-  - for real-world use
+  - referred to as _live_ publicly
   - externally accessible
+  - for general use
 
 Development environments may be created and destroyed as needed. Staging and Production environments are long-lived.
 

@@ -546,7 +546,8 @@ class TestSiteExporter:
         s3 = fx_exporter_site._index_exporter._s3_utils._s3
         record = fx_exporter_site._store.select()[0]
         fx_exporter_site._records_exporter._selected_identifiers = {record.file_identifier}
-        expected = [
+        env_path = fx_exporter_site._meta.trusted_path / "live"
+        expected_keys = [
             "favicon.ico",
             "404.html",
             "static/css/main.css",
@@ -559,10 +560,14 @@ class TestSiteExporter:
             "waf/iso-19139-all/index.html",
             "-/public-website-search/items.json",
         ]  # representative sample
+        expected_trusted = [env_path / f"items/{record.file_identifier}" / "index.html"]  # representative sample
 
         fx_exporter_site.publish()
 
         result = s3.list_objects(Bucket=fx_s3_bucket_name)
         keys = [o["Key"] for o in result["Contents"]]
-        for key in expected:
+        for key in expected_keys:
             assert key in keys
+        result2 = list(env_path.glob("**/*.*"))
+        for path in expected_trusted:
+            assert path in result2

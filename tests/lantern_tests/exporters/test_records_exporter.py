@@ -17,6 +17,7 @@ from lantern.exporters.json import JsonExporter
 
 # noinspection PyProtectedMember
 from lantern.exporters.records import (
+    Job,
     JobMethod,
     RecordsExporter,
     _job_worker_s3,
@@ -71,13 +72,14 @@ class TestRecordExporterJob:
         assert isinstance(result, S3)
 
     @pytest.mark.parametrize(
-        ("exporter", "expected"),
+        ("trusted", "exporter", "expected"),
         [
-            (HtmlExporter, "items/FILE_IDENTIFIER/index.html"),
-            (HtmlAliasesExporter, "datasets/x/index.html"),
-            (JsonExporter, "records/FILE_IDENTIFIER.json"),
-            (IsoXmlExporter, "records/FILE_IDENTIFIER.xml"),
-            (IsoXmlHtmlExporter, "records/FILE_IDENTIFIER.html"),
+            (False, HtmlExporter, "items/FILE_IDENTIFIER/index.html"),
+            (False, HtmlAliasesExporter, "datasets/x/index.html"),
+            (False, JsonExporter, "records/FILE_IDENTIFIER.json"),
+            (False, IsoXmlExporter, "records/FILE_IDENTIFIER.xml"),
+            (False, IsoXmlHtmlExporter, "records/FILE_IDENTIFIER.html"),
+            (True, HtmlExporter, "items/FILE_IDENTIFIER/index.html"),
         ],
     )
     @pytest.mark.parametrize(
@@ -97,6 +99,7 @@ class TestRecordExporterJob:
         fx_s3_utils: S3Utils,
         fx_fake_store: Store,
         fx_exporter_records_sel: RecordsExporter,
+        trusted: bool,
         exporter: RecordsExporter,
         expected: str,
         method: JobMethod,
@@ -108,22 +111,27 @@ class TestRecordExporterJob:
         )
         expected = expected.replace("FILE_IDENTIFIER", fx_revision_model_min.file_identifier)
         expected_path = fx_exporter_records_sel._config.EXPORT_PATH / expected
+        expected_path_status = method == JobMethod.EXPORT
+        expected_trusted_path = fx_exporter_records_sel._config.TRUSTED_UPLOAD_PATH / "live" / expected
+        expected_trusted_status = method == JobMethod.PUBLISH and trusted
+        expected_s3_status = 200 if method == JobMethod.PUBLISH and not trusted else 404
 
         # noinspection PyTypeChecker
         _run_job(
             config=fx_exporter_records_sel._config,
             meta=fx_exporter_records_sel._meta,
             store=fx_fake_store,
+            trusted=trusted,
             exporter=exporter,
             record=fx_revision_model_min,
             method=method,
         )
 
-        if method == JobMethod.EXPORT:
-            assert expected_path.exists()
-        elif method == JobMethod.PUBLISH:
+        assert expected_path.exists() is expected_path_status
+        assert expected_trusted_path.exists() is expected_trusted_status
+        if expected_s3_status == 200:
             result = fx_s3_utils._s3.get_object(Bucket=fx_s3_bucket_name, Key=expected)
-            assert result["ResponseMetadata"]["HTTPStatusCode"] == 200
+            assert result["ResponseMetadata"]["HTTPStatusCode"] == expected_s3_status
 
 
 class TestRecordsExporter:
@@ -155,6 +163,19 @@ class TestRecordsExporter:
 
         assert isinstance(exporter, RecordsExporter)
         assert exporter.name == "Records"
+
+    @pytest.mark.cov()
+    def test_generate(self, fx_exporter_records_sel: RecordsExporter):
+        """Can generate expected processing jobs."""
+        parallel_classes = [HtmlExporter, HtmlAliasesExporter, JsonExporter, IsoXmlExporter, IsoXmlHtmlExporter]
+        record = fx_exporter_records_sel._store.select()[0]
+        fx_exporter_records_sel._selected_identifiers = {record.file_identifier}
+        expected = [Job(trusted=False, record=record, exporter=cls) for cls in parallel_classes] + [
+            Job(trusted=True, record=record, exporter=HtmlExporter)
+        ]
+
+        result = fx_exporter_records_sel._generate()
+        assert result == expected
 
     @pytest.mark.cov()
     def test_prep_store_gitlab_cache(
@@ -193,6 +214,7 @@ class TestRecordsExporter:
     ):
         """Can publish selected records."""
         mocker.patch("lantern.exporters.records._job_worker_s3", return_value=fx_exporter_records_sel._s3_client)
+        env_path = fx_exporter_records_sel._config.TRUSTED_UPLOAD_PATH / "live"
         # limit exported records for speed
         file_identifier = fx_exporter_records_sel._store.select()[0].file_identifier
         fx_exporter_records_sel._selected_identifiers = {file_identifier}
@@ -202,3 +224,4 @@ class TestRecordsExporter:
         result = fx_s3_utils._s3.list_objects(Bucket=fx_s3_bucket_name)
         keys = [o["Key"] for o in result["Contents"]]
         assert len(keys) > 0
+        assert len(list(env_path.glob("**/*.*"))) > 0

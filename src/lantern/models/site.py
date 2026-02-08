@@ -257,10 +257,12 @@ class ExportMeta(SiteMeta):
     Extends SiteMetadata with additional properties from app config:
 
     - export_path: base path for local site output
-    - s3_bucket: S3 bucket name for published site output
+    - s3_bucket: S3 bucket name for public site output
     - parallel_jobs: number of jobs to run in parallel
     - admin_meta_keys: keys accessing administration metadata in records
     - trusted: whether sensitive information can be shown in public site output
+    - trusted_path: optional path for trusted site output (required where trusted=True)
+    - trusted_host: optional host for trusted site output
     """
 
     export_path: Path
@@ -268,6 +270,14 @@ class ExportMeta(SiteMeta):
     parallel_jobs: int
     admin_meta_keys: AdministrationKeys | None
     trusted: bool = False
+    trusted_path: Path | None = None
+    trusted_host: str | None = None
+
+    def __post_init__(self) -> None:
+        """Validate trusted site properties."""
+        if self.trusted and not self.trusted_path:
+            msg = "`trusted_path` cannot be None when `trusted=True`."
+            raise TypeError(msg)
 
     @property
     def site_metadata(self) -> SiteMeta:
@@ -290,6 +300,8 @@ class ExportMeta(SiteMeta):
         In addition to the properties provided by parent `from_config_store()`, the config instance provides values for:
         - export_path: from EXPORT_PATH
         - s3_bucket: from AWS_S3_BUCKET
+        - trusted_path: from TRUSTED_UPLOAD_PATH
+        - trusted_host: from TRUSTED_UPLOAD_HOST
         - parallel_jobs: from PARALLEL_JOBS
         - admin_meta_keys: from ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE and ADMIN_METADATA_SIGNING_KEY_PUBLIC
         """
@@ -301,6 +313,8 @@ class ExportMeta(SiteMeta):
                 **super_meta,
                 "export_path": config.EXPORT_PATH,
                 "s3_bucket": config.AWS_S3_BUCKET,
+                "trusted_path": config.TRUSTED_UPLOAD_PATH,
+                "trusted_host": config.TRUSTED_UPLOAD_HOST,
                 "parallel_jobs": config.PARALLEL_JOBS,
                 "admin_meta_keys": config.ADMIN_METADATA_KEYS,
                 **kwargs,

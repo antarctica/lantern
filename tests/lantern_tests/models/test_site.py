@@ -1,4 +1,5 @@
 import json
+from dataclasses import asdict
 from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import PropertyMock
@@ -362,14 +363,21 @@ class TestSiteMetadata:
 class TestExportMetadata:
     """Test export metadata/context as an exception to SiteMetadata."""
 
+    @pytest.mark.parametrize("trusted", [False, True])
     def test_init(
-        self, freezer: FrozenDateTimeFactory, fx_freezer_time: datetime, fx_admin_meta_keys: AdministrationKeys
+        self,
+        freezer: FrozenDateTimeFactory,
+        fx_freezer_time: datetime,
+        fx_admin_meta_keys: AdministrationKeys,
+        trusted: bool,
     ):
-        """Can create a SiteMetadata instance with required values."""
+        """Can create an ExportMetadata instance with direct values and optional trusted context."""
         freezer.move_to(fx_freezer_time)
         expected_str = "x"
         expected_int = 1
         expected_path = Path("./x")
+        trusted_path = expected_path if trusted else None
+
         meta = ExportMeta(
             base_url=expected_str,
             build_key=expected_str,
@@ -384,6 +392,8 @@ class TestExportMetadata:
             s3_bucket=expected_str,
             parallel_jobs=expected_int,
             admin_meta_keys=fx_admin_meta_keys,
+            trusted=trusted,
+            trusted_path=trusted_path,
         )
 
         assert meta.base_url == expected_str
@@ -391,16 +401,27 @@ class TestExportMetadata:
         assert meta.s3_bucket == expected_str
         assert meta.parallel_jobs == expected_int
         assert meta.admin_meta_keys == fx_admin_meta_keys
-        assert meta.trusted is False  # default
+        assert meta.trusted is trusted
+        assert meta.trusted_path == trusted_path
+
+    @pytest.mark.cov()
+    def test_post_init(self, fx_export_meta: ExportMeta):
+        """Cannot create an ExportMetadata instance with trusted context without a trusted path."""
+        kwargs = asdict(fx_export_meta)
+        kwargs["trusted"] = True
+        kwargs.pop("trusted_path")
+
+        with pytest.raises(TypeError, match=r"`trusted_path` cannot be None when `trusted=True`."):
+            ExportMeta(**kwargs)
 
     def test_from_config_store(self, fx_config: Config):
-        """Can create export metadata from config."""
+        """Can create ExportMetadata instance from config."""
         result = ExportMeta.from_config_store(config=fx_config)
         assert isinstance(result, ExportMeta)
         assert result.embedded_maps_endpoint == fx_config.TEMPLATES_ITEM_MAPS_ENDPOINT
 
     def test_as_site_metadata(self, fx_export_meta: ExportMeta):
-        """Can create derived site metadata."""
+        """Can create derived SiteMeta without leaking additional properties."""
         result = fx_export_meta.site_metadata
         assert not isinstance(result, ExportMeta)
         assert isinstance(result, SiteMeta)

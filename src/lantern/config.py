@@ -25,6 +25,7 @@ class Config:
         self._app_prefix = "LANTERN_"
         self._app_package = "lantern"
         self._safe_value = "[**REDACTED**]"
+        self._none_value = "[**NOT SET**]"
 
         self.env = Env()
         if read_env:
@@ -77,14 +78,17 @@ class Config:
             "AWS_S3_BUCKET",
             "AWS_ACCESS_ID",
             "AWS_ACCESS_SECRET",
+            "TRUSTED_UPLOAD_PATH",
             "VERIFY_SHAREPOINT_PROXY_ENDPOINT",
             "VERIFY_SAN_PROXY_ENDPOINT",
         ]
-        directories = ["STORE_GITLAB_CACHE_PATH", "EXPORT_PATH"]
+        directories = ["STORE_GITLAB_CACHE_PATH", "EXPORT_PATH", "TRUSTED_UPLOAD_PATH"]
 
         for prop in required:
             attr = prop
             if prop == "ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE" or prop == "ADMIN_METADATA_SIGNING_KEY_PUBLIC":
+                # Though these options are set as separate ENV VARs, they are accessed together through
+                # ADMIN_METADATA_KEYS as an `AdministrationKeys` instance, which validates required properties are set.
                 attr = "ADMIN_METADATA_KEYS"
             try:
                 _ = getattr(self, attr)
@@ -93,6 +97,9 @@ class Config:
                 raise ConfigurationError(msg) from e
 
         for prop in directories:
+            if prop == "TRUSTED_UPLOAD_PATH" and self.TRUSTED_UPLOAD_HOST:
+                # Do not validate TRUSTED_UPLOAD_PATH where path is on a remote host.
+                continue
             if Path(getattr(self, prop)).exists() and not Path(getattr(self, prop)).is_dir():
                 msg = f"{prop} must be a directory."
                 raise ConfigurationError(msg)
@@ -126,11 +133,15 @@ class Config:
         AWS_S3_BUCKET: str
         AWS_ACCESS_ID: str
         AWS_ACCESS_SECRET: str
+        TRUSTED_UPLOAD_PATH: str
+        TRUSTED_UPLOAD_HOST: str
         VERIFY_SHAREPOINT_PROXY_ENDPOINT: str
         VERIFY_SAN_PROXY_ENDPOINT: str
 
     def dumps_safe(self) -> ConfigDumpSafe:
         """Dump config for output to the user with sensitive data redacted."""
+        _trusted_host: str = self.TRUSTED_UPLOAD_HOST if self.TRUSTED_UPLOAD_HOST is not None else self._none_value
+
         return {
             "NAME": self.NAME,
             "VERSION": self.VERSION,
@@ -158,6 +169,8 @@ class Config:
             "AWS_S3_BUCKET": self.AWS_S3_BUCKET,
             "AWS_ACCESS_ID": self.AWS_ACCESS_ID,
             "AWS_ACCESS_SECRET": self.AWS_ACCESS_SECRET_SAFE,
+            "TRUSTED_UPLOAD_PATH": str(self.TRUSTED_UPLOAD_PATH.resolve()),
+            "TRUSTED_UPLOAD_HOST": _trusted_host,
             "VERIFY_SHAREPOINT_PROXY_ENDPOINT": self.VERIFY_SHAREPOINT_PROXY_ENDPOINT,
             "VERIFY_SAN_PROXY_ENDPOINT": self.VERIFY_SAN_PROXY_ENDPOINT,
         }
@@ -338,6 +351,21 @@ class Config:
     def AWS_ACCESS_SECRET_SAFE(self) -> str:
         """AWS_ACCESS_SECRET with value redacted."""
         return self._safe_value if self.AWS_ACCESS_SECRET else ""
+
+    @property
+    def TRUSTED_UPLOAD_PATH(self) -> Path:
+        """Target path for trusted content on local or remote host."""
+        with self.env.prefixed(self._app_prefix):
+            return self.env.path("TRUSTED_UPLOAD_PATH")
+
+    @property
+    def TRUSTED_UPLOAD_HOST(self) -> str | None:
+        """Optional remote for uploading trusted content."""
+        try:
+            with self.env.prefixed(self._app_prefix):
+                return self.env.str("TRUSTED_UPLOAD_HOST")
+        except EnvError:
+            return None
 
     @property
     def VERIFY_SHAREPOINT_PROXY_ENDPOINT(self) -> str:

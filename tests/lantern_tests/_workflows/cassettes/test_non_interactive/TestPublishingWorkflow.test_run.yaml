@@ -1,0 +1,1153 @@
+#file: noinspection YAMLIncompatibleTypes
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/7.0.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234
+  response:
+    body:
+      string: '{"id":1234}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/7.0.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/files/records%2F5d%2F5b%2F5d5b4e21-fd32-409c-be83-ca1c339903e5.json?ref=test
+  response:
+    body:
+      string: '{"message":"404 Commit Not Found"}'
+    headers:
+      Cache-Control:
+      - no-cache
+      Content-Length:
+      - '34'
+      Content-Type:
+      - application/json
+      Server:
+      - nginx
+      Vary:
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/7.0.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234
+  response:
+    body:
+      string: '{"id":1234}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/7.0.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234/merge_requests?state=opened&source_branch=test
+  response:
+    body:
+      string: '[]'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Length:
+      - '2'
+      Content-Type:
+      - application/json
+      Link:
+      - <https://gitlab.example.com/api/v4/projects/1234/merge_requests?id=1234&order_by=created_at&page=1&per_page=20&sort=desc&source_branch=test&state=opened&with_labels_details=false&with_merge_status_recheck=false>;
+        rel="first", <https://gitlab.example.com/api/v4/projects/1234/merge_requests?id=1234&order_by=created_at&page=1&per_page=20&sort=desc&source_branch=test&state=opened&with_labels_details=false&with_merge_status_recheck=false>;
+        rel="last"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Next-Page:
+      - ''
+      X-Page:
+      - '1'
+      X-Per-Page:
+      - '20'
+      X-Prev-Page:
+      - ''
+      X-Total:
+      - '0'
+      X-Total-Pages:
+      - '1'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/7.0.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234
+  response:
+    body:
+      string: '{"id":1234}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"source_branch": "test", "target_branch": "main", "title": "Automated publishing changeset: Workflow test",
+      "description": "...\n\nCreated by the experimental MAGIC Lantern non-interactive records publishing workflow."}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '220'
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/7.0.0
+    method: POST
+    uri: https://gitlab.example.com/api/v4/projects/1234/merge_requests
+  response:
+    body:
+      string: '{"web_url":"https://gitlab.example.com/MAGIC/lantern-records/-/merge_requests/6"}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Length:
+      - '82'
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/7.0.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234
+  response:
+    body:
+      string: '{"id":1234}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/7.0.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/branches/test
+  response:
+    body:
+      string: '{"message":"404 Branch Not Found"}'
+    headers:
+      Cache-Control:
+      - no-cache
+      Content-Length:
+      - '34'
+      Content-Type:
+      - application/json
+      Server:
+      - nginx
+      Vary:
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/7.0.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234
+  response:
+    body:
+      string: '{"id":1234}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"branch": "test", "ref": "main"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '33'
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/7.0.0
+    method: POST
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/branches
+  response:
+    body:
+      string: '{"name":"test"}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Length:
+      - '16'
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/7.0.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234
+  response:
+    body:
+      string: '{"id":1234}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/7.0.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/files/records%2F5d%2F5b%2F5d5b4e21-fd32-409c-be83-ca1c339903e5.json?ref=test
+  response:
+    body:
+      string: '{"message":"404 File Not Found"}'
+    headers:
+      Cache-Control:
+      - no-cache
+      Content-Length:
+      - '32'
+      Content-Type:
+      - application/json
+      Server:
+      - nginx
+      Vary:
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/7.0.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234
+  response:
+    body:
+      string: '{"id":1234}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+    status:
+      code: 200
+      message: OK
+- request:
+    body:
+      string: '{"branch": "test", "commit_message": "Test commit from workflow\n...", "author_name": "Connie Watson", "author_email": "conwat@bas.ac.uk", "actions": [{"action": "create", "file_path": "records/5d/5b/5d5b4e21-fd32-409c-be83-ca1c339903e5.json", "content": "..."}, {"action": "create", "file_path": "records/5d/5b/5d5b4e21-fd32-409c-be83-ca1c339903e5.xml", "content": "..."}]}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '17261'
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/7.0.0
+    method: POST
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/commits
+  response:
+    body:
+      string: '{"id":"59e71abd216dff86a41293a7f4fe7d2395353fd4"}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Length:
+      - '49'
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/7.0.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234
+  response:
+    body:
+      string: '{"id":1234}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/7.0.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/commits?ref_name=test
+  response:
+    body:
+      string: '[{"id":"59e71abd216dff86a41293a7f4fe7d2395353fd4"}]'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Link:
+      - <https://gitlab.example.com/api/v4/projects/1234/repository/commits?id=1234&order=default&page=2&per_page=20&ref_name=test&trailers=false>;
+        rel="next", <https://gitlab.example.com/api/v4/projects/1234/repository/commits?id=1234&order=default&page=1&per_page=20&ref_name=test&trailers=false>;
+        rel="first", <https://gitlab.example.com/api/v4/projects/1234/repository/commits?id=1234&order=default&page=2&per_page=20&ref_name=test&trailers=false>;
+        rel="last"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Next-Page:
+      - '2'
+      X-Page:
+      - '1'
+      X-Per-Page:
+      - '20'
+      X-Prev-Page:
+      - ''
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/7.0.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234
+  response:
+    body:
+      string: '{"id":1234}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/7.0.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/files/records%2F5d%2F5b%2F5d5b4e21-fd32-409c-be83-ca1c339903e5.json?ref=test
+  response:
+    body:
+      string: '{"file_name":"5d5b4e21-fd32-409c-be83-ca1c339903e5.json","file_path":"records/5d/5b/5d5b4e21-fd32-409c-be83-ca1c339903e5.json","size":4291,"encoding":"base64","content_sha256":"cb35c407f3da6157d2d7efa7334f8f5ac78e672adb05171e9a6cdd8a6487dcf2","ref":"test","blob_id":"ec07b93e45802ee91ec8c37b9975b16116d20ff5","commit_id":"59e71abd216dff86a41293a7f4fe7d2395353fd4","last_commit_id":"59e71abd216dff86a41293a7f4fe7d2395353fd4","execute_filemode":false,"content":"ewogICIkc2NoZW1hIjogImh0dHBzOi8vbWV0YWRhdGEtcmVzb3VyY2VzLmRhdGEuYmFzLmFjLnVrL2Jhcy1tZXRhZGF0YS1nZW5lcmF0b3ItY29uZmlndXJhdGlvbi1zY2hlbWFzL3YyL2lzby0xOTExNS0yLXY0Lmpzb24iLAogICJmaWxlX2lkZW50aWZpZXIiOiAiNWQ1YjRlMjEtZmQzMi00MDljLWJlODMtY2ExYzMzOTkwM2U1IiwKICAiaGllcmFyY2h5X2xldmVsIjogImRhdGFzZXQiLAogICJtZXRhZGF0YSI6IHsKICAgICJjaGFyYWN0ZXJfc2V0IjogInV0ZjgiLAogICAgImxhbmd1YWdlIjogImVuZyIsCiAgICAiY29udGFjdHMiOiBbCiAgICAgIHsKICAgICAgICAib3JnYW5pc2F0aW9uIjogewogICAgICAgICAgIm5hbWUiOiAieCIKICAgICAgICB9LAogICAgICAgICJyb2xlIjogWwogICAgICAgICAgInBvaW50T2ZDb250YWN0IgogICAgICAgIF0KICAgICAgfQogICAgXSwKICAgICJkYXRlX3N0YW1wIjogIjIwMTQtMDYtMzAiLAogICAgIm1ldGFkYXRhX3N0YW5kYXJkIjogewogICAgICAibmFtZSI6ICJJU08gMTkxMTUtMiBHZW9ncmFwaGljIEluZm9ybWF0aW9uIC0gTWV0YWRhdGEgLSBQYXJ0IDI6IEV4dGVuc2lvbnMgZm9yIEltYWdlcnkgYW5kIEdyaWRkZWQgRGF0YSIsCiAgICAgICJ2ZXJzaW9uIjogIklTTyAxOTExNS0yOjIwMDkoRSkiCiAgICB9CiAgfSwKICAiaWRlbnRpZmljYXRpb24iOiB7CiAgICAidGl0bGUiOiB7CiAgICAgICJ2YWx1ZSI6ICJ4IgogICAgfSwKICAgICJhYnN0cmFjdCI6ICJ4IiwKICAgICJkYXRlcyI6IHsKICAgICAgImNyZWF0aW9uIjogIjIwMTQtMDYtMzAiCiAgICB9LAogICAgImlkZW50aWZpZXJzIjogWwogICAgICB7CiAgICAgICAgImlkZW50aWZpZXIiOiAiNWQ1YjRlMjEtZmQzMi00MDljLWJlODMtY2ExYzMzOTkwM2U1IiwKICAgICAgICAiaHJlZiI6ICJodHRwczovL2RhdGEuYmFzLmFjLnVrL2l0ZW1zLzVkNWI0ZTIxLWZkMzItNDA5Yy1iZTgzLWNhMWMzMzk5MDNlNSIsCiAgICAgICAgIm5hbWVzcGFjZSI6ICJkYXRhLmJhcy5hYy51ayIKICAgICAgfSwKICAgICAgewogICAgICAgICJpZGVudGlmaWVyIjogImRhdGFzZXRzL3giLAogICAgICAgICJocmVmIjogImh0dHBzOi8vZGF0YS5iYXMuYWMudWsvZGF0YXNldHMveCIsCiAgICAgICAgIm5hbWVzcGFjZSI6ICJhbGlhcy5kYXRhLmJhcy5hYy51ayIKICAgICAgfQogICAgXSwKICAgICJjb250YWN0cyI6IFsKICAgICAgewogICAgICAgICJvcmdhbmlzYXRpb24iOiB7CiAgICAgICAgICAibmFtZSI6ICJNYXBwaW5nIGFuZCBHZW9ncmFwaGljIEluZm9ybWF0aW9uIENlbnRyZSwgQnJpdGlzaCBBbnRhcmN0aWMgU3VydmV5IiwKICAgICAgICAgICJocmVmIjogImh0dHBzOi8vcm9yLm9yZy8wMXJoZmYzMDkiLAogICAgICAgICAgInRpdGxlIjogInJvciIKICAgICAgICB9LAogICAgICAgICJwaG9uZSI6ICIrNDQgKDApMTIyMyAyMjE0MDAiLAogICAgICAgICJhZGRyZXNzIjogewogICAgICAgICAgImRlbGl2ZXJ5X3BvaW50IjogIkJyaXRpc2ggQW50YXJjdGljIFN1cnZleSwgSGlnaCBDcm9zcywgTWFkaW5nbGV5IFJvYWQiLAogICAgICAgICAgImNpdHkiOiAiQ2FtYnJpZGdlIiwKICAgICAgICAgICJhZG1pbmlzdHJhdGl2ZV9hcmVhIjogIkNhbWJyaWRnZXNoaXJlIiwKICAgICAgICAgICJwb3N0YWxfY29kZSI6ICJDQjMgMEVUIiwKICAgICAgICAgICJjb3VudHJ5IjogIlVuaXRlZCBLaW5nZG9tIgogICAgICAgIH0sCiAgICAgICAgImVtYWlsIjogIm1hZ2ljQGJhcy5hYy51ayIsCiAgICAgICAgIm9ubGluZV9yZXNvdXJjZSI6IHsKICAgICAgICAgICJocmVmIjogImh0dHBzOi8vd3d3LmJhcy5hYy51ay90ZWFtcy9tYWdpYyIsCiAgICAgICAgICAidGl0bGUiOiAiTWFwcGluZyBhbmQgR2VvZ3JhcGhpYyBJbmZvcm1hdGlvbiBDZW50cmUgKE1BR0lDKSAtIEJBUyBwdWJsaWMgd2Vic2l0ZSIsCiAgICAgICAgICAiZGVzY3JpcHRpb24iOiAiR2VuZXJhbCBpbmZvcm1hdGlvbiBhYm91dCB0aGUgQkFTIE1hcHBpbmcgYW5kIEdlb2dyYXBoaWMgSW5mb3JtYXRpb24gQ2VudHJlIChNQUdJQykgZnJvbSB0aGUgQnJpdGlzaCBBbnRhcmN0aWMgU3VydmV5IChCQVMpIHB1YmxpYyB3ZWJzaXRlLiIsCiAgICAgICAgICAiZnVuY3Rpb24iOiAiaW5mb3JtYXRpb24iCiAgICAgICAgfSwKICAgICAgICAicm9sZSI6IFsKICAgICAgICAgICJwb2ludE9mQ29udGFjdCIKICAgICAgICBdCiAgICAgIH0KICAgIF0sCiAgICAic3VwcGxlbWVudGFsX2luZm9ybWF0aW9uIjogIntcImFkbWluaXN0cmF0aXZlX21ldGFkYXRhXCI6IFwiZXlKamRIa2lPaUpLVjFRaUxDSmxjR3NpT25zaWEzUjVJam9pUlVNaUxDSmpjbllpT2lKUUxUSTFOaUlzSW5naU9pSXROWFZEUjNKaldFdHhOa2MyT0RkelRsWlpTelEyZEc5TlRrdzRhMmd6ZGxvMmNXNW9jM0ZUT0V0Vklpd2llU0k2SWpoeFRtaG1ZMjA1VUhKSlUxQTFlWGQyVTNSaGVIbGZPRlF4Y2tZNVRqVk1hV0ZKTVZoaVpFazFja2tpZlN3aVlXeG5Jam9pUlVORVNDMUZVeXRCTVRJNFMxY2lMQ0psYm1NaU9pSkJNalUyUjBOTklpd2lhMmxrSWpvaWJXRm5hV05mYldWMFlXUmhkR0ZmZEdWemRHbHVaMTlsYm1OeWVYQjBhVzl1WDJ0bGVTSjkuRnpITUdtd3RXSDJsRFRtNmlWQ3ZtclhHbXlXMzFFTjd0Mzh0bWx4OGFsRXFIOXFVUDhUSV9nLlkyYTE3SDlTMUs1c05ZRDEueTBDX0xWUkcyeldDWmVTYld6Q0l4eTZmemQ4T3dTZmgyS1JGUkhHaGx1eTBfcVhDSzVNQzV2cy12UmdYdkN0U2paVmY1UW1pcHFYQVhFa3dnc0VtMTZfSWs1Vm5pZWdpT1JQcG1Bak5jMGxIUGlMaHNvZm5WVEtpSlRGMnhoTzJmYUlRSml0RFBWcTVJSGowNUVjMHNxSnFrMUw0QWcyWXFrTEhzOE1wX1RTUEVhcTZ3RWktcllfd2twSDhDN1d0VmZRdngwazI4OTR2SnF1RjgzVGhqR3V6eGN5M21JY2dmZ2lVSmV6LU5DdUVCUS1YZHY3SmhjRHVfVXAtUE4zSlVjZ3dXRTI5bG9mb1dmYzJzTUhybzhaVHJpX3hUMGZPal82U1ktczlISUd3c2JnXzA0ZExqbGV4cTZvaW1jMzdRXzR6dFIwYlZVRk5OVlZkbndIalF4TzdGWXJYNnNQcGQxVlV2bWwyNFlvQ2dLY2hHSzRXTHJXaXhpamxGVk5rbDFaVHhxTEY0MlNDbFhzeFNHRzJnczNwTVo5MTZjc3pyczZkemx1bWZIelZDd29na2Rtb0tTVi1tN0Yza2M5Q3Z0a0FzQkVpQnR0WmtoSS1DOHh6TUNNd0xBcE02blNISmVTX1FUVE9DRnVZUDZZUFdPZjdsdkVzYUxPd3lHaWZsUGlBMk5hMllEWklrYXhJY044R2pXa3BBMjF2ajhHekR5YW5tVUhjREJZc2pKZFNuM1dBcGxzX2FvTEdtRFpPaF8yeHBHVWNma0x2eFZBaVJ6MWJsTUJ5cU5TU3ZSNHREZDNLY25yaVhjMjY5a2U4YlZTVlRTVXBFaThkUTZvUmVaeVp5ZmhXQU1FZDhVVS1OSWN5UmxzT1hBSzk1ZFJkajZKNmY1NjJlUTVFdjVCRkVmUmI2bnJXenc5akNxcGxHYlFEc0VITUFRbjZ1TmJwdlpQcDhGTmgtNERDdG9ES09pclFodnpfTHJWUHZhX3RPcmZRVFpwVXV6a3FNWEdOeEstejlWWmhFbmlNWWRmQzFmTDNjMzdYUXNNX05iaU9FZ25UakxjTWRuaDIwa0k1RmxwRjRUMDFIMGh4SnZnbGdOU2xXaE42WGFRek5QSkJpMl9nM3V0eWtyWmJWUlpKbG5SbERCY0JmRWR3OVpXdXp3Qmt3ak0za1B1WkxteVZMVTVGbzlWU3ExVmtKOG9zTTJ2ZDJNdWx5R3R2dHhxWW9DN292X0x4VWh4bGFZRENTS3BQUkowanZOZHFNckswZU9YQ3JQOUpxS0hqUjFXenNFaEFIVThjR1VEVlN6RGhnd0oyMk55cjM0ZER5VDNyLnJIVFVuSjdCOVNaSmgxTWM4a1JnMmdcIn0iLAogICAgImNoYXJhY3Rlcl9zZXQiOiAidXRmOCIsCiAgICAibGFuZ3VhZ2UiOiAiZW5nIiwKICAgICJleHRlbnRzIjogWwogICAgICB7CiAgICAgICAgImlkZW50aWZpZXIiOiAieCIsCiAgICAgICAgImdlb2dyYXBoaWMiOiB7CiAgICAgICAgICAiYm91bmRpbmdfYm94IjogewogICAgICAgICAgICAid2VzdF9sb25naXR1ZGUiOiAwLjAsCiAgICAgICAgICAgICJlYXN0X2xvbmdpdHVkZSI6IDAuMCwKICAgICAgICAgICAgInNvdXRoX2xhdGl0dWRlIjogMC4wLAogICAgICAgICAgICAibm9ydGhfbGF0aXR1ZGUiOiAwLjAKICAgICAgICAgIH0KICAgICAgICB9CiAgICAgIH0sCiAgICAgIHsKICAgICAgICAiaWRlbnRpZmllciI6ICJ5IiwKICAgICAgICAiZ2VvZ3JhcGhpYyI6IHsKICAgICAgICAgICJib3VuZGluZ19ib3giOiB7CiAgICAgICAgICAgICJ3ZXN0X2xvbmdpdHVkZSI6IDAuMCwKICAgICAgICAgICAgImVhc3RfbG9uZ2l0dWRlIjogMC4wLAogICAgICAgICAgICAic291dGhfbGF0aXR1ZGUiOiAwLjAsCiAgICAgICAgICAgICJub3J0aF9sYXRpdHVkZSI6IDAuMAogICAgICAgICAgfQogICAgICAgIH0KICAgICAgfQogICAgXQogIH0KfQ=="}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Gitlab-Blob-Id:
+      - ec07b93e45802ee91ec8c37b9975b16116d20ff5
+      X-Gitlab-Commit-Id:
+      - 59e71abd216dff86a41293a7f4fe7d2395353fd4
+      X-Gitlab-Content-Sha256:
+      - cb35c407f3da6157d2d7efa7334f8f5ac78e672adb05171e9a6cdd8a6487dcf2
+      X-Gitlab-Encoding:
+      - base64
+      X-Gitlab-Execute-Filemode:
+      - 'false'
+      X-Gitlab-File-Name:
+      - 5d5b4e21-fd32-409c-be83-ca1c339903e5.json
+      X-Gitlab-File-Path:
+      - records/5d/5b/5d5b4e21-fd32-409c-be83-ca1c339903e5.json
+      X-Gitlab-Last-Commit-Id:
+      - 59e71abd216dff86a41293a7f4fe7d2395353fd4
+      X-Gitlab-Ref:
+      - test
+      X-Gitlab-Size:
+      - '4291'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        NTA3ZA0KPC...JnPT0NCg0K
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40Mi45IG1kL0JvdG9jb3JlIzEuNDIuOSB1YS8yLjEgb3MvbWFjb3MjMjQuNi4wIG1k
+        L2FyY2gjYXJtNjQgbGFuZy9weXRob24jMy4xMS4xMSBtZC9weWltcGwjQ1B5dGhvbiBtL1UsRCxl
+        LFosYiBjZmcvcmV0cnktbW9kZSNsZWdhY3kgQm90b2NvcmUvMS40Mi45
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MjA2MDU=
+      X-Amz-Trailer:
+      - !!binary |
+        eC1hbXotY2hlY2tzdW0tY3JjMzI=
+      amz-sdk-request:
+      - !!binary |
+        YXR0ZW1wdD0x
+      x-amz-meta-file_identifier:
+      - !!binary |
+        NWQ1YjRlMjEtZmQzMi00MDljLWJlODMtY2ExYzMzOTkwM2U1
+      x-amz-meta-file_revision:
+      - !!binary |
+        NTllNzFhYmQyMTZkZmY4NmE0MTI5M2E3ZjRmZTdkMjM5NTM1M2ZkNA==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/items/5d5b4e21-fd32-409c-be83-ca1c339903e5/index.html
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - u91QBg==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        MTMxDQo8IU...ZRPT0NCg0K
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40Mi45IG1kL0JvdG9jb3JlIzEuNDIuOSB1YS8yLjEgb3MvbWFjb3MjMjQuNi4wIG1k
+        L2FyY2gjYXJtNjQgbGFuZy9weXRob24jMy4xMS4xMSBtZC9weWltcGwjQ1B5dGhvbiBtL1UsRCxl
+        LFosYiBjZmcvcmV0cnktbW9kZSNsZWdhY3kgQm90b2NvcmUvMS40Mi45
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzA1
+      X-Amz-Trailer:
+      - !!binary |
+        eC1hbXotY2hlY2tzdW0tY3JjMzI=
+      amz-sdk-request:
+      - !!binary |
+        YXR0ZW1wdD0x
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+      x-amz-website-redirect-location:
+      - !!binary |
+        L2l0ZW1zLzVkNWI0ZTIxLWZkMzItNDA5Yy1iZTgzLWNhMWMzMzk5MDNlNS9pbmRleC5odG1s
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/datasets/x/index.html
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - kBApfQ==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        YWY4DQp7Ci...pyUT09DQoN
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        YXBwbGljYXRpb24vanNvbg==
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40Mi45IG1kL0JvdG9jb3JlIzEuNDIuOSB1YS8yLjEgb3MvbWFjb3MjMjQuNi4wIG1k
+        L2FyY2gjYXJtNjQgbGFuZy9weXRob24jMy4xMS4xMSBtZC9weWltcGwjQ1B5dGhvbiBtL1UsRCxl
+        LFosYiBjZmcvcmV0cnktbW9kZSNsZWdhY3kgQm90b2NvcmUvMS40Mi45
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MjgwOA==
+      X-Amz-Trailer:
+      - !!binary |
+        eC1hbXotY2hlY2tzdW0tY3JjMzI=
+      amz-sdk-request:
+      - !!binary |
+        YXR0ZW1wdD0x
+      x-amz-meta-file_identifier:
+      - !!binary |
+        NWQ1YjRlMjEtZmQzMi00MDljLWJlODMtY2ExYzMzOTkwM2U1
+      x-amz-meta-file_revision:
+      - !!binary |
+        NTllNzFhYmQyMTZkZmY4NmE0MTI5M2E3ZjRmZTdkMjM5NTM1M2ZkNA==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/records/5d5b4e21-fd32-409c-be83-ca1c339903e5.json
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - +YXjrQ==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        MjhjNA0KPD...09DQoNCg==
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        YXBwbGljYXRpb24veG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40Mi45IG1kL0JvdG9jb3JlIzEuNDIuOSB1YS8yLjEgb3MvbWFjb3MjMjQuNi4wIG1k
+        L2FyY2gjYXJtNjQgbGFuZy9weXRob24jMy4xMS4xMSBtZC9weWltcGwjQ1B5dGhvbiBtL1UsRCxl
+        LFosYiBjZmcvcmV0cnktbW9kZSNsZWdhY3kgQm90b2NvcmUvMS40Mi45
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MTA0MzY=
+      X-Amz-Trailer:
+      - !!binary |
+        eC1hbXotY2hlY2tzdW0tY3JjMzI=
+      amz-sdk-request:
+      - !!binary |
+        YXR0ZW1wdD0x
+      x-amz-meta-file_identifier:
+      - !!binary |
+        NWQ1YjRlMjEtZmQzMi00MDljLWJlODMtY2ExYzMzOTkwM2U1
+      x-amz-meta-file_revision:
+      - !!binary |
+        NTllNzFhYmQyMTZkZmY4NmE0MTI5M2E3ZjRmZTdkMjM5NTM1M2ZkNA==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/records/5d5b4e21-fd32-409c-be83-ca1c339903e5.xml
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - PgWY1g==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        MTY5OQ0KPG...FBPT0NCg0K
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40Mi45IG1kL0JvdG9jb3JlIzEuNDIuOSB1YS8yLjEgb3MvbWFjb3MjMjQuNi4wIG1k
+        L2FyY2gjYXJtNjQgbGFuZy9weXRob24jMy4xMS4xMSBtZC9weWltcGwjQ1B5dGhvbiBtL1UsRCxl
+        LFosYiBjZmcvcmV0cnktbW9kZSNsZWdhY3kgQm90b2NvcmUvMS40Mi45
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        NTc4NQ==
+      X-Amz-Trailer:
+      - !!binary |
+        eC1hbXotY2hlY2tzdW0tY3JjMzI=
+      amz-sdk-request:
+      - !!binary |
+        YXR0ZW1wdD0x
+      x-amz-meta-file_identifier:
+      - !!binary |
+        NWQ1YjRlMjEtZmQzMi00MDljLWJlODMtY2ExYzMzOTkwM2U1
+      x-amz-meta-file_revision:
+      - !!binary |
+        NTllNzFhYmQyMTZkZmY4NmE0MTI5M2E3ZjRmZTdkMjM5NTM1M2ZkNA==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/records/5d5b4e21-fd32-409c-be83-ca1c339903e5.html
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - 1fPzQA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"commit": {"branch": "test", "commit": "59e71abd216dff86a41293a7f4fe7d2395353fd4",
+      "new_identifiers": ["5d5b4e21-fd32-409c-be83-ca1c339903e5"], "updated_identifiers":
+      [], "stats": {"new_records": 1, "new_files": 2, "updated_records": 0, "updated_files":
+      0}, "url": "x/-/commit/59e71abd216dff86a41293a7f4fe7d2395353fd4"}, "merge_request":
+      {"url": "https://gitlab.example.com/MAGIC/lantern-records/-/merge_requests/6"}}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '411'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.32.5
+    method: POST
+    uri: https://example.com/webhook
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+    status:
+      code: 202
+      message: Accepted
+version: 1

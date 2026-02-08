@@ -415,11 +415,9 @@ def main() -> None:
 
     # process any zap authored records
     _zap(logger=logger, store=store, admin_keys=admin_keys, import_path=import_path)
-
-    # stop if no valid (zap) records present
     records = import_load(logger=logger, input_path=import_path)
     if len(records) < 1:
-        logger.warning("No records to import, exiting.")
+        logger.info("No valid records to commit, exiting.")
         sys.exit(0)
 
     # open a changeset if needed

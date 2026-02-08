@@ -13,6 +13,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 ### Changed [!BREAKING]
 
 * `ItemBase.abstract*` methods changed to `ItemBase.description*` (impacts externally maintained item subclasses)
+* `PLAUSIBLE_DOMAIN` config option renamed to `PLAUSIBLE_ID`
 
 ### Added
 
@@ -92,6 +93,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Importing Cloudflare Turnstile config under Infrastructure as Code
 * Importing Sentry project under Infrastructure as Code
 * Improving infrastructure and setup documentation
+* Upgrading Plausible tracking script
 
 ### Removed
 

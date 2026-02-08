@@ -19,7 +19,7 @@ class TestMacrosSite:
             build_key="x",
             build_time=freezer_time(),
             html_title="x",
-            plausible_domain="x",
+            plausible_id="x",
             embedded_maps_endpoint="x",
             items_enquires_endpoint="x",
             items_enquires_turnstile_key="x",
@@ -104,10 +104,11 @@ class TestMacrosSite:
 
     def test_script_plausible(self):
         """Can get Plausible script from page."""
-        template = """{% import '_macros/site.html.j2' as site %}{{ site.script_plausible(meta.plausible_domain) }}"""
+        template = """{% import '_macros/site.html.j2' as site %}{{ site.script_plausible(meta.plausible_id) }}"""
         meta = self._site_meta()
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
-        assert html.head.find(name="script", attrs={"data-domain": meta.plausible_domain}) is not None
+        assert len(meta.plausible_id) > 0
+        assert html.head.find(name="script", src=lambda s: s and meta.plausible_id in s) is not None
 
     def test_script_turnstile(self):
         """Can get Cloudflare Turnstile script from page."""
@@ -152,7 +153,7 @@ class TestMacrosSite:
                 build_key="000",
                 build_time=freezer_time(),
                 html_title="x",
-                plausible_domain="x",
+                plausible_id="x",
                 embedded_maps_endpoint="x",
                 items_enquires_endpoint="x",
                 items_enquires_turnstile_key="x",
@@ -163,7 +164,7 @@ class TestMacrosSite:
                 base_url="x",
                 build_key="000",
                 html_title="x",
-                plausible_domain="x",
+                plausible_id="x",
                 embedded_maps_endpoint="x",
                 items_enquires_endpoint="x",
                 items_enquires_turnstile_key="x",
@@ -202,7 +203,7 @@ class TestMacrosSite:
 
         assert html.head.find(name="link", rel="stylesheet", href="/static/css/main.css?v=000") is not None
 
-        assert html.head.find(name="script", attrs={"data-domain": meta.plausible_domain}) is not None
+        assert html.head.find(name="script", src=lambda s: s and meta.plausible_id in s) is not None
         assert html.head.find(name="script", src=cf_turnstile) is not None
         assert html.head.find(name="script", src="/static/js/enhancements.js?v=000") is not None
 

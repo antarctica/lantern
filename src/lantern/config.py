@@ -70,7 +70,7 @@ class Config:
             "STORE_GITLAB_PROJECT_ID",
             "STORE_GITLAB_BRANCH",
             "STORE_GITLAB_CACHE_PATH",
-            "TEMPLATES_PLAUSIBLE_DOMAIN",
+            "TEMPLATES_PLAUSIBLE_ID",
             "TEMPLATES_ITEM_CONTACT_ENDPOINT",
             "TEMPLATES_ITEM_VERSIONS_ENDPOINT",
             "TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY",
@@ -123,7 +123,7 @@ class Config:
         STORE_GITLAB_BRANCH: str
         STORE_GITLAB_CACHE_PATH: str
         TEMPLATES_CACHE_BUST_VALUE: str
-        TEMPLATES_PLAUSIBLE_DOMAIN: str
+        TEMPLATES_PLAUSIBLE_ID: str
         TEMPLATES_ITEM_MAPS_ENDPOINT: str
         TEMPLATES_ITEM_CONTACT_ENDPOINT: str
         TEMPLATES_ITEM_VERSIONS_ENDPOINT: str
@@ -159,7 +159,7 @@ class Config:
             "STORE_GITLAB_BRANCH": self.STORE_GITLAB_BRANCH,
             "STORE_GITLAB_CACHE_PATH": str(self.STORE_GITLAB_CACHE_PATH.resolve()),
             "TEMPLATES_CACHE_BUST_VALUE": self.TEMPLATES_CACHE_BUST_VALUE,
-            "TEMPLATES_PLAUSIBLE_DOMAIN": self.TEMPLATES_PLAUSIBLE_DOMAIN,
+            "TEMPLATES_PLAUSIBLE_ID": self.TEMPLATES_PLAUSIBLE_ID,
             "TEMPLATES_ITEM_MAPS_ENDPOINT": self.TEMPLATES_ITEM_MAPS_ENDPOINT,
             "TEMPLATES_ITEM_CONTACT_ENDPOINT": self.TEMPLATES_ITEM_CONTACT_ENDPOINT,
             "TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": self.TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY,
@@ -286,10 +286,10 @@ class Config:
         return sha1(f"v{self.VERSION}".encode()).hexdigest()[:7]  # noqa: S324
 
     @property
-    def TEMPLATES_PLAUSIBLE_DOMAIN(self) -> str:
+    def TEMPLATES_PLAUSIBLE_ID(self) -> str:
         """Plausible site/domain name."""
         with self.env.prefixed(self._app_prefix), self.env.prefixed("TEMPLATES_"):
-            return self.env("PLAUSIBLE_DOMAIN")
+            return self.env("PLAUSIBLE_ID")
 
     @property
     def TEMPLATES_ITEM_MAPS_ENDPOINT(self) -> str:

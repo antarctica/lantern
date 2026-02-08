@@ -187,7 +187,7 @@ plugins.md014.enabled = false
 extensions.markdown-extended-autolinks.enabled = true
 
 [tool.pytest_env]
-# `X_ADMIN_METADATA_SIGNING_KEY_PRIVATE` is needed to sign administrative metadata in test records
+# `X_ADMIN_METADATA_SIGNING_KEY_PRIVATE` is needed to sign administrative metadata in test records but is not real key
 LANTERN_LOG_LEVEL = "INFO"
 LANTERN_PARALLEL_JOBS="1"
 LANTERN_ENABLE_FEATURE_SENTRY = "false"

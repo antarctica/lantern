@@ -60,7 +60,7 @@ class Config:
 
         Note: Logging level is validated at the point of access by environs automatically.
 
-        If invalid a ConfigurationError is raised.
+        Raises `ConfigurationError` if invalid.
         """
         required = [
             "ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE",

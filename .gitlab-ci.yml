@@ -66,6 +66,9 @@ image: mcr.microsoft.com/playwright/python:v1.57.0-noble
   - export LANGUAGE=en_GB:en
   - export LC_ALL=en_GB.UTF-8
 
+  # Setup rsync for trusted publishing
+  - apt-get install -y rsync
+
   # setup app deps
   - uv sync --frozen --all-groups --python $PYTHON_VERSION
   # start static site for e2e tests

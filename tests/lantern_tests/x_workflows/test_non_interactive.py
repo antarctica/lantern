@@ -30,7 +30,7 @@ class TestPublishingWorkflow:
 
     @pytest.mark.vcr
     @pytest.mark.block_network
-    def test_run(self, mocker: MockerFixture, tmp_path: Path) -> None:
+    def test_run(self, mocker: MockerFixture, tmp_path: Path):
         """Can run workflow in isolated subprocess."""
         mock = mocker.MagicMock()
         mock.returncode = 0

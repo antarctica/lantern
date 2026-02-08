@@ -94,6 +94,8 @@ class TestConfig:
             "AWS_S3_BUCKET": "x",
             "AWS_ACCESS_ID": "x",
             "AWS_ACCESS_SECRET": redacted_value,
+            "TRUSTED_UPLOAD_PATH": str(fx_config.TRUSTED_UPLOAD_PATH.resolve()),
+            "TRUSTED_UPLOAD_HOST": "x",
             "VERIFY_SHAREPOINT_PROXY_ENDPOINT": "x",
             "VERIFY_SAN_PROXY_ENDPOINT": "x",
         }
@@ -102,6 +104,7 @@ class TestConfig:
 
         assert output == expected
         assert len(output["EXPORT_PATH"]) > 0
+        assert len(output["TRUSTED_UPLOAD_PATH"]) > 0
         assert len(output["STORE_GITLAB_CACHE_PATH"]) > 0
         assert len(output["TEMPLATES_CACHE_BUST_VALUE"]) > 0
 
@@ -202,6 +205,7 @@ class TestConfig:
                 }
             ),
             ({"LANTERN_EXPORT_PATH": None}),
+            ({"LANTERN_TRUSTED_UPLOAD_PATH": None}),
             ({"LANTERN_AWS_S3_BUCKET": None, "LANTERN_AWS_ACCESS_ID": "x", "LANTERN_AWS_ACCESS_SECRET": "x"}),
             ({"LANTERN_AWS_S3_BUCKET": "x", "LANTERN_AWS_ACCESS_ID": None, "LANTERN_AWS_ACCESS_SECRET": "x"}),
             ({"LANTERN_AWS_S3_BUCKET": "x", "LANTERN_AWS_ACCESS_ID": "x", "LANTERN_AWS_ACCESS_SECRET": None}),
@@ -232,16 +236,32 @@ class TestConfig:
 
         self._unset_envs(envs, envs_bck)
 
-    @pytest.mark.parametrize("env", ["LANTERN_STORE_GITLAB_CACHE_PATH", "LANTERN_EXPORT_PATH"])
+    @pytest.mark.parametrize(
+        "env", ["LANTERN_STORE_GITLAB_CACHE_PATH", "LANTERN_EXPORT_PATH", "LANTERN_TRUSTED_UPLOAD_PATH"]
+    )
     def test_validate_invalid_path(self, env: str):
         """Cannot validate where a required path is invalid."""
-        envs = {env: str(Path(__file__).resolve())}
+        envs: dict = {env: str(Path(__file__).resolve())}
+        if env == "LANTERN_TRUSTED_UPLOAD_PATH":
+            # ensure `TRUSTED_UPLOAD_HOST` is unset so `TRUSTED_UPLOAD_PATH` is treated as a local path and validated
+            envs["LANTERN_TRUSTED_UPLOAD_HOST"] = None
         envs_bck = self._set_envs(envs)
 
         config = Config(read_env=False)
 
         with pytest.raises(ConfigurationError):
             config.validate()
+
+        self._unset_envs(envs, envs_bck)
+
+    @pytest.mark.cov()
+    def test_validate_remote_trusted_path(self):
+        """Cannot validate TRUSTED_UPLOAD_PATH where a remote host is set."""
+        envs = {"LANTERN_TRUSTED_UPLOAD_PATH": "x", "LANTERN_TRUSTED_UPLOAD_HOST": "x"}
+        envs_bck = self._set_envs(envs)
+        config = Config(read_env=False)
+
+        config.validate()
 
         self._unset_envs(envs, envs_bck)
 
@@ -262,6 +282,8 @@ class TestConfig:
             ("AWS_S3_BUCKET", "x", False),
             ("AWS_ACCESS_ID", "x", False),
             ("AWS_ACCESS_SECRET", "x", True),
+            ("TRUSTED_UPLOAD_PATH", Path("x").resolve(), False),
+            ("TRUSTED_UPLOAD_HOST", "x", False),
             ("VERIFY_SHAREPOINT_PROXY_ENDPOINT", "x", False),
             ("VERIFY_SAN_PROXY_ENDPOINT", "x", False),
         ],
@@ -279,6 +301,20 @@ class TestConfig:
         assert getattr(config, property_name) == expected
         if sensitive:
             assert getattr(config, f"{property_name}_SAFE") == config._safe_value
+
+        self._unset_envs(envs, envs_bck)
+
+    @pytest.mark.parametrize("property_name", ["TRUSTED_UPLOAD_HOST"])
+    def test_nullable_property(self, property_name: str):
+        """Can get and validate properties that specifically support/allow no value."""
+        envs = {f"LANTERN_{property_name}": None}
+        envs_bck = self._set_envs(envs)
+        config = Config(read_env=False)
+
+        assert getattr(config, property_name) is None
+        output = config.dumps_safe()
+        # noinspection PyTypedDict
+        assert output[property_name] == config._none_value
 
         self._unset_envs(envs, envs_bck)
 

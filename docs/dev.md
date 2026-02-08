@@ -200,8 +200,6 @@ config options used by development tasks.
 | Option                                 | Type         | Sensitive | Since Version | Summary                                                      | Default | Example                                      |
 |----------------------------------------|--------------|-----------|---------------|--------------------------------------------------------------|---------|----------------------------------------------|
 | `X_ADMIN_METADATA_SIGNING_KEY_PRIVATE` | JSON Web Key | Yes       | v0.4.x        | JSON Web Key (JWK) for updating administrative metadata      | *None*  | '{"kid": "magic_metadata_signing_key", ...}' |
-| `X_TRUSTED_UPLOAD_HOST`                | String       | No        | v0.5.x        | SSH config alias for trusted content hosting server          | *None*  | 'lantern-trusted-content'                    |
-| `X_TRUSTED_UPLOAD_PATH`                | String       | No        | v0.5.x        | Directory for uploaded content within trusted content server | *None*  | '/data/lantern'                              |
 <!-- pyml enable md013 -->
 
 <!-- pyml disable md028 -->

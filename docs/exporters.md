@@ -36,6 +36,8 @@ Exporters use these options from the app `lantern.Config` class:
 - `AWS_ACCESS_ID`: credential for AWS IAM principle, MUST have permissions to manage content in the S3 bucket
 - `AWS_ACCESS_SECRET`: corresponding secret for the `AWS_ACCESS_ID` credential
 - `AWS_S3_BUCKET`: AWS S3 bucket for published content, MUST exist and will be wholly managed by this application
+- `TRUSTED_UPLOAD_HOST`: Optional remote host for [Trusted Publishing](#trusted-publishing) content
+- `TRUSTED_UPLOAD_PATH`: base local or remote path for [Trusted Publishing](#trusted-publishing) content
 - `PUBLIC_WEBSITE_ENDPOINT`: WordPress API endpoint for the public website search exporter
 - `PUBLIC_WEBSITE_POST_TYPE`: custom WordPress post type for the public website search exporter
 - `PUBLIC_WEBSITE_USERNAME`: WordPress user credential for the public website search exporter

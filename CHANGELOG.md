@@ -43,6 +43,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * custom Sentry user feedback widget
 * Infrastructure as Code using OpenTofu
 * Automatic publishing of trusted content for administrative metadata
+* Updating non-interactive publishing workflow to support branches and change sets
 
 ### Fixed
 

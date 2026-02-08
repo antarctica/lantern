@@ -23,6 +23,13 @@ The module:
 Separate modules (and corresponding virtual environments) are created for each project [Release](/README.md#releases)
 automatically by the [Ansible Playbook](#ansible-playbook).
 
+## Non-interactive record publishing script
+
+A Python script, `resources/scripts/non-interactive-publishing-workflow.py`, and a
+[shell script wrapper 🛡️](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/roles/lantern/templates/pub-cat.sh.j2)
+managed by [Ansible](#ansible-playbook), are deployed to the BAS Central workstations to implement the
+[Non-Interactive Publishing Workflow](/docs/usage.md#non-interactive-record-publishing-workflow).
+
 ## Ansible playbook
 
 This application is deployed using an

@@ -43,7 +43,9 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * custom Sentry user feedback widget
 * Infrastructure as Code using OpenTofu
 * Automatic publishing of trusted content for administrative metadata
-* Updating non-interactive publishing workflow to support branches and change sets
+* Infrastructure, hosting and site dependencies documentation diagrams
+* Branches and change sets support in the non-interactive publishing workflow
+* Basic web hooks support in the non-interactive publishing workflow
 
 ### Fixed
 
@@ -55,6 +57,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Missing Open Graph and Schema.org metadata for static site pages
 * Read-only database error when purging a GitLab local cache due to a stale connection
 * Missing content-types for S3 uploaded files (in relation to `X-Content-Type-Options=nosniff`)
+* Preventing non-interactive publishing workflow from clobbering global exporters output in partial builds
 
 ### Changed
 

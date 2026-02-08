@@ -97,8 +97,8 @@ This ACL:
 [2] As a user in the `magic` group:
 
 ```text
-$ mkdir -p $DOCUMENT_ROOT/content/cat/stage/items $DOCUMENT_ROOT/content/cat/prod/items
-$ chmod -R g+w $DOCUMENT_ROOT/content/cat/stage $DOCUMENT_ROOT/content/cat/prod
+$ mkdir -p $DOCUMENT_ROOT/content/cat/testing/items $DOCUMENT_ROOT/content/cat/live/items
+$ chmod -R g+w $DOCUMENT_ROOT/content/cat/testing $DOCUMENT_ROOT/content/cat/live
 ```
 
 ## Reverse proxying

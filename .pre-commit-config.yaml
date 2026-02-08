@@ -8,7 +8,7 @@ repos:
       args: ["--maxkb=600"]
     - id: check-case-conflict
     - id: check-yaml # some VCR recordings contain PyYAML tags pre-commit doesn't understand
-      exclude: tests/lantern_tests/_workflows/cassettes/test_non_interactive/TestPublishingWorkflow\.test_run\.yaml$
+      exclude: tests/lantern_tests/x_workflows/cassettes/test_non_interactive/TestPublishingWorkflow\.test_run\.yaml$
     - id: check-toml  # for pyproject.toml
     - id: check-merge-conflict
     - id: trailing-whitespace

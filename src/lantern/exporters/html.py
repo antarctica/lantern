@@ -1,4 +1,6 @@
 import logging
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from mypy_boto3_s3 import S3Client
 
@@ -9,7 +11,7 @@ from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
 from lantern.stores.base import SelectRecordProtocol
-from lantern.utils import dumps_redirect, get_jinja_env, get_record_aliases, prettify_html
+from lantern.utils import RsyncUtils, dumps_redirect, get_jinja_env, get_record_aliases, prettify_html
 
 
 class HtmlExporter(ResourceExporter):
@@ -19,6 +21,8 @@ class HtmlExporter(ResourceExporter):
     Exports a Record as ItemCatalogue HTML.
 
     Intended as the primary human-readable representation of a record.
+
+    Supports trusted publishing.
     """
 
     def __init__(
@@ -63,6 +67,36 @@ class HtmlExporter(ResourceExporter):
 
         raw = self._jinja.get_template(self._template_path).render(item=item, meta=item.site_metadata)
         return prettify_html(raw)
+
+    def _publish_trusted(self) -> None:
+        """
+        Save dumped output to secure hosting via rsync.
+
+        Group write permissions are set on uploaded files (660) and directories (770) to allow shared management.
+        """
+        with TemporaryDirectory() as tmp_path:
+            base_path = Path(tmp_path)
+
+        items_source = base_path / "items"
+        item_path = items_source / self._record.file_identifier / "index.html"
+        env_path = "testing" if "integration" in self._meta.s3_bucket else "live"
+        items_target = self._meta.trusted_path / env_path / "items"  # ty:ignore[unsupported-operator]
+
+        item_path.parent.mkdir(parents=True, exist_ok=True)
+        with item_path.open("w") as record_file:
+            record_file.write(self.dumps())
+        item_path.parent.chmod(0o770)
+        item_path.chmod(0o660)
+
+        sync = RsyncUtils(logger=self._logger)
+        sync.put(src_path=items_source, target_path=items_target, target_host=self._meta.trusted_host)
+
+    def publish(self) -> None:
+        """Save dumped output to remote S3 bucket, or secure hosting if in trusted context."""
+        if self._meta.trusted:
+            self._publish_trusted()
+            return
+        super().publish()
 
 
 class HtmlAliasesExporter(ResourceExporter):

@@ -11,7 +11,6 @@ from gitlab.exceptions import GitlabGetError
 from mypy_boto3_s3 import S3Client
 from tasks._config import ExtraConfig
 from tasks._record_utils import init, init_store, parse_records
-from tasks.records_build import upload_trusted
 from tasks.records_import import clean as import_clean
 from tasks.records_import import load as import_load
 from tasks.records_import import push as import_push
@@ -334,10 +333,8 @@ def _build(
     logger.info("Freezing store.")
     store._frozen = True
     store._cache._frozen = True
-    logger.info(f"Publishing {len(identifiers)} records to {config.AWS_S3_BUCKET}.")
+    logger.info(f"Publishing {len(identifiers)} records.")
     site.publish()
-    logger.info("Publishing trusted items to a secure location.")
-    upload_trusted(logger=logger, config=config, store=store, s3=s3, identifiers=identifiers)
 
 
 @_time_task(label="Verify")

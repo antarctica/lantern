@@ -126,6 +126,23 @@ class TestRsyncUtils:
         rsync_utils = RsyncUtils(logger=fx_logger)
         assert isinstance(rsync_utils, RsyncUtils)
 
+    @pytest.mark.cov()
+    @pytest.mark.parametrize("exists", [True, False])
+    def test_target_path_handling(self, mocker: MockerFixture, fx_logger: logging.Logger, exists: bool):
+        """Can create target path if missing and local."""
+        with TemporaryDirectory() as tmp_path:
+            target_path = Path(tmp_path) / "t"
+        if exists:
+            target_path.mkdir(parents=True, exist_ok=True)
+        mock = mocker.MagicMock()
+        # noinspection SpellCheckingInspection
+        mock.returncode = 0
+        mocker.patch("sysrsync.runner.subprocess.run", return_value=mock)
+        rsync_utils = RsyncUtils(logger=fx_logger)
+
+        rsync_utils.put(src_path=Path("x"), target_path=target_path, target_host=None)
+        assert target_path.exists()
+
     @pytest.mark.parametrize("host", [None, "h"])
     def test_put(self, mocker: MockerFixture, fx_logger: logging.Logger, host: str | None):
         """Can generate expected rsync command."""

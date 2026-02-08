@@ -165,6 +165,13 @@ schedule by other projects as a background task.
 > [!WARNING]
 > This will publish any records to the production S3 bucket / catalogue environment.
 
+This workflow only calls the [Records](/docs/exporters.md#records-resource-exporter) exporter as:
+
+- calling _global_ exporters (such as the [Site Index](/docs/exporters.md#site-index-exporter)), as they would only
+  include records from the workflow, omitting other/existing records and giving incomplete outputs
+- calling _stable_ exporters (for [Site Pages](/docs/exporters.md#site-pages-exporter), etc.) is unnecessarily, given
+  they are not sensitive to record changes
+
 This workflow is experimental with major limitations:
 
 - record files must be accessible from the BAS central workstations

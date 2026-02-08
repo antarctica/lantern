@@ -28,8 +28,9 @@ class JobMethod(Enum):
 
 
 class Job(NamedTuple):
-    """Record/exporter for processing job."""
+    """Record/exporter and trusted context for processing job."""
 
+    trusted: bool
     record: RecordRevision
     exporter: Callable[..., ResourceExporter]
 
@@ -69,6 +70,7 @@ def _run_job(
     config: Config,
     meta: ExportMeta,
     store: Store,
+    trusted: bool,
     exporter: Callable[..., ResourceExporter],
     record: RecordRevision,
     method: JobMethod,
@@ -83,6 +85,7 @@ def _run_job(
     init_logging(config.LOG_LEVEL)
     logger = logging.getLogger("app")
 
+    meta.trusted = trusted
     s3 = _job_worker_s3(config=config)
     store = _job_worker_store(store=store)
     select_record = store.select_one
@@ -130,13 +133,14 @@ class RecordsExporter(Exporter):
         """
         Generate parallel processing jobs for exporting or publishing all/selected records.
 
-        Jobs = all/selected records * each record exporter class.
+        Jobs = all/selected records * (record exporter classes + with trusted context for items).
         """
         parallel_classes = [HtmlExporter, HtmlAliasesExporter, JsonExporter, IsoXmlExporter, IsoXmlHtmlExporter]
         jobs: list[Job] = []
 
         for record in self._store.select(self._selected_identifiers):
-            jobs.extend([Job(record=record, exporter=cls) for cls in parallel_classes])
+            jobs.extend([Job(trusted=False, record=record, exporter=cls) for cls in parallel_classes])
+            jobs.append(Job(trusted=True, record=record, exporter=HtmlExporter))
         return jobs
 
     def _prep_store(self) -> Store:
@@ -156,6 +160,14 @@ class RecordsExporter(Exporter):
         store._cache._flash.clear()
         return store
 
+    def _prep_meta(self) -> ExportMeta:
+        """
+        Prepare export metadata for use in parallel processing jobs.
+
+        Copied to prevent final job influencing trusted context value.
+        """
+        return deepcopy(self._meta)
+
     def _run(self, method: JobMethod) -> None:
         """
         Execute parallel processing jobs for exporting or publishing selected records.
@@ -163,7 +175,7 @@ class RecordsExporter(Exporter):
         To debug, comment out Parallel loop and manually call _job() before with a selected job then return early. E.g:
         ```
         _run_job(
-            self._config, self._meta, admin_meta_keys_json, jobs[0].exporter, jobs[0].record, method,
+            self._config, self._meta, admin_meta_keys_json, jobs[0].trusted, jobs[0].exporter, jobs[0].record, method,
         )
         return None
         Parallel(n_jobs=self._parallel_jobs)(...)
@@ -171,9 +183,10 @@ class RecordsExporter(Exporter):
         jobs[15] = 30825673-6276-4e5a-8a97-f97f2094cd25 (complete product, HTML exporter)
         """
         jobs = self._generate()
+        meta = self._prep_meta()
         store = self._prep_store()
         Parallel(n_jobs=self._parallel_jobs)(
-            delayed(_run_job)(self._config, self._meta, store, job.exporter, job.record, method) for job in jobs
+            delayed(_run_job)(self._config, meta, store, job.trusted, job.exporter, job.record, method) for job in jobs
         )
 
     @property

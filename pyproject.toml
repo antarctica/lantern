@@ -209,11 +209,11 @@ LANTERN_EXPORT_PATH="export"
 LANTERN_AWS_ACCESS_ID="x"
 LANTERN_AWS_ACCESS_SECRET="x"
 LANTERN_AWS_S3_BUCKET="x"
+LANTERN_TRUSTED_UPLOAD_HOST="x"
+LANTERN_TRUSTED_UPLOAD_PATH="x"
 LANTERN_VERIFY_SHAREPOINT_PROXY_ENDPOINT="x"
 LANTERN_VERIFY_SAN_PROXY_ENDPOINT="x"
 X_ADMIN_METADATA_SIGNING_KEY_PRIVATE = "{\"kty\":\"EC\",\"crv\":\"P-256\",\"x\":\"243mJW8nkwqB76WGb1Y4DGaU_KpFR7m5PyQvveubgHA\",\"y\":\"l9M7YErkNgM5FL58EavMBxJVgG60DE_qyif3Bp1lawU\",\"d\":\"SdvAiYZplSs_rR0Rqbs2mqMBLyfOUmRNBZkr4XZPxPg\",\"alg\":\"ES256\",\"kid\":\"magic_metadata_testing_signing_key\"}"
-X_TRUSTED_UPLOAD_HOST="x"
-X_TRUSTED_UPLOAD_PATH="x"
 
 [tool.pytest.ini_options]
 # --strict-markers | fail if unknown markers are used

@@ -63,6 +63,40 @@ class TestHtmlExporter:
         result = fx_exporter_html.dumps()
         assert "<!DOCTYPE html>" in result
 
+    def test_publish(self, fx_s3_bucket_name: str, fx_exporter_html: HtmlExporter):
+        """
+        Can upload public item output to S3.
+
+        Duplicates `lantern_tests.exporters.test_base_exporter.TestBaseResourceExporter.test_publish` to test
+        non-trusted publishing.
+        """
+        fx_exporter_html.publish()
+
+        result = fx_exporter_html._s3_utils._s3.list_objects_v2(Bucket=fx_s3_bucket_name)
+        assert len(result["Contents"]) == 1
+
+        key = result["Contents"][0]["Key"]
+        result2 = fx_exporter_html._s3_utils._s3.get_object(Bucket=fx_s3_bucket_name, Key=key)
+        meta_keys = ["file_identifier", "file_revision"]
+        assert all(key in result2["Metadata"] for key in meta_keys)
+
+    def test_publish_trusted(self, fx_s3_bucket_name: str, fx_exporter_html: HtmlExporter):
+        """Can upload item output in a trusted context to secure hosting."""
+        with TemporaryDirectory() as tmp_path:
+            base_path = Path(tmp_path)
+        env_path = base_path / "live" / "items"
+        env_path.mkdir(parents=True)
+        fx_exporter_html._meta.trusted = True
+        fx_exporter_html._meta.trusted_path = base_path
+        fx_exporter_html._meta.trusted_host = None
+        expected_path = env_path / fx_exporter_html._record.file_identifier / "index.html"
+
+        fx_exporter_html.publish()
+
+        result = fx_exporter_html._s3_utils._s3.list_objects_v2(Bucket=fx_s3_bucket_name)
+        assert "Contents" not in result
+        assert expected_path.exists()
+
 
 class TestHtmlAliasesExporter:
     """Test HTML alias redirect exporter."""

@@ -116,9 +116,15 @@ class RsyncUtils:
         """
         Copy contents of source path to target on local or remote server.
 
+        The source and target path MUST be directories.
+
         E.g. for a source path './items' containing './items/123/index.html' and a target path of '/data/', this will
         create '/data/123/index.html'.
         """
+        if not target_host and not target_path.exists():
+            self._logger.info("Ensuring target local path exists.")
+            target_path.mkdir(parents=True, exist_ok=True)
+
         target = f"{target_host}:{target_path}" if target_host else str(target_path)
         kwargs = {
             "source": str(src_path.resolve()),

@@ -3,19 +3,15 @@ import logging
 import shutil
 from collections.abc import Callable
 from datetime import UTC, datetime
-from pathlib import Path
-from tempfile import TemporaryDirectory
 
 from mypy_boto3_s3 import S3Client
 from tasks._config import ExtraConfig
 from tasks._record_utils import init
 
-from lantern.exporters.html import HtmlExporter
-from lantern.exporters.site import SiteExporter, SiteResourcesExporter
+from lantern.exporters.site import SiteExporter
 from lantern.models.site import ExportMeta
 from lantern.stores.gitlab import GitLabStore
 from lantern.stores.gitlab_cache import GitLabCachedStore
-from lantern.utils import RsyncUtils
 
 
 def time_task(label: str) -> Callable:
@@ -33,44 +29,6 @@ def time_task(label: str) -> Callable:
         return wrapper
 
     return decorator
-
-
-def upload_trusted(
-    logger: logging.Logger, config: ExtraConfig, store: GitLabStore, s3: S3Client, identifiers: set[str] | None = None
-) -> None:
-    """
-    Publish trusted content to SFTP.
-
-    Group write permissions are set on uploaded files (660) and directories (770) to allow shared management.
-    """
-    sync = RsyncUtils(logger=logger)
-    export_meta = ExportMeta.from_config_store(
-        config=config, store=store, build_repo_ref=store.head_commit, trusted=True
-    )
-    with TemporaryDirectory() as tmp_path:
-        items_path = Path(tmp_path) / "items"
-    items_path.mkdir(parents=True, exist_ok=True)
-
-    env_path = "stage" if "integration" in config.AWS_S3_BUCKET else "prod"
-    items_target = config.TRUSTED_UPLOAD_PATH / env_path / "items"
-
-    assets_exporter = SiteResourcesExporter(logger=logger, meta=export_meta, s3=s3)
-    assets_exporter.export()
-
-    for record in store.select(identifiers):
-        fid = record.file_identifier
-        logger.info(f"Generating record '{fid}' using Item HTML exporter in a trusted context")
-        item_exporter = HtmlExporter(
-            logger=logger, meta=export_meta, s3=s3, record=record, select_record=store.select_one
-        )
-        item_path = items_path / fid / "index.html"
-        item_path.parent.mkdir(parents=True, exist_ok=True)
-        with item_path.open("w") as record_file:
-            record_file.write(item_exporter.dumps())
-        item_path.parent.chmod(0o770)
-        item_path.chmod(0o660)
-
-    sync.put(src_path=items_path, target_path=items_target, target_host=config.TRUSTED_UPLOAD_HOST)
 
 
 class ToyCatalogue:
@@ -116,25 +74,10 @@ class ToyCatalogue:
         """Export catalogue to file system."""
         self._site.export()
 
-    def _publish_untrusted(self) -> None:
-        """Publish catalogue to S3 with unrestricted access."""
-        self._site.publish()
-
-    def _publish_trusted(self) -> None:
-        """Publish supplemental content with restricted access."""
-        upload_trusted(
-            logger=self._logger,
-            config=self._config,
-            store=self._store,
-            s3=self._s3,
-            identifiers=self._selected_identifiers,
-        )
-
     @time_task(label="Publish")
     def publish(self) -> None:
         """Publish catalogue to remote (un)trusted location."""
-        self._publish_untrusted()
-        self._publish_trusted()
+        self._site.publish()
 
     # noinspection PyProtectedMember
     @time_task(label="Purge")

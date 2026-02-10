@@ -13,19 +13,22 @@ Exporters create the catalogue [Static Site](/docs/architecture.md#static-site).
 All exporters implement a [Common Interface](#exporter-classes) supporting:
 
 - exporting to a local path using `export()`
-- and/or publishing to a remote service (typically [AWS S3](/docs/architecture.md#amazon-s3)) using `publish()`
+- and/or publishing to a remote service using `publish()`:
+  - [AWS S3](/docs/architecture.md#amazon-s3) for public content
+  - secure hosting via `rsync` for [Trusted Publishing](#trusted-publishing)
 
 Exporters that access Records use a callable from a [Store](/docs/architecture.md#stores) to select single or multiple
 Records as needed. A `selected_identifiers` property MAY control which Records are output, for partial site builds.
 
 ### Trusted publishing
 
-Access to [Administrative Metadata](/docs/data-model.md#item-administrative-metadata) (such as the admin tab of
-[Catalogue Item](/docs/data-model.md#catalogue-items) outputs) is controlled by the `trusted`
-[Export](/docs/data-model.md#export-metadata) flag, which defaults to false (disabled).
+Where non-public information, such as [Administrative Metadata](/docs/data-model.md#item-administrative-metadata)
+should be published, via [Catalogue Items](/docs/data-model.md#catalogue-items) for example, the `trusted`
+[Export Metadata](/docs/data-model.md#export-metadata) flag can be set to true.
 
-> [!CAUTION]
-> Access control MUST be used for any outputs created where the `trusted` flag is true.
+Where set, exporters will publish content to secure hosting, provided by the
+[BAS Operations Data Store 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/ops-data-store), restricting access to the *Admin*
+role.
 
 ## Exporters configuration
 
@@ -108,6 +111,9 @@ More complex exporter outputting Records as [Catalogue Item](/docs/data-model.md
 Uses a [Store](/docs/architecture.md#stores) select record callable to generate item summaries for related records, and
 an `_item_class()` method to determine if a [Special Catalogue Item](/docs/data-model.md#special-catalogue-items) class
 should be used for a Record.
+
+Supports [Trusted Publishing](#trusted-publishing) to include
+[Administrative Metadata](/docs/data-model.md#item-administrative-metadata) via an items template tab.
 
 ### HTML aliases resource exporter
 

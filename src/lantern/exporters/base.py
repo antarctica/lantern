@@ -133,4 +133,4 @@ class ResourceExporter(Exporter, ABC):
         media_type = guess_type(self._export_path.name)[0] or "application/octet-stream"
         key = self._s3_utils.calc_key(self._export_path)
         meta = {"file_identifier": self._record.file_identifier, "file_revision": self._record.file_revision}
-        self._s3_utils.upload_content(key=key, content_type=media_type, body=self.dumps(), meta=meta)
+        self._s3_utils.upload_object(key=key, content_type=media_type, body=self.dumps(), meta=meta)

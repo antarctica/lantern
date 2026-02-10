@@ -466,7 +466,7 @@ class TestSiteExporter:
             fx_exporter_site._meta = meta
 
             fx_exporter_site._meta.export_path.joinpath("x").touch()
-            fx_exporter_site._s3_utils.upload_content(key="x", content_type="text/plain", body="x")
+            fx_exporter_site._s3_utils.upload_object(key="x", content_type="text/plain", body="x")
 
             fx_exporter_site.purge()
 

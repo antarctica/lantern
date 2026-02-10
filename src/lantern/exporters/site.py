@@ -104,7 +104,7 @@ class SiteResourcesExporter(Exporter):
                 content = css_file.read()
 
         key = self._s3_utils.calc_key(self._export_base.joinpath("css", name))
-        self._s3_utils.upload_content(key=key, content_type="text/css", body=content)
+        self._s3_utils.upload_object(key=key, content_type="text/css", body=content)
 
     def _publish_favicon_ico(self) -> None:
         """Upload favicon.ico as an S3 object."""
@@ -115,7 +115,7 @@ class SiteResourcesExporter(Exporter):
                 content = favicon_file.read()
 
         key = self._s3_utils.calc_key(self._export_base.parent.joinpath(name))
-        self._s3_utils.upload_content(key=key, content_type="image/x-icon", body=content)
+        self._s3_utils.upload_object(key=key, content_type="image/x-icon", body=content)
 
     def _publish_fonts(self) -> None:
         """Upload fonts as S3 objects if they do not already exist."""
@@ -252,7 +252,7 @@ class SiteIndexExporter(ResourcesExporter):
         """Publish proto index to S3."""
         self._logger.info("Publishing site index.")
         index_key = self._s3_utils.calc_key(self._index_path)
-        self._s3_utils.upload_content(key=index_key, content_type="text/html", body=self._dumps())
+        self._s3_utils.upload_object(key=index_key, content_type="text/html", body=self._dumps())
 
 
 class SitePagesExporter(Exporter):
@@ -319,7 +319,7 @@ class SitePagesExporter(Exporter):
         """Publish a page to S3."""
         page_path = self._get_page_path(template_path)
         page_key = self._s3_utils.calc_key(page_path)
-        self._s3_utils.upload_content(key=page_key, content_type="text/html", body=self._dumps(template_path))
+        self._s3_utils.upload_object(key=page_key, content_type="text/html", body=self._dumps(template_path))
 
     @property
     def name(self) -> str:
@@ -424,10 +424,10 @@ class SiteApiExporter(Exporter):
         catalogue_key = self._s3_utils.calc_key(self._catalog_path)
         redirect_key = self._s3_utils.calc_key(self._catalog_well_known_path)
         media_type = "application/linkset+json; profile=https://www.rfc-editor.org/info/rfc9727"
-        self._s3_utils.upload_content(
+        self._s3_utils.upload_object(
             key=catalogue_key, content_type=media_type, body=json.dumps(self._dumps_catalog(), indent=2)
         )
-        self._s3_utils.upload_content(
+        self._s3_utils.upload_object(
             key=redirect_key,
             content_type="text/html",
             body=self._dumps_catalog_redirect(),
@@ -440,14 +440,14 @@ class SiteApiExporter(Exporter):
         key = self._s3_utils.calc_key(self._schema_path)
         media_type = "application/vnd.oai.openapi+json;version=3.1"
         data = json.dumps(self._dumps_openapi_schema(), indent=2)
-        self._s3_utils.upload_content(key=key, content_type=media_type, body=data)
+        self._s3_utils.upload_object(key=key, content_type=media_type, body=data)
 
     def _publish_api_docs(self) -> None:
         """Publish API documentation guide to S3."""
         self._logger.info("Publishing API guide page.")
         key = self._s3_utils.calc_key(self._docs_path)
         data = self._dumps_api_docs()
-        self._s3_utils.upload_content(key=key, content_type="text/html", body=data)
+        self._s3_utils.upload_object(key=key, content_type="text/html", body=data)
 
     @property
     def name(self) -> str:
@@ -541,10 +541,10 @@ class SiteHealthExporter(Exporter):
         health_key = self._s3_utils.calc_key(self._health_check_path)
         redirect_key = self._s3_utils.calc_key(self._health_alias_path)
         media_type = "application/health+json"
-        self._s3_utils.upload_content(
+        self._s3_utils.upload_object(
             key=health_key, content_type=media_type, body=json.dumps(self._dumps_health_check(), indent=2)
         )
-        self._s3_utils.upload_content(
+        self._s3_utils.upload_object(
             key=redirect_key, content_type="text/html", body=self._dumps_health_redirect(), redirect=f"/{health_key}"
         )
 

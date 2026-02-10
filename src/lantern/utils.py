@@ -71,6 +71,24 @@ class S3Utils:
         msg = f"Unsupported image file extension: {path.suffix}"
         raise ValueError(msg) from None
 
+    def upload_directory(self, src_path: Path, base_key: str, content_type: str) -> None:
+        """Upload contents of a directory as S3 objects if they do not already exist."""
+        if not src_path.is_dir():
+            msg = "Source path must be a directory"
+            raise FileNotFoundError(msg) from None
+
+        for path in src_path.glob("**/*.*"):
+            file_content_type = content_type
+            relative_path = path.relative_to(src_path)
+            if file_content_type == "image/*":
+                file_content_type = self._get_img_media_type(path)
+            self._s3.upload_file(
+                Filename=str(path),
+                Bucket=self._bucket,
+                Key=f"{base_key}/{relative_path}",
+                ExtraArgs={"ContentType": file_content_type},
+            )
+
     def upload_package_resources(self, src_ref: str, base_key: str, content_type: str) -> None:
         """
         Upload package resources as S3 objects if they do not already exist.
@@ -84,17 +102,7 @@ class S3Utils:
             return
 
         with resources_as_file(resources_files(src_ref)) as resources_path:
-            for path in resources_path.glob("**/*.*"):
-                file_content_type = content_type
-                relative_path = path.relative_to(resources_path)
-                if file_content_type == "image/*":
-                    file_content_type = self._get_img_media_type(path)
-                self._s3.upload_file(
-                    Filename=path,
-                    Bucket=self._bucket,
-                    Key=f"{base_key}/{relative_path}",
-                    ExtraArgs={"ContentType": file_content_type},
-                )
+            self.upload_directory(src_path=resources_path, base_key=base_key, content_type=content_type)
 
     def empty_bucket(self) -> None:
         """Delete all keys from the S3 bucket."""

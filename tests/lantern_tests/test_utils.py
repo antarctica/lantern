@@ -82,6 +82,36 @@ class TestS3Utils:
         result = fx_s3_utils._get_img_media_type(path=path)
         assert result == expected
 
+    def test_upload_directory(self, fx_s3_bucket_name: str, fx_s3_utils: S3Utils):
+        """Can upload directory of resources to S3 bucket."""
+        with TemporaryDirectory() as tmp_path:
+            output_base = Path(tmp_path) / "output"
+        output_img = output_base / "bar" / "x.png"
+        output_not_image = output_base / "bar" / "x.txt"
+        output_img.parent.mkdir(parents=True, exist_ok=True)
+        output_img.touch()
+        output_not_image.touch()
+
+        expected = ["foo/bar/x.png", "foo/bar/x.txt"]
+        fx_s3_utils.upload_directory(
+            src_path=output_base,
+            base_key="foo",
+            content_type="text/plain",
+        )
+
+        for expected_key in expected:
+            result = fx_s3_utils._s3.get_object(Bucket=fx_s3_bucket_name, Key=expected_key)
+            assert result["ResponseMetadata"]["HTTPStatusCode"] == 200
+
+    def test_upload_directory_missing(self, fx_s3_bucket_name: str, fx_s3_utils: S3Utils):
+        """Can't upload directory that doesn't exist."""
+        with pytest.raises(FileNotFoundError):
+            fx_s3_utils.upload_directory(
+                src_path=Path("/invalid"),
+                base_key="",
+                content_type="text/plain",
+            )
+
     def test_upload_package_resources(self, fx_s3_bucket_name: str, fx_s3_utils: S3Utils):
         """Can upload package resources to S3 bucket."""
         expected = "static/xsl/iso-html/xml-to-html-ISO.xsl"

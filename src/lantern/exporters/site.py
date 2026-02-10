@@ -3,6 +3,7 @@ import logging
 import shutil
 from pathlib import Path
 from shutil import copy
+from tempfile import TemporaryDirectory
 
 from importlib_resources import as_file as resources_as_file
 from importlib_resources import files as resources_files
@@ -145,6 +146,15 @@ class SiteResourcesExporter(Exporter):
         """Upload JS files as S3 objects if they do not already exist."""
         self._s3_utils.upload_package_resources(
             src_ref=self._js_src_ref,
+            base_key=self._s3_utils.calc_key(self._export_base.joinpath("js")),
+            content_type="application/javascript",
+        )
+        with TemporaryDirectory() as tmp_path:
+            output_base = Path(tmp_path) / "output"
+        output_base.mkdir(parents=True, exist_ok=True)
+        self._dump_js_dynamic(output_base=output_base)
+        self._s3_utils.upload_directory(
+            src_path=output_base,
             base_key=self._s3_utils.calc_key(self._export_base.joinpath("js")),
             content_type="application/javascript",
         )

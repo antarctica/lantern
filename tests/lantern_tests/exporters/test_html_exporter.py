@@ -84,7 +84,7 @@ class TestHtmlExporter:
         """Can upload item output in a trusted context to secure hosting."""
         with TemporaryDirectory() as tmp_path:
             base_path = Path(tmp_path)
-        env_path = base_path / "live" / "items"
+        env_path = base_path / "testing" / "items"
         env_path.mkdir(parents=True)
         fx_exporter_html._meta.trusted = True
         fx_exporter_html._meta.trusted_path = base_path

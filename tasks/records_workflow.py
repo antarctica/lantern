@@ -401,7 +401,7 @@ def main() -> None:
     admin_keys = config.ADMIN_METADATA_KEYS_RW
     import_path = Path("./import")
     base_url = "https://data-testing.data.bas.ac.uk"
-    testing_bucket = "add-catalogue-integration.data.bas.ac.uk"
+    testing_bucket = "lantern-testing.data.bas.ac.uk"
 
     if testing_bucket != config.AWS_S3_BUCKET:
         logger.error("No. Non-testing bucket selected.")

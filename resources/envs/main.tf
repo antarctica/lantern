@@ -101,8 +101,14 @@ data "terraform_remote_state" "BAS-CORE-DOMAINS" {
 
 variable "static_site_ref" {
   type        = string
-  default     = "v0.4.0"
+  default     = "v0.5.1"
   description = "Static site module version."
+}
+
+variable "static_site_tls_version" {
+  type = string
+  default = "TLSv1.2_2025"
+  description = "CloudFront viewer certificate minimum protocol version"
 }
 
 module "site_stage" {
@@ -114,6 +120,7 @@ module "site_stage" {
 
   site_name                         = "lantern-testing.data.bas.ac.uk"
   route53_zone_id                   = data.terraform_remote_state.BAS-CORE-DOMAINS.outputs.DATA-BAS-AC-UK-ID
+  cloudfront_min_proto_version      = var.static_site_tls_version
   cloudfront_comment                = "Lantern Exp Site (Testing)"
   cloudfront_csp                    = "default-src * data: 'unsafe-inline'"
   cloudfront_enable_default_caching = false
@@ -134,6 +141,7 @@ module "site_prod" {
 
   site_name                         = "lantern.data.bas.ac.uk"
   route53_zone_id                   = data.terraform_remote_state.BAS-CORE-DOMAINS.outputs.DATA-BAS-AC-UK-ID
+  cloudfront_min_proto_version      = var.static_site_tls_version
   cloudfront_comment                = "Lantern Exp Site (Production)"
   cloudfront_csp                    = "default-src * data: 'unsafe-inline'"
   cloudfront_enable_default_caching = true

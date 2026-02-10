@@ -546,7 +546,7 @@ class TestSiteExporter:
         s3 = fx_exporter_site._index_exporter._s3_utils._s3
         record = fx_exporter_site._store.select()[0]
         fx_exporter_site._records_exporter._selected_identifiers = {record.file_identifier}
-        env_path = fx_exporter_site._meta.trusted_path / "live"
+        env_path = fx_exporter_site._meta.trusted_path / "testing"
         expected_keys = [
             "favicon.ico",
             "404.html",

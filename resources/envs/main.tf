@@ -111,6 +111,12 @@ variable "static_site_tls_version" {
   description = "CloudFront viewer certificate minimum protocol version"
 }
 
+variable "static_site_csp" {
+  type = string
+  default = "default-src * data: 'unsafe-inline'"
+  description = "CloudFront content security policy header (CSP)"
+}
+
 module "site_stage" {
   source = "git::https://github.com/felnne/tf-aws-static-site.git?ref=${var.static_site_ref}"
 
@@ -122,7 +128,7 @@ module "site_stage" {
   route53_zone_id                   = data.terraform_remote_state.BAS-CORE-DOMAINS.outputs.DATA-BAS-AC-UK-ID
   cloudfront_min_proto_version      = var.static_site_tls_version
   cloudfront_comment                = "Lantern Exp Site (Testing)"
-  cloudfront_csp                    = "default-src * data: 'unsafe-inline'"
+  cloudfront_csp                    = var.static_site_csp
   cloudfront_enable_default_caching = false
 
   tags = {
@@ -143,7 +149,7 @@ module "site_prod" {
   route53_zone_id                   = data.terraform_remote_state.BAS-CORE-DOMAINS.outputs.DATA-BAS-AC-UK-ID
   cloudfront_min_proto_version      = var.static_site_tls_version
   cloudfront_comment                = "Lantern Exp Site (Production)"
-  cloudfront_csp                    = "default-src * data: 'unsafe-inline'"
+  cloudfront_csp                    = var.static_site_csp
   cloudfront_enable_default_caching = true
 
   tags = {

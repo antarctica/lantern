@@ -94,6 +94,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Importing Sentry project under Infrastructure as Code
 * Improving infrastructure and setup documentation
 * Upgrading Plausible tracking script
+* Improving non-interactive publishing workflow documentation
 
 ### Removed
 

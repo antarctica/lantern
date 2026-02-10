@@ -1,0 +1,88 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Lantern Non-interactive record publishing workflow payload",
+  "description": "Payload definition for non-interactive publishing workflow webhook.",
+  "type": "object",
+  "required": ["commit", "merge_request"],
+  "additionalProperties": false,
+  "properties": {
+    "commit": {
+      "title": "Commit",
+      "type": "object",
+      "required": ["branch", "commit", "stats", "url"],
+      "additionalProperties": false,
+      "properties": {
+        "branch": {
+          "title": "Branch",
+          "description": "Git branch representing changeset.",
+          "type": "string"
+        },
+        "commit": {
+          "title": "Commit SHA",
+          "description": "SHA-1 identifier representing git commit.",
+          "type": "string"
+        },
+        "new_identifiers": {
+          "title": "New record identifiers",
+          "description": "List of file identifiers for any new records committed.",
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "updated_identifiers": {
+          "title": "Updated record identifiers",
+          "description": "List of file identifiers for any updated records committed.",
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "stats": {
+          "title": "Commit statistics",
+          "description": "Counts for any new and/or updated records committed and their underlying files.",
+          "type": "object",
+          "required": ["new_records", "new_files", "updated_records", "updated_files"],
+          "additionalProperties": false,
+          "properties": {
+            "new_records": {"title": "New records", "type": "integer"},
+            "new_files": {"title": "New files", "type": "integer"},
+            "updated_records": {"title": "Updated records", "type": "integer"},
+            "updated_files": {"title": "Updated files", "type": "integer"}
+          }
+        },
+        "url": {"title": "Commit URL", "type": "string", "format": "uri"}
+      }
+    },
+    "merge_request": {
+      "title": "Merge request information",
+      "description": "GitLab merge request representing changeset.",
+      "type": "object",
+      "required": ["url"],
+      "additionalProperties": false,
+      "properties": {
+        "url": {"title": "Merge request URL", "type": "string", "format": "uri"}
+      }
+    }
+  },
+  "examples": [
+    {
+      "commit": {
+        "branch": "example",
+        "commit": "59e71abd216dff86a41293a7f4fe7d2395353fd4",
+        "new_identifiers": [
+          "88b0aa22-d53a-48b1-951c-eacb6ce7d3e7"
+        ],
+        "updated_identifiers": [
+          "bfbdacc3-26cd-430e-8e99-17624952030c"
+        ],
+        "stats": {
+          "new_records": 1,
+          "new_files": 2,
+          "updated_records": 1,
+          "updated_files": 2
+        },
+        "url": "https://gitlab.example.com/MAGIC/lantern-records/-/commit/59e71abd216dff86a41293a7f4fe7d2395353fd4"
+      },
+      "merge_request": {
+        "url": "https://gitlab.example.com/MAGIC/lantern-records/-/merge_requests/123"
+      }
+    }
+  ]
+}

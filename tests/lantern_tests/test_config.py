@@ -173,7 +173,7 @@ class TestConfig:
             ),
             (
                 {
-                    "LANTERN_TEMPLATES_PLAUSIBLE_DOMAIN": None,
+                    "LANTERN_TEMPLATES_PLAUSIBLE_ID": None,
                     "LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT": "x",
                     "LANTERN_TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": "x",
                     "LANTERN_TEMPLATES_ITEM_VERSIONS_ENDPOINT": "x",
@@ -181,7 +181,7 @@ class TestConfig:
             ),
             (
                 {
-                    "LANTERN_TEMPLATES_PLAUSIBLE_DOMAIN": "x",
+                    "LANTERN_TEMPLATES_PLAUSIBLE_ID": "x",
                     "LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT": None,
                     "LANTERN_TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": "x",
                     "LANTERN_TEMPLATES_ITEM_VERSIONS_ENDPOINT": "x",
@@ -189,7 +189,7 @@ class TestConfig:
             ),
             (
                 {
-                    "LANTERN_TEMPLATES_PLAUSIBLE_DOMAIN": "x",
+                    "LANTERN_TEMPLATES_PLAUSIBLE_ID": "x",
                     "LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT": "x",
                     "LANTERN_TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": None,
                     "LANTERN_TEMPLATES_ITEM_VERSIONS_ENDPOINT": "x",
@@ -197,7 +197,7 @@ class TestConfig:
             ),
             (
                 {
-                    "LANTERN_TEMPLATES_PLAUSIBLE_DOMAIN": "x",
+                    "LANTERN_TEMPLATES_PLAUSIBLE_ID": "x",
                     "LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT": "x",
                     "LANTERN_TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": "x",
                     "LANTERN_TEMPLATES_ITEM_VERSIONS_ENDPOINT": None,
@@ -270,7 +270,7 @@ class TestConfig:
             ("STORE_GITLAB_PROJECT_ID", "x", False),
             ("STORE_GITLAB_BRANCH", "x", False),
             ("STORE_GITLAB_CACHE_PATH", Path("x").resolve(), False),
-            ("TEMPLATES_PLAUSIBLE_DOMAIN", "x", False),
+            ("TEMPLATES_PLAUSIBLE_ID", "x", False),
             ("TEMPLATES_ITEM_CONTACT_ENDPOINT", "x", False),
             ("TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY", "x", False),
             ("TEMPLATES_ITEM_VERSIONS_ENDPOINT", "x", False),

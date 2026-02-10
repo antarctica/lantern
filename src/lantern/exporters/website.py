@@ -102,4 +102,4 @@ class WebsiteSearchExporter(ResourcesExporter):
         """Publish aggregation API resources to S3."""
         self._logger.info("Publishing public website search items.")
         index_key = self._s3_utils.calc_key(self._export_path)
-        self._s3_utils.upload_content(key=index_key, content_type="application/json", body=self._dumps())
+        self._s3_utils.upload_object(key=index_key, content_type="application/json", body=self._dumps())

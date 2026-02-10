@@ -156,6 +156,6 @@ class HtmlAliasesExporter(ResourceExporter):
         """Write redirect pages with redirect headers to S3."""
         location = f"{self.target}index.html"
         for alias in self._get_aliases():
-            self._s3_utils.upload_content(
+            self._s3_utils.upload_object(
                 key=f"{alias}/index.html", content_type="text/html", body=self.dumps(), redirect=location
             )

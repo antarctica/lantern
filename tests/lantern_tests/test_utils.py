@@ -44,22 +44,22 @@ class TestS3Utils:
         actual = fx_s3_utils.calc_key(path=path)
         assert actual == expected
 
-    def test_upload_content(self, caplog: pytest.LogCaptureFixture, fx_s3_bucket_name: str, fx_s3_utils: S3Utils):
+    def test_upload_object(self, caplog: pytest.LogCaptureFixture, fx_s3_bucket_name: str, fx_s3_utils: S3Utils):
         """Can write output to an object at a low level."""
         expected = "x"
 
-        fx_s3_utils.upload_content(key=expected, content_type="text/plain", body="x", meta={expected: "..."})
+        fx_s3_utils.upload_object(key=expected, content_type="text/plain", body="x", meta={expected: "..."})
 
         result = fx_s3_utils._s3.get_object(Bucket=fx_s3_bucket_name, Key=expected)
         assert result["Metadata"][expected] == "..."
         assert f"s3://{fx_s3_bucket_name}/{expected}" in caplog.text
 
-    def test_upload_content_redirect(self, fx_s3_bucket_name: str, fx_s3_utils: S3Utils):
+    def test_upload_object_redirect(self, fx_s3_bucket_name: str, fx_s3_utils: S3Utils):
         """Can write output to an object with an object redirect."""
         key = "x"
         expected = "y"
 
-        fx_s3_utils.upload_content(key=key, content_type="text/plain", body="x", redirect="y")
+        fx_s3_utils.upload_object(key=key, content_type="text/plain", body="x", redirect="y")
 
         result = fx_s3_utils._s3.get_object(Bucket=fx_s3_bucket_name, Key=key)
         assert result["WebsiteRedirectLocation"] == expected
@@ -139,7 +139,7 @@ class TestS3Utils:
 
     def test_empty_bucket(self, caplog: pytest.LogCaptureFixture, fx_s3_bucket_name: str, fx_s3_utils: S3Utils):
         """Can empty all objects in bucket."""
-        fx_s3_utils.upload_content(key="x", content_type="text/plain", body="x")
+        fx_s3_utils.upload_object(key="x", content_type="text/plain", body="x")
         result = fx_s3_utils._s3.list_objects_v2(Bucket=fx_s3_bucket_name)
         assert len(result["Contents"]) == 1
 

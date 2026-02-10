@@ -390,6 +390,6 @@ class VerificationExporter(ResourcesExporter):
     def publish(self) -> None:
         """Publish JSON and HTML report files to S3."""
         data_key = self._s3_utils.calc_key(self._export_path.joinpath("data.json"))
-        self._s3_utils.upload_content(key=data_key, content_type="application/json", body=json.dumps(self.report.data))
+        self._s3_utils.upload_object(key=data_key, content_type="application/json", body=json.dumps(self.report.data))
         index_key = self._s3_utils.calc_key(self._export_path.joinpath("index.html"))
-        self._s3_utils.upload_content(key=index_key, content_type="text/html", body=self.report.dumps())
+        self._s3_utils.upload_object(key=index_key, content_type="text/html", body=self.report.dumps())

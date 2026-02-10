@@ -37,7 +37,7 @@ class S3Utils:
         """
         return str(path.relative_to(self._relative_base))
 
-    def upload_content(
+    def upload_object(
         self, key: str, content_type: str, body: str | bytes, redirect: str | None = None, meta: dict | None = None
     ) -> None:
         """

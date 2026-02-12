@@ -150,6 +150,8 @@ Then run:
   - [Production 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=hksogwx7zqx3ct2jr36cshoqpy&h=magic.1password.eu):
     - [IAM user for workstation module 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=hgjc2sxfvctejscocydzmg2tge&h=magic.1password.eu)
   - for [Exporters](/docs/exporters.md) to publish public content
+  - [S3 Versioning](https://docs.aws.amazon.com/AmazonS3/latest/userguide/Versioning.html) is enabled on the production
+    bucket to allow recover previous rendered output that cannot be recreated (due to downtime or template changes)
   - DNS records for CloudFront aliases are registered in the relevant AWS Route53 zone
   - TLS certificates for these aliases are managed via AWS Certificate Manager
   - managed via [Infrastructure as Code](#infrastructure-as-code)

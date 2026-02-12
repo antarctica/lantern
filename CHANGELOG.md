@@ -20,11 +20,11 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Development task for minimally cloning a record
 * Development task for minimally initialising a GitLab records cache
 * Support for configuring the GitLab store branch name
-* Support for branch-based changesets in interactive publishing workflow
-* Support for v2 MAGIC discovery profile
-* Support for initiative records as 'project' items
-* Support for container and resource 'super types' to more flexibly support similar item types
-* Support for SAN based distribution options (skipped during verification)
+* Branch-based changesets in interactive publishing workflow
+* v2 MAGIC discovery profile
+* Initiative records as 'project' items
+* Container and resource 'super types' to handle similar item types more easily
+* SAN based distribution options (skipped during verification)
 * Support for running GitLab instance locally in development environments
 * Additional validation for MAGIC Discovery profile Req. 06 (released date presence)
 * Setup documentation for Plausible
@@ -45,7 +45,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Infrastructure as Code using OpenTofu
 * Automatic publishing of trusted content for administrative metadata
 * Infrastructure, hosting and site dependencies documentation diagrams
-* Branches and change sets support in the non-interactive publishing workflow
+* Branch-based changesets in non-interactive publishing workflow
 * Basic web hooks support in the non-interactive publishing workflow
 * S3 bucket versioning enabled on production/live site
 

@@ -106,14 +106,14 @@ variable "static_site_ref" {
 }
 
 variable "static_site_tls_version" {
-  type = string
-  default = "TLSv1.2_2025"
+  type        = string
+  default     = "TLSv1.2_2025"
   description = "CloudFront viewer certificate minimum protocol version"
 }
 
 variable "static_site_csp" {
-  type = string
-  default = "default-src * data: 'unsafe-inline'"
+  type        = string
+  default     = "default-src * data: 'unsafe-inline'"
   description = "CloudFront content security policy header (CSP)"
 }
 
@@ -148,7 +148,7 @@ module "site_prod" {
   site_name                         = "lantern.data.bas.ac.uk"
   route53_zone_id                   = data.terraform_remote_state.BAS-CORE-DOMAINS.outputs.DATA-BAS-AC-UK-ID
   cloudfront_min_proto_version      = var.static_site_tls_version
-  cloudfront_comment                = "Lantern Exp Site (Production)"
+  cloudfront_comment                = "Lantern Exp Site (Live)"
   cloudfront_csp                    = var.static_site_csp
   cloudfront_enable_default_caching = true
 

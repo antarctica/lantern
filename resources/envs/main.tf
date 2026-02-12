@@ -158,6 +158,12 @@ module "site_prod" {
     X-Managed-By = "Terraform"
   }
 }
+resource "aws_s3_bucket_versioning" "versioning_example" {
+  bucket = module.site_prod.s3_bucket_name
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
 
 ### Workstation module access to static site content
 

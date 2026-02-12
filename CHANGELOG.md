@@ -47,6 +47,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Infrastructure, hosting and site dependencies documentation diagrams
 * Branches and change sets support in the non-interactive publishing workflow
 * Basic web hooks support in the non-interactive publishing workflow
+* S3 bucket versioning enabled on production/live site
 
 ### Fixed
 

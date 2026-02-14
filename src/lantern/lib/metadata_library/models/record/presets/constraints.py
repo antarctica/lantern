@@ -1,4 +1,4 @@
-from lantern.lib.metadata_library.models.record.elements.identification import Constraint
+from lantern.lib.metadata_library.models.record.elements.common import Constraint
 from lantern.lib.metadata_library.models.record.enums import ConstraintRestrictionCode, ConstraintTypeCode
 
 OPEN_ACCESS = Constraint(
@@ -12,4 +12,11 @@ OGL_V3 = Constraint(
     restriction_code=ConstraintRestrictionCode.LICENSE,
     href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
     statement="This information is licensed under the Open Government Licence v3.0. To view this licence, visit https://www.nationalarchives.gov.uk/doc/open-government-licence/.",
+)
+
+CC_BY_ND_V4 = Constraint(
+    type=ConstraintTypeCode.USAGE,
+    restriction_code=ConstraintRestrictionCode.LICENSE,
+    href="https://creativecommons.org/licenses/by-nd/4.0/",
+    statement="This information is licensed under the Creative Commons Attribution-NoDerivatives 4.0 International Licence (CC BY-ND 4.0). To view this licence, visit https://creativecommons.org/licenses/by-nd/4.0/",
 )

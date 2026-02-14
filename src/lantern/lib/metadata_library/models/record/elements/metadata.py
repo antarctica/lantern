@@ -4,7 +4,7 @@ from typing import TypeVar
 
 import cattrs
 
-from lantern.lib.metadata_library.models.record.elements.common import Contacts
+from lantern.lib.metadata_library.models.record.elements.common import Constraints, Contacts, Maintenance
 
 TMetadata = TypeVar("TMetadata", bound="Metadata")
 
@@ -38,13 +38,14 @@ class Metadata:
     Schema definition: metadata [1]
     ISO element: N/A [2]
 
-    [1] https://github.com/antarctica/metadata-library/blob/v0.15.1/src/bas_metadata_library/schemas/dist/iso_19115_2_v4.json#L1150
+    [1] https://github.com/antarctica/metadata-library/blob/v0.16.0/src/bas_metadata_library/schemas/dist/iso_19115_2_v4.json#L1154
     [2] -
     """
 
     character_set: str = "utf8"
     language: str = "eng"
     contacts: Contacts = field(default_factory=Contacts)
+    constraints: Constraints = field(default_factory=Constraints)
     date_stamp: date = field(default_factory=lambda: datetime.now(tz=UTC).date())
     metadata_standard: MetadataStandard = field(default_factory=MetadataStandard)
 
@@ -67,6 +68,7 @@ class Metadata:
         """
         converter = cattrs.Converter()
         converter.register_structure_hook(Contacts, lambda d, t: Contacts.structure(d))
+        converter.register_structure_hook(Constraints, lambda d, t: Constraints.structure(d))
         converter.register_structure_hook(date, lambda d, t: date.fromisoformat(d))
         return converter.structure(value, cls)
 
@@ -79,5 +81,6 @@ class Metadata:
         """
         converter = cattrs.Converter()
         converter.register_unstructure_hook(Contacts, lambda d: d.unstructure())
+        converter.register_unstructure_hook(Constraints, lambda d: d.unstructure())
         converter.register_unstructure_hook(date, lambda d: d.isoformat())
         return converter.unstructure(self)

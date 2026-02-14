@@ -3,58 +3,55 @@ from datetime import UTC, date, datetime
 import cattrs
 import pytest
 
-from lantern.lib.metadata_library.models.record.elements.common import Contact, ContactIdentity, Contacts
+from lantern.lib.metadata_library.models.record.elements.common import (
+    Constraint,
+    Contact,
+    ContactIdentity,
+    Contacts,
+)
 from lantern.lib.metadata_library.models.record.elements.metadata import Metadata, MetadataStandard
-from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
+from lantern.lib.metadata_library.models.record.enums import (
+    ConstraintTypeCode,
+    ContactRoleCode,
+)
 from lantern.lib.metadata_library.models.record.utils.clean import clean_dict
+
+MIN_METADATA = {"contacts": [Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT})]}
+EXPECTED_DATESTAMP = datetime.now(tz=UTC).date()
 
 
 class TestMetadata:
     """Test Metadata element."""
 
     @pytest.mark.parametrize(
-        ("values", "expected_date"),
+        "values",
         [
-            (
-                {
-                    "contacts": [
-                        Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT})
-                    ]
-                },
-                datetime.now(tz=UTC).date(),
-            ),
-            (
-                {
-                    "contacts": [
-                        Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT})
-                    ],
-                    "date_stamp": None,
-                },
-                datetime.now(tz=UTC).date(),
-            ),
-            (
-                {
-                    "contacts": [
-                        Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT})
-                    ],
-                    "date_stamp": datetime(2014, 6, 30, tzinfo=UTC).date(),
-                },
-                datetime(2014, 6, 30, tzinfo=UTC).date(),
-            ),
+            MIN_METADATA,
+            {**MIN_METADATA, "date_stamp": None},
+            {**MIN_METADATA, "date_stamp": datetime(2014, 6, 30, tzinfo=UTC).date()},
+            {**MIN_METADATA, "constraints": [Constraint(type=ConstraintTypeCode.ACCESS)]},
         ],
     )
-    def test_init(self, values: dict, expected_date: datetime):
+    def test_init(self, values: dict):
         """Can create a Metadata element from directly assigned properties."""
         expected_character = "utf8"
         expected_language = "eng"
+        expected_datestamp = values.get("date_stamp", EXPECTED_DATESTAMP)
+        if "date_stamp" in values and values["date_stamp"] is None:
+            expected_datestamp = EXPECTED_DATESTAMP  # handle explicitly None scenario
         metadata = Metadata(**values)
 
         assert metadata.character_set == expected_character
         assert metadata.language == expected_language
         assert len(metadata.contacts) > 0
         assert metadata.date_stamp is not None
-        assert metadata.date_stamp == expected_date
+        assert metadata.date_stamp == expected_datestamp
         assert isinstance(metadata.metadata_standard, MetadataStandard)
+
+        if "constraints" in values and isinstance(values["constraints"], list) and len(values["constraints"]) > 0:
+            assert all(isinstance(constraint, Constraint) for constraint in metadata.constraints)
+        else:
+            assert metadata.constraints == []
 
     def test_invalid_contacts(self):
         """Can't create a Metadata element without any contacts."""

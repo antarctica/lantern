@@ -7,6 +7,7 @@ from lantern.lib.metadata_library.models.record.elements.administration import P
 from lantern.lib.metadata_library.models.record.elements.common import (
     Address,
     Citation,
+    Constraint,
     ContactIdentity,
     Date,
     Identifier,
@@ -22,7 +23,6 @@ from lantern.lib.metadata_library.models.record.elements.distribution import For
 from lantern.lib.metadata_library.models.record.elements.identification import (
     Aggregation,
     BoundingBox,
-    Constraint,
     ExtentGeographic,
 )
 from lantern.lib.metadata_library.models.record.elements.identification import Aggregations as RecordAggregations
@@ -756,6 +756,51 @@ class TestAdditionalInfoTab:
         """Can get any data quality profiles if set."""
         fx_item_cat_info_tab_minimal._profiles = profiles
         assert fx_item_cat_info_tab_minimal.profiles == expected
+
+    @pytest.mark.parametrize(
+        ("licence", "expected"),
+        [
+            (None, None),
+            (Constraint(type=ConstraintTypeCode.USAGE, restriction_code=ConstraintRestrictionCode.LICENSE), None),
+            (
+                Constraint(
+                    type=ConstraintTypeCode.USAGE, restriction_code=ConstraintRestrictionCode.LICENSE, statement="x"
+                ),
+                None,
+            ),
+            (
+                Constraint(type=ConstraintTypeCode.USAGE, restriction_code=ConstraintRestrictionCode.LICENSE, href="x"),
+                Link(value="x", href="x", external=True),
+            ),
+            (
+                Constraint(
+                    type=ConstraintTypeCode.USAGE,
+                    restriction_code=ConstraintRestrictionCode.LICENSE,
+                    href="x",
+                    statement="y",  # ignored
+                ),
+                Link(value="x", href="x", external=True),
+            ),
+            (
+                Constraint(
+                    type=ConstraintTypeCode.USAGE,
+                    restriction_code=ConstraintRestrictionCode.LICENSE,
+                    href="https://creativecommons.org/licenses/by-nd/4.0/",
+                ),
+                Link(
+                    value="Creative Commons Attribution-NoDerivatives 4.0 International",
+                    href="https://creativecommons.org/licenses/by-nd/4.0/",
+                    external=True,
+                ),
+            ),
+        ],
+    )
+    def test_metadata_licence(
+        self, fx_item_cat_info_tab_minimal: AdditionalInfoTab, licence: Constraint, expected: Link | None
+    ):
+        """Can get metadata licence if set."""
+        fx_item_cat_info_tab_minimal._metadata_licence = licence
+        assert fx_item_cat_info_tab_minimal.metadata_licence == expected
 
 
 class TestContactTab:

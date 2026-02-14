@@ -6,6 +6,8 @@ from typing import TypeVar
 import cattrs
 
 from lantern.lib.metadata_library.models.record.enums import (
+    ConstraintRestrictionCode,
+    ConstraintTypeCode,
     ContactRoleCode,
     DatePrecisionCode,
     DateTypeCode,
@@ -16,6 +18,7 @@ TDate = TypeVar("TDate", bound="Date")
 TDates = TypeVar("TDates", bound="Dates")
 TContacts = TypeVar("TContacts", bound="Contacts")
 TCitation = TypeVar("TCitation", bound="Citation")
+TConstraints = TypeVar("TConstraints", bound="Constraints")
 
 
 @dataclass(kw_only=True)
@@ -514,3 +517,101 @@ class Citation:
         value["title"] = title
 
         return value
+
+
+@dataclass(kw_only=True)
+class Constraint:
+    """
+    Constraint.
+
+    Schema definition: constraint [1]
+    ISO element: gmd:MD_LegalConstraints [2]
+
+    [1] https://github.com/antarctica/metadata-library/blob/v0.15.1/src/bas_metadata_library/schemas/dist/iso_19115_2_v4.json#L145
+    [2] https://www.datypic.com/sc/niem21/e-gmd_MD_LegalConstraints.html
+    """
+
+    type: ConstraintTypeCode
+    restriction_code: ConstraintRestrictionCode | None = None
+    statement: str | None = None
+    href: str | None = None
+
+    def matches_filter(
+        self,
+        href: str | None = None,
+        types: list[ConstraintTypeCode] | None = None,
+        restrictions: list[ConstraintRestrictionCode] | None = None,
+    ) -> bool:
+        """
+        Check if constraint matches filter criteria.
+
+        Intended for use in filtering functions.
+        """
+        if href is not None and self.href != href:
+            return False
+        if types is not None and self.type not in types:
+            return False
+        return not (
+            restrictions is not None and (self.restriction_code is None or self.restriction_code not in restrictions)
+        )
+
+
+class Constraints(list[Constraint]):
+    """
+    Constraints.
+
+    Wrapper around a list of Constraint items with additional methods for filtering/selecting items.
+
+    Schema definition: constraints [1]
+    ISO element: gmd:MD_LegalConstraints [2]
+
+    [1] https://github.com/antarctica/metadata-library/blob/v0.15.1/src/bas_metadata_library/schemas/dist/iso_19115_2_v4.json#L252
+    [2] See 'used in' section of: https://www.datypic.com/sc/niem21/e-gmd_MD_LegalConstraints.html
+    """
+
+    @classmethod
+    def structure(cls: type[TConstraints], value: list[dict]) -> "Constraints":
+        """
+        Parse constraints from plain types.
+
+        Returns a new class instance with parsed data. Intended to be used as a cattrs structure hook.
+        E.g. `converter.register_structure_hook(Constraints, lambda d, t: Constraints.structure(d))`
+
+        Structures input items into a list of Constraint items via cattrs as a new instance of this class.
+
+        Example input: [{"type": "usage", "restriction_code": "license", "statement": "x", "href": "x"}]
+        Example output: Constraints([Constraint(type=ConstraintTypeCode.USAGE, restriction_code=ConstraintRestrictionCode.LICENSE, statement="x", href="x")])
+        """
+        converter = cattrs.Converter()
+        return cls([converter.structure(constraint, Constraint) for constraint in value])
+
+    def unstructure(self) -> list[dict]:
+        """
+        Convert to plain types.
+
+        Intended to be used as a cattrs unstructure hook.
+        E.g. `converter.register_unstructure_hook(Constraints, lambda d: d.unstructure())`
+
+        Example input: Constraints([Constraint(type=ConstraintTypeCode.USAGE, restriction_code=ConstraintRestrictionCode.LICENSE, statement="x", href="x")])
+        Example output: [{"type": "usage", "restriction_code": "license", "statement": "x", "href": "x"}]
+
+        """
+        # noinspection PyUnresolvedReferences
+        converter = cattrs.Converter()
+        return [converter.unstructure(constraint) for constraint in self]
+
+    def filter(
+        self,
+        href: str | None = None,
+        types: ConstraintTypeCode | list[ConstraintTypeCode] | None = None,
+        restrictions: ConstraintRestrictionCode | list[ConstraintRestrictionCode] | None = None,
+    ) -> "Constraints":
+        """
+        Filter constraints by href and/or type(s) and/or restriction(s).
+
+        Conditions use logical AND, i.e. constraints must match a href and type(s) if specified.
+        Types/restrictions use logical OR for multiple values.
+        """
+        types = [types] if isinstance(types, ConstraintTypeCode) else types
+        restrictions = [restrictions] if isinstance(restrictions, ConstraintRestrictionCode) else restrictions
+        return Constraints([constraint for constraint in self if constraint.matches_filter(href, types, restrictions)])

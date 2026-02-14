@@ -9,8 +9,8 @@ from pytest_mock import MockerFixture
 
 from lantern.exporters.website import WebsiteSearchExporter
 from lantern.lib.metadata_library.models.record.elements.administration import Administration
-from lantern.lib.metadata_library.models.record.elements.common import Identifier
-from lantern.lib.metadata_library.models.record.elements.identification import Aggregation, Constraint
+from lantern.lib.metadata_library.models.record.elements.common import Constraint, Identifier
+from lantern.lib.metadata_library.models.record.elements.identification import Aggregation
 from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,
     ConstraintRestrictionCode,

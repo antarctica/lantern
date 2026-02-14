@@ -4,10 +4,9 @@ from abc import ABC, abstractmethod
 from datetime import date, datetime
 
 from lantern.lib.metadata_library.models.record.elements.administration import Permission
-from lantern.lib.metadata_library.models.record.elements.common import Date, Identifier, Series
+from lantern.lib.metadata_library.models.record.elements.common import Constraint, Date, Identifier, Series
 from lantern.lib.metadata_library.models.record.elements.data_quality import DomainConsistency
 from lantern.lib.metadata_library.models.record.elements.distribution import Distribution as RecordDistribution
-from lantern.lib.metadata_library.models.record.elements.identification import Constraint
 from lantern.lib.metadata_library.models.record.elements.metadata import MetadataStandard
 from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
 from lantern.models.item.base.elements import Contact, Link
@@ -416,6 +415,7 @@ class AdditionalInfoTab(Tab):
         maintenance: Maintenance | None = None,
         standard: MetadataStandard | None = None,
         profiles: list[DomainConsistency] | None = None,
+        metadata_licence: Constraint | None = None,
     ) -> None:
         self._item_id = item_id
         self._item_type = item_type
@@ -429,6 +429,7 @@ class AdditionalInfoTab(Tab):
         self._maintenance = maintenance
         self._standard = standard
         self._profiles = profiles if profiles is not None else []
+        self._metadata_licence = metadata_licence
         self._kv = kv
         self._build_time = build_time
 
@@ -592,6 +593,20 @@ class AdditionalInfoTab(Tab):
             )
             for profile in self._profiles
         ]
+
+    @property
+    def metadata_licence(self) -> Link | None:
+        """
+        Formatted metadata licence if set.
+
+        Licence usage constraint must include a href.
+        """
+        if self._metadata_licence is None or not self._metadata_licence.href:
+            return None
+        value = self._metadata_licence.href
+        if self._metadata_licence.href == "https://creativecommons.org/licenses/by-nd/4.0/":
+            value = "Creative Commons Attribution-NoDerivatives 4.0 International"
+        return Link(value=value, href=self._metadata_licence.href, external=True)
 
     @property
     def record_link_xml(self) -> Link:

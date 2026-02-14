@@ -2,6 +2,7 @@ from datetime import UTC, date, datetime
 
 from lantern.lib.metadata_library.models.record.elements.administration import Administration
 from lantern.lib.metadata_library.models.record.elements.common import (
+    Constraints,
     Date,
     Dates,
     Identifier,
@@ -10,8 +11,6 @@ from lantern.lib.metadata_library.models.record.elements.data_quality import Lin
 from lantern.lib.metadata_library.models.record.elements.identification import (
     Aggregation,
     Aggregations,
-    Constraint,
-    Constraints,
     Extent,
     Extents,
     Identification,
@@ -20,16 +19,15 @@ from lantern.lib.metadata_library.models.record.elements.identification import (
 from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,
     AggregationInitiativeCode,
-    ConstraintRestrictionCode,
-    ConstraintTypeCode,
     ContactRoleCode,
     DatePrecisionCode,
     HierarchyLevelCode,
     MaintenanceFrequencyCode,
     ProgressCode,
 )
-from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
+from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS as OPEN_ACCESS_PERMISSION
 from lantern.lib.metadata_library.models.record.presets.base import RecordMagicDiscoveryV2
+from lantern.lib.metadata_library.models.record.presets.constraints import CC_BY_ND_V4, OGL_V3, OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.presets.contacts import make_magic_role
 from lantern.lib.metadata_library.models.record.presets.extents import make_bbox_extent, make_temporal_extent
 from lantern.lib.metadata_library.models.record.utils.admin import set_admin
@@ -52,6 +50,8 @@ def make_record(
         ),
     )
 
+    record.metadata.constraints = Constraints([OPEN_ACCESS, CC_BY_ND_V4])
+
     record.metadata.date_stamp = date(2023, 10, 1)
 
     record.identification.edition = "1"
@@ -70,21 +70,7 @@ def make_record(
     )
     record.identification.contacts[magic_index] = magic_contact
 
-    record.identification.constraints = Constraints(
-        [
-            Constraint(
-                type=ConstraintTypeCode.ACCESS,
-                restriction_code=ConstraintRestrictionCode.UNRESTRICTED,
-                statement="Open Access (Anonymous)",
-            ),
-            Constraint(
-                type=ConstraintTypeCode.USAGE,
-                restriction_code=ConstraintRestrictionCode.LICENSE,
-                href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
-                statement="This information is licensed under the Open Government Licence v3.0. To view this licence, visit https://www.nationalarchives.gov.uk/doc/open-government-licence/.",
-            ),
-        ]
-    )
+    record.identification.constraints = Constraints([OPEN_ACCESS, OGL_V3])
 
     record.identification.aggregations = Aggregations(
         [
@@ -122,7 +108,7 @@ def make_record(
     administration = Administration(
         id=record.file_identifier,
         gitlab_issues=[],
-        access_permissions=[OPEN_ACCESS],
+        access_permissions=[OPEN_ACCESS_PERMISSION],
     )
     keys = load_test_keys()
     set_admin(keys=keys, record=record, admin_meta=administration)

@@ -1,12 +1,16 @@
 from functools import cached_property
 
 from lantern.lib.metadata_library.models.record.elements.administration import Administration
-from lantern.lib.metadata_library.models.record.elements.common import Identifier, Identifiers, Series
+from lantern.lib.metadata_library.models.record.elements.common import (
+    Constraint,
+    Constraints,
+    Identifier,
+    Identifiers,
+    Series,
+)
 from lantern.lib.metadata_library.models.record.elements.distribution import Distribution
 from lantern.lib.metadata_library.models.record.elements.identification import (
     Aggregations,
-    Constraint,
-    Constraints,
     GraphicOverview,
     GraphicOverviews,
 )
@@ -131,7 +135,7 @@ class ItemBase:
 
     @property
     def constraints(self) -> Constraints:
-        """Constraints."""
+        """Resource Constraints."""
         return self._record.identification.constraints
 
     @property

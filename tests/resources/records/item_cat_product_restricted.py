@@ -1,5 +1,7 @@
 from lantern.lib.metadata_library.models.record.elements.common import (
     Address,
+    Constraint,
+    Constraints,
     Contact,
     ContactIdentity,
     OnlineResource,
@@ -10,7 +12,6 @@ from lantern.lib.metadata_library.models.record.elements.distribution import (
     Size,
     TransferOption,
 )
-from lantern.lib.metadata_library.models.record.elements.identification import Constraint, Constraints
 from lantern.lib.metadata_library.models.record.enums import (
     ConstraintRestrictionCode,
     ConstraintTypeCode,

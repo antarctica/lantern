@@ -11,6 +11,8 @@ from lantern.lib.metadata_library.models.record.elements.administration import P
 from lantern.lib.metadata_library.models.record.elements.common import (
     Address,
     Citation,
+    Constraint,
+    Constraints,
     Contact,
     ContactIdentity,
     Contacts,
@@ -26,8 +28,6 @@ from lantern.lib.metadata_library.models.record.elements.identification import (
     Aggregation,
     Aggregations,
     BoundingBox,
-    Constraint,
-    Constraints,
     Extent,
     ExtentGeographic,
     Extents,
@@ -1361,6 +1361,25 @@ class TestInfoTab:
                 assert profiles.select_one(f"a[href='{item.href}']") is not None
         else:
             assert profiles is None
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            None,
+            Constraint(type=ConstraintTypeCode.USAGE, restriction_code=ConstraintRestrictionCode.LICENSE, href="x"),
+        ],
+    )
+    def test_metadata_licence(self, fx_item_cat_model_min: ItemCatalogue, value: Constraint | None):
+        """Can get metadata profiles based on values from item."""
+        fx_item_cat_model_min._record.metadata.constraints = Constraints([value]) if value else Constraints([])
+        expected = fx_item_cat_model_min._additional_info.metadata_licence
+        html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
+
+        licences = html.select_one("#info-licence")
+        if expected:
+            assert licences.select_one(f"a[href='{expected.href}']") is not None
+        else:
+            assert licences is None
 
     def test_record_links(self, fx_item_cat_model_min: ItemCatalogue):
         """Can get metadata record links based on values from item."""

@@ -29,6 +29,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     HierarchyLevelCode,
     OnlineResourceFunctionCode,
 )
+from lantern.lib.metadata_library.models.record.presets.constraints import OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.presets.extents import make_bbox_extent, make_temporal_extent
 from lantern.lib.metadata_library.models.record.utils.kv import set_kv
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
@@ -48,11 +49,7 @@ graphics = {
 }
 constraints = Constraints(
     [
-        Constraint(
-            type=ConstraintTypeCode.ACCESS,
-            restriction_code=ConstraintRestrictionCode.UNRESTRICTED,
-            statement="Open Access (Anonymous)",
-        ),
+        OPEN_ACCESS,
         Constraint(
             type=ConstraintTypeCode.USAGE,
             restriction_code=ConstraintRestrictionCode.LICENSE,

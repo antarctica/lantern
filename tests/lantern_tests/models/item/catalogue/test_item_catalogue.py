@@ -16,7 +16,6 @@ from lantern.lib.metadata_library.models.record.enums import (
     ConstraintRestrictionCode,
     ConstraintTypeCode,
     ContactRoleCode,
-    HierarchyLevelCode,
 )
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 from lantern.models.item.base.elements import Link
@@ -93,12 +92,6 @@ class TestItemCatalogue:
                 select_record=_select_record,
             )
 
-    def test_revision(
-        self,
-        fx_site_meta: SiteMeta,
-        fx_item_cat_model_min: ItemCatalogue,
-    ):
-
     @pytest.mark.parametrize(
         ("licence", "expected"),
         [
@@ -120,6 +113,7 @@ class TestItemCatalogue:
         fx_item_cat_model_min._record.metadata.constraints = Constraints([licence]) if licence else Constraints([])
         assert fx_item_cat_model_min._metadata_licence == expected
 
+    def test_revision(self, fx_site_meta: SiteMeta, fx_item_cat_model_min: ItemCatalogue):
         """Can compute link to record revision where available."""
         # realistic values needed over 'x' so substrings can be extracted safely
         id_ = "ee21f4a7-7e87-4074-b92f-9fa27a68d26d"

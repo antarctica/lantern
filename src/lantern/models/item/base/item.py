@@ -306,12 +306,15 @@ class ItemBase:
 
         Typically used for published maps.
 
-        Due to a bug in V4 BAS ISO JSON Schema the 'page' (sheet number) property cannot be set. As a workaround, this
-        class supports loading an optional 'sheet_number' from KV properties.
+        Due to a bug in early revisions of the V4 BAS ISO JSON Schema, the 'page' (sheet number) property could not be
+        set. This class supports loading an optional 'sheet_number' from KV properties if not set in the series element.
         """
         series = self._record.identification.series
+        if series and series.page:
+            return series
+
         sheet_number = self.kv.get("sheet_number", None)
-        if sheet_number is not None:
+        if sheet_number:
             series.page = sheet_number
         return series
 

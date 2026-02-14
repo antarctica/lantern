@@ -169,7 +169,7 @@ record.identification.identifiers = Identifiers(
         ),
     ]
 )
-record.identification.series = Series(name="Test Series", page="3", edition="1")
+record.identification.series = Series(name="Test Series", page="4", edition="1")
 record.identification.spatial_resolution = 1_234_567_890
 record.identification.contacts = Contacts(
     [
@@ -273,7 +273,7 @@ record.identification.graphic_overviews = GraphicOverviews(
     ]
 )
 record.identification.other_citation_details = "Produced by the Mapping and Geographic Information Centre, British Antarctic Survey, 2025, version 1, https://data.bas.ac.uk/maps/1005."
-set_kv({"physical_size_width_mm": "210", "physical_size_height_mm": "297", "sheet_number": "4"}, record)
+set_kv({"physical_size_width_mm": "210", "physical_size_height_mm": "297"}, record)
 
 # add a containing project
 record.identification.aggregations.append(

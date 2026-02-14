@@ -476,7 +476,9 @@ class TestItemBase:
         [
             (None, None, None),
             (Series(name="x", edition="x"), None, Series(name="x", edition="x")),
-            (Series(name="x", edition="x"), "x", Series(name="x", page="x", edition="x")),
+            (Series(name="x", page="x", edition="x"), None, Series(name="x", page="x", edition="x")),
+            (Series(name="x", page="x", edition="x"), "y", Series(name="x", page="x", edition="x")),
+            (Series(name="x", edition="x"), "y", Series(name="x", page="y", edition="x")),
         ],
     )
     def test_series_descriptive(

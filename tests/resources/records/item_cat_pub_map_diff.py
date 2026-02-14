@@ -129,10 +129,10 @@ combined.identification.identifiers.append(
     ),
 )
 combined.identification.edition = "1"
-combined.identification.series = Series(name="Catalogue Test Resources", edition="1")
+combined.identification.series = Series(name="Catalogue Test Resources", page="3", edition="1")
 combined.identification.dates.creation = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
 combined.identification.dates.published = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
-set_kv({"physical_size_width_mm": 890, "physical_size_height_mm": 840, "sheet_number": "3"}, combined)
+set_kv({"physical_size_width_mm": 890, "physical_size_height_mm": 840}, combined)
 combined.identification.constraints = constraints
 combined.distribution = distribution
 combined.identification.graphic_overviews = GraphicOverviews(
@@ -187,11 +187,11 @@ side_a = make_record(
     purpose="Item to test dissimilar published maps are presented correctly (side Z [A]).",
 )
 side_a.identification.edition = "20"
-side_a.identification.series = Series(name="Catalogue Test Resources", edition="20")
+side_a.identification.series = Series(name="Catalogue Test Resources", page="3(⬆️)", edition="20")
 side_a.identification.dates.creation = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
 side_a.identification.dates.published = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
 side_a.identification.spatial_resolution = 200_000
-set_kv({"physical_size_width_mm": 890, "physical_size_height_mm": 840, "sheet_number": "3(⬆️)"}, side_a)
+set_kv({"physical_size_width_mm": 890, "physical_size_height_mm": 840}, side_a)
 side_a.identification.constraints = constraints
 side_a.distribution = distribution
 side_a.identification.graphic_overviews = GraphicOverviews(
@@ -245,11 +245,11 @@ side_b = make_record(
     purpose="Item to test dissimilar published maps are presented correctly (side Soaring Crescendo [B]).",
 )
 side_b.identification.edition = "400"
-side_b.identification.series = Series(name="Alt Catalogue Test Resources", edition="400")
+side_b.identification.series = Series(name="Alt Catalogue Test Resources", page='"3(⬇️)"', edition="400")
 side_b.identification.dates.creation = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
 side_b.identification.dates.published = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
 side_b.identification.spatial_resolution = 800_000
-set_kv({"physical_size_width_mm": 890, "physical_size_height_mm": 840, "sheet_number": "3(⬇️)"}, side_b)
+set_kv({"physical_size_width_mm": 890, "physical_size_height_mm": 840}, side_b)
 side_b.identification.constraints = constraints
 side_b.distribution = distribution
 side_b.identification.graphic_overviews = GraphicOverviews(

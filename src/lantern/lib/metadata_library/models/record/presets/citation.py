@@ -1,6 +1,18 @@
+from enum import Enum
+
 from lantern.lib.metadata_library.models.record.elements.common import Date, Identifier
 from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
 from lantern.models.record.const import CATALOGUE_NAMESPACE
+
+
+class CitationHierarchyLevelCode(Enum):
+    """Partial mapping of the Hierarchy Level code list to citation resource types."""
+
+    DATASET = "Dataset"
+    PRODUCT = "Product"
+    MAP_PRODUCT = "Map"
+    PAPER_MAP_PRODUCT = "Map"
+    WEB_MAP_PRODUCT = "Online"
 
 
 def make_magic_citation(
@@ -15,8 +27,9 @@ def make_magic_citation(
     publisher = "British Antarctic Survey Mapping and Geographic Information Centre"
     year = "?year" if publication_date is None else publication_date.date.year
     version = "?version" if edition is None else edition
-    type_ = hierarchy_level.value.capitalize()
-
+    type_ = ""
+    if hierarchy_level.name in list(CitationHierarchyLevelCode.__members__.keys()):
+        type_ = f" [{CitationHierarchyLevelCode[hierarchy_level.name].value}]"
     identifiers = [] if identifiers is None else identifiers
     href = "?"
     try:
@@ -26,4 +39,4 @@ def make_magic_citation(
         pass
     reference = f"[{href}]({href})"
 
-    return f"{author} ({year}). _{title}_ (Version {version}) [{type_}]. {publisher}. {reference}."
+    return f"{author} ({year}). _{title}_ (Version {version}){type_}. {publisher}. {reference}."

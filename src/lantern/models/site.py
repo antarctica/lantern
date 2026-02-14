@@ -125,7 +125,8 @@ class SiteMeta:
     - base_url: endpoint needed to construct absolute URLs (e.g. 'https://example.com')
     - build_key: cache busting value
     - html_title: HTML head title value (will be combined with site name)
-    - plausible_domain: Plausible Analytics site identifier
+    - sentry_dsn: Sentry project identifier
+    - plausible_id: Plausible Analytics site identifier
     - embedded_maps_endpoint: BAS Embedded Maps Service endpoint
     - items_enquires_endpoint: endpoint for item enquiries form
     - items_enquires_turnstile_key: site key for item enquiries Cloudflare Turnstile widget
@@ -143,7 +144,8 @@ class SiteMeta:
     base_url: str
     build_key: str
     html_title: str
-    plausible_domain: str
+    sentry_dsn: str
+    plausible_id: str
     embedded_maps_endpoint: str
     items_enquires_endpoint: str
     items_enquires_turnstile_key: str
@@ -213,7 +215,8 @@ class SiteMeta:
         The Config instance provides values for:
         - base_url
         - build_key
-        - plausible_domain
+        - sentry_dsn
+        - plausible_id
         - embedded_maps_domain
         - items_enquires_endpoint
         - items_enquires_turnstile_key
@@ -235,7 +238,8 @@ class SiteMeta:
             **{  # ty: ignore[invalid-argument-type]
                 "base_url": config.BASE_URL,
                 "build_key": config.TEMPLATES_CACHE_BUST_VALUE,
-                "plausible_domain": config.TEMPLATES_PLAUSIBLE_DOMAIN,
+                "sentry_dsn": config.SENTRY_DSN,
+                "plausible_id": config.TEMPLATES_PLAUSIBLE_ID,
                 "embedded_maps_endpoint": config.TEMPLATES_ITEM_MAPS_ENDPOINT,
                 "items_enquires_endpoint": config.TEMPLATES_ITEM_CONTACT_ENDPOINT,
                 "items_enquires_turnstile_key": config.TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY,
@@ -285,7 +289,7 @@ class ExportMeta(SiteMeta):
         _site_meta = {}
         for site_field in fields(SiteMeta):
             _site_meta[site_field.name] = getattr(self, site_field.name)
-        return SiteMeta(**_site_meta)  # ty: ignore[missing-argument]
+        return SiteMeta(**_site_meta)
 
     @classmethod
     def from_config_store(

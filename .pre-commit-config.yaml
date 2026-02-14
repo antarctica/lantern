@@ -16,22 +16,22 @@ repos:
     - id: end-of-file-fixer
       exclude: \.pxd$
 - repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: v0.14.10
+  rev: v0.15.0
   hooks:
     - id: ruff-check
     - id: ruff-format
 - repo: https://github.com/astral-sh/uv-pre-commit
-  rev: 0.9.18
+  rev: 0.10.0
   hooks:
     - id: uv-lock
 - repo: local
   hooks:
     - id: ty
       name: ty check
-      entry: uvx --offline ty@0.0.4 check src/ --ignore unresolved-import
+      entry: uvx --offline ty@0.0.15 check src/ --ignore unresolved-import
       pass_filenames: false
       language: python
 - repo: https://github.com/jackdewinter/pymarkdown
-  rev: v0.9.33
+  rev: v0.9.35
   hooks:
       - id: pymarkdown

@@ -101,11 +101,23 @@ data "terraform_remote_state" "BAS-CORE-DOMAINS" {
 
 variable "static_site_ref" {
   type        = string
-  default     = "v0.4.0"
+  default     = "v0.5.1"
   description = "Static site module version."
 }
 
-module "site_testing" {
+variable "static_site_tls_version" {
+  type        = string
+  default     = "TLSv1.2_2025"
+  description = "CloudFront viewer certificate minimum protocol version"
+}
+
+variable "static_site_csp" {
+  type        = string
+  default     = "default-src * data: 'unsafe-inline'"
+  description = "CloudFront content security policy header (CSP)"
+}
+
+module "site_stage" {
   source = "git::https://github.com/felnne/tf-aws-static-site.git?ref=${var.static_site_ref}"
 
   providers = {
@@ -114,8 +126,9 @@ module "site_testing" {
 
   site_name                         = "lantern-testing.data.bas.ac.uk"
   route53_zone_id                   = data.terraform_remote_state.BAS-CORE-DOMAINS.outputs.DATA-BAS-AC-UK-ID
+  cloudfront_min_proto_version      = var.static_site_tls_version
   cloudfront_comment                = "Lantern Exp Site (Testing)"
-  cloudfront_csp                    = "default-src * data: 'unsafe-inline'"
+  cloudfront_csp                    = var.static_site_csp
   cloudfront_enable_default_caching = false
 
   tags = {
@@ -134,14 +147,21 @@ module "site_prod" {
 
   site_name                         = "lantern.data.bas.ac.uk"
   route53_zone_id                   = data.terraform_remote_state.BAS-CORE-DOMAINS.outputs.DATA-BAS-AC-UK-ID
-  cloudfront_comment                = "Lantern Exp Site (Production)"
-  cloudfront_csp                    = "default-src * data: 'unsafe-inline'"
+  cloudfront_min_proto_version      = var.static_site_tls_version
+  cloudfront_comment                = "Lantern Exp Site (Live)"
+  cloudfront_csp                    = var.static_site_csp
   cloudfront_enable_default_caching = true
 
   tags = {
     Name         = "lantern-prod"
     X-Project    = "BAS Lantern Experiment"
     X-Managed-By = "Terraform"
+  }
+}
+resource "aws_s3_bucket_versioning" "versioning_example" {
+  bucket = module.site_prod.s3_bucket_name
+  versioning_configuration {
+    status = "Enabled"
   }
 }
 
@@ -187,8 +207,8 @@ resource "aws_iam_user_policy" "workstation_stage" {
           "s3:PutObjectAcl"
         ]
         Resource = [
-          module.site_testing.s3_bucket_arn,
-          "${module.site_testing.s3_bucket_arn}/*"
+          module.site_stage.s3_bucket_arn,
+          "${module.site_stage.s3_bucket_arn}/*"
         ]
       }
     ]
@@ -358,7 +378,7 @@ resource "cloudflare_turnstile_widget" "site" {
   # To enable bot protection on item enquires (see /docs/site.md#bot-protection)
   account_id = var.cloudflare_account_id
   domains = sort([
-    module.site_testing.s3_bucket_name,
+    module.site_stage.s3_bucket_name,
     module.site_prod.s3_bucket_name,
     "data-testing.data.bas.ac.uk",
     "data.bas.ac.uk"

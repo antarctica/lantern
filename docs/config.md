@@ -43,7 +43,7 @@ Application configuration is managed by the `lantern.Config` class.
 | `TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY`  | String       | Yes          | Yes      | No        | v0.4.x        | Cloudflare Turnstile site key for item contact form                                | *N/A*                                     | 'x'                                             |
 | `TEMPLATES_ITEM_MAPS_ENDPOINT`          | String       | Yes          | No       | No        | v0.1.x        | Embedded Maps Service base endpoint                                                | `https://embedded-maps.data.bas.ac.uk/v1` | 'https://embedded-maps.data.bas.ac.uk/v1'       |
 | `TEMPLATES_ITEM_VERSIONS_ENDPOINT`      | String       | Yes          | Yes      | No        | v0.2.x        | Base URL to a GitLab project for viewing item record revisions                     | *None*                                    | 'https://example.com'                           |
-| `TEMPLATES_PLAUSIBLE_DOMAIN`            | String       | No           | -        | No        | v0.1.x        | Plausible site identifier for frontend analytics                                   | *None*                                    | 'example'                                       |
+| `TEMPLATES_PLAUSIBLE_ID`                | String       | No           | -        | No        | v0.5.x        | Plausible site identifier for frontend analytics                                   | *None*                                    | 'pa-xxx'                                        |
 | `TRUSTED_UPLOAD_HOST`                   | String       | Yes          | No       | No        | v0.5.x        | SSH config alias for remote trusted content hosting server                         | *None*                                    | 'lantern-trusted-content'                       |
 | `TRUSTED_UPLOAD_PATH`                   | String       | Yes          | Yes      | No        | v0.5.x        | Directory for trusted content, local or remote within trusted content server       | *None*                                    | '/data/lantern'                                 |
 | `VERIFY_SAN_PROXY_ENDPOINT`             | String       | Yes          | Yes      | No        | v0.5.x        | Microsoft Power Automate trigger endpoint for checking SAN references              | *N/A*                                     | 'https://example.com'                           |
@@ -97,6 +97,8 @@ See the [Exporters](/docs/exporters.md#exporters-configuration) docs for more in
 - `AWS_ACCESS_SECRET`
 - `AWS_ACCESS_SECRET_SAFE`
 - `AWS_S3_BUCKET`
+- `TRUSTED_UPLOAD_HOST`
+- `TRUSTED_UPLOAD_PATH`
 - `VERIFY_SHAREPOINT_PROXY_ENDPOINT`
 
 ### Site templates config options
@@ -109,7 +111,7 @@ See the [Templates](/docs/site.md#templates-configuration) docs for more informa
 - `TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY`
 - `TEMPLATES_ITEM_MAPS_ENDPOINT`
 - `TEMPLATES_ITEM_VERSIONS_ENDPOINT`
-- `TEMPLATES_PLAUSIBLE_DOMAIN`
+- `TEMPLATES_PLAUSIBLE_ID`
 
 ### Development task options
 

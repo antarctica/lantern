@@ -8,7 +8,7 @@ from lantern.models.verification.types import VerificationContext
 def main() -> None:
     """Entrypoint."""
     base_url = "https://data.bas.ac.uk"
-    selected = {"00203387-0840-447c-b9ae-f25088501031"}  # set()  # to set use the form {"abc", "..."}
+    selected = set()  # to set use the form {"abc", "..."}
 
     logger, config, store, s3 = init(cached_store=True)
     context: VerificationContext = {

@@ -14,7 +14,7 @@ services:
       context: ./apache
       dockerfile: Dockerfile
     volumes:
-        - './apache/run/cat/stage/items:/data/web/ops-data-store/www/content/cat/stage/items'
+        - './apache/run/cat/testing/items:/data/web/ops-data-store/www/content/cat/testing/items'
   mail:
     image: rnwood/smtp4dev:v3
   gitlab:

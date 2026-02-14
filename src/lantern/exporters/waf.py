@@ -75,4 +75,4 @@ class WebAccessibleFolderExporter(ResourcesExporter):
         """Publish listing to S3."""
         self._logger.info("Publishing all items WAF.")
         index_key = self._s3_utils.calc_key(self._export_path)
-        self._s3_utils.upload_content(key=index_key, content_type="text/html", body=self._dumps())
+        self._s3_utils.upload_object(key=index_key, content_type="text/html", body=self._dumps())

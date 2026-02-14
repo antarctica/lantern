@@ -59,7 +59,7 @@ class TestHtmlExporter:
         assert result == expected
 
     def test_dumps(self, fx_exporter_html: HtmlExporter):
-        """Can encode record as a form of Data Catalogue item page."""
+        """Can encode record as an item page."""
         result = fx_exporter_html.dumps()
         assert "<!DOCTYPE html>" in result
 
@@ -84,7 +84,7 @@ class TestHtmlExporter:
         """Can upload item output in a trusted context to secure hosting."""
         with TemporaryDirectory() as tmp_path:
             base_path = Path(tmp_path)
-        env_path = base_path / "live" / "items"
+        env_path = base_path / "testing" / "items"
         env_path.mkdir(parents=True)
         fx_exporter_html._meta.trusted = True
         fx_exporter_html._meta.trusted_path = base_path

@@ -12,11 +12,11 @@ dependencies = [
     "bas-metadata-library>=0.15.3",
     "beautifulsoup4>=4.13.4",
     "bleach>=6.2.0",
-    "boto3>=1.38.46",
-    "boto3-stubs[s3]>=1.38.46",
+    "boto3>=1.42.44",
+    "boto3-stubs[s3]>=1.42.44",
     "cattrs>=25.1.1",
     "deepdiff>=8.5.0",
-    "environs>=14.2.0",
+    "environs>=14.5.0",
     "humanize>=4.12.3",
     "inquirer>=3.4.0",
     "jinja2>=3.1.6",
@@ -25,9 +25,9 @@ dependencies = [
     "jwskate>=0.12.2",
     "markdown>=3.8.2",
     "markdown-gfm-admonition>=0.1.1",
-    "python-gitlab>=6.0.0",
-    "requests>=2.32.4",
-    "sentry-sdk>=2.32.0",
+    "python-gitlab>=8.0.0",
+    "requests>=2.32.5",
+    "sentry-sdk>=2.52.0",
     "sqlorm-py>=0.4.1",
     "truststore>=0.10.4",
 ]
@@ -37,11 +37,11 @@ dev = [
     "dunamai>=1.25.0",
     "pymarkdownlnt>=0.9.33",
     "pytailwindcss>=0.2.0",
-    "ruff>=0.12.4",
+    "ruff>=0.15.0",
     "safety>=3.5.2",
     "sysrsync>=1.1.1",
     "taskipy>=1.14.1",
-    "ty>=0.0.1a23",
+    "ty>=0.0.15",
     "types-lxml>=2025.3.30",
 ]
 test = [
@@ -99,7 +99,6 @@ config-check = { cmd = "python -m tasks.config_check", help = "Check app config"
 css = { cmd = "python -m tasks.css", help = "Regenerate CSS via tailwind" }
 css-audit = { cmd = "python -m tasks.css_audit", help = "List CSS styles used in app templates" }
 icons-audit = { cmd = "python -m tasks.icons_audit", help = "List icons used in app templates" }
-js = { cmd = "python -m tasks.js", help = "Regenerate JavaScript" }
 build-test-records = { cmd = "python tests/scripts/build_test.py", help = "Build test records as a catalogue site" }
 build-test-cache = { cmd = "python tests/resources/stores/gitlab_cache/refresh.py", help = "Build test/resource cache" }
 # fake CLI
@@ -187,8 +186,7 @@ plugins.md014.enabled = false
 extensions.markdown-extended-autolinks.enabled = true
 
 [tool.pytest_env]
-# `LANTERN_TEMPLATES_SENTRY_SRC` needs to be real to load the Sentry feedback widget
-# `X_ADMIN_METADATA_SIGNING_KEY_PRIVATE` is needed to sign administrative metadata in test records
+# `X_ADMIN_METADATA_SIGNING_KEY_PRIVATE` is needed to sign administrative metadata in test records but is not real key
 LANTERN_LOG_LEVEL = "INFO"
 LANTERN_PARALLEL_JOBS="1"
 LANTERN_ENABLE_FEATURE_SENTRY = "false"
@@ -196,15 +194,14 @@ LANTERN_SENTRY_ENVIRONMENT = "test"
 LANTERN_ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE = "{\"kty\":\"EC\",\"crv\":\"P-256\",\"x\":\"MzZQPXly16iAS2fzW_SbKqKHazsId57y7U35G9j4bbs\",\"y\":\"6__rBtqNe6unAdllQpb2cypCH9u8-LouEX47uC-ncN0\",\"d\":\"_fA1R8yP_uvfB7Qv9IApj7yydLA47N81Y75jZ92QH6U\",\"alg\":\"ECDH-ES+A128KW\",\"kid\":\"magic_metadata_testing_encryption_key\"}"
 LANTERN_ADMIN_METADATA_SIGNING_KEY_PUBLIC = "{\"kty\":\"EC\",\"kid\":\"magic_metadata_testing_signing_key\",\"alg\":\"ES256\",\"crv\":\"P-256\",\"x\":\"243mJW8nkwqB76WGb1Y4DGaU_KpFR7m5PyQvveubgHA\",\"y\":\"l9M7YErkNgM5FL58EavMBxJVgG60DE_qyif3Bp1lawU\"}"
 LANTERN_STORE_GITLAB_ENDPOINT = "https://gitlab.example.com"
-LANTERN_STORE_GITLAB_TOKEN='x'
-LANTERN_STORE_GITLAB_PROJECT_ID='1234'
+LANTERN_STORE_GITLAB_TOKEN="x"
+LANTERN_STORE_GITLAB_PROJECT_ID="1234"
 LANTERN_STORE_GITLAB_BRANCH="main"
-LANTERN_STORE_GITLAB_CACHE_PATH='cache'
-LANTERN_TEMPLATES_SENTRY_SRC="https://js.sentry-cdn.com/57698b6483c7ac43b7c9c905cdb79943.min.js"
-LANTERN_TEMPLATES_PLAUSIBLE_DOMAIN="x"
-LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT='https://example.com/contact' # must be 'https://example.com/contact'
-LANTERN_TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY='x'
-LANTERN_TEMPLATES_ITEM_VERSIONS_ENDPOINT='x'
+LANTERN_STORE_GITLAB_CACHE_PATH="cache"
+LANTERN_TEMPLATES_PLAUSIBLE_ID="x"
+LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT="https://example.com/contact" # must be "https://example.com/contact"
+LANTERN_TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY="x"
+LANTERN_TEMPLATES_ITEM_VERSIONS_ENDPOINT="x"
 LANTERN_EXPORT_PATH="export"
 LANTERN_AWS_ACCESS_ID="x"
 LANTERN_AWS_ACCESS_SECRET="x"

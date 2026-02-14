@@ -13,11 +13,7 @@ def init(logging_level: int) -> None:
 
 
 def init_sentry() -> None:
-    """
-    Initialize Sentry SDK if enabled.
-
-    The DSN is embedded here as the config class is not yet available based on when this method is called.
-    """
+    """Initialise Sentry SDK, if enabled."""
     # can't import Config normally due to circular imports
     from lantern.config import Config
 

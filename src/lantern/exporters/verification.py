@@ -56,11 +56,11 @@ def _req_url(logger: logging.Logger, job: VerificationJob, params: dict | None =
 
     match method:
         case "get":
-            r = requests.get(**params_)  # noqa: S113 # ty: ignore[missing-argument]
+            r = requests.get(**params_)  # noqa: S113
         case "post":
-            r = requests.post(**params_, json=body)  # noqa: S113 # ty: ignore[missing-argument]
+            r = requests.post(**params_, json=body)  # noqa: S113
         case "head":
-            r = requests.head(**params_)  # noqa: S113 # ty: ignore[missing-argument]
+            r = requests.head(**params_)  # noqa: S113
         case _:
             msg = f"Unsupported HTTP method: {method}"
             raise ValueError(msg) from None
@@ -390,6 +390,6 @@ class VerificationExporter(ResourcesExporter):
     def publish(self) -> None:
         """Publish JSON and HTML report files to S3."""
         data_key = self._s3_utils.calc_key(self._export_path.joinpath("data.json"))
-        self._s3_utils.upload_content(key=data_key, content_type="application/json", body=json.dumps(self.report.data))
+        self._s3_utils.upload_object(key=data_key, content_type="application/json", body=json.dumps(self.report.data))
         index_key = self._s3_utils.calc_key(self._export_path.joinpath("index.html"))
-        self._s3_utils.upload_content(key=index_key, content_type="text/html", body=self.report.dumps())
+        self._s3_utils.upload_object(key=index_key, content_type="text/html", body=self.report.dumps())

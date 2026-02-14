@@ -13,17 +13,18 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 ### Changed [!BREAKING]
 
 * `ItemBase.abstract*` methods changed to `ItemBase.description*` (impacts externally maintained item subclasses)
+* `PLAUSIBLE_DOMAIN` config option renamed to `PLAUSIBLE_ID`
 
 ### Added
 
 * Development task for minimally cloning a record
 * Development task for minimally initialising a GitLab records cache
 * Support for configuring the GitLab store branch name
-* Support for branch-based changesets in interactive publishing workflow
-* Support for v2 MAGIC discovery profile
-* Support for initiative records as 'project' items
-* Support for container and resource 'super types' to more flexibly support similar item types
-* Support for SAN based distribution options (skipped during verification)
+* Branch-based changesets in interactive publishing workflow
+* v2 MAGIC discovery profile
+* Initiative records as 'project' items
+* Container and resource 'super types' to handle similar item types more easily
+* SAN based distribution options (skipped during verification)
 * Support for running GitLab instance locally in development environments
 * Additional validation for MAGIC Discovery profile Req. 06 (released date presence)
 * Setup documentation for Plausible
@@ -43,7 +44,10 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * custom Sentry user feedback widget
 * Infrastructure as Code using OpenTofu
 * Automatic publishing of trusted content for administrative metadata
-* Updating non-interactive publishing workflow to support branches and change sets
+* Infrastructure, hosting and site dependencies documentation diagrams
+* Branch-based changesets in non-interactive publishing workflow
+* Basic web hooks support in the non-interactive publishing workflow
+* S3 bucket versioning enabled on production/live site
 
 ### Fixed
 
@@ -55,6 +59,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Missing Open Graph and Schema.org metadata for static site pages
 * Read-only database error when purging a GitLab local cache due to a stale connection
 * Missing content-types for S3 uploaded files (in relation to `X-Content-Type-Options=nosniff`)
+* Preventing non-interactive publishing workflow from clobbering global exporters output in partial builds
 
 ### Changed
 
@@ -89,6 +94,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Importing Cloudflare Turnstile config under Infrastructure as Code
 * Importing Sentry project under Infrastructure as Code
 * Improving infrastructure and setup documentation
+* Upgrading Plausible tracking script
+* Improving non-interactive publishing workflow documentation
 
 ### Removed
 

@@ -3,6 +3,7 @@ import logging
 import shutil
 from pathlib import Path
 from shutil import copy
+from tempfile import TemporaryDirectory
 
 from importlib_resources import as_file as resources_as_file
 from importlib_resources import files as resources_files
@@ -72,13 +73,28 @@ class SiteResourcesExporter(Exporter):
         """Copy text files to directory if not already present."""
         BaseExporter._dump_package_resources(src_ref=self._txt_src_ref, dest_path=self._export_base.joinpath("txt"))
 
-    def _dump_js(self) -> None:
-        """
-        Copy JS files to directory if not already present.
+    def _dump_js_dynamic(self, output_base: Path) -> None:
+        """Generate templated JS files."""
+        _jinja = get_jinja_env()
+        package_path = "lantern.resources.templates._assets.js"
 
-        Some JS files need generating from `resources/templates/_assets/*.j2` first using the `js` dev task.
-        """
-        BaseExporter._dump_package_resources(src_ref=self._js_src_ref, dest_path=self._export_base.joinpath("js"))
+        with resources_as_file(resources_files(package_path)) as resources_path:
+            for source_path in resources_path.glob("**/*.js.j2"):
+                relative_source_path = source_path.relative_to(resources_path)
+                template_path = f"_assets/js/{relative_source_path.as_posix()}"
+                output_path = output_base / relative_source_path.stem
+
+                rnd = _jinja.get_template(str(template_path)).render(data=self._meta.site_metadata)
+                rnd = "\n".join([line.rstrip() for line in rnd.splitlines() if line.strip() != ""])  # trim blank lines
+                with output_path.open("w") as f:
+                    f.write(rnd)
+                    f.write("\n")  # append trailing new line
+
+    def _dump_js(self) -> None:
+        """Copy static and templated JS files to directory if not already present."""
+        output_base = self._export_base.joinpath("js")
+        BaseExporter._dump_package_resources(src_ref=self._js_src_ref, dest_path=output_base)
+        self._dump_js_dynamic(output_base=output_base)
 
     def _publish_css(self) -> None:
         """Upload CSS as an S3 object."""
@@ -89,7 +105,7 @@ class SiteResourcesExporter(Exporter):
                 content = css_file.read()
 
         key = self._s3_utils.calc_key(self._export_base.joinpath("css", name))
-        self._s3_utils.upload_content(key=key, content_type="text/css", body=content)
+        self._s3_utils.upload_object(key=key, content_type="text/css", body=content)
 
     def _publish_favicon_ico(self) -> None:
         """Upload favicon.ico as an S3 object."""
@@ -100,7 +116,7 @@ class SiteResourcesExporter(Exporter):
                 content = favicon_file.read()
 
         key = self._s3_utils.calc_key(self._export_base.parent.joinpath(name))
-        self._s3_utils.upload_content(key=key, content_type="image/x-icon", body=content)
+        self._s3_utils.upload_object(key=key, content_type="image/x-icon", body=content)
 
     def _publish_fonts(self) -> None:
         """Upload fonts as S3 objects if they do not already exist."""
@@ -130,6 +146,15 @@ class SiteResourcesExporter(Exporter):
         """Upload JS files as S3 objects if they do not already exist."""
         self._s3_utils.upload_package_resources(
             src_ref=self._js_src_ref,
+            base_key=self._s3_utils.calc_key(self._export_base.joinpath("js")),
+            content_type="application/javascript",
+        )
+        with TemporaryDirectory() as tmp_path:
+            output_base = Path(tmp_path) / "output"
+        output_base.mkdir(parents=True, exist_ok=True)
+        self._dump_js_dynamic(output_base=output_base)
+        self._s3_utils.upload_directory(
+            src_path=output_base,
             base_key=self._s3_utils.calc_key(self._export_base.joinpath("js")),
             content_type="application/javascript",
         )
@@ -237,7 +262,7 @@ class SiteIndexExporter(ResourcesExporter):
         """Publish proto index to S3."""
         self._logger.info("Publishing site index.")
         index_key = self._s3_utils.calc_key(self._index_path)
-        self._s3_utils.upload_content(key=index_key, content_type="text/html", body=self._dumps())
+        self._s3_utils.upload_object(key=index_key, content_type="text/html", body=self._dumps())
 
 
 class SitePagesExporter(Exporter):
@@ -304,7 +329,7 @@ class SitePagesExporter(Exporter):
         """Publish a page to S3."""
         page_path = self._get_page_path(template_path)
         page_key = self._s3_utils.calc_key(page_path)
-        self._s3_utils.upload_content(key=page_key, content_type="text/html", body=self._dumps(template_path))
+        self._s3_utils.upload_object(key=page_key, content_type="text/html", body=self._dumps(template_path))
 
     @property
     def name(self) -> str:
@@ -409,10 +434,10 @@ class SiteApiExporter(Exporter):
         catalogue_key = self._s3_utils.calc_key(self._catalog_path)
         redirect_key = self._s3_utils.calc_key(self._catalog_well_known_path)
         media_type = "application/linkset+json; profile=https://www.rfc-editor.org/info/rfc9727"
-        self._s3_utils.upload_content(
+        self._s3_utils.upload_object(
             key=catalogue_key, content_type=media_type, body=json.dumps(self._dumps_catalog(), indent=2)
         )
-        self._s3_utils.upload_content(
+        self._s3_utils.upload_object(
             key=redirect_key,
             content_type="text/html",
             body=self._dumps_catalog_redirect(),
@@ -425,14 +450,14 @@ class SiteApiExporter(Exporter):
         key = self._s3_utils.calc_key(self._schema_path)
         media_type = "application/vnd.oai.openapi+json;version=3.1"
         data = json.dumps(self._dumps_openapi_schema(), indent=2)
-        self._s3_utils.upload_content(key=key, content_type=media_type, body=data)
+        self._s3_utils.upload_object(key=key, content_type=media_type, body=data)
 
     def _publish_api_docs(self) -> None:
         """Publish API documentation guide to S3."""
         self._logger.info("Publishing API guide page.")
         key = self._s3_utils.calc_key(self._docs_path)
         data = self._dumps_api_docs()
-        self._s3_utils.upload_content(key=key, content_type="text/html", body=data)
+        self._s3_utils.upload_object(key=key, content_type="text/html", body=data)
 
     @property
     def name(self) -> str:
@@ -526,10 +551,10 @@ class SiteHealthExporter(Exporter):
         health_key = self._s3_utils.calc_key(self._health_check_path)
         redirect_key = self._s3_utils.calc_key(self._health_alias_path)
         media_type = "application/health+json"
-        self._s3_utils.upload_content(
+        self._s3_utils.upload_object(
             key=health_key, content_type=media_type, body=json.dumps(self._dumps_health_check(), indent=2)
         )
-        self._s3_utils.upload_content(
+        self._s3_utils.upload_object(
             key=redirect_key, content_type="text/html", body=self._dumps_health_redirect(), redirect=f"/{health_key}"
         )
 

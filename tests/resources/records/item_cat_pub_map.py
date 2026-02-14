@@ -114,11 +114,11 @@ combined.identification.identifiers.append(
     ),
 )
 combined.identification.edition = "1"
-combined.identification.series = Series(name="Catalogue Test Resources", edition="1")
+combined.identification.series = Series(name="Catalogue Test Resources", page="1", edition="1")
 combined.identification.dates.creation = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
 combined.identification.dates.published = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
 combined.identification.spatial_resolution = 400_000
-set_kv({"physical_size_width_mm": 890, "physical_size_height_mm": 840, "sheet_number": "1"}, combined)
+set_kv({"physical_size_width_mm": 890, "physical_size_height_mm": 840}, combined)
 
 combined.identification.constraints = constraints
 combined.distribution = distribution
@@ -174,11 +174,11 @@ side_a = make_record(
     purpose="Item to test published maps are presented correctly (side A).\n\nIt's Sunday, but screw it — juice box time. Say something that will terrify me. Yeah, I invited her. You said you wanted to spend time some with her.",
 )
 side_a.identification.edition = "1"
-side_a.identification.series = Series(name="Catalogue Test Resources", edition="1")
+side_a.identification.series = Series(name="Catalogue Test Resources", page="1", edition="1")
 side_a.identification.dates.creation = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
 side_a.identification.dates.published = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
 side_a.identification.spatial_resolution = 400_000
-set_kv({"physical_size_width_mm": 890, "physical_size_height_mm": 840, "sheet_number": "1"}, side_a)
+set_kv({"physical_size_width_mm": 890, "physical_size_height_mm": 840}, side_a)
 side_a.identification.constraints = constraints
 side_a.distribution = distribution
 side_a.identification.graphic_overviews = GraphicOverviews(
@@ -232,11 +232,11 @@ side_b = make_record(
     purpose="Item to test published maps are presented correctly (side B).",
 )
 side_b.identification.edition = "1"
-combined.identification.series = Series(name="Catalogue Test Resources", edition="1")
+side_b.identification.series = Series(name="Catalogue Test Resources", page="1", edition="1")
 side_b.identification.dates.creation = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
 side_b.identification.dates.published = Date(date=date(year=2023, month=10, day=30), precision=DatePrecisionCode.YEAR)
 side_b.identification.spatial_resolution = 400_000
-set_kv({"physical_size_width_mm": 890, "physical_size_height_mm": 840, "sheet_number": "1"}, side_b)
+set_kv({"physical_size_width_mm": 890, "physical_size_height_mm": 840}, side_b)
 side_b.identification.constraints = constraints
 side_b.distribution = distribution
 side_b.identification.graphic_overviews = GraphicOverviews(

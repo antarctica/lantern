@@ -2,6 +2,8 @@ from datetime import UTC, date, datetime
 
 from lantern.lib.metadata_library.models.record.elements.common import (
     Address,
+    Constraint,
+    Constraints,
     Contact,
     ContactIdentity,
     Date,
@@ -12,8 +14,6 @@ from lantern.lib.metadata_library.models.record.elements.common import (
 from lantern.lib.metadata_library.models.record.elements.distribution import Distribution, TransferOption
 from lantern.lib.metadata_library.models.record.elements.identification import (
     Aggregation,
-    Constraint,
-    Constraints,
     Extent,
     Extents,
     GraphicOverview,

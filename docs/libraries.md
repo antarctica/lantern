@@ -95,6 +95,7 @@ Supported elements (references not normative or exhaustive):
 - `metadata.character_set` (hard-coded to 'utf8')
 - `metadata.language` (hard-coded to 'eng')
 - `metadata.contacts` (see `*.citation.contacts`)
+- `metadata.constraints`
 - `metadata.date_stamp`
 - `metadata.metadata_standard`
 - `reference_system_info`

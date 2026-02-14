@@ -12,6 +12,8 @@ from lantern.lib.metadata_library.models.record.elements.administration import A
 from lantern.lib.metadata_library.models.record.elements.common import (
     Address,
     Citation,
+    Constraint,
+    Constraints,
     Contact,
     ContactIdentity,
     Contacts,
@@ -24,8 +26,6 @@ from lantern.lib.metadata_library.models.record.elements.common import (
 from lantern.lib.metadata_library.models.record.elements.data_quality import DataQuality, DomainConsistency, Lineage
 from lantern.lib.metadata_library.models.record.elements.identification import (
     BoundingBox,
-    Constraint,
-    Constraints,
     Extent,
     ExtentGeographic,
     Extents,
@@ -117,6 +117,21 @@ class TestRecord:
                         ),
                         role={ContactRoleCode.POINT_OF_CONTACT},
                     )
+                ]
+            ),
+            constraints=Constraints(
+                [
+                    Constraint(
+                        type=ConstraintTypeCode.ACCESS,
+                        restriction_code=ConstraintRestrictionCode.UNRESTRICTED,
+                        statement="Open Access (Anonymous)",
+                    ),
+                    Constraint(
+                        type=ConstraintTypeCode.USAGE,
+                        restriction_code=ConstraintRestrictionCode.LICENSE,
+                        href="https://creativecommons.org/licenses/by-nd/4.0/",
+                        statement="This information is licensed under the Creative Commons Attribution-NoDerivatives 4.0 International Licence (CC BY-ND 4.0). To view this licence, visit https://creativecommons.org/licenses/by-nd/4.0/",
+                    ),
                 ]
             ),
             date_stamp=datetime(2014, 6, 30, tzinfo=UTC).date(),

@@ -50,7 +50,7 @@ class DistributionType(Enum):
 
 
 class Licence(Enum):
-    """Supported catalogue licences."""
+    """Supported resource licences."""
 
     OGL_UK_3_0 = "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
     CC_BY_4_0 = "https://creativecommons.org/licenses/by/4.0/"

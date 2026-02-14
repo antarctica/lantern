@@ -3,14 +3,16 @@ import json
 import pytest
 
 from lantern.lib.metadata_library.models.record.elements.administration import Administration, Permission
-from lantern.lib.metadata_library.models.record.elements.common import Contact as RecordContact
 from lantern.lib.metadata_library.models.record.elements.common import (
+    Constraint,
+    Constraints,
     ContactIdentity,
     Identifier,
     Identifiers,
     OnlineResource,
     Series,
 )
+from lantern.lib.metadata_library.models.record.elements.common import Contact as RecordContact
 from lantern.lib.metadata_library.models.record.elements.common import Contacts as RecordContacts
 from lantern.lib.metadata_library.models.record.elements.data_quality import DataQuality, Lineage
 from lantern.lib.metadata_library.models.record.elements.distribution import Distribution, TransferOption
@@ -18,8 +20,6 @@ from lantern.lib.metadata_library.models.record.elements.identification import (
     Aggregation,
     Aggregations,
     BoundingBox,
-    Constraint,
-    Constraints,
     ExtentGeographic,
     GraphicOverview,
     GraphicOverviews,
@@ -231,7 +231,7 @@ class TestItemBase:
             _ = item._record.identification.contacts[0].ror
 
     def test_constraints(self, fx_revision_model_min: RecordRevision):
-        """Can get constraints from record."""
+        """Can get resource constraints from record."""
         expected = Constraint(type=ConstraintTypeCode.ACCESS)
         fx_revision_model_min.identification.constraints = Constraints([expected])
         item = ItemBase(fx_revision_model_min)

@@ -13,8 +13,8 @@ from bs4 import BeautifulSoup
 from jinja2 import Environment, PackageLoader, select_autoescape
 
 from lantern.lib.metadata_library.models.record.elements.administration import Administration
-from lantern.lib.metadata_library.models.record.elements.common import Date, Identifier
-from lantern.lib.metadata_library.models.record.elements.identification import Aggregation, Constraint, Constraints
+from lantern.lib.metadata_library.models.record.elements.common import Constraint, Constraints, Date, Identifier
+from lantern.lib.metadata_library.models.record.elements.identification import Aggregation
 from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,
     ConstraintRestrictionCode,

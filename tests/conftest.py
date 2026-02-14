@@ -38,8 +38,7 @@ from lantern.exporters.waf import WebAccessibleFolderExporter
 from lantern.exporters.website import WebsiteSearchExporter
 from lantern.exporters.xml import IsoXmlHtmlExporter
 from lantern.lib.metadata_library.models.record.elements.administration import Administration
-from lantern.lib.metadata_library.models.record.elements.common import Date, Dates, Identifier, Identifiers
-from lantern.lib.metadata_library.models.record.elements.identification import Constraint
+from lantern.lib.metadata_library.models.record.elements.common import Constraint, Date, Dates, Identifier, Identifiers
 from lantern.lib.metadata_library.models.record.enums import (
     ConstraintRestrictionCode,
     ConstraintTypeCode,

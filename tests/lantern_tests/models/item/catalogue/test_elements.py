@@ -3,9 +3,15 @@ from datetime import UTC, date, datetime
 import pytest
 
 from lantern.lib.metadata_library.models.record.elements.administration import Administration
-from lantern.lib.metadata_library.models.record.elements.common import Date, Identifier
+from lantern.lib.metadata_library.models.record.elements.common import (
+    Date,
+    Identifier,
+)
 from lantern.lib.metadata_library.models.record.elements.common import Dates as RecordDates
 from lantern.lib.metadata_library.models.record.elements.common import Identifiers as RecordIdentifiers
+from lantern.lib.metadata_library.models.record.elements.common import (
+    Maintenance as RecordMaintenance,
+)
 from lantern.lib.metadata_library.models.record.elements.identification import (
     Aggregation,
     BoundingBox,
@@ -16,7 +22,6 @@ from lantern.lib.metadata_library.models.record.elements.identification import (
 )
 from lantern.lib.metadata_library.models.record.elements.identification import Aggregations as RecordAggregations
 from lantern.lib.metadata_library.models.record.elements.identification import Extent as RecordExtent
-from lantern.lib.metadata_library.models.record.elements.identification import Maintenance as RecordMaintenance
 from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,
     AggregationInitiativeCode,

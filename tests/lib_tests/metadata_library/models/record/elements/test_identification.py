@@ -10,6 +10,7 @@ from lantern.lib.metadata_library.models.record.elements.common import (
     Date,
     Dates,
     Identifier,
+    Maintenance,
 )
 from lantern.lib.metadata_library.models.record.elements.identification import (
     Aggregation,
@@ -22,7 +23,6 @@ from lantern.lib.metadata_library.models.record.elements.identification import (
     GraphicOverview,
     GraphicOverviews,
     Identification,
-    Maintenance,
     TemporalPeriod,
 )
 from lantern.lib.metadata_library.models.record.enums import (
@@ -32,7 +32,6 @@ from lantern.lib.metadata_library.models.record.enums import (
     ConstraintTypeCode,
     ContactRoleCode,
     MaintenanceFrequencyCode,
-    ProgressCode,
 )
 from lantern.lib.metadata_library.models.record.utils.clean import clean_dict, clean_list
 
@@ -801,33 +800,6 @@ class TestGraphicOverviews:
         result = clean_list(converter.unstructure(value))
 
         assert result == expected
-
-
-class TestMaintenance:
-    """Test Maintenance element."""
-
-    @pytest.mark.parametrize(
-        "values",
-        [
-            {"maintenance_frequency": MaintenanceFrequencyCode.AS_NEEDED, "progress": ProgressCode.ON_GOING},
-            {"maintenance_frequency": MaintenanceFrequencyCode.AS_NEEDED},
-            {"progress": ProgressCode.ON_GOING},
-            {},
-        ],
-    )
-    def test_init(self, values: dict):
-        """Can create a Maintenance element from directly assigned properties."""
-        maintenance = Maintenance(**values)
-
-        if "maintenance_frequency" in values:
-            assert maintenance.maintenance_frequency == values["maintenance_frequency"]
-        else:
-            assert maintenance.maintenance_frequency is None
-
-        if "progress" in values:
-            assert maintenance.progress == values["progress"]
-        else:
-            assert maintenance.progress is None
 
 
 class TestTemporalPeriod:

@@ -19,6 +19,7 @@ from lantern.lib.metadata_library.models.record.elements.common import (
     Date,
     Dates,
     Identifier,
+    Maintenance,
     OnlineResource,
     Series,
 )
@@ -32,7 +33,6 @@ from lantern.lib.metadata_library.models.record.elements.identification import (
     ExtentGeographic,
     Extents,
     ExtentTemporal,
-    Maintenance,
     TemporalPeriod,
 )
 from lantern.lib.metadata_library.models.record.elements.projection import Code, ReferenceSystemInfo

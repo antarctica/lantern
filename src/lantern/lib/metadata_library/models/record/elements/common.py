@@ -11,7 +11,9 @@ from lantern.lib.metadata_library.models.record.enums import (
     ContactRoleCode,
     DatePrecisionCode,
     DateTypeCode,
+    MaintenanceFrequencyCode,
     OnlineResourceFunctionCode,
+    ProgressCode,
 )
 
 TDate = TypeVar("TDate", bound="Date")
@@ -615,3 +617,19 @@ class Constraints(list[Constraint]):
         types = [types] if isinstance(types, ConstraintTypeCode) else types
         restrictions = [restrictions] if isinstance(restrictions, ConstraintRestrictionCode) else restrictions
         return Constraints([constraint for constraint in self if constraint.matches_filter(href, types, restrictions)])
+
+
+@dataclass(kw_only=True)
+class Maintenance:
+    """
+    Maintenance.
+
+    Schema definition: maintenance [1]
+    ISO element: gmd:MD_MaintenanceInformation [2]
+
+    [1] https://github.com/antarctica/metadata-library/blob/v0.15.1/src/bas_metadata_library/schemas/dist/iso_19115_2_v4.json#L1116
+    [2] https://www.datypic.com/sc/niem21/e-gmd_MD_MaintenanceInformation.html
+    """
+
+    maintenance_frequency: MaintenanceFrequencyCode | None = None
+    progress: ProgressCode | None = None

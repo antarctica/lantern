@@ -21,6 +21,7 @@ from lantern.lib.metadata_library.models.record.elements.common import (
     Dates,
     Identifier,
     Identifiers,
+    Maintenance,
     OnlineResource,
 )
 from lantern.lib.metadata_library.models.record.elements.data_quality import DataQuality, DomainConsistency, Lineage
@@ -30,7 +31,6 @@ from lantern.lib.metadata_library.models.record.elements.identification import (
     ExtentGeographic,
     Extents,
     Identification,
-    Maintenance,
 )
 from lantern.lib.metadata_library.models.record.elements.metadata import Metadata
 from lantern.lib.metadata_library.models.record.enums import (

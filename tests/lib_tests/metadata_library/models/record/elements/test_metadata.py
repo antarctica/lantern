@@ -8,11 +8,13 @@ from lantern.lib.metadata_library.models.record.elements.common import (
     Contact,
     ContactIdentity,
     Contacts,
+    Maintenance,
 )
 from lantern.lib.metadata_library.models.record.elements.metadata import Metadata, MetadataStandard
 from lantern.lib.metadata_library.models.record.enums import (
     ConstraintTypeCode,
     ContactRoleCode,
+    MaintenanceFrequencyCode,
 )
 from lantern.lib.metadata_library.models.record.utils.clean import clean_dict
 
@@ -29,6 +31,7 @@ class TestMetadata:
             MIN_METADATA,
             {**MIN_METADATA, "date_stamp": None},
             {**MIN_METADATA, "date_stamp": datetime(2014, 6, 30, tzinfo=UTC).date()},
+            {**MIN_METADATA, "maintenance": Maintenance(maintenance_frequency=MaintenanceFrequencyCode.AS_NEEDED)},
             {**MIN_METADATA, "constraints": [Constraint(type=ConstraintTypeCode.ACCESS)]},
         ],
     )
@@ -52,6 +55,11 @@ class TestMetadata:
             assert all(isinstance(constraint, Constraint) for constraint in metadata.constraints)
         else:
             assert metadata.constraints == []
+
+        if "maintenance" in values:
+            assert metadata.maintenance == values["maintenance"]
+        else:
+            assert metadata.maintenance == Maintenance()
 
     def test_invalid_contacts(self):
         """Can't create a Metadata element without any contacts."""

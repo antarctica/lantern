@@ -9,12 +9,11 @@ from lantern.lib.metadata_library.models.record.elements.common import (
     Date,
     Dates,
     Identifier,
+    Maintenance,
 )
 from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,
     AggregationInitiativeCode,
-    MaintenanceFrequencyCode,
-    ProgressCode,
 )
 
 TGraphicOverviews = TypeVar("TGraphicOverviews", bound="GraphicOverviews")
@@ -377,22 +376,6 @@ class GraphicOverviews(list[GraphicOverview]):
         Note: GraphicOverview identifiers are not guaranteed to be unique.
         """
         return GraphicOverviews([overview for overview in self if overview.identifier == identifier])
-
-
-@dataclass(kw_only=True)
-class Maintenance:
-    """
-    Maintenance.
-
-    Schema definition: maintenance [1]
-    ISO element: gmd:MD_MaintenanceInformation [2]
-
-    [1] https://github.com/antarctica/metadata-library/blob/v0.15.1/src/bas_metadata_library/schemas/dist/iso_19115_2_v4.json#L1116
-    [2] https://www.datypic.com/sc/niem21/e-gmd_MD_MaintenanceInformation.html
-    """
-
-    maintenance_frequency: MaintenanceFrequencyCode | None = None
-    progress: ProgressCode | None = None
 
 
 @dataclass(kw_only=True)

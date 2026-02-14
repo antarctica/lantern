@@ -17,6 +17,9 @@ from lantern.lib.metadata_library.models.record.elements.common import (
 from lantern.lib.metadata_library.models.record.elements.common import Contact as RecordContact
 from lantern.lib.metadata_library.models.record.elements.common import Dates as RecordDates
 from lantern.lib.metadata_library.models.record.elements.common import Identifiers as RecordIdentifiers
+from lantern.lib.metadata_library.models.record.elements.common import (
+    Maintenance as RecordMaintenance,
+)
 from lantern.lib.metadata_library.models.record.elements.data_quality import DomainConsistency
 from lantern.lib.metadata_library.models.record.elements.distribution import Distribution as RecordDistribution
 from lantern.lib.metadata_library.models.record.elements.distribution import Format, TransferOption
@@ -27,7 +30,6 @@ from lantern.lib.metadata_library.models.record.elements.identification import (
 )
 from lantern.lib.metadata_library.models.record.elements.identification import Aggregations as RecordAggregations
 from lantern.lib.metadata_library.models.record.elements.identification import Extent as RecordExtent
-from lantern.lib.metadata_library.models.record.elements.identification import Maintenance as RecordMaintenance
 from lantern.lib.metadata_library.models.record.elements.metadata import MetadataStandard
 from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,

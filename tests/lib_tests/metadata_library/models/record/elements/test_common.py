@@ -16,6 +16,7 @@ from lantern.lib.metadata_library.models.record.elements.common import (
     Dates,
     Identifier,
     Identifiers,
+    Maintenance,
     OnlineResource,
     Series,
 )
@@ -26,7 +27,9 @@ from lantern.lib.metadata_library.models.record.enums import (
     ContactRoleCode,
     DatePrecisionCode,
     DateTypeCode,
+    MaintenanceFrequencyCode,
     OnlineResourceFunctionCode,
+    ProgressCode,
 )
 from lantern.lib.metadata_library.models.record.utils.clean import clean_dict, clean_list
 
@@ -1249,3 +1252,28 @@ class TestConstraints:
         assert result == expected
 
 
+class TestMaintenance:
+    """Test Maintenance element."""
+
+    @pytest.mark.parametrize(
+        "values",
+        [
+            {"maintenance_frequency": MaintenanceFrequencyCode.AS_NEEDED, "progress": ProgressCode.ON_GOING},
+            {"maintenance_frequency": MaintenanceFrequencyCode.AS_NEEDED},
+            {"progress": ProgressCode.ON_GOING},
+            {},
+        ],
+    )
+    def test_init(self, values: dict):
+        """Can create a Maintenance element from directly assigned properties."""
+        maintenance = Maintenance(**values)
+
+        if "maintenance_frequency" in values:
+            assert maintenance.maintenance_frequency == values["maintenance_frequency"]
+        else:
+            assert maintenance.maintenance_frequency is None
+
+        if "progress" in values:
+            assert maintenance.progress == values["progress"]
+        else:
+            assert maintenance.progress is None

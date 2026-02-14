@@ -5,6 +5,7 @@ from lantern.lib.metadata_library.models.record.elements.common import (
     Dates,
     Identifier,
     Identifiers,
+    Maintenance,
 )
 from lantern.lib.metadata_library.models.record.elements.identification import (
     Aggregation,
@@ -17,6 +18,8 @@ from lantern.lib.metadata_library.models.record.enums import (
     AggregationInitiativeCode,
     DatePrecisionCode,
     HierarchyLevelCode,
+    MaintenanceFrequencyCode,
+    ProgressCode,
 )
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin, set_admin
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
@@ -82,6 +85,9 @@ record = make_record(
     title="Test Resource - Collection with all supported fields",
     abstract=abstract,
     purpose="Item to test all supported Collection properties are recognised and presented correctly.",
+)
+record.metadata.maintenance = Maintenance(
+    maintenance_frequency=MaintenanceFrequencyCode.AS_NEEDED, progress=ProgressCode.COMPLETED
 )
 record.identification.dates = Dates(
     creation=Date(date=date(2023, 10, 1), precision=DatePrecisionCode.YEAR),

@@ -6,6 +6,7 @@ from lantern.lib.metadata_library.models.record.elements.common import (
     Date,
     Dates,
     Identifier,
+    Maintenance,
 )
 from lantern.lib.metadata_library.models.record.elements.data_quality import Lineage
 from lantern.lib.metadata_library.models.record.elements.identification import (
@@ -14,7 +15,6 @@ from lantern.lib.metadata_library.models.record.elements.identification import (
     Extent,
     Extents,
     Identification,
-    Maintenance,
 )
 from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,

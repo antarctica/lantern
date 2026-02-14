@@ -46,6 +46,7 @@ class Metadata:
     language: str = "eng"
     contacts: Contacts = field(default_factory=Contacts)
     constraints: Constraints = field(default_factory=Constraints)
+    maintenance: Maintenance = field(default_factory=Maintenance)
     date_stamp: date = field(default_factory=lambda: datetime.now(tz=UTC).date())
     metadata_standard: MetadataStandard = field(default_factory=MetadataStandard)
 

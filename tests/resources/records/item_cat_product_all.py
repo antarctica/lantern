@@ -10,6 +10,7 @@ from lantern.lib.metadata_library.models.record.elements.common import (
     Dates,
     Identifier,
     Identifiers,
+    Maintenance,
     OnlineResource,
     Series,
 )
@@ -34,7 +35,9 @@ from lantern.lib.metadata_library.models.record.enums import (
     ContactRoleCode,
     DatePrecisionCode,
     HierarchyLevelCode,
+    MaintenanceFrequencyCode,
     OnlineResourceFunctionCode,
+    ProgressCode,
 )
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin, set_admin
 from lantern.lib.metadata_library.models.record.utils.kv import set_kv
@@ -80,6 +83,9 @@ record = make_record(
     title="Test Resource - Product with all supported fields",
     abstract=abstract,
     purpose="Item to test all supported Product properties are recognised and presented correctly.",
+)
+record.metadata.maintenance = Maintenance(
+    maintenance_frequency=MaintenanceFrequencyCode.AS_NEEDED, progress=ProgressCode.COMPLETED
 )
 record.reference_system_info = ReferenceSystemInfo(
     code=Code(

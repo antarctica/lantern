@@ -32,7 +32,7 @@ from lantern.lib.metadata_library.models.record.enums import (
 from lantern.lib.metadata_library.models.record.presets.extents import make_bbox_extent, make_temporal_extent
 from lantern.lib.metadata_library.models.record.utils.kv import set_kv
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
-from tests.resources.records.utils import make_record
+from tests.resources.records.utils import make_record, relate_products
 
 # A trio of records to demonstrate a published map with two dissimilar sides
 #
@@ -166,6 +166,7 @@ combined.identification.aggregations.extend(
         ),
     ]
 )
+combined.identification.aggregations.extend(relate_products(combined.file_identifier))
 combined.identification.extents = Extents(
     [
         Extent(

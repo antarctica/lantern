@@ -209,7 +209,11 @@ class HierarchyLevelCode(Enum):
     SERVICE = "service"
     SOFTWARE = "software"
     TILE = "tile"
-    PAPER_MAP_PRODUCT = "paperMapProduct"  # local code
+
+    # Local
+    MAP_PRODUCT = "mapProduct"
+    PAPER_MAP_PRODUCT = "paperMapProduct"
+    WEB_MAP_PRODUCT = "webMapProduct"
 
 
 class MaintenanceFrequencyCode(Enum):

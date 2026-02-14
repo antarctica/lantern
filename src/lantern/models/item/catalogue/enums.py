@@ -20,8 +20,10 @@ class ResourceTypeIcon(Enum):
     COLLECTION = "fa-regular fa-shapes"
     DATASET = "fa-regular fa-cube"
     INITIATIVE = "fa-regular fa-cassette-betamax"
-    PRODUCT = "fa-regular fa-map"
+    PRODUCT = "fa-regular fa-file-fragment"
+    MAP_PRODUCT = "fa-regular fa-frame"
     PAPER_MAP_PRODUCT = "fa-regular fa-map"
+    WEB_MAP_PRODUCT = "fa-regular fa-picture-in-picture"
 
 
 class DistributionType(Enum):

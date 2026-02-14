@@ -84,7 +84,7 @@ class TestConfig:
             "STORE_GITLAB_BRANCH": "main",
             "STORE_GITLAB_CACHE_PATH": str(fx_config.STORE_GITLAB_CACHE_PATH),
             "TEMPLATES_CACHE_BUST_VALUE": fx_config.TEMPLATES_CACHE_BUST_VALUE,
-            "TEMPLATES_PLAUSIBLE_DOMAIN": "x",
+            "TEMPLATES_PLAUSIBLE_ID": "x",
             "TEMPLATES_ITEM_MAPS_ENDPOINT": "https://embedded-maps.data.bas.ac.uk/v1",
             "TEMPLATES_ITEM_CONTACT_ENDPOINT": "https://example.com/contact",
             "TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": "x",
@@ -101,7 +101,6 @@ class TestConfig:
         }
 
         output = fx_config.dumps_safe()
-
         assert output == expected
         assert len(output["EXPORT_PATH"]) > 0
         assert len(output["TRUSTED_UPLOAD_PATH"]) > 0
@@ -174,7 +173,7 @@ class TestConfig:
             ),
             (
                 {
-                    "LANTERN_TEMPLATES_PLAUSIBLE_DOMAIN": None,
+                    "LANTERN_TEMPLATES_PLAUSIBLE_ID": None,
                     "LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT": "x",
                     "LANTERN_TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": "x",
                     "LANTERN_TEMPLATES_ITEM_VERSIONS_ENDPOINT": "x",
@@ -182,7 +181,7 @@ class TestConfig:
             ),
             (
                 {
-                    "LANTERN_TEMPLATES_PLAUSIBLE_DOMAIN": "x",
+                    "LANTERN_TEMPLATES_PLAUSIBLE_ID": "x",
                     "LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT": None,
                     "LANTERN_TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": "x",
                     "LANTERN_TEMPLATES_ITEM_VERSIONS_ENDPOINT": "x",
@@ -190,7 +189,7 @@ class TestConfig:
             ),
             (
                 {
-                    "LANTERN_TEMPLATES_PLAUSIBLE_DOMAIN": "x",
+                    "LANTERN_TEMPLATES_PLAUSIBLE_ID": "x",
                     "LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT": "x",
                     "LANTERN_TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": None,
                     "LANTERN_TEMPLATES_ITEM_VERSIONS_ENDPOINT": "x",
@@ -198,7 +197,7 @@ class TestConfig:
             ),
             (
                 {
-                    "LANTERN_TEMPLATES_PLAUSIBLE_DOMAIN": "x",
+                    "LANTERN_TEMPLATES_PLAUSIBLE_ID": "x",
                     "LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT": "x",
                     "LANTERN_TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": "x",
                     "LANTERN_TEMPLATES_ITEM_VERSIONS_ENDPOINT": None,
@@ -216,7 +215,6 @@ class TestConfig:
     def test_validate_missing_required_option(self, envs: dict):
         """Cannot validate where a required provider or exporter config option is missing."""
         envs_bck = self._set_envs(envs)
-
         config = Config(read_env=False)
 
         with pytest.raises(ConfigurationError):
@@ -228,7 +226,6 @@ class TestConfig:
         """Cannot validate where the logging level is invalid."""
         envs = {"LANTERN_LOG_LEVEL": "INVALID"}
         envs_bck = self._set_envs(envs)
-
         config = Config(read_env=False)
 
         with pytest.raises(ConfigurationError):
@@ -246,7 +243,6 @@ class TestConfig:
             # ensure `TRUSTED_UPLOAD_HOST` is unset so `TRUSTED_UPLOAD_PATH` is treated as a local path and validated
             envs["LANTERN_TRUSTED_UPLOAD_HOST"] = None
         envs_bck = self._set_envs(envs)
-
         config = Config(read_env=False)
 
         with pytest.raises(ConfigurationError):
@@ -274,7 +270,7 @@ class TestConfig:
             ("STORE_GITLAB_PROJECT_ID", "x", False),
             ("STORE_GITLAB_BRANCH", "x", False),
             ("STORE_GITLAB_CACHE_PATH", Path("x").resolve(), False),
-            ("TEMPLATES_PLAUSIBLE_DOMAIN", "x", False),
+            ("TEMPLATES_PLAUSIBLE_ID", "x", False),
             ("TEMPLATES_ITEM_CONTACT_ENDPOINT", "x", False),
             ("TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY", "x", False),
             ("TEMPLATES_ITEM_VERSIONS_ENDPOINT", "x", False),

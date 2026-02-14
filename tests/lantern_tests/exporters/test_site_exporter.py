@@ -207,8 +207,8 @@ class TestSiteResourcesExporter:
     def test_dump_js(self, fx_exporter_site_resources: SiteResourcesExporter):
         """Can copy JavaScript files to output path."""
         expected = [
-            fx_exporter_site_resources._export_base.joinpath("js/enhancements.js"),
-            fx_exporter_site_resources._export_base.joinpath("js/lib/scalar.min.js"),
+            fx_exporter_site_resources._export_base.joinpath("js/enhancements.js"),  # templated
+            fx_exporter_site_resources._export_base.joinpath("js/lib/scalar.min.js"),  # static
         ]
 
         fx_exporter_site_resources._dump_js()
@@ -466,7 +466,7 @@ class TestSiteExporter:
             fx_exporter_site._meta = meta
 
             fx_exporter_site._meta.export_path.joinpath("x").touch()
-            fx_exporter_site._s3_utils.upload_content(key="x", content_type="text/plain", body="x")
+            fx_exporter_site._s3_utils.upload_object(key="x", content_type="text/plain", body="x")
 
             fx_exporter_site.purge()
 
@@ -546,7 +546,7 @@ class TestSiteExporter:
         s3 = fx_exporter_site._index_exporter._s3_utils._s3
         record = fx_exporter_site._store.select()[0]
         fx_exporter_site._records_exporter._selected_identifiers = {record.file_identifier}
-        env_path = fx_exporter_site._meta.trusted_path / "live"
+        env_path = fx_exporter_site._meta.trusted_path / "testing"
         expected_keys = [
             "favicon.ico",
             "404.html",

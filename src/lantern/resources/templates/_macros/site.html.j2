@@ -80,7 +80,7 @@
 
 {% macro head_scripts(data) %}
   {{ script_sentry(data.build_key) }}
-  {{ script_plausible(data.plausible_domain) }}
+  {{ script_plausible(data.plausible_id) }}
   {{ script_turnstile() }}
   {{ script_enhancements(data.build_key) }}
   {% if data.html_schema_org_content %}
@@ -93,11 +93,11 @@
 {% endmacro %}
 
 {% macro script_plausible(value) %}
-  <script defer data-domain="{{ value }}" src="https://plausible.io/js/script.hash.outbound-links.js"></script>
+  <script async src="https://plausible.io/js/{{ value }}.js"></script>
 {% endmacro %}
 
 {% macro script_turnstile() %}
-  <script defer async src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>
+  <script async src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>
 {% endmacro %}
 
 {% macro script_enhancements(build_key) %}

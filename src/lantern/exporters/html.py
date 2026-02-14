@@ -79,7 +79,7 @@ class HtmlExporter(ResourceExporter):
 
         items_source = base_path / "items"
         item_path = items_source / self._record.file_identifier / "index.html"
-        env_path = "testing" if "integration" in self._meta.s3_bucket else "live"
+        env_path = "testing" if "testing" in self._meta.s3_bucket else "live"
         items_target = self._meta.trusted_path / env_path / "items"  # ty:ignore[unsupported-operator]
 
         item_path.parent.mkdir(parents=True, exist_ok=True)
@@ -156,6 +156,6 @@ class HtmlAliasesExporter(ResourceExporter):
         """Write redirect pages with redirect headers to S3."""
         location = f"{self.target}index.html"
         for alias in self._get_aliases():
-            self._s3_utils.upload_content(
+            self._s3_utils.upload_object(
                 key=f"{alias}/index.html", content_type="text/html", body=self.dumps(), redirect=location
             )

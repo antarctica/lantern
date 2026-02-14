@@ -45,7 +45,6 @@ class TestCommitResults:
     def test_eq(self, other: object, expected: bool):
         """Can compare instances."""
         base = CommitResults(branch="x", commit="x", changes={"create": [], "update": []}, actions=[])
-
         assert (base == other) is expected
 
     def test_unstructure(self):

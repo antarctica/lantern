@@ -97,8 +97,8 @@ This ACL:
 [2] As a user in the `magic` group:
 
 ```text
-$ mkdir -p $DOCUMENT_ROOT/content/cat/stage/items $DOCUMENT_ROOT/content/cat/prod/items
-$ chmod -R g+w $DOCUMENT_ROOT/content/cat/stage $DOCUMENT_ROOT/content/cat/prod
+$ mkdir -p $DOCUMENT_ROOT/content/cat/testing/items $DOCUMENT_ROOT/content/cat/live/items
+$ chmod -R g+w $DOCUMENT_ROOT/content/cat/testing $DOCUMENT_ROOT/content/cat/live
 ```
 
 ## Reverse proxying
@@ -117,7 +117,7 @@ This requires a request to BAS IT asking for:
     - the relevant AWS CloudFront Distribution
     - or the relevant Operations Data Store endpoint
   - a health check using the [Health Check Endpoint](/docs/monitoring.md#health-check-endpoint) (for static hosting)
-  - URL rewriting as needed (for secure hosting)
+  - URL rewriting as needed (for secure hosting) [3]
 
 [1] Static site endpoints:
 
@@ -140,6 +140,16 @@ This requires a request to BAS IT asking for:
 
 ```text
 /-/items/
+```
+
+[3]
+
+For secure hosting, URL rewrites are required to change `/-` to `/cat/testing` or `/cat/live` in the internal HAProxy,
+to ensure requests map to the Operations Data Store web root. E.g.:
+
+```yaml
+# rewrite '/-' to '/cat/testing' (e.g. '/-/items/000/index.html' to '/cat/testing/items/000/index.html')
+http-request replace-path ^/-/(.*) /cat/testing/\1
 ```
 
 ## Sentry

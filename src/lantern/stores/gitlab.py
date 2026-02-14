@@ -337,7 +337,7 @@ class GitLabStore(Store):
         the number of underlying files changed (where each record is stored as a JSON and XML file).
         """
         changes: dict[str, list[str]] = {"update": [], "create": []}
-        data: CommitData = {
+        data = {
             "branch": self._source.ref,
             "commit_message": f"{title}\n{message}",
             "author_name": author[0],

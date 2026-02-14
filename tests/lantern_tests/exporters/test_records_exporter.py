@@ -112,7 +112,7 @@ class TestRecordExporterJob:
         expected = expected.replace("FILE_IDENTIFIER", fx_revision_model_min.file_identifier)
         expected_path = fx_exporter_records_sel._config.EXPORT_PATH / expected
         expected_path_status = method == JobMethod.EXPORT
-        expected_trusted_path = fx_exporter_records_sel._config.TRUSTED_UPLOAD_PATH / "live" / expected
+        expected_trusted_path = fx_exporter_records_sel._config.TRUSTED_UPLOAD_PATH / "testing" / expected
         expected_trusted_status = method == JobMethod.PUBLISH and trusted
         expected_s3_status = 200 if method == JobMethod.PUBLISH and not trusted else 404
 
@@ -214,7 +214,7 @@ class TestRecordsExporter:
     ):
         """Can publish selected records."""
         mocker.patch("lantern.exporters.records._job_worker_s3", return_value=fx_exporter_records_sel._s3_client)
-        env_path = fx_exporter_records_sel._config.TRUSTED_UPLOAD_PATH / "live"
+        env_path = fx_exporter_records_sel._config.TRUSTED_UPLOAD_PATH / "testing"
         # limit exported records for speed
         file_identifier = fx_exporter_records_sel._store.select()[0].file_identifier
         fx_exporter_records_sel._selected_identifiers = {file_identifier}

@@ -109,7 +109,7 @@ To preview records in the testing catalogue:
 
 1. copy record configurations as JSON files to the `import/` directory (see [Creating Records](#creating-records))
 1. run the `records-workflow` [Development Task](/docs/dev.md#development-tasks)
-1. repeat this process (using the [`select-records`](#updating-records) task to get the now existing records) until the
+1. repeat this process (using the [`select-records`](#update-records) task to get the now existing records) until the
    record author is happy for them to be live
 
 > [!NOTE]
@@ -150,7 +150,7 @@ Helpdesk issue recorded in the record.
 ## Non-interactive record publishing workflow
 
 A workflow is available to [Import](#import-records) and [Build](#build-static-site) sets of records updated on a
-schedule by other projects as a background task.
+schedule by other projects using the [Workstation module](#workstation-module).
 
 > [!IMPORTANT]
 > This workflow is intended for routine updates to records managed by automated systems.
@@ -159,47 +159,93 @@ schedule by other projects as a background task.
 >
 > For other use-cases, combine individual record related tasks as needed.
 
-1. export a set of record configurations as JSON files to a directory
-2. call `/data/magic/projects/lantern/prod/tasks/pub-cat` with required arguments [1]
+The workflow:
 
-> [!WARNING]
-> This will publish any records to the production S3 bucket / catalogue environment.
+- parses, validates and filters records from the given input path, such that only valid records that have changed are
+  processed (changes are determined by comparing a SHA1 hash of the record content against the remote records store)
+- creates a new branch and associated merge request in the remote records store if needed
+- commits records to this branch
+- calls the [Records](/docs/exporters.md#records-resource-exporter) exporter (only [1]) and publishes to S3 and secure
+  hosting (for public and trusted content respectively)
+- if set, calls a [Webhook](#non-interactive-record-publishing-workflow---webhook) with workflow output
 
-This workflow only calls the [Records](/docs/exporters.md#records-resource-exporter) exporter as:
+> [!TIP]
+> The configured branch CAN be periodically squashed and merged to the default branch to prevent drift (e.g. nightly).
+> The workflow will automatically recreate the branch and merge request as needed.
 
-- calling _global_ exporters (such as the [Site Index](/docs/exporters.md#site-index-exporter)), as they would only
-  include records from the workflow, omitting other/existing records and giving incomplete outputs
-- calling _stable_ exporters (for [Site Pages](/docs/exporters.md#site-pages-exporter), etc.) is unnecessarily, given
+[1] Other exporters are not called because:
+
+- the [Site Index Exporter](/docs/exporters.md#site-index-exporter)) for example only includes records passed to it,
+  which would be limited to records managed by the workflow, clobbering outputs including other (all) expected records
+  and giving incomplete results
+- calling exporters such as the [Site Pages Exporter](/docs/exporters.md#site-pages-exporter) is unnecessarily, given
   they are not sensitive to record changes
 
-This workflow is experimental with major limitations:
+### Non-interactive record publishing workflow - bootstrapping
 
-- record files must be accessible from the BAS central workstations
-- publishing scripts must have access to the [Environment Module](#workstation-module) on the BAS central workstations
-- no authentication or authorisation is performed on calling scripts
-- the workflow is locked to the production publishing environment
+Perform these actions manually to set up the workflow for your application:
 
-[1] Example script:
+1. export a set of JSON encoded record files to a directory
+2. import and publish these records using the [Interactive Workflow](#interactive-record-publishing-workflow):
+   - commit to the `main` branch
+   - this adds new records to global exporters (e.g. the [Site Index Exporter](/docs/exporters.md#site-index-exporter))
+   - this adds new records under any parent collections or other container resources
+3. then follow the routine usage instructions for ongoing updates
+
+### Non-interactive record publishing workflow - routine usage
+
+Configure your application to perform these actions as frequently as needed:
+
+1. export a set of JSON encoded record files to a directory
+2. call `/data/magic/projects/lantern/live/tasks/pub-cat` with required arguments [1]
+
+> [!WARNING]
+> This will publish any records to the live catalogue.
+>
+> To publish to the testing catalogue, call `/data/magic/projects/lantern/testing/tasks/pub-cat`
+
+[1] Example usage script:
 
 ```shell
 #!/usr/bin/env bash
 set -e -u -o pipefail
 
-PUB_CAT_PATH="/data/magic/projects/PROJECT/prod/exports/records"
+# Change PROJECT and PROJECT-SLUG to the relevant values
+PUB_CAT_PATH="/data/magic/projects/PROJECT-SLUG/prod/exports/records"
+PUB_CAT_BRANCH="main"
+PUB_CAT_MR_TITLE="auto-PROJECT-SLUG"
+PUB_CAT_MR_MESSAGE="Updates from PROJECT"
 PUB_CAT_COMMIT_TITLE="Updating PROJECT records"
 PUB_CAT_COMMIT_MESSAGE="Routine update to reflect latest extents."
 PUB_CAT_AUTHOR_NAME="PROJECT-SLUG"
 PUB_CAT_AUTHOR_EMAIL="magicdev@bas.ac.uk"
+PUB_CAT_WEBHOOK="https://example.com/webhook"
 
 /data/magic/projects/lantern/prod/tasks/pub-cat \
 --path "$PUB_CAT_PATH" \
+--changeset-base "$PUB_CAT_BRANCH" \
+--changeset-title" "$PUB_CAT_MR_TITLE" \
+--changeset-message" "$PUB_CAT_MR_MESSAGE" \
 --commit-title "$PUB_CAT_COMMIT_TITLE" \
 --commit-message "$PUB_CAT_COMMIT_MESSAGE" \
 --author-name "$PUB_CAT_AUTHOR_NAME" \
---author-email "$PUB_CAT_AUTHOR_EMAIL"
+--author-email "$PUB_CAT_AUTHOR_EMAIL" \
+--webhook "$PUB_CAT_WEBHOOK"
 ```
 
-## Updating records
+### Non-interactive record publishing workflow - webhook
+
+An optional webhook can be provided which will be called if any records are committed as part of the workflow. The
+configured URL will be called as a POST request with a JSON payload containing:
+
+- merge request and commit URLs
+- new and/or updated record file identifiers
+- statistics about the number of files created and/or updated)
+
+Payload JSON [Schema and Example](/resources/scripts/non-interactive-publishing-workflow-schema.json)
+(for 2 committed records, one new, one updated).
+
+## Update records
 
 - run the `select-records` [Development Task](/docs/dev.md#development-tasks)
 - update records in the import directory as per the [Record Authoring](/docs/libraries.md#record-authoring) section

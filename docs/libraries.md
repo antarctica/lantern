@@ -96,6 +96,7 @@ Supported elements (references not normative or exhaustive):
 - `metadata.language` (hard-coded to 'eng')
 - `metadata.contacts` (see `*.citation.contacts`)
 - `metadata.constraints`
+- `metadata.maintenance`
 - `metadata.date_stamp`
 - `metadata.metadata_standard`
 - `reference_system_info`
@@ -138,7 +139,6 @@ Unsupported elements (not normative or exhaustive):
 - `identification.spatial_representation_type`
 - `identification.status`
 - `identification.topics`
-- `metadata.maintenance` (`identification.metadata` is supported)
 
 ### Record authoring
 

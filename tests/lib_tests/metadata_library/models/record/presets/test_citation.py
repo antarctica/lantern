@@ -35,9 +35,59 @@ class TestMakeMagicCitation:
                 },
                 "British Antarctic Survey (2014). _x_ (Version x) [Dataset]. British Antarctic Survey Mapping and Geographic Information Centre. [https://data.bas.ac.uk/items/x](https://data.bas.ac.uk/items/x).",
             ),
+            (
+                {
+                    "title": "x",
+                    "hierarchy_level": HierarchyLevelCode.COLLECTION,
+                    "edition": None,
+                    "publication_date": None,
+                    "identifiers": None,
+                },
+                "British Antarctic Survey (?year). _x_ (Version ?version). British Antarctic Survey Mapping and Geographic Information Centre. [?](?).",
+            ),
+            (
+                {
+                    "title": "x",
+                    "hierarchy_level": HierarchyLevelCode.PRODUCT,
+                    "edition": None,
+                    "publication_date": None,
+                    "identifiers": None,
+                },
+                "British Antarctic Survey (?year). _x_ (Version ?version) [Product]. British Antarctic Survey Mapping and Geographic Information Centre. [?](?).",
+            ),
+            (
+                {
+                    "title": "x",
+                    "hierarchy_level": HierarchyLevelCode.MAP_PRODUCT,
+                    "edition": None,
+                    "publication_date": None,
+                    "identifiers": None,
+                },
+                "British Antarctic Survey (?year). _x_ (Version ?version) [Map]. British Antarctic Survey Mapping and Geographic Information Centre. [?](?).",
+            ),
+            (
+                {
+                    "title": "x",
+                    "hierarchy_level": HierarchyLevelCode.PAPER_MAP_PRODUCT,
+                    "edition": None,
+                    "publication_date": None,
+                    "identifiers": None,
+                },
+                "British Antarctic Survey (?year). _x_ (Version ?version) [Map]. British Antarctic Survey Mapping and Geographic Information Centre. [?](?).",
+            ),
+            (
+                {
+                    "title": "x",
+                    "hierarchy_level": HierarchyLevelCode.WEB_MAP_PRODUCT,
+                    "edition": None,
+                    "publication_date": None,
+                    "identifiers": None,
+                },
+                "British Antarctic Survey (?year). _x_ (Version ?version) [Online]. British Antarctic Survey Mapping and Geographic Information Centre. [?](?).",
+            ),
         ],
     )
-    def test_default(self, values: dict, expected: str):
+    def test_citation(self, values: dict, expected: str):
         """Can generate a MAGIC citation."""
         result = make_magic_citation(**values)
         assert result == expected

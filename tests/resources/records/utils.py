@@ -130,3 +130,31 @@ def make_record(
     # Convert to RecordRevision
     config = {"file_revision": "83fake487e5671f4a1dd7074b92fb94aa68d26bd", **record.dumps(strip_admin=False)}
     return RecordRevision.loads(config)
+
+
+def relate_products(file_identifier: str) -> Aggregations:
+    """
+    Make aggregations to relate records together.
+
+    Superseded product ('7e3611a6-8dbf-4813-aaf9-dadf9decff5b') excluded as it's covered by another aggregation type.
+    """
+    product_ids = [
+        "a59b5c5b-b099-4f01-b670-3800cb65e666",  # webMapProduct
+        "8422d4e7-654f-4fbb-a5e0-4051ee21418e",  # mapProduct
+        "30825673-6276-4e5a-8a97-f97f2094cd25",  # product (all)
+        "3c77ffae-6aa0-4c26-bc34-5521dbf4bf23",  # product (min)
+        "57327327-4623-4247-af86-77fb43b7f45b",  # product (restricted
+        "53ed9f6a-2d68-46c2-b5c5-f15422aaf5b2",  # paperMapProduct
+        "09dbc743-cc96-46ff-8449-1709930b73ad",  # paperMapProduct (diff)
+    ]
+
+    return Aggregations(
+        [
+            Aggregation(
+                identifier=Identifier(identifier=pid, namespace=CATALOGUE_NAMESPACE),
+                association_type=AggregationAssociationCode.CROSS_REFERENCE,
+            )
+            for pid in product_ids
+            if pid != file_identifier
+        ]
+    )

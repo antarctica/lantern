@@ -40,7 +40,7 @@ from lantern.lib.metadata_library.models.record.utils.admin import get_admin, se
 from lantern.lib.metadata_library.models.record.utils.kv import set_kv
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from tests.resources.records.admin_keys.testing_keys import load_keys as load_test_keys
-from tests.resources.records.utils import make_record
+from tests.resources.records.utils import make_record, relate_products
 
 # A record for an ItemCatalogue instance with all supported fields for products.
 
@@ -281,17 +281,8 @@ record.identification.aggregations.append(
         initiative_type=AggregationInitiativeCode.PROJECT,
     )
 )
-# add a related peer
-record.identification.aggregations.append(
-    Aggregation(
-        identifier=Identifier(
-            identifier="57327327-4623-4247-af86-77fb43b7f45b",
-            href=f"https://{CATALOGUE_NAMESPACE}/items/57327327-4623-4247-af86-77fb43b7f45b",
-            namespace=CATALOGUE_NAMESPACE,
-        ),
-        association_type=AggregationAssociationCode.CROSS_REFERENCE,
-    )
-)
+# add related peers
+record.identification.aggregations.extend(relate_products(record.file_identifier))
 # add a superseded peer
 record.identification.aggregations.append(
     Aggregation(

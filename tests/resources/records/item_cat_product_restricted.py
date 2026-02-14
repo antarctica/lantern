@@ -21,7 +21,7 @@ from lantern.lib.metadata_library.models.record.enums import (
 from lantern.lib.metadata_library.models.record.presets.admin import BAS_STAFF
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin, set_admin
 from tests.resources.records.admin_keys.testing_keys import load_keys as load_test_keys
-from tests.resources.records.utils import make_record
+from tests.resources.records.utils import make_record, relate_products
 
 # A record for an ItemCatalogue instance with minimum required fields for products.
 
@@ -31,6 +31,8 @@ record = make_record(
     title="Test Resource - Product marked as restricted",
     abstract="Item to test a Product with a restricted access constraint is presented correctly.",
 )
+# add related peers
+record.identification.aggregations.extend(relate_products(record.file_identifier))
 record.identification.constraints = Constraints(
     [
         Constraint(

@@ -17,9 +17,11 @@ from tests.resources.records.item_cat_licence import (
     rights_reversed_record,
 )
 from tests.resources.records.item_cat_product_all import record as product_all_supported
+from tests.resources.records.item_cat_product_map import record as product_map
 from tests.resources.records.item_cat_product_min import record as product_min_required
 from tests.resources.records.item_cat_product_replaced import record as product_replaced
 from tests.resources.records.item_cat_product_restricted import record as product_restricted
+from tests.resources.records.item_cat_product_web_map import record as product_web_map
 from tests.resources.records.item_cat_pub_map import combined as product_published_map_combined
 from tests.resources.records.item_cat_pub_map import side_a as product_published_map_side_a
 from tests.resources.records.item_cat_pub_map import side_b as product_published_map_side_b
@@ -65,6 +67,8 @@ class FakeRecordsStore(Store):
             product_restricted,
             product_replaced,
             product_all_supported,
+            product_map,
+            product_web_map,
             formatting_supported,
             data_all_supported,
             verify,

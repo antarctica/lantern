@@ -48,6 +48,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Branch-based changesets in non-interactive publishing workflow
 * Basic web hooks support in the non-interactive publishing workflow
 * S3 bucket versioning enabled on production/live site
+* 'mapProduct' and 'webMapProduct' item types
 
 ### Fixed
 

@@ -1,8 +1,8 @@
 from datetime import UTC, date, datetime
 
 import pytest
+from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
 
-from lantern.lib.metadata_library.models.record.elements.administration import Administration
 from lantern.lib.metadata_library.models.record.elements.common import (
     Date,
     Identifier,
@@ -476,7 +476,9 @@ class TestItemCatalogueSummaryCatalogue:
         """Can get fragments to use as part of item summary UI."""
         record = fx_item_base_model_min._record
         if not restricted:
-            admin_meta = Administration(id=record.file_identifier, access_permissions=[OPEN_ACCESS])
+            admin_meta = AdministrationMetadata(
+                id=record.file_identifier, metadata_permissions=[OPEN_ACCESS], resource_permissions=[OPEN_ACCESS]
+            )
             set_admin(keys=fx_item_base_model_min._admin_keys, record=record, admin_meta=admin_meta)
         exp_resource_type = ResourceTypeLabel[resource_type.name]
         record.hierarchy_level = resource_type

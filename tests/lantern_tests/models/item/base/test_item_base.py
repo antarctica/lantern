@@ -1,8 +1,8 @@
 import json
 
 import pytest
+from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata, Permission
 
-from lantern.lib.metadata_library.models.record.elements.administration import Administration, Permission
 from lantern.lib.metadata_library.models.record.elements.common import (
     Constraint,
     Constraints,
@@ -65,13 +65,14 @@ class TestItemBase:
         item = ItemBase(record=model, admin_keys=keys)
         assert item._record == model
         assert item._admin_keys == keys
+        assert item._admin_metadata is None
 
     @pytest.mark.parametrize("has_keys", [False, True])
     @pytest.mark.parametrize("has_admin", [False, True])
     def test_admin_metadata(
         self,
         fx_revision_model_min: RecordRevision,
-        fx_admin_meta_element: Administration,
+        fx_admin_meta_element: AdministrationMetadata,
         fx_admin_meta_keys: AdministrationKeys,
         has_keys: bool,
         has_admin: bool,
@@ -84,9 +85,9 @@ class TestItemBase:
 
         item = ItemBase(record=fx_revision_model_min, admin_keys=keys)
         if has_admin and has_keys:
-            assert item._admin_metadata == fx_admin_meta_element
+            assert item.admin_metadata == fx_admin_meta_element
         else:
-            assert item._admin_metadata is None
+            assert item.admin_metadata is None
 
     @pytest.mark.parametrize(
         ("has_admin_metadata", "permissions", "expected"),
@@ -94,40 +95,42 @@ class TestItemBase:
             (False, [], AccessLevel.NONE),
             (True, [], AccessLevel.NONE),
             (True, [Permission(directory="~nerc", group="~bas-staff")], AccessLevel.BAS_STAFF),
-            (True, [Permission(directory="*", group="~public")], AccessLevel.PUBLIC),
+            (True, [Permission(directory="*", group="*")], AccessLevel.PUBLIC),
             (True, [Permission(directory="x", group="x"), Permission(directory="y", group="y")], AccessLevel.UNKNOWN),
         ],
     )
     def test_admin_access_level(
         self,
         fx_revision_model_min: RecordRevision,
-        fx_admin_meta_element: Administration,
+        fx_admin_meta_element: AdministrationMetadata,
         fx_admin_meta_keys: AdministrationKeys,
         has_admin_metadata: bool,
         permissions: list[Permission],
         expected: AccessLevel,
     ):
-        """Can resolve access type from admin metadata."""
+        """Can resolve metadata and resource access type from admin metadata."""
         if has_admin_metadata:
             fx_admin_meta_element.id = fx_revision_model_min.file_identifier
-            fx_admin_meta_element.access_permissions = permissions
+            fx_admin_meta_element.metadata_permissions = permissions
+            fx_admin_meta_element.resource_permissions = permissions
             set_admin(keys=fx_admin_meta_keys, record=fx_revision_model_min, admin_meta=fx_admin_meta_element)
 
         item = ItemBase(record=fx_revision_model_min, admin_keys=fx_admin_meta_keys)
-        assert item.admin_access_level == expected
+        assert item.admin_metadata_access == expected
+        assert item.admin_resource_access == expected
 
     @pytest.mark.parametrize(
         ("has_admin_metadata", "issues", "expected"),
         [
             (False, [], []),
             (True, [], []),
-            (True, ["x"], ["x"]),
+            (True, ["https://gitlab.com/group/project/-/issues/1"], ["https://gitlab.com/group/project/-/issues/1"]),
         ],
     )
     def test_admin_gitlab_issues(
         self,
         fx_revision_model_min: RecordRevision,
-        fx_admin_meta_element: Administration,
+        fx_admin_meta_element: AdministrationMetadata,
         fx_admin_meta_keys: AdministrationKeys,
         has_admin_metadata: bool,
         issues: list[str],

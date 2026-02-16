@@ -1,6 +1,7 @@
 from datetime import UTC, date, datetime
 
-from lantern.lib.metadata_library.models.record.elements.administration import Administration
+from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
+
 from lantern.lib.metadata_library.models.record.elements.common import (
     Constraints,
     Date,

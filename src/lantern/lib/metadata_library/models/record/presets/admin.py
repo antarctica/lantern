@@ -1,13 +1,13 @@
-from lantern.lib.metadata_library.models.record.elements.administration import Permission
+from bas_metadata_library.standards.magic_administration.v1 import Permission
 
 OPEN_ACCESS = Permission(
     directory="*",
-    group="~public",
-    comments="For public release.",
+    group="*",
+    comment="For public release.",
 )
 
 BAS_STAFF = Permission(
     directory="~nerc",
     group="~bas-staff",
-    comments="Restricted to staff employed by UKRI at BAS.",
+    comment="Restricted to staff employed at the British Antarctic Survey.",
 )

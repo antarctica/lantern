@@ -124,8 +124,12 @@ class ItemCatalogue(ItemBase):
 
     @property
     def _restricted(self) -> bool:
-        """Whether the item is restricted."""
-        return self.admin_access_level != AccessLevel.PUBLIC
+        """
+        Whether the item is restricted.
+
+        Based on resource access only. Restricted metadata is not supported.
+        """
+        return self.admin_resource_access != AccessLevel.PUBLIC
 
     @property
     def _items(self) -> ItemsTab:
@@ -212,8 +216,9 @@ class ItemCatalogue(ItemBase):
             revision=self._revision,
             gitlab_issues=self.admin_gitlab_issues,
             restricted=self._restricted,
-            access_level=self.admin_access_level,
-            access_permissions=self._admin_metadata.access_permissions,  # ty:ignore[possibly-missing-attribute]
+            metadata_access=self.admin_metadata_access,
+            resource_access=self.admin_resource_access,
+            admin_meta=self.admin_metadata,
         )
 
     @property

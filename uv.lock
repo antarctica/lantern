@@ -84,18 +84,19 @@ wheels = [
 
 [[package]]
 name = "bas-metadata-library"
-version = "0.16.0a5"
+version = "0.16.0a7"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
+    { name = "cattrs" },
     { name = "importlib-resources" },
     { name = "jsonschema" },
     { name = "lxml" },
     { name = "rfc3987" },
     { name = "strict-rfc3339" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/cd/80/c79ff03dd4994b4c373acd3db29d860c2288bfcedbd862685d71c6628d82/bas_metadata_library-0.16.0a5.tar.gz", hash = "sha256:229c1ffd9321aa9ef4606226d46924a46902ad94630175f1eb0688976468d8e4", size = 162754, upload-time = "2026-02-12T19:34:14.087Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/dc/7d/c1a5cfd5df9c83d7cb281cc14ce9940a7cccf9bcd9a861ac7d95fbce4d80/bas_metadata_library-0.16.0a7.tar.gz", hash = "sha256:b1e60f4147185141ec2a1c002eabf9abc9c99a9edcf8d2947e5df040273bfdee", size = 166889, upload-time = "2026-02-15T13:36:02.611Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/5b/b5/54fbb5ba1e03c879cc7c7667b3625029ae65af264e15ff7a9e6ec288a05e/bas_metadata_library-0.16.0a5-py3-none-any.whl", hash = "sha256:27731e4b92a1a43ade8dc1811acc804a98d9331a7224fafd12f7e400a21ccbe5", size = 238538, upload-time = "2026-02-12T19:34:12.272Z" },
+    { url = "https://files.pythonhosted.org/packages/89/5b/585626fd132c4b083714f4320eee1748d04d8064477c3fdf64ff238ff479/bas_metadata_library-0.16.0a7-py3-none-any.whl", hash = "sha256:f4a2746fc8aee7a9944d01474a673860e57f3aa076287b498e4b583384b0a1f8", size = 247517, upload-time = "2026-02-15T13:36:00.819Z" },
 ]
 
 [[package]]

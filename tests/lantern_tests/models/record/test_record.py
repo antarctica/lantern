@@ -1,9 +1,9 @@
 from datetime import date
 
 import pytest
+from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
 from cattrs import ClassValidationError
 
-from lantern.lib.metadata_library.models.record.elements.administration import Administration
 from lantern.lib.metadata_library.models.record.elements.common import (
     Contact,
     ContactIdentity,
@@ -57,7 +57,7 @@ class TestRecord:
                 Extent(identifier="y", geographic=make_bbox_extent(0, 0, 0, 0)),
             ]
         )
-        set_admin(keys=_admin_meta_keys(), record=record, admin_meta=Administration(id=record.file_identifier))
+        set_admin(keys=_admin_meta_keys(), record=record, admin_meta=AdministrationMetadata(id=record.file_identifier))
         return record
 
     def test_init(self):

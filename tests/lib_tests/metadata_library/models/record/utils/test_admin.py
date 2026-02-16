@@ -2,10 +2,10 @@ import json
 import pickle
 
 import pytest
+from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
 from cryptography.hazmat.primitives.keywrap import InvalidUnwrap
 from jwskate import InvalidClaim, InvalidSignature, Jwk, JwtSigner
 
-from lantern.lib.metadata_library.models.record.elements.administration import Administration
 from lantern.lib.metadata_library.models.record.record import Record
 from lantern.lib.metadata_library.models.record.utils.admin import (
     AdministrationKeys,
@@ -78,13 +78,15 @@ class TestAdministrationSeal:
         seal = AdministrationWrapper(fx_admin_meta_keys)
         assert seal._keys == fx_admin_meta_keys
 
-    def test_encode(self, fx_admin_wrapper: AdministrationWrapper, fx_admin_meta_element: Administration):
+    def test_encode(self, fx_admin_wrapper: AdministrationWrapper, fx_admin_meta_element: AdministrationMetadata):
         """Can sign and encrypt administrative metadata."""
         result = fx_admin_wrapper.encode(fx_admin_meta_element)
         assert isinstance(result, str)
 
     @pytest.mark.cov()
-    def test_encode_no_keys(self, fx_admin_wrapper: AdministrationWrapper, fx_admin_meta_element: Administration):
+    def test_encode_no_keys(
+        self, fx_admin_wrapper: AdministrationWrapper, fx_admin_meta_element: AdministrationMetadata
+    ):
         """Cannot sign administrative metadata without private signing key."""
         wrapper = AdministrationWrapper(
             keys=AdministrationKeys(
@@ -95,15 +97,15 @@ class TestAdministrationSeal:
         with pytest.raises(ValueError, match=r"Private signing key is required for writing metadata."):
             wrapper.encode(fx_admin_meta_element)
 
-    def test_decode(self, fx_admin_wrapper: AdministrationWrapper, fx_admin_meta_element: Administration):
+    def test_decode(self, fx_admin_wrapper: AdministrationWrapper, fx_admin_meta_element: AdministrationMetadata):
         """Can sign and encrypt administrative metadata."""
         value = fx_admin_wrapper.encode(fx_admin_meta_element)
 
         result = fx_admin_wrapper.decode(value)
-        assert isinstance(result, Administration)
+        assert isinstance(result, AdministrationMetadata)
 
     def test_decode_bad_encryption(
-        self, fx_admin_wrapper: AdministrationWrapper, fx_admin_meta_element: Administration
+        self, fx_admin_wrapper: AdministrationWrapper, fx_admin_meta_element: AdministrationMetadata
     ):
         """Cannot decrypt administrative metadata with the wrong encryption key."""
         alt_encryption_key = Jwk.generate(alg="ECDH-ES+A128KW", crv="P-256", kid="alt_encryption_key")
@@ -119,7 +121,7 @@ class TestAdministrationSeal:
             fx_admin_wrapper.decode(value)
 
     def test_decode_bad_validate_key(
-        self, fx_admin_wrapper: AdministrationWrapper, fx_admin_meta_element: Administration
+        self, fx_admin_wrapper: AdministrationWrapper, fx_admin_meta_element: AdministrationMetadata
     ):
         """Cannot validate administrative metadata with the wrong public signing key."""
         value = fx_admin_wrapper.encode(fx_admin_meta_element)
@@ -135,7 +137,9 @@ class TestAdministrationSeal:
         with pytest.raises(InvalidSignature):
             alt_wrapper.decode(value)
 
-    def test_decode_bad_issuer(self, fx_admin_wrapper: AdministrationWrapper, fx_admin_meta_element: Administration):
+    def test_decode_bad_issuer(
+        self, fx_admin_wrapper: AdministrationWrapper, fx_admin_meta_element: AdministrationMetadata
+    ):
         """Cannot validate administrative metadata with the wrong issuer."""
         alt_signer = JwtSigner(issuer="x", key=fx_admin_wrapper._keys.signing_private)
         value = str(
@@ -150,7 +154,9 @@ class TestAdministrationSeal:
             fx_admin_wrapper.decode(value)
         assert e.value.args[1] == "iss"
 
-    def test_decode_bad_audience(self, fx_admin_wrapper: AdministrationWrapper, fx_admin_meta_element: Administration):
+    def test_decode_bad_audience(
+        self, fx_admin_wrapper: AdministrationWrapper, fx_admin_meta_element: AdministrationMetadata
+    ):
         """Cannot validate administrative metadata with the wrong audience."""
         alt_signer = JwtSigner(issuer=fx_admin_wrapper._issuer, key=fx_admin_wrapper._keys.signing_private)
         value = str(
@@ -165,7 +171,9 @@ class TestAdministrationSeal:
             fx_admin_wrapper.decode(value)
         assert e.value.args[1] == "aud"
 
-    def test_decode_bad_subject(self, fx_admin_wrapper: AdministrationWrapper, fx_admin_meta_element: Administration):
+    def test_decode_bad_subject(
+        self, fx_admin_wrapper: AdministrationWrapper, fx_admin_meta_element: AdministrationMetadata
+    ):
         """Cannot validate administrative metadata with the wrong audience."""
         signer = JwtSigner(issuer=fx_admin_wrapper._issuer, key=fx_admin_wrapper._keys.signing_private)
         value = str(
@@ -187,7 +195,7 @@ class TestAdministrationGetSet:
     def test_get(
         self,
         fx_admin_meta_keys: AdministrationKeys,
-        fx_admin_meta_element: Administration,
+        fx_admin_meta_element: AdministrationMetadata,
         fx_admin_wrapper: AdministrationWrapper,
         fx_lib_record_model_min_iso: Record,
         value: bool,
@@ -208,7 +216,7 @@ class TestAdministrationGetSet:
     def test_get_mismatched_subject(
         self,
         fx_admin_meta_keys: AdministrationKeys,
-        fx_admin_meta_element: Administration,
+        fx_admin_meta_element: AdministrationMetadata,
         fx_admin_wrapper: AdministrationWrapper,
         fx_lib_record_model_min_iso: Record,
     ):
@@ -225,7 +233,7 @@ class TestAdministrationGetSet:
     def test_set(
         self,
         fx_admin_meta_keys: AdministrationKeys,
-        fx_admin_meta_element: Administration,
+        fx_admin_meta_element: AdministrationMetadata,
         fx_admin_wrapper: AdministrationWrapper,
         fx_lib_record_model_min_iso: Record,
     ):
@@ -241,7 +249,7 @@ class TestAdministrationGetSet:
     def test_set_mismatched_subject(
         self,
         fx_admin_meta_keys: AdministrationKeys,
-        fx_admin_meta_element: Administration,
+        fx_admin_meta_element: AdministrationMetadata,
         fx_admin_wrapper: AdministrationWrapper,
         fx_lib_record_model_min_iso: Record,
     ):

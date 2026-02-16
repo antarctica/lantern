@@ -1,6 +1,7 @@
 from datetime import UTC, datetime
 
 import pytest
+from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
 
 from lantern.config import Config
 from lantern.lib.metadata_library.models.record.elements.common import (
@@ -17,7 +18,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     ConstraintTypeCode,
     ContactRoleCode,
 )
-from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
+from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, set_admin
 from lantern.models.item.base.elements import Link
 from lantern.models.item.base.enums import ResourceTypeLabel
 from lantern.models.item.catalogue.elements import PageSummary
@@ -138,9 +139,9 @@ class TestItemCatalogue:
         restricted: bool,
     ):
         """
-        Can compute whether record is open access.
+        Can compute whether record is open access or not.
 
-        Defaults to restricted.
+        Based on resource access only. Defaults to restricted.
         """
         model = fx_item_cat_model_min if restricted else fx_item_cat_model_open
         assert model._restricted == restricted

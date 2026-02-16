@@ -9,10 +9,10 @@ from copy import deepcopy
 from datetime import date
 
 import pytest
+from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
 from bs4 import BeautifulSoup
 from jinja2 import Environment, PackageLoader, select_autoescape
 
-from lantern.lib.metadata_library.models.record.elements.administration import Administration
 from lantern.lib.metadata_library.models.record.elements.common import Constraint, Constraints, Date, Identifier
 from lantern.lib.metadata_library.models.record.elements.identification import Aggregation
 from lantern.lib.metadata_library.models.record.enums import (
@@ -188,7 +188,9 @@ class TestItemSummary:
         record = deepcopy(self.summary_base._record)
         record.identification.constraints = Constraints([value])
         if value.restriction_code == ConstraintRestrictionCode.UNRESTRICTED:
-            admin_meta = Administration(id=record.file_identifier, access_permissions=[OPEN_ACCESS])
+            admin_meta = AdministrationMetadata(
+                id=record.file_identifier, metadata_permissions=[OPEN_ACCESS], resource_permissions=[OPEN_ACCESS]
+            )
             set_admin(keys=fx_admin_meta_keys, record=record, admin_meta=admin_meta)
         summary = ItemCatalogueSummary(record=record, admin_meta_keys=self.summary_base._admin_keys)
 

@@ -1,6 +1,6 @@
+from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
 from jwskate import JweCompact, Jwk, JwtSigner
 
-from lantern.lib.metadata_library.models.record.elements.administration import Administration
 from lantern.lib.metadata_library.models.record.record import Record
 from lantern.lib.metadata_library.models.record.utils.kv import get_kv, set_kv
 
@@ -91,7 +91,7 @@ class AdministrationWrapper:
     def __init__(self, keys: AdministrationKeys) -> None:
         self._keys = keys
 
-    def encode(self, metadata: Administration) -> str:
+    def encode(self, metadata: AdministrationMetadata) -> str:
         """
         Sign and encrypt metadata.
 
@@ -107,18 +107,18 @@ class AdministrationWrapper:
         ).encrypt(key=self._keys.encryption_private.public_jwk(), enc=self._enc_alg)
         return str(token)
 
-    def decode(self, encrypted_metadata: str) -> Administration:
+    def decode(self, encrypted_metadata: str) -> AdministrationMetadata:
         """Decrypt and verify metadata."""
         token = JweCompact(encrypted_metadata)
         trusted_token = token.decrypt_jwt(self._keys.encryption_private)
         trusted_token.validate(key=self._keys.signing_public, issuer=self._issuer, audience=self._audience)
-        value = Administration.loads_json(trusted_token.claims["pyd"])
+        value = AdministrationMetadata.loads_json(trusted_token.claims["pyd"])
         if trusted_token.subject != value.id:
             raise AdministrativeMetadataIntegrityError() from None
         return value
 
 
-def get_admin(keys: AdministrationKeys, record: Record) -> Administration | None:
+def get_admin(keys: AdministrationKeys, record: Record) -> AdministrationMetadata | None:
     """
 
     Get administrative metadata for record if available.
@@ -137,7 +137,7 @@ def get_admin(keys: AdministrationKeys, record: Record) -> Administration | None
     return value
 
 
-def set_admin(keys: AdministrationKeys, record: Record, admin_meta: Administration) -> None:
+def set_admin(keys: AdministrationKeys, record: Record, admin_meta: AdministrationMetadata) -> None:
     """Set administrative metadata for record."""
     if admin_meta.id != record.file_identifier:
         raise AdministrativeMetadataSubjectMismatchError() from None

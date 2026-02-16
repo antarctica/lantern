@@ -3,7 +3,8 @@ import locale
 from abc import ABC, abstractmethod
 from datetime import date, datetime
 
-from lantern.lib.metadata_library.models.record.elements.administration import Permission
+from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata, Permission
+
 from lantern.lib.metadata_library.models.record.elements.common import Constraint, Date, Identifier, Series
 from lantern.lib.metadata_library.models.record.elements.data_quality import DomainConsistency
 from lantern.lib.metadata_library.models.record.elements.distribution import Distribution as RecordDistribution
@@ -747,16 +748,18 @@ class AdminTab(Tab):
         revision: Link,
         gitlab_issues: list[str],
         restricted: bool,
-        access_level: AccessLevel,
-        access_permissions: list[Permission],
+        metadata_access: AccessLevel,
+        resource_access: AccessLevel,
+        admin_meta: AdministrationMetadata | None,
     ) -> None:
         self._trusted = trusted
         self._item_id = item_id
         self._revision = revision
         self._gitlab_issues = gitlab_issues
         self._restricted = restricted
-        self._access_level = access_level
-        self._access_permissions = access_permissions
+        self._metadata_access = metadata_access
+        self._resource_access = resource_access
+        self._admin_meta = admin_meta
 
     @staticmethod
     def _make_gitlab_issue_ref(href: str) -> str:
@@ -766,6 +769,22 @@ class AdminTab(Tab):
         E.g. https://gitlab.data.bas.ac.uk/MAGIC/foo/-/issues/123 -> MAGIC/foo#123                                                                                                                                                                              .
         """
         return f"{href.split('/')[-5]}/{href.split('/')[-4]}#{href.split('/')[-1]}"
+
+    @staticmethod
+    def _dump_permissions(permissions: list[Permission]) -> list[str]:
+        return [
+            json.dumps(
+                {
+                    "directory": permission.directory,
+                    "group": permission.group,
+                    "expiry": permission.expiry.isoformat(),
+                    "comment": permission.comment,
+                },
+                indent=2,
+                ensure_ascii=False,
+            )
+            for permission in permissions
+        ]
 
     @property
     def enabled(self) -> bool:
@@ -810,27 +829,33 @@ class AdminTab(Tab):
         return self._restricted
 
     @property
-    def access_level(self) -> str:
-        """Base item access level."""
-        return self._access_level.name
+    def metadata_access(self) -> str:
+        """Base item metadata access level."""
+        return self._metadata_access.name
 
     @property
-    def access(self) -> list[str]:
+    def metadata_permissions(self) -> list[str]:
         """
-        Access permissions if set.
+        Metadata access permissions if set.
 
         Temporary encoding.
         """
-        return [
-            json.dumps(
-                {
-                    "directory": permission.directory,
-                    "group": permission.group,
-                    "expiry": permission.expiry.isoformat(),
-                    "comments": permission.comments,
-                },
-                indent=2,
-                ensure_ascii=False,
-            )
-            for permission in self._access_permissions
-        ]
+        if self._admin_meta is None:
+            return []
+        return self._dump_permissions(self._admin_meta.metadata_permissions)
+
+    @property
+    def resource_access(self) -> str:
+        """Base item resource access level."""
+        return self._resource_access.name
+
+    @property
+    def resource_permissions(self) -> list[str]:
+        """
+        Resource access permissions if set.
+
+        Temporary encoding.
+        """
+        if self._admin_meta is None:
+            return []
+        return self._dump_permissions(self._admin_meta.resource_permissions)

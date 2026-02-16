@@ -1,8 +1,8 @@
 from datetime import date
 
 import pytest
+from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
 
-from lantern.lib.metadata_library.models.record.elements.administration import Administration
 from lantern.lib.metadata_library.models.record.elements.common import Date
 from lantern.lib.metadata_library.models.record.elements.identification import GraphicOverview
 from lantern.lib.metadata_library.models.record.enums import ProgressCode
@@ -171,7 +171,11 @@ class TestItemWebsiteSearch:
     ):
         """Can determine if resource is open access."""
         if open_access:
-            admin_meta = Administration(id=fx_revision_model_min.file_identifier, access_permissions=[OPEN_ACCESS])
+            admin_meta = AdministrationMetadata(
+                id=fx_revision_model_min.file_identifier,
+                metadata_permissions=[OPEN_ACCESS],
+                resource_permissions=[OPEN_ACCESS],
+            )
             set_admin(keys=fx_admin_meta_keys, record=fx_revision_model_min, admin_meta=admin_meta)
 
         item = ItemWebsiteSearch(

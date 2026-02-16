@@ -150,7 +150,7 @@ class ItemCatalogueSummary(ItemBase):
     @property
     def _restricted(self) -> bool:
         """Whether the item is restricted."""
-        return self.admin_access_level != AccessLevel.PUBLIC
+        return self.admin_resource_access != AccessLevel.PUBLIC
 
     @property
     def summary_html(self) -> str:

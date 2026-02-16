@@ -52,7 +52,7 @@ record.identification.constraints = Constraints(
 
 keys = load_test_keys()
 administration = get_admin(keys=keys, record=record)
-administration.access_permissions = [BAS_STAFF]
+administration.resource_permissions = [BAS_STAFF]
 set_admin(keys=keys, record=record, admin_meta=administration)
 
 distributor = Contact(

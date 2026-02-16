@@ -107,7 +107,7 @@ class RecordRevision(Record):
         model = self
         if strip_admin:
             model = deepcopy(self)
-            self._strip_admin_metadata(model)
+            self._strip_admin(model)
 
         converter = cattrs.Converter()
         converter.register_unstructure_hook(RecordRevision, lambda d: d.unstructure())

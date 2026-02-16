@@ -6,9 +6,9 @@ from datetime import UTC, date, datetime
 import pytest
 from bas_metadata_library.standards.iso_19115_2 import MetadataRecord
 from bas_metadata_library.standards.iso_19115_common.utils import _encode_date_properties
+from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
 from pytest_mock import MockerFixture
 
-from lantern.lib.metadata_library.models.record.elements.administration import Administration
 from lantern.lib.metadata_library.models.record.elements.common import (
     Address,
     Citation,
@@ -42,7 +42,11 @@ from lantern.lib.metadata_library.models.record.enums import (
     OnlineResourceFunctionCode,
     ProgressCode,
 )
-from lantern.lib.metadata_library.models.record.presets.conformance import MAGIC_DISCOVERY_V1, MAGIC_DISCOVERY_V2
+from lantern.lib.metadata_library.models.record.presets.conformance import (
+    MAGIC_ADMINISTRATION_V1,
+    MAGIC_DISCOVERY_V1,
+    MAGIC_DISCOVERY_V2,
+)
 from lantern.lib.metadata_library.models.record.record import Record, RecordInvalidError, RecordSchema
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, get_admin, set_admin
 from lantern.lib.metadata_library.models.record.utils.kv import set_kv
@@ -69,11 +73,11 @@ class TestRecordSchema:
                 "https://metadata-resources.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-2-v4.json",
             ),
             (
-                RecordSchema.MAGIC_V1,
+                RecordSchema.MAGIC_DISCO_V1,
                 "https://metadata-resources.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/magic-discovery-v1.json",
             ),
             (
-                RecordSchema.MAGIC_V2,
+                RecordSchema.MAGIC_DISCO_V2,
                 "https://metadata-resources.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/magic-discovery-v2.json",
             ),
         ],
@@ -250,6 +254,26 @@ class TestRecord:
         ),
     )
 
+    magic_administration_v1_valid = Record(
+        file_identifier="x",
+        hierarchy_level=HierarchyLevelCode.DATASET,
+        metadata=Metadata(
+            contacts=Contacts(
+                [Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT})]
+            ),
+            date_stamp=datetime(2014, 6, 30, tzinfo=UTC).date(),
+        ),
+        identification=Identification(
+            title="x",
+            abstract="x",
+            dates=Dates(creation=Date(date=datetime(2014, 6, 30, tzinfo=UTC).date())),
+            supplemental_information="...",
+        ),
+        data_quality=DataQuality(
+            domain_consistency=[MAGIC_ADMINISTRATION_V1],
+        ),
+    )
+
     def test_init(self):
         """Can create a minimal Record element from directly assigned properties."""
         value = "x"
@@ -394,7 +418,7 @@ class TestRecord:
             (json.dumps({"administrative_metadata": {}}), None),
         ],
     )
-    def test_strip_admin_metadata(
+    def test_strip_admin_meta(
         self,
         fx_admin_meta_keys: AdministrationKeys,
         fx_lib_record_model_min_iso: Record,
@@ -403,8 +427,51 @@ class TestRecord:
     ):
         """Can strip admin metadata from a record if present."""
         fx_lib_record_model_min_iso.identification.supplemental_information = sinfo
-        Record._strip_admin_metadata(fx_lib_record_model_min_iso)
+        Record._strip_admin(fx_lib_record_model_min_iso)
         assert fx_lib_record_model_min_iso.identification.supplemental_information == expected
+
+    fake_admin_version = DomainConsistency(
+        specification=Citation(
+            title="x",
+            href="https://metadata-standards.data.bas.ac.uk/profiles/magic-administration/vX/",
+            dates=Dates(publication=Date(date=date(2014, 6, 30))),
+            edition="X",
+        ),
+        explanation="x",
+        result=True,
+    )
+
+    @pytest.mark.parametrize(
+        ("dq", "expected"),
+        [
+            (DataQuality(), DataQuality()),
+            # unrelated properties not changed
+            (
+                DataQuality(domain_consistency=[MAGIC_ADMINISTRATION_V1], lineage=Lineage(statement="x")),
+                DataQuality(lineage=Lineage(statement="x")),
+            ),
+            # removes target conformance
+            (DataQuality(domain_consistency=[MAGIC_ADMINISTRATION_V1]), DataQuality()),
+            # removes target conformance (any version)
+            (DataQuality(domain_consistency=[fake_admin_version]), DataQuality()),
+            # preserves unrelated conformance
+            (
+                DataQuality(domain_consistency=[MAGIC_DISCOVERY_V2, MAGIC_ADMINISTRATION_V1]),
+                DataQuality(domain_consistency=[MAGIC_DISCOVERY_V2]),
+            ),
+        ],
+    )
+    def test_strip_admin_conformance(
+        self,
+        fx_admin_meta_keys: AdministrationKeys,
+        fx_lib_record_model_min_iso: Record,
+        dq: DataQuality,
+        expected: DataQuality,
+    ):
+        """Can strip admin metadata conformance from a record if present."""
+        fx_lib_record_model_min_iso.data_quality = dq
+        Record._strip_admin(fx_lib_record_model_min_iso)
+        assert fx_lib_record_model_min_iso.data_quality == expected
 
     @pytest.mark.parametrize("strip_admin", [False, True])
     def test_dumps(
@@ -424,7 +491,7 @@ class TestRecord:
             "constraint_code": ConstraintRestrictionCode.LICENSE,
         }
         fx_lib_record_model_min_iso.file_identifier = value_str  # required for administrative metadata
-        value_admin = Administration(id=fx_lib_record_model_min_iso.file_identifier)
+        value_admin = AdministrationMetadata(id=fx_lib_record_model_min_iso.file_identifier)
         value_kv = {"x": "x"}
         fx_lib_record_model_min_iso.identification.constraints = Constraints(
             [Constraint(type=value_enums["constraint_type"], restriction_code=value_enums["constraint_code"])]
@@ -532,7 +599,7 @@ class TestRecord:
     def test_validate_min_magic_discovery_v1(self):
         """Can validate a valid record using the MAGIC Discovery profile (v1, original href)."""
         record = deepcopy(self.magic_discovery_v1_valid)
-        assert record._profile_schemas == [RecordSchema.MAGIC_V1]
+        assert record._profile_schemas == [RecordSchema.MAGIC_DISCO_V1]
         assert record.validate() is None
 
     def test_validate_min_magic_discovery_v1_alt(self):
@@ -540,7 +607,7 @@ class TestRecord:
         record = deepcopy(self.magic_discovery_v1_valid)
         record.data_quality.domain_consistency = [MAGIC_DISCOVERY_V1]
 
-        assert record._profile_schemas == [RecordSchema.MAGIC_V1]
+        assert record._profile_schemas == [RecordSchema.MAGIC_DISCO_V1]
         assert record.validate() is None
 
     def test_validate_min_magic_discovery_v2(self):
@@ -552,7 +619,13 @@ class TestRecord:
         )
         record.data_quality.domain_consistency = [MAGIC_DISCOVERY_V2]
 
-        assert record._profile_schemas == [RecordSchema.MAGIC_V2]
+        assert record._profile_schemas == [RecordSchema.MAGIC_DISCO_V2]
+        assert record.validate() is None
+
+    def test_validate_min_magic_administration_v1(self):
+        """Can validate a valid record using the MAGIC Discovery profile (v2)."""
+        record = deepcopy(self.magic_administration_v1_valid)
+        assert record._profile_schemas == [RecordSchema.MAGIC_ADMIN_V1]
         assert record.validate() is None
 
     def test_validate_invalid_iso(self, mocker: MockerFixture, fx_lib_record_model_min_iso: Record):
@@ -572,7 +645,7 @@ class TestRecord:
     def test_validate_invalid_forced_schemas(self, fx_lib_record_model_min_iso: Record):
         """Can't validate a record that does not comply with a forced set of schemas."""
         with pytest.raises(RecordInvalidError):
-            fx_lib_record_model_min_iso.validate(force_schemas=[RecordSchema.MAGIC_V2])
+            fx_lib_record_model_min_iso.validate(force_schemas=[RecordSchema.MAGIC_DISCO_V2])
 
     def test_validate_ignore_profiles(self, fx_lib_record_model_min_iso: Record):
         """Can validate a record that would not normally comply because of a schema indicated via domain consistency."""

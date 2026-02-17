@@ -237,4 +237,4 @@ class TestRecord:
         with pytest.raises(RecordInvalidError) as excinfo:
             record.validate()
         assert isinstance(excinfo.value.validation_error, ValueError)
-        assert "No administrative metadata." in str(excinfo.value.validation_error)
+        assert "No administration metadata." in str(excinfo.value.validation_error)

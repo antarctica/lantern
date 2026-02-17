@@ -69,7 +69,7 @@ class TestIsoXmlExporter:
         fx_s3_client: S3Client,
         fx_revision_model_min: RecordRevision,
     ):
-        """Can verify dumped records do not include administrative metadata."""
+        """Can verify dumped records do not include administration metadata."""
         with TemporaryDirectory() as tmp_path:
             output_path = Path(tmp_path)
         mock_config = mocker.Mock()
@@ -90,7 +90,7 @@ class TestIsoXmlExporter:
 
         result = exporter.dumps()
         assert "<gmi:MI_Metadata" in result
-        assert "administrative_metadata" not in result
+        assert "admin_metadata" not in result
 
 
 class TestIsoXmlHtmlExporter:

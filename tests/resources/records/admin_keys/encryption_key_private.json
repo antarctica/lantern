@@ -1,9 +1,0 @@
-{
-  "kty":"EC",
-  "crv":"P-256",
-  "x":"MzZQPXly16iAS2fzW_SbKqKHazsId57y7U35G9j4bbs",
-  "y":"6__rBtqNe6unAdllQpb2cypCH9u8-LouEX47uC-ncN0",
-  "d":"_fA1R8yP_uvfB7Qv9IApj7yydLA47N81Y75jZ92QH6U",
-  "alg":"ECDH-ES+A128KW",
-  "kid":"magic_metadata_testing_encryption_key"
-}

@@ -315,7 +315,7 @@ class Record:
             return
         if not isinstance(kv, dict):
             return
-        kv.pop("administrative_metadata", None)
+        kv.pop("admin_metadata", None)
         if len(kv) == 0:
             model.identification.supplemental_information = None
             return

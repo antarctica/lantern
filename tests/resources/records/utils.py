@@ -31,10 +31,9 @@ from lantern.lib.metadata_library.models.record.presets.base import RecordMagicD
 from lantern.lib.metadata_library.models.record.presets.constraints import CC_BY_ND_V4, OGL_V3, OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.presets.contacts import make_magic_role
 from lantern.lib.metadata_library.models.record.presets.extents import make_bbox_extent, make_temporal_extent
-from lantern.lib.metadata_library.models.record.utils.admin import set_admin
 from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
-from tests.resources.records.admin_keys.testing_keys import load_keys as load_test_keys
+from tests.resources.admin_keys import test_keys
 
 
 def make_record(

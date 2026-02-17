@@ -134,9 +134,9 @@ class TestRecordRevision:
         else:
             assert "file_revision" not in config
         if strip_admin:
-            assert "administrative_metadata" not in kv
+            assert "admin_metadata" not in kv
             # guard against original record being modified
             assert get_admin(keys=fx_admin_meta_keys, record=fx_revision_model_min) is not None
             assert get_admin(keys=fx_admin_meta_keys, record=result) is None
         else:
-            assert "administrative_metadata" in kv
+            assert "admin_metadata" in kv

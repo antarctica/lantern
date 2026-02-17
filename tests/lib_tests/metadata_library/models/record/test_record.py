@@ -414,8 +414,8 @@ class TestRecord:
             ("x", "x"),  # can't parse so not changed
             (json.dumps([]), json.dumps([])),  # can't parse so not changed
             (json.dumps({}), None),
-            (json.dumps({"administrative_metadata": {}, "x": "x"}), json.dumps({"x": "x"})),
-            (json.dumps({"administrative_metadata": {}}), None),
+            (json.dumps({"admin_metadata": {}, "x": "x"}), json.dumps({"x": "x"})),
+            (json.dumps({"admin_metadata": {}}), None),
         ],
     )
     def test_strip_admin_meta(
@@ -440,6 +440,15 @@ class TestRecord:
         explanation="x",
         result=True,
     )
+    simple_consistency = DomainConsistency(
+        specification=Citation(
+            title="x",
+            dates=Dates(publication=Date(date=date(2014, 6, 30))),
+            edition="X",
+        ),
+        explanation="x",
+        result=True,
+    )
 
     @pytest.mark.parametrize(
         ("dq", "expected"),
@@ -450,10 +459,26 @@ class TestRecord:
                 DataQuality(domain_consistency=[MAGIC_ADMINISTRATION_V1], lineage=Lineage(statement="x")),
                 DataQuality(lineage=Lineage(statement="x")),
             ),
+            # unrelated conformance properties not changed
+            (
+                DataQuality(domain_consistency=[MAGIC_DISCOVERY_V2]),
+                DataQuality(domain_consistency=[MAGIC_DISCOVERY_V2]),
+            ),
+            # conformance properties without specification href not changed
+            (
+                DataQuality(domain_consistency=[simple_consistency]),
+                DataQuality(domain_consistency=[simple_consistency]),
+            ),
             # removes target conformance
-            (DataQuality(domain_consistency=[MAGIC_ADMINISTRATION_V1]), DataQuality()),
+            (
+                DataQuality(domain_consistency=[MAGIC_ADMINISTRATION_V1]),
+                DataQuality(),
+            ),
             # removes target conformance (any version)
-            (DataQuality(domain_consistency=[fake_admin_version]), DataQuality()),
+            (
+                DataQuality(domain_consistency=[fake_admin_version]),
+                DataQuality(),
+            ),
             # preserves unrelated conformance
             (
                 DataQuality(domain_consistency=[MAGIC_DISCOVERY_V2, MAGIC_ADMINISTRATION_V1]),
@@ -490,7 +515,7 @@ class TestRecord:
             "constraint_type": ConstraintTypeCode.USAGE,
             "constraint_code": ConstraintRestrictionCode.LICENSE,
         }
-        fx_lib_record_model_min_iso.file_identifier = value_str  # required for administrative metadata
+        fx_lib_record_model_min_iso.file_identifier = value_str  # required for administration metadata
         value_admin = AdministrationMetadata(id=fx_lib_record_model_min_iso.file_identifier)
         value_kv = {"x": "x"}
         fx_lib_record_model_min_iso.identification.constraints = Constraints(
@@ -505,7 +530,7 @@ class TestRecord:
             #
             # If included, we can't know the exact JWE to expect, as each is unique regardless of whether the data is
             # different. Therefore, a dummy value is expected.
-            value_kv["administrative_metadata"] = "x"
+            value_kv["admin_metadata"] = "x"
         expected = {
             "file_identifier": value_str,
             "hierarchy_level": value_enums["hierarchy_level"].value,
@@ -539,7 +564,7 @@ class TestRecord:
         kv = json.loads(config["identification"]["supplemental_information"])
         if not strip_admin:
             # admin meta values are a JWE, which are unique even when using the same data, so expected value is replaced
-            kv["administrative_metadata"] = value_kv["administrative_metadata"]
+            kv["admin_metadata"] = value_kv["admin_metadata"]
             config["identification"]["supplemental_information"] = json.dumps(kv)
         assert config == expected
 

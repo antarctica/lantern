@@ -326,7 +326,7 @@ class TestConfig:
             assert getattr(config, f"{property_name}_SAFE") == expected
 
     def test_admin_metadata_keys(self, fx_config: Config):
-        """Can get administrative metadata keys assembled from multiple environment variables."""
+        """Can get administration metadata keys assembled from multiple environment variables."""
         envs = {
             "LANTERN_ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE": str(self.JWK),
             "ADMIN_METADATA_SIGNING_KEY_PUBLIC": str(self.JWK),

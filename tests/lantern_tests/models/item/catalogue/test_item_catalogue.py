@@ -18,12 +18,13 @@ from lantern.lib.metadata_library.models.record.enums import (
     ConstraintRestrictionCode,
     ConstraintTypeCode,
     ContactRoleCode,
+    HierarchyLevelCode,
 )
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, set_admin
 from lantern.models.item.base.elements import Link
 from lantern.models.item.base.enums import ResourceTypeLabel
 from lantern.models.item.catalogue.elements import PageSummary
-from lantern.models.item.catalogue.enums import Licence
+from lantern.models.item.catalogue.enums import ItemSuperType, Licence
 from lantern.models.item.catalogue.item import ItemCatalogue
 from lantern.models.item.catalogue.tabs import (
     AdditionalInfoTab,
@@ -139,6 +140,28 @@ class TestItemCatalogue:
             item.record = fx_record_model_min
         assert item.record == record_b  # unchanged
         assert item._admin_metadata == admin_b
+
+    @pytest.mark.parametrize(
+        ("hierarchy_level", "expected"),
+        [
+            (HierarchyLevelCode.COLLECTION, ItemSuperType.CONTAINER),
+            (HierarchyLevelCode.FIELD_SESSION, ItemSuperType.CONTAINER),
+            (HierarchyLevelCode.INITIATIVE, ItemSuperType.CONTAINER),
+            (HierarchyLevelCode.DATASET, ItemSuperType.RESOURCE),
+            (HierarchyLevelCode.FEATURE, ItemSuperType.RESOURCE),
+            (HierarchyLevelCode.PRODUCT, ItemSuperType.RESOURCE),
+            (HierarchyLevelCode.MAP_PRODUCT, ItemSuperType.RESOURCE),
+            (HierarchyLevelCode.PAPER_MAP_PRODUCT, ItemSuperType.RESOURCE),
+            (HierarchyLevelCode.WEB_MAP_PRODUCT, ItemSuperType.RESOURCE),
+            (HierarchyLevelCode.SERIES, ItemSuperType.RESOURCE),
+        ],
+    )
+    def test_super_type(
+        self, fx_item_cat_model_min: ItemCatalogue, hierarchy_level: HierarchyLevelCode, expected: ItemSuperType
+    ):
+        """Can determine super type for item types."""
+        fx_item_cat_model_min._record.hierarchy_level = hierarchy_level
+        assert fx_item_cat_model_min._super_type == expected
 
     @pytest.mark.parametrize(
         ("licence", "expected"),

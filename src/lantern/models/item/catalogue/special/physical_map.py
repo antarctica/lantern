@@ -162,7 +162,7 @@ class ItemCataloguePhysicalMap(ItemCatalogue):
     @property
     def _sides(self) -> list[RecordRevision]:
         """Records that make up the sides/pages of a physical map."""
-        side_identifiers = self._record.identification.aggregations.filter(
+        side_identifiers = self.record.identification.aggregations.filter(
             associations=AggregationAssociationCode.IS_COMPOSED_OF,
             initiatives=AggregationInitiativeCode.PAPER_MAP,
         )
@@ -220,7 +220,7 @@ class ItemCataloguePhysicalMap(ItemCatalogue):
         """Graphic overviews combined from the item and its sides."""
         return GraphicOverviews(
             [
-                *self._record.identification.graphic_overviews,
+                *self.record.identification.graphic_overviews,
                 *(graphic for side in self._sides for graphic in side.identification.graphic_overviews),
             ]
         )

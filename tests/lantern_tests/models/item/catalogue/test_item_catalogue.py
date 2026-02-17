@@ -1,3 +1,4 @@
+from copy import deepcopy
 from datetime import UTC, datetime
 
 import pytest
@@ -58,16 +59,14 @@ class TestItemCatalogue:
             select_record=_select_record,
         )
         assert isinstance(item, ItemCatalogue)
-        assert item._record == fx_revision_model_min
+        assert item.record == fx_revision_model_min
 
-    def test_init_invalid_record(
-        self,
-        fx_site_meta: SiteMeta,
-        fx_record_model_min: Record,
-        fx_admin_meta_keys: AdministrationKeys,
+    @pytest.mark.cov()
+    def test_init_invalid_record_type(
+        self, fx_site_meta: SiteMeta, fx_record_model_min: Record, fx_admin_meta_keys: AdministrationKeys
     ):
         """Cannot create an ItemCatalogue if not a RecordRevision."""
-        with pytest.raises(TypeError, match=r"record must be a RecordRevision instance"):
+        with pytest.raises(TypeError, match=r"record must be a RecordRevision"):
             # noinspection PyTypeChecker
             _ = ItemCatalogue(
                 site_meta=fx_site_meta,
@@ -77,11 +76,8 @@ class TestItemCatalogue:
                 select_record=_select_record,
             )
 
-    def test_init_invalid_admin_keys(
-        self,
-        fx_site_meta: SiteMeta,
-        fx_revision_model_min: RecordRevision,
-    ):
+    @pytest.mark.cov()
+    def test_init_invalid_admin_keys(self, fx_site_meta: SiteMeta, fx_revision_model_min: RecordRevision):
         """Cannot create an ItemCatalogue if admin keys are not provided."""
         with pytest.raises(TypeError, match=r"administration metadata keys must be provided"):
             # noinspection PyTypeChecker
@@ -92,6 +88,57 @@ class TestItemCatalogue:
                 trusted_context=True,
                 select_record=_select_record,
             )
+
+    @pytest.mark.cov()
+    def test_record(
+        self,
+        fx_site_meta: SiteMeta,
+        fx_admin_meta_keys: AdministrationKeys,
+        fx_admin_meta_element: AdministrationMetadata,
+        fx_record_model_min: Record,
+        fx_revision_model_min: RecordRevision,
+    ):
+        """
+        Can get and set underlying RecordRevision.
+
+        Also check cached admin metadata is reset when record is changed, and that Records are rejected.
+        """
+        record_a = fx_revision_model_min
+        admin_a = deepcopy(fx_admin_meta_element)
+        admin_a.id = record_a.file_identifier
+        set_admin(keys=fx_admin_meta_keys, record=record_a, admin_meta=admin_a)
+
+        record_b = deepcopy(fx_revision_model_min)
+        record_b.file_identifier = "y"
+        admin_b = deepcopy(fx_admin_meta_element)
+        admin_b.id = record_b.file_identifier
+        set_admin(keys=fx_admin_meta_keys, record=record_b, admin_meta=admin_b)
+
+        item = ItemCatalogue(
+            site_meta=fx_site_meta,
+            record=record_a,
+            admin_meta_keys=fx_admin_meta_keys,
+            trusted_context=True,
+            select_record=_select_record,
+        )
+
+        assert item.record == record_a
+        assert item._admin_metadata is None
+        assert item.admin_metadata == admin_a
+        assert item._admin_metadata == admin_a
+
+        item.record = record_b
+        assert item._record == record_b
+        assert item.record == record_b
+        assert item._admin_metadata is None
+        assert item.admin_metadata == admin_b
+        assert item._admin_metadata == admin_b
+
+        with pytest.raises(TypeError, match=r"record must be a RecordRevision"):
+            # noinspection PyTypeChecker
+            item.record = fx_record_model_min
+        assert item.record == record_b  # unchanged
+        assert item._admin_metadata == admin_b
 
     @pytest.mark.parametrize(
         ("licence", "expected"),

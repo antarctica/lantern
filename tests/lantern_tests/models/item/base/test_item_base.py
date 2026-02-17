@@ -1,4 +1,5 @@
 import json
+from copy import deepcopy
 
 import pytest
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata, Permission
@@ -67,6 +68,19 @@ class TestItemBase:
         assert item._admin_keys == keys
         assert item._admin_metadata is None
 
+    @pytest.mark.cov()
+    def test_record(self, fx_revision_model_min: RecordRevision, fx_admin_meta_keys: AdministrationKeys):
+        """Can get and set underlying Record."""
+        record_a = fx_revision_model_min
+        record_b = deepcopy(record_a)
+        record_b.file_identifier = "y"
+        item = ItemBase(record=record_a, admin_keys=None)
+
+        assert item.record == record_a
+        item.record = record_b
+        assert item._record == record_b
+        assert item.record == record_b
+
     @pytest.mark.parametrize("has_keys", [False, True])
     @pytest.mark.parametrize("has_admin", [False, True])
     def test_admin_metadata(
@@ -88,6 +102,35 @@ class TestItemBase:
             assert item.admin_metadata == fx_admin_meta_element
         else:
             assert item.admin_metadata is None
+
+    @pytest.mark.cov()
+    def test_cached_admin_metadata(
+        self,
+        fx_revision_model_min: RecordRevision,
+        fx_admin_meta_element: AdministrationMetadata,
+        fx_admin_meta_keys: AdministrationKeys,
+    ):
+        """Can cache admin metadata if present, and cache is reset if record is changed."""
+        record_a = fx_revision_model_min
+        admin_a = deepcopy(fx_admin_meta_element)
+        admin_a.id = record_a.file_identifier
+        set_admin(keys=fx_admin_meta_keys, record=record_a, admin_meta=admin_a)
+
+        record_b = deepcopy(fx_revision_model_min)
+        record_b.file_identifier = "y"
+        admin_b = deepcopy(fx_admin_meta_element)
+        admin_b.id = record_b.file_identifier
+        set_admin(keys=fx_admin_meta_keys, record=record_b, admin_meta=admin_b)
+
+        item = ItemBase(record=fx_revision_model_min, admin_keys=fx_admin_meta_keys)
+        assert item._admin_metadata is None
+        assert item.admin_metadata == fx_admin_meta_element
+        assert item._admin_metadata == fx_admin_meta_element
+
+        item.record = record_b
+        assert item._admin_metadata is None
+        assert item.admin_metadata == admin_b
+        assert item._admin_metadata == admin_b
 
     @pytest.mark.parametrize(
         ("has_admin_metadata", "permissions", "expected"),

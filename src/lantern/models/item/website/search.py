@@ -63,7 +63,7 @@ class ItemWebsiteSearch(ItemBase):
 
         Returned in order of preference to prefer more up-to-date values. The first available value is returned.
         """
-        dates = self._record.identification.dates
+        dates = self.record.identification.dates
         if dates.revision:
             return dates.revision.unstructure()
         if dates.publication:
@@ -96,7 +96,7 @@ class ItemWebsiteSearch(ItemBase):
 
         Value is based on the item's maintenance information and defaults to False (not deleted).
         """
-        progress = self._record.identification.maintenance.progress
+        progress = self.record.identification.maintenance.progress
         return progress == ProgressCode.OBSOLETE or progress == ProgressCode.HISTORICAL_ARCHIVE
 
     @property

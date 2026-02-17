@@ -33,20 +33,19 @@ class ItemBase:
     """
     Base representation of a resource within the BAS Data Catalogue.
 
-    Items are a high-level, read-only, and non-standards specific view of a resource via an underlying Record instance,
+    Items are a high-level, read-only, and non-standards specific view of a resource via an underlying catalogue Record,
     to make it easier and less cumbersome to use through various filtering, processing and formatting methods.
 
     Items provide access to administrative metadata if defined and encryption and signing keys are set via the
     `admin_keys` argument.
 
     Item subclasses are used for different contexts and systems. This base class contains core/common properties and
-    methods and is not expected to be used directly.
+    methods and is not expected to be used directly. Base items are compatible with catalogue Records or RecordRevisions,
+    depending on available context. Subclasses MAY require RecordRevisions and/or impose other requirements.
 
     It is expected, and acceptable, to access information from the underlying record via the `record` property,
     especially for properties this class would simply pass through from the record.
 
-
-    Base items are compatible with Records and RecordRevisions, depending on available context.
     Properties for administrative metadata elements can be accessed from the `admin_metadata` property, which is cached
     on first access unless the underlying record changes. As admin metadata is optional, all `admin_` properties are
     return `None` or a suitable equivalent where admin metadata is not included, or keys are not provided to access it.

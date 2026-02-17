@@ -20,7 +20,7 @@
         {% endcall %}
       {% endif %}
 
-      {% call com.dl_item(title='Item Restricted', id='admin-restricted') %}
+      {% call com.dl_item(title='Item Restricted?', id='admin-restricted') %}
         {% if data.restricted %}
           {% call com.alert(variant='red') %}Yes{% endcall %}
         {% else %}

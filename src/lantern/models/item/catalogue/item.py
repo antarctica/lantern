@@ -41,10 +41,13 @@ class ItemCatalogue(ItemBase):
     Catalogue items structure a base item into the (HTML) page structure used in the BAS Data Catalogue website using
     Jinja2 templates and classes representing the various tabs and other sections that form these pages.
 
-    In addition to a catalogue Record instance, this Item variant requires:
-    - endpoints for external services used in this template, such as the item contact form and extent map, via site_meta
-    - keys to decrypt and verify administrative metadata for reading the record's administrative metadata
-    - a callable to get a RecordSummary for a given identifier (used for related items from aggregations)
+    This Item subclass has stricter and additional requirements:
+    - site metadata (for item contact form and extent map endpoints used in templates)
+    - admin metadata keys to access administrative metadata
+    - a catalogue RecordRevision instance with administrative metadata
+    - a callable to get a Record for a given identifier (used for related items via aggregations)
+
+    This class support trusted contexts (e.g. internal users), where an additional ADMIN tab is included.
 
     Note: This class is an incomplete rendering of Record properties (which is itself an incomplete mapping of the
     ISO 19115:2003 / 19115-2:2009 standards). See `docs/data_model.md#catalogue-item-limitations` for more information.
@@ -56,8 +59,8 @@ class ItemCatalogue(ItemBase):
         site_meta: SiteMeta,
         record: RecordRevision,
         admin_meta_keys: AdministrationKeys,
-        trusted_context: bool,
         select_record: SelectRecordProtocol,
+        trusted_context: bool,
         **kwargs: Any,
     ) -> None:
         if not isinstance(admin_meta_keys, AdministrationKeys):
@@ -164,7 +167,11 @@ class ItemCatalogue(ItemBase):
 
     @property
     def _licence(self) -> LicenceTab:
-        """Licence tab."""
+        """
+        Licence tab.
+
+        For the resource. The Metadata licence (if set) is shown in the Additional Information tab.
+        """
         return LicenceTab(
             item_super_type=self._super_type,
             licence=super().licence,

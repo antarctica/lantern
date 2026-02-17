@@ -27,7 +27,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     ProgressCode,
 )
 from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS as OPEN_ACCESS_PERMISSION
-from lantern.lib.metadata_library.models.record.presets.base import RecordMagicDiscoveryV2
+from lantern.lib.metadata_library.models.record.presets.base import RecordMagic
 from lantern.lib.metadata_library.models.record.presets.constraints import CC_BY_ND_V4, OGL_V3, OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.presets.contacts import make_magic_role
 from lantern.lib.metadata_library.models.record.presets.extents import make_bbox_extent, make_temporal_extent
@@ -40,7 +40,15 @@ def make_record(
     file_identifier: str, hierarchy_level: HierarchyLevelCode, title: str, abstract: str, purpose: str | None = None
 ) -> RecordRevision:
     """Make a record for testing based on RecordMagicDiscoveryV1."""
-    record = RecordMagicDiscoveryV2(
+    admin_keys = test_keys()
+    admin_meta = AdministrationMetadata(
+        id=file_identifier,
+        gitlab_issues=[],
+        metadata_permissions=[OPEN_ACCESS_PERMISSION],
+        resource_permissions=[OPEN_ACCESS_PERMISSION],
+    )
+
+    record = RecordMagic(
         file_identifier=file_identifier,
         hierarchy_level=hierarchy_level,
         identification=Identification(
@@ -48,6 +56,8 @@ def make_record(
             abstract=abstract,
             dates=Dates(creation=Date(date=date(2023, 10, 1), precision=DatePrecisionCode.YEAR)),
         ),
+        admin_keys=admin_keys,
+        admin_meta=admin_meta,
     )
 
     record.metadata.constraints = Constraints([OPEN_ACCESS, CC_BY_ND_V4])
@@ -104,14 +114,6 @@ def make_record(
     )
 
     record.data_quality.lineage = Lineage(statement="x")
-
-    administration = Administration(
-        id=record.file_identifier,
-        gitlab_issues=[],
-        access_permissions=[OPEN_ACCESS_PERMISSION],
-    )
-    keys = load_test_keys()
-    set_admin(keys=keys, record=record, admin_meta=administration)
 
     # Convert to RecordRevision
     config = {"file_revision": "83fake487e5671f4a1dd7074b92fb94aa68d26bd", **record.dumps(strip_admin=False)}

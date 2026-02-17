@@ -1,54 +1,94 @@
+import logging
 from datetime import date
 from typing import Any
 
+from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
+from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
+
 from lantern.lib.metadata_library.models.record.elements.common import Contact, Contacts
+from lantern.lib.metadata_library.models.record.elements.data_quality import DomainConsistency
 from lantern.lib.metadata_library.models.record.elements.metadata import Metadata
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
 from lantern.lib.metadata_library.models.record.presets.citation import make_magic_citation
-from lantern.lib.metadata_library.models.record.presets.conformance import MAGIC_DISCOVERY_V2
+from lantern.lib.metadata_library.models.record.presets.conformance import MAGIC_ADMINISTRATION_V1, MAGIC_DISCOVERY_V2
 from lantern.lib.metadata_library.models.record.presets.contacts import UKRI_RIGHTS_HOLDER, make_magic_role
 from lantern.lib.metadata_library.models.record.presets.identifiers import make_bas_cat
 from lantern.lib.metadata_library.models.record.record import Record
+from lantern.lib.metadata_library.models.record.utils.admin import set_admin
 
 
-class RecordMagicDiscoveryV2(Record):
+class RecordMagic(Record):
     """
-    A Record based on the MAGIC Discovery profile v2.
+    Create a Record based on MAGIC metadata profiles and other conventional values.
 
-    Use when creating records for MAGIC resources to pre-configure elements with conventional values - specifically:
-    - the conventional MAGIC contact (appendix 2) as the metadata, and an identification, point of contact
-    - the conventional MAGIC Discovery profile domain consistency element (appendix 1)
-    - a BAS Data Catalogue identifier based on the file identifier
+    At a high-level, this method creates a record complaint with:
+    - the MAGIC Discovery profile (V2, https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery/v2/)
+    - the MAGIC Administration profile (V1, https://metadata-standards.data.bas.ac.uk/profiles/magic-administration/v1/)
 
-    This class also:
-    - sets UKRI as a default copyright holder contact
-    - sets a default citation based on MAGIC's conventions and record details
+    At a lower level, this method extends a minimal ISO record with:
+    - a domain consistency element for the MAGIC Discovery profile (appendix 1)
+    - the conventional MAGIC contact (Discovery profile appendix 2) as the metadata and identification point of contact
+    - an identification identifier using the Data Catalogue namespace based on the file identifier
+    - an identification contact for UKRI as a rights holder
+    - an identification citation based on the Harvard APA style, MAGIC conventions and record details
+    - if admin metadata is included, a domain consistency element for the MAGIC Administration profile (appendix 1)
+    - if admin metadata is included, the metadata encoded within the identification supplemental info element
 
-    See https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery/v2/ for more information about this profile.
+    Examples:
+    1. Minimal, without admin metadata:
+    ```
+    RecordMagic(
+        file_identifier="x",
+        hierarchy_level=HierarchyLevelCode.DATASET,
+        identification=Identification(title="x", abstract="x", dates=Dates(creation=Date(date=datetime.now(tz=UTC))))
+    )
+    ```
+
+    2. Minimal, with admin metadata:
+    ```
+    RecordMagic(
+        file_identifier="x",
+        hierarchy_level=HierarchyLevelCode.DATASET,
+        identification=Identification(title="x", abstract="x", dates=Dates(creation=Date(date=datetime.now(tz=UTC)))),
+        admin_keys=AdministrationKeys,
+        admin_meta=AdministrationMetadata,
+    )
+    ```
+
     """
+
+    magic_poc = make_magic_role({ContactRoleCode.POINT_OF_CONTACT})
 
     def __init__(self, **kwargs: Any) -> None:
-        """Process defaults."""
+        """
+        Process defaults.
+
+        Inject metadata element with optional datestamp.
+        """
+        # prepare metadata element
         date_stamp: date | None = kwargs.pop("date_stamp", None)
-        kwargs["metadata"] = Metadata(
-            contacts=Contacts([make_magic_role({ContactRoleCode.POINT_OF_CONTACT})]), date_stamp=date_stamp
-        )
+        kwargs["metadata"] = Metadata(contacts=Contacts([self.magic_poc]), date_stamp=date_stamp)
+
+        # prepare optional administration element
+        self._admin_keys: AdministrationKeys | None = kwargs.pop("admin_keys", None)
+        self._admin_meta: AdministrationMetadata | None = kwargs.pop("admin_meta", None)
+
         super().__init__(**kwargs)
 
     def __post_init__(self) -> None:
-        """Process defaults."""
-        RecordMagicDiscoveryV2._set_magic_poc(self.identification.contacts)
-        RecordMagicDiscoveryV2._set_ukri_rights(self.identification.contacts)
+        """Process defaults and set optional admin metadata."""
+        profiles = [MAGIC_DISCOVERY_V2]
 
-        self_identifier = make_bas_cat(self.file_identifier)  # ty: ignore[invalid-argument-type]
-        if self_identifier not in self.identification.identifiers:
-            self.identification.identifiers.append(self_identifier)
-
+        self._set_contacts()
+        self._set_cat_identifier()
         self._set_citation()
 
-        profile = MAGIC_DISCOVERY_V2
-        if profile not in self.data_quality.domain_consistency:
-            self.data_quality.domain_consistency.append(profile)
+        # create optional administration element if provided
+        if self._admin_keys is not None and self._admin_meta is not None:
+            set_admin(keys=self._admin_keys, record=self, admin_meta=self._admin_meta)
+            profiles.append(MAGIC_ADMINISTRATION_V1)
+
+        self._set_profiles(profiles)
 
         super().__post_init__()
 
@@ -73,19 +113,25 @@ class RecordMagicDiscoveryV2(Record):
         # append new contact
         existing_contacts.append(target_contact)
 
-    @staticmethod
-    def _set_magic_poc(contacts: list[Contact]) -> None:
-        """Ensure a list of contacts contains MAGIC as a point of contact."""
-        poc = make_magic_role({ContactRoleCode.POINT_OF_CONTACT})
-        RecordMagicDiscoveryV2._ensure_contact(poc, contacts)
+    def _set_contacts(self) -> None:
+        """
+        Ensure record identification contains conventional contacts.
 
-    @staticmethod
-    def _set_ukri_rights(contacts: list[Contact]) -> None:
-        """Ensure a list of contacts contains UKRI as a rights holder contact."""
-        RecordMagicDiscoveryV2._ensure_contact(UKRI_RIGHTS_HOLDER, contacts)
+        MAGIC as a point of contact and UKRI as a rights holder
+        """
+        self._ensure_contact(self.magic_poc, self.identification.contacts)
+        self._ensure_contact(UKRI_RIGHTS_HOLDER, self.identification.contacts)
+
+    def _set_cat_identifier(self) -> None:
+        """Ensure an identifier within the Data Catalogue namespace based on the file identifier."""
+        self_identifier = make_bas_cat(self.file_identifier)  # ty:ignore[invalid-argument-type]
+        if self_identifier not in self.identification.identifiers:
+            self.identification.identifiers.append(self_identifier)
 
     def _set_citation(self) -> None:
-        """Set citation using record details as per `make_magic_citation` preset."""
+        """Set citation using record details as per `make_magic_citation` preset if not already set."""
+        if self.identification.other_citation_details:
+            return
         self.identification.other_citation_details = make_magic_citation(
             title=self.identification.title,
             hierarchy_level=self.hierarchy_level,
@@ -94,16 +140,20 @@ class RecordMagicDiscoveryV2(Record):
             identifiers=self.identification.identifiers,
         )
 
-    # noinspection PyMethodOverriding
+    def _set_profiles(self, profiles: list[DomainConsistency]) -> None:
+        """Ensure record identification / data quality contains MAGIC profiles."""
+        for profile in profiles:
+            if profile not in self.data_quality.domain_consistency:
+                self.data_quality.domain_consistency.append(profile)
+
     @classmethod
-    # noinspection PyMethodOverridingInspection
-    def loads(cls, value: dict) -> "RecordMagicDiscoveryV2":  # ty: ignore[invalid-method-override]
+    def loads(cls, value: dict, check_supported: bool = False, logger: logging.Logger | None = None) -> "Record":
         """
         Create a Record from a dict loaded from a JSON schema instance.
 
         Known to violate method override rules due to differing signature.
         """
-        record = super().loads(value)
+        record = super().loads(value=value, check_supported=check_supported, logger=logger)
         return cls(
             file_identifier=record.file_identifier,
             hierarchy_level=record.hierarchy_level,

@@ -42,8 +42,8 @@ class ItemBase:
     Item subclasses are used for different contexts and systems. This base class contains core/common properties and
     methods and is not expected to be used directly.
 
-    It is expected, and acceptable, to use the underlying `_record` property to access information not made directly
-    available by this class. Especially for properties this class would simply pass through to the record.
+    It is expected, and acceptable, to access information from the underlying record via the `record` property,
+    especially for properties this class would simply pass through from the record.
 
 
     Base items are compatible with Records and RecordRevisions, depending on available context.
@@ -66,6 +66,21 @@ class ItemBase:
         if permissions == [OPEN_ACCESS]:
             return AccessLevel.PUBLIC
         return AccessLevel.UNKNOWN
+
+    @property
+    def record(self) -> Record | RecordRevision:
+        """Get underlying Record(Revision)."""
+        return self._record
+
+    @record.setter
+    def record(self, value: Record | RecordRevision) -> None:
+        """
+        Update underlying Record(Revision).
+
+        Clears cached admin metadata to ensure it reflects the new record.
+        """
+        self._record = value
+        self._admin_metadata = None
 
     @property
     def admin_metadata(self) -> AdministrationMetadata | None:
@@ -112,7 +127,7 @@ class ItemBase:
     @property
     def aggregations(self) -> Aggregations:
         """Aggregations."""
-        return self._record.identification.aggregations
+        return self.record.identification.aggregations
 
     @property
     def bounding_extent(self) -> Extent | None:
@@ -125,7 +140,7 @@ class ItemBase:
     @property
     def citation_raw(self) -> str | None:
         """Optional raw citation."""
-        _citation = self._record.identification.other_citation_details
+        _citation = self.record.identification.other_citation_details
         return None if _citation is None else _citation
 
     @property
@@ -147,17 +162,17 @@ class ItemBase:
         Casts copies of Record Contact items as Item Contact items, to leverage Item specific functionality.
         Cast items are contained in a Record Contacts container subclass, to reflect correct types.
         """
-        return Contacts([Contact(contact) for contact in self._record.identification.contacts])
+        return Contacts([Contact(contact) for contact in self.record.identification.contacts])
 
     @property
     def constraints(self) -> Constraints:
         """Resource Constraints."""
-        return self._record.identification.constraints
+        return self.record.identification.constraints
 
     @property
     def description_raw(self) -> str:
         """Raw Abstract."""
-        return self._record.identification.abstract
+        return self.record.identification.abstract
 
     @property
     def description_md(self) -> str:
@@ -172,12 +187,12 @@ class ItemBase:
     @property
     def distributions(self) -> list[Distribution]:
         """Distributions."""
-        return self._record.distribution
+        return self.record.distribution
 
     @property
     def edition(self) -> str | None:
         """Edition."""
-        return self._record.identification.edition
+        return self.record.identification.edition
 
     @property
     def extents(self) -> Extents:
@@ -187,7 +202,7 @@ class ItemBase:
         Casts copies of Record Extent items as Item Extent items, to leverage Item specific functionality.
         Cast items are contained in a Record Extents container subclass, to reflect correct types.
         """
-        return Extents([Extent(extent) for extent in self._record.identification.extents])
+        return Extents([Extent(extent) for extent in self.record.identification.extents])
 
     @property
     def graphics(self) -> GraphicOverviews:
@@ -196,7 +211,7 @@ class ItemBase:
 
         See `overview_graphic` for accessing primary/default overview.
         """
-        return self._record.identification.graphic_overviews
+        return self.record.identification.graphic_overviews
 
     @property
     def href(self) -> str:
@@ -206,7 +221,7 @@ class ItemBase:
     @property
     def identifiers(self) -> Identifiers:
         """Identifiers."""
-        return self._record.identification.identifiers
+        return self.record.identification.identifiers
 
     @property
     def kv(self) -> dict:
@@ -230,7 +245,7 @@ class ItemBase:
         metadata ecosystem of tools but is human-readable to an extent so could be shown elsewhere.
         """
         try:
-            return get_kv(self._record)
+            return get_kv(self.record)
         except (ValueError, TypeError):
             return {}
 
@@ -248,9 +263,9 @@ class ItemBase:
     @property
     def lineage_raw(self) -> str | None:
         """Optional raw lineage statement."""
-        if self._record.data_quality is None or self._record.data_quality.lineage is None:
+        if self.record.data_quality is None or self.record.data_quality.lineage is None:
             return None
-        return self._record.data_quality.lineage.statement
+        return self.record.data_quality.lineage.statement
 
     @property
     def lineage_md(self) -> str | None:
@@ -280,7 +295,7 @@ class ItemBase:
 
         Limited to EPSG projections so we can predictably handle them.
         """
-        ref = self._record.reference_system_info
+        ref = self.record.reference_system_info
         if ref is None or "urn:ogc:def:crs:EPSG" not in ref.code.value:
             return None
         code = ref.code.value.replace("urn:ogc:def:crs:EPSG::", "EPSG:")
@@ -293,7 +308,7 @@ class ItemBase:
 
         AKA resource/record/item/file identifier.
         """
-        return self._record.file_identifier
+        return self.record.file_identifier
 
     @property
     def resource_revision(self) -> str | None:
@@ -302,8 +317,8 @@ class ItemBase:
 
         If item relates to a RecordRevision.
         """
-        if isinstance(self._record, RecordRevision):
-            return self._record.file_revision
+        if isinstance(self.record, RecordRevision):
+            return self.record.file_revision
         return None
 
     @property
@@ -313,7 +328,7 @@ class ItemBase:
 
         AKA hierarchy-level/scope-code.
         """
-        return self._record.hierarchy_level
+        return self.record.hierarchy_level
 
     @property
     def series_descriptive(self) -> Series:
@@ -325,7 +340,7 @@ class ItemBase:
         Due to a bug in early revisions of the V4 BAS ISO JSON Schema, the 'page' (sheet number) property could not be
         set. This class supports loading an optional 'sheet_number' from KV properties if not set in the series element.
         """
-        series = self._record.identification.series
+        series = self.record.identification.series
         if series and series.page:
             return series
 
@@ -337,7 +352,7 @@ class ItemBase:
     @property
     def summary_raw(self) -> str | None:
         """Optional raw Summary (purpose)."""
-        return self._record.identification.purpose
+        return self.record.identification.purpose
 
     @property
     def summary_md(self) -> str | None:
@@ -357,7 +372,7 @@ class ItemBase:
     @property
     def title_raw(self) -> str:
         """Raw Title."""
-        return self._record.identification.title
+        return self.record.identification.title
 
     @property
     def title_md(self) -> str:

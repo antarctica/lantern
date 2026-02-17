@@ -60,18 +60,34 @@ class ItemCatalogue(ItemBase):
         select_record: SelectRecordProtocol,
         **kwargs: Any,
     ) -> None:
+        if not isinstance(admin_meta_keys, AdministrationKeys):
+            msg = "administration metadata keys must be provided"
+            raise TypeError(msg) from None
+        self._validate_record(record)
+
         super().__init__(record=record, admin_keys=admin_meta_keys)
         self._meta = site_meta
         self._trusted_context = trusted_context
         self._select_record = select_record
+        self.record: RecordRevision
 
-        if not isinstance(self._admin_keys, AdministrationKeys):
-            msg = "administration metadata keys must be provided"
+    @staticmethod
+    def _validate_record(record: RecordRevision) -> None:
+        """Validate record a revision and has admin metadata."""
+        if not isinstance(record, RecordRevision):
+            msg = "record must be a RecordRevision"
             raise TypeError(msg) from None
-        if not isinstance(self._record, RecordRevision):
-            msg = "record must be a RecordRevision instance"
-            raise TypeError(msg) from None
-        self._record: RecordRevision
+
+    @property
+    def record(self) -> RecordRevision:
+        """Get underlying RecordRevision."""
+        return super().record  # ty:ignore[invalid-return-type]
+
+    @record.setter
+    def record(self, value: RecordRevision) -> None:
+        """Set underlying RecordRevision."""
+        self._validate_record(value)
+        ItemBase.record.fset(self, value)
 
     @property
     def _super_type(self) -> ItemSuperType:
@@ -90,22 +106,22 @@ class ItemCatalogue(ItemBase):
     @property
     def _dates(self) -> Dates:
         """Formatted dates."""
-        return Dates(self._record.identification.dates)
+        return Dates(self.record.identification.dates)
 
     @property
     def _identifiers(self) -> Identifiers:
         """Identifiers."""
-        return Identifiers(self._record.identification.identifiers)
+        return Identifiers(self.record.identification.identifiers)
 
     @property
     def _maintenance(self) -> Maintenance | None:
-        """Formatted dates."""
-        return Maintenance(self._record.identification.maintenance)
+        """Friendly code list terms."""
+        return Maintenance(self.record.identification.maintenance)
 
     @property
     def _metadata_licence(self) -> Constraint | None:
         """Licence constraint."""
-        licences = self._record.metadata.constraints.filter(
+        licences = self.record.metadata.constraints.filter(
             types=ConstraintTypeCode.USAGE, restrictions=ConstraintRestrictionCode.LICENSE
         )
         try:
@@ -118,8 +134,8 @@ class ItemCatalogue(ItemBase):
     def _revision(self) -> Link:
         """Link to the record revision."""
         path = f"records/{self.resource_id[:2]}/{self.resource_id[2:4]}/{self.resource_id}.json"
-        href = f"{self._meta.build_repo_base_url}/-/blob/{self._record.file_revision}/{path}"
-        short_ref = self._record.file_revision[:8]
+        href = f"{self._meta.build_repo_base_url}/-/blob/{self.record.file_revision}/{path}"
+        short_ref = self.record.file_revision[:8]
         return Link(value=short_ref, href=href, external=True)
 
     @property
@@ -184,12 +200,12 @@ class ItemCatalogue(ItemBase):
             gitlab_issues=self.admin_gitlab_issues,
             dates=self._dates,
             series=self.series_descriptive,
-            scale=self._record.identification.spatial_resolution,
-            datestamp=self._record.metadata.date_stamp,
+            scale=self.record.identification.spatial_resolution,
+            datestamp=self.record.metadata.date_stamp,
             projection=self.projection,
             maintenance=self._maintenance,
-            standard=self._record.metadata.metadata_standard,
-            profiles=self._record.data_quality.domain_consistency if self._record.data_quality else None,
+            standard=self.record.metadata.metadata_standard,
+            profiles=self.record.data_quality.domain_consistency if self.record.data_quality else None,
             metadata_licence=self._metadata_licence,
             kv=self.kv,
             build_time=self._meta.build_time,

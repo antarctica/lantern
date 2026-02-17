@@ -10,6 +10,7 @@ from lantern.lib.metadata_library.models.record.elements.common import (
     Dates,
     Identifier,
     Identifiers,
+    Maintenance,
     OnlineResource,
     Series,
 )
@@ -34,13 +35,15 @@ from lantern.lib.metadata_library.models.record.enums import (
     ContactRoleCode,
     DatePrecisionCode,
     HierarchyLevelCode,
+    MaintenanceFrequencyCode,
     OnlineResourceFunctionCode,
+    ProgressCode,
 )
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin, set_admin
 from lantern.lib.metadata_library.models.record.utils.kv import set_kv
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
-from tests.resources.records.admin_keys.testing_keys import load_keys as load_test_keys
-from tests.resources.records.utils import make_record
+from tests.resources.admin_keys import test_keys
+from tests.resources.records.utils import make_record, relate_products
 
 # A record for an ItemCatalogue instance with all supported fields for products.
 
@@ -80,6 +83,9 @@ record = make_record(
     title="Test Resource - Product with all supported fields",
     abstract=abstract,
     purpose="Item to test all supported Product properties are recognised and presented correctly.",
+)
+record.metadata.maintenance = Maintenance(
+    maintenance_frequency=MaintenanceFrequencyCode.AS_NEEDED, progress=ProgressCode.COMPLETED
 )
 record.reference_system_info = ReferenceSystemInfo(
     code=Code(
@@ -163,7 +169,7 @@ record.identification.identifiers = Identifiers(
         ),
     ]
 )
-record.identification.series = Series(name="Test Series", page="3", edition="1")
+record.identification.series = Series(name="Test Series", page="4", edition="1")
 record.identification.spatial_resolution = 1_234_567_890
 record.identification.contacts = Contacts(
     [
@@ -267,7 +273,7 @@ record.identification.graphic_overviews = GraphicOverviews(
     ]
 )
 record.identification.other_citation_details = "Produced by the Mapping and Geographic Information Centre, British Antarctic Survey, 2025, version 1, https://data.bas.ac.uk/maps/1005."
-set_kv({"physical_size_width_mm": "210", "physical_size_height_mm": "297", "sheet_number": "4"}, record)
+set_kv({"physical_size_width_mm": "210", "physical_size_height_mm": "297"}, record)
 
 # add a containing project
 record.identification.aggregations.append(
@@ -281,17 +287,8 @@ record.identification.aggregations.append(
         initiative_type=AggregationInitiativeCode.PROJECT,
     )
 )
-# add a related peer
-record.identification.aggregations.append(
-    Aggregation(
-        identifier=Identifier(
-            identifier="57327327-4623-4247-af86-77fb43b7f45b",
-            href=f"https://{CATALOGUE_NAMESPACE}/items/57327327-4623-4247-af86-77fb43b7f45b",
-            namespace=CATALOGUE_NAMESPACE,
-        ),
-        association_type=AggregationAssociationCode.CROSS_REFERENCE,
-    )
-)
+# add related peers
+record.identification.aggregations.extend(relate_products(record.file_identifier))
 # add a superseded peer
 record.identification.aggregations.append(
     Aggregation(
@@ -517,7 +514,7 @@ record.distribution = [
     ),
 ]
 
-keys = load_test_keys()
+keys = test_keys()
 administration = get_admin(keys=keys, record=record)
 administration.gitlab_issues = ["https://gitlab.data.bas.ac.uk/MAGIC/test/-/issues/123"]
 set_admin(keys=keys, record=record, admin_meta=administration)

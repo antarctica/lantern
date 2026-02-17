@@ -2,9 +2,9 @@ import logging
 from datetime import date
 
 import pytest
+from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
 from cattrs import ClassValidationError
 
-from lantern.lib.metadata_library.models.record.elements.administration import Administration
 from lantern.lib.metadata_library.models.record.elements.common import Contact, ContactIdentity, Contacts, Date, Dates
 from lantern.lib.metadata_library.models.record.elements.identification import Identification
 from lantern.lib.metadata_library.models.record.elements.metadata import Metadata
@@ -119,7 +119,7 @@ class TestRecordRevision:
 
         This only tests revision specific properties can be optionally included along with regular Record properties.
         """
-        value_admin = Administration(id=fx_revision_model_min.file_identifier)
+        value_admin = AdministrationMetadata(id=fx_revision_model_min.file_identifier)
         set_admin(keys=fx_admin_meta_keys, record=fx_revision_model_min, admin_meta=value_admin)
 
         config = fx_revision_model_min.dumps(strip_admin=strip_admin, with_revision=inc_revision)
@@ -134,9 +134,9 @@ class TestRecordRevision:
         else:
             assert "file_revision" not in config
         if strip_admin:
-            assert "administrative_metadata" not in kv
+            assert "admin_metadata" not in kv
             # guard against original record being modified
             assert get_admin(keys=fx_admin_meta_keys, record=fx_revision_model_min) is not None
             assert get_admin(keys=fx_admin_meta_keys, record=result) is None
         else:
-            assert "administrative_metadata" in kv
+            assert "admin_metadata" in kv

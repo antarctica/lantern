@@ -142,6 +142,12 @@
         {% endcall %}
       {% endif %}
 
+      {% if data.metadata_licence %}
+        {% call com.dl_item(title='Metadata Licence', id='info-licence') %}
+          {{ com.ext_link_a(href=data.metadata_licence.href, value=data.metadata_licence.value) }}
+        {% endcall %}
+      {% endif %}
+
       {% call com.dl_item(title='Metadata Links', id='info-records') %}
         <ul class="space-y-2">
           {% for item in data.record_links %}

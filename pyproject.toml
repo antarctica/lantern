@@ -22,7 +22,6 @@ dependencies = [
     "jinja2>=3.1.6",
     "joblib>=1.5.1",
     "jsonschema>=4.23.0",
-    "jwskate>=0.12.2",
     "markdown>=3.8.2",
     "markdown-gfm-admonition>=0.1.1",
     "python-gitlab>=8.0.0",
@@ -191,8 +190,8 @@ LANTERN_LOG_LEVEL = "INFO"
 LANTERN_PARALLEL_JOBS="1"
 LANTERN_ENABLE_FEATURE_SENTRY = "false"
 LANTERN_SENTRY_ENVIRONMENT = "test"
-LANTERN_ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE = "{\"kty\":\"EC\",\"crv\":\"P-256\",\"x\":\"MzZQPXly16iAS2fzW_SbKqKHazsId57y7U35G9j4bbs\",\"y\":\"6__rBtqNe6unAdllQpb2cypCH9u8-LouEX47uC-ncN0\",\"d\":\"_fA1R8yP_uvfB7Qv9IApj7yydLA47N81Y75jZ92QH6U\",\"alg\":\"ECDH-ES+A128KW\",\"kid\":\"magic_metadata_testing_encryption_key\"}"
-LANTERN_ADMIN_METADATA_SIGNING_KEY_PUBLIC = "{\"kty\":\"EC\",\"kid\":\"magic_metadata_testing_signing_key\",\"alg\":\"ES256\",\"crv\":\"P-256\",\"x\":\"243mJW8nkwqB76WGb1Y4DGaU_KpFR7m5PyQvveubgHA\",\"y\":\"l9M7YErkNgM5FL58EavMBxJVgG60DE_qyif3Bp1lawU\"}"
+LANTERN_ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE = "{\"kty\":\"EC\",\"kid\":\"bas_metadata_testing_encryption_key\",\"alg\":\"ECDH-ES+A128KW\",\"crv\":\"P-256\",\"x\":\"kYiwq6MW8lGN6PB2csVMuMRcISVk5eNUpGkjM-mm8QY\",\"y\":\"raOTT2xAQhHFKhPHy338L8Ql0hvgsDtHwtEc8pCOf2Q\",\"d\":\"2lBuUtJK2TcV_b4B-bDCPnRVAqMnYvnLZ41IUguprs8\"}"
+LANTERN_ADMIN_METADATA_SIGNING_KEY_PUBLIC = "{\"kty\":\"EC\",\"kid\":\"bas_metadata_testing_signing_key\",\"alg\":\"ES256\",\"crv\":\"P-256\",\"x\":\"FzxBM1ZPO5W2bYlhT9AjZUKz5_oH5vIh4_k4aEZ64rM\",\"y\":\"vmK5PWOoIA9eO0ntLh37AMpVODyj0NWf842FwoN-GRs\"}"
 LANTERN_STORE_GITLAB_ENDPOINT = "https://gitlab.example.com"
 LANTERN_STORE_GITLAB_TOKEN="x"
 LANTERN_STORE_GITLAB_PROJECT_ID="1234"
@@ -210,7 +209,7 @@ LANTERN_TRUSTED_UPLOAD_HOST="x"
 LANTERN_TRUSTED_UPLOAD_PATH="x"
 LANTERN_VERIFY_SHAREPOINT_PROXY_ENDPOINT="x"
 LANTERN_VERIFY_SAN_PROXY_ENDPOINT="x"
-X_ADMIN_METADATA_SIGNING_KEY_PRIVATE = "{\"kty\":\"EC\",\"crv\":\"P-256\",\"x\":\"243mJW8nkwqB76WGb1Y4DGaU_KpFR7m5PyQvveubgHA\",\"y\":\"l9M7YErkNgM5FL58EavMBxJVgG60DE_qyif3Bp1lawU\",\"d\":\"SdvAiYZplSs_rR0Rqbs2mqMBLyfOUmRNBZkr4XZPxPg\",\"alg\":\"ES256\",\"kid\":\"magic_metadata_testing_signing_key\"}"
+X_ADMIN_METADATA_SIGNING_KEY_PRIVATE = "{\"kty\":\"EC\",\"kid\":\"bas_metadata_testing_signing_key\",\"alg\":\"ES256\",\"crv\":\"P-256\",\"x\":\"FzxBM1ZPO5W2bYlhT9AjZUKz5_oH5vIh4_k4aEZ64rM\",\"y\":\"vmK5PWOoIA9eO0ntLh37AMpVODyj0NWf842FwoN-GRs\",\"d\":\"2lBuUtJK2TcV_b4B-bDCPnRVAqMnYvnLZ41IUguprs8\"}"
 
 [tool.pytest.ini_options]
 # --strict-markers | fail if unknown markers are used

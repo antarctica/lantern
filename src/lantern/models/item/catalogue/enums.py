@@ -20,8 +20,10 @@ class ResourceTypeIcon(Enum):
     COLLECTION = "fa-regular fa-shapes"
     DATASET = "fa-regular fa-cube"
     INITIATIVE = "fa-regular fa-cassette-betamax"
-    PRODUCT = "fa-regular fa-map"
+    PRODUCT = "fa-regular fa-file-fragment"
+    MAP_PRODUCT = "fa-regular fa-frame"
     PAPER_MAP_PRODUCT = "fa-regular fa-map"
+    WEB_MAP_PRODUCT = "fa-regular fa-picture-in-picture"
 
 
 class DistributionType(Enum):
@@ -48,7 +50,7 @@ class DistributionType(Enum):
 
 
 class Licence(Enum):
-    """Supported catalogue licences."""
+    """Supported resource licences."""
 
     OGL_UK_3_0 = "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
     CC_BY_4_0 = "https://creativecommons.org/licenses/by/4.0/"

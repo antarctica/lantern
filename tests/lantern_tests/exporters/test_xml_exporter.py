@@ -3,11 +3,11 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import PropertyMock
 
+from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
 from boto3 import client as S3Client  # noqa: N812
 from pytest_mock import MockerFixture
 
 from lantern.exporters.xml import IsoXmlExporter, IsoXmlHtmlExporter
-from lantern.lib.metadata_library.models.record.elements.administration import Administration
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, set_admin
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
@@ -69,7 +69,7 @@ class TestIsoXmlExporter:
         fx_s3_client: S3Client,
         fx_revision_model_min: RecordRevision,
     ):
-        """Can verify dumped records do not include administrative metadata."""
+        """Can verify dumped records do not include administration metadata."""
         with TemporaryDirectory() as tmp_path:
             output_path = Path(tmp_path)
         mock_config = mocker.Mock()
@@ -83,14 +83,14 @@ class TestIsoXmlExporter:
         type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
         meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
 
-        value_admin = Administration(id=fx_revision_model_min.file_identifier)
+        value_admin = AdministrationMetadata(id=fx_revision_model_min.file_identifier)
         set_admin(keys=fx_admin_meta_keys, record=fx_revision_model_min, admin_meta=value_admin)
 
         exporter = IsoXmlExporter(meta=meta, logger=fx_logger, s3=fx_s3_client, record=fx_revision_model_min)
 
         result = exporter.dumps()
         assert "<gmi:MI_Metadata" in result
-        assert "administrative_metadata" not in result
+        assert "admin_metadata" not in result
 
 
 class TestIsoXmlHtmlExporter:

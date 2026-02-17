@@ -1,8 +1,0 @@
-{
-  "kty":"EC",
-  "kid":"magic_metadata_testing_signing_key",
-  "alg":"ES256",
-  "crv":"P-256",
-  "x":"243mJW8nkwqB76WGb1Y4DGaU_KpFR7m5PyQvveubgHA",
-  "y":"l9M7YErkNgM5FL58EavMBxJVgG60DE_qyif3Bp1lawU"
-}

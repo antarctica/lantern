@@ -1,5 +1,7 @@
 from lantern.lib.metadata_library.models.record.elements.common import (
     Address,
+    Constraint,
+    Constraints,
     Contact,
     ContactIdentity,
     OnlineResource,
@@ -10,7 +12,6 @@ from lantern.lib.metadata_library.models.record.elements.distribution import (
     Size,
     TransferOption,
 )
-from lantern.lib.metadata_library.models.record.elements.identification import Constraint, Constraints
 from lantern.lib.metadata_library.models.record.enums import (
     ConstraintRestrictionCode,
     ConstraintTypeCode,
@@ -20,8 +21,8 @@ from lantern.lib.metadata_library.models.record.enums import (
 )
 from lantern.lib.metadata_library.models.record.presets.admin import BAS_STAFF
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin, set_admin
-from tests.resources.records.admin_keys.testing_keys import load_keys as load_test_keys
-from tests.resources.records.utils import make_record
+from tests.resources.admin_keys import test_keys
+from tests.resources.records.utils import make_record, relate_products
 
 # A record for an ItemCatalogue instance with minimum required fields for products.
 
@@ -31,6 +32,8 @@ record = make_record(
     title="Test Resource - Product marked as restricted",
     abstract="Item to test a Product with a restricted access constraint is presented correctly.",
 )
+# add related peers
+record.identification.aggregations.extend(relate_products(record.file_identifier))
 record.identification.constraints = Constraints(
     [
         Constraint(
@@ -47,9 +50,9 @@ record.identification.constraints = Constraints(
     ]
 )
 
-keys = load_test_keys()
+keys = test_keys()
 administration = get_admin(keys=keys, record=record)
-administration.access_permissions = [BAS_STAFF]
+administration.resource_permissions = [BAS_STAFF]
 set_admin(keys=keys, record=record, admin_meta=administration)
 
 distributor = Contact(

@@ -25,6 +25,18 @@ MAGIC_DISCOVERY_V2 = DomainConsistency(
         edition="2",
         contacts=Contacts([make_magic_role(roles={ContactRoleCode.PUBLISHER})]),
     ),
-    explanation="Resource within scope of British Antarctic Survey (BAS) Mapping and Geographic Information Centre (MAGIC) Discovery Metadata Profile.",
+    explanation="Resource within scope of the British Antarctic Survey (BAS) Mapping and Geographic Information Centre (MAGIC) Discovery Metadata Profile.",
+    result=True,
+)
+
+MAGIC_ADMINISTRATION_V1 = DomainConsistency(
+    specification=Citation(
+        title="British Antarctic Survey (BAS) Mapping and Geographic Information Centre (MAGIC) Administration Metadata Profile",
+        href="https://metadata-standards.data.bas.ac.uk/profiles/magic-administration/v1/",
+        dates=Dates(publication=Date(date=date(2025, 10, 22))),
+        edition="1",
+        contacts=Contacts([make_magic_role(roles={ContactRoleCode.PUBLISHER})]),
+    ),
+    explanation="Resource within scope of the British Antarctic Survey (BAS) Mapping and Geographic Information Centre (MAGIC) Administration Metadata Profile.",
     result=True,
 )

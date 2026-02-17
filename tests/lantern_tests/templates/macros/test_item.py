@@ -3,11 +3,10 @@ from datetime import date
 import pytest
 from bs4 import BeautifulSoup
 
-from lantern.lib.metadata_library.models.record.elements.common import Date, Identifier
+from lantern.lib.metadata_library.models.record.elements.common import Constraint, Date, Identifier
 from lantern.lib.metadata_library.models.record.elements.identification import (
     Aggregation,
     Aggregations,
-    Constraint,
     GraphicOverview,
     GraphicOverviews,
 )

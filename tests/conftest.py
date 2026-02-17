@@ -16,6 +16,8 @@ from tempfile import TemporaryDirectory
 from unittest.mock import MagicMock, PropertyMock
 
 import pytest
+from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
+from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys, AdministrationWrapper
 from boto3 import client as S3Client  # noqa: N812
 from gitlab import Gitlab
 from moto import mock_aws
@@ -37,9 +39,7 @@ from lantern.exporters.verification import VerificationExporter
 from lantern.exporters.waf import WebAccessibleFolderExporter
 from lantern.exporters.website import WebsiteSearchExporter
 from lantern.exporters.xml import IsoXmlHtmlExporter
-from lantern.lib.metadata_library.models.record.elements.administration import Administration
-from lantern.lib.metadata_library.models.record.elements.common import Date, Dates, Identifier, Identifiers
-from lantern.lib.metadata_library.models.record.elements.identification import Constraint
+from lantern.lib.metadata_library.models.record.elements.common import Constraint, Date, Dates, Identifier, Identifiers
 from lantern.lib.metadata_library.models.record.enums import (
     ConstraintRestrictionCode,
     ConstraintTypeCode,
@@ -47,7 +47,7 @@ from lantern.lib.metadata_library.models.record.enums import (
 )
 from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.record import Record as RecordBase
-from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, AdministrationWrapper, set_admin
+from lantern.lib.metadata_library.models.record.utils.admin import set_admin
 from lantern.models.item.base.elements import Link
 from lantern.models.item.base.enums import AccessLevel
 from lantern.models.item.base.item import ItemBase
@@ -67,8 +67,8 @@ from lantern.stores.base import SelectRecordProtocol, SelectRecordsProtocol
 from lantern.stores.gitlab import GitLabSource, GitLabStore
 from lantern.stores.gitlab_cache import GitLabCachedStore, GitLabLocalCache
 from lantern.utils import S3Utils, get_jinja_env, prettify_html
+from tests.resources.admin_keys import test_keys
 from tests.resources.exporters.fake_exporter import FakeExporter, FakeResourceExporter
-from tests.resources.records.admin_keys.testing_keys import load_keys
 from tests.resources.stores.fake_records_store import FakeRecordsStore
 
 
@@ -153,13 +153,15 @@ def fx_export_meta(fx_config: Config) -> ExportMeta:
 @lru_cache(maxsize=1)
 def _admin_meta_keys() -> AdministrationKeys:
     """
-    Administration keys for signing and encrypting administrative metadata.
+    BAS Metadata Library administration metadata test encryption and signing keys.
+
+    These test keys are not secret and so not sensitive.
 
     Standalone method to allow use outside of fixtures in test parametrisation.
 
     Cached for better performance.
     """
-    return load_keys()
+    return test_keys()
 
 
 @pytest.fixture()
@@ -169,9 +171,9 @@ def fx_admin_meta_keys() -> AdministrationKeys:
 
 
 @pytest.fixture()
-def fx_admin_meta_element() -> Administration:
+def fx_admin_meta_element() -> AdministrationMetadata:
     """Administrative metadata element."""
-    return Administration(id="x")
+    return AdministrationMetadata(id="x")
 
 
 @pytest.fixture()
@@ -430,7 +432,7 @@ def _item_cat_model_min() -> ItemCatalogue:
         select_record=_select_record,
     )
     # noinspection PyProtectedMember
-    set_admin(keys=model._admin_keys, record=model._record, admin_meta=Administration(id=model.resource_id))
+    set_admin(keys=model._admin_keys, record=model._record, admin_meta=AdministrationMetadata(id=model.resource_id))
     return model
 
 
@@ -454,7 +456,7 @@ def fx_item_cat_model_min(
         select_record=fx_select_record,
     )
     # noinspection PyProtectedMember
-    set_admin(keys=model._admin_keys, record=model._record, admin_meta=Administration(id=model.resource_id))
+    set_admin(keys=model._admin_keys, record=model._record, admin_meta=AdministrationMetadata(id=model.resource_id))
     return model
 
 
@@ -470,7 +472,9 @@ def fx_item_cat_model_open(
     set_admin(
         keys=model._admin_keys,
         record=model._record,
-        admin_meta=Administration(id=model.resource_id, access_permissions=[OPEN_ACCESS]),
+        admin_meta=AdministrationMetadata(
+            id=model.resource_id, metadata_permissions=[OPEN_ACCESS], resource_permissions=[OPEN_ACCESS]
+        ),
     )
     return model
 
@@ -495,7 +499,7 @@ def fx_item_physical_map_model_min(
         select_record=fx_select_record,
     )
     # noinspection PyProtectedMember
-    set_admin(keys=model._admin_keys, record=model._record, admin_meta=Administration(id=model.resource_id))
+    set_admin(keys=model._admin_keys, record=model._record, admin_meta=AdministrationMetadata(id=model.resource_id))
     return model
 
 
@@ -557,8 +561,9 @@ def fx_item_cat_admin_tab_min() -> AdminTab:
         revision=Link(value="x", href="x", external=True),
         gitlab_issues=[],
         restricted=False,
-        access_level=AccessLevel.NONE,
-        access_permissions=[],
+        metadata_access=AccessLevel.NONE,
+        resource_access=AccessLevel.NONE,
+        admin_meta=None,
     )
 
 
@@ -961,7 +966,9 @@ def _select_record_open(identifier: str) -> RecordRevision:
     record.file_identifier = identifier
 
     # access permissions
-    admin_meta = Administration(id=record.file_identifier, access_permissions=[OPEN_ACCESS])
+    admin_meta = AdministrationMetadata(
+        id=record.file_identifier, metadata_permissions=[OPEN_ACCESS], resource_permissions=[OPEN_ACCESS]
+    )
     set_admin(keys=_admin_meta_keys(), record=record, admin_meta=admin_meta)
 
     # access constraints (informative)

@@ -1,17 +1,24 @@
 from datetime import UTC, datetime
 
 import pytest
+from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
 
 from lantern.config import Config
 from lantern.lib.metadata_library.models.record.elements.common import (
+    Constraint,
+    Constraints,
     Contact,
     ContactIdentity,
     Contacts,
     Date,
 )
 from lantern.lib.metadata_library.models.record.elements.identification import GraphicOverview, GraphicOverviews
-from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
-from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
+from lantern.lib.metadata_library.models.record.enums import (
+    ConstraintRestrictionCode,
+    ConstraintTypeCode,
+    ContactRoleCode,
+)
+from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, set_admin
 from lantern.models.item.base.elements import Link
 from lantern.models.item.base.enums import ResourceTypeLabel
 from lantern.models.item.catalogue.elements import PageSummary
@@ -86,11 +93,28 @@ class TestItemCatalogue:
                 select_record=_select_record,
             )
 
-    def test_revision(
-        self,
-        fx_site_meta: SiteMeta,
-        fx_item_cat_model_min: ItemCatalogue,
+    @pytest.mark.parametrize(
+        ("licence", "expected"),
+        [
+            (None, None),
+            (
+                Constraint(type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.UNRESTRICTED),
+                None,
+            ),
+            (
+                Constraint(type=ConstraintTypeCode.USAGE, restriction_code=ConstraintRestrictionCode.LICENSE),
+                Constraint(type=ConstraintTypeCode.USAGE, restriction_code=ConstraintRestrictionCode.LICENSE),
+            ),
+        ],
+    )
+    def test_metadata_licence(
+        self, fx_item_cat_model_min: ItemCatalogue, licence: Constraint | None, expected: Constraint | None
     ):
+        """Can get metadata usage constraint if set and applicable."""
+        fx_item_cat_model_min._record.metadata.constraints = Constraints([licence]) if licence else Constraints([])
+        assert fx_item_cat_model_min._metadata_licence == expected
+
+    def test_revision(self, fx_site_meta: SiteMeta, fx_item_cat_model_min: ItemCatalogue):
         """Can compute link to record revision where available."""
         # realistic values needed over 'x' so substrings can be extracted safely
         id_ = "ee21f4a7-7e87-4074-b92f-9fa27a68d26d"
@@ -115,9 +139,9 @@ class TestItemCatalogue:
         restricted: bool,
     ):
         """
-        Can compute whether record is open access.
+        Can compute whether record is open access or not.
 
-        Defaults to restricted.
+        Based on resource access only. Defaults to restricted.
         """
         model = fx_item_cat_model_min if restricted else fx_item_cat_model_open
         assert model._restricted == restricted

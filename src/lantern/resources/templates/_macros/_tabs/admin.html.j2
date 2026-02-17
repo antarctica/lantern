@@ -28,16 +28,30 @@
         {% endif %}
       {% endcall %}
 
-      {% call com.dl_item(title='Resource Access Level', id='admin-level') %}
-        {% if data.access_level == 'PUBLIC' %}
+      {% call com.dl_item(title='Metadata Access', id='admin-metadata-access') %}
+        {% if data.metadata_access == 'PUBLIC' %}
           {% call com.alert(variant='green') %}Public (Open Access){% endcall %}
         {% else %}
-          {% call com.alert(variant='red') %}{{ data.access_level }}{% endcall %}
+          {% call com.alert(variant='red') %}{{ data.metadata_access }}{% endcall %}
         {% endif %}
       {% endcall %}
 
-      {% call com.dl_item(title='Access Permissions', id='admin-access') %}
-        {% for permission in data.access %}
+      {% call com.dl_item(title='Resource Access', id='admin-resource-access') %}
+        {% if data.resource_access == 'PUBLIC' %}
+          {% call com.alert(variant='green') %}Public (Open Access){% endcall %}
+        {% else %}
+          {% call com.alert(variant='red') %}{{ data.resource_access }}{% endcall %}
+        {% endif %}
+      {% endcall %}
+
+      {% call com.dl_item(title='Metadata Permissions', id='admin-metadata-permissions') %}
+        {% for permission in data.metadata_permissions %}
+          <pre>{{ permission }}</pre>
+        {% endfor %}
+      {% endcall %}
+
+      {% call com.dl_item(title='Resource Permissions', id='admin-resource-permissions') %}
+        {% for permission in data.resource_permissions %}
           <pre>{{ permission }}</pre>
         {% endfor %}
       {% endcall %}

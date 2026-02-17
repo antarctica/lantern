@@ -84,18 +84,20 @@ wheels = [
 
 [[package]]
 name = "bas-metadata-library"
-version = "0.16.0a3"
+version = "0.16.0a8"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
+    { name = "cattrs" },
     { name = "importlib-resources" },
     { name = "jsonschema" },
+    { name = "jwskate" },
     { name = "lxml" },
     { name = "rfc3987" },
     { name = "strict-rfc3339" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/38/fd/e2378a904242876b832936e8388bacab0ab7aa44da27993f8e07df20a64f/bas_metadata_library-0.16.0a3.tar.gz", hash = "sha256:f64247811eae925e49128dd380f7327eebd8743be953e4a13869a58ed5b43c6b", size = 162227, upload-time = "2025-12-10T20:57:22.972Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/51/91/fc4a8fd4f81a60aad86005faf92c17734bef13f8686bda27b1dce16ac88a/bas_metadata_library-0.16.0a8.tar.gz", hash = "sha256:172091419a7323d94ab39c63ff2e57b412b7abea89c67d13d44a1009e7e1677e", size = 168746, upload-time = "2026-02-16T23:31:44.062Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/2e/b9/3b5575db8865ff514e047875a550917ec3f1de22b57cf54bdec764a31b3c/bas_metadata_library-0.16.0a3-py3-none-any.whl", hash = "sha256:335cc652c1d0bc36eeb88339f14437e6f5ad0ef8a0de7f301d0981df31275ff2", size = 238161, upload-time = "2025-12-10T20:57:21.264Z" },
+    { url = "https://files.pythonhosted.org/packages/ce/5b/2a198adb4131a2b4e9152557cb4610402e27bc9b89c223fc5ab2825a54f0/bas_metadata_library-0.16.0a8-py3-none-any.whl", hash = "sha256:8d3054d9d8c3edeb1089fc2eaaf5e8f32b1c0ab6258e449d9a37d876372653d3", size = 249915, upload-time = "2026-02-16T23:31:42.106Z" },
 ]
 
 [[package]]
@@ -898,7 +900,6 @@ dependencies = [
     { name = "jinja2" },
     { name = "joblib" },
     { name = "jsonschema" },
-    { name = "jwskate" },
     { name = "markdown" },
     { name = "markdown-gfm-admonition" },
     { name = "python-gitlab" },
@@ -949,7 +950,6 @@ requires-dist = [
     { name = "jinja2", specifier = ">=3.1.6" },
     { name = "joblib", specifier = ">=1.5.1" },
     { name = "jsonschema", specifier = ">=4.23.0" },
-    { name = "jwskate", specifier = ">=0.12.2" },
     { name = "markdown", specifier = ">=3.8.2" },
     { name = "markdown-gfm-admonition", specifier = ">=0.1.1" },
     { name = "python-gitlab", specifier = ">=8.0.0" },

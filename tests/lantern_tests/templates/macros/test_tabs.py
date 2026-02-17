@@ -4,19 +4,22 @@ from datetime import date
 from unittest.mock import PropertyMock
 
 import pytest
+from bas_metadata_library.standards.magic_administration.v1 import Permission
 from bs4 import BeautifulSoup
 from pytest_mock import MockerFixture
 
-from lantern.lib.metadata_library.models.record.elements.administration import Permission
 from lantern.lib.metadata_library.models.record.elements.common import (
     Address,
     Citation,
+    Constraint,
+    Constraints,
     Contact,
     ContactIdentity,
     Contacts,
     Date,
     Dates,
     Identifier,
+    Maintenance,
     OnlineResource,
     Series,
 )
@@ -26,13 +29,10 @@ from lantern.lib.metadata_library.models.record.elements.identification import (
     Aggregation,
     Aggregations,
     BoundingBox,
-    Constraint,
-    Constraints,
     Extent,
     ExtentGeographic,
     Extents,
     ExtentTemporal,
-    Maintenance,
     TemporalPeriod,
 )
 from lantern.lib.metadata_library.models.record.elements.projection import Code, ReferenceSystemInfo
@@ -1362,6 +1362,25 @@ class TestInfoTab:
         else:
             assert profiles is None
 
+    @pytest.mark.parametrize(
+        "value",
+        [
+            None,
+            Constraint(type=ConstraintTypeCode.USAGE, restriction_code=ConstraintRestrictionCode.LICENSE, href="x"),
+        ],
+    )
+    def test_metadata_licence(self, fx_item_cat_model_min: ItemCatalogue, value: Constraint | None):
+        """Can get metadata profiles based on values from item."""
+        fx_item_cat_model_min._record.metadata.constraints = Constraints([value]) if value else Constraints([])
+        expected = fx_item_cat_model_min._additional_info.metadata_licence
+        html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
+
+        licences = html.select_one("#info-licence")
+        if expected:
+            assert licences.select_one(f"a[href='{expected.href}']") is not None
+        else:
+            assert licences is None
+
     def test_record_links(self, fx_item_cat_model_min: ItemCatalogue):
         """Can get metadata record links based on values from item."""
         expected = fx_item_cat_model_min._additional_info.record_links
@@ -1492,7 +1511,7 @@ class TestAdminTab:
             assert issues is None
 
     @pytest.mark.parametrize(("restricted", "expected"), [(True, "Yes"), (False, "No")])
-    def test_restricted(
+    def test_item_restricted(
         self,
         fx_item_cat_model_min: ItemCatalogue,
         fx_item_cat_model_open: ItemCatalogue,
@@ -1509,32 +1528,33 @@ class TestAdminTab:
     @pytest.mark.parametrize(
         ("value", "expected"), [(AccessLevel.NONE, "NONE"), (AccessLevel.PUBLIC, "Public (Open Access)")]
     )
-    def test_access_level(self, fx_item_cat_model_min: ItemCatalogue, value: AccessLevel, expected: str):
-        """Can get item access level based on value from item."""
-        if value == AccessLevel.PUBLIC:
-            admin_meta = get_admin(keys=fx_item_cat_model_min._admin_keys, record=fx_item_cat_model_min._record)
-            admin_meta.access_permissions = [OPEN_ACCESS]
-            set_admin(
-                keys=fx_item_cat_model_min._admin_keys, record=fx_item_cat_model_min._record, admin_meta=admin_meta
-            )
+    def test_access(self, fx_item_cat_model_min: ItemCatalogue, value: AccessLevel, expected: str):
+        """Can get metadata and resource access level based on value from item."""
+        admin_meta = get_admin(keys=fx_item_cat_model_min._admin_keys, record=fx_item_cat_model_min._record)
+        admin_meta.metadata_permissions = [OPEN_ACCESS] if value == AccessLevel.PUBLIC else []
+        admin_meta.resource_permissions = [OPEN_ACCESS] if value == AccessLevel.PUBLIC else []
+        set_admin(keys=fx_item_cat_model_min._admin_keys, record=fx_item_cat_model_min._record, admin_meta=admin_meta)
         html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
 
-        result = html.select_one("#admin-level")
-        assert result.text.strip() == str(expected)
+        result_metadata = html.select_one("#admin-metadata-access")
+        assert result_metadata.text.strip() == str(expected)
+        result_resource = html.select_one("#admin-resource-access")
+        assert result_resource.text.strip() == str(expected)
 
     @pytest.mark.parametrize("value", [AccessLevel.NONE, AccessLevel.PUBLIC])
-    def test_access_permissions(self, fx_item_cat_model_min: ItemCatalogue, value: list[Permission]):
-        """Can get item access permissions based on value from item."""
-        if value == AccessLevel.PUBLIC:
-            admin_meta = get_admin(keys=fx_item_cat_model_min._admin_keys, record=fx_item_cat_model_min._record)
-            admin_meta.access_permissions = [OPEN_ACCESS]
-            set_admin(
-                keys=fx_item_cat_model_min._admin_keys, record=fx_item_cat_model_min._record, admin_meta=admin_meta
-            )
-        expected = fx_item_cat_model_min._admin.access
+    def test_permissions(self, fx_item_cat_model_min: ItemCatalogue, value: list[Permission]):
+        """Can get metadata and resource access permissions based on value from item."""
+        admin_meta = get_admin(keys=fx_item_cat_model_min._admin_keys, record=fx_item_cat_model_min._record)
+        admin_meta.metadata_permissions = [OPEN_ACCESS] if value == AccessLevel.PUBLIC else []
+        admin_meta.resource_permissions = [OPEN_ACCESS] if value == AccessLevel.PUBLIC else []
+        set_admin(keys=fx_item_cat_model_min._admin_keys, record=fx_item_cat_model_min._record, admin_meta=admin_meta)
+        expected = fx_item_cat_model_min._admin.resource_permissions
         html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
 
-        access_permissions = html.select_one("#admin-access")
+        metadata_permissions = html.select_one("#admin-metadata-permissions")
+        resource_permissions = html.select_one("#admin-resource-permissions")
         for permission in expected:
             # noinspection PyTypeChecker
-            assert access_permissions.find(name="pre", string=permission) is not None
+            assert metadata_permissions.find(name="pre", string=permission) is not None
+            # noinspection PyTypeChecker
+            assert resource_permissions.find(name="pre", string=permission) is not None

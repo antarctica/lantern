@@ -1,4 +1,4 @@
-from lantern.lib.metadata_library.models.record.elements.identification import Constraint, Constraints
+from lantern.lib.metadata_library.models.record.elements.common import Constraint, Constraints
 from lantern.lib.metadata_library.models.record.enums import (
     ConstraintRestrictionCode,
     ConstraintTypeCode,
@@ -6,10 +6,10 @@ from lantern.lib.metadata_library.models.record.enums import (
 )
 from tests.resources.records.utils import make_record
 
-# Records for all supported licence usage constraints.
+# Records for all supported resource licence usage constraints.
 
 abstract = """
-Item to test all supported licences:
+Item to test all supported resource licences:
 
 - OGL v3
 - CC BY v4
@@ -59,7 +59,7 @@ cc_record.identification.constraints = Constraints(
             type=ConstraintTypeCode.USAGE,
             restriction_code=ConstraintRestrictionCode.LICENSE,
             href="https://creativecommons.org/licenses/by/4.0/",
-            statement="This information is licensed under the Create Commons Attribution 4.0 International Licence (CC BY 4.0). To view this licence, visit https://creativecommons.org/licenses/by/4.0/",
+            statement="This information is licensed under the Creative Commons Attribution 4.0 International Licence (CC BY 4.0). To view this licence, visit https://creativecommons.org/licenses/by/4.0/",
         ),
     ]
 )

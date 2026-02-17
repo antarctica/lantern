@@ -42,7 +42,7 @@ from lantern.lib.metadata_library.models.record.enums import (
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin, set_admin
 from lantern.lib.metadata_library.models.record.utils.kv import set_kv
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
-from tests.resources.records.admin_keys.testing_keys import load_keys as load_test_keys
+from tests.resources.admin_keys import test_keys
 from tests.resources.records.utils import make_record, relate_products
 
 # A record for an ItemCatalogue instance with all supported fields for products.
@@ -514,7 +514,7 @@ record.distribution = [
     ),
 ]
 
-keys = load_test_keys()
+keys = test_keys()
 administration = get_admin(keys=keys, record=record)
 administration.gitlab_issues = ["https://gitlab.data.bas.ac.uk/MAGIC/test/-/issues/123"]
 set_admin(keys=keys, record=record, admin_meta=administration)

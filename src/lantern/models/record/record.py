@@ -146,12 +146,12 @@ class Record(RecordBase):
 
     def _validate_admin(self) -> None:
         """
-        Verify record has administrative metadata.
+        Verify record has administration metadata.
 
         Simple presence check, structure and content cannot be validated here as keys aren't available.
         """
-        if "administrative_metadata" not in get_kv(self):
-            msg = "No administrative metadata."
+        if "admin_metadata" not in get_kv(self):
+            msg = "No administration metadata."
             exp = ValueError(msg)
             raise RecordInvalidError(validation_error=exp)
 
@@ -167,7 +167,7 @@ class Record(RecordBase):
         - include a contact with the 'Point of Contact' role
         - use unique extent identifiers if included
         - don't use UUIDs as aliases, and/or include additional `/` values
-        - has administrative metadata
+        - have administration metadata
 
         See docs/data_model.md#record-validation for more information.
         """

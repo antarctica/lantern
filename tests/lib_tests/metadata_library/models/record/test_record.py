@@ -94,7 +94,7 @@ class TestRecord:
 
     magic_discovery_v1_valid = Record(
         file_identifier="x",
-        hierarchy_level=HierarchyLevelCode.DATASET,
+        hierarchy_level=HierarchyLevelCode.PRODUCT,
         metadata=Metadata(
             contacts=Contacts(
                 [
@@ -279,7 +279,7 @@ class TestRecord:
         value = "x"
         expected_schema = "https://metadata-resources.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-2-v4.json"
         date_stamp = datetime(2014, 6, 30, tzinfo=UTC).date()
-        hierarchy_level = HierarchyLevelCode.DATASET
+        hierarchy_level = HierarchyLevelCode.PRODUCT
 
         record = Record(
             hierarchy_level=hierarchy_level,
@@ -346,7 +346,7 @@ class TestRecord:
         expected_str = "x"
         expected_date = date(2014, 6, 30)
         expected_enums = {
-            "hierarchy_level": HierarchyLevelCode.DATASET,
+            "hierarchy_level": HierarchyLevelCode.PRODUCT,
             "contact_role": ContactRoleCode.POINT_OF_CONTACT,
             "constraint_type": ConstraintTypeCode.USAGE,
             "constraint_code": ConstraintRestrictionCode.LICENSE,
@@ -392,7 +392,7 @@ class TestRecord:
         """Cannot create a Record from a JSON serialised dict referencing an unsupported JSON Schema."""
         config = {
             "$schema": "x",
-            "hierarchy_level": HierarchyLevelCode.DATASET,
+            "hierarchy_level": HierarchyLevelCode.PRODUCT,
             "metadata": {
                 "contacts": [{"organisation": {"name": "x"}, "role": [ContactRoleCode.POINT_OF_CONTACT]}],
                 "date_stamp": date(2014, 6, 30).isoformat(),
@@ -607,7 +607,7 @@ class TestRecord:
     def test_validate_min_iso(self):
         """A minimally valid ISO record can be validated."""
         record = Record(
-            hierarchy_level=HierarchyLevelCode.DATASET,
+            hierarchy_level=HierarchyLevelCode.PRODUCT,
             metadata=Metadata(
                 contacts=Contacts(
                     [Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT})]

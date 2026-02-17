@@ -93,16 +93,6 @@
         {% endcall %}
       {% endif %}
 
-      {% if data.gitlab_issues %}
-        {% call com.dl_item(title='Internal references', id='info-issues') %}
-          <ul class="space-y-2">
-            {% for value in data.gitlab_issues %}
-              <li>{{ value }}</li>
-            {% endfor %}
-          </ul>
-        {% endcall %}
-      {% endif %}
-
       {% for label, value in data.dates.items() %}
         {% set id = label | lower | replace(' ', '-') %}
         {% call com.dl_item(title=label) %}{{ com.time(value, id='info-'+id) }}{% endcall %}

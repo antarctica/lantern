@@ -197,7 +197,6 @@ class ItemCatalogue(ItemBase):
             item_id=self.resource_id,
             item_type=self.resource_type,
             identifiers=self._identifiers,
-            gitlab_issues=self.admin_gitlab_issues,
             dates=self._dates,
             series=self.series_descriptive,
             scale=self.record.identification.spatial_resolution,

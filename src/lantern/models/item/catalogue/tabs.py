@@ -405,7 +405,6 @@ class AdditionalInfoTab(Tab):
         item_id: str,
         item_type: HierarchyLevelCode,
         identifiers: Identifiers,
-        gitlab_issues: list[str],
         dates: Dates,
         datestamp: date,
         kv: dict[str, str],
@@ -424,7 +423,6 @@ class AdditionalInfoTab(Tab):
         self._scale = scale
         self._projection = projection
         self._identifiers = identifiers
-        self._gitlab_issues = gitlab_issues
         self._dates = dates
         self._datestamp = datestamp
         self._maintenance = maintenance
@@ -538,11 +536,6 @@ class AdditionalInfoTab(Tab):
     def isbn(self) -> list[str]:
         """ISBN identifiers if set."""
         return self._identifiers.isbn
-
-    @property
-    def gitlab_issues(self) -> list[str]:
-        """GitLab issue references if set."""
-        return [AdminTab._make_gitlab_issue_ref(issue) for issue in self._gitlab_issues]
 
     @property
     def dates(self) -> dict[str, FormattedDate]:

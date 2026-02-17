@@ -2,7 +2,7 @@ from lantern.lib.metadata_library.models.record.elements.identification import A
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode, HierarchyLevelCode
 from tests.resources.records.utils import make_record
 
-# A record for an ItemCatalogue instance with minimum required fields for initiatives.
+# A record for an ItemCatalogue instance with minimum required fields for open-access initiatives.
 
 record = make_record(
     file_identifier="c31720da-8c10-496a-893d-f003f09151e9",

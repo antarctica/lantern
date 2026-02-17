@@ -61,7 +61,6 @@ def make_record(
     )
 
     record.metadata.constraints = Constraints([OPEN_ACCESS, CC_BY_ND_V4])
-
     record.metadata.date_stamp = date(2023, 10, 1)
 
     record.identification.edition = "1"

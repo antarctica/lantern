@@ -8,7 +8,7 @@ from dunamai import Style, Version
 from tomlkit import dump as toml_dump
 from tomlkit import parse as toml_parse
 
-__VERSION__ = "0.3.0"
+__VERSION__ = "0.3.0"  # of this release workflow, not the project
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 

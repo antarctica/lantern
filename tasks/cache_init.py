@@ -18,8 +18,8 @@ def init_cache(logger: logging.Logger, store: GitLabCachedStore) -> None:
 # noinspection PyProtectedMember
 def main() -> None:
     """Entrypoint."""
-    logger, _config, store, _s3 = init()
-    init_cache(logger=logger, store=store)
+    logger, _config, store, _s3 = init(cached_store=True)
+    init_cache(logger=logger, store=store)  # ty:ignore[invalid-argument-type]
 
 
 if __name__ == "__main__":

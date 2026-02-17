@@ -242,9 +242,9 @@ def fx_lib_record_config_min_iso() -> dict:
 @pytest.fixture()
 def fx_lib_record_config_min_magic(fx_lib_record_config_min_iso: dict) -> dict:
     """
-    Minimal (base) record configuration (MAGIC preset).
+    Minimal (base) record configuration (MAGIC presets).
 
-    Minimal record that can create a valid RecordMagicDiscoveryV1 instance. Does not include properties the preset will
+    Minimal record that can create a valid RecordMagic instance. Does not include properties the preset will
     configure automatically (such as identifiers, contacts, domain consistencies).
 
     Types must be safe to encode as JSON.
@@ -544,7 +544,6 @@ def fx_item_cat_info_tab_minimal(fx_site_meta: SiteMeta) -> AdditionalInfoTab:
         item_id="x",
         item_type=HierarchyLevelCode.PRODUCT,
         identifiers=identifiers,
-        gitlab_issues=[],
         dates=dates,
         datestamp=datetime(2014, 6, 30, 14, 30, second=45, tzinfo=UTC).date(),
         kv={},

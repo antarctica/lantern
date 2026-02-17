@@ -6,11 +6,12 @@ from pathlib import Path
 from uuid import uuid4
 
 import inquirer
+from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 from tasks._record_utils import dump_records, init, process_record_selections
 
 from lantern.lib.metadata_library.models.record.presets.identifiers import make_bas_cat
 from lantern.lib.metadata_library.models.record.record import Record
-from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, get_admin, set_admin
+from lantern.lib.metadata_library.models.record.utils.admin import get_admin, set_admin
 from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.record.record import Record as CatalogueRecord
 from lantern.stores.gitlab import GitLabStore

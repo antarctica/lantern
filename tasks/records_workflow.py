@@ -7,6 +7,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 import inquirer
+from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 from gitlab.exceptions import GitlabGetError
 from mypy_boto3_s3 import S3Client
 from tasks._config import ExtraConfig
@@ -22,7 +23,8 @@ from tasks.records_zap import process_records as zap_process_records
 from lantern.config import Config
 from lantern.exporters.site import SiteExporter
 from lantern.exporters.verification import VerificationExporter
-from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, get_admin
+from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
+from lantern.lib.metadata_library.models.record.utils.admin import get_admin
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
 from lantern.models.verification.types import VerificationContext
@@ -234,6 +236,20 @@ def _zap(logger: logging.Logger, store: GitLabStore, admin_keys: AdministrationK
         logger.info("No Zap records to process, skipping.")
         return
 
+    product_types = [
+        HierarchyLevelCode.PRODUCT,
+        HierarchyLevelCode.MAP_PRODUCT,
+        HierarchyLevelCode.PAPER_MAP_PRODUCT,
+        HierarchyLevelCode.WEB_MAP_PRODUCT,
+    ]
+    for record in records:
+        if record.hierarchy_level != HierarchyLevelCode.PRODUCT:
+            continue
+        print(f"Confirm product (sub-)type for record [{record.file_identifier}] '{record.identification.title}'")
+        ptype = inquirer.prompt([inquirer.List("ptype", message="Product type", choices=product_types)])["ptype"]
+        record.hierarchy_level = HierarchyLevelCode(ptype)
+        logger.info(f"Hierarchy level set to '{record.hierarchy_level}' for record [{record.file_identifier}].")
+
     records.extend(zap_process_records(logger=logger, records=records, store=store, admin_keys=admin_keys))
     zap_dump_records(logger=logger, records=records, output_path=import_path)
     zap_clean_input_path(input_record_paths=record_paths, processed_ids=[r.file_identifier for r in records])  # ty:ignore[invalid-argument-type]
@@ -264,14 +280,14 @@ def _changeset(
     print(
         "\nEnsure GitLab issue selected is where changeset should be linked (e.g. Helpdesk vs. Mapping Coordination)."
     )
-    issue = inquirer.prompt([inquirer.List("issue", message="Issue URL", choices=record_issues)])["issue"]
-    print(issue)
+    issue = inquirer.prompt([inquirer.List("issue", message="Issue URL", choices=sorted(record_issues))])["issue"]
     if issue == "<NONE>":
         issue = None
     elif issue == "<OTHER>":
         issue = inquirer.prompt([inquirer.Text(name="url", message="Issue URL", default="<NONE>")])["url"]
         if issue == "<NONE>":
             issue = None
+    logger.info(f"Issue set to '{issue}'.")
 
     branch = _changeset_branch(logger=logger, issue=issue, default=config.STORE_GITLAB_BRANCH)
     store = init_store(logger=logger, config=config, branch=branch, cached=True)

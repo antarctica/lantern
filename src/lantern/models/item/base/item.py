@@ -1,12 +1,15 @@
-from functools import cached_property
+from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata, Permission
 
-from lantern.lib.metadata_library.models.record.elements.administration import Administration
-from lantern.lib.metadata_library.models.record.elements.common import Identifier, Identifiers, Series
+from lantern.lib.metadata_library.models.record.elements.common import (
+    Constraint,
+    Constraints,
+    Identifier,
+    Identifiers,
+    Series,
+)
 from lantern.lib.metadata_library.models.record.elements.distribution import Distribution
 from lantern.lib.metadata_library.models.record.elements.identification import (
     Aggregations,
-    Constraint,
-    Constraints,
     GraphicOverview,
     GraphicOverviews,
 )
@@ -42,52 +45,69 @@ class ItemBase:
     It is expected, and acceptable, to use the underlying `_record` property to access information not made directly
     available by this class. Especially for properties this class would simply pass through to the record.
 
-    Properties for administrative metadata elements can be accessed from the `_admin_metadata` property. All admin
-    metadata properties are optional and return `None` or a suitable equivalent where admin metadata is not included in
-    the record, or keys are not provided to access it.
 
     Base items are compatible with Records and RecordRevisions, depending on available context.
+    Properties for administrative metadata elements can be accessed from the `admin_metadata` property, which is cached
+    on first access unless the underlying record changes. As admin metadata is optional, all `admin_` properties are
+    return `None` or a suitable equivalent where admin metadata is not included, or keys are not provided to access it.
     """
 
     def __init__(self, record: Record | RecordRevision, admin_keys: AdminMetadataKeys | None = None) -> None:
         self._record = record
         self._admin_keys = admin_keys
+        self._admin_metadata: AdministrationMetadata | None = None
 
-    @cached_property
-    def _admin_metadata(self) -> Administration | None:
+    @staticmethod
+    def _compute_access_level(permissions: list[Permission]) -> AccessLevel:
+        if len(permissions) == 0:
+            return AccessLevel.NONE
+        if permissions == [BAS_STAFF]:
+            return AccessLevel.BAS_STAFF
+        if permissions == [OPEN_ACCESS]:
+            return AccessLevel.PUBLIC
+        return AccessLevel.UNKNOWN
+
+    @property
+    def admin_metadata(self) -> AdministrationMetadata | None:
         """
         Optional administrative metadata.
 
-        If present, value is decrypted and verified in terms of its signature and subject resource.
+        If present, value is decrypted and verified on first access.
         """
         if self._admin_keys is None:
             return None
-        return get_admin(keys=self._admin_keys, record=self._record)
+        if self._admin_metadata is None:
+            self._admin_metadata = get_admin(keys=self._admin_keys, record=self.record)
+        return self._admin_metadata
 
     @property
-    def admin_access_level(self) -> AccessLevel:
+    def admin_metadata_access(self) -> AccessLevel:
+        """
+        Metadata access.
+
+        Determined by admin access permissions. Defaults to no access if no access permissions are set.
+        """
+        if self.admin_metadata is None:
+            return AccessLevel.NONE
+        return self._compute_access_level(permissions=self.admin_metadata.metadata_permissions)
+
+    @property
+    def admin_resource_access(self) -> AccessLevel:
         """
         Resource access.
 
         Determined by admin access permissions. Defaults to no access if no access permissions are set.
         """
-        if self._admin_metadata is None or len(self._admin_metadata.access_permissions) == 0:
+        if self.admin_metadata is None:
             return AccessLevel.NONE
-
-        permissions = self._admin_metadata.access_permissions
-        if permissions == [BAS_STAFF]:
-            return AccessLevel.BAS_STAFF
-        if permissions == [OPEN_ACCESS]:
-            return AccessLevel.PUBLIC
-
-        return AccessLevel.UNKNOWN
+        return self._compute_access_level(permissions=self.admin_metadata.resource_permissions)
 
     @property
     def admin_gitlab_issues(self) -> list[str]:
         """Optional list of associated GitLab issues."""
-        if self._admin_metadata is None:
+        if self.admin_metadata is None:
             return []
-        return self._admin_metadata.gitlab_issues
+        return self.admin_metadata.gitlab_issues
 
     @property
     def aggregations(self) -> Aggregations:
@@ -131,7 +151,7 @@ class ItemBase:
 
     @property
     def constraints(self) -> Constraints:
-        """Constraints."""
+        """Resource Constraints."""
         return self._record.identification.constraints
 
     @property
@@ -302,12 +322,15 @@ class ItemBase:
 
         Typically used for published maps.
 
-        Due to a bug in V4 BAS ISO JSON Schema the 'page' (sheet number) property cannot be set. As a workaround, this
-        class supports loading an optional 'sheet_number' from KV properties.
+        Due to a bug in early revisions of the V4 BAS ISO JSON Schema, the 'page' (sheet number) property could not be
+        set. This class supports loading an optional 'sheet_number' from KV properties if not set in the series element.
         """
         series = self._record.identification.series
+        if series and series.page:
+            return series
+
         sheet_number = self.kv.get("sheet_number", None)
-        if sheet_number is not None:
+        if sheet_number:
             series.page = sheet_number
         return series
 

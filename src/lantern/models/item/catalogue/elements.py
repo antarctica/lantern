@@ -8,8 +8,8 @@ from typing import TypeVar
 from lantern.lib.metadata_library.models.record.elements.common import Date
 from lantern.lib.metadata_library.models.record.elements.common import Dates as RecordDates
 from lantern.lib.metadata_library.models.record.elements.common import Identifiers as RecordIdentifiers
+from lantern.lib.metadata_library.models.record.elements.common import Maintenance as RecordMaintenance
 from lantern.lib.metadata_library.models.record.elements.identification import Aggregations as RecordAggregations
-from lantern.lib.metadata_library.models.record.elements.identification import Maintenance as RecordMaintenance
 from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,
     AggregationInitiativeCode,
@@ -150,7 +150,7 @@ class ItemCatalogueSummary(ItemBase):
     @property
     def _restricted(self) -> bool:
         """Whether the item is restricted."""
-        return self.admin_access_level != AccessLevel.PUBLIC
+        return self.admin_resource_access != AccessLevel.PUBLIC
 
     @property
     def summary_html(self) -> str:

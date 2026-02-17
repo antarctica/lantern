@@ -5,12 +5,12 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest.mock import PropertyMock
 
+from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
 from pytest_mock import MockerFixture
 
 from lantern.exporters.website import WebsiteSearchExporter
-from lantern.lib.metadata_library.models.record.elements.administration import Administration
-from lantern.lib.metadata_library.models.record.elements.common import Identifier
-from lantern.lib.metadata_library.models.record.elements.identification import Aggregation, Constraint
+from lantern.lib.metadata_library.models.record.elements.common import Constraint, Identifier
+from lantern.lib.metadata_library.models.record.elements.identification import Aggregation
 from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,
     ConstraintRestrictionCode,
@@ -64,7 +64,9 @@ class TestWebsiteSearchExporter:
 
         if identifier == "in_scope":
             # access permissions
-            admin_meta = Administration(id=record.file_identifier, access_permissions=[OPEN_ACCESS])
+            admin_meta = AdministrationMetadata(
+                id=record.file_identifier, metadata_permissions=[OPEN_ACCESS], resource_permissions=[OPEN_ACCESS]
+            )
             set_admin(keys=_admin_meta_keys(), record=record, admin_meta=admin_meta)
             # constraint
             record.identification.constraints.append(

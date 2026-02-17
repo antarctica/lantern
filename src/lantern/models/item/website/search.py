@@ -129,7 +129,7 @@ class ItemWebsiteSearch(ItemBase):
 
         As determined by administrative metadata.
         """
-        return self.admin_access_level == AccessLevel.PUBLIC
+        return self.admin_resource_access == AccessLevel.PUBLIC
 
     def dumps(self) -> dict:
         """

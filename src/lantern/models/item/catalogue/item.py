@@ -1,6 +1,11 @@
 from typing import Any
 
-from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
+from lantern.lib.metadata_library.models.record.elements.common import Constraint
+from lantern.lib.metadata_library.models.record.enums import (
+    ConstraintRestrictionCode,
+    ConstraintTypeCode,
+    ContactRoleCode,
+)
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 from lantern.models.item.base.elements import Link
 from lantern.models.item.base.enums import AccessLevel
@@ -97,6 +102,17 @@ class ItemCatalogue(ItemBase):
         """Formatted dates."""
         return Maintenance(self._record.identification.maintenance)
 
+    @property
+    def _metadata_licence(self) -> Constraint | None:
+        """Licence constraint."""
+        licences = self._record.metadata.constraints.filter(
+            types=ConstraintTypeCode.USAGE, restrictions=ConstraintRestrictionCode.LICENSE
+        )
+        try:
+            return licences[0]
+        except IndexError:
+            return None
+
     # noinspection PyUnresolvedReferences
     @property
     def _revision(self) -> Link:
@@ -108,8 +124,12 @@ class ItemCatalogue(ItemBase):
 
     @property
     def _restricted(self) -> bool:
-        """Whether the item is restricted."""
-        return self.admin_access_level != AccessLevel.PUBLIC
+        """
+        Whether the item is restricted.
+
+        Based on resource access only. Restricted metadata is not supported.
+        """
+        return self.admin_resource_access != AccessLevel.PUBLIC
 
     @property
     def _items(self) -> ItemsTab:
@@ -170,6 +190,7 @@ class ItemCatalogue(ItemBase):
             maintenance=self._maintenance,
             standard=self._record.metadata.metadata_standard,
             profiles=self._record.data_quality.domain_consistency if self._record.data_quality else None,
+            metadata_licence=self._metadata_licence,
             kv=self.kv,
             build_time=self._meta.build_time,
         )
@@ -195,8 +216,9 @@ class ItemCatalogue(ItemBase):
             revision=self._revision,
             gitlab_issues=self.admin_gitlab_issues,
             restricted=self._restricted,
-            access_level=self.admin_access_level,
-            access_permissions=self._admin_metadata.access_permissions,  # ty:ignore[possibly-missing-attribute]
+            metadata_access=self.admin_metadata_access,
+            resource_access=self.admin_resource_access,
+            admin_meta=self.admin_metadata,
         )
 
     @property

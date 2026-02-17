@@ -2,11 +2,12 @@ import json
 from datetime import UTC, datetime
 
 import pytest
+from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata, Permission
 
-from lantern.lib.metadata_library.models.record.elements.administration import Permission
 from lantern.lib.metadata_library.models.record.elements.common import (
     Address,
     Citation,
+    Constraint,
     ContactIdentity,
     Date,
     Identifier,
@@ -16,18 +17,19 @@ from lantern.lib.metadata_library.models.record.elements.common import (
 from lantern.lib.metadata_library.models.record.elements.common import Contact as RecordContact
 from lantern.lib.metadata_library.models.record.elements.common import Dates as RecordDates
 from lantern.lib.metadata_library.models.record.elements.common import Identifiers as RecordIdentifiers
+from lantern.lib.metadata_library.models.record.elements.common import (
+    Maintenance as RecordMaintenance,
+)
 from lantern.lib.metadata_library.models.record.elements.data_quality import DomainConsistency
 from lantern.lib.metadata_library.models.record.elements.distribution import Distribution as RecordDistribution
 from lantern.lib.metadata_library.models.record.elements.distribution import Format, TransferOption
 from lantern.lib.metadata_library.models.record.elements.identification import (
     Aggregation,
     BoundingBox,
-    Constraint,
     ExtentGeographic,
 )
 from lantern.lib.metadata_library.models.record.elements.identification import Aggregations as RecordAggregations
 from lantern.lib.metadata_library.models.record.elements.identification import Extent as RecordExtent
-from lantern.lib.metadata_library.models.record.elements.identification import Maintenance as RecordMaintenance
 from lantern.lib.metadata_library.models.record.elements.metadata import MetadataStandard
 from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,
@@ -531,7 +533,7 @@ class TestAdditionalInfoTab:
         assert tab.enabled is True
         assert tab.item_id == item_id
         assert tab.item_type == ResourceTypeLabel[item_type.name].value
-        assert tab.item_type_icon == "fa-regular fa-map"
+        assert tab.item_type_icon == "fa-regular fa-file-fragment"
         assert isinstance(tab.dates, dict)
         assert tab.datestamp == FormattedDate.from_rec_date(Date(date=datestamp))
         assert tab.record_link_xml.href == xml_href
@@ -757,6 +759,51 @@ class TestAdditionalInfoTab:
         fx_item_cat_info_tab_minimal._profiles = profiles
         assert fx_item_cat_info_tab_minimal.profiles == expected
 
+    @pytest.mark.parametrize(
+        ("licence", "expected"),
+        [
+            (None, None),
+            (Constraint(type=ConstraintTypeCode.USAGE, restriction_code=ConstraintRestrictionCode.LICENSE), None),
+            (
+                Constraint(
+                    type=ConstraintTypeCode.USAGE, restriction_code=ConstraintRestrictionCode.LICENSE, statement="x"
+                ),
+                None,
+            ),
+            (
+                Constraint(type=ConstraintTypeCode.USAGE, restriction_code=ConstraintRestrictionCode.LICENSE, href="x"),
+                Link(value="x", href="x", external=True),
+            ),
+            (
+                Constraint(
+                    type=ConstraintTypeCode.USAGE,
+                    restriction_code=ConstraintRestrictionCode.LICENSE,
+                    href="x",
+                    statement="y",  # ignored
+                ),
+                Link(value="x", href="x", external=True),
+            ),
+            (
+                Constraint(
+                    type=ConstraintTypeCode.USAGE,
+                    restriction_code=ConstraintRestrictionCode.LICENSE,
+                    href="https://creativecommons.org/licenses/by-nd/4.0/",
+                ),
+                Link(
+                    value="Creative Commons Attribution-NoDerivatives 4.0 International",
+                    href="https://creativecommons.org/licenses/by-nd/4.0/",
+                    external=True,
+                ),
+            ),
+        ],
+    )
+    def test_metadata_licence(
+        self, fx_item_cat_info_tab_minimal: AdditionalInfoTab, licence: Constraint, expected: Link | None
+    ):
+        """Can get metadata licence if set."""
+        fx_item_cat_info_tab_minimal._metadata_licence = licence
+        assert fx_item_cat_info_tab_minimal.metadata_licence == expected
+
 
 class TestContactTab:
     """Test contact tab."""
@@ -875,16 +922,18 @@ class TestAdminTab:
             revision=revision_link,
             gitlab_issues=[],
             restricted=True,
-            access_level=AccessLevel.NONE,
-            access_permissions=[],
+            metadata_access=AccessLevel.NONE,
+            resource_access=AccessLevel.NONE,
+            admin_meta=None,
         )
 
         assert tab.enabled is True
         assert tab.item_id == item_id
         assert tab.revision_link == revision_link
         assert tab.restricted is True
-        assert tab.access_level == AccessLevel.NONE.name
-        assert tab.access == []
+        assert tab.metadata_access == AccessLevel.NONE.name
+        assert tab.resource_access == AccessLevel.NONE.name
+        assert tab.resource_permissions == []
         # cov
         assert tab.title != ""
         assert tab.icon != ""
@@ -906,8 +955,9 @@ class TestAdminTab:
             revision=Link(value="x", href="x", external=True),
             gitlab_issues=[],
             restricted=True,
-            access_level=AccessLevel.NONE,
-            access_permissions=[],
+            metadata_access=AccessLevel.NONE,
+            resource_access=AccessLevel.NONE,
+            admin_meta=None,
         )
 
         assert tab.enabled is trusted
@@ -933,24 +983,13 @@ class TestAdminTab:
         fx_item_cat_admin_tab_min._gitlab_issues = issues
         assert fx_item_cat_admin_tab_min.gitlab_issues == expected
 
-    @pytest.mark.parametrize(
-        "value",
-        [
-            [],
-            [Permission(directory="x", group="x")],
-            [Permission(directory="y", group="y", expiry=datetime(2014, 6, 30, tzinfo=UTC), comments="...")],
-        ],
-    )
-    def test_access_permissions(self, fx_item_cat_admin_tab_min: AdminTab, value: list[Permission]):
-        """Can get base item access."""
-        fx_item_cat_admin_tab_min._access_permissions = value
-
-        result = fx_item_cat_admin_tab_min.access
+    @staticmethod
+    def _check_permissions(result: list[str], value: list[Permission]) -> None:
         assert len(result) == len(value)
         assert all(isinstance(item, str) for item in result)
 
         decoded = [json.loads(permission) for permission in result]
-        # each decoded permission should have a 'expiry' key as a string, recast to a datetime for comparison
+        # each decoded permission should have an 'expiry' key as a string, recast to a datetime for comparison
         parsed = [
             Permission(
                 **{
@@ -962,3 +1001,20 @@ class TestAdminTab:
         ]
         for permission in value:
             assert permission in parsed
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            [],
+            [Permission(directory="x", group="x")],
+            [Permission(directory="y", group="y", expiry=datetime(2014, 6, 30, tzinfo=UTC), comment="...")],
+        ],
+    )
+    def test_permissions(self, fx_item_cat_admin_tab_min: AdminTab, value: list[Permission]):
+        """Can get formatted metadata and resource permissions."""
+        fx_item_cat_admin_tab_min._admin_meta = AdministrationMetadata(
+            id="x", metadata_permissions=value, resource_permissions=value
+        )
+
+        self._check_permissions(fx_item_cat_admin_tab_min.metadata_permissions, value)
+        self._check_permissions(fx_item_cat_admin_tab_min.resource_permissions, value)

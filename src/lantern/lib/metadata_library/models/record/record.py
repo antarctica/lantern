@@ -37,8 +37,9 @@ class RecordSchema(Enum):
     """Record validation schemas."""
 
     ISO_2_V4 = "iso_2_v4"
-    MAGIC_V1 = "magic_discovery_v1"
-    MAGIC_V2 = "magic_discovery_v2"
+    MAGIC_DISCO_V1 = "magic_discovery_v1"
+    MAGIC_DISCO_V2 = "magic_discovery_v2"  # 50% more funky
+    MAGIC_ADMIN_V1 = "magic_administration_v1"
 
     @staticmethod
     def map_href(href: str) -> "RecordSchema":
@@ -49,9 +50,10 @@ class RecordSchema(Enum):
         """
         mapping = {
             "https://metadata-resources.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-2-v4.json": RecordSchema.ISO_2_V4,
-            "https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery-v1/": RecordSchema.MAGIC_V1,
-            "https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery/v1/": RecordSchema.MAGIC_V1,
-            "https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery/v2/": RecordSchema.MAGIC_V2,
+            "https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery-v1/": RecordSchema.MAGIC_DISCO_V1,  # legacy alt form
+            "https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery/v1/": RecordSchema.MAGIC_DISCO_V1,
+            "https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery/v2/": RecordSchema.MAGIC_DISCO_V2,
+            "https://metadata-standards.data.bas.ac.uk/profiles/magic-administration/v1/": RecordSchema.MAGIC_ADMIN_V1,
         }
         return mapping[href]
 
@@ -67,13 +69,17 @@ class RecordSchema(Enum):
                 "bas_metadata_library.schemas.dist",
                 "iso_19115_2_v4.json",
             ),
-            RecordSchema.MAGIC_V1: (
+            RecordSchema.MAGIC_DISCO_V1: (
                 "bas_metadata_library.schemas.dist",
                 "magic_discovery_v1.json",
             ),
-            RecordSchema.MAGIC_V2: (
+            RecordSchema.MAGIC_DISCO_V2: (
                 "bas_metadata_library.schemas.dist",
                 "magic_discovery_v2.json",
+            ),
+            RecordSchema.MAGIC_ADMIN_V1: (
+                "bas_metadata_library.schemas.dist",
+                "magic_administration_encoding_v1.json",
             ),
         }
         schema_ref, schema_file = mapping[schema]
@@ -293,12 +299,12 @@ class Record:
         return converter.structure(value, cls)
 
     @staticmethod
-    def _strip_admin_metadata(model: "Record") -> None:
+    def _strip_admin_meta(model: "Record") -> None:
         """
-        Remove any administrative metadata instance included in a record.
+        Remove any administration metadata element included in a record.
 
         Can't use get/set_kv due to circular import.
-        If admin metadata was the only KV, set supplemental_information to None rather than an empty dict.
+        If admin metadata was the only KV item, supplemental_information is set to None rather than an empty dict.
         """
         sinfo = model.identification.supplemental_information
         if sinfo is None:
@@ -309,23 +315,40 @@ class Record:
             return
         if not isinstance(kv, dict):
             return
-        kv.pop("administrative_metadata", None)
+        kv.pop("admin_metadata", None)
         if len(kv) == 0:
             model.identification.supplemental_information = None
             return
         model.identification.supplemental_information = json.dumps(kv)
 
+    @staticmethod
+    def _strip_admin_conformance(model: "Record") -> None:
+        """Remove any administration profile domain conformance element included in a record."""
+        check_url = "https://metadata-standards.data.bas.ac.uk/profiles/magic-administration/"  # non-versioned
+        for idx, dc in enumerate(model.data_quality.domain_consistency):
+            if not dc.specification or not dc.specification.href:
+                continue
+            if check_url not in dc.specification.href:
+                continue
+            model.data_quality.domain_consistency.pop(idx)
+
+    @staticmethod
+    def _strip_admin(model: "Record") -> None:
+        """Remove any administration metadata and associated domain conformance included in a record."""
+        Record._strip_admin_meta(model)
+        Record._strip_admin_conformance(model)
+
     def dumps(self, strip_admin: bool = True) -> dict:
         """
         Export Record as a dict with plain, JSON safe, types.
 
-        If `strip_admin` is true, any administrative metadata instance included in the record is removed.
-        If used, the record instance needs to be cloned to avoid modifying the original.
+        If `strip_admin` is true, any administration metadata and associated domain conformance included are removed.
+        Where used, a copy of the record instance is made to avoid modifying the original record.
         """
         model = self
         if strip_admin:
             model = deepcopy(self)
-            self._strip_admin_metadata(model)
+            self._strip_admin(model)
 
         converter = cattrs.Converter()
         converter.register_unstructure_hook(Record, lambda d: d.unstructure())
@@ -337,7 +360,7 @@ class Record:
 
         Note: Indentation is automatically enabled.
 
-        If `strip_admin` is true, any administrative metadata instance included in the record is removed.
+        If `strip_admin` is true, any administration metadata and associated domain conformance included are removed.
         """
         return json.dumps(
             {"$schema": self._schema, **self.dumps(strip_admin=strip_admin)}, indent=2, ensure_ascii=False
@@ -347,7 +370,7 @@ class Record:
         """
         Export Record as an ISO 19115 XML document using the BAS Metadata Library.
 
-        If `strip_admin` is true, any administrative metadata instance included in the record is removed.
+        If `strip_admin` is true, any administration metadata and associated domain conformance included are removed.
         """
         config = MetadataRecordConfigV4(**_decode_date_properties(self.dumps(strip_admin=strip_admin)))
         record = MetadataRecord(configuration=config)

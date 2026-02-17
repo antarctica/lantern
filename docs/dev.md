@@ -253,6 +253,20 @@ In the `tests.lantern_tests.config` module:
 - if configurable, update the `test_configurable_property` method
 - update or create other tests as needed
 
+### Adding record hierarchy levels
+
+> [!WARNING]
+> This section is Work in Progress (WIP) and may not be complete/accurate.
+
+For each new hierarchy level:
+
+- if a new local level, update the `lantern.lib.metadata_library.models.record.enums.HierarchyLevelCode` enum
+- update the `lantern.models.item.base.enums.ResourceTypeLabel` enum to set a formatted value/label
+- update the `lantern.models.item.catalogue.enums.ResourceTypeIcon` enum to set an accompanying icon
+- if citable, update the `lantern.lib.metadata_library.models.record.presets.citation.CitationHierarchyLevelCode` enum
+  and `tests.lib_tests.metadata_library.models.record.presets.test_citation.TestMakeMagicCitation.test_citation`
+- add a new [Test Record](#adding-new-test-records)
+
 ### Adding catalogue item types
 
 > [!WARNING]

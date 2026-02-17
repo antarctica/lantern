@@ -5,6 +5,7 @@ from lantern.lib.metadata_library.models.record.elements.common import (
     Dates,
     Identifier,
     Identifiers,
+    Maintenance,
 )
 from lantern.lib.metadata_library.models.record.elements.identification import (
     Aggregation,
@@ -17,10 +18,12 @@ from lantern.lib.metadata_library.models.record.enums import (
     AggregationInitiativeCode,
     DatePrecisionCode,
     HierarchyLevelCode,
+    MaintenanceFrequencyCode,
+    ProgressCode,
 )
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin, set_admin
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
-from tests.resources.records.admin_keys.testing_keys import load_keys as load_test_keys
+from tests.resources.admin_keys import test_keys
 from tests.resources.records.utils import make_record
 
 # A record for an ItemCatalogue instance with all supported fields for collections.
@@ -42,6 +45,8 @@ collection_members = [
     "cf80b941-3de6-4a04-8f5a-a2349c1e3ae0",
     "fd126357-0f88-4b89-81b8-fe33654ef045",
     "c31720da-8c10-496a-893d-f003f09151e9",
+    "a59b5c5b-b099-4f01-b670-3800cb65e666",
+    "8422d4e7-654f-4fbb-a5e0-4051ee21418e",
 ]
 
 abstract = """
@@ -80,6 +85,9 @@ record = make_record(
     title="Test Resource - Collection with all supported fields",
     abstract=abstract,
     purpose="Item to test all supported Collection properties are recognised and presented correctly.",
+)
+record.metadata.maintenance = Maintenance(
+    maintenance_frequency=MaintenanceFrequencyCode.AS_NEEDED, progress=ProgressCode.COMPLETED
 )
 record.identification.dates = Dates(
     creation=Date(date=date(2023, 10, 1), precision=DatePrecisionCode.YEAR),
@@ -183,7 +191,7 @@ record.identification.aggregations.append(
 # Can't add opposite side relation as not a physical map side
 # Can't add a parent physical map as not a physical map side
 
-keys = load_test_keys()
+keys = test_keys()
 administration = get_admin(keys=keys, record=record)
 administration.gitlab_issues = ["https://gitlab.data.bas.ac.uk/MAGIC/test/-/issues/123"]
 set_admin(keys=keys, record=record, admin_meta=administration)

@@ -7,7 +7,7 @@ class TestOpenAccess:
     def test_default(self):
         """Can get constant."""
         result = OPEN_ACCESS
-        assert result.comments == "For public release."
+        assert result.comment == "For public release."
 
 
 class TestBasStaff:
@@ -16,4 +16,4 @@ class TestBasStaff:
     def test_default(self):
         """Can get constant."""
         result = BAS_STAFF
-        assert result.comments == "Restricted to staff employed by UKRI at BAS."
+        assert result.comment == "Restricted to staff employed at the British Antarctic Survey."

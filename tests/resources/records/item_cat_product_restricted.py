@@ -34,6 +34,7 @@ record = make_record(
 )
 # add related peers
 record.identification.aggregations.extend(relate_products(record.file_identifier))
+# change access and licence
 record.identification.constraints = Constraints(
     [
         Constraint(
@@ -49,12 +50,12 @@ record.identification.constraints = Constraints(
         ),
     ]
 )
-
+# replace admin metadata to reflect changed access
 keys = test_keys()
 administration = get_admin(keys=keys, record=record)
 administration.resource_permissions = [BAS_STAFF]
 set_admin(keys=keys, record=record, admin_meta=administration)
-
+# add example distribution to test restricted state handling
 distributor = Contact(
     organisation=ContactIdentity(
         name="Mapping and Geographic Information Centre, British Antarctic Survey",
@@ -78,7 +79,6 @@ distributor = Contact(
     ),
     role={ContactRoleCode.DISTRIBUTOR},
 )
-
 record.distribution = [
     Distribution(
         distributor=distributor,

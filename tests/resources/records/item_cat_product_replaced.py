@@ -3,7 +3,7 @@ from lantern.lib.metadata_library.models.record.enums import (
 )
 from tests.resources.records.utils import make_record
 
-# A record for an ItemCatalogue instance with minimum required fields for products.
+# A record for an ItemCatalogue instance for use as a superseded product.
 
 record = make_record(
     file_identifier="7e3611a6-8dbf-4813-aaf9-dadf9decff5b",

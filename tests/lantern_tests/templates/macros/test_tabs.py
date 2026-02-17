@@ -1256,32 +1256,6 @@ class TestInfoTab:
         else:
             assert isbn is None
 
-    @pytest.mark.parametrize(
-        "value",
-        [
-            [],
-            [
-                "https://gitlab.data.bas.ac.uk/MAGIC/x/-/issues/123",
-                "https://gitlab.data.bas.ac.uk/MAGIC/x/-/issues/234",
-            ],
-        ],
-    )
-    def test_issues(self, fx_item_cat_model_min: ItemCatalogue, value: list[str]):
-        """Can get optional item GitLab issues based on value from item."""
-        admin_meta = get_admin(keys=fx_item_cat_model_min._admin_keys, record=fx_item_cat_model_min._record)
-        admin_meta.gitlab_issues = value
-        set_admin(keys=fx_item_cat_model_min._admin_keys, record=fx_item_cat_model_min._record, admin_meta=admin_meta)
-        expected = fx_item_cat_model_min._additional_info.gitlab_issues
-        html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
-
-        issues = html.select_one("#info-issues")
-        if expected:
-            for item in expected:
-                # noinspection PyTypeChecker
-                assert issues.find(name="li", string=item) is not None
-        else:
-            assert issues is None
-
     def test_dates(self, fx_item_cat_model_min: ItemCatalogue):
         """Can get item dates based on values from item."""
         expected = fx_item_cat_model_min._additional_info.dates

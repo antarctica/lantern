@@ -15,6 +15,7 @@ from lantern.exporters.base import Exporter as BaseExporter
 from lantern.exporters.records import RecordsExporter
 from lantern.exporters.waf import WebAccessibleFolderExporter
 from lantern.exporters.website import WebsiteSearchExporter
+from lantern.models.item.catalogue.enums import ResourceTypeIcon
 from lantern.models.site import ExportMeta, SitePageMeta
 from lantern.stores.base import SelectRecordsProtocol, Store
 from lantern.utils import dumps_redirect, get_jinja_env, get_record_aliases, prettify_html
@@ -221,6 +222,7 @@ class SiteIndexExporter(ResourcesExporter):
         for record in self._select_records():
             idx_records.append(
                 {
+                    "icon_class": ResourceTypeIcon[record.hierarchy_level.name].value,
                     "type": record.hierarchy_level.name,
                     "file_identifier": record.file_identifier,
                     "title": record.identification.title,

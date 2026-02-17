@@ -50,6 +50,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * S3 bucket versioning enabled on production/live site
 * Metadata maintenance element support
 * 'mapProduct' and 'webMapProduct' item types
+* Item type icons in internal index template
 
 ### Fixed
 

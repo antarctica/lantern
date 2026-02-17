@@ -52,8 +52,9 @@ class ReferenceSystemInfo:
         """
         # workaround v4 schema not allowing multiple contacts
         # https://gitlab.data.bas.ac.uk/uk-pdc/metadata-infrastructure/metadata-library/-/issues/255
-        value["authority"]["contacts"] = [value["authority"]["contact"]]
-        del value["authority"]["contact"]
+        if "authority" in value and "contact" in value["authority"]:
+            value["authority"]["contacts"] = [value["authority"]["contact"]]
+            del value["authority"]["contact"]
 
         converter = cattrs.Converter()
         converter.register_structure_hook(Citation, lambda d, t: Citation.structure(d))
@@ -72,7 +73,8 @@ class ReferenceSystemInfo:
 
         # workaround v4 schema not allowing multiple contacts
         # https://gitlab.data.bas.ac.uk/uk-pdc/metadata-infrastructure/metadata-library/-/issues/255
-        value["authority"]["contact"] = value["authority"]["contacts"][0]
-        del value["authority"]["contacts"]
+        if value["authority"] and value["authority"]["contacts"]:
+            value["authority"]["contact"] = value["authority"]["contacts"][0]
+            del value["authority"]["contacts"]
 
         return value

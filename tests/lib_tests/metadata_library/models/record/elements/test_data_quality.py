@@ -98,39 +98,39 @@ class TestDataQuality:
         else:
             assert data_quality.domain_consistency == []
 
-    def test_structure_cattrs(self):
+    @pytest.mark.parametrize("has_spec_contact", [False, True])
+    def test_structure_cattrs(self, has_spec_contact: bool):
         """Can use Cattrs to create a DataQuality instance from plain types."""
         expected_date = date(2014, 6, 30)
-        value = {
+        value: dict = {
             "lineage": {"statement": "x"},
             "domain_consistency": [
                 {
-                    "specification": {
-                        "title": {"value": "x"},
-                        "dates": {"creation": expected_date.isoformat()},
-                        "contact": {"organisation": {"name": "x"}, "role": [ContactRoleCode.PUBLISHER.value]},
-                    },
+                    "specification": {"title": {"value": "x"}, "dates": {"creation": expected_date.isoformat()}},
                     "explanation": "x",
                     "result": True,
                 }
             ],
         }
+        if has_spec_contact:
+            value["domain_consistency"][0]["specification"]["contact"] = {
+                "organisation": {"name": "x"},
+                "role": [ContactRoleCode.PUBLISHER.value],
+            }
         expected = DataQuality(
             lineage=Lineage(statement="x"),
             domain_consistency=[
                 DomainConsistency(
-                    specification=Citation(
-                        title="x",
-                        dates=Dates(creation=Date(date=expected_date)),
-                        contacts=Contacts(
-                            [Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.PUBLISHER})]
-                        ),
-                    ),
+                    specification=Citation(title="x", dates=Dates(creation=Date(date=expected_date))),
                     explanation="x",
                     result=True,
                 )
             ],
         )
+        if has_spec_contact:
+            expected.domain_consistency[0].specification.contacts = Contacts(
+                [Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.PUBLISHER})]
+            )
 
         converter = cattrs.Converter()
         converter.register_structure_hook(DataQuality, lambda d, t: DataQuality.structure(d))
@@ -138,39 +138,39 @@ class TestDataQuality:
 
         assert result == expected
 
-    def test_unstructure_cattrs(self):
+    @pytest.mark.parametrize("has_spec_contact", [False, True])
+    def test_unstructure_cattrs(self, has_spec_contact: bool):
         """Can use Cattrs to convert a DataQuality instance into plain types."""
         expected_date = date(2014, 6, 30)
         value = DataQuality(
             lineage=Lineage(statement="x"),
             domain_consistency=[
                 DomainConsistency(
-                    specification=Citation(
-                        title="x",
-                        dates=Dates(creation=Date(date=expected_date)),
-                        contacts=Contacts(
-                            [Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.PUBLISHER})]
-                        ),
-                    ),
+                    specification=Citation(title="x", dates=Dates(creation=Date(date=expected_date))),
                     explanation="x",
                     result=True,
                 )
             ],
         )
-        expected = {
+        if has_spec_contact:
+            value.domain_consistency[0].specification.contacts = Contacts(
+                [Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.PUBLISHER})]
+            )
+        expected: dict = {
             "lineage": {"statement": "x"},
             "domain_consistency": [
                 {
-                    "specification": {
-                        "title": {"value": "x"},
-                        "dates": {"creation": expected_date.isoformat()},
-                        "contact": {"organisation": {"name": "x"}, "role": [ContactRoleCode.PUBLISHER.value]},
-                    },
+                    "specification": {"title": {"value": "x"}, "dates": {"creation": expected_date.isoformat()}},
                     "explanation": "x",
                     "result": True,
                 }
             ],
         }
+        if has_spec_contact:
+            expected["domain_consistency"][0]["specification"]["contact"] = {
+                "organisation": {"name": "x"},
+                "role": [ContactRoleCode.PUBLISHER.value],
+            }
 
         converter = cattrs.Converter()
         converter.register_unstructure_hook(DataQuality, lambda d: d.unstructure())

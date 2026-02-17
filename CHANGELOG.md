@@ -105,6 +105,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 ### Removed
 
 * Records load development task
+* GitLab issues from additional information tab (now in admin tab)
 
 ## [0.4.0] - 2025-10-24
 

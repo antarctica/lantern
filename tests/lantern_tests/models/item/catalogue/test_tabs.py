@@ -523,7 +523,6 @@ class TestAdditionalInfoTab:
             item_id=item_id,
             item_type=item_type,
             identifiers=identifiers,
-            gitlab_issues=[],
             dates=dates,
             datestamp=datestamp,
             kv={},
@@ -660,23 +659,6 @@ class TestAdditionalInfoTab:
         """Can get any ISBNs if set."""
         fx_item_cat_info_tab_minimal._identifiers = Identifiers(identifiers)
         assert fx_item_cat_info_tab_minimal.isbn == expected
-
-    @pytest.mark.parametrize(
-        ("issues", "expected"),
-        [
-            ([], []),
-            (
-                ["https://gitlab.data.bas.ac.uk/MAGIC/foo/-/issues/123"],
-                ["MAGIC/foo#123"],
-            ),
-        ],
-    )
-    def test_gitlab_issues(
-        self, fx_item_cat_info_tab_minimal: AdditionalInfoTab, issues: list[Link], expected: list[str]
-    ):
-        """Can get any resource GitLab issue references if set."""
-        fx_item_cat_info_tab_minimal._gitlab_issues = issues
-        assert fx_item_cat_info_tab_minimal.gitlab_issues == expected
 
     @pytest.mark.parametrize(
         ("maintenance", "expected_progress", "expected_frequency"),

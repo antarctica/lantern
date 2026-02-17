@@ -3,12 +3,14 @@ from copy import deepcopy
 from datetime import UTC, datetime
 from pathlib import Path
 
+from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata, Permission
+from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 from tasks._record_utils import dump_records, init
 from tasks._record_utils import parse_records as base_parse_records
 
-from lantern.lib.metadata_library.models.record.elements.administration import Administration, Permission
 from lantern.lib.metadata_library.models.record.elements.common import (
     Address,
+    Constraints,
     Contact,
     ContactIdentity,
     Date,
@@ -23,11 +25,13 @@ from lantern.lib.metadata_library.models.record.enums import (
     HierarchyLevelCode,
     OnlineResourceFunctionCode,
 )
-from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
+from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS as OPEN_ACCESS_PERMISSION
 from lantern.lib.metadata_library.models.record.presets.aggregations import make_bas_cat_collection_member
 from lantern.lib.metadata_library.models.record.presets.conformance import MAGIC_DISCOVERY_V1, MAGIC_DISCOVERY_V2
+from lantern.lib.metadata_library.models.record.presets.constraints import CC_BY_ND_V4, OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.record import Record
-from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, get_admin, set_admin
+from lantern.lib.metadata_library.models.record.utils.admin import get_admin, set_admin
+from lantern.lib.metadata_library.models.record.utils.kv import get_kv, set_kv
 from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.stores.base import RecordNotFoundError
 from lantern.stores.gitlab import GitLabStore
@@ -74,29 +78,6 @@ def clean_input_path(input_record_paths: list[tuple[Record, Path]], processed_id
     for record_path in input_record_paths:
         if record_path[0].file_identifier in processed_ids:
             record_path[1].unlink()
-
-
-def _upgrade_discovery_profile(logger: logging.Logger, records: list[Record]) -> None:
-    """Upgrade MAGIC discovery profile to V2 if records contain V1."""
-    for record in records:
-        discovery_v1_index = next(
-            (
-                i
-                for i, c in enumerate(record.data_quality.domain_consistency)
-                if c.specification.href == MAGIC_DISCOVERY_V1.specification.href
-                or c.specification.href == "https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery-v1/"
-            ),
-            None,
-        )
-        if discovery_v1_index is None:
-            logger.debug("MAGIC discovery profile V1 not found in record, skipping upgrade")
-            continue
-        logger.info("Upgrading MAGIC discovery profile from V1 to V2")
-        copyright_holders = record.identification.contacts.filter(roles=[ContactRoleCode.RIGHTS_HOLDER])
-        if len(copyright_holders) == 0:
-            logger.info("No rights holder found in record, setting default copyright holder for V2 profile")
-            record.identification.contacts.append(default_copyright_contact)
-        record.data_quality.domain_consistency[discovery_v1_index] = MAGIC_DISCOVERY_V2
 
 
 def _revise_collection(time: datetime, collection: Record) -> None:
@@ -257,6 +238,35 @@ def _process_magic_collections(
             additional_records.append(updated_collection)
 
 
+def _upgrade_discovery_profile_v1_v2(logger: logging.Logger, record: Record, discovery_v1_index: int) -> None:
+    """Upgrade MAGIC discovery profile from V1 to V2."""
+    logger.info("Upgrading MAGIC discovery profile from V1 to V2")
+    record.data_quality.domain_consistency[discovery_v1_index] = MAGIC_DISCOVERY_V2
+
+    copyright_holders = record.identification.contacts.filter(roles=[ContactRoleCode.RIGHTS_HOLDER])
+    if len(copyright_holders) == 0:
+        logger.info("No rights holder found in record, setting default copyright holder for V2 profile")
+        record.identification.contacts.append(default_copyright_contact)
+
+
+def _upgrade_discovery_profile(logger: logging.Logger, records: list[Record]) -> None:
+    """Upgrade MAGIC discovery profile to V2 if records contain V1."""
+    for record in records:
+        discovery_v1_index = next(
+            (
+                i
+                for i, c in enumerate(record.data_quality.domain_consistency)
+                if c.specification.href == MAGIC_DISCOVERY_V1.specification.href
+                or c.specification.href == "https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery-v1/"
+            ),
+            None,
+        )
+        if discovery_v1_index is None:
+            logger.debug("MAGIC discovery profile V1 not found in record, skipping upgrade")
+            continue
+        _upgrade_discovery_profile_v1_v2(logger=logger, record=record, discovery_v1_index=discovery_v1_index)
+
+
 def _get_gitlab_issues(logger: logging.Logger, record: Record) -> list[str] | None:
     """
     Get and remove GitLab issues from record identifiers if present.
@@ -286,19 +296,30 @@ def _get_gitlab_issues(logger: logging.Logger, record: Record) -> list[str] | No
     return issue_urls
 
 
-def _get_access_permissions(logger: logging.Logger, record: Record) -> list[Permission]:
+def _get_access_permissions(logger: logging.Logger, record: Record) -> tuple[list[Permission], list[Permission]]:
     """
-    Get access permissions from record access constraints.
+    Get metadata and resource access permissions from record access constraints.
+
+    Zap ⚡ doesn't support metadata access restrictions so defaults to OPEN ACCESS.
 
     Zap ⚡️'s restricted options don't map to access permissions used in admin metadata so aren't supported.
     """
+    metadata_permissions = [OPEN_ACCESS_PERMISSION]
+    resource_permissions = []
+
+    logger.info(f"Setting metadata access constraints for record '{record.file_identifier}' to OPEN ACCESS by default.")
     constraints = record.identification.constraints.filter(types=ConstraintTypeCode.ACCESS)
     logger.info(f"Record '{record.file_identifier}' has {len(constraints)} access constraints")
     if len(constraints) == 1 and constraints[0].restriction_code == ConstraintRestrictionCode.UNRESTRICTED:
-        logger.info(f"Record '{record.file_identifier}' has unrestricted access constraint, setting to OPEN ACCESS")
-        return [OPEN_ACCESS]
-    logger.info(f"Record '{record.file_identifier}' has no supported access constraints, no access permissions set")
-    return []
+        logger.info(
+            f"Record '{record.file_identifier}' has unrestricted resource access constraint, setting to OPEN ACCESS."
+        )
+        resource_permissions = [OPEN_ACCESS_PERMISSION]
+    logger.info(
+        f"Record '{record.file_identifier}' has no supported access constraints, no resource access permissions set."
+    )
+
+    return metadata_permissions, resource_permissions
 
 
 def _create_admin_metadata(logger: logging.Logger, admin_keys: AdministrationKeys, record: Record) -> None:
@@ -325,17 +346,24 @@ def _create_admin_metadata(logger: logging.Logger, admin_keys: AdministrationKey
         logger.info(f"Existing administrative metadata loaded for record '{record.file_identifier}'")
     else:
         logger.info(f"No administrative metadata found for record '{record.file_identifier}', creating")
-        admin_meta = Administration(id=record.file_identifier)
+        admin_meta = AdministrationMetadata(id=record.file_identifier)
 
     gitlab_issues = _get_gitlab_issues(logger, record)
     if gitlab_issues:
         logger.info(f"GitLab issues in identifiers, setting in administrative record for '{record.file_identifier}'")
         admin_meta.gitlab_issues = gitlab_issues
 
-    access_permissions = _get_access_permissions(logger, record)
-    if len(access_permissions) > 0 and access_permissions != admin_meta.access_permissions:
-        logger.info(f"Access permissions different to administrative record for '{record.file_identifier}', updating")
-        admin_meta.access_permissions = access_permissions
+    metadata_permissions, resource_permissions = _get_access_permissions(logger, record)
+    if len(metadata_permissions) > 0 and metadata_permissions != admin_meta.metadata_permissions:
+        logger.info(
+            f"Metadata access permissions different to administrative record for '{record.file_identifier}', updating"
+        )
+        admin_meta.metadata_permissions = metadata_permissions
+    if len(resource_permissions) > 0 and resource_permissions != admin_meta.resource_permissions:
+        logger.info(
+            f"Resource access permissions different to administrative record for '{record.file_identifier}', updating"
+        )
+        admin_meta.resource_permissions = resource_permissions
 
     set_admin(keys=admin_keys, record=record, admin_meta=admin_meta)
     logger.debug(f"Administrative metadata for record '{record.file_identifier}':")
@@ -380,6 +408,46 @@ def _process_distribution_descriptions(logger: logging.Logger, records: list[Rec
                 distribution.transfer_option.online_resource.description = format_descriptions[distribution.format.href]  # ty: ignore[possibly-missing-attribute]
 
 
+def _process_metadata_constraints(logger: logging.Logger, records: list[Record]) -> None:
+    """Add default metadata constraints if missing."""
+    for record in records:
+        if len(record.metadata.constraints) == 0:
+            logger.info(f"No metadata constraints found in record [{record.file_identifier}], setting defaults.")
+            record.metadata.constraints = Constraints([OPEN_ACCESS, CC_BY_ND_V4])
+
+
+def _process_sheet_number(logger: logging.Logger, records: list[Record]) -> None:
+    """Add default metadata constraints if missing ((workaround for mega-zap's now outdated broken schema workaround)."""
+    for record in records:
+        kv = get_kv(record)
+        sheet_number = kv.get("sheet_number", None)
+        if not sheet_number:
+            logger.info(f"Sheet number not found in KV for record [{record.file_identifier}], skipping.")
+            continue
+
+        pop_sheet_number = False
+        logger.info(f"Sheet number found in KV for record [{record.file_identifier}].")
+        if record.identification.series and record.identification.series.page:
+            if record.identification.series.page == sheet_number:
+                logger.info("Sheet number found in KV and descriptive series with matching value, removing from KV.")
+                pop_sheet_number = True
+            else:
+                logger.warning(
+                    "Sheet number found in KV and descriptive series with different values, resolve manually."
+                )
+        elif record.identification.series and not record.identification.series.page:
+            logger.info("Sheet number found in KV but not in descriptive series, moving to descriptive series.")
+            record.identification.series.page = sheet_number
+            pop_sheet_number = True
+        elif not record.identification.series:
+            logger.warning("Sheet number found in KV but no descriptive series, resolve manually.")
+
+        if pop_sheet_number:
+            kv.pop("sheet_number", None)
+            set_kv(kv, record, replace=True)
+            logger.info("Sheet number removed from KV.")
+
+
 def process_records(
     logger: logging.Logger, records: list[Record], store: GitLabStore, admin_keys: AdministrationKeys
 ) -> list[Record]:
@@ -391,6 +459,8 @@ def process_records(
     Where any of these records are modified, the date_stamp and other relevant properties are revised.
     """
     additional_records: list[Record] = []
+    _process_metadata_constraints(logger=logger, records=records)
+    _process_sheet_number(logger=logger, records=records)
     _process_distribution_descriptions(logger=logger, records=records)
     _process_admin_metadata(logger=logger, admin_keys=admin_keys, records=records)
     _process_magic_collections(logger=logger, records=records, additional_records=additional_records, store=store)

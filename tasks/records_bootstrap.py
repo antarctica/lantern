@@ -106,7 +106,7 @@ def _stage1(logger: logging.Logger, config: Config, working_path: Path) -> None:
     for record_path in chain(working_path.glob("*.json"), working_path.glob("*.xml")):
         with record_path.open(mode="r") as f:
             content = f.read()
-        data["actions"].append(  # ty: ignore[possibly-missing-attribute]
+        data["actions"].append(
             {
                 "action": "create",
                 "file_path": store._get_remote_hashed_path(record_path.name),
@@ -138,10 +138,10 @@ def _stage2(logger: logging.Logger, config: Config) -> None:
         print("Selected branch is not 'main', this is unusual.")
         _confirm(logger)
 
-    store = init_store(logger=logger, config=config)
-    if store._cache.exists:
+    store = init_store(logger=logger, config=config, cached=True)
+    if store._cache.exists:  # ty:ignore[unresolved-attribute]
         print(f"Local cache path {config.STORE_GITLAB_CACHE_PATH.resolve()} exists and needs purging.")
-        store._cache.purge()
+        store._cache.purge()  # ty:ignore[unresolved-attribute]
 
     print(f"Stage {stage} complete.")
     print("All stages complete.")

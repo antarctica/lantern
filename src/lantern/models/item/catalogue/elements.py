@@ -115,7 +115,7 @@ class ItemCatalogueSummary(ItemBase):
     @property
     def _date(self) -> FormattedDate | None:
         """Formatted date."""
-        publication = self._record.identification.dates.publication
+        publication = self.record.identification.dates.publication
         return FormattedDate.from_rec_date(publication) if publication else None
 
     @property
@@ -138,7 +138,7 @@ class ItemCatalogueSummary(ItemBase):
         E.g. For collections, the number of items it contains.
         """
         count = len(
-            self._record.identification.aggregations.filter(associations=AggregationAssociationCode.IS_COMPOSED_OF)
+            self.record.identification.aggregations.filter(associations=AggregationAssociationCode.IS_COMPOSED_OF)
         )
         if count < 1:
             return None

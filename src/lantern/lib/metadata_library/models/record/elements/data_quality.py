@@ -69,6 +69,8 @@ class DataQuality:
         # workaround v4 schema not allowing multiple contacts
         # https://gitlab.data.bas.ac.uk/uk-pdc/metadata-infrastructure/metadata-library/-/issues/255
         for i, dc in enumerate(value.get("domain_consistency", [])):
+            if "contact" not in dc["specification"]:
+                continue
             dc["specification"]["contacts"] = [dc["specification"]["contact"]]
             del dc["specification"]["contact"]
             value["domain_consistency"][i] = dc
@@ -91,6 +93,8 @@ class DataQuality:
         # workaround v4 schema not allowing multiple contacts
         # https://gitlab.data.bas.ac.uk/uk-pdc/metadata-infrastructure/metadata-library/-/issues/255
         for i, dc in enumerate(value.get("domain_consistency", [])):
+            if not dc["specification"]["contacts"]:
+                continue
             dc["specification"]["contact"] = dc["specification"]["contacts"][0]
             del dc["specification"]["contacts"]
             value["domain_consistency"][i] = dc

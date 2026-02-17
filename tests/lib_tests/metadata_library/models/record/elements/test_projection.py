@@ -72,28 +72,25 @@ class TestReferenceSystemInfo:
         else:
             assert projection.authority is None
 
-    def test_structure_cattrs(self):
+    @pytest.mark.parametrize("has_authority", [False, True])
+    def test_structure_cattrs(self, has_authority: bool):
         """Can use Cattrs to create a ReferenceSystemInfo instance from plain types."""
         expected_date = date(2014, 6, 30)
-        value = {
-            "code": {"value": "x", "href": "x"},
-            "version": "x",
-            "authority": {
+        value: dict = {"code": {"value": "x", "href": "x"}, "version": "x"}
+        if has_authority:
+            value["authority"] = {
                 "title": {"value": "x", "href": "x"},
                 "dates": {"creation": expected_date.isoformat()},
                 "contact": {"organisation": {"name": "x"}, "role": [ContactRoleCode.PUBLISHER.value]},
-            },
-        }
-        expected = ReferenceSystemInfo(
-            code=Code(value="x", href="x"),
-            version="x",
-            authority=Citation(
+            }
+        expected = ReferenceSystemInfo(code=Code(value="x", href="x"), version="x")
+        if has_authority:
+            expected.authority = Citation(
                 title="x",
                 href="x",
                 dates=Dates(creation=Date(date=expected_date)),
                 contacts=Contacts([Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.PUBLISHER})]),
-            ),
-        )
+            )
 
         converter = cattrs.Converter()
         converter.register_structure_hook(ReferenceSystemInfo, lambda d, t: ReferenceSystemInfo.structure(d))
@@ -101,29 +98,28 @@ class TestReferenceSystemInfo:
 
         assert result == expected
 
-    def test_unstructure_cattrs(self):
+    @pytest.mark.parametrize("has_authority", [False, True])
+    def test_unstructure_cattrs(self, has_authority: bool):
         """Can use Cattrs to convert a ReferenceSystemInfo instance into plain types."""
         expected_date = date(2014, 6, 30)
         value = ReferenceSystemInfo(
             code=Code(value="x", href="x"),
             version="x",
-            authority=Citation(
+        )
+        if has_authority:
+            value.authority = Citation(
                 title="x",
                 href="x",
                 dates=Dates(creation=Date(date=expected_date)),
                 contacts=Contacts([Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.PUBLISHER})]),
-            ),
-        )
-        expected = {
-            "code": {"value": "x", "href": "x"},
-            "version": "x",
-            "authority": {
+            )
+        expected: dict = {"code": {"value": "x", "href": "x"}, "version": "x"}
+        if has_authority:
+            expected["authority"] = {
                 "title": {"value": "x", "href": "x"},
                 "dates": {"creation": expected_date.isoformat()},
                 "contact": {"organisation": {"name": "x"}, "role": [ContactRoleCode.PUBLISHER.value]},
-            },
-        }
-
+            }
         converter = cattrs.Converter()
         converter.register_unstructure_hook(ReferenceSystemInfo, lambda d: d.unstructure())
         result = clean_dict(converter.unstructure(value))

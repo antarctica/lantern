@@ -62,6 +62,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Read-only database error when purging a GitLab local cache due to a stale connection
 * Missing content-types for S3 uploaded files (in relation to `X-Content-Type-Options=nosniff`)
 * Preventing non-interactive publishing workflow from clobbering global exporters output in partial builds
+* Record models containing citations without contacts (projection authorities and domain consistency specifications)
 
 ### Changed
 
@@ -98,6 +99,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Improving infrastructure and setup documentation
 * Upgrading Plausible tracking script
 * Improving non-interactive publishing workflow documentation
+* Private record property in Items changed to public
+* Refactoring MAGIC base record preset and including administration metadata profile support
 
 ### Removed
 

@@ -100,6 +100,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Improving infrastructure and setup documentation
 * Upgrading Plausible tracking script
 * Improving non-interactive publishing workflow documentation
+* Upgrading to BAS Metadata Library 0.16.x release, which upstreams administration metadata and test keys
 * Private record property in Items changed to public
 * Refactoring MAGIC base record preset and including administration metadata profile support
 

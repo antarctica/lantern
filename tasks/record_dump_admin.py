@@ -4,10 +4,10 @@ from argparse import ArgumentParser
 from pathlib import Path
 
 import cattrs
+from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
 from tasks._record_utils import confirm_source, init
 from tasks.record_clone import _get_record
 
-from lantern.lib.metadata_library.models.record.elements.administration import Administration
 from lantern.lib.metadata_library.models.record.record import Record
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, get_admin
 from lantern.lib.metadata_library.models.record.utils.clean import clean_dict
@@ -85,7 +85,7 @@ def _dumps_admin_meta(logger: logging.Logger, admin_keys: AdministrationKeys, re
         msg = "Missing administrative metadata in source record."
         raise ValueError(msg) from None
     converter = cattrs.Converter()
-    converter.register_unstructure_hook(Administration, lambda d: d.unstructure())
+    converter.register_unstructure_hook(AdministrationMetadata, lambda d: d.unstructure())
     result = clean_dict(converter.unstructure(admin_meta))
     logger.info("Admin metadata:")
     logger.info(json.dumps(result, indent=2))

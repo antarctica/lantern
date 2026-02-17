@@ -3,22 +3,27 @@ import sys
 from pathlib import Path
 
 import inquirer
+from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata, Permission
+from bas_metadata_library.standards.magic_administration.v1.utils import (
+    AdministrationKeys,
+    AdministrationMetadataSubjectMismatchError,
+)
 from tasks._record_utils import dump_records, init, parse_records
 
-from lantern.lib.metadata_library.models.record.elements.administration import Administration, Permission
 from lantern.lib.metadata_library.models.record.presets.admin import BAS_STAFF, OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.record import Record
-from lantern.lib.metadata_library.models.record.utils.admin import (
-    AdministrationKeys,
-    AdministrativeMetadataSubjectMismatchError,
-    get_admin,
-    set_admin,
-)
+from lantern.lib.metadata_library.models.record.utils.admin import get_admin, set_admin
 from lantern.models.item.base.enums import AccessLevel
 
 
-def _get_args(logger: logging.Logger, records: list[Record]) -> tuple[list[Record], Permission | None]:
-    """Get user input."""
+def _get_args(
+    logger: logging.Logger, records: list[Record]
+) -> tuple[list[Record], Permission | None, Permission | None]:
+    """
+    Get user input.
+
+    Returns a list of records to set (the same) metadata and resource permissions for.
+    """
     choices = {
         f"{r.file_identifier} ('{r.identification.title}' {r.hierarchy_level.value})": r.file_identifier
         for r in records
@@ -36,8 +41,10 @@ def _get_args(logger: logging.Logger, records: list[Record]) -> tuple[list[Recor
                 message="Records",
                 choices=list(choices.keys()),
             ),
-            inquirer.List("level", message="Access level", choices=levels),
-            inquirer.Text("comment", message="Comment (Optional)", default=""),
+            inquirer.List("m_level", message="Metadata: access level", choices=levels, default=AccessLevel.PUBLIC),
+            inquirer.Text("m_comment", message="Metadata: comment (Optional)", default=""),
+            inquirer.List("r_level", message="Resource: access level", choices=levels, default=AccessLevel.PUBLIC),
+            inquirer.Text("r_comment", message="Resource: comment (Optional)", default=""),
         ]
     )
 
@@ -46,19 +53,27 @@ def _get_args(logger: logging.Logger, records: list[Record]) -> tuple[list[Recor
     logger.info(f"Selected records: {selected_fids}")
     selected_records = [records_[fid] for fid in selected_fids]
 
-    permission = None
-    if answers["level"] == AccessLevel.PUBLIC.name:
-        permission = OPEN_ACCESS
-    elif answers["level"] == AccessLevel.BAS_STAFF.name:
-        permission = BAS_STAFF
-    if permission and answers["comment"] != "":
-        permission.comment = answers["comment"]  # ty: ignore[invalid-assignment]
-    logger.info(f"Selected permission: {permission}")
+    permissions: list[Permission | None] = [None, None]
+    for i, prefix in enumerate(["m", "r"]):
+        if answers[f"{prefix}_level"] == AccessLevel.PUBLIC.name:
+            permissions[i] = OPEN_ACCESS
+        elif answers[f"{prefix}_level"] == AccessLevel.BAS_STAFF.name:
+            permissions[i] = BAS_STAFF
+        if isinstance(permissions[i], Permission) and answers[f"{prefix}_comment"] != "":
+            permissions[i].comment = answers[f"{prefix}_comment"]  # ty:ignore[invalid-assignment]
+    logger.info(f"Selected metadata permission: {permissions[0]}")
+    logger.info(f"Selected resource permission: {permissions[1]}")
 
-    return selected_records, permission
+    return selected_records, permissions[0], permissions[1]
 
 
-def _set_permission(logger: logging.Logger, keys: AdministrationKeys, record: Record, permission: Permission) -> None:
+def _set_permission(
+    logger: logging.Logger,
+    keys: AdministrationKeys,
+    record: Record,
+    metadata_permission: Permission | None,
+    resource_permission: Permission | None,
+) -> None:
     """Set single access permission in a record, overwriting any possible existing permissions."""
     admin = None
     if record.file_identifier is None:
@@ -66,11 +81,11 @@ def _set_permission(logger: logging.Logger, keys: AdministrationKeys, record: Re
         raise ValueError(msg) from None
     try:
         admin = get_admin(keys=keys, record=record)
-    except AdministrativeMetadataSubjectMismatchError as e:
+    except AdministrationMetadataSubjectMismatchError as e:
         # prompt user whether to ignore mismatch by clearing existing admin metadata
         if inquirer.confirm(
             message=(
-                "Existing administrative metadata references the wrong record. Drop existing metadata (if record is cloned)?"
+                "Existing administration metadata references the wrong record. Drop existing metadata (if record is cloned)?"
             ),
             default=False,
         ):
@@ -78,18 +93,25 @@ def _set_permission(logger: logging.Logger, keys: AdministrationKeys, record: Re
         else:
             raise e from e
     if admin is None:
-        admin = Administration(id=record.file_identifier)
-    admin.access_permissions = [permission]
-    logger.debug(f"Setting access permissions for '{record.file_identifier}' as: {permission}")
+        admin = AdministrationMetadata(id=record.file_identifier)
+    admin.metadata_permissions = [metadata_permission] if metadata_permission else []
+    admin.resource_permissions = [resource_permission] if resource_permission else []
+    logger.debug(
+        f"Setting access permissions for '{record.file_identifier}' as: {metadata_permission} (metadata), {resource_permission} (resource)"
+    )
     set_admin(keys=keys, record=record, admin_meta=admin)
 
 
 def _set_permissions(
-    logger: logging.Logger, keys: AdministrationKeys, records: list[Record], permission: Permission
+    logger: logging.Logger,
+    keys: AdministrationKeys,
+    records: list[Record],
+    metadata_permission: Permission | None,
+    resource_permission: Permission | None,
 ) -> None:
     """Set single access permission in records, overwriting any possible existing permissions."""
     for record in records:
-        _set_permission(logger, keys, record, permission)
+        _set_permission(logger, keys, record, metadata_permission, resource_permission)
 
 
 def main() -> None:
@@ -97,17 +119,28 @@ def main() -> None:
     logger, config, _store, _s3 = init()
     admin_keys = config.ADMIN_METADATA_KEYS_RW
 
+    print("\nNote: This task does not support:")
+    print("- setting expiry dates for permissions")
+    print("- setting expiry arbitrary groups for permissions")
+    print("\nWARNING: This task will overwrite any existing permissions in selected records.")
+
     input_path = Path("./import")
     logger.info(f"Loading records from: '{input_path.resolve()}'")
     records = [record_path[0] for record_path in parse_records(logger=logger, search_path=input_path)]
 
-    selected_records, permission = _get_args(logger=logger, records=records)
-    if not permission:
-        logger.info("No permission selected, aborting.")
+    selected_records, metadata_permission, resource_permission = _get_args(logger=logger, records=records)
+    if not metadata_permission and not resource_permission:
+        logger.info("No permissions selected, aborting.")
         sys.exit(0)
 
     for record in records:
-        _set_permission(logger=logger, keys=admin_keys, record=record, permission=permission)  # ty: ignore[invalid-argument-type]
+        _set_permission(
+            logger=logger,
+            keys=admin_keys,
+            record=record,
+            metadata_permission=metadata_permission,
+            resource_permission=resource_permission,
+        )
     dump_records(logger=logger, records=selected_records, output_path=input_path)
 
 

@@ -1,9 +1,17 @@
-from lantern.lib.metadata_library.models.record.elements.common import Constraint, Constraints
+from lantern.lib.metadata_library.models.record.elements.common import (
+    Constraint,
+    Constraints,
+    Contact,
+    ContactIdentity,
+    Contacts,
+)
 from lantern.lib.metadata_library.models.record.enums import (
     ConstraintRestrictionCode,
     ConstraintTypeCode,
+    ContactRoleCode,
     HierarchyLevelCode,
 )
+from lantern.lib.metadata_library.models.record.presets.contacts import make_magic_role
 from tests.resources.records.utils import make_record
 
 # Records for all supported resource licence usage constraints.
@@ -13,6 +21,7 @@ Item to test all supported resource licences:
 
 - OGL v3
 - CC BY v4
+- Copernicus Sentinel data v1
 - X Operations Mapping v1
 - X MAGIC Products v1
 - X All Rights Reversed v1
@@ -130,5 +139,34 @@ rights_reversed_record.identification.constraints = Constraints(
             href="https://metadata-resources.data.bas.ac.uk/licences/all-rights-reserved-v1/",
             statement="All rights for this information are reserved. View the (Local) All Rights Reserved v1 licence, https://metadata-resources.data.bas.ac.uk/licences/operations-mapping-v1/, for more information.",
         ),
+    ]
+)
+
+copernicus_sentinel_record = make_record(
+    file_identifier="43287219-40aa-47fd-809e-21b50773a052",
+    hierarchy_level=HierarchyLevelCode.PRODUCT,
+    title="Test Resource - Item to test licences (Copernicus Sentinel v1)",
+    abstract=abstract,
+    purpose="Item to test all supported licence usage constraints are presented correctly.",
+)
+copernicus_sentinel_record.identification.constraints = Constraints(
+    [
+        Constraint(
+            type=ConstraintTypeCode.ACCESS,
+            restriction_code=ConstraintRestrictionCode.UNRESTRICTED,
+            statement="Open Access (Anonymous)",
+        ),
+        Constraint(
+            type=ConstraintTypeCode.USAGE,
+            restriction_code=ConstraintRestrictionCode.LICENSE,
+            href="https://cds.climate.copernicus.eu/licences/ec-sentinel",
+            statement="This information is licensed under the Copernicus Sentinel data licence (rev. 1).",
+        ),
+    ]
+)
+copernicus_sentinel_record.identification.contacts = Contacts(
+    [
+        make_magic_role({ContactRoleCode.POINT_OF_CONTACT, ContactRoleCode.PUBLISHER}),
+        Contact(organisation=ContactIdentity(name="European Commission"), role={ContactRoleCode.RIGHTS_HOLDER}),
     ]
 )

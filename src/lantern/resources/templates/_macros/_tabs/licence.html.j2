@@ -19,7 +19,7 @@
   </div>
 {% endmacro %}
 
-{% macro licence(id, href, name, copyright_holders, icon_classes=None) %}
+{% macro licence(id, href, name, copyright_holders, icon_classes=None, has_summary=True) %}
   <section id="{{ id }}" class="grid grid-cols-1 gap-y-4 lg:gap-y-8 lg:gap-x-8 lg:grid-cols-[auto_1fr]">
     <div><strong>Item licence</strong></div>
     <div class="relative flex justify-between items-top">
@@ -45,13 +45,15 @@
       </div>
     {% endif %}
 
-    <div><strong>Licence summary</strong></div>
-    <div class="space-y-8">
-      {{ caller('rights') }}
-      {{ caller('conditions') }}
-      {{ caller('restrictions') }}
-      <p>This is a short licence summary, see the {{ com.ext_link_a(href=href, value="Formal Licence") }} for more information.</p>
-    </div>
+    {% if has_summary %}
+      <div><strong>Licence summary</strong></div>
+      <div class="space-y-8">
+        {{ caller('rights') }}
+        {{ caller('conditions') }}
+        {{ caller('restrictions') }}
+        <p>This is a licence summary, see the {{ com.ext_link_a(href=href, value="Formal Licence") }} for more information.</p>
+      </div>
+    {% endif %}
   </section>
 {% endmacro %}
 
@@ -133,6 +135,17 @@
         {% endcall %}
       {% endcall %}
     {% endif %}
+  {% endcall %}
+{% endmacro %}
+
+{% macro copernicus_sentinel_data_1(copyright_holders) %}
+{% call(content) licence(
+    id='copernicus-sentinel-data-1-0',
+    href='https://cds.climate.copernicus.eu/licences/ec-sentinel',
+    name='Copernicus Sentinel data licence (rev. 1)',
+    copyright_holders=copyright_holders,
+    has_summary=False
+  ) %}
   {% endcall %}
 {% endmacro %}
 

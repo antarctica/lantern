@@ -70,6 +70,7 @@ The `Record` data class includes a `validate()` method which will:
 - validate the record configuration against any of these supported profiles:
   - the [MAGIC Discovery Profile (v1)](https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery/v1).
   - the [MAGIC Discovery Profile (v2)](https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery/v2).
+  - the [MAGIC Administration Profile (v1)](https://metadata-standards.data.bas.ac.uk/profiles/magic-administration/v1).
 
 Records will be validated automatically when needed. Invalid records will raise a
 `lantern.lib.metadata_library.models.record.RecordInvalidError` exception.
@@ -109,7 +110,7 @@ Supported elements (references not normative or exhaustive):
 - `identification.purpose`
 - `identification.other_citation_details`
 - `identification.supplemental_information`
-- `identification.constraints` (except permissions)
+- `identification.constraints`
 - `identification.aggregations`
 - `identification.extents` (temporal and bounding box extents only)
 - `identification.graphic_overviews`
@@ -131,7 +132,6 @@ Unsupported elements (not normative or exhaustive):
 - `(identification.)data_quality.lineage.sources`
 - `distribution.format` (except name and URL)
 - `identification.credit`
-- `identification.constraint.permissions`
 - `identification.extent.geographic.identifier`
 - `identification.extent.vertical`
 - `identification.keywords`
@@ -175,9 +175,8 @@ For example:
   - provides a constant for the Open Government Licence
 
 > [!TIP]
-> A larger scale present (`lantern.lib.metadata_library.models.record.presets.base.RecordMagicDiscoveryV2`) exists for
-> creating [MAGIC Discovery ISO 19115 Profile](https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery/v2)
-> compliant records.
+> A larger scale present (`lantern.lib.metadata_library.models.record.presets.base.RecordMagic`) exists for
+> creating typical MAGIC records, valid against the MAGIC Discovery (v2) and Administration (v1) profiles.
 
 ### Record utilities
 

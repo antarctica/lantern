@@ -64,6 +64,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Missing content-types for S3 uploaded files (in relation to `X-Content-Type-Options=nosniff`)
 * Preventing non-interactive publishing workflow from clobbering global exporters output in partial builds
 * Record models containing citations without contacts (projection authorities and domain consistency specifications)
+* Optional properties included in minimal test records
 
 ### Changed
 

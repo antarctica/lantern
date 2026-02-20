@@ -65,6 +65,16 @@ class TestRecordMagic:
 
         assert isinstance(record, RecordMagic)
 
+    def test_no_file_identifier(self):
+        """Cannot create a Record without a file identifier."""
+        with pytest.raises(ValueError, match=r"Records require a file_identifier."):
+            _ = RecordMagic(
+                hierarchy_level=HierarchyLevelCode.PRODUCT,
+                identification=Identification(
+                    title="x", abstract="x", dates=Dates(creation=Date(date=datetime(2014, 6, 30, tzinfo=UTC).date()))
+                ),
+            )
+
     def test_loads(self, fx_lib_record_config_min_magic: dict):
         """Can create a minimal Record from a JSON serialised dict."""
         record = RecordMagic.loads(fx_lib_record_config_min_magic)

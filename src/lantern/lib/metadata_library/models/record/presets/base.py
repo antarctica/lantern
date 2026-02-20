@@ -79,6 +79,10 @@ class RecordMagic(Record):
         """Process defaults and set optional admin metadata."""
         profiles = [MAGIC_DISCOVERY_V2]
 
+        if self.file_identifier is None:
+            msg = "Records require a file_identifier."
+            raise ValueError(msg)
+
         self._set_contacts()
         self._set_cat_identifier()
         self._set_citation()

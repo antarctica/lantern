@@ -1,7 +1,6 @@
 from datetime import date
 
 import pytest
-from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
 from cattrs import ClassValidationError
 
 from lantern.lib.metadata_library.models.record.elements.common import (
@@ -20,10 +19,8 @@ from lantern.lib.metadata_library.models.record.presets.extents import make_bbox
 from lantern.lib.metadata_library.models.record.presets.identifiers import make_bas_cat
 from lantern.lib.metadata_library.models.record.record import Record as RecordBase
 from lantern.lib.metadata_library.models.record.record import RecordInvalidError
-from lantern.lib.metadata_library.models.record.utils.admin import set_admin
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.record import Record
-from tests.conftest import _admin_meta_keys
 
 
 class TestRecord:
@@ -57,7 +54,6 @@ class TestRecord:
                 Extent(identifier="y", geographic=make_bbox_extent(0, 0, 0, 0)),
             ]
         )
-        set_admin(keys=_admin_meta_keys(), record=record, admin_meta=AdministrationMetadata(id=record.file_identifier))
         return record
 
     def test_init(self):
@@ -228,13 +224,3 @@ class TestRecord:
             record.validate()
         assert isinstance(excinfo.value.validation_error, ValueError)
         assert match in str(excinfo.value.validation_error)
-
-    def test_invalid_admin_meta(self):
-        """Cannot validate a Record without admin metadata."""
-        record = self._make_valid_record()
-        record.identification.supplemental_information = None
-
-        with pytest.raises(RecordInvalidError) as excinfo:
-            record.validate()
-        assert isinstance(excinfo.value.validation_error, ValueError)
-        assert "No administration metadata." in str(excinfo.value.validation_error)

@@ -4,6 +4,8 @@ from bas_metadata_library.standards.magic_administration.v1 import Administratio
 
 from lantern.lib.metadata_library.models.record.elements.common import (
     Constraints,
+    Contact,
+    ContactIdentity,
     Date,
     Dates,
     Identifier,
@@ -117,6 +119,22 @@ def make_record(
     # Convert to RecordRevision
     config = {"file_revision": "83fake487e5671f4a1dd7074b92fb94aa68d26bd", **record.dumps(strip_admin=False)}
     return RecordRevision.loads(config)
+
+
+def make_minimal_open_record(record: RecordRevision) -> None:
+    """Un-set non-required fields set by `make_record()`."""
+    record.identification.edition = None
+    record.identification.purpose = None
+    record.identification.contacts[0] = Contact(
+        organisation=ContactIdentity(name="MAGIC"), email="magic@bas.ac.uk", role={ContactRoleCode.POINT_OF_CONTACT}
+    )
+    record.identification.other_citation_details = None
+    record.identification.aggregations = Aggregations([])
+    record.identification.extents = Extents([])
+    record.identification.maintenance.progress = None
+    record.identification.maintenance.maintenance_frequency = None
+    record.data_quality.lineage = None
+    record.data_quality.domain_consistency = []
 
 
 def relate_products(file_identifier: str) -> Aggregations:

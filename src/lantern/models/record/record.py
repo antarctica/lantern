@@ -9,7 +9,6 @@ import cattrs
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode, HierarchyLevelCode
 from lantern.lib.metadata_library.models.record.record import Record as RecordBase
 from lantern.lib.metadata_library.models.record.record import RecordInvalidError, RecordSchema
-from lantern.lib.metadata_library.models.record.utils.kv import get_kv
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 
 TRecord = TypeVar("TRecord", bound="Record")
@@ -144,17 +143,6 @@ class Record(RecordBase):
             except ValueError:
                 pass
 
-    def _validate_admin(self) -> None:
-        """
-        Verify record has administration metadata.
-
-        Simple presence check, structure and content cannot be validated here as keys aren't available.
-        """
-        if "admin_metadata" not in get_kv(self):
-            msg = "No administration metadata."
-            exp = ValueError(msg)
-            raise RecordInvalidError(validation_error=exp)
-
     def validate(self, use_profiles: bool = True, force_schemas: list[RecordSchema] | None = None) -> None:
         """
         Verify records against Catalogue specific requirements.
@@ -167,7 +155,6 @@ class Record(RecordBase):
         - include a contact with the 'Point of Contact' role
         - use unique extent identifiers if included
         - don't use UUIDs as aliases, and/or include additional `/` values
-        - have administration metadata
 
         See docs/data_model.md#record-validation for more information.
         """
@@ -177,4 +164,3 @@ class Record(RecordBase):
         self._validate_poc()
         self._validate_extents()
         self._validate_aliases()
-        self._validate_admin()

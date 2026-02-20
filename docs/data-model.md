@@ -50,7 +50,6 @@ In addition to [Record Validation](/docs/libraries.md#record-validation), the Da
   - to determine if a record is part of the Catalogue
 - include an `identification.identifier.contacts.*.contact` with at least the 'pointOfContact' role
   - for use with the item contact tab
-- include [Administrative Metadata](#item-administrative-metadata)
 - use unique identifiers for extents
 - structure any [Aliases](#item-aliases) as below if included:
   - MUST use values in the form: `{prefix}/{value}`
@@ -59,6 +58,11 @@ In addition to [Record Validation](/docs/libraries.md#record-validation), the Da
   - MUST set the `href` property to `https://data.bas.ac.uk/{alias}` (e.g. `https://data.bas.ac.uk/collections/foo`)
 
 These requirements are enforced by the `validate()` method in the [Catalogue Record](#catalogue-records) class.
+
+> [!NOTE]
+> Whilst not required, records without
+> [Administration Metadata](/docs/libraries.md#record-administrative-metadata) will be interpreted as
+> [Restricted Items](#item-access-levels) when processed, and is therefore typically also included.
 
 [1]
 

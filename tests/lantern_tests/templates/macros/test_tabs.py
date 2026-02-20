@@ -489,6 +489,10 @@ class TestLicenceTab:
                 "https://metadata-resources.data.bas.ac.uk/licences/operations-mapping-v1/",
                 "BAS Operations Mapping Internal Use Licence (v1)",
             ),
+            (
+                "https://cds.climate.copernicus.eu/licences/ec-sentinel",
+                "Copernicus Sentinel data licence (rev. 1)",
+            ),
         ],
     )
     def test_licence(self, fx_item_cat_model_min: ItemCatalogue, value: str, expected: str):

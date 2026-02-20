@@ -11,6 +11,7 @@ from tests.resources.records.item_cat_initiative_all import record as initiative
 from tests.resources.records.item_cat_initiative_min import record as initiative_min_required
 from tests.resources.records.item_cat_licence import (
     cc_record,
+    copernicus_sentinel_record,
     magic_products_record,
     ogl_record,
     ops_record,
@@ -77,6 +78,7 @@ class FakeRecordsStore(Store):
             ops_record,
             magic_products_record,
             rights_reversed_record,
+            copernicus_sentinel_record,
             product_published_map_combined,
             product_published_map_side_a,
             product_published_map_side_b,

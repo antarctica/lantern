@@ -446,7 +446,7 @@ def fx_item_cat_model_min(
     """
     Minimal ItemCatalogue model instance.
 
-    Includes minimal admin metadata required by admin tab.
+    Includes minimal admin metadata and admin keys required by admin tab.
     """
     model = ItemCatalogue(
         site_meta=fx_site_meta,

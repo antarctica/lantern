@@ -48,14 +48,12 @@ from tests.conftest import _select_record
 class TestItemCatalogue:
     """Test catalogue item."""
 
-    def test_init(
-        self, fx_site_meta: SiteMeta, fx_admin_meta_keys: AdministrationKeys, fx_revision_model_min: RecordRevision
-    ):
+    def test_init(self, fx_site_meta: SiteMeta, fx_revision_model_min: RecordRevision):
         """Can create an ItemCatalogue."""
         item = ItemCatalogue(
             site_meta=fx_site_meta,
             record=fx_revision_model_min,
-            admin_meta_keys=fx_admin_meta_keys,
+            admin_meta_keys=None,
             trusted_context=True,
             select_record=_select_record,
         )
@@ -63,28 +61,13 @@ class TestItemCatalogue:
         assert item.record == fx_revision_model_min
 
     @pytest.mark.cov()
-    def test_init_invalid_record_type(
-        self, fx_site_meta: SiteMeta, fx_record_model_min: Record, fx_admin_meta_keys: AdministrationKeys
-    ):
+    def test_init_invalid_record_type(self, fx_site_meta: SiteMeta, fx_record_model_min: Record):
         """Cannot create an ItemCatalogue if not a RecordRevision."""
         with pytest.raises(TypeError, match=r"record must be a RecordRevision"):
             # noinspection PyTypeChecker
             _ = ItemCatalogue(
                 site_meta=fx_site_meta,
                 record=fx_record_model_min,
-                admin_meta_keys=fx_admin_meta_keys,
-                trusted_context=True,
-                select_record=_select_record,
-            )
-
-    @pytest.mark.cov()
-    def test_init_invalid_admin_keys(self, fx_site_meta: SiteMeta, fx_revision_model_min: RecordRevision):
-        """Cannot create an ItemCatalogue if admin keys are not provided."""
-        with pytest.raises(TypeError, match=r"administration metadata keys must be provided"):
-            # noinspection PyTypeChecker
-            _ = ItemCatalogue(
-                site_meta=fx_site_meta,
-                record=fx_revision_model_min,
                 admin_meta_keys=None,
                 trusted_context=True,
                 select_record=_select_record,

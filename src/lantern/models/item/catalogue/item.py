@@ -43,7 +43,6 @@ class ItemCatalogue(ItemBase):
 
     This Item subclass has stricter and additional requirements:
     - site metadata (for item contact form and extent map endpoints used in templates)
-    - admin metadata keys to access administrative metadata
     - a catalogue RecordRevision instance with administrative metadata
     - a callable to get a Record for a given identifier (used for related items via aggregations)
 
@@ -58,14 +57,11 @@ class ItemCatalogue(ItemBase):
         self,
         site_meta: SiteMeta,
         record: RecordRevision,
-        admin_meta_keys: AdministrationKeys,
+        admin_meta_keys: AdministrationKeys | None,
         select_record: SelectRecordProtocol,
         trusted_context: bool,
         **kwargs: Any,
     ) -> None:
-        if not isinstance(admin_meta_keys, AdministrationKeys):
-            msg = "administration metadata keys must be provided"
-            raise TypeError(msg) from None
         self._validate_record(record)
 
         super().__init__(record=record, admin_keys=admin_meta_keys)

@@ -3,6 +3,9 @@ import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
+from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
+from tests.resources.admin_keys import test_keys
+
 from lantern.models.site import ExportMeta
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -13,9 +16,18 @@ from boto3 import client as S3Client  # noqa: N812
 from moto import mock_aws
 from tests.resources.stores.fake_records_store import FakeRecordsStore
 
-from lantern.config import Config as Config
+from lantern.config import Config as BaseConfig
 from lantern.exporters.site import SiteExporter
 from lantern.log import init as init_logging
+
+
+class Config(BaseConfig):
+    """Config with test keys."""
+
+    @property
+    def ADMIN_METADATA_KEYS(self) -> AdministrationKeys:  # noqa: N802
+        """Administration metadata keys."""
+        return test_keys()
 
 
 def time_task(label: str) -> callable:

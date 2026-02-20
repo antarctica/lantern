@@ -55,7 +55,7 @@ class TestRecordMagic:
     def test_init(self):
         """Can create a minimal Record element from directly assigned properties."""
         date_ = datetime(2014, 6, 30, tzinfo=UTC).date()
-        hierarchy_level = HierarchyLevelCode.DATASET
+        hierarchy_level = HierarchyLevelCode.PRODUCT
         value = "x"
         record = RecordMagic(
             file_identifier="x",
@@ -89,7 +89,7 @@ class TestRecordMagic:
         """Can specify a metadata date stamp."""
         expected = datetime(2014, 6, 30, tzinfo=UTC).date()
         date_ = datetime(2014, 6, 30, tzinfo=UTC).date()
-        hierarchy_level = HierarchyLevelCode.DATASET
+        hierarchy_level = HierarchyLevelCode.PRODUCT
         value = "x"
         record = RecordMagic(
             file_identifier="x",
@@ -182,7 +182,7 @@ class TestRecordMagic:
                 {
                     "$schema": "https://metadata-resources.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-2-v4.json",
                     "file_identifier": "x",
-                    "hierarchy_level": "dataset",
+                    "hierarchy_level": "product",
                     "metadata": {
                         "contacts": [{"organisation": {"name": "x"}, "role": ["pointOfContact"]}],
                         "date_stamp": "2014-06-30",
@@ -193,13 +193,13 @@ class TestRecordMagic:
                         "abstract": "x",
                     },
                 },
-                "British Antarctic Survey (?year). _x_ (Version ?version) [Dataset]. British Antarctic Survey Mapping and Geographic Information Centre. [https://data.bas.ac.uk/items/x](https://data.bas.ac.uk/items/x).",
+                "British Antarctic Survey (?year). _x_ (Version ?version) [Product]. British Antarctic Survey Mapping and Geographic Information Centre. [https://data.bas.ac.uk/items/x](https://data.bas.ac.uk/items/x).",
             ),
             (
                 {
                     "$schema": "https://metadata-resources.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-2-v4.json",
                     "file_identifier": "x",
-                    "hierarchy_level": "dataset",
+                    "hierarchy_level": "product",
                     "metadata": {
                         "contacts": [{"organisation": {"name": "x"}, "role": ["pointOfContact"]}],
                         "date_stamp": "2014-06-30",
@@ -211,7 +211,7 @@ class TestRecordMagic:
                         "abstract": "x",
                     },
                 },
-                "British Antarctic Survey (2014). _x_ (Version x) [Dataset]. British Antarctic Survey Mapping and Geographic Information Centre. [https://data.bas.ac.uk/items/x](https://data.bas.ac.uk/items/x).",
+                "British Antarctic Survey (2014). _x_ (Version x) [Product]. British Antarctic Survey Mapping and Geographic Information Centre. [https://data.bas.ac.uk/items/x](https://data.bas.ac.uk/items/x).",
             ),
         ],
     )
@@ -234,7 +234,7 @@ class TestRecordMagic:
         date_stamp = datetime(2014, 6, 30, tzinfo=UTC).date()
         record = RecordMagic(
             file_identifier="x",
-            hierarchy_level=HierarchyLevelCode.DATASET,
+            hierarchy_level=HierarchyLevelCode.PRODUCT,
             identification=Identification(
                 title="x", abstract="x", dates=Dates(creation=Date(date=date_stamp)), other_citation_details=expected
             ),
@@ -255,7 +255,7 @@ class TestRecordMagic:
         date_ = datetime(2014, 6, 30, tzinfo=UTC).date()
         record = RecordMagic(
             file_identifier="x",
-            hierarchy_level=HierarchyLevelCode.DATASET,
+            hierarchy_level=HierarchyLevelCode.PRODUCT,
             identification=Identification(title="x", abstract="x", dates=Dates(creation=Date(date=date_))),
             admin_keys=fx_admin_meta_keys,
             admin_meta=fx_admin_meta_element,

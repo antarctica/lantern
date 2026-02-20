@@ -41,17 +41,17 @@ Record Revisions are implemented as a [Catalogue Record](#catalogue-records) sub
 
 ### Record requirements
 
-In addition to [Record Validation](/docs/libraries.md#record-validation), the Data Catalogue requires all records MUST:
+In addition to [Record Validation](/docs/libraries.md#record-validation), the Data Catalogue requires all records:
 
-- use a UUID value for the `file_identifier`:
+- MUST use a UUID value for the `file_identifier`:
   - to ensure resources can be distinguished without relying on a value such as title that may change or not be unique
   - to ensure resource identifiers and aliases are distinct and can't be ambiguous
-- include an `identification.identifier`, as per [1]
+- MUST include an `identification.identifier`, as per [1]
   - to determine if a record is part of the Catalogue
-- include an `identification.identifier.contacts.*.contact` with at least the 'pointOfContact' role
+- MUST include an `identification.identifier.contacts.*.contact` with at least the 'pointOfContact' role
   - for use with the item contact tab
-- use unique identifiers for extents
-- structure any [Aliases](#item-aliases) as below if included:
+- MUST use unique identifiers for extents
+- MUST structure any [Aliases](#item-aliases) as below if included:
   - MUST use values in the form: `{prefix}/{value}`
   - MUST use an allowed prefix for each hierarchy level, as per [2]
   - MUST NOT use UUIDs in values (to avoid conflicts with `file_identifier` values)
@@ -256,7 +256,7 @@ The `ItemBase` class includes an `admin_metadata` property returning:
 
 Additional Item properties, prefixed with `admin_` are provide access to admin metadata properties, or also return `None`.
 
-JSON Web Keys (JWKs) for decrypting JWEs and verifying the signature of JWTs should be configured using
+JSON Web Keys (JWKs) for decrypting JWEs and verifying the signature of JWTs should be configured using the
 `ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE` and `ADMIN_METADATA_SIGNING_KEY_PUBLIC`
 [Config Options](/docs/config.md#config-options) respectively.
 

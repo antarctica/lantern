@@ -257,6 +257,7 @@ class ItemCatalogue(ItemBase):
 
         `self._dates` returns values as `FormattedDates` not `Date` so `.datetime` returns a pre-formatted value.
         """
+        # noinspection PyUnresolvedReferences
         return OpenGraphMeta(
             title=self.title_plain,
             url=f"{self._meta.base_url}/items/{self.resource_id}",

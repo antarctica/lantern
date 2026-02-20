@@ -5,7 +5,8 @@ from playwright.sync_api import Browser, Page, Route, expect
 
 from tests.conftest import has_network
 from tests.resources.records.item_cat_data import record as product_data
-from tests.resources.records.item_cat_product_min import record as product_min_supported
+from tests.resources.records.item_cat_product_all import record as product_all_supported
+from tests.resources.records.item_cat_product_open_min import record as product_min_open
 
 
 class TestItemTabs:
@@ -13,7 +14,7 @@ class TestItemTabs:
 
     def test_switch(self, fx_exporter_static_server: Popen, page: Page):
         """Can switch between tabs."""
-        endpoint = f"http://localhost:8123/items/{product_min_supported.file_identifier}/index.html"
+        endpoint = f"http://localhost:8123/items/{product_min_open.file_identifier}/index.html"
         page.goto(endpoint)
 
         status_code = page.evaluate("window.performance.getEntries()[0].responseStatus")
@@ -31,7 +32,7 @@ class TestItemTabs:
 
     def test_history(self, fx_exporter_static_server: Popen, page: Page):
         """Can switch between visited tabs."""
-        endpoint = f"http://localhost:8123/items/{product_min_supported.file_identifier}/index.html"
+        endpoint = f"http://localhost:8123/items/{product_min_open.file_identifier}/index.html"
         page.goto(endpoint)
         status_code = page.evaluate("window.performance.getEntries()[0].responseStatus")
         assert status_code == 200
@@ -52,7 +53,7 @@ class TestItemTabs:
 
     def test_load(self, fx_exporter_static_server: Popen, page: Page):
         """Can set initial tab on page load if set in URL fragment."""
-        endpoint = f"http://localhost:8123/items/{product_min_supported.file_identifier}/index.html"
+        endpoint = f"http://localhost:8123/items/{product_min_open.file_identifier}/index.html"
         page.goto(endpoint + "#tab-info")
         status_code = page.evaluate("window.performance.getEntries()[0].responseStatus")
         assert status_code == 200
@@ -78,7 +79,7 @@ class TestItemEmbeddedMap:
 
         page.route("https://embedded-maps.data.bas.ac.uk/*", handle)
 
-        endpoint = f"http://localhost:8123/items/{product_min_supported.file_identifier}/index.html#tab-extent"
+        endpoint = f"http://localhost:8123/items/{product_all_supported.file_identifier}/index.html#tab-extent"
         page.goto(endpoint)
         status_code = page.evaluate("window.performance.getEntries()[0].responseStatus")
         assert status_code == 200
@@ -107,7 +108,7 @@ class TestItemContactForm:
 
         page.route("https://example.com/contact*", handle)
 
-        endpoint = f"http://localhost:8123/items/{product_min_supported.file_identifier}/index.html#tab-contact"
+        endpoint = f"http://localhost:8123/items/{product_min_open.file_identifier}/index.html#tab-contact"
         page.goto(endpoint)
         status_code = page.evaluate("window.performance.getEntries()[0].responseStatus")
         assert status_code == 200

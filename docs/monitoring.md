@@ -158,3 +158,4 @@ The production environment is automatically verified via a cron job running on t
 - results: [data.bas.ac.uk/-/verification/](https://data.bas.ac.uk/-/verification/))
 - logs: `/users/geoweb/cron_logs/lantern/lantern-verify-*.log`
 - log retention: 90 days (enforced monthly)
+- deployment: via [Ansible](/docs/deployment.md#site-verification-script)

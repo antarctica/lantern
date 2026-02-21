@@ -59,10 +59,15 @@ In addition to [Record Validation](/docs/libraries.md#record-validation), the Da
 
 These requirements are enforced by the `validate()` method in the [Catalogue Record](#catalogue-records) class.
 
+<!-- pyml disable md028 -->
 > [!NOTE]
 > Whilst not required, records without
 > [Administration Metadata](/docs/libraries.md#record-administrative-metadata) will be interpreted as
 > [Restricted Items](#item-access-levels) when processed, and is therefore typically also included.
+
+> [!CAUTION]
+> The catalogue does not enforce metadata access constraints if set.
+<!-- pyml enable md028 -->
 
 [1]
 
@@ -96,7 +101,8 @@ For example:
 
 - `Item.citation_html` returns an HTML formatted version of `identification.other_citation_details`, if set
 - `Item.kv` returns a dict of key-values if `identification.supplemental_information` is a suitable JSON encoded object
-- `Item.access` returns a local access type enumeration value by parsing access constraints from `identification.constraints`
+- `Item.resource_access` returns a local access type enumeration value by parsing any resource permissions set in
+  optional [Administrative Metadata](#item-administrative-metadata)
 
 ### Catalogue items
 
@@ -119,6 +125,10 @@ Supported properties (references not normative or exhaustive):
 - `file_identifier`
 - `file_revision`
 - `hierarchy_level`
+- `metadata.date_stamp`
+- `metadata.metadata_standard.name`
+- `metadata.metadata_standard.version`
+- `metadata.constraints[type='usage', restriction_code='licence']` (only where a `href` is included)
 - `reference_system_info`
 - `identification.citation.title`
 - `identification.citation.dates`
@@ -128,7 +138,6 @@ Supported properties (references not normative or exhaustive):
 - `identification.citation.identifiers[namespace='doi']`
 - `identification.citation.identifiers[namespace='isbn']`
 - `identification.citation.identifiers[namespace='alias.data.bas.ac.uk']`
-- `identification.citation.identifiers[namespace='gitlab.data.bas.ac.uk'] (as references only)`
 - `identification.abstract`
 - `identification.aggregations` (only as below)
   - 'part of' (items in collections)
@@ -136,27 +145,30 @@ Supported properties (references not normative or exhaustive):
   - supersedes (not 'superseded by')
   - 'one side of' (physical maps only)
   - 'opposite side of' (physical maps only)
-- `identification.constraints` ('licence' only)
+- `identification.constraints[type='usage', restriction_code='licence']`
 - `identification.maintenance`
 - `identification.extent` (single bounding temporal and geographic bounding box extent only)
 - `identification.other_citation_details`
 - `identification.graphic_overviews` ('overview' image only)
 - `identification.spatial_resolution`
-- `identification.supplemental_information` (for 'physical dimensions' and 'sheet number' only)
+- `identification.supplemental_information` ('physical_size_*' and 'admin_meta' KV's only)
 - `data_quality.lineage.statement`
 - `data_quality.domain_consistency`
-- distributor.format (`format` and `href` only)
-- distributor.transfer_option (except `online_resource.protocol`)
+- `distribution.distributor.format` (`format` and `href` only)
+- `distribution.distributor.transfer_option` (except `online_resource.protocol`)
+- [Administrative Metadata](#item-administrative-metadata) (in trusted contexts only)
 
 Unsupported properties (references not normative or exhaustive):
 
 - `identification.purpose` (except as used in ItemSummaries)
+- `identification.citation.identifiers` (except `'doi'`, `'isbn'`, `'alias.data.bas.ac.uk'` namespaces)
 
 Intentionally omitted properties (references not normative or exhaustive):
 
 - `*.character_set` (not useful to end-users, present in underlying record)
 - `*.language` (not useful to end-users, present in underlying record)
 - `*.online_resource.protocol` (not useful to end-users, present in underlying record)
+- `*.constraints[type='access']` (not trustworthy, see [Item Access](#item-access-levels))
 - `distribution.distributor` (not useful to end-users)
 
 ### Special catalogue items
@@ -249,46 +261,54 @@ The `ItemBase` class includes a `kv` property returning a dictionary of:
 
 ### Item administrative metadata
 
-The `ItemBase` class includes an `admin_metadata` property returning:
+The `ItemBase` class includes an optional `admin_metadata` property returning:
 
 - parsed [Administrative Metadata](/docs/libraries.md#record-administrative-metadata)
-- or, `None` if no Admin Metadata is defined, or cannot be decrypted and verified
+- `None` if no admin metadata is defined, or cannot be decrypted and verified
 
-Additional Item properties, prefixed with `admin_` are provide access to admin metadata properties, or also return `None`.
+Item properties, prefixed with `admin_` provide access to admin metadata properties, or also return `None`.
 
 JSON Web Keys (JWKs) for decrypting JWEs and verifying the signature of JWTs should be configured using the
 `ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE` and `ADMIN_METADATA_SIGNING_KEY_PUBLIC`
 [Config Options](/docs/config.md#config-options) respectively.
 
 > [!TIP]
-> Keys can be accessed from [Export Metadata](#export-metadata) if created from a Config object.
+> These keys can be accessed from [Export Metadata](#export-metadata) if created from a Config object.
 
 ### Item access levels
 
-An access level for each item is available via the `Item.admin_access_level` property. Levels are defined by the
-`lantern.models.item.base.enums.AccessLevel` enum determined by evaluating permissions within the `access_permissions`
-[Administrative Metadata](#item-administrative-metadata) property.
+Access levels for each item are available via:
 
-> [!IMPORTANT]
-> External data access systems are responsible for enforcing any access permissions that may apply. The catalogue only
-> indicates whether restrictions may apply at an informative level.
+- `Item.admin_metadata_access` (who can view a description of the item)
+- `Item.admin_resource_access` (who can access the item itself, if applicable)
 
-The `ItemBase` class includes an `admin_access_level` property returning the evaluated access level.
+Both properties return a `lantern.models.item.base.enums.AccessLevel` enum value, determined by permissions within the
+[Administrative Metadata](#item-administrative-metadata).
+
+Both properties default to `AccessLevel.NONE`. To allow open access, include permissions equivalent to the
+`lantern.lib.metadata_library.models.record.presets.admin.OPEN_ACCESS` permission.
+
+<!-- pyml disable md028 -->
+> [!CAUTION]
+> The catalogue does not enforce any metadata access permissions set.
+
+> [!WARNING]
+> External data access systems are responsible for enforcing any resource permissions that may apply. The catalogue
+> only indicates whether restrictions may apply at an informative level.
+
+> [!WARNING]
+> The catalogue does not consider access constraints set in `metadata.costraints` or `identification.constraints`, as
+> they can not be verified as trustworthy.
 
 > [!NOTE]
-> Items default to the `AccessLevel.NONE` access level where admin metadata is unavailable, or does not include access
-> permissions, allowing open access (as per `lantern.lib.metadata_library.models.record.presets.admin.OPEN_ACCESS`).
+> Access constraints SHOULD still be set for visibility to end users and for interoperability with other systems.
+<!-- pyml enable md028 -->
 
-[Catalogue Items](#catalogue-items) simplify access levels to a binary *is restricted* value via the `restricted`
+[Catalogue Items](#catalogue-items) simplify the `admin_resource_access` access level to a binary `restricted`
 property, returning and defaulting to true unless `Item.admin_access_level == AccessLevel.PUBLIC`.
 
 Where restricted, [Item Templates](/docs/site.md#templates) display additional context in item summaries and
 the data tab (if applicable).
-
-> [!NOTE]
-> Access constraints set in `identification.constraints` within the underlying record are not used to determine access
-> levels, as they are not signed as authentic and so cannot be trusted. They should still be set for information and
-> interoperability with other systems.
 
 ## Verification Jobs
 

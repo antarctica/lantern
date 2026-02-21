@@ -277,9 +277,13 @@ resource "gitlab_user" "lantern_bot" {
 resource "gitlab_personal_access_token" "lantern_bot_pa_item_enquires" {
   # To enable item enquires via Power Automate (see /docs/site.md#item-enquiries)
   user_id    = gitlab_user.lantern_bot.id
-  name       = "pa-item-enquires"
-  expires_at = "2026-07-09"
+  name       = "iac-pa-item-enquires"
   scopes     = ["api"]
+
+  rotation_configuration = {
+    expiration_days    = 90
+    rotate_before_days = 7
+  }
 }
 resource "onepassword_item" "lantern_bot_pa_item_enquires_token" {
   vault      = var.pvd_op_vault_id
@@ -292,10 +296,14 @@ resource "onepassword_item" "lantern_bot_pa_item_enquires_token" {
 
 resource "gitlab_personal_access_token" "lantern_bot_ansible_workstation_module" {
   # To enable publishing workflows via Ansible managed workstation module (see /docs/usage.md)
-  user_id    = gitlab_user.lantern_bot.id
-  name       = "ansible-workstation-module"
-  expires_at = "2026-07-09"
-  scopes     = ["api"]
+  user_id = gitlab_user.lantern_bot.id
+  name    = "iac-ansible-workstation-module"
+  scopes  = ["api"]
+
+  rotation_configuration = {
+    expiration_days    = 90
+    rotate_before_days = 7
+  }
 }
 resource "onepassword_item" "lantern_bot_ansible_workstation_module_token" {
   vault      = var.pvd_op_vault_id

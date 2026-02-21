@@ -109,6 +109,7 @@ admin-record = { cmd = "python -m tasks.record_dump_admin", help = "View adminis
 select-records = { cmd = "python -m tasks.records_select", help = "Copy records from cache to import directory for editing" }
 zap-records = { cmd = "python -m tasks.records_zap", help = "Process Zap ⚡️ authored records from import directory" }
 ops-eo-records = { cmd = "python -m tasks.records_ops_eo", help = "Process Ops EO authored records from import directory" }
+preview-records = { cmd = "python -m tasks.records_preview", help = "Preview records as HTML items" }
 import-records = { cmd = "python -m tasks.records_import", help = "Import records from directory" }
 build-records = { cmd = "python -m tasks.records_build", help = "Build records as a catalogue site" }
 verify-records = { cmd = "python -m tasks.records_verify", help = "Verify static site contents" }

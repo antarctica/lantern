@@ -92,6 +92,19 @@ These fields are updated when duplicating a record:
 
 > [!NOTE]
 > Other fields (such as citation, aliases, edition, title, etc.) will need updating after cloning.
+## Preview records
+
+To preview a set of records before importing them:
+
+1. copy record configurations as JSON files to the `import/` directory
+2. run the `preview-records` [Development Task](/docs/dev.md#development-tasks) and select which records to preview
+3. run the [Local development web server](/docs/dev.md#local-development-web-server) to records as items
+
+> [!NOTE]
+> Records are only exported using the [HTML resource exporter](/docs/exporters.md#html-resource-exporter). Links to
+> view items as XML or JSON will not work.
+>
+> Placeholder information will be shown for any related records, as they may not exist yet.
 
 ## Interactive record publishing workflow
 

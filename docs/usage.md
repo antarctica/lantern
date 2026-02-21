@@ -395,3 +395,9 @@ The `verify-records` task will:
    [Verification Exporter](/docs/exporters.md#verification-exporter)
 1. run [Verification checks](/docs/monitoring.md#verification-checks) against the generated static site
 1. compile and export/publish a [Verification report](/docs/monitoring.md#verification-report)
+## Troubleshooting
+
+### Administration metadata keys
+
+Run the `keys-check` [Development Task](/docs/dev.md#development-tasks) to verify the current administration metadata
+keys work. No output will be returned if working.

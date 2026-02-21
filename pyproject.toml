@@ -95,6 +95,7 @@ tfvars-init = { cmd = "op inject --in-file resources/envs/terraform.tfvars.tpl -
 release = { cmd = "python -m tasks.release", help = "Prepapre app release" }
 config-init = { cmd = "op inject --in-file resources/dev/.env.tpl --out-file .env", help = "Initialise config file" }
 config-check = { cmd = "python -m tasks.config_check", help = "Check app config" }
+keys-check = { cmd = "python -m tasks.keys_check", help = "Check admin meta keys" }
 css = { cmd = "python -m tasks.css", help = "Regenerate CSS via tailwind" }
 css-audit = { cmd = "python -m tasks.css_audit", help = "List CSS styles used in app templates" }
 icons-audit = { cmd = "python -m tasks.icons_audit", help = "List icons used in app templates" }

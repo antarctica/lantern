@@ -253,56 +253,50 @@ In the `tests.lantern_tests.config` module:
 - if configurable, update the `test_configurable_property` method
 - update or create other tests as needed
 
-### Adding record hierarchy levels
-
-> [!WARNING]
-> This section is Work in Progress (WIP) and may not be complete/accurate.
-
-For each new hierarchy level:
-
-- if a new local level, update the `lantern.lib.metadata_library.models.record.enums.HierarchyLevelCode` enum
-- update the `lantern.models.item.base.enums.ResourceTypeLabel` enum to set a formatted value/label
-- update the `lantern.models.item.catalogue.enums.ResourceTypeIcon` enum to set an accompanying icon
-- if citable, update the `lantern.lib.metadata_library.models.record.presets.citation.CitationHierarchyLevelCode` enum
-  and `tests.lib_tests.metadata_library.models.record.presets.test_citation.TestMakeMagicCitation.test_citation`
-- add a new [Test Record](#adding-new-test-records)
-
 ### Adding catalogue item types
 
 > [!WARNING]
 > This section is Work in Progress (WIP) and may not be complete/accurate.
 
-Update record schemas to allow the new item type in records:
+Agree the use of new types:
 
-1. if the type is not a member of the ISO 19115 `MD_ScopeCode` code list, create and agree a proposal in the
-   [BAS Metadata Standards](https://gitlab.data.bas.ac.uk/uk-pdc/metadata-infrastructure/metadata-standards) project
-2. if needed, add the type to the `hierarchy_level` enum in the ISO 19115 JSON Schema within the
-   [BAS Metadata Library](https://github.com/antarctica/metadata-library) and make a new release as needed
-3. if needed, allow the type to profiles that restrict allowed item types (e.g. the MAGIC Discovery profile)
+1. if types are not members of the ISO 19115 `MD_ScopeCode` code list, create and agree a proposal to add locally in the
+   [BAS Metadata Standards 🛡️](https://gitlab.data.bas.ac.uk/uk-pdc/metadata-infrastructure/metadata-standards) project
+2. revise requirement 03 in the MAGIC Discovery Profile and map to a [Super Type](/docs/data-model.md#item-super-types)
+   via a proposal in the [MAGIC Data Management 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/data-management) project
 
-Within this project:
+Update record schemas in the [BAS Metadata Library](https://github.com/antarctica/metadata-library) to allow the new
+types in records:
 
-1. if needed, upgrade the 'bas-metadata-library' dependency to a version including the new item type
-2. add new [Test Records](#adding-new-test-records) as needed using the new item type
-3. update the `prefixes` mapping in `lantern.models.record.record.Record._validate_aliases()` to set allowed aliases
-4. update the allowed prefixes table in the [Record requirements](/docs/data-model.md#record-requirements) documentation
-5. add new paths for prefixes in the [OpenAPI Definition](/docs/site.md#openapi-definition)
-6. add item type to `lantern.models.item.base.enums.ResourceTypeLabel` enum
-7. add item type to `lantern.models.item.catalogue.enums.ResourceTypeIcon` enum (see https://fontawesome.com/v5/search)
-8. if a 'container' [Super Type](/docs/data-model.md#item-super-types), update the
-  `lantern.models.item.catalogue.item.ItemCatalogue._super_type` property
-9. verify the [Test Records](#test-records) build as a local site
-10. update static site endpoints in [Reverse Proxying](/docs/setup.md#reverse-proxying) and `resources/dev/haproxy` to
-    include new aliases, and request updating the BAS Load Balancer config to match
+1. if needed, add types to the `hierarchy_level` enum in the ISO 19115 JSON Schema
+2. add the types to the relevant super type enum in the MAGIC Discovery Profile JSON Schema
+3. release a new version of the library and update the dependency in this project
 
-If additional item relationships are needed:
+Within this project, for each new item type:
 
-1. add relevant properties to `lantern.models.item.catalogue.elements.Aggregations`
-2. call new properties in `lantern.resources.templates._macros.related`
-3. add tests as needed in:
-   - `tests.lantern_tests.models.item.catalogue.test_elements.TestAggregations`
-   - `tests.lantern_tests.templates.macros.test_tabs.TestRelatedTab`
-4. update [Test records](#test-records) to set aggregations as needed
+- if a new local level, update the `lantern.lib.metadata_library.models.record.enums.HierarchyLevelCode` enum
+- update the `lantern.models.item.base.enums.ResourceTypeLabel` enum to set a formatted value/label
+- update the `lantern.models.item.catalogue.enums.ResourceTypeIcon` enum to set an accompanying icon
+- if the new type is a 'container' [Super Type](/docs/data-model.md#item-super-types):
+  - add the `HierarchyLevelCode` member to the `lantern.models.item.catalogue.const.CONTAINER_SUPER_TYPES` list
+  - update `tests.lantern_tests.models.item.catalogue.test_item_catalogue.TestItemCatalogue.test_super_type`
+- if the new type is included in citations:
+  - update the `lantern.lib.metadata_library.models.record.presets.citation.CitationHierarchyLevelCode` enum
+  - update `tests.lib_tests.metadata_library.models.record.presets.test_citation.TestMakeMagicCitation.test_citation`
+- if the new type introduces a new [Item Alias Prefix](/docs/data-model.md#item-aliases):
+  - update the `prefixes` mapping in `lantern.models.record.record.Record._validate_aliases()` to set allowed aliases
+  - update the allowed prefixes table in the [Record requirements](/docs/data-model.md#record-requirements) docs
+  - add new paths for prefixes in the [OpenAPI Definition](/docs/site.md#openapi-definition)
+  - update static site endpoints in [Reverse Proxying](/docs/setup.md#reverse-proxying) and `resources/dev/haproxy` to
+    include new prefixes, and request updating the BAS Load Balancer config to match
+- if the new type introduces new item relationships:
+  - add relevant properties to `lantern.models.item.catalogue.elements.Aggregations`
+  - call new properties in `lantern.resources.templates._macros.related`
+  - add tests as needed in:
+    - `tests.lantern_tests.models.item.catalogue.test_elements.TestAggregations`
+    - `tests.lantern_tests.templates.macros.test_tabs.TestRelatedTab`
+- add a new [Test Record](#adding-new-test-records) using the new item type, aliases and/or relationships as applicable
+- verify new behaviour in a local site build
 
 ### Adding properties to items
 
@@ -378,9 +372,6 @@ If additional item relationships are needed:
 
 ### Adding catalogue licences
 
-> [!WARNING]
-> This section is Work in Progress (WIP) and may not be complete/accurate.
-
 1. update `lantern.models.item.catalogue.enums.Licence`
 2. in `src/lantern/resources/templates/_macros/_tabs/licence.html.j2`:
    - create a new macro calling the `licence` macro, named after a lower case version of the Licence enum item
@@ -388,6 +379,7 @@ If additional item relationships are needed:
 4. add test record to:
    - `tests.resources.records.item_cat_collection_all`
    - `tests.resources.stores.fake_records_store.FakeRecordsStore._fake_records`
+5. update the `lantern_tests.templates.macros.test_tabs.TestLicenceTab.test_licence` test
 
 ### Adding site pages
 
@@ -711,14 +703,16 @@ to load these records for use with [Exporters](/docs/architecture.md#exporters).
 
 #### Test records signing keys
 
-A set of test keys are used for signing and encrypting
-[Administrative Metadata](/docs/data-model.md#item-administrative-metadata) within test records. These keys are
-were generated using `tests.resources.records.admin_keys.testing_keys._make_keys()` and intended as static values
-available via [Pytest-Env](#pytest-env) and `tests.conftest._admin_meta_keys` and its related fixture.
+Test keys from the [BAS Metadata Library](https://github.com/antarctica/metadata-library/blob/main/docs/dev.md#test-keys)
+are used for signing and encrypting [Administrative Metadata](/docs/data-model.md#item-administrative-metadata) within
+test records.
+
+An additional `X_ADMIN_METADATA_SIGNING_KEY_PRIVATE` environment variable is set to load the private signing key for
+signing admin metadata instances.
 
 > [!TIP]
-> An additional `X_ADMIN_METADATA_SIGNING_KEY_PRIVATE` environment variable is set to load the private signing key for
-> use signing admin metadata instances for use in tests and test records.
+> In [Development Tasks](#development-tasks), the `tasks._config.ExtraConfig` class includes a `ADMIN_METADATA_KEYS_RW`
+> property returning an `AdministrationKeys` instance with this key loaded.
 
 #### Adding new test records
 

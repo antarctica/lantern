@@ -64,15 +64,20 @@ if [ $? -eq 0 ]; then
 fi
 ```
 
-## Creating records
+## Create records
 
 1. create new records, (or clone a record using the `clone-record` [Development Task](/docs/dev.md#development-tasks))
    as JSON files in the import directory as per the [Record Authoring](/docs/libraries.md#record-authoring) section
 1. run the [Import Records](#import-records) workflow
 
+<!-- pyml disable md028 -->
+> [!CAUTION]
+> The catalogue does not enforce any metadata access permissions set.
+
 > [!TIP]
 > See the [Content Formatting](https://data.bas.ac.uk/guides/formatting) for Markdown syntax supported in record
 > free-text elements.
+<!-- pyml enable md028 -->
 
 The `clone-record` task will:
 
@@ -89,14 +94,37 @@ These fields are updated when duplicating a record:
 
 - `file_identifier`
 - `identification.identifier[namespace='data.bas.ac.uk']` (data catalogue identifier)
+- `identification.supplemental_information[admin_metadata]`
 
 > [!NOTE]
-> Other fields (such as citation, aliases, edition, title, etc.) will need updating after cloning.
+> Other fields (such as citation, aliases, edition, title, etc.) are not changed and may need updating.
+
+For administrative metadata, these fields are updated:
+
+- `id` (to match the new `file_identifier`)
+
+> [!NOTE]
+> Other properties (gitlab issues, metadata/resource access permissions etc.) are not changed and may need updating.
+
+## Preview records
+
+To preview a set of records before importing them:
+
+1. copy record configurations as JSON files to the `import/` directory
+2. run the `preview-records` [Development Task](/docs/dev.md#development-tasks) and select which records to preview
+3. run the [Local development web server](/docs/dev.md#local-development-web-server) to records as items
+
+> [!NOTE]
+> Records are only exported using the [HTML resource exporter](/docs/exporters.md#html-resource-exporter). Links to
+> view items as XML or JSON will not work.
+>
+> Placeholder information will be shown for any related records, as they may not exist yet.
 
 ## Interactive record publishing workflow
 
 A semi-automated workflow is available to [Import](#import-records), [Build](#build-static-site) and
-[Verify](#verify-static-site) sets of manually authored records using interactive prompts for required information.
+[Verify](#verify-static-site) sets of [Manually Authored](#create-records) records using interactive prompts for
+required information.
 
 > [!NOTE]
 > This workflow is intended as a convenience for the Business As Usual (BAU) process of publishing records from GitLab
@@ -107,7 +135,7 @@ A semi-automated workflow is available to [Import](#import-records), [Build](#bu
 
 To preview records in the testing catalogue:
 
-1. copy record configurations as JSON files to the `import/` directory (see [Creating Records](#creating-records))
+1. copy record configurations as JSON files to the `import/` directory (see [Create Records](#create-records))
 1. run the `records-workflow` [Development Task](/docs/dev.md#development-tasks)
 1. repeat this process (using the [`select-records`](#update-records) task to get the now existing records) until the
    record author is happy for them to be live
@@ -252,6 +280,9 @@ Payload JSON [Schema and Example](/resources/scripts/non-interactive-publishing-
 - if changing access permissions, run the `restrict-records` [Development Task](/docs/dev.md#development-tasks)
 - run the [Import Records](#import-records) workflow
 
+> [!CAUTION]
+> The catalogue does not enforce any metadata access permissions set.
+
 ### Replacing record thumbnails
 
 To replace the thumbnail for an existing resource:
@@ -310,13 +341,18 @@ The `restrict-records` task (if needed) will:
 
 1. parse and validate `import/*.json` files (ignoring subfolders) as [Records](/docs/data-model.md#records)
 1. prompt interactively for which records to update
-1. prompt interactively for which access permission to set
+1. prompt interactively for which metadata and resource permissions to set
 1. update the [Administrative Metadata](/docs/libraries.md#record-administrative-metadata) in selected records with the
    selected access permission
 1. save updated record configurations as JSON files in the `import/` directory
 
+<!-- pyml disable md028 -->
+> [!CAUTION]
+> The catalogue does not enforce any metadata access permissions set.
+
 > [!NOTE]
 > Only 'Open Access' and 'BAS Staff' access permissions are supported by this task.
+<!-- pyml enable md028 -->
 
 ## Import records
 
@@ -347,7 +383,9 @@ The `zap-records` task (if used) will:
 > Creating administrative metadata from access constraints is not safe where the origin of a record is not trusted.
 
 > [!NOTE]
-> Only open access (unrestricted) access constraints are converted to access permissions in administrative metadata.
+> Only open access (unrestricted) access constraints are converted to resource access permissions in administrative
+> metadata. Metadata access permissions are always set to open access (unrestricted).
+>
 > Other constraints are ignored and will need setting via the `restrict-records`
 > [Development Task](/docs/dev.md#development-tasks).
 <!-- pyml enable md028 -->
@@ -395,3 +433,14 @@ The `verify-records` task will:
    [Verification Exporter](/docs/exporters.md#verification-exporter)
 1. run [Verification checks](/docs/monitoring.md#verification-checks) against the generated static site
 1. compile and export/publish a [Verification report](/docs/monitoring.md#verification-report)
+
+## Rotate access tokens
+
+See [Deployment](/docs/deployment.md#rotating-access-tokens) documentation.
+
+## Troubleshooting
+
+### Administration metadata keys
+
+Run the `keys-check` [Development Task](/docs/dev.md#development-tasks) to verify the current administration metadata
+keys work. No output will be returned if working.

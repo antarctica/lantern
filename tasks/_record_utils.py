@@ -212,3 +212,19 @@ def confirm_source(logger: logging.Logger, store: GitLabStore, action: str) -> N
     if not answers["confirm"]:
         logger.info("Aborting. Set `STORE_GITLAB_*` in config to change source.")
         sys.exit(1)
+
+
+def pick_records(logger: logging.Logger, records: list[Record]) -> list[Record]:
+    """Pick records from a list."""
+    choices = {
+        f"{r.file_identifier} ('{r.identification.title}' {r.hierarchy_level.value})": r.file_identifier
+        for r in records
+    }
+    logger.debug(f"Choices: {list(choices.keys())}")
+
+    answers = inquirer.prompt([inquirer.Checkbox("selections", message="Records", choices=list(choices.keys()))])
+
+    records_ = {r.file_identifier: r for r in records}
+    selected_fids = [choices[k] for k in answers["selections"]]
+    logger.info(f"Selected records: {selected_fids}")
+    return [records_[fid] for fid in selected_fids]

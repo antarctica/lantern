@@ -25,7 +25,11 @@ class Record(RecordBase):
     file_identifier: str
 
     def __post_init__(self) -> None:
-        """Validate properties."""
+        """
+        Validate properties.
+
+        File identifier is checked for here (that it exists) and in validation (that it's a UUID).
+        """
         super().__post_init__()
         if self.file_identifier is None:
             msg = "Records require a file_identifier."

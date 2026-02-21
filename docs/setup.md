@@ -20,6 +20,13 @@ This includes a GitLab bot user to enable:
 - the [Publishing Workflows](#gitlab-publishing-workflows)
 - [Item Enquires](#gitlab-item-enquires)
 
+IaC will:
+
+- create this bot user
+- add the bot user as a member of the GitLab projects containing issues relevant to the
+  [Interactive Publishing Workflow](/docs/usage.md#interactive-record-publishing-workflow), with at least the
+  *reporter* role
+
 ### GitLab publishing workflows
 
 IaC will:
@@ -27,8 +34,7 @@ IaC will:
 - create and store in 1Password a personal access token to enable the
   [Workstation Module](/docs/usage.md#workstation-module) to:
   - access and manage records in the [GitLab Store](/docs/stores.md#gitlab-store)
-  - comment on issues for the [Interactive Publishing Workflow](/docs/usage.md#interactive-record-publishing-workflow)
-- add the bot user as a member of the GitLab projects containing these issues, with at least the *reporter* role
+  - as part of the [Non-Interactive Publishing Workflow](/docs/usage.md#non-interactive-record-publishing-workflow)
 
 Manually:
 

@@ -8,7 +8,7 @@ from bas_metadata_library.standards.magic_administration.v1.utils import (
     AdministrationKeys,
     AdministrationMetadataSubjectMismatchError,
 )
-from tasks._record_utils import dump_records, init, parse_records
+from tasks._record_utils import dump_records, init, parse_records, pick_records
 
 from lantern.lib.metadata_library.models.record.presets.admin import BAS_STAFF, OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.record import Record
@@ -24,34 +24,20 @@ def _get_args(
 
     Returns a list of records to set (the same) metadata and resource permissions for.
     """
-    choices = {
-        f"{r.file_identifier} ('{r.identification.title}' {r.hierarchy_level.value})": r.file_identifier
-        for r in records
-    }
     levels = [al.name for al in AccessLevel]
     levels.remove(AccessLevel.NONE.name)
     levels.remove(AccessLevel.UNKNOWN.name)
-    logger.debug(f"Choices: {list(choices.keys())}")
     logger.debug(f"Levels: {levels}")
 
+    records_picked = pick_records(logger=logger, records=records)
     answers = inquirer.prompt(
         [
-            inquirer.Checkbox(
-                "selections",
-                message="Records",
-                choices=list(choices.keys()),
-            ),
             inquirer.List("m_level", message="Metadata: access level", choices=levels, default=AccessLevel.PUBLIC),
             inquirer.Text("m_comment", message="Metadata: comment (Optional)", default=""),
             inquirer.List("r_level", message="Resource: access level", choices=levels, default=AccessLevel.PUBLIC),
             inquirer.Text("r_comment", message="Resource: comment (Optional)", default=""),
         ]
     )
-
-    records_ = {r.file_identifier: r for r in records}
-    selected_fids = [choices[k] for k in answers["selections"]]
-    logger.info(f"Selected records: {selected_fids}")
-    selected_records = [records_[fid] for fid in selected_fids]
 
     permissions: list[Permission | None] = [None, None]
     for i, prefix in enumerate(["m", "r"]):
@@ -64,7 +50,7 @@ def _get_args(
     logger.info(f"Selected metadata permission: {permissions[0]}")
     logger.info(f"Selected resource permission: {permissions[1]}")
 
-    return selected_records, permissions[0], permissions[1]
+    return records_picked, permissions[0], permissions[1]
 
 
 def _set_permission(
@@ -93,6 +79,13 @@ def _set_permission(
         else:
             raise e from e
     if admin is None:
+        logger.warning("No or unsupported administration metadata found, creating new instance.")
+        if not inquirer.confirm(
+            message="Existing administration metadata missing or unsupported, reset?",
+            default=False,
+        ):
+            logger.info("Aborting.")
+            sys.exit(1)
         admin = AdministrationMetadata(id=record.file_identifier)
     admin.metadata_permissions = [metadata_permission] if metadata_permission else []
     admin.resource_permissions = [resource_permission] if resource_permission else []

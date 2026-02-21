@@ -4,11 +4,11 @@ from copy import copy
 from lantern.models.record.revision import RecordRevision
 from lantern.stores.base import RecordNotFoundError, RecordsNotFoundError, Store
 from tests.resources.records.item_cat_collection_all import record as collection_all_supported
-from tests.resources.records.item_cat_collection_min import record as collection_min_required
+from tests.resources.records.item_cat_collection_open_min import record as collection_open_min_required
 from tests.resources.records.item_cat_data import record as data_all_supported
 from tests.resources.records.item_cat_formatting import record as formatting_supported
 from tests.resources.records.item_cat_initiative_all import record as initiative_all_supported
-from tests.resources.records.item_cat_initiative_min import record as initiative_min_required
+from tests.resources.records.item_cat_initiative_open_min import record as initiative_open_min_required
 from tests.resources.records.item_cat_licence import (
     cc_record,
     copernicus_sentinel_record,
@@ -20,6 +20,7 @@ from tests.resources.records.item_cat_licence import (
 from tests.resources.records.item_cat_product_all import record as product_all_supported
 from tests.resources.records.item_cat_product_map import record as product_map
 from tests.resources.records.item_cat_product_min import record as product_min_required
+from tests.resources.records.item_cat_product_open_min import record as product_open_min_required
 from tests.resources.records.item_cat_product_replaced import record as product_replaced
 from tests.resources.records.item_cat_product_restricted import record as product_restricted
 from tests.resources.records.item_cat_product_web_map import record as product_web_map
@@ -60,11 +61,12 @@ class FakeRecordsStore(Store):
     @property
     def _fake_records(self) -> list[RecordRevision]:
         records = [
-            initiative_min_required,
+            initiative_open_min_required,
             initiative_all_supported,
-            collection_min_required,
+            collection_open_min_required,
             collection_all_supported,
             product_min_required,
+            product_open_min_required,
             product_restricted,
             product_replaced,
             product_all_supported,

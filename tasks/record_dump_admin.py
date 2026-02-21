@@ -14,7 +14,7 @@ from lantern.lib.metadata_library.models.record.utils.clean import clean_dict
 from lantern.stores.gitlab import GitLabStore
 
 
-def _get_cli_args() -> dict:
+def _get_cli_args(logger: logging.Logger) -> dict:
     """
     Get optional command line arguments.
 
@@ -95,7 +95,7 @@ def main() -> None:
     """Entrypoint."""
     logger, config, store, _s3 = init()
     confirm_source(logger=logger, store=store, action="Selecting records from")
-    args = _get_cli_args()
+    args = _get_cli_args(logger)
 
     record = _load_record(logger=logger, args=args, store=store)
     _dumps_admin_meta(logger=logger, admin_keys=config.ADMIN_METADATA_KEYS, record=record)

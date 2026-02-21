@@ -70,6 +70,7 @@ The `Record` data class includes a `validate()` method which will:
 - validate the record configuration against any of these supported profiles:
   - the [MAGIC Discovery Profile (v1)](https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery/v1).
   - the [MAGIC Discovery Profile (v2)](https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery/v2).
+  - the [MAGIC Administration Profile (v1)](https://metadata-standards.data.bas.ac.uk/profiles/magic-administration/v1).
 
 Records will be validated automatically when needed. Invalid records will raise a
 `lantern.lib.metadata_library.models.record.RecordInvalidError` exception.
@@ -109,7 +110,7 @@ Supported elements (references not normative or exhaustive):
 - `identification.purpose`
 - `identification.other_citation_details`
 - `identification.supplemental_information`
-- `identification.constraints` (except permissions)
+- `identification.constraints`
 - `identification.aggregations`
 - `identification.extents` (temporal and bounding box extents only)
 - `identification.graphic_overviews`
@@ -131,7 +132,6 @@ Unsupported elements (not normative or exhaustive):
 - `(identification.)data_quality.lineage.sources`
 - `distribution.format` (except name and URL)
 - `identification.credit`
-- `identification.constraint.permissions`
 - `identification.extent.geographic.identifier`
 - `identification.extent.vertical`
 - `identification.keywords`
@@ -175,9 +175,8 @@ For example:
   - provides a constant for the Open Government Licence
 
 > [!TIP]
-> A larger scale present (`lantern.lib.metadata_library.models.record.presets.base.RecordMagicDiscoveryV2`) exists for
-> creating [MAGIC Discovery ISO 19115 Profile](https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery/v2)
-> compliant records.
+> A larger scale present (`lantern.lib.metadata_library.models.record.presets.base.RecordMagic`) exists for
+> creating typical MAGIC records, valid against the MAGIC Discovery (v2) and Administration (v1) profiles.
 
 ### Record utilities
 
@@ -202,28 +201,9 @@ encoded in a JSON string within the `identifification.supplemental_information` 
 
 ### Record administrative metadata
 
-To support the internal management of metadata records, additional
-[Administrative metadata](https://metadata-standards.data.bas.ac.uk/profiles/magic-administration-v1/) (as opposed
-to discovery, calibration or other metadata) can be included in Records.
-
-> [!NOTE]
-> Administrative metadata uses an internally developed schema and is not intended for external use. Administrative
-> metadata is stored in the supplemental information element within the ISO 19115 information model.
-
-The `lantern.lib.metadata_library.models.record.elements.administration.Administration` Python data class implements
-this concept and supports encoding/decoding to/from a JSON encoded string.
-
-This string value is included as a custom `pyd` (payload) claim within an asymmetrically signed long-lived JSON Web
-Token (JWT), nested within a symmetrically encrypted JWE (JSON Web Encryption) using the
-`lantern.lib.metadata_library.models.record.utils.admin.AdministrationWrapper` utility class. JWE values should be
-stored in Records a [Key Value](#record-key-value-data) item under a `administrative_metadata` key.
-
-The JSON Web Keys (JWKs) for signing/verifying JWTs and encrypting/decrypting JWEs are held in the
-`lantern.lib.metadata_library.models.record.utils.admin.AdministrationKeys` data class.
-
-> [!TIP]
-> The `lantern.lib.metadata_library.models.record.utils.admin.get_admin` and `set_admin` utility functions SHOULD be
-> used to access and update administrative metadata.
+The `lantern.lib.metadata_library.models.record.utils.admin.get_admin` and `set_admin` utility functions extend the
+[Metadata Library](https://github.com/antarctica/metadata-library/blob/v0.16.0rc1/docs/usage.md#magic-administration-metadata)
+methods to access and update MAGIC Administration metadata to work with [Records](#records).
 
 ### Adding new Record properties
 

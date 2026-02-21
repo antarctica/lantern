@@ -17,8 +17,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 
 ### Added
 
-* Development task for minimally cloning a record
-* Development task for minimally initialising a GitLab records cache
+* 'record-clone' task for minimally cloning an existing record
+* 'build-cache' Development task for minimally initialising a GitLab records cache
 * Support for configuring the GitLab store branch name
 * Branch-based changesets in interactive publishing workflow
 * v2 MAGIC discovery profile
@@ -29,7 +29,6 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Additional validation for MAGIC Discovery profile Req. 06 (released date presence)
 * Setup documentation for Plausible
 * Store frozen (read-only) mode for publishing workflows
-* 'js' development task for assembling JavaScript scripts
 * OpenAPI definition and Scalar based interactive documentation for static site
 * Reverse engineered JSON schema for site verification report data (for use in OpenAPI definition)
 * Reverse engineered JSON schema for public website search items data (for use in OpenAPI definition)
@@ -41,7 +40,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Sized support for stores to get number of records a store contains
 * Additional footer navigation links
 * 'admin-record' development task for viewing administrative metadata for a record
-* custom Sentry user feedback widget
+* Custom Sentry user feedback widget
 * Infrastructure as Code using OpenTofu
 * Automatic publishing of trusted content for administrative metadata
 * Infrastructure, hosting and site dependencies documentation diagrams
@@ -49,8 +48,12 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Basic web hooks support in the non-interactive publishing workflow
 * S3 bucket versioning enabled on production/live site
 * Metadata maintenance element support
-* 'mapProduct' and 'webMapProduct' item types
+* 'mapProduct' and 'webMapProduct' item types support
 * Item type icons in internal index template
+* 'preview-records' development task for previewing records as HTML catalogue items without publishing
+* 'keys-check' troubleshooting development task to verify administration metadata keys work
+* Importing non-interactive publishing workflow Python script from Ansible
+* Importing site verification Python script from Ansible
 
 ### Fixed
 
@@ -64,6 +67,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Missing content-types for S3 uploaded files (in relation to `X-Content-Type-Options=nosniff`)
 * Preventing non-interactive publishing workflow from clobbering global exporters output in partial builds
 * Record models containing citations without contacts (projection authorities and domain consistency specifications)
+* Optional properties included in minimal test records
+* Missing GitLab PAT rotation in IaC and instructions for applying changes to Ansible and Power Automate
 
 ### Changed
 

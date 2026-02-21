@@ -18,6 +18,8 @@ def make_in_bas_cat_collection(collection_id: str) -> Aggregation:
     """
     Resource within a collection.
 
+    I.e. 'this item is a part of ... collection' / 'my parent collection is ...'
+
     Inverse of `make_bas_cat_collection_member`.
     """
     return make_bas_cat(
@@ -28,6 +30,8 @@ def make_in_bas_cat_collection(collection_id: str) -> Aggregation:
 def make_bas_cat_collection_member(item_id: str) -> Aggregation:
     """
     Member of collection.
+
+    I.e. 'this item is made up of ... items' / 'my children are ...'
 
     Inverse of `make_in_bas_cat_collection()`.
     """

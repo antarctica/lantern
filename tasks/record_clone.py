@@ -6,6 +6,7 @@ from pathlib import Path
 from uuid import uuid4
 
 import inquirer
+from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
 from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 from tasks._record_utils import dump_records, init, process_record_selections
 
@@ -82,8 +83,8 @@ def _clone_record(
     # admin metadata
     admin_meta = get_admin(keys=admin_keys, record=source_record)  # can't use cloned record as ID will mismatch
     if admin_meta is None:
-        msg = "Missing administrative metadata in source record."
-        raise ValueError(msg) from None
+        logger.warning("Missing/unrecognised administrative metadata in source record, setting minimal instance.")
+        admin_meta = AdministrationMetadata(id=cloned_record.file_identifier)
     admin_meta.id = cloned_record.file_identifier
     set_admin(keys=admin_keys, record=cloned_record, admin_meta=admin_meta)
 
@@ -105,7 +106,7 @@ def main() -> None:
     target_identifier = _get_new_identifier(identifier=args["target_id"])
     new_record = _clone_record(
         logger=logger,
-        admin_keys=config.ADMIN_METADATA_KEYS,
+        admin_keys=config.ADMIN_METADATA_KEYS_RW,
         source_record=source_record,
         new_identifier=target_identifier,
     )

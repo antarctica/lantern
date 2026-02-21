@@ -3,10 +3,9 @@ import logging
 import sys
 from pathlib import Path
 
-import inquirer
 from boto3 import client as S3Client  # noqa: N812
 from moto import mock_aws
-from tasks._record_utils import init, parse_records
+from tasks._record_utils import init, parse_records, pick_records
 from tests.conftest import _select_record
 
 from lantern.config import Config
@@ -23,18 +22,7 @@ def _get_args(logger: logging.Logger, records: list[Record]) -> list[Record]:
 
     Returns a list of records to preview.
     """
-    choices = {
-        f"{r.file_identifier} ('{r.identification.title}' {r.hierarchy_level.value})": r.file_identifier
-        for r in records
-    }
-    logger.debug(f"Choices: {list(choices.keys())}")
-
-    answers = inquirer.prompt([inquirer.Checkbox("selections", message="Records", choices=list(choices.keys()))])
-
-    records_ = {r.file_identifier: r for r in records}
-    selected_fids = [choices[k] for k in answers["selections"]]
-    logger.info(f"Selected records: {selected_fids}")
-    return [records_[fid] for fid in selected_fids]
+    return pick_records(logger=logger, records=records)
 
 
 def _export(logger: logging.Logger, config: Config, records: list[Record], output_path: Path) -> None:

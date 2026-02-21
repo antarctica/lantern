@@ -12,6 +12,7 @@ from lantern.config import Config
 from lantern.exporters.site import SiteExporter
 from lantern.lib.metadata_library.models.record.record import RecordInvalidError
 from lantern.log import init as init_logging
+from lantern.log import init_sentry
 from lantern.models.record.record import Record
 from lantern.models.site import ExportMeta
 from lantern.stores.base import RecordNotFoundError
@@ -225,6 +226,8 @@ def _run(logger: logging.Logger, config: Config, args: Args) -> None:
 
 def main() -> None:
     """Entrypoint."""
+    init_sentry()
+
     config = Config()
     args = _parse_args()
 

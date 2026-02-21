@@ -68,6 +68,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Preventing non-interactive publishing workflow from clobbering global exporters output in partial builds
 * Record models containing citations without contacts (projection authorities and domain consistency specifications)
 * Optional properties included in minimal test records
+* Missing GitLab PAT rotation in IaC and instructions for applying changes to Ansible and Power Automate
 
 ### Changed
 

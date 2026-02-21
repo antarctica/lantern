@@ -110,6 +110,7 @@ Then run:
   - for [Storing](/docs/stores.md#gitlab-store) records in GitLab
   - managed via [Infrastructure as Code](#infrastructure-as-code) and manually as per
     [Setup](/docs/setup.md#gitLab-publishing-workflows) documentation
+  - requires regular [Rotation](/docs/deployment.md#rotating-access-tokens)
 
 ### Power Automate
 
@@ -118,6 +119,7 @@ Then run:
   - for [Item Enquires](/docs/site.md#item-enquires)
   - managed via [Infrastructure as Code](#infrastructure-as-code) and manually as per
     [Setup](/docs/setup.md#power-automate-item-enquires) documentation
+  - requires regular [Rotation](/docs/deployment.md#rotating-access-tokens)
 - [SharePoint Proxy 🔒](...)
   - for verifying SharePoint hosted record distribution options
   - managed manually as per [Setup](/docs/setup.md#power-automate-sharepoint-proxy) documentation

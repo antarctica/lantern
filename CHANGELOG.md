@@ -51,6 +51,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Metadata maintenance element support
 * 'mapProduct' and 'webMapProduct' item types
 * Item type icons in internal index template
+* 'keys-check' troubleshooting development task to verify administration metadata keys work
 * Importing site verification Python script from Ansible
 
 ### Fixed

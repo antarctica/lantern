@@ -138,7 +138,7 @@ class RsyncUtils:
             "source": str(src_path.resolve()),
             "sync_source_contents": True,
             "destination": str(target_path),
-            "options": ["-a"],
+            "options": ["-a", "--no-g", "--no-times"],  # to work around copying to the SAN as geoweb
         }
         if target_host:
             kwargs["destination_ssh"] = target_host

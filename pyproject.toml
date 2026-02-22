@@ -9,7 +9,7 @@ authors = [
 ]
 requires-python = ">=3.11"
 dependencies = [
-    "bas-metadata-library>=0.15.3",
+    "bas-metadata-library>=0.16.0rc1",
     "beautifulsoup4>=4.13.4",
     "bleach>=6.2.0",
     "boto3>=1.42.44",
@@ -28,6 +28,7 @@ dependencies = [
     "requests>=2.32.5",
     "sentry-sdk>=2.52.0",
     "sqlorm-py>=0.4.1",
+    "sysrsync>=1.1.1",
     "truststore>=0.10.4",
 ]
 
@@ -38,7 +39,6 @@ dev = [
     "pytailwindcss>=0.2.0",
     "ruff>=0.15.0",
     "safety>=3.5.2",
-    "sysrsync>=1.1.1",
     "taskipy>=1.14.1",
     "ty>=0.0.15",
     "types-lxml>=2025.3.30",

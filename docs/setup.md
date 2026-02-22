@@ -105,6 +105,7 @@ This ACL:
 ```text
 $ mkdir -p $DOCUMENT_ROOT/content/cat/testing/items $DOCUMENT_ROOT/content/cat/live/items
 $ chmod -R g+w $DOCUMENT_ROOT/content/cat/testing $DOCUMENT_ROOT/content/cat/live
+$ chmod -R g+s $DOCUMENT_ROOT/content/cat/testing $DOCUMENT_ROOT/content/cat/live
 ```
 
 ## Reverse proxying

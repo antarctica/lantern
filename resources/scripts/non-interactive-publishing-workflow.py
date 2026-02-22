@@ -137,7 +137,8 @@ def _publish_records(logger: logging.Logger, config: Config, site: SiteExporter,
     logger.info("Records published:")
     for identifier in sorted(identifiers):
         logger.info(f"* https://{config.AWS_S3_BUCKET}/items/{identifier}")
-        logger.info(f"* https://{config.AWS_S3_BUCKET}/-/items/{identifier}")
+        # hack as reverse proxying is needed
+        logger.info(f"* https://{config.AWS_S3_BUCKET.replace('lantern', 'data')}/-/items/{identifier}")
 
 
 def _webhook(logger: logging.Logger, config: Config, commit: CommitResults, mr_url: str, wh_url: str) -> None:
@@ -162,7 +163,12 @@ def _parse_args() -> Args:
     parser.add_argument("--path", type=Path, required=True, help="Directory containing record config files")
     parser.add_argument("--changeset-base", type=str, required=True, help="Changeset base branch name")
     parser.add_argument("--changeset-title", type=str, required=True, help="Changest title")
-    parser.add_argument("--changeset-message", type=str, required=True, help="Changest message")
+    parser.add_argument(
+        "--changeset-message",
+        type=lambda s: s.encode().decode("unicode_escape"),  # to handle newlines and other escaped characters
+        required=True,
+        help="Changest message",
+    )
     parser.add_argument("--commit-title", type=str, required=True, help="Changeset commit title")
     parser.add_argument("--commit-message", type=str, required=True, help="Changeset commit message")
     parser.add_argument("--author-name", type=str, required=True, help="Changeset author name")

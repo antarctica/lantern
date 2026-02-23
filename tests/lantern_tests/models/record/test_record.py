@@ -30,7 +30,7 @@ class TestRecord:
     def _make_record(file_identifier: str) -> Record:
         return Record(
             file_identifier=file_identifier,
-            hierarchy_level=HierarchyLevelCode.DATASET,
+            hierarchy_level=HierarchyLevelCode.PRODUCT,
             metadata=Metadata(
                 contacts=Contacts(
                     [Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT})]
@@ -46,7 +46,7 @@ class TestRecord:
         record.identification.identifiers.append(make_bas_cat(record.file_identifier))
         record.identification.contacts.append(make_magic_role(roles={ContactRoleCode.POINT_OF_CONTACT}))
         record.identification.identifiers.append(
-            Identifier(identifier="datasets/x", href="https://data.bas.ac.uk/datasets/x", namespace=ALIAS_NAMESPACE)
+            Identifier(identifier="products/x", href="https://data.bas.ac.uk/products/x", namespace=ALIAS_NAMESPACE)
         )
         record.identification.extents.extend(
             [
@@ -207,11 +207,11 @@ class TestRecord:
             ),
             (
                 Identifier(
-                    identifier="datasets/123e4567-e89b-12d3-a456-426614174000",
-                    href="https://data.bas.ac.uk/datasets/123e4567-e89b-12d3-a456-426614174000",
+                    identifier="products/123e4567-e89b-12d3-a456-426614174000",
+                    href="https://data.bas.ac.uk/products/123e4567-e89b-12d3-a456-426614174000",
                     namespace=ALIAS_NAMESPACE,
                 ),
-                "Invalid alias identifier 'datasets/123e4567-e89b-12d3-a456-426614174000' must not contain a UUID.",
+                "Invalid alias identifier 'products/123e4567-e89b-12d3-a456-426614174000' must not contain a UUID.",
             ),
         ],
     )

@@ -186,7 +186,7 @@ class TestRsyncUtils:
         source = Path("/x")
         target = target_path
         expected_target = f"{host}:{target}" if host else str(target)
-        expected = f"rsync -a --no-g --no-times {source.resolve()}/ {expected_target}"
+        expected = f"rsync -rlD --no-perms --no-times {source.resolve()}/ {expected_target}"
         rsync_utils = RsyncUtils(logger=fx_logger)
 
         rsync_utils.put(src_path=source, target_path=target, target_host=host)

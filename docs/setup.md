@@ -82,7 +82,7 @@ authentication and authorisation for securely hosting restricted content. It is 
 
 Manually:
 
-- create an area in the Operations Data Store web root [1]
+- create and secure an area in the Operations Data Store web root [1]
 - configure this area [2]
 - configure [Reverse Proxying](#reverse-proxying)
 
@@ -91,21 +91,24 @@ Manually:
 ```text
 $ mkdir -p $DOCUMENT_ROOT/content/cat
 $ chgrp magic $DOCUMENT_ROOT/content/cat
+$ chmod g+s $DOCUMENT_ROOT/content/cat
 $ setfacl -m g::rwx,g:apache:rx,o::--- -m d:g::rwx,d:g:apache:rx,d:o::--- $DOCUMENT_ROOT/content/cat
 ```
 
-This ACL:
+This:
 
-- grants members of the default group (i.e. `magic`) full control
-- grants the web server user read access
-- revokes all access to others/world
+- creates a catalogue directory
+- sets group inheritance on this directory
+- sets an ACL on this directory which:
+  - grants members of the default group (i.e. `magic`) full control
+  - grants the web server user read access
+  - revokes all access to others/world
 
 [2] As a user in the `magic` group:
 
 ```text
-$ mkdir -p $DOCUMENT_ROOT/content/cat/testing/items $DOCUMENT_ROOT/content/cat/live/items
-$ chmod -R g+w $DOCUMENT_ROOT/content/cat/testing $DOCUMENT_ROOT/content/cat/live
-$ chmod -R g+s $DOCUMENT_ROOT/content/cat/testing $DOCUMENT_ROOT/content/cat/live
+$ umask 002
+$ mkdir -p $DOCUMENT_ROOT/content/cat/testing/items /data/ops-data-store/www/content/cat/live/items
 ```
 
 ## Reverse proxying

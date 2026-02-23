@@ -225,6 +225,7 @@ prerelease:
     - $TASK_BIN release prerelease
     - TASK_CMD=($TASK_BIN)
     - echo "DEPLOY_APP_VERSION=$("${TASK_CMD[@]}" version)" >> build.env
+    - cat build.env
   script:
     - $TASK_BIN build
     - uv publish --index=self --username=gitlab-ci-token --password=$CI_JOB_TOKEN
@@ -246,10 +247,12 @@ deploy_stage:
     DEPLOY_ENV: "staging"
   before_script:
     - *before_script_deploy
+    - PLAYBOOK_CMD="ansible-playbook -v -b -e env=$DEPLOY_ENV -e group=$DEPLOY_GROUP -e project=$DEPLOY_ANSIBLE_ROOT_PATH -e app_version=$DEPLOY_APP_VERSION --vault-id ~/$DEPLOY_ANSIBLE_VAULT_PATH -i inventory/$DEPLOY_GROUP/$DEPLOY_ENV playbooks/$DEPLOY_GROUP/$DEPLOY_PLAYBOOK"
   script:
     - cd $DEPLOY_ANSIBLE_ROOT_PATH
     - ansible workstations -m ping -i inventory/$DEPLOY_GROUP/$DEPLOY_ENV
-    - ansible-playbook -v -b -e env=$DEPLOY_ENV -e group=$DEPLOY_GROUP -e project=$DEPLOY_ANSIBLE_ROOT_PATH -e app_version=$DEPLOY_APP_VERSION --vault-id ~/$DEPLOY_ANSIBLE_VAULT_PATH -i inventory/$DEPLOY_GROUP/$DEPLOY_ENV playbooks/$DEPLOY_GROUP/$DEPLOY_PLAYBOOK
+    - echo "$PLAYBOOK_CMD"
+    - eval "$PLAYBOOK_CMD"
   environment:
     name: staging
   rules:
@@ -266,10 +269,12 @@ deploy_prod:
   before_script:
     - *before_script_deploy
     - export DEPLOY_APP_VERSION=$(echo $CI_COMMIT_TAG | cut -c 2-)  # remove 'v' prefix
+    - PLAYBOOK_CMD="ansible-playbook -v -b -e env=$DEPLOY_ENV -e group=$DEPLOY_GROUP -e project=$DEPLOY_ANSIBLE_ROOT_PATH -e app_version=$DEPLOY_APP_VERSION --vault-id ~/$DEPLOY_ANSIBLE_VAULT_PATH -i inventory/$DEPLOY_GROUP/$DEPLOY_ENV playbooks/$DEPLOY_GROUP/$DEPLOY_PLAYBOOK"
   script:
     - cd $DEPLOY_ANSIBLE_ROOT_PATH
     - ansible workstations -m ping -i inventory/$DEPLOY_GROUP/$DEPLOY_ENV
-    - ansible-playbook -v -b -e env=$DEPLOY_ENV -e group=$DEPLOY_GROUP -e project=$DEPLOY_ANSIBLE_ROOT_PATH -e app_version=$DEPLOY_APP_VERSION --vault-id ~/$DEPLOY_ANSIBLE_VAULT_PATH -i inventory/$DEPLOY_GROUP/$DEPLOY_ENV playbooks/$DEPLOY_GROUP/$DEPLOY_PLAYBOOK
+    - echo "$PLAYBOOK_CMD"
+    - eval "$PLAYBOOK_CMD"
   environment:
     name: production
   rules:

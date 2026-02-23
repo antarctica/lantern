@@ -128,6 +128,20 @@ class RsyncUtils:
 
         E.g. for a source path './items' containing './items/123/index.html' and a target path of '/data/', this will
         create '/data/123/index.html'.
+
+        Rsync options:
+        - `-rlD`      : recurse, symlinks, devices/specials
+        - `--no-perms`: don't chmod — new files/dirs inherit default ACLs automatically
+        - `--no-times : don't set timestamps (as this requires ownership of the parent directory)
+
+        Note: `-a` not used as it implies: `-p` (perms), `-o` (owner), `-g` (group), `-t` (times) — all of which can
+        fail for non-owners.
+
+        Explanation:
+        > These options are necessary because rsync `-a/-p` for example tries to call chmod() on the target to match
+        > source permissions. Even if the target directory has group-write, only the directory owner can chmod() it —
+        > this is a Linux kernel restriction, not a permission bit issue. I.e. if the target was created by `alice`,
+        > `bob` cannot change their permissions even with group-write access.
         """
         if not target_host and not target_path.exists():
             self._logger.info("Ensuring target local path exists.")
@@ -138,7 +152,7 @@ class RsyncUtils:
             "source": str(src_path.resolve()),
             "sync_source_contents": True,
             "destination": str(target_path),
-            "options": ["-a", "--no-g", "--no-times"],  # to work around copying to the SAN as geoweb
+            "options": ["-rlD", "--no-perms", "--no-times"],  # to work around POSIX group-write limitations
         }
         if target_host:
             kwargs["destination_ssh"] = target_host

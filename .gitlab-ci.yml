@@ -224,7 +224,7 @@ prerelease:
     - uv sync --frozen --group=dev --python $PYTHON_VERSION
     - $TASK_BIN release prerelease
     - TASK_CMD=($TASK_BIN)
-    - echo "DEPLOY_APP_VERSION=$("${TASK_CMD[@]}" version)" >> build.env
+    - echo "DEPLOY_APP_VERSION=$("${TASK_CMD[@]}" version --short)" >> build.env
     - cat build.env
   script:
     - $TASK_BIN build

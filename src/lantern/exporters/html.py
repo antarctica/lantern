@@ -60,7 +60,7 @@ class HtmlExporter(ResourceExporter):
         item = item_class(
             site_meta=self._meta.site_metadata,
             record=self._record,
-            admin_meta_keys=self._meta.admin_meta_keys,  # ty: ignore[invalid-argument-type]
+            admin_meta_keys=self._meta.admin_meta_keys,
             trusted_context=self._meta.trusted,
             select_record=self._select_record,
         )
@@ -69,11 +69,7 @@ class HtmlExporter(ResourceExporter):
         return prettify_html(raw)
 
     def _publish_trusted(self) -> None:
-        """
-        Save dumped output to secure hosting via rsync.
-
-        Group write permissions are set on uploaded files (660) and directories (770) to allow shared management.
-        """
+        """Save dumped output to secure hosting via rsync."""
         with TemporaryDirectory() as tmp_path:
             base_path = Path(tmp_path)
 
@@ -85,8 +81,6 @@ class HtmlExporter(ResourceExporter):
         item_path.parent.mkdir(parents=True, exist_ok=True)
         with item_path.open("w") as record_file:
             record_file.write(self.dumps())
-        item_path.parent.chmod(0o770)
-        item_path.chmod(0o660)
 
         sync = RsyncUtils(logger=self._logger)
         sync.put(src_path=items_source, target_path=items_target, target_host=self._meta.trusted_host)

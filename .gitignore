@@ -34,5 +34,6 @@ terraform.tfvars
 import/
 export/
 export-trusted/
+upgrade/
 .cache/
 .env

@@ -22,11 +22,11 @@ def encode(keys: AdministrationKeys, cleartext: str) -> str:
     return str(token)
 
 
-def decode(keys: AdministrationKeys, ciphertext: str) -> str:
+def decode(keys: AdministrationKeys, ciphertext: str, issuer: str, audience: str) -> str:
     """Decrypt and verify value."""
     token = JweCompact(ciphertext)
     trusted_token = token.decrypt_jwt(keys.encryption_private)
-    trusted_token.validate(key=keys.signing_public, issuer="x", audience="x")
+    trusted_token.validate(key=keys.signing_public, issuer=issuer, audience=audience)
     return trusted_token.claims["pyd"]
 
 
@@ -37,7 +37,7 @@ def main() -> None:
     value = "x"
 
     ciphertext = encode(keys, value)
-    result = decode(keys, ciphertext)
+    result = decode(keys, ciphertext, issuer=value, audience=value)
     if value != result:
         msg = f"'{result} != '{value}' (result, expected)"
         raise ValueError(msg) from None

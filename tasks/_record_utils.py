@@ -10,6 +10,7 @@ from boto3 import client as S3Client  # noqa: N812
 from tasks._config import ExtraConfig
 
 from lantern.config import Config
+from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
 from lantern.lib.metadata_library.models.record.record import Record, RecordInvalidError
 from lantern.log import init as _init_logging
 from lantern.models.record.record import Record as CatalogueRecord
@@ -228,3 +229,14 @@ def pick_records(logger: logging.Logger, records: list[Record]) -> list[Record]:
     selected_fids = [choices[k] for k in answers["selections"]]
     logger.info(f"Selected records: {selected_fids}")
     return [records_[fid] for fid in selected_fids]
+
+
+def append_role_to_contact(record: Record, name: str, role: ContactRoleCode) -> None:
+    """Append a role to an existing contact in a record if needed."""
+    for contact in record.identification.contacts:
+        if (contact.organisation and contact.organisation.name == name) or (
+            contact.individual and contact.individual.name == name
+        ):
+            if role not in contact.role:
+                contact.role.add(role)
+            return

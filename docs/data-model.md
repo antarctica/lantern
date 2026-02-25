@@ -77,13 +77,15 @@ These requirements are enforced by the `validate()` method in the [Catalogue Rec
 
 [2]
 
-| Hierarchy level           | Allowed Prefixes   |
-|---------------------------|--------------------|
-| `collection`              | `collections`      |
-| `dataset`                 | `datasets`         |
-| `product`                 | `products`, `maps` |
-| `initiative`              | `projects`         |
-| `paperMapProduct` (local) | `products`, `maps` |
+| Hierarchy level           | Allowed Prefixes |
+|---------------------------|------------------|
+| `collection`              | `collections`    |
+| `dataset`                 | `datasets`       |
+| `initiative`              | `projects`       |
+| `product`                 | `products`       |
+| `mapProduct` (local)      | `maps`           |
+| `paperMapProduct` (local) | `maps`           |
+| `webMapProduct` (local)   | `maps`           |
 
 ## Items
 

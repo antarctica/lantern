@@ -113,13 +113,14 @@ class Record(RecordBase):
 
     def _validate_aliases(self) -> None:
         """Verify record alias values."""
-        product_prefixes = ["products", "maps"]
         prefixes = {
             HierarchyLevelCode.COLLECTION: ["collections"],
             HierarchyLevelCode.DATASET: ["datasets"],
             HierarchyLevelCode.INITIATIVE: ["projects"],
-            HierarchyLevelCode.PRODUCT: product_prefixes,
-            HierarchyLevelCode.PAPER_MAP_PRODUCT: product_prefixes,
+            HierarchyLevelCode.PRODUCT: ["products"],
+            HierarchyLevelCode.MAP_PRODUCT: ["maps"],
+            HierarchyLevelCode.PAPER_MAP_PRODUCT: ["maps"],
+            HierarchyLevelCode.WEB_MAP_PRODUCT: ["maps"],
         }
 
         for alias in self.identification.identifiers.filter(ALIAS_NAMESPACE):

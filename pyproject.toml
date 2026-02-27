@@ -1,6 +1,6 @@
 [project]
 name = "lantern"
-version = "0.4.0"
+version = "0.5.0"
 description = "A prototype data catalogue for BAS discovery metadata."
 readme = "README.md"
 license = "MIT"

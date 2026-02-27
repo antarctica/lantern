@@ -10,6 +10,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 <!-- pyml disable no-duplicate-heading,no-duplicate-header -->
 ## [Unreleased]
 
+## [0.5.0] - 2026-02-27 [!BREAKING]
+
 ### Changed [!BREAKING]
 
 * `ItemBase.abstract*` methods changed to `ItemBase.description*` (impacts externally maintained item subclasses)
@@ -111,6 +113,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Upgrading to BAS Metadata Library 0.16.x release, which upstreams administration metadata and test keys
 * Private record property in Items changed to public
 * Refactoring MAGIC base record preset and including administration metadata profile support
+* Updating `release` development task to wrap around `uv version`
 
 ### Removed
 

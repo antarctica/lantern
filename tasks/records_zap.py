@@ -5,30 +5,20 @@ from pathlib import Path
 
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata, Permission
 from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
-from tasks._record_utils import dump_records, init
-from tasks._record_utils import parse_records as base_parse_records
+from tasks._record_utils import dump_records, init, parse_records
+from tasks.records_upgrade_2026_02 import RecordUpgrade
 
-from lantern.lib.metadata_library.models.record.elements.common import (
-    Address,
-    Constraints,
-    Contact,
-    ContactIdentity,
-    Date,
-    OnlineResource,
-)
+from lantern.lib.metadata_library.models.record.elements.common import Date
 from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,
     AggregationInitiativeCode,
     ConstraintRestrictionCode,
     ConstraintTypeCode,
-    ContactRoleCode,
     HierarchyLevelCode,
-    OnlineResourceFunctionCode,
 )
 from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS as OPEN_ACCESS_PERMISSION
 from lantern.lib.metadata_library.models.record.presets.aggregations import make_bas_cat_collection_member
-from lantern.lib.metadata_library.models.record.presets.conformance import MAGIC_DISCOVERY_V1, MAGIC_DISCOVERY_V2
-from lantern.lib.metadata_library.models.record.presets.constraints import CC_BY_ND_V4, OPEN_ACCESS
+from lantern.lib.metadata_library.models.record.presets.conformance import MAGIC_ADMINISTRATION_V1
 from lantern.lib.metadata_library.models.record.record import Record
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin, set_admin
 from lantern.lib.metadata_library.models.record.utils.kv import get_kv, set_kv
@@ -36,6 +26,7 @@ from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.stores.base import RecordNotFoundError
 from lantern.stores.gitlab import GitLabStore
 
+# c68df2de-d40c-459f-ad5a-1f4d4ab5d8b9 - Assets Tracking Service (externally managed, not included here)
 magic_collection_ids = [
     "0ed7da71-72e1-46e4-a482-064433d4c73d",  # SCAR Antarctic Digital Database (ADD) Supplemental Datasets
     "6f5102ae-dfae-4d72-ad07-6ce4c85f5db8",  # BAS Published Maps
@@ -54,23 +45,6 @@ magic_collection_ids = [
     "cf6dee46-493f-464c-8380-c8b2c5356508",  # BAS Legacy Maps
     "8b60e3b1-ccbf-48de-acaf-adf74382d6ea",  # BAS Geomatics Catalogue
 ]
-
-default_copyright_contact = Contact(
-    organisation=ContactIdentity(name="UKRI Research and Innovation", href="https://ror.org/001aqnf71", title="ror"),
-    address=Address(
-        delivery_point="UK Research and Innovation, Polaris House",
-        city="Swindon",
-        postal_code="SN2 1FL",
-        country="United Kingdom",
-    ),
-    online_resource=OnlineResource(
-        href="https://www.ukri.org",
-        title="UKRI - UK Research and Innovation",
-        description="Public website for UK Research and Innovation.",
-        function=OnlineResourceFunctionCode.INFORMATION,
-    ),
-    role={ContactRoleCode.RIGHTS_HOLDER},
-)
 
 
 def clean_input_path(input_record_paths: list[tuple[Record, Path]], processed_ids: list[str]) -> None:
@@ -238,35 +212,6 @@ def _process_magic_collections(
             additional_records.append(updated_collection)
 
 
-def _upgrade_discovery_profile_v1_v2(logger: logging.Logger, record: Record, discovery_v1_index: int) -> None:
-    """Upgrade MAGIC discovery profile from V1 to V2."""
-    logger.info("Upgrading MAGIC discovery profile from V1 to V2")
-    record.data_quality.domain_consistency[discovery_v1_index] = MAGIC_DISCOVERY_V2
-
-    copyright_holders = record.identification.contacts.filter(roles=[ContactRoleCode.RIGHTS_HOLDER])
-    if len(copyright_holders) == 0:
-        logger.info("No rights holder found in record, setting default copyright holder for V2 profile")
-        record.identification.contacts.append(default_copyright_contact)
-
-
-def _upgrade_discovery_profile(logger: logging.Logger, records: list[Record]) -> None:
-    """Upgrade MAGIC discovery profile to V2 if records contain V1."""
-    for record in records:
-        discovery_v1_index = next(
-            (
-                i
-                for i, c in enumerate(record.data_quality.domain_consistency)
-                if c.specification.href == MAGIC_DISCOVERY_V1.specification.href
-                or c.specification.href == "https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery-v1/"
-            ),
-            None,
-        )
-        if discovery_v1_index is None:
-            logger.debug("MAGIC discovery profile V1 not found in record, skipping upgrade")
-            continue
-        _upgrade_discovery_profile_v1_v2(logger=logger, record=record, discovery_v1_index=discovery_v1_index)
-
-
 def _get_gitlab_issues(logger: logging.Logger, record: Record) -> list[str] | None:
     """
     Get and remove GitLab issues from record identifiers if present.
@@ -300,14 +245,14 @@ def _get_access_permissions(logger: logging.Logger, record: Record) -> tuple[lis
     """
     Get metadata and resource access permissions from record access constraints.
 
-    Zap ⚡ doesn't support metadata access restrictions so defaults to OPEN ACCESS.
+    Zap ⚡ doesn't support metadata access restrictions so hard-codes to OPEN ACCESS.
 
     Zap ⚡️'s restricted options don't map to access permissions used in admin metadata so aren't supported.
     """
     metadata_permissions = [OPEN_ACCESS_PERMISSION]
-    resource_permissions = []
+    logger.info(f"Setting metadata access constraints for record '{record.file_identifier}' to OPEN ACCESS.")
 
-    logger.info(f"Setting metadata access constraints for record '{record.file_identifier}' to OPEN ACCESS by default.")
+    resource_permissions = []
     constraints = record.identification.constraints.filter(types=ConstraintTypeCode.ACCESS)
     logger.info(f"Record '{record.file_identifier}' has {len(constraints)} access constraints")
     if len(constraints) == 1 and constraints[0].restriction_code == ConstraintRestrictionCode.UNRESTRICTED:
@@ -315,70 +260,56 @@ def _get_access_permissions(logger: logging.Logger, record: Record) -> tuple[lis
             f"Record '{record.file_identifier}' has unrestricted resource access constraint, setting to OPEN ACCESS."
         )
         resource_permissions = [OPEN_ACCESS_PERMISSION]
-    logger.info(
-        f"Record '{record.file_identifier}' has no supported access constraints, no resource access permissions set."
+    logger.warning(
+        f"Record '{record.file_identifier}' has unsupported access constraints, no resource access permissions set."
     )
 
     return metadata_permissions, resource_permissions
 
 
-def _create_admin_metadata(logger: logging.Logger, admin_keys: AdministrationKeys, record: Record) -> None:
+def _process_admin_metadata(logger: logging.Logger, admin_keys: AdministrationKeys, records: list[Record]) -> None:
     """
     Add administrative metadata to record.
 
-    The input record is not modified.
-
-    Zap ⚡️ authored records do not support administrative metadata natively however a mapping of discovery properties
-    can be used:
+    Zap ⚡️ authored records do not support administrative metadata natively however, a mapping of discovery properties
+    can be used, providing the input is trusted with a suitable chain of custody:
 
     - admin.access_permissions -> identification.constraints[type=access]
     - admin.gitlab_issues -> identification.identifiers[namespace=gitlab.data.bas.ac.uk]
 
-    Note: This assumes discovery metadata is trustworthy and requires a suitable chain of custody.
-    Note: This method clobbers any existing admin metadata if already present in the record.
-    """
-    admin_meta = get_admin(keys=admin_keys, record=record)
-    if record.file_identifier is None:
-        msg = "Record must have a file identifier to create administrative metadata."
-        logger.error(msg)
-        raise ValueError(msg) from None
-    if admin_meta:
-        logger.info(f"Existing administrative metadata loaded for record '{record.file_identifier}'")
-    else:
-        logger.info(f"No administrative metadata found for record '{record.file_identifier}', creating")
-        admin_meta = AdministrationMetadata(id=record.file_identifier)
-
-    gitlab_issues = _get_gitlab_issues(logger, record)
-    if gitlab_issues:
-        logger.info(f"GitLab issues in identifiers, setting in administrative record for '{record.file_identifier}'")
-        admin_meta.gitlab_issues = gitlab_issues
-
-    metadata_permissions, resource_permissions = _get_access_permissions(logger, record)
-    if len(metadata_permissions) > 0 and metadata_permissions != admin_meta.metadata_permissions:
-        logger.info(
-            f"Metadata access permissions different to administrative record for '{record.file_identifier}', updating"
-        )
-        admin_meta.metadata_permissions = metadata_permissions
-    if len(resource_permissions) > 0 and resource_permissions != admin_meta.resource_permissions:
-        logger.info(
-            f"Resource access permissions different to administrative record for '{record.file_identifier}', updating"
-        )
-        admin_meta.resource_permissions = resource_permissions
-
-    set_admin(keys=admin_keys, record=record, admin_meta=admin_meta)
-    logger.debug(f"Administrative metadata for record '{record.file_identifier}':")
-    logger.debug(admin_meta.dumps_json())
-    logger.debug(record.identification.supplemental_information)
-
-
-def _process_admin_metadata(logger: logging.Logger, admin_keys: AdministrationKeys, records: list[Record]) -> None:
-    """
-    Add administrative metadata to records.
-
-    Requires private signing key to author admin metadata instances.
+    Note: This method assumes admin metadata is already present in the record.
+    Note: This method replaces any existing admin metadata already present in the record.
     """
     for record in records:
-        _create_admin_metadata(logger=logger, admin_keys=admin_keys, record=record)
+        admin_meta = get_admin(keys=admin_keys, record=record)
+        if admin_meta is None:
+            msg = "Record must have administration metadata."
+            logger.error(msg)
+            raise ValueError(msg) from None
+
+        gitlab_issues = _get_gitlab_issues(logger, record)
+        if gitlab_issues:
+            logger.info(
+                f"GitLab issues in identifiers, setting in administrative record for '{record.file_identifier}'"
+            )
+            admin_meta.gitlab_issues = gitlab_issues
+
+        metadata_permissions, resource_permissions = _get_access_permissions(logger, record)
+        if len(metadata_permissions) > 0 and metadata_permissions != admin_meta.metadata_permissions:
+            logger.info(
+                f"Metadata access permissions different to administrative record for '{record.file_identifier}', updating"
+            )
+            admin_meta.metadata_permissions = metadata_permissions
+        if len(resource_permissions) > 0 and resource_permissions != admin_meta.resource_permissions:
+            logger.info(
+                f"Resource access permissions different to administrative record for '{record.file_identifier}', updating"
+            )
+            admin_meta.resource_permissions = resource_permissions
+
+        set_admin(keys=admin_keys, record=record, admin_meta=admin_meta)
+        logger.debug(f"Administrative metadata for record '{record.file_identifier}':")
+        logger.debug(admin_meta.dumps_json())
+        logger.debug(record.identification.supplemental_information)
 
 
 def _process_distribution_descriptions(logger: logging.Logger, records: list[Record]) -> None:
@@ -408,16 +339,8 @@ def _process_distribution_descriptions(logger: logging.Logger, records: list[Rec
                 distribution.transfer_option.online_resource.description = format_descriptions[distribution.format.href]  # ty: ignore[possibly-missing-attribute]
 
 
-def _process_metadata_constraints(logger: logging.Logger, records: list[Record]) -> None:
-    """Add default metadata constraints if missing."""
-    for record in records:
-        if len(record.metadata.constraints) == 0:
-            logger.info(f"No metadata constraints found in record [{record.file_identifier}], setting defaults.")
-            record.metadata.constraints = Constraints([OPEN_ACCESS, CC_BY_ND_V4])
-
-
 def _process_sheet_number(logger: logging.Logger, records: list[Record]) -> None:
-    """Add default metadata constraints if missing ((workaround for mega-zap's now outdated broken schema workaround)."""
+    """Workaround mega-zap's now outdated broken schema workaround."""
     for record in records:
         kv = get_kv(record)
         sheet_number = kv.get("sheet_number", None)
@@ -448,7 +371,7 @@ def _process_sheet_number(logger: logging.Logger, records: list[Record]) -> None
             logger.info("Sheet number removed from KV.")
 
 
-def process_records(
+def process_zap_records(
     logger: logging.Logger, records: list[Record], store: GitLabStore, admin_keys: AdministrationKeys
 ) -> list[Record]:
     """
@@ -459,38 +382,53 @@ def process_records(
     Where any of these records are modified, the date_stamp and other relevant properties are revised.
     """
     additional_records: list[Record] = []
-    _process_metadata_constraints(logger=logger, records=records)
     _process_sheet_number(logger=logger, records=records)
     _process_distribution_descriptions(logger=logger, records=records)
     _process_admin_metadata(logger=logger, admin_keys=admin_keys, records=records)
     _process_magic_collections(logger=logger, records=records, additional_records=additional_records, store=store)
-    _upgrade_discovery_profile(logger=logger, records=additional_records)
     _revise_records(logger=logger, records=[*records, *additional_records], store=store)
     return additional_records
 
 
-def parse_records(logger: logging.Logger, input_path: Path) -> list[tuple[Record, Path]]:
+def parse_zap_records(
+    logger: logging.Logger, admin_keys: AdministrationKeys, input_path: Path
+) -> list[tuple[Record, Path]]:
     """
-    Wrapper for records parsing logic to support MAGIC discovery profile changes.
+    Wrapper for records parsing logic to support MAGIC discovery profile change.
 
     The V2 discovery profile supports additional hierarchy levels the V1 schema rejects but which may be manually set
-    in records after exporting from Zap ⚡, preventing their use.
+    in records after exporting from Zap ⚡, preventing their use. The catalogue will reject the V1 profile.
 
-    This wrapper loads records without profile validation first, saves them using the V2 schema, then calls the
-    `base_parse_records()` method as normal.
+    This wrapper loads records without profile validation first, upgrades them to the V2 schema, adds minimal
+    administration metadata, then calls the normal `parse_records()` logic.
     """
-    record_paths = base_parse_records(
+    record_paths = parse_records(
         logger=logger, search_path=input_path, validate_profiles=False, glob_pattern="zap-*.json"
     )
     for record, record_path in record_paths:
         original_record = deepcopy(record)
-        _upgrade_discovery_profile(logger=logger, records=[record])
-        if original_record.sha1 != record.sha1:
-            logger.info(f"Saving upgraded record '{record.file_identifier}' to '{record_path}'")
-            with record_path.open("w") as f:
-                f.write(record.dumps_json(strip_admin=False))
+        # Add minimal admin metadata for future use
+        if not record.file_identifier:
+            msg = "Record must have a file identifier."
+            raise ValueError(msg) from None
+        admin = AdministrationMetadata(id=record.file_identifier)
+        set_admin(keys=admin_keys, record=record, admin_meta=admin)
+        add_conformance = True
+        for dc in record.data_quality.domain_consistency:
+            if dc.specification.href == MAGIC_ADMINISTRATION_V1.specification.href:
+                add_conformance = False
+                break
+        if add_conformance:
+            record.data_quality.domain_consistency.append(MAGIC_ADMINISTRATION_V1)
 
-    return base_parse_records(logger=logger, search_path=input_path, glob_pattern="zap-*.json")
+        up = RecordUpgrade(record=record, original_sha1=original_record.sha1)
+        up.upgrade(logger=logger, keys=admin_keys)
+        up.validate()
+        logger.info(f"Saving upgraded record '{record.file_identifier}' to '{record_path}'")
+        with record_path.open("w") as f:
+            f.write(record.dumps_json(strip_admin=False))
+
+    return parse_records(logger=logger, search_path=input_path, glob_pattern="zap-*.json")
 
 
 def main() -> None:
@@ -500,9 +438,9 @@ def main() -> None:
 
     input_path = Path("./import")
     logger.info(f"Loading records from: '{input_path.resolve()}'")
-    record_paths = parse_records(logger=logger, input_path=input_path)
+    record_paths = parse_zap_records(logger=logger, admin_keys=admin_keys, input_path=input_path)
     records = [record_path[0] for record_path in record_paths]
-    records.extend(process_records(logger=logger, records=records, store=store, admin_keys=admin_keys))
+    records.extend(process_zap_records(logger=logger, records=records, store=store, admin_keys=admin_keys))
     dump_records(logger=logger, records=records, output_path=input_path)
     clean_input_path(input_record_paths=record_paths, processed_ids=[r.file_identifier for r in records])  # ty:ignore[invalid-argument-type]
 

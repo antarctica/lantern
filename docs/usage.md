@@ -68,6 +68,8 @@ fi
 
 1. create new records, (or clone a record using the `clone-record` [Development Task](/docs/dev.md#development-tasks))
    as JSON files in the import directory as per the [Record Authoring](/docs/libraries.md#record-authoring) section
+1. use the `esri-record` [Development Task](/docs/dev.md#development-tasks) to include distribution options for any
+   Esri ArcGIS Online items that apply to records
 1. run the [Import Records](#import-records) workflow
 
 <!-- pyml disable md028 -->
@@ -107,8 +109,17 @@ For administrative metadata, these fields are updated:
 > Other properties (gitlab issues, metadata/resource access permissions etc.) are not changed and may need updating.
 
 ## Preview records
+The `esri-record` task will:
 
 To preview a set of records before importing them:
+- accept an identifier to an existing record, or path to a record configuration file, and an AGOL item ID or URL via
+  the command line
+- prompt interactively to confirm the GitLab store is configured with the correct branch
+- load the record from a [GitLab Store](/docs/stores.md#gitlab-store) or from the given file path
+- get details for the ArcGIS item via the ArcGIS REST API
+- create distribution options for the layer and service based on these details and catalogue conventions
+- add these options to the record where they do not yet exist
+
 
 1. copy record configurations as JSON files to the `import/` directory
 2. run the `preview-records` [Development Task](/docs/dev.md#development-tasks) and select which records to preview

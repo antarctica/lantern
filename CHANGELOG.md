@@ -55,6 +55,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Importing non-interactive publishing workflow Python script from Ansible
 * Importing site verification Python script from Ansible
 * 'records-upgrade' development task for upgrading records to new MAGIC profiles and other bulk improvements
+* 'esri-record' development task for including distribution options based on an Esri ArcGIS Online item
 
 ### Fixed
 

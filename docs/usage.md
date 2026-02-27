@@ -74,7 +74,7 @@ fi
 
 <!-- pyml disable md028 -->
 > [!CAUTION]
-> The catalogue does not enforce any metadata access permissions set.
+> The catalogue does not enforce metadata access permissions. They will always evaluate to open access (unrestricted).
 
 > [!TIP]
 > See the [Content Formatting](https://data.bas.ac.uk/guides/formatting) for Markdown syntax supported in record
@@ -108,10 +108,8 @@ For administrative metadata, these fields are updated:
 > [!NOTE]
 > Other properties (gitlab issues, metadata/resource access permissions etc.) are not changed and may need updating.
 
-## Preview records
 The `esri-record` task will:
 
-To preview a set of records before importing them:
 - accept an identifier to an existing record, or path to a record configuration file, and an AGOL item ID or URL via
   the command line
 - prompt interactively to confirm the GitLab store is configured with the correct branch
@@ -120,16 +118,38 @@ To preview a set of records before importing them:
 - create distribution options for the layer and service based on these details and catalogue conventions
 - add these options to the record where they do not yet exist
 
+## View records
+
+To preview new or edited records before importing them:
 
 1. copy record configurations as JSON files to the `import/` directory
 2. run the `preview-records` [Development Task](/docs/dev.md#development-tasks) and select which records to preview
 3. run the [Local development web server](/docs/dev.md#local-development-web-server) to records as items
 
+To view [Administration Metadata](/docs/libraries.md#record-administrative-metadata) for a record:
+
+1. run the `admin-record` [Development Task](/docs/dev.md#development-tasks)
+
+The `preview-records` task will:
+
+- parse and validate `import/*.json` files (ignoring subfolders) as [Records](/docs/data-model.md#records)
+- prompt interactively for which records to preview
+- export selected records using the [HTML resource exporter](/docs/exporters.md#html-resource-exporter)
+
 > [!NOTE]
-> Records are only exported using the [HTML resource exporter](/docs/exporters.md#html-resource-exporter). Links to
-> view items as XML or JSON will not work.
+> XML and JSON versions of items are not available in previews.
 >
-> Placeholder information will be shown for any related records, as they may not exist yet.
+> Related items are not available in previews. Links to a generic 'x' item will be used as a placeholder.
+
+The `admin-record` task will:
+
+- accept an identifier to an existing record, or path to a record configuration file via the command line
+- prompt interactively to confirm the GitLab store is configured with the correct branch
+- if needed, prompt interactively for a record identifier
+  - the user accepts any initial selection set via the command line
+  - the user indicates they're finished selecting records
+- load the record from a [GitLab Store](/docs/stores.md#gitlab-store) or from the given file path
+- output any administration metadata for the loaded record
 
 ## Interactive record publishing workflow
 
@@ -144,27 +164,16 @@ required information.
 > To publish records on a schedule, use the [Non-interactive Workflow](#non-interactive-record-publishing-workflow)
 > instead. For other use-cases, combine individual record related tasks as needed.
 
-To preview records in the testing catalogue:
+To publish records in the testing catalogue:
 
 1. copy record configurations as JSON files to the `import/` directory (see [Create Records](#create-records))
 1. run the `records-workflow` [Development Task](/docs/dev.md#development-tasks)
 1. repeat this process (using the [`select-records`](#update-records) task to get the now existing records) until the
-   record author is happy for them to be live
+   record author is happy for them to be published live
 
 > [!NOTE]
-> The Lantern GitLab bot user must have reporter permissions to post comments on a tracking issue (if specified).
+> The Lantern GitLab bot user MUST have at least reporter permissions to post comments on a tracking issue (if specified).
 > Project access SHOULD be defined via [Infrastructure as Code](/docs/infrastructure.md#infrastructure-as-code).
-
-To publish records to the production catalogue:
-
-1. merge the relevant merge request for the changeset into `main`
-1. switch the `AWS_S3_BUCKET` config option to the production bucket
-1. run the `build-records` [Development Task](/docs/dev.md#development-tasks) with the publish option enabled
-1. switch the `AWS_S3_BUCKET` config option back to the integration bucket
-
-> [!NOTE]
-> As a precaution, the `records-workflow` [Development Task](/docs/dev.md#development-tasks) will not run if the
-> integration S3 bucket is selected.
 
 The `records-workflow` task calls and coordinates other tasks to:
 
@@ -176,14 +185,23 @@ The `records-workflow` task calls and coordinates other tasks to:
 1. verify committed records in the testing site (via the [`verify-records`](#verify-static-site) task)
 1. if an issue was selected, post a comment listing the records changed, preview URLs and links to the merge request
 
-[1]
+> [!NOTE]
+> As a precaution, the `records-workflow` [Development Task](/docs/dev.md#development-tasks) will not run if the
+> integration S3 bucket is selected.
 
-If needed, ensure the selected issue URL is for publishing the record(s), rather than an issue for authoring.
+To publish records to the live catalogue:
 
-For example a Helpdesk issue may exist to track the request for a product, which is then set as a GitLab issue within
-its metadata record. Later, when ready for publishing, a separate Mapping Coordination issue may be created.
+1. merge the relevant merge request for the changeset into `main`
+1. switch the `AWS_S3_BUCKET` config option to the production bucket
+1. run the `build-records` [Development Task](/docs/dev.md#development-tasks) with the publish option enabled
+1. switch the `AWS_S3_BUCKET` config option back to the integration bucket
 
-In this case, the Mapping Coordination issue URL should be used in the workflow as an '< OTHER >' value, not the
+[1] If needed, ensure the selected issue URL is for publishing the record(s), rather than an issue for authoring.
+
+For example, a Helpdesk issue may exist to track the request for a product, which is then set as a GitLab issue within
+its metadata record to provide context. When ready for publishing, a separate Mapping Coordination issue may be created.
+
+In this case, the Mapping Coordination issue should be used in this workflow (as an '< OTHER >' value), *not* the
 Helpdesk issue recorded in the record.
 
 ## Non-interactive record publishing workflow
@@ -298,7 +316,7 @@ Payload JSON [Schema and Example](/resources/scripts/non-interactive-publishing-
 - run the [Import Records](#import-records) workflow
 
 > [!CAUTION]
-> The catalogue does not enforce any metadata access permissions set.
+> The catalogue does not enforce metadata access permissions. They will always evaluate to open access (unrestricted).
 
 ### Replacing record thumbnails
 
@@ -341,12 +359,14 @@ To replace an artefact for an existing resource:
 
 The `select-records` task will:
 
-1. repeatedly prompt interactively for the identifier(s) of existing records until:
-   - the user accepts an initial selection set via the command line
-   - the user indicates they're finished selecting records
-1. confirm the selected file identifiers to load
-1. get selected records from a [GitLab Store](/docs/stores.md#gitlab-store)
-1. save selected record configurations as JSON files in the `import/` directory
+- accept identifiers for existing record identifiers via the command line
+- prompt interactively to confirm the GitLab store is configured with the correct branch
+- repeatedly prompt interactively for any additional the identifier(s) of existing records until:
+  - the user accepts any initial selection set via the command line
+  - the user indicates they're finished selecting records
+- confirm the selected file identifiers to load
+- get selected records from a [GitLab Store](/docs/stores.md#gitlab-store)
+- save selected record configurations as JSON files to the `import/` directory
 
 > [!TIP]
 > Record identifiers are intentionally flexible, supporting various catalogue URLs, file names, etc. optionally as a
@@ -354,18 +374,18 @@ The `select-records` task will:
 
 ### Setting record permissions
 
-The `restrict-records` task (if needed) will:
+The `restrict-records` task will:
 
-1. parse and validate `import/*.json` files (ignoring subfolders) as [Records](/docs/data-model.md#records)
-1. prompt interactively for which records to update
-1. prompt interactively for which metadata and resource permissions to set
-1. update the [Administrative Metadata](/docs/libraries.md#record-administrative-metadata) in selected records with the
-   selected access permission
-1. save updated record configurations as JSON files in the `import/` directory
+- parse and validate `import/*.json` files (ignoring subfolders) as [Records](/docs/data-model.md#records)
+- prompt interactively for which records to update
+- prompt interactively for which metadata and resource permissions to set
+- update the [Administrative Metadata](/docs/libraries.md#record-administrative-metadata) in selected records with the
+  selected access permission
+- save updated record configurations as JSON files to the `import/` directory
 
 <!-- pyml disable md028 -->
 > [!CAUTION]
-> The catalogue does not enforce any metadata access permissions set.
+> The catalogue does not enforce metadata access permissions. They will always evaluate to open access (unrestricted).
 
 > [!NOTE]
 > Only 'Open Access' and 'BAS Staff' access permissions are supported by this task.
@@ -389,11 +409,13 @@ To import a set of new and/or updated records:
 
 The `zap-records` task (if used) will:
 
-1. update collections referenced in records to create back-references and update the bounding extent of the collection
-1. update metadata datestamps in any revised records, and edition in any revised collection records
-1. create missing [Administrative Metadata](/docs/libraries.md#record-administrative-metadata) based on access
-   constraints and any GitLab issue identifiers
-1. save any revised records in the import directory and remove any original records
+- update collections referenced in records, to create back-references and update the bounding extent of the collection
+- update metadata datestamps in any revised records, and the edition in any revised collection records
+- upgrade records to the MAGIC discovery profile v2
+- set resource permissions in [Administration Metadata](/docs/libraries.md#record-administrative-metadata) from any
+  resource access constraints in the record
+- move any GitLab issue identifiers to administration metadata
+- save revised records to the import directory and remove original records, ready for import
 
 <!-- pyml disable md028 -->
 > [!CAUTION]
@@ -409,13 +431,14 @@ The `zap-records` task (if used) will:
 
 The `import-records` task will:
 
-1. parse and validate `import/*.json` files (ignoring subfolders) as [Records](/docs/data-model.md#records)
-1. prompt interactively for commit information:
-   - a changeset title and description (which will open your configured `$EDITOR`)
-   - a changeset author name and email
-1. push validated records to a [GitLab Store](/docs/stores.md#gitlab-store), committing changes to the configured branch
-1. log the commit URL, if a commit was made (i.e. if one or more records are new or is different to its existing version)
-1. delete any imported record files
+- parse and validate `import/*.json` files (ignoring subfolders) as [Records](/docs/data-model.md#records)
+- prompt interactively to confirm the GitLab store is configured with the correct branch
+- prompt interactively for commit information:
+  - a changeset title and description (which will open your configured `$EDITOR`)
+  - a changeset author name and email
+- push validated records to a [GitLab Store](/docs/stores.md#gitlab-store), committing changes to the configured branch
+- log the commit URL, if a commit was made (i.e. if one or more records are new or is different to its existing version)
+- delete any imported record files
 
 ## Build static site
 
@@ -429,12 +452,12 @@ To build the [Static Site](/docs/architecture.md#static-site):
 
 The `build-records` task will:
 
-1. load some or all or records from a [GitLab Store](/docs/stores.md#gitlab-store) into a
-   [Site Exporter](/docs/exporters.md#site-exporter)
-1. if the export option is enabled, output the static site to a local path
-1. if the publish option is enabled:
-   - upload public static site content to a remote S3 bucket
-   - upload [Trusted Content](/docs/exporters.md#trusted-publishing) to the
+- load some or all or records from a [GitLab Store](/docs/stores.md#gitlab-store) into a
+  [Site Exporter](/docs/exporters.md#site-exporter)
+- if the export option is enabled, output the static site to a local path
+- if the publish option is enabled:
+  - upload public static site content to a remote S3 bucket
+  - upload [Trusted Content](/docs/exporters.md#trusted-publishing) to the
     [BAS Operations Data Store 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/ops-data-store) hosting server
 
 ## Verify static site
@@ -446,10 +469,10 @@ To [Verify](/docs/monitoring.md#site-verification) the [Static Site](/docs/archi
 
 The `verify-records` task will:
 
-1. load some or all or records from a [GitLab Store](/docs/stores.md#gitlab-store) into a
-   [Verification Exporter](/docs/exporters.md#verification-exporter)
-1. run [Verification checks](/docs/monitoring.md#verification-checks) against the generated static site
-1. compile and export/publish a [Verification report](/docs/monitoring.md#verification-report)
+- load some or all or records from a [GitLab Store](/docs/stores.md#gitlab-store) into a
+  [Verification Exporter](/docs/exporters.md#verification-exporter)
+- run [Verification checks](/docs/monitoring.md#verification-checks) against the generated static site
+- compile and export/publish a [Verification report](/docs/monitoring.md#verification-report)
 
 ## Rotate access tokens
 

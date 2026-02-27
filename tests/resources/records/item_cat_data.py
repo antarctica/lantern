@@ -45,6 +45,39 @@ Item to test all supported data formats:
 """
 
 distributions = {
+    "ArcGIS Feature Layer": Distribution(
+        distributor=Contact(
+            organisation=ContactIdentity(
+                name="Environmental Systems Research Institute", href="https://ror.org/0428exr50", title="ror"
+            ),
+            address=Address(
+                delivery_point="380 New York Street",
+                city="Redlands",
+                administrative_area="California",
+                postal_code="92373",
+                country="United States of America",
+            ),
+            online_resource=OnlineResource(
+                href="https://www.esri.com",
+                title="GIS Mapping Software, Location Intelligence & Spatial Analytics | Esri",
+                description="Corporate website for Environmental Systems Research Institute (ESRI).",
+                function=OnlineResourceFunctionCode.INFORMATION,
+            ),
+            role={ContactRoleCode.DISTRIBUTOR},
+        ),
+        format=Format(
+            format="ArcGIS Feature Layer",
+            href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+feature",
+        ),
+        transfer_option=TransferOption(
+            online_resource=OnlineResource(
+                href="x",
+                function=OnlineResourceFunctionCode.INFORMATION,
+                title="ArcGIS Online",
+                description="Access information as an ArcGIS feature layer.",
+            )
+        ),
+    ),
     "ArcGIS Feature Service": Distribution(
         distributor=Contact(
             organisation=ContactIdentity(
@@ -78,7 +111,7 @@ distributions = {
             )
         ),
     ),
-    "ArcGIS Feature Layer": Distribution(
+    "ArcGIS OGC Feature Layer": Distribution(
         distributor=Contact(
             organisation=ContactIdentity(
                 name="Environmental Systems Research Institute", href="https://ror.org/0428exr50", title="ror"
@@ -99,15 +132,15 @@ distributions = {
             role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
-            format="ArcGIS Feature Layer",
-            href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+feature",
+            format="ArcGIS OGC Feature Layer",
+            href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+feature+ogc",
         ),
         transfer_option=TransferOption(
             online_resource=OnlineResource(
-                href="x",
-                function=OnlineResourceFunctionCode.DOWNLOAD,
+                href="y",
+                function=OnlineResourceFunctionCode.INFORMATION,
                 title="ArcGIS Online",
-                description="Access information as an ArcGIS feature layer.",
+                description="Access information as an ArcGIS OGC feature layer.",
             )
         ),
     ),
@@ -144,39 +177,6 @@ distributions = {
             )
         ),
     ),
-    "ArcGIS OGC Feature Layer": Distribution(
-        distributor=Contact(
-            organisation=ContactIdentity(
-                name="Environmental Systems Research Institute", href="https://ror.org/0428exr50", title="ror"
-            ),
-            address=Address(
-                delivery_point="380 New York Street",
-                city="Redlands",
-                administrative_area="California",
-                postal_code="92373",
-                country="United States of America",
-            ),
-            online_resource=OnlineResource(
-                href="https://www.esri.com",
-                title="GIS Mapping Software, Location Intelligence & Spatial Analytics | Esri",
-                description="Corporate website for Environmental Systems Research Institute (ESRI).",
-                function=OnlineResourceFunctionCode.INFORMATION,
-            ),
-            role={ContactRoleCode.DISTRIBUTOR},
-        ),
-        format=Format(
-            format="ArcGIS OGC Feature Layer",
-            href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+feature+ogc",
-        ),
-        transfer_option=TransferOption(
-            online_resource=OnlineResource(
-                href="y",
-                function=OnlineResourceFunctionCode.DOWNLOAD,
-                title="ArcGIS Online",
-                description="Access information as an ArcGIS OGC feature layer.",
-            )
-        ),
-    ),
     "ArcGIS Raster Tile Layer": Distribution(
         distributor=Contact(
             organisation=ContactIdentity(
@@ -204,7 +204,7 @@ distributions = {
         transfer_option=TransferOption(
             online_resource=OnlineResource(
                 href="za",
-                function=OnlineResourceFunctionCode.DOWNLOAD,
+                function=OnlineResourceFunctionCode.INFORMATION,
                 title="ArcGIS Online",
                 description="Access information as an ArcGIS raster tile layer.",
             )
@@ -270,7 +270,7 @@ distributions = {
         transfer_option=TransferOption(
             online_resource=OnlineResource(
                 href="z",
-                function=OnlineResourceFunctionCode.DOWNLOAD,
+                function=OnlineResourceFunctionCode.INFORMATION,
                 title="ArcGIS Online",
                 description="Access information as an ArcGIS vector tile layer.",
             )

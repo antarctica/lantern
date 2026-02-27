@@ -5,16 +5,14 @@ from pathlib import Path
 
 import cattrs
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
-from tasks._record_utils import confirm_source, init
-from tasks.record_clone import _get_record
+from tasks._record_utils import confirm_source, init, load_record
 
 from lantern.lib.metadata_library.models.record.record import Record
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, get_admin
 from lantern.lib.metadata_library.models.record.utils.clean import clean_dict
-from lantern.stores.gitlab import GitLabStore
 
 
-def _get_cli_args(logger: logging.Logger) -> dict:
+def _get_cli_args() -> dict:
     """
     Get optional command line arguments.
 
@@ -64,14 +62,6 @@ def _get_cli_args(logger: logging.Logger) -> dict:
     return {"id": record_id, "path": path}
 
 
-def _load_record(logger: logging.Logger, args: dict, store: GitLabStore) -> Record:
-    """Load a record from a store by its identifier or from a local file path."""
-    if args["path"] is not None:
-        with args["path"].open(mode="r") as f:
-            return Record.loads(json.load(f))
-    return _get_record(logger=logger, store=store, identifier=args["id"])
-
-
 def _dumps_admin_meta(logger: logging.Logger, admin_keys: AdministrationKeys, record: Record) -> None:
     """
     Get and display admin metadata.
@@ -95,9 +85,9 @@ def main() -> None:
     """Entrypoint."""
     logger, config, store, _s3 = init()
     confirm_source(logger=logger, store=store, action="Selecting records from")
-    args = _get_cli_args(logger)
+    args = _get_cli_args()
 
-    record = _load_record(logger=logger, args=args, store=store)
+    record = load_record(logger=logger, ref=(args["id"], args["path"]), store=store)
     _dumps_admin_meta(logger=logger, admin_keys=config.ADMIN_METADATA_KEYS, record=record)
 
 

@@ -231,6 +231,22 @@ def pick_records(logger: logging.Logger, records: list[Record]) -> list[Record]:
     return [records_[fid] for fid in selected_fids]
 
 
+def get_record(logger: logging.Logger, store: GitLabStore, identifier: str | None = None) -> Record:
+    """Get record from store using flexible, and optionally preset, identifier."""
+    if identifier is None:
+        identifier = inquirer.prompt([inquirer.Text("id", message="Record identifier")])["id"]
+    file_identifier = next(iter(process_record_selections(logger=logger, identifiers=[identifier])))
+    return store.select_one(file_identifier=file_identifier)
+
+
+def load_record(logger: logging.Logger, ref: tuple[str | None, Path | None], store: GitLabStore) -> Record:
+    """Load a record from a store by its identifier or from a local file path."""
+    if ref[1] is not None:
+        with ref[1].open(mode="r") as f:
+            return Record.loads(json.load(f))
+    return get_record(logger=logger, store=store, identifier=ref[0])
+
+
 def append_role_to_contact(record: Record, name: str, role: ContactRoleCode) -> None:
     """Append a role to an existing contact in a record if needed."""
     for contact in record.identification.contacts:

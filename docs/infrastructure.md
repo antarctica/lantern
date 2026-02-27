@@ -70,7 +70,7 @@ project.
 
 To apply this infrastructure:
 
-- install tools (`brew install awscli 1password-cli`)
+- install tools (`brew install opentofu awscli 1password-cli`)
 - configure credentials for the [BAS AWS 🛡️](https://gitlab.data.bas.ac.uk/WSF/bas-aws) account (`aws configure`)
 - copy `resources/envs/terraform.tfvars.tpl` to `resources/envs/terraform.tfvars` and populate credentials/values
 

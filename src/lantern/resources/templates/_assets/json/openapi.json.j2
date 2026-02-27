@@ -21,7 +21,7 @@
       "description": "Primary production environment, shared with other systems during transition."
     },
     {
-      "url": "https://data-testing.bas.ac.uk",
+      "url": "https://data-testing.data.bas.ac.uk",
       "description": "Pre-production environment, without availability guarantees (generally and for specific resources)."
     },
     {
@@ -31,6 +31,10 @@
     {
       "url": "https://lantern-testing.data.bas.ac.uk",
       "description": "Underlying, non-reverse-proxied pre-production environment."
+    },
+    {
+      "url": "http://localhost:9000",
+      "description": "Local development environment."
     }
   ],
   "externalDocs": {
@@ -79,11 +83,7 @@
     {
       "name": "internal",
       "x-displayName": "Internal",
-      "description": "Various, non-sensitive, informational pages related to content and system administration.",
-      "externalDocs": {
-        "description": "More information",
-        "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/site.md#internal-pages-structure"
-      }
+      "description": "Various, non-sensitive, informational pages related to content and system administration."
     },
     {
       "name": "static",
@@ -466,6 +466,67 @@
         }
       }
     },
+    "/-/items/{fileIdentifier}/index.html": {
+      "get":  {
+        "tags": ["items"],
+        "security": [{"ldapMagic": []}],
+        "servers": [
+          {
+            "url": "https://data.bas.ac.uk",
+            "description": "Primary production environment, shared with other systems during transition."
+          },
+          {
+            "url": "https://data-testing.data.bas.ac.uk",
+            "description": "Pre-production environment, without availability guarantees (generally and for specific resources)."
+          }
+        ],
+        "operationId": "getItemTrustedHtml",
+        "x-scalar-stability": "experimental",
+        "summary": "Content item (Trusted)",
+        "description": "Get content item with additional privileged information.\n\nAuthenticated 🔒 and available from selected endpoints only.",
+        "externalDocs": {
+          "description": "More information",
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/exporters.md#trusted-publishing"
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/fileIdentifier"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Item found.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/htmlContent"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorised.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/htmlUnauthorised"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Item not found.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/htmlNotFound"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/collections/{aliasIdentifier}/index.html": {
       "get":  {
         "tags": ["items"],
@@ -769,6 +830,13 @@
     }
   },
   "components": {
+    "securitySchemes": {
+      "ldapMagic": {
+        "type": "http",
+        "scheme": "basic",
+        "description": "Restricted to MAGIC team members via LDAP."
+      }
+    },
     "schemas": {
       "htmlContent": {
         "title": "HTML content",
@@ -779,6 +847,11 @@
         "title": "HTML redirect content",
         "type": "string",
         "examples": ["<!DOCTYPE html>\n\n<html lang=\"en-GB\"><head><title>BAS Data Catalogue</title><meta http-equiv=\"refresh\" content=\"0;url=/items/dbe5f712-696a-47d8-b4a7-3b173e47e3ab/\"></head><body><a href=\"/items/dbe5f712-696a-47d8-b4a7-3b173e47e3ab/\">Click here if you are not redirected after a few seconds.</a></body></html>"]
+      },
+      "htmlUnauthorised": {
+        "title": "HTML 401 content",
+        "type": "string",
+        "examples": ["<!DOCTYPE html>\n\n<html lang=\"en-GB\"><body>Unauthorised. Unable to verify you are authorized to access the information requested.</body></html>"]
       },
       "htmlNotFound": {
         "title": "HTML 404 content",
@@ -1063,17 +1136,17 @@
     },
     "parameters": {
       "fileIdentifier": {
-        "name": "File Identifier",
+        "name": "fileIdentifier",
         "in": "path",
         "description": "Persistent and unique identifier for a resource.",
         "required": true,
         "schema": {
           "type": "string",
-          "examples": ["7b0cd3e3-069e-4fe2-92d4-f2387bfc40f1"]
+          "examples": ["b8b78c6c-fac2-402c-a772-9f518c7121e5"]
         }
       },
       "aliasIdentifier": {
-        "name": "Alias Identifier",
+        "name": "aliasIdentifier",
         "in": "path",
         "description": "Alias currently assigned to a resource.",
         "required": true,

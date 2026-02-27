@@ -21,7 +21,7 @@
       "description": "Primary production environment, shared with other systems during transition."
     },
     {
-      "url": "https://data-testing.bas.ac.uk",
+      "url": "https://data-testing.data.bas.ac.uk",
       "description": "Pre-production environment, without availability guarantees (generally and for specific resources)."
     },
     {
@@ -31,6 +31,10 @@
     {
       "url": "https://lantern-testing.data.bas.ac.uk",
       "description": "Underlying, non-reverse-proxied pre-production environment."
+    },
+    {
+      "url": "http://localhost:9000",
+      "description": "Local development environment."
     }
   ],
   "externalDocs": {
@@ -79,11 +83,7 @@
     {
       "name": "internal",
       "x-displayName": "Internal",
-      "description": "Various, non-sensitive, informational pages related to content and system administration.",
-      "externalDocs": {
-        "description": "More information",
-        "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/site.md#internal-pages-structure"
-      }
+      "description": "Various, non-sensitive, informational pages related to content and system administration."
     },
     {
       "name": "static",
@@ -1063,17 +1063,17 @@
     },
     "parameters": {
       "fileIdentifier": {
-        "name": "File Identifier",
+        "name": "fileIdentifier",
         "in": "path",
         "description": "Persistent and unique identifier for a resource.",
         "required": true,
         "schema": {
           "type": "string",
-          "examples": ["7b0cd3e3-069e-4fe2-92d4-f2387bfc40f1"]
+          "examples": ["b8b78c6c-fac2-402c-a772-9f518c7121e5"]
         }
       },
       "aliasIdentifier": {
-        "name": "Alias Identifier",
+        "name": "aliasIdentifier",
         "in": "path",
         "description": "Alias currently assigned to a resource.",
         "required": true,

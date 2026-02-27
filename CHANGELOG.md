@@ -10,6 +10,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 <!-- pyml disable no-duplicate-heading,no-duplicate-header -->
 ## [Unreleased]
 
+## [0.5.0] - 2026-02-27 [!BREAKING]
+
 ### Changed [!BREAKING]
 
 * `ItemBase.abstract*` methods changed to `ItemBase.description*` (impacts externally maintained item subclasses)

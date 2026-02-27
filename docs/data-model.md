@@ -292,7 +292,7 @@ Both properties default to `AccessLevel.NONE`. To allow open access, include per
 
 <!-- pyml disable md028 -->
 > [!CAUTION]
-> The catalogue does not enforce any metadata access permissions set.
+> The catalogue does not enforce metadata access permissions. They will always evaluate to open access (unrestricted).
 
 > [!WARNING]
 > External data access systems are responsible for enforcing any resource permissions that may apply. The catalogue
@@ -311,6 +311,33 @@ property, returning and defaulting to true unless `Item.admin_access_level == Ac
 
 Where restricted, [Item Templates](/docs/site.md#templates) display additional context in item summaries and
 the data tab (if applicable).
+
+### Item distribution options
+
+Services:
+
+- ArcGIS Feature Layer/Service,
+- ArcGIS OGC API Features Layer/Service
+- ArcGIS Raster Tile
+- ArcGIS Vector Tile
+
+File types:
+
+- CSV
+- Garmin FPL (aviation GPS data)
+- OGC GeoPackage
+- GeoJson
+- GPX
+- JPEG
+- MapboxVectorTiles
+- PDF (with optional geo-referencing)
+- PNG
+- Esri Shapefile
+
+Special cases:
+
+- BAS published maps purchasing options
+- BAS SAN references
 
 ## Verification Jobs
 

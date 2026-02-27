@@ -38,10 +38,14 @@ To run [Publishing Workflows](/docs/usage.md) locally:
    - token name: `lantern-conwat`
    - scopes: *api*
 3. for [Trusted Publishing](/docs/exporters.md#trusted-publishing):
-   - ensure you can access the Ops Data Store web root with a user in the `magic` group
+   - ensure you can access the catalogue directory within the Ops Data Store web root
    - if needed, create an SSH key and add the public key to the relevant remote authorised keys file
    - if needed, configure SSH to access the relevant server with the relevant credentials automatically [1]
 4. set the relevant [Config](/docs/config.md) options in your local `.env` file
+
+> [!NOTE]
+> This user MUST have a `0002` umask, as rsync is configured not to set permissions to avoid limitations with group
+> write permissions on POSIX filesystems.
 
 [1] E.g. in `~/.ssh/config`:
 
@@ -52,9 +56,10 @@ Host lantern-trusted-content
     IdentityFile ~/.ssh/lantern_trusted_content.pub
 ```
 
-The`IdentityFile` is a public key as a hint for the 1Password SSH agent.
-
 Needed for `rsync` to automatically authenticate.
+
+> [!TIP]
+> The`IdentityFile` is a public key as a hint for the 1Password SSH agent.
 
 ### Local development Stack
 
@@ -202,13 +207,8 @@ config options used by development tasks.
 | `X_ADMIN_METADATA_SIGNING_KEY_PRIVATE` | JSON Web Key | Yes       | v0.4.x        | JSON Web Key (JWK) for updating administrative metadata      | *None*  | '{"kid": "magic_metadata_signing_key", ...}' |
 <!-- pyml enable md013 -->
 
-<!-- pyml disable md028 -->
-> [!TIP]
-> See [Local Development Publishing](#local-development-publishing) for how to configure `X_TRUSTED_UPLOAD_HOST`.
-
 > [!WARNING]
 > These config options are not validated. Manually ensure any options needed by a task are set.
-<!-- pyml enable md028 -->
 
 ## Contributing
 
@@ -345,6 +345,7 @@ Within this project, for each new item type:
 9. add new tests to:
    - `tests.lantern_tests.models.item.catalogue.test_distributions`
    - `tests.lantern_tests.templates.macros.test_tabs.TestDataTab.test_data_info` (if using a collapsible panel)
+10. update the [Item distribution options](/docs/data-model.md#item-distribution-options) documentation
 
 ### Adding catalogue item tabs
 

@@ -317,6 +317,30 @@ class RecordUpgrade:
             return
         logger.debug(f"[{self.record.file_identifier}] SCAR fix: no SCAR contact found - skipping.")
 
+    def _esri_info(self, logger: logging.Logger) -> None:
+        """Change transfer option function for any Esri layers (not services)."""
+        if not self.record.distribution:
+            logger.debug(f"[{self.record.file_identifier}] esri layers: no distributions - skipping.")
+            return
+
+        formats = [
+            "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+feature",
+            "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+feature+ogc",
+            "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+tile+raster",
+            "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+tile+vector",
+        ]
+        flag = False
+        for do in self.record.distribution:
+            if do.format and do.format.href in formats:
+                do.transfer_option.online_resource.function = OnlineResourceFunctionCode.INFORMATION
+                self.changes.append(f"Function code for '{do.format.href}' updated.")
+                flag = True
+
+        if not flag:
+            logger.debug(
+                f"[{self.record.file_identifier}] esri layers: no application distribution options - skipping."
+            )
+
     def _revise(self, logger: logging.Logger) -> None:
         """Update date stamp in record if needed."""
         if self.record.sha1 == self._original_sha1:
@@ -340,6 +364,7 @@ class RecordUpgrade:
         self._update_distributors(logger=logger)
         self._order_profiles(logger=logger)
         self._fix_scar(logger=logger)
+        self._esri_info(logger=logger)
         self._revise(logger=logger)
 
     def validate(self) -> None:

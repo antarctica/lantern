@@ -54,6 +54,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * 'keys-check' troubleshooting development task to verify administration metadata keys work
 * Importing non-interactive publishing workflow Python script from Ansible
 * Importing site verification Python script from Ansible
+* 'records-upgrade' development task for upgrading records to new MAGIC profiles and other bulk improvements
 
 ### Fixed
 

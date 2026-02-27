@@ -8,14 +8,13 @@ from uuid import uuid4
 import inquirer
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
 from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
-from tasks._record_utils import dump_records, init, process_record_selections
+from tasks._record_utils import dump_records, get_record, init
 
 from lantern.lib.metadata_library.models.record.presets.identifiers import make_bas_cat
 from lantern.lib.metadata_library.models.record.record import Record
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin, set_admin
 from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.record.record import Record as CatalogueRecord
-from lantern.stores.gitlab import GitLabStore
 
 
 def _get_cli_args() -> dict:
@@ -36,14 +35,6 @@ def _get_cli_args() -> dict:
         help="Optional target record identifier. Will interactively prompt if missing.",
     )
     return {"source_id": parser.parse_args().source, "target_id": parser.parse_args().target}
-
-
-def _get_record(logger: logging.Logger, store: GitLabStore, identifier: str | None = None) -> Record:
-    """Get record from store using flexible, and optionally preset, identifier."""
-    if identifier is None:
-        identifier = inquirer.prompt([inquirer.Text("id", message="Record identifier")])["id"]
-    file_identifier = next(iter(process_record_selections(logger=logger, identifiers=[identifier])))
-    return store.select_one(file_identifier=file_identifier)
 
 
 def _get_new_identifier(identifier: str | None = None) -> str:
@@ -102,7 +93,7 @@ def main() -> None:
     input_path = Path("./import")
     args = _get_cli_args()
 
-    source_record = _get_record(logger=logger, store=store, identifier=args["source_id"])
+    source_record = get_record(logger=logger, store=store, identifier=args["source_id"])
     target_identifier = _get_new_identifier(identifier=args["target_id"])
     new_record = _clone_record(
         logger=logger,

@@ -1,6 +1,7 @@
 import functools
 import logging
 import re
+import subprocess
 import sys
 from collections.abc import Callable
 from datetime import UTC, datetime
@@ -17,8 +18,8 @@ from tasks.records_import import load as import_load
 from tasks.records_import import push as import_push
 from tasks.records_zap import clean_input_path as zap_clean_input_path
 from tasks.records_zap import dump_records as zap_dump_records
-from tasks.records_zap import parse_records as zap_parse_records
-from tasks.records_zap import process_records as zap_process_records
+from tasks.records_zap import parse_zap_records as zap_parse_records
+from tasks.records_zap import process_zap_records as zap_process_records
 
 from lantern.config import Config
 from lantern.exporters.site import SiteExporter
@@ -175,6 +176,19 @@ _This comment was left automatically by the Lantern Experiment's [Interactive re
         issue.notes.create({"body": self.render()})
 
 
+def _ping_host(host: str) -> None:
+    try:
+        subprocess.run(  # noqa: S603
+            ["ssh", host, "echo x"],  # noqa: S607
+            check=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.STDOUT,
+        )
+    except subprocess.CalledProcessError as e:
+        msg = f"Host unreachable: {host}"
+        raise RuntimeError(msg) from e
+
+
 def _time_task(label: str) -> Callable:
     """Time a task and log duration."""
 
@@ -228,7 +242,7 @@ def _zap(logger: logging.Logger, store: GitLabStore, admin_keys: AdministrationK
     Processed records will include any collections these records appear within.
     """
     logger.info(f"Loading Zap authored records from: '{import_path.resolve()}'")
-    record_paths = zap_parse_records(logger=logger, input_path=import_path)
+    record_paths = zap_parse_records(logger=logger, admin_keys=admin_keys, input_path=import_path)
     records = [record_path[0] for record_path in record_paths]
 
     logger.debug(f"Found {len(records)} Zap authored records to process.")
@@ -370,10 +384,14 @@ def _verify(
     exporter = VerificationExporter(
         logger=logger, meta=meta, s3=s3, context=context, select_records=store.select, selected_identifiers=identifiers
     )
-    exporter.run()
-    exporter.export()
-    logger.info(f"Verification complete, result: {exporter.report.data['pass_fail']}.")
-    logger.info("See local export for report.")
+    # noinspection PyBroadException
+    try:
+        exporter.run()
+        exporter.export()
+        logger.info(f"Verification complete, result: {exporter.report.data['pass_fail']}.")
+        logger.info("See local export for report.")
+    except Exception:
+        logger.exception("Verification failed.")
 
 
 @_time_task(label="Output")
@@ -422,6 +440,9 @@ def main() -> None:
     if testing_bucket != config.AWS_S3_BUCKET:
         logger.error("No. Non-testing bucket selected.")
         sys.exit(1)
+    if config.TRUSTED_UPLOAD_HOST:
+        logger.info("Checking connectivity to trusted upload host.")
+        _ping_host(config.TRUSTED_UPLOAD_HOST)
 
     print("\nThis script is for adding or updating records in the Catalogue.")
     print("It combines the 'zap-' 'import-', 'build-' and 'verify-' records dev tasks with some workflow logic.")

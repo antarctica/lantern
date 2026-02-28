@@ -229,6 +229,6 @@ class ItemCataloguePhysicalMap(ItemCatalogue):
     def sides(self) -> list[tuple[str, ItemCatalogueSummary]]:
         """Item summaries for the items that make up the physical map."""
         return [
-            (f"Side {side_index_label(i)}", ItemCatalogueSummary(record=side, admin_meta_keys=self._admin_keys))
+            (f"Side {side_index_label(i)}", ItemCatalogueSummary(record=side, admin_keys=self._admin_keys))
             for i, side in enumerate(self._sides)
         ]

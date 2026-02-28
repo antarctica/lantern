@@ -365,9 +365,9 @@ class TestContacts:
         assert len(contacts) == 1
         assert contacts[0] == expected
 
-    test_filer_roles_poc = Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT})
-    test_filer_roles_author = Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.AUTHOR})
-    test_filer_roles_poc_publisher = Contact(
+    test_filter_roles_poc = Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT})
+    test_filter_roles_author = Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.AUTHOR})
+    test_filter_roles_poc_publisher = Contact(
         organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT, ContactRoleCode.PUBLISHER}
     )
 
@@ -376,11 +376,11 @@ class TestContacts:
         [
             (
                 ContactRoleCode.POINT_OF_CONTACT,
-                [test_filer_roles_poc, test_filer_roles_poc_publisher],
+                [test_filter_roles_poc, test_filter_roles_poc_publisher],
             ),
             (
                 [ContactRoleCode.POINT_OF_CONTACT, ContactRoleCode.AUTHOR],
-                [test_filer_roles_poc, test_filer_roles_author, test_filer_roles_poc_publisher],
+                [test_filter_roles_poc, test_filter_roles_author, test_filter_roles_poc_publisher],
             ),
             ([], []),
         ],
@@ -388,11 +388,31 @@ class TestContacts:
     def test_filter_roles(self, value: ContactRoleCode | list[ContactRoleCode], expected: list[Contact]):
         """Can filter contacts by one or more roles."""
         contacts = Contacts(
-            [self.test_filer_roles_poc, self.test_filer_roles_author, self.test_filer_roles_poc_publisher]
+            [self.test_filter_roles_poc, self.test_filter_roles_author, self.test_filter_roles_poc_publisher]
         )
 
         result = contacts.filter(value)
         assert result == expected
+
+    test_ensure_roles_superset = Contact(
+        organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT, ContactRoleCode.AUTHOR}
+    )
+
+    @pytest.mark.parametrize(
+        ("before", "after"),
+        [
+            (Contacts([]), Contacts([test_filter_roles_author])),
+            (Contacts([test_filter_roles_author]), Contacts([test_filter_roles_author])),
+            (Contacts([test_ensure_roles_superset]), Contacts([test_ensure_roles_superset])),
+            (Contacts([test_filter_roles_poc]), Contacts([test_ensure_roles_superset])),
+        ],
+    )
+    def test_ensure(self, before: Contacts, after: Contacts):
+        """Can append a contact, or append to a contact's roles as needed."""
+        value = self.test_filter_roles_author
+
+        before.ensure(value)
+        assert before == after
 
     def test_structure(self):
         """Can create a Contacts container by converting a list of plain types."""
@@ -829,6 +849,22 @@ class TestIdentifiers:
 
         result = identifiers.filter(identifier.namespace)
         assert result == expected
+
+    test_ensure_id = Identifier(identifier="x", href="x", namespace="x")
+
+    @pytest.mark.parametrize(
+        ("before", "after"),
+        [
+            (Identifiers([]), Identifiers([test_ensure_id])),
+            (Identifiers([test_ensure_id]), Identifiers([test_ensure_id])),
+        ],
+    )
+    def test_ensure(self, before: Identifiers, after: Identifiers):
+        """Can append an identifier as needed."""
+        value = self.test_ensure_id
+
+        before.ensure(value)
+        assert before == after
 
     def test_structure(self):
         """Can create an Identifiers container by converting a list of plain types."""

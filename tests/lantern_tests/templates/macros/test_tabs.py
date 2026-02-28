@@ -23,7 +23,12 @@ from lantern.lib.metadata_library.models.record.elements.common import (
     OnlineResource,
     Series,
 )
-from lantern.lib.metadata_library.models.record.elements.data_quality import DataQuality, DomainConsistency, Lineage
+from lantern.lib.metadata_library.models.record.elements.data_quality import (
+    DataQuality,
+    DomainConsistencies,
+    DomainConsistency,
+    Lineage,
+)
 from lantern.lib.metadata_library.models.record.elements.distribution import Distribution, Format, Size, TransferOption
 from lantern.lib.metadata_library.models.record.elements.identification import (
     Aggregation,
@@ -1317,17 +1322,21 @@ class TestInfoTab:
     @pytest.mark.parametrize(
         "value",
         [
-            [],
-            [
-                DomainConsistency(
-                    specification=Citation(title="x", href="x", dates=Dates(publication=Date(date=date(2010, 10, 31)))),
-                    explanation="x",
-                    result=True,
-                )
-            ],
+            DomainConsistencies([]),
+            DomainConsistencies(
+                [
+                    DomainConsistency(
+                        specification=Citation(
+                            title="x", href="x", dates=Dates(publication=Date(date=date(2010, 10, 31)))
+                        ),
+                        explanation="x",
+                        result=True,
+                    )
+                ]
+            ),
         ],
     )
-    def test_profiles(self, fx_item_cat_model_min: ItemCatalogue, value: list[DomainConsistency]):
+    def test_profiles(self, fx_item_cat_model_min: ItemCatalogue, value: DomainConsistencies):
         """Can get metadata profiles based on values from item."""
         fx_item_cat_model_min._record.data_quality = DataQuality(domain_consistency=value)
         expected = fx_item_cat_model_min._additional_info.profiles

@@ -1,3 +1,5 @@
+from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
+
 from lantern.lib.metadata_library.models.record.elements.common import (
     Address,
     Constraint,
@@ -20,13 +22,14 @@ from lantern.lib.metadata_library.models.record.enums import (
     OnlineResourceFunctionCode,
 )
 from lantern.lib.metadata_library.models.record.presets.admin import BAS_STAFF
-from lantern.lib.metadata_library.models.record.utils.admin import get_admin, set_admin
+from lantern.lib.metadata_library.models.record.utils.admin import set_admin
 from tests.resources.admin_keys import test_keys
 from tests.resources.records.utils import make_record, relate_products
 
-# A record for an ItemCatalogue instance with minimum required fields for products.
+# A restricted record for testing a restricted catalogue item.
 
 record = make_record(
+    open_access=False,
     file_identifier="57327327-4623-4247-af86-77fb43b7f45b",
     hierarchy_level=HierarchyLevelCode.PRODUCT,
     title="Test Resource - Product marked as restricted",
@@ -34,6 +37,7 @@ record = make_record(
 )
 # add related peers
 record.identification.aggregations.extend(relate_products(record.file_identifier))
+
 # change access and licence
 record.identification.constraints = Constraints(
     [
@@ -50,11 +54,11 @@ record.identification.constraints = Constraints(
         ),
     ]
 )
-# replace admin metadata to reflect changed access
+# add admin metadata to reflect access
 keys = test_keys()
-administration = get_admin(keys=keys, record=record)
-administration.resource_permissions = [BAS_STAFF]
-set_admin(keys=keys, record=record, admin_meta=administration)
+admin = AdministrationMetadata(id=record.file_identifier, resource_permissions=[BAS_STAFF])
+set_admin(keys=keys, record=record, admin_meta=admin)
+
 # add example distribution to test restricted state handling
 distributor = Contact(
     organisation=ContactIdentity(

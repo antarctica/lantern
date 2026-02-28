@@ -5,16 +5,18 @@ from typing import Any
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
 from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 
-from lantern.lib.metadata_library.models.record.elements.common import Contact, Contacts
+from lantern.lib.metadata_library.models.record.elements.common import Constraints, Contacts
 from lantern.lib.metadata_library.models.record.elements.data_quality import DomainConsistency
 from lantern.lib.metadata_library.models.record.elements.metadata import Metadata
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
+from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS as OPEN_ACCESS_PERMISSION
 from lantern.lib.metadata_library.models.record.presets.citation import make_magic_citation
 from lantern.lib.metadata_library.models.record.presets.conformance import MAGIC_ADMINISTRATION_V1, MAGIC_DISCOVERY_V2
+from lantern.lib.metadata_library.models.record.presets.constraints import CC_BY_ND_V4, OGL_V3, OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.presets.contacts import UKRI_RIGHTS_HOLDER, make_magic_role
 from lantern.lib.metadata_library.models.record.presets.identifiers import make_bas_cat
 from lantern.lib.metadata_library.models.record.record import Record
-from lantern.lib.metadata_library.models.record.utils.admin import set_admin
+from lantern.lib.metadata_library.models.record.utils.admin import get_admin, set_admin
 
 
 class RecordMagic(Record):
@@ -27,10 +29,12 @@ class RecordMagic(Record):
 
     At a lower level, this method extends a minimal ISO record with:
     - a domain consistency element for the MAGIC Discovery profile (appendix 1)
-    - the conventional MAGIC contact (Discovery profile appendix 2) as the metadata and identification point of contact
+    - default metadata constraints for open access and the CC BY-ND-v4 licence
+    - the required MAGIC contact (Discovery profile appendix 2) as the metadata and identification point of contact
     - an identification identifier using the Data Catalogue namespace based on the file identifier
     - an identification contact for UKRI as a rights holder
-    - an identification citation based on the Harvard APA style, MAGIC conventions and record details
+    - an identification contact for MAGIC as a publisher
+    - an identification citation based on the Harvard APA style with MAGIC conventions and record details
     - if admin metadata is included, a domain consistency element for the MAGIC Administration profile (appendix 1)
     - if admin metadata is included, the metadata encoded within the identification supplemental info element
 
@@ -50,14 +54,12 @@ class RecordMagic(Record):
         file_identifier="x",
         hierarchy_level=HierarchyLevelCode.DATASET,
         identification=Identification(title="x", abstract="x", dates=Dates(creation=Date(date=datetime.now(tz=UTC)))),
-        admin_keys=AdministrationKeys,
-        admin_meta=AdministrationMetadata,
+        admin_keys=AdministrationKeys(...),
+        admin_meta=AdministrationMetadata(id="x"),
     )
     ```
 
     """
-
-    magic_poc = make_magic_role({ContactRoleCode.POINT_OF_CONTACT})
 
     def __init__(self, **kwargs: Any) -> None:
         """
@@ -67,70 +69,55 @@ class RecordMagic(Record):
         """
         # prepare metadata element
         date_stamp: date | None = kwargs.pop("date_stamp", None)
-        kwargs["metadata"] = Metadata(contacts=Contacts([self.magic_poc]), date_stamp=date_stamp)
+        magic = make_magic_role({ContactRoleCode.POINT_OF_CONTACT})
+        kwargs["metadata"] = Metadata(contacts=Contacts([magic]), date_stamp=date_stamp)
 
         # prepare optional administration element
         self._admin_keys: AdministrationKeys | None = kwargs.pop("admin_keys", None)
         self._admin_meta: AdministrationMetadata | None = kwargs.pop("admin_meta", None)
 
+        # prepare profiles
+        self._profiles: list[DomainConsistency] = [MAGIC_DISCOVERY_V2]
+
         super().__init__(**kwargs)
 
     def __post_init__(self) -> None:
         """Process defaults and set optional admin metadata."""
-        profiles = [MAGIC_DISCOVERY_V2]
-
         if self.file_identifier is None:
             msg = "Records require a file_identifier."
-            raise ValueError(msg)
+            raise TypeError(msg)
 
+        self._set_metadata_constraints()
         self._set_contacts()
         self._set_cat_identifier()
         self._set_citation()
-
-        # create optional administration element if provided
-        if self._admin_keys is not None and self._admin_meta is not None:
-            set_admin(keys=self._admin_keys, record=self, admin_meta=self._admin_meta)
-            profiles.append(MAGIC_ADMINISTRATION_V1)
-
-        self._set_profiles(profiles)
+        self._set_admin()
+        self._set_profiles()
 
         super().__post_init__()
 
-    @staticmethod
-    def _ensure_contact(target_contact: Contact, existing_contacts: list[Contact]) -> None:
-        """Ensure a list of contacts contains a desired contact."""
-        # skip exact match
-        if target_contact in existing_contacts:
-            return
+    def _set_metadata_constraints(self) -> None:
+        """
+        Set conventional metadata constraints.
 
-        # skip with overlapping roles
-        for contact in existing_contacts:
-            if contact.eq_contains_roles(target_contact):
-                return
-
-        # append to existing contact with non-overlapping roles
-        for i, contact in enumerate(existing_contacts):
-            if contact.eq_no_roles(target_contact):
-                existing_contacts[i].role = existing_contacts[i].role.union(target_contact.role)
-                return
-
-        # append new contact
-        existing_contacts.append(target_contact)
+        Restricted metadata is not yet supported.
+        """
+        self.metadata.constraints = Constraints([OPEN_ACCESS, CC_BY_ND_V4])
 
     def _set_contacts(self) -> None:
         """
-        Ensure record identification contains conventional contacts.
+        Set conventional contacts.
 
-        MAGIC as a point of contact and UKRI as a rights holder
+        MAGIC as a point of contact and publisher; UKRI as a rights holder
         """
-        self._ensure_contact(self.magic_poc, self.identification.contacts)
-        self._ensure_contact(UKRI_RIGHTS_HOLDER, self.identification.contacts)
+        magic = make_magic_role({ContactRoleCode.POINT_OF_CONTACT, ContactRoleCode.PUBLISHER})
+        self.identification.contacts.ensure(magic)
+        self.identification.contacts.ensure(UKRI_RIGHTS_HOLDER)
 
     def _set_cat_identifier(self) -> None:
-        """Ensure an identifier within the Data Catalogue namespace based on the file identifier."""
+        """Set an identifier within the Data Catalogue namespace based on the file identifier."""
         self_identifier = make_bas_cat(self.file_identifier)  # ty:ignore[invalid-argument-type]
-        if self_identifier not in self.identification.identifiers:
-            self.identification.identifiers.append(self_identifier)
+        self.identification.identifiers.ensure(self_identifier)
 
     def _set_citation(self) -> None:
         """Set citation using record details as per `make_magic_citation` preset if not already set."""
@@ -144,25 +131,106 @@ class RecordMagic(Record):
             identifiers=self.identification.identifiers,
         )
 
-    def _set_profiles(self, profiles: list[DomainConsistency]) -> None:
-        """Ensure record identification / data quality contains MAGIC profiles."""
-        for profile in profiles:
-            if profile not in self.data_quality.domain_consistency:
-                self.data_quality.domain_consistency.append(profile)
+    def _set_admin(self) -> None:
+        """Set administration metadata if provided."""
+        if isinstance(self._admin_keys, AdministrationKeys) and isinstance(self._admin_meta, AdministrationMetadata):
+            set_admin(keys=self._admin_keys, record=self, admin_meta=self._admin_meta)
+            self._profiles.append(MAGIC_ADMINISTRATION_V1)
+
+    def _set_profiles(self) -> None:
+        """Set domain consistency elements for any applicable profiles."""
+        for profile in self._profiles:
+            self.data_quality.domain_consistency.ensure(profile)
 
     @classmethod
-    def loads(cls, value: dict, check_supported: bool = False, logger: logging.Logger | None = None) -> "Record":
+    def loads(
+        cls,
+        value: dict,
+        check_supported: bool = False,
+        logger: logging.Logger | None = None,
+        admin_keys: AdministrationKeys | None = None,
+        **kwargs: Any,
+    ) -> "RecordMagic":
         """
         Create a Record from a dict loaded from a JSON schema instance.
 
         Known to violate method override rules due to differing signature.
         """
-        record = super().loads(value=value, check_supported=check_supported, logger=logger)
-        return cls(
+        record = super().loads(value=value, check_supported=check_supported, logger=logger, **kwargs)
+        admin_meta = get_admin(keys=admin_keys, record=record) if admin_keys else None
+        return RecordMagic(
             file_identifier=record.file_identifier,
             hierarchy_level=record.hierarchy_level,
             metadata=record.metadata,
+            reference_system_info=record.reference_system_info,
             identification=record.identification,
             data_quality=record.data_quality,
             distribution=record.distribution,
+            admin_keys=admin_keys,
+            admin_meta=admin_meta,
+        )
+
+
+class RecordMagicOpen(RecordMagic):
+    """
+    Create an unrestricted (open) Record based on MAGIC metadata profiles and other conventional values.
+
+    Extends RecordMagic to:
+    - set metadata and resource access constraints and administration metadata permissions to open access
+    - set a metadata usage constraint for the CC BY ND v4 licence
+    - set a resource usage constraint for the OGL v3.0 licence
+
+    Note: Any constraints and admin metadata permissions passed to this class will be overwritten.
+    """
+
+    @staticmethod
+    def _set_open_access(admin_keys: AdministrationKeys | None, record: Record) -> None:
+        """
+        Set open access constraints and permissions.
+
+        Overrides any existing constraints and permissions.
+        """
+        if not isinstance(admin_keys, AdministrationKeys):
+            msg = "Open records require administration metadata keys."
+            raise TypeError(msg)
+
+        record.metadata.constraints = Constraints([OPEN_ACCESS, CC_BY_ND_V4])
+        record.identification.constraints = Constraints([OPEN_ACCESS, OGL_V3])
+
+        admin_meta = get_admin(keys=admin_keys, record=record)
+        if not admin_meta:
+            admin_meta = AdministrationMetadata(id=record.file_identifier)  # ty:ignore[invalid-argument-type]
+            record.data_quality.domain_consistency.append(MAGIC_ADMINISTRATION_V1)
+
+        admin_meta.metadata_permissions = [OPEN_ACCESS_PERMISSION]
+        admin_meta.resource_permissions = [OPEN_ACCESS_PERMISSION]
+        set_admin(keys=admin_keys, record=record, admin_meta=admin_meta)
+
+    def __post_init__(self) -> None:
+        """Set constraints and permissions."""
+        super().__post_init__()
+        self._set_open_access(admin_keys=self._admin_keys, record=self)
+
+    @classmethod
+    def loads(
+        cls,
+        value: dict,
+        check_supported: bool = False,
+        logger: logging.Logger | None = None,
+        admin_keys: AdministrationKeys | None = None,
+        **kwargs: Any,
+    ) -> "RecordMagicOpen":
+        """Create an unrestricted Record from a dict loaded from a JSON schema instance."""
+        record = super().loads(
+            value=value, check_supported=check_supported, logger=logger, admin_keys=admin_keys, **kwargs
+        )
+        return RecordMagicOpen(
+            file_identifier=record.file_identifier,
+            hierarchy_level=record.hierarchy_level,
+            metadata=record.metadata,
+            reference_system_info=record.reference_system_info,
+            identification=record.identification,
+            data_quality=record.data_quality,
+            distribution=record.distribution,
+            admin_keys=admin_keys,
         )

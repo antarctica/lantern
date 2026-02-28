@@ -35,7 +35,8 @@ from lantern.lib.metadata_library.models.record.utils.kv import set_kv
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from tests.resources.records.utils import make_record, relate_products
 
-# A trio of records to demonstrate a published map with two dissimilar sides
+# A trio of open-access records for a paper map product with two, dissimilar, sides.
+
 #
 # Dissimilar properties:
 # - file_identifier*
@@ -110,6 +111,7 @@ distribution = [
 ]
 
 combined = make_record(
+    open_access=True,
     file_identifier=ids["c"],
     hierarchy_level=HierarchyLevelCode.PAPER_MAP_PRODUCT,
     title="Test Resource - Published map (Z and Soaring Crescendo)",
@@ -177,6 +179,7 @@ combined.identification.extents = Extents(
 )
 
 side_a = make_record(
+    open_access=True,
     file_identifier=ids["a"],
     hierarchy_level=HierarchyLevelCode.PRODUCT,
     title="Test Resource - Published map (Side Z)",
@@ -235,6 +238,7 @@ side_a.identification.extents = Extents(
 )
 
 side_b = make_record(
+    open_access=True,
     file_identifier=ids["b"],
     hierarchy_level=HierarchyLevelCode.PRODUCT,
     title="Test Resource - Published map (Side Soaring Crescendo)",

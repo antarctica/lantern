@@ -1,9 +1,6 @@
 from datetime import UTC, date, datetime
 
-from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
-
 from lantern.lib.metadata_library.models.record.elements.common import (
-    Constraints,
     Contact,
     ContactIdentity,
     Date,
@@ -11,7 +8,7 @@ from lantern.lib.metadata_library.models.record.elements.common import (
     Identifier,
     Maintenance,
 )
-from lantern.lib.metadata_library.models.record.elements.data_quality import Lineage
+from lantern.lib.metadata_library.models.record.elements.data_quality import DataQuality, DomainConsistencies, Lineage
 from lantern.lib.metadata_library.models.record.elements.identification import (
     Aggregation,
     Aggregations,
@@ -28,10 +25,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     MaintenanceFrequencyCode,
     ProgressCode,
 )
-from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS as OPEN_ACCESS_PERMISSION
-from lantern.lib.metadata_library.models.record.presets.base import RecordMagic
-from lantern.lib.metadata_library.models.record.presets.constraints import CC_BY_ND_V4, OGL_V3, OPEN_ACCESS
-from lantern.lib.metadata_library.models.record.presets.contacts import make_magic_role
+from lantern.lib.metadata_library.models.record.presets.base import RecordMagic, RecordMagicOpen
 from lantern.lib.metadata_library.models.record.presets.extents import make_bbox_extent, make_temporal_extent
 from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
@@ -39,49 +33,31 @@ from tests.resources.admin_keys import test_keys
 
 
 def make_record(
-    file_identifier: str, hierarchy_level: HierarchyLevelCode, title: str, abstract: str, purpose: str | None = None
+    open_access: bool,
+    file_identifier: str,
+    hierarchy_level: HierarchyLevelCode,
+    title: str,
+    abstract: str,
+    purpose: str | None = None,
 ) -> RecordRevision:
     """Make a record for testing based on RecordMagicDiscoveryV1."""
     admin_keys = test_keys()
-    admin_meta = AdministrationMetadata(
-        id=file_identifier,
-        gitlab_issues=[],
-        metadata_permissions=[OPEN_ACCESS_PERMISSION],
-        resource_permissions=[OPEN_ACCESS_PERMISSION],
-    )
+    record_cls = RecordMagicOpen if open_access else RecordMagic
 
-    record = RecordMagic(
+    record = record_cls(
         file_identifier=file_identifier,
         hierarchy_level=hierarchy_level,
+        date_stamp=date(2023, 10, 1),  # will be popped for use in Metadata
         identification=Identification(
             title=title,
             abstract=abstract,
+            purpose=abstract if purpose is None else purpose,
+            edition="1",
             dates=Dates(creation=Date(date=date(2023, 10, 1), precision=DatePrecisionCode.YEAR)),
         ),
+        data_quality=DataQuality(lineage=Lineage(statement="x")),
         admin_keys=admin_keys,
-        admin_meta=admin_meta,
     )
-
-    record.metadata.constraints = Constraints([OPEN_ACCESS, CC_BY_ND_V4])
-    record.metadata.date_stamp = date(2023, 10, 1)
-
-    record.identification.edition = "1"
-
-    record.identification.purpose = abstract if purpose is None else purpose
-
-    # Include additional role for existing magic contact
-    magic_contact = make_magic_role({ContactRoleCode.POINT_OF_CONTACT, ContactRoleCode.PUBLISHER})
-    magic_index = next(
-        (
-            i
-            for i, c in enumerate(record.identification.contacts)
-            if c.organisation.name == magic_contact.organisation.name
-        ),
-        None,
-    )
-    record.identification.contacts[magic_index] = magic_contact
-
-    record.identification.constraints = Constraints([OPEN_ACCESS, OGL_V3])
 
     record.identification.aggregations = Aggregations(
         [
@@ -114,15 +90,13 @@ def make_record(
         maintenance_frequency=MaintenanceFrequencyCode.AS_NEEDED,
     )
 
-    record.data_quality.lineage = Lineage(statement="x")
-
     # Convert to RecordRevision
     config = {"file_revision": "83fake487e5671f4a1dd7074b92fb94aa68d26bd", **record.dumps(strip_admin=False)}
     return RecordRevision.loads(config)
 
 
 def make_minimal_open_record(record: RecordRevision) -> None:
-    """Un-set non-required fields set by `make_record()`."""
+    """Remove all non-required fields set by `make_record()` except those needed for open-access."""
     record.identification.edition = None
     record.identification.purpose = None
     record.identification.contacts[0] = Contact(
@@ -134,7 +108,7 @@ def make_minimal_open_record(record: RecordRevision) -> None:
     record.identification.maintenance.progress = None
     record.identification.maintenance.maintenance_frequency = None
     record.data_quality.lineage = None
-    record.data_quality.domain_consistency = []
+    record.data_quality.domain_consistency = DomainConsistencies([])
 
 
 def relate_products(file_identifier: str) -> Aggregations:

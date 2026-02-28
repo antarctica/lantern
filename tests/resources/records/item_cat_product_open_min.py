@@ -1,9 +1,10 @@
 from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
 from tests.resources.records.utils import make_minimal_open_record, make_record
 
-# A record for an ItemCatalogue instance with minimum required fields for open-access products.
+# A record for a product with minimum required fields for open-access.
 
 record = make_record(
+    open_access=True,
     file_identifier="b0e92ec2-b018-4f9f-a1e1-bc0fe195619f",
     hierarchy_level=HierarchyLevelCode.PRODUCT,
     title="Test Resource - Product with minimum required fields for open-access",

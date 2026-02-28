@@ -5,7 +5,7 @@ from copy import deepcopy
 from dataclasses import dataclass, field
 from enum import Enum
 from hashlib import sha1
-from typing import TypeVar
+from typing import Any, TypeVar
 
 import cattrs
 from bas_metadata_library.standards.iso_19115_2 import MetadataRecord, MetadataRecordConfigV4
@@ -126,7 +126,7 @@ class Record:
         """
         Process defaults.
 
-        Retained for subclasses to override.
+        Included for subclasses to override.
         """
         pass
 
@@ -284,12 +284,16 @@ class Record:
         return value
 
     @classmethod
-    def loads(cls, value: dict, check_supported: bool = False, logger: logging.Logger | None = None) -> "Record":
+    def loads(
+        cls, value: dict, check_supported: bool = False, logger: logging.Logger | None = None, **kwargs: Any
+    ) -> "Record":
         """
         Create a Record from a JSON schema instance.
 
         Set `check_supported` to True to check the configuration is fully supported by this class.
         Set `logger` to enable optional logging of any unsupported content as a debug message.
+
+        Kwargs included for subclasses.
         """
         if check_supported:
             cls._config_supported(value, logger=logger)

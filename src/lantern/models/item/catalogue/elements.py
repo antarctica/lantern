@@ -27,7 +27,6 @@ from lantern.models.item.base.item import ItemBase
 from lantern.models.item.base.utils import md_as_html
 from lantern.models.item.catalogue.enums import ItemSuperType, ResourceTypeIcon
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
-from lantern.models.record.revision import RecordRevision
 from lantern.stores.base import SelectRecordProtocol
 
 TFormattedDate = TypeVar("TFormattedDate", bound="FormattedDate")
@@ -94,13 +93,6 @@ class ItemCatalogueSummary(ItemBase):
     Catalogue item summaries provide additional context for base summaries for use when presenting search results or
     resources related to the current item within the BAS Data Catalogue website.
     """
-
-    def __init__(self, record: RecordRevision, admin_meta_keys: AdministrationKeys | None) -> None:
-        if not isinstance(admin_meta_keys, AdministrationKeys):
-            msg = "administration metadata keys must be provided"
-            raise TypeError(msg) from None
-
-        super().__init__(record=record, admin_keys=admin_meta_keys)
 
     @property
     def _resource_type_label(self) -> str:
@@ -303,7 +295,7 @@ class Aggregations:
         summaries = {}
         for aggregation in self._aggregations:
             identifier = aggregation.identifier.identifier
-            summaries[identifier] = ItemCatalogueSummary(select_record(identifier), admin_meta_keys=self._admin_keys)
+            summaries[identifier] = ItemCatalogueSummary(select_record(identifier), admin_keys=self._admin_keys)
         return summaries
 
     def __len__(self) -> int:

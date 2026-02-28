@@ -388,26 +388,18 @@ class TestItemCatalogueSummaryCatalogue:
     Used for showing summaries of other items.
     """
 
-    def test_init(self, fx_item_base_model_min: ItemBase):
+    def test_init(self, fx_item_base_model_min: ItemBase, fx_admin_meta_keys: AdministrationKeys):
         """Can create an ItemCatalogueSummaryCatalogue."""
-        summary = ItemCatalogueSummary(
-            record=fx_item_base_model_min._record, admin_meta_keys=fx_item_base_model_min._admin_keys
-        )
+        summary = ItemCatalogueSummary(record=fx_item_base_model_min._record, admin_keys=fx_admin_meta_keys)
 
         assert isinstance(summary, ItemCatalogueSummary)
         assert summary._record == fx_item_base_model_min._record
         assert isinstance(summary._admin_keys, AdministrationKeys)
 
-    def test_init_invalid_admin_keys(self, fx_item_base_model_min: ItemBase):
-        """Cannot create an ItemCatalogueSummaryCatalogue if admin keys are not provided."""
-        with pytest.raises(TypeError, match=r"administration metadata keys must be provided"):
-            # noinspection PyTypeChecker
-            _ = ItemCatalogueSummary(record=fx_item_base_model_min._record, admin_meta_keys=None)
-
     def test_resource_type_icon(self, fx_item_base_model_min: ItemBase):
         """Can get icon for resource type."""
         summary = ItemCatalogueSummary(
-            record=fx_item_base_model_min._record, admin_meta_keys=fx_item_base_model_min._admin_keys
+            record=fx_item_base_model_min._record, admin_keys=fx_item_base_model_min._admin_keys
         )
         assert summary._resource_type_icon == ResourceTypeIcon[summary.resource_type.name].value
 
@@ -416,7 +408,7 @@ class TestItemCatalogueSummaryCatalogue:
         """Can get summary with Markdown formatting encoded as HTML if present, or a blank string."""
         record = fx_item_base_model_min._record
         record.identification.purpose = value
-        summary = ItemCatalogueSummary(record=record, admin_meta_keys=fx_item_base_model_min._admin_keys)
+        summary = ItemCatalogueSummary(record=record, admin_keys=fx_item_base_model_min._admin_keys)
 
         assert summary.summary_html == expected
 
@@ -428,7 +420,7 @@ class TestItemCatalogueSummaryCatalogue:
         expected = "30 June 2014" if has_date else None
         if has_date:
             record.identification.dates.publication = publication
-        summary = ItemCatalogueSummary(record=record, admin_meta_keys=fx_item_base_model_min._admin_keys)
+        summary = ItemCatalogueSummary(record=record, admin_keys=fx_item_base_model_min._admin_keys)
         if has_date:
             assert summary._date.value == expected
         else:
@@ -464,6 +456,7 @@ class TestItemCatalogueSummaryCatalogue:
     def test_fragments(
         self,
         fx_item_base_model_min: ItemBase,
+        fx_admin_meta_keys: AdministrationKeys,
         restricted: bool,
         resource_type: HierarchyLevelCode,
         edition: str | None,
@@ -479,7 +472,7 @@ class TestItemCatalogueSummaryCatalogue:
             admin_meta = AdministrationMetadata(
                 id=record.file_identifier, metadata_permissions=[OPEN_ACCESS], resource_permissions=[OPEN_ACCESS]
             )
-            set_admin(keys=fx_item_base_model_min._admin_keys, record=record, admin_meta=admin_meta)
+            set_admin(keys=fx_admin_meta_keys, record=record, admin_meta=admin_meta)
         exp_resource_type = ResourceTypeLabel[resource_type.name]
         record.hierarchy_level = resource_type
         record.identification.edition = edition
@@ -500,7 +493,7 @@ class TestItemCatalogueSummaryCatalogue:
             record.identification.aggregations.append(aggregation)
         record.child_aggregations_count = child_count
 
-        summary = ItemCatalogueSummary(record=record, admin_meta_keys=fx_item_base_model_min._admin_keys)
+        summary = ItemCatalogueSummary(record=record, admin_keys=fx_admin_meta_keys)
         result = summary.fragments
 
         assert result.restricted == restricted
@@ -537,7 +530,7 @@ class TestItemCatalogueSummaryCatalogue:
                 GraphicOverview(identifier="overview", href=href, mime_type="x")
             )
 
-        summary = ItemCatalogueSummary(record=record, admin_meta_keys=fx_item_base_model_min._admin_keys)
+        summary = ItemCatalogueSummary(record=record, admin_keys=fx_item_base_model_min._admin_keys)
 
         if href is not None:
             assert summary.href_graphic == expected

@@ -402,9 +402,9 @@ def fx_revision_model_min(fx_revision_config_min: dict) -> RecordRevision:
 
 
 @pytest.fixture()
-def fx_item_base_model_min(fx_item_config_min_base: dict, fx_admin_meta_keys: AdministrationKeys) -> ItemBase:
+def fx_item_base_model_min(fx_item_config_min_base: dict) -> ItemBase:
     """Minimal ItemBase model instance."""
-    return ItemBase(record=RecordRevision.loads(fx_item_config_min_base), admin_keys=fx_admin_meta_keys)
+    return ItemBase(record=RecordRevision.loads(fx_item_config_min_base))
 
 
 def render_item_catalogue(item: ItemCatalogue) -> str:

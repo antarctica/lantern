@@ -1,7 +1,7 @@
 import logging
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import TypeVar
+from typing import Any, TypeVar
 
 import cattrs
 
@@ -79,7 +79,7 @@ class RecordRevision(Record):
 
     @classmethod
     def loads(
-        cls, value: dict, check_supported: bool = False, logger: logging.Logger | None = None
+        cls, value: dict, check_supported: bool = False, logger: logging.Logger | None = None, **kwargs: Any
     ) -> "RecordRevision":
         """
         Create a Record Revision from a JSON schema instance and additional context.

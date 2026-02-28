@@ -14,6 +14,11 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 
 * `DomainConsisties` container element for managing domain consistency data quality elements
 * `ensures()` util methods for contacts, identifiers and domain conformance elements to prevent duplicate items
+* Open-access MAGIC base record preset
+
+### Changed
+
+* Improving MAGIC base record preset
 
 ## [0.5.0] - 2026-02-27 [!BREAKING]
 

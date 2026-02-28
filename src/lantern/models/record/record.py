@@ -1,7 +1,7 @@
 import logging
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import TypeVar
+from typing import Any, TypeVar
 from uuid import UUID
 
 import cattrs
@@ -51,7 +51,9 @@ class Record(RecordBase):
         return instance
 
     @classmethod
-    def loads(cls, value: dict, check_supported: bool = False, logger: logging.Logger | None = None) -> "Record":
+    def loads(
+        cls, value: dict, check_supported: bool = False, logger: logging.Logger | None = None, **kwargs: Any
+    ) -> "Record":
         """
         Create a Record from a JSON schema instance and additional context.
 

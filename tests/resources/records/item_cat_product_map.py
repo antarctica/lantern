@@ -3,9 +3,10 @@ from lantern.lib.metadata_library.models.record.enums import (
 )
 from tests.resources.records.utils import make_record, relate_products
 
-# A record for an ItemCatalogue instance with minimum required fields for map products.
+# An open-access record for a map product.
 
 record = make_record(
+    open_access=True,
     file_identifier="8422d4e7-654f-4fbb-a5e0-4051ee21418e",
     hierarchy_level=HierarchyLevelCode.MAP_PRODUCT,
     title="Test Resource - Map Product",

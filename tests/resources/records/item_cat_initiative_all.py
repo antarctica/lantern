@@ -23,7 +23,7 @@ from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from tests.resources.admin_keys import test_keys
 from tests.resources.records.utils import make_record
 
-# A record for an ItemCatalogue instance with all supported fields for initiatives.
+# An open-access record for an initiative with all supported fields.
 
 initiative_members = ["30825673-6276-4e5a-8a97-f97f2094cd25"]
 
@@ -58,6 +58,7 @@ the same. Well excuse me, Judge Reinhold!
 """
 
 record = make_record(
+    open_access=True,
     file_identifier="fd126357-0f88-4b89-81b8-fe33654ef045",
     hierarchy_level=HierarchyLevelCode.INITIATIVE,
     title="Test Resource - Initiative with all supported fields",

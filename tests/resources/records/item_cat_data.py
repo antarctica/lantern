@@ -21,7 +21,8 @@ from lantern.lib.metadata_library.models.record.enums import (
 from lantern.models.record.const import CATALOGUE_NAMESPACE
 from tests.resources.records.utils import make_record
 
-# A record with all supported distribution options.
+# An open-access record to test all supported data formats.
+
 
 abstract = """
 Item to test all supported data formats:
@@ -825,6 +826,7 @@ distributions = {
 }
 
 record = make_record(
+    open_access=True,
     file_identifier="f90013f6-2893-4c72-953a-a1a6bc1919d7",
     hierarchy_level=HierarchyLevelCode.DATASET,
     title="Test Resource - Item to test data formats",

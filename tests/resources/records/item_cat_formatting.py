@@ -1,7 +1,7 @@
 from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
 from tests.resources.records.utils import make_record
 
-# A record for an ItemCatalogue instance with examples of Markdown formatting in all supported fields.
+# An open-access record for testing all supported formatting options.
 
 abstract = """
 Pargraph: I spent so much time making sweet jam in the kitchen that it's hard to hear anything over the clatter of the
@@ -178,6 +178,7 @@ No, I was ashamed to be **SEEN** with you. I like being **WITH** you!
 1. Chickens don't clap!
 """
 record = make_record(
+    open_access=True,
     file_identifier="e0df252c-fb8b-49ff-9711-f91831b66ea2",
     hierarchy_level=HierarchyLevelCode.PRODUCT,
     title="Test Resource - Product to test **Markdown** _formatting_",

@@ -1,6 +1,6 @@
 import cattrs
 
-from lantern.lib.metadata_library.models.record.elements.data_quality import DataQuality
+from lantern.lib.metadata_library.models.record.elements.data_quality import DataQuality, DomainConsistencies
 from lantern.lib.metadata_library.models.record.presets.conformance import MAGIC_DISCOVERY_V1
 from lantern.lib.metadata_library.models.record.utils.clean import clean_dict
 
@@ -49,7 +49,7 @@ class TestMagicProfileV1:
 
         converter = cattrs.Converter()
         converter.register_unstructure_hook(DataQuality, lambda d: d.unstructure())
-        container = DataQuality(domain_consistency=[MAGIC_DISCOVERY_V1])
+        container = DataQuality(domain_consistency=DomainConsistencies([MAGIC_DISCOVERY_V1]))
         result = clean_dict(converter.unstructure(container))["domain_consistency"][0]
 
         assert result == expected

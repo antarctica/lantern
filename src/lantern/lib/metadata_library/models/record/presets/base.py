@@ -5,7 +5,7 @@ from typing import Any
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
 from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 
-from lantern.lib.metadata_library.models.record.elements.common import Contact, Contacts
+from lantern.lib.metadata_library.models.record.elements.common import Constraints, Contacts
 from lantern.lib.metadata_library.models.record.elements.data_quality import DomainConsistency
 from lantern.lib.metadata_library.models.record.elements.metadata import Metadata
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
@@ -168,4 +168,69 @@ class RecordMagic(Record):
             distribution=record.distribution,
             admin_keys=admin_keys,
             admin_meta=admin_meta,
+        )
+
+
+class RecordMagicOpen(RecordMagic):
+    """
+    Create an unrestricted (open) Record based on MAGIC metadata profiles and other conventional values.
+
+    Extends RecordMagic to:
+    - set metadata and resource access constraints and administration metadata permissions to open access
+    - set a metadata usage constraint for the CC BY ND v4 licence
+    - set a resource usage constraint for the OGL v3.0 licence
+
+    Note: Any constraints and admin metadata permissions passed to this class will be overwritten.
+    """
+
+    @staticmethod
+    def _set_open_access(admin_keys: AdministrationKeys | None, record: Record) -> None:
+        """
+        Set open access constraints and permissions.
+
+        Overrides any existing constraints and permissions.
+        """
+        if not isinstance(admin_keys, AdministrationKeys):
+            msg = "Open records require administration metadata keys."
+            raise TypeError(msg)
+
+        record.metadata.constraints = Constraints([OPEN_ACCESS, CC_BY_ND_V4])
+        record.identification.constraints = Constraints([OPEN_ACCESS, OGL_V3])
+
+        admin_meta = get_admin(keys=admin_keys, record=record)
+        if not admin_meta:
+            admin_meta = AdministrationMetadata(id=record.file_identifier)  # ty:ignore[invalid-argument-type]
+            record.data_quality.domain_consistency.append(MAGIC_ADMINISTRATION_V1)
+
+        admin_meta.metadata_permissions = [OPEN_ACCESS_PERMISSION]
+        admin_meta.resource_permissions = [OPEN_ACCESS_PERMISSION]
+        set_admin(keys=admin_keys, record=record, admin_meta=admin_meta)
+
+    def __post_init__(self) -> None:
+        """Set constraints and permissions."""
+        super().__post_init__()
+        self._set_open_access(admin_keys=self._admin_keys, record=self)
+
+    @classmethod
+    def loads(
+        cls,
+        value: dict,
+        check_supported: bool = False,
+        logger: logging.Logger | None = None,
+        admin_keys: AdministrationKeys | None = None,
+        **kwargs: Any,
+    ) -> "RecordMagicOpen":
+        """Create an unrestricted Record from a dict loaded from a JSON schema instance."""
+        record = super().loads(
+            value=value, check_supported=check_supported, logger=logger, admin_keys=admin_keys, **kwargs
+        )
+        return RecordMagicOpen(
+            file_identifier=record.file_identifier,
+            hierarchy_level=record.hierarchy_level,
+            metadata=record.metadata,
+            reference_system_info=record.reference_system_info,
+            identification=record.identification,
+            data_quality=record.data_quality,
+            distribution=record.distribution,
+            admin_keys=admin_keys,
         )

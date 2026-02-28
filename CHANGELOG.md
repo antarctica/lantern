@@ -16,6 +16,10 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * `ensures()` util methods for contacts, identifiers and domain conformance elements to prevent duplicate items
 * Open-access MAGIC base record preset
 
+### Fixed
+
+* Inconsistencies with supporting optional admin metadata
+
 ### Changed
 
 * Improving release issue template to include post-deployment resources clean-up

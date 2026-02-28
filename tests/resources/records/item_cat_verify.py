@@ -17,7 +17,7 @@ from lantern.lib.metadata_library.models.record.enums import (
 )
 from tests.resources.records.utils import make_record
 
-# A record with all distinct verification distribution options.
+# An open-access record to test all distinct verification distribution options.
 
 abstract = """
 Item to test all VerificationDistributionType enum members:
@@ -310,6 +310,7 @@ san_reference = Distribution(
 )
 
 record = make_record(
+    open_access=True,
     file_identifier="cf80b941-3de6-4a04-8f5a-a2349c1e3ae0",
     hierarchy_level=HierarchyLevelCode.DATASET,
     title="Test Resource - Item to test verification download types",

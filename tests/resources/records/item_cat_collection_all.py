@@ -26,7 +26,7 @@ from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from tests.resources.admin_keys import test_keys
 from tests.resources.records.utils import make_record
 
-# A record for an ItemCatalogue instance with all supported fields for collections.
+# An open-access record for a collection with all supported fields.
 
 collection_members = [
     "30825673-6276-4e5a-8a97-f97f2094cd25",
@@ -82,6 +82,7 @@ the same. Well excuse me, Judge Reinhold!
 """
 
 record = make_record(
+    open_access=True,
     file_identifier="dbe5f712-696a-47d8-b4a7-3b173e47e3ab",
     hierarchy_level=HierarchyLevelCode.COLLECTION,
     title="Test Resource - Collection with all supported fields",

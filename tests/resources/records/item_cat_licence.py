@@ -11,10 +11,11 @@ from lantern.lib.metadata_library.models.record.enums import (
     ContactRoleCode,
     HierarchyLevelCode,
 )
+from lantern.lib.metadata_library.models.record.presets.constraints import OGL_V3, OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.presets.contacts import make_magic_role
 from tests.resources.records.utils import make_record
 
-# Records for all supported resource licence usage constraints.
+# Open-access records to test all supported licences.
 
 abstract = """
 Item to test all supported resource licences:
@@ -28,6 +29,7 @@ Item to test all supported resource licences:
 """
 
 ogl_record = make_record(
+    open_access=True,
     file_identifier="589408f0-f46b-4609-b537-2f90a2f61243",
     hierarchy_level=HierarchyLevelCode.PRODUCT,
     title="Test Resource - Item to test licences (OGL v3)",
@@ -36,21 +38,13 @@ ogl_record = make_record(
 )
 ogl_record.identification.constraints = Constraints(
     [
-        Constraint(
-            type=ConstraintTypeCode.ACCESS,
-            restriction_code=ConstraintRestrictionCode.UNRESTRICTED,
-            statement="Open Access (Anonymous)",
-        ),
-        Constraint(
-            type=ConstraintTypeCode.USAGE,
-            restriction_code=ConstraintRestrictionCode.LICENSE,
-            href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
-            statement="This information is licensed under the Open Government Licence v3.0. To view this licence, visit https://www.nationalarchives.gov.uk/doc/open-government-licence/.",
-        ),
+        OPEN_ACCESS,
+        OGL_V3,
     ]
 )
 
 cc_record = make_record(
+    open_access=True,
     file_identifier="4ba929ac-ca32-4932-a15f-38c1640c0b0f",
     hierarchy_level=HierarchyLevelCode.PRODUCT,
     title="Test Resource - Item to test licences (CC BY v4)",
@@ -59,11 +53,7 @@ cc_record = make_record(
 )
 cc_record.identification.constraints = Constraints(
     [
-        Constraint(
-            type=ConstraintTypeCode.ACCESS,
-            restriction_code=ConstraintRestrictionCode.UNRESTRICTED,
-            statement="Open Access (Anonymous)",
-        ),
+        OPEN_ACCESS,
         Constraint(
             type=ConstraintTypeCode.USAGE,
             restriction_code=ConstraintRestrictionCode.LICENSE,
@@ -74,6 +64,7 @@ cc_record.identification.constraints = Constraints(
 )
 
 ops_record = make_record(
+    open_access=False,
     file_identifier="5ab58461-5ba7-404d-a904-2b4efcb7556e",
     hierarchy_level=HierarchyLevelCode.PRODUCT,
     title="Test Resource - Item to test licences (Operations Mapping v1)",
@@ -97,6 +88,7 @@ ops_record.identification.constraints = Constraints(
 )
 
 magic_products_record = make_record(
+    open_access=False,
     file_identifier="60c05109-d15e-4b43-9e36-d4fd9d7c606b",
     hierarchy_level=HierarchyLevelCode.PRODUCT,
     title="Test Resource - Item to test licences (MAGIC Products v1)",
@@ -120,6 +112,7 @@ magic_products_record.identification.constraints = Constraints(
 )
 
 rights_reversed_record = make_record(
+    open_access=True,
     file_identifier="c993ea2b-d44e-4ca0-9007-9a972f7dd117",
     hierarchy_level=HierarchyLevelCode.PRODUCT,
     title="Test Resource - Item to test licences (All Rights Reversed v1)",
@@ -128,11 +121,7 @@ rights_reversed_record = make_record(
 )
 rights_reversed_record.identification.constraints = Constraints(
     [
-        Constraint(
-            type=ConstraintTypeCode.ACCESS,
-            restriction_code=ConstraintRestrictionCode.UNRESTRICTED,
-            statement="Open Access (Anonymous)",
-        ),
+        OPEN_ACCESS,
         Constraint(
             type=ConstraintTypeCode.USAGE,
             restriction_code=ConstraintRestrictionCode.LICENSE,
@@ -143,6 +132,7 @@ rights_reversed_record.identification.constraints = Constraints(
 )
 
 copernicus_sentinel_record = make_record(
+    open_access=True,
     file_identifier="43287219-40aa-47fd-809e-21b50773a052",
     hierarchy_level=HierarchyLevelCode.PRODUCT,
     title="Test Resource - Item to test licences (Copernicus Sentinel v1)",
@@ -151,11 +141,7 @@ copernicus_sentinel_record = make_record(
 )
 copernicus_sentinel_record.identification.constraints = Constraints(
     [
-        Constraint(
-            type=ConstraintTypeCode.ACCESS,
-            restriction_code=ConstraintRestrictionCode.UNRESTRICTED,
-            statement="Open Access (Anonymous)",
-        ),
+        OPEN_ACCESS,
         Constraint(
             type=ConstraintTypeCode.USAGE,
             restriction_code=ConstraintRestrictionCode.LICENSE,

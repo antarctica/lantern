@@ -245,7 +245,7 @@ def _get_access_permissions(logger: logging.Logger, record: Record) -> tuple[lis
     """
     Get metadata and resource access permissions from record access constraints.
 
-    Zap ⚡ doesn't support metadata access restrictions so hard-codes to OPEN ACCESS.
+    Zap ⚡ and the catalogue don't support metadata access permissions so hard-codes to OPEN_ACCESS.
 
     Zap ⚡️'s restricted options don't map to access permissions used in admin metadata so aren't supported.
     """
@@ -283,14 +283,14 @@ def _process_admin_metadata(logger: logging.Logger, admin_keys: AdministrationKe
     for record in records:
         admin_meta = get_admin(keys=admin_keys, record=record)
         if admin_meta is None:
-            msg = "Record must have administration metadata."
+            msg = "Zap records must have administration metadata."
             logger.error(msg)
             raise ValueError(msg) from None
 
         gitlab_issues = _get_gitlab_issues(logger, record)
         if gitlab_issues:
             logger.info(
-                f"GitLab issues in identifiers, setting in administrative record for '{record.file_identifier}'"
+                f"GitLab issues in identification identifiers, moving to admin metadata for '{record.file_identifier}'"
             )
             admin_meta.gitlab_issues = gitlab_issues
 
@@ -345,7 +345,7 @@ def _process_sheet_number(logger: logging.Logger, records: list[Record]) -> None
         kv = get_kv(record)
         sheet_number = kv.get("sheet_number", None)
         if not sheet_number:
-            logger.info(f"Sheet number not found in KV for record [{record.file_identifier}], skipping.")
+            logger.debug(f"Sheet number not found in KV for record [{record.file_identifier}], skipping.")
             continue
 
         pop_sheet_number = False
@@ -399,8 +399,8 @@ def parse_zap_records(
     The V2 discovery profile supports additional hierarchy levels the V1 schema rejects but which may be manually set
     in records after exporting from Zap ⚡, preventing their use. The catalogue will reject the V1 profile.
 
-    This wrapper loads records without profile validation first, upgrades them to the V2 schema, adds minimal
-    administration metadata, then calls the normal `parse_records()` logic.
+    This wrapper loads records without profile validation, upgrades them to the V2 schema, adds minimal administration
+    metadata, then calls the normal `parse_records()` logic to validate records as normal.
     """
     record_paths = parse_records(
         logger=logger, search_path=input_path, validate_profiles=False, glob_pattern="zap-*.json"
@@ -413,13 +413,7 @@ def parse_zap_records(
             raise ValueError(msg) from None
         admin = AdministrationMetadata(id=record.file_identifier)
         set_admin(keys=admin_keys, record=record, admin_meta=admin)
-        add_conformance = True
-        for dc in record.data_quality.domain_consistency:
-            if dc.specification.href == MAGIC_ADMINISTRATION_V1.specification.href:
-                add_conformance = False
-                break
-        if add_conformance:
-            record.data_quality.domain_consistency.append(MAGIC_ADMINISTRATION_V1)
+        record.data_quality.domain_consistency.ensure(MAGIC_ADMINISTRATION_V1)
 
         up = RecordUpgrade(record=record, original_sha1=original_record.sha1)
         up.upgrade(logger=logger, keys=admin_keys)

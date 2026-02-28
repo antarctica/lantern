@@ -20,6 +20,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 
 * Improving release issue template to include post-deployment resources clean-up
 * Improving MAGIC base record preset
+* Refactoring test records to use base record presets
 
 ## [0.5.0] - 2026-02-27 [!BREAKING]
 

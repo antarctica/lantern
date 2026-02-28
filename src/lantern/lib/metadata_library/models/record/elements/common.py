@@ -149,7 +149,7 @@ class Contacts(list[Contact]):
     """
     Contacts.
 
-    Wrapper around a list of Contact items with additional methods for filtering/selecting items.
+    Wrapper around a list of Contact items with additional methods for filtering and managing items.
 
     Schema definition: contacts [1]
     ISO element: gmd:CI_ResponsibleParty [2]
@@ -193,6 +193,31 @@ class Contacts(list[Contact]):
         """Filter contacts by role(s)."""
         roles = [roles] if isinstance(roles, ContactRoleCode) else roles
         return Contacts([contact for contact in self if any(role in contact.role for role in roles)])
+
+    def ensure(self, contact: Contact) -> None:
+        """
+        Add contact without creating duplicates.
+
+        Handles cases where:
+        - a contact already exists with a superset of roles (no changed needed)
+        - a contact already exists with a distinct sets of roles (distinct roles added to existing contact)
+        """
+        if contact in self:
+            # skip exact match
+            return
+
+        for c in self:
+            if c.eq_contains_roles(contact):
+                # skip with overlapping roles
+                return
+
+        for i, c in enumerate(self):
+            if c.eq_no_roles(contact):
+                # append to existing contact with non-overlapping roles
+                self[i].role = self[i].role.union(contact.role)
+                return
+
+        self.append(contact)
 
 
 @dataclass(kw_only=True)
@@ -369,7 +394,7 @@ class Identifiers(list[Identifier]):
     """
     Identifiers.
 
-    Wrapper around a list of Identifier items with additional methods for filtering/selecting items.
+    Wrapper around a list of Identifier items with additional methods for filtering/managing items.
 
     Schema definition: identifiers [1]
     ISO element: gmd:MD_Identifier [2]
@@ -411,6 +436,14 @@ class Identifiers(list[Identifier]):
     def filter(self, namespace: str) -> "Identifiers":
         """Filter identifiers by namespace."""
         return Identifiers([identifier for identifier in self if identifier.namespace == namespace])
+
+    def ensure(self, identifier: Identifier) -> None:
+        """Add identifier without creating duplicates."""
+        if identifier in self:
+            # skip exact match
+            return
+
+        self.append(identifier)
 
 
 @dataclass(kw_only=True)

@@ -24,7 +24,12 @@ from lantern.lib.metadata_library.models.record.elements.common import (
     Maintenance,
     OnlineResource,
 )
-from lantern.lib.metadata_library.models.record.elements.data_quality import DataQuality, DomainConsistency, Lineage
+from lantern.lib.metadata_library.models.record.elements.data_quality import (
+    DataQuality,
+    DomainConsistencies,
+    DomainConsistency,
+    Lineage,
+)
 from lantern.lib.metadata_library.models.record.elements.identification import (
     BoundingBox,
     Extent,
@@ -212,45 +217,47 @@ class TestRecord:
         ),
         data_quality=DataQuality(
             lineage=Lineage(statement="x"),
-            domain_consistency=[
-                DomainConsistency(
-                    specification=Citation(
-                        title="British Antarctic Survey (BAS) Mapping and Geographic Information Centre (MAGIC) Discovery Metadata Profile",
-                        href="https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery-v1/",
-                        dates=Dates(publication=Date(date=date(2024, 11, 1))),
-                        edition="1",
-                        contacts=Contacts(
-                            [
-                                Contact(
-                                    organisation=ContactIdentity(
-                                        name="Mapping and Geographic Information Centre, British Antarctic Survey",
-                                        href="https://ror.org/01rhff309",
-                                        title="ror",
-                                    ),
-                                    phone="+44 (0)1223 221400",
-                                    email="magic@bas.ac.uk",
-                                    address=Address(
-                                        delivery_point="British Antarctic Survey, High Cross, Madingley Road",
-                                        city="Cambridge",
-                                        administrative_area="Cambridgeshire",
-                                        postal_code="CB3 0ET",
-                                        country="United Kingdom",
-                                    ),
-                                    online_resource=OnlineResource(
-                                        href="https://www.bas.ac.uk/teams/magic",
-                                        title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-                                        description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
-                                        function=OnlineResourceFunctionCode.INFORMATION,
-                                    ),
-                                    role={ContactRoleCode.PUBLISHER},
-                                )
-                            ]
+            domain_consistency=DomainConsistencies(
+                [
+                    DomainConsistency(
+                        specification=Citation(
+                            title="British Antarctic Survey (BAS) Mapping and Geographic Information Centre (MAGIC) Discovery Metadata Profile",
+                            href="https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery-v1/",
+                            dates=Dates(publication=Date(date=date(2024, 11, 1))),
+                            edition="1",
+                            contacts=Contacts(
+                                [
+                                    Contact(
+                                        organisation=ContactIdentity(
+                                            name="Mapping and Geographic Information Centre, British Antarctic Survey",
+                                            href="https://ror.org/01rhff309",
+                                            title="ror",
+                                        ),
+                                        phone="+44 (0)1223 221400",
+                                        email="magic@bas.ac.uk",
+                                        address=Address(
+                                            delivery_point="British Antarctic Survey, High Cross, Madingley Road",
+                                            city="Cambridge",
+                                            administrative_area="Cambridgeshire",
+                                            postal_code="CB3 0ET",
+                                            country="United Kingdom",
+                                        ),
+                                        online_resource=OnlineResource(
+                                            href="https://www.bas.ac.uk/teams/magic",
+                                            title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
+                                            description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
+                                            function=OnlineResourceFunctionCode.INFORMATION,
+                                        ),
+                                        role={ContactRoleCode.PUBLISHER},
+                                    )
+                                ]
+                            ),
                         ),
-                    ),
-                    explanation="Resource within scope of British Antarctic Survey (BAS) Mapping and Geographic Information Centre (MAGIC) Discovery Metadata Profile.",
-                    result=True,
-                )
-            ],
+                        explanation="Resource within scope of British Antarctic Survey (BAS) Mapping and Geographic Information Centre (MAGIC) Discovery Metadata Profile.",
+                        result=True,
+                    )
+                ]
+            ),
         ),
     )
 
@@ -270,7 +277,7 @@ class TestRecord:
             supplemental_information="...",
         ),
         data_quality=DataQuality(
-            domain_consistency=[MAGIC_ADMINISTRATION_V1],
+            domain_consistency=DomainConsistencies([MAGIC_ADMINISTRATION_V1]),
         ),
     )
 
@@ -456,33 +463,35 @@ class TestRecord:
             (DataQuality(), DataQuality()),
             # unrelated properties not changed
             (
-                DataQuality(domain_consistency=[MAGIC_ADMINISTRATION_V1], lineage=Lineage(statement="x")),
+                DataQuality(
+                    domain_consistency=DomainConsistencies([MAGIC_ADMINISTRATION_V1]), lineage=Lineage(statement="x")
+                ),
                 DataQuality(lineage=Lineage(statement="x")),
             ),
             # unrelated conformance properties not changed
             (
-                DataQuality(domain_consistency=[MAGIC_DISCOVERY_V2]),
-                DataQuality(domain_consistency=[MAGIC_DISCOVERY_V2]),
+                DataQuality(domain_consistency=DomainConsistencies([MAGIC_DISCOVERY_V2])),
+                DataQuality(domain_consistency=DomainConsistencies([MAGIC_DISCOVERY_V2])),
             ),
             # conformance properties without specification href not changed
             (
-                DataQuality(domain_consistency=[simple_consistency]),
-                DataQuality(domain_consistency=[simple_consistency]),
+                DataQuality(domain_consistency=DomainConsistencies([simple_consistency])),
+                DataQuality(domain_consistency=DomainConsistencies([simple_consistency])),
             ),
             # removes target conformance
             (
-                DataQuality(domain_consistency=[MAGIC_ADMINISTRATION_V1]),
+                DataQuality(domain_consistency=DomainConsistencies([MAGIC_ADMINISTRATION_V1])),
                 DataQuality(),
             ),
             # removes target conformance (any version)
             (
-                DataQuality(domain_consistency=[fake_admin_version]),
+                DataQuality(domain_consistency=DomainConsistencies([fake_admin_version])),
                 DataQuality(),
             ),
             # preserves unrelated conformance
             (
-                DataQuality(domain_consistency=[MAGIC_DISCOVERY_V2, MAGIC_ADMINISTRATION_V1]),
-                DataQuality(domain_consistency=[MAGIC_DISCOVERY_V2]),
+                DataQuality(domain_consistency=DomainConsistencies([MAGIC_DISCOVERY_V2, MAGIC_ADMINISTRATION_V1])),
+                DataQuality(domain_consistency=DomainConsistencies([MAGIC_DISCOVERY_V2])),
             ),
         ],
     )
@@ -630,7 +639,7 @@ class TestRecord:
     def test_validate_min_magic_discovery_v1_alt(self):
         """Can validate a valid record using the MAGIC Discovery profile (v1, replacement href)."""
         record = deepcopy(self.magic_discovery_v1_valid)
-        record.data_quality.domain_consistency = [MAGIC_DISCOVERY_V1]
+        record.data_quality.domain_consistency = DomainConsistencies([MAGIC_DISCOVERY_V1])
 
         assert record._profile_schemas == [RecordSchema.MAGIC_DISCO_V1]
         assert record.validate() is None
@@ -642,7 +651,7 @@ class TestRecord:
         record.identification.contacts.append(
             Contact(organisation=ContactIdentity(name="UKRI"), role={ContactRoleCode.RIGHTS_HOLDER})
         )
-        record.data_quality.domain_consistency = [MAGIC_DISCOVERY_V2]
+        record.data_quality.domain_consistency = DomainConsistencies([MAGIC_DISCOVERY_V2])
 
         assert record._profile_schemas == [RecordSchema.MAGIC_DISCO_V2]
         assert record.validate() is None
@@ -662,7 +671,9 @@ class TestRecord:
 
     def test_validate_invalid_profile(self, fx_lib_record_model_min_iso: Record):
         """Can't validate a record that does not comply with a schema inferred from a domain consistency element."""
-        fx_lib_record_model_min_iso.data_quality = DataQuality(domain_consistency=[MAGIC_DISCOVERY_V2])
+        fx_lib_record_model_min_iso.data_quality = DataQuality(
+            domain_consistency=DomainConsistencies([MAGIC_DISCOVERY_V2])
+        )
 
         with pytest.raises(RecordInvalidError):
             fx_lib_record_model_min_iso.validate()
@@ -674,7 +685,9 @@ class TestRecord:
 
     def test_validate_ignore_profiles(self, fx_lib_record_model_min_iso: Record):
         """Can validate a record that would not normally comply because of a schema indicated via domain consistency."""
-        fx_lib_record_model_min_iso.data_quality = DataQuality(domain_consistency=[MAGIC_DISCOVERY_V2])
+        fx_lib_record_model_min_iso.data_quality = DataQuality(
+            domain_consistency=DomainConsistencies([MAGIC_DISCOVERY_V2])
+        )
         fx_lib_record_model_min_iso.validate(use_profiles=False)
 
     @pytest.mark.parametrize(

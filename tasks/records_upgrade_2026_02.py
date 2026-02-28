@@ -7,11 +7,11 @@ from pathlib import Path
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata, Permission
 from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 from tasks._config import ExtraConfig
-from tasks._record_utils import append_role_to_contact, dump_records, init
+from tasks._record_utils import dump_records, init
 from tasks.keys_check import decode as jwe_decode
 
 from lantern.lib.metadata_library.models.record.elements.common import Address, Contact, ContactIdentity, OnlineResource
-from lantern.lib.metadata_library.models.record.elements.data_quality import DomainConsistency
+from lantern.lib.metadata_library.models.record.elements.data_quality import DomainConsistencies
 from lantern.lib.metadata_library.models.record.enums import (
     ConstraintTypeCode,
     ContactRoleCode,
@@ -106,25 +106,15 @@ class RecordUpgrade:
         msg = "Permission not mapped, aborting as a precaution."
         raise NotImplementedError(msg) from None
 
-    def _get_domain_conformance(self, href: str) -> DomainConsistency | None:
-        """Get a domain conformance identified by href if it exists."""
-        for dc in self.record.data_quality.domain_consistency:
-            if dc.specification.href == href:
-                return dc
-        return None
+    def _remove_domain_conformance_href(self, href: str) -> None:
+        """
+        Filter out a domain conformance identified by href if it exists.
 
-    def _add_domain_conformance(self, conformance: DomainConsistency) -> None:
-        """Add a domain conformance identified by href if needed."""
-        for dc in self.record.data_quality.domain_consistency:
-            if dc.specification.href == conformance.specification.href:
-                return
-        self.record.data_quality.domain_consistency.append(conformance)
-
-    def _remove_domain_conformance(self, href: str) -> None:
-        """Filter out a domain conformance identified by href if it exists."""
-        self.record.data_quality.domain_consistency = [
-            dc for dc in self.record.data_quality.domain_consistency if dc.specification.href != href
-        ]
+        Not going to upstream.
+        """
+        self.record.data_quality.domain_consistency = DomainConsistencies(
+            [dc for dc in self.record.data_quality.domain_consistency if dc.specification.href != href]
+        )
 
     def _upgrade_admin(self, logger: logging.Logger, keys: AdministrationKeys) -> None:
         """Upgrade administration metadata to final v1 profile."""
@@ -150,7 +140,7 @@ class RecordUpgrade:
             raise RuntimeError(msg)
 
         set_admin(keys=keys, record=self.record, admin_meta=admin)
-        self._add_domain_conformance(MAGIC_ADMINISTRATION_V1)
+        self.record.data_quality.domain_consistency.ensure(MAGIC_ADMINISTRATION_V1)
         self.changes.append("Administration metadata upgraded to V1 final content/encoding.")
 
     def _add_rights_holder(self) -> None:
@@ -161,7 +151,9 @@ class RecordUpgrade:
         scar_name = "Standing Committee on Antarctic Research"
         sponsors = self.record.identification.contacts.filter(roles=ContactRoleCode.SPONSOR)
         if len(sponsors) == 1 and sponsors[0].organisation and sponsors[0].organisation.name == scar_name:
-            append_role_to_contact(record=self.record, name=scar_name, role=ContactRoleCode.RIGHTS_HOLDER)
+            sponsor = sponsors[0]
+            sponsor.role.add(ContactRoleCode.RIGHTS_HOLDER)
+            self.record.identification.contacts.ensure(sponsor)
             self.changes.append("Added rights holder role to SCAR contact.")
             return
         self.record.identification.contacts.append(UKRI_RIGHTS_HOLDER)
@@ -190,7 +182,7 @@ class RecordUpgrade:
             logger.debug(f"[{self.record.file_identifier}] fix discovery v2: not applicable - skipping.")
             return
         logger.debug(f"[{self.record.file_identifier}] fix discovery v2: fixing early v2 conformance.")
-        self._remove_domain_conformance(href=MAGIC_DISCOVERY_V2.specification.href)  # ty:ignore[invalid-argument-type]
+        self.record.data_quality.domain_consistency.remove(MAGIC_DISCOVERY_V2)
 
     def _fix_dates(self) -> None:
         """Fix mising publication and released dates required by discovery profile v2."""
@@ -205,7 +197,7 @@ class RecordUpgrade:
 
     def _upgrade_discovery(self, logger: logging.Logger) -> None:
         """Upgrade to discovery profile v2."""
-        if self._get_domain_conformance(href=MAGIC_DISCOVERY_V2.specification.href):  # ty:ignore[invalid-argument-type]
+        if self.record.data_quality.domain_consistency.filter(href=MAGIC_DISCOVERY_V2.specification.href):  # ty:ignore[invalid-argument-type]
             logger.debug(f"[{self.record.file_identifier}] discovery v2: already conforms - skipping.")
             return
 
@@ -216,8 +208,8 @@ class RecordUpgrade:
             "https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery-v1/",
             "https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery/v1/",
         ]:
-            self._remove_domain_conformance(href)
-        self._add_domain_conformance(MAGIC_DISCOVERY_V2)
+            self._remove_domain_conformance_href(href)
+        self.record.data_quality.domain_consistency.ensure(MAGIC_DISCOVERY_V2)
         self.changes.append("Discovery metadata upgraded to V2.")
 
     def _change_product_type(self, logger: logging.Logger) -> None:
@@ -302,7 +294,7 @@ class RecordUpgrade:
         if set(href_order) != set(hrefs):
             logger.debug(f"[{self.record.file_identifier}] profiles order: no or not applicable profiles - skipping.")
             return
-        self.record.data_quality.domain_consistency = [MAGIC_DISCOVERY_V2, MAGIC_ADMINISTRATION_V1]
+        self.record.data_quality.domain_consistency = DomainConsistencies([MAGIC_DISCOVERY_V2, MAGIC_ADMINISTRATION_V1])
 
     def _fix_scar(self, logger: logging.Logger) -> None:
         """Fix misspelt SCAR organisation name if needed."""

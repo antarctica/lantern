@@ -35,7 +35,7 @@ from lantern.lib.metadata_library.models.record.utils.kv import set_kv
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from tests.resources.records.utils import make_record, relate_products
 
-# A trio of records to demonstrate a published map with two, mostly similar, sides.
+# A trio of open-access records for a paper map product with two, mostly similar, sides.
 
 ids = {
     "c": "53ed9f6a-2d68-46c2-b5c5-f15422aaf5b2",
@@ -95,6 +95,7 @@ distribution = [
 ]
 
 combined = make_record(
+    open_access=True,
     file_identifier=ids["c"],
     hierarchy_level=HierarchyLevelCode.PAPER_MAP_PRODUCT,
     title="Test Resource - Published map (X and Y)",
@@ -164,6 +165,7 @@ combined.identification.extents = Extents(
 )
 
 side_a = make_record(
+    open_access=True,
     file_identifier=ids["a"],
     hierarchy_level=HierarchyLevelCode.PRODUCT,
     title="Test Resource - Published map (Side X)",
@@ -222,6 +224,7 @@ side_a.identification.extents = Extents(
 )
 
 side_b = make_record(
+    open_access=True,
     file_identifier=ids["b"],
     hierarchy_level=HierarchyLevelCode.PRODUCT,
     title="Test Resource - Published map (Side Y)",

@@ -45,7 +45,7 @@ from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from tests.resources.admin_keys import test_keys
 from tests.resources.records.utils import make_record, relate_products
 
-# A record for an ItemCatalogue instance with all supported fields for products.
+# An open-access record for a product with all supported fields.
 
 abstract = """
 I spent so much time making sweet jam in the kitchen that it's hard to hear anything over the clatter of the
@@ -78,6 +78,7 @@ the same. Well excuse me, Judge Reinhold!
 """
 
 record = make_record(
+    open_access=True,
     file_identifier="30825673-6276-4e5a-8a97-f97f2094cd25",
     hierarchy_level=HierarchyLevelCode.PRODUCT,
     title="Test Resource - Product with all supported fields",

@@ -162,7 +162,12 @@ class RsyncUtils:
 
 
 def init_gitlab_store(
-    logger: logging.Logger, config: Config, branch: str | None = None, cached: bool = False, frozen: bool = False
+    logger: logging.Logger,
+    config: Config,
+    branch: str | None = None,
+    path: Path | None = None,
+    cached: bool = False,
+    frozen: bool = False,
 ) -> GitLabStore | GitLabCachedStore:
     """
     Initialise a GitLab store from app Config.
@@ -185,7 +190,7 @@ def init_gitlab_store(
         source=source,
         access_token=config.STORE_GITLAB_TOKEN,
         parallel_jobs=config.PARALLEL_JOBS,
-        cache_dir=config.STORE_GITLAB_CACHE_PATH,
+        cache_dir=path if path else config.STORE_GITLAB_CACHE_PATH,
         frozen=frozen,
     )
 

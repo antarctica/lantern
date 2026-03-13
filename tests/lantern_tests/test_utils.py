@@ -197,9 +197,12 @@ class TestRsyncUtils:
 class TestUtils:
     """Test app utils not tested elsewhere."""
 
+    @pytest.mark.parametrize("path", [True, False])
     @pytest.mark.parametrize("cached", [True, False])
     @pytest.mark.parametrize("frozen", [True, False])
-    def test_gitlab_store(self, fx_logger: logging.Logger, fx_config: Config, cached: bool, frozen: bool) -> None:
+    def test_gitlab_store(
+        self, fx_logger: logging.Logger, fx_config: Config, path: bool, cached: bool, frozen: bool
+    ) -> None:
         """
         Can init GitLab store.
 
@@ -209,12 +212,18 @@ class TestUtils:
             with pytest.raises(ValueError, match=r"Cannot create a frozen GitLab store without caching."):
                 init_gitlab_store(logger=fx_logger, config=fx_config, cached=cached, frozen=frozen)
             return
+        cache_dir = fx_config.STORE_GITLAB_CACHE_PATH
+        if path:
+            with TemporaryDirectory() as tmp_path:
+                cache_dir = Path(tmp_path)
+        cache_path = cache_dir if path else None
 
-        store = init_gitlab_store(logger=fx_logger, config=fx_config, cached=cached, frozen=frozen)
+        store = init_gitlab_store(logger=fx_logger, config=fx_config, path=cache_path, cached=cached, frozen=frozen)
         assert isinstance(store, GitLabStore)
         assert isinstance(store, GitLabCachedStore) == cached
         if isinstance(store, GitLabCachedStore):
             assert store.frozen == frozen
+            assert store._cache._cache_path.parent == cache_dir
 
     def test_s3_client(self, fx_logger: logging.Logger, fx_config: Config):
         """

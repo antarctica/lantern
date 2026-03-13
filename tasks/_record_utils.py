@@ -1,8 +1,11 @@
+import functools
 import json
 import logging
 import re
+import subprocess
 import sys
-from collections.abc import Generator, Mapping, Sequence
+from collections.abc import Callable, Generator, Mapping, Sequence
+from datetime import UTC, datetime
 from pathlib import Path
 
 import inquirer
@@ -29,10 +32,15 @@ def init_logging(config: Config) -> logging.Logger:
 
 
 def init_store(
-    logger: logging.Logger, config: Config, branch: str | None = None, cached: bool = False, frozen: bool = False
+    logger: logging.Logger,
+    config: Config,
+    path: Path | None = None,
+    branch: str | None = None,
+    cached: bool = False,
+    frozen: bool = False,
 ) -> GitLabStore | GitLabCachedStore:
     """Initialise store."""
-    return init_gitlab_store(logger=logger, config=config, branch=branch, cached=cached, frozen=frozen)
+    return init_gitlab_store(logger=logger, config=config, path=path, branch=branch, cached=cached, frozen=frozen)
 
 
 def init_s3(config: Config) -> S3Client:  # ty: ignore[invalid-type-form]
@@ -244,3 +252,45 @@ def load_record(logger: logging.Logger, ref: tuple[str | None, Path | None], sto
         with ref[1].open(mode="r") as f:
             return Record.loads(json.load(f))
     return get_record(logger=logger, store=store, identifier=ref[0])
+
+
+def ping_host(host: str) -> None:
+    try:
+        subprocess.run(  # noqa: S603
+            ["ssh", host, "echo x"],  # noqa: S607
+            check=True,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.STDOUT,
+        )
+    except subprocess.CalledProcessError as e:
+        msg = f"Host unreachable: {host}"
+        raise RuntimeError(msg) from e
+
+
+def time_task(label: str) -> Callable:
+    """Time a task and log duration."""
+
+    def decorator(func: Callable) -> Callable:
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):  # noqa: ANN002, ANN003, ANN202,
+            start = datetime.now(tz=UTC)
+            result = func(*args, **kwargs)
+            end = datetime.now(tz=UTC)
+            print(f"{label} took {round((end - start).total_seconds())} seconds")
+            return result
+
+        return wrapper
+
+    return decorator
+
+
+def confirm(logger: logging.Logger, message: str) -> None:
+    """Confirm user wants to proceed."""
+    answers = inquirer.prompt(
+        [
+            inquirer.Confirm(name="confirm", message=message, default=True),
+        ]
+    )
+    if not answers["confirm"]:
+        logger.info("Cancelled by the user.")
+        sys.exit(1)

@@ -153,56 +153,88 @@ The `admin-record` task will:
 
 ## Interactive record publishing workflow
 
-A semi-automated workflow is available to [Import](#import-records), [Build](#build-static-site) and
-[Verify](#verify-static-site) sets of [Manually Authored](#create-records) records using interactive prompts for
-required information.
+Semi-automated workflows with interactive prompts for required information are available to:
+
+- [Import](#import-records), [Build](#build-static-site) and [Verify](#verify-static-site) sets of
+  [Manually Authored](#create-records) records, creating a changeset (merge request) and publishing to the testing site
+- merge, [Build](#build-static-site) and [Verify](#verify-static-site) approved changesets, publishing to the live site
 
 > [!NOTE]
-> This workflow is intended as a convenience for the Business As Usual (BAU) process of publishing records from GitLab
-> issues. It will not fit all use-cases.
+> This workflow is intended as a convenience for the Business As Usual (BAU) process of publishing records. It will not
+> fit all use-cases and requires an associated GitLab issue.
 >
 > To publish records on a schedule, use the [Non-interactive Workflow](#non-interactive-record-publishing-workflow)
-> instead. For other use-cases, combine individual record related tasks as needed.
+> instead.
+>
+> For other use-cases, combine individual record related tasks as needed.
 
-To publish records in the testing catalogue:
+### Interactive record publishing workflow - testing
 
-1. copy record configurations as JSON files to the `import/` directory (see [Create Records](#create-records))
-1. run the `records-workflow` [Development Task](/docs/dev.md#development-tasks)
+To publish records to the testing catalogue:
+
+1. ensure a suitable GitLab issue exists to track publishing the records
+1. ensure JSON configurations for these records exist in the `import/` directory (see [Create Records](#create-records))
+1. run the `workflow-testing` [Development Task](/docs/dev.md#development-tasks)
 1. repeat this process (using the [`select-records`](#update-records) task to get the now existing records) until the
-   record author is happy for them to be published live
+   record author is happy to publish live (by approving the merge request for the related changeset)
 
 > [!NOTE]
-> The Lantern GitLab bot user MUST have at least reporter permissions to post comments on a tracking issue (if specified).
-> Project access SHOULD be defined via [Infrastructure as Code](/docs/infrastructure.md#infrastructure-as-code).
+> This workflow will comment on GitLab tracking issue when creating the changeset. The Lantern GitLab bot user MUST
+> have at least reporter permissions within the relevant project to do this. Project memberships SHOULD be defined via
+> [Infrastructure as Code](/docs/infrastructure.md#infrastructure-as-code).
 
-The `records-workflow` task calls and coordinates other tasks to:
+The `workflow-testing` task calls and coordinates other tasks to:
 
-1. process records authored in the Zap ⚡️editor (via the [`zap-records`](#import-records) task)
-1. prompt for an optional issue URL to use as a changeset identifier and branch name [1]
-1. commit new and/or updated records (via the [`import-records`](#import-records) task)
-1. create a merge request for the committed records if one does not exist for the changeset
+1. if used, process records for resources authored in the Zap ⚡️editor (via the [`zap-records`](#import-records) task)
+1. prompt for an issue URL to use as a changeset identifier and branch name
+   - ensure the selected issue URL is for publishing the record(s), rather than an issue for authoring [1]
+1. commit new and/or updated records (via the [`import-records`](#import-records) task) to the changeset branch
+1. if needed, create a merge request for the changeset branch, adding the record author as a reviewer
 1. publish committed records to the testing site (via the [`build-records`](#build-static-site) task)
 1. verify committed records in the testing site (via the [`verify-records`](#verify-static-site) task)
-1. if an issue was selected, post a comment listing the records changed, preview URLs and links to the merge request
+1. post a comment listing the records changed, preview URLs and links to the merge request
+1. if needed, post a comment on the issue with a link to the changeset merge request
 
 > [!NOTE]
-> As a precaution, the `records-workflow` [Development Task](/docs/dev.md#development-tasks) will not run if the
-> integration S3 bucket is selected.
+> As a precaution, the `workflow-testing` [Development Task](/docs/dev.md#development-tasks) will not run if:
+>
+> - the S3 bucket for the live site is selected
+> - if configured, the [Trusted Publishing](/docs/exporters.md#trusted-publishing) host is unavailable
 
-To publish records to the live catalogue:
-
-1. merge the relevant merge request for the changeset into `main`
-1. switch the `AWS_S3_BUCKET` config option to the production bucket
-1. run the `build-records` [Development Task](/docs/dev.md#development-tasks) with the publish option enabled
-1. switch the `AWS_S3_BUCKET` config option back to the integration bucket
-
-[1] If needed, ensure the selected issue URL is for publishing the record(s), rather than an issue for authoring.
+[1]
 
 For example, a Helpdesk issue may exist to track the request for a product, which is then set as a GitLab issue within
 its metadata record to provide context. When ready for publishing, a separate Mapping Coordination issue may be created.
 
-In this case, the Mapping Coordination issue should be used in this workflow (as an '< OTHER >' value), *not* the
+In this case, the Mapping Coordination issue SHOULD be used in this workflow (as an '< OTHER >' value), *not* the
 Helpdesk issue recorded in the record.
+
+### Interactive record publishing workflow - live
+
+To publish records to the live catalogue:
+
+1. ensure records have been published via the `workflow-testing` [Development Task](/docs/dev.md#development-tasks)
+1. ensure the record author has approved the merge request for the changeset to be published
+1. remove the draft status for the merge request
+1. switch the `AWS_S3_BUCKET` config option to the production bucket
+1. run the `workflow-live` [Development Task](/docs/dev.md#development-tasks)
+1. switch the `AWS_S3_BUCKET` config option back to the integration bucket
+
+The `workflow-live` task calls and coordinates other tasks to:
+
+1. prompt for the changeset (merge request) to confirm (merge)
+   1. the workflow will check the merge request is not a draft and has approval
+1. merge the changeset into main
+1. publish changeset records to the live site (via the [`build-records`](#build-static-site) task)
+1. verify changeset records in the live site (via the [`verify-records`](#verify-static-site) task)
+1. post a comment listing the item and alias URLs for published records in the changeset issue
+
+> [!NOTE]
+> As a precaution, the `workflow-live` [Development Task](/docs/dev.md#development-tasks) will not run if:
+>
+> - the merge request is either a draft or not approved
+> - the S3 bucket for the testing site is selected
+> - if configured, the [Trusted Publishing](/docs/exporters.md#trusted-publishing) host is unavailable
 
 ## Non-interactive record publishing workflow
 

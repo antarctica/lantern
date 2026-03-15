@@ -340,9 +340,9 @@ resource "aws_iam_group_policy_attachment" "local_dev" {
 resource "gitlab_project" "records_store" {
   name             = "🏮 Lantern records store"
   path             = "lantern-records-exp"
-  namespace_id     = 22 # felnne
-  description      = "Records store for Lantern experimental catalogue. This project is managed using Infrastructure as Code."
-  visibility_level = "internal"
+  namespace_id     = 31 # magic
+  description      = "Metadata records store for the Lantern data catalogue. This project is managed by IaC via the Lantern project."
+  visibility_level = "private"
 
   # disable everything except repository and merge-requests
   auto_devops_enabled                  = false

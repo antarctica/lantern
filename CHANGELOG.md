@@ -21,6 +21,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * `ItemArcGis` model derived from the Assets Tracking Service
 * 'strip empty strings' option in clean dict/list utils
 * Map ordering guide
+* Terraform format linting in CI
 
 ### Fixed
 

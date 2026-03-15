@@ -67,6 +67,7 @@ def export_test_site(export_path: Path) -> None:
         parallel_jobs=1,
         admin_meta_keys=test_keys(),
         trusted=True,
+        trusted_path=export_path,
     )
 
     exporter = SiteExporter(

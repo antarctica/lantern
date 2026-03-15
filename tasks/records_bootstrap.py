@@ -32,12 +32,7 @@ def _dump_records(logger: logging.Logger, file_identifiers: list[str], store: St
 
 def _confirm(logger: logging.Logger) -> None:
     """Confirm user wants to proceed."""
-    answers = inquirer.prompt(
-        [
-            inquirer.Confirm(name="confirm", message="Ready?", default=True),
-        ]
-    )
-    if not answers["confirm"]:
+    if not inquirer.confirm(message="Ready?", default=True):
         logger.info("Cancelled by the user.")
         sys.exit(1)
 

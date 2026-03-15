@@ -106,123 +106,6 @@ For example:
 - `Item.resource_access` returns a local access type enumeration value by parsing any resource permissions set in
   optional [Administrative Metadata](#item-administrative-metadata)
 
-### Catalogue items
-
-Catalogue Items (`lantern.models.item.catalogue.ItemCatalogue`) are tightly coupled to the Data Catalogue and its user
-interface. Features include:
-
-- properties organised under classes for each UI tab (including logic to determine whether a tab should be shown)
-- local enums mapping Record properties to UI values for improved readability
-- a `render()` method to output an HTML page for each item
-- classes (`lantern.models.item.catalogue.distributions`) for processing distribution options for the catalogue UI
-- an item summary implementation (`lantern.models.item.catalogue.elements.ItemSummaryCatalogue`)
-
-#### Catalogue item limitations
-
-> [!WARNING]
-> This section is Work in Progress (WIP) and may not be complete/accurate.
-
-Supported properties (references not normative or exhaustive):
-
-- `file_identifier`
-- `file_revision`
-- `hierarchy_level`
-- `metadata.date_stamp`
-- `metadata.metadata_standard.name`
-- `metadata.metadata_standard.version`
-- `metadata.constraints[type='usage', restriction_code='licence']` (only where a `href` is included)
-- `reference_system_info`
-- `identification.citation.title`
-- `identification.citation.dates`
-- `identification.citation.edition`
-- `identification.citation.contacts` ('author' and single 'point of contact' roles only, excludes `contact.position`)
-- `identification.citation.series`
-- `identification.citation.identifiers[namespace='doi']`
-- `identification.citation.identifiers[namespace='isbn']`
-- `identification.citation.identifiers[namespace='alias.data.bas.ac.uk']`
-- `identification.abstract`
-- `identification.aggregations` (only as below)
-  - 'part of' (items in collections)
-  - item and collection cross-references
-  - supersedes (not 'superseded by')
-  - 'one side of' (physical maps only)
-  - 'opposite side of' (physical maps only)
-- `identification.constraints[type='usage', restriction_code='licence']`
-- `identification.maintenance`
-- `identification.extent` (single bounding temporal and geographic bounding box extent only)
-- `identification.other_citation_details`
-- `identification.graphic_overviews` ('overview' image only)
-- `identification.spatial_resolution`
-- `identification.supplemental_information` ('physical_size_*' and 'admin_meta' KV's only)
-- `data_quality.lineage.statement`
-- `data_quality.domain_consistency`
-- `distribution.distributor.format` (`format` and `href` only)
-- `distribution.distributor.transfer_option` (except `online_resource.protocol`)
-- [Administrative Metadata](#item-administrative-metadata) (in trusted contexts only)
-
-Unsupported properties (references not normative or exhaustive):
-
-- `identification.purpose` (except as used in ItemSummaries)
-- `identification.citation.identifiers` (except `'doi'`, `'isbn'`, `'alias.data.bas.ac.uk'` namespaces)
-
-Intentionally omitted properties (references not normative or exhaustive):
-
-- `*.character_set` (not useful to end-users, present in underlying record)
-- `*.language` (not useful to end-users, present in underlying record)
-- `*.online_resource.protocol` (not useful to end-users, present in underlying record)
-- `*.constraints[type='access']` (not trustworthy, see [Item Access](#item-access-levels))
-- `distribution.distributor` (not useful to end-users)
-
-### Special catalogue items
-
-To support more complex use-cases `ItemCatalogue` subclasses can be used to implement special handling for items.
-
-Special catalogue items classes MUST implement a public `matches` class method returning a boolean indicating whether
-the special class applies to a given Record.
-
-Suitable logic needs to be implemented where Records are processed into items to call these `matches` methods to
-determine which Catalogue Item class or subclass to use.
-
-#### Physical map items
-
-Physical maps are represented by a trio of Records, one per side plus a third Record for the overall map itself.
-Aggregations are used to associate the records together with the local 'physicalReverseOf' aggregation association
-(`lantern.lib.metadata_library.models.record.enums.AggregationAssociationCode.PHYSICAL_REVERSE_OF`) and local 'paperMap'
-aggregation initiative (`lantern.lib.metadata_library.models.record.enums.AggregationInitiativeCode.PAPER_MAP`).
-
-Records for each side processed as typical Catalogue Items. The overall Record is processed by the
-`lantern.models.item.catalogue.special.physical_map.ItemCataloguePhysicalMap` class, distinguished by:
-
-- using the local 'paperMapProduct' hierarchy level
-  (`lantern.lib.metadata_library.models.record.enums.HierarchyLevelCode.PAPER_MAP_PRODUCT`)
-- including at least one aggregation for a map side ('isComposedOf' association, 'paperMap' initiative)
-
-The physical map class includes overloaded versions of some tabs to overload selected properties that should aggregate
-values from each side (for example spatial resolution (scale)).
-
-A general convention determines whether a single common value is shown, or multiple values labelled for each side:
-
-- if the values in each side are the same they are ignored and the value from the overall Record is shown
-- if different, values for each side are shown - the value from the overall Record is ignored
-
-### Public website search items
-
-Public website search items (`lantern.models.item.public_website.ItemWebsiteSearch`) are used to include items in the
-[BAS Public Website](https://www.bas.ac.uk) global search. Search items are limited to the properties needed to
-describe an item within these search results. A sync API aggregates these search items across the different catalogues
-used in BAS for harvesting by the Public Website.
-
-This sync API defines:
-
-- a JSON Schema for the content of these items
-- additional properties required to identify the source system of each item, whether it should be marked as deleted, etc.
-
-This schema and requirements are implicitly implemented within this class. Other features include:
-
-- selecting the most relevant date for the item (revision > publication > creation)
-- selecting the most suitable description for the item (purpose > abstract)
-- determining whether an item should be marked as removed/deleted (based item maintenance info)
-
 ### Item super-types
 
 Item types (set by their underlying Record's `hierarchy_level` property) can be sorted into two broad 'super-types':
@@ -276,40 +159,27 @@ JSON Web Keys (JWKs) for decrypting JWEs and verifying the signature of JWTs sho
 
 > [!TIP]
 > These keys can be accessed from [Export Metadata](#export-metadata) if created from a Config object.
-## ArcGIS items
 
 ### Item access levels
-ArcGIS items (`lantern.models.item.arcgis.ItemArcGIS`) represent [Items](#items) as ArcGIS content. Features include:
 
 Access levels for each item are available via:
-- reflecting Item properties, such as summary, description, access permissions and licence constraints, etc. in ArcGIS
-  content items consistently
-- establishing a one-to-many relationship between an Item and ArcGIS content items via ArcGIS item
-  [Metadata](#arcgis-items-metadata)
 
 - `Item.admin_metadata_access` (who can view a description of the item)
 - `Item.admin_resource_access` (who can access the item itself, if applicable)
-Templates, stored in `src/lantern/resources/templates/_arcgis`, are used to:
 
 Both properties return a `lantern.models.item.base.enums.AccessLevel` enum value, determined by permissions within the
 [Administrative Metadata](#item-administrative-metadata).
 
 Both properties default to `AccessLevel.NONE`. To allow open access, include permissions equivalent to the
 `lantern.lib.metadata_library.models.record.presets.admin.OPEN_ACCESS` permission.
-- combine the record abstract, lineage and link to the catalogue item as the ArcGIS item description
-- format supported licences to look consistent with [Catalogue Items](#catalogue-items)
 
 <!-- pyml disable md028 -->
 > [!CAUTION]
 > The catalogue does not enforce metadata access permissions. They will always evaluate to open access (unrestricted).
-ArcGIS items require a [Record](#records) and an ArcGIS content item, represented by the
-[`lantern.lib.arcgis.gis.dataclasses.Item`](/docs/libraries.md#arcgis-items) class, to set ArcGIS specific
-properties, such the ArcGIS content `type` needed to represent Items as valid ArcGIS content items (via `.item()`).
 
 > [!WARNING]
 > External data access systems are responsible for enforcing any resource permissions that may apply. The catalogue
 > only indicates whether restrictions may apply at an informative level.
-The sharing level of ArcGIS items is set based on the [Item Access Level](#item-access-levels).
 
 > [!WARNING]
 > The catalogue does not consider access constraints set in `metadata.costraints` or `identification.constraints`, as
@@ -318,53 +188,197 @@ The sharing level of ArcGIS items is set based on the [Item Access Level](#item-
 > [!NOTE]
 > Access constraints SHOULD still be set for visibility to end users and for interoperability with other systems.
 <!-- pyml enable md028 -->
-> This logic does not take account of group based sharing options. Use with caution if this applies to an item.
 
 [Catalogue Items](#catalogue-items) simplify the `admin_resource_access` access level to a binary `restricted`
 property, returning and defaulting to true unless `Item.admin_access_level == AccessLevel.PUBLIC`.
-### ArcGIS items metadata
 
 Where restricted, [Item Templates](/docs/site.md#templates) display additional context in item summaries and
 the data tab (if applicable).
+
+## Catalogue items
+
+Catalogue Items (`lantern.models.item.catalogue.ItemCatalogue`) are tightly coupled to the Data Catalogue and its user
+interface. Features include:
+
+- properties organised under classes for each UI tab (including logic to determine whether a tab should be shown)
+- local enums mapping Record properties to UI values for improved readability
+- a `render()` method to output an HTML page for each item
+- classes (`lantern.models.item.catalogue.distributions`) for processing distribution options for the catalogue UI
+- an item summary implementation (`lantern.models.item.catalogue.elements.ItemSummaryCatalogue`)
+
+### Catalogue item limitations
+
+Supported properties (references not normative or exhaustive):
+
+- `file_identifier`
+- `file_revision`
+- `hierarchy_level`
+- `metadata.date_stamp`
+- `metadata.metadata_standard.name`
+- `metadata.metadata_standard.version`
+- `metadata.constraints[type='usage', restriction_code='licence']` (only where a `href` is included)
+- `reference_system_info`
+- `identification.citation.title`
+- `identification.citation.dates`
+- `identification.citation.edition`
+- `identification.citation.contacts` ('author' and single 'point of contact' roles only, excludes `contact.position`)
+- `identification.citation.series`
+- `identification.citation.identifiers[namespace='doi']`
+- `identification.citation.identifiers[namespace='isbn']`
+- `identification.citation.identifiers[namespace='alias.data.bas.ac.uk']`
+- `identification.abstract`
+- `identification.aggregations` (only as below)
+  - 'part of' (items in collections)
+  - item and collection cross-references
+  - supersedes (not 'superseded by')
+  - 'one side of' (physical maps only)
+  - 'opposite side of' (physical maps only)
+- `identification.constraints[type='usage', restriction_code='licence']`
+- `identification.maintenance`
+- `identification.extent` (single bounding temporal and geographic bounding box extent only)
+- `identification.other_citation_details`
+- `identification.graphic_overviews` ('overview' image only)
+- `identification.spatial_resolution`
+- `identification.supplemental_information` ('physical_size_*' and 'admin_meta' KV's only)
+- `data_quality.lineage.statement`
+- `data_quality.domain_consistency`
+- `distribution.distributor.format` (`format` and `href` only)
+- `distribution.distributor.transfer_option` (except `online_resource.protocol`)
+- [Administrative Metadata](#item-administrative-metadata) (in trusted contexts only)
+
+Unsupported properties (references not normative or exhaustive):
+
+- `identification.purpose` (except as used in ItemSummaries)
+- `identification.citation.identifiers` (except `'doi'`, `'isbn'`, `'alias.data.bas.ac.uk'` namespaces)
+
+Intentionally omitted properties (references not normative or exhaustive):
+
+- `*.character_set` (not useful to end-users, present in underlying record)
+- `*.language` (not useful to end-users, present in underlying record)
+- `*.online_resource.protocol` (not useful to end-users, present in underlying record)
+- `*.constraints[type='access']` (not trustworthy, see [Item Access](#item-access-levels))
+- `distribution.distributor` (not useful to end-users)
+
+### Catalogue items supported distribution options
+
+Implemented via classes in `lantern.models.item.catalogue.distributions` for:
+
+- services:
+  - ArcGIS Feature Layer/Service
+  - ArcGIS OGC API Features Layer/Service
+  - ArcGIS (Raster) Tile Layer/Service
+  - ArcGIS Vector Tile Layer/Service
+- file types:
+  - CSV
+  - Garmin FPL (aviation GPS data)
+  - OGC GeoPackage
+  - GeoJson
+  - GPX
+  - JPEG
+  - Mapbox Vector Tiles
+  - PDF (with optional geo-referencing)
+  - PNG
+  - Esri Shapefile
+- other special cases:
+  - BAS published maps purchasing options
+  - BAS SAN references
+
+## Special catalogue items
+
+To support more complex use-cases `ItemCatalogue` subclasses can be used to implement special handling for items.
+
+Special catalogue items classes MUST implement a public `matches` class method returning a boolean indicating whether
+the special class applies to a given Record.
+
+Suitable logic needs to be implemented where Records are processed into items to call these `matches` methods to
+determine which Catalogue Item class or subclass to use.
+
+### Physical map items
+
+Physical maps are represented by a trio of Records, one per side plus a third Record for the overall map itself.
+Aggregations are used to associate the records together with the local 'physicalReverseOf' aggregation association
+(`lantern.lib.metadata_library.models.record.enums.AggregationAssociationCode.PHYSICAL_REVERSE_OF`) and local 'paperMap'
+aggregation initiative (`lantern.lib.metadata_library.models.record.enums.AggregationInitiativeCode.PAPER_MAP`).
+
+Records for each side processed as typical Catalogue Items. The overall Record is processed by the
+`lantern.models.item.catalogue.special.physical_map.ItemCataloguePhysicalMap` class, distinguished by:
+
+- using the local 'paperMapProduct' hierarchy level
+  (`lantern.lib.metadata_library.models.record.enums.HierarchyLevelCode.PAPER_MAP_PRODUCT`)
+- including at least one aggregation for a map side ('isComposedOf' association, 'paperMap' initiative)
+
+The physical map class includes overloaded versions of some tabs to overload selected properties that should aggregate
+values from each side (for example spatial resolution (scale)).
+
+A general convention determines whether a single common value is shown, or multiple values labelled for each side:
+
+- if the values in each side are the same they are ignored and the value from the overall Record is shown
+- if different, values for each side are shown - the value from the overall Record is ignored
+
+## Public website search items
+
+Public website search items (`lantern.models.item.public_website.ItemWebsiteSearch`) are used to include items in the
+[BAS Public Website](https://www.bas.ac.uk) global search. Search items are limited to the properties needed to
+describe an item within these search results. A sync API aggregates these search items across the different catalogues
+used in BAS for harvesting by the Public Website.
+
+This sync API defines:
+
+- a JSON Schema for the content of these items
+- additional properties required to identify the source system of each item, whether it should be marked as deleted, etc.
+
+> [!TIP]
+> See the [Public Website Search Exporter](/docs/exporters.md#public-website-search-exporter) for more information
+> about the sync API.
+
+This schema and requirements are implicitly implemented within this class. Other features include:
+
+- selecting the most relevant date for the item (revision > publication > creation)
+- selecting the most suitable description for the item (purpose > abstract)
+- determining whether an item should be marked as removed/deleted (based item maintenance info)
+
+## ArcGIS items
+
+ArcGIS items (`lantern.models.item.arcgis.ItemArcGIS`) represent [Items](#items) as ArcGIS content. Features include:
+
+- reflecting Item properties, such as summary, description, access permissions and licence constraints, etc. in ArcGIS
+  content items consistently
+- establishing a one-to-many relationship between an Item and ArcGIS content items via ArcGIS item
+  [Metadata](#arcgis-items-metadata)
+
+Templates, stored in `src/lantern/resources/templates/_arcgis`, are used to:
+
+- combine the record abstract, lineage and link to the catalogue item as the ArcGIS item description
+- format supported licences to look consistent with [Catalogue Items](#catalogue-items)
+
+ArcGIS items require a [Record](#records) and an ArcGIS content item, represented by the
+[`lantern.lib.arcgis.gis.dataclasses.Item`](/docs/libraries.md#arcgis-items) class, to set ArcGIS specific
+properties, such the ArcGIS content `type` needed to represent Items as valid ArcGIS content items (via `.item()`).
+
+The sharing level of ArcGIS items is set based on the [Item Access Level](#item-access-levels).
+
+> [!WARNING]
+> This logic does not take account of group based sharing options. Use with caution if this applies to an item.
+
+### ArcGIS items metadata
+
 [ArcGIS Item Metadata](https://developers.arcgis.com/rest/users-groups-and-items/metadata-reference/#add-or-update-metadata)
 can store full metadata instances using a range of information models, including ISO 19115 (via the ISO 19139 encoding).
 
-### Item distribution options
 The ArcGIS Item class uses this feature to associate a catalogue resource with ArcGIS resources. This is implemented by
 storing the ISO file identifier, using the Esri vendor specific information model, as a one-way, one-to-many,
 child-parent relationship.
 
-Services:
-
-- ArcGIS Feature Layer/Service,
-- ArcGIS OGC API Features Layer/Service
-- ArcGIS Raster Tile
-- ArcGIS Vector Tile
-
-File types:
 > [!NOTE]
 > Whilst uni-directional, the inverse of this relationship (from parent to children, between catalogue resources to
 > ArcGIS resources) is effectively represented by ArcGIS layer distribution options within catalogue resources, which
 > link to the respective ArcGIS content items.
 
-- CSV
-- Garmin FPL (aviation GPS data)
-- OGC GeoPackage
-- GeoJson
-- GPX
-- JPEG
-- MapboxVectorTiles
-- PDF (with optional geo-referencing)
-- PNG
-- Esri Shapefile
 ### ArcGIS items limitations
 
-Special cases:
 > [!WARNING]
 > This section is Work in Progress (WIP) and may not be complete/accurate.
 
-- BAS published maps purchasing options
-- BAS SAN references
 - ArcGIS items are limited to the properties used in ArcGIS item pages, and that map to the ArcGIS content item
   information model (i.e. maintenance and progress information is not included as they cannot be represented)
 - only the OGL v3 licence is supported as a licence usage constraint, using others will raise an exception

@@ -107,13 +107,13 @@ variable "static_site_ref" {
 
 variable "static_site_tls_version" {
   type        = string
-  default     = "TLSv1.2_2025"
+  default     = "TLSv1.2_2025" # for compatibility with BAS load balancer
   description = "CloudFront viewer certificate minimum protocol version"
 }
 
 variable "static_site_csp" {
   type        = string
-  default     = "default-src * data: 'unsafe-inline'"
+  default     = "default-src * data: 'unsafe-inline';"
   description = "CloudFront content security policy header (CSP)"
 }
 
@@ -158,14 +158,14 @@ module "site_prod" {
     X-Managed-By = "Terraform"
   }
 }
-resource "aws_s3_bucket_versioning" "versioning_example" {
+resource "aws_s3_bucket_versioning" "site_prod" {
   bucket = module.site_prod.s3_bucket_name
   versioning_configuration {
     status = "Enabled"
   }
 }
 
-### Workstation module access to static site content
+### Workstation environment module access to static site content
 
 resource "aws_iam_user" "workstation_stage" {
   name = "lantern-workstation-stage"
@@ -176,6 +176,7 @@ resource "aws_iam_user" "workstation_stage" {
     X-Managed-For = "Ansible"
   }
 }
+
 resource "aws_iam_access_key" "workstation_stage" {
   # would ideally be ephemeral https://github.com/hashicorp/terraform-provider-aws/issues/42182
   user = aws_iam_user.workstation_stage.name
@@ -189,30 +190,30 @@ resource "onepassword_item" "workstation_stage_access_key" {
   note_value = "Used in Ansible to set environment module config for Lantern workstation workflows.\n\nManaged by Terraform in Lantern."
   tags       = ["SCAR ADD Metadata Toolbox"]
 }
-resource "aws_iam_user_policy" "workstation_stage" {
-  name = "staging-bucket"
-  user = aws_iam_user.workstation_stage.name
 
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Sid    = "MinimalContinuousDeploymentPermissions"
-        Effect = "Allow"
-        Action = [
-          "s3:ListBucket",
-          "s3:PutObject",
-          "s3:DeleteObject",
-          "s3:GetObjectAcl",
-          "s3:PutObjectAcl"
-        ]
-        Resource = [
-          module.site_stage.s3_bucket_arn,
-          "${module.site_stage.s3_bucket_arn}/*"
-        ]
-      }
+data "aws_iam_policy_document" "workstation_stage" {
+  statement {
+    sid    = "MinimalContentPermissions"
+    effect = "Allow"
+
+    actions = [
+      "s3:ListBucket",
+      "s3:PutObject",
+      "s3:DeleteObject",
+      "s3:GetObjectAcl",
+      "s3:PutObjectAcl",
     ]
-  })
+
+    resources = [
+      module.site_stage.s3_bucket_arn,
+      "${module.site_stage.s3_bucket_arn}/*",
+    ]
+  }
+}
+resource "aws_iam_user_policy" "workstation_stage" {
+  name   = "staging-bucket"
+  user   = aws_iam_user.workstation_stage.name
+  policy = data.aws_iam_policy_document.workstation_stage.json
 }
 
 resource "aws_iam_user" "workstation_prod" {
@@ -224,6 +225,7 @@ resource "aws_iam_user" "workstation_prod" {
     X-Managed-For = "Ansible"
   }
 }
+
 resource "aws_iam_access_key" "workstation_prod" {
   # would ideally be ephemeral https://github.com/hashicorp/terraform-provider-aws/issues/42182
   user = aws_iam_user.workstation_prod.name
@@ -237,48 +239,190 @@ resource "onepassword_item" "workstation_prod_access_key" {
   note_value = "Used in Ansible to set environment module config for Lantern workstation workflows.\n\nManaged by Terraform in Lantern."
   tags       = ["SCAR ADD Metadata Toolbox"]
 }
-resource "aws_iam_user_policy" "workstation_prod" {
-  name = "production-bucket"
-  user = aws_iam_user.workstation_prod.name
 
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Sid    = "MinimalContinuousDeploymentPermissions"
-        Effect = "Allow"
-        Action = [
-          "s3:ListBucket",
-          "s3:PutObject",
-          "s3:DeleteObject",
-          "s3:GetObjectAcl",
-          "s3:PutObjectAcl"
-        ]
-        Resource = [
-          module.site_prod.s3_bucket_arn,
-          "${module.site_prod.s3_bucket_arn}/*"
-        ]
-      }
+data "aws_iam_policy_document" "workstation_prod" {
+  statement {
+    sid    = "MinimalContentPermissions"
+    effect = "Allow"
+
+    actions = [
+      "s3:ListBucket",
+      "s3:PutObject",
+      "s3:DeleteObject",
+      "s3:GetObjectAcl",
+      "s3:PutObjectAcl",
     ]
-  })
+
+    resources = [
+      module.site_prod.s3_bucket_arn,
+      "${module.site_prod.s3_bucket_arn}/*",
+    ]
+  }
+  statement {
+    sid    = "MinimalCacheInvalidationPermissions"
+    effect = "Allow"
+
+    actions = [
+      "cloudfront:CreateInvalidation",
+      "cloudfront:GetInvalidation",
+    ]
+
+    resources = [
+      module.site_prod.cloudfront_distribution_arn
+    ]
+  }
+}
+resource "aws_iam_user_policy" "workstation_prod" {
+  name   = "production-bucket"
+  user   = aws_iam_user.workstation_prod.name
+  policy = data.aws_iam_policy_document.workstation_prod.json
+}
+
+### Local development access to static site content
+
+resource "aws_iam_group" "local_dev" {
+  name = "lantern-local-dev"
+}
+
+data "aws_iam_policy_document" "local_dev" {
+  statement {
+    sid    = "MinimalContentPermissions"
+    effect = "Allow"
+
+    actions = [
+      "s3:ListBucket",
+      "s3:PutObject",
+      "s3:DeleteObject",
+      "s3:GetObjectAcl",
+      "s3:PutObjectAcl",
+    ]
+
+    resources = [
+      module.site_stage.s3_bucket_arn,
+      "${module.site_stage.s3_bucket_arn}/*",
+      module.site_prod.s3_bucket_arn,
+      "${module.site_prod.s3_bucket_arn}/*",
+    ]
+  }
+  statement {
+    sid    = "MinimalCacheInvalidationPermissions"
+    effect = "Allow"
+
+    actions = [
+      "cloudfront:CreateInvalidation",
+      "cloudfront:GetInvalidation",
+    ]
+
+    resources = [
+      module.site_prod.cloudfront_distribution_arn
+    ]
+  }
+}
+resource "aws_iam_policy" "local_dev" {
+  name        = "lantern-local-dev"
+  description = "Lantern local development policy."
+  policy      = data.aws_iam_policy_document.local_dev.json
+
+  tags = {
+    X-Project     = "BAS Lantern Experiment"
+    X-Managed-By  = "Terraform"
+    X-Managed-For = "Local development"
+  }
+}
+
+resource "aws_iam_group_policy_attachment" "local_dev" {
+  group      = aws_iam_group.local_dev.name
+  policy_arn = aws_iam_policy.local_dev.arn
 }
 
 ### GitLab store
 
+resource "gitlab_project" "records_store" {
+  name             = "🏮 Lantern records store"
+  path             = "lantern-records-exp"
+  namespace_id     = 22 # felnne
+  description      = "Records store for Lantern experimental catalogue. This project is managed using Infrastructure as Code."
+  visibility_level = "internal"
+
+  # disable everything except repository and merge-requests
+  auto_devops_enabled                  = false
+  emails_enabled                       = false
+  lfs_enabled                          = false
+  packages_enabled                     = false
+  initialize_with_readme               = false
+  analytics_access_level               = "disabled"
+  builds_access_level                  = "disabled"
+  container_registry_access_level      = "disabled"
+  environments_access_level            = "disabled"
+  feature_flags_access_level           = "disabled"
+  forking_access_level                 = "disabled"
+  infrastructure_access_level          = "disabled"
+  issues_access_level                  = "disabled"
+  monitor_access_level                 = "disabled"
+  pages_access_level                   = "disabled"
+  releases_access_level                = "disabled"
+  security_and_compliance_access_level = "disabled"
+  snippets_access_level                = "disabled"
+  wiki_access_level                    = "disabled"
+  # model_experiments_access_level     = "disabled"  # not supported in GitLab 15.7
+  # model_registry_access_level        = "disabled"  # not supported in GitLab 15.7
+  # requirements_access_level          = "disabled"  # not supported in GitLab 15.7
+}
+
+resource "gitlab_branch_protection" "records_store_main" {
+  project            = gitlab_project.records_store.id
+  branch             = "main"
+  push_access_level  = "no one"
+  merge_access_level = "developer"
+}
+
+# GitLab bot project access
+
+resource "gitlab_project_membership" "lantern_records_lantern_bot" {
+  # To enable GitLab Store (see /docs/stores.md#gitlab-store)
+  project      = gitlab_project.records_store.id
+  user_id      = gitlab_user.lantern_bot.id
+  access_level = "maintainer"
+}
+
+resource "gitlab_project_membership" "magic_helpdesk_lantern_bot" {
+  # To enable item enquires via Power Automate (see /docs/site.md#item-enquiries)
+  # and interactive publishing workflow (see /docs/usage.md#interactive-record-publishing-workflow)
+  project      = 462 # MAGIC Helpdesk
+  user_id      = gitlab_user.lantern_bot.id
+  access_level = "reporter"
+}
+
+resource "gitlab_project_membership" "magic_data_management_lantern_bot" {
+  # To enable interactive publishing workflow (see /docs/usage.md#interactive-record-publishing-workflow)
+  project      = 667 # MAGIC data management
+  user_id      = gitlab_user.lantern_bot.id
+  access_level = "reporter"
+}
+
+resource "gitlab_project_membership" "magic_mapping_coordination_lantern_bot" {
+  # To enable interactive publishing workflow (see /docs/usage.md#interactive-record-publishing-workflow)
+  project      = 1254 # MAGIC mapping coordination
+  user_id      = gitlab_user.lantern_bot.id
+  access_level = "reporter"
+}
+
+### GitLab bot user
+
 resource "gitlab_user" "lantern_bot" {
   username          = "bot_magic_lantern"
-  name              = "MAGIC Lantern Exp (Bot)"
+  name              = "🏮 Lantern (Bot)"
   email             = "magicdev@bas.ac.uk"
-  note              = "Bot user for Lantern data catalogue. Mangaged by IaC via the Lantern project."
+  note              = "Bot user for the Lantern data catalogue. Mangaged by IaC via the Lantern project."
   skip_confirmation = true
   is_external       = true
 }
 
 resource "gitlab_personal_access_token" "lantern_bot_pa_item_enquires" {
   # To enable item enquires via Power Automate (see /docs/site.md#item-enquiries)
-  user_id    = gitlab_user.lantern_bot.id
-  name       = "iac-pa-item-enquires"
-  scopes     = ["api"]
+  user_id = gitlab_user.lantern_bot.id
+  name    = "iac-pa-item-enquires"
+  scopes  = ["api"]
 
   rotation_configuration = {
     expiration_days    = 90
@@ -312,67 +456,6 @@ resource "onepassword_item" "lantern_bot_ansible_workstation_module_token" {
   password   = gitlab_personal_access_token.lantern_bot_ansible_workstation_module.token
   note_value = "Used in Ansible vaults to include in environment module deployed to workstations for record workflows.\n\nManaged by Terraform in Lantern."
   tags       = ["SCAR ADD Metadata Toolbox"]
-}
-
-resource "gitlab_project" "records_store" {
-  name             = "Lantern experiment - records" # "Lantern Records Store"
-  path             = "lantern-records-exp"
-  namespace_id     = 22 # felnne
-  description      = "Records store for Lantern experimental catalogue. This project is managed using Infrastructure as Code."
-  visibility_level = "internal"
-
-  # disable everything except repository and merge-requests
-  auto_devops_enabled                  = false
-  emails_enabled                       = false
-  lfs_enabled                          = false
-  packages_enabled                     = false
-  initialize_with_readme               = false
-  analytics_access_level               = "disabled"
-  builds_access_level                  = "disabled"
-  container_registry_access_level      = "disabled"
-  environments_access_level            = "disabled"
-  feature_flags_access_level           = "disabled"
-  forking_access_level                 = "disabled"
-  infrastructure_access_level          = "disabled"
-  issues_access_level                  = "disabled"
-  monitor_access_level                 = "disabled"
-  pages_access_level                   = "disabled"
-  releases_access_level                = "disabled"
-  security_and_compliance_access_level = "disabled"
-  snippets_access_level                = "disabled"
-  wiki_access_level                    = "disabled"
-  # model_experiments_access_level     = "disabled"  # not supported in GitLab 15.7
-  # model_registry_access_level        = "disabled"  # not supported in GitLab 15.7
-  # requirements_access_level          = "disabled"  # not supported in GitLab 15.7
-}
-
-resource "gitlab_project_membership" "lantern_records_lantern_bot" {
-  # To enable GitLab Store (see /docs/stores.md#gitlab-store)
-  project      = gitlab_project.records_store.id
-  user_id      = gitlab_user.lantern_bot.id
-  access_level = "maintainer"
-}
-
-resource "gitlab_project_membership" "magic_helpdesk_lantern_bot" {
-  # To enable item enquires via Power Automate (see /docs/site.md#item-enquiries)
-  # and interactive publishing workflow (see /docs/usage.md#interactive-record-publishing-workflow)
-  project      = 462 # MAGIC Helpdesk
-  user_id      = gitlab_user.lantern_bot.id
-  access_level = "reporter"
-}
-
-resource "gitlab_project_membership" "magic_data_management_lantern_bot" {
-  # To enable interactive publishing workflow (see /docs/usage.md#interactive-record-publishing-workflow)
-  project      = 667 # MAGIC data management
-  user_id      = gitlab_user.lantern_bot.id
-  access_level = "reporter"
-}
-
-resource "gitlab_project_membership" "magic_mapping_coordination_lantern_bot" {
-  # To enable interactive publishing workflow (see /docs/usage.md#interactive-record-publishing-workflow)
-  project      = 1254 # MAGIC mapping coordination
-  user_id      = gitlab_user.lantern_bot.id
-  access_level = "reporter"
 }
 
 # Turnstile bot protection

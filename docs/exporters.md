@@ -171,6 +171,10 @@ These resources consist of:
 > [!NOTE]
 > This Sync API is an aggregator for items across BAS Data Catalogues and is maintained outside of this project. It is
 > configured to include items from this exporter via the published items listing.
+>
+> See the [Import 🛡️](https://gitlab.data.bas.ac.uk/uk-pdc/data-infrastructure/pdc-di-scripts/-/blob/master/bas_pdc/import_website_search_records.py)
+> and [Export 🛡️](https://gitlab.data.bas.ac.uk/uk-pdc/data-infrastructure/pdc-di-scripts/-/blob/master/bas_pdc/export_website_search_records.py)
+> scripts for more information.
 
 #### Public Website search criteria
 

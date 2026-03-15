@@ -30,9 +30,8 @@ Setup:
 
 To run [Publishing Workflows](/docs/usage.md) locally:
 
-1. manually create a named AWS IAM user (e.g. `lantern-conwat`) with a suitable
-   [Inline Policy 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=6wawslwrjk42cbff7qanfswz6q&h=magic.1password.eu)
-   to manage content in [AWS S3 Content Buckets](/docs/infrastructure.md#exporters)
+1. manually create a named AWS IAM user (`lantern-$USER` e.g. `lantern-conwat`) and add to the `lantern-local-dev`
+   group to manage content in [AWS S3 Content Buckets](/docs/infrastructure.md#exporters)
 2. as a GitLab administrator impersonating the GitLab bot user, create a
    [Personal Access Token 🔒](https://gitlab.data.bas.ac.uk/-/profile/personal_access_tokens):
    - token name: `lantern-conwat`
@@ -61,7 +60,7 @@ Needed for `rsync` to automatically authenticate.
 > [!TIP]
 > The`IdentityFile` is a public key as a hint for the 1Password SSH agent.
 
-### Local development Stack
+### Local development stack
 
 Local versions of services used by Lantern can be run via containers.
 
@@ -347,7 +346,7 @@ Within this project, for each new item type:
 9. add new tests to:
    - `tests.lantern_tests.models.item.catalogue.test_distributions`
    - `tests.lantern_tests.templates.macros.test_tabs.TestDataTab.test_data_info` (if using a collapsible panel)
-10. update the [Item distribution options](/docs/data-model.md#item-distribution-options) documentation
+10. update the [Item distribution options](/docs/data-model.md#catalogue-items-supported-distribution-options) docs
 
 ### Adding catalogue item tabs
 

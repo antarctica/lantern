@@ -9,18 +9,21 @@
     'Discover': [('https://www.bas.ac.uk/maps', 'Maps', false, false)],
     'Portals': [
       ('https://www.icelogistics.info', 'Ice Logistics Portal', true, false),
-      ('https://opsgis.web.bas.ac.uk/login', 'Operations GIS', true, true)
+      ('https://opsgis.web.bas.ac.uk/login', 'Operations GIS', true, true),
      ],
-    'Guides': [
+    'Learn more': [
       ('https://guides.geospatial.bas.ac.uk', 'Geospatial training', true, false),
-      ('https://metadata-standards.data.bas.ac.uk', 'Metadata standards', true, false),
-      ('/guides/formatting', 'Content formatting', false, false),
-      ('/guides/api', 'API documentation', false, false)
+      ('/guides/map-purchasing', 'Map purchasing', false, false),
     ],
     'About': [
+      ('https://github.com/antarctica/lantern', 'GitHub', true, false),
+      ('/guides/api', 'API documentation', false, false)
+    ],
+    'Publishing': [
       ('https://gitlab.data.bas.ac.uk/MAGIC/lantern-exp', 'GitLab project', true, true),
-      ('https://github.com/antarctica/lantern', 'GitHub mirror', true, false)
-    ]
+      ('https://metadata-standards.data.bas.ac.uk', 'Metadata standards', true, false),
+      ('/guides/formatting', 'Content formatting', false, false),
+    ],
   }
 %}
 
@@ -219,7 +222,7 @@
 {% endmacro %}
 
 {% macro footer_nav() %}
-  <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 lg:text-left">
+  <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:text-left">
     {% for section_title, link in footer_nav_items.items() %}
     <section class="space-y-4">
       <h4>{{ section_title }}</h4>

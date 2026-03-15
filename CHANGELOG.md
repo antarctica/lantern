@@ -32,6 +32,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Updating project logo to AI placeholder
 * Records publishing workflow updated to use merge request reviewer approvals
 * Adding 'strip empty strings' option to `clean_dict()` util
+* Map ordering guide
 
 ## [0.5.0] - 2026-02-27 [!BREAKING]
 

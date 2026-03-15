@@ -82,6 +82,7 @@ class TestSitePageExporter:
         "legal/copyright/index.html",
         "legal/privacy/index.html",
         "guides/formatting/index.html",
+        "guides/map-purchasing/index.html",
     ]
 
     def test_init(self, mocker: MockerFixture, fx_logger: logging.Logger):

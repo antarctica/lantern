@@ -1,0 +1,57 @@
+{% extends '_layouts/page.html.j2' %}
+{% import '_macros/common.html.j2' as com %}
+
+{% set header_main = 'Ordering British Antarctic Survey published maps' %}
+
+{% macro section(slug='', title='') %}
+  <section id="{{ slug }}" class="space-y-4">
+    <h2 class="text-2xl">{{ title }}</h2>
+    {{ caller() }}
+  </section>
+{% endmacro %}
+
+{% block page_content %}
+  {% call section(slug='small-orders', title='Individual maps and small orders') %}
+    <p>In small quantities, our maps can be purchased from a range of shops and suppliers, including:</p>
+    <ul class="space-y-4">
+      <li class="space-y-2">
+        <p>{{ com.ext_link_a(href='https://www.stanfords.co.uk/maps?publisher=British%20Antarctic%20Survey', value='Stanfords') }}</p>
+        <p>The UK’s specialist retailer of maps, travel books and other travel accessories.</p>
+      </li>
+      <li class="space-y-2">
+        <p>{{ com.ext_link_a(href='https://shop.ukaht.org/collections/antarctic-maps', value='UK Antarctic Heritage Trust (UKAHT)') }}</p>
+        <p>The Trust sells a range of products, the main outlet for which is Port Lockroy, Antarctica. All proceeds support the work of the Trust.</p>
+      </li>
+      <li class="space-y-2">
+        <p>{{ com.ext_link_a(href='https://www.nhbs.com/manufacturer/bas-gb', value='NHBS') }}</p>
+        <p>Large, online bookstore specialising in wildlife, ecology and conservation books and maps.</p>
+      </li>
+      <li class="space-y-2">
+        <p>{{ com.ext_link_a(href='https://www.spri.cam.ac.uk/shop/maps/', value='Scott Polar Research Institute (SPRI)') }}</p>
+        <p>The Museum Shop sells a range of polar related items including maps.</p>
+      </li>
+      <li class="space-y-2">
+        <p>{{ com.ext_link_a(href='https://shop.bgs.ac.uk/Shop/Category/BritishAntarcticSurvey', value='British Geological Survey (BGS) Online Shop') }}</p>
+        <p>Geological maps, books and guides.</p>
+      </li>
+    </ul>
+    {% call com.alert(variant='blue') %}BAS does not endorse any specific supplier.{% endcall %}
+    <h3 class="text-xl">International suppliers</h3>
+    <ul class="space-y-2">
+      <li>{{ com.ext_link_a(href='https://www.chartandmapshop.com.au/collections/maps/antarctica', value='The Chart &amp; Map Shop') }}, Fremantle</li>
+      <li>{{ com.ext_link_a(href='https://www.freytagberndt.com/en/verlage/british-antarctic-survey', value='freytag &amp; berndt') }}, Vienna</li>
+      <li>{{ com.ext_link_a(href='https://athenaeumscheltema.nl/', value='Sheltema / Pied à Terre') }}, Amsterdam</li>
+      <li>{{ com.ext_link_a(href='https://www.worldofmaps.com/', value='World of Maps') }}, Ottawa</li>
+    </ul>
+  {% endcall %}
+  {% call section(slug='wholesale-orders', title='Wholesale orders') %}
+    <p>BAS can supply wholesale map orders above a minimum quantity directly and at a discount.</p>
+    <p>Please contact {{ com.ext_link_a(href='mailto:mapsales@bas.ac.uk', value='mapsales@bas.ac.uk') }} for more information.</p>
+  {% endcall %}
+  {% call section(slug='historic-maps', title='Historic maps') %}
+    <p>Please contact the BAS {{ com.ext_link_a(href='https://www.bas.ac.uk/archives', value='Archives Service') }} regarding printed maps produced by BAS or its predecessor organisations.</p>
+  {% endcall %}
+  {% call section(slug='further-info', title='Further information') %}
+    <p>Please contact the BAS {{ com.ext_link_a(href='https://www.bas.ac.uk/teams/magic', value='Mapping and Geographic Information Centre') }} (MAGIC) if you have any other questions about our maps.</p>
+  {% endcall %}
+{% endblock %}

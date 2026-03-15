@@ -305,6 +305,11 @@ class SitePagesExporter(Exporter):
                 url=f"{self._meta.base_url}/guides/formatting",
                 description="Formatting guide for content items",
             ),
+            "_views/guides/map-purchasing.html.j2": SitePageMeta(
+                title="Map Purchasing",
+                url=f"{self._meta.base_url}/guides/map-purchasing",
+                description="How to order BAS published maps",
+            ),
         }
 
     def _get_page_path(self, template_path: str) -> Path:

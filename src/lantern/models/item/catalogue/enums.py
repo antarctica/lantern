@@ -47,14 +47,3 @@ class DistributionType(Enum):
     SHAPEFILE_ZIP = "Shapefile (Zipped)"
     X_BAS_PAPER_MAP = "Flat or folded paper map"
     X_BAS_SAN = "SAN path reference"
-
-
-class Licence(Enum):
-    """Supported resource licences."""
-
-    OGL_UK_3_0 = "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
-    CC_BY_4_0 = "https://creativecommons.org/licenses/by/4.0/"
-    COPERNICUS_SENTINEL_DATA_1 = "https://cds.climate.copernicus.eu/licences/ec-sentinel"
-    X_ALL_RIGHTS_RESERVED_1 = "https://metadata-resources.data.bas.ac.uk/licences/all-rights-reserved-v1/"
-    X_OPERATIONS_MAPPING_1 = "https://metadata-resources.data.bas.ac.uk/licences/operations-mapping-v1/"
-    X_MAGIC_PRODUCTS_1 = "https://metadata-resources.data.bas.ac.uk/licences/magic-products-v1/"

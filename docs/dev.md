@@ -202,9 +202,11 @@ config options used by development tasks.
 > These extra variables are prefixed with `X` rather than `LANTERN_`.
 
 <!-- pyml disable md013 -->
-| Option                                 | Type         | Sensitive | Since Version | Summary                                                      | Default | Example                                      |
-|----------------------------------------|--------------|-----------|---------------|--------------------------------------------------------------|---------|----------------------------------------------|
-| `X_ADMIN_METADATA_SIGNING_KEY_PRIVATE` | JSON Web Key | Yes       | v0.4.x        | JSON Web Key (JWK) for updating administrative metadata      | *None*  | '{"kid": "magic_metadata_signing_key", ...}' |
+| Option                                 | Type         | Sensitive | Since Version | Summary                                                                   | Default | Example                                      |
+|----------------------------------------|--------------|-----------|---------------|---------------------------------------------------------------------------|---------|----------------------------------------------|
+| `X_ADMIN_METADATA_SIGNING_KEY_PRIVATE` | JSON Web Key | Yes       | v0.4.x        | JSON Web Key (JWK) for updating administrative metadata                   | *None*  | '{"kid": "magic_metadata_signing_key", ...}' |
+| `X_AGOL_CLIENT_ID`                     | String       | No        | v0.6.x        | Client ID for AGOL OAuth application for accessing and updating items     | *None*  | 'xxx'                                        |
+| `X_AGOL_CLIENT_SECRET`                 | String       | Yes       | v0.6.x        | Client secret for AGOL OAuth application for accessing and updating items | *None*  | 'xxx'                                        |
 <!-- pyml enable md013 -->
 
 > [!WARNING]

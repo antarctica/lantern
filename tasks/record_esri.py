@@ -1,10 +1,16 @@
+import logging
 from argparse import ArgumentParser
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 import requests
+from authlib.integrations.requests_client.oauth2_session import OAuth2Session
+from authlib.oauth2.rfc7523 import ClientSecretJWT
+from tasks._config import ExtraConfig
 from tasks._record_utils import confirm_source, dump_records, init, load_record
 
+from lantern.lib.arcgis.gis.dataclasses import Item as ArcGisItem
+from lantern.lib.arcgis.gis.enums import ItemType as ArcGisItemType
 from lantern.lib.metadata_library.models.record.elements.common import OnlineResource
 from lantern.lib.metadata_library.models.record.elements.distribution import Distribution, Format, TransferOption
 from lantern.lib.metadata_library.models.record.enums import OnlineResourceFunctionCode
@@ -95,101 +101,139 @@ def _get_cli_args() -> dict:
     return {"id": record_id, "path": path, "item": item}
 
 
-def _get_agol_item(item_ref: str) -> dict:
+def get_agol_token(config: ExtraConfig) -> str:
+    """
+    Generates an access token for an AGOL OAuth application per request (which is known to be inefficient).
+
+    Sources:
+    - https://developers.arcgis.com/documentation/security-and-authentication/reference/rest-authentication-operations/#access-token-from-client-credentials
+    - https://developers.arcgis.com/documentation/security-and-authentication/reference/access-tokens/#how-to-use-an-access-token
+    """
+    token_endpoint = "https://www.arcgis.com/sharing/rest/oauth2/token"  # noqa: S105
+    session = OAuth2Session(
+        client_id=config.AGOL_CLIENT_ID,
+        client_secret=config.AGOL_CLIENT_ID,
+        token_endpoint_auth_method=ClientSecretJWT(token_endpoint),
+    )
+    # AGOL requires the client ID/secret as body parameters, not from basic auth which AuthLib does by default.
+    token = session.fetch_token(
+        token_endpoint, client_id=config.AGOL_CLIENT_ID, client_secret=config.AGOL_CLIENT_SECRET
+    )
+    return token["access_token"]
+
+
+def _get_agol_metadata(logger: logging.Logger, config: ExtraConfig, item_id: str) -> str:
+    """Get metadata for an ArcGIS Online item."""
+    logger.info(f"Fetching ArcGIS metadata for item: {item_id}")
+    access_token = get_agol_token(config)
+    # AGOL requires the token as a query parameter, not a bearer type Authorization header.
+    req = requests.get(
+        f"https://www.arcgis.com/sharing/rest/content/items/{item_id}/info/metadata/metadata.xml",
+        params={"token": access_token},
+        timeout=10,
+    )
+    req.raise_for_status()
+
+    return req.text
+
+
+def get_agol_item(logger: logging.Logger, config: ExtraConfig, item_ref: str) -> ArcGisItem:
     """
     Get an ArcGIS Online item from an item ID or URL.
 
-    Limited to public items.
+    AGOL requires the token as a query parameter, not a bearer type Authorization header.
     """
     item_id = item_ref
     if item_ref.startswith("http"):
         item_id = parse_qs(urlparse(item_ref).query).get("id")
-    req = requests.get(f"https://www.arcgis.com/sharing/rest/content/items/{item_id}", timeout=10, params={"f": "json"})
-    req.raise_for_status()
-    return req.json()
+
+    logger.info(f"Fetching ArcGIS item: {item_id}")
+    access_token = get_agol_token(config)
+
+    req_data = requests.get(
+        f"https://www.arcgis.com/sharing/rest/content/items/{item_id}",
+        params={"f": "json", "token": access_token},
+        timeout=10,
+    )
+    req_data.raise_for_status()
+    data = req_data.json()
+    if "error" in data:
+        msg = f"Error fetching item {item_id} from AGOL: {data['error']['message']}"
+        raise ValueError(msg)
+
+    req_metadata = requests.get(
+        f"https://www.arcgis.com/sharing/rest/content/items/{item_id}/info/metadata/metadata.xml",
+        params={"token": access_token},
+        timeout=10,
+    )
+    req_metadata.raise_for_status()
+    metadata = req_metadata.text
+
+    item = ArcGisItem.from_item_json(data=data, metadata=metadata)
+    item.properties.metadata = _get_agol_metadata(logger=logger, config=config, item_id=item.id)
+    return item
 
 
-def _get_esri_type(item_json: dict) -> DistributionType:
-    """
-    Determine distribution type for an ArcGIS item.
-
-    | Type (UI)                    | Type (JSON)           | Example Item                                                               |
-    |------------------------------|-----------------------|----------------------------------------------------------------------------|
-    | 'Feature layer (hosted)'     | 'Feature Service'     | https://maps.arcgis.com/home/item.html?id=54a2070f3d6943a29a635c0761e19301 |
-    | 'OGC feature layer (hosted)' | 'OGCFeatureServer'    | https://maps.arcgis.com/home/item.html?id=67c77b72e46c467eb0a2ba041c04cc98 |
-    | 'Tile Layer (Hosted)'        | 'Map Service'         | https://maps.arcgis.com/home/item.html?id=7af8a136533c4d70a9e8116591058694 |
-    | 'Tile layer (hosted)'        | 'Vector Tile Service' | https://maps.arcgis.com/home/item.html?id=caa4df3010a549e38fabfca03a4daa87 |
-    """
-    mapping = {
-        "Feature Service": DistributionType.ARCGIS_FEATURE_LAYER,
-        "OGCFeatureServer": DistributionType.ARCGIS_OGC_FEATURE_LAYER,
-        "Map Service": DistributionType.ARCGIS_RASTER_TILE_LAYER,
-        "Vector Tile Service": DistributionType.ARCGIS_VECTOR_TILE_LAYER,
-    }
-    return mapping[item_json["type"]]
-
-
-def _make_esri_distributions(item_json: dict) -> list[Distribution]:
+def _make_esri_distributions(arcgis_item: ArcGisItem) -> list[Distribution]:
     """Generate distribution options for an ArcGIS item."""
-    item_type = _get_esri_type(item_json)
-
     item_format = {
-        DistributionType.ARCGIS_FEATURE_LAYER: Format(
+        ArcGisItemType.FEATURE_SERVICE: Format(
             format="ArcGIS Feature Layer",
             href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+feature",
         ),
-        DistributionType.ARCGIS_OGC_FEATURE_LAYER: Format(
+        ArcGisItemType.OGCFEATURESERVER: Format(
             format="ArcGIS OGC Feature Layer",
             href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+feature+ogc",
         ),
-        DistributionType.ARCGIS_RASTER_TILE_LAYER: Format(
+        ArcGisItemType.MAP_SERVICE: Format(
             format="ArcGIS Raster Tile Layer",
             href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+tile+raster",
         ),
-        DistributionType.ARCGIS_VECTOR_TILE_LAYER: Format(
+        ArcGisItemType.VECTOR_TILE_SERVICE: Format(
             format="ArcGIS Vector Tile Service",
             href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+tile+vector",
         ),
     }
     item_description = {
-        DistributionType.ARCGIS_FEATURE_LAYER: "Access information as an ArcGIS feature layer.",
-        DistributionType.ARCGIS_OGC_FEATURE_LAYER: "Access information as an ArcGIS OGC feature layer.",
-        DistributionType.ARCGIS_RASTER_TILE_LAYER: "Access information as an ArcGIS raster tile layer.",
-        DistributionType.ARCGIS_VECTOR_TILE_LAYER: "Access information as an ArcGIS vector tile layer.",
+        ArcGisItemType.FEATURE_SERVICE: "Access information as an ArcGIS feature layer.",
+        ArcGisItemType.OGCFEATURESERVER: "Access information as an ArcGIS OGC feature layer.",
+        ArcGisItemType.MAP_SERVICE: "Access information as an ArcGIS raster tile layer.",
+        ArcGisItemType.VECTOR_TILE_SERVICE: "Access information as an ArcGIS vector tile layer.",
     }
 
     service_format = {
-        DistributionType.ARCGIS_FEATURE_LAYER: Format(
+        ArcGisItemType.FEATURE_SERVICE: Format(
             format="ArcGIS Feature Service",
             href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+feature",
         ),
-        DistributionType.ARCGIS_OGC_FEATURE_LAYER: Format(
+        ArcGisItemType.OGCFEATURESERVER: Format(
             format="OGC API Features Service",
             href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/ogc+api+feature",
         ),
-        DistributionType.ARCGIS_RASTER_TILE_LAYER: Format(
+        ArcGisItemType.MAP_SERVICE: Format(
             format="ArcGIS Raster Tile Service",
             href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+raster",
         ),
-        DistributionType.ARCGIS_VECTOR_TILE_LAYER: Format(
+        ArcGisItemType.VECTOR_TILE_SERVICE: Format(
             format="ArcGIS Vector Tile Service",
             href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+vector",
         ),
     }
     service_description = {
-        DistributionType.ARCGIS_FEATURE_LAYER: "Access information as an ArcGIS feature service.",
-        DistributionType.ARCGIS_OGC_FEATURE_LAYER: "Access information as an OGC API feature service.",
-        DistributionType.ARCGIS_RASTER_TILE_LAYER: "Access information as an ArcGIS raster tile service.",
-        DistributionType.ARCGIS_VECTOR_TILE_LAYER: "Access information as an ArcGIS vector tile service.",
+        ArcGisItemType.FEATURE_SERVICE: "Access information as an ArcGIS feature service.",
+        ArcGisItemType.OGCFEATURESERVER: "Access information as an OGC API feature service.",
+        ArcGisItemType.MAP_SERVICE: "Access information as an ArcGIS raster tile service.",
+        ArcGisItemType.VECTOR_TILE_SERVICE: "Access information as an ArcGIS vector tile service.",
     }
 
+    item_type = arcgis_item.properties.item_type
     return [
         Distribution(
             distributor=ESRI_DISTRIBUTOR,
             format=item_format[item_type],
             transfer_option=TransferOption(
                 online_resource=OnlineResource(
-                    href=f"https://maps.arcgis.com/home/item.html?id={item_json['id']}",
+                    href=f"https://maps.arcgis.com/home/item.html?id={arcgis_item.id}",
                     function=OnlineResourceFunctionCode.INFORMATION,
                     title="ArcGIS Online",
                     description=item_description[item_type],
@@ -201,7 +245,7 @@ def _make_esri_distributions(item_json: dict) -> list[Distribution]:
             format=service_format[item_type],
             transfer_option=TransferOption(
                 online_resource=OnlineResource(
-                    href=item_json["url"],
+                    href=arcgis_item.url,
                     function=OnlineResourceFunctionCode.DOWNLOAD,
                     title="ArcGIS Online",
                     description=service_description[item_type],
@@ -220,13 +264,14 @@ def _add_distribution_options(record: Record, options: list[Distribution]) -> No
 
 def main() -> None:
     """Entrypoint."""
-    logger, _config, store, _s3 = init()
+    logger, config, store, _s3 = init()
     output_path = Path("import")
     confirm_source(logger=logger, store=store, action="Selecting records from")
     args = _get_cli_args()
 
     record = load_record(logger=logger, ref=(args["id"], args["path"]), store=store)
-    item = _get_agol_item(args["item"])
+    item = get_agol_item(logger=logger, config=config, item_ref=args["item"])
+
     distribution_options = _make_esri_distributions(item)
     _add_distribution_options(record, distribution_options)
     output_path = args["path"].parent if args["path"] else output_path

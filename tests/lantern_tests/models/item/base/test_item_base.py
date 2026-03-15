@@ -40,7 +40,7 @@ from lantern.lib.metadata_library.models.record.enums import (
 from lantern.lib.metadata_library.models.record.presets.projections import EPSG_4326
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, set_admin
 from lantern.models.item.base.elements import Contact, Contacts, Extent, Extents
-from lantern.models.item.base.enums import AccessLevel
+from lantern.models.item.base.enums import AccessLevel, Licence
 from lantern.models.item.base.item import ItemBase
 from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
@@ -408,6 +408,40 @@ class TestItemBase:
         item = ItemBase(fx_revision_model_min)
 
         assert item.licence == value
+
+    @pytest.mark.parametrize(
+        ("value", "expected"),
+        [
+            (None, None),
+            (
+                Constraint(
+                    type=ConstraintTypeCode.USAGE,
+                    restriction_code=ConstraintRestrictionCode.LICENSE,
+                    href="x",
+                    statement="x",
+                ),
+                None,
+            ),
+            (
+                Constraint(
+                    type=ConstraintTypeCode.USAGE,
+                    restriction_code=ConstraintRestrictionCode.LICENSE,
+                    href=Licence.OGL_UK_3_0.value,
+                    statement="x",
+                ),
+                Licence.OGL_UK_3_0,
+            ),
+        ],
+    )
+    def test_licence_enum(
+        self, fx_revision_model_min: RecordRevision, value: Constraint | None, expected: Licence | None
+    ):
+        """Can get optional licence usage constraint as an enumeration member."""
+        if value is not None:
+            fx_revision_model_min.identification.constraints = Constraints([value])
+        item = ItemBase(fx_revision_model_min)
+
+        assert item.licence_enum == expected
 
     @pytest.mark.parametrize("expected", ["x", None])
     def test_lineage_raw(self, fx_revision_model_min: RecordRevision, expected: str | None):

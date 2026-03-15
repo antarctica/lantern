@@ -12,7 +12,7 @@ from lantern.lib.metadata_library.models.record.elements.metadata import Metadat
 from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
 from lantern.models.item.base.elements import Contact, Link
 from lantern.models.item.base.elements import Extent as ItemExtent
-from lantern.models.item.base.enums import AccessLevel, ResourceTypeLabel
+from lantern.models.item.base.enums import AccessLevel, Licence, ResourceTypeLabel
 from lantern.models.item.catalogue.distributions import (
     ArcGisFeatureLayer,
     ArcGisOgcApiFeatures,
@@ -40,7 +40,7 @@ from lantern.models.item.catalogue.elements import (
     ItemCatalogueSummary,
     Maintenance,
 )
-from lantern.models.item.catalogue.enums import ItemSuperType, Licence, ResourceTypeIcon
+from lantern.models.item.catalogue.enums import ItemSuperType, ResourceTypeIcon
 
 
 class Tab(ABC):
@@ -258,11 +258,11 @@ class LicenceTab(Tab):
     def __init__(
         self,
         item_super_type: ItemSuperType,
-        licence: Constraint | None,
+        licence: Licence | None,
         rights_holders: list[Contact] | None = None,
     ) -> None:
         self._item_super_type = item_super_type
-        self._licence = licence
+        self.licence = licence
         self._copyright_holders = rights_holders if rights_holders is not None else []
 
     @property
@@ -270,7 +270,7 @@ class LicenceTab(Tab):
         """Whether tab is enabled."""
         if self._item_super_type == ItemSuperType.CONTAINER:
             return False
-        return self.slug is not None
+        return self.licence is not None
 
     @property
     def anchor(self) -> str:
@@ -286,23 +286,6 @@ class LicenceTab(Tab):
     def icon(self) -> str:
         """Tab icon class."""
         return "fa-regular fa-file-certificate"
-
-    @property
-    def slug(self) -> Licence | None:
-        """
-        Licence reference.
-
-        Returns a licence enum value or None if not defined or recognised.
-
-        Defensive check as records are not limited to licences supported by catalogue items and so should not fail if
-        an unknown value is used. If records should be limited, a check should be added in `Record.validate()` instead.
-        """
-        if not (self._licence and self._licence.href):
-            return None
-        try:
-            return Licence(self._licence.href)
-        except ValueError:
-            return None
 
     @property
     def copyright_holders(self) -> list[Link | str]:

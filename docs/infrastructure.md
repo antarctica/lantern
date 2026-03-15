@@ -144,6 +144,12 @@ Then run:
   - for [Icons](/docs/supplemental/icon-audit.md)
   - managed manually as per [Setup](/docs/setup.md#font-awesome) documentation
 
+### ArcGIS Online
+
+- [OAuth application 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=l6srwxde4bj3e3tiwegsixocyq&h=magic.1password.eu)
+  - for adding AGOL items to records as distribution options and syncing record metadata to AGOL items
+  - managed manually as per [Setup](/docs/setup.md#arcgis-online) documentation
+
 ### Exporters
 
 - AWS S3 publishing buckets & CloudFront distributions:

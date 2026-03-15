@@ -276,27 +276,40 @@ JSON Web Keys (JWKs) for decrypting JWEs and verifying the signature of JWTs sho
 
 > [!TIP]
 > These keys can be accessed from [Export Metadata](#export-metadata) if created from a Config object.
+## ArcGIS items
 
 ### Item access levels
+ArcGIS items (`lantern.models.item.arcgis.ItemArcGIS`) represent [Items](#items) as ArcGIS content. Features include:
 
 Access levels for each item are available via:
+- reflecting Item properties, such as summary, description, access permissions and licence constraints, etc. in ArcGIS
+  content items consistently
+- establishing a one-to-many relationship between an Item and ArcGIS content items via ArcGIS item
+  [Metadata](#arcgis-items-metadata)
 
 - `Item.admin_metadata_access` (who can view a description of the item)
 - `Item.admin_resource_access` (who can access the item itself, if applicable)
+Templates, stored in `src/lantern/resources/templates/_arcgis`, are used to:
 
 Both properties return a `lantern.models.item.base.enums.AccessLevel` enum value, determined by permissions within the
 [Administrative Metadata](#item-administrative-metadata).
 
 Both properties default to `AccessLevel.NONE`. To allow open access, include permissions equivalent to the
 `lantern.lib.metadata_library.models.record.presets.admin.OPEN_ACCESS` permission.
+- combine the record abstract, lineage and link to the catalogue item as the ArcGIS item description
+- format supported licences to look consistent with [Catalogue Items](#catalogue-items)
 
 <!-- pyml disable md028 -->
 > [!CAUTION]
 > The catalogue does not enforce metadata access permissions. They will always evaluate to open access (unrestricted).
+ArcGIS items require a [Record](#records) and an ArcGIS content item, represented by the
+[`lantern.lib.arcgis.gis.dataclasses.Item`](/docs/libraries.md#arcgis-items) class, to set ArcGIS specific
+properties, such the ArcGIS content `type` needed to represent Items as valid ArcGIS content items (via `.item()`).
 
 > [!WARNING]
 > External data access systems are responsible for enforcing any resource permissions that may apply. The catalogue
 > only indicates whether restrictions may apply at an informative level.
+The sharing level of ArcGIS items is set based on the [Item Access Level](#item-access-levels).
 
 > [!WARNING]
 > The catalogue does not consider access constraints set in `metadata.costraints` or `identification.constraints`, as
@@ -305,14 +318,21 @@ Both properties default to `AccessLevel.NONE`. To allow open access, include per
 > [!NOTE]
 > Access constraints SHOULD still be set for visibility to end users and for interoperability with other systems.
 <!-- pyml enable md028 -->
+> This logic does not take account of group based sharing options. Use with caution if this applies to an item.
 
 [Catalogue Items](#catalogue-items) simplify the `admin_resource_access` access level to a binary `restricted`
 property, returning and defaulting to true unless `Item.admin_access_level == AccessLevel.PUBLIC`.
+### ArcGIS items metadata
 
 Where restricted, [Item Templates](/docs/site.md#templates) display additional context in item summaries and
 the data tab (if applicable).
+[ArcGIS Item Metadata](https://developers.arcgis.com/rest/users-groups-and-items/metadata-reference/#add-or-update-metadata)
+can store full metadata instances using a range of information models, including ISO 19115 (via the ISO 19139 encoding).
 
 ### Item distribution options
+The ArcGIS Item class uses this feature to associate a catalogue resource with ArcGIS resources. This is implemented by
+storing the ISO file identifier, using the Esri vendor specific information model, as a one-way, one-to-many,
+child-parent relationship.
 
 Services:
 
@@ -322,6 +342,10 @@ Services:
 - ArcGIS Vector Tile
 
 File types:
+> [!NOTE]
+> Whilst uni-directional, the inverse of this relationship (from parent to children, between catalogue resources to
+> ArcGIS resources) is effectively represented by ArcGIS layer distribution options within catalogue resources, which
+> link to the respective ArcGIS content items.
 
 - CSV
 - Garmin FPL (aviation GPS data)
@@ -333,11 +357,20 @@ File types:
 - PDF (with optional geo-referencing)
 - PNG
 - Esri Shapefile
+### ArcGIS items limitations
 
 Special cases:
+> [!WARNING]
+> This section is Work in Progress (WIP) and may not be complete/accurate.
 
 - BAS published maps purchasing options
 - BAS SAN references
+- ArcGIS items are limited to the properties used in ArcGIS item pages, and that map to the ArcGIS content item
+  information model (i.e. maintenance and progress information is not included as they cannot be represented)
+- only the OGL v3 licence is supported as a licence usage constraint, using others will raise an exception
+- group based sharing options are not supported
+- the Esri vendor specific [Metadata](#arcgis-items-metadata) used is too minimal to be considered valid by the ArcGIS
+  Online/Portal metadata editor
 
 ## Verification Jobs
 

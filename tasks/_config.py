@@ -18,11 +18,15 @@ class ExtraConfig(Config):
         """Types and keys for `dumps_extra`."""
 
         ADMIN_METADATA_KEYS_SIGNING_KEY_PUBLIC: str
+        AGOL_CLIENT_ID: str
+        AGOL_CLIENT_SECRET: str
 
     def dumps_extra(self) -> ConfigDumpSafe:
         """Dump extra config for output to the user with sensitive data redacted."""
         return {
             "ADMIN_METADATA_KEYS_SIGNING_KEY_PUBLIC": self.ADMIN_METADATA_KEYS_RW_SAFE,
+            "AGOL_CLIENT_ID": self.AGOL_CLIENT_ID,
+            "AGOL_CLIENT_SECRET": self.AGOL_CLIENT_SECRET_SAFE,
         }
 
     @property
@@ -37,3 +41,20 @@ class ExtraConfig(Config):
     def ADMIN_METADATA_KEYS_RW_SAFE(self) -> str:  # noqa: N802
         """ADMIN_METADATA_KEYS_RW with value redacted."""
         return self._safe_value if self.ADMIN_METADATA_KEYS_RW.signing_private else ""
+
+    @property
+    def AGOL_CLIENT_ID(self) -> str:  # noqa: N802
+        """Client ID for ArcGIS Online OAuth developer credential for accessing/updating item metadata."""
+        with self.env.prefixed(self._extra_prefix), self.env.prefixed("AGOL_CLIENT_"):
+            return self.env.str("ID")
+
+    @property
+    def AGOL_CLIENT_SECRET(self) -> str:  # noqa: N802
+        """Secret for ArcGIS Online OAuth developer credential for accessing/updating item metadata."""
+        with self.env.prefixed(self._extra_prefix), self.env.prefixed("AGOL_CLIENT_"):
+            return self.env.str("SECRET")
+
+    @property
+    def AGOL_CLIENT_SECRET_SAFE(self) -> str:  # noqa: N802
+        """AGOL_CLIENT_SECRET with value redacted."""
+        return self._safe_value if self.AGOL_CLIENT_SECRET else ""

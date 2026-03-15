@@ -135,6 +135,7 @@ This requires a request to BAS IT asking for:
 /-/
 /collections
 /features
+/guides
 /items
 /legal
 /maps
@@ -261,3 +262,29 @@ Manually:
 > [!TIP]
 > See [this note](https://gitlab.data.bas.ac.uk/MAGIC/dev-docs/-/blob/32f4adf63fae42acab7b8fb749362432b68ad397/tool-power-automate.md#sftp-connector)
 > on getting the SSH server fingerprint in the format Power Automate expects.
+
+## ArcGIS Online
+
+An OAuth client application is registered in ArcGIS Online for accessing restricted content and syncing catalogue
+metadata to ArcGIS items.
+
+Manually:
+
+- using a privileged account, create a developer credentials item:
+  - credential type: *OAuth 2.0 credentials for app authentication*
+  - where will you use the credentials: *Private application that impersonates you*
+  - settings:
+    - referrer URLs: *NONE* (not applicable)
+  - item details:
+    - title: `BAS Data Catalogue (Lantern)`
+    - summary: [1]
+- set the relevant [Extra Config](/docs/dev.md#development-tasks-config) options in the `.env` template
+
+[1]
+
+> Application representing the Lantern data catalogue to allow:
+>
+> - reading items to add distribution options to records for services
+> - read and write item metadata to apply record information to the item
+>
+> Managed by MAGIC.

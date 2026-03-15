@@ -23,7 +23,7 @@ from lantern.lib.metadata_library.models.record.utils.admin import Administratio
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin
 from lantern.lib.metadata_library.models.record.utils.kv import get_kv
 from lantern.models.item.base.elements import Contact, Contacts, Extent, Extents
-from lantern.models.item.base.enums import AccessLevel
+from lantern.models.item.base.enums import AccessLevel, Licence
 from lantern.models.item.base.utils import md_as_html, md_as_plain
 from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
@@ -257,6 +257,23 @@ class ItemBase:
         try:
             return licences[0]
         except IndexError:
+            return None
+
+    @property
+    def licence_enum(self) -> Licence | None:
+        """
+        Licence reference.
+
+        Returns a licence enum value or None if not defined or recognised.
+
+        Defensive check as records are not limited to licences supported by catalogue items and so should not fail if
+        an unknown value is used. If records should be limited, a check should be added in `Record.validate()` instead.
+        """
+        if not (self.licence and self.licence.href):
+            return None
+        try:
+            return Licence(self.licence.href)
+        except ValueError:
             return None
 
     @property

@@ -32,3 +32,5 @@ LANTERN_VERIFY_SAN_PROXY_ENDPOINT="op://Infrastructure/SCAR ADD Metadata Toolbox
 
 # Dev tasks
 X_ADMIN_METADATA_SIGNING_KEY_PRIVATE="op://Shared/MAGIC administrative metadata signing key/private-jwk-escaped"
+X_AGOL_CLIENT_ID="op://Infrastructure/l6srwxde4bj3e3tiwegsixocyq/username"
+X_AGOL_CLIENT_SECRET="op://Infrastructure/l6srwxde4bj3e3tiwegsixocyq/credential"

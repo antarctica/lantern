@@ -16,7 +16,7 @@ from lantern.lib.metadata_library.models.record.elements.common import (
 from lantern.lib.metadata_library.models.record.elements.common import Contact as RecordContact
 from lantern.lib.metadata_library.models.record.elements.common import Contacts as RecordContacts
 from lantern.lib.metadata_library.models.record.elements.data_quality import DataQuality, Lineage
-from lantern.lib.metadata_library.models.record.elements.distribution import Distribution, TransferOption
+from lantern.lib.metadata_library.models.record.elements.distribution import Distribution, Distributions, TransferOption
 from lantern.lib.metadata_library.models.record.elements.identification import (
     Aggregation,
     Aggregations,
@@ -314,14 +314,18 @@ class TestItemBase:
 
     def test_distributions(self, fx_revision_model_min: RecordRevision):
         """Can get record distributions as item distributions."""
-        expected = [
-            Distribution(
-                distributor=RecordContact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
-                transfer_option=TransferOption(
-                    online_resource=OnlineResource(href="x", function=OnlineResourceFunctionCode.DOWNLOAD)
-                ),
-            )
-        ]
+        expected = Distributions(
+            [
+                Distribution(
+                    distributor=RecordContact(
+                        organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}
+                    ),
+                    transfer_option=TransferOption(
+                        online_resource=OnlineResource(href="x", function=OnlineResourceFunctionCode.DOWNLOAD)
+                    ),
+                )
+            ]
+        )
         fx_revision_model_min.distribution = expected
 
         item = ItemBase(fx_revision_model_min)

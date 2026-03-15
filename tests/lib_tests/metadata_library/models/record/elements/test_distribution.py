@@ -4,13 +4,14 @@ import pytest
 from lantern.lib.metadata_library.models.record.elements.common import Contact, ContactIdentity
 from lantern.lib.metadata_library.models.record.elements.distribution import (
     Distribution,
+    Distributions,
     Format,
     OnlineResource,
     Size,
     TransferOption,
 )
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode, OnlineResourceFunctionCode
-from lantern.lib.metadata_library.models.record.utils.clean import clean_dict
+from lantern.lib.metadata_library.models.record.utils.clean import clean_dict, clean_list
 
 
 class TestFormat:
@@ -127,5 +128,112 @@ class TestDistribution:
         converter = cattrs.Converter()
         converter.register_unstructure_hook(Distribution, lambda d: d.unstructure())
         result = clean_dict(converter.unstructure(value))
+
+        assert result == expected
+
+
+class TestDistributions:
+    """Test Distribution options container."""
+
+    test_distribution = Distribution(
+        distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
+        transfer_option=TransferOption(
+            online_resource=OnlineResource(href="x", function=OnlineResourceFunctionCode.DOWNLOAD)
+        ),
+    )
+
+    def test_init(self):
+        """Can create a Distribution options container from directly assigned properties."""
+        expected = self.test_distribution
+        distributions = Distributions([expected])
+
+        assert len(distributions) == 1
+        assert distributions[0] == expected
+
+    @pytest.mark.parametrize(
+        ("before", "after"),
+        [
+            (Distributions([]), Distributions([test_distribution])),
+            (Distributions([test_distribution]), Distributions([test_distribution])),
+        ],
+    )
+    def test_ensure(self, before: Distributions, after: Distributions):
+        """Can append a distribution option as needed."""
+        value = self.test_distribution
+
+        before.ensure(value)
+        assert before == after
+
+    def test_structure(self):
+        """Can create a Distribution options container by converting a list of plain types."""
+        expected = Distributions(
+            [
+                Distribution(
+                    distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
+                    transfer_option=TransferOption(
+                        online_resource=OnlineResource(href="x", function=OnlineResourceFunctionCode.DOWNLOAD)
+                    ),
+                )
+            ]
+        )
+        result = Distributions.structure(
+            [
+                {
+                    "distributor": {"organisation": {"name": "x"}, "role": ["distributor"]},
+                    "transfer_option": {"online_resource": {"href": "x", "function": "download"}},
+                }
+            ]
+        )
+
+        assert type(result) is type(expected)
+        assert result == expected
+
+    def test_structure_cattrs(self):
+        """Can use Cattrs to create a Distribution options instance from plain types."""
+        value = [
+            {
+                "distributor": {"organisation": {"name": "x"}, "role": ["distributor"]},
+                "transfer_option": {"online_resource": {"href": "x", "function": "download"}},
+            }
+        ]
+        expected = Distributions(
+            [
+                Distribution(
+                    distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
+                    transfer_option=TransferOption(
+                        online_resource=OnlineResource(href="x", function=OnlineResourceFunctionCode.DOWNLOAD)
+                    ),
+                )
+            ]
+        )
+
+        converter = cattrs.Converter()
+        converter.register_structure_hook(Distributions, lambda d, t: Distributions.structure(d))
+        result = converter.structure(value, Distributions)
+
+        assert result == expected
+
+    def test_unstructure_cattrs(self):
+        """Can use Cattrs to convert a Distribution options instance into plain types."""
+        value = Distributions(
+            [
+                Distribution(
+                    distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
+                    transfer_option=TransferOption(
+                        online_resource=OnlineResource(href="x", function=OnlineResourceFunctionCode.DOWNLOAD)
+                    ),
+                )
+            ]
+        )
+        expected = [
+            {
+                "distributor": {"organisation": {"name": "x"}, "role": ["distributor"]},
+                "transfer_option": {"online_resource": {"href": "x", "function": "download"}},
+            }
+        ]
+
+        converter = cattrs.Converter()
+        converter.register_unstructure_hook(Distributions, lambda d: d.unstructure())
+        result = clean_list(converter.unstructure(value))
 
         assert result == expected

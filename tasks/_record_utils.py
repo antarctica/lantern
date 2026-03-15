@@ -216,8 +216,7 @@ def clean_record_configs(
 def confirm_source(logger: logging.Logger, store: GitLabStore, action: str) -> None:
     """Confirm store source."""
     logger.info(f"{action} branch '{store._source.ref}' on '{store._project.http_url_to_repo}'")
-    answers = inquirer.prompt([inquirer.Confirm(name="confirm", message="Correct source?", default=True)])
-    if not answers["confirm"]:
+    if not inquirer.confirm(message="Correct source?", default=True):
         logger.info("Aborting. Set `STORE_GITLAB_*` in config to change source.")
         sys.exit(1)
 
@@ -230,10 +229,10 @@ def pick_records(logger: logging.Logger, records: list[Record]) -> list[Record]:
     }
     logger.debug(f"Choices: {list(choices.keys())}")
 
-    answers = inquirer.prompt([inquirer.Checkbox("selections", message="Records", choices=list(choices.keys()))])
+    selections = inquirer.checkbox(message="Records", choices=list(choices.keys()))
 
     records_ = {r.file_identifier: r for r in records}
-    selected_fids = [choices[k] for k in answers["selections"]]
+    selected_fids = [choices[k] for k in selections]
     logger.info(f"Selected records: {selected_fids}")
     return [records_[fid] for fid in selected_fids]
 
@@ -241,7 +240,7 @@ def pick_records(logger: logging.Logger, records: list[Record]) -> list[Record]:
 def get_record(logger: logging.Logger, store: GitLabStore, identifier: str | None = None) -> Record:
     """Get record from store using flexible, and optionally preset, identifier."""
     if identifier is None:
-        identifier = inquirer.prompt([inquirer.Text("id", message="Record identifier")])["id"]
+        identifier = inquirer.text(message="Record identifier")
     file_identifier = next(iter(process_record_selections(logger=logger, identifiers=[identifier])))
     return store.select_one(file_identifier=file_identifier)
 
@@ -286,11 +285,6 @@ def time_task(label: str) -> Callable:
 
 def confirm(logger: logging.Logger, message: str) -> None:
     """Confirm user wants to proceed."""
-    answers = inquirer.prompt(
-        [
-            inquirer.Confirm(name="confirm", message=message, default=True),
-        ]
-    )
-    if not answers["confirm"]:
+    if not inquirer.confirm(message=message, default=True):
         logger.info("Cancelled by the user.")
         sys.exit(1)

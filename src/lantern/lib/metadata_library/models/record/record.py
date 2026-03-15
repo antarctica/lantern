@@ -16,7 +16,7 @@ from importlib_resources import files as resources_files
 from jsonschema import ValidationError, validate
 
 from lantern.lib.metadata_library.models.record.elements.data_quality import DataQuality
-from lantern.lib.metadata_library.models.record.elements.distribution import Distribution
+from lantern.lib.metadata_library.models.record.elements.distribution import Distributions
 from lantern.lib.metadata_library.models.record.elements.identification import Identification
 from lantern.lib.metadata_library.models.record.elements.metadata import Metadata
 from lantern.lib.metadata_library.models.record.elements.projection import ReferenceSystemInfo
@@ -120,7 +120,7 @@ class Record:
     reference_system_info: ReferenceSystemInfo | None = None
     identification: Identification
     data_quality: DataQuality = field(default_factory=DataQuality)
-    distribution: list[Distribution] = field(default_factory=list)
+    distribution: Distributions = field(default_factory=Distributions)
 
     def __post_init__(self) -> None:
         """
@@ -224,6 +224,7 @@ class Record:
         converter.register_structure_hook(ReferenceSystemInfo, lambda d, t: ReferenceSystemInfo.structure(d))
         converter.register_structure_hook(Identification, lambda d, t: Identification.structure(d))
         converter.register_structure_hook(DataQuality, lambda d, t: DataQuality.structure(d))
+        converter.register_structure_hook(Distributions, lambda d, t: Distributions.structure(d))
 
         return converter
 
@@ -252,7 +253,7 @@ class Record:
         converter.register_unstructure_hook(ReferenceSystemInfo, lambda d: d.unstructure())
         converter.register_unstructure_hook(Identification, lambda d: d.unstructure())
         converter.register_unstructure_hook(DataQuality, lambda d: d.unstructure())
-        converter.register_unstructure_hook(Distribution, lambda d: d.unstructure())
+        converter.register_unstructure_hook(Distributions, lambda d: d.unstructure())
         return converter
 
     @staticmethod

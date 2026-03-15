@@ -10,6 +10,7 @@ from lantern.lib.metadata_library.models.record.elements.common import (
 )
 from lantern.lib.metadata_library.models.record.elements.distribution import (
     Distribution,
+    Distributions,
     Format,
     Size,
     TransferOption,
@@ -83,47 +84,49 @@ distributor = Contact(
     ),
     role={ContactRoleCode.DISTRIBUTOR},
 )
-record.distribution = [
-    Distribution(
-        distributor=distributor,
-        format=Format(
-            format="GeoJSON",
-            href="https://www.iana.org/assignments/media-types/application/geo+json",
-        ),
-        transfer_option=TransferOption(
-            size=Size(unit="bytes", magnitude=24 * 1024 * 1024),
-            online_resource=OnlineResource(
-                href="x",
-                function=OnlineResourceFunctionCode.DOWNLOAD,
-                title="GeoJSON",
-                description="Access information as a GeoJSON file.",
+record.distribution = Distributions(
+    [
+        Distribution(
+            distributor=distributor,
+            format=Format(
+                format="GeoJSON",
+                href="https://www.iana.org/assignments/media-types/application/geo+json",
+            ),
+            transfer_option=TransferOption(
+                size=Size(unit="bytes", magnitude=24 * 1024 * 1024),
+                online_resource=OnlineResource(
+                    href="x",
+                    function=OnlineResourceFunctionCode.DOWNLOAD,
+                    title="GeoJSON",
+                    description="Access information as a GeoJSON file.",
+                ),
             ),
         ),
-    ),
-    Distribution(
-        distributor=distributor,
-        format=Format(
-            format="PDF",
-            href="https://www.iana.org/assignments/media-types/application/pdf",
-        ),
-        transfer_option=TransferOption(
-            size=Size(unit="bytes", magnitude=321 * 1024 * 1024),
-            online_resource=OnlineResource(
-                href="x",
-                function=OnlineResourceFunctionCode.DOWNLOAD,
-                title="PDF",
-                description="Access information as a PDF file.",
+        Distribution(
+            distributor=distributor,
+            format=Format(
+                format="PDF",
+                href="https://www.iana.org/assignments/media-types/application/pdf",
+            ),
+            transfer_option=TransferOption(
+                size=Size(unit="bytes", magnitude=321 * 1024 * 1024),
+                online_resource=OnlineResource(
+                    href="x",
+                    function=OnlineResourceFunctionCode.DOWNLOAD,
+                    title="PDF",
+                    description="Access information as a PDF file.",
+                ),
             ),
         ),
-    ),
-    Distribution(
-        distributor=distributor,
-        transfer_option=TransferOption(
-            online_resource=OnlineResource(
-                href="sftp://san.nerc-bas.ac.uk/data/x",
-                function=OnlineResourceFunctionCode.DOWNLOAD,
-                title="Access from the BAS SAN",
+        Distribution(
+            distributor=distributor,
+            transfer_option=TransferOption(
+                online_resource=OnlineResource(
+                    href="sftp://san.nerc-bas.ac.uk/data/x",
+                    function=OnlineResourceFunctionCode.DOWNLOAD,
+                    title="Access from the BAS SAN",
+                ),
             ),
         ),
-    ),
-]
+    ]
+)

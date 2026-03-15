@@ -28,7 +28,7 @@ def _get_args(cli_identifiers: str | None) -> list[str]:
     if cli_identifiers:
         print("Record identifiers from command line arguments:")
         print(f"> {cli_identifiers}")
-        if not inquirer.prompt([inquirer.Confirm("continue", message="Add others?", default=False)])["continue"]:
+        if not inquirer.confirm(message="Add others?", default=False):
             return [cli_identifiers]
 
     print("Record identifiers can be URLs, file names, or bare identifiers with optional markdown formatting.")
@@ -77,12 +77,7 @@ def _confirm_selection(file_identifiers: set[str]) -> bool:
     for file_identifier in file_identifiers:
         print(f"- {file_identifier}")
 
-    answers = inquirer.prompt(
-        [
-            inquirer.Confirm("confirm", message="Confirm selection?", default=True),
-        ]
-    )
-    return answers["confirm"]
+    return inquirer.confirm(message="Confirm selection?", default=True)
 
 
 def main() -> None:

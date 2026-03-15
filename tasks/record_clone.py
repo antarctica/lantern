@@ -19,32 +19,31 @@ from lantern.models.record.record import Record as CatalogueRecord
 
 def _get_cli_args() -> dict:
     """
-    Get optional command line arguments.
+    Get command line arguments.
 
-    Missing arguments will be prompted for interactively and return as None here.
+    Source record identifier is required. Target is optional and will be prompted for interactively if not set.
     """
     parser = ArgumentParser(description="Clone record from cache into import directory.")
     parser.add_argument(
         "--source",
         type=str,
-        help="Optional source record identifier (file identifier, URL, or file name). Will interactively prompt if missing.",
+        help="Source record identifier (file identifier, URL, or file name).",
     )
     parser.add_argument(
         "--target",
         type=str,
         help="Optional target record identifier. Will interactively prompt if missing.",
     )
+    if not parser.parse_args().source:
+        msg = "Source record identifier required."
+        raise ValueError(msg) from None
     return {"source_id": parser.parse_args().source, "target_id": parser.parse_args().target}
 
 
 def _get_new_identifier(identifier: str | None = None) -> str:
     if identifier is not None:
         return identifier
-    return inquirer.prompt(
-        [
-            inquirer.Text("id", message="File identifier (random default)", default=str(uuid4())),
-        ]
-    )["id"]
+    return inquirer.text(message="File identifier (random default)", default=str(uuid4()))
 
 
 def _clone_record(

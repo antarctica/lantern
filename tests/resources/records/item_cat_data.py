@@ -7,6 +7,7 @@ from lantern.lib.metadata_library.models.record.elements.common import (
 )
 from lantern.lib.metadata_library.models.record.elements.distribution import (
     Distribution,
+    Distributions,
     Format,
     Size,
     TransferOption,
@@ -844,4 +845,4 @@ record.identification.aggregations.append(
     )
 )
 
-record.distribution = list(distributions.values())
+record.distribution = Distributions(distributions.values())

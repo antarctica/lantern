@@ -1,4 +1,4 @@
-# Lantern
+# 🏮 Lantern
 
 A prototype [Data Catalogue](https://data.bas.ac.uk/-/index) for BAS discovery metadata.
 
@@ -22,17 +22,15 @@ A data discovery tool used to find, evaluate and access resources produced, mana
 
 ## Usage
 
-See [Access](/docs/access.md) documentation for how to access catalogue records.
+See [Access](/docs/access.md) for how to access catalogue records.
 
-See [Usage](/docs/usage.md) documentation for how to load records and build the catalogue static site.
+See [Usage](/docs/usage.md) for how to manage records and wider catalogue site.
 
 ## Architecture
 
-See [Architecture](/docs/architecture.md) documentation.
+See [Architecture](/docs/architecture.md) for a high level description of how this project works.
 
-## Infrastructure
-
-See [Infrastructure](/docs/infrastructure.md) documentation.
+See [Infrastructure](/docs/infrastructure.md) for details of the infrastructure used to implement this project.
 
 ## Development
 
@@ -42,12 +40,7 @@ See [Development](/docs/dev.md) documentation.
 
 - [latest release 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/lantern-exp/-/releases/permalink/latest)
 - [all releases 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/lantern-exp/-/releases)
-
-### Release workflow
-
-Create a
-[release issue 🛡](https://gitlab.data.bas.ac.uk/MAGIC/lantern-exp/-/issues/new?issue[title]=x.x.x%20release&issuable_template=release)
-and follow its instructions.
+- [create release 🛡](https://gitlab.data.bas.ac.uk/MAGIC/lantern-exp/-/issues/new?issue[title]=x.x.x%20release&issuable_template=release)
 
 ## Project maintainer
 
@@ -55,6 +48,13 @@ Mapping and Geographic Information Centre ([MAGIC](https://www.bas.ac.uk/teams/m
 ([BAS](https://www.bas.ac.uk)).
 
 Project lead: [@felnne](https://www.bas.ac.uk/profile/felnne).
+
+## Project name
+
+> What does Lantern mean?
+
+Nothing, it's simply an unambiguous label to differentiate this project from other data catalogues. It avoids using
+generic terms or names that will get out of date such ‘new catalogue’ etc.
 
 ## Data protection
 

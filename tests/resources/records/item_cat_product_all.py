@@ -16,6 +16,7 @@ from lantern.lib.metadata_library.models.record.elements.common import (
 )
 from lantern.lib.metadata_library.models.record.elements.distribution import (
     Distribution,
+    Distributions,
     Format,
     Size,
     TransferOption,
@@ -306,214 +307,216 @@ record.identification.aggregations.append(
 # Can't add opposite side relation as not a physical map side
 # Can't add a parent physical map as not a physical map side
 
-record.distribution = [
-    Distribution(
-        distributor=Contact(
-            organisation=ContactIdentity(
-                name="Environmental Systems Research Institute", href="https://ror.org/0428exr50", title="ror"
+record.distribution = Distributions(
+    [
+        Distribution(
+            distributor=Contact(
+                organisation=ContactIdentity(
+                    name="Environmental Systems Research Institute", href="https://ror.org/0428exr50", title="ror"
+                ),
+                address=Address(
+                    delivery_point="380 New York Street",
+                    city="Redlands",
+                    administrative_area="California",
+                    postal_code="92373",
+                    country="United States of America",
+                ),
+                online_resource=OnlineResource(
+                    href="https://www.esri.com",
+                    title="GIS Mapping Software, Location Intelligence & Spatial Analytics | Esri",
+                    description="Corporate website for Environmental Systems Research Institute (ESRI).",
+                    function=OnlineResourceFunctionCode.INFORMATION,
+                ),
+                role={ContactRoleCode.DISTRIBUTOR},
             ),
-            address=Address(
-                delivery_point="380 New York Street",
-                city="Redlands",
-                administrative_area="California",
-                postal_code="92373",
-                country="United States of America",
+            format=Format(
+                format="ArcGIS Feature Service",
+                href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+feature",
             ),
-            online_resource=OnlineResource(
-                href="https://www.esri.com",
-                title="GIS Mapping Software, Location Intelligence & Spatial Analytics | Esri",
-                description="Corporate website for Environmental Systems Research Institute (ESRI).",
-                function=OnlineResourceFunctionCode.INFORMATION,
-            ),
-            role={ContactRoleCode.DISTRIBUTOR},
-        ),
-        format=Format(
-            format="ArcGIS Feature Service",
-            href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+feature",
-        ),
-        transfer_option=TransferOption(
-            online_resource=OnlineResource(
-                href="x",
-                function=OnlineResourceFunctionCode.DOWNLOAD,
-                title="ArcGIS Online",
-                description="Access information as an ArcGIS feature service.",
-            )
-        ),
-    ),
-    Distribution(
-        distributor=Contact(
-            organisation=ContactIdentity(
-                name="Environmental Systems Research Institute", href="https://ror.org/0428exr50", title="ror"
-            ),
-            address=Address(
-                delivery_point="380 New York Street",
-                city="Redlands",
-                administrative_area="California",
-                postal_code="92373",
-                country="United States of America",
-            ),
-            online_resource=OnlineResource(
-                href="https://www.esri.com",
-                title="GIS Mapping Software, Location Intelligence & Spatial Analytics | Esri",
-                description="Corporate website for Environmental Systems Research Institute (ESRI).",
-                function=OnlineResourceFunctionCode.INFORMATION,
-            ),
-            role={ContactRoleCode.DISTRIBUTOR},
-        ),
-        format=Format(
-            format="ArcGIS Feature Layer",
-            href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+feature",
-        ),
-        transfer_option=TransferOption(
-            online_resource=OnlineResource(
-                href="x",
-                function=OnlineResourceFunctionCode.DOWNLOAD,
-                title="ArcGIS Online",
-                description="Access information as an ArcGIS feature layer.",
-            )
-        ),
-    ),
-    Distribution(
-        distributor=Contact(
-            organisation=ContactIdentity(
-                name="Environmental Systems Research Institute", href="https://ror.org/0428exr50", title="ror"
-            ),
-            address=Address(
-                delivery_point="380 New York Street",
-                city="Redlands",
-                administrative_area="California",
-                postal_code="92373",
-                country="United States of America",
-            ),
-            online_resource=OnlineResource(
-                href="https://www.esri.com",
-                title="GIS Mapping Software, Location Intelligence & Spatial Analytics | Esri",
-                description="Corporate website for Environmental Systems Research Institute (ESRI).",
-                function=OnlineResourceFunctionCode.INFORMATION,
-            ),
-            role={ContactRoleCode.DISTRIBUTOR},
-        ),
-        format=Format(
-            format="OGC API Features Service",
-            href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/ogc+api+feature",
-        ),
-        transfer_option=TransferOption(
-            online_resource=OnlineResource(
-                href="y",
-                function=OnlineResourceFunctionCode.DOWNLOAD,
-                title="ArcGIS Online",
-                description="Access information as an OGC API feature service.",
-            )
-        ),
-    ),
-    Distribution(
-        distributor=Contact(
-            organisation=ContactIdentity(
-                name="Environmental Systems Research Institute", href="https://ror.org/0428exr50", title="ror"
-            ),
-            address=Address(
-                delivery_point="380 New York Street",
-                city="Redlands",
-                administrative_area="California",
-                postal_code="92373",
-                country="United States of America",
-            ),
-            online_resource=OnlineResource(
-                href="https://www.esri.com",
-                title="GIS Mapping Software, Location Intelligence & Spatial Analytics | Esri",
-                description="Corporate website for Environmental Systems Research Institute (ESRI).",
-                function=OnlineResourceFunctionCode.INFORMATION,
-            ),
-            role={ContactRoleCode.DISTRIBUTOR},
-        ),
-        format=Format(
-            format="ArcGIS OGC Feature Layer",
-            href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+feature+ogc",
-        ),
-        transfer_option=TransferOption(
-            online_resource=OnlineResource(
-                href="y",
-                function=OnlineResourceFunctionCode.DOWNLOAD,
-                title="ArcGIS Online",
-                description="Access information as an ArcGIS OGC feature layer.",
-            )
-        ),
-    ),
-    Distribution(
-        distributor=Contact(
-            organisation=ContactIdentity(
-                name="Mapping and Geographic Information Centre, British Antarctic Survey",
-                href="https://ror.org/01rhff309",
-                title="ror",
-            ),
-            phone="+44 (0)1223 221400",
-            email="magic@bas.ac.uk",
-            address=Address(
-                delivery_point="British Antarctic Survey, High Cross, Madingley Road",
-                city="Cambridge",
-                administrative_area="Cambridgeshire",
-                postal_code="CB3 0ET",
-                country="United Kingdom",
-            ),
-            online_resource=OnlineResource(
-                href="https://www.bas.ac.uk/teams/magic",
-                title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-                description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
-                function=OnlineResourceFunctionCode.INFORMATION,
-            ),
-            role={ContactRoleCode.DISTRIBUTOR},
-        ),
-        format=Format(
-            format="PNG",
-            href="https://www.iana.org/assignments/media-types/image/png",
-        ),
-        transfer_option=TransferOption(
-            size=Size(unit="bytes", magnitude=6 * 1024),
-            online_resource=OnlineResource(
-                href="x",
-                function=OnlineResourceFunctionCode.DOWNLOAD,
+            transfer_option=TransferOption(
+                online_resource=OnlineResource(
+                    href="x",
+                    function=OnlineResourceFunctionCode.DOWNLOAD,
+                    title="ArcGIS Online",
+                    description="Access information as an ArcGIS feature service.",
+                )
             ),
         ),
-    ),
-    Distribution(
-        distributor=Contact(
-            organisation=ContactIdentity(
-                name="Mapping and Geographic Information Centre, British Antarctic Survey",
-                href="https://ror.org/01rhff309",
-                title="ror",
+        Distribution(
+            distributor=Contact(
+                organisation=ContactIdentity(
+                    name="Environmental Systems Research Institute", href="https://ror.org/0428exr50", title="ror"
+                ),
+                address=Address(
+                    delivery_point="380 New York Street",
+                    city="Redlands",
+                    administrative_area="California",
+                    postal_code="92373",
+                    country="United States of America",
+                ),
+                online_resource=OnlineResource(
+                    href="https://www.esri.com",
+                    title="GIS Mapping Software, Location Intelligence & Spatial Analytics | Esri",
+                    description="Corporate website for Environmental Systems Research Institute (ESRI).",
+                    function=OnlineResourceFunctionCode.INFORMATION,
+                ),
+                role={ContactRoleCode.DISTRIBUTOR},
             ),
-            phone="+44 (0)1223 221400",
-            email="magic@bas.ac.uk",
-            address=Address(
-                delivery_point="British Antarctic Survey, High Cross, Madingley Road",
-                city="Cambridge",
-                administrative_area="Cambridgeshire",
-                postal_code="CB3 0ET",
-                country="United Kingdom",
+            format=Format(
+                format="ArcGIS Feature Layer",
+                href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+feature",
             ),
-            online_resource=OnlineResource(
-                href="https://www.bas.ac.uk/teams/magic",
-                title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-                description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
-                function=OnlineResourceFunctionCode.INFORMATION,
-            ),
-            role={ContactRoleCode.DISTRIBUTOR},
-        ),
-        format=Format(
-            format="PNG",
-            href="https://www.iana.org/assignments/media-types/image/png",
-        ),
-        transfer_option=TransferOption(
-            size=Size(unit="bytes", magnitude=6 * 1024),
-            online_resource=OnlineResource(
-                href="x",
-                function=OnlineResourceFunctionCode.DOWNLOAD,
-                title="PNG (alt title)",
-                description="Optional value.",
+            transfer_option=TransferOption(
+                online_resource=OnlineResource(
+                    href="x",
+                    function=OnlineResourceFunctionCode.DOWNLOAD,
+                    title="ArcGIS Online",
+                    description="Access information as an ArcGIS feature layer.",
+                )
             ),
         ),
-    ),
-]
+        Distribution(
+            distributor=Contact(
+                organisation=ContactIdentity(
+                    name="Environmental Systems Research Institute", href="https://ror.org/0428exr50", title="ror"
+                ),
+                address=Address(
+                    delivery_point="380 New York Street",
+                    city="Redlands",
+                    administrative_area="California",
+                    postal_code="92373",
+                    country="United States of America",
+                ),
+                online_resource=OnlineResource(
+                    href="https://www.esri.com",
+                    title="GIS Mapping Software, Location Intelligence & Spatial Analytics | Esri",
+                    description="Corporate website for Environmental Systems Research Institute (ESRI).",
+                    function=OnlineResourceFunctionCode.INFORMATION,
+                ),
+                role={ContactRoleCode.DISTRIBUTOR},
+            ),
+            format=Format(
+                format="OGC API Features Service",
+                href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/ogc+api+feature",
+            ),
+            transfer_option=TransferOption(
+                online_resource=OnlineResource(
+                    href="y",
+                    function=OnlineResourceFunctionCode.DOWNLOAD,
+                    title="ArcGIS Online",
+                    description="Access information as an OGC API feature service.",
+                )
+            ),
+        ),
+        Distribution(
+            distributor=Contact(
+                organisation=ContactIdentity(
+                    name="Environmental Systems Research Institute", href="https://ror.org/0428exr50", title="ror"
+                ),
+                address=Address(
+                    delivery_point="380 New York Street",
+                    city="Redlands",
+                    administrative_area="California",
+                    postal_code="92373",
+                    country="United States of America",
+                ),
+                online_resource=OnlineResource(
+                    href="https://www.esri.com",
+                    title="GIS Mapping Software, Location Intelligence & Spatial Analytics | Esri",
+                    description="Corporate website for Environmental Systems Research Institute (ESRI).",
+                    function=OnlineResourceFunctionCode.INFORMATION,
+                ),
+                role={ContactRoleCode.DISTRIBUTOR},
+            ),
+            format=Format(
+                format="ArcGIS OGC Feature Layer",
+                href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+feature+ogc",
+            ),
+            transfer_option=TransferOption(
+                online_resource=OnlineResource(
+                    href="y",
+                    function=OnlineResourceFunctionCode.DOWNLOAD,
+                    title="ArcGIS Online",
+                    description="Access information as an ArcGIS OGC feature layer.",
+                )
+            ),
+        ),
+        Distribution(
+            distributor=Contact(
+                organisation=ContactIdentity(
+                    name="Mapping and Geographic Information Centre, British Antarctic Survey",
+                    href="https://ror.org/01rhff309",
+                    title="ror",
+                ),
+                phone="+44 (0)1223 221400",
+                email="magic@bas.ac.uk",
+                address=Address(
+                    delivery_point="British Antarctic Survey, High Cross, Madingley Road",
+                    city="Cambridge",
+                    administrative_area="Cambridgeshire",
+                    postal_code="CB3 0ET",
+                    country="United Kingdom",
+                ),
+                online_resource=OnlineResource(
+                    href="https://www.bas.ac.uk/teams/magic",
+                    title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
+                    description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
+                    function=OnlineResourceFunctionCode.INFORMATION,
+                ),
+                role={ContactRoleCode.DISTRIBUTOR},
+            ),
+            format=Format(
+                format="PNG",
+                href="https://www.iana.org/assignments/media-types/image/png",
+            ),
+            transfer_option=TransferOption(
+                size=Size(unit="bytes", magnitude=6 * 1024),
+                online_resource=OnlineResource(
+                    href="x",
+                    function=OnlineResourceFunctionCode.DOWNLOAD,
+                ),
+            ),
+        ),
+        Distribution(
+            distributor=Contact(
+                organisation=ContactIdentity(
+                    name="Mapping and Geographic Information Centre, British Antarctic Survey",
+                    href="https://ror.org/01rhff309",
+                    title="ror",
+                ),
+                phone="+44 (0)1223 221400",
+                email="magic@bas.ac.uk",
+                address=Address(
+                    delivery_point="British Antarctic Survey, High Cross, Madingley Road",
+                    city="Cambridge",
+                    administrative_area="Cambridgeshire",
+                    postal_code="CB3 0ET",
+                    country="United Kingdom",
+                ),
+                online_resource=OnlineResource(
+                    href="https://www.bas.ac.uk/teams/magic",
+                    title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
+                    description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
+                    function=OnlineResourceFunctionCode.INFORMATION,
+                ),
+                role={ContactRoleCode.DISTRIBUTOR},
+            ),
+            format=Format(
+                format="PNG",
+                href="https://www.iana.org/assignments/media-types/image/png",
+            ),
+            transfer_option=TransferOption(
+                size=Size(unit="bytes", magnitude=6 * 1024),
+                online_resource=OnlineResource(
+                    href="x",
+                    function=OnlineResourceFunctionCode.DOWNLOAD,
+                    title="PNG (alt title)",
+                    description="Optional value.",
+                ),
+            ),
+        ),
+    ]
+)
 
 keys = test_keys()
 administration = get_admin(keys=keys, record=record)

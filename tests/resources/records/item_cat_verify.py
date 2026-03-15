@@ -6,6 +6,7 @@ from lantern.lib.metadata_library.models.record.elements.common import (
 )
 from lantern.lib.metadata_library.models.record.elements.distribution import (
     Distribution,
+    Distributions,
     Format,
     Size,
     TransferOption,
@@ -317,12 +318,14 @@ record = make_record(
     abstract=abstract,
     purpose="Item to test all distinct verification download types.",
 )
-record.distribution = [
-    *file_distributions,
-    *arc_layer_distributions,
-    *arc_service_distributions,
-    nora_file,
-    sharepoint_file,
-    map_purchase,
-    san_reference,
-]
+record.distribution = Distributions(
+    [
+        *file_distributions,
+        *arc_layer_distributions,
+        *arc_service_distributions,
+        nora_file,
+        sharepoint_file,
+        map_purchase,
+        san_reference,
+    ]
+)

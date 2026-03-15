@@ -29,7 +29,13 @@ from lantern.lib.metadata_library.models.record.elements.data_quality import (
     DomainConsistency,
     Lineage,
 )
-from lantern.lib.metadata_library.models.record.elements.distribution import Distribution, Format, Size, TransferOption
+from lantern.lib.metadata_library.models.record.elements.distribution import (
+    Distribution,
+    Distributions,
+    Format,
+    Size,
+    TransferOption,
+)
 from lantern.lib.metadata_library.models.record.elements.identification import (
     Aggregation,
     Aggregations,
@@ -124,18 +130,20 @@ class TestDataTab:
     @pytest.mark.parametrize(
         "value",
         [
-            [],
-            [
-                Distribution(
-                    distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
-                    transfer_option=TransferOption(
-                        online_resource=OnlineResource(href="x", function=OnlineResourceFunctionCode.DOWNLOAD)
-                    ),
-                )
-            ],
+            Distributions([]),
+            Distributions(
+                [
+                    Distribution(
+                        distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
+                        transfer_option=TransferOption(
+                            online_resource=OnlineResource(href="x", function=OnlineResourceFunctionCode.DOWNLOAD)
+                        ),
+                    )
+                ]
+            ),
         ],
     )
-    def test_enabled(self, fx_item_cat_model_min: ItemCatalogue, value: list[Distribution]):
+    def test_enabled(self, fx_item_cat_model_min: ItemCatalogue, value: Distributions):
         """Can get data tab if enabled in item."""
         fx_item_cat_model_min._record.distribution = value
         expected = fx_item_cat_model_min._data.enabled
@@ -148,16 +156,18 @@ class TestDataTab:
 
     def test_data_download(self, fx_item_cat_model_min: ItemCatalogue):
         """Can get individual data elements for download distributions based on values from item."""
-        fx_item_cat_model_min._record.distribution = [
-            Distribution(
-                distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
-                format=Format(format="x", href="https://www.iana.org/assignments/media-types/image/png"),
-                transfer_option=TransferOption(
-                    size=Size(unit="bytes", magnitude=1024),
-                    online_resource=OnlineResource(href="x", function=OnlineResourceFunctionCode.DOWNLOAD),
-                ),
-            )
-        ]
+        fx_item_cat_model_min._record.distribution = Distributions(
+            [
+                Distribution(
+                    distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
+                    format=Format(format="x", href="https://www.iana.org/assignments/media-types/image/png"),
+                    transfer_option=TransferOption(
+                        size=Size(unit="bytes", magnitude=1024),
+                        online_resource=OnlineResource(href="x", function=OnlineResourceFunctionCode.DOWNLOAD),
+                    ),
+                )
+            ]
+        )
         expected = fx_item_cat_model_min._data.items[0]
         html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
 
@@ -170,18 +180,20 @@ class TestDataTab:
     @pytest.mark.parametrize("value", [None, "x"])
     def test_data_description(self, fx_item_cat_model_min: ItemCatalogue, value: str | None):
         """Can get optional data descriptions based on values from item."""
-        fx_item_cat_model_min._record.distribution = [
-            Distribution(
-                distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
-                format=Format(format="x", href="https://www.iana.org/assignments/media-types/image/png"),
-                transfer_option=TransferOption(
-                    size=Size(unit="bytes", magnitude=1024),
-                    online_resource=OnlineResource(
-                        href="x", description=value, function=OnlineResourceFunctionCode.DOWNLOAD
+        fx_item_cat_model_min._record.distribution = Distributions(
+            [
+                Distribution(
+                    distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
+                    format=Format(format="x", href="https://www.iana.org/assignments/media-types/image/png"),
+                    transfer_option=TransferOption(
+                        size=Size(unit="bytes", magnitude=1024),
+                        online_resource=OnlineResource(
+                            href="x", description=value, function=OnlineResourceFunctionCode.DOWNLOAD
+                        ),
                     ),
-                ),
-            )
-        ]
+                )
+            ]
+        )
         html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
 
         result = html.find(name="aside", string=value)

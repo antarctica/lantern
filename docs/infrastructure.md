@@ -105,7 +105,7 @@ Then run:
 - [Project User 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=el4eljwuhbgpunh7pvu3m7pvfy&h=magic.1password.eu)
   - for committing records and interacting with issues
   - managed via [Infrastructure as Code](#infrastructure-as-code)
-- [Records Repository 🛡️](https://gitlab.data.bas.ac.uk/felnne/lantern-records-exp)
+- [Records Repository 🔒️](https://gitlab.data.bas.ac.uk/MAGIC/lantern-records-exp)
   - [GitLab bot user PAT 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=geijspsmchmg6j2ojhc6fkh7ge&h=magic.1password.eu).
   - for [Storing](/docs/stores.md#gitlab-store) records in GitLab
   - managed via [Infrastructure as Code](#infrastructure-as-code) and manually as per

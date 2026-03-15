@@ -19,6 +19,9 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Second records workflow development task (`workflow-live`) to complete the interactive publishing workflow
 * `esri-item` development task for applying catalogue resource information to an Esri ArcGIS Online item
 * `ItemArcGis` model derived from the Assets Tracking Service
+* 'strip empty strings' option in clean dict/list utils
+* Map ordering guide
+* Terraform format linting in CI
 
 ### Fixed
 
@@ -31,8 +34,6 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Refactoring test records to use base record presets
 * Updating project logo to AI placeholder
 * Records publishing workflow updated to use merge request reviewer approvals
-* Adding 'strip empty strings' option to `clean_dict()` util
-* Map ordering guide
 
 ## [0.5.0] - 2026-02-27 [!BREAKING]
 

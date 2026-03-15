@@ -55,7 +55,7 @@ In either case, Record configurations are loaded into the Catalogue and then per
 
 ## GitLab
 
-The [BAS GitLab instance](https://gitlab.data.bas.ac.uk) is used to as a remote Records [Store](#stores) and change
+The [BAS GitLab instance](https://gitlab.data.bas.ac.uk) is used as a remote Records [Store](#stores) and change
 tracking tool.
 
 GitLab is used for:

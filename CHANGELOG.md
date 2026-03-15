@@ -13,8 +13,10 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 ### Added
 
 * `DomainConsisties` container element for managing domain consistency data quality elements
-* `ensures()` util methods for contacts, identifiers and domain conformance elements to prevent duplicate items
+* `Distributions` container element for managing distribution option elements
+* `ensures()` util methods for contacts, identifiers, domain conformance and distribution elements to prevent duplicates
 * Open-access MAGIC base record preset
+* Second records workflow development task (`workflow-live`) to complete the interactive publishing workflow
 * `esri-item` development task for applying catalogue resource information to an Esri ArcGIS Online item
 * `ItemArcGis` model derived from the Assets Tracking Service
 
@@ -27,6 +29,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Improving release issue template to include post-deployment resources clean-up
 * Improving MAGIC base record preset
 * Refactoring test records to use base record presets
+* Updating project logo to AI placeholder
+* Records publishing workflow updated to use merge request reviewer approvals
 * Adding 'strip empty strings' option to `clean_dict()` util
 
 ## [0.5.0] - 2026-02-27 [!BREAKING]

@@ -360,7 +360,7 @@ def _process_sheet_number(logger: logging.Logger, records: list[Record]) -> None
                 )
         elif record.identification.series and not record.identification.series.page:
             logger.info("Sheet number found in KV but not in descriptive series, moving to descriptive series.")
-            record.identification.series.page = sheet_number
+            record.identification.series.page = str(sheet_number)
             pop_sheet_number = True
         elif not record.identification.series:
             logger.warning("Sheet number found in KV but no descriptive series, resolve manually.")

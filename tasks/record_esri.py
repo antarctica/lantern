@@ -15,8 +15,6 @@ from lantern.lib.metadata_library.models.record.elements.common import OnlineRes
 from lantern.lib.metadata_library.models.record.elements.distribution import Distribution, Format, TransferOption
 from lantern.lib.metadata_library.models.record.enums import OnlineResourceFunctionCode
 from lantern.lib.metadata_library.models.record.presets.contacts import ESRI_DISTRIBUTOR
-from lantern.lib.metadata_library.models.record.record import Record
-from lantern.models.item.catalogue.enums import DistributionType
 
 
 def _get_cli_args() -> dict:
@@ -255,13 +253,6 @@ def _make_esri_distributions(arcgis_item: ArcGisItem) -> list[Distribution]:
     ]
 
 
-def _add_distribution_options(record: Record, options: list[Distribution]) -> None:
-    """Add distribution options to a record if needed."""
-    for option in options:
-        if not any(record_option == option for record_option in record.distribution):
-            record.distribution.append(option)
-
-
 def main() -> None:
     """Entrypoint."""
     logger, config, store, _s3 = init()
@@ -273,7 +264,9 @@ def main() -> None:
     item = get_agol_item(logger=logger, config=config, item_ref=args["item"])
 
     distribution_options = _make_esri_distributions(item)
-    _add_distribution_options(record, distribution_options)
+    for option in distribution_options:
+        record.distribution.ensure(option)
+
     output_path = args["path"].parent if args["path"] else output_path
     dump_records(logger=logger, output_path=output_path, records=[record])
 

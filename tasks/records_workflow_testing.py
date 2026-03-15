@@ -178,12 +178,7 @@ class OutputCommentMergeRequest:
     """Output comment for a GitLab merge request."""
 
     def __init__(
-        self,
-        config: Config,
-        store: GitLabStore,
-        base_url: str,
-        commit: CommitResults,
-        merge_url: str,
+        self, config: Config, store: GitLabStore, base_url: str, commit: CommitResults, merge_url: str
     ) -> None:
         self._store = store
         self._base_url = base_url
@@ -312,7 +307,7 @@ def _zap(logger: logging.Logger, store: GitLabStore, admin_keys: AdministrationK
         if record.hierarchy_level != HierarchyLevelCode.PRODUCT:
             continue
         print(f"Confirm product (sub-)type for record [{record.file_identifier}] '{record.identification.title}'")
-        ptype = inquirer.prompt([inquirer.List("ptype", message="Product type", choices=product_types)])["ptype"]
+        ptype = inquirer.list_input(message="Product type", choices=product_types)
         record.hierarchy_level = HierarchyLevelCode(ptype)
         logger.info(f"Hierarchy level set to '{record.hierarchy_level}' for record [{record.file_identifier}].")
 
@@ -344,9 +339,9 @@ def _changeset(
     print(
         "\nEnsure GitLab issue selected is where changeset should be linked (e.g. Helpdesk vs. Mapping Coordination)."
     )
-    issue = inquirer.prompt([inquirer.List("issue", message="Issue URL", choices=sorted(record_issues))])["issue"]
+    issue = inquirer.list_input(message="Issue URL", choices=sorted(record_issues))
     if issue == "<OTHER>":
-        issue = inquirer.prompt([inquirer.Text(name="url", message="Issue URL")])["url"]
+        issue = inquirer.text(message="Issue URL")
     if not isinstance(issue, str):
         msg = "Issue must be set for a changeset."
         raise TypeError(msg) from None
@@ -386,7 +381,7 @@ def _merge_request(logger: logging.Logger, store: GitLabStore, issue_href: str) 
     logger.info("Creating merge request for changeset")
     description_lines = [
         f"Created for records related to {issue_href}.",
-        "Created by the experimental MAGIC Lantern [Interactive record publishing workflow](https://github.com/antarctica/lantern/blob/main/docs/usage.md#interactive-record-publishing-workflow)",
+        "Created by the experimental MAGIC Lantern [Interactive record publishing workflow](https://github.com/antarctica/lantern/blob/main/docs/usage.md#interactive-record-publishing-workflow).",
         "/draft",
         f"/assign {answers['assignee']}",
         f"/assign_reviewer {answers['reviewer']}",

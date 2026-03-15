@@ -170,7 +170,7 @@ class ItemCatalogue(ItemBase):
         """
         return LicenceTab(
             item_super_type=self._super_type,
-            licence=super().licence,
+            licence=super().licence_enum,
             rights_holders=self.contacts.filter(roles=ContactRoleCode.RIGHTS_HOLDER),  # ty: ignore[invalid-argument-type]
         )
 

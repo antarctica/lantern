@@ -39,6 +39,10 @@ from lantern.exporters.verification import VerificationExporter
 from lantern.exporters.waf import WebAccessibleFolderExporter
 from lantern.exporters.website import WebsiteSearchExporter
 from lantern.exporters.xml import IsoXmlHtmlExporter
+from lantern.lib.arcgis.gis.dataclasses import Item as ArcGisItem
+from lantern.lib.arcgis.gis.dataclasses import ItemProperties as ArcGisItemProperties
+from lantern.lib.arcgis.gis.enums import ItemType as ArcGisItemType
+from lantern.lib.arcgis.gis.enums import SharingLevel as ArcGisSharingLevel
 from lantern.lib.metadata_library.models.record.elements.common import Constraint, Date, Dates, Identifier, Identifiers
 from lantern.lib.metadata_library.models.record.enums import (
     ConstraintRestrictionCode,
@@ -48,6 +52,7 @@ from lantern.lib.metadata_library.models.record.enums import (
 from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.record import Record as RecordBase
 from lantern.lib.metadata_library.models.record.utils.admin import set_admin
+from lantern.models.item.arcgis.item import ItemArcGis
 from lantern.models.item.base.elements import Link
 from lantern.models.item.base.enums import AccessLevel
 from lantern.models.item.base.item import ItemBase
@@ -564,6 +569,31 @@ def fx_item_cat_admin_tab_min() -> AdminTab:
         resource_access=AccessLevel.NONE,
         admin_meta=None,
     )
+
+
+@pytest.fixture()
+def fx_lib_arcgis_item_properties() -> ArcGisItemProperties:
+    """Minimal ArcGiS Item properties instance."""
+    return ArcGisItemProperties(title="x", item_type=ArcGisItemType.FEATURE_SERVICE, metadata="x")
+
+
+@pytest.fixture()
+def fx_lib_arcgis_item(fx_lib_arcgis_item_properties: ArcGisItemProperties) -> ArcGisItem:
+    """Minimal ArcGiS Item instance."""
+    return ArcGisItem(
+        id="x",
+        owner="x",
+        org_id="x",
+        url="x",
+        properties=fx_lib_arcgis_item_properties,
+        sharing_level=ArcGisSharingLevel.PRIVATE,
+    )
+
+
+@pytest.fixture()
+def fx_item_arc_model_min(fx_record_model_min: Record, fx_lib_arcgis_item: ArcGisItem):
+    """Minimal ItemArcGis model instance."""
+    return ItemArcGis(fx_record_model_min, arcgis_item=fx_lib_arcgis_item)
 
 
 # noinspection PyUnusedLocal

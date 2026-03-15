@@ -22,9 +22,9 @@ from lantern.lib.metadata_library.models.record.enums import (
 )
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, set_admin
 from lantern.models.item.base.elements import Link
-from lantern.models.item.base.enums import ResourceTypeLabel
+from lantern.models.item.base.enums import Licence, ResourceTypeLabel
 from lantern.models.item.catalogue.elements import PageSummary
-from lantern.models.item.catalogue.enums import ItemSuperType, Licence
+from lantern.models.item.catalogue.enums import ItemSuperType
 from lantern.models.item.catalogue.item import ItemCatalogue
 from lantern.models.item.catalogue.tabs import (
     AdditionalInfoTab,

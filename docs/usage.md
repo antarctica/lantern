@@ -118,6 +118,10 @@ The `esri-record` task will:
 - create distribution options for the layer and service based on these details and catalogue conventions
 - add these options to the record where they do not yet exist
 
+> [!TIP]
+> Use the `esri-item` [Development Task](/docs/dev.md#development-tasks) instead to update an ArcGIS Online item with
+> supported properties from a catalogue record.
+
 ## View records
 
 To preview new or edited records before importing them:
@@ -505,6 +509,36 @@ The `verify-records` task will:
   [Verification Exporter](/docs/exporters.md#verification-exporter)
 - run [Verification checks](/docs/monitoring.md#verification-checks) against the generated static site
 - compile and export/publish a [Verification report](/docs/monitoring.md#verification-report)
+
+## Apply record details to ArcGIS item
+
+To update an ArcGIS Online item with supported properties from a catalogue record (via an
+[ArcGOS (Catalogue) Item](/docs/data-model.md#arcgis-items)):
+
+1. run the `esri-item` [Development Task](/docs/dev.md#development-tasks)
+
+> [!TIP]
+> Use the `esri-record` [Development Task](/docs/dev.md#development-tasks) instead to add ArcGIS distribution options
+> to records.
+
+The `esri-item` task will:
+
+- load a source record from a [GitLab Store](/docs/stores.md#gitlab-store)
+- load an existing target item from ArcGIS Online via the ArcGIS REST API
+- simulate a ArcGIS content item from the source record, to allow comparison against the target
+- update the target item's metadata, sharing level and/or a subset of in-scope properties as needed
+
+<!-- pyml disable md028 -->
+> [!CAUTION]
+> This task will update the target item's sharing level based on the resource access permissions set in the source
+> record's administration metadata.
+
+> [!WARNING]
+> This task can access any item in the BAS AGOL subscription.
+
+> [!NOTE]
+> This task only supports items hosted in ArcGIS Online.
+<!-- pyml enable md028 -->
 
 ## Rotate access tokens
 

@@ -53,8 +53,7 @@ from lantern.lib.metadata_library.models.record.enums import (
 )
 from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, get_admin, set_admin
-from lantern.models.item.base.enums import AccessLevel
-from lantern.models.item.catalogue.enums import Licence
+from lantern.models.item.base.enums import AccessLevel, Licence
 from lantern.models.item.catalogue.item import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE

@@ -228,3 +228,101 @@ To add support for a new ISO element within Records:
    1. amend tests for root-level cattrs hooks if top-level hooks changed (as an integration check)
    2. amend variants in `test_loop` as needed (include all possible options in complete variant)
 10. amend list of unsupported properties in `/docs/data-model.md#record-limitations` as needed
+
+## ArcGIS
+
+Package: `assets_tracking_service.lib.arcgis`
+
+### ArcGIS API for Python
+
+The Esri [ArcGIS API for Python](https://developers.arcgis.com/python) package is not used in this project due to the
+number of dependencies it relies on (see https://github.com/Esri/arcgis-python-api/issues/1692).
+
+Instead, direct HTTP requests are made the relevant operations in the ArcGIS REST API.
+
+### ArcGIS vendored classes
+
+A vendored subset of data classes and enums for representing content items are maintained in this package.
+
+> [!WARNING]
+> These classes have been modified from their original versions in some cases to remove unneeded functionality and to
+> adjust types to comply with linting rules in this project.
+
+### ArcGIS item JSON properties
+
+Supported item JSON properties:
+
+- id
+- owner
+- org_id
+- url (service endpoint)
+- access (sharing level)
+- title
+- type [enum]
+- snippet
+- description
+- accessInformation (attribution)
+- licenseInfo
+
+Unsupported item JSON properties:
+
+- created
+- isOrgItem
+- modified
+- guid
+- name
+- typeKeywords
+- tags
+- thumbnail
+- documentation
+- extent
+- categories
+- spatialReference
+- classification
+- culture
+- properties
+- advancedSettings
+- proxyFilter
+- size
+- subInfo
+- appCategories
+- industries
+- languages
+- largeThumbnail
+- banner
+- screenshots
+- listed
+- ownerFolder
+- protected
+- commentsEnabled
+- numComments
+- numRatings
+- avgRating
+- cnumViews
+- itemControl
+- scoreCompleteness
+- groupDesignations
+- apiToken1ExpirationDate
+- apiToken2ExpirationDate
+- lastViewed
+
+### ArcGIS limitations
+
+<!-- pyml disable md028 -->
+> [!WARNING]
+> This section is Work in Progress (WIP) and may not be complete/accurate.
+
+> [!NOTE]
+> Overall, this package is limited to functionality required by the `esri-record` and `esri-item` dev tasks only.
+<!-- pyml enable md028 -->
+
+Partially supported features (not-exhaustive):
+
+- the `metadataEditable` property
+  - not exposed as a property via these classes
+  - used only in the `_update_agol_item()` method of the `esri-item` dev task (force set)
+
+Known unsupported features (not-exhaustive):
+
+- group sharing (see also [ArcGIS Item Limitations](/docs/data-model.md#arcgis-items-limitations))
+- [Unsupported Item JSON Properties](#arcgis-item-json-properties)

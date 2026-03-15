@@ -45,7 +45,7 @@ from lantern.lib.metadata_library.models.record.enums import (
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 from lantern.models.item.base.elements import Contact, Contacts, Link
 from lantern.models.item.base.elements import Extent as ItemExtent
-from lantern.models.item.base.enums import AccessLevel, ResourceTypeLabel
+from lantern.models.item.base.enums import AccessLevel, Licence, ResourceTypeLabel
 from lantern.models.item.catalogue.const import CONTAINER_SUPER_TYPES
 from lantern.models.item.catalogue.distributions import ArcGisFeatureLayer
 from lantern.models.item.catalogue.elements import (
@@ -57,7 +57,7 @@ from lantern.models.item.catalogue.elements import (
     ItemCatalogueSummary,
     Maintenance,
 )
-from lantern.models.item.catalogue.enums import ItemSuperType, Licence
+from lantern.models.item.catalogue.enums import ItemSuperType
 from lantern.models.item.catalogue.tabs import (
     AdditionalInfoTab,
     AdminTab,
@@ -268,18 +268,14 @@ class TestLicenceTab:
 
     def test_init(self):
         """Can create licence tab."""
-        constraint = Constraint(
-            type=ConstraintTypeCode.USAGE,
-            restriction_code=ConstraintRestrictionCode.LICENSE,
-            href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
-            statement="x",
-        )
-        tab = LicenceTab(item_super_type=ItemSuperType.RESOURCE, licence=constraint)
+        _licence = Licence.OGL_UK_3_0
+        tab = LicenceTab(item_super_type=ItemSuperType.RESOURCE, licence=_licence)
 
         assert tab.enabled is True
         # cov
         assert tab.title != ""
         assert tab.icon != ""
+        assert tab.licence == _licence
 
     @pytest.mark.parametrize(
         ("item_type", "has_licence", "expected"),
@@ -292,45 +288,11 @@ class TestLicenceTab:
     def test_disabled(self, item_type: HierarchyLevelCode, has_licence: bool, expected: bool):
         """Can disable licence tab based on item type and if item has a licence."""
         super_type = ItemSuperType.CONTAINER if item_type in CONTAINER_SUPER_TYPES else ItemSuperType.RESOURCE
-        constraint = Constraint(
-            type=ConstraintTypeCode.USAGE,
-            restriction_code=ConstraintRestrictionCode.LICENSE,
-            href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
-            statement="x",
-        )
-        licence = constraint if has_licence else None
+        licence = Licence.OGL_UK_3_0 if has_licence else None
 
         tab = LicenceTab(item_super_type=super_type, licence=licence)
 
         assert tab.enabled == expected
-        if has_licence:
-            assert isinstance(tab.slug, Licence)
-        else:
-            assert tab.slug is None
-
-    @pytest.mark.parametrize(
-        ("licence", "href", "expected"),
-        [
-            (False, None, None),
-            (True, None, None),
-            (True, "x", None),
-            (True, Licence.OGL_UK_3_0.value, Licence.OGL_UK_3_0),
-        ],
-    )
-    def test_slug(self, licence: bool, href: str | None, expected: Licence | None):
-        """Can get licence macro name from licence constraint href if set."""
-        constraint = Constraint(
-            type=ConstraintTypeCode.USAGE,
-            restriction_code=ConstraintRestrictionCode.LICENSE,
-            href=href,
-            statement="x",
-        )
-        if not licence:
-            constraint = None
-
-        tab = LicenceTab(item_super_type=ItemSuperType.RESOURCE, licence=constraint)
-
-        assert tab.slug == expected
 
     @pytest.mark.parametrize(
         ("contacts", "expected"),

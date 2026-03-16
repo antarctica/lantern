@@ -350,40 +350,44 @@ Payload JSON [Schema and Example](/resources/scripts/non-interactive-publishing-
 - update records in the import directory as per the [Record Authoring](/docs/libraries.md#record-authoring) section
 - if changing access permissions, run the `restrict-records` [Development Task](/docs/dev.md#development-tasks)
 - run the [Import Records](#import-records) workflow
+- run the `invalidate-records` [Development Task](/docs/dev.md#development-tasks)
 
 > [!CAUTION]
 > The catalogue does not enforce metadata access permissions. They will always evaluate to open access (unrestricted).
 
+The `invalidate-record` task will:
+
+- take one or more resource identifiers as command line arguments
+- create a CloudFront invalidation in the static site for all keys under each resource identifier prefix
+
+E.g. for a resource ID `123`, an invalidation is made for `/records/123/*` and `/items/123/*`.
+
+> [!NOTE]
+> The CloudFront distribution ID is read from [Infrastructure as Code](/docs/infrastructure.md#infrastructure-as-code).
+
 ### Replacing record thumbnails
 
-To replace the thumbnail for an existing resource:
+To replace a thumbnail for an existing resource:
 
-```text
-% aws s3 cp $IMAGE_FILE s3://cdn.web.bas.ac.uk/add-catalogue/0.0.0/img/items/$FILE_IDENTIFIER/
-% aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths "/add-catalogue/0.0.0/img/items/$FILE_IDENTIFIER/$IMAGE_FILE"
-% aws cloudfront get-invalidation --distribution-id $DISTRIBUTION_ID --id $INVALIDATION_ID --query "Invalidation.Status" --output text
-InProgress
-# ...
-% aws cloudfront get-invalidation --distribution-id $DISTRIBUTION_ID --id $INVALIDATION_ID --query "Invalidation.Status" --output text
-Completed
-```
+- run the `thumbnail-invalidate` [Development Task](/docs/dev.md#development-tasks)
 
-Where:
+> [!TIP]
+> If the thumbnail file name or file type has changed - select, and replace the relevant graphic overview URL in,
+> the record for the resource as per the [Update](#update-records) workflow instead.
 
-- `$IMAGE_FILE` is the local path to the replacement thumbnail file
-- `$FILE_IDENTIFIER` is the identifier of the resource being updated
-- `$DISTRIBUTION_ID` is the CloudFront distribution hosting catalogue thumbnails
-- `$INVALIDATION_ID` is returned by the `create-invalidation` command
+The `thumbnail-invalidate` task will:
 
-If the thumbnail file name has changed:
+- take a resource identifier as a command line argument
+- create a CloudFront invalidation in the BAS CDN for all keys under the resource identifier prefix
 
-- select the record for the resource as per the generic update workflow
-- replace the relevant graphic overview URL
-- continue following the generic update workflow to complete updating the record
+E.g. for a resource ID `123`, an invalidation is made for `/add-catalogue/0.0.0/img/items/123/*`.
+
+> [!NOTE]
+> The CloudFront distribution ID is read from [Infrastructure as Code](/docs/infrastructure.md#infrastructure-as-code).
 
 ### Replacing record artefacts
 
-To replace an artefact for an existing resource:
+To replace file artefacts included in an existing resource:
 
 - use the Zap ⚡️editor to select (but not upload) the replacement artefact to get an updated distribution option
 - select the record for the resource as per the generic update workflow

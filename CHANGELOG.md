@@ -22,6 +22,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * 'strip empty strings' option in clean dict/list utils
 * Map ordering guide
 * Terraform format linting in CI
+* `site-invalidate`, `thumbnail-invalidate`, `invalidate-records` development tasks for invalidating CloudFront cache
 
 ### Fixed
 

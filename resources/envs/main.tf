@@ -57,6 +57,16 @@ variable "pvd_sentry_api_token" {
   description = "Sentry API token."
 }
 
+variable "aws_cf_cdn_id" {
+  type        = string
+  description = "CloudFront distribution identifier for the BAS CDN production environment used for item thumbnails."
+}
+
+variable "aws_cf_cdn_arn" {
+  type        = string
+  description = "CloudFront distribution ARN for the BAS CDN production environment used for item thumbnails."
+}
+
 provider "aws" {
   region = "eu-west-1"
   # credentials set by awscli profile
@@ -209,6 +219,19 @@ data "aws_iam_policy_document" "workstation_stage" {
       "${module.site_stage.s3_bucket_arn}/*",
     ]
   }
+  statement {
+    sid    = "MinimalCacheInvalidationPermissions"
+    effect = "Allow"
+
+    actions = [
+      "cloudfront:CreateInvalidation",
+      "cloudfront:GetInvalidation",
+    ]
+
+    resources = [
+      var.aws_cf_cdn_arn,
+    ]
+  }
 }
 resource "aws_iam_user_policy" "workstation_stage" {
   name   = "staging-bucket"
@@ -268,7 +291,8 @@ data "aws_iam_policy_document" "workstation_prod" {
     ]
 
     resources = [
-      module.site_prod.cloudfront_distribution_arn
+      module.site_prod.cloudfront_distribution_arn,
+      var.aws_cf_cdn_arn,
     ]
   }
 }
@@ -314,7 +338,8 @@ data "aws_iam_policy_document" "local_dev" {
     ]
 
     resources = [
-      module.site_prod.cloudfront_distribution_arn
+      module.site_prod.cloudfront_distribution_arn,
+      var.aws_cf_cdn_arn,
     ]
   }
 }
@@ -517,4 +542,16 @@ output "sentry_dsn" {
   # (public) DSNs are not sensitive in newer Sentry versions
   value       = nonsensitive(data.sentry_key.lantern_dsn.dsn.public)
   description = "Sentry DSN."
+}
+
+# Outputs for external automation
+
+output "site_cf_id" {
+  value       = module.site_prod.cloudfront_distribution_id
+  description = "CloudFront distribution ID for live static site hosting."
+}
+
+output "thumbnails_cf_id" {
+  value       = var.aws_cf_cdn_id
+  description = "CloudFront distribution ID for item thumbnails hosting."
 }

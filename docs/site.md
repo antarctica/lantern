@@ -233,6 +233,11 @@ version as a SHA1 hash, e.g. `main.css?v=f053ddb` for version 0.1.0.
 > You may need to manually clear caches locally when developing, as this value will not change until the next release.
 <!-- pyml enable md028 -->
 
+## Cache invalidation
+
+Content in the live static site is cached for 24 hours by default. To force a cache invalidation, use the
+`site-invalidate` [Development Task](/docs/dev.md#development-tasks) specifying one or more key patterns to invalidate.
+
 ## Security
 
 ### Content security policy

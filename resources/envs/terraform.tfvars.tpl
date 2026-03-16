@@ -9,6 +9,9 @@ pvd_op_vault_id          = ""
 pvd_cloudflare_api_token = ""
 # https://antarctica.sentry.io/settings/account/api/auth-tokens/new-token/ -> 'project:admin' & 'organization:read' scopes
 pvd_sentry_api_token     = ""
-
 # Cloudflare -> Account home -> Copy account ID
 cloudflare_account_id    = ""
+# BAS CDN production distribution ID
+aws_cf_cdn_id            = ""
+# BAS CDN production distribution ARN
+aws_cf_cdn_arn           = ""

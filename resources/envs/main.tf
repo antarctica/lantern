@@ -67,6 +67,12 @@ variable "aws_cf_cdn_arn" {
   description = "CloudFront distribution ARN for the BAS CDN production environment used for item thumbnails."
 }
 
+locals {
+  static_site_ref         = "v0.6.1"       # Static site module version.
+  static_site_tls_version = "TLSv1.2_2025" # for compatibility with BAS load balancer
+  static_site_csp         = "default-src * data: 'unsafe-inline';"
+}
+
 provider "aws" {
   region = "eu-west-1"
   # credentials set by awscli profile
@@ -109,26 +115,8 @@ data "terraform_remote_state" "BAS-CORE-DOMAINS" {
   }
 }
 
-variable "static_site_ref" {
-  type        = string
-  default     = "v0.5.1"
-  description = "Static site module version."
-}
-
-variable "static_site_tls_version" {
-  type        = string
-  default     = "TLSv1.2_2025" # for compatibility with BAS load balancer
-  description = "CloudFront viewer certificate minimum protocol version"
-}
-
-variable "static_site_csp" {
-  type        = string
-  default     = "default-src * data: 'unsafe-inline';"
-  description = "CloudFront content security policy header (CSP)"
-}
-
 module "site_stage" {
-  source = "git::https://github.com/felnne/tf-aws-static-site.git?ref=${var.static_site_ref}"
+  source = "git::https://github.com/felnne/tf-aws-static-site.git?ref=${local.static_site_ref}"
 
   providers = {
     aws.us-east-1 = aws.us-east-1
@@ -136,9 +124,9 @@ module "site_stage" {
 
   site_name                         = "lantern-testing.data.bas.ac.uk"
   route53_zone_id                   = data.terraform_remote_state.BAS-CORE-DOMAINS.outputs.DATA-BAS-AC-UK-ID
-  cloudfront_min_proto_version      = var.static_site_tls_version
+  cloudfront_min_proto_version      = local.static_site_tls_version
   cloudfront_comment                = "Lantern Exp Site (Testing)"
-  cloudfront_csp                    = var.static_site_csp
+  cloudfront_csp                    = local.static_site_csp
   cloudfront_enable_default_caching = false
 
   tags = {
@@ -149,7 +137,7 @@ module "site_stage" {
 }
 
 module "site_prod" {
-  source = "git::https://github.com/felnne/tf-aws-static-site.git?ref=${var.static_site_ref}"
+  source = "git::https://github.com/felnne/tf-aws-static-site.git?ref=${local.static_site_ref}"
 
   providers = {
     aws.us-east-1 = aws.us-east-1
@@ -157,9 +145,9 @@ module "site_prod" {
 
   site_name                         = "lantern.data.bas.ac.uk"
   route53_zone_id                   = data.terraform_remote_state.BAS-CORE-DOMAINS.outputs.DATA-BAS-AC-UK-ID
-  cloudfront_min_proto_version      = var.static_site_tls_version
+  cloudfront_min_proto_version      = local.static_site_tls_version
   cloudfront_comment                = "Lantern Exp Site (Live)"
-  cloudfront_csp                    = var.static_site_csp
+  cloudfront_csp                    = local.static_site_csp
   cloudfront_enable_default_caching = true
 
   tags = {

@@ -35,6 +35,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Refactoring test records to use base record presets
 * Updating project logo to AI placeholder
 * Records publishing workflow updated to use merge request reviewer approvals
+* Updating documentation diagrams
 
 ## [0.5.0] - 2026-02-27 [!BREAKING]
 

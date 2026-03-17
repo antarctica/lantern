@@ -5,7 +5,8 @@ A prototype [Data Catalogue](https://data.bas.ac.uk/-/index) for BAS discovery m
 ## Overview
 
 A data discovery tool used to find, evaluate and access resources produced, managed and/or used by the
-[British Antarctic Survey](https://www.bas.ac.uk) and [UK Polar Data Centre](https://www.bas.ac.uk/data/uk-pdc/).
+[British Antarctic Survey](https://www.bas.ac.uk) and
+[UK Polar Data Centre](https://www.bas.ac.uk/data/polar-data-centre/).
 
 <!-- pyml disable md028 -->
 > [!IMPORTANT]
@@ -13,6 +14,9 @@ A data discovery tool used to find, evaluate and access resources produced, mana
 > [BAS Assets Tracking Service](https://github.com/antarctica/assets-tracking-service) that will form the next release
 > of the [ADD Metadata Toolbox 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox), which will form the new
 > BAS Data Catalogue.
+
+> [!NOTE]
+> This project forms part of the MAGIC Spatial Data Infrastructure (SDI).
 
 > [!NOTE]
 > This project is focused on needs within the British Antarctic Survey. It has been open-sourced in case parts are of

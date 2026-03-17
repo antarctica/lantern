@@ -63,7 +63,7 @@ These requirements are enforced by the `validate()` method in the [Catalogue Rec
 > [!NOTE]
 > Whilst not required, records without
 > [Administration Metadata](/docs/libraries.md#record-administrative-metadata) will be interpreted as
-> [Restricted Items](#item-access-levels) when processed, and is therefore typically also included.
+> [Restricted Items](#item-access-levels).
 
 > [!CAUTION]
 > The catalogue does not enforce metadata access constraints if set.

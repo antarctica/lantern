@@ -10,6 +10,9 @@ This diagram shows this project's components at lower and more detailed level:
 
 ![Architecture Diagram](/docs/img/architecture-narrow.png)
 
+> [!NOTE]
+> This project forms part of the MAGIC Spatial Data Infrastructure (SDI) as a discovery service.
+
 ## Catalogue application
 
 The Data Catalogue is managed by a Python application within the `src/lantern` package.
@@ -82,6 +85,11 @@ AWS S3 is used as a web host for:
 See the [Site Exporter](/docs/exporters.md#site-exporter) docs for how information is managed in S3.
 
 See the [Static Site](/docs/site.md) docs for more information about what is stored in S3.
+
+### ArcGIS Online
+
+[ArcGIS Online](https://www.arcgis.com) is used in Records as a distribution option and key data access system for
+spatial services. It also underpins the Embedded Maps Service used for extent visualisations in Items.
 
 ## Infrastructure
 

@@ -1,5 +1,8 @@
 # Lantern - Data Model
 
+> [!WARNING]
+> This documentation is partially outdated due to changes made to streamline site/export metadata.
+
 ## Records
 
 ### Base records

@@ -1,5 +1,9 @@
 # Lantern - Stores
 
+> [!WARNING]
+> This documentation is partially outdated and does not reflect changes made to split exporters into outputs, a
+> top-level site and verification class and more focused exporters.
+
 Stores act as containers for [Records](/docs/data-model.md#records) and typically relate to a storage system such as a
 database, file system or object store. Stores provide a consistent public interface to access Records.
 
@@ -33,7 +37,7 @@ See the [Infrastructure](/docs/infrastructure.md#exporters) docs for credentials
 
 ## Store classes
 
-All exporters inherit from the `lantern.stores.base.Store` abstract base class and MUST implement its minimal
+All stores inherit from the `lantern.stores.base.Store` abstract base class and MUST implement its minimal
 public interface to:
 
 - select Records

@@ -13,11 +13,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 import logging
 
 from boto3 import client as S3Client  # noqa: N812
+from lantern.exporters.site import SiteExporter
 from moto import mock_aws
 from tests.resources.stores.fake_records_store import FakeRecordsStore
 
 from lantern.config import Config as BaseConfig
-from lantern.exporters.site import SiteExporter
 from lantern.log import init as init_logging
 
 

@@ -8,6 +8,8 @@ import inquirer
 from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 from gitlab import Gitlab
 from gitlab.v4.objects import ProjectIssue, ProjectMergeRequest
+from lantern.exporters.site import SiteExporter
+from lantern.exporters.verification import VerificationExporter
 from mypy_boto3_s3 import S3Client
 from tasks._config import ExtraConfig
 from tasks._record_utils import confirm, init, init_store, ping_host, time_task
@@ -20,8 +22,6 @@ from tasks.records_zap import parse_zap_records as zap_parse_records
 from tasks.records_zap import process_zap_records as zap_process_records
 
 from lantern.config import Config
-from lantern.exporters.site import SiteExporter
-from lantern.exporters.verification import VerificationExporter
 from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
 from lantern.lib.metadata_library.models.record.record import Record
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin

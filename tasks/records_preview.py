@@ -4,13 +4,13 @@ import sys
 from pathlib import Path
 
 from boto3 import client as S3Client  # noqa: N812
+from lantern.exporters.html import HtmlExporter
+from lantern.exporters.site import SiteResourcesExporter
 from moto import mock_aws
 from tasks._record_utils import init, parse_records, pick_records
 from tests.conftest import _select_record
 
 from lantern.config import Config
-from lantern.exporters.html import HtmlExporter
-from lantern.exporters.site import SiteResourcesExporter
 from lantern.lib.metadata_library.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta

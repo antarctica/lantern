@@ -4,11 +4,11 @@ import shutil
 from collections.abc import Callable
 from datetime import UTC, datetime
 
+from lantern.exporters.site import SiteExporter
 from mypy_boto3_s3 import S3Client
 from tasks._config import ExtraConfig
 from tasks._record_utils import init
 
-from lantern.exporters.site import SiteExporter
 from lantern.models.site import ExportMeta
 from lantern.stores.gitlab import GitLabStore
 from lantern.stores.gitlab_cache import GitLabCachedStore

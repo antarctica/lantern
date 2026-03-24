@@ -2,6 +2,10 @@
 
 ## Overview
 
+> [!WARNING]
+> This documentation is outdated and does not reflect changes made to split exporters into outputs, a top-level site
+> class and more focused exporters.
+
 This diagram shows this project's components at a high level and the project interacts with other systems:
 
 ![Architecture Diagram](/docs/img/architecture-wide.png)

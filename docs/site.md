@@ -1,5 +1,9 @@
 # Lantern - Static site
 
+> [!WARNING]
+> This documentation is outdated and does not reflect changes made to split exporters into outputs, a top-level site
+> and verification class and more focused exporters.
+
 The Data Catalogue website is built as a static site using the [Site Exporter](/docs/exporters.md#site-exporter).
 
 ## Site access

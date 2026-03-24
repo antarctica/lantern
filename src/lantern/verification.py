@@ -1,19 +1,18 @@
 import json
 import logging
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 from typing import Final, cast
 
 import cattrs
 import requests
 from bs4 import BeautifulSoup
 from joblib import Parallel, delayed
-from mypy_boto3_s3 import S3Client
 from requests import Response
 
-from lantern.exporters.base import ResourcesExporter
 from lantern.log import init as init_logging
 from lantern.models.record.const import CATALOGUE_NAMESPACE
-from lantern.models.site import ExportMeta, SiteMeta
+from lantern.models.site import ExportMeta, SiteContent, SiteMeta
 from lantern.models.verification.elements import VerificationRecord
 from lantern.models.verification.enums import VerificationResult, VerificationType
 from lantern.models.verification.jobs import VerificationJob
@@ -276,9 +275,9 @@ class VerificationReport:
         return self._jinja.get_template(self._template_path).render(data=data, meta=self._meta)
 
 
-class VerificationExporter(ResourcesExporter):
+class Verification:
     """
-    Site verification exporter.
+    Site verification.
 
     Verifies the contents of a static site using automic URL checks processed in parallel as a series of jobs.
     The results of these checks are processed into a JSON and HTML report using a `VerificationReport` instance.
@@ -297,22 +296,17 @@ class VerificationExporter(ResourcesExporter):
         self,
         logger: logging.Logger,
         meta: ExportMeta,
-        s3: S3Client,
         context: VerificationContext,
         select_records: SelectRecordsProtocol,
-        selected_identifiers: set[str] | None = None,
+        identifiers: set[str] | None = None,
     ) -> None:
         """Initialise exporter."""
-        super().__init__(logger=logger, meta=meta, s3=s3, select_records=select_records)
+        self._logger = logger
+        self._meta = meta
+        self._select_records = select_records
         self._context = context
-        self._selected_identifiers: set[str] = selected_identifiers or set()
+        self._identifiers: set[str] = identifiers or set()
         self._jobs: list[VerificationJob] = []
-        self._export_path = self._meta.export_path / "-" / "verification"
-
-    @property
-    def name(self) -> str:
-        """Exporter name."""
-        return "Verification"
 
     @property
     def _404_job(self) -> VerificationJob:
@@ -347,7 +341,7 @@ class VerificationExporter(ResourcesExporter):
     @property
     def _record_jobs(self) -> list[VerificationJob]:
         """Generate verification jobs for selected records."""
-        records = self._select_records(self._selected_identifiers)
+        records = self._select_records(self._identifiers)
         jobs = [job for record in records for job in VerificationRecord(record).jobs(context=self._context)]
 
         # Skip checks that can't run based on BASE_URL
@@ -379,17 +373,18 @@ class VerificationExporter(ResourcesExporter):
             delayed(run_job)(self._logger.level, job) for job in self._jobs
         )
 
-    def export(self) -> None:
-        """Export JSON and HTML report files to local directory."""
-        self._export_path.mkdir(parents=True, exist_ok=True)
-        with self._export_path.joinpath("data.json").open("w") as f:
-            json.dump(self.report.data, f, indent=2, ensure_ascii=False)
-        with self._export_path.joinpath("index.html").open("w") as f:
-            f.write(self.report.dumps())
-
-    def publish(self) -> None:
-        """Publish JSON and HTML report files to S3."""
-        data_key = self._s3_utils.calc_key(self._export_path.joinpath("data.json"))
-        self._s3_utils.upload_object(key=data_key, content_type="application/json", body=json.dumps(self.report.data))
-        index_key = self._s3_utils.calc_key(self._export_path.joinpath("index.html"))
-        self._s3_utils.upload_object(key=index_key, content_type="text/html", body=self.report.dumps())
+    @property
+    def outputs(self) -> list[SiteContent]:
+        """Output content for record."""
+        return [
+            SiteContent(
+                content=json.dumps(self.report.data),
+                path=Path("-") / "verification" / "data.json",
+                media_type="application/json",
+            ),
+            SiteContent(
+                content=self.report.dumps(),
+                path=Path("-") / "verification" / "index.html",
+                media_type="text/html",
+            ),
+        ]

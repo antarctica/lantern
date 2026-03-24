@@ -3,12 +3,13 @@ import logging
 from boto3 import client as S3Client  # noqa: N812
 
 from lantern.config import Config
-from lantern.exporters.verification import VerificationExporter
+from lantern.exporters.s3 import S3Exporter
 from lantern.log import init as init_logging
 from lantern.log import init_sentry
 from lantern.models.site import ExportMeta
 from lantern.models.verification.types import VerificationContext
 from lantern.stores.gitlab import GitLabSource, GitLabStore
+from lantern.verification import Verification
 
 
 def _run(logger: logging.Logger, config: Config, base_url: str) -> None:
@@ -33,9 +34,9 @@ def _run(logger: logging.Logger, config: Config, base_url: str) -> None:
         "SAN_PROXY_ENDPOINT": config.VERIFY_SAN_PROXY_ENDPOINT,
     }
     meta = ExportMeta.from_config_store(config=config, store=None, build_repo_ref=store.head_commit)
-    exporter = VerificationExporter(logger=logger, meta=meta, s3=s3, context=context, select_records=store.select)
-    exporter.run()
-    exporter.publish()
+    verifier = Verification(logger=logger, meta=meta, context=context, select_records=store.select)
+    exporter = S3Exporter(logger=logger, s3=s3, bucket=config.AWS_S3_BUCKET)
+    exporter.export(verifier.outputs)
 
 
 def main() -> None:

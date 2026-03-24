@@ -1,5 +1,4 @@
 import json
-from dataclasses import asdict
 from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import PropertyMock
@@ -12,7 +11,16 @@ from lantern.config import Config
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 from lantern.models.item.base.elements import Link
 from lantern.models.item.catalogue.elements import FormattedDate
-from lantern.models.site import ExportMeta, OpenGraphMeta, SchemaOrgAuthor, SchemaOrgMeta, SiteMeta, SitePageMeta
+from lantern.models.site import (
+    ExportMeta,
+    OpenGraphMeta,
+    SchemaOrgAuthor,
+    SchemaOrgMeta,
+    SiteContent,
+    SiteMeta,
+    SitePageMeta,
+    SiteRedirect,
+)
 from lantern.stores.gitlab import GitLabStore
 
 
@@ -229,6 +237,65 @@ class TestSitePageMeta:
         assert page_meta.schema_org is None
 
 
+class TestSiteContent:
+    """Test site content."""
+
+    @pytest.mark.parametrize("value", ["x", b"x"])
+    def test_init(self, value: str | bytes):
+        """Can create a SiteContent instance with required values."""
+        path = Path("x")
+        media_type = "x"
+        content = SiteContent(content=value, path=path, media_type=media_type)
+
+        assert isinstance(content, SiteContent)
+        assert content.content == value
+        assert content.path == path
+        assert content.media_type == media_type
+        assert content.object_meta == {}
+        assert content.redirect is None
+        assert repr(content) == f"<SiteContent path='{path}' media_type='{media_type}' content_length='{len(value)}'>"
+
+    def test_non_relative_path(self):
+        """Cannot create a SiteContent instance where path is absolute."""
+        with pytest.raises(ValueError, match=r"Path must be relative."):
+            SiteContent(content="x", path=Path("/invalid"), media_type="x")
+
+    def test_non_absolute_redirect(self):
+        """Cannot create a SiteContent instance where optional redirect is not absolute."""
+        with pytest.raises(ValueError, match=r"Redirect must be an absolute URL."):
+            SiteContent(content="x", path=Path("x"), media_type="x", redirect="invalid")
+
+    def test_object_meta(self):
+        """Can create a SiteContent instance with optional object meta value."""
+        expected = {"x": "x"}
+        content = SiteContent(content="x", path=Path("x"), media_type="x", object_meta=expected)
+        assert content.object_meta == expected
+
+    @pytest.mark.parametrize("value", [None, "https://x"])
+    def test_redirect(self, value: str | None):
+        """Can create a SiteContent instance with optional redirect value."""
+        content = SiteContent(content="x", path=Path("x"), media_type="x", redirect=value)
+        assert content.redirect == value
+
+
+class TestSiteRedirect:
+    """Test site redirect."""
+
+    def test_init(self):
+        """Can create a SiteRedirect instance with required values."""
+        path = Path("x")
+        target = "https://x"
+        redirect = SiteRedirect(path=path, target=target)
+
+        assert isinstance(redirect, SiteContent)
+        assert "<!DOCTYPE html>" in redirect.content
+        assert target in redirect.content
+        assert redirect.path == path
+        assert redirect.media_type == "text/html"
+        assert redirect.redirect == target
+        assert repr(redirect) == f"<SiteRedirect path='{path}' target='{redirect.redirect}'>"
+
+
 class TestSiteMetadata:
     """Test site metadata/context."""
 
@@ -378,8 +445,6 @@ class TestExportMetadata:
         freezer.move_to(fx_freezer_time)
         expected_str = "x"
         expected_int = 1
-        expected_path = Path("./x")
-        trusted_path = expected_path if trusted else None
 
         meta = ExportMeta(
             base_url=expected_str,
@@ -392,31 +457,15 @@ class TestExportMetadata:
             items_enquires_turnstile_key=expected_str,
             generator=expected_str,
             version=expected_str,
-            export_path=expected_path,
-            s3_bucket=expected_str,
             parallel_jobs=expected_int,
             admin_meta_keys=fx_admin_meta_keys,
             trusted=trusted,
-            trusted_path=trusted_path,
         )
 
         assert meta.base_url == expected_str
-        assert meta.export_path == expected_path
-        assert meta.s3_bucket == expected_str
         assert meta.parallel_jobs == expected_int
         assert meta.admin_meta_keys == fx_admin_meta_keys
         assert meta.trusted is trusted
-        assert meta.trusted_path == trusted_path
-
-    @pytest.mark.cov()
-    def test_post_init(self, fx_export_meta: ExportMeta):
-        """Cannot create an ExportMetadata instance with trusted context without a trusted path."""
-        kwargs = asdict(fx_export_meta)
-        kwargs["trusted"] = True
-        kwargs.pop("trusted_path")
-
-        with pytest.raises(TypeError, match=r"`trusted_path` cannot be None when `trusted=True`."):
-            ExportMeta(**kwargs)
 
     def test_from_config_store(self, fx_config: Config):
         """Can create ExportMetadata instance from config."""

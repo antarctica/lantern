@@ -2,15 +2,21 @@ import json
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
-from tempfile import TemporaryDirectory
-from unittest.mock import PropertyMock
 
 import pytest
 from pytest_mock import MockerFixture
 from requests import Response
 
-from lantern.exporters.verification import (
-    VerificationExporter,
+from lantern.lib.metadata_library.models.record.elements.common import Identifier
+from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
+from lantern.models.record.revision import RecordRevision
+from lantern.models.site import ExportMeta, SiteMeta
+from lantern.models.verification.enums import VerificationResult, VerificationType
+from lantern.models.verification.jobs import VerificationJob
+from lantern.models.verification.types import VerificationContext
+from lantern.stores.base import SelectRecordsProtocol
+from lantern.verification import (
+    Verification,
     VerificationReport,
     _req_url,
     check_item_download,
@@ -19,19 +25,10 @@ from lantern.exporters.verification import (
     check_url_redirect,
     run_job,
 )
-from lantern.lib.metadata_library.models.record.elements.common import (
-    Identifier,
-)
-from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
-from lantern.models.record.revision import RecordRevision
-from lantern.models.site import ExportMeta, SiteMeta
-from lantern.models.verification.enums import VerificationResult, VerificationType
-from lantern.models.verification.jobs import VerificationJob
-from lantern.models.verification.types import VerificationContext
-from lantern.stores.base import SelectRecordsProtocol
+from tests.conftest import _index_site_content_outputs
 
 
-class TestVerificationExporterChecks:
+class TestVerificationChecks:
     """Test Verification standalone URL check methods."""
 
     @pytest.mark.vcr
@@ -400,9 +397,9 @@ class TestVerificationReport:
             VerificationResult.FAIL: 2,
         }
 
-    def test_data(self, fx_exporter_verify_post_run: VerificationExporter):
+    def test_data(self, fx_verification_post_run: Verification):
         """Can get report data."""
-        report = fx_exporter_verify_post_run.report
+        report = fx_verification_post_run.report
         result = report.data
         assert isinstance(result, dict)
         assert result["pass_fail"] is True
@@ -412,56 +409,49 @@ class TestVerificationReport:
         assert "context" not in result["site_checks"][0]  # context not shown in output
 
     @pytest.mark.cov()
-    def test_data_no_commit(self, fx_exporter_verify_post_run: VerificationExporter):
+    def test_data_no_commit(self, fx_verification_post_run: Verification):
         """Can get report data without commit in context."""
-        fx_exporter_verify_post_run._meta.build_repo_ref = None
-        fx_exporter_verify_post_run._meta.build_repo_base_url = None
+        fx_verification_post_run._meta.build_repo_ref = None
+        fx_verification_post_run._meta.build_repo_base_url = None
 
-        report = fx_exporter_verify_post_run.report
+        report = fx_verification_post_run.report
         result = report.data
         assert isinstance(result, dict)
         assert result["commit"] is None
 
-    def test_dumps(self, fx_exporter_verify_post_run: VerificationExporter):
+    def test_dumps(self, fx_verification_post_run: Verification):
         """Can get report data as HTML."""
         commit = "abc123"
-        fx_exporter_verify_post_run._meta.build_repo_ref = commit
-        fx_exporter_verify_post_run._meta.build_repo_base_url = "x"
-        report = fx_exporter_verify_post_run.report
+        fx_verification_post_run._meta.build_repo_ref = commit
+        fx_verification_post_run._meta.build_repo_base_url = "x"
+        report = fx_verification_post_run.report
         result = report.dumps()
         assert isinstance(result, str)
         assert "All tests passed" in result
         assert commit in result
 
 
-class TestVerificationExporter:
-    """Test Verification exporter."""
+class TestVerification:
+    """Test Site Verification."""
 
-    def test_init(self, mocker: MockerFixture, fx_logger: logging.Logger, fx_select_records: SelectRecordsProtocol):
-        """Can instantiate exporter."""
-        with TemporaryDirectory() as tmp_path:
-            output_path = Path(tmp_path)
-        s3_client = mocker.MagicMock()
-        mock_config = mocker.Mock()
-        type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
-        meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
-        context: VerificationContext = {
-            "BASE_URL": meta.base_url,
-            "SHAREPOINT_PROXY_ENDPOINT": "x",
-            "SAN_PROXY_ENDPOINT": "x",
-        }
-
-        exporter = VerificationExporter(
-            logger=fx_logger, meta=meta, s3=s3_client, select_records=fx_select_records, context=context
+    def test_init(
+        self,
+        fx_logger: logging.Logger,
+        fx_export_meta: ExportMeta,
+        fx_select_records: SelectRecordsProtocol,
+        fx_verification_context: VerificationContext,
+    ):
+        """Can instantiate verification instance."""
+        exporter = Verification(
+            logger=fx_logger, meta=fx_export_meta, select_records=fx_select_records, context=fx_verification_context
         )
 
-        assert isinstance(exporter, VerificationExporter)
-        assert exporter.name == "Verification"
+        assert isinstance(exporter, Verification)
 
-    def test_jobs(self, fx_exporter_verify_sel: VerificationExporter):
+    def test_jobs(self, fx_verification_sel: Verification):
         """Can generate jobs for site and selected records."""
-        fx_exporter_verify_sel._init_jobs()
-        results = fx_exporter_verify_sel._jobs
+        fx_verification_sel._init_jobs()
+        results = fx_verification_sel._jobs
         assert len(results) == 11
 
         for path in ["404", "/legal/privacy", "/-/formatting"]:  # representative sample
@@ -480,98 +470,80 @@ class TestVerificationExporter:
         assert item_job is not None
 
     @pytest.mark.cov()
-    def test_jobs_404_local(self, fx_exporter_verify_sel: VerificationExporter):
+    def test_jobs_404_local(self, fx_verification_sel: Verification):
         """Skips 404 job when using localhost."""
-        fx_exporter_verify_sel._context["BASE_URL"] = "http://localhost"
-        not_found_job = fx_exporter_verify_sel._404_job
+        fx_verification_sel._context["BASE_URL"] = "http://localhost"
+        not_found_job = fx_verification_sel._404_job
         assert not_found_job.result == VerificationResult.SKIP
 
     @pytest.mark.cov()
     def test_jobs_aliases_local(
-        self, mocker: MockerFixture, fx_revision_model_min: RecordRevision, fx_exporter_verify_sel: VerificationExporter
+        self, mocker: MockerFixture, fx_revision_model_min: RecordRevision, fx_verification_sel: Verification
     ):
         """Skips aliases jobs when using localhost."""
-        fx_exporter_verify_sel._context["BASE_URL"] = "http://localhost"
+        fx_verification_sel._context["BASE_URL"] = "http://localhost"
         fx_revision_model_min.identification.identifiers.append(
             Identifier(identifier="x/x", href=f"https://{CATALOGUE_NAMESPACE}/x/x", namespace=ALIAS_NAMESPACE)
         )
-        fx_exporter_verify_sel._select_records = mocker.MagicMock(return_value=[fx_revision_model_min])
+        fx_verification_sel._select_records = mocker.MagicMock(return_value=[fx_revision_model_min])
 
-        results = fx_exporter_verify_sel._record_jobs
+        results = fx_verification_sel._record_jobs
         alias_job = next((result for result in results if result.type == VerificationType.ALIAS_REDIRECTS), None)
         assert alias_job.result == VerificationResult.SKIP
 
     @pytest.mark.cov()
     def test_jobs_doi_other(
-        self, mocker: MockerFixture, fx_revision_model_min: RecordRevision, fx_exporter_verify_sel: VerificationExporter
+        self, mocker: MockerFixture, fx_revision_model_min: RecordRevision, fx_verification_sel: Verification
     ):
         """Skips DOI jobs when not using production domain."""
-        fx_exporter_verify_sel._context["BASE_URL"] = "http://localhost"
+        fx_verification_sel._context["BASE_URL"] = "http://localhost"
         fx_revision_model_min.identification.identifiers.append(
             Identifier(identifier="x/x", href="https://doi.org/x/x", namespace="doi")
         )
-        fx_exporter_verify_sel._select_records = mocker.MagicMock(return_value=[fx_revision_model_min])
+        fx_verification_sel._select_records = mocker.MagicMock(return_value=[fx_revision_model_min])
 
-        results = fx_exporter_verify_sel._record_jobs
+        results = fx_verification_sel._record_jobs
         alias_job = next((result for result in results if result.type == VerificationType.DOI_REDIRECTS), None)
         assert alias_job.result == VerificationResult.SKIP
 
     @pytest.mark.cov()
     def test_jobs_doi_ok(
-        self, mocker: MockerFixture, fx_revision_model_min: RecordRevision, fx_exporter_verify_sel: VerificationExporter
+        self, mocker: MockerFixture, fx_revision_model_min: RecordRevision, fx_verification_sel: Verification
     ):
         """Can get DOI jobs when using production domain."""
-        fx_exporter_verify_sel._context["BASE_URL"] = f"https://{CATALOGUE_NAMESPACE}"
+        fx_verification_sel._context["BASE_URL"] = f"https://{CATALOGUE_NAMESPACE}"
         fx_revision_model_min.identification.identifiers.append(
             Identifier(identifier="x/x", href="https://doi.org/x/x", namespace="doi")
         )
-        fx_exporter_verify_sel._select_records = mocker.MagicMock(return_value=[fx_revision_model_min])
+        fx_verification_sel._select_records = mocker.MagicMock(return_value=[fx_revision_model_min])
 
-        results = fx_exporter_verify_sel._record_jobs
+        results = fx_verification_sel._record_jobs
         alias_job = next((result for result in results if result.type == VerificationType.DOI_REDIRECTS), None)
         assert alias_job.result == VerificationResult.PENDING
 
-    def test_report(self, fx_exporter_verify_post_run: VerificationExporter):
+    def test_report(self, fx_verification_post_run: Verification):
         """Can generate jobs for site and selected records."""
-        report = fx_exporter_verify_post_run.report
+        report = fx_verification_post_run.report
         assert isinstance(report, VerificationReport)
         assert report._result == VerificationResult.PASS
 
     @pytest.mark.vcr
     @pytest.mark.block_network
-    def test_run(self, fx_exporter_verify_sel: VerificationExporter):
+    def test_run(self, fx_verification_sel: Verification):
         """Can execute generated jobs."""
-        assert len(fx_exporter_verify_sel._jobs) == 0
-        fx_exporter_verify_sel.run()
-        jobs = fx_exporter_verify_sel._jobs
+        assert len(fx_verification_sel._jobs) == 0
+        fx_verification_sel.run()
+        jobs = fx_verification_sel._jobs
         assert len(jobs) > 0
         # assert all jobs are not pending (i.e. at least some have run)
         assert all(job.result != VerificationResult.PENDING for job in jobs)
 
-    def test_export(self, fx_exporter_verify_post_run: VerificationExporter):
+    def test_output(self, fx_verification_post_run: Verification):
         """Can export report files to local files."""
-        base_path = fx_exporter_verify_post_run._export_path
-        data_path = base_path / "data.json"
-        report_path = base_path / "index.html"
+        outputs = _index_site_content_outputs(fx_verification_post_run.outputs)
+        assert len(outputs) > 1
 
-        fx_exporter_verify_post_run.export()
-        assert data_path.exists()
-        assert report_path.exists()
-
-    def test_publish(self, fx_exporter_verify_post_run: VerificationExporter, fx_s3_bucket_name: str):
-        """Can publish report files to S3."""
-        data_key = "-/verification/data.json"
-        report_key = "-/verification/index.html"
-
-        fx_exporter_verify_post_run.publish()
-
-        data_output = fx_exporter_verify_post_run._s3_utils._s3.get_object(
-            Bucket=fx_s3_bucket_name,
-            Key=data_key,
-        )
-        report_output = fx_exporter_verify_post_run._s3_utils._s3.get_object(
-            Bucket=fx_s3_bucket_name,
-            Key=report_key,
-        )
-        assert data_output["ResponseMetadata"]["HTTPStatusCode"] == 200
-        assert report_output["ResponseMetadata"]["HTTPStatusCode"] == 200
+        data_output = outputs[Path("-/verification/data.json")]
+        assert data_output.media_type == "application/json"
+        report_output = outputs[Path("-/verification/index.html")]
+        assert report_output.media_type == "text/html"

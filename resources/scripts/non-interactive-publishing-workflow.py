@@ -9,12 +9,15 @@ import requests
 from boto3 import client as S3Client  # noqa: N812
 
 from lantern.config import Config
-from lantern.exporters.site import SiteExporter
+from lantern.exporters.s3 import S3Exporter
 from lantern.lib.metadata_library.models.record.record import RecordInvalidError
 from lantern.log import init as init_logging
 from lantern.log import init_sentry
 from lantern.models.record.record import Record
 from lantern.models.site import ExportMeta
+from lantern.outputs.item_html import ItemAliasesOutput, ItemCatalogueOutput
+from lantern.outputs.record_iso import RecordIsoHtmlOutput, RecordIsoJsonOutput, RecordIsoXmlOutput
+from lantern.site import Site
 from lantern.stores.base import RecordNotFoundError
 from lantern.stores.gitlab import CommitResults, GitLabSource, GitLabStore
 
@@ -122,23 +125,33 @@ def _commit_records(
     return results
 
 
-def _publish_records(logger: logging.Logger, config: Config, site: SiteExporter, commit: CommitResults) -> None:
+def _publish_records(logger: logging.Logger, site: Site, exporter: S3Exporter, identifiers: set[str]) -> None:
     """
     Publish items and records for records included in a commit.
 
     - publishes to S3 publicly
     - additionally uploads items as trusted content to secure hosting
     """
-    identifiers = set(commit.new_identifiers + commit.updated_identifiers)
-
     logger.info(f"Publishing {len(identifiers)} records.")
-    site._records_exporter.publish()
+
+    outputs = site.run(
+        global_outputs=[],
+        individual_outputs=[
+            ItemCatalogueOutput,
+            ItemAliasesOutput,
+            RecordIsoJsonOutput,
+            RecordIsoXmlOutput,
+            RecordIsoHtmlOutput,
+        ],
+        identifiers=identifiers,
+    )
+    exporter.export(outputs)
 
     logger.info("Records published:")
     for identifier in sorted(identifiers):
-        logger.info(f"* https://{config.AWS_S3_BUCKET}/items/{identifier}")
+        logger.info(f"* https://{exporter._bucket}/items/{identifier}")
         # hack as reverse proxying is needed
-        logger.info(f"* https://{config.AWS_S3_BUCKET.replace('lantern', 'data')}/-/items/{identifier}")
+        logger.info(f"* https://{exporter._bucket.replace('lantern', 'data')}/-/items/{identifier}")
 
 
 def _webhook(logger: logging.Logger, config: Config, commit: CommitResults, mr_url: str, wh_url: str) -> None:
@@ -209,22 +222,17 @@ def _run(logger: logging.Logger, config: Config, args: Args) -> None:
         logger.info("No records committed, exiting.")
         sys.exit(0)
 
-    meta = ExportMeta.from_config_store(config=config, store=store, build_repo_ref=commit.commit)
     s3 = S3Client(
         "s3",
         aws_access_key_id=config.AWS_ACCESS_ID,
         aws_secret_access_key=config.AWS_ACCESS_SECRET,
         region_name="eu-west-1",
     )
-    site = SiteExporter(
-        logger=logger,
-        config=config,
-        meta=meta,
-        s3=s3,
-        store=store,
-        selected_identifiers=set(commit.new_identifiers + commit.updated_identifiers),
-    )
-    _publish_records(logger=logger, config=config, site=site, commit=commit)
+    meta = ExportMeta.from_config_store(config=config, store=store, build_repo_ref=commit.commit)
+    site = Site(logger=logger, meta=meta, store=store)
+    exporter = S3Exporter(logger=logger, s3=s3, bucket=config.AWS_S3_BUCKET)
+    identifiers = set(commit.new_identifiers + commit.updated_identifiers)
+    _publish_records(logger=logger, site=site, exporter=exporter, identifiers=identifiers)
 
     if args.webhook:
         _webhook(logger=logger, config=config, commit=commit, mr_url=mr_url, wh_url=args.webhook)

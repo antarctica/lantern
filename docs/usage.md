@@ -1,7 +1,13 @@
 # Lantern - Usage
 
+<!-- pyml disable md028 -->
+> [!WARNING]
+> This documentation is outdated and does not reflect changes made to split exporters into outputs, a top-level site
+> and verification class and more focused exporters.
+
 > [!NOTE]
 > These are draft workflows and are not intended for use by general end-users.
+<!-- pyml enable md028 -->
 
 ## Setup
 

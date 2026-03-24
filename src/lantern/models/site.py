@@ -3,6 +3,9 @@ from dataclasses import asdict, dataclass, field, fields
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
+from urllib.parse import urlparse
+
+from lxml import etree as ET  # noqa: N812
 
 from lantern.config import Config
 from lantern.lib.metadata_library.models.record.elements.common import Date
@@ -115,6 +118,82 @@ class SitePageMeta:
         if not self.inc_meta:
             return None
         return SchemaOrgMeta(type_="Article", headline=self.title, url=self.url, description=self.description)
+
+
+@dataclass(kw_only=True)
+class SiteContent:
+    """
+    Content item with static site.
+
+    Wrapper around a content (bytes) string to hold:
+
+    - path: relative path to content, which when combined with SiteMeta.base_url gives an absolute URL
+    - media_type: content media/MIME (not inferred from path extension, must be explicitly set)
+    - object_meta: optional key-value metadata to include alongside content where supported (e.g. in S3)
+    - redirect: optional redirect target, i.e. an (external) URL to redirect to for item aliases etc.
+
+    Used by Exporters to persist content in a storage system.
+
+    Minimal example:
+    SiteContent(content='<html>...</html>', path=Path('index.html'), media_type='text/html')
+
+    Note: The `redirect` property is intended for S3 object redirects (i.e. as metadata). For other export targets the
+    content itself must trigger a redirect (i.e. by using `<meta http-equiv="refresh" content="0;URL='/...'" />`).
+    """
+
+    content: str | bytes
+    path: Path
+    media_type: str
+    object_meta: dict[str, str] = field(default_factory=dict)
+    redirect: str | None = None
+
+    def __post_init__(self) -> None:
+        """Validate properties."""
+        if self.path.is_absolute():
+            msg = "Path must be relative."
+            raise ValueError(msg) from None
+
+        if self.redirect:
+            parsed = urlparse(self.redirect)
+            if not parsed.scheme or not parsed.netloc:
+                msg = "Redirect must be an absolute URL."
+                raise ValueError(msg) from None
+
+    def __repr__(self) -> str:
+        """String representation."""
+        return f"<SiteContent path='{self.path}' media_type='{self.media_type}' content_length='{len(self.content)}'>"
+
+
+class SiteRedirect(SiteContent):
+    """Content item for a page redirect."""
+
+    def __init__(self, path: Path, target: str, object_meta: dict[str, str] | None = None) -> None:
+        """Initialise."""
+        super().__init__(
+            content=self._content(target),
+            path=path,
+            media_type="text/html",
+            object_meta=object_meta if object_meta else {},
+            redirect=target,
+        )
+
+    def __repr__(self) -> str:
+        """String representation."""
+        return f"<SiteRedirect path='{self.path}' target='{self.redirect}'>"
+
+    @staticmethod
+    def _content(target: str) -> str:
+        """Generate a minimal HTML redirect page."""
+        html = ET.Element("html", attrib={"lang": "en-GB"})
+        head = ET.SubElement(html, "head")
+        title = ET.SubElement(head, "title")
+        title.text = "BAS Data Catalogue"
+        ET.SubElement(head, "meta", attrib={"http-equiv": "refresh", "content": f"0;url={target}"})
+        body = ET.SubElement(html, "body")
+        a = ET.SubElement(body, "a", attrib={"href": target})
+        a.text = "Click here if you are not redirected after a few seconds."
+        html_str = ET.tostring(html, encoding="unicode", method="html")
+        return f"<!DOCTYPE html>\n{html_str}"
 
 
 @dataclass(kw_only=True)
@@ -256,32 +335,18 @@ class SiteMeta:
 @dataclass(kw_only=True)
 class ExportMeta(SiteMeta):
     """
-    Metadata needed for exporters.
+    Metadata needed for outputs and exporters.
 
     Extends SiteMetadata with additional properties from app config:
 
-    - export_path: base path for local site output
-    - s3_bucket: S3 bucket name for public site output
     - parallel_jobs: number of jobs to run in parallel
     - admin_meta_keys: keys accessing administration metadata in records
-    - trusted: whether sensitive information can be shown in public site output
-    - trusted_path: optional path for trusted site output (required where trusted=True)
-    - trusted_host: optional host for trusted site output
+    - trusted: whether sensitive information can be shown in output
     """
 
-    export_path: Path
-    s3_bucket: str
     parallel_jobs: int
     admin_meta_keys: AdministrationKeys | None
     trusted: bool = False
-    trusted_path: Path | None = None
-    trusted_host: str | None = None
-
-    def __post_init__(self) -> None:
-        """Validate trusted site properties."""
-        if self.trusted and not self.trusted_path:
-            msg = "`trusted_path` cannot be None when `trusted=True`."
-            raise TypeError(msg)
 
     @property
     def site_metadata(self) -> SiteMeta:
@@ -302,10 +367,6 @@ class ExportMeta(SiteMeta):
         Create an Export Metadata instance from an app Config instance, optional GitLab Store and additional properties.
 
         In addition to the properties provided by parent `from_config_store()`, the config instance provides values for:
-        - export_path: from EXPORT_PATH
-        - s3_bucket: from AWS_S3_BUCKET
-        - trusted_path: from TRUSTED_UPLOAD_PATH
-        - trusted_host: from TRUSTED_UPLOAD_HOST
         - parallel_jobs: from PARALLEL_JOBS
         - admin_meta_keys: from ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE and ADMIN_METADATA_SIGNING_KEY_PUBLIC
         """
@@ -315,10 +376,6 @@ class ExportMeta(SiteMeta):
         return cls(
             **{  # ty: ignore[invalid-argument-type]
                 **super_meta,
-                "export_path": config.EXPORT_PATH,
-                "s3_bucket": config.AWS_S3_BUCKET,
-                "trusted_path": config.TRUSTED_UPLOAD_PATH,
-                "trusted_host": config.TRUSTED_UPLOAD_HOST,
                 "parallel_jobs": config.PARALLEL_JOBS,
                 "admin_meta_keys": config.ADMIN_METADATA_KEYS,
                 **kwargs,

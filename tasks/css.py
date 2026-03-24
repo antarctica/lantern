@@ -6,13 +6,13 @@ from tempfile import TemporaryDirectory
 
 from boto3 import client as S3Client  # noqa: N812
 from jinja2 import Environment, FileSystemLoader, select_autoescape
+from lantern.exporters.site import SiteExporter
+from lantern.exporters.verification import VerificationReport
 from moto import mock_aws
 from tests.resources.admin_keys import test_keys
 from tests.resources.stores.fake_records_store import FakeRecordsStore
 
 from lantern.config import Config as BaseConfig
-from lantern.exporters.site import SiteExporter
-from lantern.exporters.verification import VerificationReport
 from lantern.models.site import ExportMeta
 from lantern.models.verification.enums import VerificationResult, VerificationType
 from lantern.models.verification.jobs import VerificationJob

@@ -24,31 +24,15 @@ from moto import mock_aws
 from pytest_mock import MockerFixture
 
 from lantern.config import Config
-from lantern.exporters.base import Exporter, ResourceExporter
-from lantern.exporters.html import HtmlAliasesExporter, HtmlExporter
-from lantern.exporters.records import RecordsExporter
-from lantern.exporters.site import (
-    SiteApiExporter,
-    SiteExporter,
-    SiteHealthExporter,
-    SiteIndexExporter,
-    SitePagesExporter,
-    SiteResourcesExporter,
-)
-from lantern.exporters.verification import VerificationExporter
-from lantern.exporters.waf import WebAccessibleFolderExporter
-from lantern.exporters.website import WebsiteSearchExporter
-from lantern.exporters.xml import IsoXmlHtmlExporter
+from lantern.exporters.local import LocalExporter
+from lantern.exporters.rsync import RsyncExporter
+from lantern.exporters.s3 import S3Exporter
 from lantern.lib.arcgis.gis.dataclasses import Item as ArcGisItem
 from lantern.lib.arcgis.gis.dataclasses import ItemProperties as ArcGisItemProperties
 from lantern.lib.arcgis.gis.enums import ItemType as ArcGisItemType
 from lantern.lib.arcgis.gis.enums import SharingLevel as ArcGisSharingLevel
-from lantern.lib.metadata_library.models.record.elements.common import Constraint, Date, Dates, Identifier, Identifiers
-from lantern.lib.metadata_library.models.record.enums import (
-    ConstraintRestrictionCode,
-    ConstraintTypeCode,
-    HierarchyLevelCode,
-)
+from lantern.lib.metadata_library.models.record.elements.common import Date, Dates, Identifiers
+from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
 from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.record import Record as RecordBase
 from lantern.lib.metadata_library.models.record.utils.admin import set_admin
@@ -61,19 +45,29 @@ from lantern.models.item.catalogue.elements import Identifiers as ItemCatIdentif
 from lantern.models.item.catalogue.item import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
 from lantern.models.item.catalogue.tabs import AdditionalInfoTab, AdminTab
-from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
+from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
-from lantern.models.site import ExportMeta, SiteMeta, SitePageMeta
+from lantern.models.site import ExportMeta, SiteContent, SiteMeta, SitePageMeta
 from lantern.models.verification.enums import VerificationResult, VerificationType
 from lantern.models.verification.jobs import VerificationJob
 from lantern.models.verification.types import VerificationContext
+from lantern.outputs.item_html import ItemAliasesOutput, ItemCatalogueOutput
+from lantern.outputs.items_bas_website import ItemsBasWebsiteOutput
+from lantern.outputs.record_iso import RecordIsoHtmlOutput, RecordIsoJsonOutput, RecordIsoXmlOutput
+from lantern.outputs.records_waf import RecordsWafOutput
+from lantern.outputs.site_api import SiteApiOutput
+from lantern.outputs.site_health import SiteHealthOutput
+from lantern.outputs.site_index import SiteIndexOutput
+from lantern.outputs.site_pages import SitePagesOutput
+from lantern.outputs.site_resources import SiteResourcesOutput
+from lantern.site import Site
 from lantern.stores.base import SelectRecordProtocol, SelectRecordsProtocol
 from lantern.stores.gitlab import GitLabSource, GitLabStore
 from lantern.stores.gitlab_cache import GitLabCachedStore, GitLabLocalCache
-from lantern.utils import S3Utils, get_jinja_env, prettify_html
+from lantern.utils import get_jinja_env, prettify_html
+from lantern.verification import Verification
 from tests.resources.admin_keys import test_keys
-from tests.resources.exporters.fake_exporter import FakeExporter, FakeResourceExporter
 from tests.resources.stores.fake_records_store import FakeRecordsStore
 
 
@@ -141,6 +135,12 @@ def fx_config() -> Config:
 def fx_site_page_meta() -> SitePageMeta:
     """Site page metadata."""
     return SitePageMeta(title="x", url="x", description="x", inc_meta=False)
+
+
+@pytest.fixture()
+def fx_site_content() -> SiteContent:
+    """Site content item."""
+    return SiteContent(content="x", path=Path("x"), media_type="x")
 
 
 @pytest.fixture()
@@ -528,6 +528,18 @@ def _select_records(file_identifiers: set[str]) -> list[RecordRevision]:
     return [_select_record(fid) for fid in file_identifiers]
 
 
+def _select_records_fixed(file_identifiers: set[str] | None = None) -> list[RecordRevision]:
+    """
+    Minimal records fetch method returning a fixed set of records.
+
+    `file_identifiers` parameter is ignored but needed for compatibility with the SelectRecordsProtocol and used by
+    the Verification class.
+
+    Standalone method to allow use outside of fixtures.
+    """
+    return [_select_record("x")]
+
+
 @pytest.fixture()
 def fx_select_record() -> Callable[[str], RecordRevision]:
     """Minimal record lookup method."""
@@ -538,6 +550,13 @@ def fx_select_record() -> Callable[[str], RecordRevision]:
 def fx_select_records() -> SelectRecordsProtocol:
     """Minimal records lookup method."""
     return _select_records
+
+
+@pytest.fixture()
+def fx_select_records_fixed() -> SelectRecordsProtocol:
+    """Minimal records lookup method returning a fixed set of records."""
+    # noinspection PyTypeChecker
+    return _select_records_fixed
 
 
 @pytest.fixture()
@@ -715,6 +734,72 @@ def fx_gitlab_cached_store_pop(
     return fx_gitlab_cached_store
 
 
+def _index_site_content_outputs(outputs: list[SiteContent]) -> dict[Path, SiteContent]:
+    """Index site content outputs by path."""
+    return {output.path: output for output in outputs}
+
+
+@pytest.fixture()
+def fx_item_output(
+    fx_logger: logging.Logger,
+    fx_export_meta: ExportMeta,
+    fx_revision_model_min: RecordRevision,
+    fx_select_record: SelectRecordProtocol,
+) -> ItemCatalogueOutput:
+    """Catalogue item output."""
+    return ItemCatalogueOutput(
+        logger=fx_logger, meta=fx_export_meta, record=fx_revision_model_min, select_record=fx_select_record
+    )
+
+
+@pytest.fixture()
+def fx_item_aliases_output(
+    fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_revision_model_min: RecordRevision
+) -> ItemAliasesOutput:
+    """Catalogue item aliases output."""
+    return ItemAliasesOutput(logger=fx_logger, meta=fx_export_meta, record=fx_revision_model_min)
+
+
+@pytest.fixture()
+def fx_record_iso_xml_output(
+    fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_revision_model_min: RecordRevision
+) -> RecordIsoXmlOutput:
+    """ISO 19115 record XML output."""
+    return RecordIsoXmlOutput(logger=fx_logger, meta=fx_export_meta, record=fx_revision_model_min)
+
+
+@pytest.fixture()
+def fx_records_bas_website_output(
+    fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_select_records: SelectRecordsProtocol
+) -> ItemsBasWebsiteOutput:
+    """BAS Public Website Search items output (empty)."""
+    return ItemsBasWebsiteOutput(logger=fx_logger, meta=fx_export_meta, select_records=fx_select_records)
+
+
+@pytest.fixture()
+def fx_records_waf_output(
+    fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_select_records: SelectRecordsProtocol
+) -> RecordsWafOutput:
+    """Records WAF output (empty)."""
+    return RecordsWafOutput(logger=fx_logger, meta=fx_export_meta, select_records=fx_select_records)
+
+
+@pytest.fixture()
+def fx_local_exporter(fx_logger: logging.Logger) -> LocalExporter:
+    """Local filesystem exporter using a temporary directory."""
+    with TemporaryDirectory() as tmp_dir:
+        tmp_path = Path(tmp_dir) / "local"
+    return LocalExporter(logger=fx_logger, path=tmp_path)
+
+
+@pytest.fixture()
+def fx_rsync_exporter(fx_logger: logging.Logger) -> RsyncExporter:
+    """Rsync exporter using a temporary directory."""
+    with TemporaryDirectory() as tmp_dir:
+        tmp_path = Path(tmp_dir) / "rsync"
+    return RsyncExporter(logger=fx_logger, path=tmp_path)
+
+
 @pytest.fixture()
 def fx_s3_bucket_name() -> str:
     """S3 bucket name."""
@@ -745,568 +830,107 @@ def fx_s3_client(mocker: MockerFixture, fx_s3_bucket_name: str) -> S3Client:
 
 
 @pytest.fixture()
-def fx_s3_utils(fx_logger: logging.Logger, fx_s3_client: S3Client, fx_s3_bucket_name: str) -> S3Utils:
-    """S3Utils with a mocked S3 client."""
-    with TemporaryDirectory() as tmp_path:
-        base_path = Path(tmp_path)
-    return S3Utils(logger=fx_logger, s3=fx_s3_client, s3_bucket=fx_s3_bucket_name, relative_base=base_path)
+def fx_s3_exporter(fx_logger: logging.Logger, fx_s3_client: S3Client, fx_s3_bucket_name: str) -> S3Exporter:
+    """S3 exporter using mocked s3 client."""
+    return S3Exporter(logger=fx_logger, s3=fx_s3_client, bucket=fx_s3_bucket_name)
 
 
 @pytest.fixture()
-def fx_exporter_base(
-    mocker: MockerFixture, fx_logger: logging.Logger, fx_s3_bucket_name: str, fx_s3_client: S3Client
-) -> Exporter:
-    """
-    Base Data Catalogue exporter.
-
-    With a mocked config and S3 client
-
-    Actual exporter has abstract method so a subclass is used.
-    """
-    mock_config = mocker.Mock()
-    type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
-    meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
-
-    return FakeExporter(logger=fx_logger, meta=meta, s3=fx_s3_client)
+def fx_site(fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_fake_store: FakeRecordsStore) -> Site:
+    """Site generator using fake/test records."""
+    return Site(logger=fx_logger, meta=fx_export_meta, store=fx_fake_store)
 
 
 @pytest.fixture()
-def fx_exporter_resource_base(
-    mocker: MockerFixture,
-    fx_logger: logging.Logger,
-    fx_exporter_base: Exporter,
-    fx_s3_bucket_name: str,
-    fx_s3_client: S3Client,
-    fx_revision_model_min: RecordRevision,
-) -> ResourceExporter:
-    """
-    Base resource exporter.
-
-    With a mocked config and S3 client
-
-    Actual exporter has abstract method so a subclass is used.
-    """
-    with TemporaryDirectory() as tmp_path:
-        output_path = Path(tmp_path)
-    mock_config = mocker.Mock()
-    type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
-    type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
-    fx_exporter_base._config = mock_config
-    meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
-
-    return FakeResourceExporter(
-        logger=fx_logger,
-        meta=meta,
-        s3=fx_s3_client,
-        record=fx_revision_model_min,
-        export_base=output_path.joinpath("x"),
-        export_name="x.txt",
-    )
-
-
-@pytest.fixture()
-def fx_exporter_iso_xml_html(
-    mocker: MockerFixture,
-    fx_logger: logging.Logger,
-    fx_s3_bucket_name: str,
-    fx_s3_client: S3Client,
-    fx_revision_model_min: RecordRevision,
-) -> Exporter:
-    """ISO 19115 XML as HTML exporter with a mocked config and S3 client."""
-    with TemporaryDirectory() as tmp_path:
-        output_path = Path(tmp_path)
-    mock_config = mocker.Mock()
-    type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
-    type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
-    meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
-
-    return IsoXmlHtmlExporter(logger=fx_logger, meta=meta, s3=fx_s3_client, record=fx_revision_model_min)
-
-
-@pytest.fixture()
-def fx_exporter_html(
-    mocker: MockerFixture,
-    fx_admin_meta_keys: AdministrationKeys,
-    fx_logger: logging.Logger,
-    fx_s3_bucket_name: str,
-    fx_s3_client: S3Client,
-    fx_revision_model_min: RecordRevision,
-) -> HtmlExporter:
-    """HTML exporter with a mocked config and S3 client."""
-    with TemporaryDirectory() as tmp_path:
-        output_path = Path(tmp_path)
-    mock_config = mocker.Mock()
-    type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
-    type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
-    type(mock_config).TEMPLATES_ITEM_MAPS_ENDPOINT = PropertyMock(return_value="x")
-    type(mock_config).TEMPLATES_ITEM_CONTACT_ENDPOINT = PropertyMock(return_value="x")
-    type(mock_config).ADMIN_METADATA_KEYS = fx_admin_meta_keys
-    meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
-
-    return HtmlExporter(
-        logger=fx_logger,
-        meta=meta,
-        s3=fx_s3_client,
-        record=fx_revision_model_min,
-        select_record=_select_record,
-    )
-
-
-@pytest.fixture()
-def fx_exporter_html_alias(
-    mocker: MockerFixture,
-    fx_logger: logging.Logger,
-    fx_s3_bucket_name: str,
-    fx_s3_client: S3Client,
-    fx_revision_model_min: RecordRevision,
-) -> HtmlAliasesExporter:
-    """HTML alias exporter with a mocked config and S3 client."""
-    with TemporaryDirectory() as tmp_path:
-        output_path = Path(tmp_path)
-    mock_config = mocker.Mock()
-    type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
-    type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
-    meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
-
-    fx_revision_model_min.identification.identifiers.append(
-        Identifier(identifier="x", href=f"https://{CATALOGUE_NAMESPACE}/datasets/x", namespace=ALIAS_NAMESPACE)
-    )
-
-    return HtmlAliasesExporter(logger=fx_logger, meta=meta, s3=fx_s3_client, record=fx_revision_model_min)
-
-
-@pytest.fixture()
-def fx_exporter_records(
-    mocker: MockerFixture,
-    fx_logger: logging.Logger,
-    fx_admin_meta_keys: AdministrationKeys,
-    fx_s3_bucket_name: str,
-    fx_s3_client: S3Client,
-    fx_fake_store: FakeRecordsStore,
-    fx_select_record: SelectRecordProtocol,
-) -> RecordsExporter:
-    """
-    Site records exporter (empty).
-
-    With:
-    - a mocked config and S3 client
-    - a minimal sample record
-    """
-    with TemporaryDirectory() as tmp_path:
-        export_path = Path(tmp_path)
-    with TemporaryDirectory() as tmp_path2:
-        trusted_path = Path(tmp_path2)
-    mock_config = mocker.Mock()
-    type(mock_config).LOG_LEVEL = PropertyMock(return_value=logging.DEBUG)
-    type(mock_config).PARALLEL_JOBS = PropertyMock(return_value=1)
-    type(mock_config).ADMIN_METADATA_KEYS = fx_admin_meta_keys
-    type(mock_config).EXPORT_PATH = PropertyMock(return_value=export_path)
-    type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
-    type(mock_config).TRUSTED_UPLOAD_PATH = PropertyMock(return_value=trusted_path)
-    type(mock_config).TRUSTED_UPLOAD_HOST = PropertyMock(return_value=None)
-    type(mock_config).TEMPLATES_ITEM_MAPS_ENDPOINT = PropertyMock(return_value="x")
-    type(mock_config).TEMPLATES_ITEM_CONTACT_ENDPOINT = PropertyMock(return_value="x")
-    meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
-
-    return RecordsExporter(
-        logger=fx_logger,
-        config=mock_config,
-        meta=meta,
-        s3=fx_s3_client,
-        store=fx_fake_store,
-    )
-
-
-@pytest.fixture()
-def fx_exporter_records_sel(
-    fx_exporter_records: RecordsExporter, fx_revision_model_min: RecordRevision
-) -> RecordsExporter:
-    """Site records exporter with a single record selected."""
-    fx_exporter_records.selected_identifiers = {fx_revision_model_min.file_identifier}
-    return fx_exporter_records
-
-
-@pytest.fixture()
-def fx_exporter_site_resources(
-    mocker: MockerFixture, fx_logger: logging.Logger, fx_s3_bucket_name: str, fx_s3_client: S3Client
-) -> SiteResourcesExporter:
-    """Site resources exporter with a mocked config and S3 client."""
-    with TemporaryDirectory() as tmp_path:
-        output_path = Path(tmp_path)
-    mock_config = mocker.Mock()
-    type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
-    type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
-    meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
-
-    return SiteResourcesExporter(logger=fx_logger, meta=meta, s3=fx_s3_client)
-
-
-def _select_record_alias(identifier: str) -> RecordRevision:
-    """Minimal record lookup method with an alias identifier."""
-    record = RecordRevision.loads(deepcopy(_revision_config_min()))
-    record.file_identifier = identifier
-    record.identification.identifiers.append(
-        Identifier(identifier="x", href="https://data.bas.ac.uk/datasets/x", namespace=ALIAS_NAMESPACE)
-    )
-    return record
-
-
-def _select_records_alias(file_identifiers: set[str]) -> list[RecordRevision]:
-    """Wrapper for _get_record_alias."""
-    return [_select_record_alias(identifier) for identifier in file_identifiers]
-
-
-@pytest.fixture()
-def fx_exporter_site_index(
-    mocker: MockerFixture, fx_s3_bucket_name: str, fx_logger: logging.Logger, fx_s3_client: S3Client
-) -> SiteIndexExporter:
-    """
-    Site index exporter (empty).
-
-    With a mocked config and S3 client.
-    """
-    with TemporaryDirectory() as tmp_path:
-        output_path = Path(tmp_path)
-    mock_config = mocker.Mock()
-    type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
-    type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
-    meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
-
-    return SiteIndexExporter(logger=fx_logger, meta=meta, s3=fx_s3_client, select_records=_select_records_alias)
-
-
-@pytest.fixture()
-def fx_exporter_site_index_sel(
-    fx_exporter_site_index: SiteIndexExporter, fx_revision_model_min: RecordRevision
-) -> SiteIndexExporter:
-    """Site index exporter with a single record selected."""
-
-    # noinspection PyUnusedLocal
-    def select_records(file_identifiers: set[str] | None = None) -> list[RecordRevision]:
-        return [_select_record_alias("x")]
-
-    fx_exporter_site_index._select_records = select_records
-    return fx_exporter_site_index
-
-
-def _select_record_open(identifier: str) -> RecordRevision:
-    """Minimal record lookup method with open access constraint and admin access permissions."""
-    record = RecordRevision.loads(deepcopy(_revision_config_min()))
-    record.file_identifier = identifier
-
-    # access permissions
-    admin_meta = AdministrationMetadata(
-        id=record.file_identifier, metadata_permissions=[OPEN_ACCESS], resource_permissions=[OPEN_ACCESS]
-    )
-    set_admin(keys=_admin_meta_keys(), record=record, admin_meta=admin_meta)
-
-    # access constraints (informative)
-    record.identification.constraints.append(
-        Constraint(type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.UNRESTRICTED)
-    )
-    return record
-
-
-def _select_records_open(file_identifiers: set[str]) -> list[RecordRevision]:
-    """Wrapper for _select_record_open."""
-    return [_select_record_open(identifier) for identifier in file_identifiers]
-
-
-@pytest.fixture()
-def fx_exporter_waf(
-    mocker: MockerFixture, fx_s3_bucket_name: str, fx_logger: logging.Logger, fx_s3_client: S3Client
-) -> WebAccessibleFolderExporter:
-    """
-    Web Accessible Folder exporter (empty).
-
-    With a mocked config and S3 client.
-    """
-    with TemporaryDirectory() as tmp_path:
-        output_path = Path(tmp_path)
-    mock_config = mocker.Mock()
-    type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
-    type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
-    meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
-
-    return WebAccessibleFolderExporter(
-        logger=fx_logger, meta=meta, s3=fx_s3_client, select_records=_select_records_open
-    )
-
-
-@pytest.fixture()
-def fx_exporter_waf_sel(fx_exporter_waf: WebAccessibleFolderExporter) -> WebAccessibleFolderExporter:
-    """Web Accessible Folder exporter with a single record selected."""
-
-    # noinspection PyUnusedLocal
-    def select_records(file_identifiers: set[str] | None = None) -> list[RecordRevision]:
-        return [_select_record_open("x")]
-
-    fx_exporter_waf._select_records = select_records
-    return fx_exporter_waf
-
-
-@pytest.fixture()
-def fx_exporter_website_search(
-    mocker: MockerFixture,
-    fx_admin_meta_keys: AdministrationKeys,
-    fx_s3_bucket_name: str,
-    fx_logger: logging.Logger,
-    fx_s3_client: S3Client,
-) -> WebsiteSearchExporter:
-    """
-    Public website search exporter (empty).
-
-    With a mocked config and S3 client.
-    """
-    with TemporaryDirectory() as tmp_path:
-        output_path = Path(tmp_path)
-    mock_config = mocker.Mock()
-    type(mock_config).NAME = PropertyMock(return_value="lantern")
-    type(mock_config).ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE = PropertyMock(
-        return_value=fx_admin_meta_keys.encryption_private
-    )
-    type(mock_config).ADMIN_METADATA_SIGNING_KEY_PUBLIC = PropertyMock(return_value=fx_admin_meta_keys.signing_public)
-    type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
-    type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
-
-    meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
-    # Inject private signing key so admin metadata can be signed in other fixtures and tests
-    meta.admin_meta_keys = fx_admin_meta_keys
-
-    return WebsiteSearchExporter(logger=fx_logger, meta=meta, s3=fx_s3_client, select_records=_select_records_open)
-
-
-@pytest.fixture()
-def fx_exporter_website_search_sel(fx_exporter_website_search: WebsiteSearchExporter) -> WebsiteSearchExporter:
-    """Public website search exporter with a single record selected."""
-
-    # noinspection PyUnusedLocal
-    def select_records(file_identifiers: set[str] | None = None) -> list[RecordRevision]:
-        return [_select_record_open("x")]
-
-    fx_exporter_website_search._select_records = select_records
-    return fx_exporter_website_search
-
-
-@pytest.fixture()
-def fx_exporter_site_pages(
-    mocker: MockerFixture, fx_s3_bucket_name: str, fx_logger: logging.Logger, fx_s3_client: S3Client
-) -> SitePagesExporter:
-    """Site pages exporter with a mocked config and S3 client."""
-    with TemporaryDirectory() as tmp_path:
-        output_path = Path(tmp_path)
-    mock_config = mocker.Mock()
-    type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
-    type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
-    meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
-
-    return SitePagesExporter(logger=fx_logger, meta=meta, s3=fx_s3_client)
-
-
-@pytest.fixture()
-def fx_exporter_site_api(
-    mocker: MockerFixture, fx_logger: logging.Logger, fx_s3_bucket_name: str, fx_s3_client: S3Client
-) -> SiteApiExporter:
-    """Site API definitions exporter with a mocked config and S3 client."""
-    with TemporaryDirectory() as tmp_path:
-        output_path = Path(tmp_path)
-    mock_config = mocker.Mock()
-    type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
-    type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
-    type(mock_config).BASE_URL = PropertyMock(return_value="https://example.com")
-    type(mock_config).VERSION = PropertyMock(return_value="0.0.0")
-
-    meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
-
-    return SiteApiExporter(logger=fx_logger, meta=meta, s3=fx_s3_client)
-
-
-@pytest.fixture()
-def fx_exporter_site_health(
-    mocker: MockerFixture,
-    fx_logger: logging.Logger,
-    fx_s3_bucket_name: str,
-    fx_s3_client: S3Client,
-    fx_fake_store: FakeRecordsStore,
-) -> SiteHealthExporter:
-    """Site API definitions exporter with a mocked config and S3 client."""
-    with TemporaryDirectory() as tmp_path:
-        output_path = Path(tmp_path)
-    mock_config = mocker.Mock()
-    type(mock_config).EXPORT_PATH = PropertyMock(return_value=output_path)
-    type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
-    type(mock_config).BASE_URL = PropertyMock(return_value="https://example.com")
-    type(mock_config).VERSION = PropertyMock(return_value="0.0.0")
-
-    meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
-
-    return SiteHealthExporter(logger=fx_logger, meta=meta, s3=fx_s3_client, store=fx_fake_store)
-
-
-@pytest.fixture()
-def fx_exporter_site(
-    mocker: MockerFixture,
-    fx_s3_bucket_name: str,
-    fx_logger: logging.Logger,
-    fx_admin_meta_keys: AdministrationKeys,
-    fx_s3_client: S3Client,
-    fx_fake_store: FakeRecordsStore,
-) -> SiteExporter:
-    """
-    Site exporter (empty records).
-
-    With: a mocked config and S3 client
-    """
-    with TemporaryDirectory() as tmp_path:
-        export_path = Path(tmp_path)
-    with TemporaryDirectory() as tmp_path2:
-        trusted_path = Path(tmp_path2)
-    mock_config = mocker.Mock()
-    type(mock_config).NAME = PropertyMock(return_value="x")
-    type(mock_config).LOG_LEVEL = PropertyMock(return_value=logging.DEBUG)
-    type(mock_config).PARALLEL_JOBS = PropertyMock(return_value=1)
-    type(mock_config).ADMIN_METADATA_KEYS = fx_admin_meta_keys
-    type(mock_config).EXPORT_PATH = PropertyMock(return_value=export_path)
-    type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
-    type(mock_config).TRUSTED_UPLOAD_PATH = PropertyMock(return_value=trusted_path)
-    type(mock_config).TRUSTED_UPLOAD_HOST = PropertyMock(return_value=None)
-    type(mock_config).TEMPLATES_ITEM_MAPS_ENDPOINT = PropertyMock(return_value="x")
-    type(mock_config).TEMPLATES_ITEM_CONTACT_ENDPOINT = PropertyMock(return_value="x")
-    mocker.patch("lantern.exporters.records._job_worker_s3", return_value=fx_s3_client)
-    meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
-
-    return SiteExporter(
-        logger=fx_logger,
-        config=mock_config,
-        meta=meta,
-        s3=fx_s3_client,
-        store=fx_fake_store,
-        selected_identifiers=set(),
-    )
-
-
-@pytest.fixture()
-def fx_exporter_verify(
-    mocker: MockerFixture,
-    fx_s3_bucket_name: str,
-    fx_logger: logging.Logger,
-    fx_s3_client: S3Client,
-    fx_select_records: SelectRecordsProtocol,
-) -> VerificationExporter:
-    """
-    Verification exporter (empty records).
-
-    With:
-    - a mocked config and S3 client
-    - global verification context
-    """
-    with TemporaryDirectory() as tmp_path:
-        export_path = Path(tmp_path)
-    with TemporaryDirectory() as tmp_path2:
-        trusted_path = Path(tmp_path2)
-    mock_config = mocker.Mock()
-    type(mock_config).PARALLEL_JOBS = PropertyMock(return_value=1)
-    type(mock_config).EXPORT_PATH = PropertyMock(return_value=export_path)
-    type(mock_config).AWS_S3_BUCKET = PropertyMock(return_value=fx_s3_bucket_name)
-    type(mock_config).TRUSTED_UPLOAD_PATH = PropertyMock(return_value=trusted_path)
-    type(mock_config).TRUSTED_UPLOAD_HOST = PropertyMock(return_value=None)
-    type(mock_config).TEMPLATES_ITEM_MAPS_ENDPOINT = PropertyMock(return_value="x")
-    type(mock_config).TEMPLATES_ITEM_CONTACT_ENDPOINT = PropertyMock(return_value="x")
-    type(mock_config).BASE_URL = PropertyMock(return_value="https://example.com")
-    meta = ExportMeta.from_config_store(config=mock_config, store=None, build_repo_ref="83fake48")
-
-    context: VerificationContext = {
-        "BASE_URL": meta.base_url,
+def fx_verification_context(fx_export_meta: ExportMeta) -> VerificationContext:
+    """Site Verification context."""
+    return {
+        "BASE_URL": fx_export_meta.base_url,
         "SHAREPOINT_PROXY_ENDPOINT": "x",
         "SAN_PROXY_ENDPOINT": "x",
     }
 
-    return VerificationExporter(
-        logger=fx_logger, meta=meta, s3=fx_s3_client, select_records=fx_select_records, context=context
+
+@pytest.fixture()
+def fx_verification(
+    fx_logger: logging.Logger,
+    fx_export_meta: ExportMeta,
+    fx_select_records: SelectRecordsProtocol,
+    fx_verification_context: VerificationContext,
+) -> Verification:
+    """Site Verification with a global verification context."""
+    return Verification(
+        logger=fx_logger, meta=fx_export_meta, select_records=fx_select_records, context=fx_verification_context
     )
 
 
 @pytest.fixture()
-def fx_exporter_verify_sel(
-    fx_exporter_verify: VerificationExporter, fx_revision_model_min: RecordRevision
-) -> VerificationExporter:
-    """Verification exporter with a single record selected."""
-
-    # noinspection PyUnusedLocal
-    def select_records(file_identifiers: set[str] | None = None) -> list[RecordRevision]:
-        return [_select_record("x")]
-
-    fx_exporter_verify._select_records = select_records
-    return fx_exporter_verify
+def fx_verification_sel(fx_verification: Verification, fx_select_records_fixed: SelectRecordsProtocol) -> Verification:
+    """Site Verification with a single selectable record."""
+    fx_verification._select_records = fx_select_records_fixed
+    return fx_verification
 
 
 @pytest.fixture()
-def fx_exporter_verify_post_run(fx_exporter_verify_sel: VerificationExporter) -> VerificationExporter:
-    """Verification exporter with a single record selected and applicable jobs in a PASS state."""
-    fx_exporter_verify_sel._jobs = [
+def fx_verification_post_run(fx_verification_sel: Verification) -> Verification:
+    """Site Verification with a single selectable record and applicable jobs in a PASS state."""
+    fx_verification_sel._jobs = [
         VerificationJob(
             result=VerificationResult.PASS,
             type=VerificationType.SITE_PAGES,
             url="https://data.bas.ac.uk/-/index",
-            context=fx_exporter_verify_sel._context,
+            context=fx_verification_sel._context,
             data={"duration": timedelta(microseconds=1)},
         ),
         VerificationJob(
             result=VerificationResult.PASS,
             type=VerificationType.ITEM_PAGES,
             url="https://data.bas.ac.uk/items/123",
-            context=fx_exporter_verify_sel._context,
+            context=fx_verification_sel._context,
             data={"file_identifier": "x", "duration": timedelta(microseconds=1)},
         ),
     ]
-    return fx_exporter_verify_sel
+    return fx_verification_sel
 
 
 @pytest.fixture(scope="module")
-def fx_exporter_static_site(module_mocker: MockerFixture) -> TemporaryDirectory:
+def fx_static_site() -> TemporaryDirectory:
     """
     Build static site and export to a temp directory.
 
-    Module scoped for performance. Means usual fixtures for config, S3Client, get_record and FakeRecordsStore can't be
-    used and are duplicated.
+    Module scoped for performance. This means usual fixtures for logging, stores, etc. can't be used and are duplicated.
     """
     site_dir = TemporaryDirectory()
+    site_path = Path(site_dir.name)
 
     logger = logging.getLogger("app")
     logger.setLevel(logging.DEBUG)
 
     config = Config()
-    module_mocker.patch.object(
-        type(config),
-        attribute="EXPORT_PATH",
-        new_callable=PropertyMock,
-        return_value=Path(site_dir.name),
-    )
-    module_mocker.patch.object(type(config), attribute="AWS_ACCESS_ID", new_callable=PropertyMock, return_value="x")
-    module_mocker.patch.object(type(config), attribute="AWS_ACCESS_SECRET", new_callable=PropertyMock, return_value="x")
-    meta = ExportMeta.from_config_store(config=config, store=None, build_repo_ref="83fake48", trusted=True)
-    # load private signing key so admin metadata can be signed in other fixtures and tests
-    meta.admin_meta_keys = _admin_meta_keys()
-
-    with mock_aws():
-        s3_client = S3Client(
-            "s3",
-            aws_access_key_id=config.AWS_ACCESS_ID,
-            aws_secret_access_key=config.AWS_ACCESS_SECRET,
-            region_name="eu-west-1",
-        )
-
     store = FakeRecordsStore(logger=logger)
-    exporter = SiteExporter(
-        logger=logger,
-        config=config,
-        meta=meta,
-        s3=s3_client,
-        store=store,
-        selected_identifiers={record.file_identifier for record in store.select()},
-    )
-    exporter.export()
+    meta = ExportMeta.from_config_store(config=config, store=None, build_repo_ref="83fake48", trusted=True)
+    exporter = LocalExporter(logger=logger, path=site_path)
+    site = Site(logger=logger, meta=meta, store=store)
 
+    content = site.run(
+        global_outputs=[
+            SiteResourcesOutput,
+            SiteIndexOutput,
+            SitePagesOutput,
+            SiteApiOutput,
+            SiteHealthOutput,
+            RecordsWafOutput,
+            ItemsBasWebsiteOutput,
+        ],
+        individual_outputs=[
+            ItemCatalogueOutput,
+            ItemAliasesOutput,
+            RecordIsoJsonOutput,
+            RecordIsoXmlOutput,
+            RecordIsoHtmlOutput,
+        ],
+    )
+    exporter.export(content)
     if not Path(site_dir.name).joinpath("favicon.ico").exists():
         msg = "Failed to generate static site"
         raise RuntimeError(msg) from None
@@ -1315,9 +939,9 @@ def fx_exporter_static_site(module_mocker: MockerFixture) -> TemporaryDirectory:
 
 
 @pytest.fixture(scope="module")
-def fx_exporter_static_server(fx_exporter_static_site: TemporaryDirectory):
+def fx_exporter_static_server(fx_static_site: TemporaryDirectory):
     """Expose static site from a local server."""
-    site_dir = fx_exporter_static_site.name
+    site_dir = fx_static_site.name
 
     if os.environ.get("CI"):
         # In CI, requests to this local server won't resolve, instead we need to symlink the site_dir to within the
@@ -1352,4 +976,4 @@ def fx_exporter_static_server(fx_exporter_static_site: TemporaryDirectory):
         finally:
             process.terminate()
             process.wait()
-            fx_exporter_static_site.cleanup()
+            fx_static_site.cleanup()

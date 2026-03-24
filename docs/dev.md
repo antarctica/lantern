@@ -1,5 +1,9 @@
 # Lantern - Development
 
+> [!WARNING]
+> This documentation is outdated and does not reflect changes made to split exporters into outputs, a top-level site
+> and verification class and more focused exporters.
+
 ## Local development environment
 
 Requirements:

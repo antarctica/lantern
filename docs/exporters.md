@@ -1,5 +1,9 @@
 # Lantern - Exporters
 
+> [!WARNING]
+> This documentation is outdated and does not reflect changes made to split exporters into outputs, a top-level site
+> and verification class and more focused exporters.
+
 Exporters create the catalogue [Static Site](/docs/architecture.md#static-site). They can be broadly split into:
 
 - [Resource Exporters](#resource-exporters) - which create derived outputs of individual

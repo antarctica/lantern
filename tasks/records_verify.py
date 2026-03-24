@@ -1,16 +1,17 @@
 from tasks._record_utils import confirm_source, init
 
-from lantern.exporters.verification import VerificationExporter
+from lantern.exporters.local import LocalExporter
 from lantern.models.site import ExportMeta
 from lantern.models.verification.types import VerificationContext
+from lantern.verification import Verification
 
 
 def main() -> None:
     """Entrypoint."""
     base_url = "https://data.bas.ac.uk"
-    selected = set()  # to set use the form {"abc", "..."}
+    identifiers = set()  # to set use the form {"abc", "..."}
 
-    logger, config, store, s3 = init(cached_store=True)
+    logger, config, store, _s3 = init(cached_store=True)
     context: VerificationContext = {
         "BASE_URL": base_url,
         "SHAREPOINT_PROXY_ENDPOINT": config.VERIFY_SHAREPOINT_PROXY_ENDPOINT,
@@ -22,12 +23,13 @@ def main() -> None:
         # noinspection PyProtectedMember
         store._cache._ensure_exists()  # ensure cache exists to get head commit for ExportMeta
     meta = ExportMeta.from_config_store(config=config, store=None, build_repo_ref=store.head_commit, trusted=False)
-    exporter = VerificationExporter(
-        logger=logger, meta=meta, s3=s3, context=context, select_records=store.select, selected_identifiers=selected
+    verifier = Verification(
+        logger=logger, meta=meta, context=context, select_records=store.select, identifiers=identifiers
     )
-    exporter.run()
-    exporter.export()
-    logger.info("Verify report saved.")
+    verifier.run()
+    exporter = LocalExporter(logger=logger, path=config.EXPORT_PATH)
+    exporter.export(verifier.outputs)
+    logger.info("Verify data and report saved.")
 
 
 if __name__ == "__main__":

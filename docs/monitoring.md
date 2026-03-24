@@ -1,5 +1,9 @@
 # Lantern - Monitoring
 
+> [!WARNING]
+> This documentation is outdated and does not reflect changes made to split exporters into outputs, a top-level site
+> and verification class and more focused exporters.
+
 ## Monitoring configuration
 
 These options from the app `lantern.Config` class are used to configure application logging:

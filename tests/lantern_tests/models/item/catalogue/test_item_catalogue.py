@@ -221,7 +221,7 @@ class TestItemCatalogue:
             "og:site_name": "BAS Data Catalogue",
             "og:type": "article",
             "og:title": fx_item_cat_model_min.title_plain,
-            "og:url": f"{fx_config.BASE_URL}/items/{fx_item_cat_model_min.resource_id}",
+            "og:url": f"{fx_config.BASE_URL_TESTING}/items/{fx_item_cat_model_min.resource_id}",
         }
 
         if summary is not None:
@@ -272,7 +272,7 @@ class TestItemCatalogue:
             "@type": "Article",
             "name": "BAS Data Catalogue",
             "headline": fx_item_cat_model_min.title_plain,
-            "url": f"{fx_config.BASE_URL}/items/{fx_item_cat_model_min.resource_id}",
+            "url": f"{fx_config.BASE_URL_TESTING}/items/{fx_item_cat_model_min.resource_id}",
         }
         if summary is not None:
             fx_item_cat_model_min._record.identification.purpose = summary

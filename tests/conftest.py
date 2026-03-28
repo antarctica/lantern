@@ -13,6 +13,7 @@ from importlib.metadata import version
 from pathlib import Path
 from subprocess import PIPE, Popen
 from tempfile import TemporaryDirectory
+from typing import get_args
 from unittest.mock import MagicMock, PropertyMock
 
 import pytest
@@ -23,6 +24,7 @@ from gitlab import Gitlab
 from moto import mock_aws
 from pytest_mock import MockerFixture
 
+from lantern.catalogue import BasCatalogue, BasCatEnv, BasCatTrusted, BasCatUntrusted, BasEnvironment
 from lantern.config import Config
 from lantern.exporters.local import LocalExporter
 from lantern.exporters.rsync import RsyncExporter
@@ -68,6 +70,7 @@ from lantern.stores.gitlab_cache import GitLabCachedStore, GitLabLocalCache
 from lantern.utils import get_jinja_env, prettify_html
 from lantern.verification import Verification
 from tests.resources.admin_keys import test_keys
+from tests.resources.catalogues.fake_catalogue import FakeCatalogue
 from tests.resources.stores.fake_records_store import FakeRecordsStore
 
 
@@ -94,7 +97,7 @@ def has_network() -> bool:
         return True
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def vcr_config():
     """Pytest Recording config."""
     return {"filter_headers": ["Authorization", "PRIVATE-TOKEN"]}
@@ -893,12 +896,121 @@ def fx_verification_post_run(fx_verification_sel: Verification) -> Verification:
     return fx_verification_sel
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture()
+def fx_fake_catalogue(fx_logger: logging.Logger, fx_config: Config, fx_fake_store: FakeRecordsStore):
+    """Fake catalogue instance."""
+    with TemporaryDirectory() as tmp_dir:
+        tmp_path = Path(tmp_dir) / "output"
+    return FakeCatalogue(logger=fx_logger, config=fx_config, store=fx_fake_store, base_path=tmp_path)
+
+
+@pytest.fixture()
+def fx_bas_cat_untrusted(
+    mocker: MockerFixture,
+    fx_logger: logging.Logger,
+    fx_export_meta: ExportMeta,
+    fx_fake_store: FakeRecordsStore,
+    fx_s3_client: S3Client,
+    fx_s3_bucket_name: str,
+) -> BasCatUntrusted:
+    """
+    BAS untrusted catalogue instance.
+
+    Uses Fake store over GitLab to avoid mocking and/or request recordings.
+
+    Sets S3 export to local mock via mocked config.
+
+    Mocks verification to return fixed results.
+    """
+    mock_verification = mocker.MagicMock()
+    mock_verification.process.return_value = None
+    mock_verification.outputs = [
+        SiteContent(content="", path=Path("-/verification/data.json"), media_type="application/json")
+    ]
+    mocker.patch("lantern.catalogue.Verification", return_value=mock_verification)
+
+    # noinspection PyTypeChecker
+    return BasCatUntrusted(
+        logger=fx_logger,
+        meta=fx_export_meta,
+        store=fx_fake_store,
+        s3=fx_s3_client,
+        bucket=fx_s3_bucket_name,
+        verify_sharepoint_endpoint="x",
+        verify_san_endpoint="x",
+    )
+
+
+@pytest.fixture()
+def fx_bas_cat_trusted(
+    fx_logger: logging.Logger,
+    fx_export_meta: ExportMeta,
+    fx_fake_store: FakeRecordsStore,
+    fx_s3_client: S3Client,
+    fx_s3_bucket_name: str,
+) -> BasCatTrusted:
+    """
+    BAS trusted catalogue instance.
+
+    Uses Fake store over GitLab to avoid mocking and/or request recordings.
+
+    Sets Rsync export to a temp directory.
+
+    Mocks verification to return fixed results.
+    """
+    with TemporaryDirectory() as tmp_dir:
+        rsync_path = Path(tmp_dir) / "rsync"
+    # noinspection PyTypeChecker
+    return BasCatTrusted(logger=fx_logger, meta=fx_export_meta, store=fx_fake_store, host=None, path=rsync_path)
+
+
+@pytest.fixture()
+def fx_bas_cat_env(
+    fx_logger: logging.Logger,
+    fx_config: Config,
+    fx_fake_store: FakeRecordsStore,
+    fx_s3_client: S3Client,
+    fx_bas_cat_untrusted: BasCatUntrusted,
+    fx_bas_cat_trusted: BasCatTrusted,
+) -> BasCatEnv:
+    """BAS untrusted catalogue instance."""
+    # noinspection PyTypeChecker
+    cat = BasCatEnv(logger=fx_logger, config=fx_config, store=fx_fake_store, s3=fx_s3_client, env="testing")
+    cat._untrusted = fx_bas_cat_untrusted
+    cat._trusted = fx_bas_cat_trusted
+    return cat
+
+
+@pytest.fixture()
+def fx_bas_catalogue(
+    fx_logger: logging.Logger,
+    fx_config: Config,
+    fx_fake_store: FakeRecordsStore,
+    fx_s3_client: S3Client,
+    fx_s3_bucket_name: str,
+    fx_bas_cat_env: BasCatEnv,
+) -> BasCatalogue:
+    """
+    BAS catalogue instance.
+
+    Uses Fake store over GitLab to avoid mocking and/or request recordings.
+
+    Mocks remote export locations (to local S3 and temp directory) via config.
+
+    Mocks verification to return fixed results.
+    """
+    # noinspection PyTypeChecker
+    cat = BasCatalogue(logger=fx_logger, config=fx_config, store=fx_fake_store, s3=fx_s3_client)
+    cat._envs = dict.fromkeys(get_args(BasEnvironment), fx_bas_cat_env)
+    return cat
+
+
+@pytest.fixture(scope="session")
 def fx_static_site() -> TemporaryDirectory:
     """
     Build static site and export to a temp directory.
 
-    Module scoped for performance. This means usual fixtures for logging, stores, etc. can't be used and are duplicated.
+    Session scoped for performance. This means usual fixtures for logging, stores, etc. can't be used and are duplicated.
     """
     site_dir = TemporaryDirectory()
     site_path = Path(site_dir.name)
@@ -912,7 +1024,7 @@ def fx_static_site() -> TemporaryDirectory:
     exporter = LocalExporter(logger=logger, path=site_path)
     site = Site(logger=logger, meta=meta, store=store)
 
-    content = site.run(
+    content = site.process(
         global_outputs=[
             SiteResourcesOutput,
             SiteIndexOutput,
@@ -938,7 +1050,7 @@ def fx_static_site() -> TemporaryDirectory:
     return site_dir
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def fx_exporter_static_server(fx_static_site: TemporaryDirectory):
     """Expose static site from a local server."""
     site_dir = fx_static_site.name

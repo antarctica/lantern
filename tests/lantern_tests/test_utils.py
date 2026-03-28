@@ -4,6 +4,7 @@ from tempfile import TemporaryDirectory
 
 import pytest
 from jinja2 import Environment
+from pytest_mock import MockerFixture
 
 from lantern.config import Config
 from lantern.lib.metadata_library.models.record.elements.common import Identifier
@@ -11,7 +12,7 @@ from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 from lantern.stores.gitlab import GitLabStore
 from lantern.stores.gitlab_cache import GitLabCachedStore
-from lantern.utils import get_jinja_env, get_record_aliases, init_gitlab_store, prettify_html
+from lantern.utils import get_jinja_env, get_record_aliases, init_gitlab_store, prettify_html, time_task
 
 
 @pytest.mark.cov()
@@ -67,3 +68,22 @@ class TestUtils:
             prettify_html(html="<html>\n\n\n\n\n<body><p>...</p></body></html>")
             == "<html>\n<body><p>...</p></body></html>"
         )
+
+    def test_time_task(self, mocker: MockerFixture):
+        """Can time a task and log duration using decorator."""
+        mock_logger = mocker.MagicMock()
+
+        class _Dummy:
+            _logger = mock_logger
+
+            @time_task(label="Test task")
+            def do_work(self) -> str:
+                return "done"
+
+        result = _Dummy().do_work()
+
+        assert result == "done"
+        mock_logger.info.assert_called_once()
+        logged_msg = mock_logger.info.call_args[0][0]
+        assert logged_msg.startswith("Test task took ")
+        assert logged_msg.endswith(" seconds")

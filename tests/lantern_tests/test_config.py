@@ -89,21 +89,21 @@ class TestConfig:
             "TEMPLATES_ITEM_CONTACT_ENDPOINT": "https://example.com/contact",
             "TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": "x",
             "TEMPLATES_ITEM_VERSIONS_ENDPOINT": "x",
-            "BASE_URL": "https://x",
-            "EXPORT_PATH": str(fx_config.EXPORT_PATH),
-            "AWS_S3_BUCKET": "x",
-            "AWS_ACCESS_ID": "x",
-            "AWS_ACCESS_SECRET": redacted_value,
-            "TRUSTED_UPLOAD_PATH": str(fx_config.TRUSTED_UPLOAD_PATH.resolve()),
-            "TRUSTED_UPLOAD_HOST": "x",
+            "SITE_UNTRUSTED_S3_BUCKET_TESTING": "x",
+            "SITE_UNTRUSTED_S3_BUCKET_LIVE": "x",
+            "SITE_UNTRUSTED_S3_ACCESS_ID": "x",
+            "SITE_UNTRUSTED_S3_ACCESS_SECRET": redacted_value,
+            "SITE_TRUSTED_RSYNC_HOST": "x",
+            "SITE_TRUSTED_RSYNC_BASE_PATH_TESTING": str(fx_config.SITE_TRUSTED_RSYNC_BASE_PATH_TESTING),
+            "SITE_TRUSTED_RSYNC_BASE_PATH_LIVE": str(fx_config.SITE_TRUSTED_RSYNC_BASE_PATH_LIVE),
             "VERIFY_SHAREPOINT_PROXY_ENDPOINT": "x",
             "VERIFY_SAN_PROXY_ENDPOINT": "x",
+            "BASE_URL_TESTING": "https://example.com",
+            "BASE_URL_LIVE": "https://example.com",
         }
 
         output = fx_config.dumps_safe()
         assert output == expected
-        assert len(output["EXPORT_PATH"]) > 0
-        assert len(output["TRUSTED_UPLOAD_PATH"]) > 0
         assert len(output["STORE_GITLAB_CACHE_PATH"]) > 0
         assert len(output["TEMPLATES_CACHE_BUST_VALUE"]) > 0
 
@@ -203,13 +203,63 @@ class TestConfig:
                     "LANTERN_TEMPLATES_ITEM_VERSIONS_ENDPOINT": None,
                 }
             ),
-            ({"LANTERN_EXPORT_PATH": None}),
-            ({"LANTERN_TRUSTED_UPLOAD_PATH": None}),
-            ({"LANTERN_AWS_S3_BUCKET": None, "LANTERN_AWS_ACCESS_ID": "x", "LANTERN_AWS_ACCESS_SECRET": "x"}),
-            ({"LANTERN_AWS_S3_BUCKET": "x", "LANTERN_AWS_ACCESS_ID": None, "LANTERN_AWS_ACCESS_SECRET": "x"}),
-            ({"LANTERN_AWS_S3_BUCKET": "x", "LANTERN_AWS_ACCESS_ID": "x", "LANTERN_AWS_ACCESS_SECRET": None}),
+            (
+                {
+                    "LANTERN_SITE_UNTRUSTED_S3_BUCKET_TESTING": None,
+                    "LANTERN_SITE_UNTRUSTED_S3_BUCKET_LIVE": "x",
+                    "LANTERN_SITE_UNTRUSTED_S3_ACCESS_ID": "x",
+                    "LANTERN_SITE_UNTRUSTED_S3_ACCESS_SECRET": "x",
+                }
+            ),
+            (
+                {
+                    "LANTERN_SITE_UNTRUSTED_S3_BUCKET_TESTING": "x",
+                    "LANTERN_SITE_UNTRUSTED_S3_BUCKET_LIVE": None,
+                    "LANTERN_SITE_UNTRUSTED_S3_ACCESS_ID": "x",
+                    "LANTERN_SITE_UNTRUSTED_S3_ACCESS_SECRET": "x",
+                }
+            ),
+            (
+                {
+                    "LANTERN_SITE_UNTRUSTED_S3_BUCKET_TESTING": "x",
+                    "LANTERN_SITE_UNTRUSTED_S3_BUCKET_LIVE": "x",
+                    "LANTERN_SITE_UNTRUSTED_S3_ACCESS_ID": None,
+                    "LANTERN_SITE_UNTRUSTED_S3_ACCESS_SECRET": "x",
+                }
+            ),
+            (
+                {
+                    "LANTERN_SITE_UNTRUSTED_S3_BUCKET_TESTING": "x",
+                    "LANTERN_SITE_UNTRUSTED_S3_BUCKET_LIVE": "x",
+                    "LANTERN_SITE_UNTRUSTED_S3_ACCESS_ID": "x",
+                    "LANTERN_SITE_UNTRUSTED_S3_ACCESS_SECRET": None,
+                }
+            ),
+            (
+                {
+                    "LANTERN_SITE_TRUSTED_RSYNC_HOST": None,
+                    "LANTERN_SITE_TRUSTED_RSYNC_BASE_PATH_TESTING": "x",
+                    "LANTERN_SITE_TRUSTED_RSYNC_BASE_PATH_LIVE": "x",
+                }
+            ),
+            (
+                {
+                    "LANTERN_SITE_TRUSTED_RSYNC_HOST": "x",
+                    "LANTERN_SITE_TRUSTED_RSYNC_BASE_PATH_TESTING": None,
+                    "LANTERN_SITE_TRUSTED_RSYNC_BASE_PATH_LIVE": "x",
+                }
+            ),
+            (
+                {
+                    "LANTERN_SITE_TRUSTED_RSYNC_HOST": "x",
+                    "LANTERN_SITE_TRUSTED_RSYNC_BASE_PATH_TESTING": "x",
+                    "LANTERN_SITE_TRUSTED_RSYNC_BASE_PATH_LIVE": None,
+                }
+            ),
             ({"LANTERN_VERIFY_SHAREPOINT_PROXY_ENDPOINT": None, "LANTERN_VERIFY_SAN_PROXY_ENDPOINT": "x"}),
             ({"LANTERN_VERIFY_SHAREPOINT_PROXY_ENDPOINT": "x", "LANTERN_VERIFY_SAN_PROXY_ENDPOINT": None}),
+            ({"LANTERN_BASE_URL_TESTING": "x", "LANTERN_BASE_URL_LIVE": None}),
+            ({"LANTERN_BASE_URL_TESTING": None, "LANTERN_BASE_URL_LIVE": "x"}),
         ],
     )
     def test_validate_missing_required_option(self, envs: dict):
@@ -233,31 +283,15 @@ class TestConfig:
 
         self._unset_envs(envs, envs_bck)
 
-    @pytest.mark.parametrize(
-        "env", ["LANTERN_STORE_GITLAB_CACHE_PATH", "LANTERN_EXPORT_PATH", "LANTERN_TRUSTED_UPLOAD_PATH"]
-    )
+    @pytest.mark.parametrize("env", ["LANTERN_STORE_GITLAB_CACHE_PATH"])
     def test_validate_invalid_path(self, env: str):
         """Cannot validate where a required path is invalid."""
         envs: dict = {env: str(Path(__file__).resolve())}
-        if env == "LANTERN_TRUSTED_UPLOAD_PATH":
-            # ensure `TRUSTED_UPLOAD_HOST` is unset so `TRUSTED_UPLOAD_PATH` is treated as a local path and validated
-            envs["LANTERN_TRUSTED_UPLOAD_HOST"] = None
         envs_bck = self._set_envs(envs)
         config = Config(read_env=False)
 
         with pytest.raises(ConfigurationError):
             config.validate()
-
-        self._unset_envs(envs, envs_bck)
-
-    @pytest.mark.cov()
-    def test_validate_remote_trusted_path(self):
-        """Cannot validate TRUSTED_UPLOAD_PATH where a remote host is set."""
-        envs = {"LANTERN_TRUSTED_UPLOAD_PATH": "x", "LANTERN_TRUSTED_UPLOAD_HOST": "x"}
-        envs_bck = self._set_envs(envs)
-        config = Config(read_env=False)
-
-        config.validate()
 
         self._unset_envs(envs, envs_bck)
 
@@ -274,14 +308,17 @@ class TestConfig:
             ("TEMPLATES_ITEM_CONTACT_ENDPOINT", "x", False),
             ("TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY", "x", False),
             ("TEMPLATES_ITEM_VERSIONS_ENDPOINT", "x", False),
-            ("EXPORT_PATH", Path("x").resolve(), False),
-            ("AWS_S3_BUCKET", "x", False),
-            ("AWS_ACCESS_ID", "x", False),
-            ("AWS_ACCESS_SECRET", "x", True),
-            ("TRUSTED_UPLOAD_PATH", Path("x").resolve(), False),
-            ("TRUSTED_UPLOAD_HOST", "x", False),
+            ("SITE_UNTRUSTED_S3_BUCKET_TESTING", "x", False),
+            ("SITE_UNTRUSTED_S3_BUCKET_LIVE", "x", False),
+            ("SITE_UNTRUSTED_S3_ACCESS_ID", "x", False),
+            ("SITE_UNTRUSTED_S3_ACCESS_SECRET", "x", True),
+            ("SITE_TRUSTED_RSYNC_HOST", "x", False),
+            ("SITE_TRUSTED_RSYNC_BASE_PATH_TESTING", Path("x"), False),
+            ("SITE_TRUSTED_RSYNC_BASE_PATH_LIVE", Path("x"), False),
             ("VERIFY_SHAREPOINT_PROXY_ENDPOINT", "x", False),
             ("VERIFY_SAN_PROXY_ENDPOINT", "x", False),
+            ("BASE_URL_TESTING", "https://example.com", False),
+            ("BASE_URL_LIVE", "https://example.com", False),
         ],
     )
     def test_configurable_property(self, property_name: str, expected: Any, sensitive: bool):
@@ -300,21 +337,7 @@ class TestConfig:
 
         self._unset_envs(envs, envs_bck)
 
-    @pytest.mark.parametrize("property_name", ["TRUSTED_UPLOAD_HOST"])
-    def test_nullable_property(self, property_name: str):
-        """Can get and validate properties that specifically support/allow no value."""
-        envs = {f"LANTERN_{property_name}": None}
-        envs_bck = self._set_envs(envs)
-        config = Config(read_env=False)
-
-        assert getattr(config, property_name) is None
-        output = config.dumps_safe()
-        # noinspection PyTypedDict
-        assert output[property_name] == config._none_value
-
-        self._unset_envs(envs, envs_bck)
-
-    @pytest.mark.parametrize("property_name", ["STORE_GITLAB_TOKEN", "AWS_ACCESS_SECRET"])
+    @pytest.mark.parametrize("property_name", ["STORE_GITLAB_TOKEN", "SITE_UNTRUSTED_S3_ACCESS_SECRET"])
     def test_redacted_property(self, mocker: MockerFixture, property_name: str):
         """Can only get redacted value where secret values have a value."""
         for has_value in [True, False]:

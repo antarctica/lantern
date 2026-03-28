@@ -87,7 +87,7 @@ def _clone_record(
 
 def main() -> None:
     """Entrypoint."""
-    logger, config, store, _s3 = init()
+    logger, config, store = init()
 
     input_path = Path("./import")
     args = _get_cli_args()

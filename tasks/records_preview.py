@@ -3,17 +3,55 @@ import logging
 import sys
 from pathlib import Path
 
-from boto3 import client as S3Client  # noqa: N812
-from lantern.exporters.html import HtmlExporter
-from lantern.exporters.site import SiteResourcesExporter
-from moto import mock_aws
 from tasks._record_utils import init, parse_records, pick_records
 from tests.conftest import _select_record
 
 from lantern.config import Config
+from lantern.exporters.local import LocalExporter
 from lantern.lib.metadata_library.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
+from lantern.outputs.item_html import ItemCatalogueOutput
+from lantern.outputs.site_api import SiteApiOutput
+from lantern.outputs.site_pages import SitePagesOutput
+from lantern.outputs.site_resources import SiteResourcesOutput
+from lantern.site import Site, SiteJob
+from lantern.stores.base import RecordsNotFoundError, Store
+
+
+class MirrorStore(Store):
+    """
+    Store that reflects requested records.
+
+    Returns a placeholder for any related record lookups when testing local, unpublished or otherwise detached records.
+    """
+
+    def __init__(self) -> None:
+        """Initialise."""
+        self.records = []
+
+    def __len__(self) -> int:
+        """Number of records."""
+        return 0
+
+    @property
+    def frozen(self) -> bool:
+        """Whether store can be modified/updated."""
+        return True
+
+    def select(self, file_identifiers: set[str] | None = None) -> list[RecordRevision]:
+        """Return minimal records for selected records or raise a `RecordsNotFoundError` exception."""
+        if not file_identifiers:
+            raise RecordsNotFoundError(file_identifiers=set())
+        return [self.select_one(fid) for fid in file_identifiers]
+
+    def select_one(self, file_identifier: str) -> RecordRevision:
+        """
+        Return a minimal record for any identifier.
+
+        Will never raise a `RecordNotFoundError` exception.
+        """
+        return _select_record(file_identifier)
 
 
 def _get_args(logger: logging.Logger, records: list[Record]) -> list[Record]:
@@ -27,25 +65,22 @@ def _get_args(logger: logging.Logger, records: list[Record]) -> list[Record]:
 
 def _export(logger: logging.Logger, config: Config, records: list[Record], output_path: Path) -> None:
     meta = ExportMeta.from_config_store(config=config, store=None, trusted=True)
-    with mock_aws():
-        s3 = S3Client("s3", aws_access_key_id="x", aws_secret_access_key="x", region_name="eu-west-1")  # noqa: S106
+    site = Site(logger=logger, meta=meta, store=MirrorStore())
+    exporter = LocalExporter(logger=logger, path=output_path)
 
-    site_resources = SiteResourcesExporter(logger=logger, meta=meta, s3=s3)
-    site_resources.export()
-
+    jobs = [SiteJob(output=cls) for cls in [SiteResourcesOutput, SitePagesOutput, SiteApiOutput]]
+    # not SiteHealth (not front facing), not SiteIndex (won't include previewed records)
     for record in records:
         record = RecordRevision.loads({**json.loads(record.dumps_json(strip_admin=False)), "file_revision": "x"})
-        exporter = HtmlExporter(logger=logger, meta=meta, s3=s3, record=record, select_record=_select_record)  # ty:ignore[invalid-argument-type]
-        record_path = output_path / "items" / record.file_identifier / "index.html"
-        record_path.parent.mkdir(parents=True, exist_ok=True)
-        with record_path.open("w") as f:
-            f.write(exporter.dumps())
-        logger.info(f"Exported record: '{record_path.resolve()}'")
+        jobs.append(SiteJob(output=ItemCatalogueOutput, record=record))
+
+    outputs = site.execute(jobs)
+    exporter.export(outputs)
 
 
 def main() -> None:
     """Entrypoint."""
-    logger, config, _store, _s3 = init()
+    logger, config, _store = init()
     input_path = Path("./import")
     output_path = Path("./export")
 

@@ -1,77 +1,46 @@
+# Publish records to testing site
+
+import json
 import logging
 import re
+import shutil
 import sys
+from datetime import UTC, datetime
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from textwrap import dedent
 
 import inquirer
 from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
-from gitlab import Gitlab
+from gitlab import Gitlab, GitlabGetError
 from gitlab.v4.objects import ProjectIssue, ProjectMergeRequest
-from lantern.exporters.site import SiteExporter
-from lantern.exporters.verification import VerificationExporter
-from mypy_boto3_s3 import S3Client
-from tasks._config import ExtraConfig
-from tasks._record_utils import confirm, init, init_store, ping_host, time_task
+from tasks._record_utils import confirm, init, init_s3, init_store, ping_host
+from tasks.records_build import export
 from tasks.records_import import clean as import_clean
 from tasks.records_import import load as import_load
 from tasks.records_import import push as import_push
+from tasks.records_verify import verify
 from tasks.records_zap import clean_input_path as zap_clean_input_path
 from tasks.records_zap import dump_records as zap_dump_records
 from tasks.records_zap import parse_zap_records as zap_parse_records
 from tasks.records_zap import process_zap_records as zap_process_records
 
+from lantern.catalogue import BasCatalogue, BasEnvironment
 from lantern.config import Config
 from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
 from lantern.lib.metadata_library.models.record.record import Record
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
-from lantern.models.verification.types import VerificationContext
+from lantern.outputs.item_html import ItemAliasesOutput, ItemCatalogueOutput
+from lantern.outputs.items_bas_website import ItemsBasWebsiteOutput
+from lantern.outputs.record_iso import RecordIsoHtmlOutput, RecordIsoJsonOutput, RecordIsoXmlOutput
+from lantern.outputs.records_waf import RecordsWafOutput
+from lantern.outputs.site_health import SiteHealthOutput
+from lantern.outputs.site_index import SiteIndexOutput
 from lantern.stores.gitlab import CommitResults, GitLabStore
 from lantern.stores.gitlab_cache import GitLabCachedStore
-from lantern.utils import get_jinja_env, get_record_aliases
-
-
-def build(
-    logger: logging.Logger, config: ExtraConfig, store: GitLabCachedStore, s3: S3Client, identifiers: set[str]
-) -> None:
-    """Build items for committed records."""
-    meta = ExportMeta.from_config_store(
-        config=config, store=store, build_repo_ref=store.head_commit if store.head_commit else "-"
-    )
-    site = SiteExporter(config=config, meta=meta, logger=logger, s3=s3, store=store, selected_identifiers=identifiers)
-    logger.info("Freezing store.")
-    store._frozen = True
-    store._cache._frozen = True
-    logger.info(f"Publishing {len(identifiers)} records.")
-    site.publish()
-
-
-def verify(
-    logger: logging.Logger, config: Config, store: GitLabStore, s3: S3Client, base_url: str, identifiers: set[str]
-) -> None:
-    """Verify items for committed records."""
-    logger.info(f"Verifying {len(identifiers)} records.")
-    context: VerificationContext = {
-        "BASE_URL": base_url,
-        "SHAREPOINT_PROXY_ENDPOINT": config.VERIFY_SHAREPOINT_PROXY_ENDPOINT,
-        "SAN_PROXY_ENDPOINT": config.VERIFY_SAN_PROXY_ENDPOINT,
-    }
-    meta = ExportMeta.from_config_store(
-        config=config, store=store, build_repo_ref=store.head_commit if store.head_commit else "-"
-    )
-    exporter = VerificationExporter(
-        logger=logger, meta=meta, s3=s3, context=context, select_records=store.select, selected_identifiers=identifiers
-    )
-    # noinspection PyBroadException
-    try:
-        exporter.run()
-        exporter.export()
-        logger.info(f"Verification complete, result: {exporter.report.data['pass_fail']}.")
-        logger.info("See local export for report.")
-    except Exception:
-        logger.exception("Verification failed.")
+from lantern.utils import get_jinja_env, get_record_aliases, time_task
 
 
 def gitlab_project_mr_from_url(gitlab: Gitlab, mr_url: str) -> ProjectMergeRequest:
@@ -96,7 +65,13 @@ def gitlab_project_issue_from_url(gitlab: Gitlab, issue_url: str) -> ProjectIssu
     project_path = match.group(1)  # "group/project"
     issue_iid = int(match.group(2))  # 1
 
-    project = gitlab.projects.get(project_path)
+    try:
+        project = gitlab.projects.get(project_path)
+    except GitlabGetError as e:
+        if e.response_code == 404:
+            msg = f"Project '{project_path} not found - check bot user has access."
+            raise ValueError(msg) from e
+        raise
     return project.issues.get(issue_iid)
 
 
@@ -158,15 +133,15 @@ class OutputCommentItem:
     @property
     def _template(self) -> str:
         """Jinja template."""
-        return """
-{{ title }} ({{ type }})
-{% if alias_urls %}
-- 🔗 {{ alias_urls }}
-{% endif %}
-- 🌏 {{ item_url }}
-- 🔒 {{ trusted_item_url }}
-- 💾️ {{ revision_link }}
-        """
+        return dedent("""\
+            {{ title }} ({{ type }})
+            {% if alias_urls %}
+            - 🔗 {{ alias_urls }}
+            {% endif %}
+            - 🌏 {{ item_url }}
+            - 🔒 {{ trusted_item_url }}
+            - 💾️ {{ revision_link }}
+         """)
 
     def render(self) -> str:
         """Render jinja template as comment body."""
@@ -214,24 +189,26 @@ class OutputCommentMergeRequest:
     @property
     def _template(self) -> str:
         """Jinja template for merge request."""
-        return """
-{{ count }} {{ count_label }} published to testing:
+        return dedent("""\
+            {{ count }} {{ count_label }} published to testing:
 
-{% for item in items %}
-{{ item }}
-{% endfor %}
+            {% for item in items %}
+            {{ item }}
+            {% endfor %}
 
-If these items look ok and you are the nominated reviewer:
+            If these items look ok and you are the nominated reviewer:
 
-- mark any threads as resolved
-- approve the merge request - but do not merge it or change from being a draft
+            - mark any threads as resolved
+            - approve the merge request - but do not merge it or change it from being a draft
 
-Otherwise:
+            Otherwise:
 
-- start or continue threads to track each problem (use the drop-down on the comment button to create a thread)
+            - start or continue threads to track each problem (use the drop-down on the comment button to create a thread)
 
-_This comment was left automatically by the Lantern Experiment's [Interactive record publishing workflow](https://github.com/antarctica/lantern/blob/main/docs/usage.md#interactive-record-publishing-workflow). This comment was left by a bot user that does not monitor replies._
-        """
+            _This comment was left automatically by the Lantern Experiment's [Interactive record publishing workflow](https://github.com/antarctica/lantern/blob/main/docs/usage.md#interactive-record-publishing-workflow)._
+
+            _This comment was left by a bot user that does not monitor replies. Contact @/felnne for support._
+         """)
 
     def render(self) -> str:
         """Render jinja template as comment body."""
@@ -262,13 +239,17 @@ class OutputCommentIssue:
     @property
     def _template(self) -> str:
         """Jinja template for issue."""
-        return """
-Records published to testing as part of a changeset.
+        return dedent("""\
+            Hello,
 
-See this merge request for more information and progress: {{merge_url}}
+            Some catalogue records have been published to testing in a changeset linked to this issue.
 
-_This comment was left automatically by the Lantern Experiment's [Interactive record publishing workflow](https://github.com/antarctica/lantern/blob/main/docs/usage.md#interactive-record-publishing-workflow). This comment was left by a bot user that does not monitor replies._
-        """
+            See this merge request for more information and how to proceed with publishing: {{merge_url}}
+
+            _This comment was left automatically by the Lantern Experiment's [Interactive record publishing workflow](https://github.com/antarctica/lantern/blob/main/docs/usage.md#interactive-record-publishing-workflow)._
+
+            _This comment was left by a bot user that does not monitor replies. Contact @/felnne for support._
+         """)
 
     def render(self) -> str:
         """Render jinja template as comment body."""
@@ -409,20 +390,45 @@ def _import(logger: logging.Logger, config: Config, store: GitLabStore, import_p
     return commit
 
 
-@time_task(label="Build")
-def _build(
-    logger: logging.Logger, config: ExtraConfig, store: GitLabCachedStore, s3: S3Client, identifiers: set[str]
-) -> None:
-    """Build items for committed records."""
-    build(logger=logger, config=config, store=store, s3=s3, identifiers=identifiers)
+@time_task(label="Export")
+def _export(logger: logging.Logger, catalogue: BasCatalogue, env: BasEnvironment, identifiers: set[str]) -> None:
+    """
+    Export items for committed records.
+
+    Outputs limited to record specific (individual) classes, and global that include individual records (e.g. indexes).
+    """
+    outputs = [
+        SiteIndexOutput,
+        SiteHealthOutput,
+        RecordsWafOutput,
+        ItemsBasWebsiteOutput,
+        ItemCatalogueOutput,
+        ItemAliasesOutput,
+        RecordIsoJsonOutput,
+        RecordIsoXmlOutput,
+        RecordIsoHtmlOutput,
+    ]
+    export(logger=logger, catalogue=catalogue, env=env, target="remote", identifiers=identifiers, outputs=outputs)
 
 
 @time_task(label="Verify")
 def _verify(
-    logger: logging.Logger, config: Config, store: GitLabStore, s3: S3Client, base_url: str, identifiers: set[str]
-) -> None:
+    logger: logging.Logger, catalogue: BasCatalogue, env: BasEnvironment, identifiers: set[str], workflow_path: Path
+) -> Path:
     """Verify items for committed records."""
-    verify(logger=logger, config=config, store=store, s3=s3, base_url=base_url, identifiers=identifiers)
+    verify(
+        logger=logger, catalogue=catalogue, env=env, target="local", identifiers=identifiers, target_local=workflow_path
+    )
+    # clean up verification output
+    with workflow_path.joinpath("-/verification/data.json").open() as f:
+        data = json.load(f)
+    shutil.rmtree(workflow_path.joinpath("-"), ignore_errors=True)
+    suffix = datetime.now(tz=UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z").replace(":", "-")
+    data_path = workflow_path / f"verify-data_{suffix}.json"
+    data_path.parent.mkdir(parents=True, exist_ok=True)
+    with data_path.open(mode="w") as f:
+        json.dump(data, f, indent=2)
+    return data_path
 
 
 @time_task(label="Output")
@@ -462,18 +468,14 @@ def main() -> None:
     This task uses a non-cached GitLab store as it will be pushing to a new branch for a changeset, and likely
     operating on a limited number of records.
     """
-    logger, config, store, s3 = init()
+    env: BasEnvironment = "testing"
+    logger, config, store = init()
     admin_keys = config.ADMIN_METADATA_KEYS_RW
     import_path = Path("./import")
-    base_url = "https://data-testing.data.bas.ac.uk"
-    testing_bucket = "lantern-testing.data.bas.ac.uk"
+    results_path = Path("./workflow_results/testing")
 
-    if testing_bucket != config.AWS_S3_BUCKET:
-        logger.error("No. Non-testing bucket selected.")
-        sys.exit(1)
-    if config.TRUSTED_UPLOAD_HOST:
-        logger.info("Checking connectivity to trusted upload host.")
-        ping_host(config.TRUSTED_UPLOAD_HOST)
+    logger.info("Checking connectivity to trusted upload host.")
+    ping_host(config.SITE_TRUSTED_RSYNC_HOST)
 
     print("\nThis script is for adding or updating records and previewing them in the testing site.")
     print("It combines the 'zap-', 'import-', 'build-' and 'verify-' records dev tasks with some workflow logic.")
@@ -503,20 +505,27 @@ def main() -> None:
         sys.exit(0)
 
     # build and verify records
-    _build(logger=logger, config=config, store=store, s3=s3, identifiers=identifiers)
-    _verify(logger=logger, config=config, store=store, s3=s3, base_url=base_url, identifiers=identifiers)
+    s3 = init_s3(config=config)
+    catalogue = BasCatalogue(logger=logger, config=config, store=store, s3=s3)
+    _export(logger=logger, catalogue=catalogue, env=env, identifiers=identifiers)
+    verify_path = _verify(
+        logger=logger, catalogue=catalogue, env=env, identifiers=identifiers, workflow_path=results_path
+    )
 
     # generate output comments
     _output(
         logger=logger,
         config=config,
         store=store,
-        base_url=base_url,
+        base_url=config.BASE_URL_TESTING,
         commit=commit,
         issue_url=issue_url,
         merge_url=merge_url,
         merge_new=merge_new,
     )
+
+    print("Testing records workflow exited normally.")
+    print(f"Verification data: {verify_path.resolve()}")
 
 
 if __name__ == "__main__":

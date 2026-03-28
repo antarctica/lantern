@@ -2,25 +2,32 @@ import logging
 import re
 import sys
 from pathlib import Path
+from textwrap import dedent
 
 import inquirer
-from mypy_boto3_s3 import S3Client
 from tasks._config import ExtraConfig
-from tasks._record_utils import confirm, init, init_store, ping_host, time_task
+from tasks._record_utils import confirm, init, init_s3, init_store, ping_host
+from tasks.records_invalidate import get_record_invalidation_keys
 from tasks.records_workflow_testing import (
     OutputCommentItem,
-    build,
     gitlab_project_issue_from_url,
     gitlab_project_mr_from_url,
-    verify,
 )
+from tasks.records_workflow_testing import (
+    _export as export,
+)
+from tasks.records_workflow_testing import (
+    _verify as verify,
+)
+from tasks.site_invalidate import get_cf_distribution_id, invalidate_keys
 
+from lantern.catalogue import BasCatalogue, BasEnvironment
 from lantern.config import Config
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
 from lantern.stores.gitlab import GitLabStore
 from lantern.stores.gitlab_cache import GitLabCachedStore
-from lantern.utils import get_jinja_env
+from lantern.utils import get_jinja_env, time_task
 
 
 class OutputCommentIssue:
@@ -62,17 +69,21 @@ class OutputCommentIssue:
     @property
     def _template(self) -> str:
         """Jinja template for issue."""
-        return """
-Records published live:
+        return dedent("""\
+            Hello,
 
-{% for item in items %}
-{{ item }}
-{% endfor %}
+            Some catalogue records related to this issue have been published live:
 
-See the [updating records](https://github.com/antarctica/lantern/blob/main/docs/usage.md#update-records) documentation for how to revise these items if needed in future.
+            {% for item in items %}
+            {{ item }}
+            {% endfor %}
 
-_This comment was left automatically by the Lantern Experiment's [Interactive record publishing workflow](https://github.com/antarctica/lantern/blob/main/docs/usage.md#interactive-record-publishing-workflow). This comment was left by a bot user that does not monitor replies._
-        """
+            See the [updating records](https://github.com/antarctica/lantern/blob/main/docs/usage.md#update-records) documentation for how to revise these items in the future.
+
+            _This comment was left automatically by the Lantern Experiment's [Interactive record publishing workflow](https://github.com/antarctica/lantern/blob/main/docs/usage.md#interactive-record-publishing-workflow)._
+
+            _This comment was left by a bot user that does not monitor replies. Contact @/felnne for support._
+         """)
 
     def render(self) -> str:
         """Render jinja template as comment body."""
@@ -138,20 +149,22 @@ def _merge_request(logger: logging.Logger, store: GitLabStore, merge_url: str) -
     return ids
 
 
-@time_task(label="Build")
-def _build(
-    logger: logging.Logger, config: ExtraConfig, store: GitLabCachedStore, s3: S3Client, identifiers: set[str]
+@time_task(label="Export")
+def _export(
+    logger: logging.Logger, config: ExtraConfig, catalogue: BasCatalogue, env: BasEnvironment, identifiers: set[str]
 ) -> None:
-    """Build items for committed records."""
-    build(logger=logger, config=config, store=store, s3=s3, identifiers=identifiers)
+    """Export items for committed records."""
+    cf_id = get_cf_distribution_id(iac_cwd=Path("./resources/envs"), cf_id="site_cf_id")
+    export(logger=logger, catalogue=catalogue, env=env, identifiers=identifiers)
+    invalidate_keys(logger=logger, config=config, distribution_id=cf_id, keys=get_record_invalidation_keys(identifiers))
 
 
 @time_task(label="Verify")
 def _verify(
-    logger: logging.Logger, config: Config, store: GitLabStore, s3: S3Client, base_url: str, identifiers: set[str]
-) -> None:
+    logger: logging.Logger, catalogue: BasCatalogue, env: BasEnvironment, identifiers: set[str], workflow_path: Path
+) -> Path:
     """Verify items for committed records."""
-    verify(logger=logger, config=config, store=store, s3=s3, base_url=base_url, identifiers=identifiers)
+    return verify(logger=logger, catalogue=catalogue, env=env, identifiers=identifiers, workflow_path=workflow_path)
 
 
 @time_task(label="Output")
@@ -178,16 +191,12 @@ def main() -> None:
     This workflow is known to be inefficient in terms of how changed records are parsed as identifiers from diffs, then
     later loaded from the store to allow output comments to be generated.
     """
-    logger, config, store, s3 = init(cached_store=True)
-    base_url = "https://data.bas.ac.uk"
-    live_bucket = "lantern.data.bas.ac.uk"
+    env: BasEnvironment = "live"
+    logger, config, store = init(cached_store=True)
+    results_path = Path("./workflow_results/live")
 
-    if live_bucket != config.AWS_S3_BUCKET:
-        logger.error("No. Non-live bucket selected.")
-        sys.exit(1)
-    if config.TRUSTED_UPLOAD_HOST:
-        logger.info("Checking connectivity to trusted upload host.")
-        ping_host(config.TRUSTED_UPLOAD_HOST)
+    logger.info("Checking connectivity to trusted upload host.")
+    ping_host(config.SITE_TRUSTED_RSYNC_HOST)
     if not config.STORE_GITLAB_CACHE_PATH.exists():
         logger.error("GitLab cache does not exist, build will fail. Run `task cache-init` first.")
         sys.exit(1)
@@ -202,11 +211,25 @@ def main() -> None:
     identifiers = _merge_request(logger=logger, store=cs_store, merge_url=merge_url)
 
     # build and verify records
-    _build(logger=logger, config=config, store=store, s3=s3, identifiers=identifiers)
-    _verify(logger=logger, config=config, store=store, s3=s3, base_url=base_url, identifiers=identifiers)
+    s3 = init_s3(config=config)
+    catalogue = BasCatalogue(logger=logger, config=config, store=store, s3=s3)
+    _export(logger=logger, catalogue=catalogue, env=env, identifiers=identifiers)
+    verify_path = _verify(
+        logger=logger, catalogue=catalogue, env=env, identifiers=identifiers, workflow_path=results_path
+    )
 
     # generate output comments
-    _output(logger=logger, config=config, store=store, base_url=base_url, issue_url=issue_url, identifiers=identifiers)
+    _output(
+        logger=logger,
+        config=config,
+        store=store,
+        base_url=config.BASE_URL_LIVE,
+        issue_url=issue_url,
+        identifiers=identifiers,
+    )
+
+    print("Testing records workflow exited normally.")
+    print(f"Verification data: {verify_path.resolve()}")
 
 
 if __name__ == "__main__":

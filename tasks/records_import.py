@@ -62,7 +62,7 @@ def clean(logger: logging.Logger, records: dict[Path, Record], commit: CommitRes
 
 def main() -> None:
     """Entrypoint."""
-    logger, config, store, _s3 = init()
+    logger, config, store = init()
     input_path = Path("./import")
 
     records = load(logger=logger, input_path=input_path)

@@ -427,7 +427,7 @@ def parse_zap_records(
 
 def main() -> None:
     """Entrypoint."""
-    logger, config, store, _s3 = init()
+    logger, config, store = init()
     admin_keys = config.ADMIN_METADATA_KEYS_RW
 
     input_path = Path("./import")

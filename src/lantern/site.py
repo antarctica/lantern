@@ -130,26 +130,34 @@ class Site:
         ]
         return global_ + individual_
 
-    def run(
+    def execute(self, jobs: list[SiteJob]) -> list[SiteContent]:
+        """
+        Execute a set of jobs in parallel to generate site content.
+
+        Returns generated content items as a flattened list.
+        """
+        store = self._prep_store()
+        nested_outputs: list[list[SiteContent]] = Parallel(n_jobs=self._workers)(
+            delayed(_run_job)(self._logger.level, self._meta, store, job.output, job.record) for job in jobs
+        )
+        return [content for output_content in nested_outputs for content in output_content]
+
+    def process(
         self,
         global_outputs: list[Callable[..., OutputBase]],
         individual_outputs: list[Callable[..., OutputBase]],
         identifiers: set[str] | None = None,
     ) -> list[SiteContent]:
         """
-        Generate site content for Output classes and records.
+        Generate site content.
+
+        Wrapper around `execute` to generate processing jobs for selected Output classes and records.
 
         Output classes are 'global' or 'individual' depending on whether they operate on individual records.
 
-        Uses a set of processing jobs to generated content in parallel (where configured).
-
         Returns generated content items as a flattened list.
         """
-        store = self._prep_store()
         jobs = self._generate_jobs(
             global_outputs=global_outputs, individual_outputs=individual_outputs, identifiers=identifiers
         )
-        nested_outputs: list[list[SiteContent]] = Parallel(n_jobs=self._workers)(
-            delayed(_run_job)(self._logger.level, self._meta, store, job.output, job.record) for job in jobs
-        )
-        return [content for output_content in nested_outputs for content in output_content]
+        return self.execute(jobs)

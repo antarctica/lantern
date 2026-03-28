@@ -162,7 +162,13 @@ class TestSite:
         else:
             assert result == expected
 
-    def test_run(self, fx_site: Site):
+    @pytest.mark.cov()
+    def test_execute(self, fx_site: Site):
+        """Can generate expected site content for directly created processing jobs."""
+        results = fx_site.execute(jobs=[SiteJob(output=SiteIndexOutput)])
+        assert len(results) > 0
+
+    def test_process(self, fx_site: Site):
         """Can generate expected site content for selected outputs."""
-        results = fx_site.run(global_outputs=[SiteIndexOutput], individual_outputs=[])
+        results = fx_site.process(global_outputs=[SiteIndexOutput], individual_outputs=[])
         assert len(results) > 0

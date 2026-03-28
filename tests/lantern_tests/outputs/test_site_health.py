@@ -36,4 +36,4 @@ class TestSiteHealthOutput:
         assert health_output.media_type == "application/health+json"
 
         catalog_redirect = outputs[Path("-/health")]
-        assert catalog_redirect.redirect == "https://x/static/json/health.json"
+        assert catalog_redirect.redirect == "https://example.com/static/json/health.json"

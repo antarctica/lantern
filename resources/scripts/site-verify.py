@@ -2,17 +2,14 @@ import logging
 
 from boto3 import client as S3Client  # noqa: N812
 
+from lantern.catalogue import BasCatalogue
 from lantern.config import Config
-from lantern.exporters.s3 import S3Exporter
 from lantern.log import init as init_logging
 from lantern.log import init_sentry
-from lantern.models.site import ExportMeta
-from lantern.models.verification.types import VerificationContext
 from lantern.stores.gitlab import GitLabSource, GitLabStore
-from lantern.verification import Verification
 
 
-def _run(logger: logging.Logger, config: Config, base_url: str) -> None:
+def _run(logger: logging.Logger, config: Config) -> None:
     store = GitLabStore(
         logger=logger,
         source=GitLabSource(
@@ -24,35 +21,23 @@ def _run(logger: logging.Logger, config: Config, base_url: str) -> None:
     )
     s3 = S3Client(
         "s3",
-        aws_access_key_id=config.AWS_ACCESS_ID,
-        aws_secret_access_key=config.AWS_ACCESS_SECRET,
+        aws_access_key_id=config.SITE_UNTRUSTED_S3_ACCESS_ID,
+        aws_secret_access_key=config.SITE_UNTRUSTED_S3_ACCESS_SECRET,
         region_name="eu-west-1",
     )
-    context: VerificationContext = {
-        "BASE_URL": base_url,
-        "SHAREPOINT_PROXY_ENDPOINT": config.VERIFY_SHAREPOINT_PROXY_ENDPOINT,
-        "SAN_PROXY_ENDPOINT": config.VERIFY_SAN_PROXY_ENDPOINT,
-    }
-    meta = ExportMeta.from_config_store(config=config, store=None, build_repo_ref=store.head_commit)
-    verifier = Verification(logger=logger, meta=meta, context=context, select_records=store.select)
-    exporter = S3Exporter(logger=logger, s3=s3, bucket=config.AWS_S3_BUCKET)
-    exporter.export(verifier.outputs)
+    catalogue = BasCatalogue(logger=logger, config=config, store=store, s3=s3)
+    catalogue.verify(env="live")
 
 
 def main() -> None:
     """Entrypoint."""
     init_sentry()
-
     config = Config()
-
     init_logging(logging_level=config.LOG_LEVEL)
     logger = logging.getLogger("app")
     logger.info("Initialising Lantern site-wide verification.")
 
-    base_url = "https://data.bas.ac.uk"
-    logger.info(f"Base URL: {base_url}")
-    _run(logger=logger, config=config, base_url=base_url)
-
+    _run(logger=logger, config=config)
     print("Script exiting normally.")
 
 

@@ -18,17 +18,22 @@ LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT="op://Infrastructure/SCAR ADD Metadata T
 LANTERN_TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY="op://Infrastructure/SCAR ADD Metadata Toolbox - Cloudflare Turnstile Captcha/username"
 LANTERN_TEMPLATES_ITEM_VERSIONS_ENDPOINT="op://Infrastructure/SCAR ADD Metadata Toolbox - GitLab Store/GitLab Project Web URL/web_url"
 
-LANTERN_EXPORT_PATH="./export"
-LANTERN_AWS_ACCESS_ID=""  # populate with per-user/instance IAM credentials
-LANTERN_AWS_ACCESS_SECRET=""  # populate with per-user/instance IAM credentials
-LANTERN_AWS_S3_BUCKET="op://Infrastructure/rnv7zb3jzviwsvziknpxicvqaq/password"  # testing
-#LANTERN_AWS_S3_BUCKET="op://Infrastructure/hksogwx7zqx3ct2jr36cshoqpy/password"  # production
-LANTERN_TRUSTED_UPLOAD_HOST=""  # populate with SSH config entry or leave blank to use local file system
-LANTERN_TRUSTED_UPLOAD_PATH="op://Infrastructure/SCAR ADD Metadata Toolbox - SAN sync/content-path"
-#LANTERN_TRUSTED_UPLOAD_PATH="./resources/dev/apache/run/cat"  # use for local stack
+LANTERN_SITE_UNTRUSTED_S3_BUCKET_TESTING="op://Infrastructure/rnv7zb3jzviwsvziknpxicvqaq/password"  # testing
+LANTERN_SITE_UNTRUSTED_S3_BUCKET_LIVE="op://Infrastructure/hksogwx7zqx3ct2jr36cshoqpy/password"  # production
+LANTERN_SITE_UNTRUSTED_S3_ACCESS_ID=""  # populate with per-user/instance IAM credentials
+LANTERN_SITE_UNTRUSTED_S3_ACCESS_SECRET=""  # populate with per-user/instance IAM credentials
+
+LANTERN_SITE_TRUSTED_RSYNC_HOST=""  # populate with SSH config entry or leave blank to use local file system
+LANTERN_SITE_TRUSTED_RSYNC_BASE_PATH_TESTING="{{ op://Infrastructure/SCAR ADD Metadata Toolbox - SAN sync/content-path }}/testing"
+LANTERN_SITE_TRUSTED_RSYNC_BASE_PATH_LIVE="{{ op://Infrastructure/SCAR ADD Metadata Toolbox - SAN sync/content-path }}/live"
+#LANTERN_SITE_TRUSTED_RSYNC_HOST=""  # for local stack
+#LANTERN_SITE_TRUSTED_RSYNC_BASE_PATH_TESTING="./resources/dev/apache/run/cat/testing"  # for local stack
 
 LANTERN_VERIFY_SHAREPOINT_PROXY_ENDPOINT="op://Infrastructure/SCAR ADD Metadata Toolbox - SharePoint proxy URL/password"
 LANTERN_VERIFY_SAN_PROXY_ENDPOINT="op://Infrastructure/SCAR ADD Metadata Toolbox - SAN proxy URL/password"
+
+LANTERN_BASE_URL_TESTING="https://data.bas.ac.uk"
+LANTERN_BASE_URL_LIVE="https://data-testing.data.bas.ac.uk"
 
 # Dev tasks
 X_ADMIN_METADATA_SIGNING_KEY_PRIVATE="op://Shared/MAGIC administrative metadata signing key/private-jwk-escaped"

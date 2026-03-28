@@ -303,6 +303,8 @@ class SiteMeta:
         - build_repo_base_url
         - version
 
+        Note: `base_url` uses the config value for the testing environment.
+
         The optional GitLab Store provides values for:
         - build_repo_ref
 
@@ -315,7 +317,7 @@ class SiteMeta:
 
         return cls(
             **{  # ty: ignore[invalid-argument-type]
-                "base_url": config.BASE_URL,
+                "base_url": config.BASE_URL_TESTING,
                 "build_key": config.TEMPLATES_CACHE_BUST_VALUE,
                 "sentry_dsn": config.SENTRY_DSN,
                 "plausible_id": config.TEMPLATES_PLAUSIBLE_ID,

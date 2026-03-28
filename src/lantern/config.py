@@ -4,7 +4,7 @@ from importlib.metadata import version
 from pathlib import Path
 from typing import TypedDict
 
-from environs import Env, EnvError, EnvValidationError
+from environs import Env, EnvError, EnvValidationError, validate
 from jwskate import Jwk
 
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
@@ -74,15 +74,19 @@ class Config:
             "TEMPLATES_ITEM_CONTACT_ENDPOINT",
             "TEMPLATES_ITEM_VERSIONS_ENDPOINT",
             "TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY",
-            "EXPORT_PATH",
-            "AWS_S3_BUCKET",
-            "AWS_ACCESS_ID",
-            "AWS_ACCESS_SECRET",
-            "TRUSTED_UPLOAD_PATH",
+            "SITE_UNTRUSTED_S3_BUCKET_TESTING",
+            "SITE_UNTRUSTED_S3_BUCKET_LIVE",
+            "SITE_UNTRUSTED_S3_ACCESS_ID",
+            "SITE_UNTRUSTED_S3_ACCESS_SECRET",
+            "SITE_TRUSTED_RSYNC_HOST",
+            "SITE_TRUSTED_RSYNC_BASE_PATH_TESTING",
+            "SITE_TRUSTED_RSYNC_BASE_PATH_LIVE",
             "VERIFY_SHAREPOINT_PROXY_ENDPOINT",
             "VERIFY_SAN_PROXY_ENDPOINT",
+            "BASE_URL_TESTING",
+            "BASE_URL_LIVE",
         ]
-        directories = ["STORE_GITLAB_CACHE_PATH", "EXPORT_PATH", "TRUSTED_UPLOAD_PATH"]
+        directories = ["STORE_GITLAB_CACHE_PATH"]
 
         for prop in required:
             attr = prop
@@ -97,9 +101,6 @@ class Config:
                 raise ConfigurationError(msg) from e
 
         for prop in directories:
-            if prop == "TRUSTED_UPLOAD_PATH" and self.TRUSTED_UPLOAD_HOST:
-                # Do not validate TRUSTED_UPLOAD_PATH where path is on a remote host.
-                continue
             if Path(getattr(self, prop)).exists() and not Path(getattr(self, prop)).is_dir():
                 msg = f"{prop} must be a directory."
                 raise ConfigurationError(msg)
@@ -128,20 +129,20 @@ class Config:
         TEMPLATES_ITEM_CONTACT_ENDPOINT: str
         TEMPLATES_ITEM_VERSIONS_ENDPOINT: str
         TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY: str
-        BASE_URL: str
-        EXPORT_PATH: str
-        AWS_S3_BUCKET: str
-        AWS_ACCESS_ID: str
-        AWS_ACCESS_SECRET: str
-        TRUSTED_UPLOAD_PATH: str
-        TRUSTED_UPLOAD_HOST: str
+        SITE_UNTRUSTED_S3_BUCKET_TESTING: str
+        SITE_UNTRUSTED_S3_BUCKET_LIVE: str
+        SITE_UNTRUSTED_S3_ACCESS_ID: str
+        SITE_UNTRUSTED_S3_ACCESS_SECRET: str
+        SITE_TRUSTED_RSYNC_HOST: str
+        SITE_TRUSTED_RSYNC_BASE_PATH_TESTING: str
+        SITE_TRUSTED_RSYNC_BASE_PATH_LIVE: str
         VERIFY_SHAREPOINT_PROXY_ENDPOINT: str
         VERIFY_SAN_PROXY_ENDPOINT: str
+        BASE_URL_TESTING: str
+        BASE_URL_LIVE: str
 
     def dumps_safe(self) -> ConfigDumpSafe:
         """Dump config for output to the user with sensitive data redacted."""
-        _trusted_host: str = self.TRUSTED_UPLOAD_HOST if self.TRUSTED_UPLOAD_HOST is not None else self._none_value
-
         return {
             "NAME": self.NAME,
             "VERSION": self.VERSION,
@@ -164,15 +165,17 @@ class Config:
             "TEMPLATES_ITEM_CONTACT_ENDPOINT": self.TEMPLATES_ITEM_CONTACT_ENDPOINT,
             "TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": self.TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY,
             "TEMPLATES_ITEM_VERSIONS_ENDPOINT": self.TEMPLATES_ITEM_VERSIONS_ENDPOINT,
-            "BASE_URL": self.BASE_URL,
-            "EXPORT_PATH": str(self.EXPORT_PATH.resolve()),
-            "AWS_S3_BUCKET": self.AWS_S3_BUCKET,
-            "AWS_ACCESS_ID": self.AWS_ACCESS_ID,
-            "AWS_ACCESS_SECRET": self.AWS_ACCESS_SECRET_SAFE,
-            "TRUSTED_UPLOAD_PATH": str(self.TRUSTED_UPLOAD_PATH.resolve()),
-            "TRUSTED_UPLOAD_HOST": _trusted_host,
+            "SITE_UNTRUSTED_S3_BUCKET_TESTING": self.SITE_UNTRUSTED_S3_BUCKET_TESTING,
+            "SITE_UNTRUSTED_S3_BUCKET_LIVE": self.SITE_UNTRUSTED_S3_BUCKET_LIVE,
+            "SITE_UNTRUSTED_S3_ACCESS_ID": self.SITE_UNTRUSTED_S3_ACCESS_ID,
+            "SITE_UNTRUSTED_S3_ACCESS_SECRET": self.SITE_UNTRUSTED_S3_ACCESS_SECRET_SAFE,
+            "SITE_TRUSTED_RSYNC_HOST": self.SITE_TRUSTED_RSYNC_HOST,
+            "SITE_TRUSTED_RSYNC_BASE_PATH_TESTING": str(self.SITE_TRUSTED_RSYNC_BASE_PATH_TESTING),
+            "SITE_TRUSTED_RSYNC_BASE_PATH_LIVE": str(self.SITE_TRUSTED_RSYNC_BASE_PATH_LIVE),
             "VERIFY_SHAREPOINT_PROXY_ENDPOINT": self.VERIFY_SHAREPOINT_PROXY_ENDPOINT,
             "VERIFY_SAN_PROXY_ENDPOINT": self.VERIFY_SAN_PROXY_ENDPOINT,
+            "BASE_URL_TESTING": self.BASE_URL_TESTING,
+            "BASE_URL_LIVE": self.BASE_URL_LIVE,
         }
 
     @property
@@ -289,7 +292,7 @@ class Config:
     def TEMPLATES_PLAUSIBLE_ID(self) -> str:
         """Plausible site/domain name."""
         with self.env.prefixed(self._app_prefix), self.env.prefixed("TEMPLATES_"):
-            return self.env("PLAUSIBLE_ID")
+            return self.env.str("PLAUSIBLE_ID")
 
     @property
     def TEMPLATES_ITEM_MAPS_ENDPOINT(self) -> str:
@@ -300,13 +303,13 @@ class Config:
     def TEMPLATES_ITEM_CONTACT_ENDPOINT(self) -> str:
         """Endpoint for contact form in items contact tab."""
         with self.env.prefixed(self._app_prefix), self.env.prefixed("TEMPLATES_"), self.env.prefixed("ITEM_"):
-            return self.env("CONTACT_ENDPOINT")
+            return self.env.str("CONTACT_ENDPOINT")
 
     @property
     def TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY(self) -> str:
         """Site key for public facing Cloudflare Turnstile bot protection widget."""
         with self.env.prefixed(self._app_prefix), self.env.prefixed("TEMPLATES_"), self.env.prefixed("ITEM_"):
-            return self.env("CONTACT_TURNSTILE_KEY")
+            return self.env.str("CONTACT_TURNSTILE_KEY")
 
     @property
     def TEMPLATES_ITEM_VERSIONS_ENDPOINT(self) -> str:
@@ -316,65 +319,83 @@ class Config:
         I.e. The URL to the Git repository where item record revisions are stored.
         """
         with self.env.prefixed(self._app_prefix), self.env.prefixed("TEMPLATES_"), self.env.prefixed("ITEM_"):
-            return self.env("VERSIONS_ENDPOINT")
+            return self.env.str("VERSIONS_ENDPOINT")
 
     @property
-    def BASE_URL(self) -> str:
-        """Root URL for site output."""
-        return f"https://{self.AWS_S3_BUCKET}"
+    def SITE_UNTRUSTED_S3_BUCKET_TESTING(self) -> str:
+        """Target S3 bucket for untrusted site content (testing environment)."""
+        with self.env.prefixed(self._app_prefix), self.env.prefixed("SITE_UNTRUSTED_S3_"):
+            return self.env.str("BUCKET_TESTING")
 
     @property
-    def EXPORT_PATH(self) -> Path:
-        """Path to site output."""
-        with self.env.prefixed(self._app_prefix):
-            return self.env.path("EXPORT_PATH").resolve()
+    def SITE_UNTRUSTED_S3_BUCKET_LIVE(self) -> str:
+        """Target S3 bucket for untrusted site content (live environment)."""
+        with self.env.prefixed(self._app_prefix), self.env.prefixed("SITE_UNTRUSTED_S3_"):
+            return self.env.str("BUCKET_LIVE")
 
     @property
-    def AWS_S3_BUCKET(self) -> str:
-        """S3 bucket for site output."""
-        with self.env.prefixed(self._app_prefix), self.env.prefixed("AWS_"):
-            return self.env("S3_BUCKET")
+    def SITE_UNTRUSTED_S3_ACCESS_ID(self) -> str:
+        """ID for AWS IAM access key used to manage content in SITE_UNTRUSTED_S3_BUCKET."""
+        with self.env.prefixed(self._app_prefix), self.env.prefixed("SITE_UNTRUSTED_S3_"):
+            return self.env.str("ACCESS_ID")
 
     @property
-    def AWS_ACCESS_ID(self) -> str:
-        """ID for AWS IAM access key used to manage content in AWS_S3_BUCKET."""
-        with self.env.prefixed(self._app_prefix), self.env.prefixed("AWS_"):
-            return self.env("ACCESS_ID")
+    def SITE_UNTRUSTED_S3_ACCESS_SECRET(self) -> str:
+        """Secret for AWS IAM access key used to manage content in SITE_UNTRUSTED_S3_BUCKET."""
+        with self.env.prefixed(self._app_prefix), self.env.prefixed("SITE_UNTRUSTED_S3_"):
+            return self.env.str("ACCESS_SECRET")
 
     @property
-    def AWS_ACCESS_SECRET(self) -> str:
-        """Secret for AWS IAM access key used to manage content in AWS_S3_BUCKET."""
-        with self.env.prefixed(self._app_prefix), self.env.prefixed("AWS_"):
-            return self.env("ACCESS_SECRET")
+    def SITE_UNTRUSTED_S3_ACCESS_SECRET_SAFE(self) -> str:
+        """SITE_UNTRUSTED_S3_ACCESS_SECRET with value redacted."""
+        return self._safe_value if self.SITE_UNTRUSTED_S3_ACCESS_SECRET else ""
 
     @property
-    def AWS_ACCESS_SECRET_SAFE(self) -> str:
-        """AWS_ACCESS_SECRET with value redacted."""
-        return self._safe_value if self.AWS_ACCESS_SECRET else ""
+    def SITE_TRUSTED_RSYNC_HOST(self) -> str:
+        """Target host for trusted site content."""
+        with self.env.prefixed(self._app_prefix), self.env.prefixed("SITE_TRUSTED_RSYNC_"):
+            return self.env.str("HOST")
 
     @property
-    def TRUSTED_UPLOAD_PATH(self) -> Path:
-        """Target path for trusted content on local or remote host."""
-        with self.env.prefixed(self._app_prefix):
-            return self.env.path("TRUSTED_UPLOAD_PATH")
+    def SITE_TRUSTED_RSYNC_BASE_PATH_TESTING(self) -> Path:
+        """Target path for trusted site content (testing environment)."""
+        with self.env.prefixed(self._app_prefix), self.env.prefixed("SITE_TRUSTED_RSYNC_"):
+            return self.env.path("BASE_PATH_TESTING")
 
     @property
-    def TRUSTED_UPLOAD_HOST(self) -> str | None:
-        """Optional remote for uploading trusted content."""
-        try:
-            with self.env.prefixed(self._app_prefix):
-                return self.env.str("TRUSTED_UPLOAD_HOST")
-        except EnvError:
-            return None
+    def SITE_TRUSTED_RSYNC_BASE_PATH_LIVE(self) -> Path:
+        """Target path for trusted site content (live environment)."""
+        with self.env.prefixed(self._app_prefix), self.env.prefixed("SITE_TRUSTED_RSYNC_"):
+            return self.env.path("BASE_PATH_LIVE")
 
     @property
     def VERIFY_SHAREPOINT_PROXY_ENDPOINT(self) -> str:
         """Endpoint for checking SharePoint hosted downloads in verification jobs."""
         with self.env.prefixed(self._app_prefix), self.env.prefixed("VERIFY_"):
-            return self.env("SHAREPOINT_PROXY_ENDPOINT")
+            return self.env.str("SHAREPOINT_PROXY_ENDPOINT")
 
     @property
     def VERIFY_SAN_PROXY_ENDPOINT(self) -> str:
         """Endpoint for checking SAN references in verification jobs."""
         with self.env.prefixed(self._app_prefix), self.env.prefixed("VERIFY_"):
-            return self.env("SAN_PROXY_ENDPOINT")
+            return self.env.str("SAN_PROXY_ENDPOINT")
+
+    @property
+    def BASE_URL_TESTING(self) -> str:
+        """
+        Catalogue base URL (Testing environment).
+
+        Can be a reverse proxied endpoint. Must be a fully qualified URL.
+        """
+        with self.env.prefixed(self._app_prefix), self.env.prefixed("BASE_URL_"):
+            return self.env.str("TESTING", validate=validate.URL())
+
+    @property
+    def BASE_URL_LIVE(self) -> str:
+        """
+        Catalogue hosting base URL (Live environment).
+
+        Can be a reverse proxied endpoint. Must be a fully qualified URL.
+        """
+        with self.env.prefixed(self._app_prefix), self.env.prefixed("BASE_URL_"):
+            return self.env.str("LIVE", validate=validate.URL())

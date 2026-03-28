@@ -249,7 +249,7 @@ def _update_agol_item(logger: logging.Logger, config: ExtraConfig, item: ArcGisI
 
 def main() -> None:
     """Entrypoint."""
-    logger, config, store, _s3 = init()
+    logger, config, store = init()
     args = _get_cli_args()
 
     source_record = get_record(logger=logger, store=store, identifier=args["source_id"])

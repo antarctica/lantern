@@ -54,8 +54,8 @@ def invalidate_keys(logger: logging.Logger, config: ExtraConfig, distribution_id
 
     client = boto3.client(
         "cloudfront",
-        aws_access_key_id=config.AWS_ACCESS_ID,
-        aws_secret_access_key=config.AWS_ACCESS_SECRET,
+        aws_access_key_id=config.SITE_UNTRUSTED_S3_ACCESS_ID,
+        aws_secret_access_key=config.SITE_UNTRUSTED_S3_ACCESS_SECRET,
     )
     caller_ref = str(uuid4())
     logger.info(f"Creating CloudFront invalidation for distribution {distribution_id}")
@@ -80,7 +80,7 @@ def invalidate_keys(logger: logging.Logger, config: ExtraConfig, distribution_id
 
 def main() -> None:
     """Entrypoint."""
-    logger, _config, _store, _s3 = init()
+    logger, _config, _store = init()
 
     cf_id = get_cf_distribution_id(iac_cwd=Path("./resources/envs"), cf_id="site_cf_id")
     keys = _get_cli_args()

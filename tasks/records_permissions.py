@@ -109,7 +109,7 @@ def _set_permissions(
 
 def main() -> None:
     """Entrypoint."""
-    logger, config, _store, _s3 = init()
+    logger, config, _store = init()
     admin_keys = config.ADMIN_METADATA_KEYS_RW
 
     print("\nNote: This task does not support:")

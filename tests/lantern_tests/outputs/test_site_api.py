@@ -27,7 +27,7 @@ class TestSiteApiOutput:
         assert catalog_output.media_type == "application/linkset+json; profile=https://www.rfc-editor.org/info/rfc9727"
 
         catalog_redirect = outputs[Path(".well-known/api-catalog")]
-        assert catalog_redirect.redirect == "https://x/static/json/api-catalog.json"
+        assert catalog_redirect.redirect == "https://example.com/static/json/api-catalog.json"
 
         openapi_output = outputs[Path("static/json/openapi.json")]
         assert "openapi" in json.loads(openapi_output.content)

@@ -97,7 +97,7 @@ class TestItemAliasesOutput:
         result = results[0]
         assert isinstance(result, SiteRedirect)
         assert result.path == Path("datasets/x/index.html")
-        assert result.redirect == f"https://x/items/{target}/"
+        assert result.redirect == f"https://example.com/items/{target}/"
         assert result.object_meta == {
             "file_identifier": fx_revision_model_min.file_identifier,
             "file_revision": fx_revision_model_min.file_revision,

@@ -10,6 +10,20 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 <!-- pyml disable no-duplicate-heading,no-duplicate-header -->
 ## [Unreleased]
 
+### Changed [!BREAKING]
+
+* `AWS_S3_BUCKET` config option split into `SITE_UNTRUSTED_S3_BUCKET_TESTING` and `SITE_UNTRUSTED_S3_BUCKET_LIVE`
+* `AWS_ACCESS_ID` config option renamed to `SITE_UNTRUSTED_S3_ACCESS_ID`
+* `AWS_ACCESS_SECRET` config option renamed to `SITE_UNTRUSTED_S3_ACCESS_SECRET`
+* `BASE_URL` config option split into `BASE_URL_LIVE` and `BASE_URL_TESTING`
+* `TRUSTED_UPLOAD_HOST` config option renamed to `SITE_TRUSTED_RSYNC_HOST`
+* `TRUSTED_UPLOAD_PATH` config option split into `SITE_TRUSTED_RSYNC_BASE_PATH_TESTING` and
+  `SITE_TRUSTED_RSYNC_BASE_PATH_LIVE`
+
+### Removed [!BREAKING]
+
+* `EXPORT_PATH` config option retired
+
 ### Added
 
 * `DomainConsisties` container element for managing domain consistency data quality elements
@@ -29,6 +43,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
   public website search items, ISO JSON/XML/HTML records)
 * new `lantern.export` classes extracted from previous exporters and utils (local/Rsync/S3)
 * new `SiteContent` and `SiteRedirect` site models for passing site content between Output and Exporter classes
+* `Catalogue` high level coordinating class combining Store, Site and Exporter classes
 
 ### Fixed
 
@@ -43,6 +58,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Records publishing workflow updated to use merge request reviewer approvals
 * Updating documentation diagrams
 * Exporter classes refactored into Output classes, refactored Exporters and top-level Site and Verification classes
+* Refactoring task timing decorator from development tasks into utils with tests
 
 ## [0.5.0] - 2026-02-27 [!BREAKING]
 

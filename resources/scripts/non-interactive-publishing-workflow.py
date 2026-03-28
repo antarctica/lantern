@@ -4,20 +4,19 @@ import logging
 import sys
 from dataclasses import dataclass
 from pathlib import Path
+from typing import get_args
 
 import requests
 from boto3 import client as S3Client  # noqa: N812
 
+from lantern.catalogue import BasCatalogue, BasEnvironment
 from lantern.config import Config
-from lantern.exporters.s3 import S3Exporter
 from lantern.lib.metadata_library.models.record.record import RecordInvalidError
 from lantern.log import init as init_logging
 from lantern.log import init_sentry
 from lantern.models.record.record import Record
-from lantern.models.site import ExportMeta
 from lantern.outputs.item_html import ItemAliasesOutput, ItemCatalogueOutput
 from lantern.outputs.record_iso import RecordIsoHtmlOutput, RecordIsoJsonOutput, RecordIsoXmlOutput
-from lantern.site import Site
 from lantern.stores.base import RecordNotFoundError
 from lantern.stores.gitlab import CommitResults, GitLabSource, GitLabStore
 
@@ -26,6 +25,7 @@ from lantern.stores.gitlab import CommitResults, GitLabSource, GitLabStore
 class Args:
     """Script arguments."""
 
+    env: BasEnvironment
     path: Path
     changeset_base: str
     changeset_title: str
@@ -125,7 +125,9 @@ def _commit_records(
     return results
 
 
-def _publish_records(logger: logging.Logger, site: Site, exporter: S3Exporter, identifiers: set[str]) -> None:
+def _publish_records(
+    logger: logging.Logger, catalogue: BasCatalogue, env: BasEnvironment, base_url: str, identifiers: set[str]
+) -> None:
     """
     Publish items and records for records included in a commit.
 
@@ -133,25 +135,22 @@ def _publish_records(logger: logging.Logger, site: Site, exporter: S3Exporter, i
     - additionally uploads items as trusted content to secure hosting
     """
     logger.info(f"Publishing {len(identifiers)} records.")
-
-    outputs = site.run(
-        global_outputs=[],
-        individual_outputs=[
+    catalogue.export(
+        env=env,
+        identifiers=identifiers,
+        outputs=[
             ItemCatalogueOutput,
             ItemAliasesOutput,
             RecordIsoJsonOutput,
             RecordIsoXmlOutput,
             RecordIsoHtmlOutput,
         ],
-        identifiers=identifiers,
     )
-    exporter.export(outputs)
 
     logger.info("Records published:")
     for identifier in sorted(identifiers):
-        logger.info(f"* https://{exporter._bucket}/items/{identifier}")
-        # hack as reverse proxying is needed
-        logger.info(f"* https://{exporter._bucket.replace('lantern', 'data')}/-/items/{identifier}")
+        logger.info(f"* {base_url}/items/{identifier}")
+        logger.info(f"* {base_url}/-/items/{identifier}")
 
 
 def _webhook(logger: logging.Logger, config: Config, commit: CommitResults, mr_url: str, wh_url: str) -> None:
@@ -173,6 +172,9 @@ def _webhook(logger: logging.Logger, config: Config, commit: CommitResults, mr_u
 def _parse_args() -> Args:
     """Parse and validate script arguments."""
     parser = argparse.ArgumentParser(description="Import and publish catalogue records.")
+    parser.add_argument(
+        "--site", type=str, required=True, choices=get_args(BasEnvironment), help="Catalogue site [testing/live]"
+    )
     parser.add_argument("--path", type=Path, required=True, help="Directory containing record config files")
     parser.add_argument("--changeset-base", type=str, required=True, help="Changeset base branch name")
     parser.add_argument("--changeset-title", type=str, required=True, help="Changest title")
@@ -224,15 +226,14 @@ def _run(logger: logging.Logger, config: Config, args: Args) -> None:
 
     s3 = S3Client(
         "s3",
-        aws_access_key_id=config.AWS_ACCESS_ID,
-        aws_secret_access_key=config.AWS_ACCESS_SECRET,
+        aws_access_key_id=config.SITE_UNTRUSTED_S3_ACCESS_ID,
+        aws_secret_access_key=config.SITE_UNTRUSTED_S3_ACCESS_SECRET,
         region_name="eu-west-1",
     )
-    meta = ExportMeta.from_config_store(config=config, store=store, build_repo_ref=commit.commit)
-    site = Site(logger=logger, meta=meta, store=store)
-    exporter = S3Exporter(logger=logger, s3=s3, bucket=config.AWS_S3_BUCKET)
+    catalogue = BasCatalogue(logger=logger, config=config, store=store, s3=s3)
     identifiers = set(commit.new_identifiers + commit.updated_identifiers)
-    _publish_records(logger=logger, site=site, exporter=exporter, identifiers=identifiers)
+    base_url = config.BASE_URL_TESTING if args.env == "testing" else config.BASE_URL_LIVE
+    _publish_records(logger=logger, catalogue=catalogue, env=args.env, base_url=base_url, identifiers=identifiers)
 
     if args.webhook:
         _webhook(logger=logger, config=config, commit=commit, mr_url=mr_url, wh_url=args.webhook)

@@ -77,15 +77,17 @@ def time_task(label: str) -> Callable:
     """
     Time a task and log duration.
 
-    Requires wrapped method to be part of a class with a `_logger` property.
+    Uses a temporary app logger.
     """
 
     def decorator(func: Callable) -> Callable:
         @functools.wraps(func)
-        def wrapper(self, *args, **kwargs):  # noqa: ANN001, ANN002, ANN003, ANN202
+        def wrapper(*args, **kwargs):  # noqa: ANN002, ANN003, ANN202
             start = time.monotonic()
-            result = func(self, *args, **kwargs)
-            self._logger.info(f"{label} took {round(time.monotonic() - start)} seconds")
+            result = func(*args, **kwargs)
+            logger = logging.getLogger("app")
+            logger.setLevel(logging.INFO)
+            logger.info(f"{label} took {round(time.monotonic() - start)} seconds")
             return result
 
         return wrapper

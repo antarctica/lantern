@@ -255,7 +255,7 @@ def _make_esri_distributions(arcgis_item: ArcGisItem) -> list[Distribution]:
 
 def main() -> None:
     """Entrypoint."""
-    logger, config, store, _s3 = init()
+    logger, config, store = init()
     output_path = Path("import")
     confirm_source(logger=logger, store=store, action="Selecting records from")
     args = _get_cli_args()

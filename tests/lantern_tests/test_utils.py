@@ -4,7 +4,6 @@ from tempfile import TemporaryDirectory
 
 import pytest
 from jinja2 import Environment
-from pytest_mock import MockerFixture
 
 from lantern.config import Config
 from lantern.lib.metadata_library.models.record.elements.common import Identifier
@@ -69,21 +68,22 @@ class TestUtils:
             == "<html>\n<body><p>...</p></body></html>"
         )
 
-    def test_time_task(self, mocker: MockerFixture):
+    def test_time_task(self, caplog: pytest.LogCaptureFixture) -> None:
         """Can time a task and log duration using decorator."""
-        mock_logger = mocker.MagicMock()
+        expected_class = "Test class method"
+        expected_func = "Test method"
 
         class _Dummy:
-            _logger = mock_logger
-
-            @time_task(label="Test task")
+            @time_task(label=expected_class)
             def do_work(self) -> str:
-                return "done"
+                return "..."
 
-        result = _Dummy().do_work()
+        @time_task(label=expected_func)
+        def _dummy() -> str:
+            return "..."
 
-        assert result == "done"
-        mock_logger.info.assert_called_once()
-        logged_msg = mock_logger.info.call_args[0][0]
-        assert logged_msg.startswith("Test task took ")
-        assert logged_msg.endswith(" seconds")
+        _Dummy().do_work()
+        _dummy()
+
+        assert expected_class in caplog.text
+        assert expected_func in caplog.text

@@ -44,7 +44,7 @@ def _get_cli_args() -> str:
 
 def main() -> None:
     """Entrypoint."""
-    logger, _config, _store, _s3 = init()
+    logger, _config, _store = init()
 
     cf_id = get_cf_distribution_id(iac_cwd=Path("./resources/envs"), cf_id="thumbnails_cf_id")
     item = _get_cli_args()

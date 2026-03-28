@@ -83,7 +83,7 @@ def _dumps_admin_meta(logger: logging.Logger, admin_keys: AdministrationKeys, re
 
 def main() -> None:
     """Entrypoint."""
-    logger, config, store, _s3 = init()
+    logger, config, store = init()
     confirm_source(logger=logger, store=store, action="Selecting records from")
     args = _get_cli_args()
 

@@ -1,12 +1,11 @@
-import functools
 import json
 import logging
 import re
 import subprocess
 import sys
-from collections.abc import Callable, Generator, Mapping, Sequence
-from datetime import UTC, datetime
+from collections.abc import Generator, Mapping, Sequence
 from pathlib import Path
+from typing import Literal
 
 import inquirer
 from boto3 import client as S3Client  # noqa: N812
@@ -21,6 +20,8 @@ from lantern.models.record.revision import RecordRevision
 from lantern.stores.gitlab import GitLabStore
 from lantern.stores.gitlab_cache import GitLabCachedStore
 from lantern.utils import init_gitlab_store
+
+TargetEnv = Literal["local", "remote"]
 
 
 def init_logging(config: Config) -> logging.Logger:
@@ -47,15 +48,15 @@ def init_s3(config: Config) -> S3Client:  # ty: ignore[invalid-type-form]
     """Initialise S3 client."""
     return S3Client(
         "s3",
-        aws_access_key_id=config.AWS_ACCESS_ID,
-        aws_secret_access_key=config.AWS_ACCESS_SECRET,
+        aws_access_key_id=config.SITE_UNTRUSTED_S3_ACCESS_ID,
+        aws_secret_access_key=config.SITE_UNTRUSTED_S3_ACCESS_SECRET,
         region_name="eu-west-1",
     )
 
 
 def init(
     cached_store: bool = False, frozen_store: bool = False
-) -> tuple[logging.Logger, ExtraConfig, GitLabStore | GitLabCachedStore, S3Client]:  # ty: ignore[invalid-type-form]
+) -> tuple[logging.Logger, ExtraConfig, GitLabStore | GitLabCachedStore]:
     """
     Initialise common objects.
 
@@ -65,8 +66,7 @@ def init(
     config = ExtraConfig()
     logger = init_logging(config)
     store = init_store(logger, config, cached=cached_store, frozen=frozen_store)
-    s3 = init_s3(config)
-    return logger, config, store, s3
+    return logger, config, store
 
 
 def _parse_configs(search_path: Path, glob_pattern: str | None = None) -> Generator[tuple[dict, Path], None, None]:
@@ -264,23 +264,6 @@ def ping_host(host: str) -> None:
     except subprocess.CalledProcessError as e:
         msg = f"Host unreachable: {host}"
         raise RuntimeError(msg) from e
-
-
-def time_task(label: str) -> Callable:
-    """Time a task and log duration."""
-
-    def decorator(func: Callable) -> Callable:
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):  # noqa: ANN002, ANN003, ANN202,
-            start = datetime.now(tz=UTC)
-            result = func(*args, **kwargs)
-            end = datetime.now(tz=UTC)
-            print(f"{label} took {round((end - start).total_seconds())} seconds")
-            return result
-
-        return wrapper
-
-    return decorator
 
 
 def confirm(logger: logging.Logger, message: str) -> None:

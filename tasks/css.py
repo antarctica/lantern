@@ -4,83 +4,38 @@ from datetime import timedelta
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from boto3 import client as S3Client  # noqa: N812
+from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-from lantern.exporters.site import SiteExporter
-from lantern.exporters.verification import VerificationReport
-from moto import mock_aws
 from tests.resources.admin_keys import test_keys
+from tests.resources.catalogues.fake_catalogue import FakeCatalogue
 from tests.resources.stores.fake_records_store import FakeRecordsStore
 
-from lantern.config import Config as BaseConfig
-from lantern.models.site import ExportMeta
+from lantern.config import Config as ConfigBase
 from lantern.models.verification.enums import VerificationResult, VerificationType
 from lantern.models.verification.jobs import VerificationJob
 from lantern.models.verification.types import VerificationContext
+from lantern.verification import VerificationReport
 
 
-# noinspection PyPep8Naming
-class Config(BaseConfig):
-    """Local config class."""
-
-    def __init__(self) -> None:
-        super().__init__()
+class Config(ConfigBase):
+    """Config with test keys."""
 
     @property
-    def AWS_ACCESS_ID(self) -> str:  # noqa: N802
-        """AWS access key ID."""
-        return "x"
-
-    @property
-    def AWS_ACCESS_SECRET(self) -> str:  # noqa: N802
-        """AWS access key secret."""
-        return "x"
+    def ADMIN_METADATA_KEYS(self) -> AdministrationKeys:  # noqa: N802
+        """Administration metadata keys."""
+        return test_keys()
 
 
 def export_test_site(export_path: Path) -> None:
     """Export test records as a static site."""
     logger = logging.getLogger("app")
     logger.setLevel(logging.INFO)
+    config = Config()
     store = FakeRecordsStore(logger=logger)
+    catalogue = FakeCatalogue(logger=logger, config=config, store=store, base_path=export_path)
+    catalogue.export()
 
-    with mock_aws():
-        s3_client = S3Client(
-            "s3",
-            aws_access_key_id="x",
-            aws_secret_access_key="x",  # noqa: S106
-            region_name="eu-west-1",
-        )
-
-    meta = ExportMeta(
-        base_url="x",
-        build_key="x",
-        html_title="",
-        sentry_dsn="x",
-        plausible_id="x",
-        embedded_maps_endpoint="x",
-        items_enquires_endpoint="x",
-        items_enquires_turnstile_key="x",
-        generator="x",
-        version="x",
-        export_path=export_path,
-        s3_bucket="x",
-        parallel_jobs=1,
-        admin_meta_keys=test_keys(),
-        trusted=True,
-        trusted_path=export_path,
-    )
-
-    exporter = SiteExporter(
-        config=Config(),
-        meta=meta,
-        s3=s3_client,
-        logger=logger,
-        store=store,
-        selected_identifiers={record.file_identifier for record in store.select()},
-    )
-    exporter.export()
-
-    # Include verification report
+    # Include fake verification report
     report_path = export_path / "-" / "verification" / "index.html"
     context: VerificationContext = {
         "BASE_URL": "https://example.com",
@@ -110,7 +65,7 @@ def export_test_site(export_path: Path) -> None:
             data={"file_identifier": "x"},
         ),
     ]
-    report = VerificationReport(meta.site_metadata, jobs=jobs, context=context)
+    report = VerificationReport(catalogue._meta.site_metadata, jobs=jobs, context=context)
     report_path.parent.mkdir(parents=True, exist_ok=True)
     with report_path.open("w") as report_file:
         report_file.write(report.dumps())

@@ -1,35 +1,42 @@
-from tasks._record_utils import confirm_source, init
+# Verify catalogue site
 
+import logging
+from pathlib import Path
+
+from tasks._record_utils import TargetEnv, init, init_s3
+
+from lantern.catalogue import BasCatalogue, BasEnvironment
 from lantern.exporters.local import LocalExporter
-from lantern.models.site import ExportMeta
-from lantern.models.verification.types import VerificationContext
-from lantern.verification import Verification
+
+
+def verify(
+    logger: logging.Logger,
+    catalogue: BasCatalogue,
+    env: BasEnvironment,
+    target: TargetEnv,
+    identifiers: set[str],
+    target_local: Path | None = None,
+) -> None:
+    """Run catalogue verify, optionally overloading exporter."""
+    if target == "local":
+        if not target_local:
+            msg = "target_local must be set where target=local"
+            raise ValueError(msg) from None
+        catalogue._envs[env]._untrusted._exporter = LocalExporter(logger=logger, path=target_local)
+    catalogue.verify(env=env, identifiers=identifiers)
 
 
 def main() -> None:
     """Entrypoint."""
-    base_url = "https://data.bas.ac.uk"
-    identifiers = set()  # to set use the form {"abc", "..."}
+    selected = set()  # to set use the form {"abc", "..."}
+    env: BasEnvironment = "testing"  # testing/live
+    target: TargetEnv = "local"  # local/remote
+    target_local = Path("export")
 
-    logger, config, store, _s3 = init(cached_store=True)
-    context: VerificationContext = {
-        "BASE_URL": base_url,
-        "SHAREPOINT_PROXY_ENDPOINT": config.VERIFY_SHAREPOINT_PROXY_ENDPOINT,
-        "SAN_PROXY_ENDPOINT": config.VERIFY_SAN_PROXY_ENDPOINT,
-    }
-
-    confirm_source(logger=logger, store=store, action="Validating records from")
-    if store.head_commit is None:
-        # noinspection PyProtectedMember
-        store._cache._ensure_exists()  # ensure cache exists to get head commit for ExportMeta
-    meta = ExportMeta.from_config_store(config=config, store=None, build_repo_ref=store.head_commit, trusted=False)
-    verifier = Verification(
-        logger=logger, meta=meta, context=context, select_records=store.select, identifiers=identifiers
-    )
-    verifier.run()
-    exporter = LocalExporter(logger=logger, path=config.EXPORT_PATH)
-    exporter.export(verifier.outputs)
-    logger.info("Verify data and report saved.")
+    logger, config, store = init(cached_store=True, frozen_store=True)
+    s3 = init_s3(config=config)
+    catalogue = BasCatalogue(logger=logger, config=config, store=store, s3=s3)
+    verify(logger=logger, catalogue=catalogue, env=env, target=target, identifiers=selected, target_local=target_local)
 
 
 if __name__ == "__main__":

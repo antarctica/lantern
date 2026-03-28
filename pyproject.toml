@@ -124,7 +124,6 @@ workflow-live = { cmd = "python -m tasks.records_workflow_live", help = "Import 
 site-invalidate = { cmd = "python -m tasks.site_invalidate", help = "Invalidate cached content in live site" }
 thumbnail-invalidate = { cmd = "python -m tasks.thumbnail_invalidate", help = "Invalidate cached item thumbnail in CDN" }
 serve = { cmd = "python -m tasks.serve", help = "Serve local catalogue site" }
-output = { cmd = "python -m tasks.output", help = "Temp output" }
 
 [tool.ruff]
 src = ["src"]

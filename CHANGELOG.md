@@ -59,6 +59,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Updating documentation diagrams
 * Exporter classes refactored into Output classes, refactored Exporters and top-level Site and Verification classes
 * Refactoring task timing decorator from development tasks into utils with tests
+* Refactoring development tasks to use catalogue classes and associated changes
 
 ## [0.5.0] - 2026-02-27 [!BREAKING]
 

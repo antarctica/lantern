@@ -1,114 +1,43 @@
-import functools
 import logging
-import shutil
 from collections.abc import Callable
-from datetime import UTC, datetime
+from pathlib import Path
 
-from lantern.exporters.site import SiteExporter
-from mypy_boto3_s3 import S3Client
-from tasks._config import ExtraConfig
-from tasks._record_utils import init
+from tasks._record_utils import TargetEnv, init, init_s3
 
-from lantern.models.site import ExportMeta
-from lantern.stores.gitlab import GitLabStore
+from lantern.catalogue import BasCatalogue, BasEnvironment
+from lantern.exporters.local import LocalExporter
+from lantern.outputs.base import OutputBase
 from lantern.stores.gitlab_cache import GitLabCachedStore
 
 
-def time_task(label: str) -> Callable:
-    """Time a task and log duration."""
-
-    def decorator(func: Callable) -> Callable:
-        @functools.wraps(func)
-        def wrapper(self, *args, **kwargs):  # noqa: ANN001, ANN002, ANN003, ANN202,
-            start = datetime.now(tz=UTC)
-            result = func(self, *args, **kwargs)
-            end = datetime.now(tz=UTC)
-            self._logger.info(f"{label} took {round((end - start).total_seconds())} seconds")
-            return result
-
-        return wrapper
-
-    return decorator
-
-
-class ToyCatalogue:
-    """Toy catalogue for prototyping."""
-
-    def __init__(
-        self,
-        logger: logging.Logger,
-        config: ExtraConfig,
-        s3: S3Client,
-        store: GitLabStore | GitLabCachedStore,
-        selected_identifiers: set[str] | None = None,
-    ) -> None:
-        self._logger = logger
-        self._config = config
-        self._s3 = s3
-        self._store = store
-        self._selected_identifiers = selected_identifiers
-
-        if isinstance(self._store, GitLabCachedStore):
-            # ensure cache exists to get head commit for ExportMeta and is up to date before freezing
-            self._store._cache._ensure_exists()
-        self._meta = ExportMeta.from_config_store(
-            config=self._config, store=self._store, build_repo_ref=self._store.head_commit, trusted=False
-        )
-
-        if isinstance(self._store, GitLabCachedStore):
-            self._logger.info("Freezing store.")
-            self._store._frozen = True
-            self._store._cache._frozen = True
-
-        self._site = SiteExporter(
-            logger=self._logger,
-            config=self._config,
-            meta=self._meta,
-            s3=self._s3,
-            store=self._store,
-            selected_identifiers=selected_identifiers,
-        )
-
-    @time_task(label="Export")
-    def export(self) -> None:
-        """Export catalogue to file system."""
-        self._site.export()
-
-    @time_task(label="Publish")
-    def publish(self) -> None:
-        """Publish catalogue to remote (un)trusted location."""
-        self._site.publish()
-
-    # noinspection PyProtectedMember
-    @time_task(label="Purge")
-    def purge(self, purge_export: bool = False, purge_publish: bool = False) -> None:
-        """Empty records from catalogue store and site exporter."""
-        if isinstance(self._store, GitLabCachedStore):
-            self._logger.info("Purging store")
-            self._store.purge()
-
-        if purge_export and self._site._meta.export_path.exists():
-            self._site._logger.info("Purging file system export directory")
-            shutil.rmtree(self._site._meta.export_path)
-        if purge_publish:
-            self._logger.info("Purging S3 publishing bucket")
-            self._site._s3_utils.empty_bucket()
+def export(
+    logger: logging.Logger,
+    catalogue: BasCatalogue,
+    env: BasEnvironment,
+    target: TargetEnv,
+    identifiers: set[str],
+    outputs: list[Callable[..., OutputBase]] | None = None,
+) -> None:
+    """Run catalogue export, ensuring store is frozen for performance and optionally overloading exporter."""
+    if isinstance(catalogue._store, GitLabCachedStore):
+        catalogue._store._frozen = True
+        catalogue._store._cache._frozen = True
+    if target == "local":
+        catalogue._envs[env]._untrusted._exporter = LocalExporter(logger=logger, path=Path("export"))
+        catalogue._envs[env]._trusted._exporter = LocalExporter(logger=logger, path=Path("export-trusted"))
+    catalogue.export(env=env, identifiers=identifiers, outputs=outputs)
 
 
 def main() -> None:
     """Entrypoint."""
-    export = True
-    publish = False
     selected = set()  # to set use the form {"abc", "..."}
+    env: BasEnvironment = "testing"  # testing/live
+    target: TargetEnv = "local"  # local/remote
 
-    cached = True  # always cached as index and website search exporters always select all records
-    logger, config, store, s3 = init(cached_store=cached)
-    cat = ToyCatalogue(config=config, logger=logger, s3=s3, store=store, selected_identifiers=selected)
-
-    if export:
-        cat.export()
-    if publish:
-        cat.publish()
+    logger, config, store = init(cached_store=True, frozen_store=True)
+    s3 = init_s3(config=config)
+    catalogue = BasCatalogue(logger=logger, config=config, store=store, s3=s3)
+    export(logger=logger, catalogue=catalogue, env=env, target=target, identifiers=selected)
 
 
 if __name__ == "__main__":

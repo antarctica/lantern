@@ -82,6 +82,7 @@ Supported common elements (references not normative or exhaustive):
 - `*.citation.title`
 - `*.citation.dates`
 - `*.citation.edition`
+- `*.constraints` (limited restriction code list options)
 - `*.citation.contacts` (except `contact.position`)
 - `*.citation.identifiers`
 - `*.citation.series` (with local workaround for `series.page` until v5 schema)
@@ -110,7 +111,6 @@ Supported elements (references not normative or exhaustive):
 - `identification.purpose`
 - `identification.other_citation_details`
 - `identification.supplemental_information`
-- `identification.constraints`
 - `identification.aggregations`
 - `identification.extents` (temporal and bounding box extents only)
 - `identification.graphic_overviews`

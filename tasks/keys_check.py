@@ -1,8 +1,8 @@
+# Check administration metadata keys work.
+
 from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 from jwskate import JweCompact, JwtSigner
 from tasks._config import ExtraConfig
-
-# Troubleshooting task to check administration metadata keys work.
 
 
 def encode(keys: AdministrationKeys, cleartext: str) -> str:

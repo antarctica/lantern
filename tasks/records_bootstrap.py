@@ -1,3 +1,5 @@
+# Setup a new GitLab store remote repository
+
 import logging
 import sys
 from itertools import chain

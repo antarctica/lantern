@@ -1,3 +1,5 @@
+# Compile Tailwind classes used in static site output
+
 import logging
 import subprocess
 from datetime import timedelta

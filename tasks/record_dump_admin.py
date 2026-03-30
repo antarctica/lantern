@@ -1,3 +1,5 @@
+# Display administration metadata set in a record
+
 import json
 import logging
 from argparse import ArgumentParser

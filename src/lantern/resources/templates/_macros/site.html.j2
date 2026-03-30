@@ -5,7 +5,7 @@
 
 {# dict of tuple lists of ('href', 'label', 'external', 'restricted' #}
 {% set
-  footer_nav_items = {
+  secondary_nav_items = {
     'Discover': [('https://www.bas.ac.uk/maps', 'Maps', false, false)],
     'Portals': [
       ('https://www.icelogistics.info', 'Ice Logistics Portal', true, false),
@@ -65,7 +65,7 @@
   <link fetchpriority="low" rel="shortcut icon" href="/static/img/favicon.ico?v={{ build_key }}" />
   <link fetchpriority="low" rel="icon" href="/static/img/favicon.svg?v={{ build_key }}" type="image/svg+xml">
   <link fetchpriority="low" rel="apple-touch-icon" href="/static/img/apple-touch-icon.png?v={{ build_key }}" sizes="180x180" />
-  <link fetchpriority="low" rel="manifest" href="/static/txt/manifest.webmanifest?v={{ build_key }}" />
+  <link fetchpriority="low" rel="manifest" href="/static/json/manifest.webmanifest?v={{ build_key }}" />
 {% endmacro %}
 
 {% macro head_api_catalogue(build_key) %}
@@ -223,7 +223,7 @@
 
 {% macro footer_nav() %}
   <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:text-left">
-    {% for section_title, link in footer_nav_items.items() %}
+    {% for section_title, link in secondary_nav_items.items() %}
     <section class="space-y-4">
       <h4>{{ section_title }}</h4>
       <ul class="space-y-2">

@@ -1,3 +1,5 @@
+# Validate app config
+
 from pprint import pprint
 
 from tasks._config import ExtraConfig

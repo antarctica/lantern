@@ -7,7 +7,7 @@ from lantern.lib.metadata_library.models.record.utils.admin import Administratio
 
 
 class ExtraConfig(Config):
-    """Additional config options needed for tasks."""
+    """Additional config options needed for development tasks."""
 
     def __init__(self, read_env: bool = True) -> None:
         super().__init__(read_env)

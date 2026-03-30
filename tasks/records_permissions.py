@@ -1,3 +1,5 @@
+# Set access permissions in administration metadata in records
+
 import logging
 import sys
 from pathlib import Path

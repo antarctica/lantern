@@ -1,10 +1,10 @@
-# BAS Assets Tracking Service - Libraries
+# Lantern - Libraries
 
 Extensions to, or code closely associated with, third-party libraries relied on by this application.
 
 ## Markdown
 
-Package: `assets_tracking_service.lib.markdown`
+`assets_tracking_service.lib.markdown`
 
 ### Markdown plain text plugin
 
@@ -26,9 +26,9 @@ correctly paragraphs from lists in Markdown and ensure proper formatting.
 > [!IMPORTANT]
 > These are rough/working notes that will be written up properly when this module is extracted.
 
-Package: `lantern.lib.metadata_library`
+`lantern.lib.metadata_library`
 
-Includes classes for [Records](/docs/data-model.md#records).
+Includes classes for [Records](/docs/models.md#records).
 
 These redesigned and refactored classes will replace core parts of the Metadata Library project.
 
@@ -164,7 +164,7 @@ directly as JSON documents, or constructed as `Record` data class instances and 
 
 ### Record presets
 
-If authoring Records using data classes, a set of *presents* in the `lantern.lib.metadata_library.models.record.presets`
+If authoring Records using data classes, a set of *presets* in the `lantern.lib.metadata_library.models.record.presets`
 package are available to create common config subsets and improve consistency across records.
 
 For example:
@@ -231,7 +231,7 @@ To add support for a new ISO element within Records:
 
 ## ArcGIS
 
-Package: `assets_tracking_service.lib.arcgis`
+`assets_tracking_service.lib.arcgis`
 
 ### ArcGIS API for Python
 
@@ -324,5 +324,5 @@ Partially supported features (not-exhaustive):
 
 Known unsupported features (not-exhaustive):
 
-- group sharing (see also [ArcGIS Item Limitations](/docs/data-model.md#arcgis-items-limitations))
+- group sharing (see also [ArcGIS Item Limitations](/docs/models.md#arcgis-items-limitations))
 - [Unsupported Item JSON Properties](#arcgis-item-json-properties)

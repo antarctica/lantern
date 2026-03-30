@@ -1,5 +1,7 @@
-
 # Lantern - Icon Audit (Supplemental)
+
+> [!NOTE]
+> This page is specific to the [BAS Data Catalogue](/docs/architecture.md#bas-data-catalogue).
 
 Summary of icons used across site templates. Compiled and referenced manually to encourage consistency in icon use.
 

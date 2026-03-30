@@ -1,7 +1,7 @@
 # Lantern - Setup
 
-> [!WARNING]
-> This section is Work in Progress (WIP) and is not complete/accurate.
+> [!NOTE]
+> This page is specific to the [BAS Data Catalogue](/docs/architecture.md#bas-data-catalogue).
 
 ## 1Password
 
@@ -12,7 +12,7 @@ For managing secrets and common [Config](/docs/config.md) options.
 
 ## GitLab
 
-Resources for the [GitLab Store](/docs/stores.md#gitlab-store) are managed using
+Resources for the Catalogue [GitLab Store](/docs/stores.md#gitlab-store) are managed using
 [Infrastructure as Code (IaC)](/docs/infrastructure.md#infrastructure-as-code).
 
 This includes a GitLab bot user to enable:
@@ -54,7 +54,7 @@ Manually:
 
 ## Static website hosting
 
-The majority of the [Static Site](/docs/architecture.md#static-site) hosting setup is managed using
+The majority of the Catalogue [Site](/docs/architecture.md#sites) hosting is managed using
 [Infrastructure as Code (IaC)](/docs/infrastructure.md#infrastructure-as-code).
 
 Once applied, manually configure [Reverse Proxying](#reverse-proxying).
@@ -65,20 +65,20 @@ IaC will:
 
 - create an IAM user to enable the [Workstation Module](/docs/usage.md#workstation-module) with a suitable inline
   policy to:
-  - manage content in the [Static Site](/docs/architecture.md#static-site) for the
+  - manage content and create invalidations in the Catalogue hosting buckets and distributions to enable the
     [Interactive](/docs/usage.md#interactive-record-publishing-workflow) and
-    [Non-Interactive](/docs/usage.md#non-interactive-record-publishing-workflow) Publishing Workflows
+    [Non-Interactive](/docs/usage.md#non-interactive-record-publishing-workflow) publishing workflows
 - create and store an access key in 1Password for each non-development environment
 
 Manually:
 
-- reference the relevant access key in the corresponding Ansible Vault templates to set [Config](/docs/config.md) options
+- reference the relevant access key in the corresponding Ansible Vault templates to set [Config](/docs/config.md)
+  options
 
 ## Secure website hosting
 
-The [BAS Operations Data Store 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/ops-data-store) provides a web-server with LDAP
-authentication and authorisation for securely hosting restricted content. It is used by this project for
-[Trusted Publishing](/docs/exporters.md#trusted-publishing).
+The [BAS Operations Data Store 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/ops-data-store) is used by this project for
+[Trusted Publishing](/docs/architecture.md#trusted-publishing) in the Catalogue.
 
 Manually:
 
@@ -116,8 +116,8 @@ $ mkdir -p $DOCUMENT_ROOT/content/cat/testing/items /data/ops-data-store/www/con
 Set up reverse proxying within the BAS HAProxy load balancer to direct traffic to either:
 
 - the legacy DMS catalogue
-- [Static Hosting](#static-website-hosting) for public content
-- [Secure Hosting](#secure-website-hosting) for [Trusted Publishing](/docs/exporters.md#trusted-publishing)
+- [Static Hosting](#static-website-hosting) for untrusted/public content
+- [Secure Hosting](#secure-website-hosting) for [Trusted Publishing](/docs/architecture.md#trusted-publishing) content
 
 This requires a request to BAS IT asking for:
 
@@ -188,7 +188,7 @@ Manually:
 
 ## Cloudflare Turnstile
 
-A Cloudflare Turnstile widget for [Bot Protection](/docs/site.md#bot-protection) in the static site is managed using
+A Cloudflare Turnstile widget for [Bot Protection](/docs/site.md#bot-protection) is managed using
 [Infrastructure as Code (IaC)](/docs/infrastructure.md#infrastructure-as-code).
 
 IaC will:

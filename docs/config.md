@@ -1,5 +1,8 @@
 # Lantern - Configuration
 
+> [!NOTE]
+> Parts of this page are specific to the [BAS Data Catalogue](/docs/architecture.md#bas-data-catalogue).
+
 Application configuration is managed by the `lantern.Config` class.
 
 <!-- pyml disable md028 -->
@@ -20,21 +23,25 @@ Application configuration is managed by the `lantern.Config` class.
 |-----------------------------------------|--------------|--------------|----------|-----------|---------------|------------------------------------------------------------------------------------|-------------------------------------------|-------------------------------------------------|
 | `ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE` | JSON Web Key | Yes          | Yes      | Yes       | v0.4.x        | JSON Web Key (JWK) for accessing administrative metadata                           | *None*                                    | '{"kid": "magic_metadata_encryption_key", ...}' |
 | `ADMIN_METADATA_SIGNING_KEY_PUBLIC`     | JSON Web Key | Yes          | Yes      | No        | v0.4.x        | JSON Web Key (JWK) for verifying administrative metadata                           | *None*                                    | '{"kid": "magic_metadata_signing_key", ...}'    |
-| `AWS_ACCESS_ID`                         | String       | Yes          | Yes      | No        | v0.1.x        | AWS IAM user identifier for site exporter remote uploads                           | *None*                                    | 'x'                                             |
-| `AWS_ACCESS_SECRET`                     | String       | Yes          | Yes      | Yes       | v0.1.x        | AWS IAM user secret for site exporter remote uploads                               | *None*                                    | 'x'                                             |
-| `AWS_ACCESS_SECRET_SAFE`                | String       | No           | -        | No        | v0.1.x        | Redacted version of `STORE_GITLAB_TOKEN`                                           | *N/A*                                     | 'REDACTED'                                      |
-| `AWS_S3_BUCKET`                         | String       | Yes          | Yes      | No        | v0.1.x        | AWS S3 bucket used for remote static site builds                                   | *None*                                    | 'example.com'                                   |
-| `BASE_URL`                              | String       | No           | -        | No        | v0.2.x        | Root URL for the static site, used to generate fully qualified links               | `https://{AWS_S3_BUCKET}`                 | 'https://example.com'                           |
+| `BASE_URL_LIVE`                         | String       | Yes          | Yes      | No        | v0.6.x        | Base URL for production/live catalogue (typically reverse proxied)                 | *None*                                    | 'https://example.com'                           |
+| `BASE_URL_TESTING`                      | String       | Yes          | Yes      | No        | v0.6.x        | Base URL for staging/testing catalogue (typically reverse proxied)                 | *None*                                    | 'https://example.com'                           |
 | `ENABLE_FEATURE_SENTRY`                 | Boolean      | Yes          | No       | No        | v0.1.x        | Enables Sentry monitoring if true                                                  | *True*                                    | *True*                                          |
-| `EXPORT_PATH`                           | Path         | Yes          | Yes      | No        | v0.1.x        | Location for local static site exporter builds                                     | *None*                                    | '/data/exports/records'                         |
 | `LOG_LEVEL`                             | Number       | Yes          | No       | No        | v0.1.x        | A logging level name or number to set the application logging level                | 30                                        | 20                                              |
 | `LOG_LEVEL_NAME`                        | String       | No           | -        | No        | v0.1.x        | Logging level name for the configured application logging level                    | 'WARNING'                                 | 'INFO'                                          |
 | `PARALLEL_JOBS`                         | Number       | Yes          | No       | No        | v0.3.x        | Number of parallel jobs to run for applicable tasks                                | 1                                         | 4                                               |
 | `SENTRY_DSN`                            | String       | No           | -        | No        | v0.1.x        | Sentry connection string for backend error monitoring (not sensitive)              | *N/A*                                     | 'https://example.com'                           |
 | `SENTRY_ENVIRONMENT`                    | String       | Yes          | No       | No        | v0.1.x        | Application runtime environment to include in Sentry errors                        | 'development'                             | 'production'                                    |
+| `SITE_TRUSTED_RSYNC_BASE_PATH_LIVE`     | String       | Yes          | Yes      | No        | v0.6.x        | Path for trusted site content within upload server (live environment)              | *None*                                    | '/data/content/live'                            |
+| `SITE_TRUSTED_RSYNC_BASE_PATH_TESTING`  | String       | Yes          | Yes      | No        | v0.6.x        | Path for trusted site content within upload server (testing environment)           | *None*                                    | '/data/content/testing'                         |
+| `SITE_TRUSTED_RSYNC_HOST`               | String       | Yes          | Yes      | No        | v0.6.x        | SSH config alias for trusted site uploads                                          | *None*                                    | "lantern-trusted-content"                       |
+| `SITE_UNTRUSTED_S3_ACCESS_ID`           | String       | Yes          | Yes      | No        | v0.6.x        | AWS IAM user identifier for untrusted site uploads                                 | *None*                                    | 'xxx'                                           |
+| `SITE_UNTRUSTED_S3_ACCESS_SECRET`       | String       | Yes          | Yes      | Yes       | v0.6.x        | AWS IAM user secret for untrusted site uploads                                     | *None*                                    | 'xxx'                                           |
+| `SITE_UNTRUSTED_S3_ACCESS_SECRET_SAFE`  | String       | Yes          | Yes      | Yes       | v0.6.x        | Redacted version of `SITE_UNTRUSTED_S3_ACCESS_SECRET`                              | *N/A*                                     | 'REDACTED'                                      |
+| `SITE_UNTRUSTED_S3_BUCKET_LIVE`         | String       | Yes          | Yes      | No        | v0.6.x        | AWS S3 bucket used for untrusted site uploads (live environment)                   | *None*                                    | 'example.com'                                   |
+| `SITE_UNTRUSTED_S3_BUCKET_TESTING`      | String       | Yes          | Yes      | No        | v0.6.x        | AWS S3 bucket used for untrusted site uploads (testing environment)                | *None*                                    | 'testing.example.com'                           |
 | `STORE_GITLAB_BRANCH`                   | String       | Yes          | Yes      | No        | v0.5.x        | GitLab store's remote branch name                                                  | *None*                                    | 'main'                                          |
 | `STORE_GITLAB_CACHE_PATH`               | Path         | Yes          | Yes      | No        | v0.1.x        | Location for GitLab store's local records cache                                    | *None*                                    | '/tmp/gitlab_cache/'                            |
-| `STORE_GITLAB_ENDPOINT`                 | String       | Yes          | Yes      | No        | v0.1.x        | base API endpoint for GitLab store's remote instance                               | *None*                                    | 'https://gitlab.com'                            |
+| `STORE_GITLAB_ENDPOINT`                 | String       | Yes          | Yes      | No        | v0.1.x        | Base API endpoint for GitLab store's remote instance                               | *None*                                    | 'https://gitlab.com'                            |
 | `STORE_GITLAB_PROJECT_ID`               | String       | Yes          | Yes      | No        | v0.1.x        | GitLab project ID for GitLab store's remote instance                               | *None*                                    | '123'                                           |
 | `STORE_GITLAB_TOKEN`                    | String       | Yes          | Yes      | Yes       | v0.1.x        | API access token for GitLab store's remote instance                                | *None*                                    | 'REDACTED'                                      |
 | `STORE_GITLAB_TOKEN_SAFE`               | String       | No           | -        | No        | v0.1.x        | Redacted version of `STORE_GITLAB_TOKEN`                                           | *N/A*                                     | 'REDACTED'                                      |
@@ -44,8 +51,6 @@ Application configuration is managed by the `lantern.Config` class.
 | `TEMPLATES_ITEM_MAPS_ENDPOINT`          | String       | Yes          | No       | No        | v0.1.x        | Embedded Maps Service base endpoint                                                | `https://embedded-maps.data.bas.ac.uk/v1` | 'https://embedded-maps.data.bas.ac.uk/v1'       |
 | `TEMPLATES_ITEM_VERSIONS_ENDPOINT`      | String       | Yes          | Yes      | No        | v0.2.x        | Base URL to a GitLab project for viewing item record revisions                     | *None*                                    | 'https://example.com'                           |
 | `TEMPLATES_PLAUSIBLE_ID`                | String       | No           | -        | No        | v0.5.x        | Plausible site identifier for frontend analytics                                   | *None*                                    | 'pa-xxx'                                        |
-| `TRUSTED_UPLOAD_HOST`                   | String       | Yes          | No       | No        | v0.5.x        | SSH config alias for remote trusted content hosting server                         | *None*                                    | 'lantern-trusted-content'                       |
-| `TRUSTED_UPLOAD_PATH`                   | String       | Yes          | Yes      | No        | v0.5.x        | Directory for trusted content, local or remote within trusted content server       | *None*                                    | '/data/lantern'                                 |
 | `VERIFY_SAN_PROXY_ENDPOINT`             | String       | Yes          | Yes      | No        | v0.5.x        | Microsoft Power Automate trigger endpoint for checking SAN references              | *N/A*                                     | 'https://example.com'                           |
 | `VERIFY_SHAREPOINT_PROXY_ENDPOINT`      | String       | Yes          | Yes      | No        | v0.3.x        | Microsoft Power Automate trigger endpoint for checking SharePoint hosted downloads | *N/A*                                     | 'https://example.com'                           |
 | `VERSION`                               | String       | No           | -        | No        | v0.1.x        | Application package version                                                        | *N/A*                                     | '0.3.0'                                         |
@@ -80,26 +85,31 @@ See the [Stores](/docs/stores.md#stores-configuration) docs for more information
 [Config Options](#config-options) are used by stores:
 
 - `STORE_GITLAB_BRANCH`
-- `STORE_GITLAB_STORE_CACHE_PATH`
-- `STORE_GITLAB_STORE_ENDPOINT`
-- `STORE_GITLAB_STORE_PROJECT_ID`
+- `STORE_GITLAB_CACHE_PATH`
+- `STORE_GITLAB_ENDPOINT`
+- `STORE_GITLAB_PROJECT_ID`
 - `STORE_GITLAB_TOKEN`
 - `STORE_GITLAB_TOKEN_SAFE`
 
 ### Exporter config options
 
+> [!WARNING]
+> This documentation is outdated and does not reflect changes made to split exporters into outputs, a top-level site
+> and verification class and more focused exporters.
+
 See the [Exporters](/docs/exporters.md#exporters-configuration) docs for more information on how these
 [Config Options](#config-options) are used by exporters:
 
-- `BASE_URL`
-- `EXPORT_PATH`
-- `AWS_ACCESS_ID`
-- `AWS_ACCESS_SECRET`
-- `AWS_ACCESS_SECRET_SAFE`
-- `AWS_S3_BUCKET`
-- `TRUSTED_UPLOAD_HOST`
-- `TRUSTED_UPLOAD_PATH`
-- `VERIFY_SHAREPOINT_PROXY_ENDPOINT`
+- `BASE_URL_LIVE`
+- `BASE_URL_TESTING`
+- `SITE_TRUSTED_RSYNC_HOST`
+- `SITE_TRUSTED_RSYNC_BASE_PATH_LIVE`
+- `SITE_TRUSTED_RSYNC_BASE_PATH_TESTING`
+- `SITE_UNTRUSTED_S3_ACCESS_ID`
+- `SITE_UNTRUSTED_S3_ACCESS_SECRET`
+- `SITE_UNTRUSTED_S3_ACCESS_SECRET_SAFE`
+- `SITE_UNTRUSTED_S3_BUCKET_LIVE`
+- `SITE_UNTRUSTED_S3_BUCKET_TESTING`
 
 ### Site templates config options
 

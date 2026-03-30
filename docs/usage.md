@@ -1,9 +1,8 @@
 # Lantern - Usage
 
 <!-- pyml disable md028 -->
-> [!WARNING]
-> This documentation is outdated and does not reflect changes made to split exporters into outputs, a top-level site
-> and verification class and more focused exporters.
+> [!NOTE]
+> This page is specific to the [BAS Data Catalogue](/docs/architecture.md#bas-data-catalogue).
 
 > [!NOTE]
 > These are draft workflows and are not intended for use by general end-users.
@@ -11,24 +10,21 @@
 
 ## Setup
 
-<!-- pyml disable md028 -->
-> [!IMPORTANT]
-> Ensure you have a working [Local Development Environment](/docs/dev.md#local-development-environment) available with
-> a valid [Configuration](/docs/config.md#config-options) (including access tokens) before running these instructions.
+1. ensure you have a working [Local Development Environment](/docs/dev.md#local-development-environment) available with
+   a valid [Configuration](/docs/config.md#config-options), including access tokens
 
 > [!TIP]
 > Run the `config-check` [Development Task](/docs/dev.md#development-tasks) to validate the current configuration.
-<!-- pyml enable md028 -->
 
 ## Logging
 
 Log messages at or above the *warning* level are written to `stderr` by default. The logging level can be changed via
-the `LOG_LEVEL` [Config Option](/docs/config.md#config-options) set to a valid Python logging level.
+the `LOG_LEVEL` [Config Option](/docs/config.md#config-options) set to a valid Python logging level, typically *info*.
 
 ## Workstation module
 
-A minimal installation of this project is available on the BAS central workstations for integrating directly with other
-projects to manage and/or publish records.
+An installation of this project is available on the BAS central workstations for other projects to manage and/or
+publish records.
 
 <!-- pyml disable md028 -->
 > [!IMPORTANT]
@@ -43,32 +39,14 @@ projects to manage and/or publish records.
 
 To use this installation:
 
-- ensure MAGIC environment modules are included in your module search path [1]
-- load the `lantern` module `module load lantern`
+1. ensure [MAGIC environment modules 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/dev-docs/-/blob/main/service-magic-env-modules.md#usage)
+   are included in your module search path
+1. load the `lantern` module: `module load lantern`
 
 > [!TIP]
 > This will load the latest stable [Release](/README.md#releases).
 >
 > To load a preview of the next release (built from `main`), run `module load lantern/0.0.0.STAGING` instead.
-
-[1]
-
-To include MAGIC modules in your current session:
-
-```text
-$ module use --append /data/magic/.Modules/modulefiles
-```
-
-To always include MAGIC modules, add the above to your shell profile (e.g. in `~/.bash_profile`):
-
-```shell
-# include MAGIC custom environment modules
-type module >/dev/null 2>&1
-if [ $? -eq 0 ]; then
-    module use --append /data/magic/.Modules/modulefiles
-    echo "MAGIC custom modules are available"
-fi
-```
 
 ## Create records
 
@@ -76,7 +54,8 @@ fi
    as JSON files in the import directory as per the [Record Authoring](/docs/libraries.md#record-authoring) section
 1. use the `esri-record` [Development Task](/docs/dev.md#development-tasks) to include distribution options for any
    Esri ArcGIS Online items that apply to records
-1. run the [Import Records](#import-records) workflow
+1. run the [Interactive Publishing Workflow](#interactive-record-publishing-workflow) (preferred) or where you need
+   greater control, run the [Import Records](#import-records) task directly
 
 <!-- pyml disable md028 -->
 > [!CAUTION]
@@ -134,22 +113,22 @@ To preview new or edited records before importing them:
 
 1. copy record configurations as JSON files to the `import/` directory
 2. run the `preview-records` [Development Task](/docs/dev.md#development-tasks) and select which records to preview
-3. run the [Local development web server](/docs/dev.md#local-development-web-server) to records as items
+3. run the [Local development web server](/docs/dev.md#local-development-web-server) to view records as items
 
-To view [Administration Metadata](/docs/libraries.md#record-administrative-metadata) for a record:
+To view [Administration Metadata](/docs/libraries.md#record-administrative-metadata) for a record at the command line:
 
 1. run the `admin-record` [Development Task](/docs/dev.md#development-tasks)
 
 The `preview-records` task will:
 
-- parse and validate `import/*.json` files (ignoring subfolders) as [Records](/docs/data-model.md#records)
+- parse and validate `import/*.json` files (ignoring subfolders) as [Records](/docs/models.md#records)
 - prompt interactively for which records to preview
-- export selected records using the [HTML resource exporter](/docs/exporters.md#html-resource-exporter)
+- export selected records using the [Catalogue Item HTML](/docs/outputs.md#catalogue-item-output) Output
 
 > [!NOTE]
-> XML and JSON versions of items are not available in previews.
+> XML and JSON versions of items and related items are not available in previews.
 >
-> Related items are not available in previews. Links to a generic 'x' item will be used as a placeholder.
+> Links to a generic 'x' item will be used as a placeholder for other items.
 
 The `admin-record` task will:
 
@@ -182,11 +161,11 @@ Semi-automated workflows with interactive prompts for required information are a
 
 To publish records to the testing catalogue:
 
-1. ensure a suitable GitLab issue exists to track publishing the records
+1. ensure a suitable GitLab issue exists to track publishing the records [1]
 1. ensure JSON configurations for these records exist in the `import/` directory (see [Create Records](#create-records))
 1. run the `workflow-testing` [Development Task](/docs/dev.md#development-tasks)
-1. repeat this process (using the [`select-records`](#update-records) task to get the now existing records) until the
-   record author is happy to publish live (by approving the merge request for the related changeset)
+1. repeat this process (using the [`select-records`](#update-records) task to get the now existing records for editing)
+   until the record author is happy to publish live (by approving the merge request for the related changeset)
 
 > [!NOTE]
 > This workflow will comment on GitLab tracking issue when creating the changeset. The Lantern GitLab bot user MUST
@@ -204,12 +183,7 @@ The `workflow-testing` task calls and coordinates other tasks to:
 1. verify committed records in the testing site (via the [`verify-records`](#verify-static-site) task)
 1. post a comment listing the records changed, preview URLs and links to the merge request
 1. if needed, post a comment on the issue with a link to the changeset merge request
-
-> [!NOTE]
-> As a precaution, the `workflow-testing` [Development Task](/docs/dev.md#development-tasks) will not run if:
->
-> - the S3 bucket for the live site is selected
-> - if configured, the [Trusted Publishing](/docs/exporters.md#trusted-publishing) host is unavailable
+1. save the verification report as a timestamped JSON file in the `workflow_results/testing` directory
 
 [1]
 
@@ -226,9 +200,7 @@ To publish records to the live catalogue:
 1. ensure records have been published via the `workflow-testing` [Development Task](/docs/dev.md#development-tasks)
 1. ensure the record author has approved the merge request for the changeset to be published
 1. remove the draft status for the merge request
-1. switch the `AWS_S3_BUCKET` config option to the production bucket
 1. run the `workflow-live` [Development Task](/docs/dev.md#development-tasks)
-1. switch the `AWS_S3_BUCKET` config option back to the integration bucket
 
 The `workflow-live` task calls and coordinates other tasks to:
 
@@ -238,13 +210,7 @@ The `workflow-live` task calls and coordinates other tasks to:
 1. publish changeset records to the live site (via the [`build-records`](#build-static-site) task)
 1. verify changeset records in the live site (via the [`verify-records`](#verify-static-site) task)
 1. post a comment listing the item and alias URLs for published records in the changeset issue
-
-> [!NOTE]
-> As a precaution, the `workflow-live` [Development Task](/docs/dev.md#development-tasks) will not run if:
->
-> - the merge request is either a draft or not approved
-> - the S3 bucket for the testing site is selected
-> - if configured, the [Trusted Publishing](/docs/exporters.md#trusted-publishing) host is unavailable
+1. save the verification report as a timestamped JSON file in the `workflow_results/live` directory
 
 ## Non-interactive record publishing workflow
 
@@ -264,22 +230,21 @@ The workflow:
   processed (changes are determined by comparing a SHA1 hash of the record content against the remote records store)
 - creates a new branch and associated merge request in the remote records store if needed
 - commits records to this branch
-- calls the [Records](/docs/exporters.md#records-resource-exporter) exporter (only [1]) and publishes to S3 and secure
-  hosting (for public and trusted content respectively)
+- calls non-global [Outputs](/docs/architecture.md#outputs) [1] only and publishes untrusted and trusted content
 - if set, calls a [Webhook](#non-interactive-record-publishing-workflow---webhook) with workflow output
 
 > [!TIP]
-> The configured branch CAN be periodically squashed and merged to the default branch to prevent drift (e.g. nightly),
-> but does not provide this functionality.
+> The workflow will automatically recreate the branch and merge request if needed.
 >
-> The workflow will automatically recreate the branch and merge request as needed.
+> The configured branch CAN be periodically squashed and merged to the default branch to prevent drift (e.g. nightly),
+> but this workflow does not provide that functionality.
 
-[1] Other exporters are not called because:
+[1] Global outputs are not called because:
 
-- the [Site Index Exporter](/docs/exporters.md#site-index-exporter)) for example only includes records passed to it,
-  which would be limited to records managed by the workflow, clobbering outputs including other (all) expected records
-  and giving incomplete results
-- calling exporters such as the [Site Pages Exporter](/docs/exporters.md#site-pages-exporter) is unnecessarily, given
+- the [Site Index](/docs/outputs.md#site-index-output)) Output for example only includes records from the Store passed
+  to it, which would be limited to records managed by the workflow, clobbering outputs including other (all) expected
+  records and giving incomplete results
+- calling exporters such as the [Site Pages Exporter](/docs/outputs.md#site-resources-output) is unnecessary, given
   they are not sensitive to record changes
 
 ### Non-interactive record publishing workflow - bootstrapping
@@ -289,7 +254,7 @@ Perform these actions manually to set up the workflow for your application:
 1. export a set of JSON encoded record files to a directory
 2. import and publish these records using the [Interactive Workflow](#interactive-record-publishing-workflow):
    - commit to the `main` branch
-   - this adds new records to global exporters (e.g. the [Site Index Exporter](/docs/exporters.md#site-index-exporter))
+   - this adds new records to global exporters (e.g. the [Site Index](/docs/outputs.md#site-index-output) Output)
    - this adds new records under any parent collections or other container resources
 3. then follow the routine usage instructions for ongoing updates
 
@@ -308,13 +273,15 @@ Configure your application to perform these actions as frequently as needed:
 [1] Example usage script:
 
 > [!NOTE]
-> Change `PROJECT` and `PROJECT_SLUG` to relevant values.
+> Change `SITE`, `PROJECT` and `PROJECT_SLUG` to relevant values.
 
 ```shell
 #!/usr/bin/env bash
 set -e -u -o pipefail
 
 PUB_CAT_PATH="/data/magic/projects/PROJECT-SLUG/prod/exports/records"
+# 'live' or 'testing'
+PUB_CAT_SITE="live"
 PUB_CAT_BRANCH="auto-PROJECT_SLUG"
 # 'Automated publishing changeset: ' will always be prefixed to the MR title
 PUB_CAT_MR_TITLE="Updates from PROJECT"
@@ -328,6 +295,7 @@ PUB_CAT_WEBHOOK="https://example.com/webhook"
 
 /data/magic/projects/lantern/prod/tasks/pub-cat \
 --path "$PUB_CAT_PATH" \
+--site "$PUB_CAT_SITE" \
 --changeset-base "$PUB_CAT_BRANCH" \
 --changeset-title "$PUB_CAT_MR_TITLE" \
 --changeset-message "$PUB_CAT_MR_MESSAGE" \
@@ -375,6 +343,7 @@ E.g. for a resource ID `123`, an invalidation is made for `/records/123/*` and `
 
 To replace a thumbnail for an existing resource:
 
+- overwrite the thumbnail file using the AWS CLI [1]
 - run the `thumbnail-invalidate` [Development Task](/docs/dev.md#development-tasks)
 
 > [!TIP]
@@ -390,6 +359,12 @@ E.g. for a resource ID `123`, an invalidation is made for `/add-catalogue/0.0.0/
 
 > [!NOTE]
 > The CloudFront distribution ID is read from [Infrastructure as Code](/docs/infrastructure.md#infrastructure-as-code).
+
+[1]
+
+```text
+$ aws s3 cp ./overview.png s3://cdn.web.bas.ac.uk/add-catalogue/0.0.0/img/items/{file_identifier}/
+```
 
 ### Replacing record artefacts
 
@@ -422,7 +397,7 @@ The `select-records` task will:
 
 The `restrict-records` task will:
 
-- parse and validate `import/*.json` files (ignoring subfolders) as [Records](/docs/data-model.md#records)
+- parse and validate `import/*.json` files (ignoring subfolders) as [Records](/docs/models.md#records)
 - prompt interactively for which records to update
 - prompt interactively for which metadata and resource permissions to set
 - update the [Administrative Metadata](/docs/libraries.md#record-administrative-metadata) in selected records with the
@@ -477,7 +452,7 @@ The `zap-records` task (if used) will:
 
 The `import-records` task will:
 
-- parse and validate `import/*.json` files (ignoring subfolders) as [Records](/docs/data-model.md#records)
+- parse and validate `import/*.json` files (ignoring subfolders) as [Records](/docs/models.md#records)
 - prompt interactively to confirm the GitLab store is configured with the correct branch
 - prompt interactively for commit information:
   - a changeset title and description (which will open your configured `$EDITOR`)
@@ -488,27 +463,22 @@ The `import-records` task will:
 
 ## Build static site
 
-To build the [Static Site](/docs/architecture.md#static-site):
+To build the static site for the [BAS Data Catalogue](/docs/architecture.md#bas-data-catalogue):
 
 1. set the options in `tasks/records_build.py` for whether to export the site locally and/or publish remotely
 1. run the `build-records` [Development Task](/docs/dev.md#development-tasks)
 
-> [!IMPORTANT]
-> If publishing remotely, check the `AWS_S3_BUCKET` config option is set to the intended bucket name.
-
 The `build-records` task will:
 
 - load some or all or records from a [GitLab Store](/docs/stores.md#gitlab-store) into a
-  [Site Exporter](/docs/exporters.md#site-exporter)
-- if the export option is enabled, output the static site to a local path
-- if the publish option is enabled:
-  - upload public static site content to a remote S3 bucket
-  - upload [Trusted Content](/docs/exporters.md#trusted-publishing) to the
-    [BAS Operations Data Store 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/ops-data-store) hosting server
+  [Site](/docs/architecture.md#sites)
+- if the `target` option is 'local', export the site to a local path
+- if the `target` option is 'remote', export the site to the relevant BAS Catalogue environment set by the `env` option
 
 ## Verify static site
 
-To [Verify](/docs/monitoring.md#site-verification) the [Static Site](/docs/architecture.md#static-site):
+To [Verify](/docs/monitoring.md#site-verification) for the
+[BAS Data Catalogue](/docs/architecture.md#bas-data-catalogue):
 
 1. set the options in `tasks/records_verify.py` for the site to check (`base_url`)
 1. run the `verify-records` [Development Task](/docs/dev.md#development-tasks)
@@ -516,14 +486,16 @@ To [Verify](/docs/monitoring.md#site-verification) the [Static Site](/docs/archi
 The `verify-records` task will:
 
 - load some or all or records from a [GitLab Store](/docs/stores.md#gitlab-store) into a
-  [Verification Exporter](/docs/exporters.md#verification-exporter)
+  [Verification](/docs/monitoring.md#site-verification) instance
 - run [Verification checks](/docs/monitoring.md#verification-checks) against the generated static site
-- compile and export/publish a [Verification report](/docs/monitoring.md#verification-report)
+- compile a [Verification report](/docs/monitoring.md#verification-report)
+- if the `target` option is 'local', export the report to a local path
+- if the `target` option is 'remote', export the report to the relevant BAS Catalogue environment set by the `env` option
 
 ## Apply record details to ArcGIS item
 
 To update an ArcGIS Online item with supported properties from a catalogue record (via an
-[ArcGOS (Catalogue) Item](/docs/data-model.md#arcgis-items)):
+[ArcGOS (Catalogue) Item](/docs/models.md#arcgis-items)):
 
 1. run the `esri-item` [Development Task](/docs/dev.md#development-tasks)
 

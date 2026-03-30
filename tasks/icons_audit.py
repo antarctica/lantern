@@ -1,3 +1,5 @@
+# Crude check of Font Awesome icon classes used in static site templates
+
 from pathlib import Path
 
 from tasks.css_audit import _get_template_classes

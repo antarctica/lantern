@@ -1,3 +1,5 @@
+# Crude check of CSS classes used in static site templates
+
 import re
 from pathlib import Path
 

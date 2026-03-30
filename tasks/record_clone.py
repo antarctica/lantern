@@ -1,3 +1,5 @@
+# Create a new record based on an existing record
+
 import logging
 from argparse import ArgumentParser
 from copy import deepcopy

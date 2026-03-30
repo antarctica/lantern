@@ -369,8 +369,8 @@ class ExportMeta(SiteMeta):
         Create an Export Metadata instance from an app Config instance, optional GitLab Store and additional properties.
 
         In addition to the properties provided by parent `from_config_store()`, the config instance provides values for:
-        - parallel_jobs: from PARALLEL_JOBS
-        - admin_meta_keys: from ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE and ADMIN_METADATA_SIGNING_KEY_PUBLIC
+        - parallel_jobs
+        - admin_meta_keys
         """
         site_kwargs = {k: v for k, v in kwargs.items() if k in {f.name for f in fields(SiteMeta)}}
         super_meta = asdict(SiteMeta.from_config_store(config, store, **site_kwargs))

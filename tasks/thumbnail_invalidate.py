@@ -1,3 +1,5 @@
+# Invalidate thumbnails for selected records in CloudFront cache for BAS CDN
+
 import subprocess
 from argparse import ArgumentParser
 from pathlib import Path

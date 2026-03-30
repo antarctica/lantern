@@ -685,6 +685,27 @@
         }
       }
     },
+    "/guides/map-purchasing": {
+      "get": {
+        "tags": ["guides"],
+        "operationId": "getMapPurchasingIndex",
+        "x-scalar-stability": "stable",
+        "summary": "Published maps purchasing information",
+        "description": "Get guide for how to purchase BAS published maps.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/htmlContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/guides/api/index.html": {
       "get": {
         "tags": ["guides"],

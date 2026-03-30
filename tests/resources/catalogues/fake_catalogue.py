@@ -74,12 +74,12 @@ class FakeCatalogue(CatalogueBase):
 
     @time_task(label="Generate site")
     def export(self, identifiers: set[str] | None = None) -> None:
-        """Export generated site content locally."""
+        """Generate and export site content to hosting."""
         self._exporter.export(self._generate(identifiers))
 
     @time_task(label="Verify site")
     def verify(self, identifiers: set[str] | None = None) -> None:
-        """Verify catalogue site contents."""
+        """Verify site contents (optionally for selected records)."""
         verify = Verification(
             logger=self._logger,
             meta=self._meta,

@@ -37,13 +37,14 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Map ordering guide
 * Terraform format linting in CI
 * `site-invalidate`, `thumbnail-invalidate`, `invalidate-records` development tasks for invalidating CloudFront cache
-* new `lantern.site` class, replacing `lantern.exporters.site.SiteExporter` and `lantern.exporters.records`
-* new `lantern.verification` class, replacing `lantern.exporters.verification.VerificationExporter`
-* new `lantern.output` classes created from previous exporters (site index/pages/api/health/resources, records WAF,
+* `lantern.site` class, replacing `lantern.exporters.site.SiteExporter` and `lantern.exporters.records`
+* `lantern.verification` class, replacing `lantern.exporters.verification.VerificationExporter`
+* `lantern.output` classes created from previous exporters (site index/pages/api/health/resources, records WAF,
   public website search items, ISO JSON/XML/HTML records)
-* new `lantern.export` classes extracted from previous exporters and utils (local/Rsync/S3)
-* new `SiteContent` and `SiteRedirect` site models for passing site content between Output and Exporter classes
+* `lantern.export` classes extracted from previous exporters and utils (local/Rsync/S3)
+* `SiteContent` and `SiteRedirect` site models for passing site content between Output and Exporter classes
 * `Catalogue` high level coordinating class combining Store, Site and Exporter classes
+* CloudFront invalidation support added to live records workflow
 
 ### Fixed
 
@@ -59,7 +60,11 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Updating documentation diagrams
 * Exporter classes refactored into Output classes, refactored Exporters and top-level Site and Verification classes
 * Refactoring task timing decorator from development tasks into utils with tests
+* Test static site fixtures changed to session scope for better performance
 * Refactoring development tasks to use catalogue classes and associated changes
+* Improving documentation and updating diagrams to new and refactored concepts and classes
+* Renaming `footer_nav_items` to `secondary_nav_items` for consistency and documenting
+* Documentation updated
 
 ## [0.5.0] - 2026-02-27 [!BREAKING]
 

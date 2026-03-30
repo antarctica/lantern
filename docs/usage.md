@@ -179,7 +179,7 @@ The `workflow-testing` task calls and coordinates other tasks to:
    - ensure the selected issue URL is for publishing the record(s), rather than an issue for authoring [1]
 1. commit new and/or updated records (via the [`import-records`](#import-records) task) to the changeset branch
 1. if needed, create a merge request for the changeset branch, adding the record author as a reviewer
-1. publish committed records to the testing site (via the [`build-records`](#build-static-site) task)
+1. export committed records to the testing site (via the [`build-records`](#build-static-site) task)
 1. verify committed records in the testing site (via the [`verify-records`](#verify-static-site) task)
 1. post a comment listing the records changed, preview URLs and links to the merge request
 1. if needed, post a comment on the issue with a link to the changeset merge request
@@ -207,7 +207,8 @@ The `workflow-live` task calls and coordinates other tasks to:
 1. prompt for the changeset (merge request) to confirm (merge)
    1. the workflow will check the merge request is not a draft and has approval
 1. merge the changeset into main
-1. publish changeset records to the live site (via the [`build-records`](#build-static-site) task)
+1. export changeset records to the live site (via the [`build-records`](#build-static-site) task)
+1. invalidate changeset records in the live site (via the [`invalidate-records`](#update-records) task)
 1. verify changeset records in the live site (via the [`verify-records`](#verify-static-site) task)
 1. post a comment listing the item and alias URLs for published records in the changeset issue
 1. save the verification report as a timestamped JSON file in the `workflow_results/live` directory

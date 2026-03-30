@@ -95,7 +95,7 @@ class ContactRoleCode(Enum):
 
 class ConstraintRestrictionCode(Enum):
     """
-    Constraint Restriction code list.
+    Constraint Restriction code list (restricted selection).
 
     Schema definition: restriction_code [1]
     ISO element: MD_RestrictionCode [2]
@@ -111,7 +111,7 @@ class ConstraintRestrictionCode(Enum):
 
 class ConstraintTypeCode(Enum):
     """
-    Constraint Type meta code list.
+    Constraint Type meta code list (restricted selection).
 
     Schema definition: constraint_type [1]
     ISO element: N/A [2]
@@ -155,7 +155,7 @@ class DateTypeCode(Enum):
 
 class DatePrecisionCode(Enum):
     """
-    Date Precision meta code list.
+    Date Precision meta code list (local).
 
     Precision of the date value to workaround Python minimum date precision of day (which may not be known).
 

@@ -1,8 +1,7 @@
 # Lantern - Monitoring
 
-> [!WARNING]
-> This documentation is outdated and does not reflect changes made to split exporters into outputs, a top-level site
-> and verification class and more focused exporters.
+> [!NOTE]
+> Parts of this page are specific to the [BAS Data Catalogue](/docs/architecture.md#bas-data-catalogue).
 
 ## Monitoring configuration
 
@@ -20,8 +19,8 @@ See the [Config](/docs/config.md#config-options) docs for how to set these confi
 
 ### Heartbeat
 
-A static text file is available as part of the [Static Site](/docs/architecture.md#static-site) for use as a basic,
-binary, health monitoring endpoint at: `/static/txt/heartbeat.txt`.
+A static text file is available within a [Site](/docs/architecture.md#sites) as a basic, binary, health monitoring
+endpoint at: `/static/txt/heartbeat.txt`.
 
 This endpoint MAY be used by monitoring tools and/or load balancers to determine if the static site is available.
 
@@ -29,7 +28,7 @@ A non-200 status code MUST be considered as the static site being unavailable.
 
 ### Health check endpoint
 
-A static JSON health check is available as part of the [Static Site](/docs/architecture.md#static-site), structured as
+A static JSON health check is available within a [Site](/docs/architecture.md#sites), structured as
 per the [Draft API Health Check](https://datatracker.ietf.org/doc/html/draft-inadarei-api-health-check) specification,
 at: `/-/health`.
 
@@ -56,7 +55,7 @@ Alerts are sent via email and to the `#dev` channel in the MAGIC Teams workspace
 
 A Sentry [Uptime Check](https://docs.sentry.io/product/uptime-monitoring/) checks the
 [BAS Map Catalogue](https://data.bas.ac.uk/collections/bas-maps) collection returns a 2xx response in the production
-environment every 5 minutes, automatically following the [Item Alias](/docs/data-model.md#item-aliases) redirect.
+environment every 5 minutes, automatically following the [Item Alias](/docs/models.md#item-aliases) redirect.
 
 ### User feedback
 
@@ -68,16 +67,21 @@ a custom [widget](/docs/site.md#user-feedback).
 
 ## Plausible
 
-[Plausible](https://plausible.io) is used for recording web analytics in the frontend [Static Site](/docs/site.md).
+[Plausible](https://plausible.io) is used for recording web analytics in the
+[BAS Data Catalogue](/docs/architecture.md#bas-data-catalogue) static site.
 
 - [Plausible Dashboard 🔒](/docs/infrastructure.md#plausible)
 
 ## Site verification
 
-A series of checks can be run to verify the contents of a generated site against expected values.
+`lantern.verification.Verification`
 
-[Verification checks](#verification-checks) are run and compiled into a [Verification report](#verification-report) by
-the [Verification Exporter](/docs/exporters.md#verification-exporter).
+A series of checks can be run to verify the contents of a [Catalogue](/docs/architecture.md#catalogues) site against
+expected values taken from source Records.
+
+[Verification checks](#verification-checks) are run in parallel and compiled into a
+[Verification report](#verification-report) as [Site Content Items](/docs/models.md#static-site-content) within a
+[Site](/docs/architecture.md#sites).
 
 ### Verification checks
 
@@ -85,9 +89,9 @@ Checks are run for:
 
 - site 404 handler (by requesting a page known not to exist)
 - site pages (legal policy pages, formatting guide, etc.)
-- [Record](/docs/data-model.md#records) pages (JSON, XML, HTML)
-- [Item](/docs/data-model.md#items) pages (HTML)
-- [Item Alias](/docs/data-model.md#item-aliases) redirects
+- [Record](/docs/models.md#records) pages (JSON, XML, HTML)
+- [Item](/docs/models.md#items) pages (HTML)
+- [Item Alias](/docs/models.md#item-aliases) redirects
 - Item DOI redirects
 - Item distribution options (as links on Item pages)
 - File distribution options (with special support for SharePoint and NORA hosted files)
@@ -96,7 +100,7 @@ Checks are run for:
 Checks are not run for:
 
 - SAN reference distribution options (as there is no allowed access method)
-- [Trusted Publishing](/docs/exporters.md#trusted-publishing) content
+- [Trusted Publishing](/docs/architecture.md#trusted-publishing) content
 
 For Record and Item checks, all records in the [Store](/docs/architecture.md) are checked.
 
@@ -147,19 +151,21 @@ See the [Setup](/docs/setup.md#power-automate-san-proxy) docs for more informati
 
 ### Verification report
 
+`lantern.verification.VerificationReport`
+
 The results from [Verification Checks](#verification-checks) are compiled into a JSON and HTML report for manual review
 and/or optional additional processing:
 
 - JSON report: `/-/verification/data.json`
 - HTML report: `/-/verification/index.html`
 
-### Scheduled verification
+### Scheduled verifications
 
 The production environment is automatically verified via a cron job running on the BAS central workstations:
 
 - scope: all items
 - frequency: Wednesdays at 12:15 (local time)
-- results: [data.bas.ac.uk/-/verification/](https://data.bas.ac.uk/-/verification/))
+- results: [data.bas.ac.uk/-/verification/](https://data.bas.ac.uk/-/verification/)
 - logs: `/users/geoweb/cron_logs/lantern/lantern-verify-*.log`
 - log retention: 90 days (enforced monthly)
 - deployment: via [Ansible](/docs/deployment.md#site-verification-script)

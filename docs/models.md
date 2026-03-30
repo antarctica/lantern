@@ -1,46 +1,57 @@
 # Lantern - Data Model
 
-> [!WARNING]
-> This documentation is partially outdated due to changes made to streamline site/export metadata.
+## Overview
+
+![Entities Overview](/docs/img/entities-resources.png)
 
 ## Records
 
 ### Base records
 
+`lantern.lib.metadata_library.models.record.Record`.
+
 Records are a partial representation of the [ISO 19115](https://metadata-standards.data.bas.ac.uk/standards/iso-19115-19139)
-information model implemented as a base data class (`lantern.lib.metadata_library.models.record.Record`). They
-generically describe resources (maps [products], datasets, collections, etc.).
+information model in Python. They generically describe resources (maps/products, datasets, collections, etc.).
 
 <!-- pyml disable md028 -->
+> [!NOTE]
+> Unless stated otherwise, references to 'Records' elsewhere in this documentation refer
+> [Record Revisions](#record-revisions) and not this concept of a record.
+
 > [!NOTE]
 > The base Records model is considered part of the BAS Metadata Library. See the
 > [Library](/docs/libraries.md#bas-metadata-library) docs for more information.
 
-> [!NOTE]
-> Unless stated otherwise, references to 'Records' elsewhere refer to the [`RecordRevision`](#record-revisions) class.
-<!-- pyml enable md028 -->
-
 ### Catalogue records
 
-Catalogue Records represent [Records](#records) within the Data Catalogue specifically as a `Record` subclass
-(`lantern.models.record.Record`). This subclass SHOULD be used for any additional subclasses within the Catalogue.
+`lantern.models.record.Record`
+
+Catalogue Records represent [Records](#records) within the Data Catalogue specifically.
+
+> [!NOTE]
+> Unless stated otherwise, references to 'Records' elsewhere in this documentation refer
+> [Record Revisions](#record-revisions) and not this concept of a record.
 
 Catalogue Records extend the [Base Record](#base-records) class by implementing the Catalogue's
 [Record Requirements](#record-requirements).
 
+> [!NOTE]
+> This subclass SHOULD be used for any additional subclasses within the Catalogue.
+
 ### Record revisions
 
+`lantern.models.record.revision.RecordRevision`
+
 Record Revisions represent [Records](#records) at a particular point in time indicated by a revision identifier.
+
+> [!NOTE]
+> Unless stated otherwise, references to 'Records' elsewhere in this documentation refer to this concept of a record.
 
 Revision identifiers are a local addition and not part of the ISO 19115 information model. Identifiers SHOULD come from
 a version Control system (VCS) such as Git. Identifiers MUST be unique within the history of each Record but MAY be
 shared across multiple Records, to represent a coordinated set of changes for example (i.e. a records  changeset).
 
-Record Revisions are implemented as a [Catalogue Record](#catalogue-records) subclass
-(`lantern.models.record.revision.RecordRevision`) adding a `file_revision` property.
-
-> [!NOTE]
-> Unless stated otherwise, references to 'Records' elsewhere in this documentation refer to the `RecordRevision` class.
+Implemented as a (catalogue) `Record` subclass with an additional top-level `file_revision` property.
 
 ### Record requirements
 
@@ -62,7 +73,6 @@ In addition to [Record Validation](/docs/libraries.md#record-validation), the Da
 
 These requirements are enforced by the `validate()` method in the [Catalogue Record](#catalogue-records) class.
 
-<!-- pyml disable md028 -->
 > [!NOTE]
 > Whilst not required, records without
 > [Administration Metadata](/docs/libraries.md#record-administrative-metadata) will be interpreted as
@@ -100,7 +110,9 @@ configuration for use in a specific context.
 
 ### Item base
 
-The `lantern.models.item.base.ItemBase` Python class contains common properties and methods across all item subclasses.
+`lantern.models.item.base.ItemBase`
+
+A base item contains common properties and methods across all item subclasses.
 
 For example:
 
@@ -111,6 +123,8 @@ For example:
 
 ### Item super-types
 
+`lantern.models.item.catalogue.enums.ItemSuperType`
+
 Item types (set by their underlying Record's `hierarchy_level` property) can be sorted into two broad 'super-types':
 
 - *containers*: for types such as collections and projects that group and organise records
@@ -119,33 +133,29 @@ Item types (set by their underlying Record's `hierarchy_level` property) can be 
 This higher level grouping is useful to simplify and generalise logic in catalogue item tabs and other elements. For
 example, whether to enable the licence tab.
 
-Super-types are defined by the `lantern.models.item.catalogue.enums.ItemSuperType` enum.
-
-The super-type for each item is available via the `Item._super_type` private property (for passing to tabs and elements).
+Implemented as an enumeration available as the `Item._super_type` private property (for use in Item elements and tabs).
 
 ### Item aliases
 
-Items are identified by their Record's UUIDv4 `file_identifier` property, including in URLs for item pages. These
-values are intentionally non-meaningful and due to their length and randomness not memorable. Whilst useful for ensuring
-uniqueness, they are useful when sharing URLs.
+Items are canonically identified by their Record's UUIDv4 `file_identifier` property, including in URLs for item pages.
+These values are intentionally non-meaningful, and due to their length and randomness, not memorable. Whilst useful for
+ensuring uniqueness, they are not useful when referring to items, or providing self-describing URLs.
 
 Item aliases provide a way to create additional URLs for an item with more useful values, such as a slugified title or
 existing codes or shorthand.
 
 Aliases are defined as Record identifiers using the `alias.data.bas.ac.uk` namespace. Values are prefixed by a
 pluralised term related to the Record hierarchy level (e.g. `collections/foo` for a collection record). See the
-[Record requirements](#record-requirements) section for specific requirements.
+[Record requirements](#record-requirements) section for allowed prefixes and other requirements.
 
 > [!CAUTION]
-> The catalogue does not enforce aliases to be unique across records and the behaviour of conflicting aliases is left
+> The catalogue does not enforce aliases to be unique across records, and the behaviour of conflicting aliases is left
 > undefined. Any implicit behaviour MUST NOT be relied upon.
 
 ### Item key value data
 
-The `ItemBase` class includes a `kv` property returning a dictionary of:
-
-- parsed [Key Value](/docs/libraries.md#record-key-value-data)
-- or, an empty dict if no KV value is defined, or is malformed
+The `ItemBase` class includes a `kv` property returning a dictionary of parsed
+[Key Value](/docs/libraries.md#record-key-value-data), or an empty dict if no KV value is defined or is malformed.
 
 ### Item administrative metadata
 
@@ -154,7 +164,7 @@ The `ItemBase` class includes an optional `admin_metadata` property returning:
 - parsed [Administrative Metadata](/docs/libraries.md#record-administrative-metadata)
 - `None` if no admin metadata is defined, or cannot be decrypted and verified
 
-Item properties, prefixed with `admin_` provide access to admin metadata properties, or also return `None`.
+Administration metadata properties are available as `admin_` prefixed Item properties with optional return values.
 
 JSON Web Keys (JWKs) for decrypting JWEs and verifying the signature of JWTs should be configured using the
 `ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE` and `ADMIN_METADATA_SIGNING_KEY_PUBLIC`
@@ -165,12 +175,14 @@ JSON Web Keys (JWKs) for decrypting JWEs and verifying the signature of JWTs sho
 
 ### Item access levels
 
+`lantern.models.item.base.enums.AccessLevel`
+
 Access levels for each item are available via:
 
-- `Item.admin_metadata_access` (who can view a description of the item)
-- `Item.admin_resource_access` (who can access the item itself, if applicable)
+- `Item.admin_metadata_access` Item property (for who can view a description of the item)
+- `Item.admin_resource_access` Item property (for who can access the item itself, if applicable)
 
-Both properties return a `lantern.models.item.base.enums.AccessLevel` enum value, determined by permissions within the
+Both properties return an enumeration value, determined by permissions from
 [Administrative Metadata](#item-administrative-metadata).
 
 Both properties default to `AccessLevel.NONE`. To allow open access, include permissions equivalent to the
@@ -200,8 +212,9 @@ the data tab (if applicable).
 
 ## Catalogue items
 
-Catalogue Items (`lantern.models.item.catalogue.ItemCatalogue`) are tightly coupled to the Data Catalogue and its user
-interface. Features include:
+`lantern.models.item.catalogue.ItemCatalogue`.
+
+Catalogue Items are tightly coupled to the Data Catalogue and its user interface. Features include:
 
 - properties organised under classes for each UI tab (including logic to determine whether a tab should be shown)
 - local enums mapping Record properties to UI values for improved readability
@@ -264,7 +277,7 @@ Intentionally omitted properties (references not normative or exhaustive):
 
 ### Catalogue items supported distribution options
 
-Implemented via classes in `lantern.models.item.catalogue.distributions` for:
+Supported distribution options:
 
 - services:
   - ArcGIS Feature Layer/Service
@@ -286,6 +299,8 @@ Implemented via classes in `lantern.models.item.catalogue.distributions` for:
   - BAS published maps purchasing options
   - BAS SAN references
 
+Implemented via classes in the `lantern.models.item.catalogue.distributions` package.
+
 ## Special catalogue items
 
 To support more complex use-cases `ItemCatalogue` subclasses can be used to implement special handling for items.
@@ -298,51 +313,51 @@ determine which Catalogue Item class or subclass to use.
 
 ### Physical map items
 
+`lantern.models.item.catalogue.special.physical_map.ItemCataloguePhysicalMap`.
+
 Physical maps are represented by a trio of Records, one per side plus a third Record for the overall map itself.
-Aggregations are used to associate the records together with the local 'physicalReverseOf' aggregation association
-(`lantern.lib.metadata_library.models.record.enums.AggregationAssociationCode.PHYSICAL_REVERSE_OF`) and local 'paperMap'
-aggregation initiative (`lantern.lib.metadata_library.models.record.enums.AggregationInitiativeCode.PAPER_MAP`).
+Aggregations are used to associate the records together with the local 'physicalReverseOf' aggregation association [1]
+and local 'paperMap' aggregation initiative [2].
 
-Records for each side processed as typical Catalogue Items. The overall Record is processed by the
-`lantern.models.item.catalogue.special.physical_map.ItemCataloguePhysicalMap` class, distinguished by:
+Records for each side are typical Catalogue Items. The overall Record is special Physical Map subclass, which is used
+automatically when a Record:
 
-- using the local 'paperMapProduct' hierarchy level
-  (`lantern.lib.metadata_library.models.record.enums.HierarchyLevelCode.PAPER_MAP_PRODUCT`)
-- including at least one aggregation for a map side ('isComposedOf' association, 'paperMap' initiative)
+- uses the local 'paperMapProduct' hierarchy level [3]
+- includes at least one aggregation for a map side ('isComposedOf' association, 'paperMap' initiative)
 
-The physical map class includes overloaded versions of some tabs to overload selected properties that should aggregate
-values from each side (for example spatial resolution (scale)).
+This subclass overloads some properties in Catalogue Item tabs to show a common, aggregated, value, or separate values
+per side:
 
-A general convention determines whether a single common value is shown, or multiple values labelled for each side:
-
-- if the values in each side are the same they are ignored and the value from the overall Record is shown
+- if the values in each side are the same, they are ignored and the value from the overall Record is shown
 - if different, values for each side are shown - the value from the overall Record is ignored
 
-## Public website search items
+[1] `lantern.lib.metadata_library.models.record.enums.AggregationAssociationCode.PHYSICAL_REVERSE_OF`
 
-Public website search items (`lantern.models.item.public_website.ItemWebsiteSearch`) are used to include items in the
-[BAS Public Website](https://www.bas.ac.uk) global search. Search items are limited to the properties needed to
-describe an item within these search results. A sync API aggregates these search items across the different catalogues
-used in BAS for harvesting by the Public Website.
+[2] `lantern.lib.metadata_library.models.record.enums.AggregationInitiativeCode.PAPER_MAP`
 
-This sync API defines:
+[3] `lantern.lib.metadata_library.models.record.enums.HierarchyLevelCode.PAPER_MAP_PRODUCT`
 
-- a JSON Schema for the content of these items
-- additional properties required to identify the source system of each item, whether it should be marked as deleted, etc.
+## BAS public website search items
 
-> [!TIP]
-> See the [Public Website Search Exporter](/docs/exporters.md#public-website-search-exporter) for more information
-> about the sync API.
+`lantern.models.item.public_website.ItemWebsiteSearch`
 
-This schema and requirements are implicitly implemented within this class. Other features include:
+BAS public website search items represent [Items](#items) within the search index of the
+[BAS Public Website](https://www.bas.ac.uk) for use with the
+[BAS Public Website Search](/docs/outputs.md#bas-public-website-search-output) Output.
 
-- selecting the most relevant date for the item (revision > publication > creation)
-- selecting the most suitable description for the item (purpose > abstract)
-- determining whether an item should be marked as removed/deleted (based item maintenance info)
+Consists of limited properties needed to render a search result for an Item. Includes logic to:
+
+- select the most relevant date for the item (revision > publication > creation)
+- select the most suitable description for the item (purpose > abstract)
+- determining whether an item should be marked as removed/deleted (based on resource maintenance information)
 
 ## ArcGIS items
 
-ArcGIS items (`lantern.models.item.arcgis.ItemArcGIS`) represent [Items](#items) as ArcGIS content. Features include:
+`lantern.models.item.arcgis.ItemArcGIS`
+
+ArcGIS items represent [Items](#items) as ArcGIS content.
+
+sFeatures include:
 
 - reflecting Item properties, such as summary, description, access permissions and licence constraints, etc. in ArcGIS
   content items consistently
@@ -355,10 +370,12 @@ Templates, stored in `src/lantern/resources/templates/_arcgis`, are used to:
 - format supported licences to look consistent with [Catalogue Items](#catalogue-items)
 
 ArcGIS items require a [Record](#records) and an ArcGIS content item, represented by the
-[`lantern.lib.arcgis.gis.dataclasses.Item`](/docs/libraries.md#arcgis-items) class, to set ArcGIS specific
-properties, such the ArcGIS content `type` needed to represent Items as valid ArcGIS content items (via `.item()`).
+`lantern.lib.arcgis.gis.dataclasses.Item` class, to set ArcGIS specific properties such the ArcGIS content `type`,
+needed to represent Items as valid ArcGIS content items (via an `.item()` property).
 
-The sharing level of ArcGIS items is set based on the [Item Access Level](#item-access-levels).
+### ArcGIS items sharing levels
+
+The sharing level of an ArcGIS item is set based on the [Item Access Level](#item-access-levels).
 
 > [!WARNING]
 > This logic does not take account of group based sharing options. Use with caution if this applies to an item.
@@ -391,14 +408,16 @@ child-parent relationship.
 
 ## Verification Jobs
 
+`lantern.models.verification.jobs.VerificationJob`
+
 Verification jobs represent individual checks run as part of [Site Verification](/docs/monitoring.md#site-verification).
 
-The `lantern.models.verification.jobs.VerificationJob` Python data class implements a structure for each job/check.
-
 A typed dict, `lantern.models.verification.types.VerificationContext`, defines available keys for the context object
-used by each job. Various enumerations are used to define values for check types and job status/results.
+within each job. Various enumerations are used to define values for check types and job status/results.
 
 ## Static site metadata
+
+`lantern.models.site.SiteMeta`
 
 Site metadata represents site-wide information and page specific context, including:
 
@@ -408,14 +427,55 @@ Site metadata represents site-wide information and page specific context, includ
 - [Schema.org](https://schema.org) metadata string
   - which can be constructed via the `lantern.models.site.SchemaOrgMeta` class
 
-The `lantern.models.site.SiteMeta` Python data class implements this concept.
-
 ## Export metadata
 
-Exporter metadata is a superset of [Site metadata](#static-site-metadata) including additional properties without
-passing [Config](/docs/config.md) instances to exporters. This includes:
+`lantern.models.site.ExportMeta`
 
-- the export path
-- keys for accessing [Administrative Metadata](#item-administrative-metadata) .
+Exporter metadata inherits from and extends [Site metadata](#static-site-metadata) with additional properties for use
+by [Outputs](/docs/architecture.md#outputs) and [Exporters](/docs/architecture.md#exporters), including:
 
-The `lantern.models.site.ExportMeta` Python data class implements this concept, inheriting from `SiteMeta`.
+- keys for accessing [Administrative Metadata](#item-administrative-metadata)
+- whether to use parallel processing for some tasks
+- whether a [Trusted Publishing](/docs/architecture.md#trusted-publishing) context applies
+
+## Static site content
+
+`lantern.models.site.SiteContent`
+
+Static site content represent pages or other files within a [Site](/docs/architecture.md#site) generated by
+[Outputs](/docs/architecture.md#outputs) for use by [Exporters](/docs/architecture.md#exporters).
+
+Content items wrap a text or binary value with additional metadata including:
+
+- the relative path for the file within the static site
+- its media type and any optional profiles
+- optionally, [Content Metadata](#static-site-content-metadata)
+- optionally, a redirect target (the URL the item should redirect to)
+
+> [!TIP]
+> Where using a redirect, consider using a [Site Redirect](#static-site-redirects) instead.
+
+### Static site content metadata
+
+Site content items can optionally include a set of key-value pairs (as a dict).
+
+These values MAY have a functional use, such as for determining outdated content, and/or for troubleshooting.
+
+> [!NOTE]
+> [Exporters](/docs/architecture.md#exporters) may not support content metadata where the target storage system does
+> not support it.
+
+### Static site redirects
+
+`lantern.models.site.SiteRedirect`
+
+Specialised form of [Static Site Content](#static-site-content) representing redirects.
+
+Auto-generates a minimal HTML page including `lantern.models.site.SiteRedirect` tag as a content value.
+
+### Static site page meta
+
+`lantern.models.site.SitePageMeta`
+
+Used by [Static Site Pages](/docs/site.md#site-pages) to set information needed for
+[HTML Metadata](/docs/site.md#html-metadata) and [Item Previews](/docs/site.md#item-sharing-previews).

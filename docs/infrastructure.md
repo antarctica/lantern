@@ -1,5 +1,8 @@
 # Lantern - Infrastructure
 
+> [!NOTE]
+> This page is specific to the [BAS Data Catalogue](/docs/architecture.md#bas-data-catalogue).
+
 ## Overview
 
 This diagram shows this project's infrastructure components:
@@ -47,10 +50,10 @@ Endpoints:
 - development: [localhost:9000](http://localhost:9000/)
 - staging (testing): [data-testing.data.bas.ac.uk](https://data-testing.data.bas.ac.uk/), composed of:
   - [lantern-testing.data.bas.ac.uk](https://lantern-testing.data.bas.ac.uk) for public content
-  - BAS Operations Data Store for [Trusted Publishing](/docs/exporters.md#trusted-publishing)
+  - BAS Operations Data Store for [Trusted Publishing](/docs/architecture.md#trusted-publishing)
 - production (live): [data.bas.ac.uk](https://data.bas.ac.uk/), composed of:
   - [lantern.data.bas.ac.uk](https://lantern.data.bas.ac.uk) for public content
-  - BAS Operations Data Store for [Trusted Publishing](/docs/exporters.md#trusted-publishing)
+  - BAS Operations Data Store for [Trusted Publishing](/docs/architecture.md#trusted-publishing)
 
 The testing and live environments share their endpoints with the legacy Discovery Metadata System (DMS), via
 reverse proxying. The BAS HAProxy load balancer proxies applicable requests to either:

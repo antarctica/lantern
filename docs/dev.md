@@ -1,9 +1,5 @@
 # Lantern - Development
 
-> [!WARNING]
-> This documentation is outdated and does not reflect changes made to split exporters into outputs, a top-level site
-> and verification class and more focused exporters.
-
 ## Local development environment
 
 Requirements:
@@ -32,7 +28,7 @@ Setup:
 
 ### Local development publishing
 
-To run [Publishing Workflows](/docs/usage.md) locally:
+To run BAS Data Catalogue [Publishing Workflows](/docs/usage.md) locally:
 
 1. manually create a named AWS IAM user (`lantern-$USER` e.g. `lantern-conwat`) and add to the `lantern-local-dev`
    group to manage content in [AWS S3 Content Buckets](/docs/infrastructure.md#exporters)
@@ -40,15 +36,12 @@ To run [Publishing Workflows](/docs/usage.md) locally:
    [Personal Access Token 🔒](https://gitlab.data.bas.ac.uk/-/profile/personal_access_tokens):
    - token name: `lantern-conwat`
    - scopes: *api*
-3. for [Trusted Publishing](/docs/exporters.md#trusted-publishing):
+3. for [Trusted Publishing](/docs/architecture.md#trusted-publishing):
    - ensure you can access the catalogue directory within the Ops Data Store web root
    - if needed, create an SSH key and add the public key to the relevant remote authorised keys file
    - if needed, configure SSH to access the relevant server with the relevant credentials automatically [1]
+   - if needed, set the umask for this user to `0002` to allow group write permissions on POSIX filesystems
 4. set the relevant [Config](/docs/config.md) options in your local `.env` file
-
-> [!NOTE]
-> This user MUST have a `0002` umask, as rsync is configured not to set permissions to avoid limitations with group
-> write permissions on POSIX filesystems.
 
 [1] E.g. in `~/.ssh/config`:
 
@@ -103,9 +96,9 @@ Reset:
 
 ### Local development web server
 
-Part of [Local Development Stack](#local-development-stack).
+Part of [Local Development Stack](#local-development-stack) for the BAS Data Catalogue.
 
-For simulating secure content hosting for [Trusted Publishing](/docs/exporters.md#trusted-publishing).
+For simulating secure content hosting for [Trusted Publishing](/docs/architecture.md#trusted-publishing).
 
 Set relevant [Config Options](/docs/config.md) in `.env` file.
 
@@ -114,7 +107,7 @@ Once the [Local Stack](#local-development-stack) is up, visit
 
 ### Local development load balancer
 
-Part of [Local Development Stack](#local-development-stack).
+Part of [Local Development Stack](#local-development-stack) for the BAS Data Catalogue.
 
 For simulating reverse proxying similar to the BAS HAProxy Load Balancer.
 
@@ -267,7 +260,7 @@ Agree the use of new types:
 
 1. if types are not members of the ISO 19115 `MD_ScopeCode` code list, create and agree a proposal to add locally in the
    [BAS Metadata Standards 🛡️](https://gitlab.data.bas.ac.uk/uk-pdc/metadata-infrastructure/metadata-standards) project
-2. revise requirement 03 in the MAGIC Discovery Profile and map to a [Super Type](/docs/data-model.md#item-super-types)
+2. revise requirement 03 in the MAGIC Discovery Profile and map to a [Super Type](/docs/models.md#item-super-types)
    via a proposal in the [MAGIC Data Management 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/data-management) project
 
 Update record schemas in the [BAS Metadata Library](https://github.com/antarctica/metadata-library) to allow the new
@@ -282,15 +275,15 @@ Within this project, for each new item type:
 - if a new local level, update the `lantern.lib.metadata_library.models.record.enums.HierarchyLevelCode` enum
 - update the `lantern.models.item.base.enums.ResourceTypeLabel` enum to set a formatted value/label
 - update the `lantern.models.item.catalogue.enums.ResourceTypeIcon` enum to set an accompanying icon
-- if the new type is a 'container' [Super Type](/docs/data-model.md#item-super-types):
+- if the new type is a 'container' [Super Type](/docs/models.md#item-super-types):
   - add the `HierarchyLevelCode` member to the `lantern.models.item.catalogue.const.CONTAINER_SUPER_TYPES` list
   - update `tests.lantern_tests.models.item.catalogue.test_item_catalogue.TestItemCatalogue.test_super_type`
 - if the new type is included in citations:
   - update the `lantern.lib.metadata_library.models.record.presets.citation.CitationHierarchyLevelCode` enum
   - update `tests.lib_tests.metadata_library.models.record.presets.test_citation.TestMakeMagicCitation.test_citation`
-- if the new type introduces a new [Item Alias Prefix](/docs/data-model.md#item-aliases):
+- if the new type introduces a new [Item Alias Prefix](/docs/models.md#item-aliases):
   - update the `prefixes` mapping in `lantern.models.record.record.Record._validate_aliases()` to set allowed aliases
-  - update the allowed prefixes table in the [Record requirements](/docs/data-model.md#record-requirements) docs
+  - update the allowed prefixes table in the [Record requirements](/docs/models.md#record-requirements) docs
   - add new paths for prefixes in the [OpenAPI Definition](/docs/site.md#openapi-definition)
   - update static site endpoints in [Reverse Proxying](/docs/setup.md#reverse-proxying) and `resources/dev/haproxy` to
     include new prefixes, and request updating the BAS Load Balancer config to match
@@ -309,7 +302,7 @@ Within this project, for each new item type:
 > This section is Work in Progress (WIP) and may not be complete/accurate.
 
 1. if needed, [Support New Record Properties](/docs/libraries.md#adding-new-record-properties)
-2. if needed, update [Item](/docs/data-model.md#items) classes to process new and/or existing properties
+2. if needed, update [Item](/docs/models.md#items) classes to process new and/or existing properties
    - existing properties may need updating such as `ItemBase.kv` handling
 3. add new properties to the relevant item tab class in `lantern.models.item.catalogue.tabs`
    - work backwards to include additional Record properties in the main `lantern.models.item.catalogue` class
@@ -325,9 +318,9 @@ Within this project, for each new item type:
    - Item templates (static HTML tests and Playwright if needed)
 6. update any relevant record authoring guides to explain how new properties are handled by the Catalogue
 7. if a property is required for all items:
-   - update the [Record Requirements](/docs/data-model.md#record-requirements) documentation
+   - update the [Record Requirements](/docs/models.md#record-requirements) documentation
    - in future this may include updating a corresponding JSON Schema too
-8. amend list of unsupported properties in `/docs/data-model.md#catalogue-item-limitations` as needed
+8. amend list of unsupported properties in `/docs/models.md#catalogue-item-limitations` as needed
 
 ### Adding distribution formats
 
@@ -350,7 +343,7 @@ Within this project, for each new item type:
 9. add new tests to:
    - `tests.lantern_tests.models.item.catalogue.test_distributions`
    - `tests.lantern_tests.templates.macros.test_tabs.TestDataTab.test_data_info` (if using a collapsible panel)
-10. update the [Item distribution options](/docs/data-model.md#catalogue-items-supported-distribution-options) docs
+10. update the [Item distribution options](/docs/models.md#catalogue-items-supported-distribution-options) docs
 
 ### Adding catalogue item tabs
 
@@ -392,7 +385,7 @@ Within this project, for each new item type:
 > [!WARNING]
 > This section is Work in Progress (WIP) and may not be complete/accurate.
 
-- ... include in `VerificationExporter.site_pages` list
+- ... include in `lantern.verification.Verification.site_pages` list
 - ... include in [OpenAPI Definition](/docs/site.md#openapi-definition)
 
 ### Updating styles
@@ -403,28 +396,28 @@ Within this project, for each new item type:
 1. make changes to `src/lantern/resources/templates/_assets/css/main.css.j2`
 2. apply classes as necessary to elements in [HTML Templates](/docs/site.md#templates)
 3. run the `css` [Development Task](/docs/dev.md#development-tasks) which will:
-   - build a temporary [Static Site](/docs/architecture.md#static-site) containing [Test Records](#test-records)
-   - run Tailwind compiler against this site, adding or removing classes as needed
+   - build a temporary [Static Site](/docs/architecture.md#sites) using the [Test Catalogue](#test-catalogue)
+   - run the Tailwind compiler against this site output, adding or removing classes based on usage
    - copy the resulting minified CSS to `src/lantern/resources/css/main.css`
 4. run the `build-test-records` or `build-records` [Development Task](/docs/dev.md#development-tasks) to rebuild the
    static site
    - needed as builds reference a local copy of `main.css` that will need refreshing
 
 > [!TIP]
-> You can run `uv run task css && uv run task build-test-records` to chain these tasks together.
+> You can run `uv run task css && uv run task build-test-records` to chain these tasks together when iterating changes.
 
 ### Updating scripts
 
 1. make changes to `src/lantern/resources/templates/_assets/js/*.js.j2` and/or [Asset Macros](/docs/site.md#asset-macros)
 2. if needed, make changes to [HTML Templates](/docs/site.md#templates) and/or [Common Macros](/docs/site.md#common-macros)
-3. delete an existing site build
+3. delete any existing site build
 4. run the `build-test-records` or `build-records` [Development Task](/docs/dev.md#development-tasks) to rebuild the
    static site
-   - needed to include variables from [Site Metadata](/docs/data-model.md#static-site-metadata)
+   - needed to include variables from [Site Metadata](/docs/models.md#static-site-metadata)
    - needed as builds reference local copies of these dynamic generated scripts
 
 > [!TIP]
-> You can run `trash export/ && task js && task build-test-records` to chain these tasks together.
+> You can run `trash export/ && task js && task build-test-records` to chain these tasks together when iterating changes.
 
 ### Adding development tasks
 
@@ -479,7 +472,7 @@ the [Pre-Commit Hook](#pre-commit-hook).
 >
 > Known-positive findings are frequently ignored, where it would require effort to fix, as a pragmatic/lax approach.
 >
-> Aa stricter approach may be adopted as `ty` matures, and/or specific bugs are fixed.
+> A stricter approach may be adopted as `ty` matures, and/or specific bugs are fixed.
 
 > [!TIP]
 > To check types manually run the `types` [Development Task](#development-tasks).
@@ -500,7 +493,7 @@ set in [`pyproject.toml`](/pyproject.toml). Linting checks are run automatically
 
 > [!WARNING]
 > As with all security tools, Bandit is an aid for spotting common mistakes, not a guarantee of secure code.
-> In particular this tool can't check for issues that are only be detectable when running code.
+> In particular this tool can't check for issues that are only detectable when running code.
 
 ### Markdown
 
@@ -522,7 +515,7 @@ Wide tables will fail rule `MD013` (max line length). Wrap such tables with prag
 ```
 
 Stacked admonitions will fail rule `MD028` (blank lines in blockquote) as it's ambiguous whether a new blockquote has
-started where another element isn't inbetween. Wrap such instances with pragma disable/enable exceptions:
+started where another element isn't in between. Wrap such instances with pragma disable/enable exceptions:
 
 ```markdown
 <!-- pyml disable md028 -->
@@ -680,7 +673,7 @@ To run a specific test file with visible output:
 ```
 
 Playwright tests require a real website to test against, which is provided by the `fx_exporter_static_server` fixture.
-This hosts a local [Static Site](/docs/architecture.md#static-site) served from a temporary directory using Python's
+This hosts a local [Static Site](/docs/architecture.md#sites) served from a temporary directory using Python's
 simple HTTP server. The site is built by the `fx_exporter_static_site` fixture and contains all
 [Test Records](#test-records).
 
@@ -689,9 +682,18 @@ simple HTTP server. The site is built by the `fx_exporter_static_site` fixture a
 > path in the build directory is started before Pytest runs. The `fx_exporter_static_server` detects the CI environment
 > and copies the static site build to this path, then quits, giving an equivalent outcome.
 
+### Test catalogue
+
+`tests.resources.catalogues.fake_catalogue.FakeCatalogue`
+
+To aid in debugging and testing, a simple [Catalogue](/docs/architecture.md#catalogues) is provided using a
+[Test Records Store](#test-records-store), exporting to a local directory.
+
 ### Test records
 
-To aid in debugging and testing, a set of fake records are included in `tests/resources/records/`. They include:
+`tests.resources.records`
+
+To aid in debugging and testing, a set of fake records are included for:
 
 - example collections and products with only minimal properties set
 - example collections and products with all optional properties set
@@ -700,17 +702,19 @@ To aid in debugging and testing, a set of fake records are included in `tests/re
 - example items for each supported licence
 - examples of special items, such as physical maps
 
-These records are used within tests but can and should also be used when developing [Templates](/docs/site.md#templates).
+These records are used within tests but CAN and SHOULD also be used when developing [Templates](/docs/site.md#templates).
 
 #### Test records store
 
-An in-memory [Store](/docs/architecture.md#stores), `resources.stores.fake_records_store.FakeRecordsStore`, is provided
-to load these records for use with [Exporters](/docs/architecture.md#exporters).
+`tests.resources.stores.fake_records_store.FakeRecordsStore`
+
+An in-memory [Store](/docs/architecture.md#stores) is provided to load these records for use with
+[Exporters](/docs/architecture.md#exporters).
 
 #### Test records signing keys
 
 Test keys from the [BAS Metadata Library](https://github.com/antarctica/metadata-library/blob/main/docs/dev.md#test-keys)
-are used for signing and encrypting [Administrative Metadata](/docs/data-model.md#item-administrative-metadata) within
+are used for signing and encrypting [Administrative Metadata](/docs/models.md#item-administrative-metadata) within
 test records.
 
 An additional `X_ADMIN_METADATA_SIGNING_KEY_PRIVATE` environment variable is set to load the private signing key for

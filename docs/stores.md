@@ -1,21 +1,9 @@
 # Lantern - Stores
 
-> [!WARNING]
-> This documentation is partially outdated and does not reflect changes made to split exporters into outputs, a
-> top-level site and verification class and more focused exporters.
+Stores abstract managing [Records](/docs/models.md#records) within a database, object store or other system.
 
-Stores act as containers for [Records](/docs/data-model.md#records) and typically relate to a storage system such as a
-database, file system or object store. Stores provide a consistent public interface to access Records.
-
-## Stores usage
-
-All stores implement a [Common Interface](#store-classes) supporting:
-
-- accessing some or all available Records using `store.select()`
-- accessing a specific Record by file identifier using `store.select_one()`
-- configuring a Store as [Frozen](#frozen-stores) (read-only)
-
-Stores MAY support additional functionality, such as persisting new or updated Records in a backing system.
+They are used by [Exporters](/docs/architecture.md#exporters) to access Records when building a
+[Site](/docs/architecture.md#sites), and optionally, to store new or updated Records.
 
 ## Stores configuration
 
@@ -40,20 +28,23 @@ See the [Infrastructure](/docs/infrastructure.md#exporters) docs for credentials
 All stores inherit from the `lantern.stores.base.Store` abstract base class and MUST implement its minimal
 public interface to:
 
-- select Records
-- configure a Store as [Frozen](#frozen-stores)
+- select some or all available Records, using `store.select()`
+-select a specific Record by file identifier, using `store.select_one()`
+- where applicable, configure a Store as [Frozen](#frozen-stores) (read-only)
+
+Stores MAY support additional features, such as storing new or updated Records.
 
 ## Frozen stores
 
-Stores can typically be created as frozen (read-only), by setting a `frozen` parameter on instantiation, which MAY
-implement more efficient access to Records. Frozen stores are intended for data integrity and fast access is critical,
-such as in distributed [Exporters](/docs/architecture.md#exporters).
+Stores can typically be configured as frozen (read-only) by setting a `frozen` flag on instantiation. Frozen
+stores are intended for where data integrity in parallel processing and/or fast access is critical.
 
 > [!WARNING]
-> Stores that do not support freezing will raise a `lantern.stores.exceptions.StoreFrozenUnsupportedError`.
+> Stores that do not support freezing will raise a `lantern.stores.exceptions.StoreFrozenUnsupportedError` if the
+> `frozen` flag is set.
 >
-> Frozen stores will raise a `lantern.stores.exceptions.StoreFrozenError` for any operations that would cause
-> modifications, including possible remote retrievals.
+> Frozen stores will raise a `lantern.stores.exceptions.StoreFrozenError` for any operations that would modify and/or
+> access additional Records.
 
 ## GitLab store
 
@@ -62,19 +53,20 @@ such as in distributed [Exporters](/docs/architecture.md#exporters).
 Stores Records in a [GitLab](/docs/architecture.md#gitlab) project repository using
 [`python-gitlab`](https://python-gitlab.readthedocs.io/en/stable/).
 
-Supports reading, creating and updating Records. Does not support deleting or moving Records, or
-[Freezing](#frozen-stores) as Records are accessed directly from GitLab.
+Supports reading, creating and updating Records. Does not support deleting or moving Records, or non-head file (record)
+revisions.
 
 > [!NOTE]
-> This store only supports reading the latest (head) revision of records.
+> GitLab stores do not support [Freezing](#frozen-stores) as Records are accessed directly from GitLab.
+> Use a [GitLab Cached Store](#gitlab-cached-store) instead for any frozen use cases.
 
-Records are stored in the remote repository in a given branch. A hashed directory structure is used to store records as
-in BAS 19115 JSON and ISO 19139 XML formats. For example a Record with file identifier `123abc` is stored as
-`/records/12/3a/123abc.json` and `/records/12/3a/123abc.xml`.
+Records are stored in BAS 19115 JSON and ISO 19139 XML formats in a repository branch using a hashed directory
+structure. For example a Record with file identifier `123abc` is stored as `/records/12/3a/123abc.json` and
+`/records/12/3a/123abc.xml`.
 
 > [!TIP]
-> The `GitLabStore` is a very inefficient if accessing large numbers of Records (e.g. for building the
-> [Static Site](/docs/architecture.md#static-site)), due to the number of GitLab API calls.
+> The `GitLabStore` is a very inefficient if accessing large numbers of Records (e.g. for generating an entire
+> [Site](/docs/architecture.md#sites)), due to the number of GitLab API calls it will generate.
 >
 > It is highly recommended to use a [`GitLabCachedStore`](#gitlab-cached-store) instead for these use cases.
 

@@ -1,5 +1,8 @@
 # Lantern - Colour Audit (Supplemental)
 
+> [!NOTE]
+> This page is specific to the [BAS Data Catalogue](/docs/architecture.md#bas-data-catalogue).
+
 Summary of colours used across site templates. Compiled and referenced manually to encourage consistency in colour use.
 
 ## Distinct colours

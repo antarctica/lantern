@@ -1,5 +1,8 @@
 # Lantern - Deployment
 
+> [!NOTE]
+> Parts of this page are specific to the [BAS Data Catalogue](/docs/architecture.md#bas-data-catalogue).
+
 ## Python package
 
 This application is distributed as a Python (Pip) package.
@@ -34,7 +37,7 @@ managed by [Ansible](#ansible-playbook), are deployed to the BAS Central worksta
 
 A Python script, `resources/scripts/site-verify.py`, and a [cron shell script wrapper 🛡️](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/roles/lantern/templates/site-verify-cron.sh.j2)
 managed by [Ansible](#ansible-playbook), are deployed to the BAS Central workstations for
-[Scheduled Verification](/docs/monitoring.md#scheduled-verification).
+[Scheduled Verification](/docs/monitoring.md#scheduled-verifications).
 
 ## Ansible playbook
 
@@ -46,7 +49,7 @@ The playbook:
 
 - creates a Python virtual environment containing the [Python Package](#python-package) for the app version
 - generates an [Environment Module](#environment-module) for the app version
-- configures cron jobs for [Scheduled Monitoring](/docs/monitoring.md#scheduled-verification)
+- configures cron jobs for [Scheduled Monitoring](/docs/monitoring.md#scheduled-verifications)
 
 The playbook is run automatically via [Continuous Deployment](#continuous-deployment).
 

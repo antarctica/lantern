@@ -1,3 +1,5 @@
+# Directly output catalogue items for selected records
+
 import json
 import logging
 import sys

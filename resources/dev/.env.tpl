@@ -32,8 +32,8 @@ LANTERN_SITE_TRUSTED_RSYNC_BASE_PATH_LIVE="{{ op://Infrastructure/SCAR ADD Metad
 LANTERN_VERIFY_SHAREPOINT_PROXY_ENDPOINT="op://Infrastructure/SCAR ADD Metadata Toolbox - SharePoint proxy URL/password"
 LANTERN_VERIFY_SAN_PROXY_ENDPOINT="op://Infrastructure/SCAR ADD Metadata Toolbox - SAN proxy URL/password"
 
-LANTERN_BASE_URL_TESTING="https://data.bas.ac.uk"
-LANTERN_BASE_URL_LIVE="https://data-testing.data.bas.ac.uk"
+LANTERN_BASE_URL_TESTING="https://data-testing.data.bas.ac.uk"
+LANTERN_BASE_URL_LIVE="https://data.bas.ac.uk"
 
 # Dev tasks
 X_ADMIN_METADATA_SIGNING_KEY_PRIVATE="op://Shared/MAGIC administrative metadata signing key/private-jwk-escaped"

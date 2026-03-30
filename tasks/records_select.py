@@ -1,3 +1,5 @@
+# Pull records from store
+
 from argparse import ArgumentParser
 from pathlib import Path
 

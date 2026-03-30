@@ -45,7 +45,7 @@ class S3Exporter(ExporterBase):
         if meta:
             # noinspection PyTypeChecker
             params["Metadata"] = meta
-        self._logger.debug(f"Putting {key} as {content_type}")
+        self._logger.info(f"Putting {key} as {content_type}")
         self._s3.put_object(**params)
 
     def _empty_bucket(self) -> None:

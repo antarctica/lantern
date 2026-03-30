@@ -1,3 +1,5 @@
+# Publish records to live site
+
 import logging
 import re
 import sys

@@ -1,3 +1,5 @@
+# Update record to include distribution options for an ArcGIS Online item
+
 import logging
 from argparse import ArgumentParser
 from pathlib import Path

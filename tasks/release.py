@@ -1,3 +1,5 @@
+# Prepare project release
+
 import argparse
 import subprocess
 from datetime import UTC, datetime

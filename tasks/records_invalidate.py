@@ -1,3 +1,5 @@
+# Invalidate record specific outputs in CloudFront cache for live site
+
 from argparse import ArgumentParser
 from pathlib import Path
 

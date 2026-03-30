@@ -1,3 +1,5 @@
+# Update an ArcGIS Online item based on a related catalogue record
+
 import json
 import logging
 from argparse import ArgumentParser

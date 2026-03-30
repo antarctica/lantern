@@ -420,6 +420,13 @@ resource "gitlab_project_membership" "magic_mapping_coordination_lantern_bot" {
   access_level = "reporter"
 }
 
+resource "gitlab_project_membership" "magic_assets_tracking_lantern_bot" {
+  # To enable interactive publishing workflow (see /docs/usage.md#interactive-record-publishing-workflow)
+  project      = 1220 # MAGIC assets tracking
+  user_id      = gitlab_user.lantern_bot.id
+  access_level = "reporter"
+}
+
 ### GitLab bot user
 
 resource "gitlab_user" "lantern_bot" {

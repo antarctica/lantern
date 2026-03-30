@@ -1,3 +1,5 @@
+# Workaround shortfalls and config draft in records from Zap ⚡️editor
+
 import logging
 from copy import deepcopy
 from datetime import UTC, datetime

@@ -1,3 +1,5 @@
+# Invalidate selected outputs in CloudFront cache for live site
+
 import logging
 import subprocess
 from argparse import ArgumentParser

@@ -1,3 +1,5 @@
+# Generate and export catalogue site
+
 import logging
 from collections.abc import Callable
 from pathlib import Path
@@ -31,8 +33,8 @@ def export(
 def main() -> None:
     """Entrypoint."""
     selected = set()  # to set use the form {"abc", "..."}
-    env: BasEnvironment = "testing"  # testing/live
     target: TargetEnv = "local"  # local/remote
+    env: BasEnvironment = "testing"  # testing/live, only relevant where target='remote'
 
     logger, config, store = init(cached_store=True, frozen_store=True)
     s3 = init_s3(config=config)

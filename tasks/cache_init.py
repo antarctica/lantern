@@ -1,3 +1,5 @@
+# Force initialise GitLab cached store
+
 import logging
 
 from tasks._record_utils import confirm_source, init

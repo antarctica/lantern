@@ -1,3 +1,5 @@
+# Preview local site with CORS support
+
 from functools import partial
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path

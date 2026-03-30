@@ -54,7 +54,7 @@ class LocalExporter(ExporterBase):
             path.chmod(mode=self._mode_file)
 
             # log any object metadata that local system doesn't support
-            if item.object_meta or item.redirect:
+            if self._logger.isEnabledFor(logging.DEBUG) and (item.object_meta or item.redirect):
                 if item.redirect:
                     item.object_meta["redirect"] = item.redirect
                 self._logger.debug(f"Additional properties for {path.resolve()}:")
@@ -62,4 +62,4 @@ class LocalExporter(ExporterBase):
 
             count += 1
 
-        self._logger.info(f"Exported {count} items to '{self.base_path.resolve()}'.'")
+        self._logger.info(f"Exported {count} items to '{self.base_path.resolve()}'.")

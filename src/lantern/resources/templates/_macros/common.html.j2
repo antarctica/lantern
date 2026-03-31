@@ -3,6 +3,7 @@
 {% macro base_bg_text_classes() %}text-grey-900 dark:text-grey-100 bg-white dark:bg-grey-950{% endmacro %}
 
 {% macro link_base_classes() %}underline{% endmacro %}
+{% macro font_bolder_classes() %}font-bold{% endmacro %}
 
 {% macro link_classes() %}{{ link_base_classes() }} text-sky-blue-500 dark:text-sky-blue-300{% endmacro %}
 
@@ -18,7 +19,7 @@
 
 {% macro table_border_classes() %}border-grey-100 dark:border-grey-900{% endmacro %}
 
-{% macro table_header_classes() %}p-2 font-bold border-b border-grey-500 dark:border-grey-300 bg-grey-100 dark:bg-grey-900{% endmacro %}
+{% macro table_header_classes() %}{{ font_bolder_classes() }} p-2 border-b border-grey-500 dark:border-grey-300 bg-grey-100 dark:bg-grey-900{% endmacro %}
 
 {% macro table_row_classes() %}p-2 border-b {{ table_border_classes() }}{% endmacro %}
 
@@ -36,18 +37,20 @@
 
 {% macro show_js_only() %}show-js hidden{% endmacro %}
 
+{% macro strong() %}<span class="{{ com.font_weight_headings_classes() }}">{{ caller() }}</span>{% endmacro %}
+
 {% macro feedback_trigger(classes, fallback, text) %}
   <noscript><a class="{{ classes }}" href="mailto:{{ fallback }}">{{ text }}</a></noscript>
   <button class="{{ show_js_only() }} cursor-pointer {{ classes }}" data-target="#{{ feedback_widget_target() }}">{{ text }}</button>
 {% endmacro %}
 
 {% macro prose() %}
-  <div class="max-w-none prose prose-base dark:prose-invert prose-headings:font-bold prose-li:my-0">{{ caller() }}</div>
+  <div class="max-w-none prose prose-base dark:prose-invert prose-headings:{{ font_bolder_classes() }} prose-li:my-0">{{ caller() }}</div>
 {% endmacro %}
 
 {% macro dl_item(title, id, dd_class=None) %}
   <div class="space-y-2">
-    <dt class="font-bold text-black dark:text-white">{{ title }}</dt>
+    <dt class="{{ font_bolder_classes() }} text-black dark:text-white">{{ title }}</dt>
     <dd {% if dd_class %}class="{{ dd_class }}"{% endif %} id="{{ id }}">{{ caller() }}</dd>
   </div>
 {% endmacro %}
@@ -93,7 +96,7 @@
 {% endmacro %}
 
 {% macro form_label(for, label) %}
-  <label class="block font-bold" for="{{ for }}">{{ label }}</label>
+  <label class="block {{ font_weight_headings_classes() }}" for="{{ for }}">{{ label }}</label>
 {% endmacro %}
 
 {% macro form_input(id, name, value, placeholder, required) %}

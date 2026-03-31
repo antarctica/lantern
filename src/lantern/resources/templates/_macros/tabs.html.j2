@@ -149,7 +149,7 @@
 {% macro contact(data) %}
   <section id="tab-content-contact" class="space-y-8">
     {% call com.alert(variant='blue') %}
-      Contact the <strong>{{ data.team }}</strong> with any questions or comments about this item.
+      Contact the {% call com.strong() %}{{ data.team }}{% endcall %} with any questions or comments about this item.
     {% endcall %}
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-y-4 lg:gap-x-4">
       <div class="col-span-1 space-y-8">

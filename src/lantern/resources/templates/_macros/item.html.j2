@@ -21,7 +21,7 @@
 {% endmacro %}
 
 {% macro summary(data) %}
-  <section id="item-summary" class="col-span-2 h-full p-4 space-y-8 bg-grey-100 dark:bg-grey-900">
+  <section id="item-summary" class="col-span-2 h-full p-8 space-y-8 bg-grey-100 dark:bg-grey-900">
     {% if data.grid_enabled %}
       {{ summary_grid(data) }}
     {% endif %}
@@ -55,62 +55,67 @@
   </section>
 {% endmacro %}
 
-{% macro collections(data) %}
-  <div class="font-bold">Collections</div>
-  <div>
-    <ul id="summary-collections" class="space-y-2">
-      {% for item in data %}
+{% macro summary_grid_section(id, title) %}
+  <header class="{{ com.font_bolder_classes() }}">{{ title }}</header>
+  <main {% if id %}id="{{ id }}"{% endif %}>{{ caller() }}</main>
+{% endmacro %}
+
+{% macro summary_grid_list(id, title, items) %}
+  <header class="{{ com.font_bolder_classes() }}">{{ title }}</header>
+  <main>
+    <ul id="{{ id }}" class="space-y-2">
+      {% for item in items %}
         <li><a class="{{ com.link_classes() }}" href="{{ item.href }}">{{ item.value }}</a></li>
       {% endfor %}
     </ul>
-  </div>
+  </main>
+{% endmacro %}
+
+{% macro summary_prose(id, title, value) %}
+  <section class="space-y-2">
+    <header class="{{ com.font_bolder_classes() }} text-2xl">{{ title }}</header>
+    <article id="{{ id }}">{% call com.prose() %}{{ value }}{% endcall %}</article>
+  </section>
+{% endmacro %}
+
+{% macro collections(data) %}
+  {{ summary_grid_list(id='summary-collections', title='Collections', items=data) }}
 {% endmacro %}
 
 {% macro projects(data) %}
-  <div class="font-bold">Projects</div>
-  <div>
-    <ul id="summary-projects" class="space-y-2">
-      {% for item in data %}
-        <li><a class="{{ com.link_classes() }}" href="{{ item.href }}">{{ item.value }}</a></li>
-      {% endfor %}
-    </ul>
-  </div>
+  {{ summary_grid_list(id='summary-projects', title='Projects', items=data) }}
 {% endmacro %}
 
 {% macro physical_parent(data) %}
-  <div class="font-bold">One side of</div>
-  <div id="summary-physical-parent"><a class="{{ com.link_classes() }}" href="{{ data.href }}">{{ data.value }}</a></div>
+  {% call summary_grid_section(id="summary-physical-parent", title="One side of") %}
+    <a class="{{ com.link_classes() }}" href="{{ data.href }}">{{ data.value }}</a>
+  {% endcall %}
 {% endmacro %}
 
 {% macro edition(value) %}
-  <div class="font-bold">Edition</div>
-  <div id="summary-edition">{{ value }}</div>
+  {% call summary_grid_section(id="summary-edition", title="Edition") %}
+    {{ value }}
+  {% endcall %}
 {% endmacro %}
 
 {% macro published(data) %}
-  <div class="font-bold">Published</div>
-  <div>{{ com.time(data, id='summary-published') }}</div>
+  {% call summary_grid_section(title="Published") %}
+    {{ com.time(data, id='summary-published') }}
+  {% endcall %}
 {% endmacro %}
 
 {% macro access() %}
-  <div class="font-bold">Access</div>
-  <div id="summary-access">
+  {% call summary_grid_section(id="summary-access", title="Access") %}
     <span class="bg-yellow-500 px-2 py-1 text-sm dark:text-grey-950">{{ com.restricted_i() }} Restricted</span>
-  </div>
+  {% endcall %}
 {% endmacro %}x
 
 {% macro citation(value) %}
-  <section class="space-y-2">
-    <h2 class="text-2xl">Citation</h2>
-    <article id="summary-citation">{% call com.prose() %}{{ value }}{% endcall %}</article>
-  </section>
+  {{ summary_prose(id="summary-citation", title="Citation", value=value) }}
 {% endmacro %}
 
 {% macro about(value) %}
-  <section class="space-y-2">
-    <h2 class="text-2xl">About</h2>
-    <article id="summary-about">{% call com.prose() %}{{ value }}{% endcall %}</article>
-  </section>
+  {{ summary_prose(id="summary-about", title="About", value=value) }}
 {% endmacro %}
 
 {% macro graphics(data) %}

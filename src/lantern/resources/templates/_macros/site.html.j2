@@ -134,13 +134,13 @@
   <nav id="site-nav" class="lg:p-4 bg-grey-950 dark:bg-black text-white">
     <div class="{{ com.container_classes() }} py-4 lg:flex lg:gap-8 lg:justify-between lg:items-end">
       <div class="flex-none flex justify-center lg:justify-start items-center">
-        <a id="site-title" class="block font-bold text-lg text-center lg:text-left" href="/">BAS Data Catalogue</a>
+        <a id="site-title" class="block {{ com.font_bolder_classes() }} text-lg text-center lg:text-left" href="/">BAS Data Catalogue</a>
       </div>
       <div class="flex-1 hidden lg:flex items-center gap-4 justify-start">
         {{ primary_nav() }}
       </div>
       <div class="flex-1 flex self-center justify-end">
-        <a class="hidden lg:block hover:underline" href="https://www.bas.ac.uk">Part of British Antarctic Survey</a>
+        <a class="hidden lg:block hover:underline" href="https://www.bas.ac.uk" target="_blank">Part of British Antarctic Survey {{ com.ext_link_i() }}</a>
       </div>
     </div>
   </nav>

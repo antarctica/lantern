@@ -4,7 +4,7 @@
 <!DOCTYPE html>
 <html lang="en">
   {{ site.html_head(meta) }}
-  <body id="{{ com.back_to_top_id() }}" class="font-sans text-base {{ com.base_bg_text_classes() }}">
+  <body id="{{ com.back_to_top_id() }}" class="font-sans text-base font-normal {{ com.base_bg_text_classes() }}">
     <div class="flex flex-col min-h-screen space-y-8 lg:space-y-12">
       {{ site.header(meta) }}
       <div class="px-2 flex-1">{% block content %}{% endblock %}</div>

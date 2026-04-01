@@ -43,19 +43,19 @@
         <div class="space-y-4">
           {% if data.address %}
             <div class="space-y-2">
-              <h3 class="font-bold"><i class="fa-regular fa-envelope"></i> By post</h3>
+              <h3 class="{{ com.font_bolder_classes() }}"><i class="fa-regular fa-envelope"></i> By post</h3>
               <address id="contact-post">{{ data.address }}</address>
             </div>
           {% endif %}
           {% if data.phone %}
             <div class="space-y-2">
-              <h3 class="font-bold"><i class="fa-regular fa-phone-rotary"></i> By phone</h3>
+              <h3 class="{{ com.font_bolder_classes() }}"><i class="fa-regular fa-phone-rotary"></i> By phone</h3>
               <div id="contact-phone">{{ data.phone }}</div>
             </div>
           {% endif %}
           {% if data.email %}
             <div class="space-y-2">
-              <h3 class="font-bold"><i class="fa-regular fa-at"></i> By email</h3>
+              <h3 class="{{ com.font_bolder_classes() }}"><i class="fa-regular fa-at"></i> By email</h3>
               <div id="contact-email"><a class="{{ com.link_classes() }}" href="{{ data.email }}">{{ data.email }}</a></div>
             </div>
            {% endif %}

@@ -66,6 +66,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Renaming `footer_nav_items` to `secondary_nav_items` for consistency and documenting
 * Documentation updated
 * Refactoring site templates to reduce repetition and improve consistency
+* Updating styles to reflect BAS Style Kit 2025 and new public website
 
 ## [0.5.0] - 2026-02-27 [!BREAKING]
 

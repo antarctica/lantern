@@ -37,7 +37,7 @@
 
 {% macro show_js_only() %}show-js hidden{% endmacro %}
 
-{% macro strong() %}<span class="{{ com.font_weight_headings_classes() }}">{{ caller() }}</span>{% endmacro %}
+{% macro strong() %}<span class="{{ font_bolder_classes() }}">{{ caller() }}</span>{% endmacro %}
 
 {% macro feedback_trigger(classes, fallback, text) %}
   <noscript><a class="{{ classes }}" href="mailto:{{ fallback }}">{{ text }}</a></noscript>
@@ -96,7 +96,7 @@
 {% endmacro %}
 
 {% macro form_label(for, label) %}
-  <label class="block {{ font_weight_headings_classes() }}" for="{{ for }}">{{ label }}</label>
+  <label class="block {{ font_bolder_classes() }}" for="{{ for }}">{{ label }}</label>
 {% endmacro %}
 
 {% macro form_input(id, name, value, placeholder, required) %}

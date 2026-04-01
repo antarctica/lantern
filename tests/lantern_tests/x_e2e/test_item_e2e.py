@@ -21,14 +21,14 @@ class TestItemTabs:
         assert status_code == 200
 
         # initial tab will be 'licence', expect element from another tab not to be visible
-        expect(page.locator("strong", has_text="Item licence")).to_be_visible()
+        expect(page.locator("span", has_text="Item licence")).to_be_visible()
         expect(page.locator("dt", has_text="Item ID")).not_to_be_visible()
 
         # change to another tab and expect its content to now be visible
         expect(page.locator("#item-tabs label[for='tab-info']")).to_be_visible()
         page.locator("#item-tabs label[for='tab-info']").click()
         expect(page.locator("dt", has_text="Item ID")).to_be_visible()
-        expect(page.locator("strong", has_text="Item licence")).not_to_be_visible()
+        expect(page.locator("span", has_text="Item licence")).not_to_be_visible()
 
     def test_history(self, fx_exporter_static_server: Popen, page: Page):
         """Can switch between visited tabs."""
@@ -37,7 +37,7 @@ class TestItemTabs:
         status_code = page.evaluate("window.performance.getEntries()[0].responseStatus")
         assert status_code == 200
 
-        expect(page.locator("strong", has_text="Item licence")).to_be_visible()
+        expect(page.locator("span", has_text="Item licence")).to_be_visible()
 
         # On load, no tab is explicitly selected so there's no URL fragment is present. Changing tab will explicitly
         # select that tab but if navigating back, the original, fragment-less URL will be used so the tab won't change.
@@ -49,7 +49,7 @@ class TestItemTabs:
         page.locator("#item-tabs label[for='tab-info']").click()
         expect(page.locator("dt", has_text="Item ID")).to_be_visible()
         page.go_back()
-        expect(page.locator("strong", has_text="Item licence")).to_be_visible()
+        expect(page.locator("span", has_text="Item licence")).to_be_visible()
 
     def test_load(self, fx_exporter_static_server: Popen, page: Page):
         """Can set initial tab on page load if set in URL fragment."""

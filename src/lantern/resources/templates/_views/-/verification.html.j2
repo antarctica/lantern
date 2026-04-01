@@ -26,11 +26,11 @@
       {% call com.alert(variant='blue') %}
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-y-4 lg:gap-x-4">
           <div class="grid grid-cols-1 gap-y-4 lg:gap-x-8 lg:grid-cols-[auto_1fr]">
-            <div class="font-bold">Site tested</div>
+            <div class="{{ com.font_bolder_classes() }}">Site tested</div>
             <div><a class="{{ com.link_classes() }}" href="{{ meta.base_url }}">{{ meta.base_url }}</a></div>
-            <div class="font-bold">Revision tested</div>
+            <div class="{{ com.font_bolder_classes() }}">Revision tested</div>
             <div><a class="{{ com.link_classes() }}" href="{{ meta.build_ref.href }}">{{ meta.build_ref.value }} {{ com.restricted_i() }}{{ com.ext_link_i() }}</a></div>
-            <div class="font-bold">Tested at</div>
+            <div class="{{ com.font_bolder_classes() }}">Tested at</div>
             <div>{{ com.time(meta.build_time_fmt) }}</div>
           </div>
           <div class="grid grid-cols-1 gap-y-4 lg:gap-x-8 lg:grid-cols-[auto_1fr]">

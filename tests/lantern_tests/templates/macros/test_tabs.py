@@ -519,7 +519,7 @@ class TestLicenceTab:
         html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
 
         # noinspection PyTypeChecker
-        assert html.find(name="strong", string="Item licence") is not None
+        assert html.find(name="span", string="Item licence") is not None
 
         licence = html.select_one(f"a[href='{value}']")
         assert licence is not None
@@ -560,7 +560,7 @@ class TestLicenceTab:
 
         label_text = "Copyright Holder" if len(expected) < 2 else "Copyright Holders"
         # noinspection PyTypeChecker
-        label = html.find(name="strong", string=label_text)
+        label = html.find(name="span", string=label_text)
         assert label is not None if expected else label is None
 
         expected_string = ", ".join(expected)

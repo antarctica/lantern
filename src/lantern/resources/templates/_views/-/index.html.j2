@@ -7,11 +7,11 @@
     <section class="space-y-4 space-y-8">
       {% call com.alert(variant='blue') %}
         <div class="grid grid-cols-1 gap-y-4 lg:gap-x-8 lg:grid-cols-[auto_1fr]">
-          <div class="font-bold">Items count</div>
+          <div class="{{ com.font_bolder_classes() }}">Items count</div>
           <div>{{ data.records | length }}</div>
-          <div class="font-bold">Revision</div>
+          <div class="{{ com.font_bolder_classes() }}">Revision</div>
           <div><a class="{{ com.link_classes() }}" href="{{ meta.build_ref.href }}">{{ meta.build_ref.value }} {{ com.restricted_i() }}{{ com.ext_link_i() }}</a></div>
-          <div class="font-bold">Built at</div>
+          <div class="{{ com.font_bolder_classes() }}">Built at</div>
           <div>{{ com.time(meta.build_time_fmt) }}</div>
         </div>
       {% endcall %}

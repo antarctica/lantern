@@ -4,20 +4,20 @@
 @plugin "@tailwindcss/forms";
 
 @font-face {
-  font-family: 'Open Sans';
-  src: url('../fonts/open-sans.ttf') format('truetype');
-  font-weight: normal;
+  font-family: 'Work Sans';
+  src: url('../fonts/work-sans.ttf') format('truetype');
+  font-weight: 100 900;
   font-style: normal;
 }
 @font-face {
-  font-family: 'Open Sans';
-  src: url('../fonts/open-sans-italic.ttf') format('truetype');
-  font-weight: normal;
+  font-family: 'Work Sans';
+  src: url('../fonts/work-sans-italic.ttf') format('truetype');
+  font-weight: 100 900;
   font-style: italic;
 }
 
 @theme {
-  --font-sans: "Open Sans", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-sans: "Work Sans", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 
   --color-*: initial;
   --color-white: #fff;
@@ -42,6 +42,7 @@
   --color-orange-500: #F47738;
   --color-orange-700: #A35026;
   --color-orange-900: #532813;
+  --color-sky-blue-50: #EFF4F7;  /* BSK-2025 */
 
   --color-air-red-100: #EEA8BA;
   --color-air-red-300: #DD5476;
@@ -126,8 +127,8 @@
   --tw-prose-invert-headings: var(--color-grey-100);
   --tw-prose-lead: var(--color-grey-900);
   --tw-prose-invert-lead: var(--color-grey-100);
-  --tw-prose-links: var(--color-sky-blue-500);
-  --tw-prose-invert-links: var(--color-sky-blue-300);
+  --tw-prose-links: var(--color-blue-500);
+  --tw-prose-invert-links: var(--color-white);
   --tw-prose-bold: var(--color-grey-900);
   --tw-prose-invert-bold: var(--color-grey-100);
   --tw-prose-counters: var(--color-grey-500);
@@ -166,7 +167,7 @@
   }
 
   .admonition-title {
-    @apply text-lg font-bold;
+    @apply text-lg font-semibold;
   }
 
   .admonition.note {

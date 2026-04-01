@@ -21,7 +21,7 @@
 {% endmacro %}
 
 {% macro summary(data) %}
-  <section id="item-summary" class="col-span-2 h-full p-8 space-y-8 bg-grey-100 dark:bg-grey-900">
+  <section id="item-summary" class="col-span-2 h-full p-8 space-y-8 bg-sky-blue-50 dark:bg-grey-900">
     {% if data.grid_enabled %}
       {{ summary_grid(data) }}
     {% endif %}
@@ -147,8 +147,8 @@
     <input id="{{ tab_id }}" type="radio" name="tabs" class="peer/{{ tab_id }} opacity-0 absolute" {% if is_default_tab %}checked="checked"{% endif %} />
     <label for="{{ tab_id }}" class="block relative p-4 cursor-pointer hover:underline border-1 border-transparent
       text-grey-500 bg:text-grey-300
-      hover:bg-grey-100 dark:hover:bg-grey-900
-      hover:text-sky-blue-500 dark:hover:text-sky-blue-300
+      hover:bg-sky-blue-50 dark:hover:bg-grey-900
+      hover:text-blue-500 dark:hover:text-grey-100
       hover:border-b-grey-300 dark:hover:border-b-grey-500
       peer-checked/{{ tab_id }}:text-grey-900 dark:peer-checked/{{ tab_id }}:text-grey-100
       peer-checked/{{ tab_id }}:hover:text-grey-900 dark:peer-checked/{{ tab_id }}:hover:text-grey-100

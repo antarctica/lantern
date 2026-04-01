@@ -19,8 +19,8 @@ class TestSiteResourcesOutput:
         """Can generate site content items."""
         expected_path_media = {
             Path("static/css/main.css"): "text/css",
-            Path("static/fonts/open-sans.ttf"): "font/ttf",
-            Path("static/fonts/open-sans-italic.ttf"): "font/ttf",
+            Path("static/fonts/work-sans.ttf"): "font/ttf",
+            Path("static/fonts/work-sans-italic.ttf"): "font/ttf",
             Path("favicon.ico"): "image/x-icon",
             Path("static/img/favicon.svg"): "image/svg+xml",
             Path("static/img/favicon-192.png"): "image/png",

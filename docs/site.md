@@ -76,15 +76,11 @@ A fixed set of links to legal policies and the BAS Public Website as a copyright
 
 [Tailwind](https://tailwindcss.com) is used as a base CSS framework, extended to:
 
-- use the colours and fonts from the 2015 [BAS Style Kit](https://style-kit.web.bas.ac.uk)
+- use colours and fonts from the 2015 and 2025 [BAS Style Kit](https://style-kit.web.bas.ac.uk)
 - use the [Tailwind typography](https://github.com/tailwindlabs/tailwindcss-typography) plugin to style user generated
   content in Records (such as abstracts)
 - use the [Tailwind forms](https://github.com/tailwindlabs/tailwindcss-forms) plugin to apply base styles to the
   [Contact Form](#item-enquires)
-
-> [!NOTE]
-> For practical reasons, the licenced Gill Sans font used for headings in the 2015 Style Kit is not used in this
-> Tailwind adaption (falling back to Open Sans).
 
 The `pytailwindcss` package is used to manage a standalone
 [Tailwind CLI](https://tailwindcss.com/docs/installation/tailwind-cli) install to avoid needing Node.js.

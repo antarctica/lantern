@@ -25,7 +25,7 @@
         </div>
         <aside id="data-restricted-info" class="col-span-1">
           {% call com.alert(variant='yellow', classes="border-5 border-yellow-500 space-y-2") %}
-            <p class="text-lg font-bold">This item requires permission to access</p>
+            <p class="text-lg {{ com.font_bolder_classes() }}">This item requires permission to access</p>
             <p>This may be because the item:</p>
             <ul class="list-disc pl-4">
               <li>contains sensitive and/or personal data</li>
@@ -57,8 +57,8 @@
 
 {% macro author(data) %}
   <article class="border-1 border-grey-100 p-2 space-y-2">
-    {% if data.individual.name %}<div class="font-bold">{{ data.individual.name }}</div>{% endif %}
-    {% if data.organisation.name %}<div class="font-bold">{{ data.organisation.name }}</div>{% endif %}
+    {% if data.individual.name %}<div class="{{ com.font_bolder_classes() }}">{{ data.individual.name }}</div>{% endif %}
+    {% if data.organisation.name %}<div class="{{ com.font_bolder_classes() }}">{{ data.organisation.name }}</div>{% endif %}
     {% if data.orcid %}
       <div><i class="fa-brands fa-orcid text-[#A6CE39]"></i> ORCID: <a class="{{ com.link_classes() }}" href="{{ data.orcid }}">{{ data.orcid }} {{ com.ext_link_i() }}</a></div>
     {% endif %}

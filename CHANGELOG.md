@@ -65,7 +65,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Improving documentation and updating diagrams to new and refactored concepts and classes
 * Renaming `footer_nav_items` to `secondary_nav_items` for consistency and documenting
 * Documentation updated
-* Refactoring site templates to reduce repetition
+* Refactoring site templates to reduce repetition and improve consistency
 
 ## [0.5.0] - 2026-02-27 [!BREAKING]
 

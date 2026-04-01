@@ -2,20 +2,21 @@
 
 {% macro base_bg_text_classes() %}text-grey-900 dark:text-grey-100 bg-white dark:bg-grey-950{% endmacro %}
 
-{% macro link_base_classes() %}underline{% endmacro %}
-{% macro font_bolder_classes() %}font-bold{% endmacro %}
+{% macro font_bolder_classes() %}font-semibold{% endmacro %}
 
-{% macro link_classes() %}{{ link_base_classes() }} text-sky-blue-500 dark:text-sky-blue-300{% endmacro %}
+{% macro link_base_classes() %}underline hover:decoration-2{% endmacro %}
+
+{% macro link_classes() %}{{ link_base_classes() }} text-blue-500 dark:text-white{% endmacro %}
 
 {% macro btn_base_classes() %}cursor-pointer{% endmacro %}
 
 {% macro btn_default_classes() %}{{ btn_base_classes() }} bg-grey-100 text-black hover:bg-grey-300 hover:text-white{% endmacro %}
 
-{% macro btn_primary_classes() %}{{ btn_base_classes() }} bg-turquoise-500 text-white hover:bg-turquoise-700{% endmacro %}
+{% macro btn_primary_classes() %}{{ btn_base_classes() }} bg-blue-500 text-white hover:bg-blue-300{% endmacro %}
 
 {% macro btn_warning_classes() %}{{ btn_base_classes() }} bg-yellow-500 text-black hover:bg-yellow-700{% endmacro %}
 
-{% macro footer_link_classes() %}{{ link_base_classes() }} text-sky-blue-300 dark:text-sky-blue-500{% endmacro %}
+{% macro footer_link_classes() %}{{ link_base_classes() }}{% endmacro %}
 
 {% macro table_border_classes() %}border-grey-100 dark:border-grey-900{% endmacro %}
 
@@ -83,7 +84,7 @@
         {% if sub_i %}<i class="{{ sub_i }}"></i>{% endif %} {{ sub }}
       </small>
     {% endif %}
-    <h1 {% if id_main %}id="{{ id_main }}"{% endif %} class="text-3xl">{{ main }}</h1>
+    <h1 {% if id_main %}id="{{ id_main }}"{% endif %} class="{{ font_bolder_classes() }} text-3xl text-blue-500 dark:text-white">{{ main }}</h1>
   </header>
 {% endmacro %}
 
@@ -149,7 +150,7 @@
         ) }}
       </div>
       <div class="w-5/6 flex flex-col h-full pl-2">
-        <header><a class="text-lg {{ link_classes() }}" href="{{item.href}}">{{ item.title_html }}</a></header>
+        <header><a class="{{ font_bolder_classes() }} {{ link_classes() }} text-xl" href="{{item.href}}">{{ item.title_html }}</a></header>
         <article class="py-2 flex-grow overflow-auto">{% call prose() %}{{ item.summary_html }}{% endcall %}</article>
         <footer class="mt-auto flex items-center space-x-2 text-sm text-grey-500 dark:text-grey-300">
           {{ item_summary_fragments(item.fragments) }}

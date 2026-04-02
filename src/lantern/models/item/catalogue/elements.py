@@ -32,6 +32,19 @@ from lantern.stores.base import SelectRecordProtocol
 TFormattedDate = TypeVar("TFormattedDate", bound="FormattedDate")
 
 
+def strip_title(value: str) -> str:
+    """
+    Basic method to strip wrapping <p> tags from title value.
+
+    Titles can use Markdown, which is converted to HTML for rendering. The converted value is wrapped in <p> tags
+    and are typically included within link (anchor) elements.
+
+    This causes an accessibility issue as <p> tags should not be inside <a> tags. This method strips the <p> tags
+    to give an HTML fragment that can be wrapped in any element.
+    """
+    return value.replace("<p>", "").replace("</p>", "")
+
+
 @dataclass(kw_only=True)
 class FormattedDate:
     """Represents a HTML time element."""
@@ -143,6 +156,11 @@ class ItemCatalogueSummary(ItemBase):
     def _restricted(self) -> bool:
         """Whether the item is restricted."""
         return self.admin_resource_access != AccessLevel.PUBLIC
+
+    @property
+    def title_html(self) -> str:
+        """Title with Markdown formatting encoded as HTML without wrapping <p> tags."""
+        return strip_title(super().title_html)
 
     @property
     def summary_html(self) -> str:
@@ -659,18 +677,24 @@ class PageSummary:
     @property
     def collections(self) -> list[Link]:
         """Collections item is part of."""
-        return [Link(value=summary.title_html, href=summary.href) for summary in self._aggregations.parent_collections]
+        return [
+            Link(value=strip_title(summary.title_html), href=summary.href)
+            for summary in self._aggregations.parent_collections
+        ]
 
     @property
     def projects(self) -> list[Link]:
         """Projects item is part of."""
-        return [Link(value=summary.title_html, href=summary.href) for summary in self._aggregations.parent_projects]
+        return [
+            Link(value=strip_title(summary.title_html), href=summary.href)
+            for summary in self._aggregations.parent_projects
+        ]
 
     @property
     def physical_parent(self) -> Link | None:
         """Item that represents the physical map an item is one side of."""
         item = self._aggregations.parent_printed_map
-        return Link(value=item.title_html, href=item.href) if item else None
+        return Link(value=strip_title(item.title_html), href=item.href) if item else None
 
     @property
     def restricted(self) -> bool:

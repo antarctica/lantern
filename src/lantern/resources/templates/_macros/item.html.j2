@@ -21,7 +21,7 @@
 {% endmacro %}
 
 {% macro summary(data) %}
-  <section id="item-summary" class="col-span-2 h-full p-8 space-y-8 bg-sky-blue-50 dark:bg-grey-900">
+  <section id="item-summary" class="col-span-2 h-full p-4 lg:p-8 space-y-8 bg-sky-blue-50 dark:bg-grey-900">
     {% if data.grid_enabled %}
       {{ summary_grid(data) }}
     {% endif %}
@@ -33,7 +33,7 @@
 {% endmacro %}
 
 {% macro summary_grid(data) %}
-  <section class="grid grid-cols-1 gap-y-4 lg:gap-x-8 lg:grid-cols-[auto_1fr]">
+  <dl class="grid grid-cols-1 gap-y-4 lg:gap-x-8 lg:grid-cols-[auto_1fr]">
     {% if data.collections %}
       {{ collections(data.collections) }}
     {% endif %}
@@ -52,30 +52,30 @@
     {% if data.restricted %}
       {{ access() }}
     {% endif %}
-  </section>
+  </dl>
 {% endmacro %}
 
 {% macro summary_grid_section(id, title) %}
-  <header class="{{ com.font_bolder_classes() }}">{{ title }}</header>
-  <main {% if id %}id="{{ id }}"{% endif %}>{{ caller() }}</main>
+  <dt class="{{ com.font_bolder_classes() }}">{{ title }}</dt>
+  <dd {% if id %}id="{{ id }}"{% endif %}>{{ caller() }}</dd>
 {% endmacro %}
 
 {% macro summary_grid_list(id, title, items) %}
-  <header class="{{ com.font_bolder_classes() }}">{{ title }}</header>
-  <main>
+  <dd class="{{ com.font_bolder_classes() }}">{{ title }}</dd>
+  <dt>
     <ul id="{{ id }}" class="space-y-2">
       {% for item in items %}
         <li><a class="{{ com.link_classes() }}" href="{{ item.href }}">{{ item.value }}</a></li>
       {% endfor %}
     </ul>
-  </main>
+  </dt>
 {% endmacro %}
 
 {% macro summary_prose(id, title, value) %}
-  <section class="space-y-2">
-    <header class="{{ com.font_bolder_classes() }} text-2xl">{{ title }}</header>
-    <article id="{{ id }}">{% call com.prose() %}{{ value }}{% endcall %}</article>
-  </section>
+  <div class="space-y-2">
+    <dt class="{{ com.font_bolder_classes() }} text-2xl">{{ title }}</dt>
+    <dd id="{{ id }}">{% call com.prose() %}{{ value }}{% endcall %}</dd>
+  </div>
 {% endmacro %}
 
 {% macro collections(data) %}
@@ -123,7 +123,7 @@
     {% if data | length > 0 %}
       {% set item = data[0] %}
       {% set alt = item.description or item.identifier %}
-      <img id="graphics-{{ item.identifier }}" class="w-full" src="{{ item.href }}" alt="{{ alt }}" aria-details="summary-about" rel="preload" fetchpriority="high" />
+      <img id="graphics-{{ item.identifier }}" class="w-full" src="{{ item.href }}" alt="{{ alt }}" aria-details="summary-about" fetchpriority="high" />
     {% endif %}
   </aside>
 {% endmacro %}
@@ -144,8 +144,8 @@
   {% set is_default_tab = data.tab.anchor == data.default_anchor %}
 
   {% if data.tab.enabled %}
-    <input id="{{ tab_id }}" type="radio" name="tabs" class="peer/{{ tab_id }} opacity-0 absolute" {% if is_default_tab %}checked="checked"{% endif %} />
-    <label for="{{ tab_id }}" class="block relative p-4 cursor-pointer hover:underline border-1 border-transparent
+    <input id="{{ tab_id }}" type="radio" name="tabs" class="peer/{{ tab_id }} opacity-0 absolute" aria-hidden="true" {% if is_default_tab %}checked="checked"{% endif %} />
+    <label for="{{ tab_id }}" role="tab" aria-selected="false" aria-controls="{{ tab_content_id }}-data" tabindex="-1" class="block relative p-4 cursor-pointer hover:underline border-1 border-transparent
       text-grey-500 bg:text-grey-300
       hover:bg-sky-blue-50 dark:hover:bg-grey-900
       hover:text-blue-500 dark:hover:text-grey-100
@@ -157,7 +157,7 @@
       peer-checked/{{ tab_id }}:hover:bg-white dark:peer-checked/{{ tab_id }}:hover:bg-grey-950
       peer-checked/{{ tab_id }}:hover:border-b-white dark:peer-checked/{{ tab_id }}:hover:border-b-grey-950
       peer-checked/{{ tab_id }}:hover:no-underline peer-checked/{{ tab_id }}:hover:cursor-default">
-      <i class="{{ data.tab.icon }}"></i> {{ data.tab.title }}
+      <i class="{{ data.tab.icon }}" aria-hidden="true"></i> {{ data.tab.title }}
     </label>
   {% endif %}
 {% endmacro %}
@@ -165,19 +165,22 @@
 {% macro nav_content(data) %}
   {% set tab_id = "tab-" + data.anchor %}
   {% if data.enabled %}
-    <div class="border-1 border-grey-300 dark:border-grey-500 p-4 pt-8 -mt-px w-full hidden peer-checked/{{ tab_id }}:block">
+    <div
+      role="tabpanel" id="{{ tab_id }}-data" aria-labelledby="{{ tab_id }}" tabindex="0"
+      class="border-1 border-grey-300 dark:border-grey-500 p-4 pt-8 -mt-px w-full hidden peer-checked/{{ tab_id }}:block"
+    >
       {{ tab[data.anchor](data) }}
     </div>
   {% endif %}
 {% endmacro %}
 
 {% macro tabs(data) %}
-  <nav id="item-tabs" class="flex flex-row flex-wrap">
+  <div id="item-tabs" class="flex flex-row flex-wrap" role="tablist">
     {% for tab in data.tabs %}
       {{ nav_tab({'tab': tab, 'default_anchor': data.default_anchor}) }}
     {% endfor %}
     {% for tab in data.tabs %}
       {{ nav_content(tab) }}
     {% endfor %}
-  </nav>
+  </div>
 {% endmacro %}

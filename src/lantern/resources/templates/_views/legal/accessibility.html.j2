@@ -21,7 +21,7 @@
       <a class="{{ com.link_classes() }}" href="https://data.bas.ac.uk">data.bas.ac.uk</a> (and several preview URLs).
     </p>
     {% call com.alert(variant='blue') %}
-      This check is not intended as a formal accessibility assessment.
+      This basic check is not intended to be a formal accessibility assessment.
     {% endcall %}
   {% endcall %}
 
@@ -47,10 +47,9 @@
   {% call legal.policy_section(slug='accessibility-review', title='Results of this check') %}
     <p>Issues we found when reviewing the sample content:</p>
     <ul class="list-disc pl-5">
-      <li>the website feedback widget does not work when CSS styles are disabled</li>
       <li>some links within item descriptions may not include sufficient context (such as DOIs)</li>
-      <li>item tabs are not visually highlighted when using a keyword to navigate</li>
       <li>some page elements have poor colour contrast</li>
+      <li>admonition title elements do not state they are labels (presentation) rather than page headings</li>
       <li>anti-spam checks on item enquiry forms may not work with all assistive technologies</li>
     </ul>
     <p>We will regularly review these issues, and repeat this review, as part of improving and maintaining this website.</p>
@@ -69,9 +68,16 @@
   {% endcall %}
 
   {% call legal.policy_section(slug='changelog', title='Changes to this page') %}
+    {% call legal.policy_subsection(title='2026-04-02') %}
+      <p>Resolved issue with the site feedback widget not working when CSS styles are disabled.</p>
+      <p>Resolved issue with missing text in the site feedback widget close button when styles are disabled.</p>
+      <p>Resolved issue with item tabs not being visually highlighted when using a keyword to navigate</p>
+      <p>Improved screen reader support for external links</p>
+      <p>Improved the use of semantic elements (inc. in item summary and item previews)</p>
+    {% endcall %}
     {% call legal.policy_subsection(title='2025-10-10') %}
       <p>Resolved issue with item thumbnail alternate text using <code>aria-describes</code> to link images with abstracts.</p>
-      <p>Added potential issue caused by spam protection added to item enquiry forms</p>
+      <p>Added potential issue caused by spam protection added to item enquiry forms.</p>
     {% endcall %}
     {% call legal.policy_subsection(title='2025-08-15') %}
       <p>Initial accessibility check.</p>

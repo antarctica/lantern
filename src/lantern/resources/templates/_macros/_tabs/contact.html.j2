@@ -15,7 +15,7 @@
             warning="Do not include any sensitive information in your message."
           ) }}
           {{ com.form_input(id="message-sender-name", name="Your name") }}
-          {{ com.form_input(id="message-sender-email", name="Your email address", required=True) }}
+          {{ com.form_input(id="message-sender-email", name="Your email address", type='email', required=True) }}
           <div class="space-y-2">
             <div class="cf-turnstile" data-sitekey="{{ data.turnstile_site_key }}" data-theme="auto" data-size="flexible"></div>
             <noscript>
@@ -26,7 +26,7 @@
               {% endcall %}
             </noscript>
             <button class="{{ com.btn_primary_classes() }} p-4" type="submit">
-                Send Message <i class="fa-regular fa-paper-plane-top"></i>
+                Send Message <i class="fa-regular fa-paper-plane-top" aria-hidden="true"></i>
             </button>
           </div>
         </div>
@@ -43,20 +43,20 @@
         <div class="space-y-4">
           {% if data.address %}
             <div class="space-y-2">
-              <h3 class="{{ com.font_bolder_classes() }}"><i class="fa-regular fa-envelope"></i> By post</h3>
+              <h3 class="{{ com.font_bolder_classes() }}"><i class="fa-regular fa-envelope" aria-hidden="true"></i> By post</h3>
               <address id="contact-post">{{ data.address }}</address>
             </div>
           {% endif %}
           {% if data.phone %}
             <div class="space-y-2">
-              <h3 class="{{ com.font_bolder_classes() }}"><i class="fa-regular fa-phone-rotary"></i> By phone</h3>
+              <h3 class="{{ com.font_bolder_classes() }}"><i class="fa-regular fa-phone-rotary" aria-hidden="true"></i> By phone</h3>
               <div id="contact-phone">{{ data.phone }}</div>
             </div>
           {% endif %}
           {% if data.email %}
             <div class="space-y-2">
-              <h3 class="{{ com.font_bolder_classes() }}"><i class="fa-regular fa-at"></i> By email</h3>
-              <div id="contact-email"><a class="{{ com.link_classes() }}" href="{{ data.email }}">{{ data.email }}</a></div>
+              <h3 class="{{ com.font_bolder_classes() }}"><i class="fa-regular fa-at" aria-hidden="true"></i> By email</h3>
+              <div id="contact-email"><a class="{{ com.link_classes() }}" href="mailto:{{ data.email }}">{{ data.email }}</a></div>
             </div>
            {% endif %}
         </div>

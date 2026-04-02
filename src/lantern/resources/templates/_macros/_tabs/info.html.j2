@@ -7,7 +7,7 @@
       {% call com.dl_item(title='Item ID', id='info-id') %}{{ data.item_id }}{% endcall %}
 
       {% call com.dl_item(title='Item Type', id='info-type') %}
-        <i class="{{ data.item_type_icon }}"></i> {{ data.item_type }}
+        <i class="{{ data.item_type_icon }}" aria-hidden="true"></i> {{ data.item_type }}
       {% endcall %}
 
       {% if data.series_name or data.series_names %}
@@ -58,7 +58,7 @@
         {% endif %}
 
         {% call com.dl_item(title='Page Size', id='info-page-size') %}
-          {% if icon_class %}<i class="{{ icon_class }}"></i>{% endif %}
+          {% if icon_class %}<i class="{{ icon_class }}" aria-hidden="true"></i>{% endif %}
           {{ data.page_size }}
         {% endcall %}
       {% endif %}

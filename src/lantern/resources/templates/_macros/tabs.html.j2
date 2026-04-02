@@ -60,7 +60,10 @@
     {% if data.individual.name %}<div class="{{ com.font_bolder_classes() }}">{{ data.individual.name }}</div>{% endif %}
     {% if data.organisation.name %}<div class="{{ com.font_bolder_classes() }}">{{ data.organisation.name }}</div>{% endif %}
     {% if data.orcid %}
-      <div><i class="fa-brands fa-orcid text-[#A6CE39]"></i> ORCID: <a class="{{ com.link_classes() }}" href="{{ data.orcid }}">{{ data.orcid }} {{ com.ext_link_i() }}</a></div>
+      <div>
+        <i class="fa-brands fa-orcid text-[#A6CE39]" aria-hidden="true"></i>
+        ORCID: <a class="{{ com.link_classes() }}" href="{{ data.orcid }}">{{ data.orcid }} {{ com.ext_link_i() }}</a>
+      </div>
     {% endif %}
   </article>
 {% endmacro %}

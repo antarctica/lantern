@@ -513,6 +513,7 @@ class TestLicenceTab:
     )
     def test_licence(self, fx_item_cat_model_min: ItemCatalogue, value: str, expected: str):
         """Can get matching licence template based on value from item."""
+        ext_link_context = "External link, opens in a new window."
         fx_item_cat_model_min._record.identification.constraints = Constraints(
             [Constraint(type=ConstraintTypeCode.USAGE, restriction_code=ConstraintRestrictionCode.LICENSE, href=value)]
         )
@@ -523,7 +524,7 @@ class TestLicenceTab:
 
         licence = html.select_one(f"a[href='{value}']")
         assert licence is not None
-        assert licence.text.strip() == expected
+        assert licence.text.replace(ext_link_context, "").strip() == expected
 
     @pytest.mark.parametrize(
         ("value", "expected"),
@@ -545,6 +546,7 @@ class TestLicenceTab:
     )
     def test_copyright_holders(self, fx_item_cat_model_min: ItemCatalogue, value: list[Contact], expected: str):
         """Can get optional copyright holders based on value from item."""
+        ext_link_context = "External link, opens in a new window."
         # needed to enable tab
         fx_item_cat_model_min._record.identification.constraints = Constraints(
             [
@@ -568,7 +570,7 @@ class TestLicenceTab:
         if not expected:
             assert output is None
             return
-        output_normalised = ", ".join([el.strip() for el in output.text.split(",")])
+        output_normalised = ", ".join([el.strip() for el in output.text.replace(ext_link_context, "").split(",")])
         assert output_normalised == expected_string
 
 

@@ -114,7 +114,7 @@
 
 {% macro primary_nav() %}
   {% for item in primary_nav_items %}
-    <a class="hover:underline" href="{{ item[1] }}"><i class="{{ item[2] }}"></i> {{ item[0] }}</a>
+    <a class="hover:underline" href="{{ item[1] }}"><i class="{{ item[2] }}" aria-hidden="true"></i> {{ item[0] }}</a>
   {% endfor %}
 {% endmacro %}
 
@@ -146,8 +146,8 @@
 {% endmacro %}
 
 {% macro dev_phase(fallback_email) %}
-    <span id="site-dev-phase" class="uppercase text-sm {{ com.font_bolder_classes() }} bg-pink-500 text-white dark:text-grey-950 py-1 px-2">alpha</span>
   <div id="site-dev" class="{{ com.container_classes() }} px-2 space-x-2 text-center lg:text-left">
+    <span id="site-dev-phase" class="uppercase text-sm {{ com.font_bolder_classes() }} bg-pink-500 text-white dark:text-grey-950 py-1 px-2" aria-hidden="true">alpha</span>
     <span>
       This is a new website, your {{ com.feedback_trigger(classes=com.link_classes(), fallback=fallback_email, text='feedback') }}
       will help us to improve it.
@@ -166,14 +166,15 @@
         class="{{ com.btn_base_classes() }} text-grey-500 dark:text-grey-300 hover:text-grey-700"
         data-target="#{{ com.feedback_widget_target() }}"
       >
-        <i class="fa-regular fa-xmark fa-lg"></i>
+        <i class="fa-regular fa-xmark fa-lg" aria-hidden="true"></i>
+        <span class="sr-only">Close</span>
       </button>
     </header>
     <div class="space-y-2">
       {{ com.form_textarea(
         id="feedback-content", name="Message", rows=4, required=True, warning="Do not include any sensitive information."
       ) }}
-      {{ com.form_input(id="feedback-email", name="Contact email (optional)") }}
+      {{ com.form_input(id="feedback-email", name="Contact email (optional)", type='email') }}
     </div>
     <footer class="space-y-2">
       {% call com.alert(variant='blue') %}
@@ -181,7 +182,7 @@
           See our <a class="{{ com.link_classes() }}" href="/legal/privacy">privacy policy</a> for more information.</p>
       {% endcall %}
       <button class="{{ com.btn_primary_classes() }} w-full p-4 text-base" type="submit">
-        Send Feedback <i class="fa-regular fa-paper-plane-top"></i>
+        Send Feedback <i class="fa-regular fa-paper-plane-top" aria-hidden="true"></i>
       </button>
     <div id="feedback-success" class="hidden">
       {% call com.alert(variant='green') %}
@@ -203,14 +204,14 @@
   <footer id="site-footer" class="bg-grey-950 dark:bg-black text-grey-100 text-center">
     <div class="{{ com.container_classes() }} px-2 py-8 space-y-8">
       {{ footer_basics(data.fallback_email) }}
-      <section class="space-y-4 lg:space-y-8">
+      <div>
         {{ footer_nav() }}
         {{ footer_primary_nav() }}
-      </section>
-      <section class="space-y-4 lg:space-y-8">
+      </div>
+      <div>
         {{ footer_legal(data.build_time.year) }}
         {{ footer_network_nav() }}
-      </section>
+      </div>
     </div>
   </footer>
 {% endmacro %}
@@ -219,7 +220,7 @@
   <div class="flex flex-col justify-between space-y-4 lg:space-y-0 lg:flex-row">
     {{ com.feedback_trigger(classes=com.footer_link_classes(), fallback=fallback_email, text='Is something wrong with this page?') }}
     <a class="{{ com.footer_link_classes() }} lg:text-right" href="#{{ com.back_to_top_id() }}">
-      Back to top <i class="fa-regular fa-arrow-up"></i>
+      Back to top <i class="fa-regular fa-arrow-up" aria-hidden="true"></i>
     </a>
   </div>
 {% endmacro %}
@@ -227,8 +228,8 @@
 {% macro footer_nav() %}
   <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:text-left">
     {% for section_title, link in secondary_nav_items.items() %}
-      <section class="space-y-4 {% if loop.last %}text-right{% endif %}">
-        <h4 class="{{ com.font_bolder_classes() }}">{{ section_title }}</h4>
+      <section class="space-y-4 {% if loop.last %}lg:text-right{% endif %}">
+        <header class="{{ com.font_bolder_classes() }}">{{ section_title }}</header>
         <ul class="space-y-2">
           {% for link in link %}
             <li>

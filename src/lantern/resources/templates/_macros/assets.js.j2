@@ -80,6 +80,74 @@ document.addEventListener('DOMContentLoaded', function() {
 })();
 {% endmacro %}
 
+{% macro script_accessible_tabs() %}
+(function () {
+  function getTabLabels() {
+    return Array.from(document.querySelectorAll('[role="tablist"] [role="tab"]'));
+  }
+
+  function updateAriaState(activeTabId) {
+    getTabLabels().forEach(function (label) {
+      var isActive = label.getAttribute('for') === activeTabId;
+      label.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      label.setAttribute('tabindex', isActive ? '0' : '-1');
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    // Sticky-tabs DOMContentLoaded has already run (registered first),
+    // so the correct radio is already checked — read that state.
+    var checked = document.querySelector('input[name="tabs"]:checked');
+    if (checked) { updateAriaState(checked.id); }
+
+    // Sync ARIA on label click (sticky-tabs handles radio/hash, this handles ARIA).
+    getTabLabels().forEach(function (label) {
+      label.addEventListener('click', function () {
+        updateAriaState(label.getAttribute('for'));
+      });
+    });
+
+    // Sync ARIA on hash change (sticky-tabs handles radio, this handles ARIA).
+    window.addEventListener('hashchange', function () {
+      var hash = window.location.hash;
+      if (hash) { updateAriaState(hash.substring(1)); }
+    });
+
+    // Arrow key + Enter/Space navigation per ARIA tabs pattern.
+    var tablist = document.querySelector('[role="tablist"]');
+    if (!tablist) { return; }
+
+    tablist.addEventListener('keydown', function (e) {
+      var labels = getTabLabels();
+      var index = labels.indexOf(document.activeElement);
+      if (index === -1) { return; }
+
+      var next = -1;
+
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        next = (index + 1) % labels.length;
+      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        next = (index - 1 + labels.length) % labels.length;
+      } else if (e.key === 'Home') {
+        next = 0;
+      } else if (e.key === 'End') {
+        next = labels.length - 1;
+      } else if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        labels[index].click(); // activates sticky-tabs click handler + ARIA handler
+        return;
+      }
+
+      if (next !== -1) {
+        e.preventDefault();
+        labels[next].focus();
+        labels[next].click(); // activates sticky-tabs click handler + ARIA handler
+      }
+    });
+  });
+})();
+{% endmacro %}
+
 {% macro script_collapsible() %}
 document.addEventListener('DOMContentLoaded', () => {
   // Find all elements with the `data-target` attribute and add click event listeners to hide/show a target element

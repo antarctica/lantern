@@ -49,9 +49,9 @@ class TestPageHeader:
         """Can render a page header with optional subheader with and without icon."""
         html = BeautifulSoup(self._render({"sub": sub, "sub_i": sub_i}), parser="html.parser", features="lxml")
 
-        assert html.select_one("small").text.strip() == sub
+        assert html.select_one("span").text.strip() == sub
         if sub_i is not None:
-            assert html.select_one("small i")["class"] == sub_i.split(" ")
+            assert html.select_one("span i")["class"] == sub_i.split(" ")
 
     def test_id(self):
         """Can render a page header with optional id selectors for each component."""
@@ -215,7 +215,7 @@ class TestDefinitionListItem:
         return jinja.from_string(template).render(config=config, value=value)
 
     def test_main(self):
-        """Can render a minimal DL item with minimal properties only."""
+        """Can render a DL item with minimal properties only."""
         config = {"title": "x", "id": "x"}
         value = "x"
         html = BeautifulSoup(
@@ -226,8 +226,20 @@ class TestDefinitionListItem:
         assert html.select_one("dt").text.strip() == config["title"]
         assert html.select_one("dd", id=config["id"]) is not None
 
+    @pytest.mark.cov()
+    def test_no_id(self):
+        """Can render a DL item without an ID property."""
+        html = BeautifulSoup(
+            self._render(config={"title": "x"}, value="x"),
+            parser="html.parser",
+            features="lxml",
+        )
+        result = html.select_one("dt")
+        assert result.text == "x"
+        assert result.get("id") is None
+
     def test_dd_class(self):
-        """Can render a DL item classes on the DD element."""
+        """Can render a DL item with classes on the DD element."""
         dd_class = "x"
         html = BeautifulSoup(
             self._render(config={"title": "x", "id": "x", "dd_class": dd_class}, value="x"),
@@ -235,3 +247,45 @@ class TestDefinitionListItem:
             features="lxml",
         )
         assert html.select_one(f"dd.{dd_class}") is not None
+
+
+class TestFormInput:
+    """Test form input macro."""
+
+    @staticmethod
+    def _render(config: dict) -> str:
+        _loader = PackageLoader("lantern", "resources/templates")
+        jinja = Environment(loader=_loader, autoescape=select_autoescape(), trim_blocks=True, lstrip_blocks=True)
+        template = """{% import '_macros/common.html.j2' as com %}{{ com.form_input(**config)}}"""
+        return jinja.from_string(template).render(config=config)
+
+    def test_main(self):
+        """Can render a form input item with minimal properties only."""
+        config = {"id": "x", "name": "x"}
+        html = BeautifulSoup(self._render(config=config), parser="html.parser", features="lxml")
+        result = html.select_one("input")
+        assert result is not None
+        assert result.get("id") == "x"
+        assert result.get("name") == "x"
+
+    @pytest.mark.parametrize("value", [None, "x"])
+    @pytest.mark.parametrize("required", [None, True])
+    @pytest.mark.parametrize("placeholder", [None, "x"])
+    @pytest.mark.parametrize("type_", [None, "text", "email"])
+    def test_optional(self, value: str | None, required: bool | None, placeholder: str | None, type_: str | None):
+        """Can render a form input item with optional properties."""
+        config = {"id": "x", "name": "x", "value": value, "required": required, "placeholder": placeholder}
+        if type_:
+            config["type"] = type_
+        expected_value = value if value else None
+        expected_required = "" if required else None
+        expected_placeholder = placeholder if placeholder else None
+        expected_type = type_ if type_ else "text"
+        html = BeautifulSoup(self._render(config=config), parser="html.parser", features="lxml")
+
+        result = html.select_one("input")
+        assert result is not None
+        assert result.get("type") == expected_type
+        assert result.get("value") == expected_value
+        assert result.get("required") == expected_required
+        assert result.get("placeholder") == expected_placeholder

@@ -49,10 +49,10 @@
   <div class="max-w-none prose prose-base dark:prose-invert prose-headings:{{ font_bolder_classes() }} prose-li:my-0">{{ caller() }}</div>
 {% endmacro %}
 
-{% macro dl_item(title, id, dd_class=None) %}
+{% macro dl_item(title, id=None, dd_class=None) %}
   <div class="space-y-2">
     <dt class="{{ font_bolder_classes() }} text-black dark:text-white">{{ title }}</dt>
-    <dd {% if dd_class %}class="{{ dd_class }}"{% endif %} id="{{ id }}">{{ caller() }}</dd>
+    <dd {% if dd_class %}class="{{ dd_class }}"{% endif %} {%  if id %}id="{{ id }}"{% endif %}>{{ caller() }}</dd>
   </div>
 {% endmacro %}
 
@@ -63,26 +63,32 @@
 {% macro copyable_path(value) %}
 <div class="grid grid-cols-[minmax(0,1fr)_auto] gap-2 items-center">
   <div class="overflow-x-auto"><code class="whitespace-nowrap inline-block">{{ value }}</code></div>
-  <button type="button" class="{{ show_js_only() }} p-2 {{ btn_default_classes() }}" data-copy="{{ value }}"><i class="fa-regular fa-copy"></i></button>
+  <button type="button" class="{{ show_js_only() }} p-2 {{ btn_default_classes() }}" data-copy="{{ value }}">
+    <i class="fa-regular fa-copy" aria-hidden="true"></i>
+    <span class="sr-only">Copy</span>
+  </button>
 </div>
 {% endmacro %}
 
-{% macro restricted_i() %}<i class="fa-regular fa-lock-keyhole"></i>{% endmacro %}
+{% macro restricted_i() %}<i class="fa-regular fa-lock-keyhole" aria-hidden="true"></i>{% endmacro %}
 
-{% macro ext_link_i() %}<i class="fa-regular fa-arrow-up-right-from-square"></i>{% endmacro %}
+{% macro ext_link_i() %}
+  <i class="fa-regular fa-arrow-up-right-from-square" aria-hidden="true"><span class="sr-only">External link, opens in a new window.</span></i>
+{% endmacro %}
 
-{% macro experimental_i() %}<i class="fa-regular fa-flask-round-potion"></i>{% endmacro %}
+{% macro experimental_i() %}<i class="fa-regular fa-flask-round-potion" aria-hidden="true"></i>{% endmacro %}
 
 {% macro ext_link_a(href, value) %}
-  <a class="{{ link_classes() }}" href="{{ href }}" target="_blank">{{ value }} {{ ext_link_i() }}</a>
+  <a class="{{ link_classes() }}" href="{{ href }}" target="_blank">
+    {{ value }} {{ ext_link_i() }}</a>
 {% endmacro %}
 
 {% macro page_header(id_wrapper=None, id_sub=None, id_main=None, sub=None, sub_i=None, main=None) %}
   <header {% if id_wrapper %}id="{{ id_wrapper }}"{% endif %} class="pb-4 border-b-1 border-grey-100 dark:border-grey-900">
     {% if sub %}
-      <small {% if id_sub %}id="{{ id_sub }}"{% endif %} class="text-grey-500 dark:text-grey-300 uppercase">
-        {% if sub_i %}<i class="{{ sub_i }}"></i>{% endif %} {{ sub }}
-      </small>
+      <span {% if id_sub %}id="{{ id_sub }}"{% endif %} class="text-grey-500 dark:text-grey-300 uppercase">
+        {% if sub_i %}<i class="{{ sub_i }}" aria-hidden="true"></i>{% endif %} {{ sub }}
+      </span>
     {% endif %}
     <h1 {% if id_main %}id="{{ id_main }}"{% endif %} class="{{ font_bolder_classes() }} text-3xl text-blue-500 dark:text-white">{{ main }}</h1>
   </header>
@@ -100,12 +106,12 @@
   <label class="block {{ font_bolder_classes() }}" for="{{ for }}">{{ label }}</label>
 {% endmacro %}
 
-{% macro form_input(id, name, value, placeholder, required) %}
+{% macro form_input(id, name, value, placeholder, required, type='text') %}
   <div class="space-y-2">
     {{ form_label(for=id, label=name) }}
     <input
       class="{{ form_item_classes() }} {% if required %}{{ form_invalid_classes() }}{% endif %}"
-      type="text" name="{{ id }}" id="{{ id }}"
+      type="{{ type }}" name="{{ id }}" id="{{ id }}"
       {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
       {% if value %}value="{{ value }}"{% endif %}
       {% if required %}required{% endif %}
@@ -165,7 +171,7 @@
 {% endmacro %}
 
 {% macro item_summary_fragments(data) %}
-  <span><i class="{{ data.item_type_icon }}"></i> {{ data.item_type }}</span>
+  <span><i class="{{ data.item_type_icon }}" aria-hidden="true"></i> {{ data.item_type }}</span>
   {% if data.edition %}
     {{ item_summary_fragment_divider() }}
     <span>{{ data.edition }}</span>

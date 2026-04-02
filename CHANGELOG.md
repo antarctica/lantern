@@ -45,6 +45,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * `SiteContent` and `SiteRedirect` site models for passing site content between Output and Exporter classes
 * `Catalogue` high level coordinating class combining Store, Site and Exporter classes
 * CloudFront invalidation support added to live records workflow
+* Aria hidden role for icons
+* Aria roles for item tabs, with minimal JavaScript to support keyboard navigation between tabs
 
 ### Fixed
 
@@ -68,6 +70,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Refactoring site templates to reduce repetition and improve consistency
 * Updating styles to reflect BAS Style Kit 2025 and new public website
 * Improvements to responsive design in templates
+* Improvements to accessibility in templates
 
 ## [0.5.0] - 2026-02-27 [!BREAKING]
 

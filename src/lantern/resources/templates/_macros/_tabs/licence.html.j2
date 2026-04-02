@@ -2,7 +2,7 @@
 
 {% macro clause(content, i_classes) %}
   <div class="flex justify-between items-center space-x-2">
-    <i class="flex-shrink-0 fa-2xl {{ i_classes }}"></i>
+    <i class="flex-shrink-0 fa-2xl {{ i_classes }}" aria-hidden="true"></i>
     <div class="flex-grow">{{ caller() }}</div>
   </div>
 {% endmacro %}
@@ -27,7 +27,7 @@
         <a class="{{ com.link_classes() }}" href="{{ href }}">{{ name }} {{ com.ext_link_i() }}</a>
       </div>
       {% if icon_classes %}
-        <span class="hidden lg:block absolute top-[-45px] right-0"><i class="fa-9x {{ icon_classes }}"></i></span>
+        <span class="hidden lg:block absolute top-[-45px] right-0"><i class="fa-9x {{ icon_classes }}" aria-hidden="true"></i></span>
       {% endif %}
     </div>
 

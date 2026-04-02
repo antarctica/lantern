@@ -48,10 +48,22 @@ from lantern.models.item.catalogue.elements import (
     Maintenance,
     PageHeader,
     PageSummary,
+    strip_title,
 )
 from lantern.models.item.catalogue.enums import ItemSuperType, ResourceTypeIcon
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from tests.conftest import _admin_meta_keys, _select_record
+
+
+class TestElements:
+    """Test other Catalogue Item elements."""
+
+    def test_strip_title(self):
+        """Can strip HTML tags from a title."""
+        title = "<p>x</p>"
+        expected = "x"
+        result = strip_title(title)
+        assert result == expected
 
 
 class TestFormattedDate:
@@ -402,6 +414,13 @@ class TestItemCatalogueSummaryCatalogue:
             record=fx_item_base_model_min._record, admin_keys=fx_item_base_model_min._admin_keys
         )
         assert summary._resource_type_icon == ResourceTypeIcon[summary.resource_type.name].value
+
+    def test_title_html(self, fx_item_base_model_min: ItemBase):
+        """Can get title with Markdown formatting encoded as HTML with stripped <p> tags."""
+        record = fx_item_base_model_min._record
+        fx_item_base_model_min._record.identification.title = "_x_"
+        summary = ItemCatalogueSummary(record=record, admin_keys=fx_item_base_model_min._admin_keys)
+        assert summary.title_html == "<em>x</em>"
 
     @pytest.mark.parametrize(("value", "expected"), [(None, ""), ("x", "<p>x</p>"), ("_x_", "<p><em>x</em></p>")])
     def test_summary_html(self, fx_item_base_model_min: ItemBase, value: str, expected: str):
@@ -977,6 +996,6 @@ class TestPageSummary:
         physical_parent = summary.physical_parent
 
         if has_aggregation:
-            assert physical_parent == Link(value="<p>x</p>", href="/items/x/", external=False)
+            assert physical_parent == Link(value="x", href="/items/x/", external=False)
         if not has_aggregation:
             assert physical_parent is None

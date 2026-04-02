@@ -26,11 +26,11 @@
 
   {% if data.action.href %}
     <a class="inline-block p-2 {{ classes }}" href="{{ data.action.href }}">
-      {{ data.action.value }} <i class="{{ data.action_btn_icon }}"></i>
+      {{ data.action.value }} <i class="{{ data.action_btn_icon }}" aria-hidden="true"></i>
     </a>
   {% else %}
     <button class="{{ com.show_js_only() }} p-2 {{ classes }}" data-target="{{ data.access_target }}">
-      {{ data.action.value }} <i class="{{ data.action_btn_icon }}"></i>
+      {{ data.action.value }} <i class="{{ data.action_btn_icon }}" aria-hidden="true"></i>
     </button>
   {% endif %}
 {% endmacro %}

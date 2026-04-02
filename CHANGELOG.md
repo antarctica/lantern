@@ -67,6 +67,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Documentation updated
 * Refactoring site templates to reduce repetition and improve consistency
 * Updating styles to reflect BAS Style Kit 2025 and new public website
+* Improvements to responsive design in templates
 
 ## [0.5.0] - 2026-02-27 [!BREAKING]
 

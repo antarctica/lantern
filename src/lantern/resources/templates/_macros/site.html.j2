@@ -146,8 +146,8 @@
 {% endmacro %}
 
 {% macro dev_phase(fallback_email) %}
-  <div id="site-dev" class="{{ com.container_classes() }} px-2 space-x-2">
     <span id="site-dev-phase" class="uppercase text-sm {{ com.font_bolder_classes() }} bg-pink-500 text-white dark:text-grey-950 py-1 px-2">alpha</span>
+  <div id="site-dev" class="{{ com.container_classes() }} px-2 space-x-2 text-center lg:text-left">
     <span>
       This is a new website, your {{ com.feedback_trigger(classes=com.link_classes(), fallback=fallback_email, text='feedback') }}
       will help us to improve it.
@@ -201,12 +201,16 @@
 
 {% macro footer(data) %}
   <footer id="site-footer" class="bg-grey-950 dark:bg-black text-grey-100 text-center">
-    <div class="{{ com.container_classes() }} px-2 py-8 space-y-4 lg:space-y-8">
+    <div class="{{ com.container_classes() }} px-2 py-8 space-y-8">
       {{ footer_basics(data.fallback_email) }}
-      {{ footer_nav() }}
-      {{ footer_primary_nav() }}
-      {{ footer_legal(data.build_time.year) }}
-      {{ footer_network_nav() }}
+      <section class="space-y-4 lg:space-y-8">
+        {{ footer_nav() }}
+        {{ footer_primary_nav() }}
+      </section>
+      <section class="space-y-4 lg:space-y-8">
+        {{ footer_legal(data.build_time.year) }}
+        {{ footer_network_nav() }}
+      </section>
     </div>
   </footer>
 {% endmacro %}

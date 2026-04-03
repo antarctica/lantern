@@ -132,14 +132,6 @@ SHOULD be used over margins where possible to limit `the number of classes.
 
 Consideration SHOULD be given the user's colour preference by providing a dark mode using the Tailwind `dark:` modifier.
 
-Common pairings, which SHOULD be used and re-enforced where sensible, are:
-
-| Light Mode | Dark Mode |
-|------------|-----------|
-| `black`    | `white`   |
-| `*-100`    | `*-900`   |
-| `*-500`    | `*-300`   |
-
 #### Colour audit
 
 A [Colour Audit](/docs/supplemental/colour-audit.md) and reference is manually maintained to coordinate and constrain

@@ -6,9 +6,10 @@ from typing import Any
 from unittest.mock import PropertyMock
 
 import pytest
+from environs.exceptions import EnvError, EnvValidationError
 from pytest_mock import MockerFixture
 
-from lantern.config import Config, ConfigurationError
+from lantern.config import Config
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 
 
@@ -88,7 +89,7 @@ class TestConfig:
             "TEMPLATES_ITEM_MAPS_ENDPOINT": "https://embedded-maps.data.bas.ac.uk/v1",
             "TEMPLATES_ITEM_CONTACT_ENDPOINT": "https://example.com/contact",
             "TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": "x",
-            "TEMPLATES_ITEM_VERSIONS_ENDPOINT": "x",
+            "TEMPLATES_ITEM_VERSIONS_ENDPOINT": "https://example.com",
             "SITE_UNTRUSTED_S3_BUCKET_TESTING": "x",
             "SITE_UNTRUSTED_S3_BUCKET_LIVE": "x",
             "SITE_UNTRUSTED_S3_ACCESS_ID": "x",
@@ -96,8 +97,8 @@ class TestConfig:
             "SITE_TRUSTED_RSYNC_HOST": "x",
             "SITE_TRUSTED_RSYNC_BASE_PATH_TESTING": str(fx_config.SITE_TRUSTED_RSYNC_BASE_PATH_TESTING),
             "SITE_TRUSTED_RSYNC_BASE_PATH_LIVE": str(fx_config.SITE_TRUSTED_RSYNC_BASE_PATH_LIVE),
-            "VERIFY_SHAREPOINT_PROXY_ENDPOINT": "x",
-            "VERIFY_SAN_PROXY_ENDPOINT": "x",
+            "VERIFY_SHAREPOINT_PROXY_ENDPOINT": "https://example.com",
+            "VERIFY_SAN_PROXY_ENDPOINT": "https://example.com",
             "BASE_URL_TESTING": "https://example.com",
             "BASE_URL_LIVE": "https://example.com",
         }
@@ -265,9 +266,9 @@ class TestConfig:
     def test_validate_missing_required_option(self, envs: dict):
         """Cannot validate where a required provider or exporter config option is missing."""
         envs_bck = self._set_envs(envs)
-        config = Config(read_env=False)
+        config = Config(read_dotenv=False)
 
-        with pytest.raises(ConfigurationError):
+        with pytest.raises(EnvError):
             config.validate()
 
         self._unset_envs(envs, envs_bck)
@@ -276,10 +277,22 @@ class TestConfig:
         """Cannot validate where the logging level is invalid."""
         envs = {"LANTERN_LOG_LEVEL": "INVALID"}
         envs_bck = self._set_envs(envs)
-        config = Config(read_env=False)
+        config = Config(read_dotenv=False)
 
-        with pytest.raises(ConfigurationError):
+        with pytest.raises(EnvValidationError):
             _ = config.LOG_LEVEL
+
+        self._unset_envs(envs, envs_bck)
+
+    @pytest.mark.parametrize("value", ["0", "-2", "INVALID"])
+    def test_validate_invalid_parallel_value(self, value: int | str):
+        """Cannot validate where the parallel processing jobs value is invalid."""
+        envs = {"LANTERN_PARALLEL_JOBS": value}
+        envs_bck = self._set_envs(envs)
+        config = Config(read_dotenv=False)
+
+        with pytest.raises(EnvValidationError):
+            _ = config.PARALLEL_JOBS
 
         self._unset_envs(envs, envs_bck)
 
@@ -288,9 +301,9 @@ class TestConfig:
         """Cannot validate where a required path is invalid."""
         envs: dict = {env: str(Path(__file__).resolve())}
         envs_bck = self._set_envs(envs)
-        config = Config(read_env=False)
+        config = Config(read_dotenv=False)
 
-        with pytest.raises(ConfigurationError):
+        with pytest.raises(EnvValidationError):
             config.validate()
 
         self._unset_envs(envs, envs_bck)
@@ -299,15 +312,15 @@ class TestConfig:
         ("property_name", "expected", "sensitive"),
         [
             ("PARALLEL_JOBS", 2, False),
-            ("STORE_GITLAB_ENDPOINT", "x", False),
+            ("STORE_GITLAB_ENDPOINT", "https://example.com", False),
             ("STORE_GITLAB_TOKEN", "x", True),
             ("STORE_GITLAB_PROJECT_ID", "x", False),
             ("STORE_GITLAB_BRANCH", "x", False),
             ("STORE_GITLAB_CACHE_PATH", Path("x").resolve(), False),
             ("TEMPLATES_PLAUSIBLE_ID", "x", False),
-            ("TEMPLATES_ITEM_CONTACT_ENDPOINT", "x", False),
+            ("TEMPLATES_ITEM_CONTACT_ENDPOINT", "https://example.com", False),
             ("TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY", "x", False),
-            ("TEMPLATES_ITEM_VERSIONS_ENDPOINT", "x", False),
+            ("TEMPLATES_ITEM_VERSIONS_ENDPOINT", "https://example.com", False),
             ("SITE_UNTRUSTED_S3_BUCKET_TESTING", "x", False),
             ("SITE_UNTRUSTED_S3_BUCKET_LIVE", "x", False),
             ("SITE_UNTRUSTED_S3_ACCESS_ID", "x", False),
@@ -315,8 +328,8 @@ class TestConfig:
             ("SITE_TRUSTED_RSYNC_HOST", "x", False),
             ("SITE_TRUSTED_RSYNC_BASE_PATH_TESTING", Path("x"), False),
             ("SITE_TRUSTED_RSYNC_BASE_PATH_LIVE", Path("x"), False),
-            ("VERIFY_SHAREPOINT_PROXY_ENDPOINT", "x", False),
-            ("VERIFY_SAN_PROXY_ENDPOINT", "x", False),
+            ("VERIFY_SHAREPOINT_PROXY_ENDPOINT", "https://example.com", False),
+            ("VERIFY_SAN_PROXY_ENDPOINT", "https://example.com", False),
             ("BASE_URL_TESTING", "https://example.com", False),
             ("BASE_URL_LIVE", "https://example.com", False),
         ],

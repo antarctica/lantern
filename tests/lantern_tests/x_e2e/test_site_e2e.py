@@ -87,7 +87,7 @@ class TestPrimaryNavigation:
         assert status_code == 200
 
         # expect primary link not to be viewport initially (and so not in header)
-        primary_link = mobile_page.get_by_role("link", name="Part of British Antarctic Survey")
+        primary_link = mobile_page.get_by_role("link", name="Accessibility")
         expect(primary_link).not_to_be_in_viewport()
 
         # scroll to end of page and expect link to now be visible
@@ -102,5 +102,5 @@ class TestPrimaryNavigation:
         status_code = page.evaluate("window.performance.getEntries()[0].responseStatus")
         assert status_code == 200
 
-        primary_link = page.get_by_role("link", name="Part of British Antarctic Survey")
+        primary_link = page.get_by_role("link", name="BAS Data Catalogue")
         expect(primary_link).to_be_in_viewport()

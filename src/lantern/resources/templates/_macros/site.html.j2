@@ -139,7 +139,7 @@
         {{ primary_nav() }}
       </div>
       <div class="flex-1 flex self-center justify-end">
-        <a class="hidden lg:block hover:underline" href="https://www.bas.ac.uk" target="_blank">Part of British Antarctic Survey {{ com.ext_link_i() }}</a>
+        <span class="hidden lg:block">Part of <a class="hover:underline" href="https://www.bas.ac.uk" target="_blank">British Antarctic Survey {{ com.ext_link_i() }}</a></span>
       </div>
     </div>
   </nav>
@@ -253,7 +253,7 @@
 {% macro footer_legal(copyright_year) %}
   <div class="flex flex-col justify-between space-y-4 lg:space-y-0 lg:flex-row">
     <div class="lg:text-left lg:flex lg:space-x-2">
-      <p>© <a class="{{ com.footer_link_classes() }}" href="https://www.bas.ac.uk">British Antarctic Survey</a> {{ copyright_year }}<span class="hidden lg:inline">.</span></p>
+      <span>© <a class="{{ com.footer_link_classes() }}" href="https://www.ukri.org" target="_blank">UK Research and Innovation {{ com.ext_link_i() }}</a>{{ copyright_year }}<span class="hidden lg:inline">.</span></span>
     </div>
     <ul class="flex justify-center space-x-2 lg:justify-end">
       <li><a class="{{ com.footer_link_classes() }}" href="/legal/accessibility">Accessibility</a></li>
@@ -265,5 +265,5 @@
 {% endmacro %}
 
 {% macro footer_network_nav() %}
-  <a class="block lg:hidden {{ com.footer_link_classes() }}" target="_blank" href="https://www.bas.ac.uk">Part of British Antarctic Survey {{ com.ext_link_i() }}</a>
+  <span class="block lg:hidden">Part of <a class="{{ com.footer_link_classes() }}" href="https://www.bas.ac.uk" target="_blank">British Antarctic Survey {{ com.ext_link_i() }}</a></span>
 {% endmacro %}

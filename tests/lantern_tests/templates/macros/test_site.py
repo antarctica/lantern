@@ -239,7 +239,7 @@ class TestMacrosSite:
 
     def test_navbar_primary_nav(self):
         """Can get expected primary navigation links from navbar."""
-        expected_labels = ["Part of British Antarctic Survey"]
+        expected_labels = ["British Antarctic Survey"]
         template = """{% import '_macros/site.html.j2' as site %}{{ site.navbar() }}"""
         html = BeautifulSoup(self._render(template), parser="html.parser", features="lxml")
 

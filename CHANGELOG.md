@@ -71,6 +71,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Updating styles to reflect BAS Style Kit 2025 and new public website
 * Improvements to responsive design in templates
 * Improvements to accessibility in templates
+* Refactoring config class to use environs validation consistently
 
 ## [0.5.0] - 2026-02-27 [!BREAKING]
 

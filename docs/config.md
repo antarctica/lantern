@@ -3,14 +3,15 @@
 > [!NOTE]
 > Parts of this page are specific to the [BAS Data Catalogue](/docs/architecture.md#bas-data-catalogue).
 
-Application configuration is managed by the `lantern.Config` class.
+Application configuration is managed by the `lantern.Config` class using environment variables.
+
+All variables are prefixed with `LANTERN_` to avoid conflicts with other applications. E.g. use `LANTERN_FOO` to set a
+`FOO` option.
 
 <!-- pyml disable md028 -->
 > [!TIP]
-> User configurable options can be defined using environment variables and/or an `.env` file, with environment
-> variables taking precedence. Variables are prefixed with `LANTERN_` to avoid conflicts with other applications.
->
-> E.g. use `LANTERN_FOO` to set a `FOO` option.
+> Configurable options can be defined using environment variables and/or an `.env` file, with environment variables
+> taking precedence.
 
 > [!NOTE]
 > Config option values may be [Overridden](/docs/dev.md#pytest-env) in application tests.
@@ -25,10 +26,10 @@ Application configuration is managed by the `lantern.Config` class.
 | `ADMIN_METADATA_SIGNING_KEY_PUBLIC`     | JSON Web Key | Yes          | Yes      | No        | v0.4.x        | JSON Web Key (JWK) for verifying administrative metadata                           | *None*                                    | '{"kid": "magic_metadata_signing_key", ...}'    |
 | `BASE_URL_LIVE`                         | String       | Yes          | Yes      | No        | v0.6.x        | Base URL for production/live catalogue (typically reverse proxied)                 | *None*                                    | 'https://example.com'                           |
 | `BASE_URL_TESTING`                      | String       | Yes          | Yes      | No        | v0.6.x        | Base URL for staging/testing catalogue (typically reverse proxied)                 | *None*                                    | 'https://example.com'                           |
-| `ENABLE_FEATURE_SENTRY`                 | Boolean      | Yes          | No       | No        | v0.1.x        | Enables Sentry monitoring if true                                                  | *True*                                    | *True*                                          |
-| `LOG_LEVEL`                             | Number       | Yes          | No       | No        | v0.1.x        | A logging level name or number to set the application logging level                | 30                                        | 20                                              |
+| `ENABLE_FEATURE_SENTRY`                 | Boolean      | Yes          | No       | No        | v0.1.x        | Enables Sentry monitoring if true                                                  | *True*                                    | 'true'                                          |
+| `LOG_LEVEL`                             | Number       | Yes          | No       | No        | v0.1.x        | A logging level name or number to set the application logging level                | 30                                        | '20'                                            |
 | `LOG_LEVEL_NAME`                        | String       | No           | -        | No        | v0.1.x        | Logging level name for the configured application logging level                    | 'WARNING'                                 | 'INFO'                                          |
-| `PARALLEL_JOBS`                         | Number       | Yes          | No       | No        | v0.3.x        | Number of parallel jobs to run for applicable tasks                                | 1                                         | 4                                               |
+| `PARALLEL_JOBS`                         | Number       | Yes          | No       | No        | v0.3.x        | Number of parallel jobs to run for applicable tasks                                | 1                                         | '4'                                             |
 | `SENTRY_DSN`                            | String       | No           | -        | No        | v0.1.x        | Sentry connection string for backend error monitoring (not sensitive)              | *N/A*                                     | 'https://example.com'                           |
 | `SENTRY_ENVIRONMENT`                    | String       | Yes          | No       | No        | v0.1.x        | Application runtime environment to include in Sentry errors                        | 'development'                             | 'production'                                    |
 | `SITE_TRUSTED_RSYNC_BASE_PATH_LIVE`     | String       | Yes          | Yes      | No        | v0.6.x        | Path for trusted site content within upload server (live environment)              | *None*                                    | '/data/content/live'                            |
@@ -65,8 +66,12 @@ Application configuration is managed by the `lantern.Config` class.
 
 - `PARALLEL_JOBS`
 
-Some tasks such as populating caches can run in parallel for better performance. The `PARALLEL_JOBS` option sets the
-maximum number of parallel jobs to run. Where `1` disables parallelism and `-1` uses all available CPU cores.
+Some tasks such as populating caches can run in parallel for better performance.
+
+The `PARALLEL_JOBS` option sets the maximum number of parallel jobs to run.
+
+Where `1` disables parallelism and `-1` uses all available CPU cores. Non-positive integers (except `-1`) will give a
+validator error. Defaults to `1` (no parallelism).
 
 ### Monitoring config options
 
@@ -135,14 +140,22 @@ by the `Config` class. E.g. `'true'` and `'True'` will be parsed as Python's `Tr
 
 ## Config validation
 
-The `Config.validate()` method performs limited validation of configurable [Config Options](#config-options), raising
-an exception if invalid.
+Missing, required, config options will raise a `environs.exceptions.EnvError` on property access via the
+environs package.
 
-This checks whether required options are set and can be parsed, it does not check whether access credentials work with
-a remote service for example. These sorts of errors SHOULD be caught elsewhere in the application.
+[Marshmallow](https://marshmallow.readthedocs.io/en/stable/marshmallow.validate.html and custom validation methods MAY
+additionally validate some config options, raising `environs.exceptions.EnvValidationError` (a `EnvError` subclass) if
+invalid.
+
+> [!WARNING]
+> This validation is basic/limited, checking a value is a URL for example, not that it points to a particular type of
+> service. Additional validation and error handling SHOULD be caught elsewhere in the application.
+
+The `Config.validate()` method can be used to force validation of all properties.
 
 > [!TIP]
-> Run the `config-check` [Development Task](/docs/dev.md#development-tasks) to validate the current configuration.
+> Run the `config-check` [Development Task](/docs/dev.md#development-tasks) to call this method and return the current
+> configuration if valid.
 
 ## Config listing
 

@@ -4,32 +4,31 @@ from importlib.metadata import version
 from pathlib import Path
 from typing import TypedDict
 
-from environs import Env, EnvError, EnvValidationError, validate
+from environs import Env, ValidationError
 from jwskate import Jwk
+from marshmallow import validate
 
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 
 
-class ConfigurationError(Exception):
-    """Raised for configuration validation errors."""
-
-    pass
-
-
 # noinspection PyPep8Naming
 class Config:
-    """Application configuration."""
+    """
+    Application configuration using environment variables.
 
-    def __init__(self, read_env: bool = True) -> None:
+    Properties are validated on access, see `validate()` for details and/or how to force checks.
+    """
+
+    def __init__(self, read_dotenv: bool = True) -> None:
         """Create Config instance and load options from possible .env file."""
         self._app_prefix = "LANTERN_"
         self._app_package = "lantern"
         self._safe_value = "[**REDACTED**]"
         self._none_value = "[**NOT SET**]"
 
-        self.env = Env()
-        if read_env:
-            self.env.read_env()
+        self._env = Env()
+        if read_dotenv:
+            self._env.read_env()
 
     def __getstate__(self) -> dict:
         """
@@ -38,72 +37,19 @@ class Config:
         Environs instances cannot be pickled.
         """
         state = self.__dict__.copy()
-        del state["env"]
+        del state["_env"]
         return state
 
     def __setstate__(self, state: dict) -> None:
         """Restore unsupported attributes when unpickling."""
         self.__dict__.update(state)
-        self.env = Env()
+        self._env = Env()
 
     def __eq__(self, other: object) -> bool:
         """Check equality."""
         if not isinstance(other, Config):
             return NotImplemented
         return self.dumps_safe() == other.dumps_safe() and self.ADMIN_METADATA_KEYS == other.ADMIN_METADATA_KEYS
-
-    def validate(self) -> None:
-        """
-        Validate configuration.
-
-        This validation is basic/limited. E.g. We check that credentials aren't empty, not that they work.
-
-        Note: Logging level is validated at the point of access by environs automatically.
-
-        Raises `ConfigurationError` if invalid.
-        """
-        required = [
-            "ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE",
-            "ADMIN_METADATA_SIGNING_KEY_PUBLIC",
-            "STORE_GITLAB_ENDPOINT",
-            "STORE_GITLAB_TOKEN",
-            "STORE_GITLAB_PROJECT_ID",
-            "STORE_GITLAB_BRANCH",
-            "STORE_GITLAB_CACHE_PATH",
-            "TEMPLATES_PLAUSIBLE_ID",
-            "TEMPLATES_ITEM_CONTACT_ENDPOINT",
-            "TEMPLATES_ITEM_VERSIONS_ENDPOINT",
-            "TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY",
-            "SITE_UNTRUSTED_S3_BUCKET_TESTING",
-            "SITE_UNTRUSTED_S3_BUCKET_LIVE",
-            "SITE_UNTRUSTED_S3_ACCESS_ID",
-            "SITE_UNTRUSTED_S3_ACCESS_SECRET",
-            "SITE_TRUSTED_RSYNC_HOST",
-            "SITE_TRUSTED_RSYNC_BASE_PATH_TESTING",
-            "SITE_TRUSTED_RSYNC_BASE_PATH_LIVE",
-            "VERIFY_SHAREPOINT_PROXY_ENDPOINT",
-            "VERIFY_SAN_PROXY_ENDPOINT",
-            "BASE_URL_TESTING",
-            "BASE_URL_LIVE",
-        ]
-        directories = ["STORE_GITLAB_CACHE_PATH"]
-
-        for prop in required:
-            attr = prop
-            if prop == "ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE" or prop == "ADMIN_METADATA_SIGNING_KEY_PUBLIC":
-                # Though these options are set as separate ENV VARs, they are accessed together through
-                # ADMIN_METADATA_KEYS as an `AdministrationKeys` instance, which validates required properties are set.
-                attr = "ADMIN_METADATA_KEYS"
-            try:
-                _ = getattr(self, attr)
-            except EnvError as e:
-                msg = f"{prop} must be set."
-                raise ConfigurationError(msg) from e
-
-        for prop in directories:
-            if Path(getattr(self, prop)).exists() and not Path(getattr(self, prop)).is_dir():
-                msg = f"{prop} must be a directory."
-                raise ConfigurationError(msg)
 
     class ConfigDumpSafe(TypedDict):
         """Types and keys for `dumps_safe`."""
@@ -178,6 +124,36 @@ class Config:
             "BASE_URL_LIVE": self.BASE_URL_LIVE,
         }
 
+    def validate(self) -> None:
+        """
+        Prompt config validation.
+
+        Trigger validation of all properties by trying to access them.
+
+        Undefined required properties will raise `environs.exceptions.EnvError`.
+
+        Invalid property values will raise a `environs.exceptions.EnvValidationError` (a `EnvError` subclass).
+
+        Validation is set on each property, using a combination of default environs/marshmallow and custom validators.
+        Validation is basic/limited, for example we check credentials aren't empty, not that they work.
+        """
+        self.dumps_safe()
+
+    @staticmethod
+    def _opt_path_validator(n: Path) -> None:
+        """If path exists, it must be a directory."""
+        if n.exists() and not n.is_dir():
+            msg = "Must be a directory."
+            raise ValidationError(msg)
+
+    @staticmethod
+    def _parallel_validator(n: int) -> None:
+        """Must be a positive integer or -1."""
+        # Accept integers >= 0 or the sentinel -1. Reject other values.
+        if not (type(n) is int and (n > 0 or n == -1)):
+            msg = "Must be a positive integer or -1."
+            raise ValidationError(msg)
+
     @property
     def NAME(self) -> str:
         """Application name."""
@@ -195,18 +171,14 @@ class Config:
     @property
     def PARALLEL_JOBS(self) -> int:
         """Number of parallel jobs to use for relevant tasks."""
-        with self.env.prefixed(self._app_prefix):
-            return self.env.int("PARALLEL_JOBS", 1)
+        with self._env.prefixed(self._app_prefix):
+            return self._env.int("PARALLEL_JOBS", default=1, validate=self._parallel_validator)
 
     @property
     def LOG_LEVEL(self) -> int:
         """Logging level."""
-        with self.env.prefixed(self._app_prefix):
-            try:
-                return self.env.log_level("LOG_LEVEL", logging.WARNING)
-            except EnvValidationError as e:
-                msg = "LOG_LEVEL is invalid."
-                raise ConfigurationError(msg) from e
+        with self._env.prefixed(self._app_prefix):
+            return self._env.log_level("LOG_LEVEL", default=logging.WARNING)
 
     @property
     def LOG_LEVEL_NAME(self) -> str:
@@ -215,29 +187,41 @@ class Config:
 
     @property
     def SENTRY_DSN(self) -> str:
-        """Connection string for Sentry monitoring."""
+        """
+        Connection string for Sentry monitoring.
+
+        This value is not sensitive.
+        """
         return "https://7ee10f6777ab8ec05ffe8b84c4c3039e@o39753.ingest.us.sentry.io/4507147658919936"
 
     @property
     def ENABLE_FEATURE_SENTRY(self) -> bool:
         """Controls whether Sentry monitoring is used."""
-        with self.env.prefixed(self._app_prefix):
-            return self.env.bool("ENABLE_FEATURE_SENTRY", True)
+        with self._env.prefixed(self._app_prefix):
+            return self._env.bool("ENABLE_FEATURE_SENTRY", default=True)
 
     @property
     def SENTRY_ENVIRONMENT(self) -> str:
         """Controls whether Sentry monitoring is used."""
-        with self.env.prefixed(self._app_prefix):
-            return self.env.str("SENTRY_ENVIRONMENT", "development")
+        with self._env.prefixed(self._app_prefix):
+            return self._env.str("SENTRY_ENVIRONMENT", default="development")
 
     @property
     def ADMIN_METADATA_KEYS(self) -> AdministrationKeys:
-        """JSON Web Keys for decrypting and verifying administrative metadata."""
-        with self.env.prefixed(self._app_prefix), self.env.prefixed("ADMIN_METADATA_"):
-            return AdministrationKeys(
-                encryption_private=Jwk(self.env.json("ENCRYPTION_KEY_PRIVATE")),
-                signing_public=Jwk(self.env.json("SIGNING_KEY_PUBLIC")),
+        """
+        JSON Web Keys for decrypting and verifying administrative metadata.
+
+        Keys are cached JWKs for performance. Use setter if changing keys (for tests etc.).
+        """
+        if "_admin_metadata_keys" in self.__dict__:
+            return self.__dict__["_admin_metadata_keys"]
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("ADMIN_METADATA_"):
+            keys = AdministrationKeys(
+                encryption_private=Jwk(self._env.json("ENCRYPTION_KEY_PRIVATE")),
+                signing_public=Jwk(self._env.json("SIGNING_KEY_PUBLIC")),
             )
+            self.__dict__["_admin_metadata_keys"] = keys
+            return keys
 
     @property
     def ADMIN_METADATA_KEYS_ENCRYPTION_KEY_PRIVATE_SAFE(self) -> str:
@@ -247,14 +231,15 @@ class Config:
     @property
     def STORE_GITLAB_ENDPOINT(self) -> str:
         """Endpoint for GitLab store."""
-        with self.env.prefixed(self._app_prefix), self.env.prefixed("STORE_GITLAB_"):
-            return self.env.str("ENDPOINT")
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("STORE_GITLAB_"):
+            # noinspection PyTypeChecker
+            return self._env.str("ENDPOINT", validate=validate.URL())
 
     @property
     def STORE_GITLAB_TOKEN(self) -> str:
         """API token for GitLab store."""
-        with self.env.prefixed(self._app_prefix), self.env.prefixed("STORE_GITLAB_"):
-            return self.env.str("TOKEN")
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("STORE_GITLAB_"):
+            return self._env.str("TOKEN")
 
     @property
     def STORE_GITLAB_TOKEN_SAFE(self) -> str:
@@ -264,20 +249,20 @@ class Config:
     @property
     def STORE_GITLAB_PROJECT_ID(self) -> str:
         """Project ID for GitLab store."""
-        with self.env.prefixed(self._app_prefix), self.env.prefixed("STORE_GITLAB_"):
-            return self.env.str("PROJECT_ID")
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("STORE_GITLAB_"):
+            return self._env.str("PROJECT_ID")
 
     @property
     def STORE_GITLAB_BRANCH(self) -> str:
         """Branch name for GitLab store."""
-        with self.env.prefixed(self._app_prefix), self.env.prefixed("STORE_GITLAB_"):
-            return self.env.str("BRANCH")
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("STORE_GITLAB_"):
+            return self._env.str("BRANCH")
 
     @property
     def STORE_GITLAB_CACHE_PATH(self) -> Path:
         """Path to local cache for GitLab store."""
-        with self.env.prefixed(self._app_prefix), self.env.prefixed("STORE_GITLAB_"):
-            return self.env.path("CACHE_PATH").resolve()
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("STORE_GITLAB_"):
+            return self._env.path("CACHE_PATH", validate=self._opt_path_validator).resolve()
 
     @property
     def TEMPLATES_CACHE_BUST_VALUE(self) -> str:
@@ -291,8 +276,8 @@ class Config:
     @property
     def TEMPLATES_PLAUSIBLE_ID(self) -> str:
         """Plausible site/domain name."""
-        with self.env.prefixed(self._app_prefix), self.env.prefixed("TEMPLATES_"):
-            return self.env.str("PLAUSIBLE_ID")
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("TEMPLATES_"):
+            return self._env.str("PLAUSIBLE_ID")
 
     @property
     def TEMPLATES_ITEM_MAPS_ENDPOINT(self) -> str:
@@ -302,14 +287,15 @@ class Config:
     @property
     def TEMPLATES_ITEM_CONTACT_ENDPOINT(self) -> str:
         """Endpoint for contact form in items contact tab."""
-        with self.env.prefixed(self._app_prefix), self.env.prefixed("TEMPLATES_"), self.env.prefixed("ITEM_"):
-            return self.env.str("CONTACT_ENDPOINT")
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("TEMPLATES_"), self._env.prefixed("ITEM_"):
+            # noinspection PyTypeChecker
+            return self._env.str("CONTACT_ENDPOINT", validate=validate.URL())
 
     @property
     def TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY(self) -> str:
         """Site key for public facing Cloudflare Turnstile bot protection widget."""
-        with self.env.prefixed(self._app_prefix), self.env.prefixed("TEMPLATES_"), self.env.prefixed("ITEM_"):
-            return self.env.str("CONTACT_TURNSTILE_KEY")
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("TEMPLATES_"), self._env.prefixed("ITEM_"):
+            return self._env.str("CONTACT_TURNSTILE_KEY")
 
     @property
     def TEMPLATES_ITEM_VERSIONS_ENDPOINT(self) -> str:
@@ -318,32 +304,33 @@ class Config:
 
         I.e. The URL to the Git repository where item record revisions are stored.
         """
-        with self.env.prefixed(self._app_prefix), self.env.prefixed("TEMPLATES_"), self.env.prefixed("ITEM_"):
-            return self.env.str("VERSIONS_ENDPOINT")
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("TEMPLATES_"), self._env.prefixed("ITEM_"):
+            # noinspection PyTypeChecker
+            return self._env.str("VERSIONS_ENDPOINT", validate=validate.URL())
 
     @property
     def SITE_UNTRUSTED_S3_BUCKET_TESTING(self) -> str:
         """Target S3 bucket for untrusted site content (testing environment)."""
-        with self.env.prefixed(self._app_prefix), self.env.prefixed("SITE_UNTRUSTED_S3_"):
-            return self.env.str("BUCKET_TESTING")
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("SITE_UNTRUSTED_S3_"):
+            return self._env.str("BUCKET_TESTING")
 
     @property
     def SITE_UNTRUSTED_S3_BUCKET_LIVE(self) -> str:
         """Target S3 bucket for untrusted site content (live environment)."""
-        with self.env.prefixed(self._app_prefix), self.env.prefixed("SITE_UNTRUSTED_S3_"):
-            return self.env.str("BUCKET_LIVE")
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("SITE_UNTRUSTED_S3_"):
+            return self._env.str("BUCKET_LIVE")
 
     @property
     def SITE_UNTRUSTED_S3_ACCESS_ID(self) -> str:
         """ID for AWS IAM access key used to manage content in SITE_UNTRUSTED_S3_BUCKET."""
-        with self.env.prefixed(self._app_prefix), self.env.prefixed("SITE_UNTRUSTED_S3_"):
-            return self.env.str("ACCESS_ID")
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("SITE_UNTRUSTED_S3_"):
+            return self._env.str("ACCESS_ID")
 
     @property
     def SITE_UNTRUSTED_S3_ACCESS_SECRET(self) -> str:
         """Secret for AWS IAM access key used to manage content in SITE_UNTRUSTED_S3_BUCKET."""
-        with self.env.prefixed(self._app_prefix), self.env.prefixed("SITE_UNTRUSTED_S3_"):
-            return self.env.str("ACCESS_SECRET")
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("SITE_UNTRUSTED_S3_"):
+            return self._env.str("ACCESS_SECRET")
 
     @property
     def SITE_UNTRUSTED_S3_ACCESS_SECRET_SAFE(self) -> str:
@@ -353,32 +340,34 @@ class Config:
     @property
     def SITE_TRUSTED_RSYNC_HOST(self) -> str:
         """Target host for trusted site content."""
-        with self.env.prefixed(self._app_prefix), self.env.prefixed("SITE_TRUSTED_RSYNC_"):
-            return self.env.str("HOST")
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("SITE_TRUSTED_RSYNC_"):
+            return self._env.str("HOST")
 
     @property
     def SITE_TRUSTED_RSYNC_BASE_PATH_TESTING(self) -> Path:
         """Target path for trusted site content (testing environment)."""
-        with self.env.prefixed(self._app_prefix), self.env.prefixed("SITE_TRUSTED_RSYNC_"):
-            return self.env.path("BASE_PATH_TESTING")
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("SITE_TRUSTED_RSYNC_"):
+            return self._env.path("BASE_PATH_TESTING")
 
     @property
     def SITE_TRUSTED_RSYNC_BASE_PATH_LIVE(self) -> Path:
         """Target path for trusted site content (live environment)."""
-        with self.env.prefixed(self._app_prefix), self.env.prefixed("SITE_TRUSTED_RSYNC_"):
-            return self.env.path("BASE_PATH_LIVE")
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("SITE_TRUSTED_RSYNC_"):
+            return self._env.path("BASE_PATH_LIVE")
 
     @property
     def VERIFY_SHAREPOINT_PROXY_ENDPOINT(self) -> str:
         """Endpoint for checking SharePoint hosted downloads in verification jobs."""
-        with self.env.prefixed(self._app_prefix), self.env.prefixed("VERIFY_"):
-            return self.env.str("SHAREPOINT_PROXY_ENDPOINT")
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("VERIFY_"):
+            # noinspection PyTypeChecker
+            return self._env.str("SHAREPOINT_PROXY_ENDPOINT", validate=validate.URL())
 
     @property
     def VERIFY_SAN_PROXY_ENDPOINT(self) -> str:
         """Endpoint for checking SAN references in verification jobs."""
-        with self.env.prefixed(self._app_prefix), self.env.prefixed("VERIFY_"):
-            return self.env.str("SAN_PROXY_ENDPOINT")
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("VERIFY_"):
+            # noinspection PyTypeChecker
+            return self._env.str("SAN_PROXY_ENDPOINT", validate=validate.URL())
 
     @property
     def BASE_URL_TESTING(self) -> str:
@@ -387,8 +376,9 @@ class Config:
 
         Can be a reverse proxied endpoint. Must be a fully qualified URL.
         """
-        with self.env.prefixed(self._app_prefix), self.env.prefixed("BASE_URL_"):
-            return self.env.str("TESTING", validate=validate.URL())
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("BASE_URL_"):
+            # noinspection PyTypeChecker
+            return self._env.str("TESTING", validate=validate.URL())
 
     @property
     def BASE_URL_LIVE(self) -> str:
@@ -397,5 +387,6 @@ class Config:
 
         Can be a reverse proxied endpoint. Must be a fully qualified URL.
         """
-        with self.env.prefixed(self._app_prefix), self.env.prefixed("BASE_URL_"):
-            return self.env.str("LIVE", validate=validate.URL())
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("BASE_URL_"):
+            # noinspection PyTypeChecker
+            return self._env.str("LIVE", validate=validate.URL())

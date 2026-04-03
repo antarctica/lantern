@@ -9,8 +9,8 @@ from lantern.lib.metadata_library.models.record.utils.admin import Administratio
 class ExtraConfig(Config):
     """Additional config options needed for development tasks."""
 
-    def __init__(self, read_env: bool = True) -> None:
-        super().__init__(read_env)
+    def __init__(self, read_dotenv: bool = True) -> None:
+        super().__init__(read_dotenv)
         self._extra_prefix = "X_"
         self._none_value = "[**NOT SET**]"
 
@@ -33,8 +33,8 @@ class ExtraConfig(Config):
     def ADMIN_METADATA_KEYS_RW(self) -> AdministrationKeys:  # noqa: N802
         """JSON Web Keys for encrypting and signing administrative metadata."""
         return AdministrationKeys(
-            encryption_private=Jwk(self.env.json(f"{self._app_prefix}ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE")),
-            signing_private=Jwk(self.env.json(f"{self._extra_prefix}ADMIN_METADATA_SIGNING_KEY_PRIVATE")),
+            encryption_private=Jwk(self._env.json(f"{self._app_prefix}ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE")),
+            signing_private=Jwk(self._env.json(f"{self._extra_prefix}ADMIN_METADATA_SIGNING_KEY_PRIVATE")),
         )
 
     @property
@@ -45,14 +45,14 @@ class ExtraConfig(Config):
     @property
     def AGOL_CLIENT_ID(self) -> str:  # noqa: N802
         """Client ID for ArcGIS Online OAuth developer credential for accessing/updating item metadata."""
-        with self.env.prefixed(self._extra_prefix), self.env.prefixed("AGOL_CLIENT_"):
-            return self.env.str("ID")
+        with self._env.prefixed(self._extra_prefix), self._env.prefixed("AGOL_CLIENT_"):
+            return self._env.str("ID")
 
     @property
     def AGOL_CLIENT_SECRET(self) -> str:  # noqa: N802
         """Secret for ArcGIS Online OAuth developer credential for accessing/updating item metadata."""
-        with self.env.prefixed(self._extra_prefix), self.env.prefixed("AGOL_CLIENT_"):
-            return self.env.str("SECRET")
+        with self._env.prefixed(self._extra_prefix), self._env.prefixed("AGOL_CLIENT_"):
+            return self._env.str("SECRET")
 
     @property
     def AGOL_CLIENT_SECRET_SAFE(self) -> str:  # noqa: N802

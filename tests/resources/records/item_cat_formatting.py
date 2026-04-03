@@ -131,7 +131,7 @@ Admonitions (lower-case triggers and custom headings):
 ...
 
 > [!CAUTION] _Something terrible has happened 😧_
-> Negative potential consequences of an action.
+> ...
 
 Table:
 

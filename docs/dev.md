@@ -394,12 +394,12 @@ Within this project, for each new item type:
 > Follow the [Styling Guidelines](/docs/site.md#styling-guidelines) when updating styles.
 
 1. make changes to `src/lantern/resources/templates/_assets/css/main.css.j2`
-2. apply classes as necessary to elements in [HTML Templates](/docs/site.md#templates)
-3. run the `css` [Development Task](/docs/dev.md#development-tasks) which will:
+1. apply classes as necessary to elements in [HTML Templates](/docs/site.md#templates)
+1. run the `css` [Development Task](/docs/dev.md#development-tasks) which will:
    - build a temporary [Static Site](/docs/architecture.md#sites) using the [Test Catalogue](#test-catalogue)
    - run the Tailwind compiler against this site output, adding or removing classes based on usage
    - copy the resulting minified CSS to `src/lantern/resources/css/main.css`
-4. run the `build-test-records` or `build-records` [Development Task](/docs/dev.md#development-tasks) to rebuild the
+1. run the `build-test-records` or `build-records` [Development Task](/docs/dev.md#development-tasks) to rebuild the
    static site
    - needed as builds reference a local copy of `main.css` that will need refreshing
 
@@ -409,15 +409,14 @@ Within this project, for each new item type:
 ### Updating scripts
 
 1. make changes to `src/lantern/resources/templates/_assets/js/*.js.j2` and/or [Asset Macros](/docs/site.md#asset-macros)
-2. if needed, make changes to [HTML Templates](/docs/site.md#templates) and/or [Common Macros](/docs/site.md#common-macros)
-3. delete any existing site build
-4. run the `build-test-records` or `build-records` [Development Task](/docs/dev.md#development-tasks) to rebuild the
+1. if needed, make changes to [HTML Templates](/docs/site.md#templates) and/or [Common Macros](/docs/site.md#common-macros)
+1. run the `build-test-records` or `build-records` [Development Task](/docs/dev.md#development-tasks) to rebuild the
    static site
    - needed to include variables from [Site Metadata](/docs/models.md#static-site-metadata)
    - needed as builds reference local copies of these dynamic generated scripts
 
 > [!TIP]
-> You can run `trash export/ && task js && task build-test-records` to chain these tasks together when iterating changes.
+> You can run `task js && task build-test-records` to chain these tasks together when iterating changes.
 
 ### Adding development tasks
 

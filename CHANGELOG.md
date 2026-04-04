@@ -47,6 +47,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * CloudFront invalidation support added to live records workflow
 * Aria hidden role for icons
 * Aria roles for item tabs, with minimal JavaScript to support keyboard navigation between tabs
+* `gitlab-record` development task for setting GitLab issues in records
 
 ### Fixed
 

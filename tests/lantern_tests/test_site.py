@@ -3,6 +3,7 @@ import logging
 from collections.abc import Callable
 
 import pytest
+from lxml import etree
 
 from lantern.lib.metadata_library.models.record.elements.common import Identifier
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
@@ -18,7 +19,7 @@ from lantern.outputs.site_health import SiteHealthOutput
 from lantern.outputs.site_index import SiteIndexOutput
 from lantern.outputs.site_pages import SitePagesOutput
 from lantern.outputs.site_resources import SiteResourcesOutput
-from lantern.site import Site, SiteJob, _job_worker_store, _run_job
+from lantern.site import Site, SiteJob, _job_worker_iso_html_transform, _job_worker_store, _run_job
 from lantern.stores.base import Store
 from lantern.stores.gitlab_cache import GitLabCachedStore
 from tests.resources.records.item_cat_product_min import record as product_min_required
@@ -29,10 +30,12 @@ def fx_reset_singletons():
     """Reset singletons for test isolation."""
     mod = importlib.import_module("lantern.site")
     mod._STORE_SINGLETON = None
+    mod._ISO_HTML_XSLT_SINGLETON = None
 
     yield
 
     mod._STORE_SINGLETON = None
+    mod._ISO_HTML_XSLT_SINGLETON = None
 
 
 class TestSiteJob:
@@ -52,6 +55,12 @@ class TestSiteJob:
         result = _job_worker_store(store=fx_gitlab_cached_store_pop)
         assert isinstance(result, GitLabCachedStore)
         assert len(result._cache._flash) > 0
+
+    @pytest.mark.cov()
+    def test_job_worker_iso_transform(self, fx_reset_singletons):  # noqa: ANN001
+        """Can create ISO HTML XSLT instance."""
+        result = _job_worker_iso_html_transform()
+        assert isinstance(result, etree.XSLT)
 
     @pytest.mark.parametrize(
         ("output_cls", "expected"),

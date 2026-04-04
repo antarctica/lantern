@@ -1,13 +1,11 @@
+import logging
 from pathlib import Path
-from shutil import copytree
-from tempfile import TemporaryDirectory
 
-from importlib_resources import as_file as resources_as_file
 from importlib_resources import files as resources_files
 from lxml import etree
 
 from lantern.models.record.revision import RecordRevision
-from lantern.models.site import SiteContent
+from lantern.models.site import ExportMeta, SiteContent
 from lantern.outputs.base import OutputRecord
 
 
@@ -111,10 +109,20 @@ class RecordIsoHtmlOutput(OutputRecord):
 
     Supports trusted publishing (via export meta).
 
-    Note: This output class is very inefficient.
+    An existing XSLT transformer can be provided to avoid recreating on each run in parallel processing contexts.
 
     [1] https://metadata-standards.data.bas.ac.uk/standards/iso-19115-19139#iso-html
     """
+
+    def __init__(
+        self,
+        logger: logging.Logger,
+        meta: ExportMeta,
+        record: RecordRevision,
+        transform: etree.XSLT | None = None,
+    ) -> None:
+        super().__init__(logger=logger, meta=meta, record=record)
+        self._transform = transform
 
     @property
     def name(self) -> str:
@@ -130,29 +138,30 @@ class RecordIsoHtmlOutput(OutputRecord):
         }
 
     @staticmethod
-    def _load_xsl(package_ref: str) -> TemporaryDirectory:
-        """Copy XSL files from package to a temporary directory."""
-        xsl_dir = TemporaryDirectory()
-        xsl_path = Path(xsl_dir.name) / "xsl"
-        with resources_as_file(resources_files(package_ref)) as resources_path:
-            xsl_path.parent.mkdir(parents=True, exist_ok=True)
-            copytree(resources_path, xsl_path)
-        return xsl_dir
+    def create_xslt_transformer() -> etree.XSLT:
+        """Create XSLT transformer for the ISO XML to HTML stylesheet."""
+        combined = resources_files("lantern.resources.xsl").joinpath("xml-to-html-ISO-combined.xsl")
+        xsl_bytes = combined.read_bytes()
+        xsl_doc = etree.fromstring(xsl_bytes)
+        return etree.XSLT(xsl_doc)
 
     def _apply_iso_html_xslt(self, record: RecordRevision) -> str:
-        """Apply XSLT to record and return rendered output."""
-        xsl_path = self._load_xsl(package_ref="lantern.resources.xsl")
-        try:
-            entrypoint_path = Path(xsl_path.name) / "xsl" / "iso-html" / "xml-to-html-ISO.xsl"
-            xsl_doc = etree.parse(entrypoint_path)
+        """
+        Apply XSLT to record and return rendered output.
 
-            record_xml: str = RecordIsoXmlOutput(logger=self._logger, meta=self._meta, record=record).outputs[0].content  # ty:ignore[invalid-assignment]
-            record_doc = etree.ElementTree(etree.fromstring(record_xml.encode()))
+        Uses an existing XSLT transformer if available (for performance in parallel processing).
+        """
+        if self._transform is None:
+            self._transform = self.create_xslt_transformer()
 
-            transform = etree.XSLT(xsl_doc)
-            return etree.tostring(transform(record_doc), method="html", pretty_print=True, encoding="utf-8").decode()
-        finally:
-            xsl_path.cleanup()
+        # Build XML document from the record XML string
+        record_xml = RecordIsoXmlOutput(logger=self._logger, meta=self._meta, record=record).outputs[0].content
+        record_bytes = bytes(record_xml) if isinstance(record_xml, (bytes, bytearray)) else str(record_xml).encode()
+        record_doc = etree.ElementTree(etree.fromstring(record_bytes))
+
+        # Apply transformation
+        result = self._transform(record_doc)
+        return etree.tostring(result, method="html", pretty_print=True, encoding="utf-8").decode()
 
     @property
     def _content(self) -> str:

@@ -5,16 +5,13 @@ import sys
 from pathlib import Path
 
 import inquirer
-from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata, Permission
-from bas_metadata_library.standards.magic_administration.v1.utils import (
-    AdministrationKeys,
-    AdministrationMetadataSubjectMismatchError,
-)
-from tasks._record_utils import dump_records, init, parse_records, pick_records
+from bas_metadata_library.standards.magic_administration.v1 import Permission
+from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
+from tasks._record_utils import dump_records, ensure_admin, init, parse_records, pick_records
 
 from lantern.lib.metadata_library.models.record.presets.admin import BAS_STAFF, OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.record import Record
-from lantern.lib.metadata_library.models.record.utils.admin import get_admin, set_admin
+from lantern.lib.metadata_library.models.record.utils.admin import set_admin
 from lantern.models.item.base.enums import AccessLevel
 
 
@@ -63,32 +60,7 @@ def _set_permission(
     resource_permission: Permission | None,
 ) -> None:
     """Set single access permission in a record, overwriting any possible existing permissions."""
-    admin = None
-    if record.file_identifier is None:
-        msg = "File identifier required."
-        raise ValueError(msg) from None
-    try:
-        admin = get_admin(keys=keys, record=record)
-    except AdministrationMetadataSubjectMismatchError as e:
-        # prompt user whether to ignore mismatch by clearing existing admin metadata
-        if inquirer.confirm(
-            message=(
-                "Existing administration metadata references the wrong record. Drop existing metadata (if record is cloned)?"
-            ),
-            default=False,
-        ):
-            pass
-        else:
-            raise e from e
-    if admin is None:
-        logger.warning("No or unsupported administration metadata found, creating new instance.")
-        if not inquirer.confirm(
-            message="Existing administration metadata missing or unsupported, reset?",
-            default=False,
-        ):
-            logger.info("Aborting.")
-            sys.exit(1)
-        admin = AdministrationMetadata(id=record.file_identifier)
+    admin = ensure_admin(logger=logger, record=record, keys=keys)
     admin.metadata_permissions = [metadata_permission] if metadata_permission else []
     admin.resource_permissions = [resource_permission] if resource_permission else []
     logger.debug(

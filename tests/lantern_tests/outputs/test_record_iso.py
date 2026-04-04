@@ -108,3 +108,15 @@ class TestRecordIsoHtmlOutput:
             "file_identifier": fx_revision_model_min.file_identifier,
             "file_revision": fx_revision_model_min.file_revision,
         }
+
+    @pytest.mark.cov()
+    def test_existing_transform(
+        self, fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_revision_model_min: RecordRevision
+    ):
+        """Can use an existing transform if provided."""
+        transform = RecordIsoHtmlOutput.create_xslt_transformer()
+        output = RecordIsoHtmlOutput(
+            logger=fx_logger, meta=fx_export_meta, record=fx_revision_model_min, transform=transform
+        )
+        results = output.outputs
+        assert len(results) == 1

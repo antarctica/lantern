@@ -8,11 +8,17 @@ from pathlib import Path
 from typing import Literal
 
 import inquirer
+from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
+from bas_metadata_library.standards.magic_administration.v1.utils import (
+    AdministrationKeys,
+    AdministrationMetadataSubjectMismatchError,
+)
 from boto3 import client as S3Client  # noqa: N812
 from tasks._config import ExtraConfig
 
 from lantern.config import Config
 from lantern.lib.metadata_library.models.record.record import Record, RecordInvalidError
+from lantern.lib.metadata_library.models.record.utils.admin import get_admin
 from lantern.log import init as _init_logging
 from lantern.models.record.record import Record as CatalogueRecord
 from lantern.models.record.record import Record as RecordCatalogue
@@ -271,3 +277,34 @@ def confirm(logger: logging.Logger, message: str) -> None:
     if not inquirer.confirm(message=message, default=True):
         logger.info("Cancelled by the user.")
         sys.exit(1)
+
+
+def ensure_admin(logger: logging.Logger, record: Record, keys: AdministrationKeys) -> AdministrationMetadata:
+    """Ensure record has valid, minimal, admin metadata."""
+    admin = None
+    if record.file_identifier is None:
+        msg = "File identifier required."
+        raise ValueError(msg) from None
+    try:
+        admin = get_admin(keys=keys, record=record)
+    except AdministrationMetadataSubjectMismatchError as e:
+        # prompt user whether to ignore mismatch by clearing existing admin metadata
+        if inquirer.confirm(
+            message=(
+                "Existing administration metadata references the wrong record. Drop existing metadata (if record is cloned)?"
+            ),
+            default=False,
+        ):
+            pass
+        else:
+            raise e from e
+    if admin is None:
+        logger.warning("No or unsupported administration metadata found, creating new instance.")
+        if not inquirer.confirm(
+            message="Existing administration metadata missing or unsupported, reset?",
+            default=False,
+        ):
+            logger.info("Aborting.")
+            sys.exit(1)
+        admin = AdministrationMetadata(id=record.file_identifier)
+    return admin

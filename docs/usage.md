@@ -394,6 +394,19 @@ The `select-records` task will:
 > Record identifiers are intentionally flexible, supporting various catalogue URLs, file names, etc. optionally as a
 > comma and/or space separated list (e.g. `https://example.com/items/123/, 123.json`). Run task for supported formats.
 
+### Setting record issues
+
+The `gitlab-record` task will:
+
+- parse and validate `import/*.json` files (ignoring subfolders) as [Records](/docs/models.md#records)
+- prompt interactively for which record to update
+- via an editor, prompt interactively for which GitLab issues to include in the selected record
+  - issues should be listed on separate lines as canonical GitLab issue URLs (not short references)
+  - existing issues will be pre-populated to either append or remove
+- update the [Administrative Metadata](/docs/libraries.md#record-administrative-metadata) in the selected record with
+  the specified issues
+- save the updated record configuration as a JSON file to the `import/` directory
+
 ### Setting record permissions
 
 The `restrict-records` task will:

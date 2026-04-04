@@ -72,6 +72,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Improvements to responsive design in templates
 * Improvements to accessibility in templates
 * Refactoring config class to use environs validation consistently
+* Refactoring ISO HTML output to avoid loading XSLT on each use
 
 ## [0.5.0] - 2026-02-27 [!BREAKING]
 

@@ -4,6 +4,7 @@ from copy import deepcopy
 from typing import NamedTuple
 
 from joblib import Parallel, delayed
+from lxml import etree
 
 from lantern.log import init as init_logging
 from lantern.models.record.revision import RecordRevision
@@ -19,6 +20,7 @@ from lantern.stores.base import Store
 from lantern.stores.gitlab_cache import GitLabCachedStore
 
 _STORE_SINGLETON: Store | None = None
+_ISO_HTML_XSLT_SINGLETON: etree.XSLT | None = None
 
 
 def _job_worker_store(store: Store) -> Store:
@@ -31,9 +33,22 @@ def _job_worker_store(store: Store) -> Store:
     if _STORE_SINGLETON is None:
         _STORE_SINGLETON = store
         if isinstance(store, GitLabCachedStore):
-            # recreate flash cache
-            _STORE_SINGLETON.select()
+            _STORE_SINGLETON.select()  # recreate flash cache
+    # noinspection PyTypeChecker
     return _STORE_SINGLETON
+
+
+def _job_worker_iso_html_transform() -> etree.XSLT:
+    """
+    ISO HTML XSLT transform per worker process.
+
+    Singleton used to avoid initialising transform for each job as transform cannot be pickled.
+    """
+    global _ISO_HTML_XSLT_SINGLETON
+    if _ISO_HTML_XSLT_SINGLETON is None:
+        _ISO_HTML_XSLT_SINGLETON = RecordIsoHtmlOutput.create_xslt_transformer()
+    # noinspection PyTypeChecker
+    return _ISO_HTML_XSLT_SINGLETON
 
 
 def _run_job(
@@ -51,6 +66,7 @@ def _run_job(
     init_logging(log_level)
     logger = logging.getLogger("app")
     store = _job_worker_store(store=store)
+    iso_html_transform = _job_worker_iso_html_transform()
     select_record = store.select_one
     select_records = store.select
 
@@ -58,7 +74,9 @@ def _run_job(
         output = output_cls(logger=logger, meta=meta, record=record, select_record=select_record)
     elif output_cls in [SiteIndexOutput, SiteHealthOutput, ItemsBasWebsiteOutput, RecordsWafOutput]:
         output = output_cls(logger=logger, meta=meta, select_records=select_records)
-    elif output_cls in [ItemAliasesOutput, RecordIsoJsonOutput, RecordIsoXmlOutput, RecordIsoHtmlOutput]:
+    elif output_cls == RecordIsoHtmlOutput:
+        output = output_cls(logger=logger, meta=meta, record=record, transform=iso_html_transform)
+    elif output_cls in [ItemAliasesOutput, RecordIsoJsonOutput, RecordIsoXmlOutput]:
         output = output_cls(logger=logger, meta=meta, record=record)
     else:
         output = output_cls(logger=logger, meta=meta)

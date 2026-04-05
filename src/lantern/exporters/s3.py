@@ -1,7 +1,10 @@
 import logging
-from collections.abc import Iterable
+import threading
+from collections.abc import Collection
 
-from mypy_boto3_s3 import S3Client
+from boto3 import client as S3Client  # noqa: N812
+from joblib import Parallel, delayed
+from mypy_boto3_s3 import S3Client as S3ClientT
 
 from lantern.exporters.base import ExporterBase
 from lantern.models.site import SiteContent
@@ -14,19 +17,44 @@ class S3Exporter(ExporterBase):
     For use with S3 compatible object stores.
     """
 
-    def __init__(self, logger: logging.Logger, s3: S3Client, bucket: str) -> None:
+    def __init__(self, logger: logging.Logger, s3: S3ClientT, bucket: str, parallel_jobs: int) -> None:
         """Initialise."""
         super().__init__(logger=logger)
         self._s3 = s3
         self._bucket = bucket
+
+        self._thread_local = threading.local()
+        self._workers = parallel_jobs
 
     @property
     def name(self) -> str:
         """Exporter name."""
         return "S3"
 
+    def _get_client(self) -> S3ClientT:
+        """Create per-thread S3 client."""
+        if not hasattr(self._thread_local, "s3"):
+            # Hack to copy access key from existing client
+            # noinspection PyUnresolvedReferences
+            _key = self._s3._request_signer._credentials.get_frozen_credentials()  # ty:ignore[possibly-missing-attribute]
+
+            self._thread_local.s3 = S3Client(
+                "s3",
+                aws_access_key_id=_key.access_key,
+                aws_secret_access_key=_key.secret_key,
+                region_name=self._s3.meta.region_name,
+            )
+
+        return self._thread_local.s3
+
     def _upload_object(
-        self, key: str, content_type: str, body: str | bytes, redirect: str | None = None, meta: dict | None = None
+        self,
+        s3: S3ClientT,
+        key: str,
+        content_type: str,
+        body: str | bytes,
+        redirect: str | None = None,
+        meta: dict | None = None,
     ) -> None:
         """
         Upload file.
@@ -34,6 +62,8 @@ class S3Exporter(ExporterBase):
         Overwrites any existing file.
 
         Supports optional object redirect [1].
+
+        Requires S3 client as a parameter for use in parallel jobs.
 
         [1] https://docs.aws.amazon.com/AmazonS3/latest/userguide/how-to-page-redirect.html#redirect-requests-object-metadata
         """
@@ -46,7 +76,17 @@ class S3Exporter(ExporterBase):
             # noinspection PyTypeChecker
             params["Metadata"] = meta
         self._logger.info(f"Putting {key} as {content_type}")
-        self._s3.put_object(**params)
+        s3.put_object(**params)
+
+    def _upload_item(self, item: SiteContent) -> None:
+        self._upload_object(
+            s3=self._get_client(),  # per-thread client
+            key=str(item.path),
+            content_type=item.media_type,
+            body=item.content,
+            redirect=item.redirect,
+            meta=item.object_meta,
+        )
 
     def _empty_bucket(self) -> None:
         """Delete all keys from S3 bucket."""
@@ -57,16 +97,10 @@ class S3Exporter(ExporterBase):
             # noinspection PyTypeChecker
             self._s3.delete_objects(Bucket=self._bucket, Delete={"Objects": keys})
 
-    def export(self, content: Iterable[SiteContent]) -> None:
-        """Persist content."""
-        _count = 0
-        for item in content:
-            self._upload_object(
-                key=str(item.path),
-                content_type=item.media_type,
-                body=item.content,
-                redirect=item.redirect,
-                meta=item.object_meta,
-            )
-            _count += 1
-        self._logger.info(f"Exported {_count} items to 'https://{self._bucket}'")
+    def export(self, content: Collection[SiteContent]) -> None:
+        """
+        Persist content.
+
+        Uploads are processed in parallel using a threaded pool to avoid issues with picking the S3 client.
+        """
+        Parallel(n_jobs=self._workers, backend="threading")(delayed(self._upload_item)(c) for c in content)

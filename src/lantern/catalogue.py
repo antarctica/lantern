@@ -86,7 +86,7 @@ class BasCatUntrusted(CatalogueBase):
             SAN_PROXY_ENDPOINT=verify_san_endpoint,
         )
         self._site = Site(logger=logger, meta=self._meta, store=self._store)
-        self._exporter = S3Exporter(logger=logger, s3=s3, bucket=bucket)
+        self._exporter = S3Exporter(logger=logger, s3=s3, bucket=bucket, parallel_jobs=self._meta.parallel_jobs)
 
     @staticmethod
     def _sort_output_classes(

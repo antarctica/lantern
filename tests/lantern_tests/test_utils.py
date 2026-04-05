@@ -11,7 +11,7 @@ from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 from lantern.stores.gitlab import GitLabStore
 from lantern.stores.gitlab_cache import GitLabCachedStore
-from lantern.utils import get_jinja_env, get_record_aliases, init_gitlab_store, prettify_html, time_task
+from lantern.utils import get_jinja_env, get_record_aliases, init_gitlab_store, prettify_html
 
 
 @pytest.mark.cov()
@@ -67,23 +67,3 @@ class TestUtils:
             prettify_html(html="<html>\n\n\n\n\n<body><p>...</p></body></html>")
             == "<html>\n<body><p>...</p></body></html>"
         )
-
-    def test_time_task(self, caplog: pytest.LogCaptureFixture) -> None:
-        """Can time a task and log duration using decorator."""
-        expected_class = "Test class method"
-        expected_func = "Test method"
-
-        class _Dummy:
-            @time_task(label=expected_class)
-            def do_work(self) -> str:
-                return "..."
-
-        @time_task(label=expected_func)
-        def _dummy() -> str:
-            return "..."
-
-        _Dummy().do_work()
-        _dummy()
-
-        assert expected_class in caplog.text
-        assert expected_func in caplog.text

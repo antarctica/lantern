@@ -1,4 +1,5 @@
 import json
+from collections.abc import Sequence
 from json import JSONDecodeError
 from typing import Any
 
@@ -77,7 +78,7 @@ class AdditionalInfoTab(CatalogueAdditionalInfoTab):
     the plural properties first and fall back to the singular version.
     """
 
-    def __init__(self, serieses: list[Series | None], scales: list[int | None], **kwargs: Any) -> None:
+    def __init__(self, serieses: Sequence[Series | None], scales: list[int | None], **kwargs: Any) -> None:
         super().__init__(**kwargs)
         self._serieses = serieses
         self._scales = scales
@@ -211,9 +212,9 @@ class ItemCataloguePhysicalMap(ItemCatalogue):
             if "sheet_number" in sup_info:
                 side.identification.series.page = sup_info["sheet_number"]
 
-        series: list[Series] = [side.identification.series for side in self._sides]
+        series = [side.identification.series for side in self._sides]
         scales = [side.identification.spatial_resolution for side in self._sides]
-        return AdditionalInfoTab(serieses=series, scales=scales, **kwargs)  # ty: ignore[invalid-argument-type]
+        return AdditionalInfoTab(serieses=series, scales=scales, **kwargs)
 
     @property
     def graphics(self) -> GraphicOverviews:

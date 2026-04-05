@@ -279,6 +279,23 @@ class TestContact:
         with pytest.raises(ValueError, match=r"At least one role is required"):
             Contact(individual=ContactIdentity(name="x"), role=set())
 
+    @pytest.mark.parametrize("has_individual", [True, False])
+    def test_name(self, has_individual: bool):
+        """Can get either individual or organisation name."""
+        organisation = ContactIdentity(name="x") if not has_individual else None
+        individual = ContactIdentity(name="y") if has_individual else None
+        expected = "y" if has_individual else "x"
+
+        contact = Contact(organisation=organisation, individual=individual, role={ContactRoleCode.POINT_OF_CONTACT})
+        assert contact.name == expected
+
+    def test_name_invalid(self):
+        """Cannot get individual or organisation name if both are undefined."""
+        contact = Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT})
+        contact.organisation = None
+        with pytest.raises(AttributeError):
+            _ = contact.name
+
     def test_unique_roles(self):
         """Contact.role property does not contain duplicate values."""
         role = ContactRoleCode.PUBLISHER

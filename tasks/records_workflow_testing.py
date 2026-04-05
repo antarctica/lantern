@@ -14,7 +14,7 @@ import inquirer
 from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 from gitlab import Gitlab, GitlabGetError
 from gitlab.v4.objects import ProjectIssue, ProjectMergeRequest
-from tasks._record_utils import confirm, init, init_s3, init_store, ping_host
+from tasks._shared import confirm, init, init_s3, init_store, ping_host, time_task
 from tasks.records_build import export
 from tasks.records_import import clean as import_clean
 from tasks.records_import import load as import_load
@@ -32,6 +32,7 @@ from lantern.lib.metadata_library.models.record.record import Record
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
+from lantern.outputs.base import OutputBase
 from lantern.outputs.item_html import ItemAliasesOutput, ItemCatalogueOutput
 from lantern.outputs.items_bas_website import ItemsBasWebsiteOutput
 from lantern.outputs.record_iso import RecordIsoHtmlOutput, RecordIsoJsonOutput, RecordIsoXmlOutput
@@ -40,7 +41,7 @@ from lantern.outputs.site_health import SiteHealthOutput
 from lantern.outputs.site_index import SiteIndexOutput
 from lantern.stores.gitlab import CommitResults, GitLabStore
 from lantern.stores.gitlab_cache import GitLabCachedStore
-from lantern.utils import get_jinja_env, get_record_aliases, time_task
+from lantern.utils import get_jinja_env, get_record_aliases
 
 
 def gitlab_project_mr_from_url(gitlab: Gitlab, mr_url: str) -> ProjectMergeRequest:
@@ -397,7 +398,7 @@ def _export(logger: logging.Logger, catalogue: BasCatalogue, env: BasEnvironment
 
     Outputs limited to record specific (individual) classes, and global that include individual records (e.g. indexes).
     """
-    outputs = [
+    outputs: list[type[OutputBase]] = [
         SiteIndexOutput,
         SiteHealthOutput,
         RecordsWafOutput,

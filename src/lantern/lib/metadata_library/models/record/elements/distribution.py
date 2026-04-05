@@ -130,7 +130,6 @@ class Distributions(list[Distribution]):
         Example input: Distributions([Distribution(distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}), transfer_option=TransferOption(online_resource=OnlineResource(href="x", function=OnlineResourceFunctionCode.DOWNLOAD)))])
         Example output: [{"distributor": {"organisation": {"name": "x"}, "role": ["distributor"]}, "transfer_option": {"online_resource": {"href": "x", "function": "download"}}}]
         """
-        # noinspection PyUnresolvedReferences
         converter = cattrs.Converter()
         converter.register_unstructure_hook(Distribution, lambda d: d.unstructure())
         return [converter.unstructure(distribution) for distribution in self]

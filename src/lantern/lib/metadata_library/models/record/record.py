@@ -386,8 +386,10 @@ class Record:
         """Load any supported validation schemas based on any domain consistency elements within the Record."""
         schemas = []
         for dc in self.data_quality.domain_consistency:
+            if not dc.specification.href:
+                continue
             with contextlib.suppress(KeyError):
-                schemas.append(RecordSchema.map_href(dc.specification.href))  # ty: ignore[invalid-argument-type]
+                schemas.append(RecordSchema.map_href(dc.specification.href))
 
         return schemas
 

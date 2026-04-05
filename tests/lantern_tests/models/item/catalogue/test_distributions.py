@@ -246,6 +246,17 @@ class TestArcGISDistribution:
         dist = FakeArcGISDistributionType(option=_make_dist("x"), other_options=[service_dist])
         assert dist.access_target == "#item-data-info-eA"
 
+    @pytest.mark.cov()
+    def test_access_target_no_item_link(self):
+        """Cannot get access target if item link it contains is not defined."""
+        service_dist = _make_dist(
+            "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+feature"
+        )
+        dist = FakeArcGISDistributionType(option=_make_dist("x"), other_options=[service_dist])
+        dist._layer.transfer_option.online_resource.href = None
+        with pytest.raises(TypeError):
+            _ = dist.access_target
+
 
 class TestFileDistribution:
     """Test base file based Catalogue distribution."""
@@ -616,6 +627,14 @@ class TestDistributionGeoPackage:
         assert dist._compressed == compressed
         assert dist.matches(option, [])
 
+    @pytest.mark.cov()
+    def test_compressed_no_format(self):
+        """Cannot get format if not defined."""
+        option = _make_dist(format_href="")
+        option.format = None
+        with pytest.raises(TypeError):
+            GeoPackage(option=option, restricted=False)
+
 
 class TestDistributionGpx:
     """Test GPX catalogue distribution."""
@@ -679,6 +698,14 @@ class TestDistributionPdf:
         assert dist.format_type == format_type
         assert dist._georeferenced == georeferenced
         assert dist.matches(option, [])
+
+    @pytest.mark.cov()
+    def test_georeferenced_no_format(self):
+        """Cannot get format if not defined."""
+        option = _make_dist(format_href="")
+        option.format = None
+        with pytest.raises(TypeError):
+            Pdf(option=option, restricted=False)
 
 
 class TestDistributionPng:

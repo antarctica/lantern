@@ -116,7 +116,10 @@ class RecordMagic(Record):
 
     def _set_cat_identifier(self) -> None:
         """Set an identifier within the Data Catalogue namespace based on the file identifier."""
-        self_identifier = make_bas_cat(self.file_identifier)  # ty:ignore[invalid-argument-type]
+        if self.file_identifier is None:
+            msg = "Records require a file_identifier."
+            raise TypeError(msg) from None
+        self_identifier = make_bas_cat(self.file_identifier)
         self.identification.identifiers.ensure(self_identifier)
 
     def _set_citation(self) -> None:
@@ -190,6 +193,9 @@ class RecordMagicOpen(RecordMagic):
 
         Overrides any existing constraints and permissions.
         """
+        if record.file_identifier is None:
+            msg = "Records require a file_identifier to set open access constraints and permissions."
+            raise TypeError(msg) from None
         if not isinstance(admin_keys, AdministrationKeys):
             msg = "Open records require administration metadata keys."
             raise TypeError(msg)
@@ -199,7 +205,7 @@ class RecordMagicOpen(RecordMagic):
 
         admin_meta = get_admin(keys=admin_keys, record=record)
         if not admin_meta:
-            admin_meta = AdministrationMetadata(id=record.file_identifier)  # ty:ignore[invalid-argument-type]
+            admin_meta = AdministrationMetadata(id=record.file_identifier)
             record.data_quality.domain_consistency.append(MAGIC_ADMINISTRATION_V1)
 
         admin_meta.metadata_permissions = [OPEN_ACCESS_PERMISSION]

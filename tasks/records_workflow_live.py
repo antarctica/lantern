@@ -8,7 +8,7 @@ from textwrap import dedent
 
 import inquirer
 from tasks._config import ExtraConfig
-from tasks._record_utils import confirm, init, init_s3, init_store, ping_host
+from tasks._shared import confirm, init, init_s3, init_store, ping_host, time_task
 from tasks.records_invalidate import get_record_invalidation_keys
 from tasks.records_workflow_testing import (
     OutputCommentItem,
@@ -29,7 +29,7 @@ from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta
 from lantern.stores.gitlab import GitLabStore
 from lantern.stores.gitlab_cache import GitLabCachedStore
-from lantern.utils import get_jinja_env, time_task
+from lantern.utils import get_jinja_env
 
 
 class OutputCommentIssue:
@@ -215,7 +215,7 @@ def main() -> None:
     # build and verify records
     s3 = init_s3(config=config)
     catalogue = BasCatalogue(logger=logger, config=config, store=store, s3=s3)
-    _export(logger=logger, catalogue=catalogue, env=env, identifiers=identifiers)
+    _export(logger=logger, config=config, catalogue=catalogue, env=env, identifiers=identifiers)
     verify_path = _verify(
         logger=logger, catalogue=catalogue, env=env, identifiers=identifiers, workflow_path=results_path
     )

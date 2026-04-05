@@ -1,4 +1,5 @@
 import logging
+import time
 from collections.abc import Collection
 from pathlib import Path
 
@@ -37,7 +38,9 @@ class LocalExporter(ExporterBase):
 
     def export(self, content: Collection[SiteContent]) -> None:
         """Persist content."""
+        start = time.monotonic()
         count = 0
+
         for item in content:
             path = self.base_path / item.path
 
@@ -62,4 +65,6 @@ class LocalExporter(ExporterBase):
 
             count += 1
 
-        self._logger.info(f"Exported {count} items to '{self.base_path.resolve()}'.")
+        self._logger.info(
+            f"Exported {count} items to '{self.base_path.resolve()}' in {round(time.monotonic() - start)} seconds"
+        )

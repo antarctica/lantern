@@ -5,7 +5,7 @@ import logging
 import sys
 from pathlib import Path
 
-from tasks._record_utils import init, parse_records, pick_records
+from tasks._shared import init, parse_records, pick_records
 from tests.conftest import _select_record
 
 from lantern.config import Config

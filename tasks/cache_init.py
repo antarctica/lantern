@@ -2,7 +2,7 @@
 
 import logging
 
-from tasks._record_utils import confirm_source, init
+from tasks._shared import confirm_source, init
 
 from lantern.stores.gitlab_cache import GitLabCachedStore
 

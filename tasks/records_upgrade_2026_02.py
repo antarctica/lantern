@@ -7,7 +7,7 @@ from pathlib import Path
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata, Permission
 from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 from tasks._config import ExtraConfig
-from tasks._record_utils import dump_records, init
+from tasks._shared import dump_records, init
 from tasks.keys_check import decode as jwe_decode
 
 from lantern.lib.metadata_library.models.record.elements.common import Address, Contact, ContactIdentity, OnlineResource

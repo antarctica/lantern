@@ -66,7 +66,7 @@ All variables are prefixed with `LANTERN_` to avoid conflicts with other applica
 
 - `PARALLEL_JOBS`
 
-Some tasks such as populating caches can run in parallel for better performance.
+Some tasks such as populating caches, generating and uploading content, etc. can run in parallel for better performance.
 
 The `PARALLEL_JOBS` option sets the maximum number of parallel jobs to run.
 

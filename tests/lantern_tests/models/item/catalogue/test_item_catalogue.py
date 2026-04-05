@@ -64,7 +64,6 @@ class TestItemCatalogue:
     def test_init_invalid_record_type(self, fx_site_meta: SiteMeta, fx_record_model_min: Record):
         """Cannot create an ItemCatalogue if not a RecordRevision."""
         with pytest.raises(TypeError, match=r"record must be a RecordRevision"):
-            # noinspection PyTypeChecker
             _ = ItemCatalogue(
                 site_meta=fx_site_meta,
                 record=fx_record_model_min,
@@ -119,7 +118,6 @@ class TestItemCatalogue:
         assert item._admin_metadata == admin_b
 
         with pytest.raises(TypeError, match=r"record must be a RecordRevision"):
-            # noinspection PyTypeChecker
             item.record = fx_record_model_min
         assert item.record == record_b  # unchanged
         assert item._admin_metadata == admin_b

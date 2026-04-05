@@ -1,7 +1,4 @@
-import functools
 import logging
-import time
-from collections.abc import Callable
 from pathlib import Path
 
 from bs4 import BeautifulSoup
@@ -71,25 +68,3 @@ def prettify_html(html: str) -> str:
     The `prettify()` method is not used as it splits all elements onto new lines, which causes layout/spacing bugs.
     """
     return str(BeautifulSoup(html, parser="html.parser", features="lxml"))
-
-
-def time_task(label: str) -> Callable:
-    """
-    Time a task and log duration.
-
-    Uses a temporary app logger.
-    """
-
-    def decorator(func: Callable) -> Callable:
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):  # noqa: ANN002, ANN003, ANN202
-            start = time.monotonic()
-            result = func(*args, **kwargs)
-            logger = logging.getLogger("app")
-            logger.setLevel(logging.INFO)
-            logger.info(f"{label} took {round(time.monotonic() - start)} seconds")
-            return result
-
-        return wrapper
-
-    return decorator

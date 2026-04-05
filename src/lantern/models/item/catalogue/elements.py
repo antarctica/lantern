@@ -47,7 +47,7 @@ def strip_title(value: str) -> str:
 
 @dataclass(kw_only=True)
 class FormattedDate:
-    """Represents a HTML time element."""
+    """Represents an HTML time element."""
 
     value: str
     datetime: str
@@ -165,7 +165,7 @@ class ItemCatalogueSummary(ItemBase):
     @property
     def summary_html(self) -> str:
         """Summary with Markdown formatting encoded as HTML if present or a blank string."""
-        return md_as_html(self.summary_md) if self.summary_md else md_as_html(" ")
+        return md_as_html(self.summary_md or " ")
 
     @property
     def fragments(self) -> ItemSummaryFragments:
@@ -423,7 +423,6 @@ class Dates(RecordDates):
     """
 
     def __init__(self, dates: RecordDates) -> None:
-        # noinspection PyTypeChecker
         super().__init__(**unpack(dates))
 
     def __getattribute__(self, name: str) -> FormattedDate | None:
@@ -436,14 +435,13 @@ class Dates(RecordDates):
             return None
         return FormattedDate.from_rec_date(val)
 
-    def as_dict_enum(self) -> dict[DateTypeCode, FormattedDate]:  # ty: ignore[invalid-method-override]
+    def as_dict_enum_formatted(self) -> dict[DateTypeCode, FormattedDate]:
         """
-        Non-None values as a dictionary with DateTypeCode enum keys.
+        Non-None values as a dictionary with DateTypeCode enum keys, with values formatted as FormattedDate.
 
-        Known to violate method override rules due to differing return type.
+        Converts from the base-class Date values to FormattedDate instances to stay type compatible.
         """
-        # noinspection PyTypeChecker
-        return super().as_dict_enum()  # ty: ignore[invalid-return-type]
+        return super().as_dict_enum()  # ty:ignore[invalid-return-type]
 
     def as_dict_labeled(self) -> dict[str, FormattedDate]:
         """Non-None values as a dictionary with human-readable labels as keys."""
@@ -465,7 +463,7 @@ class Dates(RecordDates):
             DateTypeCode.VALIDITY_BEGINS: "Item valid from",
             DateTypeCode.VALIDITY_EXPIRES: "Item valid until",
         }
-        return {mapping[key]: value for key, value in self.as_dict_enum().items()}
+        return {mapping[key]: value for key, value in self.as_dict_enum_formatted().items()}
 
 
 class Extent(ItemExtent):
@@ -482,12 +480,12 @@ class Extent(ItemExtent):
     @property
     def start(self) -> FormattedDate | None:
         """Temporal period start."""
-        return FormattedDate.from_rec_date(super().start) if super().start else None  # ty: ignore[invalid-argument-type]
+        return (FormattedDate.from_rec_date(start) if start else None) if (start := super().start) is not None else None
 
     @property
     def end(self) -> FormattedDate | None:
         """Temporal period end."""
-        return FormattedDate.from_rec_date(super().end) if super().end else None  # ty: ignore[invalid-argument-type]
+        return (FormattedDate.from_rec_date(end) if end else None) if (end := super().end) is not None else None
 
     @property
     def map_iframe(self) -> str:
@@ -505,7 +503,6 @@ class Identifiers(RecordIdentifiers):
     """
 
     def __init__(self, identifiers: RecordIdentifiers) -> None:
-        # noinspection PyTypeChecker
         super().__init__(identifiers)
 
     @property
@@ -518,23 +515,16 @@ class Identifiers(RecordIdentifiers):
     @property
     def isbn(self) -> list[str]:
         """ISBNs for Item."""
-        # noinspection PyTypeChecker
         return [identifier.identifier for identifier in self.filter("isbn")]
 
     @property
     def aliases(self) -> list[Link]:
-        """
-        Aliases for Item.
-
-        Alias URLs are converted to relative links so they can be tested in non-production environments.
-        """
-        return [
-            Link(
-                href=identifier.href.replace(f"https://{CATALOGUE_NAMESPACE}", ""),  # ty: ignore[possibly-missing-attribute]
-                value=identifier.identifier,
-            )
-            for identifier in self.filter(ALIAS_NAMESPACE)
-        ]
+        """Aliases for Item."""
+        items = list(self.filter(ALIAS_NAMESPACE))
+        if any(not i.href for i in items):
+            msg = "Aliases must have a href."
+            raise ValueError(msg) from None
+        return [Link(value=i.identifier, href=i.href, external=False) for i in items]
 
 
 class Maintenance(RecordMaintenance):
@@ -545,7 +535,6 @@ class Maintenance(RecordMaintenance):
     """
 
     def __init__(self, maintenance: RecordMaintenance) -> None:
-        # noinspection PyTypeChecker
         super().__init__(**unpack(maintenance))
 
     @property

@@ -5,7 +5,7 @@ from pathlib import Path
 
 import inquirer
 from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
-from tasks._record_utils import confirm, dump_records, ensure_admin, init, parse_records
+from tasks._shared import confirm, dump_records, ensure_admin, init, parse_records
 
 from lantern.lib.metadata_library.models.record.record import Record
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin, set_admin

@@ -38,7 +38,7 @@ dev = [
     "pymarkdownlnt>=0.9.33",
     "pytailwindcss>=0.2.0",
     "ruff>=0.15.0",
-    "safety>=3.5.2",
+    "safety>=3.7.0",
     "taskipy>=1.14.1",
     "ty>=0.0.15",
     "types-lxml>=2025.3.30",
@@ -267,5 +267,5 @@ source = ["src"]
 omit = []
 
 [build-system]
-requires = ["uv_build>=0.9.18,<0.11.0"]
+requires = ["uv_build>=0.9.18,<0.12.0"]
 build-backend = "uv_build"

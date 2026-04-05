@@ -8,7 +8,7 @@ from uuid import uuid4
 
 import boto3
 from tasks._config import ExtraConfig
-from tasks._record_utils import confirm, init
+from tasks._shared import confirm, init
 
 
 def get_cf_distribution_id(iac_cwd: Path, cf_id: str) -> str:

@@ -102,7 +102,6 @@ class TestFormattedDate:
         """Cannot process an invalid value."""
         now = datetime(2014, 6, 30, 14, 30, second=45, tzinfo=UTC)
         with pytest.raises(TypeError):
-            # noinspection PyTypeChecker
             FormattedDate.from_rec_date("", relative_to=now)
 
 
@@ -572,7 +571,7 @@ class TestIdentifiers:
             ([], []),
             (
                 [Identifier(identifier="x/x", href="https://data.bas.ac.uk/x/x", namespace=ALIAS_NAMESPACE)],
-                [Link(value="x/x", href="/x/x", external=False)],
+                [Link(value="x/x", href="https://data.bas.ac.uk/x/x", external=False)],
             ),
         ],
     )
@@ -581,6 +580,12 @@ class TestIdentifiers:
         identifiers = Identifiers(RecordIdentifiers(identifiers))
         result = identifiers.aliases
         assert result == expected
+
+    def test_aliases_no_url(self):
+        """Cannot get aliases if any don't include a URL."""
+        identifiers = Identifiers(RecordIdentifiers([Identifier(identifier="x/x", namespace=ALIAS_NAMESPACE)]))
+        with pytest.raises(ValueError, match=r"Aliases must have a href."):
+            _ = identifiers.aliases
 
     @pytest.mark.parametrize(
         ("identifiers", "expected"),

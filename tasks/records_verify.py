@@ -3,7 +3,7 @@
 import logging
 from pathlib import Path
 
-from tasks._record_utils import TargetEnv, init, init_s3
+from tasks._shared import TargetEnv, init, init_s3
 
 from lantern.catalogue import BasCatalogue, BasEnvironment
 from lantern.exporters.local import LocalExporter

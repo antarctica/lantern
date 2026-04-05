@@ -1,9 +1,11 @@
+import functools
 import json
 import logging
 import re
 import subprocess
 import sys
-from collections.abc import Generator, Mapping, Sequence
+import time
+from collections.abc import Callable, Generator, Mapping, Sequence
 from pathlib import Path
 from typing import Literal
 
@@ -308,3 +310,27 @@ def ensure_admin(logger: logging.Logger, record: Record, keys: AdministrationKey
             sys.exit(1)
         admin = AdministrationMetadata(id=record.file_identifier)
     return admin
+
+
+def time_task(label: str) -> Callable:
+    """
+    Time a task and log duration.
+
+    Uses a temporary app logger.
+
+    Used in workflow dev tasks.
+    """
+
+    def decorator(func: Callable) -> Callable:
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):  # noqa: ANN002, ANN003, ANN202
+            start = time.monotonic()
+            result = func(*args, **kwargs)
+            logger = logging.getLogger("app")
+            logger.setLevel(logging.INFO)
+            logger.info(f"{label} took {round(time.monotonic() - start)} seconds")
+            return result
+
+        return wrapper
+
+    return decorator

@@ -122,7 +122,6 @@ class TestItemSummary:
         html = BeautifulSoup(self._render(summary), parser="html.parser", features="lxml")
 
         if expected:
-            # noinspection PyTypeChecker
             assert html.find(name="span", string=expected) is not None
 
     @pytest.mark.parametrize("published", [None, Date(date=date(2023, 10, 31))])
@@ -152,10 +151,8 @@ class TestItemSummary:
         html = BeautifulSoup(self._render(summary), parser="html.parser", features="lxml")
 
         if expected:
-            # noinspection PyTypeChecker
             assert html.find(name="span", string=expected) is not None
         else:
-            # noinspection PyTypeChecker
             assert html.find(name="span", string="0 items") is None
 
     @pytest.mark.parametrize(

@@ -68,7 +68,10 @@ class ItemWebsiteSearch(ItemBase):
             return dates.revision.unstructure()
         if dates.publication:
             return dates.publication.unstructure()
-        return dates.creation.unstructure()  # ty: ignore[possibly-missing-attribute]
+        if dates.creation:
+            return dates.creation.unstructure()
+        msg = "No available date for item."
+        raise ValueError(msg) from None
 
     @property
     def _thumbnail_href(self) -> str | None:

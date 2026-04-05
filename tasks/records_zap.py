@@ -7,7 +7,7 @@ from pathlib import Path
 
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata, Permission
 from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
-from tasks._record_utils import dump_records, init, parse_records
+from tasks._shared import dump_records, init, parse_records
 from tasks.records_upgrade_2026_02 import RecordUpgrade
 
 from lantern.lib.metadata_library.models.record.elements.common import Date
@@ -335,10 +335,9 @@ def _process_distribution_descriptions(logger: logging.Logger, records: list[Rec
                 and format_href in format_descriptions
             ):
                 logger.info(
-                    f"Updating distribution description for format '{distribution.format.format}' "  # ty: ignore[possibly-missing-attribute]
-                    f"in Record '{record.file_identifier}'"
+                    f"Updating distribution description for format '{distribution.format.format}' in Record '{record.file_identifier}'"
                 )
-                distribution.transfer_option.online_resource.description = format_descriptions[distribution.format.href]  # ty: ignore[possibly-missing-attribute]
+                distribution.transfer_option.online_resource.description = format_descriptions[distribution.format.href]
 
 
 def _process_sheet_number(logger: logging.Logger, records: list[Record]) -> None:

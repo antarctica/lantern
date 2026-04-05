@@ -92,7 +92,6 @@ class TestBasCatUntrusted:
 
         Uses fake store over GitLab to avoid mocking and/or request recordings.
         """
-        # noinspection PyTypeChecker
         cat = BasCatUntrusted(
             logger=fx_logger,
             meta=fx_export_meta,
@@ -136,7 +135,7 @@ class TestBasCatUntrusted:
         expected: tuple[list[Callable[..., OutputBase]], list[Callable[..., OutputBase]]],
     ):
         """Can sort selected output classes into individual and global types, or return all classes."""
-        results = fx_bas_cat_untrusted._sort_output_classes(values)
+        results = fx_bas_cat_untrusted._group_output_classes(values)
         assert results == expected
 
     def test_export(self, fx_bas_cat_untrusted: BasCatUntrusted):
@@ -169,7 +168,6 @@ class TestBasCatTrusted:
 
         Uses fake store over GitLab to avoid mocking and/or request recordings.
         """
-        # noinspection PyTypeChecker
         cat = BasCatTrusted(logger=fx_logger, meta=fx_export_meta, store=fx_fake_store, host="x", path=Path("x"))
         assert isinstance(cat, BasCatTrusted)
 
@@ -197,7 +195,6 @@ class TestBasCatEnv:
 
         Uses fake store over GitLab to avoid mocking and/or request recordings.
         """
-        # noinspection PyTypeChecker
         cat = BasCatEnv(logger=fx_logger, config=fx_config, store=fx_fake_store, s3=fx_s3_client, env="testing")
         assert isinstance(cat, BasCatEnv)
         assert isinstance(cat._untrusted, BasCatUntrusted)
@@ -236,7 +233,6 @@ class TestBasCatalogue:
 
         Uses fake store over GitLab to avoid mocking and/or request recordings.
         """
-        # noinspection PyTypeChecker
         cat = BasCatalogue(logger=fx_logger, config=fx_config, store=fx_fake_store, s3=fx_s3_client)
         assert isinstance(cat, BasCatalogue)
         assert isinstance(cat._envs["testing"], BasCatEnv)

@@ -1,4 +1,5 @@
 import logging
+import time
 from collections.abc import Callable
 from copy import deepcopy
 from typing import NamedTuple
@@ -34,7 +35,6 @@ def _job_worker_store(store: Store) -> Store:
         _STORE_SINGLETON = store
         if isinstance(store, GitLabCachedStore):
             _STORE_SINGLETON.select()  # recreate flash cache
-    # noinspection PyTypeChecker
     return _STORE_SINGLETON
 
 
@@ -47,7 +47,6 @@ def _job_worker_iso_html_transform() -> etree.XSLT:
     global _ISO_HTML_XSLT_SINGLETON
     if _ISO_HTML_XSLT_SINGLETON is None:
         _ISO_HTML_XSLT_SINGLETON = RecordIsoHtmlOutput.create_xslt_transformer()
-    # noinspection PyTypeChecker
     return _ISO_HTML_XSLT_SINGLETON
 
 
@@ -131,8 +130,8 @@ class Site:
 
     def _generate_jobs(
         self,
-        global_outputs: list[Callable[..., OutputBase]],
-        individual_outputs: list[Callable[..., OutputBase]],
+        global_outputs: list[type[OutputBase]],
+        individual_outputs: list[type[OutputBase]],
         identifiers: set[str] | None = None,
     ) -> list[SiteJob]:
         """
@@ -155,15 +154,18 @@ class Site:
         Returns generated content items as a flattened list.
         """
         store = self._prep_store()
+        start = time.monotonic()
         nested_outputs: list[list[SiteContent]] = Parallel(n_jobs=self._workers)(
             delayed(_run_job)(self._logger.level, self._meta, store, job.output, job.record) for job in jobs
         )
-        return [content for output_content in nested_outputs for content in output_content]
+        outputs = [content for output_content in nested_outputs for content in output_content]
+        self._logger.info(f"Generated {len(outputs)} site content items in {round(time.monotonic() - start)} seconds")
+        return outputs
 
     def process(
         self,
-        global_outputs: list[Callable[..., OutputBase]],
-        individual_outputs: list[Callable[..., OutputBase]],
+        global_outputs: list[type[OutputBase]],
+        individual_outputs: list[type[OutputBase]],
         identifiers: set[str] | None = None,
     ) -> list[SiteContent]:
         """

@@ -30,7 +30,6 @@ class TestRecordsWafOutput:
 
         assert len(records) > 0
         for record in records:
-            # noinspection PyTypeChecker
             link = html.find("a", string=record.file_identifier)
             assert link is not None
 

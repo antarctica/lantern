@@ -300,7 +300,6 @@ class TestGitLabLocalCache:
         mock_project.commits.get.return_value = mock_commit
         mock_project.http_url_to_repo = "https://gitlab.example.com/x.git"
         mocker.patch.object(type(fx_gitlab_cache_pop), "_project", new_callable=PropertyMock, return_value=mock_project)
-        # noinspection PyTypeChecker
         fx_gitlab_cache_pop._flash["x"] = "x"  # to verify flash is later cleared
 
         fx_gitlab_cache_pop._create_refresh(records=[])

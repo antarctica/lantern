@@ -4,7 +4,7 @@ import logging
 from pathlib import Path
 
 import inquirer
-from tasks._record_utils import clean_record_configs, confirm_source, init, parse_records
+from tasks._shared import clean_record_configs, confirm_source, init, parse_records
 
 from lantern.config import Config
 from lantern.models.record.record import Record

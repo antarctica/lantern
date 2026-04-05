@@ -2,6 +2,7 @@ import json
 import locale
 from abc import ABC, abstractmethod
 from datetime import date, datetime
+from typing import cast
 
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata, Permission
 
@@ -10,7 +11,7 @@ from lantern.lib.metadata_library.models.record.elements.data_quality import Dom
 from lantern.lib.metadata_library.models.record.elements.distribution import Distribution as RecordDistribution
 from lantern.lib.metadata_library.models.record.elements.metadata import MetadataStandard
 from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
-from lantern.models.item.base.elements import Contact, Link
+from lantern.models.item.base.elements import Contact, Contacts, Link
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.base.enums import AccessLevel, Licence, ResourceTypeLabel
 from lantern.models.item.catalogue.distributions import (
@@ -140,7 +141,6 @@ class DataTab(Tab):
         for dist_option in self._resource_distributions:
             for dist_type in self._supported_distributions:
                 if dist_type.matches(option=dist_option, other_options=self._resource_distributions):
-                    # noinspection PyTypeChecker
                     processed.append(
                         dist_type(
                             option=dist_option,
@@ -220,7 +220,7 @@ class ExtentTab(Tab):
 class AuthorsTab(Tab):
     """Authors tab."""
 
-    def __init__(self, item_super_type: ItemSuperType, authors: list[Contact]) -> None:
+    def __init__(self, item_super_type: ItemSuperType, authors: Contacts) -> None:
         self._item_super_type = item_super_type
         self._authors = authors
 
@@ -247,7 +247,7 @@ class AuthorsTab(Tab):
         return "fa-regular fa-user-group-simple"
 
     @property
-    def items(self) -> list[Contact]:
+    def items(self) -> Contacts:
         """Authors."""
         return self._authors
 
@@ -259,7 +259,7 @@ class LicenceTab(Tab):
         self,
         item_super_type: ItemSuperType,
         licence: Licence | None,
-        rights_holders: list[Contact] | None = None,
+        rights_holders: Contacts | None = None,
     ) -> None:
         self._item_super_type = item_super_type
         self.licence = licence
@@ -296,7 +296,7 @@ class LicenceTab(Tab):
         """
         holders = []
         for contact in self._copyright_holders:
-            name = contact.organisation.name if contact.organisation else contact.individual.name  # ty: ignore[possibly-missing-attribute]
+            name = contact.name
             if not contact.online_resource:
                 holders.append(name)
                 continue
@@ -346,7 +346,7 @@ class RelatedTab(Tab):
         self._item_type = item_type
         self._aggregations = aggregations
 
-    def __getattribute__(self, name: str) -> str | int | None:
+    def __getattribute__(self, name: str) -> str | int | ItemCatalogueSummary | list[ItemCatalogueSummary] | None:
         """Proxy calls to self._aggregations if applicable."""
         aggregation = object.__getattribute__(self, "_aggregations")
         if hasattr(aggregation, name):
@@ -361,7 +361,7 @@ class RelatedTab(Tab):
         all_agg = len(self._aggregations)
         if self._item_type == HierarchyLevelCode.COLLECTION:
             # if all aggregations are a container's items, disable tab as these are shown in item tab
-            return len(self.child_items) != all_agg  # ty: ignore[invalid-argument-type]
+            return len(cast(list[ItemCatalogueSummary], self.child_items)) != all_agg
         return all_agg > 0
 
     @property

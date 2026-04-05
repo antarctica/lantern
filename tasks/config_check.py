@@ -2,9 +2,8 @@
 
 from pprint import pprint
 
+from environs import EnvError
 from tasks._config import ExtraConfig
-
-from lantern.config import ConfigurationError
 
 
 def main() -> None:
@@ -17,7 +16,7 @@ def main() -> None:
         pprint(config.dumps_safe())
         print("\nTasks extra config:")
         pprint(config.dumps_extra())
-    except ConfigurationError as e:
+    except EnvError as e:
         print("Configuration invalid:")
         print(e)
 

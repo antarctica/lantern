@@ -9,7 +9,7 @@ import requests
 from authlib.integrations.requests_client.oauth2_session import OAuth2Session
 from authlib.oauth2.rfc7523 import ClientSecretJWT
 from tasks._config import ExtraConfig
-from tasks._record_utils import confirm_source, dump_records, init, load_record
+from tasks._shared import confirm_source, dump_records, init, load_record
 
 from lantern.lib.arcgis.gis.dataclasses import Item as ArcGisItem
 from lantern.lib.arcgis.gis.enums import ItemType as ArcGisItemType

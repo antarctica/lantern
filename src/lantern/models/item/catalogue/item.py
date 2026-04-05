@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, cast
 
 from lantern.lib.metadata_library.models.record.elements.common import Constraint
 from lantern.lib.metadata_library.models.record.enums import (
@@ -11,7 +11,7 @@ from lantern.models.item.base.elements import Link
 from lantern.models.item.base.enums import AccessLevel
 from lantern.models.item.base.item import ItemBase
 from lantern.models.item.catalogue.const import CONTAINER_SUPER_TYPES
-from lantern.models.item.catalogue.elements import Dates, Extent, PageHeader, PageSummary
+from lantern.models.item.catalogue.elements import Dates, Extent, FormattedDate, PageHeader, PageSummary
 from lantern.models.item.catalogue.enums import ItemSuperType
 from lantern.models.item.catalogue.tabs import (
     AdditionalInfoTab,
@@ -52,7 +52,6 @@ class ItemCatalogue(ItemBase):
     ISO 19115:2003 / 19115-2:2009 standards). See `docs/data_model.md#catalogue-item-limitations` for more information.
     """
 
-    # noinspection PyUnusedLocal
     def __init__(
         self,
         site_meta: SiteMeta,
@@ -80,7 +79,7 @@ class ItemCatalogue(ItemBase):
     @property
     def record(self) -> RecordRevision:
         """Get underlying RecordRevision."""
-        return super().record  # ty:ignore[invalid-return-type]
+        return cast(RecordRevision, super().record)
 
     @record.setter
     def record(self, value: RecordRevision) -> None:
@@ -128,7 +127,6 @@ class ItemCatalogue(ItemBase):
         except IndexError:
             return None
 
-    # noinspection PyUnresolvedReferences
     @property
     def _revision(self) -> Link:
         """Link to the record revision."""
@@ -159,7 +157,7 @@ class ItemCatalogue(ItemBase):
     @property
     def _authors(self) -> AuthorsTab:
         """Authors tab."""
-        return AuthorsTab(item_super_type=self._super_type, authors=self.contacts.filter(roles=ContactRoleCode.AUTHOR))  # ty: ignore[invalid-argument-type]
+        return AuthorsTab(item_super_type=self._super_type, authors=self.contacts.filter(roles=ContactRoleCode.AUTHOR))
 
     @property
     def _licence(self) -> LicenceTab:
@@ -171,7 +169,7 @@ class ItemCatalogue(ItemBase):
         return LicenceTab(
             item_super_type=self._super_type,
             licence=super().licence_enum,
-            rights_holders=self.contacts.filter(roles=ContactRoleCode.RIGHTS_HOLDER),  # ty: ignore[invalid-argument-type]
+            rights_holders=self.contacts.filter(roles=ContactRoleCode.RIGHTS_HOLDER),
         )
 
     @property
@@ -218,7 +216,7 @@ class ItemCatalogue(ItemBase):
         """Contact tab."""
         poc = self.contacts.filter(roles=ContactRoleCode.POINT_OF_CONTACT)[0]
         return ContactTab(
-            contact=poc,  # ty: ignore[invalid-argument-type]
+            contact=poc,
             item_id=self.resource_id,
             item_title=self.title_plain,
             form_action=self._meta.items_enquires_endpoint,
@@ -257,13 +255,14 @@ class ItemCatalogue(ItemBase):
 
         `self._dates` returns values as `FormattedDates` not `Date` so `.datetime` returns a pre-formatted value.
         """
-        # noinspection PyUnresolvedReferences
+        publication_date = cast(FormattedDate | None, self._dates.publication)
+        image_href = self.overview_graphic.href if self.overview_graphic is not None else None
         return OpenGraphMeta(
             title=self.title_plain,
             url=f"{self._meta.base_url}/items/{self.resource_id}",
             description=self.summary_plain,
-            image=self.overview_graphic.href if self.overview_graphic else None,
-            published_at=self._dates.publication.datetime if self._dates.publication else None,  # ty:ignore[unresolved-attribute]
+            image=image_href,
+            published_at=publication_date.datetime if publication_date else None,
         )
 
     @property
@@ -297,8 +296,8 @@ class ItemCatalogue(ItemBase):
         return PageSummary(
             item_super_type=self._super_type,
             edition=self.edition,
-            published_date=self._dates.publication,  # ty: ignore[invalid-argument-type]
-            revision_date=self._dates.revision,  # ty: ignore[invalid-argument-type]
+            published_date=cast(FormattedDate | None, self._dates.publication),
+            revision_date=cast(FormattedDate | None, self._dates.revision),
             aggregations=self._aggregations,
             restricted=self._restricted,
             citation=self.citation_html,

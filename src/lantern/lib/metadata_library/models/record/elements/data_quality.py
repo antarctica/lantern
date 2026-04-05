@@ -81,7 +81,6 @@ class DomainConsistencies(list[DomainConsistency]):
         Example input: DomainConsistencies([DomainConsistency(specification=Citation(title="x", dates=Dates(creation=Date(date=date(2014, 6, 30)))), explanation="x", result=True)])
         Example output: [{"specification": {"title": {"value": "x"}, "dates": {"creation": '2014-06-30'}}, "explanation": "x", "result": True}]
         """
-        # noinspection PyUnresolvedReferences
         converter = cattrs.Converter()
         converter.register_unstructure_hook(Citation, lambda d: d.unstructure())
         return [converter.unstructure(identifier) for identifier in self]

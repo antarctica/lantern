@@ -44,12 +44,10 @@ class TestCleanDict:
         result = clean_dict(value, strip_empty_str=True)
         assert result == expected
 
-    # noinspection PyTypeChecker
     @pytest.mark.cov()
     def test_clean_dict_wrong(self):
         """Cannot clean a non-dict."""
         with pytest.raises(TypeError, match=r"Value must be a dict"):
-            # noinspection PyTypeChecker
             clean_dict([])
 
 
@@ -90,5 +88,4 @@ class TestCleanList:
     def test_clean_list_wrong(self):
         """Cannot clean a non-list."""
         with pytest.raises(TypeError, match=r"Value must be a list"):
-            # noinspection PyTypeChecker
             clean_list({})

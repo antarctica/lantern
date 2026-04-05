@@ -57,8 +57,10 @@ Project lead: [@felnne](https://www.bas.ac.uk/profile/felnne).
 
 > What does Lantern mean?
 
-Nothing, it's simply an unambiguous label to differentiate this project from other data catalogues. It avoids using
-generic terms or names that will get out of date such ‘new catalogue’ etc.
+Nothing, it's simply an unambiguous label to differentiate this project from other data catalogues. It was inspired by
+the [MAGIC Lantern](https://www.magiclantern.fm/) Cannon camera project.
+
+It was chosen to avoid generic terms and names that will get out of date, such as ‘new catalogue’ etc.
 
 ## Data protection
 

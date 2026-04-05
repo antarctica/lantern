@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 from pathlib import Path
 
 import inquirer
-from tasks._record_utils import confirm_source, dump_records, init, process_record_selections
+from tasks._shared import confirm_source, dump_records, init, process_record_selections
 
 
 def _get_cli_args() -> dict:

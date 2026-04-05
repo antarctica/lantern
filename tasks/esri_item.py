@@ -13,7 +13,7 @@ from lxml.html import HTMLParser
 from lxml.html import fragment_fromstring as html_fromstring
 from lxml.html import tostring as html_tostring
 from tasks._config import ExtraConfig
-from tasks._record_utils import get_record, init
+from tasks._shared import get_record, init
 from tasks.record_esri import get_agol_item, get_agol_token
 
 from lantern.lib.arcgis.gis.dataclasses import Item as ArcGisItem
@@ -187,7 +187,6 @@ def _update_agol_sharing(
     files_sharing: dict[str, tuple] = {k: (None, v) for k, v in sharing.items()}
     logger.debug(sharing)
 
-    # noinspection PyTypeChecker
     req = requests.post(
         url=f"{base_url}/share",
         params={"token": token, "f": "json"},
@@ -214,7 +213,6 @@ def _update_agol_properties(
     files_update: dict[str, tuple] = {k: (None, v) for k, v in properties.items()}
     files_update["metadataEditable"] = (None, "false")
     logger.debug(files_update)
-    # noinspection PyTypeChecker
     req = requests.post(
         url=f"{base_url}/update",
         params={"f": "json", "token": token},

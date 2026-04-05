@@ -44,6 +44,8 @@ class TestItemArcGIS:
     ):
         """Can render description using template."""
         abstract = "-x-"
+        # identifier included by default is never correct so always remove
+        fx_item_arc_model_min.record.identification.identifiers = Identifiers([])
 
         fx_item_arc_model_min.record.identification.abstract = abstract
         if citation is not None:

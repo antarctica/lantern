@@ -1,9 +1,10 @@
-from datetime import date
+from datetime import UTC, date, datetime
 
 import pytest
 from cattrs import ClassValidationError
 
 from lantern.lib.metadata_library.models.record.elements.common import (
+    Citation,
     Contact,
     ContactIdentity,
     Contacts,
@@ -11,6 +12,7 @@ from lantern.lib.metadata_library.models.record.elements.common import (
     Dates,
     Identifier,
 )
+from lantern.lib.metadata_library.models.record.elements.data_quality import DomainConsistencies, DomainConsistency
 from lantern.lib.metadata_library.models.record.elements.identification import Extent, Identification
 from lantern.lib.metadata_library.models.record.elements.metadata import Metadata
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode, HierarchyLevelCode
@@ -117,6 +119,30 @@ class TestRecord:
     def test_valid(self):
         """Can validate a Record complying with catalogue record requirements."""
         record = self._make_valid_record()
+        record.validate()
+
+    @pytest.mark.cov()
+    def test_validate_no_profile_href(self):
+        """
+        Can validate a Record where domain consistency elements don't have a href (by not including their schemas).
+
+        Note: This is a very silly test, but essentially it ensures we can still validate a record at a base level, even
+        if it defines profiles we can't resolve to a schema (because the profile doesn't include a href as a lookup key).
+        """
+        record = self._make_valid_record()
+        record.data_quality.domain_consistency = DomainConsistencies(
+            [
+                DomainConsistency(
+                    specification=Citation(
+                        title="x",
+                        dates=Dates(creation=Date(date=datetime(2014, 6, 30, 14, 30, second=45, tzinfo=UTC))),
+                    ),
+                    explanation="x",
+                    result=True,
+                )
+            ]
+        )
+
         record.validate()
 
     @pytest.mark.cov()

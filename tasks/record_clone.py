@@ -10,7 +10,7 @@ from uuid import uuid4
 import inquirer
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
 from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
-from tasks._record_utils import dump_records, get_record, init
+from tasks._shared import dump_records, get_record, init
 
 from lantern.lib.metadata_library.models.record.presets.identifiers import make_bas_cat
 from lantern.lib.metadata_library.models.record.record import Record

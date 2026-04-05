@@ -1,6 +1,5 @@
 import logging
 from abc import ABC, abstractmethod
-from collections.abc import Callable
 from pathlib import Path
 from typing import Literal, get_args
 
@@ -89,11 +88,11 @@ class BasCatUntrusted(CatalogueBase):
         self._exporter = S3Exporter(logger=logger, s3=s3, bucket=bucket, parallel_jobs=self._meta.parallel_jobs)
 
     @staticmethod
-    def _sort_output_classes(
-        outputs: list[Callable[..., OutputBase]] | None = None,
-    ) -> tuple[list[Callable[..., OutputBase]], list[Callable[..., OutputBase]]]:
+    def _group_output_classes(
+        outputs: list[type[OutputBase]] | None = None,
+    ) -> tuple[list[type[OutputBase]], list[type[OutputBase]]]:
         """Sort selected output classes into individual and global types, or return all classes."""
-        all_global = [
+        all_global: list[type[OutputBase]] = [
             SiteResourcesOutput,
             SiteIndexOutput,
             SitePagesOutput,
@@ -102,7 +101,7 @@ class BasCatUntrusted(CatalogueBase):
             RecordsWafOutput,
             ItemsBasWebsiteOutput,
         ]
-        all_individual = [
+        all_individual: list[type[OutputBase]] = [
             ItemCatalogueOutput,
             ItemAliasesOutput,
             RecordIsoJsonOutput,
@@ -117,15 +116,13 @@ class BasCatUntrusted(CatalogueBase):
         ]
 
     def _generate(
-        self, identifiers: set[str] | None = None, outputs: list[Callable[..., OutputBase]] | None = None
+        self, identifiers: set[str] | None = None, outputs: list[type[OutputBase]] | None = None
     ) -> list[SiteContent]:
         """Generate site content."""
-        global_, individual = self._sort_output_classes(outputs=outputs)
+        global_, individual = self._group_output_classes(outputs=outputs)
         return self._site.process(global_outputs=global_, individual_outputs=individual, identifiers=identifiers)
 
-    def export(
-        self, identifiers: set[str] | None = None, outputs: list[Callable[..., OutputBase]] | None = None
-    ) -> None:
+    def export(self, identifiers: set[str] | None = None, outputs: list[type[OutputBase]] | None = None) -> None:
         """Generate and export site content to hosting."""
         self._exporter.export(self._generate(identifiers=identifiers, outputs=outputs))
 
@@ -163,9 +160,7 @@ class BasCatTrusted(CatalogueBase):
         """Generate site content."""
         return self._site.process(global_outputs=[], individual_outputs=[ItemCatalogueOutput], identifiers=identifiers)
 
-    def export(
-        self, identifiers: set[str] | None = None, outputs: list[Callable[..., OutputBase]] | None = None
-    ) -> None:
+    def export(self, identifiers: set[str] | None = None, outputs: list[type[OutputBase]] | None = None) -> None:
         """
         Generate and export site content to hosting.
 
@@ -218,9 +213,7 @@ class BasCatEnv(CatalogueBase):
             ),
         )
 
-    def export(
-        self, identifiers: set[str] | None = None, outputs: list[Callable[..., OutputBase]] | None = None
-    ) -> None:
+    def export(self, identifiers: set[str] | None = None, outputs: list[type[OutputBase]] | None = None) -> None:
         """Generate and export site content to hosting."""
         self._logger.info(f"Exporting untrusted {self._env} site")
         self._untrusted.export(identifiers=identifiers, outputs=outputs)
@@ -270,7 +263,7 @@ class BasCatalogue:
         self,
         env: BasEnvironment,
         identifiers: set[str] | None = None,
-        outputs: list[Callable[..., OutputBase]] | None = None,
+        outputs: list[type[OutputBase]] | None = None,
     ) -> None:
         """Export generated sites to relevant hosting."""
         self._envs[env].export(identifiers=identifiers, outputs=outputs)

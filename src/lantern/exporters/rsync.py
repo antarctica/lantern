@@ -1,4 +1,5 @@
 import logging
+import time
 from collections.abc import Collection
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -81,7 +82,10 @@ class RsyncExporter(ExporterBase):
             tmp_exporter = LocalExporter(logger=self._logger, path=tmp_path)
             tmp_exporter.export(content)
 
+            start = time.monotonic()
             # `src_path=tmp_path` not used to allow ExporterLocal to be mocked in tests to give a predictable path.
             self._upload_dir(src_path=tmp_exporter.base_path, target_path=self._path, target_host=self._host)
             target = f"{self._host}:{self._path}" if self._host else str(self._path)
-            self._logger.info(f"Exported {len(content)} items to '{target}'")
+            self._logger.info(
+                f"Exported {len(content)} items to '{target}' in {round(time.monotonic() - start)} seconds"
+            )

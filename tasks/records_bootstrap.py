@@ -6,7 +6,7 @@ from itertools import chain
 from pathlib import Path
 
 import inquirer
-from tasks._record_utils import init, init_store
+from tasks._shared import init, init_store
 from tasks.records_zap import magic_collection_ids
 
 from lantern.config import Config

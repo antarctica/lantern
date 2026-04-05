@@ -51,7 +51,6 @@ class TestSiteJob:
     def test_job_worker_store_gitlab_cache(self, fx_reset_singletons, fx_gitlab_cached_store_pop: GitLabCachedStore):  # noqa: ANN001
         """Can create and re-warm GitLabCachedStore instance."""
         fx_gitlab_cached_store_pop._cache._flash.clear()
-        # noinspection PyTypeChecker
         result = _job_worker_store(store=fx_gitlab_cached_store_pop)
         assert isinstance(result, GitLabCachedStore)
         assert len(result._cache._flash) > 0
@@ -95,7 +94,6 @@ class TestSiteJob:
         )
         expected = [exp.replace("FILE_IDENTIFIER", fx_revision_model_min.file_identifier) for exp in expected]
 
-        # noinspection PyTypeChecker
         outputs = _run_job(
             log_level=logging.DEBUG,
             meta=fx_export_meta,
@@ -123,7 +121,6 @@ class TestSite:
         fx_site._store = fx_gitlab_cached_store_pop
         _ = fx_gitlab_cached_store_pop.select()
         assert len(fx_gitlab_cached_store_pop._cache._flash) > 0
-        # noinspection PyTypeChecker
         result: GitLabCachedStore = fx_site._prep_store()
         assert len(result._cache._flash) == 0
         assert len(fx_gitlab_cached_store_pop._cache._flash) > 0

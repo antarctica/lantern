@@ -70,7 +70,6 @@ class TestSchemaOrgAuthor:
         """Can create a Schema.org author instance with required values."""
         expected = "x"
         expected_type = "Person"
-        # noinspection PyTypeChecker
         author = SchemaOrgAuthor(
             type_=expected_type,
             name=expected,
@@ -83,7 +82,6 @@ class TestSchemaOrgAuthor:
         """Can create a Schema.org author instance with all possible values."""
         expected = "x"
         expected_type = "Organization"
-        # noinspection PyTypeChecker
         author = SchemaOrgAuthor(
             type_=expected_type,
             name=expected,
@@ -96,7 +94,6 @@ class TestSchemaOrgAuthor:
     def test_dumps(self):
         """Can dump a Schema.org author instance as a dict with correct keys."""
         expected = {"@type": "Person", "name": "x", "url": "x"}
-        # noinspection PyTypeChecker
         author = SchemaOrgAuthor(
             type_=expected["@type"],
             name=expected["name"],
@@ -128,7 +125,6 @@ class TestSchemaOrgMeta:
         """Can create a Schema.org metadata instance with all possible values."""
         expected = "x"
         expected_type = "Article"
-        # noinspection PyTypeChecker
         meta = SchemaOrgMeta(
             type_=expected_type,
             name=expected,
@@ -158,7 +154,6 @@ class TestSchemaOrgMeta:
             "image": "x",
             "creator": [{"@type": "Person", "name": "x"}],
         }
-        # noinspection PyTypeChecker
         meta = SchemaOrgMeta(
             type_=expected["@type"],
             name=expected["name"],
@@ -170,7 +165,6 @@ class TestSchemaOrgMeta:
         )
         assert meta._dumps() == expected
 
-        # noinspection PyTypeChecker
         meta_no_list = SchemaOrgMeta(
             type_=expected["@type"],
             name=expected["name"],
@@ -193,7 +187,6 @@ class TestSchemaOrgMeta:
             "image": "x",
             "creator": [{"@type": "Person", "name": "x"}],
         }
-        # noinspection PyTypeChecker
         meta = SchemaOrgMeta(
             type_=expected["@type"],
             name=expected["name"],

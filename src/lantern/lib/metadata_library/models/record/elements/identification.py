@@ -109,7 +109,6 @@ class Aggregations(list[Aggregation]):
             {"identifier": {"identifier": "x", "href": "x", "namespace": "x"}, "association_type": "crossReference"}
         ]
         """
-        # noinspection PyUnresolvedReferences
         converter = cattrs.Converter()
         return [converter.unstructure(aggregation) for aggregation in self]
 
@@ -292,7 +291,6 @@ class Extents(list[Extent]):
             {"identifier": "x", "geographic": { "bounding_box": {"west_longitude": 1.0,"east_longitude": 1.0,"south_latitude": 1.0,"north_latitude": 1.0}}}
         ]
         """
-        # noinspection PyUnresolvedReferences
         converter = cattrs.Converter()
         converter.register_unstructure_hook(Date, lambda d: d.unstructure())
         converter.register_unstructure_hook(Dates, lambda d: d.unstructure())
@@ -363,9 +361,7 @@ class GraphicOverviews(list[GraphicOverview]):
 
         Example input: GraphicOverviews([GraphicOverview(identifier="x", description="x", href="x", mime_type="x")])
         Example output: [{"identifier": "x", "href": "x", "mime_type": "x"}]
-
         """
-        # noinspection PyUnresolvedReferences
         converter = cattrs.Converter()
         return [converter.unstructure(overview) for overview in self]
 

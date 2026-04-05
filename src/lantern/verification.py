@@ -64,7 +64,6 @@ def _req_url(logger: logging.Logger, job: VerificationJob, params: dict | None =
             msg = f"Unsupported HTTP method: {method}"
             raise ValueError(msg) from None
 
-    # noinspection PyUnboundLocalVariable
     job.data["status_code"] = r.status_code
     if r.status_code != expected_status:
         # fail if status is not expected

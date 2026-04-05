@@ -835,7 +835,7 @@ def fx_s3_client(mocker: MockerFixture, fx_s3_bucket_name: str) -> S3Client:
 @pytest.fixture()
 def fx_s3_exporter(fx_logger: logging.Logger, fx_s3_client: S3Client, fx_s3_bucket_name: str) -> S3Exporter:
     """S3 exporter using mocked s3 client."""
-    return S3Exporter(logger=fx_logger, s3=fx_s3_client, bucket=fx_s3_bucket_name)
+    return S3Exporter(logger=fx_logger, s3=fx_s3_client, bucket=fx_s3_bucket_name, parallel_jobs=1)
 
 
 @pytest.fixture()

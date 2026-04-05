@@ -12,7 +12,7 @@ class TestS3Exporter:
 
     def test_init(self, fx_logger: logging.Logger, fx_s3_client: S3Client, fx_s3_bucket_name: str):
         """Can create a local exporter."""
-        s3 = S3Exporter(logger=fx_logger, s3=fx_s3_client, bucket=fx_s3_bucket_name)
+        s3 = S3Exporter(logger=fx_logger, s3=fx_s3_client, bucket=fx_s3_bucket_name, parallel_jobs=1)
         assert isinstance(s3, S3Exporter)
         assert s3.name == "S3"
 

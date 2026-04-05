@@ -1,5 +1,6 @@
 import logging
 import threading
+import time
 from collections.abc import Collection
 
 from boto3 import client as S3Client  # noqa: N812
@@ -35,8 +36,7 @@ class S3Exporter(ExporterBase):
         """Create per-thread S3 client."""
         if not hasattr(self._thread_local, "s3"):
             # Hack to copy access key from existing client
-            # noinspection PyUnresolvedReferences
-            _key = self._s3._request_signer._credentials.get_frozen_credentials()  # ty:ignore[possibly-missing-attribute]
+            _key = self._s3._request_signer._credentials.get_frozen_credentials()  # ty:ignore[unresolved-attribute]
 
             self._thread_local.s3 = S3Client(
                 "s3",
@@ -73,7 +73,6 @@ class S3Exporter(ExporterBase):
         if redirect is not None:
             params["WebsiteRedirectLocation"] = redirect
         if meta:
-            # noinspection PyTypeChecker
             params["Metadata"] = meta
         self._logger.info(f"Putting {key} as {content_type}")
         s3.put_object(**params)
@@ -94,7 +93,6 @@ class S3Exporter(ExporterBase):
             keys = [{"Key": obj["Key"]} for obj in page.get("Contents", [])]
             if not keys:
                 continue
-            # noinspection PyTypeChecker
             self._s3.delete_objects(Bucket=self._bucket, Delete={"Objects": keys})
 
     def export(self, content: Collection[SiteContent]) -> None:
@@ -103,4 +101,8 @@ class S3Exporter(ExporterBase):
 
         Uploads are processed in parallel using a threaded pool to avoid issues with picking the S3 client.
         """
+        start = time.monotonic()
         Parallel(n_jobs=self._workers, backend="threading")(delayed(self._upload_item)(c) for c in content)
+        self._logger.info(
+            f"Exported {len(content)} items to 's3://{self._bucket}' in {round(time.monotonic() - start)} seconds"
+        )

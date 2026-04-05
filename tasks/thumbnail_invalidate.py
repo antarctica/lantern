@@ -4,7 +4,7 @@ import subprocess
 from argparse import ArgumentParser
 from pathlib import Path
 
-from tasks._record_utils import init
+from tasks._shared import init
 from tasks.site_invalidate import invalidate_keys
 
 

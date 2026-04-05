@@ -7,7 +7,7 @@ from pathlib import Path
 
 import cattrs
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
-from tasks._record_utils import confirm_source, init, load_record
+from tasks._shared import confirm_source, init, load_record
 
 from lantern.lib.metadata_library.models.record.record import Record
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, get_admin

@@ -208,7 +208,9 @@ class ArcGISDistribution(Distribution, ABC):
     @property
     def access_target(self) -> str:
         """DOM selector of element showing more information on accessing layer."""
-        return f"#item-data-info-{self._encode_url(self.item_link.href)}"  # ty: ignore[invalid-argument-type]
+        if not self.item_link.href:
+            raise TypeError() from None
+        return f"#item-data-info-{self._encode_url(self.item_link.href)}"
 
 
 class FileDistribution(Distribution, ABC):
@@ -579,8 +581,9 @@ class GeoPackage(FileDistribution):
     def _is_compressed(option: RecordDistribution) -> bool:
         """Check if GeoPackage is compressed based on self-reported format."""
         target_href = "https://metadata-resources.data.bas.ac.uk/media-types/application/geopackage+sqlite3+zip"
-        # TYPING: This assumes option.format is not None but given `matches()` this will never be the case.
-        return option.format.href == target_href  # ty: ignore[possibly-missing-attribute]
+        if not option.format:
+            raise TypeError() from None
+        return option.format.href == target_href
 
     @property
     def format_type(self) -> DistributionType:
@@ -665,8 +668,9 @@ class Pdf(FileDistribution):
     def _is_georeferenced(option: RecordDistribution) -> bool:
         """Check if PDF is georeferenced based on self-reported format."""
         target_href = "https://metadata-resources.data.bas.ac.uk/media-types/application/pdf+geo"
-        # TYPING: This assumes option.format is not None but given `matches()` this will never be the case.
-        return option.format.href == target_href  # ty: ignore[possibly-missing-attribute]
+        if not option.format:
+            raise TypeError() from None
+        return option.format.href == target_href
 
     @property
     def format_type(self) -> DistributionType:

@@ -439,7 +439,6 @@ def _item_cat_model_min() -> ItemCatalogue:
         trusted_context=True,
         select_record=_select_record,
     )
-    # noinspection PyProtectedMember
     set_admin(keys=model._admin_keys, record=model._record, admin_meta=AdministrationMetadata(id=model.resource_id))
     return model
 
@@ -463,12 +462,10 @@ def fx_item_cat_model_min(
         trusted_context=True,
         select_record=fx_select_record,
     )
-    # noinspection PyProtectedMember
     set_admin(keys=model._admin_keys, record=model._record, admin_meta=AdministrationMetadata(id=model.resource_id))
     return model
 
 
-# noinspection PyProtectedMember
 @pytest.fixture()
 def fx_item_cat_model_open(
     fx_item_cat_model_min: ItemCatalogue,
@@ -476,7 +473,6 @@ def fx_item_cat_model_open(
 ) -> ItemCatalogue:
     """Minimal cloned ItemCatalogue model instance with minimal admin metadata to allow open access."""
     model = _item_cat_model_min()
-    # noinspection PyProtectedMember
     set_admin(
         keys=model._admin_keys,
         record=model._record,
@@ -506,7 +502,6 @@ def fx_item_physical_map_model_min(
         trusted_context=True,
         select_record=fx_select_record,
     )
-    # noinspection PyProtectedMember
     set_admin(keys=model._admin_keys, record=model._record, admin_meta=AdministrationMetadata(id=model.resource_id))
     return model
 
@@ -558,7 +553,6 @@ def fx_select_records() -> SelectRecordsProtocol:
 @pytest.fixture()
 def fx_select_records_fixed() -> SelectRecordsProtocol:
     """Minimal records lookup method returning a fixed set of records."""
-    # noinspection PyTypeChecker
     return _select_records_fixed
 
 
@@ -618,7 +612,6 @@ def fx_item_arc_model_min(fx_record_model_min: Record, fx_lib_arcgis_item: ArcGi
     return ItemArcGis(fx_record_model_min, arcgis_item=fx_lib_arcgis_item)
 
 
-# noinspection PyUnusedLocal
 def _init_fake_store(logger: logging.Logger, config: Config | None = None, frozen: bool = False) -> FakeRecordsStore:
     """Callable to initialize a FakeRecordsStore."""
     return FakeRecordsStore(logger=logger, frozen=frozen)
@@ -669,7 +662,6 @@ def _gitlab_cache_create(cache: fx_gitlab_cache) -> None:
     Intended to be used as a side effect when mocking the `GitLabStore._create` method.
     """
     cache_src = Path(__file__).resolve().parent / "resources" / "stores" / "gitlab_cache"
-    # noinspection PyProtectedMember
     shutil.copytree(cache_src, cache._path, dirs_exist_ok=True)
 
 
@@ -681,7 +673,6 @@ def fx_gitlab_cache_pop(mocker: MockerFixture, fx_gitlab_cache: GitLabLocalCache
     To simulate and bypass fetching records from remote repository.
     """
     mocker.patch.object(fx_gitlab_cache, "_create", side_effect=lambda: _gitlab_cache_create(fx_gitlab_cache))
-    # noinspection PyProtectedMember
     fx_gitlab_cache._create()
     return fx_gitlab_cache
 
@@ -689,7 +680,6 @@ def fx_gitlab_cache_pop(mocker: MockerFixture, fx_gitlab_cache: GitLabLocalCache
 @pytest.fixture()
 def fx_gitlab_cache_frozen(fx_gitlab_cache: GitLabLocalCache) -> GitLabLocalCache:
     """Frozen GitLab local cache populated with records."""
-    # noinspection PyProtectedMember
     fx_gitlab_cache._frozen = True
     _gitlab_cache_create(fx_gitlab_cache)
     return fx_gitlab_cache
@@ -732,7 +722,6 @@ def fx_gitlab_cached_store_pop(
     mock_project.http_url_to_repo = "https://gitlab.example.com/x.git"
     mocker.patch.object(type(fx_gitlab_cache_pop), "_project", new_callable=PropertyMock, return_value=mock_project)
 
-    # noinspection PyProtectedMember
     fx_gitlab_cached_store._cache = fx_gitlab_cache_pop
     return fx_gitlab_cached_store
 
@@ -929,7 +918,6 @@ def fx_bas_cat_untrusted(
     ]
     mocker.patch("lantern.catalogue.Verification", return_value=mock_verification)
 
-    # noinspection PyTypeChecker
     return BasCatUntrusted(
         logger=fx_logger,
         meta=fx_export_meta,
@@ -960,7 +948,6 @@ def fx_bas_cat_trusted(
     """
     with TemporaryDirectory() as tmp_dir:
         rsync_path = Path(tmp_dir) / "rsync"
-    # noinspection PyTypeChecker
     return BasCatTrusted(logger=fx_logger, meta=fx_export_meta, store=fx_fake_store, host=None, path=rsync_path)
 
 
@@ -974,7 +961,6 @@ def fx_bas_cat_env(
     fx_bas_cat_trusted: BasCatTrusted,
 ) -> BasCatEnv:
     """BAS untrusted catalogue instance."""
-    # noinspection PyTypeChecker
     cat = BasCatEnv(logger=fx_logger, config=fx_config, store=fx_fake_store, s3=fx_s3_client, env="testing")
     cat._untrusted = fx_bas_cat_untrusted
     cat._trusted = fx_bas_cat_trusted
@@ -999,7 +985,6 @@ def fx_bas_catalogue(
 
     Mocks verification to return fixed results.
     """
-    # noinspection PyTypeChecker
     cat = BasCatalogue(logger=fx_logger, config=fx_config, store=fx_fake_store, s3=fx_s3_client)
     cat._envs = dict.fromkeys(get_args(BasEnvironment), fx_bas_cat_env)
     return cat

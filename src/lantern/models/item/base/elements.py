@@ -1,11 +1,12 @@
 from dataclasses import dataclass, is_dataclass
-from typing import Any, cast
+from typing import Any, SupportsIndex, cast, overload
 
 from lantern.lib.metadata_library.models.record.elements.common import Contact as RecordContact
 from lantern.lib.metadata_library.models.record.elements.common import Contacts as RecordContacts
 from lantern.lib.metadata_library.models.record.elements.common import Date
 from lantern.lib.metadata_library.models.record.elements.identification import Extent as RecordExtent
 from lantern.lib.metadata_library.models.record.elements.identification import Extents as RecordExtents
+from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
 
 
 class Contact(RecordContact):
@@ -17,7 +18,6 @@ class Contact(RecordContact):
 
     def __init__(self, contact: RecordContact) -> None:
         """Initialise from an underlying Record Contact."""
-        # noinspection PyTypeChecker
         props = unpack(contact)
         super().__init__(**props)
 
@@ -53,13 +53,20 @@ class Contacts(RecordContacts):
     Wrapper around Record Contacts to reflect correct type.
     """
 
-    def __getitem__(self, index: int) -> Contact:  # ty: ignore[invalid-method-override]
-        """
-        Override type.
+    @overload
+    def __getitem__(self, index: SupportsIndex) -> Contact: ...  # pragma: no branch
 
-        Known to violate method override rules due to differing return type.
-        """
-        return cast(Contact, super().__getitem__(index))
+    @overload
+    def __getitem__(self, index: slice) -> "Contacts": ...  # pragma: no branch
+
+    def __getitem__(self, index: SupportsIndex | slice) -> "Contact | Contacts":
+        """Get items as overloaded type."""
+        result = super().__getitem__(index)
+        return cast(Contacts, result) if isinstance(index, slice) else cast(Contact, result)
+
+    def filter(self, roles: ContactRoleCode | list[ContactRoleCode]) -> "Contacts":
+        """Get items as overloaded type."""
+        return cast(Contacts, super().filter(roles))
 
 
 class Extent(RecordExtent):
@@ -71,7 +78,6 @@ class Extent(RecordExtent):
 
     def __init__(self, extent: RecordExtent) -> None:
         """Initialise from an underlying Record Extent."""
-        # noinspection PyTypeChecker
         super().__init__(**unpack(extent))
 
     @property
@@ -102,13 +108,20 @@ class Extents(RecordExtents):
     Wrapper around Record Extents to reflect correct type.
     """
 
-    def __getitem__(self, index: int) -> Extent:  # ty: ignore[invalid-method-override]
-        """
-        Override type.
+    @overload
+    def __getitem__(self, index: SupportsIndex) -> Extent: ...  # pragma: no branch
 
-        Known to violate method override rules due to differing return type.
-        """
-        return cast(Extent, super().__getitem__(index))
+    @overload
+    def __getitem__(self, index: slice) -> "Extents": ...  # pragma: no branch
+
+    def __getitem__(self, index: SupportsIndex | slice) -> "Extent | Extents":
+        """Get items as overloaded type."""
+        result = super().__getitem__(index)
+        return cast(Extents, result) if isinstance(index, slice) else cast(Extent, result)
+
+    def filter(self, identifier: str) -> "Extents":
+        """Get items as overloaded type."""
+        return cast(Extents, super().filter(identifier))
 
 
 @dataclass

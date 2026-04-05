@@ -132,7 +132,7 @@ class ItemBase:
     def bounding_extent(self) -> Extent | None:
         """Bounding extent."""
         try:
-            return self.extents.filter(identifier="bounding")[0]  # ty: ignore[invalid-return-type]
+            return self.extents.filter(identifier="bounding")[0]
         except IndexError:
             return None
 

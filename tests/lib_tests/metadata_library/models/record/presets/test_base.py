@@ -84,6 +84,21 @@ class TestRecordMagic:
                 ),
             )
 
+    @pytest.mark.cov()
+    def test_no_file_identifier_set_cat_identifier(self):
+        """Cannot set catalogue identifier in a Record without a file identifier."""
+        record = RecordMagic(
+            file_identifier="x",
+            hierarchy_level=HierarchyLevelCode.PRODUCT,
+            identification=Identification(
+                title="x", abstract="x", dates=Dates(creation=Date(date=datetime(2014, 6, 30, tzinfo=UTC).date()))
+            ),
+        )
+        record.file_identifier = None
+
+        with pytest.raises(TypeError):
+            record._set_cat_identifier()
+
     def test_loads(self, fx_lib_record_config_min_magic: dict):
         """Can create a minimal Record from a JSON serialised dict."""
         record = RecordMagic.loads(fx_lib_record_config_min_magic)
@@ -128,7 +143,6 @@ class TestRecordMagic:
     def test_catalogue_identifier_existing(self, fx_lib_record_config_min_magic: dict):
         """Can include a catalogue identifier without creating duplicates where already in the record."""
         expected = Identifier(identifier="x", href="https://data.bas.ac.uk/items/x", namespace="data.bas.ac.uk")
-        # noinspection PyTypeChecker
         fx_lib_record_config_min_magic["identification"]["identifiers"] = [asdict(expected)]
         record = RecordMagic.loads(fx_lib_record_config_min_magic)
 
@@ -362,6 +376,22 @@ class TestRecordMagicOpen:
                     title="x", abstract="x", dates=Dates(creation=Date(date=datetime(2014, 6, 30, tzinfo=UTC).date()))
                 ),
             )
+
+    @pytest.mark.cov()
+    def test_no_file_identifier_set_open_access(self, fx_admin_meta_keys: AdministrationKeys):
+        """Cannot set catalogue identifier in a Record without a file identifier."""
+        record = RecordMagicOpen(
+            file_identifier="x",
+            hierarchy_level=HierarchyLevelCode.PRODUCT,
+            identification=Identification(
+                title="x", abstract="x", dates=Dates(creation=Date(date=datetime(2014, 6, 30, tzinfo=UTC).date()))
+            ),
+            admin_keys=fx_admin_meta_keys,
+        )
+        record.file_identifier = None
+
+        with pytest.raises(TypeError):
+            record._set_open_access(admin_keys=fx_admin_meta_keys, record=record)
 
     def test_loads(self, fx_admin_meta_keys: AdministrationKeys, fx_lib_record_config_min_magic: dict):
         """Can create a minimal unrestricted Record from a JSON serialised dict."""

@@ -1,10 +1,9 @@
 # Generate and export catalogue site
 
 import logging
-from collections.abc import Callable
 from pathlib import Path
 
-from tasks._record_utils import TargetEnv, init, init_s3
+from tasks._shared import TargetEnv, init, init_s3
 
 from lantern.catalogue import BasCatalogue, BasEnvironment
 from lantern.exporters.local import LocalExporter
@@ -18,7 +17,7 @@ def export(
     env: BasEnvironment,
     target: TargetEnv,
     identifiers: set[str],
-    outputs: list[Callable[..., OutputBase]] | None = None,
+    outputs: list[type[OutputBase]] | None = None,
 ) -> None:
     """Run catalogue export, ensuring store is frozen for performance and optionally overloading exporter."""
     if isinstance(catalogue._store, GitLabCachedStore):
@@ -33,7 +32,7 @@ def export(
 def main() -> None:
     """Entrypoint."""
     selected = set()  # to set use the form {"abc", "..."}
-    target: TargetEnv = "local"  # local/remote
+    target: TargetEnv = "remote"  # local/remote
     env: BasEnvironment = "testing"  # testing/live, only relevant where target='remote'
 
     logger, config, store = init(cached_store=True, frozen_store=True)

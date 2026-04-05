@@ -11,7 +11,6 @@ from marshmallow import validate
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 
 
-# noinspection PyPep8Naming
 class Config:
     """
     Application configuration using environment variables.
@@ -232,7 +231,6 @@ class Config:
     def STORE_GITLAB_ENDPOINT(self) -> str:
         """Endpoint for GitLab store."""
         with self._env.prefixed(self._app_prefix), self._env.prefixed("STORE_GITLAB_"):
-            # noinspection PyTypeChecker
             return self._env.str("ENDPOINT", validate=validate.URL())
 
     @property
@@ -288,7 +286,6 @@ class Config:
     def TEMPLATES_ITEM_CONTACT_ENDPOINT(self) -> str:
         """Endpoint for contact form in items contact tab."""
         with self._env.prefixed(self._app_prefix), self._env.prefixed("TEMPLATES_"), self._env.prefixed("ITEM_"):
-            # noinspection PyTypeChecker
             return self._env.str("CONTACT_ENDPOINT", validate=validate.URL())
 
     @property
@@ -305,7 +302,6 @@ class Config:
         I.e. The URL to the Git repository where item record revisions are stored.
         """
         with self._env.prefixed(self._app_prefix), self._env.prefixed("TEMPLATES_"), self._env.prefixed("ITEM_"):
-            # noinspection PyTypeChecker
             return self._env.str("VERSIONS_ENDPOINT", validate=validate.URL())
 
     @property
@@ -359,14 +355,12 @@ class Config:
     def VERIFY_SHAREPOINT_PROXY_ENDPOINT(self) -> str:
         """Endpoint for checking SharePoint hosted downloads in verification jobs."""
         with self._env.prefixed(self._app_prefix), self._env.prefixed("VERIFY_"):
-            # noinspection PyTypeChecker
             return self._env.str("SHAREPOINT_PROXY_ENDPOINT", validate=validate.URL())
 
     @property
     def VERIFY_SAN_PROXY_ENDPOINT(self) -> str:
         """Endpoint for checking SAN references in verification jobs."""
         with self._env.prefixed(self._app_prefix), self._env.prefixed("VERIFY_"):
-            # noinspection PyTypeChecker
             return self._env.str("SAN_PROXY_ENDPOINT", validate=validate.URL())
 
     @property
@@ -377,7 +371,6 @@ class Config:
         Can be a reverse proxied endpoint. Must be a fully qualified URL.
         """
         with self._env.prefixed(self._app_prefix), self._env.prefixed("BASE_URL_"):
-            # noinspection PyTypeChecker
             return self._env.str("TESTING", validate=validate.URL())
 
     @property
@@ -388,5 +381,4 @@ class Config:
         Can be a reverse proxied endpoint. Must be a fully qualified URL.
         """
         with self._env.prefixed(self._app_prefix), self._env.prefixed("BASE_URL_"):
-            # noinspection PyTypeChecker
             return self._env.str("LIVE", validate=validate.URL())

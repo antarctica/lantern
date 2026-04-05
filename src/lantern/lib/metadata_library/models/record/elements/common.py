@@ -21,6 +21,7 @@ TDates = TypeVar("TDates", bound="Dates")
 TContacts = TypeVar("TContacts", bound="Contacts")
 TCitation = TypeVar("TCitation", bound="Citation")
 TConstraints = TypeVar("TConstraints", bound="Constraints")
+TIdentifiers = TypeVar("TIdentifiers", bound="Identifiers")
 
 
 @dataclass(kw_only=True)
@@ -111,6 +112,14 @@ class Contact:
             msg = "At least one role is required"
             raise ValueError(msg) from None
 
+    @property
+    def name(self) -> str:
+        """Individual or organisation name."""
+        identity = self.individual or self.organisation
+        if identity is None:
+            raise AttributeError() from None
+        return identity.name
+
     def unstructure(self) -> list[dict]:
         """
         Convert to plain types.
@@ -123,7 +132,6 @@ class Contact:
         Example input: Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.POINT_OF_CONTACT])
         Example output: {'organisation': {'name': 'x'}, 'role': ['pointOfContact']}
         """
-        # noinspection PyUnresolvedReferences
         converter = cattrs.Converter()
         contact = converter.unstructure(self)
         contact["role"] = sorted(contact["role"])
@@ -184,14 +192,13 @@ class Contacts(list[Contact]):
         Example input: Contacts([Contact(organisation=ContactIdentity(name="x"), role=[ContactRoleCode.POINT_OF_CONTACT])])
         Example output: [{'organisation': {'name': 'x'}, 'role': ['pointOfContact']}]
         """
-        # noinspection PyUnresolvedReferences
         converter = cattrs.Converter()
         converter.register_unstructure_hook(Contact, lambda d: d.unstructure())
         return [converter.unstructure(contact) for contact in self]
 
     def filter(self, roles: ContactRoleCode | list[ContactRoleCode]) -> "Contacts":
         """Filter contacts by role(s)."""
-        roles = [roles] if isinstance(roles, ContactRoleCode) else roles
+        roles: list[ContactRoleCode] = [roles] if isinstance(roles, ContactRoleCode) else roles
         return Contacts([contact for contact in self if any(role in contact.role for role in roles)])
 
     def ensure(self, contact: Contact) -> None:
@@ -318,7 +325,6 @@ class Dates:
 
     def __post_init__(self) -> None:
         """Process defaults."""
-        # noinspection PyTypeChecker
         if set(astuple(self)) == {None}:
             msg = "At least one date is required"
             raise ValueError(msg) from None
@@ -330,7 +336,6 @@ class Dates:
     @property
     def _dict(self) -> dict[str, Date]:
         """Non-None values as a dictionary."""
-        # noinspection PyUnresolvedReferences
         return {k: getattr(self, k) for k in self.__dataclass_fields__ if getattr(self, k) is not None}
 
     def as_dict_enum(self) -> dict[DateTypeCode, Date]:
@@ -404,7 +409,7 @@ class Identifiers(list[Identifier]):
     """
 
     @classmethod
-    def structure(cls: type[TContacts], value: list[dict]) -> "Contacts":
+    def structure(cls: type[TIdentifiers], value: list[dict]) -> "Identifiers":
         """
         Parse identifiers from plain types.
 
@@ -417,7 +422,7 @@ class Identifiers(list[Identifier]):
         Example output: Identifiers([Identifier(identifier="x", href="x", namespace="x")])
         """
         converter = cattrs.Converter()
-        return cls([converter.structure(identifier, Identifier) for identifier in value])  # ty: ignore[invalid-argument-type]
+        return cls([converter.structure(identifier, Identifier) for identifier in value])
 
     def unstructure(self) -> list[dict]:
         """
@@ -429,7 +434,6 @@ class Identifiers(list[Identifier]):
         Example input: Identifiers([Identifier(identifier="x", href="x", namespace="x")])
         Example output: [{"identifier": "x", "href": "x", "namespace": "x"}]
         """
-        # noinspection PyUnresolvedReferences
         converter = cattrs.Converter()
         return [converter.unstructure(identifier) for identifier in self]
 
@@ -499,7 +503,7 @@ class Citation:
         converter.register_unstructure_hook(Contacts, lambda d: d.unstructure())
         converter.register_structure_hook(Dates, lambda d, t: Dates.structure(d))
         converter.register_unstructure_hook(Dates, lambda d: d.unstructure())
-        converter.register_structure_hook(Identifiers, lambda d, t: Identifiers.structure(d))  # ty: ignore[invalid-argument-type]
+        converter.register_structure_hook(Identifiers, lambda d, t: Identifiers.structure(d))
         converter.register_unstructure_hook(Identifiers, lambda d: d.unstructure())
         return converter
 
@@ -631,7 +635,6 @@ class Constraints(list[Constraint]):
         Example output: [{"type": "usage", "restriction_code": "license", "statement": "x", "href": "x"}]
 
         """
-        # noinspection PyUnresolvedReferences
         converter = cattrs.Converter()
         return [converter.unstructure(constraint) for constraint in self]
 

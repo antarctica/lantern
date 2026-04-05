@@ -104,6 +104,16 @@ class TestContacts:
         # verify methods from parent class are accessible
         assert len(item_contacts.filter(roles=role)) > 0
 
+    def test_slice(self):
+        """Can slice items in a Contacts container."""
+        role = ContactRoleCode.POINT_OF_CONTACT
+        rec_contact = RecordContact(organisation=ContactIdentity(name="x"), role={role})
+        item_contact = Contact(rec_contact)
+
+        item_contacts = Contacts([item_contact, item_contact])
+        assert isinstance(item_contacts, Contacts)
+        assert item_contacts[:1] == Contacts([item_contact])
+
 
 class TestExtent:
     """Test Item Extent."""

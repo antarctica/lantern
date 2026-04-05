@@ -7,7 +7,7 @@ from pathlib import Path
 import inquirer
 from bas_metadata_library.standards.magic_administration.v1 import Permission
 from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
-from tasks._record_utils import dump_records, ensure_admin, init, parse_records, pick_records
+from tasks._shared import dump_records, ensure_admin, init, parse_records, pick_records
 
 from lantern.lib.metadata_library.models.record.presets.admin import BAS_STAFF, OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.record import Record

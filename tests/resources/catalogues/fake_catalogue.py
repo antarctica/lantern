@@ -2,6 +2,8 @@ import logging
 import shutil
 from pathlib import Path
 
+from tasks._shared import time_task
+
 from lantern.catalogue import CatalogueBase
 from lantern.config import Config
 from lantern.exporters.local import LocalExporter
@@ -17,7 +19,6 @@ from lantern.outputs.site_index import SiteIndexOutput
 from lantern.outputs.site_pages import SitePagesOutput
 from lantern.outputs.site_resources import SiteResourcesOutput
 from lantern.site import Site
-from lantern.utils import time_task
 from lantern.verification import Verification
 from tests.resources.stores.fake_records_store import FakeRecordsStore
 

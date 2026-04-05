@@ -117,12 +117,14 @@ class ItemArcGis(ItemBase):
         Mapped to: description (from [1])
         [1] https://developers.arcgis.com/rest/users-groups-and-items/common-parameters/#item-parameters
         """
-        parts = {"abstract": self.description_html}
+        parts = {"abstract": self.description_html, "catalogue_href": None}
         if self.lineage_html is not None:
             parts["lineage"] = self.lineage_html
         if self.citation_html is not None:
             parts["citation"] = self.citation_html
-        parts["catalogue_href"] = self.identifiers.filter(namespace=CATALOGUE_NAMESPACE)[0].href
+        cat_identifiers = self.identifiers.filter(namespace=CATALOGUE_NAMESPACE)
+        if len(cat_identifiers) > 0 and cat_identifiers[0].href:
+            parts["catalogue_href"] = cat_identifiers[0].href
 
         return self._jinja.get_template("_arcgis/description.html.j2").render(**parts)
 

@@ -21,7 +21,9 @@ class TestMakeBasCat:
                 {"item_id": "x", "association": AggregationAssociationCode.LARGER_WORK_CITATION, "initiative": None},
                 Aggregation(
                     identifier=Identifier(
-                        identifier="x", href="https://data.bas.ac.uk/items/x", namespace="data.bas.ac.uk"
+                        identifier="x",
+                        href="https://lantern.data.bas.ac.uk/items/x",
+                        namespace="lantern.data.bas.ac.uk",
                     ),
                     association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
                 ),
@@ -34,7 +36,9 @@ class TestMakeBasCat:
                 },
                 Aggregation(
                     identifier=Identifier(
-                        identifier="x", href="https://data.bas.ac.uk/items/x", namespace="data.bas.ac.uk"
+                        identifier="x",
+                        href="https://lantern.data.bas.ac.uk/items/x",
+                        namespace="lantern.data.bas.ac.uk",
                     ),
                     association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
                     initiative_type=AggregationInitiativeCode.CAMPAIGN,
@@ -54,7 +58,9 @@ class TestMakeInBasCatCollection:
     def test_default(self):
         """Can make an aggregation for a collection."""
         expected = Aggregation(
-            identifier=Identifier(identifier="x", href="https://data.bas.ac.uk/items/x", namespace="data.bas.ac.uk"),
+            identifier=Identifier(
+                identifier="x", href="https://lantern.data.bas.ac.uk/items/x", namespace="lantern.data.bas.ac.uk"
+            ),
             association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
             initiative_type=AggregationInitiativeCode.COLLECTION,
         )
@@ -69,7 +75,9 @@ class TestMakeBasCatCollectionMember:
     def test_default(self):
         """Can make an aggregation for an item in a collection."""
         expected = Aggregation(
-            identifier=Identifier(identifier="x", href="https://data.bas.ac.uk/items/x", namespace="data.bas.ac.uk"),
+            identifier=Identifier(
+                identifier="x", href="https://lantern.data.bas.ac.uk/items/x", namespace="lantern.data.bas.ac.uk"
+            ),
             association_type=AggregationAssociationCode.IS_COMPOSED_OF,
             initiative_type=AggregationInitiativeCode.COLLECTION,
         )
@@ -84,7 +92,9 @@ class TestMakeBasCatCrossRef:
     def test_default(self):
         """Can make an aggregation for an item related to another."""
         expected = Aggregation(
-            identifier=Identifier(identifier="x", href="https://data.bas.ac.uk/items/x", namespace="data.bas.ac.uk"),
+            identifier=Identifier(
+                identifier="x", href="https://lantern.data.bas.ac.uk/items/x", namespace="lantern.data.bas.ac.uk"
+            ),
             association_type=AggregationAssociationCode.CROSS_REFERENCE,
         )
         result = make_bas_cat_cross_ref("x")

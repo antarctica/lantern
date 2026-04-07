@@ -8,23 +8,29 @@ from pathlib import Path
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata, Permission
 from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 from tasks._shared import dump_records, init, parse_records
-from tasks.records_upgrade_2026_02 import RecordUpgrade
 
 from lantern.lib.metadata_library.models.record.elements.common import Date
+from lantern.lib.metadata_library.models.record.elements.data_quality import DomainConsistencies
 from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,
     AggregationInitiativeCode,
     ConstraintRestrictionCode,
     ConstraintTypeCode,
+    ContactRoleCode,
     HierarchyLevelCode,
+    MaintenanceFrequencyCode,
+    ProgressCode,
 )
 from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS as OPEN_ACCESS_PERMISSION
 from lantern.lib.metadata_library.models.record.presets.aggregations import make_bas_cat_collection_member
-from lantern.lib.metadata_library.models.record.presets.conformance import MAGIC_ADMINISTRATION_V1
+from lantern.lib.metadata_library.models.record.presets.conformance import MAGIC_ADMINISTRATION_V1, MAGIC_DISCOVERY_V2
+from lantern.lib.metadata_library.models.record.presets.constraints import CC_BY_ND_V4, OPEN_ACCESS
+from lantern.lib.metadata_library.models.record.presets.contacts import UKRI_RIGHTS_HOLDER
 from lantern.lib.metadata_library.models.record.record import Record
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin, set_admin
 from lantern.lib.metadata_library.models.record.utils.kv import get_kv, set_kv
-from lantern.models.record.const import CATALOGUE_NAMESPACE
+from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
+from lantern.models.record.revision import RecordRevision
 from lantern.stores.base import RecordNotFoundError
 from lantern.stores.gitlab import GitLabStore
 
@@ -148,7 +154,7 @@ def _update_collection_extent(logger: logging.Logger, record: Record, collection
         return
 
 
-def _update_record_collections(logger: logging.Logger, record: Record, collections: dict[str, Record]) -> None:
+def _update_record_collections(logger: logging.Logger, record: Record, collections: dict[str, RecordRevision]) -> None:
     """
     Update in-scope collections a record is part of.
 
@@ -269,6 +275,32 @@ def _get_access_permissions(logger: logging.Logger, record: Record) -> tuple[lis
     return metadata_permissions, resource_permissions
 
 
+def _process_identifiers(logger: logging.Logger, records: list[Record]) -> None:
+    """Workaround zap's now outdated catalogue, aliases and aggregation identifiers."""
+    old = "data.bas.ac.uk"
+    old_alias = "alias.data.bas.ac.uk"
+    for record in records:
+        for identifier in record.identification.identifiers:
+            if identifier.namespace == old:
+                logger.info(f"Catalogue identifier with old namespace found in record [{record.file_identifier}].")
+                if identifier.href:
+                    identifier.href = identifier.href.replace(old, CATALOGUE_NAMESPACE)
+                identifier.namespace = CATALOGUE_NAMESPACE
+            if identifier.namespace == old_alias:
+                logger.info(
+                    f"Alias identifier '{identifier.identifier}' with old namespace found in record [{record.file_identifier}]."
+                )
+                if identifier.href:
+                    identifier.href = identifier.href.replace("data.bas.ac.uk", CATALOGUE_NAMESPACE)
+                identifier.namespace = ALIAS_NAMESPACE
+        for aggregation in record.identification.aggregations:
+            if aggregation.identifier.namespace == old:
+                logger.info(f"Aggregation identifier with old namespace found in record [{record.file_identifier}].")
+                if aggregation.identifier.href:
+                    aggregation.identifier.href = aggregation.identifier.href.replace(old, CATALOGUE_NAMESPACE)
+                aggregation.identifier.namespace = CATALOGUE_NAMESPACE
+
+
 def _process_admin_metadata(logger: logging.Logger, admin_keys: AdministrationKeys, records: list[Record]) -> None:
     """
     Add administrative metadata to record.
@@ -278,6 +310,8 @@ def _process_admin_metadata(logger: logging.Logger, admin_keys: AdministrationKe
 
     - admin.access_permissions -> identification.constraints[type=access]
     - admin.gitlab_issues -> identification.identifiers[namespace=gitlab.data.bas.ac.uk]
+
+    Also removes any legacy permissions.
 
     Note: This method assumes admin metadata is already present in the record.
     Note: This method replaces any existing admin metadata already present in the record.
@@ -313,6 +347,11 @@ def _process_admin_metadata(logger: logging.Logger, admin_keys: AdministrationKe
         logger.debug(admin_meta.dumps_json())
         logger.debug(record.identification.supplemental_information)
 
+        for con in record.identification.constraints:
+            if con.type == ConstraintTypeCode.ACCESS and con.href:
+                con.href = None
+                logger.info("Removing legacy permissions.")
+
 
 def _process_distribution_descriptions(logger: logging.Logger, records: list[Record]) -> None:
     """Remove unnecessary online resource descriptions for simple distributions or align values."""
@@ -334,10 +373,100 @@ def _process_distribution_descriptions(logger: logging.Logger, records: list[Rec
                 distribution.transfer_option.online_resource.description is not None
                 and format_href in format_descriptions
             ):
+                _format = distribution.format.format if distribution.format else None
                 logger.info(
-                    f"Updating distribution description for format '{distribution.format.format}' in Record '{record.file_identifier}'"
+                    f"Updating distribution description for format '{_format}' in Record '{record.file_identifier}'"
                 )
-                distribution.transfer_option.online_resource.description = format_descriptions[distribution.format.href]
+                distribution.transfer_option.online_resource.description = format_descriptions[format_href]
+
+
+def _add_rights_holder(logger: logging.Logger, records: list[Record]) -> None:
+    """Add copyright holder."""
+    for record in records:
+        record.identification.contacts.ensure(UKRI_RIGHTS_HOLDER)
+        logger.info("Adding UKRI contact as rights holder if missing.")
+
+
+def _add_publisher(logger: logging.Logger, records: list[Record]) -> None:
+    """Add MAGIC as a publisher if needed."""
+    for record in records:
+        for contact in record.identification.contacts:
+            if (
+                contact.name == "Mapping and Geographic Information Centre, British Antarctic Survey"
+                and ContactRoleCode.PUBLISHER not in contact.role
+            ):
+                contact.role.add(ContactRoleCode.PUBLISHER)
+                logger.info("Adding MAGIC as publisher if no other.")
+                return
+
+
+def _add_metadata_constraints(logger: logging.Logger, records: list[Record]) -> None:
+    """Add unrestricted access and/or CC-BY-ND usage if missing."""
+    for record in records:
+        if not record.metadata.constraints.filter(types=ConstraintTypeCode.ACCESS):
+            record.metadata.constraints.append(OPEN_ACCESS)
+            logger.info("Added open access metadata access constraint.")
+        if not record.metadata.constraints.filter(types=ConstraintTypeCode.USAGE):
+            record.metadata.constraints.append(CC_BY_ND_V4)
+            logger.info("Added CC BY ND licence metadata usage constraint.")
+
+
+def _fix_dates(logger: logging.Logger, records: list[Record]) -> None:
+    """Fix missing publication and released dates required by discovery profile v2."""
+    for record in records:
+        dates = record.identification.dates
+        date = dates.released or dates.publication or dates.creation
+        if not dates.publication:
+            dates.publication = date
+            logger.info("Missing publication date added based on creation date.")
+        if not dates.released:
+            dates.released = date
+            logger.info("Missing released date added based on creation date.")
+
+
+def _upgrade_discovery(logger: logging.Logger, records: list[Record]) -> None:
+    """Upgrade to discovery profile v2."""
+    href = "https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery-v1/"
+
+    for record in records:
+        record.data_quality.domain_consistency = DomainConsistencies(
+            [dc for dc in record.data_quality.domain_consistency if dc.specification.href != href]
+        )
+        record.data_quality.domain_consistency.ensure(MAGIC_DISCOVERY_V2)
+        logger.info("Discovery metadata upgraded to V2.")
+
+
+def _change_product_type(logger: logging.Logger, records: list[Record]) -> None:
+    """Change hierarchy level from product to mapProduct which Zap didn't know about."""
+    for record in records:
+        if record.hierarchy_level == HierarchyLevelCode.PRODUCT:
+            record.hierarchy_level = HierarchyLevelCode.MAP_PRODUCT
+            logger.info("Hierarchy level changed to mapProduct.")
+
+
+def _order_profiles(logger: logging.Logger, records: list[Record]) -> None:
+    """Order profile domain consistency elements by opinionated list to prevent false positives in diffs."""
+    href_order = [MAGIC_DISCOVERY_V2.specification.href, MAGIC_ADMINISTRATION_V1.specification.href]
+
+    for record in records:
+        hrefs = [dc.specification.href for dc in record.data_quality.domain_consistency]
+        if set(href_order) != set(hrefs):
+            return
+        logger.info("Setting profiles order.")
+        record.data_quality.domain_consistency = DomainConsistencies([MAGIC_DISCOVERY_V2, MAGIC_ADMINISTRATION_V1])
+
+
+def _update_published_maps_link(logger: logging.Logger, records: list[Record]) -> None:
+    """Fix now outdated URL in map purchasing distribution option set by mega zap."""
+    for record in records:
+        for do in record.distribution:
+            if (
+                do.transfer_option.online_resource.href
+                == "https://www.bas.ac.uk/data/our-data/maps/how-to-order-a-map/"
+            ):
+                do.transfer_option.online_resource.href = "https://data.bas.ac.uk/guides/map-purchasing/"
+                logger.info("Updated published maps purchasing link.")
+                return
 
 
 def _process_sheet_number(logger: logging.Logger, records: list[Record]) -> None:
@@ -372,6 +501,19 @@ def _process_sheet_number(logger: logging.Logger, records: list[Record]) -> None
             logger.info("Sheet number removed from KV.")
 
 
+def _set_metadata_maintenance(logger: logging.Logger, records: list[Record]) -> None:
+    """Workaround for zap's lack of maintenance metadata support."""
+    _progress = ProgressCode.COMPLETED
+    _frequency = MaintenanceFrequencyCode.AS_NEEDED
+    for record in records:
+        if record.metadata.maintenance.progress is None:
+            record.metadata.maintenance.progress = ProgressCode.COMPLETED
+            logger.info(f"Maintenance progress set to {_progress.name}.")
+        if record.metadata.maintenance.maintenance_frequency != _frequency:
+            record.metadata.maintenance.maintenance_frequency = MaintenanceFrequencyCode.AS_NEEDED
+            logger.info(f"Maintenance frequency set to {_frequency.name}.")
+
+
 def process_zap_records(
     logger: logging.Logger, records: list[Record], store: GitLabStore, admin_keys: AdministrationKeys
 ) -> list[Record]:
@@ -383,7 +525,17 @@ def process_zap_records(
     Where any of these records are modified, the date_stamp and other relevant properties are revised.
     """
     additional_records: list[Record] = []
+    _add_metadata_constraints(logger=logger, records=records)
+    _fix_dates(logger=logger, records=records)
+    _add_rights_holder(logger=logger, records=records)
+    _add_publisher(logger=logger, records=records)
+    _upgrade_discovery(logger=logger, records=records)
+    _change_product_type(logger=logger, records=records)
+    _order_profiles(logger=logger, records=records)
+    _update_published_maps_link(logger=logger, records=records)
     _process_sheet_number(logger=logger, records=records)
+    _process_identifiers(logger=logger, records=records)
+    _set_metadata_maintenance(logger=logger, records=records)
     _process_distribution_descriptions(logger=logger, records=records)
     _process_admin_metadata(logger=logger, admin_keys=admin_keys, records=records)
     _process_magic_collections(logger=logger, records=records, additional_records=additional_records, store=store)
@@ -407,7 +559,6 @@ def parse_zap_records(
         logger=logger, search_path=input_path, validate_profiles=False, glob_pattern="zap-*.json"
     )
     for record, record_path in record_paths:
-        original_record = deepcopy(record)
         # Add minimal admin metadata for future use
         if not record.file_identifier:
             msg = "Record must have a file identifier."
@@ -416,9 +567,6 @@ def parse_zap_records(
         set_admin(keys=admin_keys, record=record, admin_meta=admin)
         record.data_quality.domain_consistency.ensure(MAGIC_ADMINISTRATION_V1)
 
-        up = RecordUpgrade(record=record, original_sha1=original_record.sha1)
-        up.upgrade(logger=logger, keys=admin_keys)
-        up.validate()
         logger.info(f"Saving upgraded record '{record.file_identifier}' to '{record_path}'")
         with record_path.open("w") as f:
             f.write(record.dumps_json(strip_admin=False))

@@ -80,7 +80,7 @@ The `clone-record` task will:
 These fields are updated when duplicating a record:
 
 - `file_identifier`
-- `identification.identifier[namespace='data.bas.ac.uk']` (data catalogue identifier)
+- `identification.identifier[namespace='lantern.data.bas.ac.uk']` (data catalogue identifier)
 - `identification.supplemental_information[admin_metadata]`
 
 > [!NOTE]
@@ -535,6 +535,27 @@ The `esri-item` task will:
 > [!NOTE]
 > This task only supports items hosted in ArcGIS Online.
 <!-- pyml enable md028 -->
+
+## Upgrade records
+
+To update records in bulk (e.g. to a new profile version, or to adopt new conventions, etc.):
+
+1. create a new [Development Task](/docs/dev.md#record-upgrade-tasks) named `upgrade-records`
+1. run the `upgrade-records` [Development Task](/docs/dev.md#development-tasks) to initialise an upgrade directory
+1. run the `upgrade-records` task again to process records in the upgrade directory
+1. store the upgrade report
+1. [Import](#import-records) the upgraded records
+
+> [!TIP]
+> The upgrade directory SHOULD be tracked in a local Git repo to easily compare and rollback changes.
+
+The `upgrade-records` task will:
+
+- create an upgrade directory and dump all records from the [GitLab Store](/docs/stores.md#gitlab-store) as JSON files
+- capture the SHA1 hashes of all records to allow detecting changes after processing as `hashes_orginal.json`
+- process records as needed and writing back to the upgrade directory
+- capture the SHA1 hashes of all (processed) records as `hashes_working.json` for comparison
+- generate a report of changes as `report_data.json` and `report_rendered.md`
 
 ## Rotate access tokens
 

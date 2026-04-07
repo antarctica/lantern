@@ -11,7 +11,7 @@ class TestMakeBasCat:
         """Can make an identifier for an item."""
         value = "x"
         expected = Identifier(
-            identifier=value, href=f"https://data.bas.ac.uk/items/{value}", namespace="data.bas.ac.uk"
+            identifier=value, href=f"https://lantern.data.bas.ac.uk/items/{value}", namespace="lantern.data.bas.ac.uk"
         )
 
         result = make_bas_cat(value)

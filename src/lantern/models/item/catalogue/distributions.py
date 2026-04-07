@@ -389,10 +389,7 @@ class BasPublishedMap(Distribution):
     @classmethod
     def matches(cls, option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:
         """Whether this class matches the distribution option."""
-        return (
-            option.transfer_option.online_resource.href
-            == "https://www.bas.ac.uk/data/our-data/maps/how-to-order-a-map/"
-        )
+        return option.transfer_option.online_resource.href == "https://data.bas.ac.uk/guides/map-purchasing/"
 
     @property
     def format_type(self) -> DistributionType:

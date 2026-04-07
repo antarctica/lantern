@@ -520,11 +520,15 @@ class Identifiers(RecordIdentifiers):
     @property
     def aliases(self) -> list[Link]:
         """Aliases for Item."""
-        items = list(self.filter(ALIAS_NAMESPACE))
-        if any(not i.href for i in items):
-            msg = "Aliases must have a href."
-            raise ValueError(msg) from None
-        return [Link(value=i.identifier, href=i.href, external=False) for i in items]
+        identifiers = list(self.filter(ALIAS_NAMESPACE))
+        aliases = []
+        for identifier in identifiers:
+            if not identifier.href:
+                msg = "Aliases must have a href."
+                raise ValueError(msg) from None
+            href = identifier.href.replace(f"https://{CATALOGUE_NAMESPACE}", "")
+            aliases.append(Link(value=identifier.identifier, href=href, external=False))
+        return aliases
 
 
 class Maintenance(RecordMaintenance):

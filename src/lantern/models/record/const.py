@@ -1,2 +1,2 @@
-CATALOGUE_NAMESPACE = "data.bas.ac.uk"
+CATALOGUE_NAMESPACE = "lantern.data.bas.ac.uk"
 ALIAS_NAMESPACE = f"alias.{CATALOGUE_NAMESPACE}"

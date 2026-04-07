@@ -148,8 +148,6 @@ class Record:
             "name": "ISO 19115-2 Geographic Information - Metadata - Part 2: Extensions for Imagery and Gridded Data",
             "version": "ISO 19115-2:2009(E)",
         }
-        if "maintenance" in normalised["metadata"]:
-            del normalised["metadata"]["maintenance"]
 
         normalised["identification"]["character_set"] = "utf8"
         normalised["identification"]["language"] = "eng"

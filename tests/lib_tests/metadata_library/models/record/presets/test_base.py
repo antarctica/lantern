@@ -135,14 +135,18 @@ class TestRecordMagic:
 
     def test_catalogue_identifier(self, fx_lib_record_config_min_magic: dict):
         """Can include an identifier using the catalogue namespace."""
-        expected = Identifier(identifier="x", href="https://data.bas.ac.uk/items/x", namespace="data.bas.ac.uk")
+        expected = Identifier(
+            identifier="x", href="https://lantern.data.bas.ac.uk/items/x", namespace="lantern.data.bas.ac.uk"
+        )
         record = RecordMagic.loads(fx_lib_record_config_min_magic)
 
         assert expected in record.identification.identifiers
 
     def test_catalogue_identifier_existing(self, fx_lib_record_config_min_magic: dict):
         """Can include a catalogue identifier without creating duplicates where already in the record."""
-        expected = Identifier(identifier="x", href="https://data.bas.ac.uk/items/x", namespace="data.bas.ac.uk")
+        expected = Identifier(
+            identifier="x", href="https://lantern.data.bas.ac.uk/items/x", namespace="lantern.data.bas.ac.uk"
+        )
         fx_lib_record_config_min_magic["identification"]["identifiers"] = [asdict(expected)]
         record = RecordMagic.loads(fx_lib_record_config_min_magic)
 

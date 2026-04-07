@@ -324,7 +324,7 @@ class TestDistributionBasPublishedMap:
             distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
             transfer_option=TransferOption(
                 online_resource=OnlineResource(
-                    href="https://www.bas.ac.uk/data/our-data/maps/how-to-order-a-map/",
+                    href="https://data.bas.ac.uk/guides/map-purchasing/",
                     function=OnlineResourceFunctionCode.DOWNLOAD,
                 )
             ),

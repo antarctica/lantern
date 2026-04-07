@@ -19,6 +19,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * `TRUSTED_UPLOAD_HOST` config option renamed to `SITE_TRUSTED_RSYNC_HOST`
 * `TRUSTED_UPLOAD_PATH` config option split into `SITE_TRUSTED_RSYNC_BASE_PATH_TESTING` and
   `SITE_TRUSTED_RSYNC_BASE_PATH_LIVE`
+* Catalogue and alias namespace changed from `data.bas.ac.uk` to `lantern.data.bas.ac.uk` to avoid conflicts
 
 ### Removed [!BREAKING]
 
@@ -48,6 +49,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Aria hidden role for icons
 * Aria roles for item tabs, with minimal JavaScript to support keyboard navigation between tabs
 * `gitlab-record` development task for setting GitLab issues in records
+* Records upgrade development task (2026-04) and usage/developer documentation
 
 ### Fixed
 
@@ -74,6 +76,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Improvements to accessibility in templates
 * Refactoring config class to use environs validation consistently
 * Refactoring ISO HTML output to avoid loading XSLT on each use
+* Refactoring relevant parts of previous records upgrade development task into Zap ⚡️ development task
 
 ## [0.5.0] - 2026-02-27 [!BREAKING]
 

@@ -311,16 +311,6 @@ class TestRecord:
         """Can calculate a SHA1 hash of the record config."""
         assert fx_lib_record_model_min_iso.sha1 == "12e1d01105a5c77e3315e493acf5eb590129ffca"
 
-    @pytest.mark.cov()
-    @pytest.mark.parametrize("maintenance", [False, True])
-    def test_normalise_static_config_values(self, fx_lib_record_config_min_iso: dict, maintenance: bool):
-        """Can normalise record."""
-        if maintenance:
-            fx_lib_record_config_min_iso["metadata"]["maintenance"] = {"progress": ProgressCode.ON_GOING.value}
-
-        result = Record._normalise_static_config_values(fx_lib_record_config_min_iso)
-        assert "maintenance" not in result["metadata"]
-
     @pytest.mark.parametrize("value", [{}, {"invalid": "x"}, {"hierarchy_level": HierarchyLevelCode.DIMENSION_GROUP}])
     def test_config_supported(self, fx_lib_record_config_min_iso: dict, value: dict):
         """Can determine if a record config is supported or not."""
@@ -849,7 +839,11 @@ class TestRecord:
                             }
                         ],
                         "identifiers": [
-                            {"href": "https://data.bas.ac.uk/items/x", "identifier": "x", "namespace": "data.bas.ac.uk"}
+                            {
+                                "href": "https://lantern.data.bas.ac.uk/items/x",
+                                "identifier": "x",
+                                "namespace": "lantern.data.bas.ac.uk",
+                            }
                         ],
                         "language": "eng",
                         "lineage": {"statement": "x"},
@@ -892,6 +886,11 @@ class TestRecord:
                             }
                         ],
                         "date_stamp": datetime(2014, 6, 30, tzinfo=UTC).date().isoformat(),
+                        "constraints": [
+                            {"type": "access", "restriction_code": "unrestricted", "statement": "x", "href": "x"},
+                            {"type": "usage", "restriction_code": "license", "statement": "x", "href": "x"},
+                        ],
+                        "maintenance": {"maintenance_frequency": "asNeeded", "progress": "completed"},
                         "metadata_standard": {
                             "name": "ISO 19115-2 Geographic Information - Metadata - Part 2: Extensions for Imagery and Gridded Data",
                             "version": "ISO 19115-2:2009(E)",
@@ -997,7 +996,8 @@ class TestRecord:
                         ],
                         "graphic_overviews": [{"identifier": "x", "description": "x", "href": "x", "mime_type": "x"}],
                         "constraints": [
-                            {"type": "usage", "restriction_code": "license", "statement": "x", "href": "x"}
+                            {"type": "access", "restriction_code": "unrestricted", "statement": "x", "href": "x"},
+                            {"type": "usage", "restriction_code": "license", "statement": "x", "href": "x"},
                         ],
                         "aggregations": [
                             {

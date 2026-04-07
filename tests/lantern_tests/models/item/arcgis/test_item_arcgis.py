@@ -52,7 +52,7 @@ class TestItemArcGIS:
             fx_item_arc_model_min.record.identification.other_citation_details = citation
         if href is not None:
             fx_item_arc_model_min.record.identification.identifiers = Identifiers(
-                [Identifier(identifier="x", href=href, namespace="data.bas.ac.uk")]
+                [Identifier(identifier="x", href=href, namespace="lantern.data.bas.ac.uk")]
             )
         if lineage is not None:
             fx_item_arc_model_min.record.data_quality = DataQuality(lineage=Lineage(statement=lineage))

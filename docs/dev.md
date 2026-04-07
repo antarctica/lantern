@@ -208,6 +208,35 @@ config options used by development tasks.
 > [!WARNING]
 > These config options are not validated. Manually ensure any options needed by a task are set.
 
+### Record upgrade tasks
+
+> [!WARNING]
+> This section is Work in Progress (WIP) and may not be complete/accurate.
+
+A mini-framework is available for bulk updating records. It consists of:
+
+1. a `RecordUpgrade` class which modifies a record as needed and tracks changes
+2. a `RecordsReport` class for compiling changes made to a set of records into a Markdown formatted report
+3. a `RecordsIO` class for reading and writing records, initially from a Store, then to a local directory for processing
+4. a `Upgradamatron` class for coordinating an overall upgrade, inc. initialising, upgrading and reporting
+
+These classes are wrapped in a development task configured with a relevant local directory and name (`YYYY-MM`).
+
+Each upgrade SHOULD use a separate development task with copies of these classes, modified as needed. Only the most
+recent development task SHOULD be kept but all MUST be checked in for future reference.
+
+Upgrade methods should be largely atomic, focusing on one logical change. Changes MUST be tracked for inclusion in the
+upgrade report. Non-changes SHOULD be tracked via the logger at debug level for troubleshooting.
+
+> [!TIP]
+> Typically only the `RecordUpgrade` class will need updating.
+
+See [Usage](/docs/usage.md#upgrade-records) documentation for more information on running an upgrade.
+
+Previous upgrades for reference:
+
+- [2026-02 (initial) 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/lantern-exp/-/blob/5aef254028552c44e5c9b6b8e1625a99101da693/tasks/records_upgrade_2026_02.py)
+
 ## Contributing
 
 All changes except minor tweaks (typos, comments, etc.) MUST:

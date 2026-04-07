@@ -215,7 +215,7 @@ class TestDataTab:
                 "(as implemented by ArcGIS Server)",
             ),
             (
-                ["https://www.bas.ac.uk/data/our-data/maps/how-to-order-a-map/"],
+                ["https://data.bas.ac.uk/guides/map-purchasing/"],
                 "This item is available to purchase as a physical paper map",
             ),
             (

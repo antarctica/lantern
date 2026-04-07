@@ -91,7 +91,7 @@ class Record(RecordBase):
         if identifier.identifier != self.file_identifier:
             msg = "Invalid identifier value in Catalogue resource identifier."
             raise RecordInvalidError(validation_error=ValueError(msg)) from None
-        if identifier.href != f"https://data.bas.ac.uk/items/{self.file_identifier}":
+        if identifier.href != f"https://{CATALOGUE_NAMESPACE}/items/{self.file_identifier}":
             msg = "Invalid href in Catalogue resource identifier."
             raise RecordInvalidError(validation_error=ValueError(msg)) from None
 
@@ -126,7 +126,7 @@ class Record(RecordBase):
         }
 
         for alias in self.identification.identifiers.filter(ALIAS_NAMESPACE):
-            expected = f"https://data.bas.ac.uk/{alias.identifier}"
+            expected = f"https://{CATALOGUE_NAMESPACE}/{alias.identifier}"
             if alias.href != expected:
                 msg = f"Invalid alias href '{alias.href}' must be '{expected}'."
                 exp = ValueError(msg)

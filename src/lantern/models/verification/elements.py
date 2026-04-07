@@ -45,7 +45,7 @@ class VerificationDistribution:
         "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+vector",
     ]
 
-    published_maps_url: Final[str] = "https://www.bas.ac.uk/data/our-data/maps/how-to-order-a-map/"
+    published_maps_url: Final[str] = "https://data.bas.ac.uk/guides/map-purchasing/"
     nora_sigil: Final[str] = "https://nora.nerc.ac.uk/"
     bas_san_sigil: Final[str] = "sftp://san.nerc-bas.ac.uk/"
 

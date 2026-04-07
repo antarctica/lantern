@@ -48,7 +48,9 @@ class TestRecord:
         record.identification.identifiers.append(make_bas_cat(record.file_identifier))
         record.identification.contacts.append(make_magic_role(roles={ContactRoleCode.POINT_OF_CONTACT}))
         record.identification.identifiers.append(
-            Identifier(identifier="products/x", href="https://data.bas.ac.uk/products/x", namespace=ALIAS_NAMESPACE)
+            Identifier(
+                identifier="products/x", href="https://lantern.data.bas.ac.uk/products/x", namespace=ALIAS_NAMESPACE
+            )
         )
         record.identification.extents.extend(
             [
@@ -217,24 +219,24 @@ class TestRecord:
         [
             (
                 Identifier(identifier="x", namespace=ALIAS_NAMESPACE),
-                "Invalid alias href 'None' must be 'https://data.bas.ac.uk/x'.",
+                "Invalid alias href 'None' must be 'https://lantern.data.bas.ac.uk/x'.",
             ),
             (
                 Identifier(identifier="x", href="/x", namespace=ALIAS_NAMESPACE),
-                "Invalid alias href '/x' must be 'https://data.bas.ac.uk/x'.",
+                "Invalid alias href '/x' must be 'https://lantern.data.bas.ac.uk/x'.",
             ),
             (
-                Identifier(identifier="x/x/x", href="https://data.bas.ac.uk/x/x/x", namespace=ALIAS_NAMESPACE),
+                Identifier(identifier="x/x/x", href="https://lantern.data.bas.ac.uk/x/x/x", namespace=ALIAS_NAMESPACE),
                 "Invalid alias identifier 'x/x/x' must not contain additional '/' values.",
             ),
             (
-                Identifier(identifier="x/x", href="https://data.bas.ac.uk/x/x", namespace=ALIAS_NAMESPACE),
+                Identifier(identifier="x/x", href="https://lantern.data.bas.ac.uk/x/x", namespace=ALIAS_NAMESPACE),
                 "Invalid prefix in alias identifier 'x/x' for hierarchy level.",
             ),
             (
                 Identifier(
                     identifier="products/123e4567-e89b-12d3-a456-426614174000",
-                    href="https://data.bas.ac.uk/products/123e4567-e89b-12d3-a456-426614174000",
+                    href="https://lantern.data.bas.ac.uk/products/123e4567-e89b-12d3-a456-426614174000",
                     namespace=ALIAS_NAMESPACE,
                 ),
                 "Invalid alias identifier 'products/123e4567-e89b-12d3-a456-426614174000' must not contain a UUID.",

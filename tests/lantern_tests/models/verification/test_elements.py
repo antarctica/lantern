@@ -71,7 +71,7 @@ class TestVerificationDistribution:
                 VerificationDistributionType.NORA,
             ),
             (
-                "https://www.bas.ac.uk/data/our-data/maps/how-to-order-a-map/",
+                "https://data.bas.ac.uk/guides/map-purchasing/",
                 None,
                 VerificationDistributionType.PUBLISHED_MAP,
             ),

@@ -30,7 +30,11 @@ class TestMakeMagicCitation:
                     "edition": "x",
                     "publication_date": Date(date=date(2014, 6, 30)),
                     "identifiers": [
-                        Identifier(identifier="x", href="https://data.bas.ac.uk/items/x", namespace="data.bas.ac.uk")
+                        Identifier(
+                            identifier="x",
+                            href="https://lantern.data.bas.ac.uk/items/x",
+                            namespace="lantern.data.bas.ac.uk",
+                        )
                     ],
                 },
                 "British Antarctic Survey (2014). _x_ (Version x) [Dataset]. British Antarctic Survey Mapping and Geographic Information Centre. [https://data.bas.ac.uk/items/x](https://data.bas.ac.uk/items/x).",
@@ -89,5 +93,25 @@ class TestMakeMagicCitation:
     )
     def test_citation(self, values: dict, expected: str):
         """Can generate a MAGIC citation."""
+        result = make_magic_citation(**values)
+        assert result == expected
+
+    @pytest.mark.cov()
+    def test_citation_no_href(self):
+        """Can generate a MAGIC citation where no href is set in the catalogue identifier."""
+        values = {
+            "title": "x",
+            "hierarchy_level": HierarchyLevelCode.DATASET,
+            "edition": "x",
+            "publication_date": Date(date=date(2014, 6, 30)),
+            "identifiers": [
+                Identifier(
+                    identifier="x",
+                    namespace="lantern.data.bas.ac.uk",
+                )
+            ],
+        }
+        expected = "British Antarctic Survey (2014). _x_ (Version x) [Dataset]. British Antarctic Survey Mapping and Geographic Information Centre. [?](?)."
+
         result = make_magic_citation(**values)
         assert result == expected

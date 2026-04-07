@@ -9,7 +9,7 @@ authors = [
 ]
 requires-python = ">=3.11"
 dependencies = [
-    "bas-metadata-library>=0.16.0",
+    "bas-metadata-library>=0.17.0",
     "beautifulsoup4>=4.13.4",
     "bleach>=6.2.0",
     "boto3>=1.42.44",
@@ -56,6 +56,9 @@ test = [
     "pytest-recording>=0.13.4",
     "pytest-unordered>=0.7.0",
 ]
+
+[tool.uv]
+exclude-newer-package = { bas-metadata-library = false }
 
 [[tool.uv.index]]
 name = "self"
@@ -118,7 +121,7 @@ build-records = { cmd = "python -m tasks.records_build", help = "Build records a
 verify-records = { cmd = "python -m tasks.records_verify", help = "Verify static site contents" }
 invalidate-records = { cmd = "python -m tasks.records_invalidate", help = "Invalidate cached records in live site" }
 restrict-records = { cmd = "python -m tasks.records_permissions", help = "Set access permissions for chosen records" }
-upgrade-records = { cmd = "python -m tasks.records_upgrade_2026_02", help = "Upgrade records" }
+upgrade-records = { cmd = "python -m tasks.records_upgrade_2026_04", help = "Upgrade records" }
 bootstrap-records = { cmd = "python -m tasks.records_bootstrap", help = "Bootstrap a new records repo" }
 workflow-testing = { cmd = "python -m tasks.records_workflow_testing", help = "Import records to testing site" }
 workflow-live = { cmd = "python -m tasks.records_workflow_live", help = "Import records to live site" }

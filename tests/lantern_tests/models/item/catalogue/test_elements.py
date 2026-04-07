@@ -570,8 +570,8 @@ class TestIdentifiers:
         [
             ([], []),
             (
-                [Identifier(identifier="x/x", href="https://data.bas.ac.uk/x/x", namespace=ALIAS_NAMESPACE)],
-                [Link(value="x/x", href="https://data.bas.ac.uk/x/x", external=False)],
+                [Identifier(identifier="x/x", href="https://lantern.data.bas.ac.uk/x/x", namespace=ALIAS_NAMESPACE)],
+                [Link(value="x/x", href="/x/x", external=False)],
             ),
         ],
     )

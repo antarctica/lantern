@@ -69,7 +69,9 @@ In addition to [Record Validation](/docs/libraries.md#record-validation), the Da
   - MUST use values in the form: `{prefix}/{value}`
   - MUST use an allowed prefix for each hierarchy level, as per [2]
   - MUST NOT use UUIDs in values (to avoid conflicts with `file_identifier` values)
-  - MUST set the `href` property to `https://data.bas.ac.uk/{alias}` (e.g. `https://data.bas.ac.uk/collections/foo`)
+  - MUST set the `href` property to `https://lantern.data.bas.ac.uk/{alias}`
+    (e.g. `https://lantern.data.bas.ac.uk/collections/foo`)
+  - MUST use the namespace: `alias.lantern.data.bas.ac.uk`
 
 These requirements are enforced by the `validate()` method in the [Catalogue Record](#catalogue-records) class.
 
@@ -85,8 +87,8 @@ These requirements are enforced by the `validate()` method in the [Catalogue Rec
 [1]
 
 - identifier: `{file_identifier}`
-- href: `https://data.bas.ac.uk/items/{file_identifier}`
-- namespace: `data.bas.ac.uk`
+- href: `https://lantern.data.bas.ac.uk/items/{file_identifier}`
+- namespace: `lantern.data.bas.ac.uk`
 
 [2]
 
@@ -144,7 +146,7 @@ ensuring uniqueness, they are not useful when referring to items, or providing s
 Item aliases provide a way to create additional URLs for an item with more useful values, such as a slugified title or
 existing codes or shorthand.
 
-Aliases are defined as Record identifiers using the `alias.data.bas.ac.uk` namespace. Values are prefixed by a
+Aliases are defined as Record identifiers using the `alias.lantern.data.bas.ac.uk` namespace. Values are prefixed by a
 pluralised term related to the Record hierarchy level (e.g. `collections/foo` for a collection record). See the
 [Record requirements](#record-requirements) section for allowed prefixes and other requirements.
 
@@ -241,7 +243,7 @@ Supported properties (references not normative or exhaustive):
 - `identification.citation.series`
 - `identification.citation.identifiers[namespace='doi']`
 - `identification.citation.identifiers[namespace='isbn']`
-- `identification.citation.identifiers[namespace='alias.data.bas.ac.uk']`
+- `identification.citation.identifiers[namespace='alias.lantern.data.bas.ac.uk']`
 - `identification.abstract`
 - `identification.aggregations` (only as below)
   - 'part of' (items in collections)
@@ -265,7 +267,7 @@ Supported properties (references not normative or exhaustive):
 Unsupported properties (references not normative or exhaustive):
 
 - `identification.purpose` (except as used in ItemSummaries)
-- `identification.citation.identifiers` (except `'doi'`, `'isbn'`, `'alias.data.bas.ac.uk'` namespaces)
+- `identification.citation.identifiers` (except `'doi'`, `'isbn'`, `'lantern.alias.data.bas.ac.uk'` namespaces)
 
 Intentionally omitted properties (references not normative or exhaustive):
 

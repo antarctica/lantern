@@ -15,7 +15,6 @@ class SiteApiOutput(OutputSite):
     """
 
     def __init__(self, logger: logging.Logger, meta: ExportMeta) -> None:
-        """Initialise."""
         super().__init__(logger, meta)
         self._catalog_path = Path("static") / "json" / "api-catalog.json"
         self._docs_path = Path("guides") / "api" / "index.html"

@@ -21,7 +21,6 @@ class RsyncExporter(ExporterBase):
     """
 
     def __init__(self, logger: logging.Logger, path: Path, host: str | None = None) -> None:
-        """Initialise."""
         super().__init__(logger=logger)
         self._path = path
         self._host = host

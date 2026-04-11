@@ -24,7 +24,7 @@ from gitlab import Gitlab
 from moto import mock_aws
 from pytest_mock import MockerFixture
 
-from lantern.catalogue import BasCatalogue, BasCatEnv, BasCatTrusted, BasCatUntrusted, BasEnvironment
+from lantern.catalogue import BasCatalogue, BasCatEnv, BasCatTrusted, BasCatUntrusted
 from lantern.config import Config
 from lantern.exporters.local import LocalExporter
 from lantern.exporters.rsync import RsyncExporter
@@ -50,7 +50,7 @@ from lantern.models.item.catalogue.tabs import AdditionalInfoTab, AdminTab
 from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
-from lantern.models.site import ExportMeta, SiteContent, SiteMeta, SitePageMeta
+from lantern.models.site import ExportMeta, SiteContent, SiteEnvironment, SiteMeta, SitePageMeta
 from lantern.models.verification.enums import VerificationResult, VerificationType
 from lantern.models.verification.jobs import VerificationJob
 from lantern.models.verification.types import VerificationContext
@@ -149,13 +149,13 @@ def fx_site_content() -> SiteContent:
 @pytest.fixture()
 def fx_site_meta(fx_config: Config) -> SiteMeta:
     """Site build metadata."""
-    return SiteMeta.from_config_store(config=fx_config, store=None, build_repo_ref="83fake48")
+    return SiteMeta.from_config_store(config=fx_config, env="testing", store=None, build_repo_ref="83fake48")
 
 
 @pytest.fixture()
 def fx_export_meta(fx_config: Config) -> ExportMeta:
     """Exporter build metadata (superset of site metadata)."""
-    return ExportMeta.from_config_store(config=fx_config, store=None, build_repo_ref="83fake48")
+    return ExportMeta.from_config_store(config=fx_config, env="testing", store=None, build_repo_ref="83fake48")
 
 
 @lru_cache(maxsize=1)
@@ -431,7 +431,7 @@ def _item_cat_model_min() -> ItemCatalogue:
 
     Standalone method to allow use outside of fixtures in test parametrisation.
     """
-    meta = SiteMeta.from_config_store(config=Config(), store=None, build_repo_ref="83fake48")
+    meta = SiteMeta.from_config_store(config=Config(), env="testing", store=None, build_repo_ref="83fake48")
     model = ItemCatalogue(
         site_meta=meta,
         record=RecordRevision.loads(_item_config_min_catalogue()),
@@ -948,6 +948,7 @@ def fx_bas_cat_trusted(
     """
     with TemporaryDirectory() as tmp_dir:
         rsync_path = Path(tmp_dir) / "rsync"
+    fx_export_meta.trusted = True
     return BasCatTrusted(logger=fx_logger, meta=fx_export_meta, store=fx_fake_store, host=None, path=rsync_path)
 
 
@@ -986,7 +987,7 @@ def fx_bas_catalogue(
     Mocks verification to return fixed results.
     """
     cat = BasCatalogue(logger=fx_logger, config=fx_config, store=fx_fake_store, s3=fx_s3_client)
-    cat._envs = dict.fromkeys(get_args(BasEnvironment), fx_bas_cat_env)
+    cat._envs = dict.fromkeys(get_args(SiteEnvironment), fx_bas_cat_env)
     return cat
 
 
@@ -1005,7 +1006,9 @@ def fx_static_site() -> TemporaryDirectory:
 
     config = Config()
     store = FakeRecordsStore(logger=logger)
-    meta = ExportMeta.from_config_store(config=config, store=None, build_repo_ref="83fake48", trusted=True)
+    meta = ExportMeta.from_config_store(
+        config=config, env="testing", store=None, build_repo_ref="83fake48", trusted=True
+    )
     exporter = LocalExporter(logger=logger, path=site_path)
     site = Site(logger=logger, meta=meta, store=store)
 

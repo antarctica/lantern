@@ -1,6 +1,7 @@
 # Push records into store as a changeset
 
 import logging
+import sys
 from pathlib import Path
 
 import inquirer
@@ -44,6 +45,10 @@ def push(logger: logging.Logger, config: Config, store: GitLabStore, records: li
 
     Higher-level tasks SHOULD call this method to incorporate importing records.
     """
+    if store._source.ref == "main":
+        logger.error("Cannot commit to 'main' branch.")
+        logger.info("Aborting. Set `STORE_GITLAB_*` in config to change source.")
+        sys.exit(1)
     confirm_source(logger=logger, store=store, action="Committing records to")
     title, message, author_name, author_email = _get_args()
     results = store.push(records=records, title=title, message=message, author=(author_name, author_email))

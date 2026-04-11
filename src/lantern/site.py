@@ -104,7 +104,6 @@ class Site:
     """
 
     def __init__(self, logger: logging.Logger, meta: ExportMeta, store: Store) -> None:
-        """Initialise."""
         self._logger = logger
         self._meta = meta
         self._store = store

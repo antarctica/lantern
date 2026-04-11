@@ -82,10 +82,11 @@ Supported common elements (references not normative or exhaustive):
 - `*.citation.title`
 - `*.citation.dates`
 - `*.citation.edition`
-- `*.constraints` (limited restriction code list options)
-- `*.citation.contacts` (except `contact.position`)
 - `*.citation.identifiers`
+- `*.citation.contacts` (except `contact.position`)
 - `*.citation.series` (with local workaround for `series.page` until v5 schema)
+- `*.constraints` (limited restriction code list options)
+- `*.maintenance`
 - `*.online resource` (partial)
 
 Supported elements (references not normative or exhaustive):

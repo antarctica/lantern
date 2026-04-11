@@ -13,7 +13,7 @@ from lxml.html import HTMLParser
 from lxml.html import fragment_fromstring as html_fromstring
 from lxml.html import tostring as html_tostring
 from tasks._config import ExtraConfig
-from tasks._shared import get_record, init
+from tasks._shared import confirm, get_record, init
 from tasks.record_esri import get_agol_item, get_agol_token
 
 from lantern.lib.arcgis.gis.dataclasses import Item as ArcGisItem
@@ -137,7 +137,7 @@ def _diff_arcgis_items(source_item: ArcGisItem, target_item: ArcGisItem) -> dict
         if src_val == tgt_val or src_val is None:
             continue
         diff[_snake_to_camel_case(prop)] = src_val
-    for html_prop in ["snippet", "description", "license_info"]:
+    for html_prop in ["description", "license_info"]:
         src_val = _normalise_arcgis_html(getattr(source_item.properties, html_prop, ""))
         tgt_val = _normalise_arcgis_html(getattr(target_item.properties, html_prop, ""))
         if src_val == tgt_val or src_val == "":
@@ -240,8 +240,9 @@ def _update_agol_item(logger: logging.Logger, config: ExtraConfig, item: ArcGisI
     if isinstance(metadata, str):
         _update_agol_metadata(logger=logger, base_url=base_url, token=access_token, item=item, metadata=metadata)
 
-    sharing = properties.pop("sharing", None)
+    sharing = properties.pop("sharing_level", None)
     if isinstance(sharing, SharingLevel):
+        confirm(logger, f"Update sharing level to {sharing}?")
         _update_agol_sharing(logger=logger, base_url=base_url, token=access_token, item=item, sharing_level=sharing)
 
     _update_agol_properties(logger=logger, base_url=base_url, token=access_token, item=item, properties=properties)
@@ -265,7 +266,7 @@ def main() -> None:
         logger.info(f"Target item {target_item.id} == {source_record.file_identifier}, skipping.")
         return
     logger.info("Target item {target_item.id} != {source_record.file_identifier}, updating...")
-    logger.info(diff)
+    logger.debug(diff)
     _dump_arcgis_item(logger=logger, output_path=Path("agol-item-backups"), item=target_item)
     _update_agol_item(logger=logger, config=config, item=target_item, properties=diff)
 

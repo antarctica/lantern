@@ -45,9 +45,14 @@ def main() -> None:
     logger, _config, _store = init()
 
     cf_id = get_cf_distribution_id(iac_cwd=Path("./resources/envs"), cf_id="site_cf_id")
+    cf_replica_id = get_cf_distribution_id(iac_cwd=Path("./resources/envs"), cf_id="site_replica_cf_id")
+
     file_identifiers = _get_cli_args()
     keys = get_record_invalidation_keys(file_identifiers)
-    invalidate_keys(logger=logger, config=_config, distribution_id=cf_id, keys=keys)
+
+    # also apply to replica site distribution
+    for cid in [cf_id, cf_replica_id]:
+        invalidate_keys(logger=logger, config=_config, distribution_id=cid, keys=keys)
 
 
 if __name__ == "__main__":

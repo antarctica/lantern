@@ -67,6 +67,11 @@ variable "aws_cf_cdn_arn" {
   description = "CloudFront distribution ARN for the BAS CDN production environment used for item thumbnails."
 }
 
+variable "aws_cf_site_replica_id" {
+  type        = string
+  description = "CloudFront distribution identifier for the UKRI parallel/replica live static site hosting."
+}
+
 locals {
   static_site_ref         = "v0.6.1"       # Static site module version.
   static_site_tls_version = "TLSv1.2_2025" # for compatibility with BAS load balancer
@@ -544,6 +549,11 @@ output "sentry_dsn" {
 output "site_cf_id" {
   value       = module.site_prod.cloudfront_distribution_id
   description = "CloudFront distribution ID for live static site hosting."
+}
+
+output "site_replica_cf_id" {
+  value       = var.aws_cf_site_replica_id
+  description = "CloudFront distribution ID for UKRI parallel/replica live static site hosting."
 }
 
 output "thumbnails_cf_id" {

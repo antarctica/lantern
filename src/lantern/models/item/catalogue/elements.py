@@ -519,7 +519,16 @@ class Identifiers(RecordIdentifiers):
 
     @property
     def aliases(self) -> list[Link]:
-        """Aliases for Item."""
+        """
+        Aliases for Item.
+
+        Aliases consists of a `{prefix}/{value}` identifier and `https://{alias_namespace}/{identifier}` as a href.
+        E.g. `https://alias.lantern.data.bas.ac.uk/product/foo`.
+
+        Note: The alias_namespace used is a constant independent of the site environment (live, testing, dev).
+
+        Links are made non-fully qualified for use in any environment.
+        """
         identifiers = list(self.filter(ALIAS_NAMESPACE))
         aliases = []
         for identifier in identifiers:

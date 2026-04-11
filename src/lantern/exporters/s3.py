@@ -19,7 +19,6 @@ class S3Exporter(ExporterBase):
     """
 
     def __init__(self, logger: logging.Logger, s3: S3ClientT, bucket: str, parallel_jobs: int) -> None:
-        """Initialise."""
         super().__init__(logger=logger)
         self._s3 = s3
         self._bucket = bucket

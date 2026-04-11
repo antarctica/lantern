@@ -25,13 +25,13 @@ from tasks.records_zap import dump_records as zap_dump_records
 from tasks.records_zap import parse_zap_records as zap_parse_records
 from tasks.records_zap import process_zap_records as zap_process_records
 
-from lantern.catalogue import BasCatalogue, BasEnvironment
+from lantern.catalogue import BasCatalogue
 from lantern.config import Config
 from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
 from lantern.lib.metadata_library.models.record.record import Record
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin
 from lantern.models.record.revision import RecordRevision
-from lantern.models.site import ExportMeta
+from lantern.models.site import ExportMeta, SiteEnvironment
 from lantern.outputs.base import OutputBase
 from lantern.outputs.item_html import ItemAliasesOutput, ItemCatalogueOutput
 from lantern.outputs.items_bas_website import ItemsBasWebsiteOutput
@@ -86,20 +86,19 @@ def _changeset_branch(issue: str) -> str:
 class OutputCommentItem:
     """Snippet for each record processed by the workflow."""
 
-    def __init__(self, meta: ExportMeta, base_url: str, record: RecordRevision) -> None:
+    def __init__(self, meta: ExportMeta, record: RecordRevision) -> None:
         self._meta = meta
-        self._base_url = base_url
         self._record = record
 
     @property
     def _item_url(self) -> str:
         """Canonical URL to item."""
-        return f"{self._base_url}/items/{self._record.file_identifier}"
+        return f"{self._meta.base_url}/items/{self._record.file_identifier}"
 
     @property
     def _trusted_item_url(self) -> str:
         """Canonical URL to item."""
-        return f"{self._base_url}/-/items/{self._record.file_identifier}"
+        return f"{self._meta.base_url}/-/items/{self._record.file_identifier}"
 
     @property
     def _revision_url(self) -> str:
@@ -117,7 +116,7 @@ class OutputCommentItem:
     @property
     def _aliases(self) -> list[str]:
         """Optional aliases for record."""
-        return [f"{self._base_url}/{alias.identifier}" for alias in get_record_aliases(self._record)]
+        return [f"{self._meta.base_url}/{alias.identifier}" for alias in get_record_aliases(self._record)]
 
     @property
     def _context(self) -> dict[str, str]:
@@ -154,15 +153,14 @@ class OutputCommentMergeRequest:
     """Output comment for a GitLab merge request."""
 
     def __init__(
-        self, config: Config, store: GitLabStore, base_url: str, commit: CommitResults, merge_url: str
+        self, config: Config, env: SiteEnvironment, store: GitLabStore, commit: CommitResults, merge_url: str
     ) -> None:
         self._store = store
-        self._base_url = base_url
         self._commit = commit
         self._merge_url = merge_url
 
         self._meta = ExportMeta.from_config_store(
-            config=config, store=store, build_repo_ref=store.head_commit if store.head_commit else "-"
+            config=config, env=env, store=store, build_repo_ref=store.head_commit if store.head_commit else "-"
         )
         self._jinja = get_jinja_env()
 
@@ -175,7 +173,7 @@ class OutputCommentMergeRequest:
     @property
     def _items(self) -> list[OutputCommentItem]:
         """Generated snippets for each record."""
-        return [OutputCommentItem(meta=self._meta, base_url=self._base_url, record=record) for record in self._records]
+        return [OutputCommentItem(meta=self._meta, record=record) for record in self._records]
 
     @property
     def _context(self) -> dict[str, str | list[str]]:
@@ -195,6 +193,7 @@ class OutputCommentMergeRequest:
 
             {% for item in items %}
             {{ item }}
+
             {% endfor %}
 
             If these items look ok and you are the nominated reviewer:
@@ -392,7 +391,7 @@ def _import(logger: logging.Logger, config: Config, store: GitLabStore, import_p
 
 
 @time_task(label="Export")
-def _export(logger: logging.Logger, catalogue: BasCatalogue, env: BasEnvironment, identifiers: set[str]) -> None:
+def _export(logger: logging.Logger, catalogue: BasCatalogue, env: SiteEnvironment, identifiers: set[str]) -> None:
     """
     Export items for committed records.
 
@@ -414,7 +413,7 @@ def _export(logger: logging.Logger, catalogue: BasCatalogue, env: BasEnvironment
 
 @time_task(label="Verify")
 def _verify(
-    logger: logging.Logger, catalogue: BasCatalogue, env: BasEnvironment, identifiers: set[str], workflow_path: Path
+    logger: logging.Logger, catalogue: BasCatalogue, env: SiteEnvironment, identifiers: set[str], workflow_path: Path
 ) -> Path:
     """Verify items for committed records."""
     verify(
@@ -437,16 +436,14 @@ def _output(
     logger: logging.Logger,
     config: Config,
     store: GitLabStore,
-    base_url: str,
+    env: SiteEnvironment,
     commit: CommitResults,
     issue_url: str,
     merge_url: str,
     merge_new: bool,
 ) -> None:
     """Add comments to GitLab merge request and, if MR is new, issue."""
-    mr_comment = OutputCommentMergeRequest(
-        config=config, store=store, base_url=base_url, commit=commit, merge_url=merge_url
-    )
+    mr_comment = OutputCommentMergeRequest(config=config, env=env, store=store, commit=commit, merge_url=merge_url)
     print(mr_comment.render())
     confirm(logger, "Post comment above to GitLab merge request?")
     mr_comment.post()
@@ -469,7 +466,7 @@ def main() -> None:
     This task uses a non-cached GitLab store as it will be pushing to a new branch for a changeset, and likely
     operating on a limited number of records.
     """
-    env: BasEnvironment = "testing"
+    env: SiteEnvironment = "testing"
     logger, config, store = init()
     admin_keys = config.ADMIN_METADATA_KEYS_RW
     import_path = Path("./import")
@@ -517,8 +514,8 @@ def main() -> None:
     _output(
         logger=logger,
         config=config,
+        env=env,
         store=store,
-        base_url=config.BASE_URL_TESTING,
         commit=commit,
         issue_url=issue_url,
         merge_url=merge_url,

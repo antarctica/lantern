@@ -29,7 +29,7 @@ from lantern.stores.gitlab import GitLabStore
 from lantern.stores.gitlab_cache import GitLabCachedStore
 from lantern.utils import init_gitlab_store
 
-TargetEnv = Literal["local", "remote"]
+TargetEnvironment = Literal["local", "remote"]
 
 
 def init_logging(config: Config) -> logging.Logger:

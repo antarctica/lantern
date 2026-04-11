@@ -16,7 +16,6 @@ class SiteResourcesOutput(OutputSite):
     """
 
     def __init__(self, logger: logging.Logger, meta: ExportMeta) -> None:
-        """Initialise."""
         super().__init__(logger=logger, meta=meta)
         self._css_src_ref = "lantern.resources.css"
         self._fonts_src_ref = "lantern.resources.fonts"

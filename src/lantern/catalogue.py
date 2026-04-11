@@ -1,14 +1,14 @@
 import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Literal, get_args
+from typing import get_args
 
 from mypy_boto3_s3 import S3Client
 
 from lantern.config import Config
 from lantern.exporters.rsync import RsyncExporter
 from lantern.exporters.s3 import S3Exporter
-from lantern.models.site import ExportMeta, SiteContent
+from lantern.models.site import ExportMeta, SiteContent, SiteEnvironment
 from lantern.models.verification.types import VerificationContext
 from lantern.outputs.base import OutputBase
 from lantern.outputs.item_html import ItemAliasesOutput, ItemCatalogueOutput
@@ -50,9 +50,6 @@ class CatalogueBase(ABC):
     def verify(self, identifiers: set[str] | None = None) -> None:
         """Verify catalogue site contents (optionally for selected records)."""
         ...
-
-
-BasEnvironment = Literal["live", "testing"]
 
 
 class BasCatUntrusted(CatalogueBase):
@@ -181,7 +178,7 @@ class BasCatEnv(CatalogueBase):
     """
 
     def __init__(
-        self, logger: logging.Logger, config: Config, store: GitLabStore, s3: S3Client, env: BasEnvironment
+        self, logger: logging.Logger, config: Config, store: GitLabStore, s3: S3Client, env: SiteEnvironment
     ) -> None:
         """Initialise."""
         super().__init__(logger)
@@ -190,27 +187,33 @@ class BasCatEnv(CatalogueBase):
         self._s3 = s3
         self._env = env
 
+        meta_untrusted = ExportMeta.from_config_store(
+            config=self._config, env=self._env, store=self._store, trusted=False
+        )
+        meta_trusted = ExportMeta.from_config_store(config=self._config, env=self._env, store=self._store, trusted=True)
+        bucket = config.SITE_UNTRUSTED_S3_BUCKET_TESTING if env == "testing" else config.SITE_UNTRUSTED_S3_BUCKET_LIVE
+        path = Path(
+            config.SITE_TRUSTED_RSYNC_BASE_PATH_TESTING
+            if env == "testing"
+            else config.SITE_TRUSTED_RSYNC_BASE_PATH_LIVE
+        )
+
         self._untrusted = BasCatUntrusted(
             logger=self._logger,
-            meta=ExportMeta.from_config_store(config=config, store=store, trusted=False),
+            meta=meta_untrusted,
             store=store,
             s3=s3,
-            bucket=(
-                config.SITE_UNTRUSTED_S3_BUCKET_TESTING if env == "testing" else config.SITE_UNTRUSTED_S3_BUCKET_LIVE
-            ),
+            bucket=bucket,
             verify_sharepoint_endpoint=config.VERIFY_SHAREPOINT_PROXY_ENDPOINT,
             verify_san_endpoint=config.VERIFY_SAN_PROXY_ENDPOINT,
         )
+
         self._trusted = BasCatTrusted(
             logger=self._logger,
-            meta=ExportMeta.from_config_store(config=config, store=store, trusted=True),
+            meta=meta_trusted,
             store=store,
             host=config.SITE_TRUSTED_RSYNC_HOST,
-            path=Path(
-                config.SITE_TRUSTED_RSYNC_BASE_PATH_TESTING
-                if env == "testing"
-                else config.SITE_TRUSTED_RSYNC_BASE_PATH_LIVE
-            ),
+            path=path,
         )
 
     def export(self, identifiers: set[str] | None = None, outputs: list[type[OutputBase]] | None = None) -> None:
@@ -256,19 +259,19 @@ class BasCatalogue:
 
         self._envs = {
             env: BasCatEnv(logger=logger, config=config, store=store, s3=s3, env=env)
-            for env in get_args(BasEnvironment)
+            for env in get_args(SiteEnvironment)
         }
 
     def export(
         self,
-        env: BasEnvironment,
+        env: SiteEnvironment,
         identifiers: set[str] | None = None,
         outputs: list[type[OutputBase]] | None = None,
     ) -> None:
         """Export generated sites to relevant hosting."""
         self._envs[env].export(identifiers=identifiers, outputs=outputs)
 
-    def verify(self, env: BasEnvironment, identifiers: set[str] | None = None) -> None:
+    def verify(self, env: SiteEnvironment, identifiers: set[str] | None = None) -> None:
         """
         Verify catalogue site contents (optionally for selected records).
 

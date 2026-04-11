@@ -52,6 +52,12 @@ To use this installation:
 
 1. create new records, (or clone a record using the `clone-record` [Development Task](/docs/dev.md#development-tasks))
    as JSON files in the import directory as per the [Record Authoring](/docs/libraries.md#record-authoring) section
+   - records MAY be created using the experimental [Zap ⚡](https://basweb.nerc-bas.ac.uk/~felnne/apps/zap/prod/) editor,
+     though this tool now has limitations
+   - published map records MAY use the experimental [MEGA Zap ⚡️](https://mega-zap.streamlit.app/) to finalise records,
+     though this tool now has limitations
+   - restricted product records MAY use deposit file artefacts (downloads) using the experimental
+     [MAGIC Products Distribution Service 🛡](https://gitlab.data.bas.ac.uk/MAGIC/products-distribution) tool
 1. use the `esri-record` [Development Task](/docs/dev.md#development-tasks) to include distribution options for any
    Esri ArcGIS Online items that apply to records
 1. run the [Interactive Publishing Workflow](#interactive-record-publishing-workflow) (preferred) or where you need
@@ -98,7 +104,7 @@ The `esri-record` task will:
 - accept an identifier to an existing record, or path to a record configuration file, and an AGOL item ID or URL via
   the command line
 - prompt interactively to confirm the GitLab store is configured with the correct branch
-- load the record from a [GitLab Store](/docs/stores.md#gitlab-store) or from the given file path
+- load the record from the [GitLab Store](/docs/stores.md#gitlab-store) or from the given file path
 - get details for the ArcGIS item via the ArcGIS REST API
 - create distribution options for the layer and service based on these details and catalogue conventions
 - add these options to the record where they do not yet exist
@@ -137,7 +143,7 @@ The `admin-record` task will:
 - if needed, prompt interactively for a record identifier
   - the user accepts any initial selection set via the command line
   - the user indicates they're finished selecting records
-- load the record from a [GitLab Store](/docs/stores.md#gitlab-store) or from the given file path
+- load the record from the [GitLab Store](/docs/stores.md#gitlab-store) or from the given file path
 - output any administration metadata for the loaded record
 
 ## Interactive record publishing workflow
@@ -319,6 +325,60 @@ configured URL will be called as a POST request with a JSON payload containing:
 Payload JSON [Schema and Example](/resources/scripts/non-interactive-publishing-workflow-schema.json)
 (for 2 committed records, one new, one updated).
 
+## Import records
+
+To import a set of new and/or updated records:
+
+1. copy record configurations as JSON files to the `import/` directory
+2. run the `zap-records` [Development Task](/docs/dev.md#development-tasks) if importing records from the Zap ⚡️editor
+3. run the `import-records` [Development Task](/docs/dev.md#development-tasks)
+4. create a merge request for the changeset branch in the [Records Repository](/docs/infrastructure.md#gitlab)
+5. after appropriate review, merge the changes into `main`
+
+<!-- pyml disable md028 -->
+> [!NOTE]
+> Records are considered existing if a record with the same `file_identifier` exists.
+
+> [!NOTE]
+> Records cannot be commited directly to the 'main' branch.
+
+> [!TIP]
+> All records in the `import/` directory will be committed together. Consider splitting unrelated changes separately.
+<!-- pyml enable md028 -->
+
+The `zap-records` task (if used) will:
+
+- update collections referenced in records, to create back-references and update the bounding extent of the collection
+- update metadata datestamps in any revised records, and the edition in any revised collection records
+- upgrade records to the MAGIC discovery profile v2
+- set resource permissions in [Administration Metadata](/docs/libraries.md#record-administrative-metadata) from any
+  resource access constraints in the record
+- move any GitLab issue identifiers to administration metadata
+- save revised records to the import directory and remove original records, ready for import
+
+<!-- pyml disable md028 -->
+> [!CAUTION]
+> Creating administrative metadata from access constraints is not safe where the origin of a record is not trusted.
+
+> [!NOTE]
+> Only open access (unrestricted) access constraints are converted to resource access permissions in administrative
+> metadata. Metadata access permissions are always set to open access (unrestricted).
+>
+> Other constraints are ignored and will need setting via the `restrict-records`
+> [Development Task](/docs/dev.md#development-tasks).
+<!-- pyml enable md028 -->
+
+The `import-records` task will:
+
+- parse and validate `import/*.json` files (ignoring subfolders) as [Records](/docs/models.md#records)
+- prompt interactively to confirm the GitLab store is configured with the correct branch
+- prompt interactively for commit information:
+  - a changeset title and description (which will open your configured `$EDITOR`)
+  - a changeset author name and email
+- push validated records to the [GitLab Store](/docs/stores.md#gitlab-store), committing changes to the configured branch
+- log the commit URL, if a commit was made (i.e. if one or more records are new or is different to its existing version)
+- delete any imported record files
+
 ## Update records
 
 - run the `select-records` [Development Task](/docs/dev.md#development-tasks)
@@ -387,7 +447,7 @@ The `select-records` task will:
   - the user accepts any initial selection set via the command line
   - the user indicates they're finished selecting records
 - confirm the selected file identifiers to load
-- get selected records from a [GitLab Store](/docs/stores.md#gitlab-store)
+- get selected records from the [GitLab Store](/docs/stores.md#gitlab-store)
 - save selected record configurations as JSON files to the `import/` directory
 
 > [!TIP]
@@ -426,55 +486,6 @@ The `restrict-records` task will:
 > Only 'Open Access' and 'BAS Staff' access permissions are supported by this task.
 <!-- pyml enable md028 -->
 
-## Import records
-
-To import a set of new and/or updated records:
-
-1. copy record configurations as JSON files to the `import/` directory
-2. run the `zap-records` [Development Task](/docs/dev.md#development-tasks) if importing records from the Zap ⚡️editor
-3. run the `import-records` [Development Task](/docs/dev.md#development-tasks)
-
-<!-- pyml disable md028 -->
-> [!NOTE]
-> Records are considered existing if a record with the same `file_identifier` exists.
-
-> [!TIP]
-> All records in the `import/` directory will be committed together. Consider splitting unrelated changes separately.
-<!-- pyml enable md028 -->
-
-The `zap-records` task (if used) will:
-
-- update collections referenced in records, to create back-references and update the bounding extent of the collection
-- update metadata datestamps in any revised records, and the edition in any revised collection records
-- upgrade records to the MAGIC discovery profile v2
-- set resource permissions in [Administration Metadata](/docs/libraries.md#record-administrative-metadata) from any
-  resource access constraints in the record
-- move any GitLab issue identifiers to administration metadata
-- save revised records to the import directory and remove original records, ready for import
-
-<!-- pyml disable md028 -->
-> [!CAUTION]
-> Creating administrative metadata from access constraints is not safe where the origin of a record is not trusted.
-
-> [!NOTE]
-> Only open access (unrestricted) access constraints are converted to resource access permissions in administrative
-> metadata. Metadata access permissions are always set to open access (unrestricted).
->
-> Other constraints are ignored and will need setting via the `restrict-records`
-> [Development Task](/docs/dev.md#development-tasks).
-<!-- pyml enable md028 -->
-
-The `import-records` task will:
-
-- parse and validate `import/*.json` files (ignoring subfolders) as [Records](/docs/models.md#records)
-- prompt interactively to confirm the GitLab store is configured with the correct branch
-- prompt interactively for commit information:
-  - a changeset title and description (which will open your configured `$EDITOR`)
-  - a changeset author name and email
-- push validated records to a [GitLab Store](/docs/stores.md#gitlab-store), committing changes to the configured branch
-- log the commit URL, if a commit was made (i.e. if one or more records are new or is different to its existing version)
-- delete any imported record files
-
 ## Build static site
 
 To build the static site for the [BAS Data Catalogue](/docs/architecture.md#bas-data-catalogue):
@@ -484,7 +495,7 @@ To build the static site for the [BAS Data Catalogue](/docs/architecture.md#bas-
 
 The `build-records` task will:
 
-- load some or all or records from a [GitLab Store](/docs/stores.md#gitlab-store) into a
+- load some or all or records from the [GitLab Store](/docs/stores.md#gitlab-store) into a
   [Site](/docs/architecture.md#sites)
 - if the `target` option is 'local', export the site to a local path
 - if the `target` option is 'remote', export the site to the relevant BAS Catalogue environment set by the `env` option
@@ -499,7 +510,7 @@ To [Verify](/docs/monitoring.md#site-verification) for the
 
 The `verify-records` task will:
 
-- load some or all or records from a [GitLab Store](/docs/stores.md#gitlab-store) into a
+- load some or all or records from the [GitLab Store](/docs/stores.md#gitlab-store) into a
   [Verification](/docs/monitoring.md#site-verification) instance
 - run [Verification checks](/docs/monitoring.md#verification-checks) against the generated static site
 - compile a [Verification report](/docs/monitoring.md#verification-report)
@@ -519,7 +530,7 @@ To update an ArcGIS Online item with supported properties from a catalogue recor
 
 The `esri-item` task will:
 
-- load a source record from a [GitLab Store](/docs/stores.md#gitlab-store)
+- load a source record from the [GitLab Store](/docs/stores.md#gitlab-store)
 - load an existing target item from ArcGIS Online via the ArcGIS REST API
 - simulate a ArcGIS content item from the source record, to allow comparison against the target
 - update the target item's metadata, sharing level and/or a subset of in-scope properties as needed

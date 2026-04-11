@@ -15,3 +15,5 @@ cloudflare_account_id    = ""
 aws_cf_cdn_id            = ""
 # BAS CDN production distribution ARN
 aws_cf_cdn_arn           = ""
+# UKRI CloudFront distribution ID for replica live environment
+aws_cf_site_replica_id   = ""

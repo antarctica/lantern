@@ -17,6 +17,7 @@ from lantern.models.site import (
     SchemaOrgAuthor,
     SchemaOrgMeta,
     SiteContent,
+    SiteEnvironment,
     SiteMeta,
     SitePageMeta,
     SiteRedirect,
@@ -408,16 +409,33 @@ class TestSiteMetadata:
         assert fx_site_meta.html_title == fx_site_page_meta.title
         assert fx_site_meta.html_description == fx_site_page_meta.description
 
+    @pytest.mark.parametrize(
+        ("site_env", "exp_base_url"), [("testing", "https://red.com"), ("live", "https://blue.com")]
+    )
     @pytest.mark.parametrize(("has_store", "kwargs"), [(False, {"fallback_email": "y"}), (True, {})])
     def test_from_config_store(
-        self, mocker: MockerFixture, fx_config: Config, fx_gitlab_store: GitLabStore, has_store: bool, kwargs: dict
+        self,
+        mocker: MockerFixture,
+        fx_config: Config,
+        fx_gitlab_store: GitLabStore,
+        site_env: SiteEnvironment,
+        exp_base_url: str,
+        has_store: bool,
+        kwargs: dict,
     ):
         """Can create site metadata from config and optional store."""
+        mocker.patch.object(
+            type(fx_config), "BASE_URL_TESTING", new_callable=PropertyMock, return_value="https://red.com"
+        )
+        mocker.patch.object(
+            type(fx_config), "BASE_URL_LIVE", new_callable=PropertyMock, return_value="https://blue.com"
+        )
         mocker.patch.object(type(fx_gitlab_store), "head_commit", new_callable=PropertyMock, return_value="x")
         store = fx_gitlab_store if has_store else None
 
-        result = SiteMeta.from_config_store(config=fx_config, store=store, **kwargs)
+        result = SiteMeta.from_config_store(config=fx_config, env=site_env, store=store, **kwargs)
         assert isinstance(result, SiteMeta)
+        assert result.base_url == exp_base_url
         assert result.build_repo_ref == None if not has_store else fx_gitlab_store.head_commit  # noqa: E711
         for key, value in kwargs.items():
             assert getattr(result, key) == value
@@ -462,7 +480,7 @@ class TestExportMetadata:
 
     def test_from_config_store(self, fx_config: Config):
         """Can create ExportMetadata instance from config."""
-        result = ExportMeta.from_config_store(config=fx_config)
+        result = ExportMeta.from_config_store(config=fx_config, env="testing")
         assert isinstance(result, ExportMeta)
         assert result.embedded_maps_endpoint == fx_config.TEMPLATES_ITEM_MAPS_ENDPOINT
 

@@ -23,7 +23,6 @@ class ItemCatalogueOutput(OutputRecord):
     def __init__(
         self, logger: logging.Logger, meta: ExportMeta, record: RecordRevision, select_record: SelectRecordProtocol
     ) -> None:
-        """Initialise."""
         super().__init__(logger=logger, meta=meta, record=record)
         self._select_record = select_record
         self._jinja = get_jinja_env()

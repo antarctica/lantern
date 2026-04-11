@@ -74,6 +74,9 @@ a custom [widget](/docs/site.md#user-feedback).
 
 ## Site verification
 
+> [!IMPORTANT]
+> The way site verification is implemented is not very intuitive complex and needs review.
+
 `lantern.verification.Verification`
 
 A series of checks can be run to verify the contents of a [Catalogue](/docs/architecture.md#catalogues) site against

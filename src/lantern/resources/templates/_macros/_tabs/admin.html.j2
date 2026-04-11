@@ -1,7 +1,7 @@
 {% import '_macros/common.html.j2' as com %}
 
 {% macro item(data) %}
-  {% call com.item_title() %}Administrative Information{% endcall %}
+  {% call com.item_title() %}Administration Information{% endcall %}
   {% call com.item_border() %}
     <dl class="space-y-4">
       {% call com.dl_item(title='Resource ID', id='admin-id') %}{{ data.item_id }}{% endcall %}

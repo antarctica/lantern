@@ -21,6 +21,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     MaintenanceFrequencyCode,
     ProgressCode,
 )
+from lantern.lib.metadata_library.models.record.presets.admin import BAS_STAFF
 from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS as OPEN_ACCESS_PERMISSION
 from lantern.lib.metadata_library.models.record.presets.aggregations import make_bas_cat_collection_member
 from lantern.lib.metadata_library.models.record.presets.conformance import MAGIC_ADMINISTRATION_V1, MAGIC_DISCOVERY_V2
@@ -268,9 +269,19 @@ def _get_access_permissions(logger: logging.Logger, record: Record) -> tuple[lis
             f"Record '{record.file_identifier}' has unrestricted resource access constraint, setting to OPEN ACCESS."
         )
         resource_permissions = [OPEN_ACCESS_PERMISSION]
-    logger.warning(
-        f"Record '{record.file_identifier}' has unsupported access constraints, no resource access permissions set."
-    )
+    elif (
+        len(constraints) == 1
+        and constraints[0].restriction_code == ConstraintRestrictionCode.RESTRICTED
+        and constraints[0].statement == "Closed Access (NERC)"
+    ):
+        logger.info(
+            f"Record '{record.file_identifier}' has all NERC restricted resource access constraint, setting to BAS STAFF."
+        )
+        resource_permissions = [BAS_STAFF]
+    else:
+        logger.warning(
+            f"Record '{record.file_identifier}' has unsupported access constraints, no resource access permissions set."
+        )
 
     return metadata_permissions, resource_permissions
 

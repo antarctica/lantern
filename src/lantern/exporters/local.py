@@ -25,7 +25,6 @@ class LocalExporter(ExporterBase):
     """
 
     def __init__(self, logger: logging.Logger, path: Path, mode_d: int = 0o755, mode_f: int = 0o644) -> None:
-        """Initialise."""
         super().__init__(logger=logger)
         self.base_path = path
         self._mode_dir = mode_d

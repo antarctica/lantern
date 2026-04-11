@@ -23,7 +23,6 @@ class OutputBase(ABC):
     """
 
     def __init__(self, logger: logging.Logger, meta: ExportMeta) -> None:
-        """Initialise."""
         self._logger = logger
         self._meta = meta
 
@@ -53,7 +52,6 @@ class OutputSite(OutputBase, ABC):
     """Outputs relating to the overall static site."""
 
     def __init__(self, logger: logging.Logger, meta: ExportMeta) -> None:
-        """Initialise."""
         super().__init__(logger=logger, meta=meta)
         self._jinja = get_jinja_env()
 
@@ -62,7 +60,6 @@ class OutputRecord(OutputBase, ABC):
     """Outputs relating to processing a target record."""
 
     def __init__(self, logger: logging.Logger, meta: ExportMeta, record: RecordRevision) -> None:
-        """Initialise."""
         super().__init__(logger=logger, meta=meta)
         self._record = record
         self._strip_admin = not self._meta.trusted
@@ -72,6 +69,5 @@ class OutputRecords(OutputBase, ABC):
     """Outputs relating to processing multiple records."""
 
     def __init__(self, logger: logging.Logger, meta: ExportMeta, select_records: SelectRecordsProtocol) -> None:
-        """Initialise."""
         super().__init__(logger=logger, meta=meta)
         self._select_records = select_records

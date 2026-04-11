@@ -9,9 +9,9 @@ import pytest
 from mypy_boto3_s3 import S3Client
 from pytest_mock import MockerFixture
 
-from lantern.catalogue import BasCatalogue, BasCatEnv, BasCatTrusted, BasCatUntrusted, BasEnvironment, CatalogueBase
+from lantern.catalogue import BasCatalogue, BasCatEnv, BasCatTrusted, BasCatUntrusted, CatalogueBase
 from lantern.config import Config
-from lantern.models.site import ExportMeta
+from lantern.models.site import ExportMeta, SiteEnvironment
 from lantern.outputs.base import OutputBase
 from lantern.outputs.item_html import ItemAliasesOutput, ItemCatalogueOutput
 from lantern.outputs.items_bas_website import ItemsBasWebsiteOutput
@@ -143,11 +143,19 @@ class TestBasCatUntrusted:
         identifier = "3c77ffae-6aa0-4c26-bc34-5521dbf4bf23"  # minimal product test record
         fx_bas_cat_untrusted.export(identifiers={identifier})
 
-        for key in ["favicon.ico", f"items/{identifier}/index.html"]:
-            result = fx_bas_cat_untrusted._exporter._s3.get_object(
-                Bucket=fx_bas_cat_untrusted._exporter._bucket, Key=key
-            )
-            assert result["ResponseMetadata"]["HTTPStatusCode"] == 200
+        assert (
+            fx_bas_cat_untrusted._exporter._s3.get_object(
+                Bucket=fx_bas_cat_untrusted._exporter._bucket, Key="favicon.ico"
+            )["ResponseMetadata"]["HTTPStatusCode"]
+            == 200
+        )
+
+        result = fx_bas_cat_untrusted._exporter._s3.get_object(
+            Bucket=fx_bas_cat_untrusted._exporter._bucket, Key=f"items/{identifier}/index.html"
+        )
+        assert result["ResponseMetadata"]["HTTPStatusCode"] == 200
+        item_text = result["Body"].read().decode("utf-8")
+        assert "tab-content-admin" not in item_text
 
     def test_verify(self, fx_bas_cat_untrusted: BasCatUntrusted):
         """Can verify untrusted site."""
@@ -176,7 +184,12 @@ class TestBasCatTrusted:
         identifier = "3c77ffae-6aa0-4c26-bc34-5521dbf4bf23"  # minimal product test record
         fx_bas_cat_trusted.export(identifiers={identifier})
         trusted_path = fx_bas_cat_trusted._exporter._path
-        assert trusted_path.joinpath(f"items/{identifier}/index.html").exists()
+
+        item_path = trusted_path.joinpath(f"items/{identifier}/index.html")
+        assert item_path.exists()
+        with item_path.open() as f:
+            item_text = f.read()
+        assert "tab-content-admin" in item_text
 
     def test_verify(self, fx_bas_cat_trusted: BasCatTrusted):
         """Cannot verify trusted site (not supported)."""
@@ -239,13 +252,13 @@ class TestBasCatalogue:
         assert isinstance(cat._envs["live"], BasCatEnv)
 
     @pytest.mark.parametrize("env", ["testing", "live"])
-    def test_export(self, mocker: MockerFixture, fx_bas_catalogue: BasCatalogue, env: BasEnvironment):
+    def test_export(self, mocker: MockerFixture, fx_bas_catalogue: BasCatalogue, env: SiteEnvironment):
         """Can export environment's static site."""
         mocker.patch.object(fx_bas_catalogue._envs[env], "export", return_value=None)
         fx_bas_catalogue.export(env=env)
 
     @pytest.mark.parametrize("env", ["testing", "live"])
-    def test_verify(self, mocker: MockerFixture, fx_bas_catalogue: BasCatalogue, env: BasEnvironment):
+    def test_verify(self, mocker: MockerFixture, fx_bas_catalogue: BasCatalogue, env: SiteEnvironment):
         """Can verify environment's static site."""
         mocker.patch.object(fx_bas_catalogue._envs[env], "verify", return_value=None)
         fx_bas_catalogue.verify(env=env)

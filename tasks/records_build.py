@@ -1,21 +1,24 @@
 # Generate and export catalogue site
 
 import logging
+import time
 from pathlib import Path
 
-from tasks._shared import TargetEnv, init, init_s3
+from tasks._shared import TargetEnvironment, init, init_s3, init_store
+from tasks.cache_init import init_cache
 
-from lantern.catalogue import BasCatalogue, BasEnvironment
+from lantern.catalogue import BasCatalogue
 from lantern.exporters.local import LocalExporter
+from lantern.models.site import SiteEnvironment
 from lantern.outputs.base import OutputBase
-from lantern.stores.gitlab_cache import GitLabCachedStore
+from lantern.stores.gitlab_cache import CacheFrozenError, GitLabCachedStore
 
 
 def export(
     logger: logging.Logger,
     catalogue: BasCatalogue,
-    env: BasEnvironment,
-    target: TargetEnv,
+    env: SiteEnvironment,
+    target: TargetEnvironment,
     identifiers: set[str],
     outputs: list[type[OutputBase]] | None = None,
 ) -> None:
@@ -32,13 +35,32 @@ def export(
 def main() -> None:
     """Entrypoint."""
     selected = set()  # to set use the form {"abc", "..."}
-    target: TargetEnv = "remote"  # local/remote
-    env: BasEnvironment = "testing"  # testing/live, only relevant where target='remote'
+    target: TargetEnvironment = "remote"  # local/remote
+    env: SiteEnvironment = "testing"  # testing/live, only relevant where target='remote'
 
-    logger, config, store = init(cached_store=True, frozen_store=True)
+    logger, config, store = init(cached_store=True)
+    if not isinstance(store, GitLabCachedStore):
+        raise TypeError() from None
     s3 = init_s3(config=config)
     catalogue = BasCatalogue(logger=logger, config=config, store=store, s3=s3)
-    export(logger=logger, catalogue=catalogue, env=env, target=target, identifiers=selected)
+
+    # Ensure store cache is up to date, then freeze
+    store._cache._ensure_exists()
+    store._frozen = True
+    store._cache._frozen = True
+
+    start = time.monotonic()
+    try:
+        export(logger=logger, catalogue=catalogue, env=env, target=target, identifiers=selected)
+    except CacheFrozenError:
+        _store = init_store(logger=logger, config=config, cached=True)
+        init_cache(logger=logger, store=_store)  # ty:ignore[invalid-argument-type]
+
+        # retry export with new frozen store
+        catalogue._store = init_store(logger=logger, config=config, cached=True, frozen=True)
+        export(logger=logger, catalogue=catalogue, env=env, target=target, identifiers=selected)
+    finally:
+        logger.info(f"Exported site in {round(time.monotonic() - start)} seconds.")
 
 
 if __name__ == "__main__":

@@ -576,7 +576,7 @@ class TestIdentifiers:
         ],
     )
     def test_aliases(self, identifiers: list[Identifier], expected: list[str]):
-        """Can get any aliases."""
+        """Can get any aliases as relative links."""
         identifiers = Identifiers(RecordIdentifiers(identifiers))
         result = identifiers.aliases
         assert result == expected

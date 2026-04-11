@@ -39,7 +39,7 @@ class FakeCatalogue(CatalogueBase):
         self._path = base_path
 
         self._meta = ExportMeta.from_config_store(
-            config=self._config, store=None, build_repo_ref="83fake48", trusted=True
+            config=self._config, env="testing", store=None, build_repo_ref="83fake48", trusted=True
         )
         self._verify_context = VerificationContext(
             BASE_URL=self._config.BASE_URL_TESTING,

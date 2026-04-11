@@ -168,7 +168,6 @@ class SiteRedirect(SiteContent):
     """Content item for a page redirect."""
 
     def __init__(self, path: Path, target: str, object_meta: dict[str, str] | None = None) -> None:
-        """Initialise."""
         super().__init__(
             content=self._content(target),
             path=path,
@@ -194,6 +193,9 @@ class SiteRedirect(SiteContent):
         a.text = "Click here if you are not redirected after a few seconds."
         html_str = ET.tostring(html, encoding="unicode", method="html")
         return f"<!DOCTYPE html>\n{html_str}"
+
+
+SiteEnvironment = Literal["testing", "live"]
 
 
 @dataclass(kw_only=True)
@@ -287,7 +289,9 @@ class SiteMeta:
         self.html_schema_org = page_meta.schema_org
 
     @classmethod
-    def from_config_store(cls, config: Config, store: GitLabStore | None = None, **kwargs: Any) -> "SiteMeta":
+    def from_config_store(
+        cls, config: Config, env: SiteEnvironment, store: GitLabStore | None = None, **kwargs: Any
+    ) -> "SiteMeta":
         """
         Create a Site Metadata instance from an app Config instance, optional GitLab Store and additional properties.
 
@@ -303,21 +307,22 @@ class SiteMeta:
         - build_repo_base_url
         - version
 
-        Note: `base_url` uses the config value for the testing environment.
+        Note: `base_url` value is based on the live/testing environment (`env` parameter)
 
-        The optional GitLab Store provides values for:
+        The optional GitLab Store (`store` parameter) provides values for:
         - build_repo_ref
 
-        Initial (blank) values are set for:
+        Initial (blank) values for future override are set for:
         - html_title
         """
+        base_url = config.BASE_URL_TESTING if env == "testing" else config.BASE_URL_LIVE
         build_ref = None
         if isinstance(store, GitLabStore):
             build_ref = store.head_commit
 
         return cls(
             **{  # ty: ignore[invalid-argument-type]
-                "base_url": config.BASE_URL_TESTING,
+                "base_url": base_url,
                 "build_key": config.TEMPLATES_CACHE_BUST_VALUE,
                 "sentry_dsn": config.SENTRY_DSN,
                 "plausible_id": config.TEMPLATES_PLAUSIBLE_ID,
@@ -362,6 +367,7 @@ class ExportMeta(SiteMeta):
     def from_config_store(
         cls,
         config: Config,
+        env: SiteEnvironment,
         store: GitLabStore | None = None,
         **kwargs: bool | int | str | dict | Path | datetime | AdministrationKeys | None,
     ) -> "ExportMeta":
@@ -373,7 +379,7 @@ class ExportMeta(SiteMeta):
         - admin_meta_keys
         """
         site_kwargs = {k: v for k, v in kwargs.items() if k in {f.name for f in fields(SiteMeta)}}
-        super_meta = asdict(SiteMeta.from_config_store(config, store, **site_kwargs))
+        super_meta = asdict(SiteMeta.from_config_store(config, env, store, **site_kwargs))
 
         return cls(
             **{  # ty: ignore[invalid-argument-type]

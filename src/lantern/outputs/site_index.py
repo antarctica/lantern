@@ -18,7 +18,6 @@ class SiteIndexOutput(OutputSite):
     """
 
     def __init__(self, logger: logging.Logger, meta: ExportMeta, select_records: SelectRecordsProtocol) -> None:
-        """Initialise."""
         super().__init__(logger=logger, meta=meta)
         self._select_records = select_records
         self._template_path = "_views/-/index.html.j2"

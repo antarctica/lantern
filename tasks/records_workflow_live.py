@@ -23,10 +23,10 @@ from tasks.records_workflow_testing import (
 )
 from tasks.site_invalidate import get_cf_distribution_id, invalidate_keys
 
-from lantern.catalogue import BasCatalogue, BasEnvironment
+from lantern.catalogue import BasCatalogue
 from lantern.config import Config
 from lantern.models.record.revision import RecordRevision
-from lantern.models.site import ExportMeta
+from lantern.models.site import ExportMeta, SiteEnvironment
 from lantern.stores.gitlab import GitLabStore
 from lantern.stores.gitlab_cache import GitLabCachedStore
 from lantern.utils import get_jinja_env
@@ -36,15 +36,14 @@ class OutputCommentIssue:
     """Output comment for a GitLab issue."""
 
     def __init__(
-        self, config: Config, store: GitLabStore, base_url: str, issue_url: str, identifiers: set[str]
+        self, config: Config, env: SiteEnvironment, store: GitLabStore, issue_url: str, identifiers: set[str]
     ) -> None:
         self._store = store
-        self._base_url = base_url
         self._issue_url = issue_url
         self._identifiers = identifiers
 
         self._meta = ExportMeta.from_config_store(
-            config=config, store=store, build_repo_ref=store.head_commit if store.head_commit else "-"
+            config=config, env=env, store=store, build_repo_ref=store.head_commit if store.head_commit else "-"
         )
         self._jinja = get_jinja_env()
 
@@ -56,7 +55,7 @@ class OutputCommentIssue:
     @property
     def _items(self) -> list[OutputCommentItem]:
         """Generated snippets for each record."""
-        return [OutputCommentItem(meta=self._meta, base_url=self._base_url, record=record) for record in self._records]
+        return [OutputCommentItem(meta=self._meta, record=record) for record in self._records]
 
     @property
     def _context(self) -> dict[str, str | list[str]]:
@@ -78,6 +77,7 @@ class OutputCommentIssue:
 
             {% for item in items %}
             {{ item }}
+
             {% endfor %}
 
             See the [updating records](https://github.com/antarctica/lantern/blob/main/docs/usage.md#update-records) documentation for how to revise these items in the future.
@@ -153,7 +153,7 @@ def _merge_request(logger: logging.Logger, store: GitLabStore, merge_url: str) -
 
 @time_task(label="Export")
 def _export(
-    logger: logging.Logger, config: ExtraConfig, catalogue: BasCatalogue, env: BasEnvironment, identifiers: set[str]
+    logger: logging.Logger, config: ExtraConfig, catalogue: BasCatalogue, env: SiteEnvironment, identifiers: set[str]
 ) -> None:
     """Export items for committed records."""
     cf_id = get_cf_distribution_id(iac_cwd=Path("./resources/envs"), cf_id="site_cf_id")
@@ -163,7 +163,7 @@ def _export(
 
 @time_task(label="Verify")
 def _verify(
-    logger: logging.Logger, catalogue: BasCatalogue, env: BasEnvironment, identifiers: set[str], workflow_path: Path
+    logger: logging.Logger, catalogue: BasCatalogue, env: SiteEnvironment, identifiers: set[str], workflow_path: Path
 ) -> Path:
     """Verify items for committed records."""
     return verify(logger=logger, catalogue=catalogue, env=env, identifiers=identifiers, workflow_path=workflow_path)
@@ -171,11 +171,16 @@ def _verify(
 
 @time_task(label="Output")
 def _output(
-    logger: logging.Logger, config: Config, store: GitLabStore, base_url: str, issue_url: str, identifiers: set[str]
+    logger: logging.Logger,
+    config: Config,
+    env: SiteEnvironment,
+    store: GitLabStore,
+    issue_url: str,
+    identifiers: set[str],
 ) -> None:
     """Add comments to GitLab issue."""
     issue_comment = OutputCommentIssue(
-        config=config, store=store, base_url=base_url, issue_url=issue_url, identifiers=identifiers
+        config=config, env=env, store=store, issue_url=issue_url, identifiers=identifiers
     )
     print(issue_comment.render())
     confirm(logger, "Post comment above to GitLab issue?")
@@ -193,7 +198,7 @@ def main() -> None:
     This workflow is known to be inefficient in terms of how changed records are parsed as identifiers from diffs, then
     later loaded from the store to allow output comments to be generated.
     """
-    env: BasEnvironment = "live"
+    env: SiteEnvironment = "live"
     logger, config, store = init(cached_store=True)
     results_path = Path("./workflow_results/live")
 
@@ -224,8 +229,8 @@ def main() -> None:
     _output(
         logger=logger,
         config=config,
+        env=env,
         store=store,
-        base_url=config.BASE_URL_LIVE,
         issue_url=issue_url,
         identifiers=identifiers,
     )

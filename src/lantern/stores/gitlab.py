@@ -171,7 +171,6 @@ class GitLabStore(Store):
     """
 
     def __init__(self, logger: logging.Logger, source: GitLabSource, access_token: str, frozen: bool = False) -> None:
-        """Initialise."""
         if frozen:
             msg = "GitLab stores cannot be frozen."
             raise StoreFrozenUnsupportedError(msg) from None

@@ -17,7 +17,6 @@ class SiteHealthOutput(OutputRecords):
     """
 
     def __init__(self, logger: logging.Logger, meta: ExportMeta, select_records: SelectRecordsProtocol) -> None:
-        """Initialise."""
         super().__init__(logger=logger, meta=meta, select_records=select_records)
         self._health_path = Path("static") / "json" / "health.json"
 

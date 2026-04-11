@@ -18,7 +18,6 @@ class ExporterBase(ABC):
     """
 
     def __init__(self, logger: logging.Logger) -> None:
-        """Initialise."""
         self._logger = logger
 
     @property

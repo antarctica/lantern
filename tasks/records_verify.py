@@ -3,17 +3,18 @@
 import logging
 from pathlib import Path
 
-from tasks._shared import TargetEnv, init, init_s3
+from tasks._shared import TargetEnvironment, init, init_s3
 
-from lantern.catalogue import BasCatalogue, BasEnvironment
+from lantern.catalogue import BasCatalogue
 from lantern.exporters.local import LocalExporter
+from lantern.models.site import SiteEnvironment
 
 
 def verify(
     logger: logging.Logger,
     catalogue: BasCatalogue,
-    env: BasEnvironment,
-    target: TargetEnv,
+    env: SiteEnvironment,
+    target: TargetEnvironment,
     identifiers: set[str],
     target_local: Path | None = None,
 ) -> None:
@@ -29,8 +30,8 @@ def verify(
 def main() -> None:
     """Entrypoint."""
     selected = set()  # to set use the form {"abc", "..."}
-    target: TargetEnv = "local"  # local/remote
-    env: BasEnvironment = "testing"  # testing/live, only relevant where target='remote'
+    target: TargetEnvironment = "local"  # local/remote
+    env: SiteEnvironment = "live"  # testing/live
     target_local = Path("export")
 
     logger, config, store = init(cached_store=True, frozen_store=True)

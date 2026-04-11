@@ -36,6 +36,5 @@ export/
 export-trusted/
 workflow_results/
 agol-item-backups/
-upgrade/
 .cache/
 .env

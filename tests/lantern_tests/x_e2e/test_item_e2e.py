@@ -152,7 +152,7 @@ class TestItemDataActions:
         assert status_code == 200
 
         # find expected text is visible
-        text = "Add item to a desktop or online GIS that supports ArcGIS Feature Services"
+        text = "Add this item to a desktop or online GIS that supports ArcGIS Feature Services"
         text_locator = page.locator("p", has_text=text).first
         expect(text_locator).to_be_visible()
 

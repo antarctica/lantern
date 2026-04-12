@@ -459,16 +459,17 @@ The minimum Python version is 3.11 for consistency with related projects.
 
 ### Vulnerability scanning
 
-The [Safety](https://pypi.org/project/safety/) package checks dependencies for known vulnerabilities.
+The [`uv audit`](https://docs.astral.sh/uv/reference/cli/#uv-audit) command checks for known vulnerabilities in
+packages using the [Python Packaging Advisory Database](https://github.com/pypa/advisory-database).
 
 > [!WARNING]
-> As with all security tools, Safety is an aid for spotting common mistakes, not a guarantee of secure code.
-> In particular this is using the free vulnerability database, which is updated less frequently than paid options.
+> As with all security tools, `uv audit` is a tool for detecting well-known vulnerabilities, not a guarantee of
+> secure dependencies. While `uv audi` is experimental, it's data source is not.
 
 Checks are run automatically in [Continuous Integration](#continuous-integration).
 
 > [!TIP]
-> To check locally run the `safety` [Development Task](#development-tasks).
+> To check locally run the `vulnerabilities` [Development Task](#development-tasks).
 
 ### Updating dependencies
 

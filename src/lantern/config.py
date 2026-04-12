@@ -81,8 +81,6 @@ class Config:
         SITE_TRUSTED_RSYNC_HOST: str
         SITE_TRUSTED_RSYNC_BASE_PATH_TESTING: str
         SITE_TRUSTED_RSYNC_BASE_PATH_LIVE: str
-        VERIFY_SHAREPOINT_PROXY_ENDPOINT: str
-        VERIFY_SAN_PROXY_ENDPOINT: str
         BASE_URL_TESTING: str
         BASE_URL_LIVE: str
 
@@ -117,8 +115,6 @@ class Config:
             "SITE_TRUSTED_RSYNC_HOST": self.SITE_TRUSTED_RSYNC_HOST,
             "SITE_TRUSTED_RSYNC_BASE_PATH_TESTING": str(self.SITE_TRUSTED_RSYNC_BASE_PATH_TESTING),
             "SITE_TRUSTED_RSYNC_BASE_PATH_LIVE": str(self.SITE_TRUSTED_RSYNC_BASE_PATH_LIVE),
-            "VERIFY_SHAREPOINT_PROXY_ENDPOINT": self.VERIFY_SHAREPOINT_PROXY_ENDPOINT,
-            "VERIFY_SAN_PROXY_ENDPOINT": self.VERIFY_SAN_PROXY_ENDPOINT,
             "BASE_URL_TESTING": self.BASE_URL_TESTING,
             "BASE_URL_LIVE": self.BASE_URL_LIVE,
         }
@@ -269,7 +265,7 @@ class Config:
 
         Set to the first 7 characters of app version SHA1 hash. E.g. `main.css?v=f053ddb` for version 0.1.0.
         """
-        return sha1(f"v{self.VERSION}".encode()).hexdigest()[:7]  # noqa: S324
+        return sha1(f"v{self.VERSION}x".encode()).hexdigest()[:7]  # noqa: S324
 
     @property
     def TEMPLATES_PLAUSIBLE_ID(self) -> str:
@@ -350,18 +346,6 @@ class Config:
         """Target path for trusted site content (live environment)."""
         with self._env.prefixed(self._app_prefix), self._env.prefixed("SITE_TRUSTED_RSYNC_"):
             return self._env.path("BASE_PATH_LIVE")
-
-    @property
-    def VERIFY_SHAREPOINT_PROXY_ENDPOINT(self) -> str:
-        """Endpoint for checking SharePoint hosted downloads in verification jobs."""
-        with self._env.prefixed(self._app_prefix), self._env.prefixed("VERIFY_"):
-            return self._env.str("SHAREPOINT_PROXY_ENDPOINT", validate=validate.URL())
-
-    @property
-    def VERIFY_SAN_PROXY_ENDPOINT(self) -> str:
-        """Endpoint for checking SAN references in verification jobs."""
-        with self._env.prefixed(self._app_prefix), self._env.prefixed("VERIFY_"):
-            return self._env.str("SAN_PROXY_ENDPOINT", validate=validate.URL())
 
     @property
     def BASE_URL_TESTING(self) -> str:

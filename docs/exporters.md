@@ -9,7 +9,6 @@ They are used in [Sites](/docs/architecture.md#sites) to store and/or publish co
 
 Exporters use these options from the app `lantern.Config` class:
 
-- `BASE_URL_LIVE` / `BASE_URL_TESTING` - root URL for the static site, used to generate fully qualified links to content
 - `SITE_TRUSTED_RSYNC_HOST` - SSH config alias for trusted site uploads
 - `SITE_TRUSTED_RSYNC_BASE_PATH_LIVE` / `SITE_TRUSTED_RSYNC_BASE_PATH_TESTING` - remote path for trusted site uploads
 - `SITE_UNTRUSTED_S3_ACCESS_ID` - AWS IAM credential for untrusted site uploads

@@ -20,6 +20,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * `TRUSTED_UPLOAD_PATH` config option split into `SITE_TRUSTED_RSYNC_BASE_PATH_TESTING` and
   `SITE_TRUSTED_RSYNC_BASE_PATH_LIVE`
 * Catalogue and alias namespace changed from `data.bas.ac.uk` to `lantern.data.bas.ac.uk` to avoid conflicts
+* Removing `VERIFY_SAN_PROXY_ENDPOINT` and `VERIFY_SHAREPOINT_PROXY_ENDPOINT` config options
 
 ### Removed [!BREAKING]
 
@@ -77,6 +78,12 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Refactoring config class to use environs validation consistently
 * Refactoring ISO HTML output to avoid loading XSLT on each use
 * Refactoring relevant parts of previous records upgrade development task into Zap ⚡️ development task
+* Overhauled site verification into simplified and better integrated site checks
+
+### Removed
+
+* Checks for SharePoint distribution items, until a new implementation is available
+* Checks for distribution items within item pages, as the catalogue is now more robust
 
 ## [0.5.0] - 2026-02-27 [!BREAKING]
 

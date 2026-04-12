@@ -1,0 +1,35 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Range:
+      - bytes=0-253
+      User-Agent:
+      - python-requests/2.33.0
+    method: GET
+    uri: https://nora.nerc.ac.uk/id/eprint/123/x.pdf
+  response:
+    body:
+      string: !!binary |
+        JVBERi0xLjMNJeLjz9MNCjEgMCBvYmoNPDwvTWV0YWRhdGEgMiAwIFIvT3V0cHV0SW50ZW50c1s8
+        PC9EZXN0T3V0cHV0UHJvZmlsZSA1IDAgUi9JbmZvKEV1cm9zY2FsZSBDb2F0ZWQgdjIpL091dHB1
+        dENvbmRpdGlvbigpL091dHB1dENvbmRpdGlvbklkZW50aWZpZXIoRk9HUkExKS9SZWdpc3RyeU5h
+        bWUoaHR0cDovL3d3dy5jb2xvci5vcmcpL1MvR1RTX1BERlgvVHlwZS9PdXRwdXRJbnRlbnQ+Pl0v
+        UGFnZXMgMyAwIFIvVHlwZS9DYXRhbG9nPj4=
+    headers:
+      Accept-Ranges:
+      - bytes
+      Content-Length:
+      - '254'
+      Content-Range:
+      - bytes 0-253/1439443
+    status:
+      code: 206
+      message: Partial Content
+version: 1

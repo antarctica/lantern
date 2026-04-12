@@ -6,7 +6,7 @@ import sys
 import time
 from collections.abc import Callable
 from copy import deepcopy
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from functools import lru_cache
 from http.client import HTTPConnection
 from importlib.metadata import version
@@ -38,6 +38,7 @@ from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
 from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.record import Record as RecordBase
 from lantern.lib.metadata_library.models.record.utils.admin import set_admin
+from lantern.models.checks import Check, CheckType
 from lantern.models.item.arcgis.item import ItemArcGis
 from lantern.models.item.base.elements import Link
 from lantern.models.item.base.enums import AccessLevel
@@ -51,9 +52,6 @@ from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta, SiteContent, SiteEnvironment, SiteMeta, SitePageMeta
-from lantern.models.verification.enums import VerificationResult, VerificationType
-from lantern.models.verification.jobs import VerificationJob
-from lantern.models.verification.types import VerificationContext
 from lantern.outputs.item_html import ItemAliasesOutput, ItemCatalogueOutput
 from lantern.outputs.items_bas_website import ItemsBasWebsiteOutput
 from lantern.outputs.record_iso import RecordIsoHtmlOutput, RecordIsoJsonOutput, RecordIsoXmlOutput
@@ -68,7 +66,6 @@ from lantern.stores.base import SelectRecordProtocol, SelectRecordsProtocol
 from lantern.stores.gitlab import GitLabSource, GitLabStore
 from lantern.stores.gitlab_cache import GitLabCachedStore, GitLabLocalCache
 from lantern.utils import get_jinja_env, prettify_html
-from lantern.verification import Verification
 from tests.resources.admin_keys import test_keys
 from tests.resources.catalogues.fake_catalogue import FakeCatalogue
 from tests.resources.stores.fake_records_store import FakeRecordsStore
@@ -156,6 +153,12 @@ def fx_site_meta(fx_config: Config) -> SiteMeta:
 def fx_export_meta(fx_config: Config) -> ExportMeta:
     """Exporter build metadata (superset of site metadata)."""
     return ExportMeta.from_config_store(config=fx_config, env="testing", store=None, build_repo_ref="83fake48")
+
+
+@pytest.fixture()
+def fx_check() -> Check:
+    """Site/resource content check."""
+    return Check(type=CheckType.NONE, url="https://example.com/index.html")
 
 
 @lru_cache(maxsize=1)
@@ -834,58 +837,6 @@ def fx_site(fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_fake_store
 
 
 @pytest.fixture()
-def fx_verification_context(fx_export_meta: ExportMeta) -> VerificationContext:
-    """Site Verification context."""
-    return {
-        "BASE_URL": fx_export_meta.base_url,
-        "SHAREPOINT_PROXY_ENDPOINT": "x",
-        "SAN_PROXY_ENDPOINT": "x",
-    }
-
-
-@pytest.fixture()
-def fx_verification(
-    fx_logger: logging.Logger,
-    fx_export_meta: ExportMeta,
-    fx_select_records: SelectRecordsProtocol,
-    fx_verification_context: VerificationContext,
-) -> Verification:
-    """Site Verification with a global verification context."""
-    return Verification(
-        logger=fx_logger, meta=fx_export_meta, select_records=fx_select_records, context=fx_verification_context
-    )
-
-
-@pytest.fixture()
-def fx_verification_sel(fx_verification: Verification, fx_select_records_fixed: SelectRecordsProtocol) -> Verification:
-    """Site Verification with a single selectable record."""
-    fx_verification._select_records = fx_select_records_fixed
-    return fx_verification
-
-
-@pytest.fixture()
-def fx_verification_post_run(fx_verification_sel: Verification) -> Verification:
-    """Site Verification with a single selectable record and applicable jobs in a PASS state."""
-    fx_verification_sel._jobs = [
-        VerificationJob(
-            result=VerificationResult.PASS,
-            type=VerificationType.SITE_PAGES,
-            url="https://data.bas.ac.uk/-/index",
-            context=fx_verification_sel._context,
-            data={"duration": timedelta(microseconds=1)},
-        ),
-        VerificationJob(
-            result=VerificationResult.PASS,
-            type=VerificationType.ITEM_PAGES,
-            url="https://data.bas.ac.uk/items/123",
-            context=fx_verification_sel._context,
-            data={"file_identifier": "x", "duration": timedelta(microseconds=1)},
-        ),
-    ]
-    return fx_verification_sel
-
-
-@pytest.fixture()
 def fx_fake_catalogue(fx_logger: logging.Logger, fx_config: Config, fx_fake_store: FakeRecordsStore):
     """Fake catalogue instance."""
     with TemporaryDirectory() as tmp_dir:
@@ -909,23 +860,15 @@ def fx_bas_cat_untrusted(
 
     Sets S3 export to local mock via mocked config.
 
-    Mocks verification to return fixed results.
+    Mocks checks to return fixed (empty) results.
     """
-    mock_verification = mocker.MagicMock()
-    mock_verification.process.return_value = None
-    mock_verification.outputs = [
-        SiteContent(content="", path=Path("-/verification/data.json"), media_type="application/json")
-    ]
-    mocker.patch("lantern.catalogue.Verification", return_value=mock_verification)
+    mock_checker = mocker.MagicMock()
+    expected_content = [SiteContent(content="", path=Path("-/checks/data.json"), media_type="application/json")]
+    mock_checker.check.return_value = expected_content
+    mocker.patch("lantern.catalogue.Checker", return_value=mock_checker)
 
     return BasCatUntrusted(
-        logger=fx_logger,
-        meta=fx_export_meta,
-        store=fx_fake_store,
-        s3=fx_s3_client,
-        bucket=fx_s3_bucket_name,
-        verify_sharepoint_endpoint="x",
-        verify_san_endpoint="x",
+        logger=fx_logger, meta=fx_export_meta, store=fx_fake_store, s3=fx_s3_client, bucket=fx_s3_bucket_name
     )
 
 
@@ -1012,7 +955,7 @@ def fx_static_site() -> TemporaryDirectory:
     exporter = LocalExporter(logger=logger, path=site_path)
     site = Site(logger=logger, meta=meta, store=store)
 
-    content = site.process(
+    content = site.generate_content(
         global_outputs=[
             SiteResourcesOutput,
             SiteIndexOutput,

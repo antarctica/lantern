@@ -4,6 +4,7 @@ from pathlib import Path
 from importlib_resources import as_file as resources_as_file
 from importlib_resources import files as resources_files
 
+from lantern.models.checks import Check, CheckType
 from lantern.models.site import ExportMeta, SiteContent
 from lantern.outputs.base import OutputSite
 
@@ -16,7 +17,7 @@ class SiteResourcesOutput(OutputSite):
     """
 
     def __init__(self, logger: logging.Logger, meta: ExportMeta) -> None:
-        super().__init__(logger=logger, meta=meta)
+        super().__init__(logger=logger, meta=meta, name="Site Resources", check_type=CheckType.SITE_RESOURCES)
         self._css_src_ref = "lantern.resources.css"
         self._fonts_src_ref = "lantern.resources.fonts"
         self._img_src_ref = "lantern.resources.img"
@@ -25,11 +26,6 @@ class SiteResourcesOutput(OutputSite):
         self._js_dyn_src_ref = "lantern.resources.templates._assets.js"
         self._json_src_ref = "lantern.resources.json"
         self._base_path = Path("static")
-
-    @property
-    def name(self) -> str:
-        """Output name."""
-        return "Site Resources"
 
     @property
     def _object_meta(self) -> dict[str, str]:
@@ -182,7 +178,7 @@ class SiteResourcesOutput(OutputSite):
         )
 
     @property
-    def outputs(self) -> list[SiteContent]:
+    def content(self) -> list[SiteContent]:
         """Output content for all site resources."""
         return [
             *self._css_outputs,
@@ -191,4 +187,14 @@ class SiteResourcesOutput(OutputSite):
             *self._txt_outputs,
             *self._js_outputs,
             *self._json_outputs,
+        ]
+
+    @property
+    def checks(self) -> list[Check]:
+        """Output checks."""
+        _patterns = ("favicon.ico", "**/css/main.css", "**/txt/heartbeat.txt")
+        subset = [o for o in self.content if any(o.path.match(p) for p in _patterns)]
+        return [
+            Check.from_site_content(content=c, check_type=CheckType.SITE_RESOURCES, base_url=self._meta.base_url)
+            for c in subset
         ]

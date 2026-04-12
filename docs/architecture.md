@@ -64,7 +64,7 @@ Catalogues are the core component of this project, responsible for:
 
 - managing [Records](/docs/models.md#records)
 - transforming these into a static website for discovery
-- optionally, [Verifying](/docs/monitoring.md#site-verification) the contents of this static website
+- [Checking](/docs/monitoring.md#site-checks) the static website's content and downloads linked from records
 
 A minimum Catalogue consists of:
 
@@ -73,6 +73,7 @@ A minimum Catalogue consists of:
 - a [Store](#stores) to manage and access Records created by [Editors](#record-editors)
 - a [Site](#sites) generator
 - an [Exporter](#exporters) to publish the generated site to a hosting service, such as [AWS S3](#amazon-s3)
+- a [Checker](/docs/monitoring.md#site-checks) to verify generated site content and downloads linked from records
 
 > [!IMPORTANT]
 > Only the [BAS Data Catalogue](#bas-data-catalogue) and [Test Catalogue](/docs/dev.md#test-catalogue) are supported
@@ -84,7 +85,7 @@ A minimum Catalogue consists of:
 
 Sites are static websites built from a set of Records and other content as the output of a [Catalogue](#catalogues).
 
-They generate content from [Outputs](#outputs) using a [Store](#stores) for accessing records.
+They generate content or checks for content, from [Outputs](#outputs) using a [Store](#stores) to access records.
 
 > [!TIP]
 > A static site is used over a dynamic site for its robustness and ease of hosting, such as via [AWS S3](#amazon-s3).
@@ -92,6 +93,8 @@ They generate content from [Outputs](#outputs) using a [Store](#stores) for acce
 See the [Outputs](/docs/outputs.md) docs for information about the content within a site.
 
 See the [Static site](/docs/site.md) docs for information about the site structure, templates, styles, scripts, etc.
+
+See the [Checks](/docs/monitoring.md#site-checks) docs for information about the checks generated for a site.
 
 ## Stores
 
@@ -104,7 +107,7 @@ See the [Stores](/docs/stores.md) docs for more information.
 ## Outputs
 
 Outputs create different parts of a [Site](#sites), such as Item pages, general resources such as CSS files and
-monitoring / API discovery endpoints.
+monitoring / API discovery endpoints. Outputs also create [Checks](/docs/monitoring.md#site-checks) for their content.
 
 See the [Outputs](/docs/outputs.md) docs for more information.
 

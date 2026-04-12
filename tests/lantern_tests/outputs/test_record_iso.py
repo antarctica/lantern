@@ -5,7 +5,16 @@ import pytest
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
 from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 
+from lantern.lib.metadata_library.models.record.elements.common import (
+    Contact,
+    ContactIdentity,
+    Identifier,
+    OnlineResource,
+)
+from lantern.lib.metadata_library.models.record.elements.distribution import Distribution, TransferOption
+from lantern.lib.metadata_library.models.record.enums import ContactRoleCode, OnlineResourceFunctionCode
 from lantern.lib.metadata_library.models.record.utils.admin import set_admin
+from lantern.models.checks import CheckType
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta, SiteContent
 from lantern.outputs.record_iso import RecordIsoHtmlOutput, RecordIsoJsonOutput, RecordIsoXmlOutput
@@ -18,14 +27,13 @@ class TestRecordIsoJsonOutput:
         """Can create a record JSON output."""
         output = RecordIsoJsonOutput(logger=fx_logger, meta=fx_export_meta, record=fx_revision_model_min)
         assert isinstance(output, RecordIsoJsonOutput)
-        assert output.name == "Record ISO JSON"
 
-    def test_outputs(
+    def test_content(
         self, fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_revision_model_min: RecordRevision
     ):
         """Can generate site content items."""
         output = RecordIsoJsonOutput(logger=fx_logger, meta=fx_export_meta, record=fx_revision_model_min)
-        results = output.outputs
+        results = output.content
         assert len(results) == 1
         result = results[0]
         assert isinstance(result, SiteContent)
@@ -45,7 +53,6 @@ class TestRecordIsoXmlOutput:
         """Can create a record XML output."""
         output = RecordIsoXmlOutput(logger=fx_logger, meta=fx_export_meta, record=fx_revision_model_min)
         assert isinstance(output, RecordIsoXmlOutput)
-        assert output.name == "Record ISO XML"
 
     @pytest.mark.parametrize("trusted", [False, True])
     def test_content_trusted(
@@ -63,14 +70,14 @@ class TestRecordIsoXmlOutput:
         else:
             assert "admin_metadata" not in result
 
-    def test_outputs(
+    def test_content(
         self,
         fx_record_iso_xml_output: RecordIsoXmlOutput,
         fx_export_meta: ExportMeta,
         fx_revision_model_min: RecordRevision,
     ):
         """Can generate site content items."""
-        results = fx_record_iso_xml_output.outputs
+        results = fx_record_iso_xml_output.content
         assert len(results) == 1
         result = results[0]
         assert isinstance(result, SiteContent)
@@ -82,6 +89,29 @@ class TestRecordIsoXmlOutput:
             "file_revision": fx_revision_model_min.file_revision,
         }
 
+    def test_checks(
+        self,
+        fx_record_iso_xml_output: RecordIsoXmlOutput,
+        fx_export_meta: ExportMeta,
+        fx_revision_model_min: RecordRevision,
+    ):
+        """Can generate checks for record itself and its contents (DOIs and distributions)."""
+        fx_record_iso_xml_output._record.identification.identifiers.append(
+            Identifier(identifier="x", href="x", namespace="doi")
+        )
+        fx_record_iso_xml_output._record.distribution.append(
+            Distribution(
+                distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
+                transfer_option=TransferOption(
+                    online_resource=OnlineResource(href="x", function=OnlineResourceFunctionCode.DOWNLOAD)
+                ),
+            )
+        )
+        results = fx_record_iso_xml_output.checks
+        assert any(check.type == CheckType.RECORD_PAGES_XML for check in results)
+        assert any(check.type == CheckType.DOI_REDIRECTS for check in results)
+        assert any(check.type == CheckType.DOWNLOADS_OPEN for check in results)
+
 
 class TestRecordIsoHtmlOutput:
     """Test ISO record HTML output."""
@@ -90,14 +120,13 @@ class TestRecordIsoHtmlOutput:
         """Can create a record HTML output."""
         output = RecordIsoHtmlOutput(logger=fx_logger, meta=fx_export_meta, record=fx_revision_model_min)
         assert isinstance(output, RecordIsoHtmlOutput)
-        assert output.name == "Record ISO HTML"
 
-    def test_outputs(
+    def test_content(
         self, fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_revision_model_min: RecordRevision
     ):
         """Can generate site content items."""
         output = RecordIsoHtmlOutput(logger=fx_logger, meta=fx_export_meta, record=fx_revision_model_min)
-        results = output.outputs
+        results = output.content
         assert len(results) == 1
         result = results[0]
         assert isinstance(result, SiteContent)
@@ -118,5 +147,5 @@ class TestRecordIsoHtmlOutput:
         output = RecordIsoHtmlOutput(
             logger=fx_logger, meta=fx_export_meta, record=fx_revision_model_min, transform=transform
         )
-        results = output.outputs
+        results = output.content
         assert len(results) == 1

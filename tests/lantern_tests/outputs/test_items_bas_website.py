@@ -35,7 +35,6 @@ class TestItemsBasWebsiteOutput:
         """Can create a BAS website search output."""
         output = ItemsBasWebsiteOutput(logger=fx_logger, meta=fx_export_meta, select_records=fx_select_records)
         assert isinstance(output, ItemsBasWebsiteOutput)
-        assert output.name == "Items Public Website Search Results"
 
     @staticmethod
     def _make_record_open(record: Record) -> None:
@@ -94,13 +93,13 @@ class TestItemsBasWebsiteOutput:
         assert len(results) == 1
         assert results[0].resource_id == "in_scope"
 
-    def test_outputs(self, fx_records_bas_website_output: ItemsBasWebsiteOutput):
+    def test_content(self, fx_records_bas_website_output: ItemsBasWebsiteOutput):
         """Can generate site content items."""
         build_ref = "x"
         fx_records_bas_website_output._select_records = self._get_records_in_scope
         fx_records_bas_website_output._meta.build_repo_ref = build_ref
 
-        results = fx_records_bas_website_output.outputs
+        results = fx_records_bas_website_output.content
         assert len(results) == 1
         result = results[0]
         assert isinstance(result, SiteContent)

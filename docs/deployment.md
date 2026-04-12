@@ -33,11 +33,12 @@ A Python script, `resources/scripts/non-interactive-publishing-workflow.py`, and
 managed by [Ansible](#ansible-playbook), are deployed to the BAS Central workstations to implement the
 [Non-Interactive Publishing Workflow](/docs/usage.md#non-interactive-record-publishing-workflow).
 
-## Site verification script
+## Site checks script
 
-A Python script, `resources/scripts/site-verify.py`, and a [cron shell script wrapper 🛡️](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/roles/lantern/templates/site-verify-cron.sh.j2)
+A Python script, `resources/scripts/site-checks.py`, and a
+[cron shell script wrapper 🛡️](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/roles/lantern/templates/site-checks-cron.sh.j2)
 managed by [Ansible](#ansible-playbook), are deployed to the BAS Central workstations for
-[Scheduled Verification](/docs/monitoring.md#scheduled-verifications).
+[Scheduled Checks](/docs/monitoring.md#scheduled-checks).
 
 ## Ansible playbook
 
@@ -49,7 +50,7 @@ The playbook:
 
 - creates a Python virtual environment containing the [Python Package](#python-package) for the app version
 - generates an [Environment Module](#environment-module) for the app version
-- configures cron jobs for [Scheduled Monitoring](/docs/monitoring.md#scheduled-verifications)
+- configures a cron job for [Scheduled Checks](/docs/monitoring.md#scheduled-checks)
 
 The playbook is run automatically via [Continuous Deployment](#continuous-deployment).
 

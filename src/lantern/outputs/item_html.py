@@ -1,6 +1,7 @@
 import logging
 from pathlib import Path
 
+from lantern.models.checks import CheckType
 from lantern.models.item.catalogue.item import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
 from lantern.models.record.const import CATALOGUE_NAMESPACE
@@ -23,15 +24,12 @@ class ItemCatalogueOutput(OutputRecord):
     def __init__(
         self, logger: logging.Logger, meta: ExportMeta, record: RecordRevision, select_record: SelectRecordProtocol
     ) -> None:
-        super().__init__(logger=logger, meta=meta, record=record)
+        super().__init__(
+            logger=logger, meta=meta, record=record, name="Item Catalogue HTML", check_type=CheckType.ITEM_PAGES
+        )
         self._select_record = select_record
         self._jinja = get_jinja_env()
         self._template_path = "_views/item.html.j2"
-
-    @property
-    def name(self) -> str:
-        """Output name."""
-        return "Item Catalogue HTML"
 
     @property
     def _object_meta(self) -> dict[str, str]:
@@ -64,7 +62,7 @@ class ItemCatalogueOutput(OutputRecord):
         return prettify_html(raw)
 
     @property
-    def outputs(self) -> list[SiteContent]:
+    def content(self) -> list[SiteContent]:
         """Output content for item."""
         return [
             SiteContent(
@@ -85,10 +83,10 @@ class ItemAliasesOutput(OutputRecord):
     Uses S3 object redirects where possible with a minimal HTML redirect page as a fallback.
     """
 
-    @property
-    def name(self) -> str:
-        """Exporter name."""
-        return "Item Aliases"
+    def __init__(self, logger: logging.Logger, meta: ExportMeta, record: RecordRevision) -> None:
+        super().__init__(
+            logger=logger, meta=meta, name="Item Aliases", check_type=CheckType.ITEM_ALIASES, record=record
+        )
 
     @property
     def _object_meta(self) -> dict[str, str]:
@@ -101,7 +99,7 @@ class ItemAliasesOutput(OutputRecord):
         return [(identifier.href or "").replace(f"https://{CATALOGUE_NAMESPACE}/", "") for identifier in identifiers]
 
     @property
-    def outputs(self) -> list[SiteContent]:
+    def content(self) -> list[SiteContent]:
         """Output content per item alias."""
         target = self._meta.base_url + f"/items/{self._record.file_identifier}/"  # ensure trailing slash
         return [

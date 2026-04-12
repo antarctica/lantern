@@ -1,0 +1,52 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.33.0
+    method: GET
+    uri: https://utility.arcgis.com/usrsvcs/servers/x/rest/services/x/FeatureServer?f=json
+  response:
+    body:
+      string: '{"currentVersion":11.5,"serviceItemId":"123"}'
+    headers:
+      Cache-Control:
+      - must-revalidate,max-age=0,public
+      Connection:
+      - keep-alive
+      Content-Encoding:
+      - gzip
+      Content-Length:
+      - '1173'
+      Content-Type:
+      - application/json;charset=utf-8
+      Date:
+      - Sun, 12 Apr 2026 11:01:59 GMT
+      ETag:
+      - '"02fd8eae7b613c873640fb3896fe1b56ab859488145b4a2bff15e5ec9e6ec892"'
+      Server:
+      - ArcGIS Online
+      Strict-Transport-Security:
+      - max-age=31536000
+      Vary:
+      - Origin
+      Via:
+      - 1.1 ad61f1a3605512df66adabdba5122802.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - en-xDSmAPJZlqyEnIIckiDbcYXgssgK0CIDzMKJ2x0GKmrbUaz6KSQ==
+      X-Amz-Cf-Pop:
+      - LHR61-P4
+      X-Cache:
+      - Miss from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

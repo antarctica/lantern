@@ -2,6 +2,7 @@ import json
 import logging
 from pathlib import Path
 
+from lantern.models.checks import CheckType
 from lantern.models.site import ExportMeta, SiteContent, SitePageMeta, SiteRedirect
 from lantern.outputs.base import OutputSite
 from lantern.utils import prettify_html
@@ -15,16 +16,11 @@ class SiteApiOutput(OutputSite):
     """
 
     def __init__(self, logger: logging.Logger, meta: ExportMeta) -> None:
-        super().__init__(logger, meta)
+        super().__init__(logger=logger, meta=meta, name="Site API", check_type=CheckType.SITE_API)
         self._catalog_path = Path("static") / "json" / "api-catalog.json"
         self._docs_path = Path("guides") / "api" / "index.html"
         self._openapi_template_path = "_assets/json/openapi.json.j2"
         self._api_docs_template_path = "_views/guides/api.html.j2"
-
-    @property
-    def name(self) -> str:
-        """Exporter name."""
-        return "Site API"
 
     @property
     def _object_meta(self) -> dict[str, str]:
@@ -72,7 +68,7 @@ class SiteApiOutput(OutputSite):
         return prettify_html(raw)
 
     @property
-    def outputs(self) -> list[SiteContent]:
+    def content(self) -> list[SiteContent]:
         """Output content for site."""
         return [
             SiteContent(

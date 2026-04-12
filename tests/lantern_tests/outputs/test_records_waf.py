@@ -20,7 +20,6 @@ class TestRecordsWafOutput:
         """Can create a Web Accessible Folder output."""
         output = RecordsWafOutput(logger=fx_logger, meta=fx_export_meta, select_records=fx_select_records)
         assert isinstance(output, RecordsWafOutput)
-        assert output.name == "Web Accessible Folder"
 
     def test_content(self, fx_records_waf_output: RecordsWafOutput, fx_select_records_fixed: SelectRecordsProtocol):
         """Can generate WAF index."""
@@ -39,7 +38,7 @@ class TestRecordsWafOutput:
         fx_records_waf_output._meta.build_repo_ref = build_ref
         fx_records_waf_output._select_records = fx_select_records_fixed
 
-        results = fx_records_waf_output.outputs
+        results = fx_records_waf_output.content
         assert len(results) == 1
         result = results[0]
         assert isinstance(result, SiteContent)

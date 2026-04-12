@@ -408,14 +408,27 @@ child-parent relationship.
 - the Esri vendor specific [Metadata](#arcgis-items-metadata) used is too minimal to be considered valid by the ArcGIS
   Online/Portal metadata editor
 
-## Verification Jobs
+## Site checks
 
-`lantern.models.verification.jobs.VerificationJob`
+`lantern.models.checks.Check`
 
-Verification jobs represent individual checks run as part of [Site Verification](/docs/monitoring.md#site-verification).
+Represent checks run as part of [Site Checks](/docs/monitoring.md#site-checks).
 
-A typed dict, `lantern.models.verification.types.VerificationContext`, defines available keys for the context object
-within each job. Various enumerations are used to define values for check types and job status/results.
+Consists of:
+
+- a check type for configuring how checks are run
+- properties to configure how to run a check (URL to check, expected HTTP status, etc.)
+- properties to track the execution of a check and record results (lifecycle state, actual HTTP status, duration, etc.)
+
+### Record checks
+
+`lantern.models.checks.RecordChecks`
+
+Represents a generator for additional checks to check selected properties in a given [Record](#records)
+(e.g. distributions).
+
+> [!TIP]
+> These checks are included via the [Record ISO XML](/docs/outputs.md#iso-19115-record-xml-output) Output.
 
 ## Static site metadata
 

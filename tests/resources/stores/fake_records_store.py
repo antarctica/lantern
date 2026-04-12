@@ -3,6 +3,7 @@ from copy import copy
 
 from lantern.models.record.revision import RecordRevision
 from lantern.stores.base import RecordNotFoundError, RecordsNotFoundError, Store
+from tests.resources.records.item_cat_checks import record as check
 from tests.resources.records.item_cat_collection_all import record as collection_all_supported
 from tests.resources.records.item_cat_collection_open_min import record as collection_open_min_required
 from tests.resources.records.item_cat_data import record as data_all_supported
@@ -30,7 +31,6 @@ from tests.resources.records.item_cat_pub_map import side_b as product_published
 from tests.resources.records.item_cat_pub_map_diff import combined as product_diff_published_map_combined
 from tests.resources.records.item_cat_pub_map_diff import side_a as product_diff_published_map_side_a
 from tests.resources.records.item_cat_pub_map_diff import side_b as product_diff_published_map_side_b
-from tests.resources.records.item_cat_verify import record as verify
 
 
 class FakeRecordsStore(Store):
@@ -74,7 +74,7 @@ class FakeRecordsStore(Store):
             product_web_map,
             formatting_supported,
             data_all_supported,
-            verify,
+            check,
             ogl_record,
             cc_record,
             ops_record,

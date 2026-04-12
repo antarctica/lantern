@@ -2,7 +2,7 @@
 
 import logging
 import subprocess
-from datetime import timedelta
+from http import HTTPStatus
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -13,10 +13,8 @@ from tests.resources.catalogues.fake_catalogue import FakeCatalogue
 from tests.resources.stores.fake_records_store import FakeRecordsStore
 
 from lantern.config import Config as ConfigBase
-from lantern.models.verification.enums import VerificationResult, VerificationType
-from lantern.models.verification.jobs import VerificationJob
-from lantern.models.verification.types import VerificationContext
-from lantern.verification import VerificationReport
+from lantern.models.checks import Check, CheckState, CheckType
+from lantern.outputs.checks import ChecksOutput
 
 
 class Config(ConfigBase):
@@ -38,39 +36,45 @@ def export_test_site(export_path: Path) -> None:
     catalogue.export()
 
     # Include fake verification report
-    report_path = export_path / "-" / "verification" / "index.html"
-    context: VerificationContext = {
-        "BASE_URL": "https://example.com",
-        "SHAREPOINT_PROXY_ENDPOINT": "x",
-        "SAN_PROXY_ENDPOINT": "x",
-    }
-    jobs = [
-        VerificationJob(
-            result=VerificationResult.PASS,
-            type=VerificationType.SITE_PAGES,
-            url="https://example.com/-/index",
-            context=context,
-            data={"duration": timedelta(microseconds=1)},
+    report_path = export_path / "-" / "checks" / "index.html"
+    checks = [
+        Check(
+            type=CheckType.SITE_HEALTH,
+            url="x",
+            state=CheckState.PASS,
+            duration=0.1,
+            result_http_status=HTTPStatus.OK,
+            result_output="OK",
         ),
-        VerificationJob(
-            result=VerificationResult.FAIL,
-            type=VerificationType.ITEM_PAGES,
-            url="https://example.com/items/123",
-            context=context,
-            data={"file_identifier": "x", "duration": timedelta(microseconds=1)},
+        Check(
+            type=CheckType.RECORD_PAGES_XML,
+            url="x",
+            file_identifier="x",
+            state=CheckState.FAILED,
+            duration=0.1,
+            result_http_status=HTTPStatus.NOT_FOUND,
+            result_output="Bad",
         ),
-        VerificationJob(
-            result=VerificationResult.SKIP,
-            type=VerificationType.ITEM_PAGES,
-            url="https://example.com/items/123",
-            context=context,
-            data={"file_identifier": "x"},
+        Check(
+            type=CheckType.DOWNLOADS_SHAREPOINT,
+            url="x",
+            file_identifier="x",
+            state=CheckState.SKIPPED,
+            duration=0.0,
+        ),
+        Check(
+            type=CheckType.ITEM_ALIASES,
+            url="x",
+            file_identifier="x",
+            state=CheckState.PENDING,
+            duration=0.0,
         ),
     ]
-    report = VerificationReport(catalogue._meta.site_metadata, jobs=jobs, context=context)
+    output = ChecksOutput(logger=logger, meta=catalogue._meta, checks=checks)
+    report_data = output.content[1]
     report_path.parent.mkdir(parents=True, exist_ok=True)
     with report_path.open("w") as report_file:
-        report_file.write(report.dumps())
+        report_file.write(report_data.content)  # ty:ignore[invalid-argument-type]
 
     print(f"Exported test site inc. verification report to '{export_path.resolve()}'")
 

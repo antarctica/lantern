@@ -9,17 +9,19 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.32.4
+      - python-requests/2.33.0
     method: GET
-    uri: https://example.com/
+    uri: https://services.arcgis.com/x/arcgis/rest/services/x/FeatureServer?f=json
   response:
     body:
-      string: 'x'
+      string: "{\"currentVersion\":12,\"serviceItemId\":\"123\"}"
     headers:
+      Accept-Ranges:
+      - bytes
+      Content-Encoding:
+      - gzip
       Content-Type:
-        - text/html
-      Content-Length:
-        - '1'
+      - application/json; charset=utf-8
     status:
       code: 200
       message: OK

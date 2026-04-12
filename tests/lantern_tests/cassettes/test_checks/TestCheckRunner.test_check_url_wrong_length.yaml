@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"path": "/x"}'
+    body: null
     headers:
       Accept:
       - '*/*'
@@ -8,22 +8,18 @@ interactions:
       - gzip, deflate
       Connection:
       - keep-alive
-      Content-Length:
-      - '15'
-      Content-Type:
-      - application/json
       User-Agent:
-      - python-requests/2.32.4
-    method: POST
-    uri: https://example.com/
+      - python-requests/2.33.0
+    method: HEAD
+    uri: https://example.com/index.html
   response:
     body:
-      string: '123'
+      string: ''
     headers:
-      Content-Type:
-      - text/plain
       Content-Length:
-        - '4'
+      - '10'
+      Content-Type:
+      - text/html
     status:
       code: 200
       message: OK

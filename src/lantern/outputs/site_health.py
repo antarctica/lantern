@@ -2,6 +2,7 @@ import json
 import logging
 from pathlib import Path
 
+from lantern.models.checks import CheckType
 from lantern.models.site import ExportMeta, SiteContent, SiteRedirect
 from lantern.outputs.base import OutputRecords
 from lantern.stores.base import SelectRecordsProtocol
@@ -17,13 +18,14 @@ class SiteHealthOutput(OutputRecords):
     """
 
     def __init__(self, logger: logging.Logger, meta: ExportMeta, select_records: SelectRecordsProtocol) -> None:
-        super().__init__(logger=logger, meta=meta, select_records=select_records)
+        super().__init__(
+            logger=logger,
+            meta=meta,
+            name="Site Health",
+            check_type=CheckType.SITE_HEALTH,
+            select_records=select_records,
+        )
         self._health_path = Path("static") / "json" / "health.json"
-
-    @property
-    def name(self) -> str:
-        """Exporter name."""
-        return "Site Health"
 
     @property
     def _content(self) -> str:
@@ -65,7 +67,7 @@ class SiteHealthOutput(OutputRecords):
         )
 
     @property
-    def outputs(self) -> list[SiteContent]:
+    def content(self) -> list[SiteContent]:
         """Output content for site."""
         return [
             SiteContent(content=self._content, path=self._health_path, media_type="application/health+json"),

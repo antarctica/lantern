@@ -2,12 +2,13 @@ import logging
 import time
 from collections.abc import Callable
 from copy import deepcopy
-from typing import NamedTuple
+from typing import Literal, NamedTuple, cast
 
 from joblib import Parallel, delayed
 from lxml import etree
 
 from lantern.log import init as init_logging
+from lantern.models.checks import Check
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta, SiteContent
 from lantern.outputs.base import OutputBase
@@ -19,6 +20,8 @@ from lantern.outputs.site_health import SiteHealthOutput
 from lantern.outputs.site_index import SiteIndexOutput
 from lantern.stores.base import Store
 from lantern.stores.gitlab_cache import GitLabCachedStore
+
+SiteAction = Literal["content", "checks"]
 
 _STORE_SINGLETON: Store | None = None
 _ISO_HTML_XSLT_SINGLETON: etree.XSLT | None = None
@@ -54,11 +57,10 @@ def _run_job(
     log_level: int,
     meta: ExportMeta,
     store: Store,
-    output_cls: Callable[..., OutputBase],
-    record: RecordRevision | None,
-) -> list[SiteContent]:
+    job: "SiteJob",
+) -> list[SiteContent] | list[Check]:
     """
-    Output a Record.
+    Generate content or checks from an Output.
 
     Standalone function for use in parallel processing.
     """
@@ -69,27 +71,30 @@ def _run_job(
     select_record = store.select_one
     select_records = store.select
 
-    if output_cls == ItemCatalogueOutput:
-        output = output_cls(logger=logger, meta=meta, record=record, select_record=select_record)
-    elif output_cls in [SiteIndexOutput, SiteHealthOutput, ItemsBasWebsiteOutput, RecordsWafOutput]:
-        output = output_cls(logger=logger, meta=meta, select_records=select_records)
-    elif output_cls == RecordIsoHtmlOutput:
-        output = output_cls(logger=logger, meta=meta, record=record, transform=iso_html_transform)
-    elif output_cls in [ItemAliasesOutput, RecordIsoJsonOutput, RecordIsoXmlOutput]:
-        output = output_cls(logger=logger, meta=meta, record=record)
+    if job.output == ItemCatalogueOutput:
+        output = job.output(logger=logger, meta=meta, record=job.record, select_record=select_record)
+    elif job.output in [SiteIndexOutput, SiteHealthOutput, ItemsBasWebsiteOutput, RecordsWafOutput]:
+        output = job.output(logger=logger, meta=meta, select_records=select_records)
+    elif job.output == RecordIsoHtmlOutput:
+        output = job.output(logger=logger, meta=meta, record=job.record, transform=iso_html_transform)
+    elif job.output in [ItemAliasesOutput, RecordIsoJsonOutput, RecordIsoXmlOutput]:
+        output = job.output(logger=logger, meta=meta, record=job.record)
     else:
-        output = output_cls(logger=logger, meta=meta)
+        output = job.output(logger=logger, meta=meta)
 
-    msg = f"Outputting content using {output.name}."
-    if record:
-        msg = f"Outputting record '{record.file_identifier}' using {output.name}."
+    msg = f"Outputting {job.action} using {output.name}."
+    if job.record:
+        msg = f"Outputting {job.action} for record '{job.record.file_identifier}' using {output.name}."
     logger.info(msg)
-    return output.outputs
+    if job.action == "checks":
+        return output.checks
+    return output.content
 
 
 class SiteJob(NamedTuple):
-    """Output class and optional Record instance for a SiteGenerator processing job."""
+    """Output class, action, and optional Record instance for a Site generator job."""
 
+    action: SiteAction
     output: Callable[..., OutputBase]
     record: RecordRevision | None = None
 
@@ -98,7 +103,7 @@ class Site:
     """
     Simple static site generator.
 
-    Generates content for selected Output classes and optionally records from a Store.
+    Generates content or content checks for selected Output classes and records from a Store.
 
     Flexible class intended to be used in a higher level and opinionated Catalogue class.
     """
@@ -129,54 +134,68 @@ class Site:
 
     def _generate_jobs(
         self,
+        actions: list[SiteAction],
         global_outputs: list[type[OutputBase]],
         individual_outputs: list[type[OutputBase]],
         identifiers: set[str] | None = None,
     ) -> list[SiteJob]:
         """
-        Generate processing jobs for Output classes and records.
+        Create jobs for generating content and/or checks for Output classes and records.
 
-        For individual Output classes, jobs are generated as 'Output classes * records'.
+        Output classes are 'global' or 'individual' depending on whether they operate on individual records.
+
+        Generated as: [actions] * [output class] (* [record])
         """
-        global_ = [SiteJob(output=cls) for cls in global_outputs]
+        global_ = [SiteJob(action=action, output=cls) for action in actions for cls in global_outputs]
         individual_ = [
-            SiteJob(output=cls, record=record)
+            SiteJob(action=action, output=cls, record=record)
+            for action in actions
             for cls in individual_outputs
             for record in self._store.select(identifiers)
         ]
         return global_ + individual_
 
-    def execute(self, jobs: list[SiteJob]) -> list[SiteContent]:
+    def execute(self, jobs: list[SiteJob]) -> list[SiteContent | Check]:
         """
-        Execute a set of jobs in parallel to generate site content.
+        Execute a set of jobs in parallel to generate site content and/or checks.
 
-        Returns generated content items as a flattened list.
+        Returns generated content and/or checks as a flattened list.
         """
         store = self._prep_store()
         start = time.monotonic()
         nested_outputs: list[list[SiteContent]] = Parallel(n_jobs=self._workers)(
-            delayed(_run_job)(self._logger.level, self._meta, store, job.output, job.record) for job in jobs
+            delayed(_run_job)(self._logger.level, self._meta, store, job) for job in jobs
         )
         outputs = [content for output_content in nested_outputs for content in output_content]
-        self._logger.info(f"Generated {len(outputs)} site content items in {round(time.monotonic() - start)} seconds")
+        self._logger.info(f"Generated {len(outputs)} site content/checks in {round(time.monotonic() - start)} seconds")
         return outputs
 
-    def process(
+    def generate_content(
         self,
         global_outputs: list[type[OutputBase]],
         individual_outputs: list[type[OutputBase]],
         identifiers: set[str] | None = None,
     ) -> list[SiteContent]:
-        """
-        Generate site content.
-
-        Wrapper around `execute` to generate processing jobs for selected Output classes and records.
-
-        Output classes are 'global' or 'individual' depending on whether they operate on individual records.
-
-        Returns generated content items as a flattened list.
-        """
+        """Generate site content."""
         jobs = self._generate_jobs(
-            global_outputs=global_outputs, individual_outputs=individual_outputs, identifiers=identifiers
+            actions=["content"],
+            global_outputs=global_outputs,
+            individual_outputs=individual_outputs,
+            identifiers=identifiers,
         )
-        return self.execute(jobs)
+        return cast(list[SiteContent], self.execute(jobs))
+
+    def generate_checks(
+        self,
+        global_outputs: list[type[OutputBase]],
+        individual_outputs: list[type[OutputBase]],
+        identifiers: set[str] | None = None,
+    ) -> list[Check]:
+        """Generate site content."""
+        jobs = self._generate_jobs(
+            actions=["checks"],
+            global_outputs=global_outputs,
+            individual_outputs=individual_outputs,
+            identifiers=identifiers,
+        )
+        return cast(list[Check], self.execute(jobs))

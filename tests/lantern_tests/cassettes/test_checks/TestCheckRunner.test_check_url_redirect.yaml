@@ -1,0 +1,78 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.33.0
+    method: HEAD
+    uri: https://example.com/redirect.html
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '15'
+      Content-Type:
+      - text/html
+      Location:
+      - https://example.com/index.html
+    status:
+      code: 301
+      message: Moved Permanently
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.33.0
+    method: HEAD
+    uri: https://example.com/redirect.html
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '15'
+      Content-Type:
+      - text/html
+      Location:
+      - https://example.com/index.html
+    status:
+      code: 301
+      message: Moved Permanently
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.33.0
+    method: HEAD
+    uri: https://example.com/index.html
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '15'
+      Content-Type:
+      - text/html
+    status:
+      code: 200
+      message: OK
+version: 1

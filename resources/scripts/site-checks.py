@@ -26,7 +26,7 @@ def _run(logger: logging.Logger, config: Config) -> None:
         region_name="eu-west-1",
     )
     catalogue = BasCatalogue(logger=logger, config=config, store=store, s3=s3)
-    catalogue.verify(env="live")
+    catalogue.check(env="live")
 
 
 def main() -> None:
@@ -35,7 +35,7 @@ def main() -> None:
     config = Config()
     init_logging(logging_level=config.LOG_LEVEL)
     logger = logging.getLogger("app")
-    logger.info("Initialising Lantern site-wide verification.")
+    logger.info("Initialising Lantern catalogue checks.")
 
     _run(logger=logger, config=config)
     print("Script exiting normally.")

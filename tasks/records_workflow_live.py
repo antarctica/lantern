@@ -200,7 +200,7 @@ def main() -> None:
     """
     env: SiteEnvironment = "live"
     logger, config, store = init(cached_store=True)
-    results_path = Path("./workflow_results/live")
+    checks_base_path = Path("./workflow_results/live")
 
     logger.info("Checking connectivity to trusted upload host.")
     ping_host(config.SITE_TRUSTED_RSYNC_HOST)
@@ -221,8 +221,8 @@ def main() -> None:
     s3 = init_s3(config=config)
     catalogue = BasCatalogue(logger=logger, config=config, store=store, s3=s3)
     _export(logger=logger, config=config, catalogue=catalogue, env=env, identifiers=identifiers)
-    verify_path = _verify(
-        logger=logger, catalogue=catalogue, env=env, identifiers=identifiers, workflow_path=results_path
+    checks_path = _verify(
+        logger=logger, catalogue=catalogue, env=env, identifiers=identifiers, workflow_path=checks_base_path
     )
 
     # generate output comments
@@ -236,7 +236,7 @@ def main() -> None:
     )
 
     print("Testing records workflow exited normally.")
-    print(f"Verification data: {verify_path.resolve()}")
+    print(f"Checks data: {checks_path.resolve()}")
 
 
 if __name__ == "__main__":

@@ -1,17 +1,18 @@
-from lantern.models.site import SiteContent
+import logging
+
+from lantern.models.checks import CheckType
+from lantern.models.site import ExportMeta, SiteContent
 from lantern.outputs.base import OutputBase, OutputRecord, OutputRecords, OutputSite
 
 
 class FakeOutputBase(OutputBase):
     """Fake output for testing."""
 
-    @property
-    def name(self) -> str:
-        """Output name."""
-        return "Fake Base"
+    def __init__(self, logger: logging.Logger, meta: ExportMeta) -> None:
+        super().__init__(logger, meta, name="Fake Base", check_type=CheckType.NONE)
 
     @property
-    def outputs(self) -> list[SiteContent]:
+    def content(self) -> list[SiteContent]:
         """Output content."""
         return []
 
@@ -25,7 +26,7 @@ class FakeOutputSite(OutputSite):
         return "Fake Site"
 
     @property
-    def outputs(self) -> list[SiteContent]:
+    def content(self) -> list[SiteContent]:
         """Output content."""
         return []
 
@@ -39,7 +40,7 @@ class FakeOutputRecord(OutputRecord):
         return "Fake Record"
 
     @property
-    def outputs(self) -> list[SiteContent]:
+    def content(self) -> list[SiteContent]:
         """Output content."""
         return []
 
@@ -53,6 +54,6 @@ class FakeOutputRecords(OutputRecords):
         return "Fake Records"
 
     @property
-    def outputs(self) -> list[SiteContent]:
+    def content(self) -> list[SiteContent]:
         """Output content."""
         return []

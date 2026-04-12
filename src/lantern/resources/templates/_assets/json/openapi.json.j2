@@ -3,7 +3,7 @@
   "info": {
     "title": "BAS Data Catalogue (Lantern)",
     "summary": "Prototype data catalogue for discovery metadata.",
-    "description": "A data discovery tool to find, evaluate and access resources produced, managed and/or used by the [British Antarctic Survey](https://www.bas.ac.uk/) and [UK Polar Data Centre](https://www.bas.ac.uk/data/uk-pdc/). This includes datasets, products (maps), services and other information.\n\n> [!NOTE]\n> This documentation does not cover all services available under this domain. See the [API Catalogue](/.well-known/api-catalog) for all available services.",
+    "description": "A data discovery tool to find, evaluate and access resources produced, managed and/or used by the [British Antarctic Survey](https://www.bas.ac.uk/) and [UK Polar Data Centre](https://www.bas.ac.uk/data/uk-pdc/). This includes datasets, products (maps), services and other information.\n\n> [!NOTE]\n> This documentation does not cover all services available under this domain. See the [API Catalogue](/.well-known/api-catalog) for all services.",
     "contact": {
       "name": "MAGIC and Geographic Information Centre",
       "url": "https://www.bas.ac.uk/teams/magic",
@@ -41,7 +41,9 @@
     "url": "https://github.com/antarctica/lantern",
     "description": "Project documentation"
   },
-  "security": [{}],
+  "security": [
+    {}
+  ],
   "tags": [
     {
       "name": "waf",
@@ -94,14 +96,16 @@
   "paths": {
     "/-/index/index.html": {
       "get": {
-        "tags": ["internal"],
+        "tags": [
+          "internal"
+        ],
         "operationId": "getIndex",
         "x-scalar-stability": "experimental",
         "summary": "Internal content index",
         "description": "Basic listing of any content items and item aliases in the catalogue.",
         "externalDocs": {
           "description": "More information",
-          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/exporters.md#site-index-exporter"
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/outputs.md#site-index-output"
         },
         "responses": {
           "200": {
@@ -118,8 +122,10 @@
       }
     },
     "/-/health/index.html": {
-      "get":  {
-        "tags": ["internal"],
+      "get": {
+        "tags": [
+          "internal"
+        ],
         "operationId": "getHealthRedirect",
         "x-scalar-stability": "experimental",
         "summary": "Health check redirect",
@@ -137,7 +143,9 @@
                 "schema": {
                   "type": "string",
                   "format": "uri",
-                  "examples": ["https://data.bas.ac.uk/static/json/health.json"]
+                  "examples": [
+                    "https://data.bas.ac.uk/static/json/health.json"
+                  ]
                 }
               }
             },
@@ -154,14 +162,16 @@
     },
     "/-/public-website-search/items.json": {
       "get": {
-        "tags": ["internal"],
+        "tags": [
+          "internal"
+        ],
         "operationId": "getPublicWebsiteSearchItems",
         "x-scalar-stability": "experimental",
         "summary": "BAS public website search items",
         "description": "Subset of catalogue content as search index items for inclusion in the [BAS public website](https://www.bas.ac.uk).",
         "externalDocs": {
           "description": "More information",
-          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/exporters.md#public-website-search-exporter"
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/outputs.md#bas-public-website-search-output"
         },
         "responses": {
           "200": {
@@ -177,16 +187,18 @@
         }
       }
     },
-    "/-/verification/data.json": {
-      "get":  {
-        "tags": ["internal"],
-        "operationId": "getVerificationData",
+    "/-/checks/data.json": {
+      "get": {
+        "tags": [
+          "internal"
+        ],
+        "operationId": "getChecksData",
         "x-scalar-stability": "experimental",
-        "summary": "Catalogue verification data",
+        "summary": "Catalogue checks data",
         "description": "Underlying data for the latest checks made against catalogue content (such as external downloads). Intended for further processing in other applications.",
         "externalDocs": {
           "description": "More information",
-          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/monitoring.md#verification-report"
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/monitoring.md#site-checks-report"
         },
         "responses": {
           "200": {
@@ -194,7 +206,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/verificationReportData"
+                  "$ref": "#/components/schemas/checksData"
                 }
               }
             }
@@ -202,16 +214,18 @@
         }
       }
     },
-    "/-/verification/index.html": {
-      "get":  {
-        "tags": ["internal"],
-        "operationId": "getVerificationIndex",
+    "/-/checks/index.html": {
+      "get": {
+        "tags": [
+          "internal"
+        ],
+        "operationId": "getChecksIndex",
         "x-scalar-stability": "experimental",
-        "summary": "Catalogue verification report",
-        "description": "Latest Catalogue verification data formatted as a simple online report.",
+        "summary": "Catalogue checks report",
+        "description": "Latest online report for checks made against catalogue content (such as external downloads) for human verification.",
         "externalDocs": {
           "description": "More information",
-          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/monitoring.md#verification-report"
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/monitoring.md#site-checks-report"
         },
         "responses": {
           "200": {
@@ -229,11 +243,17 @@
     },
     "/legal/accessibility/index.html": {
       "get": {
-        "tags": ["legal"],
+        "tags": [
+          "legal"
+        ],
         "operationId": "getAccessibilityIndex",
         "x-scalar-stability": "experimental",
         "summary": "Accessibility policy",
         "description": "Get information about accessibility.",
+        "externalDocs": {
+          "description": "More information",
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/outputs.md#site-pages-output"
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -250,11 +270,17 @@
     },
     "/legal/cookies/index.html": {
       "get": {
-        "tags": ["legal"],
+        "tags": [
+          "legal"
+        ],
         "operationId": "getCookiesIndex",
         "x-scalar-stability": "stable",
         "summary": "Cookies policy",
         "description": "Get information about cookies.",
+        "externalDocs": {
+          "description": "More information",
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/outputs.md#site-pages-output"
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -271,11 +297,17 @@
     },
     "/legal/copyright/index.html": {
       "get": {
-        "tags": ["legal"],
+        "tags": [
+          "legal"
+        ],
         "operationId": "getCopyrightIndex",
         "x-scalar-stability": "stable",
         "summary": "Copyright policy",
         "description": "Get information about copyright.",
+        "externalDocs": {
+          "description": "More information",
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/outputs.md#site-pages-output"
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -292,11 +324,17 @@
     },
     "/legal/privacy/index.html": {
       "get": {
-        "tags": ["legal"],
+        "tags": [
+          "legal"
+        ],
         "operationId": "getPrivacyIndex",
         "x-scalar-stability": "stable",
         "summary": "Privacy policy",
         "description": "Get information about privacy.",
+        "externalDocs": {
+          "description": "More information",
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/outputs.md#site-pages-output"
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -312,15 +350,17 @@
       }
     },
     "/records/{fileIdentifier}.xml": {
-      "get":  {
-        "tags": ["records"],
+      "get": {
+        "tags": [
+          "records"
+        ],
         "operationId": "getRecordXml",
         "x-scalar-stability": "stable",
         "summary": "ISO 19115 XML",
         "description": "Get record as XML as per ISO 19139 (no profile).",
         "externalDocs": {
           "description": "More information",
-          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/exporters.md#xml-resource-exporter"
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/outputs.md#iso-19115-record-XML-output"
         },
         "parameters": [
           {
@@ -348,15 +388,17 @@
       }
     },
     "/records/{fileIdentifier}.html": {
-      "get":  {
-        "tags": ["records"],
+      "get": {
+        "tags": [
+          "records"
+        ],
         "operationId": "getRecordHtml",
         "x-scalar-stability": "stable",
         "summary": "ISO 19115 XML with HTML stylesheet",
         "description": "Get record as HTML with basic formatting.\n\nGenerated from XML records by applying an XSLT transformation.\n\nIntended for easier review of ISO metadata by humans.",
         "externalDocs": {
           "description": "More information",
-          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/exporters.md#xml-html-resource-exporter"
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/outputs.md#iso-19115-record-html-output"
         },
         "parameters": [
           {
@@ -381,15 +423,17 @@
       }
     },
     "/records/{fileIdentifier}.json": {
-      "get":  {
-        "tags": ["records"],
+      "get": {
+        "tags": [
+          "records"
+        ],
         "operationId": "getRecordXml",
         "x-scalar-stability": "stable",
         "summary": "BAS ISO 19115 JSON",
         "description": "Get record as JSON as per [BAS ISO 19139 schema](https://metadata-standards.data.bas.ac.uk/standards/iso-19115-19139#json-schemas).",
         "externalDocs": {
           "description": "More information",
-          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/exporters.md#json-resource-exporter"
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/outputs.md#iso-19115-record-json-output"
         },
         "parameters": [
           {
@@ -405,17 +449,33 @@
                   "$ref": "#/components/schemas/jsonIso19115Record"
                 },
                 "example": {
-                    "$schema": "https://metadata-resources.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-0-v4.json",
-                    "metadata": {
-                        "contacts": [{"organisation": {"name": "Mapping and Geographic Information Centre, British Antarctic Survey"}, "role": ["pointOfContact"]}],
-                        "date_stamp": "2018-10-18"
+                  "$schema": "https://metadata-resources.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-0-v4.json",
+                  "metadata": {
+                    "contacts": [
+                      {
+                        "organisation": {
+                          "name": "Mapping and Geographic Information Centre, British Antarctic Survey"
+                        },
+                        "role": [
+                          "pointOfContact"
+                        ]
+                      }
+                    ],
+                    "date_stamp": "2018-10-18"
+                  },
+                  "identification": {
+                    "title": {
+                      "value": "Test Record"
                     },
-                    "identification": {
-                        "title": {"value": "Test Record"},
-                        "dates": {"creation": {"date": "2018-01-01", "date_precision": "year"}},
-                        "abstract": "Test Record for ISO 19115 metadata standard (no profile) with required properties only.",
-                        "language": "eng"
-                    }
+                    "dates": {
+                      "creation": {
+                        "date": "2018-01-01",
+                        "date_precision": "year"
+                      }
+                    },
+                    "abstract": "Test Record for ISO 19115 metadata standard (no profile) with required properties only.",
+                    "language": "eng"
+                  }
                 }
               }
             }
@@ -427,15 +487,17 @@
       }
     },
     "/items/{fileIdentifier}/index.html": {
-      "get":  {
-        "tags": ["items"],
+      "get": {
+        "tags": [
+          "items"
+        ],
         "operationId": "getItemHtml",
         "x-scalar-stability": "stable",
         "summary": "Content item",
         "description": "Get content item.",
         "externalDocs": {
           "description": "More information",
-          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/data-model.md#catalogue-items"
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/outputs.md#catalogue-item-output"
         },
         "parameters": [
           {
@@ -467,9 +529,15 @@
       }
     },
     "/-/items/{fileIdentifier}/index.html": {
-      "get":  {
-        "tags": ["items"],
-        "security": [{"ldapMagic": []}],
+      "get": {
+        "tags": [
+          "items"
+        ],
+        "security": [
+          {
+            "ldapMagic": []
+          }
+        ],
         "servers": [
           {
             "url": "https://data.bas.ac.uk",
@@ -486,7 +554,7 @@
         "description": "Get content item with additional privileged information.\n\nAuthenticated 🔒 and available from selected endpoints only.",
         "externalDocs": {
           "description": "More information",
-          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/exporters.md#trusted-publishing"
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/outputs.md#catalogue-item-output"
         },
         "parameters": [
           {
@@ -528,15 +596,17 @@
       }
     },
     "/collections/{aliasIdentifier}/index.html": {
-      "get":  {
-        "tags": ["items"],
+      "get": {
+        "tags": [
+          "items"
+        ],
         "operationId": "getCollectionHtml",
         "x-scalar-stability": "stable",
         "summary": "Collection alias redirect",
         "description": "Get target content item for a collection alias.",
         "externalDocs": {
           "description": "More information",
-          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/data-model.md#item-aliases"
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/outputs.md#catalogue-item-aliases-output"
         },
         "parameters": [
           {
@@ -554,15 +624,17 @@
       }
     },
     "/datasets/{aliasIdentifier}/index.html": {
-      "get":  {
-        "tags": ["items"],
+      "get": {
+        "tags": [
+          "items"
+        ],
         "operationId": "getDatasetHtml",
         "x-scalar-stability": "stable",
         "summary": "Dataset alias redirect",
         "description": "Get target content item for a dataset alias.",
         "externalDocs": {
           "description": "More information",
-          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/data-model.md#item-aliases"
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/outputs.md#catalogue-item-aliases-output"
         },
         "parameters": [
           {
@@ -580,15 +652,17 @@
       }
     },
     "/products/{aliasIdentifier}/index.html": {
-      "get":  {
-        "tags": ["items"],
+      "get": {
+        "tags": [
+          "items"
+        ],
         "operationId": "getProductHtml",
         "x-scalar-stability": "stable",
         "summary": "Product alias redirect",
         "description": "Get target content item for a product alias.",
         "externalDocs": {
           "description": "More information",
-          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/data-model.md#item-aliases"
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/outputs.md#catalogue-item-aliases-output"
         },
         "parameters": [
           {
@@ -606,15 +680,17 @@
       }
     },
     "/projects/{aliasIdentifier}/index.html": {
-      "get":  {
-        "tags": ["items"],
+      "get": {
+        "tags": [
+          "items"
+        ],
         "operationId": "getProjectHtml",
         "x-scalar-stability": "stable",
         "summary": "Project alias redirect",
         "description": "Get target content item for a project alias.",
         "externalDocs": {
           "description": "More information",
-          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/data-model.md#item-aliases"
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/outputs.md#catalogue-item-aliases-output"
         },
         "parameters": [
           {
@@ -632,15 +708,17 @@
       }
     },
     "/maps/{aliasIdentifier}/index.html": {
-      "get":  {
-        "tags": ["items"],
+      "get": {
+        "tags": [
+          "items"
+        ],
         "operationId": "getMapHtml",
         "x-scalar-stability": "stable",
         "summary": "Map alias redirect",
         "description": "Get target content item for a map product alias.",
         "externalDocs": {
           "description": "More information",
-          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/data-model.md#item-aliases"
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/outputs.md#catalogue-item-aliases-output"
         },
         "parameters": [
           {
@@ -658,15 +736,17 @@
       }
     },
     "/waf/iso-19139-all/index.html": {
-      "get":  {
-        "tags": ["waf"],
+      "get": {
+        "tags": [
+          "waf"
+        ],
         "operationId": "getIso19139AllWafIndex",
         "x-scalar-stability": "stable",
         "summary": "All records WAF",
         "description": "Get Web Accessible Folder listing all resources encoded as ISO 19139-2:2012 records.",
         "externalDocs": {
           "description": "More information",
-          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/access.md#web-accessible-folder"
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/outputs.md#web-accessible-folder-output"
         },
         "responses": {
           "200": {
@@ -687,11 +767,17 @@
     },
     "/guides/map-purchasing": {
       "get": {
-        "tags": ["guides"],
+        "tags": [
+          "guides"
+        ],
         "operationId": "getMapPurchasingIndex",
         "x-scalar-stability": "stable",
         "summary": "Published maps purchasing information",
         "description": "Get guide for how to purchase BAS published maps.",
+        "externalDocs": {
+          "description": "More information",
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/outputs.md#site-pages-output"
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -708,11 +794,17 @@
     },
     "/guides/api/index.html": {
       "get": {
-        "tags": ["guides"],
+        "tags": [
+          "guides"
+        ],
         "operationId": "getApiGuideIndex",
         "x-scalar-stability": "experimental",
         "summary": "API documentation",
         "description": "Get interactive API documentation (this page) describing the catalogue structure and endpoints.",
+        "externalDocs": {
+          "description": "More information",
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/outputs.md#site-api-output"
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -729,11 +821,17 @@
     },
     "/guides/formatting/index.html": {
       "get": {
-        "tags": ["guides"],
+        "tags": [
+          "guides"
+        ],
         "operationId": "getFormattingGuideIndex",
         "x-scalar-stability": "stable",
         "summary": "Content formatting documentation",
         "description": "Get examples of supported markdown syntax that can be used in content items.",
+        "externalDocs": {
+          "description": "More information",
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/outputs.md#site-pages-output"
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -750,14 +848,16 @@
     },
     "/static/json/openapi.json": {
       "get": {
-        "tags": ["static"],
+        "tags": [
+          "static"
+        ],
         "operationId": "getOpenApiSchema",
         "x-scalar-stability": "experimental",
         "summary": "OpenAPI Schema",
         "description": "Get Open APISchema definition describing the catalogue structure.",
         "externalDocs": {
           "description": "More information",
-          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/site.md#openapi-definition"
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/outputs.md#site-api-output"
         },
         "responses": {
           "200": {
@@ -775,7 +875,9 @@
     },
     "/static/json/api-catalog.json": {
       "get": {
-        "tags": ["static"],
+        "tags": [
+          "static"
+        ],
         "operationId": "getApiCatalog",
         "x-scalar-stability": "experimental",
         "summary": "API Catalog",
@@ -800,7 +902,9 @@
     },
     "/static/txt/heartbeat.txt": {
       "get": {
-        "tags": ["static"],
+        "tags": [
+          "static"
+        ],
         "operationId": "getHeartbeat",
         "x-scalar-stability": "stable",
         "summary": "Heartbeat",
@@ -816,7 +920,9 @@
               "text/plain": {
                 "schema": {
                   "type": "string",
-                  "examples": ["badump, badump"]
+                  "examples": [
+                    "badump, badump"
+                  ]
                 }
               }
             }
@@ -826,7 +932,9 @@
     },
     "/static/json/health.json": {
       "get": {
-        "tags": ["static"],
+        "tags": [
+          "static"
+        ],
         "operationId": "getHealthJson",
         "x-scalar-stability": "experimental",
         "summary": "Health check",
@@ -862,22 +970,30 @@
       "htmlContent": {
         "title": "HTML content",
         "type": "string",
-        "examples": ["<!DOCTYPE html>\n\n<html lang=\"en-GB\">...</html>"]
+        "examples": [
+          "<!DOCTYPE html>\n\n<html lang=\"en-GB\">...</html>"
+        ]
       },
       "htmlRedirect": {
         "title": "HTML redirect content",
         "type": "string",
-        "examples": ["<!DOCTYPE html>\n\n<html lang=\"en-GB\"><head><title>BAS Data Catalogue</title><meta http-equiv=\"refresh\" content=\"0;url=/items/dbe5f712-696a-47d8-b4a7-3b173e47e3ab/\"></head><body><a href=\"/items/dbe5f712-696a-47d8-b4a7-3b173e47e3ab/\">Click here if you are not redirected after a few seconds.</a></body></html>"]
+        "examples": [
+          "<!DOCTYPE html>\n\n<html lang=\"en-GB\"><head><title>BAS Data Catalogue</title><meta http-equiv=\"refresh\" content=\"0;url=/items/dbe5f712-696a-47d8-b4a7-3b173e47e3ab/\"></head><body><a href=\"/items/dbe5f712-696a-47d8-b4a7-3b173e47e3ab/\">Click here if you are not redirected after a few seconds.</a></body></html>"
+        ]
       },
       "htmlUnauthorised": {
         "title": "HTML 401 content",
         "type": "string",
-        "examples": ["<!DOCTYPE html>\n\n<html lang=\"en-GB\"><body>Unauthorised. Unable to verify you are authorized to access the information requested.</body></html>"]
+        "examples": [
+          "<!DOCTYPE html>\n\n<html lang=\"en-GB\"><body>Unauthorised. Unable to verify you are authorized to access the information requested.</body></html>"
+        ]
       },
       "htmlNotFound": {
         "title": "HTML 404 content",
         "type": "string",
-        "examples": ["<!DOCTYPE html>\n\n<html lang=\"en-GB\"><body>Page not found.</body></html>"]
+        "examples": [
+          "<!DOCTYPE html>\n\n<html lang=\"en-GB\"><body>Page not found.</body></html>"
+        ]
       },
       "publicWebsiteSearchItems": {
         "title": "BAS public website additional search items",
@@ -886,27 +1002,41 @@
         "items": {
           "title": "BAS public website additional search item",
           "type": "object",
-          "required": ["file_identifier", "file_revision", "source", "content", "deleted"],
+          "required": [
+            "file_identifier",
+            "file_revision",
+            "source",
+            "content",
+            "deleted"
+          ],
           "additionalProperties": false,
           "properties": {
             "file_identifier": {
               "title": "File identifier",
               "description": "Persistent and unique identifier for a resource.",
               "type": "string",
-              "examples": ["7b0cd3e3-069e-4fe2-92d4-f2387bfc40f1"]
+              "examples": [
+                "7b0cd3e3-069e-4fe2-92d4-f2387bfc40f1"
+              ]
             },
             "file_revision": {
               "title": "File revision",
               "description": "Identifier for a resource at a specific revision.",
               "type": "string",
-              "examples":  ["2d3358180f619996b6fcf06126b9b3ca4988c5e6"]
+              "examples": [
+                "2d3358180f619996b6fcf06126b9b3ca4988c5e6"
+              ]
             },
             "source": {
               "title": "Source",
               "description": "Identifier to indicate the origin of a resource.",
               "type": "string",
-              "enum": ["lantern"],
-              "examples": ["lantern"]
+              "enum": [
+                "lantern"
+              ],
+              "examples": [
+                "lantern"
+              ]
             },
             "content": {
               "title": "Search item content",
@@ -927,50 +1057,73 @@
                   "title": "ID",
                   "description": "Persistent and unique identifier for the item.\n\nNot intended to be shown in search results.",
                   "type": "string",
-                  "examples": ["7b0cd3e3-069e-4fe2-92d4-f2387bfc40f1"]
+                  "examples": [
+                    "7b0cd3e3-069e-4fe2-92d4-f2387bfc40f1"
+                  ]
                 },
                 "revision": {
                   "title": "Revision",
                   "description": "Optional reference for the version of the item.\n\nNot intended to be shown in search results.",
                   "type": "string",
-                  "examples": ["2d3358180f619996b6fcf06126b9b3ca4988c5e6"]
+                  "examples": [
+                    "2d3358180f619996b6fcf06126b9b3ca4988c5e6"
+                  ]
                 },
                 "type": {
                   "title": "Item Type",
                   "description": "Derived from resource type.",
                   "type": "string",
-                  "enum": ["COLLECTION", "DATASET", "INITIATIVE (PROJECT)", "PRODUCT (MAP)", "PRODUCT (PAPER MAP)"],
-                  "examples": ["PRODUCT (MAP)"]
+                  "enum": [
+                    "COLLECTION",
+                    "DATASET",
+                    "INITIATIVE (PROJECT)",
+                    "PRODUCT (MAP)",
+                    "PRODUCT (PAPER MAP)"
+                  ],
+                  "examples": [
+                    "PRODUCT (MAP)"
+                  ]
                 },
                 "title": {
                   "title": "Title",
                   "description": "Mapped from the resource title.",
                   "type": "string",
-                  "examples": ["Fictitious map of mermaid sightings in Antarctica"]
+                  "examples": [
+                    "Fictitious map of mermaid sightings in Antarctica"
+                  ]
                 },
                 "description": {
                   "title": "Description",
                   "description": "Mapped from the resource summary or description.",
                   "type": "string",
-                  "examples": ["..."]
+                  "examples": [
+                    "..."
+                  ]
                 },
                 "date": {
                   "title": "Date",
                   "description": "Mapped from a suitable resource date, typically the publication date.",
                   "type": "date-time",
-                  "examples": ["2014-06-30T14:20:42+00:00"]
+                  "examples": [
+                    "2014-06-30T14:20:42+00:00"
+                  ]
                 },
                 "version": {
                   "title": "Version",
                   "description": "Mapped from the resource edition if available.",
                   "type": "string",
-                  "examples": ["1", "2014.2"]
+                  "examples": [
+                    "1",
+                    "2014.2"
+                  ]
                 },
                 "thumbnail_href": {
                   "title": "Thumbnail URL",
                   "description": "URL to an overview thumbnail for the resource if available.",
                   "type": "string",
-                  "examples": ["https://cdn.web.bas.ac.uk/item-thumbnails/7b0cd3e3-069e-4fe2-92d4-f2387bfc40f1/overview.png"]
+                  "examples": [
+                    "https://cdn.web.bas.ac.uk/item-thumbnails/7b0cd3e3-069e-4fe2-92d4-f2387bfc40f1/overview.png"
+                  ]
                 },
                 "keywords": {
                   "title": "Search keywords",
@@ -979,13 +1132,23 @@
                   "items": {
                     "type": "string"
                   },
-                  "examples": [["mermaids", "sightings", "Antarctica", "map", "fictitious"]]
+                  "examples": [
+                    [
+                      "mermaids",
+                      "sightings",
+                      "Antarctica",
+                      "map",
+                      "fictitious"
+                    ]
+                  ]
                 },
                 "href": {
                   "title": "Item URL",
                   "description": "URL to the item in the Catalogue.",
                   "type": "string",
-                  "examples": ["https://data.bas.ac.uk/items/7b0cd3e3-069e-4fe2-92d4-f2387bfc40f1"]
+                  "examples": [
+                    "https://data.bas.ac.uk/items/7b0cd3e3-069e-4fe2-92d4-f2387bfc40f1"
+                  ]
                 }
               }
             },
@@ -993,160 +1156,228 @@
               "title": "Deleted",
               "description": "Flag to indicate whether the resource has been deleted and should be removed.",
               "type": "boolean",
-              "examples": [false]
+              "examples": [
+                false
+              ]
             }
           }
         }
       },
-      "verificationCheckData": {
-        "title": "Verification check data",
-        "description": "Structured data for a verification check.",
+      "checkData": {
+        "title": "Catalogue check",
+        "description": "Data and results for a single catalogue check.",
         "type": "object",
-        "required": ["type", "url", "result"],
         "additionalProperties": false,
+        "required": [
+          "type",
+          "url",
+          "http_method",
+          "http_status",
+          "state",
+          "duration",
+          "result_http_status",
+          "result_output"
+        ],
         "properties": {
           "type": {
+            "type": "string",
             "title": "Check type",
-            "description": "Identifier for the kind of verification check.",
-            "type": "string",
-            "examples": ["Site Pages", "Record Pages (JSON)"]
-          },
-          "url": {
-            "title": "URL",
-            "description": "URL checked (may be the URL to a proxy service).",
-            "type": "string",
-            "format": "uri",
+            "description": "Human-friendly type/category of check.",
             "examples": [
-              "https://data.bas.ac.uk/legal/accessibility/",
-              "https://data.bas.ac.uk/records/260298c6-8b63-4def-b0c3-964986a8bd24.json"
+              "Item Pages",
+              "NORA Downloads"
+            ],
+            "enum": [
+              "BAS Public Website Search","Item Aliases","Item Pages","Record Pages (JSON)","Record Pages (XML HTML)","Record Pages (XML)","Site Not Found Handler","Site API","Site Health","Site Index","Site Pages","Site Resources","WAF","DOI Redirects","Published Map","Normal Downloads","NORA Downloads","SharePoint Downloads","BAS SAN Downloads","ArcGIS Layer","ArcGIS Service"
             ]
           },
-          "exporter": {
-            "title": "Exporter",
-            "description": "Identifier of the internal exporter related to the check.",
+          "url": {
             "type": "string",
-            "examples": ["SitePagesExporter", "JsonExporter"]
+            "format": "uri",
+            "title": "URL",
+            "description": "URL that was checked."
           },
-          "result": {
-            "title": "Result",
-            "description": "Outcome or status of the check.",
+          "http_method": {
             "type": "string",
-            "enum": ["passed", "failed", "skipped", "-"],
-            "examples": ["passed","passed"]
-          },
-          "params": {
-            "title": "Parameters",
-            "description": "Optional parameters that apply to the check.",
-            "type": "object",
-            "examples": [{},{}]
-          },
-          "data": {
-            "title": "Data",
-            "description": "Optional additional data that applies to the check.",
-            "type": "object",
+            "title": "HTTP method",
+            "description": "HTTP method used for the check.",
             "examples": [
-              {"path": "404", "status_code": 404, "duration": 100553},
-              {"file_identifier": "260298c6-8b63-4def-b0c3-964986a8bd24", "status_code": 200, "duration": 84403}]
+              "GET",
+              "HEAD",
+              "POST"
+            ]
+          },
+          "http_status": {
+            "type": "integer",
+            "title": "Expected HTTP status",
+            "description": "HTTP status code expected when the check is executed.",
+            "examples": [
+              200,
+              206,
+              404
+            ]
+          },
+          "content_length": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "title": "Content length",
+            "description": "Expected content length in bytes when known, otherwise null."
+          },
+          "redirect_location": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri",
+            "title": "Redirect location",
+            "description": "Expected target URL where checked content is a redirect, otherwise null."
+          },
+          "file_identifier": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "File identifier",
+            "description": "File/resource identifier where check is associated with a resource, otherwise null."
+          },
+          "state": {
+            "type": "string",
+            "title": "State",
+            "description": "Check lifecycle/result.",
+            "enum": [
+              "pending",
+              "passed",
+              "failed",
+              "skipped"
+            ]
+          },
+          "duration": {
+            "type": "number",
+            "title": "Duration",
+            "description": "Time taken for check in seconds (floating point)."
+          },
+          "result_http_status": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "title": "Observed HTTP status",
+            "description": "HTTP status code observed if the check has been executed, otherwise null."
+          },
+          "result_output": {
+            "type": "string",
+            "description": "Optional additional information readable if the check has been executed, otherwise null",
+            "examples": [
+              "OK",
+              "Bad status: 404 (expected 200)"
+            ]
           }
         }
       },
-      "verificationReportData": {
-        "title": "Verification checks data",
-        "description": "Structured data for verification checks, aggregated statistics and contextual information.",
+      "checksData": {
+        "title": "Catalogue checks data",
+        "description": "Structured data for catalogue checks output (as produced by /-/checks/data.json).",
         "type": "object",
-        "required": ["pass_fail", "base_url", "commit", "time", "stats", "site_checks", "resource_checks"],
         "additionalProperties": false,
+        "required": [
+          "base_url",
+          "commit",
+          "time",
+          "duration",
+          "pass_fail",
+          "stats",
+          "site_checks",
+          "resource_checks"
+        ],
         "properties": {
-          "pass_fail": {
-            "title": "Pass/Fail",
-            "description": "Overall status of all checks.",
-            "type": "string",
-            "enum": ["PASS", "FAIL"],
-            "examples": ["PASS"]
-          },
           "base_url": {
-            "title": "Base URL",
-            "description": "Indication of which Catalogue instance has been checked.",
             "type": "string",
             "format": "uri",
-            "examples": ["https://data.bas.ac.uk"]
+            "description": "Base URL used for checks."
           },
           "commit": {
-            "title": "Commit",
-            "description": "Information about the head commit in the backing content store at the time of the report.",
             "type": "object",
-            "required": ["value", "href", "external"],
+            "title": "Commit",
+            "description": "Revision of the site when checks were performed.",
             "additionalProperties": false,
+            "required": [
+              "value",
+              "href"
+            ],
             "properties": {
               "value": {
-                "title": "Commit short ID",
-                "description":"Short commit reference, for link text.",
-                "type":"string",
-                "examples": ["2d33581"]
+                "type": "string",
+                "title": "Commit hash",
+                "description": "Short commit hash or revision identifier."
               },
               "href": {
-                "title":  "Commit URL",
-                "description": "URL to commit, for link target.",
                 "type": "string",
                 "format": "uri",
-                "examples":  ["https://gitlab.data.bas.ac.uk/MAGIC/lantern-records/-/commit/2d3358180f619996b6fcf06126b9b3ca4988c5e6"]
-              },
-              "external": {
-                "title":  "External URL",
-                "description": "Internal context for link rendering.",
-                "type": "boolean",
-                "examples":  [true]
+                "title": "Commit URL",
+                "description": "Link to the commit in VCS (restricted)."
               }
             }
           },
           "time": {
-            "title": "Timestamp",
-            "description": "Time instant at which the report started to be generated.",
             "type": "string",
             "format": "date-time",
-            "examples": ["2014-06-30T14:20:42+00:00"]
+            "title": "Datetime",
+            "description": "Time at which checks were performed, formatted as ISO 8601 string."
+          },
+          "duration": {
+            "type": "number",
+            "title": "Duration",
+            "description": "Total time taken for checks in seconds (floating point)."
+          },
+          "pass_fail": {
+            "type": "boolean",
+            "title": "Pass/Fail",
+            "description": "Overall pass/fail boolean for checks."
           },
           "stats": {
             "title": "Statistics",
-            "description": "Aggregated check outcomes (count of successful/failed checks).",
+            "description": "Counts for check states.",
             "type": "object",
-            "required": ["pass", "fail", "skip"],
             "additionalProperties": false,
+            "required": [
+              "skipped",
+              "failed",
+              "passed"
+            ],
             "properties": {
-              "pass": {
-                "title": "Successful checks",
-                "description": "Count of any passed checks.",
+              "skipped": {
                 "type": "integer",
-                "examples": [10]
+                "minimum": 0
               },
-              "fail": {
-                "title":  "Failed checks",
-                "description":  "Count of any failed checks.",
-                "type":  "integer",
-                "examples": [0]
+              "failed": {
+                "type": "integer",
+                "minimum": 0
               },
-              "skip": {
-                "title":  "Skipped checks",
-                "description":  "Count of any skipped checks.",
-                "type":  "integer",
-                "examples": [2]
+              "passed": {
+                "type": "integer",
+                "minimum": 0
               }
             }
           },
           "site_checks": {
-            "title": "Site verification checks",
-            "description": "Verification checks for site level content.",
             "type": "array",
+            "title": "Site-level checks",
+            "description": "Checks against site-level resources (not tied to a specific file identifier).",
             "items": {
-              "$ref": "#/components/schemas/verificationCheckData"
+              "$ref": "#/components/schemas/checkData"
             }
           },
           "resource_checks": {
-            "title": "Resources verification checks",
-            "description": "Verification checks for individual resource content.",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/verificationCheckData"
+            "type": "object",
+            "title": "Resource-level checks",
+            "description": "Map of resource/file identifier -> list of checks for that resource.",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/checkData"
+              }
             }
           }
         }
@@ -1163,7 +1394,9 @@
         "required": true,
         "schema": {
           "type": "string",
-          "examples": ["b8b78c6c-fac2-402c-a772-9f518c7121e5"]
+          "examples": [
+            "b8b78c6c-fac2-402c-a772-9f518c7121e5"
+          ]
         }
       },
       "aliasIdentifier": {
@@ -1171,9 +1404,11 @@
         "in": "path",
         "description": "Alias currently assigned to a resource.",
         "required": true,
-        "schema" : {
+        "schema": {
           "type": "string",
-          "examples": ["mermaid-sightings-in-antarctica"]
+          "examples": [
+            "mermaid-sightings-in-antarctica"
+          ]
         }
       }
     },
@@ -1196,7 +1431,9 @@
             "schema": {
               "type": "string",
               "format": "uri",
-              "examples": ["https://data.bas.ac.uk/items/7b0cd3e3-069e-4fe2-92d4-f2387bfc40f1"]
+              "examples": [
+                "https://data.bas.ac.uk/items/7b0cd3e3-069e-4fe2-92d4-f2387bfc40f1"
+              ]
             }
           }
         },

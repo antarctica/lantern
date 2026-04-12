@@ -238,31 +238,6 @@ Manually:
 4. set the flow endpoint as the relevant [Config](/docs/config.md) option in the `.env` template and Ansible Vault for
    use in the [Environment Module](/docs/deployment.md#environment-module) template
 
-### Power Automate SharePoint proxy
-
-Manually:
-
-1. import `resources/flows/lantern-sharepoint-proxy.zip` into Power Automate as a new flow
-2. configure the flow connections and generate an HTTP endpoint
-3. set the flow endpoint as the relevant [Config](/docs/config.md) option in the `.env` template and Ansible Vault for
-   use in the [Environment Module](/docs/deployment.md#environment-module) template
-
-### Power Automate SAN proxy
-
-> [!IMPORTANT]
-> This proxy is not used for operational reasons.
-
-Manually:
-
-1. import `resources/flows/lantern-san-proxy.zip` into Power Automate as a new flow
-2. configure the flow connections and generate an HTTP endpoint
-3. set the relevant [Config](/docs/config.md) option in the `.env` template and Ansible Vault for use in the
-   [Environment Module](/docs/deployment.md#environment-module) template
-
-> [!TIP]
-> See [this note](https://gitlab.data.bas.ac.uk/MAGIC/dev-docs/-/blob/32f4adf63fae42acab7b8fb749362432b68ad397/tool-power-automate.md#sftp-connector)
-> on getting the SSH server fingerprint in the format Power Automate expects.
-
 ## ArcGIS Online
 
 An OAuth client application is registered in ArcGIS Online for accessing restricted content and syncing catalogue

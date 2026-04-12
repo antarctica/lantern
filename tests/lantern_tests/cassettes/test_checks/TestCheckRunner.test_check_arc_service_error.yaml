@@ -9,26 +9,22 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.32.4
+      - python-requests/2.33.0
     method: GET
-    uri: 'https://data.bas.ac.uk/items/123/'
+    uri: https://services.arcgis.com/arcgis/rest/services/x/featureserver?f=json
   response:
     body:
-      string: "<!DOCTYPE html><html lang=\"en\"><div>Page with expected URL: <a href=\"https://valid\">Download</a></div></html>"
+      string: '{"error":{"code":499,"message":"Token Required","details":[]}}'
     headers:
       Content-Encoding:
       - gzip
       Content-Type:
-      - text/html
+      - application/json;charset=UTF-8
       Server:
-      - AmazonS3
+      - ''
       Transfer-Encoding:
       - chunked
-      x-amz-meta-file_identifier:
-      - '123'
-      x-amz-meta-file_revision:
-      - 'x'
     status:
       code: 200
-      message: OK
+      message: ''
 version: 1

@@ -1,6 +1,9 @@
+import logging
+from http import HTTPStatus
 from pathlib import Path
 
-from lantern.models.site import SiteContent, SitePageMeta
+from lantern.models.checks import Check, CheckType
+from lantern.models.site import ExportMeta, SiteContent, SitePageMeta
 from lantern.outputs.base import OutputSite
 from lantern.utils import prettify_html
 
@@ -14,10 +17,8 @@ class SitePagesOutput(OutputSite):
     Note: Static pages may also be generated in other output classes (e.g. `lantern.outputs.site_api.SiteApiOutput`).
     """
 
-    @property
-    def name(self) -> str:
-        """Exporter name."""
-        return "Site Pages"
+    def __init__(self, logger: logging.Logger, meta: ExportMeta) -> None:
+        super().__init__(logger=logger, meta=meta, name="Site Pages", check_type=CheckType.SITE_PAGES)
 
     @property
     def _object_meta(self) -> dict[str, str]:
@@ -75,7 +76,7 @@ class SitePagesOutput(OutputSite):
         return prettify_html(raw)
 
     @property
-    def outputs(self) -> list[SiteContent]:
+    def content(self) -> list[SiteContent]:
         """Output content for site pages."""
         return [
             SiteContent(
@@ -86,3 +87,16 @@ class SitePagesOutput(OutputSite):
             )
             for page_view in self._page_meta
         ]
+
+    @property
+    def checks(self) -> list[Check]:
+        """Output checks."""
+        checks = super().checks
+        checks.append(
+            Check(
+                type=CheckType.SITE_404,
+                url=f"{self._meta.base_url}/invalid",
+                http_status=HTTPStatus.NOT_FOUND,
+            )
+        )
+        return checks

@@ -97,8 +97,6 @@ class TestConfig:
             "SITE_TRUSTED_RSYNC_HOST": "x",
             "SITE_TRUSTED_RSYNC_BASE_PATH_TESTING": str(fx_config.SITE_TRUSTED_RSYNC_BASE_PATH_TESTING),
             "SITE_TRUSTED_RSYNC_BASE_PATH_LIVE": str(fx_config.SITE_TRUSTED_RSYNC_BASE_PATH_LIVE),
-            "VERIFY_SHAREPOINT_PROXY_ENDPOINT": "https://example.com",
-            "VERIFY_SAN_PROXY_ENDPOINT": "https://example.com",
             "BASE_URL_TESTING": "https://example.com",
             "BASE_URL_LIVE": "https://example.com",
         }
@@ -257,8 +255,6 @@ class TestConfig:
                     "LANTERN_SITE_TRUSTED_RSYNC_BASE_PATH_LIVE": None,
                 }
             ),
-            ({"LANTERN_VERIFY_SHAREPOINT_PROXY_ENDPOINT": None, "LANTERN_VERIFY_SAN_PROXY_ENDPOINT": "x"}),
-            ({"LANTERN_VERIFY_SHAREPOINT_PROXY_ENDPOINT": "x", "LANTERN_VERIFY_SAN_PROXY_ENDPOINT": None}),
             ({"LANTERN_BASE_URL_TESTING": "x", "LANTERN_BASE_URL_LIVE": None}),
             ({"LANTERN_BASE_URL_TESTING": None, "LANTERN_BASE_URL_LIVE": "x"}),
         ],
@@ -328,8 +324,6 @@ class TestConfig:
             ("SITE_TRUSTED_RSYNC_HOST", "x", False),
             ("SITE_TRUSTED_RSYNC_BASE_PATH_TESTING", Path("x"), False),
             ("SITE_TRUSTED_RSYNC_BASE_PATH_LIVE", Path("x"), False),
-            ("VERIFY_SHAREPOINT_PROXY_ENDPOINT", "https://example.com", False),
-            ("VERIFY_SAN_PROXY_ENDPOINT", "https://example.com", False),
             ("BASE_URL_TESTING", "https://example.com", False),
             ("BASE_URL_LIVE", "https://example.com", False),
         ],

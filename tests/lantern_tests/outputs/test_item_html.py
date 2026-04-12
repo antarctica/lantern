@@ -28,7 +28,6 @@ class TestItemCatalogueOutput:
             logger=fx_logger, meta=fx_export_meta, record=fx_revision_model_min, select_record=fx_select_record
         )
         assert isinstance(output, ItemCatalogueOutput)
-        assert output.name == "Item Catalogue HTML"
 
     @pytest.mark.cov()
     @pytest.mark.parametrize("expected", [ItemCatalogue, ItemCataloguePhysicalMap])
@@ -42,14 +41,14 @@ class TestItemCatalogueOutput:
         result = fx_item_output._item_class()
         assert result == expected
 
-    def test_outputs(
+    def test_content(
         self,
         fx_item_output: ItemCatalogueOutput,
         fx_export_meta: ExportMeta,
         fx_revision_model_min: RecordRevision,
     ):
         """Can generate site content items."""
-        results = fx_item_output.outputs
+        results = fx_item_output.content
         assert len(results) == 1
         result = results[0]
         assert isinstance(result, SiteContent)
@@ -76,7 +75,6 @@ class TestItemAliasesOutput:
         """Can create alias outputs for an item."""
         output = ItemAliasesOutput(logger=fx_logger, meta=fx_export_meta, record=fx_revision_model_min)
         assert isinstance(output, ItemAliasesOutput)
-        assert output.name == "Item Aliases"
 
     def test_get_identifiers(self, fx_item_aliases_output: ItemAliasesOutput):
         """Can process any alias identifiers in record."""
@@ -84,7 +82,7 @@ class TestItemAliasesOutput:
             Identifier(identifier="x", href=f"https://{CATALOGUE_NAMESPACE}/datasets/x", namespace=ALIAS_NAMESPACE)
         )
 
-    def test_outputs(self, fx_item_aliases_output: ItemAliasesOutput, fx_revision_model_min: RecordRevision):
+    def test_content(self, fx_item_aliases_output: ItemAliasesOutput, fx_revision_model_min: RecordRevision):
         """Can generate site redirect items."""
         alias = "datasets/x"
         target = "x"
@@ -92,7 +90,7 @@ class TestItemAliasesOutput:
             Identifier(identifier=target, href=f"https://{CATALOGUE_NAMESPACE}/{alias}", namespace=ALIAS_NAMESPACE)
         )
 
-        results = fx_item_aliases_output.outputs
+        results = fx_item_aliases_output.content
         assert len(results) == 1
         result = results[0]
         assert isinstance(result, SiteRedirect)

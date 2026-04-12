@@ -129,9 +129,6 @@ Then run:
   - managed via [Infrastructure as Code](#infrastructure-as-code) and manually as per
     [Setup](/docs/setup.md#power-automate-item-enquires) documentation
   - requires regular [Rotation](/docs/deployment.md#rotating-access-tokens)
-- [SharePoint Proxy 🔒](...)
-  - for verifying SharePoint hosted record distribution options
-  - managed manually as per [Setup](/docs/setup.md#power-automate-sharepoint-proxy) documentation
 
 ### Plausible
 

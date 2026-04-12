@@ -150,9 +150,9 @@ The `admin-record` task will:
 
 Semi-automated workflows with interactive prompts for required information are available to:
 
-- [Import](#import-records), [Build](#build-static-site) and [Verify](#verify-static-site) sets of
+- [Import](#import-records), [Build](#build-static-site) and [Check](#check-static-site) sets of
   [Manually Authored](#create-records) records, creating a changeset (merge request) and publishing to the testing site
-- merge, [Build](#build-static-site) and [Verify](#verify-static-site) approved changesets, publishing to the live site
+- merge, [Build](#build-static-site) and [Check](#check-static-site) approved changesets, publishing to the live site
 
 > [!NOTE]
 > This workflow is intended as a convenience for the Business As Usual (BAU) process of publishing records. It will not
@@ -186,10 +186,10 @@ The `workflow-testing` task calls and coordinates other tasks to:
 1. commit new and/or updated records (via the [`import-records`](#import-records) task) to the changeset branch
 1. if needed, create a merge request for the changeset branch, adding the record author as a reviewer
 1. export committed records to the testing site (via the [`build-records`](#build-static-site) task)
-1. verify committed records in the testing site (via the [`verify-records`](#verify-static-site) task)
+1. check committed records in the testing site (via the [`check-records`](#check-static-site) task)
 1. post a comment listing the records changed, preview URLs and links to the merge request
 1. if needed, post a comment on the issue with a link to the changeset merge request
-1. save the verification report as a timestamped JSON file in the `workflow_results/testing` directory
+1. save the checks report as a timestamped JSON file in the `workflow_results/testing` directory
 
 [1]
 
@@ -215,9 +215,9 @@ The `workflow-live` task calls and coordinates other tasks to:
 1. merge the changeset into main
 1. export changeset records to the live site (via the [`build-records`](#build-static-site) task)
 1. invalidate changeset records in the live site (via the [`invalidate-records`](#update-records) task)
-1. verify changeset records in the live site (via the [`verify-records`](#verify-static-site) task)
+1. checks changeset records in the live site (via the [`check-records`](#check-static-site) task)
 1. post a comment listing the item and alias URLs for published records in the changeset issue
-1. save the verification report as a timestamped JSON file in the `workflow_results/live` directory
+1. save the checks report as a timestamped JSON file in the `workflow_results/live` directory
 
 ## Non-interactive record publishing workflow
 
@@ -240,11 +240,17 @@ The workflow:
 - calls non-global [Outputs](/docs/architecture.md#outputs) [1] only and publishes untrusted and trusted content
 - if set, calls a [Webhook](#non-interactive-record-publishing-workflow---webhook) with workflow output
 
+<!-- pyml disable md028 -->
+> [!WARNING]
+> This workflow will not run checks for published records. However, once merged into the main branch they will be
+> checked by [Periodic Site Checks](/docs/monitoring.md#scheduled-checks).
+
 > [!TIP]
 > The workflow will automatically recreate the branch and merge request if needed.
 >
 > The configured branch CAN be periodically squashed and merged to the default branch to prevent drift (e.g. nightly),
 > but this workflow does not provide that functionality.
+<!-- pyml enable md028 -->
 
 [1] Global outputs are not called because:
 
@@ -500,22 +506,20 @@ The `build-records` task will:
 - if the `target` option is 'local', export the site to a local path
 - if the `target` option is 'remote', export the site to the relevant BAS Catalogue environment set by the `env` option
 
-## Verify static site
+## Check static site
 
-To [Verify](/docs/monitoring.md#site-verification) for the
-[BAS Data Catalogue](/docs/architecture.md#bas-data-catalogue):
+To [Check](/docs/monitoring.md#site-checks) the [BAS Data Catalogue](/docs/architecture.md#bas-data-catalogue):
 
-1. set the options in `tasks/records_verify.py` for the site to check (`base_url`)
-1. run the `verify-records` [Development Task](/docs/dev.md#development-tasks)
+1. set the options in `tasks/records_check.py` for the site environment to check
+1. run the `check-records` [Development Task](/docs/dev.md#development-tasks)
 
-The `verify-records` task will:
+The `check-records` task will:
 
 - load some or all or records from the [GitLab Store](/docs/stores.md#gitlab-store) into a
-  [Verification](/docs/monitoring.md#site-verification) instance
-- run [Verification checks](/docs/monitoring.md#verification-checks) against the generated static site
-- compile a [Verification report](/docs/monitoring.md#verification-report)
-- if the `target` option is 'local', export the report to a local path
-- if the `target` option is 'remote', export the report to the relevant BAS Catalogue environment set by the `env` option
+  [Site](/docs/architecture.md#sites) and generate pending/skipped content checks
+- execute checks in parallel, processing results into a data file and report
+- if the `target` option is 'local', export the data and report to a local path
+- if the `target` option is 'remote', export the data and report to the relevant BAS Catalogue environment
 
 ## Apply record details to ArcGIS item
 

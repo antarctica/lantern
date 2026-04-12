@@ -118,7 +118,7 @@ ops-eo-records = { cmd = "python -m tasks.records_ops_eo", help = "Process Ops E
 preview-records = { cmd = "python -m tasks.records_preview", help = "Preview records as HTML items" }
 import-records = { cmd = "python -m tasks.records_import", help = "Import records from directory" }
 build-records = { cmd = "python -m tasks.records_build", help = "Build records as a catalogue site" }
-verify-records = { cmd = "python -m tasks.records_verify", help = "Verify static site contents" }
+check-records = { cmd = "python -m tasks.records_check", help = "Check static site and records contents" }
 invalidate-records = { cmd = "python -m tasks.records_invalidate", help = "Invalidate cached records in live site" }
 restrict-records = { cmd = "python -m tasks.records_permissions", help = "Set access permissions for chosen records" }
 upgrade-records = { cmd = "python -m tasks.records_upgrade_2026_04", help = "Upgrade records" }

@@ -16,10 +16,10 @@ from gitlab import Gitlab, GitlabGetError
 from gitlab.v4.objects import ProjectIssue, ProjectMergeRequest
 from tasks._shared import confirm, init, init_s3, init_store, ping_host, time_task
 from tasks.records_build import export
+from tasks.records_check import check
 from tasks.records_import import clean as import_clean
 from tasks.records_import import load as import_load
 from tasks.records_import import push as import_push
-from tasks.records_verify import verify
 from tasks.records_zap import clean_input_path as zap_clean_input_path
 from tasks.records_zap import dump_records as zap_dump_records
 from tasks.records_zap import parse_zap_records as zap_parse_records
@@ -416,15 +416,15 @@ def _verify(
     logger: logging.Logger, catalogue: BasCatalogue, env: SiteEnvironment, identifiers: set[str], workflow_path: Path
 ) -> Path:
     """Verify items for committed records."""
-    verify(
+    check(
         logger=logger, catalogue=catalogue, env=env, target="local", identifiers=identifiers, target_local=workflow_path
     )
     # clean up verification output
-    with workflow_path.joinpath("-/verification/data.json").open() as f:
+    with workflow_path.joinpath("-/checks/data.json").open() as f:
         data = json.load(f)
     shutil.rmtree(workflow_path.joinpath("-"), ignore_errors=True)
     suffix = datetime.now(tz=UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z").replace(":", "-")
-    data_path = workflow_path / f"verify-data_{suffix}.json"
+    data_path = workflow_path / f"checks-data_{suffix}.json"
     data_path.parent.mkdir(parents=True, exist_ok=True)
     with data_path.open(mode="w") as f:
         json.dump(data, f, indent=2)
@@ -470,7 +470,7 @@ def main() -> None:
     logger, config, store = init()
     admin_keys = config.ADMIN_METADATA_KEYS_RW
     import_path = Path("./import")
-    results_path = Path("./workflow_results/testing")
+    checks_base_path = Path("./checks/testing")
 
     logger.info("Checking connectivity to trusted upload host.")
     ping_host(config.SITE_TRUSTED_RSYNC_HOST)
@@ -506,8 +506,8 @@ def main() -> None:
     s3 = init_s3(config=config)
     catalogue = BasCatalogue(logger=logger, config=config, store=store, s3=s3)
     _export(logger=logger, catalogue=catalogue, env=env, identifiers=identifiers)
-    verify_path = _verify(
-        logger=logger, catalogue=catalogue, env=env, identifiers=identifiers, workflow_path=results_path
+    checks_path = _verify(
+        logger=logger, catalogue=catalogue, env=env, identifiers=identifiers, workflow_path=checks_base_path
     )
 
     # generate output comments
@@ -523,7 +523,7 @@ def main() -> None:
     )
 
     print("Testing records workflow exited normally.")
-    print(f"Verification data: {verify_path.resolve()}")
+    print(f"Checks data: {checks_path.resolve()}")
 
 
 if __name__ == "__main__":

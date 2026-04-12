@@ -9,60 +9,73 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.32.4
+      - python-requests/2.33.0
     method: HEAD
-    uri: https://example.com/
+    uri: https://example.com/redirect.html
   response:
     body:
       string: ''
     headers:
-      Location:
-      - https://example.com/redirected
-    status:
-      code: 302
-      message: Moved Temporarily
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python-requests/2.32.4
-    method: HEAD
-    uri: https://example.com/
-  response:
-    body:
-      string: ''
-    headers:
-      Location:
-      - https://example.com/redirected
-    status:
-      code: 302
-      message: Moved Temporarily
-- request:
-    body: null
-    headers:
-      Accept:
-      - '*/*'
-      Accept-Encoding:
-      - gzip, deflate
-      Connection:
-      - keep-alive
-      User-Agent:
-      - python-requests/2.32.4
-    method: HEAD
-    uri: https://example.com/redirected
-  response:
-    body:
-      string: ''
-    headers:
+      Content-Length:
+      - '15'
       Content-Type:
       - text/html
+      Location:
+      - https://example.com/index.html
     status:
-      code: 200
-      message: OK
+      code: 301
+      message: Moved Permanently
+
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.33.0
+    method: HEAD
+    uri: https://example.com/redirect.html
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '15'
+      Content-Type:
+      - text/html
+      Location:
+      - https://example.com/another-redirect.html
+    status:
+      code: 301
+      message: Moved Permanently
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.33.0
+    method: HEAD
+    uri: https://example.com/another-redirect.html
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '15'
+      Content-Type:
+      - text/html
+      Location:
+      - https://example.com/another-redirect.html
+    status:
+      code: 301
+      message: Moved Permanently
 version: 1

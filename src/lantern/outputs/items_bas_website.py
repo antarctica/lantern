@@ -1,12 +1,15 @@
 import json
+import logging
 from pathlib import Path
 
 from lantern.lib.metadata_library.models.record.enums import AggregationAssociationCode
+from lantern.models.checks import CheckType
 from lantern.models.item.website.search import ItemWebsiteSearch
 from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
-from lantern.models.site import SiteContent
+from lantern.models.site import ExportMeta, SiteContent
 from lantern.outputs.base import OutputRecords
+from lantern.stores.base import SelectRecordsProtocol
 
 
 class ItemsBasWebsiteOutput(OutputRecords):
@@ -31,10 +34,14 @@ class ItemsBasWebsiteOutput(OutputRecords):
     Note: This second filtering condition is not implemented efficiently as it requires a reverse lookup.
     """
 
-    @property
-    def name(self) -> str:
-        """Output name."""
-        return "Items Public Website Search Results"
+    def __init__(self, logger: logging.Logger, meta: ExportMeta, select_records: SelectRecordsProtocol) -> None:
+        super().__init__(
+            logger=logger,
+            meta=meta,
+            name="Items Public Website Search Results",
+            check_type=CheckType.BAS_WEBSITE_SEARCH,
+            select_records=select_records,
+        )
 
     @property
     def _object_meta(self) -> dict[str, str]:
@@ -83,7 +90,7 @@ class ItemsBasWebsiteOutput(OutputRecords):
         return json.dumps(payload, indent=2, ensure_ascii=False)
 
     @property
-    def outputs(self) -> list[SiteContent]:
+    def content(self) -> list[SiteContent]:
         """Output content aggregating all items."""
         return [
             SiteContent(

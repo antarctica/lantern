@@ -9,15 +9,21 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.32.4
+      - python-requests/2.33.0
     method: GET
     uri: https://www.arcgis.com/sharing/rest/content/items/123?f=json
   response:
     body:
-      string: "{\"id\":\"123\"}"
+      string: '{"error":{"code":400,"messageCode":"CONT_0001","message":"Item does not exist or is inaccessible.","details":[]}}'
     headers:
+      Cache-Control:
+      - no-cache
+      Content-Length:
+      - '113'
       Content-Type:
-      - application/json
+      - application/json;charset=utf-8
+      Server:
+      - ArcGIS Online
     status:
       code: 200
       message: OK

@@ -13,9 +13,8 @@ class TestSiteResourcesOutput:
         """Can create a site resources output."""
         output = SiteResourcesOutput(logger=fx_logger, meta=fx_export_meta)
         assert isinstance(output, SiteResourcesOutput)
-        assert output.name == "Site Resources"
 
-    def test_outputs(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta):
+    def test_content(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta):
         """Can generate site content items."""
         expected_path_media = {
             Path("static/css/main.css"): "text/css",
@@ -34,7 +33,7 @@ class TestSiteResourcesOutput:
         }
 
         output = SiteResourcesOutput(logger=fx_logger, meta=fx_export_meta)
-        outputs = _index_site_content_outputs(output.outputs)
+        outputs = _index_site_content_outputs(output.content)
 
         assert len(outputs) > 1
         for path, media_type in expected_path_media.items():
@@ -42,3 +41,9 @@ class TestSiteResourcesOutput:
             result = outputs[path]
             assert result.media_type == media_type
             assert result.object_meta == {"build_key": fx_export_meta.build_key}
+
+    def test_checks(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta):
+        """Can generate checks for a subset of content."""
+        output = SiteResourcesOutput(logger=fx_logger, meta=fx_export_meta)
+        checks = output.checks
+        assert len(checks) == 3

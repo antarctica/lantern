@@ -1,6 +1,7 @@
 import logging
 from pathlib import Path
 
+from lantern.models.checks import CheckType
 from lantern.models.item.catalogue.enums import ResourceTypeIcon
 from lantern.models.site import ExportMeta, SiteContent
 from lantern.outputs.base import OutputSite
@@ -18,14 +19,9 @@ class SiteIndexOutput(OutputSite):
     """
 
     def __init__(self, logger: logging.Logger, meta: ExportMeta, select_records: SelectRecordsProtocol) -> None:
-        super().__init__(logger=logger, meta=meta)
+        super().__init__(logger=logger, meta=meta, name="Site Index", check_type=CheckType.SITE_INDEX)
         self._select_records = select_records
         self._template_path = "_views/-/index.html.j2"
-
-    @property
-    def name(self) -> str:
-        """Output name."""
-        return "Site Index"
 
     @property
     def _object_meta(self) -> dict[str, str]:
@@ -77,7 +73,7 @@ class SiteIndexOutput(OutputSite):
         return prettify_html(raw)
 
     @property
-    def outputs(self) -> list[SiteContent]:
+    def content(self) -> list[SiteContent]:
         """Output content for site."""
         return [
             SiteContent(

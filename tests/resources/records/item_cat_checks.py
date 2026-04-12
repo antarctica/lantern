@@ -2,6 +2,7 @@ from lantern.lib.metadata_library.models.record.elements.common import (
     Address,
     Contact,
     ContactIdentity,
+    Identifier,
     OnlineResource,
 )
 from lantern.lib.metadata_library.models.record.elements.distribution import (
@@ -18,18 +19,18 @@ from lantern.lib.metadata_library.models.record.enums import (
 )
 from tests.resources.records.utils import make_record
 
-# An open-access record to test all distinct verification distribution options.
+# An open-access record to test all distinct verification distribution options and a DOI identifier.
 
 abstract = """
-Item to test all VerificationDistributionType enum members:
+Item to test distribution related CheckType enum members:
 
 - open/regular files
 - ArcGIS Layers
 - ArcGIS Services
 - NORA file
-- SharePoint file
 - published map purchase option
-- BAS SAN reference
+
+Also includes a DOI identifier to test an additional CheckType.
 
 Distribution option URLs all need to parse as URLs. Some must match a specific format to be matched to the right enum.
 """
@@ -210,39 +211,6 @@ nora_file = Distribution(
     ),
 )
 
-sharepoint_file = Distribution(
-    distributor=Contact(
-        organisation=ContactIdentity(name="Microsoft Corporation", href="https://ror.org/00d0nc645", title="ror"),
-        address=Address(
-            delivery_point="1 Microsoft Way, Bldg 37",
-            city="Redmond",
-            administrative_area="Washington",
-            postal_code="98052",
-            country="United States of America",
-        ),
-        online_resource=OnlineResource(
-            href="https://www.microsoft.com",
-            title="Microsoft - AI, Cloud, Productivity, Computing, Gaming & Apps",
-            description="Corporate website for Microsoft.",
-            function=OnlineResourceFunctionCode.INFORMATION,
-        ),
-        role={ContactRoleCode.DISTRIBUTOR},
-    ),
-    format=Format(
-        format="-",
-        href="https://www.iana.org/assignments/media-types/application/pdf",
-    ),
-    transfer_option=TransferOption(
-        size=Size(unit="bytes", magnitude=15),
-        online_resource=OnlineResource(
-            href="https://example-my.sharepoint.com/:b:/r/personal/conwat_example_com/Documents/x.pdf",
-            function=OnlineResourceFunctionCode.DOWNLOAD,
-            title="-",
-            description="Verify distribution as a SharePoint hosted file.",
-        ),
-    ),
-)
-
 map_purchase = Distribution(
     distributor=Contact(
         organisation=ContactIdentity(
@@ -277,55 +245,15 @@ map_purchase = Distribution(
     ),
 )
 
-san_reference = Distribution(
-    distributor=Contact(
-        organisation=ContactIdentity(
-            name="Mapping and Geographic Information Centre, British Antarctic Survey",
-            href="https://ror.org/01rhff309",
-            title="ror",
-        ),
-        phone="+44 (0)1223 221400",
-        email="magic@bas.ac.uk",
-        address=Address(
-            delivery_point="British Antarctic Survey, High Cross, Madingley Road",
-            city="Cambridge",
-            administrative_area="Cambridgeshire",
-            postal_code="CB3 0ET",
-            country="United Kingdom",
-        ),
-        online_resource=OnlineResource(
-            href="https://www.bas.ac.uk/teams/magic",
-            title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-            description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
-            function=OnlineResourceFunctionCode.INFORMATION,
-        ),
-        role={ContactRoleCode.DISTRIBUTOR},
-    ),
-    transfer_option=TransferOption(
-        online_resource=OnlineResource(
-            href="sftp://san.nerc-bas.ac.uk/data/x",
-            function=OnlineResourceFunctionCode.DOWNLOAD,
-            title="Access data from BAS SAN (restricted and internal use).",
-        ),
-    ),
-)
-
 record = make_record(
     open_access=True,
     file_identifier="cf80b941-3de6-4a04-8f5a-a2349c1e3ae0",
     hierarchy_level=HierarchyLevelCode.DATASET,
-    title="Test Resource - Item to test verification download types",
+    title="Test Resource - Item to test checks for distribution types",
     abstract=abstract,
-    purpose="Item to test all distinct verification download types.",
+    purpose="Item to test checks for distribution types.",
 )
+record.identification.identifiers.append(Identifier(identifier="x", href="x", namespace="doi"))
 record.distribution = Distributions(
-    [
-        *file_distributions,
-        *arc_layer_distributions,
-        *arc_service_distributions,
-        nora_file,
-        sharepoint_file,
-        map_purchase,
-        san_reference,
-    ]
+    [*file_distributions, *arc_layer_distributions, *arc_service_distributions, nora_file, map_purchase]
 )

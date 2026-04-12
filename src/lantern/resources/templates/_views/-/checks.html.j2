@@ -1,7 +1,7 @@
 {% extends "_layouts/main.html.j2" %}
 {% import '_macros/common.html.j2' as com %}
 
-{% macro result_label(value) %}
+{% macro state_label(value) %}
   {% if value == 'skipped' %}
     <div class="w-18 p-1 border-1 text-center text-grey-500 border-grey-500">{{ value | upper }}</div>
   {% elif value == 'passed' %}
@@ -15,7 +15,7 @@
 
 {% block main %}
   <article class="space-y-4 lg:space-y-8">
-    {{ com.page_header(main="Catalogue verification results", sub='Admin', sub_i=com.maintenance_i_classes())}}
+    {{ com.page_header(main="Catalogue checks", sub='Admin', sub_i=com.maintenance_i_classes())}}
     <section class="space-y-4 space-y-8">
       {% if data.pass_fail %}
         {% call com.alert(variant='green') %}All tests passed 😀{% endcall %}
@@ -35,7 +35,7 @@
           </div>
           <div class="grid grid-cols-1 gap-y-4 lg:gap-x-8 lg:grid-cols-[auto_1fr]">
             {% for label, count in data.stats.items() %}
-              <div>{{ result_label(label) }}</div>
+              <div>{{ state_label(label) }}</div>
               <div>{{ count }}</div>
             {% endfor %}
           </div>
@@ -57,7 +57,7 @@
             {{ test.type }}
           </div>
           <div class="{{ com.table_row_classes() }} flex items-center">
-            {{ result_label(test.result) }}
+            {{ state_label(test.state) }}
           </div>
           <div class="{{ com.table_row_classes() }} break-all">
             <a class="{{ com.link_classes() }}" href="{{ test.url }}" target="_blank">{{ test.url }}</a>
@@ -89,7 +89,7 @@
               {{ test.type }}
             </div>
             <div class="{{ com.table_row_classes() }} flex items-center">
-              {{ result_label(test.result) }}
+              {{ state_label(test.state) }}
             </div>
             <div class="{{ com.table_row_classes() }} break-all">
               <a class="{{ com.link_classes() }}" href="{{ test.url }}" target="_blank">{{ test.url }}</a>

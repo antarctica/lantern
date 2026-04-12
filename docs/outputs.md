@@ -2,8 +2,9 @@
 
 Outputs create the contents of a [Catalogue](/docs/architecture.md#catalogues).
 
-They are used in [Sites](/docs/architecture.md#sites) as the source of content passed to
-[Exporters](/docs/architecture.md#exporters).
+They are used in [Sites](/docs/architecture.md#sites) as the source of [Content](/docs/models.md#static-site-content)
+passed to [Exporters](/docs/architecture.md#exporters). Outputs also generate [Checks](/docs/monitoring.md#site-checks)
+for the contents they produce.
 
 Output classes can be broadly split into:
 
@@ -24,6 +25,7 @@ public interface to:
 
 - define an output name
 - generate a list of [`SiteContent`](/docs/models.md#static-site-content) items
+- generate a corresponding list of [`Check`](/docs/monitoring.md#site-checks) items to verify for this content
 
 Outputs at the site level SHOULD inherit from the `lantern.outputs.base.OutputSite` abstract base, which includes a
 [Site Templates](/docs/site.md#templates) instance for rendering content. These outputs *SHOULD* also include
@@ -62,6 +64,8 @@ Outputs:
 
 Jinja2 templates are used for including variables in JavaScript files.
 
+Checks are generated for a limited subset of these resources as indicative tests.
+
 ## Site pages output
 
 `lantern.outputs.site_pages.SitePagesOutput`
@@ -75,6 +79,8 @@ Outputs HTML pages using [Site Templates](/docs/site.md#item-templates) for:
 
 Sharing previews, similar to [Item Pages](/docs/site.md#item-sharing-previews), are enabled via
 [Static Site Page Meta](/docs/models.md#static-site-page-meta) with manually defined values.
+
+An additional check for a URL known not to exist is generated to check the 404 handler.
 
 ## Site health output
 
@@ -113,6 +119,18 @@ Outputs:
 
 > [!NOTE]
 > This page is intended as a basic, internal, reference to site content - not a proper, public, homepage.
+
+## Checks output
+
+`lantern.outputs.checks.ChecksOutput`
+
+Processes a set of pre-executed checks into:
+
+- [JSON Data](/docs/monitoring.md#site-checks-data)
+- a [HTML Report](/docs/monitoring.md#site-checks-report).
+
+> [!NOTE]
+> This output does not generate checks for these content items.
 
 ## Catalogue item output
 
@@ -160,6 +178,9 @@ Outputs:
 - [Records](/docs/models.md#records) as ISO 19139 XML files using the BAS ISO 19115 schema
 
 Intended for interoperability for use across wider providers and tools.
+
+> [!NOTE]
+> This output includes checks for the [Contents](/docs/models.md#record-checks) of records, such as linked downloads.
 
 ## ISO 19115 record HTML output
 

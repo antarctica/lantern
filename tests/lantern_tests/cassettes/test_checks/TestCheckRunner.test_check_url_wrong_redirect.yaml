@@ -9,16 +9,20 @@ interactions:
       Connection:
       - keep-alive
       User-Agent:
-      - python-requests/2.32.4
+      - python-requests/2.33.0
     method: HEAD
-    uri: https://example.com/
+    uri: https://example.com/redirect.html
   response:
     body:
       string: ''
     headers:
-      X-Foo:
-        - 'x'
+      Content-Length:
+      - '15'
+      Content-Type:
+      - text/html
+      Location:
+      - https://invalid
     status:
-      code: 302
-      message: Moved Temporarily
+      code: 301
+      message: Moved Permanently
 version: 1

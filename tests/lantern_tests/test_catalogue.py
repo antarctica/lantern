@@ -11,6 +11,7 @@ from pytest_mock import MockerFixture
 
 from lantern.catalogue import BasCatalogue, BasCatEnv, BasCatTrusted, BasCatUntrusted, CatalogueBase
 from lantern.config import Config
+from lantern.models.checks import CheckType
 from lantern.models.site import ExportMeta, SiteEnvironment
 from lantern.outputs.base import OutputBase
 from lantern.outputs.item_html import ItemAliasesOutput, ItemCatalogueOutput
@@ -35,73 +36,6 @@ class TestCatalogueBase:
             tmp_path = Path(tmp_dir) / "output"
         cat = FakeCatalogue(logger=fx_logger, config=fx_config, store=fx_fake_store, base_path=tmp_path)
         assert isinstance(cat, CatalogueBase)
-
-    def test_export(self, fx_fake_catalogue: FakeCatalogue):
-        """
-        Can export static site.
-
-        Note: Performs an actual export so takes a few seconds.
-        """
-        export_path: Path = fx_fake_catalogue._path
-        fx_fake_catalogue.export()
-        assert export_path.joinpath("favicon.ico").exists()
-
-    def test_verify(self, fx_fake_catalogue: FakeCatalogue, fx_exporter_static_server: Popen):
-        """
-        Can verify catalogue contents.
-
-        Performs a real export and verification of a test record using a local server (as per e2e tests). This server
-        contains all test records which takes a few seconds to build.
-
-        Note: Uses the minimal product test record ('3c77ffae-6aa0-4c26-bc34-5521dbf4bf23') rather the verification
-        record (`cf80b941-3de6-4a04-8f5a-a2349c1e3ae0`) because it has external distribution options with fake values
-        that trip up the request method.
-        """
-        identifiers = {"3c77ffae-6aa0-4c26-bc34-5521dbf4bf23"}  # minimal product test record
-        fx_fake_catalogue._verify_context["BASE_URL"] = "http://localhost:8123"
-        fx_fake_catalogue.export(identifiers)
-        export_path: Path = fx_fake_catalogue._path
-
-        fx_fake_catalogue.verify(identifiers)
-        assert export_path.joinpath("-/verification/data.json").exists()
-
-    def test_purge(self, fx_fake_catalogue: FakeCatalogue):
-        """Can purge export target."""
-        identifiers = {"3c77ffae-6aa0-4c26-bc34-5521dbf4bf23"}  # minimal product test record
-        export_path: Path = fx_fake_catalogue._path
-        fx_fake_catalogue.export(identifiers)
-        assert export_path.joinpath("favicon.ico").exists()
-
-        fx_fake_catalogue.purge()
-        assert not export_path.joinpath("favicon.ico").exists()
-
-
-class TestBasCatUntrusted:
-    """Test BAS data catalogue untrusted site."""
-
-    def test_init(
-        self,
-        fx_logger: logging.Logger,
-        fx_export_meta: ExportMeta,
-        fx_fake_store: FakeRecordsStore,
-        fx_s3_client: S3Client,
-        fx_s3_bucket_name: str,
-    ):
-        """
-        Can create a BAS untrusted catalogue instance.
-
-        Uses fake store over GitLab to avoid mocking and/or request recordings.
-        """
-        cat = BasCatUntrusted(
-            logger=fx_logger,
-            meta=fx_export_meta,
-            store=fx_fake_store,
-            s3=fx_s3_client,
-            bucket=fx_s3_bucket_name,
-            verify_sharepoint_endpoint="x",
-            verify_san_endpoint="x",
-        )
-        assert isinstance(cat, BasCatUntrusted)
 
     all_global: Final[list[Callable[..., OutputBase]]] = [
         SiteResourcesOutput,
@@ -138,6 +72,67 @@ class TestBasCatUntrusted:
         results = fx_bas_cat_untrusted._group_output_classes(values)
         assert results == expected
 
+    def test_export(self, fx_fake_catalogue: FakeCatalogue):
+        """
+        Can export static site.
+
+        Note: Performs an actual export so takes a few seconds.
+        """
+        export_path: Path = fx_fake_catalogue._path
+        fx_fake_catalogue.export()
+        assert export_path.joinpath("favicon.ico").exists()
+
+    def test_check(self, fx_fake_catalogue: FakeCatalogue, fx_exporter_static_server: Popen):
+        """
+        Can check catalogue contents.
+
+        Performs a real export and check of a test record using a local server (as per e2e tests). This server
+        contains all test records which takes a few seconds to build.
+
+        Note: Uses the minimal product test record ('3c77ffae-6aa0-4c26-bc34-5521dbf4bf23') rather the check record
+        (`cf80b941-3de6-4a04-8f5a-a2349c1e3ae0`) because it has external distribution options with fake values that
+        trip up the test.
+        """
+        identifiers = {"3c77ffae-6aa0-4c26-bc34-5521dbf4bf23"}  # minimal product test record
+        fx_fake_catalogue._meta.base_url = "http://localhost:8123"
+        fx_fake_catalogue.export(identifiers)
+        export_path: Path = fx_fake_catalogue._path
+
+        fx_fake_catalogue.check(identifiers)
+        assert export_path.joinpath("-/checks/data.json").exists()
+
+    def test_purge(self, fx_fake_catalogue: FakeCatalogue):
+        """Can purge export target."""
+        identifiers = {"3c77ffae-6aa0-4c26-bc34-5521dbf4bf23"}  # minimal product test record
+        export_path: Path = fx_fake_catalogue._path
+        fx_fake_catalogue.export(identifiers)
+        assert export_path.joinpath("favicon.ico").exists()
+
+        fx_fake_catalogue.purge()
+        assert not export_path.joinpath("favicon.ico").exists()
+
+
+class TestBasCatUntrusted:
+    """Test BAS data catalogue untrusted site."""
+
+    def test_init(
+        self,
+        fx_logger: logging.Logger,
+        fx_export_meta: ExportMeta,
+        fx_fake_store: FakeRecordsStore,
+        fx_s3_client: S3Client,
+        fx_s3_bucket_name: str,
+    ):
+        """
+        Can create a BAS untrusted catalogue instance.
+
+        Uses fake store over GitLab to avoid mocking and/or request recordings.
+        """
+        cat = BasCatUntrusted(
+            logger=fx_logger, meta=fx_export_meta, store=fx_fake_store, s3=fx_s3_client, bucket=fx_s3_bucket_name
+        )
+        assert isinstance(cat, BasCatUntrusted)
+
     def test_export(self, fx_bas_cat_untrusted: BasCatUntrusted):
         """Can export untrusted site."""
         identifier = "3c77ffae-6aa0-4c26-bc34-5521dbf4bf23"  # minimal product test record
@@ -157,12 +152,12 @@ class TestBasCatUntrusted:
         item_text = result["Body"].read().decode("utf-8")
         assert "tab-content-admin" not in item_text
 
-    def test_verify(self, fx_bas_cat_untrusted: BasCatUntrusted):
-        """Can verify untrusted site."""
+    def test_check(self, fx_bas_cat_untrusted: BasCatUntrusted):
+        """Can check untrusted site."""
         identifiers = {"3c77ffae-6aa0-4c26-bc34-5521dbf4bf23"}  # minimal product test record
-        fx_bas_cat_untrusted.verify(identifiers)
+        fx_bas_cat_untrusted.check(identifiers)
         result = fx_bas_cat_untrusted._exporter._s3.get_object(
-            Bucket=fx_bas_cat_untrusted._exporter._bucket, Key="-/verification/data.json"
+            Bucket=fx_bas_cat_untrusted._exporter._bucket, Key="-/checks/data.json"
         )
         assert result["ResponseMetadata"]["HTTPStatusCode"] == 200
 
@@ -191,10 +186,10 @@ class TestBasCatTrusted:
             item_text = f.read()
         assert "tab-content-admin" in item_text
 
-    def test_verify(self, fx_bas_cat_trusted: BasCatTrusted):
-        """Cannot verify trusted site (not supported)."""
+    def test_check(self, fx_bas_cat_trusted: BasCatTrusted):
+        """Cannot check trusted site (not supported)."""
         with pytest.raises(NotImplementedError):
-            fx_bas_cat_trusted.verify()
+            fx_bas_cat_trusted.check()
 
 
 class TestBasCatEnv:
@@ -225,14 +220,36 @@ class TestBasCatEnv:
         trusted_path = fx_bas_cat_env._trusted._exporter._path
         assert trusted_path.joinpath(f"items/{identifier}/index.html").exists()
 
-    def test_verify(self, mocker: MockerFixture, fx_bas_cat_env: BasCatEnv):
+    def test_check(self, mocker: MockerFixture, fx_bas_cat_env: BasCatEnv):
         """
-        Can verify catalogue contents.
+        Can check catalogue contents.
 
-        Verification is not actually run, this test only verifies the coordination logic.
+        Checks are not actually run, this test only verifies the coordination logic.
         """
-        mocker.patch.object(fx_bas_cat_env._untrusted, "verify", return_value=None)
-        fx_bas_cat_env.verify()
+        mocker.patch.object(fx_bas_cat_env._untrusted, "check", return_value=None)
+        fx_bas_cat_env.check()
+
+    @pytest.mark.cov()
+    @pytest.mark.parametrize("env", ["testing", "live"])
+    def test_check_doi_filtering(self, mocker: MockerFixture, fx_bas_cat_env: BasCatEnv, env: SiteEnvironment):
+        """
+        Can filter out DOI checks from non-live environment.
+
+        The checker on the untrusted sub-catalogue instance is replaced with a mock to capture the arguments passed to
+        it to check DOI checks are removed if needed.
+        """
+        mock_checker = mocker.MagicMock()
+        mocker.patch.object(fx_bas_cat_env._untrusted, "_checker", mock_checker)
+        if env == "live":
+            fx_bas_cat_env._untrusted._meta.base_url = "https://data.bas.ac.uk"  # specific value needed for DOIs
+
+        fx_bas_cat_env.check(identifiers={"cf80b941-3de6-4a04-8f5a-a2349c1e3ae0"})  # check test record
+
+        checks = mock_checker.check.call_args[0][0]
+        if env == "live":
+            assert any(check.type == CheckType.DOI_REDIRECTS for check in checks)
+        else:
+            assert not any(check.type == CheckType.DOI_REDIRECTS for check in checks)
 
 
 class TestBasCatalogue:
@@ -258,7 +275,7 @@ class TestBasCatalogue:
         fx_bas_catalogue.export(env=env)
 
     @pytest.mark.parametrize("env", ["testing", "live"])
-    def test_verify(self, mocker: MockerFixture, fx_bas_catalogue: BasCatalogue, env: SiteEnvironment):
-        """Can verify environment's static site."""
-        mocker.patch.object(fx_bas_catalogue._envs[env], "verify", return_value=None)
-        fx_bas_catalogue.verify(env=env)
+    def test_check(self, mocker: MockerFixture, fx_bas_catalogue: BasCatalogue, env: SiteEnvironment):
+        """Can check environment's static site."""
+        mocker.patch.object(fx_bas_catalogue._envs[env], "check", return_value=None)
+        fx_bas_catalogue.check(env=env)

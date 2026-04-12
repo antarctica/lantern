@@ -5,11 +5,12 @@ from typing import get_args
 
 from mypy_boto3_s3 import S3Client
 
+from lantern.checks import Checker
 from lantern.config import Config
 from lantern.exporters.rsync import RsyncExporter
 from lantern.exporters.s3 import S3Exporter
-from lantern.models.site import ExportMeta, SiteContent, SiteEnvironment
-from lantern.models.verification.types import VerificationContext
+from lantern.models.checks import CheckType
+from lantern.models.site import ExportMeta, SiteEnvironment
 from lantern.outputs.base import OutputBase
 from lantern.outputs.item_html import ItemAliasesOutput, ItemCatalogueOutput
 from lantern.outputs.items_bas_website import ItemsBasWebsiteOutput
@@ -22,7 +23,6 @@ from lantern.outputs.site_pages import SitePagesOutput
 from lantern.outputs.site_resources import SiteResourcesOutput
 from lantern.site import Site
 from lantern.stores.gitlab import GitLabStore
-from lantern.verification import Verification
 
 
 class CatalogueBase(ABC):
@@ -30,7 +30,7 @@ class CatalogueBase(ABC):
     Abstract base class for a catalogue.
 
     Catalogues are responsible at a high level for managing a set of Records and transforming these into a static site
-    built from representations of these Records plus global/static content, and exporting this output to a host.
+    built from representations of these Records plus global/static content.
 
     Combines and coordinates one or more Stores, Outputs, Sites and Exporters.
 
@@ -38,51 +38,7 @@ class CatalogueBase(ABC):
     """
 
     def __init__(self, logger: logging.Logger) -> None:
-        """Initialise."""
         self._logger = logger
-
-    @abstractmethod
-    def export(self, identifiers: set[str] | None = None) -> None:
-        """Generate a static site from (selected) records and other content, then export to a host."""
-        ...
-
-    @abstractmethod
-    def verify(self, identifiers: set[str] | None = None) -> None:
-        """Verify catalogue site contents (optionally for selected records)."""
-        ...
-
-
-class BasCatUntrusted(CatalogueBase):
-    """
-    BAS data catalogue untrusted site.
-
-    Sub-catalogue within an environment within a BasCatalogue instance.
-
-    Manages unrestricted (public) content for all site outputs (except trusted content), uploaded to AWS S3.
-    """
-
-    def __init__(
-        self,
-        logger: logging.Logger,
-        meta: ExportMeta,
-        store: GitLabStore,
-        s3: S3Client,
-        bucket: str,
-        verify_sharepoint_endpoint: str,
-        verify_san_endpoint: str,
-    ) -> None:
-        """Initialise."""
-        super().__init__(logger)
-        self._meta = meta
-        self._store = store
-
-        self._verify_context = VerificationContext(
-            BASE_URL=self._meta.base_url,
-            SHAREPOINT_PROXY_ENDPOINT=verify_sharepoint_endpoint,
-            SAN_PROXY_ENDPOINT=verify_san_endpoint,
-        )
-        self._site = Site(logger=logger, meta=self._meta, store=self._store)
-        self._exporter = S3Exporter(logger=logger, s3=s3, bucket=bucket, parallel_jobs=self._meta.parallel_jobs)
 
     @staticmethod
     def _group_output_classes(
@@ -112,28 +68,63 @@ class BasCatUntrusted(CatalogueBase):
             output for output in all_individual if output in outputs
         ]
 
-    def _generate(
-        self, identifiers: set[str] | None = None, outputs: list[type[OutputBase]] | None = None
-    ) -> list[SiteContent]:
-        """Generate site content."""
-        global_, individual = self._group_output_classes(outputs=outputs)
-        return self._site.process(global_outputs=global_, individual_outputs=individual, identifiers=identifiers)
+    @abstractmethod
+    def export(self, identifiers: set[str] | None = None) -> None:
+        """Generate a static site from (selected) records and other content, then export to a host."""
+        ...
+
+    @abstractmethod
+    def check(self, identifiers: set[str] | None = None) -> None:
+        """Check catalogue site contents (optionally for selected records)."""
+        ...
+
+
+class BasCatUntrusted(CatalogueBase):
+    """
+    BAS data catalogue untrusted site.
+
+    Sub-catalogue within an environment within a BasCatalogue instance.
+
+    Manages unrestricted (public) content for all site outputs (except trusted content), uploaded to AWS S3.
+    """
+
+    def __init__(
+        self,
+        logger: logging.Logger,
+        meta: ExportMeta,
+        store: GitLabStore,
+        s3: S3Client,
+        bucket: str,
+    ) -> None:
+        super().__init__(logger)
+        self._meta = meta
+        self._store = store
+
+        self._site = Site(logger=logger, meta=self._meta, store=self._store)
+        self._exporter = S3Exporter(logger=logger, s3=s3, bucket=bucket, parallel_jobs=self._meta.parallel_jobs)
+        self._checker = Checker(logger=self._logger, meta=self._meta)
 
     def export(self, identifiers: set[str] | None = None, outputs: list[type[OutputBase]] | None = None) -> None:
         """Generate and export site content to hosting."""
-        self._exporter.export(self._generate(identifiers=identifiers, outputs=outputs))
-
-    def verify(self, identifiers: set[str] | None = None) -> None:
-        """Verify site contents (optionally for selected records)."""
-        verify = Verification(
-            logger=self._logger,
-            meta=self._meta,
-            context=self._verify_context,
-            select_records=self._store.select,
-            identifiers=identifiers,
+        global_, individual = self._group_output_classes(outputs=outputs)
+        content = self._site.generate_content(
+            global_outputs=global_, individual_outputs=individual, identifiers=identifiers
         )
-        verify.run()
-        self._exporter.export(verify.outputs)
+        self._exporter.export(content)
+
+    def check(self, identifiers: set[str] | None = None, outputs: list[type[OutputBase]] | None = None) -> None:
+        """Check site contents (optionally for selected records)."""
+        global_, individual = self._group_output_classes(outputs=outputs)
+        checks = self._site.generate_checks(
+            global_outputs=global_, individual_outputs=individual, identifiers=identifiers
+        )
+
+        # filter out DOI checks if not using live site
+        if self._meta.base_url != "https://data.bas.ac.uk":
+            checks = [check for check in checks if check.type != CheckType.DOI_REDIRECTS]
+
+        content = self._checker.check(checks)
+        self._exporter.export(content)
 
 
 class BasCatTrusted(CatalogueBase):
@@ -148,14 +139,9 @@ class BasCatTrusted(CatalogueBase):
     """
 
     def __init__(self, logger: logging.Logger, meta: ExportMeta, store: GitLabStore, host: str, path: Path) -> None:
-        """Initialise."""
         super().__init__(logger)
         self._site = Site(logger=logger, meta=meta, store=store)
         self._exporter = RsyncExporter(logger=logger, host=host, path=path)
-
-    def _generate(self, identifiers: set[str] | None = None) -> list[SiteContent]:
-        """Generate site content."""
-        return self._site.process(global_outputs=[], individual_outputs=[ItemCatalogueOutput], identifiers=identifiers)
 
     def export(self, identifiers: set[str] | None = None, outputs: list[type[OutputBase]] | None = None) -> None:
         """
@@ -163,10 +149,17 @@ class BasCatTrusted(CatalogueBase):
 
         Output classes cannot be set for the trusted site.
         """
-        self._exporter.export(self._generate(identifiers=identifiers))
+        content = self._site.generate_content(
+            global_outputs=[], individual_outputs=[ItemCatalogueOutput], identifiers=identifiers
+        )
+        self._exporter.export(content)
 
-    def verify(self, identifiers: set[str] | None = None) -> None:
-        """Verify site contents (optionally for selected records)."""
+    def check(self, identifiers: set[str] | None = None) -> None:
+        """
+        Check site contents (optionally for selected records).
+
+        Trusted site content is not validated due to Ops Data Store auth. See docs/monitoring.md for details.
+        """
         raise NotImplementedError
 
 
@@ -180,7 +173,6 @@ class BasCatEnv(CatalogueBase):
     def __init__(
         self, logger: logging.Logger, config: Config, store: GitLabStore, s3: S3Client, env: SiteEnvironment
     ) -> None:
-        """Initialise."""
         super().__init__(logger)
         self._config = config
         self._store = store
@@ -198,15 +190,7 @@ class BasCatEnv(CatalogueBase):
             else config.SITE_TRUSTED_RSYNC_BASE_PATH_LIVE
         )
 
-        self._untrusted = BasCatUntrusted(
-            logger=self._logger,
-            meta=meta_untrusted,
-            store=store,
-            s3=s3,
-            bucket=bucket,
-            verify_sharepoint_endpoint=config.VERIFY_SHAREPOINT_PROXY_ENDPOINT,
-            verify_san_endpoint=config.VERIFY_SAN_PROXY_ENDPOINT,
-        )
+        self._untrusted = BasCatUntrusted(logger=self._logger, meta=meta_untrusted, store=store, s3=s3, bucket=bucket)
 
         self._trusted = BasCatTrusted(
             logger=self._logger,
@@ -223,14 +207,14 @@ class BasCatEnv(CatalogueBase):
         self._logger.info(f"Exporting trusted {self._env} site")
         self._trusted.export(identifiers=identifiers, outputs=outputs)
 
-    def verify(self, identifiers: set[str] | None = None) -> None:
+    def check(self, identifiers: set[str] | None = None) -> None:
         """
         Verify untrusted site contents (optionally for selected records).
 
         Trusted site content is not validated due to Ops Data Store auth. See docs/monitoring.md for details.
         """
         self._logger.info(f"Verifying untrusted {self._env} site")
-        self._untrusted.verify(identifiers=identifiers)
+        self._untrusted.check(identifiers=identifiers)
 
 
 class BasCatalogue:
@@ -251,7 +235,6 @@ class BasCatalogue:
     """
 
     def __init__(self, logger: logging.Logger, config: Config, store: GitLabStore, s3: S3Client) -> None:
-        """Initialise."""
         self._logger = logger
         self._config = config
         self._store = store
@@ -271,10 +254,10 @@ class BasCatalogue:
         """Export generated sites to relevant hosting."""
         self._envs[env].export(identifiers=identifiers, outputs=outputs)
 
-    def verify(self, env: SiteEnvironment, identifiers: set[str] | None = None) -> None:
+    def check(self, env: SiteEnvironment, identifiers: set[str] | None = None) -> None:
         """
-        Verify catalogue site contents (optionally for selected records).
+        Check catalogue site contents (optionally for selected records).
 
         Trusted site content is not validated due to Ops Data Store auth. See docs/monitoring.md for details.
         """
-        self._envs[env].verify(identifiers=identifiers)
+        self._envs[env].check(identifiers=identifiers)

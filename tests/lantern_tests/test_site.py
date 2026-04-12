@@ -6,9 +6,10 @@ import pytest
 from lxml import etree
 
 from lantern.lib.metadata_library.models.record.elements.common import Identifier
+from lantern.models.checks import Check
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
-from lantern.models.site import ExportMeta
+from lantern.models.site import ExportMeta, SiteContent
 from lantern.outputs.base import OutputBase
 from lantern.outputs.item_html import ItemAliasesOutput, ItemCatalogueOutput
 from lantern.outputs.items_bas_website import ItemsBasWebsiteOutput
@@ -19,7 +20,7 @@ from lantern.outputs.site_health import SiteHealthOutput
 from lantern.outputs.site_index import SiteIndexOutput
 from lantern.outputs.site_pages import SitePagesOutput
 from lantern.outputs.site_resources import SiteResourcesOutput
-from lantern.site import Site, SiteJob, _job_worker_iso_html_transform, _job_worker_store, _run_job
+from lantern.site import Site, SiteAction, SiteJob, _job_worker_iso_html_transform, _job_worker_store, _run_job
 from lantern.stores.base import Store
 from lantern.stores.gitlab_cache import GitLabCachedStore
 from tests.resources.records.item_cat_product_min import record as product_min_required
@@ -88,22 +89,29 @@ class TestSiteJob:
         output_cls: OutputBase,
         expected: list[str],
     ):
-        """Can output site content for an output class."""
+        """Can output site content and checks for an output class."""
         fx_revision_model_min.identification.identifiers.append(
             Identifier(identifier="x", href=f"https://{CATALOGUE_NAMESPACE}/products/x", namespace=ALIAS_NAMESPACE)
         )
         expected = [exp.replace("FILE_IDENTIFIER", fx_revision_model_min.file_identifier) for exp in expected]
 
-        outputs = _run_job(
+        content = _run_job(
             log_level=logging.DEBUG,
             meta=fx_export_meta,
             store=fx_fake_store,
-            output_cls=output_cls,
-            record=fx_revision_model_min,
+            job=SiteJob(action="content", output=output_cls, record=fx_revision_model_min),
         )
-        results = [str(output.path) for output in outputs]
+        results = [str(output.path) for output in content]
         for exp in expected:
             assert exp in results
+
+        checks = _run_job(
+            log_level=logging.DEBUG,
+            meta=fx_export_meta,
+            store=fx_fake_store,
+            job=SiteJob(action="checks", output=output_cls, record=fx_revision_model_min),
+        )
+        assert len(checks) > 0
 
 
 class TestSite:
@@ -127,27 +135,32 @@ class TestSite:
 
     @pytest.mark.cov()
     @pytest.mark.parametrize(
-        ("global_", "individual", "identifiers", "expected"),
+        ("actions", "global_", "individual", "identifiers", "expected"),
         [
-            ([], [], None, []),
-            ([SiteResourcesOutput], [], None, [SiteJob(output=SiteResourcesOutput)]),
-            ([], [ItemCatalogueOutput], None, []),
+            ([], [], [], None, []),
+            (["content"], [SiteResourcesOutput], [], None, [SiteJob(action="content", output=SiteResourcesOutput)]),
+            (["checks"], [SiteResourcesOutput], [], None, [SiteJob(action="checks", output=SiteResourcesOutput)]),
+            (["content"], [], [ItemCatalogueOutput], None, []),
             (
+                ["content"],
                 [],
                 [ItemCatalogueOutput, RecordIsoXmlOutput],
                 {product_min_required.file_identifier},
                 [
-                    SiteJob(output=ItemCatalogueOutput, record=product_min_required),
-                    SiteJob(output=RecordIsoXmlOutput, record=product_min_required),
+                    SiteJob(action="content", output=ItemCatalogueOutput, record=product_min_required),
+                    SiteJob(action="content", output=RecordIsoXmlOutput, record=product_min_required),
                 ],
             ),
             (
+                ["content", "checks"],
                 [SiteResourcesOutput],
                 [ItemCatalogueOutput],
                 {product_min_required.file_identifier},
                 [
-                    SiteJob(output=SiteResourcesOutput),
-                    SiteJob(output=ItemCatalogueOutput, record=product_min_required),
+                    SiteJob(action="content", output=SiteResourcesOutput),
+                    SiteJob(action="checks", output=SiteResourcesOutput),
+                    SiteJob(action="content", output=ItemCatalogueOutput, record=product_min_required),
+                    SiteJob(action="checks", output=ItemCatalogueOutput, record=product_min_required),
                 ],
             ),
         ],
@@ -155,13 +168,14 @@ class TestSite:
     def test_generate_jobs(
         self,
         fx_site: Site,
+        actions: list[SiteAction],
         global_: list[Callable[..., OutputBase]],
         individual: list[Callable[..., OutputBase]],
         identifiers: set[str] | None,
         expected: list[SiteJob],
     ):
         """Can generate expected processing jobs."""
-        result = fx_site._generate_jobs(global_, individual, identifiers)
+        result = fx_site._generate_jobs(actions, global_, individual, identifiers)
         if individual and not identifiers:
             # where > 0 individual output classes and no selected identifiers, jobs are generated for all records
             assert len(result) > 0
@@ -170,11 +184,20 @@ class TestSite:
 
     @pytest.mark.cov()
     def test_execute(self, fx_site: Site):
-        """Can generate expected site content for directly created processing jobs."""
-        results = fx_site.execute(jobs=[SiteJob(output=SiteIndexOutput)])
+        """Can generate expected site content and/or checks for directly created processing jobs."""
+        results = fx_site.execute(
+            jobs=[SiteJob(action="content", output=SiteIndexOutput), SiteJob(action="checks", output=SiteIndexOutput)]
+        )
         assert len(results) > 0
 
-    def test_process(self, fx_site: Site):
+    def test_generate_content(self, fx_site: Site):
         """Can generate expected site content for selected outputs."""
-        results = fx_site.process(global_outputs=[SiteIndexOutput], individual_outputs=[])
+        results = fx_site.generate_content(global_outputs=[SiteIndexOutput], individual_outputs=[])
         assert len(results) > 0
+        assert all(isinstance(result, SiteContent) for result in results)
+
+    def test_generate_checks(self, fx_site: Site):
+        """Can generate expected checks for selected outputs."""
+        results = fx_site.generate_checks(global_outputs=[SiteIndexOutput], individual_outputs=[])
+        assert len(results) > 0
+        assert all(isinstance(result, Check) for result in results)

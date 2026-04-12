@@ -1,9 +1,12 @@
+import logging
 from pathlib import Path
 
 from lxml import etree as ET  # noqa: N812
 
-from lantern.models.site import SiteContent
+from lantern.models.checks import CheckType
+from lantern.models.site import ExportMeta, SiteContent
 from lantern.outputs.base import OutputRecords
+from lantern.stores.base import SelectRecordsProtocol
 
 
 class RecordsWafOutput(OutputRecords):
@@ -18,10 +21,14 @@ class RecordsWafOutput(OutputRecords):
     (i.e. via the `lantern.outputs.records_iso.RecordIsoXmlOutput` output class).
     """
 
-    @property
-    def name(self) -> str:
-        """Output name."""
-        return "Web Accessible Folder"
+    def __init__(self, logger: logging.Logger, meta: ExportMeta, select_records: SelectRecordsProtocol) -> None:
+        super().__init__(
+            logger=logger,
+            meta=meta,
+            name="Web Accessible Folder",
+            check_type=CheckType.WAF_PAGES,
+            select_records=select_records,
+        )
 
     @property
     def _object_meta(self) -> dict[str, str]:
@@ -61,7 +68,7 @@ class RecordsWafOutput(OutputRecords):
         return ET.tostring(html, encoding="unicode", method="html")
 
     @property
-    def outputs(self) -> list[SiteContent]:
+    def content(self) -> list[SiteContent]:
         """Output content for record."""
         return [
             SiteContent(

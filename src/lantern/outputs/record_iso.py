@@ -4,6 +4,7 @@ from pathlib import Path
 from importlib_resources import files as resources_files
 from lxml import etree
 
+from lantern.models.checks import Check, CheckType, RecordChecks
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta, SiteContent
 from lantern.outputs.base import OutputRecord
@@ -22,10 +23,10 @@ class RecordIsoJsonOutput(OutputRecord):
     [1] https://metadata-standards.data.bas.ac.uk/standards/iso-19115-19139#json-schemas
     """
 
-    @property
-    def name(self) -> str:
-        """Output name."""
-        return "Record ISO JSON"
+    def __init__(self, logger: logging.Logger, meta: ExportMeta, record: RecordRevision) -> None:
+        super().__init__(
+            logger=logger, meta=meta, name="Record ISO JSON", check_type=CheckType.RECORD_PAGES_JSON, record=record
+        )
 
     @property
     def _object_meta(self) -> dict[str, str]:
@@ -41,7 +42,7 @@ class RecordIsoJsonOutput(OutputRecord):
         return self._record.dumps_json(strip_admin=self._strip_admin)
 
     @property
-    def outputs(self) -> list[SiteContent]:
+    def content(self) -> list[SiteContent]:
         """Output content for record."""
         return [
             SiteContent(
@@ -61,13 +62,15 @@ class RecordIsoXmlOutput(OutputRecord):
 
     Intended for interoperability with clients that prefer ISO XML, or need access to the full underlying record.
 
+    Attaches additional record based checks.
+
     Supports trusted publishing (via export meta).
     """
 
-    @property
-    def name(self) -> str:
-        """Output name."""
-        return "Record ISO XML"
+    def __init__(self, logger: logging.Logger, meta: ExportMeta, record: RecordRevision) -> None:
+        super().__init__(
+            logger=logger, meta=meta, name="Record ISO XML", check_type=CheckType.RECORD_PAGES_XML, record=record
+        )
 
     @property
     def _object_meta(self) -> dict[str, str]:
@@ -83,7 +86,7 @@ class RecordIsoXmlOutput(OutputRecord):
         return self._record.dumps_xml(strip_admin=self._strip_admin)
 
     @property
-    def outputs(self) -> list[SiteContent]:
+    def content(self) -> list[SiteContent]:
         """Output content for record."""
         return [
             SiteContent(
@@ -93,6 +96,18 @@ class RecordIsoXmlOutput(OutputRecord):
                 object_meta=self._object_meta,
             )
         ]
+
+    @property
+    def checks(self) -> list[Check]:
+        """
+        Output checks.
+
+        Includes additional checks generated from the contents of the record (e.g. DOIs and distributions).
+        """
+        checks = super().checks
+        record_checks = RecordChecks(record=self._record)
+        checks.extend(record_checks.checks)
+        return checks
 
 
 class RecordIsoHtmlOutput(OutputRecord):
@@ -121,13 +136,10 @@ class RecordIsoHtmlOutput(OutputRecord):
         record: RecordRevision,
         transform: etree.XSLT | None = None,
     ) -> None:
-        super().__init__(logger=logger, meta=meta, record=record)
+        super().__init__(
+            logger=logger, meta=meta, name="Record ISO HTML", check_type=CheckType.RECORD_PAGES_HTML, record=record
+        )
         self._transform = transform
-
-    @property
-    def name(self) -> str:
-        """Output name."""
-        return "Record ISO HTML"
 
     @property
     def _object_meta(self) -> dict[str, str]:
@@ -155,7 +167,7 @@ class RecordIsoHtmlOutput(OutputRecord):
             self._transform = self.create_xslt_transformer()
 
         # Build XML document from the record XML string
-        record_xml = RecordIsoXmlOutput(logger=self._logger, meta=self._meta, record=record).outputs[0].content
+        record_xml = RecordIsoXmlOutput(logger=self._logger, meta=self._meta, record=record).content[0].content
         record_bytes = bytes(record_xml) if isinstance(record_xml, (bytes, bytearray)) else str(record_xml).encode()
         record_doc = etree.ElementTree(etree.fromstring(record_bytes))
 
@@ -169,7 +181,7 @@ class RecordIsoHtmlOutput(OutputRecord):
         return self._apply_iso_html_xslt(record=self._record)
 
     @property
-    def outputs(self) -> list[SiteContent]:
+    def content(self) -> list[SiteContent]:
         """Output content for record."""
         return [
             SiteContent(

@@ -1,4 +1,4 @@
-# Verify catalogue site
+# Check catalogue site
 
 import logging
 from pathlib import Path
@@ -10,7 +10,7 @@ from lantern.exporters.local import LocalExporter
 from lantern.models.site import SiteEnvironment
 
 
-def verify(
+def check(
     logger: logging.Logger,
     catalogue: BasCatalogue,
     env: SiteEnvironment,
@@ -18,26 +18,27 @@ def verify(
     identifiers: set[str],
     target_local: Path | None = None,
 ) -> None:
-    """Run catalogue verify, optionally overloading exporter."""
+    """Run catalogue checks, optionally overloading exporter."""
     if target == "local":
         if not target_local:
             msg = "target_local must be set where target=local"
             raise ValueError(msg) from None
         catalogue._envs[env]._untrusted._exporter = LocalExporter(logger=logger, path=target_local)
-    catalogue.verify(env=env, identifiers=identifiers)
+        # don't need to overload trusted exporter as checks are not supported
+    catalogue.check(env=env, identifiers=identifiers)
 
 
 def main() -> None:
     """Entrypoint."""
     selected = set()  # to set use the form {"abc", "..."}
-    target: TargetEnvironment = "local"  # local/remote
-    env: SiteEnvironment = "live"  # testing/live
+    target: TargetEnvironment = "remote"  # local/remote
+    env: SiteEnvironment = "testing"  # testing/live
     target_local = Path("export")
 
     logger, config, store = init(cached_store=True, frozen_store=True)
     s3 = init_s3(config=config)
     catalogue = BasCatalogue(logger=logger, config=config, store=store, s3=s3)
-    verify(logger=logger, catalogue=catalogue, env=env, target=target, identifiers=selected, target_local=target_local)
+    check(logger=logger, catalogue=catalogue, env=env, target=target, identifiers=selected, target_local=target_local)
 
 
 if __name__ == "__main__":

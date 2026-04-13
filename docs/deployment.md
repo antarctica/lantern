@@ -64,8 +64,8 @@ and context:
 
 ## Continuous Deployment
 
-Tagged commits created for [Releases](/README.md#releases) will trigger a continuous deployment workflow for the release
-to the production environment using GitLab's CI/CD configured in [`.gitlab-ci.yml`](/.gitlab-ci.yml).
+Tagged commits created for [Releases](/README.md#releases) will trigger a continuous deployment workflow for the
+release to the production environment using GitLab's CI/CD configured in [`.gitlab-ci.yml`](/.gitlab-ci.yml).
 
 Pre-releases can optionally be deployed to the staging environment by triggering the relevant CI job manually.
 

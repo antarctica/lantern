@@ -2,7 +2,7 @@ import logging
 from copy import copy
 
 from lantern.models.record.revision import RecordRevision
-from lantern.stores.base import RecordNotFoundError, RecordsNotFoundError, Store
+from lantern.stores.base import RecordNotFoundError, RecordsNotFoundError, StoreBase
 from tests.resources.records.item_cat_checks import record as check
 from tests.resources.records.item_cat_collection_all import record as collection_all_supported
 from tests.resources.records.item_cat_collection_open_min import record as collection_open_min_required
@@ -33,7 +33,7 @@ from tests.resources.records.item_cat_pub_map_diff import side_a as product_diff
 from tests.resources.records.item_cat_pub_map_diff import side_b as product_diff_published_map_side_b
 
 
-class FakeRecordsStore(Store):
+class FakeRecordsStore(StoreBase):
     """
     Simple in-memory store of fake/test records.
 

@@ -113,14 +113,17 @@ class BasCatUntrusted(CatalogueBase):
         self._exporter.export(content)
 
     def check(self, identifiers: set[str] | None = None, outputs: list[type[OutputBase]] | None = None) -> None:
-        """Check site contents (optionally for selected records)."""
+        """
+        Check site contents (optionally for selected records).
+
+        When not using the live site, filter out DOI checks as these are set externally for the live endpoint only.
+        """
         global_, individual = self._group_output_classes(outputs=outputs)
         checks = self._site.generate_checks(
             global_outputs=global_, individual_outputs=individual, identifiers=identifiers
         )
 
-        # filter out DOI checks if not using live site
-        if self._meta.base_url != "https://data.bas.ac.uk":
+        if self._meta.env != "live":
             checks = [check for check in checks if check.type != CheckType.DOI_REDIRECTS]
 
         content = self._checker.check(checks)

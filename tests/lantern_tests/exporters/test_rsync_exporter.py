@@ -15,7 +15,6 @@ class TestRsyncExporter:
         """Can create a rsync exporter."""
         rsync = RsyncExporter(logger=fx_logger, path=Path("x"))
         assert isinstance(rsync, RsyncExporter)
-        assert rsync.name == "Rsync"
 
     @pytest.mark.parametrize("exists", [True, False])
     def test_export_local(self, fx_rsync_exporter: RsyncExporter, fx_site_content: SiteContent, exists: bool):

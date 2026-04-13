@@ -235,7 +235,7 @@ class TestItemCatalogue:
         if fx_item_cat_model_min.overview_graphic is not None:
             expected["og:image"] = fx_item_cat_model_min.overview_graphic.href
 
-        result = fx_item_cat_model_min.site_metadata.html_open_graph
+        result = fx_item_cat_model_min.site_meta.html_open_graph
         parsed = result.dumps()
         assert isinstance(result, OpenGraphMeta)
         assert parsed == expected
@@ -282,7 +282,7 @@ class TestItemCatalogue:
         if any(contact.role == {ContactRoleCode.AUTHOR} for contact in contacts):
             expected["creator"] = [{"@type": "Organization", "name": "x"}]
 
-        result = fx_item_cat_model_min.site_metadata.html_schema_org
+        result = fx_item_cat_model_min.site_meta.html_schema_org
         parsed = result._dumps()
         assert isinstance(result, SchemaOrgMeta)
         assert parsed == expected

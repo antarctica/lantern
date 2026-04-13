@@ -34,7 +34,7 @@ terraform.tfvars
 import/
 export/
 export-trusted/
-workflow_results/
+checks/
 agol-item-backups/
 .cache/
 .env

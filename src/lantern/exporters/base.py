@@ -17,14 +17,14 @@ class ExporterBase(ABC):
     This base exporter class is intended to be generic with subclasses being more opinionated.
     """
 
-    def __init__(self, logger: logging.Logger) -> None:
+    def __init__(self, logger: logging.Logger, name: str) -> None:
         self._logger = logger
+        self._name = name
 
     @property
-    @abstractmethod
     def name(self) -> str:
         """Exporter name."""
-        ...
+        return self._name
 
     @abstractmethod
     def export(self, content: Collection[SiteContent]) -> None:

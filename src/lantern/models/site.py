@@ -123,7 +123,7 @@ class SitePageMeta:
 @dataclass(kw_only=True)
 class SiteContent:
     """
-    Content item with static site.
+    Content item within static site.
 
     Wrapper around a content (bytes) string to hold:
 
@@ -203,6 +203,7 @@ class SiteMeta:
     """
     Common metadata needed for building catalogue static site.
 
+    - env: live or testing site environment
     - base_url: endpoint needed to construct absolute URLs (e.g. 'https://example.com')
     - build_key: cache busting value
     - html_title: HTML head title value (will be combined with site name)
@@ -222,6 +223,7 @@ class SiteMeta:
     - html_description: optional description meta tag
     """
 
+    env: SiteEnvironment
     base_url: str
     build_key: str
     html_title: str
@@ -322,6 +324,7 @@ class SiteMeta:
 
         return cls(
             **{  # ty: ignore[invalid-argument-type]
+                "env": env,
                 "base_url": base_url,
                 "build_key": config.TEMPLATES_CACHE_BUST_VALUE,
                 "sentry_dsn": config.SENTRY_DSN,

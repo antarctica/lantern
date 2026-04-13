@@ -21,6 +21,7 @@ information model in Python. They generically describe resources (maps/products,
 > [!NOTE]
 > The base Records model is considered part of the BAS Metadata Library. See the
 > [Library](/docs/libraries.md#bas-metadata-library) docs for more information.
+<!-- pyml enable md028 -->
 
 ### Catalogue records
 
@@ -60,9 +61,9 @@ In addition to [Record Validation](/docs/libraries.md#record-validation), the Da
 - MUST use a UUID value for the `file_identifier`:
   - to ensure resources can be distinguished without relying on a value such as title that may change or not be unique
   - to ensure resource identifiers and aliases are distinct and can't be ambiguous
-- MUST include an `identification.identifier`, as per [1]
+- MUST include an `identification.identifier`, as per [1]:
   - to determine if a record is part of the Catalogue
-- MUST include an `identification.identifier.contacts.*.contact` with at least the 'pointOfContact' role
+- MUST include an `identification.identifier.contacts.*.contact` with at least the 'pointOfContact' role:
   - for use with the item contact tab
 - MUST use unique identifiers for extents
 - MUST structure any [Aliases](#item-aliases) as below if included:
@@ -75,6 +76,7 @@ In addition to [Record Validation](/docs/libraries.md#record-validation), the Da
 
 These requirements are enforced by the `validate()` method in the [Catalogue Record](#catalogue-records) class.
 
+<!-- pyml disable md028 -->
 > [!NOTE]
 > Whilst not required, records without
 > [Administration Metadata](/docs/libraries.md#record-administrative-metadata) will be interpreted as

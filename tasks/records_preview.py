@@ -18,10 +18,10 @@ from lantern.outputs.site_api import SiteApiOutput
 from lantern.outputs.site_pages import SitePagesOutput
 from lantern.outputs.site_resources import SiteResourcesOutput
 from lantern.site import Site, SiteJob
-from lantern.stores.base import RecordsNotFoundError, Store
+from lantern.stores.base import RecordsNotFoundError, StoreBase
 
 
-class MirrorStore(Store):
+class MirrorStore(StoreBase):
     """
     Store that reflects requested records.
 

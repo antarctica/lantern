@@ -52,6 +52,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * `gitlab-record` development task for setting GitLab issues in records
 * Records upgrade development task (2026-04) and usage/developer documentation
 * Parallel tests using `pytest-xdist`
+* Site environment (live/testing) included in site meta for use in templates
 
 ### Fixed
 

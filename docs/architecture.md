@@ -76,8 +76,8 @@ A minimum Catalogue consists of:
 - a [Checker](/docs/monitoring.md#site-checks) to verify generated site content and downloads linked from records
 
 > [!IMPORTANT]
-> Only the [BAS Data Catalogue](#bas-data-catalogue) and [Test Catalogue](/docs/dev.md#test-catalogue) are supported
-> by this project.
+> Only the [BAS Data Catalogue](#bas-data-catalogue) and [Test Catalogue](/docs/dev.md#test-catalogue) are formally
+> supported by this project.
 
 ## Sites
 

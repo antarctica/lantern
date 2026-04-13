@@ -346,7 +346,7 @@ To import a set of new and/or updated records:
 > Records are considered existing if a record with the same `file_identifier` exists.
 
 > [!NOTE]
-> Records cannot be commited directly to the 'main' branch.
+> Records cannot be commited directly to the default branch.
 
 > [!TIP]
 > All records in the `import/` directory will be committed together. Consider splitting unrelated changes separately.

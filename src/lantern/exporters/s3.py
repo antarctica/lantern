@@ -19,17 +19,12 @@ class S3Exporter(ExporterBase):
     """
 
     def __init__(self, logger: logging.Logger, s3: S3ClientT, bucket: str, parallel_jobs: int) -> None:
-        super().__init__(logger=logger)
+        super().__init__(logger=logger, name="S3")
         self._s3 = s3
         self._bucket = bucket
 
         self._thread_local = threading.local()
         self._workers = parallel_jobs
-
-    @property
-    def name(self) -> str:
-        """Exporter name."""
-        return "S3"
 
     def _get_client(self) -> S3ClientT:
         """Create per-thread S3 client."""

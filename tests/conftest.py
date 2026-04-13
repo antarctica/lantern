@@ -422,7 +422,7 @@ def render_item_catalogue(item: ItemCatalogue) -> str:
     """Render item to HTML."""
     _jinja = get_jinja_env()
     _template_path = "_views/item.html.j2"
-    raw = _jinja.get_template(_template_path).render(item=item, meta=item.site_metadata)
+    raw = _jinja.get_template(_template_path).render(item=item, meta=item.site_meta)
     return prettify_html(raw)
 
 

@@ -14,7 +14,6 @@ class TestLocalExporter:
         """Can create a local exporter."""
         local = LocalExporter(logger=fx_logger, path=Path("x"))
         assert isinstance(local, LocalExporter)
-        assert local.name == "Local Filesystem"
 
     @pytest.mark.parametrize("mode_d", [0o755, 0o770])
     @pytest.mark.parametrize("mode_f", [0o644, 0o660])

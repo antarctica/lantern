@@ -13,7 +13,7 @@ class TestItemTemplate:
 
         Integration test between item template and site layout.
         """
-        expected = fx_item_cat_model_min.site_metadata
+        expected = fx_item_cat_model_min.site_meta
         html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
 
         assert html.head.title.string == expected.html_title_suffixed

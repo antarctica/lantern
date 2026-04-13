@@ -6,6 +6,7 @@ from playwright.sync_api import Page, expect
 from tests.conftest import has_network
 
 
+@pytest.mark.xdist_group("e2e")
 @pytest.mark.skipif(not has_network(), reason="network unavailable")
 class TestFeedbackWidget:
     """Test site feedback widget in Catalogue template."""
@@ -47,6 +48,7 @@ class TestFeedbackWidget:
         context.close()
 
 
+@pytest.mark.xdist_group("e2e")
 class TestBackToTop:
     """Test back to top link."""
 
@@ -65,6 +67,7 @@ class TestBackToTop:
         expect(back_to_top).not_to_be_in_viewport()  # link is off-screen when at top of page
 
 
+@pytest.mark.xdist_group("e2e")
 class TestPrimaryNavigation:
     """Test primary navigation is responsive."""
 

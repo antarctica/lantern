@@ -10,6 +10,10 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 <!-- pyml disable no-duplicate-heading,no-duplicate-header -->
 ## [Unreleased]
 
+### Added [!BREAKING]
+
+* Catalogue record validation rule blocking 'data.bas.ac.uk' as a namespace in identifiers (too ambiguous)
+
 ### Changed [!BREAKING]
 
 * `AWS_S3_BUCKET` config option split into `SITE_UNTRUSTED_S3_BUCKET_TESTING` and `SITE_UNTRUSTED_S3_BUCKET_LIVE`

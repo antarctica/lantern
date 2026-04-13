@@ -9,7 +9,7 @@ for the contents they produce.
 Output classes can be broadly split into:
 
 - individual, record related, outputs (items, etc.)
-- global, record related, outputs (indexes, etc.)
+- global, record related, outputs (indexes of items, etc.)
 - global, non-record related, outputs (supporting pages, styles, scripts, etc.)
 
 ## Outputs configuration
@@ -28,8 +28,9 @@ public interface to:
 - generate a corresponding list of [`Check`](/docs/monitoring.md#site-checks) items to verify for this content
 
 Outputs at the site level SHOULD inherit from the `lantern.outputs.base.OutputSite` abstract base, which includes a
-[Site Templates](/docs/site.md#templates) instance for rendering content. These outputs *SHOULD* also include
-[Content Metadata](/docs/models.md#static-site-content-metadata) for the site
+[Site Templates](/docs/site.md#templates) instance for rendering content.
+
+These outputs *SHOULD* also include [Content Metadata](/docs/models.md#static-site-content-metadata) for the site
 [Cache Busting](/docs/site.md#cache-busting) value in their content items.
 
 Outputs processing single [Records](/docs/models.md#records) SHOULD inherit from the
@@ -44,9 +45,11 @@ These outputs *SHOULD* include [Content Metadata](/docs/models.md#static-site-co
 [Record](/docs/models.md#records) file and revision identifier in their content items.
 
 Outputs processing multiple Records SHOULD inherit from the `lantern.outputs.base.OutputRecords` abstract base which
-includes a [Store](/docs/architecture.md#stores) multi record access callable. These outputs *SHOULD* include
-[Content Metadata](/docs/models.md#static-site-content-metadata) for a value representing the state/version of the
-[Store](/docs/architecture.md#stores) in their content items (e.g. the head revision for a Git based store).
+includes a [Store](/docs/architecture.md#stores) multi record access callable.
+
+These outputs *SHOULD* include [Content Metadata](/docs/models.md#static-site-content-metadata) for a value
+representing the state/version of the [Store](/docs/architecture.md#stores) in their content items (e.g. the head
+revision for a Git based store).
 
 > [!NOTE]
 > The `OutputRecords` base class does not include an equivalent `strip_admin` property because these classes are only
@@ -212,7 +215,7 @@ Outputs:
 
 Outputs:
 
-- a listing of 'BAS Public Website Catalogue Sync API' resources
+- a list of 'BAS Public Website Catalogue Sync API' resources
 
 Intended to allow users to discover [Selected Items](#public-website-search-criteria) within the
 [BAS Public Website](https://www.bas.ac.uk).

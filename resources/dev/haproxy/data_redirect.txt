@@ -1,6 +1,7 @@
 /-/
 /collections
 /features
+/guides
 /items
 /legal
 /maps

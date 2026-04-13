@@ -238,7 +238,7 @@ class ItemCatalogue(ItemBase):
         )
 
     @property
-    def site_metadata(self) -> SiteMeta:
+    def site_meta(self) -> SiteMeta:
         """Site metadata for item."""
         self._meta.html_title = self.title_plain
         self._meta.html_description = self.summary_plain

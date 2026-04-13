@@ -258,14 +258,13 @@ All changes except minor tweaks (typos, comments, etc.) MUST:
 
 In the `lantern.Config` class:
 
-- define a new property
+- define a new property with a relevant validation method if needed
 - add property to `ConfigDumpSafe` typed dict
 - add property to `dumps_safe()` method
-- if needed, add logic to `validate()` method
 
 In the [Configuration](/docs/config.md) documentation:
 
-- add to [Options Table](/docs/config.md#config-options) in alphabetical order
+- add to the [Options Table](/docs/config.md#config-options) (in alphabetical order)
 - if needed, add a subsection to explain the option in more detail
 
 If configurable:
@@ -276,7 +275,7 @@ If configurable:
 In the `tests.lantern_tests.config` module:
 
 - update the expected response in the `test_dumps_safe` method
-- if validated, update the `test_validate` (valid) method and add new `test_validate_` (invalid) tests if needed
+- if validated, update and/or add `test_validate_` tests as needed
 - if configurable, update the `test_configurable_property` method
 - update or create other tests as needed
 
@@ -331,48 +330,48 @@ Within this project, for each new item type:
 > This section is Work in Progress (WIP) and may not be complete/accurate.
 
 1. if needed, [Support New Record Properties](/docs/libraries.md#adding-new-record-properties)
-2. if needed, update [Item](/docs/models.md#items) classes to process new and/or existing properties
+1. if needed, update [Item](/docs/models.md#items) classes to process new and/or existing properties
    - existing properties may need updating such as `ItemBase.kv` handling
-3. add new properties to the relevant item tab class in `lantern.models.item.catalogue.tabs`
+1. add new properties to the relevant item tab class in `lantern.models.item.catalogue.tabs`
    - work backwards to include additional Record properties in the main `lantern.models.item.catalogue` class
    - and/or `lantern.models.item.catalogue.elements` classes
    - amend tests that directly instantiate these classes to include the new property
      - some of these are not obvious where `kwargs` are used to pass properties such as:
        `lantern.models.item.catalogue.special.physical_map.AdditionalInfoTab`
-4. update the [Site Template](/docs/site.md#templates) to include the new property as needed
-5. add tests as needed for:
+1. update the [Site Template](/docs/site.md#templates) to include the new property as needed
+1. add tests as needed for:
    - Record properties
    - Item properties
    - Item Catalogue tab, element and base classes
    - Item templates (static HTML tests and Playwright if needed)
-6. update any relevant record authoring guides to explain how new properties are handled by the Catalogue
-7. if a property is required for all items:
+1. if needed, update `lantern.models.checks.RecordChecks` to generate checks for the new property
+1. update any relevant record authoring guides to explain how new properties are handled by the Catalogue
+1. if a property is required for all items:
    - update the [Record Requirements](/docs/models.md#record-requirements) documentation
    - in future this may include updating a corresponding JSON Schema too
-8. amend list of unsupported properties in `/docs/models.md#catalogue-item-limitations` as needed
+1. amend list of unsupported properties in `/docs/models.md#catalogue-item-limitations` as needed
 
 ### Adding distribution formats
 
-1. create a new class under `lantern.models.item.catalogue.distributions` inheriting from `Distribution` or a relevant
-   subclass
-2. if needed, register new media-types under the Metadata Standards resources site (`metadata-resources.data.bas.ac.uk`)
-3. configure the new class:
+1. if needed, register new media-types under the Metadata Standards resources site (`metadata-resources.data.bas.ac.uk`)
+1. create a new class under `lantern.models.item.catalogue.distributions`, inheriting from `Distribution` or a relevant
+   subclass and tests under `tests.lantern_tests.models.item.catalogue.test_distributions`
+1. configure the new distribution format class:
    - set the `matches` class method to determine a exclusive match for the distribution (typically via media types)
    - add an item to the `lantern.models.item.catalogue.enums.DistributionType` enum for the distribution type
-4. add the new class to `lantern.models.item.catalogue.tabs.DataTab._supported_distributions` list
-5. if the distribution should use a collapsible information panel, edit the
+1. add the new class to the `lantern.models.item.catalogue.tabs.DataTab._supported_distributions` list
+1. if the distribution should use a collapsible information panel, edit the
    `src/lantern/resources/templates/_macros/_tabs/data.html.j2` macros in the [Site Templates](/docs/site.md#templates):
    - create a new macro for the distribution format
    - update the `panel` macro to call the new macro
-6. include the new distribution format in`lantern.models.verification.elements.VerificationDistribution`
-7. include the new distribution format in [Test Records](#test-records):
+   - update the `tests.lantern_tests.templates.macros.test_tabs.TestDataTab.test_data_info` tests
+1. include the new distribution format in [Test Records](#test-records):
    - `tests.resources.records/item_cat_data::record`
-   - `tests.resources.records/item_cat_verify::record`
-8. update `lantern.models.verification.elements.VerificationDistribution`
-9. add new tests to:
-   - `tests.lantern_tests.models.item.catalogue.test_distributions`
-   - `tests.lantern_tests.templates.macros.test_tabs.TestDataTab.test_data_info` (if using a collapsible panel)
-10. update the [Item distribution options](/docs/models.md#catalogue-items-supported-distribution-options) docs
+   - `tests.resources.records/item_cat_checks::record`
+1. include the distribution format in the `lantern.models.checks.DistributionChecks` class and add tests
+1. if needed, add a new enum member for the check type in `lantern.models.checks.CheckType`
+1. if needed, add check logic to `lantern.checks.CheckRunner` and add tests
+1. update the [Item distribution options](/docs/models.md#catalogue-items-supported-distribution-options) docs
 
 ### Adding catalogue item tabs
 

@@ -38,9 +38,9 @@ class RecordsNotFoundError(Exception):
         return f"Records '{', '.join(self.file_identifiers)}' not found."
 
 
-class Store(ABC):
+class StoreBase(ABC):
     """
-    Base representation for a container of resources.
+    Abstract base class for stores.
 
     Stores manage Records held in a temporary or permanent storage system, such as an in-memory dict or remote database.
 

@@ -15,6 +15,7 @@ class TestMacrosSite:
     @staticmethod
     def _site_meta() -> SiteMeta:
         return SiteMeta(
+            env="testing",
             base_url="x",
             build_key="x",
             build_time=freezer_time(),
@@ -150,6 +151,7 @@ class TestMacrosSite:
         "meta",
         [
             SiteMeta(
+                env="testing",
                 base_url="x",
                 build_key="000",
                 build_time=freezer_time(),
@@ -163,6 +165,7 @@ class TestMacrosSite:
                 version="x",
             ),
             SiteMeta(
+                env="testing",
                 base_url="x",
                 build_key="000",
                 html_title="x",

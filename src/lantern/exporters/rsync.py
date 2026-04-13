@@ -21,14 +21,9 @@ class RsyncExporter(ExporterBase):
     """
 
     def __init__(self, logger: logging.Logger, path: Path, host: str | None = None) -> None:
-        super().__init__(logger=logger)
+        super().__init__(logger=logger, name="Rsync")
         self._path = path
         self._host = host
-
-    @property
-    def name(self) -> str:
-        """Exporter name."""
-        return "Rsync"
 
     def _upload_dir(self, src_path: Path, target_path: Path, target_host: str | None = None) -> None:
         """

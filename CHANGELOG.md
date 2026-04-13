@@ -51,6 +51,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Aria roles for item tabs, with minimal JavaScript to support keyboard navigation between tabs
 * `gitlab-record` development task for setting GitLab issues in records
 * Records upgrade development task (2026-04) and usage/developer documentation
+* Parallel tests using `pytest-xdist`
 
 ### Fixed
 

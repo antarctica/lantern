@@ -165,27 +165,42 @@ class TestRecord:
         )
 
     @pytest.mark.parametrize(
-        ("identifier", "match"),
+        ("identifiers", "match"),
         [
             (
-                Identifier(identifier="x", namespace="x"),
+                [Identifier(identifier="x", namespace="x")],
                 "No resource identifier with catalogue namespace.",
             ),
             (
-                Identifier(identifier="y", namespace=CATALOGUE_NAMESPACE),
+                [Identifier(identifier="y", namespace=CATALOGUE_NAMESPACE)],
                 "Invalid identifier value in Catalogue resource identifier.",
             ),
             (
-                Identifier(identifier="5d5b4e21-fd32-409c-be83-ca1c339903e5", href="y", namespace=CATALOGUE_NAMESPACE),
+                [
+                    Identifier(
+                        identifier="5d5b4e21-fd32-409c-be83-ca1c339903e5", href="y", namespace=CATALOGUE_NAMESPACE
+                    )
+                ],
                 "Invalid href in Catalogue resource identifier.",
+            ),
+            (
+                [
+                    Identifier(
+                        identifier="5d5b4e21-fd32-409c-be83-ca1c339903e5",
+                        href=f"https://{CATALOGUE_NAMESPACE}/items/5d5b4e21-fd32-409c-be83-ca1c339903e5",
+                        namespace=CATALOGUE_NAMESPACE,
+                    ),
+                    Identifier(identifier="x", namespace="data.bas.ac.uk"),
+                ],
+                "Contains identifier with ambiguous 'data.bas.ac.uk' namespace.",
             ),
         ],
     )
-    def test_invalid_identifier(self, identifier: Identifier, match: str):
+    def test_invalid_identifier(self, identifiers: list[Identifier], match: str):
         """Cannot validate a Record with an invalid resource identifier."""
         record = self._make_valid_record()
         record.identification.identifiers.clear()
-        record.identification.identifiers.append(identifier)
+        record.identification.identifiers.extend(identifiers)
 
         with pytest.raises(RecordInvalidError) as excinfo:
             record.validate()

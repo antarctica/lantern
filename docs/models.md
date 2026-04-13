@@ -63,6 +63,8 @@ In addition to [Record Validation](/docs/libraries.md#record-validation), the Da
   - to ensure resource identifiers and aliases are distinct and can't be ambiguous
 - MUST include an `identification.identifier`, as per [1]:
   - to determine if a record is part of the Catalogue
+- MUST NOT use the `database.bas.ac.uk` namespace in any `identification.identifier` elements:
+  - as this value is ambiguous across systems, use a more specific value (e.g. `foo.data.bas.ac.uk`)
 - MUST include an `identification.identifier.contacts.*.contact` with at least the 'pointOfContact' role:
   - for use with the item contact tab
 - MUST use unique identifiers for extents

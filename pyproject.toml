@@ -38,7 +38,6 @@ dev = [
     "pymarkdownlnt>=0.9.33",
     "pytailwindcss>=0.2.0",
     "ruff>=0.15.0",
-    "safety>=3.7.0",
     "taskipy>=1.14.1",
     "ty>=0.0.15",
     "types-lxml>=2025.3.30",
@@ -58,7 +57,7 @@ test = [
 ]
 
 [tool.uv]
-exclude-newer-package = { bas-metadata-library = false }
+exclude-newer-package = { bas-metadata-library = false, cryptography = false }
 
 [[tool.uv.index]]
 name = "self"
@@ -84,11 +83,10 @@ pre-commit = { cmd = "pre-commit run --all-files", help = "Run pre-commit hooks 
 test = { cmd = "pytest", help = "Run tests" }
 test-cov = { cmd = "pytest {cov_options}", help = "Run tests with coverage", use_vars = true }
 test-reset = { cmd = "pytest --cache-clear", help = "Reset pytest cache and run tests" }
-safety = { cmd = "safety scan --detailed-output", help = "Check for insecure dependencies" }
+vulnerabilities = { cmd = "uv audit --frozen", help = "Check for insecure dependencies" }
 outdated = { cmd = "uv tree --outdated --depth=1", help = "List outdated directed dependencies" }
 # CI
 ci-test = { cmd = "pytest {cov_options} -o junit_family=xunit2 --junitxml=test-results.xml --continue-on-collection-errors", help = "Called by CI", use_vars = true }
-ci-safety = { cmd = "safety --stage cicd scan --detailed-output", help = "Called by CI" }
 # local stack
 stack-start = { cmd = "docker-compose -f {local_stack_compose} up -d", help = "Start local dev stack", use_vars = true }
 stack-stop = { cmd = "docker-compose -f {local_stack_compose} down", help = "Stop local dev stack", use_vars = true }

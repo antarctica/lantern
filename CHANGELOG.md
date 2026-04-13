@@ -79,6 +79,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Refactoring ISO HTML output to avoid loading XSLT on each use
 * Refactoring relevant parts of previous records upgrade development task into Zap ⚡️ development task
 * Overhauled site verification into simplified and better integrated site checks
+* Replacing Safety with `uv audit` for dependency vulnerability checking
 
 ### Removed
 

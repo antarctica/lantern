@@ -82,7 +82,11 @@ class Record(RecordBase):
             raise RecordInvalidError(validation_error=exp) from None
 
     def _validate_identifiers(self) -> None:
-        """Verify non file identifier resource identifier."""
+        """
+        Verify identifier in the catalogue namespace exists based on resource identifier.
+
+        Error as ambiguous if an identifier exists using the generic `data.bas.ac.uk` namespace.
+        """
         try:
             identifier = self.identification.identifiers.filter(CATALOGUE_NAMESPACE)[0]
         except IndexError as e:
@@ -93,6 +97,10 @@ class Record(RecordBase):
             raise RecordInvalidError(validation_error=ValueError(msg)) from None
         if identifier.href != f"https://{CATALOGUE_NAMESPACE}/items/{self.file_identifier}":
             msg = "Invalid href in Catalogue resource identifier."
+            raise RecordInvalidError(validation_error=ValueError(msg)) from None
+
+        if len(self.identification.identifiers.filter("data.bas.ac.uk")):
+            msg = "Contains identifier with ambiguous 'data.bas.ac.uk' namespace."
             raise RecordInvalidError(validation_error=ValueError(msg)) from None
 
     def _validate_poc(self) -> None:

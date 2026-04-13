@@ -582,8 +582,10 @@ To update Pre-Commit and configured hooks:
 in `pyproject.toml`. Tests are defined in the `tests` package.
 
 > [!NOTE]
-> Parallel processing is disabled for tests to avoid issues with [HTTP recording](#pytest-recording) by setting the
-> `PARALLEL_JOBS` [config option](#pytest-env).
+> Parallel processing _within_ code is disabled in tests to avoid issues with [HTTP recording](#pytest-recording),
+> (by setting the `PARALLEL_JOBS` [config option](#pytest-env)).
+>
+> Tests themselves are run in parallel using [`pytest-xdist`](#pytest-xdist).
 
 Tests are run automatically in [Continuous Integration](#continuous-integration).
 
@@ -657,6 +659,14 @@ def test_foo():
     assert 'foo' == 'foo'
 ```
 
+### Pytest-xdist
+
+[pytest-xdist](https://pytest-xdist.readthedocs.io) runs tests in parallel to speed up test runs.
+
+> [!NOTE]
+> Tests that rely on the `fx_exporter_static_server` fixture (such as [Playwright tests](#playwright-tests)) need to
+> run on the same worker. This is set using the `e2e` xdist group (i.e. `@pytest.mark.xdist_group("e2e")`).
+
 ### Pytest-env
 
 [pytest-env](https://pypi.org/project/pytest-env/) sets environment variables used by the [Config](/docs/config.md)
@@ -706,10 +716,15 @@ This hosts a local [Static Site](/docs/architecture.md#sites) served from a temp
 simple HTTP server. The site is built by the `fx_exporter_static_site` fixture and contains all
 [Test Records](#test-records).
 
+<!-- pyml disable md028 -->
 > [!NOTE]
 > This local server cannot be used directly in CI. Instead, a Python simple server serving a known (initially empty)
 > path in the build directory is started before Pytest runs. The `fx_exporter_static_server` detects the CI environment
 > and copies the static site build to this path, then quits, giving an equivalent outcome.
+
+> [!NOTE]
+> Make sure Playwright tests use the `e2e` xdist group (i.e. `@pytest.mark.xdist_group("e2e")`) to avoid test failures.
+<!-- pyml enable md028 -->
 
 ### Test catalogue
 

@@ -9,6 +9,7 @@ from tests.resources.records.item_cat_product_all import record as product_all_s
 from tests.resources.records.item_cat_product_open_min import record as product_min_open
 
 
+@pytest.mark.xdist_group("e2e")
 class TestItemTabs:
     """Test tabs implementation in Catalogue Item template."""
 
@@ -61,6 +62,7 @@ class TestItemTabs:
         expect(page.locator("dt", has_text="Item ID")).to_be_visible()
 
 
+@pytest.mark.xdist_group("e2e")
 @pytest.mark.skipif(not has_network(), reason="network unavailable")
 class TestItemEmbeddedMap:
     """
@@ -93,6 +95,7 @@ class TestItemEmbeddedMap:
         assert map_iframe.evaluate("document.title") == "BAS Embedded Maps Service"
 
 
+@pytest.mark.xdist_group("e2e")
 class TestItemContactForm:
     """Test contact form in Catalogue Item template."""
 
@@ -122,6 +125,7 @@ class TestItemContactForm:
         expect(page.locator("body")).to_have_text("OK")
 
 
+@pytest.mark.xdist_group("e2e")
 class TestItemDataActions:
     """Test data access information sections in Catalogue Item template."""
 

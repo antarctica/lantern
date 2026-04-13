@@ -54,6 +54,7 @@ test = [
     "pytest-random-order>=1.2.0",
     "pytest-recording>=0.13.4",
     "pytest-unordered>=0.7.0",
+    "pytest-xdist>=3.8.0",
 ]
 
 [tool.uv]
@@ -245,7 +246,8 @@ X_ADMIN_METADATA_SIGNING_KEY_PRIVATE = "{\"kty\":\"EC\",\"kid\":\"bas_metadata_t
 # --random-order   | run tests in random order
 # -x               | stop after first failure [Overriden in CI]
 # --ff             | run failed tests first
-addopts = "--strict-markers --random-order -x --ff"
+# -n auto          | run tests in parallel using all available CPUs
+addopts = "--strict-markers --random-order --ff -n auto"
 markers = [
     "cov: coverage checks (deselect with '-m \"not cov\"')",
 ]

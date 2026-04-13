@@ -14,7 +14,6 @@ class TestS3Exporter:
         """Can create a local exporter."""
         s3 = S3Exporter(logger=fx_logger, s3=fx_s3_client, bucket=fx_s3_bucket_name, parallel_jobs=1)
         assert isinstance(s3, S3Exporter)
-        assert s3.name == "S3"
 
     @pytest.mark.parametrize("value", ["x", b"x"])
     @pytest.mark.parametrize("meta", [False, True])

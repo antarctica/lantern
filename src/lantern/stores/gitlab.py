@@ -12,7 +12,7 @@ from gitlab.v4.objects import Project
 from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
 from lantern.shims import inject_truststore_into_ssl_boto_fix
-from lantern.stores.base import RecordNotFoundError, RecordsNotFoundError, Store, StoreFrozenUnsupportedError
+from lantern.stores.base import RecordNotFoundError, RecordsNotFoundError, StoreBase, StoreFrozenUnsupportedError
 
 inject_truststore_into_ssl_boto_fix()
 
@@ -159,7 +159,7 @@ class GetHashesProtocol(Protocol):
     ) -> dict[str, str | None]: ...
 
 
-class GitLabStore(Store):
+class GitLabStore(StoreBase):
     """
     Basic read-write store backed by a remote GitLab repository.
 

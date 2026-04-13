@@ -296,8 +296,10 @@ class TestSiteMetadata:
     def test_init(self, freezer: FrozenDateTimeFactory, fx_freezer_time: datetime):
         """Can create a SiteMetadata instance with required values."""
         freezer.move_to(fx_freezer_time)
+        site_env: SiteEnvironment = "testing"
         expected = "x"
         meta = SiteMeta(
+            env=site_env,
             base_url=expected,
             build_key=expected,
             html_title=expected,
@@ -310,6 +312,7 @@ class TestSiteMetadata:
             version=expected,
         )
 
+        assert meta.env == site_env
         assert meta.base_url == expected
         assert meta.build_key == expected
         assert meta.html_title == expected
@@ -330,12 +333,14 @@ class TestSiteMetadata:
 
     def test_all(self):
         """Can create a SiteMetadata instance with all possible values."""
+        site_env: SiteEnvironment = "testing"
         expected_str = "x"
         expected_open_graph = OpenGraphMeta(title=expected_str, url=expected_str)
         expected_schema_org = SchemaOrgMeta(headline=expected_str, url=expected_str)
         expected_time = datetime(2014, 6, 30, 14, 30, 45, tzinfo=UTC)
 
         meta = SiteMeta(
+            env=site_env,
             base_url=expected_str,
             build_key=expected_str,
             html_title=expected_str,
@@ -435,6 +440,7 @@ class TestSiteMetadata:
 
         result = SiteMeta.from_config_store(config=fx_config, env=site_env, store=store, **kwargs)
         assert isinstance(result, SiteMeta)
+        assert result.env == site_env
         assert result.base_url == exp_base_url
         assert result.build_repo_ref == None if not has_store else fx_gitlab_store.head_commit  # noqa: E711
         for key, value in kwargs.items():
@@ -454,10 +460,12 @@ class TestExportMetadata:
     ):
         """Can create an ExportMetadata instance with direct values and optional trusted context."""
         freezer.move_to(fx_freezer_time)
+        site_env: SiteEnvironment = "testing"
         expected_str = "x"
         expected_int = 1
 
         meta = ExportMeta(
+            env=site_env,
             base_url=expected_str,
             build_key=expected_str,
             html_title=expected_str,
@@ -473,6 +481,7 @@ class TestExportMetadata:
             trusted=trusted,
         )
 
+        assert meta.env == site_env
         assert meta.base_url == expected_str
         assert meta.parallel_jobs == expected_int
         assert meta.admin_meta_keys == fx_admin_meta_keys

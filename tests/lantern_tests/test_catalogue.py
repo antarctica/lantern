@@ -240,11 +240,9 @@ class TestBasCatEnv:
         """
         mock_checker = mocker.MagicMock()
         mocker.patch.object(fx_bas_cat_env._untrusted, "_checker", mock_checker)
-        if env == "live":
-            fx_bas_cat_env._untrusted._meta.base_url = "https://data.bas.ac.uk"  # specific value needed for DOIs
+        fx_bas_cat_env._untrusted._meta.env = env
 
         fx_bas_cat_env.check(identifiers={"cf80b941-3de6-4a04-8f5a-a2349c1e3ae0"})  # check test record
-
         checks = mock_checker.check.call_args[0][0]
         if env == "live":
             assert any(check.type == CheckType.DOI_REDIRECTS for check in checks)

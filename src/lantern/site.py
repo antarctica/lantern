@@ -18,16 +18,16 @@ from lantern.outputs.record_iso import RecordIsoHtmlOutput, RecordIsoJsonOutput,
 from lantern.outputs.records_waf import RecordsWafOutput
 from lantern.outputs.site_health import SiteHealthOutput
 from lantern.outputs.site_index import SiteIndexOutput
-from lantern.stores.base import Store
+from lantern.stores.base import StoreBase
 from lantern.stores.gitlab_cache import GitLabCachedStore
 
 SiteAction = Literal["content", "checks"]
 
-_STORE_SINGLETON: Store | None = None
+_STORE_SINGLETON: StoreBase | None = None
 _ISO_HTML_XSLT_SINGLETON: etree.XSLT | None = None
 
 
-def _job_worker_store(store: Store) -> Store:
+def _job_worker_store(store: StoreBase) -> StoreBase:
     """
     Store per worker process.
 
@@ -56,7 +56,7 @@ def _job_worker_iso_html_transform() -> etree.XSLT:
 def _run_job(
     log_level: int,
     meta: ExportMeta,
-    store: Store,
+    store: StoreBase,
     job: "SiteJob",
 ) -> list[SiteContent] | list[Check]:
     """
@@ -108,14 +108,14 @@ class Site:
     Flexible class intended to be used in a higher level and opinionated Catalogue class.
     """
 
-    def __init__(self, logger: logging.Logger, meta: ExportMeta, store: Store) -> None:
+    def __init__(self, logger: logging.Logger, meta: ExportMeta, store: StoreBase) -> None:
         self._logger = logger
         self._meta = meta
         self._store = store
 
         self._workers = meta.parallel_jobs
 
-    def _prep_store(self) -> Store:
+    def _prep_store(self) -> StoreBase:
         """
         Prepare store for use in parallel processing jobs.
 

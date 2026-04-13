@@ -21,7 +21,7 @@ from lantern.outputs.site_index import SiteIndexOutput
 from lantern.outputs.site_pages import SitePagesOutput
 from lantern.outputs.site_resources import SiteResourcesOutput
 from lantern.site import Site, SiteAction, SiteJob, _job_worker_iso_html_transform, _job_worker_store, _run_job
-from lantern.stores.base import Store
+from lantern.stores.base import StoreBase
 from lantern.stores.gitlab_cache import GitLabCachedStore
 from tests.resources.records.item_cat_product_min import record as product_min_required
 
@@ -43,10 +43,10 @@ class TestSiteJob:
     """Test functions related to site generator parallel processing jobs."""
 
     @pytest.mark.cov()
-    def test_job_worker_store(self, fx_reset_singletons, fx_fake_store: Store):  # noqa: ANN001
+    def test_job_worker_store(self, fx_reset_singletons, fx_fake_store: StoreBase):  # noqa: ANN001
         """Can create store instance."""
         result = _job_worker_store(store=fx_fake_store)
-        assert isinstance(result, Store)
+        assert isinstance(result, StoreBase)
 
     @pytest.mark.cov()
     def test_job_worker_store_gitlab_cache(self, fx_reset_singletons, fx_gitlab_cached_store_pop: GitLabCachedStore):  # noqa: ANN001
@@ -84,7 +84,7 @@ class TestSiteJob:
         fx_logger: logging.Logger,
         fx_revision_model_min: RecordRevision,
         fx_select_record: callable,
-        fx_fake_store: Store,
+        fx_fake_store: StoreBase,
         fx_export_meta: ExportMeta,
         output_cls: OutputBase,
         expected: list[str],
@@ -117,7 +117,7 @@ class TestSiteJob:
 class TestSite:
     """Test site generator."""
 
-    def test_init(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_fake_store: Store):
+    def test_init(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_fake_store: StoreBase):
         """Can create a site generator instance."""
         site = Site(logger=fx_logger, meta=fx_export_meta, store=fx_fake_store)
         assert isinstance(site, Site)

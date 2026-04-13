@@ -10,12 +10,12 @@ from tasks._shared import init, init_store
 from tasks.records_zap import magic_collection_ids
 
 from lantern.config import Config
-from lantern.stores.base import Store
+from lantern.stores.base import StoreBase
 
 max_stage = 3
 
 
-def _dump_records(logger: logging.Logger, file_identifiers: list[str], store: Store, output_path: Path) -> None:
+def _dump_records(logger: logging.Logger, file_identifiers: list[str], store: StoreBase, output_path: Path) -> None:
     """Dump selected records from the store to a path as JSON and XML."""
     output_path.mkdir(parents=True, exist_ok=True)
     for file_identifier in file_identifiers:

@@ -58,7 +58,7 @@ class ItemCatalogueOutput(OutputRecord):
             select_record=self._select_record,
         )
 
-        raw = self._jinja.get_template(self._template_path).render(item=item, meta=item.site_metadata)
+        raw = self._jinja.get_template(self._template_path).render(item=item, meta=item.site_meta)
         return prettify_html(raw)
 
     @property

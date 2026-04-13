@@ -25,15 +25,10 @@ class LocalExporter(ExporterBase):
     """
 
     def __init__(self, logger: logging.Logger, path: Path, mode_d: int = 0o755, mode_f: int = 0o644) -> None:
-        super().__init__(logger=logger)
+        super().__init__(logger=logger, name="Local Filesystem")
         self.base_path = path
         self._mode_dir = mode_d
         self._mode_file = mode_f
-
-    @property
-    def name(self) -> str:
-        """Exporter name."""
-        return "Local Filesystem"
 
     def export(self, content: Collection[SiteContent]) -> None:
         """Persist content."""

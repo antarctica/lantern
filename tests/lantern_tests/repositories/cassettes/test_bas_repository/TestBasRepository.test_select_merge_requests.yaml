@@ -1,0 +1,108 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.2.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234
+  response:
+    body:
+      string: "{\"id\":1234}"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Runtime:
+      - '0.063658'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.2.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234/merge_requests?state=opened
+  response:
+    body:
+      string: "[{\"id\":123,\"iid\":123,\"project_id\":1234}]"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Link:
+      - <https://gitlab.example.com/api/v4/projects/1234/merge_requests?id=1234&order_by=created_at&page=1&per_page=20&sort=desc&state=opened&with_labels_details=false&with_merge_status_recheck=false>;
+        rel="first", <https://gitlab.example.com/api/v4/projects/1234/merge_requests?id=1234&order_by=created_at&page=1&per_page=20&sort=desc&state=opened&with_labels_details=false&with_merge_status_recheck=false>;
+        rel="last"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Next-Page:
+      - ''
+      X-Page:
+      - '1'
+      X-Per-Page:
+      - '20'
+      X-Prev-Page:
+      - ''
+      X-Runtime:
+      - '0.079733'
+      X-Total:
+      - '1'
+      X-Total-Pages:
+      - '1'
+    status:
+      code: 200
+      message: OK
+version: 1

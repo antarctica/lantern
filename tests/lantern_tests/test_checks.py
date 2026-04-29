@@ -7,6 +7,7 @@ import requests
 from pytest_mock import MockerFixture
 
 from lantern.checks import Checker, CheckRunner, run_check
+from lantern.config import Config
 from lantern.models.checks import Check, CheckState, CheckType
 from lantern.models.site import ExportMeta, SiteContent
 
@@ -228,13 +229,13 @@ class TestRunCheck:
 class TestChecker:
     """Test checks runner."""
 
-    def test_init(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta) -> None:
+    def test_init(self, fx_logger: logging.Logger, fx_config: Config) -> None:
         """Can create a Checker instance."""
-        runner = Checker(logger=fx_logger, meta=fx_export_meta)
+        runner = Checker(logger=fx_logger, parallel_jobs=fx_config.PARALLEL_JOBS)
         assert isinstance(runner, Checker)
 
     def test_execute(
-        self, mocker: MockerFixture, fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_check: Check
+        self, mocker: MockerFixture, fx_logger: logging.Logger, fx_config: Config, fx_check: Check
     ) -> None:
         """
         Can run checks.
@@ -242,13 +243,18 @@ class TestChecker:
         Check methods are disabled to avoid making real requests.
         """
         mocker.patch.object(CheckRunner, "run", return_value=None)
-        checker = Checker(logger=fx_logger, meta=fx_export_meta)
+        checker = Checker(logger=fx_logger, parallel_jobs=fx_config.PARALLEL_JOBS)
 
         checks = checker.execute([fx_check])
         assert checks == [fx_check]  # checks will remain as initial
 
     def test_checks(
-        self, mocker: MockerFixture, fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_check: Check
+        self,
+        mocker: MockerFixture,
+        fx_logger: logging.Logger,
+        fx_config: Config,
+        fx_export_meta: ExportMeta,
+        fx_check: Check,
     ) -> None:
         """
         Can run checks and get output.
@@ -256,7 +262,7 @@ class TestChecker:
         Check methods are disabled to avoid making real requests.
         """
         mocker.patch.object(CheckRunner, "run", return_value=None)
-        checker = Checker(logger=fx_logger, meta=fx_export_meta)
+        checker = Checker(logger=fx_logger, parallel_jobs=fx_config.PARALLEL_JOBS)
 
-        outputs = checker.check([fx_check])
+        outputs = checker.check(meta=fx_export_meta, checks=[fx_check])
         assert all(isinstance(o, SiteContent) for o in outputs)

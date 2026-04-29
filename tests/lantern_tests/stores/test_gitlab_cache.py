@@ -59,7 +59,7 @@ class TestGitLabLocalCache:
         source = GitLabSource(
             endpoint=fx_config.STORE_GITLAB_ENDPOINT,
             project=fx_config.STORE_GITLAB_PROJECT_ID,
-            ref=fx_config.STORE_GITLAB_BRANCH,
+            ref=fx_config.STORE_GITLAB_DEFAULT_BRANCH,
         )
 
         cache = GitLabLocalCache(
@@ -817,6 +817,14 @@ class TestGitLabLocalCache:
         assert len(fx_gitlab_cache_pop._flash) == 0
         assert fx_gitlab_cache_pop._conn is None
 
+    @pytest.mark.cov()
+    @pytest.mark.parametrize("frozen", [False, True])
+    def test_frozen(self, fx_gitlab_cache_pop: GitLabLocalCache, frozen: bool):
+        """Can get whether store is frozen."""
+        if frozen:
+            fx_gitlab_cache_pop.freeze()
+        assert fx_gitlab_cache_pop._frozen is frozen
+
 
 class TestGitLabCachedStore:
     """Test GitLab local cache store."""
@@ -826,24 +834,31 @@ class TestGitLabCachedStore:
         with TemporaryDirectory() as tmp_path:
             cache_path = Path(tmp_path) / ".cache"
 
-        GitLabCachedStore(
+        store = GitLabCachedStore(
             logger=fx_logger,
             source=fx_gitlab_source,
             access_token="x",  # noqa: S106
             parallel_jobs=fx_config.PARALLEL_JOBS,
             cache_dir=cache_path,
         )
+        assert store.frozen is False
+
+    @pytest.mark.cov()
+    def test_from_gitlab_store(self, fx_gitlab_store: GitLabStore):
+        """Can initialise store from existing, uncached, GitLab store."""
+        expected_parallel = 99
+        expected_cache = Path("x")
+        store = GitLabCachedStore.from_gitlab_store(
+            store=fx_gitlab_store, parallel_jobs=expected_parallel, cache_dir=expected_cache
+        )
+        assert isinstance(store, GitLabCachedStore)
+        assert store._access_token == fx_gitlab_store._access_token
+        assert store._cache._parallel_jobs == expected_parallel
+        assert store._cache._path == expected_cache
 
     def test_len(self, fx_gitlab_cached_store_pop: GitLabCachedStore):
         """Can get count of records in store."""
         assert len(fx_gitlab_cached_store_pop) > 0
-
-    @pytest.mark.cov()
-    @pytest.mark.parametrize("frozen", [False, True])
-    def test_frozen(self, fx_gitlab_cached_store: GitLabCachedStore, frozen: bool):
-        """Can get whether store is frozen."""
-        fx_gitlab_cached_store._frozen = frozen
-        assert fx_gitlab_cached_store.frozen is frozen
 
     @pytest.mark.cov()
     def test_project(self, mocker: MockerFixture, fx_gitlab_cached_store: GitLabCachedStore):
@@ -926,6 +941,15 @@ class TestGitLabCachedStore:
         """Cannot push changes when store is frozen."""
         with pytest.raises(StoreFrozenError):
             fx_gitlab_cached_store_frozen.push(records=[], title="x", message="x", author=("x", "x@example.com"))
+
+    @pytest.mark.cov()
+    @pytest.mark.parametrize("frozen", [False, True])
+    def test_freeze(self, fx_gitlab_cached_store_pop: GitLabCachedStore, frozen: bool):
+        """Can freeze store."""
+        if frozen:
+            fx_gitlab_cached_store_pop.freeze()
+        assert fx_gitlab_cached_store_pop._frozen is frozen
+        assert fx_gitlab_cached_store_pop._cache._frozen is frozen
 
     @pytest.mark.parametrize("exists", [True, False])
     def test_purge(self, fx_gitlab_cached_store_pop: GitLabCachedStore, exists: bool):

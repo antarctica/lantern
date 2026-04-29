@@ -1,10 +1,11 @@
+import importlib
 import logging
 import os
 import shutil
 import socket
 import sys
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Generator
 from copy import deepcopy
 from datetime import UTC, datetime
 from functools import lru_cache
@@ -24,7 +25,7 @@ from gitlab import Gitlab
 from moto import mock_aws
 from pytest_mock import MockerFixture
 
-from lantern.catalogue import BasCatalogue, BasCatEnv, BasCatTrusted, BasCatUntrusted
+from lantern.catalogues.bas import BasCatalogue, BasCatEnv, BasCatTrusted, BasCatUntrusted
 from lantern.config import Config
 from lantern.exporters.local import LocalExporter
 from lantern.exporters.rsync import RsyncExporter
@@ -61,6 +62,7 @@ from lantern.outputs.site_health import SiteHealthOutput
 from lantern.outputs.site_index import SiteIndexOutput
 from lantern.outputs.site_pages import SitePagesOutput
 from lantern.outputs.site_resources import SiteResourcesOutput
+from lantern.repositories.bas import BasRepository
 from lantern.site import Site
 from lantern.stores.base import SelectRecordProtocol, SelectRecordsProtocol
 from lantern.stores.gitlab import GitLabSource, GitLabStore
@@ -68,6 +70,7 @@ from lantern.stores.gitlab_cache import GitLabCachedStore, GitLabLocalCache
 from lantern.utils import get_jinja_env, prettify_html
 from tests.resources.admin_keys import test_keys
 from tests.resources.catalogues.fake_catalogue import FakeCatalogue
+from tests.resources.repositories.fake_repository import FakeRepository
 from tests.resources.stores.fake_records_store import FakeRecordsStore
 
 
@@ -146,13 +149,13 @@ def fx_site_content() -> SiteContent:
 @pytest.fixture()
 def fx_site_meta(fx_config: Config) -> SiteMeta:
     """Site build metadata."""
-    return SiteMeta.from_config_store(config=fx_config, env="testing", store=None, build_repo_ref="83fake48")
+    return SiteMeta.from_config(config=fx_config, env="testing", build_repo_ref="83fake48")
 
 
 @pytest.fixture()
 def fx_export_meta(fx_config: Config) -> ExportMeta:
     """Exporter build metadata (superset of site metadata)."""
-    return ExportMeta.from_config_store(config=fx_config, env="testing", store=None, build_repo_ref="83fake48")
+    return ExportMeta.from_config(config=fx_config, env="testing", build_repo_ref="83fake48")
 
 
 @pytest.fixture()
@@ -434,7 +437,7 @@ def _item_cat_model_min() -> ItemCatalogue:
 
     Standalone method to allow use outside of fixtures in test parametrisation.
     """
-    meta = SiteMeta.from_config_store(config=Config(), env="testing", store=None, build_repo_ref="83fake48")
+    meta = SiteMeta.from_config(config=Config(), env="testing", build_repo_ref="83fake48")
     model = ItemCatalogue(
         site_meta=meta,
         record=RecordRevision.loads(_item_config_min_catalogue()),
@@ -533,8 +536,7 @@ def _select_records_fixed(file_identifiers: set[str] | None = None) -> list[Reco
     """
     Minimal records fetch method returning a fixed set of records.
 
-    `file_identifiers` parameter is ignored but needed for compatibility with the SelectRecordsProtocol and used by
-    the Verification class.
+    `file_identifiers` parameter is ignored but needed for compatibility with the SelectRecordsProtocol.
 
     Standalone method to allow use outside of fixtures.
     """
@@ -615,9 +617,9 @@ def fx_item_arc_model_min(fx_record_model_min: Record, fx_lib_arcgis_item: ArcGi
     return ItemArcGis(fx_record_model_min, arcgis_item=fx_lib_arcgis_item)
 
 
-def _init_fake_store(logger: logging.Logger, config: Config | None = None, frozen: bool = False) -> FakeRecordsStore:
-    """Callable to initialize a FakeRecordsStore."""
-    return FakeRecordsStore(logger=logger, frozen=frozen)
+def _init_fake_store(logger: logging.Logger) -> FakeRecordsStore:
+    """Callable to initialise a FakeRecordsStore."""
+    return FakeRecordsStore(logger=logger)
 
 
 @pytest.fixture()
@@ -632,7 +634,7 @@ def fx_gitlab_source(fx_config: Config) -> GitLabSource:
     return GitLabSource(
         endpoint=fx_config.STORE_GITLAB_ENDPOINT,
         project=fx_config.STORE_GITLAB_PROJECT_ID,
-        ref=fx_config.STORE_GITLAB_BRANCH,
+        ref=fx_config.STORE_GITLAB_DEFAULT_BRANCH,
     )
 
 
@@ -727,6 +729,49 @@ def fx_gitlab_cached_store_pop(
 
     fx_gitlab_cached_store._cache = fx_gitlab_cache_pop
     return fx_gitlab_cached_store
+
+
+@pytest.fixture()
+def fx_fake_repo(fx_logger: logging.Logger, fx_config: Config, fx_fake_store: FakeRecordsStore) -> FakeRepository:
+    """Fake repository instance."""
+    return FakeRepository(logger=fx_logger, config=fx_config, store=fx_fake_store)
+
+
+@pytest.fixture()
+def fx_bas_repo(fx_logger: logging.Logger, fx_config: Config) -> BasRepository:
+    """BAS Catalogue repository instance."""
+    return BasRepository(logger=fx_logger, config=fx_config)
+
+
+@pytest.fixture()
+def fx_bas_repo_cached_store_pop(
+    mocker: MockerFixture, fx_bas_repo: BasRepository, fx_gitlab_cached_store_pop: GitLabCachedStore
+):
+    """BAS Catalogue repository, with frozen and cached GitLab store, populated with a single record."""
+    mocker.patch.object(fx_bas_repo, "_make_gitlab_store", return_value=fx_gitlab_cached_store_pop)
+    return fx_bas_repo
+
+
+@pytest.fixture()
+def fx_bas_repo_min_cat_record(
+    mocker: MockerFixture,
+    fx_logger: logging.Logger,
+    fx_config: Config,
+    fx_bas_repo: BasRepository,
+    fx_gitlab_source: GitLabSource,
+    fx_item_cat_model_min: ItemCatalogue,
+):
+    """
+    BAS Catalogue record instance, populated with a single minimal catalogue record.
+
+    Mocks repo to return a fixed store, itself mocked to return fixed records.
+    """
+    record = fx_item_cat_model_min.record
+    store = GitLabStore(logger=fx_logger, source=fx_gitlab_source, access_token=fx_config.STORE_GITLAB_TOKEN)
+    mocker.patch.object(store, "select", return_value=[record])
+    mocker.patch.object(type(store), "head_commit", new_callable=PropertyMock, return_value="x")
+    mocker.patch.object(fx_bas_repo, "_make_gitlab_store", return_value=store)
+    return fx_bas_repo
 
 
 def _index_site_content_outputs(outputs: list[SiteContent]) -> dict[Path, SiteContent]:
@@ -831,81 +876,94 @@ def fx_s3_exporter(fx_logger: logging.Logger, fx_s3_client: S3Client, fx_s3_buck
 
 
 @pytest.fixture()
+def fx_reset_site_singletons() -> Generator[None, None, None]:
+    """Reset singletons for test isolation."""
+    mod = importlib.import_module("lantern.site")
+    mod._STORE_SINGLETON = None
+    mod._ISO_HTML_XSLT_SINGLETON = None
+
+    yield
+
+    mod._STORE_SINGLETON = None
+    mod._ISO_HTML_XSLT_SINGLETON = None
+
+
+@pytest.fixture()
 def fx_site(fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_fake_store: FakeRecordsStore) -> Site:
     """Site generator using fake/test records."""
     return Site(logger=fx_logger, meta=fx_export_meta, store=fx_fake_store)
 
 
 @pytest.fixture()
-def fx_fake_catalogue(fx_logger: logging.Logger, fx_config: Config, fx_fake_store: FakeRecordsStore):
+def fx_fake_catalogue(fx_logger: logging.Logger, fx_config: Config):
     """Fake catalogue instance."""
     with TemporaryDirectory() as tmp_dir:
         tmp_path = Path(tmp_dir) / "output"
-    return FakeCatalogue(logger=fx_logger, config=fx_config, store=fx_fake_store, base_path=tmp_path)
+    return FakeCatalogue(logger=fx_logger, config=fx_config, base_path=tmp_path)
 
 
 @pytest.fixture()
 def fx_bas_cat_untrusted(
     mocker: MockerFixture,
     fx_logger: logging.Logger,
-    fx_export_meta: ExportMeta,
-    fx_fake_store: FakeRecordsStore,
+    fx_config: Config,
+    fx_bas_repo_min_cat_record: BasRepository,
     fx_s3_client: S3Client,
     fx_s3_bucket_name: str,
 ) -> BasCatUntrusted:
     """
     BAS untrusted catalogue instance.
 
-    Uses Fake store over GitLab to avoid mocking and/or request recordings.
+    Mocks checks to return fixed (empty) results.
 
     Sets S3 export to local mock via mocked config.
-
-    Mocks checks to return fixed (empty) results.
     """
     mock_checker = mocker.MagicMock()
     expected_content = [SiteContent(content="", path=Path("-/checks/data.json"), media_type="application/json")]
     mock_checker.check.return_value = expected_content
-    mocker.patch("lantern.catalogue.Checker", return_value=mock_checker)
+    mocker.patch("lantern.catalogues.bas.Checker", return_value=mock_checker)
 
     return BasCatUntrusted(
-        logger=fx_logger, meta=fx_export_meta, store=fx_fake_store, s3=fx_s3_client, bucket=fx_s3_bucket_name
+        logger=fx_logger,
+        config=fx_config,
+        repo=fx_bas_repo_min_cat_record,
+        s3=fx_s3_client,
+        bucket=fx_s3_bucket_name,
+        env="testing",
     )
 
 
 @pytest.fixture()
 def fx_bas_cat_trusted(
     fx_logger: logging.Logger,
-    fx_export_meta: ExportMeta,
-    fx_fake_store: FakeRecordsStore,
+    fx_config: Config,
+    fx_bas_repo_min_cat_record: BasRepository,
     fx_s3_client: S3Client,
     fx_s3_bucket_name: str,
 ) -> BasCatTrusted:
     """
     BAS trusted catalogue instance.
 
-    Uses Fake store over GitLab to avoid mocking and/or request recordings.
-
     Sets Rsync export to a temp directory.
-
-    Mocks verification to return fixed results.
     """
     with TemporaryDirectory() as tmp_dir:
         rsync_path = Path(tmp_dir) / "rsync"
-    fx_export_meta.trusted = True
-    return BasCatTrusted(logger=fx_logger, meta=fx_export_meta, store=fx_fake_store, host=None, path=rsync_path)
+    return BasCatTrusted(
+        logger=fx_logger, config=fx_config, repo=fx_bas_repo_min_cat_record, host=None, path=rsync_path, env="testing"
+    )
 
 
 @pytest.fixture()
 def fx_bas_cat_env(
     fx_logger: logging.Logger,
     fx_config: Config,
-    fx_fake_store: FakeRecordsStore,
+    fx_bas_repo_min_cat_record: BasRepository,
     fx_s3_client: S3Client,
     fx_bas_cat_untrusted: BasCatUntrusted,
     fx_bas_cat_trusted: BasCatTrusted,
 ) -> BasCatEnv:
-    """BAS untrusted catalogue instance."""
-    cat = BasCatEnv(logger=fx_logger, config=fx_config, store=fx_fake_store, s3=fx_s3_client, env="testing")
+    """BAS catalogue testing environment instance."""
+    cat = BasCatEnv(logger=fx_logger, config=fx_config, repo=fx_bas_repo_min_cat_record, s3=fx_s3_client, env="testing")
     cat._untrusted = fx_bas_cat_untrusted
     cat._trusted = fx_bas_cat_trusted
     return cat
@@ -915,7 +973,7 @@ def fx_bas_cat_env(
 def fx_bas_catalogue(
     fx_logger: logging.Logger,
     fx_config: Config,
-    fx_fake_store: FakeRecordsStore,
+    fx_bas_repo: BasRepository,
     fx_s3_client: S3Client,
     fx_s3_bucket_name: str,
     fx_bas_cat_env: BasCatEnv,
@@ -923,13 +981,14 @@ def fx_bas_catalogue(
     """
     BAS catalogue instance.
 
-    Uses Fake store over GitLab to avoid mocking and/or request recordings.
+    Overrides repo constructed by on catalogue init to carry any behaviours applied upstream.
 
     Mocks remote export locations (to local S3 and temp directory) via config.
 
-    Mocks verification to return fixed results.
+    Mocks checks to return fixed results.
     """
-    cat = BasCatalogue(logger=fx_logger, config=fx_config, store=fx_fake_store, s3=fx_s3_client)
+    cat = BasCatalogue(logger=fx_logger, config=fx_config, s3=fx_s3_client)
+    cat.repo = fx_bas_repo
     cat._envs = dict.fromkeys(get_args(SiteEnvironment), fx_bas_cat_env)
     return cat
 
@@ -949,9 +1008,7 @@ def fx_static_site() -> TemporaryDirectory:
 
     config = Config()
     store = FakeRecordsStore(logger=logger)
-    meta = ExportMeta.from_config_store(
-        config=config, env="testing", store=None, build_repo_ref="83fake48", trusted=True
-    )
+    meta = ExportMeta.from_config(config=config, env="testing", build_repo_ref="83fake48", trusted=True)
     exporter = LocalExporter(logger=logger, path=site_path)
     site = Site(logger=logger, meta=meta, store=store)
 

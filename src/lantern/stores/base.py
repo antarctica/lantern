@@ -68,6 +68,15 @@ class StoreBase(ABC):
         """Return a specific record or raise a `RecordNotFoundError` exception."""
         ...
 
+    @abstractmethod
+    def freeze(self) -> None:
+        """
+        Attempt to freeze store.
+
+        Raises `StoreFrozenUnsupportedError` if not supported.
+        """
+        ...
+
 
 class SelectRecordsProtocol(Protocol):
     """Callable protocol for selecting records from Store."""

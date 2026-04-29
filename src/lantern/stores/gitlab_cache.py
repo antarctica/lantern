@@ -3,6 +3,7 @@ import logging
 import pickle
 import shutil
 from base64 import b64decode
+from collections.abc import Collection
 from copy import deepcopy
 from dataclasses import dataclass
 from functools import cached_property
@@ -127,7 +128,6 @@ class GitLabLocalCache:
         gitlab_client: Gitlab,
         gitlab_token: str,
         gitlab_source: GitLabSource,
-        frozen: bool = False,
     ) -> None:
         """Initialize cache."""
         self._logger = logger
@@ -136,9 +136,9 @@ class GitLabLocalCache:
         self._client = gitlab_client
         self._token = gitlab_token
         self._source_ = gitlab_source
-        self._frozen = frozen
         self._cache_path = path / "cache.db"
 
+        self._frozen = False
         self._flash: dict[str, RecordRevision] = {}
         self._conn: Engine | None = None
 
@@ -610,6 +610,15 @@ class GitLabLocalCache:
         with self._engine as tx:
             return tx.fetchscalar("""SELECT count(file_identifier) FROM record;""")
 
+    def freeze(self) -> None:
+        """
+        Freeze cache.
+
+        Refresh prior to freezing to prevent an empty or outdated cache.
+        """
+        self._ensure_exists()
+        self._frozen = True
+
     def purge(self) -> None:
         """Clear cache contents."""
         if self._path.exists():
@@ -638,10 +647,9 @@ class GitLabCachedStore(GitLabStore):
         access_token: str,
         parallel_jobs: int,
         cache_dir: Path,
-        frozen: bool = False,
     ) -> None:
-        super().__init__(logger=logger, source=source, access_token=access_token, frozen=False)
-        self._frozen = frozen
+        super().__init__(logger=logger, source=source, access_token=access_token)
+        self._frozen = False
 
         self._cache = GitLabLocalCache(
             logger=self._logger,
@@ -650,9 +658,19 @@ class GitLabCachedStore(GitLabStore):
             gitlab_client=self._client,
             gitlab_token=self._access_token,
             gitlab_source=source,
-            frozen=self._frozen,
         )
         self._get_hashes_callable = self._cache.get_hashes
+
+    @classmethod
+    def from_gitlab_store(cls, store: GitLabStore, parallel_jobs: int, cache_dir: Path) -> "GitLabCachedStore":
+        """Create cached store from base GitLab store."""
+        return GitLabCachedStore(
+            logger=store._logger,
+            source=store._source,
+            access_token=store._access_token,
+            parallel_jobs=parallel_jobs,
+            cache_dir=cache_dir,
+        )
 
     def __len__(self) -> int:
         """Count of records in store."""
@@ -707,7 +725,7 @@ class GitLabCachedStore(GitLabStore):
             raise StoreFrozenError(msg) from None
         super()._ensure_branch(branch)
 
-    def push(self, records: list[Record], title: str, message: str, author: tuple[str, str]) -> CommitResults:
+    def push(self, records: Collection[Record], title: str, message: str, author: tuple[str, str]) -> CommitResults:
         """
         Add or update records in the GitLab repository.
 
@@ -725,6 +743,15 @@ class GitLabCachedStore(GitLabStore):
         if results.commit:
             self._cache._ensure_exists()
         return results
+
+    def freeze(self) -> None:
+        """
+        Freeze store.
+
+        The cache is first refreshed to prevent freezing an uninitialised or outdated store.
+        """
+        self._cache.freeze()
+        self._frozen = True
 
     def purge(self) -> None:
         """Clear underlying cache."""

@@ -82,7 +82,7 @@ class TestConfig:
             "STORE_GITLAB_ENDPOINT": "https://gitlab.example.com",
             "STORE_GITLAB_TOKEN": redacted_value,
             "STORE_GITLAB_PROJECT_ID": "1234",
-            "STORE_GITLAB_BRANCH": "main",
+            "STORE_GITLAB_DEFAULT_BRANCH": "main",
             "STORE_GITLAB_CACHE_PATH": str(fx_config.STORE_GITLAB_CACHE_PATH),
             "TEMPLATES_CACHE_BUST_VALUE": fx_config.TEMPLATES_CACHE_BUST_VALUE,
             "TEMPLATES_PLAUSIBLE_ID": "x",
@@ -130,7 +130,7 @@ class TestConfig:
                     "LANTERN_STORE_GITLAB_ENDPOINT": None,
                     "LANTERN_STORE_GITLAB_TOKEN": "x",
                     "LANTERN_STORE_GITLAB_PROJECT_ID": "x",
-                    "LANTERN_STORE_GITLAB_BRANCH": "x",
+                    "LANTERN_STORE_GITLAB_DEFAULT_BRANCH": "x",
                     "LANTERN_STORE_GITLAB_CACHE_PATH": "x",
                 }
             ),
@@ -139,7 +139,7 @@ class TestConfig:
                     "LANTERN_STORE_GITLAB_ENDPOINT": "x",
                     "LANTERN_STORE_GITLAB_TOKEN": None,
                     "LANTERN_STORE_GITLAB_PROJECT_ID": "x",
-                    "LANTERN_STORE_GITLAB_BRANCH": "x",
+                    "LANTERN_STORE_GITLAB_DEFAULT_BRANCH": "x",
                     "LANTERN_STORE_GITLAB_CACHE_PATH": "x",
                 }
             ),
@@ -148,7 +148,7 @@ class TestConfig:
                     "LANTERN_STORE_GITLAB_ENDPOINT": "x",
                     "LANTERN_STORE_GITLAB_TOKEN": "x",
                     "LANTERN_STORE_GITLAB_PROJECT_ID": None,
-                    "LANTERN_STORE_GITLAB_BRANCH": "x",
+                    "LANTERN_STORE_GITLAB_DEFAULT_BRANCH": "x",
                     "LANTERN_STORE_GITLAB_CACHE_PATH": "x",
                 }
             ),
@@ -157,7 +157,7 @@ class TestConfig:
                     "LANTERN_STORE_GITLAB_ENDPOINT": "x",
                     "LANTERN_STORE_GITLAB_TOKEN": "x",
                     "LANTERN_STORE_GITLAB_PROJECT_ID": "x",
-                    "LANTERN_STORE_GITLAB_BRANCH": None,
+                    "LANTERN_STORE_GITLAB_DEFAULT_BRANCH": None,
                     "LANTERN_STORE_GITLAB_CACHE_PATH": "x",
                 }
             ),
@@ -166,7 +166,7 @@ class TestConfig:
                     "LANTERN_STORE_GITLAB_ENDPOINT": "x",
                     "LANTERN_STORE_GITLAB_TOKEN": "x",
                     "LANTERN_STORE_GITLAB_PROJECT_ID": "x",
-                    "LANTERN_STORE_GITLAB_BRANCH": "x",
+                    "LANTERN_STORE_GITLAB_DEFAULT_BRANCH": "x",
                     "LANTERN_STORE_GITLAB_CACHE_PATH": None,
                 }
             ),
@@ -311,7 +311,7 @@ class TestConfig:
             ("STORE_GITLAB_ENDPOINT", "https://example.com", False),
             ("STORE_GITLAB_TOKEN", "x", True),
             ("STORE_GITLAB_PROJECT_ID", "x", False),
-            ("STORE_GITLAB_BRANCH", "x", False),
+            ("STORE_GITLAB_DEFAULT_BRANCH", "x", False),
             ("STORE_GITLAB_CACHE_PATH", Path("x").resolve(), False),
             ("TEMPLATES_PLAUSIBLE_ID", "x", False),
             ("TEMPLATES_ITEM_CONTACT_ENDPOINT", "https://example.com", False),

@@ -3,7 +3,7 @@ import logging
 import pytest
 
 from lantern.models.record.record import Record
-from lantern.stores.base import RecordNotFoundError, RecordsNotFoundError
+from lantern.stores.base import RecordNotFoundError, RecordsNotFoundError, StoreFrozenUnsupportedError
 from tests.resources.stores.fake_records_store import FakeRecordsStore
 
 
@@ -46,10 +46,13 @@ class TestBaseStore:
 
     @pytest.mark.cov()
     @pytest.mark.parametrize("frozen", [False, True])
-    def test_frozen(self, fx_logger: logging.Logger, frozen: bool):
+    def test_frozen(self, fx_fake_store: FakeRecordsStore, frozen: bool):
         """Can get whether store is frozen."""
-        store = FakeRecordsStore(logger=fx_logger, frozen=frozen)
-        assert store.frozen is frozen
+        if frozen:
+            # workaround for fake store not supporting freezing
+            fx_fake_store._frozen = True
+        fx_fake_store._frozen = frozen
+        assert fx_fake_store.frozen is frozen
 
     def test_ref(self, fx_logger: logging.Logger):
         """Can get unique instances of records from store."""
@@ -76,3 +79,8 @@ class TestBaseStore:
         """Cannot get an unknown record."""
         with pytest.raises(RecordNotFoundError):
             fx_fake_store.select_one("invalid")
+
+    def test_frozen_unsupported(self, fx_fake_store: FakeRecordsStore):
+        """Cannot freeze a store that does not support freezing."""
+        with pytest.raises(StoreFrozenUnsupportedError):
+            fx_fake_store.freeze()

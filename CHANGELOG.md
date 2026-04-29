@@ -25,6 +25,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
   `SITE_TRUSTED_RSYNC_BASE_PATH_LIVE`
 * Catalogue and alias namespace changed from `data.bas.ac.uk` to `lantern.data.bas.ac.uk` to avoid conflicts
 * Removing `VERIFY_SAN_PROXY_ENDPOINT` and `VERIFY_SHAREPOINT_PROXY_ENDPOINT` config options
+* `STORE_GITLAB_BRANCH` config option renamed to `STORE_GITLAB_DEFAULT_BRANCH`
+* Site meta object no longer accepts a GitLab store directly to set `build_repo_ref` (set directly instead)
 
 ### Removed [!BREAKING]
 
@@ -49,7 +51,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
   public website search items, ISO JSON/XML/HTML records)
 * `lantern.export` classes extracted from previous exporters and utils (local/Rsync/S3)
 * `SiteContent` and `SiteRedirect` site models for passing site content between Output and Exporter classes
-* `Catalogue` high level coordinating class combining Store, Site and Exporter classes
+* `Catalogue` high level coordinating class combining a Repository and Site class to manage records and content
 * CloudFront invalidation support added to live records workflow
 * Aria hidden role for icons
 * Aria roles for item tabs, with minimal JavaScript to support keyboard navigation between tabs
@@ -57,6 +59,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Records upgrade development task (2026-04) and usage/developer documentation
 * Parallel tests using `pytest-xdist`
 * Site environment (live/testing) included in site meta for use in templates
+* `Repository` high level coordinating class combining and abstracting Stores classes
 
 ### Fixed
 

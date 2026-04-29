@@ -1,6 +1,7 @@
 import json
 import logging
 from base64 import b64decode
+from collections.abc import Collection
 from dataclasses import dataclass
 from functools import cached_property
 from typing import Protocol, TypedDict
@@ -170,11 +171,7 @@ class GitLabStore(StoreBase):
     Records can be added or updated using `push()`, which commits changes to the remote GitLab project repository.
     """
 
-    def __init__(self, logger: logging.Logger, source: GitLabSource, access_token: str, frozen: bool = False) -> None:
-        if frozen:
-            msg = "GitLab stores cannot be frozen."
-            raise StoreFrozenUnsupportedError(msg) from None
-
+    def __init__(self, logger: logging.Logger, source: GitLabSource, access_token: str) -> None:
         self._logger = logger
         self._source = source
         self._access_token = access_token
@@ -323,7 +320,7 @@ class GitLabStore(StoreBase):
             hashes[file_identifier] = record.sha1 if record else None
         return hashes
 
-    def _commit(self, records: list[Record], title: str, message: str, author: tuple[str, str]) -> CommitResults:
+    def _commit(self, records: Collection[Record], title: str, message: str, author: tuple[str, str]) -> CommitResults:
         """
         Commit records to the GitLab repository.
 
@@ -385,7 +382,7 @@ class GitLabStore(StoreBase):
         results.commit = commit.id
         return results
 
-    def push(self, records: list[Record], title: str, message: str, author: tuple[str, str]) -> CommitResults:
+    def push(self, records: Collection[Record], title: str, message: str, author: tuple[str, str]) -> CommitResults:
         """
         Add or update records in the GitLab repository.
 
@@ -407,3 +404,7 @@ class GitLabStore(StoreBase):
         self._logger.info(f"Push successful as commit '{results.commit}'")
 
         return results
+
+    def freeze(self) -> None:
+        """Attempt to freeze store."""
+        raise StoreFrozenUnsupportedError() from None

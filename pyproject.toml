@@ -9,6 +9,7 @@ authors = [
 ]
 requires-python = ">=3.11"
 dependencies = [
+    "authlib>=1.6.9",
     "bas-metadata-library>=0.17.0",
     "beautifulsoup4>=4.13.4",
     "bleach>=6.2.0",
@@ -24,6 +25,7 @@ dependencies = [
     "jsonschema>=4.23.0",
     "markdown>=3.8.2",
     "markdown-gfm-admonition>=0.1.1",
+    "pathvalidate>=3.3.1",
     "python-gitlab>=8.0.0",
     "requests>=2.32.5",
     "sentry-sdk>=2.52.0",
@@ -109,7 +111,7 @@ cache-init = { cmd = "python -m tasks.cache_init", help = "Initialize records ca
 esri-record = { cmd = "python -m tasks.record_esri", help = "Add Esri item distribution options to a record" }
 esri-item = { cmd = "python -m tasks.esri_item", help = "Sync record details to an Esri item" }
 clone-record = { cmd = "python -m tasks.record_clone", help = "Clone record from cache into import directory" }
-gitlab-record = { cmd = "python -m tasks.record_gitlab", help = "Set GitLab issues for a record"}
+issues-record = { cmd = "python -m tasks.record_issues", help = "Set GitLab issues for a record"}
 admin-record = { cmd = "python -m tasks.record_dump_admin", help = "View administrative metadata for a record" }
 select-records = { cmd = "python -m tasks.records_select", help = "Copy records from cache to import directory for editing" }
 zap-records = { cmd = "python -m tasks.records_zap", help = "Process Zap ⚡️ authored records from import directory" }
@@ -222,7 +224,6 @@ LANTERN_ADMIN_METADATA_SIGNING_KEY_PUBLIC = "{\"kty\":\"EC\",\"kid\":\"bas_metad
 LANTERN_STORE_GITLAB_ENDPOINT = "https://gitlab.example.com"
 LANTERN_STORE_GITLAB_TOKEN="x"
 LANTERN_STORE_GITLAB_PROJECT_ID="1234"
-LANTERN_STORE_GITLAB_BRANCH="main"
 LANTERN_STORE_GITLAB_CACHE_PATH="cache"
 LANTERN_TEMPLATES_PLAUSIBLE_ID="x"
 LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT="https://example.com/contact" # must be "https://example.com/contact"
@@ -239,6 +240,7 @@ LANTERN_VERIFY_SHAREPOINT_PROXY_ENDPOINT="https://example.com"
 LANTERN_VERIFY_SAN_PROXY_ENDPOINT="https://example.com"
 LANTERN_BASE_URL_TESTING="https://example.com"
 LANTERN_BASE_URL_LIVE="https://example.com"
+LANTERN_STORE_GITLAB_DEFAULT_BRANCH = "main"
 X_ADMIN_METADATA_SIGNING_KEY_PRIVATE = "{\"kty\":\"EC\",\"kid\":\"bas_metadata_testing_signing_key\",\"alg\":\"ES256\",\"crv\":\"P-256\",\"x\":\"FzxBM1ZPO5W2bYlhT9AjZUKz5_oH5vIh4_k4aEZ64rM\",\"y\":\"vmK5PWOoIA9eO0ntLh37AMpVODyj0NWf842FwoN-GRs\",\"d\":\"2lBuUtJK2TcV_b4B-bDCPnRVAqMnYvnLZ41IUguprs8\"}"
 
 [tool.pytest.ini_options]
@@ -247,7 +249,7 @@ X_ADMIN_METADATA_SIGNING_KEY_PRIVATE = "{\"kty\":\"EC\",\"kid\":\"bas_metadata_t
 # -x               | stop after first failure [Overriden in CI]
 # --ff             | run failed tests first
 # -n auto          | run tests in parallel using all available CPUs
-addopts = "--strict-markers --random-order --ff -n auto"
+addopts = "--strict-markers --random-order -x --ff -n auto"
 markers = [
     "cov: coverage checks (deselect with '-m \"not cov\"')",
 ]

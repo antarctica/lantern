@@ -79,7 +79,7 @@ class TestGitLabSource:
         GitLabSource(
             endpoint=fx_config.STORE_GITLAB_ENDPOINT,
             project=fx_config.STORE_GITLAB_PROJECT_ID,
-            ref=fx_config.STORE_GITLAB_BRANCH,
+            ref=fx_config.STORE_GITLAB_DEFAULT_BRANCH,
         )
 
     @pytest.mark.parametrize("valid", [True, False])
@@ -90,7 +90,7 @@ class TestGitLabSource:
         source = GitLabSource(
             endpoint=endpoint,
             project=fx_config.STORE_GITLAB_PROJECT_ID,
-            ref=fx_config.STORE_GITLAB_BRANCH,
+            ref=fx_config.STORE_GITLAB_DEFAULT_BRANCH,
         )
 
         if not valid:
@@ -120,14 +120,8 @@ class TestGitLabStore:
 
     def test_init(self, fx_logger: logging.Logger, fx_config: Config, fx_gitlab_source: GitLabSource):
         """Can initialise store."""
-        GitLabStore(logger=fx_logger, source=fx_gitlab_source, access_token=fx_config.STORE_GITLAB_TOKEN)
-
-    def test_init_frozen(self, fx_logger: logging.Logger, fx_config: Config, fx_gitlab_source: GitLabSource):
-        """Cannot initialise frozen store."""
-        with pytest.raises(StoreFrozenUnsupportedError):
-            GitLabStore(
-                logger=fx_logger, source=fx_gitlab_source, access_token=fx_config.STORE_GITLAB_TOKEN, frozen=True
-            )
+        store = GitLabStore(logger=fx_logger, source=fx_gitlab_source, access_token=fx_config.STORE_GITLAB_TOKEN)
+        assert store.frozen is False
 
     def test_get_remote_hashed_path(self, fx_gitlab_store: GitLabStore):
         """Can get the path to a record within the remote repository."""
@@ -144,11 +138,6 @@ class TestGitLabStore:
         )
 
         assert len(fx_gitlab_store) > 0
-
-    @pytest.mark.cov()
-    def test_frozen(self, fx_gitlab_store: GitLabStore):
-        """Can get whether store is frozen."""
-        assert fx_gitlab_store.frozen is False
 
     @pytest.mark.cov()
     def test_source(self, fx_gitlab_store: GitLabStore, fx_gitlab_source: GitLabSource):
@@ -372,3 +361,9 @@ class TestGitLabStore:
             assert "No records pushed, skipping cache invalidation" in caplog.text
         else:
             assert "Push successful as commit" in caplog.text
+
+    @pytest.mark.cov()
+    def test_freeze(self, fx_gitlab_store: GitLabStore):
+        """Cannot freeze store (unsupported when not cached)."""
+        with pytest.raises(StoreFrozenUnsupportedError):
+            fx_gitlab_store.freeze()

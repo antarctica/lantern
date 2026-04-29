@@ -22,7 +22,6 @@ from lantern.models.site import (
     SitePageMeta,
     SiteRedirect,
 )
-from lantern.stores.gitlab import GitLabStore
 
 
 class TestOpenGraphMeta:
@@ -417,34 +416,26 @@ class TestSiteMetadata:
     @pytest.mark.parametrize(
         ("site_env", "exp_base_url"), [("testing", "https://red.com"), ("live", "https://blue.com")]
     )
-    @pytest.mark.parametrize(("has_store", "kwargs"), [(False, {"fallback_email": "y"}), (True, {})])
-    def test_from_config_store(
-        self,
-        mocker: MockerFixture,
-        fx_config: Config,
-        fx_gitlab_store: GitLabStore,
-        site_env: SiteEnvironment,
-        exp_base_url: str,
-        has_store: bool,
-        kwargs: dict,
+    @pytest.mark.parametrize("kwargs", [{}, {"fallback_email": "y"}, {"build_ref": "x"}])
+    def test_from_config(
+        self, mocker: MockerFixture, fx_config: Config, site_env: SiteEnvironment, exp_base_url: str, kwargs: dict
     ):
-        """Can create site metadata from config and optional store."""
+        """Can create site metadata from config and revision information."""
         mocker.patch.object(
             type(fx_config), "BASE_URL_TESTING", new_callable=PropertyMock, return_value="https://red.com"
         )
         mocker.patch.object(
             type(fx_config), "BASE_URL_LIVE", new_callable=PropertyMock, return_value="https://blue.com"
         )
-        mocker.patch.object(type(fx_gitlab_store), "head_commit", new_callable=PropertyMock, return_value="x")
-        store = fx_gitlab_store if has_store else None
+        expected_build_repo = kwargs.get("build_ref")
+        expected_fallback_email = kwargs.get("fallback_email", "magic@bas.ac.uk")
 
-        result = SiteMeta.from_config_store(config=fx_config, env=site_env, store=store, **kwargs)
+        result = SiteMeta.from_config(config=fx_config, env=site_env, **kwargs)
         assert isinstance(result, SiteMeta)
         assert result.env == site_env
         assert result.base_url == exp_base_url
-        assert result.build_repo_ref == None if not has_store else fx_gitlab_store.head_commit  # noqa: E711
-        for key, value in kwargs.items():
-            assert getattr(result, key) == value
+        assert result.build_repo_ref == expected_build_repo
+        assert result.fallback_email == expected_fallback_email
 
 
 class TestExportMetadata:
@@ -489,7 +480,7 @@ class TestExportMetadata:
 
     def test_from_config_store(self, fx_config: Config):
         """Can create ExportMetadata instance from config."""
-        result = ExportMeta.from_config_store(config=fx_config, env="testing")
+        result = ExportMeta.from_config(config=fx_config, env="testing")
         assert isinstance(result, ExportMeta)
         assert result.embedded_maps_endpoint == fx_config.TEMPLATES_ITEM_MAPS_ENDPOINT
 

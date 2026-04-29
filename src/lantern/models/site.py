@@ -12,7 +12,6 @@ from lantern.lib.metadata_library.models.record.elements.common import Date
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 from lantern.models.item.base.elements import Link
 from lantern.models.item.catalogue.elements import FormattedDate
-from lantern.stores.gitlab import GitLabStore
 
 
 @dataclass(kw_only=True)
@@ -291,14 +290,14 @@ class SiteMeta:
         self.html_schema_org = page_meta.schema_org
 
     @classmethod
-    def from_config_store(
-        cls, config: Config, env: SiteEnvironment, store: GitLabStore | None = None, **kwargs: Any
+    def from_config(
+        cls, config: Config, env: SiteEnvironment, build_ref: str | None = None, **kwargs: Any
     ) -> "SiteMeta":
         """
-        Create a Site Metadata instance from an app Config instance, optional GitLab Store and additional properties.
+        Create a Site Metadata instance from an app Config instance, environment and additional properties.
 
         The Config instance provides values for:
-        - base_url
+        - base_url (based on the environment from `env` parameter)
         - build_key
         - sentry_dsn
         - plausible_id
@@ -309,18 +308,10 @@ class SiteMeta:
         - build_repo_base_url
         - version
 
-        Note: `base_url` value is based on the live/testing environment (`env` parameter)
-
-        The optional GitLab Store (`store` parameter) provides values for:
-        - build_repo_ref
-
         Initial (blank) values for future override are set for:
         - html_title
         """
         base_url = config.BASE_URL_TESTING if env == "testing" else config.BASE_URL_LIVE
-        build_ref = None
-        if isinstance(store, GitLabStore):
-            build_ref = store.head_commit
 
         return cls(
             **{  # ty: ignore[invalid-argument-type]
@@ -367,22 +358,18 @@ class ExportMeta(SiteMeta):
         return SiteMeta(**_site_meta)
 
     @classmethod
-    def from_config_store(
-        cls,
-        config: Config,
-        env: SiteEnvironment,
-        store: GitLabStore | None = None,
-        **kwargs: bool | int | str | dict | Path | datetime | AdministrationKeys | None,
+    def from_config(
+        cls, config: Config, env: SiteEnvironment, build_ref: str | None = None, **kwargs: Any
     ) -> "ExportMeta":
         """
-        Create an Export Metadata instance from an app Config instance, optional GitLab Store and additional properties.
+        Create an Export Metadata instance from an app Config instance, environment and additional properties.
 
-        In addition to the properties provided by parent `from_config_store()`, the config instance provides values for:
+        In addition to the properties provided by parent `from_config()`, the config instance provides values for:
         - parallel_jobs
         - admin_meta_keys
         """
         site_kwargs = {k: v for k, v in kwargs.items() if k in {f.name for f in fields(SiteMeta)}}
-        super_meta = asdict(SiteMeta.from_config_store(config, env, store, **site_kwargs))
+        super_meta = asdict(SiteMeta.from_config(config, env, build_ref, **site_kwargs))
 
         return cls(
             **{  # ty: ignore[invalid-argument-type]

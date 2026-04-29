@@ -201,9 +201,9 @@ class Checker:
     Flexible class intended to be used in a higher level and opinionated Catalogue class.
     """
 
-    def __init__(self, logger: logging.Logger, meta: ExportMeta) -> None:
+    def __init__(self, logger: logging.Logger, parallel_jobs: int) -> None:
         self._logger = logger
-        self._meta = meta
+        self._parallel_jobs = parallel_jobs
 
     def execute(self, checks: list[Check]) -> list[Check]:
         """
@@ -211,15 +211,13 @@ class Checker:
 
         Returns executed checks.
         """
-        return Parallel(n_jobs=self._meta.parallel_jobs)(
-            delayed(run_check)(self._logger.level, check) for check in checks
-        )
+        return Parallel(n_jobs=self._parallel_jobs)(delayed(run_check)(self._logger.level, check) for check in checks)
 
-    def check(self, checks: list[Check]) -> list[SiteContent]:
+    def check(self, meta: ExportMeta, checks: list[Check]) -> list[SiteContent]:
         """
         Run checks.
 
         Returns report outputs for export. Use `execute()` to return raw checks.
         """
         results = self.execute(checks)
-        return ChecksOutput(logger=self._logger, meta=self._meta, checks=results).content
+        return ChecksOutput(logger=self._logger, meta=meta, checks=results).content

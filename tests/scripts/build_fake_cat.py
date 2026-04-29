@@ -4,7 +4,6 @@ from pathlib import Path
 from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 from tests.resources.admin_keys import test_keys
 from tests.resources.catalogues.fake_catalogue import FakeCatalogue
-from tests.resources.stores.fake_records_store import FakeRecordsStore
 
 from lantern.config import Config as ConfigBase
 from lantern.log import init as init_logging
@@ -30,8 +29,7 @@ def main() -> None:
     logger = logging.getLogger("app")
     logger.info("Initialising")
 
-    store = FakeRecordsStore(logger=logger)
-    cat = FakeCatalogue(logger=logger, config=config, store=store, base_path=path)
+    cat = FakeCatalogue(logger=logger, config=config, base_path=path)
 
     if purge:
         cat.purge()

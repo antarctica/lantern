@@ -100,6 +100,15 @@
 
 {% macro script_turnstile() %}
   <script async src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>
+  <script>
+    function onTurnstileError(code) {
+      const family = Math.trunc(code / 1000);
+      if (family === 300 || family === 600) {
+        return;
+      }
+      throw new Error(`Turnstile error: ${code}`);
+    }
+  </script>
 {% endmacro %}
 
 {% macro script_enhancements(build_key) %}

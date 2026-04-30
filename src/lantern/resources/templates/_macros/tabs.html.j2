@@ -24,7 +24,7 @@
           {% endfor %}
         </div>
         <aside id="data-restricted-info" class="col-span-1">
-          {% call com.alert(variant='yellow', classes="border-5 border-yellow-500 space-y-2") %}
+          {% call com.alert(shape='box', variant='yellow') %}
             <p class="text-lg {{ com.font_bolder_classes() }}">This item requires permission to access</p>
             <p>This may be because the item:</p>
             <ul class="list-disc pl-4">
@@ -151,7 +151,7 @@
 
 {% macro contact(data) %}
   <section id="tab-content-contact" class="space-y-8">
-    {% call com.alert(variant='blue') %}
+    {% call com.alert(shape='side', variant='blue') %}
       Contact the {% call com.strong() %}{{ data.team }}{% endcall %} with any questions or comments about this item.
     {% endcall %}
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-y-4 lg:gap-x-4">
@@ -176,7 +176,7 @@
         {% call com.item_title() %}&nbsp;{% endcall %}
         {% call com.item_border() %}
           <div class="space-y-2">
-            {% call com.alert(variant='blue') %}
+            {% call com.alert(shape='side', variant='blue') %}
               {{ com.restricted_i() }} This tab can only be seen by members of MAGIC.
             {% endcall %}
           </div>

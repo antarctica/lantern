@@ -18,12 +18,12 @@
     {{ com.page_header(main="Catalogue checks", sub='Admin', sub_i=com.maintenance_i_classes())}}
     <section class="space-y-4 space-y-8">
       {% if data.pass_fail %}
-        {% call com.alert(variant='green') %}All tests passed 😀{% endcall %}
+        {% call com.alert(shape='side', variant='green') %}All tests passed 😀{% endcall %}
       {% else %}
-        {% call com.alert(variant='red') %}Some tests failed 😣{% endcall %}
+        {% call com.alert(shape='side', variant='red') %}Some tests failed 😣{% endcall %}
       {% endif %}
 
-      {% call com.alert(variant='blue') %}
+      {% call com.alert(shape='side', variant='blue') %}
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-y-4 lg:gap-x-4">
           <div class="grid grid-cols-1 gap-y-4 lg:gap-x-8 lg:grid-cols-[auto_1fr]">
             <div class="{{ com.font_bolder_classes() }}">Site tested</div>
@@ -67,7 +67,7 @@
     </section>
 
     <section>
-      {% call com.alert(variant='blue') %}
+      {% call com.alert(shape='side', variant='blue') %}
         The underlying data for this report is <a class="{{ com.link_classes() }}" href="/-/verification/data.json">available as JSON</a> for further processing.
       {% endcall %}
     </section>

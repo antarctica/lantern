@@ -66,6 +66,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Inconsistencies with supporting optional admin metadata
 * Test group dependencies not being included vulnerabilities app task
 * Configuration for local stack GitLab enabled project features and SMTP STARTTLS
+* UI padding for box type alerts
 
 ### Changed
 

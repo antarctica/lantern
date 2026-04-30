@@ -129,7 +129,7 @@
       {% if required %}required{% endif %}
     ></textarea>
     {% if warning %}
-      {% call alert(variant='yellow', classes="space-y-2") %}{{ warning }}{% endcall %}
+      {% call alert(shape='side', variant='yellow', classes="space-y-2") %}{{ warning }}{% endcall %}
     {% endif %}
   </div>
 {% endmacro %}
@@ -190,20 +190,28 @@
   {% endif %}
 {% endmacro %}
 
-{% macro alert(variant, classes="") %}
-  {% set variant_colour = "grey-500" %}
-  {% if variant == "green" %}
-    {% set variant_colour = "green-500" %}
-  {% elif variant == "yellow" %}
-    {% set variant_colour = "yellow-500" %}
-  {% elif variant == "red" %}
-    {% set variant_colour = "red-500" %}
-  {% elif variant == "blue" %}
-    {% set variant_colour = "sky-blue-500" %}
-  {% elif variant == "purple" %}
-    {% set variant_colour = "mauve-500" %}
+{% macro alert(shape, variant, classes="") %}
+  {% set shape_classes = "" %}
+  {% if shape == "side" %}
+    {% set shape_classes = "pr-0 border-l-5" %}
+  {% elif shape == "box" %}
+    {% set shape_classes = "border-5 space-y-2" %}
   {% endif %}
-  <div class="p-4 pr-0 border-l-5 border-l-{{ variant_colour }} {{ classes }}">
+
+  {% set variant_classes = "grey-500" %}
+  {% if variant == "green" %}
+    {% set variant_classes = "green-500" %}
+  {% elif variant == "yellow" %}
+    {% set variant_classes = "yellow-500" %}
+  {% elif variant == "red" %}
+    {% set variant_classes = "red-500" %}
+  {% elif variant == "blue" %}
+    {% set variant_classes = "sky-blue-500" %}
+  {% elif variant == "purple" %}
+    {% set variant_classes = "mauve-500" %}
+  {% endif %}
+
+  <div class="p-4 {{ shape_classes }} border-{{ variant_classes }} {{ classes }}">
     {{ caller() }}
   </div>
 {% endmacro %}

@@ -5,10 +5,10 @@
   <section id="{{ slug }}" class="space-y-4">
     <h2 class="text-2xl">{{ title }}</h2>
     {% if danger %}
-      {% call com.alert(variant='red') %}{{ danger }}{% endcall %}
+      {% call com.alert(shape='side', variant='red') %}{{ danger }}{% endcall %}
     {% endif %}
     {% if tip %}
-      {% call com.alert(variant='green') %}{{ tip }}{% endcall %}
+      {% call com.alert(shape='side', variant='green') %}{{ tip }}{% endcall %}
     {% endif %}
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-y-4 lg:gap-x-4">
       {% call com.item_border() %}
@@ -56,7 +56,7 @@
       </ul>
     </section>
 
-    {% call com.alert(variant='blue') %}
+    {% call com.alert(shape='side', variant='blue') %}
       <div class="space-y-4">
         <p>This guide applies to these Markdown enabled fields:</p>
         <ul class="list-disc pl-5">

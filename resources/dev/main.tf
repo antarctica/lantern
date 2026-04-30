@@ -50,7 +50,7 @@ resource "gitlab_project" "lantern_records" {
   forking_access_level                 = "disabled"
   infrastructure_access_level          = "disabled"
   issues_access_level                  = "disabled"
-  merge_requests_access_level          = "disabled"
+  merge_requests_access_level          = "enabled"
   model_experiments_access_level       = "disabled"
   model_registry_access_level          = "disabled"
   monitor_access_level                 = "disabled"

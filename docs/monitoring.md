@@ -1,7 +1,7 @@
 # Lantern - Monitoring
 
 > [!NOTE]
-> Parts of this page are specific to the [BAS Data Catalogue](/docs/architecture.md#bas-data-catalogue).
+> Parts of this page are specific to the [BAS Catalogue](/docs/architecture.md#bas-catalogue).
 
 ## Monitoring configuration
 
@@ -66,7 +66,7 @@ a custom [widget](/docs/site.md#user-feedback).
 ## Plausible
 
 [Plausible](https://plausible.io) is used for recording web analytics in the
-[BAS Data Catalogue](/docs/architecture.md#bas-data-catalogue) static site.
+[BAS Catalogue](/docs/architecture.md#bas-catalogue) static site.
 
 - [Plausible Dashboard 🔒](/docs/infrastructure.md#plausible)
 

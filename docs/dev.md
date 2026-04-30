@@ -69,6 +69,9 @@ Requirements:
 Setup:
 
 - install tools `brew install --cask orbstack opentofu`
+
+Start:
+
 - start stack using the `stack-start` [Development Task](#development-tasks)
 - Run [GitLab](#local-development-gitlab) manual pre-configuration
 - Run local Infrastructure as Code using OpenTofu [2]
@@ -153,7 +156,7 @@ Manual pre-configuration:
 - open [Local Email Server](https://mail.dev.orb.local) and follow link in signup email to set password
 - create a [Personal Access Token](https://gitlab.dev.orb.local/-/user_settings/personal_access_tokens):
   - token name: `lantern-dev-tf`
-  - scopes: `api`
+  - scopes: `api`, `sudo`
 
 Manual post-configuration:
 
@@ -682,15 +685,15 @@ known values are used in tests).
 To update a specific test:
 
 ```text
-% uv run pytest --record-mode=once tests/path/to/test_module.py::<class>::<method>
+% uv run pytest -n 0 --record-mode=once tests/path/to/test_module.py::<class>::<method>
 # E.g.
-% uv run pytest --record-mode=once tests/lantern_tests/stores/test_gitlab_store.py::TestGitLabLocalCache::test_fetch_file_commits
+% uv run pytest -n 0 --record-mode=once tests/lantern_tests/stores/test_gitlab_store.py::TestGitLabLocalCache::test_fetch_file_commits
 ```
 
 To incrementally build up a set of related tests (including parameterised tests) use the `new_episodes` recording mode:
 
 ```text
-% uv run pytest --record-mode=new_episodes tests/path/to/test_module.py::<class>::<method>
+% uv run pytest -n 0 --record-mode=new_episodes tests/path/to/test_module.py::<class>::<method>
 ```
 
 ### Static site template tests

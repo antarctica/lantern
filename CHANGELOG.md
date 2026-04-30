@@ -64,6 +64,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 ### Fixed
 
 * Inconsistencies with supporting optional admin metadata
+* Test group dependencies not being included vulnerabilities app task
 
 ### Changed
 

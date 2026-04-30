@@ -26,7 +26,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Catalogue and alias namespace changed from `data.bas.ac.uk` to `lantern.data.bas.ac.uk` to avoid conflicts
 * Removing `VERIFY_SAN_PROXY_ENDPOINT` and `VERIFY_SHAREPOINT_PROXY_ENDPOINT` config options
 * `STORE_GITLAB_BRANCH` config option renamed to `STORE_GITLAB_DEFAULT_BRANCH`
-* Site meta object no longer accepts a GitLab store directly to set `build_repo_ref` (set directly instead)
+* Site-meta object no longer accepts a GitLab store directly to set `build_repo_ref` (set directly instead)
 
 ### Removed [!BREAKING]
 
@@ -60,11 +60,14 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Parallel tests using `pytest-xdist`
 * Site environment (live/testing) included in site meta for use in templates
 * `Repository` high level coordinating class combining and abstracting Stores classes
+* Error handler for Turnstile to handle/ignore client side errors
 
 ### Fixed
 
 * Inconsistencies with supporting optional admin metadata
 * Test group dependencies not being included vulnerabilities app task
+* Configuration for local stack GitLab enabled project features and SMTP STARTTLS
+* UI padding for box type alerts
 
 ### Changed
 

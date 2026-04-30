@@ -600,7 +600,7 @@ def fx_lib_arcgis_item_properties() -> ArcGisItemProperties:
 
 @pytest.fixture()
 def fx_lib_arcgis_item(fx_lib_arcgis_item_properties: ArcGisItemProperties) -> ArcGisItem:
-    """Minimal ArcGiS Item instance."""
+    """Minimal ArcGIS Item instance."""
     return ArcGisItem(
         id="x",
         owner="x",

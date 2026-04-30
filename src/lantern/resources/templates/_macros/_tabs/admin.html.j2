@@ -22,25 +22,25 @@
 
       {% call com.dl_item(title='Item Restricted?', id='admin-restricted') %}
         {% if data.restricted %}
-          {% call com.alert(variant='red') %}Yes{% endcall %}
+          {% call com.alert(shape='side', variant='red') %}Yes{% endcall %}
         {% else %}
-          {% call com.alert(variant='green') %}No{% endcall %}
+          {% call com.alert(shape='side', variant='green') %}No{% endcall %}
         {% endif %}
       {% endcall %}
 
       {% call com.dl_item(title='Metadata Access', id='admin-metadata-access') %}
         {% if data.metadata_access == 'PUBLIC' %}
-          {% call com.alert(variant='green') %}Public (Open Access){% endcall %}
+          {% call com.alert(shape='side', variant='green') %}Public (Open Access){% endcall %}
         {% else %}
-          {% call com.alert(variant='red') %}{{ data.metadata_access }}{% endcall %}
+          {% call com.alert(shape='side', variant='red') %}{{ data.metadata_access }}{% endcall %}
         {% endif %}
       {% endcall %}
 
       {% call com.dl_item(title='Resource Access', id='admin-resource-access') %}
         {% if data.resource_access == 'PUBLIC' %}
-          {% call com.alert(variant='green') %}Public (Open Access){% endcall %}
+          {% call com.alert(shape='side', variant='green') %}Public (Open Access){% endcall %}
         {% else %}
-          {% call com.alert(variant='red') %}{{ data.resource_access }}{% endcall %}
+          {% call com.alert(shape='side', variant='red') %}{{ data.resource_access }}{% endcall %}
         {% endif %}
       {% endcall %}
 

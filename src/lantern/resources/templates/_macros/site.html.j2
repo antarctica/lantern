@@ -177,7 +177,7 @@
       {{ com.form_input(id="feedback-email", name="Contact email (optional)", type='email') }}
     </div>
     <footer class="space-y-2">
-      {% call com.alert(variant='blue') %}
+      {% call com.alert(shape='side', variant='blue') %}
         <p>Basic device information will be included with your feedback.
           See our <a class="{{ com.link_classes() }}" href="/legal/privacy">privacy policy</a> for more information.</p>
       {% endcall %}
@@ -185,12 +185,12 @@
         Send Feedback <i class="fa-regular fa-paper-plane-top" aria-hidden="true"></i>
       </button>
     <div id="feedback-success" class="hidden">
-      {% call com.alert(variant='green') %}
+      {% call com.alert(shape='side', variant='green') %}
         <p>Thank you for your feedback!</p>
       {% endcall %}
     </div>
     <div id="feedback-error" class="hidden">
-      {% call com.alert(variant='red', classes='space-y-2') %}
+      {% call com.alert(shape='side', variant='red', classes='space-y-2') %}
         <p>Error sending feedback.</p>
         <p>Please try again later or <a class="{{ com.link_classes() }}" href="mailto:{{ fallback_email }}">contact us</a>.</p>
         <p>If you are using an ad-blocker, please ensure Sentry is allowed.</p>

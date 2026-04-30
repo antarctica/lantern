@@ -60,7 +60,7 @@ test = [
 ]
 
 [tool.uv]
-exclude-newer-package = { bas-metadata-library = false, cryptography = false }
+exclude-newer-package = { bas-metadata-library = false }
 
 [[tool.uv.index]]
 name = "self"
@@ -87,7 +87,7 @@ test = { cmd = "pytest", help = "Run tests" }
 test-cov = { cmd = "pytest {cov_options}", help = "Run tests with coverage", use_vars = true }
 test-reset = { cmd = "pytest --cache-clear", help = "Reset pytest cache and run tests" }
 vulnerabilities = { cmd = "uv audit --frozen", help = "Check for insecure dependencies" }
-outdated = { cmd = "uv tree --outdated --depth=1", help = "List outdated directed dependencies" }
+outdated = { cmd = "uv tree --all-groups --outdated --depth=1", help = "List outdated directed dependencies" }
 # CI
 ci-test = { cmd = "pytest {cov_options} -o junit_family=xunit2 --junitxml=test-results.xml --continue-on-collection-errors", help = "Called by CI", use_vars = true }
 # local stack

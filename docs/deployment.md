@@ -1,7 +1,7 @@
 # Lantern - Deployment
 
 > [!NOTE]
-> Parts of this page are specific to the [BAS Data Catalogue](/docs/architecture.md#bas-data-catalogue).
+> Parts of this page are specific to the [BAS Catalogue](/docs/architecture.md#bas-catalogue).
 
 ## Python package
 
@@ -97,3 +97,12 @@ Then:
 - manually re-run the [Ansible Playbook](/docs/deployment.md#ansible-playbook)
 - manually set the updated token for [Item Enquires](/docs/setup.md#gitlab-item-enquires) in Power Automate
 - set a calendar reminder to repeat this process in 32 days
+
+> [!TIP]
+> To check the expiry date of managed tokens:
+>
+> ```shell
+> % cd resources/envs
+> % terraform state show 'gitlab_personal_access_token.lantern_bot_pa_item_enquires'
+> % terraform state show 'gitlab_personal_access_token.lantern_bot_ansible_workstation_module'
+> ```

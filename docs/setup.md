@@ -1,7 +1,7 @@
 # Lantern - Setup
 
 > [!NOTE]
-> This page is specific to the [BAS Data Catalogue](/docs/architecture.md#bas-data-catalogue).
+> This page is specific to the [BAS Catalogue](/docs/architecture.md#bas-catalogue).
 
 ## 1Password
 

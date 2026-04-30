@@ -9,7 +9,8 @@ They are used by [Exporters](/docs/architecture.md#exporters) to access Records 
 
 Stores use these options from the app `lantern.Config` class:
 
-- `STORE_GITLAB_BRANCH`: remote branch name for [GitLab Store](#gitlab-store), will be created if it does not exist
+- `STORE_GITLAB_DEFAULT_BRANCH`: default remote branch name for [GitLab Store](#gitlab-store), will be created if it
+  does not exist
 - `STORE_GITLAB_STORE_CACHE_PATH`: local path for [GitLab Cached Store](#gitlab-cached-store), will be created if it
   does not exist
 - `STORE_GITLAB_STORE_ENDPOINT`: API endpoint of a GitLab instance for [GitLab Store](#gitlab-store)
@@ -29,22 +30,23 @@ All stores inherit from the `lantern.stores.base.Store` abstract base class and 
 public interface to:
 
 - select some or all available Records, using `store.select()`
--select a specific Record by file identifier, using `store.select_one()`
+- select a specific Record by file identifier, using `store.select_one()`
 - where applicable, configure a Store as [Frozen](#frozen-stores) (read-only)
 
 Stores MAY support additional features, such as storing new or updated Records.
 
 ## Frozen stores
 
-Stores can typically be configured as frozen (read-only) by setting a `frozen` flag on instantiation. Frozen
-stores are intended for where data integrity in parallel processing and/or fast access is critical.
+Stores MAY be configurable as frozen (read-only) by calling a `freeze()` method after instantiation. Frozen stores are
+intended for data integrity and increased performance in parallel processing.
 
-> [!WARNING]
-> Stores that do not support freezing will raise a `lantern.stores.exceptions.StoreFrozenUnsupportedError` if the
-> `frozen` flag is set.
+> [!NOTE]
+> Stores that do not support freezing will raise a `lantern.stores.exceptions.StoreFrozenUnsupportedError` if attempted.
 >
 > Frozen stores will raise a `lantern.stores.exceptions.StoreFrozenError` for any operations that would modify and/or
 > access additional Records.
+>
+> Frozen stores cannot be unfrozen.
 
 ## GitLab store
 

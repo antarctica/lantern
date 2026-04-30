@@ -3,20 +3,22 @@
 > [!NOTE]
 > This project forms part of the MAGIC Spatial Data Infrastructure (SDI) as a discovery service.
 
-## BAS Data Catalogue
+## BAS Catalogue
 
 `lantern.catalogue.BasCatalogue`
 
-The BAS Data Catalogue is the primary use case for this project, and the only supported [Catalogue](#catalogues).
+The BAS Catalogue underpins the BAS Data Catalogue and only supported [Catalogue](#catalogues).
 
 > [!TIP]
-> See the [Access](/docs/access.md) docs for more information about how to access the BAS Data Catalogue.
+> See the [Access](/docs/access.md) docs for how to access the BAS Catalogue.
 
 At a high level it consists of:
 
-![BAS Data Catalogue overview](/docs/img/architecture-bas-overview.png)
+![BAS Catalogue overview](/docs/img/architecture-bas-overview.png)
 
-- a [GitLab Store](#gitlab) to manage Records
+![BAS Catalogue editing](/docs/img/architecture-bas-editing.png)
+
+- a BAS [Repository](#repositories) to read and write records in a [GitLab Store](#gitlab)
 - an experimental editor [Zap ⚡️](https://github.com/felnne/zap) to create most records
 - various automated systems to create and update specific Records
 - a [Site](#sites) for untrusted (public) content, hosted in [AWS S3](#amazon-s3)
@@ -29,12 +31,12 @@ At a high level it consists of:
 >
 > All other content is considered non-sensitive (untrusted/unrestricted), and intended for public consumption.
 
-The BAS catalogue contains sub-catalogues for:
+The BAS Catalogue contains sub-catalogues for:
 
 - testing and live environments (used for previewing content and general access respectively)
 - trusted and untrusted content, per environment
 
-![BAS Data Catalogue components](/docs/img/architecture-bas-detail.png)
+![BAS Catalogue components](/docs/img/architecture-bas-detail.png)
 
 ## Trusted Publishing
 
@@ -50,15 +52,13 @@ example.
 
 A Python application defined within the `src/lantern` package consisting of:
 
+- a logging class, including [Sentry](/docs/monitoring.md#sentry) integration
 - a [Config](/docs/config.md) class
-- a logging class
 - a [Catalogue](#catalogues) class
-- a [Site](#sites) class
-- a [Verification](/docs/monitoring.md#site-verification) class
 
 ## Catalogues
 
-`lantern.catalogue.Catalogue`
+`lantern.catalogues`
 
 Catalogues are the core component of this project, responsible for:
 
@@ -68,7 +68,7 @@ Catalogues are the core component of this project, responsible for:
 
 A minimum Catalogue consists of:
 
-![Minimum catalogue components](/docs/img/architecture-min.png)
+![Minimum catalogue components](/docs/img/architecture-generic-min.png)
 
 - a [Store](#stores) to manage and access Records created by [Editors](#record-editors)
 - a [Site](#sites) generator
@@ -76,8 +76,14 @@ A minimum Catalogue consists of:
 - a [Checker](/docs/monitoring.md#site-checks) to verify generated site content and downloads linked from records
 
 > [!IMPORTANT]
-> Only the [BAS Data Catalogue](#bas-data-catalogue) and [Test Catalogue](/docs/dev.md#test-catalogue) are formally
-> supported by this project.
+> Only the [BAS Catalogue](#bas-catalogue) is officially supported by this project.
+
+## Repositories
+
+`lantern.repositories`
+
+Repositories abstract managing [Records](/docs/models.md#records) in one or more [Stores](#stores) within larger
+[Catalogues](#catalogues).
 
 ## Sites
 
@@ -98,7 +104,10 @@ See the [Checks](/docs/monitoring.md#site-checks) docs for information about the
 
 ## Stores
 
-Stores create, update, read and delete Records in local or remote systems, such as GitLab.
+`lantern.stores`
+
+Stores create, update, read and delete Records in local or remote systems, such as GitLab. They are used in
+[Repositories](#repositories) in larger [Catalogues](#catalogues).
 
 They provide access to Records used to build a [Site](#sites) and may add or update Records for use in future builds.
 
@@ -106,12 +115,16 @@ See the [Stores](/docs/stores.md) docs for more information.
 
 ## Outputs
 
+`lantern.outputs`
+
 Outputs create different parts of a [Site](#sites), such as Item pages, general resources such as CSS files and
 monitoring / API discovery endpoints. Outputs also create [Checks](/docs/monitoring.md#site-checks) for their content.
 
 See the [Outputs](/docs/outputs.md) docs for more information.
 
 ## Exporters
+
+`lantern.exporters`
 
 Exporters save files to local or remote systems, such as an S3 bucket.
 

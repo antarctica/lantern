@@ -2,7 +2,7 @@
 
 <!-- pyml disable md028 -->
 > [!NOTE]
-> This page is specific to the [BAS Data Catalogue](/docs/architecture.md#bas-data-catalogue).
+> This page is specific to the [BAS Catalogue](/docs/architecture.md#bas-catalogue).
 
 > [!NOTE]
 > These are draft workflows and are not intended for use by general end-users.
@@ -494,7 +494,7 @@ The `restrict-records` task will:
 
 ## Build static site
 
-To build the static site for the [BAS Data Catalogue](/docs/architecture.md#bas-data-catalogue):
+To build the static site for the [BAS Catalogue](/docs/architecture.md#bas-catalogue):
 
 1. set the options in `tasks/records_build.py` for whether to export the site locally and/or publish remotely
 1. run the `build-records` [Development Task](/docs/dev.md#development-tasks)
@@ -508,7 +508,7 @@ The `build-records` task will:
 
 ## Check static site
 
-To [Check](/docs/monitoring.md#site-checks) the [BAS Data Catalogue](/docs/architecture.md#bas-data-catalogue):
+To [Check](/docs/monitoring.md#site-checks) the [BAS Catalogue](/docs/architecture.md#bas-catalogue):
 
 1. set the options in `tasks/records_check.py` for the site environment to check
 1. run the `check-records` [Development Task](/docs/dev.md#development-tasks)

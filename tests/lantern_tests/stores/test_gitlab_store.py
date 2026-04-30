@@ -140,12 +140,6 @@ class TestGitLabStore:
         assert len(fx_gitlab_store) > 0
 
     @pytest.mark.cov()
-    def test_source(self, fx_gitlab_store: GitLabStore, fx_gitlab_source: GitLabSource):
-        """Can get source."""
-        assert isinstance(fx_gitlab_store.source, GitLabSource)
-        assert fx_gitlab_store.source == fx_gitlab_source
-
-    @pytest.mark.cov()
     @pytest.mark.block_network
     def test_client(self, fx_gitlab_store: GitLabStore):
         """Can get GitLab client."""

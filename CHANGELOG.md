@@ -26,7 +26,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Catalogue and alias namespace changed from `data.bas.ac.uk` to `lantern.data.bas.ac.uk` to avoid conflicts
 * Removing `VERIFY_SAN_PROXY_ENDPOINT` and `VERIFY_SHAREPOINT_PROXY_ENDPOINT` config options
 * `STORE_GITLAB_BRANCH` config option renamed to `STORE_GITLAB_DEFAULT_BRANCH`
-* Site meta object no longer accepts a GitLab store directly to set `build_repo_ref` (set directly instead)
+* Site-meta object no longer accepts a GitLab store directly to set `build_repo_ref` (set directly instead)
 
 ### Removed [!BREAKING]
 

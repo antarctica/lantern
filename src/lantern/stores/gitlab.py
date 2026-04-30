@@ -23,7 +23,9 @@ class GitLabSource:
     """
     Elements of a GitLab remote repository.
 
-    E.g. https://gitlab.data.bas.ac.uk/foo/bar/.../main (where 'foo/bar' is a project with ID '123'), gives:
+    Consists of '{endpoint}/{group_project}/.../{ref}'
+
+    E.g. https://gitlab.data.bas.ac.uk/foo/bar/.../main (where 'foo/bar' is a project with ID '123' in a group), gives:
     - endpoint: 'https://gitlab.data.bas.ac.uk'
     - instance: 'gitlab.data.bas.ac.uk'
     - project: '123'
@@ -127,7 +129,7 @@ class CommitResults:
         self.stats = CommitResultsStats(changes=changes, actions=actions)
 
     def __eq__(self, other: object) -> bool:
-        """Equality comparison for tests."""
+        """Equality comparison."""
         if not isinstance(other, CommitResults):
             return False
         return (
@@ -166,7 +168,10 @@ class GitLabStore(StoreBase):
 
     Uses https://python-gitlab.readthedocs.io/ and the GitLab API, rather than the generic Git protocol.
 
-    Does not support freezing or deleting or renaming/moving records.
+    Does not support freezing (see `GitLabCachedStore`), or deleting/renaming/moving records.
+
+    Source is a read only property for compatibility with cached GL stores (where changing source will break cache).
+    `_get_hashes_callable` is configurable for cached stores can use a more efficient alternative.
 
     Records can be added or updated using `push()`, which commits changes to the remote GitLab project repository.
     """
@@ -193,19 +198,15 @@ class GitLabStore(StoreBase):
         """
         Count of records in store.
 
-        Deliberately simplistic as this method is not expected to be used for this store.
+        Should not be used for non-cached stores as it will simplisticly request all records from the remote source.
         """
+        self._logger.warning("Avoid calling this method on uncached stores as all records are fetched.")
         return len(self.select())
 
     @property
     def frozen(self) -> bool:
         """Static value, as GitLab stores cannot be frozen."""
         return False
-
-    @property
-    def source(self) -> GitLabSource:
-        """GitLab repository information."""
-        return self._source
 
     @cached_property
     def _client(self) -> Gitlab:
@@ -346,9 +347,9 @@ class GitLabStore(StoreBase):
 
         existing_hashes = self._get_hashes_callable(file_identifiers={record.file_identifier for record in records})
         for record in records:
-            self._logger.info(f"Existing: '{existing_hashes[record.file_identifier]}', New: '{record.sha1}'")
+            self._logger.debug(f"Existing: '{existing_hashes[record.file_identifier]}', New: '{record.sha1}'")
             if record.sha1 == existing_hashes[record.file_identifier]:
-                self._logger.info(f"Record '{record.file_identifier}' is unchanged, skipping")
+                self._logger.debug(f"Record '{record.file_identifier}' is unchanged, skipping")
                 continue
 
             action = "update"

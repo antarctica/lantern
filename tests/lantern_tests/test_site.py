@@ -1,4 +1,3 @@
-import importlib
 import logging
 from collections.abc import Callable
 
@@ -26,30 +25,18 @@ from lantern.stores.gitlab_cache import GitLabCachedStore
 from tests.resources.records.item_cat_product_min import record as product_min_required
 
 
-@pytest.fixture()
-def fx_reset_singletons():
-    """Reset singletons for test isolation."""
-    mod = importlib.import_module("lantern.site")
-    mod._STORE_SINGLETON = None
-    mod._ISO_HTML_XSLT_SINGLETON = None
-
-    yield
-
-    mod._STORE_SINGLETON = None
-    mod._ISO_HTML_XSLT_SINGLETON = None
-
-
+@pytest.mark.usefixtures("fx_reset_site_singletons")
 class TestSiteJob:
     """Test functions related to site generator parallel processing jobs."""
 
     @pytest.mark.cov()
-    def test_job_worker_store(self, fx_reset_singletons, fx_fake_store: StoreBase):  # noqa: ANN001
+    def test_job_worker_store(self, fx_fake_store: StoreBase):
         """Can create store instance."""
         result = _job_worker_store(store=fx_fake_store)
         assert isinstance(result, StoreBase)
 
     @pytest.mark.cov()
-    def test_job_worker_store_gitlab_cache(self, fx_reset_singletons, fx_gitlab_cached_store_pop: GitLabCachedStore):  # noqa: ANN001
+    def test_job_worker_store_gitlab_cache(self, fx_gitlab_cached_store_pop: GitLabCachedStore):
         """Can create and re-warm GitLabCachedStore instance."""
         fx_gitlab_cached_store_pop._cache._flash.clear()
         result = _job_worker_store(store=fx_gitlab_cached_store_pop)
@@ -57,7 +44,7 @@ class TestSiteJob:
         assert len(result._cache._flash) > 0
 
     @pytest.mark.cov()
-    def test_job_worker_iso_transform(self, fx_reset_singletons):  # noqa: ANN001
+    def test_job_worker_iso_transform(self):
         """Can create ISO HTML XSLT instance."""
         result = _job_worker_iso_html_transform()
         assert isinstance(result, etree.XSLT)

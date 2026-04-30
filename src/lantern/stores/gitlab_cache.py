@@ -633,7 +633,7 @@ class GitLabCachedStore(GitLabStore):
     """
     GitLab store accessed through a local SQLite based cache for performance and offline support.
 
-    Supports freezing.
+    Supports freezing via `freeze()` method which will first ensure the cache is refreshed.
 
     The local cache is refreshed on record access or update. It can be fully reset if needed using `purge()`.
 

@@ -14,7 +14,7 @@ class FakeRepository(RepositoryBase):
 
     Used to test RepositoryBase.
 
-    Simplistic example wrapping a single Store. Would not be used in practice (over managing Store directly).
+    Simplistic example wrapping a single Store. Would not be used in practice (over using a Store directly).
     """
 
     def __init__(self, logger: logging.Logger, config: Config, store: FakeRecordsStore) -> None:

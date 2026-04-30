@@ -34,7 +34,7 @@ services:
         gitlab_rails['smtp_ssl'] = false
         gitlab_rails['smtp_force_ssl'] = false
         gitlab_rails['smtp_openssl_verify_mode'] = 'none'
-        gitlab_rails['smtp_enable_starttls_auto'] = falses
+        gitlab_rails['smtp_enable_starttls_auto'] = false
     volumes:
       - './gitlab/run/config:/etc/gitlab'
       - './gitlab/run/logs:/var/log/gitlab'

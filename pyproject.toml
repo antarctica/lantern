@@ -113,6 +113,7 @@ esri-item = { cmd = "python -m tasks.esri_item", help = "Sync record details to 
 clone-record = { cmd = "python -m tasks.record_clone", help = "Clone record from cache into import directory" }
 issues-record = { cmd = "python -m tasks.record_issues", help = "Set GitLab issues for a record"}
 admin-record = { cmd = "python -m tasks.record_dump_admin", help = "View administrative metadata for a record" }
+restrict-record = { cmd = "python -m tasks.record_permissions", help = "Set access permissions for a record" }
 select-records = { cmd = "python -m tasks.records_select", help = "Copy records from cache to import directory for editing" }
 zap-records = { cmd = "python -m tasks.records_zap", help = "Process Zap ⚡️ authored records from import directory" }
 ops-eo-records = { cmd = "python -m tasks.records_ops_eo", help = "Process Ops EO authored records from import directory" }
@@ -121,7 +122,6 @@ import-records = { cmd = "python -m tasks.records_import", help = "Import record
 build-records = { cmd = "python -m tasks.records_build", help = "Build records as a catalogue site" }
 check-records = { cmd = "python -m tasks.records_check", help = "Check static site and records contents" }
 invalidate-records = { cmd = "python -m tasks.records_invalidate", help = "Invalidate cached records in live site" }
-restrict-records = { cmd = "python -m tasks.records_permissions", help = "Set access permissions for chosen records" }
 upgrade-records = { cmd = "python -m tasks.records_upgrade_2026_04", help = "Upgrade records" }
 bootstrap-records = { cmd = "python -m tasks.records_bootstrap", help = "Bootstrap a new records repo" }
 workflow-testing = { cmd = "python -m tasks.records_workflow_testing", help = "Import records to testing site" }

@@ -177,6 +177,7 @@ class SharingLevel(Enum):
     Original import: `arcgis.gis._impl._content_manager.sharing.api.SharingLevel`
     """
 
-    ORG = "ORGANIZATION"
     PRIVATE = "PRIVATE"
+    ORG = "ORGANIZATION"
+    SHARED = "SHARED"
     EVERYONE = "EVERYONE"

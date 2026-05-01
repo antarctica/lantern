@@ -7,6 +7,12 @@ OPEN_ACCESS = Constraint(
     statement="Open Access (Anonymous)",
 )
 
+BAS_ACCESS = Constraint(
+    type=ConstraintTypeCode.ACCESS,
+    restriction_code=ConstraintRestrictionCode.UNRESTRICTED,
+    statement="Closed Access (BAS Staff)",
+)
+
 OGL_V3 = Constraint(
     type=ConstraintTypeCode.USAGE,
     restriction_code=ConstraintRestrictionCode.LICENSE,

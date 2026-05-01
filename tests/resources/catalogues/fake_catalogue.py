@@ -1,9 +1,8 @@
-import functools
 import logging
 import shutil
-import time
-from collections.abc import Callable
 from pathlib import Path
+
+from tasks._shared import time_task
 
 from lantern.catalogues.base import CatalogueBase
 from lantern.checks import Checker
@@ -12,28 +11,6 @@ from lantern.exporters.local import LocalExporter
 from lantern.models.site import ExportMeta
 from lantern.site import Site
 from tests.resources.stores.fake_records_store import FakeRecordsStore
-
-
-def time_task(label: str) -> Callable:
-    """
-    Time a task and log duration.
-
-    Copied from tasks.shared.
-    """
-
-    def decorator(func: Callable) -> Callable:
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs):  # noqa: ANN002, ANN003, ANN202
-            start = time.monotonic()
-            result = func(*args, **kwargs)
-            logger = logging.getLogger("app")
-            logger.setLevel(logging.INFO)
-            logger.info(f"{label} took {round(time.monotonic() - start)} seconds")
-            return result
-
-        return wrapper
-
-    return decorator
 
 
 class FakeCatalogue(CatalogueBase):

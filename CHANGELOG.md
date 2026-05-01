@@ -68,6 +68,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Test group dependencies not being included vulnerabilities app task
 * Configuration for local stack GitLab enabled project features and SMTP STARTTLS
 * UI padding for box type alerts
+* Preventing error syncing a record against an ArcGIS item with shared group permissions (by refusing)
 
 ### Changed
 

@@ -21,7 +21,7 @@ IaC will:
 
 - create this bot user
 - add the bot user as a member of the GitLab projects containing issues relevant to the
-  [Interactive Publishing Workflow](/docs/usage.md#interactive-record-publishing-workflow), with at least the
+  [Interactive Publishing Workflow](/docs/usage.md#interactive-publishing-workflow), with at least the
   *reporter* role
 
 ### GitLab publishing workflows
@@ -31,7 +31,7 @@ IaC will:
 - create and store in 1Password a personal access token to enable the
   [Workstation Module](/docs/usage.md#workstation-module) to:
   - access and manage records in the [GitLab Store](/docs/stores.md#gitlab-store)
-  - as part of the [Non-Interactive Publishing Workflow](/docs/usage.md#non-interactive-record-publishing-workflow)
+  - as part of the [Non-Interactive Publishing Workflow](/docs/usage.md#non-interactive-publishing-workflow)
 
 Manually:
 
@@ -63,8 +63,8 @@ IaC will:
 - create an IAM user to enable the [Workstation Module](/docs/usage.md#workstation-module) with a suitable inline
   policy to:
   - manage content and create invalidations in the Catalogue hosting buckets and distributions to enable the
-    [Interactive](/docs/usage.md#interactive-record-publishing-workflow) and
-    [Non-Interactive](/docs/usage.md#non-interactive-record-publishing-workflow) publishing workflows
+    [Interactive](/docs/usage.md#interactive-publishing-workflow) and
+    [Non-Interactive](/docs/usage.md#non-interactive-publishing-workflow) publishing workflows
 - create and store an access key in 1Password for each non-development environment
 
 Manually:

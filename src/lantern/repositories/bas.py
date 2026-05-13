@@ -188,7 +188,7 @@ class BasRepository(RepositoryBase):
             msg = f"Could not get issue for: {url}"
             raise IssueNotFoundError(msg) from None
 
-    def select(
+    def select_records(
         self, file_identifiers: set[str] | None = None, branch: str | None = None, cached: bool = True
     ) -> list[RecordRevision]:
         """
@@ -203,7 +203,7 @@ class BasRepository(RepositoryBase):
         store = self._make_gitlab_store(branch=branch, cached=cached, frozen=bool(cached))
         return store.select(file_identifiers)
 
-    def select_one(self, file_identifier: str, branch: str | None = None, cached: bool = True) -> RecordRevision:
+    def select_record(self, file_identifier: str, branch: str | None = None, cached: bool = True) -> RecordRevision:
         """
         Return a specific record or raise a `RecordNotFoundError` exception.
 
@@ -216,7 +216,7 @@ class BasRepository(RepositoryBase):
         store = self._make_gitlab_store(branch=branch, cached=cached, frozen=bool(cached))
         return store.select_one(file_identifier)
 
-    def upsert(self, records: Collection[Record], context: GitUpsertContext, **kwargs: Any) -> GitUpsertResults:
+    def upsert_records(self, records: Collection[Record], context: GitUpsertContext, **kwargs: Any) -> GitUpsertResults:
         """
         Persist new or existing records.
 

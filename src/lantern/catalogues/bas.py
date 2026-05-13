@@ -239,7 +239,7 @@ class BasCatalogue:
 
         Requires additional context for who authored the changes and why.
         """
-        return self.repo.upsert(records=records, context=context)
+        return self.repo.upsert_records(records=records, context=context)
 
     def export(
         self,

@@ -201,17 +201,17 @@ class TestBasRepository:
         with pytest.raises(IssueNotFoundError):
             fx_bas_repo.select_issue(url=url)
 
-    def test_select(self, fx_bas_repo_cached_store_pop: BasRepository):
+    def test_select_records(self, fx_bas_repo_cached_store_pop: BasRepository):
         """Cannot select any/some records from records store project/repo."""
-        records = fx_bas_repo_cached_store_pop.select()
+        records = fx_bas_repo_cached_store_pop.select_records()
         assert len(records) == 1
 
-    def test_select_one(self, fx_bas_repo_cached_store_pop: BasRepository):
+    def test_select_record(self, fx_bas_repo_cached_store_pop: BasRepository):
         """Cannot select a record from records store project/repo."""
-        record = fx_bas_repo_cached_store_pop.select_one(file_identifier="a1b2c3")
+        record = fx_bas_repo_cached_store_pop.select_record(file_identifier="a1b2c3")
         assert record is not None
 
-    def test_upsert(self, mocker: MockerFixture, fx_bas_repo: BasRepository, fx_record_model_min: Record):
+    def test_upsert_records(self, mocker: MockerFixture, fx_bas_repo: BasRepository, fx_record_model_min: Record):
         """Can upsert a record in the records store project/repo."""
         branch = "x"
         commit = "abc123"
@@ -226,14 +226,16 @@ class TestBasRepository:
         context = GitUpsertContext(title="x", message="x", author_name="x", author_email="x", branch=branch)
         expected = GitUpsertResults(branch=branch, commit=commit, new_identifiers=[file_id], updated_identifiers=[])
 
-        results = fx_bas_repo.upsert(records=[fx_record_model_min], context=context)
+        results = fx_bas_repo.upsert_records(records=[fx_record_model_min], context=context)
         assert results == expected
 
     @pytest.mark.cov()
-    def test_upsert_default_branch(self, fx_bas_repo: BasRepository, fx_config: Config, fx_record_model_min: Record):
+    def test_upsert_records_default_branch(
+        self, fx_bas_repo: BasRepository, fx_config: Config, fx_record_model_min: Record
+    ):
         """Cannot upsert a record in the default branch of the records store project/repo."""
         context = GitUpsertContext(
             title="x", message="x", author_name="x", author_email="x", branch=fx_config.STORE_GITLAB_DEFAULT_BRANCH
         )
         with pytest.raises(ProtectedGitBranchError):
-            fx_bas_repo.upsert(records=[fx_record_model_min], context=context)
+            fx_bas_repo.upsert_records(records=[fx_record_model_min], context=context)

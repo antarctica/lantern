@@ -10,7 +10,6 @@ from bas_metadata_library.standards.magic_administration.v1.utils import Adminis
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from tests.resources.admin_keys import test_keys
 from tests.resources.catalogues.fake_catalogue import FakeCatalogue
-from tests.resources.stores.fake_records_store import FakeRecordsStore
 
 from lantern.config import Config as ConfigBase
 from lantern.models.checks import Check, CheckState, CheckType
@@ -31,8 +30,7 @@ def export_test_site(export_path: Path) -> None:
     logger = logging.getLogger("app")
     logger.setLevel(logging.INFO)
     config = Config()
-    store = FakeRecordsStore(logger=logger)
-    catalogue = FakeCatalogue(logger=logger, config=config, store=store, base_path=export_path)
+    catalogue = FakeCatalogue(logger=logger, config=config, base_path=export_path)
     catalogue.export()
 
     # Include fake verification report

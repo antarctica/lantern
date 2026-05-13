@@ -49,7 +49,7 @@ class Distribution(ABC):
     @property
     @abstractmethod
     def label(self) -> str:
-        """Distinguishing identifier."""
+        """Distinguishing identifier across other distribution options."""
         ...
 
     @property
@@ -176,7 +176,7 @@ class ArcGISDistribution(Distribution, ABC):
 
     @property
     def size(self) -> str:
-        """Not applicable."""
+        """Not applicable for services."""
         return ""
 
     @property

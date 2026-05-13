@@ -371,7 +371,8 @@ Within this project, for each new item type:
 1. include the new distribution format in [Test Records](#test-records):
    - `tests.resources.records/item_cat_data::record`
    - `tests.resources.records/item_cat_checks::record`
-1. include the distribution format in the `lantern.models.checks.DistributionChecks` class and add tests
+1. include the distribution format in the `lantern.models.checks.DistributionChecks` class and add tests in
+   `tests.models.test_checks.TestDistributionChecks`
 1. if needed, add a new enum member for the check type in `lantern.models.checks.CheckType`
 1. if needed, add check logic to `lantern.checks.CheckRunner` and add tests
 1. update the [Item distribution options](/docs/models.md#catalogue-items-supported-distribution-options) docs

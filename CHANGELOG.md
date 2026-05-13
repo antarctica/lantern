@@ -69,6 +69,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Configuration for local stack GitLab enabled project features and SMTP STARTTLS
 * UI padding for box type alerts
 * Preventing error syncing a record against an ArcGIS item with shared group permissions (by refusing)
+* Using `markupsafe` over simplistic local method to strip tags from title elements in catalogue items
+* Handling CloudFront invalidation wildcard path limit by invalidating the whole distribution
 
 ### Changed
 
@@ -77,14 +79,14 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Refactoring test records to use base record presets
 * Updating project logo to AI placeholder
 * Records publishing workflow updated to use merge request reviewer approvals
-* Updating documentation diagrams
+* Updated documentation diagrams
 * Exporter classes refactored into Output classes, refactored Exporters and top-level Site and Verification classes
 * Refactoring task timing decorator from development tasks into utils with tests
 * Test static site fixtures changed to session scope for better performance
 * Refactoring development tasks to use catalogue classes and associated changes
 * Improving documentation and updating diagrams to new and refactored concepts and classes
 * Renaming `footer_nav_items` to `secondary_nav_items` for consistency and documenting
-* Documentation updated
+* Updated documentation
 * Refactoring site templates to reduce repetition and improve consistency
 * Updating styles to reflect BAS Style Kit 2025 and new public website
 * Improvements to responsive design in templates
@@ -94,11 +96,13 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Refactoring relevant parts of previous records upgrade development task into Zap ⚡️ development task
 * Overhauled site verification into simplified and better integrated site checks
 * Replacing Safety with `uv audit` for dependency vulnerability checking
+* Refactoring development tasks to use more (but not fully) consisting arguments processing and prompting
 
 ### Removed
 
 * Checks for SharePoint distribution items, until a new implementation is available
 * Checks for distribution items within item pages, as the catalogue is now more robust
+* `cache-init` development task
 
 ## [0.5.0] - 2026-02-27 [!BREAKING]
 

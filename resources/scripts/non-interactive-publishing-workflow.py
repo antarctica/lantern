@@ -68,7 +68,7 @@ def _filter_records(
     records_ = {}
     for _path, record in record_paths.items():
         try:
-            existing_record = cat.repo.select_one(file_identifier=record.file_identifier, branch=branch)
+            existing_record = cat.repo.select_record(file_identifier=record.file_identifier, branch=branch)
             if record.dumps() == existing_record.dumps():
                 logger.info(f"Record '{record.file_identifier}' is the same as stored version, skipping.")
                 continue

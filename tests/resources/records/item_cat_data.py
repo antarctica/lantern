@@ -311,7 +311,7 @@ distributions = {
             )
         ),
     ),
-    "csv": Distribution(
+    "CSV": Distribution(
         distributor=Contact(
             organisation=ContactIdentity(
                 name="Mapping and Geographic Information Centre, British Antarctic Survey",

@@ -47,7 +47,7 @@ class OutputCommentIssue:
     @property
     def _records(self) -> list[RecordRevision]:
         """Records from changeset."""
-        return self._cat.repo.select(branch=self._branch, file_identifiers=self._identifiers)
+        return self._cat.repo.select_records(branch=self._branch, file_identifiers=self._identifiers)
 
     @property
     def _items(self) -> list[OutputCommentItem]:

@@ -9,7 +9,7 @@ authors = [
 ]
 requires-python = ">=3.11"
 dependencies = [
-    "authlib>=1.6.9",
+    "authlib>=1.7.1",
     "bas-metadata-library>=0.17.0",
     "beautifulsoup4>=4.13.4",
     "bleach>=6.2.0",
@@ -25,6 +25,7 @@ dependencies = [
     "jsonschema>=4.23.0",
     "markdown>=3.8.2",
     "markdown-gfm-admonition>=0.1.1",
+    "markupsafe>=3.0.3",
     "pathvalidate>=3.3.1",
     "python-gitlab>=8.0.0",
     "requests>=2.32.5",
@@ -32,6 +33,7 @@ dependencies = [
     "sqlorm-py>=0.4.1",
     "sysrsync>=1.1.1",
     "truststore>=0.10.4",
+    "urllib3>=2.7",  # to address https://github.com/urllib3/urllib3/security/advisories/GHSA-qccp-gfcp-xxvc
 ]
 
 [dependency-groups]
@@ -60,7 +62,7 @@ test = [
 ]
 
 [tool.uv]
-exclude-newer-package = { bas-metadata-library = false }
+exclude-newer-package = { bas-metadata-library = false, urllib3 = false }
 
 [[tool.uv.index]]
 name = "self"
@@ -107,7 +109,6 @@ build-test-records = { cmd = "python -m tests.scripts.build_fake_cat", help = "B
 build-test-cache = { cmd = "python -m tests.resources.stores.gitlab_cache.refresh", help = "Build test/resource cache" }
 # fake CLI
 version = { cmd = "uv version", help = "Show app version" }
-cache-init = { cmd = "python -m tasks.cache_init", help = "Initialize records cache" }
 esri-record = { cmd = "python -m tasks.record_esri", help = "Add Esri item distribution options to a record" }
 esri-item = { cmd = "python -m tasks.esri_item", help = "Sync record details to an Esri item" }
 clone-record = { cmd = "python -m tasks.record_clone", help = "Clone record from cache into import directory" }

@@ -4,6 +4,7 @@ from collections.abc import Collection
 from lantern.config import Config
 from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
+from lantern.models.repository import UpsertResults
 from lantern.repositories.base import RepositoryBase
 from tests.resources.stores.fake_records_store import FakeRecordsStore
 
@@ -22,14 +23,14 @@ class FakeRepository(RepositoryBase):
         self._config = config
         self._store = store
 
-    def select(self, file_identifiers: set[str] | None = None) -> list[RecordRevision]:
+    def select_records(self, file_identifiers: set[str] | None = None) -> list[RecordRevision]:
         """Return all records or raise a `RecordsNotFoundError` exception."""
         return self._store.select(file_identifiers=file_identifiers)
 
-    def select_one(self, file_identifier: str) -> RecordRevision:
+    def select_record(self, file_identifier: str) -> RecordRevision:
         """Return a specific record or raise a `RecordNotFoundError` exception."""
         return self._store.select_one(file_identifier=file_identifier)
 
-    def upsert(self, content: Collection[Record]) -> None:
+    def upsert_records(self, content: Collection[Record]) -> UpsertResults:
         """Persist new or existing records."""
-        return
+        return UpsertResults(new_identifiers=[], updated_identifiers=[])

@@ -137,7 +137,7 @@ class OutputCommentMergeRequest:
     def _records(self) -> list[RecordRevision]:
         """New/updated records from the commit."""
         identifiers = set(self._commit.new_identifiers + self._commit.updated_identifiers)
-        return self._cat.repo.select(branch=self._branch, file_identifiers=identifiers)
+        return self._cat.repo.select_records(branch=self._branch, file_identifiers=identifiers)
 
     @property
     def _items(self) -> list[OutputCommentItem]:

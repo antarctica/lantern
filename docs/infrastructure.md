@@ -1,8 +1,5 @@
 # Lantern - Infrastructure
 
-> [!NOTE]
-> This page is specific to the [BAS Catalogue](/docs/architecture.md#bas-catalogue).
-
 ## Overview
 
 This diagram shows this project's infrastructure components:
@@ -62,12 +59,6 @@ reverse proxying. The BAS HAProxy load balancer proxies applicable requests to e
   - controlled by the `data_redirect.txt` load balancer config file (🔒)
 - or a relevant part of the [BAS Operations Data Store 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/ops-data-store)
   - controlled by the `data_internal_redirect.txt` load balancer config file (🔒)
-
-> [!NOTE]
-> For testing the UKRI managed AWS offering, a replica of the production S3 bucket and parallel CloudFront distribution
-> are in use. This parallel CF distribution is used by the BAS Load Balancer for 100% of live traffic.
->
-> See [WSF/bas-aws#71 🔒](https://gitlab.data.bas.ac.uk/WSF/bas-aws/-/issues/71) for more information.
 
 ## Infrastructure as Code
 
@@ -176,9 +167,3 @@ Then run:
     - [SSH credentials for workstation module 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=ydfrpsnqbmifpic5y5mp2du4pa&h=magic.1password.eu)
   - for [Exporters](/docs/exporters.md) to publish trusted content
   - managed manually as per [Setup](/docs/setup.md#secure-website-hosting) documentation
-
-> [!NOTE]
-> For testing the UKRI managed AWS offering, a replica of the production S3 bucket and parallel CloudFront distribution
-> are in use. This parallel CF distribution is used by the BAS Load Balancer for 100% of live traffic.
->
-> See [WSF/bas-aws#71 🔒](https://gitlab.data.bas.ac.uk/WSF/bas-aws/-/issues/71) for more information.

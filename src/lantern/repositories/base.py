@@ -22,16 +22,16 @@ class RepositoryBase(ABC):
         self._logger = logger
 
     @abstractmethod
-    def select(self, file_identifiers: set[str] | None = None) -> list[RecordRevision]:
+    def select_records(self, file_identifiers: set[str] | None = None) -> list[RecordRevision]:
         """Return all records or raise a `RecordsNotFoundError` exception."""
         ...
 
     @abstractmethod
-    def select_one(self, file_identifier: str) -> RecordRevision:
+    def select_record(self, file_identifier: str) -> RecordRevision:
         """Return a specific record or raise a `RecordNotFoundError` exception."""
         ...
 
     @abstractmethod
-    def upsert(self, records: Collection[Record], *args: Any, **kwargs: Any) -> UpsertResults:
+    def upsert_records(self, records: Collection[Record], *args: Any, **kwargs: Any) -> UpsertResults:
         """Persist new or existing records."""
         ...

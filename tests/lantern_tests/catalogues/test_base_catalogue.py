@@ -78,7 +78,7 @@ class TestCatalogueBase:
         fx_fake_catalogue.export(identifiers={"3c77ffae-6aa0-4c26-bc34-5521dbf4bf23"})  # product min
         assert export_path.joinpath("favicon.ico").exists()
 
-    def test_check(self, fx_fake_catalogue: FakeCatalogue, fx_exporter_static_server: Popen):
+    def test_check(self, fx_fake_catalogue: FakeCatalogue, fx_exporter_static_server: Popen, fx_static_server_url: str):
         """
         Can check catalogue contents.
 
@@ -90,7 +90,7 @@ class TestCatalogueBase:
         trip up the test.
         """
         identifiers = {"3c77ffae-6aa0-4c26-bc34-5521dbf4bf23"}  # minimal product test record
-        fx_fake_catalogue._meta.base_url = "http://localhost:8123"
+        fx_fake_catalogue._meta.base_url = fx_static_server_url
         fx_fake_catalogue.export(identifiers)
         export_path: Path = fx_fake_catalogue._path
 

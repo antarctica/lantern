@@ -1,9 +1,12 @@
 import json
+import re
 from dataclasses import dataclass
 from datetime import UTC, date, timedelta
 from datetime import datetime as DateTime  # noqa: N812
 from itertools import chain
 from typing import TypeVar
+
+from markupsafe import Markup
 
 from lantern.lib.metadata_library.models.record.elements.common import Date
 from lantern.lib.metadata_library.models.record.elements.common import Dates as RecordDates
@@ -30,19 +33,6 @@ from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.stores.base import SelectRecordProtocol
 
 TFormattedDate = TypeVar("TFormattedDate", bound="FormattedDate")
-
-
-def strip_title(value: str) -> str:
-    """
-    Basic method to strip wrapping <p> tags from title value.
-
-    Titles can use Markdown, which is converted to HTML for rendering. The converted value is wrapped in <p> tags
-    and are typically included within link (anchor) elements.
-
-    This causes an accessibility issue as <p> tags should not be inside <a> tags. This method strips the <p> tags
-    to give an HTML fragment that can be wrapped in any element.
-    """
-    return value.replace("<p>", "").replace("</p>", "")
 
 
 @dataclass(kw_only=True)
@@ -160,7 +150,7 @@ class ItemCatalogueSummary(ItemBase):
     @property
     def title_html(self) -> str:
         """Title with Markdown formatting encoded as HTML without wrapping <p> tags."""
-        return strip_title(super().title_html)
+        return Markup(re.sub(r"</?p[^>]*>", "", super().title_html))  # noqa: S704
 
     @property
     def summary_html(self) -> str:
@@ -680,7 +670,7 @@ class PageSummary:
     def collections(self) -> list[Link]:
         """Collections item is part of."""
         return [
-            Link(value=strip_title(summary.title_html), href=summary.href)
+            Link(value=Markup(re.sub(r"</?p[^>]*>", "", summary.title_html)), href=summary.href)  # noqa: S704
             for summary in self._aggregations.parent_collections
         ]
 
@@ -688,7 +678,7 @@ class PageSummary:
     def projects(self) -> list[Link]:
         """Projects item is part of."""
         return [
-            Link(value=strip_title(summary.title_html), href=summary.href)
+            Link(value=Markup(re.sub(r"</?p[^>]*>", "", summary.title_html)), href=summary.href)  # noqa: S704
             for summary in self._aggregations.parent_projects
         ]
 
@@ -696,7 +686,7 @@ class PageSummary:
     def physical_parent(self) -> Link | None:
         """Item that represents the physical map an item is one side of."""
         item = self._aggregations.parent_printed_map
-        return Link(value=strip_title(item.title_html), href=item.href) if item else None
+        return Link(value=Markup(re.sub(r"</?p[^>]*>", "", item.title_html)), href=item.href) if item else None  # noqa: S704
 
     @property
     def restricted(self) -> bool:

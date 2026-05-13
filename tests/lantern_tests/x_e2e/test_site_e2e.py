@@ -6,14 +6,13 @@ from playwright.sync_api import Page, expect
 from tests.conftest import has_network
 
 
-@pytest.mark.xdist_group("e2e")
 @pytest.mark.skipif(not has_network(), reason="network unavailable")
 class TestFeedbackWidget:
     """Test site feedback widget in Catalogue template."""
 
-    def test_widget(self, fx_exporter_static_server: Popen, page: Page):
+    def test_widget(self, fx_exporter_static_server: Popen, fx_static_server_url: str, page: Page):
         """Can open feedback widget between tabs."""
-        page.goto("http://localhost:8123/legal/privacy/index.html")
+        page.goto(f"{fx_static_server_url}/legal/privacy/index.html")
         status_code = page.evaluate("window.performance.getEntries()[0].responseStatus")
         assert status_code == 200
         expect(page.locator("#site-feedback >> text=Site feedback")).not_to_be_visible()
@@ -31,11 +30,11 @@ class TestFeedbackWidget:
         page.locator("#site-feedback >> button[data-target='#site-feedback']").click()
         expect(page.locator("#site-feedback")).not_to_be_visible()
 
-    def test_fallback(self, fx_exporter_static_server: Popen, page: Page):
+    def test_fallback(self, fx_exporter_static_server: Popen, fx_static_server_url: str, page: Page):
         """Email link shown where JavaScript is unavailable."""
         context = page.context.browser.new_context(java_script_enabled=False)
         no_js_page = context.new_page()
-        no_js_page.goto("http://localhost:8123/legal/privacy/index.html")
+        no_js_page.goto(f"{fx_static_server_url}/legal/privacy/index.html")
         status_code = no_js_page.evaluate("window.performance.getEntries()[0].responseStatus")
         assert status_code == 200
 
@@ -48,17 +47,16 @@ class TestFeedbackWidget:
         context.close()
 
 
-@pytest.mark.xdist_group("e2e")
 class TestBackToTop:
     """Test back to top link."""
 
-    def test_link(self, fx_exporter_static_server: Popen, page: Page):
+    def test_link(self, fx_exporter_static_server: Popen, fx_static_server_url: str, page: Page):
         """
         Can navigate to the top of the page.
 
         Privacy page chosen as it's long enough to scroll.
         """
-        page.goto("http://localhost:8123/legal/privacy/index.html")
+        page.goto(f"{fx_static_server_url}/legal/privacy/index.html")
         status_code = page.evaluate("window.performance.getEntries()[0].responseStatus")
         assert status_code == 200
 
@@ -67,11 +65,10 @@ class TestBackToTop:
         expect(back_to_top).not_to_be_in_viewport()  # link is off-screen when at top of page
 
 
-@pytest.mark.xdist_group("e2e")
 class TestPrimaryNavigation:
     """Test primary navigation is responsive."""
 
-    def test_mobile(self, fx_exporter_static_server: Popen, page: Page):
+    def test_mobile(self, fx_exporter_static_server: Popen, fx_static_server_url: str, page: Page):
         """Can access primary navigation from the page footer on mobile."""
         iphone_13_mini = {
             "viewport": {"width": 375, "height": 812},
@@ -85,7 +82,7 @@ class TestPrimaryNavigation:
         }
         context = page.context.browser.new_context(**iphone_13_mini)
         mobile_page = context.new_page()
-        mobile_page.goto("http://localhost:8123/legal/privacy/index.html")
+        mobile_page.goto(f"{fx_static_server_url}/legal/privacy/index.html")
         status_code = mobile_page.evaluate("window.performance.getEntries()[0].responseStatus")
         assert status_code == 200
 
@@ -99,9 +96,9 @@ class TestPrimaryNavigation:
 
         context.close()
 
-    def test_desktop(self, fx_exporter_static_server: Popen, page: Page):
+    def test_desktop(self, fx_exporter_static_server: Popen, fx_static_server_url: str, page: Page):
         """Can access primary navigation from the page header on larger viewports."""
-        page.goto("http://localhost:8123/legal/privacy/index.html")
+        page.goto(f"{fx_static_server_url}/legal/privacy/index.html")
         status_code = page.evaluate("window.performance.getEntries()[0].responseStatus")
         assert status_code == 200
 

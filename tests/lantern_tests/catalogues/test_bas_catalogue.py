@@ -202,7 +202,7 @@ class TestBasCatalogue:
         """
         mocker.patch.object(
             fx_bas_catalogue.repo,
-            "upsert",
+            "upsert_records",
             return_value=GitUpsertResults(
                 branch="x",
                 commit="x",

@@ -140,7 +140,7 @@ def parse_records(
 
     Records are returned as a list of (RecordClass, Path) tuples, where 'Path' is the Path to the source file.
     """
-    RecordClass = RecordCatalogue if validate_base else Record  # noqa: N806
+    RecordClass = RecordCatalogue if validate_catalogue else Record  # noqa: N806
     records: list[tuple[Record, Path]] = []
 
     for config_path in _parse_configs(search_path, glob_pattern=glob_pattern):
@@ -266,7 +266,7 @@ def pick_local_records(logger: logging.Logger, records: list[Record]) -> list[Re
     return [records_[fid] for fid in selected_fids]
 
 
-def pick_local_record(logger: logging.Logger, records: list[Record]) -> Record:
+def pick_local_record(logger: logging.Logger, records: Sequence[Record | RecordCatalogue]) -> Record:
     """Pick a local record from a list."""
     choices = {
         f"{r.file_identifier} ('{r.identification.title}' {r.hierarchy_level.value})": r.file_identifier
@@ -287,7 +287,7 @@ def pick_local_record(logger: logging.Logger, records: list[Record]) -> Record:
 def get_record(logger: logging.Logger, cat: BasCatalogue, reference: str, branch: str | None = None) -> Record:
     """Get record from catalogue repo using flexible reference."""
     file_identifier = next(iter(process_record_references(logger=logger, references=[reference])))
-    return cat.repo.select_one(file_identifier=file_identifier, branch=branch, cached=False)
+    return cat.repo.select_record(file_identifier=file_identifier, branch=branch, cached=False)
 
 
 def load_record(

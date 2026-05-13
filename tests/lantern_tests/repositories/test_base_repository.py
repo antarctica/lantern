@@ -2,6 +2,7 @@ import logging
 
 from lantern.config import Config
 from lantern.models.record.record import Record
+from lantern.models.repository import UpsertResults
 from tests.resources.repositories.fake_repository import FakeRepository
 from tests.resources.stores.fake_records_store import FakeRecordsStore
 
@@ -14,18 +15,18 @@ class TestRepositoryBase:
         cat = FakeRepository(logger=fx_logger, config=fx_config, store=fx_fake_store)
         assert isinstance(cat, FakeRepository)
 
-    def test_select(self, fx_fake_repo: FakeRepository):
+    def test_select_records(self, fx_fake_repo: FakeRepository):
         """Can select one or more records."""
-        results = fx_fake_repo.select()
+        results = fx_fake_repo.select_records()
         selected = results[0].file_identifier
         assert len(results) > 0
-        assert len(fx_fake_repo.select(file_identifiers={selected})) == 1
+        assert len(fx_fake_repo.select_records(file_identifiers={selected})) == 1
 
-    def test_upsert(self, fx_fake_repo: FakeRepository, fx_record_model_min: Record):
+    def test_upsert_records(self, fx_fake_repo: FakeRepository, fx_record_model_min: Record):
         """
         Can insert/update one or more records.
 
         This is essentially a no-op as there's nothing behind the fake repo.
         """
-        results = fx_fake_repo.upsert([fx_record_model_min])
-        assert results is None
+        results = fx_fake_repo.upsert_records([fx_record_model_min])
+        assert isinstance(results, UpsertResults)

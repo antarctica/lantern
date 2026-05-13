@@ -9,13 +9,12 @@ from tests.resources.records.item_cat_product_all import record as product_all_s
 from tests.resources.records.item_cat_product_open_min import record as product_min_open
 
 
-@pytest.mark.xdist_group("e2e")
 class TestItemTabs:
     """Test tabs implementation in Catalogue Item template."""
 
-    def test_switch(self, fx_exporter_static_server: Popen, page: Page):
+    def test_switch(self, fx_exporter_static_server: Popen, fx_static_server_url: str, page: Page):
         """Can switch between tabs."""
-        endpoint = f"http://localhost:8123/items/{product_min_open.file_identifier}/index.html"
+        endpoint = f"{fx_static_server_url}/items/{product_min_open.file_identifier}/index.html"
         page.goto(endpoint)
 
         status_code = page.evaluate("window.performance.getEntries()[0].responseStatus")
@@ -31,9 +30,9 @@ class TestItemTabs:
         expect(page.locator("dt", has_text="Item ID")).to_be_visible()
         expect(page.locator("span", has_text="Item licence")).not_to_be_visible()
 
-    def test_history(self, fx_exporter_static_server: Popen, page: Page):
+    def test_history(self, fx_exporter_static_server: Popen, fx_static_server_url: str, page: Page):
         """Can switch between visited tabs."""
-        endpoint = f"http://localhost:8123/items/{product_min_open.file_identifier}/index.html"
+        endpoint = f"{fx_static_server_url}/items/{product_min_open.file_identifier}/index.html"
         page.goto(endpoint)
         status_code = page.evaluate("window.performance.getEntries()[0].responseStatus")
         assert status_code == 200
@@ -52,9 +51,9 @@ class TestItemTabs:
         page.go_back()
         expect(page.locator("span", has_text="Item licence")).to_be_visible()
 
-    def test_load(self, fx_exporter_static_server: Popen, page: Page):
+    def test_load(self, fx_exporter_static_server: Popen, fx_static_server_url: str, page: Page):
         """Can set initial tab on page load if set in URL fragment."""
-        endpoint = f"http://localhost:8123/items/{product_min_open.file_identifier}/index.html"
+        endpoint = f"{fx_static_server_url}/items/{product_min_open.file_identifier}/index.html"
         page.goto(endpoint + "#tab-info")
         status_code = page.evaluate("window.performance.getEntries()[0].responseStatus")
         assert status_code == 200
@@ -62,7 +61,6 @@ class TestItemTabs:
         expect(page.locator("dt", has_text="Item ID")).to_be_visible()
 
 
-@pytest.mark.xdist_group("e2e")
 @pytest.mark.skipif(not has_network(), reason="network unavailable")
 class TestItemEmbeddedMap:
     """
@@ -71,7 +69,7 @@ class TestItemEmbeddedMap:
     As this test checks the contents of the iframe loaded from an external service, it is skipped if offline.
     """
 
-    def test_load(self, fx_exporter_static_server: Popen, page: Page):
+    def test_load(self, fx_exporter_static_server: Popen, fx_static_server_url: str, page: Page):
         """Can load embedded map."""
 
         def handle(route: Route) -> None:
@@ -81,7 +79,7 @@ class TestItemEmbeddedMap:
 
         page.route("https://embedded-maps.data.bas.ac.uk/*", handle)
 
-        endpoint = f"http://localhost:8123/items/{product_all_supported.file_identifier}/index.html#tab-extent"
+        endpoint = f"{fx_static_server_url}/items/{product_all_supported.file_identifier}/index.html#tab-extent"
         page.goto(endpoint)
         status_code = page.evaluate("window.performance.getEntries()[0].responseStatus")
         assert status_code == 200
@@ -95,11 +93,10 @@ class TestItemEmbeddedMap:
         assert map_iframe.evaluate("document.title") == "BAS Embedded Maps Service"
 
 
-@pytest.mark.xdist_group("e2e")
 class TestItemContactForm:
     """Test contact form in Catalogue Item template."""
 
-    def test_send(self, fx_exporter_static_server: Popen, page: Page):
+    def test_send(self, fx_exporter_static_server: Popen, fx_static_server_url: str, page: Page):
         """
         Can use item contact form.
 
@@ -111,7 +108,7 @@ class TestItemContactForm:
 
         page.route("https://example.com/contact*", handle)
 
-        endpoint = f"http://localhost:8123/items/{product_min_open.file_identifier}/index.html#tab-contact"
+        endpoint = f"{fx_static_server_url}/items/{product_min_open.file_identifier}/index.html#tab-contact"
         page.goto(endpoint)
         status_code = page.evaluate("window.performance.getEntries()[0].responseStatus")
         assert status_code == 200
@@ -125,13 +122,12 @@ class TestItemContactForm:
         expect(page.locator("body")).to_have_text("OK")
 
 
-@pytest.mark.xdist_group("e2e")
 class TestItemDataActions:
     """Test data access information sections in Catalogue Item template."""
 
-    def test_access_info(self, fx_exporter_static_server: Popen, page: Page):
+    def test_access_info(self, fx_exporter_static_server: Popen, fx_static_server_url: str, page: Page):
         """Can open a data access information section in an item."""
-        endpoint = f"http://localhost:8123/items/{product_data.file_identifier}/index.html#tab-data"
+        endpoint = f"{fx_static_server_url}/items/{product_data.file_identifier}/index.html#tab-data"
         page.goto(endpoint)
         status_code = page.evaluate("window.performance.getEntries()[0].responseStatus")
         assert status_code == 200
@@ -145,12 +141,12 @@ class TestItemDataActions:
         trigger.click()
         expect(page.locator(f"{data_target}")).to_be_visible()
 
-    def test_access_info_fallback(self, fx_exporter_static_server: Popen, browser: Browser):
+    def test_access_info_fallback(self, fx_exporter_static_server: Popen, fx_static_server_url: str, browser: Browser):
         """Can see data access information sections when JavaScript is disabled."""
         context = browser.new_context(java_script_enabled=False)
         page = context.new_page()
 
-        endpoint = f"http://localhost:8123/items/{product_data.file_identifier}/index.html#tab-data"
+        endpoint = f"{fx_static_server_url}/items/{product_data.file_identifier}/index.html#tab-data"
         page.goto(endpoint)
         status_code = page.evaluate("window.performance.getEntries()[0].responseStatus")
         assert status_code == 200

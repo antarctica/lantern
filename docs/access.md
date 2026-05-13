@@ -1,8 +1,5 @@
 # Lantern - Access
 
-> [!NOTE]
-> This page is specific to the [BAS Catalogue](/docs/architecture.md#bas-catalogue) for the BAS Data Catalogue.
-
 ## Website
 
 A website is available for end-users to browse and view catalogue records as HTML formatted items at:

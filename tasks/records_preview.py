@@ -41,7 +41,7 @@ class PlaceholderStore(StoreBase):
 
     @property
     def frozen(self) -> bool:
-        """Whether store can be modified/updated."""
+        """Whether the store is frozen."""
         return True
 
     def select(self, file_identifiers: set[str] | None = None) -> list[RecordRevision]:
@@ -57,6 +57,10 @@ class PlaceholderStore(StoreBase):
         Will never raise a `RecordNotFoundError` exception.
         """
         return _select_record(file_identifier)
+
+    def freeze(self) -> None:
+        """Unsupported."""
+        raise NotImplementedError
 
 
 def _get_cli_args() -> tuple[bool, Path, Path, Path | None]:

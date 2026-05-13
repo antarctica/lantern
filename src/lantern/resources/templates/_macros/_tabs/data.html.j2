@@ -44,10 +44,10 @@
     {{ arc_raster_tile_layer(data) }}
   {% elif data.format_type.name == "ARCGIS_VECTOR_TILE_LAYER"  %}
     {{ arc_vector_tile_layer(data) }}
-  {% elif data.format_type.name == "X_BAS_PAPER_MAP"  %}
-    {{ bas_published_map() }}
   {% elif data.format_type.name == "X_BAS_SAN"  %}
     {{ bas_san(data) }}
+  {% elif data.format_type.name == "X_BAS_PAPER_MAP"  %}
+    {{ bas_published_map() }}
   {% endif %}
 {% endmacro %}
 

@@ -88,7 +88,7 @@ class TestConfig:
             "TEMPLATES_PLAUSIBLE_ID": "x",
             "TEMPLATES_ITEM_MAPS_ENDPOINT": "https://embedded-maps.data.bas.ac.uk/v1",
             "TEMPLATES_ITEM_CONTACT_ENDPOINT": "https://example.com/contact",
-            "TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": "x",
+            "TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": "1x00000000000000000000AA",
             "TEMPLATES_ITEM_VERSIONS_ENDPOINT": "https://example.com",
             "SITE_UNTRUSTED_S3_BUCKET_TESTING": "x",
             "SITE_UNTRUSTED_S3_BUCKET_LIVE": "x",

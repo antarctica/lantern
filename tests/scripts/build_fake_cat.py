@@ -17,6 +17,11 @@ class Config(ConfigBase):
         """Administration metadata keys."""
         return test_keys()
 
+    @property
+    def TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY(self) -> str:  # noqa: N802
+        """Turnstile site key."""
+        return "1x00000000000000000000AA"  # https://developers.cloudflare.com/turnstile/troubleshooting/testing/
+
 
 def main() -> None:
     """Entrypoint."""

@@ -1,8 +1,5 @@
 # Lantern - Setup
 
-> [!NOTE]
-> This page is specific to the [BAS Catalogue](/docs/architecture.md#bas-catalogue).
-
 ## 1Password
 
 For managing secrets and common [Config](/docs/config.md) options.

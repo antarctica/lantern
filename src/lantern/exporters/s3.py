@@ -61,7 +61,7 @@ class S3Exporter(ExporterBase):
 
         [1] https://docs.aws.amazon.com/AmazonS3/latest/userguide/how-to-page-redirect.html#redirect-requests-object-metadata
         """
-        params = {"Bucket": self._bucket, "Key": key, "Body": body, "ContentType": content_type}
+        params: dict = {"Bucket": self._bucket, "Key": key, "Body": body, "ContentType": content_type}
         if isinstance(body, str):
             params["Body"] = body.encode("utf-8")
         if redirect is not None:

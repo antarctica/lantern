@@ -1,8 +1,5 @@
 # Lantern - Monitoring
 
-> [!NOTE]
-> Parts of this page are specific to the [BAS Catalogue](/docs/architecture.md#bas-catalogue).
-
 ## Monitoring configuration
 
 These options from the app `lantern.Config` class are used to configure application logging:

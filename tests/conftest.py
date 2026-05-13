@@ -1039,7 +1039,24 @@ def fx_static_site() -> TemporaryDirectory:
 
 
 @pytest.fixture(scope="session")
-def fx_exporter_static_server(fx_static_site: TemporaryDirectory):
+def fx_static_server_port(worker_id: str) -> int:
+    """Return a unique HTTP server port for each xdist worker to avoid port conflicts when running tests in parallel."""
+    base_port = 8123
+    if os.environ.get("CI") or worker_id in ("master", "gw0"):
+        return base_port
+    # worker_id is "gw0", "gw1", etc. — derive an offset from the numeric part
+    worker_num = int(worker_id[2:])
+    return base_port + worker_num
+
+
+@pytest.fixture(scope="session")
+def fx_static_server_url(fx_static_server_port: int) -> str:
+    """Return the base URL for the static site server used in e2e tests."""
+    return f"http://localhost:{fx_static_server_port}"
+
+
+@pytest.fixture(scope="session")
+def fx_exporter_static_server(fx_static_site: TemporaryDirectory, fx_static_server_port: int):
     """Expose static site from a local server."""
     site_dir = fx_static_site.name
 
@@ -1052,13 +1069,13 @@ def fx_exporter_static_server(fx_static_site: TemporaryDirectory):
         yield None
     else:
         python_bin = sys.executable
-        args = [python_bin, "-m", "http.server", "8123", "--directory", site_dir]
+        args = [python_bin, "-m", "http.server", str(fx_static_server_port), "--directory", site_dir]
         process = Popen(args, stdout=PIPE)  # noqa: S603
         retries = 5
 
         while retries > 0:
             try:
-                conn = HTTPConnection("localhost:8123")
+                conn = HTTPConnection(f"localhost:{fx_static_server_port}")
                 conn.request("HEAD", "/")
                 response = conn.getresponse()
                 if response is not None:

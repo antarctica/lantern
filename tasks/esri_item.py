@@ -253,7 +253,7 @@ def main() -> None:
     logger, config, catalogue = init()
     args = _get_cli_args()
 
-    source_record = get_record(logger=logger, cat=catalogue, identifier=args["source_id"])
+    source_record = get_record(logger=logger, cat=catalogue, reference=args["source_id"])
     target_item = get_agol_item(logger=logger, config=config, item_ref=args["target_id"])
     source_item = _create_source_arcgis_item(
         source_record=Record.loads(source_record.dumps(strip_admin=False)),

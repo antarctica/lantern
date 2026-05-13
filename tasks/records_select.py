@@ -141,7 +141,7 @@ def main() -> None:
         return
 
     logger.info("Loading records from Store")
-    records = catalogue.repo.select(branch=branch, file_identifiers=file_identifiers)
+    records = catalogue.repo.select_records(branch=branch, file_identifiers=file_identifiers)
 
     logger.info(f"Dumping {len(file_identifiers)} selected records from '{branch}' in GitLab store")
     dump_records(logger=logger, output_path=import_path, records=records)

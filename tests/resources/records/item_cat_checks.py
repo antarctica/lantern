@@ -28,7 +28,7 @@ Item to test distribution related CheckType enum members:
 - ArcGIS Layers
 - ArcGIS Services
 - NORA file
-- published map purchase option
+- BAS published maps purchasing
 
 Also includes a DOI identifier to test an additional CheckType.
 

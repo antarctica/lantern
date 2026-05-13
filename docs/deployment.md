@@ -1,8 +1,5 @@
 # Lantern - Deployment
 
-> [!NOTE]
-> Parts of this page are specific to the [BAS Catalogue](/docs/architecture.md#bas-catalogue).
-
 ## Python package
 
 This application is distributed as a Python (Pip) package.

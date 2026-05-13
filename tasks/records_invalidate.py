@@ -108,7 +108,6 @@ def main() -> None:
     logger, config, _catalogue = init()
 
     cf_id = get_cf_distribution_id(iac_cwd=Path("./resources/envs"), cf_id="site_cf_id")
-    cf_replica_id = get_cf_distribution_id(iac_cwd=Path("./resources/envs"), cf_id="site_replica_cf_id")
 
     cli_args = _get_cli_args()
     references = _get_args(logger=logger, cli_args=cli_args)
@@ -118,9 +117,7 @@ def main() -> None:
         return
 
     keys = get_record_invalidation_keys(file_identifiers)
-    # apply to primary and replica site distributions
-    for cid in [cf_id, cf_replica_id]:
-        invalidate_keys(logger=logger, config=config, distribution_id=cid, keys=keys)
+    invalidate_keys(logger=logger, config=config, distribution_id=cf_id, keys=keys)
 
 
 if __name__ == "__main__":

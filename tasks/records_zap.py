@@ -86,7 +86,7 @@ def _revise_records(logger: logging.Logger, records: list[Record], catalogue: Ba
             logger.error(msg)
             raise ValueError(msg) from None
         try:
-            existing_record = catalogue.repo.select_one(record.file_identifier)
+            existing_record = catalogue.repo.select_record(record.file_identifier)
             if record.dumps(strip_admin=False) != existing_record.dumps(strip_admin=False):
                 logger.info(f"Record '{record.file_identifier}' is different to stored version, revising")
                 _revise_record(record)
@@ -207,7 +207,7 @@ def _process_magic_collections(
         record_collection_ids = [c.identifier.identifier for c in parent_collections]
         filtered_record_collection_ids = set(record_collection_ids).intersection(set(magic_collection_ids))
         collection_ids.update(filtered_record_collection_ids)
-    collections = [catalogue.repo.select_one(record_id) for record_id in collection_ids]
+    collections = [catalogue.repo.select_record(record_id) for record_id in collection_ids]
     collections_updated = {c.file_identifier: deepcopy(c) for c in collections}
 
     for record in records:
@@ -584,7 +584,7 @@ def parse_zap_records(
         with record_path.open("w") as f:
             f.write(record.dumps_json(strip_admin=False))
 
-    return parse_records(logger=logger, search_path=input_path, glob_pattern="zap-*.json")
+    return parse_records(logger=logger, search_path=input_path, glob_pattern="zap-*.json", validate_profiles=False)
 
 
 def main() -> None:

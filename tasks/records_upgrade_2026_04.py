@@ -324,7 +324,7 @@ class RecordsIO:
         records_path = self.base / "records"
         hashes_path = self.base / "hashes_original.json"
 
-        records = self.cat.repo.select()
+        records = self.cat.repo.select_records()
         dump_records(logger=self.logger, output_path=records_path, records=records)
         self.logger.info(f"{len(records)} records dumped to {self.base.resolve()}.")
 

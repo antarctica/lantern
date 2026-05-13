@@ -48,22 +48,10 @@ from lantern.models.item.catalogue.elements import (
     Maintenance,
     PageHeader,
     PageSummary,
-    strip_title,
 )
 from lantern.models.item.catalogue.enums import ItemSuperType, ResourceTypeIcon
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from tests.conftest import _admin_meta_keys, _select_record
-
-
-class TestElements:
-    """Test other Catalogue Item elements."""
-
-    def test_strip_title(self):
-        """Can strip HTML tags from a title."""
-        title = "<p>x</p>"
-        expected = "x"
-        result = strip_title(title)
-        assert result == expected
 
 
 class TestFormattedDate:

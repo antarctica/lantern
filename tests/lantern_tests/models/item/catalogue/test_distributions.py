@@ -13,6 +13,7 @@ from lantern.models.item.catalogue.distributions import (
     ArcGisOgcApiFeatures,
     ArcGisRasterTileLayer,
     ArcGisVectorTileLayer,
+    BasPartnersCDE,
     BasPublishedMap,
     BasSan,
     Csv,
@@ -29,6 +30,8 @@ from lantern.models.item.catalogue.distributions import (
     Shapefile,
 )
 from lantern.models.item.catalogue.enums import DistributionType
+
+ACTION_BTN_ICON_RESTRICTED_DEFAULT = "fa-regular fa-lock-keyhole"
 
 
 def _make_dist(format_href: str) -> RecordDistribution:
@@ -75,11 +78,6 @@ class FakeDistributionType(Distribution):
         return Link(value="x", href="x")
 
     @property
-    def action_btn_icon(self) -> str:
-        """Link icon."""
-        return "fa-regular fa-square"
-
-    @property
     def access_target(self) -> None:
         """Access target."""
         return None
@@ -88,9 +86,7 @@ class FakeDistributionType(Distribution):
 class FakeArcGISDistributionType(ArcGISDistribution):
     """For testing non-abstract or common ArcGIS distribution properties."""
 
-    def __init__(self, option: RecordDistribution, other_options: list[RecordDistribution], **kwargs: dict) -> None:
-        service_media_href = "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+feature"
-        super().__init__(option, other_options, service_media_href, **kwargs)
+    service_media_href = "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+feature"
 
     @classmethod
     def matches(cls, option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:
@@ -131,9 +127,22 @@ class TestDistribution:
     @pytest.mark.cov()
     def test_defaults(self):
         """Can get default values."""
-        dist = FakeDistributionType()
-        assert dist.action_btn_variant != ""
-        assert dist.action_btn_icon != ""
+        dist = FakeDistributionType(option=_make_dist("x"))
+        assert isinstance(dist, FakeDistributionType)
+
+    @pytest.mark.parametrize(("restricted", "expected"), [(False, "default"), (True, "warning")])
+    def test_action_btn_variant(self, restricted: bool, expected: str):
+        """Can get action variant."""
+        dist = FakeDistributionType(option=_make_dist("x"), restricted=restricted)
+        assert dist.action_btn_variant == expected
+
+    @pytest.mark.parametrize(
+        ("restricted", "expected"), [(False, "fa-regular fa-square"), (True, ACTION_BTN_ICON_RESTRICTED_DEFAULT)]
+    )
+    def test_action_btn_icon(self, restricted: bool, expected: str):
+        """Can get action icon."""
+        dist = FakeDistributionType(option=_make_dist("x"), restricted=restricted)
+        assert dist.action_btn_icon == expected
 
 
 class TestArcGISDistribution:
@@ -222,21 +231,26 @@ class TestArcGISDistribution:
         dist = FakeArcGISDistributionType(option=_make_dist("x"), other_options=[service_dist])
         assert dist.action == Link(value="Add to GIS", href=None)
 
-    def test_action_variant(self):
+    @pytest.mark.parametrize(("restricted", "expected"), [(False, "primary"), (True, "warning")])
+    def test_action_variant(self, restricted: bool, expected: str):
         """Can get action variant."""
         service_dist = _make_dist(
             "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+feature"
         )
-        dist = FakeArcGISDistributionType(option=_make_dist("x"), other_options=[service_dist])
-        assert dist.action_btn_variant == "primary"
+        dist = FakeArcGISDistributionType(option=_make_dist("x"), other_options=[service_dist], restricted=restricted)
+        assert dist.action_btn_variant == expected
 
-    def test_action_btn_icon(self):
+    @pytest.mark.parametrize(
+        ("restricted", "expected"),
+        [(False, "fa-regular fa-layer-plus"), (True, ACTION_BTN_ICON_RESTRICTED_DEFAULT)],
+    )
+    def test_action_btn_icon(self, restricted: bool, expected: str):
         """Can get action icon."""
         service_dist = _make_dist(
             "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+feature"
         )
-        dist = FakeArcGISDistributionType(option=_make_dist("x"), other_options=[service_dist])
-        assert dist.action_btn_icon == "fa-regular fa-layer-plus"
+        dist = FakeArcGISDistributionType(option=_make_dist("x"), other_options=[service_dist], restricted=restricted)
+        assert dist.action_btn_icon == expected
 
     def test_access_target(self):
         """Can get action target."""
@@ -288,21 +302,14 @@ class TestFileDistribution:
         dist._option.transfer_option.size = size
         assert dist.size == expected
 
-    @pytest.mark.parametrize(("restricted", "expected"), [(False, "Download"), (True, "Download")])
-    def test_action(self, restricted: bool, expected: str):
+    def test_action(self):
         """Can get action link."""
-        dist = FakeFileDistributionType(option=_make_dist("x"), restricted=restricted)
-        assert dist.action == Link(value=expected, href="x")
-
-    @pytest.mark.parametrize(("restricted", "expected"), [(False, "default"), (True, "warning")])
-    def test_action_btn_variant(self, restricted: bool, expected: str):
-        """Can get action variant."""
-        dist = FakeFileDistributionType(option=_make_dist("x"), restricted=restricted)
-        assert dist.action_btn_variant == expected
+        dist = FakeFileDistributionType(option=_make_dist("x"))
+        assert dist.action == Link(value="Download", href="x")
 
     @pytest.mark.parametrize(
         ("restricted", "expected"),
-        [(False, "fa-regular fa-file-arrow-down"), (True, "fa-regular fa-lock-keyhole")],
+        [(False, "fa-regular fa-file-arrow-down"), (True, ACTION_BTN_ICON_RESTRICTED_DEFAULT)],
     )
     def test_action_btn_icon(self, restricted: bool, expected: str):
         """Can get action icon."""
@@ -318,20 +325,31 @@ class TestFileDistribution:
 class TestDistributionBasPublishedMap:
     """Test BAS Published Map ordering distribution."""
 
+    _base_option = RecordDistribution(
+        distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
+        transfer_option=TransferOption(
+            online_resource=OnlineResource(
+                href="https://data.bas.ac.uk/guides/map-purchasing/",
+                function=OnlineResourceFunctionCode.DOWNLOAD,
+            )
+        ),
+    )
+
     def test_init(self):
         """Can create a distribution."""
-        option = RecordDistribution(
-            distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
-            transfer_option=TransferOption(
-                online_resource=OnlineResource(
-                    href="https://data.bas.ac.uk/guides/map-purchasing/",
-                    function=OnlineResourceFunctionCode.DOWNLOAD,
-                )
-            ),
-        )
-        dist = BasPublishedMap(option=option, restricted=False)
+        dist = BasPublishedMap(option=self._base_option, restricted=False)
 
-        assert dist.matches(option, [])
+        assert dist.matches(self._base_option, [])
+
+    def test_action(self):
+        """Can get action."""
+        dist = BasPublishedMap(option=self._base_option, restricted=False)
+        assert dist.action == Link(value="Purchase", href=None)
+
+    def test_action_btn_icon(self):
+        """Can get action icon."""
+        dist = BasPublishedMap(option=self._base_option, restricted=False)
+        assert dist.action_btn_icon == "fa-regular fa-basket-shopping"
 
 
 class TestDistributionBasSan:
@@ -364,12 +382,14 @@ class TestDistributionBasSan:
         dist = BasSan(option=option, restricted=False)
         assert dist.label == expected
 
-    @pytest.mark.parametrize("value", [False, True])
-    def test_restricted(self, value: bool):
-        """Can pass through restricted status."""
-        option = deepcopy(self._base_option)
-        dist = BasSan(option=option, restricted=value)
-        assert dist.restricted == value
+    @pytest.mark.parametrize(
+        ("restricted", "expected"),
+        [(False, "fa-regular fa-server"), (True, ACTION_BTN_ICON_RESTRICTED_DEFAULT)],
+    )
+    def test_action_btn_icon(self, restricted: bool, expected: str):
+        """Can get action icon."""
+        dist = BasSan(option=self._base_option, restricted=restricted)
+        assert dist.action_btn_icon == expected
 
     def test_paths(self):
         """Can parse and format SAN path into posix and UNC paths for a distribution."""
@@ -377,19 +397,51 @@ class TestDistributionBasSan:
         assert dist.posix_path == "/data/x"
         assert dist.unc_path == r"\\samba.nerc-bas.ac.uk\data\x"
 
-    @pytest.mark.parametrize(("restricted", "expected"), [(False, "default"), (True, "warning")])
-    def test_action_btn_variant(self, restricted: bool, expected: str):
-        """Can get action variant."""
-        dist = BasSan(option=self._base_option, restricted=restricted)
-        assert dist.action_btn_variant == expected
+
+class TestDistributionBasPartnersCDE:
+    """Test BAS Partners CDE access distribution."""
+
+    _base_option = RecordDistribution(
+        distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
+        transfer_option=TransferOption(
+            online_resource=OnlineResource(
+                href="https://cde.data.bas.ac.uk/x",
+                function=OnlineResourceFunctionCode.DOWNLOAD,
+            )
+        ),
+    )
+
+    def test_init(self):
+        """Can create a distribution."""
+        dist = BasPartnersCDE(option=self._base_option, restricted=False)
+
+        assert dist.matches(self._base_option, [])
 
     @pytest.mark.parametrize(
-        ("restricted", "expected"), [(False, "fa-regular fa-server"), (True, "fa-regular fa-lock-keyhole")]
+        ("title", "expected"),
+        [(None, "BAS Construction Partners CDE"), ("x", "x")],
+    )
+    def test_label(self, title: str | None, expected: str):
+        """Can get label based on transfer option or format."""
+        option = deepcopy(self._base_option)
+        option.transfer_option.online_resource.title = title
+
+        dist = BasPartnersCDE(option=option, restricted=False)
+        assert dist.label == expected
+
+    @pytest.mark.parametrize(
+        ("restricted", "expected"),
+        [(False, "fa-regular fa-people-arrows"), (True, ACTION_BTN_ICON_RESTRICTED_DEFAULT)],
     )
     def test_action_btn_icon(self, restricted: bool, expected: str):
         """Can get action icon."""
-        dist = BasSan(option=self._base_option, restricted=restricted)
+        dist = BasPartnersCDE(option=self._base_option, restricted=restricted)
         assert dist.action_btn_icon == expected
+
+    def test_cde_ref(self):
+        """Can parse and format CDE file name for a distribution."""
+        dist = BasPartnersCDE(option=self._base_option, restricted=False)
+        assert dist.cde_ref == "x"
 
 
 class TestDistributionArcGisFeatureLayer:

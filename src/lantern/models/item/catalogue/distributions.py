@@ -21,6 +21,12 @@ class Distribution(ABC):
     Classes use a `matches()` class method to determine if a Record has the required distribution options.
     """
 
+    def __init__(self, option: RecordDistribution, restricted: bool = False, **kwargs: Any) -> None:
+        self._option = option
+        self._restricted = restricted
+        self._unrestricted_btn_variant = "default"
+        self._unrestricted_btn_icon = "fa-regular fa-square"
+
     @classmethod
     @abstractmethod
     def matches(cls, option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:
@@ -81,40 +87,17 @@ class Distribution(ABC):
 
     @property
     def action_btn_variant(self) -> str:
-        """
-        Variant of button to display for action link or trigger.
-
-        See https://style-kit.web.bas.ac.uk/core/buttons/#variants for available variants.
-        """
-        return "default"
+        """Variant of button to display for action link based on resource access."""
+        return self._unrestricted_btn_variant if not self._restricted else "warning"
 
     @property
-    def action_btn_variant_restricted(self) -> str:
-        """
-        Variant of button to display for action link or trigger in a restricted context.
-
-        See https://style-kit.web.bas.ac.uk/core/buttons/#variants for available variants.
-        """
-        return "warning"
-
-    @property
-    @abstractmethod
     def action_btn_icon(self) -> str:
         """
         Font Awesome icon classes to display in action link or trigger.
 
         See https://fontawesome.com/v7/search?ip=classic&s=regular for choices (in available version and recommended style).
         """
-        ...
-
-    @property
-    def action_btn_icon_restricted(self) -> str:
-        """
-        Font Awesome icon classes to display in action link or trigger in a restricted context.
-
-        See https://fontawesome.com/v7/search?ip=classic&s=regular for choices (in available version and recommended style).
-        """
-        return "fa-regular fa-lock-keyhole"
+        return self._unrestricted_btn_icon if not self._restricted else "fa-regular fa-lock-keyhole"
 
     @property
     @abstractmethod
@@ -130,15 +113,20 @@ class ArcGISDistribution(Distribution, ABC):
     Represents common properties of ArcGIS distribution types supported by the BAS Data Catalogue.
     """
 
+    service_media_href = ""
+
     def __init__(
         self,
         option: RecordDistribution,
         other_options: list[RecordDistribution],
-        service_media_href: str,
+        restricted: bool = False,
         **kwargs: Any,
     ) -> None:
+        super().__init__(option, restricted, **kwargs)
         self._layer = option
-        self._service = self._get_service_option(other_options, service_media_href)
+        self._service = self._get_service_option(other_options, self.service_media_href)
+        self._unrestricted_btn_variant = "primary"
+        self._unrestricted_btn_icon = "fa-regular fa-layer-plus"
 
     @staticmethod
     def _get_service_option(options: list[RecordDistribution], target_href: str) -> RecordDistribution:
@@ -196,16 +184,6 @@ class ArcGISDistribution(Distribution, ABC):
         return Link(value="Add to GIS", href=None)
 
     @property
-    def action_btn_variant(self) -> str:
-        """Action button variant."""
-        return "primary"
-
-    @property
-    def action_btn_icon(self) -> str:
-        """Action button icon classes."""
-        return "fa-regular fa-layer-plus"
-
-    @property
     def access_target(self) -> str:
         """DOM selector of element showing more information on accessing layer."""
         if not self.item_link.href:
@@ -220,9 +198,9 @@ class FileDistribution(Distribution, ABC):
     Represents common properties of file based distribution types supported by the BAS Data Catalogue.
     """
 
-    def __init__(self, option: RecordDistribution, restricted: bool, **kwargs: Any) -> None:
-        self._option = option
-        self._restricted = restricted
+    def __init__(self, option: RecordDistribution, restricted: bool = False, **kwargs: Any) -> None:
+        super().__init__(option, restricted, **kwargs)
+        self._unrestricted_btn_icon = "fa-regular fa-file-arrow-down"
 
     @property
     def label(self) -> str:
@@ -251,16 +229,6 @@ class FileDistribution(Distribution, ABC):
         return Link(value="Download", href=self._option.transfer_option.online_resource.href)
 
     @property
-    def action_btn_variant(self) -> str:
-        """Variant of button to display for action link based on resource access."""
-        return super().action_btn_variant if not self._restricted else super().action_btn_variant_restricted
-
-    @property
-    def action_btn_icon(self) -> str:
-        """Action button icon classes."""
-        return "fa-regular fa-file-arrow-down" if not self._restricted else super().action_btn_icon_restricted
-
-    @property
     def access_target(self) -> None:
         """Not applicable for files."""
         return None
@@ -273,9 +241,7 @@ class ArcGisFeatureLayer(ArcGISDistribution):
     Consisting of a Feature Service and Feature Layer option.
     """
 
-    def __init__(self, option: RecordDistribution, other_options: list[RecordDistribution], **kwargs: Any) -> None:
-        service_media_href = "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+feature"
-        super().__init__(option, other_options, service_media_href, **kwargs)
+    service_media_href = "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+feature"
 
     @classmethod
     def matches(cls, option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:
@@ -301,9 +267,7 @@ class ArcGisOgcApiFeatures(ArcGISDistribution):
     Consisting of an ArcGIS OGC Feature Service and ArcGIS OGC Feature Layer option.
     """
 
-    def __init__(self, option: RecordDistribution, other_options: list[RecordDistribution], **kwargs: Any) -> None:
-        service_media_href = "https://metadata-resources.data.bas.ac.uk/media-types/x-service/ogc+api+feature"
-        super().__init__(option, other_options, service_media_href, **kwargs)
+    service_media_href = "https://metadata-resources.data.bas.ac.uk/media-types/x-service/ogc+api+feature"
 
     @classmethod
     def matches(cls, option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:
@@ -327,11 +291,7 @@ class ArcGisVectorTileLayer(ArcGISDistribution):
     Consisting of a vector tile service and vector tile layer option.
     """
 
-    def __init__(self, option: RecordDistribution, other_options: list[RecordDistribution], **kwargs: Any) -> None:
-        service_media_href = (
-            "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+vector"
-        )
-        super().__init__(option, other_options, service_media_href, **kwargs)
+    service_media_href = "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+vector"
 
     @classmethod
     def matches(cls, option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:
@@ -355,11 +315,7 @@ class ArcGisRasterTileLayer(ArcGISDistribution):
     Consisting of a (raster) tile service and (raster) tile layer option.
     """
 
-    def __init__(self, option: RecordDistribution, other_options: list[RecordDistribution], **kwargs: Any) -> None:
-        service_media_href = (
-            "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+raster"
-        )
-        super().__init__(option, other_options, service_media_href, **kwargs)
+    service_media_href = "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+raster"
 
     @classmethod
     def matches(cls, option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:
@@ -383,8 +339,9 @@ class BasPublishedMap(Distribution):
     Provides information to users on how to purchase BAS maps.
     """
 
-    def __init__(self, option: RecordDistribution, **kwargs: Any) -> None:
-        self._option = option
+    def __init__(self, option: RecordDistribution, restricted: bool = False, **kwargs: Any) -> None:
+        super().__init__(option, restricted, **kwargs)
+        self._unrestricted_btn_icon = "fa-regular fa-basket-shopping"
 
     @classmethod
     def matches(cls, option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:
@@ -414,12 +371,7 @@ class BasPublishedMap(Distribution):
     @property
     def action(self) -> Link:
         """Link to distribution without href due to using `access_trigger`."""
-        return Link(value="Purchase Options", href=None)
-
-    @property
-    def action_btn_icon(self) -> str:
-        """Action button icon classes."""
-        return "fa-regular fa-basket-shopping"
+        return Link(value="Purchase", href=None)
 
     @property
     def access_target(self) -> str | None:
@@ -436,9 +388,9 @@ class BasSan(Distribution):
 
     _sigil = "sftp://san.nerc-bas.ac.uk/"
 
-    def __init__(self, option: RecordDistribution, restricted: bool, **kwargs: Any) -> None:
-        self._option = option
-        self._restricted = restricted
+    def __init__(self, option: RecordDistribution, restricted: bool = False, **kwargs: Any) -> None:
+        super().__init__(option, restricted, **kwargs)
+        self._unrestricted_btn_icon = "fa-regular fa-server"
 
     @classmethod
     def matches(cls, option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:
@@ -479,9 +431,59 @@ class BasSan(Distribution):
         return samba_endpoint + raw.replace("/", "\\")
 
     @property
-    def restricted(self) -> bool:
-        """Restricted status."""
-        return self._restricted
+    def action(self) -> Link:
+        """Link to distribution without href due to using `access_trigger`."""
+        return Link(value="Access Data", href=None)
+
+    @property
+    def access_target(self) -> str | None:
+        """DOM selector of element showing more information on accessing item."""
+        return "#item-data-info-san-access"
+
+
+class BasPartnersCDE(Distribution):
+    """
+    BAS Construction partners Common Data Environment (CDE) distribution option.
+
+    Provides information to BAS construction partners on how to access data transmitted by BAS from their CDE.
+    """
+
+    _sigil = "https://cde.data.bas.ac.uk/"
+
+    def __init__(self, option: RecordDistribution, restricted: bool = False, **kwargs: Any) -> None:
+        super().__init__(option, restricted, **kwargs)
+        self._unrestricted_btn_icon = "fa-regular fa-people-arrows"
+
+    @classmethod
+    def matches(cls, option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:
+        """Whether this class matches the distribution option."""
+        return option.transfer_option.online_resource.href.startswith(BasPartnersCDE._sigil)
+
+    @property
+    def format_type(self) -> DistributionType:
+        """Fixed (fake) Format type."""
+        return DistributionType.X_BAS_CDE
+
+    @property
+    def label(self) -> str:
+        """Distinguishing identifier from transfer option if available, or generic value based on file type."""
+        title = self._option.transfer_option.online_resource.title
+        return title if title else "BAS Construction Partners CDE"
+
+    @property
+    def description(self) -> None:
+        """Not applicable as info box provides additional context."""
+        return None
+
+    @property
+    def size(self) -> str:
+        """Not applicable."""
+        return ""
+
+    @property
+    def cde_ref(self) -> str:
+        """CDE file reference."""
+        return urlparse(unquote(self._option.transfer_option.online_resource.href)).path.replace("/", "")
 
     @property
     def action(self) -> Link:
@@ -489,19 +491,9 @@ class BasSan(Distribution):
         return Link(value="Access Data", href=None)
 
     @property
-    def action_btn_variant(self) -> str:
-        """Variant of button to display for action link."""
-        return super().action_btn_variant if not self._restricted else super().action_btn_variant_restricted
-
-    @property
-    def action_btn_icon(self) -> str:
-        """Action button icon classes."""
-        return "fa-regular fa-server" if not self._restricted else super().action_btn_icon_restricted
-
-    @property
     def access_target(self) -> str | None:
         """DOM selector of element showing more information on accessing item."""
-        return "#item-data-info-san-access"
+        return "#item-data-info-cde-access"
 
 
 class Csv(FileDistribution):

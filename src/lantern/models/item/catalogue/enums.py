@@ -47,3 +47,4 @@ class DistributionType(Enum):
     SHAPEFILE_ZIP = "Shapefile (Zipped)"
     X_BAS_PAPER_MAP = "Flat or folded paper map"
     X_BAS_SAN = "SAN path reference"
+    X_BAS_CDE = "Construction partners Common Data Environment (CDE) reference"

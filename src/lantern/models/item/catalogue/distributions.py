@@ -492,16 +492,59 @@ class BasSan(Distribution):
     def action_btn_variant(self) -> str:
         """Variant of button to display for action link."""
         return super().action_btn_variant if not self._restricted else super().action_btn_variant_restricted
+class BasPartnersCDE(Distribution):
+    """
+    BAS Construction partners Common Data Environment (CDE) distribution option.
+
+    Provides information to BAS construction partners on how to access data transmitted by BAS from their CDE.
+    """
+
+    _sigil = "https://cde.data.bas.ac.uk/"
+
+    def __init__(self, option: RecordDistribution, restricted: bool = False, **kwargs: Any) -> None:
+        super().__init__(option, restricted, **kwargs)
+        self._unrestricted_btn_icon = "fa-regular fa-people-arrows"
+
+    @classmethod
+    def matches(cls, option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:
+        """Whether this class matches the distribution option."""
+        return option.transfer_option.online_resource.href.startswith(BasPartnersCDE._sigil)
 
     @property
-    def action_btn_icon(self) -> str:
-        """Action button icon classes."""
-        return "fa-regular fa-server" if not self._restricted else super().action_btn_icon_restricted
+    def format_type(self) -> DistributionType:
+        """Fixed (fake) Format type."""
+        return DistributionType.X_BAS_CDE
+
+    @property
+    def label(self) -> str:
+        """Distinguishing identifier from transfer option if available, or generic value based on file type."""
+        title = self._option.transfer_option.online_resource.title
+        return title if title else "BAS Construction Partners CDE"
+
+    @property
+    def description(self) -> None:
+        """Not applicable as info box provides additional context."""
+        return None
+
+    @property
+    def size(self) -> str:
+        """Not applicable."""
+        return ""
+
+    @property
+    def cde_ref(self) -> str:
+        """CDE file reference."""
+        return urlparse(unquote(self._option.transfer_option.online_resource.href)).path.replace("/", "")
+
+    @property
+    def action(self) -> Link:
+        """Link to distribution without href due to using `access_trigger`."""
+        return Link(value="Access Data", href=None)
 
     @property
     def access_target(self) -> str | None:
         """DOM selector of element showing more information on accessing item."""
-        return "#item-data-info-san-access"
+        return "#item-data-info-cde-access"
 
 
 class Csv(FileDistribution):

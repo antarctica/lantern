@@ -38,6 +38,7 @@ class CheckType(Enum):
     DOWNLOADS_NORA = "NORA Downloads"
     DOWNLOADS_SHAREPOINT = "SharePoint Downloads"
     DOWNLOADS_BAS_SAN = "BAS SAN Downloads"
+    DOWNLOADS_BAS_CDE = "BAS CDE Downloads"
     DOWNLOADS_ARCGIS_LAYER = "ArcGIS Layer"
     DOWNLOADS_ARCGIS_SERVICE = "ArcGIS Service"
 
@@ -120,6 +121,7 @@ class DistributionChecks:
     _nora_sigil: Final[str] = "https://nora.nerc.ac.uk/"
     _sharepoint_sigil: Final[str] = "sharepoint.com"
     _bas_san_sigil: Final[str] = "sftp://san.nerc-bas.ac.uk/"
+    _bas_cde_sigil: Final[str] = "https://cde.data.bas.ac.uk/"
 
     def __init__(self, distributions: Distributions, file_identifier: str) -> None:
         self._distributions = distributions
@@ -161,6 +163,8 @@ class DistributionChecks:
                 type_ = CheckType.DOWNLOADS_NORA
             elif transfer_href.startswith(self._bas_san_sigil):
                 type_ = CheckType.DOWNLOADS_BAS_SAN
+            elif transfer_href.startswith(self._bas_cde_sigil):
+                type_ = CheckType.DOWNLOADS_BAS_CDE
             elif self._sharepoint_sigil in transfer_href:
                 type_ = CheckType.DOWNLOADS_SHAREPOINT
 
@@ -182,7 +186,7 @@ class DistributionChecks:
             if check.type == CheckType.DOWNLOADS_NORA:
                 check.http_method = HTTPMethod.GET
                 check.http_status = HTTPStatus.PARTIAL_CONTENT
-            if check.type in [CheckType.DOWNLOADS_SHAREPOINT, CheckType.DOWNLOADS_BAS_SAN]:
+            if check.type in [CheckType.DOWNLOADS_SHAREPOINT, CheckType.DOWNLOADS_BAS_SAN, CheckType.DOWNLOADS_BAS_CDE]:
                 check.state = CheckState.SKIPPED
             checks.append(check)
         return checks

@@ -1,9 +1,8 @@
 {% import '_macros/common.html.j2' as com %}
 
 {% macro item(data) %}
-  {% call com.item_border(classes="grid grid-cols-1 gap-y-2 lg:grid-cols-3 items-center data-option") %}
-    <div class="text-center lg:text-left"><span>{{ data.label }}</span>
-    </div>
+  {% call com.item_border(classes="grid grid-cols-1 lg:grid-cols-[44%_28%_28%] gap-y-2 items-center data-option") %}
+    <div class="text-center lg:text-left"><span>{{ data.label }}</span></div>
     <div class="text-center">{{ data.size }}</div>
     <div class="text-center lg:text-right">{{ action(data) }}</div>
     {% if data.description %}<aside class="lg:col-span-3 text-sm text-grey-500 dark:text-grey-300 text-center lg:text-left">{{ data.description }}</aside>{% endif %}
@@ -48,6 +47,8 @@
     {{ bas_san(data) }}
   {% elif data.format_type.name == "X_BAS_PAPER_MAP"  %}
     {{ bas_published_map() }}
+  {% elif data.format_type.name == "X_BAS_CDE"  %}
+    {{ bas_partners_cde(data) }}
   {% endif %}
 {% endmacro %}
 
@@ -184,4 +185,18 @@
     <p>This item is available to purchase as a physical paper map. Please see this <a class="{{ com.link_classes() }}" href="/guides/map-purchasing/">guide</a> for more information.</p>
     <p>This item is available free of charge to BAS staff members. Please <a class="{{ com.link_classes() }}" href="#tab-contact">contact MAGIC</a> to request a copy.</p>
   {% endcall %}
+{% endmacro %}
+
+{% macro bas_partners_cde(data) %}
+  {% set id_base = data.access_target | replace("#", "") %}
+  <div class="space-y-4">
+    {% call com.alert(shape='side', variant='blue', classes='space-y-4') %}
+      <p>Access this item through a partner Common Data Environment (CDE).</p>
+    {% endcall %}
+    <dl>
+      {% call com.dl_item(title='Codified file name', id=id_base + '-ref') %}
+        {{ com.copyable_path(data.cde_ref) }}
+      {% endcall %}
+    </dl>
+  </div>
 {% endmacro %}

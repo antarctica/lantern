@@ -33,6 +33,7 @@ Item to test all supported data formats:
 - ArcGIS Raster Tile Layer
 - ArcGIS Vector Tile Layer
 - BAS SAN (not format based/aware)
+- BAS Construction CDE (not format based/aware)
 - BAS Paper Map ordering (not format based/aware)
 - CSV
 - FPL
@@ -819,6 +820,38 @@ distributions = {
         transfer_option=TransferOption(
             online_resource=OnlineResource(
                 href="sftp://san.nerc-bas.ac.uk/data/x",
+                function=OnlineResourceFunctionCode.DOWNLOAD,
+                # title deliberately not set to use default value in distribution option
+            ),
+        ),
+    ),
+    "X - BAS Construction Partners CDE Access": Distribution(
+        distributor=Contact(
+            organisation=ContactIdentity(
+                name="Mapping and Geographic Information Centre, British Antarctic Survey",
+                href="https://ror.org/01rhff309",
+                title="ror",
+            ),
+            phone="+44 (0)1223 221400",
+            email="magic@bas.ac.uk",
+            address=Address(
+                delivery_point="British Antarctic Survey, High Cross, Madingley Road",
+                city="Cambridge",
+                administrative_area="Cambridgeshire",
+                postal_code="CB3 0ET",
+                country="United Kingdom",
+            ),
+            online_resource=OnlineResource(
+                href="https://www.bas.ac.uk/teams/magic",
+                title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
+                description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
+                function=OnlineResourceFunctionCode.INFORMATION,
+            ),
+            role={ContactRoleCode.DISTRIBUTOR},
+        ),
+        transfer_option=TransferOption(
+            online_resource=OnlineResource(
+                href="https://cde.data.bas.ac.uk/123abc",
                 function=OnlineResourceFunctionCode.DOWNLOAD,
                 # title deliberately not set to use default value in distribution option
             ),

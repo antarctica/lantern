@@ -304,6 +304,7 @@ Supported distribution options:
 - other special cases:
   - BAS published maps purchasing options
   - BAS SAN references
+  - BAS construction partners CDE references
 
 Implemented via classes in the `lantern.models.item.catalogue.distributions` package.
 

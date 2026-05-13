@@ -13,6 +13,7 @@ from lantern.models.item.catalogue.distributions import (
     ArcGisOgcApiFeatures,
     ArcGisRasterTileLayer,
     ArcGisVectorTileLayer,
+    BasPartnersCDE,
     BasPublishedMap,
     BasSan,
     Csv,
@@ -29,6 +30,8 @@ from lantern.models.item.catalogue.distributions import (
     Shapefile,
 )
 from lantern.models.item.catalogue.enums import DistributionType
+
+ACTION_BTN_ICON_RESTRICTED_DEFAULT = "fa-regular fa-lock-keyhole"
 
 
 def _make_dist(format_href: str) -> RecordDistribution:
@@ -383,13 +386,50 @@ class TestDistributionBasSan:
         dist = BasSan(option=self._base_option, restricted=restricted)
         assert dist.action_btn_variant == expected
 
+class TestDistributionBasPartnersCDE:
+    """Test BAS Partners CDE access distribution."""
+
+    _base_option = RecordDistribution(
+        distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
+        transfer_option=TransferOption(
+            online_resource=OnlineResource(
+                href="https://cde.data.bas.ac.uk/x",
+                function=OnlineResourceFunctionCode.DOWNLOAD,
+            )
+        ),
+    )
+
+    def test_init(self):
+        """Can create a distribution."""
+        dist = BasPartnersCDE(option=self._base_option, restricted=False)
+
+        assert dist.matches(self._base_option, [])
+
     @pytest.mark.parametrize(
-        ("restricted", "expected"), [(False, "fa-regular fa-server"), (True, "fa-regular fa-lock-keyhole")]
+        ("title", "expected"),
+        [(None, "BAS Construction Partners CDE"), ("x", "x")],
+    )
+    def test_label(self, title: str | None, expected: str):
+        """Can get label based on transfer option or format."""
+        option = deepcopy(self._base_option)
+        option.transfer_option.online_resource.title = title
+
+        dist = BasPartnersCDE(option=option, restricted=False)
+        assert dist.label == expected
+
+    @pytest.mark.parametrize(
+        ("restricted", "expected"),
+        [(False, "fa-regular fa-people-arrows"), (True, ACTION_BTN_ICON_RESTRICTED_DEFAULT)],
     )
     def test_action_btn_icon(self, restricted: bool, expected: str):
         """Can get action icon."""
-        dist = BasSan(option=self._base_option, restricted=restricted)
+        dist = BasPartnersCDE(option=self._base_option, restricted=restricted)
         assert dist.action_btn_icon == expected
+
+    def test_cde_ref(self):
+        """Can parse and format CDE file name for a distribution."""
+        dist = BasPartnersCDE(option=self._base_option, restricted=False)
+        assert dist.cde_ref == "x"
 
 
 class TestDistributionArcGisFeatureLayer:

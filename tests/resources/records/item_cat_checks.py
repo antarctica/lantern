@@ -29,6 +29,7 @@ Item to test distribution related CheckType enum members:
 - ArcGIS Services
 - NORA file
 - BAS published maps purchasing
+- BAS Construction CDE
 
 Also includes a DOI identifier to test an additional CheckType.
 
@@ -245,6 +246,39 @@ map_purchase = Distribution(
     ),
 )
 
+common_data_env_access = Distribution(
+    distributor=Contact(
+        organisation=ContactIdentity(
+            name="Mapping and Geographic Information Centre, British Antarctic Survey",
+            href="https://ror.org/01rhff309",
+            title="ror",
+        ),
+        phone="+44 (0)1223 221400",
+        email="magic@bas.ac.uk",
+        address=Address(
+            delivery_point="British Antarctic Survey, High Cross, Madingley Road",
+            city="Cambridge",
+            administrative_area="Cambridgeshire",
+            postal_code="CB3 0ET",
+            country="United Kingdom",
+        ),
+        online_resource=OnlineResource(
+            href="https://www.bas.ac.uk/teams/magic",
+            title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
+            description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
+            function=OnlineResourceFunctionCode.INFORMATION,
+        ),
+        role={ContactRoleCode.DISTRIBUTOR},
+    ),
+    transfer_option=TransferOption(
+        online_resource=OnlineResource(
+            href="https://cde.data.bas.ac.uk/123abc",
+            function=OnlineResourceFunctionCode.DOWNLOAD,
+            # title deliberately not set to use default value in distribution option
+        ),
+    ),
+)
+
 record = make_record(
     open_access=True,
     file_identifier="cf80b941-3de6-4a04-8f5a-a2349c1e3ae0",
@@ -255,5 +289,12 @@ record = make_record(
 )
 record.identification.identifiers.append(Identifier(identifier="x", href="x", namespace="doi"))
 record.distribution = Distributions(
-    [*file_distributions, *arc_layer_distributions, *arc_service_distributions, nora_file, map_purchase]
+    [
+        *file_distributions,
+        *arc_layer_distributions,
+        *arc_service_distributions,
+        nora_file,
+        map_purchase,
+        common_data_env_access,
+    ],
 )

@@ -207,6 +207,17 @@ class TestDistributionChecks:
                 ],
             ),
             (
+                Distributions([_make_dist_opt(href="https://cde.data.bas.ac.uk/...")]),
+                [
+                    Check(
+                        type=CheckType.DOWNLOADS_BAS_CDE,
+                        url="https://cde.data.bas.ac.uk/...",
+                        file_identifier="x",
+                        state=CheckState.SKIPPED,
+                    )
+                ],
+            ),
+            (
                 Distributions([_make_dist_opt(href="https:/x.sharepoint.com/...")]),
                 [
                     Check(

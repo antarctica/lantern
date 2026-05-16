@@ -66,7 +66,7 @@ class Aggregations(list[Aggregation]):
     """
     Aggregations.
 
-    Wrapper around a list of Aggregation items with additional methods for filtering/selecting items.
+    Wrapper around a list of Aggregation items with additional methods for filtering/managing items.
 
     Schema definition: aggregations [1]
     ISO element: gmd:CI_ResponsibleParty [2]
@@ -154,6 +154,20 @@ class Aggregations(list[Aggregation]):
                 )
             ]
         )
+
+    def ensure(self, aggregation: Aggregation) -> None:
+        """
+        Add aggregation without creating duplicates.
+
+        Handles cases where:
+        - a contact already exists with a superset of roles (no changed needed)
+        - a contact already exists with a distinct sets of roles (distinct roles added to existing contact)
+        """
+        if aggregation in self:
+            # skip exact match
+            return
+
+        self.append(aggregation)
 
 
 @dataclass(kw_only=True)

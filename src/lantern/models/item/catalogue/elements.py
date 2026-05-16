@@ -550,6 +550,7 @@ class Maintenance(RecordMaintenance):
             ProgressCode.COMPLETED: "Item is complete and recommended for general use",
             ProgressCode.HISTORICAL_ARCHIVE: "Item has been archived and may be outdated",
             ProgressCode.OBSOLETE: "Item is obsolete and should be used with caution",
+            ProgressCode.SUPERSEDED: "Item has been replaced with a newer edition",
             ProgressCode.ON_GOING: "Item is being regularly updated and recommended for general use",
             ProgressCode.PLANNED: "Item is planned and does not yet exist",
             ProgressCode.REQUIRED: "Required (Contact us for further information)",

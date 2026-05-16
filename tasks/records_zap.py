@@ -70,7 +70,7 @@ def _revise_collection(time: datetime, collection: Record) -> None:
     collection.identification.edition = str(int(collection.identification.edition) + 1)  # ty:ignore[invalid-argument-type]
 
 
-def _revise_record(record: Record) -> None:
+def revise_record(record: Record) -> None:
     """Indicate record change via relevant properties."""
     now = datetime.now(tz=UTC).replace(microsecond=0)
     record.metadata.date_stamp = now.date()
@@ -89,7 +89,7 @@ def _revise_records(logger: logging.Logger, records: list[Record], catalogue: Ba
             existing_record = catalogue.repo.select_record(record.file_identifier)
             if record.dumps(strip_admin=False) != existing_record.dumps(strip_admin=False):
                 logger.info(f"Record '{record.file_identifier}' is different to stored version, revising")
-                _revise_record(record)
+                revise_record(record)
             else:
                 logger.info(f"Record '{record.file_identifier}' unchanged, skipping revision")
         except RecordNotFoundError:

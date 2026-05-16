@@ -414,6 +414,25 @@ class TestAggregations:
         result = value.identifiers(exclude=excluded)
         assert result == expected
 
+    test_ensure_agg = Aggregation(
+        identifier=Identifier(identifier="x", href="x", namespace="x"),
+        association_type=AggregationAssociationCode.CROSS_REFERENCE,
+    )
+
+    @pytest.mark.parametrize(
+        ("before", "after"),
+        [
+            (Aggregations([]), Aggregations([test_ensure_agg])),
+            (Aggregations([test_ensure_agg]), Aggregations([test_ensure_agg])),
+        ],
+    )
+    def test_ensure(self, before: Aggregations, after: Aggregations):
+        """Can append an aggregation as needed."""
+        value = self.test_ensure_agg
+
+        before.ensure(value)
+        assert before == after
+
     def test_structure(self):
         """Can create an Aggregations element by converting a list of plain types."""
         expected = Aggregations(

@@ -10,7 +10,7 @@ authors = [
 requires-python = ">=3.11"
 dependencies = [
     "authlib>=1.7.1",
-    "bas-metadata-library>=0.17.0",
+    "bas-metadata-library>=0.17.1",
     "beautifulsoup4>=4.13.4",
     "bleach>=6.2.0",
     "boto3>=1.42.44",
@@ -62,7 +62,7 @@ test = [
 ]
 
 [tool.uv]
-exclude-newer-package = { bas-metadata-library = false, urllib3 = false }
+exclude-newer-package = { bas-metadata-library = false }
 
 [[tool.uv.index]]
 name = "self"
@@ -112,6 +112,7 @@ version = { cmd = "uv version", help = "Show app version" }
 esri-record = { cmd = "python -m tasks.record_esri", help = "Add Esri item distribution options to a record" }
 esri-item = { cmd = "python -m tasks.esri_item", help = "Sync record details to an Esri item" }
 clone-record = { cmd = "python -m tasks.record_clone", help = "Clone record from cache into import directory" }
+supersede-record = { cmd = "python -m tasks.record_supersede", help = "Indicate a new record is the successor to another" }
 issues-record = { cmd = "python -m tasks.record_issues", help = "Set GitLab issues for a record"}
 admin-record = { cmd = "python -m tasks.record_dump_admin", help = "View administrative metadata for a record" }
 restrict-record = { cmd = "python -m tasks.record_permissions", help = "Set access permissions for a record" }

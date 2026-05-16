@@ -52,6 +52,13 @@ To create records:
   - see [MAGIC metadata guidance](https://gist.github.com/felnne/d18cceab0fd87acaf2cd482ba3ee5d62)
 - clone an existing record:
   - run the [`clone-record`](/docs/supplemental/proto-cli-reference.md#clone-record) command
+- superseding an existing record:
+  - if the successor record has been made already using Zap ⚡:
+    - run the [`zap-records`](/docs/supplemental/proto-cli-reference.md#zap-records) command
+  - otherwise:
+    - run the [`clone-record`](/docs/supplemental/proto-cli-reference.md#clone-record) command
+    - then update the cloned record as needed (edition, etc.)
+  - run the [`supersede-record`](/docs/supplemental/proto-cli-reference.md#supersede-record) command
 
 Then run the [Interactive Publishing Workflows](#interactive-publishing-workflow) to publish records.
 
@@ -64,7 +71,7 @@ To update new and existing records:
 
 - if needed, run the [`select-records`](/docs/supplemental/proto-cli-reference.md#select-records) command
 - to replace a record with a successor:
-  - run the [`replace-record`](/docs/supplemental/proto-cli-reference.md#replace-record) command
+  - run the [`supersede-record`](/docs/supplemental/proto-cli-reference.md#supersede-record) command
 - to include an Esri ArcGIS Online item as a distribution option:
   - run the [`esri-record`](/docs/supplemental/proto-cli-reference.md#esri-record) command
 - to set access permissions:

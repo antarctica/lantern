@@ -7,7 +7,6 @@ exclude-newer = "0001-01-01T00:00:00Z" # This has no effect and is included for 
 exclude-newer-span = "P7D"
 
 [options.exclude-newer-package]
-urllib3 = false
 bas-metadata-library = false
 
 [[package]]
@@ -71,7 +70,7 @@ wheels = [
 
 [[package]]
 name = "bas-metadata-library"
-version = "0.17.0"
+version = "0.17.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cattrs" },
@@ -82,9 +81,9 @@ dependencies = [
     { name = "rfc3987" },
     { name = "strict-rfc3339" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/43/51/6adc733e5d5c718f1edfa63ef965668ba8f4f1fd9c3bc1f29d59058700ec/bas_metadata_library-0.17.0.tar.gz", hash = "sha256:c0b4466a550066d95a8fc1444d73bc8dc7a5b5d0aa52cc5305c05eb8c8a8ebf2", size = 168929, upload-time = "2026-04-07T07:18:21.726Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/66/87/0501b47150df4f80268c267c08c785196a6590365976d807060820a565bb/bas_metadata_library-0.17.1.tar.gz", hash = "sha256:96f77b08e311ac7a64da719b639b03aaa84645917d5119393b388246a44dcb48", size = 169139, upload-time = "2026-05-16T13:46:13.823Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/bd/07/a887f99e80241afef43e62eb493eb809307a2a3744baa9cd5b56f4516061/bas_metadata_library-0.17.0-py3-none-any.whl", hash = "sha256:f0ba82c543ac17ab972292575ff35c59ff43e9220e59216d8b798cc923a7a8ad", size = 250159, upload-time = "2026-04-07T07:18:19.709Z" },
+    { url = "https://files.pythonhosted.org/packages/2e/1e/89ee588fa7614648ba9d60eee1ea8cc7b03192cd7cb78d3fb24bc6d1444e/bas_metadata_library-0.17.1-py3-none-any.whl", hash = "sha256:b2835036360ca0ff9c3077d64620746caf2c31795ef11886cdf2e50c4b58d9f2", size = 250378, upload-time = "2026-05-16T13:46:12.103Z" },
 ]
 
 [[package]]
@@ -908,7 +907,7 @@ test = [
 [package.metadata]
 requires-dist = [
     { name = "authlib", specifier = ">=1.7.1" },
-    { name = "bas-metadata-library", specifier = ">=0.17.0" },
+    { name = "bas-metadata-library", specifier = ">=0.17.1" },
     { name = "beautifulsoup4", specifier = ">=4.13.4" },
     { name = "bleach", specifier = ">=6.2.0" },
     { name = "boto3", specifier = ">=1.42.44" },

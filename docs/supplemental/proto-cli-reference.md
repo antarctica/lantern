@@ -34,7 +34,7 @@ workflow-live        Import records to live site
 
 # single record commands
 clone-record         Clone record from cache into import directory
-successor-record     Indicate a new record is the successor to another
+supersede-record     Indicate a new record is the successor to another
 issues-record        Set GitLab issues for a record
 admin-record         View administrative metadata for a record
 restrict-record      Set access permissions for a record
@@ -137,19 +137,37 @@ These fields are updated when cloning a record:
 > Other fields (such as citation, aliases, edition, title, admin gitlab issues, permissions, etc.) are not changed and
 > may need updating.
 
-### `successor-record`
+### `supersede-record`
 
 Indicate a new record is the successor to another.
 
 ```shell
-% task successor-record --help
+% task supersede-record --help
 ```
+
+These fields are updated in the predecessor record:
+
+- `identification.aggregations[assocation='largerWorkCitation',initiative='collection']` (removed)
+- `identification.abstract` (superseded note with link to successor appended)
+
+These fields are updated in the successor record:
+
+- `identification.aggregations[assocation='revisionOf']` (pointing to predecessor)
+- `identification.aggregations[assocation='largerWorkCitation',initiative='collection']` (any from predecessor)
+
+These fields are updated in any collection records the predecessor contained:
+
+- `identification.aggregations[assocation='isComposedOf',initiative='collection']` (identifier updated to successor)
+
+> [!NOTE]
+> If working with a [`zap-records`](#zap-records) processed record, this command will separately update collections to
+> correct back-references to the successor record. Other collection changes (e.g. extent updates) will need reapplying.
 
 Examples:
 
 ```shell
 # set current and successor records with default branch and import path, without interaction
-% task successor-record --current 76c35d79-3611-4a12-adbc-8a1ce45200df --successor ./import/88d2ff3f-b159-42a4-826d-183c5c5dde70.json
+% task supersede-record --force --current 76c35d79-3611-4a12-adbc-8a1ce45200df --successor ./import/88d2ff3f-b159-42a4-826d-183c5c5dde70.json
 ```
 
 ### `issues-record`

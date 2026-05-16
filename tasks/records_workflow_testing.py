@@ -89,6 +89,7 @@ class OutputCommentItem:
         return {
             "type": self._record.hierarchy_level.value,
             "title": self._record.identification.title,
+            "edition": self._record.identification.edition or "NONE",
             "item_url": self._item_url,
             "trusted_item_url": self._trusted_item_url,
             "alias_urls": ", ".join(self._aliases),
@@ -99,7 +100,7 @@ class OutputCommentItem:
     def _template(self) -> str:
         """Jinja template."""
         return dedent("""\
-            {{ title }} ({{ type }})
+            {{ title }} [Ed. {{ edition }}] ({{ type }})
             {% if alias_urls %}
             - 🔗 {{ alias_urls }}
             {% endif %}
@@ -174,7 +175,7 @@ class OutputCommentMergeRequest:
 
             - start or continue threads to track each problem (use the drop-down on the comment button to create a thread)
 
-            _This comment was left automatically by the Lantern Experiment's [Interactive record publishing workflow](https://github.com/antarctica/lantern/blob/main/docs/usage.md#interactive-record-publishing-workflow)._
+            _This comment was left automatically by the Lantern Experiment's [Interactive record publishing workflow](https://github.com/antarctica/lantern/blob/main/docs/usage.md#interactive-publishing-workflow)._
 
             _This comment was left by a bot user that does not monitor replies. Contact @/felnne for support._
          """)
@@ -215,7 +216,7 @@ class OutputCommentIssue:
 
             See this merge request for more information and how to proceed with publishing: {{merge_url}}
 
-            _This comment was left automatically by the Lantern Experiment's [Interactive record publishing workflow](https://github.com/antarctica/lantern/blob/main/docs/usage.md#interactive-record-publishing-workflow)._
+            _This comment was left automatically by the Lantern Experiment's [Interactive record publishing workflow](https://github.com/antarctica/lantern/blob/main/docs/usage.md#interactive-publishing-workflow)._
 
             _This comment was left by a bot user that does not monitor replies. Contact @/felnne for support._
          """)

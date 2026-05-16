@@ -41,3 +41,8 @@ def make_bas_cat_collection_member(item_id: str) -> Aggregation:
 def make_bas_cat_cross_ref(item_id: str) -> Aggregation:
     """Cross-reference to another item."""
     return make_bas_cat(item_id, AggregationAssociationCode.CROSS_REFERENCE)
+
+
+def make_bas_cat_revision_of(item_id: str) -> Aggregation:
+    """Indicates this item is a revision of another item."""
+    return make_bas_cat(item_id, AggregationAssociationCode.REVISION_OF)

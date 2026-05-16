@@ -276,4 +276,5 @@ class ProgressCode(Enum):
     ON_GOING = "onGoing"
     PLANNED = "planned"
     REQUIRED = "required"
+    SUPERSEDED = "superseded"
     UNDER_DEVELOPMENT = "underDevelopment"

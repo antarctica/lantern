@@ -7,6 +7,7 @@ from lantern.lib.metadata_library.models.record.presets.aggregations import (
     make_bas_cat,
     make_bas_cat_collection_member,
     make_bas_cat_cross_ref,
+    make_bas_cat_revision_of,
     make_in_bas_cat_collection,
 )
 
@@ -98,5 +99,21 @@ class TestMakeBasCatCrossRef:
             association_type=AggregationAssociationCode.CROSS_REFERENCE,
         )
         result = make_bas_cat_cross_ref("x")
+
+        assert result == expected
+
+
+class TestMakeBasCatRevisionOf:
+    """Test `make_bas_cat_revision_of()` preset."""
+
+    def test_default(self):
+        """Can make an aggregation for an item that is a revision of another."""
+        expected = Aggregation(
+            identifier=Identifier(
+                identifier="x", href="https://lantern.data.bas.ac.uk/items/x", namespace="lantern.data.bas.ac.uk"
+            ),
+            association_type=AggregationAssociationCode.REVISION_OF,
+        )
+        result = make_bas_cat_revision_of("x")
 
         assert result == expected

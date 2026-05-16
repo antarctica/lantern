@@ -451,10 +451,10 @@ resource "gitlab_personal_access_token" "lantern_bot_pa_item_enquires" {
   name    = "iac-pa-item-enquires"
   scopes  = ["api"]
 
-  rotation_configuration = {
-    expiration_days    = 90
-    rotate_before_days = 7
-  }
+  # rotation_configuration = {
+  #   expiration_days    = 90
+  #   rotate_before_days = 7
+  # }
 }
 resource "onepassword_item" "lantern_bot_pa_item_enquires_token" {
   vault      = var.pvd_op_vault_id
@@ -471,10 +471,10 @@ resource "gitlab_personal_access_token" "lantern_bot_ansible_workstation_module"
   name    = "iac-ansible-workstation-module"
   scopes  = ["api"]
 
-  rotation_configuration = {
-    expiration_days    = 90
-    rotate_before_days = 7
-  }
+  # rotation_configuration = {
+  #   expiration_days    = 90
+  #   rotate_before_days = 7
+  # }
 }
 resource "onepassword_item" "lantern_bot_ansible_workstation_module_token" {
   vault      = var.pvd_op_vault_id

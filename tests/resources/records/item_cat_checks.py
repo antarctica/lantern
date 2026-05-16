@@ -1,5 +1,4 @@
 from lantern.lib.metadata_library.models.record.elements.common import (
-    Address,
     Contact,
     ContactIdentity,
     Identifier,
@@ -54,29 +53,7 @@ file_formats = [
 file_url = "https://example.com/x"
 file_distributions = [
     Distribution(
-        distributor=Contact(
-            organisation=ContactIdentity(
-                name="Mapping and Geographic Information Centre, British Antarctic Survey",
-                href="https://ror.org/01rhff309",
-                title="ror",
-            ),
-            phone="+44 (0)1223 221400",
-            email="magic@bas.ac.uk",
-            address=Address(
-                delivery_point="British Antarctic Survey, High Cross, Madingley Road",
-                city="Cambridge",
-                administrative_area="Cambridgeshire",
-                postal_code="CB3 0ET",
-                country="United Kingdom",
-            ),
-            online_resource=OnlineResource(
-                href="https://www.bas.ac.uk/teams/magic",
-                title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-                description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
-                function=OnlineResourceFunctionCode.INFORMATION,
-            ),
-            role={ContactRoleCode.DISTRIBUTOR},
-        ),
+        distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
         format=Format(
             format="-",
             href=file_format,
@@ -103,25 +80,7 @@ arc_layer_formats = [
 arc_layer_url = "https://example.com/x"
 arc_layer_distributions = [
     Distribution(
-        distributor=Contact(
-            organisation=ContactIdentity(
-                name="Environmental Systems Research Institute", href="https://ror.org/0428exr50", title="ror"
-            ),
-            address=Address(
-                delivery_point="380 New York Street",
-                city="Redlands",
-                administrative_area="California",
-                postal_code="92373",
-                country="United States of America",
-            ),
-            online_resource=OnlineResource(
-                href="https://www.esri.com",
-                title="GIS Mapping Software, Location Intelligence & Spatial Analytics | Esri",
-                description="Corporate website for Environmental Systems Research Institute (ESRI).",
-                function=OnlineResourceFunctionCode.INFORMATION,
-            ),
-            role={ContactRoleCode.DISTRIBUTOR},
-        ),
+        distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
         format=Format(
             format="-",
             href=arc_layer,
@@ -147,25 +106,7 @@ arc_service_formats = [
 arc_service_url = "https://example.com/x"
 arc_service_distributions = [
     Distribution(
-        distributor=Contact(
-            organisation=ContactIdentity(
-                name="Environmental Systems Research Institute", href="https://ror.org/0428exr50", title="ror"
-            ),
-            address=Address(
-                delivery_point="380 New York Street",
-                city="Redlands",
-                administrative_area="California",
-                postal_code="92373",
-                country="United States of America",
-            ),
-            online_resource=OnlineResource(
-                href="https://www.esri.com",
-                title="GIS Mapping Software, Location Intelligence & Spatial Analytics | Esri",
-                description="Corporate website for Environmental Systems Research Institute (ESRI).",
-                function=OnlineResourceFunctionCode.INFORMATION,
-            ),
-            role={ContactRoleCode.DISTRIBUTOR},
-        ),
+        distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
         format=Format(
             format="-",
             href=arc_service,
@@ -183,21 +124,7 @@ arc_service_distributions = [
 ]
 
 nora_file = Distribution(
-    distributor=Contact(
-        organisation=ContactIdentity(
-            name="NERC Open Research Archive",
-            href="https://ror.org/02b5d8509",
-            title="ror",
-        ),
-        email="nora.nerc@bgs.ac.uk",
-        online_resource=OnlineResource(
-            href="https://nora.nerc.ac.uk/information.html",
-            title="About this repository - NERC Open Research Archive",
-            description="General information about the NERC Open Research Archive (NORA) from the NORA website.",
-            function=OnlineResourceFunctionCode.INFORMATION,
-        ),
-        role={ContactRoleCode.DISTRIBUTOR},
-    ),
+    distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
     format=Format(
         format="-",
         href="https://www.iana.org/assignments/media-types/application/pdf",
@@ -214,29 +141,7 @@ nora_file = Distribution(
 )
 
 map_purchase = Distribution(
-    distributor=Contact(
-        organisation=ContactIdentity(
-            name="Mapping and Geographic Information Centre, British Antarctic Survey",
-            href="https://ror.org/01rhff309",
-            title="ror",
-        ),
-        phone="+44 (0)1223 221400",
-        email="magic@bas.ac.uk",
-        address=Address(
-            delivery_point="British Antarctic Survey, High Cross, Madingley Road",
-            city="Cambridge",
-            administrative_area="Cambridgeshire",
-            postal_code="CB3 0ET",
-            country="United Kingdom",
-        ),
-        online_resource=OnlineResource(
-            href="https://www.bas.ac.uk/teams/magic",
-            title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-            description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
-            function=OnlineResourceFunctionCode.INFORMATION,
-        ),
-        role={ContactRoleCode.DISTRIBUTOR},
-    ),
+    distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
     transfer_option=TransferOption(
         online_resource=OnlineResource(
             href="https://data.bas.ac.uk/guides/map-purchasing/",
@@ -248,29 +153,7 @@ map_purchase = Distribution(
 )
 
 san_access = Distribution(
-    distributor=Contact(
-        organisation=ContactIdentity(
-            name="Mapping and Geographic Information Centre, British Antarctic Survey",
-            href="https://ror.org/01rhff309",
-            title="ror",
-        ),
-        phone="+44 (0)1223 221400",
-        email="magic@bas.ac.uk",
-        address=Address(
-            delivery_point="British Antarctic Survey, High Cross, Madingley Road",
-            city="Cambridge",
-            administrative_area="Cambridgeshire",
-            postal_code="CB3 0ET",
-            country="United Kingdom",
-        ),
-        online_resource=OnlineResource(
-            href="https://www.bas.ac.uk/teams/magic",
-            title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-            description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
-            function=OnlineResourceFunctionCode.INFORMATION,
-        ),
-        role={ContactRoleCode.DISTRIBUTOR},
-    ),
+    distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
     transfer_option=TransferOption(
         online_resource=OnlineResource(
             href="sftp://san.nerc-bas.ac.uk/data/x",
@@ -281,29 +164,7 @@ san_access = Distribution(
 )
 
 common_data_env_access = Distribution(
-    distributor=Contact(
-        organisation=ContactIdentity(
-            name="Mapping and Geographic Information Centre, British Antarctic Survey",
-            href="https://ror.org/01rhff309",
-            title="ror",
-        ),
-        phone="+44 (0)1223 221400",
-        email="magic@bas.ac.uk",
-        address=Address(
-            delivery_point="British Antarctic Survey, High Cross, Madingley Road",
-            city="Cambridge",
-            administrative_area="Cambridgeshire",
-            postal_code="CB3 0ET",
-            country="United Kingdom",
-        ),
-        online_resource=OnlineResource(
-            href="https://www.bas.ac.uk/teams/magic",
-            title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-            description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
-            function=OnlineResourceFunctionCode.INFORMATION,
-        ),
-        role={ContactRoleCode.DISTRIBUTOR},
-    ),
+    distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
     transfer_option=TransferOption(
         online_resource=OnlineResource(
             href="https://cde.data.bas.ac.uk/123abc&456def",

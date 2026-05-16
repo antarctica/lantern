@@ -77,9 +77,9 @@ class OutputCommentIssue:
 
             {% endfor %}
 
-            See the [updating records](https://github.com/antarctica/lantern/blob/main/docs/usage.md#update-records) documentation for how to revise these items in the future.
+            See the [updating records](https://github.com/antarctica/lantern/blob/main/docs/usage.md#updating-records) documentation for how to revise these items in the future.
 
-            _This comment was left automatically by the Lantern Experiment's [Interactive record publishing workflow](https://github.com/antarctica/lantern/blob/main/docs/usage.md#interactive-record-publishing-workflow)._
+            _This comment was left automatically by the Lantern Experiment's [Interactive record publishing workflow](https://github.com/antarctica/lantern/blob/main/docs/usage.md#interactive-publishing-workflow)._
 
             _This comment was left by a bot user that does not monitor replies. Contact @/felnne for support._
          """)
@@ -216,7 +216,7 @@ def main() -> None:
     """
     env: SiteEnvironment = "live"
     logger, config, catalogue = init()
-    checks_base_path = Path("./workflow_results/live")
+    checks_base_path = Path("./checks/live")
 
     logger.info("Checking connectivity to trusted upload host.")
     ping_host(config.SITE_TRUSTED_RSYNC_HOST)

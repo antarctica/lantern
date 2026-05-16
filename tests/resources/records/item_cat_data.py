@@ -828,12 +828,11 @@ distributions = {
     "X - BAS Construction Partners CDE Access": Distribution(
         distributor=Contact(
             organisation=ContactIdentity(
-                name="Mapping and Geographic Information Centre, British Antarctic Survey",
+                name="Antarctic Infrastructure Modernisation Programme, British Antarctic Survey",
                 href="https://ror.org/01rhff309",
                 title="ror",
             ),
             phone="+44 (0)1223 221400",
-            email="magic@bas.ac.uk",
             address=Address(
                 delivery_point="British Antarctic Survey, High Cross, Madingley Road",
                 city="Cambridge",
@@ -842,9 +841,9 @@ distributions = {
                 country="United Kingdom",
             ),
             online_resource=OnlineResource(
-                href="https://www.bas.ac.uk/teams/magic",
-                title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-                description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
+                href="https://www.bas.ac.uk/polar-capabilities/antarctic-infrastructure-modernisation-programme/",
+                title="Antarctic Infrastructure Modernisation Programme - BAS public website",
+                description="General information about the Antarctic Infrastructure Modernisation Programme from the British Antarctic Survey (BAS) public website.",
                 function=OnlineResourceFunctionCode.INFORMATION,
             ),
             role={ContactRoleCode.DISTRIBUTOR},

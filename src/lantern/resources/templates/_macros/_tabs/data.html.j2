@@ -194,8 +194,12 @@
       <p>Access this item through a partner Common Data Environment (CDE).</p>
     {% endcall %}
     <dl>
-      {% call com.dl_item(title='Codified file name', id=id_base + '-ref') %}
-        {{ com.copyable_path(data.cde_ref) }}
+      {% call com.dl_item(title='Codified file names', id=id_base + '-refs') %}
+        <ul class="space-y-2">
+          {% for value in data.cde_refs %}
+            <li>{{ com.copyable_path(value) }}</li>
+          {% endfor %}
+        </ul>
       {% endcall %}
     </dl>
   </div>

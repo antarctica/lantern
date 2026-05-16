@@ -481,9 +481,17 @@ class BasPartnersCDE(Distribution):
         return ""
 
     @property
-    def cde_ref(self) -> str:
-        """CDE file reference."""
-        return urlparse(unquote(self._option.transfer_option.online_resource.href)).path.replace("/", "")
+    def cde_refs(self) -> list[str]:
+        """
+        CDE file reference.
+
+        CDE references are file specific but an item may relate to a collection. To avoid specifying 1:n CDE dist
+        options, multiple values can be specified using '&` as a separator.
+
+        I.e. 'https://cde.data.bas.ac.uk/a&b' -> ['a', 'b'].
+        """
+        raw = urlparse(unquote(self._option.transfer_option.online_resource.href)).path.replace("/", "")
+        return raw.split("&")
 
     @property
     def action(self) -> Link:

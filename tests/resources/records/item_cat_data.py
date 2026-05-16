@@ -851,7 +851,7 @@ distributions = {
         ),
         transfer_option=TransferOption(
             online_resource=OnlineResource(
-                href="https://cde.data.bas.ac.uk/123abc",
+                href="https://cde.data.bas.ac.uk/123abc&456def",
                 function=OnlineResourceFunctionCode.DOWNLOAD,
                 # title deliberately not set to use default value in distribution option
             ),

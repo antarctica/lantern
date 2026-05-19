@@ -201,6 +201,10 @@ def _parse_args() -> Args:
     parser.add_argument("--webhook", type=str, help="Optional webhook URL")
     args_ns = parser.parse_args()
 
+    # rename `site` to `env` to match Args data class
+    args_ns.env = args_ns.site
+    del args_ns.site
+
     if not args_ns.changeset_base.replace("-", "").isalnum() or args_ns.changeset_base.startswith("-"):
         print(f"Error: '{args_ns.path}' must be alphanumeric with hyphens only. Values cannot start with a hyphen.")
         sys.exit(1)

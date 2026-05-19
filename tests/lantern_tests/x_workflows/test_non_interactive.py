@@ -40,6 +40,7 @@ class TestPublishingWorkflow:
         script_path = self._get_script_path()
 
         args = {
+            "--site": "testing",
             "--path": str(records_path),
             "--changeset-base": "test",
             "--changeset-title": "Workflow test",

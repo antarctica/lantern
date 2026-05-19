@@ -127,7 +127,7 @@ class Config:
 
         Undefined required properties will raise `environs.exceptions.EnvError`.
 
-        Invalid property values will raise a `environs.exceptions.EnvValidationError` (a `EnvError` subclass).
+        Invalid property values will raise a `environs.exceptions.EnvValidationError` (an `EnvError` subclass).
 
         Validation is set on each property, using a combination of default environs/marshmallow and custom validators.
         Validation is basic/limited, for example we check credentials aren't empty, not that they work.

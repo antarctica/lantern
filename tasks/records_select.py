@@ -6,7 +6,7 @@ from pathlib import Path
 
 import inquirer
 from inquirer import Path as InquirerPath
-from tasks._shared import dump_records, get_gitlab_source, init, process_record_references
+from tasks._shared import dump_records, init, process_record_references
 
 from lantern.catalogues.bas import BasCatalogue
 
@@ -65,7 +65,7 @@ def _get_args(
         return path, branch, references
 
     path = Path(inquirer.path("Import path", path_type=InquirerPath.DIRECTORY, exists=True, default=path))
-    branch = get_gitlab_source(logger=logger, cat=cat, action="Fetching records from")
+    branch = inquirer.text(message="Branch", default=branch)
 
     if cli_references:
         logger.info("Record references from command line arguments:")

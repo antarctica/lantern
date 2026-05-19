@@ -1,7 +1,10 @@
 {% macro script_sentry_feedback_widget(dsn) %}
 document.addEventListener('DOMContentLoaded', () => {
   Sentry.init({
-    dsn: '{{ dsn }}'
+    dsn: '{{ dsn }}',
+    ignoreErrors: [
+      /\[Cloudflare Turnstile] Error: [36]\d{2}\d{3}/,
+    ],
   });
 
   const form = document.getElementById('site-feedback');

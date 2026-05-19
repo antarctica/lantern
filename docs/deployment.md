@@ -68,8 +68,8 @@ Pre-releases can optionally be deployed to the staging environment by triggering
 
 ## Rotating access tokens
 
-> [!WARNING]
-> This section is Work in Progress (WIP) and may not be complete/accurate.
+> [!IMPORTANT]
+> Automatic rotation via IaC will not work with the BAS GitLab instance due to its age.
 
 Applies to:
 
@@ -78,16 +78,10 @@ Applies to:
     ([Records Repository](/docs/infrastructure.md#gitlab)
   - for [Item Enquires](/docs/setup.md#gitlab-item-enquires) ([Power Automate](/docs/infrastructure.md#power-automate))
 
-Automatic rotation is configured in [IaC](/docs/infrastructure.md#infrastructure-as-code), which will typically update a
-1Password item for use in an [Ansible Vault](#ansible-playbook) or other system.
+Automatic rotation is configured in [IaC](/docs/infrastructure.md#infrastructure-as-code), which should update a
+1Password item for use in an [Ansible Vault](#ansible-playbook) or other system [1].
 
-To update IaC:
-
-```text
-% cd resources/envs
-% opentofu init
-% opentofu apply
-```
+Due to the age of the BAS GitLab instance, automatic token rotation is unavailable and disabled (tokens do not expire).
 
 Then:
 
@@ -103,3 +97,11 @@ Then:
 > % terraform state show 'gitlab_personal_access_token.lantern_bot_pa_item_enquires'
 > % terraform state show 'gitlab_personal_access_token.lantern_bot_ansible_workstation_module'
 > ```
+
+[1]
+
+```text
+% cd resources/envs
+% tofu init
+% tofu apply
+```

@@ -138,8 +138,8 @@ def export(
 ) -> None:
     """Run catalogue export, optionally overloading exporter."""
     if target == "local":
-        cat._envs[env]._untrusted._exporter = LocalExporter(logger=cat._logger, path=Path("export"))
-        cat._envs[env]._trusted._exporter = LocalExporter(logger=cat._logger, path=Path("export-trusted"))
+        cat._envs[env]._untrusted._exporter = LocalExporter(logger=cat._logger, path=Path("export"))  # ty:ignore[invalid-assignment]
+        cat._envs[env]._trusted._exporter = LocalExporter(logger=cat._logger, path=Path("export-trusted"))  # ty:ignore[invalid-assignment]
     cat.export(env=env, identifiers=identifiers, branch=branch, outputs=outputs)
 
 

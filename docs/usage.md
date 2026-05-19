@@ -48,9 +48,9 @@ To use this installation:
 
 To create records:
 
-- create from scratch:
+- from scratch:
   - see [MAGIC metadata guidance](https://gist.github.com/felnne/d18cceab0fd87acaf2cd482ba3ee5d62)
-- clone an existing record:
+- by cloning an existing record:
   - run the [`clone-record`](/docs/supplemental/proto-cli-reference.md#clone-record) command
 - superseding an existing record:
   - if the successor record has been made already using Zap ⚡:
@@ -84,6 +84,9 @@ Then run the [Interactive Publishing Workflows](#interactive-publishing-workflow
 
 ### Replacing record thumbnails
 
+> [!NOTE]
+> This is an advanced topic
+
 To replace a thumbnail for an existing resource:
 
 - overwrite the thumbnail file using the AWS CLI [1]
@@ -101,6 +104,9 @@ To replace a thumbnail for an existing resource:
 
 ### Replacing record artefacts
 
+> [!NOTE]
+> This is an advanced topic
+
 To replace file artefacts included in an existing resource:
 
 - use Zap ⚡️to select (but not upload) the replacement artefact to get an updated distribution option
@@ -108,81 +114,6 @@ To replace file artefacts included in an existing resource:
   - the transfer option URL (and amending if renamed)
   - this should ensure the format and size are updated if needed but double-check this
 - continue following the generic update workflow to complete updating the record
-
-### Selecting records
-
-The `select-records` task will:
-
-- accept the directory to save records to, the GitLab branch and record references via the command line
-- unless skipped with the `--force` flag, interactively confirm the directory to save records to
-- unless skipped with the `--force` flag, interactively confirm the GitLab branch to fetch records from
-- unless skipped with the `--force` flag, repeatedly prompt interactively for any additional record references(s) until:
-  - the user accepts any initial selection set via the command line
-  - the user indicates they're finished selecting records
-- parse record references to record identifiers
-- unless skipped with the `--force` flag, confirm the file identifiers to load
-- get selected records from the [GitLab Store](/docs/stores.md#gitlab-store)
-- save selected record configurations as JSON files to the target records directory
-
-> [!TIP]
-> Record references are intentionally flexible, supporting various catalogue URLs, file names, etc. optionally as a
-> comma and/or space separated list (e.g. `https://example.com/items/123/, 123.json`). Run task for supported formats.
-
-```shell
-# prompt for target path, branch and record identifiers (with defaults for path and branch)
-% task select-records
-# set branch and record reference (with interactive conformation)
-% task select-records --branch main https://data.bas.ac.uk/items/2fc581f3-8c7c-4ea5-a4a2-b133a437ff41/
-# set destination path, branch and record references (without interactive conformation)
-% task select-records --force --path ./x --branch main 2fc581f3-8c7c-4ea5-a4a2-b133a437ff41, https://data.bas.ac.uk/items/6f5102ae-dfae-4d72-ad07-6ce4c85f5db8/
-```
-
-### Setting record issues
-
-The `gitlab-record` task will:
-
-- parse and validate `import/*.json` files (ignoring subfolders) as [Records](/docs/models.md#records)
-- prompt interactively for which record to update
-- via an editor, prompt interactively for which GitLab issues to include in the selected record
-  - issues should be listed on separate lines as canonical GitLab issue URLs (not short references)
-  - existing issues will be pre-populated to either append or remove
-- update the [Administrative Metadata](/docs/libraries.md#record-administrative-metadata) in the selected record with
-  the specified issues
-- save the updated record configuration as a JSON file to the `import/` directory
-
-### Setting record permissions
-
-The `restrict-record` task will:
-
-- accept the directory for local records, a specific selected record config file, resource/metadata permission preset
-  and comments via the command line
-- if the `--force` flag is set:
-  - load the selected record config as a [Record](/docs/models.md#records), or return an error if no record is chosen
-  - create optional resource and/or metadata permissions from supported permission presets, with optional comments
-- unless skipped with the `--force` flag:
-  - interactively confirm the local records directory
-  - interactively confirm the optional resource and/or metadata permissions to set from supported presets
-  - interactively confirm optional comments to include with configured permissions
-  - parse and validate local record config files (ignoring subfolders) as [Records](/docs/models.md#records)
-  - prompt interactively to select which record to update
-- set resource and metadata permissions in the selected record's
-  [Administration Metadata](/docs/libraries.md#record-administrative-metadata), replacing any existing permissions
-- save the updated record to the local records path
-
-<!-- pyml disable md028 -->
-> [!CAUTION]
-> The catalogue does not enforce metadata access permissions. They will always evaluate to open access (unrestricted).
-
-> [!NOTE]
-> Only 'Open Access' and 'BAS Staff' access permissions are supported by this task.
-<!-- pyml enable md028 -->
-
-```shell
-# prompt for which record to restrict, metadata and resource permissions and comments (with default for local records)
-% task restrict-record
-# set resource permission and comment for a specific record config to preview (without interactive conformation)
-% task restrict-records --force --record import/ed1fe01c-951f-4979-8339-00748d6bfb0b.json --resource-preset 'BAS_STAFF' --resource-comment '...'
-```
 
 ## Previewing records
 
@@ -193,8 +124,8 @@ To preview new and updated records before importing them:
 3. run the [Local development web server](/docs/dev.md#local-development-web-server) to view records as items
 
 > [!TIP]
-> To view just [Administration Metadata](/docs/libraries.md#record-administrative-metadata) for a record at the command
-> line, run the [`admin-record`](/docs/supplemental/proto-cli-reference.md#admin-record) command.
+> To view [Administration Metadata](/docs/libraries.md#record-administrative-metadata) for a record at the command
+> line, use the [`admin-record`](/docs/supplemental/proto-cli-reference.md#admin-record) command instead.
 
 ## Publishing workflows
 
@@ -318,7 +249,7 @@ To [Check](/docs/monitoring.md#site-checks) the catalogue static site:
 
 1. run the [`check-records`](/docs/supplemental/proto-cli-reference.md#check-records) command
 
-## Upgrade records
+## Upgrading records
 
 > [!NOTE]
 > This is an advanced topic.

@@ -438,10 +438,17 @@ class TestDistributionBasPartnersCDE:
         dist = BasPartnersCDE(option=self._base_option, restricted=restricted)
         assert dist.action_btn_icon == expected
 
-    def test_cde_ref(self):
+    @pytest.mark.parametrize(
+        ("href", "expected"),
+        [("https://cde.data.bas.ac.uk/x", ["x"]), ("https://cde.data.bas.ac.uk/x&y", ["x", "y"])],
+    )
+    def test_cde_ref(self, href: str, expected: list[str]):
         """Can parse and format CDE file name for a distribution."""
-        dist = BasPartnersCDE(option=self._base_option, restricted=False)
-        assert dist.cde_ref == "x"
+        option = self._base_option
+        option.transfer_option.online_resource.href = href
+        dist = BasPartnersCDE(option=option, restricted=False)
+
+        assert dist.cde_refs == expected
 
 
 class TestDistributionArcGisFeatureLayer:

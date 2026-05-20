@@ -8,6 +8,7 @@ from typing import get_args
 
 import requests
 from boto3 import client as S3Client  # noqa: N812
+from gitlab import GitlabGetError
 
 from lantern.catalogues.bas import BasCatalogue
 from lantern.config import Config
@@ -72,7 +73,8 @@ def _filter_records(
             if record.dumps() == existing_record.dumps():
                 logger.info(f"Record '{record.file_identifier}' is the same as stored version, skipping.")
                 continue
-        except RecordNotFoundError:
+        except (RecordNotFoundError, GitlabGetError):
+            # GitlabGetError returned if branch doesn't exist
             pass
         records_[_path] = record
     return records_
@@ -96,7 +98,7 @@ def _import_records(logger: logging.Logger, cat: BasCatalogue, args: Args) -> di
 
 def _create_changeset(logger: logging.Logger, cat: BasCatalogue, args: Args) -> str:
     """Create, or use an existing changeset, to relate a set of commits."""
-    mr = cat.repo.select_merge_requests(state="opened", source_branch=args.changeset_base)
+    mr = cat.repo.select_merge_requests(state="opened", branch=args.changeset_base)
     if mr:
         logger.info(f"Merge request exists: {mr.web_url}")
         return mr[0].web_url
@@ -132,7 +134,7 @@ def _commit_records(
 
 
 def _publish_records(
-    logger: logging.Logger, catalogue: BasCatalogue, env: SiteEnvironment, base_url: str, identifiers: set[str]
+    logger: logging.Logger, catalogue: BasCatalogue, args: Args, base_url: str, identifiers: set[str]
 ) -> None:
     """
     Publish items and records for records included in a commit.
@@ -142,8 +144,9 @@ def _publish_records(
     """
     logger.info(f"Publishing {len(identifiers)} records.")
     catalogue.export(
-        env=env,
+        env=args.env,
         identifiers=identifiers,
+        branch=args.changeset_base,
         outputs=[
             ItemCatalogueOutput,
             ItemAliasesOutput,
@@ -238,7 +241,7 @@ def _run(logger: logging.Logger, config: Config, args: Args) -> None:
 
     identifiers = set(commit.new_identifiers + commit.updated_identifiers)
     base_url = config.BASE_URL_TESTING if args.env == "testing" else config.BASE_URL_LIVE
-    _publish_records(logger=logger, catalogue=catalogue, env=args.env, base_url=base_url, identifiers=identifiers)
+    _publish_records(logger=logger, catalogue=catalogue, args=args, base_url=base_url, identifiers=identifiers)
 
     if args.webhook:
         _webhook(logger=logger, config=config, commit=commit, mr_url=mr_url, wh_url=args.webhook)

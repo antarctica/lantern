@@ -100,7 +100,7 @@ def _create_changeset(logger: logging.Logger, cat: BasCatalogue, args: Args) -> 
     """Create, or use an existing changeset, to relate a set of commits."""
     mr = cat.repo.select_merge_requests(state="opened", branch=args.changeset_base)
     if mr:
-        logger.info(f"Merge request exists: {mr.web_url}")
+        logger.info(f"Merge request exists: {mr[0].web_url}")
         return mr[0].web_url
 
     logger.info("Creating merge request for changeset")

@@ -14,7 +14,7 @@ from lantern.lib.metadata_library.models.record.presets.citation import make_mag
 from lantern.lib.metadata_library.models.record.presets.conformance import MAGIC_ADMINISTRATION_V1, MAGIC_DISCOVERY_V2
 from lantern.lib.metadata_library.models.record.presets.constraints import CC_BY_ND_V4, OGL_V3, OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.presets.contacts import UKRI_RIGHTS_HOLDER, make_magic_role
-from lantern.lib.metadata_library.models.record.presets.identifiers import make_bas_cat
+from lantern.lib.metadata_library.models.record.presets.identifiers import make_bas_cat_item
 from lantern.lib.metadata_library.models.record.record import Record
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin, set_admin
 
@@ -119,7 +119,7 @@ class RecordMagic(Record):
         if self.file_identifier is None:
             msg = "Records require a file_identifier."
             raise TypeError(msg) from None
-        self_identifier = make_bas_cat(self.file_identifier)
+        self_identifier = make_bas_cat_item(self.file_identifier)
         self.identification.identifiers.ensure(self_identifier)
 
     def _set_citation(self) -> None:

@@ -19,7 +19,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     ProgressCode,
 )
 from lantern.lib.metadata_library.models.record.presets.aggregations import make_bas_cat_revision_of
-from lantern.lib.metadata_library.models.record.presets.identifiers import make_bas_cat as make_bas_cat_id
+from lantern.lib.metadata_library.models.record.presets.identifiers import make_bas_cat_item
 from lantern.models.item.base.item import ItemBase
 from lantern.models.record.record import Record
 
@@ -225,7 +225,7 @@ def _process_collections(
         revise_record(collection)
         for agg in collection.identification.aggregations:
             if agg.identifier.identifier == predecessor.file_identifier:
-                agg.identifier = make_bas_cat_id(record.file_identifier)
+                agg.identifier = make_bas_cat_item(record.file_identifier)
 
     return [Record.loads(value=c.dumps(strip_admin=False)) for c in collections]  # return as catalogue records
 

@@ -175,9 +175,16 @@ For example:
 - `lantern.lib.metadata_library.models.record.presets.constraints.OGL_V3`:
   - provides a constant for the Open Government Licence
 
+Larger scale presets for creating typical MAGIC records, valid against the MAGIC Discovery (v2) and Administration (v1)
+profiles, are available in two forms:
+
+- `lantern.lib.metadata_library.models.record.presets.base.RecordMagic` (*base*)
+- `lantern.lib.metadata_library.models.record.presets.base.RecordMagicOpen` (inherits from *base*)
+
 > [!TIP]
-> A larger scale present (`lantern.lib.metadata_library.models.record.presets.base.RecordMagic`) exists for
-> creating typical MAGIC records, valid against the MAGIC Discovery (v2) and Administration (v1) profiles.
+> Additional elements to check when using these larger presets:
+>
+> - `metadata.maintenance`
 
 ### Record utilities
 

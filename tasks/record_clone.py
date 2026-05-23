@@ -14,7 +14,7 @@ from inquirer import Path as InquirerPath
 from tasks._shared import dump_records, get_gitlab_source, get_record, init
 
 from lantern.catalogues.bas import BasCatalogue
-from lantern.lib.metadata_library.models.record.presets.identifiers import make_bas_cat
+from lantern.lib.metadata_library.models.record.presets.identifiers import make_bas_cat_item
 from lantern.lib.metadata_library.models.record.record import Record
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin, set_admin
 from lantern.models.record.const import CATALOGUE_NAMESPACE
@@ -118,7 +118,7 @@ def _clone_record(
     # catalogue identifier
     for i, identifier in enumerate(source_record.identification.identifiers):
         if identifier.namespace == CATALOGUE_NAMESPACE:
-            cloned_record.identification.identifiers[i] = make_bas_cat(cloned_record.file_identifier)
+            cloned_record.identification.identifiers[i] = make_bas_cat_item(cloned_record.file_identifier)
 
     # admin metadata
     admin_meta = get_admin(keys=admin_keys, record=source_record)  # can't use cloned record as ID will mismatch

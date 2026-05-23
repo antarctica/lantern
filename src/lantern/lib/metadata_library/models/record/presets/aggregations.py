@@ -1,6 +1,6 @@
 from lantern.lib.metadata_library.models.record.elements.identification import Aggregation
 from lantern.lib.metadata_library.models.record.enums import AggregationAssociationCode, AggregationInitiativeCode
-from lantern.lib.metadata_library.models.record.presets.identifiers import make_bas_cat as make_bas_cat_id
+from lantern.lib.metadata_library.models.record.presets.identifiers import make_bas_cat_item
 
 
 def make_bas_cat(
@@ -8,7 +8,7 @@ def make_bas_cat(
 ) -> Aggregation:
     """An item within BAS Data Catalogue."""
     return Aggregation(
-        identifier=make_bas_cat_id(item_id),
+        identifier=make_bas_cat_item(item_id),
         association_type=association,
         initiative_type=initiative,
     )

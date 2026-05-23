@@ -18,7 +18,7 @@ from lantern.lib.metadata_library.models.record.elements.metadata import Metadat
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode, HierarchyLevelCode
 from lantern.lib.metadata_library.models.record.presets.contacts import make_magic_role
 from lantern.lib.metadata_library.models.record.presets.extents import make_bbox_extent
-from lantern.lib.metadata_library.models.record.presets.identifiers import make_bas_cat
+from lantern.lib.metadata_library.models.record.presets.identifiers import make_bas_cat_item
 from lantern.lib.metadata_library.models.record.record import Record as RecordBase
 from lantern.lib.metadata_library.models.record.record import RecordInvalidError
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
@@ -45,7 +45,7 @@ class TestRecord:
     @staticmethod
     def _make_valid_record(file_identifier: str | None = "5d5b4e21-fd32-409c-be83-ca1c339903e5") -> Record:
         record = TestRecord._make_record(file_identifier)
-        record.identification.identifiers.append(make_bas_cat(record.file_identifier))
+        record.identification.identifiers.append(make_bas_cat_item(record.file_identifier))
         record.identification.contacts.append(make_magic_role(roles={ContactRoleCode.POINT_OF_CONTACT}))
         record.identification.identifiers.append(
             Identifier(

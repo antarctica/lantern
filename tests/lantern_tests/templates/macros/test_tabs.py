@@ -1273,6 +1273,19 @@ class TestInfoTab:
         else:
             assert isbn is None
 
+    @pytest.mark.parametrize("value", [None, "x"])
+    def test_edition(self, fx_item_cat_model_min: ItemCatalogue, value: str | None):
+        """Can get optional item edition based on value from item."""
+        fx_item_cat_model_min._record.identification.edition = value
+        expected = fx_item_cat_model_min._additional_info.edition
+        html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
+
+        edition = html.select_one("#info-edition")
+        if expected:
+            assert edition.text.strip() == expected
+        else:
+            assert edition is None
+
     def test_dates(self, fx_item_cat_model_min: ItemCatalogue):
         """Can get item dates based on values from item."""
         expected = fx_item_cat_model_min._additional_info.dates

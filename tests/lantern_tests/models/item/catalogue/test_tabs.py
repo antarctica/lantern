@@ -485,6 +485,7 @@ class TestAdditionalInfoTab:
             item_id=item_id,
             item_type=item_type,
             identifiers=identifiers,
+            edition=None,
             dates=dates,
             datestamp=datestamp,
             kv={},
@@ -621,6 +622,12 @@ class TestAdditionalInfoTab:
         """Can get any ISBNs if set."""
         fx_item_cat_info_tab_minimal._identifiers = Identifiers(identifiers)
         assert fx_item_cat_info_tab_minimal.isbn == expected
+
+    @pytest.mark.parametrize(("edition", "expected"), [(None, None), ("x", "x")])
+    def test_edition(self, fx_item_cat_info_tab_minimal: AdditionalInfoTab, edition: str | None, expected: str | None):
+        """Can get edition if set."""
+        fx_item_cat_info_tab_minimal._edition = edition
+        assert fx_item_cat_info_tab_minimal.edition == expected
 
     @pytest.mark.parametrize(
         ("maintenance", "expected_progress", "expected_frequency"),

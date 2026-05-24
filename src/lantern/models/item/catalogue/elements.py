@@ -436,22 +436,22 @@ class Dates(RecordDates):
     def as_dict_labeled(self) -> dict[str, FormattedDate]:
         """Non-None values as a dictionary with human-readable labels as keys."""
         mapping = {
-            DateTypeCode.CREATION: "Item created",
-            DateTypeCode.PUBLICATION: "Item published",
-            DateTypeCode.REVISION: "Item updated",
-            DateTypeCode.ADOPTED: "Item adopted",
-            DateTypeCode.DEPRECATED: "Item deprecated",
-            DateTypeCode.DISTRIBUTION: "Item distributed",
-            DateTypeCode.EXPIRY: "Item expiry",
-            DateTypeCode.IN_FORCE: "Item in force from",
-            DateTypeCode.LAST_REVISION: "Item last revised",
-            DateTypeCode.LAST_UPDATE: "Item last updated",
-            DateTypeCode.NEXT_UPDATE: "Item next update",
-            DateTypeCode.RELEASED: "Item released",
-            DateTypeCode.SUPERSEDED: "Item superseded",
-            DateTypeCode.UNAVAILABLE: "Item unavailable from",
-            DateTypeCode.VALIDITY_BEGINS: "Item valid from",
-            DateTypeCode.VALIDITY_EXPIRES: "Item valid until",
+            DateTypeCode.CREATION: "Item Created",
+            DateTypeCode.PUBLICATION: "Item Published",
+            DateTypeCode.REVISION: "Item Updated",
+            DateTypeCode.ADOPTED: "Item Adopted",
+            DateTypeCode.DEPRECATED: "Item Deprecated",
+            DateTypeCode.DISTRIBUTION: "Item Distributed",
+            DateTypeCode.EXPIRY: "Item Expiry",
+            DateTypeCode.IN_FORCE: "Item In Force From",
+            DateTypeCode.LAST_REVISION: "Item Last Revised",
+            DateTypeCode.LAST_UPDATE: "Item Last Updated",
+            DateTypeCode.NEXT_UPDATE: "Item Next Update",
+            DateTypeCode.RELEASED: "Item Released",
+            DateTypeCode.SUPERSEDED: "Item Superseded",
+            DateTypeCode.UNAVAILABLE: "Item Unavailable From",
+            DateTypeCode.VALIDITY_BEGINS: "Item Valid From",
+            DateTypeCode.VALIDITY_EXPIRES: "Item Valid Until",
         }
         return {mapping[key]: value for key, value in self.as_dict_enum_formatted().items()}
 
@@ -631,13 +631,10 @@ class PageSummary:
         """
         Whether to show summary grid section in UI.
 
-        Contains all item summary properties except abstract and citation.
+        Contains all item summary properties except about (abstract) and citation.
 
-        Shown if item has any summary grid properties (e.g. restricted, edition, one or more collections, etc.),
-        unless item is a container super-type (e.g. a collection. project, etc.).
+        Shown if item has any summary grid properties (e.g. restricted, edition, one or more collections, etc.).
         """
-        if self._item_super_type == ItemSuperType.CONTAINER:
-            return False
         return (
             self.restricted
             or self.edition is not None

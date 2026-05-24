@@ -198,6 +198,7 @@ class ItemCatalogue(ItemBase):
             item_id=self.resource_id,
             item_type=self.resource_type,
             identifiers=self._identifiers,
+            edition=self.edition,
             dates=self._dates,
             series=self.series_descriptive,
             scale=self.record.identification.spatial_resolution,

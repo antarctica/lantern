@@ -390,6 +390,7 @@ class AdditionalInfoTab(Tab):
         item_id: str,
         item_type: HierarchyLevelCode,
         identifiers: Identifiers,
+        edition: str | None,
         dates: Dates,
         datestamp: date,
         kv: dict[str, str],
@@ -404,6 +405,7 @@ class AdditionalInfoTab(Tab):
     ) -> None:
         self._item_id = item_id
         self._item_type = item_type
+        self._edition = edition
         self._series = series
         self._scale = scale
         self._projection = projection
@@ -521,6 +523,11 @@ class AdditionalInfoTab(Tab):
     def isbn(self) -> list[str]:
         """ISBN identifiers if set."""
         return self._identifiers.isbn
+
+    @property
+    def edition(self) -> str | None:
+        """Edition if set."""
+        return self._edition
 
     @property
     def dates(self) -> dict[str, FormattedDate]:

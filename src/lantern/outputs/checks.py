@@ -7,7 +7,7 @@ import cattrs
 from lantern.models.checks import Check, CheckState, CheckType
 from lantern.models.site import ExportMeta, SiteContent
 from lantern.outputs.base import OutputSite
-from lantern.utils import prettify_html
+from lantern.utils import minify_html
 
 
 class ChecksOutput(OutputSite):
@@ -99,7 +99,7 @@ class ChecksOutput(OutputSite):
         """Generate report page."""
         self._meta.html_title = "Verification Checks"
         raw = self._jinja.get_template(self._template_path).render(meta=self._meta.site_metadata, data=self._data)
-        return prettify_html(raw)
+        return minify_html(raw)
 
     @property
     def content(self) -> list[SiteContent]:

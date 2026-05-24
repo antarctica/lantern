@@ -5,7 +5,7 @@ from pathlib import Path
 from lantern.models.checks import Check, CheckType
 from lantern.models.site import ExportMeta, SiteContent, SitePageMeta
 from lantern.outputs.base import OutputSite
-from lantern.utils import prettify_html
+from lantern.utils import minify_html
 
 
 class SitePagesOutput(OutputSite):
@@ -73,7 +73,7 @@ class SitePagesOutput(OutputSite):
         page_meta: SitePageMeta = self._page_meta[template_path]
         self._meta.apply_page_meta(page_meta)
         raw = self._jinja.get_template(template_path).render(meta=self._meta)
-        return prettify_html(raw)
+        return minify_html(raw)
 
     @property
     def content(self) -> list[SiteContent]:

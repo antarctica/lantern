@@ -6,7 +6,7 @@ from lantern.models.item.catalogue.enums import ResourceTypeIcon
 from lantern.models.site import ExportMeta, SiteContent
 from lantern.outputs.base import OutputSite
 from lantern.stores.base import SelectRecordsProtocol
-from lantern.utils import get_record_aliases, prettify_html
+from lantern.utils import get_record_aliases, minify_html
 
 
 class SiteIndexOutput(OutputSite):
@@ -70,7 +70,7 @@ class SiteIndexOutput(OutputSite):
         """Generate index page."""
         self._meta.html_title = "Index"
         raw = self._jinja.get_template(self._template_path).render(meta=self._meta.site_metadata, data=self._data)
-        return prettify_html(raw)
+        return minify_html(raw)
 
     @property
     def content(self) -> list[SiteContent]:

@@ -4,7 +4,7 @@ from jinja2 import Environment
 from lantern.lib.metadata_library.models.record.elements.common import Identifier
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
-from lantern.utils import get_jinja_env, get_record_aliases, prettify_html
+from lantern.utils import get_jinja_env, get_record_aliases, minify_html
 
 
 @pytest.mark.cov()
@@ -26,9 +26,8 @@ class TestUtils:
         assert isinstance(result, Environment)
         assert "_macros/common.html.j2" in result.loader.list_templates()
 
-    def test_prettify_html(self):
-        """Can format HTML."""
+    def test_minify_html(self):
+        """Can minify HTML string."""
         assert (
-            prettify_html(html="<html>\n\n\n\n\n<body><p>...</p></body></html>")
-            == "<html>\n<body><p>...</p></body></html>"
+            minify_html(html="<html>\n\n\n\n\n<body><p>...</p></body></html>") == "<html><body><p>...</p></body></html>"
         )

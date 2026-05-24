@@ -48,6 +48,6 @@ class TestSiteIndexOutput:
         assert len(results) == 1
         result = results[0]
         assert isinstance(result, SiteContent)
-        assert "<!DOCTYPE html>" in result.content
+        assert "<!doctype html>" in result.content
         assert result.path == Path("-/index/index.html")
         assert result.media_type == "text/html"

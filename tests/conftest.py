@@ -67,7 +67,7 @@ from lantern.site import Site
 from lantern.stores.base import SelectRecordProtocol, SelectRecordsProtocol
 from lantern.stores.gitlab import GitLabSource, GitLabStore
 from lantern.stores.gitlab_cache import GitLabCachedStore, GitLabLocalCache
-from lantern.utils import get_jinja_env, prettify_html
+from lantern.utils import get_jinja_env, minify_html
 from tests.resources.admin_keys import test_keys
 from tests.resources.catalogues.fake_catalogue import FakeCatalogue
 from tests.resources.repositories.fake_repository import FakeRepository
@@ -426,7 +426,7 @@ def render_item_catalogue(item: ItemCatalogue) -> str:
     _jinja = get_jinja_env()
     _template_path = "_views/item.html.j2"
     raw = _jinja.get_template(_template_path).render(item=item, meta=item.site_meta)
-    return prettify_html(raw)
+    return minify_html(raw)
 
 
 def _item_cat_model_min() -> ItemCatalogue:

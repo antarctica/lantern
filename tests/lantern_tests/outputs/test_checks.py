@@ -177,7 +177,7 @@ class TestChecksOutput:
         """Can unstructure processed checks into simple types."""
         output = ChecksOutput(logger=fx_logger, meta=fx_export_meta, checks=[fx_check])
         results = output._report
-        assert "<!DOCTYPE html>" in results
+        assert "<!doctype html>" in results
 
     def test_content(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_check: Check):
         """Can generate site content items."""
@@ -193,7 +193,7 @@ class TestChecksOutput:
 
         report = results[1]
         assert isinstance(report, SiteContent)
-        assert "<!DOCTYPE html>" in report.content
+        assert "<!doctype html>" in report.content
         assert report.path == Path("-/checks/index.html")
         assert report.media_type == "text/html"
 

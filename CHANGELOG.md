@@ -101,6 +101,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Overhauled site verification into simplified and better integrated site checks
 * Replacing Safety with `uv audit` for dependency vulnerability checking
 * Refactoring development tasks to use more (but not fully) consisting arguments processing and prompting
+* Switching from beautiful soup prettifier to rust based HTML minifier
 
 ### Removed
 

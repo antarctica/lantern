@@ -9,7 +9,7 @@ from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta, SiteContent, SiteRedirect
 from lantern.outputs.base import OutputRecord
 from lantern.stores.base import SelectRecordProtocol
-from lantern.utils import get_jinja_env, get_record_aliases, prettify_html
+from lantern.utils import get_jinja_env, get_record_aliases, minify_html
 
 
 class ItemCatalogueOutput(OutputRecord):
@@ -59,7 +59,7 @@ class ItemCatalogueOutput(OutputRecord):
         )
 
         raw = self._jinja.get_template(self._template_path).render(item=item, meta=item.site_meta)
-        return prettify_html(raw)
+        return minify_html(raw)
 
     @property
     def content(self) -> list[SiteContent]:

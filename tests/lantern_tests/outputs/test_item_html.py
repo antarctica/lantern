@@ -52,7 +52,7 @@ class TestItemCatalogueOutput:
         assert len(results) == 1
         result = results[0]
         assert isinstance(result, SiteContent)
-        assert "<!DOCTYPE html>" in result.content
+        assert "<!doctype html>" in result.content
         assert result.path == Path(f"items/{fx_revision_model_min.file_identifier}/index.html")
         assert result.media_type == "text/html"
         assert result.object_meta == {

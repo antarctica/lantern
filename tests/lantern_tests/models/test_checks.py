@@ -251,6 +251,7 @@ class TestRecordChecks:
         generator = RecordChecks(fx_record_model_min)
         checks = generator._doi_checks
         assert len(checks) == 1
+        assert checks[0].http_status == HTTPStatus.FOUND
 
     def test_distribution_checks(self, fx_record_model_min: Record):
         """Can create checks for distribution options in a record."""

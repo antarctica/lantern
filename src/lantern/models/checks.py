@@ -211,6 +211,7 @@ class RecordChecks:
                 Check(
                     type=CheckType.DOI_REDIRECTS,
                     url=f"https://doi.org/{doi.identifier}",
+                    http_status=HTTPStatus.FOUND,
                     redirect_location=f"https://data.bas.ac.uk/items/{self._record.file_identifier}",
                     file_identifier=self._record.file_identifier,
                 )

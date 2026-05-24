@@ -93,7 +93,7 @@ Then:
 > To check the expiry date of managed tokens:
 >
 > ```shell
-> % cd resources/envs
+> % cd resources/infra
 > % terraform state show 'gitlab_personal_access_token.lantern_bot_pa_item_enquires'
 > % terraform state show 'gitlab_personal_access_token.lantern_bot_ansible_workstation_module'
 > ```
@@ -101,7 +101,7 @@ Then:
 [1]
 
 ```text
-% cd resources/envs
+% cd resources/infra
 % tofu init
 % tofu apply
 ```

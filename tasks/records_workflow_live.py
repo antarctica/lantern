@@ -151,7 +151,7 @@ def _export(
 
     Records are invalidated in case they have been previously published and currently cached.
     """
-    cf_id = get_cf_distribution_id(iac_cwd=Path("./resources/envs"), cf_id="site_cf_id")
+    cf_id = get_cf_distribution_id(iac_cwd=Path("./resources/infra"), cf_id="site_cf_id")
     export(cat=cat, env=env, branch=cat.repo.gitlab_default_branch, identifiers=identifiers)
     invalidate_keys(logger=logger, config=config, distribution_id=cf_id, keys=get_record_invalidation_keys(identifiers))
 

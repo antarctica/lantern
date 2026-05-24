@@ -107,7 +107,7 @@ def main() -> None:
     """Entrypoint."""
     logger, config, _catalogue = init()
 
-    cf_id = get_cf_distribution_id(iac_cwd=Path("./resources/envs"), cf_id="site_cf_id")
+    cf_id = get_cf_distribution_id(iac_cwd=Path("./resources/infra"), cf_id="site_cf_id")
 
     cli_args = _get_cli_args()
     references = _get_args(logger=logger, cli_args=cli_args)

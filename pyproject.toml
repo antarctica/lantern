@@ -97,7 +97,7 @@ ci-test = { cmd = "pytest {cov_options} -o junit_family=xunit2 --junitxml=test-r
 stack-start = { cmd = "docker-compose -f {local_stack_compose} up -d", help = "Start local dev stack", use_vars = true }
 stack-stop = { cmd = "docker-compose -f {local_stack_compose} down", help = "Stop local dev stack", use_vars = true }
 # IaC
-tfvars-init = { cmd = "op inject --in-file resources/envs/terraform.tfvars.tpl --out-file resources/envs/terraform.tfvars", help = "Initialise Terraform/OpenTofu vars file" }
+tfvars-init = { cmd = "op inject --in-file resources/infra/terraform.tfvars.tpl --out-file resources/infra/terraform.tfvars", help = "Initialise Terraform/OpenTofu vars file" }
 # app dev
 release = { cmd = "python -m tasks.release", help = "Prepapre app release" }
 config-init = { cmd = "op inject --in-file resources/dev/.env.tpl --out-file .env", help = "Initialise config file" }

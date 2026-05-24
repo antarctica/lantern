@@ -112,7 +112,7 @@ class TestCheckRunner:
         runner = CheckRunner(logger=fx_logger, check=fx_check)
         runner._check_url()
         assert fx_check.state == CheckState.FAILED
-        assert fx_check.result_output == "Multiple redirects"
+        assert fx_check.result_output == "Exceeds allowed redirects"
 
     @pytest.mark.vcr
     @pytest.mark.block_network

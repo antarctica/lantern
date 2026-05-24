@@ -10,6 +10,10 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 <!-- pyml disable no-duplicate-heading,no-duplicate-header -->
 ## [Unreleased]
 
+### Fixed
+
+* DOI redirect checks
+
 ## [0.6.0] - 2026-05-24
 
 ### Added [!BREAKING]

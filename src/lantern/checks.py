@@ -29,22 +29,24 @@ class CheckRunner:
         method: HTTPMethod,
         url: str,
         headers: dict | None = None,
-        redirects: bool = False,
+        redirects: int = 0,
         raise_errors: bool = False,
     ) -> Response | None:
         """
         Common method for checking a URL.
 
+        `redirects` is the maximum number of redirects allowed (where 0 is none).
+
         Handles time out errors only.
         """
         s = requests.Session()
-        s.max_redirects = 1
+        s.max_redirects = redirects if redirects > 0 else 1  # for requests that should redirect but not be followed
 
         if headers is None:
             headers = {}
 
         try:
-            r = s.request(method=method.value, url=url, headers=headers, allow_redirects=redirects, timeout=10)
+            r = s.request(method=method.value, url=url, headers=headers, allow_redirects=redirects > 0, timeout=10)
             if raise_errors:
                 r.raise_for_status()
         except requests.Timeout:
@@ -52,7 +54,7 @@ class CheckRunner:
             self._check.result_output = "Request timed out"
         except requests.TooManyRedirects:
             self._check.state = CheckState.FAILED
-            self._check.result_output = "Multiple redirects"
+            self._check.result_output = "Exceeds allowed redirects"
         else:
             self._logger.debug(r.headers)
             self._check.result_http_status = HTTPStatus(r.status_code)
@@ -78,7 +80,7 @@ class CheckRunner:
             method=self._check.http_method,
             url=self._check.url,
             headers=headers,
-            redirects=False,
+            redirects=0,
             raise_errors=False,
         )
         if r is None:
@@ -112,8 +114,9 @@ class CheckRunner:
             self._check.result_output = f"Bad location: {location} (expected {self._check.redirect_location})"
             return
 
-        # Follow redirect
-        r2 = self._fetch_url(method=self._check.http_method, url=self._check.url, redirects=True, raise_errors=True)
+        # Follow redirect(s if a DOI)
+        r_max = 2 if self._check.type == CheckType.DOI_REDIRECTS else 1
+        r2 = self._fetch_url(method=self._check.http_method, url=self._check.url, redirects=r_max, raise_errors=True)
         if r2 is None:
             return
 

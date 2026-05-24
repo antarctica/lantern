@@ -63,7 +63,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Error handler for Turnstile to handle/ignore client side errors
 * Construction partner CDE (Common Data Environment) distribution options
 * `supersede-record` development task for marking a record as superseding another record
-* Records preset for alias identifiers
+* Records presets for alias identifiers and constraints
 
 ### Fixed
 

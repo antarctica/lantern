@@ -69,7 +69,7 @@ Then run the [Interactive Publishing Workflows](#interactive-publishing-workflow
 
 To update new and existing records:
 
-- if needed, run the [`select-records`](/docs/supplemental/proto-cli-reference.md#select-records) command
+- run the [`select-records`](/docs/supplemental/proto-cli-reference.md#select-records) command
 - to replace a record with a successor:
   - run the [`supersede-record`](/docs/supplemental/proto-cli-reference.md#supersede-record) command
 - to include an Esri ArcGIS Online item as a distribution option:

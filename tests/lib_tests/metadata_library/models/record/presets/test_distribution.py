@@ -1,6 +1,15 @@
-from lantern.lib.metadata_library.models.record.elements.distribution import Distribution
-from lantern.lib.metadata_library.models.record.presets.contacts import ESRI_DISTRIBUTOR
-from lantern.lib.metadata_library.models.record.presets.distribution import make_esri_feature_layer
+import csv
+from pathlib import Path
+
+from lantern.lib.metadata_library.models.record.elements.distribution import Distribution, Format
+from lantern.lib.metadata_library.models.record.presets.contacts import ESRI_DISTRIBUTOR, MAGIC_DISTRIBUTOR
+from lantern.lib.metadata_library.models.record.presets.distribution import (
+    make_distribution,
+    make_esri_feature_layer,
+    make_file_distribution,
+    make_file_format,
+)
+from lantern.lib.metadata_library.models.record.utils.distribution import ZapFormat
 
 
 class TestMakeEsriFeatureLayer:
@@ -62,3 +71,46 @@ class TestMakeEsriFeatureLayer:
 
         assert result[3].format.href == expected_portal_media_type
         assert result[3].transfer_option.online_resource.href == expected_portal_url
+
+
+class TestFileFormat:
+    """Test `make_file_format` preset."""
+
+    def test_make_file_format(self):
+        """Can make a distribution format from a known file path extension."""
+        result = make_file_format(Path("x.csv"))
+        assert isinstance(result, Format)
+        assert result.href == "https://www.iana.org/assignments/media-types/text/csv"
+
+
+class TestDistribution:
+    """Test `make_distribution` preset."""
+
+    def test_make_distribution(self):
+        """Can make a distribution option with Zap format and optional format description and resource size."""
+        format_ = ZapFormat(
+            slug="csv",
+            name="Comma Separated Values",
+            url="https://www.iana.org/assignments/media-types/text/csv",
+            extensions=[".csv"],
+            media_types="text/csv",
+        )
+        result = make_distribution(format_=format_, access_url="x", distributor=MAGIC_DISTRIBUTOR, size_bytes=123)
+        assert isinstance(result, Distribution)
+        assert isinstance(result.format, Format)
+        assert result.transfer_option.online_resource.href == "x"
+
+
+class TestFileDistribution:
+    """Test `make_file_distribution` preset."""
+
+    def test_make_file_distribution(self, tmp_path: Path):
+        """Can make a distribution option for a local file available at an access URL via a distributor."""
+        csv_path = tmp_path / "x.csv"
+        with csv_path.open("w", encoding="utf-8") as f:
+            writer = csv.writer(f)
+            writer.writerow(["x", "y"])
+
+        result = make_file_distribution(path=csv_path, access_url="x", distributor=MAGIC_DISTRIBUTOR)
+        assert isinstance(result, Distribution)
+        assert result.transfer_option.online_resource.href == "x"

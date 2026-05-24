@@ -7,6 +7,12 @@ OPEN_ACCESS = Constraint(
     statement="Open Access (Anonymous)",
 )
 
+CLOSED_ACCESS = Constraint(
+    type=ConstraintTypeCode.ACCESS,
+    restriction_code=ConstraintRestrictionCode.RESTRICTED,
+    statement="Closed Access (Restricted)",
+)
+
 BAS_ACCESS = Constraint(
     type=ConstraintTypeCode.ACCESS,
     restriction_code=ConstraintRestrictionCode.UNRESTRICTED,
@@ -25,4 +31,11 @@ CC_BY_ND_V4 = Constraint(
     restriction_code=ConstraintRestrictionCode.LICENSE,
     href="https://creativecommons.org/licenses/by-nd/4.0/",
     statement="This information is licensed under the Creative Commons Attribution-NoDerivatives 4.0 International Licence (CC BY-ND 4.0). To view this licence, visit https://creativecommons.org/licenses/by-nd/4.0/",
+)
+
+MAGIC_PRODUCTS_V1 = Constraint(
+    type=ConstraintTypeCode.USAGE,
+    restriction_code=ConstraintRestrictionCode.LICENSE,
+    href="https://metadata-resources.data.bas.ac.uk/licences/magic-products-v1/",
+    statement="This information is licensed under the (Local) MAGIC Products v1 licence. To view this licence, visit https://metadata-resources.data.bas.ac.uk/licences/magic-products-v1/.",
 )

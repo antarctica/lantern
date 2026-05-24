@@ -1,7 +1,14 @@
-from lantern.lib.metadata_library.models.record.elements.common import OnlineResource
-from lantern.lib.metadata_library.models.record.elements.distribution import Distribution, Format, TransferOption
+from pathlib import Path
+
+from lantern.lib.metadata_library.models.record.elements.common import Contact, OnlineResource
+from lantern.lib.metadata_library.models.record.elements.distribution import (
+    Distribution,
+    Format,
+    TransferOption,
+)
 from lantern.lib.metadata_library.models.record.enums import OnlineResourceFunctionCode
 from lantern.lib.metadata_library.models.record.presets.contacts import ESRI_DISTRIBUTOR
+from lantern.lib.metadata_library.models.record.utils.distribution import DistributionMaker, ZapFormat
 
 
 def make_esri_feature_layer(
@@ -92,3 +99,36 @@ def make_esri_feature_layer(
         )
 
     return distributions
+
+
+def make_file_format(path: Path) -> Format:
+    """
+    Generate a distribution format for a file available.
+
+    Wrapper for `DistributionMaker.format_by_ext` to fit convention of presets as functions.
+    """
+    dist_maker = DistributionMaker()
+    format_ = dist_maker.format_by_ext(file_path=path)
+    return Format(format=format_.name, href=format_.url)
+
+
+def make_distribution(
+    format_: ZapFormat, access_url: str, distributor: Contact, size_bytes: int | None = None
+) -> Distribution:
+    """
+    Generate a distribution option.
+
+    Wrapper for `DistributionMaker.make_dist_option` to fit convention of presets as functions.
+    """
+    dist_maker = DistributionMaker()
+    return dist_maker.make_dist_option(format_=format_, href=access_url, distributor=distributor, size_bytes=size_bytes)
+
+
+def make_file_distribution(path: Path, access_url: str, distributor: Contact) -> Distribution:
+    """
+    Generate a distribution option for a file available at a URL via a distributor.
+
+    Wrapper for `DistributionMaker.from_file` to fit convention of presets as functions.
+    """
+    dist_maker = DistributionMaker()
+    return dist_maker.from_file(file_path=path, href=access_url, distributor=distributor)

@@ -48,7 +48,7 @@ def main() -> None:
     """Entrypoint."""
     logger, config, _catalogue = init()
 
-    cf_id = get_cf_distribution_id(iac_cwd=Path("./resources/envs"), cf_id="thumbnails_cf_id")
+    cf_id = get_cf_distribution_id(iac_cwd=Path("./resources/infra"), cf_id="thumbnails_cf_id")
     item = _get_cli_args()
     keys = [f"/add-catalogue/0.0.0/img/items/{item}/*"]
     invalidate_keys(logger=logger, config=config, distribution_id=cf_id, keys=keys)

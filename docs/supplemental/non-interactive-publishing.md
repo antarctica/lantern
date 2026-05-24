@@ -16,9 +16,9 @@ Global outputs are not called because:
 
 To set up this workflow for an application:
 
-1. generate a set of JSON encoded record configurations as files in a directory
-2. import and publish these records using the [Interactive Workflow](/docs/usage.md#interactive-record-publishing-workflow):
-   - commit to the `main` branch
+1. [Generate](/docs/usage.md#creating-records) a set of JSON encoded record configurations as files in a directory
+2. import and publish these records using the [Interactive Workflow](/docs/usage.md#interactive-publishing-workflow):
+   - merge the changeset into `main`
    - this includes records in [Outputs](#outputs-filtering) normally filtered out
    - it also adds new records under any parent collections or other container resources
 3. then follow the [Routine Usage](#routine-usage) instructions for future updates
@@ -44,31 +44,19 @@ Configure your application to perform these actions as frequently as needed:
 #!/usr/bin/env bash
 set -e -u -o pipefail
 
-PUB_CAT_PATH="/data/magic/projects/PROJECT-SLUG/prod/exports/records"
-# 'live' or 'testing'
-PUB_CAT_SITE="live"
-PUB_CAT_BRANCH="auto-PROJECT_SLUG"
-# 'Automated publishing changeset: ' will always be prefixed to the MR title
-PUB_CAT_MR_TITLE="Updates from PROJECT"
-PUB_CAT_MR_MESSAGE="..."
-PUB_CAT_COMMIT_TITLE="Updating PROJECT records"
-PUB_CAT_COMMIT_MESSAGE="Routine update to reflect latest extents."
-PUB_CAT_AUTHOR_NAME="PROJECT_SLUG"
-PUB_CAT_AUTHOR_EMAIL="magicdev@bas.ac.uk"
-# Optional
-PUB_CAT_WEBHOOK="https://example.com/webhook"
-
+# 'Automated publishing changeset: ' will always be prefixed to `--changeset-title`
+# `--webook` is optional
 /data/magic/projects/lantern/prod/tasks/pub-cat \
---path "$PUB_CAT_PATH" \
---site "$PUB_CAT_SITE" \
---changeset-base "$PUB_CAT_BRANCH" \
---changeset-title "$PUB_CAT_MR_TITLE" \
---changeset-message "$PUB_CAT_MR_MESSAGE" \
---commit-title "$PUB_CAT_COMMIT_TITLE" \
---commit-message "$PUB_CAT_COMMIT_MESSAGE" \
---author-name "$PUB_CAT_AUTHOR_NAME" \
---author-email "$PUB_CAT_AUTHOR_EMAIL" \
---webhook "$PUB_CAT_WEBHOOK"
+--site "live" \
+--path "/path/to/records" \
+--changeset-base "auto-$PROJECT_SLUG" \
+--changeset-title "$PROJECT routine updates" \
+--changeset-message "..." \
+--commit-title "$PROJECT routine update" \
+--commit-message "Routine update to records reflecting ..." \
+--author-name "$PROJECT_SLUG" \
+--author-email "magicdev@bas.ac.uk" \
+--webhook "https://example.com/webhook"
 ```
 
 ## Webhook

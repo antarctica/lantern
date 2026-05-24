@@ -2,7 +2,6 @@ from bas_metadata_library.standards.magic_administration.v1 import Administratio
 
 from lantern.lib.metadata_library.models.record.elements.common import (
     Address,
-    Constraint,
     Constraints,
     Contact,
     ContactIdentity,
@@ -16,13 +15,12 @@ from lantern.lib.metadata_library.models.record.elements.distribution import (
     TransferOption,
 )
 from lantern.lib.metadata_library.models.record.enums import (
-    ConstraintRestrictionCode,
-    ConstraintTypeCode,
     ContactRoleCode,
     HierarchyLevelCode,
     OnlineResourceFunctionCode,
 )
 from lantern.lib.metadata_library.models.record.presets.admin import BAS_STAFF
+from lantern.lib.metadata_library.models.record.presets.constraints import CLOSED_ACCESS, MAGIC_PRODUCTS_V1
 from lantern.lib.metadata_library.models.record.utils.admin import set_admin
 from tests.resources.admin_keys import test_keys
 from tests.resources.records.utils import make_record, relate_products
@@ -40,21 +38,7 @@ record = make_record(
 record.identification.aggregations.extend(relate_products(record.file_identifier))
 
 # change access and licence
-record.identification.constraints = Constraints(
-    [
-        Constraint(
-            type=ConstraintTypeCode.ACCESS,
-            restriction_code=ConstraintRestrictionCode.RESTRICTED,
-            statement="Closed Access",
-        ),
-        Constraint(
-            type=ConstraintTypeCode.USAGE,
-            restriction_code=ConstraintRestrictionCode.LICENSE,
-            href="https://metadata-resources.data.bas.ac.uk/licences/operations-mapping-v1/",
-            statement="This information is licensed under the (Local) Operations Mapping v1 licence. To view this licence, visit https://metadata-resources.data.bas.ac.uk/licences/operations-mapping-v1/.",
-        ),
-    ]
-)
+record.identification.constraints = Constraints([CLOSED_ACCESS, MAGIC_PRODUCTS_V1])
 # add admin metadata to reflect access
 keys = test_keys()
 admin = AdministrationMetadata(id=record.file_identifier, resource_permissions=[BAS_STAFF])

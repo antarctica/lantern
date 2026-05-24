@@ -165,8 +165,8 @@ resource "aws_s3_bucket_versioning" "site_prod" {
 
 ### Workstation environment module access to static site content
 
-resource "aws_iam_user" "workstation_stage" {
-  name = "lantern-workstation-stage"
+resource "aws_iam_user" "workstation" {
+  name = "lantern-workstation"
 
   tags = {
     X-Project     = "BAS Lantern Experiment"
@@ -175,21 +175,21 @@ resource "aws_iam_user" "workstation_stage" {
   }
 }
 
-resource "aws_iam_access_key" "workstation_stage" {
+resource "aws_iam_access_key" "workstation" {
   # would ideally be ephemeral https://github.com/hashicorp/terraform-provider-aws/issues/42182
-  user = aws_iam_user.workstation_stage.name
+  user = aws_iam_user.workstation.name
 }
-resource "onepassword_item" "workstation_stage_access_key" {
+resource "onepassword_item" "workstation" {
   vault      = var.pvd_op_vault_id
   category   = "login"
-  title      = "SCAR ADD Metadata Toolbox - Workstation AWS IAM S3 access key [Staging]"
-  username   = aws_iam_access_key.workstation_stage.id
-  password   = aws_iam_access_key.workstation_stage.secret
+  title      = "SCAR ADD Metadata Toolbox - Workstation AWS IAM S3 access key"
+  username   = aws_iam_access_key.workstation.id
+  password   = aws_iam_access_key.workstation.secret
   note_value = "Used in Ansible to set environment module config for Lantern workstation workflows.\n\nManaged by Terraform in Lantern."
   tags       = ["SCAR ADD Metadata Toolbox"]
 }
 
-data "aws_iam_policy_document" "workstation_stage" {
+data "aws_iam_policy_document" "workstation" {
   statement {
     sid    = "MinimalContentPermissions"
     effect = "Allow"
@@ -205,66 +205,6 @@ data "aws_iam_policy_document" "workstation_stage" {
     resources = [
       module.site_stage.s3_bucket_arn,
       "${module.site_stage.s3_bucket_arn}/*",
-    ]
-  }
-  statement {
-    sid    = "MinimalCacheInvalidationPermissions"
-    effect = "Allow"
-
-    actions = [
-      "cloudfront:CreateInvalidation",
-      "cloudfront:GetInvalidation",
-    ]
-
-    resources = [
-      var.aws_cf_cdn_arn,
-    ]
-  }
-}
-resource "aws_iam_user_policy" "workstation_stage" {
-  name   = "staging-bucket"
-  user   = aws_iam_user.workstation_stage.name
-  policy = data.aws_iam_policy_document.workstation_stage.json
-}
-
-resource "aws_iam_user" "workstation_prod" {
-  name = "lantern-workstation-prod"
-
-  tags = {
-    X-Project     = "BAS Lantern Experiment"
-    X-Managed-By  = "Terraform"
-    X-Managed-For = "Ansible"
-  }
-}
-
-resource "aws_iam_access_key" "workstation_prod" {
-  # would ideally be ephemeral https://github.com/hashicorp/terraform-provider-aws/issues/42182
-  user = aws_iam_user.workstation_prod.name
-}
-resource "onepassword_item" "workstation_prod_access_key" {
-  vault      = var.pvd_op_vault_id
-  category   = "login"
-  title      = "SCAR ADD Metadata Toolbox - Workstation AWS IAM S3 access key [Production]"
-  username   = aws_iam_access_key.workstation_prod.id
-  password   = aws_iam_access_key.workstation_prod.secret
-  note_value = "Used in Ansible to set environment module config for Lantern workstation workflows.\n\nManaged by Terraform in Lantern."
-  tags       = ["SCAR ADD Metadata Toolbox"]
-}
-
-data "aws_iam_policy_document" "workstation_prod" {
-  statement {
-    sid    = "MinimalContentPermissions"
-    effect = "Allow"
-
-    actions = [
-      "s3:ListBucket",
-      "s3:PutObject",
-      "s3:DeleteObject",
-      "s3:GetObjectAcl",
-      "s3:PutObjectAcl",
-    ]
-
-    resources = [
       module.site_prod.s3_bucket_arn,
       "${module.site_prod.s3_bucket_arn}/*",
     ]
@@ -284,10 +224,10 @@ data "aws_iam_policy_document" "workstation_prod" {
     ]
   }
 }
-resource "aws_iam_user_policy" "workstation_prod" {
-  name   = "production-bucket"
-  user   = aws_iam_user.workstation_prod.name
-  policy = data.aws_iam_policy_document.workstation_prod.json
+resource "aws_iam_user_policy" "workstation" {
+  name   = "staging-bucket"
+  user   = aws_iam_user.workstation.name
+  policy = data.aws_iam_policy_document.workstation.json
 }
 
 ### Local development access to static site content

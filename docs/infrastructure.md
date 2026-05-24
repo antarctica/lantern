@@ -63,7 +63,7 @@ reverse proxying. The BAS HAProxy load balancer proxies applicable requests to e
 ## Infrastructure as Code
 
 [OpenTofu](https://opentofu.org), an open-source fork of the [Terraform](https://www.terraform.io) infrastructure as
-code tool, is used to manage some project infrastructure in `resources/envs/main.tf`.
+code tool, is used to manage some project infrastructure in `resources/infra/main.tf`.
 
 Remote state is managed by the [BAS Terraform Remote State 🛡️](https://gitlab.data.bas.ac.uk/WSF/terraform-remote-state)
 project.
@@ -72,12 +72,12 @@ To apply this infrastructure:
 
 - install tools (`brew install opentofu awscli 1password-cli`)
 - configure credentials for the [BAS AWS 🛡️](https://gitlab.data.bas.ac.uk/WSF/bas-aws) account (`aws configure`)
-- copy `resources/envs/terraform.tfvars.tpl` to `resources/envs/terraform.tfvars` and populate credentials/values
+- copy `resources/infra/terraform.tfvars.tpl` to `resources/infra/terraform.tfvars` and populate credentials/values
 
 Then run:
 
 ```text
-% cd resources/envs
+% cd resources/infra
 % opentofu init
 % opentofu apply
 ```

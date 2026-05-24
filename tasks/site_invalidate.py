@@ -90,7 +90,7 @@ def main() -> None:
 
     keys = _get_cli_args()
 
-    cf_id = get_cf_distribution_id(iac_cwd=Path("./resources/envs"), cf_id="site_cf_id")
+    cf_id = get_cf_distribution_id(iac_cwd=Path("./resources/infra"), cf_id="site_cf_id")
     invalidate_keys(logger=logger, config=config, distribution_id=cf_id, keys=keys)
 
 

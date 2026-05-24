@@ -570,6 +570,7 @@ def fx_item_cat_info_tab_minimal(fx_site_meta: SiteMeta) -> AdditionalInfoTab:
         item_id="x",
         item_type=HierarchyLevelCode.PRODUCT,
         identifiers=identifiers,
+        edition=None,
         dates=dates,
         datestamp=datetime(2014, 6, 30, 14, 30, second=45, tzinfo=UTC).date(),
         kv={},

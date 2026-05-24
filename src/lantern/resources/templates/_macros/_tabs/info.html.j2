@@ -93,6 +93,10 @@
         {% endcall %}
       {% endif %}
 
+      {% if data.edition %}
+        {% call com.dl_item(title='Item edition', id='info-edition') %}{{ data.edition }}{% endcall %}
+      {% endif %}
+
       {% for label, value in data.dates.items() %}
         {% set id = label | lower | replace(' ', '-') %}
         {% call com.dl_item(title=label) %}{{ com.time(value, id='info-'+id) }}{% endcall %}

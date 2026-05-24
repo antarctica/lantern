@@ -65,6 +65,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * `supersede-record` development task for marking a record as superseding another record
 * Record presets for alias identifiers and constraints
 * Record distribution option presets and utilities, upstreamed from ODS automated records
+* Item edition shown in additional information tab where present
 
 ### Fixed
 
@@ -75,6 +76,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Preventing error syncing a record against an ArcGIS item with shared group permissions (by refusing)
 * Using `markupsafe` over simplistic local method to strip tags from title elements in catalogue items
 * Handling CloudFront invalidation wildcard path limit by invalidating the whole distribution
+* Parent collections are shown in item page summaries for all hierarchy levels
 
 ### Changed
 

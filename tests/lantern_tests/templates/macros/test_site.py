@@ -281,7 +281,7 @@ class TestMacrosSite:
         meta = self._site_meta()
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
 
-        assert html.find(name="a", href="https://www.bas.ac.uk/maps") is not None
+        assert html.find(name="a", href="https://data.bas.ac.uk/collections/bas-maps") is not None
         restricted_external = html.find(name="a", href="https://opsgis.web.bas.ac.uk/login")
         assert restricted_external is not None
         assert restricted_external.find("i", class_="fa-arrow-up-right-from-square") is not None  # external status

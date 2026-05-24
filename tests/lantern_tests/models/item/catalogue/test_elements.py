@@ -316,7 +316,7 @@ class TestDates:
         """Can get dates as a dict with human formatted keys."""
         date_ = Date(date=datetime(2014, 6, 30, 14, 30, second=45, tzinfo=UTC))
         dates = Dates(dates=RecordDates(creation=date_))
-        expected = {"Item created": FormattedDate.from_rec_date(date_)}
+        expected = {"Item Created": FormattedDate.from_rec_date(date_)}
 
         assert dates.as_dict_labeled() == expected
 
@@ -745,7 +745,6 @@ class TestPageSummary:
         )
         assert summary.collections == collections
         assert summary.edition == edition
-        assert summary.published == published
         assert summary.restricted == restricted
         assert summary.about == "x"
 
@@ -755,11 +754,10 @@ class TestPageSummary:
             assert summary.citation is None
 
     @pytest.mark.parametrize(
-        ("item_type", "edition", "published", "restricted", "aggregations", "expected"),
+        ("edition", "published", "restricted", "aggregations", "expected"),
         [
             # [all triggers]
             (
-                HierarchyLevelCode.PRODUCT,
                 "1",
                 "x",
                 False,
@@ -790,7 +788,6 @@ class TestPageSummary:
             ),
             # edition & collections
             (
-                HierarchyLevelCode.PRODUCT,
                 "1",
                 None,
                 False,
@@ -811,7 +808,6 @@ class TestPageSummary:
             ),
             # published & projects
             (
-                HierarchyLevelCode.PRODUCT,
                 None,
                 "x",
                 False,
@@ -832,36 +828,9 @@ class TestPageSummary:
             ),
             # [no triggers]
             (
-                HierarchyLevelCode.PRODUCT,
                 None,
                 None,
                 False,
-                Aggregations(
-                    admin_meta_keys=_admin_meta_keys(),
-                    aggregations=RecordAggregations([]),
-                    select_record=_select_record,
-                ),
-                False,
-            ),
-            # [container type]
-            (
-                HierarchyLevelCode.COLLECTION,
-                "1",
-                "x",
-                False,
-                Aggregations(
-                    admin_meta_keys=_admin_meta_keys(),
-                    aggregations=RecordAggregations([]),
-                    select_record=_select_record,
-                ),
-                False,
-            ),
-            # [container type, restricted]
-            (
-                HierarchyLevelCode.COLLECTION,
-                "1",
-                "x",
-                True,
                 Aggregations(
                     admin_meta_keys=_admin_meta_keys(),
                     aggregations=RecordAggregations([]),
@@ -872,19 +841,11 @@ class TestPageSummary:
         ],
     )
     def test_grid_enabled(
-        self,
-        item_type: HierarchyLevelCode,
-        edition: str | None,
-        published: str | None,
-        restricted: bool,
-        aggregations: Aggregations,
-        expected: bool,
+        self, edition: str | None, published: str | None, restricted: bool, aggregations: Aggregations, expected: bool
     ):
         """Can determine whether to show item summary grid."""
-        super_type = ItemSuperType.CONTAINER if item_type in CONTAINER_SUPER_TYPES else ItemSuperType.RESOURCE
-
         summary = PageSummary(
-            item_super_type=super_type,
+            item_super_type=ItemSuperType.RESOURCE,
             edition=edition,
             published_date=published,
             revision_date=None,
@@ -897,30 +858,17 @@ class TestPageSummary:
         assert summary.grid_enabled == expected
 
     @pytest.mark.parametrize(
-        ("item_type", "published", "revision", "expected"),
+        ("published", "revision", "expected"),
         [
-            (HierarchyLevelCode.PRODUCT, None, None, None),
+            (None, None, None),
+            (FormattedDate(datetime="x", value="x"), None, FormattedDate(datetime="x", value="x")),
+            (None, "x", None),
             (
-                HierarchyLevelCode.PRODUCT,
-                FormattedDate(datetime="x", value="x"),
-                None,
-                FormattedDate(datetime="x", value="x"),
-            ),
-            (HierarchyLevelCode.PRODUCT, None, "x", None),
-            (
-                HierarchyLevelCode.PRODUCT,
                 FormattedDate(datetime="x", value="x"),
                 FormattedDate(datetime="x", value="x"),
                 FormattedDate(datetime="x", value="x"),
             ),
             (
-                HierarchyLevelCode.PRODUCT,
-                FormattedDate(datetime="x", value="x"),
-                FormattedDate(datetime="y", value="y"),
-                FormattedDate(datetime="x", value="x (last updated: y)"),
-            ),
-            (
-                HierarchyLevelCode.COLLECTION,
                 FormattedDate(datetime="x", value="x"),
                 FormattedDate(datetime="y", value="y"),
                 FormattedDate(datetime="x", value="x (last updated: y)"),
@@ -930,16 +878,13 @@ class TestPageSummary:
     def test_published(
         self,
         fx_admin_meta_keys: AdministrationKeys,
-        item_type: HierarchyLevelCode,
         published: FormattedDate | None,
         revision: FormattedDate | None,
         expected: str,
     ):
         """Can show combination of publication and revision date if relevant."""
-        super_type = ItemSuperType.CONTAINER if item_type in CONTAINER_SUPER_TYPES else ItemSuperType.RESOURCE
-
         summary = PageSummary(
-            item_super_type=super_type,
+            item_super_type=ItemSuperType.RESOURCE,
             edition=None,
             published_date=published,
             revision_date=revision,
@@ -953,15 +898,9 @@ class TestPageSummary:
 
         assert summary.published == expected
 
-    @pytest.mark.parametrize(
-        ("item_type", "has_aggregation"),
-        [(HierarchyLevelCode.PRODUCT, False), (HierarchyLevelCode.PRODUCT, True)],
-    )
-    def test_physical_map(
-        self, fx_admin_meta_keys: AdministrationKeys, item_type: HierarchyLevelCode, has_aggregation: bool
-    ):
+    @pytest.mark.parametrize("has_aggregation", [False, True])
+    def test_physical_map(self, fx_admin_meta_keys: AdministrationKeys, has_aggregation: bool):
         """Can show combination of publication and revision date if relevant."""
-        super_type = ItemSuperType.CONTAINER if item_type in CONTAINER_SUPER_TYPES else ItemSuperType.RESOURCE
         aggregations = []
         if has_aggregation:
             aggregations.append(
@@ -972,7 +911,7 @@ class TestPageSummary:
                 )
             )
         summary = PageSummary(
-            item_super_type=super_type,
+            item_super_type=ItemSuperType.RESOURCE,
             aggregations=Aggregations(
                 admin_meta_keys=fx_admin_meta_keys,
                 aggregations=RecordAggregations(aggregations),

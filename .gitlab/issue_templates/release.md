@@ -9,6 +9,6 @@
 1. [ ] run the `release` [Development task](/docs/dev.md#development-tasks) with `major`/`minor`/`patch` as an argument
 1. [ ] commit and push changes
 1. [ ] merge into `main` and tag merge commit with version prefixed with `v` (e.g. `v0.5.0`)
-1. [ ] [Reset]https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/roles/lantern/README.md#post-deployment-reset
+1. [ ] [Reset](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/roles/lantern/README.md#post-deployment-reset)
        resources created during deployment
 1. [ ] if needed, delete any un-used virtual environments created for pre-deployments (except the most recent)

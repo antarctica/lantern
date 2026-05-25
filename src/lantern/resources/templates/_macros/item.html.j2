@@ -167,7 +167,7 @@
   {% if data.enabled %}
     <div
       role="tabpanel" id="{{ tab_id }}-data" aria-labelledby="{{ tab_id }}" tabindex="0"
-      class="border-1 border-grey-300 dark:border-grey-500 p-4 pt-8 -mt-px w-full hidden peer-checked/{{ tab_id }}:block"
+      class="{{ com.bg_classes() }} border-1 border-grey-300 dark:border-grey-500 p-4 pt-8 -mt-px w-full hidden peer-checked/{{ tab_id }}:block"
     >
       {{ tab[data.anchor](data) }}
     </div>

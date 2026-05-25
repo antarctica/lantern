@@ -1,3 +1,4 @@
+import pytest
 from bs4 import BeautifulSoup
 from jinja2 import Environment, PackageLoader, select_autoescape
 
@@ -41,3 +42,17 @@ class TestLayoutBase:
         favicon_rels = ["shortcut icon", "icon", "apple-touch-icon", "manifest"]
         for rel in favicon_rels:
             assert html.head.find("link", rel=rel)["href"].endswith(f"?v={fx_site_meta.build_key}")
+
+    @pytest.mark.parametrize("env", ["testing", "live"])
+    def test_body_env_classes(self, fx_site_meta: SiteMeta, env: str):
+        """Can set environment-specific classes on body element."""
+        fx_site_meta.env = env
+        env_class = "app-testing-watermark"
+
+        html = BeautifulSoup(self._render(fx_site_meta), parser="html.parser", features="lxml")
+        body_classes = html.body["class"]
+
+        if env == "testing":
+            assert env_class in body_classes
+        else:
+            assert env_class not in body_classes

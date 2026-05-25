@@ -10,6 +10,10 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 <!-- pyml disable no-duplicate-heading,no-duplicate-header -->
 ## [Unreleased]
 
+### Added
+
+* Testing watermark added to test site env HTML outputs
+
 ## [0.6.1] - 2026-05-24
 
 ### Fixed

@@ -134,6 +134,6 @@ BAS central workstations:
 - scope: all items
 - frequency: Wednesdays at 12:15 (local time)
 - results: [data.bas.ac.uk/-/checks/](https://data.bas.ac.uk/-/checks/)
-- logs: `/users/geoweb/cron_logs/lantern/lantern-verify-*.log`
+- logs: `/users/geoweb/cron_logs/lantern/lantern-checks-*.log`
 - log retention: 90 days (enforced monthly)
 - deployment: via [Ansible](/docs/deployment.md#site-checks-script)

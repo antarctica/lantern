@@ -14,6 +14,10 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 
 * Testing watermark added to test site env HTML outputs
 
+### Changed
+
+* App logger renamed from `app` to `lantern`
+
 ## [0.6.1] - 2026-05-24
 
 ### Fixed

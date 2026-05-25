@@ -1,5 +1,5 @@
 LANTERN_LOG_LEVEL="INFO"  # normally INFO
-LANTERN_PARALLEL_JOBS="-1"  # normally -1 (all CPUs)
+LANTERN_PARALLEL_JOBS="-1"  # normally -1 (all CPUs), use '1' for debugging
 
 LANTERN_ENABLE_FEATURE_SENTRY="false"  # normally false
 LANTERN_SENTRY_ENVIRONMENT="development"  # normally development

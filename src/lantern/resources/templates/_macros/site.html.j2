@@ -170,7 +170,7 @@
 {% macro feedback_widget(fallback_email) %}
   <form
     id="{{ com.feedback_widget_target() }}"
-    class="hidden fixed bottom-4 right-4 w-80 mb-0 p-4 text-sm space-y-4 {{ com.base_bg_text_classes() }} shadow-lg border border-grey-300 dark:border-grey-500"
+    class="hidden fixed bottom-4 right-4 w-80 mb-0 p-4 text-sm space-y-4 {{ com.bg_classes() }} shadow-lg border border-grey-300 dark:border-grey-500"
   >
     <header class="flex items-center justify-between">
       <h2 class="text-lg {{ com.font_bolder_classes() }}">Send feedback</h2>

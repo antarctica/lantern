@@ -1,6 +1,8 @@
 {% macro container_classes() %}container mx-auto{% endmacro %}
 
-{% macro base_bg_text_classes() %}text-grey-900 dark:text-grey-100 bg-white dark:bg-grey-950{% endmacro %}
+{% macro bg_classes() %}bg-white dark:bg-grey-950{% endmacro %}
+
+{% macro body_env_classes(value) %}{% if value == 'testing' %}app-testing-watermark{% endif %}{% endmacro %}
 
 {% macro font_bolder_classes() %}font-semibold{% endmacro %}
 

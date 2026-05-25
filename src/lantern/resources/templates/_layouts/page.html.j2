@@ -4,7 +4,7 @@
 {# use `{% set header_main = "..." %}` in child templates to set page title.  #}
 
 {% block main %}
-  <article class="space-y-4 lg:space-y-8">
+  <article class="space-y-4 lg:space-y-8 {{ com.bg_classes() }}">
     {{ com.page_header(main=header_main)}}
     <div class="space-y-4 lg:space-y-8 lg:w-2/3">
       {% block page_content %}{% endblock %}

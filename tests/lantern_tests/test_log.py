@@ -15,7 +15,7 @@ class TestLogging:
         warn = "a"
         debug = "b"
         init_logging(logging.WARNING)
-        logger = logging.getLogger("app")
+        logger = logging.getLogger("lantern")
         logger.warning(warn)
         logger.debug(debug)
         assert warn in caplog.text
@@ -24,7 +24,7 @@ class TestLogging:
         warn2 = "c"
         debug2 = "d"
         init_logging(logging.DEBUG)
-        logger2 = logging.getLogger("app")
+        logger2 = logging.getLogger("lantern")
         logger2.warning(warn2)
         logger2.debug(debug2)
         assert warn2 in caplog.text

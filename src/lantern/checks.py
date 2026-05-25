@@ -189,7 +189,7 @@ def run_check(logging_level: int, check: Check) -> Check:
     Standalone function for use in parallel processing.
     """
     init_logging(logging_level)  # each process needs logging initialising
-    logger = logging.getLogger("app")
+    logger = logging.getLogger("lantern")
     runner = CheckRunner(logger, check)
     runner.run()
     return check

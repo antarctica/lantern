@@ -31,7 +31,7 @@ def main() -> None:
 
     config = Config()
     init_logging(config.LOG_LEVEL)
-    logger = logging.getLogger("app")
+    logger = logging.getLogger("lantern")
     logger.info("Initialising")
 
     cat = FakeCatalogue(logger=logger, config=config, base_path=path)

@@ -8,7 +8,7 @@ def init(logging_level: int) -> None:
     """Initialize application logging."""
     # noinspection SpellCheckingInspection
     logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-    logger = logging.getLogger("app")
+    logger = logging.getLogger("lantern")
     logger.setLevel(logging_level)
 
 

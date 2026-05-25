@@ -123,7 +123,7 @@ def fx_package_version() -> str:
 @pytest.fixture()
 def fx_logger() -> logging.Logger:
     """App logger."""
-    logger = logging.getLogger("app")
+    logger = logging.getLogger("lantern")
     logger.setLevel(logging.DEBUG)
     return logger
 
@@ -1004,7 +1004,7 @@ def fx_static_site() -> TemporaryDirectory:
     site_dir = TemporaryDirectory()
     site_path = Path(site_dir.name)
 
-    logger = logging.getLogger("app")
+    logger = logging.getLogger("lantern")
     logger.setLevel(logging.DEBUG)
 
     config = Config()

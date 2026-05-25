@@ -65,7 +65,7 @@ def _run_job(
     Standalone function for use in parallel processing.
     """
     init_logging(log_level)
-    logger = logging.getLogger("app")
+    logger = logging.getLogger("lantern")
     store = _job_worker_store(store=store)
     iso_html_transform = _job_worker_iso_html_transform()
     select_record = store.select_one

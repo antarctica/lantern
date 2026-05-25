@@ -18,6 +18,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 <!-- pyml disable no-duplicate-heading,no-duplicate-header -->
 ## [Unreleased]
 
+## [0.14.0] - 2026-05-25
+
 ### Changed [!BREAKING]
 
 * Grafting ADD Metadata Toolbox commits to give combined history
@@ -404,14 +406,14 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Initial reimplementation as *Lantern* based on the
   [BAS Assets Tracking Service v0.7.0 release](https://github.com/antarctica/assets-tracking-service/tree/v0.7.0)
 
-## [0.7.6] - 2024-09-26
+## [0.7.5] - 2024-09-26
 
 ### Fixed
 
 * Multiple auth related bugs (token scopes, email claim)
   [#417](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/417)
 
-## [0.7.5] - 2024-09-25
+## [0.7.4] - 2024-09-25
 
 ### Fixed
 
@@ -421,6 +423,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
   [#411](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/411)
 * Multiple auth related bugs (token scopes, unauthenticated CSW client requests, token comparison, email claim)
   [#417](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/417)
+* CSW Server token scope validation used inverted logic
+  [#421](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/421)
 
 ### Changed
 
@@ -444,13 +448,6 @@ Wherever possible, a reference to an issue in the project issue tracker should b
   [#419](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/419)
 * Reducing required record properties to agreed minimum
   [#274](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/274)
-
-## [0.7.4] - 2024-09-25
-
-### Fixed
-
-* CSW Server token scope validation used inverted logic
-  [#421](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox/-/issues/421)
 
 ## [0.7.3] - 2024-09-05
 

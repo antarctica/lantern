@@ -33,7 +33,7 @@ def export_test_site(export_path: Path) -> None:
     catalogue = FakeCatalogue(logger=logger, config=config, base_path=export_path)
     catalogue.export()
 
-    # Include fake verification report
+    # Include fake checks report
     report_path = export_path / "-" / "checks" / "index.html"
     checks = [
         Check(
@@ -74,7 +74,7 @@ def export_test_site(export_path: Path) -> None:
     with report_path.open("w") as report_file:
         report_file.write(report_data.content)  # ty:ignore[invalid-argument-type]
 
-    print(f"Exported test site inc. verification report to '{export_path.resolve()}'")
+    print(f"Exported test site inc. checks report to '{export_path.resolve()}'")
 
 
 def regenerate_styles(tw_bin: Path, site_path: Path, base_path: Path) -> None:

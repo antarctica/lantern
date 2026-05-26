@@ -646,15 +646,14 @@ def fx_gitlab_store(fx_logger: logging.Logger, fx_config: Config, fx_gitlab_sour
 
 
 @pytest.fixture()
-def fx_gitlab_cache(fx_logger: logging.Logger, fx_config: Config, fx_gitlab_source: GitLabSource) -> GitLabLocalCache:
+def fx_gitlab_cache(
+    tmp_path: Path, fx_logger: logging.Logger, fx_config: Config, fx_gitlab_source: GitLabSource
+) -> GitLabLocalCache:
     """GitLab local cache."""
-    with TemporaryDirectory() as tmp_path:
-        cache_path = Path(tmp_path) / ".cache"
-
     return GitLabLocalCache(
         logger=fx_logger,
         parallel_jobs=fx_config.PARALLEL_JOBS,
-        path=cache_path,
+        path=Path(tmp_path) / ".cache",
         gitlab_token="x",  # noqa: S106
         gitlab_client=Gitlab(url=fx_gitlab_source.endpoint, private_token=fx_config.STORE_GITLAB_TOKEN),
         gitlab_source=fx_gitlab_source,
@@ -692,17 +691,16 @@ def fx_gitlab_cache_frozen(fx_gitlab_cache: GitLabLocalCache) -> GitLabLocalCach
 
 
 @pytest.fixture()
-def fx_gitlab_cached_store(fx_logger: logging.Logger, fx_config: Config, fx_gitlab_source: GitLabSource) -> GitLabStore:
+def fx_gitlab_cached_store(
+    tmp_path: Path, fx_logger: logging.Logger, fx_config: Config, fx_gitlab_source: GitLabSource
+) -> GitLabStore:
     """GitLab cached store."""
-    with TemporaryDirectory() as tmp_path:
-        cache_path = Path(tmp_path) / ".cache"
-
     return GitLabCachedStore(
         logger=fx_logger,
         source=fx_gitlab_source,
         access_token=fx_config.STORE_GITLAB_TOKEN,
         parallel_jobs=fx_config.PARALLEL_JOBS,
-        cache_dir=cache_path,
+        cache_dir=Path(tmp_path) / ".cache",
     )
 
 
@@ -826,19 +824,15 @@ def fx_records_waf_output(
 
 
 @pytest.fixture()
-def fx_local_exporter(fx_logger: logging.Logger) -> LocalExporter:
+def fx_local_exporter(tmp_path: Path, fx_logger: logging.Logger) -> LocalExporter:
     """Local filesystem exporter using a temporary directory."""
-    with TemporaryDirectory() as tmp_dir:
-        tmp_path = Path(tmp_dir) / "local"
-    return LocalExporter(logger=fx_logger, path=tmp_path)
+    return LocalExporter(logger=fx_logger, path=tmp_path / "local")
 
 
 @pytest.fixture()
-def fx_rsync_exporter(fx_logger: logging.Logger) -> RsyncExporter:
+def fx_rsync_exporter(tmp_path: Path, fx_logger: logging.Logger) -> RsyncExporter:
     """Rsync exporter using a temporary directory."""
-    with TemporaryDirectory() as tmp_dir:
-        tmp_path = Path(tmp_dir) / "rsync"
-    return RsyncExporter(logger=fx_logger, path=tmp_path)
+    return RsyncExporter(logger=fx_logger, path=tmp_path / "rsync")
 
 
 @pytest.fixture()
@@ -896,11 +890,9 @@ def fx_site(fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_fake_store
 
 
 @pytest.fixture()
-def fx_fake_catalogue(fx_logger: logging.Logger, fx_config: Config):
+def fx_fake_catalogue(tmp_path: Path, fx_logger: logging.Logger, fx_config: Config):
     """Fake catalogue instance."""
-    with TemporaryDirectory() as tmp_dir:
-        tmp_path = Path(tmp_dir) / "output"
-    return FakeCatalogue(logger=fx_logger, config=fx_config, base_path=tmp_path)
+    return FakeCatalogue(logger=fx_logger, config=fx_config, base_path=tmp_path / "output")
 
 
 @pytest.fixture()
@@ -936,6 +928,7 @@ def fx_bas_cat_untrusted(
 
 @pytest.fixture()
 def fx_bas_cat_trusted(
+    tmp_path: Path,
     fx_logger: logging.Logger,
     fx_config: Config,
     fx_bas_repo_min_cat_record: BasRepository,
@@ -947,10 +940,13 @@ def fx_bas_cat_trusted(
 
     Sets Rsync export to a temp directory.
     """
-    with TemporaryDirectory() as tmp_dir:
-        rsync_path = Path(tmp_dir) / "rsync"
     return BasCatTrusted(
-        logger=fx_logger, config=fx_config, repo=fx_bas_repo_min_cat_record, host=None, path=rsync_path, env="testing"
+        logger=fx_logger,
+        config=fx_config,
+        repo=fx_bas_repo_min_cat_record,
+        host=None,
+        path=tmp_path / "rsync",
+        env="testing",
     )
 
 

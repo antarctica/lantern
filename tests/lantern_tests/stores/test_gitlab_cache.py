@@ -3,7 +3,6 @@ import logging
 import pickle
 import re
 from pathlib import Path
-from tempfile import TemporaryDirectory
 from unittest.mock import MagicMock, PropertyMock
 
 import pytest
@@ -52,10 +51,8 @@ class TestCachedProcessedRecord:
 class TestGitLabLocalCache:
     """Test GitLab local cache."""
 
-    def test_init(self, fx_logger: logging.Logger, fx_config: Config):
+    def test_init(self, tmp_path: Path, fx_logger: logging.Logger, fx_config: Config):
         """Can initialise cache."""
-        with TemporaryDirectory() as tmp_path:
-            cache_path = Path(tmp_path) / ".cache"
         source = GitLabSource(
             endpoint=fx_config.STORE_GITLAB_ENDPOINT,
             project=fx_config.STORE_GITLAB_PROJECT_ID,
@@ -65,7 +62,7 @@ class TestGitLabLocalCache:
         cache = GitLabLocalCache(
             logger=fx_logger,
             parallel_jobs=fx_config.PARALLEL_JOBS,
-            path=cache_path,
+            path=Path(tmp_path) / ".cache",
             gitlab_token="x",  # noqa: S106
             gitlab_client=Gitlab(url="x", private_token="x"),  # noqa: S106
             gitlab_source=source,
@@ -829,17 +826,14 @@ class TestGitLabLocalCache:
 class TestGitLabCachedStore:
     """Test GitLab local cache store."""
 
-    def test_init(self, fx_logger: logging.Logger, fx_config: Config, fx_gitlab_source: GitLabSource):
+    def test_init(self, tmp_path: Path, fx_logger: logging.Logger, fx_config: Config, fx_gitlab_source: GitLabSource):
         """Can initialise store."""
-        with TemporaryDirectory() as tmp_path:
-            cache_path = Path(tmp_path) / ".cache"
-
         store = GitLabCachedStore(
             logger=fx_logger,
             source=fx_gitlab_source,
             access_token="x",  # noqa: S106
             parallel_jobs=fx_config.PARALLEL_JOBS,
-            cache_dir=cache_path,
+            cache_dir=tmp_path / ".cache",
         )
         assert store.frozen is False
 

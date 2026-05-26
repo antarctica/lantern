@@ -2,7 +2,6 @@ import logging
 from collections.abc import Callable
 from pathlib import Path
 from subprocess import Popen
-from tempfile import TemporaryDirectory
 from typing import Final
 
 import pytest
@@ -26,11 +25,9 @@ from tests.resources.stores.fake_records_store import FakeRecordsStore
 class TestCatalogueBase:
     """Test catalogue abstract base class via fake catalogue implementation."""
 
-    def test_init(self, fx_logger: logging.Logger, fx_config: Config, fx_fake_store: FakeRecordsStore):
+    def test_init(self, tmp_path: Path, fx_logger: logging.Logger, fx_config: Config, fx_fake_store: FakeRecordsStore):
         """Can create a catalogue instance."""
-        with TemporaryDirectory() as tmp_dir:
-            tmp_path = Path(tmp_dir) / "output"
-        cat = FakeCatalogue(logger=fx_logger, config=fx_config, base_path=tmp_path)
+        cat = FakeCatalogue(logger=fx_logger, config=fx_config, base_path=tmp_path / "output")
         assert isinstance(cat, CatalogueBase)
 
     all_global: Final[list[Callable[..., OutputBase]]] = [

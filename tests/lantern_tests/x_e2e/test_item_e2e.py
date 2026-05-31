@@ -71,13 +71,14 @@ class TestItemEmbeddedMap:
 
     def test_load(self, fx_exporter_static_server: Popen, fx_static_server_url: str, page: Page):
         """Can load embedded map."""
+        maps_domain = "embedded-maps.data.bas.ac.uk"
 
         def handle(route: Route) -> None:
             route.fulfill(
                 status=200, content_type="text/html", body="<html><body>BAS Embedded Maps Service</body></html>"
             )
 
-        page.route("https://embedded-maps.data.bas.ac.uk/*", handle)
+        page.route(f"https://{maps_domain}/*", handle)
 
         endpoint = f"{fx_static_server_url}/items/{product_all_supported.file_identifier}/index.html#tab-extent"
         page.goto(endpoint)
@@ -85,8 +86,7 @@ class TestItemEmbeddedMap:
         assert status_code == 200
 
         # get iframe for embedded map by looking for iframe with a base src value
-        map_src = page.locator('iframe[src*="embedded-maps.data.bas.ac.uk"]').get_attribute("src")
-        map_iframe = next((frame for frame in page.frames if frame.url == map_src), None)
+        map_iframe = next((frame for frame in page.frames if maps_domain in frame.url), None)
         assert map_iframe is not None
 
         # verify iframe has expected content

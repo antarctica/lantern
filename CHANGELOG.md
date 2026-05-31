@@ -29,6 +29,10 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Hard-coded config option for AWS region (`SITE_UNTRUSTED_AWS_REGION`, EU West 1)
 * AWS CloudFront exporter for invalidating cached content in the live site
 
+### Fixed
+
+* Relaxing URL comparison in embedded maps e2e test
+
 ### Changed
 
 * Refactoring live site cache invalidation to automatically apply to any generated output

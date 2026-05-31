@@ -36,6 +36,15 @@ class TestBaseOutput:
         results = base.checks
         assert len(results) == 1
 
+    def test_invalidation_keys(
+        self, mocker: MockerFixture, fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_site_content: SiteContent
+    ):
+        """Can use default logic to generate checks from content."""
+        base = FakeOutputBase(logger=fx_logger, meta=fx_export_meta)
+        mocker.patch.object(type(base), "content", new_callable=PropertyMock, return_value=[fx_site_content])
+
+        assert base.invalidation_keys == ["/x"]
+
 
 class TestSiteOutput:
     """Test site output via fake output class."""

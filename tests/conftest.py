@@ -20,13 +20,16 @@ from unittest.mock import MagicMock, PropertyMock
 import pytest
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
 from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys, AdministrationWrapper
-from boto3 import client as S3Client  # noqa: N812
+from boto3 import client as BotoClient  # noqa: N812
 from gitlab import Gitlab
 from moto import mock_aws
+from mypy_boto3_cloudfront import CloudFrontClient
+from mypy_boto3_s3 import S3Client
 from pytest_mock import MockerFixture
 
 from lantern.catalogues.bas import BasCatalogue, BasCatEnv, BasCatTrusted, BasCatUntrusted
 from lantern.config import Config
+from lantern.exporters.cloudfront import CloudFrontExporter
 from lantern.exporters.local import LocalExporter
 from lantern.exporters.rsync import RsyncExporter
 from lantern.exporters.s3 import S3Exporter
@@ -847,27 +850,89 @@ def fx_s3_client(mocker: MockerFixture, fx_s3_bucket_name: str) -> S3Client:
     mock_config = mocker.Mock()
     type(mock_config).AWS_ACCESS_ID = PropertyMock(return_value="x")
     type(mock_config).AWS_ACCESS_SECRET = PropertyMock(return_value="x")
+    type(mock_config).AWS_REGION = PropertyMock(return_value="eu-west-1")
 
     with mock_aws():
-        client = S3Client(
+        client = BotoClient(
             "s3",
             aws_access_key_id=mock_config.AWS_ACCESS_ID,
             aws_secret_access_key=mock_config.AWS_ACCESS_SECRET,
-            region_name="eu-west-1",
+            region_name=mock_config.AWS_REGION,
         )
 
         client.create_bucket(
             Bucket=fx_s3_bucket_name,
-            CreateBucketConfiguration={"LocationConstraint": "eu-west-1"},
+            CreateBucketConfiguration={"LocationConstraint": mock_config.AWS_REGION},
         )
 
         yield client
 
 
 @pytest.fixture()
+def fx_cf_client(mocker: MockerFixture) -> CloudFrontClient:
+    """Mocked S3 client with testing distribution pre-created."""
+    mock_config = mocker.Mock()
+    type(mock_config).AWS_ACCESS_ID = PropertyMock(return_value="x")
+    type(mock_config).AWS_ACCESS_SECRET = PropertyMock(return_value="x")
+    type(mock_config).AWS_REGION = PropertyMock(return_value="eu-west-1")
+
+    config = {
+        "CallerReference": "x",
+        "Origins": {
+            "Quantity": 1,
+            "Items": [
+                {
+                    "Id": "origin1",
+                    "DomainName": f"x.s3.{mock_config.AWS_REGION}.amazonaws.com",
+                    "OriginPath": "/example",
+                    "S3OriginConfig": {"OriginAccessIdentity": "origin-access-identity/cloudfront/00000000000001"},
+                }
+            ],
+        },
+        "DefaultCacheBehavior": {
+            "TargetOriginId": "origin1",
+            "ViewerProtocolPolicy": "allow-all",
+            "MinTTL": 10,
+            "ForwardedValues": {"QueryString": False, "Cookies": {"Forward": "none"}},
+        },
+        "Comment": "optional comment that's not actually optional",
+        "Enabled": True,
+    }
+
+    with mock_aws():
+        client = BotoClient(
+            "cloudfront",
+            aws_access_key_id=mock_config.AWS_ACCESS_ID,
+            aws_secret_access_key=mock_config.AWS_ACCESS_SECRET,
+            region_name=mock_config.AWS_REGION,
+        )
+        client.create_distribution(DistributionConfig=config)
+
+        yield client
+
+
+@pytest.fixture()
+def fx_cf_distribution_id(fx_cf_client: CloudFrontClient) -> str:
+    """
+    CloudFront distribution name.
+
+    Dynamically generated so retrieved from CloudFront client (opposite to S3 where we supply the ID).
+    """
+    return fx_cf_client.list_distributions()["DistributionList"]["Items"][0]["Id"]
+
+
+@pytest.fixture()
 def fx_s3_exporter(fx_logger: logging.Logger, fx_s3_client: S3Client, fx_s3_bucket_name: str) -> S3Exporter:
     """S3 exporter using mocked s3 client."""
     return S3Exporter(logger=fx_logger, s3=fx_s3_client, bucket=fx_s3_bucket_name, parallel_jobs=1)
+
+
+@pytest.fixture()
+def fx_cf_exporter(
+    fx_logger: logging.Logger, fx_cf_client: CloudFrontClient, fx_cf_distribution_id: str
+) -> CloudFrontExporter:
+    """S3 exporter using mocked s3 client."""
+    return CloudFrontExporter(logger=fx_logger, cloudfront=fx_cf_client, distribution=fx_cf_distribution_id)
 
 
 @pytest.fixture()
@@ -922,6 +987,7 @@ def fx_bas_cat_untrusted(
         repo=fx_bas_repo_min_cat_record,
         s3=fx_s3_client,
         bucket=fx_s3_bucket_name,
+        distribution=None,
         env="testing",
     )
 

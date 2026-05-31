@@ -11,8 +11,10 @@ Exporters use these options from the app `lantern.Config` class:
 
 - `SITE_TRUSTED_RSYNC_HOST` - SSH config alias for trusted site uploads
 - `SITE_TRUSTED_RSYNC_BASE_PATH_LIVE` / `SITE_TRUSTED_RSYNC_BASE_PATH_TESTING` - remote path for trusted site uploads
-- `SITE_UNTRUSTED_S3_ACCESS_ID` - AWS IAM credential for untrusted site uploads
-- `SITE_UNTRUSTED_S3_ACCESS_SECRET` - corresponding secret for the credential used in `SITE_UNTRUSTED_S3_ACCESS_ID`
+- `SITE_UNTRUSTED_AWS_ACCESS_ID` - AWS IAM credential for managing untrusted site uploads and invalidations
+- `SITE_UNTRUSTED_AWS_ACCESS_SECRET` - corresponding secret for the credential used in `SITE_UNTRUSTED_AWS_ACCESS_ID`
+- `SITE_UNTRUSTED_AWS_REGION` - AWS region for untrusted site (hard-coded to `eu-west-1`)
+- `SITE_UNTRUSTED_CLOUDFRONT_DIST_LIVE` - AWS CloudFront distribution for untrusted live site invalidations
 - `SITE_UNTRUSTED_S3_BUCKET_LIVE` / `SITE_UNTRUSTED_S3_BUCKET_TESTING` - AWS S3 bucket name for untrusted site uploads
 
 See the [Config](/docs/config.md#config-options) docs for how to set these config options.
@@ -92,3 +94,24 @@ Supports:
 
 > [!NOTE]
 > These are supported by AWS S3 but MAY NOT be supported by S3 compatible providers.
+
+## CloudFront exporter
+
+`lantern.exporters.cloudfront.CloudFrontExporter`
+
+For invalidating cached content in AWS CloudFront distributions using the
+[AWS Python SDK](https://aws.amazon.com/sdk-for-python/) (`boto`).
+
+> [!NOTE]
+> This exporter is intended for use with the [S3 Exporter](#s3-exporter) and does not support exporting content.
+
+Requires:
+
+- a distribution ID
+- an AWS Python SDK CloudFront client, configured with suitable access credentials
+
+Supports invalidating up to 15 keys by path including wildcards (AWS limitation).
+
+> [!TIP]
+> See the [CloudFront](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/invalidation-specifying-objects.html)
+> documentation for more information about cache invalidation keys.

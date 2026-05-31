@@ -100,3 +100,8 @@ class SitePagesOutput(OutputSite):
             )
         )
         return checks
+
+    @property
+    def invalidation_keys(self) -> list[str]:
+        """Keys to invalidate."""
+        return [f"{item.url.replace(self._meta.base_url, '')}/index.html" for item in self._page_meta.values()][1:]

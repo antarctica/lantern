@@ -1,13 +1,17 @@
+# ruff: noqa: N812
 import logging
 from collections.abc import Collection
 from pathlib import Path
 from typing import get_args
 
+from boto3 import client as BotoClient
+from mypy_boto3_cloudfront import CloudFrontClient
 from mypy_boto3_s3 import S3Client
 
 from lantern.catalogues.base import CatalogueBase
 from lantern.checks import Checker
 from lantern.config import Config
+from lantern.exporters.cloudfront import CloudFrontExporter
 from lantern.exporters.rsync import RsyncExporter
 from lantern.exporters.s3 import S3Exporter
 from lantern.models.checks import CheckType
@@ -36,15 +40,30 @@ class BasCatUntrusted(CatalogueBase):
         repo: BasRepository,
         s3: S3Client,
         bucket: str,
+        distribution: str | None,
         env: SiteEnvironment,
     ) -> None:
         super().__init__(logger)
         self._config = config
         self._repo = repo
+        self._s3 = s3
         self._env = env
 
-        self._exporter = S3Exporter(logger=logger, s3=s3, bucket=bucket, parallel_jobs=config.PARALLEL_JOBS)
+        self._invalidator: CloudFrontExporter | None = None
+        if env == "live" and distribution is not None:
+            cf_client = self._create_cf_client()
+            self._invalidator = CloudFrontExporter(logger=logger, cloudfront=cf_client, distribution=distribution)
+        self._exporter = S3Exporter(logger=logger, s3=self._s3, bucket=bucket, parallel_jobs=config.PARALLEL_JOBS)
         self._checker = Checker(logger=self._logger, parallel_jobs=config.PARALLEL_JOBS)
+
+    def _create_cf_client(self) -> CloudFrontClient:
+        """Create CloudFront boto client."""
+        return BotoClient(
+            "cloudfront",
+            aws_access_key_id=self._config.SITE_UNTRUSTED_AWS_ACCESS_ID,
+            aws_secret_access_key=self._config.SITE_UNTRUSTED_AWS_ACCESS_SECRET,
+            region_name=self._config.SITE_UNTRUSTED_AWS_REGION,
+        )
 
     def export(
         self,
@@ -63,9 +82,15 @@ class BasCatUntrusted(CatalogueBase):
         meta = ExportMeta.from_config(config=self._config, env=self._env, build_ref=store.head_commit, trusted=False)
         site = Site(logger=self._logger, meta=meta, store=store)
         global_, individual = self._group_output_classes(outputs=outputs)
+        site_params = {"global_outputs": global_, "individual_outputs": individual, "identifiers": identifiers}
 
-        content = site.generate_content(global_outputs=global_, individual_outputs=individual, identifiers=identifiers)
+        content = site.generate_content(**site_params)
         self._exporter.export(content)
+
+        if self._invalidator:
+            # Invalidate entire site where all records will be exported
+            keys = site.generate_invalidation_keys(**site_params) if identifiers else ["/*"]
+            self._invalidator.invalidate(keys)
 
     def check(
         self,
@@ -156,15 +181,20 @@ class BasCatEnv(CatalogueBase):
         s3 = s3
         self._env = env
 
-        bucket = config.SITE_UNTRUSTED_S3_BUCKET_TESTING if env == "testing" else config.SITE_UNTRUSTED_S3_BUCKET_LIVE
+        bucket = config.SITE_UNTRUSTED_S3_BUCKET_LIVE if env == "live" else config.SITE_UNTRUSTED_S3_BUCKET_TESTING
+        distribution = config.SITE_UNTRUSTED_CLOUDFRONT_DIST_LIVE if env == "live" else None
         path = Path(
-            config.SITE_TRUSTED_RSYNC_BASE_PATH_TESTING
-            if env == "testing"
-            else config.SITE_TRUSTED_RSYNC_BASE_PATH_LIVE
+            config.SITE_TRUSTED_RSYNC_BASE_PATH_LIVE if env == "live" else config.SITE_TRUSTED_RSYNC_BASE_PATH_TESTING
         )
 
         self._untrusted = BasCatUntrusted(
-            logger=self._logger, config=config, repo=repo, s3=s3, bucket=bucket, env=self._env
+            logger=self._logger,
+            config=config,
+            repo=repo,
+            s3=s3,
+            distribution=distribution,
+            bucket=bucket,
+            env=self._env,
         )
 
         self._trusted = BasCatTrusted(

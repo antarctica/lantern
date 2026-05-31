@@ -90,10 +90,12 @@ class TestConfig:
             "TEMPLATES_ITEM_CONTACT_ENDPOINT": "https://example.com/contact",
             "TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": "1x00000000000000000000AA",
             "TEMPLATES_ITEM_VERSIONS_ENDPOINT": "https://example.com",
+            "SITE_UNTRUSTED_AWS_ACCESS_ID": "x",
+            "SITE_UNTRUSTED_AWS_ACCESS_SECRET": redacted_value,
+            "SITE_UNTRUSTED_CLOUDFRONT_DIST_LIVE": "x",
             "SITE_UNTRUSTED_S3_BUCKET_TESTING": "x",
             "SITE_UNTRUSTED_S3_BUCKET_LIVE": "x",
-            "SITE_UNTRUSTED_S3_ACCESS_ID": "x",
-            "SITE_UNTRUSTED_S3_ACCESS_SECRET": redacted_value,
+            "SITE_UNTRUSTED_AWS_REGION": "eu-west-1",
             "SITE_TRUSTED_RSYNC_HOST": "x",
             "SITE_TRUSTED_RSYNC_BASE_PATH_TESTING": str(fx_config.SITE_TRUSTED_RSYNC_BASE_PATH_TESTING),
             "SITE_TRUSTED_RSYNC_BASE_PATH_LIVE": str(fx_config.SITE_TRUSTED_RSYNC_BASE_PATH_LIVE),
@@ -204,34 +206,47 @@ class TestConfig:
             ),
             (
                 {
+                    "LANTERN_SITE_UNTRUSTED_AWS_ACCESS_ID": None,
+                    "LANTERN_SITE_UNTRUSTED_AWS_ACCESS_SECRET": "x",
+                    "LANTERN_SITE_UNTRUSTED_S3_BUCKET_TESTING": "x",
+                    "LANTERN_SITE_UNTRUSTED_S3_BUCKET_LIVE": "x",
+                    "LANTERN_SITE_UNTRUSTED_CLOUDFRONT_DIST_LIVE": "x",
+                }
+            ),
+            (
+                {
+                    "LANTERN_SITE_UNTRUSTED_AWS_ACCESS_ID": "x",
+                    "LANTERN_SITE_UNTRUSTED_AWS_ACCESS_SECRET": None,
+                    "LANTERN_SITE_UNTRUSTED_S3_BUCKET_TESTING": "x",
+                    "LANTERN_SITE_UNTRUSTED_S3_BUCKET_LIVE": "x",
+                    "LANTERN_SITE_UNTRUSTED_CLOUDFRONT_DIST_LIVE": "x",
+                }
+            ),
+            (
+                {
+                    "LANTERN_SITE_UNTRUSTED_AWS_ACCESS_ID": "x",
+                    "LANTERN_SITE_UNTRUSTED_AWS_ACCESS_SECRET": "x",
                     "LANTERN_SITE_UNTRUSTED_S3_BUCKET_TESTING": None,
                     "LANTERN_SITE_UNTRUSTED_S3_BUCKET_LIVE": "x",
-                    "LANTERN_SITE_UNTRUSTED_S3_ACCESS_ID": "x",
-                    "LANTERN_SITE_UNTRUSTED_S3_ACCESS_SECRET": "x",
+                    "LANTERN_SITE_UNTRUSTED_CLOUDFRONT_DIST_LIVE": "x",
                 }
             ),
             (
                 {
+                    "LANTERN_SITE_UNTRUSTED_AWS_ACCESS_ID": "x",
+                    "LANTERN_SITE_UNTRUSTED_AWS_ACCESS_SECRET": "x",
                     "LANTERN_SITE_UNTRUSTED_S3_BUCKET_TESTING": "x",
                     "LANTERN_SITE_UNTRUSTED_S3_BUCKET_LIVE": None,
-                    "LANTERN_SITE_UNTRUSTED_S3_ACCESS_ID": "x",
-                    "LANTERN_SITE_UNTRUSTED_S3_ACCESS_SECRET": "x",
+                    "LANTERN_SITE_UNTRUSTED_CLOUDFRONT_DIST_LIVE": "x",
                 }
             ),
             (
                 {
+                    "LANTERN_SITE_UNTRUSTED_AWS_ACCESS_ID": "x",
+                    "LANTERN_SITE_UNTRUSTED_AWS_ACCESS_SECRET": "x",
                     "LANTERN_SITE_UNTRUSTED_S3_BUCKET_TESTING": "x",
                     "LANTERN_SITE_UNTRUSTED_S3_BUCKET_LIVE": "x",
-                    "LANTERN_SITE_UNTRUSTED_S3_ACCESS_ID": None,
-                    "LANTERN_SITE_UNTRUSTED_S3_ACCESS_SECRET": "x",
-                }
-            ),
-            (
-                {
-                    "LANTERN_SITE_UNTRUSTED_S3_BUCKET_TESTING": "x",
-                    "LANTERN_SITE_UNTRUSTED_S3_BUCKET_LIVE": "x",
-                    "LANTERN_SITE_UNTRUSTED_S3_ACCESS_ID": "x",
-                    "LANTERN_SITE_UNTRUSTED_S3_ACCESS_SECRET": None,
+                    "LANTERN_SITE_UNTRUSTED_CLOUDFRONT_DIST_LIVE": None,
                 }
             ),
             (
@@ -317,10 +332,11 @@ class TestConfig:
             ("TEMPLATES_ITEM_CONTACT_ENDPOINT", "https://example.com", False),
             ("TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY", "x", False),
             ("TEMPLATES_ITEM_VERSIONS_ENDPOINT", "https://example.com", False),
+            ("SITE_UNTRUSTED_AWS_ACCESS_ID", "x", False),
+            ("SITE_UNTRUSTED_AWS_ACCESS_SECRET", "x", True),
+            ("SITE_UNTRUSTED_CLOUDFRONT_DIST_LIVE", "x", False),
             ("SITE_UNTRUSTED_S3_BUCKET_TESTING", "x", False),
             ("SITE_UNTRUSTED_S3_BUCKET_LIVE", "x", False),
-            ("SITE_UNTRUSTED_S3_ACCESS_ID", "x", False),
-            ("SITE_UNTRUSTED_S3_ACCESS_SECRET", "x", True),
             ("SITE_TRUSTED_RSYNC_HOST", "x", False),
             ("SITE_TRUSTED_RSYNC_BASE_PATH_TESTING", Path("x"), False),
             ("SITE_TRUSTED_RSYNC_BASE_PATH_LIVE", Path("x"), False),
@@ -344,7 +360,7 @@ class TestConfig:
 
         self._unset_envs(envs, envs_bck)
 
-    @pytest.mark.parametrize("property_name", ["STORE_GITLAB_TOKEN", "SITE_UNTRUSTED_S3_ACCESS_SECRET"])
+    @pytest.mark.parametrize("property_name", ["STORE_GITLAB_TOKEN", "SITE_UNTRUSTED_AWS_ACCESS_SECRET"])
     def test_redacted_property(self, mocker: MockerFixture, property_name: str):
         """Can only get redacted value where secret values have a value."""
         for has_value in [True, False]:

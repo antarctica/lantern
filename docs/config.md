@@ -35,16 +35,18 @@ All variables are prefixed with `LANTERN_` to avoid conflicts with other applica
 | `SITE_TRUSTED_RSYNC_BASE_PATH_LIVE`     | String       | Yes          | Yes      | No        | v0.6.x        | Path for trusted site content within upload server (live environment)    | *None*                                    | '/data/content/live'                            |
 | `SITE_TRUSTED_RSYNC_BASE_PATH_TESTING`  | String       | Yes          | Yes      | No        | v0.6.x        | Path for trusted site content within upload server (testing environment) | *None*                                    | '/data/content/testing'                         |
 | `SITE_TRUSTED_RSYNC_HOST`               | String       | Yes          | Yes      | No        | v0.6.x        | SSH config alias for trusted site uploads                                | *None*                                    | "lantern-trusted-content"                       |
-| `SITE_UNTRUSTED_S3_ACCESS_ID`           | String       | Yes          | Yes      | No        | v0.6.x        | AWS IAM user identifier for untrusted site uploads                       | *None*                                    | 'xxx'                                           |
-| `SITE_UNTRUSTED_S3_ACCESS_SECRET`       | String       | Yes          | Yes      | Yes       | v0.6.x        | AWS IAM user secret for untrusted site uploads                           | *None*                                    | 'xxx'                                           |
-| `SITE_UNTRUSTED_S3_ACCESS_SECRET_SAFE`  | String       | Yes          | Yes      | Yes       | v0.6.x        | Redacted version of `SITE_UNTRUSTED_S3_ACCESS_SECRET`                    | *N/A*                                     | 'REDACTED'                                      |
-| `SITE_UNTRUSTED_S3_BUCKET_LIVE`         | String       | Yes          | Yes      | No        | v0.6.x        | AWS S3 bucket used for untrusted site uploads (live environment)         | *None*                                    | 'example.com'                                   |
-| `SITE_UNTRUSTED_S3_BUCKET_TESTING`      | String       | Yes          | Yes      | No        | v0.6.x        | AWS S3 bucket used for untrusted site uploads (testing environment)      | *None*                                    | 'testing.example.com'                           |
+| `SITE_UNTRUSTED_AWS_ACCESS_ID`          | String       | Yes          | Yes      | No        | v0.15.x       | AWS IAM user identifier for untrusted site                               | *None*                                    | 'xxx'                                           |
+| `SITE_UNTRUSTED_AWS_ACCESS_SECRET`      | String       | Yes          | Yes      | Yes       | v0.15.x       | AWS IAM user secret for untrusted site                                   | *None*                                    | 'xxx'                                           |
+| `SITE_UNTRUSTED_AWS_ACCESS_SECRET_SAFE` | String       | No           | -        | No        | v0.15.x       | Redacted version of `SITE_UNTRUSTED_S3_ACCESS_SECRET`                    | *N/A*                                     | 'REDACTED'                                      |
+| `SITE_UNTRUSTED_AWS_REGION`             | String       | No           | -        | No        | v0.15.x       | AWS region for untrusted site S3 buckets                                 | *None*                                    | 'eu-west-1'                                     |
+| `SITE_UNTRUSTED_CLOUDFRONT_DIST_LIVE`   | String       | Yes          | Yes      | No        | v0.15.x       | AWS CloudFront distribution ID for untrusted site (live environment)     | *None*                                    | 'AEBCDEF1234567'                                |
+| `SITE_UNTRUSTED_S3_BUCKET_LIVE`         | String       | Yes          | Yes      | No        | v0.6.x        | AWS S3 bucket used for untrusted site (live environment)                 | *None*                                    | 'example.com'                                   |
+| `SITE_UNTRUSTED_S3_BUCKET_TESTING`      | String       | Yes          | Yes      | No        | v0.6.x        | AWS S3 bucket used for untrusted site (testing environment)              | *None*                                    | 'testing.example.com'                           |
 | `STORE_GITLAB_CACHE_PATH`               | Path         | Yes          | Yes      | No        | v0.1.x        | Location for GitLab store's local records cache                          | *None*                                    | '/tmp/gitlab_cache/'                            |
 | `STORE_GITLAB_DEFAULT_BRANCH`           | String       | Yes          | Yes      | No        | v0.6.x        | GitLab store's default remote branch name                                | *None*                                    | 'main'                                          |
 | `STORE_GITLAB_ENDPOINT`                 | String       | Yes          | Yes      | No        | v0.1.x        | Base API endpoint for GitLab store's remote instance                     | *None*                                    | 'https://gitlab.com'                            |
 | `STORE_GITLAB_PROJECT_ID`               | String       | Yes          | Yes      | No        | v0.1.x        | GitLab project ID for GitLab store's remote instance                     | *None*                                    | '123'                                           |
-| `STORE_GITLAB_TOKEN`                    | String       | Yes          | Yes      | Yes       | v0.1.x        | API access token for GitLab store's remote instance                      | *None*                                    | 'REDACTED'                                      |
+| `STORE_GITLAB_TOKEN`                    | String       | Yes          | Yes      | Yes       | v0.1.x        | API access token for GitLab store's remote instance                      | *None*                                    | 'glpat-xxx'                                     |
 | `STORE_GITLAB_TOKEN_SAFE`               | String       | No           | -        | No        | v0.1.x        | Redacted version of `STORE_GITLAB_TOKEN`                                 | *N/A*                                     | 'REDACTED'                                      |
 | `TEMPLATES_CACHE_BUST_VALUE`            | String       | No           | -        | No        | v0.1.x        | Query string value appended to site assets to avoid stale browser caches | *N/A*                                     | '0.3.0'                                         |
 | `TEMPLATES_ITEM_CONTACT_ENDPOINT`       | String       | Yes          | Yes      | No        | v0.1.x        | Microsoft Power Automate trigger endpoint for item contact form          | *N/A*                                     | 'https://example.com'                           |
@@ -92,7 +94,7 @@ See the [Stores](/docs/stores.md#stores-configuration) docs for more information
 - `STORE_GITLAB_TOKEN`
 - `STORE_GITLAB_TOKEN_SAFE`
 
-### Exporter config options
+### Exporters config options
 
 See the [Exporters](/docs/exporters.md#exporters-configuration) docs for more information on how these
 [Config Options](#config-options) are used by exporters:
@@ -100,9 +102,11 @@ See the [Exporters](/docs/exporters.md#exporters-configuration) docs for more in
 - `SITE_TRUSTED_RSYNC_HOST`
 - `SITE_TRUSTED_RSYNC_BASE_PATH_LIVE`
 - `SITE_TRUSTED_RSYNC_BASE_PATH_TESTING`
-- `SITE_UNTRUSTED_S3_ACCESS_ID`
-- `SITE_UNTRUSTED_S3_ACCESS_SECRET`
-- `SITE_UNTRUSTED_S3_ACCESS_SECRET_SAFE`
+- `SITE_UNTRUSTED_AWS_ACCESS_ID`
+- `SITE_UNTRUSTED_AWS_ACCESS_SECRET`
+- `SITE_UNTRUSTED_AWS_ACCESS_SECRET_SAFE`
+- `SITE_UNTRUSTED_AWS_REGION`
+- `SITE_UNTRUSTED_CLOUDFRONT_DIST_LIVE`
 - `SITE_UNTRUSTED_S3_BUCKET_LIVE`
 - `SITE_UNTRUSTED_S3_BUCKET_TESTING`
 

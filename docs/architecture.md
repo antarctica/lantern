@@ -89,7 +89,8 @@ Repositories abstract managing [Records](/docs/models.md#records) in one or more
 
 Sites are static websites built from a set of Records and other content as the output of a [Catalogue](#catalogues).
 
-They generate content or checks for content, from [Outputs](#outputs) using a [Store](#stores) to access records.
+They generate content, checks and/or cache invalidation keys for content from [Outputs](#outputs) using a
+[Store](#stores) to access records.
 
 > [!TIP]
 > A static site is used over a dynamic site for its robustness and ease of hosting, such as via [AWS S3](#amazon-s3).
@@ -170,6 +171,10 @@ AWS S3 is used for:
 See the [S3 Exporter](/docs/exporters.md#s3-exporter) for details on *how* information is stored in S3.
 
 See the [Static Site](/docs/site.md) docs for more information on *what* is stored in S3.
+
+> [!NOTE]
+> AWS CloudFront sits in front of the S3 bucket which caches content by default. The BAS Catalogue automatically
+> invalidates cached content when updated.
 
 ## ArcGIS Online
 

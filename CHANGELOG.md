@@ -18,6 +18,25 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 <!-- pyml disable no-duplicate-heading,no-duplicate-header -->
 ## [Unreleased]
 
+### Changed [!BREAKING]
+
+* `SITE_UNTRUSTED_S3_ACCESS_ID` config option renamed to `SITE_UNTRUSTED_S3_ACCESS_ID`
+* `SITE_UNTRUSTED_S3_ACCESS_SECRET` config option renamed to `SITE_UNTRUSTED_AWS_ACCESS_SECRET`
+* `SITE_UNTRUSTED_S3_ACCESS_SECRET_SAFE` config option renamed to `SITE_UNTRUSTED_AWS_ACCESS_SECRET_SAFE`
+
+### Added
+
+* Hard-coded config option for AWS region (`SITE_UNTRUSTED_AWS_REGION`, EU West 1)
+* AWS CloudFront exporter for invalidating cached content in the live site
+
+### Fixed
+
+* Relaxing URL comparison in embedded maps e2e test
+
+### Changed
+
+* Refactoring live site cache invalidation to automatically apply to any generated output
+
 ## [0.14.0] - 2026-05-25
 
 ### Changed [!BREAKING]

@@ -1,26 +1,8 @@
 # Invalidate selected outputs in CloudFront cache for live site
 
-import logging
-import subprocess
 from argparse import ArgumentParser
-from pathlib import Path
-from uuid import uuid4
 
-import boto3
-from tasks._config import ExtraConfig
-from tasks._shared import confirm, init
-
-
-def get_cf_distribution_id(iac_cwd: Path, cf_id: str) -> str:
-    """Get CloudFront distribution ID from IaC state."""
-    proc = subprocess.run(  # noqa: S603
-        ["tofu", "output", "-raw", cf_id],  # noqa: S607
-        cwd=str(iac_cwd),
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    return proc.stdout.strip()
+from tasks._shared import init
 
 
 def _get_cli_args() -> list[str]:
@@ -44,54 +26,12 @@ def _get_cli_args() -> list[str]:
     return list(args.keys or [])
 
 
-def invalidate_keys(logger: logging.Logger, config: ExtraConfig, distribution_id: str, keys: list[str]) -> None:
-    """Create and execute CloudFront invalidation for selected keys."""
-    if not keys:
-        logger.info("No keys to invalidate.")
-        return
-    if len(keys) > 14:
-        logger.warning("CloudFront limits wildcard invalidations to 15, selection changed to global invalidation.")
-        keys = ["/*"]
-    logger.info("Keys to invalidate:")
-    for key in keys:
-        logger.info(f"'{key}'")
-    confirm(logger=logger, message="Continue?")
-
-    client = boto3.client(
-        "cloudfront",
-        aws_access_key_id=config.SITE_UNTRUSTED_S3_ACCESS_ID,
-        aws_secret_access_key=config.SITE_UNTRUSTED_S3_ACCESS_SECRET,
-    )
-
-    caller_ref = str(uuid4())
-    logger.info(f"Creating CloudFront invalidation for distribution {distribution_id}")
-    response = client.create_invalidation(
-        DistributionId=distribution_id,
-        InvalidationBatch={
-            "Paths": {
-                "Quantity": len(keys),
-                "Items": keys,
-            },
-            "CallerReference": caller_ref,
-        },
-    )
-    invalidation_id = response["Invalidation"]["Id"]
-    logger.info(f"Invalidation created: {invalidation_id}")
-
-    waiter = client.get_waiter("invalidation_completed")
-    logger.info("Waiting for invalidation to complete ...")
-    waiter.wait(DistributionId=distribution_id, Id=invalidation_id, WaiterConfig={"Delay": 10, "MaxAttempts": 60})
-    logger.info("Invalidation completed.")
-
-
 def main() -> None:
     """Entrypoint."""
-    logger, config, _catalogue = init()
+    _logger, _config, catalogue = init()
 
     keys = _get_cli_args()
-
-    cf_id = get_cf_distribution_id(iac_cwd=Path("./resources/infra"), cf_id="site_cf_id")
-    invalidate_keys(logger=logger, config=config, distribution_id=cf_id, keys=keys)
+    catalogue._envs["live"]._untrusted._invalidator.invalidate(keys)  # ty:ignore[unresolved-attribute]
 
 
 if __name__ == "__main__":

@@ -76,8 +76,10 @@ class Config:
         TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY: str
         SITE_UNTRUSTED_S3_BUCKET_TESTING: str
         SITE_UNTRUSTED_S3_BUCKET_LIVE: str
-        SITE_UNTRUSTED_S3_ACCESS_ID: str
-        SITE_UNTRUSTED_S3_ACCESS_SECRET: str
+        SITE_UNTRUSTED_CLOUDFRONT_DIST_LIVE: str
+        SITE_UNTRUSTED_AWS_REGION: str
+        SITE_UNTRUSTED_AWS_ACCESS_ID: str
+        SITE_UNTRUSTED_AWS_ACCESS_SECRET: str
         SITE_TRUSTED_RSYNC_HOST: str
         SITE_TRUSTED_RSYNC_BASE_PATH_TESTING: str
         SITE_TRUSTED_RSYNC_BASE_PATH_LIVE: str
@@ -110,8 +112,10 @@ class Config:
             "TEMPLATES_ITEM_VERSIONS_ENDPOINT": self.TEMPLATES_ITEM_VERSIONS_ENDPOINT,
             "SITE_UNTRUSTED_S3_BUCKET_TESTING": self.SITE_UNTRUSTED_S3_BUCKET_TESTING,
             "SITE_UNTRUSTED_S3_BUCKET_LIVE": self.SITE_UNTRUSTED_S3_BUCKET_LIVE,
-            "SITE_UNTRUSTED_S3_ACCESS_ID": self.SITE_UNTRUSTED_S3_ACCESS_ID,
-            "SITE_UNTRUSTED_S3_ACCESS_SECRET": self.SITE_UNTRUSTED_S3_ACCESS_SECRET_SAFE,
+            "SITE_UNTRUSTED_CLOUDFRONT_DIST_LIVE": self.SITE_UNTRUSTED_CLOUDFRONT_DIST_LIVE,
+            "SITE_UNTRUSTED_AWS_REGION": self.SITE_UNTRUSTED_AWS_REGION,
+            "SITE_UNTRUSTED_AWS_ACCESS_ID": self.SITE_UNTRUSTED_AWS_ACCESS_ID,
+            "SITE_UNTRUSTED_AWS_ACCESS_SECRET": self.SITE_UNTRUSTED_AWS_ACCESS_SECRET_SAFE,
             "SITE_TRUSTED_RSYNC_HOST": self.SITE_TRUSTED_RSYNC_HOST,
             "SITE_TRUSTED_RSYNC_BASE_PATH_TESTING": str(self.SITE_TRUSTED_RSYNC_BASE_PATH_TESTING),
             "SITE_TRUSTED_RSYNC_BASE_PATH_LIVE": str(self.SITE_TRUSTED_RSYNC_BASE_PATH_LIVE),
@@ -313,21 +317,36 @@ class Config:
             return self._env.str("BUCKET_LIVE")
 
     @property
-    def SITE_UNTRUSTED_S3_ACCESS_ID(self) -> str:
-        """ID for AWS IAM access key used to manage content in SITE_UNTRUSTED_S3_BUCKET."""
-        with self._env.prefixed(self._app_prefix), self._env.prefixed("SITE_UNTRUSTED_S3_"):
+    def SITE_UNTRUSTED_CLOUDFRONT_DIST_LIVE(self) -> str:
+        """AWS CloudFront distribution for untrusted site content (live environment)."""
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("SITE_UNTRUSTED_CLOUDFRONT_"):
+            return self._env.str("DIST_LIVE")
+
+    @property
+    def SITE_UNTRUSTED_AWS_REGION(self) -> str:
+        """
+        AWS region.
+
+        S3 and CloudFront resources are global but the AWS API still requires a region.
+        """
+        return "eu-west-1"
+
+    @property
+    def SITE_UNTRUSTED_AWS_ACCESS_ID(self) -> str:
+        """ID for AWS IAM access key used to manage content in untrusted S3 & CloudFront site."""
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("SITE_UNTRUSTED_AWS_"):
             return self._env.str("ACCESS_ID")
 
     @property
-    def SITE_UNTRUSTED_S3_ACCESS_SECRET(self) -> str:
-        """Secret for AWS IAM access key used to manage content in SITE_UNTRUSTED_S3_BUCKET."""
-        with self._env.prefixed(self._app_prefix), self._env.prefixed("SITE_UNTRUSTED_S3_"):
+    def SITE_UNTRUSTED_AWS_ACCESS_SECRET(self) -> str:
+        """Secret for AWS IAM access key used to manage content in untrusted S3 & CloudFront site."""
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("SITE_UNTRUSTED_AWS_"):
             return self._env.str("ACCESS_SECRET")
 
     @property
-    def SITE_UNTRUSTED_S3_ACCESS_SECRET_SAFE(self) -> str:
+    def SITE_UNTRUSTED_AWS_ACCESS_SECRET_SAFE(self) -> str:
         """SITE_UNTRUSTED_S3_ACCESS_SECRET with value redacted."""
-        return self._safe_value if self.SITE_UNTRUSTED_S3_ACCESS_SECRET else ""
+        return self._safe_value if self.SITE_UNTRUSTED_AWS_ACCESS_SECRET else ""
 
     @property
     def SITE_TRUSTED_RSYNC_HOST(self) -> str:

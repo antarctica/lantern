@@ -68,6 +68,17 @@ class OutputBase(ABC):
             for c in self.content
         ]
 
+    @property
+    def invalidation_keys(self) -> list[str]:
+        """
+        Keys to invalidate for content produced by output content.
+
+        For use with CloudFront distributions supporting invalidations, including optional wildcards.
+
+        Derived from content by default.
+        """
+        return [f"/{c.path}" for c in self.content]
+
 
 class OutputSite(OutputBase, ABC):
     """Outputs relating to the overall static site."""

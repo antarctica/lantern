@@ -44,3 +44,15 @@ class TestSitePagesOutput:
         checks = output.checks
         assert len(checks) == len(content) + 1
         assert checks[-1].http_status == HTTPStatus.NOT_FOUND
+
+    def test_invalidation_keys(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta):
+        """Can generate invalidation paths for content."""
+        output = SitePagesOutput(logger=fx_logger, meta=fx_export_meta)
+        assert output.invalidation_keys == [
+            "/legal/accessibility/index.html",
+            "/legal/cookies/index.html",
+            "/legal/copyright/index.html",
+            "/legal/privacy/index.html",
+            "/guides/formatting/index.html",
+            "/guides/map-purchasing/index.html",
+        ]

@@ -9,13 +9,10 @@ from textwrap import dedent
 
 import inquirer
 from pathvalidate import sanitize_filepath
-from tasks._config import ExtraConfig
 from tasks._shared import confirm, init, ping_host, time_task
-from tasks.records_invalidate import get_record_invalidation_keys
 from tasks.records_workflow_testing import OutputCommentItem
 from tasks.records_workflow_testing import _export as export
 from tasks.records_workflow_testing import _verify as verify
-from tasks.site_invalidate import get_cf_distribution_id, invalidate_keys
 
 from lantern.catalogues.bas import BasCatalogue
 from lantern.config import Config
@@ -143,17 +140,13 @@ def _merge_request(logger: logging.Logger, cat: BasCatalogue, merge_url: str) ->
 
 
 @time_task(label="Export")
-def _export(
-    logger: logging.Logger, config: ExtraConfig, cat: BasCatalogue, env: SiteEnvironment, identifiers: set[str]
-) -> None:
+def _export(cat: BasCatalogue, env: SiteEnvironment, identifiers: set[str]) -> None:
     """
     Export items for committed records.
 
-    Records are invalidated in case they have been previously published and currently cached.
+    Records are automatically invalidated in case they have been previously published and cached.
     """
-    cf_id = get_cf_distribution_id(iac_cwd=Path("./resources/infra"), cf_id="site_cf_id")
     export(cat=cat, env=env, branch=cat.repo.gitlab_default_branch, identifiers=identifiers)
-    invalidate_keys(logger=logger, config=config, distribution_id=cf_id, keys=get_record_invalidation_keys(identifiers))
 
 
 @time_task(label="Verify")
@@ -234,7 +227,7 @@ def main() -> None:
     identifiers = _merge_request(logger=logger, cat=catalogue, merge_url=merge_url)
 
     # build and verify records
-    _export(logger=logger, config=config, cat=catalogue, env=env, identifiers=identifiers)
+    _export(cat=catalogue, env=env, identifiers=identifiers)
     checks_path = _verify(cat=catalogue, env=env, identifiers=identifiers, checks_base_path=checks_base_path)
 
     # clean up changeset related files

@@ -21,7 +21,7 @@ from lantern.outputs.site_index import SiteIndexOutput
 from lantern.stores.base import StoreBase
 from lantern.stores.gitlab_cache import GitLabCachedStore
 
-SiteAction = Literal["content", "checks"]
+SiteAction = Literal["content", "checks", "invalidations"]
 
 _STORE_SINGLETON: StoreBase | None = None
 _ISO_HTML_XSLT_SINGLETON: etree.XSLT | None = None
@@ -58,7 +58,7 @@ def _run_job(
     meta: ExportMeta,
     store: StoreBase,
     job: "SiteJob",
-) -> list[SiteContent] | list[Check]:
+) -> list[SiteContent] | list[Check] | list[str]:
     """
     Generate content or checks from an Output.
 
@@ -88,6 +88,8 @@ def _run_job(
     logger.info(msg)
     if job.action == "checks":
         return output.checks
+    if job.action == "invalidations":
+        return output.invalidation_keys
     return output.content
 
 
@@ -140,7 +142,7 @@ class Site:
         identifiers: set[str] | None = None,
     ) -> list[SiteJob]:
         """
-        Create jobs for generating content and/or checks for Output classes and records.
+        Create jobs for generating content, checks and/or invalidation keys for Output classes and records.
 
         Output classes are 'global' or 'individual' depending on whether they operate on individual records.
 
@@ -155,19 +157,21 @@ class Site:
         ]
         return global_ + individual_
 
-    def execute(self, jobs: list[SiteJob]) -> list[SiteContent | Check]:
+    def execute(self, jobs: list[SiteJob]) -> list[SiteContent | Check | list[str]]:
         """
-        Execute a set of jobs in parallel to generate site content and/or checks.
+        Execute a set of jobs in parallel to generate site content, checks and/or invalidation keys.
 
-        Returns generated content and/or checks as a flattened list.
+        Returns generated content, checks and/or invalidation keys as a flattened list.
         """
         store = self._prep_store()
         start = time.monotonic()
         nested_outputs: list[list[SiteContent]] = Parallel(n_jobs=self._workers)(
             delayed(_run_job)(self._logger.level, self._meta, store, job) for job in jobs
         )
-        outputs = [content for output_content in nested_outputs for content in output_content]
-        self._logger.info(f"Generated {len(outputs)} site content/checks in {round(time.monotonic() - start)} seconds")
+        outputs = [output for output_outputs in nested_outputs for output in output_outputs]
+        self._logger.info(
+            f"Generated {len(outputs)} site content/checks/keys in {round(time.monotonic() - start)} seconds"
+        )
         return outputs
 
     def generate_content(
@@ -191,7 +195,7 @@ class Site:
         individual_outputs: list[type[OutputBase]],
         identifiers: set[str] | None = None,
     ) -> list[Check]:
-        """Generate site content."""
+        """Generate site checks."""
         jobs = self._generate_jobs(
             actions=["checks"],
             global_outputs=global_outputs,
@@ -199,3 +203,19 @@ class Site:
             identifiers=identifiers,
         )
         return cast(list[Check], self.execute(jobs))
+
+    def generate_invalidation_keys(
+        self,
+        global_outputs: list[type[OutputBase]],
+        individual_outputs: list[type[OutputBase]],
+        identifiers: set[str] | None = None,
+    ) -> list[str]:
+        """Generate site invalidation keys for content."""
+        jobs = self._generate_jobs(
+            actions=["invalidations"],
+            global_outputs=global_outputs,
+            individual_outputs=individual_outputs,
+            identifiers=identifiers,
+        )
+        keys = set(self.execute(jobs))
+        return cast(list[str], cast(object, list(keys)))

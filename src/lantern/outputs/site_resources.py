@@ -198,3 +198,8 @@ class SiteResourcesOutput(OutputSite):
             Check.from_site_content(content=c, check_type=CheckType.SITE_RESOURCES, base_url=self._meta.base_url)
             for c in subset
         ]
+
+    @property
+    def invalidation_keys(self) -> list[str]:
+        """Keys to invalidate."""
+        return [f"/{self._base_path}/*"]

@@ -127,6 +127,13 @@ class TestSite:
             ([], [], [], None, []),
             (["content"], [SiteResourcesOutput], [], None, [SiteJob(action="content", output=SiteResourcesOutput)]),
             (["checks"], [SiteResourcesOutput], [], None, [SiteJob(action="checks", output=SiteResourcesOutput)]),
+            (
+                ["invalidations"],
+                [SiteResourcesOutput],
+                [],
+                None,
+                [SiteJob(action="invalidations", output=SiteResourcesOutput)],
+            ),
             (["content"], [], [ItemCatalogueOutput], None, []),
             (
                 ["content"],
@@ -150,6 +157,20 @@ class TestSite:
                     SiteJob(action="checks", output=ItemCatalogueOutput, record=product_min_required),
                 ],
             ),
+            (
+                ["content", "checks", "invalidations"],
+                [SiteResourcesOutput],
+                [ItemCatalogueOutput],
+                {product_min_required.file_identifier},
+                [
+                    SiteJob(action="content", output=SiteResourcesOutput),
+                    SiteJob(action="checks", output=SiteResourcesOutput),
+                    SiteJob(action="invalidations", output=SiteResourcesOutput),
+                    SiteJob(action="content", output=ItemCatalogueOutput, record=product_min_required),
+                    SiteJob(action="checks", output=ItemCatalogueOutput, record=product_min_required),
+                    SiteJob(action="invalidations", output=ItemCatalogueOutput, record=product_min_required),
+                ],
+            ),
         ],
     )
     def test_generate_jobs(
@@ -171,9 +192,13 @@ class TestSite:
 
     @pytest.mark.cov()
     def test_execute(self, fx_site: Site):
-        """Can generate expected site content and/or checks for directly created processing jobs."""
+        """Can generate expected site content, checks and/or invalidation keys for directly created processing jobs."""
         results = fx_site.execute(
-            jobs=[SiteJob(action="content", output=SiteIndexOutput), SiteJob(action="checks", output=SiteIndexOutput)]
+            jobs=[
+                SiteJob(action="content", output=SiteIndexOutput),
+                SiteJob(action="checks", output=SiteIndexOutput),
+                SiteJob(action="invalidations", output=SiteIndexOutput),
+            ]
         )
         assert len(results) > 0
 
@@ -188,3 +213,9 @@ class TestSite:
         results = fx_site.generate_checks(global_outputs=[SiteIndexOutput], individual_outputs=[])
         assert len(results) > 0
         assert all(isinstance(result, Check) for result in results)
+
+    def test_generate_invalidation_keys(self, fx_site: Site):
+        """Can generate expected invalidation keys for selected outputs."""
+        results = fx_site.generate_invalidation_keys(global_outputs=[SiteIndexOutput], individual_outputs=[])
+        assert len(results) > 0
+        assert all(isinstance(result, str) for result in results)

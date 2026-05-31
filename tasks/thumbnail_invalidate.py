@@ -1,11 +1,15 @@
 # Invalidate thumbnails for selected records in CloudFront cache for BAS CDN
 
+import logging
 import subprocess
 from argparse import ArgumentParser
 from pathlib import Path
 
+import boto3
+from tasks._config import ExtraConfig
 from tasks._shared import init
-from tasks.site_invalidate import invalidate_keys
+
+from lantern.exporters.cloudfront import CloudFrontExporter
 
 
 def get_cf_distribution_id(iac_cwd: Path, cf_id: str) -> str:
@@ -42,6 +46,21 @@ def _get_cli_args() -> str:
     if item is None:
         parser.error("Item is required (positional or using --item)")
     return item
+
+
+def invalidate_keys(logger: logging.Logger, config: ExtraConfig, distribution_id: str, keys: list[str]) -> None:
+    """
+    Create and execute CloudFront invalidation for selected keys.
+
+    Using CDN (non-project specific) distribution.
+    """
+    client = boto3.client(
+        "cloudfront",
+        aws_access_key_id=config.SITE_UNTRUSTED_AWS_ACCESS_ID,
+        aws_secret_access_key=config.SITE_UNTRUSTED_AWS_ACCESS_SECRET,
+    )
+    exporter = CloudFrontExporter(logger=logger, cloudfront=client, distribution=distribution_id)
+    exporter.invalidate(keys)
 
 
 def main() -> None:

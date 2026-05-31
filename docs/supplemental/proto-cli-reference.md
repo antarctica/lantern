@@ -102,8 +102,7 @@ Calls and coordinates other tasks to:
 1. prompt for an existing changeset (merge request) to complete
    1. the workflow will check the merge request has been approved and is not a draft
 1. merge the changeset branch into main
-1. export all changeset records to the live site (via the [`build-records`](#build-records) command)
-1. invalidate changeset records in the live site (via the [`invalidate-records`](#invalidate-records) command)
+1. export and invalidate all changeset records to the live site (via the [`build-records`](#build-records) command)
 1. check changeset records in the live site (via the (via the [`check-records`](#check-records) command)
 1. optionally, post a comment listing the item and alias URLs for published records in the changeset issue
 1. save check results as a timestamped JSON file in `./workflow_results/live/`
@@ -332,27 +331,6 @@ Check static site and records contents.
 % task check-records --help
 ```
 
-### `invalidate-records`
-
-```shell
-% task invalidate-records --help
-```
-
-Creates a CloudFront invalidation in the static site for all keys under each resource identifier prefix.
-E.g. for a resource ID `123`, an invalidation is made for `/records/123/*`, `/items/123/*`, etc.
-
-<!-- pyml disable md028 -->
-> [!NOTE]
-> The CloudFront distribution ID is read from [Infrastructure as Code](/docs/infrastructure.md#infrastructure-as-code).
-
-> [!TIP]
-> See the [Invalidate Site Content](#site-invalidate) command to invalidate all records and/or other
-> content in the live site.
->
-> See the [Invalidate Item Thumbnails](#thumbnail-invalidate) command to also invalidate any thumbnails for an
-> item in the BAS CDN.
-<!-- pyml enable md028 -->
-
 ### `upgrade-records`
 
 Upgrade records.
@@ -403,16 +381,9 @@ Invalidate cached content in live site.
 
 Creates a CloudFront invalidation for specified S3 keys.
 
-<!-- pyml disable md028 -->
-> [!NOTE]
-> The CloudFront distribution ID is read from [Infrastructure as Code](/docs/infrastructure.md#infrastructure-as-code).
-
 > [!TIP]
 > See the [CloudFront](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/invalidation-specifying-objects.html)
 > documentation for more information about cache invalidation keys.
->
-> See the [`invalidate-records`](#invalidate-records) command to invalidate specific records.
-<!-- pyml enable md028 -->
 
 Examples:
 

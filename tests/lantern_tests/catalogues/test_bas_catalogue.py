@@ -1,6 +1,7 @@
 import logging
 from copy import deepcopy
 from pathlib import Path
+from typing import get_args
 from unittest.mock import PropertyMock
 
 import pytest
@@ -9,6 +10,7 @@ from pytest_mock import MockerFixture
 
 from lantern.catalogues.bas import BasCatalogue, BasCatEnv, BasCatTrusted, BasCatUntrusted
 from lantern.config import Config
+from lantern.exporters.cloudfront import CloudFrontExporter
 from lantern.lib.metadata_library.models.record.elements.identification import Aggregations
 from lantern.models.checks import CheckType
 from lantern.models.record.record import Record
@@ -24,6 +26,7 @@ pytestmark = pytest.mark.usefixtures("fx_reset_site_singletons")
 class TestBasCatUntrusted:
     """Test BAS data catalogue untrusted site."""
 
+    @pytest.mark.parametrize("invalidation", [False, True])
     def test_init(
         self,
         fx_logger: logging.Logger,
@@ -31,27 +34,55 @@ class TestBasCatUntrusted:
         fx_bas_repo: BasRepository,
         fx_s3_client: S3Client,
         fx_s3_bucket_name: str,
+        fx_cf_distribution_id: str,
+        invalidation: bool,
     ):
-        """Can create a BAS untrusted catalogue instance."""
+        """
+        Can create a BAS untrusted catalogue instance.
+
+        With or without cache invalidation for live site.
+        """
         cat = BasCatUntrusted(
             logger=fx_logger,
             config=fx_config,
             repo=fx_bas_repo,
             s3=fx_s3_client,
             bucket=fx_s3_bucket_name,
-            env="testing",
+            distribution=fx_cf_distribution_id if invalidation else None,
+            env="live",
         )
         assert isinstance(cat, BasCatUntrusted)
+        if invalidation:
+            assert isinstance(cat._invalidator, CloudFrontExporter)
+        else:
+            assert cat._invalidator is None
 
+    @pytest.mark.parametrize("identifiers", [None, ["x"]])
     def test_export(
         self,
+        mocker: MockerFixture,
         fx_bas_cat_untrusted: BasCatUntrusted,
         fx_s3_bucket_name: str,
+        fx_cf_distribution_id: str,
+        identifiers: list[str],
     ):
         """Can generate and export site content for untrusted catalogue."""
         expected_keys = {"legal/accessibility/index.html", "-/index/index.html", "items/x/index.html", "records/x.xml"}
+        expected_invalidation_keys = (
+            {"/legal/accessibility/index.html", "/-/index/index.html", "/items/x/index.html", "/records/x.xml"}
+            if identifiers
+            else {"/*"}
+        )
 
-        fx_bas_cat_untrusted.export()
+        fx_bas_cat_untrusted._invalidator = CloudFrontExporter(
+            logger=fx_bas_cat_untrusted._logger,
+            cloudfront=fx_bas_cat_untrusted._create_cf_client(),
+            distribution=fx_cf_distribution_id,
+        )
+        # mock fx_bas_cat_untrusted._invalidator.invalidate to capture invalidation keys it is called with
+        mocker.patch.object(fx_bas_cat_untrusted._invalidator, "invalidate", return_value=None)
+
+        fx_bas_cat_untrusted.export(identifiers=identifiers)
 
         result = fx_bas_cat_untrusted._exporter._s3.list_objects(Bucket=fx_s3_bucket_name)
         keys = {o["Key"] for o in result["Contents"]}
@@ -63,6 +94,9 @@ class TestBasCatUntrusted:
         assert item_object["ResponseMetadata"]["HTTPStatusCode"] == 200
         item_text = item_object["Body"].read().decode("utf-8")
         assert "tab-content-admin" not in item_text
+
+        invalidation_keys = set(fx_bas_cat_untrusted._invalidator.invalidate.call_args.args[0])
+        assert invalidation_keys.issuperset(expected_invalidation_keys)
 
     def test_check(self, fx_bas_cat_untrusted: BasCatUntrusted):
         """Can check untrusted site content."""
@@ -105,15 +139,16 @@ class TestBasCatTrusted:
 class TestBasCatEnv:
     """Test BAS data catalogue environment subclass."""
 
+    @pytest.mark.parametrize("env", list(get_args(SiteEnvironment)))
     def test_init(
-        self, fx_logger: logging.Logger, fx_config: Config, fx_bas_repo: BasRepository, fx_s3_client: S3Client
+        self, fx_logger: logging.Logger, fx_config: Config, fx_bas_repo: BasRepository, fx_s3_client: S3Client, env: str
     ):
         """
         Can create a BAS catalogue environment instance.
 
         Uses fake store over GitLab to avoid mocking and/or request recordings.
         """
-        cat = BasCatEnv(logger=fx_logger, config=fx_config, repo=fx_bas_repo, s3=fx_s3_client, env="testing")
+        cat = BasCatEnv(logger=fx_logger, config=fx_config, repo=fx_bas_repo, s3=fx_s3_client, env=env)
         assert isinstance(cat, BasCatEnv)
         assert isinstance(cat._untrusted, BasCatUntrusted)
         assert isinstance(cat._trusted, BasCatTrusted)

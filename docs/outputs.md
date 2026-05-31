@@ -26,6 +26,7 @@ public interface to:
 - define an output name
 - generate a list of [`SiteContent`](/docs/models.md#static-site-content) items
 - generate a corresponding list of [`Check`](/docs/monitoring.md#site-checks) items to verify for this content
+- generate a list of keys (paths) for invalidating content
 
 Outputs at the site level SHOULD inherit from the `lantern.outputs.base.OutputSite` abstract base, which includes a
 [Site Templates](/docs/site.md#templates) instance for rendering content.
@@ -68,6 +69,8 @@ Outputs:
 Jinja2 templates are used for including variables in JavaScript files.
 
 Checks are generated for a limited subset of these resources as indicative tests.
+
+A wildcard invalidation key is generated for all resources (which may invalidate non-updated resources).
 
 ## Site pages output
 

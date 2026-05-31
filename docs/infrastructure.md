@@ -16,16 +16,15 @@ Available environments:
 
 - development:
   - for prototyping and making changes (see [Development](/docs/dev.md) documentation)
-  - hosted locally with an optional [Local Stack](/docs/dev.md#local-development-stack) for external infrastructure
+  - hosts a local development site with optional [Local Stack](/docs/dev.md#local-development-stack) for external
+    infrastructure
 - staging:
-  - referred to as _testing_ publicly
-  - externally accessible
   - for infrastructure testing (i.e. HTTPS configuration, deployment workflows, etc.)
   - for experimentation and previewing content by authors and invited testers
+  - hosts a _testing_ site accessible externally
 - production:
-  - referred to as _live_ publicly
-  - externally accessible
   - for general use
+  - hosts a _live_ site accessible externally
 
 Development environments may be created and destroyed as needed. Staging and Production environments are long-lived.
 
@@ -81,6 +80,15 @@ Then run:
 % opentofu init
 % opentofu apply
 ```
+
+## Exporters components
+
+- [AWS](#amazon-web-services)
+- [Secure Hosting](#secure-hosting)
+
+## Stores components
+
+- [GitLab](#gitlab)
 
 ## Components
 
@@ -147,9 +155,9 @@ Then run:
   - for adding AGOL items to records as distribution options and syncing record metadata to AGOL items
   - managed manually as per [Setup](/docs/setup.md#arcgis-online) documentation
 
-### Exporters
+### Amazon Web Services
 
-- AWS S3 publishing buckets & CloudFront distributions:
+- S3 publishing buckets & CloudFront distributions:
   - [Staging 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=rnv7zb3jzviwsvziknpxicvqaq&h=magic.1password.eu):
     - [IAM user for workstation module 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=b3xyp2epz6qycjrbootkf3oaha&h=magic.1password.eu)
   - [Production 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=hksogwx7zqx3ct2jr36cshoqpy&h=magic.1password.eu):
@@ -160,10 +168,12 @@ Then run:
   - DNS records for CloudFront aliases are registered in the relevant AWS Route53 zone
   - TLS certificates for these aliases are managed via AWS Certificate Manager
   - managed via [Infrastructure as Code](#infrastructure-as-code)
-- Secure hosting:
-  - provided by the [BAS Operations Data Store 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/ops-data-store)
-  - which in turn uses the BAS LDAP directory for authentication and authorisation
-  - [All Environments 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=l2whnxwdbixs3xypq5ja6w6gr4&h=magic.1password.eu)
-    - [SSH credentials for workstation module 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=ydfrpsnqbmifpic5y5mp2du4pa&h=magic.1password.eu)
-  - for [Exporters](/docs/exporters.md) to publish trusted content
-  - managed manually as per [Setup](/docs/setup.md#secure-website-hosting) documentation
+
+### Secure hosting
+
+- provided by the [BAS Operations Data Store 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/ops-data-store)
+- which in turn uses the BAS LDAP directory for authentication and authorisation
+- [All Environments 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=l2whnxwdbixs3xypq5ja6w6gr4&h=magic.1password.eu)
+  - [SSH credentials for workstation module 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=ydfrpsnqbmifpic5y5mp2du4pa&h=magic.1password.eu)
+- for [Exporters](/docs/exporters.md) to publish trusted content
+- managed manually as per [Setup](/docs/setup.md#secure-website-hosting) documentation

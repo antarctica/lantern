@@ -40,8 +40,6 @@ variables:
   # - PROJECT_ACCESS_TOKEN
   #   - https://gitlab.data.bas.ac.uk/MAGIC/lantern-exp/-/settings/access_tokens
   #   - (name: 'gitlab_ci' scope: 'read_api', role: 'reporter')
-  # - SAFETY_API_KEY
-  #   - https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=swbuhnii4ego6qycyqknvtk7gi&h=magic.1password.eu
   # - OP_SERVICE_ACCOUNT_TOKEN
   #   - https://magic.1password.eu/developer-tools/infrastructure-secrets/serviceaccount/4MR5NL7W45AA3GAFGRZMVN2H2I
 

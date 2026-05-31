@@ -82,7 +82,7 @@ See the [Monitoring](/docs/monitoring.md#monitoring-configuration) docs for more
 - `SENTRY_ENVIRONMENT`
 - `SENTRY_DSN`
 
-### GitLab Store config options
+### Stores config options
 
 See the [Stores](/docs/stores.md#stores-configuration) docs for more information on how these
 [Config Options](#config-options) are used by stores:

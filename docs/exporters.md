@@ -19,7 +19,7 @@ Exporters use these options from the app `lantern.Config` class:
 
 See the [Config](/docs/config.md#config-options) docs for how to set these config options.
 
-See the [Infrastructure](/docs/infrastructure.md#exporters) docs for credentials used by exporters.
+See the [Infrastructure](/docs/infrastructure.md#exporters-components) docs for credentials used by exporters.
 
 ## Exporter classes
 
@@ -93,7 +93,7 @@ Supports:
   [`x-amz-website-redirect-location`](https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingMetadata.html#redirect-object-metadata))
 
 > [!NOTE]
-> These are supported by AWS S3 but MAY NOT be supported by S3 compatible providers.
+> These features are supported by AWS S3 but MAY NOT be supported by S3 compatible providers.
 
 ## CloudFront exporter
 

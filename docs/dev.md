@@ -31,7 +31,7 @@ Setup:
 To run BAS Data Catalogue [Publishing Workflows](/docs/usage.md) locally:
 
 1. manually create a named AWS IAM user (`lantern-$USER` e.g. `lantern-conwat`) and add to the `lantern-local-dev`
-   group to manage content in [AWS S3 Content Buckets](/docs/infrastructure.md#exporters)
+   group to manage content in [AWS S3 Content Buckets](/docs/infrastructure.md#amazon-web-services)
 2. as a GitLab administrator impersonating the GitLab bot user, create a
    [Personal Access Token 🔒](https://gitlab.data.bas.ac.uk/-/profile/personal_access_tokens):
    - token name: `lantern-conwat`
@@ -234,7 +234,7 @@ upgrade report. Non-changes SHOULD be tracked via the logger at debug level for 
 > [!TIP]
 > Typically only the `RecordUpgrade` class will need updating.
 
-See [Usage](/docs/usage.md#upgrade-records) documentation for more information on running an upgrade.
+See [Usage](/docs/usage.md#upgrading-records) documentation for more information on running an upgrade.
 
 Previous upgrades for reference:
 

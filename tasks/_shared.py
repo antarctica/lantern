@@ -41,9 +41,9 @@ def init_s3(config: Config) -> S3Client:  # ty: ignore[invalid-type-form]
     """Initialise S3 client."""
     return S3Client(
         "s3",
-        aws_access_key_id=config.SITE_UNTRUSTED_S3_ACCESS_ID,
-        aws_secret_access_key=config.SITE_UNTRUSTED_S3_ACCESS_SECRET,
-        region_name="eu-west-1",
+        aws_access_key_id=config.SITE_UNTRUSTED_AWS_ACCESS_ID,
+        aws_secret_access_key=config.SITE_UNTRUSTED_AWS_ACCESS_SECRET,
+        region_name=config.SITE_UNTRUSTED_AWS_REGION,
     )
 
 

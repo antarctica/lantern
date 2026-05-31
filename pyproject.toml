@@ -62,8 +62,8 @@ test = [
     "pytest-xdist>=3.8.0",
 ]
 
-[tool.uv]
-exclude-newer-package = { bas-metadata-library = false }
+[tool.uv.exclude-newer-package]
+bas-metadata-library = false
 
 [[tool.uv.index]]
 name = "self"
@@ -75,6 +75,7 @@ explicit = true
 docs_targets = "docs/ README.md CHANGELOG.md"
 types_targets = "src/"
 targets = "src/ tasks/ tests/"
+test_base = "pytest -n auto"
 cov_options = "--cov --cov-report=html"
 local_stack_compose = "./resources/dev/docker-compose.yml"
 
@@ -86,13 +87,13 @@ lint = { cmd = "ruff check {targets}", help = "Lint app", use_vars = true }
 types = { cmd = "ty check {types_targets}", help = "Type check app", use_vars = true }
 markdown = { cmd = "pymarkdown scan --recurse {docs_targets}", help = "Lint docs", use_vars = true }
 pre-commit = { cmd = "pre-commit run --all-files", help = "Run pre-commit hooks on all files" }
-test = { cmd = "pytest", help = "Run tests" }
-test-cov = { cmd = "pytest {cov_options}", help = "Run tests with coverage", use_vars = true }
+test = { cmd = "{test_base}", help = "Run tests" }
+test-cov = { cmd = "{test_base} {cov_options}", help = "Run tests with coverage", use_vars = true }
 test-reset = { cmd = "pytest --cache-clear", help = "Reset pytest cache and run tests" }
 vulnerabilities = { cmd = "uv audit --frozen", help = "Check for insecure dependencies" }
 outdated = { cmd = "uv tree --all-groups --outdated --depth=1", help = "List outdated directed dependencies" }
 # CI
-ci-test = { cmd = "pytest {cov_options} -o junit_family=xunit2 --junitxml=test-results.xml --continue-on-collection-errors", help = "Called by CI", use_vars = true }
+ci-test = { cmd = "{test_base} {cov_options} -o junit_family=xunit2 --junitxml=test-results.xml --continue-on-collection-errors", help = "Called by CI", use_vars = true }
 # local stack
 stack-start = { cmd = "docker-compose -f {local_stack_compose} up -d", help = "Start local dev stack", use_vars = true }
 stack-stop = { cmd = "docker-compose -f {local_stack_compose} down", help = "Stop local dev stack", use_vars = true }
@@ -252,8 +253,8 @@ X_ADMIN_METADATA_SIGNING_KEY_PRIVATE = "{\"kty\":\"EC\",\"kid\":\"bas_metadata_t
 # --random-order   | run tests in random order
 # -x               | stop after first failure [Overriden in CI]
 # --ff             | run failed tests first
-# -n auto          | run tests in parallel using all available CPUs
-addopts = "--strict-markers --random-order -x --ff -n auto"
+# -n 0             | do not run tests in parallel [overridden when running all tests]
+addopts = "--strict-markers --random-order -x --ff -n 0"
 markers = [
     "cov: coverage checks (deselect with '-m \"not cov\"')",
 ]

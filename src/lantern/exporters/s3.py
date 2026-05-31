@@ -3,9 +3,9 @@ import threading
 import time
 from collections.abc import Collection
 
-from boto3 import client as S3Client  # noqa: N812
+from boto3 import client as BotoClient  # noqa: N812
 from joblib import Parallel, delayed
-from mypy_boto3_s3 import S3Client as S3ClientT
+from mypy_boto3_s3 import S3Client as S3Client
 
 from lantern.exporters.base import ExporterBase
 from lantern.models.site import SiteContent
@@ -18,7 +18,7 @@ class S3Exporter(ExporterBase):
     For use with S3 compatible object stores.
     """
 
-    def __init__(self, logger: logging.Logger, s3: S3ClientT, bucket: str, parallel_jobs: int) -> None:
+    def __init__(self, logger: logging.Logger, s3: S3Client, bucket: str, parallel_jobs: int) -> None:
         super().__init__(logger=logger, name="S3")
         self._s3 = s3
         self._bucket = bucket
@@ -26,13 +26,13 @@ class S3Exporter(ExporterBase):
         self._thread_local = threading.local()
         self._workers = parallel_jobs
 
-    def _get_client(self) -> S3ClientT:
+    def _get_client(self) -> S3Client:
         """Create per-thread S3 client."""
         if not hasattr(self._thread_local, "s3"):
             # Hack to copy access key from existing client
             _key = self._s3._request_signer._credentials.get_frozen_credentials()  # ty:ignore[unresolved-attribute]
 
-            self._thread_local.s3 = S3Client(
+            self._thread_local.s3 = BotoClient(
                 "s3",
                 aws_access_key_id=_key.access_key,
                 aws_secret_access_key=_key.secret_key,
@@ -43,7 +43,7 @@ class S3Exporter(ExporterBase):
 
     def _upload_object(
         self,
-        s3: S3ClientT,
+        s3: S3Client,
         key: str,
         content_type: str,
         body: str | bytes,

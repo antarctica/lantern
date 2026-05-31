@@ -22,7 +22,7 @@ Stores use these options from the app `lantern.Config` class:
 
 See the [Config](/docs/config.md#config-options) docs for how to set these config options.
 
-See the [Infrastructure](/docs/infrastructure.md#exporters) docs for credentials used by stores.
+See the [Infrastructure](/docs/infrastructure.md#stores-components) docs for credentials used by stores.
 
 ## Store classes
 

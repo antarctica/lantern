@@ -28,34 +28,34 @@ public interface to:
 - generate a corresponding list of [`Check`](/docs/monitoring.md#site-checks) items to verify for this content
 - generate a list of keys (paths) for invalidating content
 
-Outputs at the site level SHOULD inherit from the `lantern.outputs.base.OutputSite` abstract base, which includes a
-[Site Templates](/docs/site.md#templates) instance for rendering content.
+Outputs at the site level SHOULD:
 
-These outputs *SHOULD* also include [Content Metadata](/docs/models.md#static-site-content-metadata) for the site
-[Cache Busting](/docs/site.md#cache-busting) value in their content items.
+- inherit from the `lantern.outputs.base.OutputSite` abstract base, which includes:
+  - a [Site Templates](/docs/site.md#templates) instance for rendering content
+- outputs *SHOULD* set [Content Metadata](/docs/models.md#static-site-content-metadata) to include:
+  - site [Cache Busting](/docs/site.md#cache-busting) in their content
 
-Outputs processing single [Records](/docs/models.md#records) SHOULD inherit from the
-`lantern.outputs.base.OutputRecord` abstract base which includes:
+Outputs processing single [Records](/docs/models.md#records) SHOULD:
 
-- a [Store](/docs/architecture.md#stores) single record access callable
-- a `strip_admin` property to control whether
-  [Administration Metadata](/docs/models.md#item-administrative-metadata) should be included as part of
-  [Trusted Publishing](/docs/architecture.md#trusted-publishing).
+- inherit from the `lantern.outputs.base.OutputRecord` abstract base, which includes:
+  - a single record [Store](/docs/architecture.md#stores) selection callable
+  - a `strip_admin` property to control whether
+    [Administration Metadata](/docs/models.md#item-administrative-metadata) should be included as part of
+    [Trusted Publishing](/docs/architecture.md#trusted-publishing)
+- outputs *SHOULD* set [Content Metadata](/docs/models.md#static-site-content-metadata) to include:
+  - the [Record](/docs/models.md#records) file and revision identifier in their content items
 
-These outputs *SHOULD* include [Content Metadata](/docs/models.md#static-site-content-metadata) for the
-[Record](/docs/models.md#records) file and revision identifier in their content items.
+Outputs processing multiple Records SHOULD:
 
-Outputs processing multiple Records SHOULD inherit from the `lantern.outputs.base.OutputRecords` abstract base which
-includes a [Store](/docs/architecture.md#stores) multi record access callable.
-
-These outputs *SHOULD* include [Content Metadata](/docs/models.md#static-site-content-metadata) for a value
-representing the state/version of the [Store](/docs/architecture.md#stores) in their content items (e.g. the head
-revision for a Git based store).
+- inherit from the `lantern.outputs.base.OutputRecords` abstract base which includes:
+  - a multi-record [Store](/docs/architecture.md#stores) selection callable
+- outputs *SHOULD* set [Content Metadata](/docs/models.md#static-site-content-metadata) to include:
+  - the state/version of the [Store](/docs/architecture.md#stores) in their content items (e.g. the head revision)
 
 > [!NOTE]
 > The `OutputRecords` base class does not include an equivalent `strip_admin` property because these classes are only
 > expected to use limited properties from Records (e.g. titles and summaries to build an index). Outputs that use whole
-> records SHOUL implement a similar control.
+> records SHOULD implement a similar control.
 
 ## Site resources output
 

@@ -46,6 +46,26 @@ See [Development](/docs/dev.md) documentation.
 - [all releases 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/lantern-exp/-/releases)
 - [create release 🛡](https://gitlab.data.bas.ac.uk/MAGIC/lantern-exp/-/issues/new?issue[title]=x.x.x%20release&issuable_template=release)
 
+## Related projects
+
+Key related projects:
+
+![Related Projects](/docs/img/related-projects.png)
+
+- [Zap ⚡ (🛡️)](https://gitlab.data.bas.ac.uk/felnne/zap) - an experimental editor for MAGIC to create metadata records
+- [BAS AWS 🛡](https://gitlab.data.bas.ac.uk/WSF/bas-aws) - BAS Amazon Web Services management and base infrastructure
+- [MAGIC Products Distribution 🛡](https://gitlab.data.bas.ac.uk/MAGIC/products-distribution) - data access system for
+  MAGIC managed products based on SharePoint
+- [BAS Metadata Standards 🛡](https://gitlab.data.bas.ac.uk/uk-pdc/metadata-infrastructure/metadata-standards) -
+  metadata standards policy and coordination within BAS
+- [BAS Metadata Library 🛡](https://gitlab.data.bas.ac.uk/uk-pdc/metadata-infrastructure/metadata-library) - Python
+  library to encode and decode metadata records
+- [BAS Esri 🛡](https://gitlab.data.bas.ac.uk/MAGIC/esri) - BAS Esri ArcGIS management and coordination
+- [BAS Embedded Maps 🛡](https://gitlab.data.bas.ac.uk/MAGIC/embedded-maps) - tool for easily include interactive maps
+  with MAGIC recommended basemaps in websites
+- [MAGIC Data Management 🛡](https://gitlab.data.bas.ac.uk/MAGIC/data-management) - data management coordination and
+  task tracking within MAGIC
+
 ## Project maintainer
 
 Mapping and Geographic Information Centre ([MAGIC](https://www.bas.ac.uk/teams/magic)), British Antarctic Survey

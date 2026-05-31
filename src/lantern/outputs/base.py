@@ -62,7 +62,11 @@ class OutputBase(ABC):
 
     @property
     def checks(self) -> list[Check]:
-        """Output checks."""
+        """
+        Output checks.
+
+        Derived from content by default.
+        """
         return [
             Check.from_site_content(content=c, check_type=self._check_type, base_url=self._meta.base_url)
             for c in self.content

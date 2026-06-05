@@ -91,7 +91,7 @@ lint = { cmd = "ruff check {targets}", help = "Lint app", use_vars = true }
 types = { cmd = "ty check {types_targets}", help = "Type check app", use_vars = true }
 markdown = { cmd = "pymarkdown scan --recurse {docs_targets}", help = "Lint docs", use_vars = true }
 pre-commit = { cmd = "pre-commit run --all-files", help = "Run pre-commit hooks on all files" }
-test = { cmd = "{test_base}", help = "Run tests" }
+test = { cmd = "{test_base}", help = "Run tests", use_vars = true }
 test-cov = { cmd = "{test_base} {cov_options}", help = "Run tests with coverage", use_vars = true }
 test-reset = { cmd = "pytest --cache-clear", help = "Reset pytest cache and run tests" }
 vulnerabilities = { cmd = "uv audit --frozen", help = "Check for insecure dependencies" }

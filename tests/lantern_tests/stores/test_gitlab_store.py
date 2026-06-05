@@ -212,7 +212,7 @@ class TestGitLabStore:
 
     @pytest.mark.parametrize("selected", ["a1b2c3", "invalid"])
     def test_select_one(self, mocker: MockerFixture, fx_gitlab_store: GitLabStore, selected: str):
-        """Can get a record that exists."""
+        """Can get a record if it exists."""
         mocker.patch.object(fx_gitlab_store, "_fetch_record_head_commit", side_effect=self._fetch_record_head_commit)
 
         if selected == "invalid":
@@ -337,11 +337,11 @@ class TestGitLabStore:
         expected: CommitResults,
     ):
         """
-        Can create, update or delete Records in the remote repository.
+        Can create or update Records in the remote repository.
 
         High level public method.
 
-        No-op case for submitted records that don't trigger any changes to remote repo.
+        No-op where submitted records don't trigger changes to remote repo.
         """
         mocker.patch.object(fx_gitlab_store, "_commit", return_value=expected)
         records = [] if mode == "none" else [fx_record_model_min]

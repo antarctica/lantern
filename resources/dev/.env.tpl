@@ -13,6 +13,9 @@ LANTERN_STORE_GITLAB_TOKEN=""  # populate with personal access token for GitLab 
 LANTERN_STORE_GITLAB_DEFAULT_BRANCH="main"
 LANTERN_STORE_GITLAB_CACHE_PATH=".cache"
 
+LANTERN_STORE_ALGOLIA_APP_ID="op://Infrastructure/hqm2s5h7zjuxljy7owrkzefyke/Application ID/password"
+LANTERN_STORE_ALGOLIA_WRITE_API_KEY="op://Infrastructure/hqm2s5h7zjuxljy7owrkzefyke/Backend API Key/password"
+
 LANTERN_TEMPLATES_PLAUSIBLE_ID="op://Infrastructure/SCAR ADD Metadata Toolbox - Plausible site/password"
 LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT="op://Infrastructure/SCAR ADD Metadata Toolbox - Power Automate item enquires/password"
 LANTERN_TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY="op://Infrastructure/SCAR ADD Metadata Toolbox - Cloudflare Turnstile Captcha/username"

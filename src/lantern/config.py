@@ -68,6 +68,8 @@ class Config:
         STORE_GITLAB_PROJECT_ID: str
         STORE_GITLAB_DEFAULT_BRANCH: str
         STORE_GITLAB_CACHE_PATH: str
+        STORE_ALGOLIA_APP_ID: str
+        STORE_ALGOLIA_WRITE_API_KEY: str
         TEMPLATES_CACHE_BUST_VALUE: str
         TEMPLATES_PLAUSIBLE_ID: str
         TEMPLATES_ITEM_MAPS_ENDPOINT: str
@@ -104,6 +106,8 @@ class Config:
             "STORE_GITLAB_PROJECT_ID": self.STORE_GITLAB_PROJECT_ID,
             "STORE_GITLAB_DEFAULT_BRANCH": self.STORE_GITLAB_DEFAULT_BRANCH,
             "STORE_GITLAB_CACHE_PATH": str(self.STORE_GITLAB_CACHE_PATH.resolve()),
+            "STORE_ALGOLIA_APP_ID": self.STORE_ALGOLIA_APP_ID,
+            "STORE_ALGOLIA_WRITE_API_KEY": self.STORE_ALGOLIA_WRITE_API_KEY_SAFE,
             "TEMPLATES_CACHE_BUST_VALUE": self.TEMPLATES_CACHE_BUST_VALUE,
             "TEMPLATES_PLAUSIBLE_ID": self.TEMPLATES_PLAUSIBLE_ID,
             "TEMPLATES_ITEM_MAPS_ENDPOINT": self.TEMPLATES_ITEM_MAPS_ENDPOINT,
@@ -261,6 +265,23 @@ class Config:
         """Path to local cache for GitLab store."""
         with self._env.prefixed(self._app_prefix), self._env.prefixed("STORE_GITLAB_"):
             return self._env.path("CACHE_PATH", validate=self._opt_path_validator).resolve()
+
+    @property
+    def STORE_ALGOLIA_APP_ID(self) -> str:
+        """Application ID for Algolia search store."""
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("STORE_ALGOLIA_"):
+            return self._env.str("APP_ID")
+
+    @property
+    def STORE_ALGOLIA_WRITE_API_KEY(self) -> str:
+        """API key for Algolia search store."""
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("STORE_ALGOLIA_"):
+            return self._env.str("WRITE_API_KEY")
+
+    @property
+    def STORE_ALGOLIA_WRITE_API_KEY_SAFE(self) -> str:
+        """STORE_ALGOLIA_WRITE_API_KEY with value redacted."""
+        return self._safe_value if self.STORE_ALGOLIA_WRITE_API_KEY else ""
 
     @property
     def TEMPLATES_CACHE_BUST_VALUE(self) -> str:

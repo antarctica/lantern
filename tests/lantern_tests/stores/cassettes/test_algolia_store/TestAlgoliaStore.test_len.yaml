@@ -1,0 +1,48 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      content-type:
+      - application/json
+      user-agent:
+      - Algolia for Python (4.40.1); Python (3.11.11); Search (4.40.1)
+      x-algolia-api-key:
+      - x
+      x-algolia-application-id:
+      - x
+    method: GET
+    uri: https://x-dsn.algolia.net/1/indexes
+  response:
+    body:
+      string: '{"items":[{"name":"x","createdAt":"2014-06-30T12:00:00.0Z","updatedAt":"2014-06-30T12:00:00.0Z","entries":1,"dataSize":1,"fileSize":1,"lastBuildTimeS":1,"numberOfPendingTasks":0,"pendingTask":false}],"nbPages":1}'
+    headers:
+      Accept-Encoding:
+      - deflate, gzip
+      Access-Control-Allow-Origin:
+      - '*'
+      Cache-Control:
+      - no-store
+      Connection:
+      - keep-alive
+      Content-Disposition:
+      - inline; filename=a.txt
+      Content-Length:
+      - '233'
+      Content-Type:
+      - application/json; charset=UTF-8
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Timing-Allow-Origin:
+      - '*'
+      X-Content-Type-Options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -73,7 +73,7 @@ class ItemCatalogue(ItemBase):
     def _validate_record(record: RecordRevision) -> None:
         """Validate record a revision and has admin metadata."""
         if not isinstance(record, RecordRevision):
-            msg = "record must be a RecordRevision"
+            msg = "Record must be a RecordRevision."
             raise TypeError(msg) from None
 
     @property

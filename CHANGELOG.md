@@ -29,6 +29,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Related projects README section
 * Hard-coded config option for AWS region (`SITE_UNTRUSTED_AWS_REGION`, EU West 1)
 * AWS CloudFront exporter for invalidating cached content in the live site
+* Initial Algolia search model and store
 
 ### Fixed
 

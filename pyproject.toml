@@ -9,6 +9,7 @@ authors = [
 ]
 requires-python = ">=3.11"
 dependencies = [
+    "algoliasearch>=4.40.1",
     "authlib>=1.7.1",
     "bas-metadata-library>=0.17.1",
     "beautifulsoup4>=4.13.4",
@@ -64,6 +65,9 @@ test = [
 
 [tool.uv.exclude-newer-package]
 bas-metadata-library = false
+
+[tool.uv.audit]
+ignore = ["GHSA-hg6j-4rv6-33pg", "GHSA-jg22-mg44-37j8"]  # aiohttp < 3.14 (triggered error in python-gitlab)
 
 [[tool.uv.index]]
 name = "self"
@@ -225,6 +229,8 @@ LANTERN_ENABLE_FEATURE_SENTRY = "false"
 LANTERN_SENTRY_ENVIRONMENT = "test"
 LANTERN_ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE = "{\"kty\":\"EC\",\"kid\":\"bas_metadata_testing_encryption_key\",\"alg\":\"ECDH-ES+A128KW\",\"crv\":\"P-256\",\"x\":\"kYiwq6MW8lGN6PB2csVMuMRcISVk5eNUpGkjM-mm8QY\",\"y\":\"raOTT2xAQhHFKhPHy338L8Ql0hvgsDtHwtEc8pCOf2Q\",\"d\":\"2lBuUtJK2TcV_b4B-bDCPnRVAqMnYvnLZ41IUguprs8\"}"
 LANTERN_ADMIN_METADATA_SIGNING_KEY_PUBLIC = "{\"kty\":\"EC\",\"kid\":\"bas_metadata_testing_signing_key\",\"alg\":\"ES256\",\"crv\":\"P-256\",\"x\":\"FzxBM1ZPO5W2bYlhT9AjZUKz5_oH5vIh4_k4aEZ64rM\",\"y\":\"vmK5PWOoIA9eO0ntLh37AMpVODyj0NWf842FwoN-GRs\"}"
+LANTERN_STORE_ALGOLIA_APP_ID="x"
+LANTERN_STORE_ALGOLIA_WRITE_API_KEY="x"
 LANTERN_STORE_GITLAB_ENDPOINT = "https://gitlab.example.com"
 LANTERN_STORE_GITLAB_TOKEN = "x"
 LANTERN_STORE_GITLAB_PROJECT_ID = "1234"

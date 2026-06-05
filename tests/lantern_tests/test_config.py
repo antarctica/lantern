@@ -79,6 +79,8 @@ class TestConfig:
             "ADMIN_METADATA_KEYS_SIGNING_KEY_PUBLIC": fx_config.ADMIN_METADATA_KEYS.signing_public.to_json(
                 compact=True
             ),
+            "STORE_ALGOLIA_APP_ID": "x",
+            "STORE_ALGOLIA_WRITE_API_KEY": redacted_value,
             "STORE_GITLAB_ENDPOINT": "https://gitlab.example.com",
             "STORE_GITLAB_TOKEN": redacted_value,
             "STORE_GITLAB_PROJECT_ID": "1234",
@@ -125,6 +127,18 @@ class TestConfig:
                 {
                     "LANTERN_ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE": "x",
                     "LANTERN_ADMIN_METADATA_SIGNING_KEY_PUBLIC": None,
+                }
+            ),
+            (
+                {
+                    "LANTERN_STORE_ALGOLIA_APP_ID": None,
+                    "LANTERN_STORE_ALGOLIA_WRITE_API_KEY": "x",
+                }
+            ),
+            (
+                {
+                    "LANTERN_STORE_ALGOLIA_APP_ID": "x",
+                    "LANTERN_STORE_ALGOLIA_WRITE_API_KEY": None,
                 }
             ),
             (
@@ -323,6 +337,8 @@ class TestConfig:
         ("property_name", "expected", "sensitive"),
         [
             ("PARALLEL_JOBS", 2, False),
+            ("STORE_ALGOLIA_APP_ID", "x", False),
+            ("STORE_ALGOLIA_WRITE_API_KEY", "x", True),
             ("STORE_GITLAB_ENDPOINT", "https://example.com", False),
             ("STORE_GITLAB_TOKEN", "x", True),
             ("STORE_GITLAB_PROJECT_ID", "x", False),
@@ -360,7 +376,9 @@ class TestConfig:
 
         self._unset_envs(envs, envs_bck)
 
-    @pytest.mark.parametrize("property_name", ["STORE_GITLAB_TOKEN", "SITE_UNTRUSTED_AWS_ACCESS_SECRET"])
+    @pytest.mark.parametrize(
+        "property_name", ["STORE_ALGOLIA_WRITE_API_KEY", "STORE_GITLAB_TOKEN", "SITE_UNTRUSTED_AWS_ACCESS_SECRET"]
+    )
     def test_redacted_property(self, mocker: MockerFixture, property_name: str):
         """Can only get redacted value where secret values have a value."""
         for has_value in [True, False]:

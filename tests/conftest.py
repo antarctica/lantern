@@ -43,6 +43,7 @@ from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.record import Record as RecordBase
 from lantern.lib.metadata_library.models.record.utils.admin import set_admin
 from lantern.models.checks import Check, CheckType
+from lantern.models.item.algolia.item import ObjectRecord
 from lantern.models.item.arcgis.item import ItemArcGis
 from lantern.models.item.base.elements import Link
 from lantern.models.item.base.enums import AccessLevel
@@ -67,6 +68,7 @@ from lantern.outputs.site_pages import SitePagesOutput
 from lantern.outputs.site_resources import SiteResourcesOutput
 from lantern.repositories.bas import BasRepository
 from lantern.site import Site
+from lantern.stores.algolia import AlgoliaStore
 from lantern.stores.base import SelectRecordProtocol, SelectRecordsProtocol
 from lantern.stores.gitlab import GitLabSource, GitLabStore
 from lantern.stores.gitlab_cache import GitLabCachedStore, GitLabLocalCache
@@ -597,6 +599,21 @@ def fx_item_cat_admin_tab_min() -> AdminTab:
 
 
 @pytest.fixture()
+def fx_item_algolia_object_min() -> ObjectRecord:
+    """Minimal ItemAlgolia ObjectRecord typed-dict."""
+    obj: ObjectRecord = {
+        "objectID": "x",
+        "objectType": "DATASET",
+        "objectRevID": "x",
+        "objectRevDate": 1404086400,
+        "title": "x",
+        "summary": "x",
+        "_recordData": '["o", "x", "x", "2014-06-30"]',
+    }
+    return obj
+
+
+@pytest.fixture()
 def fx_lib_arcgis_item_properties() -> ArcGisItemProperties:
     """Minimal ArcGiS Item properties instance."""
     return ArcGisItemProperties(title="x", item_type=ArcGisItemType.FEATURE_SERVICE, metadata="x")
@@ -731,6 +748,12 @@ def fx_gitlab_cached_store_pop(
 
     fx_gitlab_cached_store._cache = fx_gitlab_cache_pop
     return fx_gitlab_cached_store
+
+
+@pytest.fixture()
+def fx_algolia_store(fx_logger: logging.Logger) -> AlgoliaStore:
+    """Algolia store."""
+    return AlgoliaStore(logger=fx_logger, app_id="x", api_key="x", index="x")
 
 
 @pytest.fixture()

@@ -1,6 +1,6 @@
 import pytest
 
-from lantern.models.item.base.utils import md_as_html, md_as_plain
+from lantern.models.item.base.utils import md_as_html, md_as_html_unwrapped, md_as_plain
 
 
 class TestMdAsHtml:
@@ -18,6 +18,17 @@ class TestMdAsHtml:
     def test_md_as_html(self, value: str, expected: str):
         """Can convert Markdown to HTML with extensions."""
         assert md_as_html(value) == expected
+
+    @pytest.mark.parametrize(
+        ("value", "expected"),
+        [
+            ("_x_", "<em>x</em>"),
+            ("> [!NOTE]\n> x", '<div class="admonition note">\n<p class="admonition-title">Note</p>\n<p>x</p>\n</div>'),
+        ],
+    )
+    def test_md_as_html_unwrapped(self, value: str, expected: str):
+        """Can convert Markdown to HTML without wrapping p tags."""
+        assert md_as_html_unwrapped(value) == expected
 
 
 class TestMdAsPlain:

@@ -13,7 +13,7 @@ from lantern.lib.metadata_library.models.record.elements.metadata import Metadat
 from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
 from lantern.models.item.base.elements import Contact, Contacts, Link
 from lantern.models.item.base.elements import Extent as ItemExtent
-from lantern.models.item.base.enums import AccessLevel, Licence, ResourceTypeLabel
+from lantern.models.item.base.enums import AccessLevel, Licence, ResourceTypeIcon, ResourceTypeLabel
 from lantern.models.item.catalogue.distributions import (
     ArcGisFeatureLayer,
     ArcGisOgcApiFeatures,
@@ -42,7 +42,7 @@ from lantern.models.item.catalogue.elements import (
     ItemCatalogueSummary,
     Maintenance,
 )
-from lantern.models.item.catalogue.enums import ItemSuperType, ResourceTypeIcon
+from lantern.models.item.catalogue.enums import ItemSuperType
 
 
 class Tab(ABC):

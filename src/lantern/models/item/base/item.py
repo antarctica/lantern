@@ -3,6 +3,7 @@ from bas_metadata_library.standards.magic_administration.v1 import Administratio
 from lantern.lib.metadata_library.models.record.elements.common import (
     Constraint,
     Constraints,
+    Date,
     Identifier,
     Identifiers,
     Series,
@@ -23,32 +24,21 @@ from lantern.lib.metadata_library.models.record.utils.admin import Administratio
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin
 from lantern.lib.metadata_library.models.record.utils.kv import get_kv
 from lantern.models.item.base.elements import Contact, Contacts, Extent, Extents
-from lantern.models.item.base.enums import AccessLevel, Licence
-from lantern.models.item.base.utils import md_as_html, md_as_plain
+from lantern.models.item.base.enums import AccessLevel, Licence, ResourceTypeIcon, ResourceTypeLabel
+from lantern.models.item.base.utils import md_as_html, md_as_html_unwrapped, md_as_plain
 from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
 
 
-class ItemBase:
+class ItemCore:
     """
-    Base representation of a resource within the BAS Data Catalogue.
+    Core base class for resources within the BAS Data Catalogue.
 
-    Items are a high-level, read-only, and non-standards specific view of a resource via an underlying catalogue Record,
-    to make it easier and less cumbersome to use through various filtering, processing and formatting methods.
+    Contains minimal properties necessary for handling metadata records.
 
-    Items provide access to administrative metadata if defined and encryption and signing keys are set via the
-    `admin_keys` argument.
-
-    Item subclasses are used for different contexts and systems. This base class contains core/common properties and
-    methods and is not expected to be used directly. Base items are compatible with catalogue Records or RecordRevisions,
-    depending on available context. Subclasses MAY require RecordRevisions and/or impose other requirements.
-
-    It is expected, and acceptable, to access information from the underlying record via the `record` property,
-    especially for properties this class would simply pass through from the record.
-
-    Properties for administrative metadata elements can be accessed from the `admin_metadata` property, which is cached
-    on first access unless the underlying record changes. As admin metadata is optional, all `admin_` properties are
-    return `None` or a suitable equivalent where admin metadata is not included, or keys are not provided to access it.
+    Includes methods to access administrative metadata, if defined and encryption.signing keys are set via the
+    `admin_keys` argument. Properties for administrative metadata elements can be accessed from the `admin_metadata`
+    property, which is cached on first access unless the underlying record changes.
     """
 
     def __init__(self, record: Record | RecordRevision, admin_keys: AdminMetadataKeys | None = None) -> None:
@@ -115,6 +105,25 @@ class ItemBase:
         if self.admin_metadata is None:
             return AccessLevel.NONE
         return self._compute_access_level(permissions=self.admin_metadata.resource_permissions)
+
+
+class ItemBase(ItemCore):
+    """
+    Base representation of a resource within the BAS Data Catalogue.
+
+    Items are a high-level, read-only, and non-standards specific view of a resource via an underlying catalogue Record,
+    to make it easier and less cumbersome to use through various filtering, processing and formatting methods.
+
+    Includes common properties, methods and classes for use in contexts or system specific subclasses. Base items are
+    not expected to be used directly and are compatible with catalogue Records or RecordRevisions. Subclasses MAY
+    require RecordRevisions and/or impose other requirements.
+
+    It is expected, and acceptable, to access information from the underlying record via the `record` property,
+    especially for properties this class would simply pass through from the record.
+
+    Properties based on administrative metadata are optional and will return `None` or a suitable equivalent where not
+    included in a record, or is not accessible where keys are not provided to access it.
+    """
 
     @property
     def admin_gitlab_issues(self) -> list[str]:
@@ -404,3 +413,81 @@ class ItemBase:
     def title_plain(self) -> str:
         """Title without Markdown formatting."""
         return md_as_plain(self.title_md)
+
+
+class ItemSummaryBase(ItemCore):
+    """
+    Base summary of a resource within the BAS Data Catalogue.
+
+    Item summaries provide additional context for use when presenting search results or resources related to the
+    current item within the BAS Data Catalogue website.
+
+    Includes common properties, methods and classes for use in contexts or system specific subclasses to give additional
+    context. Base items are not expected to be used directly and are compatible with catalogue Records or
+    RecordRevisions. Subclasses MAY require RecordRevisions and/or impose other requirements.
+
+    Properties based on administrative metadata are optional and will return `None` or a suitable equivalent where not
+    included in a record, or is not accessible where keys are not provided to access it.
+    """
+
+    @property
+    def resource_type_label(self) -> str:
+        """Friendly name for the item type."""
+        return ResourceTypeLabel[self.record.hierarchy_level.name].value
+
+    @property
+    def resource_type_icon(self) -> str:
+        """Icon class for the item type."""
+        return ResourceTypeIcon[self.record.hierarchy_level.name].value
+
+    @property
+    def href(self) -> str:
+        """Item catalogue URL."""
+        return f"/items/{self.record.file_identifier}/"
+
+    @property
+    def title_fmt(self) -> str:
+        """Formatted title, without wrapping <p> tags."""
+        return md_as_html_unwrapped(self.record.identification.title)
+
+    @property
+    def summary_fmt(self) -> str | None:
+        """Formatted summary (purpose), without wrapping <p> tags, if available."""
+        _summary = self.record.identification.purpose
+        return md_as_html_unwrapped(_summary) if _summary else None
+
+    @property
+    def restricted(self) -> bool:
+        """Whether the item is restricted."""
+        return self.admin_resource_access != AccessLevel.PUBLIC
+
+    @property
+    def edition_fmt(self) -> str | None:
+        """Formatted edition if available."""
+        _type = self.record.hierarchy_level
+        _edition = self.record.identification.edition
+
+        if _edition is None or _type == HierarchyLevelCode.COLLECTION:
+            return None
+        if _type in [
+            HierarchyLevelCode.PRODUCT,
+            HierarchyLevelCode.MAP_PRODUCT,
+            HierarchyLevelCode.PAPER_MAP_PRODUCT,
+            HierarchyLevelCode.WEB_MAP_PRODUCT,
+        ]:
+            return f"Ed. {_edition}"
+        return f"v{_edition}"
+
+    @property
+    def date(self) -> Date | None:
+        """Date representing the item, if available and not a collection."""
+        published = self.record.identification.dates.publication
+        return published if self.record.hierarchy_level != HierarchyLevelCode.COLLECTION else None
+
+    @property
+    def graphic_href(self) -> str | None:
+        """URL to an image representing the item if available."""
+        return next(
+            (graphic.href for graphic in self.record.identification.graphic_overviews.filter(identifier="overview")),
+            None,
+        )

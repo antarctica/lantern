@@ -1,12 +1,9 @@
 import json
-import re
 from dataclasses import dataclass
 from datetime import UTC, date, timedelta
 from datetime import datetime as DateTime  # noqa: N812
 from itertools import chain
-from typing import TypeVar
-
-from markupsafe import Markup
+from typing import TypedDict, TypeVar
 
 from lantern.lib.metadata_library.models.record.elements.common import Date
 from lantern.lib.metadata_library.models.record.elements.common import Dates as RecordDates
@@ -25,10 +22,10 @@ from lantern.lib.metadata_library.models.record.enums import (
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.base.elements import Link, unpack
-from lantern.models.item.base.enums import AccessLevel, ResourceTypeLabel
-from lantern.models.item.base.item import ItemBase
-from lantern.models.item.base.utils import md_as_html
-from lantern.models.item.catalogue.enums import ItemSuperType, ResourceTypeIcon
+from lantern.models.item.base.enums import ResourceTypeIcon, ResourceTypeLabel
+from lantern.models.item.base.item import ItemSummaryBase
+from lantern.models.item.base.utils import md_as_plain
+from lantern.models.item.catalogue.enums import ItemSuperType
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.stores.base import SelectRecordProtocol
 
@@ -77,56 +74,37 @@ class FormattedDate:
         return cls(value=val, datetime=dt)
 
 
-@dataclass(kw_only=True)
-class ItemSummaryFragments:
+class ItemSummaryFragments(TypedDict):
     """Properties shown as part of an ItemSummaryCatalogue."""
 
     restricted: bool
-    item_type: str
+    item_type_label: str
     item_type_icon: str
     edition: str | None
     published: FormattedDate | None
     children: str | None
 
 
-class ItemCatalogueSummary(ItemBase):
+class ItemCatalogueSummary(ItemSummaryBase):
     """
-    Summary of a resource within the BAS Data Catalogue.
+    Summary of a Catalogue item.
 
-    Catalogue item summaries provide additional context for base summaries for use when presenting search results or
-    resources related to the current item within the BAS Data Catalogue website.
+    Catalogue item summaries provide additional context for other catalogue items related to a current item.
     """
 
     @property
-    def _resource_type_label(self) -> str:
-        """Resource type label."""
-        return ResourceTypeLabel[self.resource_type.name].value
+    def date_fmt(self) -> FormattedDate | None:
+        """Formatted summary date, if available."""
+        _date = self.date
+        return FormattedDate.from_rec_date(_date) if _date else None
 
     @property
-    def _resource_type_icon(self) -> str:
-        """Resource type icon."""
-        return ResourceTypeIcon[self.resource_type.name].value
+    def title_no_fmt(self) -> str:
+        """Unformatted title, without any markup."""
+        return md_as_plain(self.record.identification.title)
 
     @property
-    def _date(self) -> FormattedDate | None:
-        """Formatted date."""
-        publication = self.record.identification.dates.publication
-        return FormattedDate.from_rec_date(publication) if publication else None
-
-    @property
-    def _edition(self) -> str | None:
-        """Formatted edition."""
-        if self.edition is None or self.resource_type == HierarchyLevelCode.COLLECTION:
-            return None
-        if (
-            self.resource_type == HierarchyLevelCode.PRODUCT
-            or self.resource_type == HierarchyLevelCode.PAPER_MAP_PRODUCT
-        ):
-            return f"Ed. {self.edition}"
-        return f"v{self.edition}"
-
-    @property
-    def _children(self) -> str | None:
+    def children(self) -> str | None:
         """
         Count of items contained within item.
 
@@ -138,42 +116,26 @@ class ItemCatalogueSummary(ItemBase):
         if count < 1:
             return None
 
-        unit = "side" if self.resource_type == HierarchyLevelCode.PAPER_MAP_PRODUCT else "item"
+        unit = "side" if self.record.hierarchy_level == HierarchyLevelCode.PAPER_MAP_PRODUCT else "item"
         unit = unit if count == 1 else f"{unit}s"
         return f"{count} {unit}"
 
     @property
-    def _restricted(self) -> bool:
-        """Whether the item is restricted."""
-        return self.admin_resource_access != AccessLevel.PUBLIC
-
-    @property
-    def title_html(self) -> str:
-        """Title with Markdown formatting encoded as HTML without wrapping <p> tags."""
-        return Markup(re.sub(r"</?p[^>]*>", "", super().title_html))  # noqa: S704
-
-    @property
-    def summary_html(self) -> str:
-        """Summary with Markdown formatting encoded as HTML if present or a blank string."""
-        return md_as_html(self.summary_md or " ")
-
-    @property
     def fragments(self) -> ItemSummaryFragments:
         """UI fragments (icons and labels) for item summary."""
-        published = self._date if self.resource_type != HierarchyLevelCode.COLLECTION else None
         return ItemSummaryFragments(
-            restricted=self._restricted,
-            item_type=self._resource_type_label,
-            item_type_icon=self._resource_type_icon,
-            edition=self._edition,
-            published=published,
-            children=self._children,
+            restricted=self.restricted,
+            item_type_label=self.resource_type_label,
+            item_type_icon=self.resource_type_icon,
+            edition=self.edition_fmt,
+            published=self.date_fmt,
+            children=self.children,
         )
 
     @property
-    def href_graphic(self) -> tuple[str, str]:
+    def graphic_href(self) -> tuple[str, str]:
         """
-        Item graphic, or generic default (BAS roundel).
+        URL to an image representing the item, or a generic default.
 
         Returned as light mode, dark mode tuple.
         """
@@ -274,11 +236,10 @@ class ItemCatalogueSummary(ItemBase):
             "LZe9BvJOhkpQAAAABJRU5ErkJggg=="
         )
 
-        return (
-            (self.overview_graphic.href, self.overview_graphic.href)
-            if self.overview_graphic
-            else (default_light, default_dark)
-        )
+        item_graphic = super().graphic_href
+        if item_graphic:
+            return item_graphic, item_graphic
+        return default_light, default_dark
 
 
 class Aggregations:
@@ -353,7 +314,7 @@ class Aggregations:
         results = self._aggregations.filter(
             namespace=CATALOGUE_NAMESPACE, associations=AggregationAssociationCode.CROSS_REFERENCE
         )
-        non_exclusive = [item.resource_id for item in chain(self.peer_collections, self.peer_projects)]
+        non_exclusive = [item.record.file_identifier for item in chain(self.peer_collections, self.peer_projects)]
         exclusive = [aggregation for aggregation in results if aggregation.identifier.identifier not in non_exclusive]
         return [self._summaries[aggregation.identifier.identifier] for aggregation in exclusive]
 
@@ -667,24 +628,18 @@ class PageSummary:
     @property
     def collections(self) -> list[Link]:
         """Collections item is part of."""
-        return [
-            Link(value=Markup(re.sub(r"</?p[^>]*>", "", summary.title_html)), href=summary.href)  # noqa: S704
-            for summary in self._aggregations.parent_collections
-        ]
+        return [Link(value=related.title_fmt, href=related.href) for related in self._aggregations.parent_collections]
 
     @property
     def projects(self) -> list[Link]:
         """Projects item is part of."""
-        return [
-            Link(value=Markup(re.sub(r"</?p[^>]*>", "", summary.title_html)), href=summary.href)  # noqa: S704
-            for summary in self._aggregations.parent_projects
-        ]
+        return [Link(value=related.title_fmt, href=related.href) for related in self._aggregations.parent_projects]
 
     @property
     def physical_parent(self) -> Link | None:
         """Item that represents the physical map an item is one side of."""
-        item = self._aggregations.parent_printed_map
-        return Link(value=Markup(re.sub(r"</?p[^>]*>", "", item.title_html)), href=item.href) if item else None  # noqa: S704
+        related = self._aggregations.parent_printed_map
+        return Link(value=related.title_fmt, href=related.href) if related else None
 
     @property
     def restricted(self) -> bool:

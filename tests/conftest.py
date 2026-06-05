@@ -47,7 +47,7 @@ from lantern.models.item.algolia.item import ObjectRecord
 from lantern.models.item.arcgis.item import ItemArcGis
 from lantern.models.item.base.elements import Link
 from lantern.models.item.base.enums import AccessLevel
-from lantern.models.item.base.item import ItemBase
+from lantern.models.item.base.item import ItemBase, ItemSummaryBase
 from lantern.models.item.catalogue.elements import Dates as ItemCatDates
 from lantern.models.item.catalogue.elements import Identifiers as ItemCatIdentifiers
 from lantern.models.item.catalogue.item import ItemCatalogue
@@ -424,6 +424,12 @@ def fx_revision_model_min(fx_revision_config_min: dict) -> RecordRevision:
 def fx_item_base_model_min(fx_item_config_min_base: dict) -> ItemBase:
     """Minimal ItemBase model instance."""
     return ItemBase(record=RecordRevision.loads(fx_item_config_min_base))
+
+
+@pytest.fixture()
+def fx_item_summary_base_model_min(fx_item_config_min_base: dict) -> ItemSummaryBase:
+    """Minimal ItemSummaryBase model instance."""
+    return ItemSummaryBase(record=RecordRevision.loads(fx_item_config_min_base))
 
 
 def render_item_catalogue(item: ItemCatalogue) -> str:

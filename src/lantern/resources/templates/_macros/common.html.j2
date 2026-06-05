@@ -151,15 +151,15 @@
     <div class="flex h-full">
       <div class="w-1/6 shrink-0 self-center">
         {{ img_light_dark(
-          item.href_graphic[0],
-          item.href_graphic[1],
-          "thumbnail for " + item.title_plain,
+          item.graphic_href[0],
+          item.graphic_href[1],
+          "thumbnail for " + item.title_no_fmt,
           "w-full h-auto object-contain"
         ) }}
       </div>
       <div class="w-5/6 flex flex-col h-full pl-2">
-        <header><a class="{{ font_bolder_classes() }} {{ link_classes() }} text-xl" href="{{item.href}}">{{ item.title_html }}</a></header>
-        <article class="py-2 flex-grow overflow-auto">{% call prose() %}{{ item.summary_html }}{% endcall %}</article>
+        <header><a class="{{ font_bolder_classes() }} {{ link_classes() }} text-xl" href="{{item.href}}">{{ item.title_fmt }}</a></header>
+        <article class="py-2 flex-grow overflow-auto">{% call prose() %}{{ item.summary_fmt }}{% endcall %}</article>
         <footer class="mt-auto flex items-center space-x-2 text-sm text-grey-500 dark:text-grey-300">
           {{ item_summary_fragments(item.fragments) }}
         </footer>
@@ -173,7 +173,7 @@
 {% endmacro %}
 
 {% macro item_summary_fragments(data) %}
-  <span><i class="{{ data.item_type_icon }}" aria-hidden="true"></i> {{ data.item_type }}</span>
+  <span><i class="{{ data.item_type_icon }}" aria-hidden="true"></i> {{ data.item_type_label }}</span>
   {% if data.edition %}
     {{ item_summary_fragment_divider() }}
     <span>{{ data.edition }}</span>

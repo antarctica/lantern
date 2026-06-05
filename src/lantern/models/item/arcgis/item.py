@@ -22,13 +22,17 @@ class ArcGisItemLicenceHrefUnsupportedError(Exception):
 
 class ItemArcGis(ItemBase):
     """
+    Representation of a resource within the Esri ArcGIS geospatial platform.
+
     ArcGIS representation of a resource within the BAS Data Catalogue / Metadata ecosystem.
 
     Maps a catalogue / ISO 19115 resource to the information model used by ArcGIS items [1] (e.g. summary -> snippet).
     Some properties that are not present as distinct elements in the ArcGIS model are combined via Jinja templates
-    (e.g. abstract, lineage, citation are mapped to the description). Some properties are not supported, or cannot be
-    known, in the Catalogue/ISO model and use either fixed values or supplementary values (e.g. the ArcGIS item ID
-    isn't held in the ISO 19115 model as it's not equivalent to the file_identifier or identification.identifier).
+    (e.g. abstract, lineage, citation are mapped to the description).
+
+    Some properties are not supported, or cannot be known, in the Catalogue/ISO model and use either fixed values or
+    supplementary values (e.g. the ArcGIS item ID isn't held in the ISO 19115 model as it's not equivalent to the file_
+    identifier or identification.identifier).
 
     Typically, there is a one-to-many relationship between Catalogue and ArcGIS items, where ArcGIS items represent
     some or all of the distribution options for a Catalogue item. (E.g. a vector dataset with a feature and vector

@@ -269,6 +269,7 @@ class GitLabStore(StoreBase):
         if len(file_identifiers) == 0:
             self._logger.info("Selecting all records.")
             return self._fetch_all_records_head_commit()
+
         self._logger.info(f"Selecting {len(file_identifiers)} records.")
         for file_identifier in file_identifiers:
             result = self._fetch_record_head_commit(file_identifier)

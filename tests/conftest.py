@@ -615,7 +615,7 @@ def fx_item_algolia_object_min() -> ObjectRecord:
 
 @pytest.fixture()
 def fx_lib_arcgis_item_properties() -> ArcGisItemProperties:
-    """Minimal ArcGiS Item properties instance."""
+    """Minimal ArcGIS Item properties instance."""
     return ArcGisItemProperties(title="x", item_type=ArcGisItemType.FEATURE_SERVICE, metadata="x")
 
 

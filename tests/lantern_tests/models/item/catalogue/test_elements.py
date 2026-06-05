@@ -1,7 +1,6 @@
 from datetime import UTC, date, datetime
 
 import pytest
-from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
 
 from lantern.lib.metadata_library.models.record.elements.common import (
     Date,
@@ -31,11 +30,10 @@ from lantern.lib.metadata_library.models.record.enums import (
     MaintenanceFrequencyCode,
     ProgressCode,
 )
-from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
-from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, set_admin
+from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.base.elements import Link
-from lantern.models.item.base.enums import ResourceTypeLabel
+from lantern.models.item.base.enums import ResourceTypeIcon, ResourceTypeLabel
 from lantern.models.item.base.item import ItemBase
 from lantern.models.item.catalogue.const import CONTAINER_SUPER_TYPES
 from lantern.models.item.catalogue.elements import (
@@ -49,7 +47,7 @@ from lantern.models.item.catalogue.elements import (
     PageHeader,
     PageSummary,
 )
-from lantern.models.item.catalogue.enums import ItemSuperType, ResourceTypeIcon
+from lantern.models.item.catalogue.enums import ItemSuperType
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from tests.conftest import _admin_meta_keys, _select_record
 
@@ -387,129 +385,64 @@ class TestItemCatalogueSummaryCatalogue:
     Used for showing summaries of other items.
     """
 
-    def test_init(self, fx_item_base_model_min: ItemBase, fx_admin_meta_keys: AdministrationKeys):
-        """Can create an ItemCatalogueSummaryCatalogue."""
-        summary = ItemCatalogueSummary(record=fx_item_base_model_min._record, admin_keys=fx_admin_meta_keys)
-
-        assert isinstance(summary, ItemCatalogueSummary)
-        assert summary._record == fx_item_base_model_min._record
-        assert isinstance(summary._admin_keys, AdministrationKeys)
-
-    def test_resource_type_icon(self, fx_item_base_model_min: ItemBase):
-        """Can get icon for resource type."""
-        summary = ItemCatalogueSummary(
-            record=fx_item_base_model_min._record, admin_keys=fx_item_base_model_min._admin_keys
-        )
-        assert summary._resource_type_icon == ResourceTypeIcon[summary.resource_type.name].value
-
-    def test_title_html(self, fx_item_base_model_min: ItemBase):
-        """Can get title with Markdown formatting encoded as HTML with stripped <p> tags."""
-        record = fx_item_base_model_min._record
-        fx_item_base_model_min._record.identification.title = "_x_"
-        summary = ItemCatalogueSummary(record=record, admin_keys=fx_item_base_model_min._admin_keys)
-        assert summary.title_html == "<em>x</em>"
-
-    @pytest.mark.parametrize(("value", "expected"), [(None, ""), ("x", "<p>x</p>"), ("_x_", "<p><em>x</em></p>")])
-    def test_summary_html(self, fx_item_base_model_min: ItemBase, value: str, expected: str):
-        """Can get summary with Markdown formatting encoded as HTML if present, or a blank string."""
-        record = fx_item_base_model_min._record
-        record.identification.purpose = value
-        summary = ItemCatalogueSummary(record=record, admin_keys=fx_item_base_model_min._admin_keys)
-
-        assert summary.summary_html == expected
-
     @pytest.mark.parametrize("has_date", [True, False])
-    def test_date(self, fx_item_base_model_min: ItemBase, has_date: bool):
-        """Can get formatted publication date if set."""
+    def test_date_fmt(self, fx_item_base_model_min: ItemBase, has_date: bool):
+        """Can get formatted date if set."""
         record = fx_item_base_model_min._record
         publication = Date(date=datetime(2014, 6, 30, tzinfo=UTC).date())
         expected = "30 June 2014" if has_date else None
         if has_date:
             record.identification.dates.publication = publication
+
         summary = ItemCatalogueSummary(record=record, admin_keys=fx_item_base_model_min._admin_keys)
         if has_date:
-            assert summary._date.value == expected
+            assert isinstance(summary.date_fmt, FormattedDate)
+            assert summary.date_fmt.value == expected
         else:
-            assert summary._date is None
+            assert summary.date_fmt is None
+
+    def test_title_no_fmt(self, fx_item_base_model_min: ItemBase):
+        """Can get title without any formatting."""
+        record = fx_item_base_model_min._record
+        record.identification.title = "_x_"
+
+        summary = ItemCatalogueSummary(record=record, admin_keys=fx_item_base_model_min._admin_keys)
+        assert summary.title_no_fmt == "x"
 
     @pytest.mark.parametrize(
-        (
-            "restricted",
-            "resource_type",
-            "edition",
-            "exp_edition",
-            "has_pub",
-            "exp_published",
-            "child_count",
-            "exp_child_count",
-        ),
+        ("resource_type", "count", "expected"),
         [
-            (False, HierarchyLevelCode.PRODUCT, "x", "Ed. x", True, "30 June 2014", 0, None),
-            (False, HierarchyLevelCode.PRODUCT, "x", "Ed. x", False, None, 0, None),
-            (False, HierarchyLevelCode.PRODUCT, None, None, True, "30 June 2014", 0, None),
-            (False, HierarchyLevelCode.PAPER_MAP_PRODUCT, None, None, True, "30 June 2014", 0, None),
-            (False, HierarchyLevelCode.DATASET, "X", "vX", False, None, 0, None),
-            (False, HierarchyLevelCode.COLLECTION, "x", None, True, None, 0, None),
-            (False, HierarchyLevelCode.COLLECTION, "x", None, False, None, 0, None),
-            (False, HierarchyLevelCode.COLLECTION, None, None, False, None, 0, None),
-            (False, HierarchyLevelCode.COLLECTION, None, None, False, None, 1, "1 item"),
-            (False, HierarchyLevelCode.COLLECTION, None, None, False, None, 2, "2 items"),
-            (False, HierarchyLevelCode.PAPER_MAP_PRODUCT, None, None, False, None, 1, "1 side"),
-            (False, HierarchyLevelCode.PAPER_MAP_PRODUCT, None, None, False, None, 2, "2 sides"),
-            (True, HierarchyLevelCode.PRODUCT, None, None, False, None, 0, None),
+            (HierarchyLevelCode.PRODUCT, 0, None),
+            (HierarchyLevelCode.COLLECTION, 0, None),
+            (HierarchyLevelCode.COLLECTION, 1, "1 item"),
+            (HierarchyLevelCode.COLLECTION, 2, "2 items"),
+            (HierarchyLevelCode.PAPER_MAP_PRODUCT, 1, "1 side"),
+            (HierarchyLevelCode.PAPER_MAP_PRODUCT, 2, "2 sides"),
         ],
     )
-    def test_fragments(
-        self,
-        fx_item_base_model_min: ItemBase,
-        fx_admin_meta_keys: AdministrationKeys,
-        restricted: bool,
-        resource_type: HierarchyLevelCode,
-        edition: str | None,
-        exp_edition: str | None,
-        has_pub: bool,
-        exp_published: FormattedDate | None,
-        child_count: int,
-        exp_child_count: str | None,
+    def test_children(
+        self, fx_item_base_model_min: ItemBase, resource_type: HierarchyLevelCode, count: int, expected: int
     ):
-        """Can get fragments to use as part of item summary UI."""
+        """Can get formatted count of parent -> child relations."""
         record = fx_item_base_model_min._record
-        if not restricted:
-            admin_meta = AdministrationMetadata(
-                id=record.file_identifier, metadata_permissions=[OPEN_ACCESS], resource_permissions=[OPEN_ACCESS]
-            )
-            set_admin(keys=fx_admin_meta_keys, record=record, admin_meta=admin_meta)
-        exp_resource_type = ResourceTypeLabel[resource_type.name]
         record.hierarchy_level = resource_type
-        record.identification.edition = edition
-        if has_pub:
-            record.identification.dates.publication = Date(date=datetime(2014, 6, 30, tzinfo=UTC).date())
-        for _ in range(child_count):
+        for _ in range(count):
             aggregation = Aggregation(
                 identifier=Identifier(identifier="x", namespace="x"),
                 association_type=AggregationAssociationCode.IS_COMPOSED_OF,
-                initiative_type=AggregationInitiativeCode.COLLECTION,
+                initiative_type=AggregationInitiativeCode.PAPER_MAP
+                if HierarchyLevelCode.PAPER_MAP_PRODUCT
+                else AggregationInitiativeCode.COLLECTION,
             )
-            if resource_type.name == HierarchyLevelCode.PAPER_MAP_PRODUCT:
-                aggregation = Aggregation(
-                    identifier=Identifier(identifier="x", namespace="x"),
-                    association_type=AggregationAssociationCode.IS_COMPOSED_OF,
-                    initiative_type=AggregationInitiativeCode.PAPER_MAP,
-                )
             record.identification.aggregations.append(aggregation)
-        record.child_aggregations_count = child_count
 
-        summary = ItemCatalogueSummary(record=record, admin_keys=fx_admin_meta_keys)
-        result = summary.fragments
+        summary = ItemCatalogueSummary(record=record, admin_keys=fx_item_base_model_min._admin_keys)
+        assert summary.children == expected
 
-        assert result.restricted == restricted
-        assert result.item_type == exp_resource_type.value
-        assert result.edition == exp_edition
-        if exp_published is not None:
-            assert result.published.value == exp_published
-        else:
-            assert result.published is None
-        assert result.children == exp_child_count
+    def test_fragments(self, fx_item_base_model_min: ItemBase, fx_admin_meta_keys: AdministrationKeys):
+        """Can get fragments to use as part of item summary UI."""
+        summary = ItemCatalogueSummary(record=fx_item_base_model_min.record, admin_keys=fx_admin_meta_keys)
+        assert summary.fragments["item_type_label"] is not None
 
     @pytest.mark.parametrize(
         ("href", "expected"),
@@ -524,9 +457,9 @@ class TestItemCatalogueSummaryCatalogue:
             ),
         ],
     )
-    def test_href_graphic(self, fx_item_base_model_min: ItemBase, href: str | None, expected: tuple[str, str]):
+    def test_graphic_href(self, fx_item_base_model_min: ItemBase, href: str | None, expected: tuple[str, str]):
         """
-        Can get href graphics.
+        Can get light and dark graphic from item or using default.
 
         If present in a record the same image is returned twice as a light and dark image.
         """
@@ -537,12 +470,11 @@ class TestItemCatalogueSummaryCatalogue:
             )
 
         summary = ItemCatalogueSummary(record=record, admin_keys=fx_item_base_model_min._admin_keys)
-
         if href is not None:
-            assert summary.href_graphic == expected
+            assert summary.graphic_href == expected
         else:
-            assert summary.href_graphic[0].startswith(expected[0])
-            assert summary.href_graphic[1].startswith(expected[1])
+            assert summary.graphic_href[0].startswith(expected[0])
+            assert summary.graphic_href[1].startswith(expected[1])
 
 
 class TestIdentifiers:
@@ -731,7 +663,7 @@ class TestPageSummary:
     ):
         """Can create class for summary panel."""
         super_type = ItemSuperType.CONTAINER if item_type in CONTAINER_SUPER_TYPES else ItemSuperType.RESOURCE
-        collections = [Link(value=summary.title_html, href=summary.href) for summary in aggregations.parent_collections]
+        collections = [Link(value=summary.title_fmt, href=summary.href) for summary in aggregations.parent_collections]
 
         summary = PageSummary(
             item_super_type=super_type,

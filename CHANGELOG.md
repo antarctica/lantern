@@ -40,6 +40,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 
 * Switching to builtin pytest `tmp_path` fixture to simplify tests
 * Refactoring live site cache invalidation to automatically apply to any generated output
+* Refactoring `ItemBase` into `ItemCore` with `ItemBase` and `ItemSummaryBase` subclasses
+* Refactoring `ItemCatalogueSummary` to derive from `ItemSummaryBase` rather than `ItemBase`
 
 ## [0.14.0] - 2026-05-25
 

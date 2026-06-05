@@ -88,20 +88,20 @@ class TestItemSummary:
         """Can get title and href with expected values from summary."""
         summary = self.summary_base
         html = BeautifulSoup(self._render(summary), parser="html.parser", features="lxml")
-        assert summary.title_html in str(html.select_one("a"))
+        assert summary.title_fmt in str(html.select_one("a"))
         assert html.select_one("a")["href"] == summary.href
 
     def test_summary(self):
         """Can get summary description with expected value from summary."""
         summary = self.summary_base
         html = BeautifulSoup(self._render(summary), parser="html.parser", features="lxml")
-        assert summary.summary_html in str(html.select_one("article"))
+        assert summary.summary_fmt in str(html.select_one("article"))
 
     def test_graphic(self):
         """Can get graphic with expected value from summary."""
         summary = self.summary_base
         html = BeautifulSoup(self._render(summary), parser="html.parser", features="lxml")
-        assert html.select_one("img")["src"] == summary.href_graphic[0]
+        assert html.select_one("img")["src"] == summary.graphic_href[0]
 
     def test_type(self):
         """Can get item type with expected value from summary."""
@@ -109,8 +109,8 @@ class TestItemSummary:
         html = BeautifulSoup(self._render(summary), parser="html.parser", features="lxml")
 
         # span containing item type can only be matched by text. Can't match directly because span contains <i> tag
-        assert any(summary.fragments.item_type in span.text for span in html.find_all(name="span"))
-        assert html.select_one("i")["class"] == summary.fragments.item_type_icon.split(" ")
+        assert any(summary.fragments.get("item_type_label") in span.text for span in html.find_all(name="span"))
+        assert html.select_one("i")["class"] == summary.fragments.get("item_type_icon").split(" ")
 
     @pytest.mark.parametrize("edition", [None, "x"])
     def test_edition(self, edition: str | None):
@@ -118,7 +118,7 @@ class TestItemSummary:
         record = deepcopy(self.summary_base._record)
         record.identification.edition = edition
         summary = ItemCatalogueSummary(record=record, admin_keys=self.summary_base._admin_keys)
-        expected = summary.fragments.edition
+        expected = summary.fragments.get("edition")
         html = BeautifulSoup(self._render(summary), parser="html.parser", features="lxml")
 
         if expected:
@@ -130,7 +130,7 @@ class TestItemSummary:
         record = deepcopy(self.summary_base._record)
         record.identification.dates.publication = published
         summary = ItemCatalogueSummary(record=record, admin_keys=self.summary_base._admin_keys)
-        expected = summary.fragments.published
+        expected = summary.fragments.get("published")
         html = BeautifulSoup(self._render(summary), parser="html.parser", features="lxml")
 
         if expected:
@@ -147,7 +147,7 @@ class TestItemSummary:
         record = deepcopy(self.summary_base._record)
         record.identification.aggregations.extend([agg for _ in range(value)])
         summary = ItemCatalogueSummary(record=record, admin_keys=self.summary_base._admin_keys)
-        expected = summary.fragments.children
+        expected = summary.fragments.get("children")
         html = BeautifulSoup(self._render(summary), parser="html.parser", features="lxml")
 
         if expected:

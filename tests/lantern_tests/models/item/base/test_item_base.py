@@ -1,13 +1,17 @@
 import json
 from copy import deepcopy
+from datetime import UTC, datetime
+from unittest.mock import PropertyMock
 
 import pytest
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata, Permission
+from pytest_mock import MockerFixture
 
 from lantern.lib.metadata_library.models.record.elements.common import (
     Constraint,
     Constraints,
     ContactIdentity,
+    Date,
     Identifier,
     Identifiers,
     OnlineResource,
@@ -40,14 +44,14 @@ from lantern.lib.metadata_library.models.record.enums import (
 from lantern.lib.metadata_library.models.record.presets.projections import EPSG_4326
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, set_admin
 from lantern.models.item.base.elements import Contact, Contacts, Extent, Extents
-from lantern.models.item.base.enums import AccessLevel, Licence
-from lantern.models.item.base.item import ItemBase
+from lantern.models.item.base.enums import AccessLevel, Licence, ResourceTypeIcon, ResourceTypeLabel
+from lantern.models.item.base.item import ItemBase, ItemCore, ItemSummaryBase
 from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
 
 
-class TestItemBase:
-    """Test base item."""
+class TestItemCore:
+    """Test core item."""
 
     @pytest.mark.parametrize("class_", ["Record", "RecordRevision"])
     @pytest.mark.parametrize("has_admin_keys", [False, True])
@@ -59,11 +63,11 @@ class TestItemBase:
         class_: str,
         has_admin_keys: bool,
     ):
-        """Can create an ItemBase from a Record and optional admin access keys."""
+        """Can create an ItemCore from a Record and optional admin access keys."""
         model = fx_record_model_min if class_ == "Record" else fx_revision_model_min
         keys = fx_admin_meta_keys if has_admin_keys else None
 
-        item = ItemBase(record=model, admin_keys=keys)
+        item = ItemCore(record=model, admin_keys=keys)
         assert item._record == model
         assert item._admin_keys == keys
         assert item._admin_metadata is None
@@ -74,7 +78,7 @@ class TestItemBase:
         record_a = fx_revision_model_min
         record_b = deepcopy(record_a)
         record_b.file_identifier = "y"
-        item = ItemBase(record=record_a, admin_keys=None)
+        item = ItemCore(record=record_a, admin_keys=None)
 
         assert item.record == record_a
         item.record = record_b
@@ -97,7 +101,7 @@ class TestItemBase:
             fx_admin_meta_element.id = fx_revision_model_min.file_identifier
             set_admin(keys=fx_admin_meta_keys, record=fx_revision_model_min, admin_meta=fx_admin_meta_element)
 
-        item = ItemBase(record=fx_revision_model_min, admin_keys=keys)
+        item = ItemCore(record=fx_revision_model_min, admin_keys=keys)
         if has_admin and has_keys:
             assert item.admin_metadata == fx_admin_meta_element
         else:
@@ -122,7 +126,7 @@ class TestItemBase:
         admin_b.id = record_b.file_identifier
         set_admin(keys=fx_admin_meta_keys, record=record_b, admin_meta=admin_b)
 
-        item = ItemBase(record=fx_revision_model_min, admin_keys=fx_admin_meta_keys)
+        item = ItemCore(record=fx_revision_model_min, admin_keys=fx_admin_meta_keys)
         assert item._admin_metadata is None
         assert item.admin_metadata == fx_admin_meta_element
         assert item._admin_metadata == fx_admin_meta_element
@@ -158,9 +162,21 @@ class TestItemBase:
             fx_admin_meta_element.resource_permissions = permissions
             set_admin(keys=fx_admin_meta_keys, record=fx_revision_model_min, admin_meta=fx_admin_meta_element)
 
-        item = ItemBase(record=fx_revision_model_min, admin_keys=fx_admin_meta_keys)
+        item = ItemCore(record=fx_revision_model_min, admin_keys=fx_admin_meta_keys)
         assert item.admin_metadata_access == expected
         assert item.admin_resource_access == expected
+
+
+class TestItemBase:
+    """Test base item."""
+
+    @pytest.mark.cov()
+    def test_init(self, fx_revision_model_min: RecordRevision):
+        """Can create an ItemBase from a Record and optional admin access keys."""
+        model = fx_revision_model_min
+
+        item = ItemBase(record=model)
+        assert isinstance(item, ItemBase)
 
     @pytest.mark.parametrize(
         ("has_admin_metadata", "issues", "expected"),
@@ -642,3 +658,124 @@ class TestItemBase:
         item = ItemBase(fx_revision_model_min)
 
         assert item.title_plain == expected
+
+
+class TestItemSummaryBase:
+    """Test base summary item."""
+
+    def test_init(self, fx_revision_model_min: RecordRevision):
+        """Can create an ItemSummaryBase from a Record and optional admin access keys."""
+        model = fx_revision_model_min
+
+        item = ItemSummaryBase(record=model)
+        assert isinstance(item, ItemSummaryBase)
+
+    def test_resource_type_label(self, fx_item_summary_base_model_min: ItemSummaryBase):
+        """Can get friendly(er) label for resource type."""
+        expected = ResourceTypeLabel[fx_item_summary_base_model_min.record.hierarchy_level.name].value
+        assert fx_item_summary_base_model_min.resource_type_label == expected
+
+    def test_resource_type_icon(self, fx_item_summary_base_model_min: ItemSummaryBase):
+        """Can get icon for resource type."""
+        expected = ResourceTypeIcon[fx_item_summary_base_model_min.record.hierarchy_level.name].value
+        assert fx_item_summary_base_model_min.resource_type_icon == expected
+
+    def test_href(self, fx_item_summary_base_model_min: ItemSummaryBase):
+        """Can get URL to item."""
+        assert fx_item_summary_base_model_min.href == f"/items/{fx_item_summary_base_model_min.record.file_identifier}/"
+
+    def test_title_fmt(self, fx_item_summary_base_model_min: ItemSummaryBase):
+        """Can get title with HTML formatting but without wrapping paragraph tags."""
+        fx_item_summary_base_model_min.record.identification.title = "_x_"
+        assert fx_item_summary_base_model_min.title_fmt == "<em>x</em>"
+
+    @pytest.mark.parametrize(("value", "expected"), [(None, None), ("_x_", "<em>x</em>")])
+    def test_summary_fmt(
+        self, fx_item_summary_base_model_min: ItemSummaryBase, value: str | None, expected: str | None
+    ):
+        """Can get summary (purpose) with HTML formatting but without wrapping paragraph tags if defined."""
+        fx_item_summary_base_model_min.record.identification.purpose = value
+        assert fx_item_summary_base_model_min.summary_fmt == expected
+
+    @pytest.mark.parametrize(
+        ("value", "expected"),
+        [
+            (AccessLevel.NONE, True),
+            (AccessLevel.UNKNOWN, True),
+            (AccessLevel.BAS_STAFF, True),
+            (AccessLevel.PUBLIC, False),
+        ],
+    )
+    def test_restricted(
+        self, mocker: MockerFixture, fx_item_summary_base_model_min: ItemSummaryBase, value: AccessLevel, expected: bool
+    ):
+        """Can get binary restricted status based on resource access level."""
+        mocker.patch.object(
+            type(fx_item_summary_base_model_min),
+            "admin_resource_access",
+            new_callable=PropertyMock,
+            return_value=value,
+        )
+
+        assert fx_item_summary_base_model_min.restricted == expected
+
+    @pytest.mark.parametrize(
+        ("resource_type", "value", "expected"),
+        [
+            (HierarchyLevelCode.PRODUCT, None, None),
+            (HierarchyLevelCode.PRODUCT, "x", "Ed. x"),
+            (HierarchyLevelCode.DATASET, "X", "vX"),
+            (HierarchyLevelCode.COLLECTION, "x", None),
+        ],
+    )
+    def test_edition_fmt(
+        self,
+        fx_item_summary_base_model_min: ItemSummaryBase,
+        resource_type: HierarchyLevelCode,
+        value: str | None,
+        expected: str | None,
+    ):
+        """Can get edition with conventional formatting based on resource type."""
+        fx_item_summary_base_model_min.record.hierarchy_level = resource_type
+        fx_item_summary_base_model_min.record.identification.edition = value
+
+        assert fx_item_summary_base_model_min.edition_fmt == expected
+
+    @pytest.mark.parametrize(
+        ("resource_type", "has_value", "expected"),
+        [
+            (HierarchyLevelCode.PRODUCT, False, None),
+            (HierarchyLevelCode.PRODUCT, True, Date(date=datetime(2014, 6, 30, tzinfo=UTC).date(), precision=None)),
+            (HierarchyLevelCode.COLLECTION, True, None),
+        ],
+    )
+    def test_date(
+        self,
+        fx_item_summary_base_model_min: ItemSummaryBase,
+        resource_type: HierarchyLevelCode,
+        has_value: bool,
+        expected: str | None,
+    ):
+        """Can get date representing summary based on resource type."""
+        fx_item_summary_base_model_min.record.hierarchy_level = resource_type
+        if has_value:
+            fx_item_summary_base_model_min.record.identification.dates.publication = Date(
+                date=datetime(2014, 6, 30, tzinfo=UTC).date()
+            )
+
+        assert fx_item_summary_base_model_min.date == expected
+
+    @pytest.mark.parametrize(("value", "expected"), [(None, None), ("x", "x")])
+    def test_graphic_href(
+        self,
+        fx_item_summary_base_model_min: ItemSummaryBase,
+        value: str | None,
+        expected: str | None,
+    ):
+        """Can get overview graphic if defined."""
+        if value is not None:
+            fx_item_summary_base_model_min.record.identification.graphic_overviews.append(
+                GraphicOverview(identifier="overview", href=value, mime_type="x")
+            )
+
+        assert fx_item_summary_base_model_min.graphic_href == expected

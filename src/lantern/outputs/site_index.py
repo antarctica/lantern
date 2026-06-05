@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 
 from lantern.models.checks import CheckType
-from lantern.models.item.catalogue.enums import ResourceTypeIcon
+from lantern.models.item.base.enums import ResourceTypeIcon
 from lantern.models.site import ExportMeta, SiteContent
 from lantern.outputs.base import OutputSite
 from lantern.stores.base import SelectRecordsProtocol

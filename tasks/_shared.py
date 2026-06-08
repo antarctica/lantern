@@ -32,7 +32,7 @@ ExportTarget = Literal["local", "remote"]
 def init_logging(config: Config) -> logging.Logger:
     """Initialise logging."""
     _init_logging(config.LOG_LEVEL)
-    logger = logging.getLogger("app")
+    logger = logging.getLogger("lantern")
     logger.info("Initialising")
     return logger
 

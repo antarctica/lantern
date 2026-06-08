@@ -7,9 +7,9 @@ import sentry_sdk
 def init(logging_level: int) -> None:
     """Initialise application logging."""
     # noinspection SpellCheckingInspection
-    logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     logger = logging.getLogger("lantern")
     logger.setLevel(logging_level)
+    logger.addHandler(logging.StreamHandler())
 
 
 def init_sentry() -> None:

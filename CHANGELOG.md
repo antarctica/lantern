@@ -35,6 +35,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 
 * Disabling parallelisation for individual tests to avoid workers overhead
 * Relaxing URL comparison in embedded maps e2e test
+* Incorrect logger called in tasks common setup
 
 ### Changed
 

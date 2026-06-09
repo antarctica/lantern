@@ -1,4 +1,5 @@
 # Indicate a record is a successor to an existing record
+
 import logging
 from argparse import ArgumentParser
 from datetime import UTC, datetime
@@ -12,7 +13,7 @@ from tasks.records_zap import revise_record
 
 from lantern.catalogues.bas import BasCatalogue
 from lantern.lib.metadata_library.models.record.elements.common import Date
-from lantern.lib.metadata_library.models.record.elements.identification import Aggregations
+from lantern.lib.metadata_library.models.record.elements.identification import Aggregation, Aggregations
 from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,
     AggregationInitiativeCode,
@@ -24,7 +25,7 @@ from lantern.models.item.base.item import ItemBase
 from lantern.models.record.record import Record
 
 
-def _get_cli_args() -> tuple[bool, Path, str | None, str | None, Path | None]:
+def _get_cli_args() -> tuple[bool, bool, Path, str | None, str | None, Path | None]:
     """Get command line arguments."""
     parser = ArgumentParser(description="Indicate a record is a successor to an existing record.")
     parser.add_argument(
@@ -32,6 +33,12 @@ def _get_cli_args() -> tuple[bool, Path, str | None, str | None, Path | None]:
         "-f",
         action="store_true",
         help="Force save path, branch and current identifier to defaults, and successor record selection to CLI argument.",
+    )
+    parser.add_argument(
+        "--replace",
+        "-r",
+        action="store_true",
+        help="Replace references to current record in collections with successor Will keep both if omitted.",
     )
     parser.add_argument(
         "--path",
@@ -58,18 +65,19 @@ def _get_cli_args() -> tuple[bool, Path, str | None, str | None, Path | None]:
         help="Optional path to successor record config file. Will interactively prompt if omitted.",
     )
     args = parser.parse_args()
-    return args.force, args.path, args.branch, args.current, args.successor
+    return args.force, args.replace, args.path, args.branch, args.current, args.successor
 
 
 def _get_args(
     logger: logging.Logger,
     cat: BasCatalogue,
-    cli_args: tuple[bool, Path, str | None, str | None, Path | None],
-) -> tuple[Path, str, str, Record]:
+    cli_args: tuple[bool, bool, Path, str | None, str | None, Path | None],
+) -> tuple[Path, str, str, Record, bool]:
     """Get task inputs, interactively if needed/allowed."""
-    cli_force, cli_path, cli_branch, cli_current_ref, cli_successor_path = cli_args
+    cli_force, cli_replace, cli_path, cli_branch, cli_current_ref, cli_successor_path = cli_args
 
     path = cli_path
+    replace = cli_replace
     branch = cli_branch if cli_branch else cat.repo.gitlab_default_branch
     current_ref = cli_current_ref
     successor_path = cli_successor_path if cli_successor_path else None
@@ -84,6 +92,9 @@ def _get_args(
         current_ref = inquirer.text(message="Current record reference", default=current_ref)
         if not successor_path:
             successor_record = pick_local_record(logger=logger, records=[rp[0] for rp in records_paths])
+        replace: bool = (
+            inquirer.list_input("Replace references to current record?", choices=["Yes", "No"], default="Yes") == "Yes"
+        )
     else:
         lookup = {rp[1].resolve(): rp[0] for rp in records_paths}
         if cli_successor_path is None:
@@ -104,10 +115,10 @@ def _get_args(
     if not isinstance(successor_record, Record):
         raise TypeError(msg) from None
 
-    return path, branch, current_ref, successor_record
+    return path, branch, current_ref, successor_record, replace
 
 
-def _process_successor(logger: logging.Logger, record: Record, predecessor: Record) -> None:
+def _process_successor(logger: logging.Logger, record: Record, predecessor: Record, replace: bool) -> None:
     """
     Update successor record.
 
@@ -129,9 +140,9 @@ def _process_successor(logger: logging.Logger, record: Record, predecessor: Reco
     for agg in collection_aggregations:
         record.identification.aggregations.ensure(agg)
 
-    # Ensure edition, citation and any identifiers are different
+    # Ensure edition (if replaced), citation and any identifiers are different
     errors = []
-    if record.identification.edition == predecessor.identification.edition:
+    if replace and record.identification.edition == predecessor.identification.edition:
         errors.append("Editions must be different.")
     if record.identification.other_citation_details == predecessor.identification.other_citation_details:
         errors.append("Citations must be different.")
@@ -142,12 +153,12 @@ def _process_successor(logger: logging.Logger, record: Record, predecessor: Reco
         raise ValueError(" ".join(errors)) from None
 
 
-def _process_predecessor(logger: logging.Logger, record: Record, successor: Record) -> None:
+def _process_predecessor(logger: logging.Logger, record: Record, successor: Record, replace: bool) -> None:
     """
     Update predecessor record.
 
     Steps:
-    - removes collection aggregations which now belong to the successor
+    - if replaced, removes collection aggregations which now belong to the successor
     - sets resource maintenance progress to superseded
     - sets a superseded date
     - appends a free text note to the abstract that the item has been superseded
@@ -155,8 +166,8 @@ def _process_predecessor(logger: logging.Logger, record: Record, successor: Reco
 
     Note:
     - there isn't a 'revisedBy' inverse aggregation type that can be used
-    - removing collection aggregations means the record is effectively orphaned and can only be accessed via its
-    direct URL, unless linked to elsewhere.
+    - removing collection aggregations (replace=True) means the record is effectively orphaned and can only be
+      accessed via itsdirect URL, unless linked to elsewhere
     """
     changed = False
     successor_item = ItemBase(record=successor)
@@ -165,13 +176,13 @@ def _process_predecessor(logger: logging.Logger, record: Record, successor: Reco
     collection_aggregations = record.identification.aggregations.filter(
         associations=AggregationAssociationCode.LARGER_WORK_CITATION, initiatives=AggregationInitiativeCode.COLLECTION
     )
-    if collection_aggregations:
+    if replace and collection_aggregations:
         changed = True
         logger.info("Removing collection aggregations from predecessor")
+        logger.info(f"Predecessor contained {len(collection_aggregations)} collection aggregations")
         record.identification.aggregations = Aggregations(
             [r for r in record.identification.aggregations if r not in collection_aggregations]
         )
-        logger.info(f"Predecessor contained {len(collection_aggregations)} collection aggregations")
 
     # Set superseded status
     if record.identification.dates.superseded is None:
@@ -201,10 +212,31 @@ def _process_predecessor(logger: logging.Logger, record: Record, successor: Reco
 
 
 def _process_collections(
-    logger: logging.Logger, catalogue: BasCatalogue, branch: str, record: Record, predecessor: Record
+    logger: logging.Logger, catalogue: BasCatalogue, branch: str, record: Record, predecessor: Record, replace: bool
 ) -> list[Record]:
     """
-    Replace references to predecessor record in collections.
+    Append or replace references to predecessor record in collections.
+
+    - where replace=True : collection aggregations referencing the predecessor record are replaced with the successor.
+    - where replace=False: collection aggregations referencing the predecessor are cloned to reference the successor
+                            and prepended (to appear before the predecessor)
+
+    I.e.: For a current/predecessor record A, with aggregations in collection C, replaced by record B:
+
+    - aggregations in C, before:
+        - ...
+        - A (predecessor)
+        - ...
+    - where replace=True, aggregations become:
+        - ...
+        - B (successor)
+        - ...
+    - where replace=False, aggregations become:
+        - ...
+        - B (successor)
+        - A (predecessor)
+        - ...
+
 
     To ensure referential integrity between parent:children and children:parent relationships.
     """
@@ -222,10 +254,39 @@ def _process_collections(
 
     collections = [get_record(logger=logger, cat=catalogue, reference=cid, branch=branch) for cid in collection_ids]
     for collection in collections:
-        revise_record(collection)
-        for agg in collection.identification.aggregations:
-            if agg.identifier.identifier == predecessor.file_identifier:
-                agg.identifier = make_bas_cat_item(record.file_identifier)
+        if replace:
+            revise = False
+            # Update existing aggregations to reference successor
+            for agg in collection.identification.aggregations:
+                if agg.identifier.identifier == predecessor.file_identifier:
+                    agg.identifier = make_bas_cat_item(record.file_identifier)
+                    revise = True
+            if revise:
+                revise_record(collection)
+        else:
+            # Clone aggregations referencing predecessor to reference successor instead and prepend before existing
+            new_aggs = [
+                (
+                    i,
+                    Aggregation(
+                        identifier=make_bas_cat_item(record.file_identifier),
+                        association_type=agg.association_type,
+                        initiative_type=agg.initiative_type,
+                    ),
+                )
+                for i, agg in enumerate(collection.identification.aggregations)
+                if agg.identifier.identifier == predecessor.file_identifier
+                and Aggregation(
+                    identifier=make_bas_cat_item(record.file_identifier),
+                    association_type=agg.association_type,
+                    initiative_type=agg.initiative_type,
+                )
+                not in collection.identification.aggregations
+            ]
+            if new_aggs:
+                for i, new_agg in reversed(new_aggs):
+                    collection.identification.aggregations.insert(i, new_agg)
+                revise_record(collection)
 
     return [Record.loads(value=c.dumps(strip_admin=False)) for c in collections]  # return as catalogue records
 
@@ -235,15 +296,15 @@ def main() -> None:
     logger, _config, catalogue = init()
 
     cli_args = _get_cli_args()
-    import_path, branch, current_ref, successor = _get_args(logger=logger, cat=catalogue, cli_args=cli_args)
+    import_path, branch, current_ref, successor, replace = _get_args(logger=logger, cat=catalogue, cli_args=cli_args)
     _predecessor = get_record(logger=logger, cat=catalogue, reference=current_ref, branch=branch)
     predecessor = Record.loads(value=_predecessor.dumps(strip_admin=False))
 
-    # order is significant as collection aggregations are moved from predecessor to successor
-    _process_successor(logger=logger, record=successor, predecessor=predecessor)
-    _process_predecessor(logger=logger, record=predecessor, successor=successor)
+    # update order is significant as collection aggregations may be moved from predecessor to successor
+    _process_successor(logger=logger, record=successor, predecessor=predecessor, replace=replace)
+    _process_predecessor(logger=logger, record=predecessor, successor=successor, replace=replace)
     collections = _process_collections(
-        logger=logger, catalogue=catalogue, branch=branch, record=successor, predecessor=predecessor
+        logger=logger, catalogue=catalogue, branch=branch, record=successor, predecessor=predecessor, replace=replace
     )
 
     dump_records(logger=logger, output_path=import_path, records=[predecessor, successor, *collections])

@@ -138,7 +138,7 @@ These fields are updated when cloning a record:
 
 ### `supersede-record`
 
-Indicate a new record is the successor to another.
+Indicate a new record is the successor to another, keeping or replacing references to the predecessor.
 
 ```shell
 % task supersede-record --help
@@ -156,7 +156,8 @@ These fields are updated in the successor record:
 
 These fields are updated in any collection records the predecessor contained:
 
-- `identification.aggregations[assocation='isComposedOf',initiative='collection']` (identifier updated to successor)
+- `identification.aggregations[assocation='isComposedOf',initiative='collection']`
+  - (identifier updated to successor if replace=true, or cloned and prepended)
 
 > [!NOTE]
 > If working with a [`zap-records`](#zap-records) processed record, this command will separately update collections to

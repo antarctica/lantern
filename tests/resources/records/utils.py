@@ -47,7 +47,7 @@ def make_record(
     record = record_cls(
         file_identifier=file_identifier,
         hierarchy_level=hierarchy_level,
-        date_stamp=date(2023, 10, 1),  # will be popped for use in Metadata
+        meta_date_stamp=date(2023, 10, 1),  # will be popped for use in Metadata
         identification=Identification(
             title=title,
             abstract=abstract,

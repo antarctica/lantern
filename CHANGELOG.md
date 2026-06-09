@@ -36,6 +36,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Disabling parallelisation for individual tests to avoid workers overhead
 * Relaxing URL comparison in embedded maps e2e test
 * Incorrect logger called in tasks common setup
+* MAGIC base record preset not producing records valid against discovery profile
+* Missing requirements needed for using MAGIC base record preset to produce records valid against discovery profile
 
 ### Changed
 

@@ -168,6 +168,11 @@ Run the `config-init` [Development Task](/docs/dev.md#development-tasks) to gene
 > This uses the [1Password CLI](https://developer.1password.com/docs/cli/) to inject relevant secrets. You must have
 > access to the MAGIC 1Password vault to run this task.
 
+To populate `LANTERN_SITE_UNTRUSTED_CLOUDFRONT_DIST_LIVE`:
+
+1. setup [Infrastructure As Code](/docs/infrastructure.md#infrastructure-as-code)
+2. run `opentofu output site_cf_id`
+
 ## Adding configuration options
 
 See the [Development](/docs/dev.md#adding-configuration-options) documentation.

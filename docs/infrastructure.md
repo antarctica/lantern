@@ -61,8 +61,8 @@ reverse proxying. The BAS HAProxy load balancer proxies applicable requests to e
 
 ## Infrastructure as Code
 
-[OpenTofu](https://opentofu.org), an open-source fork of the [Terraform](https://www.terraform.io) infrastructure as
-code tool, is used to manage some project infrastructure in `resources/infra/main.tf`.
+[OpenTofu](https://opentofu.org), an open-source fork of [Terraform](https://www.terraform.io) manages project
+infrastructure in `resources/infra/main.tf` where possible/pragmatic.
 
 Remote state is managed by the [BAS Terraform Remote State 🛡️](https://gitlab.data.bas.ac.uk/WSF/terraform-remote-state)
 project.

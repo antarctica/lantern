@@ -90,7 +90,7 @@ record = make_record(
     purpose="Item to test all supported Collection properties are recognised and presented correctly.",
 )
 record.metadata.maintenance = Maintenance(
-    maintenance_frequency=MaintenanceFrequencyCode.AS_NEEDED, progress=ProgressCode.COMPLETED
+    maintenance_frequency=MaintenanceFrequencyCode.UNKNOWN, progress=ProgressCode.REQUIRED
 )
 record.identification.dates = Dates(
     creation=Date(date=date(2023, 10, 1), precision=DatePrecisionCode.YEAR),

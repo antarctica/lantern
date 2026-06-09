@@ -5,10 +5,10 @@ from typing import Any
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
 from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 
-from lantern.lib.metadata_library.models.record.elements.common import Constraints, Contacts
+from lantern.lib.metadata_library.models.record.elements.common import Constraints, Contacts, Maintenance
 from lantern.lib.metadata_library.models.record.elements.data_quality import DomainConsistency
 from lantern.lib.metadata_library.models.record.elements.metadata import Metadata
-from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
+from lantern.lib.metadata_library.models.record.enums import ContactRoleCode, MaintenanceFrequencyCode, ProgressCode
 from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS as OPEN_ACCESS_PERMISSION
 from lantern.lib.metadata_library.models.record.presets.citation import make_magic_citation
 from lantern.lib.metadata_library.models.record.presets.conformance import MAGIC_ADMINISTRATION_V1, MAGIC_DISCOVERY_V2
@@ -30,6 +30,7 @@ class RecordMagic(Record):
     At a lower level, this method extends a minimal ISO record with:
     - a domain consistency element for the MAGIC Discovery profile (appendix 1)
     - default metadata constraints for open access and the CC BY-ND-v4 licence
+    - default metadata maintenance (frequency: "as needed",  progress: "completed")
     - the required MAGIC contact (Discovery profile appendix 2) as the metadata and identification point of contact
     - an identification identifier using the Data Catalogue namespace based on the file identifier
     - an identification contact for UKRI as a rights holder
@@ -38,13 +39,44 @@ class RecordMagic(Record):
     - if admin metadata is included, a domain consistency element for the MAGIC Administration profile (appendix 1)
     - if admin metadata is included, the metadata encoded within the identification supplemental info element
 
+    Non-standard parameters can be used to set the metadata date_stamp and/or maintenance properties without needing to
+    pass a minimal metadata element (which requires a contact).
+
+    NOTE: This does not apply when creating a record from a config via `loads()`.
+
     Examples:
     1. Minimal, without admin metadata:
     ```
     RecordMagic(
         file_identifier="x",
-        hierarchy_level=HierarchyLevelCode.DATASET,
-        identification=Identification(title="x", abstract="x", dates=Dates(creation=Date(date=datetime.now(tz=UTC))))
+        hierarchy_level=HierarchyLevelCode.PRODUCT,
+        identification=Identification(
+            title="x",
+            abstract="x",
+            dates=Dates(creation=Date(date=datetime.now(tz=UTC)))
+            edition="x",
+            constraints=Constraints(
+                [
+                    Constraint(
+                        type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.UNRESTRICTED
+                    ),
+                    Constraint(type=ConstraintTypeCode.USAGE, restriction_code=ConstraintRestrictionCode.LICENSE),
+                ]
+            ),
+            extents=Extents(
+                [
+                    Extent(
+                        identifier="bounding",
+                        geographic=ExtentGeographic(
+                            bounding_box=BoundingBox(
+                                west_longitude=0, east_longitude=0, south_latitude=0, north_latitude=0
+                            )
+                        ),
+                    )
+                ]
+            ),
+        ),
+        data_quality=DataQuality(lineage=Lineage(statement="x")),
     )
     ```
 
@@ -52,25 +84,40 @@ class RecordMagic(Record):
     ```
     RecordMagic(
         file_identifier="x",
-        hierarchy_level=HierarchyLevelCode.DATASET,
-        identification=Identification(title="x", abstract="x", dates=Dates(creation=Date(date=datetime.now(tz=UTC)))),
+        ...,
         admin_keys=AdministrationKeys(...),
         admin_meta=AdministrationMetadata(id="x"),
     )
     ```
 
+    3. Minimal, without custom metadata date stamp:
+    ```
+    RecordMagic(
+        file_identifier="x",
+        hierarchy_level=HierarchyLevelCode.PRODUCT,
+        meta_date_stamp=datetime(2014, 6, 30, tzinfo=UTC).date(),
+        ...
+    )
+    ```
     """
 
     def __init__(self, **kwargs: Any) -> None:
         """
         Process defaults.
 
-        Inject metadata element with optional datestamp.
+        Inject required metadata element with optional date stamp and/or maintenance from non-standard properties.
         """
         # prepare metadata element
-        date_stamp: date | None = kwargs.pop("date_stamp", None)
-        magic = make_magic_role({ContactRoleCode.POINT_OF_CONTACT})
-        kwargs["metadata"] = Metadata(contacts=Contacts([magic]), date_stamp=date_stamp)
+        _contacts = Contacts([make_magic_role({ContactRoleCode.POINT_OF_CONTACT})])
+        _metadata: Metadata | None = kwargs.pop("metadata", Metadata(contacts=_contacts))
+        _meta_date_stamp: date | None = kwargs.pop("meta_date_stamp", None)
+        _meta_maintenance: Maintenance | None = kwargs.pop("meta_maintenance", None)
+        _metadata.contacts = _contacts
+        if isinstance(_meta_date_stamp, date):
+            _metadata.date_stamp = _meta_date_stamp
+        if isinstance(_meta_maintenance, Maintenance):
+            _metadata.maintenance = _meta_maintenance
+        kwargs["metadata"] = _metadata
 
         # prepare optional administration element
         self._admin_keys: AdministrationKeys | None = kwargs.pop("admin_keys", None)
@@ -88,13 +135,24 @@ class RecordMagic(Record):
             raise TypeError(msg)
 
         self._set_metadata_constraints()
+        self._set_metadata_maintenance()
         self._set_contacts()
         self._set_cat_identifier()
         self._set_citation()
+        self._set_maintenance()
         self._set_admin()
         self._set_profiles()
 
         super().__post_init__()
+
+    @staticmethod
+    def __set_maintenance(prop: Maintenance | None) -> Maintenance:
+        """Set resource/metadata maintenance information to conventional values if needed."""
+        default = Maintenance(maintenance_frequency=MaintenanceFrequencyCode.AS_NEEDED, progress=ProgressCode.COMPLETED)
+        if prop:
+            default.maintenance_frequency = prop.maintenance_frequency or default.maintenance_frequency
+            default.progress = prop.progress or default.progress
+        return default
 
     def _set_metadata_constraints(self) -> None:
         """
@@ -103,6 +161,10 @@ class RecordMagic(Record):
         Restricted metadata is not yet supported.
         """
         self.metadata.constraints = Constraints([OPEN_ACCESS, CC_BY_ND_V4])
+
+    def _set_metadata_maintenance(self) -> None:
+        """Set metadata maintenance if needed."""
+        self.metadata.maintenance = self.__set_maintenance(prop=self.metadata.maintenance)
 
     def _set_contacts(self) -> None:
         """
@@ -134,6 +196,10 @@ class RecordMagic(Record):
             identifiers=self.identification.identifiers,
         )
 
+    def _set_maintenance(self) -> None:
+        """Set resource maintenance if needed."""
+        self.identification.maintenance = self.__set_maintenance(prop=self.identification.maintenance)
+
     def _set_admin(self) -> None:
         """Set administration metadata if provided."""
         if isinstance(self._admin_keys, AdministrationKeys) and isinstance(self._admin_meta, AdministrationMetadata):
@@ -158,6 +224,9 @@ class RecordMagic(Record):
         Create a Record from a dict loaded from a JSON schema instance.
 
         Known to violate method override rules due to differing signature.
+
+        Does not support non-standard keys for setting metadata date-stamp and/or maintenance
+        (include a metadata element as normal).
         """
         record = super().loads(value=value, check_supported=check_supported, logger=logger, **kwargs)
         admin_meta = get_admin(keys=admin_keys, record=record) if admin_keys else None
@@ -169,6 +238,7 @@ class RecordMagic(Record):
             identification=record.identification,
             data_quality=record.data_quality,
             distribution=record.distribution,
+            # extra
             admin_keys=admin_keys,
             admin_meta=admin_meta,
         )

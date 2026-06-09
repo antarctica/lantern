@@ -7,24 +7,36 @@ from bas_metadata_library.standards.magic_administration.v1.utils import set_adm
 
 from lantern.lib.metadata_library.models.record.elements.common import (
     Citation,
+    Constraint,
+    Constraints,
     Contact,
     ContactIdentity,
     Contacts,
     Date,
     Dates,
     Identifier,
+    Maintenance,
 )
 from lantern.lib.metadata_library.models.record.elements.data_quality import (
     DataQuality,
     DomainConsistencies,
     DomainConsistency,
+    Lineage,
 )
-from lantern.lib.metadata_library.models.record.elements.identification import Identification
+from lantern.lib.metadata_library.models.record.elements.identification import (
+    BoundingBox,
+    Extent,
+    ExtentGeographic,
+    Extents,
+    Identification,
+)
 from lantern.lib.metadata_library.models.record.enums import (
     ConstraintRestrictionCode,
     ConstraintTypeCode,
     ContactRoleCode,
     HierarchyLevelCode,
+    MaintenanceFrequencyCode,
+    ProgressCode,
 )
 from lantern.lib.metadata_library.models.record.presets.base import RecordMagic, RecordMagicOpen
 from lantern.lib.metadata_library.models.record.presets.contacts import UKRI_RIGHTS_HOLDER, make_magic_role
@@ -62,13 +74,12 @@ class TestRecordMagic:
     """Test record with magic profiles and defaults."""
 
     def test_init(self):
-        """Can create a minimal Record element from directly assigned properties."""
+        """Can create a minimal Record from directly assigned properties."""
         date_ = datetime(2014, 6, 30, tzinfo=UTC).date()
-        hierarchy_level = HierarchyLevelCode.PRODUCT
         value = "x"
         record = RecordMagic(
             file_identifier="x",
-            hierarchy_level=hierarchy_level,
+            hierarchy_level=HierarchyLevelCode.PRODUCT,
             identification=Identification(title=value, abstract=value, dates=Dates(creation=Date(date=date_))),
         )
 
@@ -112,26 +123,73 @@ class TestRecordMagic:
         )
         assert len(results) == 1
 
+    @pytest.mark.parametrize("has_frequency", [False, True])
+    @pytest.mark.parametrize("has_progress", [False, True])
+    def test_metadata_maintenance(self, has_frequency: bool, has_progress: bool):
+        """
+        Can include default metadata maintenace using a non-standard parameter.
+
+        To avoid needing to specify a minimal Metadata element.
+        """
+        default_frequency = MaintenanceFrequencyCode.AS_NEEDED
+        active_frequency = MaintenanceFrequencyCode.NOT_PLANNED
+        default_progress = ProgressCode.COMPLETED
+        active_progress = ProgressCode.ON_GOING
+
+        maintenance = Maintenance(
+            maintenance_frequency=default_frequency if not has_frequency else active_frequency,
+            progress=default_progress if not has_progress else active_progress,
+        )
+        exp_frequency = active_frequency if has_frequency else default_frequency
+        exp_progress = active_progress if has_progress else default_progress
+
+        date_ = datetime(2014, 6, 30, tzinfo=UTC).date()
+        record = RecordMagic(
+            file_identifier="x",
+            hierarchy_level=HierarchyLevelCode.PRODUCT,
+            meta_maintenance=maintenance if has_frequency or has_progress else None,
+            identification=Identification(title="x", abstract="x", dates=Dates(creation=Date(date=date_))),
+        )
+        assert record.metadata.maintenance.maintenance_frequency == exp_frequency
+        assert record.metadata.maintenance.progress == exp_progress
+
     def test_metadata_contact(self, fx_lib_record_config_min_magic: dict):
         """Can include MAGIC as metadata point of contact."""
         expected = make_magic_role({ContactRoleCode.POINT_OF_CONTACT})
         record = RecordMagic.loads(fx_lib_record_config_min_magic)
         assert record.metadata.contacts == [expected]
 
-    def test_metadata_datestamp(self):
-        """Can specify a metadata date stamp."""
+    def test_metadata_date_stamp(self):
+        """
+        Can specify a metadata date stamp using a non-standard parameter.
+
+        To avoid needing to specify a minimal Metadata element.
+        """
         expected = datetime(2014, 6, 30, tzinfo=UTC).date()
         date_ = datetime(2014, 6, 30, tzinfo=UTC).date()
         hierarchy_level = HierarchyLevelCode.PRODUCT
-        value = "x"
         record = RecordMagic(
             file_identifier="x",
             hierarchy_level=hierarchy_level,
-            date_stamp=expected,
-            identification=Identification(title=value, abstract=value, dates=Dates(creation=Date(date=date_))),
+            meta_date_stamp=expected,
+            identification=Identification(title="x", abstract="x", dates=Dates(creation=Date(date=date_))),
         )
 
         assert record.metadata.date_stamp == expected
+
+    @pytest.mark.parametrize("has_meta", [False, True])
+    def test_metadata(self, fx_lib_record_config_min_magic: dict, has_meta: bool):
+        """
+        Can include metadata element overriding some class defaults.
+
+        Date stamp and maintenance info. Contacts, constraints, etc. are hard-coded.
+        """
+        expected = "2020-04-20" if has_meta else "2014-06-30"
+        if has_meta:
+            fx_lib_record_config_min_magic["metadata"]["date_stamp"] = expected
+
+        record = RecordMagic.loads(fx_lib_record_config_min_magic)
+        assert record.metadata.date_stamp.isoformat() == expected
 
     def test_catalogue_identifier(self, fx_lib_record_config_min_magic: dict):
         """Can include an identifier using the catalogue namespace."""
@@ -285,6 +343,46 @@ class TestRecordMagic:
         record = RecordMagic.loads(fx_lib_record_config_min_magic)
         assert record.identification.other_citation_details == expected
 
+    @pytest.mark.parametrize("has_frequency", [False, True])
+    @pytest.mark.parametrize("has_progress", [False, True])
+    def test_maintenance(self, fx_lib_record_config_min_magic: dict, has_frequency: bool, has_progress: bool):
+        """Can include default resource maintenace."""
+        default_frequency = MaintenanceFrequencyCode.AS_NEEDED
+        active_frequency = MaintenanceFrequencyCode.NOT_PLANNED
+        default_progress = ProgressCode.COMPLETED
+        active_progress = ProgressCode.ON_GOING
+
+        maintenance = Maintenance(
+            maintenance_frequency=default_frequency if not has_frequency else active_frequency,
+            progress=default_progress if not has_progress else active_progress,
+        )
+        fx_lib_record_config_min_magic["identification"]["maintenance"] = {
+            "maintenance_frequency": default_frequency if not has_frequency else active_frequency,
+            "progress": default_progress if not has_progress else active_progress,
+        }
+        exp_frequency = active_frequency if has_frequency else default_frequency
+        exp_progress = active_progress if has_progress else default_progress
+
+        # via direct properties
+        date_stamp = datetime(2014, 6, 30, tzinfo=UTC).date()
+        record = RecordMagic(
+            file_identifier="x",
+            hierarchy_level=HierarchyLevelCode.PRODUCT,
+            identification=Identification(
+                title="x",
+                abstract="x",
+                dates=Dates(creation=Date(date=date_stamp)),
+                maintenance=maintenance if has_frequency or has_progress else None,
+            ),
+        )
+        assert record.identification.maintenance.maintenance_frequency == exp_frequency
+        assert record.identification.maintenance.progress == exp_progress
+
+        # via loading from dict
+        record = RecordMagic.loads(fx_lib_record_config_min_magic)
+        assert record.identification.maintenance.maintenance_frequency == exp_frequency
+        assert record.identification.maintenance.progress == exp_progress
+
     def test_admin(self, fx_admin_meta_keys: AdministrationKeys, fx_admin_meta_element: AdministrationMetadata):
         """
         Can create a minimal Record element with administration metadata from directly assigned properties.
@@ -318,6 +416,45 @@ class TestRecordMagic:
         assert isinstance(record, RecordMagic)
         result = get_admin(keys=fx_admin_meta_keys, record=record)
         assert isinstance(result, AdministrationMetadata)
+
+    @pytest.mark.cov()
+    def test_valid(self):
+        """Can create a minimal Record, valid against catalogue requirements and profiles."""
+        date_ = datetime(2014, 6, 30, tzinfo=UTC).date()
+        record = RecordMagic(
+            file_identifier="x",
+            hierarchy_level=HierarchyLevelCode.PRODUCT,
+            identification=Identification(
+                title="x",
+                abstract="x",
+                dates=Dates(creation=Date(date=date_)),
+                edition="x",
+                constraints=Constraints(
+                    [
+                        Constraint(
+                            type=ConstraintTypeCode.ACCESS, restriction_code=ConstraintRestrictionCode.UNRESTRICTED
+                        ),
+                        Constraint(type=ConstraintTypeCode.USAGE, restriction_code=ConstraintRestrictionCode.LICENSE),
+                    ]
+                ),
+                extents=Extents(
+                    [
+                        Extent(
+                            identifier="bounding",
+                            geographic=ExtentGeographic(
+                                bounding_box=BoundingBox(
+                                    west_longitude=0, east_longitude=0, south_latitude=0, north_latitude=0
+                                )
+                            ),
+                        )
+                    ]
+                ),
+            ),
+            data_quality=DataQuality(lineage=Lineage(statement="x")),
+        )
+
+        assert isinstance(record, RecordMagic)
+        record.validate()
 
 
 class TestRecordMagicOpen:
@@ -425,3 +562,35 @@ class TestRecordMagicOpen:
         metadata_permission = admin_meta.metadata_permissions[0]
         assert metadata_permission.directory == "*"
         assert metadata_permission.group == "*"
+
+    @pytest.mark.cov()
+    def test_valid(self, fx_admin_meta_keys: AdministrationKeys):
+        """Can create a minimal Record, valid against catalogue requirements and profiles."""
+        date_ = datetime(2014, 6, 30, tzinfo=UTC).date()
+        record = RecordMagicOpen(
+            file_identifier="x",
+            hierarchy_level=HierarchyLevelCode.PRODUCT,
+            identification=Identification(
+                title="x",
+                abstract="x",
+                dates=Dates(creation=Date(date=date_)),
+                edition="x",
+                extents=Extents(
+                    [
+                        Extent(
+                            identifier="bounding",
+                            geographic=ExtentGeographic(
+                                bounding_box=BoundingBox(
+                                    west_longitude=0, east_longitude=0, south_latitude=0, north_latitude=0
+                                )
+                            ),
+                        )
+                    ]
+                ),
+            ),
+            data_quality=DataQuality(lineage=Lineage(statement="x")),
+            admin_keys=fx_admin_meta_keys,
+        )
+
+        assert isinstance(record, RecordMagic)
+        record.validate()

@@ -689,11 +689,11 @@ class TestItemSummaryBase:
         fx_item_summary_base_model_min.record.identification.title = "_x_"
         assert fx_item_summary_base_model_min.title_fmt == "<em>x</em>"
 
-    @pytest.mark.parametrize(("value", "expected"), [(None, None), ("_x_", "<em>x</em>")])
+    @pytest.mark.parametrize(("value", "expected"), [(None, None), ("_x_", "<p><em>x</em></p>")])
     def test_summary_fmt(
         self, fx_item_summary_base_model_min: ItemSummaryBase, value: str | None, expected: str | None
     ):
-        """Can get summary (purpose) with HTML formatting but without wrapping paragraph tags if defined."""
+        """Can get summary (purpose) with HTML formatting if defined."""
         fx_item_summary_base_model_min.record.identification.purpose = value
         assert fx_item_summary_base_model_min.summary_fmt == expected
 

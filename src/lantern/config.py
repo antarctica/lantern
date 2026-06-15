@@ -76,7 +76,7 @@ class Config:
         TEMPLATES_ITEM_MAPS_ENDPOINT: str
         TEMPLATES_ITEM_CONTACT_ENDPOINT: str
         TEMPLATES_ITEM_VERSIONS_ENDPOINT: str
-        TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY: str
+        TEMPLATES_TURNSTILE_KEY: str
         TEMPLATES_ALGOLIA_APP_ID: str
         TEMPLATES_ALGOLIA_SEARCH_API_KEY: str
         TEMPLATES_ALGOLIA_INDEX_NAME: str
@@ -117,7 +117,7 @@ class Config:
             "TEMPLATES_PLAUSIBLE_ID": self.TEMPLATES_PLAUSIBLE_ID,
             "TEMPLATES_ITEM_MAPS_ENDPOINT": self.TEMPLATES_ITEM_MAPS_ENDPOINT,
             "TEMPLATES_ITEM_CONTACT_ENDPOINT": self.TEMPLATES_ITEM_CONTACT_ENDPOINT,
-            "TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": self.TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY,
+            "TEMPLATES_TURNSTILE_KEY": self.TEMPLATES_TURNSTILE_KEY,
             "TEMPLATES_ITEM_VERSIONS_ENDPOINT": self.TEMPLATES_ITEM_VERSIONS_ENDPOINT,
             "TEMPLATES_ALGOLIA_APP_ID": self.TEMPLATES_ALGOLIA_APP_ID,
             "TEMPLATES_ALGOLIA_SEARCH_API_KEY": self.TEMPLATES_ALGOLIA_SEARCH_API_KEY,
@@ -323,10 +323,10 @@ class Config:
             return self._env.str("CONTACT_ENDPOINT", validate=validate.URL())
 
     @property
-    def TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY(self) -> str:
+    def TEMPLATES_TURNSTILE_KEY(self) -> str:
         """Site key for public facing Cloudflare Turnstile bot protection widget."""
-        with self._env.prefixed(self._app_prefix), self._env.prefixed("TEMPLATES_"), self._env.prefixed("ITEM_"):
-            return self._env.str("CONTACT_TURNSTILE_KEY")
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("TEMPLATES_"):
+            return self._env.str("TURNSTILE_KEY")
 
     @property
     def TEMPLATES_ITEM_VERSIONS_ENDPOINT(self) -> str:

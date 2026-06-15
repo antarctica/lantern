@@ -453,9 +453,9 @@ class ItemSummaryBase(ItemCore):
 
     @property
     def summary_fmt(self) -> str | None:
-        """Formatted summary (purpose), without wrapping <p> tags, if available."""
+        """Formatted summary (purpose), if available."""
         _summary = self.record.identification.purpose
-        return md_as_html_unwrapped(_summary) if _summary else None
+        return md_as_html(_summary) if _summary else None
 
     @property
     def restricted(self) -> bool:

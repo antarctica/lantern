@@ -210,7 +210,7 @@ class SiteMeta:
     - plausible_id: Plausible Analytics site identifier
     - embedded_maps_endpoint: BAS Embedded Maps Service endpoint
     - items_enquires_endpoint: endpoint for item enquiries form
-    - items_enquires_turnstile_key: site key for item enquiries Cloudflare Turnstile widget
+    - turnstile_key: site key for item enquiries Cloudflare Turnstile widget
     - algolia_id: Algolia site identifier
     - algolia_key: non-senstitive Algolia search API key
     - algolia_index: name of Algolia search index
@@ -233,7 +233,7 @@ class SiteMeta:
     plausible_id: str
     embedded_maps_endpoint: str
     items_enquires_endpoint: str
-    items_enquires_turnstile_key: str
+    turnstile_key: str
     algolia_id: str
     algolia_key: str
     algolia_index: str
@@ -309,7 +309,7 @@ class SiteMeta:
         - plausible_id
         - embedded_maps_domain
         - items_enquires_endpoint
-        - items_enquires_turnstile_key
+        - turnstile_key
         - algolia_id
         - algolia_key
         - algolia_index
@@ -331,7 +331,7 @@ class SiteMeta:
                 "plausible_id": config.TEMPLATES_PLAUSIBLE_ID,
                 "embedded_maps_endpoint": config.TEMPLATES_ITEM_MAPS_ENDPOINT,
                 "items_enquires_endpoint": config.TEMPLATES_ITEM_CONTACT_ENDPOINT,
-                "items_enquires_turnstile_key": config.TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY,
+                "turnstile_key": config.TEMPLATES_TURNSTILE_KEY,
                 "algolia_id": config.TEMPLATES_ALGOLIA_APP_ID,
                 "algolia_key": config.TEMPLATES_ALGOLIA_SEARCH_API_KEY,
                 "algolia_index": config.TEMPLATES_ALGOLIA_INDEX_NAME,

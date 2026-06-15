@@ -779,3 +779,35 @@ class TestItemSummaryBase:
             )
 
         assert fx_item_summary_base_model_min.graphic_href == expected
+
+    @pytest.mark.parametrize(
+        ("resource_type", "count", "expected"),
+        [
+            (HierarchyLevelCode.PRODUCT, 0, None),
+            (HierarchyLevelCode.COLLECTION, 0, None),
+            (HierarchyLevelCode.COLLECTION, 1, "1 item"),
+            (HierarchyLevelCode.COLLECTION, 2, "2 items"),
+            (HierarchyLevelCode.PAPER_MAP_PRODUCT, 1, "1 side"),
+            (HierarchyLevelCode.PAPER_MAP_PRODUCT, 2, "2 sides"),
+        ],
+    )
+    def test_children(
+        self,
+        fx_item_summary_base_model_min: ItemSummaryBase,
+        resource_type: HierarchyLevelCode,
+        count: int,
+        expected: int,
+    ):
+        """Can get formatted count of parent -> child relations."""
+        fx_item_summary_base_model_min.record.hierarchy_level = resource_type
+        for _ in range(count):
+            aggregation = Aggregation(
+                identifier=Identifier(identifier="x", namespace="x"),
+                association_type=AggregationAssociationCode.IS_COMPOSED_OF,
+                initiative_type=AggregationInitiativeCode.PAPER_MAP
+                if HierarchyLevelCode.PAPER_MAP_PRODUCT
+                else AggregationInitiativeCode.COLLECTION,
+            )
+            fx_item_summary_base_model_min.record.identification.aggregations.append(aggregation)
+
+        assert fx_item_summary_base_model_min.children == expected

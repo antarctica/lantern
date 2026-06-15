@@ -307,6 +307,9 @@ class TestSiteMetadata:
             embedded_maps_endpoint=expected,
             items_enquires_endpoint=expected,
             items_enquires_turnstile_key=expected,
+            algolia_id=expected,
+            algolia_key=expected,
+            algolia_index=expected,
             generator=expected,
             version=expected,
         )
@@ -320,6 +323,9 @@ class TestSiteMetadata:
         assert meta.embedded_maps_endpoint == expected
         assert meta.items_enquires_endpoint == expected
         assert meta.items_enquires_turnstile_key == expected
+        assert meta.algolia_id == expected
+        assert meta.algolia_key == expected
+        assert meta.algolia_index == expected
         assert meta.generator == expected
         assert meta.version == expected
         assert meta.build_time == fx_freezer_time
@@ -348,6 +354,9 @@ class TestSiteMetadata:
             embedded_maps_endpoint=expected_str,
             items_enquires_endpoint=expected_str,
             items_enquires_turnstile_key=expected_str,
+            algolia_id=expected_str,
+            algolia_key=expected_str,
+            algolia_index=expected_str,
             generator=expected_str,
             version=expected_str,
             build_time=expected_time,
@@ -465,6 +474,9 @@ class TestExportMetadata:
             embedded_maps_endpoint=expected_str,
             items_enquires_endpoint=expected_str,
             items_enquires_turnstile_key=expected_str,
+            algolia_id=expected_str,
+            algolia_key=expected_str,
+            algolia_index=expected_str,
             generator=expected_str,
             version=expected_str,
             parallel_jobs=expected_int,

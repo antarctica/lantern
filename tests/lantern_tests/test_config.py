@@ -80,6 +80,7 @@ class TestConfig:
                 compact=True
             ),
             "STORE_ALGOLIA_APP_ID": "x",
+            "STORE_ALGOLIA_INDEX_NAME": "records_all_v1",
             "STORE_ALGOLIA_WRITE_API_KEY": redacted_value,
             "STORE_GITLAB_ENDPOINT": "https://gitlab.example.com",
             "STORE_GITLAB_TOKEN": redacted_value,
@@ -88,6 +89,9 @@ class TestConfig:
             "STORE_GITLAB_CACHE_PATH": str(fx_config.STORE_GITLAB_CACHE_PATH),
             "TEMPLATES_CACHE_BUST_VALUE": fx_config.TEMPLATES_CACHE_BUST_VALUE,
             "TEMPLATES_PLAUSIBLE_ID": "x",
+            "TEMPLATES_ALGOLIA_APP_ID": "x",
+            "TEMPLATES_ALGOLIA_SEARCH_API_KEY": "x",  # not sensitive
+            "TEMPLATES_ALGOLIA_INDEX_NAME": "records_all_v1",
             "TEMPLATES_ITEM_MAPS_ENDPOINT": "https://embedded-maps.data.bas.ac.uk/v1",
             "TEMPLATES_ITEM_CONTACT_ENDPOINT": "https://example.com/contact",
             "TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": "1x00000000000000000000AA",
@@ -109,6 +113,7 @@ class TestConfig:
         assert output == expected
         assert len(output["STORE_GITLAB_CACHE_PATH"]) > 0
         assert len(output["TEMPLATES_CACHE_BUST_VALUE"]) > 0
+        assert output["TEMPLATES_ALGOLIA_INDEX_NAME"] == output["STORE_ALGOLIA_INDEX_NAME"]
 
     def test_validate(self, fx_config: Config):
         """Can validate config where the configuration is OK."""
@@ -188,7 +193,9 @@ class TestConfig:
             ),
             (
                 {
-                    "LANTERN_TEMPLATES_PLAUSIBLE_ID": None,
+                    "LANTERN_TEMPLATES_ALGOLIA_APP_ID": None,
+                    "LANTERN_TEMPLATES_ALGOLIA_SEARCH_API_KEY": "x",
+                    "LANTERN_TEMPLATES_PLAUSIBLE_ID": "x",
                     "LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT": "x",
                     "LANTERN_TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": "x",
                     "LANTERN_TEMPLATES_ITEM_VERSIONS_ENDPOINT": "x",
@@ -196,6 +203,18 @@ class TestConfig:
             ),
             (
                 {
+                    "LANTERN_TEMPLATES_ALGOLIA_APP_ID": "x",
+                    "LANTERN_TEMPLATES_ALGOLIA_SEARCH_API_KEY": None,
+                    "LANTERN_TEMPLATES_PLAUSIBLE_ID": "x",
+                    "LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT": "x",
+                    "LANTERN_TEMPLATES_TURNSTILE_KEY": "x",
+                    "LANTERN_TEMPLATES_ITEM_VERSIONS_ENDPOINT": "x",
+                }
+            ),
+            (
+                {
+                    "LANTERN_TEMPLATES_ALGOLIA_APP_ID": "x",
+                    "LANTERN_TEMPLATES_ALGOLIA_SEARCH_API_KEY": "x",
                     "LANTERN_TEMPLATES_PLAUSIBLE_ID": "x",
                     "LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT": None,
                     "LANTERN_TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": "x",
@@ -204,6 +223,8 @@ class TestConfig:
             ),
             (
                 {
+                    "LANTERN_TEMPLATES_ALGOLIA_APP_ID": "x",
+                    "LANTERN_TEMPLATES_ALGOLIA_SEARCH_API_KEY": "x",
                     "LANTERN_TEMPLATES_PLAUSIBLE_ID": "x",
                     "LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT": "x",
                     "LANTERN_TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": None,
@@ -212,6 +233,8 @@ class TestConfig:
             ),
             (
                 {
+                    "LANTERN_TEMPLATES_ALGOLIA_APP_ID": "x",
+                    "LANTERN_TEMPLATES_ALGOLIA_SEARCH_API_KEY": "x",
                     "LANTERN_TEMPLATES_PLAUSIBLE_ID": "x",
                     "LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT": "x",
                     "LANTERN_TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": "x",
@@ -345,6 +368,8 @@ class TestConfig:
             ("STORE_GITLAB_DEFAULT_BRANCH", "x", False),
             ("STORE_GITLAB_CACHE_PATH", Path("x").resolve(), False),
             ("TEMPLATES_PLAUSIBLE_ID", "x", False),
+            ("TEMPLATES_ALGOLIA_APP_ID", "x", False),
+            ("TEMPLATES_ALGOLIA_SEARCH_API_KEY", "x", False),
             ("TEMPLATES_ITEM_CONTACT_ENDPOINT", "https://example.com", False),
             ("TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY", "x", False),
             ("TEMPLATES_ITEM_VERSIONS_ENDPOINT", "https://example.com", False),

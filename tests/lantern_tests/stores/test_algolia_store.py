@@ -1,4 +1,5 @@
 import logging
+from typing import cast
 
 import pytest
 from algoliasearch.search.models import FetchedIndex
@@ -83,8 +84,11 @@ class TestAlgoliaStore:
             fx_revision_model_min.file_revision = "xx"
 
         fx_algolia_store.push([fx_revision_model_min])
-        result: ObjectRecord = fx_algolia_store._client.get_object(
-            index_name=fx_algolia_store._index, object_id=fx_revision_model_min.file_identifier
+        result = cast(
+            ObjectRecord,
+            fx_algolia_store._client.get_object(
+                index_name=fx_algolia_store._index, object_id=fx_revision_model_min.file_identifier
+            ),
         )
         assert result["objectRevID"] == fx_revision_model_min.file_revision
 

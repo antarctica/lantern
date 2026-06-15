@@ -1,6 +1,6 @@
 interactions:
 - request:
-    body: '{"requests": [{"action": "addObject", "body": {"objectID": "x", "objectType": "DATASET", "objectRevID": "x", "objectRevDate": 1404086400, "title": "x", "summary": "x", "_recordData": "[\"o\", \"x\", \"x\", \"2014-06-30\"]"}}]}'
+    body: '{"requests": [{"action": "addObject", "body": {"objectID": "x", "objectType": "DATASET", "objectRevID": "x", "objectRevDate": 1404086400, "name": "x", "summary": "x", "restricted": true, "objectRecData": "[\"o\", \"x\", \"x\", \"2014-06-30\"]"}}]}'
     headers:
       Accept:
       - '*/*'
@@ -161,7 +161,7 @@ interactions:
     uri: https://x-dsn.algolia.net/1/indexes/x/x
   response:
     body:
-      string: '{"objectType":"DATASET","objectRevID":"x","objectRevDate":1404086400,"title":"x","summary":"x","_recordData":"[\"o\",\"x\", \"x\", \"2014-06-30\"]","objectID":"x"}'
+      string: '{"objectType":"DATASET","objectRevID":"x","objectRevDate":1404086400,"name":"x","summary":"x","objectRecData":"[\"o\",\"x\", \"x\", \"2014-06-30\"]","objectID":"x"}'
     headers:
       Accept-Encoding:
       - deflate, gzip

@@ -22,7 +22,7 @@ interactions:
     uri: https://x-dsn.algolia.net/1/indexes/x/browse
   response:
     body:
-      string: '{"hits":[{"objectType":"DATASET","objectRevID":"y","objectRevDate":1404086400,"title":"y","summary":"y","_recordData":"[\"o\",\"x\", \"x\", \"2014-06-30\"]","objectID":"y"},{"objectType":"DATASET","objectRevID":"x","objectRevDate":1404086400,"title":"x","summary":"x","_recordData":"[\"o\",\"x\", \"x\", \"2014-06-30\"]","objectID":"x"}],"nbHits":2,"page":0,"nbPages":1,"hitsPerPage":1000,"processingTimeMS":0,"query":"","params":""}'
+      string: '{"hits":[{"objectType":"DATASET","objectRevID":"y","objectRevDate":1404086400,"name":"y","summary":"y","restricted":false,"objectRecData":"[\"o\",\"x\", \"x\", \"2014-06-30\"]","objectID":"y"},{"objectType":"DATASET","objectRevID":"x","objectRevDate":1404086400,"name":"x","summary":"x","restricted":true,"objectRecData":"[\"o\",\"x\", \"x\", \"2014-06-30\"]","objectID":"x"}],"nbHits":2,"page":0,"nbPages":1,"hitsPerPage":1000,"processingTimeMS":0,"query":"","params":""}'
     headers:
       Accept-Encoding:
       - deflate, gzip

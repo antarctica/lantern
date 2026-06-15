@@ -1,0 +1,100 @@
+document.addEventListener('DOMContentLoaded', () => {
+  const default_img = "data:image/png;base64,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";
+
+  const { liteClient: algoliasearch } = window["algoliasearch/lite"];
+
+  const searchClient = algoliasearch("{{ data.algolia_id }}", "{{ data.algolia_key }}");
+
+  const search = instantsearch({
+    indexName: "{{ data.algolia_index }}",
+    searchClient: searchClient,
+  });
+
+  const searchInput = document.getElementById('search-query');
+
+  search.addWidgets([
+    instantsearch.connectors.connectSearchBox((renderOptions, isFirstRender) => {
+      const { query, refine } = renderOptions;
+
+      if (isFirstRender) {
+        searchInput.addEventListener('input', (event) => {
+          refine(event.target.value);
+        });
+      }
+
+      searchInput.value = query;
+    })(),
+    instantsearch.widgets.configure({
+      hitsPerPage: 200,
+    }),
+    instantsearch.widgets.hits({
+      container: "#search-hits",
+      cssClasses: {
+        list: 'space-y-4',
+      },
+      templates: {
+        empty(results) {
+          return `<p>Sorry, no results were found for "${results.query}".</p>`;
+        },
+        item(hit) {
+          // Implements a rough approximation of and should be kept in sync with, `common.item_summary` Jinja template.
+
+          const fragments = [];
+
+          // Always include type
+          fragments.push(`<span><i class="${hit.objectTypeIcon}" aria-hidden="true"></i> ${hit.type}</span>`);
+
+          // Optional: edition
+          if (hit.edition) {
+            fragments.push(`<span>${hit.edition}</span>`);
+          }
+
+          // Optional: date
+          if (hit.date) {
+            fragments.push(`<span>${hit.date}</span>`);
+          }
+
+          // Optional: children count
+          if (hit.childrenCountFmt) {
+            fragments.push(`<span>${hit.childrenCountFmt}</span>`);
+          }
+
+          // Optional: restricted
+          if (hit.restricted) {
+            fragments.push(`<span><i class="fa-regular fa-lock-keyhole" aria-hidden="true"></i> Restricted</span>`);
+          }
+
+          const footerHtml = fragments.join('<span class="text-grey-100 dark:text-grey-700">|</span>');
+          const imgSrc = hit.imageUrl || default_img;
+          const imgAlt = `Thumbnail for ${hit.name}`;
+
+          return `
+            <article class="p-2 border-1 border-grey-100 dark:border-grey-700 p-2 flex flex-col h-full">
+              <div class="flex h-full">
+                <div class="w-1/6 shrink-0 self-center">
+                  <img class="w-full h-auto object-contain" src="${imgSrc}" alt="${imgAlt}" />
+                </div>
+                <div class="w-5/6 flex flex-col h-full pl-2">
+                  <header>
+                    <a class="font-bold underline decoration-blue-500 hover:decoration-grey-500 dark:decoration-blue-300 dark:hover:decoration-grey-300 text-xl"
+                       href="/items/${hit.objectID}">
+                      ${hit.nameHtml}
+                    </a>
+                  </header>
+                  <article class="py-2 flex-grow overflow-auto">
+                    ${hit.summaryHtml}
+                  </article>
+                  <footer class="mt-auto flex items-center space-x-2 text-sm text-grey-500 dark:text-grey-300">
+                    ${footerHtml}
+                  </footer>
+                </div>
+              </div>
+            </article>
+          `;
+        }
+      }
+    }),
+  ]);
+
+  search.start();
+});

@@ -29,7 +29,7 @@
   }
 %}
 
-{% macro html_head(data) %}
+{% macro html_head(data, extra_scripts=None) %}
   <head>
     {{ head_meta(data) }}
     {{ head_title(data.html_title_suffixed) }}
@@ -39,7 +39,7 @@
     {{ head_favicon(data.build_key) }}
     {{ head_api_catalogue() }}
     {{ head_styles(data.build_key) }}
-    {{ head_scripts(data) }}
+    {{ head_scripts(data, extra_scripts) }}
   </head>
 {% endmacro %}
 
@@ -83,13 +83,16 @@
   <link rel="stylesheet" href="https://kit.fontawesome.com/032ef5c342.css" crossorigin="anonymous">
 {% endmacro %}
 
-{% macro head_scripts(data) %}
+{% macro head_scripts(data, extra_scripts) %}
   {{ script_sentry(data.build_key) }}
   {{ script_plausible(data.plausible_id) }}
   {{ script_turnstile() }}
   {{ script_enhancements(data.build_key) }}
   {% if data.html_schema_org_content %}
     {{ script_schema_org(data.html_schema_org_content) }}
+  {% endif %}
+  {% if extra_scripts %}
+    {{ extra_scripts }}
   {% endif %}
 {% endmacro %}
 

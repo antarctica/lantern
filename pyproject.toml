@@ -65,9 +65,23 @@ test = [
 
 [tool.uv.exclude-newer-package]
 bas-metadata-library = false
+cryptography = "2026-06-10T00:00:00Z"
 
 [tool.uv.audit]
-ignore = ["GHSA-hg6j-4rv6-33pg", "GHSA-jg22-mg44-37j8"]  # aiohttp < 3.14 (triggered error in python-gitlab)
+ignore = [
+    # aiohttp < 3.14 (triggers error in python-gitlab)
+    "GHSA-hg6j-4rv6-33pg",
+    "GHSA-jg22-mg44-37j8",
+    "GHSA-4fvr-rgm6-gqmc",
+    "GHSA-4m7w-qmgq-4wj5",
+    "GHSA-xcgm-r5h9-7989",
+    "GHSA-g3cq-j2xw-wf74",
+    "GHSA-63hw-fmq6-xxg2",
+    "GHSA-hpj7-wq8m-9hgp",
+    "GHSA-m6qw-4cw2-hm4m",
+    "GHSA-2fqr-mr3j-6wp8",
+    "GHSA-9x8q-7h8h-wcw9"
+]
 
 [[tool.uv.index]]
 name = "self"
@@ -240,7 +254,7 @@ LANTERN_TEMPLATES_ALGOLIA_APP_ID = "x"
 LANTERN_TEMPLATES_ALGOLIA_SEARCH_API_KEY="x"
 LANTERN_TEMPLATES_PLAUSIBLE_ID = "x"
 LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT = "https://example.com/contact" # must be "https://example.com/contact"
-LANTERN_TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY = "1x00000000000000000000AA" # https://developers.cloudflare.com/turnstile/troubleshooting/testing/
+LANTERN_TEMPLATES_TURNSTILE_KEY = "1x00000000000000000000AA" # https://developers.cloudflare.com/turnstile/troubleshooting/testing/
 LANTERN_TEMPLATES_ITEM_VERSIONS_ENDPOINT = "https://example.com"
 LANTERN_SITE_UNTRUSTED_AWS_ACCESS_ID = "x"
 LANTERN_SITE_UNTRUSTED_AWS_ACCESS_SECRET = "x"

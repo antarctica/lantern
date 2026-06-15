@@ -94,7 +94,7 @@ class TestConfig:
             "TEMPLATES_ALGOLIA_INDEX_NAME": "records_all_v1",
             "TEMPLATES_ITEM_MAPS_ENDPOINT": "https://embedded-maps.data.bas.ac.uk/v1",
             "TEMPLATES_ITEM_CONTACT_ENDPOINT": "https://example.com/contact",
-            "TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": "1x00000000000000000000AA",
+            "TEMPLATES_TURNSTILE_KEY": "1x00000000000000000000AA",
             "TEMPLATES_ITEM_VERSIONS_ENDPOINT": "https://example.com",
             "SITE_UNTRUSTED_AWS_ACCESS_ID": "x",
             "SITE_UNTRUSTED_AWS_ACCESS_SECRET": redacted_value,
@@ -197,7 +197,7 @@ class TestConfig:
                     "LANTERN_TEMPLATES_ALGOLIA_SEARCH_API_KEY": "x",
                     "LANTERN_TEMPLATES_PLAUSIBLE_ID": "x",
                     "LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT": "x",
-                    "LANTERN_TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": "x",
+                    "LANTERN_TEMPLATES_TURNSTILE_KEY": "x",
                     "LANTERN_TEMPLATES_ITEM_VERSIONS_ENDPOINT": "x",
                 }
             ),
@@ -217,7 +217,7 @@ class TestConfig:
                     "LANTERN_TEMPLATES_ALGOLIA_SEARCH_API_KEY": "x",
                     "LANTERN_TEMPLATES_PLAUSIBLE_ID": "x",
                     "LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT": None,
-                    "LANTERN_TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": "x",
+                    "LANTERN_TEMPLATES_TURNSTILE_KEY": "x",
                     "LANTERN_TEMPLATES_ITEM_VERSIONS_ENDPOINT": "x",
                 }
             ),
@@ -227,7 +227,7 @@ class TestConfig:
                     "LANTERN_TEMPLATES_ALGOLIA_SEARCH_API_KEY": "x",
                     "LANTERN_TEMPLATES_PLAUSIBLE_ID": "x",
                     "LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT": "x",
-                    "LANTERN_TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": None,
+                    "LANTERN_TEMPLATES_TURNSTILE_KEY": None,
                     "LANTERN_TEMPLATES_ITEM_VERSIONS_ENDPOINT": "x",
                 }
             ),
@@ -237,7 +237,7 @@ class TestConfig:
                     "LANTERN_TEMPLATES_ALGOLIA_SEARCH_API_KEY": "x",
                     "LANTERN_TEMPLATES_PLAUSIBLE_ID": "x",
                     "LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT": "x",
-                    "LANTERN_TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": "x",
+                    "LANTERN_TEMPLATES_TURNSTILE_KEY": "x",
                     "LANTERN_TEMPLATES_ITEM_VERSIONS_ENDPOINT": None,
                 }
             ),
@@ -371,7 +371,7 @@ class TestConfig:
             ("TEMPLATES_ALGOLIA_APP_ID", "x", False),
             ("TEMPLATES_ALGOLIA_SEARCH_API_KEY", "x", False),
             ("TEMPLATES_ITEM_CONTACT_ENDPOINT", "https://example.com", False),
-            ("TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY", "x", False),
+            ("TEMPLATES_TURNSTILE_KEY", "x", False),
             ("TEMPLATES_ITEM_VERSIONS_ENDPOINT", "https://example.com", False),
             ("SITE_UNTRUSTED_AWS_ACCESS_ID", "x", False),
             ("SITE_UNTRUSTED_AWS_ACCESS_SECRET", "x", True),

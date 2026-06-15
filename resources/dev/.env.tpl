@@ -18,7 +18,7 @@ LANTERN_STORE_ALGOLIA_WRITE_API_KEY="op://Infrastructure/hqm2s5h7zjuxljy7owrkzef
 
 LANTERN_TEMPLATES_PLAUSIBLE_ID="op://Infrastructure/SCAR ADD Metadata Toolbox - Plausible site/password"
 LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT="op://Infrastructure/SCAR ADD Metadata Toolbox - Power Automate item enquires/password"
-LANTERN_TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY="op://Infrastructure/SCAR ADD Metadata Toolbox - Cloudflare Turnstile Captcha/username"
+LANTERN_TEMPLATES_TURNSTILE_KEY="op://Infrastructure/SCAR ADD Metadata Toolbox - Cloudflare Turnstile Captcha/username"
 LANTERN_TEMPLATES_ITEM_VERSIONS_ENDPOINT="op://Infrastructure/SCAR ADD Metadata Toolbox - GitLab Store/GitLab Project Web URL/web_url"
 LANTERN_TEMPLATES_ALGOLIA_APP_ID="op://Infrastructure/hqm2s5h7zjuxljy7owrkzefyke/Application ID/password"
 LANTERN_TEMPLATES_ALGOLIA_SEARCH_API_KEY="op://Infrastructure/hqm2s5h7zjuxljy7owrkzefyke/Frontend API Key/password"

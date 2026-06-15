@@ -306,7 +306,7 @@ class TestSiteMetadata:
             plausible_id=expected,
             embedded_maps_endpoint=expected,
             items_enquires_endpoint=expected,
-            items_enquires_turnstile_key=expected,
+            turnstile_key=expected,
             algolia_id=expected,
             algolia_key=expected,
             algolia_index=expected,
@@ -322,7 +322,7 @@ class TestSiteMetadata:
         assert meta.plausible_id == expected
         assert meta.embedded_maps_endpoint == expected
         assert meta.items_enquires_endpoint == expected
-        assert meta.items_enquires_turnstile_key == expected
+        assert meta.turnstile_key == expected
         assert meta.algolia_id == expected
         assert meta.algolia_key == expected
         assert meta.algolia_index == expected
@@ -353,7 +353,7 @@ class TestSiteMetadata:
             plausible_id=expected_str,
             embedded_maps_endpoint=expected_str,
             items_enquires_endpoint=expected_str,
-            items_enquires_turnstile_key=expected_str,
+            turnstile_key=expected_str,
             algolia_id=expected_str,
             algolia_key=expected_str,
             algolia_index=expected_str,
@@ -473,7 +473,7 @@ class TestExportMetadata:
             plausible_id=expected_str,
             embedded_maps_endpoint=expected_str,
             items_enquires_endpoint=expected_str,
-            items_enquires_turnstile_key=expected_str,
+            turnstile_key=expected_str,
             algolia_id=expected_str,
             algolia_key=expected_str,
             algolia_index=expected_str,

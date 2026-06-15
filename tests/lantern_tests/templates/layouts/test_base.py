@@ -1,19 +1,18 @@
 import pytest
 from bs4 import BeautifulSoup
-from jinja2 import Environment, PackageLoader, select_autoescape
 
 from lantern.models.site import OpenGraphMeta, SchemaOrgMeta, SiteMeta
+from lantern.utils import get_jinja_env
 
 
 class TestLayoutBase:
     """Test base layout template."""
 
     @staticmethod
-    def _render(site_meta: SiteMeta) -> str:
-        _loader = PackageLoader("lantern", "resources/templates")
-        jinja = Environment(loader=_loader, autoescape=select_autoescape(), trim_blocks=True, lstrip_blocks=True)
-        template = """{% extends "_layouts/base.html.j2" %}{% block content %}...{% endblock %}"""
-        return jinja.from_string(template).render(meta=site_meta)
+    def _render(site_meta: SiteMeta, template: str | None = None) -> str:
+        jinja = get_jinja_env()
+        _template = """{% extends "_layouts/base.html.j2" %}{% block content %}...{% endblock %}"""
+        return jinja.from_string(template or _template).render(meta=site_meta)
 
     def test_head(self, fx_site_meta: SiteMeta):
         """Can set common page elements."""
@@ -30,6 +29,12 @@ class TestLayoutBase:
         schema_org_item = fx_site_meta.html_schema_org_content
         schema_org_page = html.head.find(name="script", type="application/ld+json").string
         assert schema_org_item.strip() == schema_org_page.strip()
+
+    def test_head_extra_js(self, fx_site_meta: SiteMeta):
+        """Can include additional scripts via block."""
+        template = """{% extends "_layouts/base.html.j2" %}{% block head_scripts_extra %}foo{% endblock %}{% block content %}...{% endblock %}"""
+        html = BeautifulSoup(self._render(fx_site_meta, template), parser="html.parser", features="lxml")
+        assert "foo" in str(html)
 
     def test_cache_busting(self, fx_site_meta: SiteMeta):
         """Can set cache busting query string param on relevant resources."""

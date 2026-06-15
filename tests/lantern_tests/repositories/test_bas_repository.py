@@ -18,6 +18,7 @@ from lantern.repositories.bas import (
     MergeRequestNotFoundError,
     ProtectedGitBranchError,
 )
+from lantern.stores.algolia import AlgoliaStore
 from lantern.stores.gitlab import CommitResults, GitLabStore
 from lantern.stores.gitlab_cache import GitLabCachedStore
 
@@ -122,6 +123,12 @@ class TestBasRepository:
             assert isinstance(store, GitLabCachedStore)
             assert store._cache._path.name == expected_branch
 
+    def test_make_algolia_store(self, fx_bas_repo: BasRepository, fx_config: Config):
+        """Can get GitLab store for records store project/repo."""
+        store = fx_bas_repo._make_algolia_store()
+        assert isinstance(store, AlgoliaStore)
+        assert store._index == fx_config.STORE_ALGOLIA_INDEX_NAME
+
     @pytest.mark.cov()
     def test_make_gitlab_store_frozen_conflict(self, fx_bas_repo: BasRepository):
         """Cannot get frozen GitLab Store without caching."""
@@ -184,6 +191,31 @@ class TestBasRepository:
         """Cannot create a merge request within the records store project/repo."""
         merge = fx_bas_repo.create_merge_request(source_branch="y", target_branch="x", title="x", description="x")
         assert isinstance(merge, GitlabMergeRequest)
+
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    @pytest.mark.parametrize("branch", ["default", "!default"])
+    def test_complete_merge_request(self, mocker: MockerFixture, fx_bas_repo: BasRepository, branch: str):
+        """Can 'merge' a merge request in records store project/repo."""
+        mock_algolia = MagicMock(spec=AlgoliaStore)
+        mock_algolia.push.return_value = None
+        mocker.patch.object(fx_bas_repo, "_make_algolia_store", return_value=mock_algolia)
+
+        url = "https://gitlab.example.com/group/project/-/merge_requests/123"
+        mr = fx_bas_repo.select_merge_request(url=url)
+        mr.target_branch = branch
+
+        fx_bas_repo.complete_merge_request(mr)
+        result = fx_bas_repo.select_merge_request(mr.web_url)
+        assert result.state == "merged"
+
+        if branch == "default":
+            mock_algolia.push.assert_called_once()
+            # check file identifier of pushed record
+            args = [r.file_identifier for r in mock_algolia.push.call_args.kwargs["records"]]
+            assert args == ["a1b2c3"]
+        else:
+            mock_algolia.push.assert_not_called()
 
     @pytest.mark.vcr
     @pytest.mark.block_network

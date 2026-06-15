@@ -147,6 +147,7 @@
 {% endmacro %}
 
 {% macro item_summary(item) %}
+  {# This macro must be kept in sync with item template in `lantern/resources/templates/_assets/js/search.js.j2` #}
   {% call item_border(classes="p-2 flex flex-col h-full") %}
     <div class="flex h-full">
       <div class="w-1/6 shrink-0 self-center">

@@ -5,6 +5,7 @@ from functools import cached_property
 from algoliasearch.http.exceptions import RequestException
 from algoliasearch.search.client import SearchClientSync
 from algoliasearch.search.models import FetchedIndex
+from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 
 from lantern.models.item.algolia.item import ItemAlgolia, ObjectRecord
 from lantern.models.record.revision import RecordRevision
@@ -101,10 +102,14 @@ class AlgoliaStore(StoreBase):
             raise RecordNotFoundError(file_identifier) from e
         return ItemAlgolia(algolia_object=result).record
 
-    def push(self, records: Collection[RecordRevision]) -> None:
-        """Add or update records in index."""
+    def push(self, records: Collection[RecordRevision], admin_keys: AdministrationKeys | None = None) -> None:
+        """
+        Add or update records in index.
+
+        Administration metadata keys are needed to create ItemAlgolia instances from records (`restricted` property).
+        """
         self._logger.info(f"Upserting {len(records)} records.")
-        data = [dict(ItemAlgolia(record).object) for record in records]
+        data = [dict(ItemAlgolia(record=record, admin_keys=admin_keys).object) for record in records]
         self._client.save_objects(index_name=self._index, objects=data, wait_for_tasks=True)
 
     def freeze(self) -> None:

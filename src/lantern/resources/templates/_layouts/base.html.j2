@@ -1,9 +1,10 @@
 {% import '_macros/common.html.j2' as com %}
 {% import '_macros/site.html.j2' as site %}
+{% set extra_scripts %}{% block head_scripts_extra %}{% endblock %}{% endset %}
 
 <!DOCTYPE html>
 <html lang="en">
-  {{ site.html_head(meta) }}
+  {{ site.html_head(meta, extra_scripts) }}
   <body
     id="{{ com.back_to_top_id() }}"
     class="font-sans text-base font-normal text-grey-900 dark:text-grey-100 {{ com.bg_classes() }} {{ com.body_env_classes(meta.env) }}"

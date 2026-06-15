@@ -6,6 +6,7 @@ from freezegun.api import FrozenDateTimeFactory
 from jinja2 import Environment, PackageLoader, select_autoescape
 
 from lantern.models.site import OpenGraphMeta, SchemaOrgMeta, SiteMeta
+from lantern.utils import get_jinja_env
 from tests.conftest import freezer_time
 
 
@@ -25,6 +26,9 @@ class TestMacrosSite:
             embedded_maps_endpoint="x",
             items_enquires_endpoint="x",
             items_enquires_turnstile_key="x",
+            algolia_id="x",
+            algolia_key="x",
+            algolia_index="x",
             generator="x",
             version="x",
         )
@@ -128,6 +132,15 @@ class TestMacrosSite:
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
         assert html.head.find(name="script", src=expected) is not None
 
+    @pytest.mark.cov()
+    def test_scripts_extra(self):
+        """Can include extra scripts."""
+        expected = "foo"
+        template = """{% import '_macros/site.html.j2' as site %}{{ site.head_scripts(meta, 'foo') }}"""
+        meta = self._site_meta()
+        html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
+        assert expected in str(html)
+
     def test_head_schema_org(self, freezer: FrozenDateTimeFactory, fx_freezer_time: datetime):
         """
         Can get schema.org script content with expected values from page.
@@ -161,6 +174,9 @@ class TestMacrosSite:
                 embedded_maps_endpoint="x",
                 items_enquires_endpoint="x",
                 items_enquires_turnstile_key="x",
+                algolia_id="x",
+                algolia_key="x",
+                algolia_index="x",
                 generator="x",
                 version="x",
             ),
@@ -173,7 +189,10 @@ class TestMacrosSite:
                 plausible_id="x",
                 embedded_maps_endpoint="x",
                 items_enquires_endpoint="x",
-                items_enquires_turnstile_key="x",
+                turnstile_key="x",
+                algolia_id="x",
+                algolia_key="x",
+                algolia_index="x",
                 generator="x",
                 version="x",
                 build_time=freezer_time(),
@@ -185,16 +204,22 @@ class TestMacrosSite:
             ),
         ],
     )
-    def test_html_head(self, meta: SiteMeta):
+    @pytest.mark.parametrize("extra_scripts", [None, "foo"])
+    def test_html_head(self, meta: SiteMeta, extra_scripts: str | None):
         """
         Can get HTML head elements.
 
-        Integration test for head HTML macro. Checks dynamic elements only.
-        Also acts as an implicit integration test for `head_scripts` macro.
+        Integration test for head HTML macro. Checks dynamic elements, including extra scripts content, only.
         """
-        cf_turnstile = "https://challenges.cloudflare.com/turnstile/v0/api.js"
-        template = """{% import '_macros/site.html.j2' as site %}{{ site.html_head(meta) }}"""
-        html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
+        expected_extra = "foo"
+        params: dict = {"meta": meta}
+        if extra_scripts:
+            params["extra"] = extra_scripts
+        call = """{{ site.html_head(meta, extra) }}""" if extra_scripts else """{{ site.html_head(meta) }}"""
+        template = """{% import '_macros/site.html.j2' as site %}""" + call
+
+        jinja = get_jinja_env()
+        html = BeautifulSoup(jinja.from_string(template).render(**params), parser="html.parser", features="lxml")
 
         assert html.head.meta["charset"] == "utf-8"
         assert html.head.title.string == meta.html_title_suffixed
@@ -210,7 +235,6 @@ class TestMacrosSite:
         assert html.head.find(name="link", rel="stylesheet", href="/static/css/main.css?v=000") is not None
 
         assert html.head.find(name="script", src=lambda s: s and meta.plausible_id in s) is not None
-        assert html.head.find(name="script", src=cf_turnstile) is not None
         assert html.head.find(name="script", src="/static/js/enhancements.js?v=000") is not None
 
         if meta.html_open_graph_tags:
@@ -225,6 +249,11 @@ class TestMacrosSite:
             assert html.head.find(name="script", type="application/ld+json") is not None
         else:
             assert html.head.find(name="script", type="application/ld+json") is None
+
+        if extra_scripts:
+            assert expected_extra in str(html)
+        else:
+            assert expected_extra not in str(html)
 
     def test_top_anchor(self):
         """Can get static page top anchor."""

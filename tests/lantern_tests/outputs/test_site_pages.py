@@ -19,6 +19,7 @@ class TestSitePagesOutput:
         """Can generate site content items."""
         expected_paths = [
             Path("404.html"),
+            Path("search/index.html"),
             Path("legal/accessibility/index.html"),
             Path("legal/cookies/index.html"),
             Path("legal/copyright/index.html"),
@@ -49,6 +50,7 @@ class TestSitePagesOutput:
         """Can generate invalidation paths for content."""
         output = SitePagesOutput(logger=fx_logger, meta=fx_export_meta)
         assert output.invalidation_keys == [
+            "/search/index.html",
             "/legal/accessibility/index.html",
             "/legal/cookies/index.html",
             "/legal/copyright/index.html",

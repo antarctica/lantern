@@ -132,8 +132,7 @@ def _merge_request(logger: logging.Logger, cat: BasCatalogue, merge_url: str) ->
     """Merge a merge request for a changeset and return a list of identifiers for records it contained."""
     mr = cat.repo.select_merge_request(url=merge_url)
     logger.info(f"MR set to '{mr.web_url}'.")
-    mr.merge(should_remove_source_branch=True)
-
+    cat.repo.complete_merge_request(mr)
     ids = {Path(d["new_path"]).stem for diff_ in mr.diffs.list() for d in mr.diffs.get(diff_.id).diffs}
     logger.info(f"{len(ids)} records in changeset.")
     return ids

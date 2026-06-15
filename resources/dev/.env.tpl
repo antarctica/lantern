@@ -20,6 +20,8 @@ LANTERN_TEMPLATES_PLAUSIBLE_ID="op://Infrastructure/SCAR ADD Metadata Toolbox - 
 LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT="op://Infrastructure/SCAR ADD Metadata Toolbox - Power Automate item enquires/password"
 LANTERN_TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY="op://Infrastructure/SCAR ADD Metadata Toolbox - Cloudflare Turnstile Captcha/username"
 LANTERN_TEMPLATES_ITEM_VERSIONS_ENDPOINT="op://Infrastructure/SCAR ADD Metadata Toolbox - GitLab Store/GitLab Project Web URL/web_url"
+LANTERN_TEMPLATES_ALGOLIA_APP_ID="op://Infrastructure/hqm2s5h7zjuxljy7owrkzefyke/Application ID/password"
+LANTERN_TEMPLATES_ALGOLIA_SEARCH_API_KEY="op://Infrastructure/hqm2s5h7zjuxljy7owrkzefyke/Frontend API Key/password"
 
 LANTERN_SITE_UNTRUSTED_AWS_ACCESS_ID=""  # populate with per-user/instance IAM credentials
 LANTERN_SITE_UNTRUSTED_AWS_ACCESS_SECRET=""  # populate with per-user/instance IAM credentials

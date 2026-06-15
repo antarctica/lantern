@@ -69,6 +69,7 @@ class Config:
         STORE_GITLAB_DEFAULT_BRANCH: str
         STORE_GITLAB_CACHE_PATH: str
         STORE_ALGOLIA_APP_ID: str
+        STORE_ALGOLIA_INDEX_NAME: str
         STORE_ALGOLIA_WRITE_API_KEY: str
         TEMPLATES_CACHE_BUST_VALUE: str
         TEMPLATES_PLAUSIBLE_ID: str
@@ -76,6 +77,9 @@ class Config:
         TEMPLATES_ITEM_CONTACT_ENDPOINT: str
         TEMPLATES_ITEM_VERSIONS_ENDPOINT: str
         TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY: str
+        TEMPLATES_ALGOLIA_APP_ID: str
+        TEMPLATES_ALGOLIA_SEARCH_API_KEY: str
+        TEMPLATES_ALGOLIA_INDEX_NAME: str
         SITE_UNTRUSTED_S3_BUCKET_TESTING: str
         SITE_UNTRUSTED_S3_BUCKET_LIVE: str
         SITE_UNTRUSTED_CLOUDFRONT_DIST_LIVE: str
@@ -107,6 +111,7 @@ class Config:
             "STORE_GITLAB_DEFAULT_BRANCH": self.STORE_GITLAB_DEFAULT_BRANCH,
             "STORE_GITLAB_CACHE_PATH": str(self.STORE_GITLAB_CACHE_PATH.resolve()),
             "STORE_ALGOLIA_APP_ID": self.STORE_ALGOLIA_APP_ID,
+            "STORE_ALGOLIA_INDEX_NAME": self.STORE_ALGOLIA_INDEX_NAME,
             "STORE_ALGOLIA_WRITE_API_KEY": self.STORE_ALGOLIA_WRITE_API_KEY_SAFE,
             "TEMPLATES_CACHE_BUST_VALUE": self.TEMPLATES_CACHE_BUST_VALUE,
             "TEMPLATES_PLAUSIBLE_ID": self.TEMPLATES_PLAUSIBLE_ID,
@@ -114,6 +119,9 @@ class Config:
             "TEMPLATES_ITEM_CONTACT_ENDPOINT": self.TEMPLATES_ITEM_CONTACT_ENDPOINT,
             "TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY": self.TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY,
             "TEMPLATES_ITEM_VERSIONS_ENDPOINT": self.TEMPLATES_ITEM_VERSIONS_ENDPOINT,
+            "TEMPLATES_ALGOLIA_APP_ID": self.TEMPLATES_ALGOLIA_APP_ID,
+            "TEMPLATES_ALGOLIA_SEARCH_API_KEY": self.TEMPLATES_ALGOLIA_SEARCH_API_KEY,
+            "TEMPLATES_ALGOLIA_INDEX_NAME": self.TEMPLATES_ALGOLIA_INDEX_NAME,
             "SITE_UNTRUSTED_S3_BUCKET_TESTING": self.SITE_UNTRUSTED_S3_BUCKET_TESTING,
             "SITE_UNTRUSTED_S3_BUCKET_LIVE": self.SITE_UNTRUSTED_S3_BUCKET_LIVE,
             "SITE_UNTRUSTED_CLOUDFRONT_DIST_LIVE": self.SITE_UNTRUSTED_CLOUDFRONT_DIST_LIVE,
@@ -273,6 +281,11 @@ class Config:
             return self._env.str("APP_ID")
 
     @property
+    def STORE_ALGOLIA_INDEX_NAME(self) -> str:
+        """Index name for Algolia search store."""
+        return "records_all_v1"
+
+    @property
     def STORE_ALGOLIA_WRITE_API_KEY(self) -> str:
         """API key for Algolia search store."""
         with self._env.prefixed(self._app_prefix), self._env.prefixed("STORE_ALGOLIA_"):
@@ -324,6 +337,34 @@ class Config:
         """
         with self._env.prefixed(self._app_prefix), self._env.prefixed("TEMPLATES_"), self._env.prefixed("ITEM_"):
             return self._env.str("VERSIONS_ENDPOINT", validate=validate.URL())
+
+    @property
+    def TEMPLATES_ALGOLIA_APP_ID(self) -> str:
+        """
+        Application ID for client-side site search.
+
+        Locked to Algolia search store value.
+        """
+        return self.STORE_ALGOLIA_APP_ID
+
+    @property
+    def TEMPLATES_ALGOLIA_SEARCH_API_KEY(self) -> str:
+        """
+        API key for client-side site search.
+
+        This value is not sensitive and different to `STORE_ALGOLIA_WRITE_API_KEY`.
+        """
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("TEMPLATES_"), self._env.prefixed("ALGOLIA_"):
+            return self._env.str("SEARCH_API_KEY")
+
+    @property
+    def TEMPLATES_ALGOLIA_INDEX_NAME(self) -> str:
+        """
+        Index name for Algolia search store.
+
+        Locked to `STORE_ALGOLIA_INDEX_NAME` value.
+        """
+        return self.STORE_ALGOLIA_INDEX_NAME
 
     @property
     def SITE_UNTRUSTED_S3_BUCKET_TESTING(self) -> str:

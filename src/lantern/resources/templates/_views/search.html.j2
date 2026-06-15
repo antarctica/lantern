@@ -1,0 +1,27 @@
+{% extends "_layouts/page.html.j2" %}
+{% import '_macros/common.html.j2' as com %}
+
+{% set header_main = "Search" %}
+
+{% block page_content %}
+  {% call com.alert(shape='side', variant='purple', classes="space-y-2") %}
+    <p><i class="fa-regular fa-flask-round-potion"></i> This page is a very, <em>very</em> early and minimal protype.</p>
+  {% endcall %}
+
+  <noscript>
+    {% call com.alert(shape='side', variant='red', classes="space-y-2") %}
+      <p>This page requires JavaScript. No alternative is currently available.</p>
+    {% endcall %}
+  </noscript>
+  <div id="site-search" class="show-js hidden space-y-8">
+    <section>
+      <input id="search-query" class="{{ com.form_item_classes() }}" type="search" name="search-query">
+    </section>
+    <section id="search-hits" class="space-y-4"></section>
+  </div>
+{% endblock %}
+
+{% block head_scripts_extra %}
+  <script src="/static/js/lib/algolia.min.js?v={{ build_key }}"></script>
+  <script src="/static/js/search.js?v={{ build_key }}"></script>
+{% endblock %}

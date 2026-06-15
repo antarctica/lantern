@@ -36,6 +36,11 @@ class SitePagesOutput(OutputSite):
         """Site metadata per page view."""
         return {
             "_views/404.html.j2": SitePageMeta(title="Not Found", url="-", inc_meta=False),
+            "_views/search.html.j2": SitePageMeta(
+                title="Search",
+                url=f"{self._meta.base_url}/search",
+                description="BAS Data Catalogue search",
+            ),
             "_views/legal/accessibility.html.j2": SitePageMeta(
                 title="Accessibility Statement",
                 url=f"{self._meta.base_url}/legal/accessibility",

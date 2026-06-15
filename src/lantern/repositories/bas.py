@@ -2,6 +2,7 @@ import logging
 import re
 from collections.abc import Collection
 from functools import cached_property
+from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
@@ -16,6 +17,7 @@ from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
 from lantern.models.repository import GitUpsertContext, GitUpsertResults
 from lantern.repositories.base import RepositoryBase
+from lantern.stores.algolia import AlgoliaStore
 from lantern.stores.gitlab import GitLabSource, GitLabStore
 from lantern.stores.gitlab_cache import GitLabCachedStore
 
@@ -126,6 +128,15 @@ class BasRepository(RepositoryBase):
         cached_store.freeze()
         return cached_store
 
+    def _make_algolia_store(self) -> AlgoliaStore:
+        """Initialise an Algolia search store with a selected index."""
+        return AlgoliaStore(
+            logger=self._logger,
+            app_id=self._config.STORE_ALGOLIA_APP_ID,
+            api_key=self._config.STORE_ALGOLIA_WRITE_API_KEY,
+            index=self._config.STORE_ALGOLIA_INDEX_NAME,
+        )
+
     @staticmethod
     def _get_gitlab_merge_id_by_url(url: str) -> int:
         """Get GitLab merge request identifier from a URL."""
@@ -177,6 +188,22 @@ class BasRepository(RepositoryBase):
                 "description": description,
             }
         )
+
+    def complete_merge_request(self, mr: GitlabMergeRequest) -> None:
+        """
+        Merge a merge request in the default GitLab project.
+
+        Pushes merged records into Algolia search store where merging into the default branch.
+        """
+        mr.merge(should_remove_source_branch=True)
+        if mr.target_branch != self._config.STORE_GITLAB_DEFAULT_BRANCH:
+            return
+
+        gitlab = self._make_gitlab_store(mr.target_branch)
+        mr_record_ids = {Path(d["new_path"]).stem for diff_ in mr.diffs.list() for d in mr.diffs.get(diff_.id).diffs}
+        record_revisions = gitlab.select(file_identifiers=mr_record_ids)
+        algolia = self._make_algolia_store()
+        algolia.push(records=record_revisions, admin_keys=self._config.ADMIN_METADATA_KEYS)
 
     def select_issue(self, url: str) -> GitlabIssue:
         """Return a specific issue from a GitLab project specified by URL or raise a `IssueNotFoundError` exception."""

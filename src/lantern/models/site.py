@@ -211,6 +211,9 @@ class SiteMeta:
     - embedded_maps_endpoint: BAS Embedded Maps Service endpoint
     - items_enquires_endpoint: endpoint for item enquiries form
     - items_enquires_turnstile_key: site key for item enquiries Cloudflare Turnstile widget
+    - algolia_id: Algolia site identifier
+    - algolia_key: non-senstitive Algolia search API key
+    - algolia_index: name of Algolia search index
     - generator: name of application and source of records
     - version: version of application
     - build_time: time the build was triggered
@@ -231,6 +234,9 @@ class SiteMeta:
     embedded_maps_endpoint: str
     items_enquires_endpoint: str
     items_enquires_turnstile_key: str
+    algolia_id: str
+    algolia_key: str
+    algolia_index: str
     generator: str
     version: str
     build_time: datetime = field(default_factory=lambda: datetime.now(tz=UTC).replace(microsecond=0))
@@ -304,6 +310,9 @@ class SiteMeta:
         - embedded_maps_domain
         - items_enquires_endpoint
         - items_enquires_turnstile_key
+        - algolia_id
+        - algolia_key
+        - algolia_index
         - generator
         - build_repo_base_url
         - version
@@ -323,6 +332,9 @@ class SiteMeta:
                 "embedded_maps_endpoint": config.TEMPLATES_ITEM_MAPS_ENDPOINT,
                 "items_enquires_endpoint": config.TEMPLATES_ITEM_CONTACT_ENDPOINT,
                 "items_enquires_turnstile_key": config.TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY,
+                "algolia_id": config.TEMPLATES_ALGOLIA_APP_ID,
+                "algolia_key": config.TEMPLATES_ALGOLIA_SEARCH_API_KEY,
+                "algolia_index": config.TEMPLATES_ALGOLIA_INDEX_NAME,
                 "generator": config.NAME,
                 "version": config.VERSION,
                 "build_repo_ref": build_ref,

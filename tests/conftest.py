@@ -610,11 +610,14 @@ def fx_item_algolia_object_min() -> ObjectRecord:
     obj: ObjectRecord = {
         "objectID": "x",
         "objectType": "DATASET",
+        "objectTypeIcon": "fa-regular fa-cube",
         "objectRevID": "x",
         "objectRevDate": 1404086400,
-        "title": "x",
-        "summary": "x",
-        "_recordData": '["o", "x", "x", "2014-06-30"]',
+        "objectRecData": '["o", "x", "x", "2014-06-30"]',
+        "type": "DATASET",
+        "name": "x",
+        "nameHtml": "<em>x</em>",
+        "restricted": True,
     }
     return obj
 

@@ -79,7 +79,7 @@ class SchemaOrgMeta:
     image: str | None = field(default=None, metadata={"name": "image"})
     creator: list[SchemaOrgAuthor] | None = field(default_factory=list, metadata={"name": "creator"})
 
-    def _dumps(self) -> dict[str, str]:
+    def _dumps(self) -> dict[str, str | list[dict]]:
         """Compiled metadata."""
         doc = {}
         for f in fields(self):

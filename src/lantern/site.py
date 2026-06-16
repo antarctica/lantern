@@ -38,6 +38,7 @@ def _job_worker_store(store: StoreBase) -> StoreBase:
         _STORE_SINGLETON = store
         if isinstance(store, GitLabCachedStore):
             _STORE_SINGLETON.select()  # recreate flash cache
+    # noinspection PyTypeChecker
     return _STORE_SINGLETON
 
 
@@ -50,6 +51,7 @@ def _job_worker_iso_html_transform() -> etree.XSLT:
     global _ISO_HTML_XSLT_SINGLETON
     if _ISO_HTML_XSLT_SINGLETON is None:
         _ISO_HTML_XSLT_SINGLETON = RecordIsoHtmlOutput.create_xslt_transformer()
+    # noinspection PyTypeChecker
     return _ISO_HTML_XSLT_SINGLETON
 
 
@@ -161,7 +163,7 @@ class Site:
         """
         Execute a set of jobs in parallel to generate site content, checks and/or invalidation keys.
 
-        Returns generated content, checks and/or invalidation keys as a flattened list.
+        Returns generated content, checks or invalidation keys as a flattened list.
         """
         store = self._prep_store()
         start = time.monotonic()
@@ -172,7 +174,7 @@ class Site:
         self._logger.info(
             f"Generated {len(outputs)} site content/checks/keys in {round(time.monotonic() - start)} seconds"
         )
-        return outputs
+        return cast(list[SiteContent | Check | list[str]], outputs)
 
     def generate_content(
         self,

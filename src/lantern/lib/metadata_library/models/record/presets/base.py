@@ -109,7 +109,7 @@ class RecordMagic(Record):
         """
         # prepare metadata element
         _contacts = Contacts([make_magic_role({ContactRoleCode.POINT_OF_CONTACT})])
-        _metadata: Metadata | None = kwargs.pop("metadata", Metadata(contacts=_contacts))
+        _metadata: Metadata = kwargs.pop("metadata", Metadata(contacts=_contacts))
         _meta_date_stamp: date | None = kwargs.pop("meta_date_stamp", None)
         _meta_maintenance: Maintenance | None = kwargs.pop("meta_maintenance", None)
         _metadata.contacts = _contacts

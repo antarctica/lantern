@@ -25,6 +25,7 @@ class ChecksOutput(OutputSite):
         self._template_path = "_views/-/checks.html.j2"
 
         self._site_types = [
+            CheckType.NONE,
             CheckType.SITE_404,
             CheckType.SITE_API,
             CheckType.SITE_HEALTH,
@@ -50,9 +51,9 @@ class ChecksOutput(OutputSite):
             meta["build_ref"] = self._meta.build_repo_ref
         return meta
 
-    def _process(self) -> tuple[float, bool, dict[CheckState, int], list[CheckState], dict[str, list[Check]]]:
+    def _process(self) -> tuple[float, bool, dict[CheckState, int], list[Check], dict[str, list[Check]]]:
         """Process check results."""
-        duration = 0
+        duration: float = 0.0
         pass_fail = False
         stats = dict.fromkeys(CheckState, 0)
         site_checks = []
@@ -65,6 +66,9 @@ class ChecksOutput(OutputSite):
             if check.type in self._site_types:
                 site_checks.append(check)
                 continue
+            if not check.file_identifier:
+                msg = "File identifier missing from resource check."
+                raise TypeError(msg) from None
             if check.file_identifier not in resource_checks:
                 resource_checks[check.file_identifier] = []
             resource_checks[check.file_identifier].append(check)

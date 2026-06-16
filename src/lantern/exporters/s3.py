@@ -81,14 +81,6 @@ class S3Exporter(ExporterBase):
             meta=item.object_meta,
         )
 
-    def _empty_bucket(self) -> None:
-        """Delete all keys from S3 bucket."""
-        for page in self._s3.get_paginator("list_objects_v2").paginate(Bucket=self._bucket):
-            keys = [{"Key": obj["Key"]} for obj in page.get("Contents", [])]
-            if not keys:
-                continue
-            self._s3.delete_objects(Bucket=self._bucket, Delete={"Objects": keys})
-
     def export(self, content: Collection[SiteContent]) -> None:
         """
         Persist content.

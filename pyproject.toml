@@ -47,6 +47,7 @@ dev = [
     "taskipy>=1.14.1",
     "ty>=0.0.15",
     "types-lxml>=2025.3.30",
+    {include-group = "test"},
 ]
 test = [
     "lxml>=5.4.0",

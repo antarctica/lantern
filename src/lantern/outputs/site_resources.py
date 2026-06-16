@@ -5,7 +5,7 @@ from importlib_resources import as_file as resources_as_file
 from importlib_resources import files as resources_files
 
 from lantern.models.checks import Check, CheckType
-from lantern.models.site import ExportMeta, SiteContent
+from lantern.models.site import ExportMeta, SiteContent, SiteRedirect
 from lantern.outputs.base import OutputSite
 
 
@@ -119,7 +119,12 @@ class SiteResourcesOutput(OutputSite):
 
     @property
     def _txt_outputs(self) -> list[SiteContent]:
-        """Output content for text based resources, including a basic health/availability indicator."""
+        """
+        Output content for text based resources, including a basic health/availability indicator.
+
+        This results in the `robots.txt` file being copied twice (to `/static/txt/robots.txt` and `/robots.txt`). This
+        is inefficient/inelegeant but simplistic.
+        """
         return [
             *self._package_contents(
                 package_ref=self._txt_src_ref,
@@ -127,7 +132,19 @@ class SiteResourcesOutput(OutputSite):
                 media_type="text/plain",
                 object_meta=self._object_meta,
                 glob="**/*.txt",
-            )
+            ),
+            *self._package_contents(
+                package_ref=self._txt_src_ref,
+                base_path=Path(),
+                media_type="text/plain",
+                glob="**/robots.txt",
+                object_meta=self._object_meta,
+                binary=True,
+            ),
+            SiteRedirect(
+                path=Path(".well-known") / "security.txt",
+                target=self._meta.base_url + f"/{self._base_path}/txt/security.txt",
+            ),
         ]
 
     def _js_dynamic(self, base_path: Path, media_type: str, object_meta: dict) -> list[SiteContent]:
@@ -192,7 +209,7 @@ class SiteResourcesOutput(OutputSite):
     @property
     def checks(self) -> list[Check]:
         """Output checks."""
-        _patterns = ("favicon.ico", "**/css/main.css", "**/txt/heartbeat.txt")
+        _patterns = ("favicon.ico", "robots.txt", "**/css/main.css", "**/txt/heartbeat.txt")
         subset = [o for o in self.content if any(o.path.match(p) for p in _patterns)]
         return [
             Check.from_site_content(content=c, check_type=CheckType.SITE_RESOURCES, base_url=self._meta.base_url)

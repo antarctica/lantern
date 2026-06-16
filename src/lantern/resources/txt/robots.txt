@@ -1,0 +1,4 @@
+User-agent: *
+
+# Don't allow indexing of internal, non-sensitive, pages
+Disallow: /-/

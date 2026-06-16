@@ -17,16 +17,18 @@ class TestSiteResourcesOutput:
     def test_content(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta):
         """Can generate site content items."""
         expected_path_media = {
+            Path("favicon.ico"): "image/x-icon",
+            Path("robots.txt"): "text/plain",
             Path("static/css/main.css"): "text/css",
             Path("static/fonts/work-sans.ttf"): "font/ttf",
             Path("static/fonts/work-sans-italic.ttf"): "font/ttf",
-            Path("favicon.ico"): "image/x-icon",
             Path("static/img/favicon.svg"): "image/svg+xml",
             Path("static/img/favicon-192.png"): "image/png",
             Path("static/img/favicon-512.png"): "image/png",
             Path("static/img/favicon-mask.png"): "image/png",
             Path("static/img/apple-touch-icon.png"): "image/png",
             Path("static/txt/heartbeat.txt"): "text/plain",
+            Path("static/txt/security.txt"): "text/plain",
             Path("static/js/enhancements.js"): "application/javascript",
             Path("static/js/lib/scalar.min.js"): "application/javascript",
             Path("static/json/manifest.webmanifest"): "application/manifest+json",
@@ -42,11 +44,14 @@ class TestSiteResourcesOutput:
             assert result.media_type == media_type
             assert result.object_meta == {"build_key": fx_export_meta.build_key}
 
+        catalog_redirect = outputs[Path(".well-known/security.txt")]
+        assert catalog_redirect.redirect == "https://example.com/static/txt/security.txt"
+
     def test_checks(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta):
         """Can generate checks for a subset of content."""
         output = SiteResourcesOutput(logger=fx_logger, meta=fx_export_meta)
         checks = output.checks
-        assert len(checks) == 3
+        assert len(checks) == 5
 
     def test_invalidation_keys(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta):
         """Can generate invalidation paths for content."""

@@ -34,19 +34,3 @@ class TestS3Exporter:
         assert result["ResponseMetadata"]["HTTPStatusCode"] == 200
         if redirect:
             assert result["WebsiteRedirectLocation"] == expected_redirect
-
-    @pytest.mark.cov()
-    @pytest.mark.parametrize("empty", [False, True])
-    def test_empty(self, fx_s3_exporter: S3Exporter, empty: bool):
-        """Can empty bucket contents some content."""
-        if not empty:
-            fx_s3_exporter._s3.put_object(Bucket=fx_s3_exporter._bucket, Key="x", Body="x", ContentType="text/plain")
-            before = fx_s3_exporter._s3.list_objects(Bucket=fx_s3_exporter._bucket)
-            assert len(before["Contents"]) == 1
-        else:
-            before = fx_s3_exporter._s3.list_objects(Bucket=fx_s3_exporter._bucket)
-            assert "contents" not in before
-
-        fx_s3_exporter._empty_bucket()
-        after = fx_s3_exporter._s3.list_objects(Bucket=fx_s3_exporter._bucket)
-        assert "contents" not in after

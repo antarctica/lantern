@@ -248,12 +248,14 @@ class GitLabStore(StoreBase):
 
         Fetches record configurations and head commit IDs.
         """
-        records = []
+        records: list[RecordRevision] = []
         self._logger.info("Fetching all remote records.")
         for item in self._project.repository_tree(path="records", ref=self._source.ref, recursive=True, iterator=True):
             if item["type"] == "blob" and item["path"].endswith(".json"):
                 file_identifier = item["path"].split("/")[-1].removesuffix(".json")
-                records.append(self._fetch_record_head_commit(file_identifier=file_identifier))
+                record = self._fetch_record_head_commit(file_identifier=file_identifier)
+                if record:
+                    records.append(record)
         return records
 
     def select(self, file_identifiers: set[str] | None = None) -> list[RecordRevision]:

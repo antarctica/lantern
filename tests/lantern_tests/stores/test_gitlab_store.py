@@ -1,5 +1,6 @@
 import json
 import logging
+from typing import cast
 
 import pytest
 from gitlab import Gitlab
@@ -49,7 +50,7 @@ class TestCommitResults:
 
     def test_unstructure(self):
         """Can serialise as JSON."""
-        expected = {
+        expected: dict = {
             "branch": "x",
             "commit": "x",
             "new_identifiers": ["a", "b", "c"],
@@ -116,7 +117,7 @@ class TestGitLabStore:
 
     def _fetch_all_records_head_commit(self) -> list[RecordRevision]:
         """Mock `_fetch_all_records_head_commit`."""
-        return [self._fetch_record_head_commit(fid) for fid in ["a1b2c3", "d4e5f6"]]
+        return [r for r in [self._fetch_record_head_commit(fid) for fid in ["a1b2c3", "d4e5f6"]] if r is not None]
 
     def test_init(self, fx_logger: logging.Logger, fx_config: Config, fx_gitlab_source: GitLabSource):
         """Can initialise store."""
@@ -182,14 +183,22 @@ class TestGitLabStore:
     @pytest.mark.cov()
     @pytest.mark.vcr
     @pytest.mark.block_network
-    def test_fetch_all_records_head_commit(self, mocker: MockerFixture, fx_gitlab_store: GitLabStore):
-        """Can get all records and their head commits in the remote repository."""
+    @pytest.mark.parametrize("exists", [True, False])
+    def test_fetch_all_records_head_commit(self, mocker: MockerFixture, fx_gitlab_store: GitLabStore, exists: bool):
+        """
+        Can get all records and their head commits in the remote repository if they exist.
+
+        Records not existing is an edge case as the records list is given by repository, based on its contents.
+        """
         mocker.patch.object(fx_gitlab_store, "_fetch_record_head_commit", side_effect=self._fetch_record_head_commit)
 
         results = fx_gitlab_store._fetch_all_records_head_commit()
         assert isinstance(results, list)
-        assert len(results) > 0
-        assert all(isinstance(r, RecordRevision) for r in results)
+        if exists:
+            assert len(results) > 0
+            assert all(isinstance(r, RecordRevision) for r in results)
+        else:
+            assert len(results) == 0
 
     @pytest.mark.parametrize("selected", [None, set(), {"a1b2c3"}, {"a1b2c3", "invalid"}])
     def test_select(self, mocker: MockerFixture, fx_gitlab_store: GitLabStore, selected: set[str] | None):
@@ -312,8 +321,7 @@ class TestGitLabStore:
     @pytest.mark.block_network
     def test_commit_no_changes(self, caplog: pytest.LogCaptureFixture, fx_gitlab_store: GitLabStore):
         """Does not commit records that haven't changed."""
-        record = self._fetch_record_head_commit("a1b2c3")
-
+        record = cast(Record, self._fetch_record_head_commit("a1b2c3"))
         fx_gitlab_store._commit(records=[record], title="x", message="x", author=("x", "x@example.com"))
         assert "No actions to perform, aborting" in caplog.text
 

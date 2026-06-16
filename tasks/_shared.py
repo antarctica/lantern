@@ -7,7 +7,7 @@ import sys
 import time
 from collections.abc import Callable, Collection, Generator, Mapping, Sequence
 from pathlib import Path
-from typing import Literal, cast, overload
+from typing import Literal, TypeVar, cast, overload
 
 import inquirer
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
@@ -16,6 +16,7 @@ from bas_metadata_library.standards.magic_administration.v1.utils import (
     AdministrationMetadataSubjectMismatchError,
 )
 from boto3 import client as S3Client  # noqa: N812
+from mypy_boto3_s3 import S3Client as S3ClientT
 from tasks._config import ExtraConfig
 
 from lantern.catalogues.bas import BasCatalogue
@@ -37,7 +38,7 @@ def init_logging(config: Config) -> logging.Logger:
     return logger
 
 
-def init_s3(config: Config) -> S3Client:  # ty: ignore[invalid-type-form]
+def init_s3(config: Config) -> S3ClientT:
     """Initialise S3 client."""
     return S3Client(
         "s3",
@@ -120,6 +121,9 @@ def parse_records(
 ) -> list[tuple[RecordCatalogue, Path]]: ...
 
 
+ParseRecordType = TypeVar("ParseRecordType", Record, RecordCatalogue)
+
+
 def parse_records(
     logger: logging.Logger,
     search_path: Path,
@@ -127,7 +131,7 @@ def parse_records(
     validate_base: bool = True,
     validate_profiles: bool = True,
     validate_catalogue: bool = False,
-) -> list[tuple[Record | RecordCatalogue, Path]]:
+) -> list[tuple[ParseRecordType, Path]]:
     """
     Try to create Records from record configurations within a directory.
 
@@ -141,7 +145,7 @@ def parse_records(
     Records are returned as a list of (RecordClass, Path) tuples, where 'Path' is the Path to the source file.
     """
     RecordClass = RecordCatalogue if validate_catalogue else Record  # noqa: N806
-    records: list[tuple[Record, Path]] = []
+    records: list[tuple[ParseRecordType, Path]] = []
 
     for config_path in _parse_configs(search_path, glob_pattern=glob_pattern):
         config, config_path = config_path
@@ -158,11 +162,9 @@ def parse_records(
             logger.warning(
                 f"Record '{config['file_identifier']}' contains unsupported content the catalogue will ignore."
             )
-        records.append((record, config_path))
+        records.append((cast(ParseRecordType, record), config_path))
 
     logger.info(f"Discovered {len(records)} valid records")
-    if validate_catalogue:
-        return cast(list[tuple[RecordCatalogue, Path]], records)  # ty:ignore[invalid-return-type]
     return records
 
 

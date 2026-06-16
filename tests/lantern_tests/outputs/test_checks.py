@@ -122,6 +122,27 @@ class TestChecksOutput:
         assert site_checks == expected_site_checks
         assert resource_checks == expected_resource_checks
 
+    @pytest.mark.cov()
+    def test_process_resource_no_fid(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta):
+        """Cannot process resource checks without a file identifier."""
+        output = ChecksOutput(
+            logger=fx_logger,
+            meta=fx_export_meta,
+            checks=[
+                Check(
+                    type=CheckType.ITEM_PAGES,
+                    url="x",
+                    file_identifier=None,
+                    state=CheckState.PASS,
+                    duration=0.1,
+                    result_http_status=HTTPStatus.OK,
+                    result_output="OK",
+                )
+            ],
+        )
+        with pytest.raises(TypeError, match=r"File identifier missing from resource check."):
+            _ = output._process()
+
     @pytest.mark.parametrize("build_ref", [True, False])
     def test_data(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta, build_ref: bool):
         """Can unstructure processed checks into simple types."""

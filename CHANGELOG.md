@@ -54,6 +54,12 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Refactoring `ItemCatalogueSummary` to derive from `ItemSummaryBase` rather than `ItemBase`
 * Updating project documentation
 * Updating project OpenAPI definition
+* Updating `uv` version
+* Switching to official `ty` pre-commit hook
+
+## Removed
+
+* Unused empty bucket S3 exporter method
 
 ## [0.14.0] - 2026-05-25
 

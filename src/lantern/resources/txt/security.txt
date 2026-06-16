@@ -1,0 +1,4 @@
+Canonical: https://data.bas.ac.uk/.well-known/security.txt
+Contact: mailto:servicedesk@bas.ac.uk
+Expires: 2026-11-11T00:00:00Z
+Preferred-Languages: en

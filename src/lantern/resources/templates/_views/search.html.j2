@@ -4,9 +4,7 @@
 {% set header_main = "Search" %}
 
 {% block page_content %}
-  {% call com.alert(shape='side', variant='purple', classes="space-y-2") %}
-    <p><i class="fa-regular fa-flask-round-potion"></i> This page is a very, <em>very</em> early and minimal protype.</p>
-  {% endcall %}
+  {{ com.experimental_page() }}
 
   <noscript>
     {% call com.alert(shape='side', variant='red', classes="space-y-2") %}

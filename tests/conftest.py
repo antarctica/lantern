@@ -218,7 +218,7 @@ Record (Configs) and Item fixtures
 |                 | RecordRevision           | fx_revision_model_min           | fx_revision_config_min          |
 |                 | ItemBase                 | fx_item_base_model_min          | fx_item_config_min_base         |
 |                 | ItemCatalogue            | fx_item_cat_model_min           | fx_item_config_min_catalogue    |
-|                 | ItemCatalogue            | fx_item_cat_model_min_open      | _item_cat_model_min             |
+|                 | ItemCatalogue            | fx_item_cat_model_open          | _item_cat_model_min             |
 |                 | ItemCataloguePhysicalMap | fx_item_physical_map_model_min  | fx_item_config_min_physical_map |
 """
 

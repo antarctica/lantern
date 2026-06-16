@@ -378,7 +378,7 @@ class TestExtent:
         assert extent.map_iframe == expected
 
 
-class TestItemCatalogueSummaryCatalogue:
+class TestItemCatalogueSummary:
     """
     Test Catalogue Item summary.
 

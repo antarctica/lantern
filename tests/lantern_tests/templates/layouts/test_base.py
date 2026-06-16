@@ -15,7 +15,7 @@ class TestLayoutBase:
         return jinja.from_string(template or _template).render(meta=site_meta)
 
     def test_head(self, fx_site_meta: SiteMeta):
-        """Can set common page elements."""
+        """Can set common head elements."""
         fx_site_meta.html_title = "x"
         fx_site_meta.html_open_graph = OpenGraphMeta(title="x", url="x")
         fx_site_meta.html_schema_org = SchemaOrgMeta(headline="x", url="x")

@@ -1,0 +1,86 @@
+{% extends '_layouts/page.html.j2' %}
+{% import '_macros/common.html.j2' as com %}
+
+{% set header_main = 'Roadmap and Changelog' %}
+
+{% macro section(slug='', title='') %}
+  <section id="{{ slug }}" class="space-y-4">
+    <h2 class="text-2xl">{{ title }}</h2>
+    {{ caller() }}
+  </section>
+{% endmacro %}
+
+{% macro subsection(title='') %}
+  <h3 class="text-xl">{{ title }}</h3>
+  {{ caller() }}
+{% endmacro %}
+
+{% block page_content %}
+  {{ com.experimental_page() }}
+
+  {% call section(slug='recently-released', title='Recently released') %}
+    {% call subsection(title='Geomatics Catalogue') %}
+      <p>We've added a new logical catalogue for <a class="{{ com.link_classes() }}" href="/collections/bas-geomatics">Geomatics</a>,
+        initially to list <a class="{{ com.link_classes() }}" href="/items/7344d437-4d9b-4e8c-a6f8-36c3e1b80a71">Drone Images</a>
+        captured by the Engineering Team of Rothera station.</p>
+    {% endcall %}
+    {% call subsection(title='Map Purchasing Guide') %}
+      <p>We've moved information about how to <a class="{{ com.link_classes() }}" href="/guides/map-purchasing">Purchase our Published Maps</a>
+        to this website as a guide.</p>
+    {% endcall %}
+    {% call subsection(title='CDE and SAN downloads') %}
+      <p>We've added options for accessing data for items stored on the BAS SAN (U drive), and the Common Data Environment
+        (CDE) used by BAS {{ com.ext_link_a(href='https://www.bas.ac.uk/polar-capabilities/antarctic-infrastructure-modernisation-programme/', value='AIMP') }}
+        construction partners.</p>
+    {% endcall %}
+    {% call subsection(title='Site checks improvements') %}
+      <p>We've streamlined and simplified the automatic checks we run to try and detect missing or broken content and downloads.</p>
+    {% endcall %}
+    {% call com.alert(shape='side', variant='blue', classes="space-y-2") %}
+      <p>This section only includes recent, high level, changes intended for a general audience.</p>
+      <p>The project {{ com.ext_link_a(href='https://github.com/antarctica/lantern/blob/main/CHANGELOG.md', value='CHANGELOG') }}
+        contains a full history at a lower technical level aimed at developers.</p>
+    {% endcall %}
+  {% endcall %}
+  {% call section(slug='working-on', title='What we\'re doing now') %}
+    {% call subsection(title='Search') %}
+      <p>We're introducing a basic <a class="{{ com.link_classes() }}" href="/search">Search</a> page.</p>
+    {% endcall %}
+    {% call subsection(title='Web Map Products') %}
+      <p>We're adding items for interactive web maps, specifically ArcGIS web maps.</p>
+    {% endcall %}
+    {% call subsection(title='Site checks for restricted items') %}
+      <p>We're expanding the automatic broken download checks we run to include restricted downloads hosted in SharePoint.</p>
+    {% endcall %}
+    {% call subsection(title='Roadmap and changelog') %}
+      <p>We're adding this page to explain how this website is developing.</p>
+    {% endcall %}
+    {% call subsection(title='Security and search notices') %}
+      <p>We're adding a {{ com.ext_link_a(href='https://securitytxt.org', value='security.txt') }} file explaining how
+        people can report security issues with this website, and a
+        {{ com.ext_link_a(href='https://en.wikipedia.org/wiki/Robots.txt', value='robots.txt') }} file to request
+        search engines and AI tools exclude some pages not relevant to the public (but which aren't secret).</p>
+    {% endcall %}
+    {% call subsection(title='Placeholder Homepage') %}
+      <p>We're adding a placeholder <a class="{{ com.link_classes() }}" href="/home">Home</a> page linking to key collections.</p>
+    {% endcall %}
+  {% endcall %}
+  {% call section(slug='future-plans', title='Future plans') %}
+    {% call subsection(title='Improving search') %}
+      <p>To include filters for things such as download types, publication date and access restrictions.</p>
+      <p>We are also exploring how searching for items based on their location might work.</p>
+    {% endcall %}
+    {% call subsection(title='Management API') %}
+      <p>We will add an API for storing new or updated records, and to publish them to this website.</p>
+    {% endcall %}
+    {% call subsection(title='Migrating to UKRI AWS') %}
+      <p>We will move the AWS website hosting to an account operated by our parent body, for better support and oversight.</p>
+    {% endcall %}
+    {% call com.alert(shape='side', variant='blue', classes="space-y-2") %}
+      <p>
+        We always welcome {{ com.feedback_trigger(classes=com.link_classes(), fallback=fallback_email, text='feedback') }}
+        about how you think we should improve this website.
+      </p>
+    {% endcall %}
+  {% endcall %}
+{% endblock %}

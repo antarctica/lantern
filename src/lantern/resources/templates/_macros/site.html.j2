@@ -20,6 +20,7 @@
     ],
     'About': [
       ('https://github.com/antarctica/lantern', 'GitHub project', true, false),
+      ('/guides/roadmap', 'Roadmap and Changelog', false, false),
       ('/guides/api', 'API documentation', false, false),
     ],
     'Publishing': [
@@ -134,7 +135,7 @@
   <nav id="site-nav" class="lg:p-4 bg-blue-500 text-white">
     <div class="{{ com.container_classes() }} py-4 lg:flex lg:gap-8 lg:justify-between lg:items-end">
       <div class="flex-none flex justify-center lg:justify-start items-center">
-        <a id="site-title" class="block {{ com.font_bolder_classes() }} text-lg text-center lg:text-left lg:text-2xl" href="/">BAS Data Catalogue</a>
+        <a id="site-title" class="block {{ com.font_bolder_classes() }} text-lg text-center lg:text-left lg:text-2xl" href="/home">BAS Data Catalogue</a>
       </div>
       <div class="flex-1 hidden lg:flex items-center gap-4 justify-start">
         {{ primary_nav() }}

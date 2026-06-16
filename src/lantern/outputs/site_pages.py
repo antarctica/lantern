@@ -36,6 +36,11 @@ class SitePagesOutput(OutputSite):
         """Site metadata per page view."""
         return {
             "_views/404.html.j2": SitePageMeta(title="Not Found", url="-", inc_meta=False),
+            "_views/home.html.j2": SitePageMeta(
+                title="Find Polar Data",
+                url=f"{self._meta.base_url}/home",
+                description="Discover data, services and records held by the British Antarctic Survey and UK Polar Data Centre",
+            ),
             "_views/search.html.j2": SitePageMeta(
                 title="Search",
                 url=f"{self._meta.base_url}/search",
@@ -60,6 +65,11 @@ class SitePagesOutput(OutputSite):
                 title="Privacy Policy",
                 url=f"{self._meta.base_url}/legal/privacy",
                 description="Privacy policy for the BAS Data Catalogue",
+            ),
+            "_views/guides/roadmap.html.j2": SitePageMeta(
+                title="Roadmap and Changelog",
+                url=f"{self._meta.base_url}/guides/roadmap",
+                description="Planned catalogue changes and recent improvements",
             ),
             "_views/guides/formatting.html.j2": SitePageMeta(
                 title="Formatting Guide",

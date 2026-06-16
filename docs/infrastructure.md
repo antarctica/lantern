@@ -89,6 +89,7 @@ Then run:
 ## Stores components
 
 - [GitLab](#gitlab)
+- [Algolia](#algolia)
 
 ## Components
 
@@ -119,6 +120,13 @@ Then run:
   - managed via [Infrastructure as Code](#infrastructure-as-code) and manually as per
     [Setup](/docs/setup.md#gitLab-publishing-workflows) documentation
   - requires regular [Rotation](/docs/deployment.md#rotating-access-tokens)
+
+### Algolia
+
+- [Dashboard 🔒](https://dashboard.algolia.com/apps/ZJXUEMU2FB/dashboard)
+  - [Credentials 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=hqm2s5h7zjuxljy7owrkzefyke&h=magic.1password.eu)
+  - for [Search](/docs/site.md#search)
+  - managed manually as per [Setup](/docs/setup.md#algolia) documentation
 
 ### Power Automate
 

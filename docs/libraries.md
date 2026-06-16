@@ -184,7 +184,7 @@ profiles, are available in two forms:
 > [!TIP]
 > Additional elements to check when using these larger presets:
 >
-> - `metadata.maintenance`
+> - `metadata.maintenance` (uses AS_NEEDED and COMPLETED by default)
 
 ### Record utilities
 

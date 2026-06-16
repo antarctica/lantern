@@ -73,14 +73,9 @@
       }
     },
     {
-      "name": "guides",
-      "x-displayName": "Guides",
-      "description": "Informational pages explaining how to use this catalogue."
-    },
-    {
-      "name": "legal",
-      "x-displayName": "Legal Policies",
-      "description": "Informational pages related to accessibility, privacy and copyright."
+      "name": "info",
+      "x-displayName": "Info",
+      "description": "Various, non-sensitive, informational pages including pages explaining how to use this Catalogue."
     },
     {
       "name": "internal",
@@ -90,7 +85,7 @@
     {
       "name": "static",
       "x-displayName": "Static",
-      "description": "Various supporting content."
+      "description": "Various supporting assets."
     }
   ],
   "paths": {
@@ -244,7 +239,7 @@
     "/legal/accessibility/index.html": {
       "get": {
         "tags": [
-          "legal"
+          "info"
         ],
         "operationId": "getAccessibilityIndex",
         "x-scalar-stability": "stable",
@@ -271,7 +266,7 @@
     "/legal/cookies/index.html": {
       "get": {
         "tags": [
-          "legal"
+          "info"
         ],
         "operationId": "getCookiesIndex",
         "x-scalar-stability": "stable",
@@ -298,7 +293,7 @@
     "/legal/copyright/index.html": {
       "get": {
         "tags": [
-          "legal"
+          "info"
         ],
         "operationId": "getCopyrightIndex",
         "x-scalar-stability": "stable",
@@ -325,7 +320,7 @@
     "/legal/privacy/index.html": {
       "get": {
         "tags": [
-          "legal"
+          "info"
         ],
         "operationId": "getPrivacyIndex",
         "x-scalar-stability": "stable",
@@ -765,10 +760,91 @@
         }
       }
     },
+    "/home/index.html": {
+      "get": {
+        "tags": [
+          "info"
+        ],
+        "operationId": "getHome",
+        "x-scalar-stability": "experimental",
+        "summary": "Homepage",
+        "description": "Get page with general catalogue information, links to featured resources and search.",
+        "externalDocs": {
+          "description": "More information",
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/outputs.md#site-pages-output"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/htmlContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/search/index.html": {
+      "get": {
+        "tags": [
+          "info"
+        ],
+        "operationId": "getSearch",
+        "x-scalar-stability": "experimental",
+        "summary": "Search",
+        "description": "Get page for users to search across catalogue contents.",
+        "externalDocs": {
+          "description": "More information",
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/site.md#search"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/htmlContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/guides/roadmap": {
+      "get": {
+        "tags": [
+          "info"
+        ],
+        "operationId": "getRoadmapIndex",
+        "x-scalar-stability": "experimental",
+        "summary": "Roadmap and changelog",
+        "description": "Get guide for how the catalogue has, and is planned to, change.",
+        "externalDocs": {
+          "description": "More information",
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/outputs.md#site-pages-output"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/htmlContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/guides/map-purchasing": {
       "get": {
         "tags": [
-          "guides"
+          "info"
         ],
         "operationId": "getMapPurchasingIndex",
         "x-scalar-stability": "stable",
@@ -795,7 +871,7 @@
     "/guides/api/index.html": {
       "get": {
         "tags": [
-          "guides"
+          "info"
         ],
         "operationId": "getApiGuideIndex",
         "x-scalar-stability": "experimental",
@@ -822,7 +898,7 @@
     "/guides/formatting/index.html": {
       "get": {
         "tags": [
-          "guides"
+          "info"
         ],
         "operationId": "getFormattingGuideIndex",
         "x-scalar-stability": "stable",

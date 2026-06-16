@@ -130,18 +130,24 @@ This requires a request to BAS IT asking for:
 
 ```text
 /-/
-/collections
-/features
-/guides
-/items
-/legal
-/maps
-/records
-/series
-/static
-/teams
-/waf
-/.well-known/api-catalog
+/collections/
+/datasets/
+/features/
+/guides/
+/home/
+/items/
+/legal/
+/maps/
+/records/
+/search/
+/series/
+/static/
+/teams/
+/waf/
+/.well-known/
+/404.html
+/favicon.ico
+/robots.txt
 ```
 
 [2] Secure site endpoints:
@@ -234,6 +240,18 @@ Manually:
    authentication header in the 'create-issue' action
 4. set the flow endpoint as the relevant [Config](/docs/config.md) option in the `.env` template and Ansible Vault for
    use in the [Environment Module](/docs/deployment.md#environment-module) template
+
+## Algolia
+
+Manually:
+
+1. register a new Algolia application site for the project
+2. record the application ID and write/search API keys in 1Password
+3. set the relevant [Config](/docs/config.md) option in the `.env` template and Ansible Vault for use in the
+   [Environment Module](/docs/deployment.md#environment-module) template
+
+> [!TIP]
+> The [Algolia Store](/docs/stores.md#algolia-store) will configure indicies and their settings.
 
 ## ArcGIS Online
 

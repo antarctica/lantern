@@ -10,31 +10,42 @@ MAGIC [Spatial Data Infrastructure (SDI)](https://github.com/antarctica/magic-sd
 > [!TIP]
 > See the [Access](/docs/access.md) docs for how to access the BAS Catalogue.
 
-At a high level it consists of:
+At a high level it consists of these components:
 
 ![BAS Catalogue overview](/docs/img/architecture-bas-overview.png)
 
-![BAS Catalogue editing](/docs/img/architecture-bas-editing.png)
-
-- a BAS [Repository](#repositories) to read and write records in a [GitLab Store](#gitlab)
-- an experimental editor [Zap ⚡️](https://github.com/felnne/zap) to create most records
-- various automated systems to create and update specific Records
-- a [Site](#sites) for untrusted (public) content, hosted in [AWS S3](#amazon-s3)
-- a [Site](#sites) for trusted (internal) content, hosted in the
+- a BAS multi-store [Repository](#repositories) to read and write records in:
+  - a [GitLab](#gitlab) store as a source of truth for Records and their revisions
+  - an [Algolia](#algolia) store for [Search](/docs/site.md#search) indexing
+- an experimental editor, [Zap ⚡️](https://github.com/felnne/zap) to create Records manually
+- automated systems maintaining their own Records
+- sub-catalogues for:
+  - testing and live environments (used for previewing content and general access respectively)
+  - trusted and untrusted content, per environment
+- for untrusted (public) content, a [Site](#sites) hosted in [AWS S3](#amazon-s3) for public consumption
+- for trusted (internal) content, a [Site](#sites) hosted in the
   [BAS Operations Data Store 🛡](https://gitlab.data.bas.ac.uk/MAGIC/ops-data-store), restricted to the *Admin* role
 
 > [!NOTE]
-> Catalogue items containing decrypted [Administration Metadata](/docs/models.md#item-administrative-metadata) are
-> considered sensitive and use [Trusted Publishing](#trusted-publishing).
->
-> All other content is considered non-sensitive (untrusted/unrestricted), and intended for public consumption.
+> Trusted content and [Publishing](#trusted-publishing) is used for items containing decrypted
+> [Administration Metadata](/docs/models.md#item-administrative-metadata) which are considered sensitive.
 
-The BAS Catalogue contains sub-catalogues for:
+See these additional diagrams for:
 
-- testing and live environments (used for previewing content and general access respectively)
-- trusted and untrusted content, per environment
+- how these components are used for [Creating and Updating Records](/docs/img/architecture-bas-editing.png)
+- how these components are used for [Publishing](/docs/img/architecture-bas-publishing.png) content
 
-![BAS Catalogue components](/docs/img/architecture-bas-detail.png)
+The BAS Catalogue Repository:
+
+- reads and writes Records as [Record Revisions](/docs/models.md#record-revisions) in GitLab:
+  - supports branches and merge requests, with methods to open, list and merge changesets of Records
+  - always reads the latest revision of each Record for a given branch
+  - always merges changesets into the default branch
+- writes Records to Algolia in a global search indexing:
+  - using a single, global, all Records index tracking the default GitLab branch
+- coordinates stores to ensure consistency wherever possible:
+  - by updating records in Algolia when a GitLab branch is merged into the default branch
+- does not support renaming or removing Records
 
 ## Trusted Publishing
 
@@ -135,7 +146,7 @@ See the [Exporters](/docs/exporters.md) docs for more information.
 ## Record editors
 
 Editors create and update Record configurations. They may be interactive (for use by humans to author bespoke Records),
-or automated systems managing sets of Records for a particular purpose.
+or automated systems, managing sets of Records for a particular purpose. All editors are treated equally.
 
 In either case, Record configurations are loaded into the Catalogue and then persisted via a [Store](#stores).
 
@@ -148,9 +159,9 @@ tracking tool.
 
 GitLab is used for:
 
-- consistency with other projects (including the source code for this project)
-- ease of hosting a Git repository (including via automated provisioning)
-- (as a nice to have) providing a web interface to inspect file changes
+- consistency with other projects (including this project)
+- support for merge requests for simple record review workflows via a hosted user interface
+- being able to manage provisioning, permissions and git operations programmatically
 
 See the [GitLab Store](/docs/stores.md#gitlab-store) for details on how Records are stored in GitLab.
 
@@ -158,31 +169,52 @@ See the [Infrastructure](/docs/infrastructure.md#gitlab) docs for more informati
 
 ## Amazon S3
 
-Amazon Web Services (AWS) [Simple Storage System (S3)](https://aws.amazon.com/s3/) website hosting is used to host the
-contents of the untrusted BAS Catalogue [Site](#sites). Includes a
-[CloudFront Distribution](https://aws.amazon.com/cloudfront/) to enable HTTPS support using a custom domain.
+Amazon Web Services (AWS) [Simple Storage System (S3)](https://aws.amazon.com/s3/) static hosting and a
+[CloudFront Distribution](https://aws.amazon.com/cloudfront/) are used to host untrusted [Site](#sites) content.
 
-AWS S3 is used for:
+AWS is used for:
 
-- its high availability and low cost
-- support for server side redirects and content metadata
-- ease of automated provisioning including access permissions
+- its high availability, global infrastructure and low cost
+- its support for object level server redirects and content metadata
+- the ability to manage provisioning, access control and content programmatically
 
 See the [S3 Exporter](/docs/exporters.md#s3-exporter) for details on *how* information is stored in S3.
 
 See the [Static Site](/docs/site.md) docs for more information on *what* is stored in S3.
 
 > [!NOTE]
-> AWS CloudFront sits in front of the S3 bucket which caches content by default. The BAS Catalogue automatically
-> invalidates cached content when updated.
+> AWS CloudFront caches content in the live site environment by default. The BAS Catalogue automatically invalidates
+> content as needed when publishing.
+
+## Algolia
+
+[Algolia](https://www.algolia.com) is used as a remote Records [Store](#stores) specifically for enabling
+[Site Search](/docs/site.md#search) functionality.
+
+Algolia is used for:
+
+- its focus on search, speed and generous free tier
+- frontend library to implement a search interface
+- ease of managing the backend index
+
+See the [Algolia Item Model](/docs/models.md#algolia-search-items) for details on *what* is indexed for each Record.
+
+See the [Algolia Store](/docs/stores.md#algolia-store) for details on *how* Records are stored in Algolia.
 
 ## ArcGIS Online
 
-[ArcGIS Online](https://www.arcgis.com) is used in Records as a distribution option and key data access system for
-spatial services. It also underpins the Embedded Maps Service used for extent visualisations in Items.
+[ArcGIS Online](https://www.arcgis.com) is used in Records as a key data access system for spatial services. It also
+underpins the Embedded Maps Service used for [Item Extent Visualisations](/docs/site.md#item-extent-maps) functionality.
+
+ArcGIS Online is used for:
+
+- consistency with other projects and to align with the BAS Spatial Data Infrastructure
+- its stability, performance and features
 
 ## Infrastructure
 
+See the [Infrastructure](/docs/infrastructure.md) docs for more information about the underlying infrastructure used.
+
 > [!NOTE]
-> See the [Infrastructure](/docs/infrastructure.md) docs for more information about the underlying infrastructure
-> components used.
+> Managed services, external to BAS on-premise infrastructure, are generally preferred where practical and available
+> for stability, performance and agility as the project grows.

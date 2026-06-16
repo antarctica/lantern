@@ -64,7 +64,7 @@ Outputs processing multiple Records SHOULD:
 Outputs:
 
 - [CSS](/docs/site.md#styling), [JavaScript](/docs/site.md#scripts), fonts, images (for favicons) and text files
-  (for [Monitoring](/docs/monitoring.md)) from the internal `lantern.exporters.resources` module
+  (for e.g. [Monitoring](/docs/monitoring.md)) from the internal `lantern.exporters.resources` module
 
 Jinja2 templates are used for including variables in JavaScript files.
 
@@ -79,8 +79,13 @@ A wildcard invalidation key is generated for all resources (which may invalidate
 Outputs HTML pages using [Site Templates](/docs/site.md#item-templates) for:
 
 - 404 error page
+- home page
+- search page
 - legal policies (accessibility, copyright, cookies and privacy)
-- content formatting guide (for abstracts, etc.)
+- guides for:
+  - content formatting
+  - map purchasing
+  - a roadmap of recent/upcoming changes
 - physical maps purchasing guide
 
 Sharing previews, similar to [Item Pages](/docs/site.md#item-sharing-previews), are enabled via

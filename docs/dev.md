@@ -11,17 +11,15 @@ Requirements:
 
 Setup:
 
-1. install tools (`brew install git uv pre-commit 1password-cli`)
-1. clone and setup project [2]
-1. configure app [3]
-1. [generate](/docs/config.md#generate-an-environment-config-file) an `.env` file
+1. install tools (`brew install git uv pre-commit 1password-cli opentofu`)
+1. clone and setup project [1]
+1. [Generate](/docs/config.md#generate-an-environment-config-file) an `.env` file
 
-[2]
+[1]
 
 ```shell
 % git clone https://gitlab.data.bas.ac.uk/MAGIC/lantern-exp.git
 % cd lantern-exp/
-% pre-commit install
 % uv sync --all-groups
 % uv run playwright install
 ```
@@ -176,6 +174,15 @@ Manual post-configuration:
 ```shell
 % docker compose -f ./resources/dev/docker-compose.yml exec -it gitlab grep 'Password:' /etc/gitlab/initial_root_password
 ```
+
+### Local development PyCharm
+
+[Tests](#pytest) Run/Debug configuration:
+
+- type: *pytest*
+- run type: *script*
+- run target: *./tests*
+- working directory: *./*
 
 ## Development tasks
 
@@ -360,7 +367,7 @@ Within this project, for each new item type:
 1. create a new class under `lantern.models.item.catalogue.distributions`, inheriting from `Distribution` or a relevant
    subclass and tests under `tests.lantern_tests.models.item.catalogue.test_distributions`
 1. configure the new distribution format class:
-   - set the `matches` class method to determine a exclusive match for the distribution (typically via media types)
+   - set the `matches` class method to determine an exclusive match for the distribution (typically via media types)
    - add an item to the `lantern.models.item.catalogue.enums.DistributionType` enum for the distribution type
 1. add the new class to the `lantern.models.item.catalogue.tabs.DataTab._supported_distributions` list
 1. if the distribution should use a collapsible information panel, edit the
@@ -414,11 +421,13 @@ Within this project, for each new item type:
 
 ### Adding site pages
 
-> [!WARNING]
-> This section is Work in Progress (WIP) and may not be complete/accurate.
-
-- ... include in `lantern.verification.Verification.site_pages` list
-- ... include in [OpenAPI Definition](/docs/site.md#openapi-definition)
+1. create new templates in `src/lantern/resources/templates/_views`
+2. update `lantern.outputs.site_pages.SitePagesOutput._page_meta` to generate the new page(s)
+3. update `lantern_tests.outputs.test_site_pages.TestSitePagesOutput` as needed
+4. if needed, update `primary_nav_items` / `secondary_nav_items` in `src/lantern/resources/templates/_macros/site.html.j2`
+5. if needed, update the 'Static site endpoints' list in the [Reverse Proxying](/docs/setup.md#reverse-proxying) docs
+   1. request any new prefixes from IT
+6. include the new pages in the [OpenAPI Definition](/docs/site.md#openapi-definition)
 
 ### Updating styles
 
@@ -686,15 +695,15 @@ known values are used in tests).
 To update a specific test:
 
 ```text
-% uv run pytest -n 0 --record-mode=once tests/path/to/test_module.py::<class>::<method>
+% uv run pytest --record-mode=once tests/path/to/test_module.py::<class>::<method>
 # E.g.
-% uv run pytest -n 0 --record-mode=once tests/lantern_tests/stores/test_gitlab_store.py::TestGitLabLocalCache::test_fetch_file_commits
+% uv run pytest --record-mode=once tests/lantern_tests/stores/test_gitlab_store.py::TestGitLabLocalCache::test_fetch_file_commits
 ```
 
 To incrementally build up a set of related tests (including parameterised tests) use the `new_episodes` recording mode:
 
 ```text
-% uv run pytest -n 0 --record-mode=new_episodes tests/path/to/test_module.py::<class>::<method>
+% uv run pytest --record-mode=new_episodes tests/path/to/test_module.py::<class>::<method>
 ```
 
 ### Static site template tests
@@ -711,7 +720,7 @@ such as switching tabs in items and opening/closing the feedback widget.
 To run a specific test file with visible output:
 
 ```shell
-% uv run pytest --headed tests/lantern_tests/e2e/test_item_e2e.py
+% uv run pytest --headed tests/lantern_tests/x_e2e/test_item_e2e.py
 ```
 
 Playwright tests require a real website to test against, which is provided by the `fx_exporter_static_server` fixture.

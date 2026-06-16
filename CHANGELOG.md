@@ -23,13 +23,20 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * `SITE_UNTRUSTED_S3_ACCESS_ID` config option renamed to `SITE_UNTRUSTED_S3_ACCESS_ID`
 * `SITE_UNTRUSTED_S3_ACCESS_SECRET` config option renamed to `SITE_UNTRUSTED_AWS_ACCESS_SECRET`
 * `SITE_UNTRUSTED_S3_ACCESS_SECRET_SAFE` config option renamed to `SITE_UNTRUSTED_AWS_ACCESS_SECRET_SAFE`
+* `TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY` config option renamed to `TEMPLATES_TURNSTILE_KEY`
 
 ### Added
 
 * Related projects README section
 * Hard-coded config option for AWS region (`SITE_UNTRUSTED_AWS_REGION`, EU West 1)
 * AWS CloudFront exporter for invalidating cached content in the live site
-* Initial Algolia search model and store
+* Initial Algolia model, store and BAS repository integration for site search
+* Initial and experimental site search (under `/search`)
+* Initial and experimental homepage (under `/home`)
+* Roadmap guide
+* `.well-known/seucrity.txt` endpoint
+* `robots.txt` endpoint
+* Experimental page common macro
 
 ### Fixed
 
@@ -45,6 +52,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Refactoring live site cache invalidation to automatically apply to any generated output
 * Refactoring `ItemBase` into `ItemCore` with `ItemBase` and `ItemSummaryBase` subclasses
 * Refactoring `ItemCatalogueSummary` to derive from `ItemSummaryBase` rather than `ItemBase`
+* Updating project documentation
+* Updating project OpenAPI definition
 
 ## [0.14.0] - 2026-05-25
 

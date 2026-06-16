@@ -114,6 +114,20 @@ configuration for use in a specific context.
 > [!NOTE]
 > Items do not follow a formal specification and are not interoperable outside of this project.
 
+### Item core
+
+`lantern.models.item.base.ItemCore`
+
+Provides minimal Record and [Administrative Metadata](#item-administrative-metadata) handling properties and methods
+for use across all Item subclasses.
+
+For example:
+
+- `Item.record` returns the underlying Record instance for the item
+- `Item.admin_metadata` returns parsed Administrative Metadata if defined and signing/encryption keys are provided
+- `Item.resource_access` returns a local access type enumeration value by parsing any resource permissions set in
+  optional Administrative Metadata
+
 ### Item base
 
 `lantern.models.item.base.ItemBase`
@@ -124,8 +138,17 @@ For example:
 
 - `Item.citation_html` returns an HTML formatted version of `identification.other_citation_details`, if set
 - `Item.kv` returns a dict of key-values if `identification.supplemental_information` is a suitable JSON encoded object
-- `Item.resource_access` returns a local access type enumeration value by parsing any resource permissions set in
-  optional [Administrative Metadata](#item-administrative-metadata)
+
+### Item summary
+
+`lantern.models.item.base.ItemSummaryBase`
+
+A base summary item contains common properties and methods across all item summary subclasses.
+
+For example:
+
+- `Item.restricted` returns boolean evaluation of Administrative Metadata resource permissions
+- `Item.date` returns a single representative date for the item
 
 ### Item super-types
 
@@ -343,6 +366,39 @@ per side:
 [2] `lantern.lib.metadata_library.models.record.enums.AggregationInitiativeCode.PAPER_MAP`
 
 [3] `lantern.lib.metadata_library.models.record.enums.HierarchyLevelCode.PAPER_MAP_PRODUCT`
+
+## Algolia search items
+
+`lantern.models.item.algolia.item.ItemAlgolia`
+
+Algolia items represent [Items](#items) as objects within an Algolia search index, for use in
+[Site Search](/docs/site.md#search).
+
+Consists of limited properties needed to query, refine (via filters/facets) and render Item summaries as search results.
+
+| Record/Item Property          | Algolia Property | Algolia Type   | Comment                  |
+|-------------------------------|------------------|----------------|--------------------------|
+| `item.resource_id`            | `objectID`       | String         | -                        |
+| `item.resource_revision`      | `objectRevID`    | String         | -                        |
+| `record.metadata.date_stamp`  | `objectRevDate`  | Integer        | As timestamp             |
+| `item.resource_type.name`     | `objectType`     | String         | As enum name             |
+| `summary.resource_type_icon`  | `objectTypeIcon` | String         | -                        |
+| `summary.date`                | `objectDate`     | Integer / None | As timestamp             |
+| -                             | `objectRecData`  | String         | _See note_               |
+| `summary.resource_type_label` | `type`           | String         | -                        |
+| `item.title_plain`            | `name`           | String         | Without formatting       |
+| `item.title_html`             | `nameHtml`       | String         | As HTML formatted string |
+| `item.summary_html`           | `summaryHtml`    | String / None  | As HTML formatted string |
+| `summary.restricted`          | `restricted`     | Boolean        | -                        |
+| `summary.date`                | `date`           | String / None  | As pre-formatted string  |
+| `summary.edition`             | `edition`        | String / None  | As pre-formatted string  |
+| `summary.graphic_href`        | `imageUrl`       | String / None  | -                        |
+| `summary.children`            | `childrenCount`  | String / None  | As pre-formatted string  |
+
+`_objectRecData` is a JSON encoded tuple/list of properties needed to reconstruct a valid minimal record from an object:
+
+- organisation or individual name and email address for the metadata and resource point of contact
+- creation date (as an ISO 8601 string)
 
 ## BAS public website search items
 

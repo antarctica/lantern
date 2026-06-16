@@ -41,7 +41,7 @@ HTML metadata elements are included by the `html_head` [Site Macro](#site-macros
   (for troubleshooting)
 - `description` - page summary (for SEO)
 
-## Site navigation
+## Navigation
 
 ### Primary navigation
 
@@ -155,7 +155,7 @@ the site build directory and referenced within generated pages.
 
 ## Icons
 
-[Font Awesome Pro 7](https://fontawesome.com/v7/search?o=r) MAY be used for adding icons.
+[Font Awesome Pro 7](https://fontawesome.com/search?ip=classic&s=regular) MAY be used for adding icons.
 
 Font Awesome is included via a hosted [Kit](https://docs.fontawesome.com/web/setup/use-kit).
 
@@ -177,16 +177,20 @@ A set of site wide scripts are included using [Site Macros](#site-macros) for:
 
 - [Sentry](/docs/monitoring.md#sentry) error monitoring and user feedback
 - [Plausible](/docs/monitoring.md#plausible) analytics
-- [Cloudflare Turnstile](#bot-protection) bot protection for forms
 - [Progressive Enhancements](#enhancements-script) for various bits of functionality
 
 > [!NOTE]
 > Functionality SHOULD be preferably implemented using HTML and CSS alone where practical. Scripts SHOULD be used for
 > progressive enhancement and support graceful degradation where possible.
 
-First party JavaScript are defined in:
+Extra scripts MAY be included by views using the `head_scripts_extra` template block for:
 
-- `src/lantern/resources/js/` for static files
+- [Cloudflare Turnstile](#bot-protection) bot protection for forms
+- [Algolia Instant Search](#search) for site search
+
+First party JavaScript logic is defined in:
+
+- `src/lantern/resources/js/` for static scripts
 - `src/lantern/resources/templates/_assets/js/*` for scripts including variables from macros
 
 > [!TIP]
@@ -217,7 +221,9 @@ A set of targeted enhancements to:
 - show content where JavaScript is enabled, as an 'else' to `<noscript>`
 - process feedback from the [User Feedback](#user-feedback) widget when submitted
 
-## Cache busting
+## Caching
+
+### Cache busting
 
 To ensure the latest CSS and JS files are used by browsers, a query string value is appended to the URLs of static
 assets, e.g. `main.css?v=123`. For reproducibility, this value is set to the first 7 characters of the current package
@@ -231,7 +237,7 @@ version as a SHA1 hash, e.g. `main.css?v=f053ddb` for version 0.1.0.
 > You may need to manually clear caches locally when developing, as this value will not change until the next release.
 <!-- pyml enable md028 -->
 
-## Cache invalidation
+### Cache invalidation
 
 Content in the live static site is cached for 24 hours by default. To force a cache invalidation, use the
 `site-invalidate` [Development Task](/docs/dev.md#development-tasks) specifying one or more key patterns to invalidate.
@@ -252,29 +258,68 @@ from any origin.
 
 ### Bot protection
 
-For features vulnerable to spam and abuse, such as the [Item Enquires](#item-enquires),
-[Cloudflare Turnstile](https://www.cloudflare.com/en-gb/application-services/products/turnstile/) is used to
-distinguish humans from bot agents. Typically, this check is non-interactive but may require the user to check a box.
+Features vulnerable to spam and abuse, such as the [Item Enquires](#item-enquires) use
+[Cloudflare Turnstile](https://www.cloudflare.com/en-gb/application-services/products/turnstile/) to
+distinguish humans from bots and agents.
+
+Typically, this check is non-interactive but may require the user to check a box.
+
+<!-- pyml disable md034 -->
+> [!TIP]
+> https://browser-compat.turnstile.workers.dev/ can be used to check a browser works with Turnstile.
+<!-- pyml enable md034 -->
+
+Completed challenges populate a hidden form field which MUST be validated by the form action using the Turnstile API.
 
 <!-- pyml disable md028 -->
+> [!WARNING]
+> Turnstile triggers browser warnings and errors, even when working correctly [1] and are expected (if unwanted).
+
 > [!NOTE]
 > An error handler is configured to supress `300x` and `600x` series errors (Generic challenge failures) from
-> [Sentry](/docs/monitoring.md#sentry), as these don't indicate an error with the site configuration.
+> [Sentry](/docs/monitoring.md#sentry), as these indicate an error with the client's browser not the site configuration.
+<!-- pyml enable md028 -->
+
+[1] These include:
+
+- cross-origin errors between the challenge iframe and main page, such as:
+  'Blocked a frame with origin "https://challenges.cloudflare.com" from accessing a frame with origin
+- '"$DOMAIN". Protocols, domains, and ports must match.'
+- various messages with junk content at different log levels, such as '%c%d' from the challenge script.
+- 401 errors for requesting a Private Access Token, which are expected to fail
+
+### Security.txt
+
+A [security.txt](https://securitytxt.org/) file is included at `/.well-known/security.txt` to provide a security point
+of contact (the BAS IT service desk) in a standardised form.
+
+> [!NOTE]
+> It is a best practice to include an expiry date, with a relatively short duration (< 12 months) in these files.
+> Ensure a calendar reminder is set to prevent the file becoming outdated.
+
+For consistency with the [API Catalog](/docs/access.md#api-catalog), a redirect is used to reference `security.txt` as
+a static file.
+
+## Robots.txt
+
+A permissive `robots.txt` is included to prevent indexing internal (but not sensitive) content (under `/-/`).
+
+## Analytics
+
+[Plausible](/docs/monitoring.md#plausible) is used for site analytics.
+
+## Search
 
 > [!WARNING]
-> Turnstile triggers various browser warnings and errors, even when working correctly.
->
-> These include:
->
-> - cross-origin errors between the challenge iframe and main page, such as:
-> 'Blocked a frame with origin "https://challenges.cloudflare.com" from accessing a frame with origin
-> "https://data.bas.ac.uk". Protocols, domains, and ports must match.'
-> - various messages with junk content at different log levels, such as '%c%d' from the challenge script.
-> - 401 errors for requesting a Private Access Token, which are expected to fail
+> This section is Work in Progress (WIP) and may not be complete/accurate.
 
-> [!TIP]
-> See https://browser-compat.turnstile.workers.dev/ to check your browser against Turnstile generically.
-<!-- pyml enable md028 -->
+[Algolia](/docs/architecture.md#algolia) is used to implement a basic site wide search using
+[InstantSearch.js](https://www.algolia.com/doc/guides/building-search-ui/what-is-instantsearch/js).
+
+Results for up to the first 200 results are shown using markup similar to the `item_summary` common template macro.
+
+> [!NOTE]
+> Only item names are searchable.
 
 ## User feedback
 
@@ -289,13 +334,16 @@ HTML templates use the [Jinja2](https://jinja.palletsprojects.com/) framework.
 
 Templates use these options from the app `lantern.Config` class:
 
+- `TEMPLATES_ALGOLIA_APP_ID`: see [Search](#search)
+- `TEMPLATES_ALGOLIA_INDEX_NAME`: see [Search](#search)
+- `TEMPLATES_ALGOLIA_SEARCH_API_KEY`: see [Search](#search)
 - `TEMPLATES_CACHE_BUST_VALUE`: See [Cache busting](#cache-busting)
 - `TEMPLATES_ITEM_CONTACT_ENDPOINT`: See [Contact form](#item-enquires)
-- `TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY`: Turnstile site key for item form [Bot Protection](#bot-protection)
 - `TEMPLATES_ITEM_MAPS_ENDPOINT`: See [Extent maps](#item-extent-maps)
 - `TEMPLATES_ITEM_VERSIONS_ENDPOINT`: Base URL for constructing links to view
   [Record Revisions](/docs/models.md#record-revisions)
-- `TEMPLATES_PLAUSIBLE_DOMAIN`: Plausible site identifier for [Frontend Analytics](/docs/monitoring.md#plausible)
+- `TEMPLATES_PLAUSIBLE_DOMAIN`: Plausible site identifier for [Analytics](#analytics)
+- `TEMPLATES_TURNSTILE_KEY`: Turnstile site key for [Bot Protection](#bot-protection)
 
 See the [Config](/docs/config.md#config-options) docs for how to set these config options.
 
@@ -308,7 +356,10 @@ A set of layouts are available in `src/lantern/resources/templates/_layouts/`. A
 
 The `base.html.j2` layout provides a common HTML structure including:
 
-- a `<head>` element with HTML metadata and imports for site styles and scripts
+- a `<head>` element with:
+  - HTML meta tags
+  - site wide imports for site styles and scripts
+  - a `head_scripts_extra` block for including additional scripts
 - a `<body>` element with:
   - a `<header>` element with site navigation, development phase banner and user feedback link
   - a 'content' block for each HTML page's content with minimal padding
@@ -379,6 +430,7 @@ Common macros are intended for use across templates to avoid inconsistencies and
 - a `primary_nav_items` variable for [Primary Navigation](#primary-navigation)
 - a `html_head` macro builds a `<head>` element
   - requires a [Site Metadata](/docs/models.md#static-site-metadata) context object
+  - includes CSS and JS resources, use the `head_scripts_extra` block to include additional scripts
 - a `header` macro builds a site wide `<header>` element with side wide navigation and development phase banner
   including site feedback
 - a `feedback_widget` macro creates a [User Feedback](#user-feedback) widget
@@ -449,8 +501,8 @@ The contact tab within the [Item Templates](#item-templates) includes a form for
 forms submit to a Microsoft Power Automate flow which routes enquires to the relevant team and returns a result page to
 the user.
 
-To protect against spam and abuse, the form includes a hidden [Bot Protection](#bot-protection) field, validated in the
-Power Automate flow. Where this validation fails, the flow returns an error page to the user.
+To protect against spam and abuse, the form includes [Bot Protection](#bot-protection), validated in a Power Automate
+flow. Where this validation fails, the flow returns a basic error page to the user.
 
 #### Item Markdown
 

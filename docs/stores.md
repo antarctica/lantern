@@ -9,6 +9,9 @@ They are used by [Exporters](/docs/architecture.md#exporters) to access Records 
 
 Stores use these options from the app `lantern.Config` class:
 
+- `STORE_ALGOLIA_APP_ID`: application ID within Algolia for [Algolia Store](#algolia-store)
+- `STORE_ALGOLIA_INDEX_NAME`: index name within Algolia for [Algolia Store](#algolia-store)
+- `STORE_ALGOLIA_WRITE_API_KEY`: Alogia app write API key for [Algolia Store](#algolia-store)
 - `STORE_GITLAB_DEFAULT_BRANCH`: default remote branch name for [GitLab Store](#gitlab-store), will be created if it
   does not exist
 - `STORE_GITLAB_STORE_CACHE_PATH`: local path for [GitLab Cached Store](#gitlab-cached-store), will be created if it
@@ -48,6 +51,23 @@ intended for data integrity and increased performance in parallel processing.
 >
 > Frozen stores cannot be unfrozen.
 
+## Algolia store
+
+`lantern.stores.algolia.AlgoliaStore`
+
+Stores reduced versions of Records in an [Algolia](/docs/architecture.md#algolia) search index using
+[`algoliasearch`](https://www.algolia.com/doc/libraries/sdk/changelog/python).
+
+Supports creating and updating search index objects using the
+[[Algolia Item Model](/docs/models.md#algolia-search-items)], and reading objects as limited Records.
+
+Does not support deleting or renaming objects.
+
+> [!NOTE]
+> Algolia stores do not support [Freezing](#frozen-stores) as Records are accessed directly from Algolia.
+
+Records are stored as reduced versions of records using the [Algolia Item Model](/docs/models.md#algolia-search-items).
+
 ## GitLab store
 
 `lantern.stores.gitlab.GitLabStore`
@@ -55,7 +75,7 @@ intended for data integrity and increased performance in parallel processing.
 Stores Records in a [GitLab](/docs/architecture.md#gitlab) project repository using
 [`python-gitlab`](https://python-gitlab.readthedocs.io/en/stable/).
 
-Supports reading, creating and updating Records. Does not support deleting or moving Records, or non-head file (record)
+Supports reading, creating and updating Records. Does not support deleting or renaming Records, or non-head record
 revisions.
 
 > [!NOTE]

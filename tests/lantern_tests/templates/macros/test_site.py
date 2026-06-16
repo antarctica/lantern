@@ -114,14 +114,6 @@ class TestMacrosSite:
         assert len(meta.plausible_id) > 0
         assert html.head.find(name="script", src=lambda s: s and meta.plausible_id in s) is not None
 
-    def test_script_turnstile(self):
-        """Can get Cloudflare Turnstile script from page."""
-        expected = "https://challenges.cloudflare.com/turnstile/v0/api.js"
-        template = """{% import '_macros/site.html.j2' as site %}{{ site.script_turnstile() }}"""
-        meta = self._site_meta()
-        html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
-        assert html.head.find(name="script", attrs={"src": expected}) is not None
-
     def test_script_enhancements(self):
         """Can get progressive enhancements script from page."""
         expected = "/static/js/enhancements.js?v=000"

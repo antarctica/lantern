@@ -11,7 +11,7 @@ class TestItemTemplate:
         """
         Can set common page elements in site layout.
 
-        Integration test between item template and site layout.
+        Integration test between item template and site layout (not view specific).
         """
         expected = fx_item_cat_model_min.site_meta
         html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
@@ -23,3 +23,10 @@ class TestItemTemplate:
 
         schema_org_page = html.head.find(name="script", type="application/ld+json").string
         assert expected.html_schema_org_content == schema_org_page.strip()
+
+    def test_script_turnstile(self, fx_item_cat_model_min: ItemCatalogue):
+        """Can get Cloudflare Turnstile script from page."""
+        expected = "https://challenges.cloudflare.com/turnstile/v0/api.js"
+        html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
+
+        assert html.head.find(name="script", attrs={"src": expected}) is not None

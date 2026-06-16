@@ -479,19 +479,20 @@ def fx_item_cat_model_min(
         trusted_context=True,
         select_record=fx_select_record,
     )
-    set_admin(keys=model._admin_keys, record=model._record, admin_meta=AdministrationMetadata(id=model.resource_id))
+    set_admin(keys=fx_admin_meta_keys, record=model._record, admin_meta=AdministrationMetadata(id=model.resource_id))
     return model
 
 
 @pytest.fixture()
 def fx_item_cat_model_open(
     fx_item_cat_model_min: ItemCatalogue,
+    fx_admin_meta_keys: AdministrationKeys,
     fx_item_config_min_catalogue: dict,
 ) -> ItemCatalogue:
     """Minimal cloned ItemCatalogue model instance with minimal admin metadata to allow open access."""
     model = _item_cat_model_min()
     set_admin(
-        keys=model._admin_keys,
+        keys=fx_admin_meta_keys,
         record=model._record,
         admin_meta=AdministrationMetadata(
             id=model.resource_id, metadata_permissions=[OPEN_ACCESS], resource_permissions=[OPEN_ACCESS]
@@ -519,7 +520,7 @@ def fx_item_physical_map_model_min(
         trusted_context=True,
         select_record=fx_select_record,
     )
-    set_admin(keys=model._admin_keys, record=model._record, admin_meta=AdministrationMetadata(id=model.resource_id))
+    set_admin(keys=fx_admin_meta_keys, record=model._record, admin_meta=AdministrationMetadata(id=model.resource_id))
     return model
 
 
@@ -689,7 +690,7 @@ def fx_gitlab_cache(
     )
 
 
-def _gitlab_cache_create(cache: fx_gitlab_cache) -> None:
+def _gitlab_cache_create(cache: GitLabLocalCache) -> None:
     """
     Copy static GitLab local cache to simulate cloning from remote repository.
 

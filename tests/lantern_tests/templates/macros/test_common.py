@@ -138,7 +138,7 @@ class TestItemSummary:
             assert html.select_one("time")["datetime"] == expected.datetime
 
     @pytest.mark.parametrize("value", [0, 1, 2])
-    def test_items(self, value: int | None):
+    def test_items(self, value: int):
         """Can get optional child item count with expected value from summary."""
         agg = Aggregation(
             identifier=Identifier(identifier="x", namespace="x"),

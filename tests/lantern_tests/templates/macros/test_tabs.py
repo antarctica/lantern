@@ -709,7 +709,8 @@ class TestLineageTab:
     @pytest.mark.parametrize("value", [None, "x"])
     def test_enabled(self, fx_item_cat_model_min: ItemCatalogue, value: str | None):
         """Can get lineage tab if enabled in item."""
-        fx_item_cat_model_min._record.data_quality = DataQuality(lineage=Lineage(statement=value))
+        if value:
+            fx_item_cat_model_min._record.data_quality = DataQuality(lineage=Lineage(statement=value))
         expected = fx_item_cat_model_min._lineage.enabled
         html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
 
@@ -721,11 +722,12 @@ class TestLineageTab:
     @pytest.mark.parametrize("value", [None, "x"])
     def test_collections(self, fx_item_cat_model_min: ItemCatalogue, value: str | None):
         """Can get optional lineage statement with expected values from item."""
-        fx_item_cat_model_min._record.data_quality = DataQuality(lineage=Lineage(statement=value))
+        if value:
+            fx_item_cat_model_min._record.data_quality = DataQuality(lineage=Lineage(statement=value))
         expected = fx_item_cat_model_min._lineage.statement
         html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
 
-        if fx_item_cat_model_min._lineage.enabled:
+        if fx_item_cat_model_min._lineage.enabled and expected:
             assert expected in str(html.select_one("#lineage-statement"))
 
 
@@ -1093,9 +1095,12 @@ class TestInfoTab:
             render_item_catalogue(fx_item_physical_map_model_min), parser="html.parser", features="lxml"
         )
 
-        names = html.select_one("#info-series-name")
-        for value in fx_item_physical_map_model_min._additional_info.series_names:
-            assert names.find(name="li", string=value) is not None
+        name = html.select_one("#info-series-name")
+        names = fx_item_physical_map_model_min._additional_info.series_names
+        assert isinstance(names, list)
+        for value in names:
+            # noinspection PyTypeChecker
+            assert name.find(name="li", string=value) is not None
 
     @pytest.mark.parametrize("value", [Series, Series(name="x", page="y", edition="z")])
     def test_sheet_number(self, fx_item_cat_model_min: ItemCatalogue, value: Series):
@@ -1127,9 +1132,12 @@ class TestInfoTab:
             render_item_catalogue(fx_item_physical_map_model_min), parser="html.parser", features="lxml"
         )
 
-        numbers = html.select_one("#info-sheet-number")
-        for value in fx_item_physical_map_model_min._additional_info.sheet_numbers:
-            assert numbers.find(name="li", string=value) is not None
+        number = html.select_one("#info-sheet-number")
+        numbers = fx_item_physical_map_model_min._additional_info.sheet_numbers
+        assert isinstance(numbers, list)
+        for value in numbers:
+            # noinspection PyTypeChecker
+            assert number.find(name="li", string=value) is not None
 
     @pytest.mark.parametrize("value", [None, 1.0])
     def test_scale(self, fx_item_cat_model_min: ItemCatalogue, value: float | None):
@@ -1162,7 +1170,10 @@ class TestInfoTab:
         )
 
         scale = html.select_one("#info-scale")
-        for value in fx_item_physical_map_model_min._additional_info.scales:
+        scales = fx_item_physical_map_model_min._additional_info.scales
+        assert isinstance(scales, list)
+        for value in scales:
+            # noinspection PyTypeChecker
             assert scale.find(name="li", string=value) is not None
 
     @pytest.mark.parametrize("value", [None, ReferenceSystemInfo(code=Code(value="x"))])
@@ -1503,11 +1514,14 @@ class TestAdminTab:
             ],
         ],
     )
-    def test_issues(self, fx_item_cat_model_min: ItemCatalogue, value: list[str]):
+    def test_issues(
+        self, fx_item_cat_model_min: ItemCatalogue, fx_admin_meta_keys: AdministrationKeys, value: list[str]
+    ):
         """Can get optional item GitLab issues based on value from item."""
-        admin_meta = get_admin(keys=fx_item_cat_model_min._admin_keys, record=fx_item_cat_model_min._record)
+        admin_meta = get_admin(keys=fx_admin_meta_keys, record=fx_item_cat_model_min._record)
         admin_meta.gitlab_issues = value
-        set_admin(keys=fx_item_cat_model_min._admin_keys, record=fx_item_cat_model_min._record, admin_meta=admin_meta)
+        if admin_meta:
+            set_admin(keys=fx_admin_meta_keys, record=fx_item_cat_model_min._record, admin_meta=admin_meta)
         expected = fx_item_cat_model_min._admin.gitlab_issues
         html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
 
@@ -1536,12 +1550,19 @@ class TestAdminTab:
     @pytest.mark.parametrize(
         ("value", "expected"), [(AccessLevel.NONE, "NONE"), (AccessLevel.PUBLIC, "Public (Open Access)")]
     )
-    def test_access(self, fx_item_cat_model_min: ItemCatalogue, value: AccessLevel, expected: str):
+    def test_access(
+        self,
+        fx_item_cat_model_min: ItemCatalogue,
+        fx_admin_meta_keys: AdministrationKeys,
+        value: AccessLevel,
+        expected: str,
+    ):
         """Can get metadata and resource access level based on value from item."""
-        admin_meta = get_admin(keys=fx_item_cat_model_min._admin_keys, record=fx_item_cat_model_min._record)
+        admin_meta = get_admin(keys=fx_admin_meta_keys, record=fx_item_cat_model_min._record)
         admin_meta.metadata_permissions = [OPEN_ACCESS] if value == AccessLevel.PUBLIC else []
         admin_meta.resource_permissions = [OPEN_ACCESS] if value == AccessLevel.PUBLIC else []
-        set_admin(keys=fx_item_cat_model_min._admin_keys, record=fx_item_cat_model_min._record, admin_meta=admin_meta)
+        if admin_meta:
+            set_admin(keys=fx_admin_meta_keys, record=fx_item_cat_model_min._record, admin_meta=admin_meta)
         html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
 
         result_metadata = html.select_one("#admin-metadata-access")
@@ -1550,12 +1571,15 @@ class TestAdminTab:
         assert result_resource.text.strip() == str(expected)
 
     @pytest.mark.parametrize("value", [AccessLevel.NONE, AccessLevel.PUBLIC])
-    def test_permissions(self, fx_item_cat_model_min: ItemCatalogue, value: list[Permission]):
+    def test_permissions(
+        self, fx_item_cat_model_min: ItemCatalogue, fx_admin_meta_keys: AdministrationKeys, value: list[Permission]
+    ):
         """Can get metadata and resource access permissions based on value from item."""
-        admin_meta = get_admin(keys=fx_item_cat_model_min._admin_keys, record=fx_item_cat_model_min._record)
+        admin_meta = get_admin(keys=fx_admin_meta_keys, record=fx_item_cat_model_min._record)
         admin_meta.metadata_permissions = [OPEN_ACCESS] if value == AccessLevel.PUBLIC else []
         admin_meta.resource_permissions = [OPEN_ACCESS] if value == AccessLevel.PUBLIC else []
-        set_admin(keys=fx_item_cat_model_min._admin_keys, record=fx_item_cat_model_min._record, admin_meta=admin_meta)
+        if admin_meta:
+            set_admin(keys=fx_admin_meta_keys, record=fx_item_cat_model_min._record, admin_meta=admin_meta)
         expected = fx_item_cat_model_min._admin.resource_permissions
         html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
 

@@ -9,6 +9,7 @@ class TestMdAsHtml:
     @pytest.mark.parametrize(
         ("value", "expected"),
         [
+            ("x\n\nx", "<p>x</p>\n<p>x</p>"),
             ("_x_", "<p><em>x</em></p>"),
             ("https://example.com", '<p><a href="https://example.com" rel="nofollow">https://example.com</a></p>'),
             ("x\n* x", "<p>x</p>\n<ul>\n<li>x</li>\n</ul>"),
@@ -23,6 +24,7 @@ class TestMdAsHtml:
         ("value", "expected"),
         [
             ("_x_", "<em>x</em>"),
+            ("x\n\nx", "<div><p>x</p>\n<p>x</p></div>"),
             ("> [!NOTE]\n> x", '<div class="admonition note">\n<p class="admonition-title">Note</p>\n<p>x</p>\n</div>'),
         ],
     )

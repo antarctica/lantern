@@ -1,0 +1,11 @@
+{% extends "_layouts/page.html.j2" %}
+{% import '_macros/common.html.j2' as com %}
+
+{% set header_main = "Discover polar data" %}
+
+{% block page_content %}
+  {% call com.alert(shape='side', variant='blue', classes="space-y-2") %}
+    <p>This page is a placeholder.</p>
+    <p>In the meantime, please discover our <a class="{{ com.footer_link_classes() }}" href="/collections/bas-maps">maps</a> and <a class="{{ com.footer_link_classes() }}" href="/collections/bas-geomatics">surveys</a>.</p>
+  {% endcall %}
+{% endblock %}

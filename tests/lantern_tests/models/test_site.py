@@ -69,25 +69,23 @@ class TestSchemaOrgAuthor:
     def test_init(self):
         """Can create a Schema.org author instance with required values."""
         expected = "x"
-        expected_type = "Person"
         author = SchemaOrgAuthor(
-            type_=expected_type,
+            type_="Person",
             name=expected,
         )
-        assert author.type_ == expected_type
+        assert author.type_ == "Person"
         assert author.name == expected
         assert author.url is None
 
     def test_all(self):
         """Can create a Schema.org author instance with all possible values."""
         expected = "x"
-        expected_type = "Organization"
         author = SchemaOrgAuthor(
-            type_=expected_type,
+            type_="Organization",
             name=expected,
             url=expected,
         )
-        assert author.type_ == expected_type
+        assert author.type_ == "Organization"
         assert author.name == expected
         assert author.url == expected
 
@@ -95,7 +93,7 @@ class TestSchemaOrgAuthor:
         """Can dump a Schema.org author instance as a dict with correct keys."""
         expected = {"@type": "Person", "name": "x", "url": "x"}
         author = SchemaOrgAuthor(
-            type_=expected["@type"],
+            type_="Person",
             name=expected["name"],
             url=expected["url"],
         )
@@ -119,14 +117,14 @@ class TestSchemaOrgMeta:
         assert meta.name is not None
         assert meta.description is None
         assert meta.image is None
+        assert isinstance(meta.creator, list)
         assert len(meta.creator) == 0
 
     def test_all(self):
         """Can create a Schema.org metadata instance with all possible values."""
         expected = "x"
-        expected_type = "Article"
         meta = SchemaOrgMeta(
-            type_=expected_type,
+            type_="Article",
             name=expected,
             headline=expected,
             url=expected,
@@ -134,17 +132,18 @@ class TestSchemaOrgMeta:
             image=expected,
             creator=[SchemaOrgAuthor(type_="Person", name=expected)],
         )
-        assert meta.type_ == expected_type
+        assert meta.type_ == "Article"
         assert meta.name == expected
         assert meta.headline == expected
         assert meta.url == expected
         assert meta.description == expected
         assert meta.image == expected
+        assert isinstance(meta.creator, list)
         assert len(meta.creator) == 1
 
     def test_dumps(self):
         """Can dump a Schema.org metadata instance as a dict with correct keys."""
-        expected = {
+        expected: dict = {
             "@context": "https://schema.org/",
             "@type": "Article",
             "name": "x",
@@ -155,7 +154,7 @@ class TestSchemaOrgMeta:
             "creator": [{"@type": "Person", "name": "x"}],
         }
         meta = SchemaOrgMeta(
-            type_=expected["@type"],
+            type_="Article",
             name=expected["name"],
             headline=expected["headline"],
             url=expected["url"],
@@ -177,7 +176,7 @@ class TestSchemaOrgMeta:
 
     def test_str(self):
         """Can encode a Schema.org metadata instance as a string for use in templates."""
-        expected = {
+        expected: dict = {
             "@context": "https://schema.org/",
             "@type": "Article",
             "name": "x",
@@ -188,7 +187,7 @@ class TestSchemaOrgMeta:
             "creator": [{"@type": "Person", "name": "x"}],
         }
         meta = SchemaOrgMeta(
-            type_=expected["@type"],
+            type_="Article",
             name=expected["name"],
             headline=expected["headline"],
             url=expected["url"],

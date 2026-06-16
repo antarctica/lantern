@@ -132,7 +132,13 @@ class BasCatTrusted(CatalogueBase):
     """
 
     def __init__(
-        self, logger: logging.Logger, config: Config, repo: BasRepository, host: str, path: Path, env: SiteEnvironment
+        self,
+        logger: logging.Logger,
+        config: Config,
+        repo: BasRepository,
+        host: str | None,
+        path: Path,
+        env: SiteEnvironment,
     ) -> None:
         super().__init__(logger)
         self._config = config

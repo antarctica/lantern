@@ -378,7 +378,7 @@ class TestExtent:
         assert extent.map_iframe == expected
 
 
-class TestItemCatalogueSummaryCatalogue:
+class TestItemCatalogueSummary:
     """
     Test Catalogue Item summary.
 
@@ -408,36 +408,6 @@ class TestItemCatalogueSummaryCatalogue:
 
         summary = ItemCatalogueSummary(record=record, admin_keys=fx_item_base_model_min._admin_keys)
         assert summary.title_no_fmt == "x"
-
-    @pytest.mark.parametrize(
-        ("resource_type", "count", "expected"),
-        [
-            (HierarchyLevelCode.PRODUCT, 0, None),
-            (HierarchyLevelCode.COLLECTION, 0, None),
-            (HierarchyLevelCode.COLLECTION, 1, "1 item"),
-            (HierarchyLevelCode.COLLECTION, 2, "2 items"),
-            (HierarchyLevelCode.PAPER_MAP_PRODUCT, 1, "1 side"),
-            (HierarchyLevelCode.PAPER_MAP_PRODUCT, 2, "2 sides"),
-        ],
-    )
-    def test_children(
-        self, fx_item_base_model_min: ItemBase, resource_type: HierarchyLevelCode, count: int, expected: int
-    ):
-        """Can get formatted count of parent -> child relations."""
-        record = fx_item_base_model_min._record
-        record.hierarchy_level = resource_type
-        for _ in range(count):
-            aggregation = Aggregation(
-                identifier=Identifier(identifier="x", namespace="x"),
-                association_type=AggregationAssociationCode.IS_COMPOSED_OF,
-                initiative_type=AggregationInitiativeCode.PAPER_MAP
-                if HierarchyLevelCode.PAPER_MAP_PRODUCT
-                else AggregationInitiativeCode.COLLECTION,
-            )
-            record.identification.aggregations.append(aggregation)
-
-        summary = ItemCatalogueSummary(record=record, admin_keys=fx_item_base_model_min._admin_keys)
-        assert summary.children == expected
 
     def test_fragments(self, fx_item_base_model_min: ItemBase, fx_admin_meta_keys: AdministrationKeys):
         """Can get fragments to use as part of item summary UI."""

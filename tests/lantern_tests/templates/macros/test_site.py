@@ -3,7 +3,6 @@ from datetime import UTC, datetime
 import pytest
 from bs4 import BeautifulSoup
 from freezegun.api import FrozenDateTimeFactory
-from jinja2 import Environment, PackageLoader, select_autoescape
 
 from lantern.models.site import OpenGraphMeta, SchemaOrgMeta, SiteMeta
 from lantern.utils import get_jinja_env
@@ -37,8 +36,7 @@ class TestMacrosSite:
     def _render(template: str, site_meta: SiteMeta | None = None) -> str:
         if site_meta is None:
             site_meta = TestMacrosSite._site_meta()
-        _loader = PackageLoader("lantern", "resources/templates")
-        jinja = Environment(loader=_loader, autoescape=select_autoescape(), trim_blocks=True, lstrip_blocks=True)
+        jinja = get_jinja_env()
         return jinja.from_string(template).render(meta=site_meta)
 
     def test_head_meta(self):
@@ -115,14 +113,6 @@ class TestMacrosSite:
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
         assert len(meta.plausible_id) > 0
         assert html.head.find(name="script", src=lambda s: s and meta.plausible_id in s) is not None
-
-    def test_script_turnstile(self):
-        """Can get Cloudflare Turnstile script from page."""
-        expected = "https://challenges.cloudflare.com/turnstile/v0/api.js"
-        template = """{% import '_macros/site.html.j2' as site %}{{ site.script_turnstile() }}"""
-        meta = self._site_meta()
-        html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
-        assert html.head.find(name="script", attrs={"src": expected}) is not None
 
     def test_script_enhancements(self):
         """Can get progressive enhancements script from page."""

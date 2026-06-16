@@ -343,9 +343,10 @@ class Config:
         """
         Application ID for client-side site search.
 
-        Locked to Algolia search store value.
+        Should match `STORE_ALGOLIA_APP_ID` value.
         """
-        return self.STORE_ALGOLIA_APP_ID
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("TEMPLATES_"), self._env.prefixed("ALGOLIA_"):
+            return self._env.str("APP_ID")
 
     @property
     def TEMPLATES_ALGOLIA_SEARCH_API_KEY(self) -> str:

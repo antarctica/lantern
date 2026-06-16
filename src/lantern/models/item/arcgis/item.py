@@ -24,8 +24,6 @@ class ItemArcGis(ItemBase):
     """
     Representation of a resource within the Esri ArcGIS geospatial platform.
 
-    ArcGIS representation of a resource within the BAS Data Catalogue / Metadata ecosystem.
-
     Maps a catalogue / ISO 19115 resource to the information model used by ArcGIS items [1] (e.g. summary -> snippet).
     Some properties that are not present as distinct elements in the ArcGIS model are combined via Jinja templates
     (e.g. abstract, lineage, citation are mapped to the description).

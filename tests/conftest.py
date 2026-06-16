@@ -218,7 +218,7 @@ Record (Configs) and Item fixtures
 |                 | RecordRevision           | fx_revision_model_min           | fx_revision_config_min          |
 |                 | ItemBase                 | fx_item_base_model_min          | fx_item_config_min_base         |
 |                 | ItemCatalogue            | fx_item_cat_model_min           | fx_item_config_min_catalogue    |
-|                 | ItemCatalogue            | fx_item_cat_model_min_open      | _item_cat_model_min             |
+|                 | ItemCatalogue            | fx_item_cat_model_open          | _item_cat_model_min             |
 |                 | ItemCataloguePhysicalMap | fx_item_physical_map_model_min  | fx_item_config_min_physical_map |
 """
 
@@ -456,6 +456,7 @@ def _item_cat_model_min() -> ItemCatalogue:
         trusted_context=True,
         select_record=_select_record,
     )
+    # noinspection PyTypeChecker
     set_admin(keys=model._admin_keys, record=model._record, admin_meta=AdministrationMetadata(id=model.resource_id))
     return model
 
@@ -479,19 +480,20 @@ def fx_item_cat_model_min(
         trusted_context=True,
         select_record=fx_select_record,
     )
-    set_admin(keys=model._admin_keys, record=model._record, admin_meta=AdministrationMetadata(id=model.resource_id))
+    set_admin(keys=fx_admin_meta_keys, record=model._record, admin_meta=AdministrationMetadata(id=model.resource_id))
     return model
 
 
 @pytest.fixture()
 def fx_item_cat_model_open(
     fx_item_cat_model_min: ItemCatalogue,
+    fx_admin_meta_keys: AdministrationKeys,
     fx_item_config_min_catalogue: dict,
 ) -> ItemCatalogue:
     """Minimal cloned ItemCatalogue model instance with minimal admin metadata to allow open access."""
     model = _item_cat_model_min()
     set_admin(
-        keys=model._admin_keys,
+        keys=fx_admin_meta_keys,
         record=model._record,
         admin_meta=AdministrationMetadata(
             id=model.resource_id, metadata_permissions=[OPEN_ACCESS], resource_permissions=[OPEN_ACCESS]
@@ -519,7 +521,7 @@ def fx_item_physical_map_model_min(
         trusted_context=True,
         select_record=fx_select_record,
     )
-    set_admin(keys=model._admin_keys, record=model._record, admin_meta=AdministrationMetadata(id=model.resource_id))
+    set_admin(keys=fx_admin_meta_keys, record=model._record, admin_meta=AdministrationMetadata(id=model.resource_id))
     return model
 
 
@@ -543,6 +545,7 @@ def _select_records(file_identifiers: set[str]) -> list[RecordRevision]:
     return [_select_record(fid) for fid in file_identifiers]
 
 
+# noinspection PyUnusedLocal
 def _select_records_fixed(file_identifiers: set[str] | None = None) -> list[RecordRevision]:
     """
     Minimal records fetch method returning a fixed set of records.
@@ -689,7 +692,7 @@ def fx_gitlab_cache(
     )
 
 
-def _gitlab_cache_create(cache: fx_gitlab_cache) -> None:
+def _gitlab_cache_create(cache: GitLabLocalCache) -> None:
     """
     Copy static GitLab local cache to simulate cloning from remote repository.
 
@@ -938,6 +941,7 @@ def fx_cf_client(mocker: MockerFixture) -> CloudFrontClient:
             aws_secret_access_key=mock_config.AWS_ACCESS_SECRET,
             region_name=mock_config.AWS_REGION,
         )
+        # noinspection PyTypeChecker
         client.create_distribution(DistributionConfig=config)
 
         yield client

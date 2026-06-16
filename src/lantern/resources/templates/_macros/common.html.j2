@@ -218,3 +218,9 @@
     {{ caller() }}
   </div>
 {% endmacro %}
+
+{% macro experimental_page() %}
+  {% call alert(shape='side', variant='purple', classes="space-y-2") %}
+    <p>{{ experimental_i() }} This page is experimental, your {{ feedback_trigger(classes=link_classes(), fallback=fallback_email, text='feedback') }} will help us to improve it.</p>
+  {% endcall %}
+{% endmacro %}

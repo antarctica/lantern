@@ -8,7 +8,7 @@
   secondary_nav_items = {
     'Discover': [
       ('https://data.bas.ac.uk/collections/bas-maps', 'Maps', false, false),
-      ('https://data.bas.ac.uk/collections/bas-geomatics', 'Surveys', false, false)
+      ('https://data.bas.ac.uk/collections/bas-geomatics', 'Surveys', false, false),
     ],
     'Portals': [
       ('https://www.icelogistics.info', 'Ice Logistics Portal', true, false),
@@ -20,7 +20,7 @@
     ],
     'About': [
       ('https://github.com/antarctica/lantern', 'GitHub project', true, false),
-      ('/guides/api', 'API documentation', false, false)
+      ('/guides/api', 'API documentation', false, false),
     ],
     'Publishing': [
       ('https://metadata-standards.data.bas.ac.uk', 'Metadata standards', true, false),
@@ -86,7 +86,6 @@
 {% macro head_scripts(data, extra_scripts) %}
   {{ script_sentry(data.build_key) }}
   {{ script_plausible(data.plausible_id) }}
-  {{ script_turnstile() }}
   {{ script_enhancements(data.build_key) }}
   {% if data.html_schema_org_content %}
     {{ script_schema_org(data.html_schema_org_content) }}
@@ -102,19 +101,6 @@
 
 {% macro script_plausible(value) %}
   <script async src="https://plausible.io/js/{{ value }}.js"></script>
-{% endmacro %}
-
-{% macro script_turnstile() %}
-  <script async src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>
-  <script>
-    function onTurnstileError(code) {
-      const family = Math.trunc(code / 1000);
-      if (family === 300 || family === 600) {
-        return;
-      }
-      throw new Error(`Turnstile error: ${code}`);
-    }
-  </script>
 {% endmacro %}
 
 {% macro script_enhancements(build_key) %}

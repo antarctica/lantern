@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
-from jinja2 import Environment, PackageLoader, select_autoescape
 
 from lantern.models.site import SiteMeta
+from lantern.utils import get_jinja_env
 
 
 class TestLayoutPage:
@@ -9,8 +9,7 @@ class TestLayoutPage:
 
     @staticmethod
     def _render(template: str, site_meta: SiteMeta) -> str:
-        _loader = PackageLoader("lantern", "resources/templates")
-        jinja = Environment(loader=_loader, autoescape=select_autoescape(), trim_blocks=True, lstrip_blocks=True)
+        jinja = get_jinja_env()
         return jinja.from_string(template).render(meta=site_meta)
 
     def test_page_header(self, fx_site_meta: SiteMeta):

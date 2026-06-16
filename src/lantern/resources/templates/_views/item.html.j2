@@ -6,7 +6,7 @@
   <script>
     function onTurnstileError(code) {
       const family = Math.trunc(code / 1000);
-      if (family === 300 || family === 600) {
+      if (family === 300 || family === 600 || code === 110200) {
         return;
       }
       throw new Error(`Turnstile error: ${code}`);

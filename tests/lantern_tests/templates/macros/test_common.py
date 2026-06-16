@@ -11,7 +11,6 @@ from datetime import date
 import pytest
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
 from bs4 import BeautifulSoup
-from jinja2 import Environment, PackageLoader, select_autoescape
 
 from lantern.lib.metadata_library.models.record.elements.common import Constraint, Constraints, Date, Identifier
 from lantern.lib.metadata_library.models.record.elements.identification import Aggregation
@@ -25,6 +24,7 @@ from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, set_admin
 from lantern.models.item.catalogue.elements import ItemCatalogueSummary
 from lantern.models.record.revision import RecordRevision
+from lantern.utils import get_jinja_env
 from tests.conftest import _admin_meta_keys, _revision_config_min
 
 
@@ -33,8 +33,7 @@ class TestPageHeader:
 
     @staticmethod
     def _render(config: dict) -> str:
-        _loader = PackageLoader("lantern", "resources/templates")
-        jinja = Environment(loader=_loader, autoescape=select_autoescape(), trim_blocks=True, lstrip_blocks=True)
+        jinja = get_jinja_env()
         template = """{% import '_macros/common.html.j2' as com %}{{ com.page_header(**config) }}"""
         return jinja.from_string(template).render(config=config)
 
@@ -79,8 +78,7 @@ class TestItemSummary:
 
     @staticmethod
     def _render(item: ItemCatalogueSummary) -> str:
-        _loader = PackageLoader("lantern", "resources/templates")
-        jinja = Environment(loader=_loader, autoescape=select_autoescape(), trim_blocks=True, lstrip_blocks=True)
+        jinja = get_jinja_env()
         template = """{% import '_macros/common.html.j2' as com %}{{ com.item_summary(item) }}"""
         return jinja.from_string(template).render(item=item)
 
@@ -208,8 +206,7 @@ class TestDefinitionListItem:
 
     @staticmethod
     def _render(config: dict, value: str) -> str:
-        _loader = PackageLoader("lantern", "resources/templates")
-        jinja = Environment(loader=_loader, autoescape=select_autoescape(), trim_blocks=True, lstrip_blocks=True)
+        jinja = get_jinja_env()
         template = (
             """{% import '_macros/common.html.j2' as com %}{% call com.dl_item(**config) %}{{ value }}{% endcall %}"""
         )
@@ -255,8 +252,7 @@ class TestFormInput:
 
     @staticmethod
     def _render(config: dict) -> str:
-        _loader = PackageLoader("lantern", "resources/templates")
-        jinja = Environment(loader=_loader, autoescape=select_autoescape(), trim_blocks=True, lstrip_blocks=True)
+        jinja = get_jinja_env()
         template = """{% import '_macros/common.html.j2' as com %}{{ com.form_input(**config)}}"""
         return jinja.from_string(template).render(config=config)
 

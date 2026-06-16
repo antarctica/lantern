@@ -66,6 +66,11 @@ class SitePagesOutput(OutputSite):
                 url=f"{self._meta.base_url}/legal/privacy",
                 description="Privacy policy for the BAS Data Catalogue",
             ),
+            "_views/guides/roadmap.html.j2": SitePageMeta(
+                title="Roadmap and Changelog",
+                url=f"{self._meta.base_url}/guides/roadmap",
+                description="Planned catalogue changes and recent improvements",
+            ),
             "_views/guides/formatting.html.j2": SitePageMeta(
                 title="Formatting Guide",
                 url=f"{self._meta.base_url}/guides/formatting",

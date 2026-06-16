@@ -25,6 +25,7 @@ class TestSitePagesOutput:
             Path("legal/cookies/index.html"),
             Path("legal/copyright/index.html"),
             Path("legal/privacy/index.html"),
+            Path("guides/roadmap/index.html"),
             Path("guides/formatting/index.html"),
             Path("guides/map-purchasing/index.html"),
         ]
@@ -57,6 +58,7 @@ class TestSitePagesOutput:
             "/legal/cookies/index.html",
             "/legal/copyright/index.html",
             "/legal/privacy/index.html",
+            "/guides/roadmap/index.html",
             "/guides/formatting/index.html",
             "/guides/map-purchasing/index.html",
         ]

@@ -45,6 +45,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Incorrect logger called in tasks common setup
 * MAGIC base record preset not producing records valid against discovery profile
 * Missing requirements needed for using MAGIC base record preset to produce records valid against discovery profile
+* Updating header colour in item enquires flow to match updated site design
 
 ### Changed
 

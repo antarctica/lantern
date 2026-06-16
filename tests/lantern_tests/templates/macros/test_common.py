@@ -95,6 +95,7 @@ class TestItemSummary:
         """Can get summary description with expected value from summary."""
         summary = self.summary_base
         html = BeautifulSoup(self._render(summary), parser="html.parser", features="lxml")
+        # noinspection PyTypeChecker
         assert summary.summary_fmt in str(html.select_one("article"))
 
     def test_graphic(self):
@@ -122,6 +123,7 @@ class TestItemSummary:
         html = BeautifulSoup(self._render(summary), parser="html.parser", features="lxml")
 
         if expected:
+            # noinspection PyTypeChecker
             assert html.find(name="span", string=expected) is not None
 
     @pytest.mark.parametrize("published", [None, Date(date=date(2023, 10, 31))])
@@ -151,8 +153,10 @@ class TestItemSummary:
         html = BeautifulSoup(self._render(summary), parser="html.parser", features="lxml")
 
         if expected:
+            # noinspection PyTypeChecker
             assert html.find(name="span", string=expected) is not None
         else:
+            # noinspection PyTypeChecker
             assert html.find(name="span", string="0 items") is None
 
     @pytest.mark.parametrize(

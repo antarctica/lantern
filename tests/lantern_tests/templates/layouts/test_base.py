@@ -51,6 +51,7 @@ class TestLayoutBase:
     @pytest.mark.parametrize("env", ["testing", "live"])
     def test_body_env_classes(self, fx_site_meta: SiteMeta, env: str):
         """Can set environment-specific classes on body element."""
+        # noinspection PyTypeChecker
         fx_site_meta.env = env
         env_class = "app-testing-watermark"
 

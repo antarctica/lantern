@@ -456,6 +456,7 @@ def _item_cat_model_min() -> ItemCatalogue:
         trusted_context=True,
         select_record=_select_record,
     )
+    # noinspection PyTypeChecker
     set_admin(keys=model._admin_keys, record=model._record, admin_meta=AdministrationMetadata(id=model.resource_id))
     return model
 
@@ -544,6 +545,7 @@ def _select_records(file_identifiers: set[str]) -> list[RecordRevision]:
     return [_select_record(fid) for fid in file_identifiers]
 
 
+# noinspection PyUnusedLocal
 def _select_records_fixed(file_identifiers: set[str] | None = None) -> list[RecordRevision]:
     """
     Minimal records fetch method returning a fixed set of records.
@@ -939,6 +941,7 @@ def fx_cf_client(mocker: MockerFixture) -> CloudFrontClient:
             aws_secret_access_key=mock_config.AWS_ACCESS_SECRET,
             region_name=mock_config.AWS_REGION,
         )
+        # noinspection PyTypeChecker
         client.create_distribution(DistributionConfig=config)
 
         yield client

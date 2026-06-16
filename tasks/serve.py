@@ -30,11 +30,16 @@ class CORSRequestHandler(SimpleHTTPRequestHandler):
 
 
 def run(host: str = "127.0.0.1", port: int = 9000, directory: str = "./export") -> None:
-    """Run simple development server."""
+    """
+    Run simple development server.
+
+    `localhost` used over 127.0.0.1 if set for compatibility with Font Awesome kits.
+    """
+    host_display = "localhost" if host == "127.0.0.1" else host
     handler = partial(CORSRequestHandler, directory=directory)
     with ThreadingHTTPServer((host, port), handler) as httpd:
         dir_path = Path(directory)
-        print(f"Serving directory {dir_path.resolve()} at http://{host}:{port}")
+        print(f"Serving directory {dir_path.resolve()} at http://{host_display}:{port}")
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:

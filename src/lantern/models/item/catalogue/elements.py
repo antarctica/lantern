@@ -104,23 +104,6 @@ class ItemCatalogueSummary(ItemSummaryBase):
         return md_as_plain(self.record.identification.title)
 
     @property
-    def children(self) -> str | None:
-        """
-        Count of items contained within item.
-
-        E.g. For collections, the number of items it contains.
-        """
-        count = len(
-            self.record.identification.aggregations.filter(associations=AggregationAssociationCode.IS_COMPOSED_OF)
-        )
-        if count < 1:
-            return None
-
-        unit = "side" if self.record.hierarchy_level == HierarchyLevelCode.PAPER_MAP_PRODUCT else "item"
-        unit = unit if count == 1 else f"{unit}s"
-        return f"{count} {unit}"
-
-    @property
     def fragments(self) -> ItemSummaryFragments:
         """UI fragments (icons and labels) for item summary."""
         return ItemSummaryFragments(

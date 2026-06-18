@@ -270,6 +270,9 @@ def main() -> None:
     _dump_arcgis_item(logger=logger, output_path=Path("agol-item-backups"), item=target_item)
     _update_agol_item(logger=logger, config=config, item=target_item, properties=diff)
 
+    params = f"task esri-item --source {args['source_id']} --target {args['target_id']}"
+    logger.info(f"Re-run as: '% {params}'")
+
 
 if __name__ == "__main__":
     main()

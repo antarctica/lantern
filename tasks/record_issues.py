@@ -51,7 +51,7 @@ def _get_cli_args() -> tuple[bool, Path, Path | None, set[str]]:
 
 def _get_args(
     logger: logging.Logger, keys: AdministrationKeys, cli_args: tuple[bool, Path, Path | None, set[str]]
-) -> tuple[Path, Record, set[str]]:
+) -> tuple[Path, Record, set[str], str]:
     """Get task inputs, interactively if needed/allowed."""
     cli_force, cli_records_path, cli_record_path, cli_issues = cli_args
 
@@ -67,11 +67,14 @@ def _get_args(
         record = parse_records(
             logger=logger, glob_pattern=record_path.name, search_path=record_path.parent, validate_catalogue=True
         )[0][0]
-        return import_path, record, issues
+
+        _issues = " ".join([f"--issue {i}" for i in issues]) if issues else ""
+        params = f"task issues-record --force --path {import_path.resolve()} --record {record_path.resolve()} {_issues}"
+        return import_path, record, issues, params
 
     logger.info(f"Loading records from: '{import_path.resolve()}'")
-    records = [record_path[0] for record_path in parse_records(logger=logger, search_path=import_path)]
-    record = pick_local_record(logger=logger, records=records)
+    _record_paths = parse_records(logger=logger, search_path=import_path, validate_catalogue=True)
+    record = pick_local_record(logger=logger, records=[rp[0] for rp in _record_paths])
 
     existing_issues = "\n".join(_get_issues(logger=logger, keys=keys, record=record))
     issues_raw = inquirer.editor(message="Issues (separate by new lines)", default=existing_issues)
@@ -81,7 +84,16 @@ def _get_args(
         logger.info(i)
     confirm(logger=logger, message="Correct issues?")
 
-    return import_path, record, issues
+    for rp in _record_paths:
+        if record.file_identifier == rp[0].file_identifier:
+            record_path = rp[1]
+            break
+    if not record_path:
+        msg = f"File for record '{record.file_identifier}' not found"
+        raise FileNotFoundError(msg) from None
+    _issues = " ".join([f"--issue {i}" for i in issues]) if issues else ""
+    params = f"task issues-record --force --path {import_path.resolve()} --record {record_path.resolve()} {_issues}"
+    return import_path, record, issues, params
 
 
 def _get_issues(logger: logging.Logger, keys: AdministrationKeys, record: Record) -> list[str]:
@@ -114,10 +126,12 @@ def main() -> None:
     print("\nWARNING: This task will overwrite any existing issues in the selected record.")
 
     cli_args = _get_cli_args()
-    import_path, record, issues = _get_args(logger=logger, keys=admin_keys, cli_args=cli_args)
+    import_path, record, issues, params = _get_args(logger=logger, keys=admin_keys, cli_args=cli_args)
 
     _set_issues(logger=logger, keys=admin_keys, record=record, issues=issues)
     dump_records(logger=logger, records=[record], output_path=import_path)
+
+    logger.info(f"Re-run as: '% {params}'")
 
 
 if __name__ == "__main__":

@@ -72,7 +72,7 @@ def _get_args(
     logger: logging.Logger,
     cat: BasCatalogue,
     cli_args: tuple[bool, bool, Path, str | None, str | None, Path | None],
-) -> tuple[Path, str, str, Record, bool]:
+) -> tuple[Path, str, str, Record, bool, str]:
     """Get task inputs, interactively if needed/allowed."""
     cli_force, cli_replace, cli_path, cli_branch, cli_current_ref, cli_successor_path = cli_args
 
@@ -84,24 +84,25 @@ def _get_args(
     successor_record = None
 
     logger.info(f"Loading records from: '{path.resolve()}'")
-    records_paths = parse_records(logger=logger, search_path=path, validate_catalogue=True)
+    _record_paths = parse_records(logger=logger, search_path=path, validate_catalogue=True)
+    _record_lookup = {rp[1].resolve(): rp[0] for rp in _record_paths}
+    _path_lookup = {rp[0].file_identifier: rp[1] for rp in _record_paths}
 
     if not cli_force:
         path = Path(inquirer.path("Import path", path_type=InquirerPath.DIRECTORY, exists=True, default=path))
         branch = get_gitlab_source(logger=logger, cat=cat, action="Fetching records from")
         current_ref = inquirer.text(message="Current record reference", default=current_ref)
         if not successor_path:
-            successor_record = pick_local_record(logger=logger, records=[rp[0] for rp in records_paths])
+            successor_record = pick_local_record(logger=logger, records=[rp[0] for rp in _record_paths])
         replace: bool = (
             inquirer.list_input("Replace references to current record?", choices=["Yes", "No"], default="Yes") == "Yes"
         )
     else:
-        lookup = {rp[1].resolve(): rp[0] for rp in records_paths}
         if cli_successor_path is None:
             msg = "Successor record path must be set when using --force option for this task."
             raise RuntimeError(msg) from None
         try:
-            successor_record = lookup[cli_successor_path.resolve()]
+            successor_record = _record_lookup[cli_successor_path.resolve()]
         except KeyError:
             raise FileNotFoundError() from None
 
@@ -115,7 +116,15 @@ def _get_args(
     if not isinstance(successor_record, Record):
         raise TypeError(msg) from None
 
-    return path, branch, current_ref, successor_record, replace
+    try:
+        successor_path = _path_lookup[successor_record.file_identifier]
+    except KeyError:
+        msg = f"File for record '{successor_record.file_identifier}' not found"
+        raise FileNotFoundError(msg) from None
+    _replace = "--replace" if replace else ""
+    params = f"task supersede-record --force {_replace} --path {path.resolve()} --branch {branch} --current {current_ref} --successor {successor_path.resolve()}"
+
+    return path, branch, current_ref, successor_record, replace, params
 
 
 def _process_successor(logger: logging.Logger, record: Record, predecessor: Record, replace: bool) -> None:
@@ -296,7 +305,9 @@ def main() -> None:
     logger, _config, catalogue = init()
 
     cli_args = _get_cli_args()
-    import_path, branch, current_ref, successor, replace = _get_args(logger=logger, cat=catalogue, cli_args=cli_args)
+    import_path, branch, current_ref, successor, replace, params = _get_args(
+        logger=logger, cat=catalogue, cli_args=cli_args
+    )
     _predecessor = get_record(logger=logger, cat=catalogue, reference=current_ref, branch=branch)
     predecessor = Record.loads(value=_predecessor.dumps(strip_admin=False))
 
@@ -308,6 +319,8 @@ def main() -> None:
     )
 
     dump_records(logger=logger, output_path=import_path, records=[predecessor, successor, *collections])
+
+    logger.info(f"Re-run as: '% {params}'")
 
 
 if __name__ == "__main__":

@@ -63,7 +63,7 @@ class PlaceholderStore(StoreBase):
         raise NotImplementedError
 
 
-def _get_cli_args() -> tuple[bool, Path, Path, Path | None]:
+def _get_cli_args() -> tuple[bool, Path, Path, list[Path]]:
     """Get command line arguments."""
     parser = ArgumentParser(description="Preview local records as locally exported catalogue items.")
     parser.add_argument(
@@ -90,46 +90,58 @@ def _get_cli_args() -> tuple[bool, Path, Path, Path | None]:
         "--path",
         "-p",
         type=Path,
-        help="Set specific record config file to preview. Will prompt for available files in import directory if omitted.",
+        action="append",
+        help="Set specific record config file to preview. Can be repeated. Will prompt for files in import directory if omitted.",
     )
     args = parser.parse_args()
+    if args.path is None:
+        args.path = []
     return args.force, args.import_path, args.export_path, args.path
 
 
-def _get_args(logger: logging.Logger, cli_args: tuple[bool, Path, Path, Path | None]) -> tuple[Path, list[Record]]:
+def _get_args(logger: logging.Logger, cli_args: tuple[bool, Path, Path, list[Path]]) -> tuple[Path, list[Record], str]:
     """Get task inputs, interactively if needed/allowed."""
-    cli_force, cli_import_path, cli_export_path, cli_record_path = cli_args
+    cli_force, cli_import_path, cli_export_path, cli_record_paths = cli_args
 
     import_path = cli_import_path
     export_path = cli_export_path
-    record_path = cli_record_path
+    record_paths: list[Path] = cli_record_paths
+    records: list[Record] = []
 
-    if not export_path.exists():
-        export_path.mkdir(parents=True, exist_ok=True)
+    if cli_force and not record_paths:
+        msg = "At least one record path must be set when using --force option for this task."
+        raise RuntimeError(msg) from None
+    if cli_force:
+        for path in record_paths:
+            logger.info(f"Loading record from: '{path.resolve()}'")
+            r = parse_records(logger=logger, glob_pattern=path.name, search_path=path.parent, validate_catalogue=True)
+            records.append(r[0][0])
 
-    if record_path:
-        logger.info(f"Loading record from: '{record_path.resolve()}'")
-        record = parse_records(
-            logger=logger, glob_pattern=record_path.name, search_path=record_path.parent, validate_catalogue=True
-        )[0][0]
-        return export_path, [record]
+        _paths_param = " ".join([f"--path {p.resolve()}" for p in record_paths])
+        params = f"task preview-records --force --import-path {import_path.resolve()} --export-path {export_path.resolve()} {_paths_param}"
+        return export_path, records, params
 
-    if not cli_force:
-        import_path = Path(
-            inquirer.path("Import path", path_type=InquirerPath.DIRECTORY, exists=True, default=import_path)
-        )
-        export_path = Path(
-            inquirer.path("Export path", path_type=InquirerPath.DIRECTORY, exists=True, default=export_path)
-        )
+    import_path = Path(inquirer.path("Import path", path_type=InquirerPath.DIRECTORY, exists=True, default=import_path))
+    export_path = Path(inquirer.path("Export path", path_type=InquirerPath.DIRECTORY, exists=True, default=export_path))
 
     logger.info(f"Loading records from: '{import_path.resolve()}'")
-    records = [record_path[0] for record_path in parse_records(logger=logger, search_path=import_path)]
-    selected_records = records  # if force option, preview all loaded records
+    _record_paths = parse_records(logger=logger, search_path=import_path)
+    records = pick_local_records(logger=logger, records=[rp[0] for rp in _record_paths])
 
-    if not cli_force:
-        selected_records = pick_local_records(logger=logger, records=records)
+    if not export_path.exists():
+        logger.info(f"Creating missing export directory: '{export_path.resolve()}'")
+        export_path.mkdir(parents=True, exist_ok=True)
 
-    return export_path, selected_records
+    _records_lookup = {rp[0].file_identifier: rp[1].resolve() for rp in _record_paths}
+    for r in records:
+        try:
+            record_paths.append(_records_lookup[r.file_identifier])
+        except KeyError:
+            msg = f"File for record '{r.file_identifier}' not found"
+            raise FileNotFoundError(msg) from None
+    _paths_param = " ".join([f"--path {p.resolve()}" for p in record_paths])
+    params = f"task preview-records --force --import-path {import_path.resolve()} --export-path {export_path.resolve()} {_paths_param}"
+    return export_path, records, params
 
 
 def _export(logger: logging.Logger, config: Config, records: list[Record], output_path: Path) -> None:
@@ -154,10 +166,11 @@ def main() -> None:
     logger, config, _catalogue = init()
 
     cli_args = _get_cli_args()
-    output_path, selected_records = _get_args(logger=logger, cli_args=cli_args)
+    output_path, selected_records, params = _get_args(logger=logger, cli_args=cli_args)
 
     logger.info(f"Exporting previews of {len(selected_records)} record(s) to: '{output_path.resolve()}'")
     _export(logger=logger, config=config, records=selected_records, output_path=output_path)
+    logger.info(f"Re-run as: '% {params}'")
 
 
 if __name__ == "__main__":

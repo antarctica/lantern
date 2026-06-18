@@ -62,7 +62,7 @@ def _get_args(
     logger: logging.Logger,
     cat: BasCatalogue,
     cli_args: tuple[bool, Path, str | None, str | None, str | None],
-) -> tuple[Path, str, str, str]:
+) -> tuple[Path, str, str, str, str]:
     """Get task inputs, interactively if needed/allowed."""
     cli_force, cli_path, cli_branch, cli_source_ref, cli_target_id = cli_args
 
@@ -87,7 +87,8 @@ def _get_args(
     if not isinstance(target_id, str):
         raise TypeError(msg) from None
 
-    return path, branch, source_ref, target_id
+    params = f"task clone-record --force --path {path.resolve()} --branch {branch} --source {source_ref} --target {target_id}"
+    return path, branch, source_ref, target_id, params
 
 
 def _get_new_identifier(identifier: str | None = None) -> str:
@@ -140,7 +141,7 @@ def main() -> None:
     logger, config, catalogue = init()
 
     cli_args = _get_cli_args()
-    import_path, branch, source_ref, target_id = _get_args(logger=logger, cat=catalogue, cli_args=cli_args)
+    import_path, branch, source_ref, target_id, params = _get_args(logger=logger, cat=catalogue, cli_args=cli_args)
 
     source_record = get_record(logger=logger, cat=catalogue, reference=source_ref, branch=branch)
     target_identifier = _get_new_identifier(identifier=target_id)
@@ -151,6 +152,8 @@ def main() -> None:
         new_identifier=target_identifier,
     )
     dump_records(logger=logger, output_path=import_path, records=[new_record])
+
+    logger.info(f"Re-run as: '% {params}'")
 
 
 if __name__ == "__main__":

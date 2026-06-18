@@ -53,7 +53,9 @@ def _get_cli_args() -> tuple[bool, Path, Path | None, str | None]:
     return args.force, args.path, args.record, args.item
 
 
-def _get_args(logger: logging.Logger, cli_args: tuple[bool, Path, Path | None, str | None]) -> tuple[Path, Record, str]:
+def _get_args(
+    logger: logging.Logger, cli_args: tuple[bool, Path, Path | None, str | None]
+) -> tuple[Path, Record, str, str]:
     """Get task inputs, interactively if needed/allowed."""
     cli_force, cli_records_path, cli_record_path, cli_item = cli_args
 
@@ -69,14 +71,27 @@ def _get_args(logger: logging.Logger, cli_args: tuple[bool, Path, Path | None, s
         record = parse_records(
             logger=logger, glob_pattern=record_path.name, search_path=record_path.parent, validate_catalogue=True
         )[0][0]
-        return import_path, record, item
+
+        params = (
+            f"task esri-record --force --path {import_path.resolve()} --record {record_path.resolve()} --item {item}"
+        )
+        return import_path, record, item, params
 
     logger.info(f"Loading records from: '{import_path.resolve()}'")
-    records = [record_path[0] for record_path in parse_records(logger=logger, search_path=import_path)]
-    record = pick_local_record(logger=logger, records=records)
+    _record_paths = parse_records(logger=logger, search_path=import_path)
+    record = pick_local_record(logger=logger, records=[rp[0] for rp in _record_paths])
     item = inquirer.text(message="ArcGIS item URL", default=item)
 
-    return import_path, record, item
+    record_path = None
+    for rp in _record_paths:
+        if record.file_identifier == rp[0].file_identifier:
+            record_path = rp[1]
+            break
+    if not record_path:
+        msg = f"File for record '{record.file_identifier}' not found"
+        raise FileNotFoundError(msg) from None
+    params = f"task esri-record --force --path {import_path.resolve()} --record {record_path.resolve()} --item {item}"
+    return import_path, record, item, params
 
 
 def get_agol_token(config: ExtraConfig) -> str:
@@ -238,13 +253,15 @@ def main() -> None:
     logger, config, _catalogue = init()
 
     cli_args = _get_cli_args()
-    import_path, record, item_url = _get_args(logger=logger, cli_args=cli_args)
+    import_path, record, item_url, params = _get_args(logger=logger, cli_args=cli_args)
 
     item = get_agol_item(logger=logger, config=config, item_ref=item_url)
     distribution_options = _make_esri_distributions(item)
     for option in distribution_options:
         record.distribution.ensure(option)
     dump_records(logger=logger, records=[record], output_path=import_path)
+
+    logger.info(f"Re-run as: '% {params}'")
 
 
 if __name__ == "__main__":

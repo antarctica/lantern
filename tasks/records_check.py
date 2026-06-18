@@ -65,7 +65,7 @@ def _get_args(
     logger: logging.Logger,
     cat: BasCatalogue,
     cli_args: tuple[bool, str | None, ExportTarget, SiteEnvironment, set[str]],
-) -> tuple[SiteEnvironment, ExportTarget, str, set[str]]:
+) -> tuple[SiteEnvironment, ExportTarget, str, set[str], str]:
     """Get task inputs, interactively if needed/allowed."""
     cli_force, cli_branch, cli_target, cli_env, cli_references = cli_args
 
@@ -75,7 +75,9 @@ def _get_args(
     identifiers = process_record_references(logger=logger, references=cli_references)
 
     if cli_force:
-        return env, target, branch, identifiers
+        _records_param = " ".join([f"--record {i}" for i in identifiers]) if identifiers else ""
+        params = f"task check-records --force --branch {branch} --target {target} --env {env} {_records_param}"
+        return env, target, branch, identifiers, params
 
     env = inquirer.list_input(message="Site environment (testing/live)", choices=get_args(SiteEnvironment), default=env)
     target = inquirer.list_input(message="Export target (local/remote)", choices=get_args(ExportTarget), default=target)
@@ -86,7 +88,9 @@ def _get_args(
         logger.info(f"{identifiers}")
         logger.info("Note: Any empty set is allowed and will select all records.")
         if not inquirer.confirm(message="Add others?", default=False):
-            return env, target, branch, identifiers
+            _records_param = " ".join([f"--record {i}" for i in identifiers]) if identifiers else ""
+            params = f"task check-records --force --branch {branch} --target {target} --env {env} {_records_param}"
+            return env, target, branch, identifiers, params
 
     references = set()
     message = [
@@ -124,7 +128,9 @@ def _get_args(
             break
     identifiers = identifiers.union(process_record_references(logger=logger, references=references))
 
-    return env, target, branch, identifiers
+    _records_param = " ".join([f"--record {i}" for i in identifiers]) if identifiers else ""
+    params = f"task check-records --force --branch {branch} --target {target} --env {env} {_records_param}"
+    return env, target, branch, identifiers, params
 
 
 def check(
@@ -132,7 +138,7 @@ def check(
 ) -> None:
     """Run catalogue checks, optionally overloading exporter."""
     if target == "local":
-        cat._envs[env]._untrusted._exporter = LocalExporter(logger=cat._logger, path=local_path)
+        cat._envs[env]._untrusted._exporter = LocalExporter(logger=cat._logger, path=local_path)  # ty:ignore[invalid-assignment]
         # don't need to overload trusted exporter as checks are not supported
     cat.check(env=env, identifiers=identifiers, branch=branch)
 
@@ -142,13 +148,14 @@ def main() -> None:
     logger, _config, catalogue = init()
 
     cli_args = _get_cli_args()
-    env, target, branch, identifiers = _get_args(logger=logger, cat=catalogue, cli_args=cli_args)
+    env, target, branch, identifiers, params = _get_args(logger=logger, cat=catalogue, cli_args=cli_args)
 
     start = time.monotonic()
     check(
         cat=catalogue, env=env, target=target, branch=branch, identifiers=identifiers, local_path=Path("checks/ad-hoc")
     )
     logger.info(f"Checked site in {round(time.monotonic() - start)} seconds.")
+    logger.info(f"Re-run as: '% {params}'")
 
 
 if __name__ == "__main__":

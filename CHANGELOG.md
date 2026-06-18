@@ -37,6 +37,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * `.well-known/seucrity.txt` endpoint
 * `robots.txt` endpoint
 * Experimental page common macro
+* 're-run task as' logic for development tasks that support `--force` option
 
 ### Fixed
 

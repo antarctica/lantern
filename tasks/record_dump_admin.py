@@ -42,7 +42,7 @@ def _get_cli_args() -> tuple[bool, Path, Path | None]:
     return args.force, args.path, args.record
 
 
-def _get_args(logger: logging.Logger, cli_args: tuple[bool, Path, Path | None]) -> Record:
+def _get_args(logger: logging.Logger, cli_args: tuple[bool, Path, Path | None]) -> tuple[Record, str]:
     """Get task inputs, interactively if needed/allowed."""
     cli_force, cli_import_path, cli_record_path = cli_args
 
@@ -54,14 +54,27 @@ def _get_args(logger: logging.Logger, cli_args: tuple[bool, Path, Path | None]) 
         raise RuntimeError(msg) from None
     if record_path:
         logger.info(f"Loading record from: '{record_path.resolve()}'")
-        return parse_records(
+        record = parse_records(
             logger=logger, glob_pattern=record_path.name, search_path=record_path.parent, validate_catalogue=True
         )[0][0]
 
+        params = f"task admin-record --force --path {import_path.resolve()} --record {record_path.resolve()}"
+        return record, params
+
     import_path = Path(inquirer.path("Import path", path_type=InquirerPath.DIRECTORY, exists=True, default=import_path))
     logger.info(f"Loading records from: '{import_path.resolve()}'")
-    records = [record_path[0] for record_path in parse_records(logger=logger, search_path=import_path)]
-    return pick_local_record(logger=logger, records=records)
+    _record_paths = parse_records(logger=logger, search_path=import_path, validate_catalogue=True)
+    record = pick_local_record(logger=logger, records=[rp[0] for rp in _record_paths])
+
+    for rp in _record_paths:
+        if record.file_identifier == rp[0].file_identifier:
+            record_path = rp[1]
+            break
+    if not record_path:
+        msg = f"File for record '{record.file_identifier}' not found"
+        raise FileNotFoundError(msg) from None
+    params = f"task admin-record --force --path {import_path.resolve()} --record {record_path.resolve()}"
+    return record, params
 
 
 def _dumps_admin_meta(logger: logging.Logger, admin_keys: AdministrationKeys, record: Record) -> None:
@@ -88,8 +101,10 @@ def main() -> None:
     logger, config, _catalogue = init()
 
     cli_args = _get_cli_args()
-    record = _get_args(logger=logger, cli_args=cli_args)
+    record, params = _get_args(logger=logger, cli_args=cli_args)
     _dumps_admin_meta(logger=logger, admin_keys=config.ADMIN_METADATA_KEYS, record=record)
+
+    logger.info(f"Re-run as: '% {params}'")
 
 
 if __name__ == "__main__":

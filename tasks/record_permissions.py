@@ -104,7 +104,7 @@ def _get_cli_args() -> tuple[bool, Path, Path | None, AccessPreset | None, str |
 def _get_args(
     logger: logging.Logger,
     cli_args: tuple[bool, Path, Path | None, AccessPreset | None, str | None, AccessPreset | None, str | None],
-) -> tuple[Path, Record, Permission | None, Permission | None]:
+) -> tuple[Path, Record, Permission | None, Permission | None, str]:
     """Get task inputs, interactively if needed/allowed."""
     (
         cli_force,
@@ -131,16 +131,23 @@ def _get_args(
         record = parse_records(
             logger=logger, glob_pattern=record_path.name, search_path=record_path.parent, validate_catalogue=True
         )[0][0]
+
+        _rps = f"--resource-preset {resource_permission_t}" if resource_permission_t else ""
+        _rc = f"--resource-comment {resource_comment}" if resource_comment else ""
+        _mps = f"--metadata-preset {metadata_permission_t}" if metadata_permission_t else ""
+        _mc = f"--metadata-comment {metadata_comment}" if metadata_comment else ""
+        params = f"task restrict-record --force --path {import_path.resolve()} --record {record_path.resolve()} {_rps} {_rc} {_mps} {_mc}"
         return (
             import_path,
             record,
             _make_permission(resource_permission_t, resource_comment),
             _make_permission(metadata_permission_t, metadata_comment),
+            params,
         )
 
     logger.info(f"Loading records from: '{import_path.resolve()}'")
-    records = [record_path[0] for record_path in parse_records(logger=logger, search_path=import_path)]
-    record = pick_local_record(logger=logger, records=records)
+    _record_paths = parse_records(logger=logger, search_path=import_path, validate_catalogue=True)
+    record = pick_local_record(logger=logger, records=[rp[0] for rp in _record_paths])
 
     resource_permission_t = inquirer.list_input(
         message="Resource access permission", choices=get_args(AccessPreset), default=resource_permission_t
@@ -151,11 +158,24 @@ def _get_args(
     )
     metadata_comment = inquirer.text("Metadata comment (optional)", default=cli_metadata_comment or "")
 
+    for rp in _record_paths:
+        if record.file_identifier == rp[0].file_identifier:
+            record_path = rp[1]
+            break
+    if not record_path:
+        msg = f"File for record '{record.file_identifier}' not found"
+        raise FileNotFoundError(msg) from None
+    _rps = f"--resource-preset {resource_permission_t}" if resource_permission_t else ""
+    _rc = f"--resource-comment {resource_comment}" if resource_comment else ""
+    _mps = f"--metadata-preset {metadata_permission_t}" if metadata_permission_t else ""
+    _mc = f"--metadata-comment {metadata_comment}" if metadata_comment else ""
+    params = f"task restrict-record --force --path {import_path.resolve()} --record {record_path.resolve()} {_rps} {_rc} {_mps} {_mc}"
     return (
         import_path,
         record,
         _make_permission(resource_permission_t, resource_comment),
         _make_permission(metadata_permission_t, metadata_comment),
+        params,
     )
 
 
@@ -187,7 +207,7 @@ def main() -> None:
     print("\nWARNING: This task will overwrite any existing permissions in selected records.")
 
     cli_args = _get_cli_args()
-    import_path, record, resource_permission, metadata_permission = _get_args(logger, cli_args)
+    import_path, record, resource_permission, metadata_permission, params = _get_args(logger, cli_args)
 
     if not metadata_permission and not resource_permission:
         logger.info("No permissions selected, aborting.")
@@ -201,6 +221,8 @@ def main() -> None:
         resource_permission=resource_permission,
     )
     dump_records(logger=logger, records=[record], output_path=import_path)
+
+    logger.info(f"Re-run as: '% {params}'")
 
 
 if __name__ == "__main__":

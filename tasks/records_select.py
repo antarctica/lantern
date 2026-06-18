@@ -53,7 +53,7 @@ def _get_args(
     logger: logging.Logger,
     cat: BasCatalogue,
     cli_args: tuple[bool, Path, str | None, set[str]],
-) -> tuple[Path, str, set[str]]:
+) -> tuple[Path, str, set[str], str]:
     """Get task inputs, interactively if needed/allowed."""
     cli_force, cli_path, cli_branch, cli_references = cli_args
 
@@ -62,7 +62,9 @@ def _get_args(
     references = cli_references
 
     if cli_force:
-        return path, branch, references
+        _refs_param = " ".join([f"--record {r}" for r in references]) if references else ""
+        params = f"task select-records --force --path {cli_path.resolve()} --branch {branch} {_refs_param}"
+        return path, branch, references, params
 
     path = Path(inquirer.path("Import path", path_type=InquirerPath.DIRECTORY, exists=True, default=path))
     branch = inquirer.text(message="Branch", default=branch)
@@ -71,7 +73,9 @@ def _get_args(
         logger.info("Record references from command line arguments:")
         logger.info(f"{cli_references}")
         if not inquirer.confirm(message="Add others?", default=False):
-            return path, branch, references
+            _refs_param = " ".join([f"--record {r}" for r in references]) if references else ""
+            params = f"task select-records --force --path {cli_path.resolve()} --branch {branch} {_refs_param}"
+            return path, branch, references, params
 
     message = [
         "Record references can be URLs, file names, or bare identifiers with optional markdown formatting.",
@@ -110,7 +114,9 @@ def _get_args(
         if not answers["continue"]:
             break
 
-    return path, branch, references
+    _refs_param = " ".join([f"--record {r}" for r in references]) if references else ""
+    params = f"task select-records --force --path {cli_path.resolve()} --branch {branch} {_refs_param}"
+    return path, branch, references, params
 
 
 def confirm_selection(logger: logging.Logger, cli_force: bool, file_identifiers: set[str]) -> bool:
@@ -133,7 +139,7 @@ def main() -> None:
     logger, _config, catalogue = init()
 
     cli_args = _get_cli_args()
-    import_path, branch, references = _get_args(logger=logger, cat=catalogue, cli_args=cli_args)
+    import_path, branch, references, params = _get_args(logger=logger, cat=catalogue, cli_args=cli_args)
 
     file_identifiers = process_record_references(logger=logger, references=references)
     if not confirm_selection(logger=logger, cli_force=cli_args[0], file_identifiers=file_identifiers):
@@ -146,6 +152,7 @@ def main() -> None:
     logger.info(f"Dumping {len(file_identifiers)} selected records from '{branch}' in GitLab store")
     dump_records(logger=logger, output_path=import_path, records=records)
     logger.info(f"{len(file_identifiers)} records in {import_path.resolve()} for editing.")
+    logger.info(f"Re-run as: '% {params}'")
 
 
 if __name__ == "__main__":

@@ -62,7 +62,7 @@ class BasCatUntrusted(CatalogueBase):
             "cloudfront",
             aws_access_key_id=self._config.SITE_UNTRUSTED_AWS_ACCESS_ID,
             aws_secret_access_key=self._config.SITE_UNTRUSTED_AWS_ACCESS_SECRET,
-            region_name=self._config.SITE_UNTRUSTED_AWS_REGION,
+            region_name="us-east-1",
         )
 
     def export(

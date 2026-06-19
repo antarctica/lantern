@@ -346,8 +346,20 @@ class TestConfig:
 
     @pytest.mark.parametrize("env", ["LANTERN_STORE_GITLAB_CACHE_PATH"])
     def test_validate_invalid_path(self, env: str):
-        """Cannot validate where a required path is invalid."""
+        """Cannot validate where a required path is not a directory.."""
         envs: dict = {env: str(Path(__file__).resolve())}
+        envs_bck = self._set_envs(envs)
+        config = Config(read_dotenv=False)
+
+        with pytest.raises(EnvValidationError):
+            config.validate()
+
+        self._unset_envs(envs, envs_bck)
+
+    @pytest.mark.parametrize("env", ["LANTERN_SITE_UNTRUSTED_CLOUDFRONT_DIST_LIVE"])
+    def test_validate_invalid_length(self, env: str):
+        """Cannot validate where a required value is shorter than the minimum length."""
+        envs: dict = {env: ""}
         envs_bck = self._set_envs(envs)
         config = Config(read_dotenv=False)
 

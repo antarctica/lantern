@@ -47,6 +47,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * MAGIC base record preset not producing records valid against discovery profile
 * Missing requirements needed for using MAGIC base record preset to produce records valid against discovery profile
 * Updating header colour in item enquires flow to match updated site design
+* Correcting reverse proxying prefixes in setup documentation
+* Missing validation for CloudFront distribution ID in config and CloudFront exporter
 
 ### Changed
 
@@ -59,7 +61,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Updating `uv` version
 * Switching to official `ty` pre-commit hook
 
-## Removed
+### Removed
 
 * Unused empty bucket S3 exporter method
 

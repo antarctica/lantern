@@ -134,12 +134,12 @@ This requires a request to BAS IT asking for:
 /datasets/
 /features/
 /guides/
-/home/
+/home
 /items/
 /legal/
 /maps/
 /records/
-/search/
+/search
 /series/
 /static/
 /teams/

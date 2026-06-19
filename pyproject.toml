@@ -145,7 +145,6 @@ preview-records = { cmd = "python -m tasks.records_preview", help = "Preview rec
 import-records = { cmd = "python -m tasks.records_import", help = "Import records from directory" }
 build-records = { cmd = "python -m tasks.records_build", help = "Build records as a catalogue site" }
 check-records = { cmd = "python -m tasks.records_check", help = "Check static site and records contents" }
-invalidate-records = { cmd = "python -m tasks.records_invalidate", help = "Invalidate cached records in live site" }
 upgrade-records = { cmd = "python -m tasks.records_upgrade_2026_04", help = "Upgrade records" }
 bootstrap-records = { cmd = "python -m tasks.records_bootstrap", help = "Bootstrap a new records repo" }
 workflow-testing = { cmd = "python -m tasks.records_workflow_testing", help = "Import records to testing site" }

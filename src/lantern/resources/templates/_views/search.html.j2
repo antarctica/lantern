@@ -3,6 +3,11 @@
 
 {% set header_main = "Search" %}
 
+{% block head_scripts_extra %}
+  <script src="/static/js/lib/algolia.min.js?v={{ build_key }}"></script>
+  <script src="/static/js/search.js?v={{ build_key }}"></script>
+{% endblock %}
+
 {% block page_content %}
   {{ com.experimental_page() }}
 
@@ -17,9 +22,4 @@
     </section>
     <section id="search-hits" class="space-y-4"></section>
   </div>
-{% endblock %}
-
-{% block head_scripts_extra %}
-  <script src="/static/js/lib/algolia.min.js?v={{ build_key }}"></script>
-  <script src="/static/js/search.js?v={{ build_key }}"></script>
 {% endblock %}

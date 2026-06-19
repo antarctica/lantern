@@ -185,7 +185,7 @@ Run the `config-init` [Development Task](/docs/dev.md#development-tasks) to gene
 To populate `LANTERN_SITE_UNTRUSTED_CLOUDFRONT_DIST_LIVE`:
 
 1. setup [Infrastructure As Code](/docs/infrastructure.md#infrastructure-as-code)
-2. run `opentofu output site_cf_id`
+2. run `tofu output site_cf_id`
 
 ## Adding configuration options
 

@@ -383,7 +383,7 @@ class Config:
     def SITE_UNTRUSTED_CLOUDFRONT_DIST_LIVE(self) -> str:
         """AWS CloudFront distribution for untrusted site content (live environment)."""
         with self._env.prefixed(self._app_prefix), self._env.prefixed("SITE_UNTRUSTED_CLOUDFRONT_"):
-            return self._env.str("DIST_LIVE")
+            return self._env.str("DIST_LIVE", validate=validate.Length(min=1))
 
     @property
     def SITE_UNTRUSTED_AWS_REGION(self) -> str:

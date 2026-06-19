@@ -146,7 +146,7 @@ Indicate a new record is the successor to another, keeping or replacing referenc
 
 These fields are updated in the predecessor record:
 
-- `identification.aggregations[assocation='largerWorkCitation',initiative='collection']` (removed)
+- `identification.aggregations[assocation='largerWorkCitation',initiative='collection']` (removed if replace=true)
 - `identification.abstract` (superseded note with link to successor appended)
 
 These fields are updated in the successor record:
@@ -267,15 +267,10 @@ Preview records as HTML items.
 % task preview-records --help
 ```
 
-<!-- pyml disable md028 -->
 > [!NOTE]
 >
 > - XML and JSON versions of items and related items are not available in previews.
 > - links to a generic 'x' item will be used as a placeholder for other items.
-
-> [!NOTE]
-> If the `--force` flag is set and a specific record isn't selected, previews for all loaded records will be generated.
-<!-- pyml enable md028 -->
 
 Examples:
 

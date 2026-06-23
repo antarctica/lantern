@@ -234,7 +234,7 @@ def _lib_record_config_min_iso() -> dict:
     Standalone method to allow use outside of fixtures in test parametrisation.
     """
     return {
-        "hierarchy_level": "dataset",
+        "hierarchy_level": "product",
         "metadata": {
             "contacts": [{"organisation": {"name": "x"}, "role": ["pointOfContact"]}],
             "date_stamp": "2014-06-30",
@@ -449,6 +449,7 @@ def _item_cat_model_min() -> ItemCatalogue:
     Standalone method to allow use outside of fixtures in test parametrisation.
     """
     meta = SiteMeta.from_config(config=Config(), env="testing", build_repo_ref="83fake48")
+    # noinspection PyTypeChecker
     model = ItemCatalogue(
         site_meta=meta,
         record=RecordRevision.loads(_item_config_min_catalogue()),
@@ -566,6 +567,7 @@ def fx_select_record() -> Callable[[str], RecordRevision]:
 @pytest.fixture()
 def fx_select_records() -> SelectRecordsProtocol:
     """Minimal records lookup method."""
+    # noinspection PyTypeChecker
     return _select_records
 
 
@@ -612,12 +614,12 @@ def fx_item_algolia_object_min() -> ObjectRecord:
     """Minimal ItemAlgolia ObjectRecord typed-dict."""
     obj: ObjectRecord = {
         "objectID": "x",
-        "objectType": "DATASET",
-        "objectTypeIcon": "fa-regular fa-cube",
+        "objectType": "PRODUCT",
+        "objectTypeIcon": "fa-regular fa-file-fragment",
         "objectRevID": "x",
         "objectRevDate": 1404086400,
         "objectRecData": '["o", "x", "x", "2014-06-30"]',
-        "type": "DATASET",
+        "type": "PRODUCT",
         "name": "x",
         "nameHtml": "<em>x</em>",
         "restricted": True,

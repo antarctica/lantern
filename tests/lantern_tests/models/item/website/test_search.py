@@ -44,7 +44,7 @@ class TestItemWebsiteSearch:
             "content": {
                 "id": fx_revision_model_min.file_identifier,
                 "revision": fx_revision_model_min.file_revision,
-                "type": ResourceTypeLabel.DATASET.value,
+                "type": ResourceTypeLabel.PRODUCT.value,
                 "title": "x",
                 "description": "<p>x</p>",
                 "date": "2014-06-30",
@@ -73,7 +73,7 @@ class TestItemWebsiteSearch:
             "content": {
                 "id": fx_revision_model_min.file_identifier,
                 "revision": fx_revision_model_min.file_revision,
-                "type": ResourceTypeLabel.DATASET.value,
+                "type": ResourceTypeLabel.PRODUCT.value,
                 "title": "x",
                 "description": "<p>x</p>",
                 "date": "2014-06-30",

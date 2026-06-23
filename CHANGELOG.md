@@ -60,6 +60,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Updating project OpenAPI definition
 * Updating `uv` version
 * Switching to official `ty` pre-commit hook
+* Changing to product hierarchy level in test fixtures
 
 ### Removed
 

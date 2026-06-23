@@ -159,7 +159,7 @@ class TestItemAlgolia:
             fx_item_algolia_object_min["objectDate"] = 1404086400
         if has_edition:
             fx_revision_model_min.identification.edition = "X"
-            fx_item_algolia_object_min["edition"] = "vX"
+            fx_item_algolia_object_min["edition"] = "Ed. X"
         if has_graphic:
             fx_revision_model_min.identification.graphic_overviews.append(
                 GraphicOverview(identifier="overview", href="x.jpg", mime_type="x")

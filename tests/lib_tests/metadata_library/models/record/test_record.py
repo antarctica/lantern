@@ -263,7 +263,7 @@ class TestRecord:
 
     magic_administration_v1_valid = Record(
         file_identifier="x",
-        hierarchy_level=HierarchyLevelCode.DATASET,
+        hierarchy_level=HierarchyLevelCode.PRODUCT,
         metadata=Metadata(
             contacts=Contacts(
                 [Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.POINT_OF_CONTACT})]
@@ -309,7 +309,7 @@ class TestRecord:
 
     def test_sha1(self, fx_lib_record_model_min_iso: Record):
         """Can calculate a SHA1 hash of the record config."""
-        assert fx_lib_record_model_min_iso.sha1 == "12e1d01105a5c77e3315e493acf5eb590129ffca"
+        assert fx_lib_record_model_min_iso.sha1 == "081771d18865aa6e72329e2292f337cfa11ec17e"
 
     @pytest.mark.parametrize("value", [{}, {"invalid": "x"}, {"hierarchy_level": HierarchyLevelCode.DIMENSION_GROUP}])
     def test_config_supported(self, fx_lib_record_config_min_iso: dict, value: dict):
@@ -509,7 +509,7 @@ class TestRecord:
         """
         value_str = "x"
         value_enums = {
-            "hierarchy_level": HierarchyLevelCode.DATASET,
+            "hierarchy_level": HierarchyLevelCode.PRODUCT,
             "contact_role": ContactRoleCode.POINT_OF_CONTACT,
             "constraint_type": ConstraintTypeCode.USAGE,
             "constraint_code": ConstraintRestrictionCode.LICENSE,
@@ -691,7 +691,7 @@ class TestRecord:
                         "contacts": [{"organisation": {"name": "x"}, "role": ["pointOfContact"]}],
                         "date_stamp": datetime(2014, 6, 30, tzinfo=UTC).date().isoformat(),
                     },
-                    "hierarchy_level": "dataset",
+                    "hierarchy_level": "product",
                     "identification": {
                         "title": {"value": "x"},
                         "dates": {"creation": "2014-06-30"},
@@ -704,7 +704,7 @@ class TestRecord:
                 {
                     "$schema": "https://metadata-resources.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-2-v4.json",
                     "file_identifier": "x",
-                    "hierarchy_level": "dataset",
+                    "hierarchy_level": "product",
                     "metadata": {
                         "character_set": "utf8",
                         "contacts": [
@@ -858,7 +858,7 @@ class TestRecord:
                 {
                     "$schema": "https://metadata-resources.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-2-v4.json",
                     "file_identifier": "x",
-                    "hierarchy_level": "dataset",
+                    "hierarchy_level": "product",
                     "metadata": {
                         "character_set": "utf8",
                         "language": "eng",

@@ -167,7 +167,7 @@ interactions:
     uri: https://gitlab.example.com/api/v4/projects/1234/repository/files/records%2Fa1%2Fb2%2Fa1b2c3.json?ref=main
   response:
     body:
-      string: '{"file_name":"a1b2c3.json","file_path":"records/a1/b2/a1b2c3.json","size":0,"encoding":"base64","content_sha256":"15e64d4d3ff6fbca35880b2e1fd29ce4ff666e0c4b4799c60dfa32d87ced7acc","ref":"main","blob_id":"000","commit_id":"000","last_commit_id":"def456","execute_filemode":false,"content":"eyJmaWxlX2lkZW50aWZpZXIiOiAiYTFiMmMzIiwgImhpZXJhcmNoeV9sZXZlbCI6ICJkYXRhc2V0IiwgIm1ldGFkYXRhIjogeyJjb250YWN0cyI6IFt7Im9yZ2FuaXNhdGlvbiI6IHsibmFtZSI6ICJ4In0sICJyb2xlIjogWyJwb2ludE9mQ29udGFjdCJdfV0sICJkYXRlX3N0YW1wIjogIjIwMTQtMDYtMzAifSwgImlkZW50aWZpY2F0aW9uIjogeyJ0aXRsZSI6IHsidmFsdWUiOiAieCJ9LCAiZGF0ZXMiOiB7ImNyZWF0aW9uIjogIjIwMTQtMDYtMzAifSwgImFic3RyYWN0IjogIngiLCAibGFuZ3VhZ2UiOiAiZW5nIiwgImlkZW50aWZpZXJzIjogW3siaWRlbnRpZmllciI6ICJ4IiwgImhyZWYiOiAiaHR0cHM6Ly9sYW50ZXJuLmRhdGEuYmFzLmFjLnVrL2l0ZW1zL3giLCAibmFtZXNwYWNlIjogImxhbnRlcm4uZGF0YS5iYXMuYWMudWsifV0sICJjb250YWN0cyI6IFt7Im9yZ2FuaXNhdGlvbiI6IHsibmFtZSI6ICJ4In0sICJyb2xlIjogWyJwb2ludE9mQ29udGFjdCJdLCAiZW1haWwiOiAieCJ9XSwgImVkaXRpb24iOiAiMiJ9fQ=="}'
+      string: '{"file_name":"a1b2c3.json","file_path":"records/a1/b2/a1b2c3.json","size":0,"encoding":"base64","content_sha256":"fa7cc026a82fe8fa69cafcade88561222a683dcbed5cb2e0ddd15d354d2c72d2","ref":"main","blob_id":"000","commit_id":"000","last_commit_id":"def456","execute_filemode":false,"content":"eyJmaWxlX2lkZW50aWZpZXIiOiAiYTFiMmMzIiwgImhpZXJhcmNoeV9sZXZlbCI6ICJwcm9kdWN0IiwgIm1ldGFkYXRhIjogeyJjb250YWN0cyI6IFt7Im9yZ2FuaXNhdGlvbiI6IHsibmFtZSI6ICJ4In0sICJyb2xlIjogWyJwb2ludE9mQ29udGFjdCJdfV0sICJkYXRlX3N0YW1wIjogIjIwMTQtMDYtMzAifSwgImlkZW50aWZpY2F0aW9uIjogeyJ0aXRsZSI6IHsidmFsdWUiOiAieCJ9LCAiZGF0ZXMiOiB7ImNyZWF0aW9uIjogIjIwMTQtMDYtMzAifSwgImFic3RyYWN0IjogIngiLCAibGFuZ3VhZ2UiOiAiZW5nIiwgImlkZW50aWZpZXJzIjogW3siaWRlbnRpZmllciI6ICJ4IiwgImhyZWYiOiAiaHR0cHM6Ly9sYW50ZXJuLmRhdGEuYmFzLmFjLnVrL2l0ZW1zL3giLCAibmFtZXNwYWNlIjogImxhbnRlcm4uZGF0YS5iYXMuYWMudWsifV0sICJjb250YWN0cyI6IFt7Im9yZ2FuaXNhdGlvbiI6IHsibmFtZSI6ICJ4In0sICJyb2xlIjogWyJwb2ludE9mQ29udGFjdCJdLCAiZW1haWwiOiAieCJ9XSwgImVkaXRpb24iOiAiMiJ9fQ=="}'
     headers:
       Cache-Control:
       - max-age=0, private, must-revalidate
@@ -193,7 +193,7 @@ interactions:
       X-Gitlab-Commit-Id:
       - '000'
       X-Gitlab-Content-Sha256:
-      - 15e64d4d3ff6fbca35880b2e1fd29ce4ff666e0c4b4799c60dfa32d87ced7acc
+      - fa7cc026a82fe8fa69cafcade88561222a683dcbed5cb2e0ddd15d354d2c72d2
       X-Gitlab-Encoding:
       - base64
       X-Gitlab-Execute-Filemode:

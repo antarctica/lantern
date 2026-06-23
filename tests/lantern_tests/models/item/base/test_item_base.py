@@ -566,7 +566,7 @@ class TestItemBase:
 
     def test_resource_type(self, fx_revision_model_min: RecordRevision):
         """Can get resource type / hierarchy level."""
-        expected = HierarchyLevelCode.DATASET
+        expected = HierarchyLevelCode.PRODUCT
         item = ItemBase(fx_revision_model_min)
 
         assert item.resource_type == expected

@@ -52,7 +52,7 @@ class TestSiteResourcesOutput:
         """Can generate checks for a subset of content."""
         output = SiteResourcesOutput(logger=fx_logger, meta=fx_export_meta)
         checks = output.checks
-        assert len(checks) == 5
+        assert len(checks) == 6
 
     def test_invalidation_keys(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta):
         """Can generate invalidation paths for content."""

@@ -16,6 +16,7 @@ from tasks._shared import dump_records, init, parse_records, pick_local_record
 
 from lantern.lib.arcgis.gis.dataclasses import Item as ArcGisItem
 from lantern.lib.arcgis.gis.enums import ItemType as ArcGisItemType
+from lantern.lib.arcgis.gis.enums import SharingLevel
 from lantern.lib.metadata_library.models.record.elements.common import OnlineResource
 from lantern.lib.metadata_library.models.record.elements.distribution import Distribution, Format, TransferOption
 from lantern.lib.metadata_library.models.record.enums import OnlineResourceFunctionCode
@@ -282,13 +283,15 @@ def _make_esri_distributions(arcgis_item: ArcGisItem) -> list[Distribution]:
     }
 
     item_type = arcgis_item.properties.item_type
+    item_host = "maps.arcgis.com" if arcgis_item.sharing_level == SharingLevel.EVERYONE else "bas.maps.arcgis.com"
+
     return [
         Distribution(
             distributor=ESRI_DISTRIBUTOR,
             format=item_format[item_type],
             transfer_option=TransferOption(
                 online_resource=OnlineResource(
-                    href=f"https://maps.arcgis.com/home/item.html?id={arcgis_item.id}",
+                    href=f"https://{item_host}/home/item.html?id={arcgis_item.id}",
                     function=OnlineResourceFunctionCode.INFORMATION,
                     title="ArcGIS Online",
                     description=item_description[item_type],

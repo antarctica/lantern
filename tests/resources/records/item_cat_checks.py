@@ -41,6 +41,7 @@ file_formats = [
     "https://metadata-resources.data.bas.ac.uk/media-types/application/fpl+xml",
     "https://www.iana.org/assignments/media-types/application/geo+json",
     "https://www.iana.org/assignments/media-types/application/geopackage+sqlite3",
+    "https://metadata-resources.data.bas.ac.uk/media-types/image/geo+tiff",
     "https://metadata-resources.data.bas.ac.uk/media-types/application/gpx+xml",
     "https://metadata-resources.data.bas.ac.uk/media-types/application/geopackage+sqlite3+zip",
     "https://www.iana.org/assignments/media-types/image/jpeg",

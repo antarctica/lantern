@@ -26,6 +26,7 @@ class DistributionType(Enum):
     GEOJSON = "GeoJSON"
     GEOPACKAGE = "GeoPackage"
     GEOPACKAGE_ZIP = "GeoPackage (Zipped)"
+    GEOTIFF = "GeoTIFF"
     GPX = "GPX"
     JPEG = "JPEG"
     MAPBOX_VECTOR_TILE = "MapBox Vector Tiles (MBTile)"

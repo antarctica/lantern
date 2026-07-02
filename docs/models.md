@@ -316,8 +316,9 @@ Supported distribution options:
 - file types:
   - CSV
   - Garmin FPL (aviation GPS data)
+  - GeoJSON
   - OGC GeoPackage
-  - GeoJson
+  - OGC GeoTIFF
   - GPX
   - JPEG
   - Mapbox Vector Tiles

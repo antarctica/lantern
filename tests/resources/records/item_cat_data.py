@@ -39,6 +39,7 @@ Item to test all supported data formats:
 - FPL
 - GeoJSON
 - GeoPackage (optional compression)
+- GeoTIFF
 - GPX
 - JPEG
 - Mapbox Vector Tiles
@@ -496,6 +497,43 @@ distributions = {
                 function=OnlineResourceFunctionCode.DOWNLOAD,
                 title="GeoPackage (Zipped)",
                 description="Download information as a GeoPackage file, compressed as a Zip archive.",
+            ),
+        ),
+    ),
+    "GeoTIFF": Distribution(
+        distributor=Contact(
+            organisation=ContactIdentity(
+                name="Mapping and Geographic Information Centre, British Antarctic Survey",
+                href="https://ror.org/01rhff309",
+                title="ror",
+            ),
+            phone="+44 (0)1223 221400",
+            email="magic@bas.ac.uk",
+            address=Address(
+                delivery_point="British Antarctic Survey, High Cross, Madingley Road",
+                city="Cambridge",
+                administrative_area="Cambridgeshire",
+                postal_code="CB3 0ET",
+                country="United Kingdom",
+            ),
+            online_resource=OnlineResource(
+                href="https://www.bas.ac.uk/teams/magic",
+                title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
+                description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
+                function=OnlineResourceFunctionCode.INFORMATION,
+            ),
+            role={ContactRoleCode.DISTRIBUTOR},
+        ),
+        format=Format(
+            format="GeoTIFF",
+            href="https://metadata-resources.data.bas.ac.uk/media-types/image/geo+tiff",
+        ),
+        transfer_option=TransferOption(
+            size=Size(unit="bytes", magnitude=36 * 1024 * 1024 * 1024 * 1024),
+            online_resource=OnlineResource(
+                href="x",
+                function=OnlineResourceFunctionCode.DOWNLOAD,
+                title="GeoTIFF",
             ),
         ),
     ),

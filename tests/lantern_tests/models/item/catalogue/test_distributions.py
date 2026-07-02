@@ -22,6 +22,7 @@ from lantern.models.item.catalogue.distributions import (
     Fpl,
     GeoJson,
     GeoPackage,
+    GeoTiff,
     Gpx,
     Jpeg,
     MapboxVectorTiles,
@@ -693,6 +694,18 @@ class TestDistributionGeoPackage:
         option.format = None
         with pytest.raises(TypeError):
             GeoPackage(option=option, restricted=False)
+
+
+class TestDistributionGeoTiff:
+    """Test GeoTIFF catalogue distribution."""
+
+    def test_init(self):
+        """Can create a distribution."""
+        option = _make_dist("https://metadata-resources.data.bas.ac.uk/media-types/image/geo+tiff")
+        dist = GeoTiff(option=option, restricted=False)
+
+        assert dist.format_type == DistributionType.GEOTIFF
+        assert dist.matches(option, [])
 
 
 class TestDistributionGpx:

@@ -590,6 +590,23 @@ class GeoPackage(FileDistribution):
         return DistributionType.GEOPACKAGE
 
 
+class GeoTiff(FileDistribution):
+    """GeoTIFF distribution option."""
+
+    @classmethod
+    def matches(cls, option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:
+        """Whether this class matches the distribution option."""
+        return (
+            option.format is not None
+            and option.format.href == "https://metadata-resources.data.bas.ac.uk/media-types/image/geo+tiff"
+        )
+
+    @property
+    def format_type(self) -> DistributionType:
+        """Format type."""
+        return DistributionType.GEOTIFF
+
+
 class Gpx(FileDistribution):
     """GPX distribution option."""
 

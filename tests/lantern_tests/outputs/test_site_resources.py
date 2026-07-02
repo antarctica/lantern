@@ -22,6 +22,7 @@ class TestSiteResourcesOutput:
             Path("static/css/main.css"): "text/css",
             Path("static/fonts/work-sans.ttf"): "font/ttf",
             Path("static/fonts/work-sans-italic.ttf"): "font/ttf",
+            Path("static/img/favicon.ico"): "image/x-icon",
             Path("static/img/favicon.svg"): "image/svg+xml",
             Path("static/img/favicon-192.png"): "image/png",
             Path("static/img/favicon-512.png"): "image/png",
@@ -51,7 +52,7 @@ class TestSiteResourcesOutput:
         """Can generate checks for a subset of content."""
         output = SiteResourcesOutput(logger=fx_logger, meta=fx_export_meta)
         checks = output.checks
-        assert len(checks) == 5
+        assert len(checks) == 6
 
     def test_invalidation_keys(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta):
         """Can generate invalidation paths for content."""

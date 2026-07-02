@@ -353,6 +353,17 @@ Sync record details to an Esri ArcGIS Online item.
 % task esri-item --help
 ```
 
+These ArcGIS item properties are updated:
+
+- title
+- snippet
+- thumbnail
+- description
+- terms of use
+- acknowledgements
+- sharing (except where group sharing is already in use)
+- minimal metadata (for file identifier only)
+
 > [!CAUTION]
 > This task will update the target item's sharing level based on the resource access permissions set in the source
 > record's administration metadata, unless group sharing is used which is not supported.

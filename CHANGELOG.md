@@ -38,6 +38,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * `robots.txt` endpoint
 * Experimental page common macro
 * 're-run task as' logic for development tasks that support `--force` option
+* Significant improvements to Esri item sync (inc. thumbnail support, MAGIC Products licence, etc.)
 
 ### Fixed
 

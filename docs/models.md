@@ -457,6 +457,28 @@ child-parent relationship.
 > ArcGIS resources) is effectively represented by ArcGIS layer distribution options within catalogue resources, which
 > link to the respective ArcGIS content items.
 
+### ArcGIS items thumbnails
+
+ArcGIS items can optionally include a thumbnail image (a Esri generic default is used if not set). This property is
+mapped to a `identification.graphic_overviews` with an identifier of `overview-agol` (other values are ignored).
+
+#### ArcGIS items thumbnails syncing
+
+To ensure accurate change detection when applying a record to an ArcGIS item
+(via the [`esri-item`](/docs/supplemental/proto-cli-reference.md#esri-item) command), the `href` property of this
+graphic overview MUST include a `sha1Agol` query parameter, set after an initial application and known accurate state.
+
+> [!NOTE]
+> Capturing this known SHA1 value is a manual action (via downloading the thumbnail image from on the ArcGIS item page
+> and running `sha1sum` or similar locally).
+
+See the [ArcGIS Thumbnails](/docs/libraries.md#arcgis-thumbnails) Libraries documentation for more information on how
+thumbnail values are compared.
+
+> [!TIP]
+> As a best practice, graphic overviews SHOULD also include a `sha1` query parameter (in addition to `sha1Agol`) with a
+> value for the original, non-Arc processed value.
+
 ### ArcGIS items limitations
 
 > [!WARNING]
@@ -464,7 +486,8 @@ child-parent relationship.
 
 - ArcGIS items are limited to the properties used in ArcGIS item pages, and that map to the ArcGIS content item
   information model (i.e. maintenance and progress information is not included as they cannot be represented)
-- only the OGL v3 licence is supported as a licence usage constraint, using others will raise an exception
+- only the OGL v3 and MAGIC internal products licences are supported as a licence usage constraint
+  - using others will raise an exception
 - group based sharing options are not supported
 - the Esri vendor specific [Metadata](#arcgis-items-metadata) used is too minimal to be considered valid by the ArcGIS
   Online/Portal metadata editor

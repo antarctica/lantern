@@ -271,6 +271,7 @@ Supported item JSON properties:
 - description
 - accessInformation (attribution)
 - licenseInfo
+- thumbnail (with [Special Handling](#arcgis-thumbnails))
 
 Unsupported item JSON properties:
 
@@ -281,7 +282,6 @@ Unsupported item JSON properties:
 - name
 - typeKeywords
 - tags
-- thumbnail
 - documentation
 - extent
 - categories
@@ -313,6 +313,40 @@ Unsupported item JSON properties:
 - apiToken1ExpirationDate
 - apiToken2ExpirationDate
 - lastViewed
+
+### ArcGIS specially handled features
+
+> [!WARNING]
+> The behaviour and/or use of some item properties has been expanded or changed from their original implementation in
+> the ArcGIS Python SDK to suit the requirements of this project.
+
+#### ArcGIS thumbnails
+
+In ArcGIS Portal items, thumbnails are stored as a related resource, similar to metadata. The relative path to this
+file, if set, is stored in the `thumbnail` item property.
+
+To enable thumbnail syncing (and other properties) between catalogue records and ArcGIS items, a target Arc item is
+compared against a simulated item from a catalogue record (via the [`ItemArcGIS`](/docs/models.md#arcgis-items) model).
+Catalogue records store complete URLs to thumbnails, and file references stored in a Arc item cannot be reliably
+guaranteed. This means filename based comparisons cannot be used to determine if the item thumbnail needs to be
+replaced, based on a source record.
+
+Instead, SHA1 hashes are used to compare the source and target thumbnails. For target items, the SHA1 is calculated from
+the thumbnail if set. For source records, the SHA1 is appended as a `sha1` query parameter in the relevant graphic
+overview href.
+
+However, as original thumbnails are post-processed by ArcGIS Portal/Online when uploaded, the original SHA1 value will
+never match the target item. To work around this, an additional `sha1Agol` query parameter is used to record a known
+accurate value.
+
+The `thumbnailurl` ArcGIS Python SDK class property is used to hold the computed (for target items) or pre-determined
+(for source records) image URLs containing sha1 values. Normally this property is only set when creating a thumbnail
+from an item. This property is not part of the general item representation (used by the Rest API for example) and is
+otherwise unused.
+
+> [!NOTE]
+> Due to this system, only the `sha1Agol` value is used to compare item thumbnails. If the underlying image is changed,
+> and the SHA1 values are not, the sync process will not determine the thumbnail needs to be replaced.
 
 ### ArcGIS limitations
 

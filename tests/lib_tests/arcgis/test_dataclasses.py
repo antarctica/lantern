@@ -30,7 +30,7 @@ class TestItemProperties:
 
         assert props.tags is None
         assert props.thumbnail is None
-        assert props.thumbnail_url is None
+        assert isinstance(props.thumbnail_url, str)
         assert props.metadata_editable is None
         assert props.metadata_formats == MetadataFormat.ISO19139
         assert props.type_keywords is None
@@ -88,9 +88,59 @@ class TestItemProperties:
         """Can parse enum values."""
         assert ItemProperties._parse_enum(value) == ItemType.FEATURE_SERVICE.value
 
+    @pytest.mark.cov()
+    def test_post_init_thumbnail_url(self):
+        """Can validate values via dataclass post-init."""
+        props = ItemProperties(
+            title="x",
+            item_type=ItemType.FEATURE_SERVICE,
+            metadata="x",
+            thumbnail="x.png",
+            thumbnail_url="https://example.com/x.png?sha1=x",
+        )
+        assert props.thumbnail is not None
+        assert props.thumbnail_url is not None
+
+    @pytest.mark.parametrize(
+        ("value", "msg"),
+        [
+            (None, r"thumbnail_url must reference a file."),
+            ("", r"thumbnail_url must reference a file."),
+            ("https://www.example.com", r"thumbnail_url must reference a file."),
+            (
+                "https://www.example.com/x.png",
+                r"thumbnail_url must include a 'sha1' query parameter with a single, non-empty value.",
+            ),
+            (
+                "https://www.example.com/x.png?sha1",
+                r"thumbnail_url must include a 'sha1' query parameter with a single, non-empty value.",
+            ),
+            (
+                "https://www.example.com/x.png?sha1=",
+                r"thumbnail_url must include a 'sha1' query parameter with a single, non-empty value.",
+            ),
+            (
+                "https://www.example.com/x.png?sha1=x&sha1=x",
+                r"thumbnail_url must include a 'sha1' query parameter with a single, non-empty value.",
+            ),
+        ],
+    )
+    def test_post_init_thumbnail_url_invalid(self, value: str | None, msg: str):
+        """Cannot validate missing/invalid values via dataclass post-init."""
+        with pytest.raises(ValueError, match=msg):
+            # noinspection PyTypeChecker
+            _ = ItemProperties(
+                title="x",
+                item_type=ItemType.FEATURE_SERVICE,
+                metadata="x",
+                thumbnail="x.png",
+                thumbnail_url=value,
+            )
+
     test_to_dict_expected: Final[dict] = {
         "title": "x",
         "type": ItemType.FEATURE_SERVICE.value,
+        "thumbnailurl": "https://static.arcgis.com/images/desktopapp.png?sha1=19e74b44a76c57072f67cbcd429ae434fef7ef7b",
         "metadata": "x",
         "metadataFormats": "iso19139",
     }
@@ -303,7 +353,7 @@ class TestItem:
     )
     def test_from_item_json(self, data: dict, metadata: str):
         """
-        Can create an item instance for supported properties from ArcGIS item JSON and metadata.
+        Can create an item instance for supported properties from ArcGIS item JSON, metadata and optional thumbnail.
 
         I.e. unsupported JSON properties are ignored but held in raw_item.
         """
@@ -324,7 +374,7 @@ class TestItem:
             ),
         )
 
-        item = Item.from_item_json(data=data, metadata=metadata)
+        item = Item.from_item_json(data=data, metadata=metadata, thumbnail=None)
 
         assert isinstance(item, Item)
         assert item == expected
@@ -349,7 +399,7 @@ class TestItem:
             "access": access,
         }
 
-        item = Item.from_item_json(data=data, metadata="x")
+        item = Item.from_item_json(data=data, metadata="x", thumbnail=None)
         assert item.sharing_level == sharing_level
 
     @pytest.mark.cov()
@@ -367,4 +417,25 @@ class TestItem:
                     "access": "x",
                 },
                 metadata="x",
+                thumbnail=None,
             )
+
+    @pytest.mark.cov()
+    def test_from_item_json_thumbnail(self, fx_lib_arcgis_item: Item):
+        """Can use thumbnail values."""
+        expected = ("/x.png", "https://example.com/x.png?sha1=x")
+        item = Item.from_item_json(
+            data={
+                "id": "x",
+                "owner": "x",
+                "orgId": "x",
+                "title": "x",
+                "type": "Feature Service",
+                "url": "x",
+                "access": "private",
+            },
+            metadata="x",
+            thumbnail=expected,
+        )
+        assert item.properties.thumbnail == expected[0]
+        assert item.properties.thumbnail_url == expected[1]

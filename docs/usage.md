@@ -134,7 +134,8 @@ To preview new and updated records before importing them:
 To import, build and check sets of [Manually Authored](#creating-records) records via a changeset:
 
 1. run the [Testing](#interactive-publishing-workflow-testing) publishing workflow, creating a changeset
-2. when approved, run the [Live](#interactive-publishing-workflow-live) publishing workflow,
+1. when approved, run the [Live](#interactive-publishing-workflow-live) publishing workflow
+1. if applicable, update any [ArcGIS Items](#updating-arcgis-items) based on any related published records
 
 > [!NOTE]
 > This workflow is intended for routine, manual, record publishing. This will not fit all use-cases and requires an
@@ -227,6 +228,7 @@ To directly import a set of new and updated records:
 1. run the [`import-records`](/docs/supplemental/proto-cli-reference.md#import-records) command
 1. manually create a merge request for the changeset branch in the [Records Repository](/docs/infrastructure.md#gitlab)
 1. appropriately review the imported records and merge the changes into `main` when acceptable
+1. if applicable, update any [ArcGIS Items](#updating-arcgis-items) based on any related imported records
 
 > [!WARNING]
 > All records in the `import/` directory will be committed together. Consider processing unrelated changes separately.
@@ -264,6 +266,13 @@ To update records in bulk (e.g. to a new profile version, or to adopt new conven
 
 > [!TIP]
 > The upgrade directory SHOULD be tracked in a local Git repo to easily compare and rollback changes.
+
+## Updating ArcGIS items
+
+To apply properties from a record to an item in ArcGIS Online, and create an association between a record and item:
+
+1. [Publish](#publishing-workflows) or [Import](#importing-records) the source catalogue record
+1. run the [`esri-item`](/docs/supplemental/proto-cli-reference.md#esri-item) command
 
 ## Rotating access tokens
 

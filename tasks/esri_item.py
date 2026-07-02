@@ -6,9 +6,11 @@ from argparse import ArgumentParser
 from datetime import UTC, datetime
 from io import BytesIO
 from pathlib import Path
+from urllib.parse import parse_qs, urlparse
 
 import requests
 from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
+from lxml import etree
 from lxml.html import HTMLParser
 from lxml.html import fragment_fromstring as html_fromstring
 from lxml.html import tostring as html_tostring
@@ -87,6 +89,7 @@ def _dump_arcgis_item(logger: logging.Logger, output_path: Path, item: ArcGisIte
 
 
 def _snake_to_camel_case(s: str) -> str:
+    """Convert from snake_case to camelCase."""
     parts = s.split("_")
     return parts[0] + "".join(p.capitalize() for p in parts[1:])
 
@@ -101,7 +104,8 @@ def _normalise_arcgis_html(html: str) -> str:
 
     Accounts for:
     - differences in syntax (`<a href='x'>` vs `<a href="x">`)
-    - accounting for `rel="nofollow ugc"` being added to anchor elements
+    - `rel="nofollow ugc"` being added to anchor elements
+    - possible extra div wrapper
     """
     element = html_fromstring(html, create_parent=True, parser=HTMLParser())
     # add `rel="nofollow ugc"` to any anchor elements
@@ -109,10 +113,20 @@ def _normalise_arcgis_html(html: str) -> str:
         relations = {t for t in a.get("rel", "").split() if t}
         relations.update({"nofollow", "ugc"})
         a.set("rel", " ".join(sorted(relations)))
+    # correct double wrapping div
+    if element.tag == "div" and len(element) == 1 and element[0].tag == "div":
+        element = element[0]
     return html_tostring(doc=element, encoding="unicode")
 
 
-def _diff_arcgis_items(source_item: ArcGisItem, target_item: ArcGisItem) -> dict:
+def _parse_md_file_id(metadata_xml: str) -> str | None:
+    """Attempt to get mdFileID element from Esri metadata instance."""
+    root = etree.fromstring(metadata_xml.encode())
+    md_file_id_elem = root.find("mdFileID")
+    return md_file_id_elem.text if md_file_id_elem is not None else None
+
+
+def _diff_arcgis_items(logger: logging.Logger, source_item: ArcGisItem, target_item: ArcGisItem) -> dict:
     """
     Compare a source and target ArcGIS items and return a dict of any differences that need applying.
 
@@ -123,26 +137,47 @@ def _diff_arcgis_items(source_item: ArcGisItem, target_item: ArcGisItem) -> dict
     - access_information (accessInformation) [attribution]
     - license_info (licenseInfo)
     - metadata
+    - thumbnail_url (thumbnailurl), specifcally the sha1 query parameter, location is ignored
     """
     diff = {}
+
     if source_item.sharing_level != target_item.sharing_level:
         diff["sharing_level"] = source_item.sharing_level
-    if source_item.properties.metadata not in target_item.properties.metadata:
-        print(f"<x>{source_item.properties.metadata}</x>")
-        print(target_item.properties.metadata)
+
+    # get mdFileID element value from source_item.properties.metadata XML str via LXML
+    source_md_file_id = _parse_md_file_id(source_item.properties.metadata)
+    target_md_file_id = _parse_md_file_id(target_item.properties.metadata)
+    if source_md_file_id != target_md_file_id:
+        logger.debug(source_item.properties.metadata)
+        logger.debug(target_item.properties.metadata)
         diff["metadata"] = source_item.properties.metadata
-    for prop in ["snippet", "access_information"]:
+
+    for prop in ["title", "snippet", "access_information"]:
         src_val = getattr(source_item.properties, prop, None)
         tgt_val = getattr(target_item.properties, prop, None)
         if src_val == tgt_val or src_val is None:
             continue
         diff[_snake_to_camel_case(prop)] = src_val
     for html_prop in ["description", "license_info"]:
-        src_val = _normalise_arcgis_html(getattr(source_item.properties, html_prop, ""))
-        tgt_val = _normalise_arcgis_html(getattr(target_item.properties, html_prop, ""))
+        src_val = _normalise_arcgis_html(getattr(source_item.properties, html_prop, "") or "")
+        tgt_val = _normalise_arcgis_html(getattr(target_item.properties, html_prop, "") or "")
         if src_val == tgt_val or src_val == "":
             continue
         diff[_snake_to_camel_case(html_prop)] = src_val
+
+    # prefer to compare target against AGOL processed source image rather than original (as it won't match)
+    src_thumbnail_params = parse_qs(urlparse(source_item.properties.thumbnail_url).query)
+    src_thumbnail_sha1 = (
+        src_thumbnail_params["sha1Agol"][0]
+        if "sha1Agol" in src_thumbnail_params
+        else src_thumbnail_params.get("sha1", [None])[0]
+    )
+    tgt_thumbnail_sha1 = parse_qs(urlparse(target_item.properties.thumbnail_url).query).get("sha1", [None])[0]
+    if src_thumbnail_sha1 != tgt_thumbnail_sha1:
+        logger.debug(source_item.properties.thumbnail_url)
+        logger.debug(target_item.properties.thumbnail_url)
+        diff["thumbnail_url"] = source_item.properties.thumbnail_url
+
     return diff
 
 
@@ -209,7 +244,7 @@ def _update_agol_properties(
     AGOL requires the token as a query parameter, not a bearer type Authorization header.
     Source: https://developers.arcgis.com/rest/users-groups-and-items/update-item/
     """
-    logger.info(f"Updating item: {item.id}")
+    logger.info(f"Updating properties for item: {item.id}")
     files_update: dict[str, tuple] = {k: (None, v) for k, v in properties.items()}
     files_update["metadataEditable"] = (None, "false")
     logger.debug(files_update)
@@ -223,6 +258,26 @@ def _update_agol_properties(
     data = req.json()
     if "error" in data:
         msg = f"Error updating item {item.id} in AGOL: {data['error']['message']}"
+        raise ValueError(msg)
+
+
+def _update_agol_thumbnail(logger: logging.Logger, base_url: str, token: str, item: ArcGisItem, url: str) -> None:
+    """
+    Update thumbnail image for an ArcGIS Online item.
+
+    AGOL requires the token as a query parameter, not a bearer type Authorization header.
+    Source: https://developers.arcgis.com/rest/users-groups-and-items/update-thumbnail/
+    """
+    logger.info(f"Updating thumbnail for item: {item.id}")
+    req = requests.post(
+        url=f"{base_url}/updateThumbnail",
+        params={"token": token, "f": "json", "url": url},
+        timeout=10,
+    )
+    req.raise_for_status()
+    data = req.json()
+    if not data.get("success"):
+        msg = f"Error updating thumbnail for item {item.id} in AGOL: {data}"
         raise ValueError(msg)
 
 
@@ -245,6 +300,10 @@ def _update_agol_item(logger: logging.Logger, config: ExtraConfig, item: ArcGisI
         confirm(logger, f"Update sharing level to {sharing}?")
         _update_agol_sharing(logger=logger, base_url=base_url, token=access_token, item=item, sharing_level=sharing)
 
+    thumbnail = properties.pop("thumbnail_url", None)
+    if thumbnail:
+        _update_agol_thumbnail(logger=logger, base_url=base_url, token=access_token, item=item, url=thumbnail)
+
     _update_agol_properties(logger=logger, base_url=base_url, token=access_token, item=item, properties=properties)
 
 
@@ -253,7 +312,9 @@ def main() -> None:
     logger, config, catalogue = init()
     args = _get_cli_args()
 
-    source_record = get_record(logger=logger, cat=catalogue, reference=args["source_id"])
+    source_record = get_record(
+        logger=logger, cat=catalogue, branch="changeset/MAGIC/data-management.47", reference=args["source_id"]
+    )
     target_item = get_agol_item(logger=logger, config=config, item_ref=args["target_id"])
     source_item = _create_source_arcgis_item(
         source_record=Record.loads(source_record.dumps(strip_admin=False)),
@@ -261,12 +322,12 @@ def main() -> None:
         target_item=target_item,
     )
 
-    diff = _diff_arcgis_items(source_item=source_item, target_item=target_item)
+    diff = _diff_arcgis_items(logger=logger, source_item=source_item, target_item=target_item)
     if not diff:
         logger.info(f"Target item {target_item.id} == {source_record.file_identifier}, skipping.")
         return
     logger.info("Target item {target_item.id} != {source_record.file_identifier}, updating...")
-    logger.debug(diff)
+    logger.info(list(diff.keys()))
     _dump_arcgis_item(logger=logger, output_path=Path("agol-item-backups"), item=target_item)
     _update_agol_item(logger=logger, config=config, item=target_item, properties=diff)
 

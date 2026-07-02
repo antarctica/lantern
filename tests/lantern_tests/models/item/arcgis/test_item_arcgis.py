@@ -1,6 +1,9 @@
+from textwrap import dedent
+
 import pytest
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata, Permission
 from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
+from bs4 import BeautifulSoup
 
 from lantern.lib.arcgis.gis.dataclasses import Item as ArcGisItem
 from lantern.lib.arcgis.gis.enums import ItemType as ArcGisItemType
@@ -12,7 +15,9 @@ from lantern.lib.metadata_library.models.record.enums import ConstraintRestricti
 from lantern.lib.metadata_library.models.record.utils.admin import set_admin
 from lantern.models.item.arcgis.item import ArcGisItemLicenceHrefUnsupportedError, ItemArcGis
 from lantern.models.item.base.enums import Licence
+from lantern.models.item.base.utils import md_as_html
 from lantern.models.record.record import Record
+from lantern.utils import minify_html
 
 
 class TestItemArcGIS:
@@ -24,6 +29,97 @@ class TestItemArcGIS:
 
         assert item._record == fx_record_model_min
         assert item.item_id == fx_lib_arcgis_item.id
+
+    @pytest.mark.parametrize(
+        ("value", "expected_raw"),
+        [
+            (
+                dedent("""\
+                    ## Heading
+                    ...
+                """),
+                """
+                    <div>
+                        <h5>Heading</h5>
+                        <p>...</p>
+                    </div>
+                """,
+            ),
+            (
+                dedent("""\
+                    ...
+
+                    [Fragment Link](#tab-x) [Normal Link](/)
+                """),
+                """
+                    <div>
+                        <p>...</p>
+                        <p><a href="https://data.bas.ac.uk/items/x#tab-x" rel="nofollow">Fragment Link</a> <a href="/" rel="nofollow">Normal Link</a></p>
+                    </div>
+                """,
+            ),
+            (
+                dedent("""\
+                    ...
+                """),
+                """
+                    <p>...</p>
+                """,
+            ),
+            (
+                dedent("""\
+                   ...
+
+                    > [!NOTE]
+                    > Some text shown as a note.
+                """),
+                """
+                    <div>
+                      <p>...</p>
+                      <div style="border-bottom-style:none;border-left-style:solid;border-left-width:5px;border-radius:0;border-right-style:none;border-top-style:none;margin-bottom:20px;padding:2px 10px;border-color:rgb(43, 140, 196);">
+                        <p><strong>Note</strong></p>
+                        <p>Some text shown as a note.</p>
+                      </div>
+                    </div>
+                """,
+            ),
+            (
+                dedent("""\
+                   ...
+
+                    > [!NOTE]
+                    > Some text shown as a note.
+
+                   ...
+
+                    > [!CAUTION] Custom caution
+                    > Some text shown as a caution.
+                """),
+                """
+                    <div>
+                      <p>...</p>
+                      <div style="border-bottom-style:none;border-left-style:solid;border-left-width:5px;border-radius:0;border-right-style:none;border-top-style:none;margin-bottom:20px;padding:2px 10px;border-color:rgb(43, 140, 196);">
+                        <p><strong>Note</strong></p>
+                        <p>Some text shown as a note.</p>
+                      </div>
+                      <p>...</p>
+                      <div style="border-bottom-style:none;border-left-style:solid;border-left-width:5px;border-radius:0;border-right-style:none;border-top-style:none;margin-bottom:20px;padding:2px 10px;border-color:rgb(177, 14, 30);">
+                        <p><strong>Custom caution</strong></p>
+                        <p>Some text shown as a caution.</p>
+                      </div>
+                    </div>
+                """,
+            ),
+        ],
+        ids=["big-headings", "tab-links", "no-note", "one-note", "two-notes"],
+    )
+    def test_arc_gis(self, fx_item_arc_model_min: ItemArcGis, value: str, expected_raw: str):
+        """Can format free-text values as HTML suitable for ArcGIS."""
+        expected = BeautifulSoup(minify_html(expected_raw), parser="html.parser", features="lxml")
+
+        result = fx_item_arc_model_min._arc_html(string=md_as_html(value), item_href="https://data.bas.ac.uk/items/x")
+        html = BeautifulSoup(minify_html(result), parser="html.parser", features="lxml")
+        assert html == expected
 
     def test_validate_snippet(self, fx_record_model_min: Record, fx_lib_arcgis_item: ArcGisItem):
         """Cannot use a record where snippet/purpose is too long."""
@@ -172,29 +268,32 @@ class TestItemArcGIS:
             expected = value[0].href
 
         if value is not None:
-            assert fx_item_arc_model_min.thumbnail_href == expected
+            assert fx_item_arc_model_min._thumbnail_href == expected
         else:
-            assert fx_item_arc_model_min.thumbnail_href is None
+            assert fx_item_arc_model_min._thumbnail_href is None
 
+    @pytest.mark.parametrize("purpose", ["x", None])
     @pytest.mark.parametrize(
-        ("purpose", "identifiers", "constraints", "lineage"),
+        "identifiers", [Identifiers([Identifier(identifier="x", href="x", namespace="data.bas.ac.uk")]), None]
+    )
+    @pytest.mark.parametrize(
+        "constraints",
         [
-            (
-                "x",
-                Identifiers([Identifier(identifier="x", href="x", namespace="data.bas.ac.uk")]),
-                Constraints(
-                    [
-                        Constraint(
-                            type=ConstraintTypeCode.USAGE,
-                            restriction_code=ConstraintRestrictionCode.LICENSE,
-                            href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
-                        )
-                    ]
-                ),
-                "x",
+            Constraints(
+                [
+                    Constraint(
+                        type=ConstraintTypeCode.USAGE,
+                        restriction_code=ConstraintRestrictionCode.LICENSE,
+                        href="https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+                    )
+                ]
             ),
-            (None, None, None, None),
+            None,
         ],
+    )
+    @pytest.mark.parametrize("lineage", ["x", None])
+    @pytest.mark.parametrize(
+        "graphics", [GraphicOverviews([GraphicOverview(identifier="overview-agol", href="x", mime_type="x")]), None]
     )
     def test_item_properties(
         self,
@@ -203,6 +302,7 @@ class TestItemArcGIS:
         identifiers: Identifiers | None,
         constraints: Constraints | None,
         lineage: str | None,
+        graphics: GraphicOverviews | None,
     ):
         """Can get combined ArcGIS item properties."""
         expected = "x"
@@ -216,6 +316,8 @@ class TestItemArcGIS:
             fx_item_arc_model_min.record.identification.constraints = constraints
         if lineage is not None:
             fx_item_arc_model_min.record.data_quality = DataQuality(lineage=Lineage(statement=lineage))
+        if graphics is not None:
+            fx_item_arc_model_min.record.identification.graphic_overviews = graphics
 
         result = fx_item_arc_model_min.item_properties
         assert result.title == expected  # matches `arcgis_item_name` until MAGIC/esri#122 resolved
@@ -228,7 +330,12 @@ class TestItemArcGIS:
         ):
             assert "Open Government Licence (OGL 3.0)" in result.license_info
         assert fx_item_arc_model_min.record.file_identifier in result.metadata
+        if graphics:
+            assert result.thumbnail_url == "x"
+        else:
+            assert "https://static.arcgis.com" in result.thumbnail_url
 
+    @pytest.mark.cov()
     def test_item(self, fx_item_arc_model_min: ItemArcGis):
         """Can get overall ArcGIS item."""
         result = fx_item_arc_model_min.item

@@ -1,5 +1,6 @@
 from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 from jinja2 import TemplateNotFound
+from lxml import html as lxml_html
 from lxml.etree import Element, SubElement
 from lxml.etree import tostring as etree_tostring
 
@@ -51,6 +52,146 @@ class ItemArcGis(ItemBase):
         super().__init__(record=record, admin_keys=admin_meta_keys)
 
         self._jinja = get_jinja_env()
+
+    @staticmethod
+    def _arc_html(string: str, item_href: str | None) -> str:
+        """
+        Postprocess HTML content to fit ArcGIS Portal constraints.
+
+        Intended for abstracts, lineage, and other long-form free-text properties.
+
+        Processes:
+        - headings
+        - fragment links
+        - admonitions
+
+        For headings:
+        - the description template hard-codes section headings (for abstract, lineage, etc.) as H4s
+        - to avoid headings within sections appearing larger than their section header, all headings are reduced to H5.
+
+        For fragment links:
+        - links may use fragments to item tabs, which won't resolve outside item pages
+        - link href's are rewritten as fully qualified URLs to work correctly
+        - requires a fully qualified URL
+
+        For admonitions
+        - the admonition Markdown extension will only match valid options (note, caution, etc.)
+        - this means we don't need to check for invalid options, as they won't match the xpath query
+        - similarly, instances will always include a title, as a default per option is used if a custom value isn't set
+
+        E.g.:
+
+        ```
+        <div>
+            <h3>Some heading</h3>
+        </div>
+        ```
+
+        Becomes:
+
+        ```
+        <div>
+            <h5>Some heading</h5>
+        </div>
+        ```
+
+        E.g.:
+
+        ```
+        <div>
+            <a href="#tab-foo>Some link</a>
+        </div>
+        ```
+
+        Becomes:
+
+        ```
+        <div>
+            <a href="https://data.bas.ac.uk/items/123/#tab-foo>Some link</a>
+        </div>
+        ```
+
+        E.g.:
+
+        ```
+        <div class="admonition note">
+            <p class="admonition-title">Note</p>
+            <p>Some text shown as a note.</p>
+        </div>
+        ```
+
+        Becomes:
+
+        ```
+        <div style="border-left-style:solid;...border-color:rgb(55, 146, 69);">
+            <p><strong>Note</strong></p>
+            <p>Some text shown as a note.</p>
+        </div>
+        ```
+        """
+        _admonition_colours = {
+            "note": "rgb(43, 140, 196)",
+            "tip": "rgb(55, 146, 69)",
+            "important": "rgb(111, 114, 175)",
+            "warning": "rgb(255, 191, 71)",
+            "caution": "rgb(177, 14, 30)",
+        }
+        _admonition_base_styles = [
+            "border-bottom-style:none;",
+            "border-left-style:solid;",
+            "border-left-width:5px;",
+            "border-radius:0;",
+            "border-right-style:none;",
+            "border-top-style:none;",
+            "margin-bottom:20px;",
+            "padding:2px 10px;",
+        ]
+
+        html_content = string
+        root = lxml_html.fromstring(html_content)
+
+        # headings
+        for heading in root.xpath(".//h1 | .//h2 | .//h3 | .//h4"):
+            heading.tag = "h5"
+
+        # fragment links
+        if item_href:
+            for link in root.xpath('.//a[@href and starts-with(@href, "#")]'):
+                fragment = link.get("href")
+                link.set("href", f"{item_href}{fragment}")
+
+        # admonitions
+        for div in root.xpath('.//div[@class and contains(@class, "admonition")]'):
+            class_attr = div.get("class", "")
+            classes = class_attr.split()
+
+            # get admonition type (e.g., "admonition note" -> "note")
+            # as only valid types are processed as admonitions upstream, and only admonitions are looped in the
+            # xpath, this will always match a value
+            admonition_type: str = ""
+            for cls in classes:  # pragma: no branch
+                if cls in _admonition_colours:
+                    admonition_type = cls
+                    break
+
+            colour = _admonition_colours[admonition_type]
+            inline_style = "".join([*_admonition_base_styles, f"border-color:{colour};"])
+
+            # replace class attribute with style attribute
+            div.set("style", inline_style)
+            div.attrib.pop("class", None)
+
+            # Transform admonition title
+            title_p = div.find('.//p[@class="admonition-title"]')
+            title_text = title_p.text or ""
+            # replace element with strong tag
+            title_p.getparent().remove(title_p)
+            new_p = Element("p")
+            strong = SubElement(new_p, "strong")
+            strong.text = title_text
+            div.insert(0, new_p)
+
+        return lxml_html.tostring(root, encoding="unicode", method="html")
 
     @staticmethod
     def _render_arcgis_metadata(file_identifier: str) -> str:
@@ -110,23 +251,27 @@ class ItemArcGis(ItemBase):
         """
         Item description rendered from a template.
 
-        Mapped from:
-            - base item description (abstract) (with HTML encoding)
-            - base item lineage (with HTML encoding) if present
-            - base item citation (with HTML encoding) if present
-            - base item data catalogue identifier
+        Built from:
+        - base item description (abstract) (with HTML encoding and Arc specific processing)
+        - base item lineage (with HTML encoding and Arc specific processing) if present
+        - base item citation (with HTML encoding) if present
+        - base item data catalogue identifier
 
         Mapped to: description (from [1])
         [1] https://developers.arcgis.com/rest/users-groups-and-items/common-parameters/#item-parameters
         """
-        parts = {"abstract": self.description_html, "catalogue_href": None}
-        if self.lineage_html is not None:
-            parts["lineage"] = self.lineage_html
-        if self.citation_html is not None:
-            parts["citation"] = self.citation_html
+        item_href = None
         cat_identifiers = self.identifiers.filter(namespace=CATALOGUE_NAMESPACE)
         if len(cat_identifiers) > 0 and cat_identifiers[0].href:
-            parts["catalogue_href"] = cat_identifiers[0].href
+            item_href = cat_identifiers[0].href
+        parts = {
+            "abstract": self._arc_html(string=self.description_html, item_href=item_href),
+            "catalogue_href": item_href,
+        }
+        if self.lineage_html is not None:
+            parts["lineage"] = self._arc_html(string=self.lineage_html, item_href=item_href)
+        if self.citation_html is not None:
+            parts["citation"] = self.citation_html
 
         return self._jinja.get_template("_arcgis/description.html.j2").render(**parts)
 
@@ -219,12 +364,22 @@ class ItemArcGis(ItemBase):
         return self._render_arcgis_metadata(self.resource_id)
 
     @property
-    def thumbnail_href(self) -> str | None:
+    def _thumbnail_href(self) -> str | None:
         """
         URL to optional item thumbnail.
 
-        Uses 'overview-agol' graphic label if available. This graphic must be hosted somewhere accessible to the
-        ArcGIS instance (Online or Enterprise). It should be sized as per Esri's recommendations.
+        Uses 'overview-agol' graphic label if available.
+
+        This graphic MUST:
+        - be hosted somewhere accessible to the ArcGIS Portal instance (Online or Enterprise)
+        - It MUST include a `sha1` query parameters for the image contents
+
+        E.g.: https://cdn.web.bas.ac.uk/add-catalogue/0.0.0/img/items/75a43e71-f69e-4c7e-91c2-9f0b10dc4ee5/overview-agol.jpg?sha1=74abaf53f83b771ceeafdb19ff6c4bcc8ef6e2ae
+
+        This graphic SHOULD:
+        - use Esri's recommended 600x400 size
+
+        Without the SHA1 value, item comparisons will fail in the `esri-item` dev task.
         """
         try:
             return self.graphics.filter(identifier="overview-agol")[0].href
@@ -233,7 +388,11 @@ class ItemArcGis(ItemBase):
 
     @property
     def item_properties(self) -> ArcGisItemProperties:
-        """Combined ArcGIS item properties."""
+        """
+        Combined ArcGIS item properties.
+
+        Where a ArcGIS thumbnail is set, the thumbnail property is set to a fake static value ('x').
+        """
         props = ArcGisItemProperties(
             title=self._title,
             item_type=self.item_type,
@@ -244,6 +403,9 @@ class ItemArcGis(ItemBase):
         )
         if self._snippet is not None:
             props.snippet = self._snippet
+        if self._thumbnail_href:
+            props.thumbnail = "x"
+            props.thumbnail_url = self._thumbnail_href
         return props
 
     @property

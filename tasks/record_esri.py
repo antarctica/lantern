@@ -1,7 +1,8 @@
 # Update record to include distribution options for an ArcGIS Online item
-
+import hashlib
 import logging
 from argparse import ArgumentParser
+from json import JSONDecodeError
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
@@ -9,6 +10,7 @@ import inquirer
 import requests
 from authlib.integrations.requests_client.oauth2_session import OAuth2Session
 from authlib.oauth2.rfc7523 import ClientSecretJWT
+from requests import Response
 from tasks._config import ExtraConfig
 from tasks._shared import dump_records, init, parse_records, pick_local_record
 
@@ -115,35 +117,23 @@ def get_agol_token(config: ExtraConfig) -> str:
     return token["access_token"]
 
 
-def _get_agol_metadata(logger: logging.Logger, config: ExtraConfig, item_id: str) -> str:
-    """Get metadata for an ArcGIS Online item."""
-    logger.info(f"Fetching ArcGIS metadata for item: {item_id}")
-    access_token = get_agol_token(config)
-    # AGOL requires the token as a query parameter, not a bearer type Authorization header.
-    req = requests.get(
-        f"https://www.arcgis.com/sharing/rest/content/items/{item_id}/info/metadata/metadata.xml",
-        params={"token": access_token},
-        timeout=10,
-    )
-    req.raise_for_status()
-
-    return req.text
-
-
-def get_agol_item(logger: logging.Logger, config: ExtraConfig, item_ref: str) -> ArcGisItem:
+def get_agol_item_data(
+    logger: logging.Logger, item_id: str, access_token: str | None = None, config: ExtraConfig | None = None
+) -> dict:
     """
-    Get an ArcGIS Online item from an item ID or URL.
+    Get ArcGIS Online item data for an item ID.
 
     AGOL requires the token as a query parameter, not a bearer type Authorization header.
     """
-    item_id = item_ref
-    if item_ref.startswith("http"):
-        item_id = parse_qs(urlparse(item_ref).query).get("id")
-
     logger.info(f"Fetching ArcGIS item: {item_id}")
-    access_token = get_agol_token(config)
 
-    req_data = requests.get(
+    if not access_token:
+        if not config:
+            msg = "Config required where access token is not provided"
+            raise TypeError(msg) from None
+        access_token = get_agol_token(config)
+
+    req_data: Response = requests.get(
         f"https://www.arcgis.com/sharing/rest/content/items/{item_id}",
         params={"f": "json", "token": access_token},
         timeout=10,
@@ -154,16 +144,88 @@ def get_agol_item(logger: logging.Logger, config: ExtraConfig, item_ref: str) ->
         msg = f"Error fetching item {item_id} from AGOL: {data['error']['message']}"
         raise ValueError(msg)
 
-    req_metadata = requests.get(
+    return data
+
+
+def _get_agol_item_metadata(
+    logger: logging.Logger, config: ExtraConfig, item_id: str, access_token: str | None = None
+) -> str:
+    """Get metadata for an ArcGIS Online item."""
+    logger.info(f"Fetching ArcGIS metadata for item: {item_id}")
+
+    if not access_token:
+        access_token = get_agol_token(config)
+
+    # AGOL requires the token as a query parameter, not a bearer type Authorization header.
+    req: Response = requests.get(
         f"https://www.arcgis.com/sharing/rest/content/items/{item_id}/info/metadata/metadata.xml",
         params={"token": access_token},
         timeout=10,
     )
-    req_metadata.raise_for_status()
-    metadata = req_metadata.text
+    req.raise_for_status()
+    return req.text
 
-    item = ArcGisItem.from_item_json(data=data, metadata=metadata)
-    item.properties.metadata = _get_agol_metadata(logger=logger, config=config, item_id=item.id)
+
+def _get_agol_item_thumbnail(logger: logging.Logger, item_id: str, access_token: str) -> tuple[str, str] | None:
+    """
+    Get thumbnail for an ArcGIS Online item.
+
+    Returns thumbnail path (relative to item info) and a SHA1 hash of thumbnail content, or None if no thumbnail.
+    """
+    agol_data = get_agol_item_data(logger=logger, item_id=item_id, access_token=access_token)
+
+    # get thumbnail path if set
+    thumbnail: str | None = agol_data.get("thumbnail")
+    if not thumbnail:
+        return None
+
+    # get hash of thumbnail content, requested as JSON for error checking
+    req_thumb: Response = requests.get(
+        f"https://www.arcgis.com/sharing/rest/content/items/{item_id}/info/{thumbnail}",
+        params={"f": "json", "token": access_token, "w": "400"},
+        timeout=10,
+    )
+
+    # check for JSON encoded error, where successful response is binary
+    req_thumb.raise_for_status()
+    try:
+        error = req_thumb.json()
+        if "error" in error:
+            msg = f"Error fetching item {item_id} thumbnail from AGOL: {error['error']['message']}"
+            raise ValueError(msg)
+    except JSONDecodeError:
+        pass
+
+    req_thumb_url = urlparse(req_thumb.url)
+    thumbnail_sha1 = hashlib.sha1(req_thumb.content).hexdigest()  # noqa: S324
+    thumbnail_url = f"{req_thumb_url.scheme}://{req_thumb_url.netloc}{req_thumb_url.path}?sha1={thumbnail_sha1}&w=400"
+    return thumbnail, thumbnail_url
+
+
+def get_agol_item(
+    logger: logging.Logger, config: ExtraConfig, item_ref: str, access_token: str | None = None
+) -> ArcGisItem:
+    """
+    Get an ArcGIS Online item from an item ID or URL.
+
+    AGOL requires the token as a query parameter, not a bearer type Authorization header.
+    """
+    item_id = item_ref
+    if item_ref.startswith("http"):
+        item_id = parse_qs(urlparse(item_ref).query).get("id", [item_ref])[0]
+        if not item_id:
+            msg = f"Unable to extract item ID from URL: {item_ref}"
+            raise ValueError(msg)
+
+    if not access_token:
+        access_token = get_agol_token(config)
+
+    agol_data = get_agol_item_data(logger=logger, config=config, item_id=item_id)
+    agol_meta = _get_agol_item_metadata(logger=logger, config=config, item_id=item_id, access_token=access_token)
+    agol_thumbnail = _get_agol_item_thumbnail(logger=logger, item_id=item_id, access_token=access_token)
+
+    item = ArcGisItem.from_item_json(data=agol_data, metadata=agol_meta, thumbnail=agol_thumbnail)
+    item.properties.metadata = _get_agol_item_metadata(logger=logger, config=config, item_id=item.id)
     return item
 
 

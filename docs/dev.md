@@ -476,14 +476,27 @@ packages using the [Python Packaging Advisory Database](https://github.com/pypa/
 
 > [!WARNING]
 > As with all security tools, `uv audit` is a tool for detecting well-known vulnerabilities, not a guarantee of
-> secure dependencies. While `uv audi` is experimental, it's data source is not.
+> secure dependencies. While `uv audit` is experimental, it's data source is not.
 
 Checks are run automatically in [Continuous Integration](#continuous-integration).
 
 > [!TIP]
 > To check locally run the `vulnerabilities` [Development Task](#development-tasks).
 
+To upgrade a specific (in)direct dependency to address a vulnerability (typically via a patch release):
+
+- create an issue and switch to branch
+- run `uv lock --upgrade-package $PKG==$FIX_VERSION` (e.g. `uv lock --upgrade-package foo==1.2.3`)
+- run `uv sync --all-groups` to apply upgrades
+- commit changes
+
+> [!TIP]
+> If the fix version has been released within a cool off period, verify the release is safe and add an override under
+> `tool.uv.audit` in `pyproject.toml`.
+
 ### Updating dependencies
+
+To upgrade direct dependencies (including major and minor versions changing functionality):
 
 - create an issue and switch to branch
 - run the `outdated` [Development Task](#development-tasks) to list outdated direct packages

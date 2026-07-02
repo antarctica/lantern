@@ -347,7 +347,7 @@ Bootstrap a records repo.
 
 ### `esri-item`
 
-Sync record details to an Esri ArcGIS Online item.
+Apply record details to an Esri ArcGIS Online item.
 
 ```shell
 % task esri-item --help
@@ -364,9 +364,14 @@ These ArcGIS item properties are updated:
 - sharing (except where group sharing is already in use)
 - minimal metadata (for file identifier only)
 
+<!-- pyml disable md028 -->
 > [!CAUTION]
-> This task will update the target item's sharing level based on the resource access permissions set in the source
-> record's administration metadata, unless group sharing is used which is not supported.
+> This task will prompt to update the target item's sharing level if the resource access permissions set in the source
+> record's administration metadata differ, unless group sharing is used.
+
+> [!NOTE]
+> The source record will always be selected from the default branch.
+<!-- pyml enable md028 -->
 
 Examples:
 

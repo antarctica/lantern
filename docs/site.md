@@ -281,7 +281,7 @@ Completed challenges populate a hidden form field which MUST be validated by the
 >
 > - `300x` family (generic)
 > - `600x` family (generic)
-> - `110200' (timeout)
+> - `110200` and `110600` (timeout)
 <!-- pyml enable md028 -->
 
 [1] These include:

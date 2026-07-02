@@ -421,7 +421,7 @@ Consists of limited properties needed to render a search result for an Item. Inc
 
 ArcGIS items represent [Items](#items) as ArcGIS content.
 
-sFeatures include:
+Features include:
 
 - reflecting Item properties, such as summary, description, access permissions and licence constraints, etc. in ArcGIS
   content items consistently
@@ -434,8 +434,9 @@ Templates, stored in `src/lantern/resources/templates/_arcgis`, are used to:
 - format supported licences to look consistent with [Catalogue Items](#catalogue-items)
 
 ArcGIS items require a [Record](#records) and an ArcGIS content item, represented by the
-`lantern.lib.arcgis.gis.dataclasses.Item` class, to set ArcGIS specific properties such the ArcGIS content `type`,
-needed to represent Items as valid ArcGIS content items (via an `.item()` property).
+`lantern.lib.arcgis.gis.dataclasses.Item` [Vendored Class](/docs/libraries.md#arcgis-vendored-classes), to set ArcGIS
+specific properties, such the ArcGIS content `type`, needed to represent Items as valid ArcGIS content items
+(via an `.item()` property).
 
 ### ArcGIS items sharing levels
 

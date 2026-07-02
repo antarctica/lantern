@@ -89,8 +89,8 @@ Then run the [Interactive Publishing Workflows](#interactive-publishing-workflow
 
 To replace a thumbnail for an existing resource:
 
-- overwrite the thumbnail file using the AWS CLI [1]
-- run the [`thumbnail-invalidate`](/docs/supplemental/proto-cli-reference.md#thumbnail-invalidate) command
+1. overwrite the thumbnail file using the AWS CLI [1]
+1. run the [`thumbnail-invalidate`](/docs/supplemental/proto-cli-reference.md#thumbnail-invalidate) command
 
 > [!NOTE]
 > If the thumbnail file name or file type has changed - select, and replace, the relevant graphic overview URL in
@@ -109,19 +109,20 @@ To replace a thumbnail for an existing resource:
 
 To replace file artefacts included in an existing resource:
 
-- use Zap ⚡️to select (but not upload) the replacement artefact to get an updated distribution option
-- replace the relevant distribution as per the [Update](#updating-records) workflow
-  - the transfer option URL (and amending if renamed)
-  - this should ensure the format and size are updated if needed but double-check this
-- continue following the generic update workflow to complete updating the record
+1. replace the artefact in the relevant data access system
+1. use Zap ⚡️to select (but not upload) the replacement artefact to get an updated distribution option
+   - this should ensure the format and size are updated if needed but double-check they are accurate
+1. replace the relevant distribution as per the [Update](#updating-records) workflow:
+   - ensure a transfer option URL is set (amending if the previous value if renamed etc.)
+1. [Update](#updating-records) the record
 
 ## Previewing records
 
 To preview new and updated records before importing them:
 
 1. copy record configurations as JSON files to the `import/` directory
-2. run the [`preview-records`](/docs/supplemental/proto-cli-reference.md#preview-records) command
-3. run the [Local development web server](/docs/dev.md#local-development-web-server) to view records as items
+1. run the [`preview-records`](/docs/supplemental/proto-cli-reference.md#preview-records) command
+1. run the [Local development web server](/docs/dev.md#local-development-web-server) to view records as items
 
 > [!TIP]
 > To view [Administration Metadata](/docs/libraries.md#record-administrative-metadata) for a record at the command
@@ -231,7 +232,7 @@ To directly import a set of new and updated records:
 1. if applicable, update any [ArcGIS Items](#updating-arcgis-items) based on any related imported records
 
 > [!WARNING]
-> All records in the `import/` directory will be committed together. Consider processing unrelated changes separately.
+> All records in the `import/` directory will be committed together. Consider importing unrelated changes separately.
 
 ## Building static site
 

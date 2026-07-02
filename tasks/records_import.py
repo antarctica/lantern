@@ -97,7 +97,7 @@ def get_git_commit_context(defaults: GitUpsertContext | None = None, branch: str
 
 def _get_args(
     logger: logging.Logger, cli_args: tuple[bool, Path, str | None, str | None, str | None, str | None, str | None]
-) -> tuple[Path, GitUpsertContext]:
+) -> tuple[Path, GitUpsertContext, str]:
     """Get task inputs, interactively if needed/allowed."""
     cli_force, cli_path, cli_branch, cli_title, cli_message, cli_author_name, cli_author_email = cli_args
 
@@ -129,7 +129,9 @@ def _get_args(
         raise ValueError(msg) from None
 
     logger.debug(context)
-    return path, context
+    _context_params = f"--branch '{context.branch}' --title '{context.title}' --message '{context.message}' --author-name '{context.author_name}' --author-email '{context.author_email}'"
+    params = f"task import-records --force --path {path.resolve()} {_context_params}"
+    return path, context, params
 
 
 def load(logger: logging.Logger, import_path: Path) -> dict[Path, Record]:
@@ -179,11 +181,12 @@ def main() -> None:
     logger, _config, catalogue = init()
 
     cli_args = _get_cli_args()
-    import_path, commit_context = _get_args(logger=logger, cli_args=cli_args)
+    import_path, commit_context, params = _get_args(logger=logger, cli_args=cli_args)
 
     records = load(logger=logger, import_path=import_path)
     commit = push(logger=logger, cat=catalogue, records=list(records.values()), commit_context=commit_context)
     clean(logger=logger, records=records, results=commit)
+    logger.info(f'Re-run as: "% {params}"')
 
 
 if __name__ == "__main__":

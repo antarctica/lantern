@@ -101,6 +101,14 @@ class SiteResourcesOutput(OutputSite):
             ),
             *self._package_contents(
                 package_ref=self._img_src_ref,
+                base_path=self._base_path / "img",
+                media_type="image/x-icon",
+                glob="**/favicon.ico",
+                object_meta=self._object_meta,
+                binary=True,
+            ),
+            *self._package_contents(
+                package_ref=self._img_src_ref,
                 base_path=Path(),
                 media_type="image/x-icon",
                 glob="**/favicon.ico",

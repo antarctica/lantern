@@ -81,8 +81,7 @@
 {% macro experimental_i() %}<i class="fa-regular fa-flask-round-potion" aria-hidden="true"></i>{% endmacro %}
 
 {% macro ext_link_a(href, value) %}
-  <a class="{{ link_classes() }}" href="{{ href }}" target="_blank">
-    {{ value }} {{ ext_link_i() }}</a>
+  <a class="{{ link_classes() }}" href="{{ href }}" target="_blank"> {{ value }} {{ ext_link_i() }}</a>
 {% endmacro %}
 
 {% macro page_header(id_wrapper=None, id_sub=None, id_main=None, sub=None, sub_i=None, main=None) %}

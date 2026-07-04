@@ -84,7 +84,7 @@ def _run_job(
     else:
         output = job.output(logger=logger, meta=meta)
 
-    msg = f"Outputting {job.action} using {output.name}."
+    msg = f"Outputting {job.action} for {output.name}."
     if job.record:
         msg = f"Outputting {job.action} for record '{job.record.file_identifier}' using {output.name}."
     logger.info(msg)
@@ -167,14 +167,16 @@ class Site:
         """
         store = self._prep_store()
         start = time.monotonic()
-        nested_outputs: list[list[SiteContent]] = Parallel(n_jobs=self._workers)(
+        nested_outputs: list[list[SiteContent | Check | list[str]]] = Parallel(n_jobs=self._workers)(
             delayed(_run_job)(self._logger.level, self._meta, store, job) for job in jobs
         )
-        outputs = [output for output_outputs in nested_outputs for output in output_outputs]
+        outputs: list[SiteContent | Check | list[str]] = [
+            output for output_outputs in nested_outputs for output in output_outputs
+        ]
         self._logger.info(
             f"Generated {len(outputs)} site content/checks/keys in {round(time.monotonic() - start)} seconds"
         )
-        return cast(list[SiteContent | Check | list[str]], outputs)
+        return outputs
 
     def generate_content(
         self,

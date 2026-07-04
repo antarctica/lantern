@@ -46,6 +46,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Disabling parallelisation for individual tests to avoid workers overhead
 * Relaxing URL comparison in embedded maps e2e test
 * Incorrect logger called in tasks common setup
+* Incorrectly adding multiple stream handlers to the application logger
 * MAGIC base record preset not producing records valid against discovery profile
 * Missing requirements needed for using MAGIC base record preset to produce records valid against discovery profile
 * Updating header colour in item enquires flow to match updated site design

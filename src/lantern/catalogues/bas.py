@@ -231,11 +231,11 @@ class BasCatEnv(CatalogueBase):
         outputs: list[type[OutputBase]] | None = None,
     ) -> None:
         """
-        Verify untrusted site contents (optionally for selected records).
+        Check untrusted site contents (optionally for selected records).
 
-        Trusted site content is not validated due to Ops Data Store auth. See docs/monitoring.md for details.
+        Trusted site content is not checked due to Ops Data Store auth. See docs/monitoring.md for details.
         """
-        self._logger.info(f"Verifying untrusted {self._env} site")
+        self._logger.info(f"Checking untrusted {self._env} site")
         self._untrusted.check(identifiers=identifiers, branch=branch, outputs=outputs)
 
 

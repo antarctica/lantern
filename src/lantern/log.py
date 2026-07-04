@@ -6,30 +6,21 @@ import sentry_sdk
 
 def init(logging_level: int) -> None:
     """Initialise application logging."""
-    # noinspection SpellCheckingInspection
-    handler = logging.StreamHandler()
-    handler.setFormatter(logging.Formatter("%(asctime)s [%(levelname)s] %(message)s"))
-    logger = logging.getLogger("lantern")
-    logger.setLevel(logging_level)
-    logger.addHandler(handler)
+    logging.basicConfig(
+        level=logging_level, format="%(asctime)s [%(levelname)s] %(message)s", handlers=[logging.StreamHandler()]
+    )
+    logging.getLogger("lantern").setLevel(logging_level)
 
 
 def init_sentry() -> None:
     """Initialise Sentry SDK, if enabled."""
-    # can't import Config normally due to circular imports
-    from lantern.config import Config
+    from lantern.config import Config  # avoid circular imports
 
     config = Config()
-
-    dsn = config.SENTRY_DSN
-    disabled = not config.ENABLE_FEATURE_SENTRY
-    if disabled:  # pragma: no branch
-        dsn = ""  # empty DSN disables Sentry
-
     sentry_sdk.init(
-        dsn=dsn,
-        traces_sample_rate=0.1,  # 10%
-        profiles_sample_rate=0.1,  # 10%
+        dsn=config.SENTRY_DSN if config.ENABLE_FEATURE_SENTRY else "",
+        traces_sample_rate=0.1,
+        profiles_sample_rate=0.1,
         release=version("lantern"),
         environment=config.SENTRY_ENVIRONMENT,
     )

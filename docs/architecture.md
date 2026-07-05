@@ -112,6 +112,10 @@ See the [Static site](/docs/site.md) docs for information about the site structu
 
 See the [Checks](/docs/monitoring.md#site-checks) docs for information about the checks generated for a site.
 
+> [!NOTE]
+> Some outputs MAY require additional properties, populated by [Export Metadata](/docs/models.md#export-metadata) where
+> possible, or dict of extra values passed to a Site.
+
 ## Stores
 
 `lantern.stores`

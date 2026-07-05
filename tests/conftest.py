@@ -806,10 +806,14 @@ def fx_bas_repo_min_cat_record(
     Mocks repo to return a fixed store, itself mocked to return fixed records.
     """
     record = fx_item_cat_model_min.record
-    store = GitLabStore(logger=fx_logger, source=fx_gitlab_source, access_token=fx_config.STORE_GITLAB_TOKEN)
-    mocker.patch.object(store, "select", return_value=[record])
-    mocker.patch.object(type(store), "head_commit", new_callable=PropertyMock, return_value="x")
-    mocker.patch.object(fx_bas_repo, "_make_gitlab_store", return_value=store)
+    gitlab = GitLabStore(logger=fx_logger, source=fx_gitlab_source, access_token=fx_config.STORE_GITLAB_TOKEN)
+    mocker.patch.object(gitlab, "select", return_value=[record])
+    mocker.patch.object(type(gitlab), "head_commit", new_callable=PropertyMock, return_value="x")
+    mocker.patch.object(fx_bas_repo, "_make_gitlab_store", return_value=gitlab)
+
+    mock_algolia = mocker.MagicMock()
+    mocker.patch.object(fx_bas_repo, "_make_algolia_store", return_value=mock_algolia)
+
     return fx_bas_repo
 
 

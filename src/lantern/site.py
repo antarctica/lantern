@@ -72,10 +72,18 @@ def _run_job(
     iso_html_transform = _job_worker_iso_html_transform()
     select_record = store.select_one
     select_records = store.select
+    job_extras = job.extras or {}
 
     if job.output == ItemCatalogueOutput:
         output = job.output(logger=logger, meta=meta, record=job.record, select_record=select_record)
-    elif job.output in [SiteIndexOutput, SiteHealthOutput, ItemsBasWebsiteOutput, RecordsWafOutput]:
+    elif job.output == SiteHealthOutput:
+        output = job.output(
+            logger=logger,
+            meta=meta,
+            site_records_count=job_extras.get("site_records_count", -1),
+            search_records_count=job_extras.get("search_records_count", -1),
+        )
+    elif job.output in [SiteIndexOutput, ItemsBasWebsiteOutput, RecordsWafOutput]:
         output = job.output(logger=logger, meta=meta, select_records=select_records)
     elif job.output == RecordIsoHtmlOutput:
         output = job.output(logger=logger, meta=meta, record=job.record, transform=iso_html_transform)
@@ -96,11 +104,12 @@ def _run_job(
 
 
 class SiteJob(NamedTuple):
-    """Output class, action, and optional Record instance for a Site generator job."""
+    """Output class, action, and optional Record instance and/or any extras for a Site generator job."""
 
     action: SiteAction
     output: Callable[..., OutputBase]
     record: RecordRevision | None = None
+    extras: dict | None = None
 
 
 class Site:
@@ -112,10 +121,11 @@ class Site:
     Flexible class intended to be used in a higher level and opinionated Catalogue class.
     """
 
-    def __init__(self, logger: logging.Logger, meta: ExportMeta, store: StoreBase) -> None:
+    def __init__(self, logger: logging.Logger, meta: ExportMeta, store: StoreBase, extras: dict | None = None) -> None:
         self._logger = logger
         self._meta = meta
         self._store = store
+        self._extras = extras or {}
 
         self._workers = meta.parallel_jobs
 
@@ -146,13 +156,16 @@ class Site:
         """
         Create jobs for generating content, checks and/or invalidation keys for Output classes and records.
 
+        Includes any site extras for use in Outputs.
+
         Output classes are 'global' or 'individual' depending on whether they operate on individual records.
 
         Generated as: [actions] * [output class] (* [record])
         """
-        global_ = [SiteJob(action=action, output=cls) for action in actions for cls in global_outputs]
+        extras = self._extras or None
+        global_ = [SiteJob(action=action, output=cls, extras=extras) for action in actions for cls in global_outputs]
         individual_ = [
-            SiteJob(action=action, output=cls, record=record)
+            SiteJob(action=action, output=cls, record=record, extras=extras)
             for action in actions
             for cls in individual_outputs
             for record in self._store.select(identifiers)

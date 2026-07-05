@@ -35,6 +35,14 @@ This endpoint MAY be used by monitoring tools and/or load balancers to determine
 > [!TIP]
 > The health check may be 'live' but not 'ready', during deployments or maintenance for example.
 
+#### Health check checks
+
+- `site:records`: The number of records contained in the static site
+- `search:records`: The number of records contained in the search index
+
+> [!WARNING]
+> Health checks are evaluated when the [Static Site](/docs/architecture.md#sites) is built.
+
 ## Sentry
 
 ### Error monitoring

@@ -20,6 +20,7 @@ from lantern.models.repository import GitUpsertContext, GitUpsertResults
 from lantern.models.site import ExportMeta, SiteEnvironment
 from lantern.outputs.base import OutputBase
 from lantern.outputs.item_html import ItemCatalogueOutput
+from lantern.outputs.site_health import SiteHealthOutput
 from lantern.repositories.bas import BasRepository
 from lantern.site import Site
 
@@ -80,16 +81,23 @@ class BasCatUntrusted(CatalogueBase):
         """
         store = self._repo._make_gitlab_store(branch=branch, cached=True, frozen=True)
         meta = ExportMeta.from_config(config=self._config, env=self._env, build_ref=store.head_commit, trusted=False)
-        site = Site(logger=self._logger, meta=meta, store=store)
         global_, individual = self._group_output_classes(outputs=outputs)
-        site_params = {"global_outputs": global_, "individual_outputs": individual, "identifiers": identifiers}
+        site_extras = {}
+        content_params = {"global_outputs": global_, "individual_outputs": individual, "identifiers": identifiers}
 
-        content = site.generate_content(**site_params)
+        # include extras needed for some outputs
+        if SiteHealthOutput in global_:
+            search_store = self._repo._make_algolia_store()
+            site_extras["site_records_count"] = len(store)
+            site_extras["search_records_count"] = len(search_store)
+
+        site = Site(logger=self._logger, meta=meta, store=store, extras=site_extras)
+        content = site.generate_content(**content_params)
         self._exporter.export(content)
 
         if self._invalidator:
             # Invalidate entire site where all records will be exported
-            keys = site.generate_invalidation_keys(**site_params) if identifiers else ["/*"]
+            keys = site.generate_invalidation_keys(**content_params) if identifiers else ["/*"]
             self._invalidator.invalidate(keys)
 
     def check(

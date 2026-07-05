@@ -4,11 +4,10 @@ from pathlib import Path
 
 from lantern.models.checks import CheckType
 from lantern.models.site import ExportMeta, SiteContent, SiteRedirect
-from lantern.outputs.base import OutputRecords
-from lantern.stores.base import SelectRecordsProtocol
+from lantern.outputs.base import OutputSite
 
 
-class SiteHealthOutput(OutputRecords):
+class SiteHealthOutput(OutputSite):
     """
     Site health check output.
 
@@ -17,15 +16,13 @@ class SiteHealthOutput(OutputRecords):
     Generates a health and monitoring endpoint as static JSON.
     """
 
-    def __init__(self, logger: logging.Logger, meta: ExportMeta, select_records: SelectRecordsProtocol) -> None:
-        super().__init__(
-            logger=logger,
-            meta=meta,
-            name="Site Health",
-            check_type=CheckType.SITE_HEALTH,
-            select_records=select_records,
-        )
+    def __init__(
+        self, logger: logging.Logger, meta: ExportMeta, site_records_count: int, search_records_count: int
+    ) -> None:
+        super().__init__(logger=logger, meta=meta, name="Site Health", check_type=CheckType.SITE_HEALTH)
         self._health_path = Path("static") / "json" / "health.json"
+        self._site_records_count = site_records_count
+        self._search_records_count = search_records_count
 
     @property
     def _content(self) -> str:
@@ -50,12 +47,21 @@ class SiteHealthOutput(OutputRecords):
                     "site:records": {
                         "componentId": "Site records",
                         "componentType": "datastore",
-                        "observedValue": len(self._select_records()),
+                        "observedValue": self._site_records_count,
                         "observedUnit": "records",
                         "status": "pass",
                         "affectedEndpoints": [f"{self._meta.base_url}/records/{{fileIdentifier}}.json"],
                         "time": f"{self._meta.build_time.isoformat()}",
-                    }
+                    },
+                    "search:records": {
+                        "componentId": "Search records",
+                        "componentType": "datastore",
+                        "observedValue": self._search_records_count,
+                        "observedUnit": "records",
+                        "status": "pass",
+                        "affectedEndpoints": [f"{self._meta.base_url}/site"],
+                        "time": f"{self._meta.build_time.isoformat()}",
+                    },
                 },
                 "links": {
                     "about": "https://github.com/antarctica/lantern",

@@ -4,27 +4,22 @@ from pathlib import Path
 
 from lantern.models.site import ExportMeta
 from lantern.outputs.site_health import SiteHealthOutput
-from lantern.stores.base import SelectRecordsProtocol
 from tests.conftest import _index_site_content_outputs
 
 
 class TestSiteHealthOutput:
     """Test site health output."""
 
-    def test_init(
-        self, fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_select_records_fixed: SelectRecordsProtocol
-    ):
+    def test_init(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta):
         """Can create a site health output."""
-        output = SiteHealthOutput(logger=fx_logger, meta=fx_export_meta, select_records=fx_select_records_fixed)
+        output = SiteHealthOutput(logger=fx_logger, meta=fx_export_meta, site_records_count=1, search_records_count=1)
         assert isinstance(output, SiteHealthOutput)
 
-    def test_content(
-        self, fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_select_records_fixed: SelectRecordsProtocol
-    ):
+    def test_content(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta):
         """Can generate site content items."""
         build_ref = "x"
         fx_export_meta.build_repo_ref = build_ref
-        output = SiteHealthOutput(logger=fx_logger, meta=fx_export_meta, select_records=fx_select_records_fixed)
+        output = SiteHealthOutput(logger=fx_logger, meta=fx_export_meta, site_records_count=1, search_records_count=1)
         content = _index_site_content_outputs(output.content)
         assert len(content) > 1
 
@@ -32,6 +27,7 @@ class TestSiteHealthOutput:
         health_data = json.loads(health_output.content)
         assert "description" in health_data
         assert health_data["checks"]["site:records"]["observedValue"] == 1
+        assert health_data["checks"]["search:records"]["observedValue"] == 1
         assert health_output.media_type == "application/health+json"
 
         catalog_redirect = content[Path("-/health")]

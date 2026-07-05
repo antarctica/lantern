@@ -1,3 +1,4 @@
+import json
 import logging
 from copy import deepcopy
 from pathlib import Path
@@ -16,6 +17,8 @@ from lantern.models.checks import CheckType
 from lantern.models.record.record import Record
 from lantern.models.repository import GitUpsertContext, GitUpsertResults
 from lantern.models.site import SiteEnvironment
+from lantern.outputs.site_health import SiteHealthOutput
+from lantern.outputs.site_resources import SiteResourcesOutput
 from lantern.repositories.bas import BasRepository
 from lantern.stores.gitlab import GitLabSource, GitLabStore
 from tests.resources.records.item_cat_checks import record as all_checks_test_record
@@ -98,6 +101,38 @@ class TestBasCatUntrusted:
         invalidation_keys = set(fx_bas_cat_untrusted._invalidator.invalidate.call_args.args[0])
         assert invalidation_keys.issuperset(expected_invalidation_keys)
 
+    def test_export_site_health(
+        self,
+        mocker: MockerFixture,
+        fx_bas_cat_untrusted: BasCatUntrusted,
+        fx_s3_bucket_name: str,
+        fx_cf_distribution_id: str,
+    ):
+        """
+        Can specifically generate outputs for site health with expected content values.
+
+        Integration test to ensure site extra values for record counts from stores are passed through to Output
+        """
+        expected_key = "static/json/health.json"
+        expected_count = 99
+
+        # mock stores to return fixed length
+        mock_store = mocker.MagicMock()
+        mock_store.__len__ = mocker.MagicMock(return_value=expected_count)
+        mocker.patch.object(fx_bas_cat_untrusted._repo, "_make_gitlab_store", return_value=mock_store)
+        mocker.patch.object(fx_bas_cat_untrusted._repo, "_make_algolia_store", return_value=mock_store)
+
+        fx_bas_cat_untrusted.export(outputs=[SiteHealthOutput])
+
+        item_object = fx_bas_cat_untrusted._exporter._s3.get_object(
+            Bucket=fx_bas_cat_untrusted._exporter._bucket, Key=expected_key
+        )
+        assert item_object["ResponseMetadata"]["HTTPStatusCode"] == 200
+        item_text = item_object["Body"].read().decode("utf-8")
+        health_data = json.loads(item_text)
+        assert health_data["checks"]["site:records"]["observedValue"] == expected_count
+        assert health_data["checks"]["search:records"]["observedValue"] == expected_count
+
     def test_check(self, fx_bas_cat_untrusted: BasCatUntrusted):
         """Can check untrusted site content."""
         fx_bas_cat_untrusted.check()
@@ -164,6 +199,11 @@ class TestBasCatEnv:
 
         trusted_path = fx_bas_cat_env._trusted._exporter._path
         assert trusted_path.joinpath("items/x/index.html").exists()
+
+    @pytest.mark.cov()
+    def test_export_no_outputs(self, fx_bas_cat_env: BasCatEnv):
+        """Coverage test for when site health output isn't included."""
+        fx_bas_cat_env.export(outputs=[SiteResourcesOutput])
 
     def test_check(self, mocker: MockerFixture, fx_bas_cat_env: BasCatEnv):
         """

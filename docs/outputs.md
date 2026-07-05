@@ -52,6 +52,9 @@ Outputs processing multiple Records SHOULD:
 - outputs *SHOULD* set [Content Metadata](/docs/models.md#static-site-content-metadata) to include:
   - the state/version of the [Store](/docs/architecture.md#stores) in their content items (e.g. the head revision)
 
+Outputs MAY require additional properties as needed, which MAY be populated using
+[Export Metadata](/docs/models.md#export-metadata), if applicable, or [Site](/docs/architecture.md#sites) extras.
+
 > [!NOTE]
 > The `OutputRecords` base class does not include an equivalent `strip_admin` property because these classes are only
 > expected to use limited properties from Records (e.g. titles and summaries to build an index). Outputs that use whole

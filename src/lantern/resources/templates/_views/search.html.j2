@@ -1,25 +1,30 @@
-{% extends "_layouts/page.html.j2" %}
+{% extends "_layouts/main.html.j2" %}
 {% import '_macros/common.html.j2' as com %}
-
-{% set header_main = "Search" %}
 
 {% block head_scripts_extra %}
   <script src="/static/js/lib/algolia.min.js?v={{ build_key }}"></script>
   <script src="/static/js/search.js?v={{ build_key }}"></script>
 {% endblock %}
 
-{% block page_content %}
-  {{ com.experimental_page() }}
+{% block main %}
+    <article class="space-y-4 lg:space-y-8">
+      {{ com.page_header(main="Find information produced or managed by the British Antarctic Survey", sub='Search', sub_i=com.search_i_classes())}}
+      {{ com.experimental_page() }}
 
-  <noscript>
-    {% call com.alert(shape='side', variant='red', classes="space-y-2") %}
-      <p>This page requires JavaScript. No alternative is currently available.</p>
-    {% endcall %}
-  </noscript>
-  <div id="site-search" class="show-js hidden space-y-8">
-    <section>
-      <input id="search-query" class="{{ com.form_item_classes() }}" type="search" name="search-query">
-    </section>
-    <section id="search-hits" class="space-y-4"></section>
-  </div>
+      <noscript>
+        {% call com.alert(shape='side', variant='red', classes="space-y-2") %}
+          <p>This page requires JavaScript. No alternative is currently available.</p>
+        {% endcall %}
+      </noscript>
+      <div id="site-search" class="show-js hidden space-y-8">
+        <fieldset id="search-form">
+          <input id="search-query" class="flex-1 {{ com.form_item_classes() }}" type="search" name="search-query">
+        </fieldset>
+        <div id="search-meta" class="flex justify-between items-center">
+          <div id="search-stats"></div>
+          <div id="search-tools"></div>
+        </div>
+        <output id="search-hits" class="space-y-4"></output>
+      </div>
+  </article>
 {% endblock %}

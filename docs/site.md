@@ -320,10 +320,21 @@ A permissive `robots.txt` is included to prevent indexing internal (but not sens
 [Algolia](/docs/architecture.md#algolia) is used to implement a basic site wide search using
 [InstantSearch.js](https://www.algolia.com/doc/guides/building-search-ui/what-is-instantsearch/js).
 
-Results for up to the first 200 results are shown using markup similar to the `item_summary` common template macro.
-
 > [!NOTE]
-> Only item names are searchable.
+> Only item titles are searchable.
+
+Search results:
+
+- are hard-coded to the first 200 matching items
+- are displayed using markup similar to the `item_summary` common template macro
+
+Search terms:
+
+- can be pre-set using the `q` query parameter, with spaces replaced with `+` (e.g. `/search?q=foo+bar`)
+- can be shared by users using a pre-constructed link shown on the results page
+
+> [!TIP]
+> Search statistics are available through the [Algolia Dashboard](/docs/infrastructure.md#algolia).
 
 ## User feedback
 

@@ -508,7 +508,7 @@ To upgrade direct dependencies (including major and minor versions changing func
 - commit changes
 
 > [!TIP]
-> If playwright is upgraded, run `uv playwright install` locally and update CI image to match new version.
+> If playwright is upgraded, run `uv run playwright install` locally and update CI image to match new version.
 >
 > To list all (direct and indirect) outdated dependencies, run `uv tree --outdated`.
 

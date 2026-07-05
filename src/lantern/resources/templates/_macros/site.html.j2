@@ -126,35 +126,27 @@
 
 {% macro header(data) %}
   <header id="site-header" class="space-y-4">
-    {{ navbar() }}
-    {{ dev_phase(data.fallback_email) }}
+    {{ header_navbar() }}
   </header>
 {% endmacro %}
 
-{% macro navbar() %}
+{% macro header_navbar() %}
   <nav id="site-nav" class="lg:p-4 bg-blue-500 text-white">
-    <div class="{{ com.container_classes() }} py-4 lg:flex lg:gap-8 lg:justify-between lg:items-end">
-      <div class="flex-none flex justify-center lg:justify-start items-center">
+    <div class="{{ com.container_classes() }} py-4 space-y-4 lg:space-y-0 lg:flex lg:gap-8 lg:justify-between lg:items-end">
+      <div class="flex-none flex justify-center lg:justify-start items-center space-x-2">
         <a id="site-title" class="block {{ com.font_bolder_classes() }} text-lg text-center lg:text-left lg:text-2xl" href="/home">BAS Data Catalogue</a>
+        <span id="site-dev-phase" class="hidden lg:block uppercase text-sm {{ com.font_bolder_classes() }} bg-pink-500 text-white dark:text-grey-950 py-1 px-2" aria-hidden="true">alpha</span>
       </div>
       <div class="flex-1 hidden lg:flex items-center gap-4 justify-start">
         {{ primary_nav() }}
       </div>
-      <div class="flex-1 flex self-center justify-end">
-        <span class="hidden lg:block">Part of <a class="hover:underline" href="https://www.bas.ac.uk" target="_blank">British Antarctic Survey {{ com.ext_link_i() }}</a></span>
+      <div class="flex-1 self-center justify-center lg:justify-end">
+        <a class="block text-center lg:text-right hover:underline" href="/search">
+          <i class="{{ com.search_i_classes() }}" aria-hidden="true"></i> Search
+        </a>
       </div>
     </div>
   </nav>
-{% endmacro %}
-
-{% macro dev_phase(fallback_email) %}
-  <div id="site-dev" class="{{ com.container_classes() }} px-2 space-x-2 text-center lg:text-left">
-    <span id="site-dev-phase" class="uppercase text-sm {{ com.font_bolder_classes() }} bg-pink-500 text-white dark:text-grey-950 py-1 px-2" aria-hidden="true">alpha</span>
-    <span>
-      This is a new website, your {{ com.feedback_trigger(classes=com.link_classes(), fallback=fallback_email, text='feedback') }}
-      will help us to improve it.
-    </span>
-  </div>
 {% endmacro %}
 
 {% macro feedback_widget(fallback_email) %}
@@ -212,7 +204,6 @@
       </div>
       <div>
         {{ footer_legal(data.build_time.year) }}
-        {{ footer_network_nav() }}
       </div>
     </div>
   </footer>
@@ -255,7 +246,8 @@
 {% macro footer_legal(copyright_year) %}
   <div class="flex flex-col justify-between space-y-4 lg:space-y-0 lg:flex-row">
     <div class="lg:text-left lg:flex lg:space-x-2">
-      <span>© <a class="{{ com.footer_link_classes() }}" href="https://www.ukri.org" target="_blank">UK Research and Innovation {{ com.ext_link_i() }}</a>{{ copyright_year }}<span class="hidden lg:inline">.</span></span>
+      <span class="block lg:inline">Part of <a class="{{ com.footer_link_classes() }}" href="https://www.bas.ac.uk" target="_blank">British Antarctic Survey {{ com.ext_link_i() }}</a><span class="hidden lg:inline">.</span></span>
+      <span class="block lg:inline">© <a class="{{ com.footer_link_classes() }}" href="https://www.ukri.org" target="_blank">UK Research and Innovation {{ com.ext_link_i() }}</a> {{ copyright_year }}<span class="hidden lg:inline">.</span></span>
     </div>
     <ul class="flex justify-center space-x-2 lg:justify-end">
       <li><a class="{{ com.footer_link_classes() }}" href="/legal/accessibility">Accessibility</a></li>
@@ -264,8 +256,4 @@
       <li><a class="{{ com.footer_link_classes() }}" href="/legal/privacy">Privacy</a></li>
     </ul>
   </div>
-{% endmacro %}
-
-{% macro footer_network_nav() %}
-  <span class="block lg:hidden">Part of <a class="{{ com.footer_link_classes() }}" href="https://www.bas.ac.uk" target="_blank">British Antarctic Survey {{ com.ext_link_i() }}</a></span>
 {% endmacro %}

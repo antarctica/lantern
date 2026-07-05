@@ -68,20 +68,7 @@ test = [
 bas-metadata-library = false
 
 [tool.uv.audit]
-ignore = [
-    # aiohttp < 3.14 (triggers error in python-gitlab)
-    "GHSA-hg6j-4rv6-33pg",
-    "GHSA-jg22-mg44-37j8",
-    "GHSA-4fvr-rgm6-gqmc",
-    "GHSA-4m7w-qmgq-4wj5",
-    "GHSA-xcgm-r5h9-7989",
-    "GHSA-g3cq-j2xw-wf74",
-    "GHSA-63hw-fmq6-xxg2",
-    "GHSA-hpj7-wq8m-9hgp",
-    "GHSA-m6qw-4cw2-hm4m",
-    "GHSA-2fqr-mr3j-6wp8",
-    "GHSA-9x8q-7h8h-wcw9"
-]
+ignore = []
 
 [[tool.uv.index]]
 name = "self"

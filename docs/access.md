@@ -2,7 +2,8 @@
 
 ## Website
 
-A [website](http://data.bas.ac.uk/home) is available for end-users to browse catalogue records as HTML formatted items.
+A [website](http://data.bas.ac.uk/home) is available for end-users to browse and search catalogue records as HTML
+formatted items.
 
 > [!TIP]
 > See the 'Additional Information' tab in each item page for other metadata representations, including ISO 19139 XML.

@@ -728,12 +728,12 @@ and without an optional property.
 ### Playwright tests
 
 [Playwright](https://playwright.dev/) Python tests are used to verify the behaviour of dynamic JavaScript content,
-such as switching tabs in items and opening/closing the feedback widget.
+such as switching tabs in items and using the site search.
 
 To run a specific test file with visible output:
 
 ```shell
-% uv run pytest --headed tests/lantern_tests/x_e2e/test_item_e2e.py
+% uv run pytest --headed tests/lantern_tests/x_e2e/test_site_e2e.py::TestFeedbackWidget::test_widget
 ```
 
 Playwright tests require a real website to test against, which is provided by the `fx_exporter_static_server` fixture.

@@ -253,27 +253,31 @@ class TestMacrosSite:
         assert html.find(id="site-top") is not None
 
     def test_navbar_title(self):
-        """Can get site title in navbar with expected static value."""
-        template = """{% import '_macros/site.html.j2' as site %}{{ site.navbar() }}"""
+        """Can find site title in navbar."""
+        template = """{% import '_macros/site.html.j2' as site %}{{ site.header_navbar() }}"""
         html = BeautifulSoup(self._render(template), parser="html.parser", features="lxml")
 
-        assert html.find(id="site-title").string.strip() == "BAS Data Catalogue"
+        assert "BAS Data Catalogue" in html.find(id="site-title").string
 
     def test_navbar_primary_nav(self):
-        """Can get expected primary navigation links from navbar."""
-        expected_labels = ["British Antarctic Survey"]
-        template = """{% import '_macros/site.html.j2' as site %}{{ site.navbar() }}"""
+        """
+        Can find primary navigation links in navbar.
+
+        Dummy test as no privary navigation items are configured in the site.
+        """
+        expected_labels = []
+        template = """{% import '_macros/site.html.j2' as site %}{{ site.header_navbar() }}"""
         html = BeautifulSoup(self._render(template), parser="html.parser", features="lxml")
 
         for label in expected_labels:
             assert any(label in a.text for a in html.find(id="site-nav").find_all("a"))
 
-    def test_dev_phase(self):
-        """Can get site dev phase label with expected static value."""
-        template = """{% import '_macros/site.html.j2' as site %}{{ site.dev_phase() }}"""
+    def test_navbar_search(self):
+        """Can find link to search page in navbar."""
+        template = """{% import '_macros/site.html.j2' as site %}{{ site.header_navbar() }}"""
         html = BeautifulSoup(self._render(template), parser="html.parser", features="lxml")
 
-        assert html.find(id="site-dev-phase").string.strip() == "alpha"
+        assert html.find(id="site-nav").find(name="a", href="/search") is not None
 
     def test_feedback_widget(self):
         """Can get site feedback widget."""

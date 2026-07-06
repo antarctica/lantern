@@ -37,7 +37,6 @@ from lantern.outputs.record_iso import RecordIsoHtmlOutput, RecordIsoJsonOutput,
 from lantern.outputs.records_waf import RecordsWafOutput
 from lantern.outputs.site_health import SiteHealthOutput
 from lantern.outputs.site_index import SiteIndexOutput
-from lantern.stores.gitlab import CommitResults
 from lantern.utils import get_jinja_env, get_record_aliases
 
 
@@ -124,7 +123,7 @@ class OutputCommentMergeRequest:
         cat: BasCatalogue,
         env: SiteEnvironment,
         branch: str,
-        commit: CommitResults,
+        commit: GitUpsertResults,
         merge_url: str,
     ) -> None:
         self._cat = cat
@@ -370,13 +369,11 @@ def _export(cat: BasCatalogue, env: SiteEnvironment, branch: str, identifiers: s
     export(cat=cat, env=env, target="remote", branch=branch, identifiers=identifiers, outputs=outputs)
 
 
-@time_task(label="Verify")
-def _verify(
-    cat: BasCatalogue, env: SiteEnvironment, branch: str, identifiers: set[str], checks_base_path: Path
-) -> Path:
-    """Verify items for committed records."""
+@time_task(label="Check")
+def _check(cat: BasCatalogue, env: SiteEnvironment, branch: str, identifiers: set[str], checks_base_path: Path) -> Path:
+    """Check items for committed records."""
     check(cat=cat, env=env, target="local", branch=branch, identifiers=identifiers, local_path=checks_base_path)
-    # clean up verification output
+    # clean up checks output
     with checks_base_path.joinpath("-/checks/data.json").open() as f:
         data = json.load(f)
     shutil.rmtree(checks_base_path.joinpath("-"), ignore_errors=True)
@@ -395,7 +392,7 @@ def _output(
     cat: BasCatalogue,
     env: SiteEnvironment,
     branch: str,
-    commit: CommitResults,
+    commit: GitUpsertResults,
     issue_url: str,
     merge_url: str,
     merge_new: bool,
@@ -434,7 +431,7 @@ def main() -> None:
     ping_host(config.SITE_TRUSTED_RSYNC_HOST)
 
     print("\nThis script is for adding or updating records and previewing them in the testing site.")
-    print("It combines the 'zap-', 'import-', 'build-' and 'verify-' records dev tasks with some workflow logic.")
+    print("It combines the 'zap-', 'import-', 'build-' and 'check-' records dev tasks with some workflow logic.")
     print(f"\nTo begin, stage records for import in '{import_path.resolve()}'.")
     print("TIP! See the 'records-select' and/or 'records-clone' tasks if useful.")
     confirm(logger, "Are records staged in import directory?")
@@ -462,9 +459,9 @@ def main() -> None:
     # create a merge request if needed
     merge_url, merge_new = _merge_request(logger=logger, cat=catalogue, issue_href=issue_url, branch=branch)
 
-    # build and verify records
+    # build and check records
     _export(cat=catalogue, env=env, branch=branch, identifiers=identifiers)
-    checks_path = _verify(
+    checks_path = _check(
         cat=catalogue, env=env, branch=branch, identifiers=identifiers, checks_base_path=checks_base_path
     )
 

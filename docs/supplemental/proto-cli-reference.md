@@ -383,6 +383,24 @@ Examples:
 > [!TIP]
 > See the [`esri-record`](#esri-record) command to do the opposite (add an AGOL item to a catalogue record).
 
+### `search-reindex`
+
+Recreate the Algolia based search index.
+
+```shell
+% task search-reindex --help
+```
+
+> [!NOTE]
+> The search index is always populated from the default branch.
+
+Examples:
+
+```shell
+# reindex the search index
+% task search-reindex
+```
+
 ### `site-invalidate`
 
 Invalidate cached content in live site.

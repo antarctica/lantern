@@ -11,8 +11,8 @@ import inquirer
 from pathvalidate import sanitize_filepath
 from tasks._shared import confirm, init, ping_host, time_task
 from tasks.records_workflow_testing import OutputCommentItem
+from tasks.records_workflow_testing import _check as check
 from tasks.records_workflow_testing import _export as export
-from tasks.records_workflow_testing import _verify as verify
 
 from lantern.catalogues.bas import BasCatalogue
 from lantern.config import Config
@@ -148,10 +148,10 @@ def _export(cat: BasCatalogue, env: SiteEnvironment, identifiers: set[str]) -> N
     export(cat=cat, env=env, branch=cat.repo.gitlab_default_branch, identifiers=identifiers)
 
 
-@time_task(label="Verify")
-def _verify(cat: BasCatalogue, env: SiteEnvironment, identifiers: set[str], checks_base_path: Path) -> Path:
-    """Verify items for committed records."""
-    return verify(
+@time_task(label="Check")
+def _check(cat: BasCatalogue, env: SiteEnvironment, identifiers: set[str], checks_base_path: Path) -> Path:
+    """Check items for committed records."""
+    return check(
         cat=cat,
         env=env,
         branch=cat.repo.gitlab_default_branch,
@@ -217,7 +217,7 @@ def main() -> None:
         sys.exit(1)
 
     print("\nThis script is for publishing records previewed in the testing site to the live site.")
-    print("It combines the 'build-' and 'verify-' records dev tasks with some workflow logic.")
+    print("It combines the 'build-' and 'check-' records dev tasks with some workflow logic.")
 
     # select a changeset
     branch, merge_url, issue_url = _changeset(logger=logger, cat=catalogue)
@@ -225,9 +225,9 @@ def main() -> None:
     # merge changeset and get record identifiers
     identifiers = _merge_request(logger=logger, cat=catalogue, merge_url=merge_url)
 
-    # build and verify records
+    # build and check records
     _export(cat=catalogue, env=env, identifiers=identifiers)
-    checks_path = _verify(cat=catalogue, env=env, identifiers=identifiers, checks_base_path=checks_base_path)
+    checks_path = _check(cat=catalogue, env=env, identifiers=identifiers, checks_base_path=checks_base_path)
 
     # clean up changeset related files
     _clean(logger=logger, config=config, branch=branch)

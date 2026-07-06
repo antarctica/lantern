@@ -42,6 +42,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * GeoTIFF distribution options
 * Updated app dependencies
 * Development task to rebuild the Algolia search index
+* Guided branch selection in select development task
 
 ### Fixed
 
@@ -71,6 +72,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Changing to product hierarchy level in test fixtures
 * Iterating site header to include search and other refinements
 * Whitespace issues with Jinja macros
+* Improving local development documentation
 
 ### Removed
 

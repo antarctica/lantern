@@ -155,6 +155,10 @@ class BasRepository(RepositoryBase):
             raise ValueError(msg) from None
         return int(match.group(1))
 
+    def select_branches(self) -> list[str]:
+        """Return all branch names in the default GitLab project."""
+        return [b.name for b in self._gitlab_project.branches.list(all=True)]
+
     def select_merge_requests(self, state: str = "opened", branch: str | None = None) -> list[GitlabMergeRequest]:
         """
         Return some or all GitLab merge requests for default GitLab project.
@@ -202,6 +206,8 @@ class BasRepository(RepositoryBase):
         gitlab = self._make_gitlab_store(mr.target_branch)
         mr_record_ids = {Path(d["new_path"]).stem for diff_ in mr.diffs.list() for d in mr.diffs.get(diff_.id).diffs}
         record_revisions = gitlab.select(file_identifiers=mr_record_ids)
+
+        self._logger.info("Updating search index")
         algolia = self._make_algolia_store()
         algolia.push(records=record_revisions, admin_keys=self._config.ADMIN_METADATA_KEYS)
 
@@ -248,6 +254,8 @@ class BasRepository(RepositoryBase):
         Persist new or existing records.
 
         Proxy to GitLab store.
+
+        Note: The search index is not updated despite only tracking main, as we block direct commits.
         """
         default_branch = self._config.STORE_GITLAB_DEFAULT_BRANCH
         if context.branch == default_branch:

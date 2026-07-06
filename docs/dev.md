@@ -14,6 +14,7 @@ Setup:
 1. install tools (`brew install git uv pre-commit 1password-cli opentofu`)
 1. clone and setup project [1]
 1. [Generate](/docs/config.md#generate-an-environment-config-file) an `.env` file
+1. initialise pre-commit hook (`pre-commit install`)
 
 [1]
 

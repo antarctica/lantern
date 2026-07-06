@@ -163,6 +163,13 @@ class TestBasRepository:
 
     @pytest.mark.vcr
     @pytest.mark.block_network
+    def test_select_branches(self, fx_bas_repo: BasRepository):
+        """Can get GitLab branches for records store project/repo."""
+        branches = fx_bas_repo.select_branches()
+        assert branches == ["main"]
+
+    @pytest.mark.vcr
+    @pytest.mark.block_network
     def test_select_merge_requests(self, fx_bas_repo: BasRepository):
         """Can get GitLab merge requests for records store project/repo."""
         merges = fx_bas_repo.select_merge_requests()

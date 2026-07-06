@@ -30,6 +30,8 @@
 
 {%  macro form_invalid_classes() %}user-invalid:border-red-500 user-invalid:border-2{% endmacro %}
 
+{% macro home_i_classes() %}fa-regular fa-igloo{% endmacro %}
+
 {% macro share_i_classes() %}fa-regular fa-share{% endmacro %}
 
 {% macro search_i_classes() %}fa-regular fa-magnifying-glass{% endmacro %}
@@ -51,9 +53,7 @@
   <button class="{{ show_js_only() }} cursor-pointer {{ classes }}" data-target="#{{ feedback_widget_target() }}">{{ text }}</button>
 {% endmacro %}
 
-{% macro prose() %}
-  <div class="max-w-none prose prose-base dark:prose-invert prose-headings:{{ font_bolder_classes() }} prose-li:my-0">{{ caller() }}</div>
-{% endmacro %}
+{% macro prose() %}<div class="max-w-none prose prose-base dark:prose-invert prose-headings:{{ font_bolder_classes() }} prose-li:my-0">{{ caller() }}</div>{% endmacro %}
 
 {% macro dl_item(title, id=None, dd_class=None) %}
   <div class="space-y-2">
@@ -62,9 +62,7 @@
   </div>
 {% endmacro %}
 
-{% macro time(data, id=None) %}
-  <time {% if id %}id="{{ id }}"{% endif %} datetime="{{ data.datetime }}">{{ data.value }}</time>
-{% endmacro %}
+{% macro time(data, id=None) %}<time {% if id %}id="{{ id }}"{% endif %} datetime="{{ data.datetime }}">{{ data.value }}</time>{% endmacro %}
 
 {% macro copyable_path(value) %}
 <div class="grid grid-cols-[minmax(0,1fr)_auto] gap-2 items-center">
@@ -78,15 +76,11 @@
 
 {% macro restricted_i() %}<i class="fa-regular fa-lock-keyhole" aria-hidden="true"></i>{% endmacro %}
 
-{% macro ext_link_i() %}
-  <i class="fa-regular fa-arrow-up-right-from-square" aria-hidden="true"><span class="sr-only">External link, opens in a new window.</span></i>
-{% endmacro %}
+{% macro ext_link_i() %}<i class="fa-regular fa-arrow-up-right-from-square" aria-hidden="true"><span class="sr-only">External link, opens in a new window.</span></i>{% endmacro %}
 
 {% macro experimental_i() %}<i class="fa-regular fa-flask-round-potion" aria-hidden="true"></i>{% endmacro %}
 
-{% macro ext_link_a(href, value) %}
-  <a class="{{ link_classes() }}" href="{{ href }}" target="_blank"> {{ value }} {{ ext_link_i() }}</a>
-{% endmacro %}
+{% macro ext_link_a(href, value) %}<a class="{{ link_classes() }}" href="{{ href }}" target="_blank"> {{ value }} {{ ext_link_i() }}</a>{% endmacro %}
 
 {% macro page_header(id_wrapper=None, id_sub=None, id_main=None, sub=None, sub_i=None, main=None) %}
   <header {% if id_wrapper %}id="{{ id_wrapper }}"{% endif %} class="pb-4 border-b-1 border-grey-100 dark:border-grey-900">
@@ -107,9 +101,7 @@
   </picture>
 {% endmacro %}
 
-{% macro form_label(for, label) %}
-  <label class="block {{ font_bolder_classes() }}" for="{{ for }}">{{ label }}</label>
-{% endmacro %}
+{% macro form_label(for, label) %}<label class="block {{ font_bolder_classes() }}" for="{{ for }}">{{ label }}</label>{% endmacro %}
 
 {% macro form_input(id, name, value, placeholder, required, type='text') %}
   <div class="space-y-2">
@@ -145,9 +137,7 @@
   </div>
 {% endmacro %}
 
-{% macro item_title() %}
-  <h2 class="text-2xl">{{ caller() }}</h2>
-{% endmacro %}
+{% macro item_title() %}<h2 class="text-2xl">{{ caller() }}</h2>{% endmacro %}
 
 {% macro item_summary(item) %}
   {# This macro must be kept in sync with item template in `lantern/resources/templates/_assets/js/search.js.j2` #}
@@ -172,9 +162,7 @@
   {% endcall %}
 {% endmacro %}
 
-{% macro item_summary_fragment_divider() %}
-  <span class="text-grey-100 dark:text-grey-700">|</span>
-{% endmacro %}
+{% macro item_summary_fragment_divider() %}<span class="text-grey-100 dark:text-grey-700">|</span>{% endmacro %}
 
 {% macro item_summary_fragments(data) %}
   <span><i class="{{ data.item_type_icon }}" aria-hidden="true"></i> {{ data.item_type_label }}</span>

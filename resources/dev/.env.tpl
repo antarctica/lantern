@@ -13,8 +13,19 @@ LANTERN_STORE_GITLAB_TOKEN=""  # populate with personal access token for GitLab 
 LANTERN_STORE_GITLAB_DEFAULT_BRANCH="main"
 LANTERN_STORE_GITLAB_CACHE_PATH=".cache"
 
+## For local stack
+#LANTERN_STORE_GITLAB_ENDPOINT="https://gitlab.dev.orb.local"
+#LANTERN_STORE_GITLAB_PROJECT_ID="1"
+#LANTERN_STORE_GITLAB_TOKEN=""  # 'local-env' PAT for @lantern_bot
+
 LANTERN_STORE_ALGOLIA_APP_ID="op://Infrastructure/hqm2s5h7zjuxljy7owrkzefyke/Application ID/password"
 LANTERN_STORE_ALGOLIA_WRITE_API_KEY="op://Infrastructure/hqm2s5h7zjuxljy7owrkzefyke/Backend API Key/password"
+
+## For local stack
+#LANTERN_STORE_ALGOLIA_APP_ID=""
+#LANTERN_STORE_ALGOLIA_WRITE_API_KEY=""
+#LANTERN_TEMPLATES_ALGOLIA_APP_ID=""
+#LANTERN_TEMPLATES_ALGOLIA_SEARCH_API_KEY=""
 
 LANTERN_TEMPLATES_PLAUSIBLE_ID="op://Infrastructure/SCAR ADD Metadata Toolbox - Plausible site/password"
 LANTERN_TEMPLATES_ITEM_CONTACT_ENDPOINT="op://Infrastructure/SCAR ADD Metadata Toolbox - Power Automate item enquires/password"
@@ -32,8 +43,11 @@ LANTERN_SITE_UNTRUSTED_S3_BUCKET_LIVE="op://Infrastructure/rmhzzt5pk4wdamj2ecpgu
 LANTERN_SITE_TRUSTED_RSYNC_HOST=""  # populate with SSH config entry or leave blank to use local file system
 LANTERN_SITE_TRUSTED_RSYNC_BASE_PATH_TESTING="{{ op://Infrastructure/SCAR ADD Metadata Toolbox - SAN sync/content-path }}/testing"
 LANTERN_SITE_TRUSTED_RSYNC_BASE_PATH_LIVE="{{ op://Infrastructure/SCAR ADD Metadata Toolbox - SAN sync/content-path }}/live"
-#LANTERN_SITE_TRUSTED_RSYNC_HOST=""  # for local stack
-#LANTERN_SITE_TRUSTED_RSYNC_BASE_PATH_TESTING="./resources/dev/apache/run/cat/testing"  # for local stack
+
+## For local stack
+#LANTERN_SITE_TRUSTED_RSYNC_HOST=""
+#LANTERN_SITE_TRUSTED_RSYNC_BASE_PATH_TESTING="./resources/dev/apache/run/cat/testing"
+#LANTERN_SITE_TRUSTED_RSYNC_BASE_PATH_LIVE="./resources/dev/apache/run/cat/live"
 
 LANTERN_VERIFY_SHAREPOINT_PROXY_ENDPOINT="op://Infrastructure/SCAR ADD Metadata Toolbox - SharePoint proxy URL/password"
 LANTERN_VERIFY_SAN_PROXY_ENDPOINT="op://Infrastructure/SCAR ADD Metadata Toolbox - SAN proxy URL/password"

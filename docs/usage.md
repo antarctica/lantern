@@ -122,7 +122,7 @@ To preview new and updated records before importing them:
 
 1. copy record configurations as JSON files to the `import/` directory
 1. run the [`preview-records`](/docs/supplemental/proto-cli-reference.md#preview-records) command
-1. run the [Local development web server](/docs/dev.md#local-development-web-server) to view records as items
+1. run the [`serve`](/docs/dev.md#development-tasks) development task to view records as items
 
 > [!TIP]
 > To view [Administration Metadata](/docs/libraries.md#record-administrative-metadata) for a record at the command

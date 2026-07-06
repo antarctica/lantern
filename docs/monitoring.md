@@ -24,8 +24,9 @@ A non-200 status code MUST be considered as the static site being unavailable.
 ### Health check endpoint
 
 A static JSON health check is available within a [Site](/docs/architecture.md#sites), structured as
-per the [Draft API Health Check](https://datatracker.ietf.org/doc/html/draft-inadarei-api-health-check) specification,
-at: `/-/health`.
+per the [Draft API Health Check](https://datatracker.ietf.org/doc/html/draft-inadarei-api-health-check) specification.
+
+It is available at `/-/health` and built by the [Site Health](/docs/outputs.md#site-health-output) Output.
 
 This endpoint MAY be used by monitoring tools and/or load balancers to determine:
 

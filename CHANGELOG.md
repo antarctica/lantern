@@ -68,6 +68,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Switching to official `ty` pre-commit hook
 * Changing to product hierarchy level in test fixtures
 * Iterating site header to include search and other refinements
+* Whitespace issues with Jinja macros
 
 ### Removed
 

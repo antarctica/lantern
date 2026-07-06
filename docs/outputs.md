@@ -102,8 +102,8 @@ An additional check for a URL known not to exist is generated to check the 404 h
 
 Outputs:
 
-- a [Draft API Health Check](https://datatracker.ietf.org/doc/html/draft-inadarei-api-health-check) including a check
-  counting the number of Records in the configured Store, rendered from a Python dict
+- a [Draft API Health Check](https://datatracker.ietf.org/doc/html/draft-inadarei-api-health-check) including
+  [Component Checks](/docs/monitoring.md#health-check-checks)
 
 ## Site API output
 

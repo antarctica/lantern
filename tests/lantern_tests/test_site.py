@@ -1,3 +1,4 @@
+import json
 import logging
 from collections.abc import Callable
 
@@ -70,7 +71,7 @@ class TestSiteJob:
         self,
         fx_logger: logging.Logger,
         fx_revision_model_min: RecordRevision,
-        fx_select_record: callable,
+        fx_select_record: Callable,
         fx_fake_store: StoreBase,
         fx_export_meta: ExportMeta,
         output_cls: OutputBase,
@@ -81,13 +82,25 @@ class TestSiteJob:
             Identifier(identifier="x", href=f"https://{CATALOGUE_NAMESPACE}/products/x", namespace=ALIAS_NAMESPACE)
         )
         expected = [exp.replace("FILE_IDENTIFIER", fx_revision_model_min.file_identifier) for exp in expected]
+        expected_count = 99
 
-        content = _run_job(
-            log_level=logging.DEBUG,
-            meta=fx_export_meta,
-            store=fx_fake_store,
-            job=SiteJob(action="content", output=output_cls, record=fx_revision_model_min),
+        individual_outputs = [
+            ItemCatalogueOutput,
+            ItemAliasesOutput,
+            RecordIsoJsonOutput,
+            RecordIsoXmlOutput,
+            RecordIsoHtmlOutput,
+        ]
+        job = SiteJob(
+            action="content",
+            output=output_cls,
+            record=fx_revision_model_min if output_cls in individual_outputs else None,
+            extras={"site_records_count": expected_count, "search_records_count": expected_count}
+            if output_cls == SiteHealthOutput
+            else None,
         )
+        content = _run_job(log_level=logging.DEBUG, meta=fx_export_meta, store=fx_fake_store, job=job)
+
         results = [str(output.path) for output in content]
         for exp in expected:
             assert exp in results
@@ -100,6 +113,13 @@ class TestSiteJob:
         )
         assert len(checks) > 0
 
+        # check content for outputs that use extras
+        if output_cls == SiteHealthOutput:
+            health_output = next(output for output in content if str(output.path) == "static/json/health.json")
+            health_data = json.loads(health_output.content)
+            assert health_data["checks"]["site:records"]["observedValue"] == expected_count
+            assert health_data["checks"]["search:records"]["observedValue"] == expected_count
+
 
 class TestSite:
     """Test site generator."""
@@ -108,6 +128,7 @@ class TestSite:
         """Can create a site generator instance."""
         site = Site(logger=fx_logger, meta=fx_export_meta, store=fx_fake_store)
         assert isinstance(site, Site)
+        assert site._extras == {}
         assert site._workers == 1
 
     @pytest.mark.cov()
@@ -122,23 +143,32 @@ class TestSite:
 
     @pytest.mark.cov()
     @pytest.mark.parametrize(
-        ("actions", "global_", "individual", "identifiers", "expected"),
+        ("actions", "global_", "individual", "extras", "identifiers", "expected"),
         [
-            ([], [], [], None, []),
-            (["content"], [SiteResourcesOutput], [], None, [SiteJob(action="content", output=SiteResourcesOutput)]),
-            (["checks"], [SiteResourcesOutput], [], None, [SiteJob(action="checks", output=SiteResourcesOutput)]),
+            ([], [], [], None, None, []),
+            (
+                ["content"],
+                [SiteResourcesOutput],
+                [],
+                {"x": "x"},
+                None,
+                [SiteJob(action="content", output=SiteResourcesOutput, extras={"x": "x"})],
+            ),
+            (["checks"], [SiteResourcesOutput], [], None, None, [SiteJob(action="checks", output=SiteResourcesOutput)]),
             (
                 ["invalidations"],
                 [SiteResourcesOutput],
                 [],
                 None,
+                None,
                 [SiteJob(action="invalidations", output=SiteResourcesOutput)],
             ),
-            (["content"], [], [ItemCatalogueOutput], None, []),
+            (["content"], [], [ItemCatalogueOutput], None, None, []),
             (
                 ["content"],
                 [],
                 [ItemCatalogueOutput, RecordIsoXmlOutput],
+                None,
                 {product_min_required.file_identifier},
                 [
                     SiteJob(action="content", output=ItemCatalogueOutput, record=product_min_required),
@@ -149,6 +179,7 @@ class TestSite:
                 ["content", "checks"],
                 [SiteResourcesOutput],
                 [ItemCatalogueOutput],
+                None,
                 {product_min_required.file_identifier},
                 [
                     SiteJob(action="content", output=SiteResourcesOutput),
@@ -161,6 +192,7 @@ class TestSite:
                 ["content", "checks", "invalidations"],
                 [SiteResourcesOutput],
                 [ItemCatalogueOutput],
+                None,
                 {product_min_required.file_identifier},
                 [
                     SiteJob(action="content", output=SiteResourcesOutput),
@@ -179,10 +211,14 @@ class TestSite:
         actions: list[SiteAction],
         global_: list[Callable[..., OutputBase]],
         individual: list[Callable[..., OutputBase]],
+        extras: dict | None,
         identifiers: set[str] | None,
         expected: list[SiteJob],
     ):
         """Can generate expected processing jobs."""
+        if extras:
+            fx_site._extras = extras
+
         result = fx_site._generate_jobs(actions, global_, individual, identifiers)
         if individual and not identifiers:
             # where > 0 individual output classes and no selected identifiers, jobs are generated for all records

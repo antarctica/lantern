@@ -370,9 +370,7 @@ def _export(cat: BasCatalogue, env: SiteEnvironment, branch: str, identifiers: s
 
 
 @time_task(label="Check")
-def _check(
-    cat: BasCatalogue, env: SiteEnvironment, branch: str, identifiers: set[str], checks_base_path: Path
-) -> Path:
+def _check(cat: BasCatalogue, env: SiteEnvironment, branch: str, identifiers: set[str], checks_base_path: Path) -> Path:
     """Check items for committed records."""
     check(cat=cat, env=env, target="local", branch=branch, identifiers=identifiers, local_path=checks_base_path)
     # clean up checks output

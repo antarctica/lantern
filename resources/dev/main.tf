@@ -36,9 +36,14 @@ resource "gitlab_project" "lantern_records" {
   description      = "Lantern records store."
   visibility_level = "internal"
 
-  # disable everything except repository
+  # disable everything except email notifications, repository and merge-requests
+  # exceptionally in local stack, also enable issues for publishing workflows
+  emails_enabled              = true
+  issues_access_level         = "enabled"
+  merge_requests_access_level = "enabled"
+  repository_access_level     = "enabled"
+
   auto_devops_enabled                  = false
-  emails_enabled                       = false
   lfs_enabled                          = false
   packages_enabled                     = false
   initialize_with_readme               = false
@@ -49,8 +54,6 @@ resource "gitlab_project" "lantern_records" {
   feature_flags_access_level           = "disabled"
   forking_access_level                 = "disabled"
   infrastructure_access_level          = "disabled"
-  issues_access_level                  = "disabled"
-  merge_requests_access_level          = "enabled"
   model_experiments_access_level       = "disabled"
   model_registry_access_level          = "disabled"
   monitor_access_level                 = "disabled"

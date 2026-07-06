@@ -303,6 +303,8 @@ def load_record(
 
 
 def ping_host(host: str) -> None:
+    if not host:
+        return
     try:
         subprocess.run(  # noqa: S603
             ["ssh", host, "echo x"],  # noqa: S607

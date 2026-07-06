@@ -16,8 +16,7 @@ Available environments:
 
 - development:
   - for prototyping and making changes (see [Development](/docs/dev.md) documentation)
-  - hosts a local development site with optional [Local Stack](/docs/dev.md#local-development-stack) for external
-    infrastructure
+  - hosts a local site with optional, partial, [Local Stack](/docs/dev.md#development-stack) for external infrastructure
 - staging:
   - for infrastructure testing (i.e. HTTPS configuration, deployment workflows, etc.)
   - for experimentation and previewing content by authors and invited testers

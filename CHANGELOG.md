@@ -56,6 +56,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Missing validation for CloudFront distribution ID in config and CloudFront exporter
 * Endpoint for accessing restricted ArcGIS distribution options
 * Missing favicon in site image assets (in addition to site root)
+* Interactive publishing workflows when using a local development environment
 
 ### Changed
 

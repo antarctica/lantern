@@ -24,7 +24,7 @@ Setup:
 % uv run playwright install
 ```
 
-### Local development publishing
+### Development publishing
 
 To run BAS Data Catalogue [Publishing Workflows](/docs/usage.md) locally:
 
@@ -55,7 +55,7 @@ Needed for `rsync` to automatically authenticate.
 > [!TIP]
 > The`IdentityFile` is a public key as a hint for the 1Password SSH agent.
 
-### Local development stack
+### Development stack
 
 Local versions of services used by Lantern can be run via containers.
 
@@ -71,9 +71,11 @@ Setup:
 Start:
 
 - start stack using the `stack-start` [Development Task](#development-tasks)
-- Run [GitLab](#local-development-gitlab) manual pre-configuration
-- Run local Infrastructure as Code using OpenTofu [2]
-- Run [GitLab](#local-development-gitlab) manual post-configuration
+- Run [GitLab](#local-stack-gitlab) manual pre-configuration
+- Run local Infrastructure as Code using OpenTofu [1]
+- Run [GitLab](#local-stack-gitlab) manual post-configuration
+- Configure [Algolia](#local-stack-algolia) for local development
+- Configure [S3](#local-development-s3) for local development
 
 Stop:
 
@@ -87,7 +89,13 @@ Reset:
 % task stack-start
 ```
 
-[2]
+To manipulate the local containers via OrbStack (which acts as a `docker compose` replacement) use:
+
+```text
+% docker compose -f ./resources/dev/docker-compose.yml ...
+```
+
+[1]
 
 ```text
 % cd ./resources/dev
@@ -95,20 +103,25 @@ Reset:
 % GITLAB_TOKEN=xxx tofu apply
 ```
 
-### Local development web server
+### Local stack web server
 
-Part of [Local Development Stack](#local-development-stack) for the BAS Data Catalogue.
+Part of [Local Development Stack](#development-stack) for the BAS Data Catalogue.
 
-For simulating secure content hosting for [Trusted Publishing](/docs/architecture.md#trusted-publishing).
+For simulating secure content hosting for [Trusted Publishing](/docs/architecture.md#trusted-publishing):
 
-Set relevant [Config Options](/docs/config.md) in `.env` file.
+- set relevant [Config Options](/docs/config.md) in the `.env` file (as a parallel configuration)
 
-Once the [Local Stack](#local-development-stack) is up, visit
-[web.dev.orb.local/cat/stage/items](https://user:password@web.dev.orb.local/cat/stage/items).
+Once the [Local Stack](#development-stack) is up, visit:
 
-### Local development load balancer
+- [web.dev.orb.local/cat/testing/items](https://user:password@web.dev.orb.local/cat/testing/items)
+- [web.dev.orb.local/cat/live/items](https://user:password@web.dev.orb.local/cat/live/items)
 
-Part of [Local Development Stack](#local-development-stack) for the BAS Data Catalogue.
+> [!NOTE]
+> These directory listings are only enabled in local development environments.
+
+### Local stack load balancer
+
+Part of [Local Development Stack](#development-stack) for the BAS Data Catalogue.
 
 For simulating reverse proxying similar to the BAS HAProxy Load Balancer.
 
@@ -143,18 +156,23 @@ To view HAProxy internal stats:
 
 - visit [haproxy.dev.orb.local/haproxy_stats](https://admin:password@haproxy.dev.orb.local/haproxy_stats)
 
-### Local development GitLab
+### Local stack GitLab
 
-Part of [Local Development Stack](#local-development-stack).
+Part of [Local Development Stack](#development-stack).
 
 Manual pre-configuration:
 
-- once [Local Stack](#local-development-stack) is up, login to [GitLab](https://gitlab.dev.orb.local) as 'root' [1]
-- create a new [Admin User](https://gitlab.dev.orb.local/admin/users/new)
-- open [Local Email Server](https://mail.dev.orb.local) and follow link in signup email to set password
-- create a [Personal Access Token](https://gitlab.dev.orb.local/-/user_settings/personal_access_tokens):
+- once [Local Stack](#development-stack) is up, login to [GitLab](https://gitlab.dev.orb.local) as 'root' [1]
+- create a new [Admin User](https://gitlab.dev.orb.local/admin/users/new) for yourself
+  - you can use any email address as all messages will be caught in the local email server
+- open [Local Email Server](https://mail.dev.orb.local) and follow the link in signup email to set a password
+- create a [Personal Access Token](https://gitlab.dev.orb.local/-/user_settings/personal_access_tokens) for this user:
   - token name: `lantern-dev-tf`
   - scopes: `api`, `sudo`
+
+> [!TIP]
+> Use this token to run the Terraform configuration for the local stack, as per [1] in
+> [Local development stack](#development-stack).
 
 Manual post-configuration:
 
@@ -162,7 +180,7 @@ Manual post-configuration:
 - create a [Personal Access Token](https://gitlab.dev.orb.local/-/user_settings/personal_access_tokens):
   - token name: 'local-env'
   - scopes: `api`
-- add relevant [Config Options](/docs/config.md) in `.env` file (as a parallel configuration)
+- set relevant [Config Options](/docs/config.md) in the `.env` file (as a parallel configuration)
 - run the `bootstrap-records` [Development Task](#development-tasks)
 
 > [!TIP]
@@ -175,7 +193,25 @@ Manual post-configuration:
 % docker compose -f ./resources/dev/docker-compose.yml exec -it gitlab grep 'Password:' /etc/gitlab/initial_root_password
 ```
 
-### Local development PyCharm
+### Local stack Algolia
+
+> [!WARNING]
+> This section is Work in Progress (WIP) and may not be complete/accurate.
+
+[Algolia](/docs/architecture.md#algolia) cannot be run locally as part of a development environment. Instead:
+
+- create a separate Algolia application if needed
+- set relevant [Config Options](/docs/config.md) in the `.env` file (as a parallel configuration)
+- run the `search-reindex` [Development Task](#development-tasks)
+
+### Local development S3
+
+> [!CAUTION]
+> No local stand in for S3 is available. Ensure not to export any content.
+
+If this is needed, create a separate S3 bucket and set relevant [Config Options](/docs/config.md) in the `.env` file.
+
+### Local stack PyCharm
 
 [Tests](#pytest) Run/Debug configuration:
 
@@ -425,8 +461,9 @@ Within this project, for each new item type:
 2. update `lantern.outputs.site_pages.SitePagesOutput._page_meta` to generate the new page(s)
 3. update `lantern_tests.outputs.test_site_pages.TestSitePagesOutput` as needed
 4. if needed, update `primary_nav_items` / `secondary_nav_items` in `src/lantern/resources/templates/_macros/site.html.j2`
-5. if needed, update the 'Static site endpoints' list in the [Reverse Proxying](/docs/setup.md#reverse-proxying) docs
-   1. request any new prefixes from IT
+5. if needed, update the site endpoints list in:
+   1. the [Reverse Proxying](/docs/setup.md#reverse-proxying) docs and request any new prefixes from IT
+   2. the `resources/dev/haproxy/data_redirect.txt` config to replicate the central load balancer behaviour locally
 6. include the new pages in the [OpenAPI Definition](/docs/site.md#openapi-definition)
 
 ### Updating styles
@@ -508,7 +545,7 @@ To upgrade direct dependencies (including major and minor versions changing func
 - commit changes
 
 > [!TIP]
-> If playwright is upgraded, run `uv run playwright install` locally and update CI image to match new version.
+> If playwright is upgraded, run `uv playwright install` locally and update CI image to match new version.
 >
 > To list all (direct and indirect) outdated dependencies, run `uv tree --outdated`.
 
@@ -728,12 +765,12 @@ and without an optional property.
 ### Playwright tests
 
 [Playwright](https://playwright.dev/) Python tests are used to verify the behaviour of dynamic JavaScript content,
-such as switching tabs in items and using the site search.
+such as switching tabs in items and opening/closing the feedback widget.
 
 To run a specific test file with visible output:
 
 ```shell
-% uv run pytest --headed tests/lantern_tests/x_e2e/test_site_e2e.py::TestFeedbackWidget::test_widget
+% uv run pytest --headed tests/lantern_tests/x_e2e/test_item_e2e.py
 ```
 
 Playwright tests require a real website to test against, which is provided by the `fx_exporter_static_server` fixture.

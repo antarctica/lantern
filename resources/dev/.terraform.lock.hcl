@@ -5,7 +5,20 @@ provider "registry.opentofu.org/gitlabhq/gitlab" {
   version     = "18.6.1"
   constraints = "18.6.1"
   hashes = [
+    "h1:5jS1Aq3oulokJSc7gaFYpaLyBLKStwxUFp+VWrkIbMM=",
+    "h1:8t8OzY3AVL1+rkM8eUoPUD5jur3W/600KZ4NPdIfMIs=",
+    "h1:9vxaNIFSka6Eq0f0AO5nXZaanleElRhia6q2/xGs2ns=",
+    "h1:KjmqDrbc4zYfp4u02hkkYX3CD78qldrlDb5OJHfidq0=",
+    "h1:MaWjkcCMYD97CeKui8CCWN8rKXOzSugaS+K0nzY/yok=",
+    "h1:TSIigoOJlZoAVV9STKLiF4aTbBO7ZWMwvpcukS6Ohac=",
     "h1:TU963CgQNPejGRE22RVG7dnNd5G012fMaNgiOfPHTm4=",
+    "h1:Tsp2Plu3+NWMTwWBKy4zHAeyJgvJFAaUmvwIFNyWOGM=",
+    "h1:gMFSd8KRpm94g4tZasR1mVQUXYKiqqZa1jXC4JcExds=",
+    "h1:klQ+dXSVLo8ippKxjvIYBkEnsOe30RKv0asLU9yWu5s=",
+    "h1:nCHlJDXMwrWgJtMX1OZpv2xM9tPXmAmwWEOCWMgO/hI=",
+    "h1:oLuZ3iI5yz9YFuc6hBM5ZZGER5xCuDVGHXM3ioQsCTw=",
+    "h1:tINtKkVjGMFyQBLq4CPZJTonU8nC/CftO8RocO3/IfE=",
+    "h1:xT6TnLruJBb90+NEcMSEepLvWKR/5g+ZyH1qxTshlls=",
     "zh:06af4d5ca18bfc38ac36ec1caeeda2a3de7541adb5c5afad531833120e3e03cf",
     "zh:06fa7786a6fc2b15eb6586d521c522012ffb573645d09c94298092c4341e3a8e",
     "zh:15df3dfa76850fd9f82ffbff8844bc286b944e27f3433b264b10911eebc40086",

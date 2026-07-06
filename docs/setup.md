@@ -118,15 +118,26 @@ Set up reverse proxying within the BAS HAProxy load balancer to direct traffic t
 
 This requires a request to BAS IT asking for:
 
-- frontend ACLs matching any of the static [1] or secure [2] site endpoints for each non-development environment
+- frontend ACLs matching any of the [Static](#static-site-endpoints) and [Secure Static](#static-site-secure-endpoints)
+  site endpoints for non-development environments
 - backends for each of these environments with:
   - a single server pointing to either:
     - the relevant AWS CloudFront Distribution
     - or the relevant Operations Data Store endpoint
   - a health check using the [Health Check Endpoint](/docs/monitoring.md#health-check-endpoint) (for static hosting)
-  - URL rewriting as needed (for secure hosting) [3]
+  - URL rewriting as needed (for secure hosting) [1]
 
-[1] Static site endpoints:
+[1]
+
+For secure hosting, URL rewrites are required to change `/-` to `/cat/testing` or `/cat/live` in the internal HAProxy,
+to ensure requests map to the Operations Data Store web root. E.g.:
+
+```yaml
+# rewrite '/-' to '/cat/testing' (e.g. '/-/items/000/index.html' to '/cat/testing/items/000/index.html')
+http-request replace-path ^/-/(.*) /cat/testing/\1
+```
+
+### Static site endpoints
 
 ```text
 /-/
@@ -150,20 +161,10 @@ This requires a request to BAS IT asking for:
 /robots.txt
 ```
 
-[2] Secure site endpoints:
+### Static site secure endpoints
 
 ```text
 /-/items/
-```
-
-[3]
-
-For secure hosting, URL rewrites are required to change `/-` to `/cat/testing` or `/cat/live` in the internal HAProxy,
-to ensure requests map to the Operations Data Store web root. E.g.:
-
-```yaml
-# rewrite '/-' to '/cat/testing' (e.g. '/-/items/000/index.html' to '/cat/testing/items/000/index.html')
-http-request replace-path ^/-/(.*) /cat/testing/\1
 ```
 
 ## Sentry

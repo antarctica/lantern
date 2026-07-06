@@ -68,7 +68,20 @@ test = [
 bas-metadata-library = false
 
 [tool.uv.audit]
-ignore = []
+ignore = [
+    # aiohttp < 3.14 (triggers error in python-gitlab)
+    "GHSA-hg6j-4rv6-33pg",
+    "GHSA-jg22-mg44-37j8",
+    "GHSA-4fvr-rgm6-gqmc",
+    "GHSA-4m7w-qmgq-4wj5",
+    "GHSA-xcgm-r5h9-7989",
+    "GHSA-g3cq-j2xw-wf74",
+    "GHSA-63hw-fmq6-xxg2",
+    "GHSA-hpj7-wq8m-9hgp",
+    "GHSA-m6qw-4cw2-hm4m",
+    "GHSA-2fqr-mr3j-6wp8",
+    "GHSA-9x8q-7h8h-wcw9"
+]
 
 [[tool.uv.index]]
 name = "self"
@@ -117,7 +130,6 @@ build-test-cache = { cmd = "python -m tests.resources.stores.gitlab_cache.refres
 # fake CLI
 version = { cmd = "uv version", help = "Show app version" }
 esri-record = { cmd = "python -m tasks.record_esri", help = "Add Esri item distribution options to a record" }
-esri-item = { cmd = "python -m tasks.esri_item", help = "Sync record details to an Esri item" }
 clone-record = { cmd = "python -m tasks.record_clone", help = "Clone record from cache into import directory" }
 supersede-record = { cmd = "python -m tasks.record_supersede", help = "Indicate a new record is the successor to another" }
 issues-record = { cmd = "python -m tasks.record_issues", help = "Set GitLab issues for a record"}
@@ -136,6 +148,8 @@ workflow-testing = { cmd = "python -m tasks.records_workflow_testing", help = "I
 workflow-live = { cmd = "python -m tasks.records_workflow_live", help = "Import records to live site" }
 site-invalidate = { cmd = "python -m tasks.site_invalidate", help = "Invalidate cached content in live site" }
 thumbnail-invalidate = { cmd = "python -m tasks.thumbnail_invalidate", help = "Invalidate cached item thumbnail in CDN" }
+esri-item = { cmd = "python -m tasks.esri_item", help = "Sync record details to an Esri item" }
+search-reindex = { cmd = "python -m tasks.search_reindex", help = "Recreate catalogue search index" }
 serve = { cmd = "python -m tasks.serve", help = "Serve local catalogue site" }
 
 [tool.ruff]

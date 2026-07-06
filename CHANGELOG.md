@@ -41,6 +41,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Significant improvements to Esri item sync (inc. thumbnail support, MAGIC Products licence, etc.)
 * GeoTIFF distribution options
 * Updated app dependencies
+* Development task to rebuild the Algolia search index
 
 ### Fixed
 

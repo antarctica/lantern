@@ -111,12 +111,14 @@ class DistributionChecks:
         "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+feature+ogc",
         "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+tile+raster",
         "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+tile+vector",
+        "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+scene",
     ]
     _arcgis_service_sigils: Final[list[str]] = [
         "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+feature",
         "https://metadata-resources.data.bas.ac.uk/media-types/x-service/ogc+api+feature",
         "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+raster",
         "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+vector",
+        "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+scene",
     ]
     _arcgis_webmap_sigil: Final[str] = "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+webmap"
     _bas_published_maps_sigil: Final[str] = "https://data.bas.ac.uk/guides/map-purchasing/"

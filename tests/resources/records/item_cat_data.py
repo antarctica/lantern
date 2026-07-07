@@ -33,6 +33,7 @@ Item to test all supported data formats:
 - ArcGIS OGC Feature Layer
 - ArcGIS Raster Tile Layer
 - ArcGIS Vector Tile Layer
+- ArcGIS Scene Layer
 - ArcGIS Web Map
 - BAS SAN (not format based/aware)
 - BAS Construction CDE (not format based/aware)
@@ -72,7 +73,7 @@ distributions = {
             role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
-            format="ArcGIS Feature Layer",
+            format=DistributionType.ARCGIS_FEATURE_LAYER.value,
             href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+feature",
         ),
         transfer_option=TransferOption(
@@ -105,7 +106,7 @@ distributions = {
             role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
-            format="ArcGIS Feature Service",
+            format=DistributionType.ARCGIS_FEATURE_LAYER.value.replace("Layer", "Service"),
             href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+feature",
         ),
         transfer_option=TransferOption(
@@ -138,7 +139,7 @@ distributions = {
             role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
-            format="ArcGIS OGC Feature Layer",
+            format=DistributionType.ARCGIS_OGC_FEATURE_LAYER.value,
             href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+feature+ogc",
         ),
         transfer_option=TransferOption(
@@ -171,7 +172,7 @@ distributions = {
             role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
-            format="OGC API Features Service",
+            format=DistributionType.ARCGIS_OGC_FEATURE_LAYER.value.replace("(ArcGIS) Layer", "Service"),
             href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/ogc+api+feature",
         ),
         transfer_option=TransferOption(
@@ -204,7 +205,7 @@ distributions = {
             role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
-            format="ArcGIS Raster Tile Layer",
+            format=DistributionType.ARCGIS_RASTER_TILE_LAYER.value,
             href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+tile+raster",
         ),
         transfer_option=TransferOption(
@@ -237,7 +238,7 @@ distributions = {
             role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
-            format="ArcGIS Raster Tile Service",
+            format=DistributionType.ARCGIS_RASTER_TILE_LAYER.value.replace("Layer", "Service"),
             href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+raster",
         ),
         transfer_option=TransferOption(
@@ -270,7 +271,7 @@ distributions = {
             role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
-            format="ArcGIS Vector Tile Layer",
+            format=DistributionType.ARCGIS_VECTOR_TILE_LAYER.value,
             href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+tile+vector",
         ),
         transfer_option=TransferOption(
@@ -303,7 +304,7 @@ distributions = {
             role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
-            format="ArcGIS Vector Tile Service",
+            format=DistributionType.ARCGIS_VECTOR_TILE_LAYER.value.replace("Layer", "Service"),
             href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+vector",
         ),
         transfer_option=TransferOption(
@@ -312,6 +313,72 @@ distributions = {
                 function=OnlineResourceFunctionCode.DOWNLOAD,
                 title="ArcGIS Online",
                 description="Access information as an ArcGIS vector tile service.",
+            )
+        ),
+    ),
+    "ArcGIS Scene Layer": Distribution(
+        distributor=Contact(
+            organisation=ContactIdentity(
+                name="Environmental Systems Research Institute", href="https://ror.org/0428exr50", title="ror"
+            ),
+            address=Address(
+                delivery_point="380 New York Street",
+                city="Redlands",
+                administrative_area="California",
+                postal_code="92373",
+                country="United States of America",
+            ),
+            online_resource=OnlineResource(
+                href="https://www.esri.com",
+                title="GIS Mapping Software, Location Intelligence & Spatial Analytics | Esri",
+                description="Corporate website for Environmental Systems Research Institute (ESRI).",
+                function=OnlineResourceFunctionCode.INFORMATION,
+            ),
+            role={ContactRoleCode.DISTRIBUTOR},
+        ),
+        format=Format(
+            format=DistributionType.ARCGIS_SCENE_LAYER.value,
+            href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+scene",
+        ),
+        transfer_option=TransferOption(
+            online_resource=OnlineResource(
+                href="s",
+                function=OnlineResourceFunctionCode.INFORMATION,
+                title="ArcGIS Online",
+                description="Access information as an ArcGIS 3D scene layer.",
+            )
+        ),
+    ),
+    "ArcGIS Scene Service": Distribution(
+        distributor=Contact(
+            organisation=ContactIdentity(
+                name="Environmental Systems Research Institute", href="https://ror.org/0428exr50", title="ror"
+            ),
+            address=Address(
+                delivery_point="380 New York Street",
+                city="Redlands",
+                administrative_area="California",
+                postal_code="92373",
+                country="United States of America",
+            ),
+            online_resource=OnlineResource(
+                href="https://www.esri.com",
+                title="GIS Mapping Software, Location Intelligence & Spatial Analytics | Esri",
+                description="Corporate website for Environmental Systems Research Institute (ESRI).",
+                function=OnlineResourceFunctionCode.INFORMATION,
+            ),
+            role={ContactRoleCode.DISTRIBUTOR},
+        ),
+        format=Format(
+            format="ArcGIS 3D Scene Service",
+            href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+scene",
+        ),
+        transfer_option=TransferOption(
+            online_resource=OnlineResource(
+                href="s",
+                function=OnlineResourceFunctionCode.DOWNLOAD,
+                title="ArcGIS Online",
+                description="Access information as an ArcGIS 3D scene service.",
             )
         ),
     ),
@@ -373,7 +440,7 @@ distributions = {
             role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
-            format="CSV",
+            format=DistributionType.CSV.value,
             href="https://www.iana.org/assignments/media-types/text/csv",
         ),
         transfer_option=TransferOption(
@@ -410,7 +477,7 @@ distributions = {
             role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
-            format="FPL",
+            format=DistributionType.FPL.value,
             href="https://metadata-resources.data.bas.ac.uk/media-types/application/fpl+xml",
         ),
         transfer_option=TransferOption(
@@ -448,7 +515,7 @@ distributions = {
             role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
-            format="GeoJSON",
+            format=DistributionType.GEOJSON.value,
             href="https://www.iana.org/assignments/media-types/application/geo+json",
         ),
         transfer_option=TransferOption(
@@ -485,7 +552,7 @@ distributions = {
             role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
-            format="GeoPackage",
+            format=DistributionType.GEOPACKAGE.value,
             href="https://www.iana.org/assignments/media-types/application/geopackage+sqlite3",
         ),
         transfer_option=TransferOption(
@@ -522,7 +589,7 @@ distributions = {
             role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
-            format="GeoPackage (Zipped)",
+            format=DistributionType.GEOPACKAGE_ZIP.value,
             href="https://metadata-resources.data.bas.ac.uk/media-types/application/geopackage+sqlite3+zip",
         ),
         transfer_option=TransferOption(
@@ -560,7 +627,7 @@ distributions = {
             role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
-            format="GeoTIFF",
+            format=DistributionType.GEOTIFF.value,
             href="https://metadata-resources.data.bas.ac.uk/media-types/image/geo+tiff",
         ),
         transfer_option=TransferOption(
@@ -597,7 +664,7 @@ distributions = {
             role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
-            format="GPX",
+            format=DistributionType.GPX.value,
             href="https://metadata-resources.data.bas.ac.uk/media-types/application/gpx+xml",
         ),
         transfer_option=TransferOption(
@@ -635,7 +702,7 @@ distributions = {
             role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
-            format="JPEG",
+            format=DistributionType.JPEG.value,
             href="https://www.iana.org/assignments/media-types/image/jpeg",
         ),
         transfer_option=TransferOption(
@@ -672,7 +739,7 @@ distributions = {
             role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
-            format="MapBox Vector Tile",
+            format=DistributionType.MAPBOX_VECTOR_TILE.value,
             href="https://www.iana.org/assignments/media-types/application/vnd.mapbox-vector-tile",
         ),
         transfer_option=TransferOption(
@@ -709,7 +776,7 @@ distributions = {
             role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
-            format="PDF",
+            format=DistributionType.PDF.value,
             href="https://www.iana.org/assignments/media-types/application/pdf",
         ),
         transfer_option=TransferOption(
@@ -746,7 +813,7 @@ distributions = {
             role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
-            format="PDF (Georeferenced)",
+            format=DistributionType.PDF_GEO.value,
             href="https://metadata-resources.data.bas.ac.uk/media-types/application/pdf+geo",
         ),
         transfer_option=TransferOption(
@@ -784,7 +851,7 @@ distributions = {
             role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
-            format="PNG",
+            format=DistributionType.PNG.value,
             href="https://www.iana.org/assignments/media-types/image/png",
         ),
         transfer_option=TransferOption(
@@ -821,7 +888,7 @@ distributions = {
             role={ContactRoleCode.DISTRIBUTOR},
         ),
         format=Format(
-            format="Shapefile (Zipped)",
+            format=DistributionType.SHAPEFILE_ZIP.value,
             href="https://metadata-resources.data.bas.ac.uk/media-types/application/vnd.shp+zip",
         ),
         transfer_option=TransferOption(

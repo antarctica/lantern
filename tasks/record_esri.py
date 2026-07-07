@@ -236,20 +236,24 @@ def _make_esri_distributions(arcgis_item: ArcGisItem) -> list[Distribution]:
     """Generate distribution options for an ArcGIS item."""
     item_format = {
         ArcGisItemType.FEATURE_SERVICE: Format(
-            format="ArcGIS Feature Layer",
+            format=DistributionType.ARCGIS_FEATURE_LAYER.value,
             href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+feature",
         ),
         ArcGisItemType.OGCFEATURESERVER: Format(
-            format="ArcGIS OGC Feature Layer",
+            format=DistributionType.ARCGIS_OGC_FEATURE_LAYER.value,
             href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+feature+ogc",
         ),
         ArcGisItemType.MAP_SERVICE: Format(
-            format="ArcGIS Raster Tile Layer",
+            format=DistributionType.ARCGIS_RASTER_TILE_LAYER.value,
             href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+tile+raster",
         ),
         ArcGisItemType.VECTOR_TILE_SERVICE: Format(
-            format="ArcGIS Vector Tile Service",
+            format=DistributionType.ARCGIS_VECTOR_TILE_LAYER.value,
             href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+tile+vector",
+        ),
+        ArcGisItemType.SCENE_SERVICE: Format(
+            format=DistributionType.ARCGIS_SCENE_LAYER.value,
+            href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+scene",
         ),
         ArcGisItemType.WEB_MAP: Format(
             format=DistributionType.ARCGIS_WEBMAP.value,
@@ -261,24 +265,25 @@ def _make_esri_distributions(arcgis_item: ArcGisItem) -> list[Distribution]:
         ArcGisItemType.OGCFEATURESERVER: "Access information as an ArcGIS OGC feature layer.",
         ArcGisItemType.MAP_SERVICE: "Access information as an ArcGIS raster tile layer.",
         ArcGisItemType.VECTOR_TILE_SERVICE: "Access information as an ArcGIS vector tile layer.",
+        ArcGisItemType.SCENE_SERVICE: "Access information as an ArcGIS 3D scene layer.",
         ArcGisItemType.WEB_MAP: "Access information as an ArcGIS web map",
     }
 
     service_format = {
         ArcGisItemType.FEATURE_SERVICE: Format(
-            format="ArcGIS Feature Service",
+            format=DistributionType.ARCGIS_FEATURE_LAYER.value.replace("Layer", "Service"),
             href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+feature",
         ),
         ArcGisItemType.OGCFEATURESERVER: Format(
-            format="OGC API Features Service",
+            format=DistributionType.ARCGIS_OGC_FEATURE_LAYER.value.replace("(ArcGIS) Layer", "Service"),
             href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/ogc+api+feature",
         ),
         ArcGisItemType.MAP_SERVICE: Format(
-            format="ArcGIS Raster Tile Service",
+            format=DistributionType.ARCGIS_RASTER_TILE_LAYER.value.replace("Layer", "Service"),
             href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+raster",
         ),
         ArcGisItemType.VECTOR_TILE_SERVICE: Format(
-            format="ArcGIS Vector Tile Service",
+            format=DistributionType.ARCGIS_VECTOR_TILE_LAYER.value.replace("Layer", "Service"),
             href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+vector",
         ),
     }
@@ -287,6 +292,7 @@ def _make_esri_distributions(arcgis_item: ArcGisItem) -> list[Distribution]:
         ArcGisItemType.OGCFEATURESERVER: "Access information as an OGC API feature service.",
         ArcGisItemType.MAP_SERVICE: "Access information as an ArcGIS raster tile service.",
         ArcGisItemType.VECTOR_TILE_SERVICE: "Access information as an ArcGIS vector tile service.",
+        ArcGisItemType.SCENE_SERVICE: "Access information as an ArcGIS 3D scene service.",
     }
 
     item_type = arcgis_item.properties.item_type

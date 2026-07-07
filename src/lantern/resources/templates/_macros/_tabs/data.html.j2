@@ -43,6 +43,8 @@
     {{ arc_raster_tile_layer(data) }}
   {% elif data.format_type.name == "ARCGIS_VECTOR_TILE_LAYER"  %}
     {{ arc_vector_tile_layer(data) }}
+  {% elif data.format_type.name == "ARCGIS_SCENE_LAYER"  %}
+    {{ arc_scene_layer(data) }}
   {% elif data.format_type.name == "ARCGIS_WEBMAP"  %}
     {{ arc_webmap(data) }}
   {% elif data.format_type.name == "X_BAS_SAN"  %}
@@ -155,6 +157,33 @@
           <ul class="space-y-2">
             <li>{{ com.ext_link_a(href="https://pro.arcgis.com/en/pro-app/latest/help/mapping/layer-properties/add-layers-to-a-map.htm#ESRI_STEPS_334E1F2B89A6447FBA5873DEB7ADDCED", value="Instructions for Esri ArcGIS Pro") }}</li>
             <li>{{ com.ext_link_a(href="https://guides.geospatial.bas.ac.uk/using-mapping-data-services/bas-mapping-services/loading-esri-vector-tile-layers-to-qgis", value="Instructions for QGIS") }}</li>
+          </ul>
+        {% endcall %}
+      </dl>
+    {% endcall %}
+  </div>
+{% endmacro %}
+
+{% macro arc_scene_layer(data) %}
+  {% set id_base = data.access_target | replace("#", "") %}
+    <div class="space-y-4">
+    {% call com.alert(shape='side', variant='blue', classes='space-y-4') %}
+      <p>Add this item to a desktop or online GIS that supports <a class="{{ com.link_classes() }}" href="https://developers.arcgis.com/documentation/mapping-and-location-services/mapping/scenes-3d/#scene-layers">ArcGIS 3D Scenes {{ com.ext_link_i() }}</a>.</p>
+    {% endcall %}
+    <dl class="space-y-4">
+      {% call com.dl_item(title='ArcGIS Item', id=id_base + '-portal-item') %}
+        {{ com.ext_link_a(href=data.item_link.href, value=data.item_link.value) }}
+      {% endcall %}
+      {% call com.dl_item(title='Service Endpoint', id=id_base + '-server-endpoint', dd_class="overflow-x-scroll") %}
+        {{ com.copyable_path(data.service_endpoint) }}
+      {% endcall %}
+    </dl>
+    {% call com.alert(shape='side', variant='blue', classes='space-y-4') %}
+      <dl class="space-y-4">
+        {% call com.dl_item(title='Instructions', id=id_base + '-instructions') %}
+          <ul class="space-y-2">
+            <li>{{ com.ext_link_a(href="https://pro.arcgis.com/en/pro-app/latest/help/mapping/layer-properties/add-layers-to-a-map.htm#ESRI_STEPS_334E1F2B89A6447FBA5873DEB7ADDCED", value="Instructions for Esri ArcGIS Pro") }}</li>
+            <li>{{ com.ext_link_a(href="https://guides.geospatial.bas.ac.uk/using-mapping-data-services/bas-mapping-services/loading-esri-scene-layers-in-qgis", value="Instructions for QGIS") }}</li>
           </ul>
         {% endcall %}
       </dl>

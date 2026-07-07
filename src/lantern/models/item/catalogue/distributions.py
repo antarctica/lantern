@@ -358,6 +358,32 @@ class ArcGisRasterTileLayer(ArcGisServiceLayerDistribution):
         return DistributionType.ARCGIS_RASTER_TILE_LAYER
 
 
+class ArcGisSceneLayer(ArcGisServiceLayerDistribution):
+    """
+    ArcGIS Scene Layer distribution option.
+
+    Consisting of a 3D scene service and layer option.
+    """
+
+    service_media_href = "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+scene"
+
+    @classmethod
+    def matches(cls, option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:
+        """Whether this class matches the distribution option."""
+        target_hrefs = [
+            "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+scene",
+            "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+scene",
+        ]
+        return ArcGisServiceLayerDistribution._matches(
+            target_hrefs=target_hrefs, option=option, other_options=other_options
+        )
+
+    @property
+    def format_type(self) -> DistributionType:
+        """Format type."""
+        return DistributionType.ARCGIS_SCENE_LAYER
+
+
 class ArcGisWebMap(ArcGisDistribution):
     """
     ArcGIS Web Map distribution option.

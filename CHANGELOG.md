@@ -43,6 +43,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Updated app dependencies
 * Development task to rebuild the Algolia search index
 * Guided branch selection in select development task
+* ArcGIS scene layer and web map distribution options
 
 ### Fixed
 

@@ -18,9 +18,10 @@ class DistributionType(Enum):
     """Catalogue specific distribution types."""
 
     ARCGIS_FEATURE_LAYER = "ArcGIS Feature Layer"
-    ARCGIS_OGC_FEATURE_LAYER = "OGC API Features (ArcGIS)"
+    ARCGIS_OGC_FEATURE_LAYER = "OGC API Features (ArcGIS) Layer"
     ARCGIS_RASTER_TILE_LAYER = "ArcGIS Raster Tile Layer"
     ARCGIS_VECTOR_TILE_LAYER = "ArcGIS Vector Tile Layer"
+    ARCGIS_SCENE_LAYER = "ArcGIS 3D Scene Layer"
     ARCGIS_WEBMAP = "ArcGIS Web Map"
     CSV = "CSV"
     FPL = "FPL"

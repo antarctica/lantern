@@ -313,6 +313,7 @@ Supported distribution options:
   - ArcGIS OGC API Features Layer/Service
   - ArcGIS (Raster) Tile Layer/Service
   - ArcGIS Vector Tile Layer/Service
+  - ArcGIS Scene Layer/Service
   - ArcGIS Web Map
 - file types:
   - CSV

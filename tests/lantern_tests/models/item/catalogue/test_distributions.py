@@ -12,6 +12,7 @@ from lantern.models.item.catalogue.distributions import (
     ArcGisFeatureLayer,
     ArcGisOgcApiFeatures,
     ArcGisRasterTileLayer,
+    ArcGisSceneLayer,
     ArcGisServiceLayerDistribution,
     ArcGisVectorTileLayer,
     ArcGisWebMap,
@@ -643,6 +644,44 @@ class TestDistributionArcGisVectorTileLayer:
     def test_matches(self, main: RecordDistribution, others: list[Distribution], expected: bool):
         """Can determine if a record distribution matches this catalogue distribution."""
         result = ArcGisVectorTileLayer.matches(main, others)
+        assert result == expected
+
+
+class TestDistributionArcGisSceneLayer:
+    """Test ArcGIS Scene Layer catalogue distribution."""
+
+    def test_init(self):
+        """Can create a distribution."""
+        main = _make_dist("https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+scene")
+        others = [_make_dist("https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+scene")]
+
+        dist = ArcGisSceneLayer(main, others)
+        assert dist.format_type == DistributionType.ARCGIS_SCENE_LAYER
+
+    @pytest.mark.parametrize(
+        ("main", "others", "expected"),
+        [
+            (
+                _make_dist("https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+scene"),
+                [_make_dist("https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+scene")],
+                True,
+            ),
+            (
+                _make_dist("https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+scene"),
+                [_make_dist("x")],
+                False,
+            ),
+            (
+                _make_dist("x"),
+                [_make_dist("https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+scene")],
+                False,
+            ),
+            (_make_dist("x"), [_make_dist("y")], False),
+        ],
+    )
+    def test_matches(self, main: RecordDistribution, others: list[Distribution], expected: bool):
+        """Can determine if a record distribution matches this catalogue distribution."""
+        result = ArcGisSceneLayer.matches(main, others)
         assert result == expected
 
 

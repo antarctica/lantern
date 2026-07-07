@@ -78,6 +78,7 @@ arc_layer_formats = [
     "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+feature+ogc",
     "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+tile+raster",
     "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+tile+vector",
+    "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+scene",
 ]
 arc_layer_url = "https://example.com/x"
 arc_layer_distributions = [
@@ -104,6 +105,7 @@ arc_service_formats = [
     "https://metadata-resources.data.bas.ac.uk/media-types/x-service/ogc+api+feature",
     "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+raster",
     "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+vector",
+    "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+scene",
 ]
 arc_service_url = "https://example.com/x"
 arc_service_distributions = [

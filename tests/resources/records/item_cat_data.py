@@ -19,6 +19,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     HierarchyLevelCode,
     OnlineResourceFunctionCode,
 )
+from lantern.models.item.catalogue.enums import DistributionType
 from lantern.models.record.const import CATALOGUE_NAMESPACE
 from tests.resources.records.utils import make_record
 
@@ -32,6 +33,7 @@ Item to test all supported data formats:
 - ArcGIS OGC Feature Layer
 - ArcGIS Raster Tile Layer
 - ArcGIS Vector Tile Layer
+- ArcGIS Web Map
 - BAS SAN (not format based/aware)
 - BAS Construction CDE (not format based/aware)
 - BAS Paper Map ordering (not format based/aware)
@@ -310,6 +312,39 @@ distributions = {
                 function=OnlineResourceFunctionCode.DOWNLOAD,
                 title="ArcGIS Online",
                 description="Access information as an ArcGIS vector tile service.",
+            )
+        ),
+    ),
+    "ArcGIS Web Map": Distribution(
+        distributor=Contact(
+            organisation=ContactIdentity(
+                name="Environmental Systems Research Institute", href="https://ror.org/0428exr50", title="ror"
+            ),
+            address=Address(
+                delivery_point="380 New York Street",
+                city="Redlands",
+                administrative_area="California",
+                postal_code="92373",
+                country="United States of America",
+            ),
+            online_resource=OnlineResource(
+                href="https://www.esri.com",
+                title="GIS Mapping Software, Location Intelligence & Spatial Analytics | Esri",
+                description="Corporate website for Environmental Systems Research Institute (ESRI).",
+                function=OnlineResourceFunctionCode.INFORMATION,
+            ),
+            role={ContactRoleCode.DISTRIBUTOR},
+        ),
+        format=Format(
+            format=DistributionType.ARCGIS_WEBMAP.value,
+            href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+webmap",
+        ),
+        transfer_option=TransferOption(
+            online_resource=OnlineResource(
+                href="wm",
+                function=OnlineResourceFunctionCode.INFORMATION,
+                title="ArcGIS Online",
+                description="Access information as an ArcGIS scene service.",
             )
         ),
     ),

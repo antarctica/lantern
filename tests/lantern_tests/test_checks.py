@@ -205,7 +205,13 @@ class TestRunCheck:
     """Test standalone check runner."""
 
     @pytest.mark.parametrize(
-        "check_type", [CheckType.DOWNLOADS_OPEN, CheckType.DOWNLOADS_ARCGIS_LAYER, CheckType.DOWNLOADS_ARCGIS_SERVICE]
+        "check_type",
+        [
+            CheckType.DOWNLOADS_OPEN,
+            CheckType.DOWNLOADS_ARCGIS_LAYER,
+            CheckType.DOWNLOADS_ARCGIS_SERVICE,
+            CheckType.INFO_ARCGIS_WEBMAP,
+        ],
     )
     def test_run(
         self, mocker: MockerFixture, fx_logger: logging.Logger, fx_check: Check, check_type: CheckType
@@ -214,7 +220,7 @@ class TestRunCheck:
         mocker.patch.object(CheckRunner, "_check_url", return_value=None)
         mocker.patch.object(CheckRunner, "_check_arcgis_item", side_effect=RuntimeError)
         mocker.patch.object(CheckRunner, "_check_arcgis_service", side_effect=RuntimeError)
-        if check_type == CheckType.DOWNLOADS_ARCGIS_LAYER:
+        if check_type == CheckType.DOWNLOADS_ARCGIS_LAYER or check_type == CheckType.INFO_ARCGIS_WEBMAP:
             mocker.patch.object(CheckRunner, "_check_url", side_effect=RuntimeError)
             mocker.patch.object(CheckRunner, "_check_arcgis_item", return_value=None)
         elif check_type == CheckType.DOWNLOADS_ARCGIS_SERVICE:

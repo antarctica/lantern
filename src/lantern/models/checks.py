@@ -41,6 +41,7 @@ class CheckType(Enum):
     DOWNLOADS_BAS_CDE = "BAS CDE Downloads"
     DOWNLOADS_ARCGIS_LAYER = "ArcGIS Layer"
     DOWNLOADS_ARCGIS_SERVICE = "ArcGIS Service"
+    INFO_ARCGIS_WEBMAP = "ArcGIS Web Map"
 
 
 class CheckState(Enum):
@@ -117,6 +118,7 @@ class DistributionChecks:
         "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+raster",
         "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+vector",
     ]
+    _arcgis_webmap_sigil: Final[str] = "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+webmap"
     _bas_published_maps_sigil: Final[str] = "https://data.bas.ac.uk/guides/map-purchasing/"
     _nora_sigil: Final[str] = "https://nora.nerc.ac.uk/"
     _sharepoint_sigil: Final[str] = "sharepoint.com"
@@ -127,7 +129,7 @@ class DistributionChecks:
         self._distributions = distributions
         self._file_identifier = file_identifier
 
-    def _parse(self) -> list[tuple[CheckType, str, int | None]]:
+    def _parse(self) -> list[tuple[CheckType, str, int | None]]:  # noqa: C901
         """
         Generate parameters for checks from distribution options.
 
@@ -155,6 +157,8 @@ class DistributionChecks:
             # From most to least specific
             if transfer_href == self._bas_published_maps_sigil:
                 type_ = CheckType.BAS_PUBLISHED_MAP
+            elif format_href == self._arcgis_webmap_sigil:
+                type_ = CheckType.INFO_ARCGIS_WEBMAP
             elif format_href in self._arcgis_layer_sigils:
                 type_ = CheckType.DOWNLOADS_ARCGIS_LAYER
             elif format_href in self._arcgis_service_sigils:

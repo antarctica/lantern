@@ -1,4 +1,5 @@
 # Update record to include distribution options for an ArcGIS Online item
+
 import hashlib
 import logging
 from argparse import ArgumentParser
@@ -22,6 +23,7 @@ from lantern.lib.metadata_library.models.record.elements.distribution import Dis
 from lantern.lib.metadata_library.models.record.enums import OnlineResourceFunctionCode
 from lantern.lib.metadata_library.models.record.presets.contacts import ESRI_DISTRIBUTOR
 from lantern.lib.metadata_library.models.record.record import Record
+from lantern.models.item.catalogue.enums import DistributionType
 
 
 def _get_cli_args() -> tuple[bool, Path, Path | None, str | None]:
@@ -249,12 +251,17 @@ def _make_esri_distributions(arcgis_item: ArcGisItem) -> list[Distribution]:
             format="ArcGIS Vector Tile Service",
             href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+tile+vector",
         ),
+        ArcGisItemType.WEB_MAP: Format(
+            format=DistributionType.ARCGIS_WEBMAP.value,
+            href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+webmap",
+        ),
     }
     item_description = {
         ArcGisItemType.FEATURE_SERVICE: "Access information as an ArcGIS feature layer.",
         ArcGisItemType.OGCFEATURESERVER: "Access information as an ArcGIS OGC feature layer.",
         ArcGisItemType.MAP_SERVICE: "Access information as an ArcGIS raster tile layer.",
         ArcGisItemType.VECTOR_TILE_SERVICE: "Access information as an ArcGIS vector tile layer.",
+        ArcGisItemType.WEB_MAP: "Access information as an ArcGIS web map",
     }
 
     service_format = {
@@ -285,7 +292,7 @@ def _make_esri_distributions(arcgis_item: ArcGisItem) -> list[Distribution]:
     item_type = arcgis_item.properties.item_type
     item_host = "maps.arcgis.com" if arcgis_item.sharing_level == SharingLevel.EVERYONE else "bas.maps.arcgis.com"
 
-    return [
+    distributions = [
         Distribution(
             distributor=ESRI_DISTRIBUTOR,
             format=item_format[item_type],
@@ -297,20 +304,24 @@ def _make_esri_distributions(arcgis_item: ArcGisItem) -> list[Distribution]:
                     description=item_description[item_type],
                 )
             ),
-        ),
-        Distribution(
-            distributor=ESRI_DISTRIBUTOR,
-            format=service_format[item_type],
-            transfer_option=TransferOption(
-                online_resource=OnlineResource(
-                    href=arcgis_item.url,
-                    function=OnlineResourceFunctionCode.DOWNLOAD,
-                    title="ArcGIS Online",
-                    description=service_description[item_type],
-                )
-            ),
-        ),
+        )
     ]
+    if item_type != item_type.WEB_MAP:
+        distributions.append(
+            Distribution(
+                distributor=ESRI_DISTRIBUTOR,
+                format=service_format[item_type],
+                transfer_option=TransferOption(
+                    online_resource=OnlineResource(
+                        href=arcgis_item.url,
+                        function=OnlineResourceFunctionCode.DOWNLOAD,
+                        title="ArcGIS Online",
+                        description=service_description[item_type],
+                    )
+                ),
+            ),
+        )
+    return distributions
 
 
 def main() -> None:

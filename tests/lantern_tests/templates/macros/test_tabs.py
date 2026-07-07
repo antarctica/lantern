@@ -235,6 +235,12 @@ class TestDataTab:
                 ],
                 "ArcGIS Vector Tiles",
             ),
+            (
+                [
+                    "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+webmap",
+                ],
+                "ArcGIS Web Maps",
+            ),
         ],
     )
     def test_data_info_format(self, fx_item_cat_model_min: ItemCatalogue, value: list[str], text: str):

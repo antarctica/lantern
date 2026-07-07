@@ -122,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (query) {
         const encodedQuery = query.trim().replace(/\s+/g, '+');
-        toolsContainer.innerHTML = `<a class="${linkClasses}" href="/search?q=${encodedQuery}" target="_blank"><i class="${shareClasses}" aria-hidden="true"></i> Share results</a>`;
+        toolsContainer.innerHTML = `<a class="${linkClasses}" href="/search/?q=${encodedQuery}" target="_blank"><i class="${shareClasses}" aria-hidden="true"></i> Share results</a>`;
       } else {
         toolsContainer.innerHTML = '';
       }

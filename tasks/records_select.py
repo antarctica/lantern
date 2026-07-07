@@ -67,7 +67,7 @@ def _get_args(
         return path, branch, references, params
 
     path = Path(inquirer.path("Import path", path_type=InquirerPath.DIRECTORY, exists=True, default=path))
-    branch = inquirer.text(message="Branch", default=branch)
+    branch = inquirer.list_input(message="Branch", choices=cat.repo.select_branches())
 
     if cli_references:
         logger.info("Record references from command line arguments:")

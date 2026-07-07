@@ -106,11 +106,65 @@ class Distribution(ABC):
         ...
 
 
-class ArcGISDistribution(Distribution, ABC):
+class ArcGisDistribution(Distribution, ABC):
     """
     Base (abstract) ArcGIS distribution option.
 
     Represents common properties of ArcGIS distribution types supported by the BAS Data Catalogue.
+
+    Note: This class refers to ArcGIS resources generically as layers but covers other types, such as web maps.
+    """
+
+    def __init__(
+        self,
+        option: RecordDistribution,
+        restricted: bool = False,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(option, restricted, **kwargs)
+        self._layer = option
+        self._unrestricted_btn_variant = "primary"
+        self._unrestricted_btn_icon = "fa-regular fa-layer-plus"
+
+    @property
+    def label(self) -> str:
+        """Generic label based on layer type."""
+        return self.format_type.value
+
+    @property
+    def description(self) -> None:
+        """Not applicable as info box provides additional context."""
+        return None
+
+    @property
+    def size(self) -> str:
+        """Not applicable for services."""
+        return ""
+
+    @property
+    def item_link(self) -> Link:
+        """Link to portal item."""
+        href = self._layer.transfer_option.online_resource.href
+        return Link(value=href, href=href, external=True)
+
+    @property
+    def action(self) -> Link:
+        """Link to distribution without href due to using `access_trigger`."""
+        return Link(value="Add to GIS", href=None)
+
+    @property
+    def access_target(self) -> str:
+        """DOM selector of element showing more information on accessing layer."""
+        if not self.item_link.href:
+            raise TypeError() from None
+        return f"#item-data-info-{self._encode_url(self.item_link.href)}"
+
+
+class ArcGisServiceLayerDistribution(ArcGisDistribution, ABC):
+    """
+    Layer and service (abstract) ArcGIS distribution option.
+
+    Represents common logic for ArcGIS services with corresponding layers supported by the BAS Data Catalogue.
     """
 
     service_media_href = ""
@@ -123,10 +177,7 @@ class ArcGISDistribution(Distribution, ABC):
         **kwargs: Any,
     ) -> None:
         super().__init__(option, restricted, **kwargs)
-        self._layer = option
         self._service = self._get_service_option(other_options, self.service_media_href)
-        self._unrestricted_btn_variant = "primary"
-        self._unrestricted_btn_icon = "fa-regular fa-layer-plus"
 
     @staticmethod
     def _get_service_option(options: list[RecordDistribution], target_href: str) -> RecordDistribution:
@@ -153,42 +204,9 @@ class ArcGISDistribution(Distribution, ABC):
         return match and option.format.href == target_hrefs[0]
 
     @property
-    def label(self) -> str:
-        """Generic label based on layer type."""
-        return self.format_type.value
-
-    @property
-    def description(self) -> None:
-        """Not applicable as info box provides additional context."""
-        return None
-
-    @property
-    def size(self) -> str:
-        """Not applicable for services."""
-        return ""
-
-    @property
-    def item_link(self) -> Link:
-        """Link to portal item."""
-        href = self._layer.transfer_option.online_resource.href
-        return Link(value=href, href=href, external=True)
-
-    @property
     def service_endpoint(self) -> str:
         """Link to service endpoint."""
         return self._service.transfer_option.online_resource.href
-
-    @property
-    def action(self) -> Link:
-        """Link to distribution without href due to using `access_trigger`."""
-        return Link(value="Add to GIS", href=None)
-
-    @property
-    def access_target(self) -> str:
-        """DOM selector of element showing more information on accessing layer."""
-        if not self.item_link.href:
-            raise TypeError() from None
-        return f"#item-data-info-{self._encode_url(self.item_link.href)}"
 
 
 class FileDistribution(Distribution, ABC):
@@ -234,7 +252,7 @@ class FileDistribution(Distribution, ABC):
         return None
 
 
-class ArcGisFeatureLayer(ArcGISDistribution):
+class ArcGisFeatureLayer(ArcGisServiceLayerDistribution):
     """
     ArcGIS Feature Layer distribution option.
 
@@ -250,7 +268,9 @@ class ArcGisFeatureLayer(ArcGISDistribution):
             "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+feature",
             "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+feature",
         ]
-        return ArcGisFeatureLayer._matches(target_hrefs=target_hrefs, option=option, other_options=other_options)
+        return ArcGisServiceLayerDistribution._matches(
+            target_hrefs=target_hrefs, option=option, other_options=other_options
+        )
 
     @property
     def format_type(self) -> DistributionType:
@@ -258,7 +278,7 @@ class ArcGisFeatureLayer(ArcGISDistribution):
         return DistributionType.ARCGIS_FEATURE_LAYER
 
 
-class ArcGisOgcApiFeatures(ArcGISDistribution):
+class ArcGisOgcApiFeatures(ArcGisServiceLayerDistribution):
     """
     ArcGIS OGC API Features distribution option.
 
@@ -276,7 +296,9 @@ class ArcGisOgcApiFeatures(ArcGISDistribution):
             "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+feature+ogc",
             "https://metadata-resources.data.bas.ac.uk/media-types/x-service/ogc+api+feature",
         ]
-        return ArcGisFeatureLayer._matches(target_hrefs=target_hrefs, option=option, other_options=other_options)
+        return ArcGisServiceLayerDistribution._matches(
+            target_hrefs=target_hrefs, option=option, other_options=other_options
+        )
 
     @property
     def format_type(self) -> DistributionType:
@@ -284,7 +306,7 @@ class ArcGisOgcApiFeatures(ArcGISDistribution):
         return DistributionType.ARCGIS_OGC_FEATURE_LAYER
 
 
-class ArcGisVectorTileLayer(ArcGISDistribution):
+class ArcGisVectorTileLayer(ArcGisServiceLayerDistribution):
     """
     ArcGIS Vector Tile Layer distribution option.
 
@@ -300,7 +322,9 @@ class ArcGisVectorTileLayer(ArcGISDistribution):
             "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+tile+vector",
             "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+vector",
         ]
-        return ArcGisFeatureLayer._matches(target_hrefs=target_hrefs, option=option, other_options=other_options)
+        return ArcGisServiceLayerDistribution._matches(
+            target_hrefs=target_hrefs, option=option, other_options=other_options
+        )
 
     @property
     def format_type(self) -> DistributionType:
@@ -308,7 +332,7 @@ class ArcGisVectorTileLayer(ArcGISDistribution):
         return DistributionType.ARCGIS_VECTOR_TILE_LAYER
 
 
-class ArcGisRasterTileLayer(ArcGISDistribution):
+class ArcGisRasterTileLayer(ArcGisServiceLayerDistribution):
     """
     ArcGIS Raster Tile Layer distribution option.
 
@@ -324,12 +348,45 @@ class ArcGisRasterTileLayer(ArcGISDistribution):
             "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+tile+raster",
             "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+raster",
         ]
-        return ArcGisFeatureLayer._matches(target_hrefs=target_hrefs, option=option, other_options=other_options)
+        return ArcGisServiceLayerDistribution._matches(
+            target_hrefs=target_hrefs, option=option, other_options=other_options
+        )
 
     @property
     def format_type(self) -> DistributionType:
         """Format type."""
         return DistributionType.ARCGIS_RASTER_TILE_LAYER
+
+
+class ArcGisWebMap(ArcGisDistribution):
+    """
+    ArcGIS Web Map distribution option.
+
+    Does not include a service so cannot use ArcGIS base class.
+    """
+
+    def __init__(self, option: RecordDistribution, restricted: bool = False, **kwargs: Any) -> None:
+        super().__init__(option, restricted, **kwargs)
+        self._unrestricted_btn_variant = "primary"
+        self._unrestricted_btn_icon = "fa-regular fa-picture-in-picture"
+
+    @classmethod
+    def matches(cls, option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:
+        """Whether this class matches the distribution option."""
+        return (
+            option.format is not None
+            and option.format.href == "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+webmap"
+        )
+
+    @property
+    def format_type(self) -> DistributionType:
+        """Format type."""
+        return DistributionType.ARCGIS_WEBMAP
+
+    @property
+    def action(self) -> Link:
+        """Link to distribution without href due to using `access_trigger`."""
+        return Link(value="Open in GIS", href=None)
 
 
 class BasPublishedMap(Distribution):

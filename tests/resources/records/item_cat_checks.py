@@ -26,6 +26,7 @@ Item to test distribution related CheckType enum members:
 - open/regular files
 - ArcGIS Layers
 - ArcGIS Services
+- ArcGIS Web Maps
 - NORA file
 - BAS published maps purchasing
 - BAS SAN
@@ -124,6 +125,22 @@ arc_service_distributions = [
     for arc_service in arc_service_formats
 ]
 
+arcgis_webmap = Distribution(
+    distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
+    format=Format(
+        format="-",
+        href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+webmap",
+    ),
+    transfer_option=TransferOption(
+        online_resource=OnlineResource(
+            href="x",
+            function=OnlineResourceFunctionCode.INFORMATION,
+            title="-",
+            description="Verify distribution as an ArcGIS web map item.",
+        )
+    ),
+)
+
 nora_file = Distribution(
     distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
     format=Format(
@@ -189,6 +206,7 @@ record.distribution = Distributions(
         *file_distributions,
         *arc_layer_distributions,
         *arc_service_distributions,
+        arcgis_webmap,
         nora_file,
         map_purchase,
         san_access,

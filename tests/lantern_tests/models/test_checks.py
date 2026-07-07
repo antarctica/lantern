@@ -184,6 +184,17 @@ class TestDistributionChecks:
                 ],
             ),
             (
+                Distributions(
+                    [
+                        _make_dist_opt(
+                            href="x",
+                            format_href="https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+webmap",
+                        )
+                    ]
+                ),
+                [Check(type=CheckType.INFO_ARCGIS_WEBMAP, url="x", file_identifier="x")],
+            ),
+            (
                 Distributions([_make_dist_opt(href="https://nora.nerc.ac.uk/...")]),
                 [
                     Check(

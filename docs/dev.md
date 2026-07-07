@@ -400,11 +400,11 @@ Within this project, for each new item type:
 ### Adding distribution formats
 
 1. if needed, register new media-types under the Metadata Standards resources site (`metadata-resources.data.bas.ac.uk`)
-1. create a new class under `lantern.models.item.catalogue.distributions`, inheriting from `Distribution` or a relevant
-   subclass and tests under `tests.lantern_tests.models.item.catalogue.test_distributions`
-1. configure the new distribution format class:
+1. create a new class under `lantern.models.item.catalogue.distributions`:
+   - inheriting from `Distribution` or a relevant subclass
    - set the `matches` class method to determine an exclusive match for the distribution (typically via media types)
    - add an item to the `lantern.models.item.catalogue.enums.DistributionType` enum for the distribution type
+   - update tests under `tests.lantern_tests.models.item.catalogue.test_distributions`
 1. add the new class to the `lantern.models.item.catalogue.tabs.DataTab._supported_distributions` list
 1. if the distribution should use a collapsible information panel, edit the
    `src/lantern/resources/templates/_macros/_tabs/data.html.j2` macros in the [Site Templates](/docs/site.md#templates):
@@ -414,11 +414,14 @@ Within this project, for each new item type:
 1. include the new distribution format in [Test Records](#test-records):
    - `tests.resources.records/item_cat_data::record`
    - `tests.resources.records/item_cat_checks::record`
-1. include the distribution format in the `lantern.models.checks.DistributionChecks` class and add tests in
-   `tests.models.test_checks.TestDistributionChecks`
-1. if needed, add a new enum member for the check type in `lantern.models.checks.CheckType`
-1. if needed, add check logic to `lantern.checks.CheckRunner` and add tests
+1. include the distribution format in the `lantern.models.checks.DistributionChecks` class:
+   - if needed, add a new enum member for the check type in `lantern.models.checks.CheckType`
+   - update tests in `tests.models.test_checks.TestDistributionChecks`
+1. if needed, add check logic to `lantern.checks.CheckRunner`:
+   - update tests in `lantern_tests.test_checks.TestCheckRunner`
 1. update the [Item distribution options](/docs/models.md#catalogue-items-supported-distribution-options) docs
+1. if adding an ArcGIS distribution option:
+   - update `tasks.record_esri` (ensure descriptions are in sync with `item_cat_data` test record)
 
 ### Adding catalogue item tabs
 

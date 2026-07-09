@@ -296,9 +296,7 @@ class SiteMeta:
         self.html_schema_org = page_meta.schema_org
 
     @classmethod
-    def from_config(
-        cls, config: Config, env: SiteEnvironment, build_ref: str | None = None, **kwargs: Any
-    ) -> "SiteMeta":
+    def from_config(cls, config: Config, env: SiteEnvironment, build_ref: str | None = None, **kwargs: Any) -> SiteMeta:
         """
         Create a Site Metadata instance from an app Config instance, environment and additional properties.
 
@@ -372,7 +370,7 @@ class ExportMeta(SiteMeta):
     @classmethod
     def from_config(
         cls, config: Config, env: SiteEnvironment, build_ref: str | None = None, **kwargs: Any
-    ) -> "ExportMeta":
+    ) -> ExportMeta:
         """
         Create an Export Metadata instance from an app Config instance, environment and additional properties.
 

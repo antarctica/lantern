@@ -40,7 +40,7 @@ class FormattedDate:
     datetime: str
 
     @classmethod
-    def from_rec_date(cls: type[TFormattedDate], value: Date, relative_to: DateTime | None = None) -> "FormattedDate":
+    def from_rec_date(cls: type[TFormattedDate], value: Date, relative_to: DateTime | None = None) -> FormattedDate:
         """
         Format a Record date for use in HTML time elements.
 

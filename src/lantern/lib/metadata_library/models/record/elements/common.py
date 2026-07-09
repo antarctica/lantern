@@ -137,7 +137,7 @@ class Contact:
         contact["role"] = sorted(contact["role"])
         return contact
 
-    def eq_no_roles(self, other: "Contact") -> bool:
+    def eq_no_roles(self, other: Contact) -> bool:
         """Compare if contacts are the same if roles are ignored."""
         self_ = deepcopy(self)
         self_.role = set()
@@ -146,7 +146,7 @@ class Contact:
 
         return self_ == other_
 
-    def eq_contains_roles(self, other: "Contact") -> bool:
+    def eq_contains_roles(self, other: Contact) -> bool:
         """Compare if contacts are the same if contact contains all roles of another."""
         if other.role <= self.role:
             return self.eq_no_roles(other)
@@ -167,7 +167,7 @@ class Contacts(list[Contact]):
     """
 
     @classmethod
-    def structure(cls: type[TContacts], value: list[dict]) -> "Contacts":
+    def structure(cls: type[TContacts], value: list[dict]) -> Contacts:
         """
         Parse contacts from plain types.
 
@@ -196,7 +196,7 @@ class Contacts(list[Contact]):
         converter.register_unstructure_hook(Contact, lambda d: d.unstructure())
         return [converter.unstructure(contact) for contact in self]
 
-    def filter(self, roles: ContactRoleCode | list[ContactRoleCode]) -> "Contacts":
+    def filter(self, roles: ContactRoleCode | list[ContactRoleCode]) -> Contacts:
         """Filter contacts by role(s)."""
         roles: list[ContactRoleCode] = [roles] if isinstance(roles, ContactRoleCode) else roles
         return Contacts([contact for contact in self if any(role in contact.role for role in roles)])
@@ -274,7 +274,7 @@ class Date:
         return date.fromisoformat(date_str), None
 
     @classmethod
-    def structure(cls: type[TDate], value: str) -> "Date":
+    def structure(cls: type[TDate], value: str) -> Date:
         """
         Parse date from string.
 
@@ -343,7 +343,7 @@ class Dates:
         return {getattr(DateTypeCode, k.upper()): v for k, v in self._dict.items()}
 
     @classmethod
-    def structure(cls: type[TDates], value: dict[str, str]) -> "Dates":
+    def structure(cls: type[TDates], value: dict[str, str]) -> Dates:
         """
         Parse dates from plain types.
 
@@ -409,7 +409,7 @@ class Identifiers(list[Identifier]):
     """
 
     @classmethod
-    def structure(cls: type[TIdentifiers], value: list[dict]) -> "Identifiers":
+    def structure(cls: type[TIdentifiers], value: list[dict]) -> Identifiers:
         """
         Parse identifiers from plain types.
 
@@ -437,7 +437,7 @@ class Identifiers(list[Identifier]):
         converter = cattrs.Converter()
         return [converter.unstructure(identifier) for identifier in self]
 
-    def filter(self, namespace: str) -> "Identifiers":
+    def filter(self, namespace: str) -> Identifiers:
         """Filter identifiers by namespace."""
         return Identifiers([identifier for identifier in self if identifier.namespace == namespace])
 
@@ -508,7 +508,7 @@ class Citation:
         return converter
 
     @classmethod
-    def structure(cls: type[TCitation], value: dict) -> "Citation":
+    def structure(cls: type[TCitation], value: dict) -> Citation:
         """
         Parse Citation class from plain types.
 
@@ -609,7 +609,7 @@ class Constraints(list[Constraint]):
     """
 
     @classmethod
-    def structure(cls: type[TConstraints], value: list[dict]) -> "Constraints":
+    def structure(cls: type[TConstraints], value: list[dict]) -> Constraints:
         """
         Parse constraints from plain types.
 
@@ -643,7 +643,7 @@ class Constraints(list[Constraint]):
         href: str | None = None,
         types: ConstraintTypeCode | list[ConstraintTypeCode] | None = None,
         restrictions: ConstraintRestrictionCode | list[ConstraintRestrictionCode] | None = None,
-    ) -> "Constraints":
+    ) -> Constraints:
         """
         Filter constraints by href and/or type(s) and/or restriction(s).
 

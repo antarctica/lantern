@@ -57,14 +57,14 @@ class Contacts(RecordContacts):
     def __getitem__(self, index: SupportsIndex) -> Contact: ...  # pragma: no branch
 
     @overload
-    def __getitem__(self, index: slice) -> "Contacts": ...  # pragma: no branch
+    def __getitem__(self, index: slice) -> Contacts: ...  # pragma: no branch
 
-    def __getitem__(self, index: SupportsIndex | slice) -> "Contact | Contacts":
+    def __getitem__(self, index: SupportsIndex | slice) -> Contact | Contacts:
         """Get items as overloaded type."""
         result = super().__getitem__(index)
         return cast(Contacts, result) if isinstance(index, slice) else cast(Contact, result)
 
-    def filter(self, roles: ContactRoleCode | list[ContactRoleCode]) -> "Contacts":
+    def filter(self, roles: ContactRoleCode | list[ContactRoleCode]) -> Contacts:
         """Get items as overloaded type."""
         return cast(Contacts, super().filter(roles))
 
@@ -112,14 +112,14 @@ class Extents(RecordExtents):
     def __getitem__(self, index: SupportsIndex) -> Extent: ...  # pragma: no branch
 
     @overload
-    def __getitem__(self, index: slice) -> "Extents": ...  # pragma: no branch
+    def __getitem__(self, index: slice) -> Extents: ...  # pragma: no branch
 
-    def __getitem__(self, index: SupportsIndex | slice) -> "Extent | Extents":
+    def __getitem__(self, index: SupportsIndex | slice) -> Extent | Extents:
         """Get items as overloaded type."""
         result = super().__getitem__(index)
         return cast(Extents, result) if isinstance(index, slice) else cast(Extent, result)
 
-    def filter(self, identifier: str) -> "Extents":
+    def filter(self, identifier: str) -> Extents:
         """Get items as overloaded type."""
         return cast(Extents, super().filter(identifier))
 

@@ -60,7 +60,7 @@ class Metadata:
             self.date_stamp = datetime.now(tz=UTC).date()
 
     @classmethod
-    def structure(cls: type[TMetadata], value: dict) -> "Metadata":
+    def structure(cls: type[TMetadata], value: dict) -> Metadata:
         """
         Parse Metadata class from plain types.
 

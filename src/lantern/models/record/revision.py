@@ -51,7 +51,7 @@ class RecordRevision(Record):
         )
 
     @classmethod
-    def structure(cls: type[TRecordRevision], value: dict) -> "RecordRevision":
+    def structure(cls: type[TRecordRevision], value: dict) -> RecordRevision:
         """
         Create a Record Revision instance from plain types.
 
@@ -80,7 +80,7 @@ class RecordRevision(Record):
     @classmethod
     def loads(
         cls, value: dict, check_supported: bool = False, logger: logging.Logger | None = None, **kwargs: Any
-    ) -> "RecordRevision":
+    ) -> RecordRevision:
         """
         Create a Record Revision from a JSON schema instance and additional context.
 

@@ -76,7 +76,7 @@ class Aggregations(list[Aggregation]):
     """
 
     @classmethod
-    def structure(cls: type[TAggregations], value: list[dict]) -> "Aggregations":
+    def structure(cls: type[TAggregations], value: list[dict]) -> Aggregations:
         """
         Parse aggregations from plain types.
 
@@ -135,7 +135,7 @@ class Aggregations(list[Aggregation]):
         identifiers: str | list[str] | None = None,
         associations: AggregationAssociationCode | list[AggregationAssociationCode] | None = None,
         initiatives: AggregationInitiativeCode | list[AggregationInitiativeCode] | None = None,
-    ) -> "Aggregations":
+    ) -> Aggregations:
         """
         Filter aggregations by namespace, identifier and/or association(s) and/or initiative(s).
 
@@ -270,7 +270,7 @@ class Extents(list[Extent]):
     """
 
     @classmethod
-    def structure(cls: type[TExtents], value: list[dict]) -> "Extents":
+    def structure(cls: type[TExtents], value: list[dict]) -> Extents:
         """
         Parse extents from plain types.
 
@@ -310,7 +310,7 @@ class Extents(list[Extent]):
         converter.register_unstructure_hook(Dates, lambda d: d.unstructure())
         return [converter.unstructure(extent) for extent in self]
 
-    def filter(self, identifier: str) -> "Extents":
+    def filter(self, identifier: str) -> Extents:
         """
         Filter extents by identifier.
 
@@ -351,7 +351,7 @@ class GraphicOverviews(list[GraphicOverview]):
     """
 
     @classmethod
-    def structure(cls: type[TGraphicOverviews], value: list[dict]) -> "GraphicOverviews":
+    def structure(cls: type[TGraphicOverviews], value: list[dict]) -> GraphicOverviews:
         """
         Parse graphic overviews from plain types.
 
@@ -379,7 +379,7 @@ class GraphicOverviews(list[GraphicOverview]):
         converter = cattrs.Converter()
         return [converter.unstructure(overview) for overview in self]
 
-    def filter(self, identifier: str) -> "GraphicOverviews":
+    def filter(self, identifier: str) -> GraphicOverviews:
         """
         Filter graphic overviews by identifier.
 
@@ -453,7 +453,7 @@ class Identification(Citation):
         return {key: value[key] for key in order if key in value}
 
     @classmethod
-    def structure(cls: type[TIdentification], value: dict) -> "Identification":
+    def structure(cls: type[TIdentification], value: dict) -> Identification:
         """
         Parse Identification class from plain types.
 

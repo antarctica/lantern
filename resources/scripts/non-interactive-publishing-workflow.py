@@ -73,7 +73,7 @@ def _filter_records(
             if record.dumps() == existing_record.dumps():
                 logger.info(f"Record '{record.file_identifier}' is the same as stored version, skipping.")
                 continue
-        except (RecordNotFoundError, GitlabGetError):
+        except RecordNotFoundError, GitlabGetError:
             # GitlabGetError returned if branch doesn't exist
             pass
         records_[_path] = record

@@ -240,7 +240,7 @@ class RecordsReport:
     def _data(self) -> dict[str, dict]:
         """Changes for record as a dict indexed by record file identifier."""
         return {
-            c.record.file_identifier: {
+            c.record.file_identifier or "": {
                 "id": c.record.file_identifier,
                 "type": c.record.hierarchy_level.name,
                 "title": c.record.identification.title,
@@ -248,7 +248,7 @@ class RecordsReport:
                 "changes": c.changes,
             }
             for c in self._records
-        }  # ty:ignore[invalid-return-type]
+        }
 
     @property
     def _context(self) -> dict[str, str | dict]:
@@ -368,7 +368,7 @@ class RecordsIO:
                     )
                 )
 
-    def list(self) -> None:
+    def list_records(self) -> None:
         """List or summarise loaded records."""
         if len(self.records) < 20:
             self.logger.info("Loaded records:")
@@ -407,7 +407,7 @@ class Upgradamatron:
 
     def list(self) -> None:
         """List or summarise loaded records."""
-        self.io.list()
+        self.io.list_records()
 
     def run(self) -> None:
         """Upgrade and validate records."""

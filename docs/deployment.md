@@ -78,6 +78,9 @@ Applies to:
     ([Records Repository](/docs/infrastructure.md#gitlab)
   - for [Item Enquires](/docs/setup.md#gitlab-item-enquires) ([Power Automate](/docs/infrastructure.md#power-automate))
 
+> [!TIP]
+> This does not apply to PATs used in [Development Publishing](/docs/dev.md#development-publishing).
+
 Automatic rotation is configured in [IaC](/docs/infrastructure.md#infrastructure-as-code), which should update a
 1Password item for use in an [Ansible Vault](#ansible-playbook) or other system [1].
 

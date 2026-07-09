@@ -287,6 +287,11 @@ addopts = "--strict-markers --random-order -x --ff -n 0"
 markers = [
     "cov: coverage checks (deselect with '-m \"not cov\"')",
 ]
+filterwarnings = [
+    # SQLite usage in coverage tests
+    "ignore:unclosed database.*:ResourceWarning:^(?!.*lantern).*$",
+    "ignore:unclosed database.*:ResourceWarning:environs",
+]
 
 [tool.coverage.report]
 skip_empty = true

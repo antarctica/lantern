@@ -978,7 +978,7 @@ def fx_cf_exporter(
 
 
 @pytest.fixture()
-def fx_reset_site_singletons() -> Generator[None, None, None]:
+def fx_reset_site_singletons() -> Generator[None]:
     """Reset singletons for test isolation."""
     mod = importlib.import_module("lantern.site")
     mod._STORE_SINGLETON = None

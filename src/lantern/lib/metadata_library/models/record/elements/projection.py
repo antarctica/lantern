@@ -43,7 +43,7 @@ class ReferenceSystemInfo:
     authority: Citation | None = None
 
     @classmethod
-    def structure(cls: type[TProjection], value: dict) -> "ReferenceSystemInfo":
+    def structure(cls: type[TProjection], value: dict) -> ReferenceSystemInfo:
         """
         Parse ReferenceSystemInfo class from plain types.
 

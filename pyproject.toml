@@ -7,7 +7,7 @@ license = "MIT"
 authors = [
     { name = "Felix Fennell", email = "felnne@bas.ac.uk" }
 ]
-requires-python = ">=3.11"
+requires-python = ">=3.14"
 dependencies = [
     "algoliasearch>=4.40.1",
     "authlib>=1.7.1",
@@ -155,7 +155,7 @@ serve = { cmd = "python -m tasks.serve", help = "Serve local catalogue site" }
 [tool.ruff]
 src = ["src"]
 line-length = 120
-target-version = "py311"
+target-version = "py314"
 
 [tool.ruff.lint]
 #   A | builtins (variables named after builtin names)

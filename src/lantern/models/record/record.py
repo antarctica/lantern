@@ -36,7 +36,7 @@ class Record(RecordBase):
             raise ValueError(msg)
 
     @classmethod
-    def structure(cls: type[TRecord], value: dict) -> "Record":
+    def structure(cls: type[TRecord], value: dict) -> Record:
         """
         Create a Record instance from plain types.
 
@@ -53,7 +53,7 @@ class Record(RecordBase):
     @classmethod
     def loads(
         cls, value: dict, check_supported: bool = False, logger: logging.Logger | None = None, **kwargs: Any
-    ) -> "Record":
+    ) -> Record:
         """
         Create a Record from a JSON schema instance and additional context.
 

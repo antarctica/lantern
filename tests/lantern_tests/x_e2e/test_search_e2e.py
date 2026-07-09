@@ -20,7 +20,7 @@ class TestSearch:
                 request_data = json.loads(route.request.post_data)
                 if "requests" in request_data and len(request_data["requests"]) > 0:
                     query = request_data["requests"][0].get("query")
-            except (json.JSONDecodeError, TypeError, IndexError, KeyError):
+            except json.JSONDecodeError, TypeError, IndexError, KeyError:
                 pass
 
         all_results = {
@@ -180,7 +180,7 @@ class TestSearch:
 
         # expect share results link to now show
         expect(share_link).to_be_visible()
-        expect(share_link).to_have_attribute("href", f"/search?q={SEARCH_TERMS.replace(' ', '+')}")
+        expect(share_link).to_have_attribute("href", f"/search/?q={SEARCH_TERMS.replace(' ', '+')}")
 
     def test_parameter(self, fx_exporter_static_server: Popen, fx_static_server_url: str, page: Page):
         """

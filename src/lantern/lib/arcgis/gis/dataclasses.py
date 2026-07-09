@@ -209,7 +209,7 @@ class Item:
         return self_attrs == other_attrs
 
     @classmethod
-    def from_item_json(cls, data: dict, metadata: str, thumbnail: tuple[str, str] | None) -> "Item":
+    def from_item_json(cls, data: dict, metadata: str, thumbnail: tuple[str, str] | None) -> Item:
         """
         Create instance from JSON data returned by `.../content/items/{item_id}` API endpoints.
 

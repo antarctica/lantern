@@ -219,7 +219,7 @@ class RecordMagic(Record):
         logger: logging.Logger | None = None,
         admin_keys: AdministrationKeys | None = None,
         **kwargs: Any,
-    ) -> "RecordMagic":
+    ) -> RecordMagic:
         """
         Create a Record from a dict loaded from a JSON schema instance.
 
@@ -295,7 +295,7 @@ class RecordMagicOpen(RecordMagic):
         logger: logging.Logger | None = None,
         admin_keys: AdministrationKeys | None = None,
         **kwargs: Any,
-    ) -> "RecordMagicOpen":
+    ) -> RecordMagicOpen:
         """Create an unrestricted Record from a dict loaded from a JSON schema instance."""
         record = super().loads(
             value=value, check_supported=check_supported, logger=logger, admin_keys=admin_keys, **kwargs

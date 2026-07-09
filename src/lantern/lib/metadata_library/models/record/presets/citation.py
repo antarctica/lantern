@@ -36,7 +36,7 @@ def make_magic_citation(
         self_identifier = next(identifier for identifier in identifiers if identifier.namespace == CATALOGUE_NAMESPACE)
         if isinstance(self_identifier.href, str):
             href = self_identifier.href.replace("lantern.", "")
-    except (StopIteration, TypeError):
+    except StopIteration, TypeError:
         pass
     reference = f"[{href}]({href})"
 

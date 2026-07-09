@@ -105,7 +105,7 @@ class Distributions(list[Distribution]):
     """
 
     @classmethod
-    def structure(cls: type[TDistributions], value: list[dict]) -> "Distributions":
+    def structure(cls: type[TDistributions], value: list[dict]) -> Distributions:
         """
         Parse contacts from plain types.
 

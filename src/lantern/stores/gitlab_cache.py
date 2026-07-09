@@ -662,7 +662,7 @@ class GitLabCachedStore(GitLabStore):
         self._get_hashes_callable = self._cache.get_hashes
 
     @classmethod
-    def from_gitlab_store(cls, store: GitLabStore, parallel_jobs: int, cache_dir: Path) -> "GitLabCachedStore":
+    def from_gitlab_store(cls, store: GitLabStore, parallel_jobs: int, cache_dir: Path) -> GitLabCachedStore:
         """Create cached store from base GitLab store."""
         return GitLabCachedStore(
             logger=store._logger,

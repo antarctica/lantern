@@ -42,7 +42,7 @@ class RecordSchema(Enum):
     MAGIC_ADMIN_V1 = "magic_administration_v1"
 
     @staticmethod
-    def map_href(href: str) -> "RecordSchema":
+    def map_href(href: str) -> RecordSchema:
         """
         Map a schema href to a RecordSchema enum.
 
@@ -58,7 +58,7 @@ class RecordSchema(Enum):
         return mapping[href]
 
     @staticmethod
-    def get_schema_contents(schema: "RecordSchema") -> dict:
+    def get_schema_contents(schema: RecordSchema) -> dict:
         """
         Get contents of schema.
 
@@ -227,7 +227,7 @@ class Record:
         return converter
 
     @classmethod
-    def structure(cls: type[TRecord], value: dict) -> "Record":
+    def structure(cls: type[TRecord], value: dict) -> Record:
         """
         Create a Record instance from plain types.
 
@@ -285,7 +285,7 @@ class Record:
     @classmethod
     def loads(
         cls, value: dict, check_supported: bool = False, logger: logging.Logger | None = None, **kwargs: Any
-    ) -> "Record":
+    ) -> Record:
         """
         Create a Record from a JSON schema instance.
 
@@ -302,7 +302,7 @@ class Record:
         return converter.structure(value, cls)
 
     @staticmethod
-    def _strip_admin_meta(model: "Record") -> None:
+    def _strip_admin_meta(model: Record) -> None:
         """
         Remove any administration metadata element included in a record.
 
@@ -325,7 +325,7 @@ class Record:
         model.identification.supplemental_information = json.dumps(kv)
 
     @staticmethod
-    def _strip_admin_conformance(model: "Record") -> None:
+    def _strip_admin_conformance(model: Record) -> None:
         """Remove any administration profile domain conformance element included in a record."""
         check_url = "https://metadata-standards.data.bas.ac.uk/profiles/magic-administration/"  # non-versioned
         for idx, dc in enumerate(model.data_quality.domain_consistency):
@@ -336,7 +336,7 @@ class Record:
             model.data_quality.domain_consistency.pop(idx)
 
     @staticmethod
-    def _strip_admin(model: "Record") -> None:
+    def _strip_admin(model: Record) -> None:
         """Remove any administration metadata and associated domain conformance included in a record."""
         Record._strip_admin_meta(model)
         Record._strip_admin_conformance(model)

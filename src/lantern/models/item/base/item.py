@@ -255,7 +255,7 @@ class ItemBase(ItemCore):
         """
         try:
             return get_kv(self.record)
-        except (ValueError, TypeError):
+        except ValueError, TypeError:
             return {}
 
     @property

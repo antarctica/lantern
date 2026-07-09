@@ -59,7 +59,7 @@ def _run_job(
     log_level: int,
     meta: ExportMeta,
     store: StoreBase,
-    job: "SiteJob",
+    job: SiteJob,
 ) -> list[SiteContent] | list[Check] | list[str]:
     """
     Generate content or checks from an Output.

@@ -83,7 +83,7 @@ def get_gitlab_source(logger: logging.Logger, cat: BasCatalogue, action: str) ->
     return branch
 
 
-def _parse_configs(search_path: Path, glob_pattern: str | None = None) -> Generator[tuple[dict, Path], None, None]:
+def _parse_configs(search_path: Path, glob_pattern: str | None = None) -> Generator[tuple[dict, Path]]:
     """
     Try to load any record configurations from JSON files from a directory.
 

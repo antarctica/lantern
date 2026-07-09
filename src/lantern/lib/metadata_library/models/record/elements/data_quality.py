@@ -55,7 +55,7 @@ class DomainConsistencies(list[DomainConsistency]):
     """
 
     @classmethod
-    def structure(cls: type[TDomainConsistencies], value: list[dict]) -> "DomainConsistencies":
+    def structure(cls: type[TDomainConsistencies], value: list[dict]) -> DomainConsistencies:
         """
         Parse domain consistency elements from plain types.
 
@@ -85,7 +85,7 @@ class DomainConsistencies(list[DomainConsistency]):
         converter.register_unstructure_hook(Citation, lambda d: d.unstructure())
         return [converter.unstructure(identifier) for identifier in self]
 
-    def filter(self, href: str) -> "DomainConsistencies":
+    def filter(self, href: str) -> DomainConsistencies:
         """Filter domain consistency elements by specification href."""
         return DomainConsistencies([domain for domain in self if domain.specification.href == href])
 
@@ -117,7 +117,7 @@ class DataQuality:
     domain_consistency: DomainConsistencies = field(default_factory=DomainConsistencies)
 
     @classmethod
-    def structure(cls: type[TDataQuality], value: dict) -> "DataQuality":
+    def structure(cls: type[TDataQuality], value: dict) -> DataQuality:
         """
         Parse DataQuality class from plain types.
 

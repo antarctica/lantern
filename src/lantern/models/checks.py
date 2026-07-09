@@ -88,7 +88,7 @@ class Check:
     result_output: str | None = None
 
     @classmethod
-    def from_site_content(cls, content: SiteContent, check_type: CheckType, base_url: str) -> "Check":
+    def from_site_content(cls, content: SiteContent, check_type: CheckType, base_url: str) -> Check:
         """Create check from site content."""
         status = HTTPStatus.OK
         if isinstance(content, SiteRedirect):

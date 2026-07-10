@@ -129,6 +129,25 @@ SHOULD be used over margins where possible to limit `the number of classes.
 
 Consideration SHOULD be given the user's colour preference by providing a dark mode using the Tailwind `dark:` modifier.
 
+#### Print styles
+
+Some consideration SHOULD be given to users printing pages using the Tailwind `print:` modifier.
+
+> [!Note]
+> A print style set in `main.css.j2` will show the href for any links (except for fragment links to item tabs).
+>
+> All item tabs will be shown in a linear form.
+
+Conventions:
+
+- content that can't be used or doesn't make sense when printed SHOULD be hidden using `print:hidden`
+- colours SHOULD be simplified to black text with no background
+
+> [!TIP]
+> The print modifier can be combined with, and takes precedence over, responsive modifiers.
+>
+> E.g. for `class="block lg:inline print:block"`, the element will show as a block on mobile AND when printed.
+
 #### Colour audit
 
 A [Colour Audit](/docs/supplemental/colour-audit.md) and reference is manually maintained to coordinate and constrain

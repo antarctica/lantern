@@ -132,16 +132,16 @@
 {% endmacro %}
 
 {% macro header_navbar() %}
-  <nav id="site-nav" class="lg:p-4 bg-blue-500 text-white">
+  <nav id="site-nav" class="lg:p-4 bg-blue-500 text-white print:bg-transparent print:text-black">
     <div class="{{ com.container_classes() }} py-4 space-y-4 lg:space-y-0 lg:flex lg:gap-8 lg:justify-between lg:items-end">
       <div class="flex-none flex justify-center lg:justify-start items-center space-x-2">
         <a id="site-title" class="block {{ com.font_bolder_classes() }} text-lg text-center lg:text-left lg:text-2xl" href="/home">BAS Data Catalogue</a>
-        <span id="site-dev-phase" class="hidden lg:block uppercase text-sm {{ com.font_bolder_classes() }} bg-pink-500 text-white dark:text-grey-950 py-1 px-2" aria-hidden="true">alpha</span>
+        <span id="site-dev-phase" class="hidden lg:block print:hidden uppercase text-sm {{ com.font_bolder_classes() }} bg-pink-500 text-white dark:text-grey-950 py-1 px-2" aria-hidden="true">alpha</span>
       </div>
-      <div class="flex-1 hidden lg:flex items-center gap-4 justify-start">
+      <div class="flex-1 hidden lg:flex print:hidden items-center gap-4 justify-start">
         {{ primary_nav() }}
       </div>
-      <div class="flex-1 self-center justify-center lg:justify-end">
+      <div class="flex-1 self-center justify-center lg:justify-end print:hidden">
         <a class="block text-center lg:text-right hover:underline" href="/search">
           <i class="{{ com.search_i_classes() }}" aria-hidden="true"></i> Search
         </a>
@@ -196,7 +196,7 @@
 {% endmacro %}
 
 {% macro footer(data) %}
-  <footer id="site-footer" class="bg-grey-950 dark:bg-black text-grey-100 text-center">
+  <footer id="site-footer" class="bg-grey-950 dark:bg-black text-grey-100 print:bg-transparent print:text-black text-center print:text-left">
     <div class="{{ com.container_classes() }} px-2 py-8 space-y-8">
       {{ footer_basics(data.fallback_email) }}
       <div>
@@ -211,7 +211,7 @@
 {% endmacro %}
 
 {% macro footer_basics(fallback_email) %}
-  <div class="flex flex-col justify-between space-y-4 lg:space-y-0 lg:flex-row">
+  <div class="flex flex-col justify-between space-y-4 lg:space-y-0 lg:flex-row print:hidden">
     {{ com.feedback_trigger(classes=com.footer_link_classes(), fallback=fallback_email, text='Is something wrong with this page?') }}
     <a class="{{ com.footer_link_classes() }} lg:text-right" href="#{{ com.back_to_top_id() }}">
       Back to top <i class="fa-regular fa-arrow-up" aria-hidden="true"></i>
@@ -220,9 +220,9 @@
 {% endmacro %}
 
 {% macro footer_nav() %}
-  <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:text-left">
+  <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 lg:text-left print:grid-cols-1">
     {% for section_title, link in secondary_nav_items.items() %}
-      <section class="space-y-4 {% if loop.last %}lg:text-right{% endif %}">
+      <section class="space-y-4 {% if loop.last %}lg:text-right print:text-left{% endif %}">
         <header class="{{ com.font_bolder_classes() }}">{{ section_title }}</header>
         <ul class="space-y-2">
           {% for link in link %}
@@ -245,12 +245,12 @@
 {% endmacro %}
 
 {% macro footer_legal(copyright_year) %}
-  <div class="flex flex-col justify-between space-y-4 lg:space-y-0 lg:flex-row">
-    <div class="lg:text-left lg:flex lg:space-x-2">
-      <span class="block lg:inline">Part of <a class="{{ com.footer_link_classes() }}" href="https://www.bas.ac.uk" target="_blank">British Antarctic Survey {{ com.ext_link_i() }}</a><span class="hidden lg:inline">.</span></span>
-      <span class="block lg:inline">© <a class="{{ com.footer_link_classes() }}" href="https://www.ukri.org" target="_blank">UK Research and Innovation {{ com.ext_link_i() }}</a> {{ copyright_year }}<span class="hidden lg:inline">.</span></span>
+  <div class="flex flex-col justify-between space-y-4 lg:space-y-0 lg:flex-row print:flex-col print:space-y-2">
+    <div class="lg:text-left lg:flex lg:space-x-2 print:flex-col print:justify-start print:space-x-0 print:space-y-2">
+      <span class="block lg:inline print:block">Part of <a class="{{ com.footer_link_classes() }}" href="https://www.bas.ac.uk" target="_blank">British Antarctic Survey {{ com.ext_link_i() }}</a><span class="hidden lg:inline">.</span></span>
+      <span class="block lg:inline print:block">© <a class="{{ com.footer_link_classes() }}" href="https://www.ukri.org" target="_blank">UK Research and Innovation {{ com.ext_link_i() }}</a> {{ copyright_year }}<span class="hidden lg:inline">.</span></span>
     </div>
-    <ul class="flex justify-center space-x-2 lg:justify-end">
+    <ul class="flex justify-center space-x-2 lg:justify-end print:flex-col print:justify-start print:space-x-0 print:space-y-2">
       <li><a class="{{ com.footer_link_classes() }}" href="/legal/accessibility">Accessibility</a></li>
       <li><a class="{{ com.footer_link_classes() }}" href="/legal/cookies">Cookies</a></li>
       <li><a class="{{ com.footer_link_classes() }}" href="/legal/copyright">Copyright</a></li>

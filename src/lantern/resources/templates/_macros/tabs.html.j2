@@ -7,7 +7,7 @@
 {% import '_macros/_tabs/admin.html.j2' as admin_tab %}
 
 {% macro items(data) %}
-  <section id="tab-content-items" class="grid grid-cols-1 lg:grid-cols-2 gap-y-4 lg:gap-x-4">
+  <section id="tab-content-items" class="grid grid-cols-1 lg:grid-cols-2 print:grid-cols-1 gap-y-4 lg:gap-x-4">
     {% for item in data.items %}
       {{ com.item_summary(item) }}
     {% endfor %}
@@ -17,7 +17,7 @@
 {% macro data(data) %}
   <section id="tab-content-data">
     {% if data.restricted %}
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-y-4 gap-x-4">
+      <div class="grid grid-cols-1 lg:grid-cols-2 print:grid-cols-1 gap-y-4 gap-x-4">
         <div class="space-y-4">
           {% for item in data.items %}
             {{ data_tab.item(item) }}
@@ -48,7 +48,7 @@
 {% endmacro %}
 
 {% macro authors(data) %}
-  <section id="tab-content-authors" class="grid grid-cols-1 lg:grid-cols-2 gap-y-4 lg:gap-x-4">
+  <section id="tab-content-authors" class="grid grid-cols-1 lg:grid-cols-2 print:grid-cols-1 gap-y-4 lg:gap-x-4">
     {% for item in data.items %}
       {{ author(item) }}
     {% endfor %}
@@ -79,7 +79,7 @@
 
 {% macro extent(data) %}
   <section id="tab-content-extent">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-y-4 lg:gap-x-4">
+    <div class="grid grid-cols-1 lg:grid-cols-2 print:grid-cols-1 gap-y-4 lg:gap-x-4">
       {% if data.extents %}
         {% for extent in data.extents %}
           <div class="col-span-1 space-y-8">
@@ -114,7 +114,7 @@
     <section id="related-{{ data.id }}" class="space-y-8">
       {% set items = data.related if data.related is iterable else [data.related] %}
       {% call com.item_title() %}{{ data.title }}{% endcall %}
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-y-4 lg:gap-x-4">
+      <div class="grid grid-cols-1 lg:grid-cols-2 print:grid-cols-1 gap-y-4 lg:gap-x-4">
         {% for item in items %}
           {{ com.item_summary(item) }}
         {% endfor %}
@@ -129,6 +129,8 @@
     {{ related_section({'id': 'peer-opposite-side', 'title': 'Opposite side of', 'related': data.peer_opposite_side}) }}
     {{ related_section({'id': 'peer-items', 'title': 'Related to', 'related': data.peer_cross_reference}) }}
     {{ related_section({'id': 'peer-supersedes', 'title': 'Replaces', 'related': data.peer_supersedes}) }}
+    {{ related_section({'id': 'parent-maps', 'title': 'Used as a layer within these maps', 'related': data.parent_maps }) }}
+    {{ related_section({'id': 'map-layers', 'title': 'Contains these items as layers', 'related': data.map_layers }) }}
     {{ related_section({'id': 'parent-collections', 'title': 'Part of these collections', 'related': data.parent_collections }) }}
     {{ related_section({'id': 'parent-projects', 'title': 'Part of these projects', 'related': data.parent_projects }) }}
     {{ related_section({'id': 'peer-collections', 'title': 'Related collections', 'related': data.peer_collections }) }}
@@ -138,7 +140,7 @@
 
 {% macro info(data) %}
   <section id="tab-content-info">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-y-4 lg:gap-x-4">
+    <div class="grid grid-cols-1 lg:grid-cols-2 print:grid-cols-1 gap-y-4 lg:gap-x-4">
       <div class="col-span-1 space-y-8">
         {{ info_tab.item(data) }}
       </div>
@@ -154,8 +156,8 @@
     {% call com.alert(shape='side', variant='blue') %}
       Contact the {% call com.strong() %}{{ data.team }}{% endcall %} with any questions or comments about this item.
     {% endcall %}
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-y-4 lg:gap-x-4">
-      <div class="col-span-1 space-y-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 print:grid-cols-1 gap-y-4 lg:gap-x-4">
+      <div class="col-span-1 space-y-8 print:hidden">
         {{ contact_tab.form(data) }}
       </div>
       <div class="col-span-1 space-y-8">
@@ -168,7 +170,7 @@
 
 {% macro admin(data) %}
   <section id="tab-content-admin">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-y-4 lg:gap-x-4">
+    <div class="grid grid-cols-1 lg:grid-cols-2 print:grid-cols-1 gap-y-4 lg:gap-x-4">
       <div class="col-span-1 space-y-8">
         {{ admin_tab.item(data) }}
       </div>

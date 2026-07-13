@@ -16,6 +16,7 @@ from lantern.lib.metadata_library.models.record.elements.identification import (
 )
 from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,
+    AggregationInitiativeCode,
     ConstraintRestrictionCode,
     ConstraintTypeCode,
     HierarchyLevelCode,
@@ -496,13 +497,14 @@ class ItemSummaryBase(ItemCore):
     @property
     def children(self) -> str | None:
         """
-        Count of items contained within item.
+        Formatted count of items contained within item.
 
         E.g. For collections, the number of items it contains.
+
+        Excludes layer relationships (i.e. a map contains x items as layers).
         """
-        count = len(
-            self.record.identification.aggregations.filter(associations=AggregationAssociationCode.IS_COMPOSED_OF)
-        )
+        c = self.record.identification.aggregations.filter(associations=AggregationAssociationCode.IS_COMPOSED_OF)
+        count = len([a for a in c if a.initiative_type != AggregationInitiativeCode.MAP_LAYER])
         if count < 1:
             return None
 

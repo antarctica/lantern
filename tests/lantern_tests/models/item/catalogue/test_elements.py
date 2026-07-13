@@ -279,6 +279,50 @@ class TestAggregations:
 
         assert aggregations.parent_printed_map is not None
 
+    def test_map_products(self, fx_admin_meta_keys: AdministrationKeys):
+        """Can get any map based items item is a layer within."""
+        record_aggregations = RecordAggregations(
+            [
+                Aggregation(
+                    identifier=Identifier(identifier="x", href="x", namespace=CATALOGUE_NAMESPACE),
+                    association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
+                    initiative_type=AggregationInitiativeCode.MAP_LAYER,
+                ),
+                Aggregation(
+                    identifier=Identifier(identifier="y", href="y", namespace=CATALOGUE_NAMESPACE),
+                    association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
+                    initiative_type=AggregationInitiativeCode.MAP_LAYER,
+                ),
+            ]
+        )
+        aggregations = Aggregations(
+            admin_meta_keys=fx_admin_meta_keys, aggregations=record_aggregations, select_record=_select_record
+        )
+
+        assert len(aggregations.parent_maps) == len(record_aggregations)
+
+    def test_map_layers(self, fx_admin_meta_keys: AdministrationKeys):
+        """Can get any items forming layers within a map based item."""
+        record_aggregations = RecordAggregations(
+            [
+                Aggregation(
+                    identifier=Identifier(identifier="x", href="x", namespace=CATALOGUE_NAMESPACE),
+                    association_type=AggregationAssociationCode.IS_COMPOSED_OF,
+                    initiative_type=AggregationInitiativeCode.MAP_LAYER,
+                ),
+                Aggregation(
+                    identifier=Identifier(identifier="y", href="y", namespace=CATALOGUE_NAMESPACE),
+                    association_type=AggregationAssociationCode.IS_COMPOSED_OF,
+                    initiative_type=AggregationInitiativeCode.MAP_LAYER,
+                ),
+            ]
+        )
+        aggregations = Aggregations(
+            admin_meta_keys=fx_admin_meta_keys, aggregations=record_aggregations, select_record=_select_record
+        )
+
+        assert len(aggregations.map_layers) == len(record_aggregations)
+
 
 class TestDates:
     """Test Catalogue Item dates."""

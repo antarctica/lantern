@@ -924,6 +924,70 @@ class TestRelatedTab:
                     Aggregation(
                         identifier=Identifier(identifier="x", href="x", namespace="x"),
                         association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
+                        initiative_type=AggregationInitiativeCode.MAP_LAYER,
+                    ),
+                ]
+            ),
+        ],
+    )
+    def test_parent_maps(self, fx_item_cat_model_min: ItemCatalogue, value: Aggregations):
+        """
+        Can get optional items item is used as a layer with expected values from item.
+
+        Detailed item summary tests are run in common macro tests.
+        """
+        fx_item_cat_model_min._record.identification.aggregations = value
+        expected = fx_item_cat_model_min._related.parent_maps
+        html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
+
+        replaced = html.select_one("#related-parent-maps")
+        if len(expected) > 0:
+            for item in expected:
+                assert replaced.select_one(f"a[href='{item._href}']") is not None
+        else:
+            assert replaced is None
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            Aggregations([]),
+            Aggregations(
+                [
+                    Aggregation(
+                        identifier=Identifier(identifier="x", href="x", namespace="x"),
+                        association_type=AggregationAssociationCode.IS_COMPOSED_OF,
+                        initiative_type=AggregationInitiativeCode.MAP_LAYER,
+                    ),
+                ]
+            ),
+        ],
+    )
+    def test_map_layers(self, fx_item_cat_model_min: ItemCatalogue, value: Aggregations):
+        """
+        Can get optional items item includes as layers with expected values from item.
+
+        Detailed item summary tests are run in common macro tests.
+        """
+        fx_item_cat_model_min._record.identification.aggregations = value
+        expected = fx_item_cat_model_min._related.map_layers
+        html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
+
+        replaced = html.select_one("#related-map-layers")
+        if len(expected) > 0:
+            for item in expected:
+                assert replaced.select_one(f"a[href='{item._href}']") is not None
+        else:
+            assert replaced is None
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            Aggregations([]),
+            Aggregations(
+                [
+                    Aggregation(
+                        identifier=Identifier(identifier="x", href="x", namespace="x"),
+                        association_type=AggregationAssociationCode.LARGER_WORK_CITATION,
                         initiative_type=AggregationInitiativeCode.COLLECTION,
                     ),
                     Aggregation(

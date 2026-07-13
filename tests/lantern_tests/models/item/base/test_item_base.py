@@ -811,3 +811,16 @@ class TestItemSummaryBase:
             fx_item_summary_base_model_min.record.identification.aggregations.append(aggregation)
 
         assert fx_item_summary_base_model_min.children == expected
+
+    def test_children_not_layers(self, fx_item_summary_base_model_min: ItemSummaryBase):
+        """Cannot get formatted count of excluded parent -> child layer relations."""
+        fx_item_summary_base_model_min.record.identification.aggregations = Aggregations(
+            [
+                Aggregation(
+                    identifier=Identifier(identifier="x", namespace="x"),
+                    association_type=AggregationAssociationCode.IS_COMPOSED_OF,
+                    initiative_type=AggregationInitiativeCode.MAP_LAYER,
+                )
+            ]
+        )
+        assert fx_item_summary_base_model_min.children is None

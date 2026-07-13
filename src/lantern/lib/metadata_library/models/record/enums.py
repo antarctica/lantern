@@ -58,6 +58,7 @@ class AggregationInitiativeCode(Enum):
     SCIENCE_PAPER = "sciencePaper"
     USER_GUIDE = "userGuide"
     PAPER_MAP = "paperMap"  # local code
+    MAP_LAYER = "mapLayer"  # local code
 
 
 class ContactRoleCode(Enum):

@@ -348,6 +348,22 @@ class Aggregations:
         )
         return items[0] if items else None
 
+    @property
+    def parent_maps(self) -> list[ItemCatalogueSummary]:
+        """Map based items the item forms a layer within."""
+        return self._filter(
+            associations=AggregationAssociationCode.LARGER_WORK_CITATION,
+            initiatives=[AggregationInitiativeCode.MAP_LAYER],
+        )
+
+    @property
+    def map_layers(self) -> list[ItemCatalogueSummary]:
+        """Items that comprise layers within a map based item."""
+        return self._filter(
+            associations=AggregationAssociationCode.IS_COMPOSED_OF,
+            initiatives=[AggregationInitiativeCode.MAP_LAYER],
+        )
+
 
 class Dates(RecordDates):
     """

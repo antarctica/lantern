@@ -348,7 +348,10 @@ types in records:
 Within this project, for each new item type:
 
 - if a new local level, update the `lantern.lib.metadata_library.models.record.enums.HierarchyLevelCode` enum
-- update the `lantern.models.item.base.enums.ResourceTypeLabel` enum to set a formatted value/label
+- set a formatted value/label in:
+  - the `lantern.models.item.base.enums.ResourceTypeLabel` enum
+  - `src/lantern/resources/templates/_assets/json/openapi.json.j2`
+    (`components.schemas.publicWebsiteSearchItems.content.type` enum)
 - update the `lantern.models.item.catalogue.enums.ResourceTypeIcon` enum to set an accompanying icon
 - if the new type is a 'container' [Super Type](/docs/models.md#item-super-types):
   - add the `HierarchyLevelCode` member to the `lantern.models.item.catalogue.const.CONTAINER_SUPER_TYPES` list
@@ -362,12 +365,7 @@ Within this project, for each new item type:
   - add new paths for prefixes in the [OpenAPI Definition](/docs/site.md#openapi-definition)
   - update static site endpoints in [Reverse Proxying](/docs/setup.md#reverse-proxying) and `resources/dev/haproxy` to
     include new prefixes, and request updating the BAS Load Balancer config to match
-- if the new type introduces new item relationships:
-  - add relevant properties to `lantern.models.item.catalogue.elements.Aggregations`
-  - call new properties in `lantern.resources.templates._macros.related`
-  - add tests as needed in:
-    - `tests.lantern_tests.models.item.catalogue.test_elements.TestAggregations`
-    - `tests.lantern_tests.templates.macros.test_tabs.TestRelatedTab`
+- if the new type introduces new item relationships, see [Adding Catalogue Relations](#adding-catalogue-relations)
 - add a new [Test Record](#adding-new-test-records) using the new item type, aliases and/or relationships as applicable
 - verify new behaviour in a local site build
 
@@ -416,7 +414,9 @@ Within this project, for each new item type:
    - `tests.resources.records/item_cat_data::record`
    - `tests.resources.records/item_cat_checks::record`
 1. include the distribution format in the `lantern.models.checks.DistributionChecks` class:
-   - if needed, add a new enum member for the check type in `lantern.models.checks.CheckType`
+   - if needed, add a new enum member for the check type in:
+     - `lantern.models.checks.CheckType`
+     - `src/lantern/resources/templates/_assets/json/openapi.json.j2` (`components.schemas.checkData.type` enum)
    - update tests in `tests.models.test_checks.TestDistributionChecks`
 1. if needed, add check logic to `lantern.checks.CheckRunner`:
    - update tests in `lantern_tests.test_checks.TestCheckRunner`
@@ -458,6 +458,21 @@ Within this project, for each new item type:
    - `tests.resources.records.item_cat_collection_all`
    - `tests.resources.stores.fake_records_store.FakeRecordsStore._fake_records`
 5. update the `lantern_tests.templates.macros.test_tabs.TestLicenceTab.test_licence` test
+
+### Adding catalogue relations
+
+> [!WARNING]
+> This section is Work in Progress (WIP) and may not be complete/accurate.
+
+I.e. To support additional aggregation association and initiative combinations.
+
+1. update `lantern.models.item.catalogue.elements.Aggregations` with new properties
+   - generally method should be added in pairs (children of, parents of)
+   - update tests in `lantern_tests.models.item.catalogue.test_elements.TestAggregations`
+1. update the `related` macro in `src/lantern/resources/templates/_macros/_tabs.html.j2`:
+   - update tests in `lantern_tests.templates.macros.test_tabs.TestRelatedTab`
+1. update relevant test records in `tests.resources.records`
+   - you may need to [Add](#adding-new-test-records) new test records
 
 ### Adding site pages
 
@@ -513,7 +528,8 @@ The minimum Python version is 3.11 for consistency with related projects.
 ### Vulnerability scanning
 
 The [`uv audit`](https://docs.astral.sh/uv/reference/cli/#uv-audit) command checks for known vulnerabilities in
-packages using the [Python Packaging Advisory Database](https://github.com/pypa/advisory-database).
+packages using a range of sources, including GitHub and the
+[Python Packaging Advisory Database](https://github.com/pypa/advisory-database.
 
 > [!WARNING]
 > As with all security tools, `uv audit` is a tool for detecting well-known vulnerabilities, not a guarantee of
@@ -522,7 +538,7 @@ packages using the [Python Packaging Advisory Database](https://github.com/pypa/
 Checks are run automatically in [Continuous Integration](#continuous-integration).
 
 > [!TIP]
-> To check locally run the `vulnerabilities` [Development Task](#development-tasks).
+> To check locally run the `audit` [Development Task](#development-tasks).
 
 To upgrade a specific (in)direct dependency to address a vulnerability (typically via a patch release):
 
@@ -534,6 +550,19 @@ To upgrade a specific (in)direct dependency to address a vulnerability (typicall
 > [!TIP]
 > If the fix version has been released within a cool off period, verify the release is safe and add an override under
 > `tool.uv.audit` in `pyproject.toml`.
+
+If a vulnerability cannot feasibly/reasonabily be resolved, exceptions CAN be added in `pyproject.toml`:
+
+```toml
+[tool.uv.audit]
+ignore = [
+    # $PKG < x.xx (reason)
+    "XXX"
+]
+```
+
+> [!NOTE]
+> A task to revisit any exceptions within a reasonable timeframe MUST be recorded and carried out, repeatedly if needed.
 
 ### Updating dependencies
 

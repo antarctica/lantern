@@ -7,6 +7,7 @@ from tests.resources.records.item_cat_checks import record as check
 from tests.resources.records.item_cat_collection_all import record as collection_all_supported
 from tests.resources.records.item_cat_collection_open_min import record as collection_open_min_required
 from tests.resources.records.item_cat_data import record as data_all_supported
+from tests.resources.records.item_cat_dataset_layer import record as dataset_web_map_layer
 from tests.resources.records.item_cat_formatting import record as formatting_supported
 from tests.resources.records.item_cat_initiative_all import record as initiative_all_supported
 from tests.resources.records.item_cat_initiative_open_min import record as initiative_open_min_required
@@ -72,6 +73,7 @@ class FakeRecordsStore(StoreBase):
             product_all_supported,
             product_map,
             product_web_map,
+            dataset_web_map_layer,
             formatting_supported,
             data_all_supported,
             check,

@@ -9,7 +9,7 @@
     "commit": {
       "title": "Commit",
       "type": "object",
-      "required": ["branch", "commit", "stats", "url"],
+      "required": ["branch", "commit", "url"],
       "additionalProperties": false,
       "properties": {
         "branch": {
@@ -33,19 +33,6 @@
           "description": "List of file identifiers for any updated records committed.",
           "type": "array",
           "items": {"type": "string"}
-        },
-        "stats": {
-          "title": "Commit statistics",
-          "description": "Counts for any new and/or updated records committed and their underlying files.",
-          "type": "object",
-          "required": ["new_records", "new_files", "updated_records", "updated_files"],
-          "additionalProperties": false,
-          "properties": {
-            "new_records": {"title": "New records", "type": "integer"},
-            "new_files": {"title": "New files", "type": "integer"},
-            "updated_records": {"title": "Updated records", "type": "integer"},
-            "updated_files": {"title": "Updated files", "type": "integer"}
-          }
         },
         "url": {"title": "Commit URL", "type": "string", "format": "uri"}
       }
@@ -72,12 +59,6 @@
         "updated_identifiers": [
           "bfbdacc3-26cd-430e-8e99-17624952030c"
         ],
-        "stats": {
-          "new_records": 1,
-          "new_files": 2,
-          "updated_records": 1,
-          "updated_files": 2
-        },
         "url": "https://gitlab.example.com/MAGIC/lantern-records/-/commit/59e71abd216dff86a41293a7f4fe7d2395353fd4"
       },
       "merge_request": {

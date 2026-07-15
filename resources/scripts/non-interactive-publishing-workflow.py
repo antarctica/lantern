@@ -21,7 +21,6 @@ from lantern.models.site import SiteEnvironment
 from lantern.outputs.item_html import ItemAliasesOutput, ItemCatalogueOutput
 from lantern.outputs.record_iso import RecordIsoHtmlOutput, RecordIsoJsonOutput, RecordIsoXmlOutput
 from lantern.stores.base import RecordNotFoundError
-from lantern.stores.gitlab import CommitResults
 
 
 @dataclass
@@ -116,7 +115,7 @@ def _create_changeset(logger: logging.Logger, cat: BasCatalogue, args: Args) -> 
 
 def _commit_records(
     logger: logging.Logger, config: Config, cat: BasCatalogue, records: dict[Path, Record], args: Args
-) -> CommitResults:
+) -> GitUpsertResults:
     results = cat.commit(
         records=list(records.values()),
         context=GitUpsertContext(
@@ -162,12 +161,15 @@ def _publish_records(
         logger.info(f"* {base_url}/-/items/{identifier}")
 
 
-def _webhook(logger: logging.Logger, config: Config, commit: CommitResults, mr_url: str, wh_url: str) -> None:
+def _webhook(logger: logging.Logger, config: Config, commit: GitUpsertResults, mr_url: str, wh_url: str) -> None:
     """Trigger webhook if set."""
     logger.info(f"Sending webhook to {wh_url}")
     payload = {
         "commit": {
-            **commit.unstructure(),
+            "branch": commit.branch,
+            "commit": commit.commit,
+            "new_identifiers": commit.new_identifiers,
+            "updated_identifiers": commit.updated_identifiers,
             "url": f"{config.TEMPLATES_ITEM_VERSIONS_ENDPOINT}/-/commit/{commit.commit}",
         },
         "merge_request": {"url": mr_url},
@@ -222,8 +224,8 @@ def _parse_args() -> Args:
 def _run(logger: logging.Logger, config: Config, args: Args) -> None:
     s3 = S3Client(
         "s3",
-        aws_access_key_id=config.SITE_UNTRUSTED_S3_ACCESS_ID,
-        aws_secret_access_key=config.SITE_UNTRUSTED_S3_ACCESS_SECRET,
+        aws_access_key_id=config.SITE_UNTRUSTED_AWS_ACCESS_ID,
+        aws_secret_access_key=config.SITE_UNTRUSTED_AWS_ACCESS_SECRET,
         region_name="eu-west-1",
     )
     catalogue = BasCatalogue(logger=logger, config=config, s3=s3)

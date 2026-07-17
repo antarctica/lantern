@@ -36,7 +36,7 @@ LANTERN_TEMPLATES_ALGOLIA_SEARCH_API_KEY="op://Infrastructure/hqm2s5h7zjuxljy7ow
 
 LANTERN_SITE_UNTRUSTED_AWS_ACCESS_ID=""  # populate with per-user/instance IAM credentials
 LANTERN_SITE_UNTRUSTED_AWS_ACCESS_SECRET=""  # populate with per-user/instance IAM credentials
-LANTERN_SITE_UNTRUSTED_CLOUDFRONT_DIST_LIVE=""  # populate with 'site_cf_id' Terraform output
+LANTERN_SITE_UNTRUSTED_CLOUDFRONT_DIST_LIVE="op://Infrastructure/u4f4no3n7colgagsb4fcztregm/password"
 LANTERN_SITE_UNTRUSTED_S3_BUCKET_TESTING="op://Infrastructure/rnv7zb3jzviwsvziknpxicvqaq/password"
 LANTERN_SITE_UNTRUSTED_S3_BUCKET_LIVE="op://Infrastructure/rmhzzt5pk4wdamj2ecpguxhfc4/password"
 

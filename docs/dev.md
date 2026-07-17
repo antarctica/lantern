@@ -535,7 +535,9 @@ packages using a range of sources, including GitHub and the
 > As with all security tools, `uv audit` is a tool for detecting well-known vulnerabilities, not a guarantee of
 > secure dependencies. While `uv audit` is experimental, it's data source is not.
 
-Checks are run automatically in [Continuous Integration](#continuous-integration).
+Checks are run automatically in [Continuous Integration](#continuous-integration) when code changes via a commit and
+periodically via a scheduled pipeline. Failed checks raise a warning (rather than error) if vulnerabilities are found
+to allow fixing in a standalone MR.
 
 > [!TIP]
 > To check locally run the `audit` [Development Task](#development-tasks).

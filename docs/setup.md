@@ -9,6 +9,8 @@ For managing secrets and common [Config](/docs/config.md) options.
 
 ## GitLab
 
+### GitLab store
+
 Resources for the Catalogue [GitLab Store](/docs/stores.md#gitlab-store) are managed using
 [Infrastructure as Code (IaC)](/docs/infrastructure.md#infrastructure-as-code).
 
@@ -24,7 +26,7 @@ IaC will:
   [Interactive Publishing Workflow](/docs/usage.md#interactive-publishing-workflow), with at least the
   *reporter* role
 
-### GitLab publishing workflows
+#### GitLab publishing workflows
 
 IaC will:
 
@@ -48,6 +50,14 @@ IaC will:
 Manually:
 
 - set this token in the authorisation header for the 'create-issue' action in the Power Automate flow
+
+### GitLab vulnerability scanning
+
+1. from the main GitLab project -> *CI/CD* -> *Scheduled* -> *New schedule*:
+   - description: `Python Vulnerabilities`
+   - interval pattern: `0 11 * * WED` (each Wednesday at 11:00)
+   - cron timezone: `London`
+   - target branch: `main`
 
 ## Static website hosting
 

@@ -5,7 +5,7 @@
 1. [ ] create merge request from release issue
 1. [ ] review [Documentation](/docs)
 1. [ ] review the [OpenAPI definition](/docs/site.md#openapi-definition) and `x-scalar-stability` statements
-1. [ ] review [Change log](/CHANGELOG.md)
+1. [ ] review the [Change log](/CHANGELOG.md)
 1. [ ] run the `release` [Development task](/docs/dev.md#development-tasks) with `major`/`minor`/`patch` as an argument
 1. [ ] commit and push changes
 1. [ ] merge into `main` and tag merge commit with version prefixed with `v` (e.g. `v0.5.0`)

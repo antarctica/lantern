@@ -24,7 +24,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * `SITE_UNTRUSTED_S3_ACCESS_SECRET` config option renamed to `SITE_UNTRUSTED_AWS_ACCESS_SECRET`
 * `SITE_UNTRUSTED_S3_ACCESS_SECRET_SAFE` config option renamed to `SITE_UNTRUSTED_AWS_ACCESS_SECRET_SAFE`
 * `TEMPLATES_ITEM_CONTACT_TURNSTILE_KEY` config option renamed to `TEMPLATES_TURNSTILE_KEY`
-* Upgrading package to Python 3.14 from 3.11
+* Upgrading package from Python 3.11 to 3.14
 
 ### Added
 

@@ -244,7 +244,6 @@ prerelease:
     reports:
       dotenv: build.env
   rules:
-    - if: '$CI_COMMIT_BRANCH == "main" && $CI_COMMIT_TAG == null'
     - if: '$CI_COMMIT_BRANCH == "main" && $CI_COMMIT_TAG == null && $CI_PIPELINE_SOURCE != "schedule"'
 
 deploy_stage:

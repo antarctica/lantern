@@ -489,12 +489,7 @@ output "sentry_dsn" {
   description = "Sentry DSN."
 }
 
-# Outputs for external automation
-
-output "site_cf_id" {
-  value       = module.site_prod.cloudfront_distribution_id
-  description = "CloudFront distribution ID for live static site hosting."
-}
+# Outputs for external automations
 
 output "thumbnails_cf_id" {
   value       = var.aws_cf_cdn_id

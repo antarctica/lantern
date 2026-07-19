@@ -2,7 +2,7 @@ import json
 import logging
 from copy import deepcopy
 from pathlib import Path
-from typing import get_args
+from typing import Literal, get_args
 from unittest.mock import PropertyMock
 
 import pytest
@@ -60,14 +60,14 @@ class TestBasCatUntrusted:
         else:
             assert cat._invalidator is None
 
-    @pytest.mark.parametrize("identifiers", [None, ["x"]])
+    @pytest.mark.parametrize("identifiers", [None, {"x"}])
     def test_export(
         self,
         mocker: MockerFixture,
         fx_bas_cat_untrusted: BasCatUntrusted,
         fx_s3_bucket_name: str,
         fx_cf_distribution_id: str,
-        identifiers: list[str],
+        identifiers: set[str],
     ):
         """Can generate and export site content for untrusted catalogue."""
         expected_keys = {"legal/accessibility/index.html", "-/index/index.html", "items/x/index.html", "records/x.xml"}
@@ -186,7 +186,12 @@ class TestBasCatEnv:
 
     @pytest.mark.parametrize("env", list(get_args(SiteEnvironment)))
     def test_init(
-        self, fx_logger: logging.Logger, fx_config: Config, fx_bas_repo: BasRepository, fx_s3_client: S3Client, env: str
+        self,
+        fx_logger: logging.Logger,
+        fx_config: Config,
+        fx_bas_repo: BasRepository,
+        fx_s3_client: S3Client,
+        env: Literal["testing", "live"],
     ):
         """
         Can create a BAS catalogue environment instance.

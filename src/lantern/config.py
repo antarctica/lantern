@@ -91,6 +91,8 @@ class Config:
         SITE_TRUSTED_RSYNC_BASE_PATH_LIVE: str
         BASE_URL_TESTING: str
         BASE_URL_LIVE: str
+        CHECKS_TRUSTED_USERNAME: str
+        CHECKS_TRUSTED_PASSWORD: str
 
     def dumps_safe(self) -> ConfigDumpSafe:
         """Dump config for output to the user with sensitive data redacted."""
@@ -133,6 +135,8 @@ class Config:
             "SITE_TRUSTED_RSYNC_BASE_PATH_LIVE": str(self.SITE_TRUSTED_RSYNC_BASE_PATH_LIVE),
             "BASE_URL_TESTING": self.BASE_URL_TESTING,
             "BASE_URL_LIVE": self.BASE_URL_LIVE,
+            "CHECKS_TRUSTED_USERNAME": self.CHECKS_TRUSTED_USERNAME,
+            "CHECKS_TRUSTED_PASSWORD": self.CHECKS_TRUSTED_PASSWORD_SAFE,
         }
 
     def validate(self) -> None:
@@ -448,3 +452,20 @@ class Config:
         """
         with self._env.prefixed(self._app_prefix), self._env.prefixed("BASE_URL_"):
             return self._env.str("LIVE", validate=validate.URL())
+
+    @property
+    def CHECKS_TRUSTED_USERNAME(self) -> str:
+        """Username for accessing trusted content in checks."""
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("CHECKS_TRUSTED_"):
+            return self._env.str("USERNAME")
+
+    @property
+    def CHECKS_TRUSTED_PASSWORD(self) -> str:
+        """Password for accessing trusted content in checks."""
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("CHECKS_TRUSTED_"):
+            return self._env.str("PASSWORD")
+
+    @property
+    def CHECKS_TRUSTED_PASSWORD_SAFE(self) -> str:
+        """CHECKS_TRUSTED_PASSWORD_SAFE with value redacted."""
+        return self._safe_value if self.CHECKS_TRUSTED_PASSWORD else ""

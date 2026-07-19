@@ -107,6 +107,8 @@ class TestConfig:
             "SITE_TRUSTED_RSYNC_BASE_PATH_LIVE": str(fx_config.SITE_TRUSTED_RSYNC_BASE_PATH_LIVE),
             "BASE_URL_TESTING": "https://example.com",
             "BASE_URL_LIVE": "https://example.com",
+            "CHECKS_TRUSTED_USERNAME": "x",
+            "CHECKS_TRUSTED_PASSWORD": redacted_value,
         }
 
         output = fx_config.dumps_safe()
@@ -309,6 +311,8 @@ class TestConfig:
             ),
             ({"LANTERN_BASE_URL_TESTING": "x", "LANTERN_BASE_URL_LIVE": None}),
             ({"LANTERN_BASE_URL_TESTING": None, "LANTERN_BASE_URL_LIVE": "x"}),
+            ({"LANTERN_CHECKS_TRUSTED_USERNAME": None, "LANTERN_CHECKS_TRUSTED_PASSWORD": "x"}),
+            ({"LANTERN_CHECKS_TRUSTED_USERNAME": "x", "LANTERN_CHECKS_TRUSTED_PASSWORD": None}),
         ],
     )
     def test_validate_missing_required_option(self, envs: dict):
@@ -395,6 +399,8 @@ class TestConfig:
             ("SITE_TRUSTED_RSYNC_BASE_PATH_LIVE", Path("x"), False),
             ("BASE_URL_TESTING", "https://example.com", False),
             ("BASE_URL_LIVE", "https://example.com", False),
+            ("CHECKS_TRUSTED_USERNAME", "x", False),
+            ("CHECKS_TRUSTED_PASSWORD", "x", True),
         ],
     )
     def test_configurable_property(self, property_name: str, expected: Any, sensitive: bool):
@@ -414,7 +420,13 @@ class TestConfig:
         self._unset_envs(envs, envs_bck)
 
     @pytest.mark.parametrize(
-        "property_name", ["STORE_ALGOLIA_WRITE_API_KEY", "STORE_GITLAB_TOKEN", "SITE_UNTRUSTED_AWS_ACCESS_SECRET"]
+        "property_name",
+        [
+            "STORE_ALGOLIA_WRITE_API_KEY",
+            "STORE_GITLAB_TOKEN",
+            "SITE_UNTRUSTED_AWS_ACCESS_SECRET",
+            "CHECKS_TRUSTED_PASSWORD",
+        ],
     )
     def test_redacted_property(self, mocker: MockerFixture, property_name: str):
         """Can only get redacted value where secret values have a value."""

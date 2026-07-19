@@ -1,0 +1,28 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Authorization:
+      - 'Basic eDp4' # username: x, password: x
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.33.0
+    method: HEAD
+    uri: https://example.com/restricted.html
+  response:
+    body:
+      string: 'Restricted'
+    headers:
+      Content-Length:
+      - '10'
+      Content-Type:
+      - text/html
+    status:
+      code: 200
+      message: OK
+version: 1

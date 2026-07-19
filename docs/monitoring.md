@@ -7,6 +7,8 @@ These options from the app `lantern.Config` class are used to configure applicat
 - `ENABLE_FEATURE_SENTRY`: if true, enables backend [Error Monitoring](#error-monitoring) via Sentry
 - `SENTRY_ENVIRONMENT`: the Sentry [Environment](https://docs.sentry.io/platforms/python/configuration/environments/) name
 - `SENTRY_DSN`: Sentry backend Data Source Name (DSN) for error logging
+- `CHECKS_TRUSTED_USERNAME`: credential for trusted publishing based [Checks](#site-checks)
+- `CHECKS_TRUSTED_PASSWORD`: credential for trusted publishing based [Checks](#site-checks)
 
 See the [Config](/docs/config.md#config-options) docs for how to set these config options.
 
@@ -89,6 +91,7 @@ Checks verify:
 - the site 404 page and that the error handler is working (by requesting a page known not to exist)
 - [Record](/docs/models.md#records) pages (JSON, XML, HTML)
 - [Item](/docs/models.md#items) pages (HTML) and [Aliases](/docs/models.md#item-aliases) redirects
+- [Item](/docs/models.md#items) pages in [Trusted Publishing](/docs/architecture.md#trusted-publishing)
 - DOI redirects if set within records
 - distribution options set within records (with special handling for ArcGIS layers and services)
 
@@ -96,7 +99,6 @@ Checks verify:
 > Checks are not run for:
 >
 > - BAS SAN and SharePoint distribution options within records
-> - [Item](/docs/models.md#items) pages in [Trusted Publishing](/docs/architecture.md#trusted-publishing)
 > - DOI redirects where not using the live site environment (as these only work in production)
 
 Checks are intended to verify a whole site, including all records within a store, systematically on a regular basis.

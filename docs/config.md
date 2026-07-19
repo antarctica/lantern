@@ -26,6 +26,9 @@ All variables are prefixed with `LANTERN_` to avoid conflicts with other applica
 | `ADMIN_METADATA_SIGNING_KEY_PUBLIC`     | JSON Web Key | Yes          | Yes      | No        | v0.4.x (0.11.x) | JSON Web Key (JWK) for verifying administrative metadata                 | *None*                                    | '{"kid": "magic_metadata_signing_key", ...}'    |
 | `BASE_URL_LIVE`                         | String       | Yes          | Yes      | No        | v0.6.x (0.13.x) | Base URL for production/live catalogue (typically reverse proxied)       | *None*                                    | 'https://example.com'                           |
 | `BASE_URL_TESTING`                      | String       | Yes          | Yes      | No        | v0.6.x (0.13.x) | Base URL for staging/testing catalogue (typically reverse proxied)       | *None*                                    | 'https://example.com'                           |
+| `CHECKS_TRUSTED_PASSWORD`               | String       | Yes          | Yes      | Yes       | v0.15.x         | Password for a user that can access trusted publishing content           | *None*                                    | 'xxx'                                           |
+| `CHECKS_TRUSTED_PASSWORD_SAFE`          | String       | No           | -        | No        | v0.15.x         | Redacted version of `CHECKS_TRUSTED_PASSWORD`                            | *None*                                    | 'REDACTED'                                      |
+| `CHECKS_TRUSTED_USERNAME`               | String       | Yes          | Yes      | No        | v0.15.x         | Username for a user that can access trusted publishing content           | *None*                                    | 'foo'                                           |
 | `ENABLE_FEATURE_SENTRY`                 | Boolean      | Yes          | No       | No        | v0.1.x (0.8.x)  | Enables Sentry monitoring if true                                        | *True*                                    | 'true'                                          |
 | `LOG_LEVEL`                             | Number       | Yes          | No       | No        | v0.1.x (0.8.x)  | A logging level name or number to set the application logging level      | 30                                        | '20'                                            |
 | `LOG_LEVEL_NAME`                        | String       | No           | -        | No        | v0.1.x (0.8.x)  | Logging level name for the configured application logging level          | 'WARNING'                                 | 'INFO'                                          |
@@ -85,6 +88,9 @@ validator error. Defaults to `1` (no parallelism).
 See the [Monitoring](/docs/monitoring.md#monitoring-configuration) docs for more information on how these
 [Config Options](#config-options) are used to configure app monitoring (inc. Sentry):
 
+- `CHECKS_TRUSTED_PASSWORD`
+- `CHECKS_TRUSTED_PASSWORD_SAFE`
+- `CHECKS_TRUSTED_USERNAME`
 - `ENABLE_FEATURE_SENTRY`
 - `SENTRY_ENVIRONMENT`
 - `SENTRY_DSN`

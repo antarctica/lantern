@@ -259,6 +259,8 @@ LANTERN_VERIFY_SHAREPOINT_PROXY_ENDPOINT = "https://example.com"
 LANTERN_VERIFY_SAN_PROXY_ENDPOINT = "https://example.com"
 LANTERN_BASE_URL_TESTING = "https://example.com"
 LANTERN_BASE_URL_LIVE = "https://example.com"
+LANTERN_CHECKS_TRUSTED_USERNAME="x"
+LANTERN_CHECKS_TRUSTED_PASSWORD="x"
 X_ADMIN_METADATA_SIGNING_KEY_PRIVATE = "{\"kty\":\"EC\",\"kid\":\"bas_metadata_testing_signing_key\",\"alg\":\"ES256\",\"crv\":\"P-256\",\"x\":\"FzxBM1ZPO5W2bYlhT9AjZUKz5_oH5vIh4_k4aEZ64rM\",\"y\":\"vmK5PWOoIA9eO0ntLh37AMpVODyj0NWf842FwoN-GRs\",\"d\":\"2lBuUtJK2TcV_b4B-bDCPnRVAqMnYvnLZ41IUguprs8\"}"
 
 [tool.pytest.ini_options]

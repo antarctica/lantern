@@ -81,6 +81,8 @@ class ChecksOutput(OutputSite):
     def _data(self) -> dict:
         """Assemble checks data."""
         converter = cattrs.Converter()
+        converter.register_unstructure_hook(Check, lambda d: d.unstructure())
+
         duration, pass_fail, stats, site_checks, resource_checks = self._process()
 
         commit: dict | None = converter.unstructure(self._meta.build_ref) if self._meta.build_ref else None

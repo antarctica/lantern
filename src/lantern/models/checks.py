@@ -3,6 +3,9 @@ from enum import Enum
 from http import HTTPMethod, HTTPStatus
 from typing import Final
 
+import cattrs
+from requests.auth import AuthBase
+
 from lantern.lib.metadata_library.models.record.elements.distribution import Distributions
 from lantern.models.record.record import Record
 from lantern.models.site import SiteContent, SiteRedirect
@@ -64,6 +67,7 @@ class Check:
     - url: fully qualified URL to check
     - http_method: HTTP method to use for check (HEAD is preferred to minimise content but some endpoints lack support)
     - http_status: expected HTTP status (200, 301, etc.)
+    - http_auth: required authentication options [Sensitive]
     - content_length: optional expected content length (not reliable to use generally)
     - redirect_location: optional expected location header value for redirects
     - file_identifier: optional file identifier for Record related checks, used for grouping in reporting
@@ -78,6 +82,7 @@ class Check:
     url: str
     http_method: HTTPMethod = HTTPMethod.HEAD
     http_status: HTTPStatus = HTTPStatus.OK
+    http_auth: AuthBase | None = None
     content_length: int | None = None
     redirect_location: str | None = None
     file_identifier: str | None = None
@@ -101,6 +106,24 @@ class Check:
             redirect_location=content.redirect,
             file_identifier=content.object_meta.get("file_identifier"),
         )
+
+    def unstructure(self) -> dict:
+        """
+        Convert to plain types.
+
+        Ensures any HTTP authentication is redacted.
+
+        Intended to be used as a cattrs unstructure hook.
+        E.g. `converter.register_unstructure_hook(Check, lambda d: d.unstructure())`
+
+        Example input: Check(type=CheckType.SITE_PAGES, url='x', ..., http_auth=HTTPBasicAuth('user', 'pass'))
+        Example output: {'type': 'Site Pages', 'url': 'x', ..., 'http_auth': '[**REDACTED**]'}
+        """
+        converter = cattrs.Converter()
+        check: dict = converter.unstructure(self)
+        if check.get("http_auth"):
+            check["http_auth"] = "[**REDACTED**]"
+        return check
 
 
 class DistributionChecks:

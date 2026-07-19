@@ -6,6 +6,7 @@ from http import HTTPMethod, HTTPStatus
 import requests
 from joblib import Parallel, delayed
 from requests import Response
+from requests.auth import AuthBase
 
 from lantern.log import init as init_logging
 from lantern.models.checks import Check, CheckState, CheckType
@@ -30,6 +31,7 @@ class CheckRunner:
         url: str,
         headers: dict | None = None,
         redirects: int = 0,
+        auth: AuthBase | None = None,
         raise_errors: bool = False,
     ) -> Response | None:
         """
@@ -46,7 +48,9 @@ class CheckRunner:
             headers = {}
 
         try:
-            r = s.request(method=method.value, url=url, headers=headers, allow_redirects=redirects > 0, timeout=10)
+            r = s.request(
+                method=method.value, url=url, headers=headers, allow_redirects=redirects > 0, timeout=10, auth=auth
+            )
             if raise_errors:
                 r.raise_for_status()
         except requests.Timeout:
@@ -80,6 +84,7 @@ class CheckRunner:
             method=self._check.http_method,
             url=self._check.url,
             headers=headers,
+            auth=self._check.http_auth,
             redirects=0,
             raise_errors=False,
         )

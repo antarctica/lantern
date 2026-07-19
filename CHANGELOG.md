@@ -49,6 +49,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Basic print styles
 * `SECURITY.md` file for reporting security vulnerabilities
 * Scheduled CI pipeline to run Python vulnerability checks periodically
+* Site checks for trusted content
 
 ### Fixed
 

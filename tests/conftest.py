@@ -1004,7 +1004,6 @@ def fx_fake_catalogue(tmp_path: Path, fx_logger: logging.Logger, fx_config: Conf
 
 @pytest.fixture()
 def fx_bas_cat_untrusted(
-    mocker: MockerFixture,
     fx_logger: logging.Logger,
     fx_config: Config,
     fx_bas_repo_min_cat_record: BasRepository,
@@ -1014,15 +1013,8 @@ def fx_bas_cat_untrusted(
     """
     BAS untrusted catalogue instance.
 
-    Mocks checks to return fixed (empty) results.
-
     Sets S3 export to local mock via mocked config.
     """
-    mock_checker = mocker.MagicMock()
-    expected_content = [SiteContent(content="", path=Path("-/checks/data.json"), media_type="application/json")]
-    mock_checker.check.return_value = expected_content
-    mocker.patch("lantern.catalogues.bas.Checker", return_value=mock_checker)
-
     return BasCatUntrusted(
         logger=fx_logger,
         config=fx_config,
@@ -1060,15 +1052,30 @@ def fx_bas_cat_trusted(
 
 @pytest.fixture()
 def fx_bas_cat_env(
+    mocker: MockerFixture,
     fx_logger: logging.Logger,
     fx_config: Config,
     fx_bas_repo_min_cat_record: BasRepository,
     fx_s3_client: S3Client,
+    fx_s3_bucket_name: str,
     fx_bas_cat_untrusted: BasCatUntrusted,
     fx_bas_cat_trusted: BasCatTrusted,
 ) -> BasCatEnv:
-    """BAS catalogue testing environment instance."""
+    """
+    BAS catalogue testing environment instance.
+
+    Mocks checks to return fixed (empty) results.
+
+    Sets S3 export to local mock via mocked config.
+    """
+    mock_checker = mocker.MagicMock()
+    mock_checker.check.return_value = [
+        SiteContent(content="", path=Path("-/checks/data.json"), media_type="application/json")
+    ]
+    mocker.patch("lantern.catalogues.bas.Checker", return_value=mock_checker)
+
     cat = BasCatEnv(logger=fx_logger, config=fx_config, repo=fx_bas_repo_min_cat_record, s3=fx_s3_client, env="testing")
+    cat._bucket = fx_s3_bucket_name
     cat._untrusted = fx_bas_cat_untrusted
     cat._trusted = fx_bas_cat_trusted
     return cat

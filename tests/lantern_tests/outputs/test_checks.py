@@ -3,6 +3,7 @@ from http import HTTPStatus
 from pathlib import Path
 
 import pytest
+from requests.auth import HTTPBasicAuth
 
 from lantern.models.checks import Check, CheckState, CheckType
 from lantern.models.site import ExportMeta, SiteContent
@@ -151,6 +152,7 @@ class TestChecksOutput:
                 type=CheckType.SITE_HEALTH,
                 url="x",
                 state=CheckState.PASS,
+                http_auth=HTTPBasicAuth(username="x", password="x"),  # noqa: S106
                 duration=0.1,
                 result_http_status=HTTPStatus.OK,
                 result_output="OK",
@@ -190,6 +192,7 @@ class TestChecksOutput:
             assert results["commit"] is None
         assert isinstance(results["site_checks"], list)
         assert results["site_checks"][0]["state"] == "passed"
+        assert results["site_checks"][0]["http_auth"] == "[**REDACTED**]"
         assert isinstance(results["resource_checks"], dict)
         assert results["resource_checks"]["x"][0]["state"] == "failed"
         assert results["resource_checks"]["x"][1]["state"] == "skipped"

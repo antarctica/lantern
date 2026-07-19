@@ -7,6 +7,7 @@ from typing import get_args
 from boto3 import client as BotoClient
 from mypy_boto3_cloudfront import CloudFrontClient
 from mypy_boto3_s3 import S3Client
+from requests.auth import HTTPBasicAuth
 
 from lantern.catalogues.base import CatalogueBase
 from lantern.checks import Checker
@@ -14,7 +15,7 @@ from lantern.config import Config
 from lantern.exporters.cloudfront import CloudFrontExporter
 from lantern.exporters.rsync import RsyncExporter
 from lantern.exporters.s3 import S3Exporter
-from lantern.models.checks import CheckType
+from lantern.models.checks import Check, CheckType
 from lantern.models.record.record import Record
 from lantern.models.repository import GitUpsertContext, GitUpsertResults
 from lantern.models.site import ExportMeta, SiteEnvironment
@@ -55,7 +56,6 @@ class BasCatUntrusted(CatalogueBase):
             cf_client = self._create_cf_client()
             self._invalidator = CloudFrontExporter(logger=logger, cloudfront=cf_client, distribution=distribution)
         self._exporter = S3Exporter(logger=logger, s3=self._s3, bucket=bucket, parallel_jobs=config.PARALLEL_JOBS)
-        self._checker = Checker(logger=self._logger, parallel_jobs=config.PARALLEL_JOBS)
 
     def _create_cf_client(self) -> CloudFrontClient:
         """Create CloudFront boto client."""
@@ -75,7 +75,7 @@ class BasCatUntrusted(CatalogueBase):
         """
         Generate and export site content to hosting.
 
-        Optionally for selected records from a branch for selected output types.
+        Optionally for selected records from a branch and for selected Output types.
 
         Site requires direct access to underlying store for additional processing.
         """
@@ -100,16 +100,16 @@ class BasCatUntrusted(CatalogueBase):
             keys = site.generate_invalidation_keys(**content_params) if identifiers else ["/*"]
             self._invalidator.invalidate(keys)
 
-    def check(
+    def checks(
         self,
         identifiers: set[str] | None = None,
         branch: str | None = None,
         outputs: list[type[OutputBase]] | None = None,
-    ) -> None:
+    ) -> list[Check]:
         """
-        Check site contents (optionally for selected records).
+        Generate checks for site contents.
 
-        Optionally for selected records from a branch for selected output types.
+        Optionally for selected records from a branch and for selected Output types.
 
         When not using the live site, filter out DOI checks as these are set externally for the live endpoint only.
 
@@ -123,9 +123,22 @@ class BasCatUntrusted(CatalogueBase):
         checks = site.generate_checks(global_outputs=global_, individual_outputs=individual, identifiers=identifiers)
         if self._env != "live":
             checks = [check for check in checks if check.type != CheckType.DOI_REDIRECTS]
+        return checks
 
-        content = self._checker.check(meta=meta, checks=checks)
-        self._exporter.export(content)
+    def check(
+        self,
+        identifiers: set[str] | None = None,
+        branch: str | None = None,
+        outputs: list[type[OutputBase]] | None = None,
+    ) -> None:
+        """
+        Check site contents.
+
+        Optionally for selected records from a branch and for selected Output types.
+
+        Checks are executed in `BasCatEnv.check()` because they may need to be aggregated with untrusted content.
+        """
+        raise NotImplementedError
 
 
 class BasCatTrusted(CatalogueBase):
@@ -170,11 +183,39 @@ class BasCatTrusted(CatalogueBase):
         )
         self._exporter.export(content)
 
-    def check(self, identifiers: set[str] | None = None) -> None:
+    def checks(self, identifiers: set[str] | None = None, branch: str | None = None) -> list[Check]:
         """
-        Check site contents (optionally for selected Records).
+        Generate checks for site contents.
 
-        Trusted site content is not validated due to Ops Data Store auth. See docs/monitoring.md for details.
+        Optionally for selected records from a branch. Output classes are fixed for the trusted site environment.
+
+        Trusted content is reverse proxied to appear at a prefixed path. The URLs in generated checks are not aware of
+        this prefix and so need correcting before checking.
+
+        Trusted content requires authentication to access. Generated checks are not aware of this requirement and so
+        need updating before checking.
+        """
+        store = self._repo._make_gitlab_store(branch=branch, cached=True, frozen=True)
+        meta = ExportMeta.from_config(config=self._config, env=self._env, build_ref=store.head_commit, trusted=True)
+        site = Site(logger=self._logger, meta=meta, store=store)
+
+        checks = site.generate_checks(
+            global_outputs=[], individual_outputs=[ItemCatalogueOutput], identifiers=identifiers
+        )
+        for check in checks:
+            check.url = check.url.replace("/items/", "/-/items/")
+            check.http_auth = HTTPBasicAuth(
+                username=self._config.CHECKS_TRUSTED_USERNAME, password=self._config.CHECKS_TRUSTED_PASSWORD
+            )
+        return checks
+
+    def check(self, identifiers: set[str] | None = None, branch: str | None = None) -> None:
+        """
+        Check site contents.
+
+        Optionally for selected records from a branch. Output classes are fixed for the trusted site environment.
+
+        Checks are executed in `BasCatEnv.check()` because they may need to be aggregated with untrusted content.
         """
         raise NotImplementedError
 
@@ -190,12 +231,14 @@ class BasCatEnv(CatalogueBase):
         self, logger: logging.Logger, config: Config, repo: BasRepository, s3: S3Client, env: SiteEnvironment
     ) -> None:
         super().__init__(logger)
-        config = config
-        repo = repo
-        s3 = s3
+        self._config = config
+        self._repo = repo
         self._env = env
+        s3 = s3
 
-        bucket = config.SITE_UNTRUSTED_S3_BUCKET_LIVE if env == "live" else config.SITE_UNTRUSTED_S3_BUCKET_TESTING
+        self._bucket = (
+            config.SITE_UNTRUSTED_S3_BUCKET_LIVE if env == "live" else config.SITE_UNTRUSTED_S3_BUCKET_TESTING
+        )
         distribution = config.SITE_UNTRUSTED_CLOUDFRONT_DIST_LIVE if env == "live" else None
         path = Path(
             config.SITE_TRUSTED_RSYNC_BASE_PATH_LIVE if env == "live" else config.SITE_TRUSTED_RSYNC_BASE_PATH_TESTING
@@ -203,22 +246,22 @@ class BasCatEnv(CatalogueBase):
 
         self._untrusted = BasCatUntrusted(
             logger=self._logger,
-            config=config,
-            repo=repo,
+            config=self._config,
+            repo=self._repo,
             s3=s3,
             distribution=distribution,
-            bucket=bucket,
+            bucket=self._bucket,
             env=self._env,
         )
-
         self._trusted = BasCatTrusted(
             logger=self._logger,
-            config=config,
-            repo=repo,
+            config=self._config,
+            repo=self._repo,
             host=config.SITE_TRUSTED_RSYNC_HOST,
             path=path,
             env=self._env,
         )
+        self._checker = Checker(logger=self._logger, parallel_jobs=self._config.PARALLEL_JOBS)
 
     def export(
         self,
@@ -229,8 +272,9 @@ class BasCatEnv(CatalogueBase):
         """Generate and export site content to hosting."""
         self._logger.info(f"Exporting untrusted {self._env} site")
         self._untrusted.export(identifiers=identifiers, branch=branch, outputs=outputs)
-        self._logger.info(f"Exporting trusted {self._env} site")
-        self._trusted.export(identifiers=identifiers, branch=branch)
+        if outputs is None or ItemCatalogueOutput in outputs:
+            self._logger.info(f"Exporting trusted {self._env} site")
+            self._trusted.export(identifiers=identifiers, branch=branch)
 
     def check(
         self,
@@ -241,10 +285,20 @@ class BasCatEnv(CatalogueBase):
         """
         Check untrusted site contents (optionally for selected records).
 
-        Trusted site content is not checked due to Ops Data Store auth. See docs/monitoring.md for details.
+        Checks need to be executed at this level to produce report content items from untrusted and trusted checks.
         """
-        self._logger.info(f"Checking untrusted {self._env} site")
-        self._untrusted.check(identifiers=identifiers, branch=branch, outputs=outputs)
+        store = self._repo._make_gitlab_store(branch=branch, cached=True, frozen=True)
+        meta = ExportMeta.from_config(config=self._config, env=self._env, build_ref=store.head_commit, trusted=False)
+
+        self._logger.info(f"Generating checks for untrusted {self._env} site")
+        checks = self._untrusted.checks(identifiers=identifiers, branch=branch, outputs=outputs)
+        if outputs is None or ItemCatalogueOutput in outputs:
+            self._logger.info(f"Generating checks for trusted {self._env} site")
+            checks.extend(self._trusted.checks(identifiers=identifiers, branch=branch))
+
+        self._logger.info(f"Checking {self._env} site")
+        content = self._checker.check(meta=meta, checks=checks)
+        self._untrusted._exporter.export(content)
 
 
 class BasCatalogue:

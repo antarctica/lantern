@@ -4,6 +4,7 @@ from typing import Final
 
 import cattrs
 import pytest
+from requests.auth import HTTPBasicAuth
 
 from lantern.lib.metadata_library.models.record.elements.common import (
     Contact,
@@ -36,6 +37,7 @@ class TestCheck:
         assert check.url == expected
         assert check.http_method == HTTPMethod.HEAD
         assert check.http_status == HTTPStatus.OK
+        assert check.http_auth is None
         assert check.content_length is None
         assert check.redirect_location is None
         assert check.file_identifier is None
@@ -46,6 +48,7 @@ class TestCheck:
         expected_type = CheckType.NONE
         expected_method = HTTPMethod.GET
         expected_status = HTTPStatus.NOT_FOUND
+        expected_auth = HTTPBasicAuth(username="x", password="x")  # noqa: S106
         expected_int = 1
         expected = "x"
         check = Check(
@@ -53,6 +56,7 @@ class TestCheck:
             url=expected,
             http_method=expected_method,
             http_status=expected_status,
+            http_auth=expected_auth,
             content_length=expected_int,
             redirect_location=expected,
             file_identifier=expected,
@@ -61,6 +65,7 @@ class TestCheck:
         assert check.url == expected
         assert check.http_method == expected_method
         assert check.http_status == expected_status
+        assert check.http_auth == expected_auth
         assert check.content_length == expected_int
         assert check.redirect_location == expected
         assert check.file_identifier == expected
@@ -85,13 +90,15 @@ class TestCheck:
         assert check.file_identifier is None
 
     @pytest.mark.cov()
-    def test_unstructure(self):
-        """Can unstructure a Check instance to plain types."""
+    @pytest.mark.parametrize("has_auth", [False, True])
+    def test_unstructure(self, has_auth: bool):
+        """Can unstructure a Check instance to plain types and redact auth."""
         expected = {
             "type": CheckType.ITEM_PAGES.value,
             "url": "x",
             "http_method": HTTPMethod.HEAD.value,
             "http_status": HTTPStatus.OK.value,
+            "http_auth": "[**REDACTED**]" if has_auth else None,
             "content_length": None,
             "redirect_location": None,
             "file_identifier": None,
@@ -100,8 +107,14 @@ class TestCheck:
             "state": "pending",
             "duration": 0.0,
         }
-        check = Check(type=CheckType.ITEM_PAGES, url="x")
         converter = cattrs.Converter()
+        converter.register_unstructure_hook(Check, lambda d: d.unstructure())
+
+        check = Check(
+            type=CheckType.ITEM_PAGES,
+            url="x",
+            http_auth=HTTPBasicAuth(username="x", password="x") if has_auth else None,  # noqa: S106
+        )
         result = converter.unstructure(check)
         assert result == expected
 

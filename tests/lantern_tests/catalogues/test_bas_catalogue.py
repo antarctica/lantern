@@ -133,14 +133,15 @@ class TestBasCatUntrusted:
         assert health_data["checks"]["site:records"]["observedValue"] == expected_count
         assert health_data["checks"]["search:records"]["observedValue"] == expected_count
 
-    def test_check(self, fx_bas_cat_untrusted: BasCatUntrusted):
-        """Can check untrusted site content."""
-        fx_bas_cat_untrusted.check()
+    def test_checks(self, fx_bas_cat_untrusted: BasCatUntrusted):
+        """Can generate checks for untrusted site content."""
+        results = fx_bas_cat_untrusted.checks()
+        assert len(results) > 0
 
-        result = fx_bas_cat_untrusted._exporter._s3.get_object(
-            Bucket=fx_bas_cat_untrusted._exporter._bucket, Key="-/checks/data.json"
-        )
-        assert result["ResponseMetadata"]["HTTPStatusCode"] == 200
+    def test_check(self, fx_bas_cat_untrusted: BasCatUntrusted):
+        """Cannot directly check untrusted site (not supported)."""
+        with pytest.raises(NotImplementedError):
+            fx_bas_cat_untrusted.check()
 
 
 class TestBasCatTrusted:
@@ -165,8 +166,17 @@ class TestBasCatTrusted:
             item_text = f.read()
         assert "tab-content-admin" in item_text
 
-    def test_check(self, fx_bas_cat_trusted: BasCatTrusted):
-        """Cannot check trusted site (not supported)."""
+    def test_checks(self, fx_bas_cat_trusted: BasCatTrusted):
+        """Can generate checks for trusted site content."""
+        results = fx_bas_cat_trusted.checks()
+        assert len(results) > 0
+
+        check = results[0]
+        assert "/-/items/" in check.url
+        assert check.http_auth is not None
+
+    def test_check(self, fx_bas_cat_trusted: BasCatUntrusted):
+        """Cannot directly check trusted site (not supported)."""
         with pytest.raises(NotImplementedError):
             fx_bas_cat_trusted.check()
 
@@ -201,18 +211,23 @@ class TestBasCatEnv:
         assert trusted_path.joinpath("items/x/index.html").exists()
 
     @pytest.mark.cov()
-    def test_export_no_outputs(self, fx_bas_cat_env: BasCatEnv):
-        """Coverage test for when site health output isn't included."""
+    def test_export_no_trusted_outputs(self, fx_bas_cat_env: BasCatEnv):
+        """Does not include trusted content when no relevant Outputs are included."""
         fx_bas_cat_env.export(outputs=[SiteResourcesOutput])
 
-    def test_check(self, mocker: MockerFixture, fx_bas_cat_env: BasCatEnv):
-        """
-        Can check catalogue contents.
-
-        Checks are not actually run, this test only verifies the coordination logic.
-        """
-        mocker.patch.object(fx_bas_cat_env._untrusted, "check", return_value=None)
+    def test_check(self, fx_bas_cat_env: BasCatEnv):
+        """Can check catalogue contents."""
         fx_bas_cat_env.check()
+
+        result = fx_bas_cat_env._untrusted._exporter._s3.get_object(
+            Bucket=fx_bas_cat_env._bucket, Key="-/checks/data.json"
+        )
+        assert result["ResponseMetadata"]["HTTPStatusCode"] == 200
+
+    @pytest.mark.cov()
+    def test_check_no_trusted_outputs(self, fx_bas_cat_env: BasCatEnv):
+        """Does not include trusted checks when no relevant Outputs are included."""
+        fx_bas_cat_env.check(outputs=[SiteResourcesOutput])
 
     @pytest.mark.cov()
     @pytest.mark.parametrize("env", ["testing", "live"])
@@ -247,7 +262,7 @@ class TestBasCatEnv:
         fx_bas_cat_env._untrusted._repo = fx_bas_repo
 
         mock_checker = mocker.MagicMock()
-        mocker.patch.object(fx_bas_cat_env._untrusted, "_checker", mock_checker)
+        mocker.patch.object(fx_bas_cat_env, "_checker", mock_checker)
 
         fx_bas_cat_env._untrusted._env = env
 

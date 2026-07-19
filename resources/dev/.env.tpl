@@ -49,6 +49,8 @@ LANTERN_SITE_TRUSTED_RSYNC_BASE_PATH_LIVE="{{ op://Infrastructure/SCAR ADD Metad
 #LANTERN_SITE_TRUSTED_RSYNC_BASE_PATH_TESTING="./resources/dev/apache/run/cat/testing"
 #LANTERN_SITE_TRUSTED_RSYNC_BASE_PATH_LIVE="./resources/dev/apache/run/cat/live"
 
+LANTERN_CHECKS_TRUSTED_USERNAME="op://Employee/qdewrgvwjf3pwxygkli5jkswtq/username"
+LANTERN_CHECKS_TRUSTED_PASSWORD="op://Infrastructure/hnanekrypud5jyamuilznjsv4y/password"
 LANTERN_VERIFY_SHAREPOINT_PROXY_ENDPOINT="op://Infrastructure/SCAR ADD Metadata Toolbox - SharePoint proxy URL/password"
 LANTERN_VERIFY_SAN_PROXY_ENDPOINT="op://Infrastructure/SCAR ADD Metadata Toolbox - SAN proxy URL/password"
 

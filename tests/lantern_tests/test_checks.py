@@ -5,6 +5,7 @@ from http import HTTPMethod, HTTPStatus
 import pytest
 import requests
 from pytest_mock import MockerFixture
+from requests.auth import HTTPBasicAuth
 
 from lantern.checks import Checker, CheckRunner, run_check
 from lantern.config import Config
@@ -37,6 +38,18 @@ class TestCheckRunner:
         fx_check.http_status = HTTPStatus.MOVED_PERMANENTLY
         fx_check.url = "https://example.com/redirect.html"
         fx_check.redirect_location = "https://example.com/index.html"
+        runner = CheckRunner(logger=fx_logger, check=fx_check)
+
+        runner._check_url()
+        assert fx_check.state == CheckState.PASS
+        assert fx_check.result_output == "OK"
+
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    def test_check_url_auth(self, fx_logger: logging.Logger, fx_check: Check):
+        """Can check a URL with basic auth."""
+        fx_check.url = "https://example.com/restricted.html"
+        fx_check.http_auth = HTTPBasicAuth(username="x", password="x")  # noqa: S106
         runner = CheckRunner(logger=fx_logger, check=fx_check)
 
         runner._check_url()

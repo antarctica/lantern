@@ -81,7 +81,7 @@ class TestCheck:
         assert check.url == expected_url
         assert check.file_identifier == expected_fid
 
-    def test_from_site_direct(self):
+    def test_from_site_redirect(self):
         """Can create a Check instance from a SiteRedirect instance."""
         expected_http_status = HTTPStatus.MOVED_PERMANENTLY
         redirect = SiteRedirect(path=Path("x"), target="https://y")

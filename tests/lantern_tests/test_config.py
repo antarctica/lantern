@@ -124,6 +124,7 @@ class TestConfig:
     @pytest.mark.parametrize(
         "envs",
         [
+            # Admin metadata keys
             (
                 {
                     "LANTERN_ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE": None,
@@ -136,6 +137,7 @@ class TestConfig:
                     "LANTERN_ADMIN_METADATA_SIGNING_KEY_PUBLIC": None,
                 }
             ),
+            # Algolia store
             (
                 {
                     "LANTERN_STORE_ALGOLIA_APP_ID": None,
@@ -148,6 +150,7 @@ class TestConfig:
                     "LANTERN_STORE_ALGOLIA_WRITE_API_KEY": None,
                 }
             ),
+            # GitLab store
             (
                 {
                     "LANTERN_STORE_GITLAB_ENDPOINT": None,
@@ -193,6 +196,7 @@ class TestConfig:
                     "LANTERN_STORE_GITLAB_CACHE_PATH": None,
                 }
             ),
+            # Site templates
             (
                 {
                     "LANTERN_TEMPLATES_ALGOLIA_APP_ID": None,
@@ -243,6 +247,7 @@ class TestConfig:
                     "LANTERN_TEMPLATES_ITEM_VERSIONS_ENDPOINT": None,
                 }
             ),
+            # Site untrusted host
             (
                 {
                     "LANTERN_SITE_UNTRUSTED_AWS_ACCESS_ID": None,
@@ -288,6 +293,7 @@ class TestConfig:
                     "LANTERN_SITE_UNTRUSTED_CLOUDFRONT_DIST_LIVE": None,
                 }
             ),
+            # Site trusted host
             (
                 {
                     "LANTERN_SITE_TRUSTED_RSYNC_HOST": None,
@@ -309,14 +315,16 @@ class TestConfig:
                     "LANTERN_SITE_TRUSTED_RSYNC_BASE_PATH_LIVE": None,
                 }
             ),
+            # Base URL
             ({"LANTERN_BASE_URL_TESTING": "x", "LANTERN_BASE_URL_LIVE": None}),
             ({"LANTERN_BASE_URL_TESTING": None, "LANTERN_BASE_URL_LIVE": "x"}),
+            # Checks
             ({"LANTERN_CHECKS_TRUSTED_USERNAME": None, "LANTERN_CHECKS_TRUSTED_PASSWORD": "x"}),
             ({"LANTERN_CHECKS_TRUSTED_USERNAME": "x", "LANTERN_CHECKS_TRUSTED_PASSWORD": None}),
         ],
     )
     def test_validate_missing_required_option(self, envs: dict):
-        """Cannot validate where a required provider or exporter config option is missing."""
+        """Cannot validate where a required config option is missing."""
         envs_bck = self._set_envs(envs)
         config = Config(read_dotenv=False)
 

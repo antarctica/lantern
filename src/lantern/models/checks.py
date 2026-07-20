@@ -72,6 +72,7 @@ class Check:
     - redirect_location: optional expected location header value for redirects
     - file_identifier: optional file identifier for Record related checks, used for grouping in reporting
 
+    Properties known after a check:
     - state: check lifecycle, updated by check method when processed
     - duration: duration of check processing as measured by `time`
     - result_http_status: HTTP status of check, compared against expected status

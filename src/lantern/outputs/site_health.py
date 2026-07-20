@@ -59,7 +59,7 @@ class SiteHealthOutput(OutputSite):
                         "observedValue": self._search_records_count,
                         "observedUnit": "records",
                         "status": "pass",
-                        "affectedEndpoints": [f"{self._meta.base_url}/site"],
+                        "affectedEndpoints": [f"{self._meta.base_url}/search"],
                         "time": f"{self._meta.build_time.isoformat()}",
                     },
                 },

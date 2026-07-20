@@ -11,8 +11,8 @@ from lantern.log import init_sentry
 def _run(logger: logging.Logger, config: Config) -> None:
     s3 = S3Client(
         "s3",
-        aws_access_key_id=config.SITE_UNTRUSTED_S3_ACCESS_ID,
-        aws_secret_access_key=config.SITE_UNTRUSTED_S3_ACCESS_SECRET,
+        aws_access_key_id=config.SITE_UNTRUSTED_AWS_ACCESS_ID,
+        aws_secret_access_key=config.SITE_UNTRUSTED_AWS_ACCESS_SECRET,
         region_name="eu-west-1",
     )
     catalogue = BasCatalogue(logger=logger, config=config, s3=s3)

@@ -319,7 +319,7 @@ If configurable:
 - update the `.env.tpl` template and any existing `.env` files
 - update the `[tool.pytest_env]` section in `pyproject.toml`
 
-In the `tests.lantern_tests.config` module:
+In the `tests.lantern_tests.test_config` module:
 
 - update the expected response in the `test_dumps_safe` method
 - if validated, update and/or add `test_validate_` tests as needed

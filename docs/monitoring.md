@@ -84,6 +84,9 @@ a custom [widget](/docs/site.md#user-feedback).
 contents of a [Site](/docs/architecture.md#sites) and downloads referenced in [Records](/docs/models.md#record-checks)
 via making URL requests to expected resources.
 
+> [!NOTE]
+> Check results are not considered sensitive and are publicly accessible, including for trusted publishing content.
+
 Checks verify:
 
 - a subset of site resources (CSS, images, etc.)
@@ -112,11 +115,12 @@ content, via the [Site](/docs/architecture.md#sites) class.
 > [Record ISO XML](/docs/outputs.md#iso-19115-record-xml-output) Output. This attachment is somewhat arbitrary.
 
 Sets of pending checks are executed in parallel using the `lantern.checks.Checker` class, then processed into
-[Data](#site-checks-data) and [Report](#site-checks-report) via the [Checks](/docs/outputs.md#checks-output) Output.
+[JSON Data](#site-checks-data) and a [Report](#site-checks-report) via the [Checks](/docs/outputs.md#checks-output)
+Output.
 
-Checks are executed using `lantern.checks.CheckRunner` classes, which include methods to make the relevant URL request
-depending on the type of check. For example, checks for [Item Aliases](/docs/models.md#item-aliases)) verify the
-correct redirect location is given and that this location exists.
+Checks are executed using `lantern.checks.CheckRunner` classes, with methods for different types of check. For example,
+[Item Alias](/docs/models.md#item-aliases) checks verify the expected redirect location is returned, and that this
+location exists.
 
 > [!NOTE]
 > Checks for some distribution options in Records are not implemented, and generated as skipped rather than pending.

@@ -334,6 +334,15 @@ Supported distribution options:
 
 Implemented via classes in the `lantern.models.item.catalogue.distributions` package.
 
+### Catalogue item live updates
+
+Where the record includes a resource update frequency of 'continuous' [1], Catalogue Items will include a 'live updates'
+indicator in the item page and item summaries (including search results).
+
+This is intended for items that updated in (near) real-time, such as asset position information.
+
+[1] `identification.maintenance.maintenance_frequency=MaintenanceFrequencyCode.CONTINUAL`
+
 ## Special catalogue items
 
 To support more complex use-cases `ItemCatalogue` subclasses can be used to implement special handling for items.
@@ -554,6 +563,9 @@ Content items wrap a text or binary value with additional metadata including:
 - its media type and any optional profiles
 - optionally, [Content Metadata](#static-site-content-metadata)
 - optionally, a redirect target (the URL the item should redirect to)
+- optionally, a flag to prevent downstream caching:
+  - e.g. for content that changes frequently
+  - defaults to false (caching allowed where configured for an export destination)
 
 > [!TIP]
 > Where using a redirect, consider using a [Site Redirect](#static-site-redirects) instead.

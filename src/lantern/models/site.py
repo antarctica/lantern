@@ -130,6 +130,7 @@ class SiteContent:
     - media_type: content media/MIME (not inferred from path extension, must be explicitly set)
     - object_meta: optional key-value metadata to include alongside content where supported (e.g. in S3)
     - redirect: optional redirect target, i.e. an (external) URL to redirect to for item aliases etc.
+    - prevent_caching: optionally exclude content from any downstream caching (e.g. in CloudFront)
 
     Used by Exporters to persist content in a storage system.
 
@@ -145,6 +146,7 @@ class SiteContent:
     media_type: str
     object_meta: dict[str, str] = field(default_factory=dict)
     redirect: str | None = None
+    prevent_caching: bool = False
 
     def __post_init__(self) -> None:
         """Validate properties."""

@@ -87,10 +87,15 @@ Requires:
 
 Supports:
 
-- [Content Metadata](/docs/models.md#static-site-content-metadata), using
-  [User-Defined Object Metadata](https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingMetadata.html#UserMetadata)
-- Server side redirects (using
-  [`x-amz-website-redirect-location`](https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingMetadata.html#redirect-object-metadata))
+- [Content Metadata](/docs/models.md#static-site-content-metadata):
+  - using
+    [User-Defined Object Metadata](https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingMetadata.html#UserMetadata)
+- Server side redirects:
+  - using
+    [`x-amz-website-redirect-location`](https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingMetadata.html#redirect-object-metadata)
+- Exempting objects from downstream caching:
+  - using [`Cache-Control: no-store`](https://repost.aws/knowledge-center/prevent-cloudfront-from-caching-files)
+  - controlled by the [`SiteContent.prevent_caching`](/docs/models.md#static-site-content) property
 
 > [!NOTE]
 > These features are supported by AWS S3 but MAY NOT be supported by S3 compatible providers.
@@ -99,11 +104,15 @@ Supports:
 
 `lantern.exporters.cloudfront.CloudFrontExporter`
 
+> [!NOTE]
+> This exporter is intended for use with the [S3 Exporter](#s3-exporter) and does not support exporting content.
+
 For invalidating cached content in AWS CloudFront distributions using the
 [AWS Python SDK](https://aws.amazon.com/sdk-for-python/) (`boto`).
 
-> [!NOTE]
-> This exporter is intended for use with the [S3 Exporter](#s3-exporter) and does not support exporting content.
+> [!TIP]
+> Set the [`SiteContent.prevent_caching`](/docs/models.md#static-site-content) flag on content CloudFront SHOULD NOT
+> cache to avoid frequent invalidations.
 
 Requires:
 

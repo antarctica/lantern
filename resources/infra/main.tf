@@ -68,7 +68,7 @@ variable "aws_cf_cdn_arn" {
 }
 
 locals {
-  static_site_ref         = "v0.6.1"       # Static site module version.
+  static_site_ref         = "v0.7.0"       # Static site module version.
   static_site_tls_version = "TLSv1.2_2025" # for compatibility with BAS load balancer
   static_site_csp         = "default-src * data: 'unsafe-inline';"
 }

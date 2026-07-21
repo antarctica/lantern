@@ -245,6 +245,7 @@ class TestSiteContent:
         assert content.media_type == media_type
         assert content.object_meta == {}
         assert content.redirect is None
+        assert content.prevent_caching is False
         assert repr(content) == f"<SiteContent path='{path}' media_type='{media_type}' content_length='{len(value)}'>"
 
     def test_non_relative_path(self):
@@ -268,6 +269,13 @@ class TestSiteContent:
         """Can create a SiteContent instance with optional redirect value."""
         content = SiteContent(content="x", path=Path("x"), media_type="x", redirect=value)
         assert content.redirect == value
+
+    @pytest.mark.cov()
+    @pytest.mark.parametrize("value", [False, True])
+    def test_prevent_caching(self, value: bool):
+        """Can create a SiteContent instance with optional cache prevention flag."""
+        content = SiteContent(content="x", path=Path("x"), media_type="x", prevent_caching=value)
+        assert content.prevent_caching == value
 
 
 class TestSiteRedirect:

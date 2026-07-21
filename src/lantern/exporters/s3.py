@@ -48,6 +48,7 @@ class S3Exporter(ExporterBase):
         content_type: str,
         body: str | bytes,
         redirect: str | None = None,
+        no_cache: bool = False,
         meta: dict | None = None,
     ) -> None:
         """
@@ -57,15 +58,20 @@ class S3Exporter(ExporterBase):
 
         Supports optional object redirect [1].
 
+        Supports optional object cache control, to exclude from possible downstream caching [2].
+
         Requires S3 client as a parameter for use in parallel jobs.
 
         [1] https://docs.aws.amazon.com/AmazonS3/latest/userguide/how-to-page-redirect.html#redirect-requests-object-metadata
+        [2] https://repost.aws/knowledge-center/prevent-cloudfront-from-caching-files
         """
         params: dict = {"Bucket": self._bucket, "Key": key, "Body": body, "ContentType": content_type}
         if isinstance(body, str):
             params["Body"] = body.encode("utf-8")
         if redirect is not None:
             params["WebsiteRedirectLocation"] = redirect
+        if no_cache:
+            params["CacheControl"] = "no-store"
         if meta:
             params["Metadata"] = meta
         self._logger.info(f"Putting {key} as {content_type}")
@@ -78,6 +84,7 @@ class S3Exporter(ExporterBase):
             content_type=item.media_type,
             body=item.content,
             redirect=item.redirect,
+            no_cache=item.prevent_caching,
             meta=item.object_meta,
         )
 

@@ -29,6 +29,7 @@ from lantern.lib.metadata_library.models.record.enums import (
 from lantern.models.item.base.item import ItemBase, ItemSummaryBase
 from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
+from lantern.utils import is_live_record
 
 
 class ObjectRecord(TypedDict):
@@ -58,6 +59,7 @@ class ObjectRecord(TypedDict):
     edition: NotRequired[str]
     imageUrl: NotRequired[str]
     childrenCountFmt: NotRequired[str]
+    liveUpdates: NotRequired[bool]
 
 
 class ItemAlgolia(ItemBase):
@@ -215,10 +217,9 @@ class ItemAlgolia(ItemBase):
         Create Algolia object dict from a record.
 
         Inverse to `ItemAlgolia._loads_from_algolia_object()`.
-        Lossy counterpart to `ItemBase.record` due to partial properties.
         """
         if not self.__record:
-            msg = "Creating Algolia objects requires a record."
+            msg = "Algolia objects require a record."
             raise ValueError(msg) from None
 
         _summary = ItemSummaryBase(record=self.__record, admin_keys=self._admin_keys)
@@ -253,6 +254,8 @@ class ItemAlgolia(ItemBase):
             obj["imageUrl"] = _summary.graphic_href
         if _summary_children:
             obj["childrenCountFmt"] = _summary_children
+        if is_live_record(self.__record):
+            obj["liveUpdates"] = True
         return obj
 
     @property

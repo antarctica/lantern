@@ -49,6 +49,9 @@
     {% if data.published %}
       {{ published(data.published) }}
     {% endif %}
+    {% if data.live %}
+      {{ live() }}
+    {% endif %}
     {% if data.restricted %}
       {{ access() }}
     {% endif %}
@@ -101,6 +104,12 @@
 {% macro published(data) %}
   {% call summary_grid_section(title="Published") %}
     {{ com.time(data, id='summary-published') }}
+  {% endcall %}
+{% endmacro %}
+
+{% macro live() %}
+  {% call summary_grid_section(id="summary-live", title="Updates") %}
+    {{ com.live_i() }} This item is frequently updated
   {% endcall %}
 {% endmacro %}
 

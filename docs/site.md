@@ -242,6 +242,11 @@ A set of targeted enhancements to:
 
 ## Caching
 
+### Cache exception
+
+Where caching is enabled for a site, content which changes frequently, or which should overwise not be cached, can be
+exempted using the [Static Site Content](/docs/models.md#static-site-content) `prevent_caching` flag.
+
 ### Cache busting
 
 To ensure the latest CSS and JS files are used by browsers, a query string value is appended to the URLs of static

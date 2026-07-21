@@ -8,6 +8,7 @@ from lantern.models.checks import Check, CheckType, RecordChecks
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta, SiteContent
 from lantern.outputs.base import OutputRecord
+from lantern.utils import is_live_record
 
 
 class RecordIsoJsonOutput(OutputRecord):
@@ -49,6 +50,7 @@ class RecordIsoJsonOutput(OutputRecord):
                 content=self._content,
                 path=Path("records") / f"{self._record.file_identifier}.json",
                 media_type="application/json",
+                prevent_caching=is_live_record(self._record),
                 object_meta=self._object_meta,
             )
         ]
@@ -93,6 +95,7 @@ class RecordIsoXmlOutput(OutputRecord):
                 path=Path("records") / f"{self._record.file_identifier}.xml",
                 content=self._content,
                 media_type="application/xml",
+                prevent_caching=is_live_record(self._record),
                 object_meta=self._object_meta,
             )
         ]
@@ -188,6 +191,7 @@ class RecordIsoHtmlOutput(OutputRecord):
                 path=Path("records") / f"{self._record.file_identifier}.html",
                 content=self._content,
                 media_type="text/html",
+                prevent_caching=is_live_record(self._record),
                 object_meta=self._object_meta,
             )
         ]

@@ -2,14 +2,23 @@ import pytest
 from jinja2 import Environment
 
 from lantern.lib.metadata_library.models.record.elements.common import Identifier
+from lantern.lib.metadata_library.models.record.enums import MaintenanceFrequencyCode
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
-from lantern.utils import get_jinja_env, get_record_aliases, minify_html
+from lantern.utils import get_jinja_env, get_record_aliases, is_live_record, minify_html
 
 
 @pytest.mark.cov()
 class TestUtils:
     """Test app utils not tested elsewhere."""
+
+    @pytest.mark.parametrize("live", [False, True])
+    def test_live_record(self, fx_revision_model_min: RecordRevision, live: bool):
+        """Can determine if a record is 'live' based on maintenance frequency."""
+        if live:
+            fx_revision_model_min.identification.maintenance.maintenance_frequency = MaintenanceFrequencyCode.CONTINUAL
+
+        assert is_live_record(fx_revision_model_min) == live
 
     def test_get_record_aliases(self, fx_revision_model_min: RecordRevision):
         """Can get any aliases in a record."""

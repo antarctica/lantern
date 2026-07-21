@@ -36,6 +36,8 @@
 
 {% macro search_i_classes() %}fa-regular fa-magnifying-glass{% endmacro %}
 
+{% macro live_i_classes() %}fa-regular fa-signal-stream fa-fade{% endmacro %}
+
 {% macro maintenance_i_classes() %}fa-regular fa-screwdriver-wrench{% endmacro %}
 
 {% macro back_to_top_id() %}site-top{% endmacro %}
@@ -79,6 +81,8 @@
 {% macro ext_link_i() %}<i class="fa-regular fa-arrow-up-right-from-square" aria-hidden="true"><span class="sr-only">External link, opens in a new window.</span></i>{% endmacro %}
 
 {% macro experimental_i() %}<i class="fa-regular fa-flask-round-potion" aria-hidden="true"></i>{% endmacro %}
+
+{% macro live_i() %}<i class="{{ live_i_classes() }}" aria-hidden="true"></i>{% endmacro %}
 
 {% macro ext_link_a(href, value) %}<a class="{{ link_classes() }}" href="{{ href }}" target="_blank"> {{ value }} {{ ext_link_i() }}</a>{% endmacro %}
 
@@ -177,6 +181,10 @@
   {% if data.children %}
     {{ item_summary_fragment_divider() }}
     <span>{{ data.children }}</span>
+  {% endif %}
+  {% if data.live %}
+    {{ item_summary_fragment_divider() }}
+    <span>{{ live_i() }} Live updates</span>
   {% endif %}
   {% if data.restricted %}
     {{ item_summary_fragment_divider() }}

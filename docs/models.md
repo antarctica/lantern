@@ -304,7 +304,7 @@ Intentionally omitted properties (references not normative or exhaustive):
 - `*.constraints[type='access']` (not trustworthy, see [Item Access](#item-access-levels))
 - `distribution.distributor` (not useful to end-users)
 
-### Catalogue items supported distribution options
+### Catalogue item supported distribution options
 
 Supported distribution options:
 
@@ -345,7 +345,7 @@ This is intended for items that updated in (near) real-time, such as asset posit
 
 ## Special catalogue items
 
-To support more complex use-cases `ItemCatalogue` subclasses can be used to implement special handling for items.
+To support more complex use-cases, `ItemCatalogue` subclasses MAY be used to implement special handling for items.
 
 Special catalogue items classes MUST implement a public `matches` class method returning a boolean indicating whether
 the special class applies to a given Record.
@@ -388,24 +388,25 @@ Algolia items represent [Items](#items) as objects within an Algolia search inde
 
 Consists of limited properties needed to query, refine (via filters/facets) and render Item summaries as search results.
 
-| Record/Item Property          | Algolia Property | Algolia Type   | Comment                  |
-|-------------------------------|------------------|----------------|--------------------------|
-| `item.resource_id`            | `objectID`       | String         | -                        |
-| `item.resource_revision`      | `objectRevID`    | String         | -                        |
-| `record.metadata.date_stamp`  | `objectRevDate`  | Integer        | As timestamp             |
-| `item.resource_type.name`     | `objectType`     | String         | As enum name             |
-| `summary.resource_type_icon`  | `objectTypeIcon` | String         | -                        |
-| `summary.date`                | `objectDate`     | Integer / None | As timestamp             |
-| -                             | `objectRecData`  | String         | _See note_               |
-| `summary.resource_type_label` | `type`           | String         | -                        |
-| `item.title_plain`            | `name`           | String         | Without formatting       |
-| `item.title_html`             | `nameHtml`       | String         | As HTML formatted string |
-| `item.summary_html`           | `summaryHtml`    | String / None  | As HTML formatted string |
-| `summary.restricted`          | `restricted`     | Boolean        | -                        |
-| `summary.date`                | `date`           | String / None  | As pre-formatted string  |
-| `summary.edition`             | `edition`        | String / None  | As pre-formatted string  |
-| `summary.graphic_href`        | `imageUrl`       | String / None  | -                        |
-| `summary.children`            | `childrenCount`  | String / None  | As pre-formatted string  |
+| Record/Item Property                                 | Algolia Property | Algolia Type   | Comment                  |
+|------------------------------------------------------|------------------|----------------|--------------------------|
+| `item.resource_id`                                   | `objectID`       | String         | -                        |
+| `item.resource_revision`                             | `objectRevID`    | String         | -                        |
+| `record.metadata.date_stamp`                         | `objectRevDate`  | Integer        | As timestamp             |
+| `item.resource_type.name`                            | `objectType`     | String         | As enum name             |
+| `summary.resource_type_icon`                         | `objectTypeIcon` | String         | -                        |
+| `summary.date`                                       | `objectDate`     | Integer / None | As timestamp             |
+| -                                                    | `objectRecData`  | String         | _See note_               |
+| `summary.resource_type_label`                        | `type`           | String         | -                        |
+| `item.title_plain`                                   | `name`           | String         | Without formatting       |
+| `item.title_html`                                    | `nameHtml`       | String         | As HTML formatted string |
+| `item.summary_html`                                  | `summaryHtml`    | String / None  | As HTML formatted string |
+| `summary.restricted`                                 | `restricted`     | Boolean        | -                        |
+| `summary.date`                                       | `date`           | String / None  | As pre-formatted string  |
+| `summary.edition`                                    | `edition`        | String / None  | As pre-formatted string  |
+| `summary.graphic_href`                               | `imageUrl`       | String / None  | -                        |
+| `summary.children`                                   | `childrenCount`  | String / None  | As pre-formatted string  |
+| `record.identification.maintenance.update_frequency` | `liveUpdate`     | Boolean        | As pre-formatted string |
 
 `_objectRecData` is a JSON encoded tuple/list of properties needed to reconstruct a valid minimal record from an object:
 

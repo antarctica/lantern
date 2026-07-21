@@ -28,6 +28,7 @@ from lantern.models.item.base.utils import md_as_plain
 from lantern.models.item.catalogue.enums import ItemSuperType
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.stores.base import SelectRecordProtocol
+from lantern.utils import is_live_record
 
 TFormattedDate = TypeVar("TFormattedDate", bound="FormattedDate")
 
@@ -77,6 +78,7 @@ class FormattedDate:
 class ItemSummaryFragments(TypedDict):
     """Properties shown as part of an ItemSummaryCatalogue."""
 
+    live: bool
     restricted: bool
     item_type_label: str
     item_type_icon: str
@@ -107,6 +109,7 @@ class ItemCatalogueSummary(ItemSummaryBase):
     def fragments(self) -> ItemSummaryFragments:
         """UI fragments (icons and labels) for item summary."""
         return ItemSummaryFragments(
+            live=is_live_record(self.record),
             restricted=self.restricted,
             item_type_label=self.resource_type_label,
             item_type_icon=self.resource_type_icon,
@@ -573,6 +576,7 @@ class PageSummary:
         published_date: FormattedDate | None,
         revision_date: FormattedDate | None,
         aggregations: Aggregations,
+        live: bool,
         restricted: bool,
         citation: str | None,
         description: str,
@@ -582,6 +586,7 @@ class PageSummary:
         self._published_date = published_date
         self._revision_date = revision_date
         self._aggregations = aggregations
+        self._live = live
         self._restricted = restricted
         self._citation = citation
         self._description = description
@@ -597,6 +602,7 @@ class PageSummary:
         """
         return (
             self.restricted
+            or self.live
             or self.edition is not None
             or self.published is not None
             or len(self.collections) > 0
@@ -639,6 +645,11 @@ class PageSummary:
         """Item that represents the physical map an item is one side of."""
         related = self._aggregations.parent_printed_map
         return Link(value=related.title_fmt, href=related.href) if related else None
+
+    @property
+    def live(self) -> bool:
+        """Live updating."""
+        return self._live
 
     @property
     def restricted(self) -> bool:

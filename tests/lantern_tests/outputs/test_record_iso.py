@@ -12,7 +12,11 @@ from lantern.lib.metadata_library.models.record.elements.common import (
     OnlineResource,
 )
 from lantern.lib.metadata_library.models.record.elements.distribution import Distribution, TransferOption
-from lantern.lib.metadata_library.models.record.enums import ContactRoleCode, OnlineResourceFunctionCode
+from lantern.lib.metadata_library.models.record.enums import (
+    ContactRoleCode,
+    MaintenanceFrequencyCode,
+    OnlineResourceFunctionCode,
+)
 from lantern.lib.metadata_library.models.record.utils.admin import set_admin
 from lantern.models.checks import CheckType
 from lantern.models.record.revision import RecordRevision
@@ -28,10 +32,14 @@ class TestRecordIsoJsonOutput:
         output = RecordIsoJsonOutput(logger=fx_logger, meta=fx_export_meta, record=fx_revision_model_min)
         assert isinstance(output, RecordIsoJsonOutput)
 
+    @pytest.mark.parametrize("live", [False, True])
     def test_content(
-        self, fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_revision_model_min: RecordRevision
+        self, fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_revision_model_min: RecordRevision, live: bool
     ):
         """Can generate site content items."""
+        if live:
+            fx_revision_model_min.identification.maintenance.maintenance_frequency = MaintenanceFrequencyCode.CONTINUAL
+
         output = RecordIsoJsonOutput(logger=fx_logger, meta=fx_export_meta, record=fx_revision_model_min)
         results = output.content
         assert len(results) == 1
@@ -40,6 +48,7 @@ class TestRecordIsoJsonOutput:
         assert '{\n  "$schema": "https://' in result.content
         assert result.path == Path(f"records/{fx_revision_model_min.file_identifier}.json")
         assert result.media_type == "application/json"
+        assert result.prevent_caching == live
         assert result.object_meta == {
             "file_identifier": fx_revision_model_min.file_identifier,
             "file_revision": fx_revision_model_min.file_revision,
@@ -70,13 +79,18 @@ class TestRecordIsoXmlOutput:
         else:
             assert "admin_metadata" not in result
 
+    @pytest.mark.parametrize("live", [False, True])
     def test_content(
         self,
         fx_record_iso_xml_output: RecordIsoXmlOutput,
         fx_export_meta: ExportMeta,
         fx_revision_model_min: RecordRevision,
+        live: bool,
     ):
         """Can generate site content items."""
+        if live:
+            fx_revision_model_min.identification.maintenance.maintenance_frequency = MaintenanceFrequencyCode.CONTINUAL
+
         results = fx_record_iso_xml_output.content
         assert len(results) == 1
         result = results[0]
@@ -84,6 +98,7 @@ class TestRecordIsoXmlOutput:
         assert "<gmi:MI_Metadata" in result.content
         assert result.path == Path(f"records/{fx_revision_model_min.file_identifier}.xml")
         assert result.media_type == "application/xml"
+        assert result.prevent_caching == live
         assert result.object_meta == {
             "file_identifier": fx_revision_model_min.file_identifier,
             "file_revision": fx_revision_model_min.file_revision,
@@ -121,10 +136,14 @@ class TestRecordIsoHtmlOutput:
         output = RecordIsoHtmlOutput(logger=fx_logger, meta=fx_export_meta, record=fx_revision_model_min)
         assert isinstance(output, RecordIsoHtmlOutput)
 
+    @pytest.mark.parametrize("live", [False, True])
     def test_content(
-        self, fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_revision_model_min: RecordRevision
+        self, fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_revision_model_min: RecordRevision, live: bool
     ):
         """Can generate site content items."""
+        if live:
+            fx_revision_model_min.identification.maintenance.maintenance_frequency = MaintenanceFrequencyCode.CONTINUAL
+
         output = RecordIsoHtmlOutput(logger=fx_logger, meta=fx_export_meta, record=fx_revision_model_min)
         results = output.content
         assert len(results) == 1
@@ -133,6 +152,7 @@ class TestRecordIsoHtmlOutput:
         assert "<html xmlns:gco" in result.content
         assert result.path == Path(f"records/{fx_revision_model_min.file_identifier}.html")
         assert result.media_type == "text/html"
+        assert result.prevent_caching == live
         assert result.object_meta == {
             "file_identifier": fx_revision_model_min.file_identifier,
             "file_revision": fx_revision_model_min.file_revision,

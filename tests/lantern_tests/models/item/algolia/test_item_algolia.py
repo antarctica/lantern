@@ -196,7 +196,7 @@ class TestItemAlgolia:
     def test_object_from_object(self, fx_item_algolia_object_min: ObjectRecord):
         """Cannot create an Algolia search object from an existing object."""
         item = ItemAlgolia(algolia_object=fx_item_algolia_object_min)
-        with pytest.raises(ValueError, match=r"Creating Algolia objects requires a record."):
+        with pytest.raises(ValueError, match=r"Algolia objects require a record."):
             _ = item.object
 
     def test_min_loop(self, fx_revision_model_min: RecordRevision):

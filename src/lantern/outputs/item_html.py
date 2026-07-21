@@ -47,10 +47,9 @@ class ItemCatalogueOutput(OutputRecord):
         return ItemCatalogue
 
     @property
-    def _content(self) -> str:
-        """Encode record as data catalogue item in HTML."""
+    def _item(self) -> ItemCatalogue:
         item_class = self._item_class()
-        item = item_class(
+        return item_class(
             site_meta=self._meta.site_metadata,
             record=self._record,
             admin_meta_keys=self._meta.admin_meta_keys,
@@ -58,6 +57,10 @@ class ItemCatalogueOutput(OutputRecord):
             select_record=self._select_record,
         )
 
+    @property
+    def _content(self) -> str:
+        """Encode record as a HTML data catalogue item."""
+        item = self._item
         raw = self._jinja.get_template(self._template_path).render(item=item, meta=item.site_meta)
         return minify_html(raw)
 
@@ -70,6 +73,7 @@ class ItemCatalogueOutput(OutputRecord):
                 path=Path("items") / self._record.file_identifier / "index.html",
                 media_type="text/html",
                 object_meta=self._object_meta,
+                prevent_caching=self._item.live,
             )
         ]
 

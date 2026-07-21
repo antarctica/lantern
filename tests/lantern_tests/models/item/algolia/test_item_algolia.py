@@ -6,12 +6,19 @@ import pytest
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
 from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 
-from lantern.lib.metadata_library.models.record.elements.common import Constraint, ContactIdentity, Date, Identifier
+from lantern.lib.metadata_library.models.record.elements.common import (
+    Constraint,
+    ContactIdentity,
+    Date,
+    Identifier,
+    Maintenance,
+)
 from lantern.lib.metadata_library.models.record.elements.identification import Aggregation, GraphicOverview
 from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,
     ConstraintRestrictionCode,
     ConstraintTypeCode,
+    MaintenanceFrequencyCode,
 )
 from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.utils.admin import set_admin
@@ -124,6 +131,7 @@ class TestItemAlgolia:
     @pytest.mark.parametrize("has_edition", [False, True])
     @pytest.mark.parametrize("has_graphic", [False, True])
     @pytest.mark.parametrize("has_children", [False, True])
+    @pytest.mark.parametrize("is_live", [False, True])
     def test_object(
         self,
         fx_revision_model_min: RecordRevision,
@@ -135,6 +143,7 @@ class TestItemAlgolia:
         has_edition: bool,
         has_graphic: bool,
         has_children: bool,
+        is_live: bool,
     ):
         """Can create an Algolia search object from a record."""
         fx_revision_model_min.identification.title = "_x_"
@@ -173,6 +182,11 @@ class TestItemAlgolia:
                 )
             )
             fx_item_algolia_object_min["childrenCountFmt"] = "1 item"
+        if is_live:
+            fx_revision_model_min.identification.maintenance = Maintenance(
+                maintenance_frequency=MaintenanceFrequencyCode.CONTINUAL
+            )
+            fx_item_algolia_object_min["liveUpdates"] = True
 
         item = ItemAlgolia(record=fx_revision_model_min, admin_keys=fx_admin_meta_keys)
         result = item.object
@@ -182,7 +196,7 @@ class TestItemAlgolia:
     def test_object_from_object(self, fx_item_algolia_object_min: ObjectRecord):
         """Cannot create an Algolia search object from an existing object."""
         item = ItemAlgolia(algolia_object=fx_item_algolia_object_min)
-        with pytest.raises(ValueError, match=r"Creating Algolia objects requires a record."):
+        with pytest.raises(ValueError, match=r"Algolia objects require a record."):
             _ = item.object
 
     def test_min_loop(self, fx_revision_model_min: RecordRevision):

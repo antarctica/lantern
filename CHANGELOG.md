@@ -50,6 +50,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * `SECURITY.md` file for reporting security vulnerabilities
 * Scheduled CI pipeline to run Python vulnerability checks periodically
 * Site checks for trusted content
+* Flag to exclude content items from cached, S3 backed, CloudFront destinations using an object cache control header
+* 'Live' items for information updated in near real time (multiple times per hour)
 
 ### Fixed
 

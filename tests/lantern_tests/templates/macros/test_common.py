@@ -12,13 +12,20 @@ import pytest
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
 from bs4 import BeautifulSoup
 
-from lantern.lib.metadata_library.models.record.elements.common import Constraint, Constraints, Date, Identifier
+from lantern.lib.metadata_library.models.record.elements.common import (
+    Constraint,
+    Constraints,
+    Date,
+    Identifier,
+    Maintenance,
+)
 from lantern.lib.metadata_library.models.record.elements.identification import Aggregation
 from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,
     ConstraintRestrictionCode,
     ConstraintTypeCode,
     HierarchyLevelCode,
+    MaintenanceFrequencyCode,
 )
 from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, set_admin
@@ -156,6 +163,36 @@ class TestItemSummary:
         else:
             # noinspection PyTypeChecker
             assert html.find(name="span", string="0 items") is None
+
+    @pytest.mark.parametrize(
+        ("value", "expected"),
+        [
+            (
+                Maintenance(maintenance_frequency=MaintenanceFrequencyCode.NOT_PLANNED),
+                False,
+            ),
+            (
+                Maintenance(maintenance_frequency=MaintenanceFrequencyCode.CONTINUAL),
+                True,
+            ),
+        ],
+    )
+    def test_live(self, value: Maintenance, expected: bool):
+        """
+        Can get frequently updated 'live' tag with expected value from summary.
+
+        Only shown if restricted.
+        """
+        record = deepcopy(self.summary_base._record)
+        record.identification.maintenance = value
+        summary = ItemCatalogueSummary(record=record, admin_keys=self.summary_base._admin_keys)
+
+        html = BeautifulSoup(self._render(summary), parser="html.parser", features="lxml")
+        result = html.find(lambda tag: tag.name == "span" and "Live updates" in tag.get_text())
+        if expected:
+            assert result is not None
+        else:
+            assert result is None
 
     @pytest.mark.parametrize(
         ("value", "expected"),

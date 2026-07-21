@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 
 from lantern.lib.metadata_library.models.record.elements.common import Identifier
+from lantern.lib.metadata_library.models.record.enums import MaintenanceFrequencyCode
 from lantern.models.item.catalogue.item import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
@@ -41,13 +42,22 @@ class TestItemCatalogueOutput:
         result = fx_item_output._item_class()
         assert result == expected
 
+    @pytest.mark.parametrize("live", [False, True])
     def test_content(
         self,
         fx_item_output: ItemCatalogueOutput,
         fx_export_meta: ExportMeta,
         fx_revision_model_min: RecordRevision,
+        live: bool,
     ):
-        """Can generate site content items."""
+        """
+        Can generate site content items.
+
+        Indirectly tests `.item` property.
+        """
+        if live:
+            fx_revision_model_min.identification.maintenance.maintenance_frequency = MaintenanceFrequencyCode.CONTINUAL
+
         results = fx_item_output.content
         assert len(results) == 1
         result = results[0]
@@ -55,6 +65,7 @@ class TestItemCatalogueOutput:
         assert "<!doctype html>" in result.content
         assert result.path == Path(f"items/{fx_revision_model_min.file_identifier}/index.html")
         assert result.media_type == "text/html"
+        assert result.prevent_caching == live
         assert result.object_meta == {
             "build_key": fx_export_meta.build_key,
             "file_identifier": fx_revision_model_min.file_identifier,

@@ -32,6 +32,7 @@ from lantern.models.item.catalogue.tabs import (
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import OpenGraphMeta, SchemaOrgAuthor, SchemaOrgMeta, SiteMeta
 from lantern.stores.base import SelectRecordProtocol
+from lantern.utils import is_live_record
 
 
 class ItemCatalogue(ItemBase):
@@ -292,6 +293,11 @@ class ItemCatalogue(ItemBase):
         return PageHeader(title=self.title_html, item_type=self.resource_type)
 
     @property
+    def live(self) -> bool:
+        """Whether item is updated frequently enough to be considered 'live'."""
+        return is_live_record(self._record)
+
+    @property
     def summary(self) -> PageSummary:
         """Item summary."""
         return PageSummary(
@@ -300,6 +306,7 @@ class ItemCatalogue(ItemBase):
             published_date=cast(FormattedDate | None, self._dates.publication),
             revision_date=cast(FormattedDate | None, self._dates.revision),
             aggregations=self._aggregations,
+            live=self.live,
             restricted=self._restricted,
             citation=self.citation_html,
             description=self.description_html,

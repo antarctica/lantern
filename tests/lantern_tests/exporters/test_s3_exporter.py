@@ -18,8 +18,15 @@ class TestS3Exporter:
     @pytest.mark.parametrize("value", ["x", b"x"])
     @pytest.mark.parametrize("meta", [False, True])
     @pytest.mark.parametrize("redirect", [False, True])
+    @pytest.mark.parametrize("cache", [True, False])
     def test_export(
-        self, fx_s3_exporter: S3Exporter, fx_site_content: SiteContent, value: str | bytes, meta: bool, redirect: bool
+        self,
+        fx_s3_exporter: S3Exporter,
+        fx_site_content: SiteContent,
+        value: str | bytes,
+        meta: bool,
+        redirect: bool,
+        cache: bool,
     ):
         """Can export some content."""
         expected_meta = {"x": "x"} if meta else {}
@@ -28,9 +35,15 @@ class TestS3Exporter:
         fx_site_content.object_meta = expected_meta
         if redirect:
             fx_site_content.redirect = expected_redirect
+        if not cache:
+            fx_site_content.prevent_caching = True
 
         fx_s3_exporter.export(content=[fx_site_content])
         result = fx_s3_exporter._s3.get_object(Bucket=fx_s3_exporter._bucket, Key=str(fx_site_content.path))
         assert result["ResponseMetadata"]["HTTPStatusCode"] == 200
         if redirect:
             assert result["WebsiteRedirectLocation"] == expected_redirect
+        if not cache:
+            assert result["CacheControl"] == "no-store"
+        else:
+            assert "CacheControl" not in result

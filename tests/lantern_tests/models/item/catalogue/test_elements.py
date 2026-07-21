@@ -610,7 +610,7 @@ class TestPageSummary:
     """Test Catalogue Item summary panel."""
 
     @pytest.mark.parametrize(
-        ("item_type", "edition", "published", "aggregations", "restricted", "citation"),
+        ("item_type", "edition", "published", "aggregations", "live", "restricted", "citation"),
         [
             (
                 HierarchyLevelCode.PRODUCT,
@@ -629,6 +629,7 @@ class TestPageSummary:
                     ),
                     select_record=_select_record,
                 ),
+                True,
                 False,
                 "x",
             ),
@@ -641,6 +642,7 @@ class TestPageSummary:
                     aggregations=RecordAggregations([]),
                     select_record=_select_record,
                 ),
+                False,
                 True,
                 None,
             ),
@@ -662,6 +664,7 @@ class TestPageSummary:
                     select_record=_select_record,
                 ),
                 False,
+                False,
                 "x",
             ),
         ],
@@ -672,6 +675,7 @@ class TestPageSummary:
         edition: str | None,
         published: str | None,
         aggregations: Aggregations,
+        live: bool,
         restricted: bool,
         citation: str | None,
     ):
@@ -685,12 +689,14 @@ class TestPageSummary:
             published_date=published,
             revision_date=None,
             aggregations=aggregations,
+            live=live,
             restricted=restricted,
             citation=citation,
             description="x",
         )
         assert summary.collections == collections
         assert summary.edition == edition
+        assert summary.live == live
         assert summary.restricted == restricted
         assert summary.about == "x"
 
@@ -700,13 +706,14 @@ class TestPageSummary:
             assert summary.citation is None
 
     @pytest.mark.parametrize(
-        ("edition", "published", "restricted", "aggregations", "expected"),
+        ("edition", "published", "live", "restricted", "aggregations", "expected"),
         [
             # [all triggers]
             (
                 "1",
                 "x",
-                False,
+                True,
+                True,
                 Aggregations(
                     admin_meta_keys=_admin_meta_keys(),
                     aggregations=RecordAggregations(
@@ -737,6 +744,7 @@ class TestPageSummary:
                 "1",
                 None,
                 False,
+                False,
                 Aggregations(
                     admin_meta_keys=_admin_meta_keys(),
                     aggregations=RecordAggregations(
@@ -756,6 +764,7 @@ class TestPageSummary:
             (
                 None,
                 "x",
+                False,
                 False,
                 Aggregations(
                     admin_meta_keys=_admin_meta_keys(),
@@ -777,6 +786,7 @@ class TestPageSummary:
                 None,
                 None,
                 False,
+                False,
                 Aggregations(
                     admin_meta_keys=_admin_meta_keys(),
                     aggregations=RecordAggregations([]),
@@ -787,7 +797,13 @@ class TestPageSummary:
         ],
     )
     def test_grid_enabled(
-        self, edition: str | None, published: str | None, restricted: bool, aggregations: Aggregations, expected: bool
+        self,
+        edition: str | None,
+        published: str | None,
+        live: bool,
+        restricted: bool,
+        aggregations: Aggregations,
+        expected: bool,
     ):
         """Can determine whether to show item summary grid."""
         summary = PageSummary(
@@ -795,6 +811,7 @@ class TestPageSummary:
             edition=edition,
             published_date=published,
             revision_date=None,
+            live=live,
             restricted=restricted,
             aggregations=aggregations,
             citation=None,
@@ -834,6 +851,7 @@ class TestPageSummary:
             edition=None,
             published_date=published,
             revision_date=revision,
+            live=False,
             restricted=False,
             aggregations=Aggregations(
                 admin_meta_keys=fx_admin_meta_keys, aggregations=RecordAggregations([]), select_record=_select_record
@@ -863,6 +881,7 @@ class TestPageSummary:
                 aggregations=RecordAggregations(aggregations),
                 select_record=_select_record,
             ),
+            live=False,
             restricted=False,
             edition=None,
             published_date=None,

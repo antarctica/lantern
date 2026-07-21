@@ -19,6 +19,7 @@ from lantern.lib.metadata_library.models.record.enums import (
     ConstraintTypeCode,
     ContactRoleCode,
     HierarchyLevelCode,
+    MaintenanceFrequencyCode,
 )
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, set_admin
 from lantern.models.item.base.elements import Link
@@ -295,6 +296,16 @@ class TestItemCatalogue:
 
         assert fx_item_cat_model_min.page_header.title == expected_title
         assert fx_item_cat_model_min.page_header.subtitle[0] == expected_type
+
+    @pytest.mark.parametrize("live", [False, True])
+    def test_live(self, fx_item_cat_model_min: ItemCatalogue, live: bool):
+        """Can determine whether item is updated frequently enough to be considered 'live'."""
+        if live:
+            fx_item_cat_model_min.record.identification.maintenance.maintenance_frequency = (
+                MaintenanceFrequencyCode.CONTINUAL
+            )
+
+        assert fx_item_cat_model_min.live == live
 
     def test_summary(self, fx_item_cat_model_min: ItemCatalogue):
         """

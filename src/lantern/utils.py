@@ -2,8 +2,18 @@ from jinja2 import Environment, PackageLoader, select_autoescape
 from minify_html import minify
 
 from lantern.lib.metadata_library.models.record.elements.common import Identifier
+from lantern.lib.metadata_library.models.record.enums import MaintenanceFrequencyCode
 from lantern.models.record.const import ALIAS_NAMESPACE
 from lantern.models.record.record import Record
+
+
+def is_live_record(record: Record) -> bool:
+    """
+    Determine if a record is updated frequently enough to be considered 'live' or in near real time.
+
+    Determined based on the stated record update frequency.
+    """
+    return record.identification.maintenance.maintenance_frequency == MaintenanceFrequencyCode.CONTINUAL
 
 
 def get_record_aliases(record: Record) -> list[Identifier]:

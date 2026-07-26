@@ -62,6 +62,7 @@ test = [
     "pytest-recording>=0.13.4",
     "pytest-unordered>=0.7.0",
     "pytest-xdist>=3.8.0",
+    "schemathesis>=4.22.3",
 ]
 
 [tool.uv.exclude-newer-package]
@@ -76,8 +77,10 @@ explicit = true
 [tool.taskipy.variables]
 docs_targets = "docs/ README.md CHANGELOG.md"
 types_targets = "src/"
-targets = "src/ tasks/ tests/"
+targets = "src/ tasks/ tests/ tests_slow/"
 test_base = "pytest -n auto"
+test_slow_base = "{test_base} tests_slow/"
+ci_test_options = "-o junit_family=xunit2 --junitxml=test-results.xml --continue-on-collection-errors"
 cov_options = "--cov --cov-report=html"
 local_stack_compose = "./resources/dev/docker-compose.yml"
 
@@ -90,12 +93,14 @@ types = { cmd = "ty check {types_targets}", help = "Type check app", use_vars = 
 markdown = { cmd = "pymarkdown scan --recurse {docs_targets}", help = "Lint docs", use_vars = true }
 pre-commit = { cmd = "pre-commit run --all-files", help = "Run pre-commit hooks on all files" }
 test = { cmd = "{test_base}", help = "Run tests", use_vars = true }
+test-slow = { cmd = "{test_slow_base}", help = "Run slow tests (Playwright + Schemathesis)", use_vars = true }
 test-cov = { cmd = "{test_base} {cov_options}", help = "Run tests with coverage", use_vars = true }
 test-reset = { cmd = "pytest --cache-clear", help = "Reset pytest cache and run tests" }
 audit = { cmd = "uv audit --frozen", help = "Check for insecure dependencies" }
 outdated = { cmd = "uv tree --all-groups --outdated --depth=1", help = "List outdated directed dependencies" }
 # CI
-ci-test = { cmd = "{test_base} {cov_options} -o junit_family=xunit2 --junitxml=test-results.xml --continue-on-collection-errors", help = "Called by CI", use_vars = true }
+ci-test = { cmd = "{test_base} {cov_options} {ci_test_options}", help = "Run main tests in CI", use_vars = true }
+ci-test-slow = { cmd = "{test_base} {ci_test_options}", help = "Run slow tests in CI", use_vars = true }
 # local stack
 stack-start = { cmd = "docker-compose -f {local_stack_compose} up -d", help = "Start local dev stack", use_vars = true }
 stack-stop = { cmd = "docker-compose -f {local_stack_compose} down", help = "Stop local dev stack", use_vars = true }
@@ -196,15 +201,16 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-# config.py   |   D401 | ignore imperative mood in docstrings (too unreliable)
-# config.py   |   N802 | ignore use of upper case method names
+# config.py          |   D401 | ignore imperative mood in docstrings (too unreliable)
+# config.py          |   N802 | ignore use of upper case method names
 "config.py" = ["D401", "N802"]
-# tailwind.py |   N802 | ignore use of upper case method names in config subclass
+# tailwind.py        |   N802 | ignore use of upper case method names in config subclass
 "tasks/tailwind.py" = ["N802"]
-#   tests/*   | ANN201 | ignore public functions
-#   tests/*   | ANN401 | ignore use of 'Any' type
-#   tests/*   |   S101 | ignore use of assert
+#   tests(_slow)/*   | ANN201 | ignore public functions
+#   tests(_slow)/*   | ANN401 | ignore use of 'Any' type
+#   tests(_slow)/*   |   S101 | ignore use of assert
 "tests/*" = ["ANN201", "ANN401", "D401", "S101"]
+"tests_slow/*" = ["ANN201", "ANN401", "D401", "S101"]
 
 [tool.ruff.lint.flake8-annotations]
 allow-star-arg-any = true
@@ -218,7 +224,7 @@ ignore-variadic-names = true
 
 [tool.ty.src]
 include = ["src", "tasks"]
-exclude = ["tests"]
+exclude = ["tests", "tests_slow"]
 
 [tool.pymarkdown]
 plugins.md013.line_length = 120
@@ -270,6 +276,7 @@ X_ADMIN_METADATA_SIGNING_KEY_PRIVATE = "{\"kty\":\"EC\",\"kid\":\"bas_metadata_t
 # --ff             | run failed tests first
 # -n 0             | do not run tests in parallel [overridden when running all tests]
 addopts = "--strict-markers --random-order -x --ff -n 0"
+testpaths = ["tests"]  # run main tests only by default
 markers = [
     "cov: coverage checks (deselect with '-m \"not cov\"')",
 ]

@@ -116,7 +116,7 @@
         }
       }
     },
-    "/-/health/index.html": {
+    "/-/health": {
       "get": {
         "tags": [
           "internal"
@@ -533,16 +533,6 @@
             "ldapMagic": []
           }
         ],
-        "servers": [
-          {
-            "url": "https://data.bas.ac.uk",
-            "description": "Primary production environment, shared with other systems during transition."
-          },
-          {
-            "url": "https://data-testing.data.bas.ac.uk",
-            "description": "Pre-production environment, without availability guarantees (generally and for specific resources)."
-          }
-        ],
         "operationId": "getItemTrustedHtml",
         "x-scalar-stability": "experimental",
         "summary": "Content item (Trusted)",
@@ -573,6 +563,16 @@
               "text/html": {
                 "schema": {
                   "$ref": "#/components/schemas/htmlUnauthorised"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden.",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/htmlForbidden"
                 }
               }
             }
@@ -814,7 +814,7 @@
         }
       }
     },
-    "/guides/roadmap": {
+    "/guides/roadmap/index.html": {
       "get": {
         "tags": [
           "info"
@@ -841,7 +841,7 @@
         }
       }
     },
-    "/guides/map-purchasing": {
+    "/guides/map-purchasing/index.html": {
       "get": {
         "tags": [
           "info"
@@ -1064,6 +1064,13 @@
           "<!DOCTYPE html>\n\n<html lang=\"en-GB\"><body>Unauthorised. Unable to verify you are authorized to access the information requested.</body></html>"
         ]
       },
+      "htmlForbidden": {
+        "title": "HTML 403 content",
+        "type": "string",
+        "examples": [
+          "<!DOCTYPE html>\n\n<html lang=\"en-GB\"><body>Forbidden. Request forbidden by administrative rules.</body></html>"
+        ]
+      },
       "htmlNotFound": {
         "title": "HTML 404 content",
         "type": "string",
@@ -1153,8 +1160,10 @@
                     "COLLECTION",
                     "DATASET",
                     "INITIATIVE (PROJECT)",
+                    "PRODUCT",
                     "PRODUCT (MAP)",
-                    "PRODUCT (PAPER MAP)"
+                    "PRODUCT (PAPER MAP)",
+                    "PRODUCT (WEB MAP)"
                   ],
                   "examples": [
                     "PRODUCT (MAP)"
@@ -1179,7 +1188,6 @@
                 "date": {
                   "title": "Date",
                   "description": "Mapped from a suitable resource date, typically the publication date.",
-                  "type": "date-time",
                   "examples": [
                     "2014-06-30T14:20:42+00:00"
                   ]
@@ -1187,7 +1195,7 @@
                 "version": {
                   "title": "Version",
                   "description": "Mapped from the resource edition if available.",
-                  "type": "string",
+                  "type": ["string", "null"],
                   "examples": [
                     "1",
                     "2014.2"
@@ -1196,7 +1204,7 @@
                 "thumbnail_href": {
                   "title": "Thumbnail URL",
                   "description": "URL to an overview thumbnail for the resource if available.",
-                  "type": "string",
+                  "type": ["string", "null"],
                   "examples": [
                     "https://cdn.web.bas.ac.uk/item-thumbnails/7b0cd3e3-069e-4fe2-92d4-f2387bfc40f1/overview.png"
                   ]
@@ -1264,7 +1272,27 @@
               "NORA Downloads"
             ],
             "enum": [
-              "BAS Public Website Search","Item Aliases","Item Pages","Record Pages (JSON)","Record Pages (XML HTML)","Record Pages (XML)","Site Not Found Handler","Site API","Site Health","Site Index","Site Pages","Site Resources","WAF","DOI Redirects","Published Map","Normal Downloads","NORA Downloads","SharePoint Downloads","BAS SAN Downloads","ArcGIS Layer","ArcGIS Service"
+              "BAS Public Website Search",
+              "Item Aliases",
+              "Item Pages",
+              "Record Pages (JSON)",
+              "Record Pages (XML HTML)",
+              "Record Pages (XML)",
+              "Site Not Found Handler",
+              "Site API","Site Health",
+              "Site Index",
+              "Site Pages",
+              "Site Resources",
+              "WAF","DOI Redirects",
+              "Published Map",
+              "Normal Downloads",
+              "NORA Downloads",
+              "SharePoint Downloads",
+              "BAS SAN Downloads",
+              "BAS CDE Downloads",
+              "ArcGIS Layer",
+              "ArcGIS Service",
+              "ArcGIS Web Map"
             ]
           },
           "url": {
@@ -1343,7 +1371,7 @@
             "description": "HTTP status code observed if the check has been executed, otherwise null."
           },
           "result_output": {
-            "type": "string",
+            "type": ["string", "null"],
             "description": "Optional additional information readable if the check has been executed, otherwise null",
             "examples": [
               "OK",

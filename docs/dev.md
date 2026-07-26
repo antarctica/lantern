@@ -363,6 +363,7 @@ Within this project, for each new item type:
   - update the `prefixes` mapping in `lantern.models.record.record.Record._validate_aliases()` to set allowed aliases
   - update the allowed prefixes table in the [Record requirements](/docs/models.md#record-requirements) docs
   - add new paths for prefixes in the [OpenAPI Definition](/docs/site.md#openapi-definition)
+    - update `expected_redirects` in `lantern_tests.x_e2e.test_api.test_api` to match
   - update static site endpoints in [Reverse Proxying](/docs/setup.md#reverse-proxying) and `resources/dev/haproxy` to
     include new prefixes, and request updating the BAS Load Balancer config to match
 - if the new type introduces new item relationships, see [Adding Catalogue Relations](#adding-catalogue-relations)
@@ -676,7 +677,10 @@ To update Pre-Commit and configured hooks:
 ### Pytest
 
 [pytest](https://docs.pytest.org) with a number of plugins is used for testing the application. Config options are set
-in `pyproject.toml`. Tests are defined in the `tests` package.
+in `pyproject.toml`. Tests are grouped into two test suites:
+
+- main: mostly unit tests, defined in the `tests` package
+- slow: mostly end-to-end tests, defined in the `tests_slow` package
 
 > [!NOTE]
 > Parallel processing _within_ code is disabled in tests to avoid issues with [HTTP recording](#pytest-recording),
@@ -684,17 +688,18 @@ in `pyproject.toml`. Tests are defined in the `tests` package.
 >
 > Tests themselves are run in parallel using [`pytest-xdist`](#pytest-xdist).
 
-Tests are run automatically in [Continuous Integration](#continuous-integration).
+Main and slow tests are run automatically in [Continuous Integration](#continuous-integration).
 
 <!-- pyml disable md028 -->
 > [!TIP]
-> To run tests manually run the `test` [Development Task](#development-tasks).
+> To run tests manually, run the `test` or `test-slow` [Development Tasks](#development-tasks).
 
 > [!TIP]
 > To run a specific test:
 >
 > ```shell
 > % uv run pytest tests/path/to/test_module.py::<class>.<method>
+> % uv run pytest tests_slow/path/to/test_module.py::<class>.<method>
 > ```
 <!-- pyml enable md028 -->
 
@@ -713,26 +718,19 @@ Running this task clears Pytest's cache and re-runs all tests, skipping the `--f
 ### Pytest fixtures
 
 Fixtures SHOULD be defined in `tests.conftest` prefixed with `fx_` to indicate they are a fixture when used in tests.
-E.g.:
 
-```python
-import pytest
-
-@pytest.fixture()
-def fx_foo() -> str:
-    """Example test fixture."""
-    return 'foo'
-```
+> [!NOTE]
+> This applies to fixtures used or needed for slow tests, which imports all fixtures from the main suite automatically.
 
 ### Pytest-cov test coverage
 
-[`pytest-cov`](https://pypi.org/project/pytest-cov/) checks test coverage. We aim for 100% coverage but exemptions are
-fine with good justification:
+[`pytest-cov`](https://pypi.org/project/pytest-cov/) checks test coverage in the main test suite. We aim for 100%
+coverage unless there is a good justification for an exemption using:
 
 - `# pragma: no cover` - for general exemptions
 - `# pragma: no branch` - where a conditional branch can never be called
 
-[Continuous Integration](#continuous-integration) will check coverage automatically.
+[Continuous Integration](#continuous-integration) will check coverage automatically for applicable tests.
 
 <!-- pyml disable md028 -->
 > [!TIP]
@@ -799,19 +797,18 @@ and without an optional property.
 
 ### Playwright tests
 
-[Playwright](https://playwright.dev/) Python tests are used to verify the behaviour of dynamic JavaScript content,
-such as switching tabs in items and opening/closing the feedback widget.
+[Playwright](https://playwright.dev/) is used to verify the behaviour of dynamic JavaScript content, such as switching
+tabs in items and opening/closing the feedback widget. Playwright tests are part of the slow test suite.
 
 To run a specific test file with visible output:
 
 ```shell
-% uv run pytest --headed tests/lantern_tests/x_e2e/test_item_e2e.py
+% uv run pytest --headed tests_slow/browser/test_item.py
 ```
 
 Playwright tests require a real website to test against, which is provided by the `fx_exporter_static_server` fixture.
 This hosts a local [Static Site](/docs/architecture.md#sites) served from a temporary directory using Python's
-simple HTTP server. The site is built by the `fx_exporter_static_site` fixture and contains all
-[Test Records](#test-records).
+simple HTTP server. The site contains all [Test Records](#test-records).
 
 <!-- pyml disable md028 -->
 > [!NOTE]
@@ -822,6 +819,21 @@ simple HTTP server. The site is built by the `fx_exporter_static_site` fixture a
 > [!NOTE]
 > Make sure Playwright tests use the `e2e` xdist group (i.e. `@pytest.mark.xdist_group("e2e")`) to avoid test failures.
 <!-- pyml enable md028 -->
+
+### OpenAPI tests
+
+> [!WARNING]
+> This section is Work in Progress (WIP) and may not be complete/accurate.
+
+[Schemathesis](https://schemathesis.readthedocs.io/) is used to verify the behaviour of the static site
+[OpenAPI Definition](/docs/site.md#openapi-definition), such as response schemas and authenticated requests.
+Schemathesis tests are part of the slow test suite.
+
+> [!NOTE]
+> OpenAPI testing is experimental and limited the live site only.
+
+Tests are run via Pytest in `tests_slow.openapi.test_openapi`, with additional configuration to account for
+infrastructure configuration we cannot control (e.g. how unsupported HTTP methods are handled within AWS).
 
 ### Test catalogue
 

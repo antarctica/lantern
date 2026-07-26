@@ -2,7 +2,6 @@ from subprocess import Popen
 
 import pytest
 from playwright.sync_api import Browser, Page, Route, expect
-
 from tests.conftest import has_network
 from tests.resources.records.item_cat_data import record as product_data
 from tests.resources.records.item_cat_product_all import record as product_all_supported

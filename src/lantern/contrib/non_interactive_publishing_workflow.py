@@ -29,13 +29,16 @@ class Args:
 
     env: SiteEnvironment
     path: Path
+    # merge request
     changeset_base: str  # branch
     changeset_title: str
     changeset_message: str
+    # commit within changeset
     commit_title: str
     commit_message: str
     author_name: str
     author_email: str
+    # other
     webhook: str | None = None
 
 
@@ -49,15 +52,16 @@ def _parse_records(logger: logging.Logger, search_path: Path) -> dict[Path, Reco
             record = Record.loads(config)
             record.validate()
         except RecordInvalidError as e:
-            logger.exception(f"Record '{config.get('file_identifier', '<unknown>')}' does not validate, skipping.")
+            logger.exception("Record '%s' does not validate, skipping.", config.get("file_identifier", "<unknown>"))
             logger.exception(e.validation_error)
-            sys.exit(1)
+            continue
         if hasattr(Record, "_config_supported") and not Record._config_supported(config):
             logger.warning(
-                f"Record '{config.get('file_identifier', '<unknown>')}' contains unsupported content the catalogue will ignore."
+                "Record '%s' contains unsupported content the catalogue will ignore.",
+                config.get("file_identifier", "<unknown>"),
             )
         records[json_path] = record
-    logger.info(f"Discovered {len(records)} valid records")
+    logger.info("Discovered %s valid records", len(records))
     return records
 
 
@@ -70,7 +74,7 @@ def _filter_records(
         try:
             existing_record = cat.repo.select_record(file_identifier=record.file_identifier, branch=branch)
             if record.dumps() == existing_record.dumps():
-                logger.info(f"Record '{record.file_identifier}' is the same as stored version, skipping.")
+                logger.info("Record '%s' is the same as stored version, skipping.", record.file_identifier)
                 continue
         except RecordNotFoundError, GitlabGetError:
             # GitlabGetError returned if branch doesn't exist
@@ -84,22 +88,22 @@ def _clean_input_records(logger: logging.Logger, record_paths: dict[Path, Record
     mapping = {record.file_identifier: path for path, record in record_paths.items()}
     for file_identifier in results.new_identifiers + results.updated_identifiers:
         path = mapping[file_identifier]
-        logger.info(f"Cleaning imported record: {path.resolve()}")
+        logger.info("Cleaning imported record: %s", path.resolve())
         path.unlink(missing_ok=True)
 
 
-def _import_records(logger: logging.Logger, cat: BasCatalogue, args: Args) -> dict[Path, Record]:
-    """Commit a set of records to the catalogue."""
-    logger.info(f"Importing records from '{args.path.resolve()}' to '{args.changeset_base}")
+def _reduce_records(logger: logging.Logger, cat: BasCatalogue, args: Args) -> dict[Path, Record]:
+    """Reduce a set of records to be committed to exclude unchanged (existing) records."""
+    logger.info("Importing records from '%s' to '%s", args.path.resolve(), args.changeset_base)
     record_paths = _parse_records(logger=logger, search_path=args.path)
     return _filter_records(logger=logger, cat=cat, branch=args.changeset_base, record_paths=record_paths)
 
 
-def _create_changeset(logger: logging.Logger, cat: BasCatalogue, args: Args) -> str:
+def _ensure_changeset(logger: logging.Logger, cat: BasCatalogue, args: Args) -> str:
     """Create, or use an existing changeset, to relate a set of commits."""
     mr = cat.repo.select_merge_requests(state="opened", branch=args.changeset_base)
     if mr:
-        logger.info(f"Merge request exists: {mr[0].web_url}")
+        logger.info("Merge request exists: %s", mr[0].web_url)
         return mr[0].web_url
 
     logger.info("Creating merge request for changeset")
@@ -109,7 +113,7 @@ def _create_changeset(logger: logging.Logger, cat: BasCatalogue, args: Args) -> 
         title=f"Automated publishing changeset: {args.changeset_title}",
         description=f"{args.changeset_message}\n\nCreated by the experimental MAGIC Lantern non-interactive records publishing workflow.",
     )
-    logger.info(f"Merge request created: {mr.web_url}")
+    logger.info("Merge request created: %s", mr.web_url)
     return mr.web_url
 
 
@@ -127,8 +131,8 @@ def _commit_records(
         ),
     )
     _clean_input_records(logger=logger, record_paths=records, results=results)
-    logger.info(f"{len(results.new_identifiers) + len(results.updated_identifiers)} records imported.")
-    logger.info(f"Commit: {config.TEMPLATES_ITEM_VERSIONS_ENDPOINT}/-/commit/{results.commit} created.")
+    logger.info("%s records imported.", len(results.new_identifiers) + len(results.updated_identifiers))
+    logger.info("Commit '%s' created.", f"{config.TEMPLATES_ITEM_VERSIONS_ENDPOINT}/-/commit/{results.commit}")
     return results
 
 
@@ -141,7 +145,7 @@ def _publish_records(
     - publishes to S3 publicly
     - additionally uploads items as trusted content to secure hosting
     """
-    logger.info(f"Publishing {len(identifiers)} records.")
+    logger.info("Publishing %s records.", len(identifiers))
     catalogue.export(
         env=args.env,
         identifiers=identifiers,
@@ -157,13 +161,13 @@ def _publish_records(
 
     logger.info("Records published:")
     for identifier in sorted(identifiers):
-        logger.info(f"* {base_url}/items/{identifier}")
-        logger.info(f"* {base_url}/-/items/{identifier}")
+        logger.info("* %s/items/%s", base_url, identifier)
+        logger.info("* %s/-/items/%s", base_url, identifier)
 
 
 def _webhook(logger: logging.Logger, config: Config, commit: GitUpsertResults, mr_url: str, wh_url: str) -> None:
     """Trigger webhook if set."""
-    logger.info(f"Sending webhook to {wh_url}")
+    logger.info("Sending webhook to '%s'", wh_url)
     payload = {
         "commit": {
             "branch": commit.branch,
@@ -180,7 +184,32 @@ def _webhook(logger: logging.Logger, config: Config, commit: GitUpsertResults, m
     resp.raise_for_status()
 
 
-def _parse_args() -> Args:
+def _run(logger: logging.Logger, config: Config, args: Args) -> None:
+    s3 = S3Client(
+        "s3",
+        aws_access_key_id=config.SITE_UNTRUSTED_AWS_ACCESS_ID,
+        aws_secret_access_key=config.SITE_UNTRUSTED_AWS_ACCESS_SECRET,
+        region_name="eu-west-1",
+    )
+    catalogue = BasCatalogue(logger=logger, config=config, s3=s3)
+
+    records = _reduce_records(logger=logger, cat=catalogue, args=args)
+    if len(records) < 1:
+        logger.info("No new or updated records to commit, exiting.")
+        return
+
+    mr_url = _ensure_changeset(logger=logger, cat=catalogue, args=args)
+    commit = _commit_records(logger=logger, config=config, cat=catalogue, records=records, args=args)
+
+    identifiers = set(commit.new_identifiers + commit.updated_identifiers)
+    base_url = config.BASE_URL_TESTING if args.env == "testing" else config.BASE_URL_LIVE
+    _publish_records(logger=logger, catalogue=catalogue, args=args, base_url=base_url, identifiers=identifiers)
+
+    if args.webhook:
+        _webhook(logger=logger, config=config, commit=commit, mr_url=mr_url, wh_url=args.webhook)
+
+
+def parse_args() -> Args:  # pragma: no cover
     """Parse and validate script arguments."""
     parser = argparse.ArgumentParser(description="Import and publish catalogue records.")
     parser.add_argument(
@@ -221,49 +250,17 @@ def _parse_args() -> Args:
     return Args(**vars(args_ns))
 
 
-def _run(logger: logging.Logger, config: Config, args: Args) -> None:
-    s3 = S3Client(
-        "s3",
-        aws_access_key_id=config.SITE_UNTRUSTED_AWS_ACCESS_ID,
-        aws_secret_access_key=config.SITE_UNTRUSTED_AWS_ACCESS_SECRET,
-        region_name="eu-west-1",
-    )
-    catalogue = BasCatalogue(logger=logger, config=config, s3=s3)
-
-    records = _import_records(logger=logger, cat=catalogue, args=args)
-    if len(records) < 1:
-        logger.info("No new or updated records to commit, exiting.")
-        sys.exit(0)
-
-    mr_url = _create_changeset(logger=logger, cat=catalogue, args=args)
-    commit = _commit_records(logger=logger, config=config, cat=catalogue, records=records, args=args)
-    if len(set(commit.new_identifiers + commit.updated_identifiers)) == 0:
-        logger.info("No records committed, exiting.")
-        sys.exit(0)
-
-    identifiers = set(commit.new_identifiers + commit.updated_identifiers)
-    base_url = config.BASE_URL_TESTING if args.env == "testing" else config.BASE_URL_LIVE
-    _publish_records(logger=logger, catalogue=catalogue, args=args, base_url=base_url, identifiers=identifiers)
-
-    if args.webhook:
-        _webhook(logger=logger, config=config, commit=commit, mr_url=mr_url, wh_url=args.webhook)
-
-
-def main() -> None:
+def entrypoint(args: Args) -> None:
     """Entrypoint."""
     init_sentry()
-
     config = Config()
-    args = _parse_args()
-
     init_logging(logging_level=config.LOG_LEVEL)
     logger = logging.getLogger("app")
     logger.info("Initialising Lantern non-interactive publishing workflow.")
 
     _run(logger=logger, config=config, args=args)
-
     print("Script exiting normally.")
 
 
-if __name__ == "__main__":
-    main()
+if __name__ == "__main__":  # pragma: no cover
+    entrypoint(parse_args())

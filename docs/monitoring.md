@@ -152,3 +152,4 @@ BAS central workstations:
 - logs: `/users/geoweb/cron_logs/lantern/lantern-checks-*.log`
 - log retention: 90 days (enforced monthly)
 - deployment: via [Ansible](/docs/deployment.md#site-checks-script)
+- source: [Site Checks](/docs/contrib.md#site-checks) contrib module

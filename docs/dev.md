@@ -789,6 +789,12 @@ To incrementally build up a set of related tests (including parameterised tests)
 % uv run pytest --record-mode=new_episodes tests/path/to/test_module.py::<class>::<method>
 ```
 
+### Pytest-httpserver
+
+[pytest-httpserver](https://pytest-httpserver.readthedocs.io/) is used to test HTTP requests and responses,
+specifically to verify webhook handling in the
+[Non-Interactive Publishing Workflow](/docs/contrib.md#non-interactive-publishing-workflow).
+
 ### Static site template tests
 
 Pytest parameterised tests with [BeautifulSoup](https://www.crummy.com/software/BeautifulSoup/bs4/doc/) are used to

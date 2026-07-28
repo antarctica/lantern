@@ -1036,6 +1036,7 @@ dev = [
     { name = "pytest-cov" },
     { name = "pytest-env" },
     { name = "pytest-freezer" },
+    { name = "pytest-httpserver" },
     { name = "pytest-mock" },
     { name = "pytest-playwright" },
     { name = "pytest-random-order" },
@@ -1055,6 +1056,7 @@ test = [
     { name = "pytest-cov" },
     { name = "pytest-env" },
     { name = "pytest-freezer" },
+    { name = "pytest-httpserver" },
     { name = "pytest-mock" },
     { name = "pytest-playwright" },
     { name = "pytest-random-order" },
@@ -1106,6 +1108,7 @@ dev = [
     { name = "pytest-cov", specifier = ">=6.2.1" },
     { name = "pytest-env", specifier = ">=1.1.5" },
     { name = "pytest-freezer", specifier = ">=0.4.9" },
+    { name = "pytest-httpserver", specifier = ">=1.1.5" },
     { name = "pytest-mock", specifier = ">=3.14.1" },
     { name = "pytest-playwright", specifier = ">=0.7.0" },
     { name = "pytest-random-order", specifier = ">=1.2.0" },
@@ -1125,6 +1128,7 @@ test = [
     { name = "pytest-cov", specifier = ">=6.2.1" },
     { name = "pytest-env", specifier = ">=1.1.5" },
     { name = "pytest-freezer", specifier = ">=0.4.9" },
+    { name = "pytest-httpserver", specifier = ">=1.1.5" },
     { name = "pytest-mock", specifier = ">=3.14.1" },
     { name = "pytest-playwright", specifier = ">=0.7.0" },
     { name = "pytest-random-order", specifier = ">=1.2.0" },
@@ -1739,6 +1743,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/81/f0/98dcbc5324064360b19850b14c84cea9ca50785d921741dbfc442346e925/pytest_freezer-0.4.9.tar.gz", hash = "sha256:21bf16bc9cc46bf98f94382c4b5c3c389be7056ff0be33029111ae11b3f1c82a", size = 3177, upload-time = "2024-12-12T08:53:08.684Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c1/e9/30252bc05bcf67200a17f4f0b4cc7598f0a68df4fa9fa356193aa899f145/pytest_freezer-0.4.9-py3-none-any.whl", hash = "sha256:8b6c50523b7d4aec4590b52bfa5ff766d772ce506e2bf4846c88041ea9ccae59", size = 3192, upload-time = "2024-12-12T08:53:07.641Z" },
+]
+
+[[package]]
+name = "pytest-httpserver"
+version = "1.1.5"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "werkzeug" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/50/17/ad187f46998814014f7cda309de700b87c0eb4b2e111e18bc8c819be7116/pytest_httpserver-1.1.5.tar.gz", hash = "sha256:dc3d82e1fe00e491829d8939c549bf4bd9b39a260f87113c619b9d517c2f8ff1", size = 70974, upload-time = "2026-02-14T13:27:23.412Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ec/df/0bdf90b84c6a586a9fd2b509523a3ab26b1cc1b1dba2fb62a32e4411ea9e/pytest_httpserver-1.1.5-py3-none-any.whl", hash = "sha256:ee83feb587ab652c0c6729598db2820e9048233bac8df756818b7845a1621d0a", size = 23330, upload-time = "2026-02-14T13:27:22.119Z" },
 ]
 
 [[package]]

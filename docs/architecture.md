@@ -64,6 +64,7 @@ A Python application defined within the `src/lantern` package consisting of:
 - a logging class, including [Sentry](/docs/monitoring.md#sentry) integration
 - a [Config](/docs/config.md) class
 - a [Catalogue](#catalogues) class
+- [Contrib](/docs/contrib.md) modules for use by other applications
 
 ## Catalogues
 

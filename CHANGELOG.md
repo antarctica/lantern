@@ -83,6 +83,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Whitespace issues with Jinja macros
 * Improving local development documentation
 * Splitting tests into main and slow suites, with separate development tasks and CI jobs
+* Replacing resource scripts for the non-interactive workflow and scheduled checks with contrib modules
 
 ### Removed
 

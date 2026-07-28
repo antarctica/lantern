@@ -19,17 +19,14 @@ def _run(logger: logging.Logger, config: Config) -> None:
     catalogue.check(env="live")
 
 
-def main() -> None:
+def entrypoint() -> None:
     """Entrypoint."""
     init_sentry()
     config = Config()
     init_logging(logging_level=config.LOG_LEVEL)
     logger = logging.getLogger("app")
     logger.info("Initialising Lantern catalogue checks.")
+    logger.info(config.SITE_UNTRUSTED_S3_BUCKET_LIVE)
 
     _run(logger=logger, config=config)
     print("Script exiting normally.")
-
-
-if __name__ == "__main__":
-    main()

@@ -28,14 +28,16 @@ To set up this workflow for an application:
 Configure your application to perform these actions as frequently as needed:
 
 1. generate a set of updated JSON encoded record configurations as files in a directory
-2. call `/data/magic/projects/lantern/live/tasks/pub-cat` with the required arguments
+2. call the [Non-Interactive Publishing](/docs/contrib.md#non-interactive-publishing-workflow) contrib module with the
+   required arguments and valid [Configuration](/docs/config.md#config-options)
 
-> [!WARNING]
-> This will publish any records directly to the live catalogue.
->
-> To publish to the testing catalogue, call `/data/magic/projects/lantern/testing/tasks/pub-cat` instead.
+### Publishing script
 
-### Example usage script
+If you are using the BAS central workstations, and have access to
+[MAGIC Environment Modules 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/dev-docs/-/blob/main/service-magic-env-modules.md),
+you can use the `/data/magic/projects/lantern/live/tasks/pub-cat` script to publish to the live site.
+
+For example:
 
 > [!NOTE]
 > Change `SITE`, `PROJECT` and `PROJECT_SLUG` to relevant values.
@@ -69,4 +71,4 @@ request will be made to the configured URL, with a JSON payload containing:
 - statistics about the number of files created and/or updated
 
 > [!TIP]
-> See `/resources/scripts/non-interactive-publishing-workflow-schema.json` for the schema used with an example.
+> See `lantern.contrib.non-interactive-publishing-workflow-schema.json` for a JSON Schema and an example payload.

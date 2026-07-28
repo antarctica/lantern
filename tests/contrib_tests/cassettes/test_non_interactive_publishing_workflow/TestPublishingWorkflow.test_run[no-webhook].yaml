@@ -1,0 +1,1420 @@
+#file: noinspection YAMLIncompatibleTypes
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.4.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234
+  response:
+    body:
+      string: "{\"id\":1234}"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Runtime:
+      - '0.065130'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.4.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/tree?recursive=True&path=records&ref=test
+  response:
+    body:
+      string: '{"message":"404 Tree Not Found"}'
+    headers:
+      Cache-Control:
+      - no-cache
+      Content-Length:
+      - '32'
+      Content-Type:
+      - application/json
+      Server:
+      - nginx
+      Vary:
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Runtime:
+      - '0.035313'
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.4.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234
+  response:
+    body:
+      string: "{\"id\":1234}"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Runtime:
+      - '0.055066'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.4.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234/merge_requests?state=opened&source_branch=test
+  response:
+    body:
+      string: '[]'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Length:
+      - '2'
+      Content-Type:
+      - application/json
+      Link:
+      - <https://gitlab.example.com/api/v4/projects/1234/merge_requests?id=1234&order_by=created_at&page=1&per_page=20&sort=desc&source_branch=test&state=opened&with_labels_details=false&with_merge_status_recheck=false>;
+        rel="first", <https://gitlab.example.com/api/v4/projects/1234/merge_requests?id=1234&order_by=created_at&page=1&per_page=20&sort=desc&source_branch=test&state=opened&with_labels_details=false&with_merge_status_recheck=false>;
+        rel="last"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Next-Page:
+      - ''
+      X-Page:
+      - '1'
+      X-Per-Page:
+      - '20'
+      X-Prev-Page:
+      - ''
+      X-Runtime:
+      - '0.038310'
+      X-Total:
+      - '0'
+      X-Total-Pages:
+      - '1'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"source_branch": "test", "target_branch": "main", "title": "Automated
+      publishing changeset: Workflow test", "description": "...\n\nCreated by the
+      experimental MAGIC Lantern non-interactive records publishing workflow."}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '220'
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.4.0
+    method: POST
+    uri: https://gitlab.example.com/api/v4/projects/1234/merge_requests
+  response:
+    body:
+      string: "{\"id\":999,\"iid\":1,\"project_id\":1234,\"web_url\":\"https://gitlab.example.com/group/project/-/merge_requests/1\"}"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Length:
+      - '1785'
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Runtime:
+      - '0.196481'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.4.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234
+  response:
+    body:
+      string: "{\"id\":1234}"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Runtime:
+      - '0.070059'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.4.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/branches/test
+  response:
+    body:
+      string: '{"message":"404 Branch Not Found"}'
+    headers:
+      Cache-Control:
+      - no-cache
+      Content-Length:
+      - '34'
+      Content-Type:
+      - application/json
+      Server:
+      - nginx
+      Vary:
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Runtime:
+      - '0.025710'
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.4.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234
+  response:
+    body:
+      string: "{\"id\":1234}"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Runtime:
+      - '0.057418'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"branch": "test", "ref": "main"}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '33'
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.4.0
+    method: POST
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/branches
+  response:
+    body:
+      string: '{"name":"test"}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Length:
+      - '1016'
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Runtime:
+      - '0.156608'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.4.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234
+  response:
+    body:
+      string: "{\"id\":1234}"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Runtime:
+      - '0.080381'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.4.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/files/records%2F5d%2F5b%2F5d5b4e21-fd32-409c-be83-ca1c339903e5.json?ref=test
+  response:
+    body:
+      string: '{"message":"404 File Not Found"}'
+    headers:
+      Cache-Control:
+      - no-cache
+      Content-Length:
+      - '32'
+      Content-Type:
+      - application/json
+      Server:
+      - nginx
+      Vary:
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Runtime:
+      - '0.038942'
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.4.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234
+  response:
+    body:
+      string: "{\"id\":1234}"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Runtime:
+      - '0.063476'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"branch": "test", "commit_message": "Test commit from workflow\n...",
+      "author_name": "Connie Watson", "author_email": "conwat@bas.ac.uk", "actions":
+      [{"action": "create", "file_path": "records/5d/5b/5d5b4e21-fd32-409c-be83-ca1c339903e5.json",
+      "content": "{\n  \"$schema\": \"https://metadata-resources.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-2-v4.json\",\n  \"file_identifier\":
+      \"5d5b4e21-fd32-409c-be83-ca1c339903e5\",\n  \"hierarchy_level\": \"product\",\n  \"metadata\":
+      {\n    \"character_set\": \"utf8\",\n    \"language\": \"eng\",\n    \"contacts\":
+      [\n      {\n        \"organisation\": {\n          \"name\": \"x\"\n        },\n        \"role\":
+      [\n          \"pointOfContact\"\n        ]\n      }\n    ],\n    \"date_stamp\":
+      \"2014-06-30\",\n    \"metadata_standard\": {\n      \"name\": \"ISO 19115-2
+      Geographic Information - Metadata - Part 2: Extensions for Imagery and Gridded
+      Data\",\n      \"version\": \"ISO 19115-2:2009(E)\"\n    }\n  },\n  \"identification\":
+      {\n    \"title\": {\n      \"value\": \"x\"\n    },\n    \"abstract\": \"x\",\n    \"dates\":
+      {\n      \"creation\": \"2014-06-30\"\n    },\n    \"identifiers\": [\n      {\n        \"identifier\":
+      \"5d5b4e21-fd32-409c-be83-ca1c339903e5\",\n        \"href\": \"https://lantern.data.bas.ac.uk/items/5d5b4e21-fd32-409c-be83-ca1c339903e5\",\n        \"namespace\":
+      \"lantern.data.bas.ac.uk\"\n      },\n      {\n        \"identifier\": \"products/x\",\n        \"href\":
+      \"https://lantern.data.bas.ac.uk/products/x\",\n        \"namespace\": \"alias.lantern.data.bas.ac.uk\"\n      }\n    ],\n    \"contacts\":
+      [\n      {\n        \"organisation\": {\n          \"name\": \"Mapping and Geographic
+      Information Centre, British Antarctic Survey\",\n          \"href\": \"https://ror.org/01rhff309\",\n          \"title\":
+      \"ror\"\n        },\n        \"phone\": \"+44 (0)1223 221400\",\n        \"address\":
+      {\n          \"delivery_point\": \"British Antarctic Survey, High Cross, Madingley
+      Road\",\n          \"city\": \"Cambridge\",\n          \"administrative_area\":
+      \"Cambridgeshire\",\n          \"postal_code\": \"CB3 0ET\",\n          \"country\":
+      \"United Kingdom\"\n        },\n        \"email\": \"magic@bas.ac.uk\",\n        \"online_resource\":
+      {\n          \"href\": \"https://www.bas.ac.uk/teams/magic\",\n          \"title\":
+      \"Mapping and Geographic Information Centre (MAGIC) - BAS public website\",\n          \"description\":
+      \"General information about the BAS Mapping and Geographic Information Centre
+      (MAGIC) from the British Antarctic Survey (BAS) public website.\",\n          \"function\":
+      \"information\"\n        },\n        \"role\": [\n          \"pointOfContact\"\n        ]\n      }\n    ],\n    \"character_set\":
+      \"utf8\",\n    \"language\": \"eng\",\n    \"extents\": [\n      {\n        \"identifier\":
+      \"x\",\n        \"geographic\": {\n          \"bounding_box\": {\n            \"west_longitude\":
+      0.0,\n            \"east_longitude\": 0.0,\n            \"south_latitude\":
+      0.0,\n            \"north_latitude\": 0.0\n          }\n        }\n      },\n      {\n        \"identifier\":
+      \"y\",\n        \"geographic\": {\n          \"bounding_box\": {\n            \"west_longitude\":
+      0.0,\n            \"east_longitude\": 0.0,\n            \"south_latitude\":
+      0.0,\n            \"north_latitude\": 0.0\n          }\n        }\n      }\n    ]\n  }\n}"},
+      {"action": "create", "file_path": "records/5d/5b/5d5b4e21-fd32-409c-be83-ca1c339903e5.xml",
+      "content": "<?xml version=''1.0'' encoding=''utf-8''?>\n<gmi:MI_Metadata xmlns:gmd=\"http://www.isotc211.org/2005/gmd\"
+      xmlns:gco=\"http://www.isotc211.org/2005/gco\" xmlns:gml=\"http://www.opengis.net/gml/3.2\"
+      xmlns:gmx=\"http://www.isotc211.org/2005/gmx\" xmlns:srv=\"http://www.isotc211.org/2005/srv\"
+      xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
+      xmlns:gmi=\"http://www.isotc211.org/2005/gmi\" xmlns:gss=\"http://www.isotc211.org/2005/gss\"
+      xmlns:gsr=\"http://www.isotc211.org/2005/gsr\" xmlns:gts=\"http://www.isotc211.org/2005/gts\"
+      xsi:schemaLocation=\"http://www.isotc211.org/2005/gmd https://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/gmd/gmd.xsd
+      http://www.isotc211.org/2005/gco https://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/gco/gco.xsd
+      http://www.isotc211.org/2005/gmx https://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/gmx/gmx.xsd
+      http://www.isotc211.org/2005/srv https://standards.iso.org/iso/19119/srv/srv.xsd
+      http://www.isotc211.org/2005/gmi https://standards.iso.org/iso/19115/-2/gmi/1.0/gmi.xsd
+      http://www.isotc211.org/2005/gss https://standards.iso.org/iso/19139/Schemas/gss/gss.xsd
+      http://www.isotc211.org/2005/gsr https://standards.iso.org/iso/19139/Schemas/gsr/gsr.xsd
+      http://www.isotc211.org/2005/gts https://standards.iso.org/iso/19139/Schemas/gts/gts.xsd\">\n  <gmd:fileIdentifier>\n    <gco:CharacterString>5d5b4e21-fd32-409c-be83-ca1c339903e5</gco:CharacterString>\n  </gmd:fileIdentifier>\n  <gmd:language>\n    <gmd:LanguageCode
+      codeList=\"http://www.loc.gov/standards/iso639-2/php/code_list.php\" codeListValue=\"eng\">eng</gmd:LanguageCode>\n  </gmd:language>\n  <gmd:characterSet>\n    <gmd:MD_CharacterSetCode
+      codeList=\"http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/gmxCodelists.xml#MD_CharacterSetCode\"
+      codeListValue=\"utf8\">utf8</gmd:MD_CharacterSetCode>\n  </gmd:characterSet>\n  <gmd:hierarchyLevel>\n    <gmd:MD_ScopeCode
+      codeList=\"https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_ScopeCode\"
+      codeListValue=\"product\">product</gmd:MD_ScopeCode>\n  </gmd:hierarchyLevel>\n  <gmd:hierarchyLevelName>\n    <gco:CharacterString>product</gco:CharacterString>\n  </gmd:hierarchyLevelName>\n  <gmd:contact>\n    <gmd:CI_ResponsibleParty>\n      <gmd:organisationName>\n        <gco:CharacterString>x</gco:CharacterString>\n      </gmd:organisationName>\n      <gmd:role>\n        <gmd:CI_RoleCode
+      codeList=\"https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_RoleCode\"
+      codeListValue=\"pointOfContact\">pointOfContact</gmd:CI_RoleCode>\n      </gmd:role>\n    </gmd:CI_ResponsibleParty>\n  </gmd:contact>\n  <gmd:dateStamp>\n    <gco:Date>2014-06-30</gco:Date>\n  </gmd:dateStamp>\n  <gmd:metadataStandardName>\n    <gco:CharacterString>ISO
+      19115-2 Geographic Information - Metadata - Part 2: Extensions for Imagery and
+      Gridded Data</gco:CharacterString>\n  </gmd:metadataStandardName>\n  <gmd:metadataStandardVersion>\n    <gco:CharacterString>ISO
+      19115-2:2009(E)</gco:CharacterString>\n  </gmd:metadataStandardVersion>\n  <gmd:identificationInfo>\n    <gmd:MD_DataIdentification>\n      <gmd:citation>\n        <gmd:CI_Citation>\n          <gmd:title>\n            <gco:CharacterString>x</gco:CharacterString>\n          </gmd:title>\n          <gmd:date>\n            <gmd:CI_Date>\n              <gmd:date>\n                <gco:Date>2014-06-30</gco:Date>\n              </gmd:date>\n              <gmd:dateType>\n                <gmd:CI_DateTypeCode
+      codeList=\"https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_DateTypeCode\"
+      codeListValue=\"creation\">creation</gmd:CI_DateTypeCode>\n              </gmd:dateType>\n            </gmd:CI_Date>\n          </gmd:date>\n          <gmd:identifier>\n            <gmd:RS_Identifier>\n              <gmd:code>\n                <gmx:Anchor
+      xlink:href=\"https://lantern.data.bas.ac.uk/items/5d5b4e21-fd32-409c-be83-ca1c339903e5\"
+      xlink:actuate=\"onRequest\">5d5b4e21-fd32-409c-be83-ca1c339903e5</gmx:Anchor>\n              </gmd:code>\n              <gmd:codeSpace>\n                <gco:CharacterString>lantern.data.bas.ac.uk</gco:CharacterString>\n              </gmd:codeSpace>\n            </gmd:RS_Identifier>\n          </gmd:identifier>\n          <gmd:identifier>\n            <gmd:RS_Identifier>\n              <gmd:code>\n                <gmx:Anchor
+      xlink:href=\"https://lantern.data.bas.ac.uk/products/x\" xlink:actuate=\"onRequest\">products/x</gmx:Anchor>\n              </gmd:code>\n              <gmd:codeSpace>\n                <gco:CharacterString>alias.lantern.data.bas.ac.uk</gco:CharacterString>\n              </gmd:codeSpace>\n            </gmd:RS_Identifier>\n          </gmd:identifier>\n        </gmd:CI_Citation>\n      </gmd:citation>\n      <gmd:abstract>\n        <gco:CharacterString>x</gco:CharacterString>\n      </gmd:abstract>\n      <gmd:pointOfContact>\n        <gmd:CI_ResponsibleParty>\n          <gmd:organisationName>\n            <gmx:Anchor
+      xlink:href=\"https://ror.org/01rhff309\" xlink:actuate=\"onRequest\" xlink:title=\"ror\">Mapping
+      and Geographic Information Centre, British Antarctic Survey</gmx:Anchor>\n          </gmd:organisationName>\n          <gmd:contactInfo>\n            <gmd:CI_Contact>\n              <gmd:phone>\n                <gmd:CI_Telephone>\n                  <gmd:voice>\n                    <gco:CharacterString>+44
+      (0)1223 221400</gco:CharacterString>\n                  </gmd:voice>\n                </gmd:CI_Telephone>\n              </gmd:phone>\n              <gmd:address>\n                <gmd:CI_Address>\n                  <gmd:deliveryPoint>\n                    <gco:CharacterString>British
+      Antarctic Survey, High Cross, Madingley Road</gco:CharacterString>\n                  </gmd:deliveryPoint>\n                  <gmd:city>\n                    <gco:CharacterString>Cambridge</gco:CharacterString>\n                  </gmd:city>\n                  <gmd:administrativeArea>\n                    <gco:CharacterString>Cambridgeshire</gco:CharacterString>\n                  </gmd:administrativeArea>\n                  <gmd:postalCode>\n                    <gco:CharacterString>CB3
+      0ET</gco:CharacterString>\n                  </gmd:postalCode>\n                  <gmd:country>\n                    <gco:CharacterString>United
+      Kingdom</gco:CharacterString>\n                  </gmd:country>\n                  <gmd:electronicMailAddress>\n                    <gco:CharacterString>magic@bas.ac.uk</gco:CharacterString>\n                  </gmd:electronicMailAddress>\n                </gmd:CI_Address>\n              </gmd:address>\n              <gmd:onlineResource>\n                <gmd:CI_OnlineResource>\n                  <gmd:linkage>\n                    <gmd:URL>https://www.bas.ac.uk/teams/magic</gmd:URL>\n                  </gmd:linkage>\n                  <gmd:name>\n                    <gco:CharacterString>Mapping
+      and Geographic Information Centre (MAGIC) - BAS public website</gco:CharacterString>\n                  </gmd:name>\n                  <gmd:description>\n                    <gco:CharacterString>General
+      information about the BAS Mapping and Geographic Information Centre (MAGIC)
+      from the British Antarctic Survey (BAS) public website.</gco:CharacterString>\n                  </gmd:description>\n                  <gmd:function>\n                    <gmd:CI_OnLineFunctionCode
+      codeList=\"http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/gmxCodelists.xml#CI_OnLineFunctionCode\"
+      codeListValue=\"information\">information</gmd:CI_OnLineFunctionCode>\n                  </gmd:function>\n                </gmd:CI_OnlineResource>\n              </gmd:onlineResource>\n            </gmd:CI_Contact>\n          </gmd:contactInfo>\n          <gmd:role>\n            <gmd:CI_RoleCode
+      codeList=\"https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#CI_RoleCode\"
+      codeListValue=\"pointOfContact\">pointOfContact</gmd:CI_RoleCode>\n          </gmd:role>\n        </gmd:CI_ResponsibleParty>\n      </gmd:pointOfContact>\n      <gmd:language>\n        <gmd:LanguageCode
+      codeList=\"http://www.loc.gov/standards/iso639-2/php/code_list.php\" codeListValue=\"eng\">eng</gmd:LanguageCode>\n      </gmd:language>\n      <gmd:characterSet>\n        <gmd:MD_CharacterSetCode
+      codeList=\"http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/codelist/gmxCodelists.xml#MD_CharacterSetCode\"
+      codeListValue=\"utf8\">utf8</gmd:MD_CharacterSetCode>\n      </gmd:characterSet>\n      <gmd:extent>\n        <gmd:EX_Extent
+      id=\"x\">\n          <gmd:geographicElement>\n            <gmd:EX_GeographicBoundingBox>\n              <gmd:westBoundLongitude>\n                <gco:Decimal>0.0</gco:Decimal>\n              </gmd:westBoundLongitude>\n              <gmd:eastBoundLongitude>\n                <gco:Decimal>0.0</gco:Decimal>\n              </gmd:eastBoundLongitude>\n              <gmd:southBoundLatitude>\n                <gco:Decimal>0.0</gco:Decimal>\n              </gmd:southBoundLatitude>\n              <gmd:northBoundLatitude>\n                <gco:Decimal>0.0</gco:Decimal>\n              </gmd:northBoundLatitude>\n            </gmd:EX_GeographicBoundingBox>\n          </gmd:geographicElement>\n        </gmd:EX_Extent>\n      </gmd:extent>\n      <gmd:extent>\n        <gmd:EX_Extent
+      id=\"y\">\n          <gmd:geographicElement>\n            <gmd:EX_GeographicBoundingBox>\n              <gmd:westBoundLongitude>\n                <gco:Decimal>0.0</gco:Decimal>\n              </gmd:westBoundLongitude>\n              <gmd:eastBoundLongitude>\n                <gco:Decimal>0.0</gco:Decimal>\n              </gmd:eastBoundLongitude>\n              <gmd:southBoundLatitude>\n                <gco:Decimal>0.0</gco:Decimal>\n              </gmd:southBoundLatitude>\n              <gmd:northBoundLatitude>\n                <gco:Decimal>0.0</gco:Decimal>\n              </gmd:northBoundLatitude>\n            </gmd:EX_GeographicBoundingBox>\n          </gmd:geographicElement>\n        </gmd:EX_Extent>\n      </gmd:extent>\n    </gmd:MD_DataIdentification>\n  </gmd:identificationInfo>\n  <gmd:dataQualityInfo>\n    <gmd:DQ_DataQuality>\n      <gmd:scope>\n        <gmd:DQ_Scope>\n          <gmd:level>\n            <gmd:MD_ScopeCode
+      codeList=\"https://standards.iso.org/iso/19115/resources/Codelists/cat/codelists.xml#MD_ScopeCode\"
+      codeListValue=\"product\">product</gmd:MD_ScopeCode>\n          </gmd:level>\n        </gmd:DQ_Scope>\n      </gmd:scope>\n    </gmd:DQ_DataQuality>\n  </gmd:dataQualityInfo>\n</gmi:MI_Metadata>\n"}]}'
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '14254'
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.4.0
+    method: POST
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/commits
+  response:
+    body:
+      string: "{
+        \"id\":\"0cb29f7d51fb7fcf342bd8628b50860ceef558f2\"}"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Length:
+      - '728'
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Runtime:
+      - '0.186391'
+    status:
+      code: 201
+      message: Created
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.4.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234
+  response:
+    body:
+      string: "{\"id\":1234}"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Runtime:
+      - '0.076248'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.4.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/tree?recursive=True&path=records&ref=test
+  response:
+    body:
+      string: '[
+        {"id":"973777d7237975d775a3de8b6e8ca14ea5fb7f0e","name":"5d","type":"tree","path":"records/5d","mode":"040000"},
+        {"id":"2458338930c6220a5dce923010cf2b9a2bd15a95","name":"5b","type":"tree","path":"records/5d/5b","mode":"040000"},
+        {"id":"3c2ec68b4192dcc11fe79d445820d6c7bba85fe2","name":"5d5b4e21-fd32-409c-be83-ca1c339903e5.json","type":"blob","path":"records/5d/5b/5d5b4e21-fd32-409c-be83-ca1c339903e5.json","mode":"100644"},
+        {"id":"0b21ca3bac232d8fa3010d3f38eb1b56c71283ba","name":"5d5b4e21-fd32-409c-be83-ca1c339903e5.xml","type":"blob","path":"records/5d/5b/5d5b4e21-fd32-409c-be83-ca1c339903e5.xml","mode":"100644"}
+      ]'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Link:
+      - <https://gitlab.example.com/api/v4/projects/1234/repository/tree?id=1234&page=2&pagination=legacy&path=records&per_page=20&recursive=true&ref=main>;
+        rel="next"
+        rel="first", <https://gitlab.example.com/api/v4/projects/1234/repository/tree?id=1234&page=2&pagination=legacy&path=records&per_page=20&recursive=true&ref=main>;
+        rel="last"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Next-Page:
+      - ''
+      X-Page:
+      - '1'
+      X-Per-Page:
+      - '20'
+      X-Prev-Page:
+      - ''
+      X-Runtime:
+      - '0.115561'
+      X-Total:
+      - '4'
+      X-Total-Pages:
+      - '1'
+    status:
+      code: 200
+      message: OK
+
+# KEEP ABOVE
+
+# DELETE UP UNTIL NOT /tree
+
+# DELETE DOWN UNTIL NOT /tree
+
+# CHANGE FROM /tree to /files
+
+# DELETE UP UNTIL NOT /files
+
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.4.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/files/records%2F5d%2F5b%2F5d5b4e21-fd32-409c-be83-ca1c339903e5.json?ref=test
+  response:
+    body:
+      string: '{"file_name":"5d5b4e21-fd32-409c-be83-ca1c339903e5.json","file_path":"records/5d/5b/5d5b4e21-fd32-409c-be83-ca1c339903e5.json","size":2840,"encoding":"base64","content_sha256":"49e4730ece3c42b5b585fde2ba4fa3510416a2c91ff17b6f2d57c2937c2e18bb","ref":"test","blob_id":"3c2ec68b4192dcc11fe79d445820d6c7bba85fe2","commit_id":"0cb29f7d51fb7fcf342bd8628b50860ceef558f2","last_commit_id":"0cb29f7d51fb7fcf342bd8628b50860ceef558f2","execute_filemode":false,"content":"ewogICIkc2NoZW1hIjogImh0dHBzOi8vbWV0YWRhdGEtcmVzb3VyY2VzLmRhdGEuYmFzLmFjLnVrL2Jhcy1tZXRhZGF0YS1nZW5lcmF0b3ItY29uZmlndXJhdGlvbi1zY2hlbWFzL3YyL2lzby0xOTExNS0yLXY0Lmpzb24iLAogICJmaWxlX2lkZW50aWZpZXIiOiAiNWQ1YjRlMjEtZmQzMi00MDljLWJlODMtY2ExYzMzOTkwM2U1IiwKICAiaGllcmFyY2h5X2xldmVsIjogInByb2R1Y3QiLAogICJtZXRhZGF0YSI6IHsKICAgICJjaGFyYWN0ZXJfc2V0IjogInV0ZjgiLAogICAgImxhbmd1YWdlIjogImVuZyIsCiAgICAiY29udGFjdHMiOiBbCiAgICAgIHsKICAgICAgICAib3JnYW5pc2F0aW9uIjogewogICAgICAgICAgIm5hbWUiOiAieCIKICAgICAgICB9LAogICAgICAgICJyb2xlIjogWwogICAgICAgICAgInBvaW50T2ZDb250YWN0IgogICAgICAgIF0KICAgICAgfQogICAgXSwKICAgICJkYXRlX3N0YW1wIjogIjIwMTQtMDYtMzAiLAogICAgIm1ldGFkYXRhX3N0YW5kYXJkIjogewogICAgICAibmFtZSI6ICJJU08gMTkxMTUtMiBHZW9ncmFwaGljIEluZm9ybWF0aW9uIC0gTWV0YWRhdGEgLSBQYXJ0IDI6IEV4dGVuc2lvbnMgZm9yIEltYWdlcnkgYW5kIEdyaWRkZWQgRGF0YSIsCiAgICAgICJ2ZXJzaW9uIjogIklTTyAxOTExNS0yOjIwMDkoRSkiCiAgICB9CiAgfSwKICAiaWRlbnRpZmljYXRpb24iOiB7CiAgICAidGl0bGUiOiB7CiAgICAgICJ2YWx1ZSI6ICJ4IgogICAgfSwKICAgICJhYnN0cmFjdCI6ICJ4IiwKICAgICJkYXRlcyI6IHsKICAgICAgImNyZWF0aW9uIjogIjIwMTQtMDYtMzAiCiAgICB9LAogICAgImlkZW50aWZpZXJzIjogWwogICAgICB7CiAgICAgICAgImlkZW50aWZpZXIiOiAiNWQ1YjRlMjEtZmQzMi00MDljLWJlODMtY2ExYzMzOTkwM2U1IiwKICAgICAgICAiaHJlZiI6ICJodHRwczovL2xhbnRlcm4uZGF0YS5iYXMuYWMudWsvaXRlbXMvNWQ1YjRlMjEtZmQzMi00MDljLWJlODMtY2ExYzMzOTkwM2U1IiwKICAgICAgICAibmFtZXNwYWNlIjogImxhbnRlcm4uZGF0YS5iYXMuYWMudWsiCiAgICAgIH0sCiAgICAgIHsKICAgICAgICAiaWRlbnRpZmllciI6ICJwcm9kdWN0cy94IiwKICAgICAgICAiaHJlZiI6ICJodHRwczovL2xhbnRlcm4uZGF0YS5iYXMuYWMudWsvcHJvZHVjdHMveCIsCiAgICAgICAgIm5hbWVzcGFjZSI6ICJhbGlhcy5sYW50ZXJuLmRhdGEuYmFzLmFjLnVrIgogICAgICB9CiAgICBdLAogICAgImNvbnRhY3RzIjogWwogICAgICB7CiAgICAgICAgIm9yZ2FuaXNhdGlvbiI6IHsKICAgICAgICAgICJuYW1lIjogIk1hcHBpbmcgYW5kIEdlb2dyYXBoaWMgSW5mb3JtYXRpb24gQ2VudHJlLCBCcml0aXNoIEFudGFyY3RpYyBTdXJ2ZXkiLAogICAgICAgICAgImhyZWYiOiAiaHR0cHM6Ly9yb3Iub3JnLzAxcmhmZjMwOSIsCiAgICAgICAgICAidGl0bGUiOiAicm9yIgogICAgICAgIH0sCiAgICAgICAgInBob25lIjogIis0NCAoMCkxMjIzIDIyMTQwMCIsCiAgICAgICAgImFkZHJlc3MiOiB7CiAgICAgICAgICAiZGVsaXZlcnlfcG9pbnQiOiAiQnJpdGlzaCBBbnRhcmN0aWMgU3VydmV5LCBIaWdoIENyb3NzLCBNYWRpbmdsZXkgUm9hZCIsCiAgICAgICAgICAiY2l0eSI6ICJDYW1icmlkZ2UiLAogICAgICAgICAgImFkbWluaXN0cmF0aXZlX2FyZWEiOiAiQ2FtYnJpZGdlc2hpcmUiLAogICAgICAgICAgInBvc3RhbF9jb2RlIjogIkNCMyAwRVQiLAogICAgICAgICAgImNvdW50cnkiOiAiVW5pdGVkIEtpbmdkb20iCiAgICAgICAgfSwKICAgICAgICAiZW1haWwiOiAibWFnaWNAYmFzLmFjLnVrIiwKICAgICAgICAib25saW5lX3Jlc291cmNlIjogewogICAgICAgICAgImhyZWYiOiAiaHR0cHM6Ly93d3cuYmFzLmFjLnVrL3RlYW1zL21hZ2ljIiwKICAgICAgICAgICJ0aXRsZSI6ICJNYXBwaW5nIGFuZCBHZW9ncmFwaGljIEluZm9ybWF0aW9uIENlbnRyZSAoTUFHSUMpIC0gQkFTIHB1YmxpYyB3ZWJzaXRlIiwKICAgICAgICAgICJkZXNjcmlwdGlvbiI6ICJHZW5lcmFsIGluZm9ybWF0aW9uIGFib3V0IHRoZSBCQVMgTWFwcGluZyBhbmQgR2VvZ3JhcGhpYyBJbmZvcm1hdGlvbiBDZW50cmUgKE1BR0lDKSBmcm9tIHRoZSBCcml0aXNoIEFudGFyY3RpYyBTdXJ2ZXkgKEJBUykgcHVibGljIHdlYnNpdGUuIiwKICAgICAgICAgICJmdW5jdGlvbiI6ICJpbmZvcm1hdGlvbiIKICAgICAgICB9LAogICAgICAgICJyb2xlIjogWwogICAgICAgICAgInBvaW50T2ZDb250YWN0IgogICAgICAgIF0KICAgICAgfQogICAgXSwKICAgICJjaGFyYWN0ZXJfc2V0IjogInV0ZjgiLAogICAgImxhbmd1YWdlIjogImVuZyIsCiAgICAiZXh0ZW50cyI6IFsKICAgICAgewogICAgICAgICJpZGVudGlmaWVyIjogIngiLAogICAgICAgICJnZW9ncmFwaGljIjogewogICAgICAgICAgImJvdW5kaW5nX2JveCI6IHsKICAgICAgICAgICAgIndlc3RfbG9uZ2l0dWRlIjogMC4wLAogICAgICAgICAgICAiZWFzdF9sb25naXR1ZGUiOiAwLjAsCiAgICAgICAgICAgICJzb3V0aF9sYXRpdHVkZSI6IDAuMCwKICAgICAgICAgICAgIm5vcnRoX2xhdGl0dWRlIjogMC4wCiAgICAgICAgICB9CiAgICAgICAgfQogICAgICB9LAogICAgICB7CiAgICAgICAgImlkZW50aWZpZXIiOiAieSIsCiAgICAgICAgImdlb2dyYXBoaWMiOiB7CiAgICAgICAgICAiYm91bmRpbmdfYm94IjogewogICAgICAgICAgICAid2VzdF9sb25naXR1ZGUiOiAwLjAsCiAgICAgICAgICAgICJlYXN0X2xvbmdpdHVkZSI6IDAuMCwKICAgICAgICAgICAgInNvdXRoX2xhdGl0dWRlIjogMC4wLAogICAgICAgICAgICAibm9ydGhfbGF0aXR1ZGUiOiAwLjAKICAgICAgICAgIH0KICAgICAgICB9CiAgICAgIH0KICAgIF0KICB9Cn0="}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Gitlab-Blob-Id:
+      - 3c2ec68b4192dcc11fe79d445820d6c7bba85fe2
+      X-Gitlab-Commit-Id:
+      - 0cb29f7d51fb7fcf342bd8628b50860ceef558f2
+      X-Gitlab-Content-Sha256:
+      - 49e4730ece3c42b5b585fde2ba4fa3510416a2c91ff17b6f2d57c2937c2e18bb
+      X-Gitlab-Encoding:
+      - base64
+      X-Gitlab-Execute-Filemode:
+      - 'false'
+      X-Gitlab-File-Name:
+      - 5d5b4e21-fd32-409c-be83-ca1c339903e5.json
+      X-Gitlab-File-Path:
+      - records/5d/5b/5d5b4e21-fd32-409c-be83-ca1c339903e5.json
+      X-Gitlab-Last-Commit-Id:
+      - 0cb29f7d51fb7fcf342bd8628b50860ceef558f2
+      X-Gitlab-Ref:
+      - test
+      X-Gitlab-Size:
+      - '2840'
+      X-Runtime:
+      - '0.048953'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.4.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/commits?ref_name=test
+  response:
+    body:
+      string: "[{\"id\":\"0cb29f7d51fb7fcf342bd8628b50860ceef558f2\"}]"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Link:
+      - <https://gitlab.example.com/api/v4/projects/1234/repository/commits?id=1234&order=default&page=2&per_page=20&ref_name=test&trailers=false>;
+        rel="next", <https://gitlab.example.com/api/v4/projects/1234/repository/commits?id=1234&order=default&page=1&per_page=20&ref_name=test&trailers=false>;
+        rel="first", <https://gitlab.example.com/api/v4/projects/1234/repository/commits?id=1234&order=default&page=2&per_page=20&ref_name=test&trailers=false>;
+        rel="last"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Next-Page:
+      - '2'
+      X-Page:
+      - '1'
+      X-Per-Page:
+      - '20'
+      X-Prev-Page:
+      - ''
+      X-Runtime:
+      - '0.049146'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.4.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/commits/0cb29f7d51fb7fcf342bd8628b50860ceef558f2
+  response:
+    body:
+      string: "{\"id\":\"0cb29f7d51fb7fcf342bd8628b50860ceef558f2\"}"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Runtime:
+      - '0.040190'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        NT...0K
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9aLGIs
+        ZSxELFUgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MjE4NjI=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        NG...Qy
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-file_identifier:
+      - !!binary |
+        NWQ1YjRlMjEtZmQzMi00MDljLWJlODMtY2ExYzMzOTkwM2U1
+      x-amz-meta-file_revision:
+      - !!binary |
+        MGNiMjlmN2Q1MWZiN2ZjZjM0MmJkODYyOGI1MDg2MGNlZWY1NThmMg==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/items/5d5b4e21-fd32-409c-be83-ca1c339903e5/index.html
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - LHA4WA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        MTc...g==
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9aLGIs
+        ZSxELFUgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        Mzc1
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        NT...g3
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-file_identifier:
+      - !!binary |
+        NWQ1YjRlMjEtZmQzMi00MDljLWJlODMtY2ExYzMzOTkwM2U1
+      x-amz-meta-file_revision:
+      - !!binary |
+        MGNiMjlmN2Q1MWZiN2ZjZjM0MmJkODYyOGI1MDg2MGNlZWY1NThmMg==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+      x-amz-website-redirect-location:
+      - !!binary |
+        aHR0cHM6Ly9kYXRhLXRlc3RpbmcuZGF0YS5iYXMuYWMudWsvaXRlbXMvNWQ1YjRlMjEtZmQzMi00
+        MDljLWJlODMtY2ExYzMzOTkwM2U1Lw==
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/products/x/index.html
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - ZsCZVg==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        Yj...0K
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        YXBwbGljYXRpb24vanNvbg==
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9aLGIs
+        ZSxELFUgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        Mjg0MA==
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        ZT...Nh
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-file_identifier:
+      - !!binary |
+        NWQ1YjRlMjEtZmQzMi00MDljLWJlODMtY2ExYzMzOTkwM2U1
+      x-amz-meta-file_revision:
+      - !!binary |
+        MGNiMjlmN2Q1MWZiN2ZjZjM0MmJkODYyOGI1MDg2MGNlZWY1NThmMg==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/records/5d5b4e21-fd32-409c-be83-ca1c339903e5.json
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - MjQAbQ==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        Mj...0K
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        YXBwbGljYXRpb24veG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9aLGIs
+        ZSxELFUgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MTA0Njg=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        N2...Zm
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-file_identifier:
+      - !!binary |
+        NWQ1YjRlMjEtZmQzMi00MDljLWJlODMtY2ExYzMzOTkwM2U1
+      x-amz-meta-file_revision:
+      - !!binary |
+        MGNiMjlmN2Q1MWZiN2ZjZjM0MmJkODYyOGI1MDg2MGNlZWY1NThmMg==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/records/5d5b4e21-fd32-409c-be83-ca1c339903e5.xml
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - w9P3sA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        MT...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9aLGIs
+        ZSxELFUgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        NTgxNw==
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Mj...Ex
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-file_identifier:
+      - !!binary |
+        NWQ1YjRlMjEtZmQzMi00MDljLWJlODMtY2ExYzMzOTkwM2U1
+      x-amz-meta-file_revision:
+      - !!binary |
+        MGNiMjlmN2Q1MWZiN2ZjZjM0MmJkODYyOGI1MDg2MGNlZWY1NThmMg==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/records/5d5b4e21-fd32-409c-be83-ca1c339903e5.html
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - OU1//Q==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.4.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234
+  response:
+    body:
+      string: "{\"id\":1234}"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Runtime:
+      - '0.058335'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.4.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/commits?ref_name=test
+  response:
+    body:
+      string: "[{\"id\":\"0cb29f7d51fb7fcf342bd8628b50860ceef558f2\"}]"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Link:
+      - <https://gitlab.example.com/api/v4/projects/1234/repository/commits?id=1234&order=default&page=2&per_page=20&ref_name=test&trailers=false>;
+        rel="next", <https://gitlab.example.com/api/v4/projects/1234/repository/commits?id=1234&order=default&page=1&per_page=20&ref_name=test&trailers=false>;
+        rel="first", <https://gitlab.example.com/api/v4/projects/1234/repository/commits?id=1234&order=default&page=2&per_page=20&ref_name=test&trailers=false>;
+        rel="last"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Next-Page:
+      - '2'
+      X-Page:
+      - '1'
+      X-Per-Page:
+      - '20'
+      X-Prev-Page:
+      - ''
+      X-Runtime:
+      - '0.045085'
+    status:
+      code: 200
+      message: OK
+version: 1

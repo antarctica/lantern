@@ -1,0 +1,112 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.4.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234
+  response:
+    body:
+      string: "{\"id\":1234}"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Runtime:
+      - '0.065130'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.4.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/files/records%2F5d%2F5b%2F5d5b4e21-fd32-409c-be83-ca1c339903e5.json?ref=main
+  response:
+    body:
+      string: '{"file_name":"5d5b4e21-fd32-409c-be83-ca1c339903e5.json","file_path":"records/5d/5b/5d5b4e21-fd32-409c-be83-ca1c339903e5.json","size":2840,"encoding":"base64","content_sha256":"30752a405800b8ff6c2b7a359c3ce2caa28d44248e320a18e847b1ce68a82dae","ref":"test","blob_id":"85fe23c2ec68b49d445820d6c7bba192dcc11fe7","commit_id":"abc123","last_commit_id":"abc123","execute_filemode":false,"content":"ewogICIkc2NoZW1hIjogImh0dHBzOi8vbWV0YWRhdGEtcmVzb3VyY2VzLmRhdGEuYmFzLmFjLnVrL2Jhcy1tZXRhZGF0YS1nZW5lcmF0b3ItY29uZmlndXJhdGlvbi1zY2hlbWFzL3YyL2lzby0xOTExNS0yLXY0Lmpzb24iLAogICJmaWxlX2lkZW50aWZpZXIiOiAiNWQ1YjRlMjEtZmQzMi00MDljLWJlODMtY2ExYzMzOTkwM2U1IiwKICAiaGllcmFyY2h5X2xldmVsIjogInByb2R1Y3QiLAogICJtZXRhZGF0YSI6IHsKICAgICJjaGFyYWN0ZXJfc2V0IjogInV0ZjgiLAogICAgImxhbmd1YWdlIjogImVuZyIsCiAgICAiY29udGFjdHMiOiBbCiAgICAgIHsKICAgICAgICAib3JnYW5pc2F0aW9uIjogewogICAgICAgICAgIm5hbWUiOiAieCIKICAgICAgICB9LAogICAgICAgICJyb2xlIjogWwogICAgICAgICAgInBvaW50T2ZDb250YWN0IgogICAgICAgIF0KICAgICAgfQogICAgXSwKICAgICJkYXRlX3N0YW1wIjogIjIwMTQtMDYtMzAiLAogICAgIm1ldGFkYXRhX3N0YW5kYXJkIjogewogICAgICAibmFtZSI6ICJJU08gMTkxMTUtMiBHZW9ncmFwaGljIEluZm9ybWF0aW9uIC0gTWV0YWRhdGEgLSBQYXJ0IDI6IEV4dGVuc2lvbnMgZm9yIEltYWdlcnkgYW5kIEdyaWRkZWQgRGF0YSIsCiAgICAgICJ2ZXJzaW9uIjogIklTTyAxOTExNS0yOjIwMDkoRSkiCiAgICB9CiAgfSwKICAiaWRlbnRpZmljYXRpb24iOiB7CiAgICAidGl0bGUiOiB7CiAgICAgICJ2YWx1ZSI6ICJ4IgogICAgfSwKICAgICJhYnN0cmFjdCI6ICJ4IiwKICAgICJkYXRlcyI6IHsKICAgICAgImNyZWF0aW9uIjogIjIwMTQtMDYtMzAiCiAgICB9LAogICAgImVkaXRpb24iOiAiMiIsCiAgICAiaWRlbnRpZmllcnMiOiBbCiAgICAgIHsKICAgICAgICAiaWRlbnRpZmllciI6ICI1ZDViNGUyMS1mZDMyLTQwOWMtYmU4My1jYTFjMzM5OTAzZTUiLAogICAgICAgICJocmVmIjogImh0dHBzOi8vbGFudGVybi5kYXRhLmJhcy5hYy51ay9pdGVtcy81ZDViNGUyMS1mZDMyLTQwOWMtYmU4My1jYTFjMzM5OTAzZTUiLAogICAgICAgICJuYW1lc3BhY2UiOiAibGFudGVybi5kYXRhLmJhcy5hYy51ayIKICAgICAgfSwKICAgICAgewogICAgICAgICJpZGVudGlmaWVyIjogInByb2R1Y3RzL3giLAogICAgICAgICJocmVmIjogImh0dHBzOi8vbGFudGVybi5kYXRhLmJhcy5hYy51ay9wcm9kdWN0cy94IiwKICAgICAgICAibmFtZXNwYWNlIjogImFsaWFzLmxhbnRlcm4uZGF0YS5iYXMuYWMudWsiCiAgICAgIH0KICAgIF0sCiAgICAiY29udGFjdHMiOiBbCiAgICAgIHsKICAgICAgICAib3JnYW5pc2F0aW9uIjogewogICAgICAgICAgIm5hbWUiOiAiTWFwcGluZyBhbmQgR2VvZ3JhcGhpYyBJbmZvcm1hdGlvbiBDZW50cmUsIEJyaXRpc2ggQW50YXJjdGljIFN1cnZleSIsCiAgICAgICAgICAiaHJlZiI6ICJodHRwczovL3Jvci5vcmcvMDFyaGZmMzA5IiwKICAgICAgICAgICJ0aXRsZSI6ICJyb3IiCiAgICAgICAgfSwKICAgICAgICAicGhvbmUiOiAiKzQ0ICgwKTEyMjMgMjIxNDAwIiwKICAgICAgICAiYWRkcmVzcyI6IHsKICAgICAgICAgICJkZWxpdmVyeV9wb2ludCI6ICJCcml0aXNoIEFudGFyY3RpYyBTdXJ2ZXksIEhpZ2ggQ3Jvc3MsIE1hZGluZ2xleSBSb2FkIiwKICAgICAgICAgICJjaXR5IjogIkNhbWJyaWRnZSIsCiAgICAgICAgICAiYWRtaW5pc3RyYXRpdmVfYXJlYSI6ICJDYW1icmlkZ2VzaGlyZSIsCiAgICAgICAgICAicG9zdGFsX2NvZGUiOiAiQ0IzIDBFVCIsCiAgICAgICAgICAiY291bnRyeSI6ICJVbml0ZWQgS2luZ2RvbSIKICAgICAgICB9LAogICAgICAgICJlbWFpbCI6ICJtYWdpY0BiYXMuYWMudWsiLAogICAgICAgICJvbmxpbmVfcmVzb3VyY2UiOiB7CiAgICAgICAgICAiaHJlZiI6ICJodHRwczovL3d3dy5iYXMuYWMudWsvdGVhbXMvbWFnaWMiLAogICAgICAgICAgInRpdGxlIjogIk1hcHBpbmcgYW5kIEdlb2dyYXBoaWMgSW5mb3JtYXRpb24gQ2VudHJlIChNQUdJQykgLSBCQVMgcHVibGljIHdlYnNpdGUiLAogICAgICAgICAgImRlc2NyaXB0aW9uIjogIkdlbmVyYWwgaW5mb3JtYXRpb24gYWJvdXQgdGhlIEJBUyBNYXBwaW5nIGFuZCBHZW9ncmFwaGljIEluZm9ybWF0aW9uIENlbnRyZSAoTUFHSUMpIGZyb20gdGhlIEJyaXRpc2ggQW50YXJjdGljIFN1cnZleSAoQkFTKSBwdWJsaWMgd2Vic2l0ZS4iLAogICAgICAgICAgImZ1bmN0aW9uIjogImluZm9ybWF0aW9uIgogICAgICAgIH0sCiAgICAgICAgInJvbGUiOiBbCiAgICAgICAgICAicG9pbnRPZkNvbnRhY3QiCiAgICAgICAgXQogICAgICB9CiAgICBdLAogICAgImNoYXJhY3Rlcl9zZXQiOiAidXRmOCIsCiAgICAibGFuZ3VhZ2UiOiAiZW5nIiwKICAgICJleHRlbnRzIjogWwogICAgICB7CiAgICAgICAgImlkZW50aWZpZXIiOiAieCIsCiAgICAgICAgImdlb2dyYXBoaWMiOiB7CiAgICAgICAgICAiYm91bmRpbmdfYm94IjogewogICAgICAgICAgICAid2VzdF9sb25naXR1ZGUiOiAwLjAsCiAgICAgICAgICAgICJlYXN0X2xvbmdpdHVkZSI6IDAuMCwKICAgICAgICAgICAgInNvdXRoX2xhdGl0dWRlIjogMC4wLAogICAgICAgICAgICAibm9ydGhfbGF0aXR1ZGUiOiAwLjAKICAgICAgICAgIH0KICAgICAgICB9CiAgICAgIH0sCiAgICAgIHsKICAgICAgICAiaWRlbnRpZmllciI6ICJ5IiwKICAgICAgICAiZ2VvZ3JhcGhpYyI6IHsKICAgICAgICAgICJib3VuZGluZ19ib3giOiB7CiAgICAgICAgICAgICJ3ZXN0X2xvbmdpdHVkZSI6IDAuMCwKICAgICAgICAgICAgImVhc3RfbG9uZ2l0dWRlIjogMC4wLAogICAgICAgICAgICAic291dGhfbGF0aXR1ZGUiOiAwLjAsCiAgICAgICAgICAgICJub3J0aF9sYXRpdHVkZSI6IDAuMAogICAgICAgICAgfQogICAgICAgIH0KICAgICAgfQogICAgXQogIH0KfQ=="}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Gitlab-Blob-Id:
+      - 85fe23c2ec68b49d445820d6c7bba192dcc11fe7
+      X-Gitlab-Commit-Id:
+      - abc123
+      X-Gitlab-Content-Sha256:
+      - 30752a405800b8ff6c2b7a359c3ce2caa28d44248e320a18e847b1ce68a82dae
+      X-Gitlab-Encoding:
+      - base64
+      X-Gitlab-Execute-Filemode:
+      - 'false'
+      X-Gitlab-File-Name:
+      - 5d5b4e21-fd32-409c-be83-ca1c339903e5.json
+      X-Gitlab-File-Path:
+      - records/5d/5b/5d5b4e21-fd32-409c-be83-ca1c339903e5.json
+      X-Gitlab-Last-Commit-Id:
+      - abc123
+      X-Gitlab-Ref:
+      - main
+      X-Gitlab-Size:
+      - '2840'
+      X-Runtime:
+      - '0.048953'
+    status:
+      code: 200
+      message: OK
+version: 1

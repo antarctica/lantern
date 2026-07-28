@@ -1,0 +1,2376 @@
+#file: noinspection YAMLIncompatibleTypes
+interactions:
+# == Requests for GitLab store - modified to return a single, minimal, record 'a1b2c3' ==
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.4.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234
+  response:
+    body:
+      string: "{\"id\":1234}"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Runtime:
+      - '0.091391'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.4.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/commits?ref_name=main
+  response:
+    body:
+      string: '[{"id": "abc123"}]'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Link:
+      - <https://gitlab.example.com/api/v4/projects/1234/repository/commits?id=1234&order=default&page=2&per_page=20&ref_name=main&trailers=false>;
+        rel="next", <https://gitlab.example.com/api/v4/projects/1234/repository/commits?id=1234&order=default&page=1&per_page=20&ref_name=main&trailers=false>;
+        rel="first", <https://gitlab.example.com/api/v4/projects/1234/repository/commits?id=1234&order=default&page=2&per_page=20&ref_name=main&trailers=false>;
+        rel="last"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Next-Page:
+      - '2'
+      X-Page:
+      - '1'
+      X-Per-Page:
+      - '20'
+      X-Prev-Page:
+      - ''
+      X-Runtime:
+      - '0.081131'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/6.2.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/tree?recursive=True&path=records&ref=main
+  response:
+    body:
+      string: '[{"id": "000", "name": "a1", "type": "tree", "path": "records/a1", "mode": "040000"}, {"id": "000", "name": "b2", "type": "tree", "path": "records/a1/b2", "mode": "040000"}, {"id": "000", "name": "a1b2c3.json", "type": "blob", "path": "records/a1/b2/a1b2c3.json", "mode": "100644"}]'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Link:
+      - <https://gitlab.example.com/api/v4/projects/1234/repository/tree?id=1234&page=2&pagination=legacy&path=records&per_page=20&recursive=true&ref=main>;
+        rel="next"
+        rel="first", <https://gitlab.example.com/api/v4/projects/1234/repository/tree?id=1234&page=2&pagination=legacy&path=records&per_page=20&recursive=true&ref=main>;
+        rel="last"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Next-Page:
+      - ''
+      X-Page:
+      - '1'
+      X-Per-Page:
+      - '20'
+      X-Prev-Page:
+      - ''
+      X-Total:
+      - '3'
+      X-Total-Pages:
+      - '1'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/6.2.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/files/records%2Fa1%2Fb2%2Fa1b2c3.json?ref=main
+  response:
+    body:
+      string: '{"file_name":"a1b2c3.json","file_path":"records/a1/b2/a1b2c3.json","size":0,"encoding":"base64","content_sha256":"b32935dd421d2a61eca213d08c452db2d6a22ec3c2ee5de4cd83ebbf8aa94d1b","ref":"main","blob_id":"000","commit_id":"000","last_commit_id":"abc123","execute_filemode":false,"content":"eyJmaWxlX2lkZW50aWZpZXIiOiAiYTFiMmMzIiwgImhpZXJhcmNoeV9sZXZlbCI6ICJkYXRhc2V0IiwgIm1ldGFkYXRhIjogeyJjb250YWN0cyI6IFt7Im9yZ2FuaXNhdGlvbiI6IHsibmFtZSI6ICJ4In0sICJyb2xlIjogWyJwb2ludE9mQ29udGFjdCJdfV0sICJkYXRlX3N0YW1wIjogIjIwMTQtMDYtMzAifSwgImlkZW50aWZpY2F0aW9uIjogeyJ0aXRsZSI6IHsidmFsdWUiOiAieCJ9LCAiZGF0ZXMiOiB7ImNyZWF0aW9uIjogIjIwMTQtMDYtMzAifSwgImFic3RyYWN0IjogIngiLCAibGFuZ3VhZ2UiOiAiZW5nIiwgImlkZW50aWZpZXJzIjogW3siaWRlbnRpZmllciI6ICJ4IiwgImhyZWYiOiAiaHR0cHM6Ly9kYXRhLmJhcy5hYy51ay9pdGVtcy94IiwgIm5hbWVzcGFjZSI6ICJkYXRhLmJhcy5hYy51ayJ9XSwgImNvbnRhY3RzIjogW3sib3JnYW5pc2F0aW9uIjogeyJuYW1lIjogIngifSwgInJvbGUiOiBbInBvaW50T2ZDb250YWN0Il0sICJlbWFpbCI6ICJ4In1dfX0="}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Gitlab-Blob-Id:
+      - '000'
+      X-Gitlab-Commit-Id:
+      - '000'
+      X-Gitlab-Content-Sha256:
+      - b32935dd421d2a61eca213d08c452db2d6a22ec3c2ee5de4cd83ebbf8aa94d1b
+      X-Gitlab-Encoding:
+      - base64
+      X-Gitlab-Execute-Filemode:
+      - 'false'
+      X-Gitlab-File-Name:
+      - a1b2c3.json
+      X-Gitlab-File-Path:
+      - records/a1/b2/a1b2c3.json
+      X-Gitlab-Last-Commit-Id:
+      - abc123
+      X-Gitlab-Ref:
+      - main
+      X-Gitlab-Size:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/6.2.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/commits/abc123
+  response:
+    body:
+      string: '{"id": "abc123"}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+    status:
+      code: 200
+      message: OK
+# Store repeats project and latest commit check (x1)
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.4.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234
+  response:
+    body:
+      string: "{\"id\":1234}"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Runtime:
+      - '0.091391'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.4.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/commits?ref_name=main
+  response:
+    body:
+      string: '[{"id": "abc123"}]'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Link:
+      - <https://gitlab.example.com/api/v4/projects/1234/repository/commits?id=1234&order=default&page=2&per_page=20&ref_name=main&trailers=false>;
+        rel="next", <https://gitlab.example.com/api/v4/projects/1234/repository/commits?id=1234&order=default&page=1&per_page=20&ref_name=main&trailers=false>;
+        rel="first", <https://gitlab.example.com/api/v4/projects/1234/repository/commits?id=1234&order=default&page=2&per_page=20&ref_name=main&trailers=false>;
+        rel="last"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Next-Page:
+      - '2'
+      X-Page:
+      - '1'
+      X-Per-Page:
+      - '20'
+      X-Prev-Page:
+      - ''
+      X-Runtime:
+      - '0.081131'
+    status:
+      code: 200
+      message: OK
+# Store repeats project and latest commit check (x2)
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.4.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234
+  response:
+    body:
+      string: "{\"id\":1234}"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Runtime:
+      - '0.091391'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.4.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/commits?ref_name=main
+  response:
+    body:
+      string: '[{"id": "abc123"}]'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Link:
+      - <https://gitlab.example.com/api/v4/projects/1234/repository/commits?id=1234&order=default&page=2&per_page=20&ref_name=main&trailers=false>;
+        rel="next", <https://gitlab.example.com/api/v4/projects/1234/repository/commits?id=1234&order=default&page=1&per_page=20&ref_name=main&trailers=false>;
+        rel="first", <https://gitlab.example.com/api/v4/projects/1234/repository/commits?id=1234&order=default&page=2&per_page=20&ref_name=main&trailers=false>;
+        rel="last"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Next-Page:
+      - '2'
+      X-Page:
+      - '1'
+      X-Per-Page:
+      - '20'
+      X-Prev-Page:
+      - ''
+      X-Runtime:
+      - '0.081131'
+    status:
+      code: 200
+      message: OK
+
+# == Requests for site wide checks ==
+
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://example.com/static/css/main.css
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Encoding:
+      - gzip
+      Content-Security-Policy:
+      - "default-src * data: 'unsafe-inline';"
+      Content-Type:
+      - text/css
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      x-amz-meta-build_key:
+      - 6a1e3c0
+      x-amz-version-id:
+      - ha_k69akUk_U6ey.Z.VmJq.QkKmzXkZs
+    status:
+      code: 200
+      message: OK
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://example.com/static/img/favicon.ico
+  response:
+    body:
+      string: ''
+    headers:
+      Access-Control-Allow-Methods:
+      - HEAD, GET
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - Authorization, ETag
+      Access-Control-Max-Age:
+      - '3000'
+      Content-Type:
+      - application/xml
+      Server:
+      - AmazonS3
+      X-Cache:
+      - Error from cloudfront
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://example.com/favicon.ico
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Length:
+      - '118447'
+      Content-Security-Policy:
+      - "default-src * data: 'unsafe-inline';"
+      Content-Type:
+      - image/x-icon
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      x-amz-meta-build_key:
+      - 6a1e3c0
+      x-amz-version-id:
+      - Dd.1dN8pfo.9TLCc00DxGdf71NRigPuQ
+    status:
+      code: 200
+      message: OK
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://example.com/static/txt/robots.txt
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Length:
+      - '86'
+      Content-Security-Policy:
+      - "default-src * data: 'unsafe-inline';"
+      Content-Type:
+      - text/plain
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      x-amz-meta-build_key:
+      - 6a1e3c0
+      x-amz-version-id:
+      - ECorVMSVrzEBBQM391giXBtyxTw8wgkh
+    status:
+      code: 200
+      message: OK
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://example.com/static/txt/heartbeat.txt
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Length:
+      - '15'
+      Content-Security-Policy:
+      - "default-src * data: 'unsafe-inline';"
+      Content-Type:
+      - text/plain
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      x-amz-meta-build_key:
+      - 6a1e3c0
+      x-amz-version-id:
+      - tBMo7OTr.g0tdanHdIhVxkFDFUz3llrx
+    status:
+      code: 200
+      message: OK
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://example.com/robots.txt
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Length:
+      - '86'
+      Content-Security-Policy:
+      - "default-src * data: 'unsafe-inline';"
+      Content-Type:
+      - text/plain
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      x-amz-meta-build_key:
+      - 6a1e3c0
+      x-amz-version-id:
+      - rJjEKKSb7WzsYNxwAxsV8r4654p9c_g8
+    status:
+      code: 200
+      message: OK
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://example.com/-/index/index.html
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Encoding:
+      - gzip
+      Content-Security-Policy:
+      - "default-src * data: 'unsafe-inline';"
+      Content-Type:
+      - text/html
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      x-amz-meta-build_key:
+      - 6a1e3c0
+      x-amz-meta-build_ref:
+      - abc123
+      x-amz-version-id:
+      - l5tUoQz5ssFqWr1xrd7pZlVT87.Ty4gO
+    status:
+      code: 200
+      message: OK
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://example.com/404.html
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Encoding:
+      - gzip
+      Content-Security-Policy:
+      - "default-src * data: 'unsafe-inline';"
+      Content-Type:
+      - text/html
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      x-amz-meta-build_key:
+      - 6a1e3c0
+      x-amz-version-id:
+      - vj.vXPKTWM4LqHBDIu_.emYDvR4Bjxmc
+    status:
+      code: 200
+      message: OK
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://example.com/home/index.html
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Encoding:
+      - gzip
+      Content-Security-Policy:
+      - "default-src * data: 'unsafe-inline';"
+      Content-Type:
+      - text/html
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      x-amz-meta-build_key:
+      - 6a1e3c0
+      x-amz-version-id:
+      - PV.oefirKLaL_xK_3yctiNAHZfHfJFKr
+    status:
+      code: 200
+      message: OK
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://example.com/search/index.html
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Length:
+      - '11795'
+      Content-Security-Policy:
+      - "default-src * data: 'unsafe-inline';"
+      Content-Type:
+      - text/html
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      x-amz-meta-build_key:
+      - 6a1e3c0
+      x-amz-version-id:
+      - ww6h2DD8qAInASaIRD5imWTclqxwo4eK
+    status:
+      code: 200
+      message: OK
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://example.com/legal/accessibility/index.html
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Encoding:
+      - gzip
+      Content-Security-Policy:
+      - "default-src * data: 'unsafe-inline';"
+      Content-Type:
+      - text/html
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      x-amz-meta-build_key:
+      - 6a1e3c0
+      x-amz-version-id:
+      - FCn4r84xlCmR4YEYKtnDLkVn6JQIKnkP
+    status:
+      code: 200
+      message: OK
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://example.com/legal/cookies/index.html
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Encoding:
+      - gzip
+      Content-Security-Policy:
+      - "default-src * data: 'unsafe-inline';"
+      Content-Type:
+      - text/html
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      x-amz-meta-build_key:
+      - 6a1e3c0
+      x-amz-version-id:
+      - Cv18yB2fEO7lKSWnU8vRSNaVVIZ.xB3m
+    status:
+      code: 200
+      message: OK
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://example.com/legal/copyright/index.html
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Encoding:
+      - gzip
+      Content-Security-Policy:
+      - "default-src * data: 'unsafe-inline';"
+      Content-Type:
+      - text/html
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      x-amz-meta-build_key:
+      - 6a1e3c0
+      x-amz-version-id:
+      - FuRJSn7ov8c4EgcOSzmOSVSpu8b5BVDs
+    status:
+      code: 200
+      message: OK
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://example.com/legal/privacy/index.html
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Encoding:
+      - gzip
+      Content-Security-Policy:
+      - "default-src * data: 'unsafe-inline';"
+      Content-Type:
+      - text/html
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      x-amz-meta-build_key:
+      - 6a1e3c0
+      x-amz-version-id:
+      - A36i0gHCrqRR8UVQvxl.hMYyLz2T4gUl
+    status:
+      code: 200
+      message: OK
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://example.com/guides/roadmap/index.html
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Encoding:
+      - gzip
+      Content-Security-Policy:
+      - "default-src * data: 'unsafe-inline';"
+      Content-Type:
+      - text/html
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      x-amz-meta-build_key:
+      - 6a1e3c0
+      x-amz-version-id:
+      - Kt.eabPi.e_u81W2.kLV5Hus7HsuF_jf
+    status:
+      code: 200
+      message: OK
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://example.com/guides/formatting/index.html
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Encoding:
+      - gzip
+      Content-Security-Policy:
+      - "default-src * data: 'unsafe-inline';"
+      Content-Type:
+      - text/html
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      x-amz-meta-build_key:
+      - 6a1e3c0
+      x-amz-version-id:
+      - uDvYOfP5MvoB1CK4a1yDSM6qXD1PXM.8
+    status:
+      code: 200
+      message: OK
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://example.com/guides/map-purchasing/index.html
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Encoding:
+      - gzip
+      Content-Security-Policy:
+      - "default-src * data: 'unsafe-inline';"
+      Content-Type:
+      - text/html
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      x-amz-meta-build_key:
+      - 6a1e3c0
+      x-amz-version-id:
+      - tyPFTBwBoOtgdfVK6b4rKegTvsQ3GSGi
+    status:
+      code: 200
+      message: OK
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://example.com/invalid
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Type:
+      - text/html; charset=iso-8859-1
+      Server:
+      - Apache
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://example.com/static/json/api-catalog.json
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Length:
+      - '263'
+      Content-Security-Policy:
+      - "default-src * data: 'unsafe-inline';"
+      Content-Type:
+      - application/linkset+json;
+        profile=https://www.rfc-editor.org/info/rfc9727
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      x-amz-version-id:
+      - qZ7c9MAc3h1qnJ.Z2zbtejs6uTwZ.nXy
+    status:
+      code: 200
+      message: OK
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://example.com/.well-known/api-catalog
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Length:
+      - '0'
+      Content-Security-Policy:
+      - "default-src * data: 'unsafe-inline';"
+      Location:
+      - https://example.com/static/json/api-catalog.json
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+    status:
+      code: 301
+      message: Moved Permanently
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://example.com/.well-known/api-catalog
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Length:
+      - '0'
+      Content-Security-Policy:
+      - "default-src * data: 'unsafe-inline';"
+      Location:
+      - https://example.com/static/json/api-catalog.json
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+    status:
+      code: 301
+      message: Moved Permanently
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://example.com/static/json/api-catalog.json
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Length:
+      - '263'
+      Content-Security-Policy:
+      - "default-src * data: 'unsafe-inline';"
+      Content-Type:
+      - application/linkset+json;
+        profile=https://www.rfc-editor.org/info/rfc9727
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      x-amz-version-id:
+      - qZ7c9MAc3h1qnJ.Z2zbtejs6uTwZ.nXy
+    status:
+      code: 200
+      message: OK
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://example.com/static/json/openapi.json
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Length:
+      - '53145'
+      Content-Security-Policy:
+      - "default-src * data: 'unsafe-inline';"
+      Content-Type:
+      - application/vnd.oai.openapi+json;version=3.1
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      x-amz-version-id:
+      - t7T7Apr55wetzBIrJr9NJ.R6SlBWQ1tg
+    status:
+      code: 200
+      message: OK
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://example.com/guides/api/index.html
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Length:
+      - '11340'
+      Content-Security-Policy:
+      - "default-src * data: 'unsafe-inline';"
+      Content-Type:
+      - text/html
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      x-amz-meta-build_key:
+      - 6a1e3c0
+      x-amz-version-id:
+      - LoRro.kRa_T4XisTys4s.D2ypbDINqJj
+    status:
+      code: 200
+      message: OK
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://example.com/static/json/health.json
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Length:
+      - '1161'
+      Content-Security-Policy:
+      - "default-src * data: 'unsafe-inline';"
+      Content-Type:
+      - application/health+json
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      x-amz-version-id:
+      - C2EFILJzWSeHTwFS0qtVv4nLQlcUk4Qc
+    status:
+      code: 200
+      message: OK
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://example.com/-/health
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Length:
+      - '0'
+      Content-Security-Policy:
+      - "default-src * data: 'unsafe-inline';"
+      Location:
+      - https://example.com/static/json/health.json
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+    status:
+      code: 301
+      message: Moved Permanently
+# repeated
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://example.com/-/health
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Length:
+      - '0'
+      Content-Security-Policy:
+      - "default-src * data: 'unsafe-inline';"
+      Location:
+      - https://example.com/static/json/health.json
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+    status:
+      code: 301
+      message: Moved Permanently
+# repeated
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://example.com/static/json/health.json
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Length:
+      - '1161'
+      Content-Security-Policy:
+      - "default-src * data: 'unsafe-inline';"
+      Content-Type:
+      - application/health+json
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      x-amz-version-id:
+      - C2EFILJzWSeHTwFS0qtVv4nLQlcUk4Qc
+    status:
+      code: 200
+      message: OK
+
+# == Requests for all records checks ==
+
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://example.com/waf/iso-19139-all/index.html
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Encoding:
+      - gzip
+      Content-Security-Policy:
+      - 'default-src * data: ''unsafe-inline'';'
+      Content-Type:
+      - text/html
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      x-amz-meta-build_ref:
+      - abc123
+      x-amz-version-id:
+      - HAJpoW2f_.uU7BOzqXzmA9x4Nu.tjlZ4
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://example.com/-/public-website-search/items.json
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Encoding:
+      - gzip
+      Content-Security-Policy:
+      - 'default-src * data: ''unsafe-inline'';'
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      x-amz-meta-build_ref:
+      - abc123
+      x-amz-version-id:
+      - xSH0J735PbcwMMNZXgkdJBik4Ksj94xw
+    status:
+      code: 200
+      message: OK
+
+# == Requests for per record checks ==
+# Modified to match fake record 'a1b2c3'.
+
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri:
+      https://example.com/items/a1b2c3/index.html
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Length:
+      - '73410'
+      Content-Security-Policy:
+      - "default-src * data: 'unsafe-inline';"
+      Content-Type:
+      - text/html
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      x-amz-meta-build_key:
+      - 6a1e3c0
+      x-amz-meta-file_identifier:
+      - a1b2c3
+      x-amz-meta-file_revision:
+      - abc123
+      x-amz-version-id:
+      - rSYzbvIOOhxHaQE5AQTtU6IuqED_aHHr
+    status:
+      code: 200
+      message: OK
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri:
+      https://example.com/records/a1b2c3.json
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Length:
+      - '17444'
+      Content-Security-Policy:
+      - "default-src * data: 'unsafe-inline';"
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      x-amz-meta-file_identifier:
+      - a1b2c3
+      x-amz-meta-file_revision:
+      - abc123
+      x-amz-version-id:
+      - 2B_iHJ80haFY._TApv6YTE9YsQN8.zNt
+    status:
+      code: 200
+      message: OK
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://example.com/records/a1b2c3.xml
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Length:
+      - '50900'
+      Content-Security-Policy:
+      - "default-src * data: 'unsafe-inline';"
+      Content-Type:
+      - application/xml
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      x-amz-meta-file_identifier:
+      - a1b2c3
+      x-amz-meta-file_revision:
+      - abc123
+      x-amz-version-id:
+      - TUg1V7LV5MQRJq4E5Xjc0o1Sly.KJwM_
+    status:
+      code: 200
+      message: OK
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://doi.org/10.5285/a1b2c3
+  response:
+    body:
+      string: ''
+    headers:
+      Connection:
+      - keep-alive
+      Content-Type:
+      - text/html;charset=utf-8
+      Nel:
+      - '{"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}'
+      Server:
+      - cloudflare
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      alt-svc:
+      - h3=":443"; ma=86400
+      cf-cache-status:
+      - DYNAMIC
+      location:
+      - https://example.com/items/a1b2c3
+      permissions-policy:
+      - interest-cohort=(),browsing-topics=()
+      vary:
+      - Origin
+      - Accept
+    status:
+      code: 302
+      message: Found
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://doi.org/10.5285/a1b2c3
+  response:
+    body:
+      string: ''
+    headers:
+      Connection:
+      - keep-alive
+      Content-Type:
+      - text/html;charset=utf-8
+      Nel:
+      - '{"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}'
+      Server:
+      - cloudflare
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      alt-svc:
+      - h3=":443"; ma=86400
+      cf-cache-status:
+      - DYNAMIC
+      location:
+      - https://example.com/items/a1b2c3
+      permissions-policy:
+      - interest-cohort=(),browsing-topics=()
+      vary:
+      - Origin
+      - Accept
+    status:
+      code: 302
+      message: Found
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://example.com/items/a1b2c3
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Security-Policy:
+      - "default-src * data: 'unsafe-inline';"
+      Location:
+      - /items/a1b2c3/
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      x-amz-error-code:
+      - Found
+      x-amz-error-message:
+      - Resource Found
+    status:
+      code: 302
+      message: Moved Temporarily
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri: https://example.com/items/a1b2c3/
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Encoding:
+      - gzip
+      Content-Security-Policy:
+      - "default-src * data: 'unsafe-inline';"
+      Content-Type:
+      - text/html
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      x-amz-meta-build_key:
+      - 6a1e3c0
+      x-amz-meta-file_identifier:
+      - a1b2c3
+      x-amz-meta-file_revision:
+      - abc123
+      x-amz-version-id:
+      - rSYzbvIOOhxHaQE5AQTtU6IuqED_aHHr
+    status:
+      code: 200
+      message: OK
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri:
+      https://example.com/records/a1b2c3.html
+  response:
+    body:
+      string: ''
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Length:
+      - '31362'
+      Content-Security-Policy:
+      - "default-src * data: 'unsafe-inline';"
+      Content-Type:
+      - text/html
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Origin
+      X-Cache:
+      - Hit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+      x-amz-meta-file_identifier:
+      - a1b2c3
+      x-amz-meta-file_revision:
+      - abc123
+      x-amz-version-id:
+      - jp6q4ZoS6v4qr0Y050G69sPIGWDi4UF7
+    status:
+      code: 200
+      message: OK
+- request:
+    body:
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: HEAD
+    uri:
+      https://example.com/-/items/a1b2c3/index.html
+  response:
+    body:
+      string: ''
+    headers:
+      Accept-Ranges:
+      - bytes
+      Content-Length:
+      - '77256'
+      Content-Type:
+      - text/html; charset=UTF-8
+      Server:
+      - Apache
+    status:
+      code: 200
+      message: OK
+
+# == Requests for AWS upload ==
+
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        M2...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        YXBwbGljYXRpb24vanNvbg==
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MTU0MDU=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        OT...g1
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/-/checks/data.json
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - 20a71A==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - GVPobgN3ueKlOFpCcKJpt_apjNNovY26
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/-/checks/index.html
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+version: 1

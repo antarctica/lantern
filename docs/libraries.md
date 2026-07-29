@@ -4,7 +4,7 @@ Extensions to, or code closely associated with, third-party libraries relied on 
 
 ## Markdown
 
-`assets_tracking_service.lib.markdown`
+`lantern.lib.markdown`
 
 ### Markdown plain text plugin
 
@@ -22,9 +22,6 @@ A plugin based on https://gitlab.com/ayblaq/prependnewline/ is used to automatic
 correctly paragraphs from lists in Markdown and ensure proper formatting.
 
 ## BAS Metadata Library
-
-> [!IMPORTANT]
-> These are rough/working notes that will be written up properly when this module is extracted.
 
 `lantern.lib.metadata_library`
 
@@ -239,7 +236,7 @@ To add support for a new ISO element within Records:
 
 ## ArcGIS
 
-`assets_tracking_service.lib.arcgis`
+`lantern.lib.arcgis`
 
 ### ArcGIS API for Python
 

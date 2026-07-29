@@ -52,6 +52,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Site checks for trusted content
 * Flag to exclude content items from cached, S3 backed, CloudFront destinations using an object cache control header
 * 'Live' items for information updated in near real time (multiple times per hour)
+* Usage instructions for removing records as a last resort
 
 ### Fixed
 
@@ -68,6 +69,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Missing favicon in site image assets (in addition to site root)
 * Interactive publishing workflows when using a local development environment
 * Adding AWS S3 lifecycle rules to remove old versions of objects in the live site bucket
+* Using temporary path for GitLab store cache within tests
+* Link to data in scheduled checks HTML report
 
 ### Changed
 

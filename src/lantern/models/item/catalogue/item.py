@@ -304,7 +304,7 @@ class ItemCatalogue(ItemBase):
             item_super_type=self._super_type,
             edition=self.edition,
             published_date=cast(FormattedDate | None, self._dates.publication),
-            revision_date=cast(FormattedDate | None, self._dates.revision),
+            revision_date=self._dates.revision_relative,
             aggregations=self._aggregations,
             live=self.live,
             restricted=self._restricted,

@@ -32,11 +32,11 @@ terraform.tfvars
 /resources/dev/apache/run/
 
 # App generated files
-import/
-export/
-export-trusted/
-checks/
-agol-item-backups/
-workflow_results/
-.cache/
+/import/
+/export/
+/export-trusted/
+/checks/
+/agol-item-backups/
+/workflow_results/
+/.cache/
 .env

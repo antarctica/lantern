@@ -36,6 +36,8 @@
 
 {% macro search_i_classes() %}fa-regular fa-magnifying-glass{% endmacro %}
 
+{% macro restricted_i_classes() %}fa-regular fa-lock-keyhole{% endmacro %}
+
 {% macro live_i_classes() %}fa-regular fa-signal-stream fa-fade{% endmacro %}
 
 {% macro maintenance_i_classes() %}fa-regular fa-screwdriver-wrench{% endmacro %}
@@ -76,7 +78,7 @@
 </div>
 {% endmacro %}
 
-{% macro restricted_i() %}<i class="fa-regular fa-lock-keyhole" aria-hidden="true"></i>{% endmacro %}
+{% macro restricted_i() %}<i class="{{ restricted_i_classes() }}" aria-hidden="true"></i>{% endmacro %}
 
 {% macro ext_link_i() %}<i class="fa-regular fa-arrow-up-right-from-square" aria-hidden="true"><span class="sr-only">External link, opens in a new window.</span></i>{% endmacro %}
 

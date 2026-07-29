@@ -134,8 +134,13 @@ def fx_logger() -> logging.Logger:
 
 
 @pytest.fixture()
-def fx_config() -> Config:
-    """App configuration."""
+def fx_config(tmp_path: Path) -> Config:
+    """
+    App configuration.
+
+    With temporary path for GitLab store cache.
+    """
+    os.environ["LANTERN_STORE_GITLAB_CACHE_PATH"] = str(tmp_path)
     return Config()
 
 

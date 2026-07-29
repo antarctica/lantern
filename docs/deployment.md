@@ -48,8 +48,16 @@ The playbook:
 - creates a Python virtual environment containing the [Python Package](#python-package) for the app version
 - generates an [Environment Module](#environment-module) for the app version
 - configures a cron job for [Scheduled Checks](/docs/monitoring.md#scheduled-checks)
+- runs post-deployment checks including:
+  - checking the expected version is loaded by the [Environment Module](#environment-module)
+  - checking the configuration set by the [Environment Module](#environment-module) is valid
+  - running the [Non-Interactive Publishing Workflow](/docs/usage.md#non-interactive-publishing-workflow) for a known
+    test record and branch
+  - checking the [Heartbeat](/docs/monitoring.md#heartbeat)
+  - checking the [Health Check Endpoint](/docs/monitoring.md#health-check-endpoint)
 
-The playbook is run automatically via [Continuous Deployment](#continuous-deployment).
+The playbook is run automatically in [Continuous Deployment](#continuous-deployment) for tagged releases, or via a
+manual trigger for pre-releases.
 
 The playbook can be run manually with these
 [General Instructions](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/README.MAGIC.md#run-a-playbook)

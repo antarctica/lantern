@@ -68,6 +68,7 @@ test = [
 
 [tool.uv.exclude-newer-package]
 bas-metadata-library = "2026-07-13T13:00:00Z" # set to after the latest release
+ruff = "2026-07-23T20:00:00Z" # set to after the latest release
 
 [[tool.uv.index]]
 name = "self"
@@ -305,5 +306,5 @@ source = ["src"]
 omit = []
 
 [build-system]
-requires = ["uv_build>=0.9.18,<0.12.0"]
+requires = ["uv_build>=0.9.18,<0.13.0"]
 build-backend = "uv_build"

@@ -215,9 +215,9 @@ class TestItemSummary:
             ),
         ],
     )
-    def test_access(self, fx_admin_meta_keys: AdministrationKeys, value: Constraint, expected: bool):
+    def test_restricted(self, fx_admin_meta_keys: AdministrationKeys, value: Constraint, expected: bool):
         """
-        Can get access type with expected value from summary.
+        Can get restricted tag with expected value from summary.
 
         Only shown if restricted.
         """

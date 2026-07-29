@@ -255,7 +255,7 @@ class BasRepository(RepositoryBase):
 
         Proxy to GitLab store.
 
-        Note: The search index is not updated despite only tracking main, as we block direct commits.
+        Note: The search index is not updated as it only tracks main, and we block direct commits to main.
         """
         default_branch = self._config.STORE_GITLAB_DEFAULT_BRANCH
         if context.branch == default_branch:

@@ -2,6 +2,8 @@
 
 Summary of colours used across site templates. Compiled and referenced manually to encourage consistency in colour use.
 
+> This summary may not be complete but should be broadly accurate. Last reviewed for an unknown release.
+
 ## Distinct colours
 
 Greyscale:

@@ -2,6 +2,9 @@
 
 Summary of icons used across site templates. Compiled and referenced manually to encourage consistency in icon use.
 
+> [!NOTE]
+> This summary may not be complete but should be broadly accurate. Last reviewed for the 0.15.x release.
+
 ## Uses
 
 - directly in [Templates](/docs/site.md#templates)
@@ -27,50 +30,55 @@ For consistency, these icons SHOULD be used where relevant via [Macros](/docs/si
 
 ### Single-use icons
 
-Included directly.
+Included directly or by macro.
 
-| Component                              | Icon Name                   | Icon Style   | Comment         |
-|----------------------------------------|-----------------------------|--------------|-----------------|
-| Site Footer (Back to top link)         | `fa-arrow-up`               | `fa-regular` |                 |
-| Site Feedback (Submit button)          | `fa-paper-plane-top`        | `fa-regular` |                 |
-| Item Contact (Alternative - Post)      | `fa-envelope`               | `fa-regular` |                 |
-| Item Contact (Alternative - Email)     | `fa-at`                     | `fa-regular` |                 |
-| Item Contact (Alternative - Phone)     | `fa-phone-rotary`           | `fa-regular` |                 |
-| Item Contact (Submit button)           | `fa-paper-plane-top`        | `fa-regular` |                 |
-| Item Info (Page Size - Portrait)       | `fa-rectangle-vertical`     | `fa-regular` |                 |
-| Item Info (Page Size - Landscape)      | `fa-rectangle`              | `fa-regular` |                 |
-| Item Authors (ORCID)                   | `fa-orcid`                  | `fa-brands`  |                 |
-| Item Licence (Additional restrictions) | `fa-ban`                    | `fa-regular` | in 5 licences   |
-| Item Licence (Inaccuracies)            | `fa-circle-question`        | `fa-regular` | in 5 licences   |
-| Item Licence (Warrenty)                | `fa-circle-exclamation`     | `fa-regular` | in 5 licences   |
-| Item Licence (Allowed use)             | `fa-circle-check`           | `fa-regular` | in 2 licences   |
-| Item Licence (Allowed copy)            | `fa-creative-commons-share` | `fa-brands`  | in 2 licences   |
-| Item Licence (Allowed remix)           | `fa-creative-commons-remix` | `fa-brands`  | in 2 licences   |
-| Item Licence (Attribution)             | `fa-creative-commons-by`    | `fa-brands`  | in 2 licences   |
-| Item Licence (Keep attribution)        | `fa-creative-commons-nd`    | `fa-brands`  | in 2 licences   |
-| Item Licence (OGL symbol)              | `fa-ogl-symbol`             | `fa-kit`     | Custom ket icon |
-| Item Tab (Items)                       | `fa-grid-2`                 | `fa-regular` |                 |
+| Component                              | Icon Name                   | Icon Style   | Comment            |
+|----------------------------------------|-----------------------------|--------------|--------------------|
+| Site Header (Search link)              | `fa-magnifying-glass`       | `fa-regular` |                    |
+| Site Footer (Back to top link)         | `fa-arrow-up`               | `fa-regular` |                    |
+| Site Feedback (Submit button)          | `fa-paper-plane-top`        | `fa-regular` |                    |
+| Site Feedback (Form close)             | `fa-xmark`                  | `fa-regular` |                    |
+| Site Home                              | `fa-igloo`                  | `fa-regular` | Easter egg         |
+| Site Search (Share results)            | `fa-share`                  | `fa-regular` |                    |
+| Item Contact (Alternative - Post)      | `fa-envelope`               | `fa-regular` |                    |
+| Item Contact (Alternative - Email)     | `fa-at`                     | `fa-regular` |                    |
+| Item Contact (Alternative - Phone)     | `fa-phone-rotary`           | `fa-regular` |                    |
+| Item Contact (Submit button)           | `fa-paper-plane-top`        | `fa-regular` |                    |
+| Item Info (Page Size - Portrait)       | `fa-rectangle-vertical`     | `fa-regular` |                    |
+| Item Info (Page Size - Landscape)      | `fa-rectangle`              | `fa-regular` |                    |
+| Item Authors (ORCID)                   | `fa-orcid`                  | `fa-brands`  |                    |
+| Item Licence (Additional restrictions) | `fa-ban`                    | `fa-regular` | in 5 licences      |
+| Item Licence (Inaccuracies)            | `fa-circle-question`        | `fa-regular` | in 5 licences      |
+| Item Licence (Warrenty)                | `fa-circle-exclamation`     | `fa-regular` | in 5 licences      |
+| Item Licence (Allowed use)             | `fa-circle-check`           | `fa-regular` | in 2 licences      |
+| Item Licence (Allowed copy)            | `fa-creative-commons-share` | `fa-brands`  | in 2 licences      |
+| Item Licence (Allowed remix)           | `fa-creative-commons-remix` | `fa-brands`  | in 2 licences      |
+| Item Licence (Attribution)             | `fa-creative-commons-by`    | `fa-brands`  | in 2 licences      |
+| Item Licence (Keep attribution)        | `fa-creative-commons-nd`    | `fa-brands`  | in 2 licences      |
+| Item Licence (OGL symbol)              | `fa-ogl-symbol`             | `fa-kit`     | Custom ket icon    |
+| Item Tab (Items)                       | `fa-grid-2`                 | `fa-regular` |                    |
 | Item Tab (Data)                        | `fa-cube`                   | `fa-regular` |
-| Item Tab (Extent)                      | `fa-expand`                 | `fa-regular` |                 |
-| Item Tab (Authors)                     | `fa-user-group-simple`      | `fa-regular` |                 |
-| Item Tab (Licence)                     | `fa-file-certificate`       | `fa-regular` |                 |
-| Item Tab (Lineage)                     | `fa-scroll`                 | `fa-regular` |                 |
-| Item Tab (Related)                     | `fa-diagram-project`        | `fa-regular` |                 |
-| Item Tab (AdditionalInfo)              | `fa-square-info`            | `fa-regular` |                 |
-| Item Tab (Contact)                     | `fa-comment-captions`       | `fa-regular` |                 |
-| Item Tab (Admin)                       | `fa-shield-halved`          | `fa-regular` |                 |
-| Item Distribution (Restricted)         | `fa-lock-keyhole`           | `fa-regular` |                 |
-| Item Distribution (ArcGIS)             | `fa-layer-plus`             | `fa-regular` |                 |
-| Item Distribution (File)               | `fa-file-arrow-down`        | `fa-regular` |                 |
-| Item Distribution (Published Map)      | `fa-basket-shopping`        | `fa-regular` |                 |
-| Item Distribution (SAN)                | `fa-server`                 | `fa-regular` |                 |
-| Item Type (Collection)                 | `fa-shapes`                 | `fa-regular` |                 |
-| Item Type (Dataset)                    | `fa-cube`                   | `fa-regular` |                 |
-| Item Type (Initiative)                 | `fa-cassette-betamax`       | `fa-regular` |                 |
-| Item Type (Product)                    | `fa-map`                    | `fa-regular` |                 |
-| Item Type (Paper map product)          | `fa-map`                    | `fa-regular` |                 |
+| Item Tab (Extent)                      | `fa-expand`                 | `fa-regular` |                    |
+| Item Tab (Authors)                     | `fa-user-group-simple`      | `fa-regular` |                    |
+| Item Tab (Licence)                     | `fa-file-certificate`       | `fa-regular` |                    |
+| Item Tab (Lineage)                     | `fa-scroll`                 | `fa-regular` |                    |
+| Item Tab (Related)                     | `fa-diagram-project`        | `fa-regular` |                    |
+| Item Tab (AdditionalInfo)              | `fa-square-info`            | `fa-regular` |                    |
+| Item Tab (Contact)                     | `fa-comment-captions`       | `fa-regular` |                    |
+| Item Tab (Admin)                       | `fa-shield-halved`          | `fa-regular` |                    |
+| Item Distribution (Restricted)         | `fa-lock-keyhole`           | `fa-regular` |                    |
+| Item Distribution (ArcGIS)             | `fa-layer-plus`             | `fa-regular` |                    |
+| Item Distribution (File)               | `fa-file-arrow-down`        | `fa-regular` |                    |
+| Item Distribution (Published Map)      | `fa-basket-shopping`        | `fa-regular` |                    |
+| Item Distribution (SAN)                | `fa-server`                 | `fa-regular` |                    |
+| Item Type (Collection)                 | `fa-shapes`                 | `fa-regular` |                    |
+| Item Type (Dataset)                    | `fa-cube`                   | `fa-regular` |                    |
+| Item Type (Initiative)                 | `fa-cassette-betamax`       | `fa-regular` |                    |
+| Item Type (Product)                    | `fa-map`                    | `fa-regular` |                    |
+| Item Type (Paper map product)          | `fa-map`                    | `fa-regular` |                    |
+| Item Maintenance (Continuous [Live])   | `fa-signal-stream`          | `fa-regular` | Uses 'fade' effect |
 
-## Fontawesome upgrade
+## Fontawesome upgrades
 
 ### v5 to v7
 

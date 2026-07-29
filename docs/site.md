@@ -254,7 +254,7 @@ assets, e.g. `main.css?v=123`. For reproducibility, this value is set to the fir
 version as a SHA1 hash, e.g. `main.css?v=f053ddb` for version 0.1.0.
 
 <!-- pyml disable md028 -->
-> [!IMPORTANT]
+> [!WARNING]
 > Asset references are not automatically changed. Rebuild the site after a release to update references.
 
 > [!TIP]

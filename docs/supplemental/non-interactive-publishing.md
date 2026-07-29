@@ -2,16 +2,6 @@
 
 ## Overview
 
-### Outputs filtering
-
-Global outputs are not called because:
-
-- the [Site Index](/docs/outputs.md#site-index-output)) Output for example only includes records from the Store passed
-  to it, which would be limited to records managed by the workflow, clobbering outputs that include other (all)
-  expected records and giving incomplete results
-- calling exporters such as the [Site Pages Exporter](/docs/outputs.md#site-resources-output) is unnecessary, given
-  they are not sensitive to record changes
-
 ## Bootstrapping
 
 To set up this workflow for an application:
@@ -25,7 +15,7 @@ To set up this workflow for an application:
 
 ## Routine usage
 
-Configure your application to perform these actions as frequently as needed:
+To update records as needed:
 
 1. generate a set of updated JSON encoded record configurations as files in a directory
 2. call the [Non-Interactive Publishing](/docs/contrib.md#non-interactive-publishing-workflow) contrib module with the
@@ -63,12 +53,27 @@ set -e -u -o pipefail
 
 ## Webhook
 
-An optional webhook can be provided which will be called if any records are committed as part of the workflow. A POST
-request will be made to the configured URL, with a JSON payload containing:
+An optional webhook URL CAN be provided, which will be called if any records are successfully committed as part of the
+workflow.
 
-- GitLab commit and merge request URLs
+> [!NOTE]
+> A configured webhook will not be called if an error occurs within the workflow, or no records need publishing.
+
+If successful, a POST request will be made to the configured URL, with a JSON payload containing:
+
+- the GitLab commit and merge request URL
 - new and/or updated record file identifiers
 - statistics about the number of files created and/or updated
 
 > [!TIP]
 > See `lantern.contrib.non-interactive-publishing-workflow-schema.json` for a JSON Schema and an example payload.
+
+### Outputs filtering
+
+Global outputs are not called because:
+
+- the [Site Index](/docs/outputs.md#site-index-output) Output for example only includes records from the Store passed
+  to it, which would be limited to records managed by the workflow, clobbering outputs that include other (all)
+  expected records and giving incomplete results
+- calling exporters such as the [Site Pages Exporter](/docs/outputs.md#site-resources-output) is unnecessary, given
+  they are not sensitive to record changes

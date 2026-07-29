@@ -268,6 +268,29 @@ To update records in bulk (e.g. to a new profile version, or to adopt new conven
 > [!TIP]
 > The upgrade directory SHOULD be tracked in a local Git repo to easily compare and rollback changes.
 
+## Deleting records
+
+> [!CAUTION]
+> This is an advanced topic which MUST be used as a last resort.
+>
+> Records SHOULD be kept (but updated with an appropriate progress code) even if information is no longer available.
+
+Deleting records requires manually removing data from each [Store](/docs/architecture.md#stores) and
+[Exported](/docs/exporters.md) site content:
+
+1. create an issue in a relevant project documenting why records are being deleted
+1. for the [GitLab Store](/docs/stores.md#gitlab-store):
+   1. from the [GitLab Records Repository](/docs/infrastructure.md#gitlab), create a branch
+   1. delete the relevant record files, plus any parent directories if now empty and commit changes
+   1. create a merge request against `main`, review, and merge if as expected
+1. for the [Algolia Store](/docs/stores.md#algolia-store):
+   1. from the [Algolia dashboard](/docs/infrastructure.md#algolia), go to the records index
+   1. using the index search, delete the relevant record objects
+1. rebuild the [Static Website](#building-static-site) (for at least one record) to refresh [Outputs](/docs/outputs.md)
+   containing all records
+1. for the live and testing sites:
+   1. from the AWS console or CLI, delete any generated outputs for deleted records
+
 ## Updating ArcGIS items
 
 To apply properties from a record to an item in ArcGIS Online, and create an association between a record and item:

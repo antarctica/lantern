@@ -19,22 +19,24 @@
   {{ com.experimental_page() }}
 
   {% call section(slug='recently-released', title='Recently released') %}
-    {% call subsection(title='Geomatics Catalogue') %}
-      <p>We've added a new logical catalogue for <a class="{{ com.link_classes() }}" href="/collections/bas-geomatics">Geomatics</a>,
-        initially to list <a class="{{ com.link_classes() }}" href="/items/7344d437-4d9b-4e8c-a6f8-36c3e1b80a71">Drone Images</a>
-        captured by the Engineering Team of Rothera station.</p>
+    {% call subsection(title='Web map items') %}
+      <p>Initially for our <a class="{{ com.link_classes() }}" href="/maps/5003">Antarctic base map</a>.</p>
+      <p>We have also added relations for map items to list the layers they include, or maps a layer is part of.</p>
     {% endcall %}
-    {% call subsection(title='Map Purchasing Guide') %}
-      <p>We've moved information about how to <a class="{{ com.link_classes() }}" href="/guides/map-purchasing">Purchase our Published Maps</a>
-        to this website as a guide.</p>
+    {% call subsection(title='Improving printing support') %}
+      <p>We're improving the formatting applied when printing item pages.</p>
     {% endcall %}
-    {% call subsection(title='CDE and SAN downloads') %}
-      <p>We've added options for accessing data for items stored on the BAS SAN (U drive), and the Common Data Environment
-        (CDE) used by BAS {{ com.ext_link_a(href='https://www.bas.ac.uk/polar-capabilities/antarctic-infrastructure-modernisation-programme/', value='AIMP') }}
-        construction partners.</p>
+    {% call subsection(title='Improving copying metadata to ArcGIS items') %}
+      <p>We're improving how catalogue metadata is applied to ArcGIS items, including thumbnails and admonitions.</p>
     {% endcall %}
-    {% call subsection(title='Site checks improvements') %}
-      <p>We've streamlined and simplified the automatic checks we run to try and detect missing or broken content and downloads.</p>
+    {% call subsection(title='Search') %}
+      <p>We're introduced a basic <a class="{{ com.link_classes() }}" href="/search">Search</a> page.</p>
+    {% endcall %}
+    {% call subsection(title='Placeholder Homepage') %}
+      <p>We're adding a placeholder <a class="{{ com.link_classes() }}" href="/home">Home</a> page linking to key collections.</p>
+    {% endcall %}
+    {% call subsection(title='Roadmap and changelog') %}
+      <p>We've added this page to explain how this website is developing.</p>
     {% endcall %}
     {% call com.alert(shape='side', variant='blue', classes="space-y-2") %}
       <p>This section only includes recent, high level, changes intended for a general audience.</p>
@@ -43,26 +45,22 @@
     {% endcall %}
   {% endcall %}
   {% call section(slug='working-on', title='What we\'re doing now') %}
-    {% call subsection(title='Search') %}
-      <p>We're introducing a basic <a class="{{ com.link_classes() }}" href="/search">Search</a> page.</p>
+    {% call subsection(title='Improving printing support') %}
+      <p>We're improving the formatting applied when printing item pages.</p>
     {% endcall %}
-    {% call subsection(title='Web Map Products') %}
-      <p>We're adding items for interactive web maps, specifically ArcGIS web maps.</p>
+    {% call subsection(title='OpenAPI tests') %}
+      <p>We're using {{ com.ext_link_a(href='https://schemathesis.readthedocs.io/', value='Schemathesis') }} to check
+        our OpenAPI specification is written correctly.</p>
+    {% endcall %}
+    {% call subsection(title='Site checks for restricted items') %}
+      <p>We've added an indicator for items that are updated in near real time, such as
+        <a class="{{ com.link_classes() }}" href="/items/260298c6-8b63-4def-b0c3-964986a8bd24">Asset tracking data</a>.</p>
     {% endcall %}
     {% call subsection(title='Site checks for restricted items') %}
       <p>We're expanding the automatic broken download checks we run to include restricted downloads hosted in SharePoint.</p>
     {% endcall %}
-    {% call subsection(title='Roadmap and changelog') %}
-      <p>We're adding this page to explain how this website is developing.</p>
-    {% endcall %}
-    {% call subsection(title='Security and search notices') %}
-      <p>We're adding a {{ com.ext_link_a(href='https://securitytxt.org', value='security.txt') }} file explaining how
-        people can report security issues with this website, and a
-        {{ com.ext_link_a(href='https://en.wikipedia.org/wiki/Robots.txt', value='robots.txt') }} file to request
-        search engines and AI tools exclude some pages not relevant to the public (but which aren't secret).</p>
-    {% endcall %}
-    {% call subsection(title='Placeholder Homepage') %}
-      <p>We're adding a placeholder <a class="{{ com.link_classes() }}" href="/home">Home</a> page linking to key collections.</p>
+    {% call subsection(title='Migrating to UKRI AWS') %}
+      <p>We will move the AWS website hosting to an account operated by our parent body, for better support and oversight.</p>
     {% endcall %}
   {% endcall %}
   {% call section(slug='future-plans', title='Future plans') %}
@@ -72,9 +70,6 @@
     {% endcall %}
     {% call subsection(title='Management API') %}
       <p>We will add an API for storing new or updated records, and to publish them to this website.</p>
-    {% endcall %}
-    {% call subsection(title='Migrating to UKRI AWS') %}
-      <p>We will move the AWS website hosting to an account operated by our parent body, for better support and oversight.</p>
     {% endcall %}
     {% call com.alert(shape='side', variant='blue', classes="space-y-2") %}
       <p>

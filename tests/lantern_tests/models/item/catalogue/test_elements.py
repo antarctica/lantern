@@ -1,6 +1,7 @@
 from datetime import UTC, date, datetime
 
 import pytest
+from freezegun.api import FrozenDateTimeFactory
 
 from lantern.lib.metadata_library.models.record.elements.common import (
     Date,
@@ -88,9 +89,11 @@ class TestFormattedDate:
         """Cannot process an invalid value."""
         now = datetime(2014, 6, 30, 14, 30, second=45, tzinfo=UTC)
         with pytest.raises(TypeError):
+            # noinspection PyTypeChecker
             FormattedDate.from_rec_date("", relative_to=now)
 
 
+# noinspection PyTypeChecker
 class TestAggregations:
     """Test Catalogue Item aggregations."""
 
@@ -345,6 +348,39 @@ class TestDates:
         dates = Dates(dates=RecordDates(creation=date_))
 
         assert dates.creation == expected
+
+    @pytest.mark.parametrize(
+        ("revision", "expected"),
+        [
+            (None, None),
+            (Date(date=date(2014, 6, 30)), FormattedDate(value="30 June 2014", datetime="2014-06-30")),
+            (
+                Date(date=datetime(2015, 6, 30, 14, 30, second=45, tzinfo=UTC)),
+                FormattedDate(value="30 June 2015 14:30:45 UTC", datetime="2015-06-30T14:30:45+00:00"),
+            ),
+            (
+                Date(date=datetime(2014, 6, 30, 15, 30, second=45, tzinfo=UTC)),
+                FormattedDate(value="15:30:45 UTC", datetime="2014-06-30T15:30:45+00:00"),
+            ),
+        ],
+    )
+    def test_revision_relative(
+        self,
+        freezer: FrozenDateTimeFactory,
+        fx_freezer_time: datetime,
+        revision: Date | None,
+        expected: FormattedDate | None,
+    ):
+        """Can format a revision date relative to the current date."""
+        freezer.move_to(fx_freezer_time)
+        record_dates = RecordDates(
+            # Creation needed to ensure at least one date
+            creation=Date(date=datetime(2014, 6, 30, 14, 30, second=45, tzinfo=UTC)),
+            revision=revision,
+        )
+
+        dates = Dates(dates=record_dates)
+        assert dates.revision_relative == expected
 
     def test_as_dict_enum(self):
         """Can get dates as a DateTypeCode indexed dict."""
@@ -606,6 +642,7 @@ class TestPageHeader:
         assert header.subtitle == (expected_type_label, expected_type_icon)
 
 
+# noinspection PyTypeChecker
 class TestPageSummary:
     """Test Catalogue Item summary panel."""
 
@@ -615,7 +652,7 @@ class TestPageSummary:
             (
                 HierarchyLevelCode.PRODUCT,
                 "x",
-                "x",
+                FormattedDate.from_rec_date(Date(date=datetime(2014, 6, 30, tzinfo=UTC))),
                 Aggregations(
                     admin_meta_keys=_admin_meta_keys(),
                     aggregations=RecordAggregations(
@@ -649,7 +686,7 @@ class TestPageSummary:
             (
                 HierarchyLevelCode.COLLECTION,
                 "x",
-                "x",
+                FormattedDate.from_rec_date(Date(date=datetime(2014, 6, 30, tzinfo=UTC))),
                 Aggregations(
                     admin_meta_keys=_admin_meta_keys(),
                     aggregations=RecordAggregations(
@@ -673,7 +710,7 @@ class TestPageSummary:
         self,
         item_type: HierarchyLevelCode,
         edition: str | None,
-        published: str | None,
+        published: FormattedDate | None,
         aggregations: Aggregations,
         live: bool,
         restricted: bool,
@@ -711,7 +748,7 @@ class TestPageSummary:
             # [all triggers]
             (
                 "1",
-                "x",
+                FormattedDate.from_rec_date(Date(date=datetime(2014, 6, 30, tzinfo=UTC))),
                 True,
                 True,
                 Aggregations(
@@ -864,7 +901,7 @@ class TestPageSummary:
 
     @pytest.mark.parametrize("has_aggregation", [False, True])
     def test_physical_map(self, fx_admin_meta_keys: AdministrationKeys, has_aggregation: bool):
-        """Can show combination of publication and revision date if relevant."""
+        """Can show link to physical parent item if relevant."""
         aggregations = []
         if has_aggregation:
             aggregations.append(

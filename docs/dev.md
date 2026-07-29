@@ -683,10 +683,10 @@ in `pyproject.toml`. Tests are grouped into two test suites:
 - slow: mostly end-to-end tests, defined in the `tests_slow` package
 
 > [!NOTE]
-> Parallel processing _within_ code is disabled in tests to avoid issues with [HTTP recording](#pytest-recording),
-> (by setting the `PARALLEL_JOBS` [config option](#pytest-env)).
+> Tests are usually run in parallel using [`pytest-xdist`](#pytest-xdist).
 >
-> Tests themselves are run in parallel using [`pytest-xdist`](#pytest-xdist).
+> To avoid issues with [HTTP recording](#pytest-recording), parallel processing _within_ code under test is disabled
+> by setting the `PARALLEL_JOBS` [config option](#pytest-env).
 
 Main and slow tests are run automatically in [Continuous Integration](#continuous-integration).
 
@@ -705,7 +705,7 @@ Main and slow tests are run automatically in [Continuous Integration](#continuou
 
 ### Pytest fast fail
 
-If a test run fails with a `NotImplementedError` exception run the `test-reset` [Development Task](#development-tasks).
+If a tests fail with a `NotImplementedError` exception run the `test-reset` [Development Task](#development-tasks).
 
 This occurs where:
 
@@ -737,14 +737,15 @@ coverage unless there is a good justification for an exemption using:
 > To check coverage manually run the `test-cov` [Development Task](#development-tasks).
 
 > [!TIP]
-> To run tests for a specific module locally:
+> To check coverage for a specific module locally:
 >
 > ```shell
 > % uv run pytest --cov=lantern.some.module --cov-report=html tests/lantern_tests/some/module
 > ```
 <!-- pyml enable md028 -->
 
-Where tests are added to ensure coverage, use the `cov` [mark](https://docs.pytest.org/en/7.1.x/how-to/mark.html), e.g:
+Where tests are added only to ensure coverage, use the `cov` [mark](https://docs.pytest.org/en/7.1.x/how-to/mark.html),
+e.g:
 
 ```python
 import pytest
@@ -756,11 +757,11 @@ def test_foo():
 
 ### Pytest-xdist
 
-[pytest-xdist](https://pytest-xdist.readthedocs.io) runs tests in parallel to speed up test runs.
+[pytest-xdist](https://pytest-xdist.readthedocs.io) is used to run tests in parallel.
 
 > [!NOTE]
 > Tests that rely on the `fx_exporter_static_server` fixture (such as [Playwright tests](#playwright-tests)) need to
-> run on the same worker. This is set using the `e2e` xdist group (i.e. `@pytest.mark.xdist_group("e2e")`).
+> run on the same worker using the same xdist group (e.g. `@pytest.mark.xdist_group("e2e")`).
 
 ### Pytest-env
 
@@ -819,8 +820,8 @@ simple HTTP server. The site contains all [Test Records](#test-records).
 <!-- pyml disable md028 -->
 > [!NOTE]
 > This local server cannot be used directly in CI. Instead, a Python simple server serving a known (initially empty)
-> path in the build directory is started before Pytest runs. The `fx_exporter_static_server` detects the CI environment
-> and copies the static site build to this path, then quits, giving an equivalent outcome.
+> path in the build directory is started before Pytest runs. The `fx_exporter_static_server` fixture detects the CI
+> environment and copies the static site build to this path, giving an equivalent outcome.
 
 > [!NOTE]
 > Make sure Playwright tests use the `e2e` xdist group (i.e. `@pytest.mark.xdist_group("e2e")`) to avoid test failures.
@@ -856,8 +857,9 @@ To aid in debugging and testing, a set of fake records are included for:
 
 - example collections and products with only minimal properties set
 - example collections and products with all optional properties set
+- examples of other item types to test general handling, and with relevant properties to test specific functionality
 - example items to test supported formatting options in free-text properties
-- example items to test supported distribution options and verification types
+- example items to test supported distribution and check types
 - example items for each supported licence
 - examples of special items, such as physical maps
 
@@ -884,9 +886,6 @@ signing admin metadata instances.
 > property returning an `AdministrationKeys` instance with this key loaded.
 
 #### Adding new test records
-
-> [!WARNING]
-> This section is Work in Progress (WIP) and may not be complete/accurate.
 
 1. create new `tests/resources/records/item_cat_*.py` file or clone from minimal examples
    - records MUST use a unique `file_identifier`

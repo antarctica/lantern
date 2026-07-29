@@ -43,16 +43,16 @@ class FormattedDate:
     @classmethod
     def from_rec_date(cls: type[TFormattedDate], value: Date, relative_to: DateTime | None = None) -> FormattedDate:
         """
-        Format a Record date for use in HTML time elements.
+        Create a formatted date (time) from a Python value.
 
         Time elements consist of human-readable value and a machine-readable 'datetime' attribute.
 
         For time values:
-        - uses a 'DD MMM YYYY' (e.g. 01 Oct 2023) representation where precision allows
-        - Date times within 24 hours of a reference point (defaults to now) returns the date and time (otherwise omitted)
+        - a 'DD MMM YYYY' (e.g. 01 Oct 2023) representation is used where precision allows
+        - where a value is within 24 hours of a reference point (defaults to now) the date and time is used
 
         For time 'datetime' attributes:
-        - uses the relevant ISO 8601 representation (e.g. 2023-10-01T12:00:00+00:00)
+        - the relevant ISO 8601 representation is used (e.g. 2023-10-01T12:00:00+00:00)
         """
         if not isinstance(value, Date):
             msg = "Value must be a record Date object."
@@ -373,6 +373,8 @@ class Dates(RecordDates):
     Dates.
 
     Wrapper around Record Dates to apply automatic formatting.
+
+    Includes a derived relative revision date for use in catalogue item page summaries.
     """
 
     def __init__(self, dates: RecordDates) -> None:
@@ -387,6 +389,22 @@ class Dates(RecordDates):
         if val is None:
             return None
         return FormattedDate.from_rec_date(val)
+
+    @property
+    def revision_relative(self) -> FormattedDate | None:
+        """
+        Revision date relative to now.
+
+        Returns a formatted date with a time only value where the revision date is within the current day.
+        """
+        val = super().__getattribute__("revision")
+        if val is None:
+            return None
+
+        fmt_val = FormattedDate.from_rec_date(val)
+        if isinstance(val.date, DateTime) and val.date.date() == DateTime.now(tz=UTC).date():
+            fmt_val.value = val.date.strftime("%H:%M:%S %Z")
+        return fmt_val
 
     def as_dict_enum_formatted(self) -> dict[DateTypeCode, FormattedDate]:
         """

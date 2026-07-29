@@ -3,6 +3,7 @@
 import logging
 import time
 from argparse import ArgumentParser
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import get_args
 
@@ -149,11 +150,10 @@ def main() -> None:
 
     cli_args = _get_cli_args()
     env, target, branch, identifiers, params = _get_args(logger=logger, cat=catalogue, cli_args=cli_args)
+    local_path = Path(f"checks/ad-hoc/{datetime.now(tz=UTC).strftime('%Y-%m-%d--%H-%M-%S')}")
 
     start = time.monotonic()
-    check(
-        cat=catalogue, env=env, target=target, branch=branch, identifiers=identifiers, local_path=Path("checks/ad-hoc")
-    )
+    check(cat=catalogue, env=env, target=target, branch=branch, identifiers=identifiers, local_path=local_path)
     logger.info(f"Checked site in {round(time.monotonic() - start)} seconds.")
     logger.info(f"Re-run as: '% {params}'")
 

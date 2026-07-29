@@ -163,6 +163,20 @@ resource "aws_s3_bucket_versioning" "site_prod" {
   }
 }
 
+resource "aws_s3_bucket_lifecycle_configuration" "site_prod" {
+  depends_on = [aws_s3_bucket_versioning.site_prod]
+  bucket     = module.site_prod.s3_bucket_name
+
+  rule {
+    id     = "expire-noncurrent-versions"
+    status = "Enabled"
+
+    noncurrent_version_expiration {
+      noncurrent_days = 30
+    }
+  }
+}
+
 ### Workstation environment module access to static site content
 
 resource "aws_iam_user" "workstation" {

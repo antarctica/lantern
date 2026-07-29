@@ -67,6 +67,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Endpoint for accessing restricted ArcGIS distribution options
 * Missing favicon in site image assets (in addition to site root)
 * Interactive publishing workflows when using a local development environment
+* Adding AWS S3 lifecycle rules to remove old versions of objects in the live site bucket
 
 ### Changed
 

@@ -1,11 +1,14 @@
-import logging
 from http import HTTPStatus
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from lantern.models.checks import Check, CheckType
 from lantern.models.site import ExportMeta, SiteContent, SitePageMeta
 from lantern.outputs.base import OutputSite
 from lantern.utils import minify_html
+
+if TYPE_CHECKING:
+    import logging
 
 
 class SitePagesOutput(OutputSite):

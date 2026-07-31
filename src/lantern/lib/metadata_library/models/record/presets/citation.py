@@ -1,8 +1,11 @@
 from enum import Enum
+from typing import TYPE_CHECKING
 
-from lantern.lib.metadata_library.models.record.elements.common import Date, Identifier
-from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
 from lantern.models.record.const import CATALOGUE_NAMESPACE
+
+if TYPE_CHECKING:
+    from lantern.lib.metadata_library.models.record.elements.common import Date, Identifier
+    from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
 
 
 class CitationHierarchyLevelCode(Enum):
@@ -11,7 +14,7 @@ class CitationHierarchyLevelCode(Enum):
     DATASET = "Dataset"
     PRODUCT = "Product"
     MAP_PRODUCT = "Map"
-    PAPER_MAP_PRODUCT = "Map"
+    PAPER_MAP_PRODUCT = "Map"  # intentional many:one mapping # noqa: PIE796
     WEB_MAP_PRODUCT = "Online"
 
 

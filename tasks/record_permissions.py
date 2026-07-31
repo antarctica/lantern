@@ -1,19 +1,23 @@
 # Set access permissions in a record's administration metadata
 
-import logging
 import sys
 from argparse import ArgumentParser
 from pathlib import Path
-from typing import Literal, get_args
+from typing import TYPE_CHECKING, Literal, get_args
 
 import inquirer
-from bas_metadata_library.standards.magic_administration.v1 import Permission
-from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 from tasks._shared import dump_records, ensure_admin, init, parse_records, pick_local_record
 
 from lantern.lib.metadata_library.models.record.presets.admin import BAS_STAFF, OPEN_ACCESS
-from lantern.lib.metadata_library.models.record.record import Record
 from lantern.lib.metadata_library.models.record.utils.admin import set_admin
+
+if TYPE_CHECKING:
+    import logging
+
+    from bas_metadata_library.standards.magic_administration.v1 import Permission
+    from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
+
+    from lantern.lib.metadata_library.models.record.record import Record
 
 AccessPreset = Literal["OPEN_ACCESS", "BAS_STAFF", "NONE"]
 
@@ -127,7 +131,7 @@ def _get_args(
         msg = "Record path must be set when using --force option for this task."
         raise RuntimeError(msg) from None
     if record_path:
-        logger.info(f"Loading record from: '{record_path.resolve()}'")
+        logger.info("Loading record from: %s'", record_path.resolve())
         record = parse_records(
             logger=logger, glob_pattern=record_path.name, search_path=record_path.parent, validate_catalogue=True
         )[0][0]
@@ -145,7 +149,7 @@ def _get_args(
             params,
         )
 
-    logger.info(f"Loading records from: '{import_path.resolve()}'")
+    logger.info("Loading records from: '%s'", import_path.resolve())
     _record_paths = parse_records(logger=logger, search_path=import_path, validate_catalogue=True)
     record = pick_local_record(logger=logger, records=[rp[0] for rp in _record_paths])
 
@@ -191,7 +195,10 @@ def _set_permission(
     admin.metadata_permissions = [metadata_permission] if metadata_permission else []
     admin.resource_permissions = [resource_permission] if resource_permission else []
     logger.debug(
-        f"Setting access permissions for '{record.file_identifier}' as: {metadata_permission} (metadata), {resource_permission} (resource)"
+        "Setting access permissions for '%a' as: %s (metadata), %s (resource)",
+        record.file_identifier,
+        metadata_permission,
+        resource_permission,
     )
     set_admin(keys=keys, record=record, admin_meta=admin)
 
@@ -222,7 +229,7 @@ def main() -> None:
     )
     dump_records(logger=logger, records=[record], output_path=import_path)
 
-    logger.info(f"Re-run as: '% {params}'")
+    logger.info("Re-run as: '%s'", params)
 
 
 if __name__ == "__main__":

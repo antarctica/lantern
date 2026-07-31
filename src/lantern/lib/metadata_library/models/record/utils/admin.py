@@ -1,4 +1,5 @@
-from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
+from typing import TYPE_CHECKING
+
 from bas_metadata_library.standards.magic_administration.v1.utils import (
     AdministrationKeys,
 )
@@ -9,7 +10,10 @@ from bas_metadata_library.standards.magic_administration.v1.utils import (
     set_admin as _set_admin,
 )
 
-from lantern.lib.metadata_library.models.record.record import Record
+if TYPE_CHECKING:
+    from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
+
+    from lantern.lib.metadata_library.models.record.record import Record
 
 
 def get_admin(keys: AdministrationKeys, record: Record) -> AdministrationMetadata | None:

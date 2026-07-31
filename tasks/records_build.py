@@ -1,18 +1,21 @@
 # Generate and export catalogue site
 
-import logging
 import time
 from argparse import ArgumentParser
 from pathlib import Path
-from typing import get_args
+from typing import TYPE_CHECKING, get_args
 
 import inquirer
 from tasks._shared import ExportTarget, init, process_record_references
 
-from lantern.catalogues.bas import BasCatalogue
 from lantern.exporters.local import LocalExporter
 from lantern.models.site import SiteEnvironment
-from lantern.outputs.base import OutputBase
+
+if TYPE_CHECKING:
+    import logging
+
+    from lantern.catalogues.bas import BasCatalogue
+    from lantern.outputs.base import OutputBase
 
 
 def _get_cli_args() -> tuple[bool, str | None, ExportTarget, SiteEnvironment, set[str]]:
@@ -72,7 +75,7 @@ def _get_args(
 
     env = cli_env
     target = cli_target
-    branch = cli_branch if cli_branch else cat.repo.gitlab_default_branch
+    branch = cli_branch or cat.repo.gitlab_default_branch
     identifiers = process_record_references(logger=logger, references=cli_references)
 
     if cli_force:
@@ -86,7 +89,7 @@ def _get_args(
 
     if identifiers:
         logger.info("Record identifiers from command line arguments:")
-        logger.info(f"{identifiers}")
+        logger.info(identifiers)
         logger.info("Note: Any empty set is allowed and will select all records.")
         if not inquirer.confirm(message="Add others?", default=False):
             _records_param = " ".join([f"--record {i}" for i in identifiers]) if identifiers else ""
@@ -158,8 +161,8 @@ def main() -> None:
 
     start = time.monotonic()
     export(cat=catalogue, env=env, target=target, branch=branch, identifiers=identifiers)
-    logger.info(f"Built site in {round(time.monotonic() - start)} seconds.")
-    logger.info(f"Re-run as: '% {params}'")
+    logger.info("Built site in %s seconds.", round(time.monotonic() - start))
+    logger.info("Re-run as: '%s'", params)
 
 
 if __name__ == "__main__":

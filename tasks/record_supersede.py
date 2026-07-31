@@ -5,13 +5,13 @@ from argparse import ArgumentParser
 from datetime import UTC, datetime
 from pathlib import Path
 from textwrap import dedent
+from typing import TYPE_CHECKING
 
 import inquirer
 from inquirer import Path as InquirerPath
 from tasks._shared import dump_records, get_gitlab_source, get_record, init, parse_records, pick_local_record
 from tasks.records_zap import revise_record
 
-from lantern.catalogues.bas import BasCatalogue
 from lantern.lib.metadata_library.models.record.elements.common import Date
 from lantern.lib.metadata_library.models.record.elements.identification import Aggregation, Aggregations
 from lantern.lib.metadata_library.models.record.enums import (
@@ -23,6 +23,9 @@ from lantern.lib.metadata_library.models.record.presets.aggregations import make
 from lantern.lib.metadata_library.models.record.presets.identifiers import make_bas_cat_item
 from lantern.models.item.base.item import ItemBase
 from lantern.models.record.record import Record
+
+if TYPE_CHECKING:
+    from lantern.catalogues.bas import BasCatalogue
 
 
 def _get_cli_args() -> tuple[bool, bool, Path, str | None, str | None, Path | None]:
@@ -78,12 +81,12 @@ def _get_args(
 
     path = cli_path
     replace = cli_replace
-    branch = cli_branch if cli_branch else cat.repo.gitlab_default_branch
+    branch = cli_branch or cat.repo.gitlab_default_branch
     current_ref = cli_current_ref
-    successor_path = cli_successor_path if cli_successor_path else None
+    successor_path = cli_successor_path or None
     successor_record = None
 
-    logger.info(f"Loading records from: '{path.resolve()}'")
+    logger.info("Loading records from: '%s'", path.resolve())
     _record_paths = parse_records(logger=logger, search_path=path, validate_catalogue=True)
     _record_lookup = {rp[1].resolve(): rp[0] for rp in _record_paths}
     _path_lookup = {rp[0].file_identifier: rp[1] for rp in _record_paths}
@@ -155,9 +158,8 @@ def _process_successor(logger: logging.Logger, record: Record, predecessor: Reco
         errors.append("Editions must be different.")
     if record.identification.other_citation_details == predecessor.identification.other_citation_details:
         errors.append("Citations must be different.")
-    for identifier in record.identification.identifiers:
-        if identifier in predecessor.identification.identifiers:
-            errors.append("Identifiers must be different.")
+    if any(identifier in predecessor.identification.identifiers for identifier in record.identification.identifiers):
+        errors.append("Identifiers must be different.")
     if errors:
         raise ValueError(" ".join(errors)) from None
 
@@ -188,7 +190,7 @@ def _process_predecessor(logger: logging.Logger, record: Record, successor: Reco
     if replace and collection_aggregations:
         changed = True
         logger.info("Removing collection aggregations from predecessor")
-        logger.info(f"Predecessor contained {len(collection_aggregations)} collection aggregations")
+        logger.info("Predecessor contained %s collection aggregations", len(collection_aggregations))
         record.identification.aggregations = Aggregations(
             [r for r in record.identification.aggregations if r not in collection_aggregations]
         )
@@ -256,10 +258,10 @@ def _process_collections(
             initiatives=AggregationInitiativeCode.COLLECTION,
         )
     ]
-    logger.info(f"Predecessor belonged to {len(collection_ids)} collections")
+    logger.info("Predecessor belonged to %s collections", len(collection_ids))
     if logger.isEnabledFor(logging.DEBUG):
         for collection_id in collection_ids:
-            logger.debug(f"- {collection_id}")
+            logger.debug("- %s", collection_id)
 
     collections = [get_record(logger=logger, cat=catalogue, reference=cid, branch=branch) for cid in collection_ids]
     for collection in collections:
@@ -320,7 +322,7 @@ def main() -> None:
 
     dump_records(logger=logger, output_path=import_path, records=[predecessor, successor, *collections])
 
-    logger.info(f"Re-run as: '% {params}'")
+    logger.info("Re-run as: '%s'", params)
 
 
 if __name__ == "__main__":

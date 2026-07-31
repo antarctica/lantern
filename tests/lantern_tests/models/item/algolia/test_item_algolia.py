@@ -1,10 +1,10 @@
 import json
 from copy import deepcopy
 from datetime import UTC, date, datetime
+from typing import TYPE_CHECKING
 
 import pytest
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
-from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 
 from lantern.lib.metadata_library.models.record.elements.common import (
     Constraint,
@@ -24,9 +24,13 @@ from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.utils.admin import set_admin
 from lantern.models.item.algolia.item import ItemAlgolia, ObjectRecord
 from lantern.models.record.const import CATALOGUE_NAMESPACE
-from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
-from lantern.models.site import SiteMeta
+
+if TYPE_CHECKING:
+    from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
+
+    from lantern.models.record.record import Record
+    from lantern.models.site import SiteMeta
 
 
 class TestItemAlgolia:
@@ -119,7 +123,7 @@ class TestItemAlgolia:
         data = json.loads(result)
 
         assert isinstance(data, list)  # Tuples become lists in JSON
-        assert len(data) == 4
+        assert len(data) == 4  # noqa: PLR2004
         assert data[0] == poc_type
         assert data[1] == expected_name
         assert data[2] == expected_poc_email

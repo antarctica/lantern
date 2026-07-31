@@ -1,9 +1,13 @@
-import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-from lantern.models.site import ExportMeta
 from lantern.outputs.site_resources import SiteResourcesOutput
 from tests.conftest import _index_site_content_outputs
+
+if TYPE_CHECKING:
+    import logging
+
+    from lantern.models.site import ExportMeta
 
 
 class TestSiteResourcesOutput:
@@ -52,7 +56,7 @@ class TestSiteResourcesOutput:
         """Can generate checks for a subset of content."""
         output = SiteResourcesOutput(logger=fx_logger, meta=fx_export_meta)
         checks = output.checks
-        assert len(checks) == 6
+        assert len(checks) == 6  # noqa: PLR2004
 
     def test_invalidation_keys(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta):
         """Can generate invalidation paths for content."""

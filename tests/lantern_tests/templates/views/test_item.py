@@ -1,7 +1,11 @@
+from typing import TYPE_CHECKING
+
 from bs4 import BeautifulSoup
 
-from lantern.models.item.catalogue.item import ItemCatalogue
 from tests.conftest import render_item_catalogue
+
+if TYPE_CHECKING:
+    from lantern.models.item.catalogue.item import ItemCatalogue
 
 
 class TestItemTemplate:

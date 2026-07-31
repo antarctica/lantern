@@ -1,10 +1,13 @@
 import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 
 from lantern.exporters.local import LocalExporter
-from lantern.models.site import SiteContent
+
+if TYPE_CHECKING:
+    from lantern.models.site import SiteContent
 
 
 class TestLocalExporter:

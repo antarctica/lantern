@@ -1,7 +1,7 @@
 from datetime import UTC, date, datetime
+from typing import TYPE_CHECKING
 
 import pytest
-from freezegun.api import FrozenDateTimeFactory
 
 from lantern.lib.metadata_library.models.record.elements.common import (
     Date,
@@ -31,11 +31,9 @@ from lantern.lib.metadata_library.models.record.enums import (
     MaintenanceFrequencyCode,
     ProgressCode,
 )
-from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.base.elements import Link
 from lantern.models.item.base.enums import ResourceTypeIcon, ResourceTypeLabel
-from lantern.models.item.base.item import ItemBase
 from lantern.models.item.catalogue.const import CONTAINER_SUPER_TYPES
 from lantern.models.item.catalogue.elements import (
     Aggregations,
@@ -51,6 +49,12 @@ from lantern.models.item.catalogue.elements import (
 from lantern.models.item.catalogue.enums import ItemSuperType
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from tests.conftest import _admin_meta_keys, _select_record
+
+if TYPE_CHECKING:
+    from freezegun.api import FrozenDateTimeFactory
+
+    from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
+    from lantern.models.item.base.item import ItemBase
 
 
 class TestFormattedDate:

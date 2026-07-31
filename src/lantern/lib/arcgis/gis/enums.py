@@ -51,7 +51,7 @@ class ItemType(Enum):
     EXPERIENCE_BUILDER_WIDGET_PACKAGE = "Experience Builder Widget Package"
     FORM = "Form"
     APPLICATION = "Application"
-    API_KEY_CREDENTIALS = "Application"
+    API_KEY_CREDENTIALS = "Application"  # noqa: PIE796
     GEOBIM_APPLICATION = "GeoBIM Application"
     GEOBIM_PROJECT = "GeoBIM Project"
     HUB_EVENT = "Hub Event"

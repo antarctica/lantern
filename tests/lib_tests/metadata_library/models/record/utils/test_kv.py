@@ -1,9 +1,12 @@
 import json
+from typing import TYPE_CHECKING
 
 import pytest
 
-from lantern.lib.metadata_library.models.record.record import Record
 from lantern.lib.metadata_library.models.record.utils.kv import get_kv, set_kv
+
+if TYPE_CHECKING:
+    from lantern.lib.metadata_library.models.record.record import Record
 
 
 class TestKv:

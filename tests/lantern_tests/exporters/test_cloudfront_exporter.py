@@ -1,10 +1,14 @@
-import logging
+from typing import TYPE_CHECKING
 
 import pytest
-from mypy_boto3_cloudfront import CloudFrontClient
-from pytest_mock import MockerFixture
 
 from lantern.exporters.cloudfront import CloudFrontExporter
+
+if TYPE_CHECKING:
+    import logging
+
+    from mypy_boto3_cloudfront import CloudFrontClient
+    from pytest_mock import MockerFixture
 
 
 class TestCloudFrontExporter:

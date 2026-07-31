@@ -1,13 +1,12 @@
 import json
-import logging
 import random
 from datetime import UTC, datetime
 from pathlib import Path
 from textwrap import dedent
+from typing import TYPE_CHECKING
 
 from tasks._shared import dump_records, init
 
-from lantern.catalogues.bas import BasCatalogue
 from lantern.lib.metadata_library.models.record.enums import (
     ConstraintTypeCode,
     ContactRoleCode,
@@ -18,8 +17,13 @@ from lantern.lib.metadata_library.models.record.record import Record, RecordInva
 from lantern.models.item.catalogue.const import CONTAINER_SUPER_TYPES
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.record import Record as CatRecord
-from lantern.models.record.revision import RecordRevision as CatRecordRevision
 from lantern.utils import get_jinja_env
+
+if TYPE_CHECKING:
+    import logging
+
+    from lantern.catalogues.bas import BasCatalogue
+    from lantern.models.record.revision import RecordRevision as CatRecordRevision
 
 
 class RecordUpgrade:
@@ -43,7 +47,7 @@ class RecordUpgrade:
         old = "data.bas.ac.uk"
         if self.record.identification.identifiers.filter(namespace=CATALOGUE_NAMESPACE):
             self.logger.debug(
-                f"[{self.record.file_identifier}] update catalogue identifier: has new namespace - skipping."
+                "[%s] update catalogue identifier: has new namespace - skipping.", self.record.file_identifier
             )
             return
 
@@ -56,7 +60,7 @@ class RecordUpgrade:
                 return
 
         self.logger.debug(
-            f"[{self.record.file_identifier}] update catalogue identifier: identifier not found - skipping."
+            "[%s] update catalogue identifier: identifier not found - skipping.", self.record.file_identifier
         )
 
     def _update_alias_identifiers(self) -> None:
@@ -64,7 +68,7 @@ class RecordUpgrade:
         old = "alias.data.bas.ac.uk"
         if not self.record.identification.identifiers.filter(namespace=old):
             self.logger.debug(
-                f"[{self.record.file_identifier}] update alias identifiers: no alias identifiers - skipping."
+                "[%s] update alias identifiers: no alias identifiers - skipping.", self.record.file_identifier
             )
             return
 
@@ -84,7 +88,7 @@ class RecordUpgrade:
         old = "data.bas.ac.uk"
         if not self.record.identification.aggregations:
             self.logger.debug(
-                f"[{self.record.file_identifier}] update aggregation identifiers: no aggregations - skipping."
+                "[%s] update aggregation identifiers: no aggregations - skipping.", self.record.file_identifier
             )
             return
 
@@ -102,7 +106,7 @@ class RecordUpgrade:
     def _add_publisher(self) -> None:
         """Add MAGIC as a publisher if needed."""
         if self.record.identification.contacts.filter(roles=ContactRoleCode.PUBLISHER):
-            self.logger.debug(f"[{self.record.file_identifier}] add publisher: has publisher - skipping.")
+            self.logger.debug("[%s] add publisher: has publisher - skipping.", self.record.file_identifier)
             return
 
         for contact in self.record.identification.contacts:
@@ -117,17 +121,17 @@ class RecordUpgrade:
             self.record.metadata.maintenance.progress = ProgressCode.COMPLETED
             self.changes.append("Added completed metadata maintenance progress.")
         else:
-            self.logger.debug(f"[{self.record.file_identifier}] metadata maintenance: has progress - no change.")
+            self.logger.debug("[%s] metadata maintenance: has progress - no change.", self.record.file_identifier)
         if not self.record.metadata.maintenance.maintenance_frequency:
             self.record.metadata.maintenance.maintenance_frequency = MaintenanceFrequencyCode.AS_NEEDED
             self.changes.append("Added 'as needed' metadata maintenance frequency.")
         else:
-            self.logger.debug(f"[{self.record.file_identifier}] metadata maintenance: has frequency - no change.")
+            self.logger.debug("[%s] metadata maintenance: has frequency - no change.", self.record.file_identifier)
 
     def _update_published_maps_link(self) -> None:
         """Update purchasing information link in published map records if needed."""
         if not self.record.distribution:
-            self.logger.debug(f"[{self.record.file_identifier}] published map link: no distributions - skipping.")
+            self.logger.debug("[%s] published map link: no distributions - skipping.", self.record.file_identifier)
             return
 
         found = False
@@ -143,7 +147,7 @@ class RecordUpgrade:
 
         if not found:
             self.logger.debug(
-                f"[{self.record.file_identifier}] published map link: no matching distribution - skipping."
+                "[%s] published map link: no matching distribution - skipping.", self.record.file_identifier
             )
 
     def _fix_personal_contacts(self) -> None:
@@ -156,7 +160,7 @@ class RecordUpgrade:
                 contact.email = None
                 self.changes.append("Removed personal email from contact.")
         if not flag:
-            self.logger.debug(f"[{self.record.file_identifier}] personal contacts: none found - skipping.")
+            self.logger.debug("[%s] personal contacts: none found - skipping.", self.record.file_identifier)
 
     def _remove_legacy_permissions(self) -> None:
         """Remove legacy access permissions and update statements in constraints if needed."""
@@ -179,35 +183,35 @@ class RecordUpgrade:
             self.changes.append("Legacy permissions removed from access constraints.")
         else:
             self.logger.debug(
-                f"[{self.record.file_identifier}] legacy constraints: no matching permissions values - skipping."
+                "[%s] legacy constraints: no matching permissions values - skipping.", self.record.file_identifier
             )
         if found_statement:
             self.changes.append("Access statement updated in constraints.")
         else:
             self.logger.debug(
-                f"[{self.record.file_identifier}] legacy constraints: no matching statement values - skipping."
+                "[%s] legacy constraints: no matching statement values - skipping.", self.record.file_identifier
             )
 
     def _warn_long_purpose(self) -> None:
         """Warn if purpose/summary is greater than ArcGIS snippet max length."""
         if not self.record.identification.purpose:
-            self.logger.debug(f"[{self.record.file_identifier}] max purpose: no purpose - skipping.")
+            self.logger.debug("[%s] max purpose: no purpose - skipping.", self.record.file_identifier)
             return
 
-        if len(self.record.identification.purpose) > 250:
-            self.logger.warning(f"[{self.record.file_identifier}] max purpose: length > ArcGIS snippet max length!")
+        if len(self.record.identification.purpose) > 250:  # noqa: PLR2004
+            self.logger.warning("[%s] max purpose: length > ArcGIS snippet max length!", self.record.file_identifier)
 
     def _revise(self) -> None:
         """Update date stamp in record if needed."""
         if self.record.sha1 == self._original_sha1:
-            self.logger.debug(f"[{self.record.file_identifier}] revision: record not changed - skipping.")
+            self.logger.debug("[%s] revision: record not changed - skipping.", self.record.file_identifier)
             return
 
         now = datetime.now(tz=UTC)
         self.record.metadata.date_stamp = datetime.now(tz=UTC).date()
         if self._container_super_type:
             self.record.identification.dates.revision.date = now  # ty:ignore[invalid-assignment]
-        self.logger.debug(f"[{self.record.file_identifier}] revision: record changed - revised.")
+        self.logger.debug("[%s] revision: record changed - revised.", self.record.file_identifier)
 
     def upgrade(self) -> None:
         """Upgrade record."""
@@ -326,21 +330,21 @@ class RecordsIO:
 
         records = self.cat.repo.select_records()
         dump_records(logger=self.logger, output_path=records_path, records=records)
-        self.logger.info(f"{len(records)} records dumped to {self.base.resolve()}.")
+        self.logger.info("%s records dumped to %s.", len(records), self.base.resolve())
 
         self._write_hashes(records=records, path=hashes_path)  # ty:ignore[invalid-argument-type]
-        self.logger.info(f"Original record hashes dumped to {hashes_path.resolve()}.")
+        self.logger.info("Original record hashes dumped to %s.", hashes_path.resolve())
 
     def dump(self) -> None:
         """Dump records to path."""
         records_ = [r.record for r in self.records]
         records_path = self.base / "records"
         dump_records(logger=self.logger, output_path=records_path, records=records_)
-        self.logger.info(f"{len(self.records)} records dumped to {self.base.resolve()}.")
+        self.logger.info("%s records dumped to %s.", len(self.records), self.base.resolve())
 
         hashes_path = self.base / "hashes_working.json"
         self._write_hashes(records=records_, path=hashes_path)
-        self.logger.info(f"Working record hashes dumped to {hashes_path.resolve()}.")
+        self.logger.info("Working record hashes dumped to %s.", hashes_path.resolve())
 
     def load(self, random_subset: int = 0) -> None:
         """Load (some) records from path."""
@@ -349,15 +353,15 @@ class RecordsIO:
             original_hashes = json.load(f)
 
         record_paths = list(self.base.glob("records/*.json"))
-        self.logger.info(f"{len(record_paths)} records in {self.base.resolve()}.")
+        self.logger.info("%s records in %s.", len(record_paths), self.base.resolve())
 
         subset_paths = record_paths
         if 0 < random_subset < len(record_paths):
-            self.logger.info(f"Selecting {random_subset} random records as a subset.")
+            self.logger.info("Selecting %s random records as a subset.", random_subset)
             random.seed(764)  # 764/4
             subset_paths = random.sample(record_paths, random_subset)
 
-        self.logger.info(f"Loading {len(record_paths)} records.")
+        self.logger.info("Loading %s records.", len(record_paths))
         self.records = []
         for record_path in subset_paths:
             with record_path.open("r") as f:
@@ -370,21 +374,23 @@ class RecordsIO:
 
     def list_records(self) -> None:
         """List or summarise loaded records."""
-        if len(self.records) < 20:
+        if len(self.records) < 20:  # noqa: PLR2004
             self.logger.info("Loaded records:")
             for container in self.records:
                 r = container.record
                 self.logger.info(
-                    f"* {r.file_identifier} [{r.hierarchy_level.name}] '{r.identification.title}' ({r.identification.edition})"
+                    "* %s [%s] '%s' (%s)",
+                    r.file_identifier,
+                    r.hierarchy_level.name,
+                    r.identification.title,
+                    r.identification.edition,
                 )
             return
-        self.logger.info(f"{len(self.records)} records.")
+        self.logger.info("%s records.", len(self.records))
 
 
 class NotInitialisedError(Exception):
     """Raised when local records set does yet not exist."""
-
-    pass
 
 
 # noinspection SpellCheckingInspection
@@ -413,11 +419,11 @@ class Upgradamatron:
         """Upgrade and validate records."""
         for container in self.io.records:
             container.upgrade()
-            self.logger.debug(f"[{container.record.file_identifier}] validating")
+            self.logger.debug("[%s] validating", container.record.file_identifier)
             try:
                 container.validate()
             except RecordInvalidError:
-                self.logger.exception(f"[{container.record.file_identifier}] record invalid")
+                self.logger.exception("[%s] record invalid", container.record.file_identifier)
 
     def dump(self) -> None:
         """Dump records and reports to tracking repo path."""
@@ -427,8 +433,8 @@ class Upgradamatron:
         reporter = RecordsReport(logger=self.logger, records=self.io.records)
         reporter.dump_data(path=report_data_path)
         reporter.dump_rendered(path=report_rendered_path)
-        self.logger.info(f"Report data dumped to {report_data_path.resolve()}.")
-        self.logger.info(f"Report rendered dumped to {report_rendered_path.resolve()}.")
+        self.logger.info("Report data dumped to %s.", report_data_path.resolve())
+        self.logger.info("Report rendered dumped to %s.", report_rendered_path.resolve())
 
 
 def main() -> None:

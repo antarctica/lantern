@@ -1,11 +1,16 @@
-import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
-from pytest_mock import MockerFixture
 
 from lantern.exporters.rsync import RsyncExporter
-from lantern.models.site import SiteContent
+
+if TYPE_CHECKING:
+    import logging
+
+    from pytest_mock import MockerFixture
+
+    from lantern.models.site import SiteContent
 
 
 class TestRsyncExporter:

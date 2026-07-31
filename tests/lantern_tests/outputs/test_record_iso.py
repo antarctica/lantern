@@ -1,9 +1,8 @@
-import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
-from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 
 from lantern.lib.metadata_library.models.record.elements.common import (
     Contact,
@@ -19,9 +18,15 @@ from lantern.lib.metadata_library.models.record.enums import (
 )
 from lantern.lib.metadata_library.models.record.utils.admin import set_admin
 from lantern.models.checks import CheckType
-from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta, SiteContent
 from lantern.outputs.record_iso import RecordIsoHtmlOutput, RecordIsoJsonOutput, RecordIsoXmlOutput
+
+if TYPE_CHECKING:
+    import logging
+
+    from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
+
+    from lantern.models.record.revision import RecordRevision
 
 
 class TestRecordIsoJsonOutput:

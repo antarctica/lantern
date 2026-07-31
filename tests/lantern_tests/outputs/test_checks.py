@@ -1,6 +1,6 @@
-import logging
 from http import HTTPStatus
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 from requests.auth import HTTPBasicAuth
@@ -8,6 +8,9 @@ from requests.auth import HTTPBasicAuth
 from lantern.models.checks import Check, CheckState, CheckType
 from lantern.models.site import ExportMeta, SiteContent
 from lantern.outputs.checks import ChecksOutput
+
+if TYPE_CHECKING:
+    import logging
 
 
 class TestChecksOutput:
@@ -207,7 +210,7 @@ class TestChecksOutput:
         """Can generate site content items."""
         output = ChecksOutput(logger=fx_logger, meta=fx_export_meta, checks=[fx_check])
         results = output.content
-        assert len(results) == 2
+        assert len(results) == 2  # noqa: PLR2004
 
         data = results[0]
         assert isinstance(data, SiteContent)

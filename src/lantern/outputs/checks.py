@@ -1,6 +1,6 @@
 import json
-import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import cattrs
 
@@ -8,6 +8,9 @@ from lantern.models.checks import Check, CheckState, CheckType
 from lantern.models.site import ExportMeta, SiteContent
 from lantern.outputs.base import OutputSite
 from lantern.utils import minify_html
+
+if TYPE_CHECKING:
+    import logging
 
 
 class ChecksOutput(OutputSite):

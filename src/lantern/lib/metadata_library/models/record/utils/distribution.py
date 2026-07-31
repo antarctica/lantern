@@ -1,10 +1,12 @@
 from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Final
+from typing import TYPE_CHECKING, Final
 
 from lantern.lib.metadata_library.models.record.elements.common import Contact, OnlineResource
 from lantern.lib.metadata_library.models.record.elements.distribution import Distribution, Format, Size, TransferOption
 from lantern.lib.metadata_library.models.record.enums import OnlineResourceFunctionCode
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 @dataclass

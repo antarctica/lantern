@@ -1,24 +1,29 @@
 # Create a new record based on an existing record
 
-import logging
 from argparse import ArgumentParser
 from copy import deepcopy
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import TYPE_CHECKING
 from uuid import uuid4
 
 import inquirer
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
-from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 from inquirer import Path as InquirerPath
 from tasks._shared import dump_records, get_gitlab_source, get_record, init
 
-from lantern.catalogues.bas import BasCatalogue
 from lantern.lib.metadata_library.models.record.presets.identifiers import make_bas_cat_item
-from lantern.lib.metadata_library.models.record.record import Record
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin, set_admin
 from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.record.record import Record as CatalogueRecord
+
+if TYPE_CHECKING:
+    import logging
+
+    from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
+
+    from lantern.catalogues.bas import BasCatalogue
+    from lantern.lib.metadata_library.models.record.record import Record
 
 
 def _get_cli_args() -> tuple[bool, Path, str | None, str | None, str | None]:
@@ -67,9 +72,9 @@ def _get_args(
     cli_force, cli_path, cli_branch, cli_source_ref, cli_target_id = cli_args
 
     path = cli_path
-    branch = cli_branch if cli_branch else cat.repo.gitlab_default_branch
+    branch = cli_branch or cat.repo.gitlab_default_branch
     source_ref = cli_source_ref
-    target_id = cli_target_id if cli_target_id else str(uuid4())
+    target_id = cli_target_id or str(uuid4())
 
     if not cli_force:
         path = Path(inquirer.path("Import path", path_type=InquirerPath.DIRECTORY, exists=True, default=path))
@@ -107,7 +112,7 @@ def _clone_record(
 
     Other references to the original record such as other identifiers, citations, etc. are not changed.
     """
-    logger.info(f"Cloning record [{source_record.file_identifier}] as [{new_identifier}]")
+    logger.info("Cloning record [%s] as [%s]", source_record.file_identifier, new_identifier)
     cloned_record = deepcopy(source_record)
 
     # datestamp
@@ -153,7 +158,7 @@ def main() -> None:
     )
     dump_records(logger=logger, output_path=import_path, records=[new_record])
 
-    logger.info(f"Re-run as: '% {params}'")
+    logger.info("Re-run as: '%s'", params)
 
 
 if __name__ == "__main__":

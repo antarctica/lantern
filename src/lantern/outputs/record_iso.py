@@ -1,14 +1,18 @@
-import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from importlib_resources import files as resources_files
 from lxml import etree
 
 from lantern.models.checks import Check, CheckType, RecordChecks
-from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta, SiteContent
 from lantern.outputs.base import OutputRecord
 from lantern.utils import is_live_record
+
+if TYPE_CHECKING:
+    import logging
+
+    from lantern.models.record.revision import RecordRevision
 
 
 class RecordIsoJsonOutput(OutputRecord):

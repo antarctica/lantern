@@ -1,10 +1,16 @@
-import logging
+from http import HTTPStatus
+from typing import TYPE_CHECKING
 
 import pytest
-from mypy_boto3_s3 import S3Client
 
 from lantern.exporters.s3 import S3Exporter
-from lantern.models.site import SiteContent
+
+if TYPE_CHECKING:
+    import logging
+
+    from mypy_boto3_s3 import S3Client
+
+    from lantern.models.site import SiteContent
 
 
 class TestS3Exporter:
@@ -40,7 +46,7 @@ class TestS3Exporter:
 
         fx_s3_exporter.export(content=[fx_site_content])
         result = fx_s3_exporter._s3.get_object(Bucket=fx_s3_exporter._bucket, Key=str(fx_site_content.path))
-        assert result["ResponseMetadata"]["HTTPStatusCode"] == 200
+        assert result["ResponseMetadata"]["HTTPStatusCode"] == HTTPStatus.OK
         if redirect:
             assert result["WebsiteRedirectLocation"] == expected_redirect
         if not cache:

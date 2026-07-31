@@ -1,6 +1,8 @@
 import json
+from typing import TYPE_CHECKING
 
-from lantern.lib.metadata_library.models.record.record import Record
+if TYPE_CHECKING:
+    from lantern.lib.metadata_library.models.record.record import Record
 
 
 def get_kv(record: Record) -> dict:

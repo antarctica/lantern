@@ -1,8 +1,12 @@
+from typing import TYPE_CHECKING
+
 import pytest
 from markdown import Markdown
-from pytest_mock import MockerFixture
 
 from lantern.lib.markdown.formats.plaintext import PlainTextExtension, to_plain_text
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
 
 
 class TestPlainTextExtension:

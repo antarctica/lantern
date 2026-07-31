@@ -1,11 +1,15 @@
-import logging
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
 
 from lantern.models.checks import Check, CheckType
-from lantern.models.record.revision import RecordRevision
-from lantern.models.site import ExportMeta, SiteContent
-from lantern.stores.base import SelectRecordsProtocol
 from lantern.utils import get_jinja_env
+
+if TYPE_CHECKING:
+    import logging
+
+    from lantern.models.record.revision import RecordRevision
+    from lantern.models.site import ExportMeta, SiteContent
+    from lantern.stores.base import SelectRecordsProtocol
 
 
 class OutputBase(ABC):

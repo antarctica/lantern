@@ -1,6 +1,10 @@
-from subprocess import Popen
+from http import HTTPStatus
+from typing import TYPE_CHECKING
 
 from playwright.sync_api import Page, expect
+
+if TYPE_CHECKING:
+    from subprocess import Popen
 
 
 class TestBackToTop:
@@ -14,7 +18,7 @@ class TestBackToTop:
         """
         page.goto(f"{fx_static_server_url}/legal/privacy/index.html")
         status_code = page.evaluate("window.performance.getEntries()[0].responseStatus")
-        assert status_code == 200
+        assert status_code == HTTPStatus.OK
 
         back_to_top = page.get_by_role("link", name="Back to Top")
         back_to_top.click()
@@ -38,7 +42,7 @@ class TestFeedbackWidget:
         """
         page.goto(f"{fx_static_server_url}/legal/privacy/index.html")
         status_code = page.evaluate("window.performance.getEntries()[0].responseStatus")
-        assert status_code == 200
+        assert status_code == HTTPStatus.OK
         expect(page.locator("#site-feedback >> text=Site feedback")).not_to_be_visible()
 
         # widget can be opened
@@ -62,7 +66,7 @@ class TestFeedbackWidget:
         no_js_page = context.new_page()
         no_js_page.goto(f"{fx_static_server_url}/legal/privacy/index.html")
         status_code = no_js_page.evaluate("window.performance.getEntries()[0].responseStatus")
-        assert status_code == 200
+        assert status_code == HTTPStatus.OK
 
         fallback_link = no_js_page.get_by_role("link", name="Is something wrong with this page?")
         expect(fallback_link).to_be_visible()

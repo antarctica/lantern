@@ -3,13 +3,12 @@ from dataclasses import dataclass
 from datetime import UTC, date, timedelta
 from datetime import datetime as DateTime  # noqa: N812
 from itertools import chain
-from typing import TypedDict, TypeVar
+from typing import TYPE_CHECKING, TypedDict, TypeVar
 
 from lantern.lib.metadata_library.models.record.elements.common import Date
 from lantern.lib.metadata_library.models.record.elements.common import Dates as RecordDates
 from lantern.lib.metadata_library.models.record.elements.common import Identifiers as RecordIdentifiers
 from lantern.lib.metadata_library.models.record.elements.common import Maintenance as RecordMaintenance
-from lantern.lib.metadata_library.models.record.elements.identification import Aggregations as RecordAggregations
 from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,
     AggregationInitiativeCode,
@@ -19,7 +18,6 @@ from lantern.lib.metadata_library.models.record.enums import (
     MaintenanceFrequencyCode,
     ProgressCode,
 )
-from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.base.elements import Link, unpack
 from lantern.models.item.base.enums import ResourceTypeIcon, ResourceTypeLabel
@@ -27,8 +25,12 @@ from lantern.models.item.base.item import ItemSummaryBase
 from lantern.models.item.base.utils import md_as_plain
 from lantern.models.item.catalogue.enums import ItemSuperType
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
-from lantern.stores.base import SelectRecordProtocol
 from lantern.utils import is_live_record
+
+if TYPE_CHECKING:
+    from lantern.lib.metadata_library.models.record.elements.identification import Aggregations as RecordAggregations
+    from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
+    from lantern.stores.base import SelectRecordProtocol
 
 TFormattedDate = TypeVar("TFormattedDate", bound="FormattedDate")
 

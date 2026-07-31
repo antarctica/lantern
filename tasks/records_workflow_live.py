@@ -1,11 +1,11 @@
 # Publish records to live site
 
-import logging
 import re
 import shutil
 import sys
 from pathlib import Path
 from textwrap import dedent
+from typing import TYPE_CHECKING
 
 import inquirer
 from pathvalidate import sanitize_filepath
@@ -14,11 +14,15 @@ from tasks.records_workflow_testing import OutputCommentItem
 from tasks.records_workflow_testing import _check as check
 from tasks.records_workflow_testing import _export as export
 
-from lantern.catalogues.bas import BasCatalogue
-from lantern.config import Config
-from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta, SiteEnvironment
 from lantern.utils import get_jinja_env
+
+if TYPE_CHECKING:
+    import logging
+
+    from lantern.catalogues.bas import BasCatalogue
+    from lantern.config import Config
+    from lantern.models.record.revision import RecordRevision
 
 
 class OutputCommentIssue:
@@ -104,7 +108,7 @@ def _changeset(logger: logging.Logger, cat: BasCatalogue) -> tuple[str, str, str
     options = [(mr.title.replace("Records publishing changeset: ", ""), mr.web_url) for mr in merge_requests]
     mr_url = inquirer.list_input(message="Changeset", choices=options)
     mr = cat.repo.select_merge_request(url=mr_url)
-    logger.info(f"MR set to '{mr.web_url}'.")
+    logger.info("MR set to '%s'.", mr.web_url)
 
     if mr.draft:
         msg = "Merge request is still a draft, aborting."
@@ -119,10 +123,10 @@ def _changeset(logger: logging.Logger, cat: BasCatalogue) -> tuple[str, str, str
         msg = "Only a single related issue is currently supported, aborting."
         raise ValueError(msg) from None
     issue_url = issues[0]
-    logger.info(f"Related issue: '{issue_url}'.")
+    logger.info("Related issue: '%s'.", issue_url)
 
     branch = mr.source_branch
-    logger.info(f"Changeset branch: '{branch}'.")
+    logger.info("Changeset branch: '%s'.", branch)
 
     return branch, mr.web_url, issue_url
 
@@ -131,10 +135,10 @@ def _changeset(logger: logging.Logger, cat: BasCatalogue) -> tuple[str, str, str
 def _merge_request(logger: logging.Logger, cat: BasCatalogue, merge_url: str) -> set[str]:
     """Merge a merge request for a changeset and return a list of identifiers for records it contained."""
     mr = cat.repo.select_merge_request(url=merge_url)
-    logger.info(f"MR set to '{mr.web_url}'.")
+    logger.info("MR set to '%s'.", mr.web_url)
     cat.repo.complete_merge_request(mr)
     ids = {Path(d["new_path"]).stem for diff_ in mr.diffs.list() for d in mr.diffs.get(diff_.id).diffs}
-    logger.info(f"{len(ids)} records in changeset.")
+    logger.info("%s records in changeset.", len(ids))
     return ids
 
 
@@ -184,7 +188,7 @@ def _clean(logger: logging.Logger, config: Config, branch: str) -> None:
     """Clean up changeset cache."""
     cache_path = config.STORE_GITLAB_CACHE_PATH / sanitize_filepath(branch)
     if cache_path.exists():
-        logger.info(f"Cleaning up cache for {branch} at {cache_path.resolve()} ...")
+        logger.info("Cleaning up cache for %s at %s ...", branch, cache_path.resolve())
         shutil.rmtree(cache_path)
     # remove any empty directories between config.STORE_GITLAB_CACHE_PATH and cache_path
     for parent in cache_path.parents:
@@ -244,7 +248,7 @@ def main() -> None:
     )
 
     logger.info("Testing records workflow exited normally.")
-    logger.info(f"Checks data: {checks_path.resolve()}")
+    logger.info("Checks data: %s", checks_path.resolve())
 
 
 if __name__ == "__main__":

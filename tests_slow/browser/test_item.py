@@ -1,4 +1,5 @@
-from subprocess import Popen
+from http import HTTPStatus
+from typing import TYPE_CHECKING
 
 import pytest
 from playwright.sync_api import Browser, Page, Route, expect
@@ -6,6 +7,9 @@ from tests.conftest import has_network
 from tests.resources.records.item_cat_data import record as product_data
 from tests.resources.records.item_cat_product_all import record as product_all_supported
 from tests.resources.records.item_cat_product_open_min import record as product_min_open
+
+if TYPE_CHECKING:
+    from subprocess import Popen
 
 
 class TestItemTabs:
@@ -17,7 +21,7 @@ class TestItemTabs:
         page.goto(endpoint)
 
         status_code = page.evaluate("window.performance.getEntries()[0].responseStatus")
-        assert status_code == 200
+        assert status_code == HTTPStatus.OK
 
         # initial tab will be 'licence', expect element from another tab not to be visible
         expect(page.locator("span", has_text="Item licence")).to_be_visible()
@@ -34,7 +38,7 @@ class TestItemTabs:
         endpoint = f"{fx_static_server_url}/items/{product_min_open.file_identifier}/index.html"
         page.goto(endpoint)
         status_code = page.evaluate("window.performance.getEntries()[0].responseStatus")
-        assert status_code == 200
+        assert status_code == HTTPStatus.OK
 
         expect(page.locator("span", has_text="Item licence")).to_be_visible()
 
@@ -55,7 +59,7 @@ class TestItemTabs:
         endpoint = f"{fx_static_server_url}/items/{product_min_open.file_identifier}/index.html"
         page.goto(endpoint + "#tab-info")
         status_code = page.evaluate("window.performance.getEntries()[0].responseStatus")
-        assert status_code == 200
+        assert status_code == HTTPStatus.OK
 
         expect(page.locator("dt", has_text="Item ID")).to_be_visible()
 
@@ -82,7 +86,7 @@ class TestItemEmbeddedMap:
         endpoint = f"{fx_static_server_url}/items/{product_all_supported.file_identifier}/index.html#tab-extent"
         page.goto(endpoint)
         status_code = page.evaluate("window.performance.getEntries()[0].responseStatus")
-        assert status_code == 200
+        assert status_code == HTTPStatus.OK
 
         # get iframe for embedded map by looking for iframe with a base src value
         map_iframe = next((frame for frame in page.frames if maps_domain in frame.url), None)
@@ -110,7 +114,7 @@ class TestItemContactForm:
         endpoint = f"{fx_static_server_url}/items/{product_min_open.file_identifier}/index.html#tab-contact"
         page.goto(endpoint)
         status_code = page.evaluate("window.performance.getEntries()[0].responseStatus")
-        assert status_code == 200
+        assert status_code == HTTPStatus.OK
 
         expect(page.locator("#item-enquiry textarea#message-content")).to_be_visible()
         page.locator("#item-enquiry").get_by_label("Message").fill("x")
@@ -129,7 +133,7 @@ class TestItemDataActions:
         endpoint = f"{fx_static_server_url}/items/{product_data.file_identifier}/index.html#tab-data"
         page.goto(endpoint)
         status_code = page.evaluate("window.performance.getEntries()[0].responseStatus")
-        assert status_code == 200
+        assert status_code == HTTPStatus.OK
 
         # find trigger button for a data access info section
         trigger = page.locator("#tab-content-data button[data-target]").first
@@ -148,7 +152,7 @@ class TestItemDataActions:
         endpoint = f"{fx_static_server_url}/items/{product_data.file_identifier}/index.html#tab-data"
         page.goto(endpoint)
         status_code = page.evaluate("window.performance.getEntries()[0].responseStatus")
-        assert status_code == 200
+        assert status_code == HTTPStatus.OK
 
         # find expected text is visible
         text = "Add this item to a desktop or online GIS that supports ArcGIS Feature Services"

@@ -1,8 +1,12 @@
 # Based on: https://github.com/daGrevis/mdx_linkify/blob/master/mdx_linkify/mdx_linkify.py
+from typing import TYPE_CHECKING
+
 from bleach.linkifier import Linker
-from markdown import Markdown
 from markdown.extensions import Extension
 from markdown.postprocessors import Postprocessor
+
+if TYPE_CHECKING:
+    from markdown import Markdown
 
 
 class LinkifyPostprocessor(Postprocessor):

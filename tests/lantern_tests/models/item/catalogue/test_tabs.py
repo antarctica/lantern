@@ -1,5 +1,6 @@
 import json
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
 import pytest
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata, Permission
@@ -42,7 +43,6 @@ from lantern.lib.metadata_library.models.record.enums import (
     OnlineResourceFunctionCode,
     ProgressCode,
 )
-from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 from lantern.models.item.base.elements import Contact, Contacts, Link
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.base.enums import AccessLevel, Licence, ResourceTypeLabel
@@ -72,8 +72,11 @@ from lantern.models.item.catalogue.tabs import (
     RelatedTab,
 )
 from lantern.models.record.const import CATALOGUE_NAMESPACE
-from lantern.models.site import SiteMeta
 from tests.conftest import _select_record
+
+if TYPE_CHECKING:
+    from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
+    from lantern.models.site import SiteMeta
 
 
 class TestItemsTab:
@@ -501,7 +504,7 @@ class TestAdditionalInfoTab:
         assert tab.record_link_xml.href == xml_href
         assert tab.record_link_html.href == html_href
         assert tab.record_link_json.href == json_href
-        assert len(tab.record_links) == 3
+        assert len(tab.record_links) == 3  # noqa: PLR2004
         # cov
         assert tab.title != ""
         assert tab.icon != ""

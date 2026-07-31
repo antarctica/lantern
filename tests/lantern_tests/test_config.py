@@ -2,15 +2,17 @@ import os
 import pickle
 from importlib.metadata import version
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from unittest.mock import PropertyMock
 
 import pytest
 from environs.exceptions import EnvError, EnvValidationError
-from pytest_mock import MockerFixture
 
 from lantern.config import Config
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
 
 
 class TestConfig:
@@ -22,7 +24,7 @@ class TestConfig:
     def _set_envs(envs: dict) -> dict:
         envs_bck = {}
 
-        for env in envs:
+        for env in envs:  # noqa: PLC0206
             # backup environment variable if set
             value = os.environ.get(env, None)
             if value is not None:

@@ -1,6 +1,6 @@
 from http import HTTPMethod, HTTPStatus
 from pathlib import Path
-from typing import Final
+from typing import TYPE_CHECKING, Final
 
 import cattrs
 import pytest
@@ -21,8 +21,10 @@ from lantern.lib.metadata_library.models.record.elements.distribution import (
 )
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode, OnlineResourceFunctionCode
 from lantern.models.checks import Check, CheckState, CheckType, DistributionChecks, RecordChecks
-from lantern.models.record.record import Record
 from lantern.models.site import SiteContent, SiteRedirect
+
+if TYPE_CHECKING:
+    from lantern.models.record.record import Record
 
 
 class TestCheck:

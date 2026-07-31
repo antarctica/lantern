@@ -1,9 +1,7 @@
 import json
-from collections.abc import Sequence
 from json import JSONDecodeError
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from lantern.lib.metadata_library.models.record.elements.common import Series
 from lantern.lib.metadata_library.models.record.elements.identification import GraphicOverviews
 from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,
@@ -15,8 +13,13 @@ from lantern.models.item.catalogue.elements import ItemCatalogueSummary
 from lantern.models.item.catalogue.item import ItemCatalogue
 from lantern.models.item.catalogue.tabs import AdditionalInfoTab as CatalogueAdditionalInfoTab
 from lantern.models.item.catalogue.tabs import ExtentTab as CatalogueExtentTab
-from lantern.models.record.record import Record
-from lantern.models.record.revision import RecordRevision
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
+
+    from lantern.lib.metadata_library.models.record.elements.common import Series
+    from lantern.models.record.record import Record
+    from lantern.models.record.revision import RecordRevision
 
 
 def side_index_label(index: int) -> str:

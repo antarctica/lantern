@@ -1,8 +1,12 @@
+from typing import TYPE_CHECKING
+
 from lantern.lib.metadata_library.models.record.enums import ProgressCode
-from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 from lantern.models.item.base.enums import AccessLevel, ResourceTypeLabel
 from lantern.models.item.base.item import ItemBase
 from lantern.models.record.revision import RecordRevision
+
+if TYPE_CHECKING:
+    from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 
 
 class ItemWebsiteSearch(ItemBase):
@@ -100,7 +104,7 @@ class ItemWebsiteSearch(ItemBase):
         Value is based on the item's maintenance information and defaults to False (not deleted).
         """
         progress = self.record.identification.maintenance.progress
-        return progress == ProgressCode.OBSOLETE or progress == ProgressCode.HISTORICAL_ARCHIVE
+        return progress in (ProgressCode.OBSOLETE, ProgressCode.HISTORICAL_ARCHIVE)
 
     @property
     def _content(self) -> dict:

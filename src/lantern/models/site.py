@@ -1,17 +1,20 @@
 import json
 from dataclasses import asdict, dataclass, field, fields
 from datetime import UTC, datetime
-from pathlib import Path
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 from urllib.parse import urlparse
 
 from lxml import etree as ET  # noqa: N812
 
-from lantern.config import Config
 from lantern.lib.metadata_library.models.record.elements.common import Date
-from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 from lantern.models.item.base.elements import Link
 from lantern.models.item.catalogue.elements import FormattedDate
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from lantern.config import Config
+    from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 
 
 @dataclass(kw_only=True)
@@ -173,7 +176,7 @@ class SiteRedirect(SiteContent):
             content=self._content(target),
             path=path,
             media_type="text/html",
-            object_meta=object_meta if object_meta else {},
+            object_meta=object_meta or {},
             redirect=target,
         )
 

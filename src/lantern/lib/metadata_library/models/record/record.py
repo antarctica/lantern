@@ -1,11 +1,10 @@
 import contextlib
 import json
-import logging
 from copy import deepcopy
 from dataclasses import dataclass, field
 from enum import Enum
 from hashlib import sha1
-from typing import Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
 import cattrs
 from bas_metadata_library.standards.iso_19115_2 import MetadataRecord, MetadataRecordConfigV4
@@ -20,8 +19,12 @@ from lantern.lib.metadata_library.models.record.elements.distribution import Dis
 from lantern.lib.metadata_library.models.record.elements.identification import Identification
 from lantern.lib.metadata_library.models.record.elements.metadata import Metadata
 from lantern.lib.metadata_library.models.record.elements.projection import ReferenceSystemInfo
-from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
+from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode  # needed for cattrs # noqa: TC001
 from lantern.lib.metadata_library.models.record.utils.clean import clean_dict
+
+if TYPE_CHECKING:
+    import logging
+
 
 TRecord = TypeVar("TRecord", bound="Record")
 
@@ -128,7 +131,6 @@ class Record:
 
         Included for subclasses to override.
         """
-        pass
 
     @property
     def sha1(self) -> str:
@@ -164,7 +166,7 @@ class Record:
         supported = normalised == comparison
         if logger and not supported:
             logger.warning(
-                f"Record '{candidate.get('file_identifier')}' contains unsupported content that will be ignored."
+                "Record '%s' contains unsupported content that will be ignored.", candidate.get("file_identifier")
             )
             diff = DeepDiff(comparison, normalised, verbose_level=2)
             logger.debug(diff.pretty(prefix="Diff: "))

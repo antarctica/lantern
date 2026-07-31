@@ -5,7 +5,6 @@ import shutil
 import socket
 import sys
 import time
-from collections.abc import Callable, Generator
 from copy import deepcopy
 from datetime import UTC, datetime
 from functools import lru_cache
@@ -14,7 +13,7 @@ from importlib.metadata import version
 from pathlib import Path
 from subprocess import PIPE, Popen
 from tempfile import TemporaryDirectory
-from typing import get_args
+from typing import TYPE_CHECKING, get_args
 from unittest.mock import MagicMock, PropertyMock
 
 import pytest
@@ -23,9 +22,6 @@ from bas_metadata_library.standards.magic_administration.v1.utils import Adminis
 from boto3 import client as BotoClient  # noqa: N812
 from gitlab import Gitlab
 from moto import mock_aws
-from mypy_boto3_cloudfront import CloudFrontClient
-from mypy_boto3_s3 import S3Client
-from pytest_mock import MockerFixture
 
 from lantern.catalogues.bas import BasCatalogue, BasCatEnv, BasCatTrusted, BasCatUntrusted
 from lantern.config import Config
@@ -43,7 +39,6 @@ from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.record import Record as RecordBase
 from lantern.lib.metadata_library.models.record.utils.admin import set_admin
 from lantern.models.checks import Check, CheckType
-from lantern.models.item.algolia.item import ObjectRecord
 from lantern.models.item.arcgis.item import ItemArcGis
 from lantern.models.item.base.elements import Link
 from lantern.models.item.base.enums import AccessLevel
@@ -69,7 +64,6 @@ from lantern.outputs.site_resources import SiteResourcesOutput
 from lantern.repositories.bas import BasRepository
 from lantern.site import Site
 from lantern.stores.algolia import AlgoliaStore
-from lantern.stores.base import SelectRecordProtocol, SelectRecordsProtocol
 from lantern.stores.gitlab import GitLabSource, GitLabStore
 from lantern.stores.gitlab_cache import GitLabCachedStore, GitLabLocalCache
 from lantern.utils import get_jinja_env, minify_html
@@ -77,6 +71,16 @@ from tests.resources.admin_keys import test_keys
 from tests.resources.catalogues.fake_catalogue import FakeCatalogue
 from tests.resources.repositories.fake_repository import FakeRepository
 from tests.resources.stores.fake_records_store import FakeRecordsStore
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Generator
+
+    from mypy_boto3_cloudfront import CloudFrontClient
+    from mypy_boto3_s3 import S3Client
+    from pytest_mock import MockerFixture
+
+    from lantern.models.item.algolia.item import ObjectRecord
+    from lantern.stores.base import SelectRecordProtocol, SelectRecordsProtocol
 
 
 def has_network() -> bool:

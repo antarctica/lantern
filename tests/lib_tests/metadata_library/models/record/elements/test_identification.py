@@ -894,7 +894,7 @@ class TestIdentification:
             {**MIN_IDENTIFICATION, "spatial_resolution": 1},
         ],
     )
-    def test_init(self, values: dict):
+    def test_init(self, values: dict):  # noqa: PLR0912
         """
         Can create an Identification element from directly assigned properties.
 

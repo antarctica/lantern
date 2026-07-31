@@ -1,10 +1,14 @@
 import logging
 import time
-from collections.abc import Collection
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from lantern.exporters.base import ExporterBase
-from lantern.models.site import SiteContent
+
+if TYPE_CHECKING:
+    from collections.abc import Collection
+    from pathlib import Path
+
+    from lantern.models.site import SiteContent
 
 
 class LocalExporter(ExporterBase):
@@ -54,11 +58,11 @@ class LocalExporter(ExporterBase):
             if self._logger.isEnabledFor(logging.DEBUG) and (item.object_meta or item.redirect):
                 if item.redirect:
                     item.object_meta["redirect"] = item.redirect
-                self._logger.debug(f"Additional properties for {path.resolve()}:")
+                self._logger.debug("Additional properties for %s:", path.resolve())
                 self._logger.debug(item.object_meta)
 
             count += 1
 
         self._logger.info(
-            f"Exported {count} items to '{self.base_path.resolve()}' in {round(time.monotonic() - start)} seconds"
+            "Exported %s items to '%s' in %s seconds", count, self.base_path.resolve(), round(time.monotonic() - start)
         )

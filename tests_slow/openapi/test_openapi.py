@@ -1,13 +1,16 @@
 import base64
 from http import HTTPStatus
+from typing import TYPE_CHECKING
 
 import pytest
 import schemathesis
 from schemathesis import Case
 from schemathesis.checks import not_a_server_error
 from schemathesis.core.errors import LoaderError
-from schemathesis.hooks import HookContext
 from tests.conftest import has_network
+
+if TYPE_CHECKING:
+    from schemathesis.hooks import HookContext
 
 BASE_URL = "https://data.bas.ac.uk/static/json/openapi.json"
 USES_CLOUDFRONT = True
@@ -102,7 +105,7 @@ def test_openapi(case: Case):
         if case.method.upper() not in ("GET", "HEAD"):
             return  # Stop validation (ignore unsupported methods)
 
-        assert response.status_code == HTTPStatus.MOVED_PERMANENTLY or response.status_code == HTTPStatus.NOT_FOUND
+        assert response.status_code in (HTTPStatus.MOVED_PERMANENTLY, HTTPStatus.NOT_FOUND)
         location = response.headers.get("Location", []) or response.headers.get("location", [])
         if response.status_code == HTTPStatus.MOVED_PERMANENTLY:
             assert len(location) > 0

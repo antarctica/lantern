@@ -1,10 +1,14 @@
 import json
-import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-from lantern.models.site import ExportMeta
 from lantern.outputs.site_api import SiteApiOutput
 from tests.conftest import _index_site_content_outputs
+
+if TYPE_CHECKING:
+    import logging
+
+    from lantern.models.site import ExportMeta
 
 
 class TestSiteApiOutput:

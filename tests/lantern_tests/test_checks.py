@@ -1,16 +1,21 @@
-import logging
 import time
 from http import HTTPMethod, HTTPStatus
+from typing import TYPE_CHECKING
 
 import pytest
 import requests
-from pytest_mock import MockerFixture
 from requests.auth import HTTPBasicAuth
 
 from lantern.checks import Checker, CheckRunner, run_check
-from lantern.config import Config
 from lantern.models.checks import Check, CheckState, CheckType
 from lantern.models.site import ExportMeta, SiteContent
+
+if TYPE_CHECKING:
+    import logging
+
+    from pytest_mock import MockerFixture
+
+    from lantern.config import Config
 
 
 class TestCheckRunner:
@@ -233,7 +238,7 @@ class TestRunCheck:
         mocker.patch.object(CheckRunner, "_check_url", return_value=None)
         mocker.patch.object(CheckRunner, "_check_arcgis_item", side_effect=RuntimeError)
         mocker.patch.object(CheckRunner, "_check_arcgis_service", side_effect=RuntimeError)
-        if check_type == CheckType.DOWNLOADS_ARCGIS_LAYER or check_type == CheckType.INFO_ARCGIS_WEBMAP:
+        if check_type in (CheckType.DOWNLOADS_ARCGIS_LAYER, CheckType.INFO_ARCGIS_WEBMAP):
             mocker.patch.object(CheckRunner, "_check_url", side_effect=RuntimeError)
             mocker.patch.object(CheckRunner, "_check_arcgis_item", return_value=None)
         elif check_type == CheckType.DOWNLOADS_ARCGIS_SERVICE:

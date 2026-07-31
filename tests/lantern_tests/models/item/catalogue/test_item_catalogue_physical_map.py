@@ -1,12 +1,11 @@
 import json
 from copy import deepcopy
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 from unittest.mock import PropertyMock
 
 import pytest
-from pytest_mock import MockerFixture
 
-from lantern.config import Config
 from lantern.lib.metadata_library.models.record.elements.common import Date, Series
 from lantern.lib.metadata_library.models.record.elements.common import Dates as RecordDates
 from lantern.lib.metadata_library.models.record.elements.common import Identifiers as RecordIdentifiers
@@ -21,10 +20,8 @@ from lantern.lib.metadata_library.models.record.enums import (
     AggregationInitiativeCode,
     HierarchyLevelCode,
 )
-from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.catalogue.elements import Dates, Identifiers, ItemCatalogueSummary
-from lantern.models.item.catalogue.item import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import (
     AdditionalInfoTab,
     Extent,
@@ -33,8 +30,15 @@ from lantern.models.item.catalogue.special.physical_map import (
     side_index_label,
 )
 from lantern.models.record.revision import RecordRevision
-from lantern.models.site import SiteMeta
 from tests.conftest import _select_record
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
+
+    from lantern.config import Config
+    from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
+    from lantern.models.item.catalogue.item import ItemCatalogue
+    from lantern.models.site import SiteMeta
 
 
 @pytest.mark.parametrize(("value", "expected"), [(0, "A"), (25, "Z"), (26, "AA")])
@@ -357,6 +361,7 @@ class TestItemCataloguePhysicalMap:
         assert len(sides) > 0
         # assert sides are a tuple of (side_index, ItemSummaryCatalogue)
         assert all(
-            isinstance(side, tuple) and len(side) == 2 and isinstance(side[1], ItemCatalogueSummary) for side in sides
+            isinstance(side, tuple) and len(side) == 2 and isinstance(side[1], ItemCatalogueSummary)  # noqa: PLR2004
+            for side in sides
         )
         assert sides[0][0] == "Side A"

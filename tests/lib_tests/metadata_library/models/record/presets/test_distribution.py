@@ -34,7 +34,7 @@ class TestMakeEsriFeatureLayer:
 
         result = make_esri_feature_layer(portal_endpoint, server_endpoint, service_name, item_id)
 
-        assert len(result) == 2
+        assert len(result) == 2  # noqa: PLR2004
         assert all(isinstance(distribution, Distribution) for distribution in result)
         assert all(distribution.distributor == distributor for distribution in result)
 
@@ -62,7 +62,7 @@ class TestMakeEsriFeatureLayer:
 
         result = make_esri_feature_layer(portal_endpoint, server_endpoint, service_name, item_id, ogc_item_id)
 
-        assert len(result) == 4
+        assert len(result) == 4  # noqa: PLR2004
         assert all(isinstance(distribution, Distribution) for distribution in result)
         assert all(distribution.distributor == distributor for distribution in result)
 

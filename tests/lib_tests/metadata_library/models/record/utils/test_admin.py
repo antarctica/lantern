@@ -1,15 +1,19 @@
 import json
+from typing import TYPE_CHECKING
 
 import pytest
-from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
 from bas_metadata_library.standards.magic_administration.v1.utils import (
     AdministrationKeys,
     AdministrationMetadataSubjectMismatchError,
     AdministrationWrapper,
 )
 
-from lantern.lib.metadata_library.models.record.record import Record
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin, set_admin
+
+if TYPE_CHECKING:
+    from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
+
+    from lantern.lib.metadata_library.models.record.record import Record
 
 
 class TestAdministrationGetSet:

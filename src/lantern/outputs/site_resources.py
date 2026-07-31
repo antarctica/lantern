@@ -1,5 +1,5 @@
-import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from importlib_resources import as_file as resources_as_file
 from importlib_resources import files as resources_files
@@ -7,6 +7,9 @@ from importlib_resources import files as resources_files
 from lantern.models.checks import Check, CheckType
 from lantern.models.site import ExportMeta, SiteContent, SiteRedirect
 from lantern.outputs.base import OutputSite
+
+if TYPE_CHECKING:
+    import logging
 
 
 class SiteResourcesOutput(OutputSite):

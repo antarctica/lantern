@@ -1,4 +1,5 @@
 from datetime import UTC, date, datetime
+from typing import TYPE_CHECKING
 from zoneinfo import ZoneInfo
 
 import cattrs
@@ -20,7 +21,6 @@ from lantern.lib.metadata_library.models.record.elements.common import (
     OnlineResource,
     Series,
 )
-from lantern.lib.metadata_library.models.record.elements.identification import Aggregation
 from lantern.lib.metadata_library.models.record.enums import (
     ConstraintRestrictionCode,
     ConstraintTypeCode,
@@ -32,6 +32,9 @@ from lantern.lib.metadata_library.models.record.enums import (
     ProgressCode,
 )
 from lantern.lib.metadata_library.models.record.utils.clean import clean_dict, clean_list
+
+if TYPE_CHECKING:
+    from lantern.lib.metadata_library.models.record.elements.identification import Aggregation
 
 MIN_CITATION = {
     "title": "x",
@@ -596,7 +599,7 @@ class TestDates:
             },
         ],
     )
-    def test_init(self, values: dict):  # noqa: C901
+    def test_init(self, values: dict):  # noqa: C901, PLR0912, PLR0915
         """Can create a Dates container from directly assigned properties."""
         expected_date = datetime(2014, 6, 30, 14, 30, second=45, tzinfo=UTC)
         dates = Dates(**values)

@@ -1,5 +1,5 @@
-import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -11,7 +11,11 @@ from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta, SiteContent, SiteRedirect
 from lantern.outputs.item_html import ItemAliasesOutput, ItemCatalogueOutput
-from lantern.stores.base import SelectRecordProtocol
+
+if TYPE_CHECKING:
+    import logging
+
+    from lantern.stores.base import SelectRecordProtocol
 
 
 class TestItemCatalogueOutput:

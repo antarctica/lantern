@@ -1,12 +1,15 @@
 import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 
-from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 from tests.resources.admin_keys import test_keys
 from tests.resources.catalogues.fake_catalogue import FakeCatalogue
 
 from lantern.config import Config as ConfigBase
 from lantern.log import init as init_logging
+
+if TYPE_CHECKING:
+    from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 
 
 class Config(ConfigBase):

@@ -1,14 +1,17 @@
 from dataclasses import dataclass
 from enum import Enum
 from http import HTTPMethod, HTTPStatus
-from typing import Final
+from typing import TYPE_CHECKING, Final
 
 import cattrs
-from requests.auth import AuthBase
 
-from lantern.lib.metadata_library.models.record.elements.distribution import Distributions
-from lantern.models.record.record import Record
 from lantern.models.site import SiteContent, SiteRedirect
+
+if TYPE_CHECKING:
+    from requests.auth import AuthBase
+
+    from lantern.lib.metadata_library.models.record.elements.distribution import Distributions
+    from lantern.models.record.record import Record
 
 
 class CheckType(Enum):
@@ -235,18 +238,16 @@ class RecordChecks:
 
         DOIs always use the `data.bas.ac.uk` domain and so are only valid for the live catalogue endpoint.
         """
-        checks = []
-        for doi in self._record.identification.identifiers.filter(namespace="doi"):
-            checks.append(
-                Check(
-                    type=CheckType.DOI_REDIRECTS,
-                    url=f"https://doi.org/{doi.identifier}",
-                    http_status=HTTPStatus.FOUND,
-                    redirect_location=f"https://data.bas.ac.uk/items/{self._record.file_identifier}",
-                    file_identifier=self._record.file_identifier,
-                )
+        return [
+            Check(
+                type=CheckType.DOI_REDIRECTS,
+                url=f"https://doi.org/{doi.identifier}",
+                http_status=HTTPStatus.FOUND,
+                redirect_location=f"https://data.bas.ac.uk/items/{self._record.file_identifier}",
+                file_identifier=self._record.file_identifier,
             )
-        return checks
+            for doi in self._record.identification.identifiers.filter(namespace="doi")
+        ]
 
     @property
     def _distribution_checks(self) -> list[Check]:

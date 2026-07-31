@@ -1,15 +1,14 @@
 # Publish records to testing site
 
 import json
-import logging
 import shutil
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
 from textwrap import dedent
+from typing import TYPE_CHECKING
 
 import inquirer
-from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 from tasks._shared import confirm, init, ping_host, time_task
 from tasks.records_build import export
 from tasks.records_check import check
@@ -22,15 +21,9 @@ from tasks.records_zap import dump_records as zap_dump_records
 from tasks.records_zap import parse_zap_records as zap_parse_records
 from tasks.records_zap import process_zap_records as zap_process_records
 
-from lantern.catalogues.bas import BasCatalogue
-from lantern.config import Config
 from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
-from lantern.lib.metadata_library.models.record.record import Record
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin
-from lantern.models.record.revision import RecordRevision
-from lantern.models.repository import GitUpsertResults
 from lantern.models.site import ExportMeta, SiteEnvironment
-from lantern.outputs.base import OutputBase
 from lantern.outputs.item_html import ItemAliasesOutput, ItemCatalogueOutput
 from lantern.outputs.items_bas_website import ItemsBasWebsiteOutput
 from lantern.outputs.record_iso import RecordIsoHtmlOutput, RecordIsoJsonOutput, RecordIsoXmlOutput
@@ -39,10 +32,24 @@ from lantern.outputs.site_health import SiteHealthOutput
 from lantern.outputs.site_index import SiteIndexOutput
 from lantern.utils import get_jinja_env, get_record_aliases
 
+if TYPE_CHECKING:
+    import logging
+
+    from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
+
+    from lantern.catalogues.bas import BasCatalogue
+    from lantern.config import Config
+    from lantern.lib.metadata_library.models.record.record import Record
+    from lantern.models.record.revision import RecordRevision
+    from lantern.models.repository import GitUpsertResults
+    from lantern.outputs.base import OutputBase
+
 
 def _changeset_branch(issue: str) -> str:
     """Create branch name from GitLab issue URL."""
-    conventional_ref = f"{issue.split('/')[-5]}/{issue.split('/')[-4]}#{issue.split('/')[-1]}"  # MAGIC/foo#123
+    conventional_ref = (
+        f"{issue.split('/')[-5]}/{issue.split('/')[-4]}#{issue.rsplit('/', maxsplit=1)[-1]}"  # MAGIC/foo#123
+    )
     branch_safe_ref = conventional_ref.replace("#", ".")  # MAGIC/foo.123
     return f"changeset/{branch_safe_ref}"
 
@@ -238,11 +245,11 @@ def _zap(logger: logging.Logger, cat: BasCatalogue, admin_keys: AdministrationKe
     Processed records are dumped to import directory, replacing and removing initial files.
     Processed records will include any collections these records appear within.
     """
-    logger.info(f"Loading Zap authored records from: '{import_path.resolve()}'")
+    logger.info("Loading Zap authored records from: '%s'", import_path.resolve())
     record_paths = zap_parse_records(logger=logger, admin_keys=admin_keys, input_path=import_path)
     records = [record_path[0] for record_path in record_paths]
 
-    logger.debug(f"Found {len(records)} Zap authored records to process.")
+    logger.debug("Found %s Zap authored records to process.", len(records))
     if not records:
         logger.info("No Zap records to process, skipping.")
         return
@@ -259,7 +266,7 @@ def _zap(logger: logging.Logger, cat: BasCatalogue, admin_keys: AdministrationKe
         print(f"Confirm product (sub-)type for record [{record.file_identifier}] '{record.identification.title}'")
         ptype = inquirer.list_input(message="Product type", choices=product_types)
         record.hierarchy_level = HierarchyLevelCode(ptype)
-        logger.info(f"Hierarchy level set to '{record.hierarchy_level}' for record [{record.file_identifier}].")
+        logger.info("Hierarchy level set to '%s' for record [%s].", record.hierarchy_level, record.file_identifier)
 
     records.extend(zap_process_records(logger=logger, records=records, catalogue=cat, admin_keys=admin_keys))
     zap_dump_records(logger=logger, records=records, output_path=import_path)
@@ -287,7 +294,7 @@ def _changeset(logger: logging.Logger, keys: AdministrationKeys, records: dict[P
     if not isinstance(issue, str):
         msg = "Issue must be set for a changeset."
         raise TypeError(msg) from None
-    logger.info(f"Issue set to '{issue}'.")
+    logger.info("Issue set to '%s'.", issue)
 
     branch = _changeset_branch(issue=issue)
     return issue, branch
@@ -344,7 +351,7 @@ def _merge_request(logger: logging.Logger, cat: BasCatalogue, issue_href: str, b
     mr = cat.repo.create_merge_request(
         source_branch=branch, target_branch=cat.repo.gitlab_default_branch, title=title, description=description
     )
-    logger.info(f"Merge request created: {mr.web_url}")
+    logger.info("Merge request created: %s", mr.web_url)
     return mr.web_url, True
 
 
@@ -479,7 +486,7 @@ def main() -> None:
     )
 
     logger.info("Testing records workflow exited normally.")
-    logger.info(f"Checks data: {checks_path.resolve()}")
+    logger.info("Checks data: %s", checks_path.resolve())
 
 
 if __name__ == "__main__":

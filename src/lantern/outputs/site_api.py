@@ -1,11 +1,14 @@
 import json
-import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from lantern.models.checks import CheckType
 from lantern.models.site import ExportMeta, SiteContent, SitePageMeta, SiteRedirect
 from lantern.outputs.base import OutputSite
 from lantern.utils import minify_html
+
+if TYPE_CHECKING:
+    import logging
 
 
 class SiteApiOutput(OutputSite):

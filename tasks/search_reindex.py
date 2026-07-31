@@ -1,11 +1,13 @@
 # Recreate catalogue search index
 
 import time
+from typing import TYPE_CHECKING
 
 from tasks._shared import init
 
-from lantern.catalogues.bas import BasCatalogue
-from lantern.config import Config
+if TYPE_CHECKING:
+    from lantern.catalogues.bas import BasCatalogue
+    from lantern.config import Config
 
 
 def _reindex(cat: BasCatalogue, config: Config) -> None:
@@ -21,8 +23,8 @@ def main() -> None:
 
     start = time.monotonic()
     _reindex(cat=catalogue, config=config)
-    logger.info(f"Rebuilt search index in {round(time.monotonic() - start)} seconds.")
-    logger.info(f"Re-run as: '% {params}'")
+    logger.info("Rebuilt search index in %s seconds.", round(time.monotonic() - start))
+    logger.info("Re-run as: '%s'", params)
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-import logging
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 
 import pytest
@@ -7,10 +7,7 @@ from gitlab.client import Gitlab
 from gitlab.v4.objects import Project as GitlabProject
 from gitlab.v4.objects import ProjectIssue as GitlabIssue
 from gitlab.v4.objects import ProjectMergeRequest as GitlabMergeRequest
-from pytest_mock import MockerFixture
 
-from lantern.config import Config
-from lantern.models.record.record import Record
 from lantern.models.repository import GitUpsertContext, GitUpsertResults
 from lantern.repositories.bas import (
     BasRepository,
@@ -21,6 +18,14 @@ from lantern.repositories.bas import (
 from lantern.stores.algolia import AlgoliaStore
 from lantern.stores.gitlab import CommitResults, GitLabStore
 from lantern.stores.gitlab_cache import GitLabCachedStore
+
+if TYPE_CHECKING:
+    import logging
+
+    from pytest_mock import MockerFixture
+
+    from lantern.config import Config
+    from lantern.models.record.record import Record
 
 
 class TestBasRepository:
@@ -99,7 +104,7 @@ class TestBasRepository:
         self, mocker: MockerFixture, fx_bas_repo: BasRepository, fx_config: Config, branch: str | None, cached: bool
     ):
         """Can get GitLab store for records store project/repo."""
-        expected_branch = branch if branch else fx_config.STORE_GITLAB_DEFAULT_BRANCH
+        expected_branch = branch or fx_config.STORE_GITLAB_DEFAULT_BRANCH
 
         real_from_gitlab_store = GitLabCachedStore.from_gitlab_store
 

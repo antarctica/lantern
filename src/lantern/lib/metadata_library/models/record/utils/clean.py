@@ -2,7 +2,7 @@ def _clean_val(value: dict | list | str | float, strip_empty_str: bool) -> dict 
     def _is_empty(v: object) -> bool:
         if v is None:
             return True
-        if v == [] or v == {}:
+        if v in ([], {}):
             return True
         return bool(strip_empty_str and v == "")
 
@@ -11,7 +11,7 @@ def _clean_val(value: dict | list | str | float, strip_empty_str: bool) -> dict 
         return {k: v for k, v in cleaned_dict.items() if not _is_empty(v)}
     if isinstance(value, list):
         cleaned_list = [_clean_val(v, strip_empty_str) for v in value if not _is_empty(v)]
-        return cleaned_list if cleaned_list else None
+        return cleaned_list or None
     return value
 
 

@@ -1,14 +1,16 @@
 import base64
 import re
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from urllib.parse import unquote, urlparse
 
 from humanize import naturalsize
 
-from lantern.lib.metadata_library.models.record.elements.distribution import Distribution as RecordDistribution
 from lantern.models.item.base.elements import Link
 from lantern.models.item.catalogue.enums import DistributionType
+
+if TYPE_CHECKING:
+    from lantern.lib.metadata_library.models.record.elements.distribution import Distribution as RecordDistribution
 
 
 class Distribution(ABC):
@@ -224,7 +226,7 @@ class FileDistribution(Distribution, ABC):
     def label(self) -> str:
         """Distinguishing identifier from transfer option if available, or generic value based on file type."""
         title = self._option.transfer_option.online_resource.title
-        return title if title else self.format_type.value
+        return title or self.format_type.value
 
     @property
     def description(self) -> str | None:
@@ -489,7 +491,7 @@ class BasSan(Distribution):
     def label(self) -> str:
         """Distinguishing identifier from transfer option if available, or generic value based on file type."""
         title = self._option.transfer_option.online_resource.title
-        return title if title else "BAS SAN"
+        return title or "BAS SAN"
 
     @property
     def description(self) -> None:
@@ -551,7 +553,7 @@ class BasPartnersCDE(Distribution):
     def label(self) -> str:
         """Distinguishing identifier from transfer option if available, or generic value based on file type."""
         title = self._option.transfer_option.online_resource.title
-        return title if title else "BAS Construction Partners CDE"
+        return title or "BAS Construction Partners CDE"
 
     @property
     def description(self) -> None:

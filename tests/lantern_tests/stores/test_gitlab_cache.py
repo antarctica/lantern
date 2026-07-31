@@ -1,16 +1,14 @@
 import json
-import logging
 import pickle
 import re
 from pathlib import Path
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock, PropertyMock
 
 import pytest
 from gitlab import Gitlab
-from pytest_mock import MockerFixture
 from requests.exceptions import ConnectionError as RequestsConnectionError
 
-from lantern.config import Config
 from lantern.models.record.revision import RecordRevision
 from lantern.stores.base import RecordNotFoundError, RecordsNotFoundError, StoreFrozenError
 from lantern.stores.gitlab import CommitResults, GitLabSource, GitLabStore
@@ -27,6 +25,13 @@ from lantern.stores.gitlab_cache import (
     _fetch_record_commit,
 )
 from tests.conftest import _gitlab_cache_create
+
+if TYPE_CHECKING:
+    import logging
+
+    from pytest_mock import MockerFixture
+
+    from lantern.config import Config
 
 
 @pytest.mark.cov()
@@ -96,7 +101,7 @@ class TestGitLabLocalCache:
     def test_project(self, fx_gitlab_cache: GitLabLocalCache):
         """Can get the current remote GitLab project."""
         result = fx_gitlab_cache._project
-        assert result.id == 1234
+        assert result.id == 1234  # noqa: PLR2004
 
     @pytest.mark.vcr
     @pytest.mark.block_network
@@ -275,7 +280,7 @@ class TestGitLabLocalCache:
             assert updated_record.sha1 != original_record.sha1
 
             meta = tx.fetchscalar("SELECT COUNT(*) FROM meta;")
-            assert meta == 4
+            assert meta == 4  # noqa: PLR2004
             cached_head = tx.fetchscalar("SELECT value FROM meta WHERE key = 'head_commit';")
             assert cached_head == commit
 

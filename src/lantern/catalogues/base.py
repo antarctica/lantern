@@ -1,7 +1,6 @@
-import logging
 from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING
 
-from lantern.outputs.base import OutputBase
 from lantern.outputs.item_html import ItemAliasesOutput, ItemCatalogueOutput
 from lantern.outputs.items_bas_website import ItemsBasWebsiteOutput
 from lantern.outputs.record_iso import RecordIsoHtmlOutput, RecordIsoJsonOutput, RecordIsoXmlOutput
@@ -11,6 +10,11 @@ from lantern.outputs.site_health import SiteHealthOutput
 from lantern.outputs.site_index import SiteIndexOutput
 from lantern.outputs.site_pages import SitePagesOutput
 from lantern.outputs.site_resources import SiteResourcesOutput
+
+if TYPE_CHECKING:
+    import logging
+
+    from lantern.outputs.base import OutputBase
 
 
 class CatalogueBase(ABC):

@@ -1,17 +1,20 @@
 import json
 import logging
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 import pytest
 from gitlab import Gitlab
-from pytest_mock import MockerFixture
 
-from lantern.config import Config
-from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
 from lantern.stores.base import RecordNotFoundError, RecordsNotFoundError, StoreFrozenUnsupportedError
 from lantern.stores.gitlab import CommitResults, GitLabSource, GitLabStore, ProcessedRecord
 from tests.conftest import _revision_config_min
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
+
+    from lantern.config import Config
+    from lantern.models.record.record import Record
 
 
 @pytest.mark.cov()
@@ -47,6 +50,14 @@ class TestCommitResults:
         """Can compare instances."""
         base = CommitResults(branch="x", commit="x", changes={"create": [], "update": []}, actions=[])
         assert (base == other) is expected
+
+    @pytest.mark.cov()
+    def test_hash(self):
+        """Can hash instances as part of a dict."""
+        # Test that equal instances have the same hash
+        commit = CommitResults(branch="x", commit="x", changes={"create": [], "update": []}, actions=[])
+        results = {commit: "x"}
+        assert results[commit] == "x"
 
     def test_unstructure(self):
         """Can serialise as JSON."""
@@ -152,7 +163,7 @@ class TestGitLabStore:
     def test_project(self, fx_gitlab_store: GitLabStore):
         """Can get remote GitLab project."""
         result = fx_gitlab_store._project
-        assert result.id == 1234
+        assert result.id == 1234  # noqa: PLR2004
 
     @pytest.mark.cov()
     @pytest.mark.vcr
@@ -267,12 +278,12 @@ class TestGitLabStore:
         branch = "main"
         commit = "def456" if (additions_total + updates_total) > 0 else None
         changes = {
-            "create": ["d4e5f6" for _ in range(0, additions_ids)],
-            "update": ["a1b2c3" for _ in range(0, updates_ids)],
+            "create": ["d4e5f6" for _ in range(additions_ids)],
+            "update": ["a1b2c3" for _ in range(updates_ids)],
         }
         actions = [
-            *[{"action": "create"} for _ in range(0, additions_total)],
-            *[{"action": "update"} for _ in range(0, updates_total)],
+            *[{"action": "create"} for _ in range(additions_total)],
+            *[{"action": "update"} for _ in range(updates_total)],
         ]
         return CommitResults(branch=branch, commit=commit, changes=changes, actions=actions)
 
@@ -321,7 +332,7 @@ class TestGitLabStore:
     @pytest.mark.block_network
     def test_commit_no_changes(self, caplog: pytest.LogCaptureFixture, fx_gitlab_store: GitLabStore):
         """Does not commit records that haven't changed."""
-        record = cast(Record, self._fetch_record_head_commit("a1b2c3"))
+        record = cast("Record", self._fetch_record_head_commit("a1b2c3"))
         fx_gitlab_store._commit(records=[record], title="x", message="x", author=("x", "x@example.com"))
         assert "No actions to perform, aborting" in caplog.text
 

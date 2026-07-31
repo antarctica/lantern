@@ -1,15 +1,13 @@
 # Workaround shortfalls and config draft in records from Zap ⚡️editor
 
-import logging
 from copy import deepcopy
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata, Permission
-from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 from tasks._shared import dump_records, init, parse_records
 
-from lantern.catalogues.bas import BasCatalogue
 from lantern.lib.metadata_library.models.record.elements.common import Constraints, Date
 from lantern.lib.metadata_library.models.record.elements.data_quality import DomainConsistencies
 from lantern.lib.metadata_library.models.record.enums import (
@@ -28,12 +26,19 @@ from lantern.lib.metadata_library.models.record.presets.aggregations import make
 from lantern.lib.metadata_library.models.record.presets.conformance import MAGIC_ADMINISTRATION_V1, MAGIC_DISCOVERY_V2
 from lantern.lib.metadata_library.models.record.presets.constraints import BAS_ACCESS, CC_BY_ND_V4, OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.presets.contacts import UKRI_RIGHTS_HOLDER
-from lantern.lib.metadata_library.models.record.record import Record
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin, set_admin
 from lantern.lib.metadata_library.models.record.utils.kv import get_kv, set_kv
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
-from lantern.models.record.revision import RecordRevision
 from lantern.stores.base import RecordNotFoundError
+
+if TYPE_CHECKING:
+    import logging
+
+    from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
+
+    from lantern.catalogues.bas import BasCatalogue
+    from lantern.lib.metadata_library.models.record.record import Record
+    from lantern.models.record.revision import RecordRevision
 
 # c68df2de-d40c-459f-ad5a-1f4d4ab5d8b9 - Assets Tracking Service (externally managed, not included here)
 magic_collection_ids = [
@@ -89,12 +94,12 @@ def _revise_records(logger: logging.Logger, records: list[Record], catalogue: Ba
         try:
             existing_record = catalogue.repo.select_record(record.file_identifier)
             if record.dumps(strip_admin=False) != existing_record.dumps(strip_admin=False):
-                logger.info(f"Record '{record.file_identifier}' is different to stored version, revising")
+                logger.info("Record '%s' is different to stored version, revising", record.file_identifier)
                 revise_record(record)
             else:
-                logger.info(f"Record '{record.file_identifier}' unchanged, skipping revision")
+                logger.info("Record '%s' unchanged, skipping revision", record.file_identifier)
         except RecordNotFoundError:
-            logger.info(f"Record '{record.file_identifier}' not found in store, skipping revision")
+            logger.info("Record '%s' not found in store, skipping revision", record.file_identifier)
             continue
 
 
@@ -109,11 +114,11 @@ def _update_collection_aggregations(logger: logging.Logger, record: Record, coll
         in collection.identification.aggregations.filter(identifiers=record.file_identifier).identifiers()
     ):
         logger.debug(
-            f"Record '{record.file_identifier}' already in collection '{collection.file_identifier}', skipping"
+            "Record '%s' already in collection '%s', skipping", record.file_identifier, collection.file_identifier
         )
         return
     collection.identification.aggregations.append(make_bas_cat_collection_member(record.file_identifier))
-    logger.info(f"Added record '{record.file_identifier}' to collection '{collection.file_identifier}'")
+    logger.info("Added record '%s' to collection '%s'", record.file_identifier, collection.file_identifier)
 
 
 def _update_collection_extent(logger: logging.Logger, record: Record, collection: Record) -> None:
@@ -146,12 +151,12 @@ def _update_collection_extent(logger: logging.Logger, record: Record, collection
         collection_extent.north_latitude,
     ]
     if collection_bbox_updated != collection_bbox:
-        logger.debug(f"Collection extent '{collection.file_identifier}' updated")
-        logger.debug(
-            f"From: {', '.join([str(c) for c in collection_bbox])} to: {', '.join([str(c) for c in collection_bbox_updated])}"
-        )
+        bbox = ", ".join([str(c) for c in collection_bbox])
+        bbox_updated = ", ".join([str(c) for c in collection_bbox_updated])
+        logger.debug("Collection extent '%s' updated", collection.file_identifier)
+        logger.debug("From: %s to: %s", bbox, bbox_updated)
     else:
-        logger.debug(f"Collection extent '{collection.file_identifier}' unchanged, skipping update")
+        logger.debug("Collection extent '%s' unchanged, skipping update", collection.file_identifier)
         return
 
 
@@ -175,7 +180,7 @@ def _update_record_collections(logger: logging.Logger, record: Record, collectio
     )
     record_collection_ids = [c.identifier.identifier for c in parent_collections]
     filtered_record_collection_ids = set(record_collection_ids).intersection(set(collections.keys()))
-    logger.info(f"Record contains {len(filtered_record_collection_ids)} in-scope collections to update")
+    logger.info("Record contains %s in-scope collections to update", len(filtered_record_collection_ids))
 
     for collection_id in filtered_record_collection_ids:
         collection = collections[collection_id]
@@ -217,7 +222,7 @@ def _process_magic_collections(
     for collection in collections:
         updated_collection = collections_updated[collection.file_identifier]
         if collection != updated_collection:
-            logger.info(f"Collection '{collection.file_identifier}' updated, including with commit")
+            logger.info("Collection '%s' updated, including with commit", collection.file_identifier)
             additional_records.append(updated_collection)
 
 
@@ -228,7 +233,7 @@ def _get_gitlab_issues(logger: logging.Logger, record: Record) -> list[str] | No
     Return issue URLs to add to admin metadata instead.
     """
     glab_identifiers = record.identification.identifiers.filter(namespace="gitlab.data.bas.ac.uk")
-    logger.info(f"Record '{record.file_identifier}' has {len(glab_identifiers)} GitLab issues")
+    logger.info("Record '%s' has %s GitLab issues", record.file_identifier, len(glab_identifiers))
     if len(glab_identifiers) == 0:
         logger.info("No GitLab issues to process, skipping.")
         return None
@@ -239,14 +244,16 @@ def _get_gitlab_issues(logger: logging.Logger, record: Record) -> list[str] | No
     record.identification.identifiers.clear()
     record.identification.identifiers.extend(non_glab_identifiers)
     count_after = len(record.identification.identifiers)
-    logger.info(f"Removed {count_before - count_after} GitLab issue identifiers from record '{record.file_identifier}'")
+    logger.info(
+        "Removed %s GitLab issue identifiers from record '%s'", count_before - count_after, record.file_identifier
+    )
 
     issue_urls = [i.href for i in glab_identifiers if i.href is not None]
     if len(issue_urls) != len(issues):
         msg = f"Record {record.file_identifier} has GitLab identifiers without href values."
         raise ValueError(msg) from None
 
-    logger.info(f"Will set {len(issue_urls)} GitLab issues in admin metadata for Record '{record.file_identifier}'")
+    logger.info("Will set %s GitLab issues in admin metadata for Record '%s'", len(issue_urls), record.file_identifier)
     return issue_urls
 
 
@@ -259,14 +266,14 @@ def _get_access_permissions(logger: logging.Logger, record: Record) -> tuple[lis
     Zap ⚡️'s restricted options don't map to access permissions used in admin metadata so aren't supported.
     """
     metadata_permissions = [OPEN_ACCESS_PERMISSION]
-    logger.info(f"Setting metadata access constraints for record '{record.file_identifier}' to OPEN ACCESS.")
+    logger.info("Setting metadata access constraints for record '%s' to OPEN ACCESS.", record.file_identifier)
 
     resource_permissions = []
     constraints = record.identification.constraints.filter(types=ConstraintTypeCode.ACCESS)
-    logger.info(f"Record '{record.file_identifier}' has {len(constraints)} access constraints")
+    logger.info("Record '%s' has %s access constraints", record.file_identifier, len(constraints))
     if len(constraints) == 1 and constraints[0].restriction_code == ConstraintRestrictionCode.UNRESTRICTED:
         logger.info(
-            f"Record '{record.file_identifier}' has unrestricted resource access constraint, setting to OPEN ACCESS."
+            "Record '%s' has unrestricted resource access constraint, setting to OPEN ACCESS.", record.file_identifier
         )
         resource_permissions = [OPEN_ACCESS_PERMISSION]
     elif (
@@ -275,13 +282,15 @@ def _get_access_permissions(logger: logging.Logger, record: Record) -> tuple[lis
         and constraints[0].statement == "Closed Access (NERC)"
     ):
         logger.info(
-            f"Record '{record.file_identifier}' has all NERC restricted resource access constraint, setting to BAS STAFF."
+            "Record '%s' has all NERC restricted resource access constraint, setting to BAS STAFF.",
+            record.file_identifier,
         )
         resource_permissions = [BAS_STAFF]
         record.identification.constraints = Constraints([BAS_ACCESS])
     else:
         logger.warning(
-            f"Record '{record.file_identifier}' has unsupported access constraints, no resource access permissions set."
+            "Record '%s' has unsupported access constraints, no resource access permissions set.",
+            record.file_identifier,
         )
 
     return metadata_permissions, resource_permissions
@@ -294,20 +303,22 @@ def _process_identifiers(logger: logging.Logger, records: list[Record]) -> None:
     for record in records:
         for identifier in record.identification.identifiers:
             if identifier.namespace == old:
-                logger.info(f"Catalogue identifier with old namespace found in record [{record.file_identifier}].")
+                logger.info("Catalogue identifier with old namespace found in record [%s].", record.file_identifier)
                 if identifier.href:
                     identifier.href = identifier.href.replace(old, CATALOGUE_NAMESPACE)
                 identifier.namespace = CATALOGUE_NAMESPACE
             if identifier.namespace == old_alias:
                 logger.info(
-                    f"Alias identifier '{identifier.identifier}' with old namespace found in record [{record.file_identifier}]."
+                    "Alias identifier '%s' with old namespace found in record [%s].",
+                    identifier.identifier,
+                    record.file_identifier,
                 )
                 if identifier.href:
                     identifier.href = identifier.href.replace("data.bas.ac.uk", CATALOGUE_NAMESPACE)
                 identifier.namespace = ALIAS_NAMESPACE
         for aggregation in record.identification.aggregations:
             if aggregation.identifier.namespace == old:
-                logger.info(f"Aggregation identifier with old namespace found in record [{record.file_identifier}].")
+                logger.info("Aggregation identifier with old namespace found in record [%s].", record.file_identifier)
                 if aggregation.identifier.href:
                     aggregation.identifier.href = aggregation.identifier.href.replace(old, CATALOGUE_NAMESPACE)
                 aggregation.identifier.namespace = CATALOGUE_NAMESPACE
@@ -338,24 +349,27 @@ def _process_admin_metadata(logger: logging.Logger, admin_keys: AdministrationKe
         gitlab_issues = _get_gitlab_issues(logger, record)
         if gitlab_issues:
             logger.info(
-                f"GitLab issues in identification identifiers, moving to admin metadata for '{record.file_identifier}'"
+                "GitLab issues in identification identifiers, moving to admin metadata for '%s'",
+                record.file_identifier,
             )
             admin_meta.gitlab_issues = gitlab_issues
 
         metadata_permissions, resource_permissions = _get_access_permissions(logger, record)
         if len(metadata_permissions) > 0 and metadata_permissions != admin_meta.metadata_permissions:
             logger.info(
-                f"Metadata access permissions different to administrative record for '{record.file_identifier}', updating"
+                "Metadata access permissions different to administrative record for '%s', updating",
+                record.file_identifier,
             )
             admin_meta.metadata_permissions = metadata_permissions
         if len(resource_permissions) > 0 and resource_permissions != admin_meta.resource_permissions:
             logger.info(
-                f"Resource access permissions different to administrative record for '{record.file_identifier}', updating"
+                "Resource access permissions different to administrative record for '%s', updating",
+                record.file_identifier,
             )
             admin_meta.resource_permissions = resource_permissions
 
         set_admin(keys=admin_keys, record=record, admin_meta=admin_meta)
-        logger.debug(f"Administrative metadata for record '{record.file_identifier}':")
+        logger.debug("Administrative metadata for record '%s':", record.file_identifier)
         logger.debug(admin_meta.dumps_json())
         logger.debug(record.identification.supplemental_information)
 
@@ -387,7 +401,7 @@ def _process_distribution_descriptions(logger: logging.Logger, records: list[Rec
             ):
                 _format = distribution.format.format if distribution.format else None
                 logger.info(
-                    f"Updating distribution description for format '{_format}' in Record '{record.file_identifier}'"
+                    "Updating distribution description for format '{_format}' in Record '{record.file_identifier}'"
                 )
                 distribution.transfer_option.online_resource.description = format_descriptions[format_href]
 
@@ -487,11 +501,11 @@ def _process_sheet_number(logger: logging.Logger, records: list[Record]) -> None
         kv = get_kv(record)
         sheet_number = kv.get("sheet_number", None)
         if not sheet_number:
-            logger.debug(f"Sheet number not found in KV for record [{record.file_identifier}], skipping.")
+            logger.debug("Sheet number not found in KV for record [%s], skipping.", record.file_identifier)
             continue
 
         pop_sheet_number = False
-        logger.info(f"Sheet number found in KV for record [{record.file_identifier}].")
+        logger.info("Sheet number found in KV for record [%s].", record.file_identifier)
         if record.identification.series and record.identification.series.page:
             if record.identification.series.page == sheet_number:
                 logger.info("Sheet number found in KV and descriptive series with matching value, removing from KV.")
@@ -520,10 +534,10 @@ def _set_metadata_maintenance(logger: logging.Logger, records: list[Record]) -> 
     for record in records:
         if record.metadata.maintenance.progress is None:
             record.metadata.maintenance.progress = ProgressCode.COMPLETED
-            logger.info(f"Maintenance progress set to {_progress.name}.")
+            logger.info("Maintenance progress set to %s.", _progress.name)
         if record.metadata.maintenance.maintenance_frequency != _frequency:
             record.metadata.maintenance.maintenance_frequency = MaintenanceFrequencyCode.AS_NEEDED
-            logger.info(f"Maintenance frequency set to {_frequency.name}.")
+            logger.info("Maintenance frequency set to %s.", _frequency.name)
 
 
 def process_zap_records(
@@ -581,7 +595,7 @@ def parse_zap_records(
         set_admin(keys=admin_keys, record=record, admin_meta=admin)
         record.data_quality.domain_consistency.ensure(MAGIC_ADMINISTRATION_V1)
 
-        logger.info(f"Saving upgraded record '{record.file_identifier}' to '{record_path}'")
+        logger.info("Saving upgraded record '%s' to '%s'", record.file_identifier, record_path)
         with record_path.open("w") as f:
             f.write(record.dumps_json(strip_admin=False))
 
@@ -594,7 +608,7 @@ def main() -> None:
     admin_keys = config.ADMIN_METADATA_KEYS_RW
 
     input_path = Path("./import")
-    logger.info(f"Loading records from: '{input_path.resolve()}'")
+    logger.info("Loading records from: '%s'", input_path.resolve())
     record_paths = parse_zap_records(logger=logger, admin_keys=admin_keys, input_path=input_path)
     records = [record_path[0] for record_path in record_paths]
     records.extend(process_zap_records(logger=logger, records=records, catalogue=catalogue, admin_keys=admin_keys))

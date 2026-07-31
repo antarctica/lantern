@@ -1,8 +1,11 @@
-import logging
 from abc import ABC, abstractmethod
-from collections.abc import Collection
+from typing import TYPE_CHECKING
 
-from lantern.models.site import SiteContent
+if TYPE_CHECKING:
+    import logging
+    from collections.abc import Collection
+
+    from lantern.models.site import SiteContent
 
 
 class ExporterBase(ABC):

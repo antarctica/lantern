@@ -1,9 +1,12 @@
 # Based on: https://gitlab.com/ayblaq/prependnewline/-/blob/master/prependnewline.py
 import re
+from typing import TYPE_CHECKING
 
-from markdown import Markdown
 from markdown.extensions import Extension
 from markdown.preprocessors import Preprocessor
+
+if TYPE_CHECKING:
+    from markdown import Markdown
 
 
 class PrependNewLinePreprocessor(Preprocessor):

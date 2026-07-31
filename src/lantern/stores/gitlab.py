@@ -1,19 +1,23 @@
 import json
-import logging
+import logging  # needed for mocking  # noqa: TC003
 from base64 import b64decode
-from collections.abc import Collection
 from dataclasses import dataclass
 from functools import cached_property
-from typing import Protocol, TypedDict
+from typing import TYPE_CHECKING, Protocol, TypedDict
 from urllib.parse import urlparse
 
 from gitlab import Gitlab, GitlabGetError
-from gitlab.v4.objects import Project
 
-from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
 from lantern.shims import inject_truststore_into_ssl_boto_fix
 from lantern.stores.base import RecordNotFoundError, RecordsNotFoundError, StoreBase, StoreFrozenUnsupportedError
+
+if TYPE_CHECKING:
+    from collections.abc import Collection
+
+    from gitlab.v4.objects import Project
+
+    from lantern.models.record.record import Record
 
 inject_truststore_into_ssl_boto_fix()
 
@@ -137,10 +141,22 @@ class CommitResults:
             and self.commit == other.commit
             and self.new_identifiers == other.new_identifiers
             and self.updated_identifiers == other.updated_identifiers
-            and self.stats.new_records == other.stats.new_records
-            and self.stats.new_files == other.stats.new_files
-            and self.stats.updated_records == other.stats.updated_records
-            and self.stats.updated_files == other.stats.updated_files
+            and self.stats.unstructure() == other.stats.unstructure()
+        )
+
+    def __hash__(self) -> int:
+        """Hash based on all comparable attributes."""
+        return hash(
+            (
+                self.branch,
+                self.commit,
+                tuple(self.new_identifiers),
+                tuple(self.updated_identifiers),
+                self.stats.new_records,
+                self.stats.new_files,
+                self.stats.updated_records,
+                self.stats.updated_files,
+            )
         )
 
     def unstructure(self) -> dict:
@@ -230,11 +246,11 @@ class GitLabStore(StoreBase):
         Fetches record configuration and the ID of its head commit.
         """
         file_path = self._get_remote_hashed_path(f"{file_identifier}.json")
-        self._logger.info(f"Fetching remote record '{file_path}'.")
+        self._logger.info("Fetching remote record '%s'.", file_path)
         try:
             file_contents = self._project.files.get(file_path=file_path, ref=self._source.ref)
         except GitlabGetError:
-            self._logger.warning(f"Record '{file_identifier}' not found in remote store.")
+            self._logger.warning("Record '%s' not found in remote store.", file_identifier)
             return None
         return ProcessedRecord(
             logger=self._logger,
@@ -272,7 +288,7 @@ class GitLabStore(StoreBase):
             self._logger.info("Selecting all records.")
             return self._fetch_all_records_head_commit()
 
-        self._logger.info(f"Selecting {len(file_identifiers)} records.")
+        self._logger.info("Selecting %s records.", len(file_identifiers))
         for file_identifier in file_identifiers:
             result = self._fetch_record_head_commit(file_identifier)
             if result is None:
@@ -290,7 +306,7 @@ class GitLabStore(StoreBase):
 
         Raises a `RecordNotFoundError` exception if not found.
         """
-        self._logger.info(f"Selecting record '{file_identifier}'.")
+        self._logger.info("Selecting record '%s'.", file_identifier)
         result = self._fetch_record_head_commit(file_identifier)
         if result is None:
             raise RecordNotFoundError(file_identifier) from None
@@ -305,7 +321,7 @@ class GitLabStore(StoreBase):
         try:
             _ = self._project.branches.get(branch)
         except GitlabGetError:
-            self._logger.info(f"Branch '{branch}' does not exist, creating")
+            self._logger.info("Branch '%s' does not exist, creating", branch)
             self._project.branches.create({"branch": branch, "ref": "main"})
 
     def _get_hashes(self, file_identifiers: set[str]) -> dict[str, str | None]:
@@ -317,9 +333,9 @@ class GitLabStore(StoreBase):
         Returns a mapping of file identifiers to SHA1 hashes, or `None` if a record isn't found.
         """
         hashes = {}
-        self._logger.info(f"Getting hashes for {len(file_identifiers)} selected records.")
+        self._logger.info("Getting hashes for %s selected records.", len(file_identifiers))
         for file_identifier in file_identifiers:
-            self._logger.debug(f"Getting hash for {file_identifier}.")
+            self._logger.debug("Getting hash for %s.", file_identifier)
             record = self._fetch_record_head_commit(file_identifier)
             hashes[file_identifier] = record.sha1 if record else None
         return hashes
@@ -345,20 +361,20 @@ class GitLabStore(StoreBase):
             "actions": [],
         }
 
-        self._logger.debug(f"Ensuring target branch {self._source.ref} exists")
+        self._logger.debug("Ensuring target branch %s exists", self._source.ref)
         self._ensure_branch(branch=self._source.ref)
 
         existing_hashes = self._get_hashes_callable(file_identifiers={record.file_identifier for record in records})
         for record in records:
-            self._logger.debug(f"Existing: '{existing_hashes[record.file_identifier]}', New: '{record.sha1}'")
+            self._logger.debug("Existing: '%s', New: '%s'", existing_hashes[record.file_identifier], record.sha1)
             if record.sha1 == existing_hashes[record.file_identifier]:
-                self._logger.debug(f"Record '{record.file_identifier}' is unchanged, skipping")
+                self._logger.debug("Record '%s' is unchanged, skipping", record.file_identifier)
                 continue
 
             action = "update"
             if existing_hashes[record.file_identifier] is None:
                 action = "create"
-                self._logger.debug(f"Record '{record.file_identifier}' is new, action set to create")
+                self._logger.debug("Record '%s' is new, action set to create", record.file_identifier)
 
             changes[action].append(record.file_identifier)
             data["actions"].extend(
@@ -381,7 +397,7 @@ class GitLabStore(StoreBase):
             self._logger.info("No actions to perform, aborting")
             return results
 
-        self._logger.info(f"Committing {results.stats.new_msg}, {results.stats.updated_msg}")
+        self._logger.info("Committing %s, %s", results.stats.new_msg, results.stats.updated_msg)
         commit = self._project.commits.create(data)
         results.commit = commit.id
         return results
@@ -405,7 +421,7 @@ class GitLabStore(StoreBase):
             self._logger.info("No records pushed, skipping cache invalidation")
             return empty_results
 
-        self._logger.info(f"Push successful as commit '{results.commit}'")
+        self._logger.info("Push successful as commit '%s'", results.commit)
 
         return results
 

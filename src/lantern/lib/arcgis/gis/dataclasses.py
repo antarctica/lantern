@@ -1,12 +1,14 @@
 import json
-from collections.abc import Iterator
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from urllib.parse import parse_qs, urlparse
 
 from lantern.lib.arcgis.gis.enums import ItemType, MetadataFormat, SharingLevel
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 
 @dataclass
@@ -174,7 +176,7 @@ class ItemProperties:
 
 
 @dataclass
-class Item:
+class Item:  # noqa: PLW1641
     """
     A unit of ArcGIS content.
 

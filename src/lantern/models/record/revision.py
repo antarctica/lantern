@@ -1,12 +1,14 @@
-import logging
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 
 import cattrs
 
 from lantern.lib.metadata_library.models.record.utils.clean import clean_dict
 from lantern.models.record.record import Record
+
+if TYPE_CHECKING:
+    import logging
 
 TRecordRevision = TypeVar("TRecordRevision", bound="RecordRevision")
 

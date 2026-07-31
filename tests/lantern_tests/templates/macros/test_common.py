@@ -311,10 +311,10 @@ class TestFormInput:
         config = {"id": "x", "name": "x", "value": value, "required": required, "placeholder": placeholder}
         if type_:
             config["type"] = type_
-        expected_value = value if value else None
+        expected_value = value or None
         expected_required = "" if required else None
-        expected_placeholder = placeholder if placeholder else None
-        expected_type = type_ if type_ else "text"
+        expected_placeholder = placeholder or None
+        expected_type = type_ or "text"
         html = BeautifulSoup(self._render(config=config), parser="html.parser", features="lxml")
 
         result = html.select_one("input")

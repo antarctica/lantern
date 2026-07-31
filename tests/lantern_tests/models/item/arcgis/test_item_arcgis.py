@@ -1,8 +1,8 @@
 from textwrap import dedent
+from typing import TYPE_CHECKING
 
 import pytest
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata, Permission
-from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 from bs4 import BeautifulSoup
 
 from lantern.lib.arcgis.gis.dataclasses import Item as ArcGisItem
@@ -16,8 +16,12 @@ from lantern.lib.metadata_library.models.record.utils.admin import set_admin
 from lantern.models.item.arcgis.item import ArcGisItemLicenceHrefUnsupportedError, ItemArcGis
 from lantern.models.item.base.enums import Licence
 from lantern.models.item.base.utils import md_as_html
-from lantern.models.record.record import Record
 from lantern.utils import minify_html
+
+if TYPE_CHECKING:
+    from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
+
+    from lantern.models.record.record import Record
 
 
 class TestItemArcGIS:

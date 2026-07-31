@@ -1,4 +1,5 @@
 from datetime import date
+from typing import TYPE_CHECKING
 
 import pytest
 from bs4 import BeautifulSoup
@@ -16,11 +17,13 @@ from lantern.lib.metadata_library.models.record.enums import (
     ConstraintRestrictionCode,
     ConstraintTypeCode,
 )
-from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
-from lantern.models.item.catalogue.item import ItemCatalogue
-from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
-from lantern.models.item.catalogue.tabs import Tab
 from tests.conftest import _item_cat_model_min, render_item_catalogue
+
+if TYPE_CHECKING:
+    from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
+    from lantern.models.item.catalogue.item import ItemCatalogue
+    from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
+    from lantern.models.item.catalogue.tabs import Tab
 
 
 class TestMacrosItem:

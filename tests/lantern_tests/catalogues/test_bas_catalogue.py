@@ -1,27 +1,32 @@
 import json
-import logging
 from copy import deepcopy
+from http import HTTPStatus
 from pathlib import Path
-from typing import Literal, get_args
+from typing import TYPE_CHECKING, Literal, get_args
 from unittest.mock import PropertyMock
 
 import pytest
-from mypy_boto3_s3 import S3Client
-from pytest_mock import MockerFixture
 
 from lantern.catalogues.bas import BasCatalogue, BasCatEnv, BasCatTrusted, BasCatUntrusted
-from lantern.config import Config
 from lantern.exporters.cloudfront import CloudFrontExporter
 from lantern.lib.metadata_library.models.record.elements.identification import Aggregations
 from lantern.models.checks import CheckType
-from lantern.models.record.record import Record
 from lantern.models.repository import GitUpsertContext, GitUpsertResults
 from lantern.models.site import SiteEnvironment
 from lantern.outputs.site_health import SiteHealthOutput
 from lantern.outputs.site_resources import SiteResourcesOutput
-from lantern.repositories.bas import BasRepository
 from lantern.stores.gitlab import GitLabSource, GitLabStore
 from tests.resources.records.item_cat_checks import record as all_checks_test_record
+
+if TYPE_CHECKING:
+    import logging
+
+    from mypy_boto3_s3 import S3Client
+    from pytest_mock import MockerFixture
+
+    from lantern.config import Config
+    from lantern.models.record.record import Record
+    from lantern.repositories.bas import BasRepository
 
 pytestmark = pytest.mark.usefixtures("fx_reset_site_singletons")
 
@@ -94,7 +99,7 @@ class TestBasCatUntrusted:
         item_object = fx_bas_cat_untrusted._exporter._s3.get_object(
             Bucket=fx_bas_cat_untrusted._exporter._bucket, Key="items/x/index.html"
         )
-        assert item_object["ResponseMetadata"]["HTTPStatusCode"] == 200
+        assert item_object["ResponseMetadata"]["HTTPStatusCode"] == HTTPStatus.OK
         item_text = item_object["Body"].read().decode("utf-8")
         assert "tab-content-admin" not in item_text
 
@@ -127,7 +132,7 @@ class TestBasCatUntrusted:
         item_object = fx_bas_cat_untrusted._exporter._s3.get_object(
             Bucket=fx_bas_cat_untrusted._exporter._bucket, Key=expected_key
         )
-        assert item_object["ResponseMetadata"]["HTTPStatusCode"] == 200
+        assert item_object["ResponseMetadata"]["HTTPStatusCode"] == HTTPStatus.OK
         item_text = item_object["Body"].read().decode("utf-8")
         health_data = json.loads(item_text)
         assert health_data["checks"]["site:records"]["observedValue"] == expected_count
@@ -210,7 +215,7 @@ class TestBasCatEnv:
         result = fx_bas_cat_env._untrusted._exporter._s3.get_object(
             Bucket=fx_bas_cat_env._untrusted._exporter._bucket, Key="items/x/index.html"
         )
-        assert result["ResponseMetadata"]["HTTPStatusCode"] == 200
+        assert result["ResponseMetadata"]["HTTPStatusCode"] == HTTPStatus.OK
 
         trusted_path = fx_bas_cat_env._trusted._exporter._path
         assert trusted_path.joinpath("items/x/index.html").exists()
@@ -227,7 +232,7 @@ class TestBasCatEnv:
         result = fx_bas_cat_env._untrusted._exporter._s3.get_object(
             Bucket=fx_bas_cat_env._bucket, Key="-/checks/data.json"
         )
-        assert result["ResponseMetadata"]["HTTPStatusCode"] == 200
+        assert result["ResponseMetadata"]["HTTPStatusCode"] == HTTPStatus.OK
 
     @pytest.mark.cov()
     def test_check_no_trusted_outputs(self, fx_bas_cat_env: BasCatEnv):

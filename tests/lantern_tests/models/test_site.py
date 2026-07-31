@@ -1,14 +1,11 @@
 import json
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import TYPE_CHECKING
 from unittest.mock import PropertyMock
 
 import pytest
-from freezegun.api import FrozenDateTimeFactory
-from pytest_mock import MockerFixture
 
-from lantern.config import Config
-from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 from lantern.models.item.base.elements import Link
 from lantern.models.item.catalogue.elements import FormattedDate
 from lantern.models.site import (
@@ -22,6 +19,13 @@ from lantern.models.site import (
     SitePageMeta,
     SiteRedirect,
 )
+
+if TYPE_CHECKING:
+    from freezegun.api import FrozenDateTimeFactory
+    from pytest_mock import MockerFixture
+
+    from lantern.config import Config
+    from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 
 
 class TestOpenGraphMeta:

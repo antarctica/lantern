@@ -1,11 +1,15 @@
-import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from bs4 import BeautifulSoup
 
 from lantern.models.site import ExportMeta, SiteContent
 from lantern.outputs.records_waf import RecordsWafOutput
-from lantern.stores.base import SelectRecordsProtocol
+
+if TYPE_CHECKING:
+    import logging
+
+    from lantern.stores.base import SelectRecordsProtocol
 
 
 class TestRecordsWafOutput:

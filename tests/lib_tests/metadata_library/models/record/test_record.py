@@ -2,12 +2,12 @@ import json
 import logging
 from copy import deepcopy
 from datetime import UTC, date, datetime
+from typing import TYPE_CHECKING
 
 import pytest
 from bas_metadata_library.standards.iso_19115_2 import MetadataRecord
 from bas_metadata_library.standards.iso_19115_common.utils import _encode_date_properties
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
-from pytest_mock import MockerFixture
 
 from lantern.lib.metadata_library.models.record.elements.common import (
     Address,
@@ -55,6 +55,9 @@ from lantern.lib.metadata_library.models.record.presets.conformance import (
 from lantern.lib.metadata_library.models.record.record import Record, RecordInvalidError, RecordSchema
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, get_admin, set_admin
 from lantern.lib.metadata_library.models.record.utils.kv import set_kv
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
 
 
 class TestRecordSchema:
@@ -1133,7 +1136,7 @@ class TestRecord:
         result = json.loads(record.dumps_json(strip_admin=False))
         expected = values
 
-        if run == "minimal-iso" or run == "minimal-magic":
+        if run in {"minimal-iso", "minimal-magic"}:
             # preserve '$schema' key if present for an accurate comparison
             schema = expected.pop("$schema", None)
             expected = Record._normalise_static_config_values(expected)

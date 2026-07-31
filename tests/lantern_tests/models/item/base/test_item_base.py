@@ -1,11 +1,11 @@
 import json
 from copy import deepcopy
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 from unittest.mock import PropertyMock
 
 import pytest
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata, Permission
-from pytest_mock import MockerFixture
 
 from lantern.lib.metadata_library.models.record.elements.common import (
     Constraint,
@@ -46,8 +46,12 @@ from lantern.lib.metadata_library.models.record.utils.admin import Administratio
 from lantern.models.item.base.elements import Contact, Contacts, Extent, Extents
 from lantern.models.item.base.enums import AccessLevel, Licence, ResourceTypeIcon, ResourceTypeLabel
 from lantern.models.item.base.item import ItemBase, ItemCore, ItemSummaryBase
-from lantern.models.record.record import Record
-from lantern.models.record.revision import RecordRevision
+
+if TYPE_CHECKING:
+    from pytest_mock import MockerFixture
+
+    from lantern.models.record.record import Record
+    from lantern.models.record.revision import RecordRevision
 
 
 class TestItemCore:

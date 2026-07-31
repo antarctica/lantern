@@ -1,15 +1,20 @@
-import logging
-from collections.abc import Collection
+import logging  # needed for mocking  # noqa: TC003
 from functools import cached_property
+from typing import TYPE_CHECKING
 
 from algoliasearch.http.exceptions import RequestException
 from algoliasearch.search.client import SearchClientSync
-from algoliasearch.search.models import FetchedIndex
-from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 
 from lantern.models.item.algolia.item import ItemAlgolia, ObjectRecord
-from lantern.models.record.revision import RecordRevision
 from lantern.stores.base import RecordNotFoundError, RecordsNotFoundError, StoreBase, StoreFrozenUnsupportedError
+
+if TYPE_CHECKING:
+    from collections.abc import Collection
+
+    from algoliasearch.search.models import FetchedIndex
+    from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
+
+    from lantern.models.record.revision import RecordRevision
 
 
 class AlgoliaStore(StoreBase):
@@ -73,7 +78,7 @@ class AlgoliaStore(StoreBase):
             self._logger.info("Selecting all records.")
             return [ItemAlgolia(algolia_object=result).record for result in results]
 
-        self._logger.info(f"Selecting {len(file_identifiers)} records.")
+        self._logger.info("Selecting %s records.", len(file_identifiers))
         results_indexed = {result["objectID"]: result for result in results}
         for file_identifier in file_identifiers:
             try:
@@ -95,7 +100,7 @@ class AlgoliaStore(StoreBase):
 
         Raises a `RecordNotFoundError` exception if not found.
         """
-        self._logger.info(f"Selecting record '{file_identifier}'.")
+        self._logger.info("Selecting record '%s'.", file_identifier)
         try:
             result: ObjectRecord = self._client.get_object(index_name=self._index, object_id=file_identifier)  # ty:ignore[invalid-assignment]
         except RequestException as e:
@@ -108,7 +113,7 @@ class AlgoliaStore(StoreBase):
 
         Administration metadata keys are needed to create ItemAlgolia instances from records (`restricted` property).
         """
-        self._logger.info(f"Upserting {len(records)} records.")
+        self._logger.info("Upserting %s records.", len(records))
         data = [dict(ItemAlgolia(record=record, admin_keys=admin_keys).object) for record in records]
         self._client.save_objects(index_name=self._index, objects=data, wait_for_tasks=True)
 

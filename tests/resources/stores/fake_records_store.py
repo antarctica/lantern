@@ -1,7 +1,6 @@
-import logging
 from copy import copy
+from typing import TYPE_CHECKING
 
-from lantern.models.record.revision import RecordRevision
 from lantern.stores.base import RecordNotFoundError, RecordsNotFoundError, StoreBase, StoreFrozenUnsupportedError
 from tests.resources.records.item_cat_checks import record as check
 from tests.resources.records.item_cat_collection_all import record as collection_all_supported
@@ -33,6 +32,11 @@ from tests.resources.records.item_cat_pub_map import side_b as product_published
 from tests.resources.records.item_cat_pub_map_diff import combined as product_diff_published_map_combined
 from tests.resources.records.item_cat_pub_map_diff import side_a as product_diff_published_map_side_a
 from tests.resources.records.item_cat_pub_map_diff import side_b as product_diff_published_map_side_b
+
+if TYPE_CHECKING:
+    import logging
+
+    from lantern.models.record.revision import RecordRevision
 
 
 class FakeRecordsStore(StoreBase):
@@ -103,11 +107,7 @@ class FakeRecordsStore(StoreBase):
         if file_identifiers is None or len(file_identifiers) == 0:
             return sorted(self._fake_records, key=lambda r: r.file_identifier)
 
-        records = []
-        for record in self._records:
-            if record.file_identifier in file_identifiers:
-                records.append(record)
-
+        records = [r for r in self._records if r.file_identifier in file_identifiers]
         missing_ids = file_identifiers - {r.file_identifier for r in records}
         if not missing_ids:
             return sorted(records, key=lambda r: r.file_identifier)

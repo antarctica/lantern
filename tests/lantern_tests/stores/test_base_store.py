@@ -1,10 +1,13 @@
-import logging
+from typing import TYPE_CHECKING
 
 import pytest
 
 from lantern.models.record.record import Record
 from lantern.stores.base import RecordNotFoundError, RecordsNotFoundError, StoreFrozenUnsupportedError
 from tests.resources.stores.fake_records_store import FakeRecordsStore
+
+if TYPE_CHECKING:
+    import logging
 
 
 class TestRecordNotFoundError:

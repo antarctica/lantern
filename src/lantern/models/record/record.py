@@ -1,7 +1,6 @@
-import logging
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import Any, TypeVar
+from typing import TYPE_CHECKING, Any, TypeVar
 from uuid import UUID
 
 import cattrs
@@ -10,6 +9,9 @@ from lantern.lib.metadata_library.models.record.enums import ContactRoleCode, Hi
 from lantern.lib.metadata_library.models.record.record import Record as RecordBase
 from lantern.lib.metadata_library.models.record.record import RecordInvalidError, RecordSchema
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
+
+if TYPE_CHECKING:
+    import logging
 
 TRecord = TypeVar("TRecord", bound="Record")
 
@@ -140,7 +142,7 @@ class Record(RecordBase):
                 exp = ValueError(msg)
                 raise RecordInvalidError(validation_error=exp)
 
-            if len(alias.identifier.split("/")) > 2:
+            if len(alias.identifier.split("/")) > 2:  # noqa: PLR2004
                 msg = f"Invalid alias identifier '{alias.identifier}' must not contain additional '/' values."
                 exp = ValueError(msg)
                 raise RecordInvalidError(validation_error=exp)

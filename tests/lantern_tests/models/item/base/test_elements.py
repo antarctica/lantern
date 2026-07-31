@@ -38,8 +38,6 @@ class UnpackDataClass:
 class UnpackRegularClass:
     """Resource for TestUnpack."""
 
-    pass
-
 
 class TestUnpack:
     """Test dataclass unpack util function."""

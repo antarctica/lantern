@@ -109,5 +109,5 @@ class TestDistributionMaker:
         assert result.transfer_option.online_resource.href == "x"
         assert isinstance(result.transfer_option.size, Size)
         assert result.transfer_option.size.unit == "bytes"
-        assert result.transfer_option.size.magnitude == 5
+        assert result.transfer_option.size.magnitude == 5  # noqa: PLR2004
         assert result.distributor == MAGIC_DISTRIBUTOR

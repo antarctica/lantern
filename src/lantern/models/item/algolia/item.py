@@ -1,8 +1,6 @@
 import json
 from datetime import UTC, date, datetime
-from typing import NotRequired, TypedDict
-
-from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys as AdminMetadataKeys
+from typing import TYPE_CHECKING, NotRequired, TypedDict
 
 from lantern.lib.metadata_library.models.record.elements.common import (
     Constraint,
@@ -30,6 +28,9 @@ from lantern.models.item.base.item import ItemBase, ItemSummaryBase
 from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 from lantern.utils import is_live_record
+
+if TYPE_CHECKING:
+    from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys as AdminMetadataKeys
 
 
 class ObjectRecord(TypedDict):
@@ -205,7 +206,7 @@ class ItemAlgolia(ItemBase):
         _dates = self.record.identification.dates
 
         poc_type = "o" if _poc_org_name else "i"
-        poc_val = _poc_org_name if _poc_org_name else _poc_ind_name
+        poc_val = _poc_org_name or _poc_ind_name
         poc_email = _poc.email
         created = _dates.creation.unstructure() if _dates.creation else "?"
 

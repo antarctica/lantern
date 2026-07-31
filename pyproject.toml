@@ -53,7 +53,7 @@ test = [
     "lxml>=5.4.0",
     "moto[s3]>=5.1.6",
     "pytest>=8.4.1",
-    "pytest-cov>=6.2.1",
+    "pytest-cov>=7.1.0",
     "pytest-env>=1.1.5",
     "pytest-freezer>=0.4.9",
     "pytest-httpserver>=1.1.5",
@@ -149,45 +149,64 @@ line-length = 120
 target-version = "py314"
 
 [tool.ruff.lint]
-#   A | builtins (variables named after builtin names)
-# ANN | annotations (type hints)
-#   B | bug-bear (bad code)
-#  B9 | bug-bear opinionated (additional bad code)
-# C90 | mccabe (code complexity)
-#  C4 | comprehensions (list/dict/set comprehensions)
-#   D | pydocstyle (docstring)
-# DTZ | datetimez (date/time)
-#   E | pycodestyle errors (PEP8)
-#  EM | errmsg (exceptions)
-# ERA | eraticate (comments)
-#   F | pyflakes (invalid/bad code)
-#  FA | uture-annotations (type hints)
-#   I | isort (import ordering)
-#   N | pep8-naming (PEP8)
-#  PT | pytest-style (tests)
-# PTH | use-pathlib (old syntax)
-# RET | return (return statements)
-# RUF | ruff (other)
-#   S | bandit (static security)
-# SIM | simplicity (code complexity)
-#  TD | todos (comments)
-# TRY | tryceratops (exceptions)
-#  UP | pyupgrade (old syntax)
-#   W | pycodestyle warnings (PEP8)
-select = ["A", "ANN", "B", "B9", "C90", "C4", "D", "DTZ", "E", "EM", "ERA", "F", "FA", "I", "N", "PT", "PTH", "RET", "RUF", "S", "SIM", "TD", "TRY", "UP", "W"]
+#    A | builtins (variables named after builtin names)
+#  ANN | annotations (type hints)
+#    B | bug-bear (bad code)
+#   B9 | bug-bear opinionated (additional bad code)
+#  BLE | blind except
+#  C90 | mccabe (code complexity)
+#   C4 | comprehensions (list/dict/set comprehensions)
+#  COM | commas (for diffs)
+#    D | pydocstyle (docstring)
+#  DTZ | datetimez (date/time)
+#    E | pycodestyle errors (PEP8)
+#   EM | errmsg (exceptions)
+#  ERA | eraticate (comments)
+#    F | pyflakes (invalid/bad code)
+#   FA | future-annotations (type hints)
+# FURB | refurb
+#    I | isort (import ordering)
+#  INT | flake8-gettext
+#  ISC | implicit-str-concat
+#    G | logging-format
+#  LOG | logging
+#    N | pep8-naming (PEP8)
+# PERF | performance
+#  PIE | misc rules
+#   PL | pylint
+#   PT | pytest-style (tests)
+#  PTH | use-pathlib (old syntax)
+#  PYI | type hints
+#  RET | return (return statements)
+#  RUF | ruff (other)
+#    S | bandit (static security)
+#  SIM | simplicity (code complexity)
+#   TC | type-checking
+#   TD | todos (comments)
+#  TID | tidy-imports
+#  TRY | tryceratops (exceptions)
+#   UP | pyupgrade (old syntax)
+#    W | pycodestyle warnings (PEP8)
+#  YTT | flake8-2020 (sys.version)
+select = ["A", "ANN", "B", "B9", "BLE", "C90", "C4", "COM", "D", "DTZ", "E", "EM", "ERA", "F", "FA", "FURB", "I", "INT", "ISC", "G", "LOG", "N", "PERF", "PIE", "PL", "PT", "PTH", "PYI", "RET", "RUF", "S", "SIM", "TC", "TD", "TID", "TRY", "UP", "W", "YTT"]
 
-#   D100 | for avoding module level docstrings
-#   D104 | for avoding package level docstrings
-#   D203 | for requring blank line before classes (which looks silly)
-#   D212 | for docstring requring multi-line comments to start on first line (which looks silly)
-#   D401 | for requring imperative mood in docstrings (finally had enough, too annoying)
-#   D402 | for docstring that can't resemble their signatures (despite them being completely different)
-#   D413 | for requiring a blankline in docstrings if a section is used (which looks silly)
-#   E501 | for bug-bear compatibility (as B905 overrides line length checks)
-#  PT001 | for `@pytest.fixture` parentheses (as it's unstable/unreliable)
-#  PT023 | for `@pytest.mark.cov` parentheses (as it's unstable/unreliable)
-#  TD002 | for TODOs without an author (as an issue should assign ownership)
+#     COM812 | missing trailing comma (will force verbose function signatures/calls)
+#       D100 | for avoding module level docstrings
+#       D104 | for avoding package level docstrings
+#       D203 | for requring blank line before classes (which looks silly)
+#       D212 | for docstring requring multi-line comments to start on first line (which looks silly)
+#       D401 | for requring imperative mood in docstrings (finally had enough, too annoying)
+#       D402 | for docstring that can't resemble their signatures (despite them being completely different)
+#       D413 | for requiring a blankline in docstrings if a section is used (which looks silly)
+#       E501 | for bug-bear compatibility (as B905 overrides line length checks)
+#  PL(R)0913 | too many arguments
+#  PL(R)0917 | too many positional arguments
+#      PT001 | for `@pytest.fixture` parentheses (as it's unstable/unreliable)
+#      PT023 | for `@pytest.mark.cov` parentheses (as it's unstable/unreliable)
+#     PYI019 | for using custom types instead of Self (as it breaks cattras structure methods)
+#      TD002 | for TODOs without an author (as an issue should assign ownership)
 ignore = [
+    "COM812",
     "D100",
     "D104",
     "D107",
@@ -196,8 +215,11 @@ ignore = [
     "D401",
     "D402",
     "E501",
+    "PLR0913",
+    "PLR0917",
     "PT001",
     "PT023",
+    "PYI019",
     "TD002",
     "D413",
 ]
@@ -293,8 +315,9 @@ skip_empty = true
 show_missing = false
 fail_under = 100
 exclude_lines = [
-  "pragma: no cover",
-  "@abstractmethod",
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
 ]
 
 [tool.coverage.html]

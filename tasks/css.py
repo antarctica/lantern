@@ -5,8 +5,8 @@ import subprocess
 from http import HTTPStatus
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from typing import TYPE_CHECKING
 
-from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from tests.resources.admin_keys import test_keys
 from tests.resources.catalogues.fake_catalogue import FakeCatalogue
@@ -14,6 +14,9 @@ from tests.resources.catalogues.fake_catalogue import FakeCatalogue
 from lantern.config import Config as ConfigBase
 from lantern.models.checks import Check, CheckState, CheckType
 from lantern.outputs.checks import ChecksOutput
+
+if TYPE_CHECKING:
+    from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 
 
 class Config(ConfigBase):

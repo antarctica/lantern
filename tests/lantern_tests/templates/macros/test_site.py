@@ -1,12 +1,15 @@
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
 import pytest
 from bs4 import BeautifulSoup
-from freezegun.api import FrozenDateTimeFactory
 
 from lantern.models.site import OpenGraphMeta, SchemaOrgMeta, SiteMeta
 from lantern.utils import get_jinja_env
 from tests.conftest import freezer_time
+
+if TYPE_CHECKING:
+    from freezegun.api import FrozenDateTimeFactory
 
 
 class TestMacrosSite:

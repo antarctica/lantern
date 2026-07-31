@@ -5,9 +5,8 @@ import re
 import subprocess
 import sys
 import time
-from collections.abc import Callable, Collection, Generator, Mapping, Sequence
 from pathlib import Path
-from typing import Literal, TypeVar, cast, overload
+from typing import TYPE_CHECKING, Literal, TypeVar, cast, overload
 
 import inquirer
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
@@ -16,16 +15,21 @@ from bas_metadata_library.standards.magic_administration.v1.utils import (
     AdministrationMetadataSubjectMismatchError,
 )
 from boto3 import client as S3Client  # noqa: N812
-from mypy_boto3_s3 import S3Client as S3ClientT
 from tasks._config import ExtraConfig
 
 from lantern.catalogues.bas import BasCatalogue
-from lantern.config import Config
 from lantern.lib.metadata_library.models.record.record import Record, RecordInvalidError
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin
 from lantern.log import init as _init_logging
 from lantern.models.record.record import Record as RecordCatalogue
-from lantern.models.record.revision import RecordRevision
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Collection, Generator, Mapping, Sequence
+
+    from mypy_boto3_s3 import S3Client as S3ClientT
+
+    from lantern.config import Config
+    from lantern.models.record.revision import RecordRevision
 
 ExportTarget = Literal["local", "remote"]
 
@@ -69,7 +73,7 @@ def init() -> tuple[logging.Logger, ExtraConfig, BasCatalogue]:
 
 def confirm(logger: logging.Logger, message: str, abort_msg: str | None = None) -> None:
     """Confirm user wants to proceed."""
-    abort_msg = abort_msg if abort_msg else "Aborting. Cancelled by the user."
+    abort_msg = abort_msg or "Aborting. Cancelled by the user."
     if not inquirer.confirm(message=message, default=True):
         logger.info(abort_msg)
         sys.exit(1)
@@ -79,7 +83,7 @@ def get_gitlab_source(logger: logging.Logger, cat: BasCatalogue, action: str) ->
     """Confirm GitLab store source."""
     default = cat.repo.gitlab_default_branch
     branch = inquirer.text(message="GitLab branch", default=default)
-    logger.info(f"{action} branch '{branch}' on '{cat.repo.gitlab_project_url}'")
+    logger.info("%s branch '%s' on '%s'", action, branch, cat.repo.gitlab_project_url)
     return branch
 
 
@@ -148,23 +152,23 @@ def parse_records(
     records: list[tuple[ParseRecordType, Path]] = []
 
     for config_path in _parse_configs(search_path, glob_pattern=glob_pattern):
-        config, config_path = config_path
+        config, path = config_path
         try:
             record = RecordClass.loads(config)
             if validate_base or validate_catalogue:
                 record.validate(use_profiles=validate_profiles)
         except RecordInvalidError as e:
-            logger.warning(f"Record '{config['file_identifier']}' does not validate, skipping.")
+            logger.warning("Record '%s' does not validate, skipping.", config["file_identifier"])
             logger.info(e.validation_error)
             continue
 
         if not Record._config_supported(config=config, logger=logger):
             logger.warning(
-                f"Record '{config['file_identifier']}' contains unsupported content the catalogue will ignore."
+                "Record '%s' contains unsupported content the catalogue will ignore.", config["file_identifier"]
             )
-        records.append((cast(ParseRecordType, record), config_path))
+        records.append((cast("ParseRecordType", record), path))
 
-    logger.info(f"Discovered {len(records)} valid records")
+    logger.info("Discovered %s valid records", len(records))
     return records
 
 
@@ -224,7 +228,7 @@ def process_record_references(logger: logging.Logger, references: Collection[str
             try:
                 file_identifiers.add(_parse_record_reference(reference))
             except ValueError:
-                logger.warning(f"Could not process '{reference}' as a file identifier, skipping.")
+                logger.warning("Could not process '%s' as a file identifier, skipping.", reference)
                 continue
     return file_identifiers
 
@@ -234,7 +238,7 @@ def dump_records(logger: logging.Logger, output_path: Path, records: Sequence[Re
     output_path.mkdir(parents=True, exist_ok=True)
     for record in records:
         record_path = output_path / f"{record.file_identifier}.json"
-        logger.debug(f"Writing {record_path.resolve()}")
+        logger.debug("Writing %s", record_path.resolve())
         with record_path.open(mode="w") as f:
             f.write(record.dumps_json(strip_admin=False))
 
@@ -249,7 +253,7 @@ def clean_record_configs(
 
     for file_identifier in file_identifiers:
         input_files_indexed[file_identifier].unlink()
-        logger.info(f"Removed processed file: '{input_files_indexed[file_identifier]}'.")
+        logger.info("Removed processed file: '%s'.", input_files_indexed[file_identifier])
 
 
 def pick_local_records(logger: logging.Logger, records: list[Record]) -> list[Record]:
@@ -258,13 +262,13 @@ def pick_local_records(logger: logging.Logger, records: list[Record]) -> list[Re
         f"{r.file_identifier} ('{r.identification.title}' {r.hierarchy_level.value})": r.file_identifier
         for r in records
     }
-    logger.debug(f"Choices: {list(choices.keys())}")
+    logger.debug("Choices: %s", list(choices.keys()))
 
     selections = inquirer.checkbox(message="Records", choices=list(choices.keys()))
 
     records_ = {r.file_identifier: r for r in records}
     selected_fids = [choices[k] for k in selections]
-    logger.info(f"Selected records: {selected_fids}")
+    logger.info("Selected records: %s", selected_fids)
     return [records_[fid] for fid in selected_fids]
 
 
@@ -274,14 +278,14 @@ def pick_local_record(logger: logging.Logger, records: Sequence[Record | RecordC
         f"{r.file_identifier} ('{r.identification.title}' {r.hierarchy_level.value})": r.file_identifier
         for r in records
     }
-    logger.debug(f"Choices: {list(choices.keys())}")
+    logger.debug("Choices: %s", list(choices.keys()))
 
     selection = inquirer.list_input(message="Records", choices=list(choices.keys()))
-    logger.debug(f"Selected: {selection}")
+    logger.debug("Selected: %s", selection)
 
     for r in records:
         if r.file_identifier in selection:
-            logger.info(f"Selected record: {r.file_identifier}")
+            logger.info("Selected record: %s", r.file_identifier)
             return r
     raise KeyError() from None
 
@@ -364,7 +368,7 @@ def time_task(label: str) -> Callable:
             result = func(*args, **kwargs)
             logger = logging.getLogger("app")
             logger.setLevel(logging.INFO)
-            logger.info(f"{label} took {round(time.monotonic() - start)} seconds")
+            logger.info("%s took %s seconds", label, round(time.monotonic() - start))
             return result
 
         return wrapper

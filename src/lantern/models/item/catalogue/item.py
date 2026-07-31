@@ -1,12 +1,10 @@
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
-from lantern.lib.metadata_library.models.record.elements.common import Constraint
 from lantern.lib.metadata_library.models.record.enums import (
     ConstraintRestrictionCode,
     ConstraintTypeCode,
     ContactRoleCode,
 )
-from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 from lantern.models.item.base.elements import Link
 from lantern.models.item.base.enums import AccessLevel
 from lantern.models.item.base.item import ItemBase
@@ -31,8 +29,12 @@ from lantern.models.item.catalogue.tabs import (
 )
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import OpenGraphMeta, SchemaOrgAuthor, SchemaOrgMeta, SiteMeta
-from lantern.stores.base import SelectRecordProtocol
 from lantern.utils import is_live_record
+
+if TYPE_CHECKING:
+    from lantern.lib.metadata_library.models.record.elements.common import Constraint
+    from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
+    from lantern.stores.base import SelectRecordProtocol
 
 
 class ItemCatalogue(ItemBase):
@@ -80,7 +82,7 @@ class ItemCatalogue(ItemBase):
     @property
     def record(self) -> RecordRevision:
         """Get underlying RecordRevision."""
-        return cast(RecordRevision, super().record)
+        return cast("RecordRevision", super().record)
 
     @record.setter
     def record(self, value: RecordRevision) -> None:
@@ -257,7 +259,7 @@ class ItemCatalogue(ItemBase):
 
         `self._dates` returns values as `FormattedDates` not `Date` so `.datetime` returns a pre-formatted value.
         """
-        publication_date = cast(FormattedDate | None, self._dates.publication)
+        publication_date = cast("FormattedDate | None", self._dates.publication)
         image_href = self.overview_graphic.href if self.overview_graphic is not None else None
         return OpenGraphMeta(
             title=self.title_plain,
@@ -303,7 +305,7 @@ class ItemCatalogue(ItemBase):
         return PageSummary(
             item_super_type=self._super_type,
             edition=self.edition,
-            published_date=cast(FormattedDate | None, self._dates.publication),
+            published_date=cast("FormattedDate | None", self._dates.publication),
             revision_date=self._dates.revision_relative,
             aggregations=self._aggregations,
             live=self.live,

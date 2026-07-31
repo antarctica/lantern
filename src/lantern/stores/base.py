@@ -1,19 +1,16 @@
 from abc import ABC, abstractmethod
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol
 
-from lantern.models.record.revision import RecordRevision
+if TYPE_CHECKING:
+    from lantern.models.record.revision import RecordRevision
 
 
 class StoreFrozenUnsupportedError(Exception):
     """Raised when attempting to freeze an unsupported store."""
 
-    pass
-
 
 class StoreFrozenError(Exception):
     """Raised when attempting to modify a frozen store."""
-
-    pass
 
 
 class RecordNotFoundError(Exception):

@@ -1,15 +1,20 @@
 # Set gitlab issues in administration metadata in a record
 
-import logging
 from argparse import ArgumentParser
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import inquirer
-from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 from tasks._shared import confirm, dump_records, ensure_admin, init, parse_records, pick_local_record
 
-from lantern.lib.metadata_library.models.record.record import Record
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin, set_admin
+
+if TYPE_CHECKING:
+    import logging
+
+    from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
+
+    from lantern.lib.metadata_library.models.record.record import Record
 
 
 def _get_cli_args() -> tuple[bool, Path, Path | None, set[str]]:
@@ -63,7 +68,7 @@ def _get_args(
         msg = "Record path must be set when using --force option for this task."
         raise RuntimeError(msg) from None
     if record_path:
-        logger.info(f"Loading record from: '{record_path.resolve()}'")
+        logger.info("Loading record from: '%s'", record_path.resolve())
         record = parse_records(
             logger=logger, glob_pattern=record_path.name, search_path=record_path.parent, validate_catalogue=True
         )[0][0]
@@ -72,7 +77,7 @@ def _get_args(
         params = f"task issues-record --force --path {import_path.resolve()} --record {record_path.resolve()} {_issues}"
         return import_path, record, issues, params
 
-    logger.info(f"Loading records from: '{import_path.resolve()}'")
+    logger.info("Loading records from: '%s'", import_path.resolve())
     _record_paths = parse_records(logger=logger, search_path=import_path, validate_catalogue=True)
     record = pick_local_record(logger=logger, records=[rp[0] for rp in _record_paths])
 
@@ -114,7 +119,7 @@ def _set_issues(logger: logging.Logger, keys: AdministrationKeys, record: Record
 
     admin = ensure_admin(logger=logger, record=record, keys=keys)
     admin.gitlab_issues = list(issues)
-    logger.debug(f"Setting GitLab issues for '{record.file_identifier}' as {issues}")
+    logger.debug("Setting GitLab issues for '%s' as %s", record.file_identifier, issues)
     set_admin(keys=keys, record=record, admin_meta=admin)
 
 
@@ -131,7 +136,7 @@ def main() -> None:
     _set_issues(logger=logger, keys=admin_keys, record=record, issues=issues)
     dump_records(logger=logger, records=[record], output_path=import_path)
 
-    logger.info(f"Re-run as: '% {params}'")
+    logger.info("Re-run as: '%s'", params)
 
 
 if __name__ == "__main__":

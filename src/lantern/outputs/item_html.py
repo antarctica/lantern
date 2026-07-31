@@ -1,15 +1,19 @@
-import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from lantern.models.checks import CheckType
 from lantern.models.item.catalogue.item import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
 from lantern.models.record.const import CATALOGUE_NAMESPACE
-from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta, SiteContent, SiteRedirect
 from lantern.outputs.base import OutputRecord
-from lantern.stores.base import SelectRecordProtocol
 from lantern.utils import get_jinja_env, get_record_aliases, minify_html
+
+if TYPE_CHECKING:
+    import logging
+
+    from lantern.models.record.revision import RecordRevision
+    from lantern.stores.base import SelectRecordProtocol
 
 
 class ItemCatalogueOutput(OutputRecord):

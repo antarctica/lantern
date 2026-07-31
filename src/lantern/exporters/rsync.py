@@ -1,14 +1,18 @@
-import logging
 import time
-from collections.abc import Collection
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from typing import TYPE_CHECKING
 
 import sysrsync
 
 from lantern.exporters.base import ExporterBase
 from lantern.exporters.local import LocalExporter
-from lantern.models.site import SiteContent
+
+if TYPE_CHECKING:
+    import logging
+    from collections.abc import Collection
+
+    from lantern.models.site import SiteContent
 
 
 class RsyncExporter(ExporterBase):
@@ -62,7 +66,7 @@ class RsyncExporter(ExporterBase):
         if target_host:
             kwargs["destination_ssh"] = target_host
 
-        self._logger.info(f"Syncing '{src_path.resolve()}' to '{target}'")
+        self._logger.info("Syncing '%s' to '%s'", src_path.resolve(), target)
         sysrsync.run(strict=True, **kwargs)
 
     def export(self, content: Collection[SiteContent]) -> None:
@@ -81,5 +85,5 @@ class RsyncExporter(ExporterBase):
             self._upload_dir(src_path=tmp_exporter.base_path, target_path=self._path, target_host=self._host)
             target = f"{self._host}:{self._path}" if self._host else str(self._path)
             self._logger.info(
-                f"Exported {len(content)} items to '{target}' in {round(time.monotonic() - start)} seconds"
+                "Exported %s items to '%s' in %s seconds", len(content), target, round(time.monotonic() - start)
             )

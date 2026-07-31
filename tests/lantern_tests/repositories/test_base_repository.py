@@ -1,10 +1,14 @@
-import logging
+from typing import TYPE_CHECKING
 
-from lantern.config import Config
-from lantern.models.record.record import Record
 from lantern.models.repository import UpsertResults
 from tests.resources.repositories.fake_repository import FakeRepository
-from tests.resources.stores.fake_records_store import FakeRecordsStore
+
+if TYPE_CHECKING:
+    import logging
+
+    from lantern.config import Config
+    from lantern.models.record.record import Record
+    from tests.resources.stores.fake_records_store import FakeRecordsStore
 
 
 class TestRepositoryBase:

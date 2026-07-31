@@ -1,10 +1,9 @@
 from copy import deepcopy
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
 import pytest
-from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
 
-from lantern.config import Config
 from lantern.lib.metadata_library.models.record.elements.common import (
     Constraint,
     Constraints,
@@ -40,10 +39,15 @@ from lantern.models.item.catalogue.tabs import (
     RelatedTab,
 )
 from lantern.models.record.const import CATALOGUE_NAMESPACE
-from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import OpenGraphMeta, SchemaOrgMeta, SiteMeta
 from tests.conftest import _select_record
+
+if TYPE_CHECKING:
+    from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
+
+    from lantern.config import Config
+    from lantern.models.record.record import Record
 
 
 class TestItemCatalogue:

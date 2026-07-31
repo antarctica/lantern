@@ -1,11 +1,15 @@
+from typing import TYPE_CHECKING
+
 import pytest
 from jinja2 import Environment
 
 from lantern.lib.metadata_library.models.record.elements.common import Identifier
 from lantern.lib.metadata_library.models.record.enums import MaintenanceFrequencyCode
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
-from lantern.models.record.revision import RecordRevision
 from lantern.utils import get_jinja_env, get_record_aliases, is_live_record, minify_html
+
+if TYPE_CHECKING:
+    from lantern.models.record.revision import RecordRevision
 
 
 @pytest.mark.cov()

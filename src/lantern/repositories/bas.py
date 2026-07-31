@@ -1,43 +1,42 @@
-import logging
 import re
-from collections.abc import Collection
 from functools import cached_property
+from http import HTTPStatus
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from urllib.parse import urlparse
 
 from gitlab import Gitlab, GitlabGetError
-from gitlab.v4.objects import Project as GitlabProject
-from gitlab.v4.objects import ProjectIssue as GitlabIssue
-from gitlab.v4.objects import ProjectMergeRequest as GitlabMergeRequest
 from pathvalidate import sanitize_filepath
 
-from lantern.config import Config
-from lantern.models.record.record import Record
-from lantern.models.record.revision import RecordRevision
 from lantern.models.repository import GitUpsertContext, GitUpsertResults
 from lantern.repositories.base import RepositoryBase
 from lantern.stores.algolia import AlgoliaStore
 from lantern.stores.gitlab import GitLabSource, GitLabStore
 from lantern.stores.gitlab_cache import GitLabCachedStore
 
+if TYPE_CHECKING:
+    import logging
+    from collections.abc import Collection
+
+    from gitlab.v4.objects import Project as GitlabProject
+    from gitlab.v4.objects import ProjectIssue as GitlabIssue
+    from gitlab.v4.objects import ProjectMergeRequest as GitlabMergeRequest
+
+    from lantern.config import Config
+    from lantern.models.record.record import Record
+    from lantern.models.record.revision import RecordRevision
+
 
 class ProtectedGitBranchError(Exception):
     """Raised when trying to commit directly to a protected branch in a Git like store."""
-
-    pass
 
 
 class MergeRequestNotFoundError(Exception):
     """Raised when trying to get a merge request from a GitLab project that doesn't exist."""
 
-    pass
-
 
 class IssueNotFoundError(Exception):
     """Raised when trying to get an issue from a GitLab project that doesn't exist."""
-
-    pass
 
 
 class BasRepository(RepositoryBase):
@@ -93,7 +92,7 @@ class BasRepository(RepositoryBase):
         try:
             return self._gitlab_client.projects.get(project_path)
         except GitlabGetError as e:
-            if e.response_code == 404:
+            if e.response_code == HTTPStatus.NOT_FOUND:
                 msg = f"Project '{project_path}' not found - check token has access."
                 raise ValueError(msg) from e
             raise

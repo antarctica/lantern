@@ -88,6 +88,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Improving local development documentation
 * Splitting tests into main and slow suites, with separate development tasks and CI jobs
 * Replacing resource scripts for the non-interactive workflow and scheduled checks with contrib modules
+* Adding extra ruff rules (`BLE`, `COM`, `FURB`, `INT`, `ISC`, `G`, `LOG`, `PERF`, `PIE`, `PL`, `PYL`, `TC`, `TID`, `YTT`)
 
 ### Removed
 

@@ -6,14 +6,10 @@ from tasks.css_audit import _get_template_classes
 
 
 def _get_icon_classes(search_path: Path) -> list[str]:
-    icon_classes = []
     classes = _get_template_classes(search_path)
     excluded = ["fa-fw", "fa-2x"]
 
-    for cls in classes:
-        if cls.startswith("fa-") and cls not in excluded:
-            icon_classes.append(cls)
-
+    icon_classes = [cls for cls in classes if cls.startswith("fa-") and cls not in excluded]
     icon_classes.append("!! DOES NOT INCLUDE ICONS USED IN MACROS !!")
     return icon_classes
 

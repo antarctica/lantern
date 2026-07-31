@@ -1,12 +1,11 @@
 import json
 from copy import deepcopy
 from datetime import date
+from typing import TYPE_CHECKING
 from unittest.mock import PropertyMock
 
 import pytest
-from bas_metadata_library.standards.magic_administration.v1 import Permission
 from bs4 import BeautifulSoup
-from pytest_mock import MockerFixture
 
 from lantern.lib.metadata_library.models.record.elements.common import (
     Address,
@@ -60,11 +59,16 @@ from lantern.lib.metadata_library.models.record.enums import (
 from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, get_admin, set_admin
 from lantern.models.item.base.enums import AccessLevel, Licence
-from lantern.models.item.catalogue.item import ItemCatalogue
-from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
-from lantern.models.record.revision import RecordRevision
 from tests.conftest import _select_record, render_item_catalogue
+
+if TYPE_CHECKING:
+    from bas_metadata_library.standards.magic_administration.v1 import Permission
+    from pytest_mock import MockerFixture
+
+    from lantern.models.item.catalogue.item import ItemCatalogue
+    from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
+    from lantern.models.record.revision import RecordRevision
 
 
 class TestItemsTab:
@@ -284,7 +288,7 @@ class TestDataTab:
         assert html.select_one(f"button[data-target='{expected.access_target}']") is not None
         # noinspection PyTypeChecker
         assert html.find(name="span", string=expected.format_type.value) is not None
-        assert str(html).count(text) == 2  # one in collapsible, one in <noscript>
+        assert str(html).count(text) == 2  # one in collapsible, one in <noscript>  # noqa: PLR2004
 
         for tag in html.find_all("noscript"):
             tag.decompose()  # drop
@@ -315,7 +319,7 @@ class TestDataTab:
         html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
 
         assert html.select_one(f"button[data-target='{expected.access_target}']") is not None
-        assert str(html).count(text) == 2  # one in collapsible, one in <noscript>
+        assert str(html).count(text) == 2  # one in collapsible, one in <noscript>  # noqa: PLR2004
 
         for tag in html.find_all("noscript"):
             tag.decompose()  # drop
@@ -579,7 +583,7 @@ class TestLicenceTab:
         fx_item_cat_model_min._record.identification.contacts.extend(value)
         html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
 
-        label_text = "Copyright Holder" if len(expected) < 2 else "Copyright Holders"
+        label_text = "Copyright Holder" if len(expected) < 2 else "Copyright Holders"  # noqa: PLR2004
         # noinspection PyTypeChecker
         label = html.find(name="span", string=label_text)
         assert label is not None if expected else label is None

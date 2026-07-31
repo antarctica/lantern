@@ -1,8 +1,7 @@
 import logging
 from hashlib import sha1
 from importlib.metadata import version
-from pathlib import Path
-from typing import TypedDict
+from typing import TYPE_CHECKING, TypedDict
 
 from environs import Env, ValidationError
 from jwskate import Jwk
@@ -10,12 +9,17 @@ from marshmallow import validate
 
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 
+if TYPE_CHECKING:
+    from pathlib import Path
 
-class Config:
+
+class Config:  # noqa: PLW1641
     """
     Application configuration using environment variables.
 
     Properties are validated on access, see `validate()` for details and/or how to force checks.
+
+    Note: Does not support hashing.
     """
 
     def __init__(self, read_dotenv: bool = True) -> None:

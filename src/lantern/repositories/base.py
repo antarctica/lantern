@@ -1,11 +1,13 @@
-import logging
 from abc import ABC, abstractmethod
-from collections.abc import Collection
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from lantern.models.record.record import Record
-from lantern.models.record.revision import RecordRevision
-from lantern.models.repository import UpsertResults
+if TYPE_CHECKING:
+    import logging
+    from collections.abc import Collection
+
+    from lantern.models.record.record import Record
+    from lantern.models.record.revision import RecordRevision
+    from lantern.models.repository import UpsertResults
 
 
 class RepositoryBase(ABC):

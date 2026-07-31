@@ -1,16 +1,20 @@
-import logging
 import shutil
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from tasks._shared import time_task
 
 from lantern.catalogues.base import CatalogueBase
 from lantern.checks import Checker
-from lantern.config import Config
 from lantern.exporters.local import LocalExporter
 from lantern.models.site import ExportMeta
 from lantern.site import Site
 from tests.resources.stores.fake_records_store import FakeRecordsStore
+
+if TYPE_CHECKING:
+    import logging
+    from pathlib import Path
+
+    from lantern.config import Config
 
 
 class FakeCatalogue(CatalogueBase):

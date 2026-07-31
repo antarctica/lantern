@@ -1,9 +1,9 @@
 # Display administration metadata set in a record
 
 import json
-import logging
 from argparse import ArgumentParser
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import cattrs
 import inquirer
@@ -11,9 +11,13 @@ from bas_metadata_library.standards.magic_administration.v1 import Administratio
 from inquirer import Path as InquirerPath
 from tasks._shared import init, parse_records, pick_local_record
 
-from lantern.lib.metadata_library.models.record.record import Record
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, get_admin
 from lantern.lib.metadata_library.models.record.utils.clean import clean_dict
+
+if TYPE_CHECKING:
+    import logging
+
+    from lantern.lib.metadata_library.models.record.record import Record
 
 
 def _get_cli_args() -> tuple[bool, Path, Path | None]:
@@ -53,7 +57,7 @@ def _get_args(logger: logging.Logger, cli_args: tuple[bool, Path, Path | None]) 
         msg = "Record path must be set when using --force option for this task."
         raise RuntimeError(msg) from None
     if record_path:
-        logger.info(f"Loading record from: '{record_path.resolve()}'")
+        logger.info("Loading record from: '%s'", record_path.resolve())
         record = parse_records(
             logger=logger, glob_pattern=record_path.name, search_path=record_path.parent, validate_catalogue=True
         )[0][0]
@@ -62,7 +66,7 @@ def _get_args(logger: logging.Logger, cli_args: tuple[bool, Path, Path | None]) 
         return record, params
 
     import_path = Path(inquirer.path("Import path", path_type=InquirerPath.DIRECTORY, exists=True, default=import_path))
-    logger.info(f"Loading records from: '{import_path.resolve()}'")
+    logger.info("Loading records from: '%s'", import_path.resolve())
     _record_paths = parse_records(logger=logger, search_path=import_path, validate_catalogue=True)
     record = pick_local_record(logger=logger, records=[rp[0] for rp in _record_paths])
 
@@ -104,7 +108,7 @@ def main() -> None:
     record, params = _get_args(logger=logger, cli_args=cli_args)
     _dumps_admin_meta(logger=logger, admin_keys=config.ADMIN_METADATA_KEYS, record=record)
 
-    logger.info(f"Re-run as: '% {params}'")
+    logger.info("Re-run as: '%s'", params)
 
 
 if __name__ == "__main__":

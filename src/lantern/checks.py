@@ -2,16 +2,20 @@ import json
 import logging
 import time
 from http import HTTPMethod, HTTPStatus
+from typing import TYPE_CHECKING
 
 import requests
 from joblib import Parallel, delayed
 from requests import Response
-from requests.auth import AuthBase
 
 from lantern.log import init as init_logging
 from lantern.models.checks import Check, CheckState, CheckType
-from lantern.models.site import ExportMeta, SiteContent
 from lantern.outputs.checks import ChecksOutput
+
+if TYPE_CHECKING:
+    from requests.auth import AuthBase
+
+    from lantern.models.site import ExportMeta, SiteContent
 
 
 class CheckRunner:
@@ -72,7 +76,7 @@ class CheckRunner:
 
         Validates the response status code and optionally, content length and/or location header (for redirects).
         """
-        self._logger.info(f"Fetching: {self._check.url}")
+        self._logger.info("Fetching: %s", self._check.url)
         self._logger.debug({"method": self._check.http_method, "url": self._check.url})
 
         headers = None
@@ -158,8 +162,8 @@ class CheckRunner:
         """
         item_id = self._check.url.split("id=")[-1]
         item_url = f"https://www.arcgis.com/sharing/rest/content/items/{item_id}?f=json"
-        self._logger.info(f"Checking ArcGIS item page: {self._check.url}")
-        self._logger.info(f"Fetching from ArcGIS sharing API: {item_url}")
+        self._logger.info("Checking ArcGIS item page: %s", self._check.url)
+        self._logger.info("Fetching from ArcGIS sharing API: %s", item_url)
         self._check_arcgis_url(item_url)
 
     def _check_arcgis_service(self) -> None:
@@ -169,7 +173,7 @@ class CheckRunner:
         Checks service endpoint directly. Limited to public items.
         """
         service_url = f"{self._check.url}?f=json"
-        self._logger.info(f"Fetching: {service_url}")
+        self._logger.info("Fetching: %s", service_url)
         self._check_arcgis_url(service_url)
 
     def run(self) -> None:
@@ -178,7 +182,7 @@ class CheckRunner:
             return
 
         start = time.monotonic()
-        if self._check.type == CheckType.DOWNLOADS_ARCGIS_LAYER or self._check.type == CheckType.INFO_ARCGIS_WEBMAP:
+        if self._check.type in (CheckType.DOWNLOADS_ARCGIS_LAYER, CheckType.INFO_ARCGIS_WEBMAP):
             self._check_arcgis_item()
         elif self._check.type == CheckType.DOWNLOADS_ARCGIS_SERVICE:
             self._check_arcgis_service()

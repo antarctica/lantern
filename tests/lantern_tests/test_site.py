@@ -1,6 +1,6 @@
 import json
 import logging
-from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 import pytest
 from lxml import etree
@@ -8,9 +8,7 @@ from lxml import etree
 from lantern.lib.metadata_library.models.record.elements.common import Identifier
 from lantern.models.checks import Check
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
-from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta, SiteContent
-from lantern.outputs.base import OutputBase
 from lantern.outputs.item_html import ItemAliasesOutput, ItemCatalogueOutput
 from lantern.outputs.items_bas_website import ItemsBasWebsiteOutput
 from lantern.outputs.record_iso import RecordIsoHtmlOutput, RecordIsoJsonOutput, RecordIsoXmlOutput
@@ -24,6 +22,12 @@ from lantern.site import Site, SiteAction, SiteJob, _job_worker_iso_html_transfo
 from lantern.stores.base import StoreBase
 from lantern.stores.gitlab_cache import GitLabCachedStore
 from tests.resources.records.item_cat_product_min import record as product_min_required
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from lantern.models.record.revision import RecordRevision
+    from lantern.outputs.base import OutputBase
 
 
 @pytest.mark.usefixtures("fx_reset_site_singletons")

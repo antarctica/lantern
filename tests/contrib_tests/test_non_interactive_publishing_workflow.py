@@ -1,18 +1,15 @@
 import json
-import logging
 import os
 import subprocess
 import sys
 from http import HTTPStatus
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 from pytest_httpserver import HTTPServer, RequestMatcher
-from pytest_mock import MockerFixture
 from werkzeug import Response
 
-from lantern.catalogues.bas import BasCatalogue
-from lantern.config import Config
 from lantern.contrib.non_interactive_publishing_workflow import (
     Args,
     _clean_input_records,
@@ -25,9 +22,17 @@ from lantern.contrib.non_interactive_publishing_workflow import (
     _webhook,
     entrypoint,
 )
-from lantern.models.record.record import Record
 from lantern.models.repository import GitUpsertResults
 from tests.lantern_tests.models.record.test_record import TestRecord
+
+if TYPE_CHECKING:
+    import logging
+
+    from pytest_mock import MockerFixture
+
+    from lantern.catalogues.bas import BasCatalogue
+    from lantern.config import Config
+    from lantern.models.record.record import Record
 
 
 class TestPublishingWorkflow:
@@ -301,6 +306,7 @@ print(json.dumps(d))
             capture_output=True,
             text=True,
             timeout=60,
+            check=True,
         )
         assert result.returncode == 0
 

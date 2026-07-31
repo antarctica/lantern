@@ -12,7 +12,7 @@ def _extract_css_classes(html: str) -> list[str]:
     for match in class_regex.finditer(html):
         for cls in match.group(1).split():
             if cls not in exclude:
-                cls = cls.replace("%}", "").replace("{%", "").replace("}}", "")
+                cls = cls.replace("%}", "").replace("{%", "").replace("}}", "")  # noqa: PLW2901
                 classes.add(cls)
     return sorted(classes)
 

@@ -1,19 +1,23 @@
 # Push records into store as a changeset
 
-import logging
 import subprocess
 import sys
 from argparse import ArgumentParser
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import inquirer
 from inquirer import Path as InquirerPath
 from tasks._shared import clean_record_configs, init, parse_records
 
-from lantern.catalogues.bas import BasCatalogue
-from lantern.models.record.record import Record
 from lantern.models.repository import GitUpsertContext, GitUpsertResults
 from lantern.repositories.bas import ProtectedGitBranchError
+
+if TYPE_CHECKING:
+    import logging
+
+    from lantern.catalogues.bas import BasCatalogue
+    from lantern.models.record.record import Record
 
 
 def _get_cli_args() -> tuple[bool, Path, str | None, str | None, str | None, str | None, str | None]:
@@ -78,18 +82,16 @@ def get_git_commit_context(defaults: GitUpsertContext | None = None, branch: str
     """Prompt for commit context."""
     default_name, default_email = get_default_author()
 
-    branch = branch if branch else defaults.branch if defaults else None
+    branch = branch or (defaults.branch if defaults else None)
     title = defaults.title if defaults else None
     message = defaults.message if defaults else None
-    author_name = defaults.author_name if defaults and defaults.author_name else default_name if default_name else None
-    author_email = (
-        defaults.author_email if defaults and defaults.author_email else default_email if default_email else None
-    )
+    author_name = defaults.author_name if defaults and defaults.author_name else default_name or None
+    author_email = defaults.author_email if defaults and defaults.author_email else default_email or None
 
     return GitUpsertContext(
         branch=inquirer.text(message="Branch", default=branch),
         title=inquirer.text(message="Changeset title", default=title),
-        message=message if message else inquirer.editor(message="Changeset message"),
+        message=message or inquirer.editor(message="Changeset message"),
         author_name=inquirer.text(message="Changeset author name", default=author_name),
         author_email=inquirer.text(message="Changeset author email", default=author_email),
     )
@@ -104,10 +106,10 @@ def _get_args(
     path = cli_path
     context = GitUpsertContext(
         branch=cli_branch,
-        title=cli_title if cli_title else "",
-        message=cli_message if cli_message else "",
-        author_name=cli_author_name if cli_author_name else "",
-        author_email=cli_author_email if cli_author_email else "",
+        title=cli_title or "",
+        message=cli_message or "",
+        author_name=cli_author_name or "",
+        author_email=cli_author_email or "",
     )
 
     if not cli_force:
@@ -142,9 +144,9 @@ def load(logger: logging.Logger, import_path: Path) -> dict[Path, Record]:
 
     Returned as a dict of {RecordPath: Record} to allow targeted clean-up later.
     """
-    logger.info(f"Loading records from: '{import_path.resolve()}'")
+    logger.info("Loading records from: '%s'", import_path.resolve())
     records: list[tuple[Record, Path]] = parse_records(logger=logger, search_path=import_path, validate_catalogue=True)
-    logger.info(f"Loaded {len(records)} valid records from '{import_path.resolve()}'.")
+    logger.info("Loaded %s valid records from '%s'.", len(records), import_path.resolve())
     return {path: record for record, path in records}
 
 
@@ -159,13 +161,13 @@ def push(
     try:
         results = cat.commit(records=records, context=commit_context)
     except ProtectedGitBranchError:
-        logger.exception(f"Aborting. Cannot commit to default branch '{cat.repo.gitlab_default_branch}'.")
+        logger.exception("Aborting. Cannot commit to default branch '%s'.", cat.repo.gitlab_default_branch)
         sys.exit(1)
     if results.commit is None:
         return results
 
-    logger.info(f"{len(results.new_identifiers) + len(results.updated_identifiers)} records imported")
-    logger.info(f"Commit: {cat.repo.gitlab_project_url}/-/commit/{results.commit}")
+    logger.info("%s records imported", len(results.new_identifiers) + len(results.updated_identifiers))
+    logger.info("Commit: %s/-/commit/%s", cat.repo.gitlab_project_url, results.commit)
     return results
 
 
@@ -186,7 +188,7 @@ def main() -> None:
     records = load(logger=logger, import_path=import_path)
     commit = push(logger=logger, cat=catalogue, records=list(records.values()), commit_context=commit_context)
     clean(logger=logger, records=records, results=commit)
-    logger.info(f'Re-run as: "% {params}"')
+    logger.info('Re-run as: "%s"', params)
 
 
 if __name__ == "__main__":

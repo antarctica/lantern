@@ -221,7 +221,7 @@ class Contacts(list[Contact]):
         for i, c in enumerate(self):
             if c.eq_no_roles(contact):
                 # append to existing contact with non-overlapping roles
-                self[i].role = self[i].role.union(contact.role)
+                self[i].role = c.role.union(contact.role)
                 return
 
         self.append(contact)
@@ -262,14 +262,17 @@ class Date:
     @staticmethod
     def _fromisoformat(date_str: str) -> tuple[datetime | date, DatePrecisionCode | None]:
         """Parse date(time) from ISO 8601 string."""
+        YEAR_COUNT = 1  # noqa: N806
+        YEAR_MONTH_COUNT = 2  # noqa: N806
+
         elements = date_str.split("T")
         if len(elements) > 1:
             return datetime.fromisoformat(date_str), None
 
         date_elements = elements[0].split("-")
-        if len(date_elements) == 1:
+        if len(date_elements) == YEAR_COUNT:
             return date(int(date_elements[0]), 1, 1), DatePrecisionCode.YEAR
-        if len(date_elements) == 2:
+        if len(date_elements) == YEAR_MONTH_COUNT:
             return date(int(date_elements[0]), int(date_elements[1]), 1), DatePrecisionCode.MONTH
         return date.fromisoformat(date_str), None
 

@@ -1,15 +1,9 @@
 import json
 import locale
 from abc import ABC, abstractmethod
-from datetime import date, datetime
-from typing import cast
-
-from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata, Permission
+from typing import TYPE_CHECKING, cast
 
 from lantern.lib.metadata_library.models.record.elements.common import Constraint, Date, Identifier, Series
-from lantern.lib.metadata_library.models.record.elements.data_quality import DomainConsistency
-from lantern.lib.metadata_library.models.record.elements.distribution import Distribution as RecordDistribution
-from lantern.lib.metadata_library.models.record.elements.metadata import MetadataStandard
 from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
 from lantern.models.item.base.elements import Contact, Contacts, Link
 from lantern.models.item.base.elements import Extent as ItemExtent
@@ -46,6 +40,15 @@ from lantern.models.item.catalogue.elements import (
     Maintenance,
 )
 from lantern.models.item.catalogue.enums import ItemSuperType
+
+if TYPE_CHECKING:
+    from datetime import date, datetime
+
+    from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata, Permission
+
+    from lantern.lib.metadata_library.models.record.elements.data_quality import DomainConsistency
+    from lantern.lib.metadata_library.models.record.elements.distribution import Distribution as RecordDistribution
+    from lantern.lib.metadata_library.models.record.elements.metadata import MetadataStandard
 
 
 class Tab(ABC):
@@ -145,18 +148,16 @@ class DataTab(Tab):
 
         Checks each (unprocessed) resource distribution against supported catalogue distribution types.
         """
-        processed = []
-        for dist_option in self._resource_distributions:
-            for dist_type in self._supported_distributions:
-                if dist_type.matches(option=dist_option, other_options=self._resource_distributions):
-                    processed.append(
-                        dist_type(
-                            option=dist_option,
-                            other_options=self._resource_distributions,
-                            restricted=self._restricted,
-                        )
-                    )
-        return processed
+        return [
+            dist_type(
+                option=dist_option,
+                other_options=self._resource_distributions,
+                restricted=self._restricted,
+            )
+            for dist_option in self._resource_distributions
+            for dist_type in self._supported_distributions
+            if dist_type.matches(option=dist_option, other_options=self._resource_distributions)
+        ]
 
     @property
     def enabled(self) -> bool:
@@ -369,7 +370,7 @@ class RelatedTab(Tab):
         all_agg = len(self._aggregations)
         if self._item_type == HierarchyLevelCode.COLLECTION:
             # if all aggregations are a container's items, disable tab as these are shown in item tab
-            return len(cast(list[ItemCatalogueSummary], self.child_items)) != all_agg
+            return len(cast("list[ItemCatalogueSummary]", self.child_items)) != all_agg
         return all_agg > 0
 
     @property
@@ -634,8 +635,6 @@ class AdditionalInfoTab(Tab):
 class InvalidItemContactError(Exception):
     """Raised when the contact for the Item Contact tab is unsuitable."""
 
-    pass
-
 
 class ContactTab(Tab):
     """Content tab."""
@@ -759,7 +758,7 @@ class AdminTab(Tab):
 
         E.g. https://gitlab.data.bas.ac.uk/MAGIC/foo/-/issues/123 -> MAGIC/foo#123                                                                                                                                                                              .
         """
-        return f"{href.split('/')[-5]}/{href.split('/')[-4]}#{href.split('/')[-1]}"
+        return f"{href.split('/')[-5]}/{href.split('/')[-4]}#{href.rsplit('/', maxsplit=1)[-1]}"
 
     @staticmethod
     def _dump_permissions(permissions: list[Permission]) -> list[str]:

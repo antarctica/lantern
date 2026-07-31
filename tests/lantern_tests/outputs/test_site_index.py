@@ -1,11 +1,15 @@
-import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 
 from lantern.models.site import ExportMeta, SiteContent
 from lantern.outputs.site_index import SiteIndexOutput
-from lantern.stores.base import SelectRecordsProtocol
+
+if TYPE_CHECKING:
+    import logging
+
+    from lantern.stores.base import SelectRecordsProtocol
 
 
 class TestSiteIndexOutput:

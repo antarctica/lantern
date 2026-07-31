@@ -1,4 +1,4 @@
-from datetime import datetime
+from typing import TYPE_CHECKING
 
 from lantern.lib.metadata_library.models.record.elements.common import Date
 from lantern.lib.metadata_library.models.record.elements.identification import (
@@ -7,6 +7,9 @@ from lantern.lib.metadata_library.models.record.elements.identification import (
     ExtentTemporal,
     TemporalPeriod,
 )
+
+if TYPE_CHECKING:
+    from datetime import datetime
 
 
 def make_bbox_extent(min_x: float, max_x: float, min_y: float, max_y: float) -> ExtentGeographic:

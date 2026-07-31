@@ -1,10 +1,10 @@
 # Update record to include distribution options for an ArcGIS Online item
 
 import hashlib
-import logging
 from argparse import ArgumentParser
 from json import JSONDecodeError
 from pathlib import Path
+from typing import TYPE_CHECKING
 from urllib.parse import parse_qs, urlparse
 
 import inquirer
@@ -12,7 +12,6 @@ import requests
 from authlib.integrations.requests_client.oauth2_session import OAuth2Session
 from authlib.oauth2.rfc7523 import ClientSecretJWT
 from requests import Response
-from tasks._config import ExtraConfig
 from tasks._shared import dump_records, init, parse_records, pick_local_record
 
 from lantern.lib.arcgis.gis.dataclasses import Item as ArcGisItem
@@ -22,8 +21,14 @@ from lantern.lib.metadata_library.models.record.elements.common import OnlineRes
 from lantern.lib.metadata_library.models.record.elements.distribution import Distribution, Format, TransferOption
 from lantern.lib.metadata_library.models.record.enums import OnlineResourceFunctionCode
 from lantern.lib.metadata_library.models.record.presets.contacts import ESRI_DISTRIBUTOR
-from lantern.lib.metadata_library.models.record.record import Record
 from lantern.models.item.catalogue.enums import DistributionType
+
+if TYPE_CHECKING:
+    import logging
+
+    from tasks._config import ExtraConfig
+
+    from lantern.lib.metadata_library.models.record.record import Record
 
 
 def _get_cli_args() -> tuple[bool, Path, Path | None, str | None]:
@@ -72,7 +77,7 @@ def _get_args(
         msg = "Record path and item MUST be set when using --force option for this task."
         raise RuntimeError(msg) from None
     if record_path and item:
-        logger.info(f"Loading record from: '{record_path.resolve()}'")
+        logger.info("Loading record from: '%s'", record_path.resolve())
         record = parse_records(
             logger=logger, glob_pattern=record_path.name, search_path=record_path.parent, validate_catalogue=True
         )[0][0]
@@ -82,7 +87,7 @@ def _get_args(
         )
         return import_path, record, item, params
 
-    logger.info(f"Loading records from: '{import_path.resolve()}'")
+    logger.info("Loading records from: '%s'", import_path.resolve())
     _record_paths = parse_records(logger=logger, search_path=import_path)
     record = pick_local_record(logger=logger, records=[rp[0] for rp in _record_paths])
     item = inquirer.text(message="ArcGIS item URL", default=item)
@@ -128,7 +133,7 @@ def get_agol_item_data(
 
     AGOL requires the token as a query parameter, not a bearer type Authorization header.
     """
-    logger.info(f"Fetching ArcGIS item: {item_id}")
+    logger.info("Fetching ArcGIS item: %s", item_id)
 
     if not access_token:
         if not config:
@@ -154,7 +159,7 @@ def _get_agol_item_metadata(
     logger: logging.Logger, config: ExtraConfig, item_id: str, access_token: str | None = None
 ) -> str:
     """Get metadata for an ArcGIS Online item."""
-    logger.info(f"Fetching ArcGIS metadata for item: {item_id}")
+    logger.info("Fetching ArcGIS metadata for item: %s", item_id)
 
     if not access_token:
         access_token = get_agol_token(config)
@@ -343,7 +348,7 @@ def main() -> None:
         record.distribution.ensure(option)
     dump_records(logger=logger, records=[record], output_path=import_path)
 
-    logger.info(f"Re-run as: '% {params}'")
+    logger.info("Re-run as: '%s'", params)
 
 
 if __name__ == "__main__":

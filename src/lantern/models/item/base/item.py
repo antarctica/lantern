@@ -1,4 +1,4 @@
-from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata, Permission
+from typing import TYPE_CHECKING
 
 from lantern.lib.metadata_library.models.record.elements.common import (
     Constraint,
@@ -7,12 +7,6 @@ from lantern.lib.metadata_library.models.record.elements.common import (
     Identifier,
     Identifiers,
     Series,
-)
-from lantern.lib.metadata_library.models.record.elements.distribution import Distribution
-from lantern.lib.metadata_library.models.record.elements.identification import (
-    Aggregations,
-    GraphicOverview,
-    GraphicOverviews,
 )
 from lantern.lib.metadata_library.models.record.enums import (
     AggregationAssociationCode,
@@ -28,8 +22,18 @@ from lantern.lib.metadata_library.models.record.utils.kv import get_kv
 from lantern.models.item.base.elements import Contact, Contacts, Extent, Extents
 from lantern.models.item.base.enums import AccessLevel, Licence, ResourceTypeIcon, ResourceTypeLabel
 from lantern.models.item.base.utils import md_as_html, md_as_html_unwrapped, md_as_plain
-from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
+
+if TYPE_CHECKING:
+    from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata, Permission
+
+    from lantern.lib.metadata_library.models.record.elements.distribution import Distribution
+    from lantern.lib.metadata_library.models.record.elements.identification import (
+        Aggregations,
+        GraphicOverview,
+        GraphicOverviews,
+    )
+    from lantern.models.record.record import Record
 
 
 class ItemCore:

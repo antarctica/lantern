@@ -1,15 +1,20 @@
-import logging
+from typing import TYPE_CHECKING
 from unittest.mock import PropertyMock
 
 import pytest
-from pytest_mock import MockerFixture
 
 from lantern.models.checks import CheckType
-from lantern.models.record.revision import RecordRevision
-from lantern.models.site import ExportMeta, SiteContent
 from lantern.outputs.base import OutputBase, OutputRecord, OutputRecords, OutputSite
-from lantern.stores.base import SelectRecordsProtocol
 from tests.resources.outputs.fake_outputs import FakeOutputBase, FakeOutputRecord, FakeOutputRecords, FakeOutputSite
+
+if TYPE_CHECKING:
+    import logging
+
+    from pytest_mock import MockerFixture
+
+    from lantern.models.record.revision import RecordRevision
+    from lantern.models.site import ExportMeta, SiteContent
+    from lantern.stores.base import SelectRecordsProtocol
 
 
 class TestBaseOutput:

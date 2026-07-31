@@ -1,4 +1,5 @@
-from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
+from typing import TYPE_CHECKING
+
 from jinja2 import TemplateNotFound
 from lxml import html as lxml_html
 from lxml.etree import Element, SubElement
@@ -11,14 +12,16 @@ from lantern.lib.arcgis.gis.enums import SharingLevel as ArcGisSharingLevel
 from lantern.models.item.base.enums import AccessLevel
 from lantern.models.item.base.item import ItemBase
 from lantern.models.record.const import CATALOGUE_NAMESPACE
-from lantern.models.record.record import Record
 from lantern.utils import get_jinja_env
+
+if TYPE_CHECKING:
+    from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
+
+    from lantern.models.record.record import Record
 
 
 class ArcGisItemLicenceHrefUnsupportedError(Exception):
     """Raised when the licence href value is not mapped to a licence template."""
-
-    pass
 
 
 class ItemArcGis(ItemBase):
@@ -220,7 +223,7 @@ class ItemArcGis(ItemBase):
     @staticmethod
     def _validate_record(record: Record) -> None:
         """Check record for ArcGIS specific constraints."""
-        if record.identification.purpose is not None and len(record.identification.purpose) >= 250:
+        if record.identification.purpose is not None and len(record.identification.purpose) >= 250:  # noqa: PLR2004
             msg = "ArcGIS snippet (summary/purpose) is limited to 250 characters."
             raise ValueError(msg) from None
 

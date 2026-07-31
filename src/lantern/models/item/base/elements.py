@@ -1,12 +1,14 @@
 from dataclasses import dataclass, is_dataclass
-from typing import Any, SupportsIndex, cast, overload
+from typing import TYPE_CHECKING, Any, SupportsIndex, cast, overload
 
 from lantern.lib.metadata_library.models.record.elements.common import Contact as RecordContact
 from lantern.lib.metadata_library.models.record.elements.common import Contacts as RecordContacts
 from lantern.lib.metadata_library.models.record.elements.common import Date
 from lantern.lib.metadata_library.models.record.elements.identification import Extent as RecordExtent
 from lantern.lib.metadata_library.models.record.elements.identification import Extents as RecordExtents
-from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
+
+if TYPE_CHECKING:
+    from lantern.lib.metadata_library.models.record.enums import ContactRoleCode
 
 
 class Contact(RecordContact):
@@ -62,11 +64,11 @@ class Contacts(RecordContacts):
     def __getitem__(self, index: SupportsIndex | slice) -> Contact | Contacts:
         """Get items as overloaded type."""
         result = super().__getitem__(index)
-        return cast(Contacts, result) if isinstance(index, slice) else cast(Contact, result)
+        return cast("Contacts", result) if isinstance(index, slice) else cast("Contact", result)
 
     def filter(self, roles: ContactRoleCode | list[ContactRoleCode]) -> Contacts:
         """Get items as overloaded type."""
-        return cast(Contacts, super().filter(roles))
+        return cast("Contacts", super().filter(roles))
 
 
 class Extent(RecordExtent):
@@ -117,11 +119,11 @@ class Extents(RecordExtents):
     def __getitem__(self, index: SupportsIndex | slice) -> Extent | Extents:
         """Get items as overloaded type."""
         result = super().__getitem__(index)
-        return cast(Extents, result) if isinstance(index, slice) else cast(Extent, result)
+        return cast("Extents", result) if isinstance(index, slice) else cast("Extent", result)
 
     def filter(self, identifier: str) -> Extents:
         """Get items as overloaded type."""
-        return cast(Extents, super().filter(identifier))
+        return cast("Extents", super().filter(identifier))
 
 
 @dataclass

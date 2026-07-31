@@ -1,20 +1,23 @@
 # Set up a new GitLab store remote repository
 
-import logging
 import sys
 from itertools import chain
 from pathlib import Path
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 import inquirer
 from tasks._shared import init
 from tasks.records_import import get_default_author
 from tasks.records_zap import magic_collection_ids
 
-from lantern.config import Config
-from lantern.stores.base import StoreBase
 from lantern.stores.gitlab import GitLabSource, GitLabStore
 from lantern.stores.gitlab_cache import GitLabCachedStore
+
+if TYPE_CHECKING:
+    import logging
+
+    from lantern.config import Config
+    from lantern.stores.base import StoreBase
 
 max_stage = 3
 
@@ -45,12 +48,12 @@ def _dump_records(logger: logging.Logger, file_identifiers: list[str], store: St
         record = store.select_one(file_identifier)
 
         record_path_json = output_path / f"{file_identifier}.json"
-        logger.debug(f"Writing {record_path_json.resolve()}")
+        logger.debug("Writing %s", record_path_json.resolve())
         with record_path_json.open(mode="w") as f:
             f.write(record.dumps_json(strip_admin=False))
 
         record_path_xml = output_path / f"{file_identifier}.xml"
-        logger.debug(f"Writing {record_path_xml.resolve()}")
+        logger.debug("Writing %s", record_path_xml.resolve())
         with record_path_xml.open(mode="w") as f:
             f.write(record.dumps_xml(strip_admin=False))
 
@@ -79,7 +82,7 @@ def _stage0(logger: logging.Logger, config: Config, working_path: Path) -> None:
 
     logger.info("Dumping required collection records from existing store")
     _dump_records(logger, magic_collection_ids, store, working_path)
-    logger.info(f"{len(magic_collection_ids)} records stashed in {working_path.resolve()}.")
+    logger.info("%s records stashed in %s.", len(magic_collection_ids), working_path.resolve())
 
     print(f"Stage {stage} complete.")
     print(
@@ -135,7 +138,7 @@ def _stage1(logger: logging.Logger, config: Config, working_path: Path) -> None:
             }
         )
 
-    logger.info(f"Committing {len(data['actions'])} records.")
+    logger.info("Committing %s records.", len(data["actions"]))
     store._project.commits.create(data)
 
     for record_path in chain(working_path.glob("*.json"), working_path.glob("*.xml")):
@@ -159,7 +162,7 @@ def _stage2(logger: logging.Logger, config: Config) -> None:
         print("Selected branch is not 'main', this is unusual.")
         _confirm(logger)
 
-    store = cast(GitLabCachedStore, _init_store(logger=logger, config=config, cached=True))
+    store = cast("GitLabCachedStore", _init_store(logger=logger, config=config, cached=True))
     if store._cache.exists:
         print(f"Local cache path {config.STORE_GITLAB_CACHE_PATH.resolve()} exists and needs purging.")
         store._cache.purge()
@@ -198,7 +201,7 @@ def main() -> None:
     elif answers["stage"] == "stage2":
         _stage2(logger, config)
     else:
-        logger.error(f"Unknown stage '{answers['stage']}'")
+        logger.error("Unknown stage '%s'", answers["stage"])
         sys.exit(1)
 
 

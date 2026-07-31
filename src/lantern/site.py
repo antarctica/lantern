@@ -1,25 +1,29 @@
 import logging
 import time
-from collections.abc import Callable
 from copy import deepcopy
-from typing import Literal, NamedTuple, cast
+from typing import TYPE_CHECKING, Literal, NamedTuple, cast
 
 from joblib import Parallel, delayed
-from lxml import etree
 
 from lantern.log import init as init_logging
-from lantern.models.checks import Check
-from lantern.models.record.revision import RecordRevision
-from lantern.models.site import ExportMeta, SiteContent
-from lantern.outputs.base import OutputBase
 from lantern.outputs.item_html import ItemAliasesOutput, ItemCatalogueOutput
 from lantern.outputs.items_bas_website import ItemsBasWebsiteOutput
 from lantern.outputs.record_iso import RecordIsoHtmlOutput, RecordIsoJsonOutput, RecordIsoXmlOutput
 from lantern.outputs.records_waf import RecordsWafOutput
 from lantern.outputs.site_health import SiteHealthOutput
 from lantern.outputs.site_index import SiteIndexOutput
-from lantern.stores.base import StoreBase
 from lantern.stores.gitlab_cache import GitLabCachedStore
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from lxml import etree
+
+    from lantern.models.checks import Check
+    from lantern.models.record.revision import RecordRevision
+    from lantern.models.site import ExportMeta, SiteContent
+    from lantern.outputs.base import OutputBase
+    from lantern.stores.base import StoreBase
 
 SiteAction = Literal["content", "checks", "invalidations"]
 
@@ -33,7 +37,7 @@ def _job_worker_store(store: StoreBase) -> StoreBase:
 
     Singleton used to avoid initialising store for each job as some stores cannot be pickled.
     """
-    global _STORE_SINGLETON
+    global _STORE_SINGLETON  # noqa: PLW0603
     if _STORE_SINGLETON is None:
         _STORE_SINGLETON = store
         if isinstance(store, GitLabCachedStore):
@@ -48,7 +52,7 @@ def _job_worker_iso_html_transform() -> etree.XSLT:
 
     Singleton used to avoid initialising transform for each job as transform cannot be pickled.
     """
-    global _ISO_HTML_XSLT_SINGLETON
+    global _ISO_HTML_XSLT_SINGLETON  # noqa: PLW0603
     if _ISO_HTML_XSLT_SINGLETON is None:
         _ISO_HTML_XSLT_SINGLETON = RecordIsoHtmlOutput.create_xslt_transformer()
     # noinspection PyTypeChecker
@@ -187,7 +191,7 @@ class Site:
             output for output_outputs in nested_outputs for output in output_outputs
         ]
         self._logger.info(
-            f"Generated {len(outputs)} site content/checks/keys in {round(time.monotonic() - start)} seconds"
+            "Generated %s site content/checks/keys in %s seconds", len(outputs), round(time.monotonic() - start)
         )
         return outputs
 
@@ -204,7 +208,7 @@ class Site:
             individual_outputs=individual_outputs,
             identifiers=identifiers,
         )
-        return cast(list[SiteContent], self.execute(jobs))
+        return cast("list[SiteContent]", self.execute(jobs))
 
     def generate_checks(
         self,
@@ -219,7 +223,7 @@ class Site:
             individual_outputs=individual_outputs,
             identifiers=identifiers,
         )
-        return cast(list[Check], self.execute(jobs))
+        return cast("list[Check]", self.execute(jobs))
 
     def generate_invalidation_keys(
         self,
@@ -235,4 +239,4 @@ class Site:
             identifiers=identifiers,
         )
         keys = set(self.execute(jobs))
-        return cast(list[str], cast(object, list(keys)))
+        return cast("list[str]", cast("object", list(keys)))

@@ -1,7 +1,11 @@
+from typing import TYPE_CHECKING
+
 from bs4 import BeautifulSoup
 
-from lantern.models.site import SiteMeta
 from lantern.utils import get_jinja_env
+
+if TYPE_CHECKING:
+    from lantern.models.site import SiteMeta
 
 
 class TestLayoutPage:

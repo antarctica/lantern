@@ -1,14 +1,8 @@
-import logging
-from collections.abc import Callable
-from pathlib import Path
-from subprocess import Popen
-from typing import Final
+from typing import TYPE_CHECKING, Final
 
 import pytest
 
 from lantern.catalogues.base import CatalogueBase
-from lantern.config import Config
-from lantern.outputs.base import OutputBase
 from lantern.outputs.item_html import ItemAliasesOutput, ItemCatalogueOutput
 from lantern.outputs.items_bas_website import ItemsBasWebsiteOutput
 from lantern.outputs.record_iso import RecordIsoHtmlOutput, RecordIsoJsonOutput, RecordIsoXmlOutput
@@ -19,7 +13,16 @@ from lantern.outputs.site_index import SiteIndexOutput
 from lantern.outputs.site_pages import SitePagesOutput
 from lantern.outputs.site_resources import SiteResourcesOutput
 from tests.resources.catalogues.fake_catalogue import FakeCatalogue
-from tests.resources.stores.fake_records_store import FakeRecordsStore
+
+if TYPE_CHECKING:
+    import logging
+    from collections.abc import Callable
+    from pathlib import Path
+    from subprocess import Popen
+
+    from lantern.config import Config
+    from lantern.outputs.base import OutputBase
+    from tests.resources.stores.fake_records_store import FakeRecordsStore
 
 
 class TestCatalogueBase:

@@ -1,29 +1,33 @@
 # ruff: noqa: N812
-import logging
-from collections.abc import Collection
 from pathlib import Path
-from typing import get_args
+from typing import TYPE_CHECKING, get_args
 
 from boto3 import client as BotoClient
-from mypy_boto3_cloudfront import CloudFrontClient
-from mypy_boto3_s3 import S3Client
 from requests.auth import HTTPBasicAuth
 
 from lantern.catalogues.base import CatalogueBase
 from lantern.checks import Checker
-from lantern.config import Config
 from lantern.exporters.cloudfront import CloudFrontExporter
 from lantern.exporters.rsync import RsyncExporter
 from lantern.exporters.s3 import S3Exporter
 from lantern.models.checks import Check, CheckType
-from lantern.models.record.record import Record
-from lantern.models.repository import GitUpsertContext, GitUpsertResults
 from lantern.models.site import ExportMeta, SiteEnvironment
-from lantern.outputs.base import OutputBase
 from lantern.outputs.item_html import ItemCatalogueOutput
 from lantern.outputs.site_health import SiteHealthOutput
 from lantern.repositories.bas import BasRepository
 from lantern.site import Site
+
+if TYPE_CHECKING:
+    import logging
+    from collections.abc import Collection
+
+    from mypy_boto3_cloudfront import CloudFrontClient
+    from mypy_boto3_s3 import S3Client
+
+    from lantern.config import Config
+    from lantern.models.record.record import Record
+    from lantern.models.repository import GitUpsertContext, GitUpsertResults
+    from lantern.outputs.base import OutputBase
 
 
 class BasCatUntrusted(CatalogueBase):
@@ -234,7 +238,6 @@ class BasCatEnv(CatalogueBase):
         self._config = config
         self._repo = repo
         self._env = env
-        s3 = s3
 
         self._bucket = (
             config.SITE_UNTRUSTED_S3_BUCKET_LIVE if env == "live" else config.SITE_UNTRUSTED_S3_BUCKET_TESTING
@@ -270,10 +273,10 @@ class BasCatEnv(CatalogueBase):
         outputs: list[type[OutputBase]] | None = None,
     ) -> None:
         """Generate and export site content to hosting."""
-        self._logger.info(f"Exporting untrusted {self._env} site")
+        self._logger.info("Exporting untrusted %s site", self._env)
         self._untrusted.export(identifiers=identifiers, branch=branch, outputs=outputs)
         if outputs is None or ItemCatalogueOutput in outputs:
-            self._logger.info(f"Exporting trusted {self._env} site")
+            self._logger.info("Exporting trusted %s site", self._env)
             self._trusted.export(identifiers=identifiers, branch=branch)
 
     def check(
@@ -290,13 +293,13 @@ class BasCatEnv(CatalogueBase):
         store = self._repo._make_gitlab_store(branch=branch, cached=True, frozen=True)
         meta = ExportMeta.from_config(config=self._config, env=self._env, build_ref=store.head_commit, trusted=False)
 
-        self._logger.info(f"Generating checks for untrusted {self._env} site")
+        self._logger.info("Generating checks for untrusted %s site", self._env)
         checks = self._untrusted.checks(identifiers=identifiers, branch=branch, outputs=outputs)
         if outputs is None or ItemCatalogueOutput in outputs:
-            self._logger.info(f"Generating checks for trusted {self._env} site")
+            self._logger.info("Generating checks for trusted %s site", self._env)
             checks.extend(self._trusted.checks(identifiers=identifiers, branch=branch))
 
-        self._logger.info(f"Checking {self._env} site")
+        self._logger.info("Checking %s site", self._env)
         content = self._checker.check(meta=meta, checks=checks)
         self._untrusted._exporter.export(content)
 

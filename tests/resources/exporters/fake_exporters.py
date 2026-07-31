@@ -1,8 +1,12 @@
-import logging
-from collections.abc import Collection
+from typing import TYPE_CHECKING
 
 from lantern.exporters.base import ExporterBase
-from lantern.models.site import SiteContent
+
+if TYPE_CHECKING:
+    import logging
+    from collections.abc import Collection
+
+    from lantern.models.site import SiteContent
 
 
 class FakeExporterBase(ExporterBase):
@@ -13,4 +17,3 @@ class FakeExporterBase(ExporterBase):
 
     def export(self, content: Collection[SiteContent]) -> None:
         """Persist content."""
-        pass

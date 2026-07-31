@@ -1,12 +1,10 @@
-import logging
 from datetime import date
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
 from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 
 from lantern.lib.metadata_library.models.record.elements.common import Constraints, Contacts, Maintenance
-from lantern.lib.metadata_library.models.record.elements.data_quality import DomainConsistency
 from lantern.lib.metadata_library.models.record.elements.metadata import Metadata
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode, MaintenanceFrequencyCode, ProgressCode
 from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS as OPEN_ACCESS_PERMISSION
@@ -17,6 +15,11 @@ from lantern.lib.metadata_library.models.record.presets.contacts import UKRI_RIG
 from lantern.lib.metadata_library.models.record.presets.identifiers import make_bas_cat_item
 from lantern.lib.metadata_library.models.record.record import Record
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin, set_admin
+
+if TYPE_CHECKING:
+    import logging
+
+    from lantern.lib.metadata_library.models.record.elements.data_quality import DomainConsistency
 
 
 class RecordMagic(Record):

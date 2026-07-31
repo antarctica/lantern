@@ -1,14 +1,19 @@
-import logging
 import threading
 import time
-from collections.abc import Collection
+from typing import TYPE_CHECKING
 
 from boto3 import client as BotoClient  # noqa: N812
 from joblib import Parallel, delayed
-from mypy_boto3_s3 import S3Client as S3Client
 
 from lantern.exporters.base import ExporterBase
-from lantern.models.site import SiteContent
+
+if TYPE_CHECKING:
+    import logging
+    from collections.abc import Collection
+
+    from mypy_boto3_s3 import S3Client
+
+    from lantern.models.site import SiteContent
 
 
 class S3Exporter(ExporterBase):
@@ -74,7 +79,7 @@ class S3Exporter(ExporterBase):
             params["CacheControl"] = "no-store"
         if meta:
             params["Metadata"] = meta
-        self._logger.info(f"Putting {key} as {content_type}")
+        self._logger.info("Putting %s as %s", key, content_type)
         s3.put_object(**params)
 
     def _upload_item(self, item: SiteContent) -> None:
@@ -97,5 +102,5 @@ class S3Exporter(ExporterBase):
         start = time.monotonic()
         Parallel(n_jobs=self._workers, backend="threading")(delayed(self._upload_item)(c) for c in content)
         self._logger.info(
-            f"Exported {len(content)} items to 's3://{self._bucket}' in {round(time.monotonic() - start)} seconds"
+            "Exported %s items to 's3://%s' in %s seconds", len(content), self._bucket, round(time.monotonic() - start)
         )

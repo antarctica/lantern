@@ -1,15 +1,19 @@
 # Invalidate thumbnails for selected records in CloudFront cache for BAS CDN
 
-import logging
 import subprocess
 from argparse import ArgumentParser
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import boto3
-from tasks._config import ExtraConfig
 from tasks._shared import init
 
 from lantern.exporters.cloudfront import CloudFrontExporter
+
+if TYPE_CHECKING:
+    import logging
+
+    from tasks._config import ExtraConfig
 
 
 def get_cf_distribution_id(iac_cwd: Path, cf_id: str) -> str:

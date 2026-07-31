@@ -1,4 +1,4 @@
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from lantern.lib.metadata_library.models.record.elements.common import Contact, OnlineResource
 from lantern.lib.metadata_library.models.record.elements.distribution import (
@@ -9,6 +9,9 @@ from lantern.lib.metadata_library.models.record.elements.distribution import (
 from lantern.lib.metadata_library.models.record.enums import OnlineResourceFunctionCode
 from lantern.lib.metadata_library.models.record.presets.contacts import ESRI_DISTRIBUTOR
 from lantern.lib.metadata_library.models.record.utils.distribution import DistributionMaker, ZapFormat
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 def make_esri_feature_layer(

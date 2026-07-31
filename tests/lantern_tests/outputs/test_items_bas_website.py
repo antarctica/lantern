@@ -1,7 +1,7 @@
 import json
-import logging
 from copy import deepcopy
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
 
@@ -13,14 +13,18 @@ from lantern.lib.metadata_library.models.record.enums import (
     ConstraintTypeCode,
 )
 from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
-from lantern.lib.metadata_library.models.record.record import Record
 from lantern.lib.metadata_library.models.record.utils.admin import set_admin
 from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta, SiteContent
 from lantern.outputs.items_bas_website import ItemsBasWebsiteOutput
-from lantern.stores.base import SelectRecordsProtocol
 from tests.conftest import _admin_meta_keys, _revision_config_min
+
+if TYPE_CHECKING:
+    import logging
+
+    from lantern.lib.metadata_library.models.record.record import Record
+    from lantern.stores.base import SelectRecordsProtocol
 
 
 class TestItemsBasWebsiteOutput:

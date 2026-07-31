@@ -1,8 +1,12 @@
-import logging
+from typing import TYPE_CHECKING
 
 from lantern.models.checks import CheckType
-from lantern.models.site import ExportMeta, SiteContent
 from lantern.outputs.base import OutputBase, OutputRecord, OutputRecords, OutputSite
+
+if TYPE_CHECKING:
+    import logging
+
+    from lantern.models.site import ExportMeta, SiteContent
 
 
 class FakeOutputBase(OutputBase):

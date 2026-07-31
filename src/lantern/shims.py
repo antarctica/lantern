@@ -10,6 +10,6 @@ def inject_truststore_into_ssl_boto_fix() -> None:
     truststore.inject_into_ssl()
 
     # replace reference kept by botocore as well
-    import botocore.httpsession
+    import botocore.httpsession  # noqa: PLC0415
 
     botocore.httpsession.SSLContext = truststore.SSLContext  # ty:ignore[unresolved-attribute]

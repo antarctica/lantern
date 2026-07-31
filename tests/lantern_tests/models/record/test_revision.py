@@ -1,5 +1,5 @@
-import logging
 from datetime import date
+from typing import TYPE_CHECKING
 
 import pytest
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
@@ -13,6 +13,9 @@ from lantern.lib.metadata_library.models.record.utils.admin import Administratio
 from lantern.lib.metadata_library.models.record.utils.kv import get_kv
 from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
+
+if TYPE_CHECKING:
+    import logging
 
 
 class TestRecordRevision:

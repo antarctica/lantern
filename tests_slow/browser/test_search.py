@@ -1,7 +1,11 @@
 import json
-from subprocess import Popen
+from http import HTTPStatus
+from typing import TYPE_CHECKING
 
 from playwright.sync_api import Page, Route, expect
+
+if TYPE_CHECKING:
+    from subprocess import Popen
 
 SEARCH_TERMS = "Falkland Islands overview map"  # a39d3502-55a1-4e18-8f67-fcf14b23485e
 EXPECTED_ID = "a39d3502-55a1-4e18-8f67-fcf14b23485e"
@@ -157,7 +161,7 @@ class TestSearch:
 
         page.goto(f"{fx_static_server_url}/search/index.html")
         status_code = page.evaluate("window.performance.getEntries()[0].responseStatus")
-        assert status_code == 200
+        assert status_code == HTTPStatus.OK
 
         expected_result = page.locator(f"#search-hits a[href*='/{EXPECTED_ID}']")
         unexpected_result = page.locator(f"#search-hits a[href*='/{UNEXPECTED_ID}']")
@@ -193,7 +197,7 @@ class TestSearch:
 
         page.goto(f"{fx_static_server_url}/search/index.html?q={SEARCH_TERMS.replace(' ', '+')}")
         status_code = page.evaluate("window.performance.getEntries()[0].responseStatus")
-        assert status_code == 200
+        assert status_code == HTTPStatus.OK
 
         expected_result = page.locator(f"#search-hits a[href*='/{EXPECTED_ID}']")
         unexpected_result = page.locator(f"#search-hits a[href*='/{UNEXPECTED_ID}']")

@@ -1,4 +1,5 @@
 from datetime import date
+from typing import TYPE_CHECKING
 
 import pytest
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
@@ -10,9 +11,11 @@ from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, set_admin
 from lantern.models.item.base.enums import ResourceTypeLabel
 from lantern.models.item.website.search import ItemWebsiteSearch
-from lantern.models.record.record import Record
-from lantern.models.record.revision import RecordRevision
-from lantern.models.site import SiteMeta
+
+if TYPE_CHECKING:
+    from lantern.models.record.record import Record
+    from lantern.models.record.revision import RecordRevision
+    from lantern.models.site import SiteMeta
 
 
 class TestItemWebsiteSearch:

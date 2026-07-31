@@ -1,9 +1,12 @@
-import logging
+from typing import TYPE_CHECKING
 
 import pytest
 
 from lantern.exporters.base import ExporterBase
 from tests.resources.exporters.fake_exporters import FakeExporterBase
+
+if TYPE_CHECKING:
+    import logging
 
 
 class TestBaseExporter:

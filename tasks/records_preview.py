@@ -1,19 +1,16 @@
 # Directly output catalogue items for selected records
 
 import json
-import logging
 from argparse import ArgumentParser
 from pathlib import Path
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 import inquirer
 from inquirer import Path as InquirerPath
 from tasks._shared import init, parse_records, pick_local_records
 from tests.conftest import _select_record
 
-from lantern.config import Config
 from lantern.exporters.local import LocalExporter
-from lantern.lib.metadata_library.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta, SiteContent
 from lantern.outputs.item_html import ItemCatalogueOutput
@@ -22,6 +19,12 @@ from lantern.outputs.site_pages import SitePagesOutput
 from lantern.outputs.site_resources import SiteResourcesOutput
 from lantern.site import Site, SiteJob
 from lantern.stores.base import RecordsNotFoundError, StoreBase
+
+if TYPE_CHECKING:
+    import logging
+
+    from lantern.config import Config
+    from lantern.lib.metadata_library.models.record.record import Record
 
 
 class PlaceholderStore(StoreBase):
@@ -113,7 +116,7 @@ def _get_args(logger: logging.Logger, cli_args: tuple[bool, Path, Path, list[Pat
         raise RuntimeError(msg) from None
     if cli_force:
         for path in record_paths:
-            logger.info(f"Loading record from: '{path.resolve()}'")
+            logger.info("Loading record from: '%s'", path.resolve())
             r = parse_records(logger=logger, glob_pattern=path.name, search_path=path.parent, validate_catalogue=True)
             records.append(r[0][0])
 
@@ -124,12 +127,12 @@ def _get_args(logger: logging.Logger, cli_args: tuple[bool, Path, Path, list[Pat
     import_path = Path(inquirer.path("Import path", path_type=InquirerPath.DIRECTORY, exists=True, default=import_path))
     export_path = Path(inquirer.path("Export path", path_type=InquirerPath.DIRECTORY, exists=True, default=export_path))
 
-    logger.info(f"Loading records from: '{import_path.resolve()}'")
+    logger.info("Loading records from: '%s'", import_path.resolve())
     _record_paths = parse_records(logger=logger, search_path=import_path)
     records = pick_local_records(logger=logger, records=[rp[0] for rp in _record_paths])
 
     if not export_path.exists():
-        logger.info(f"Creating missing export directory: '{export_path.resolve()}'")
+        logger.info("Creating missing export directory: '%s'", export_path.resolve())
         export_path.mkdir(parents=True, exist_ok=True)
 
     _records_lookup = {rp[0].file_identifier: rp[1].resolve() for rp in _record_paths}
@@ -153,11 +156,11 @@ def _export(logger: logging.Logger, config: Config, records: list[Record], outpu
     # not SiteHealth (not front facing), not SiteIndex (won't include previewed records)
 
     for record in records:
-        record = RecordRevision.loads({**json.loads(record.dumps_json(strip_admin=False)), "file_revision": "x"})
-        jobs.append(SiteJob(action="content", output=ItemCatalogueOutput, record=record))
+        rev = RecordRevision.loads({**json.loads(record.dumps_json(strip_admin=False)), "file_revision": "x"})
+        jobs.append(SiteJob(action="content", output=ItemCatalogueOutput, record=rev))
         # not Record ISO flavours (as boring)
 
-    outputs = cast(list[SiteContent], site.execute(jobs))
+    outputs = cast("list[SiteContent]", site.execute(jobs))
     exporter.export(outputs)
 
 
@@ -168,9 +171,9 @@ def main() -> None:
     cli_args = _get_cli_args()
     output_path, selected_records, params = _get_args(logger=logger, cli_args=cli_args)
 
-    logger.info(f"Exporting previews of {len(selected_records)} record(s) to: '{output_path.resolve()}'")
+    logger.info("Exporting previews of %s record(s) to: '%s'", len(selected_records), output_path.resolve())
     _export(logger=logger, config=config, records=selected_records, output_path=output_path)
-    logger.info(f"Re-run as: '% {params}'")
+    logger.info("Re-run as: '%s'", params)
 
 
 if __name__ == "__main__":

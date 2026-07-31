@@ -1,10 +1,13 @@
 import json
-import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from lantern.models.checks import CheckType
 from lantern.models.site import ExportMeta, SiteContent, SiteRedirect
 from lantern.outputs.base import OutputSite
+
+if TYPE_CHECKING:
+    import logging
 
 
 class SiteHealthOutput(OutputSite):

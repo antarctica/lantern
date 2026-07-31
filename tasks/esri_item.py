@@ -1,20 +1,18 @@
 # Update an ArcGIS Online item based on a related catalogue record
 
 import json
-import logging
 from argparse import ArgumentParser
 from datetime import UTC, datetime
 from io import BytesIO
 from pathlib import Path
+from typing import TYPE_CHECKING
 from urllib.parse import parse_qs, urlparse
 
 import requests
-from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 from lxml import etree
 from lxml.html import HTMLParser
 from lxml.html import fragment_fromstring as html_fromstring
 from lxml.html import tostring as html_tostring
-from tasks._config import ExtraConfig
 from tasks._shared import confirm, get_record, init
 from tasks.record_esri import get_agol_item, get_agol_token
 
@@ -23,6 +21,12 @@ from lantern.lib.arcgis.gis.dataclasses import ItemProperties as ArcGisItemPrope
 from lantern.lib.arcgis.gis.enums import SharingLevel
 from lantern.models.item.arcgis.item import ItemArcGis
 from lantern.models.record.record import Record
+
+if TYPE_CHECKING:
+    import logging
+
+    from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
+    from tasks._config import ExtraConfig
 
 
 def _get_cli_args() -> dict:
@@ -85,7 +89,7 @@ def _dump_arcgis_item(logger: logging.Logger, output_path: Path, item: ArcGisIte
     item_path.parent.mkdir(parents=True, exist_ok=True)
     with item_path.open("w") as f:
         json.dump(item.raw_item, f, indent=2)
-    logger.info(f"AGOL item {item.id} dumped to {item_path.resolve()}")
+    logger.info("AGOL item %s dumped to %s", item.id, item_path.resolve())
 
 
 def _snake_to_camel_case(s: str) -> str:
@@ -161,7 +165,7 @@ def _diff_arcgis_items(logger: logging.Logger, source_item: ArcGisItem, target_i
     for html_prop in ["description", "license_info"]:
         src_val = _normalise_arcgis_html(getattr(source_item.properties, html_prop, "") or "")
         tgt_val = _normalise_arcgis_html(getattr(target_item.properties, html_prop, "") or "")
-        if src_val == tgt_val or src_val == "":
+        if src_val in (tgt_val, ""):
             continue
         diff[_snake_to_camel_case(html_prop)] = src_val
 
@@ -188,7 +192,7 @@ def _update_agol_metadata(logger: logging.Logger, base_url: str, token: str, ite
     AGOL requires the token as a query parameter, not a bearer type Authorization header.
     Source: https://developers.arcgis.com/rest/users-groups-and-items/update-info/
     """
-    logger.info(f"Updating metadata for item: {item.id}")
+    logger.info("Updating metadata for item: %s", item.id)
     logger.debug(metadata)
     req = requests.post(
         url=f"{base_url}/updateInfo",
@@ -212,7 +216,7 @@ def _update_agol_sharing(
     AGOL requires the token as a query parameter, not a bearer type Authorization header.
     Source: https://developers.arcgis.com/rest/users-groups-and-items/share-item-as-item-owner/
     """
-    logger.info(f"Updating sharing for item: {item.id}")
+    logger.info("Updating sharing for item: %s", item.id)
     sharing = {"everyone": False, "org": False}
     if sharing_level == SharingLevel.ORG:
         sharing["org"] = True
@@ -244,7 +248,7 @@ def _update_agol_properties(
     AGOL requires the token as a query parameter, not a bearer type Authorization header.
     Source: https://developers.arcgis.com/rest/users-groups-and-items/update-item/
     """
-    logger.info(f"Updating properties for item: {item.id}")
+    logger.info("Updating properties for item: %s", item.id)
     files_update: dict[str, tuple] = {k: (None, v) for k, v in properties.items()}
     files_update["metadataEditable"] = (None, "false")
     logger.debug(files_update)
@@ -268,7 +272,7 @@ def _update_agol_thumbnail(logger: logging.Logger, base_url: str, token: str, it
     AGOL requires the token as a query parameter, not a bearer type Authorization header.
     Source: https://developers.arcgis.com/rest/users-groups-and-items/update-thumbnail/
     """
-    logger.info(f"Updating thumbnail for item: {item.id}")
+    logger.info("Updating thumbnail for item: %s", item.id)
     req = requests.post(
         url=f"{base_url}/updateThumbnail",
         params={"token": token, "f": "json", "url": url},
@@ -322,7 +326,7 @@ def main() -> None:
 
     diff = _diff_arcgis_items(logger=logger, source_item=source_item, target_item=target_item)
     if not diff:
-        logger.info(f"Target item {target_item.id} == {source_record.file_identifier}, skipping.")
+        logger.info("Target item %s == %s, skipping.", target_item.id, source_record.file_identifier)
         return
     logger.info("Target item {target_item.id} != {source_record.file_identifier}, updating...")
     logger.info(list(diff.keys()))
@@ -330,7 +334,7 @@ def main() -> None:
     _update_agol_item(logger=logger, config=config, item=target_item, properties=diff)
 
     params = f"task esri-item --source {args['source_id']} --target {args['target_id']}"
-    logger.info(f"Re-run as: '% {params}'")
+    logger.info("Re-run as: '%s'", params)
 
 
 if __name__ == "__main__":

@@ -1,15 +1,19 @@
 import json
-import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from lantern.lib.metadata_library.models.record.enums import AggregationAssociationCode
 from lantern.models.checks import CheckType
 from lantern.models.item.website.search import ItemWebsiteSearch
 from lantern.models.record.const import CATALOGUE_NAMESPACE
-from lantern.models.record.revision import RecordRevision
 from lantern.models.site import ExportMeta, SiteContent
 from lantern.outputs.base import OutputRecords
-from lantern.stores.base import SelectRecordsProtocol
+
+if TYPE_CHECKING:
+    import logging
+
+    from lantern.models.record.revision import RecordRevision
+    from lantern.stores.base import SelectRecordsProtocol
 
 
 class ItemsBasWebsiteOutput(OutputRecords):
@@ -78,8 +82,11 @@ class ItemsBasWebsiteOutput(OutputRecords):
         ]
         filtered_items = [item for item in items if item.resource_id not in superseded and item.open_access]
         self._logger.debug(
-            f"{len(filtered_items)} items of {len(items)} in-scope for website search ({len(superseded)} superseded, "
-            f"{len(filtered_items) - len(superseded)} not open-access)."
+            "%s items of %s in-scope for website search (%s superseded, %s not open-access).",
+            len(filtered_items),
+            len(items),
+            len(superseded),
+            len(filtered_items) - len(superseded),
         )
         return filtered_items
 

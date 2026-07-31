@@ -1,55 +1,50 @@
 import json
-import logging
 import pickle
 import shutil
 from base64 import b64decode
-from collections.abc import Collection
 from copy import deepcopy
 from dataclasses import dataclass
 from functools import cached_property
-from pathlib import Path
+from typing import TYPE_CHECKING
 
-from gitlab import Gitlab
-from gitlab.v4.objects import Project
 from joblib import Parallel, delayed
 from requests.exceptions import ConnectionError as RequestsConnectionError
 from sqlorm import SQL, Engine
 
 from lantern.log import init as init_logging
-from lantern.models.record.record import Record
-from lantern.models.record.revision import RecordRevision
 from lantern.stores.base import RecordNotFoundError, RecordsNotFoundError, StoreFrozenError
 from lantern.stores.gitlab import CommitResults, GitLabSource, GitLabStore, ProcessedRecord
+
+if TYPE_CHECKING:
+    import logging
+    from collections.abc import Collection
+    from pathlib import Path
+
+    from gitlab import Gitlab
+    from gitlab.v4.objects import Project
+
+    from lantern.models.record.record import Record
+    from lantern.models.record.revision import RecordRevision
 
 
 class RemoteStoreUnavailableError(Exception):
     """Raised when records cannot be loaded from the remote store."""
 
-    pass
-
 
 class CacheIntegrityError(Exception):
     """Raised when the local cache integrity cannot be guaranteed."""
-
-    pass
 
 
 class CacheNotInitialisedError(Exception):
     """Raised when the local cache has not been initialised yet."""
 
-    pass
-
 
 class CacheTooOutdatedError(Exception):
     """Raised when the local cache is too out-of-date to make sense refreshing."""
 
-    pass
-
 
 class CacheFrozenError(Exception):
     """Raised when attempting to refresh/update a frozen cache."""
-
-    pass
 
 
 @dataclass
@@ -153,7 +148,7 @@ class GitLabLocalCache:
     def _engine(self) -> Engine:
         """Engine for backing database."""
         if self._conn is None:
-            self._logger.info(f"Connecting to SQLite database at: '{self._cache_path.resolve()}'")
+            self._logger.info("Connecting to SQLite database at: '%s'", self._cache_path.resolve())
             self._conn = Engine.from_uri(f"sqlite://{self._cache_path.resolve()}")
         return self._conn
 
@@ -212,6 +207,7 @@ class GitLabLocalCache:
 
         For checking whether cache is applicable to the current/future configuration.
         """
+        expected_meta_count = 3
         if not self.exists:
             msg = 'Source unavailable, cache not initialised."'
             raise CacheNotInitialisedError(msg) from None
@@ -219,7 +215,7 @@ class GitLabLocalCache:
             results = tx.fetchscalars(
                 "SELECT value FROM meta WHERE key in ('source_endpoint', 'source_project', 'source_ref') ORDER BY key;"
             )
-        if len(results) != 3:
+        if len(results) != expected_meta_count:
             msg = 'Source incomplete, cache not initialised."'
             raise CacheNotInitialisedError(msg) from None
         return GitLabSource(endpoint=results[0], project=results[1], ref=results[2])
@@ -244,7 +240,7 @@ class GitLabLocalCache:
             return False
 
         current_source = self._source
-        self._logger.debug(f"Cached: '{cached_source}' ?= Current: '{current_source}'")
+        self._logger.debug("Cached: '{cached_source}' ?= Current: '%s'", current_source)
         return cached_source == current_source
 
     @property
@@ -265,7 +261,7 @@ class GitLabLocalCache:
             self._logger.debug("Frozen cache, ignoring current state")
             return True
 
-        self._logger.debug(f"Cached {cached_head} ?= Current: {head}")
+        self._logger.debug("Cached %s ?= Current: %s", cached_head, head)
         return cached_head == head
 
     @staticmethod
@@ -349,7 +345,7 @@ class GitLabLocalCache:
         """
         self._ensure_db()
 
-        self._logger.info(f"Processing {len(records)} records")
+        self._logger.info("Processing %s records", len(records))
         results: list[CachedProcessedRecord] = Parallel(n_jobs=self._parallel_jobs)(
             delayed(_process_record)(self._logger, self._logger.level, record_data) for record_data in records
         )
@@ -358,7 +354,7 @@ class GitLabLocalCache:
             self._logger.info("Storing records")
             for record in results:
                 tx.execute(self._record_upsert(record))
-            self._logger.info(f"Stored {len(records)} records")
+            self._logger.info("Stored %s records", len(records))
             self._logger.info("Storing source and head commit metadata")
             tx.execute(self._meta_upsert(key="source_endpoint", value=self._source.endpoint))
             tx.execute(self._meta_upsert(key="source_project", value=self._source.project))
@@ -384,7 +380,7 @@ class GitLabLocalCache:
                 continue
             paths.append(item["path"])
 
-        self._logger.info(f"Fetching {len(paths)} records")
+        self._logger.info("Fetching %s records", len(paths))
         project_ = deepcopy(self._project)  # copy to allow use in parallel processing
         return Parallel(n_jobs=self._parallel_jobs)(
             delayed(_fetch_record_commit)(project_, path, self._source.ref) for path in paths
@@ -417,7 +413,7 @@ class GitLabLocalCache:
         if len(commits) > limit:
             raise CacheTooOutdatedError() from None
 
-        self._logger.info(f"Fetching commits in range {commit_range}")
+        self._logger.info("Fetching commits in range %s", commit_range)
         for commit in commits:
             for diff in commit.diff(get_all=True):
                 if not diff["new_path"].startswith("records/") or not diff["new_path"].endswith(".json"):
@@ -431,7 +427,7 @@ class GitLabLocalCache:
                 paths.append(diff["new_path"])
         paths = set(paths)
 
-        self._logger.info(f"Fetching {len(paths)} changed records")
+        self._logger.info("Fetching %s changed records", len(paths))
         project_ = deepcopy(self._project)
         return Parallel(n_jobs=self._parallel_jobs)(
             delayed(_fetch_record_commit)(project_, path, self._source.ref) for path in paths
@@ -495,7 +491,7 @@ class GitLabLocalCache:
             self._create()
             return
 
-        self._logger.info(f"{len(records)} records have been updated in remote repository")
+        self._logger.info("%s records have been updated in remote repository", len(records))
         self._create_refresh(records=records)
 
     def _ensure_exists(self) -> None:  # noqa: C901
@@ -526,10 +522,12 @@ class GitLabLocalCache:
         try:
             if not self._applicable:
                 if self._frozen:
-                    msg = f"Cached source '{self._cached_source}' does not match current instance and branch '{self._source}' but is frozen. Will not load records."
+                    msg = f"Cached source '{self._cached_source}' does not match current instance and branch '%s' but is frozen. Will not load records."
                     raise CacheFrozenError(msg) from None
                 self._logger.warning(
-                    f"Cached source '{self._cached_source}' does not match current instance and branch '{self._source}', recreating cache"
+                    "Cached source '%s' does not match current instance and branch '%s', recreating cache",
+                    self._cached_source,
+                    self._source,
                 )
                 self._create()
                 return
@@ -565,7 +563,7 @@ class GitLabLocalCache:
             and len(file_identifiers) > 0
             and all(fid in self._flash for fid in file_identifiers)
         ):
-            self._logger.debug(f"Loading {len(file_identifiers)} records from flash")
+            self._logger.debug("Loading %s records from flash", len(file_identifiers))
             return [self._flash[fid] for fid in file_identifiers]
 
         query = SQL("SELECT record_pickled FROM record")
@@ -576,7 +574,7 @@ class GitLabLocalCache:
         with self._engine as tx:
             pickled_records = tx.fetchscalars(query, params)
 
-        self._logger.info(f"Loading {len(pickled_records)} pickled records from cache")
+        self._logger.info("Loading %s pickled records from cache", len(pickled_records))
         records = [pickle.loads(record) for record in pickled_records]  # noqa: S301
         self._flash.update({record.file_identifier: record for record in records})
         return records

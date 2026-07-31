@@ -1,10 +1,14 @@
+from typing import TYPE_CHECKING
+
 from jinja2 import Environment, PackageLoader, select_autoescape
 from minify_html import minify
 
-from lantern.lib.metadata_library.models.record.elements.common import Identifier
 from lantern.lib.metadata_library.models.record.enums import MaintenanceFrequencyCode
 from lantern.models.record.const import ALIAS_NAMESPACE
-from lantern.models.record.record import Record
+
+if TYPE_CHECKING:
+    from lantern.lib.metadata_library.models.record.elements.common import Identifier
+    from lantern.models.record.record import Record
 
 
 def is_live_record(record: Record) -> bool:

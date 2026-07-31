@@ -14,7 +14,7 @@ def init(logging_level: int) -> None:
 
 def init_sentry() -> None:
     """Initialise Sentry SDK, if enabled."""
-    from lantern.config import Config  # avoid circular imports
+    from lantern.config import Config  # avoid circular imports  # noqa: PLC0415
 
     config = Config()
     sentry_sdk.init(

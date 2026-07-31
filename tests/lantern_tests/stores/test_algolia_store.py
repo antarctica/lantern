@@ -1,13 +1,16 @@
-import logging
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 import pytest
 from algoliasearch.search.models import FetchedIndex
 
-from lantern.models.item.algolia.item import ObjectRecord
 from lantern.models.record.revision import RecordRevision
 from lantern.stores.algolia import AlgoliaStore
 from lantern.stores.base import RecordNotFoundError, RecordsNotFoundError, StoreFrozenUnsupportedError
+
+if TYPE_CHECKING:
+    import logging
+
+    from lantern.models.item.algolia.item import ObjectRecord
 
 
 class TestAlgoliaStore:
@@ -85,7 +88,7 @@ class TestAlgoliaStore:
 
         fx_algolia_store.push([fx_revision_model_min])
         result = cast(
-            ObjectRecord,
+            "ObjectRecord",
             fx_algolia_store._client.get_object(
                 index_name=fx_algolia_store._index, object_id=fx_revision_model_min.file_identifier
             ),

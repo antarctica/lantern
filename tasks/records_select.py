@@ -1,14 +1,17 @@
 # Pull records from store
 
-import logging
 from argparse import ArgumentParser
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import inquirer
 from inquirer import Path as InquirerPath
 from tasks._shared import dump_records, init, process_record_references
 
-from lantern.catalogues.bas import BasCatalogue
+if TYPE_CHECKING:
+    import logging
+
+    from lantern.catalogues.bas import BasCatalogue
 
 
 def _get_cli_args() -> tuple[bool, Path, str | None, set[str]]:
@@ -58,7 +61,7 @@ def _get_args(
     cli_force, cli_path, cli_branch, cli_references = cli_args
 
     path = cli_path
-    branch = cli_branch if cli_branch else cat.repo.gitlab_default_branch
+    branch = cli_branch or cat.repo.gitlab_default_branch
     references = cli_references
 
     if cli_force:
@@ -71,7 +74,7 @@ def _get_args(
 
     if cli_references:
         logger.info("Record references from command line arguments:")
-        logger.info(f"{cli_references}")
+        logger.info(cli_references)
         if not inquirer.confirm(message="Add others?", default=False):
             _refs_param = " ".join([f"--record {r}" for r in references]) if references else ""
             params = f"task select-records --force --path {cli_path.resolve()} --branch {branch} {_refs_param}"
@@ -130,7 +133,7 @@ def confirm_selection(logger: logging.Logger, cli_force: bool, file_identifiers:
 
     logger.info("Selected records:")
     for file_identifier in file_identifiers:
-        logger.info(f"- {file_identifier}")
+        logger.info("- %s", file_identifier)
     return inquirer.confirm(message="Confirm selection?", default=True)
 
 
@@ -149,10 +152,10 @@ def main() -> None:
     logger.info("Loading records from Store")
     records = catalogue.repo.select_records(branch=branch, file_identifiers=file_identifiers)
 
-    logger.info(f"Dumping {len(file_identifiers)} selected records from '{branch}' in GitLab store")
+    logger.info("Dumping %s selected records from '%s' in GitLab store", len(file_identifiers), branch)
     dump_records(logger=logger, output_path=import_path, records=records)
-    logger.info(f"{len(file_identifiers)} records in {import_path.resolve()} for editing.")
-    logger.info(f"Re-run as: '% {params}'")
+    logger.info("%s records in %s for editing.", len(file_identifiers), import_path.resolve())
+    logger.info("Re-run as: '%s'", params)
 
 
 if __name__ == "__main__":

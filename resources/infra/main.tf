@@ -6,6 +6,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 6.27"
     }
+    azuread = {
+      source  = "hashicorp/azuread"
+      version = "3.9.0"
+    }
     cloudflare = {
       source  = "cloudflare/cloudflare"
       version = "5.15.0"
@@ -30,6 +34,11 @@ terraform {
     region  = "eu-west-1"
     encrypt = true
   }
+}
+
+variable "pvd_entra_tenant_id" {
+  type        = string
+  description = "Entra ('azuread') provider tenant ID."
 }
 
 variable "pvd_gitlab_pat" {
@@ -83,6 +92,10 @@ provider "aws" {
   alias  = "us-east-1"
   region = "us-east-1"
   # credentials set by awscli default profile
+}
+
+provider "azuread" {
+  tenant_id = var.pvd_entra_tenant_id
 }
 
 provider "cloudflare" {
@@ -440,6 +453,82 @@ resource "onepassword_item" "lantern_bot_ansible_workstation_module_token" {
   password   = gitlab_personal_access_token.lantern_bot_ansible_workstation_module.token
   note_value = "Used in Ansible vaults to include in environment module deployed to workstations for record workflows.\n\nManaged by Terraform in Lantern."
   tags       = ["SCAR ADD Metadata Toolbox"]
+}
+
+# Entra app registration
+
+resource "azuread_application" "lantern" {
+  display_name = "BAS Data Catalogue (Lantern 🏮)"
+  identifier_uris = [
+    # set once the initial application registration has been made and Application ID has been assigned
+    "api://8bfe65d3-9509-4b0a-acd2-8ce8cdc0c01e"
+  ]
+  owners = [
+    # Felix Fennell (Admin) [o365felnne@bas.ac.uk]
+    "7aa5b9f2-25c1-4a88-8627-c0d7d1326b55"
+  ]
+  description                    = "A prototype data catalogue for BAS discovery metadata."
+  marketing_url                  = "https://data.bas.ac.uk"
+  privacy_statement_url          = "https://data.bas.ac.uk/legal/privacy"
+  logo_image                     = filebase64("../assets/logo.png")
+  sign_in_audience               = "AzureADMyOrg"
+  group_membership_claims        = ["None"]
+  fallback_public_client_enabled = false
+  prevent_duplicate_names        = true
+  notes                          = "https://github.com/antarctica/lantern"
+
+  web {
+    homepage_url = "https://data.bas.ac.uk"
+  }
+
+  feature_tags {
+    hide = false
+  }
+
+  api {
+    requested_access_token_version = 2
+  }
+
+  optional_claims {
+    access_token {
+      name = "email"
+    }
+    access_token {
+      name = "family_name"
+    }
+    access_token {
+      name = "given_name"
+    }
+  }
+
+  required_resource_access {
+    resource_app_id = "00000003-0000-0000-c000-000000000000" # Microsoft Graph
+
+    resource_access {
+      id   = "64a6cdd6-aab1-4aaf-94b8-3cc8405e90d0" # email
+      type = "Scope"
+    }
+
+    resource_access {
+      id   = "7427e0e9-2fba-42fe-b0c0-848c9e6a8182" # offline_access
+      type = "Scope"
+    }
+
+    resource_access {
+      id   = "37f7f235-527c-4136-accd-4a02d197296e" # openid
+      type = "Scope"
+    }
+
+    resource_access {
+      id   = "14dad69e-099b-42c9-810b-d002981feec1" # profile
+      type = "Scope"
+    }
+
+    resource_access {
+      id   = "883ea226-0bf2-4a8f-9f9d-92c9162a727d" # Sites.Selected
+      type = "Role"
+    }
+  }
 }
 
 # Turnstile bot protection

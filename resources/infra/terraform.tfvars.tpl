@@ -1,3 +1,5 @@
+# NERC Entra tenancy ID
+pvd_entra_tenant_id      = ""
 # https://gitlab.data.bas.ac.uk/-/profile/personal_access_tokens -> 'api' & 'sudo' scopes
 pvd_gitlab_pat           = ""
 # % op account get --format json | jq -r '.id'

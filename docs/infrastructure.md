@@ -68,8 +68,11 @@ project.
 
 To apply this infrastructure:
 
-- install tools (`brew install opentofu awscli 1password-cli`)
+- install tools (`brew install opentofu awscli azure-cli 1password-cli`)
 - configure credentials for the [BAS AWS 🛡️](https://gitlab.data.bas.ac.uk/WSF/bas-aws) account (`aws configure`)
+- configure credentials for the
+  [NERC Entra 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/dev-docs/-/blob/main/service-nerc-azure.md) tenancy
+  (`az login --allow-no-subscriptions`)
 - copy `resources/infra/terraform.tfvars.tpl` to `resources/infra/terraform.tfvars` and populate credentials/values
 
 Then run:

@@ -9,6 +9,16 @@ These options from the app `lantern.Config` class are used to configure applicat
 - `SENTRY_DSN`: Sentry backend Data Source Name (DSN) for error logging
 - `CHECKS_TRUSTED_USERNAME`: credential for trusted publishing based [Checks](#site-checks)
 - `CHECKS_TRUSTED_PASSWORD`: credential for trusted publishing based [Checks](#site-checks)
+- `CHECKS_MAGIC_PRODUCTS_CLIENT_ID`: credential for MAGIC Products Distribution service based [Checks](#site-checks)
+- `CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET`: credential for MAGIC Products Distribution service based
+  [Checks](#site-checks)
+- `CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_EXP`: credential for MAGIC Products Distribution service based
+  [Checks](#site-checks)
+- `CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_ID`: credential for MAGIC Products Distribution service based
+  [Checks](#site-checks)
+- `CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_SAFE`: credential for MAGIC Products Distribution service based
+  [Checks](#site-checks)
+- `CHECKS_MAGIC_PRODUCTS_TENANT_ID`: credential for MAGIC Products Distribution service based [Checks](#site-checks)
 
 See the [Config](/docs/config.md#config-options) docs for how to set these config options.
 
@@ -96,12 +106,15 @@ Checks verify:
 - [Item](/docs/models.md#items) pages (HTML) and [Aliases](/docs/models.md#item-aliases) redirects
 - [Item](/docs/models.md#items) pages in [Trusted Publishing](/docs/architecture.md#trusted-publishing)
 - DOI redirects if set within records
-- distribution options set within records (with special handling for ArcGIS layers and services)
+- distribution options set within records, with special handling for
+  - files hosted in the [MAGIC Products Distribution Service️](#magic-products-distribution-service-checks)
+  - [ArcGIS](#arcgis-checks) layers and services
 
 > [!WARNING]
 > Checks are not run for:
 >
-> - BAS SAN and SharePoint distribution options within records
+> - BAS SAN distribution options
+> - SharePoint distribution options, except where hosted within the MAGIC Products Distribution Service
 > - DOI redirects where not using the live site environment (as these only work in production)
 
 Checks are intended to verify a whole site, including all records within a store, systematically on a regular basis.
@@ -123,8 +136,27 @@ Checks are executed using `lantern.checks.CheckRunner` classes, with methods for
 location exists.
 
 > [!NOTE]
-> Checks for some distribution options in Records are not implemented, and generated as skipped rather than pending.
-> Skipped checks are not executed but are included in compiled data and reports.
+> As noted above, checks for some distribution options in Records are not implemented. These checks will show as
+> skipped rather than pending. Skipped checks are not executed but are included in compiled data and reports.
+
+### ArcGIS checks
+
+Distribution options for layers or services hosted within [ArcGIS Online](https://www.arcgis.com/) are checked using
+service APIs (e.g. for a feature service), or using the
+[ArcGIS Sharing API](https://developers.arcgis.com/rest/users-groups-and-items/working-with-users-groups-and-items/)
+for layers.
+
+> [!NOTE]
+> Only non-public items can be checked. Checks for non-public items will be marked as a failure.
+
+### MAGIC Products Distribution Service checks
+
+Distribution options for files hosted in the
+[MAGIC Products Distribution Service 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/products-distribution) are checked using
+the [Microsoft Graph API](https://learn.microsoft.com/en-us/graph/), as the platform underpinning the Products Service.
+
+Access tokens to check files within the Products Service SharePoint site are generated using the
+[application registration](/docs/infrastructure.md#microsoft-entra) within Microsoft Entra.
 
 ### Site checks data
 

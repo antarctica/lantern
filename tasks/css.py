@@ -57,7 +57,7 @@ def export_test_site(export_path: Path) -> None:
             result_output="Bad",
         ),
         Check(
-            type=CheckType.DOWNLOADS_SHAREPOINT,
+            type=CheckType.DOWNLOADS_SHAREPOINT_OTHER,
             url="x",
             file_identifier="x",
             state=CheckState.SKIPPED,

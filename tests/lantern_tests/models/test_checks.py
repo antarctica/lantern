@@ -249,10 +249,22 @@ class TestDistributionChecks:
                 Distributions([_make_dist_opt(href="https:/x.sharepoint.com/...")]),
                 [
                     Check(
-                        type=CheckType.DOWNLOADS_SHAREPOINT,
+                        type=CheckType.DOWNLOADS_SHAREPOINT_OTHER,
                         url="https:/x.sharepoint.com/...",
                         file_identifier="x",
                         state=CheckState.SKIPPED,
+                    )
+                ],
+            ),
+            (
+                Distributions(
+                    [_make_dist_opt(href="https://nercacuk.sharepoint.com/:b:/r/sites/MAGICProductsDistribution/...")]
+                ),
+                [
+                    Check(
+                        type=CheckType.DOWNLOADS_SHAREPOINT_MAGIC_PRODUCTS,
+                        url="https://nercacuk.sharepoint.com/:b:/r/sites/MAGICProductsDistribution/...",
+                        file_identifier="x",
                     )
                 ],
             ),

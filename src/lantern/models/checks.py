@@ -27,6 +27,7 @@ class CheckType(Enum):
     BAS_WEBSITE_SEARCH = "BAS Public Website Search"
     ITEM_ALIASES = "Item Aliases"
     ITEM_PAGES = "Item Pages"
+    ITEM_PAGES_TRUSTED = "Item Pages (Trusted)"
     RECORD_PAGES_JSON = "Record Pages (JSON)"
     RECORD_PAGES_HTML = "Record Pages (XML HTML)"
     RECORD_PAGES_XML = "Record Pages (XML)"
@@ -42,7 +43,8 @@ class CheckType(Enum):
     BAS_PUBLISHED_MAP = "Published Map"
     DOWNLOADS_OPEN = "Normal Downloads"
     DOWNLOADS_NORA = "NORA Downloads"
-    DOWNLOADS_SHAREPOINT = "SharePoint Downloads"
+    DOWNLOADS_SHAREPOINT_OTHER = "SharePoint Downloads (Personal)"
+    DOWNLOADS_SHAREPOINT_MAGIC_PRODUCTS = "SharePoint Downloads (MAGIC Products)"
     DOWNLOADS_BAS_SAN = "BAS SAN Downloads"
     DOWNLOADS_BAS_CDE = "BAS CDE Downloads"
     DOWNLOADS_ARCGIS_LAYER = "ArcGIS Layer"
@@ -150,6 +152,7 @@ class DistributionChecks:
     _arcgis_webmap_sigil: Final[str] = "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+webmap"
     _bas_published_maps_sigil: Final[str] = "https://data.bas.ac.uk/guides/map-purchasing/"
     _nora_sigil: Final[str] = "https://nora.nerc.ac.uk/"
+    _magic_products_sigal: Final[str] = "https://nercacuk.sharepoint.com/:b:/r/sites/MAGICProductsDistribution/"
     _sharepoint_sigil: Final[str] = "sharepoint.com"
     _bas_san_sigil: Final[str] = "sftp://san.nerc-bas.ac.uk/"
     _bas_cde_sigil: Final[str] = "https://cde.data.bas.ac.uk/"
@@ -198,8 +201,10 @@ class DistributionChecks:
                 type_ = CheckType.DOWNLOADS_BAS_SAN
             elif transfer_href.startswith(self._bas_cde_sigil):
                 type_ = CheckType.DOWNLOADS_BAS_CDE
+            elif self._magic_products_sigal in transfer_href:
+                type_ = CheckType.DOWNLOADS_SHAREPOINT_MAGIC_PRODUCTS
             elif self._sharepoint_sigil in transfer_href:
-                type_ = CheckType.DOWNLOADS_SHAREPOINT
+                type_ = CheckType.DOWNLOADS_SHAREPOINT_OTHER
 
             type_hrefs.append((type_, transfer_href, content_length))
         return type_hrefs
@@ -219,7 +224,11 @@ class DistributionChecks:
             if check.type == CheckType.DOWNLOADS_NORA:
                 check.http_method = HTTPMethod.GET
                 check.http_status = HTTPStatus.PARTIAL_CONTENT
-            if check.type in [CheckType.DOWNLOADS_SHAREPOINT, CheckType.DOWNLOADS_BAS_SAN, CheckType.DOWNLOADS_BAS_CDE]:
+            if check.type in [
+                CheckType.DOWNLOADS_SHAREPOINT_OTHER,
+                CheckType.DOWNLOADS_BAS_SAN,
+                CheckType.DOWNLOADS_BAS_CDE,
+            ]:
                 check.state = CheckState.SKIPPED
             checks.append(check)
         return checks

@@ -10,6 +10,7 @@ from marshmallow import validate
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
 
 if TYPE_CHECKING:
+    from datetime import date
     from pathlib import Path
 
 
@@ -97,6 +98,11 @@ class Config:  # noqa: PLW1641
         BASE_URL_LIVE: str
         CHECKS_TRUSTED_USERNAME: str
         CHECKS_TRUSTED_PASSWORD: str
+        CHECKS_MAGIC_PRODUCTS_TENANT_ID: str
+        CHECKS_MAGIC_PRODUCTS_CLIENT_ID: str
+        CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET: str
+        CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_ID: str
+        CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_EXP: date
 
     def dumps_safe(self) -> ConfigDumpSafe:
         """Dump config for output to the user with sensitive data redacted."""
@@ -141,6 +147,11 @@ class Config:  # noqa: PLW1641
             "BASE_URL_LIVE": self.BASE_URL_LIVE,
             "CHECKS_TRUSTED_USERNAME": self.CHECKS_TRUSTED_USERNAME,
             "CHECKS_TRUSTED_PASSWORD": self.CHECKS_TRUSTED_PASSWORD_SAFE,
+            "CHECKS_MAGIC_PRODUCTS_TENANT_ID": self.CHECKS_MAGIC_PRODUCTS_TENANT_ID,
+            "CHECKS_MAGIC_PRODUCTS_CLIENT_ID": self.CHECKS_MAGIC_PRODUCTS_CLIENT_ID,
+            "CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET": self.CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_SAFE,
+            "CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_ID": self.CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_ID,
+            "CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_EXP": self.CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_EXP,
         }
 
     def validate(self) -> None:
@@ -473,3 +484,38 @@ class Config:  # noqa: PLW1641
     def CHECKS_TRUSTED_PASSWORD_SAFE(self) -> str:
         """CHECKS_TRUSTED_PASSWORD_SAFE with value redacted."""
         return self._safe_value if self.CHECKS_TRUSTED_PASSWORD else ""
+
+    @property
+    def CHECKS_MAGIC_PRODUCTS_TENANT_ID(self) -> str:
+        """ID for tenant containing the app registration for CHECKS_MAGIC_PRODUCTS_CLIENT_ID."""
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("CHECKS_MAGIC_PRODUCTS_"):
+            return self._env.str("TENANT_ID")
+
+    @property
+    def CHECKS_MAGIC_PRODUCTS_CLIENT_ID(self) -> str:
+        """Client ID for accessing MAGIC Products Distribution Service content in checks."""
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("CHECKS_MAGIC_PRODUCTS_"):
+            return self._env.str("CLIENT_ID")
+
+    @property
+    def CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET(self) -> str:
+        """Client secret for accessing MAGIC Products Distribution Service content in checks."""
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("CHECKS_MAGIC_PRODUCTS_"):
+            return self._env.str("CLIENT_SECRET")
+
+    @property
+    def CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_SAFE(self) -> str:
+        """CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET with value redacted."""
+        return self._safe_value if self.CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET else ""
+
+    @property
+    def CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_ID(self) -> str:
+        """Non-sensitive ID for CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET."""
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("CHECKS_MAGIC_PRODUCTS_"):
+            return self._env.str("CLIENT_SECRET_ID")
+
+    @property
+    def CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_EXP(self) -> date:
+        """Non-sensitive expiry date for CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET."""
+        with self._env.prefixed(self._app_prefix), self._env.prefixed("CHECKS_MAGIC_PRODUCTS_"):
+            return self._env.date("CLIENT_SECRET_EXP")

@@ -2,6 +2,22 @@
 
 Extensions to, or code closely associated with, third-party libraries relied on by this application.
 
+## Requests
+
+`lantern.lib.requests`
+
+### Bearer authentication
+
+`lantern.lib.auth.HTTPBearerTokenAuth`
+
+A Requests [`AuthBase`](https://requests.readthedocs.io/en/latest/user/authentication/#new-forms-of-authentication)
+subclass for requests using [Bearer](https://datatracker.ietf.org/doc/html/rfc6750#section-1.2) authentication,
+commonly used with OAuth access tokens.
+
+> [!Note]
+> This class does not generate tokens itself. A per-provider library or custom logic SHOULD be used, as per the
+> providers recommendation.
+
 ## Markdown
 
 `lantern.lib.markdown`

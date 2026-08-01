@@ -83,6 +83,12 @@ Then run:
 % opentofu apply
 ```
 
+## Monitoring components
+
+- [Sentry](#sentry)
+- [Plausible](#plausible)
+- [Entra](#microsoft-entra)
+
 ## Exporters components
 
 - [AWS](#amazon-web-services)
@@ -177,6 +183,12 @@ Then run:
     bucket to allow recover previous rendered output that cannot be recreated (due to downtime or template changes)
   - DNS records for CloudFront aliases are registered in the relevant AWS Route53 zone
   - TLS certificates for these aliases are managed via AWS Certificate Manager
+  - managed via [Infrastructure as Code](#infrastructure-as-code)
+
+### Microsoft Entra
+
+- [App Registration 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=qlmrap2q4sxey5adfpkzll766u&h=magic.1password.eu)
+  - for [Site Checks](/docs/monitoring.md#magic-products-distribution-service-checks)
   - managed via [Infrastructure as Code](#infrastructure-as-code)
 
 ### Secure hosting

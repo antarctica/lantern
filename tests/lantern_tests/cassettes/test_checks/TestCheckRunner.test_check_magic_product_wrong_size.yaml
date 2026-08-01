@@ -1,0 +1,33 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: GET
+    uri: https://graph.microsoft.com/v1.0/shares/u!aHR0cHM6Ly9uZXJjYWN1ay5zaGFyZXBvaW50LmNvbS86Yjovci9zaXRlcy9NQUdJQ1Byb2R1Y3RzRGlzdHJpYnV0aW9uL3g/driveItem?%24select=id%2Cname%2Csize%2Cfile
+  response:
+    body:
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#Collection(driveItem)/$entity","@odata.etag":"\"{59CE0CFA-DBD5-4891-8E5D-C9774B9E9694},3\"","id":"x","name":"x.pdf","file":{"fileExtension":".pdf","hashes":{"quickXorHash":"x"},"mimeType":"application/pdf"},"size":2}'
+    headers:
+      Cache-Control:
+      - no-cache
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; odata.metadata=minimal; odata.streaming=true; IEEE754Compatible=false;
+        charset=utf-8
+      Strict-Transport-Security:
+      - max-age=31536000
+      Transfer-Encoding:
+      - chunked
+    status:
+      code: 200
+      message: OK
+version: 1

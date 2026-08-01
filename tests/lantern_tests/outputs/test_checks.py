@@ -81,7 +81,7 @@ class TestChecksOutput:
                         result_output="Bad",
                     ),
                     Check(
-                        type=CheckType.DOWNLOADS_SHAREPOINT,
+                        type=CheckType.DOWNLOADS_SHAREPOINT_OTHER,
                         url="x",
                         file_identifier="x",
                         state=CheckState.SKIPPED,
@@ -170,7 +170,7 @@ class TestChecksOutput:
                 result_output="Bad",
             ),
             Check(
-                type=CheckType.DOWNLOADS_SHAREPOINT,
+                type=CheckType.DOWNLOADS_SHAREPOINT_OTHER,
                 url="x",
                 file_identifier="x",
                 state=CheckState.SKIPPED,

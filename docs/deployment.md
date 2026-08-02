@@ -76,43 +76,4 @@ Pre-releases can optionally be deployed to the staging environment by triggering
 
 ## Rotating access tokens
 
-> [!IMPORTANT]
-> Automatic rotation via IaC will not work with the BAS GitLab instance due to its age.
-
-Applies to:
-
-- GitLab bot user PATs:
-  - for [Publishing Workflows](/docs/setup.md#gitlab-publishing-workflows)
-    ([Records Repository](/docs/infrastructure.md#gitlab)
-  - for [Item Enquires](/docs/setup.md#gitlab-item-enquires) ([Power Automate](/docs/infrastructure.md#power-automate))
-
-> [!TIP]
-> This does not apply to PATs used in [Development Publishing](/docs/dev.md#development-publishing).
-
-Automatic rotation is configured in [IaC](/docs/infrastructure.md#infrastructure-as-code), which should update a
-1Password item for use in an [Ansible Vault](#ansible-playbook) or other system [1].
-
-Due to the age of the BAS GitLab instance, automatic token rotation is unavailable and disabled (tokens do not expire).
-
-Then:
-
-- manually re-run the [Ansible Playbook](/docs/deployment.md#ansible-playbook)
-- manually set the updated token for [Item Enquires](/docs/setup.md#gitlab-item-enquires) in Power Automate
-- set a calendar reminder to repeat this process in 32 days
-
-> [!TIP]
-> To check the expiry date of managed tokens:
->
-> ```shell
-> % cd resources/infra
-> % terraform state show 'gitlab_personal_access_token.lantern_bot_pa_item_enquires'
-> % terraform state show 'gitlab_personal_access_token.lantern_bot_ansible_workstation_module'
-> ```
-
-[1]
-
-```text
-% cd resources/infra
-% tofu init
-% tofu apply
-```
+See [Infrastructure](/docs/infrastructure.md#rotating-tokens) documentation.

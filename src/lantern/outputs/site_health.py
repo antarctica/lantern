@@ -1,6 +1,7 @@
 import json
+from datetime import date, datetime
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, NamedTuple
 
 from lantern.models.checks import CheckType
 from lantern.models.site import ExportMeta, SiteContent, SiteRedirect
@@ -8,6 +9,15 @@ from lantern.outputs.base import OutputSite
 
 if TYPE_CHECKING:
     import logging
+
+
+class SiteHealthOutputComponentValues(NamedTuple):
+    """Values for component health checks."""
+
+    site_records_count: int
+    search_records_count: int
+    entra_client_secret_expiry: date
+    entra_client_secret_id: str
 
 
 class SiteHealthOutput(OutputSite):
@@ -20,12 +30,11 @@ class SiteHealthOutput(OutputSite):
     """
 
     def __init__(
-        self, logger: logging.Logger, meta: ExportMeta, site_records_count: int, search_records_count: int
+        self, logger: logging.Logger, meta: ExportMeta, component_values: SiteHealthOutputComponentValues
     ) -> None:
         super().__init__(logger=logger, meta=meta, name="Site Health", check_type=CheckType.SITE_HEALTH)
         self._health_path = Path("static") / "json" / "health.json"
-        self._site_records_count = site_records_count
-        self._search_records_count = search_records_count
+        self._component_values = component_values
 
     @property
     def _content(self) -> str:
@@ -36,6 +45,10 @@ class SiteHealthOutput(OutputSite):
 
         [1] https://datatracker.ietf.org/doc/html/draft-inadarei-api-health-check
         """
+        entra_expiry_datetime = datetime.combine(
+            self._component_values.entra_client_secret_expiry, datetime.min.time(), tzinfo=self._meta.build_time.tzinfo
+        )
+
         return json.dumps(
             {
                 "status": "pass",
@@ -50,7 +63,7 @@ class SiteHealthOutput(OutputSite):
                     "site:records": {
                         "componentId": "Site records",
                         "componentType": "datastore",
-                        "observedValue": self._site_records_count,
+                        "observedValue": self._component_values.site_records_count,
                         "observedUnit": "records",
                         "status": "pass",
                         "affectedEndpoints": [f"{self._meta.base_url}/records/{{fileIdentifier}}.json"],
@@ -59,10 +72,21 @@ class SiteHealthOutput(OutputSite):
                     "search:records": {
                         "componentId": "Search records",
                         "componentType": "datastore",
-                        "observedValue": self._search_records_count,
+                        "observedValue": self._component_values.search_records_count,
                         "observedUnit": "records",
                         "status": "pass",
                         "affectedEndpoints": [f"{self._meta.base_url}/search"],
+                        "time": f"{self._meta.build_time.isoformat()}",
+                    },
+                    "entra:expiry": {
+                        "componentId": "Entra app registration client secret expiry",
+                        "componentType": "system",
+                        "secretId": self._component_values.entra_client_secret_id,
+                        "observedValue": int((entra_expiry_datetime - self._meta.build_time).total_seconds() / 3600),
+                        "observedUnit": "hours",
+                        "observedValueAbs": self._component_values.entra_client_secret_expiry.isoformat(),
+                        "status": "warn",
+                        "output": "Observed value is relative to observed time and must be recalculated. Observed value (absolute) represents expiry as a date instant.",
                         "time": f"{self._meta.build_time.isoformat()}",
                     },
                 },

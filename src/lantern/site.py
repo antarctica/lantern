@@ -1,6 +1,7 @@
 import logging
 import time
 from copy import deepcopy
+from datetime import date
 from typing import TYPE_CHECKING, Literal, NamedTuple, cast
 
 from joblib import Parallel, delayed
@@ -10,7 +11,7 @@ from lantern.outputs.item_html import ItemAliasesOutput, ItemCatalogueOutput
 from lantern.outputs.items_bas_website import ItemsBasWebsiteOutput
 from lantern.outputs.record_iso import RecordIsoHtmlOutput, RecordIsoJsonOutput, RecordIsoXmlOutput
 from lantern.outputs.records_waf import RecordsWafOutput
-from lantern.outputs.site_health import SiteHealthOutput
+from lantern.outputs.site_health import SiteHealthOutput, SiteHealthOutputComponentValues
 from lantern.outputs.site_index import SiteIndexOutput
 from lantern.stores.gitlab_cache import GitLabCachedStore
 
@@ -81,11 +82,16 @@ def _run_job(
     if job.output == ItemCatalogueOutput:
         output = job.output(logger=logger, meta=meta, record=job.record, select_record=select_record)
     elif job.output == SiteHealthOutput:
+        component_values = SiteHealthOutputComponentValues(
+            job_extras.get("site_records_count", -1),
+            job_extras.get("search_records_count", -1),
+            job_extras.get("entra_secret_expiry", date.min),
+            job_extras.get("entra_secret_id", "?"),
+        )
         output = job.output(
             logger=logger,
             meta=meta,
-            site_records_count=job_extras.get("site_records_count", -1),
-            search_records_count=job_extras.get("search_records_count", -1),
+            component_values=component_values,
         )
     elif job.output in [SiteIndexOutput, ItemsBasWebsiteOutput, RecordsWafOutput]:
         output = job.output(logger=logger, meta=meta, select_records=select_records)

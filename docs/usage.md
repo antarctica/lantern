@@ -300,4 +300,4 @@ To apply properties from a record to an item in ArcGIS Online, and create an ass
 
 ## Rotating access tokens
 
-See [Deployment](/docs/deployment.md#rotating-access-tokens) documentation.
+See [Infrastructure](/docs/infrastructure.md#rotating-tokens) documentation.

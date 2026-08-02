@@ -52,6 +52,7 @@ This endpoint MAY be used by monitoring tools and/or load balancers to determine
 
 - `site:records`: The number of records contained in the static site
 - `search:records`: The number of records contained in the search index
+- `entra:expiry`: The number of hours until the Catalogue Microsoft Entra app registration client secret expires
 
 > [!WARNING]
 > Health checks are evaluated when the [Static Site](/docs/architecture.md#sites) is built.

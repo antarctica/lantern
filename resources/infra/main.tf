@@ -531,6 +531,48 @@ resource "azuread_application" "lantern" {
   }
 }
 
+
+resource "time_rotating" "lantern_client_secret" {
+  rotation_days = 90
+}
+resource "azuread_application_password" "lantern_app" {
+  application_id = azuread_application.lantern.id
+  display_name   = "lantern-app"
+
+  rotate_when_changed = {
+    rotation = time_rotating.lantern_client_secret.id
+  }
+}
+resource "onepassword_item" "lantern_entra_app" {
+  vault      = var.pvd_op_vault_id
+  category   = "login"
+  title      = "SCAR ADD Metadata Toolbox - Entra (Azure) App Registration"
+  username   = azuread_application.lantern.client_id
+  password   = azuread_application_password.lantern_app.value
+  note_value = "Representing the catalogue itself.\n\nUsed in Ansible and local env to set config options.\n\nManaged by Terraform in Lantern."
+  tags       = ["SCAR ADD Metadata Toolbox"]
+
+  section {
+    label = "Additional information"
+
+    field {
+      label = "tenancy-id"
+      type  = "STRING"
+      value = var.pvd_entra_tenant_id
+    }
+    field {
+      label = "secret-id"
+      type  = "STRING"
+      value = split("/", azuread_application_password.lantern_app.id)[2]
+    }
+    field {
+      label = "secret-exp"
+      type  = "DATE"
+      value = "${time_rotating.lantern_client_secret.year}-${time_rotating.lantern_client_secret.month}-${time_rotating.lantern_client_secret.day}"
+    }
+  }
+}
+
 # Turnstile bot protection
 
 variable "cloudflare_account_id" {
@@ -586,10 +628,13 @@ data "sentry_key" "lantern_dsn" {
   project      = sentry_project.lantern.slug
   first        = true # to select default key
 }
-output "sentry_dsn" {
-  # (public) DSNs are not sensitive in newer Sentry versions
-  value       = nonsensitive(data.sentry_key.lantern_dsn.dsn.public)
-  description = "Sentry DSN."
+resource "onepassword_item" "sentry_dsn" {
+  vault      = var.pvd_op_vault_id
+  category   = "password"
+  title      = "SCAR ADD Metadata Toolbox - Sentry"
+  password   = data.sentry_key.lantern_dsn.dsn.public
+  note_value = "Used in Ansible vaults to include in environment module deployed to workstations for record workflows.\n\nManaged by Terraform in Lantern."
+  tags       = ["SCAR ADD Metadata Toolbox"]
 }
 
 # Outputs for external automations

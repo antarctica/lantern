@@ -33,9 +33,16 @@ class FakeCatalogue(CatalogueBase):
 
         self._store = FakeRecordsStore(logger=logger)
         self._meta = ExportMeta.from_config(config=self._config, env="testing", build_repo_ref="83fake48", trusted=True)
-        self._site = Site(logger=logger, meta=self._meta, store=self._store)
         self._exporter = LocalExporter(logger=logger, path=self._path)
         self._checker = Checker(logger=self._logger, config=self._config)
+
+        site_extras = {
+            "site_records_count": len(self._store),
+            "search_records_count": -1,
+            "entra_secret_expiry": self._config.CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_EXP,
+            "entra_secret_id": self._config.CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_ID,
+        }
+        self._site = Site(logger=logger, meta=self._meta, store=self._store, extras=site_extras)
 
     @time_task(label="Export site")
     def export(self, identifiers: set[str] | None = None) -> None:

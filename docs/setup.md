@@ -79,8 +79,7 @@ IaC will:
 
 Manually:
 
-- reference the relevant access key in the corresponding Ansible Vault templates to set [Config](/docs/config.md)
-  options
+- set the relevant [Config](/docs/config.md) options in the relevant Ansible Vault template
 
 ## Secure website hosting
 
@@ -92,6 +91,9 @@ Manually:
 - create and secure an area in the Operations Data Store web root [1]
 - configure this area [2]
 - configure [Reverse Proxying](#reverse-proxying)
+- set the relevant [Config](/docs/config.md) options for enabling checks of trusted content in:
+  - the `/resources/dev/.env.tpl` template
+  - the relevant Ansible Vault template
 
 [1] As the Ops Data Store control user from a server with ACLs enabled:
 
@@ -184,14 +186,17 @@ A Sentry project for [Error Monitoring Protection](/docs/monitoring.md#error-mon
 
 IaC will:
 
-- register a new Sentry project and create a `sentry_dsn` output for the default DSN
+- register a Sentry project and create a `sentry_dsn` output for the default DSN
+- store the default DSN in 1Password
 
 > [!NOTE]
 > DSNs are not considered secret in newer Sentry versions.
 
 Manually:
 
-- set the relevant [Config](/docs/config.md) option for the DSN as a hard-coded value
+- reference the relevant [Config](/docs/config.md) option in:
+  - the `/resources/dev/.env.tpl` template
+  - the relevant Ansible Vault template
 - create an [Uptime Check](https://docs.sentry.io/product/uptime-monitoring/) for the production environment:
   - url: `https://data.bas.ac.uk/collections/bas-maps`
   - interval: 5 minutes
@@ -222,21 +227,22 @@ Manually:
 
 Manually:
 
-1. register a new Plausible Analytics site for the production [Hosting](/docs/infrastructure.md#hosting) endpoint
-2. record the domain in 1Password
-3. set the relevant [Config](/docs/config.md) option in the `.env` template and Ansible Vault for use in the
-   [Environment Module](/docs/deployment.md#environment-module) template
+- register a Plausible Analytics site for the production [Hosting](/docs/infrastructure.md#hosting) endpoint
+- record the domain in 1Password
+- set the relevant [Config](/docs/config.md) option in:
+  - the `/resources/dev/.env.tpl` template
+  - the relevant Ansible Vault template
 
 ## Font Awesome
 
 Manually:
 
-1. register a new Font Awesome kit with:
-   - version *7.x*
-   - *CSS only* embedding method (to support non-JavaScript clients)
-   - automatic subsetting (*classic* -> *regular*)
-   - hostnames for each [Hosting](/docs/infrastructure.md#hosting) endpoint
-2. set the kit CDN URL in the `styles_font_awesome()` [Common Macro](/docs/site.md#common-macros)
+- register a new Font Awesome kit with:
+  - version *7.x*
+  - *CSS only* embedding method (to support non-JavaScript clients)
+  - automatic subsetting (*classic* -> *regular*)
+  - hostnames for each [Hosting](/docs/infrastructure.md#hosting) endpoint
+- set the kit CDN URL in the `styles_font_awesome()` [Common Macro](/docs/site.md#common-macros)
 
 ## Power Automate
 
@@ -244,21 +250,21 @@ Manually:
 
 Manually:
 
-1. import `resources/flows/lantern-item-enquires.zip` into Power Automate as a new flow
-2. set the 'secret' property value in the body of the 'turnstile-verify' action to the
+- import `resources/flows/lantern-item-enquires.zip` into Power Automate as a new flow
+- set the 'secret' property value in the body of the 'turnstile-verify' action to the
    [Cloudflare Turnstile](#cloudflare-turnstile) secret key from 1Password
-3. for MAGIC point of contact branch, set the [GitLab Personal Access Token](#gitlab-item-enquires) in the
+- for MAGIC point of contact branch, set the [GitLab Personal Access Token](#gitlab-item-enquires) in the
    authentication header in the 'create-issue' action
-4. set the flow endpoint as the relevant [Config](/docs/config.md) option in the `.env` template and Ansible Vault for
+- set the flow endpoint as the relevant [Config](/docs/config.md) option in the `.env` template and Ansible Vault for
    use in the [Environment Module](/docs/deployment.md#environment-module) template
 
 ## Algolia
 
 Manually:
 
-1. register a new Algolia application site for the project
-2. record the application ID and write/search API keys in 1Password
-3. set the relevant [Config](/docs/config.md) option in the `.env` template and Ansible Vault for use in the
+- register a Algolia application site for the project
+- record the application ID and write/search API keys in 1Password
+- set the relevant [Config](/docs/config.md) option in the `.env` template and Ansible Vault for use in the
    [Environment Module](/docs/deployment.md#environment-module) template
 
 > [!TIP]
@@ -267,7 +273,7 @@ Manually:
 ## ArcGIS Online
 
 An OAuth client application is registered in ArcGIS Online for accessing restricted content and syncing catalogue
-metadata to ArcGIS items.
+metadata to ArcGIS items via [Development Tasks](/docs/dev.md#development-tasks).
 
 Manually:
 
@@ -295,3 +301,15 @@ Manually:
 The Microsoft Entra ID (previously Azure Active Directory) app registration used for
 [Monitoring Checks](/docs/monitoring.md#magic-products-distribution-service-checks) is managed using
 [Infrastructure as Code (IaC)](/docs/infrastructure.md#infrastructure-as-code).
+
+IaC will:
+
+- register a Entra app registration project
+- generate an application password as a client secret
+- store details about the app registration and client secret in 1Password
+
+Manually:
+
+- reference the app registration and client secret as relevant [Config](/docs/config.md) options in:
+  - the `/resources/dev/.env.tpl` template
+  - the relevant Ansible Vault template

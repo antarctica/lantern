@@ -43,7 +43,7 @@ variable "pvd_entra_tenant_id" {
 
 variable "pvd_gitlab_pat" {
   type        = string
-  description = "GitLab provider personal access token, for an admin user 'api' and 'sudo' scopes."
+  description = "GitLab provider Personal Access Token (PAT), for an admin user with 'api' and 'sudo' scopes."
 }
 
 variable "pvd_cloudflare_api_token" {
@@ -53,12 +53,12 @@ variable "pvd_cloudflare_api_token" {
 
 variable "pvd_op_account_id" {
   type        = string
-  description = "1Password provider account ID to store secrets in."
+  description = "1Password provider account ID."
 }
 
 variable "pvd_op_vault_id" {
   type        = string
-  description = "1Password provider vault ID to store secrets in."
+  description = "1Password provider vault ID."
 }
 
 variable "pvd_sentry_api_token" {
@@ -175,7 +175,6 @@ resource "aws_s3_bucket_versioning" "site_prod" {
     status = "Enabled"
   }
 }
-
 resource "aws_s3_bucket_lifecycle_configuration" "site_prod" {
   depends_on = [aws_s3_bucket_versioning.site_prod]
   bucket     = module.site_prod.s3_bucket_name
@@ -468,7 +467,7 @@ resource "azuread_application" "lantern" {
     "7aa5b9f2-25c1-4a88-8627-c0d7d1326b55"
   ]
   description                    = "A prototype data catalogue for BAS discovery metadata."
-  marketing_url                  = "https://data.bas.ac.uk"
+  marketing_url                  = "https://data.bas.ac.uk/"
   privacy_statement_url          = "https://data.bas.ac.uk/legal/privacy"
   logo_image                     = filebase64("../assets/logo.png")
   sign_in_audience               = "AzureADMyOrg"
@@ -637,7 +636,7 @@ resource "onepassword_item" "sentry_dsn" {
   tags       = ["SCAR ADD Metadata Toolbox"]
 }
 
-# Outputs for external automations
+# Outputs for external automation
 
 output "thumbnails_cf_id" {
   value       = var.aws_cf_cdn_id

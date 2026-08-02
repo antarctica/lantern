@@ -2,7 +2,7 @@
 
 ## Monitoring configuration
 
-These options from the app `lantern.Config` class are used to configure application logging:
+These options from the app `lantern.Config` class are used to configure application monitoring:
 
 - `ENABLE_FEATURE_SENTRY`: if true, enables backend [Error Monitoring](#error-monitoring) via Sentry
 - `SENTRY_ENVIRONMENT`: the Sentry [Environment](https://docs.sentry.io/platforms/python/configuration/environments/) name
@@ -140,15 +140,20 @@ location exists.
 > As noted above, checks for some distribution options in Records are not implemented. These checks will show as
 > skipped rather than pending. Skipped checks are not executed but are included in compiled data and reports.
 
+### Trusted publishing checks
+
+[Trusted Publishing](/docs/architecture.md#trusted-publishing) content are checked using a login within the Ops Data
+Store representing the Catalogue.
+
 ### ArcGIS checks
 
 Distribution options for layers or services hosted within [ArcGIS Online](https://www.arcgis.com/) are checked using
-service APIs (e.g. for a feature service), or using the
+service APIs (e.g. for a feature service), or the
 [ArcGIS Sharing API](https://developers.arcgis.com/rest/users-groups-and-items/working-with-users-groups-and-items/)
 for layers.
 
 > [!NOTE]
-> Only non-public items can be checked. Checks for non-public items will be marked as a failure.
+> Only public items can be checked. Checks for non-public items will be marked as failures.
 
 ### MAGIC Products Distribution Service checks
 
@@ -157,7 +162,7 @@ Distribution options for files hosted in the
 the [Microsoft Graph API](https://learn.microsoft.com/en-us/graph/), as the platform underpinning the Products Service.
 
 Access tokens to check files within the Products Service SharePoint site are generated using the
-[application registration](/docs/infrastructure.md#microsoft-entra) within Microsoft Entra.
+[App Registration](/docs/infrastructure.md#microsoft-entra) representing the Catalogue within Microsoft Entra.
 
 ### Site checks data
 

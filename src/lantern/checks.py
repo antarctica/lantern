@@ -48,7 +48,7 @@ class CheckRunner:
 
         `redirects` is the maximum number of redirects allowed (where 0 is none).
 
-        Handles time out errors only.
+        Otherise, handles time out errors only.
         """
         s = requests.Session()
         s.max_redirects = redirects if redirects > 0 else 1  # for requests that should redirect but not be followed

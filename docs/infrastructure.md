@@ -30,9 +30,7 @@ Development environments may be created and destroyed as needed. Staging and Pro
 ## Deployment
 
 - [Environment Module](/docs/deployment.md#environment-module)
-  - managed via [Ansible 🛡️](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/playbooks/magic/lantern.yml)
 - [Non-Interactive Publishing Script](/docs/deployment.md#non-interactive-record-publishing-script)
-  - managed via [Ansible 🛡️](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/playbooks/magic/lantern.yml)
 
 ## Hosting
 
@@ -197,7 +195,8 @@ Then run:
 - which in turn uses the BAS LDAP directory for authentication and authorisation
 - [All Environments 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=l2whnxwdbixs3xypq5ja6w6gr4&h=magic.1password.eu)
   - [SSH credentials for workstation module 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=ydfrpsnqbmifpic5y5mp2du4pa&h=magic.1password.eu)
-- for [Exporters](/docs/exporters.md) to publish trusted content
+- used for a [Rsync Exporter](/docs/exporters.md#rsync-exporter) and
+  [Site Checks](/docs/monitoring.md#trusted-publishing-checks) to publish and check trusted content
 - managed manually as per [Setup](/docs/setup.md#secure-website-hosting) documentation
 
 ## Tokens

@@ -81,7 +81,7 @@ docs_targets = "docs/ README.md CHANGELOG.md"
 types_targets = "src/"
 targets = "src/ tasks/ tests/ tests_slow/"
 test_base = "pytest -n auto"
-test_slow_base = "{test_base} tests_slow/"
+test_slow_base = { var = "{test_base} tests_slow/", recursive = true}
 ci_test_options = "-o junit_family=xunit2 --continue-on-collection-errors"
 cov_options = "--cov --cov-report=html"
 local_stack_compose = "./resources/dev/docker-compose.yml"
@@ -102,7 +102,7 @@ audit = { cmd = "uv audit --frozen", help = "Check for insecure dependencies" }
 outdated = { cmd = "uv tree --all-groups --outdated --depth=1", help = "List outdated directed dependencies" }
 # CI
 ci-test = { cmd = "{test_base} {cov_options} {ci_test_options} --junitxml=test-results.xml", help = "Run main tests in CI", use_vars = true }
-ci-test-slow = { cmd = "{test_base} {ci_test_options} --junitxml=test-slow-results.xml", help = "Run slow tests in CI", use_vars = true }
+ci-test-slow = { cmd = "{test_slow_base} {ci_test_options} --junitxml=test-slow-results.xml", help = "Run slow tests in CI", use_vars = true }
 # local stack
 stack-start = { cmd = "docker-compose -f {local_stack_compose} up -d", help = "Start local dev stack", use_vars = true }
 stack-stop = { cmd = "docker-compose -f {local_stack_compose} down", help = "Stop local dev stack", use_vars = true }

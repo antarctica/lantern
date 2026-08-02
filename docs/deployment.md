@@ -25,17 +25,16 @@ automatically by the [Ansible Playbook](#ansible-playbook).
 
 ## Non-interactive record publishing script
 
-A Python script, `resources/scripts/non-interactive-publishing-workflow.py`, and a
-[shell script wrapper 🛡️](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/roles/lantern/templates/pub-cat.sh.j2)
-managed by [Ansible](#ansible-playbook), are deployed to the BAS Central workstations to implement the
-[Non-Interactive Publishing Workflow](/docs/usage.md#non-interactive-publishing-workflow).
+A [shell script 🛡️](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/roles/magic/lantern/templates/pub-cat.sh.j2)
+managed by [Ansible](#ansible-playbook) is deployed to the BAS Central workstations to implement the
+[Non-Interactive Publishing Workflow](/docs/usage.md#non-interactive-publishing-workflow) using the
+[Contrib Module](/docs/contrib.md#non-interactive-publishing-workflow).
 
 ## Site checks script
 
-A Python script, `resources/scripts/site-checks.py`, and a
-[cron shell script wrapper 🛡️](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/roles/lantern/templates/site-checks-cron.sh.j2)
-managed by [Ansible](#ansible-playbook), are deployed to the BAS Central workstations for
-[Scheduled Checks](/docs/monitoring.md#scheduled-checks).
+A [Cron shell script 🛡️](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/roles/magic/lantern/templates/site-checks-cron.sh.j2)
+managed by [Ansible](#ansible-playbook), is deployed to the BAS Central workstations for
+[Scheduled Checks](/docs/monitoring.md#scheduled-checks) using the [Contrib Module](/docs/contrib.md#site-checks).
 
 ## Ansible playbook
 
@@ -50,22 +49,12 @@ The playbook:
 - configures a cron job for [Scheduled Checks](/docs/monitoring.md#scheduled-checks)
 - runs post-deployment checks including:
   - checking the expected version is loaded by the [Environment Module](#environment-module)
-  - checking the configuration set by the [Environment Module](#environment-module) is valid
-  - running the [Non-Interactive Publishing Workflow](/docs/usage.md#non-interactive-publishing-workflow) for a known
-    test record and branch
+  - checking the configuration set by the [Environment Module](#environment-module) is
+    [Valid](/docs/config.md#config-validation)
+  - running the [Non-Interactive Publishing Workflow](#non-interactive-record-publishing-script) for a fixed test
+    record and branch
   - checking the [Heartbeat](/docs/monitoring.md#heartbeat)
   - checking the [Health Check Endpoint](/docs/monitoring.md#health-check-endpoint)
-
-The playbook is run automatically in [Continuous Deployment](#continuous-deployment) for tagged releases, or via a
-manual trigger for pre-releases.
-
-The playbook can be run manually with these
-[General Instructions](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/README.MAGIC.md#run-a-playbook)
-and context:
-
-- environment: `staging` or `production`
-- app: `magic/lantern`
-- additional variables: `app_version=1.2.3`
 
 ## Continuous Deployment
 

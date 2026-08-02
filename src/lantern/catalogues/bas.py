@@ -93,6 +93,8 @@ class BasCatUntrusted(CatalogueBase):
             search_store = self._repo._make_algolia_store()
             site_extras["site_records_count"] = len(store)
             site_extras["search_records_count"] = len(search_store)
+            site_extras["entra_secret_expiry"] = self._config.CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_EXP
+            site_extras["entra_secret_id"] = self._config.CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_ID
 
         site = Site(logger=self._logger, meta=meta, store=store, extras=site_extras)
         content = site.generate_content(**content_params)

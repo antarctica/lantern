@@ -1,8 +1,9 @@
 import json
+from datetime import date
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from lantern.outputs.site_health import SiteHealthOutput
+from lantern.outputs.site_health import SiteHealthOutput, SiteHealthOutputComponentValues
 from tests.conftest import _index_site_content_outputs
 
 if TYPE_CHECKING:
@@ -16,14 +17,27 @@ class TestSiteHealthOutput:
 
     def test_init(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta):
         """Can create a site health output."""
-        output = SiteHealthOutput(logger=fx_logger, meta=fx_export_meta, site_records_count=1, search_records_count=1)
+        component_values = SiteHealthOutputComponentValues(
+            site_records_count=1,
+            search_records_count=1,
+            entra_client_secret_expiry=date(2014, 6, 30),
+            entra_client_secret_id="x",  # noqa: S106
+        )
+        output = SiteHealthOutput(logger=fx_logger, meta=fx_export_meta, component_values=component_values)
         assert isinstance(output, SiteHealthOutput)
 
     def test_content(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta):
         """Can generate site content items."""
         build_ref = "x"
         fx_export_meta.build_repo_ref = build_ref
-        output = SiteHealthOutput(logger=fx_logger, meta=fx_export_meta, site_records_count=1, search_records_count=1)
+        component_values = SiteHealthOutputComponentValues(
+            site_records_count=1,
+            search_records_count=1,
+            entra_client_secret_expiry=date(2014, 6, 30),
+            entra_client_secret_id="x",  # noqa: S106
+        )
+
+        output = SiteHealthOutput(logger=fx_logger, meta=fx_export_meta, component_values=component_values)
         content = _index_site_content_outputs(output.content)
         assert len(content) > 1
 

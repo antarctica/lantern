@@ -55,6 +55,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Usage instructions for removing records as a last resort
 * Site checks for MAGIC Distribution Service hosted content
 * Azure Entra app registration for accessing MAGIC Distribution Service hosted content
+* Documentation on the various tokens used for infrastructure components and Entra client secret rotation
 
 ### Fixed
 
@@ -91,6 +92,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Splitting tests into main and slow suites, with separate development tasks and CI jobs
 * Replacing resource scripts for the non-interactive workflow and scheduled checks with contrib modules
 * Adding extra ruff rules (`BLE`, `COM`, `FURB`, `INT`, `ISC`, `G`, `LOG`, `PERF`, `PIE`, `PL`, `PYL`, `TC`, `TID`, `YTT`)
+* Aligning tokens management for services managed by IaC
 
 ### Removed
 

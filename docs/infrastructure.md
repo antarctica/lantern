@@ -199,3 +199,62 @@ Then run:
   - [SSH credentials for workstation module 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=ydfrpsnqbmifpic5y5mp2du4pa&h=magic.1password.eu)
 - for [Exporters](/docs/exporters.md) to publish trusted content
 - managed manually as per [Setup](/docs/setup.md#secure-website-hosting) documentation
+
+## Tokens
+
+> [!NOTE]
+> This section does not include tokens used in [Development Environments](/docs/dev.md#local-development-environment)
+> or [Development Tasks](/docs/dev.md#development-tasks).
+
+| Component                                      | Sensitive | Expires? | Rotation | Management |
+|------------------------------------------------|-----------|----------|----------|------------|
+| [1Password Service Account](#1password)        | Yes       | No       | -        | Manual     |
+| [Sentry DSN](#sentry)                          | No        | No       | -        | IaC        |
+| [GitLab Item Enquires PAT](#gitlab)            | Yes       | No       | Disabled | Manual     |
+| [GitLab Publishing Workflows](#gitlab)         | Yes       | No       | Disabled | Manual     |
+| [Algolia App Write Key](#algolia)              | Yes       | No       | -        | Manual     |
+| [Algolia App Site Key](#algolia)               | No        | No       | -        | Manual     |
+| [Plausible App Site ID](#algolia)              | No        | No       | -        | Manual     |
+| [Cloudflare Turnstile Site Key](#cloudflare)   | No        | No       | -        | IaC        |
+| [Cloudflare Turnstile Secret Key](#cloudflare) | Yes       | No       | -        | IaC        |
+| [AWS IAM](#amazon-web-services)                | Yes       | No       | -        | IaC        |
+| [Entra App Registration](#microsoft-entra)     | Yes       | Yes      | 90 days  | IaC        |
+| [Secure Hosting Checks](#secure-hosting)       | Yes       | No       | -        | Manual     |
+
+> [!IMPORTANT]
+> Due to its age, IaC managed rotation is unavailable and disabled for BAS GitLab tokens (tokens don't expire).
+
+### Rotating tokens
+
+> [!WARNING]
+> Tokens managed via IaC are NOT rotated automatically, or applied to deployed instances automatically.
+
+To manually rotate tokens managed by IaC that expire, and update deployed instances:
+
+- run IaC [1], which will write rotated values to 1Password items
+- update Ansible Vaults [2]
+- run the [Ansible Deployment Playbook](/docs/deployment.md#ansible-playbook) [3]
+
+[1]
+
+```shell
+% cd resources/infra
+% tofu init
+% tofu apply
+```
+
+[2]
+
+Follow the
+[General Instructions 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/dev-docs/-/blob/main/service-bas-ansible.md#edit-vault-file)
+to template out secrets from 1Password and re-encrypt vault files, which will use current/updated values.
+
+[3]
+
+Follow the
+[General Instructions 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/dev-docs/-/blob/main/service-bas-ansible.md#run-a-playbook)
+to run a playbook with this context:
+
+- environment: `staging` or `production`
+- app: `magic/lantern`
+- additional variables: `app_version=x.x.x`

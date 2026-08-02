@@ -178,7 +178,7 @@ class TestBasCatTrusted:
 
         check = results[0]
         assert "/-/items/" in check.url
-        assert check.http_auth is not None
+        assert check.type == CheckType.ITEM_PAGES_TRUSTED
 
     def test_check(self, fx_bas_cat_trusted: BasCatUntrusted):
         """Cannot directly check trusted site (not supported)."""

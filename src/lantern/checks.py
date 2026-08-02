@@ -1,3 +1,4 @@
+import base64
 import json
 import logging
 import time
@@ -7,7 +8,9 @@ from typing import TYPE_CHECKING
 import requests
 from joblib import Parallel, delayed
 from requests import Response
+from requests.auth import HTTPBasicAuth
 
+from lantern.lib.requests.auth import HTTPBearerTokenAuth
 from lantern.log import init as init_logging
 from lantern.models.checks import Check, CheckState, CheckType
 from lantern.outputs.checks import ChecksOutput
@@ -15,6 +18,7 @@ from lantern.outputs.checks import ChecksOutput
 if TYPE_CHECKING:
     from requests.auth import AuthBase
 
+    from lantern.config import Config
     from lantern.models.site import ExportMeta, SiteContent
 
 
@@ -34,6 +38,7 @@ class CheckRunner:
         method: HTTPMethod,
         url: str,
         headers: dict | None = None,
+        params: dict | None = None,
         redirects: int = 0,
         auth: AuthBase | None = None,
         raise_errors: bool = False,
@@ -53,7 +58,13 @@ class CheckRunner:
 
         try:
             r = s.request(
-                method=method.value, url=url, headers=headers, allow_redirects=redirects > 0, timeout=10, auth=auth
+                method=method.value,
+                url=url,
+                headers=headers,
+                params=params,
+                allow_redirects=redirects > 0,
+                timeout=10,
+                auth=auth,
             )
             if raise_errors:
                 r.raise_for_status()
@@ -176,6 +187,60 @@ class CheckRunner:
         self._logger.info("Fetching: %s", service_url)
         self._check_arcgis_url(service_url)
 
+    def _check_magic_product(self) -> None:
+        """
+        Check MAGIC Products Distribution Service file.
+
+        https://gitlab.data.bas.ac.uk/MAGIC/products-distribution
+
+        The distribution service uses Microsoft SharePoint. This check effectively reverse proxies a request for a
+        SharePoint sharing URL (e.g. [1]), as per [2] using the MS Graph API [3] to get basic details including
+        expected file size.
+
+        [1] https://nercacuk.sharepoint.com/:b:/r/sites/MAGICProductsDistribution/...
+        [2] https://learn.microsoft.com/en-us/graph/api/shares-get#encoding-sharing-urls
+        [3] https://learn.microsoft.com/en-us/graph/api/driveitem-get
+        """
+        self._logger.info("Fetching: %s", self._check.url)
+
+        share_url = "u!" + base64.urlsafe_b64encode(self._check.url.encode("utf-8")).decode("utf-8").rstrip("=")
+        graph_url = f"https://graph.microsoft.com/v1.0/shares/{share_url}/driveItem"
+        self._logger.info("Resolved to: %s", graph_url)
+
+        r = self._fetch_url(
+            method=HTTPMethod.GET,
+            url=graph_url,
+            params={"$select": "id,name,size,file"},
+            auth=self._check.http_auth,
+            redirects=0,
+            raise_errors=False,
+        )
+        if r is None:
+            return
+        result = r.json()
+
+        if self._check.result_http_status != self._check.http_status:
+            self._check.state = CheckState.FAILED
+            self._check.result_output = (
+                f"Bad status: {self._check.result_http_status} (expected {self._check.http_status})"
+            )
+            return
+
+        if "file" not in result:
+            self._check.state = CheckState.FAILED
+            self._check.result_output = "Bad drive item type: expected file"
+            return
+
+        if self._check.content_length is not None and result.get("size") != self._check.content_length:
+            self._check.state = CheckState.FAILED
+            self._check.result_output = (
+                f"Bad drive item size: {result.get('size')} (expected {self._check.content_length})"
+            )
+            return
+
+        self._check.state = CheckState.PASS
+        self._check.result_output = "OK"
+
     def run(self) -> None:
         """Run check unless skipped."""
         if self._check.state == CheckState.SKIPPED:
@@ -186,6 +251,8 @@ class CheckRunner:
             self._check_arcgis_item()
         elif self._check.type == CheckType.DOWNLOADS_ARCGIS_SERVICE:
             self._check_arcgis_service()
+        elif self._check.type == CheckType.DOWNLOADS_SHAREPOINT_MAGIC_PRODUCTS:
+            self._check_magic_product()
         else:
             self._check_url()
         self._check.duration = time.monotonic() - start
@@ -213,16 +280,61 @@ class Checker:
     Flexible class intended to be used in a higher level and opinionated Catalogue class.
     """
 
-    def __init__(self, logger: logging.Logger, parallel_jobs: int) -> None:
+    def __init__(self, logger: logging.Logger, config: Config) -> None:
         self._logger = logger
-        self._parallel_jobs = parallel_jobs
+        self._config = config
+        self._parallel_jobs = self._config.PARALLEL_JOBS
+
+    def _get_auth_entra(self) -> str:
+        """
+        Get access token for accessing entra protected resources.
+
+        Includes the Microsoft Graph API.
+        """
+        response = requests.post(
+            f"https://login.microsoftonline.com/{self._config.CHECKS_MAGIC_PRODUCTS_TENANT_ID}/oauth2/v2.0/token",
+            data={
+                "client_id": self._config.CHECKS_MAGIC_PRODUCTS_CLIENT_ID,
+                "client_secret": self._config.CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET,
+                "scope": "https://graph.microsoft.com/.default",
+                "grant_type": "client_credentials",
+            },
+            timeout=30,
+        )
+        response.raise_for_status()
+        return response.json()["access_token"]
+
+    def _prepare_auth(self, checks: list[Check]) -> None:
+        """
+        Add authentication needed to check restricted resources.
+
+        Reuses/caches tokens for supported services.
+        """
+        _entra_token: str | None = None
+
+        for check in checks:
+            # Add basic auth for accessing trusted publishing content (Ops Data Store LDAP)
+            if check.type == CheckType.ITEM_PAGES_TRUSTED:
+                check.http_auth = HTTPBasicAuth(
+                    username=self._config.CHECKS_TRUSTED_USERNAME, password=self._config.CHECKS_TRUSTED_PASSWORD
+                )
+            elif check.type == CheckType.DOWNLOADS_SHAREPOINT_MAGIC_PRODUCTS:
+                # Add entra token for accessing SharePoint drive items (MS Graph via catalogue app registration)
+                if not _entra_token:
+                    _entra_token = self._get_auth_entra()
+                check.http_auth = HTTPBearerTokenAuth(token=_entra_token)
+
+    def _prepare_checks(self, checks: list[Check]) -> None:
+        """Post process checks prior to execution."""
+        self._prepare_auth(checks)
 
     def execute(self, checks: list[Check]) -> list[Check]:
         """
         Run checks in parallel.
 
-        Returns executed checks.
+        Returns executed, prepared, checks.
         """
+        self._prepare_checks(checks)
         return Parallel(n_jobs=self._parallel_jobs)(delayed(run_check)(self._logger.level, check) for check in checks)
 
     def check(self, meta: ExportMeta, checks: list[Check]) -> list[SiteContent]:

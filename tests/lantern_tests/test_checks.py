@@ -1,12 +1,14 @@
 import time
 from http import HTTPMethod, HTTPStatus
 from typing import TYPE_CHECKING
+from uuid import uuid4
 
 import pytest
 import requests
-from requests.auth import HTTPBasicAuth
+from requests.auth import AuthBase, HTTPBasicAuth
 
 from lantern.checks import Checker, CheckRunner, run_check
+from lantern.lib.requests.auth import HTTPBearerTokenAuth
 from lantern.models.checks import Check, CheckState, CheckType
 from lantern.models.site import ExportMeta, SiteContent
 
@@ -145,7 +147,7 @@ class TestCheckRunner:
 
     @pytest.mark.cov
     def test_check_arc_item_timeout(self, mocker: MockerFixture, fx_logger: logging.Logger, fx_check: Check):
-        """Check any errors set by fetch_url are handled correctly."""
+        """Can handle a ArcGIS layer that times out correctly."""
         mocker.patch.object(requests.Session, "request", side_effect=requests.Timeout)
         runner = CheckRunner(logger=fx_logger, check=fx_check)
 
@@ -184,7 +186,7 @@ class TestCheckRunner:
 
     @pytest.mark.cov
     def test_check_arc_service_timeout(self, mocker: MockerFixture, fx_logger: logging.Logger, fx_check: Check):
-        """Check any errors set by fetch_url are handled correctly."""
+        """Can handle a ArcGIS service that times out correctly."""
         mocker.patch.object(requests.Session, "request", side_effect=requests.Timeout)
         runner = CheckRunner(logger=fx_logger, check=fx_check)
 
@@ -195,13 +197,94 @@ class TestCheckRunner:
     @pytest.mark.vcr
     @pytest.mark.block_network
     def test_check_arc_service_error(self, fx_logger: logging.Logger, fx_check: Check):
-        """Can check an ArcGIS layer that triggers an error."""
+        """Can check an ArcGIS service that triggers an error."""
         fx_check.type = CheckType.DOWNLOADS_ARCGIS_SERVICE
         fx_check.url = "https://services.arcgis.com/arcgis/rest/services/x/featureserver"
         runner = CheckRunner(logger=fx_logger, check=fx_check)
 
         runner._check_arcgis_service()
         assert fx_check.state == CheckState.FAILED
+
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    def test_check_magic_product(self, fx_logger: logging.Logger, fx_check: Check):
+        """
+        Can check a file in the MAGIC Products Distribution Service normally.
+
+        To generate expected encoded share URL (in VCR cassette):
+
+        - base64 encode fx_check.url;
+        - strip padding '=' (replace '/' -> '_', '+' -> '-');
+        - prepend with 'u!'
+
+        E.g.
+        "https://nercacuk.sharepoint.com/:b:/r/sites/MAGICProductsDistribution/x" ->
+        "u!aHR0cHM6Ly9uZXJjYWN1ay5zaGFyZXBvaW50LmNvbS86Yjovci9zaXRlcy9NQUdJQ1Byb2R1Y3RzRGlzdHJpYnV0aW9uL3g"
+        """
+        fx_check.type = CheckType.DOWNLOADS_SHAREPOINT_MAGIC_PRODUCTS
+        fx_check.url = "https://nercacuk.sharepoint.com/:b:/r/sites/MAGICProductsDistribution/x"
+        fx_check.http_auth = HTTPBearerTokenAuth(token="x")  # noqa: S106
+        runner = CheckRunner(logger=fx_logger, check=fx_check)
+
+        runner._check_magic_product()
+        assert fx_check.state == CheckState.PASS
+
+    @pytest.mark.cov
+    def test_check_magic_product_timeout(self, mocker: MockerFixture, fx_logger: logging.Logger, fx_check: Check):
+        """Can handle a request for a MAGIC Products Distribution Service hosted resource that times out correctly."""
+        mocker.patch.object(requests.Session, "request", side_effect=requests.Timeout)
+        runner = CheckRunner(logger=fx_logger, check=fx_check)
+
+        runner._check_magic_product()
+        assert fx_check.state == CheckState.FAILED
+        assert fx_check.result_output == "Request timed out"
+
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    @pytest.mark.cov
+    def test_check_magic_product_error(self, fx_logger: logging.Logger, fx_check: Check):
+        """Can check a MAGIC Products Distribution Service hosted resource that triggers an error."""
+        fx_check.type = CheckType.DOWNLOADS_SHAREPOINT_MAGIC_PRODUCTS
+        fx_check.url = "https://nercacuk.sharepoint.com/:b:/r/sites/MAGICProductsDistribution/x"
+        fx_check.http_auth = HTTPBearerTokenAuth(token="x")  # noqa: S106
+        runner = CheckRunner(logger=fx_logger, check=fx_check)
+
+        runner._check_magic_product()
+        assert fx_check.state == CheckState.FAILED
+        assert fx_check.result_output == "Bad status: 403 (expected 200)"
+
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    @pytest.mark.cov
+    def test_check_magic_product_not_file(self, fx_logger: logging.Logger, fx_check: Check):
+        """
+        Can check a MAGIC Products Distribution Service hosted resource with the wrong drive item type.
+
+        Simulated by VCR casette response.
+        """
+        fx_check.type = CheckType.DOWNLOADS_SHAREPOINT_MAGIC_PRODUCTS
+        fx_check.url = "https://nercacuk.sharepoint.com/:b:/r/sites/MAGICProductsDistribution/x"
+        fx_check.http_auth = HTTPBearerTokenAuth(token="x")  # noqa: S106
+        runner = CheckRunner(logger=fx_logger, check=fx_check)
+
+        runner._check_magic_product()
+        assert fx_check.state == CheckState.FAILED
+        assert fx_check.result_output == "Bad drive item type: expected file"
+
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    @pytest.mark.cov
+    def test_check_magic_product_wrong_size(self, fx_logger: logging.Logger, fx_check: Check):
+        """Can check a MAGIC Products Distribution Service hosted resource with the wrong file size."""
+        fx_check.type = CheckType.DOWNLOADS_SHAREPOINT_MAGIC_PRODUCTS
+        fx_check.url = "https://nercacuk.sharepoint.com/:b:/r/sites/MAGICProductsDistribution/x"
+        fx_check.content_length = 1
+        fx_check.http_auth = HTTPBearerTokenAuth(token="x")  # noqa: S106
+        runner = CheckRunner(logger=fx_logger, check=fx_check)
+
+        runner._check_magic_product()
+        assert fx_check.state == CheckState.FAILED
+        assert fx_check.result_output == "Bad drive item size: 2 (expected 1)"
 
     @pytest.mark.parametrize("skipped", [False, True])
     def test_run(self, mocker: MockerFixture, fx_logger: logging.Logger, fx_check: Check, skipped: bool) -> None:
@@ -229,6 +312,7 @@ class TestRunCheck:
             CheckType.DOWNLOADS_ARCGIS_LAYER,
             CheckType.DOWNLOADS_ARCGIS_SERVICE,
             CheckType.INFO_ARCGIS_WEBMAP,
+            CheckType.DOWNLOADS_SHAREPOINT_MAGIC_PRODUCTS,
         ],
     )
     def test_run(
@@ -238,12 +322,15 @@ class TestRunCheck:
         mocker.patch.object(CheckRunner, "_check_url", return_value=None)
         mocker.patch.object(CheckRunner, "_check_arcgis_item", side_effect=RuntimeError)
         mocker.patch.object(CheckRunner, "_check_arcgis_service", side_effect=RuntimeError)
+        mocker.patch.object(CheckRunner, "_check_magic_product", side_effect=RuntimeError)
         if check_type in (CheckType.DOWNLOADS_ARCGIS_LAYER, CheckType.INFO_ARCGIS_WEBMAP):
             mocker.patch.object(CheckRunner, "_check_url", side_effect=RuntimeError)
             mocker.patch.object(CheckRunner, "_check_arcgis_item", return_value=None)
         elif check_type == CheckType.DOWNLOADS_ARCGIS_SERVICE:
             mocker.patch.object(CheckRunner, "_check_url", side_effect=RuntimeError)
             mocker.patch.object(CheckRunner, "_check_arcgis_service", return_value=None)
+        elif check_type == CheckType.DOWNLOADS_SHAREPOINT_MAGIC_PRODUCTS:
+            mocker.patch.object(CheckRunner, "_check_magic_product", return_value=None)
 
         fx_check.type = check_type
         result = run_check(fx_logger.level, fx_check)
@@ -255,38 +342,71 @@ class TestChecker:
 
     def test_init(self, fx_logger: logging.Logger, fx_config: Config) -> None:
         """Can create a Checker instance."""
-        runner = Checker(logger=fx_logger, parallel_jobs=fx_config.PARALLEL_JOBS)
+        runner = Checker(logger=fx_logger, config=fx_config)
         assert isinstance(runner, Checker)
 
-    def test_execute(
-        self, mocker: MockerFixture, fx_logger: logging.Logger, fx_config: Config, fx_check: Check
-    ) -> None:
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    def test_get_auth_entra(self, fx_checker: Checker):
+        """Can get Entra access token."""
+        result = fx_checker._get_auth_entra()
+        assert result == "x"
+
+    @pytest.mark.parametrize(
+        ("check_type", "expected_auth"),
+        [
+            (CheckType.NONE, None),
+            (CheckType.ITEM_PAGES_TRUSTED, HTTPBasicAuth),
+            (CheckType.DOWNLOADS_SHAREPOINT_MAGIC_PRODUCTS, HTTPBearerTokenAuth),
+        ],
+    )
+    def test_prepare_auth(
+        self,
+        mocker: MockerFixture,
+        fx_checker: Checker,
+        fx_check: Check,
+        check_type: CheckType,
+        expected_auth: AuthBase | None,
+    ):
+        """
+        Can prepare checks for authenticated resources.
+
+        Checks correct auth class is set (if applicable). Does not check if credentials are real.
+        """
+        mocker.patch.object(fx_checker, "_get_auth_entra", return_value="x")
+
+        fx_check.type = check_type
+        checks = [fx_check]
+        fx_checker._prepare_auth(checks=checks)
+        if expected_auth:
+            assert isinstance(checks[0].http_auth, expected_auth)
+        else:
+            assert checks[0].http_auth is None
+
+    @pytest.mark.cov()
+    def test_prepare_auth_reuse_token(self, mocker: MockerFixture, fx_checker: Checker, fx_check: Check):
+        """Can reuse generated tokens across checks within the same prepare loop."""
+        mocker.patch.object(fx_checker, "_get_auth_entra", return_value=str(uuid4()))
+
+        fx_check.type = CheckType.DOWNLOADS_SHAREPOINT_MAGIC_PRODUCTS
+        checks = [fx_check, fx_check]
+        fx_checker._prepare_auth(checks=checks)
+        assert checks[0].http_auth._token == checks[1].http_auth._token
+
+    def test_execute(self, fx_checker: Checker, fx_check: Check) -> None:
         """
         Can run checks.
 
         Check methods are disabled to avoid making real requests.
         """
-        mocker.patch.object(CheckRunner, "run", return_value=None)
-        checker = Checker(logger=fx_logger, parallel_jobs=fx_config.PARALLEL_JOBS)
+        checks = fx_checker.execute([fx_check])
+        assert checks == [fx_check]  # checks will remain as initial as not actually run
 
-        checks = checker.execute([fx_check])
-        assert checks == [fx_check]  # checks will remain as initial
-
-    def test_checks(
-        self,
-        mocker: MockerFixture,
-        fx_logger: logging.Logger,
-        fx_config: Config,
-        fx_export_meta: ExportMeta,
-        fx_check: Check,
-    ) -> None:
+    def test_checks(self, fx_checker: Checker, fx_export_meta: ExportMeta, fx_check: Check) -> None:
         """
         Can run checks and get output.
 
         Check methods are disabled to avoid making real requests.
         """
-        mocker.patch.object(CheckRunner, "run", return_value=None)
-        checker = Checker(logger=fx_logger, parallel_jobs=fx_config.PARALLEL_JOBS)
-
-        outputs = checker.check(meta=fx_export_meta, checks=[fx_check])
+        outputs = fx_checker.check(meta=fx_export_meta, checks=[fx_check])
         assert all(isinstance(o, SiteContent) for o in outputs)

@@ -289,3 +289,9 @@ Manually:
 > - read and write item metadata to apply record information to the item
 >
 > Managed by MAGIC.
+
+## Microsoft Entra
+
+The Microsoft Entra ID (previously Azure Active Directory) app registration used for
+[Monitoring Checks](/docs/monitoring.md#magic-products-distribution-service-checks) is managed using
+[Infrastructure as Code (IaC)](/docs/infrastructure.md#infrastructure-as-code).

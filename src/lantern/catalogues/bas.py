@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, get_args
 
 from boto3 import client as BotoClient
-from requests.auth import HTTPBasicAuth
 
 from lantern.catalogues.base import CatalogueBase
 from lantern.checks import Checker
@@ -208,9 +207,7 @@ class BasCatTrusted(CatalogueBase):
         )
         for check in checks:
             check.url = check.url.replace("/items/", "/-/items/")
-            check.http_auth = HTTPBasicAuth(
-                username=self._config.CHECKS_TRUSTED_USERNAME, password=self._config.CHECKS_TRUSTED_PASSWORD
-            )
+            check.type = CheckType.ITEM_PAGES_TRUSTED
         return checks
 
     def check(self, identifiers: set[str] | None = None, branch: str | None = None) -> None:
@@ -264,7 +261,7 @@ class BasCatEnv(CatalogueBase):
             path=path,
             env=self._env,
         )
-        self._checker = Checker(logger=self._logger, parallel_jobs=self._config.PARALLEL_JOBS)
+        self._checker = Checker(logger=self._logger, config=self._config)
 
     def export(
         self,

@@ -35,7 +35,7 @@ class FakeCatalogue(CatalogueBase):
         self._meta = ExportMeta.from_config(config=self._config, env="testing", build_repo_ref="83fake48", trusted=True)
         self._site = Site(logger=logger, meta=self._meta, store=self._store)
         self._exporter = LocalExporter(logger=logger, path=self._path)
-        self._checker = Checker(logger=self._logger, parallel_jobs=config.PARALLEL_JOBS)
+        self._checker = Checker(logger=self._logger, config=self._config)
 
     @time_task(label="Export site")
     def export(self, identifiers: set[str] | None = None) -> None:

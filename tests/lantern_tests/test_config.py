@@ -1,5 +1,6 @@
 import os
 import pickle
+from datetime import date
 from importlib.metadata import version
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
@@ -111,6 +112,11 @@ class TestConfig:
             "BASE_URL_LIVE": "https://example.com",
             "CHECKS_TRUSTED_USERNAME": "x",
             "CHECKS_TRUSTED_PASSWORD": redacted_value,
+            "CHECKS_MAGIC_PRODUCTS_TENANT_ID": "x",
+            "CHECKS_MAGIC_PRODUCTS_CLIENT_ID": "x",
+            "CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET": redacted_value,
+            "CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_ID": "x",
+            "CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_EXP": date(2014, 6, 30),
         }
 
         output = fx_config.dumps_safe()
@@ -320,9 +326,55 @@ class TestConfig:
             # Base URL
             ({"LANTERN_BASE_URL_TESTING": "x", "LANTERN_BASE_URL_LIVE": None}),
             ({"LANTERN_BASE_URL_TESTING": None, "LANTERN_BASE_URL_LIVE": "x"}),
-            # Checks
+            # Checks (trusted content)
             ({"LANTERN_CHECKS_TRUSTED_USERNAME": None, "LANTERN_CHECKS_TRUSTED_PASSWORD": "x"}),
             ({"LANTERN_CHECKS_TRUSTED_USERNAME": "x", "LANTERN_CHECKS_TRUSTED_PASSWORD": None}),
+            # Checks (MAGIC Products Distribution)
+            (
+                {
+                    "LANTERN_CHECKS_MAGIC_PRODUCTS_TENANT_ID": None,
+                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET": "x",
+                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_EXP": "2014-06-30",
+                }
+            ),
+            (
+                {
+                    "LANTERN_CHECKS_MAGIC_PRODUCTS_TENANT_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_ID": None,
+                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET": "x",
+                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_EXP": "2014-06-30",
+                }
+            ),
+            (
+                {
+                    "LANTERN_CHECKS_MAGIC_PRODUCTS_TENANT_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET": None,
+                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_EXP": "2014-06-30",
+                }
+            ),
+            (
+                {
+                    "LANTERN_CHECKS_MAGIC_PRODUCTS_TENANT_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET": "x",
+                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_ID": None,
+                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_EXP": "2014-06-30",
+                }
+            ),
+            (
+                {
+                    "LANTERN_CHECKS_MAGIC_PRODUCTS_TENANT_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET": "x",
+                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_ID": "x",
+                    "LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_EXP": None,
+                }
+            ),
         ],
     )
     def test_validate_missing_required_option(self, envs: dict):
@@ -359,9 +411,21 @@ class TestConfig:
         self._unset_envs(envs, envs_bck)
 
     @pytest.mark.parametrize("env", ["LANTERN_STORE_GITLAB_CACHE_PATH"])
-    def test_validate_invalid_path(self, env: str):
+    def test_validate_invalid_dir_path(self, env: str):
         """Cannot validate where a required path is not a directory.."""
         envs: dict = {env: str(Path(__file__).resolve())}
+        envs_bck = self._set_envs(envs)
+        config = Config(read_dotenv=False)
+
+        with pytest.raises(EnvValidationError):
+            config.validate()
+
+        self._unset_envs(envs, envs_bck)
+
+    @pytest.mark.parametrize("env", ["LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_EXP"])
+    def test_validate_invalid_date(self, env: str):
+        """Cannot validate where a required date is not a date."""
+        envs: dict = {env: "x"}
         envs_bck = self._set_envs(envs)
         config = Config(read_dotenv=False)
 
@@ -411,6 +475,11 @@ class TestConfig:
             ("BASE_URL_LIVE", "https://example.com", False),
             ("CHECKS_TRUSTED_USERNAME", "x", False),
             ("CHECKS_TRUSTED_PASSWORD", "x", True),
+            ("CHECKS_MAGIC_PRODUCTS_TENANT_ID", "x", False),
+            ("CHECKS_MAGIC_PRODUCTS_CLIENT_ID", "x", False),
+            ("CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET", "x", True),
+            ("CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_ID", "x", False),
+            ("CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_EXP", date(2014, 6, 30), False),
         ],
     )
     def test_configurable_property(self, property_name: str, expected: Any, sensitive: bool):
@@ -436,6 +505,7 @@ class TestConfig:
             "STORE_GITLAB_TOKEN",
             "SITE_UNTRUSTED_AWS_ACCESS_SECRET",
             "CHECKS_TRUSTED_PASSWORD",
+            "CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET",
         ],
     )
     def test_redacted_property(self, mocker: MockerFixture, property_name: str):

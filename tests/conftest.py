@@ -24,6 +24,7 @@ from gitlab import Gitlab
 from moto import mock_aws
 
 from lantern.catalogues.bas import BasCatalogue, BasCatEnv, BasCatTrusted, BasCatUntrusted
+from lantern.checks import Checker, CheckRunner
 from lantern.config import Config
 from lantern.exporters.cloudfront import CloudFrontExporter
 from lantern.exporters.local import LocalExporter
@@ -1003,6 +1004,17 @@ def fx_reset_site_singletons() -> Generator[None]:
 def fx_site(fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_fake_store: FakeRecordsStore) -> Site:
     """Site generator using fake/test records."""
     return Site(logger=fx_logger, meta=fx_export_meta, store=fx_fake_store)
+
+
+@pytest.fixture()
+def fx_checker(mocker: MockerFixture, fx_logger: logging.Logger, fx_config: Config) -> Checker:
+    """
+    Checks generator.
+
+    Check methods are disabled to avoid making real requests.
+    """
+    mocker.patch.object(CheckRunner, "run", return_value=None)
+    return Checker(logger=fx_logger, config=fx_config)
 
 
 @pytest.fixture()

@@ -1,5 +1,14 @@
 # Lantern - Monitoring
 
+## Overview
+
+This diagram shows this project's monitoring components:
+
+![Monitoring Diagram](/docs/img/monitoring-overview.png)
+
+> [!TIP]
+> Sentry also reports any errors encountered during static site generation.
+
 ## Monitoring configuration
 
 These options from the app `lantern.Config` class are used to configure application monitoring:
@@ -82,6 +91,13 @@ a custom [widget](/docs/site.md#user-feedback).
 > [!WARNING]
 > Sentry user feedback is only retained for 90 days. An anonymous version can be copied to GitLab if needed.
 
+## Nagios
+
+Nagios monitoring checks are configured for:
+
+- the [Heartbeat](#heartbeat) monitoring endpoint
+  - at both its [Reversed Proxied](/docs/infrastructure.md#hosting) and upstream (AWS) address for each site environment
+
 ## Plausible
 
 [Plausible](https://plausible.io) is used for recording web analytics in the
@@ -94,6 +110,8 @@ a custom [widget](/docs/site.md#user-feedback).
 [Checks](/docs/models.md#site-checks) can be run from a [Catalogue](/docs/architecture.md#catalogues) to verify the
 contents of a [Site](/docs/architecture.md#sites) and downloads referenced in [Records](/docs/models.md#record-checks)
 via making URL requests to expected resources.
+
+![Site Checks Diagram](/docs/img/monitoring-checks.png)
 
 > [!NOTE]
 > Check results are not considered sensitive and are publicly accessible, including for trusted publishing content.

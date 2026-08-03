@@ -84,6 +84,7 @@ Then run:
 ## Monitoring components
 
 - [Sentry](#sentry)
+- [Nagios](#nagios)
 - [Plausible](#plausible)
 - [Entra](#microsoft-entra)
 
@@ -148,6 +149,12 @@ Then run:
 - [Dashboard 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=ffy5l25mjdv577qj6izuk6lo4m&i=lesr4cnv35csmuptgqqcionbf4&h=magic.1password.eu)
   - for [Web Analytics](/docs/monitoring.md#plausible)
   - managed manually as per [Setup](/docs/setup.md#plausible-analytics) documentation
+
+### Nagios
+
+- [Dashboard 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=srdh6tuxclkszevlm4dx674vim&h=magic.1password.eu)
+  - for [Nagios Monitoring](/docs/monitoring.md#nagios)
+  - managed manually as per [Setup](/docs/setup.md#nagios-monitoring) documentation
 
 ### Cloudflare
 

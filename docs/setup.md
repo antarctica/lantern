@@ -205,6 +205,12 @@ Manually:
 > [!TIP]
 > Uptime monitors [cannot be managed](https://github.com/jianyuan/terraform-provider-sentry/issues/643) via IaC.
 
+## Nagios monitoring
+
+Manually:
+
+- create an issue in the PDC Nagios management project in GitLab for each [Nagios Check](/docs/monitoring.md#nagios)
+
 ## Cloudflare Turnstile
 
 A Cloudflare Turnstile widget for [Bot Protection](/docs/site.md#bot-protection) is managed using

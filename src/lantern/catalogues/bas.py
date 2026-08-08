@@ -37,6 +37,8 @@ class BasCatUntrusted(CatalogueBase):
     Sub-catalogue within an environment within a BasCatalogue instance.
 
     Manages unrestricted (public) content for all site outputs (except trusted content), uploaded to AWS S3.
+
+    Supports optional cache invalidation within a CloudFront distribution.
     """
 
     def __init__(

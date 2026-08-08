@@ -78,6 +78,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Adding AWS S3 lifecycle rules to remove old versions of objects in the live site bucket
 * Using temporary path for GitLab store cache within tests
 * Link to data in scheduled checks HTML report
+* Invalidations for auto-indexes
 
 ### Changed
 

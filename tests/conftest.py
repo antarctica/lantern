@@ -84,6 +84,18 @@ if TYPE_CHECKING:
     from lantern.stores.base import SelectRecordProtocol, SelectRecordsProtocol
 
 
+def reset_site_singletons() -> None:
+    """
+    Reset Site module singletons for test isolation.
+
+    Must be called when switching between different store implementations
+    (e.g., from GitLabCachedStore to FakeRecordsStore) to prevent singleton pollution.
+    """
+    mod = importlib.import_module("lantern.site")
+    mod._STORE_SINGLETON = None
+    mod._ISO_HTML_XSLT_SINGLETON = None
+
+
 def has_network() -> bool:
     """
     Determine if network access is available.
@@ -990,14 +1002,11 @@ def fx_cf_exporter(
 @pytest.fixture()
 def fx_reset_site_singletons() -> Generator[None]:
     """Reset singletons for test isolation."""
-    mod = importlib.import_module("lantern.site")
-    mod._STORE_SINGLETON = None
-    mod._ISO_HTML_XSLT_SINGLETON = None
+    reset_site_singletons()
 
     yield
 
-    mod._STORE_SINGLETON = None
-    mod._ISO_HTML_XSLT_SINGLETON = None
+    reset_site_singletons()
 
 
 @pytest.fixture()
@@ -1127,12 +1136,30 @@ def fx_bas_catalogue(
 
 
 @pytest.fixture(scope="session")
-def fx_static_site() -> TemporaryDirectory:
+def fx_session_tmp_dir() -> Generator[Path]:
+    """
+    Session-scoped temporary directory.
+
+    Used for session-scoped fixtures that need isolated storage.
+    """
+    with TemporaryDirectory() as tmp_dir:
+        yield Path(tmp_dir)
+
+
+@pytest.fixture(scope="session")
+def fx_static_site(fx_session_tmp_dir: Path) -> TemporaryDirectory:
     """
     Build static site and export to a temp directory.
 
     Session scoped for performance. This means usual fixtures for logging, stores, etc. can't be used and are duplicated.
     """
+    # Reset singletons to prevent pollution from previous tests
+    reset_site_singletons()
+
+    # Set cache path to session temp directory to avoid leaking into project
+    cache_path = fx_session_tmp_dir / "cache"
+    os.environ["LANTERN_STORE_GITLAB_CACHE_PATH"] = str(cache_path)
+
     site_dir = TemporaryDirectory()
     site_path = Path(site_dir.name)
 

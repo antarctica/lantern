@@ -323,8 +323,8 @@ resource "gitlab_project" "records_store" {
   description      = "Metadata records store for the Lantern data catalogue. This project is managed by IaC via the Lantern project."
   visibility_level = "private"
 
-  # disable everything except email notifications, code repository and merge-requests
-  emails_enabled              = true
+  # disable everything except code repository and merge-requests
+  emails_enabled              = false # disabled as this keeps causing plan conflicts
   merge_requests_access_level = "enabled"
   repository_access_level     = "enabled"
 

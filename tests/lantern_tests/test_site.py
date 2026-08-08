@@ -1,5 +1,6 @@
 import json
 import logging
+from datetime import date
 from typing import TYPE_CHECKING
 
 import pytest
@@ -87,6 +88,8 @@ class TestSiteJob:
         )
         expected = [exp.replace("FILE_IDENTIFIER", fx_revision_model_min.file_identifier) for exp in expected]
         expected_count = 99
+        expected_str = "x"
+        expected_date = date(2014, 6, 30)
 
         individual_outputs = [
             ItemCatalogueOutput,
@@ -99,7 +102,12 @@ class TestSiteJob:
             action="content",
             output=output_cls,
             record=fx_revision_model_min if output_cls in individual_outputs else None,
-            extras={"site_records_count": expected_count, "search_records_count": expected_count}
+            extras={
+                "site_records_count": expected_count,
+                "search_records_count": expected_count,
+                "entra_client_secret_expiry": expected_date,
+                "entra_client_secret_id": expected_str,
+            }
             if output_cls == SiteHealthOutput
             else None,
         )
@@ -123,6 +131,7 @@ class TestSiteJob:
             health_data = json.loads(health_output.content)
             assert health_data["checks"]["site:records"]["observedValue"] == expected_count
             assert health_data["checks"]["search:records"]["observedValue"] == expected_count
+            assert isinstance(health_data["checks"]["entra:expiry"]["observedValue"], int)
 
 
 class TestSite:
@@ -257,5 +266,4 @@ class TestSite:
     def test_generate_invalidation_keys(self, fx_site: Site):
         """Can generate expected invalidation keys for selected outputs."""
         results = fx_site.generate_invalidation_keys(global_outputs=[SiteIndexOutput], individual_outputs=[])
-        assert len(results) > 0
-        assert all(isinstance(result, str) for result in results)
+        assert sorted(results) == sorted(["/-/index/index.html", "/-/index/"])

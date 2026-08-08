@@ -109,7 +109,10 @@ def _run_job(
     if job.action == "checks":
         return output.checks
     if job.action == "invalidations":
-        return output.invalidation_keys
+        keys = output.invalidation_keys
+        # In Cloudfront '/foo/index.html' and '/foo' are separate keys
+        keys.extend([k.replace("index.html", "") for k in keys if k.endswith("/index.html")])
+        return keys
     return output.content
 
 

@@ -41,7 +41,8 @@ def main() -> None:
 
     if purge:
         cat.purge()
-    cat.export(identifiers=identifiers)
+    cat.export(identifiers=identifiers, trusted=False)
+    cat.export(identifiers=identifiers, trusted=True)
 
 
 if __name__ == "__main__":

@@ -25,6 +25,28 @@ Setup:
 % uv run playwright install
 ```
 
+### Development web server
+
+The `serve` [Development Task](#development-tasks) runs a Python
+[HTTP Server](https://docs.python.org/3/library/http.server.html) to serve [Static Site](/docs/architecture.md#sites)
+content locally.
+
+> [!TIP]
+> The web server address, port, document root and basic auth credentials use default values printed on server start up.
+
+The default server has been enhanced to support:
+
+- HTTPS, with a certificate generated using [trustme](https://trustme.readthedocs.io/en/latest/)
+- HTTP basic auth, for protected paths and with relevant error handling for [OpenAPI Tests](#openapi-tests)
+- explicitly blocking unsupported HTTP methods, for [OpenAPI Tests](#openapi-tests)
+- handling redirects for paths listed in the [Redirects](/docs/outputs.md#redirects-output) Output CSV
+- custom media types for the [Health](/docs/outputs.md#site-health-output) and
+  [OpenAPI](/docs/outputs.md#site-api-output) outputs
+- permissive [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CORS)
+
+> [!NOTE]
+> The HTTPS certificate used is intentionally untrusted and will be regenerated each time the `serve` task is run.
+
 ### Development publishing
 
 To run BAS Data Catalogue [Publishing Workflows](/docs/usage.md) locally:
@@ -848,6 +870,20 @@ infrastructure configuration we cannot control (e.g. how unsupported HTTP method
 
 To aid in debugging and testing, a simple [Catalogue](/docs/architecture.md#catalogues) is provided using a
 [Test Records Store](#test-records-store), exporting to a local directory.
+
+> [!TIP]
+> The fake catalogue is intended for use by the `tests.scripts.build_fake_cat` wrapping script, which is exposed as the
+> `build-test-records` [Development Task](#development-tasks).
+
+The fake catalogue supports [Trusted Publishing](/docs/architecture.md#trusted-publishing) by generating a parallel
+output with an `-trusted` suffix (conventionally `./export` and `./export-trusted`). To replicate how reverse proxying
+is used in real [Hosting](/docs/infrastructure.md#hosting), a symlink is generated to allow files under `items/` from
+trusted output to be available as `-/items/` within untrusted output.
+
+I.e. A file `./export-trusted/items/x/index.html` can also be accessed as `./export/-/items/x/index.html`.
+
+This allows the untrusted output to act as a single document root for the [Development Server](#development-web-server),
+which includes HTTP basic auth support for accessing trusted content.
 
 ### Test records
 

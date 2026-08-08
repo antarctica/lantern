@@ -45,6 +45,7 @@ dev = [
     "pytailwindcss>=0.2.0",
     "ruff>=0.15.0",
     "taskipy>=1.14.1",
+    "trustme>=1.2.1",
     "ty>=0.0.49",
     "types-lxml>=2025.3.30",
     {include-group = "test"},

@@ -1,4 +1,5 @@
 from typing import TYPE_CHECKING, Final
+from unittest.mock import PropertyMock
 
 import pytest
 
@@ -20,6 +21,8 @@ if TYPE_CHECKING:
     from collections.abc import Callable
     from pathlib import Path
     from subprocess import Popen
+
+    from pytest_mock import MockerFixture
 
     from lantern.config import Config
     from lantern.outputs.base import OutputBase
@@ -80,11 +83,17 @@ class TestCatalogueBase:
 
         Note: Performs an actual export so takes a few seconds.
         """
-        export_path: Path = fx_fake_catalogue._path
+        export_path: Path = fx_fake_catalogue._path_untrusted
         fx_fake_catalogue.export(identifiers={"3c77ffae-6aa0-4c26-bc34-5521dbf4bf23"})  # product min
         assert export_path.joinpath("favicon.ico").exists()
 
-    def test_check(self, fx_fake_catalogue: FakeCatalogue, fx_exporter_static_server: Popen, fx_static_server_url: str):
+    def test_check(
+        self,
+        mocker: MockerFixture,
+        fx_fake_catalogue: FakeCatalogue,
+        fx_exporter_static_server: Popen,
+        fx_static_server_url: str,
+    ):
         """
         Can check catalogue contents.
 
@@ -95,10 +104,15 @@ class TestCatalogueBase:
         (`cf80b941-3de6-4a04-8f5a-a2349c1e3ae0`) because it has external distribution options with fake values that
         trip up the test.
         """
+        mocker.patch.object(
+            type(fx_fake_catalogue._config),
+            "BASE_URL_TESTING",
+            new_callable=PropertyMock,
+            return_value=fx_static_server_url,
+        )
         identifiers = {"3c77ffae-6aa0-4c26-bc34-5521dbf4bf23"}  # minimal product test record
-        fx_fake_catalogue._meta.base_url = fx_static_server_url
         fx_fake_catalogue.export(identifiers)
-        export_path: Path = fx_fake_catalogue._path
+        export_path: Path = fx_fake_catalogue._path_untrusted
 
         fx_fake_catalogue.check(identifiers)
         assert export_path.joinpath("-/checks/data.json").exists()
@@ -106,7 +120,7 @@ class TestCatalogueBase:
     def test_purge(self, fx_fake_catalogue: FakeCatalogue):
         """Can purge export target."""
         identifiers = {"3c77ffae-6aa0-4c26-bc34-5521dbf4bf23"}  # minimal product test record
-        export_path: Path = fx_fake_catalogue._path
+        export_path: Path = fx_fake_catalogue._path_untrusted
         fx_fake_catalogue.export(identifiers)
         assert export_path.joinpath("favicon.ico").exists()
 

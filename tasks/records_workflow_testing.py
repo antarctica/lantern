@@ -28,6 +28,7 @@ from lantern.outputs.item_html import ItemAliasesOutput, ItemCatalogueOutput
 from lantern.outputs.items_bas_website import ItemsBasWebsiteOutput
 from lantern.outputs.record_iso import RecordIsoHtmlOutput, RecordIsoJsonOutput, RecordIsoXmlOutput
 from lantern.outputs.records_waf import RecordsWafOutput
+from lantern.outputs.redirects import RedirectsOutput
 from lantern.outputs.site_health import SiteHealthOutput
 from lantern.outputs.site_index import SiteIndexOutput
 from lantern.utils import get_jinja_env, get_record_aliases
@@ -372,6 +373,7 @@ def _export(cat: BasCatalogue, env: SiteEnvironment, branch: str, identifiers: s
         RecordIsoJsonOutput,
         RecordIsoXmlOutput,
         RecordIsoHtmlOutput,
+        RedirectsOutput,
     ]
     export(cat=cat, env=env, target="remote", branch=branch, identifiers=identifiers, outputs=outputs)
 

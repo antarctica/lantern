@@ -36,7 +36,11 @@ class CatalogueBase(ABC):
     def _group_output_classes(
         outputs: list[type[OutputBase]] | None = None,
     ) -> tuple[list[type[OutputBase]], list[type[OutputBase]]]:
-        """Sort selected output classes into individual and global types, or return all classes."""
+        """
+        Sort selected output classes into individual and global types, or return all classes.
+
+        Filters out the RedirectsOutput if included it needs to be run separately based on other Outputs.
+        """
         all_global: list[type[OutputBase]] = [
             SiteResourcesOutput,
             SiteIndexOutput,
@@ -56,6 +60,7 @@ class CatalogueBase(ABC):
 
         if not outputs:
             return all_global, all_individual
+        # RedirectsOutput won't be included as it isn't in either list
         return [output for output in all_global if output in outputs], [
             output for output in all_individual if output in outputs
         ]

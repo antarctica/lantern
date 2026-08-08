@@ -8,9 +8,13 @@ for the contents they produce.
 
 Output classes can be broadly split into:
 
-- individual, record related, outputs (items, etc.)
-- global, record related, outputs (indexes of items, etc.)
-- global, non-record related, outputs (supporting pages, styles, scripts, etc.)
+- individual outputs:
+  - record related outputs (items, etc.)
+- global outputs:
+  - records related outputs (indexes of items, etc.)
+  - non-record related outputs (supporting pages, styles, scripts, etc.)
+- special outputs:
+  - e.g. redirects output
 
 ## Outputs configuration
 
@@ -253,3 +257,30 @@ items relevant to the public. Items meeting all of these criteria are deemed rel
    - as directing users to Items they can't access is not helpful
 2. are not superseded by another Item (are not the subject of a `RevisionOf` aggregation in another Item)
    - as we don't want to confuse users by showing multiple versions of the same resource
+
+## Redirects output
+
+`lantern.outputs.redirects.RedirectsOutput`
+
+Outputs:
+
+- a CSV containing details of any redirects set in content from other Outputs
+
+Example output:
+
+```csv
+'source,target,_build_ref,_build_time
+things/x,https://example.com/4e179747-337a-4b9b-a85b-3a9799552f18,abc123,2014-06-30T14:30:45+00:00
+things/y,https://example.com/f0f553a4-a4ca-4043-8cff-4d544ef647c5,abc123,2014-06-30T14:30:45+00:00
+```
+
+Fields:
+
+- `source`: relative path to a resource that should be redirected
+- `target`: destination for redirect (redirect value)
+- `_build_ref`: build reference when file was generated (e.g. an Etag type value)
+- `_build_time`: date time when file was generated
+
+> [!TIP]
+> The `_build_ref` and `_build_time` fields are intended for other systems to check whether redirects have changed
+> and need updating. Values for these fields are the same for all rows.

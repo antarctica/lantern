@@ -236,6 +236,33 @@
         }
       }
     },
+    "/-/redirects.csv": {
+      "get": {
+        "tags": [
+          "internal"
+        ],
+        "operationId": "getRedirects",
+        "x-scalar-stability": "experimental",
+        "summary": "Catalogue redirects listing",
+        "description": "Site and item redirects in CSV format, intended for configuring webservers and/or other hosting infrastructure.",
+        "externalDocs": {
+          "description": "More information",
+          "url": "https://github.com/antarctica/lantern/blob/v{{version}}/docs/outputs.md#redirects-output"
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "$ref": "#/components/schemas/csvContent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/legal/accessibility/index.html": {
       "get": {
         "tags": [
@@ -1076,6 +1103,13 @@
         "type": "string",
         "examples": [
           "<!DOCTYPE html>\n\n<html lang=\"en-GB\"><body>Page not found.</body></html>"
+        ]
+      },
+      "csvContent": {
+        "title": "CSV content",
+        "type": "string",
+        "examples": [
+          "heading A, heading B\n\nrow 1 col A,row 1 col B"
         ]
       },
       "publicWebsiteSearchItems": {

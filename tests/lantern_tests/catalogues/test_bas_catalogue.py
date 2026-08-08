@@ -1,26 +1,34 @@
+import csv
 import json
 from copy import deepcopy
 from http import HTTPStatus
+from io import StringIO
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal, get_args
 from unittest.mock import PropertyMock
 
 import pytest
+from botocore.exceptions import ClientError
 
 from lantern.catalogues.bas import BasCatalogue, BasCatEnv, BasCatTrusted, BasCatUntrusted
 from lantern.exporters.cloudfront import CloudFrontExporter
 from lantern.lib.metadata_library.models.record.elements.identification import Aggregations
 from lantern.models.checks import CheckType
 from lantern.models.repository import GitUpsertContext, GitUpsertResults
-from lantern.models.site import SiteEnvironment
+from lantern.models.site import ExportMeta, SiteEnvironment, SiteRedirect
+from lantern.outputs.item_html import ItemAliasesOutput
+from lantern.outputs.redirects import RedirectsOutput
 from lantern.outputs.site_health import SiteHealthOutput
 from lantern.outputs.site_resources import SiteResourcesOutput
+from lantern.site import Site
 from lantern.stores.gitlab import GitLabSource, GitLabStore
 from tests.resources.records.item_cat_checks import record as all_checks_test_record
 
 if TYPE_CHECKING:
     import logging
+    from datetime import datetime
 
+    from freezegun.api import FrozenDateTimeFactory
     from mypy_boto3_s3 import S3Client
     from pytest_mock import MockerFixture
 
@@ -137,6 +145,55 @@ class TestBasCatUntrusted:
         health_data = json.loads(item_text)
         assert health_data["checks"]["site:records"]["observedValue"] == expected_count
         assert health_data["checks"]["search:records"]["observedValue"] == expected_count
+        assert health_data["checks"]["entra:expiry"]["secretId"] == "x"
+
+    @pytest.mark.cov()
+    @pytest.mark.parametrize("has_redirects", [False, True])
+    def test_export_redirects(
+        self,
+        mocker: MockerFixture,
+        freezer: FrozenDateTimeFactory,
+        fx_freezer_time: datetime,
+        fx_bas_cat_untrusted: BasCatUntrusted,
+        fx_s3_bucket_name: str,
+        fx_cf_distribution_id: str,
+        has_redirects: bool,
+    ):
+        """Can specifically generate outputs for redirects with expected values."""
+        freezer.move_to(fx_freezer_time)
+        # mock Site.generate_content() to return empty list of outputs initially
+        meta = ExportMeta.from_config(config=fx_bas_cat_untrusted._config, env=fx_bas_cat_untrusted._env)
+        mocker.patch.object(
+            Site, "generate_content", return_value=[SiteRedirect(path=Path("x"), target=f"{meta.base_url}/y")]
+        )
+
+        expected_key = "-/redirects.csv"
+        expected_row = {
+            "_build_ref": "x",
+            "_build_time": fx_freezer_time.isoformat(),
+            "source": "x",
+            "target": "https://example.com/y",
+        }
+        outputs = [ItemAliasesOutput]
+        if has_redirects:
+            outputs.append(RedirectsOutput)
+
+        fx_bas_cat_untrusted.export(outputs=outputs)
+
+        if not has_redirects:
+            with pytest.raises(ClientError):
+                fx_bas_cat_untrusted._exporter._s3.get_object(
+                    Bucket=fx_bas_cat_untrusted._exporter._bucket, Key=expected_key
+                )
+            return
+
+        item_object = fx_bas_cat_untrusted._exporter._s3.get_object(
+            Bucket=fx_bas_cat_untrusted._exporter._bucket, Key=expected_key
+        )
+        assert item_object["ResponseMetadata"]["HTTPStatusCode"] == HTTPStatus.OK
+        redirects_data = item_object["Body"].read().decode("utf-8")
+        redirects = csv.DictReader(StringIO(redirects_data))
+        assert expected_row in redirects
 
     def test_checks(self, fx_bas_cat_untrusted: BasCatUntrusted):
         """Can generate checks for untrusted site content."""

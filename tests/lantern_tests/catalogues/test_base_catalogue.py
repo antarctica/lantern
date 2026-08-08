@@ -7,6 +7,7 @@ from lantern.outputs.item_html import ItemAliasesOutput, ItemCatalogueOutput
 from lantern.outputs.items_bas_website import ItemsBasWebsiteOutput
 from lantern.outputs.record_iso import RecordIsoHtmlOutput, RecordIsoJsonOutput, RecordIsoXmlOutput
 from lantern.outputs.records_waf import RecordsWafOutput
+from lantern.outputs.redirects import RedirectsOutput
 from lantern.outputs.site_api import SiteApiOutput
 from lantern.outputs.site_health import SiteHealthOutput
 from lantern.outputs.site_index import SiteIndexOutput
@@ -56,6 +57,7 @@ class TestCatalogueBase:
         [
             (None, (all_global, all_individual)),
             ([SiteResourcesOutput, ItemCatalogueOutput], ([SiteResourcesOutput], [ItemCatalogueOutput])),
+            ([SiteResourcesOutput, RedirectsOutput], ([SiteResourcesOutput], [])),
         ],
     )
     def test__sort_output_classes(
@@ -64,7 +66,11 @@ class TestCatalogueBase:
         values: list[Callable[..., OutputBase]] | None,
         expected: tuple[list[Callable[..., OutputBase]], list[Callable[..., OutputBase]]],
     ):
-        """Can sort selected output classes into individual and global types, or return all classes."""
+        """
+        Can sort selected output classes into individual and global types, or return all classes.
+
+        Except for RedirectsOutput which is filtered out to run separately.
+        """
         results = fx_fake_catalogue._group_output_classes(values)
         assert results == expected
 

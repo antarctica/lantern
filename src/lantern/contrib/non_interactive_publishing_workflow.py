@@ -20,6 +20,7 @@ from lantern.models.repository import GitUpsertContext, GitUpsertResults
 from lantern.models.site import SiteEnvironment
 from lantern.outputs.item_html import ItemAliasesOutput, ItemCatalogueOutput
 from lantern.outputs.record_iso import RecordIsoHtmlOutput, RecordIsoJsonOutput, RecordIsoXmlOutput
+from lantern.outputs.redirects import RedirectsOutput
 from lantern.stores.base import RecordNotFoundError
 
 
@@ -156,6 +157,7 @@ def _publish_records(
             RecordIsoJsonOutput,
             RecordIsoXmlOutput,
             RecordIsoHtmlOutput,
+            RedirectsOutput,
         ],
     )
 

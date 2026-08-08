@@ -12,6 +12,7 @@ from lantern.exporters.s3 import S3Exporter
 from lantern.models.checks import Check, CheckType
 from lantern.models.site import ExportMeta, SiteEnvironment
 from lantern.outputs.item_html import ItemCatalogueOutput
+from lantern.outputs.redirects import RedirectsOutput
 from lantern.outputs.site_health import SiteHealthOutput
 from lantern.repositories.bas import BasRepository
 from lantern.site import Site
@@ -98,6 +99,8 @@ class BasCatUntrusted(CatalogueBase):
 
         site = Site(logger=self._logger, meta=meta, store=store, extras=site_extras)
         content = site.generate_content(**content_params)
+        if outputs is None or RedirectsOutput in outputs:
+            content.extend(RedirectsOutput(logger=self._logger, meta=meta, content=content).content)
         self._exporter.export(content)
 
         if self._invalidator:

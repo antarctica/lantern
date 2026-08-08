@@ -13,6 +13,7 @@ from tests.resources.catalogues.fake_catalogue import FakeCatalogue
 
 from lantern.config import Config as ConfigBase
 from lantern.models.checks import Check, CheckState, CheckType
+from lantern.models.site import ExportMeta
 from lantern.outputs.checks import ChecksOutput
 
 if TYPE_CHECKING:
@@ -71,7 +72,8 @@ def export_test_site(export_path: Path) -> None:
             duration=0.0,
         ),
     ]
-    output = ChecksOutput(logger=logger, meta=catalogue._meta, checks=checks)
+    meta = ExportMeta.from_config(config=config, env="testing", build_repo_ref="83fake48", trusted=False)
+    output = ChecksOutput(logger=logger, meta=meta, checks=checks)
     report_data = output.content[1]
     report_path.parent.mkdir(parents=True, exist_ok=True)
     with report_path.open("w") as report_file:

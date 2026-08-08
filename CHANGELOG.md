@@ -57,6 +57,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Azure Entra app registration for accessing MAGIC Distribution Service hosted content
 * Documentation on the various tokens used for infrastructure components and Entra client secret rotation
 * Overview diagrams for site monitoring and checks
+* Untrusted HTTPS support within `serve` development task
+* HTTP basic auth support within `serve` development task for OpenAPI testing
 * Redirects CSV Output, for use within `serve` development task for OpenAPI testing
 
 ### Fixed

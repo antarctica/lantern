@@ -37,7 +37,7 @@ def export_test_site(export_path: Path) -> None:
     catalogue = FakeCatalogue(logger=logger, config=config, base_path=export_path)
     catalogue.export()
 
-    # Include fake checks report
+    # Include fake checks report - mixed/different site env used to ensure both styles are included
     report_path = export_path / "-" / "checks" / "index.html"
     checks = [
         Check(

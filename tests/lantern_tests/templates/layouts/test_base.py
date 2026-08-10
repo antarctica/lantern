@@ -48,17 +48,17 @@ class TestLayoutBase:
         for rel in favicon_rels:
             assert html.head.find("link", rel=rel)["href"].endswith(f"?v={fx_site_meta.build_key}")
 
-    @pytest.mark.parametrize("env", ["testing", "live"])
+    @pytest.mark.parametrize("env", ["preview", "testing", "live"])
     def test_body_env_classes(self, fx_site_meta: SiteMeta, env: str):
         """Can set environment-specific classes on body element."""
         # noinspection PyTypeChecker
         fx_site_meta.env = env
-        env_class = "app-testing-watermark"
+        env_class = f"app-{env}-watermark"
 
         html = BeautifulSoup(self._render(fx_site_meta), parser="html.parser", features="lxml")
         body_classes = html.body["class"]
 
-        if env == "testing":
-            assert env_class in body_classes
-        else:
+        if env == "live":
             assert env_class not in body_classes
+        else:
+            assert env_class in body_classes

@@ -31,6 +31,7 @@ class FakeCatalogue(CatalogueBase):
 
     def __init__(self, logger: logging.Logger, config: Config, base_path: Path) -> None:
         super().__init__(logger)
+        self._env = "preview"
         self._config = config
         self._path_untrusted = base_path
         self._path_trusted = base_path.with_name(f"{base_path.name}-trusted")
@@ -54,7 +55,7 @@ class FakeCatalogue(CatalogueBase):
             individual = [ItemCatalogueOutput]
         path = self._path_untrusted if not trusted else self._path_trusted
 
-        meta = ExportMeta.from_config(config=self._config, env="testing", build_repo_ref="83fake48", trusted=trusted)
+        meta = ExportMeta.from_config(config=self._config, env=self._env, build_repo_ref="83fake48", trusted=trusted)
         site = Site(logger=self._logger, meta=meta, store=self._store, extras=self._site_extras)
         exporter = LocalExporter(logger=self._logger, path=path)
 
@@ -90,7 +91,7 @@ class FakeCatalogue(CatalogueBase):
         Locked to untrusted content.
         """
         global_, individual = self._group_output_classes()
-        meta = ExportMeta.from_config(config=self._config, env="testing", build_repo_ref="83fake48", trusted=False)
+        meta = ExportMeta.from_config(config=self._config, env=self._env, build_repo_ref="83fake48", trusted=False)
         site = Site(logger=self._logger, meta=meta, store=self._store, extras=self._site_extras)
         exporter = LocalExporter(logger=self._logger, path=self._path_untrusted)
 

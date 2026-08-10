@@ -313,11 +313,8 @@ class TestSiteMetadata:
             base_url=expected,
             build_key=expected,
             html_title=expected,
-            sentry_dsn=expected,
-            plausible_id=expected,
             embedded_maps_endpoint=expected,
             items_enquires_endpoint=expected,
-            turnstile_key=expected,
             algolia_id=expected,
             algolia_key=expected,
             algolia_index=expected,
@@ -329,11 +326,8 @@ class TestSiteMetadata:
         assert meta.base_url == expected
         assert meta.build_key == expected
         assert meta.html_title == expected
-        assert meta.sentry_dsn == expected
-        assert meta.plausible_id == expected
         assert meta.embedded_maps_endpoint == expected
         assert meta.items_enquires_endpoint == expected
-        assert meta.turnstile_key == expected
         assert meta.algolia_id == expected
         assert meta.algolia_key == expected
         assert meta.algolia_index == expected
@@ -346,6 +340,9 @@ class TestSiteMetadata:
         assert meta.html_open_graph is None
         assert meta.html_schema_org is None
         assert meta.html_description is None
+        assert meta.sentry_dsn is None
+        assert meta.plausible_id is None
+        assert meta.turnstile_key is None
 
     def test_all(self):
         """Can create a SiteMetadata instance with all possible values."""
@@ -360,11 +357,8 @@ class TestSiteMetadata:
             base_url=expected_str,
             build_key=expected_str,
             html_title=expected_str,
-            sentry_dsn=expected_str,
-            plausible_id=expected_str,
             embedded_maps_endpoint=expected_str,
             items_enquires_endpoint=expected_str,
-            turnstile_key=expected_str,
             algolia_id=expected_str,
             algolia_key=expected_str,
             algolia_index=expected_str,
@@ -377,6 +371,9 @@ class TestSiteMetadata:
             html_open_graph=expected_open_graph,
             html_schema_org=expected_schema_org,
             html_description=expected_str,
+            sentry_dsn=expected_str,
+            plausible_id=expected_str,
+            turnstile_key=expected_str,
         )
 
         assert meta.build_time == expected_time
@@ -386,6 +383,9 @@ class TestSiteMetadata:
         assert meta.html_open_graph == expected_open_graph
         assert meta.html_schema_org == expected_schema_org
         assert meta.html_description == expected_str
+        assert meta.sentry_dsn == expected_str
+        assert meta.plausible_id == expected_str
+        assert meta.turnstile_key == expected_str
 
     def test_html_title_suffixed(self, fx_site_meta: SiteMeta):
         """Can get HTML title with site name."""

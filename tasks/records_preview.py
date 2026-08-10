@@ -148,7 +148,11 @@ def _get_args(logger: logging.Logger, cli_args: tuple[bool, Path, Path, list[Pat
 
 
 def _export(logger: logging.Logger, config: Config, records: list[Record], output_path: Path) -> None:
-    meta = ExportMeta.from_config(config=config, env="testing", trusted=True)
+    meta = ExportMeta.from_config(config=config, env="preview", trusted=True)
+    meta.sentry_dsn = None
+    meta.plausible_id = None
+    meta.turnstile_key = None
+
     site = Site(logger=logger, meta=meta, store=PlaceholderStore())
     exporter = LocalExporter(logger=logger, path=output_path)
 

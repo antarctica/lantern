@@ -120,6 +120,10 @@
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='100px' width='100px'><text transform='translate(20, 100) rotate(-45)' fill='rgb(168, 188, 200)' font-size='20' font-family='sans-serif'>Testing</text></svg>");
 }
 
+@utility app-preview-watermark {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' version='1.1' height='100px' width='100px'><text transform='translate(20, 100) rotate(-45)' fill='rgb(201, 179, 186)' font-size='20' font-family='sans-serif'>Preview</text></svg>");
+}
+
 @media print {
   a:not([href^="#"]):after {
     content: " (" attr(href) ")";

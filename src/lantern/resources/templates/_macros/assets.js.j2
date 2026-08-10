@@ -1,47 +1,3 @@
-{% macro script_sentry_feedback_widget(dsn) %}
-document.addEventListener('DOMContentLoaded', () => {
-  Sentry.init({
-    dsn: '{{ dsn }}',
-    ignoreErrors: [
-      /\[Cloudflare Turnstile] Error: [36]\d{2}\d{3}/,
-    ],
-  });
-
-  const form = document.getElementById('site-feedback');
-  if (!form) return;
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const submitBtn = form.querySelector('button[type="submit"], [type="submit"]');
-    const successEl = document.getElementById('feedback-success');
-    const errorEl = document.getElementById('feedback-error');
-
-    if (typeof Sentry === 'undefined' || typeof Sentry.captureFeedback !== 'function') {
-      submitBtn.classList.add('hidden');
-      errorEl.classList.remove('hidden');
-      throw new Error('Sentry is not available');
-    }
-
-    const formData = new FormData(e.target);
-    const email = formData.get('feedback-email');
-    const content = formData.get('feedback-content');
-
-    Sentry.captureFeedback({
-      email: email,
-      message: content
-    });
-    submitBtn.classList.add('hidden');
-    successEl.classList.remove('hidden');
-  });
-});
-{% endmacro %}
-
-{% macro script_plausible() %}
-window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
-plausible.init()
-{% endmacro %}
-
 {% macro script_show_js(selector) %}
 document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('.{{ selector }}').forEach(el => el.classList.remove('hidden'));
@@ -196,4 +152,48 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 });
+{% endmacro %}
+
+{% macro script_sentry_feedback_widget(dsn) %}
+document.addEventListener('DOMContentLoaded', () => {
+  Sentry.init({
+    dsn: '{{ dsn }}',
+    ignoreErrors: [
+      /\[Cloudflare Turnstile] Error: [36]\d{2}\d{3}/,
+    ],
+  });
+
+  const form = document.getElementById('site-feedback');
+  if (!form) return;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const submitBtn = form.querySelector('button[type="submit"], [type="submit"]');
+    const successEl = document.getElementById('feedback-success');
+    const errorEl = document.getElementById('feedback-error');
+
+    if (typeof Sentry === 'undefined' || typeof Sentry.captureFeedback !== 'function') {
+      submitBtn.classList.add('hidden');
+      errorEl.classList.remove('hidden');
+      throw new Error('Sentry is not available');
+    }
+
+    const formData = new FormData(e.target);
+    const email = formData.get('feedback-email');
+    const content = formData.get('feedback-content');
+
+    Sentry.captureFeedback({
+      email: email,
+      message: content
+    });
+    submitBtn.classList.add('hidden');
+    successEl.classList.remove('hidden');
+  });
+});
+{% endmacro %}
+
+{% macro script_plausible() %}
+window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+plausible.init()
 {% endmacro %}

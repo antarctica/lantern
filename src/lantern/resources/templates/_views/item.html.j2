@@ -1,7 +1,7 @@
 {% extends "_layouts/main.html.j2" %}
 {% import '_macros/item.html.j2' as page %}
 
-{% block head_scripts_extra %}
+{% macro item_contact_turnstile() %}
   <script async src="https://challenges.cloudflare.com/turnstile/v0/api.js"></script>
   <script>
     function onTurnstileError(code) {
@@ -12,6 +12,12 @@
       throw new Error(`Turnstile error: ${code}`);
     }
   </script>
+{% endmacro %}
+
+{% block head_scripts_extra %}
+  {% if meta.turnstile_key %}
+    {{ item_contact_turnstile() }}
+  {% endif %}
 {% endblock %}
 
 {% block main %}

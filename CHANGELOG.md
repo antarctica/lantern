@@ -60,6 +60,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Untrusted HTTPS support within `serve` development task
 * HTTP basic auth support within `serve` development task for OpenAPI testing
 * Redirects CSV Output, for use within `serve` development task for OpenAPI testing
+* 'preview' site environment for item previews
 
 ### Fixed
 
@@ -79,6 +80,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Using temporary path for GitLab store cache within tests
 * Link to data in scheduled checks HTML report
 * Invalidations for auto-indexes
+* Making Sentry, Plausible and Turnstile optional in templates for item previews
 
 ### Changed
 

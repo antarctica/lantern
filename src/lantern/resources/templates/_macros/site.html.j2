@@ -86,8 +86,12 @@
 {% endmacro %}
 
 {% macro head_scripts(data, extra_scripts) %}
-  {{ script_sentry(data.build_key) }}
-  {{ script_plausible(data.plausible_id) }}
+  {% if data.sentry_dsn %}
+    {{ script_sentry(data.build_key) }}
+  {% endif %}
+  {% if data.plausible_id %}
+    {{ script_plausible(data.plausible_id) }}
+  {% endif %}
   {{ script_enhancements(data.build_key) }}
   {% if data.html_schema_org_content %}
     {{ script_schema_org(data.html_schema_org_content) }}

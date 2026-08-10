@@ -23,11 +23,8 @@ class TestMacrosSite:
             build_key="x",
             build_time=freezer_time(),
             html_title="x",
-            sentry_dsn="x",
-            plausible_id="x",
             embedded_maps_endpoint="x",
             items_enquires_endpoint="x",
-            turnstile_key="x",
             algolia_id="x",
             algolia_key="x",
             algolia_index="x",
@@ -102,7 +99,11 @@ class TestMacrosSite:
         assert html.head.find(name="link", rel="stylesheet", href=lambda h: h and h.startswith(href)) is not None
 
     def test_script_sentry(self):
-        """Can get Sentry script from page."""
+        """
+        Can get Sentry script from page.
+
+        This macro doesn't handle whether Sentry is enabled or not. See `test_html_head()`.
+        """
         href = "/static/js/lib/sentry.min.js?v=000"
         template = """{% import '_macros/site.html.j2' as site %}{{ site.script_sentry('000') }}"""
         meta = self._site_meta()
@@ -110,12 +111,18 @@ class TestMacrosSite:
         assert html.head.find(name="script", src=href) is not None
 
     def test_script_plausible(self):
-        """Can get Plausible script from page."""
+        """
+        Can get Plausible script from page.
+
+        This macro doesn't handle whether Plausible is enabled or not. See `test_html_head()`.
+        """
         template = """{% import '_macros/site.html.j2' as site %}{{ site.script_plausible(meta.plausible_id) }}"""
         meta = self._site_meta()
+        meta.plausible_id = "x"
         html = BeautifulSoup(self._render(template, meta), parser="html.parser", features="lxml")
+        target = f"plausible.io/js/{meta.plausible_id}"
         assert len(meta.plausible_id) > 0
-        assert html.head.find(name="script", src=lambda s: s and meta.plausible_id in s) is not None
+        assert html.head.find(name="script", src=lambda s: s and target in s) is not None
 
     def test_script_enhancements(self):
         """Can get progressive enhancements script from page."""
@@ -162,11 +169,8 @@ class TestMacrosSite:
                 build_key="000",
                 build_time=freezer_time(),
                 html_title="x",
-                sentry_dsn="x",
-                plausible_id="x",
                 embedded_maps_endpoint="x",
                 items_enquires_endpoint="x",
-                turnstile_key="x",
                 algolia_id="x",
                 algolia_key="x",
                 algolia_index="x",
@@ -195,14 +199,51 @@ class TestMacrosSite:
                 html_schema_org=SchemaOrgMeta(headline="x", url="x"),
                 html_description="x",
             ),
+            SiteMeta(
+                env="testing",
+                base_url="x",
+                build_key="000",
+                build_time=freezer_time(),
+                html_title="x",
+                embedded_maps_endpoint="x",
+                items_enquires_endpoint="x",
+                algolia_id="x",
+                algolia_key="x",
+                algolia_index="x",
+                generator="x",
+                version="x",
+                sentry_dsn="x",
+                plausible_id=None,
+                turnstile_key=None,
+            ),
+            SiteMeta(
+                env="testing",
+                base_url="x",
+                build_key="000",
+                build_time=freezer_time(),
+                html_title="x",
+                embedded_maps_endpoint="x",
+                items_enquires_endpoint="x",
+                algolia_id="x",
+                algolia_key="x",
+                algolia_index="x",
+                generator="x",
+                version="x",
+                sentry_dsn=None,
+                plausible_id="x",
+                turnstile_key=None,
+            ),
         ],
     )
     @pytest.mark.parametrize("extra_scripts", [None, "foo"])
-    def test_html_head(self, meta: SiteMeta, extra_scripts: str | None):
+    def test_html_head(self, meta: SiteMeta, extra_scripts: str | None):  # noqa: PLR0912
         """
         Can get HTML head elements.
 
-        Integration test for head HTML macro. Checks dynamic elements, including extra scripts content, only.
+        Integration test for head HTML macro, including checks for optional elements:
+        - Sentry
+        - Plausible
+        - extra scripts content
         """
         expected_extra = "foo"
         params: dict = {"meta": meta}
@@ -226,8 +267,6 @@ class TestMacrosSite:
             assert html.head.find(name="meta", attrs={"name": "description"})["content"] == meta.html_description
 
         assert html.head.find(name="link", rel="stylesheet", href="/static/css/main.css?v=000") is not None
-
-        assert html.head.find(name="script", src=lambda s: s and meta.plausible_id in s) is not None
         assert html.head.find(name="script", src="/static/js/enhancements.js?v=000") is not None
 
         if meta.html_open_graph_tags:
@@ -238,10 +277,23 @@ class TestMacrosSite:
             # check no open graph meta tags are defined
             assert all("og:" not in tag.get("property", "") for tag in html.head.find_all(name="meta"))
 
+        _schema_org_content = html.head.find(name="script", type="application/ld+json")
         if meta.html_schema_org_content:
-            assert html.head.find(name="script", type="application/ld+json") is not None
+            assert _schema_org_content is not None
         else:
-            assert html.head.find(name="script", type="application/ld+json") is None
+            assert _schema_org_content is None
+
+        _sentry_script = html.head.find(name="script", src="/static/js/lib/sentry.min.js?v=000")
+        if meta.sentry_dsn:
+            assert _sentry_script is not None
+        else:
+            assert _sentry_script is None
+
+        if meta.plausible_id:
+            target = f"plausible.io/js/{meta.plausible_id}"
+            assert html.head.find(name="script", src=lambda s: s and target in s) is not None
+        else:
+            assert html.head.find(name="script", src=lambda s: s and "plausible.io/js/" in s) is None
 
         if extra_scripts:
             assert expected_extra in str(html)

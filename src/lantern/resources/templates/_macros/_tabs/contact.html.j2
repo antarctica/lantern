@@ -17,17 +17,27 @@
           {{ com.form_input(id="message-sender-name", name="Your name") }}
           {{ com.form_input(id="message-sender-email", name="Your email address", type='email', required=True) }}
           <div class="space-y-2">
-            <div
-              class="cf-turnstile" data-sitekey="{{ data.turnstile_site_key }}"
-              data-theme="auto" data-size="flexible" data-error-callback="onTurnstileError"
-            ></div>
-            <noscript>
+            {% if data.turnstile_site_key %}
+              <div
+                class="cf-turnstile" data-sitekey="{{ data.turnstile_site_key }}"
+                data-theme="auto" data-size="flexible" data-error-callback="onTurnstileError"
+              ></div>
+              <noscript>
+                {% call com.alert(shape='side', variant='red', classes="space-y-2") %}
+                  <p>This form requires JavaScript to protect against spam.</p>
+                  <p>Without JavaScript, submitting this form will fail due to a missing bot detection value.</p>
+                  <p>Please use a alternative contact method if you cannot enable JavaScript.</p>
+                {% endcall %}
+              </noscript>
+            {% else %}
               {% call com.alert(shape='side', variant='red', classes="space-y-2") %}
-                <p>This form requires JavaScript to protect against spam.</p>
-                <p>Without JavaScript, submitting this form will fail due to a missing bot detection value.</p>
-                <p>Please use a alternative contact method if you cannot enable JavaScript.</p>
+                <p>
+                  Bot protection is unavailable (no Turnstile site key).<br />
+                  Form submissions will fail processing.<br />
+                  Please use an alternate contact method.
+                </p>
               {% endcall %}
-            </noscript>
+            {% endif %}
             <button class="{{ com.btn_primary_classes() }} p-4" type="submit">
                 Send Message <i class="fa-regular fa-paper-plane-top" aria-hidden="true"></i>
             </button>

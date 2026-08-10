@@ -639,12 +639,14 @@ class InvalidItemContactError(Exception):
 class ContactTab(Tab):
     """Content tab."""
 
-    def __init__(self, contact: Contact, item_id: str, item_title: str, form_action: str, turnstile_key: str) -> None:
+    def __init__(
+        self, contact: Contact, item_id: str, item_title: str, form_action: str, turnstile_key: str | None
+    ) -> None:
         self._contact = contact
         self._id = item_id
         self._title = item_title
         self._form_action = form_action
-        self._turnstile_key = turnstile_key
+        self._turnstile_key: str | None = turnstile_key
 
     @property
     def enabled(self) -> bool:
@@ -723,8 +725,12 @@ class ContactTab(Tab):
         return "<br/>".join([part for part in parts if part is not None])
 
     @property
-    def turnstile_site_key(self) -> str:
-        """Cloudflare Turnstile widget site key."""
+    def turnstile_site_key(self) -> str | None:
+        """
+        Optional Cloudflare Turnstile widget site key.
+
+        May not be set in preview environments.
+        """
         return self._turnstile_key
 
 

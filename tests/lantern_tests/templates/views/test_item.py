@@ -29,7 +29,12 @@ class TestItemTemplate:
         assert expected.html_schema_org_content == schema_org_page.strip()
 
     def test_script_turnstile(self, fx_item_cat_model_min: ItemCatalogue):
-        """Can get Cloudflare Turnstile script from page."""
+        """
+        Can get Cloudflare Turnstile script from page.
+
+        This test doesn't check where CloudFront keys are not set (and so not included) as it require refactoring the
+        render_item_catalogue fixture and dependant logic.
+        """
         expected = "https://challenges.cloudflare.com/turnstile/v0/api.js"
         html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
 

@@ -539,6 +539,8 @@ Site metadata represents site-wide information and page specific context, includ
   - which can be constructed via the `lantern.models.site.OpenGraphMeta` class
 - [Schema.org](https://schema.org) metadata string
   - which can be constructed via the `lantern.models.site.SchemaOrgMeta` class
+- optional keys or identifiers for external services
+  - including [Site Search](/docs/site.md#search) and [Analytics](/docs/site.md#analytics)
 
 ## Export metadata
 

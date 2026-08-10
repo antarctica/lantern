@@ -199,7 +199,7 @@ class SiteRedirect(SiteContent):
         return f"<!DOCTYPE html>\n{html_str}"
 
 
-SiteEnvironment = Literal["testing", "live"]
+SiteEnvironment = Literal["preview", "testing", "live"]
 
 
 @dataclass(kw_only=True)
@@ -211,11 +211,8 @@ class SiteMeta:
     - base_url: endpoint needed to construct absolute URLs (e.g. 'https://example.com')
     - build_key: cache busting value
     - html_title: HTML head title value (will be combined with site name)
-    - sentry_dsn: Sentry project identifier
-    - plausible_id: Plausible Analytics site identifier
     - embedded_maps_endpoint: BAS Embedded Maps Service endpoint
     - items_enquires_endpoint: endpoint for item enquiries form
-    - turnstile_key: site key for item enquiries Cloudflare Turnstile widget
     - algolia_id: Algolia site identifier
     - algolia_key: non-senstitive Algolia search API key
     - algolia_index: name of Algolia search index
@@ -228,17 +225,17 @@ class SiteMeta:
     - html_open_graph: optional Open Graph metadata
     - html_schema_org: optional URL to Schema.org metadata
     - html_description: optional description meta tag
+    - sentry_dsn: Sentry project identifier
+    - plausible_id: Plausible Analytics site identifier
+    - turnstile_key: site key for item enquiries Cloudflare Turnstile widget
     """
 
     env: SiteEnvironment
     base_url: str
     build_key: str
     html_title: str
-    sentry_dsn: str
-    plausible_id: str
     embedded_maps_endpoint: str
     items_enquires_endpoint: str
-    turnstile_key: str
     algolia_id: str
     algolia_key: str
     algolia_index: str
@@ -251,6 +248,9 @@ class SiteMeta:
     html_open_graph: OpenGraphMeta | None = None
     html_schema_org: SchemaOrgMeta | None = None
     html_description: str | None = None
+    sentry_dsn: str | None = None
+    plausible_id: str | None = None
+    turnstile_key: str | None = None
 
     @property
     def html_title_suffixed(self) -> str:
@@ -330,11 +330,8 @@ class SiteMeta:
                 "env": env,
                 "base_url": base_url,
                 "build_key": config.TEMPLATES_CACHE_BUST_VALUE,
-                "sentry_dsn": config.SENTRY_DSN,
-                "plausible_id": config.TEMPLATES_PLAUSIBLE_ID,
                 "embedded_maps_endpoint": config.TEMPLATES_ITEM_MAPS_ENDPOINT,
                 "items_enquires_endpoint": config.TEMPLATES_ITEM_CONTACT_ENDPOINT,
-                "turnstile_key": config.TEMPLATES_TURNSTILE_KEY,
                 "algolia_id": config.TEMPLATES_ALGOLIA_APP_ID,
                 "algolia_key": config.TEMPLATES_ALGOLIA_SEARCH_API_KEY,
                 "algolia_index": config.TEMPLATES_ALGOLIA_INDEX_NAME,
@@ -343,6 +340,9 @@ class SiteMeta:
                 "build_repo_ref": build_ref,
                 "build_repo_base_url": config.TEMPLATES_ITEM_VERSIONS_ENDPOINT,
                 "html_title": "",
+                "sentry_dsn": config.SENTRY_DSN,
+                "plausible_id": config.TEMPLATES_PLAUSIBLE_ID,
+                "turnstile_key": config.TEMPLATES_TURNSTILE_KEY,
                 **kwargs,
             }
         )

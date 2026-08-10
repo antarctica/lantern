@@ -869,7 +869,7 @@ infrastructure configuration we cannot control (e.g. how unsupported HTTP method
 `tests.resources.catalogues.fake_catalogue.FakeCatalogue`
 
 To aid in debugging and testing, a simple [Catalogue](/docs/architecture.md#catalogues) is provided using a
-[Test Records Store](#test-records-store), exporting to a local directory.
+[Test Records Store](#test-records-store), exporting to a local directory using 'preview' template watermarking.
 
 > [!TIP]
 > The fake catalogue is intended for use by the `tests.scripts.build_fake_cat` wrapping script, which is exposed as the

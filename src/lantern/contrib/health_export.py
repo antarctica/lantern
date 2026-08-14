@@ -5,7 +5,7 @@ from boto3 import client as S3Client  # noqa: N812
 from lantern.catalogues.bas import BasCatalogue
 from lantern.config import Config
 from lantern.log import init as init_logging
-from lantern.log import init_sentry
+from lantern.outputs.site_health import SiteHealthOutput
 
 
 def _run(logger: logging.Logger, config: Config) -> None:
@@ -16,16 +16,15 @@ def _run(logger: logging.Logger, config: Config) -> None:
         region_name="eu-west-1",
     )
     catalogue = BasCatalogue(logger=logger, config=config, s3=s3)
-    catalogue.check(env="live")
+    catalogue.export(env="live", outputs=[SiteHealthOutput])
 
 
 def entrypoint() -> None:
     """Entrypoint."""
-    init_sentry()
     config = Config()
     init_logging(logging_level=config.LOG_LEVEL)
     logger = logging.getLogger("app")
-    logger.info("Initialising Lantern catalogue checks.")
+    logger.info("Initialising Lantern health check export.")
 
     _run(logger=logger, config=config)
     print("Script exiting normally.")

@@ -122,7 +122,7 @@ def has_network() -> bool:
 @pytest.fixture(scope="session")
 def vcr_config():
     """Pytest Recording config."""
-    return {"filter_headers": ["Authorization", "PRIVATE-TOKEN"]}
+    return {"filter_headers": ["Authorization", "PRIVATE-TOKEN", "x-algolia-api-key"]}
 
 
 def freezer_time() -> datetime:

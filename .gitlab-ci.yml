@@ -34,6 +34,7 @@ variables:
   ANSIBLE_HOST_KEY_CHECKING: "False"
   DEPLOY_GROUP: "magic"
   DEPLOY_SSH_PRIVATE_KEY: "id_ed25519.pem"
+  DEPLOY_INVENTORY_GROUP: "lantern"
   DEPLOY_PLAYBOOK: "lantern.yml"
 
   # Secrets (set in GitLab CI/CD settings)
@@ -283,7 +284,7 @@ deploy_stage:
     - PLAYBOOK_CMD="ansible-playbook -v -b -e env=$DEPLOY_ENV -e group=$DEPLOY_GROUP -e project=$DEPLOY_ANSIBLE_ROOT_PATH -e app_version=$DEPLOY_APP_VERSION --vault-id ~/$DEPLOY_ANSIBLE_VAULT_PATH -i inventory/$DEPLOY_GROUP/$DEPLOY_ENV playbooks/$DEPLOY_GROUP/$DEPLOY_PLAYBOOK"
   script:
     - cd $DEPLOY_ANSIBLE_ROOT_PATH
-    - ansible workstations -m ping -i inventory/$DEPLOY_GROUP/$DEPLOY_ENV
+    - ansible $DEPLOY_INVENTORY_GROUP -m ping -i inventory/$DEPLOY_GROUP/$DEPLOY_ENV
     - echo "$PLAYBOOK_CMD"
     - eval "$PLAYBOOK_CMD"
   environment:
@@ -305,7 +306,7 @@ deploy_prod:
     - PLAYBOOK_CMD="ansible-playbook -v -b -e env=$DEPLOY_ENV -e group=$DEPLOY_GROUP -e project=$DEPLOY_ANSIBLE_ROOT_PATH -e app_version=$DEPLOY_APP_VERSION --vault-id ~/$DEPLOY_ANSIBLE_VAULT_PATH -i inventory/$DEPLOY_GROUP/$DEPLOY_ENV playbooks/$DEPLOY_GROUP/$DEPLOY_PLAYBOOK"
   script:
     - cd $DEPLOY_ANSIBLE_ROOT_PATH
-    - ansible workstations -m ping -i inventory/$DEPLOY_GROUP/$DEPLOY_ENV
+    - ansible $DEPLOY_INVENTORY_GROUP -m ping -i inventory/$DEPLOY_GROUP/$DEPLOY_ENV
     - echo "$PLAYBOOK_CMD"
     - eval "$PLAYBOOK_CMD"
   environment:

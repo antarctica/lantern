@@ -28,3 +28,17 @@ python -c "from lantern.contrib.site_checks import entrypoint; entrypoint()"
 ```
 
 Intended for use in a cron/timer task managed by [Ansible](/docs/deployment.md#ansible-playbook) to run scheduled checks.
+
+## Health check export
+
+`lantern.contrib.health_export`
+
+Module exporting the [Site Health Output](/docs/outputs.md#site-health-output) contents to the live site.
+
+E.g.
+
+```shell
+python -c "from lantern.contrib.health_export import entrypoint; entrypoint()"
+```
+
+Intended for use within [Ansible](/docs/deployment.md#ansible-playbook) to verify deployments.

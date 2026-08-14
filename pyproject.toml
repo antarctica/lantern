@@ -207,22 +207,7 @@ select = ["A", "ANN", "B", "B9", "BLE", "C90", "C4", "COM", "D", "DTZ", "E", "EM
 #     PYI019 | for using custom types instead of Self (as it breaks cattras structure methods)
 #      TD002 | for TODOs without an author (as an issue should assign ownership)
 ignore = [
-    "COM812",
-    "D100",
-    "D104",
-    "D107",
-    "D203",
-    "D212",
-    "D401",
-    "D402",
-    "E501",
-    "PLR0913",
-    "PLR0917",
-    "PT001",
-    "PT023",
-    "PYI019",
-    "TD002",
-    "D413",
+    "COM812", "D100", "D104", "D107", "D203", "D212", "D401", "D402", "E501", "PLR0913", "PLR0917", "PT001", "PT023", "PYI019", "TD002", "D413",
 ]
 
 [tool.ruff.lint.per-file-ignores]

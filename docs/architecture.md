@@ -4,8 +4,8 @@
 
 `lantern.catalogue.BasCatalogue`
 
-The BAS Catalogue underpins the BAS Data Catalogue as the only supported [Catalogue](#catalogues) and part of the
-MAGIC [Spatial Data Infrastructure (SDI)](https://github.com/antarctica/magic-sdi).
+The BAS Catalogue implements the 'BAS Data Catalogue' as the only supported [Catalogue](#catalogues), and as part of
+the MAGIC [Spatial Data Infrastructure (SDI)](https://github.com/antarctica/magic-sdi).
 
 > [!TIP]
 > See the [Access](/docs/access.md) docs for how to access the BAS Catalogue.

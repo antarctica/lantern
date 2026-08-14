@@ -4,10 +4,11 @@
 
 Requirements:
 
-- Git
+- [Git](https://git-scm.com)
 - [UV](https://docs.astral.sh/uv/)
 - [Pre-commit](https://pre-commit.com)
 - [1Password CLI](https://developer.1password.com/docs/cli/get-started/)
+  - with access to the *Shared* and *Infrastructure* vaults in the MAGIC team account
 
 Setup:
 
@@ -310,7 +311,6 @@ Previous upgrades for reference:
 
 All changes except minor tweaks (typos, comments, etc.) MUST:
 
-- be associated with an issue (either directly or by reference)
 - be included in the [Change Log](/CHANGELOG.md)
 
 ### Conventions
@@ -321,7 +321,11 @@ All changes except minor tweaks (typos, comments, etc.) MUST:
 - extensions to third party dependencies should be:
   - created in `lantern.lib`
   - documented in [Libraries](/docs/libraries.md)
-  - tested in `tests.lib_tests/`
+  - tested in `tests.lib_tests`
+- extensions for use in third party dependencies should be:
+  - created in `lantern.contrib`
+  - documented in [Contrib](/docs/contrib.md)
+  - tested in `tests.contrib_tests`
 
 ### Adding configuration options
 
@@ -443,7 +447,7 @@ Within this project, for each new item type:
    - update tests in `tests.models.test_checks.TestDistributionChecks`
 1. if needed, add check logic to `lantern.checks.CheckRunner`:
    - update tests in `lantern_tests.test_checks.TestCheckRunner`
-1. update the [Item distribution options](/docs/models.md#catalogue-items-supported-distribution-options) docs
+1. update the [Item distribution options](/docs/models.md#catalogue-item-supported-distribution-options) docs
 1. if adding an ArcGIS distribution option:
    - update `tasks.record_esri` (ensure descriptions are in sync with `item_cat_data` test record)
 
@@ -544,7 +548,7 @@ See the [Taskipy](https://github.com/taskipy/taskipy?tab=readme-ov-file#adding-t
 
 ## Python version
 
-The minimum Python version is 3.11 for consistency with related projects.
+The minimum Python version is 3.14.
 
 ## Dependencies
 
@@ -603,7 +607,7 @@ To upgrade direct dependencies (including major and minor versions changing func
 - commit changes
 
 > [!TIP]
-> If playwright is upgraded, run `uv playwright install` locally and update CI image to match new version.
+> If playwright is upgraded, run `uv run playwright install` locally and update CI image to match new version.
 >
 > To list all (direct and indirect) outdated dependencies, run `uv tree --outdated`.
 
@@ -727,7 +731,8 @@ Main and slow tests are run automatically in [Continuous Integration](#continuou
 
 ### Pytest fast fail
 
-If a tests fail with a `NotImplementedError` exception run the `test-reset` [Development Task](#development-tasks).
+> [!TIP]
+> If a tests fail with a `NotImplementedError` exception run the `test-reset` [Development Task](#development-tasks).
 
 This occurs where:
 
@@ -835,9 +840,9 @@ To run a specific test file with visible output:
 % uv run pytest --headed tests_slow/browser/test_item.py
 ```
 
-Playwright tests require a real website to test against, which is provided by the `fx_exporter_static_server` fixture.
-This hosts a local [Static Site](/docs/architecture.md#sites) served from a temporary directory using Python's
-simple HTTP server. The site contains all [Test Records](#test-records).
+Playwright require a real website to test against, which is provided by the `fx_exporter_static_server` fixture. This
+hosts a local [Static Site](/docs/architecture.md#sites) served from a temporary directory using Python's simple HTTP
+server. The site contains all [Test Records](#test-records).
 
 <!-- pyml disable md028 -->
 > [!NOTE]

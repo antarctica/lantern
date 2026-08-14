@@ -10,10 +10,8 @@ A data discovery tool used to find, evaluate and access resources produced, mana
 
 <!-- pyml disable md028 -->
 > [!IMPORTANT]
-> This project is temporary to formalise and build out refactored components initially developed in the
-> [BAS Assets Tracking Service](https://github.com/antarctica/assets-tracking-service) that will form the next release
-> of the [ADD Metadata Toolbox 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox), which will form the new
-> BAS Data Catalogue.
+> This project supersedes and will replace the
+[ADD Metadata Toolbox 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/add-metadata-toolbox) as the future BAS Data Catalogue.
 
 > [!NOTE]
 > This project forms part of the MAGIC Spatial Data Infrastructure (SDI).

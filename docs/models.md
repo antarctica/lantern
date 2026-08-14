@@ -534,10 +534,10 @@ Represents a generator for additional checks to check selected properties in a g
 
 Site metadata represents site-wide information and page specific context, including:
 
-- base URL, build time, etc.
-- [Open Graph](https://ogp.me) metadata
+- base URL and time, etc.
+- optional [Open Graph](https://ogp.me) metadata
   - which can be constructed via the `lantern.models.site.OpenGraphMeta` class
-- [Schema.org](https://schema.org) metadata string
+- optional [Schema.org](https://schema.org) metadata string
   - which can be constructed via the `lantern.models.site.SchemaOrgMeta` class
 - optional keys or identifiers for external services
   - including [Site Search](/docs/site.md#search) and [Analytics](/docs/site.md#analytics)

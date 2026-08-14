@@ -2,7 +2,8 @@
 
 Summary of colours used across site templates. Compiled and referenced manually to encourage consistency in colour use.
 
-> This summary may not be complete but should be broadly accurate. Last reviewed for an unknown release.
+> [!NOTE]
+> This summary may be incomplete but should be broadly accurate. Last reviewed for the 0.15.x release.
 
 ## Distinct colours
 
@@ -22,18 +23,20 @@ Greyscale:
 
 Colours:
 
-| Colour         | Source             | Comment                                     |
-|----------------|--------------------|---------------------------------------------|
-| `sky-blue-50`  | BSK-2025           | -                                           |
-| `sky-blue-500` | BAS Style Kit 2015 | Contventional 'information' context         |
-| `blue-300`     | BSK-2015           | Used once for 'primary' buttons hover state |
-| `blue-500`     | BSK-2025           | -                                           |
-| `yellow-500`   | BAS Style Kit 2015 | Contventional 'warning' context             |
-| `yellow-700`   | BAS Style Kit 2015 | Used once for 'warning' buttons hover state |
-| `red-500`      | BAS Style Kit 2015 | Contventional 'danger' context              |
-| `pink-500`     | BAS Style Kit 2015 | Used for alpha development status           |
-| `green-500`    | BAS Style Kit 2015 | Contventional 'success' context             |
-| `mauve-500`    | BAS Style Kit 2015 | Used once for 'important' admonition        |
+| Colour         | Source             | Comment                                       |
+|----------------|--------------------|-----------------------------------------------|
+| `sky-blue-50`  | BSK-2025           | -                                             |
+| `sky-blue-500` | BAS Style Kit 2015 | Contventional 'information' context           |
+| `blue-300`     | BSK-2015           | Used once for 'primary' buttons hover state   |
+| `blue-500`     | BSK-2025           | -                                             |
+| `yellow-500`   | BAS Style Kit 2015 | Contventional 'warning' context               |
+| `yellow-700`   | BAS Style Kit 2015 | Used once for 'warning' buttons hover state   |
+| `red-500`      | BAS Style Kit 2015 | Contventional 'danger' context                |
+| `pink-500`     | BAS Style Kit 2015 | Used for alpha development status             |
+| `green-500`    | BAS Style Kit 2015 | Contventional 'success' context               |
+| `mauve-500`    | BAS Style Kit 2015 | Used once for 'important' admonition          |
+| `#C9B3BA`      | -                  | Used once for 'preview' environment watermark |
+| `#A8BCC6`      | -                  | Used once for 'testing' environment watermark |
 
 ## Reference
 
@@ -42,6 +45,8 @@ Colours:
 |--------------------------------|------------------------|--------------|--------------|---------------------------------|
 | Body                           | Text                   | grey-900     | grey-100     |                                 |
 |                                | Background             | white        | grey-950     |                                 |
+| Body (Watermark, Preview)      | Text                   | `#C9B3BA`    | `#C9B3BA`    |                                 |
+| Body (Watermark, Testing)      | Text                   | `#A8BCC6`    | `#A8BCC6`    |                                 |
 | Navbar                         | Text                   | white        | white        | For 'brand' text specifically   |
 |                                | Background             | blue-500     | blue-500     | Equal                           |
 | Development Status             | Text                   | white        | grey-950     |                                 |
@@ -126,7 +131,7 @@ Colours:
 
 ## Change log
 
-### 0.6.x
+### 0.6.x (0.13.x)
 
 #### Changes for BAS Style Kit 2025
 

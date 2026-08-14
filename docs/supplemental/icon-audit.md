@@ -3,7 +3,7 @@
 Summary of icons used across site templates. Compiled and referenced manually to encourage consistency in icon use.
 
 > [!NOTE]
-> This summary may not be complete but should be broadly accurate. Last reviewed for the 0.15.x release.
+> This summary may be incomplete but should be broadly accurate. Last reviewed for the 0.15.x release.
 
 ## Uses
 

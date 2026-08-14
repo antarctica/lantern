@@ -1,12 +1,7 @@
 # Lantern - Configuration
 
-> [!NOTE]
-> Parts of this page are specific to the [BAS Catalogue](/docs/architecture.md#bas-catalogue).
-
-Application configuration is managed by the `lantern.Config` class using environment variables.
-
-All variables are prefixed with `LANTERN_` to avoid conflicts with other applications. E.g. use `LANTERN_FOO` to set a
-`FOO` option.
+Application configuration is managed by the `lantern.Config` class using environment variables. Variables are prefixed
+with `LANTERN_` to avoid conflicts with other applications. E.g. use `LANTERN_FOO` to set a `FOO` option.
 
 <!-- pyml disable md028 -->
 > [!TIP]
@@ -161,13 +156,12 @@ config options used by development tasks.
 
 ## Config option types
 
-All [Config Options](#config-options) are read as string values. They will then be parsed and cast to the listed type
-by the `Config` class. E.g. `'true'` and `'True'` will be parsed as Python's `True` constant for a boolean option.
+All [Config Options](#config-options) are read as string values. They will be parsed and cast to the listed type by the
+`Config` class. E.g. `'true'` and `'True'` will be parsed as Python's `True` constant for a boolean option.
 
 ## Config validation
 
-Missing, required, config options will raise a `environs.exceptions.EnvError` on property access via the
-environs package.
+Missing, required, config options will raise a `environs.exceptions.EnvError` on property access.
 
 [Marshmallow](https://marshmallow.readthedocs.io/en/stable/marshmallow.validate.html and custom validation methods MAY
 additionally validate some config options, raising `environs.exceptions.EnvValidationError` (a `EnvError` subclass) if
@@ -198,7 +192,7 @@ Run the `config-init` [Development Task](/docs/dev.md#development-tasks) to gene
 
 > [!NOTE]
 > This uses the [1Password CLI](https://developer.1password.com/docs/cli/) to inject relevant secrets. You must have
-> access to the MAGIC 1Password vault to run this task.
+> access to relevant vaults within the MAGIC 1Password account to run this task.
 
 ## Adding configuration options
 

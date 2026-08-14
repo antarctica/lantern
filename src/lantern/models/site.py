@@ -323,7 +323,7 @@ class SiteMeta:
         Initial (blank) values for future override are set for:
         - html_title
         """
-        base_url = config.BASE_URL_TESTING if env == "testing" else config.BASE_URL_LIVE
+        base_url = config.BASE_URL_TESTING if env in {"preview", "testing"} else config.BASE_URL_LIVE
 
         return cls(
             **{  # ty: ignore[invalid-argument-type]

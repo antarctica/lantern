@@ -42,10 +42,8 @@ class RecordMagic(Record):
     - if admin metadata is included, a domain consistency element for the MAGIC Administration profile (appendix 1)
     - if admin metadata is included, the metadata encoded within the identification supplemental info element
 
-    Non-standard parameters can be used to set the metadata date_stamp and/or maintenance properties without needing to
-    pass a minimal metadata element (which requires a contact).
-
-    NOTE: This does not apply when creating a record from a config via `loads()`.
+    A non-standard metadata date_stamp and/or maintenance can be set without passing a minimal metadata element
+    (which would require a contact). NOTE: This DOES NOT apply when creating a record from a config via `loads()`.
 
     Examples:
     1. Minimal, without admin metadata:
@@ -93,7 +91,7 @@ class RecordMagic(Record):
     )
     ```
 
-    3. Minimal, without custom metadata date stamp:
+    3. Minimal, with custom metadata date stamp:
     ```
     RecordMagic(
         file_identifier="x",

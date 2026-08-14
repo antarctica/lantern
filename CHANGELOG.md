@@ -18,6 +18,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 <!-- pyml disable no-duplicate-heading,no-duplicate-header -->
 ## [Unreleased]
 
+## [0.15.0] - 2026-08-14
+
 ### Changed [!BREAKING]
 
 * `SITE_UNTRUSTED_S3_ACCESS_ID` config option renamed to `SITE_UNTRUSTED_S3_ACCESS_ID`

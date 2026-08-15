@@ -8,7 +8,7 @@ Modules intended for use by other applications or scripts.
 
 Module implementing the [Non-Interactive Publishing Workflow](/docs/usage.md#non-interactive-publishing-workflow).
 
-Call the module directly to run the workflow with an argparse CLI to collect required arguments.
+Call this module directly to run the workflow with an argparse CLI to collect required arguments.
 
 Intended for creating publishing scripts managed by [Ansible](/docs/deployment.md#ansible-playbook), or for future
 direct integration within other applications that manage records.
@@ -29,16 +29,11 @@ python -c "from lantern.contrib.site_checks import entrypoint; entrypoint()"
 
 Intended for use in a cron/timer task managed by [Ansible](/docs/deployment.md#ansible-playbook) to run scheduled checks.
 
-## Health check export
+## Deployment updates
 
-`lantern.contrib.health_export`
+`lantern.contrib.deployment_updates`
 
-Module exporting the [Site Health Output](/docs/outputs.md#site-health-output) contents to the live site.
+Module implementing the [Site Updates Script](/docs/deployment.md#site-updates-script) run during
+[Ansible](/docs/deployment.md#ansible-playbook) deployments.
 
-E.g.
-
-```shell
-python -c "from lantern.contrib.health_export import entrypoint; entrypoint()"
-```
-
-Intended for use within [Ansible](/docs/deployment.md#ansible-playbook) to verify deployments.
+Call this module directly to trigger exports with an argparse CLI to collect required arguments.

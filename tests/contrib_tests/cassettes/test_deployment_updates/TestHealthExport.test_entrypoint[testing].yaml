@@ -1,0 +1,466 @@
+#file: noinspection YAMLIncompatibleTypes
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.4.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234
+  response:
+    body:
+      string: "{\"id\":1234}"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Runtime:
+      - '0.091391'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.4.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/tree?recursive=True&path=records&ref=main
+  response:
+    body:
+      string: '[{"id": "000", "name": "a1", "type": "tree", "path": "records/a1", "mode": "040000"}, {"id": "000", "name": "b2", "type": "tree", "path": "records/a1/b2", "mode": "040000"}, {"id": "000", "name": "a1b2c3.json", "type": "blob", "path": "records/a1/b2/a1b2c3.json", "mode": "100644"}]'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Link:
+      - <https://gitlab.example.com/api/v4/projects/1234/repository/tree?id=1234&page=2&pagination=legacy&path=records&per_page=20&recursive=true&ref=main>;
+        rel="next"
+        rel="first", <https://gitlab.example.com/api/v4/projects/1234/repository/tree?id=1234&page=2&pagination=legacy&path=records&per_page=20&recursive=true&ref=main>;
+        rel="last"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Next-Page:
+      - ''
+      X-Page:
+      - '1'
+      X-Per-Page:
+      - '20'
+      X-Prev-Page:
+      - ''
+      X-Total:
+      - '3'
+      X-Total-Pages:
+      - '1'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/6.2.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/files/records%2Fa1%2Fb2%2Fa1b2c3.json?ref=main
+  response:
+    body:
+      string: '{"file_name":"a1b2c3.json","file_path":"records/a1/b2/a1b2c3.json","size":0,"encoding":"base64","content_sha256":"2f64e5d61556376b898baddc313be6c3e15b36abc02e4ff9b08a3f6432be79ad","ref":"main","blob_id":"000","commit_id":"000","last_commit_id":"abc123","execute_filemode":false,"content":"eyJmaWxlX2lkZW50aWZpZXIiOiAiYTFiMmMzIiwgImhpZXJhcmNoeV9sZXZlbCI6ICJwcm9kdWN0IiwgIm1ldGFkYXRhIjogeyJjb250YWN0cyI6IFt7Im9yZ2FuaXNhdGlvbiI6IHsibmFtZSI6ICJ4In0sICJyb2xlIjogWyJwb2ludE9mQ29udGFjdCJdfV0sICJkYXRlX3N0YW1wIjogIjIwMTQtMDYtMzAifSwgImlkZW50aWZpY2F0aW9uIjogeyJ0aXRsZSI6IHsidmFsdWUiOiAieCJ9LCAiZGF0ZXMiOiB7ImNyZWF0aW9uIjogIjIwMTQtMDYtMzAifSwgImFic3RyYWN0IjogIngiLCAibGFuZ3VhZ2UiOiAiZW5nIiwgImlkZW50aWZpZXJzIjogW3siaWRlbnRpZmllciI6ICJ4IiwgImhyZWYiOiAiaHR0cHM6Ly9sYW50ZXJuLmRhdGEuYmFzLmFjLnVrL2l0ZW1zL3giLCAibmFtZXNwYWNlIjogImxhbnRlcm4uZGF0YS5iYXMuYWMudWsifV0sICJjb250YWN0cyI6IFt7Im9yZ2FuaXNhdGlvbiI6IHsibmFtZSI6ICJ4In0sICJyb2xlIjogWyJwb2ludE9mQ29udGFjdCJdLCAiZW1haWwiOiAieCJ9XX19"}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Gitlab-Blob-Id:
+      - '000'
+      X-Gitlab-Commit-Id:
+      - '000'
+      X-Gitlab-Content-Sha256:
+      - 2f64e5d61556376b898baddc313be6c3e15b36abc02e4ff9b08a3f6432be79ad
+      X-Gitlab-Encoding:
+      - base64
+      X-Gitlab-Execute-Filemode:
+      - 'false'
+      X-Gitlab-File-Name:
+      - a1b2c3.json
+      X-Gitlab-File-Path:
+      - records/a1/b2/a1b2c3.json
+      X-Gitlab-Last-Commit-Id:
+      - abc123
+      X-Gitlab-Ref:
+      - main
+      X-Gitlab-Size:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.4.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/commits?ref_name=main
+  response:
+    body:
+      string: '[{"id": "abc123"}]'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Link:
+      - <https://gitlab.example.com/api/v4/projects/1234/repository/commits?id=1234&order=default&page=2&per_page=20&ref_name=main&trailers=false>;
+        rel="next", <https://gitlab.example.com/api/v4/projects/1234/repository/commits?id=1234&order=default&page=1&per_page=20&ref_name=main&trailers=false>;
+        rel="first", <https://gitlab.example.com/api/v4/projects/1234/repository/commits?id=1234&order=default&page=2&per_page=20&ref_name=main&trailers=false>;
+        rel="last"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Next-Page:
+      - '2'
+      X-Page:
+      - '1'
+      X-Per-Page:
+      - '20'
+      X-Prev-Page:
+      - ''
+      X-Runtime:
+      - '0.081131'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/6.2.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/commits/abc123
+  response:
+    body:
+      string: '{"id": "abc123"}'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      content-type:
+      - application/json
+      user-agent:
+      - Algolia for Python (4.44.4); Python (3.14.0); Search (4.44.4)
+      x-algolia-api-key:
+      - x
+      x-algolia-application-id:
+      - x
+    method: GET
+    uri: https://x-dsn.algolia.net/1/indexes
+  response:
+    body:
+      string: '{"items":[{"name":"records_all_v1","createdAt":"2014-04-30T14:30:45Z","updatedAt":"2014-04-30T14:30:45Z","entries":1,"dataSize":1,"fileSize":1,"lastBuildTimeS":0,"numberOfPendingTasks":0,"pendingTask":false}],"nbPages":1}'
+    headers:
+      Accept-Encoding:
+      - deflate, gzip
+      Access-Control-Allow-Origin:
+      - '*'
+      Access-Control-Expose-Headers:
+      - Correlation-ID
+      Cache-Control:
+      - no-store
+      Connection:
+      - keep-alive
+      Content-Disposition:
+      - inline; filename=a.txt
+      Content-Length:
+      - '241'
+      Content-Type:
+      - application/json; charset=UTF-8
+      Correlation-ID:
+      - ZJXUEM-20wnY-3NmdPW6vPcy
+      Date:
+      - Fri, 14 Aug 2026 15:36:35 GMT
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=31536000; includeSubDomains; preload
+      Timing-Allow-Origin:
+      - '*'
+      X-Content-Type-Options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/static/json/health.json
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/-/health
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+version: 1

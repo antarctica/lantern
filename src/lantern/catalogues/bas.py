@@ -106,8 +106,9 @@ class BasCatUntrusted(CatalogueBase):
         self._exporter.export(content)
 
         if self._invalidator:
-            # Invalidate entire site where all records will be exported
-            keys = site.generate_invalidation_keys(**content_params) if identifiers else ["/*"]
+            # Where invalidation keys gets close to the AWS limit (150/s), invalidate the entire site instead
+            _keys = site.generate_invalidation_keys(**content_params)
+            keys = _keys if 0 < len(_keys) <= 140 else ["/*"]  # noqa: PLR2004
             self._invalidator.invalidate(keys)
 
     def checks(

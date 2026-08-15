@@ -73,22 +73,21 @@ class TestBasCatUntrusted:
         else:
             assert cat._invalidator is None
 
-    @pytest.mark.parametrize("identifiers", [None, {"x"}])
     def test_export(
         self,
         mocker: MockerFixture,
         fx_bas_cat_untrusted: BasCatUntrusted,
         fx_s3_bucket_name: str,
         fx_cf_distribution_id: str,
-        identifiers: set[str],
     ):
         """Can generate and export site content for untrusted catalogue."""
         expected_keys = {"legal/accessibility/index.html", "-/index/index.html", "items/x/index.html", "records/x.xml"}
-        expected_invalidation_keys = (
-            {"/legal/accessibility/index.html", "/-/index/index.html", "/items/x/index.html", "/records/x.xml"}
-            if identifiers
-            else {"/*"}
-        )
+        expected_invalidation_keys = {
+            "/legal/accessibility/index.html",
+            "/-/index/index.html",
+            "/items/x/index.html",
+            "/records/x.xml",
+        }
 
         fx_bas_cat_untrusted._invalidator = CloudFrontExporter(
             logger=fx_bas_cat_untrusted._logger,
@@ -98,8 +97,7 @@ class TestBasCatUntrusted:
         # mock fx_bas_cat_untrusted._invalidator.invalidate to capture invalidation keys it is called with
         mocker.patch.object(fx_bas_cat_untrusted._invalidator, "invalidate", return_value=None)
 
-        fx_bas_cat_untrusted.export(identifiers=identifiers)
-
+        fx_bas_cat_untrusted.export(identifiers={"x"})
         result = fx_bas_cat_untrusted._exporter._s3.list_objects(Bucket=fx_s3_bucket_name)
         keys = {o["Key"] for o in result["Contents"]}
         assert keys.issuperset(expected_keys)

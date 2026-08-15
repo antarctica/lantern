@@ -1,5 +1,6 @@
 #file: noinspection YAMLIncompatibleTypes
 interactions:
+# untrusted
 - request:
     body: null
     headers:
@@ -464,7 +465,80 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: <InvalidationBatch xmlns="http://cloudfront.amazonaws.com/doc/2020-05-31/"><CallerReference>0feb0810-d03c-4630-90b9-5fc7c77fad59</CallerReference><Paths><Quantity>1</Quantity><Items><Path>/*</Path></Items></Paths></InvalidationBatch>
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/items/a1b2c3/index.html
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+- request:
+    body: <InvalidationBatch xmlns="http://cloudfront.amazonaws.com/doc/2020-05-31/"><CallerReference>0feb0810-d03c-4630-90b9-5fc7c77fad59</CallerReference><Paths><Quantity>1</Quantity><Items><Path>/x</Path></Items></Paths></InvalidationBatch>
     headers:
       Content-Length:
       - '233'
@@ -484,7 +558,7 @@ interactions:
     uri: https://cloudfront.amazonaws.com/2020-05-31/distribution/x/invalidation
   response:
     body:
-      string: '<?xml version="1.0"?><Invalidation xmlns="http://cloudfront.amazonaws.com/doc/2020-05-31/"><Id>x</Id><Status>InProgress</Status><CreateTime>2014-04-30T14:30:45Z</CreateTime><InvalidationBatch><Paths><Quantity>1</Quantity><Items><Path>/*</Path></Items></Paths><CallerReference>0feb0810-d03c-4630-90b9-5fc7c77fad59</CallerReference></InvalidationBatch></Invalidation>'
+      string: '<?xml version="1.0"?><Invalidation xmlns="http://cloudfront.amazonaws.com/doc/2020-05-31/"><Id>x</Id><Status>InProgress</Status><CreateTime>2014-04-30T14:30:45Z</CreateTime><InvalidationBatch><Paths><Quantity>1</Quantity><Items><Path>/x</Path></Items></Paths><CallerReference>0feb0810-d03c-4630-90b9-5fc7c77fad59</CallerReference></InvalidationBatch></Invalidation>'
     headers:
       Content-Length:
       - '395'
@@ -516,12 +590,116 @@ interactions:
     uri: https://cloudfront.amazonaws.com/2020-05-31/distribution/x/invalidation/x
   response:
     body:
-      string: '<?xml version="1.0"?><Invalidation xmlns="http://cloudfront.amazonaws.com/doc/2020-05-31/"><Id>x</Id><Status>Completed</Status><CreateTime>2014-04-30T14:30:45Z</CreateTime><InvalidationBatch><Paths><Quantity>1</Quantity><Items><Path>/*</Path></Items></Paths><CallerReference>0feb0810-d03c-4630-90b9-5fc7c77fad59</CallerReference></InvalidationBatch></Invalidation>'
+      string: '<?xml version="1.0"?><Invalidation xmlns="http://cloudfront.amazonaws.com/doc/2020-05-31/"><Id>x</Id><Status>Completed</Status><CreateTime>2014-04-30T14:30:45Z</CreateTime><InvalidationBatch><Paths><Quantity>1</Quantity><Items><Path>/x</Path></Items></Paths><CallerReference>0feb0810-d03c-4630-90b9-5fc7c77fad59</CallerReference></InvalidationBatch></Invalidation>'
     headers:
       Content-Length:
       - '394'
       Content-Type:
       - text/xml
+    status:
+      code: 200
+      message: OK
+# trusted
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.4.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234
+  response:
+    body:
+      string: "{\"id\":1234}"
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Runtime:
+      - '0.091391'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - '*/*'
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-type:
+      - application/json
+      User-Agent:
+      - python-gitlab/8.4.0
+    method: GET
+    uri: https://gitlab.example.com/api/v4/projects/1234/repository/commits?ref_name=main
+  response:
+    body:
+      string: '[{"id": "abc123"}]'
+    headers:
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json
+      Link:
+      - <https://gitlab.example.com/api/v4/projects/1234/repository/commits?id=1234&order=default&page=2&per_page=20&ref_name=main&trailers=false>;
+        rel="next", <https://gitlab.example.com/api/v4/projects/1234/repository/commits?id=1234&order=default&page=1&per_page=20&ref_name=main&trailers=false>;
+        rel="first", <https://gitlab.example.com/api/v4/projects/1234/repository/commits?id=1234&order=default&page=2&per_page=20&ref_name=main&trailers=false>;
+        rel="last"
+      Referrer-Policy:
+      - strict-origin-when-cross-origin
+      Server:
+      - nginx
+      Strict-Transport-Security:
+      - max-age=63072000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      - Origin
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Next-Page:
+      - '2'
+      X-Page:
+      - '1'
+      X-Per-Page:
+      - '20'
+      X-Prev-Page:
+      - ''
+      X-Runtime:
+      - '0.081131'
     status:
       code: 200
       message: OK

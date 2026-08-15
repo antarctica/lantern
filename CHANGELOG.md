@@ -18,13 +18,16 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 <!-- pyml disable no-duplicate-heading,no-duplicate-header -->
 ## [Unreleased]
 
+## [0.15.1] - 2026-08-14
+
 ### Added
 
-* `health_export` contrib module for use in Ansible post deployment tasks
+* `deployment_updates` contrib module for use in Ansible post deployment tasks
 
 ### Fixed
 
 * Ansible ping targets in CI/CD
+* CloudFront invalidation logic where site only outputs are selected
 
 ### Changed
 

@@ -259,7 +259,7 @@ def clean_record_configs(
 def pick_local_records(logger: logging.Logger, records: list[Record]) -> list[Record]:
     """Pick one or more local records from a list."""
     choices = {
-        f"{r.file_identifier} ('{r.identification.title}' {r.hierarchy_level.value})": r.file_identifier
+        f"{r.file_identifier or '?'} ('{r.identification.title}' {r.hierarchy_level.value if r.hierarchy_level else '?'})": r.file_identifier
         for r in records
     }
     logger.debug("Choices: %s", list(choices.keys()))
@@ -275,7 +275,7 @@ def pick_local_records(logger: logging.Logger, records: list[Record]) -> list[Re
 def pick_local_record(logger: logging.Logger, records: Sequence[Record | RecordCatalogue]) -> Record:
     """Pick a local record from a list."""
     choices = {
-        f"{r.file_identifier} ('{r.identification.title}' {r.hierarchy_level.value})": r.file_identifier
+        f"{r.file_identifier or '?'} ('{r.identification.title}' {r.hierarchy_level.value if r.hierarchy_level else '?'})": r.file_identifier
         for r in records
     }
     logger.debug("Choices: %s", list(choices.keys()))

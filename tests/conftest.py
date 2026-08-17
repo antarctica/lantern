@@ -256,7 +256,6 @@ def _lib_record_config_min_iso() -> dict:
     Standalone method to allow use outside of fixtures in test parametrisation.
     """
     return {
-        "hierarchy_level": "product",
         "metadata": {
             "contacts": [{"organisation": {"name": "x"}, "role": ["pointOfContact"]}],
             "date_stamp": "2014-06-30",
@@ -290,7 +289,7 @@ def fx_lib_record_config_min_magic(fx_lib_record_config_min_iso: dict) -> dict:
 
     Types must be safe to encode as JSON.
     """
-    return {"file_identifier": "x", **fx_lib_record_config_min_iso}
+    return {"file_identifier": "x", "hierarchy_level": "product", **fx_lib_record_config_min_iso}
 
 
 @pytest.fixture()
@@ -309,7 +308,7 @@ def _record_config_min() -> dict:
 
     Standalone method to allow use outside of fixtures in test parametrisation.
     """
-    config: dict = {"file_identifier": "x", **deepcopy(_lib_record_config_min_iso())}
+    config: dict = {"file_identifier": "x", "hierarchy_level": "product", **deepcopy(_lib_record_config_min_iso())}
     config["identification"]["identifiers"] = [
         {
             "identifier": config["file_identifier"],

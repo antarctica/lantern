@@ -118,7 +118,7 @@ class Record:
     )
 
     file_identifier: str | None = None
-    hierarchy_level: HierarchyLevelCode
+    hierarchy_level: HierarchyLevelCode | None = None
     metadata: Metadata
     reference_system_info: ReferenceSystemInfo | None = None
     identification: Identification

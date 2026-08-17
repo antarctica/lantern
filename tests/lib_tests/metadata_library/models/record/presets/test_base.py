@@ -95,6 +95,20 @@ class TestRecordMagic:
                 ),
             )
 
+    def test_no_hierarchy_level(self):
+        """
+        Cannot create a Record without a hierarchy level.
+
+        Note: Checked in _set_citation to stop ty complaining.
+        """
+        with pytest.raises(TypeError, match=r"Records require a hierarchy_level."):
+            _ = RecordMagic(
+                file_identifier="x",
+                identification=Identification(
+                    title="x", abstract="x", dates=Dates(creation=Date(date=datetime(2014, 6, 30, tzinfo=UTC).date()))
+                ),
+            )
+
     @pytest.mark.cov()
     def test_no_file_identifier_set_cat_identifier(self):
         """Cannot set catalogue identifier in a Record without a file identifier."""

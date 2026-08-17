@@ -18,6 +18,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 <!-- pyml disable no-duplicate-heading,no-duplicate-header -->
 ## [Unreleased]
 
+## [0.15.2] - 2026-08-17
+
 ### Fixed
 
 * Including additional outputs to ensure styles and scripts are updated after a release (inc. resources themselves!)

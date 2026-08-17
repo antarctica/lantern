@@ -21,10 +21,11 @@ class Record(RecordBase):
     """
     Representation of a resource within the BAS Data Catalogue specifically.
 
-    Catalogue records extend the base ISO 19115 Record class, requiring the `file_identifier` property.
+    Extends the base ISO 19115 Record class, making the `file_identifier` and 'hierarchy_level' properties required.
     """
 
     file_identifier: str
+    hierarchy_level: HierarchyLevelCode
 
     def __post_init__(self) -> None:
         """
@@ -34,7 +35,10 @@ class Record(RecordBase):
         """
         super().__post_init__()
         if self.file_identifier is None:
-            msg = "Records require a file_identifier."
+            msg = "Catalogue records require a file identifier."
+            raise ValueError(msg)
+        if self.hierarchy_level is None:
+            msg = "Catalogue records require a hierarchy level."
             raise ValueError(msg)
 
     @classmethod

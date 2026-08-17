@@ -189,6 +189,9 @@ class RecordMagic(Record):
         """Set citation using record details as per `make_magic_citation` preset if not already set."""
         if self.identification.other_citation_details:
             return
+        if self.hierarchy_level is None:
+            msg = "Records require a hierarchy_level."
+            raise TypeError(msg)
         self.identification.other_citation_details = make_magic_citation(
             title=self.identification.title,
             hierarchy_level=self.hierarchy_level,

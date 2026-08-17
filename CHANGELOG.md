@@ -18,6 +18,10 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 <!-- pyml disable no-duplicate-heading,no-duplicate-header -->
 ## [Unreleased]
 
+### Fixed
+
+* Record library class incorrectly requiring hierarchy_level
+
 ## [0.15.1] - 2026-08-14
 
 ### Added

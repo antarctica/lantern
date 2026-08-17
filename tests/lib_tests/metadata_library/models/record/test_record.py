@@ -312,7 +312,7 @@ class TestRecord:
 
     def test_sha1(self, fx_lib_record_model_min_iso: Record):
         """Can calculate a SHA1 hash of the record config."""
-        assert fx_lib_record_model_min_iso.sha1 == "081771d18865aa6e72329e2292f337cfa11ec17e"
+        assert fx_lib_record_model_min_iso.sha1 == "bb3903b2398d32766a7244c059f5a56627b6b25d"
 
     @pytest.mark.parametrize("value", [{}, {"invalid": "x"}, {"hierarchy_level": HierarchyLevelCode.DIMENSION_GROUP}])
     def test_config_supported(self, fx_lib_record_config_min_iso: dict, value: dict):
@@ -346,14 +346,12 @@ class TestRecord:
         expected_str = "x"
         expected_date = date(2014, 6, 30)
         expected_enums = {
-            "hierarchy_level": HierarchyLevelCode.PRODUCT,
             "contact_role": ContactRoleCode.POINT_OF_CONTACT,
             "constraint_type": ConstraintTypeCode.USAGE,
             "constraint_code": ConstraintRestrictionCode.LICENSE,
         }
         config = {
             "$schema": "https://metadata-resources.data.bas.ac.uk/bas-metadata-generator-configuration-schemas/v2/iso-19115-2-v4.json",
-            "hierarchy_level": expected_enums["hierarchy_level"].value,
             "metadata": {
                 "contacts": [{"organisation": {"name": expected_str}, "role": [expected_enums["contact_role"].value]}],
                 "date_stamp": expected_date.isoformat(),
@@ -378,7 +376,6 @@ class TestRecord:
         assert record._schema == config["$schema"]
         assert record.identification.title == expected_str  # specially nested property
         assert record.data_quality.lineage.statement == expected_str  # moved property
-        assert record.hierarchy_level == expected_enums["hierarchy_level"]  # enum property
         assert next(iter(record.metadata.contacts[0].role)) == expected_enums["contact_role"]  # enum property
         assert record.metadata.date_stamp == expected_date  # date property
         assert record.identification.dates.creation.date == expected_date  # date property
@@ -406,6 +403,17 @@ class TestRecord:
 
         with pytest.raises(ValueError, match=r"Unsupported JSON Schema in data."):
             _ = Record.loads(config)
+
+    @pytest.mark.cov()
+    def test_loads_min(self, fx_lib_record_config_min_iso: dict):
+        """
+        Can create a Record from a minimal record config.
+
+        Intended to align with minimal record config from the underlying BAS Metadata Library.
+        https://github.com/antarctica/metadata-library/blob/main/tests/resources/configs/iso-19115-0/minimal_v4.json
+        """
+        record = Record.loads(fx_lib_record_config_min_iso)
+        assert record.identification.abstract == fx_lib_record_config_min_iso["identification"]["abstract"]
 
     @pytest.mark.parametrize(
         ("sinfo", "expected"),
@@ -512,7 +520,6 @@ class TestRecord:
         """
         value_str = "x"
         value_enums = {
-            "hierarchy_level": HierarchyLevelCode.PRODUCT,
             "contact_role": ContactRoleCode.POINT_OF_CONTACT,
             "constraint_type": ConstraintTypeCode.USAGE,
             "constraint_code": ConstraintRestrictionCode.LICENSE,
@@ -535,7 +542,6 @@ class TestRecord:
             value_kv["admin_metadata"] = "x"
         expected = {
             "file_identifier": value_str,
-            "hierarchy_level": value_enums["hierarchy_level"].value,
             "metadata": {
                 "character_set": "utf8",
                 "language": "eng",

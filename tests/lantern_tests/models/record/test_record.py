@@ -71,13 +71,16 @@ class TestRecord:
         assert record.file_identifier == expected_str  # record property
         assert isinstance(record.distribution, list)  # parent post-init property
 
-    def test_no_file_identifier(self):
-        """Cannot create a Record class instance directly without a file_identifier."""
+    @pytest.mark.parametrize("prop", ["file_identifier", "hierarchy_level"])
+    def test_missing_id_type(self, prop: str):
+        """Cannot create a Record class instance directly without a file_identifier or hierarchy_level."""
         record = self._make_record(file_identifier="x")
-        with pytest.raises(ValueError, match=r"Records require a file_identifier."):
+        expected_msg = f"Catalogue records require a {prop.replace('_', ' ')}."
+        with pytest.raises(ValueError, match=expected_msg):
             # noinspection PyArgumentList
             _ = Record(
-                hierarchy_level=record.hierarchy_level,
+                file_identifier=record.file_identifier if prop != "file_identifier" else None,
+                hierarchy_level=record.hierarchy_level if prop != "hierarchy_level" else None,
                 metadata=record.metadata,
                 identification=record.identification,
             )
@@ -116,7 +119,7 @@ class TestRecord:
         del fx_record_config_min["file_identifier"]
         with pytest.raises(ClassValidationError) as excinfo:
             Record.loads(fx_record_config_min)
-        assert "Records require a file_identifier." in str(excinfo.value.exceptions[0])
+        assert "Catalogue records require a file identifier." in str(excinfo.value.exceptions[0])
 
     def test_valid(self):
         """Can validate a Record complying with catalogue record requirements."""

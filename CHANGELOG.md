@@ -20,6 +20,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 
 ### Fixed
 
+* Including additional outputs to ensure styles and scripts are updated after a release (inc. resources themselves!)
 * Record library class incorrectly requiring hierarchy_level
 
 ## [0.15.1] - 2026-08-14

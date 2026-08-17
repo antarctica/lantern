@@ -103,7 +103,7 @@ class Record:
     code lists represented by Python enums. See docs/libraries.md#record-limitations for (un)supported config elements.
 
     Complete record configurations can be loaded from a plain Python dict using `loads_schema()` and dumped back using
-    `dumps_schema()`. This class cannot be used to load/dump from/to XML.
+    `dumps_schema()`. This class can be used to dump to but not load from XML via the BAS Metadata Library.
 
     Schema definition: resource [2]
     ISO element: gmd:MD_Metadata [3]

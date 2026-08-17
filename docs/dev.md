@@ -315,14 +315,14 @@ All changes except minor tweaks (typos, comments, etc.) MUST:
 
 ### Conventions
 
-- all deployable code should be contained in the `lantern` package
-- use `Path.resolve()` if displaying or logging file/directory paths
-- use logging to record how actions progress, using the app logger (`logger = logging.getLogger('lantern')`)
-- extensions to third party dependencies should be:
+- all deployable code SHOULD be contained in the `lantern` package
+- `Path.resolve()` SHOULD be used to display or log file/directory paths
+- logging SHOULD be used to record how actions progress, using the app logger (`logger = logging.getLogger('lantern')`)
+- extensions to third party dependencies SHOULD be:
   - created in `lantern.lib`
   - documented in [Libraries](/docs/libraries.md)
   - tested in `tests.lib_tests`
-- extensions for use in third party dependencies should be:
+- extensions for use in other tools and dependencies SHOULD be:
   - created in `lantern.contrib`
   - documented in [Contrib](/docs/contrib.md)
   - tested in `tests.contrib_tests`

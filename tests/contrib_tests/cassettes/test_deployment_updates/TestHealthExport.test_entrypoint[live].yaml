@@ -318,6 +318,7 @@ interactions:
     status:
       code: 200
       message: OK
+
 - request:
     body: !!python/object/new:_io.BytesIO
       state: !!python/tuple
@@ -371,7 +372,7 @@ interactions:
       - !!binary |
         Q1JDMzI=
     method: PUT
-    uri: https://s3.eu-west-1.amazonaws.com/x/static/json/health.json
+    uri: https://s3.eu-west-1.amazonaws.com/x/static/css/main.css
   response:
     body:
       string: ''
@@ -391,6 +392,2565 @@ interactions:
     status:
       code: 200
       message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/static/fonts/work-sans.ttf
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/static/fonts/work-sans-italic.ttf
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/static/img/apple-touch-icon.png
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/static/img/favicon.ico
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/static/img/favicon.svg
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/static/img/favicon-192.png
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/static/img/favicon-512.png
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/static/img/favicon-mask.png
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/static/js/lib/algolia.min.js
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/static/js/lib/scalar.min.js
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/static/js/lib/sentry.min.js
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/static/js/enhancements.js
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/static/js/search.js
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/static/json/api-catalog.json
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/static/json/manifest.webmanifest
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/static/json/openapi.json
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/static/txt/heartbeat.txt
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/static/txt/robots.txt
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/static/txt/security.txt
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/favicon.ico
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/robots.txt
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/.well-known/api-catalog
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/.well-known/security.txt
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/-/index/index.html
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/404.html
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/home/index.html
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/search/index.html
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/legal/accessibility/index.html
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/legal/cookies/index.html
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/legal/copyright/index.html
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/legal/privacy/index.html
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/guides/api/index.html
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/guides/formatting/index.html
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/guides/map-purchasing/index.html
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/guides/roadmap/index.html
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+
 - request:
     body: !!python/object/new:_io.BytesIO
       state: !!python/tuple
@@ -464,6 +3024,80 @@ interactions:
     status:
       code: 200
       message: OK
+- request:
+    body: !!python/object/new:_io.BytesIO
+      state: !!python/tuple
+      - !!binary |
+        OD...o=
+      - 0
+      - null
+    headers:
+      Content-Encoding:
+      - !!binary |
+        YXdzLWNodW5rZWQ=
+      Content-Type:
+      - !!binary |
+        dGV4dC9odG1s
+      Expect:
+      - !!binary |
+        MTAwLWNvbnRpbnVl
+      Transfer-Encoding:
+      - !!binary |
+        Y2h1bmtlZA==
+      User-Agent:
+      - !!binary |
+        Qm90bzMvMS40My4zNiBtZC9Cb3RvY29yZSMxLjQzLjM2IHVhLzIuMSBvcy9tYWNvcyMyNC42LjAg
+        bWQvYXJjaCNhcm02NCBsYW5nL3B5dGhvbiMzLjE0LjAgbWQvcHlpbXBsI0NQeXRob24gbS9VLFos
+        ZSxELGIgY2ZnL3JldHJ5LW1vZGUjbGVnYWN5IEJvdG9jb3JlLzEuNDMuMzY=
+      X-Amz-Content-SHA256:
+      - !!binary |
+        U1RSRUFNSU5HLVVOU0lHTkVELVBBWUxPQUQtVFJBSUxFUg==
+      X-Amz-Date:
+      - !!binary |
+        MjA...g==
+      X-Amz-Decoded-Content-Length:
+      - !!binary |
+        MzQxMzE=
+      X-Amz-Trailer:
+      - !!binary |
+        eC...I=
+      amz-sdk-invocation-id:
+      - !!binary |
+        Nj...hk
+      amz-sdk-request:
+      - !!binary |
+        YX...0x
+      x-amz-meta-build_key:
+      - !!binary |
+        NmExZTNjMA==
+      x-amz-meta-build_ref:
+      - !!binary |
+        NDI2YWRmZjFhOGNhYjgzMWEyYjQ3NzFhYTA3YTA0OTJlMzU4ODExNQ==
+      x-amz-sdk-checksum-algorithm:
+      - !!binary |
+        Q1JDMzI=
+    method: PUT
+    uri: https://s3.eu-west-1.amazonaws.com/x/static/json/health.json
+  response:
+    body:
+      string: ''
+    headers:
+      Content-Length:
+      - '0'
+      Server:
+      - AmazonS3
+      x-amz-checksum-crc32:
+      - RUjmOA==
+      x-amz-checksum-type:
+      - FULL_OBJECT
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k3cSK2_Wth.tzL9o.IZsaJom.Rx.CLUg
+    status:
+      code: 200
+      message: OK
+
 - request:
     body: !!python/object/new:_io.BytesIO
       state: !!python/tuple

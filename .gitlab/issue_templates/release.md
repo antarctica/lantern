@@ -11,7 +11,13 @@
 1. [ ] commit and push changes
 1. [ ] merge into `main`
 1. [ ] trigger staging Ansible deployment and complete required role
-  [Cleanup Tasks 🛡️](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/tree/master/roles/magic/lantern#post-deployment-reset)
+  [Clean-Up Tasks 🛡️](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/tree/master/roles/magic/lantern#post-deployment-reset)
 1. [ ] delete any virtual environments created for pre-deployments (except the most recent)
 1. [ ] tag merge commit with version prefixed with `v` (e.g. `v0.5.0`)
-1. [ ] rebuild the live site to create content referencing new cache busting value (which is based on version)
+1. [ ] complete required role
+   [Clean-Up Tasks 🛡️](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/tree/master/roles/magic/lantern#post-deployment-reset)
+   following automatic production Ansible deployment
+
+> [!NOTE]
+> Production deployments will automatically re-export site resources, pages and catalogue item outputs to the live site
+> to use updated scripts and styles.

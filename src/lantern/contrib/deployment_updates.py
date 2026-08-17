@@ -10,6 +10,9 @@ from lantern.log import init as init_logging
 from lantern.models.site import SiteEnvironment
 from lantern.outputs.item_html import ItemCatalogueOutput
 from lantern.outputs.site_health import SiteHealthOutput
+from lantern.outputs.site_index import SiteIndexOutput
+from lantern.outputs.site_pages import SitePagesOutput
+from lantern.outputs.site_resources import SiteResourcesOutput
 
 if TYPE_CHECKING:
     from lantern.outputs.base import OutputBase
@@ -26,7 +29,9 @@ def _run(logger: logging.Logger, config: Config, env: SiteEnvironment) -> None:
 
     outputs: list[type[OutputBase]] = [SiteHealthOutput]
     if env == "live":
-        outputs.append(ItemCatalogueOutput)
+        # Include outputs that use or produce styles/scripts to update cache busting
+        # (Site checks report not included as it will be updated on the next scheduled run)
+        outputs.extend([SiteResourcesOutput, SitePagesOutput, SiteIndexOutput, ItemCatalogueOutput])
     catalogue.export(env=env, outputs=outputs)
 
 

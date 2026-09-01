@@ -1,3 +1,4 @@
+from functools import lru_cache
 from typing import TYPE_CHECKING
 
 from jinja2 import Environment, PackageLoader, select_autoescape
@@ -25,8 +26,13 @@ def get_record_aliases(record: Record) -> list[Identifier]:
     return record.identification.identifiers.filter(namespace=ALIAS_NAMESPACE)
 
 
+@lru_cache(maxsize=1)
 def get_jinja_env() -> Environment:
-    """Get Jinja environment with app templates."""
+    """
+    Get Jinja environment with app templates.
+
+    Cached to avoid recompiling templates within each environment, which carries a significant cost.
+    """
     _loader = PackageLoader("lantern", "resources/templates")
     return Environment(loader=_loader, autoescape=select_autoescape(), trim_blocks=True, lstrip_blocks=True)
 

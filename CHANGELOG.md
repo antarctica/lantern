@@ -18,6 +18,10 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 <!-- pyml disable no-duplicate-heading,no-duplicate-header -->
 ## [Unreleased]
 
+### Fixed
+
+* Recreating Jinja environments for each Output, which prevents recompilation of templates giving > 80% speedup
+
 ## [0.15.2] - 2026-08-17
 
 ### Fixed

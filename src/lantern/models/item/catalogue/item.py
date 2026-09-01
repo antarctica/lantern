@@ -50,7 +50,7 @@ class ItemCatalogue(ItemBase):
     - a catalogue RecordRevision instance with administrative metadata
     - a callable to get a Record for a given identifier (used for related items via aggregations)
 
-    This class support trusted contexts (e.g. internal users), where an additional ADMIN tab is included.
+    This class supports trusted contexts (e.g. internal users), where an additional ADMIN tab is included.
 
     Note: This class is an incomplete rendering of Record properties (which is itself an incomplete mapping of the
     ISO 19115:2003 / 19115-2:2009 standards). See `docs/data_model.md#catalogue-item-limitations` for more information.
@@ -58,6 +58,8 @@ class ItemCatalogue(ItemBase):
     Note: Properties are cached as they are accessed multiple times during rendering (e.g. tabs are built for both
     navigation and content, and aggregations resolve related records via the store).
     """
+
+    _record: RecordRevision
 
     def __init__(
         self,
@@ -68,31 +70,10 @@ class ItemCatalogue(ItemBase):
         trusted_context: bool,
         **kwargs: Any,
     ) -> None:
-        self._validate_record(record)
-
         super().__init__(record=record, admin_keys=admin_meta_keys)
         self._meta = site_meta
         self._trusted_context = trusted_context
         self._select_record = select_record
-        self.record: RecordRevision
-
-    @staticmethod
-    def _validate_record(record: RecordRevision) -> None:
-        """Validate record a revision and has admin metadata."""
-        if not isinstance(record, RecordRevision):
-            msg = "Record must be a RecordRevision."
-            raise TypeError(msg) from None
-
-    @property
-    def record(self) -> RecordRevision:
-        """Get underlying RecordRevision."""
-        return cast("RecordRevision", super().record)
-
-    @record.setter
-    def record(self, value: RecordRevision) -> None:
-        """Set underlying RecordRevision."""
-        self._validate_record(value)
-        ItemBase.record.fset(self, value)
 
     @cached_property
     def _super_type(self) -> ItemSuperType:
@@ -138,8 +119,8 @@ class ItemCatalogue(ItemBase):
     def _revision(self) -> Link:
         """Link to the record revision."""
         path = f"records/{self.resource_id[:2]}/{self.resource_id[2:4]}/{self.resource_id}.json"
-        href = f"{self._meta.build_repo_base_url}/-/blob/{self.record.file_revision}/{path}"
-        short_ref = self.record.file_revision[:8]
+        href = f"{self._meta.build_repo_base_url}/-/blob/{self._record.file_revision}/{path}"
+        short_ref = self._record.file_revision[:8]
         return Link(value=short_ref, href=href, external=True)
 
     @cached_property
@@ -336,8 +317,13 @@ class ItemCatalogue(ItemBase):
 
     @cached_property
     def default_tab_anchor(self) -> str:
-        """Anchor of first enabled tab."""
-        for tab in [
+        """
+        Anchor of first enabled tab.
+
+        Only tabs shown before the additional information are considered, as it is always enabled. Candidates are listed
+        explicitly as building later tabs (contact, admin) requires properties that are not required for all records.
+        """
+        candidates = [
             self._items,
             self._data,
             self._authors,
@@ -345,7 +331,8 @@ class ItemCatalogue(ItemBase):
             self._extent,
             self._lineage,
             self._related,
-        ]:
+        ]
+        for tab in candidates:
             if tab.enabled:
                 return tab.anchor
         return self._additional_info.anchor

@@ -38,16 +38,20 @@ class LocalExporter(ExporterBase):
         """Persist content."""
         start = time.monotonic()
         count = 0
+        prepared_dirs: set[Path] = set()
 
         for item in content:
             path = self.base_path / item.path
 
             # create parent directories and set permissions (using chmod to avoid umask)
-            path.parent.mkdir(parents=True, exist_ok=True)
-            current = path.parent
-            while current != self.base_path:
-                current.chmod(self._mode_dir)
-                current = current.parent
+            # directories are tracked so each is only prepared once, as many items share the same parents
+            if path.parent not in prepared_dirs:
+                path.parent.mkdir(parents=True, exist_ok=True)
+                current = path.parent
+                while current != self.base_path and current not in prepared_dirs:
+                    current.chmod(self._mode_dir)
+                    prepared_dirs.add(current)
+                    current = current.parent
 
             item_content = item.content.encode("utf-8") if isinstance(item.content, str) else item.content
             with path.open(mode="wb") as f:
@@ -56,10 +60,11 @@ class LocalExporter(ExporterBase):
 
             # log any object metadata that local system doesn't support
             if self._logger.isEnabledFor(logging.DEBUG) and (item.object_meta or item.redirect):
+                unsupported = {**item.object_meta}
                 if item.redirect:
-                    item.object_meta["redirect"] = item.redirect
+                    unsupported["redirect"] = item.redirect
                 self._logger.debug("Additional properties for %s:", path.resolve())
-                self._logger.debug(item.object_meta)
+                self._logger.debug(unsupported)
 
             count += 1
 

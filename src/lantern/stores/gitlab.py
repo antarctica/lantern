@@ -10,7 +10,13 @@ from gitlab import Gitlab, GitlabGetError
 
 from lantern.models.record.revision import RecordRevision
 from lantern.shims import inject_truststore_into_ssl_boto_fix
-from lantern.stores.base import RecordNotFoundError, RecordsNotFoundError, StoreBase, StoreFrozenUnsupportedError
+from lantern.stores.base import (
+    RecordNotFoundError,
+    RecordsNotFoundError,
+    StoreBase,
+    StoreCountUnsupportedError,
+    StoreFrozenUnsupportedError,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Collection
@@ -214,10 +220,9 @@ class GitLabStore(StoreBase):
         """
         Count of records in store.
 
-        Should not be used for non-cached stores as it will simplisticly request all records from the remote source.
+        Not supported, as counting requires fetching every record, which is not sustainable at high record counts.
         """
-        self._logger.warning("Avoid calling this method on uncached stores as all records are fetched.")
-        return len(self.select())
+        raise StoreCountUnsupportedError() from None
 
     @property
     def frozen(self) -> bool:

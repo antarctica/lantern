@@ -6,7 +6,12 @@ import pytest
 from gitlab import Gitlab
 
 from lantern.models.record.revision import RecordRevision
-from lantern.stores.base import RecordNotFoundError, RecordsNotFoundError, StoreFrozenUnsupportedError
+from lantern.stores.base import (
+    RecordNotFoundError,
+    RecordsNotFoundError,
+    StoreCountUnsupportedError,
+    StoreFrozenUnsupportedError,
+)
 from lantern.stores.gitlab import CommitResults, GitLabSource, GitLabStore, ProcessedRecord
 from tests.conftest import _revision_config_min
 
@@ -142,14 +147,10 @@ class TestGitLabStore:
 
         assert fx_gitlab_store._get_remote_hashed_path(value) == expected
 
-    def test_len(self, mocker: MockerFixture, fx_gitlab_store: GitLabStore):
-        """Can get count of records in store."""
-        mocker.patch.object(fx_gitlab_store, "_fetch_record_head_commit", side_effect=self._fetch_record_head_commit)
-        mocker.patch.object(
-            fx_gitlab_store, "_fetch_all_records_head_commit", side_effect=self._fetch_all_records_head_commit
-        )
-
-        assert len(fx_gitlab_store) > 0
+    def test_len(self, fx_gitlab_store: GitLabStore):
+        """Cannot count records in an uncached store, as not sustainable at high record counts."""
+        with pytest.raises(StoreCountUnsupportedError):
+            len(fx_gitlab_store)
 
     @pytest.mark.cov()
     @pytest.mark.block_network

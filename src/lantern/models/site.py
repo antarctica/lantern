@@ -13,8 +13,41 @@ from lantern.models.item.catalogue.elements import FormattedDate
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from _typeshed import DataclassInstance
+
     from lantern.config import Config
     from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
+
+
+def _dump_named_fields(instance: DataclassInstance) -> dict[str, Any]:
+    """
+    Output populated dataclass fields into a dict keyed by each field's `name` metadata.
+
+    Falsy values are omitted. Values exposing their own `dumps()` are unpacked, including within lists.
+
+    E.g. For a dataclass such as:
+
+    ```
+    @dataclass
+    class Foo:
+        x: str = field(metadata={"name": "bar"})
+        y: list[str] = field(default_factory=list, metadata={"name": "baz"})
+    ```
+
+    Gives:
+    - `Foo(x='x')` -> {'bar': 'x'}
+    - `Foo(x='x', y=['a', 'b'])` -> {'bar': 'x', 'baz': ['a', 'b']}
+    """
+    doc: dict[str, Any] = {}
+    for f in fields(instance):
+        value = getattr(instance, f.name)
+        if not value:
+            continue
+        if isinstance(value, list):
+            doc[f.metadata["name"]] = [v.dumps() for v in value if hasattr(v, "dumps")]
+        else:
+            doc[f.metadata["name"]] = value
+    return doc
 
 
 @dataclass(kw_only=True)
@@ -38,12 +71,7 @@ class OpenGraphMeta:
 
     def dumps(self) -> dict[str, str]:
         """Compiled tags."""
-        tags = {}
-        for f in fields(self):
-            value = getattr(self, f.name)
-            if value:
-                tags[f.metadata["name"]] = value
-        return tags
+        return _dump_named_fields(self)
 
 
 @dataclass(kw_only=True)
@@ -56,12 +84,7 @@ class SchemaOrgAuthor:
 
     def dumps(self) -> dict[str, str]:
         """Compiled metadata."""
-        items = {}
-        for f in fields(self):
-            value = getattr(self, f.name)
-            if value:
-                items[f.metadata["name"]] = value
-        return items
+        return _dump_named_fields(self)
 
 
 @dataclass(kw_only=True)
@@ -84,14 +107,7 @@ class SchemaOrgMeta:
 
     def _dumps(self) -> dict[str, str | list[dict]]:
         """Compiled metadata."""
-        doc = {}
-        for f in fields(self):
-            value = getattr(self, f.name)
-            if isinstance(value, str):
-                doc[f.metadata["name"]] = value
-            elif isinstance(value, list) and value:
-                doc[f.metadata["name"]] = [v.dumps() for v in value if hasattr(v, "dumps")]
-        return doc
+        return _dump_named_fields(self)
 
     def __str__(self) -> str:
         """String representation for script tag."""

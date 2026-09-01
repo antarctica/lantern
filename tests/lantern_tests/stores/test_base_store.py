@@ -87,3 +87,13 @@ class TestBaseStore:
         """Cannot freeze a store that does not support freezing."""
         with pytest.raises(StoreFrozenUnsupportedError):
             fx_fake_store.freeze()
+
+    @pytest.mark.cov()
+    def test_prep_parallel(self, fx_fake_store: FakeRecordsStore):
+        """Stores are returned unchanged for parallel processing by default."""
+        assert fx_fake_store.prep_parallel() is fx_fake_store
+
+    @pytest.mark.cov()
+    def test_restore_parallel(self, fx_fake_store: FakeRecordsStore):
+        """Restoring a store in a worker process is a no-op by default."""
+        assert fx_fake_store.restore_parallel() is None

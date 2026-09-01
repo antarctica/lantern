@@ -505,8 +505,8 @@ class TestItemCatalogueSummary:
             (
                 None,
                 (
-                    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAMAAAAKE/YAAAAC+lBMVEUAAADu7u739/fz8/Pt7e3w",
-                    "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAMAAAAKE/YAAAADAFBMVEUAAAAODg4qKiozMzMBAQEVF",
+                    "/static/img/item-default-light.png",
+                    "/static/img/item-default-dark.png",
                 ),
             ),
         ],
@@ -527,8 +527,8 @@ class TestItemCatalogueSummary:
         if href is not None:
             assert summary.graphic_href == expected
         else:
-            assert summary.graphic_href[0].startswith(expected[0])
-            assert summary.graphic_href[1].startswith(expected[1])
+            assert summary.graphic_href[0] == expected[0]
+            assert summary.graphic_href[1] == expected[1]
 
 
 class TestIdentifiers:

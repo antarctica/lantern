@@ -32,6 +32,8 @@ class TestSiteResourcesOutput:
             Path("static/img/favicon-512.png"): "image/png",
             Path("static/img/favicon-mask.png"): "image/png",
             Path("static/img/apple-touch-icon.png"): "image/png",
+            Path("static/img/item-default-dark.png"): "image/png",
+            Path("static/img/item-default-light.png"): "image/png",
             Path("static/txt/heartbeat.txt"): "text/plain",
             Path("static/txt/security.txt"): "text/plain",
             Path("static/js/enhancements.js"): "application/javascript",

@@ -1,4 +1,5 @@
 import json
+from functools import cached_property
 from json import JSONDecodeError
 from typing import TYPE_CHECKING, Any
 
@@ -163,7 +164,7 @@ class ItemCataloguePhysicalMap(ItemCatalogue):
             > 0
         )
 
-    @property
+    @cached_property
     def _sides(self) -> list[RecordRevision]:
         """Records that make up the sides/pages of a physical map."""
         side_identifiers = self.record.identification.aggregations.filter(
@@ -172,7 +173,7 @@ class ItemCataloguePhysicalMap(ItemCatalogue):
         )
         return [self._select_record(side_identifier.identifier.identifier) for side_identifier in side_identifiers]
 
-    @property
+    @cached_property
     def _extent(self) -> ExtentTab:
         """
         Extent tab.
@@ -195,7 +196,7 @@ class ItemCataloguePhysicalMap(ItemCatalogue):
 
         return ExtentTab(extents=extents)
 
-    @property
+    @cached_property
     def _additional_info(self) -> AdditionalInfoTab:
         """
         Additional info tab.
@@ -219,7 +220,7 @@ class ItemCataloguePhysicalMap(ItemCatalogue):
         scales = [side.identification.spatial_resolution for side in self._sides]
         return AdditionalInfoTab(serieses=series, scales=scales, **kwargs)
 
-    @property
+    @cached_property
     def graphics(self) -> GraphicOverviews:
         """Graphic overviews combined from the item and its sides."""
         return GraphicOverviews(
@@ -229,7 +230,7 @@ class ItemCataloguePhysicalMap(ItemCatalogue):
             ]
         )
 
-    @property
+    @cached_property
     def sides(self) -> list[tuple[str, ItemCatalogueSummary]]:
         """Item summaries for the items that make up the physical map."""
         return [

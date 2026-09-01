@@ -31,6 +31,10 @@ class OutputBase(ABC):
 
     Outputs include an ExportMetadata instance, which extends SiteMetadata to provide information such as whether a
     trusted context applies. SiteMetadata includes properties such as the build time and base URL.
+
+    Note: Subclasses SHOULD implement `content` as a `functools.cached_property` to avoid repeating expensive work
+    (e.g. rendering templates, and/or resolving related records, etc.) as Outputs may be used for checks and
+    invalidation keys in addition to content export.
     """
 
     def __init__(self, logger: logging.Logger, meta: ExportMeta, name: str, check_type: CheckType) -> None:

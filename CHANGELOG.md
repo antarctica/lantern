@@ -21,6 +21,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 ### Fixed
 
 * Recreating Jinja environments for each Output, which prevents recompilation of templates giving > 80% speedup
+* Avoiding building items twice per catalogue item Output
+* Caching catalogue item properties, avoiding duplicate related record lookups when processing aggregations
 
 ## [0.15.2] - 2026-08-17
 

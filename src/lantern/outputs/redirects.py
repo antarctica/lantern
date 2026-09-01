@@ -1,4 +1,5 @@
 import csv
+from functools import cached_property
 from io import StringIO
 from pathlib import Path
 from typing import TYPE_CHECKING
@@ -71,7 +72,7 @@ class RedirectsOutput(OutputSite):
         writer.writerows(data)
         return output.getvalue().rstrip("\r\n")
 
-    @property
+    @cached_property
     def content(self) -> list[SiteContent]:
         """Output content for site."""
         return [SiteContent(content=self._content, path=Path("-") / "redirects.csv", media_type="text/csv")]

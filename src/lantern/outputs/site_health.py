@@ -1,5 +1,6 @@
 import json
 from datetime import date, datetime
+from functools import cached_property
 from pathlib import Path
 from typing import TYPE_CHECKING, NamedTuple
 
@@ -99,7 +100,7 @@ class SiteHealthOutput(OutputSite):
             ensure_ascii=False,
         )
 
-    @property
+    @cached_property
     def content(self) -> list[SiteContent]:
         """Output content for site."""
         return [

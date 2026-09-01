@@ -1,3 +1,4 @@
+from functools import cached_property
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -46,7 +47,7 @@ class RecordIsoJsonOutput(OutputRecord):
         """Encode record as BAS ISO JSON."""
         return self._record.dumps_json(strip_admin=self._strip_admin)
 
-    @property
+    @cached_property
     def content(self) -> list[SiteContent]:
         """Output content for record."""
         return [
@@ -91,7 +92,7 @@ class RecordIsoXmlOutput(OutputRecord):
         """Encode record as ISO 19139 XML."""
         return self._record.dumps_xml(strip_admin=self._strip_admin)
 
-    @property
+    @cached_property
     def content(self) -> list[SiteContent]:
         """Output content for record."""
         return [
@@ -187,7 +188,7 @@ class RecordIsoHtmlOutput(OutputRecord):
         """Encode record as ISO 19139 XML with HTML stylesheet."""
         return self._apply_iso_html_xslt(record=self._record)
 
-    @property
+    @cached_property
     def content(self) -> list[SiteContent]:
         """Output content for record."""
         return [

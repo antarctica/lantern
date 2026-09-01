@@ -1,4 +1,5 @@
 import json
+from functools import cached_property
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -96,7 +97,7 @@ class ItemsBasWebsiteOutput(OutputRecords):
         payload = [item.dumps() for item in self._in_scope_items]
         return json.dumps(payload, indent=2, ensure_ascii=False)
 
-    @property
+    @cached_property
     def content(self) -> list[SiteContent]:
         """Output content aggregating all items."""
         return [

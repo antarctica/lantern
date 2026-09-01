@@ -10,7 +10,7 @@ from lantern.exporters.cloudfront import CloudFrontExporter
 from lantern.exporters.rsync import RsyncExporter
 from lantern.exporters.s3 import S3Exporter
 from lantern.models.checks import Check, CheckType
-from lantern.models.site import ExportMeta, SiteEnvironment
+from lantern.models.site import ExportMeta, SiteContent, SiteEnvironment
 from lantern.outputs.item_html import ItemCatalogueOutput
 from lantern.outputs.redirects import RedirectsOutput
 from lantern.outputs.site_health import SiteHealthOutput
@@ -28,6 +28,9 @@ if TYPE_CHECKING:
     from lantern.models.record.record import Record
     from lantern.models.repository import GitUpsertContext, GitUpsertResults
     from lantern.outputs.base import OutputBase
+
+# AWS has a 150/second invalidations limit. Above this invalidating the whole distribution is cheaper and faster.
+MAX_INVALIDATION_KEYS = 140
 
 
 class BasCatUntrusted(CatalogueBase):
@@ -72,6 +75,10 @@ class BasCatUntrusted(CatalogueBase):
             region_name="us-east-1",
         )
 
+    def export_content(self, content: list[SiteContent]) -> None:
+        """Export pre-generated content to hosting to avoid regenerating content."""
+        self._exporter.export(content)
+
     def export(
         self,
         identifiers: set[str] | None = None,
@@ -106,9 +113,9 @@ class BasCatUntrusted(CatalogueBase):
         self._exporter.export(content)
 
         if self._invalidator:
-            # Where invalidation keys gets close to the AWS limit (150/s), invalidate the entire site instead
+            # Where invalidation keys gets close to the AWS limit, invalidate the entire site instead
             _keys = site.generate_invalidation_keys(**content_params)
-            keys = _keys if 0 < len(_keys) <= 140 else ["/*"]  # noqa: PLR2004
+            keys = _keys if 0 < len(_keys) <= MAX_INVALIDATION_KEYS else ["/*"]
             self._invalidator.invalidate(keys)
 
     def checks(
@@ -306,7 +313,7 @@ class BasCatEnv(CatalogueBase):
 
         self._logger.info("Checking %s site", self._env)
         content = self._checker.check(meta=meta, checks=checks)
-        self._untrusted._exporter.export(content)
+        self._untrusted.export_content(content)
 
 
 class BasCatalogue:

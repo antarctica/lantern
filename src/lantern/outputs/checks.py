@@ -1,4 +1,5 @@
 import json
+from functools import cached_property
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -110,7 +111,7 @@ class ChecksOutput(OutputSite):
         raw = self._jinja.get_template(self._template_path).render(meta=self._meta.site_metadata, data=self._data)
         return minify_html(raw)
 
-    @property
+    @cached_property
     def content(self) -> list[SiteContent]:
         """Output content for site."""
         return [

@@ -1,3 +1,4 @@
+from functools import cached_property
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -50,8 +51,13 @@ class ItemCatalogueOutput(OutputRecord):
             return ItemCataloguePhysicalMap
         return ItemCatalogue
 
-    @property
+    @cached_property
     def _item(self) -> ItemCatalogue:
+        """
+        Catalogue item for record.
+
+        Cached as content is needed for both the rendered page and determining its caching behaviour (for live items).
+        """
         item_class = self._item_class()
         return item_class(
             site_meta=self._meta.site_metadata,
@@ -68,7 +74,7 @@ class ItemCatalogueOutput(OutputRecord):
         raw = self._jinja.get_template(self._template_path).render(item=item, meta=item.site_meta)
         return minify_html(raw)
 
-    @property
+    @cached_property
     def content(self) -> list[SiteContent]:
         """Output content for item."""
         return [
@@ -106,7 +112,7 @@ class ItemAliasesOutput(OutputRecord):
         identifiers = get_record_aliases(self._record)
         return [(identifier.href or "").replace(f"https://{CATALOGUE_NAMESPACE}/", "") for identifier in identifiers]
 
-    @property
+    @cached_property
     def content(self) -> list[SiteContent]:
         """Output content per item alias."""
         target = self._meta.base_url + f"/items/{self._record.file_identifier}/"  # ensure trailing slash

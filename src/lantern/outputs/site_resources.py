@@ -1,3 +1,4 @@
+from functools import cached_property
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -205,7 +206,7 @@ class SiteResourcesOutput(OutputSite):
             glob="**/manifest.webmanifest",
         )
 
-    @property
+    @cached_property
     def content(self) -> list[SiteContent]:
         """Output content for all site resources."""
         return [

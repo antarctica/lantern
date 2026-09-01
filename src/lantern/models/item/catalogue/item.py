@@ -1,3 +1,4 @@
+from functools import cached_property
 from typing import TYPE_CHECKING, Any, cast
 
 from lantern.lib.metadata_library.models.record.enums import (
@@ -27,13 +28,13 @@ from lantern.models.item.catalogue.tabs import (
     RelatedTab,
     Tab,
 )
-from lantern.models.record.revision import RecordRevision
 from lantern.models.site import OpenGraphMeta, SchemaOrgAuthor, SchemaOrgMeta, SiteMeta
 from lantern.utils import is_live_record
 
 if TYPE_CHECKING:
     from lantern.lib.metadata_library.models.record.elements.common import Constraint
     from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys
+    from lantern.models.record.revision import RecordRevision
     from lantern.stores.base import SelectRecordProtocol
 
 
@@ -53,6 +54,9 @@ class ItemCatalogue(ItemBase):
 
     Note: This class is an incomplete rendering of Record properties (which is itself an incomplete mapping of the
     ISO 19115:2003 / 19115-2:2009 standards). See `docs/data_model.md#catalogue-item-limitations` for more information.
+
+    Note: Properties are cached as they are accessed multiple times during rendering (e.g. tabs are built for both
+    navigation and content, and aggregations resolve related records via the store).
     """
 
     def __init__(
@@ -90,36 +94,36 @@ class ItemCatalogue(ItemBase):
         self._validate_record(value)
         ItemBase.record.fset(self, value)
 
-    @property
+    @cached_property
     def _super_type(self) -> ItemSuperType:
         """Resource type mapped to a general 'super' type."""
         if self.resource_type in CONTAINER_SUPER_TYPES:
             return ItemSuperType.CONTAINER
         return ItemSuperType.RESOURCE
 
-    @property
+    @cached_property
     def _aggregations(self) -> Aggregations:
         """Aggregations."""
         return Aggregations(
             admin_meta_keys=self._admin_keys, aggregations=self.aggregations, select_record=self._select_record
         )
 
-    @property
+    @cached_property
     def _dates(self) -> Dates:
         """Formatted dates."""
         return Dates(self.record.identification.dates)
 
-    @property
+    @cached_property
     def _identifiers(self) -> Identifiers:
         """Identifiers."""
         return Identifiers(self.record.identification.identifiers)
 
-    @property
+    @cached_property
     def _maintenance(self) -> Maintenance | None:
         """Friendly code list terms."""
         return Maintenance(self.record.identification.maintenance)
 
-    @property
+    @cached_property
     def _metadata_licence(self) -> Constraint | None:
         """Licence constraint."""
         licences = self.record.metadata.constraints.filter(
@@ -130,7 +134,7 @@ class ItemCatalogue(ItemBase):
         except IndexError:
             return None
 
-    @property
+    @cached_property
     def _revision(self) -> Link:
         """Link to the record revision."""
         path = f"records/{self.resource_id[:2]}/{self.resource_id[2:4]}/{self.resource_id}.json"
@@ -138,7 +142,7 @@ class ItemCatalogue(ItemBase):
         short_ref = self.record.file_revision[:8]
         return Link(value=short_ref, href=href, external=True)
 
-    @property
+    @cached_property
     def _restricted(self) -> bool:
         """
         Whether the item is restricted.
@@ -147,22 +151,22 @@ class ItemCatalogue(ItemBase):
         """
         return self.admin_resource_access != AccessLevel.PUBLIC
 
-    @property
+    @cached_property
     def _items(self) -> ItemsTab:
         """Items tab."""
         return ItemsTab(aggregations=self._aggregations)
 
-    @property
+    @cached_property
     def _data(self) -> DataTab:
         """Data tab."""
         return DataTab(restricted=self._restricted, distributions=self.distributions)
 
-    @property
+    @cached_property
     def _authors(self) -> AuthorsTab:
         """Authors tab."""
         return AuthorsTab(item_super_type=self._super_type, authors=self.contacts.filter(roles=ContactRoleCode.AUTHOR))
 
-    @property
+    @cached_property
     def _licence(self) -> LicenceTab:
         """
         Licence tab.
@@ -175,7 +179,7 @@ class ItemCatalogue(ItemBase):
             rights_holders=self.contacts.filter(roles=ContactRoleCode.RIGHTS_HOLDER),
         )
 
-    @property
+    @cached_property
     def _extent(self) -> ExtentTab:
         """Extent tab."""
         bounding_ext = self.bounding_extent
@@ -184,17 +188,17 @@ class ItemCatalogue(ItemBase):
         )
         return ExtentTab(extent=extent)
 
-    @property
+    @cached_property
     def _lineage(self) -> LineageTab:
         """Lineage tab."""
         return LineageTab(item_super_type=self._super_type, statement=self.lineage_html)
 
-    @property
+    @cached_property
     def _related(self) -> RelatedTab:
         """Related tab."""
         return RelatedTab(item_type=self.resource_type, aggregations=self._aggregations)
 
-    @property
+    @cached_property
     def _additional_info(self) -> AdditionalInfoTab:
         """Additional Information tab."""
         return AdditionalInfoTab(
@@ -215,7 +219,7 @@ class ItemCatalogue(ItemBase):
             build_time=self._meta.build_time,
         )
 
-    @property
+    @cached_property
     def _contact(self) -> ContactTab:
         """Contact tab."""
         poc = self.contacts.filter(roles=ContactRoleCode.POINT_OF_CONTACT)[0]
@@ -227,7 +231,7 @@ class ItemCatalogue(ItemBase):
             turnstile_key=self._meta.turnstile_key,
         )
 
-    @property
+    @cached_property
     def _admin(self) -> AdminTab:
         """Admin tab (secure contexts only)."""
         return AdminTab(
@@ -250,7 +254,7 @@ class ItemCatalogue(ItemBase):
         self._meta.html_schema_org = self._html_schema_org
         return self._meta
 
-    @property
+    @cached_property
     def _html_open_graph(self) -> OpenGraphMeta:
         """
         Open Graph metadata tags.
@@ -269,7 +273,7 @@ class ItemCatalogue(ItemBase):
             published_at=publication_date.datetime if publication_date else None,
         )
 
-    @property
+    @cached_property
     def _html_schema_org(self) -> SchemaOrgMeta:
         """Schema.org metadata."""
         authors: list[SchemaOrgAuthor] = []
@@ -289,17 +293,17 @@ class ItemCatalogue(ItemBase):
             creator=authors,
         )
 
-    @property
+    @cached_property
     def page_header(self) -> PageHeader:
         """Page header."""
         return PageHeader(title=self.title_html, item_type=self.resource_type)
 
-    @property
+    @cached_property
     def live(self) -> bool:
         """Whether item is updated frequently enough to be considered 'live'."""
         return is_live_record(self._record)
 
-    @property
+    @cached_property
     def summary(self) -> PageSummary:
         """Item summary."""
         return PageSummary(
@@ -314,7 +318,7 @@ class ItemCatalogue(ItemBase):
             description=self.description_html,
         )
 
-    @property
+    @cached_property
     def tabs(self) -> list[Tab]:
         """For generating item navigation."""
         return [
@@ -330,7 +334,7 @@ class ItemCatalogue(ItemBase):
             self._admin,
         ]
 
-    @property
+    @cached_property
     def default_tab_anchor(self) -> str:
         """Anchor of first enabled tab."""
         for tab in [

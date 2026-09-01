@@ -1,3 +1,4 @@
+from functools import cached_property
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -71,7 +72,7 @@ class RecordsWafOutput(OutputRecords):
 
         return ET.tostring(html, encoding="unicode", method="html")
 
-    @property
+    @cached_property
     def content(self) -> list[SiteContent]:
         """Output content for record."""
         return [

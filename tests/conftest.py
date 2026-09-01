@@ -830,6 +830,9 @@ def fx_bas_repo_min_cat_record(
     gitlab = GitLabStore(logger=fx_logger, source=fx_gitlab_source, access_token=fx_config.STORE_GITLAB_TOKEN)
     mocker.patch.object(gitlab, "select", return_value=[record])
     mocker.patch.object(type(gitlab), "head_commit", new_callable=PropertyMock, return_value="x")
+    # patched on the type as dunder methods are looked up on the class, not the instance
+    # uncached GitLab stores cannot count records, but the store this stands in for (a cached store) can
+    mocker.patch.object(type(gitlab), "__len__", return_value=1)
     mocker.patch.object(fx_bas_repo, "_make_gitlab_store", return_value=gitlab)
 
     mock_algolia = mocker.MagicMock()

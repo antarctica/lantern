@@ -18,11 +18,24 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 <!-- pyml disable no-duplicate-heading,no-duplicate-header -->
 ## [Unreleased]
 
+### Added
+
+* Shared helper for OpenGraph and Schema.org metadata fields to reduce repetition
+
 ### Fixed
 
 * Recreating Jinja environments for each Output, which prevents recompilation of templates giving > 80% speedup
 * Avoiding building items twice per catalogue item Output
 * Caching catalogue item properties, avoiding duplicate related record lookups when processing aggregations
+* `StoreCountUnsupportedError` for stores that cannot count records efficiently
+* `LocalExporter` setting permissions repeatedly for common parent directories
+* Preventing Site instances reusing the wrong store singletons in parallel workers via a singleton key
+
+### Changed
+
+* Refactoring preparing Stores for parallel processing within a Site for better layering
+* Refactoring default thumbnails in item summaries from base64 strings to static site files
+* Replacing record type checks in `ItemCatalogue` with a type annotation enforced via type checking
 
 ## [0.15.2] - 2026-08-17
 

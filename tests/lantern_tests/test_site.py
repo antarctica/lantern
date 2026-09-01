@@ -2,6 +2,7 @@ import json
 import logging
 from datetime import date
 from typing import TYPE_CHECKING
+from uuid import uuid4
 
 import pytest
 from lxml import etree
@@ -23,6 +24,7 @@ from lantern.site import Site, SiteAction, SiteJob, _job_worker_iso_html_transfo
 from lantern.stores.base import StoreBase
 from lantern.stores.gitlab_cache import GitLabCachedStore
 from tests.resources.records.item_cat_product_min import record as product_min_required
+from tests.resources.stores.fake_records_store import FakeRecordsStore
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -38,14 +40,31 @@ class TestSiteJob:
     @pytest.mark.cov()
     def test_job_worker_store(self, fx_fake_store: StoreBase):
         """Can create store instance."""
-        result = _job_worker_store(store=fx_fake_store)
+        result = _job_worker_store(key=str(uuid4()), store=fx_fake_store)
         assert isinstance(result, StoreBase)
+
+    @pytest.mark.cov()
+    def test_job_worker_store_cached(self, fx_fake_store: StoreBase):
+        """Reuses the store for subsequent jobs from the same site."""
+        key = str(uuid4())
+        first = _job_worker_store(key=key, store=fx_fake_store)
+        second = _job_worker_store(key=key, store=FakeRecordsStore(logger=logging.getLogger("lantern")))
+        assert second is first
+
+    @pytest.mark.cov()
+    def test_job_worker_store_rekeyed(self, fx_fake_store: StoreBase):
+        """Does not reuse a store from a different site, as workers may be shared between sites."""
+        first = _job_worker_store(key=str(uuid4()), store=fx_fake_store)
+        other = FakeRecordsStore(logger=logging.getLogger("lantern"))
+        second = _job_worker_store(key=str(uuid4()), store=other)
+        assert second is not first
+        assert second is other
 
     @pytest.mark.cov()
     def test_job_worker_store_gitlab_cache(self, fx_gitlab_cached_store_pop: GitLabCachedStore):
         """Can create and re-warm GitLabCachedStore instance."""
         fx_gitlab_cached_store_pop._cache._flash.clear()
-        result = _job_worker_store(store=fx_gitlab_cached_store_pop)
+        result = _job_worker_store(key=str(uuid4()), store=fx_gitlab_cached_store_pop)
         assert isinstance(result, GitLabCachedStore)
         assert len(result._cache._flash) > 0
 
@@ -111,7 +130,9 @@ class TestSiteJob:
             if output_cls == SiteHealthOutput
             else None,
         )
-        content = _run_job(log_level=logging.DEBUG, meta=fx_export_meta, store=fx_fake_store, job=job)
+        content = _run_job(
+            log_level=logging.DEBUG, meta=fx_export_meta, store=fx_fake_store, job=job, worker_key=str(uuid4())
+        )
 
         results = [str(output.path) for output in content]
         for exp in expected:
@@ -122,6 +143,7 @@ class TestSiteJob:
             meta=fx_export_meta,
             store=fx_fake_store,
             job=SiteJob(action="checks", output=output_cls, record=fx_revision_model_min),
+            worker_key=str(uuid4()),
         )
         assert len(checks) > 0
 
@@ -143,16 +165,14 @@ class TestSite:
         assert isinstance(site, Site)
         assert site._extras == {}
         assert site._workers == 1
+        assert site._worker_key
 
     @pytest.mark.cov()
-    def test_prep_store_gitlab_cache(self, fx_site: Site, fx_gitlab_cached_store_pop: GitLabCachedStore):
-        """Can clear the flash cache of a GitLabCachedStore prior to parallel processing."""
-        fx_site._store = fx_gitlab_cached_store_pop
-        _ = fx_gitlab_cached_store_pop.select()
-        assert len(fx_gitlab_cached_store_pop._cache._flash) > 0
-        result: GitLabCachedStore = fx_site._prep_store()
-        assert len(result._cache._flash) == 0
-        assert len(fx_gitlab_cached_store_pop._cache._flash) > 0
+    def test_worker_key_unique(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_fake_store: StoreBase):
+        """Each site gets a distinct worker key, so reused workers don't return another site's store."""
+        site_a = Site(logger=fx_logger, meta=fx_export_meta, store=fx_fake_store)
+        site_b = Site(logger=fx_logger, meta=fx_export_meta, store=fx_fake_store)
+        assert site_a._worker_key != site_b._worker_key
 
     @pytest.mark.cov()
     @pytest.mark.parametrize(

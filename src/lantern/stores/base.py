@@ -9,6 +9,10 @@ class StoreFrozenUnsupportedError(Exception):
     """Raised when attempting to freeze an unsupported store."""
 
 
+class StoreCountUnsupportedError(Exception):
+    """Raised when attempting to count records in a store that cannot do so efficiently."""
+
+
 class StoreFrozenError(Exception):
     """Raised when attempting to modify a frozen store."""
 
@@ -73,6 +77,29 @@ class StoreBase(ABC):
         Raises `StoreFrozenUnsupportedError` if not supported.
         """
         ...
+
+    def prep_parallel(self) -> StoreBase:
+        """
+        Return store configured for use in parallel jobs.
+
+        Stores are pickled for each parallel job, which may be inefficient for e.g. in-memory state.
+
+        Where applicable, stores SHOULD exclude or otherwise mitigate such overheads within a returned copy.
+        Stores MUST NOT modify the current instance, as it remains in use by the calling process.
+
+        Paired with `restore_parallel()`, which recreates any excluded state for each worker process.
+
+        Where this is not a problem, the current store SHOULD be returned unchanged.
+        """
+        return self
+
+    def restore_parallel(self) -> None:
+        """
+        Rebuild any state excluded by `prep_parallel()`.
+
+        Called once per worker process if needed, otherwise this method SHOULD not be overridden.
+        """
+        return
 
 
 class SelectRecordsProtocol(Protocol):

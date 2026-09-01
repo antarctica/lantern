@@ -47,7 +47,6 @@ if TYPE_CHECKING:
     from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
 
     from lantern.config import Config
-    from lantern.models.record.record import Record
 
 
 class TestItemCatalogue:
@@ -66,30 +65,17 @@ class TestItemCatalogue:
         assert item.record == fx_revision_model_min
 
     @pytest.mark.cov()
-    def test_init_invalid_record_type(self, fx_site_meta: SiteMeta, fx_record_model_min: Record):
-        """Cannot create an ItemCatalogue if not a RecordRevision."""
-        with pytest.raises(TypeError, match=r"Record must be a RecordRevision."):
-            _ = ItemCatalogue(
-                site_meta=fx_site_meta,
-                record=fx_record_model_min,
-                admin_meta_keys=None,
-                trusted_context=True,
-                select_record=_select_record,
-            )
-
-    @pytest.mark.cov()
     def test_record(
         self,
         fx_site_meta: SiteMeta,
         fx_admin_meta_keys: AdministrationKeys,
         fx_admin_meta_element: AdministrationMetadata,
-        fx_record_model_min: Record,
         fx_revision_model_min: RecordRevision,
     ):
         """
         Can get and set underlying RecordRevision.
 
-        Also check cached admin metadata is reset when record is changed, and that Records are rejected.
+        Also check cached admin metadata is reset when record is changed.
         """
         record_a = fx_revision_model_min
         admin_a = deepcopy(fx_admin_meta_element)
@@ -120,11 +106,6 @@ class TestItemCatalogue:
         assert item.record == record_b
         assert item._admin_metadata is None
         assert item.admin_metadata == admin_b
-        assert item._admin_metadata == admin_b
-
-        with pytest.raises(TypeError, match=r"Record must be a RecordRevision"):
-            item.record = fx_record_model_min
-        assert item.record == record_b  # unchanged
         assert item._admin_metadata == admin_b
 
     @pytest.mark.parametrize(

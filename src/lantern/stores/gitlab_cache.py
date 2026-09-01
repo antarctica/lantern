@@ -240,7 +240,7 @@ class GitLabLocalCache:
             return False
 
         current_source = self._source
-        self._logger.debug("Cached: '{cached_source}' ?= Current: '%s'", current_source)
+        self._logger.debug("Cached: '%s' ?= Current: '%s'", cached_source, current_source)
         return cached_source == current_source
 
     @property
@@ -522,7 +522,7 @@ class GitLabLocalCache:
         try:
             if not self._applicable:
                 if self._frozen:
-                    msg = f"Cached source '{self._cached_source}' does not match current instance and branch '%s' but is frozen. Will not load records."
+                    msg = f"Cached source '{self._cached_source}' does not match current instance and branch '{self._source}' but is frozen. Will not load records."
                     raise CacheFrozenError(msg) from None
                 self._logger.warning(
                     "Cached source '%s' does not match current instance and branch '%s', recreating cache",
@@ -750,6 +750,23 @@ class GitLabCachedStore(GitLabStore):
         """
         self._cache.freeze()
         self._frozen = True
+
+    def prep_parallel(self) -> GitLabCachedStore:
+        """
+        Return a store configured for use in parallel jobs.
+
+        Resets in-memory 'flash' cache as it holds unpickled records, adding significant overhead when pickling for
+        each parallel job. It is rebuilt once per worker process by `restore_parallel()` instead.
+
+        Creates a copy as the original instance MAY be used by the calling process.
+        """
+        store = deepcopy(self)
+        store._cache._flash.clear()
+        return store
+
+    def restore_parallel(self) -> None:
+        """Rebuild the in-memory 'flash' cache for each parallel job worker."""
+        self.select()
 
     def purge(self) -> None:
         """Clear underlying cache."""

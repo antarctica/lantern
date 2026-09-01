@@ -1,8 +1,8 @@
 import logging
 import time
-from copy import deepcopy
 from datetime import date
 from typing import TYPE_CHECKING, Literal, NamedTuple, cast
+from uuid import uuid4
 
 from joblib import Parallel, delayed
 
@@ -13,7 +13,6 @@ from lantern.outputs.record_iso import RecordIsoHtmlOutput, RecordIsoJsonOutput,
 from lantern.outputs.records_waf import RecordsWafOutput
 from lantern.outputs.site_health import SiteHealthOutput, SiteHealthOutputComponentValues
 from lantern.outputs.site_index import SiteIndexOutput
-from lantern.stores.gitlab_cache import GitLabCachedStore
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -28,23 +27,25 @@ if TYPE_CHECKING:
 
 SiteAction = Literal["content", "checks", "invalidations"]
 
-_STORE_SINGLETON: StoreBase | None = None
+_STORE_SINGLETON: tuple[str, StoreBase] | None = None
 _ISO_HTML_XSLT_SINGLETON: etree.XSLT | None = None
 
 
-def _job_worker_store(store: StoreBase) -> StoreBase:
+def _job_worker_store(key: str, store: StoreBase) -> StoreBase:
     """
     Store per worker process.
 
-    Singleton used to avoid initialising store for each job as some stores cannot be pickled.
+    Singleton used to avoid re-initialising the store for each job, as some stores are expensive or impossible
+    to pickle with in memory state.
+
+    Keyed by the owning Site so that a worker reused by a different Site does not silently return the wrong
+    store. Only the most recent store is retained, as jobs from a Site are dispatched together.
     """
     global _STORE_SINGLETON  # noqa: PLW0603
-    if _STORE_SINGLETON is None:
-        _STORE_SINGLETON = store
-        if isinstance(store, GitLabCachedStore):
-            _STORE_SINGLETON.select()  # recreate flash cache
-    # noinspection PyTypeChecker
-    return _STORE_SINGLETON
+    if _STORE_SINGLETON is None or _STORE_SINGLETON[0] != key:
+        store.restore_parallel()
+        _STORE_SINGLETON = (key, store)
+    return _STORE_SINGLETON[1]
 
 
 def _job_worker_iso_html_transform() -> etree.XSLT:
@@ -52,6 +53,8 @@ def _job_worker_iso_html_transform() -> etree.XSLT:
     ISO HTML XSLT transform per worker process.
 
     Singleton used to avoid initialising transform for each job as transform cannot be pickled.
+
+    Not keyed, as the transform is built from a static stylesheet and so is identical for all Sites.
     """
     global _ISO_HTML_XSLT_SINGLETON  # noqa: PLW0603
     if _ISO_HTML_XSLT_SINGLETON is None:
@@ -65,6 +68,7 @@ def _run_job(
     meta: ExportMeta,
     store: StoreBase,
     job: SiteJob,
+    worker_key: str,
 ) -> list[SiteContent] | list[Check] | list[str]:
     """
     Generate content or checks from an Output.
@@ -73,7 +77,7 @@ def _run_job(
     """
     init_logging(log_level)
     logger = logging.getLogger("lantern")
-    store = _job_worker_store(store=store)
+    store = _job_worker_store(key=worker_key, store=store)
     iso_html_transform = _job_worker_iso_html_transform()
     select_record = store.select_one
     select_records = store.select
@@ -141,23 +145,7 @@ class Site:
         self._extras = extras or {}
 
         self._workers = meta.parallel_jobs
-
-    def _prep_store(self) -> StoreBase:
-        """
-        Prepare store for use in parallel processing jobs.
-
-        Applies specifically to GitLabCachedStore which contain an in-memory dict of pickled records, and add
-        significant overhead when pickling and unpickling these stores for each parallel job.
-
-        A copy of the store without the in-memory cache layer is made to avoid this, and the `_STORE_SINGLETON`
-        singleton will then recreate it for each worker process.
-        """
-        if not isinstance(self._store, GitLabCachedStore):
-            return self._store
-
-        store = deepcopy(self._store)
-        store._cache._flash.clear()
-        return store
+        self._worker_key = str(uuid4())
 
     def _generate_jobs(
         self,
@@ -191,10 +179,10 @@ class Site:
 
         Returns generated content, checks or invalidation keys as a flattened list.
         """
-        store = self._prep_store()
+        store = self._store.prep_parallel()
         start = time.monotonic()
         nested_outputs: list[list[SiteContent | Check | list[str]]] = Parallel(n_jobs=self._workers)(
-            delayed(_run_job)(self._logger.level, self._meta, store, job) for job in jobs
+            delayed(_run_job)(self._logger.level, self._meta, store, job, self._worker_key) for job in jobs
         )
         outputs: list[SiteContent | Check | list[str]] = [
             output for output_outputs in nested_outputs for output in output_outputs

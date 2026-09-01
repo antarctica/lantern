@@ -950,6 +950,25 @@ class TestGitLabCachedStore:
         assert fx_gitlab_cached_store_pop._frozen is frozen
         assert fx_gitlab_cached_store_pop._cache._frozen is frozen
 
+    def test_prep_parallel(self, fx_gitlab_cached_store_pop: GitLabCachedStore):
+        """Can drop the in-memory flash cache prior to parallel processing, without affecting the original store."""
+        _ = fx_gitlab_cached_store_pop.select()
+        assert len(fx_gitlab_cached_store_pop._cache._flash) > 0
+
+        result = fx_gitlab_cached_store_pop.prep_parallel()
+
+        assert len(result._cache._flash) == 0
+        assert len(fx_gitlab_cached_store_pop._cache._flash) > 0  # original unchanged
+
+    def test_restore_parallel(self, fx_gitlab_cached_store_pop: GitLabCachedStore):
+        """Can rebuild the in-memory flash cache dropped by `prep_parallel()`."""
+        store = fx_gitlab_cached_store_pop.prep_parallel()
+        assert len(store._cache._flash) == 0
+
+        store.restore_parallel()
+
+        assert len(store._cache._flash) > 0
+
     @pytest.mark.parametrize("exists", [True, False])
     def test_purge(self, fx_gitlab_cached_store_pop: GitLabCachedStore, exists: bool):
         """Can purge cached records."""

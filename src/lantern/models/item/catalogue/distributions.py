@@ -268,7 +268,7 @@ class ArcGisFeatureLayer(ArcGisServiceLayerDistribution):
         """Whether this class matches the distribution option."""
         target_hrefs = [
             "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+feature",
-            "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+feature",
+            cls.service_media_href,
         ]
         return ArcGisServiceLayerDistribution._matches(
             target_hrefs=target_hrefs, option=option, other_options=other_options
@@ -296,7 +296,7 @@ class ArcGisOgcApiFeatures(ArcGisServiceLayerDistribution):
         """Whether this class matches the distribution option."""
         target_hrefs = [
             "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+feature+ogc",
-            "https://metadata-resources.data.bas.ac.uk/media-types/x-service/ogc+api+feature",
+            cls.service_media_href,
         ]
         return ArcGisServiceLayerDistribution._matches(
             target_hrefs=target_hrefs, option=option, other_options=other_options
@@ -322,7 +322,7 @@ class ArcGisVectorTileLayer(ArcGisServiceLayerDistribution):
         """Whether this class matches the distribution option."""
         target_hrefs = [
             "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+tile+vector",
-            "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+vector",
+            cls.service_media_href,
         ]
         return ArcGisServiceLayerDistribution._matches(
             target_hrefs=target_hrefs, option=option, other_options=other_options
@@ -348,7 +348,7 @@ class ArcGisRasterTileLayer(ArcGisServiceLayerDistribution):
         """Whether this class matches the distribution option."""
         target_hrefs = [
             "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+tile+raster",
-            "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+tile+raster",
+            cls.service_media_href,
         ]
         return ArcGisServiceLayerDistribution._matches(
             target_hrefs=target_hrefs, option=option, other_options=other_options
@@ -374,7 +374,7 @@ class ArcGisSceneLayer(ArcGisServiceLayerDistribution):
         """Whether this class matches the distribution option."""
         target_hrefs = [
             "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+layer+scene",
-            "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+service+scene",
+            cls.service_media_href,
         ]
         return ArcGisServiceLayerDistribution._matches(
             target_hrefs=target_hrefs, option=option, other_options=other_options

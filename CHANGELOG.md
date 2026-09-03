@@ -20,6 +20,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 
 ### Added
 
+* `AGENTS.md` file to provide concise context and structure to LLM tools
 * Shared helper for OpenGraph and Schema.org metadata fields to reduce repetition
 
 ### Fixed

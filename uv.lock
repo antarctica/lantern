@@ -6,10 +6,6 @@ requires-python = ">=3.14"
 exclude-newer = "0001-01-01T00:00:00Z" # This has no effect and is included for backwards compatibility when using relative exclude-newer values.
 exclude-newer-span = "P7D"
 
-[options.exclude-newer-package]
-bas-metadata-library = "2026-07-13T13:00:00Z"
-ruff = "2026-07-23T20:00:00Z"
-
 [[package]]
 name = "aiohappyeyeballs"
 version = "2.7.1"

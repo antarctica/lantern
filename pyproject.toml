@@ -68,8 +68,6 @@ test = [
 ]
 
 [tool.uv.exclude-newer-package]
-bas-metadata-library = "2026-07-13T13:00:00Z" # set to after the latest release
-ruff = "2026-07-23T20:00:00Z" # set to after the latest release
 
 [[tool.uv.index]]
 name = "self"
@@ -129,7 +127,6 @@ admin-record = { cmd = "python -m tasks.record_dump_admin", help = "View adminis
 restrict-record = { cmd = "python -m tasks.record_permissions", help = "Set access permissions for a record" }
 select-records = { cmd = "python -m tasks.records_select", help = "Copy records from cache to import directory for editing" }
 zap-records = { cmd = "python -m tasks.records_zap", help = "Process Zap ⚡️ authored records from import directory" }
-ops-eo-records = { cmd = "python -m tasks.records_ops_eo", help = "Process Ops EO authored records from import directory" }
 preview-records = { cmd = "python -m tasks.records_preview", help = "Preview records as HTML items" }
 import-records = { cmd = "python -m tasks.records_import", help = "Import records from directory" }
 build-records = { cmd = "python -m tasks.records_build", help = "Build records as a catalogue site" }

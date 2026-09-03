@@ -77,8 +77,8 @@ Then run:
 
 ```text
 % cd resources/infra
-% opentofu init
-% opentofu apply
+% tofu init
+% tofu apply
 ```
 
 ## Monitoring components

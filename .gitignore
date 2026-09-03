@@ -23,7 +23,8 @@ htmlcov/
 
 # Terraform/OpenTofu generated files
 .terraform/
-terraform.tfvars
+*.tfvars
+*.tfstate
 
 # Local stack generated files
 /resources/dev/terraform.tfstate

@@ -35,6 +35,7 @@ public interface to:
 - select some or all available Records, using `store.select()`
 - select a specific Record by file identifier, using `store.select_one()`
 - where applicable, configure a Store as [Frozen](#frozen-stores) (read-only)
+- where applicable, configure a Store to support [Parallel Processing](#parallel-processing-in-stores)
 
 Stores MAY support additional features, such as storing new or updated Records.
 
@@ -50,6 +51,29 @@ intended for data integrity and increased performance in parallel processing.
 > access additional Records.
 >
 > Frozen stores cannot be unfrozen.
+
+## Parallel processing in stores
+
+Stores may be used within parallel processing jobs (such as generating a [Site](/docs/architecture.md#sites), using
+multiple worker processes with their own store instances, reused between worker jobs.
+
+Stores MUST therefore ensure they can be pickled efficently to pass to workers. This may include:
+
+- implementing `__getstate__` / `__setstate__` methods to handle attributes that cannot be pickled
+- overriding `lantern.stores.base.StoreBase.prep_parallel` / `restore_parallel` methods to use stores efficiently
+  within workers
+
+> [!NOTE]
+>
+> - `__getstate__` / `__setstate__` methods are called for each job executed by workers
+> - `prep_parallel` / `restore_parallel` methods are called for each worker
+
+For example:
+
+- a store that cannot be pickled with an active client connection MUST use `__getstate__` / `__setstate__` to  close or
+  clear the client
+- a store that uses an in-memory cache, slowing down but not preventing pickling, SHOULD be emptied then recreated,
+  using `prep_parallel` / `restore_parallel` (the cache SHOULD be recreated to ensure jobs within workers are fast)
 
 ## Algolia store
 
@@ -75,22 +99,28 @@ Records are stored as reduced versions of records using the [Algolia Item Model]
 Stores Records in a [GitLab](/docs/architecture.md#gitlab) project repository using
 [`python-gitlab`](https://python-gitlab.readthedocs.io/en/stable/).
 
-Supports reading, creating and updating Records. Does not support deleting or renaming Records, or non-head record
-revisions.
-
-> [!NOTE]
-> GitLab stores do not support [Freezing](#frozen-stores) as Records are accessed directly from GitLab.
-> Use a [GitLab Cached Store](#gitlab-cached-store) instead for any frozen use cases.
-
-Records are stored in BAS 19115 JSON and ISO 19139 XML formats in a repository branch using a hashed directory
-structure. For example a Record with file identifier `123abc` is stored as `/records/12/3a/123abc.json` and
-`/records/12/3a/123abc.xml`.
-
 > [!TIP]
-> The `GitLabStore` is a very inefficient if accessing large numbers of Records (e.g. for generating an entire
+> The `GitLabStore` is a very inefficient for accessing more than a handful of Records (e.g. for generating an entire
 > [Site](/docs/architecture.md#sites)), due to the number of GitLab API calls it will generate.
 >
 > It is highly recommended to use a [`GitLabCachedStore`](#gitlab-cached-store) instead for these use cases.
+
+Supports reading, creating and updating Records. Does not support deleting or renaming Records, or non-head record
+revisions.
+
+Does not support counting available records (using `len()`) as each Record would need accessing live from GitLab, which
+for non-trivial stores would be too surprising behaviour and not practical.
+
+Does not support [Freezing](#frozen-stores), as Records are intentionally accessed live from GitLab. Use a
+[GitLab Cached Store](#gitlab-cached-store) instead.
+
+### GitLab store content layout
+
+Records are stored in BAS 19115 JSON and ISO 19139 XML formats using a hashed directory structure. For example a Record
+`123abc`, is stored as `/records/12/3a/123abc.json` and `/records/12/3a/123abc.xml`.
+
+> [!TIP]
+> 19139 XML files are generated as it covers the entire ISO 19115 information model and will not change.
 
 ### GitLab store branches
 

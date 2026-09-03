@@ -38,6 +38,9 @@ See [Infrastructure](/docs/infrastructure.md) for details of the infrastructure 
 
 See [Development](/docs/dev.md) documentation.
 
+LLMs should review the [Agents](/AGENTS.md) documentation for an overview of the project structure and important
+conventions and context.
+
 ## Releases
 
 - [latest release 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/lantern-exp/-/releases/permalink/latest)
@@ -50,7 +53,7 @@ Key related projects:
 
 ![Related Projects](/docs/img/related-projects.png)
 
-- [Zap ⚡ (🛡️)](https://gitlab.data.bas.ac.uk/felnne/zap) - an experimental editor for MAGIC to create metadata records
+- [Zap ⚡ (🛡️)](https://gitlab.data.bas.ac.uk/MAGIC/zap) - an experimental editor for MAGIC to create metadata records
 - [BAS AWS 🛡](https://gitlab.data.bas.ac.uk/WSF/bas-aws) - BAS Amazon Web Services management and base infrastructure
 - [MAGIC Products Distribution 🛡](https://gitlab.data.bas.ac.uk/MAGIC/products-distribution) - data access system for
   MAGIC managed products based on SharePoint

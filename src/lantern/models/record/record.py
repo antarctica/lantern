@@ -36,10 +36,10 @@ class Record(RecordBase):
         super().__post_init__()
         if self.file_identifier is None:
             msg = "Catalogue records require a file identifier."
-            raise ValueError(msg)
+            raise ValueError(msg) from None
         if self.hierarchy_level is None:
             msg = "Catalogue records require a hierarchy level."
-            raise ValueError(msg)
+            raise ValueError(msg) from None
 
     @classmethod
     def structure(cls: type[TRecord], value: dict) -> Record:

@@ -32,6 +32,10 @@ public interface to:
 - generate a corresponding list of [`Check`](/docs/monitoring.md#site-checks) items to verify for this content
 - generate a list of keys (paths) for invalidating content
 
+> [!NOTE]
+> Content from Outputs SHOULD be cached using `functools.cached_property` as they are often expensive to create and MAY
+> be accessed for Site [Checks](/docs/monitoring.md#site-checks) and [Invalidation](/docs/site.md#cache-invalidation).
+
 Outputs at the site level SHOULD:
 
 - inherit from the `lantern.outputs.base.OutputSite` abstract base, which includes:
@@ -70,8 +74,8 @@ Outputs MAY require additional properties as needed, which MAY be populated usin
 
 Outputs:
 
-- [CSS](/docs/site.md#styling), [JavaScript](/docs/site.md#scripts), fonts, images (for favicons) and text files
-  (for e.g. [Monitoring](/docs/monitoring.md)) from the internal `lantern.exporters.resources` module
+- [CSS](/docs/site.md#styling), [JavaScript](/docs/site.md#scripts), fonts, images (favicons and placeholders) and text
+  files (e.g. [Monitoring](/docs/monitoring.md#health-monitoring)) from the internal `lantern.exporters.resources` module
 
 Jinja2 templates are used for including variables in JavaScript files.
 

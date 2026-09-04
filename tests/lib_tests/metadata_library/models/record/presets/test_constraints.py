@@ -1,5 +1,5 @@
 from lantern.lib.metadata_library.models.record.presets.constraints import (
-    BAS_ACCESS,
+    BAS_STAFF,
     CC_BY_ND_V4,
     CLOSED_ACCESS,
     MAGIC_PRODUCTS_V1,
@@ -31,7 +31,7 @@ class TestBasAccess:
 
     def test_default(self):
         """Can get constant."""
-        result = BAS_ACCESS
+        result = BAS_STAFF
         assert result.statement == "Closed Access (BAS Staff)"
 
 

@@ -13,9 +13,9 @@ CLOSED_ACCESS = Constraint(
     statement="Closed Access (Restricted)",
 )
 
-BAS_ACCESS = Constraint(
+BAS_STAFF = Constraint(
     type=ConstraintTypeCode.ACCESS,
-    restriction_code=ConstraintRestrictionCode.UNRESTRICTED,
+    restriction_code=ConstraintRestrictionCode.RESTRICTED,
     statement="Closed Access (BAS Staff)",
 )
 

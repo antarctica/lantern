@@ -93,7 +93,7 @@ def _get_args(
 
     if not cli_force:
         path = Path(inquirer.path("Import path", path_type=InquirerPath.DIRECTORY, exists=True, default=path))
-        branch = get_gitlab_source(logger=logger, cat=cat, action="Fetching records from")
+        branch = inquirer.list_input(message="Branch", choices=cat.repo.select_branches())
         current_ref = inquirer.text(message="Current record reference", default=current_ref)
         if not successor_path:
             successor_record = pick_local_record(logger=logger, records=[rp[0] for rp in _record_paths])

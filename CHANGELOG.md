@@ -32,6 +32,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * `LocalExporter` setting permissions repeatedly for common parent directories
 * Preventing Site instances reusing the wrong store singletons in parallel workers via a singleton key
 * incorrect BAS-STAFF access constraint metadata preset restriction code
+* `zap-records` development task not preserving usage constraints
 
 ### Changed
 

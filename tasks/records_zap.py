@@ -20,11 +20,16 @@ from lantern.lib.metadata_library.models.record.enums import (
     MaintenanceFrequencyCode,
     ProgressCode,
 )
-from lantern.lib.metadata_library.models.record.presets.admin import BAS_STAFF
+from lantern.lib.metadata_library.models.record.presets.admin import BAS_STAFF as BAS_STAFF_PERMISSION
 from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS as OPEN_ACCESS_PERMISSION
 from lantern.lib.metadata_library.models.record.presets.aggregations import make_bas_cat_collection_member
 from lantern.lib.metadata_library.models.record.presets.conformance import MAGIC_ADMINISTRATION_V1, MAGIC_DISCOVERY_V2
-from lantern.lib.metadata_library.models.record.presets.constraints import BAS_ACCESS, CC_BY_ND_V4, OPEN_ACCESS
+from lantern.lib.metadata_library.models.record.presets.constraints import (
+    BAS_STAFF,
+    CC_BY_ND_V4,
+    CLOSED_ACCESS,
+    OPEN_ACCESS,
+)
 from lantern.lib.metadata_library.models.record.presets.contacts import UKRI_RIGHTS_HOLDER
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin, set_admin
 from lantern.lib.metadata_library.models.record.utils.kv import get_kv, set_kv
@@ -266,14 +271,15 @@ def _get_access_permissions(logger: logging.Logger, record: Record) -> tuple[lis
     Zap ⚡️'s restricted options don't map to access permissions used in admin metadata so aren't supported.
     """
     metadata_permissions = [OPEN_ACCESS_PERMISSION]
-    logger.info("Setting metadata access constraints for record '%s' to OPEN ACCESS.", record.file_identifier)
+    logger.info("Setting metadata access constraints for record '%s' to OPEN-ACCESS.", record.file_identifier)
 
     resource_permissions = []
     constraints = record.identification.constraints.filter(types=ConstraintTypeCode.ACCESS)
+
     logger.info("Record '%s' has %s access constraints", record.file_identifier, len(constraints))
     if len(constraints) == 1 and constraints[0].restriction_code == ConstraintRestrictionCode.UNRESTRICTED:
         logger.info(
-            "Record '%s' has unrestricted resource access constraint, setting to OPEN ACCESS.", record.file_identifier
+            "Record '%s' has unrestricted resource access constraint, setting to OPEN-ACCESS.", record.file_identifier
         )
         resource_permissions = [OPEN_ACCESS_PERMISSION]
     elif (
@@ -282,11 +288,10 @@ def _get_access_permissions(logger: logging.Logger, record: Record) -> tuple[lis
         and constraints[0].statement == "Closed Access (NERC)"
     ):
         logger.info(
-            "Record '%s' has all NERC restricted resource access constraint, setting to BAS STAFF.",
+            "Record '%s' has all NERC restricted resource access constraint, setting to BAS-STAFF.",
             record.file_identifier,
         )
-        resource_permissions = [BAS_STAFF]
-        record.identification.constraints = Constraints([BAS_ACCESS])
+        resource_permissions = [BAS_STAFF_PERMISSION]
     else:
         logger.warning(
             "Record '%s' has unsupported access constraints, no resource access permissions set.",
@@ -328,7 +333,7 @@ def _process_admin_metadata(logger: logging.Logger, admin_keys: AdministrationKe
     """
     Add administrative metadata to record.
 
-    Zap ⚡️ authored records do not support administrative metadata natively however, a mapping of discovery properties
+    Zap ⚡️ authored records do not support administrative metadata natively, however a mapping of discovery properties
     can be used, providing the input is trusted with a suitable chain of custody:
 
     - admin.access_permissions -> identification.constraints[type=access]
@@ -377,6 +382,53 @@ def _process_admin_metadata(logger: logging.Logger, admin_keys: AdministrationKe
             if con.type == ConstraintTypeCode.ACCESS and con.href:
                 con.href = None
                 logger.info("Removing legacy permissions.")
+
+
+def _process_resource_constraints(
+    logger: logging.Logger, admin_keys: AdministrationKeys, records: list[Record]
+) -> None:
+    """
+    Updates resource constraints to match admin permissions and updated conventions.
+
+    Replaces and normalises access constraints based on admin permissions.
+
+    Preserves all usage constraints.
+
+    Note: This method assumes admin metadata permissions have already been set correct in the record.
+    Note: This method replaces any existing access constraints already present in the record.
+    """
+    for record in records:
+        admin_meta = get_admin(keys=admin_keys, record=record)
+        usage_constraints = record.identification.constraints.filter(types=ConstraintTypeCode.USAGE)
+
+        if not admin_meta:
+            msg = "Zap records must have administration metadata."
+            logger.error(msg)
+            raise ValueError(msg) from None
+        if not admin_meta.resource_permissions:
+            msg = "Zap records must have resource permissions in administration metadata."
+            logger.error(msg)
+            raise ValueError(msg) from None
+        if OPEN_ACCESS_PERMISSION in admin_meta.resource_permissions:
+            logger.info(
+                "Record '%s' has unrestricted resource permissions, setting to OPEN-ACCESS.",
+                record.file_identifier,
+            )
+            access_constraints = Constraints([OPEN_ACCESS])
+        elif BAS_STAFF_PERMISSION in admin_meta.resource_permissions:
+            logger.info(
+                "Record '%s' has BAS-STAFF resource permissions.",
+                record.file_identifier,
+            )
+            access_constraints = Constraints([BAS_STAFF])
+        else:
+            logger.info(
+                "Record '%s' has unknown resource permissions, defaulting to to generic closed access.",
+                record.file_identifier,
+            )
+            access_constraints = Constraints([CLOSED_ACCESS])
+
+        record.identification.constraints = Constraints([*access_constraints, *usage_constraints])
 
 
 def _process_distribution_descriptions(logger: logging.Logger, records: list[Record]) -> None:
@@ -564,6 +616,7 @@ def process_zap_records(
     _set_metadata_maintenance(logger=logger, records=records)
     _process_distribution_descriptions(logger=logger, records=records)
     _process_admin_metadata(logger=logger, admin_keys=admin_keys, records=records)
+    _process_resource_constraints(logger=logger, admin_keys=admin_keys, records=records)
     _process_magic_collections(
         logger=logger, records=records, additional_records=additional_records, catalogue=catalogue
     )

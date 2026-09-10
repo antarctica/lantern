@@ -55,12 +55,12 @@ Key related projects:
 
 - [Zap ⚡ (🛡️)](https://gitlab.data.bas.ac.uk/MAGIC/zap) - an experimental editor for MAGIC to create metadata records
 - [BAS AWS 🛡](https://gitlab.data.bas.ac.uk/WSF/bas-aws) - BAS Amazon Web Services management and base infrastructure
-- [MAGIC Products Distribution 🛡](https://gitlab.data.bas.ac.uk/MAGIC/products-distribution) - data access system for
-  MAGIC managed products based on SharePoint
 - [BAS Metadata Standards 🛡](https://gitlab.data.bas.ac.uk/uk-pdc/metadata-infrastructure/metadata-standards) -
   metadata standards policy and coordination within BAS
 - [BAS Metadata Library 🛡](https://gitlab.data.bas.ac.uk/uk-pdc/metadata-infrastructure/metadata-library) - Python
   library to encode and decode metadata records
+- [MAGIC Resource Distribution 🛡](https://gitlab.data.bas.ac.uk/MAGIC/resource-distribution) - data access system for
+  MAGIC file artefacts based on Microsoft SharePoint
 - [BAS Esri 🛡](https://gitlab.data.bas.ac.uk/MAGIC/esri) - BAS Esri ArcGIS management and coordination
 - [BAS Embedded Maps 🛡](https://gitlab.data.bas.ac.uk/MAGIC/embedded-maps) - tool for easily include interactive maps
   with MAGIC recommended basemaps in websites

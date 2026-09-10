@@ -22,6 +22,9 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 
 * `AGENTS.md` file to provide concise context and structure to LLM tools
 * Shared helper for OpenGraph and Schema.org metadata fields to reduce repetition
+* Microsoft distributor contact metadata preset
+* MAGIC distribution library for depositing supported file artefacts to SharePoint Online
+* `check-artefacts` and `deposit-artefacts` development tasks
 
 ### Fixed
 
@@ -39,6 +42,10 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Refactoring preparing Stores for parallel processing within a Site for better layering
 * Refactoring default thumbnails in item summaries from base64 strings to static site files
 * Replacing record type checks in `ItemCatalogue` with a type annotation enforced via type checking
+
+### Removed [BREAKING!]
+
+* `DistributionMaker` utility, replaced by more robust `ArtefactFormat` and `Artefact` classes
 
 ## [0.15.2] - 2026-08-17
 

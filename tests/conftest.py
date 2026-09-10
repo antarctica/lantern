@@ -1,3 +1,4 @@
+import csv
 import importlib
 import logging
 import os
@@ -34,6 +35,8 @@ from lantern.lib.arcgis.gis.dataclasses import Item as ArcGisItem
 from lantern.lib.arcgis.gis.dataclasses import ItemProperties as ArcGisItemProperties
 from lantern.lib.arcgis.gis.enums import ItemType as ArcGisItemType
 from lantern.lib.arcgis.gis.enums import SharingLevel as ArcGisSharingLevel
+from lantern.lib.magic_distribution.client import MagicResourceDistributionClient
+from lantern.lib.magic_distribution.models.artefact import ArtefactLocalFile
 from lantern.lib.metadata_library.models.record.elements.common import Date, Dates, Identifiers
 from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
 from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
@@ -122,7 +125,10 @@ def has_network() -> bool:
 @pytest.fixture(scope="session")
 def vcr_config():
     """Pytest Recording config."""
-    return {"filter_headers": ["Authorization", "PRIVATE-TOKEN", "x-algolia-api-key"]}
+    return {
+        "filter_headers": ["Authorization", "PRIVATE-TOKEN", "x-algolia-api-key"],
+        "filter_post_data_parameters": ["client_secret"],
+    }
 
 
 def freezer_time() -> datetime:
@@ -1256,3 +1262,49 @@ def fx_exporter_static_server(fx_static_site: TemporaryDirectory, fx_static_serv
             process.terminate()
             process.wait()
             fx_static_site.cleanup()
+
+
+@pytest.fixture()
+def fx_lib_artefact_file(tmp_path: Path) -> ArtefactLocalFile:
+    """
+    Local file artefact based on known temporary file.
+
+    File has non-minimal content to allow chunked upload testing.
+    """
+    file = tmp_path / "file.csv"
+    with file.open(mode="w", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerows(
+            [
+                ["x", "y"],
+                [10, 19],
+                [20, 29],
+                [30, 39],
+                [40, 49],
+                [50, 59],
+                [60, 69],
+                [70, 79],
+                [80, 89],
+                [90, 99],
+            ]
+        )
+    return ArtefactLocalFile(resource_id="x", artefact_path=file)
+
+
+@pytest.fixture()
+def fx_lib_magic_dist_client(mocker: MockerFixture) -> MagicResourceDistributionClient:
+    """
+    MAGIC Resource Distribution service SharePoint client, with fake credentials.
+
+    Mocks getting MS Graph access token.
+    """
+    client = MagicResourceDistributionClient(
+        tenant_id="x",
+        app_client_id="x",
+        app_client_secret="x",  # noqa: S106
+        site_id="x",
+        library_name="x",
+    )
+    mocker.patch.object(type(client), "_graph_token", new_callable=PropertyMock, return_value="x")
+    mocker.patch.object(type(client), "_drive_id", new_callable=PropertyMock, return_value="x")
+    return client

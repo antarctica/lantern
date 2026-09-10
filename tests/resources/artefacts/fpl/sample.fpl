@@ -1,0 +1,45 @@
+<?xml version='1.0' encoding='utf-8'?>
+<flight-plan xmlns="http://www8.garmin.com/xmlschemas/FlightPlan/v1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www8.garmin.com/xmlschemas/FlightPlan/v1 http://www8.garmin.com/xmlschemas/FlightPlanv1.xsd">
+  <waypoint-table>
+    <waypoint>
+      <identifier>1</identifier>
+      <type>USER WAYPOINT</type>
+      <country-code>__</country-code>
+      <lat>52.201850292404792</lat>
+      <lon>0.125236696801952</lon>
+      <comment>-</comment>
+    </waypoint>
+    <waypoint>
+      <identifier>2</identifier>
+      <type>USER WAYPOINT</type>
+      <country-code>__</country-code>
+      <lat>52.202486151245246</lat>
+      <lon>0.130937358047008</lon>
+      <comment>-</comment>
+    </waypoint>
+    <waypoint>
+      <identifier>3</identifier>
+      <type>USER WAYPOINT</type>
+      <country-code>__</country-code>
+      <lat>52.204072340093106</lat>
+      <lon>0.127378628228666</lon>
+      <comment>-</comment>
+    </waypoint>
+    <waypoint>
+      <identifier>4</identifier>
+      <type>USER WAYPOINT</type>
+      <country-code>__</country-code>
+      <lat>52.199956336360913</lat>
+      <lon>0.127958734656734</lon>
+      <comment>-</comment>
+    </waypoint>
+    <waypoint>
+      <identifier>5</identifier>
+      <type>USER WAYPOINT</type>
+      <country-code>__</country-code>
+      <lat>5,52.202198990314876</lat>
+      <lon>0.128215320192226</lon>
+      <comment>-</comment>
+    </waypoint>
+  </waypoint-table>
+</flight-plan>

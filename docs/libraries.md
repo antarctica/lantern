@@ -250,6 +250,151 @@ To add support for a new ISO element within Records:
    2. amend variants in `test_loop` as needed (include all possible options in complete variant)
 10. amend list of unsupported properties in `/docs/data-model.md#record-limitations` as needed
 
+## MAGIC Resource Distribution
+
+`lantern.lib.magic_distribution`
+
+Includes classes for [Artefacts](/docs/models.md#artefacts), associated metadata and a Microsoft Graph upload client
+for SharePoint Online.
+
+> [!NOTE]
+> These classes are specific to the SharePoint implementation of the
+> [MAGIC Resource Distribution Service 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/resource-distribution) (mainly in terms
+> of list metadata and folder structure).
+
+### SharePoint upload client
+
+`lantern.lib.magic_distribution.client.MagicResourceDistributionClient`
+
+Used to deposit [File Artefacts](#file-artefacts) in a SharePoint Online site library with associated list metadata
+using the Microsoft Graph API.
+
+> [!NOTE]
+> This client requires an Entra app registration with permissions to manage files within the relevant SharePoint site.
+
+### SharePoint client limitations
+
+- updating permissions on existing files
+- removing existing files
+
+> [!NOTE]
+> Existing files can be removed and/or metadata/permissions updated manually if needed, via the project issue tracker.
+
+### Artefacts
+
+`lantern.lib.magic_distribution.models.artefact.ArtefactBase`.
+
+Artefacts represent a description of the contents of a resource in Python. They generally describe files, services or
+other representations containing all or part of the resource in a specific (typically output focused) format or
+protocol. Artefacts are related to a [Record](#records) using distribution options or (if supported in future) resource
+representations.
+
+For example:
+
+- a map product MAY be distributed with PDF and JPEG [File Artefacts](#file-artefacts)
+  - the underlying GIS project for this map COULD also be an artefact as a resource representation, if supported
+- a vector dataset MAY be distributed as a GeoPackage file, and as an OGC Features API
+  [Service Artefact](#service-artefacts)
+
+The `ArtefactBase` abstract class defines common logic and properties and methods artefact subclasses must implement.
+
+### Artefact metadata
+
+`lantern.lib.magic_distribution.models.metadata.ArtefactMetadata`
+
+Artefacts MUST include metadata to record:
+
+- the identifier of the associated resource
+- whether this resource has unrestricted (open) access
+- a unique artefact identifier (generated via a hash of a relevant value)
+- a controlled and supported [Format](#artefact-formats)
+
+### Artefact formats
+
+`lantern.lib.magic_distribution.models.artefact.ArtefactFormat`
+
+Artefacts MUST select a supported format, identified by the
+`lantern.lib.magic_distribution.models.artefact.ArtefactFormatLabel` enum. Either by examining the entity the Artefact
+represents (e.g. a file's extension and contents or service conformance info), or by direct assignment.
+
+### File artefacts
+
+`lantern.lib.magic_distribution.models.artefact.ArtefactFile`
+
+Represents information held in a stored or virtual file of a particular type in Python, with a name which includes a
+file extension.
+
+File artefacts MAY be local (using `lantern.lib.magic_distribution.models.artefact.ArtefactLocalFile`), where the file
+contents is available and the [Format](#artefact-formats) can be reliably determined (as file extensions are not
+definitive in some cases).
+
+### SharePoint file artefacts
+
+`lantern.lib.magic_distribution.models.artefact.ArtefactSharePointFile`
+
+Represents a remote file stored in a SharePoint document library in Python and accessed via the Microsoft Graph as a
+[Drive Item](https://learn.microsoft.com/en-us/graph/api/resources/driveitem).
+
+Intended for artefacts deposited in the [MAGIC Resource Distribution](/docs/libraries.md#magic-resource-distribution),
+including associated SharePoint list values for artefact [Metadata](#artefact-metadata) and a
+[Format](#artefact-formats), also accessed via the Microsoft Graph as a
+[Field Value Set](https://learn.microsoft.com/en-us/graph/api/resources/fieldvalueset).
+
+> [!Note]
+> SharePoint artefacts do not include direct access to file content. An access URL intended for end-users is available.
+
+### Service artefacts
+
+> [!WARNING]
+> This section is Work in Progress (WIP) and may not be complete/accurate.
+
+`lantern.lib.magic_distribution.models.artefact.ArtefactServicePlaceholder`
+
+Represents information accessible via a particular protocol in Python, available at a given endpoint URL.
+
+### Supported file formats
+
+- CSV
+- FPL (Garmin flight plan - for Garmin aviation GPS units)
+- GPX (nominally for handheld GPS units)
+- JPEG images
+- GeoJSON (non-geo JSON files are not supported)
+- GeoPackage (including when zipped for compression)
+- GeoTiff (non-geo TIFF images are not supported)
+- MapBox vector tiles
+- PDF (including georeferenced PDF)
+- PNG
+- Shapefile (specifically where zipped with other related files)
+
+### Supported service formats
+
+> [!NOTE]
+> Format in this context relates to the service protocol, rather than the formats a service may offer as output.
+
+- ArcGIS feature service (and associated layer)
+- OGC API features (as implemented by ArcGIS, and including associated layer)
+- ArcGIS raster tile service (and associated layer)
+- ArcGIS vector tile service (and associated layer)
+- ArcGIS scene service (and associated layer)
+- ArcGIS web map
+
+### Adding file artefact formats
+
+> [!WARNING]
+> This section is Work in Progress (WIP) and may not be complete/accurate.
+
+To enable additional file formats to be deposited as [File Artefacts](#file-artefacts).
+
+- add a new member to the `lantern.lib.magic_distribution.models.artefact.ArtefactFormatLabel` enumeration
+- add a new list item to `lantern.lib.magic_distribution.models.artefact.ArtefactFormats.file_formats`
+  (or `.service_formats`)
+- update tests (typically `lib_tests.magic_distribution.models.test_artefacts.TestArtefactsFormats.test_get_file_format`)
+- update supported [File](#supported-file-formats) or [Service](#supported-service-formats) documentation
+
+> [!NOTE]
+> Typically, new artefact formats are also added as supported
+> [Distribution Formats](/docs/dev.md#adding-distribution-formats) for display within catalogue items.
+
 ## ArcGIS
 
 `lantern.lib.arcgis`

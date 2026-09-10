@@ -65,6 +65,25 @@ Then run the [Interactive Publishing Workflows](#interactive-publishing-workflow
 > [!CAUTION]
 > The catalogue does not enforce metadata access permissions. They will always evaluate to open access (unrestricted).
 
+### Depositing record artefacts
+
+> [!NOTE]
+> This is an advanced topic.
+
+To deposit file artefacts and include in a resource:
+
+- copy file artefacts to the `artefacts/` directory
+- optionally, run the [`artefacts-check`](/docs/supplemental/proto-cli-reference.md#check-artefacts) command
+- run the [`artefacts-deposit`](/docs/supplemental/proto-cli-reference.md#check-artefacts) command
+
+Then follow a [Publishing Workflow](#publishing-workflows).
+
+> [!WARNING]
+> Avoid using full stops in file names as they will be treated as part of the file extension, which are used to
+> determine whether a file is a supported format or not. Unsupported files cannot be deposited.
+>
+> E.g.: `X_2026_v2.2.jpg` will be treated as an unrecognised `.2.jpg` file. Use `X_2026_v2_2.jpg` or similar instead.
+
 ## Updating records
 
 To update new and existing records:

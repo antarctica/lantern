@@ -427,6 +427,12 @@ Consists of limited properties needed to render a search result for an Item. Inc
 - select the most suitable description for the item (purpose > abstract)
 - determining whether an item should be marked as removed/deleted (based on resource maintenance information)
 
+## Artefacts
+
+Artefacts represent a description of the contents of a resource, such as a file or service endpoint using a particular
+format or protocol. Artefacts are implemented in Python through the
+[MAGIC Resource Distribution](/docs/libraries.md#artefacts).
+
 ## ArcGIS items
 
 `lantern.models.item.arcgis.ItemArcGIS`

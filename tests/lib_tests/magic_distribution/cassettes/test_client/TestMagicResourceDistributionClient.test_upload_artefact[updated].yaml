@@ -1,0 +1,326 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: GET
+    uri: https://graph.microsoft.com/v1.0/drives/x/root:/x/file.csv
+  response:
+    body:
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#Collection(driveItem)/$entity","id":"x","file":{"hashes":{"quickXorHash":"vBt+32zMV3FjA3neqwmyIqtOE58="}},"name":"file.csv"}'
+    headers:
+      Cache-Control:
+      - no-store, no-cache
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; odata.metadata=minimal; odata.streaming=true; IEEE754Compatible=false;
+        charset=utf-8
+      Strict-Transport-Security:
+      - max-age=31536000
+      Transfer-Encoding:
+      - chunked
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"item": {"@microsoft.graph.conflictBehavior": "replace"}}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '58'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.34.2
+    method: POST
+    uri: https://graph.microsoft.com/v1.0/drives/x/root:/x/file.csv:/createUploadSession
+  response:
+    body:
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#microsoft.graph.uploadSession","expirationDateTime":"2014-04-30T13:25:51.443Z","nextExpectedRanges":["0-"],"uploadUrl":"https://nercacuk.sharepoint.com/sites/x/_api/v2.0/drives/x/items/x/uploadSession?guid=''761e29ca-aeb4-4293-b0bd-d4d010ecdbc4''&dc=0&tempauth=v1.ey...3o"}'
+    headers:
+      Cache-Control:
+      - no-store, no-cache
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
+      Location:
+      - https://graph.microsoft.com
+      OData-Version:
+      - '4.0'
+      SPRequestDuration:
+      - '450'
+      Strict-Transport-Security:
+      - max-age=31536000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "x,y\r\n10,19\r\n20,29\r\n30,39\r\n40,49\r\n50,59\r\n"
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '40'
+      Content-Range:
+      - bytes 0-39/75
+      User-Agent:
+      - python-requests/2.34.2
+    method: PUT
+    uri: https://nercacuk.sharepoint.com/sites/x/_api/v2.0/drives/x/items/x/uploadSession?guid='761e29ca-aeb4-4293-b0bd-d4d010ecdbc4'&dc=0&tempauth=v1.ey...3o
+  response:
+    body:
+      string: '{"@odata.context":"https://nercacuk.sharepoint.com/sites/x/_api/v2.0/$metadata#oneDrive.uploadSession","expirationDateTime":"2014-04-30T13:25:52.132Z","nextExpectedRanges":["40-74"]}'
+    headers:
+      Alt-Svc:
+      - h3=":443";ma=86400
+      Cache-Control:
+      - no-cache, no-store
+      Content-Security-Policy:
+      - frame-ancestors 'self' teams.microsoft.com *.teams.microsoft.com *.skype.com
+        *.teams.microsoft.us local.teams.office.com teams.cloud.microsoft *.office365.com
+        goals.cloud.microsoft *.powerapps.com *.powerbi.com *.yammer.com engage.cloud.microsoft
+        word.cloud.microsoft excel.cloud.microsoft powerpoint.cloud.microsoft *.officeapps.live.com
+        *.office.com *.microsoft365.com m365.cloud.microsoft *.cloud.microsoft *.stream.azure-test.net
+        *.dynamics.com *.microsoft.com onedrive.live.com *.onedrive.live.com teams.microsoft.com
+        *.teams.microsoft.com securebroker.sharepointonline.com;
+      Content-Type:
+      - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
+      Expires:
+      - '-1'
+      IsOCDI:
+      - '0'
+      MS-CV:
+      - ojjisL5AASDmTCEAjmR8Zg.0
+      MicrosoftSharePointTeamServices:
+      - 16.0.0.27626
+      ODATA-VERSION:
+      - '4.0'
+      P3P:
+      - CP="ALL IND DSP COR ADM CONo CUR CUSo IVAo IVDo PSA PSD TAI TELo OUR SAMo
+        CNT COM INT NAV ONL PHY PRE PUR UNI"
+      Pragma:
+      - no-cache
+      SPClientServiceRequestDuration:
+      - '134'
+      SPRequestDuration:
+      - '159'
+      Strict-Transport-Security:
+      - max-age=31536000
+      Transfer-Encoding:
+      - chunked
+      X-1DSCollectorUrl:
+      - https://eu-mobile.events.data.microsoft.com/OneCollector/1.0/
+      X-AriaCollectorURL:
+      - https://eu-mobile.events.data.microsoft.com/Collector/3.0/
+      X-AspNet-Version:
+      - 4.0.30319
+      X-Cache:
+      - CONFIG_NOCACHE
+      X-Content-Type-Options:
+      - nosniff
+      X-DataBoundary:
+      - EU
+      X-FRAME-OPTIONS:
+      - SAMEORIGIN
+      X-MS-InvokeApp:
+      - 1; RequireReadOnly
+      X-NetworkStatistics:
+      - 0,65535,0,27,51312,962191,962191,4449
+      X-Powered-By:
+      - ASP.NET
+      X-SP-SERVERSTATE:
+      - ReadOnly=0
+      X-SPO-VroomTelemetry:
+      - E=A
+      X-SharePointHealthScore:
+      - '2'
+    status:
+      code: 202
+      message: Accepted
+- request:
+    body: "60,69\r\n70,79\r\n80,89\r\n90,99\r\n11,18\r\n"
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '35'
+      Content-Range:
+      - bytes 40-74/75
+      User-Agent:
+      - python-requests/2.34.2
+    method: PUT
+    uri: https://nercacuk.sharepoint.com/sites/x/_api/v2.0/drives/x/items/x/uploadSession?guid='761e29ca-aeb4-4293-b0bd-d4d010ecdbc4'&dc=0&tempauth=v1.ey...3o
+  response:
+    body:
+      string: '{"@odata.context":"https://nercacuk.sharepoint.com/sites/x/_api/v2.0/$metadata#items/$entity","id":"x","file":{"hashes":{"quickXorHash":"1Jt832zMV3FjA3nepBkxOhtuFac="}},"name":"file.csv"}'
+    headers:
+      Alt-Svc:
+      - h3=":443";ma=86400
+      Cache-Control:
+      - no-cache, no-store
+      Content-Encoding:
+      - gzip
+      Content-Security-Policy:
+      - frame-ancestors 'self' teams.microsoft.com *.teams.microsoft.com *.skype.com
+        *.teams.microsoft.us local.teams.office.com teams.cloud.microsoft *.office365.com
+        goals.cloud.microsoft *.powerapps.com *.powerbi.com *.yammer.com engage.cloud.microsoft
+        word.cloud.microsoft excel.cloud.microsoft powerpoint.cloud.microsoft *.officeapps.live.com
+        *.office.com *.microsoft365.com m365.cloud.microsoft *.cloud.microsoft *.stream.azure-test.net
+        *.dynamics.com *.microsoft.com onedrive.live.com *.onedrive.live.com teams.microsoft.com
+        *.teams.microsoft.com securebroker.sharepointonline.com;
+      Content-Type:
+      - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
+      Expires:
+      - '-1'
+      IsOCDI:
+      - '0'
+      MS-CV:
+      - ojjisNFAASDmTCOy5vIJLg.0
+      MicrosoftSharePointTeamServices:
+      - 16.0.0.27626
+      ODATA-VERSION:
+      - '4.0'
+      P3P:
+      - CP="ALL IND DSP COR ADM CONo CUR CUSo IVAo IVDo PSA PSD TAI TELo OUR SAMo
+        CNT COM INT NAV ONL PHY PRE PUR UNI"
+      Pragma:
+      - no-cache
+      SPClientServiceRequestDuration:
+      - '499'
+      SPRequestDuration:
+      - '522'
+      Strict-Transport-Security:
+      - max-age=31536000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+      X-1DSCollectorUrl:
+      - https://eu-mobile.events.data.microsoft.com/OneCollector/1.0/
+      X-AriaCollectorURL:
+      - https://eu-mobile.events.data.microsoft.com/Collector/3.0/
+      X-AspNet-Version:
+      - 4.0.30319
+      X-Cache:
+      - CONFIG_NOCACHE
+      X-Content-Type-Options:
+      - nosniff
+      X-DataBoundary:
+      - EU
+      X-FRAME-OPTIONS:
+      - SAMEORIGIN
+      X-MS-InvokeApp:
+      - 1; RequireReadOnly
+      X-NetworkStatistics:
+      - 0,65535,0,3,108939,413098,413098,4441
+      X-Powered-By:
+      - ASP.NET
+      X-SP-SERVERSTATE:
+      - ReadOnly=0
+      X-SPO-VroomTelemetry:
+      - E=A
+      X-SharePointHealthScore:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"resource_id": "x", "artefact_id": "e6d72cea-bda6-5dcb-8742-cc7ff5e71791","artefact_fmt": "CSV", "unrestricted": false}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '121'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.34.2
+    method: PATCH
+    uri: https://graph.microsoft.com/v1.0/drives/x/items/x/listItem/fields
+  response:
+    body:
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#drives(''x'')/items(''x'')/listItem/fields/$entity","resource_id":"x","artefact_id":"x","unrestricted":false,"artefact_fmt":"CSV","id":"1"}'
+    headers:
+      Cache-Control:
+      - no-cache
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
+      OData-Version:
+      - '4.0'
+      Strict-Transport-Security:
+      - max-age=31536000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+    status:
+      code: 200
+      message: OK
+  # creating artefact
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: GET
+    uri: https://graph.microsoft.com/v1.0/drives/x/items/x/listItem/fields
+  response:
+    body:
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#drives(''x'')/items(''x'')/listItem/fields/$entity","resource_id":"x","artefact_id":"x","unrestricted":false,"artefact_fmt":"CSV","id":"1"}'
+    headers:
+      Cache-Control:
+      - no-cache
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
+      OData-Version:
+      - '4.0'
+      Strict-Transport-Security:
+      - max-age=31536000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+    status:
+      code: 200
+      message: OK
+version: 1

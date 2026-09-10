@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 
 import inquirer
 from inquirer import Path as InquirerPath
-from tasks._shared import dump_records, get_gitlab_source, get_record, init, parse_records, pick_local_record
+from tasks._shared import dump_records, get_record, init, parse_records, pick_local_record
 from tasks.records_zap import revise_record
 
 from lantern.lib.metadata_library.models.record.elements.common import Date

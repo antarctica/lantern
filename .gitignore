@@ -33,6 +33,7 @@ htmlcov/
 /resources/dev/apache/run/
 
 # App generated files
+/artefacts/
 /import/
 /export/
 /export-trusted/

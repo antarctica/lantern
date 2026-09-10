@@ -49,6 +49,24 @@ ESRI_DISTRIBUTOR = Contact(
     role={ContactRoleCode.DISTRIBUTOR},
 )
 
+MICROSOFT_DISTRIBUTOR = Contact(
+    organisation=ContactIdentity(name="Microsoft", href="https://ror.org/00d0nc645", title="ror"),
+    address=Address(
+        delivery_point="One Microsoft Way",
+        city="Redmond",
+        administrative_area="Washington",
+        postal_code="98052",
+        country="United States of America",
+    ),
+    online_resource=OnlineResource(
+        href="https://www.microsoft.com",
+        title="Microsoft - AI, Cloud, Productivity, Computing, Gaming & Apps",
+        description="Corporate website for the Microsoft Corporation.",
+        function=OnlineResourceFunctionCode.INFORMATION,
+    ),
+    role={ContactRoleCode.DISTRIBUTOR},
+)
+
 MAGIC_DISTRIBUTOR = make_magic_role(roles={ContactRoleCode.DISTRIBUTOR})
 
 UKRI_RIGHTS_HOLDER = Contact(

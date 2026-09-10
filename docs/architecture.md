@@ -217,6 +217,19 @@ ArcGIS Online is used for:
 - consistency with other projects and to align with the BAS Spatial Data Infrastructure
 - its stability, performance and features
 
+## Data access systems
+
+Data access systems are used to provide access to the data within resources, either directly as files, through services
+or other mechanisms. They are referenced within records and items provided by the catalogue as links.
+
+Data access systems include but are not limited to:
+
+- [ArcGIS Online](#arcgis-online)
+- [SharePoint Online](/docs/libraries.md#magic-resource-distribution)
+
+> [!TIP]
+> The inner workings of these systems are out of scope of this project.
+
 ## Infrastructure
 
 See the [Infrastructure](/docs/infrastructure.md) docs for more information about the underlying infrastructure used.

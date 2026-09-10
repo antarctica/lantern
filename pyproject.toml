@@ -19,6 +19,7 @@ dependencies = [
     "cattrs>=25.1.1",
     "deepdiff>=8.5.0",
     "environs>=14.5.0",
+    "geojson>=3.3.0",
     "humanize>=4.12.3",
     "inquirer>=3.4.0",
     "jinja2>=3.1.6",
@@ -29,7 +30,9 @@ dependencies = [
     "markupsafe>=3.0.3",
     "minify-html>=0.18.1",
     "pathvalidate>=3.3.1",
+    "pillow>=12.3.0",
     "python-gitlab>=8.0.0",
+    "quickxorhash>=1.0.5",
     "requests>=2.32.5",
     "sentry-sdk>=2.52.0",
     "sqlorm-py>=0.4.1",
@@ -135,6 +138,8 @@ upgrade-records = { cmd = "python -m tasks.records_upgrade_2026_04", help = "Upg
 bootstrap-records = { cmd = "python -m tasks.records_bootstrap", help = "Bootstrap a new records repo" }
 workflow-testing = { cmd = "python -m tasks.records_workflow_testing", help = "Import records to testing site" }
 workflow-live = { cmd = "python -m tasks.records_workflow_live", help = "Import records to live site" }
+check-artefacts = { cmd = "python -m tasks.artefacts_check", help = "Check files are supported file artefact formats" }
+deposit-artefacts = { cmd = "python -m tasks.artefacts_deposit", help = "Deposit supported file artefacts for a resource to SharePoint Online" }
 site-invalidate = { cmd = "python -m tasks.site_invalidate", help = "Invalidate cached content in live site" }
 thumbnail-invalidate = { cmd = "python -m tasks.thumbnail_invalidate", help = "Invalidate cached item thumbnail in CDN" }
 esri-item = { cmd = "python -m tasks.esri_item", help = "Sync record details to an Esri item" }

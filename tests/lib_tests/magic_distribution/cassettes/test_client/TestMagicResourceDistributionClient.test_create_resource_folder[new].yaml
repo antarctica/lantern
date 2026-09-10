@@ -1,0 +1,279 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: GET
+    uri: https://graph.microsoft.com/v1.0/drives/x/root:/x
+  response:
+    body:
+      string: '{"error":{"code":"itemNotFound","message":"The resource could not be found."}}'
+    headers:
+      Cache-Control:
+      - no-store, no-cache
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json; odata.metadata=minimal; odata.streaming=true; IEEE754Compatible=false;
+        charset=utf-8
+      SPLogId:
+      - fdcd38a2-209b-2001-e64c-25a72ca551d3
+      Strict-Transport-Security:
+      - max-age=31536000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: '{"name": "x", "folder": {}, "@microsoft.graph.conflictBehavior": "fail"}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '107'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.34.2
+    method: POST
+    uri: https://graph.microsoft.com/v1.0/drives/x/root/children
+  response:
+    body:
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#drives(''x'')/root/children/$entity","id":"x","name":"x"}'
+    headers:
+      Cache-Control:
+      - no-store, no-cache
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
+      Location:
+      - https://nercacuk.sharepoint.com/_api/v2.0/drives('x')/items('root')/children('x')
+      OData-Version:
+      - '4.0'
+      SPRequestDuration:
+      - '329'
+      Strict-Transport-Security:
+      - max-age=31536000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+    status:
+      code: 201
+      message: Created
+- request:
+    body: '{"resource_id": "x", "unrestricted": false}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '78'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.34.2
+    method: PATCH
+    uri: https://graph.microsoft.com/v1.0/drives/x/items/x/listItem/fields
+  response:
+    body:
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#drives(''x'')/items(''x'')/listItem/fields/$entity","resource_id":"x","unrestricted":false,"id":"x","ContentType":"Folder"}'
+    headers:
+      Cache-Control:
+      - no-cache
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
+      OData-Version:
+      - '4.0'
+      Strict-Transport-Security:
+      - max-age=31536000
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+    status:
+      code: 200
+      message: OK
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: GET
+    uri: https://graph.microsoft.com/v1.0/drives/x/items/x/permissions
+  response:
+    body:
+      string: |
+        {
+          "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#drives('x')/items('x')/permissions",
+          "value": [
+            {
+              "id": "1",
+              "roles": [
+                "owner"
+              ],
+              "grantedToV2": {
+                "siteGroup": {
+                  "displayName": "x Owners",
+                  "id": "x",
+                  "loginName": "X Owners"
+                },
+                "sharePointGroup": {
+                  "id": "abc",
+                  "title": "x Owners",
+                  "principalId": "1"
+                }
+              },
+              "grantedTo": {
+                "user": {
+                  "displayName": "x Resources Owners"
+                }
+              },
+              "inheritedFrom": {}
+            }
+          ]
+        }
+    headers:
+      Cache-Control:
+      - no-store, no-cache
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
+      Deprecation:
+      - Fri, 03 Sep 2021 23:59:59 GMT
+      Link:
+      - <https://developer.microsoft-tst.com/en-us/graph/changes?$filterby=v1.0,Removal&from=2021-09-01&to=2021-10-01>;rel="deprecation";type="text/html"
+      - <https://developer.microsoft-tst.com/en-us/graph/changes?$filterby=v1.0,Removal&from=2021-09-01&to=2021-10-01>;rel="deprecation";type="text/html"
+      OData-Version:
+      - '4.0'
+      SPRequestDuration:
+      - '350'
+      Strict-Transport-Security:
+      - max-age=31536000
+      Sunset:
+      - Sun, 01 Oct 2023 23:59:59 GMT
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+    status:
+      code: 200
+      message: OK
+- request:
+    body: '{"recipients": [{"objectId": "y"}], "requireSignIn": true, "sendInvitation": false, "roles": ["read"]}'
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      Content-Length:
+      - '137'
+      Content-Type:
+      - application/json
+      User-Agent:
+      - python-requests/2.34.2
+    method: POST
+    uri: https://graph.microsoft.com/v1.0/drives/x/items/x/invite
+  response:
+    body:
+      string: |
+        {
+          "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#drives('x')/items('x')/permissions",
+          "value": [
+            {
+              "id": "1",
+              "roles": [
+                "owner"
+              ],
+              "grantedToV2": {
+                "siteGroup": {
+                  "displayName": "x Owners",
+                  "id": "x",
+                  "loginName": "X Owners"
+                },
+                "sharePointGroup": {
+                  "id": "abc",
+                  "title": "x Owners",
+                  "principalId": "1"
+                }
+              },
+              "grantedTo": {
+                "user": {
+                  "displayName": "x Resources Owners"
+                }
+              },
+              "inheritedFrom": {}
+            },
+            {
+              "id":"2",
+              "roles":["read"],
+              "grantedToV2":{
+                "group":{"@odata.type":"#microsoft.graph.sharePointIdentity", "displayName":"Y", "id":"y"},
+                "siteUser":{"displayName":"Y","id":"2","loginName":"y"}
+              },
+              "grantedTo":{
+                "user":{"displayName":"Y","id":"y"}
+              },
+              "inheritedFrom":{}
+            }
+          ]
+        }
+    headers:
+      Cache-Control:
+      - no-store, no-cache
+      Content-Encoding:
+      - gzip
+      Content-Type:
+      - application/json;odata.metadata=minimal;odata.streaming=true;IEEE754Compatible=false;charset=utf-8
+      Deprecation:
+      - Fri, 03 Sep 2021 23:59:59 GMT
+      Link:
+      - <https://developer.microsoft-tst.com/en-us/graph/changes?$filterby=v1.0,Removal&from=2021-09-01&to=2021-10-01>;rel="deprecation";type="text/html"
+      - <https://developer.microsoft-tst.com/en-us/graph/changes?$filterby=v1.0,Removal&from=2021-09-01&to=2021-10-01>;rel="deprecation";type="text/html"
+      Location:
+      - https://graph.microsoft.com
+      OData-Version:
+      - '4.0'
+      SPRequestDuration:
+      - '435'
+      Strict-Transport-Security:
+      - max-age=31536000
+      Sunset:
+      - Sun, 01 Oct 2023 23:59:59 GMT
+      Transfer-Encoding:
+      - chunked
+      Vary:
+      - Accept-Encoding
+    status:
+      code: 200
+      message: OK
+version: 1

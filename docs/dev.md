@@ -268,11 +268,18 @@ config options used by development tasks.
 > These extra variables are prefixed with `X` rather than `LANTERN_`.
 
 <!-- pyml disable md013 -->
-| Option                                 | Type         | Sensitive | Since Version | Summary                                                                   | Default | Example                                      |
-|----------------------------------------|--------------|-----------|---------------|---------------------------------------------------------------------------|---------|----------------------------------------------|
-| `X_ADMIN_METADATA_SIGNING_KEY_PRIVATE` | JSON Web Key | Yes       | v0.4.x        | JSON Web Key (JWK) for updating administrative metadata                   | *None*  | '{"kid": "magic_metadata_signing_key", ...}' |
-| `X_AGOL_CLIENT_ID`                     | String       | No        | v0.6.x        | Client ID for AGOL OAuth application for accessing and updating items     | *None*  | 'xxx'                                        |
-| `X_AGOL_CLIENT_SECRET`                 | String       | Yes       | v0.6.x        | Client secret for AGOL OAuth application for accessing and updating items | *None*  | 'xxx'                                        |
+| Option                                 | Type         | Required | Sensitive | Since Version | Summary                                                                   | Example                                      |
+|----------------------------------------|--------------|----------|-----------|---------------|---------------------------------------------------------------------------|----------------------------------------------|
+| `X_ADMIN_METADATA_SIGNING_KEY_PRIVATE` | JSON Web Key | Yes      | Yes       | v0.4.x        | JSON Web Key (JWK) for updating administrative metadata                   | '{"kid": "magic_metadata_signing_key", ...}' |
+| `X_AGOL_CLIENT_ID`                     | String       | Yes      | No        | v0.6.x        | Client ID for AGOL OAuth application for accessing and updating items     | 'xxx'                                        |
+| `X_AGOL_CLIENT_SECRET`                 | String       | Yes      | Yes       | v0.6.x        | Client secret for AGOL OAuth application for accessing and updating items | 'xxx'                                        |
+| `X_DEPOSIT_CLIENT_ID`                  | String       | Yes      | No        | v0.16.x       | Client ID for Entra app registration for depositing file artefacts        | 'xxx'                                        |
+| `X_DEPOSIT_CLIENT_SECRET`              | String       | Yes      | Yes       | v0.16.x       | Client secret for Entra app registration for depositing file artefacts    | 'xxx'                                        |
+| `X_DEPOSIT_GROUPS_MAPPING`             | Dict         | Yes      | No        | v0.16.x       | JSON encoded `dict[str, list[str]`, may be empty                          | '{"x": ["123"]}'                             |
+| `X_DEPOSIT_LIBRARY_NAME`               | String       | Yes      | No        | v0.16.x       | Library name within SharePoint site used for depositing file artefacts    | 'xxx'                                        |
+| `X_DEPOSIT_PROXY_URL`                  | String       | No       | No        | v0.16.x       | Base URL for access proxy to access unrestricted file artefacts           | 'https://example.com'                        |
+| `X_DEPOSIT_SITE_ID`                    | String       | Yes      | No        | v0.16.x       | ID for SharePoint site used for depositing file artefacts                 | 'xxx'                                        |
+| `X_DEPOSIT_TENANT_ID`                  | String       | Yes      | No        | v0.16.x       | Tenancy ID for Entra app registration for depositing file artefacts       | 'xxx'                                        |
 <!-- pyml enable md013 -->
 
 > [!WARNING]
@@ -426,6 +433,7 @@ Within this project, for each new item type:
 ### Adding distribution formats
 
 1. if needed, register new media-types under the Metadata Standards resources site (`metadata-resources.data.bas.ac.uk`)
+1. if needed, [Support New File Artefacts](/docs/libraries.md#adding-file-artefact-formats) for deposit
 1. create a new class under `lantern.models.item.catalogue.distributions`:
    - inheriting from `Distribution` or a relevant subclass
    - set the `matches` class method to determine an exclusive match for the distribution (typically via media types)

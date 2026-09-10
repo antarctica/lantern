@@ -51,6 +51,10 @@ invalidate-records   Invalidate cached records in live site
 upgrade-records      Upgrade records
 bootstrap-records    Bootstrap a new records repo
 
+# artefact commands
+check-artefacts     Check files are supported file artefact formats
+deposit-artefacts   Deposit supported file artefacts for a resource to SharePoint Online
+
 # other commands
 esri-item            Sync record details to an Esri item
 site-invalidate      Invalidate cached content in live site
@@ -342,6 +346,51 @@ Bootstrap a records repo.
 ```shell
 % task bootstrap-records --help
 ```
+
+## Artefact commands
+
+### `check-artefacts`
+
+Check files are [Supported](/docs/libraries.md#supported-file-formats) file artefact formats.
+
+Intended for troubleshooting unsupported files when [Depositing Artefacts](#deposit-artefacts).
+
+```shell
+% task check-artefacts
+```
+
+Examples:
+
+```shell
+# set non-default artefacts directory without interaction
+% task check-artefacts --force --artefacts-path ./path/to/files
+```
+
+### `deposit-artefacts`
+
+Deposit [Supported](/docs/libraries.md#supported-file-formats) file artefacts for a resource to SharePoint Online.
+
+```shell
+% task artefacts-deposit
+```
+
+Selected files will be deposited as file artefacts within the
+[MAGIC Resource Distribution](/docs/libraries.md#magic-resource-distribution) SharePoint Online site.
+
+Where the `--force` flag is not used, deposited artefacts can be added as new distribution options within the selected
+record config, or overwrite properties of an existing option. With `--force`,  new options are always created.
+
+Original files for successfully deposited artefacts CAN optionally be deleted after upload.
+
+Examples:
+
+```shell
+# set record config without interaction
+% task deposit-artefacts --force --record ./import/1cc0ed92-06d3-4c4f-ae06-efcadce7c6e5.json
+```
+
+> [!TIP]
+> See the [`check-artefacts`](#check-artefacts) command to list supported files within the artefacts directory.
 
 ## Other commands
 

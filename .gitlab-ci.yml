@@ -52,6 +52,8 @@ image: mcr.microsoft.com/playwright/python:v1.62.0-noble
   - tar -xzf uv.tar.gz
   - mv uv-x86_64-unknown-linux-gnu/uv uv-x86_64-unknown-linux-gnu/uvx /usr/local/bin
   - uv --version
+  # setup quickxor C extension dependencies
+  - apt-get update && apt-get install -y --no-install-recommends build-essential
 
 .before_script_testing: &before_script_testing
   - *before_script_python

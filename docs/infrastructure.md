@@ -115,7 +115,7 @@ Then run:
 
 ### GitLab
 
-- [Project Repository 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/lantern-exp)
+- [Project Repository 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/lantern)
   - [Public Mirror](https://github.com/antarctica/lantern)
   - managed manually
 - [Project User 🔒](https://start.1password.com/open/i?a=QSB6V7TUNVEOPPPWR6G7S2ARJ4&v=k34cpwfkqaxp2r56u4aklza6ni&i=el4eljwuhbgpunh7pvu3m7pvfy&h=magic.1password.eu)

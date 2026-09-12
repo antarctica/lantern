@@ -43,13 +43,15 @@ correctly paragraphs from lists in Markdown and ensure proper formatting.
 
 Includes classes for [Records](/docs/models.md#records).
 
-These redesigned and refactored classes will replace core parts of the Metadata Library project.
+These redesigned and refactored classes are intended ti replace core parts of the
+[BAS Metadata Library](https://github.com/antarctica/metadata-library).
 
 ### Records
 
+`lantern.lib.metadata_library.models.record.Record`
+
 Records are a partial representation of the [ISO 19115](https://metadata-standards.data.bas.ac.uk/standards/iso-19115-19139)
-information model implemented as a base data class (`lantern.lib.metadata_library.models.record.Record`). They
-generically describe resources (maps [products], datasets, collections, etc.).
+information model in Python. They generically describe resources (maps/products, datasets, collections, etc.).
 
 <!-- pyml disable md028 -->
 > [!IMPORTANT]
@@ -90,7 +92,10 @@ Records will be validated automatically when needed. Invalid records will raise 
 
 ### Record limitations
 
-Supported common elements (references not normative or exhaustive):
+> [!NOTE]
+> These references are not normative or exhaustive and relate to the BAS ISO 19115 JSON schema.
+
+Supported common elements:
 
 - `*.citation.title`
 - `*.citation.dates`
@@ -102,7 +107,7 @@ Supported common elements (references not normative or exhaustive):
 - `*.maintenance`
 - `*.online resource` (partial)
 
-Supported elements (references not normative or exhaustive):
+Supported elements:
 
 - `$schema`
 - `file_identifier`
@@ -138,7 +143,7 @@ Supported elements (references not normative or exhaustive):
 - `distribution.format` (`format` and `href` only)
 - `distribution.transfer_option`
 
-Unsupported elements (not normative or exhaustive):
+Unsupported elements:
 
 - `*.contact.position`
 - `*.online_resource.protocol`

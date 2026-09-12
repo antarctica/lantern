@@ -191,11 +191,9 @@ Access levels for each item are available via:
 - `Item.admin_metadata_access` Item property (for who can view a description of the item)
 - `Item.admin_resource_access` Item property (for who can access the item itself, if applicable)
 
-Both properties return an enumeration value, determined by permissions from
-[Administrative Metadata](#item-administrative-metadata).
-
-Both properties default to `AccessLevel.NONE`. To allow open access, include permissions equivalent to the
-`lantern.lib.metadata_library.models.record.presets.admin.OPEN_ACCESS` permission.
+Both properties return an enumeration member, determined by permissions from
+[Administrative Metadata](#item-administrative-metadata), mapped to supported permissions from the MAGIC Access
+Permissions Framework (v1), or `AccessLevel.NONE` if undefined.
 
 <!-- pyml disable md028 -->
 > [!CAUTION]

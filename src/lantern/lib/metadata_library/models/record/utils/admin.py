@@ -10,8 +10,11 @@ from bas_metadata_library.standards.magic_administration.v1.utils import (
     set_admin as _set_admin,
 )
 
+from lantern.lib.metadata_library.models.record.enums import MagicAccessFrameworkPermission
+from lantern.lib.metadata_library.models.record.presets.admin import BAS_STAFF, OPEN_ACCESS
+
 if TYPE_CHECKING:
-    from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
+    from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata, Permission
 
     from lantern.lib.metadata_library.models.record.record import Record
 
@@ -30,3 +33,14 @@ def set_admin(keys: AdministrationKeys, record: Record, admin_meta: Administrati
     config = record.dumps(strip_admin=False)
     _set_admin(keys=keys, config=config, admin_meta=admin_meta)
     record.identification.supplemental_information = config["identification"]["supplemental_information"]
+
+
+def parse_framework_permissions(permissions: list[Permission]) -> MagicAccessFrameworkPermission:
+    """Evaluate access permissions against supported permissions from the MAGIC Access Permissions Framework (v1)."""
+    if len(permissions) == 0:
+        return MagicAccessFrameworkPermission.NONE
+    if permissions == [BAS_STAFF]:
+        return MagicAccessFrameworkPermission.BAS_STAFF
+    if permissions == [OPEN_ACCESS]:
+        return MagicAccessFrameworkPermission.OPEN_ACCESS
+    return MagicAccessFrameworkPermission.CUSTOM_GROUPS

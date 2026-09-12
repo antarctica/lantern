@@ -21,38 +21,45 @@
       {% endif %}
 
       {% call com.dl_item(title='Item Restricted?', id='admin-restricted') %}
-        {% if data.restricted %}
-          {% call com.alert(shape='side', variant='red') %}Yes{% endcall %}
-        {% else %}
-          {% call com.alert(shape='side', variant='green') %}No{% endcall %}
-        {% endif %}
+        {% call com.alert(shape='side', variant='blue') %}{% if data.restricted %}Yes{% else %}No{% endif %}{% endcall %}
       {% endcall %}
 
-      {% call com.dl_item(title='Metadata Access', id='admin-metadata-access') %}
-        {% if data.metadata_access == 'PUBLIC' %}
-          {% call com.alert(shape='side', variant='green') %}Public (Open Access){% endcall %}
-        {% else %}
-          {% call com.alert(shape='side', variant='red') %}{{ data.metadata_access }}{% endcall %}
-        {% endif %}
+      {% call com.dl_item(title='Metadata Access') %}
+        <div class="space-y-2">
+          {% set metadata_variant = 'green' if data.metadata_access == 'OPEN_ACCESS' else 'red' %}
+          <div id="admin-metadata-access">{% call com.alert(shape='side', variant=metadata_variant) %}{{ data.metadata_access }}{% endcall %}</div>
+          {% if data.metadata_access != 'OPEN_ACCESS' %}
+            {% call com.alert(shape='box', variant='red') %}The catalogue does not enforce metadata access permissions. They will always evaluate to open access (unrestricted).{% endcall %}
+          {% endif %}
+        </div>
+      {% endcall %}
+
+      {% call com.dl_item(title='Metadata Access (MAGIC Framework)', id='admin-metadata-access-framework') %}
+        {% call com.alert(shape='side', variant='blue') %}{{ data.metadata_access_framework }}{% endcall %}
       {% endcall %}
 
       {% call com.dl_item(title='Resource Access', id='admin-resource-access') %}
-        {% if data.resource_access == 'PUBLIC' %}
-          {% call com.alert(shape='side', variant='green') %}Public (Open Access){% endcall %}
-        {% else %}
-          {% call com.alert(shape='side', variant='red') %}{{ data.resource_access }}{% endcall %}
-        {% endif %}
+        {% set resource_variant = 'green' if data.resource_access == 'OPEN_ACCESS' else 'red' %}
+        {% call com.alert(shape='side', variant=resource_variant) %}{{ data.resource_access }}{% endcall %}
+      {% endcall %}
+
+      {% call com.dl_item(title='Resource Access (MAGIC Framework)', id='admin-resource-access-framework') %}
+        {% call com.alert(shape='side', variant='blue') %}{{ data.resource_access_framework }}{% endcall %}
       {% endcall %}
 
       {% call com.dl_item(title='Metadata Permissions', id='admin-metadata-permissions') %}
         {% for permission in data.metadata_permissions %}
-          <pre>{{ permission }}</pre>
+          <div class="overflow-x-auto">
+            <pre>{{ permission }}</pre>
+          </div>
         {% endfor %}
       {% endcall %}
 
       {% call com.dl_item(title='Resource Permissions', id='admin-resource-permissions') %}
         {% for permission in data.resource_permissions %}
-          <pre>{{ permission }}</pre>
+          <div class="overflow-x-auto">
+            <pre>{{ permission }}</pre>
+          </div>
         {% endfor %}
       {% endcall %}
     </dl>

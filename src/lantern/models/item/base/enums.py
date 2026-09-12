@@ -5,6 +5,8 @@ class AccessLevel(Enum):
     """
     Item access levels.
 
+    Extends and aligns with the `lantern.lib.metadata_library.models.record.enums.MagicAccessFrameworkPermission` enum.
+
     Where:
     - 'NONE' is a fallback value that should not be needed (as items with no access would not be catalogued)
     - 'UNKNOWN' represents undefined access that will be resolved when accessing the item (legacy measure)
@@ -12,10 +14,11 @@ class AccessLevel(Enum):
     - 'PUBLIC' represents unrestricted public access
     """
 
-    NONE = "none"
     UNKNOWN = "unknown"
+    # as per MagicAccessFrameworkPreset
+    NONE = "none"
     BAS_STAFF = "bas_staff"
-    PUBLIC = "public"
+    OPEN_ACCESS = "open_access"
 
 
 class ResourceTypeLabel(Enum):

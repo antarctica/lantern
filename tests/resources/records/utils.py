@@ -122,7 +122,9 @@ def relate_products(file_identifier: str) -> Aggregations:
         "8422d4e7-654f-4fbb-a5e0-4051ee21418e",  # mapProduct
         "30825673-6276-4e5a-8a97-f97f2094cd25",  # product (all)
         "3c77ffae-6aa0-4c26-bc34-5521dbf4bf23",  # product (min)
-        "57327327-4623-4247-af86-77fb43b7f45b",  # product (restricted
+        "b0e92ec2-b018-4f9f-a1e1-bc0fe195619f",  # product (min, Open Access)
+        "57327327-4623-4247-af86-77fb43b7f45b",  # product (restricted, BAS Staff)
+        "1481464a-521c-49d8-ac0b-c7ade9303bcd",  # product (restricted, Custom Groups)
         "53ed9f6a-2d68-46c2-b5c5-f15422aaf5b2",  # paperMapProduct
         "09dbc743-cc96-46ff-8449-1709930b73ad",  # paperMapProduct (diff)
     ]

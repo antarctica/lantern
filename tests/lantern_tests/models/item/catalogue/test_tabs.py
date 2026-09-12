@@ -121,7 +121,7 @@ class TestDataTab:
             )
         ]
 
-        tab = DataTab(restricted=False, distributions=distributions)
+        tab = DataTab(restricted=False, access_level=AccessLevel.NONE, distributions=distributions)
 
         assert tab.enabled is False
         # cov
@@ -152,7 +152,7 @@ class TestDataTab:
                 ),
             ),
         ]
-        tab = DataTab(restricted=False, distributions=distributions)
+        tab = DataTab(restricted=False, access_level=AccessLevel.NONE, distributions=distributions)
         assert tab.enabled is True
 
     def test_items(self):
@@ -181,7 +181,7 @@ class TestDataTab:
             ),
         ]
         expected = ArcGisFeatureLayer(distributions[0], [distributions[1]], restricted=restricted)
-        tab = DataTab(restricted=restricted, distributions=distributions)
+        tab = DataTab(restricted=restricted, access_level=AccessLevel.NONE, distributions=distributions)
 
         assert tab.items[0].format_type == expected.format_type
         assert tab.items[0].action.href == expected.action.href
@@ -189,7 +189,7 @@ class TestDataTab:
     def test_access(self):
         """Can get item access type."""
         expected = False
-        tab = DataTab(restricted=expected, distributions=[])
+        tab = DataTab(restricted=expected, access_level=AccessLevel.NONE, distributions=[])
         assert tab.restricted == expected
 
 
@@ -343,7 +343,7 @@ class TestLicenceTab:
             ),
         ],
     )
-    def test_copyright_holders(self, contacts: Contacts, expected: list[Link, str]):
+    def test_copyright_holders(self, contacts: Contacts, expected: list[Link | str]):
         """Can get licence macro name from licence constraint href."""
         tab = LicenceTab(item_super_type=ItemSuperType.RESOURCE, licence=None, rights_holders=contacts)
         assert tab.copyright_holders == expected

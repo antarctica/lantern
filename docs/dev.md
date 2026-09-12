@@ -918,9 +918,16 @@ To aid in debugging and testing, a set of fake records are included for:
 - example items to test supported formatting options in free-text properties
 - example items to test supported distribution and check types
 - example items for each supported licence
+- example items for each supported access permissions preset
 - examples of special items, such as physical maps
 
 These records are used within tests but CAN and SHOULD also be used when developing [Templates](/docs/site.md#templates).
+
+> [!NOTE]
+> Non-open access records do not include open access metadata permissions, which is misleading as the catalogue does
+not enforce metadata access permissions meaning they'll always evaluate to open access (unrestricted).
+>
+> I.e. Records may indicate metadata access permissions are closed, but they aren't in reality.
 
 #### Test records store
 

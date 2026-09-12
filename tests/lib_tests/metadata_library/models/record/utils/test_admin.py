@@ -2,13 +2,15 @@ import json
 from typing import TYPE_CHECKING
 
 import pytest
+from bas_metadata_library.standards.magic_administration.v1 import Permission
 from bas_metadata_library.standards.magic_administration.v1.utils import (
     AdministrationKeys,
     AdministrationMetadataSubjectMismatchError,
     AdministrationWrapper,
 )
 
-from lantern.lib.metadata_library.models.record.utils.admin import get_admin, set_admin
+from lantern.lib.metadata_library.models.record.enums import MagicAccessFrameworkPermission
+from lantern.lib.metadata_library.models.record.utils.admin import get_admin, parse_framework_permissions, set_admin
 
 if TYPE_CHECKING:
     from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
@@ -87,3 +89,27 @@ class TestAdministrationGetSet:
 
         with pytest.raises(AdministrationMetadataSubjectMismatchError):
             set_admin(keys=fx_admin_meta_keys, record=fx_lib_record_model_min_iso, admin_meta=fx_admin_meta_element)
+
+
+class TestParsePermissions:
+    """Tests for access permissions parsing."""
+
+    @pytest.mark.parametrize(
+        ("permissions", "expected"),
+        [
+            ([], MagicAccessFrameworkPermission.NONE),
+            ([Permission(directory="~nerc", group="~bas-staff")], MagicAccessFrameworkPermission.BAS_STAFF),
+            ([Permission(directory="*", group="*")], MagicAccessFrameworkPermission.OPEN_ACCESS),
+            (
+                [Permission(directory="x", group="x"), Permission(directory="y", group="y")],
+                MagicAccessFrameworkPermission.CUSTOM_GROUPS,
+            ),
+        ],
+    )
+    def test_parse_framework_permissions(
+        self,
+        permissions: list[Permission],
+        expected: MagicAccessFrameworkPermission,
+    ):
+        """Can parse access supported permissions to a MAGIC Access Permissions Framework supported permission."""
+        assert parse_framework_permissions(permissions) == expected

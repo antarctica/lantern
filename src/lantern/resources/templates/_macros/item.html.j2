@@ -154,7 +154,7 @@
 
   {% if data.tab.enabled %}
     <input id="{{ tab_id }}" type="radio" name="tabs" class="peer/{{ tab_id }} opacity-0 absolute" aria-hidden="true" {% if is_default_tab %}checked="checked"{% endif %} />
-    <label for="{{ tab_id }}" role="tab" aria-selected="false" aria-controls="{{ tab_content_id }}-data" tabindex="-1" class="block relative p-4 cursor-pointer hover:underline border-1 border-transparent
+    <label for="{{ tab_id }}" role="tab" aria-selected="false" aria-controls="{{ tab_id }}-data" tabindex="-1" class="block relative p-4 cursor-pointer hover:underline border-1 border-transparent
       text-grey-500 bg:text-grey-300
       hover:bg-sky-blue-50 dark:hover:bg-grey-900
       hover:text-blue-500 dark:hover:text-grey-100

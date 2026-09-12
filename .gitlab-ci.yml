@@ -39,7 +39,7 @@ variables:
 
   # Secrets (set in GitLab CI/CD settings)
   # - PROJECT_ACCESS_TOKEN
-  #   - https://gitlab.data.bas.ac.uk/MAGIC/lantern-exp/-/settings/access_tokens
+  #   - https://gitlab.data.bas.ac.uk/MAGIC/lantern/-/settings/access_tokens
   #   - (name: 'gitlab_ci' scope: 'read_api', role: 'reporter')
   # - OP_SERVICE_ACCOUNT_TOKEN
   #   - https://magic.1password.eu/developer-tools/infrastructure-secrets/serviceaccount/4MR5NL7W45AA3GAFGRZMVN2H2I

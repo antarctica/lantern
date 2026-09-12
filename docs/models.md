@@ -180,7 +180,7 @@ JSON Web Keys (JWKs) for decrypting JWEs and verifying the signature of JWTs sho
 [Config Options](/docs/config.md#config-options) respectively.
 
 > [!TIP]
-> These keys can be accessed from [Export Metadata](#export-metadata) if created from a Config object.
+> These keys can be accessed from [Export Metadata](#export-metadata) if created from a `Config` class instance.
 
 ### Item access levels
 
@@ -203,9 +203,9 @@ Permissions Framework (v1), or `AccessLevel.NONE` if undefined.
 > External data access systems are responsible for enforcing any resource permissions that may apply. The catalogue
 > only indicates whether restrictions may apply at an informative level.
 
-> [!WARNING]
+> [!NOTE]
 > The catalogue does not consider access constraints set in `metadata.costraints` or `identification.constraints`, as
-> they can not be verified as trustworthy.
+> they cannot be verified as trustworthy.
 
 > [!NOTE]
 > Access constraints SHOULD still be set for visibility to end users and for interoperability with other systems.

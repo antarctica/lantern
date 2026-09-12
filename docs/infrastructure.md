@@ -58,28 +58,9 @@ reverse proxying. The BAS HAProxy load balancer proxies applicable requests to e
 
 ## Infrastructure as Code
 
-[OpenTofu](https://opentofu.org), an open-source fork of [Terraform](https://www.terraform.io) manages project
-infrastructure in `resources/infra/main.tf` where possible/pragmatic.
-
-Remote state is managed by the [BAS Terraform Remote State 🛡️](https://gitlab.data.bas.ac.uk/WSF/terraform-remote-state)
-project.
-
-To apply this infrastructure:
-
-- install tools (`brew install opentofu awscli azure-cli 1password-cli`)
-- configure credentials for the [BAS AWS 🛡️](https://gitlab.data.bas.ac.uk/WSF/bas-aws) account (`aws configure`)
-- configure credentials for the
-  [NERC Entra 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/dev-docs/-/blob/main/service-nerc-azure.md) tenancy
-  (`az login --allow-no-subscriptions`)
-- copy `resources/infra/terraform.tfvars.tpl` to `resources/infra/terraform.tfvars` and populate credentials/values
-
-Then run:
-
-```text
-% cd resources/infra
-% tofu init
-% tofu apply
-```
+Infrastructure as Code using [Terraform](https://www.terraform.io) is used to manage infrastructure for this project
+where possible/pragmatic in the
+[MAGIC Terraform 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/infrastructure/terraform/-/tree/main/projects/lantern) project.
 
 ## Monitoring components
 

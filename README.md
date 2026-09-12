@@ -74,6 +74,8 @@ Key related projects:
 
 ![Related Projects](/docs/img/related-projects.png)
 
+- [MAGIC Terraform 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/infrastructure/terraform) - Infrastructure as Code for MAGIC
+  projects
 - [Zap ⚡ (🛡️)](https://gitlab.data.bas.ac.uk/MAGIC/zap) - an experimental editor for MAGIC to create metadata records
 - [BAS AWS 🛡](https://gitlab.data.bas.ac.uk/WSF/bas-aws) - BAS Amazon Web Services management and base infrastructure
 - [BAS Metadata Library 🛡](https://gitlab.data.bas.ac.uk/uk-pdc/metadata-infrastructure/metadata-library) - Python

@@ -35,7 +35,8 @@ def export_test_site(export_path: Path) -> None:
     logger.setLevel(logging.INFO)
     config = Config()
     catalogue = FakeCatalogue(logger=logger, config=config, base_path=export_path)
-    catalogue.export()
+    catalogue.export(trusted=False)
+    catalogue.export(trusted=True)  # To ensure admin tab classes are generated
 
     # Include fake checks report - mixed/different site env used to ensure both styles are included
     report_path = export_path / "-" / "checks" / "index.html"
@@ -82,20 +83,26 @@ def export_test_site(export_path: Path) -> None:
     print(f"Exported test site inc. checks report to '{export_path.resolve()}'")
 
 
-def regenerate_styles(tw_bin: Path, site_path: Path, base_path: Path) -> None:
+def regenerate_styles(tw_bin: Path, site_paths: list[Path], base_path: Path) -> None:
     """
     Regenerate app Tailwind CSS styles.
 
     Steps:
-    - render a Jinja2 template to produce source CSS (to dynamically set the Tailwind content path) as a temp file
+    - render a Jinja2 template to produce source CSS (to dynamically set Tailwind content paths) as a temp file
     - process this with the Tailwind CLI into an output CSS file
     - append a trailing new line to the output file (to satisfy linters)
+
+    Note: The templated CSS input file references one or more sources of rendered/reference content which the Tailwind
+    CLI uses for tree-shaking needed classes. In this task, these content paths are temporary (un)trusted site builds.
+    Where classes are conditional based on templates, and are not triggered by the contents of these builds they won't
+    be included in the output CSS.
     """
     templates_path = base_path / "templates"
+    content_paths = [p.resolve() for p in site_paths]
     output_path = base_path / "css" / "main.css"
     _jinja = Environment(loader=FileSystemLoader(str(templates_path)), autoescape=select_autoescape())
 
-    src_css = _jinja.get_template("_assets/css/main.css.j2").render(site_path=site_path.resolve())
+    src_css = _jinja.get_template("_assets/css/main.css.j2").render(content_paths=content_paths)
 
     with TemporaryDirectory() as tmp_dir:
         src_path = Path(tmp_dir) / "main.src.css"
@@ -114,15 +121,22 @@ def regenerate_styles(tw_bin: Path, site_path: Path, base_path: Path) -> None:
 
 
 def main() -> None:
-    """Entrypoint."""
-    site_dir = TemporaryDirectory()
-    site_path = Path(site_dir.name)
+    """
+    Entrypoint.
+
+    `tmp_dir` isn't used as the `site_path` as a parallel '-trusted' path will be created by `export_test_site()`.
+    I.e. `tmp_dir/site` and `tmp_dir/site-trusted` will be created.
+    """
+    tmp_dir = TemporaryDirectory()
+    site_path = Path(tmp_dir.name) / "site"
     tw_bin = Path(".venv/bin/tailwindcss")
     base_path = Path("src/lantern/resources")
 
     export_test_site(export_path=site_path)
-    regenerate_styles(tw_bin=tw_bin, site_path=site_path, base_path=base_path)
-    site_dir.cleanup()
+    regenerate_styles(
+        tw_bin=tw_bin, site_paths=[site_path, site_path.with_name(f"{site_path.name}-trusted")], base_path=base_path
+    )
+    tmp_dir.cleanup()
     print("Updated site styles. Re-run build to apply.")
 
 

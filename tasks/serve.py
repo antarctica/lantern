@@ -217,7 +217,7 @@ def run(
         print(
             f"- use username '{username}' and password '{password}' to access restricted content under '{BASIC_AUTH_PATH}'"
         )
-        print("- ⚠️ using self-signed certificate which will see security warnings in clients")
+        print("- ⚠️ using self-signed certificate which will trigger security warnings in clients")
         if not path.joinpath("-/items").is_dir():
             print(
                 f"\n**Note:** Run `ln -s ../../export-trusted/items items` or similar from `{path.resolve()}/-` to simulate reverse proxy."

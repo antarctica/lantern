@@ -27,8 +27,8 @@ class RecordMagic(Record):
     Create a Record based on MAGIC metadata profiles and other conventional values.
 
     At a high-level, this method creates a record complaint with:
-    - the MAGIC Discovery profile (V2, https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery/v2/)
-    - the MAGIC Administration profile (V1, https://metadata-standards.data.bas.ac.uk/profiles/magic-administration/v1/)
+    - the MAGIC Discovery profile (v2, https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery/v2/)
+    - the MAGIC Administration profile (v1, https://metadata-standards.data.bas.ac.uk/profiles/magic-administration/v1/)
 
     At a lower level, this method extends a minimal ISO record with:
     - a domain consistency element for the MAGIC Discovery profile (appendix 1)

@@ -209,8 +209,9 @@ See the [Algolia Store](/docs/stores.md#algolia-store) for details on *how* Reco
 
 ## ArcGIS Online
 
-[ArcGIS Online](https://www.arcgis.com) is used in Records as a key data access system for spatial services. It also
-underpins the Embedded Maps Service used for [Item Extent Visualisations](/docs/site.md#item-extent-maps) functionality.
+[ArcGIS Online](https://www.arcgis.com) is used in Records as a key [Data Access System](#data-access-systems) for
+spatial services. It also underpins the Embedded Maps Service used for
+[Item Extent Visualisations](/docs/site.md#item-extent-maps) functionality.
 
 ArcGIS Online is used for:
 

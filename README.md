@@ -1,6 +1,6 @@
 # 🏮 Lantern
 
-A prototype [Data Catalogue](https://data.bas.ac.uk/-/index) for BAS discovery metadata.
+A [Data Catalogue](https://data.bas.ac.uk/-/index) for discovery metadata.
 
 ## Overview
 
@@ -21,6 +21,27 @@ A data discovery tool used to find, evaluate and access resources produced, mana
 > interest to others. Some resources, indicated with a '🛡' or '🔒' symbol, can only be accessed by BAS staff or
 > project members respectively. Contact the [Project Maintainer](#project-maintainer) to request access.
 <!-- pyml enable md028 -->
+
+### Conformance
+
+This project is compliant with:
+
+- the MAGIC [Discovery Metadata](https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery/v1/) profile
+  (version 2)
+- the MAGIC [Administration Metadata](https://metadata-standards.data.bas.ac.uk/profiles/magic-administration/v1/)
+  profile (version 1)
+- the MAGIC [Access Permissions Framework](https://gitlab.data.bas.ac.uk/MAGIC/data-management/-/issues/81) (version 1)
+- the MAGIC [Licencing Framework](https://gitlab.data.bas.ac.uk/MAGIC/data-management/-/issues/82) (version 1)
+
+This project is partially compliant with:
+
+- the BAS [ISO 19115](https://metadata-standards.data.bas.ac.uk/standards/iso-19115-19139#json-schemas) JSON Schema
+  (version 4)
+  - see [Libraries](/docs/libraries.md#record-limitations) for supported/unsupported elements
+
+This project is not compliant with:
+
+- the MAGIC [Classifications Framework](https://gitlab.data.bas.ac.uk/MAGIC/data-management/-/issues/83) (version 1)
 
 ## Usage
 
@@ -43,9 +64,9 @@ conventions and context.
 
 ## Releases
 
-- [latest release 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/lantern-exp/-/releases/permalink/latest)
-- [all releases 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/lantern-exp/-/releases)
-- [create release 🛡](https://gitlab.data.bas.ac.uk/MAGIC/lantern-exp/-/issues/new?issue[title]=x.x.x%20release&issuable_template=release)
+- [latest release 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/lantern/-/releases/permalink/latest)
+- [all releases 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/lantern/-/releases)
+- [create release 🛡](https://gitlab.data.bas.ac.uk/MAGIC/lantern/-/issues/new?issue[title]=x.x.x%20release&issuable_template=release)
 
 ## Related projects
 
@@ -55,17 +76,17 @@ Key related projects:
 
 - [Zap ⚡ (🛡️)](https://gitlab.data.bas.ac.uk/MAGIC/zap) - an experimental editor for MAGIC to create metadata records
 - [BAS AWS 🛡](https://gitlab.data.bas.ac.uk/WSF/bas-aws) - BAS Amazon Web Services management and base infrastructure
-- [BAS Metadata Standards 🛡](https://gitlab.data.bas.ac.uk/uk-pdc/metadata-infrastructure/metadata-standards) -
-  metadata standards policy and coordination within BAS
 - [BAS Metadata Library 🛡](https://gitlab.data.bas.ac.uk/uk-pdc/metadata-infrastructure/metadata-library) - Python
   library to encode and decode metadata records
-- [MAGIC Resource Distribution 🛡](https://gitlab.data.bas.ac.uk/MAGIC/resource-distribution) - data access system for
-  MAGIC file artefacts based on Microsoft SharePoint
+- [BAS Metadata Standards 🛡](https://gitlab.data.bas.ac.uk/uk-pdc/metadata-infrastructure/metadata-standards) -
+  metadata standards policy and coordination within BAS
+- [MAGIC Data Management 🛡](https://gitlab.data.bas.ac.uk/MAGIC/data-management) - data management coordination and
+  task tracking within MAGIC
+- [MAGIC Resource Distribution 🛡](https://gitlab.data.bas.ac.uk/MAGIC/resource-distribution) - a data access system
+  for MAGIC file artefacts using SharePoint Online
 - [BAS Esri 🛡](https://gitlab.data.bas.ac.uk/MAGIC/esri) - BAS Esri ArcGIS management and coordination
 - [BAS Embedded Maps 🛡](https://gitlab.data.bas.ac.uk/MAGIC/embedded-maps) - tool for easily include interactive maps
   with MAGIC recommended basemaps in websites
-- [MAGIC Data Management 🛡](https://gitlab.data.bas.ac.uk/MAGIC/data-management) - data management coordination and
-  task tracking within MAGIC
 
 ## Project maintainer
 

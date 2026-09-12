@@ -6,57 +6,37 @@
 
 ## Records
 
-### Base records
-
-`lantern.lib.metadata_library.models.record.Record`.
-
-Records are a partial representation of the [ISO 19115](https://metadata-standards.data.bas.ac.uk/standards/iso-19115-19139)
-information model in Python. They generically describe resources (maps/products, datasets, collections, etc.).
-
-<!-- pyml disable md028 -->
-> [!NOTE]
-> Unless stated otherwise, references to 'Records' elsewhere in this documentation refer
-> [Record Revisions](#record-revisions) and not this concept of a record.
-
-> [!NOTE]
-> The base Records model is considered part of the BAS Metadata Library. See the
-> [Library](/docs/libraries.md#bas-metadata-library) docs for more information.
-<!-- pyml enable md028 -->
-
 ### Catalogue records
+
+> [!NOTE]
+> Unless stated otherwise, references to 'Records' generically elsewhere in this documentation SHOULD be read as
+> references to [Record Revisions](#record-revisions).
 
 `lantern.models.record.Record`
 
 Catalogue Records represent [Records](#records) within the Data Catalogue specifically.
 
-> [!NOTE]
-> Unless stated otherwise, references to 'Records' elsewhere in this documentation refer
-> [Record Revisions](#record-revisions) and not this concept of a record.
-
-Catalogue Records extend the [Base Record](#base-records) class by implementing the Catalogue's
-[Record Requirements](#record-requirements).
-
-> [!NOTE]
-> This subclass SHOULD be used for any additional subclasses within the Catalogue.
+Implemented as a BAS Metadata Library [`Record`](/docs/libraries.md#records) subclass to enforce the Catalogue's
+[Record Requirements](#record-requirements), including mandatory file identifier and hierarchy level properties.
 
 ### Record revisions
-
-`lantern.models.record.revision.RecordRevision`
-
-Record Revisions represent [Records](#records) at a particular point in time indicated by a revision identifier.
 
 > [!NOTE]
 > Unless stated otherwise, references to 'Records' elsewhere in this documentation refer to this concept of a record.
 
-Revision identifiers are a local addition and not part of the ISO 19115 information model. Identifiers SHOULD come from
-a version Control system (VCS) such as Git. Identifiers MUST be unique within the history of each Record but MAY be
-shared across multiple Records, to represent a coordinated set of changes for example (i.e. a records  changeset).
+`lantern.models.record.revision.RecordRevision`
 
-Implemented as a (catalogue) `Record` subclass with an additional top-level `file_revision` property.
+Record Revisions represent [Records](#records) at a particular state indicated by a revision identifier.
+
+Revision identifiers are a local addition and not part of the ISO 19115 information model. Identifiers SHOULD come from
+a version Control system (VCS) such as Git. Identifiers MUST be unique within the history of each Record.
+
+Implemented as a (Catalogue) [`Record`](#catalogue-records) subclass with an additional `file_revision` property.
 
 ### Record requirements
 
-In addition to [Record Validation](/docs/libraries.md#record-validation), the Data Catalogue requires all records:
+In addition to [Record Validation](/docs/libraries.md#record-validation) against the BAS ISO 19115 JSON schema and any
+profiles, the Data Catalogue requires all records:
 
 - MUST use a UUID value for the `file_identifier`:
   - to ensure resources can be distinguished without relying on a value such as title that may change or not be unique
@@ -438,6 +418,12 @@ format or protocol. Artefacts are implemented in Python through the
 `lantern.models.item.arcgis.ItemArcGIS`
 
 ArcGIS items represent [Items](#items) as ArcGIS content.
+
+> [!NOTE]
+> ArcGIS items are considered to be [Artefacts](#artefacts) from the perspective of this project, referenced in
+> [Records](#records) as distribution options. Typically, they are
+> [Service Artefacts](/docs/libraries.md#service-artefacts) but ArcGIS
+> CAN also represent [File Artefacts](/docs/libraries.md#file-artefacts).
 
 Features include:
 

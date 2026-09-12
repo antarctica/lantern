@@ -5,7 +5,7 @@
 This application is distributed as a Python (Pip) package.
 
 [Continuous Deployment](#continuous-deployment) will build the package and publish it to the project
-[Package Registry 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/lantern-exp/-/packages) automatically.
+[Package Registry 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/lantern/-/packages) automatically.
 
 > [!TIP]
 > The package can be built manually by running the `build` [Development Task](/docs/dev.md#development-tasks).

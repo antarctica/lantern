@@ -25,6 +25,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Microsoft distributor contact metadata preset
 * MAGIC distribution library for depositing supported file artefacts to SharePoint Online
 * `check-artefacts` and `deposit-artefacts` development tasks
+* Conformance information for MAGIC metadata profiles and constraint frameworks
 
 ### Fixed
 
@@ -69,7 +70,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 
 * disabling caching for health check site content
 
-## [0.15.0] - 2026-08-14
+## [0.15.0] - 2026-08-14 [!BREAKING]
 
 ### Changed [!BREAKING]
 

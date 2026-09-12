@@ -57,6 +57,7 @@ deposit-artefacts   Deposit supported file artefacts for a resource to SharePoin
 
 # other commands
 esri-item            Sync record details to an Esri item
+search-reindex       Recreate catalogue search index
 site-invalidate      Invalidate cached content in live site
 thumbnail-invalidate Invalidate cached item thumbnail in CDN
 
@@ -182,6 +183,13 @@ Set GitLab issues for a record.
 % task issues-record --help
 ```
 
+Examples:
+
+```shell
+# set record config and multiple gitlab issues, without interaction
+% task issues-record --force --record ./import/8191d953-ebec-443d-aa95-6b07b5a63ab4.json --issue https://example.com/1 --issue https://example.com/1
+```
+
 ### `admin-record`
 
 View administrative metadata for a record config file.
@@ -206,6 +214,17 @@ Set access permissions for a record.
 
 ```shell
 % task restrict-record --help
+```
+
+> [!TIP]
+> This command has a large number of arguments. It is recommended to run this command interactively and record/re-run
+> the generated command if needed.
+
+Examples:
+
+```shell
+# set record config and metadata/resource permissions presets, without interaction
+% task restrict-record --force --record ./import/2ba1206e-31fa-4e9b-ab01-ea6fe7ce3550.json --metadata-preset OPEN_ACCESS --resource-preset BAS_STAFF
 ```
 
 ### `esri-record`

@@ -1,12 +1,12 @@
 # Lantern - Usage
 
 > [!NOTE]
-> These are draft workflows and are not intended for use by general end-users.
+> These workflows and commands are not intended for use by end-users, see the [Access](/docs/access.md) documentation.
 
 ## Setup
 
-1. ensure you have a working [Local Development Environment](/docs/dev.md#local-development-environment) available with
-   a valid [Configuration](/docs/config.md#config-options), including access tokens
+- ensure you have a working [Local Development Environment](/docs/dev.md#local-development-environment) available with
+  a valid [Configuration](/docs/config.md#config-options), including access tokens
 
 > [!TIP]
 > Run the [`config-check`](/docs/supplemental/proto-cli-reference.md#config-check) to validate the current
@@ -35,9 +35,9 @@ publish records.
 
 To use this installation:
 
-1. ensure [MAGIC environment modules 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/dev-docs/-/blob/main/service-magic-env-modules.md#usage)
+- ensure [MAGIC environment modules 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/dev-docs/-/blob/main/service-magic-env-modules.md#usage)
    are included in your module search path
-1. load the `lantern` module: `module load lantern`
+- load the `lantern` module with `module load lantern`
 
 > [!TIP]
 > This will load the latest stable [Release](/README.md#releases).
@@ -60,7 +60,7 @@ To create records:
     - then update the cloned record as needed (edition, etc.)
   - run the [`supersede-record`](/docs/supplemental/proto-cli-reference.md#supersede-record) command
 
-Then run the [Interactive Publishing Workflows](#interactive-publishing-workflow) to publish records.
+Then follow a [Publishing Workflow](#publishing-workflows).
 
 > [!CAUTION]
 > The catalogue does not enforce metadata access permissions. They will always evaluate to open access (unrestricted).
@@ -86,7 +86,7 @@ Then follow a [Publishing Workflow](#publishing-workflows).
 
 ## Updating records
 
-To update new and existing records:
+To update existing records:
 
 - run the [`select-records`](/docs/supplemental/proto-cli-reference.md#select-records) command
 - to replace a record with a successor:
@@ -96,7 +96,7 @@ To update new and existing records:
 - to set access permissions:
   - run the [`restrict-records`](/docs/supplemental/proto-cli-reference.md#restrict-record) command
 
-Then run the [Interactive Publishing Workflows](#interactive-publishing-workflow) to publish records.
+Then follow a [Publishing Workflow](#publishing-workflows).
 
 > [!CAUTION]
 > The catalogue does not enforce metadata access permissions. They will always evaluate to open access (unrestricted).
@@ -104,16 +104,19 @@ Then run the [Interactive Publishing Workflows](#interactive-publishing-workflow
 ### Replacing record thumbnails
 
 > [!NOTE]
-> This is an advanced topic
+> This is an advanced topic.
 
 To replace a thumbnail for an existing resource:
 
-1. overwrite the thumbnail file using the AWS CLI [1]
-1. run the [`thumbnail-invalidate`](/docs/supplemental/proto-cli-reference.md#thumbnail-invalidate) command
+- overwrite the thumbnail file using the AWS CLI [1]
+- run the [`thumbnail-invalidate`](/docs/supplemental/proto-cli-reference.md#thumbnail-invalidate) command
 
-> [!NOTE]
-> If the thumbnail file name or file type has changed - select, and replace, the relevant graphic overview URL in
-> the record for the resource as per the [Update](#updating-records) workflow instead.
+If the thumbnail file name or file type has changed also:
+
+- remove any redundant files using the AWS CLI [2]
+- select the resource record and replace the relevant graphic overview URL
+
+Then follow a [Publishing Workflow](#publishing-workflows).
 
 [1]
 
@@ -121,27 +124,31 @@ To replace a thumbnail for an existing resource:
 % aws s3 cp ./overview.png s3://cdn.web.bas.ac.uk/add-catalogue/0.0.0/img/items/{file_identifier}/
 ```
 
+[2]
+
+```text
+% aws s3 rm s3://cdn.web.bas.ac.uk/add-catalogue/0.0.0/img/items/{file_identifier}/{file}
+```
+
 ### Replacing record artefacts
 
 > [!NOTE]
-> This is an advanced topic
+> This is an advanced topic.
 
 To replace file artefacts included in an existing resource:
 
-1. replace the artefact in the relevant data access system
-1. use Zap ⚡️to select (but not upload) the replacement artefact to get an updated distribution option
-   - this should ensure the format and size are updated if needed but double-check they are accurate
-1. replace the relevant distribution as per the [Update](#updating-records) workflow:
-   - ensure a transfer option URL is set (amending if the previous value if renamed etc.)
-1. [Update](#updating-records) the record
+- replace the artefact in the relevant data access system
+- replace the relevant distribution as per the [Update](#updating-records) workflow:
+  - ensure the transfer option URL is set correctly (if renamed etc.)
+- [Update](#updating-records) the record
 
 ## Previewing records
 
 To preview new and updated records before importing them:
 
-1. copy record configurations as JSON files to the `import/` directory
-1. run the [`preview-records`](/docs/supplemental/proto-cli-reference.md#preview-records) command
-1. run the [`serve`](/docs/dev.md#development-tasks) development task to view records as items
+- copy record configurations as JSON files to the `import/` directory
+- run the [`preview-records`](/docs/supplemental/proto-cli-reference.md#preview-records) command
+- run the [`serve`](/docs/dev.md#development-tasks) development task to view records as items
 
 > [!TIP]
 > To view [Administration Metadata](/docs/libraries.md#record-administrative-metadata) for a record at the command
@@ -153,9 +160,9 @@ To preview new and updated records before importing them:
 
 To import, build and check sets of [Manually Authored](#creating-records) records via a changeset:
 
-1. run the [Testing](#interactive-publishing-workflow-testing) publishing workflow, creating a changeset
-1. when approved, run the [Live](#interactive-publishing-workflow-live) publishing workflow
-1. if applicable, update any [ArcGIS Items](#updating-arcgis-items) based on any related published records
+- run the [Testing](#interactive-publishing-workflow-testing) publishing workflow, creating a changeset
+- when approved, run the [Live](#interactive-publishing-workflow-live) publishing workflow
+- if applicable, update any [ArcGIS Items](#updating-arcgis-items) based on any related published records
 
 > [!NOTE]
 > This workflow is intended for routine, manual, record publishing. This will not fit all use-cases and requires an
@@ -170,10 +177,10 @@ To import, build and check sets of [Manually Authored](#creating-records) record
 
 To publish records in the testing catalogue:
 
-1. ensure a suitable GitLab issue exists to track publishing the records [1]
-1. ensure `*.json` record configs exist in the `import/` directory (see [Create Records](#creating-records))
-1. run the [`workflow-testing`](/docs/supplemental/proto-cli-reference.md#workflow-testing) command
-1. repeat this process (using the [`select-records`](/docs/supplemental/proto-cli-reference.md#select-records) command),
+- ensure a suitable GitLab issue exists to track publishing the records [1]
+- ensure `*.json` record configs exist in the `import/` directory (see [Create Records](#creating-records))
+- run the [`workflow-testing`](/docs/supplemental/proto-cli-reference.md#workflow-testing) command
+- repeat this process (using the [`select-records`](/docs/supplemental/proto-cli-reference.md#select-records) command),
    until the record author is happy to publish live (signified by approving the merge request for the related changeset)
 
 > [!NOTE]
@@ -193,10 +200,10 @@ Helpdesk issue recorded in the record.
 
 To publish records in the live catalogue:
 
-1. ensure records have been published to the [Testing Site](#interactive-publishing-workflow-testing)
-1. ensure the record author has approved the merge request for the changeset to be published
-1. ensure the merge request is not a draft
-1. run the [`workflow-live`](/docs/supplemental/proto-cli-reference.md#workflow-live) command
+- ensure records have been published to the [Testing Site](#interactive-publishing-workflow-testing)
+- ensure the record author has approved the merge request for the changeset to be published
+- ensure the merge request is not a draft
+- run the [`workflow-live`](/docs/supplemental/proto-cli-reference.md#workflow-live) command
 
 ### Non-interactive publishing workflow
 
@@ -243,12 +250,12 @@ This workflow:
 
 To directly import a set of new and updated records:
 
-1. copy record configurations as JSON files to the `import/` directory
-1. if needed, run the [`zap-records`](/docs/supplemental/proto-cli-reference.md#zap-records) command
-1. run the [`import-records`](/docs/supplemental/proto-cli-reference.md#import-records) command
-1. manually create a merge request for the changeset branch in the [Records Repository](/docs/infrastructure.md#gitlab)
-1. appropriately review the imported records and merge the changes into `main` when acceptable
-1. if applicable, update any [ArcGIS Items](#updating-arcgis-items) based on any related imported records
+- copy record configurations as JSON files to the `import/` directory
+- if needed, run the [`zap-records`](/docs/supplemental/proto-cli-reference.md#zap-records) command
+- run the [`import-records`](/docs/supplemental/proto-cli-reference.md#import-records) command
+- manually create a merge request for the changeset branch in the [Records Repository](/docs/infrastructure.md#gitlab)
+- appropriately review the imported records and merge the changes into `main` when acceptable
+- if applicable, update any [ArcGIS Items](#updating-arcgis-items) based on any related imported records
 
 > [!WARNING]
 > All records in the `import/` directory will be committed together. Consider importing unrelated changes separately.
@@ -260,7 +267,7 @@ To directly import a set of new and updated records:
 
 To build the catalogue static site:
 
-1. run the [`build-records`](/docs/supplemental/proto-cli-reference.md#build-records) command
+- run the [`build-records`](/docs/supplemental/proto-cli-reference.md#build-records) command
 
 ## Checking static site
 
@@ -269,7 +276,7 @@ To build the catalogue static site:
 
 To [Check](/docs/monitoring.md#site-checks) the catalogue static site:
 
-1. run the [`check-records`](/docs/supplemental/proto-cli-reference.md#check-records) command
+- run the [`check-records`](/docs/supplemental/proto-cli-reference.md#check-records) command
 
 ## Upgrading records
 
@@ -278,11 +285,11 @@ To [Check](/docs/monitoring.md#site-checks) the catalogue static site:
 
 To update records in bulk (e.g. to a new profile version, or to adopt new conventions, etc.):
 
-1. create a new [Development Task](/docs/dev.md#record-upgrade-tasks) named `upgrade-records`
-1. run the [`upgrade-records`](/docs/supplemental/proto-cli-reference.md#upgrade-records) command to begin an upgrade
-1. repeat the `upgrade-records` command to progressively process records
-1. store the upgrade report
-1. [Import](#importing-records) upgraded records
+- create or update an `upgrade-records` [Development Task](/docs/dev.md#record-upgrade-tasks)
+- run the [`upgrade-records`](/docs/supplemental/proto-cli-reference.md#upgrade-records) command to begin an upgrade
+- repeat the `upgrade-records` command to progressively upgrade records
+- store the upgrade report for future reference
+- [Import](#importing-records) upgraded records directly
 
 > [!TIP]
 > The upgrade directory SHOULD be tracked in a local Git repo to easily compare and rollback changes.
@@ -297,25 +304,25 @@ To update records in bulk (e.g. to a new profile version, or to adopt new conven
 Deleting records requires manually removing data from each [Store](/docs/architecture.md#stores) and
 [Exported](/docs/exporters.md) site content:
 
-1. create an issue in a relevant project documenting why records are being deleted
-1. for the [GitLab Store](/docs/stores.md#gitlab-store):
-   1. from the [GitLab Records Repository](/docs/infrastructure.md#gitlab), create a branch
-   1. delete the relevant record files, plus any parent directories if now empty and commit changes
-   1. create a merge request against `main`, review, and merge if as expected
-1. for the [Algolia Store](/docs/stores.md#algolia-store):
-   1. from the [Algolia dashboard](/docs/infrastructure.md#algolia), go to the records index
-   1. using the index search, delete the relevant record objects
-1. rebuild the [Static Website](#building-static-site) (for at least one record) to refresh [Outputs](/docs/outputs.md)
-   containing all records
-1. for the live and testing sites:
-   1. from the AWS console or CLI, delete any generated outputs for deleted records
+- create an issue in a relevant project documenting why records are being deleted
+- for the [GitLab Store](/docs/stores.md#gitlab-store):
+  - from the [GitLab Records Repository](/docs/infrastructure.md#gitlab), create a branch
+  - delete the relevant record files, plus any parent directories if now empty and commit changes
+  - create a merge request against `main`, review, and merge if as expected
+- for the [Algolia Store](/docs/stores.md#algolia-store):
+  - from the [Algolia dashboard](/docs/infrastructure.md#algolia), go to the records index
+  - using the index search, delete the relevant record objects
+- rebuild the [Static Website](#building-static-site) (for at least one record) to refresh [Outputs](/docs/outputs.md)
+  containing all records
+- for the live and testing sites:
+  - from the AWS console or CLI, delete any generated outputs for deleted records
 
 ## Updating ArcGIS items
 
 To apply properties from a record to an item in ArcGIS Online, and create an association between a record and item:
 
-1. [Publish](#publishing-workflows) or [Import](#importing-records) the source catalogue record
-1. run the [`esri-item`](/docs/supplemental/proto-cli-reference.md#esri-item) command
+- [Publish](#publishing-workflows) or [Import](#importing-records) the source catalogue record
+- run the [`esri-item`](/docs/supplemental/proto-cli-reference.md#esri-item) command
 
 ## Rotating access tokens
 

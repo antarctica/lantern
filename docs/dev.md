@@ -20,8 +20,8 @@ Setup:
 [1]
 
 ```shell
-% git clone https://gitlab.data.bas.ac.uk/MAGIC/lantern-exp.git
-% cd lantern-exp/
+% git clone https://gitlab.data.bas.ac.uk/MAGIC/lantern.git
+% cd lantern/
 % uv sync --all-groups
 % uv run playwright install
 ```
@@ -312,7 +312,7 @@ See [Usage](/docs/usage.md#upgrading-records) documentation for more information
 
 Previous upgrades for reference:
 
-- [2026-02 (initial) 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/lantern-exp/-/blob/5aef254028552c44e5c9b6b8e1625a99101da693/tasks/records_upgrade_2026_02.py)
+- [2026-02 (initial) 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/lantern/-/blob/5aef254028552c44e5c9b6b8e1625a99101da693/tasks/records_upgrade_2026_02.py)
 
 ## Contributing
 
@@ -364,6 +364,8 @@ In the `tests.lantern_tests.test_config` module:
 > [!WARNING]
 > This section is Work in Progress (WIP) and may not be complete/accurate.
 
+To enable additional hierarchy levels to be shown within [Catalogue Items](/docs/models.md#catalogue-items).
+
 Agree the use of new types:
 
 1. if types are not members of the ISO 19115 `MD_ScopeCode` code list, create and agree a proposal to add locally in the
@@ -408,6 +410,8 @@ Within this project, for each new item type:
 > [!WARNING]
 > This section is Work in Progress (WIP) and may not be complete/accurate.
 
+To enable additional metadata elements to be shown within [Catalogue Items](/docs/models.md#catalogue-items).
+
 1. if needed, [Support New Record Properties](/docs/libraries.md#adding-new-record-properties)
 1. if needed, update [Item](/docs/models.md#items) classes to process new and/or existing properties
    - existing properties may need updating such as `ItemBase.kv` handling
@@ -432,7 +436,10 @@ Within this project, for each new item type:
 
 ### Adding distribution formats
 
-1. if needed, register new media-types under the Metadata Standards resources site (`metadata-resources.data.bas.ac.uk`)
+To enable additional distribution option formats to be shown within [Catalogue Items](/docs/models.md#catalogue-items).
+
+1. if needed, register a media-type under the Metadata Standards resources site (`metadata-resources.data.bas.ac.uk`)
+   - IANA media type representations SHOULD be preferred but not abused or used inaccurately
 1. if needed, [Support New File Artefacts](/docs/libraries.md#adding-file-artefact-formats) for deposit
 1. create a new class under `lantern.models.item.catalogue.distributions`:
    - inheriting from `Distribution` or a relevant subclass
@@ -752,10 +759,11 @@ Running this task clears Pytest's cache and re-runs all tests, skipping the `--f
 
 ### Pytest fixtures
 
-Fixtures SHOULD be defined in `tests.conftest` prefixed with `fx_` to indicate they are a fixture when used in tests.
+Fixtures MUST be defined in `tests.conftest`, prefixed with a `fx_` or `fx_lib_` (if related to a
+[Library](/docs/libraries.md)) for easy identification within tests.
 
 > [!NOTE]
-> This applies to fixtures used or needed for slow tests, which imports all fixtures from the main suite automatically.
+> This also applies to fixtures used in slow tests, which import all fixtures from the main suite automatically.
 
 ### Pytest-cov test coverage
 

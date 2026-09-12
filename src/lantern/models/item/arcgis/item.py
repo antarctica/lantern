@@ -349,7 +349,7 @@ class ItemArcGis(ItemBase):
     def sharing_level(self) -> ArcGisSharingLevel:
         """ArcGIS sharing level based on item access level."""
         access_level = super().admin_resource_access
-        if access_level == AccessLevel.PUBLIC:
+        if access_level == AccessLevel.OPEN_ACCESS:
             return ArcGisSharingLevel.EVERYONE
         if access_level == AccessLevel.BAS_STAFF:
             return ArcGisSharingLevel.ORG

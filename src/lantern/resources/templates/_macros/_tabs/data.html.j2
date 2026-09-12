@@ -259,3 +259,36 @@
     </dl>
   </div>
 {% endmacro %}
+
+{% macro _restricted_common() %}
+  <p>This may be because the item:</p>
+  <ul class="list-disc pl-4">
+    <li>contains sensitive and/or personal data</li>
+    <li>contains commercially licenced data</li>
+    <li>is under embargo and not yet released</li>
+    <li>includes data from other restricted items</li>
+  </ul>
+{% endmacro %}
+
+{% macro restricted_bas_staff() %}
+  {% call com.alert(shape='box', variant='yellow') %}
+    <p class="text-lg {{ com.font_bolder_classes() }}">This item is restricted to BAS staff</p>
+    {{ _restricted_common() }}
+    <p>You will need a BAS user account to access this item.</p>
+    <p>UKRI/NERC staff, students, visitors and shared roles do not have access.</p>
+  {% endcall %}
+{% endmacro %}
+
+{% macro restricted_unknown(data) %}
+  {% call com.alert(shape='box', variant='yellow') %}
+    <p class="text-lg {{ com.font_bolder_classes() }}">This item requires permission to access</p>
+    <p>This may be because the item:</p>
+    <ul class="list-disc pl-4">
+      <li>contains sensitive and/or personal data</li>
+      <li>contains commercially licenced data</li>
+      <li>is under embargo and not yet released</li>
+      <li>includes data from other restricted items</li>
+    </ul>
+    <p>Permission may be granted automatically based on a user account, or require justification.</p>
+  {% endcall %}
+{% endmacro %}

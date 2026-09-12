@@ -43,6 +43,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Refactoring preparing Stores for parallel processing within a Site for better layering
 * Refactoring default thumbnails in item summaries from base64 strings to static site files
 * Replacing record type checks in `ItemCatalogue` with a type annotation enforced via type checking
+* Refactoring determining metadata and resource access permissions based on MAGIC Access Permissions Framework
 
 ### Removed [BREAKING!]
 

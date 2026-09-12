@@ -1,4 +1,4 @@
-from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
+from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata, Permission
 
 from lantern.lib.metadata_library.models.record.elements.common import (
     Address,
@@ -19,20 +19,19 @@ from lantern.lib.metadata_library.models.record.enums import (
     HierarchyLevelCode,
     OnlineResourceFunctionCode,
 )
-from lantern.lib.metadata_library.models.record.presets.admin import BAS_STAFF
 from lantern.lib.metadata_library.models.record.presets.constraints import CLOSED_ACCESS, MAGIC_PRODUCTS_V1
 from lantern.lib.metadata_library.models.record.utils.admin import set_admin
 from tests.resources.admin_keys import test_keys
 from tests.resources.records.utils import make_record, relate_products
 
-# A restricted record for testing a restricted catalogue item.
+# A restricted record for testing a catalogue item restricted to BAS Staff.
 
 record = make_record(
     open_access=False,
-    file_identifier="57327327-4623-4247-af86-77fb43b7f45b",
+    file_identifier="1481464a-521c-49d8-ac0b-c7ade9303bcd",
     hierarchy_level=HierarchyLevelCode.PRODUCT,
-    title="Test Resource - Product marked as restricted",
-    abstract="Item to test a Product with a restricted access constraint is presented correctly.",
+    title="Test Resource - Product restricted to a custom set of groups",
+    abstract="Item to test a Product with a restricted access constraint based on custom groups is presented correctly.",
 )
 # add related peers
 record.identification.aggregations.extend(relate_products(record.file_identifier))
@@ -41,7 +40,7 @@ record.identification.aggregations.extend(relate_products(record.file_identifier
 record.identification.constraints = Constraints([CLOSED_ACCESS, MAGIC_PRODUCTS_V1])
 # add admin metadata to reflect access
 keys = test_keys()
-admin = AdministrationMetadata(id=record.file_identifier, resource_permissions=[BAS_STAFF])
+admin = AdministrationMetadata(id=record.file_identifier, resource_permissions=[Permission(directory="x", group="x")])
 set_admin(keys=keys, record=record, admin_meta=admin)
 
 # add example distribution to test restricted state handling

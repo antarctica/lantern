@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from unittest.mock import PropertyMock
 
 import pytest
+from bas_metadata_library.standards.magic_administration.v1 import Permission
 from bs4 import BeautifulSoup
 
 from lantern.lib.metadata_library.models.record.elements.common import (
@@ -52,18 +53,18 @@ from lantern.lib.metadata_library.models.record.enums import (
     ConstraintRestrictionCode,
     ConstraintTypeCode,
     ContactRoleCode,
+    MagicAccessFrameworkPermission,
     MaintenanceFrequencyCode,
     OnlineResourceFunctionCode,
     ProgressCode,
 )
-from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
+from lantern.lib.metadata_library.models.record.presets.admin import BAS_STAFF, OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys, get_admin, set_admin
 from lantern.models.item.base.enums import AccessLevel, Licence
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from tests.conftest import _select_record, render_item_catalogue
 
 if TYPE_CHECKING:
-    from bas_metadata_library.standards.magic_administration.v1 import Permission
     from pytest_mock import MockerFixture
 
     from lantern.models.item.catalogue.item import ItemCatalogue
@@ -1585,8 +1586,12 @@ class TestAdminTab:
         assert html.select_one("#admin-id").text.strip() == expected
 
     def test_revision_link(self, fx_item_cat_model_min: ItemCatalogue):
-        """Can get link to record revision based on values from item."""
-        # realistic values needed over 'x' so substrings can be extracted safely
+        """
+        Can get link to record revision based on values from item.
+
+        Realistic values are needed over 'x' so substrings can be extracted safely.
+        Item properties are set directly (rather than via record) to avoid administration ID mismatch errors.
+        """
         fx_item_cat_model_min._record = deepcopy(fx_item_cat_model_min._record)
         fx_item_cat_model_min.file_identifier = "ee21f4a7-7e87-4074-b92f-9fa27a68d26d"
         fx_item_cat_model_min.file_revision = "3401c9880d4bc42aed8dabd7b41acec8817a293a"
@@ -1626,7 +1631,7 @@ class TestAdminTab:
             assert issues is None
 
     @pytest.mark.parametrize(("restricted", "expected"), [(True, "Yes"), (False, "No")])
-    def test_item_restricted(
+    def test_restricted(
         self,
         fx_item_cat_model_min: ItemCatalogue,
         fx_item_cat_model_open: ItemCatalogue,
@@ -1641,36 +1646,82 @@ class TestAdminTab:
         assert result.text.strip() == expected
 
     @pytest.mark.parametrize(
-        ("value", "expected"), [(AccessLevel.NONE, "NONE"), (AccessLevel.PUBLIC, "Public (Open Access)")]
+        "value", [AccessLevel.UNKNOWN, AccessLevel.NONE, AccessLevel.BAS_STAFF, AccessLevel.OPEN_ACCESS]
     )
-    def test_access(
+    def test_item_access(
+        self, fx_item_cat_model_min: ItemCatalogue, fx_admin_meta_keys: AdministrationKeys, value: AccessLevel
+    ):
+        """
+        Can get metadata and resource access level based on value from item.
+
+        Specifically based on `lantern.models.item.base.enums.AccessLevel`.
+        """
+        permissions = []
+        if value == AccessLevel.UNKNOWN:
+            permissions = [Permission(directory="x", group="x")]
+        elif value == AccessLevel.BAS_STAFF:
+            permissions = [BAS_STAFF]
+        elif value == AccessLevel.OPEN_ACCESS:
+            permissions = [OPEN_ACCESS]
+
+        admin_meta = get_admin(keys=fx_admin_meta_keys, record=fx_item_cat_model_min._record)
+        admin_meta.metadata_permissions = permissions
+        admin_meta.resource_permissions = permissions
+        set_admin(keys=fx_admin_meta_keys, record=fx_item_cat_model_min._record, admin_meta=admin_meta)
+
+        html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
+        result_metadata = html.select_one("#admin-metadata-access")
+        assert result_metadata.text.strip() == str(value.name)
+        result_resource = html.select_one("#admin-resource-access")
+        assert result_resource.text.strip() == str(value.name)
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            MagicAccessFrameworkPermission.NONE,
+            MagicAccessFrameworkPermission.CUSTOM_GROUPS,
+            MagicAccessFrameworkPermission.BAS_STAFF,
+            MagicAccessFrameworkPermission.OPEN_ACCESS,
+        ],
+    )
+    def test_framework_access(
         self,
         fx_item_cat_model_min: ItemCatalogue,
         fx_admin_meta_keys: AdministrationKeys,
-        value: AccessLevel,
-        expected: str,
+        value: MagicAccessFrameworkPermission,
     ):
-        """Can get metadata and resource access level based on value from item."""
+        """
+        Can get metadata and resource MAGIC Access Permissions Framework preset based on value from item.
+
+        Specifically based on `lantern.lib.metadata_library.models.record.enums.MagicAccessFrameworkPermission`.
+        """
+        permissions = []
+        if value == MagicAccessFrameworkPermission.CUSTOM_GROUPS:
+            permissions = [Permission(directory="x", group="x")]
+        elif value == MagicAccessFrameworkPermission.BAS_STAFF:
+            permissions = [BAS_STAFF]
+        elif value == MagicAccessFrameworkPermission.OPEN_ACCESS:
+            permissions = [OPEN_ACCESS]
+
         admin_meta = get_admin(keys=fx_admin_meta_keys, record=fx_item_cat_model_min._record)
-        admin_meta.metadata_permissions = [OPEN_ACCESS] if value == AccessLevel.PUBLIC else []
-        admin_meta.resource_permissions = [OPEN_ACCESS] if value == AccessLevel.PUBLIC else []
-        if admin_meta:
-            set_admin(keys=fx_admin_meta_keys, record=fx_item_cat_model_min._record, admin_meta=admin_meta)
+        admin_meta.metadata_permissions = permissions
+        admin_meta.resource_permissions = permissions
+        set_admin(keys=fx_admin_meta_keys, record=fx_item_cat_model_min._record, admin_meta=admin_meta)
+
         html = BeautifulSoup(render_item_catalogue(fx_item_cat_model_min), parser="html.parser", features="lxml")
+        result_metadata = html.select_one("#admin-metadata-access-framework")
+        assert result_metadata.text.strip() == str(value.value)
+        result_resource = html.select_one("#admin-resource-access-framework")
+        assert result_resource.text.strip() == str(value.value)
 
-        result_metadata = html.select_one("#admin-metadata-access")
-        assert result_metadata.text.strip() == str(expected)
-        result_resource = html.select_one("#admin-resource-access")
-        assert result_resource.text.strip() == str(expected)
-
-    @pytest.mark.parametrize("value", [AccessLevel.NONE, AccessLevel.PUBLIC])
+    @pytest.mark.parametrize("value", [AccessLevel.NONE, AccessLevel.OPEN_ACCESS])
     def test_permissions(
         self, fx_item_cat_model_min: ItemCatalogue, fx_admin_meta_keys: AdministrationKeys, value: list[Permission]
     ):
         """Can get metadata and resource access permissions based on value from item."""
         admin_meta = get_admin(keys=fx_admin_meta_keys, record=fx_item_cat_model_min._record)
-        admin_meta.metadata_permissions = [OPEN_ACCESS] if value == AccessLevel.PUBLIC else []
-        admin_meta.resource_permissions = [OPEN_ACCESS] if value == AccessLevel.PUBLIC else []
+        admin_meta.metadata_permissions = [OPEN_ACCESS] if value == AccessLevel.OPEN_ACCESS else []
+        admin_meta.resource_permissions = [OPEN_ACCESS] if value == AccessLevel.OPEN_ACCESS else []
         if admin_meta:
             set_admin(keys=fx_admin_meta_keys, record=fx_item_cat_model_min._record, admin_meta=admin_meta)
         expected = fx_item_cat_model_min._admin.resource_permissions

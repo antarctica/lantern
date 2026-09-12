@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, cast
 
 from lantern.lib.metadata_library.models.record.elements.common import Constraint, Date, Identifier, Series
 from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
+from lantern.lib.metadata_library.models.record.utils.admin import parse_framework_permissions
 from lantern.models.item.base.elements import Contact, Contacts, Link
 from lantern.models.item.base.elements import Extent as ItemExtent
 from lantern.models.item.base.enums import AccessLevel, Licence, ResourceTypeIcon, ResourceTypeLabel
@@ -115,8 +116,9 @@ class ItemsTab(Tab):
 class DataTab(Tab):
     """Data tab."""
 
-    def __init__(self, restricted: bool, distributions: list[RecordDistribution]) -> None:
+    def __init__(self, restricted: bool, access_level: AccessLevel, distributions: list[RecordDistribution]) -> None:
         self._restricted = restricted
+        self._access_level: AccessLevel = access_level
         self._resource_distributions = distributions
         self._supported_distributions = [
             ArcGisFeatureLayer,
@@ -183,6 +185,11 @@ class DataTab(Tab):
     def restricted(self) -> bool:
         """Access restrictions for item."""
         return self._restricted
+
+    @property
+    def access_level(self) -> str:
+        """Access level for item."""
+        return self._access_level.name
 
     @property
     def items(self) -> list[Distribution]:
@@ -821,7 +828,11 @@ class AdminTab(Tab):
 
     @property
     def restricted(self) -> bool:
-        """Catalogue item access."""
+        """
+        Catalogue item access as a binary 'is restricted or not'.
+
+        Binary value used in other sections for contextual buttons etc. where exact restrictions are not relevant.
+        """
         return self._restricted
 
     @property
@@ -830,12 +841,19 @@ class AdminTab(Tab):
         return self._metadata_access.name
 
     @property
-    def metadata_permissions(self) -> list[str]:
+    def metadata_access_framework(self) -> str:
         """
-        Metadata access permissions if set.
+        Underlying MAGIC Access Permissions Framework preset for metadata permissions.
 
-        Temporary encoding.
+        Reprocessed from administration metadata directly for transparency/troubleshooting.
         """
+        if self._admin_meta is None:
+            return "Undefined (no admin metadata)"
+        return parse_framework_permissions(self._admin_meta.metadata_permissions).value
+
+    @property
+    def metadata_permissions(self) -> list[str]:
+        """Raw encoding of metadata access permissions if set."""
         if self._admin_meta is None:
             return []
         return self._dump_permissions(self._admin_meta.metadata_permissions)
@@ -846,12 +864,19 @@ class AdminTab(Tab):
         return self._resource_access.name
 
     @property
-    def resource_permissions(self) -> list[str]:
+    def resource_access_framework(self) -> str:
         """
-        Resource access permissions if set.
+        Underlying MAGIC Access Permissions Framework preset for resource permissions.
 
-        Temporary encoding.
+        Reprocessed from administration metadata directly for transparency/troubleshooting.
         """
+        if self._admin_meta is None:
+            return "Undefined (no admin metadata)"
+        return parse_framework_permissions(self._admin_meta.resource_permissions).value
+
+    @property
+    def resource_permissions(self) -> list[str]:
+        """Raw encoding of resource access permissions if set."""
         if self._admin_meta is None:
             return []
         return self._dump_permissions(self._admin_meta.resource_permissions)

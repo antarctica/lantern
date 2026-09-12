@@ -24,7 +24,8 @@ from tests.resources.records.item_cat_product_map import record as product_map
 from tests.resources.records.item_cat_product_min import record as product_min_required
 from tests.resources.records.item_cat_product_open_min import record as product_open_min_required
 from tests.resources.records.item_cat_product_replaced import record as product_replaced
-from tests.resources.records.item_cat_product_restricted import record as product_restricted
+from tests.resources.records.item_cat_product_restricted_bas_staff import record as product_restricted_bas_staff
+from tests.resources.records.item_cat_product_restricted_custom import record as product_restricted_custom_groups
 from tests.resources.records.item_cat_product_web_map import record as product_web_map
 from tests.resources.records.item_cat_pub_map import combined as product_published_map_combined
 from tests.resources.records.item_cat_pub_map import side_a as product_published_map_side_a
@@ -73,7 +74,8 @@ class FakeRecordsStore(StoreBase):
             collection_all_supported,
             product_min_required,
             product_open_min_required,
-            product_restricted,
+            product_restricted_bas_staff,
+            product_restricted_custom_groups,
             product_live,
             product_replaced,
             product_all_supported,

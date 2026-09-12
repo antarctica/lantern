@@ -279,3 +279,21 @@ class ProgressCode(Enum):
     REQUIRED = "required"
     SUPERSEDED = "superseded"
     UNDER_DEVELOPMENT = "underDevelopment"
+
+
+class MagicAccessFrameworkPermission(Enum):
+    """
+    Supported access permissions defined by the MAGIC Access Permissions Framework (v1).
+
+    This does not relate to a ISO 19115 code list.
+
+    Includes well-known presets (styled in 'UPPER-CASE') and other permission types (styled in '(lower-case-brackets)').
+
+    Source: https://gitlab.data.bas.ac.uk/MAGIC/data-management/-/issues/81#supported-permissions
+    """
+
+    NONE = "(none)"
+    CUSTOM_GROUPS = "(custom-groups)"
+    # well-known presets
+    BAS_STAFF = "BAS-STAFF"
+    OPEN_ACCESS = "OPEN-ACCESS"

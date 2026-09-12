@@ -126,11 +126,13 @@ class ItemCatalogue(ItemBase):
     @cached_property
     def _restricted(self) -> bool:
         """
-        Whether the item is restricted.
+        Whether the item is restricted as a binary value.
 
-        Based on resource access only. Restricted metadata is not supported.
+        Intended for contextual buttons etc. where exact restrictions are not relevant.
+
+        Based on resource access only as restricted metadata is not supported.
         """
-        return self.admin_resource_access != AccessLevel.PUBLIC
+        return self.admin_resource_access != AccessLevel.OPEN_ACCESS
 
     @cached_property
     def _items(self) -> ItemsTab:
@@ -140,7 +142,9 @@ class ItemCatalogue(ItemBase):
     @cached_property
     def _data(self) -> DataTab:
         """Data tab."""
-        return DataTab(restricted=self._restricted, distributions=self.distributions)
+        return DataTab(
+            restricted=self._restricted, access_level=self.admin_resource_access, distributions=self.distributions
+        )
 
     @cached_property
     def _authors(self) -> AuthorsTab:

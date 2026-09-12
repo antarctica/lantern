@@ -24,17 +24,11 @@
           {% endfor %}
         </div>
         <aside id="data-restricted-info" class="col-span-1">
-          {% call com.alert(shape='box', variant='yellow') %}
-            <p class="text-lg {{ com.font_bolder_classes() }}">This item requires permission to access</p>
-            <p>This may be because the item:</p>
-            <ul class="list-disc pl-4">
-              <li>contains sensitive and/or personal data</li>
-              <li>contains commercially licenced data</li>
-              <li>is under embargo and not yet released</li>
-              <li>includes data from other restricted items</li>
-            </ul>
-            <p>Permission may be granted automatically based on your BAS user account, or require justification.</p>
-          {% endcall %}
+          {% if data.access_level == 'BAS_STAFF' %}
+            {{ data_tab.restricted_bas_staff() }}
+          {% else %}
+            {{ data_tab.restricted_unknown() }}
+          {% endif %}
         </aside>
       </div>
     {% else %}

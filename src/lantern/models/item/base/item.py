@@ -14,10 +14,15 @@ from lantern.lib.metadata_library.models.record.enums import (
     ConstraintRestrictionCode,
     ConstraintTypeCode,
     HierarchyLevelCode,
+    MagicAccessFrameworkPermission,
 )
-from lantern.lib.metadata_library.models.record.presets.admin import BAS_STAFF, OPEN_ACCESS
-from lantern.lib.metadata_library.models.record.utils.admin import AdministrationKeys as AdminMetadataKeys
-from lantern.lib.metadata_library.models.record.utils.admin import get_admin
+from lantern.lib.metadata_library.models.record.utils.admin import (
+    AdministrationKeys as AdminMetadataKeys,
+)
+from lantern.lib.metadata_library.models.record.utils.admin import (
+    get_admin,
+    parse_framework_permissions,
+)
 from lantern.lib.metadata_library.models.record.utils.kv import get_kv
 from lantern.models.item.base.elements import Contact, Contacts, Extent, Extents
 from lantern.models.item.base.enums import AccessLevel, Licence, ResourceTypeIcon, ResourceTypeLabel
@@ -54,13 +59,14 @@ class ItemCore:
 
     @staticmethod
     def _compute_access_level(permissions: list[Permission]) -> AccessLevel:
-        if len(permissions) == 0:
-            return AccessLevel.NONE
-        if permissions == [BAS_STAFF]:
-            return AccessLevel.BAS_STAFF
-        if permissions == [OPEN_ACCESS]:
-            return AccessLevel.PUBLIC
-        return AccessLevel.UNKNOWN
+        """Tries to map to access permissions from the MAGIC Access Permissions Framework."""
+        parsed_preset = parse_framework_permissions(permissions)
+        if (
+            parsed_preset == MagicAccessFrameworkPermission.CUSTOM_GROUPS
+            or parsed_preset not in MagicAccessFrameworkPermission
+        ):
+            return AccessLevel.UNKNOWN
+        return AccessLevel[parsed_preset.name]
 
     @property
     def record(self) -> Record | RecordRevision:
@@ -95,22 +101,22 @@ class ItemCore:
         """
         Metadata access.
 
-        Determined by admin access permissions. Defaults to no access if no access permissions are set.
+        Determined by admin access permissions. Falls back to no access if permissions are not set.
         """
-        if self.admin_metadata is None:
-            return AccessLevel.NONE
-        return self._compute_access_level(permissions=self.admin_metadata.metadata_permissions)
+        if self.admin_metadata:
+            return self._compute_access_level(permissions=self.admin_metadata.metadata_permissions)
+        return AccessLevel.NONE
 
     @property
     def admin_resource_access(self) -> AccessLevel:
         """
         Resource access.
 
-        Determined by admin access permissions. Defaults to no access if no access permissions are set.
+        Determined by admin access permissions. Falls back to no access if permissions are not set.
         """
-        if self.admin_metadata is None:
-            return AccessLevel.NONE
-        return self._compute_access_level(permissions=self.admin_metadata.resource_permissions)
+        if self.admin_metadata:
+            return self._compute_access_level(permissions=self.admin_metadata.resource_permissions)
+        return AccessLevel.NONE
 
 
 class ItemBase(ItemCore):
@@ -465,7 +471,7 @@ class ItemSummaryBase(ItemCore):
     @property
     def restricted(self) -> bool:
         """Whether the item is restricted."""
-        return self.admin_resource_access != AccessLevel.PUBLIC
+        return self.admin_resource_access != AccessLevel.OPEN_ACCESS
 
     @property
     def edition_fmt(self) -> str | None:

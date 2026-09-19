@@ -73,8 +73,8 @@ def _get_cli_args() -> tuple[bool, Path, str | None, str | None, str | None, str
 
 def get_default_author() -> tuple[str | None, str | None]:
     """Try to get default author identity from Git config."""
-    name = subprocess.check_output(["git", "config", "--get", "user.name"]).decode().strip()  # noqa: S607
-    email = subprocess.check_output(["git", "config", "--get", "user.email"]).decode().strip()  # noqa: S607
+    name = subprocess.check_output(["git", "config", "--get", "user.name"]).decode().strip()
+    email = subprocess.check_output(["git", "config", "--get", "user.email"]).decode().strip()
     return name, email
 
 

@@ -73,8 +73,12 @@ def clean_input_path(input_record_paths: list[tuple[Record, Path]], processed_id
             record_path[1].unlink()
 
 
-def _revise_collection(time: datetime, collection: Record) -> None:
-    """Indicate collection change via edition and other relevant properties."""
+def revise_collection(time: datetime, collection: Record) -> None:
+    """
+    Indicate collection change via edition and other relevant properties.
+
+    Requires the collection to use simple integer editions as strings (e.g. '1', '2', etc.).
+    """
     if collection.identification.dates.revision is None:
         collection.identification.dates.revision = Date(date=time)
     collection.identification.dates.revision.date = time
@@ -86,7 +90,7 @@ def revise_record(record: Record) -> None:
     now = datetime.now(tz=UTC).replace(microsecond=0)
     record.metadata.date_stamp = now.date()
     if record.hierarchy_level == HierarchyLevelCode.COLLECTION:
-        _revise_collection(time=now, collection=record)
+        revise_collection(time=now, collection=record)
 
 
 def _revise_records(logger: logging.Logger, records: list[Record], catalogue: BasCatalogue) -> None:

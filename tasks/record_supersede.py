@@ -130,7 +130,7 @@ def _get_args(
     return path, branch, current_ref, successor_record, replace, params
 
 
-def _process_successor(logger: logging.Logger, record: Record, predecessor: Record, replace: bool) -> None:
+def process_successor(logger: logging.Logger, record: Record, predecessor: Record, replace: bool) -> None:
     """
     Update successor record.
 
@@ -164,7 +164,7 @@ def _process_successor(logger: logging.Logger, record: Record, predecessor: Reco
         raise ValueError(" ".join(errors)) from None
 
 
-def _process_predecessor(logger: logging.Logger, record: Record, successor: Record, replace: bool) -> None:
+def process_predecessor(logger: logging.Logger, record: Record, successor: Record, replace: bool) -> None:
     """
     Update predecessor record.
 
@@ -314,8 +314,8 @@ def main() -> None:
     predecessor = Record.loads(value=_predecessor.dumps(strip_admin=False))
 
     # update order is significant as collection aggregations may be moved from predecessor to successor
-    _process_successor(logger=logger, record=successor, predecessor=predecessor, replace=replace)
-    _process_predecessor(logger=logger, record=predecessor, successor=successor, replace=replace)
+    process_successor(logger=logger, record=successor, predecessor=predecessor, replace=replace)
+    process_predecessor(logger=logger, record=predecessor, successor=successor, replace=replace)
     collections = _process_collections(
         logger=logger, catalogue=catalogue, branch=branch, record=successor, predecessor=predecessor, replace=replace
     )

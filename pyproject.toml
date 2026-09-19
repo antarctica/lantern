@@ -46,6 +46,7 @@ dev = [
     "dunamai>=1.25.0",
     "pymarkdownlnt>=0.9.33",
     "pytailwindcss>=0.2.0",
+    "rich>=15.0.0",
     "ruff>=0.15.0",
     "taskipy>=1.14.1",
     "trustme>=1.2.1",
@@ -123,6 +124,9 @@ build-test-cache = { cmd = "python -m tests.resources.stores.gitlab_cache.refres
 # fake CLI
 version = { cmd = "uv version", help = "Show app version" }
 esri-record = { cmd = "python -m tasks.record_esri", help = "Add Esri item distribution options to a record" }
+# fake CLI (high level data publishing workflows)
+workflow-rothera-orthos = { cmd = "python -m tasks.data_workflow_rothera_orthos", help = "Process Rothera progress monitoring orthomosaics" }
+# fake CLI (single records)
 clone-record = { cmd = "python -m tasks.record_clone", help = "Clone record from cache into import directory" }
 supersede-record = { cmd = "python -m tasks.record_supersede", help = "Indicate a new record is the successor to another" }
 issues-record = { cmd = "python -m tasks.record_issues", help = "Set GitLab issues for a record"}
@@ -207,9 +211,10 @@ select = ["A", "ANN", "B", "B9", "BLE", "C90", "C4", "COM", "D", "DTZ", "E", "EM
 #      PT001 | for `@pytest.fixture` parentheses (as it's unstable/unreliable)
 #      PT023 | for `@pytest.mark.cov` parentheses (as it's unstable/unreliable)
 #     PYI019 | for using custom types instead of Self (as it breaks cattras structure methods)
+#       S607 | for using non-absolute executable paths in Subprocess (as it breaks portability)
 #      TD002 | for TODOs without an author (as an issue should assign ownership)
 ignore = [
-    "COM812", "D100", "D104", "D107", "D203", "D212", "D401", "D402", "E501", "PLR0913", "PLR0917", "PT001", "PT023", "PYI019", "TD002", "D413",
+    "COM812", "D100", "D104", "D107", "D203", "D212", "D401", "D402", "E501", "PLR0913", "PLR0917", "PT001", "PT023", "PYI019", "S607", "TD002", "D413",
 ]
 
 [tool.ruff.lint.per-file-ignores]

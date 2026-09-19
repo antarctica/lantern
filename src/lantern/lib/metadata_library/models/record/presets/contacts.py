@@ -2,16 +2,31 @@ from lantern.lib.metadata_library.models.record.elements.common import Address, 
 from lantern.lib.metadata_library.models.record.enums import ContactRoleCode, OnlineResourceFunctionCode
 
 
-def make_magic_role(roles: set[ContactRoleCode]) -> Contact:
-    """MAGIC team with configurable roles."""
+def make_bas_role(
+    roles: set[ContactRoleCode],
+    team_name: str | None = None,
+    team_email: str | None = None,
+    team_url: str | None = None,
+    team_url_title: str | None = None,
+) -> Contact:
+    """BAS organisation with configurable team name and roles."""
+    _base_name = "British Antarctic Survey"
+    _base_url = "https://www.bas.ac.uk"
+    title = f"{team_url_title} - BAS public website" if team_url_title else "British Antarctic Survey public website"
+    description = (
+        f"General information about the {team_url_title} from the British Antarctic Survey (BAS) public website."
+        if team_url_title
+        else "General information about the British Antarctic Survey (BAS)."
+    )
+
     return Contact(
         organisation=ContactIdentity(
-            name="Mapping and Geographic Information Centre, British Antarctic Survey",
+            name=f"{team_name}, {_base_name}" if team_name else _base_name,
             href="https://ror.org/01rhff309",
             title="ror",
         ),
         phone="+44 (0)1223 221400",
-        email="magic@bas.ac.uk",
+        email=team_email or None,
         address=Address(
             delivery_point="British Antarctic Survey, High Cross, Madingley Road",
             city="Cambridge",
@@ -20,13 +35,29 @@ def make_magic_role(roles: set[ContactRoleCode]) -> Contact:
             country="United Kingdom",
         ),
         online_resource=OnlineResource(
-            href="https://www.bas.ac.uk/teams/magic",
-            title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-            description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
+            href=team_url or _base_url,
+            title=title,
+            description=description,
             function=OnlineResourceFunctionCode.INFORMATION,
         ),
         role=roles,
     )
+
+
+def make_magic_role(roles: set[ContactRoleCode]) -> Contact:
+    """MAGIC team with configurable roles."""
+    contact = make_bas_role(
+        roles=roles,
+        team_name="Mapping and Geographic Information Centre",
+        team_email="magic@bas.ac.uk",
+        team_url="https://www.bas.ac.uk/teams/magic",
+        team_url_title="Mapping and Geographic Information Centre (MAGIC)",
+    )
+    # Fix inconsistency with online resource description, the format of which is required by external profiles.
+    contact.online_resource.description = contact.online_resource.description.replace(  # ty: ignore[invalid-assignment, unresolved-attribute]
+        "Mapping and Geographic Information Centre (MAGIC)", "BAS Mapping and Geographic Information Centre (MAGIC)"
+    )
+    return contact
 
 
 ESRI_DISTRIBUTOR = Contact(

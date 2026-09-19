@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 def get_cf_distribution_id(iac_cwd: Path, cf_id: str) -> str:
     """Get CloudFront distribution ID from IaC state."""
     proc = subprocess.run(  # noqa: S603
-        ["tofu", "output", "-raw", cf_id],  # noqa: S607
+        ["tofu", "output", "-raw", cf_id],
         cwd=str(iac_cwd),
         capture_output=True,
         text=True,

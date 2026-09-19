@@ -8,7 +8,7 @@ import inquirer
 from inquirer import Path as InquirerPath
 from tasks._shared import init
 
-from lantern.lib.magic_distribution.models.artefact import (
+from lantern.lib.magic_distribution.formats import (
     ArtefactFormatLabel,
     ArtefactFormatNotSupportedError,
     ArtefactFormats,

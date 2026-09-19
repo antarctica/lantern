@@ -26,6 +26,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * MAGIC distribution library for depositing supported file artefacts to SharePoint Online
 * `check-artefacts` and `deposit-artefacts` development tasks
 * Conformance information for MAGIC metadata profiles and constraint frameworks
+* Initial data publishing workflow for Rothera station orthomosaics via a development task
+* `make_bas_role` contacts preset in BAS Metadata Library lib for non-MAGIC BAS contacts
 
 ### Fixed
 
@@ -37,6 +39,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Preventing Site instances reusing the wrong store singletons in parallel workers via a singleton key
 * incorrect BAS-STAFF access constraint metadata preset restriction code
 * `zap-records` development task not preserving usage constraints
+* Relaxing types for temporal extent preset in BAS Metadata Library lib
 
 ### Changed
 

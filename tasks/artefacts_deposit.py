@@ -130,7 +130,7 @@ def _get_args(
     return artefacts_path, records_path, record, clean_deposited, params
 
 
-def _get_permissions(
+def get_permissions(
     admin_keys: AdministrationKeys, record: Record, groups_mapping: dict[str, list[str]]
 ) -> tuple[set[str], bool]:
     """
@@ -254,7 +254,7 @@ def _run(
     cli_args = _get_cli_args()
     artefacts_path, output_path, record, clean_deposited, params = _get_args(logger=logger, cli_args=cli_args)
 
-    access_groups, unrestricted = _get_permissions(
+    access_groups, unrestricted = get_permissions(
         admin_keys=config.ADMIN_METADATA_KEYS, record=record, groups_mapping=groups_mapping
     )
     artefacts = _get_artefacts(logger=logger, artefacts_path=artefacts_path, resource_id=record.file_identifier)  # ty: ignore[invalid-argument-type]

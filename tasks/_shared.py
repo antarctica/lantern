@@ -311,7 +311,7 @@ def ping_host(host: str) -> None:
         return
     try:
         subprocess.run(  # noqa: S603
-            ["ssh", host, "echo x"],  # noqa: S607
+            ["ssh", host, "echo x"],
             check=True,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.STDOUT,
@@ -366,7 +366,7 @@ def time_task(label: str) -> Callable:
         def wrapper(*args, **kwargs):  # noqa: ANN002, ANN003, ANN202
             start = time.monotonic()
             result = func(*args, **kwargs)
-            logger = logging.getLogger("app")
+            logger = logging.getLogger("lantern")
             logger.setLevel(logging.INFO)
             logger.info("%s took %s seconds", label, round(time.monotonic() - start))
             return result

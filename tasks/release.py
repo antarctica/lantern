@@ -43,7 +43,7 @@ def _bump_uv(version: str | None = None, bump: Literal["major", "minor", "patch"
         print(f"Error setting 'uv version': {e.stderr}")
         raise
     try:
-        out = subprocess.run(["uv", "version", "--short"], check=True, capture_output=True, text=True)  # noqa: S607
+        out = subprocess.run(["uv", "version", "--short"], check=True, capture_output=True, text=True)
         return out.stdout.strip()
     except subprocess.CalledProcessError as e:
         print(f"Error getting 'uv version': {e.stderr}")

@@ -59,6 +59,8 @@ To create records:
     - run the [`clone-record`](/docs/supplemental/proto-cli-reference.md#clone-record) command
     - then update the cloned record as needed (edition, etc.)
   - run the [`supersede-record`](/docs/supplemental/proto-cli-reference.md#supersede-record) command
+- for Rothera progress monitoring orthomosaics
+  - use the [Associated](/docs/supplemental/rothera-orthomoasics-publishing.md) workflow
 
 Then follow a [Publishing Workflow](#publishing-workflows).
 

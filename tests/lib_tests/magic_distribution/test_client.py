@@ -12,8 +12,8 @@ from lantern.lib.magic_distribution.client import (
     MagicResourceDistributionClient,
     SiteNotFoundError,
 )
+from lantern.lib.magic_distribution.formats import ArtefactFormatLabel
 from lantern.lib.magic_distribution.models.artefact import (
-    ArtefactFormatLabel,
     ArtefactLocalFile,
     ArtefactSharePointFile,
 )

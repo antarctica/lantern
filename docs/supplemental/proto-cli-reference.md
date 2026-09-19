@@ -32,6 +32,9 @@ These [Development Tasks](/docs/dev.md#development-tasks) acting as CLI commands
 workflow-testing     Import records to testing site
 workflow-live        Import records to live site
 
+# high-level data publishing workflows
+workflow-rothera-orthos  Process Rothera progress monitoring orthomosaics
+
 # single record commands
 clone-record         Clone record from cache into import directory
 supersede-record     Indicate a new record is the successor to another
@@ -111,6 +114,29 @@ Calls and coordinates other tasks to:
 1. check changeset records in the live site (via the (via the [`check-records`](#check-records) command)
 1. optionally, post a comment listing the item and alias URLs for published records in the changeset issue
 1. save check results as a timestamped JSON file in `./workflow_results/live/`
+
+## Data publishing workflow commands
+
+### `workflow-rothera-orthos`
+
+Process discovery metadata for GeoTIFF images representing orthomosaics of the Rothera research station.
+
+```shell
+% task workflow-rothera-orthos --help
+```
+
+Internally deposits and provisions artefacts, generated records need then need to be
+[Published](#publishing-workflow-commands).
+
+Examples:
+
+```shell
+# set path to events manifest and data area, with interactive conformation of other defaults
+% task workflow-rothera-orthos --manifest /data/orthomosaics/events.csv --data --manifest /data/orthomosaics
+```
+
+> [!TIP]
+> The event manifest does not need to exist within the data area.
 
 ## Single record commands
 

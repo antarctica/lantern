@@ -31,7 +31,7 @@ Intended for use in a cron/timer task managed by [Ansible](/docs/deployment.md#a
 
 ## Deployment updates
 
-`lantern.contrib.deployment_updates`
+`lantern.contrib.post_deployment_updates`
 
 Module implementing the [Site Updates Script](/docs/deployment.md#site-updates-script) run during
 [Ansible](/docs/deployment.md#ansible-playbook) deployments.

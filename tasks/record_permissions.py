@@ -20,7 +20,8 @@ if TYPE_CHECKING:
 
     from lantern.lib.metadata_library.models.record.record import Record
 
-access_presets = [MagicAccessFrameworkPermission.OPEN_ACCESS, MagicAccessFrameworkPermission.BAS_STAFF]
+# Well-known MAGIC access permissions framework presets
+ACCESS_PRESETS = [MagicAccessFrameworkPermission.OPEN_ACCESS, MagicAccessFrameworkPermission.BAS_STAFF]
 
 
 def _make_permission(preset: MagicAccessFrameworkPermission, comment: str | None) -> Permission:
@@ -57,7 +58,7 @@ def _get_cli_args() -> tuple[
     Get command line arguments.
 
     Metadata and resource access permissions are based on the MAGIC Access Permissions Framework (v1) supported presets
-    specifically (not the catalouge's AccessLevel enum which is similiar but not controlled across projects).
+    specifically (not the catalogue's AccessLevel enum which is similar but not controlled across projects).
 
     The MagicAccessFrameworkPermission.CUSTOM_GROUPS permissions preset is not supported.
 
@@ -104,7 +105,7 @@ def _get_cli_args() -> tuple[
         "--resource-preset",
         "-rp",
         type=str,
-        choices=[a.name for a in access_presets],
+        choices=[a.name for a in ACCESS_PRESETS],
         help="Optional resource access constraint. Will interactively prompt if omitted.",
     )
     parser.add_argument(
@@ -212,7 +213,7 @@ def _get_args(
     print("[=] Metadata access permission: OPEN_ACCESS (locked)")
     metadata_comment = inquirer.text("Metadata comment (optional)", default=cli_metadata_comment or "")
     resource_permission_n = inquirer.list_input(
-        message="Resource access permission", choices=[a.name for a in access_presets], default=resource_permission_t
+        message="Resource access permission", choices=[a.name for a in ACCESS_PRESETS], default=resource_permission_t
     )
     resource_permission_t = MagicAccessFrameworkPermission[resource_permission_n]
     resource_comment = inquirer.text("Resource comment (optional)", default=resource_comment or "")

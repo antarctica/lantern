@@ -29,45 +29,46 @@ These [Development Tasks](/docs/dev.md#development-tasks) acting as CLI commands
 
 ```yaml
 # high-level publishing workflows
-workflow-testing     Import records to testing site
-workflow-live        Import records to live site
+workflow-testing         Import records to testing site
+workflow-live            Import records to live site
 
 # high-level data publishing workflows
 workflow-rothera-orthos  Process Rothera progress monitoring orthomosaics
 
 # single record commands
-clone-record         Clone record from cache into import directory
-supersede-record     Indicate a new record is the successor to another
-issues-record        Set GitLab issues for a record
-admin-record         View administrative metadata for a record
-restrict-record      Set access permissions for a record
-esri-record          Add Esri item distribution options to a record
+clone-record             Clone record from cache into import directory
+supersede-record         Indicate a new record is the successor to another
+issues-record            Set GitLab issues for a record
+admin-record             View administrative metadata for a record
+restrict-record          Set access permissions for a record
+esri-record              Add Esri item distribution options to a record
 
 # multiple records commands
-select-records       Copy records from cache to import directory for editing
-zap-records          Process Zap ⚡️ authored records from import directory
-preview-records      Preview records as HTML items
-import-records       Import records from directory
-build-records        Build records as a catalogue site
-check-records        Check static site and records contents
-invalidate-records   Invalidate cached records in live site
-upgrade-records      Upgrade records
-bootstrap-records    Bootstrap a new records repo
+select-records           Copy records from cache to import directory for editing
+zap-records              Process Zap ⚡️ authored records from import directory
+preview-records          Preview records as HTML items
+import-records           Import records from directory
+build-records            Build records as a catalogue site
+check-records            Check static site and records contents
+
+# record utility commands
+upgrade-records          Upgrade records
+bootstrap-records        Bootstrap a new records repo
 
 # artefact commands
-check-artefacts     Check files are supported file artefact formats
-deposit-artefacts   Deposit supported file artefacts for a resource to SharePoint Online
+check-artefacts          Check files are supported file artefact formats
+deposit-artefacts        Deposit supported file artefacts for a resource to SharePoint Online
 
 # other commands
-esri-item            Sync record details to an Esri item
-search-reindex       Recreate catalogue search index
-site-invalidate      Invalidate cached content in live site
-thumbnail-invalidate Invalidate cached item thumbnail in CDN
+esri-item                Sync record details to an Esri item
+search-reindex           Recreate catalogue search index
+site-invalidate          Invalidate cached content in live site
+thumbnail-invalidate     Invalidate cached item thumbnail in CDN
 
 # utility commands
-version              Show app version
-config-check         Check app config
-keys-check           Check admin meta keys
+version                  Show app version
+config-check             Check app config
+keys-check               Check admin meta keys
 ```
 
 ## Publishing workflow commands
@@ -242,9 +243,15 @@ Set access permissions for a record.
 % task restrict-record --help
 ```
 
+<!-- pyml disable md028 -->
 > [!TIP]
 > This command has a large number of arguments. It is recommended to run this command interactively and record/re-run
 > the generated command if needed.
+
+> [!NOTE]
+> Resource access permissions are limited to well-known presets from the MAGIC Access Permissions Framework.
+> (Metadata access permissions are locked to the Open Access well-known preset as restricted metadata is not supported).
+<!-- pyml enable md028 -->
 
 Examples:
 

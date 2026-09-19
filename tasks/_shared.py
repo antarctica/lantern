@@ -53,12 +53,7 @@ def init_s3(config: Config) -> S3ClientT:
 
 
 def init_cat(logger: logging.Logger) -> BasCatalogue:
-    """
-    Initialise BAS Catalogue.
-
-    Store is not cached by default to allow switching between branches efficiently.
-    Store is not frozen by default to allow fetching changes before processing.
-    """
+    """Initialise BAS Catalogue."""
     config = ExtraConfig()
     s3 = init_s3(config)
     return BasCatalogue(logger=logger, config=config, s3=s3)

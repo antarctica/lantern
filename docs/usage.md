@@ -70,7 +70,8 @@ Then follow a [Publishing Workflow](#publishing-workflows).
 ### Depositing record artefacts
 
 > [!NOTE]
-> This is an advanced topic.
+> This topic is only relevant to the
+> [MAGIC Resource Distribution](https://gitlab.data.bas.ac.uk/MAGIC/resource-distribution) service.
 
 To deposit file artefacts and include in a resource:
 
@@ -80,11 +81,19 @@ To deposit file artefacts and include in a resource:
 
 Then follow a [Publishing Workflow](#publishing-workflows).
 
+<!-- pyml disable md028 -->
+> [!NOTE]
+> Resource access permissions are limited to well-known presets from the MAGIC Access Permissions Framework.
+
+> [!TIP]
+> See the related [Contrib Module](/docs/contrib.md#magic-file-artefact-deposit) deposit files programmatically.
+
 > [!WARNING]
-> Avoid using full stops in file names as they will be treated as part of the file extension, which are used to
+> Do not use full stops in file names as they will be treated as part of the file extension, which are used to
 > determine whether a file is a supported format or not. Unsupported files cannot be deposited.
 >
 > E.g.: `X_2026_v2.2.jpg` will be treated as an unrecognised `.2.jpg` file. Use `X_2026_v2_2.jpg` or similar instead.
+<!-- pyml enable md028 -->
 
 ## Updating records
 

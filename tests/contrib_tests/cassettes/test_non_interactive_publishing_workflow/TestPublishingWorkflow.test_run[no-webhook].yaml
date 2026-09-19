@@ -723,12 +723,13 @@ interactions:
     uri: https://gitlab.example.com/api/v4/projects/1234/repository/tree?recursive=True&path=records&ref=test
   response:
     body:
-      string: '[
-        {"id":"973777d7237975d775a3de8b6e8ca14ea5fb7f0e","name":"5d","type":"tree","path":"records/5d","mode":"040000"},
-        {"id":"2458338930c6220a5dce923010cf2b9a2bd15a95","name":"5b","type":"tree","path":"records/5d/5b","mode":"040000"},
-        {"id":"3c2ec68b4192dcc11fe79d445820d6c7bba85fe2","name":"5d5b4e21-fd32-409c-be83-ca1c339903e5.json","type":"blob","path":"records/5d/5b/5d5b4e21-fd32-409c-be83-ca1c339903e5.json","mode":"100644"},
-        {"id":"0b21ca3bac232d8fa3010d3f38eb1b56c71283ba","name":"5d5b4e21-fd32-409c-be83-ca1c339903e5.xml","type":"blob","path":"records/5d/5b/5d5b4e21-fd32-409c-be83-ca1c339903e5.xml","mode":"100644"}
-      ]'
+      string: >
+        [
+          {"id":"973777d7237975d775a3de8b6e8ca14ea5fb7f0e","name":"5d","type":"tree","path":"records/5d","mode":"040000"},
+          {"id":"2458338930c6220a5dce923010cf2b9a2bd15a95","name":"5b","type":"tree","path":"records/5d/5b","mode":"040000"},
+          {"id":"3c2ec68b4192dcc11fe79d445820d6c7bba85fe2","name":"5d5b4e21-fd32-409c-be83-ca1c339903e5.json","type":"blob","path":"records/5d/5b/5d5b4e21-fd32-409c-be83-ca1c339903e5.json","mode":"100644"},
+          {"id":"0b21ca3bac232d8fa3010d3f38eb1b56c71283ba","name":"5d5b4e21-fd32-409c-be83-ca1c339903e5.xml","type":"blob","path":"records/5d/5b/5d5b4e21-fd32-409c-be83-ca1c339903e5.xml","mode":"100644"}
+        ]
     headers:
       Cache-Control:
       - max-age=0, private, must-revalidate

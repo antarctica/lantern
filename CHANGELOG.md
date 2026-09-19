@@ -21,6 +21,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 ### Changed [BREAKING!]
 
 * `contrib.deployment_updates` renamed to `contrib.post_deployment_updates` for clarity
+* Switching from Pre-Commit to Prek for git pre-commit runner
 
 ### Added
 

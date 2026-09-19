@@ -6,16 +6,16 @@ Requirements:
 
 - [Git](https://git-scm.com)
 - [UV](https://docs.astral.sh/uv/)
-- [Pre-commit](https://pre-commit.com)
 - [1Password CLI](https://developer.1password.com/docs/cli/get-started/)
+- [Prek](https://prek.j178.dev)
   - with access to the *Shared* and *Infrastructure* vaults in the MAGIC team account
 
 Setup:
 
-1. install tools (`brew install git uv pre-commit 1password-cli opentofu`)
+1. install tools (`brew install git uv prek 1password-cli opentofu`)
 1. clone and setup project [1]
 1. [Generate](/docs/config.md#generate-an-environment-config-file) an `.env` file
-1. initialise pre-commit hook (`pre-commit install`)
+1. initialise [Prek](#prek) pre-commit hook (`prek install`)
 
 [1]
 
@@ -632,7 +632,7 @@ To upgrade direct dependencies (including major and minor versions changing func
 
 [Ty](https://docs.astral.sh/ty/) is used for static type checking in main application Python files (not tests, etc.).
 Default options are used. Type checks are run automatically in [Continuous Integration](#continuous-integration) and
-the [Pre-Commit Hook](#pre-commit-hook).
+via [Prek](#prek).
 
 <!-- pyml disable md028 -->
 > [!IMPORTANT]
@@ -650,7 +650,7 @@ the [Pre-Commit Hook](#pre-commit-hook).
 
 [Ruff](https://docs.astral.sh/ruff/) is used to lint and format Python files. Specific checks and config options are
 set in [`pyproject.toml`](/pyproject.toml). Linting checks are run automatically in
-[Continuous Integration](#continuous-integration) and the [Pre-Commit Hook](#pre-commit-hook).
+[Continuous Integration](#continuous-integration) and via [Prek](#prek).
 
 > [!TIP]
 > To check linting manually run the `lint` [Development Task](#development-tasks), for formatting run the `format` task.
@@ -667,7 +667,7 @@ set in [`pyproject.toml`](/pyproject.toml). Linting checks are run automatically
 
 [PyMarkdown](https://pymarkdown.readthedocs.io/en/latest/) is used to lint Markdown files. Specific checks and config
 options are set in [`pyproject.toml`](/pyproject.toml). Linting checks are run automatically in
-[Continuous Integration](#continuous-integration) and the [Pre-Commit Hook](#pre-commit-hook).
+[Continuous Integration](#continuous-integration) and via [Prek](#prek).
 
 > [!TIP]
 > To check linting manually run the `markdown` [Development Task](#development-tasks).
@@ -700,18 +700,18 @@ started where another element isn't in between. Wrap such instances with pragma 
 For consistency, it's strongly recommended to configure your IDE or other editor to use the
 [EditorConfig](https://editorconfig.org/) settings defined in `.editorconfig`.
 
-### Pre-commit hook
+### Prek
 
-A [Pre-Commit](https://pre-commit.com) hook is configured in `.pre-commit-config.yaml`.
+A [Prek](https://prek.j178.dev) git pre-commit hook is configured in `prek.toml`.
 
-To update Pre-Commit and configured hooks:
+To update configured hooks:
 
 ```shell
-% pre-commit autoupdate
+% prek update --cooldown-days 7
 ```
 
 > [!TIP]
-> To run pre-commit checks against all files manually run the `pre-commit` [Development Task](#development-tasks).
+> To run Prek checks against all files manually, run the `prek` [Development Task](#development-tasks).
 
 ## Testing
 

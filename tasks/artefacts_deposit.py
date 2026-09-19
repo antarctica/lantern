@@ -90,7 +90,7 @@ def _get_args(
         record = r[0][0]
 
         clean_flag = " --clean-deposited" if clean_deposited else ""
-        params = f"task artefacts-deposit --force --artefacts-path {artefacts_path.resolve()} --records-path {records_path.resolve()} --path {record_path.resolve()}{clean_flag}"
+        params = f"task deposit-artefacts --force --artefacts-path {artefacts_path.resolve()} --records-path {records_path.resolve()} --records-path {record_path.resolve()}{clean_flag}"
         return artefacts_path, records_path, record, clean_deposited, params
 
     artefacts_path = Path(
@@ -126,7 +126,7 @@ def _get_args(
         raise TypeError(msg) from None
 
     clean_flag = " --clean-deposited" if clean_deposited else ""
-    params = f"task artefacts-deposit --force --artefacts-path {artefacts_path.resolve()} --records-path {records_path.resolve()} --path {record_path.resolve()}{clean_flag}"
+    params = f"task deposit-artefacts --force --artefacts-path {artefacts_path.resolve()} --records-path {records_path.resolve()} --record-path {record_path.resolve()}{clean_flag}"
     return artefacts_path, records_path, record, clean_deposited, params
 
 

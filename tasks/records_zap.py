@@ -625,6 +625,10 @@ def process_zap_records(
         logger=logger, records=records, additional_records=additional_records, catalogue=catalogue
     )
     _revise_records(logger=logger, records=[*records, *additional_records], catalogue=catalogue)
+
+    for record in [*records, *additional_records]:
+        record.validate()
+
     return additional_records
 
 

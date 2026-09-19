@@ -31,7 +31,7 @@ class Config(ConfigBase):
 
 def export_test_site(export_path: Path) -> None:
     """Export test records as a static site."""
-    logger = logging.getLogger("app")
+    logger = logging.getLogger("lantern")
     logger.setLevel(logging.INFO)
     config = Config()
     catalogue = FakeCatalogue(logger=logger, config=config, base_path=export_path)

@@ -40,6 +40,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * incorrect BAS-STAFF access constraint metadata preset restriction code
 * `zap-records` development task not preserving usage constraints
 * Relaxing types for temporal extent preset in BAS Metadata Library lib
+* Ensuring record changes from `zap-records` development tasks validate
 
 ### Changed
 

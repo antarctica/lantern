@@ -118,6 +118,9 @@ def _get_args(logger: logging.Logger, cli_args: tuple[bool, Path, Path, list[Pat
         for path in record_paths:
             logger.info("Loading record from: '%s'", path.resolve())
             r = parse_records(logger=logger, glob_pattern=path.name, search_path=path.parent, validate_catalogue=True)
+            if not r:
+                msg = f"No valid records for selection '{path.resolve()}', aborting."
+                raise RuntimeError(msg) from None
             records.append(r[0][0])
 
         _paths_param = " ".join([f"--path {p.resolve()}" for p in record_paths])

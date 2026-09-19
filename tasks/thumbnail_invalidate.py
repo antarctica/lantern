@@ -2,7 +2,6 @@
 
 import subprocess
 from argparse import ArgumentParser
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 import boto3
@@ -12,6 +11,7 @@ from lantern.exporters.cloudfront import CloudFrontExporter
 
 if TYPE_CHECKING:
     import logging
+    from pathlib import Path
 
     from tasks._config import ExtraConfig
 
@@ -28,28 +28,23 @@ def get_cf_distribution_id(iac_cwd: Path, cf_id: str) -> str:
     return proc.stdout.strip()
 
 
-def _get_cli_args() -> str:
-    """
-    Get command line arguments.
-
-    Return an item identifier via positional and/or named `--item` arguments.
-    """
+def _get_cli_args() -> tuple[str, str]:
+    """Get command line arguments."""
     parser = ArgumentParser(description="Invalidate cached thumbnails for an item.")
     parser.add_argument(
-        "item",
-        nargs="?",
-        help="Item to invalidate thumbnails for (positional).",
+        "--item",
+        "-i",
+        required=True,
+        help="Item to invalidate thumbnails for Will interactively prompt if omitted.",
     )
     parser.add_argument(
-        "--item",
-        dest="item_opt",
-        help="Item to invalidate thumbnails for (optional flag).",
+        "--distribution",
+        "-d",
+        required=True,
+        help="CloudFront distribution containing thumbnails. Will interactively prompt if omitted.",
     )
     args = parser.parse_args()
-    item = args.item_opt if args.item_opt is not None else args.item
-    if item is None:
-        parser.error("Item is required (positional or using --item)")
-    return item
+    return args.item, args.distribution
 
 
 def invalidate_keys(logger: logging.Logger, config: ExtraConfig, distribution_id: str, keys: list[str]) -> None:
@@ -71,8 +66,7 @@ def main() -> None:
     """Entrypoint."""
     logger, config, _catalogue = init()
 
-    cf_id = get_cf_distribution_id(iac_cwd=Path("./resources/infra"), cf_id="thumbnails_cf_id")
-    item = _get_cli_args()
+    item, cf_id = _get_cli_args()
     keys = [f"/add-catalogue/0.0.0/img/items/{item}/*"]
     invalidate_keys(logger=logger, config=config, distribution_id=cf_id, keys=keys)
 

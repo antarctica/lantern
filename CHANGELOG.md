@@ -18,6 +18,10 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 <!-- pyml disable no-duplicate-heading,no-duplicate-header -->
 ## [Unreleased]
 
+### Changed [BREAKING!]
+
+* `contrib.deployment_updates` renamed to `contrib.post_deployment_updates` for clarity
+
 ### Added
 
 * `AGENTS.md` file to provide concise context and structure to LLM tools
@@ -37,9 +41,10 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * `StoreCountUnsupportedError` for stores that cannot count records efficiently
 * `LocalExporter` setting permissions repeatedly for common parent directories
 * Preventing Site instances reusing the wrong store singletons in parallel workers via a singleton key
-* incorrect BAS-STAFF access constraint metadata preset restriction code
+* Incorrect BAS-STAFF access constraint metadata preset restriction code
 * `zap-records` development task not preserving usage constraints
 * Relaxing types for temporal extent preset in BAS Metadata Library lib
+* Wrong logger used in some dev tasks
 * Ensuring record changes from `zap-records` development tasks validate
 
 ### Changed

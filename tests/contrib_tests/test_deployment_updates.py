@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from lantern.contrib.deployment_updates import entrypoint
+from lantern.contrib.post_deployment_updates import entrypoint
 
 if TYPE_CHECKING:
     from pathlib import Path

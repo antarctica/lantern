@@ -6,19 +6,19 @@
 
 To set up this workflow for an application:
 
-1. [Generate](/docs/usage.md#creating-records) a set of JSON encoded record configurations as files in a directory
-2. import and publish these records using the [Interactive Workflow](/docs/usage.md#interactive-publishing-workflow):
+1. [Create](/docs/usage.md#creating-records) a set of JSON encoded record configurations as files in a directory
+1. import and publish these records using the [Interactive Workflow](/docs/usage.md#interactive-publishing-workflow):
    - merge the changeset into `main`
    - this includes records in [Outputs](#outputs-filtering) normally filtered out
    - it also adds new records under any parent collections or other container resources
-3. then follow the [Routine Usage](#routine-usage) instructions for future updates
+1. then follow the [Routine Usage](#routine-usage) instructions for future updates
 
 ## Routine usage
 
 To update records as needed:
 
 1. generate a set of updated JSON encoded record configurations as files in a directory
-2. call the [Non-Interactive Publishing](/docs/contrib.md#non-interactive-publishing-workflow) contrib module with the
+1. call the [Non-Interactive Publishing](/docs/contrib.md#non-interactive-publishing-workflow) contrib module with the
    required arguments and valid [Configuration](/docs/config.md#config-options)
 
 ### Publishing script

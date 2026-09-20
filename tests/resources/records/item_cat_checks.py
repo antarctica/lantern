@@ -30,7 +30,6 @@ Item to test distribution related CheckType enum members:
 - NORA file
 - BAS published maps purchasing
 - BAS SAN
-- BAS Construction CDE
 
 Also includes a DOI identifier to test an additional CheckType.
 
@@ -183,11 +182,9 @@ san_access = Distribution(
     ),
 )
 
-common_data_env_access = Distribution(
     distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
     transfer_option=TransferOption(
         online_resource=OnlineResource(
-            href="https://cde.data.bas.ac.uk/123abc&456def",
             function=OnlineResourceFunctionCode.DOWNLOAD,
             # title deliberately not set to use default value in distribution option
         ),
@@ -212,6 +209,5 @@ record.distribution = Distributions(
         nora_file,
         map_purchase,
         san_access,
-        common_data_env_access,
     ],
 )

@@ -30,11 +30,11 @@ class ArtefactFormatLabel(Enum):
     # Files
     CSV = "csv"
     FPL = "fpl"
+    GEOPACKAGE = "gpkg"
+    GEOPACKAGE_ZIP = "gpkg_zip"
     GPX = "gpx"
     JPEG = "jpeg"
     GEOJSON = "geojson"
-    GEOPACKAGE = "gpkg"
-    GEOPACKAGE_ZIP = "gpkg_zip"
     MAPBOX_VECTOR_TILES = "mbtiles"
     PDF = "pdf"
     GEOPDF = "pdf_geo"
@@ -90,6 +90,24 @@ class ArtefactFormats:
             "https://metadata-resources.data.bas.ac.uk/media-types/application/fpl+xml",
         ),
         ArtefactFormat(
+            ArtefactFormatLabel.GEOPACKAGE,
+            "GeoPackage",
+            None,
+            None,
+            [".gpkg"],
+            ["application/geopackage+sqlite3"],
+            "https://www.iana.org/assignments/media-types/application/geopackage+sqlite3",
+        ),
+        ArtefactFormat(
+            ArtefactFormatLabel.GEOPACKAGE_ZIP,
+            "GeoPackage (Zipped)",
+            None,
+            "Download information as a GeoPackage file compressed as a Zip archive.",
+            [".gpkg.zip"],
+            [],
+            "https://www.iana.org/assignments/media-types/application/geo+json",
+        ),
+        ArtefactFormat(
             ArtefactFormatLabel.GPX,
             "GPX",
             "GPS Exchange Format",
@@ -114,24 +132,6 @@ class ArtefactFormats:
             None,
             [".geojson", ".json"],
             ["application/geo+json"],
-            "https://www.iana.org/assignments/media-types/application/geo+json",
-        ),
-        ArtefactFormat(
-            ArtefactFormatLabel.GEOPACKAGE,
-            "GeoPackage",
-            None,
-            None,
-            [".gpkg"],
-            ["application/geopackage+sqlite3"],
-            "https://www.iana.org/assignments/media-types/application/geopackage+sqlite3",
-        ),
-        ArtefactFormat(
-            ArtefactFormatLabel.GEOPACKAGE_ZIP,
-            "GeoPackage (Zipped)",
-            None,
-            "Download information as a GeoPackage file compressed as a Zip archive.",
-            [".gpkg.zip"],
-            [],
             "https://www.iana.org/assignments/media-types/application/geo+json",
         ),
         ArtefactFormat(

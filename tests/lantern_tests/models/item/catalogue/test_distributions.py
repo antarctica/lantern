@@ -16,7 +16,6 @@ from lantern.models.item.catalogue.distributions import (
     ArcGisServiceLayerDistribution,
     ArcGisVectorTileLayer,
     ArcGisWebMap,
-    BasPartnersCDE,
     BasPublishedMap,
     BasSan,
     Csv,
@@ -25,6 +24,7 @@ from lantern.models.item.catalogue.distributions import (
     Fpl,
     GeoJson,
     GeoPackage,
+    GeoPdf,
     GeoTiff,
     Gpx,
     Jpeg,
@@ -128,7 +128,7 @@ class FakeFileDistributionType(FileDistribution):
     @property
     def format_type(self) -> DistributionType:
         """Format."""
-        return DistributionType.GEOJSON
+        return DistributionType.JSON_GEO
 
 
 class TestDistribution:
@@ -301,7 +301,7 @@ class TestFileDistribution:
 
     @pytest.mark.parametrize(
         ("title", "expected"),
-        [(None, DistributionType.GEOJSON.value), ("x", "x")],
+        [(None, DistributionType.JSON_GEO.value), ("x", "x")],
     )
     def test_label(self, title: str | None, expected: str):
         """Can get label based on transfer option or format."""
@@ -420,59 +420,6 @@ class TestDistributionBasSan:
         dist = BasSan(option=self._base_option, restricted=False)
         assert dist.posix_path == "/data/x"
         assert dist.unc_path == r"\\samba.nerc-bas.ac.uk\data\x"
-
-
-class TestDistributionBasPartnersCDE:
-    """Test BAS Partners CDE access distribution."""
-
-    _base_option = RecordDistribution(
-        distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
-        transfer_option=TransferOption(
-            online_resource=OnlineResource(
-                href="https://cde.data.bas.ac.uk/x",
-                function=OnlineResourceFunctionCode.DOWNLOAD,
-            )
-        ),
-    )
-
-    def test_init(self):
-        """Can create a distribution."""
-        dist = BasPartnersCDE(option=self._base_option, restricted=False)
-
-        assert dist.matches(self._base_option, [])
-
-    @pytest.mark.parametrize(
-        ("title", "expected"),
-        [(None, "BAS Construction Partners CDE"), ("x", "x")],
-    )
-    def test_label(self, title: str | None, expected: str):
-        """Can get label based on transfer option or format."""
-        option = deepcopy(self._base_option)
-        option.transfer_option.online_resource.title = title
-
-        dist = BasPartnersCDE(option=option, restricted=False)
-        assert dist.label == expected
-
-    @pytest.mark.parametrize(
-        ("restricted", "expected"),
-        [(False, "fa-regular fa-people-arrows"), (True, ACTION_BTN_ICON_RESTRICTED_DEFAULT)],
-    )
-    def test_action_btn_icon(self, restricted: bool, expected: str):
-        """Can get action icon."""
-        dist = BasPartnersCDE(option=self._base_option, restricted=restricted)
-        assert dist.action_btn_icon == expected
-
-    @pytest.mark.parametrize(
-        ("href", "expected"),
-        [("https://cde.data.bas.ac.uk/x", ["x"]), ("https://cde.data.bas.ac.uk/x&y", ["x", "y"])],
-    )
-    def test_cde_ref(self, href: str, expected: list[str]):
-        """Can parse and format CDE file name for a distribution."""
-        option = self._base_option
-        option.transfer_option.online_resource.href = href
-        dist = BasPartnersCDE(option=option, restricted=False)
-
-        assert dist.cde_refs == expected
 
 
 class TestDistributionArcGisFeatureLayer:
@@ -721,18 +668,6 @@ class TestDistributionFpl:
         assert dist.matches(option, [])
 
 
-class TestDistributionGeoJson:
-    """Test GeoJSON catalogue distribution."""
-
-    def test_init(self):
-        """Can create a distribution."""
-        option = _make_dist("https://www.iana.org/assignments/media-types/application/geo+json")
-        dist = GeoJson(option=option, restricted=False)
-
-        assert dist.format_type == DistributionType.GEOJSON
-        assert dist.matches(option, [])
-
-
 class TestDistributionGeoPackage:
     """Test GeoPackage catalogue distribution."""
 
@@ -769,18 +704,6 @@ class TestDistributionGeoPackage:
             GeoPackage(option=option, restricted=False)
 
 
-class TestDistributionGeoTiff:
-    """Test GeoTIFF catalogue distribution."""
-
-    def test_init(self):
-        """Can create a distribution."""
-        option = _make_dist("https://metadata-resources.data.bas.ac.uk/media-types/image/geo+tiff")
-        dist = GeoTiff(option=option, restricted=False)
-
-        assert dist.format_type == DistributionType.GEOTIFF
-        assert dist.matches(option, [])
-
-
 class TestDistributionGpx:
     """Test GPX catalogue distribution."""
 
@@ -805,6 +728,18 @@ class TestDistributionJpeg:
         assert dist.matches(option, [])
 
 
+class TestDistributionGeoJson:
+    """Test GeoJSON catalogue distribution."""
+
+    def test_init(self):
+        """Can create a distribution."""
+        option = _make_dist("https://www.iana.org/assignments/media-types/application/geo+json")
+        dist = GeoJson(option=option, restricted=False)
+
+        assert dist.format_type == DistributionType.JSON_GEO
+        assert dist.matches(option, [])
+
+
 class TestDistributionMapBoxVectorTiles:
     """Test MapBox vector tiles catalogue distribution."""
 
@@ -818,39 +753,34 @@ class TestDistributionMapBoxVectorTiles:
 
 
 class TestDistributionPdf:
-    """Test PDF catalogue distribution."""
+    """Test (non-georeferenced) PDF catalogue distribution."""
 
-    @pytest.mark.parametrize(
-        ("href", "format_type", "georeferenced"),
-        [
-            (
-                "https://www.iana.org/assignments/media-types/application/pdf",
-                DistributionType.PDF,
-                False,
-            ),
-            (
-                "https://metadata-resources.data.bas.ac.uk/media-types/application/pdf+geo",
-                DistributionType.PDF_GEO,
-                True,
-            ),
-        ],
-    )
-    def test_init(self, href: str, format_type: DistributionType, georeferenced: bool):
+    def test_init(self):
         """Can create a distribution."""
-        option = _make_dist(format_href=href)
+        option = _make_dist(format_href="https://www.iana.org/assignments/media-types/application/pdf")
         dist = Pdf(option=option, restricted=False)
 
-        assert dist.format_type == format_type
-        assert dist._georeferenced == georeferenced
+        assert dist.format_type == DistributionType.PDF
         assert dist.matches(option, [])
 
-    @pytest.mark.cov()
-    def test_georeferenced_no_format(self):
-        """Cannot get format if not defined."""
-        option = _make_dist(format_href="")
-        option.format = None
-        with pytest.raises(TypeError):
-            Pdf(option=option, restricted=False)
+
+class TestDistributionGeoPdf:
+    """Test geo-referenced PDF catalogue distribution."""
+
+    @pytest.mark.parametrize(
+        "format_href",
+        [
+            "https://metadata-resources.data.bas.ac.uk/media-types/application/pdf+geo",  # deprecated
+            "https://metadata-resources.data.bas.ac.uk/media-types/application/geo+pdf",
+        ],
+    )
+    def test_init(self, format_href: str):
+        """Can create a distribution."""
+        option = _make_dist(format_href=format_href)
+        dist = GeoPdf(option=option, restricted=False)
+
+        assert dist.format_type == DistributionType.PDF_GEO
+        assert dist.matches(option, [])
 
 
 class TestDistributionPng:
@@ -872,4 +802,16 @@ class TestDistributionShapefile:
         option = _make_dist("https://metadata-resources.data.bas.ac.uk/media-types/application/vnd.shp+zip")
         dist = Shapefile(option=option, restricted=False)
         assert dist.format_type == DistributionType.SHAPEFILE_ZIP
+        assert dist.matches(option, [])
+
+
+class TestDistributionGeoTiff:
+    """Test GeoTIFF catalogue distribution."""
+
+    def test_init(self):
+        """Can create a distribution."""
+        option = _make_dist("https://metadata-resources.data.bas.ac.uk/media-types/image/geo+tiff")
+        dist = GeoTiff(option=option, restricted=False)
+
+        assert dist.format_type == DistributionType.TIFF_GEO
         assert dist.matches(option, [])

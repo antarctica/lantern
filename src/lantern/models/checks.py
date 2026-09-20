@@ -46,7 +46,6 @@ class CheckType(Enum):
     DOWNLOADS_SHAREPOINT_OTHER = "SharePoint Downloads (Personal)"
     DOWNLOADS_SHAREPOINT_MAGIC_PRODUCTS = "SharePoint Downloads (MAGIC Products)"
     DOWNLOADS_BAS_SAN = "BAS SAN Downloads"
-    DOWNLOADS_BAS_CDE = "BAS CDE Downloads"
     DOWNLOADS_ARCGIS_LAYER = "ArcGIS Layer"
     DOWNLOADS_ARCGIS_SERVICE = "ArcGIS Service"
     INFO_ARCGIS_WEBMAP = "ArcGIS Web Map"
@@ -155,7 +154,6 @@ class DistributionChecks:
     _magic_products_sigal: Final[str] = "https://nercacuk.sharepoint.com/:b:/r/sites/MAGICProductsDistribution/"
     _sharepoint_sigil: Final[str] = "sharepoint.com"
     _bas_san_sigil: Final[str] = "sftp://san.nerc-bas.ac.uk/"
-    _bas_cde_sigil: Final[str] = "https://cde.data.bas.ac.uk/"
 
     def __init__(self, distributions: Distributions, file_identifier: str) -> None:
         self._distributions = distributions
@@ -199,8 +197,6 @@ class DistributionChecks:
                 type_ = CheckType.DOWNLOADS_NORA
             elif transfer_href.startswith(self._bas_san_sigil):
                 type_ = CheckType.DOWNLOADS_BAS_SAN
-            elif transfer_href.startswith(self._bas_cde_sigil):
-                type_ = CheckType.DOWNLOADS_BAS_CDE
             elif self._magic_products_sigal in transfer_href:
                 type_ = CheckType.DOWNLOADS_SHAREPOINT_MAGIC_PRODUCTS
             elif self._sharepoint_sigil in transfer_href:
@@ -227,7 +223,6 @@ class DistributionChecks:
             if check.type in [
                 CheckType.DOWNLOADS_SHAREPOINT_OTHER,
                 CheckType.DOWNLOADS_BAS_SAN,
-                CheckType.DOWNLOADS_BAS_CDE,
             ]:
                 check.state = CheckState.SKIPPED
             checks.append(check)

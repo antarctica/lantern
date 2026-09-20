@@ -36,19 +36,18 @@ Item to test all supported data formats:
 - ArcGIS Scene Layer
 - ArcGIS Web Map
 - BAS SAN (not format based/aware)
-- BAS Construction CDE (not format based/aware)
 - BAS Paper Map ordering (not format based/aware)
 - CSV
 - FPL
-- GeoJSON
 - GeoPackage (optional compression)
-- GeoTIFF
 - GPX
 - JPEG
+- GeoJSON (required geospatial)
 - Mapbox Vector Tiles
 - PNG
-- PDF (optional georeferenced)
+- PDF (optional georeferencing)
 - Shapefile (required compression)
+- GeoTIFF (required georeferencing)
 """
 
 distributions = {
@@ -490,43 +489,6 @@ distributions = {
             ),
         ),
     ),
-    "GeoJSON": Distribution(
-        distributor=Contact(
-            organisation=ContactIdentity(
-                name="Mapping and Geographic Information Centre, British Antarctic Survey",
-                href="https://ror.org/01rhff309",
-                title="ror",
-            ),
-            phone="+44 (0)1223 221400",
-            email="magic@bas.ac.uk",
-            address=Address(
-                delivery_point="British Antarctic Survey, High Cross, Madingley Road",
-                city="Cambridge",
-                administrative_area="Cambridgeshire",
-                postal_code="CB3 0ET",
-                country="United Kingdom",
-            ),
-            online_resource=OnlineResource(
-                href="https://www.bas.ac.uk/teams/magic",
-                title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-                description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
-                function=OnlineResourceFunctionCode.INFORMATION,
-            ),
-            role={ContactRoleCode.DISTRIBUTOR},
-        ),
-        format=Format(
-            format=DistributionType.GEOJSON.value,
-            href="https://www.iana.org/assignments/media-types/application/geo+json",
-        ),
-        transfer_option=TransferOption(
-            size=Size(unit="bytes", magnitude=24 * 1024 * 1024 * 1024 * 1024 * 1024 * 1024 * 1024),
-            online_resource=OnlineResource(
-                href="x",
-                function=OnlineResourceFunctionCode.DOWNLOAD,
-                title="GeoJSON",
-            ),
-        ),
-    ),
     "GeoPackage": Distribution(
         distributor=Contact(
             organisation=ContactIdentity(
@@ -560,7 +522,7 @@ distributions = {
             online_resource=OnlineResource(
                 href="x",
                 function=OnlineResourceFunctionCode.DOWNLOAD,
-                title="GeoJSON",
+                title="GeoPackage",
             ),
         ),
     ),
@@ -599,43 +561,6 @@ distributions = {
                 function=OnlineResourceFunctionCode.DOWNLOAD,
                 title="GeoPackage (Zipped)",
                 description="Download information as a GeoPackage file, compressed as a Zip archive.",
-            ),
-        ),
-    ),
-    "GeoTIFF": Distribution(
-        distributor=Contact(
-            organisation=ContactIdentity(
-                name="Mapping and Geographic Information Centre, British Antarctic Survey",
-                href="https://ror.org/01rhff309",
-                title="ror",
-            ),
-            phone="+44 (0)1223 221400",
-            email="magic@bas.ac.uk",
-            address=Address(
-                delivery_point="British Antarctic Survey, High Cross, Madingley Road",
-                city="Cambridge",
-                administrative_area="Cambridgeshire",
-                postal_code="CB3 0ET",
-                country="United Kingdom",
-            ),
-            online_resource=OnlineResource(
-                href="https://www.bas.ac.uk/teams/magic",
-                title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-                description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
-                function=OnlineResourceFunctionCode.INFORMATION,
-            ),
-            role={ContactRoleCode.DISTRIBUTOR},
-        ),
-        format=Format(
-            format=DistributionType.GEOTIFF.value,
-            href="https://metadata-resources.data.bas.ac.uk/media-types/image/geo+tiff",
-        ),
-        transfer_option=TransferOption(
-            size=Size(unit="bytes", magnitude=36 * 1024 * 1024 * 1024 * 1024),
-            online_resource=OnlineResource(
-                href="x",
-                function=OnlineResourceFunctionCode.DOWNLOAD,
-                title="GeoTIFF",
             ),
         ),
     ),
@@ -711,6 +636,43 @@ distributions = {
                 href="x",
                 function=OnlineResourceFunctionCode.DOWNLOAD,
                 title="JPEG",
+            ),
+        ),
+    ),
+    "GeoJSON": Distribution(
+        distributor=Contact(
+            organisation=ContactIdentity(
+                name="Mapping and Geographic Information Centre, British Antarctic Survey",
+                href="https://ror.org/01rhff309",
+                title="ror",
+            ),
+            phone="+44 (0)1223 221400",
+            email="magic@bas.ac.uk",
+            address=Address(
+                delivery_point="British Antarctic Survey, High Cross, Madingley Road",
+                city="Cambridge",
+                administrative_area="Cambridgeshire",
+                postal_code="CB3 0ET",
+                country="United Kingdom",
+            ),
+            online_resource=OnlineResource(
+                href="https://www.bas.ac.uk/teams/magic",
+                title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
+                description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
+                function=OnlineResourceFunctionCode.INFORMATION,
+            ),
+            role={ContactRoleCode.DISTRIBUTOR},
+        ),
+        format=Format(
+            format=DistributionType.JSON_GEO.value,
+            href="https://www.iana.org/assignments/media-types/application/geo+json",
+        ),
+        transfer_option=TransferOption(
+            size=Size(unit="bytes", magnitude=24 * 1024 * 1024 * 1024 * 1024 * 1024 * 1024 * 1024),
+            online_resource=OnlineResource(
+                href="x",
+                function=OnlineResourceFunctionCode.DOWNLOAD,
+                title="GeoJSON",
             ),
         ),
     ),
@@ -814,7 +776,7 @@ distributions = {
         ),
         format=Format(
             format=DistributionType.PDF_GEO.value,
-            href="https://metadata-resources.data.bas.ac.uk/media-types/application/pdf+geo",
+            href="https://metadata-resources.data.bas.ac.uk/media-types/application/geo+pdf",
         ),
         transfer_option=TransferOption(
             size=Size(unit="bytes", magnitude=9 * 1024 * 1024),
@@ -901,6 +863,43 @@ distributions = {
             ),
         ),
     ),
+    "GeoTIFF": Distribution(
+        distributor=Contact(
+            organisation=ContactIdentity(
+                name="Mapping and Geographic Information Centre, British Antarctic Survey",
+                href="https://ror.org/01rhff309",
+                title="ror",
+            ),
+            phone="+44 (0)1223 221400",
+            email="magic@bas.ac.uk",
+            address=Address(
+                delivery_point="British Antarctic Survey, High Cross, Madingley Road",
+                city="Cambridge",
+                administrative_area="Cambridgeshire",
+                postal_code="CB3 0ET",
+                country="United Kingdom",
+            ),
+            online_resource=OnlineResource(
+                href="https://www.bas.ac.uk/teams/magic",
+                title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
+                description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
+                function=OnlineResourceFunctionCode.INFORMATION,
+            ),
+            role={ContactRoleCode.DISTRIBUTOR},
+        ),
+        format=Format(
+            format=DistributionType.TIFF_GEO.value,
+            href="https://metadata-resources.data.bas.ac.uk/media-types/image/geo+tiff",
+        ),
+        transfer_option=TransferOption(
+            size=Size(unit="bytes", magnitude=36 * 1024 * 1024 * 1024 * 1024),
+            online_resource=OnlineResource(
+                href="x",
+                function=OnlineResourceFunctionCode.DOWNLOAD,
+                title="GeoTIFF",
+            ),
+        ),
+    ),
     "X - BAS Published Map Ordering": Distribution(
         distributor=Contact(
             organisation=ContactIdentity(
@@ -960,37 +959,6 @@ distributions = {
         transfer_option=TransferOption(
             online_resource=OnlineResource(
                 href="sftp://san.nerc-bas.ac.uk/data/x",
-                function=OnlineResourceFunctionCode.DOWNLOAD,
-                # title deliberately not set to use default value in distribution option
-            ),
-        ),
-    ),
-    "X - BAS Construction Partners CDE Access": Distribution(
-        distributor=Contact(
-            organisation=ContactIdentity(
-                name="Antarctic Infrastructure Modernisation Programme, British Antarctic Survey",
-                href="https://ror.org/01rhff309",
-                title="ror",
-            ),
-            phone="+44 (0)1223 221400",
-            address=Address(
-                delivery_point="British Antarctic Survey, High Cross, Madingley Road",
-                city="Cambridge",
-                administrative_area="Cambridgeshire",
-                postal_code="CB3 0ET",
-                country="United Kingdom",
-            ),
-            online_resource=OnlineResource(
-                href="https://www.bas.ac.uk/polar-capabilities/antarctic-infrastructure-modernisation-programme/",
-                title="Antarctic Infrastructure Modernisation Programme - BAS public website",
-                description="General information about the Antarctic Infrastructure Modernisation Programme from the British Antarctic Survey (BAS) public website.",
-                function=OnlineResourceFunctionCode.INFORMATION,
-            ),
-            role={ContactRoleCode.DISTRIBUTOR},
-        ),
-        transfer_option=TransferOption(
-            online_resource=OnlineResource(
-                href="https://cde.data.bas.ac.uk/123abc&456def",
                 function=OnlineResourceFunctionCode.DOWNLOAD,
                 # title deliberately not set to use default value in distribution option
             ),

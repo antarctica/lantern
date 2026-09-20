@@ -299,7 +299,6 @@ class TestDataTab:
         ("value", "text"),
         [
             ("sftp://san.nerc-bas.ac.uk/data/x", "Access this item from the BAS SAN"),
-            ("https://cde.data.bas.ac.uk/x", "Access this item through a partner Common Data Environment (CDE)."),
         ],
     )
     def test_data_info_href(self, fx_item_cat_model_min: ItemCatalogue, value: str, text: str):

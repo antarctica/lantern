@@ -296,19 +296,18 @@ Supported distribution options:
 - file types:
   - CSV
   - Garmin FPL (aviation GPS data)
-  - GeoJSON
-  - OGC GeoPackage
-  - OGC GeoTIFF
+  - OGC GeoPackage (including when zipped for compression)
   - GPX
   - JPEG
+  - GeoJSON (non-geo JSON files are not supported)
   - Mapbox Vector Tiles
   - PDF (with optional geo-referencing)
   - PNG
-  - Esri Shapefile
+  - Esri Shapefile (specifically where zipped with other related files)
+  - OGC GeoTIFF (non-geo TIFF images are not supported)
 - other special cases:
   - BAS published maps purchasing options
   - BAS SAN references
-  - BAS construction partners CDE references
 
 Implemented via classes in the `lantern.models.item.catalogue.distributions` package.
 

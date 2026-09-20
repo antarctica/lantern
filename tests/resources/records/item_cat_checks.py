@@ -28,6 +28,7 @@ Item to test distribution related CheckType enum members:
 - ArcGIS Services
 - ArcGIS Web Maps
 - NORA file
+- SharePoint file
 - BAS published maps purchasing
 - BAS SAN
 
@@ -159,6 +160,40 @@ nora_file = Distribution(
     ),
 )
 
+sharepoint_other_file = Distribution(
+    distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
+    format=Format(
+        format="-",
+        href="https://www.iana.org/assignments/media-types/application/pdf",
+    ),
+    transfer_option=TransferOption(
+        size=Size(unit="bytes", magnitude=15),
+        online_resource=OnlineResource(
+            href="https://x.sharepoint.com/sites/x/",
+            function=OnlineResourceFunctionCode.DOWNLOAD,
+            title="-",
+            description="Verify distribution as a generic SharePoint hosted file.",
+        ),
+    ),
+)
+
+sharepoint_magic_resource_file = Distribution(
+    distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
+    format=Format(
+        format="-",
+        href="https://www.iana.org/assignments/media-types/application/pdf",
+    ),
+    transfer_option=TransferOption(
+        size=Size(unit="bytes", magnitude=15),
+        online_resource=OnlineResource(
+            href="https://nercacuk.sharepoint.com/sites/BAS-MAGICResources/x/",
+            function=OnlineResourceFunctionCode.DOWNLOAD,
+            title="-",
+            description="Verify distribution as a MAGIC Resource Distribution SharePoint hosted file.",
+        ),
+    ),
+)
+
 map_purchase = Distribution(
     distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
     transfer_option=TransferOption(
@@ -182,15 +217,6 @@ san_access = Distribution(
     ),
 )
 
-    distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
-    transfer_option=TransferOption(
-        online_resource=OnlineResource(
-            function=OnlineResourceFunctionCode.DOWNLOAD,
-            # title deliberately not set to use default value in distribution option
-        ),
-    ),
-)
-
 record = make_record(
     open_access=True,
     file_identifier="cf80b941-3de6-4a04-8f5a-a2349c1e3ae0",
@@ -207,6 +233,8 @@ record.distribution = Distributions(
         *arc_service_distributions,
         arcgis_webmap,
         nora_file,
+        sharepoint_other_file,
+        sharepoint_magic_resource_file,
         map_purchase,
         san_access,
     ],

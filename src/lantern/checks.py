@@ -187,19 +187,20 @@ class CheckRunner:
         self._logger.info("Fetching: %s", service_url)
         self._check_arcgis_url(service_url)
 
-    def _check_magic_product(self) -> None:
+    def _check_magic_resource(self) -> None:
         """
-        Check MAGIC Products Distribution Service file.
+        Check MAGIC Resource Distribution hosted file.
 
-        https://gitlab.data.bas.ac.uk/MAGIC/products-distribution
+        [0] https://gitlab.data.bas.ac.uk/MAGIC/resource-distribution
 
-        The distribution service uses Microsoft SharePoint. This check effectively reverse proxies a request for a
-        SharePoint sharing URL (e.g. [1]), as per [2] using the MS Graph API [3] to get basic details including
-        expected file size.
+        Uses MS Graph to get a Drive Item ID from a SharePoint URL [1], returning basic details [2] including expected
+        file size to check against.
 
-        [1] https://nercacuk.sharepoint.com/:b:/r/sites/MAGICProductsDistribution/...
-        [2] https://learn.microsoft.com/en-us/graph/api/shares-get#encoding-sharing-urls
-        [3] https://learn.microsoft.com/en-us/graph/api/driveitem-get
+        Note: The `/shares` endpoint works with both sharing ('https://x.sharepoint.com/:b:/r/sites/...') and
+        direct ('https://x.sharepoint.com/sites/...') links.
+
+        [1] https://learn.microsoft.com/en-us/graph/api/shares-get#encoding-sharing-urls
+        [2] https://learn.microsoft.com/en-us/graph/api/shares-get#access-the-shared-item-directly
         """
         self._logger.info("Fetching: %s", self._check.url)
 
@@ -251,8 +252,8 @@ class CheckRunner:
             self._check_arcgis_item()
         elif self._check.type == CheckType.DOWNLOADS_ARCGIS_SERVICE:
             self._check_arcgis_service()
-        elif self._check.type == CheckType.DOWNLOADS_SHAREPOINT_MAGIC_PRODUCTS:
-            self._check_magic_product()
+        elif self._check.type == CheckType.DOWNLOADS_SHAREPOINT_MAGIC_RESOURCE:
+            self._check_magic_resource()
         else:
             self._check_url()
         self._check.duration = time.monotonic() - start
@@ -318,7 +319,7 @@ class Checker:
                 check.http_auth = HTTPBasicAuth(
                     username=self._config.CHECKS_TRUSTED_USERNAME, password=self._config.CHECKS_TRUSTED_PASSWORD
                 )
-            elif check.type == CheckType.DOWNLOADS_SHAREPOINT_MAGIC_PRODUCTS:
+            elif check.type == CheckType.DOWNLOADS_SHAREPOINT_MAGIC_RESOURCE:
                 # Add entra token for accessing SharePoint drive items (MS Graph via catalogue app registration)
                 if not _entra_token:
                     _entra_token = self._get_auth_entra()

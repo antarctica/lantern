@@ -47,9 +47,9 @@ class FakeArtefact(ArtefactBase):
         """Optional artefact size in bytes."""
         return 0
 
-    def validate(self) -> bool:
+    def validate_format(self) -> None:
         """Check artefact is a supported type."""
-        return False
+        return
 
 
 class TestArtefactBase:
@@ -87,7 +87,9 @@ class TestArtefactService:
         assert artefact.format == expected_fmt
         assert artefact.name == expected_str
         assert artefact.size_bytes is None
-        assert artefact.validate() is False
+
+        with pytest.raises(NotImplementedError):
+            artefact.validate_format()
 
 
 class TestArtefactLocalFile:
@@ -119,7 +121,7 @@ class TestArtefactLocalFile:
         assert artefact.name == expected_name
         assert isinstance(artefact.data, bytes)
         assert artefact.size_bytes == expected_size
-        assert artefact.validate() is True
+        assert artefact.validate_format() is None
 
     def test_unsupported(self):
         """Cannot create a valid local file artefact with an unsupported format."""
@@ -130,7 +132,8 @@ class TestArtefactLocalFile:
         assert artefact.quickxor == "VH6vNOkIy6i6d5q1NAkZQDCHMLQ="  # not dependent on format
 
         # ArtefactLocalFile
-        assert artefact.validate() is False
+        with pytest.raises(ArtefactFormatUnknownError):
+            artefact.validate_format()
         with pytest.raises(ArtefactFormatUnknownError):
             repr(artefact)
         with pytest.raises(ArtefactFormatUnknownError):
@@ -174,7 +177,7 @@ class TestArtefactSharePointFile:
         assert artefact.size_bytes == expected_size
         assert artefact.quickxor == expected_hash
         assert artefact.url == expected_str
-        assert artefact.validate() is True
+        assert artefact.validate_format() is None
 
         # getting data isn't supported
         with pytest.raises(NotImplementedError):
@@ -217,7 +220,8 @@ class TestArtefactSharePointFile:
             ),
         )
 
-        assert artefact.validate() is False
+        with pytest.raises(ArtefactFormatUnknownError):
+            artefact.validate_format()
         with pytest.raises(ArtefactFormatUnknownError):
             _ = artefact.format
 

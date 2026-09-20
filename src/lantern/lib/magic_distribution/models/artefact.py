@@ -9,7 +9,6 @@ from quickxorhash import quickxorhash  # ty: ignore[unresolved-import]
 from lantern.lib.magic_distribution.formats import (
     ArtefactFormat,
     ArtefactFormatLabel,
-    ArtefactFormatNotSupportedError,
     ArtefactFormats,
     ArtefactFormatUnknownError,
 )
@@ -75,8 +74,12 @@ class ArtefactBase(ABC):
         """Optional artefact size in bytes."""
 
     @abstractmethod
-    def validate(self) -> bool:
-        """Check artefact is a supported type."""
+    def validate_format(self) -> None:
+        """
+        Check artefact is a supported type.
+
+        May raise `ArtefactFormatUnknownError` or `ArtefactFormatNotSupportedError` if unknown or explicitly unsupported.
+        """
 
 
 class ArtefactFile(ArtefactBase):
@@ -158,9 +161,9 @@ class ArtefactServicePlaceholder(ArtefactBase):
         """Artefact size in bytes."""
         return None
 
-    def validate(self) -> bool:
+    def validate_format(self) -> None:
         """Check service is a supported type."""
-        return False
+        raise NotImplementedError() from None
 
 
 class ArtefactLocalFile(ArtefactFile):
@@ -193,14 +196,13 @@ class ArtefactLocalFile(ArtefactFile):
         """
         return ArtefactFormats.get_file_format(self._artefact, name=self.name)
 
-    def validate(self) -> bool:
-        """Check file is a supported type."""
-        try:
-            ArtefactFormats.check_file_supported(self._artefact, name=self.name)
-        except ArtefactFormatUnknownError, ArtefactFormatNotSupportedError:
-            return False
-        else:
-            return True
+    def validate_format(self) -> None:
+        """
+        Check file is a supported type.
+
+        May raise `ArtefactFormatUnknownError` or `ArtefactFormatNotSupportedError` if unknown or explicitly unsupported.
+        """
+        ArtefactFormats.check_file_supported(self._artefact, name=self.name)
 
     @property
     def name(self) -> str:
@@ -300,14 +302,13 @@ class ArtefactSharePointFile(ArtefactFile):
         else:
             return ArtefactFormats.get_label(label)
 
-    def validate(self) -> bool:
-        """Check file is a supported type."""
-        try:
-            _ = self.format
-        except ArtefactFormatUnknownError:
-            return False
-        else:
-            return True
+    def validate_format(self) -> None:
+        """
+        Check file is a supported type.
+
+        May, but should not, raise ArtefactFormatUnknownError if list metadata reports an unknown format.
+        """
+        _ = self.format  # will trigger ArtefactFormatUnknownError if not supported
 
     @property
     def name(self) -> str:

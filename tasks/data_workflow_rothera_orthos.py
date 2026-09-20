@@ -26,7 +26,12 @@ from tasks.records_zap import revise_collection
 
 from lantern.exporters.s3 import S3Exporter
 from lantern.lib.magic_distribution.client import MagicResourceDistributionClient
-from lantern.lib.magic_distribution.formats import ArtefactFormatLabel, ArtefactFormats
+from lantern.lib.magic_distribution.formats import (
+    ArtefactFormatLabel,
+    ArtefactFormatNotSupportedError,
+    ArtefactFormats,
+    ArtefactFormatUnknownError,
+)
 from lantern.lib.magic_distribution.models.artefact import (
     ArtefactLocalFile,
     ArtefactSharePointFile,
@@ -854,8 +859,10 @@ def _deposit_files(
             logger.info("Depositing %s as a file artefact", artefact_path.resolve())
 
             artefact = ArtefactLocalFile(resource_id=event.file_identifier, artefact_path=artefact_path)
-            if not artefact.validate():
-                logger.error("File artefact does not validate, skipping event.")
+            try:
+                artefact.validate_format()
+            except (ArtefactFormatUnknownError, ArtefactFormatNotSupportedError) as e:
+                logger.exception("File artefact does not validate, skipping event.", exc_info=e)
                 continue
 
             sp_artefact = sp_client.deposit_artefact(

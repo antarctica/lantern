@@ -23,6 +23,10 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * `contrib.deployment_updates` renamed to `contrib.post_deployment_updates` for clarity
 * Switching from Pre-Commit to Prek for git pre-commit runner
 
+### Removed [BREAKING!]
+
+* Construction partner CDE (Common Data Environment) distribution options
+
 ### Added
 
 * `AGENTS.md` file to provide concise context and structure to LLM tools

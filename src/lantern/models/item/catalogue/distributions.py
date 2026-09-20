@@ -526,69 +526,6 @@ class BasSan(Distribution):
         return "#item-data-info-san-access"
 
 
-class BasPartnersCDE(Distribution):
-    """
-    BAS Construction partners Common Data Environment (CDE) distribution option.
-
-    Provides information to BAS construction partners on how to access data transmitted by BAS from their CDE.
-    """
-
-    _sigil = "https://cde.data.bas.ac.uk/"
-
-    def __init__(self, option: RecordDistribution, restricted: bool = False, **kwargs: Any) -> None:
-        super().__init__(option, restricted, **kwargs)
-        self._unrestricted_btn_icon = "fa-regular fa-people-arrows"
-
-    @classmethod
-    def matches(cls, option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:
-        """Whether this class matches the distribution option."""
-        return option.transfer_option.online_resource.href.startswith(BasPartnersCDE._sigil)
-
-    @property
-    def format_type(self) -> DistributionType:
-        """Fixed (fake) Format type."""
-        return DistributionType.X_BAS_CDE
-
-    @property
-    def label(self) -> str:
-        """Distinguishing identifier from transfer option if available, or generic value based on file type."""
-        title = self._option.transfer_option.online_resource.title
-        return title or "BAS Construction Partners CDE"
-
-    @property
-    def description(self) -> None:
-        """Not applicable as info box provides additional context."""
-        return None
-
-    @property
-    def size(self) -> str:
-        """Not applicable."""
-        return ""
-
-    @property
-    def cde_refs(self) -> list[str]:
-        """
-        CDE file reference.
-
-        CDE references are file specific but an item may relate to a collection. To avoid specifying 1:n CDE dist
-        options, multiple values can be specified using '&` as a separator.
-
-        I.e. 'https://cde.data.bas.ac.uk/a&b' -> ['a', 'b'].
-        """
-        raw = urlparse(unquote(self._option.transfer_option.online_resource.href)).path.replace("/", "")
-        return raw.split("&")
-
-    @property
-    def action(self) -> Link:
-        """Link to distribution without href due to using `access_trigger`."""
-        return Link(value="Access Data", href=None)
-
-    @property
-    def access_target(self) -> str | None:
-        """DOM selector of element showing more information on accessing item."""
-        return "#item-data-info-cde-access"
-
-
 class Csv(FileDistribution):
     """CSV distribution option."""
 
@@ -622,8 +559,46 @@ class Fpl(FileDistribution):
         return DistributionType.FPL
 
 
+class Gpx(FileDistribution):
+    """GPX distribution option."""
+
+    @classmethod
+    def matches(cls, option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:
+        """Whether this class matches the distribution option."""
+        return (
+            option.format is not None
+            and option.format.href == "https://metadata-resources.data.bas.ac.uk/media-types/application/gpx+xml"
+        )
+
+    @property
+    def format_type(self) -> DistributionType:
+        """Format type."""
+        return DistributionType.GPX
+
+
+class Jpeg(FileDistribution):
+    """JPEG distribution option."""
+
+    @classmethod
+    def matches(cls, option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:
+        """Whether this class matches the distribution option."""
+        return (
+            option.format is not None
+            and option.format.href == "https://www.iana.org/assignments/media-types/image/jpeg"
+        )
+
+    @property
+    def format_type(self) -> DistributionType:
+        """Format type."""
+        return DistributionType.JPEG
+
+
 class GeoJson(FileDistribution):
-    """GeoJSON distribution option."""
+    """
+    GeoJSON distribution option.
+
+    Note: Non-geo JSON files are not supported.
+    """
 
     @classmethod
     def matches(cls, option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:
@@ -636,7 +611,7 @@ class GeoJson(FileDistribution):
     @property
     def format_type(self) -> DistributionType:
         """Format type."""
-        return DistributionType.GEOJSON
+        return DistributionType.JSON_GEO
 
 
 class GeoPackage(FileDistribution):
@@ -675,57 +650,6 @@ class GeoPackage(FileDistribution):
         return DistributionType.GEOPACKAGE
 
 
-class GeoTiff(FileDistribution):
-    """GeoTIFF distribution option."""
-
-    @classmethod
-    def matches(cls, option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:
-        """Whether this class matches the distribution option."""
-        return (
-            option.format is not None
-            and option.format.href == "https://metadata-resources.data.bas.ac.uk/media-types/image/geo+tiff"
-        )
-
-    @property
-    def format_type(self) -> DistributionType:
-        """Format type."""
-        return DistributionType.GEOTIFF
-
-
-class Gpx(FileDistribution):
-    """GPX distribution option."""
-
-    @classmethod
-    def matches(cls, option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:
-        """Whether this class matches the distribution option."""
-        return (
-            option.format is not None
-            and option.format.href == "https://metadata-resources.data.bas.ac.uk/media-types/application/gpx+xml"
-        )
-
-    @property
-    def format_type(self) -> DistributionType:
-        """Format type."""
-        return DistributionType.GPX
-
-
-class Jpeg(FileDistribution):
-    """JPEG distribution option."""
-
-    @classmethod
-    def matches(cls, option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:
-        """Whether this class matches the distribution option."""
-        return (
-            option.format is not None
-            and option.format.href == "https://www.iana.org/assignments/media-types/image/jpeg"
-        )
-
-    @property
-    def format_type(self) -> DistributionType:
-        """Format type."""
-        return DistributionType.JPEG
-
-
 class MapboxVectorTiles(FileDistribution):
     """Mapbox Vector Tiles distribution option."""
 
@@ -747,36 +671,43 @@ class Pdf(FileDistribution):
     """
     PDF distribution option.
 
-    With support for distinguishing optional georeferencing.
+    Specifically for non-georeferenced PDFs. Georeferenced PDFs are represented separately.
     """
 
     def __init__(self, option: RecordDistribution, restricted: bool, **kwargs: Any) -> None:
         super().__init__(option, restricted, **kwargs)
-        self._georeferenced = self._is_georeferenced(option)
+
+    @classmethod
+    def matches(cls, option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:
+        """Whether this class matches the distribution option."""
+        target_hrefs = ["https://www.iana.org/assignments/media-types/application/pdf"]
+        return option.format is not None and option.format.href in target_hrefs
+
+    @property
+    def format_type(self) -> DistributionType:
+        """Format type."""
+        return DistributionType.PDF
+
+
+class GeoPdf(FileDistribution):
+    """Geo-referenced PDF distribution option."""
+
+    def __init__(self, option: RecordDistribution, restricted: bool, **kwargs: Any) -> None:
+        super().__init__(option, restricted, **kwargs)
 
     @classmethod
     def matches(cls, option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:
         """Whether this class matches the distribution option."""
         target_hrefs = [
-            "https://www.iana.org/assignments/media-types/application/pdf",
-            "https://metadata-resources.data.bas.ac.uk/media-types/application/pdf+geo",
+            "https://metadata-resources.data.bas.ac.uk/media-types/application/pdf+geo",  # deprecated
+            "https://metadata-resources.data.bas.ac.uk/media-types/application/geo+pdf",
         ]
         return option.format is not None and option.format.href in target_hrefs
-
-    @staticmethod
-    def _is_georeferenced(option: RecordDistribution) -> bool:
-        """Check if PDF is georeferenced based on self-reported format."""
-        target_href = "https://metadata-resources.data.bas.ac.uk/media-types/application/pdf+geo"
-        if not option.format:
-            raise TypeError() from None
-        return option.format.href == target_href
 
     @property
     def format_type(self) -> DistributionType:
         """Format type."""
-        if self._georeferenced:
-            return DistributionType.PDF_GEO
-        return DistributionType.PDF
+        return DistributionType.PDF_GEO
 
 
 class Png(FileDistribution):
@@ -814,3 +745,24 @@ class Shapefile(FileDistribution):
     def format_type(self) -> DistributionType:
         """Format type."""
         return DistributionType.SHAPEFILE_ZIP
+
+
+class GeoTiff(FileDistribution):
+    """
+    GeoTIFF distribution option.
+
+    Note: Non-geo TIFF files are not supported.
+    """
+
+    @classmethod
+    def matches(cls, option: RecordDistribution, other_options: list[RecordDistribution]) -> bool:
+        """Whether this class matches the distribution option."""
+        return (
+            option.format is not None
+            and option.format.href == "https://metadata-resources.data.bas.ac.uk/media-types/image/geo+tiff"
+        )
+
+    @property
+    def format_type(self) -> DistributionType:
+        """Format type."""
+        return DistributionType.TIFF_GEO

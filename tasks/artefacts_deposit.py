@@ -9,6 +9,7 @@ from inquirer import Path as InquirerPath
 from tasks._shared import dump_records, init, parse_records, pick_local_record
 
 from lantern.lib.magic_distribution.client import MagicResourceDistributionClient
+from lantern.lib.magic_distribution.formats import ArtefactFormatNotSupportedError, ArtefactFormatUnknownError
 from lantern.lib.magic_distribution.models.artefact import ArtefactLocalFile, ArtefactSharePointFile
 from lantern.lib.metadata_library.models.record.elements.common import OnlineResource
 from lantern.lib.metadata_library.models.record.elements.distribution import Distribution, Size, TransferOption
@@ -168,8 +169,10 @@ def _get_artefacts(logger: logging.Logger, artefacts_path: Path, resource_id: st
         if path.is_file():
             logger.info("Evaluating file: %s", path.resolve())
             artefact = ArtefactLocalFile(resource_id=resource_id, artefact_path=path)
-            if not artefact.validate():
-                logger.warning("%s does not validate as an artefact, skipping.", path.name)
+            try:
+                artefact.validate_format()
+            except (ArtefactFormatUnknownError, ArtefactFormatNotSupportedError) as e:
+                logger.exception("File artefact does not validate, skipping.", exc_info=e)
                 continue
             artefacts.append(artefact)
             logger.debug(artefact)

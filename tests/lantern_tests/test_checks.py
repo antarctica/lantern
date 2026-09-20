@@ -207,9 +207,9 @@ class TestCheckRunner:
 
     @pytest.mark.vcr
     @pytest.mark.block_network
-    def test_check_magic_product(self, fx_logger: logging.Logger, fx_check: Check):
+    def test_check_magic_resource(self, fx_logger: logging.Logger, fx_check: Check):
         """
-        Can check a file in the MAGIC Products Distribution Service normally.
+        Can check a file in the MAGIC Resource Distribution service normally.
 
         To generate expected encoded share URL (in VCR cassette):
 
@@ -218,71 +218,73 @@ class TestCheckRunner:
         - prepend with 'u!'
 
         E.g.
-        "https://nercacuk.sharepoint.com/:b:/r/sites/MAGICProductsDistribution/x" ->
-        "u!aHR0cHM6Ly9uZXJjYWN1ay5zaGFyZXBvaW50LmNvbS86Yjovci9zaXRlcy9NQUdJQ1Byb2R1Y3RzRGlzdHJpYnV0aW9uL3g"
+        "https://nercacuk.sharepoint.com/sites/BAS-MAGICResources/Main/x/x.jpg" ->
+        "u!aHR0cHM6Ly9uZXJjYWN1ay5zaGFyZXBvaW50LmNvbS9zaXRlcy9CQVMtTUFHSUNSZXNvdXJjZXMvTWFpbi94L3guanBn"
+
+        To make a real request, disable env overrides in `pyproject.toml`, then use:
+        ```
+        fx_check.url = "https://nercacuk.sharepoint.com/sites/BAS-MAGICResources/Main/x/x.jpg"
+        fx_check.http_auth = HTTPBearerTokenAuth(token=Checker(logger=fx_logger, config=Config())._get_auth_entra())
+        ```
         """
-        fx_check.type = CheckType.DOWNLOADS_SHAREPOINT_MAGIC_PRODUCTS
-        fx_check.url = "https://nercacuk.sharepoint.com/:b:/r/sites/MAGICProductsDistribution/x"
+        fx_check.type = CheckType.DOWNLOADS_SHAREPOINT_MAGIC_RESOURCE
+        fx_check.url = "https://nercacuk.sharepoint.com/sites/BAS-MAGICResources/Main/x/x.jpg"
         fx_check.http_auth = HTTPBearerTokenAuth(token="x")  # noqa: S106
         runner = CheckRunner(logger=fx_logger, check=fx_check)
 
-        runner._check_magic_product()
+        runner._check_magic_resource()
         assert fx_check.state == CheckState.PASS
 
     @pytest.mark.cov
-    def test_check_magic_product_timeout(self, mocker: MockerFixture, fx_logger: logging.Logger, fx_check: Check):
-        """Can handle a request for a MAGIC Products Distribution Service hosted resource that times out correctly."""
+    def test_check_magic_resource_timeout(self, mocker: MockerFixture, fx_logger: logging.Logger, fx_check: Check):
+        """Can handle a request for a MAGIC Resource Distribution service hosted resource that times out correctly."""
         mocker.patch.object(requests.Session, "request", side_effect=requests.Timeout)
         runner = CheckRunner(logger=fx_logger, check=fx_check)
 
-        runner._check_magic_product()
+        runner._check_magic_resource()
         assert fx_check.state == CheckState.FAILED
         assert fx_check.result_output == "Request timed out"
 
     @pytest.mark.vcr
     @pytest.mark.block_network
     @pytest.mark.cov
-    def test_check_magic_product_error(self, fx_logger: logging.Logger, fx_check: Check):
-        """Can check a MAGIC Products Distribution Service hosted resource that triggers an error."""
-        fx_check.type = CheckType.DOWNLOADS_SHAREPOINT_MAGIC_PRODUCTS
-        fx_check.url = "https://nercacuk.sharepoint.com/:b:/r/sites/MAGICProductsDistribution/x"
+    def test_check_magic_resource_error(self, fx_logger: logging.Logger, fx_check: Check):
+        """Can check a MAGIC Resource Distribution service hosted resource that triggers an error."""
+        fx_check.type = CheckType.DOWNLOADS_SHAREPOINT_MAGIC_RESOURCE
+        fx_check.url = "https://nercacuk.sharepoint.com/sites/BAS-MAGICResources/Main/x/x.jpg"
         fx_check.http_auth = HTTPBearerTokenAuth(token="x")  # noqa: S106
         runner = CheckRunner(logger=fx_logger, check=fx_check)
 
-        runner._check_magic_product()
+        runner._check_magic_resource()
         assert fx_check.state == CheckState.FAILED
         assert fx_check.result_output == "Bad status: 403 (expected 200)"
 
     @pytest.mark.vcr
     @pytest.mark.block_network
     @pytest.mark.cov
-    def test_check_magic_product_not_file(self, fx_logger: logging.Logger, fx_check: Check):
-        """
-        Can check a MAGIC Products Distribution Service hosted resource with the wrong drive item type.
-
-        Simulated by VCR casette response.
-        """
-        fx_check.type = CheckType.DOWNLOADS_SHAREPOINT_MAGIC_PRODUCTS
-        fx_check.url = "https://nercacuk.sharepoint.com/:b:/r/sites/MAGICProductsDistribution/x"
+    def test_check_magic_resource_not_file(self, fx_logger: logging.Logger, fx_check: Check):
+        """Can check a MAGIC Resource Distribution service hosted resource with the wrong drive item type."""
+        fx_check.type = CheckType.DOWNLOADS_SHAREPOINT_MAGIC_RESOURCE
+        fx_check.url = "https://nercacuk.sharepoint.com/sites/BAS-MAGICResources/Main/x"
         fx_check.http_auth = HTTPBearerTokenAuth(token="x")  # noqa: S106
         runner = CheckRunner(logger=fx_logger, check=fx_check)
 
-        runner._check_magic_product()
+        runner._check_magic_resource()
         assert fx_check.state == CheckState.FAILED
         assert fx_check.result_output == "Bad drive item type: expected file"
 
     @pytest.mark.vcr
     @pytest.mark.block_network
     @pytest.mark.cov
-    def test_check_magic_product_wrong_size(self, fx_logger: logging.Logger, fx_check: Check):
-        """Can check a MAGIC Products Distribution Service hosted resource with the wrong file size."""
-        fx_check.type = CheckType.DOWNLOADS_SHAREPOINT_MAGIC_PRODUCTS
-        fx_check.url = "https://nercacuk.sharepoint.com/:b:/r/sites/MAGICProductsDistribution/x"
+    def test_check_magic_resource_wrong_size(self, fx_logger: logging.Logger, fx_check: Check):
+        """Can check a MAGIC Resource Distribution service hosted resource with the wrong file size."""
+        fx_check.type = CheckType.DOWNLOADS_SHAREPOINT_MAGIC_RESOURCE
+        fx_check.url = "https://nercacuk.sharepoint.com/sites/BAS-MAGICResources/Main/x/x.jpg"
         fx_check.content_length = 1
         fx_check.http_auth = HTTPBearerTokenAuth(token="x")  # noqa: S106
         runner = CheckRunner(logger=fx_logger, check=fx_check)
 
-        runner._check_magic_product()
+        runner._check_magic_resource()
         assert fx_check.state == CheckState.FAILED
         assert fx_check.result_output == "Bad drive item size: 2 (expected 1)"
 
@@ -312,7 +314,7 @@ class TestRunCheck:
             CheckType.DOWNLOADS_ARCGIS_LAYER,
             CheckType.DOWNLOADS_ARCGIS_SERVICE,
             CheckType.INFO_ARCGIS_WEBMAP,
-            CheckType.DOWNLOADS_SHAREPOINT_MAGIC_PRODUCTS,
+            CheckType.DOWNLOADS_SHAREPOINT_MAGIC_RESOURCE,
         ],
     )
     def test_run(
@@ -322,15 +324,15 @@ class TestRunCheck:
         mocker.patch.object(CheckRunner, "_check_url", return_value=None)
         mocker.patch.object(CheckRunner, "_check_arcgis_item", side_effect=RuntimeError)
         mocker.patch.object(CheckRunner, "_check_arcgis_service", side_effect=RuntimeError)
-        mocker.patch.object(CheckRunner, "_check_magic_product", side_effect=RuntimeError)
+        mocker.patch.object(CheckRunner, "_check_magic_resource", side_effect=RuntimeError)
         if check_type in (CheckType.DOWNLOADS_ARCGIS_LAYER, CheckType.INFO_ARCGIS_WEBMAP):
             mocker.patch.object(CheckRunner, "_check_url", side_effect=RuntimeError)
             mocker.patch.object(CheckRunner, "_check_arcgis_item", return_value=None)
         elif check_type == CheckType.DOWNLOADS_ARCGIS_SERVICE:
             mocker.patch.object(CheckRunner, "_check_url", side_effect=RuntimeError)
             mocker.patch.object(CheckRunner, "_check_arcgis_service", return_value=None)
-        elif check_type == CheckType.DOWNLOADS_SHAREPOINT_MAGIC_PRODUCTS:
-            mocker.patch.object(CheckRunner, "_check_magic_product", return_value=None)
+        elif check_type == CheckType.DOWNLOADS_SHAREPOINT_MAGIC_RESOURCE:
+            mocker.patch.object(CheckRunner, "_check_magic_resource", return_value=None)
 
         fx_check.type = check_type
         result = run_check(fx_logger.level, fx_check)
@@ -357,7 +359,7 @@ class TestChecker:
         [
             (CheckType.NONE, None),
             (CheckType.ITEM_PAGES_TRUSTED, HTTPBasicAuth),
-            (CheckType.DOWNLOADS_SHAREPOINT_MAGIC_PRODUCTS, HTTPBearerTokenAuth),
+            (CheckType.DOWNLOADS_SHAREPOINT_MAGIC_RESOURCE, HTTPBearerTokenAuth),
         ],
     )
     def test_prepare_auth(
@@ -388,7 +390,7 @@ class TestChecker:
         """Can reuse generated tokens across checks within the same prepare loop."""
         mocker.patch.object(fx_checker, "_get_auth_entra", return_value=str(uuid4()))
 
-        fx_check.type = CheckType.DOWNLOADS_SHAREPOINT_MAGIC_PRODUCTS
+        fx_check.type = CheckType.DOWNLOADS_SHAREPOINT_MAGIC_RESOURCE
         checks = [fx_check, fx_check]
         fx_checker._prepare_auth(checks=checks)
         assert checks[0].http_auth._token == checks[1].http_auth._token

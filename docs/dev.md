@@ -5,9 +5,9 @@
 Requirements:
 
 - [Git](https://git-scm.com)
-- [UV](https://docs.astral.sh/uv/)
-- [1Password CLI](https://developer.1password.com/docs/cli/get-started/)
+- [UV](https://docs.astral.sh/uv)
 - [Prek](https://prek.j178.dev)
+- [1Password CLI](https://developer.1password.com/docs/cli/get-started)
   - with access to the *Shared* and *Infrastructure* vaults in the MAGIC team account
 
 Setup:
@@ -440,7 +440,7 @@ To enable additional distribution option formats to be shown within [Catalogue I
 
 1. if needed, register a media-type under the Metadata Standards resources site (`metadata-resources.data.bas.ac.uk`)
    - IANA media type representations SHOULD be preferred but not abused or used inaccurately
-1. if needed, [Support New File Artefacts](/docs/libraries.md#adding-file-artefact-formats) for deposit
+1. if needed, support new [File](/docs/libraries.md#adding-file-artefact-formats) or service formats
 1. create a new class under `lantern.models.item.catalogue.distributions`:
    - inheriting from `Distribution` or a relevant subclass
    - set the `matches` class method to determine an exclusive match for the distribution (typically via media types)

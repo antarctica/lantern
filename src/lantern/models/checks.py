@@ -44,7 +44,7 @@ class CheckType(Enum):
     DOWNLOADS_OPEN = "Normal Downloads"
     DOWNLOADS_NORA = "NORA Downloads"
     DOWNLOADS_SHAREPOINT_OTHER = "SharePoint Downloads (Personal)"
-    DOWNLOADS_SHAREPOINT_MAGIC_PRODUCTS = "SharePoint Downloads (MAGIC Products)"
+    DOWNLOADS_SHAREPOINT_MAGIC_RESOURCE = "SharePoint Downloads (MAGIC Resource Distribution)"
     DOWNLOADS_BAS_SAN = "BAS SAN Downloads"
     DOWNLOADS_ARCGIS_LAYER = "ArcGIS Layer"
     DOWNLOADS_ARCGIS_SERVICE = "ArcGIS Service"
@@ -151,7 +151,7 @@ class DistributionChecks:
     _arcgis_webmap_sigil: Final[str] = "https://metadata-resources.data.bas.ac.uk/media-types/x-service/arcgis+webmap"
     _bas_published_maps_sigil: Final[str] = "https://data.bas.ac.uk/guides/map-purchasing/"
     _nora_sigil: Final[str] = "https://nora.nerc.ac.uk/"
-    _magic_products_sigal: Final[str] = "https://nercacuk.sharepoint.com/:b:/r/sites/MAGICProductsDistribution/"
+    _magic_resource_sigal: Final[str] = "https://nercacuk.sharepoint.com/sites/BAS-MAGICResources/"
     _sharepoint_sigil: Final[str] = "sharepoint.com"
     _bas_san_sigil: Final[str] = "sftp://san.nerc-bas.ac.uk/"
 
@@ -197,8 +197,10 @@ class DistributionChecks:
                 type_ = CheckType.DOWNLOADS_NORA
             elif transfer_href.startswith(self._bas_san_sigil):
                 type_ = CheckType.DOWNLOADS_BAS_SAN
-            elif self._magic_products_sigal in transfer_href:
-                type_ = CheckType.DOWNLOADS_SHAREPOINT_MAGIC_PRODUCTS
+            elif self._magic_resource_sigal in transfer_href:
+                # MAGIC Resource hosted files for open-access resources will use an anonymous access proxy and not
+                # match this type. This is a useful side effect to ensure we treat these files as DOWNLOADS_OPEN.
+                type_ = CheckType.DOWNLOADS_SHAREPOINT_MAGIC_RESOURCE
             elif self._sharepoint_sigil in transfer_href:
                 type_ = CheckType.DOWNLOADS_SHAREPOINT_OTHER
 
@@ -210,7 +212,8 @@ class DistributionChecks:
         """
         Generate checks for distribution options.
 
-        Checks for SharePoint and the BAS SAN are marked as skipped until a suitable implementation is available.
+        Checks for some SharePoint sites and the BAS SAN are marked as skipped until a suitable implementation is
+        available.
         """
         checks = []
         for type_href in self._parse():

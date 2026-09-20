@@ -284,7 +284,12 @@ Intentionally omitted properties (references not normative or exhaustive):
 
 ### Catalogue item supported distribution options
 
-Supported distribution options:
+`lantern.models.item.catalogue.distributions`
+
+> [!TIP]
+> See also the `lantern.models.item.catalogue.enums.DistributionType` enum for a concise summary.
+
+Supported distribution option formats:
 
 - services:
   - ArcGIS Feature Layer/Service
@@ -309,7 +314,9 @@ Supported distribution options:
   - BAS published maps purchasing options
   - BAS SAN references
 
-Implemented via classes in the `lantern.models.item.catalogue.distributions` package.
+> [!NOTE]
+> These formats are intended to align with those supported by the
+> [MAGIC Resource Distribution](/docs/libraries.md#supported-file-formats) service.
 
 ### Catalogue item live updates
 

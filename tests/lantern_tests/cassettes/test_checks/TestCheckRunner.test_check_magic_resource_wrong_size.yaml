@@ -11,10 +11,10 @@ interactions:
       User-Agent:
       - python-requests/2.34.2
     method: GET
-    uri: https://graph.microsoft.com/v1.0/shares/u!aHR0cHM6Ly9uZXJjYWN1ay5zaGFyZXBvaW50LmNvbS86Yjovci9zaXRlcy9NQUdJQ1Byb2R1Y3RzRGlzdHJpYnV0aW9uL3g/driveItem?%24select=id%2Cname%2Csize%2Cfile
+    uri: https://graph.microsoft.com/v1.0/shares/u!aHR0cHM6Ly9uZXJjYWN1ay5zaGFyZXBvaW50LmNvbS9zaXRlcy9CQVMtTUFHSUNSZXNvdXJjZXMvTWFpbi94L3guanBn/driveItem?%24select=id%2Cname%2Csize%2Cfile
   response:
     body:
-      string: '{"error": {"code": "accessDenied", "innerError": {"code": "sharesAccessDenied"}, "message": "The system cannot find the file specified. (Exception from HRESULT: 0x80070002)", "@onedrive.linkFeatures": []}}'
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#Collection(driveItem)/$entity","@odata.etag":"\"{x},3\"","id":"x","name":"x.jpg","file":{"fileExtension":".jpg","hashes":{"quickXorHash":"x"},"mimeType":"image/jpg"},"size":2}'
     headers:
       Cache-Control:
       - no-cache
@@ -28,6 +28,6 @@ interactions:
       Transfer-Encoding:
       - chunked
     status:
-      code: 403
-      message: Forbidden
+      code: 200
+      message: OK
 version: 1

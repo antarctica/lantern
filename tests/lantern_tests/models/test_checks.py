@@ -246,13 +246,11 @@ class TestDistributionChecks:
                 ],
             ),
             (
-                Distributions(
-                    [_make_dist_opt(href="https://nercacuk.sharepoint.com/:b:/r/sites/MAGICProductsDistribution/...")]
-                ),
+                Distributions([_make_dist_opt(href="https://nercacuk.sharepoint.com/sites/BAS-MAGICResources/...")]),
                 [
                     Check(
-                        type=CheckType.DOWNLOADS_SHAREPOINT_MAGIC_PRODUCTS,
-                        url="https://nercacuk.sharepoint.com/:b:/r/sites/MAGICProductsDistribution/...",
+                        type=CheckType.DOWNLOADS_SHAREPOINT_MAGIC_RESOURCE,
+                        url="https://nercacuk.sharepoint.com/sites/BAS-MAGICResources/...",
                         file_identifier="x",
                     )
                 ],

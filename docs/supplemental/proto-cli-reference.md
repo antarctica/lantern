@@ -64,6 +64,7 @@ esri-item                Sync record details to an Esri item
 search-reindex           Recreate catalogue search index
 site-invalidate          Invalidate cached content in live site
 thumbnail-invalidate     Invalidate cached item thumbnail in CDN
+upload-thumbnail         Upload an image to the BAS CDN as an item overview thumbnail
 
 # utility commands
 version                  Show app version
@@ -526,14 +527,35 @@ Examples:
 ```
 
 ### `thumbnail-invalidate`
+### `upload-thumbnail`
 
 Invalidate thumbnails for an item in the BAS CDN.
+Process and upload an image to the BAS CDN and add as a graphic overview in a record.
+
+> ![NOTE]
+> Item thumbnails are hosted in the BAS CDN (`cdn.web.bas.ac.uk`), which is not managed by this project.
 
 ```shell
 % task thumbnail-invalidate --help
+% task upload-thumbnail --help
 ```
 
 <!-- pyml disable md028 -->
+> [!WARNING]
+> This command replaces all graphic overviews in the selected record (and so only supports one overview per record).
+
+This command is limited to 'overview' graphic overviews in JPEG format (original files MAY be a JPEG or PNG). Original
+images are not modified.
+
+Examples:
+
+```shell
+# set record config and source image without interaction
+% task upload-thumbnail --force --record ./import/94dc85d9-dc8f-4ccd-b9ad-9de9ac74faaf.json --image ./artefacts/image.png
+# further downsample source image (200px square rather than 800px) for sensitive resources
+% upload-thumbnail --downsample
+```
+
 > ![NOTE]
 > Item thumbnails are hosted in the BAS CDN (`cdn.web.bas.ac.uk`), which is a separate CloudFront distribution to the
 > live catalogue site.

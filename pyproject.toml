@@ -152,6 +152,7 @@ esri-item = { cmd = "python -m tasks.esri_item", help = "Sync record details to 
 search-reindex = { cmd = "python -m tasks.search_reindex", help = "Recreate catalogue search index" }
 site-invalidate = { cmd = "python -m tasks.site_invalidate", help = "Invalidate cached content in live site" }
 thumbnail-invalidate = { cmd = "python -m tasks.thumbnail_invalidate", help = "Invalidate cached item thumbnail in CDN" }
+upload-thumbnail = { cmd = "python -m tasks.thumbnail_upload", help = "Upload an image to the BAS CDN as a record graphic overview" }
 
 [tool.ruff]
 src = ["src"]

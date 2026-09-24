@@ -22,11 +22,12 @@ This workflow:
 - does not support [Service Provisioning](#service-artefact-provisioning)
 - requires a [Local Development Environment](/docs/dev.md#local-development-environment)
 - has not been robustly tested
+- does not support multiple events within the same day
 - is an initial, exploratory, implementation, which MAY be changed or removed without warning
 
 Resources catalogued by this workflow:
 
-- have limited data quality (acquisition, processing) as we don't generate receive this information
+- have limited data quality (acquisition, processing) as we don't receive this information
 - uses qualitative rather than structured data quality (for instrumentation, acquisition, processing, etc.)
 
 ## Bootstrapping

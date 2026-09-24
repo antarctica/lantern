@@ -450,9 +450,7 @@ class ArtefactFormats:
 
         Implicitly checks format is supported.
 
-        Raises:
-        - ArtefactFormatUnknownError or ArtefactFormatNotSupportedError: from checking whether a file is supported
-        - RuntimeError: as a fallback for a supported file not matched to a supported format (this shouldn't happen)
+        Raises `ArtefactFormatUnknownError` or `ArtefactFormatNotSupportedError` if not supported.
 
         Intended for use in Artefact classes.
         """

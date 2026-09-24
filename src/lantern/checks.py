@@ -248,7 +248,7 @@ class CheckRunner:
             return
 
         start = time.monotonic()
-        if self._check.type in (CheckType.DOWNLOADS_ARCGIS_LAYER, CheckType.INFO_ARCGIS_WEBMAP):
+        if self._check.type in (CheckType.INFO_ARCGIS_LAYER, CheckType.INFO_ARCGIS_WEBMAP):
             self._check_arcgis_item()
         elif self._check.type == CheckType.DOWNLOADS_ARCGIS_SERVICE:
             self._check_arcgis_service()

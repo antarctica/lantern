@@ -67,26 +67,29 @@ Then follow a [Publishing Workflow](#publishing-workflows).
 > [!CAUTION]
 > The catalogue does not enforce metadata access permissions. They will always evaluate to open access (unrestricted).
 
+### Uploading record thumbnails
+
+To upload an image for use as an 'overview' thumbnail and include in a resource:
+
+- copy a source image to the `artefacts/` directory (by default/convention)
+- run the [`upload-thumbnail`](/docs/supplemental/proto-cli-reference.md#check-artefacts) command
+
+Then follow a [Publishing Workflow](#publishing-workflows).
+
 ### Depositing record artefacts
 
-> [!NOTE]
-> This topic is only relevant to the
-> [MAGIC Resource Distribution](https://gitlab.data.bas.ac.uk/MAGIC/resource-distribution) service.
+To deposit file artefacts in the [MAGIC Resource Distribution](https://gitlab.data.bas.ac.uk/MAGIC/resource-distribution)
+service and include in a resource:
 
-To deposit file artefacts and include in a resource:
-
-- copy file artefacts to the `artefacts/` directory
-- optionally, run the [`artefacts-check`](/docs/supplemental/proto-cli-reference.md#check-artefacts) command
-- run the [`artefacts-deposit`](/docs/supplemental/proto-cli-reference.md#check-artefacts) command
+- copy file artefacts to the `artefacts/` directory (by default/convention)
+- optionally, run the [`check-artefacts`](/docs/supplemental/proto-cli-reference.md#check-artefacts) command
+- run the [`deposit-artefacts`](/docs/supplemental/proto-cli-reference.md#deposit-artefacts) command
 
 Then follow a [Publishing Workflow](#publishing-workflows).
 
 <!-- pyml disable md028 -->
 > [!NOTE]
 > Resource access permissions are limited to well-known presets from the MAGIC Access Permissions Framework.
-
-> [!TIP]
-> See the related [Contrib Module](/docs/contrib.md#magic-file-artefact-deposit) deposit files programmatically.
 
 > [!WARNING]
 > Do not use full stops in file names as they will be treated as part of the file extension, which are used to
@@ -119,27 +122,12 @@ Then follow a [Publishing Workflow](#publishing-workflows).
 
 To replace a thumbnail for an existing resource:
 
-- overwrite the thumbnail file using the AWS CLI [1]
-- run the [`thumbnail-invalidate`](/docs/supplemental/proto-cli-reference.md#thumbnail-invalidate) command
+- follow the [Thumbnail Upload](#uploading-record-thumbnails) steps which will overwrite any existing thumbnail
 
-If the thumbnail file name or file type has changed also:
-
-- remove any redundant files using the AWS CLI [2]
-- select the resource record and replace the relevant graphic overview URL
+> [!NOTE]
+> Images are always uploaded as `overview.jpg` (converted from PNG if needed) so will always overwrite existing files.
 
 Then follow a [Publishing Workflow](#publishing-workflows).
-
-[1]
-
-```text
-% aws s3 cp ./overview.png s3://cdn.web.bas.ac.uk/add-catalogue/0.0.0/img/items/{file_identifier}/
-```
-
-[2]
-
-```text
-% aws s3 rm s3://cdn.web.bas.ac.uk/add-catalogue/0.0.0/img/items/{file_identifier}/{file}
-```
 
 ### Replacing record artefacts
 
@@ -157,7 +145,7 @@ To replace file artefacts included in an existing resource:
 
 To preview new and updated records before importing them:
 
-- copy record configurations as JSON files to the `import/` directory
+- copy record configurations as JSON files to the `import/` directory (by default/convention)
 - run the [`preview-records`](/docs/supplemental/proto-cli-reference.md#preview-records) command
 - run the [`serve`](/docs/dev.md#development-tasks) development task to view records as items
 
@@ -189,7 +177,8 @@ To import, build and check sets of [Manually Authored](#creating-records) record
 To publish records in the testing catalogue:
 
 - ensure a suitable GitLab issue exists to track publishing the records [1]
-- ensure `*.json` record configs exist in the `import/` directory (see [Create Records](#creating-records))
+- ensure `*.json` record configs exist in the `import/` directory (by default/convention)
+  - see [Create Records](#creating-records) if needed
 - run the [`workflow-testing`](/docs/supplemental/proto-cli-reference.md#workflow-testing) command
 - repeat this process (using the [`select-records`](/docs/supplemental/proto-cli-reference.md#select-records) command),
    until the record author is happy to publish live (signified by approving the merge request for the related changeset)
@@ -261,7 +250,7 @@ This workflow:
 
 To directly import a set of new and updated records:
 
-- copy record configurations as JSON files to the `import/` directory
+- copy record configurations as JSON files to the `import/` directory (by default/convention)
 - if needed, run the [`zap-records`](/docs/supplemental/proto-cli-reference.md#zap-records) command
 - run the [`import-records`](/docs/supplemental/proto-cli-reference.md#import-records) command
 - manually create a merge request for the changeset branch in the [Records Repository](/docs/infrastructure.md#gitlab)
@@ -269,7 +258,7 @@ To directly import a set of new and updated records:
 - if applicable, update any [ArcGIS Items](#updating-arcgis-items) based on any related imported records
 
 > [!WARNING]
-> All records in the `import/` directory will be committed together. Consider importing unrelated changes separately.
+> All records in the specified directory will be committed together. Consider importing unrelated changes separately.
 
 ## Building static site
 

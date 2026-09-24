@@ -1,6 +1,5 @@
 # Invalidate thumbnails for selected records in CloudFront cache for BAS CDN
 
-import subprocess
 from argparse import ArgumentParser
 from typing import TYPE_CHECKING
 
@@ -11,21 +10,8 @@ from lantern.exporters.cloudfront import CloudFrontExporter
 
 if TYPE_CHECKING:
     import logging
-    from pathlib import Path
 
     from tasks._config import ExtraConfig
-
-
-def get_cf_distribution_id(iac_cwd: Path, cf_id: str) -> str:
-    """Get CloudFront distribution ID from IaC state."""
-    proc = subprocess.run(  # noqa: S603
-        ["tofu", "output", "-raw", cf_id],
-        cwd=str(iac_cwd),
-        capture_output=True,
-        text=True,
-        check=False,
-    )
-    return proc.stdout.strip()
 
 
 def _get_cli_args() -> tuple[str, str]:
@@ -35,7 +21,7 @@ def _get_cli_args() -> tuple[str, str]:
         "--item",
         "-i",
         required=True,
-        help="Item to invalidate thumbnails for Will interactively prompt if omitted.",
+        help="Item to invalidate thumbnails for. Will interactively prompt if omitted.",
     )
     parser.add_argument(
         "--distribution",

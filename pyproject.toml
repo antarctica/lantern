@@ -146,13 +146,13 @@ upgrade-records = { cmd = "python -m tasks.records_upgrade_2026_04", help = "Upg
 bootstrap-records = { cmd = "python -m tasks.records_bootstrap", help = "Bootstrap a new records repo" }
 # fake CLI (artefact)
 check-artefacts = { cmd = "python -m tasks.artefacts_check", help = "Check files are supported file artefact formats" }
-deposit-artefacts = { cmd = "python -m tasks.artefacts_deposit", help = "Deposit supported file artefacts for a resource to SharePoint Online" }
+deposit-artefacts = { cmd = "python -m tasks.artefacts_deposit", help = "Deposit file artefacts to SharePoint Online as record distribution options" }
 # fake CLI (other)
 esri-item = { cmd = "python -m tasks.esri_item", help = "Sync record details to an Esri item" }
 search-reindex = { cmd = "python -m tasks.search_reindex", help = "Recreate catalogue search index" }
 site-invalidate = { cmd = "python -m tasks.site_invalidate", help = "Invalidate cached content in live site" }
-thumbnail-invalidate = { cmd = "python -m tasks.thumbnail_invalidate", help = "Invalidate cached item thumbnail in CDN" }
 upload-thumbnail = { cmd = "python -m tasks.thumbnail_upload", help = "Upload an image to the BAS CDN as a record graphic overview" }
+invalidate-thumbnails = { cmd = "python -m tasks.thumbnail_invalidate", help = "Invalidate cached item thumbnails for an item in the BAS CDN" }
 
 [tool.ruff]
 src = ["src"]

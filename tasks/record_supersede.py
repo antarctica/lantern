@@ -59,11 +59,13 @@ def _get_cli_args() -> tuple[bool, bool, Path, str | None, str | None, Path | No
     )
     parser.add_argument(
         "--current",
+        "-c",
         type=str,
         help="Optional current record identifier (file identifier, URL, or file name). Will interactively prompt if omitted.",
     )
     parser.add_argument(
         "--successor",
+        "-s",
         type=Path,
         help="Optional path to successor record config file. Will interactively prompt if omitted.",
     )

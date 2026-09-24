@@ -10,7 +10,7 @@ from uuid import uuid4
 import inquirer
 from bas_metadata_library.standards.magic_administration.v1 import AdministrationMetadata
 from inquirer import Path as InquirerPath
-from tasks._shared import dump_records, get_gitlab_source, get_record, init
+from tasks._shared import dump_records, get_record, init
 
 from lantern.lib.metadata_library.models.record.presets.identifiers import make_bas_cat_item
 from lantern.lib.metadata_library.models.record.utils.admin import get_admin, set_admin
@@ -78,7 +78,7 @@ def _get_args(
 
     if not cli_force:
         path = Path(inquirer.path("Import path", path_type=InquirerPath.DIRECTORY, exists=True, default=path))
-        branch = get_gitlab_source(logger=logger, cat=cat, action="Fetching records from")
+        branch = inquirer.list_input(message="Branch", choices=cat.repo.select_branches())
         source_ref = inquirer.text(message="Source record reference", default=source_ref)
         target_id = inquirer.text(message="Target record identifier (random default)", default=target_id)
 

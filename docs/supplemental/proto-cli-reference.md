@@ -2,30 +2,18 @@
 
 ## Overview
 
-<!-- pyml disable md028 -->
 > [!IMPORTANT]
 > This project does not include a formal CLI.
 >
 > The commands described here are [Development Tasks](/docs/dev.md#development-tasks) that resemble a CLI but are
-> untested, standalone, scripts - which may be inconsistent in structure and behaviour and/or unstable.
-
-> [!NOTE]
-> Parts of this page are specific to the [BAS Data Catalogue](/docs/architecture.md#bas-catalogue).
-<!-- pyml enable md028 -->
-
-### Limitations
-
-These [Development Tasks](/docs/dev.md#development-tasks) acting as CLI commands:
-
-- MAY be changed or removed without warning
-- MAY NOT be consistent in structure and behaviour (i.e. between each other)
-- do not use a typical CLI structure (subcommands, autocompletion etc.)
-- are not tested
+> untested, possibly unstable scripts to workaround gaps in other projects. They may be removed or changed at any time.
 
 ### Summary
 
-> [!NOTE]
-> See the [Setup](/docs/usage.md#setup) section of the usage documentation before running these commands.
+See the [Setup](/docs/usage.md#setup) section of the usage documentation before running these commands.
+
+> [!TIP]
+> Most commands will interactively prompt for missing arguments. Use the `--force` flag for non-interactive use-cases.
 
 ```yaml
 # high-level publishing workflows
@@ -57,13 +45,14 @@ bootstrap-records        Bootstrap a new records repo
 
 # artefact commands
 check-artefacts          Check files are supported file artefact formats
-deposit-artefacts        Deposit supported file artefacts for a resource to SharePoint Online
+deposit-artefacts        Deposit file artefacts to SharePoint Online as record distribution options
 
 # other commands
 esri-item                Sync record details to an Esri item
 search-reindex           Recreate catalogue search index
 site-invalidate          Invalidate cached content in live site
-thumbnail-invalidate     Invalidate cached item thumbnail in CDN
+upload-thumbnail         Upload an image to the BAS CDN as an item overview thumbnail
+invalidate-thumbnails    Invalidate cached item thumbnails for an item in the BAS CDN
 
 # utility commands
 version                  Show app version
@@ -525,30 +514,52 @@ Examples:
 % task site-invalidate --key '/items/*'  --key '/records/*'
 ```
 
-### `thumbnail-invalidate`
+### `upload-thumbnail`
 
-Invalidate thumbnails for an item in the BAS CDN.
+Process and upload an image to the BAS CDN and add as a graphic overview in a record.
+
+> ![NOTE]
+> Item thumbnails are hosted in the BAS CDN (`cdn.web.bas.ac.uk`), which is not managed by this project.
 
 ```shell
-% task thumbnail-invalidate --help
+% task upload-thumbnail --help
 ```
 
-<!-- pyml disable md028 -->
+> [!WARNING]
+> This command replaces all graphic overviews in the selected record (and so only supports one overview per record).
+
+This command is limited to 'overview' graphic overviews in JPEG format (original files MAY be a JPEG or PNG). Original
+images are not modified.
+
+Examples:
+
+```shell
+# set record config and source image without interaction
+% task upload-thumbnail --force --record ./import/94dc85d9-dc8f-4ccd-b9ad-9de9ac74faaf.json --image ./artefacts/image.png
+# further downsample source image (200px square rather than 800px) for sensitive resources
+% upload-thumbnail --downsample
+```
+
+### `invalidate-thumbnails`
+
+Invalidate all graphic overviews for an item in the BAS CDN.
+
 > ![NOTE]
 > Item thumbnails are hosted in the BAS CDN (`cdn.web.bas.ac.uk`), which is a separate CloudFront distribution to the
 > live catalogue site.
->
-> The CloudFront distribution ID is read from [Infrastructure as Code](/docs/infrastructure.md#infrastructure-as-code).
+
+```shell
+% task invalidate-thumbnails --help
+```
 
 > [!TIP]
 > This command doesn't accept a `--force` argument for some reason.
-<!-- pyml enable md028 -->
 
 Examples:
 
 ```shell
 # invalidate thumbnails for a specific item
-% task thumbnail-invalidate --item 54b8c8d4-aef0-48d0-b4a2-97d02a8b6c0a
+% task invalidate-thumbnails --item 54b8c8d4-aef0-48d0-b4a2-97d02a8b6c0a --distribution E1Q02Y3X4Y5Z6Z
 ```
 
 ## Utility commands

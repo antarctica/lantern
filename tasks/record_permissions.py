@@ -139,11 +139,11 @@ def _return_args(
     resource_permission_t: MagicAccessFrameworkPermission,
     resource_comment: str | None,
 ) -> tuple[Path, Record, Permission | None, Permission | None, str]:
-    _mps = f"--metadata-preset {metadata_permission_t}"
-    _mc = f"--metadata-comment {metadata_comment}" if metadata_comment else ""
-    _rps = f"--resource-preset {resource_permission_t.name}"
-    _rc = f"--resource-comment {resource_comment}" if resource_comment else ""
-    params = f"task restrict-record --force --path {import_path.resolve()} --record {record_path.resolve()} {_mps} {_mc} {_rps} {_rc}"
+    _mps = f" --metadata-preset {metadata_permission_t.name}"
+    _mc = f" --metadata-comment {metadata_comment}" if metadata_comment else ""
+    _rps = f" --resource-preset {resource_permission_t.name}"
+    _rc = f" --resource-comment {resource_comment}" if resource_comment else ""
+    params = f"task restrict-record --force --path {import_path.resolve()} --record {record_path.resolve()}{_mps}{_mc}{_rps}{_rc}"
 
     return (
         import_path,

@@ -165,9 +165,10 @@ class RecordEvent(RecordMagic):
     Extends RecordMagic to:
     - set resource access constraints and permissions to BAS Staff
     - set resource usage constraints to MAGIC Products local licence
-    - set the title, purpose and abstract to templated values using the event acquisition date
-    - set the lineage statement to a static template
-    - set the edition to a simple static value
+    - set an associated GitLab issue
+    - set the title and purpose to templated values using the event acquisition date
+    - set the abstract and lineage statement to a static value
+    - set the edition
     - set the creation date to the event acquisition date (which is not strictly correct)
     - set the publication and released dates to now (which is not ideal as they will move forwards when regenerated)
     - add an author for the Engineering team
@@ -183,6 +184,7 @@ class RecordEvent(RecordMagic):
         collection_id: str,
         edition_count: int,
     ) -> None:
+        _gl_issue = "https://gitlab.data.bas.ac.uk/MAGIC/data-management/-/issues/47"
         _title = f"Rothera Station Orthomosaic {event.acquisition_date.isoformat()}"
         _purpose = f"Orthomosaic of Rothera Station, derived from UAV imagery captured {self._date_fmt(event.acquisition_date)}."
         _abstract = dedent("""\
@@ -211,6 +213,7 @@ class RecordEvent(RecordMagic):
             admin_keys=admin_keys,
             admin_meta=AdministrationMetadata(
                 id=event.file_identifier,
+                gitlab_issues=[_gl_issue],
                 metadata_permissions=[OPEN_ACCESS_PERMISSION],
                 resource_permissions=[BAS_STAFF_PERMISSION],
             ),
@@ -965,7 +968,7 @@ def _update_collection(
     )
 
     collection = deepcopy(original)
-    for event in events:
+    for event in sorted(events, key=lambda e: e.acquisition_date):
         collection.identification.aggregations.ensure(make_bas_cat_collection_member(event.file_identifier))
     if collection != original:
         revise_collection(time=now, collection=collection)

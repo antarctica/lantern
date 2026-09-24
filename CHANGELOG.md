@@ -37,6 +37,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Conformance information for MAGIC metadata profiles and constraint frameworks
 * Initial data publishing workflow for Rothera station orthomosaics via a development task
 * `make_bas_role` contacts preset in BAS Metadata Library lib for non-MAGIC BAS contacts
+* `upload-thumbnail` development task
 
 ### Fixed
 

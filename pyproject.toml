@@ -4,6 +4,7 @@ version = "0.15.2"
 description = "A data catalogue for discovery metadata."
 readme = "README.md"
 license = "MIT"
+license-files = ["LICENSE.md"]
 authors = [
     { name = "Felix Fennell", email = "felnne@bas.ac.uk" }
 ]

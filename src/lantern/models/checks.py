@@ -46,8 +46,8 @@ class CheckType(Enum):
     DOWNLOADS_SHAREPOINT_OTHER = "SharePoint Downloads (Personal)"
     DOWNLOADS_SHAREPOINT_MAGIC_RESOURCE = "SharePoint Downloads (MAGIC Resource Distribution)"
     DOWNLOADS_BAS_SAN = "BAS SAN Downloads"
-    DOWNLOADS_ARCGIS_LAYER = "ArcGIS Layer"
     DOWNLOADS_ARCGIS_SERVICE = "ArcGIS Service"
+    INFO_ARCGIS_LAYER = "ArcGIS Layer"
     INFO_ARCGIS_WEBMAP = "ArcGIS Web Map"
 
 
@@ -190,7 +190,7 @@ class DistributionChecks:
             elif format_href == self._arcgis_webmap_sigil:
                 type_ = CheckType.INFO_ARCGIS_WEBMAP
             elif format_href in self._arcgis_layer_sigils:
-                type_ = CheckType.DOWNLOADS_ARCGIS_LAYER
+                type_ = CheckType.INFO_ARCGIS_LAYER
             elif format_href in self._arcgis_service_sigils:
                 type_ = CheckType.DOWNLOADS_ARCGIS_SERVICE
             elif transfer_href.startswith(self._nora_sigil):

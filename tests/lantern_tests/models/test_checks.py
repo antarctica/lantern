@@ -188,10 +188,7 @@ class TestDistributionChecks:
             ),
             (
                 Distributions([_make_dist_opt(href="x", format_href=f) for f in _arc_layer_formats]),
-                [
-                    Check(type=CheckType.DOWNLOADS_ARCGIS_LAYER, url="x", file_identifier="x")
-                    for _ in _arc_layer_formats
-                ],
+                [Check(type=CheckType.INFO_ARCGIS_LAYER, url="x", file_identifier="x") for _ in _arc_layer_formats],
             ),
             (
                 Distributions([_make_dist_opt(href="x", format_href=f) for f in _arc_service_formats]),

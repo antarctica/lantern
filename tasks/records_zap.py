@@ -435,6 +435,23 @@ def _process_resource_constraints(
         record.identification.constraints = Constraints([*access_constraints, *usage_constraints])
 
 
+def _process_distribution_formats(logger: logging.Logger, records: list[Record]) -> None:
+    """Replace deprecated format URLs."""
+    replacements = {
+        "https://metadata-resources.data.bas.ac.uk/media-types/application/pdf+geo": "https://metadata-resources.data.bas.ac.uk/media-types/application/geo+pdf"
+    }
+    for record in records:
+        for distribution in record.distribution:
+            if distribution.format and distribution.format.href in replacements:
+                logger.info(
+                    "Replacing deprecated distribution format URL '%s' with '%s' in record '%s'",
+                    distribution.format.href,
+                    replacements[distribution.format.href],
+                    record.file_identifier,
+                )
+                distribution.format.href = replacements[distribution.format.href]
+
+
 def _process_distribution_descriptions(logger: logging.Logger, records: list[Record]) -> None:
     """Remove unnecessary online resource descriptions for simple distributions or align values."""
     format_descriptions = {
@@ -618,6 +635,7 @@ def process_zap_records(
     _process_sheet_number(logger=logger, records=records)
     _process_identifiers(logger=logger, records=records)
     _set_metadata_maintenance(logger=logger, records=records)
+    _process_distribution_formats(logger=logger, records=records)
     _process_distribution_descriptions(logger=logger, records=records)
     _process_admin_metadata(logger=logger, admin_keys=admin_keys, records=records)
     _process_resource_constraints(logger=logger, admin_keys=admin_keys, records=records)

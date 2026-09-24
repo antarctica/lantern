@@ -138,7 +138,7 @@ class TestCheckRunner:
     @pytest.mark.block_network
     def test_check_arc_item(self, fx_logger: logging.Logger, fx_check: Check):
         """Can check an ArcGIS item normally."""
-        fx_check.type = CheckType.DOWNLOADS_ARCGIS_LAYER
+        fx_check.type = CheckType.INFO_ARCGIS_LAYER
         fx_check.url = "https://www.arcgis.com/home/item.html?id=123"
         runner = CheckRunner(logger=fx_logger, check=fx_check)
 
@@ -159,7 +159,7 @@ class TestCheckRunner:
     @pytest.mark.block_network
     def test_check_arc_item_error(self, fx_logger: logging.Logger, fx_check: Check):
         """Can check an ArcGIS item that triggers an error."""
-        fx_check.type = CheckType.DOWNLOADS_ARCGIS_LAYER
+        fx_check.type = CheckType.INFO_ARCGIS_LAYER
         fx_check.url = "https://www.arcgis.com/home/item.html?id=123"
         runner = CheckRunner(logger=fx_logger, check=fx_check)
 
@@ -311,7 +311,7 @@ class TestRunCheck:
         "check_type",
         [
             CheckType.DOWNLOADS_OPEN,
-            CheckType.DOWNLOADS_ARCGIS_LAYER,
+            CheckType.INFO_ARCGIS_LAYER,
             CheckType.DOWNLOADS_ARCGIS_SERVICE,
             CheckType.INFO_ARCGIS_WEBMAP,
             CheckType.DOWNLOADS_SHAREPOINT_MAGIC_RESOURCE,
@@ -325,7 +325,7 @@ class TestRunCheck:
         mocker.patch.object(CheckRunner, "_check_arcgis_item", side_effect=RuntimeError)
         mocker.patch.object(CheckRunner, "_check_arcgis_service", side_effect=RuntimeError)
         mocker.patch.object(CheckRunner, "_check_magic_resource", side_effect=RuntimeError)
-        if check_type in (CheckType.DOWNLOADS_ARCGIS_LAYER, CheckType.INFO_ARCGIS_WEBMAP):
+        if check_type in (CheckType.INFO_ARCGIS_LAYER, CheckType.INFO_ARCGIS_WEBMAP):
             mocker.patch.object(CheckRunner, "_check_url", side_effect=RuntimeError)
             mocker.patch.object(CheckRunner, "_check_arcgis_item", return_value=None)
         elif check_type == CheckType.DOWNLOADS_ARCGIS_SERVICE:

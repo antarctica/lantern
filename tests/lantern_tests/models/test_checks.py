@@ -79,7 +79,7 @@ class TestCheck:
         expected_fid = "x"
         fx_site_content.object_meta = {"file_identifier": expected_fid}
 
-        check = Check.from_site_content(content=fx_site_content, check_type=CheckType.ITEM_PAGES, base_url=base_url)
+        check = Check.from_site_entry(content=fx_site_content, check_type=CheckType.ITEM_PAGES, base_url=base_url)
         assert check.url == expected_url
         assert check.file_identifier == expected_fid
 
@@ -87,7 +87,7 @@ class TestCheck:
         """Can create a Check instance from a SiteRedirect instance."""
         expected_http_status = HTTPStatus.MOVED_PERMANENTLY
         redirect = SiteRedirect(path=Path("x"), target="https://y")
-        check = Check.from_site_content(content=redirect, check_type=CheckType.ITEM_ALIASES, base_url="x")
+        check = Check.from_site_entry(content=redirect, check_type=CheckType.ITEM_ALIASES, base_url="x")
         assert check.http_status == expected_http_status
         assert check.file_identifier is None
 

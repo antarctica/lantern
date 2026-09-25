@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from lxml import etree as ET  # noqa: N812
 
 from lantern.models.checks import CheckType
-from lantern.models.site import ExportMeta, SiteContent
+from lantern.models.site import ExportMeta, SiteContent, SiteEntry
 from lantern.outputs.base import OutputRecords
 
 if TYPE_CHECKING:
@@ -73,13 +73,15 @@ class RecordsWafOutput(OutputRecords):
         return ET.tostring(html, encoding="unicode", method="html")
 
     @cached_property
-    def content(self) -> list[SiteContent]:
-        """Output content for record."""
+    def entries(self) -> list[SiteEntry]:
+        """Descriptions for content items."""
         return [
-            SiteContent(
-                content=self._content,
-                path=Path("waf") / "iso-19139-all" / "index.html",
-                media_type="text/html",
-                object_meta=self._object_meta,
+            SiteEntry(
+                path=Path("waf") / "iso-19139-all" / "index.html", media_type="text/html", object_meta=self._object_meta
             )
         ]
+
+    @cached_property
+    def content(self) -> list[SiteContent]:
+        """Output content for record."""
+        return [SiteContent(content=self._content, **vars(self.entries[0]))]

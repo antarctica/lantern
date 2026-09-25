@@ -16,7 +16,6 @@ from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
 from lantern.lib.metadata_library.models.record.utils.admin import set_admin
 from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
-from lantern.models.site import ExportMeta, SiteContent
 from lantern.outputs.items_bas_website import ItemsBasWebsiteOutput
 from tests.conftest import _admin_meta_keys, _revision_config_min
 
@@ -24,6 +23,7 @@ if TYPE_CHECKING:
     import logging
 
     from lantern.lib.metadata_library.models.record.record import Record
+    from lantern.models.site import ExportMeta
     from lantern.stores.base import SelectRecordsProtocol
 
 
@@ -97,18 +97,22 @@ class TestItemsBasWebsiteOutput:
         assert len(results) == 1
         assert results[0].resource_id == "in_scope"
 
-    def test_content(self, fx_records_bas_website_output: ItemsBasWebsiteOutput):
-        """Can generate site content items."""
+    def test_entries(self, fx_records_bas_website_output: ItemsBasWebsiteOutput):
+        """Can generate site content entries."""
         build_ref = "x"
-        fx_records_bas_website_output._select_records = self._get_records_in_scope
         fx_records_bas_website_output._meta.build_repo_ref = build_ref
 
-        results = fx_records_bas_website_output.content
+        results = fx_records_bas_website_output.entries
         assert len(results) == 1
         result = results[0]
-        assert isinstance(result, SiteContent)
-        data = json.loads(result.content)
-        assert len(data) > 0
         assert result.path == Path("-/public-website-search/items.json")
         assert result.media_type == "application/json"
         assert result.object_meta == {"build_ref": build_ref}
+
+    def test_content(self, fx_records_bas_website_output: ItemsBasWebsiteOutput):
+        """Can generate site content items."""
+        fx_records_bas_website_output._select_records = self._get_records_in_scope
+
+        results = fx_records_bas_website_output.content
+        data = json.loads(results[0].content)
+        assert len(data) > 0

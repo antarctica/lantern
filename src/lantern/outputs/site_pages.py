@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from lantern.models.checks import Check, CheckType
-from lantern.models.site import ExportMeta, SiteContent, SitePageMeta
+from lantern.models.site import ExportMeta, SiteContent, SiteEntry, SitePageMeta
 from lantern.outputs.base import OutputSite
 from lantern.utils import minify_html
 
@@ -95,16 +95,19 @@ class SitePagesOutput(OutputSite):
         return minify_html(raw)
 
     @cached_property
+    def entries(self) -> list[SiteEntry]:
+        """Descriptions for content items."""
+        return [
+            SiteEntry(path=self._page_path(page_view), media_type="text/html", object_meta=self._object_meta)
+            for page_view in self._page_meta
+        ]
+
+    @cached_property
     def content(self) -> list[SiteContent]:
         """Output content for site pages."""
         return [
-            SiteContent(
-                content=self._page_content(page_view),
-                path=self._page_path(page_view),
-                media_type="text/html",
-                object_meta=self._object_meta,
-            )
-            for page_view in self._page_meta
+            SiteContent(content=self._page_content(page_view), **vars(entry))
+            for page_view, entry in zip(self._page_meta, self.entries, strict=True)
         ]
 
     @property

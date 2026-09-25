@@ -6,9 +6,9 @@ from lantern.models.checks import CheckType
 from lantern.models.item.catalogue.item import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
 from lantern.models.record.const import CATALOGUE_NAMESPACE
-from lantern.models.site import ExportMeta, SiteContent, SiteRedirect
+from lantern.models.site import ExportMeta, SiteContent, SiteEntry, SiteRedirect
 from lantern.outputs.base import OutputRecord
-from lantern.utils import get_jinja_env, get_record_aliases, minify_html
+from lantern.utils import get_jinja_env, get_record_aliases, is_live_record, minify_html
 
 if TYPE_CHECKING:
     import logging
@@ -75,15 +75,24 @@ class ItemCatalogueOutput(OutputRecord):
         return minify_html(raw)
 
     @cached_property
+    def entries(self) -> list[SiteEntry]:
+        """Description for content item."""
+        return [
+            SiteEntry(
+                path=Path("items") / self._record.file_identifier / "index.html",
+                media_type="text/html",
+                object_meta=self._object_meta,
+                prevent_caching=is_live_record(self._record),
+            )
+        ]
+
+    @cached_property
     def content(self) -> list[SiteContent]:
         """Output content for item."""
         return [
             SiteContent(
                 content=self._content,
-                path=Path("items") / self._record.file_identifier / "index.html",
-                media_type="text/html",
-                object_meta=self._object_meta,
-                prevent_caching=self._item.live,
+                **vars(self.entries[0]),
             )
         ]
 
@@ -113,10 +122,21 @@ class ItemAliasesOutput(OutputRecord):
         return [(identifier.href or "").replace(f"https://{CATALOGUE_NAMESPACE}/", "") for identifier in identifiers]
 
     @cached_property
+    def entries(self) -> list[SiteEntry]:
+        """Descriptions for content items."""
+        target = self._meta.base_url + f"/items/{self._record.file_identifier}/"
+        return [
+            SiteEntry(
+                path=Path(alias) / "index.html", media_type="text/html", redirect=target, object_meta=self._object_meta
+            )
+            for alias in self._get_aliases()
+        ]
+
+    @cached_property
     def content(self) -> list[SiteContent]:
         """Output content per item alias."""
-        target = self._meta.base_url + f"/items/{self._record.file_identifier}/"  # ensure trailing slash
         return [
-            SiteRedirect(path=Path(alias) / "index.html", target=target, object_meta=self._object_meta)
-            for alias in self._get_aliases()
+            SiteRedirect(path=entry.path, target=entry.redirect, object_meta=entry.object_meta)
+            for entry in self.entries
+            if entry.redirect is not None
         ]

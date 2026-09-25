@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from lantern.models.checks import CheckType
-from lantern.models.site import ExportMeta, SiteContent, SitePageMeta, SiteRedirect
+from lantern.models.site import ExportMeta, SiteContent, SiteEntry, SitePageMeta, SiteRedirect
 from lantern.outputs.base import OutputSite
 from lantern.utils import minify_html
 
@@ -72,27 +72,33 @@ class SiteApiOutput(OutputSite):
         return minify_html(raw)
 
     @cached_property
-    def content(self) -> list[SiteContent]:
-        """Output content for site."""
+    def entries(self) -> list[SiteEntry]:
+        """Descriptions for content items."""
         return [
-            SiteContent(
-                content=self._catalog_content,
+            SiteEntry(
                 path=self._catalog_path,
                 media_type="application/linkset+json; profile=https://www.rfc-editor.org/info/rfc9727",
             ),
-            SiteRedirect(
+            SiteEntry(
                 path=Path(".well-known") / "api-catalog",
-                target=self._meta.base_url + "/" + str(self._catalog_path),
-            ),
-            SiteContent(
-                content=self._schema_content,
-                path=Path("static") / "json" / "openapi.json",
-                media_type="application/vnd.oai.openapi+json;version=3.1",
-            ),
-            SiteContent(
-                content=self._docs_content,
-                path=self._docs_path,
                 media_type="text/html",
-                object_meta=self._object_meta,
+                redirect=self._meta.base_url + "/" + str(self._catalog_path),
             ),
+            SiteEntry(
+                path=Path("static") / "json" / "openapi.json", media_type="application/vnd.oai.openapi+json;version=3.1"
+            ),
+            SiteEntry(path=self._docs_path, media_type="text/html", object_meta=self._object_meta),
+        ]
+
+    @cached_property
+    def content(self) -> list[SiteContent]:
+        """Output content for site."""
+        return [
+            SiteContent(content=self._catalog_content, **vars(self.entries[0])),
+            SiteRedirect(
+                path=self.entries[1].path,
+                target=self.entries[1].redirect,  # ty: ignore[invalid-argument-type]
+            ),
+            SiteContent(content=self._schema_content, **vars(self.entries[2])),
+            SiteContent(content=self._docs_content, **vars(self.entries[3])),
         ]

@@ -113,9 +113,10 @@ class BasCatUntrusted(CatalogueBase):
         self._exporter.export(content)
 
         if self._invalidator:
-            # Where invalidation keys gets close to the AWS limit, invalidate the entire site instead
-            _keys = site.generate_invalidation_keys(**content_params)
-            keys = _keys if 0 < len(_keys) <= MAX_INVALIDATION_KEYS else ["/*"]
+            # Generate keys from site entries to avoid generating content we don't need.
+            # Where keys get close to the AWS limit, invalidate the entire site instead.
+            manifest_keys = site.generate_invalidation_keys(**content_params)
+            keys = manifest_keys if 0 < len(manifest_keys) <= MAX_INVALIDATION_KEYS else ["/*"]
             self._invalidator.invalidate(keys)
 
     def checks(
@@ -125,11 +126,13 @@ class BasCatUntrusted(CatalogueBase):
         outputs: list[type[OutputBase]] | None = None,
     ) -> list[Check]:
         """
-        Generate checks for site contents.
+        Generate checks from site entries.
 
         Optionally for selected records from a branch and for selected Output types.
 
         When not using the live site, filter out DOI checks as these are set externally for the live endpoint only.
+
+        Site entries used to avoid generating content we don't need (i.e. generating checks doesn't need actual content).
 
         Site requires direct access to underlying store for additional processing.
         """
@@ -203,7 +206,7 @@ class BasCatTrusted(CatalogueBase):
 
     def checks(self, identifiers: set[str] | None = None, branch: str | None = None) -> list[Check]:
         """
-        Generate checks for site contents.
+        Generate checks from site entries.
 
         Optionally for selected records from a branch. Output classes are fixed for the trusted site environment.
 
@@ -212,6 +215,8 @@ class BasCatTrusted(CatalogueBase):
 
         Trusted content requires authentication to access. Generated checks are not aware of this requirement and so
         need updating before checking.
+
+        Site entries used to avoid generating content we don't need (i.e. generating checks doesn't need actual content).
         """
         store = self._repo._make_gitlab_store(branch=branch, cached=True, frozen=True)
         meta = ExportMeta.from_config(config=self._config, env=self._env, build_ref=store.head_commit, trusted=True)

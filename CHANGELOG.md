@@ -60,6 +60,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Replacing record type checks in `ItemCatalogue` with a type annotation enforced via type checking
 * Refactoring determining metadata and resource access permissions based on MAGIC Access Permissions Framework
 * Terraform IaC configuration moved to MAGIC Terraform project
+* `SiteEntry` added as a `SiteContent` parent class for situations where actual content isn't needed
 
 ### Removed [BREAKING!]
 

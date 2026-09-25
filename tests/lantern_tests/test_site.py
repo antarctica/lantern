@@ -1,7 +1,9 @@
 import json
 import logging
 from datetime import date
+from http import HTTPStatus
 from typing import TYPE_CHECKING
+from unittest.mock import PropertyMock
 from uuid import uuid4
 
 import pytest
@@ -28,6 +30,8 @@ from tests.resources.stores.fake_records_store import FakeRecordsStore
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+
+    from pytest_mock import MockerFixture
 
     from lantern.models.record.revision import RecordRevision
     from lantern.outputs.base import OutputBase
@@ -147,6 +151,10 @@ class TestSiteJob:
         )
         assert len(checks) > 0
 
+        for check in checks:
+            if check.url.removeprefix(f"{fx_export_meta.base_url}/") in results:
+                assert check.http_status == (HTTPStatus.MOVED_PERMANENTLY if check.redirect_location else HTTPStatus.OK)
+
         # check content for outputs that use extras
         if output_cls == SiteHealthOutput:
             health_output = next(output for output in content if str(output.path) == "static/json/health.json")
@@ -154,6 +162,30 @@ class TestSiteJob:
             assert health_data["checks"]["site:records"]["observedValue"] == expected_count
             assert health_data["checks"]["search:records"]["observedValue"] == expected_count
             assert isinstance(health_data["checks"]["entra:expiry"]["observedValue"], int)
+
+    @pytest.mark.parametrize("output_cls", [ItemCatalogueOutput, RecordIsoXmlOutput, RecordIsoHtmlOutput])
+    def test_check_jobs_do_not_render(
+        self,
+        mocker: MockerFixture,
+        fx_logger: logging.Logger,
+        fx_revision_model_min: RecordRevision,
+        fx_fake_store: StoreBase,
+        fx_export_meta: ExportMeta,
+        output_cls: type[OutputBase],
+    ):
+        """Can output checks and invalidations without generating content."""
+        rendered = mocker.patch.object(output_cls, "_content", new_callable=PropertyMock)
+        rendered.side_effect = AssertionError("rendered content")
+        for action in ("checks", "invalidations"):
+            results = _run_job(
+                log_level=fx_logger.level,
+                meta=fx_export_meta,
+                store=fx_fake_store,
+                job=SiteJob(action=action, output=output_cls, record=fx_revision_model_min),
+                worker_key=str(uuid4()),
+            )
+            assert results
+        rendered.assert_not_called()
 
 
 class TestSite:

@@ -55,7 +55,7 @@ from lantern.models.item.catalogue.tabs import AdditionalInfoTab, AdminTab
 from lantern.models.record.const import CATALOGUE_NAMESPACE
 from lantern.models.record.record import Record
 from lantern.models.record.revision import RecordRevision
-from lantern.models.site import ExportMeta, SiteContent, SiteEnvironment, SiteMeta, SitePageMeta
+from lantern.models.site import ExportMeta, SiteContent, SiteEntry, SiteEnvironment, SiteMeta, SitePageMeta
 from lantern.outputs.item_html import ItemAliasesOutput, ItemCatalogueOutput
 from lantern.outputs.items_bas_website import ItemsBasWebsiteOutput
 from lantern.outputs.record_iso import RecordIsoHtmlOutput, RecordIsoJsonOutput, RecordIsoXmlOutput
@@ -174,9 +174,15 @@ def fx_site_page_meta() -> SitePageMeta:
 
 
 @pytest.fixture()
-def fx_site_content() -> SiteContent:
+def fx_site_entry() -> SiteEntry:
+    """Site entry item."""
+    return SiteEntry(path=Path("x"), media_type="x")
+
+
+@pytest.fixture()
+def fx_site_content(fx_site_entry: SiteEntry) -> SiteContent:
     """Site content item."""
-    return SiteContent(content="x", path=Path("x"), media_type="x")
+    return SiteContent(content="x", **vars(fx_site_entry))
 
 
 @pytest.fixture()
@@ -847,8 +853,8 @@ def fx_bas_repo_min_cat_record(
     return fx_bas_repo
 
 
-def _index_site_content_outputs(outputs: list[SiteContent]) -> dict[Path, SiteContent]:
-    """Index site content outputs by path."""
+def _index_site_entries(outputs: list[SiteEntry]) -> dict[Path, SiteEntry]:
+    """Index site entry outputs by path."""
     return {output.path: output for output in outputs}
 
 

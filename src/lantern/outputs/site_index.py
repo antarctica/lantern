@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from lantern.models.checks import CheckType
 from lantern.models.item.base.enums import ResourceTypeIcon
-from lantern.models.site import ExportMeta, SiteContent
+from lantern.models.site import ExportMeta, SiteContent, SiteEntry
 from lantern.outputs.base import OutputSite
 from lantern.utils import get_record_aliases, minify_html
 
@@ -78,13 +78,13 @@ class SiteIndexOutput(OutputSite):
         return minify_html(raw)
 
     @cached_property
+    def entries(self) -> list[SiteEntry]:
+        """Descriptions for content items."""
+        return [
+            SiteEntry(path=Path("-") / "index" / "index.html", media_type="text/html", object_meta=self._object_meta)
+        ]
+
+    @cached_property
     def content(self) -> list[SiteContent]:
         """Output content for site."""
-        return [
-            SiteContent(
-                content=self._content,
-                path=Path("-") / "index" / "index.html",
-                media_type="text/html",
-                object_meta=self._object_meta,
-            )
-        ]
+        return [SiteContent(content=self._content, **vars(self.entries[0]))]

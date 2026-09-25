@@ -93,6 +93,16 @@ class TestChecksOutput:
         results = output._content
         assert results == expected
 
+    def test_entries(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta):
+        """Can generate site content entries."""
+        output = RedirectsOutput(
+            logger=fx_logger,
+            meta=fx_export_meta,
+            content=[SiteRedirect(path=Path("x"), target=f"{fx_export_meta.base_url}/y")],
+        )
+        results = output.entries
+        assert len(results) == 1
+
     def test_content(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta):
         """Can generate site content items."""
         output = RedirectsOutput(

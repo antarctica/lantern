@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from lantern.outputs.site_pages import SitePagesOutput
-from tests.conftest import _index_site_content_outputs
+from tests.conftest import _index_site_entries
 
 if TYPE_CHECKING:
     import logging
@@ -19,8 +19,8 @@ class TestSitePagesOutput:
         output = SitePagesOutput(logger=fx_logger, meta=fx_export_meta)
         assert isinstance(output, SitePagesOutput)
 
-    def test_content(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta):
-        """Can generate site content items."""
+    def test_entries(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta):
+        """Can generate site content entries."""
         expected_paths = [
             Path("404.html"),
             Path("search/index.html"),
@@ -35,22 +35,29 @@ class TestSitePagesOutput:
         ]
 
         output = SitePagesOutput(logger=fx_logger, meta=fx_export_meta)
-        content = _index_site_content_outputs(output.content)
+        results = _index_site_entries(output.entries)
 
-        assert len(content) > 1
+        assert len(results) > 1
         for path in expected_paths:
-            assert path in content
-            result = content[path]
+            assert path in results
+            result = results[path]
             assert result.object_meta == {"build_key": fx_export_meta.build_key}
             assert result.media_type == "text/html"
+
+    def test_content(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta):
+        """Can generate site content items."""
+        output = SitePagesOutput(logger=fx_logger, meta=fx_export_meta)
+        results = _index_site_entries(output.content)
+        # noinspection unresolved-references
+        assert len(results[Path("404.html")].content) > 0
 
     def test_checks(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta):
         """Can generate additional checks for 404 error handling."""
         output = SitePagesOutput(logger=fx_logger, meta=fx_export_meta)
         content = output.content
-        checks = output.checks
-        assert len(checks) == len(content) + 1
-        assert checks[-1].http_status == HTTPStatus.NOT_FOUND
+        results = output.checks
+        assert len(results) == len(content) + 1
+        assert results[-1].http_status == HTTPStatus.NOT_FOUND
 
     def test_invalidation_keys(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta):
         """Can generate invalidation paths for content."""

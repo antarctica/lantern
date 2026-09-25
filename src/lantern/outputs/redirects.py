@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from lantern.models.checks import CheckType
-from lantern.models.site import ExportMeta, SiteContent
+from lantern.models.site import ExportMeta, SiteContent, SiteEntry
 from lantern.outputs.base import OutputSite
 
 if TYPE_CHECKING:
@@ -73,6 +73,11 @@ class RedirectsOutput(OutputSite):
         return output.getvalue().rstrip("\r\n")
 
     @cached_property
+    def entries(self) -> list[SiteEntry]:
+        """Descriptions for content items."""
+        return [SiteEntry(path=Path("-") / "redirects.csv", media_type="text/csv")]
+
+    @cached_property
     def content(self) -> list[SiteContent]:
         """Output content for site."""
-        return [SiteContent(content=self._content, path=Path("-") / "redirects.csv", media_type="text/csv")]
+        return [SiteContent(content=self._content, **vars(self.entries[0]))]

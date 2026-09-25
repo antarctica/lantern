@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, NamedTuple
 
 from lantern.models.checks import CheckType
-from lantern.models.site import ExportMeta, SiteContent, SiteRedirect
+from lantern.models.site import ExportMeta, SiteContent, SiteEntry, SiteRedirect
 from lantern.outputs.base import OutputSite
 
 if TYPE_CHECKING:
@@ -101,14 +101,21 @@ class SiteHealthOutput(OutputSite):
         )
 
     @cached_property
+    def entries(self) -> list[SiteEntry]:
+        """Descriptions for content items."""
+        return [
+            SiteEntry(path=self._health_path, media_type="application/health+json", prevent_caching=True),
+            SiteEntry(
+                path=Path("-") / "health",
+                media_type="text/html",
+                redirect=self._meta.base_url + "/" + str(self._health_path),
+            ),
+        ]
+
+    @cached_property
     def content(self) -> list[SiteContent]:
         """Output content for site."""
         return [
-            SiteContent(
-                content=self._content,
-                path=self._health_path,
-                media_type="application/health+json",
-                prevent_caching=True,
-            ),
-            SiteRedirect(path=Path("-") / "health", target=self._meta.base_url + "/" + str(self._health_path)),
+            SiteContent(content=self._content, **vars(self.entries[0])),
+            SiteRedirect(path=self.entries[1].path, target=self._meta.base_url + "/" + str(self._health_path)),
         ]

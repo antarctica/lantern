@@ -9,7 +9,7 @@ from lantern.models.item.catalogue.item import ItemCatalogue
 from lantern.models.item.catalogue.special.physical_map import ItemCataloguePhysicalMap
 from lantern.models.record.const import ALIAS_NAMESPACE, CATALOGUE_NAMESPACE
 from lantern.models.record.revision import RecordRevision
-from lantern.models.site import ExportMeta, SiteContent, SiteRedirect
+from lantern.models.site import ExportMeta, SiteRedirect
 from lantern.outputs.item_html import ItemAliasesOutput, ItemCatalogueOutput
 
 if TYPE_CHECKING:
@@ -47,26 +47,20 @@ class TestItemCatalogueOutput:
         assert result == expected
 
     @pytest.mark.parametrize("live", [False, True])
-    def test_content(
+    def test_entries(
         self,
         fx_item_output: ItemCatalogueOutput,
         fx_export_meta: ExportMeta,
         fx_revision_model_min: RecordRevision,
         live: bool,
     ):
-        """
-        Can generate site content items.
-
-        Indirectly tests `.item` property.
-        """
+        """Can generate site content entries."""
         if live:
             fx_revision_model_min.identification.maintenance.maintenance_frequency = MaintenanceFrequencyCode.CONTINUAL
 
-        results = fx_item_output.content
+        results = fx_item_output.entries
         assert len(results) == 1
         result = results[0]
-        assert isinstance(result, SiteContent)
-        assert "<!doctype html>" in result.content
         assert result.path == Path(f"items/{fx_revision_model_min.file_identifier}/index.html")
         assert result.media_type == "text/html"
         assert result.prevent_caching == live
@@ -75,6 +69,16 @@ class TestItemCatalogueOutput:
             "file_identifier": fx_revision_model_min.file_identifier,
             "file_revision": fx_revision_model_min.file_revision,
         }
+
+    def test_content(
+        self, fx_item_output: ItemCatalogueOutput, fx_export_meta: ExportMeta, fx_revision_model_min: RecordRevision
+    ):
+        """
+        Can generate site content items.
+
+        Indirectly tests `.item` property.
+        """
+        assert "<!doctype html>" in fx_item_output.content[0].content
 
 
 class TestItemAliasesOutput:

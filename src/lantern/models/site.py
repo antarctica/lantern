@@ -39,6 +39,7 @@ def _dump_named_fields(instance: DataclassInstance) -> dict[str, Any]:
     - `Foo(x='x', y=['a', 'b'])` -> {'bar': 'x', 'baz': ['a', 'b']}
     """
     doc: dict[str, Any] = {}
+    # noinspection dataclass
     for f in fields(instance):
         value = getattr(instance, f.name)
         if not value:
@@ -139,17 +140,48 @@ class SitePageMeta:
 
 
 @dataclass(kw_only=True)
-class SiteContent:
+class SiteEntry:
     """
-    Content item within static site.
+    Item within static site.
 
-    Wrapper around a content (bytes) string to hold:
+    Description of a content item in the static site, without its actual content.
 
     - path: relative path to content, which when combined with SiteMeta.base_url gives an absolute URL
     - media_type: content media/MIME (not inferred from path extension, must be explicitly set)
     - object_meta: optional key-value metadata to include alongside content where supported (e.g. in S3)
     - redirect: optional redirect target, i.e. an (external) URL to redirect to for item aliases etc.
     - prevent_caching: optionally exclude content from any downstream caching (e.g. in CloudFront)
+    """
+
+    path: Path
+    media_type: str
+    object_meta: dict[str, str] = field(default_factory=dict)
+    redirect: str | None = None
+    prevent_caching: bool = False
+
+    def __post_init__(self) -> None:
+        """Validate paths and redirect targets."""
+        if self.path.is_absolute():
+            msg = "Path must be relative."
+            raise ValueError(msg) from None
+
+        if self.redirect:
+            parsed = urlparse(self.redirect)
+            if not parsed.scheme or not parsed.netloc:
+                msg = "Redirect must be an absolute URL."
+                raise ValueError(msg) from None
+
+    def __repr__(self) -> str:
+        """String representation."""
+        return f"<SiteEntry path='{self.path}' media_type='{self.media_type}'>"
+
+
+@dataclass(kw_only=True)
+class SiteContent(SiteEntry):
+    """
+    Content item within static site.
+
+    Wrapper around SiteEntry with a content (bytes) string.
 
     Used by Exporters to persist content in a storage system.
 
@@ -161,23 +193,6 @@ class SiteContent:
     """
 
     content: str | bytes
-    path: Path
-    media_type: str
-    object_meta: dict[str, str] = field(default_factory=dict)
-    redirect: str | None = None
-    prevent_caching: bool = False
-
-    def __post_init__(self) -> None:
-        """Validate properties."""
-        if self.path.is_absolute():
-            msg = "Path must be relative."
-            raise ValueError(msg) from None
-
-        if self.redirect:
-            parsed = urlparse(self.redirect)
-            if not parsed.scheme or not parsed.netloc:
-                msg = "Redirect must be an absolute URL."
-                raise ValueError(msg) from None
 
     def __repr__(self) -> str:
         """String representation."""

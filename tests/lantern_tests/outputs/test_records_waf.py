@@ -3,12 +3,12 @@ from typing import TYPE_CHECKING
 
 from bs4 import BeautifulSoup
 
-from lantern.models.site import ExportMeta, SiteContent
 from lantern.outputs.records_waf import RecordsWafOutput
 
 if TYPE_CHECKING:
     import logging
 
+    from lantern.models.site import ExportMeta
     from lantern.stores.base import SelectRecordsProtocol
 
 
@@ -36,6 +36,19 @@ class TestRecordsWafOutput:
             link = html.find("a", string=record.file_identifier)
             assert link is not None
 
+    def test_entries(self, fx_records_waf_output: RecordsWafOutput, fx_select_records_fixed: SelectRecordsProtocol):
+        """Can generate site content entries."""
+        build_ref = "x"
+        fx_records_waf_output._meta.build_repo_ref = build_ref
+        fx_records_waf_output._select_records = fx_select_records_fixed
+
+        results = fx_records_waf_output.entries
+        assert len(results) == 1
+        result = results[0]
+        assert result.path == Path("waf/iso-19139-all/index.html")
+        assert result.media_type == "text/html"
+        assert result.object_meta == {"build_ref": build_ref}
+
     def test_outputs(self, fx_records_waf_output: RecordsWafOutput, fx_select_records_fixed: SelectRecordsProtocol):
         """Can generate site content items."""
         build_ref = "x"
@@ -43,10 +56,4 @@ class TestRecordsWafOutput:
         fx_records_waf_output._select_records = fx_select_records_fixed
 
         results = fx_records_waf_output.content
-        assert len(results) == 1
-        result = results[0]
-        assert isinstance(result, SiteContent)
-        assert "html" in result.content
-        assert result.path == Path("waf/iso-19139-all/index.html")
-        assert result.media_type == "text/html"
-        assert result.object_meta == {"build_ref": build_ref}
+        assert "html" in results[0].content

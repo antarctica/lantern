@@ -18,7 +18,6 @@ from lantern.lib.metadata_library.models.record.enums import (
 )
 from lantern.lib.metadata_library.models.record.utils.admin import set_admin
 from lantern.models.checks import CheckType
-from lantern.models.site import ExportMeta, SiteContent
 from lantern.outputs.record_iso import RecordIsoHtmlOutput, RecordIsoJsonOutput, RecordIsoXmlOutput
 
 if TYPE_CHECKING:
@@ -27,6 +26,7 @@ if TYPE_CHECKING:
     from bas_metadata_library.standards.magic_administration.v1.utils import AdministrationKeys
 
     from lantern.models.record.revision import RecordRevision
+    from lantern.models.site import ExportMeta
 
 
 class TestRecordIsoJsonOutput:
@@ -38,19 +38,17 @@ class TestRecordIsoJsonOutput:
         assert isinstance(output, RecordIsoJsonOutput)
 
     @pytest.mark.parametrize("live", [False, True])
-    def test_content(
+    def test_entries(
         self, fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_revision_model_min: RecordRevision, live: bool
     ):
-        """Can generate site content items."""
+        """Can generate site content entries."""
         if live:
             fx_revision_model_min.identification.maintenance.maintenance_frequency = MaintenanceFrequencyCode.CONTINUAL
 
         output = RecordIsoJsonOutput(logger=fx_logger, meta=fx_export_meta, record=fx_revision_model_min)
-        results = output.content
+        results = output.entries
         assert len(results) == 1
         result = results[0]
-        assert isinstance(result, SiteContent)
-        assert '{\n  "$schema": "https://' in result.content
         assert result.path == Path(f"records/{fx_revision_model_min.file_identifier}.json")
         assert result.media_type == "application/json"
         assert result.prevent_caching == live
@@ -58,6 +56,13 @@ class TestRecordIsoJsonOutput:
             "file_identifier": fx_revision_model_min.file_identifier,
             "file_revision": fx_revision_model_min.file_revision,
         }
+
+    def test_content(
+        self, fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_revision_model_min: RecordRevision
+    ):
+        """Can generate site content items."""
+        output = RecordIsoJsonOutput(logger=fx_logger, meta=fx_export_meta, record=fx_revision_model_min)
+        assert '{\n  "$schema": "https://' in output.content[0].content
 
 
 class TestRecordIsoXmlOutput:
@@ -67,6 +72,29 @@ class TestRecordIsoXmlOutput:
         """Can create a record XML output."""
         output = RecordIsoXmlOutput(logger=fx_logger, meta=fx_export_meta, record=fx_revision_model_min)
         assert isinstance(output, RecordIsoXmlOutput)
+
+    @pytest.mark.parametrize("live", [False, True])
+    def test_entries(
+        self,
+        fx_record_iso_xml_output: RecordIsoXmlOutput,
+        fx_export_meta: ExportMeta,
+        fx_revision_model_min: RecordRevision,
+        live: bool,
+    ):
+        """Can generate site content entries."""
+        if live:
+            fx_revision_model_min.identification.maintenance.maintenance_frequency = MaintenanceFrequencyCode.CONTINUAL
+
+        results = fx_record_iso_xml_output.entries
+        assert len(results) == 1
+        result = results[0]
+        assert result.path == Path(f"records/{fx_revision_model_min.file_identifier}.xml")
+        assert result.media_type == "application/xml"
+        assert result.prevent_caching == live
+        assert result.object_meta == {
+            "file_identifier": fx_revision_model_min.file_identifier,
+            "file_revision": fx_revision_model_min.file_revision,
+        }
 
     @pytest.mark.parametrize("trusted", [False, True])
     def test_content_trusted(
@@ -84,30 +112,14 @@ class TestRecordIsoXmlOutput:
         else:
             assert "admin_metadata" not in result
 
-    @pytest.mark.parametrize("live", [False, True])
     def test_content(
         self,
         fx_record_iso_xml_output: RecordIsoXmlOutput,
         fx_export_meta: ExportMeta,
         fx_revision_model_min: RecordRevision,
-        live: bool,
     ):
         """Can generate site content items."""
-        if live:
-            fx_revision_model_min.identification.maintenance.maintenance_frequency = MaintenanceFrequencyCode.CONTINUAL
-
-        results = fx_record_iso_xml_output.content
-        assert len(results) == 1
-        result = results[0]
-        assert isinstance(result, SiteContent)
-        assert "<gmi:MI_Metadata" in result.content
-        assert result.path == Path(f"records/{fx_revision_model_min.file_identifier}.xml")
-        assert result.media_type == "application/xml"
-        assert result.prevent_caching == live
-        assert result.object_meta == {
-            "file_identifier": fx_revision_model_min.file_identifier,
-            "file_revision": fx_revision_model_min.file_revision,
-        }
+        assert "<gmi:MI_Metadata" in fx_record_iso_xml_output.content[0].content
 
     def test_checks(
         self,
@@ -142,19 +154,17 @@ class TestRecordIsoHtmlOutput:
         assert isinstance(output, RecordIsoHtmlOutput)
 
     @pytest.mark.parametrize("live", [False, True])
-    def test_content(
+    def test_entries(
         self, fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_revision_model_min: RecordRevision, live: bool
     ):
-        """Can generate site content items."""
+        """Can generate site content entries."""
         if live:
             fx_revision_model_min.identification.maintenance.maintenance_frequency = MaintenanceFrequencyCode.CONTINUAL
 
         output = RecordIsoHtmlOutput(logger=fx_logger, meta=fx_export_meta, record=fx_revision_model_min)
-        results = output.content
+        results = output.entries
         assert len(results) == 1
         result = results[0]
-        assert isinstance(result, SiteContent)
-        assert "<html xmlns:gco" in result.content
         assert result.path == Path(f"records/{fx_revision_model_min.file_identifier}.html")
         assert result.media_type == "text/html"
         assert result.prevent_caching == live
@@ -162,6 +172,13 @@ class TestRecordIsoHtmlOutput:
             "file_identifier": fx_revision_model_min.file_identifier,
             "file_revision": fx_revision_model_min.file_revision,
         }
+
+    def test_content(
+        self, fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_revision_model_min: RecordRevision
+    ):
+        """Can generate site content items."""
+        output = RecordIsoHtmlOutput(logger=fx_logger, meta=fx_export_meta, record=fx_revision_model_min)
+        assert "<html xmlns:gco" in output.content[0].content
 
     @pytest.mark.cov()
     def test_existing_transform(

@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 import cattrs
 
 from lantern.models.checks import Check, CheckState, CheckType
-from lantern.models.site import ExportMeta, SiteContent
+from lantern.models.site import ExportMeta, SiteContent, SiteEntry
 from lantern.outputs.base import OutputSite
 from lantern.utils import minify_html
 
@@ -112,20 +112,19 @@ class ChecksOutput(OutputSite):
         return minify_html(raw)
 
     @cached_property
+    def entries(self) -> list[SiteEntry]:
+        """Descriptions for content items."""
+        return [
+            SiteEntry(path=Path("-") / "checks" / "data.json", media_type="application/json"),
+            SiteEntry(path=Path("-") / "checks" / "index.html", media_type="text/html", object_meta=self._object_meta),
+        ]
+
+    @cached_property
     def content(self) -> list[SiteContent]:
         """Output content for site."""
         return [
-            SiteContent(
-                content=json.dumps(self._data, indent=2, ensure_ascii=False),
-                path=Path("-") / "checks" / "data.json",
-                media_type="application/json",
-            ),
-            SiteContent(
-                content=self._report,
-                path=Path("-") / "checks" / "index.html",
-                media_type="text/html",
-                object_meta=self._object_meta,
-            ),
+            SiteContent(content=json.dumps(self._data, indent=2, ensure_ascii=False), **vars(self.entries[0])),
+            SiteContent(content=self._report, **vars(self.entries[1])),
         ]
 
     @property

@@ -8,7 +8,7 @@ if TYPE_CHECKING:
     import logging
 
     from lantern.models.record.revision import RecordRevision
-    from lantern.models.site import ExportMeta, SiteContent
+    from lantern.models.site import ExportMeta, SiteContent, SiteEntry
     from lantern.stores.base import SelectRecordsProtocol
 
 
@@ -17,10 +17,12 @@ class OutputBase(ABC):
     Abstract base class for Outputs.
 
     Outputs are responsible for producing:
-    - one or more items of SiteContent, to populate a Site
-    - one or more Check items, corresponding to these SiteContent items
+    - one or more SiteEntry items, describing the contents of a static site
+    - one or more SiteContent items, to populate a static site
+    - one or more Check items, corresponding to these entries
 
-    (I.e. Outputs product content, and checks for ensuring that content exists correctly in an exported site).
+    Note: SiteEntry items are used where only metadata about the contents of Outputs are needed. E.g. for site checks
+    and invalidation keys where only the path for content items is needed.
 
     Outputs do not persist content, see Exporters.
 
@@ -31,10 +33,6 @@ class OutputBase(ABC):
 
     Outputs include an ExportMetadata instance, which extends SiteMetadata to provide information such as whether a
     trusted context applies. SiteMetadata includes properties such as the build time and base URL.
-
-    Note: Subclasses SHOULD implement `content` as a `functools.cached_property` to avoid repeating expensive work
-    (e.g. rendering templates, and/or resolving related records, etc.) as Outputs may be used for checks and
-    invalidation keys in addition to content export.
     """
 
     def __init__(self, logger: logging.Logger, meta: ExportMeta, name: str, check_type: CheckType) -> None:
@@ -64,6 +62,12 @@ class OutputBase(ABC):
 
     @property
     @abstractmethod
+    def entries(self) -> list[SiteEntry]:
+        """Descriptions for content items."""
+        ...
+
+    @property
+    @abstractmethod
     def content(self) -> list[SiteContent]:
         """Output content."""
         ...
@@ -73,11 +77,11 @@ class OutputBase(ABC):
         """
         Output checks.
 
-        Derived from content by default.
+        Derived from content manifest by default.
         """
         return [
-            Check.from_site_content(content=c, check_type=self._check_type, base_url=self._meta.base_url)
-            for c in self.content
+            Check.from_site_entry(content=c, check_type=self._check_type, base_url=self._meta.base_url)
+            for c in self.entries
         ]
 
     @property
@@ -87,9 +91,9 @@ class OutputBase(ABC):
 
         For use with CloudFront distributions supporting invalidations, including optional wildcards.
 
-        Derived from content by default.
+        Derived from content manifest by default.
         """
-        return [f"/{c.path}" for c in self.content]
+        return [f"/{c.path}" for c in self.entries]
 
 
 class OutputSite(OutputBase, ABC):

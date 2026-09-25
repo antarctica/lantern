@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
     from lantern.models.record.revision import RecordRevision
-    from lantern.models.site import ExportMeta, SiteContent
+    from lantern.models.site import ExportMeta, SiteEntry
     from lantern.stores.base import SelectRecordsProtocol
 
 
@@ -32,20 +32,20 @@ class TestBaseOutput:
         assert base.content == []
 
     def test_checks(
-        self, mocker: MockerFixture, fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_site_content: SiteContent
+        self, mocker: MockerFixture, fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_site_entry: SiteEntry
     ):
-        """Can use default logic to generate checks from content."""
+        """Can generate checks from site content entries."""
         base = FakeOutputBase(logger=fx_logger, meta=fx_export_meta)
-        mocker.patch.object(type(base), "content", new_callable=PropertyMock, return_value=[fx_site_content])
+        mocker.patch.object(type(base), "entries", new_callable=PropertyMock, return_value=[fx_site_entry])
 
         assert len(base.checks) == 1
 
     def test_invalidation_keys(
-        self, mocker: MockerFixture, fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_site_content: SiteContent
+        self, mocker: MockerFixture, fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_site_entry: SiteEntry
     ):
-        """Can use default logic to generate checks from content."""
+        """Can generate invalidation keys from site content entries."""
         base = FakeOutputBase(logger=fx_logger, meta=fx_export_meta)
-        mocker.patch.object(type(base), "content", new_callable=PropertyMock, return_value=[fx_site_content])
+        mocker.patch.object(type(base), "entries", new_callable=PropertyMock, return_value=[fx_site_entry])
 
         assert base.invalidation_keys == ["/x"]
 

@@ -5,13 +5,12 @@ from typing import TYPE_CHECKING, Final
 
 import cattrs
 
-from lantern.models.site import SiteContent, SiteRedirect
-
 if TYPE_CHECKING:
     from requests.auth import AuthBase
 
     from lantern.lib.metadata_library.models.record.elements.distribution import Distributions
     from lantern.models.record.record import Record
+    from lantern.models.site import SiteEntry
 
 
 class CheckType(Enum):
@@ -98,10 +97,10 @@ class Check:
     result_output: str | None = None
 
     @classmethod
-    def from_site_content(cls, content: SiteContent, check_type: CheckType, base_url: str) -> Check:
-        """Create check from site content."""
+    def from_site_entry(cls, content: SiteEntry, check_type: CheckType, base_url: str) -> Check:
+        """Create check from a site entry."""
         status = HTTPStatus.OK
-        if isinstance(content, SiteRedirect):
+        if content.redirect:
             status = HTTPStatus.MOVED_PERMANENTLY
 
         return cls(

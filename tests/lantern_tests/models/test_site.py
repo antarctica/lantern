@@ -14,6 +14,7 @@ from lantern.models.site import (
     SchemaOrgAuthor,
     SchemaOrgMeta,
     SiteContent,
+    SiteEntry,
     SiteEnvironment,
     SiteMeta,
     SitePageMeta,
@@ -233,34 +234,30 @@ class TestSitePageMeta:
         assert page_meta.schema_org is None
 
 
-class TestSiteContent:
-    """Test site content."""
+class TestSiteEntry:
+    """Test descriptions of site content without rendered bytes."""
 
-    @pytest.mark.parametrize("value", ["x", b"x"])
-    def test_init(self, value: str | bytes):
-        """Can create a SiteContent instance with required values."""
+    def test_init(self):
+        """Can create a SiteEntry instance with required values."""
         path = Path("x")
         media_type = "x"
-        content = SiteContent(content=value, path=path, media_type=media_type)
+        entry = SiteEntry(path=path, media_type=media_type, redirect="https://example.com")
 
-        assert isinstance(content, SiteContent)
-        assert content.content == value
-        assert content.path == path
-        assert content.media_type == media_type
-        assert content.object_meta == {}
-        assert content.redirect is None
-        assert content.prevent_caching is False
-        assert repr(content) == f"<SiteContent path='{path}' media_type='{media_type}' content_length='{len(value)}'>"
+        assert isinstance(entry, SiteEntry)
+        assert entry.object_meta == {}
+        assert entry.prevent_caching is False
+        assert entry.redirect == "https://example.com"
+        assert repr(entry) == f"<SiteEntry path='{path}' media_type='{media_type}'>"
 
     def test_non_relative_path(self):
-        """Cannot create a SiteContent instance where path is absolute."""
-        with pytest.raises(ValueError, match=r"Path must be relative."):
-            SiteContent(content="x", path=Path("/invalid"), media_type="x")
+        """Entries must use relative paths."""
+        with pytest.raises(ValueError, match="Path must be relative"):
+            SiteEntry(path=Path("/invalid"), media_type="text/html")
 
     def test_non_absolute_redirect(self):
-        """Cannot create a SiteContent instance where optional redirect is not absolute."""
-        with pytest.raises(ValueError, match=r"Redirect must be an absolute URL."):
-            SiteContent(content="x", path=Path("x"), media_type="x", redirect="invalid")
+        """Entries must use absolute redirect targets."""
+        with pytest.raises(ValueError, match="Redirect must be an absolute URL"):
+            SiteEntry(path=Path("x"), media_type="text/html", redirect="invalid")
 
     def test_object_meta(self):
         """Can create a SiteContent instance with optional object meta value."""
@@ -280,6 +277,21 @@ class TestSiteContent:
         """Can create a SiteContent instance with optional cache prevention flag."""
         content = SiteContent(content="x", path=Path("x"), media_type="x", prevent_caching=value)
         assert content.prevent_caching == value
+
+
+class TestSiteContent:
+    """Test site content."""
+
+    @pytest.mark.parametrize("value", ["x", b"x"])
+    def test_init(self, value: str | bytes):
+        """Can create a SiteContent instance with required values."""
+        path = Path("x")
+        media_type = "x"
+        content = SiteContent(content=value, path=path, media_type=media_type)
+
+        assert isinstance(content, SiteContent)
+        assert content.content == value
+        assert repr(content) == f"<SiteContent path='{path}' media_type='{media_type}' content_length='1'>"
 
 
 class TestSiteRedirect:

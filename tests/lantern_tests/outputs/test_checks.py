@@ -6,11 +6,12 @@ import pytest
 from requests.auth import HTTPBasicAuth
 
 from lantern.models.checks import Check, CheckState, CheckType
-from lantern.models.site import ExportMeta, SiteContent
 from lantern.outputs.checks import ChecksOutput
 
 if TYPE_CHECKING:
     import logging
+
+    from lantern.models.site import ExportMeta
 
 
 class TestChecksOutput:
@@ -179,7 +180,7 @@ class TestChecksOutput:
         ]
         if not build_ref:
             fx_export_meta.build_repo_ref = None
-            fx_export_meta.build_repo_url = None
+            fx_export_meta.build_repo_base_url = None
         output = ChecksOutput(logger=fx_logger, meta=fx_export_meta, checks=checks)
 
         results = output._data
@@ -206,23 +207,25 @@ class TestChecksOutput:
         results = output._report
         assert "<!doctype html>" in results
 
-    def test_content(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_check: Check):
-        """Can generate site content items."""
+    def test_entries(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_check: Check):
+        """Can generate site content entries."""
         output = ChecksOutput(logger=fx_logger, meta=fx_export_meta, checks=[fx_check])
         results = output.content
         assert len(results) == 2  # noqa: PLR2004
 
         data = results[0]
-        assert isinstance(data, SiteContent)
-        assert "pass_fail" in data.content
         assert data.path == Path("-/checks/data.json")
         assert data.media_type == "application/json"
 
         report = results[1]
-        assert isinstance(report, SiteContent)
-        assert "<!doctype html>" in report.content
         assert report.path == Path("-/checks/index.html")
         assert report.media_type == "text/html"
+
+    def test_content(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_check: Check):
+        """Can generate site content items."""
+        output = ChecksOutput(logger=fx_logger, meta=fx_export_meta, checks=[fx_check])
+        assert "pass_fail" in output.content[0].content
+        assert "<!doctype html>" in output.content[1].content
 
     @pytest.mark.cov()
     def test_checks(self, fx_logger: logging.Logger, fx_export_meta: ExportMeta, fx_check: Check):

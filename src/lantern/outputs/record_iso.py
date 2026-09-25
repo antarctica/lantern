@@ -6,7 +6,7 @@ from importlib_resources import files as resources_files
 from lxml import etree
 
 from lantern.models.checks import Check, CheckType, RecordChecks
-from lantern.models.site import ExportMeta, SiteContent
+from lantern.models.site import ExportMeta, SiteContent, SiteEntry
 from lantern.outputs.base import OutputRecord
 from lantern.utils import is_live_record
 
@@ -48,17 +48,21 @@ class RecordIsoJsonOutput(OutputRecord):
         return self._record.dumps_json(strip_admin=self._strip_admin)
 
     @cached_property
-    def content(self) -> list[SiteContent]:
-        """Output content for record."""
+    def entries(self) -> list[SiteEntry]:
+        """Descriptions for content items."""
         return [
-            SiteContent(
-                content=self._content,
+            SiteEntry(
                 path=Path("records") / f"{self._record.file_identifier}.json",
                 media_type="application/json",
                 prevent_caching=is_live_record(self._record),
                 object_meta=self._object_meta,
             )
         ]
+
+    @cached_property
+    def content(self) -> list[SiteContent]:
+        """Output content for record."""
+        return [SiteContent(content=self._content, **vars(self.entries[0]))]
 
 
 class RecordIsoXmlOutput(OutputRecord):
@@ -93,17 +97,21 @@ class RecordIsoXmlOutput(OutputRecord):
         return self._record.dumps_xml(strip_admin=self._strip_admin)
 
     @cached_property
-    def content(self) -> list[SiteContent]:
-        """Output content for record."""
+    def entries(self) -> list[SiteEntry]:
+        """Descriptions for content items."""
         return [
-            SiteContent(
+            SiteEntry(
                 path=Path("records") / f"{self._record.file_identifier}.xml",
-                content=self._content,
                 media_type="application/xml",
                 prevent_caching=is_live_record(self._record),
                 object_meta=self._object_meta,
             )
         ]
+
+    @cached_property
+    def content(self) -> list[SiteContent]:
+        """Output content for record."""
+        return [SiteContent(content=self._content, **vars(self.entries[0]))]
 
     @property
     def checks(self) -> list[Check]:
@@ -189,14 +197,18 @@ class RecordIsoHtmlOutput(OutputRecord):
         return self._apply_iso_html_xslt(record=self._record)
 
     @cached_property
-    def content(self) -> list[SiteContent]:
-        """Output content for record."""
+    def entries(self) -> list[SiteEntry]:
+        """Descriptions for content items."""
         return [
-            SiteContent(
+            SiteEntry(
                 path=Path("records") / f"{self._record.file_identifier}.html",
-                content=self._content,
                 media_type="text/html",
                 prevent_caching=is_live_record(self._record),
                 object_meta=self._object_meta,
             )
         ]
+
+    @cached_property
+    def content(self) -> list[SiteContent]:
+        """Output content for record."""
+        return [SiteContent(content=self._content, **vars(self.entries[0]))]

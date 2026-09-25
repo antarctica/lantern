@@ -7,7 +7,7 @@ from lantern.lib.metadata_library.models.record.enums import AggregationAssociat
 from lantern.models.checks import CheckType
 from lantern.models.item.website.search import ItemWebsiteSearch
 from lantern.models.record.const import CATALOGUE_NAMESPACE
-from lantern.models.site import ExportMeta, SiteContent
+from lantern.models.site import ExportMeta, SiteContent, SiteEntry
 from lantern.outputs.base import OutputRecords
 
 if TYPE_CHECKING:
@@ -98,13 +98,17 @@ class ItemsBasWebsiteOutput(OutputRecords):
         return json.dumps(payload, indent=2, ensure_ascii=False)
 
     @cached_property
-    def content(self) -> list[SiteContent]:
-        """Output content aggregating all items."""
+    def entries(self) -> list[SiteEntry]:
+        """Descriptions for content items."""
         return [
-            SiteContent(
-                content=self._content,
+            SiteEntry(
                 path=Path("-") / "public-website-search" / "items.json",
                 media_type="application/json",
                 object_meta=self._object_meta,
             )
         ]
+
+    @cached_property
+    def content(self) -> list[SiteContent]:
+        """Output content aggregating all items."""
+        return [SiteContent(content=self._content, **vars(self.entries[0]))]

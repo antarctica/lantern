@@ -28,13 +28,13 @@ All outputs inherit from the `lantern.outputs.base.OutputBase` abstract base cla
 public interface to:
 
 - define an output name
-- generate a list of [`SiteContent`](/docs/models.md#static-site-content) items
-- generate a corresponding list of [`Check`](/docs/monitoring.md#site-checks) items to verify for this content
+- generate a list of [`SiteEntry` and `SiteContent`](/docs/models.md#static-site-content) items
+- generate a corresponding list of [`Check`](/docs/monitoring.md#site-checks) items to verify this content
 - generate a list of keys (paths) for invalidating content
 
 > [!NOTE]
-> Content from Outputs SHOULD be cached using `functools.cached_property` as they are often expensive to create and MAY
-> be accessed for Site [Checks](/docs/monitoring.md#site-checks) and [Invalidation](/docs/site.md#cache-invalidation).
+> It's expected `SiteEntry` items are used for generating checks and invalidation keys to avoid expensive/heavy content
+> generation.
 
 Outputs at the site level SHOULD:
 

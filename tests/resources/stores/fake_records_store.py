@@ -19,6 +19,7 @@ from tests.resources.records.item_cat_licence import (
     rights_reversed_record,
 )
 from tests.resources.records.item_cat_product_all import record as product_all_supported
+from tests.resources.records.item_cat_product_deprecated import record as product_deprecated
 from tests.resources.records.item_cat_product_live import record as product_live
 from tests.resources.records.item_cat_product_map import record as product_map
 from tests.resources.records.item_cat_product_min import record as product_min_required
@@ -77,6 +78,7 @@ class FakeRecordsStore(StoreBase):
             product_restricted_bas_staff,
             product_restricted_custom_groups,
             product_live,
+            product_deprecated,
             product_replaced,
             product_all_supported,
             product_map,

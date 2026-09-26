@@ -612,7 +612,7 @@ class TestMaintenance:
         ("progress", "expected"),
         [
             (None, None),
-            (ProgressCode.HISTORICAL_ARCHIVE, "Item has been archived and may be outdated"),
+            (ProgressCode.DEPRECATED, "Item is deprecated and should be used with caution"),
         ],
     )
     def test_status(self, progress: ProgressCode | None, expected: ProgressCode | None):

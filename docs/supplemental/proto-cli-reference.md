@@ -25,6 +25,7 @@ workflow-rothera-orthos  Process Rothera progress monitoring orthomosaics
 
 # single record commands
 clone-record             Clone record from cache into import directory
+deprecate-record         Indicate a record is deprecated without a replacement
 supersede-record         Indicate a new record is the successor to another
 issues-record            Set GitLab issues for a record
 admin-record             View administrative metadata for a record
@@ -156,6 +157,30 @@ These fields are updated when cloning a record:
 > [!NOTE]
 > Other fields (such as citation, aliases, edition, title, admin gitlab issues, permissions, etc.) are not changed and
 > may need updating.
+
+### `deprecate-record`
+
+Indicate a new record is deprecated but still available for use.
+
+```shell
+% task deprecate-record --help
+```
+
+> [!TIP]
+> See the [`supersede-record`](#supersede-record) command to if the record has a replacement/successor.
+
+These fields are updated in the record:
+
+- `identification.dates.deprecated` (set to the current date)
+- `identification.maintenance.progress` (set as deprecated)
+- `identification.abstract` (warning that record is deprecated)
+
+Examples:
+
+```shell
+# set record without interaction
+% task supersede-record --force --record ./import/9552b570-e633-4e6e-ac7a-47bd9cf66a01.json
+```
 
 ### `supersede-record`
 

@@ -429,19 +429,23 @@ class Maintenance(RecordMaintenance):
 
     @property
     def status(self) -> str | None:
-        """Non-None progress as a human-readable status label."""
+        """
+        Non-None progress as a human-readable status label.
+
+        Aligned to MAGIC Discovery profile (v2) Req. 11 permitted code list options [1].
+
+        [1] https://metadata-standards.data.bas.ac.uk/profiles/magic-discovery/v2/#requirement-11-progress-code
+        """
         if self.progress is None:
             return None
 
         mapping = {
             ProgressCode.COMPLETED: "Item is complete and recommended for general use",
-            ProgressCode.HISTORICAL_ARCHIVE: "Item has been archived and may be outdated",
-            ProgressCode.OBSOLETE: "Item is obsolete and should be used with caution",
-            ProgressCode.SUPERSEDED: "Item has been replaced with a newer edition",
+            ProgressCode.DEPRECATED: "Item is deprecated and should be used with caution",
             ProgressCode.ON_GOING: "Item is being regularly updated and recommended for general use",
-            ProgressCode.PLANNED: "Item is planned and does not yet exist",
-            ProgressCode.REQUIRED: "Required (Contact us for further information)",
-            ProgressCode.UNDER_DEVELOPMENT: "Item is a draft and should not yet be used",
+            ProgressCode.SUPERSEDED: "Item has been replaced with a newer edition",
+            ProgressCode.RETIRED: "Item is no longer available",
+            ProgressCode.UNDER_DEVELOPMENT: "Item is not yet ready for use",
         }
         return mapping[self.progress]
 

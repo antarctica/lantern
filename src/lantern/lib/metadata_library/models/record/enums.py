@@ -267,18 +267,28 @@ class ProgressCode(Enum):
     Schema definition: progress [1]
     ISO element: MD_ProgressCode [2]
 
-    [1] https://github.com/antarctica/metadata-library/blob/v0.15.1/src/bas_metadata_library/schemas/dist/iso_19115_2_v4.json#L1340
+    [1] https://github.com/antarctica/metadata-library/blob/v0.18.1/src/bas_metadata_library/schemas/dist/iso_19115_2_v4.json#L1348
     [2] https://wiki.esipfed.org/ISO_19115-3_Codelists#MD_ProgressCode
     """
 
+    ACCEPTED = "accepted"
     COMPLETED = "completed"
+    DEPRECATED = "deprecated"
+    FINAL = "final"
     HISTORICAL_ARCHIVE = "historicalArchive"
+    NOT_ACCEPTED = "notAccepted"
     OBSOLETE = "obsolete"
     ON_GOING = "onGoing"
+    PENDING = "pending"
     PLANNED = "planned"
+    PROPOSED = "proposed"
     REQUIRED = "required"
+    RETIRED = "retired"
     SUPERSEDED = "superseded"
+    TENTATIVE = "tentative"
     UNDER_DEVELOPMENT = "underDevelopment"
+    VALID = "valid"
+    WITHDRAWN = "withdrawn"
 
 
 class MagicAccessFrameworkPermission(Enum):

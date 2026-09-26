@@ -112,6 +112,34 @@ class TestArtefactsFormats:
 
     @pytest.mark.cov()
     @pytest.mark.parametrize(
+        ("path", "expected"),
+        [
+            (artefacts_path / "gpkg_zip" / "sample.gpkg.zip", True),
+            (artefacts_path / "_unsupported" / "invalid.gpkg.zip", False),
+        ],
+    )
+    def test_check_file_gpkg_zip(self, path: Path, expected: bool):
+        """Can check a file is a compressed GeoPackage archive."""
+        manager = ArtefactFormats()
+        with path.open(mode="rb") as f:
+            assert manager._check_file_gpkg_zip(f) is expected
+
+    @pytest.mark.cov()
+    @pytest.mark.parametrize(
+        ("path", "expected"),
+        [
+            (artefacts_path / "shp_zip" / "sample.shp.zip", True),
+            (artefacts_path / "_unsupported" / "invalid.shp.zip", False),
+        ],
+    )
+    def test_check_file_shp_zip(self, path: Path, expected: bool):
+        """Can check a file is a Shapefile bundle archive."""
+        manager = ArtefactFormats()
+        with path.open(mode="rb") as f:
+            assert manager._check_file_shp_zip(f) is expected
+
+    @pytest.mark.cov()
+    @pytest.mark.parametrize(
         ("file", "name", "expected"),
         [(Path("x"), None, ""), (Path("x.Y.z"), None, ".y.z"), (BytesIO(b""), "x.Y.z", ".y.z"), (None, "x.x", ".x")],
     )
@@ -163,9 +191,9 @@ class TestArtefactsFormats:
     )
     def test_check_file_supported(self, file: Path | IO[bytes], name: str | None):
         """
-        Can determine supported formats by file extension and contents where ambigious.
+        Can determine supported formats by file extension and contents where ambiguous.
 
-        Ambigious formats:
+        Ambiguous formats:
         - GeoJSON (non-geo JSON unsupported and '.geojson' ext not always used)
         - GeoTiff (non-geo Tiff unsupported)
         """
@@ -178,7 +206,7 @@ class TestArtefactsFormats:
         [(Path("x.x"), None), (BytesIO(b""), "x"), (Path("x.zip"), None)],
     )
     def test_check_file_unknown(self, file: Path | IO[bytes], name: str | None):
-        """Can determine unknown and supporteded formats by file extension."""
+        """Can determine unknown and supported formats by file extension."""
         manager = ArtefactFormats()
 
         with pytest.raises(ArtefactFormatUnknownError):
@@ -186,18 +214,20 @@ class TestArtefactsFormats:
 
     @pytest.mark.cov()
     @pytest.mark.parametrize(
-        ("file", "name"),
+        "file",
         [
-            (artefacts_path / "_unsupported" / "sample.json", None),  # non-geo JSON
-            (artefacts_path / "_unsupported" / "sample.tiff", None),  # non-geo Tiff
+            artefacts_path / "_unsupported" / "sample.json",  # non-geo JSON
+            artefacts_path / "_unsupported" / "sample.tiff",  # non-geo Tiff
+            artefacts_path / "_unsupported" / "invalid.gpkg.zip",  # archive without a GeoPackage
+            artefacts_path / "_unsupported" / "invalid.shp.zip",  # archive without Shapefile files
         ],
     )
-    def test_check_file_unsupported(self, file: Path | IO[bytes], name: str | None):
-        """Can determine known and unsupporteded formats by file extension."""
+    def test_check_file_unsupported(self, file: Path | IO[bytes]):
+        """Can determine known and unsupported formats by file extension and/or archive contents."""
         manager = ArtefactFormats()
 
         with pytest.raises(ArtefactFormatNotSupportedError):
-            manager.check_file_supported(file=file, name=name)
+            manager.check_file_supported(file=file)
 
     @pytest.mark.parametrize(
         ("file", "name", "expected"),
@@ -211,7 +241,7 @@ class TestArtefactsFormats:
             (artefacts_path / "geojson" / "sample.json", None, ArtefactFormatLabel.GEOJSON),
             (artefacts_path / "geojson" / "sample.geojson", None, ArtefactFormatLabel.GEOJSON),
             (artefacts_path / "gpkg" / "sample.gpkg", None, ArtefactFormatLabel.GEOPACKAGE),
-            (artefacts_path / "gpkg" / "sample.gpkg.zip", None, ArtefactFormatLabel.GEOPACKAGE_ZIP),
+            (artefacts_path / "gpkg_zip" / "sample.gpkg.zip", None, ArtefactFormatLabel.GEOPACKAGE_ZIP),
             (artefacts_path / "mbtiles" / "sample.mbtiles", None, ArtefactFormatLabel.MAPBOX_VECTOR_TILES),
             (artefacts_path / "pdf" / "sample.pdf", None, ArtefactFormatLabel.PDF),
             (artefacts_path / "pdf_geo" / "sample.pdf", None, ArtefactFormatLabel.GEOPDF),
@@ -226,6 +256,7 @@ class TestArtefactsFormats:
 
         Ambigious formats:
         - PDF (both supported)
+        - Shapefile archives (to not solely rely on file extension convention)
         """
         manager = ArtefactFormats()
         result = manager.get_file_format(file=file, name=name)

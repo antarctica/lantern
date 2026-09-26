@@ -2,8 +2,9 @@ from contextlib import contextmanager
 from enum import Enum
 from functools import cached_property
 from json import JSONDecodeError
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import IO, TYPE_CHECKING, Final, NamedTuple, cast
+from zipfile import ZipFile
 
 import geojson
 from PIL import Image, UnidentifiedImageError
@@ -384,6 +385,43 @@ class ArtefactFormats:
             return False
 
     @staticmethod
+    def _check_file_gpkg_zip(file: IO[bytes]) -> bool:
+        """
+        Check if a zip archive contains a GeoPackage file.
+
+        To distinguish archives containing GeoPackages from others, without only relying on a conventional file name.
+
+        As weak resistance to smuggling unsupported formats within archives.
+
+        WARNING! This check is not definitive as GeoPackage files are not parsed specifically.
+        """
+        with ZipFile(file) as archive:
+            for f in archive.infolist():
+                if PurePosixPath(f.filename).suffix == ".gpkg":
+                    return True
+        return False
+
+    @staticmethod
+    def _check_file_shp_zip(file: IO[bytes]) -> bool:
+        """
+        Check if a zip archive contains files required for a shapefile.
+
+        To distinguish archives containing shapefiles from others, without only relying on a conventional file name.
+
+        As weak resistance to smuggling unsupported formats within archives.
+
+        WARNING! This check is not definitive as Shapefile files are not parsed specifically.
+        """
+        required = {".shp", ".shx", ".dbf"}
+
+        with ZipFile(file) as archive:
+            extensions = {PurePosixPath(f.filename).suffix for f in archive.infolist()}
+            if extensions.issuperset(required):
+                return True
+
+        return False
+
+    @staticmethod
     def _get_file_extension(file: Path | IO[bytes], name: str | None = None) -> str:
         """Normalise opening an input file from a path or existing IO buffer."""
         if isinstance(file, Path):
@@ -415,6 +453,9 @@ class ArtefactFormats:
         - both formats are supported but are distinguished (e.g. PDFs and GeoPDFs are both supported)
         - only georeferenced instances are supported (e.g. GeoJSON vs JSON where only GeoJSON is supported)
 
+        Checks the contents of zip archives for formats consisting of multiple files and/or allowing compression
+        (e.g. Shapefile).
+
         Note: Media types are not checked as Python's `mimetypes` lookup maps to file extensions, which we already have
         a controlled list of.
 
@@ -426,11 +467,14 @@ class ArtefactFormats:
         """
         geojson_exts = cls.get_label(ArtefactFormatLabel.GEOJSON).extensions
         geotiff_exts = cls.get_label(ArtefactFormatLabel.GEOTIFF).extensions
+        gpkg_z_exts = cls.get_label(ArtefactFormatLabel.GEOPACKAGE_ZIP).extensions
+        shp_z_exts = cls.get_label(ArtefactFormatLabel.SHAPEFILE_ZIP).extensions
+
         file_ext = cls._get_file_extension(file=file, name=name)
 
         if file_ext not in [ext for format_ in cls.file_formats for ext in format_.extensions]:
             raise ArtefactFormatUnknownError() from None
-        if file_ext not in geojson_exts and file_ext not in geotiff_exts:
+        if file_ext not in [*geojson_exts, *geotiff_exts, *gpkg_z_exts, *shp_z_exts]:
             return  # known, unambiguous, format
 
         with cls._open_binary(file) as f:
@@ -439,6 +483,12 @@ class ArtefactFormats:
                 raise ArtefactFormatNotSupportedError(msg) from None
             if file_ext in geotiff_exts and not cls._check_file_geotiff(f):
                 msg = "Non-Geo Tiffs are not supported."
+                raise ArtefactFormatNotSupportedError(msg) from None
+            if file_ext in gpkg_z_exts and not cls._check_file_gpkg_zip(f):
+                msg = "GeoPackage archives must contain a GeoPackage."
+                raise ArtefactFormatNotSupportedError(msg) from None
+            if file_ext in shp_z_exts and not cls._check_file_shp_zip(f):
+                msg = "Shapefile archives must contain required Shapefile component files."
                 raise ArtefactFormatNotSupportedError(msg) from None
 
     @classmethod

@@ -637,8 +637,8 @@ class TestAdditionalInfoTab:
         [
             (None, None, None),
             (
-                Maintenance(RecordMaintenance(progress=ProgressCode.HISTORICAL_ARCHIVE)),
-                "Item has been archived and may be outdated",
+                Maintenance(RecordMaintenance(progress=ProgressCode.DEPRECATED)),
+                "Item is deprecated and should be used with caution",
                 None,
             ),
             (

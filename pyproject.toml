@@ -130,6 +130,7 @@ workflow-live = { cmd = "python -m tasks.records_workflow_live", help = "Import 
 workflow-rothera-orthos = { cmd = "python -m tasks.data_workflow_rothera_orthos", help = "Process Rothera progress monitoring orthomosaics" }
 # fake CLI (single records)
 clone-record = { cmd = "python -m tasks.record_clone", help = "Clone record from cache into import directory" }
+deprecate-record = { cmd = "python -m tasks.record_deprecate", help = "Indicate a record is deprecated without a replacement" }
 supersede-record = { cmd = "python -m tasks.record_supersede", help = "Indicate a new record is the successor to another" }
 issues-record = { cmd = "python -m tasks.record_issues", help = "Set GitLab issues for a record"}
 admin-record = { cmd = "python -m tasks.record_dump_admin", help = "View administrative metadata for a record" }

@@ -105,6 +105,8 @@ To update existing records:
 - run the [`select-records`](/docs/supplemental/proto-cli-reference.md#select-records) command
 - to replace a record with a successor:
   - run the [`supersede-record`](/docs/supplemental/proto-cli-reference.md#supersede-record) command
+- to mark a record as deprecated (without a successor):
+  - run the [`deprecate-record`](/docs/supplemental/proto-cli-reference.md#deprecate-record) command
 - to include an Esri ArcGIS Online item as a distribution option:
   - run the [`esri-record`](/docs/supplemental/proto-cli-reference.md#esri-record) command
 - to set access permissions:

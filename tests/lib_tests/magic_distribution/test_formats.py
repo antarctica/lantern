@@ -73,7 +73,7 @@ class TestArtefactsFormats:
         """
         Can check a file is GeoJSON not regular JSON.
 
-        Implictly checks file is JSON parsable and valid GeoJSON.
+        Implicitly checks file is JSON parsable and valid GeoJSON.
         """
         manager = ArtefactFormats()
         with path.open() as f:
@@ -252,9 +252,9 @@ class TestArtefactsFormats:
     )
     def test_get_file_format(self, file: Path | IO[bytes], name: str | None, expected: ArtefactFormatLabel):
         """
-        Can get supported format by file extension and contents where ambigious.
+        Can get supported format by file extension and contents where ambiguous.
 
-        Ambigious formats:
+        Ambiguous formats:
         - PDF (both supported)
         - Shapefile archives (to not solely rely on file extension convention)
         """

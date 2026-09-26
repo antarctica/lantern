@@ -194,6 +194,8 @@ These fields are updated in the predecessor record:
 
 - `identification.aggregations[assocation='largerWorkCitation',initiative='collection']` (removed if replace=true)
 - `identification.abstract` (superseded note with link to successor appended)
+- `identification.dates.superseded` (set to the current date)
+- `identification.maintenance.progress` (set as superseded)
 
 These fields are updated in the successor record:
 
@@ -212,7 +214,7 @@ These fields are updated in any collection records the predecessor contained:
 Examples:
 
 ```shell
-# set current and successor records with default branch and import path, without interaction
+# set current and successor records, without interaction
 % task supersede-record --force --current 76c35d79-3611-4a12-adbc-8a1ce45200df --successor ./import/88d2ff3f-b159-42a4-826d-183c5c5dde70.json
 ```
 

@@ -78,7 +78,6 @@ def _run_job(
     init_logging(log_level)
     logger = logging.getLogger("lantern")
     store = _job_worker_store(key=worker_key, store=store)
-    iso_html_transform = _job_worker_iso_html_transform()
     select_record = store.select_one
     select_records = store.select
     job_extras = job.extras or {}
@@ -100,7 +99,8 @@ def _run_job(
     elif job.output in [SiteIndexOutput, ItemsBasWebsiteOutput, RecordsWafOutput]:
         output = job.output(logger=logger, meta=meta, select_records=select_records)
     elif job.output == RecordIsoHtmlOutput:
-        output = job.output(logger=logger, meta=meta, record=job.record, transform=iso_html_transform)
+        transform = _job_worker_iso_html_transform() if job.action == "content" else None
+        output = job.output(logger=logger, meta=meta, record=job.record, transform=transform)
     elif job.output in [ItemAliasesOutput, RecordIsoJsonOutput, RecordIsoXmlOutput]:
         output = job.output(logger=logger, meta=meta, record=job.record)
     else:

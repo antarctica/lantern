@@ -126,8 +126,8 @@ def _get_args(
     except KeyError:
         msg = f"File for record '{successor_record.file_identifier}' not found"
         raise FileNotFoundError(msg) from None
-    _replace = "--replace" if replace else ""
-    params = f"task supersede-record --force {_replace} --path {path.resolve()} --branch {branch} --current {current_ref} --successor {successor_path.resolve()}"
+    _replace = " --replace" if replace else ""
+    params = f"task supersede-record --force{_replace} --path {path.resolve()} --branch {branch} --current {current_ref} --successor {successor_path.resolve()}"
 
     return path, branch, current_ref, successor_record, replace, params
 
@@ -180,7 +180,7 @@ def process_predecessor(logger: logging.Logger, record: Record, successor: Recor
     Note:
     - there isn't a 'revisedBy' inverse aggregation type that can be used
     - removing collection aggregations (replace=True) means the record is effectively orphaned and can only be
-      accessed via itsdirect URL, unless linked to elsewhere
+      accessed via search results or its direct URL
     """
     changed = False
     successor_item = ItemBase(record=successor)
@@ -217,7 +217,7 @@ def process_predecessor(logger: logging.Logger, record: Record, successor: Recor
             > {_sigil}
             >
             > Please see [{successor_item.title_md}](/items/{successor_item.resource_id}), edition **{successor_item.edition}**.
-         """)
+        """)
 
     if not changed:
         logger.info("Predecessor record not updated")

@@ -85,7 +85,7 @@ def _get_args(
 
     env = inquirer.list_input(message="Site environment (testing/live)", choices=get_args(SiteEnvironment), default=env)
     target = inquirer.list_input(message="Export target (local/remote)", choices=get_args(ExportTarget), default=target)
-    branch = inquirer.text(message="Branch", default=branch)
+    branch = inquirer.list_input(message="Branch", choices=cat.repo.select_branches())
 
     if identifiers:
         logger.info("Record identifiers from command line arguments:")
@@ -93,7 +93,7 @@ def _get_args(
         logger.info("Note: Any empty set is allowed and will select all records.")
         if not inquirer.confirm(message="Add others?", default=False):
             _records_param = " ".join([f"--record {i}" for i in identifiers]) if identifiers else ""
-            params = f"task check-records --force --branch {branch} --target {target} --env {env} {_records_param}"
+            params = f"task build-records --force --branch {branch} --target {target} --env {env} {_records_param}"
             return env, target, branch, identifiers, params
 
     references = set()

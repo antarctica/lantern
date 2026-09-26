@@ -37,7 +37,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Conformance information for MAGIC metadata profiles and constraint frameworks
 * Initial data publishing workflow for Rothera station orthomosaics via a development task
 * `make_bas_role` contacts preset in BAS Metadata Library lib for non-MAGIC BAS contacts
-* `upload-thumbnail` development task
+* `upload-thumbnail` development task to downsample and upload thumbnails to the BAS CDN
 * `deprecate-record` to mark a record as deprecated without a replacement
 
 ### Fixed
@@ -53,6 +53,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Relaxing types for temporal extent preset in BAS Metadata Library lib
 * Wrong logger used in some dev tasks
 * Ensuring record changes from `zap-records` development tasks validate
+* Styling to ensure visual separation between consecutive admonition elements
 
 ### Changed
 

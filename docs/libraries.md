@@ -362,13 +362,13 @@ Represents information accessible via a particular protocol in Python, available
 - CSV
 - FPL (Garmin flight plan - for Garmin aviation GPS units)
 - GPX (nominally for handheld GPS units)
-- GeoPackage (including when zipped for compression)
+- GeoPackage (optionally zipped for compression)
 - JPEG images
 - GeoJSON (non-geo JSON files are not supported)
 - MapBox vector tiles
 - PDF (including georeferenced PDF)
 - PNG
-- Shapefile (specifically where zipped with other related files)
+- Shapefile (specifically where zipped with required files `.shp`, `.shx`, `.dbf`)
 - GeoTiff (non-geo TIFF images are not supported)
 
 ### Supported service formats

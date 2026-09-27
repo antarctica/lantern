@@ -4,6 +4,7 @@ import shutil
 from base64 import b64decode
 from copy import deepcopy
 from dataclasses import dataclass
+from enum import Enum, auto
 from functools import cached_property
 from typing import TYPE_CHECKING
 
@@ -45,6 +46,94 @@ class CacheTooOutdatedError(Exception):
 
 class CacheFrozenError(Exception):
     """Raised when attempting to refresh/update a frozen cache."""
+
+
+class SourceState(Enum):
+    """Represents whether a cache applies to a remote store."""
+
+    MATCH = auto()  # yes
+    MISMATCH = auto()  # no
+    UNINITIALISED = auto()  # no
+
+
+class CachePolicyDecision(Enum):
+    """Represents the action to take based when ensuring the cache exists, is applicable and is current."""
+
+    CHECK_SOURCE = auto()
+    CHECK_CURRENT = auto()
+    ERROR_UNAVAILABLE = auto()
+    CREATE = auto()
+    ERROR_EMPTY_FROZEN = auto()
+    ERROR_SOURCE_UNAVAILABLE = auto()
+    USE_STALE = auto()
+    ERROR_SOURCE_FROZEN = auto()
+    RECREATE_SOURCE = auto()
+    ERROR_UNINITIALISED_FROZEN = auto()
+    RECREATE_UNINITIALISED = auto()
+    USE_FROZEN = auto()
+    REFRESH = auto()
+    USE_CURRENT = auto()
+
+
+@dataclass()
+class GitLabCachePolicy:
+    """
+    Determine the action or error needed to arrive at a populated, current and applicable cache.
+
+    Focused on policy and decision-making only. Inputs provide the current state of the cache, remote source, etc.
+    """
+
+    # needed for initial decision
+    online: bool
+    exists: bool
+    frozen: bool
+    # needed for subsequent decisions
+    source: SourceState | None = None
+    current: bool | None = None
+
+    def decide(self) -> CachePolicyDecision:
+        """
+        Return the next or final decision, with delegation to avoid considering all branches at once.
+
+        Crucially decisions that require accessing GitLab are deferred until needed.
+        """
+        if not self.exists:
+            return self._missing_decision()
+        if self.source is None:
+            return CachePolicyDecision.CHECK_SOURCE
+        if not self.online:
+            return (
+                CachePolicyDecision.USE_STALE
+                if self.source is SourceState.MATCH
+                else CachePolicyDecision.ERROR_SOURCE_UNAVAILABLE
+            )
+        if self.source is not SourceState.MATCH:
+            return self._source_decision()
+        if self.frozen:
+            return CachePolicyDecision.USE_FROZEN
+        return self._freshness_decision()
+
+    def _missing_decision(self) -> CachePolicyDecision:
+        """Decide whether cache can be created based on whether remote store is available and cache is not frozen."""
+        if not self.online:
+            return CachePolicyDecision.ERROR_UNAVAILABLE
+        return CachePolicyDecision.ERROR_EMPTY_FROZEN if self.frozen else CachePolicyDecision.CREATE
+
+    def _source_decision(self) -> CachePolicyDecision:
+        """Decide whether cache needs recreating based on remote store if not frozen."""
+        if self.source is SourceState.UNINITIALISED:
+            return (
+                CachePolicyDecision.ERROR_UNINITIALISED_FROZEN
+                if self.frozen
+                else CachePolicyDecision.RECREATE_UNINITIALISED
+            )
+        return CachePolicyDecision.ERROR_SOURCE_FROZEN if self.frozen else CachePolicyDecision.RECREATE_SOURCE
+
+    def _freshness_decision(self) -> CachePolicyDecision:
+        """Decide whether an existing cache needs updating based on remote store."""
+        if self.current is None:
+            return CachePolicyDecision.CHECK_CURRENT
+        return CachePolicyDecision.USE_CURRENT if self.current else CachePolicyDecision.REFRESH
 
 
 @dataclass
@@ -494,61 +583,99 @@ class GitLabLocalCache:
         self._logger.info("%s records have been updated in remote repository", len(records))
         self._create_refresh(records=records)
 
-    def _ensure_exists(self) -> None:  # noqa: C901
+    def _cache_source_state(self, online: bool) -> SourceState:
+        """
+        Determine source applicability.
+
+        Helper method for `_ensure_exists()`.
+        """
+        try:
+            if self._applicable:
+                return SourceState.MATCH
+            if online:
+                _ = self._cached_source
+        except CacheNotInitialisedError:
+            # raised by _cached_source, caught to distinguish between an unprocessed vs. inapplicable remote source
+            return SourceState.UNINITIALISED
+        return SourceState.MISMATCH
+
+    def _ensure_exists(self) -> None:
         """
         Ensure cache exists and is up-to-date.
 
-        An existing, up-to-date, cache is not modified.
+        To keep this method understandable, a cache policy instance determines the applicable action to take over
+        several stages based on whether the remote store is available and up to date, and if a cache exists, is
+        applicable and is current. An existing, up-to-date, and/or frozen cache is not modified.
         """
-        if not self._online and not self.exists:
-            msg = "Local cache and GitLab unavailable. Cannot load records."
-            raise RemoteStoreUnavailableError(msg) from None
+        _error_states = {
+            CachePolicyDecision.ERROR_UNAVAILABLE,
+            CachePolicyDecision.ERROR_EMPTY_FROZEN,
+            CachePolicyDecision.ERROR_SOURCE_UNAVAILABLE,
+            CachePolicyDecision.ERROR_SOURCE_FROZEN,
+            CachePolicyDecision.ERROR_UNINITIALISED_FROZEN,
+        }
 
-        if self._online and not self.exists:
-            if self._frozen:
-                msg = "Local cache unavailable and is frozen. Cannot load records."
-                raise CacheFrozenError(msg) from None
-            self._logger.info("Local cache not ready, creating from GitLab")
-            self._create()
-            return
+        policy = GitLabCachePolicy(online=self._online, exists=self.exists, frozen=self._frozen)
+        if policy.decide() is CachePolicyDecision.CHECK_SOURCE:
+            policy.source = self._cache_source_state(online=policy.online)
+        if policy.decide() is CachePolicyDecision.CHECK_CURRENT:
+            policy.current = self._current
 
-        if not self._online:
-            if not self._applicable:
-                msg = "Local cache source does not match remote and cannot access GitLab to recreate."
-                raise RemoteStoreUnavailableError(msg) from None
-            self._logger.warning("Cannot check if records cache is current, loading possibly stale records")
-            return
+        outcome = policy.decide()
+        if outcome in _error_states:
+            self._raise_cache_decision(outcome)
+        self._apply_cache_decision(outcome)
 
-        try:
-            if not self._applicable:
-                if self._frozen:
-                    msg = f"Cached source '{self._cached_source}' does not match current instance and branch '{self._source}' but is frozen. Will not load records."
-                    raise CacheFrozenError(msg) from None
+    def _apply_cache_decision(self, decision: CachePolicyDecision) -> None:
+        """Perform the selected operation without revisiting the cache-state policy."""
+        match decision:
+            case CachePolicyDecision.CREATE:
+                self._logger.info("Local cache not ready, creating from GitLab")
+                self._create()
+            case CachePolicyDecision.USE_STALE:
+                self._logger.warning("Cannot check if records cache is current, loading possibly stale records")
+            case CachePolicyDecision.RECREATE_SOURCE:
                 self._logger.warning(
                     "Cached source '%s' does not match current instance and branch '%s', recreating cache",
                     self._cached_source,
                     self._source,
                 )
                 self._create()
-                return
-        except CacheNotInitialisedError:
-            if self._frozen:
+            case CachePolicyDecision.RECREATE_UNINITIALISED:
+                self._logger.info("Local cache not setup, recreating from GitLab")
+                self._create()
+            case CachePolicyDecision.USE_FROZEN:
+                self._logger.debug("Cache exists and is frozen")
+            case CachePolicyDecision.REFRESH:
+                self._logger.warning("Cached records are not up to date, updating from GitLab")
+                self._refresh()
+            case CachePolicyDecision.USE_CURRENT:
+                self._logger.info("Records cache exists and is current, no changes needed")
+            case _:  # pragma: no cover
+                msg = "Unknown action."
+                raise RuntimeError(msg) from None
+
+    def _raise_cache_decision(self, decision: CachePolicyDecision) -> None:
+        """Report why an unavailable or frozen cache cannot be used."""
+        match decision:
+            case CachePolicyDecision.ERROR_UNAVAILABLE:
+                msg = "Local cache and GitLab unavailable. Cannot load records."
+                raise RemoteStoreUnavailableError(msg) from None
+            case CachePolicyDecision.ERROR_EMPTY_FROZEN:
+                msg = "Local cache unavailable and is frozen. Cannot load records."
+                raise CacheFrozenError(msg) from None
+            case CachePolicyDecision.ERROR_SOURCE_UNAVAILABLE:
+                msg = "Local cache source does not match remote and cannot access GitLab to recreate."
+                raise RemoteStoreUnavailableError(msg) from None
+            case CachePolicyDecision.ERROR_SOURCE_FROZEN:
+                msg = f"Cached source '{self._cached_source}' does not match current instance and branch '{self._source}' but is frozen. Will not load records."
+                raise CacheFrozenError(msg) from None
+            case CachePolicyDecision.ERROR_UNINITIALISED_FROZEN:
                 msg = "Local cache not setup and is frozen. Cannot load records."
                 raise CacheFrozenError(msg) from None
-            self._logger.info("Local cache not setup, recreating from GitLab")
-            self._create()
-            return
-
-        if self._frozen:
-            self._logger.debug("Cache exists and is frozen")
-            return
-
-        if self._online and not self._current:
-            self._logger.warning("Cached records are not up to date, updating from GitLab")
-            self._refresh()
-            return
-
-        self._logger.info("Records cache exists and is current, no changes needed")
+            case _:  # pragma: no cover
+                msg = "Unknown action."
+                raise RuntimeError(msg) from None
 
     def get(self, file_identifiers: set[str] | None = None) -> list[RecordRevision]:
         """

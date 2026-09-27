@@ -17,11 +17,14 @@ from lantern.stores.gitlab_cache import (
     CacheFrozenError,
     CacheIntegrityError,
     CacheNotInitialisedError,
+    CachePolicyDecision,
     CacheTooOutdatedError,
     GitLabCachedStore,
+    GitLabCachePolicy,
     GitLabLocalCache,
     RawRecord,
     RemoteStoreUnavailableError,
+    SourceState,
     _fetch_record_commit,
 )
 from tests.conftest import _gitlab_cache_create
@@ -32,6 +35,49 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
     from lantern.config import Config
+
+
+@pytest.mark.cov()
+class TestGitLabCachePolicy:
+    """Test GitLab local cache policy."""
+
+    @pytest.mark.parametrize(
+        ("online", "exists", "frozen", "source", "current", "expected"),
+        [
+            (False, False, False, None, None, CachePolicyDecision.ERROR_UNAVAILABLE),
+            (False, False, True, None, None, CachePolicyDecision.ERROR_UNAVAILABLE),
+            (True, False, False, None, None, CachePolicyDecision.CREATE),
+            (True, False, True, None, None, CachePolicyDecision.ERROR_EMPTY_FROZEN),
+            (False, True, False, None, None, CachePolicyDecision.CHECK_SOURCE),
+            (True, True, False, None, None, CachePolicyDecision.CHECK_SOURCE),
+            (False, True, False, SourceState.MATCH, None, CachePolicyDecision.USE_STALE),
+            (False, True, True, SourceState.MATCH, None, CachePolicyDecision.USE_STALE),
+            (False, True, True, SourceState.MISMATCH, None, CachePolicyDecision.ERROR_SOURCE_UNAVAILABLE),
+            (False, True, False, SourceState.UNINITIALISED, None, CachePolicyDecision.ERROR_SOURCE_UNAVAILABLE),
+            (True, True, False, SourceState.MISMATCH, None, CachePolicyDecision.RECREATE_SOURCE),
+            (True, True, True, SourceState.MISMATCH, None, CachePolicyDecision.ERROR_SOURCE_FROZEN),
+            (True, True, False, SourceState.UNINITIALISED, None, CachePolicyDecision.RECREATE_UNINITIALISED),
+            (True, True, True, SourceState.UNINITIALISED, None, CachePolicyDecision.ERROR_UNINITIALISED_FROZEN),
+            (True, True, True, SourceState.MATCH, None, CachePolicyDecision.USE_FROZEN),
+            (True, True, False, SourceState.MATCH, None, CachePolicyDecision.CHECK_CURRENT),
+            (True, True, False, SourceState.MATCH, False, CachePolicyDecision.REFRESH),
+            (True, True, False, SourceState.MATCH, True, CachePolicyDecision.USE_CURRENT),
+        ],
+    )
+    def test_decide(
+        self,
+        online: bool,
+        exists: bool,
+        frozen: bool,
+        source: SourceState | None,
+        current: bool | None,
+        expected: CachePolicyDecision,
+    ) -> None:
+        """Can correctly determine the action to take or error to raise based on the current cache and remote state."""
+        assert (
+            GitLabCachePolicy(online=online, exists=exists, frozen=frozen, source=source, current=current).decide()
+            is expected
+        )
 
 
 @pytest.mark.cov()
@@ -661,6 +707,35 @@ class TestGitLabLocalCache:
         fx_gitlab_cache_pop._ensure_exists()
         assert fx_gitlab_cache_pop.exists
         assert "Local cache not setup, recreating from GitLab" in caplog.text
+
+    @pytest.mark.cov()
+    @pytest.mark.parametrize("applicable", [True, False])
+    def test_ensure_exists_offline_frozen(
+        self, mocker: MockerFixture, fx_gitlab_cache_pop: GitLabLocalCache, applicable: bool
+    ):
+        """Can get records when frozen but only when remote source is applicable."""
+        fx_gitlab_cache_pop._frozen = True
+        mocker.patch.object(type(fx_gitlab_cache_pop), "_online", new_callable=PropertyMock, return_value=False)
+        mocker.patch.object(
+            type(fx_gitlab_cache_pop), "_applicable", new_callable=PropertyMock, return_value=applicable
+        )
+
+        if applicable:
+            assert len(fx_gitlab_cache_pop.get()) == 1
+        else:
+            with pytest.raises(RemoteStoreUnavailableError):
+                fx_gitlab_cache_pop.get()
+
+    @pytest.mark.cov()
+    def test_ensure_exists_frozen_missing_source(self, mocker: MockerFixture, fx_gitlab_cache_pop: GitLabLocalCache):
+        """Can distinguish between an unprocessed vs. inapplicable remote source when frozen."""
+        fx_gitlab_cache_pop._frozen = True
+        mocker.patch.object(type(fx_gitlab_cache_pop), "_online", new_callable=PropertyMock, return_value=True)
+        with fx_gitlab_cache_pop._engine as tx:
+            tx.execute("DELETE FROM meta WHERE key LIKE 'source_%';")
+
+        with pytest.raises(CacheFrozenError, match="Local cache not setup and is frozen"):
+            fx_gitlab_cache_pop._ensure_exists()
 
     @pytest.mark.vcr
     @pytest.mark.block_network

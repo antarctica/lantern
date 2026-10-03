@@ -64,10 +64,11 @@ class Check:
     """
     Site check.
 
-    Used to verify the contents of a site or a resource within a site.
+    Used to verify the contents of a site, resource or resource artefact within a site or resource.
 
     - type: see CheckType
-    - url: fully qualified URL to check
+    - url: fully qualified (canonical) URL to check and use in reporting
+    - access_url: optional alternative URL to check (e.g. presigned), not used for reporting
     - http_method: HTTP method to use for check (HEAD is preferred to minimise content but some endpoints lack support)
     - http_status: expected HTTP status (200, 301, etc.)
     - http_auth: required authentication options [Sensitive]
@@ -80,6 +81,13 @@ class Check:
     - duration: duration of check processing as measured by `time`
     - result_http_status: HTTP status of check, compared against expected status
     - result_output: output of check, for reporting/troubleshooting
+
+    `access_url`'s are intended where a canonical URL cannot be checked directly, or doing so is less preferable. Where
+    set the `access_url` will be checked instead of the `url` (not both) and the results attributed to the `url`.
+
+    This is intended for services hosting restricted content where a presigned URL can be used to ease access, or where
+    an API can be used to be check known resources more reliably than checking the canonical URLs directly (as the data
+    should be easier to parse and give a more reliable/accurate result).
     """
 
     type: CheckType
@@ -89,6 +97,7 @@ class Check:
     http_auth: AuthBase | None = None
     content_length: int | None = None
     redirect_location: str | None = None
+    access_url: str | None = None
     file_identifier: str | None = None
 
     state: CheckState = CheckState.PENDING

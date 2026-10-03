@@ -22,6 +22,11 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 
 * `contrib.deployment_updates` renamed to `contrib.post_deployment_updates` for clarity
 * Switching from Pre-Commit to Prek for git pre-commit runner
+* `LANTERN_CHECKS_MAGIC_PRODUCTS_TENANT_ID` config option renamed to `LANTERN_CHECKS_MAGIC_RESOURCES_TENANT_ID`
+* `LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_ID` config option renamed to `LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_ID`
+* `LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET` config option renamed to `LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_SECRET`
+* `LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_ID` config option renamed to `LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_ID`
+* `LANTERN_CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_EXP` config option renamed to `LANTERN_CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_EXP`
 
 ### Removed [BREAKING!]
 
@@ -32,7 +37,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * `AGENTS.md` file to provide concise context and structure to LLM tools
 * Shared helper for OpenGraph and Schema.org metadata fields to reduce repetition
 * Microsoft distributor contact metadata preset
-* MAGIC distribution library for depositing supported file artefacts to SharePoint Online
+* Library for MAGIC Resource Distribution service for depositing supported file artefacts to SharePoint Online
 * `check-artefacts` and `deposit-artefacts` development tasks
 * Conformance information for MAGIC metadata profiles and constraint frameworks
 * Initial data publishing workflow for Rothera station orthomosaics via a development task
@@ -65,6 +70,8 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Terraform IaC configuration moved to MAGIC Terraform project
 * `SiteEntry` added as a `SiteContent` parent class for situations where actual content isn't needed
 * `GitLabLocalCache._ensure_exists` refactored and simplified to use a `GitLabCachePolicy` class
+* Refactoring checks to use `access_url` where a transformed version of the canonical is needed (presigned, etc.)
+* Refactoring checks for MAGIC Resource Distribution hosted files to use SharePoint client
 
 ### Removed [BREAKING!]
 

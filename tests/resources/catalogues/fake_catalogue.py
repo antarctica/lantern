@@ -42,8 +42,8 @@ class FakeCatalogue(CatalogueBase):
         self._site_extras = {
             "site_records_count": len(self._store),
             "search_records_count": -1,  # not available
-            "entra_secret_expiry": self._config.CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_EXP,
-            "entra_secret_id": self._config.CHECKS_MAGIC_PRODUCTS_CLIENT_SECRET_ID,
+            "entra_secret_expiry": self._config.CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_EXP,
+            "entra_secret_id": self._config.CHECKS_MAGIC_RESOURCES_CLIENT_SECRET_ID,
         }
 
     @time_task(label="Export site")

@@ -1,3 +1,7 @@
+from pathlib import Path
+from urllib.parse import urlencode, urlparse, urlunparse
+
+from lantern.lib.magic_distribution.models.artefact import ArtefactLocalFile
 from lantern.lib.metadata_library.models.record.elements.common import (
     Address,
     Contact,
@@ -25,6 +29,7 @@ from tests.resources.records.utils import make_record
 
 # An open-access record to test all supported data formats.
 
+file_identifier = "f90013f6-2893-4c72-953a-a1a6bc1919d7"
 
 abstract = """
 Item to test all supported data formats:
@@ -37,6 +42,12 @@ Item to test all supported data formats:
 - ArcGIS Web Map
 - BAS SAN (not format based/aware)
 - BAS Paper Map ordering (not format based/aware)
+
+> [!NOTE]
+> Downloads for these formats link against
+> [Sample Artefacts](https://github.com/antarctica/lantern/blob/main/docs/dev.md#test-artefacts) but with exaggerated
+> file sizes to test the 'humanise' logic used when file sizes are expressed in bytes.
+
 - CSV
 - FPL
 - GeoPackage (optional compression)
@@ -49,6 +60,36 @@ Item to test all supported data formats:
 - Shapefile (required compression)
 - GeoTIFF (required georeferencing)
 """
+
+
+def _make_dist_opt_for_artefact(path: Path, fake_size: int | None = None) -> Distribution:
+    """
+    Generate a record distribution option for a given sample artefact.
+
+    It is assumed `path` is to a sample file in, and relative to, ./tests/resources/artefacts/` (which is accessible
+    through the test site at `/.sample-artefacts/`). For example `path=Path('csv/sample.csv')`.
+
+    For simulating file size handling for larger files, the file size can optionally be overridden with a fake value.
+    """
+    file_path = Path(__file__).parent.parent / "artefacts" / path
+    artefact = ArtefactLocalFile(resource_id=file_identifier, artefact_path=file_path)
+    params = {"sha256": artefact.sha256, "quickxor": artefact.quickxor}
+    href = urlunparse(urlparse(str(Path("/.sample-artefacts") / path))._replace(query=urlencode(params)))
+
+    return Distribution(
+        distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
+        format=artefact.distribution_format,
+        transfer_option=TransferOption(
+            online_resource=OnlineResource(
+                href=href,
+                function=OnlineResourceFunctionCode.DOWNLOAD,
+                title=artefact.format.name,
+                description=artefact.format.description,
+            ),
+            size=Size(unit="bytes", magnitude=fake_size or file_path.stat().st_size),
+        ),
+    )
+
 
 distributions = {
     "ArcGIS Feature Layer": Distribution(
@@ -414,492 +455,25 @@ distributions = {
             )
         ),
     ),
-    "CSV": Distribution(
-        distributor=Contact(
-            organisation=ContactIdentity(
-                name="Mapping and Geographic Information Centre, British Antarctic Survey",
-                href="https://ror.org/01rhff309",
-                title="ror",
-            ),
-            phone="+44 (0)1223 221400",
-            email="magic@bas.ac.uk",
-            address=Address(
-                delivery_point="British Antarctic Survey, High Cross, Madingley Road",
-                city="Cambridge",
-                administrative_area="Cambridgeshire",
-                postal_code="CB3 0ET",
-                country="United Kingdom",
-            ),
-            online_resource=OnlineResource(
-                href="https://www.bas.ac.uk/teams/magic",
-                title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-                description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
-                function=OnlineResourceFunctionCode.INFORMATION,
-            ),
-            role={ContactRoleCode.DISTRIBUTOR},
-        ),
-        format=Format(
-            format=DistributionType.CSV.value,
-            href="https://www.iana.org/assignments/media-types/text/csv",
-        ),
-        transfer_option=TransferOption(
-            size=Size(unit="bytes", magnitude=12 * 1024),
-            online_resource=OnlineResource(
-                href="x",
-                function=OnlineResourceFunctionCode.DOWNLOAD,
-                title="CSV",
-            ),
-        ),
+    "CSV": _make_dist_opt_for_artefact(path=Path("csv/sample.csv"), fake_size=12 * 1024),
+    "FPL": _make_dist_opt_for_artefact(path=Path("fpl/sample.fpl"), fake_size=12 * 1024 * 1024),
+    "GeoPackage": _make_dist_opt_for_artefact(
+        path=Path("gpkg/sample.gpkg"), fake_size=21 * 1024 * 1024 * 1024 * 1024 * 1024 * 1024
     ),
-    "FPL": Distribution(
-        distributor=Contact(
-            organisation=ContactIdentity(
-                name="Mapping and Geographic Information Centre, British Antarctic Survey",
-                href="https://ror.org/01rhff309",
-                title="ror",
-            ),
-            phone="+44 (0)1223 221400",
-            email="magic@bas.ac.uk",
-            address=Address(
-                delivery_point="British Antarctic Survey, High Cross, Madingley Road",
-                city="Cambridge",
-                administrative_area="Cambridgeshire",
-                postal_code="CB3 0ET",
-                country="United Kingdom",
-            ),
-            online_resource=OnlineResource(
-                href="https://www.bas.ac.uk/teams/magic",
-                title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-                description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
-                function=OnlineResourceFunctionCode.INFORMATION,
-            ),
-            role={ContactRoleCode.DISTRIBUTOR},
-        ),
-        format=Format(
-            format=DistributionType.FPL.value,
-            href="https://metadata-resources.data.bas.ac.uk/media-types/application/fpl+xml",
-        ),
-        transfer_option=TransferOption(
-            size=Size(unit="bytes", magnitude=12 * 1024 * 1024),
-            online_resource=OnlineResource(
-                href="x",
-                function=OnlineResourceFunctionCode.DOWNLOAD,
-                title="FPL",
-                description="Download information as a file suitable for Garmin Aircraft GPS devices.",
-            ),
-        ),
+    "GeoPackage (Zipped)": _make_dist_opt_for_artefact(
+        path=Path("gpkg_zip/sample.gpkg.zip"), fake_size=18 * 1024 * 1024 * 1024 * 1024 * 1024
     ),
-    "GeoPackage": Distribution(
-        distributor=Contact(
-            organisation=ContactIdentity(
-                name="Mapping and Geographic Information Centre, British Antarctic Survey",
-                href="https://ror.org/01rhff309",
-                title="ror",
-            ),
-            phone="+44 (0)1223 221400",
-            email="magic@bas.ac.uk",
-            address=Address(
-                delivery_point="British Antarctic Survey, High Cross, Madingley Road",
-                city="Cambridge",
-                administrative_area="Cambridgeshire",
-                postal_code="CB3 0ET",
-                country="United Kingdom",
-            ),
-            online_resource=OnlineResource(
-                href="https://www.bas.ac.uk/teams/magic",
-                title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-                description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
-                function=OnlineResourceFunctionCode.INFORMATION,
-            ),
-            role={ContactRoleCode.DISTRIBUTOR},
-        ),
-        format=Format(
-            format=DistributionType.GEOPACKAGE.value,
-            href="https://www.iana.org/assignments/media-types/application/geopackage+sqlite3",
-        ),
-        transfer_option=TransferOption(
-            size=Size(unit="bytes", magnitude=21 * 1024 * 1024 * 1024 * 1024 * 1024 * 1024),
-            online_resource=OnlineResource(
-                href="x",
-                function=OnlineResourceFunctionCode.DOWNLOAD,
-                title="GeoPackage",
-            ),
-        ),
+    "GPX": _make_dist_opt_for_artefact(path=Path("gpx/sample.gpx"), fake_size=12 * 1024 * 1024 * 1024),
+    "JPEG": _make_dist_opt_for_artefact(path=Path("jpeg/sample.jpg"), fake_size=15 * 1024 * 1024 * 1024 * 1024),
+    "GeoJSON": _make_dist_opt_for_artefact(
+        path=Path("geojson/sample.json"), fake_size=24 * 1024 * 1024 * 1024 * 1024 * 1024 * 1024 * 1024
     ),
-    "GeoPackage (Zipped)": Distribution(
-        distributor=Contact(
-            organisation=ContactIdentity(
-                name="Mapping and Geographic Information Centre, British Antarctic Survey",
-                href="https://ror.org/01rhff309",
-                title="ror",
-            ),
-            phone="+44 (0)1223 221400",
-            email="magic@bas.ac.uk",
-            address=Address(
-                delivery_point="British Antarctic Survey, High Cross, Madingley Road",
-                city="Cambridge",
-                administrative_area="Cambridgeshire",
-                postal_code="CB3 0ET",
-                country="United Kingdom",
-            ),
-            online_resource=OnlineResource(
-                href="https://www.bas.ac.uk/teams/magic",
-                title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-                description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
-                function=OnlineResourceFunctionCode.INFORMATION,
-            ),
-            role={ContactRoleCode.DISTRIBUTOR},
-        ),
-        format=Format(
-            format=DistributionType.GEOPACKAGE_ZIP.value,
-            href="https://metadata-resources.data.bas.ac.uk/media-types/application/geopackage+sqlite3+zip",
-        ),
-        transfer_option=TransferOption(
-            size=Size(unit="bytes", magnitude=18 * 1024 * 1024 * 1024 * 1024 * 1024),
-            online_resource=OnlineResource(
-                href="x",
-                function=OnlineResourceFunctionCode.DOWNLOAD,
-                title="GeoPackage (Zipped)",
-                description="Download information as a GeoPackage file, compressed as a Zip archive.",
-            ),
-        ),
-    ),
-    "GPX": Distribution(
-        distributor=Contact(
-            organisation=ContactIdentity(
-                name="Mapping and Geographic Information Centre, British Antarctic Survey",
-                href="https://ror.org/01rhff309",
-                title="ror",
-            ),
-            phone="+44 (0)1223 221400",
-            email="magic@bas.ac.uk",
-            address=Address(
-                delivery_point="British Antarctic Survey, High Cross, Madingley Road",
-                city="Cambridge",
-                administrative_area="Cambridgeshire",
-                postal_code="CB3 0ET",
-                country="United Kingdom",
-            ),
-            online_resource=OnlineResource(
-                href="https://www.bas.ac.uk/teams/magic",
-                title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-                description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
-                function=OnlineResourceFunctionCode.INFORMATION,
-            ),
-            role={ContactRoleCode.DISTRIBUTOR},
-        ),
-        format=Format(
-            format=DistributionType.GPX.value,
-            href="https://metadata-resources.data.bas.ac.uk/media-types/application/gpx+xml",
-        ),
-        transfer_option=TransferOption(
-            size=Size(unit="bytes", magnitude=12 * 1024 * 1024 * 1024),
-            online_resource=OnlineResource(
-                href="x",
-                function=OnlineResourceFunctionCode.DOWNLOAD,
-                title="GPX",
-                description="Download information as a file suitable for most GPS devices.",
-            ),
-        ),
-    ),
-    "JPEG": Distribution(
-        distributor=Contact(
-            organisation=ContactIdentity(
-                name="Mapping and Geographic Information Centre, British Antarctic Survey",
-                href="https://ror.org/01rhff309",
-                title="ror",
-            ),
-            phone="+44 (0)1223 221400",
-            email="magic@bas.ac.uk",
-            address=Address(
-                delivery_point="British Antarctic Survey, High Cross, Madingley Road",
-                city="Cambridge",
-                administrative_area="Cambridgeshire",
-                postal_code="CB3 0ET",
-                country="United Kingdom",
-            ),
-            online_resource=OnlineResource(
-                href="https://www.bas.ac.uk/teams/magic",
-                title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-                description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
-                function=OnlineResourceFunctionCode.INFORMATION,
-            ),
-            role={ContactRoleCode.DISTRIBUTOR},
-        ),
-        format=Format(
-            format=DistributionType.JPEG.value,
-            href="https://www.iana.org/assignments/media-types/image/jpeg",
-        ),
-        transfer_option=TransferOption(
-            size=Size(unit="bytes", magnitude=15 * 1024 * 1024 * 1024 * 1024),
-            online_resource=OnlineResource(
-                href="x",
-                function=OnlineResourceFunctionCode.DOWNLOAD,
-                title="JPEG",
-            ),
-        ),
-    ),
-    "GeoJSON": Distribution(
-        distributor=Contact(
-            organisation=ContactIdentity(
-                name="Mapping and Geographic Information Centre, British Antarctic Survey",
-                href="https://ror.org/01rhff309",
-                title="ror",
-            ),
-            phone="+44 (0)1223 221400",
-            email="magic@bas.ac.uk",
-            address=Address(
-                delivery_point="British Antarctic Survey, High Cross, Madingley Road",
-                city="Cambridge",
-                administrative_area="Cambridgeshire",
-                postal_code="CB3 0ET",
-                country="United Kingdom",
-            ),
-            online_resource=OnlineResource(
-                href="https://www.bas.ac.uk/teams/magic",
-                title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-                description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
-                function=OnlineResourceFunctionCode.INFORMATION,
-            ),
-            role={ContactRoleCode.DISTRIBUTOR},
-        ),
-        format=Format(
-            format=DistributionType.JSON_GEO.value,
-            href="https://www.iana.org/assignments/media-types/application/geo+json",
-        ),
-        transfer_option=TransferOption(
-            size=Size(unit="bytes", magnitude=24 * 1024 * 1024 * 1024 * 1024 * 1024 * 1024 * 1024),
-            online_resource=OnlineResource(
-                href="x",
-                function=OnlineResourceFunctionCode.DOWNLOAD,
-                title="GeoJSON",
-            ),
-        ),
-    ),
-    "MapBox Vector Tile": Distribution(
-        distributor=Contact(
-            organisation=ContactIdentity(
-                name="Mapping and Geographic Information Centre, British Antarctic Survey",
-                href="https://ror.org/01rhff309",
-                title="ror",
-            ),
-            phone="+44 (0)1223 221400",
-            email="magic@bas.ac.uk",
-            address=Address(
-                delivery_point="British Antarctic Survey, High Cross, Madingley Road",
-                city="Cambridge",
-                administrative_area="Cambridgeshire",
-                postal_code="CB3 0ET",
-                country="United Kingdom",
-            ),
-            online_resource=OnlineResource(
-                href="https://www.bas.ac.uk/teams/magic",
-                title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-                description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
-                function=OnlineResourceFunctionCode.INFORMATION,
-            ),
-            role={ContactRoleCode.DISTRIBUTOR},
-        ),
-        format=Format(
-            format=DistributionType.MAPBOX_VECTOR_TILE.value,
-            href="https://www.iana.org/assignments/media-types/application/vnd.mapbox-vector-tile",
-        ),
-        transfer_option=TransferOption(
-            size=Size(unit="bytes", magnitude=16 * 1024 * 1024),
-            online_resource=OnlineResource(
-                href="x",
-                function=OnlineResourceFunctionCode.DOWNLOAD,
-                title="MapBox Vector Tiles",
-            ),
-        ),
-    ),
-    "PDF": Distribution(
-        distributor=Contact(
-            organisation=ContactIdentity(
-                name="Mapping and Geographic Information Centre, British Antarctic Survey",
-                href="https://ror.org/01rhff309",
-                title="ror",
-            ),
-            phone="+44 (0)1223 221400",
-            email="magic@bas.ac.uk",
-            address=Address(
-                delivery_point="British Antarctic Survey, High Cross, Madingley Road",
-                city="Cambridge",
-                administrative_area="Cambridgeshire",
-                postal_code="CB3 0ET",
-                country="United Kingdom",
-            ),
-            online_resource=OnlineResource(
-                href="https://www.bas.ac.uk/teams/magic",
-                title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-                description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
-                function=OnlineResourceFunctionCode.INFORMATION,
-            ),
-            role={ContactRoleCode.DISTRIBUTOR},
-        ),
-        format=Format(
-            format=DistributionType.PDF.value,
-            href="https://www.iana.org/assignments/media-types/application/pdf",
-        ),
-        transfer_option=TransferOption(
-            size=Size(unit="bytes", magnitude=12 * 1024 * 1024 * 1024),
-            online_resource=OnlineResource(
-                href="x",
-                function=OnlineResourceFunctionCode.DOWNLOAD,
-                title="PDF",
-            ),
-        ),
-    ),
-    "PDF (GeoReferenced)": Distribution(
-        distributor=Contact(
-            organisation=ContactIdentity(
-                name="Mapping and Geographic Information Centre, British Antarctic Survey",
-                href="https://ror.org/01rhff309",
-                title="ror",
-            ),
-            phone="+44 (0)1223 221400",
-            email="magic@bas.ac.uk",
-            address=Address(
-                delivery_point="British Antarctic Survey, High Cross, Madingley Road",
-                city="Cambridge",
-                administrative_area="Cambridgeshire",
-                postal_code="CB3 0ET",
-                country="United Kingdom",
-            ),
-            online_resource=OnlineResource(
-                href="https://www.bas.ac.uk/teams/magic",
-                title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-                description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
-                function=OnlineResourceFunctionCode.INFORMATION,
-            ),
-            role={ContactRoleCode.DISTRIBUTOR},
-        ),
-        format=Format(
-            format=DistributionType.PDF_GEO.value,
-            href="https://metadata-resources.data.bas.ac.uk/media-types/application/geo+pdf",
-        ),
-        transfer_option=TransferOption(
-            size=Size(unit="bytes", magnitude=9 * 1024 * 1024),
-            online_resource=OnlineResource(
-                href="x",
-                function=OnlineResourceFunctionCode.DOWNLOAD,
-                title="PDF (Georeferenced)",
-                description="Download information as a PDF with embedded georeferencing.",
-            ),
-        ),
-    ),
-    "PNG": Distribution(
-        distributor=Contact(
-            organisation=ContactIdentity(
-                name="Mapping and Geographic Information Centre, British Antarctic Survey",
-                href="https://ror.org/01rhff309",
-                title="ror",
-            ),
-            phone="+44 (0)1223 221400",
-            email="magic@bas.ac.uk",
-            address=Address(
-                delivery_point="British Antarctic Survey, High Cross, Madingley Road",
-                city="Cambridge",
-                administrative_area="Cambridgeshire",
-                postal_code="CB3 0ET",
-                country="United Kingdom",
-            ),
-            online_resource=OnlineResource(
-                href="https://www.bas.ac.uk/teams/magic",
-                title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-                description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
-                function=OnlineResourceFunctionCode.INFORMATION,
-            ),
-            role={ContactRoleCode.DISTRIBUTOR},
-        ),
-        format=Format(
-            format=DistributionType.PNG.value,
-            href="https://www.iana.org/assignments/media-types/image/png",
-        ),
-        transfer_option=TransferOption(
-            size=Size(unit="bytes", magnitude=6 * 1024),
-            online_resource=OnlineResource(
-                href="x",
-                function=OnlineResourceFunctionCode.DOWNLOAD,
-                title="PNG",
-            ),
-        ),
-    ),
-    "Shapefile (Zipped)": Distribution(
-        distributor=Contact(
-            organisation=ContactIdentity(
-                name="Mapping and Geographic Information Centre, British Antarctic Survey",
-                href="https://ror.org/01rhff309",
-                title="ror",
-            ),
-            phone="+44 (0)1223 221400",
-            email="magic@bas.ac.uk",
-            address=Address(
-                delivery_point="British Antarctic Survey, High Cross, Madingley Road",
-                city="Cambridge",
-                administrative_area="Cambridgeshire",
-                postal_code="CB3 0ET",
-                country="United Kingdom",
-            ),
-            online_resource=OnlineResource(
-                href="https://www.bas.ac.uk/teams/magic",
-                title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-                description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
-                function=OnlineResourceFunctionCode.INFORMATION,
-            ),
-            role={ContactRoleCode.DISTRIBUTOR},
-        ),
-        format=Format(
-            format=DistributionType.SHAPEFILE_ZIP.value,
-            href="https://metadata-resources.data.bas.ac.uk/media-types/application/vnd.shp+zip",
-        ),
-        transfer_option=TransferOption(
-            size=Size(unit="bytes", magnitude=3),
-            online_resource=OnlineResource(
-                href="x",
-                function=OnlineResourceFunctionCode.DOWNLOAD,
-                title="Shapefile (Zipped)",
-                description="Download information as an Esri Shapefile, compressed as a Zip archive.",
-            ),
-        ),
-    ),
-    "GeoTIFF": Distribution(
-        distributor=Contact(
-            organisation=ContactIdentity(
-                name="Mapping and Geographic Information Centre, British Antarctic Survey",
-                href="https://ror.org/01rhff309",
-                title="ror",
-            ),
-            phone="+44 (0)1223 221400",
-            email="magic@bas.ac.uk",
-            address=Address(
-                delivery_point="British Antarctic Survey, High Cross, Madingley Road",
-                city="Cambridge",
-                administrative_area="Cambridgeshire",
-                postal_code="CB3 0ET",
-                country="United Kingdom",
-            ),
-            online_resource=OnlineResource(
-                href="https://www.bas.ac.uk/teams/magic",
-                title="Mapping and Geographic Information Centre (MAGIC) - BAS public website",
-                description="General information about the BAS Mapping and Geographic Information Centre (MAGIC) from the British Antarctic Survey (BAS) public website.",
-                function=OnlineResourceFunctionCode.INFORMATION,
-            ),
-            role={ContactRoleCode.DISTRIBUTOR},
-        ),
-        format=Format(
-            format=DistributionType.TIFF_GEO.value,
-            href="https://metadata-resources.data.bas.ac.uk/media-types/image/geo+tiff",
-        ),
-        transfer_option=TransferOption(
-            size=Size(unit="bytes", magnitude=36 * 1024 * 1024 * 1024 * 1024),
-            online_resource=OnlineResource(
-                href="x",
-                function=OnlineResourceFunctionCode.DOWNLOAD,
-                title="GeoTIFF",
-            ),
-        ),
-    ),
+    "MapBox Vector Tile": _make_dist_opt_for_artefact(path=Path("mbtiles/sample.mbtiles"), fake_size=16 * 1024 * 1024),
+    "PDF": _make_dist_opt_for_artefact(path=Path("pdf/sample.pdf"), fake_size=12 * 1024 * 1024 * 1024),
+    "PDF (GeoReferenced)": _make_dist_opt_for_artefact(path=Path("pdf_geo/sample.pdf"), fake_size=9 * 1024 * 1024),
+    "PNG": _make_dist_opt_for_artefact(path=Path("png/sample.png"), fake_size=6 * 1024),
+    "Shapefile (Zipped)": _make_dist_opt_for_artefact(path=Path("shp_zip/sample.shp.zip"), fake_size=3),
+    "GeoTIFF": _make_dist_opt_for_artefact(path=Path("tiff_geo/sample.tiff"), fake_size=36 * 1024 * 1024 * 1024 * 1024),
     "X - BAS Published Map Ordering": Distribution(
         distributor=Contact(
             organisation=ContactIdentity(

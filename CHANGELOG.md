@@ -38,6 +38,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * Shared helper for OpenGraph and Schema.org metadata fields to reduce repetition
 * Microsoft distributor contact metadata preset
 * Library for MAGIC Resource Distribution service for depositing supported file artefacts to SharePoint Online
+* Sample files for formats supported by MAGIC Resource Distribution and Catalogue item distribution options
 * `check-artefacts` and `deposit-artefacts` development tasks
 * Conformance information for MAGIC metadata profiles and constraint frameworks
 * Initial data publishing workflow for Rothera station orthomosaics via a development task

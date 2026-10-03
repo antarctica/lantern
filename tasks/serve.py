@@ -1,6 +1,7 @@
 # Preview local site with CORS support
 
 import csv
+import os
 import ssl
 from base64 import b64encode
 from functools import partial
@@ -196,10 +197,11 @@ def run(
 
     Note: Where host is `127.0.0.1`, `localhost` is used for compatibility with Font Awesome icon kits.
     """
+    doc_root = Path(raw_path)
+    project_root = Path(__file__).parent.parent
     host_display = "localhost" if host == "127.0.0.1" else host
-    path = Path(raw_path)
-    handler = partial(RequestHandler, directory=path, username=username, password=password)
-    _load_redirects(base_path=path)
+    handler = partial(RequestHandler, directory=doc_root, username=username, password=password)
+    _load_redirects(base_path=doc_root)
 
     # Create self-signed certificate using trustme
     ca = trustme.CA()
@@ -211,16 +213,28 @@ def run(
 
     with ThreadingHTTPServer((host, port), handler) as httpd:
         httpd.socket = ssl_context.wrap_socket(httpd.socket, server_side=True)
-        print(f"- serving {path.resolve()} at https://{host_display}:{port}")
+        print(f"- serving {doc_root.resolve()} at https://{host_display}:{port}")
         print(f"- loaded {len(REDIRECTS)} redirects")
         print(f"- using {len(MEDIA_TYPES)} extra content-type mappings")
         print(
             f"- use username '{username}' and password '{password}' to access restricted content under '{BASIC_AUTH_PATH}'"
         )
         print("- ⚠️ using self-signed certificate which will trigger security warnings in clients")
-        if not path.joinpath("-/items").is_dir():
+
+        # If needed, create a relative symlink at '/.sample-artefacts' to `./tests/resources/artefacts`.
+        # Enables e.g. './tests/resources/artefacts/csv/sample.csv' to be available at
+        # '/.sample-artefacts/csv/sample.csv'.
+        symlink_path = doc_root / ".sample-artefacts"
+        symlink_target = project_root / "tests" / "resources" / "artefacts"
+        if not symlink_path.exists() or not symlink_path.is_symlink():
+            print("Symlinking %s to %s", symlink_path.resolve(), symlink_target.resolve())
+            relative_target = os.path.relpath(symlink_target, symlink_path.parent)
+            symlink_path.symlink_to(relative_target, target_is_directory=True)
+
+        # The trusted content symlink should be created by FakeCatalogue so isn't repeated here.
+        if not doc_root.joinpath("-/items").is_dir():
             print(
-                f"\n**Note:** Run `ln -s ../../export-trusted/items items` or similar from `{path.resolve()}/-` to simulate reverse proxy."
+                "\n**Note:** The FakeCatalogue should have created a symlink for `/-/items` to simulate the reverse proxy."
             )
 
         try:

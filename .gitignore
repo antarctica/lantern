@@ -41,4 +41,5 @@ htmlcov/
 /agol-item-backups/
 /workflow_results/
 /.cache/
+/exp/
 .env

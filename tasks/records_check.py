@@ -83,9 +83,10 @@ def _get_args(
         params = f"task check-records --force --branch {branch} --target {target} --env {env} {_records_param}"
         return env, target, branch, identifiers, params
 
-    env = inquirer.list_input(message="Site environment (testing/live)", choices=get_args(SiteEnvironment), default=env)
-    target = inquirer.list_input(message="Export target (local/remote)", choices=get_args(ExportTarget), default=target)
-    branch = inquirer.text(message="Branch", default=branch)
+    env = inquirer.list_input(message="Site environment", choices=get_args(SiteEnvironment), default=env)
+    _targets = ["local"] if env == "preview" else get_args(ExportTarget)
+    target = inquirer.list_input(message="Export target (local/remote)", choices=_targets, default=target)
+    branch = inquirer.list_input(message="Branch", choices=cat.repo.select_branches())
 
     if identifiers:
         logger.info("Record identifiers from command line arguments:")

@@ -131,11 +131,11 @@ Checks verify:
 > Checks are not run for:
 >
 > - BAS SAN distribution options
-> - SharePoint distribution options, except where hosted within the MAGIC Products Distribution Service
+> - SharePoint distribution options not hosted within the MAGIC Resource Distribution service
 > - DOI redirects where not using the live site environment (as these only work in production)
 
-Checks are intended to verify a whole site, including all records within a store, systematically on a regular basis.
-Ad-hoc checks for specific records CAN be run as part of record publishing workflows.
+Checks are intended to verify a whole site, including all records within a store and their distribution options,
+systematically on a regular basis. Ad-hoc checks for specific records CAN be run as part of record publishing workflows.
 
 Checks are generated in a pending state for site content by [Outputs](/docs/architecture.md#outputs) alongside their
 content, via the [Site](/docs/architecture.md#sites) class.

@@ -84,7 +84,8 @@ def _get_args(
         return env, target, branch, identifiers, params
 
     env = inquirer.list_input(message="Site environment (testing/live)", choices=get_args(SiteEnvironment), default=env)
-    target = inquirer.list_input(message="Export target (local/remote)", choices=get_args(ExportTarget), default=target)
+    _targets = ["local"] if env == "preview" else get_args(ExportTarget)
+    target = inquirer.list_input(message="Export target (local/remote)", choices=_targets, default=target)
     branch = inquirer.list_input(message="Branch", choices=cat.repo.select_branches())
 
     if identifiers:

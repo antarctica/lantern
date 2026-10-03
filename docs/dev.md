@@ -359,6 +359,11 @@ In the `tests.lantern_tests.test_config` module:
 - if configurable, update the `test_configurable_property` method
 - update or create other tests as needed
 
+Check if downstream resources need updating:
+
+- [Contrib Modules](/docs/contrib.md)
+- [Ansible Role](/docs/deployment.md#ansible-role)
+
 ### Adding catalogue item types
 
 > [!WARNING]
@@ -964,6 +969,21 @@ record.
 > Run the `build-test-records` [Development Task](#development-tasks) to export a static site using these records.
 >
 > Run the `serve` task to host an exported static site, with real or test records, locally.
+
+### Test artefacts
+
+`test.resources.artefacts`
+
+To aid in testing, a set of sample files are included for formats supported by catalogue item
+[Distribution Options](/docs/models.md#catalogue-item-supported-distribution-options) and
+[MAGIC Resource Distribution](/docs/libraries.md#supported-file-formats) library artefacts.
+
+These files are used within tests but CAN be used for other purposes within the
+[Development Web Server](#development-web-server), under `/.sample-artefacts`.
+
+> [!NOTE]
+> These sample files are based on the same simple point dataset, encoded in the relevant file format where possible.
+> I.e. the sample GeoJSON and GEOTIFF files represent the same dataset (despite being a mix of vector and raster files).
 
 ### Test stores
 

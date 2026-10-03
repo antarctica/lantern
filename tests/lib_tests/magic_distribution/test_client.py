@@ -50,9 +50,8 @@ class TestMagicResourceDistributionClient:
             site_id="x",
             library_name="x",
         )
-
-        token = client._graph_token
-        assert len(token) > 0
+        result = client._graph_token
+        assert len(result) > 0
 
     @pytest.mark.cov()
     def test_drive_id(self, mocker: MockerFixture):
@@ -288,6 +287,7 @@ class TestMagicResourceDistributionClient:
         mocker.patch.object(
             fx_lib_magic_dist_client, "_create_sharepoint_artefact", return_value=fx_lib_artefact_sharepoint
         )
+        mocker.patch.object(fx_lib_magic_dist_client, "_get_drive_item", return_value=None)
 
         assert fx_lib_magic_dist_client.lookup_artefact(url="x") == fx_lib_artefact_sharepoint
 

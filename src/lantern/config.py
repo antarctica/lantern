@@ -262,6 +262,7 @@ class Config:  # noqa: PLW1641
         """ADMIN_METADATA_ENCRYPTION_KEY_PRIVATE with value redacted."""
         return self._safe_value if self.ADMIN_METADATA_KEYS.encryption_private else ""
 
+    # noinspection argument-list
     @property
     def STORE_GITLAB_ENDPOINT(self) -> str:
         """Endpoint for GitLab store."""
@@ -339,6 +340,7 @@ class Config:  # noqa: PLW1641
         """Base URL for Embedded Maps Service to generate extent maps in items extent tab."""
         return "https://embedded-maps.data.bas.ac.uk/v1"
 
+    # noinspection argument-list
     @property
     def TEMPLATES_ITEM_CONTACT_ENDPOINT(self) -> str:
         """Endpoint for contact form in items contact tab."""
@@ -351,6 +353,7 @@ class Config:  # noqa: PLW1641
         with self._env.prefixed(self._app_prefix), self._env.prefixed("TEMPLATES_"):
             return self._env.str("TURNSTILE_KEY")
 
+    # noinspection argument-list
     @property
     def TEMPLATES_ITEM_VERSIONS_ENDPOINT(self) -> str:
         """
@@ -402,6 +405,7 @@ class Config:  # noqa: PLW1641
         with self._env.prefixed(self._app_prefix), self._env.prefixed("SITE_UNTRUSTED_S3_"):
             return self._env.str("BUCKET_LIVE")
 
+    # noinspection argument-list
     @property
     def SITE_UNTRUSTED_CLOUDFRONT_DIST_LIVE(self) -> str:
         """AWS CloudFront distribution for untrusted site content (live environment)."""
@@ -452,6 +456,7 @@ class Config:  # noqa: PLW1641
         with self._env.prefixed(self._app_prefix), self._env.prefixed("SITE_TRUSTED_RSYNC_"):
             return self._env.path("BASE_PATH_LIVE")
 
+    # noinspection argument-list
     @property
     def BASE_URL_TESTING(self) -> str:
         """
@@ -462,6 +467,7 @@ class Config:  # noqa: PLW1641
         with self._env.prefixed(self._app_prefix), self._env.prefixed("BASE_URL_"):
             return self._env.str("TESTING", validate=validate.URL())
 
+    # noinspection argument-list
     @property
     def BASE_URL_LIVE(self) -> str:
         """

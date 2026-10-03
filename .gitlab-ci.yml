@@ -12,11 +12,9 @@ stages:
   - 📣 release
 
 variables:
-  # Image
-  UV_VERSION: "0.12.0"
+  # UV
   PYTHON_VERSION: "3.12"
-
-  # Setup
+  UV_VERSION: "0.12.22"
   UV_PYTHON_PREFERENCE: "only-managed"
 
   # App
@@ -47,7 +45,7 @@ variables:
   # - OP_SERVICE_ACCOUNT_TOKEN
   #   - https://magic.1password.eu/developer-tools/infrastructure-secrets/serviceaccount/4MR5NL7W45AA3GAFGRZMVN2H2I
 
-image: mcr.microsoft.com/playwright/python:v1.62.0-noble
+image: mcr.microsoft.com/playwright/python:v1.63.0-noble
 
 .before_script_python: &before_script_python
   # setup UV

@@ -31,6 +31,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 ### Removed [BREAKING!]
 
 * Construction partner CDE (Common Data Environment) distribution options
+* `HTTPBearerTokenAuth` auth class for Requests (no longer used)
 
 ### Added
 

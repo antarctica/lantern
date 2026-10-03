@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import os
 import pickle
 from datetime import date

@@ -1,4 +1,7 @@
 # Based on: https://github.com/daGrevis/mdx_linkify/blob/master/mdx_linkify/mdx_linkify.py
+
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from bleach.linkifier import Linker

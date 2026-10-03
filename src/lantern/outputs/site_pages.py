@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from functools import cached_property
 from http import HTTPStatus
 from pathlib import Path

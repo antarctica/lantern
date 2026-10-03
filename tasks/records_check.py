@@ -1,5 +1,7 @@
 # Check catalogue site contents
 
+from __future__ import annotations
+
 import time
 from argparse import ArgumentParser
 from datetime import UTC, datetime

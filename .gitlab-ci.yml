@@ -14,7 +14,10 @@ stages:
 variables:
   # Image
   UV_VERSION: "0.12.0"
-  PYTHON_VERSION: "3.14"
+  PYTHON_VERSION: "3.12"
+
+  # Setup
+  UV_PYTHON_PREFERENCE: "only-managed"
 
   # App
   STATIC_SITE_PATH: "$CI_PROJECT_DIR/_site"
@@ -71,6 +74,7 @@ image: mcr.microsoft.com/playwright/python:v1.62.0-noble
   - apt-get install -y rsync
 
   # setup app deps
+  - uv python install "$PYTHON_VERSION"
   - uv sync --frozen --all-groups --python $PYTHON_VERSION
 
   # start static site for e2e tests

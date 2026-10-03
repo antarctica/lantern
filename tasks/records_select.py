@@ -1,5 +1,7 @@
 # Pull records from store
 
+from __future__ import annotations
+
 from argparse import ArgumentParser
 from pathlib import Path
 from typing import TYPE_CHECKING

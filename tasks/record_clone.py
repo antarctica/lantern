@@ -1,5 +1,7 @@
 # Create a new record based on an existing record
 
+from __future__ import annotations
+
 from argparse import ArgumentParser
 from copy import deepcopy
 from datetime import UTC, datetime

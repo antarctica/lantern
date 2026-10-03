@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 import logging
 import time
@@ -7,7 +9,7 @@ from typing import TYPE_CHECKING
 import requests
 from joblib import Parallel, delayed
 from requests import Response
-from requests.auth import HTTPBasicAuth
+from requests.auth import AuthBase, HTTPBasicAuth
 
 from lantern.lib.magic_distribution.client import MagicResourceDistributionClient
 from lantern.log import init as init_logging
@@ -15,8 +17,6 @@ from lantern.models.checks import Check, CheckState, CheckType
 from lantern.outputs.checks import ChecksOutput
 
 if TYPE_CHECKING:
-    from requests.auth import AuthBase
-
     from lantern.config import Config
     from lantern.models.site import ExportMeta, SiteContent
 

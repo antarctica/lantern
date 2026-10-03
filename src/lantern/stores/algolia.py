@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging  # needed for mocking  # noqa: TC003
 from functools import cached_property
 from typing import TYPE_CHECKING

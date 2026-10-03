@@ -1,5 +1,7 @@
 # Crude check of CSS classes used in static site templates
 
+from __future__ import annotations
+
 import re
 from pathlib import Path
 

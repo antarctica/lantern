@@ -1,5 +1,7 @@
 # Deposit one or more artefacts related to an existing record in the MAGIC Resource Distribution service (SharePoint)
 
+from __future__ import annotations
+
 from argparse import ArgumentParser
 from pathlib import Path
 from typing import TYPE_CHECKING

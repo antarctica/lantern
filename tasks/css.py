@@ -1,5 +1,7 @@
 # Compile Tailwind classes used in static site output
 
+from __future__ import annotations
+
 import logging
 import subprocess
 from http import HTTPStatus

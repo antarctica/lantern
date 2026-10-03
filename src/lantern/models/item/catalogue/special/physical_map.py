@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import json
 from functools import cached_property
 from json import JSONDecodeError

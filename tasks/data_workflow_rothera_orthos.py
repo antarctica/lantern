@@ -1,5 +1,7 @@
 # Automatically process Rothera progress monitoring orthomosaics
 
+from __future__ import annotations
+
 import csv
 import json
 import subprocess
@@ -670,7 +672,7 @@ def _load_manifest(logger: logging.Logger, manifest_path: Path) -> list[EventMan
             continue
         try:
             acquisition_date = date.fromisoformat(row["acquisition_date"])
-        except TypeError, ValueError:
+        except (TypeError, ValueError):
             logger.warning(
                 "Row date '%s' cannot be parsed as a date, ensure ISO YYYY-MM-DD format.",
                 row["image_date"],

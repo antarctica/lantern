@@ -1,5 +1,7 @@
 # Update an ArcGIS Online item based on a related catalogue record
 
+from __future__ import annotations
+
 import json
 from argparse import ArgumentParser
 from datetime import UTC, datetime

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import hashlib
 import uuid
 from abc import ABC, abstractmethod

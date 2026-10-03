@@ -1,5 +1,7 @@
 # Update record to include distribution options for an ArcGIS Online item
 
+from __future__ import annotations
+
 import hashlib
 from argparse import ArgumentParser
 from json import JSONDecodeError

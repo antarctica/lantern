@@ -1,13 +1,14 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from enum import Enum
 from http import HTTPMethod, HTTPStatus
 from typing import TYPE_CHECKING, Final
 
 import cattrs
+from requests.auth import AuthBase  # noqa: TC002
 
 if TYPE_CHECKING:
-    from requests.auth import AuthBase
-
     from lantern.lib.metadata_library.models.record.elements.distribution import Distributions
     from lantern.models.record.record import Record
     from lantern.models.site import SiteEntry

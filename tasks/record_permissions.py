@@ -1,5 +1,7 @@
 # Set access permissions in a record's administration metadata
 
+from __future__ import annotations
+
 import sys
 from argparse import ArgumentParser
 from pathlib import Path

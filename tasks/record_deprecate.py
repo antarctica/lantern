@@ -1,5 +1,7 @@
 # Indicate a record is deprecated without a replacement
 
+from __future__ import annotations
+
 from argparse import ArgumentParser
 from datetime import UTC, datetime
 from pathlib import Path

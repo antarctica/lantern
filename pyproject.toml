@@ -8,7 +8,7 @@ license-files = ["LICENSE.md"]
 authors = [
     { name = "Felix Fennell", email = "felnne@bas.ac.uk" }
 ]
-requires-python = ">=3.14"
+requires-python = ">=3.12"
 dependencies = [
     "algoliasearch>=4.40.1",
     "authlib>=1.7.1",
@@ -159,7 +159,7 @@ invalidate-thumbnails = { cmd = "python -m tasks.thumbnail_invalidate", help = "
 [tool.ruff]
 src = ["src"]
 line-length = 120
-target-version = "py314"
+target-version = "py312"
 
 [tool.ruff.lint]
 #    A | builtins (variables named after builtin names)

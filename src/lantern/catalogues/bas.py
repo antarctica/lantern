@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 # ruff: noqa: N812
 from pathlib import Path
 from typing import TYPE_CHECKING, get_args

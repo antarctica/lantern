@@ -1,5 +1,7 @@
 # Invalidate thumbnails for selected records in CloudFront cache for BAS CDN
 
+from __future__ import annotations
+
 from argparse import ArgumentParser
 from typing import TYPE_CHECKING
 

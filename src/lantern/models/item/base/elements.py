@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, is_dataclass
 from typing import TYPE_CHECKING, Any, SupportsIndex, cast, overload
 

@@ -39,6 +39,7 @@ Wherever possible, a reference to an issue in the project issue tracker should b
 * `make_bas_role` contacts preset in BAS Metadata Library lib for non-MAGIC BAS contacts
 * `upload-thumbnail` development task to downsample and upload thumbnails to the BAS CDN
 * `deprecate-record` to mark a record as deprecated without a replacement
+* Initial, internal, support for file checksums within distribution options
 
 ### Fixed
 

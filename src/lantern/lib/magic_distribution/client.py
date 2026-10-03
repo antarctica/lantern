@@ -1,7 +1,8 @@
 import contextlib
+from base64 import urlsafe_b64encode
 from functools import cached_property
 from http import HTTPMethod, HTTPStatus
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import requests
 from requests import Session
@@ -10,9 +11,13 @@ from urllib3.util import Retry
 
 from lantern.lib.magic_distribution.models.artefact import (
     ArtefactFile,
+    ArtefactLocalFile,
     ArtefactSharePointFile,
 )
 from lantern.lib.magic_distribution.models.metadata import ArtefactMetadata, ResourceMetadata
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 class SiteNotFoundError(Exception):
@@ -146,20 +151,37 @@ class MagicResourceDistributionClient:
             raise DriveNotFoundError() from None
         return drive_id
 
-    def _get_drive_item(self, drive_path: str) -> dict:
+    def _get_drive_item(self, drive_path: str | None = None, drive_url: str | None = None) -> dict:
         """
-        Get Drive Item at file path if it exists.
+        Get Drive Item for file path or access URL if it exists.
 
-        E.g. to get a file at https://example.sharepoint.com/sites/example/library/folder/sub-folder/file.txt, use
-        `drive_path='folder/sub-folder/file.txt'`.
+        E.g. for https://example.sharepoint.com/sites/example/library/folder/sub-folder/file.txt, use either:
+        - `drive_path='folder/sub-folder/file.txt'`
+        - `drive_url='https://example.sharepoint.com/sites/example/library/folder/sub-folder/file.txt'`
+
+        The Graph `/shares` endpoint [2] is used where a `drive_url` is used. This supports both sharing
+        ('https://x.sharepoint.com/:b:/r/sites/...') and direct ('https://x.sharepoint.com/sites/...') links.
 
         Returns an MS Graph `driveItem` [1].
 
         [1] https://learn.microsoft.com/en-us/graph/api/resources/driveitem
+        [2] https://learn.microsoft.com/en-us/graph/api/shares-get
         """
-        file_url = f"{self._graph_base}/drives/{self._drive_id}/root:/{drive_path}"
-        resp = self._request(HTTPMethod.GET, url=file_url)
-        if resp.status_code == HTTPStatus.NOT_FOUND:
+        if drive_path and drive_url:
+            msg = "Drive path or URL required, both supplied."
+            raise ValueError(msg) from None
+
+        if drive_path:
+            graph_url = f"{self._graph_base}/drives/{self._drive_id}/root:/{drive_path}"
+        elif drive_url:
+            share_url = "u!" + urlsafe_b64encode(drive_url.encode("utf-8")).decode().rstrip("=")
+            graph_url = f"{self._graph_base}/shares/{share_url}/driveItem"
+        else:
+            msg = "Drive path or URL required, neither supplied."
+            raise ValueError(msg) from None
+
+        resp = self._request(HTTPMethod.GET, url=graph_url)
+        if resp.status_code == HTTPStatus.NOT_FOUND or (drive_url and resp.status_code == HTTPStatus.FORBIDDEN):
             raise DriveItemNotFoundError() from None
         return resp.json()
 
@@ -389,3 +411,16 @@ class MagicResourceDistributionClient:
             resource_id=artefact.resource_id, access_groups=access_groups, unrestricted=unrestricted
         )
         return self._upload_artefact(artefact=artefact, unrestricted=unrestricted)
+
+    def lookup_artefact(self, url: str) -> ArtefactSharePointFile:
+        """Get an artefact based on a direct (non-proxied) URL."""
+        return self._create_sharepoint_artefact(drive_item=self._get_drive_item(drive_url=url))
+
+    def download_artefact(self, artefact: ArtefactSharePointFile, path: Path) -> ArtefactLocalFile:
+        """Download an artefact to a local path."""
+        with self._request(HTTPMethod.GET, url=artefact.presigned_url, stream=True) as resp:
+            resp.raise_for_status()
+            with path.open("wb") as f:
+                for chunk in resp.iter_content(chunk_size=8192):
+                    f.write(chunk)
+        return ArtefactLocalFile(resource_id=artefact.resource_id, artefact_path=path)

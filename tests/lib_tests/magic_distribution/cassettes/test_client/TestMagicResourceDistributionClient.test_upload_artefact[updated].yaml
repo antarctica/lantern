@@ -251,7 +251,7 @@ interactions:
       code: 200
       message: OK
 - request:
-    body: '{"resource_id": "x", "artefact_id": "e6d72cea-bda6-5dcb-8742-cc7ff5e71791","artefact_fmt": "CSV", "unrestricted": false}'
+    body: '{"resource_id": "x", "artefact_id": "e6d72cea-bda6-5dcb-8742-cc7ff5e71791","artefact_fmt": "CSV", "artefact_sha256":"x", "unrestricted": false}'
     headers:
       Accept:
       - application/json
@@ -269,7 +269,7 @@ interactions:
     uri: https://graph.microsoft.com/v1.0/drives/x/items/x/listItem/fields
   response:
     body:
-      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#drives(''x'')/items(''x'')/listItem/fields/$entity","resource_id":"x","artefact_id":"x","unrestricted":false,"artefact_fmt":"CSV","id":"1"}'
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#drives(''x'')/items(''x'')/listItem/fields/$entity","resource_id":"x","artefact_id":"x","artefact_fmt":"CSV","artefact_sha256":"x","unrestricted":false,"id":"1"}'
     headers:
       Cache-Control:
       - no-cache
@@ -304,7 +304,7 @@ interactions:
     uri: https://graph.microsoft.com/v1.0/drives/x/items/x/listItem/fields
   response:
     body:
-      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#drives(''x'')/items(''x'')/listItem/fields/$entity","resource_id":"x","artefact_id":"x","unrestricted":false,"artefact_fmt":"CSV","id":"1"}'
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#drives(''x'')/items(''x'')/listItem/fields/$entity","resource_id":"x","artefact_id":"x","unrestricted":false,"artefact_fmt":"CSV","artefact_sha256":"x","id":"1"}'
     headers:
       Cache-Control:
       - no-cache

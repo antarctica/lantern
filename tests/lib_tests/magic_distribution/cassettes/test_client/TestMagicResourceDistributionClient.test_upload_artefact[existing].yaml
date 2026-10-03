@@ -46,7 +46,7 @@ interactions:
     uri: https://graph.microsoft.com/v1.0/drives/x/items/x/listItem/fields
   response:
     body:
-      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#drives(''x'')/items(''x'')/listItem/fields/$entity","resource_id":"x","artefact_id":"x","unrestricted":false,"artefact_fmt":"CSV","id":"1"}'
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#drives(''x'')/items(''x'')/listItem/fields/$entity","resource_id":"x","artefact_id":"x","artefact_fmt":"CSV","artefact_sha256":"x","unrestricted":false,"id":"1"}'
     headers:
       Cache-Control:
       - no-cache

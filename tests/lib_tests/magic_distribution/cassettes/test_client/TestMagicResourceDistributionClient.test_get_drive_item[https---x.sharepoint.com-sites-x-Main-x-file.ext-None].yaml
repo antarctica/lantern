@@ -11,10 +11,10 @@ interactions:
       User-Agent:
       - python-requests/2.34.2
     method: GET
-    uri: https://graph.microsoft.com/v1.0/drives/x/root:/path/ok
+    uri: https://graph.microsoft.com/v1.0/shares/u!aHR0cHM6Ly94LnNoYXJlcG9pbnQuY29tL3NpdGVzL3gvTWFpbi94L2ZpbGUuZXh0/driveItem
   response:
     body:
-      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#Collection(driveItem)/$entity", "id":"x","name":"x"}'
+      string: '{"@odata.context":"https://graph.microsoft.com/v1.0/$metadata#Collection(driveItem)/$entity","id":"x","name":"file.ext"}'
     headers:
       Cache-Control:
       - no-store, no-cache
@@ -23,6 +23,8 @@ interactions:
       Content-Type:
       - application/json; odata.metadata=minimal; odata.streaming=true; IEEE754Compatible=false;
         charset=utf-8
+      SPRequestDuration:
+      - '153'
       Strict-Transport-Security:
       - max-age=31536000
       Transfer-Encoding:

@@ -14,4 +14,5 @@ class ArtefactMetadata(TypedDict):
     resource_id: str
     artefact_id: str
     artefact_fmt: str
+    artefact_sha256: str
     unrestricted: bool

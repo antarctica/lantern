@@ -23,7 +23,7 @@ Discovery Profile metadata). Core flow: **Store → Repository → Catalogue →
 - `lantern.lib` — extensions to third-party dependencies (e.g. `bas-metadata-library`), tested in `tests.lib_tests`.
 - `lantern.contrib` — code meant for reuse by *other* applications, tested in `tests.contrib_tests`.
 - `tasks/` — standalone CLI scripts (not part of the deployable `lantern` package) run via `python -m tasks.xxx`,
-  exposed as `taskipy` tasks in `pyproject.toml` (e.g. `bootstrap-records`, `records_build`, `serve`).
+  exposed as `taskipy` tasks in `pyproject.toml` (e.g. `bootstrap-records`, `build-records`, `serve`).
 
 Read `/docs/architecture.md` first for terminology (Catalogue, Store, Repository, Site, Output, Exporter) — these
 words are used precisely and consistently across the codebase.
@@ -34,23 +34,26 @@ words are used precisely and consistently across the codebase.
 since each touches multiple files that must stay in sync:
 
 - Adding config options (`Adding configuration options`) — must update `Config`, `ConfigDumpSafe`, `dumps_safe()`,
-  `docs/config.md`, `.env.tpl`, `[tool.pytest_env]` in `pyproject.toml`, and `test_config.py`.
+  `docs/config.md`, and `test_config.py`; for configurable options also update `resources/dev/.env.tpl` and
+  `[tool.pytest_env]` in `pyproject.toml`.
 - Adding a new item/hierarchy-level type (`Adding catalogue item types`).
 - Adding a distribution format (`Adding distribution formats`) — new class under
   `lantern.models.item.catalogue.distributions`, enum member, macro in `_macros/_tabs/data.html.j2`.
 - Adding an item tab (`Adding catalogue item tabs`) — class in `.tabs`, wired into `ItemCatalogue.tabs`, macro under
-  `_macros/tabs` or `_macros/_tabs`, then run the `tailwind` task to pick up new classes.
+  `_macros/tabs` or `_macros/_tabs`, then run the `css` task to pick up new classes.
 - Adding a licence, site page, or relation type — see corresponding sections.
 
 ## Conventions (from docs/dev.md)
 
-- All deployable code lives under `lantern` package; `tasks/` and `tests/` are excluded from `ty` type checking
-  (`[tool.ty.src]` in `pyproject.toml`).
+- Target Python 3.12 (`.python-version`, `requires-python` in `pyproject.toml`); avoid syntax introduced in later
+  versions. Use `from __future__ import annotations` and `if TYPE_CHECKING` for type-only imports where appropriate.
+- Deployable code belongs under `lantern`; `uv run task types` checks `src/` only, while `[tool.ty.src]` includes
+  `src/` and `tasks/` and excludes `tests/` and `tests_slow/` when running `ty` without an explicit path.
 - Use `Path.resolve()` when logging/displaying paths; log via `logger = logging.getLogger('lantern')`.
 - Ruff enforces `ban-relative-imports = "all"` — always use absolute imports (`from lantern.foo import Bar`).
 - 100% test coverage is required (`fail_under = 100` in `[tool.coverage.report]`); use `# pragma: no cover` /
   `# pragma: no branch` for justified exceptions, and `@pytest.mark.cov()` for coverage-only tests.
-- `ruff` (lint+format+bandit) and `ty` (type checking, main app code only) are the linters; `pymarkdown` lints docs.
+- `ruff` (lint+format+bandit) and `ty` (type checking) are the code checks; `pymarkdown` lints docs.
 - The Jinja environment (`lantern.utils.get_jinja_env()`) is `lru_cache`d — do not construct a new `Environment` per
   Output/record, this previously caused an 80%+ slowdown by recompiling all templates on every access.
 - Prefer `functools.cached_property` for derived Output/Item properties that are read more than once per instance
@@ -67,7 +70,7 @@ uv run task test-slow       # e2e/Playwright/Schemathesis suite (tests_slow/), s
 uv run task test-cov        # coverage (--cov-report=html -> htmlcov/)
 uv run task lint            # ruff check
 uv run task format          # ruff format
-uv run task types           # ty check src/
+uv run task types           # ty check src/ (run uv run ty check tasks/ to check scripts)
 uv run task css             # rebuild Tailwind CSS: builds a temp site, extracts used classes, writes main.css
 uv run task build-test-records   # build a static site from tests.resources.records test fixtures
 uv run task serve            # serve a built static site locally (HTTPS via trustme, basic auth)

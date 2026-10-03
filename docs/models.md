@@ -380,7 +380,7 @@ Consists of limited properties needed to query, refine (via filters/facets) and 
 | `item.resource_type.name`                            | `objectType`     | String         | As enum name             |
 | `summary.resource_type_icon`                         | `objectTypeIcon` | String         | -                        |
 | `summary.date`                                       | `objectDate`     | Integer / None | As timestamp             |
-| -                                                    | `objectRecData`  | String         | _See note_               |
+| -                                                    | `objectRecData`  | String         | *See note*               |
 | `summary.resource_type_label`                        | `type`           | String         | -                        |
 | `item.title_plain`                                   | `name`           | String         | Without formatting       |
 | `item.title_html`                                    | `nameHtml`       | String         | As HTML formatted string |

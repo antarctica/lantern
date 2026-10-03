@@ -124,7 +124,7 @@ Checks verify:
 - [Item](/docs/models.md#items) pages in [Trusted Publishing](/docs/architecture.md#trusted-publishing)
 - DOI redirects if set within records
 - distribution options set within records, with special handling for
-  - files hosted in the [MAGIC Products Distribution Service️](#magic-products-distribution-service-checks)
+  - files hosted in the [MAGIC Products Distribution Service️](#magic-resource-distribution-service-checks)
   - [ArcGIS](#arcgis-checks) layers and services
 
 > [!WARNING]

@@ -569,7 +569,7 @@ See the [Taskipy](https://github.com/taskipy/taskipy?tab=readme-ov-file#adding-t
 
 ## Python version
 
-The minimum Python version is 3.14.
+The minimum Python version is 3.12 for compatibility with BAS IT servers.
 
 ## Dependencies
 
@@ -616,6 +616,8 @@ ignore = [
 
 ### Updating dependencies
 
+#### Python dependencies
+
 To upgrade direct dependencies (including major and minor versions changing functionality):
 
 - create an issue and switch to branch
@@ -631,6 +633,39 @@ To upgrade direct dependencies (including major and minor versions changing func
 > If playwright is upgraded, run `uv run playwright install` locally and update CI image to match new version.
 >
 > To list all (direct and indirect) outdated dependencies, run `uv tree --outdated`.
+
+#### Bundled Algolia JS dependencies
+
+> [!WARNING]
+> This section is Work in Progress (WIP) and may not be complete/accurate.
+
+- check the latest version from https://www.npmjs.com/package/algoliasearch (ensuring 7 day cooldown is respected)
+  - get minified browser build using: `https://cdn.jsdelivr.net/npm/algoliasearch@{VERSION}/dist/lite/builds/browser.umd.js`
+  - replacing `{VERSION}`, e.g. `algoliasearch@5.54.0/dist`
+- check latest version from https://www.npmjs.com/package/instantsearch.js (ensuring 7 day cooldown is respected)
+  - get minified build https://cdn.jsdelivr.net/npm/instantsearch.js@{VERSION}/dist/instantsearch.production.min.js
+  - replacing `{VERSION}`, e.g. `instantsearch.js@4.101.1/dist`
+- concatenate both files to update `src/lantern/resources/js/lib/algolia.min.js` (`algoliasearch` first)
+
+#### Bundled Scalar JS dependency
+
+> [!WARNING]
+> This section is Work in Progress (WIP) and may not be complete/accurate.
+
+- check the latest version from https://www.npmjs.com/package/@scalar/api-reference
+  - get minified browser build using: `https://cdn.jsdelivr.net/npm/@scalar/api-reference@{VERSION}`
+  - replacing `{VERSION}`, e.g. `@scalar/api-reference@1.40.9`
+- update `src/lantern/resources/js/lib/scalar.min.js`
+
+#### Bundled Sentry JS dependency
+
+> [!WARNING]
+> This section is Work in Progress (WIP) and may not be complete/accurate.
+
+- check the latest version from https://docs.sentry.io/platforms/javascript/install/loader/#cdn
+  - get the `bundle.feedback.<modifiers>.js` script using `https://browser.sentry-cdn.com/{VERSION}/bundle.feedback.min.js`
+  - replacing `{VERSION}`, e.g. `browser.sentry-cdn.com/10.34.0/bundle`
+- update `src/lantern/resources/js/lib/sentry.min.js`
 
 ## Linting
 
@@ -732,7 +767,7 @@ in `pyproject.toml`. Tests are grouped into two test suites:
 > [!NOTE]
 > Tests are usually run in parallel using [`pytest-xdist`](#pytest-xdist).
 >
-> To avoid issues with [HTTP recording](#pytest-recording), parallel processing _within_ code under test is disabled
+> To avoid issues with [HTTP recording](#pytest-recording), parallel processing *within* code under test is disabled
 > by setting the `PARALLEL_JOBS` [config option](#pytest-env).
 
 Main and slow tests are run automatically in [Continuous Integration](#continuous-integration).
@@ -799,9 +834,10 @@ e.g:
 ```python
 import pytest
 
+
 @pytest.mark.cov()
 def test_foo():
-    assert 'foo' == 'foo'
+    assert "foo" == "foo"
 ```
 
 ### Pytest-xdist

@@ -1,8 +1,10 @@
+import hashlib
 import uuid
 from abc import ABC, abstractmethod
 from base64 import b64encode, urlsafe_b64encode
 from functools import cached_property
 from typing import TYPE_CHECKING, Final, get_type_hints
+from urllib.parse import urlencode, urlparse, urlunparse
 
 from quickxorhash import quickxorhash  # ty: ignore[unresolved-import]
 
@@ -88,7 +90,7 @@ class ArtefactFile(ArtefactBase):
     @property
     def _artefact_hash(self) -> str:
         """Value to use for constructing the artefact ID."""
-        return self.quickxor
+        return self.sha256
 
     @property
     @abstractmethod
@@ -107,8 +109,20 @@ class ArtefactFile(ArtefactBase):
         chunk_size = 8192
         data = self.data
         for i in range(0, len(data), chunk_size):
-            h.update(bytes(data[i : i + chunk_size]))
+            chunk = bytes(data[i : i + chunk_size])
+            h.update(chunk)
         return b64encode(h.digest()).decode()
+
+    @cached_property
+    def sha256(self) -> str:
+        """SHA 256 hash."""
+        h = hashlib.sha256()
+        chunk_size = 8192
+        data = self.data
+        for i in range(0, len(data), chunk_size):
+            chunk = bytes(data[i : i + chunk_size])
+            h.update(chunk)
+        return h.hexdigest()
 
     @property
     def deposit_metadata(self) -> ArtefactMetadata:
@@ -122,6 +136,7 @@ class ArtefactFile(ArtefactBase):
             resource_id=self.resource_id,
             artefact_id=self.artefact_id,
             artefact_fmt=self.format_label.name,
+            artefact_sha256=self.sha256,
             unrestricted=False,
         )
 
@@ -185,7 +200,7 @@ class ArtefactLocalFile(ArtefactFile):
 
     def __repr__(self) -> str:
         """Class representation."""
-        return f"<ArtefactLocal: {self.name}, {self.format.name}, {self.size_bytes} bytes>"
+        return f"<ArtefactLocal: {self.name}, {self.format.name}, {self.size_bytes} bytes, sha256: {self.sha256}>"
 
     @property
     def format(self) -> ArtefactFormat:
@@ -235,8 +250,8 @@ class ArtefactSharePointFile(ArtefactFile):
 
     Metadata consists of:
     - `drive_item`: system metadata (file size, hash, name, etc.), via an MS Graph `driveItem` resource [1]
-    - `list_metadata`: user metadata (artefact/resource ID, controlled format and unrestricted status), via an MS Graph
-      `fieldValueSet` [2]
+    - `list_metadata`: user metadata (artefact/resource ID, controlled format, SHA256, and unrestricted status), via
+      an MS Graph `fieldValueSet` [2]
 
     `drive_item` properties are generic and controlled by the underlying SharePoint/Graph platform. `list_metadata`
     properties are intended to provide additional context where needed. `list_metadata` values are explicitly trusted.
@@ -244,9 +259,9 @@ class ArtefactSharePointFile(ArtefactFile):
     Artefact format
     ---------------
 
-    As determining the artefact format accuretly requires access the file content (e.g. for geo-PDFs) and file content
+    As determining the artefact format accurately requires access the file content (e.g. for geo-PDFs) and file content
     is not accessible, a known format must be provided by via `list_metadata`. This stated value MUST be a member of
-    the `lantern.lib.magic_distribution.models.artefacts.ArtefactFormatLabel` enum and will be treated as authoriative.
+    the `lantern.lib.magic_distribution.models.artefacts.ArtefactFormatLabel` enum and will be treated as authoritative.
 
     Access Proxy
     ------------
@@ -272,7 +287,7 @@ class ArtefactSharePointFile(ArtefactFile):
 
     def __repr__(self) -> str:
         """Class representation."""
-        return f"<ArtefactSpFile: {self.artefact_id} (driveItem: {self._drive_item['id']}), {self.format.name}, {self.size_bytes} bytes>"
+        return f"<ArtefactSpFile: {self.artefact_id} (driveItem: {self._drive_item['id']}), {self.format.name}, {self.size_bytes} bytes, sha256: {self.sha256}>"
 
     @staticmethod
     def _check_artefact_metadata(list_metadata: ArtefactMetadata) -> None:
@@ -331,16 +346,47 @@ class ArtefactSharePointFile(ArtefactFile):
         return self._drive_item["file"]["hashes"]["quickXorHash"]
 
     @property
+    def sha256(self) -> str:
+        """
+        SHA 256 hash.
+
+        This value is set at upload, it is not based on the underlying file stored in SharePoint and so cannot be used
+        to determine if a file has changed internally (see `quickxor`) but can be used for external comparisons.
+        """
+        return self._list_fields["artefact_sha256"]
+
+    @property
+    def presigned_url(self) -> str:
+        """
+        Temporary presigned access URL.
+
+        WARNING: Do not expose in untrusted contexts.
+
+        Values are time-limited and so may require refreshing by re-fetching the artefact.
+        """
+        return self._drive_item["@microsoft.graph.downloadUrl"]
+
+    @property
     def url(self) -> str:
         """
         Direct access URL, unless an access proxy is configured and the artefact is unrestricted.
 
-        Where an access proxy is used, the direct URL will be base 64 encoded and appended to the `proxy_base`
-        parameter as a `url` query parameter.
+        File checksum values are appended to the direct URL for checking the integrity of downloaded files.
 
-        E.g. For a proxy base `https://example.com` and direct URL of `https://example.com/file.ext`,
-        `https://example.com?url=aHR0cHM6Ly9leGFtcGxlLmNvbS9maWxlLnR4dA==` will be returned.
+        E.g. A direct URL `https://example.com/file.ext` becomes: `https://example.com/file.ext?sha256=x&quickxor=y`.
+
+        Where an access proxy is used:
+        - a base 64 encoded direct URL is appended to the `proxy_base` parameter as a `url` query parameter
+        - the file name (`file.ext`) is appended as a `name` query parameter
+
+        E.g. With a proxy base `https://example.com`, a direct URL `https://example.com/file.ext` becomes:
+        `https://example.com?sha256=x&quickxor=y&url=aHR0cHM6Ly9leGFtcGxlLmNvbS9maWxlLnR4dA%3D%3D&name=file.ext`
         """
-        if self._list_fields["unrestricted"] and self._proxy_base:
-            return f"{self._proxy_base}?url={urlsafe_b64encode(self._drive_item['webUrl'].encode()).decode()}"
-        return self._drive_item["webUrl"]
+        proxy = bool(self._list_fields["unrestricted"] and self._proxy_base)
+        direct = self._drive_item["webUrl"]
+
+        params = {"sha256": self.sha256, "quickxor": self.quickxor}
+        base = self._proxy_base if proxy else direct
+        if proxy:
+            params.update({"url": urlsafe_b64encode(direct.encode()).decode(), "name": self.name})
+        return urlunparse(urlparse(base)._replace(query=urlencode(params)))

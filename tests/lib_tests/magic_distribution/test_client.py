@@ -29,7 +29,7 @@ class TestMagicResourceDistributionClient:
     """Test MAGIC Resource Distribution service SharePoint client."""
 
     def test_init(self):
-        """Can initalise client with required parameters."""
+        """Can initialise client with required parameters."""
         client = MagicResourceDistributionClient(
             tenant_id="x",
             app_client_id="x",
@@ -99,15 +99,34 @@ class TestMagicResourceDistributionClient:
 
     @pytest.mark.vcr
     @pytest.mark.block_network
-    @pytest.mark.parametrize("drive_path", ["path/ok", "path/unknown"])
-    def test_get_drive_item(self, fx_lib_magic_dist_client: MagicResourceDistributionClient, drive_path: str):
+    @pytest.mark.parametrize("drive_path", [None, "path/ok", "path/unknown"])
+    @pytest.mark.parametrize(
+        "drive_url",
+        [
+            None,
+            "https://x.sharepoint.com/sites/x/Main/x/file.ext",
+            "https://x.sharepoint.com/sites/x/Main/x/unknown",
+        ],
+    )
+    def test_get_drive_item(
+        self, fx_lib_magic_dist_client: MagicResourceDistributionClient, drive_path: str | None, drive_url: str | None
+    ):
         """Can get an MS Graph Drive Item within a given Drive at a given path, if it exists."""
-        if drive_path == "path/unknown":
-            with pytest.raises(DriveItemNotFoundError):
-                fx_lib_magic_dist_client._get_drive_item(drive_path=drive_path)
+        if drive_path and drive_url:
+            with pytest.raises(ValueError, match=r"Drive path or URL required, both supplied."):
+                fx_lib_magic_dist_client._get_drive_item(drive_path=drive_path, drive_url=drive_url)
+            return
+        if not drive_path and not drive_url:
+            with pytest.raises(ValueError, match=r"Drive path or URL required, neither supplied."):
+                fx_lib_magic_dist_client._get_drive_item(drive_path=drive_path, drive_url=drive_url)
             return
 
-        drive_id = fx_lib_magic_dist_client._get_drive_item(drive_path=drive_path)
+        if drive_path == "path/unknown" or drive_url == "https://x.sharepoint.com/sites/x/Main/x/unknown":
+            with pytest.raises(DriveItemNotFoundError):
+                fx_lib_magic_dist_client._get_drive_item(drive_path=drive_path, drive_url=drive_url)
+            return
+
+        drive_id = fx_lib_magic_dist_client._get_drive_item(drive_path=drive_path, drive_url=drive_url)
         assert len(drive_id) > 0
 
     @pytest.mark.vcr
@@ -132,6 +151,7 @@ class TestMagicResourceDistributionClient:
             resource_id="x",
             artefact_id="x",
             artefact_fmt=ArtefactFormatLabel.CSV.name,
+            artefact_sha256="x",
             unrestricted=False,
         )
         fx_lib_magic_dist_client._set_metadata(item_id="x", metadata=expected)
@@ -171,7 +191,9 @@ class TestMagicResourceDistributionClient:
         self, mocker: MockerFixture, fx_lib_magic_dist_client: MagicResourceDistributionClient
     ):
         """Can create a SharePoint file artefact from a drive item and fetched related list metadata from MS Graph."""
-        metadata = ArtefactMetadata(resource_id="x", artefact_id="x", artefact_fmt="CSV", unrestricted=False)
+        metadata = ArtefactMetadata(
+            resource_id="x", artefact_id="x", artefact_fmt="CSV", artefact_sha256="x", unrestricted=False
+        )
         mocker.patch.object(fx_lib_magic_dist_client, "_get_metadata", return_value=metadata)
         drive_item = {
             "id": "123",
@@ -197,7 +219,7 @@ class TestMagicResourceDistributionClient:
         """
         Can upload big and small files as Drive Items where they don't exist or match hash value.
 
-        Implictly tests `_upload_small_file()` and `_upload_big_file()` ('updated') methods.
+        Implicitly tests `_upload_small_file()` and `_upload_big_file()` ('updated') methods.
 
         'hash_miss' checks an edge case where the remote file has a different hash to the original (see cassette).
         'broken-large' checks an edge case where a chunked large upload fails to upload an empty file.
@@ -234,23 +256,14 @@ class TestMagicResourceDistributionClient:
         self,
         mocker: MockerFixture,
         fx_lib_artefact_file: ArtefactLocalFile,
+        fx_lib_artefact_sharepoint: ArtefactSharePointFile,
         fx_lib_magic_dist_client: MagicResourceDistributionClient,
         groups: set[str],
         unrestricted: bool,
     ):
         """Can deposit a file to SharePoint."""
-        deposited = ArtefactSharePointFile(
-            drive_item={
-                "id": "123",
-                "name": "x",
-                "file": {"hashes": {"quickXorHash": "x"}},  # not related to fx_lib_artefact_file
-                "size": 206,  # not related to fx_lib_artefact_file
-                "webUrl": "x",
-            },
-            list_metadata=ArtefactMetadata(resource_id="x", artefact_id="x", artefact_fmt="CSV", unrestricted=False),
-        )
         mocker.patch.object(fx_lib_magic_dist_client, "_create_resource_folder", return_value=None)
-        mocker.patch.object(fx_lib_magic_dist_client, "_upload_artefact", return_value=deposited)
+        mocker.patch.object(fx_lib_magic_dist_client, "_upload_artefact", return_value=fx_lib_artefact_sharepoint)
 
         if not unrestricted and not groups:
             with pytest.raises(ArtefactPermissionsNotSupportedError):
@@ -263,3 +276,40 @@ class TestMagicResourceDistributionClient:
             artefact=fx_lib_artefact_file, access_groups=groups, unrestricted=unrestricted
         )
         assert isinstance(result, ArtefactSharePointFile)
+
+    @pytest.mark.cov()
+    def test_lookup_artefact(
+        self,
+        mocker: MockerFixture,
+        fx_lib_artefact_sharepoint: ArtefactSharePointFile,
+        fx_lib_magic_dist_client: MagicResourceDistributionClient,
+    ):
+        """Can get previously deposited artefact by unproxied access URL."""
+        mocker.patch.object(
+            fx_lib_magic_dist_client, "_create_sharepoint_artefact", return_value=fx_lib_artefact_sharepoint
+        )
+
+        assert fx_lib_magic_dist_client.lookup_artefact(url="x") == fx_lib_artefact_sharepoint
+
+    @pytest.mark.vcr
+    @pytest.mark.block_network
+    @pytest.mark.cov()
+    def test_download_artefact(
+        self,
+        mocker: MockerFixture,
+        tmp_path: Path,
+        fx_lib_artefact_sharepoint: ArtefactSharePointFile,
+        fx_lib_magic_dist_client: MagicResourceDistributionClient,
+    ):
+        """Can get file for a previously deposited artefact."""
+        mocker.patch.object(
+            type(fx_lib_artefact_sharepoint),
+            "presigned_url",
+            new_callable=PropertyMock,
+            return_value="https://data.bas.ac.uk/static/txt/heartbeat.txt",
+        )
+        file_path = tmp_path / "file.txt"
+
+        result = fx_lib_magic_dist_client.download_artefact(artefact=fx_lib_artefact_sharepoint, path=file_path)
+        assert isinstance(result, ArtefactLocalFile)
+        assert result.data == b"badump, badump"

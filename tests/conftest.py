@@ -36,7 +36,8 @@ from lantern.lib.arcgis.gis.dataclasses import ItemProperties as ArcGisItemPrope
 from lantern.lib.arcgis.gis.enums import ItemType as ArcGisItemType
 from lantern.lib.arcgis.gis.enums import SharingLevel as ArcGisSharingLevel
 from lantern.lib.magic_distribution.client import MagicResourceDistributionClient
-from lantern.lib.magic_distribution.models.artefact import ArtefactLocalFile
+from lantern.lib.magic_distribution.models.artefact import ArtefactLocalFile, ArtefactSharePointFile
+from lantern.lib.magic_distribution.models.metadata import ArtefactMetadata
 from lantern.lib.metadata_library.models.record.elements.common import Date, Dates, Identifiers
 from lantern.lib.metadata_library.models.record.enums import HierarchyLevelCode
 from lantern.lib.metadata_library.models.record.presets.admin import OPEN_ACCESS
@@ -1295,6 +1296,24 @@ def fx_lib_artefact_file(tmp_path: Path) -> ArtefactLocalFile:
             ]
         )
     return ArtefactLocalFile(resource_id="x", artefact_path=file)
+
+
+@pytest.fixture()
+def fx_lib_artefact_sharepoint() -> ArtefactSharePointFile:
+    """Remote, non-existent, SharePoint hosted file."""
+    return ArtefactSharePointFile(
+        drive_item={
+            "id": "123",
+            "name": "x",
+            "file": {"hashes": {"quickXorHash": "x"}},  # not related to fx_lib_artefact_file
+            "size": 206,  # not related to fx_lib_artefact_file
+            "webUrl": "x",
+            "@microsoft.graph.downloadUrl": "x",
+        },
+        list_metadata=ArtefactMetadata(
+            resource_id="x", artefact_id="x", artefact_fmt="CSV", artefact_sha256="x", unrestricted=False
+        ),
+    )
 
 
 @pytest.fixture()

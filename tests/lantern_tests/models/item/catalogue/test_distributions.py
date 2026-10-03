@@ -38,11 +38,11 @@ from lantern.models.item.catalogue.enums import DistributionType
 ACTION_BTN_ICON_RESTRICTED_DEFAULT = "fa-regular fa-lock-keyhole"
 
 
-def _make_dist(format_href: str) -> RecordDistribution:
+def _make_dist(format_href: str, transfer_href: str = "x") -> RecordDistribution:
     return RecordDistribution(
         distributor=Contact(organisation=ContactIdentity(name="x"), role={ContactRoleCode.DISTRIBUTOR}),
         transfer_option=TransferOption(
-            online_resource=OnlineResource(href="x", function=OnlineResourceFunctionCode.DOWNLOAD)
+            online_resource=OnlineResource(href=transfer_href, function=OnlineResourceFunctionCode.DOWNLOAD)
         ),
         format=Format(format="x", href=format_href),
     )
@@ -326,10 +326,20 @@ class TestFileDistribution:
         dist._option.transfer_option.size = size
         assert dist.size == expected
 
-    def test_action(self):
-        """Can get action link."""
-        dist = FakeFileDistributionType(option=_make_dist("x"))
-        assert dist.action == Link(value="Download", href="x")
+    @pytest.mark.parametrize(
+        ("url", "expected"),
+        [
+            ("x", "x"),
+            ("x?x=x", "x?x=x"),
+            ("x?sha256=x", "x"),
+            ("x?quickxor=x", "x"),
+            ("x?sha256=x&quickxor=x&x=x", "x?x=x"),
+        ],
+    )
+    def test_action(self, url: str, expected: str):
+        """Can get action link, stripping checksum query parameters if present."""
+        dist = FakeFileDistributionType(option=_make_dist(format_href="x", transfer_href=url))
+        assert dist.action == Link(value="Download", href=expected)
 
     @pytest.mark.parametrize(
         ("restricted", "expected"),

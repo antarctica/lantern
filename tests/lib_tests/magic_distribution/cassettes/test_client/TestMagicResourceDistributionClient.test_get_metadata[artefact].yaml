@@ -16,7 +16,7 @@ interactions:
     body:
       string: '{
         "@odata.context":"https://graph.microsoft.com/v1.0/$metadata#drives(''x'')/items(''x'')/listItem/fields/$entity",
-        "resource_id":"x", "artefact_id":"x", "unrestricted":false, "artefact_fmt":"CSV", "id":"x"
+        "resource_id":"x", "artefact_id":"x", "artefact_fmt":"CSV", "artefact_sha256": "x", "unrestricted":false, "id":"x"
         }'
     headers:
       Cache-Control:

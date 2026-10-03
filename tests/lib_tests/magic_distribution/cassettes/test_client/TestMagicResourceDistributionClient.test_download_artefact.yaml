@@ -1,0 +1,51 @@
+interactions:
+- request:
+    body: null
+    headers:
+      Accept:
+      - application/json
+      Accept-Encoding:
+      - gzip, deflate, zstd
+      Connection:
+      - keep-alive
+      User-Agent:
+      - python-requests/2.34.2
+    method: GET
+    uri: https://data.bas.ac.uk/static/txt/heartbeat.txt
+  response:
+    body:
+      string: 'badump, badump'
+    headers:
+      Alt-Svc:
+      - h3=":443"; ma=86400
+      Content-Length:
+      - '15'
+      Content-Security-Policy:
+      - 'default-src * data: ''unsafe-inline'';'
+      Content-Type:
+      - text/plain
+      Referrer-Policy:
+      - no-referrer-when-downgrade
+      Server:
+      - CloudFront
+      Strict-Transport-Security:
+      - max-age=63072000
+      Vary:
+      - Accept-Encoding
+      - Origin
+      Via:
+      - 1.1 dcf5a2deb202715e535979acb8e2a6a2.cloudfront.net (CloudFront)
+      X-Amz-Cf-Id:
+      - QB_5jaM9LtLb8L2fJWeKRrbo_vS_4Qc_d-fE1OHkhKEgn5KAGOAwUQ==
+      X-Amz-Cf-Pop:
+      - LHR86-P2
+      X-Cache:
+      - RefreshHit from cloudfront
+      X-Content-Type-Options:
+      - nosniff
+      X-Frame-Options:
+      - DENY
+    status:
+      code: 200
+      message: OK
+version: 1

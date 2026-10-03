@@ -103,8 +103,13 @@ class TestArtefactLocalFile:
         expected_name = "sample.csv"
         expected_size = 206
         expected_fmt = ArtefactFormats.get_label(ArtefactFormatLabel.CSV)
+        expected_sha256 = "49e6612e97cf7156b6a14577f06857d4450ac1a024fa3e3ed4a35bcc2982a320"
         expected_deposit_meta = ArtefactMetadata(
-            resource_id=expected_str, artefact_id=None, artefact_fmt=expected_fmt.label.name, unrestricted=False
+            resource_id=expected_str,
+            artefact_id=None,
+            artefact_fmt=expected_fmt.label.name,
+            artefact_sha256=expected_sha256,
+            unrestricted=False,
         )
         artefact = ArtefactLocalFile(
             resource_id=expected_str, artefact_path=self.artefacts_path / "csv" / expected_name
@@ -113,10 +118,14 @@ class TestArtefactLocalFile:
 
         # from ArtefactFile
         assert artefact.quickxor == "sEya4uW4DwER4+icrInuSUYOsRI="
+        assert artefact.sha256 == expected_sha256
         assert artefact.deposit_metadata == expected_deposit_meta
 
         # ArtefactLocalFile
-        assert repr(artefact) == f"<ArtefactLocal: {expected_name}, {expected_fmt.label.name}, {expected_size} bytes>"
+        assert (
+            repr(artefact)
+            == f"<ArtefactLocal: {expected_name}, {expected_fmt.label.name}, {expected_size} bytes, sha256: {expected_sha256}>"
+        )
         assert artefact.format == expected_fmt
         assert artefact.name == expected_name
         assert isinstance(artefact.data, bytes)
@@ -148,35 +157,42 @@ class TestArtefactSharePointFile:
         """Can create a SharePoint hosted file artefact."""
         expected_str = "x"
         expected_size = 206
-        expected_hash = "sEya4uW4DwER4+icrInuSUYOsRI="
+        expected_quickxor = "sEya4uW4DwER4+icrInuSUYOsRI="
+        expected_sha256 = "49e6612e97cf7156b6a14577f06857d4450ac1a024fa3e3ed4a35bcc2982a320"
         expected_fmt = ArtefactFormats.get_label(ArtefactFormatLabel.CSV)
+        expected_url = f"{expected_str}?sha256={expected_sha256}&quickxor={expected_quickxor.replace('=', '%3D').replace('+', '%2B')}"
 
         artefact = ArtefactSharePointFile(
             drive_item={
                 "id": "123",
                 "name": expected_str,
-                "file": {"hashes": {"quickXorHash": expected_hash}},
+                "file": {"hashes": {"quickXorHash": expected_quickxor}},
                 "size": expected_size,
                 "webUrl": expected_str,
+                "@microsoft.graph.downloadUrl": expected_str,
             },
             list_metadata=ArtefactMetadata(
                 resource_id=expected_str,
                 artefact_id=expected_str,
                 artefact_fmt="CSV",
+                artefact_sha256=expected_sha256,
                 unrestricted=False,
             ),
         )
 
         assert (
-            repr(artefact) == f"<ArtefactSpFile: x (driveItem: 123), {expected_fmt.label.name}, {expected_size} bytes>"
+            repr(artefact)
+            == f"<ArtefactSpFile: x (driveItem: 123), {expected_fmt.label.name}, {expected_size} bytes, sha256: {expected_sha256}>"
         )
         assert artefact.resource_id == expected_str
         assert artefact.artefact_id == expected_str
         assert artefact.name == expected_str
         assert artefact.format == expected_fmt
         assert artefact.size_bytes == expected_size
-        assert artefact.quickxor == expected_hash
-        assert artefact.url == expected_str
+        assert artefact.quickxor == expected_quickxor
+        assert artefact.sha256 == expected_sha256
+        assert artefact.presigned_url == expected_str
+        assert artefact.url == expected_url
         assert artefact.validate_format() is None
 
         # getting data isn't supported
@@ -200,6 +216,7 @@ class TestArtefactSharePointFile:
                     resource_id="x",
                     # no artefact_id
                     artefact_fmt="CSV",
+                    artefact_sha256="x",
                     unrestricted=False,
                 ),
             )
@@ -216,7 +233,7 @@ class TestArtefactSharePointFile:
                 "webUrl": "x",
             },
             list_metadata=ArtefactMetadata(
-                resource_id="x", artefact_id="x", artefact_fmt=artefact_fmt, unrestricted=False
+                resource_id="x", artefact_id="x", artefact_fmt=artefact_fmt, artefact_sha256="x", unrestricted=False
             ),
         )
 
@@ -230,8 +247,12 @@ class TestArtefactSharePointFile:
     def test_url(self, proxy_base: str, unrestricted: bool):
         """Can use access proxy for URL if the resource is unrestricted."""
         raw_url = "https://example.com/file.txt"
-        encoded_url = f"{proxy_base}?url=aHR0cHM6Ly9leGFtcGxlLmNvbS9maWxlLnR4dA==" if proxy_base else None
-        expected_url = encoded_url if proxy_base and unrestricted else raw_url
+        common_query = "sha256=y&quickxor=x"
+        expected_url = (
+            f"{proxy_base}?{common_query}&url=aHR0cHM6Ly9leGFtcGxlLmNvbS9maWxlLnR4dA%3D%3D&name=x"
+            if proxy_base and unrestricted
+            else f"{raw_url}?{common_query}"
+        )
 
         artefact = ArtefactSharePointFile(
             drive_item={
@@ -242,11 +263,12 @@ class TestArtefactSharePointFile:
                 "webUrl": raw_url,
             },
             list_metadata=ArtefactMetadata(
-                resource_id="x", artefact_id="x", artefact_fmt="CSV", unrestricted=unrestricted
+                resource_id="x", artefact_id="x", artefact_fmt="CSV", artefact_sha256="y", unrestricted=unrestricted
             ),
             proxy_base=proxy_base,
         )
 
         assert artefact.url == expected_url
+        qs = {k: v[0] for k, v in parse_qs(urlparse(artefact.url).query).items()}
         if proxy_base and unrestricted:
-            assert urlsafe_b64decode(parse_qs(urlparse(artefact.url).query)["url"][0].encode()).decode() == raw_url
+            assert urlsafe_b64decode(qs["url"].encode()).decode() == raw_url

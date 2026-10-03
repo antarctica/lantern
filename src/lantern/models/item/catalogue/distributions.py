@@ -2,7 +2,7 @@ import base64
 import re
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Any
-from urllib.parse import unquote, urlparse
+from urllib.parse import parse_qsl, unquote, urlencode, urlparse, urlunparse
 
 from humanize import naturalsize
 
@@ -245,8 +245,16 @@ class FileDistribution(Distribution, ABC):
 
     @property
     def action(self) -> Link:
-        """Link to resource artefact."""
-        return Link(value="Download", href=self._option.transfer_option.online_resource.href)
+        """
+        Link to resource artefact.
+
+        Strips any `sha256` and `quickxor` query parameters in URLs for future internal use.
+        """
+        url = urlparse(self._option.transfer_option.online_resource.href)
+        query = parse_qsl(url.query, keep_blank_values=True)
+        query_stripped = [(key, value) for key, value in query if key not in {"sha256", "quickxor"}]
+        url_stripped = urlunparse(url._replace(query=urlencode(query_stripped)))
+        return Link(value="Download", href=url_stripped)
 
     @property
     def access_target(self) -> None:

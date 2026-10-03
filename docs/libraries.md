@@ -267,15 +267,16 @@ for SharePoint Online.
 > [MAGIC Resource Distribution Service 🛡️](https://gitlab.data.bas.ac.uk/MAGIC/resource-distribution) (mainly in terms
 > of list metadata and folder structure).
 
-### SharePoint upload client
+### SharePoint client
 
 `lantern.lib.magic_distribution.client.MagicResourceDistributionClient`
 
-Used to deposit [File Artefacts](#file-artefacts) in a SharePoint Online site library with associated list metadata
-using the Microsoft Graph API.
+Used to deposit, lookup and download [File Artefacts](#file-artefacts) in a SharePoint Online site library using the
+Microsoft Graph API.
 
 > [!NOTE]
-> This client requires an Entra app registration with permissions to manage files within the relevant SharePoint site.
+> This client requires an Entra app registration with permissions to either read, or manage files within the relevant
+> SharePoint site (depending on whether file deposit is needed).
 
 ### SharePoint client limitations
 

@@ -72,4 +72,4 @@ X_DEPOSIT_CLIENT_SECRET=""  # populate with per-user/instance client secret
 X_DEPOSIT_SITE_ID="op://Infrastructure/e7rftaanttrgjfyoppl3rqqlcm/site-id"
 X_DEPOSIT_LIBRARY_NAME="Main"
 X_DEPOSIT_GROUPS_MAPPING="op://Infrastructure/e7rftaanttrgjfyoppl3rqqlcm/groups-mapping"
-X_DEPOSIT_PROXY_URL="https://example.com"
+X_DEPOSIT_PROXY_URL="https://magic-resources.data.bas.ac.uk/proxy"

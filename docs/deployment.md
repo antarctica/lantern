@@ -55,13 +55,9 @@ For production deployments:
 - all records are exported using the [Catalogue Item Output](/docs/outputs.md#catalogue-item-output)
   - only if deploying to production, to ensure [Cache Busting](/docs/site.md#cache-busting) values are updated
 
-## Ansible playbook
+## Ansible role
 
-This application is deployed using an
-[Ansible Playbook 🛡️](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/playbooks/magic/lantern.yml)
-as part of the BAS IT [Ansible 🛡️](https://gitlab.data.bas.ac.uk/station-data-management/ansible/) project.
-
-The playbook:
+This application is deployed using an Ansible role, which:
 
 - creates a Python virtual environment containing the [Python Package](#python-package) for the app version
 - generates an [Environment Module](#environment-module) for the app version
@@ -76,6 +72,12 @@ The playbook:
   - checking the [Heartbeat](/docs/monitoring.md#heartbeat)
   - checking the [Health Check Endpoint](/docs/monitoring.md#health-check-endpoint) including:
     - the expected version is reported
+
+## Ansible playbook
+
+The [Ansible Role](#ansible-role) is applied target infrastructure by an
+[Ansible Playbook 🛡️](https://gitlab.data.bas.ac.uk/station-data-management/ansible/-/blob/master/playbooks/magic/lantern.yml)
+within the BAS IT [Ansible 🛡️](https://gitlab.data.bas.ac.uk/station-data-management/ansible/) project.
 
 ## Continuous Deployment
 

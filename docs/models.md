@@ -415,7 +415,7 @@ Consists of limited properties needed to render a search result for an Item. Inc
 
 Artefacts represent a description of the contents of a resource, such as a file or service endpoint using a particular
 format or protocol. Artefacts are implemented in Python through the
-[MAGIC Resource Distribution](/docs/libraries.md#artefacts).
+[MAGIC Resource Distribution](/docs/libraries.md#artefacts) library.
 
 ## ArcGIS items
 

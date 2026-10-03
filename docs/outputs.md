@@ -61,9 +61,9 @@ Outputs processing multiple Records SHOULD:
   - the state/version of the [Store](/docs/architecture.md#stores) in their content items (e.g. the head revision)
 
 Outputs MAY require additional properties as needed, which MAY be populated using
-[Export Metadata](/docs/models.md#export-metadata), if applicable, or [Site](/docs/architecture.md#sites) extras.
+[Export Metadata](/docs/models.md#export-metadata), if applicable, or [Site](/docs/architecture.md#sites) extras dict.
 
-> [!NOTE]
+> [!WARNING]
 > The `OutputRecords` base class does not include an equivalent `strip_admin` property because these classes are only
 > expected to use limited properties from Records (e.g. titles and summaries to build an index). Outputs that use whole
 > records SHOULD implement a similar control.
@@ -102,7 +102,8 @@ Outputs HTML pages using [Site Templates](/docs/site.md#item-templates) for:
 Sharing previews, similar to [Item Pages](/docs/site.md#item-sharing-previews), are enabled via
 [Static Site Page Meta](/docs/models.md#static-site-page-meta) with manually defined values.
 
-An additional check for a URL known not to exist is generated to check the 404 handler.
+> [!NOTE]
+> An additional check for a URL known not to exist is generated to check the 404 handler.
 
 ## Site health output
 
@@ -116,9 +117,6 @@ Outputs:
 ## Site API output
 
 `lantern.outputs.site_health.SiteApiOutput`
-
-> [!WARNING]
-> This exporter is experimental.
 
 Outputs:
 
@@ -140,7 +138,7 @@ Outputs:
   [Site Templates](/docs/site.md#page-templates)
 
 > [!NOTE]
-> This page is intended as a basic, internal, reference to site content - not a proper, public, homepage.
+> This page is intended as a basic, internal, reference to site content, not a replacement for the home or search pages.
 
 ## Checks output
 

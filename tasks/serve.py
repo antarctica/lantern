@@ -238,6 +238,7 @@ def run(
             )
 
         try:
+            print("ready for connections ...")
             httpd.serve_forever()
         except KeyboardInterrupt:
             print("Keyboard interrupt received, exiting.")

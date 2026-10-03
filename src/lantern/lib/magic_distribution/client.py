@@ -77,7 +77,6 @@ class MagicResourceDistributionClient:
         self._timeout = 10
         self._scopes = ["https://graph.microsoft.com/.default"]
         self._graph_base = "https://graph.microsoft.com/v1.0"
-
         self._max_simple_upload_size = 250 * 1024 * 1024  # 250MB max size for small uploads
         self._upload_chunk_size = 50 * 1024 * 1024  # 50MB per chunk for large uploads
 
@@ -164,6 +163,8 @@ class MagicResourceDistributionClient:
 
         Returns an MS Graph `driveItem` [1].
 
+        Note: Though the `/shares/` endpoint is not tied to a specific Drive, the `_get_metadata()` method is.
+
         [1] https://learn.microsoft.com/en-us/graph/api/resources/driveitem
         [2] https://learn.microsoft.com/en-us/graph/api/shares-get
         """
@@ -189,8 +190,9 @@ class MagicResourceDistributionClient:
         """
         Get list fields for a Drive Item.
 
-        Expected to be specific to the MAGIC Resource Distribution service SharePoint libraries as per the
-        `lantern.lib.magic_distribution.models.metadata.ResourceMetadata` or `ArtefactMetadata` typed dicts.
+        Limited to configured Drive, which is expected to be a MAGIC Resource Distribution service SharePoint library,
+        and include associated list fields as per the `lantern.lib.magic_distribution.models.metadata.ResourceMetadata`
+        or `ArtefactMetadata` typed dicts.
 
         Returns an MS Graph `fieldValueSet` [1].
 
